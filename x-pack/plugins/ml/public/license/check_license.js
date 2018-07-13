@@ -5,12 +5,12 @@
  */
 
 
-
+import React from 'react';
 import { XPackInfoProvider } from 'plugins/xpack_main/services/xpack_info';
-import { notify, Notifier } from 'ui/notify';
+import { notify, Notifier, banners } from 'ui/notify';
 import _ from 'lodash';
-
 import chrome from 'ui/chrome';
+import { EuiCallOut } from '@elastic/eui';
 
 let licenseHasExpired = true;
 
@@ -38,8 +38,16 @@ export function checkLicense(Private, kbnBaseUrl) {
     const message = features.message;
     const exists = _.find(notify._notifs, (item) => item.content === message);
     if (!exists) {
-      // Only show the banner once with no countdown
-      notify.warning(message, { lifetime: 0 });
+      // Only show the banner once with no way to dismiss it
+      banners.add({
+        component: (
+          <EuiCallOut
+            iconType="iInCircle"
+            color="warning"
+            title={message}
+          />
+        ),
+      });
     }
   }
 

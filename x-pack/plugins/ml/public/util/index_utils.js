@@ -6,7 +6,7 @@
 
 
 
-import { notify } from 'ui/notify';
+import { toastNotifications } from 'ui/notify';
 import { SavedObjectsClientProvider } from 'ui/saved_objects';
 
 let indexPatternCache = [];
@@ -71,7 +71,7 @@ export function timeBasedIndexCheck(indexPattern, showNotification = false) {
     if (showNotification) {
       const message = `The index pattern ${indexPattern.title} is not time series based. \
         Anomaly detection can only be run over indices which are time based.`;
-      notify.warning(message, { lifetime: 0 });
+      toastNotifications.addWarning(message);
     }
     return false;
   } else {

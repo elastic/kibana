@@ -18,7 +18,7 @@ import moment from 'moment';
 import 'plugins/ml/components/anomalies_table';
 import 'plugins/ml/components/controls';
 
-import { notify } from 'ui/notify';
+import { toastNotifications } from 'ui/notify';
 import uiRoutes from 'ui/routes';
 import { timefilter } from 'ui/timefilter';
 import { parseInterval } from 'ui/utils/parse_interval';
@@ -133,20 +133,20 @@ module.controller('MlTimeSeriesExplorerController', function (
             if (selectedJobIds.length === 0 && timeSeriesJobIds.length > 0) {
               warningText += ', auto selecting first job';
             }
-            notify.warning(warningText, { lifetime: 30000 });
+            toastNotifications.addWarning(warningText);
           }
 
           if (selectedJobIds.length > 1 || mlJobSelectService.groupIds.length) {
           // if more than one job or a group has been loaded from the URL
             if (selectedJobIds.length > 1) {
             // if more than one job, select the first job from the selection.
-              notify.warning('Only one job may be viewed at a time in this dashboard', { lifetime: 30000 });
+              toastNotifications.addWarning('Only one job may be viewed at a time in this dashboard');
               mlJobSelectService.setJobIds([selectedJobIds[0]]);
             } else {
             // if a group has been loaded
               if (selectedJobIds.length > 0) {
               // if the group contains valid jobs, select the first
-                notify.warning('Only one job may be viewed at a time in this dashboard', { lifetime: 30000 });
+                toastNotifications.addWarning('Only one job may be viewed at a time in this dashboard');
                 mlJobSelectService.setJobIds([selectedJobIds[0]]);
               } else if ($scope.jobs.length > 0) {
               // if there are no valid jobs in the group but there are valid jobs
@@ -660,7 +660,7 @@ module.controller('MlTimeSeriesExplorerController', function (
     let detectorIndex = appStateDtrIdx !== undefined ? appStateDtrIdx : +(viewableDetectors[0].index);
     if (_.find(viewableDetectors, { 'index': '' + detectorIndex }) === undefined) {
       const warningText = `Requested detector index ${detectorIndex} is not valid for job ${$scope.selectedJob.job_id}`;
-      notify.warning(warningText, { lifetime: 30000 });
+      toastNotifications.addWarning(warningText);
       detectorIndex = +(viewableDetectors[0].index);
       $scope.appState.mlTimeSeriesExplorer.detectorIndex = detectorIndex;
       $scope.appState.save();
