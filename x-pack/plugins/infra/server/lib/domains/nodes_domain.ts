@@ -6,7 +6,7 @@
 
 import { InfraFrameworkRequest, InfraNodeRequestOptions, InfraNodesAdapter } from '../infra_types';
 
-import { InfraResponse } from '../../../common/types';
+import { InfraResponse } from '../../../common/graphql/types';
 
 export class InfraNodesDomain {
   private adapter: InfraNodesAdapter;

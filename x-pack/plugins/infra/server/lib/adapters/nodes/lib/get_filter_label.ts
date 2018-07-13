@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { isGroupByFilters } from '../../../../../common/type_guards';
-import { InfraGroupBy, InfraGroupByFilter } from '../../../../../common/types';
+import { InfraGroupBy, InfraGroupByFilter } from '../../../../../common/graphql/types';
+import { isGroupByFilters } from './type_guards';
 
 export function getFilterLabel(group: InfraGroupBy, name: string | number): string {
   if (isGroupByFilters(group) && typeof name === 'number') {

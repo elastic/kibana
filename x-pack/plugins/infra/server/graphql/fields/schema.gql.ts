@@ -5,10 +5,8 @@
  */
 
 import gql from 'graphql-tag';
-import { InfraField } from '../../common/types';
-import { InfraBackendLibs, InfraContext, InfraResolverFn } from '../lib/infra_types';
 
-export const fieldsSchema: any = gql`
+export const fieldsSchema = gql`
   interface InfraField {
     name: String
     type: String
@@ -25,21 +23,3 @@ export const fieldsSchema: any = gql`
     ): [InfraField]
   }
 `;
-
-export const createFieldResolvers = (libs: InfraBackendLibs) => {
-  const getFields: InfraResolverFn<InfraField[]> = async (
-    src,
-    args: any,
-    ctx: InfraContext
-  ): Promise<InfraField[]> => {
-    const { req } = ctx;
-    const fields: any = await libs.fields.getFields(req, args.indexPattern);
-    return fields;
-  };
-
-  return {
-    Query: {
-      fields: getFields,
-    },
-  };
-};

@@ -9,7 +9,7 @@ import {
   InfraFilterType,
   InfraGroupBy,
   InfraGroupByFilter,
-} from '../../../../../common/types';
+} from '../../../../../common/graphql/types';
 
 import {
   InfraESBoolQuery,
@@ -18,8 +18,8 @@ import {
   InfraNodeRequestOptions,
 } from '../../../infra_types';
 
-import { isGroupByFilters, isGroupByTerms } from '../../../../../common/type_guards';
 import { convertInputFilterToESQuery } from '../lib/convert_input_filter_to_es_query';
+import { isGroupByFilters, isGroupByTerms } from './type_guards';
 
 export function createQuery(options: InfraNodeRequestOptions): InfraESQuery {
   const { timerange, indexPattern, groupBy, filters }: InfraNodeRequestOptions = options;
@@ -36,6 +36,7 @@ export function createQuery(options: InfraNodeRequestOptions): InfraESQuery {
       },
     },
   };
+
   filterClause.push(rangeFilter);
 
   if (groupBy) {

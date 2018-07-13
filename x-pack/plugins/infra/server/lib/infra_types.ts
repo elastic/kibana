@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { GraphQLResolveInfo, GraphQLSchema } from 'graphql';
+import { GraphQLSchema } from 'graphql';
 import { IRouteAdditionalConfigurationOptions, IStrictReply } from 'hapi';
 import { internalInfraFrameworkRequest } from '../utils/wrap_request';
 import { InfraFieldsDomain } from './domains/fields_domain';
@@ -22,7 +22,7 @@ import {
   InfraResponse,
   InfraService,
   InfraTimerange,
-} from '../../common/types';
+} from '../../common/graphql/types';
 
 export interface InfraDomainLibs {
   fields: InfraFieldsDomain;
@@ -141,13 +141,6 @@ export interface InfraContext {
   req: InfraFrameworkRequest;
   libs: InfraBackendLibs;
 }
-
-export type InfraResolverFn<T> = (
-  src: object,
-  args: any,
-  ctx: InfraContext,
-  info: GraphQLResolveInfo
-) => Promise<T>;
 
 export interface FieldCapsResponse {
   fields: {

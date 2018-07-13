@@ -5,7 +5,7 @@
  */
 
 import React from 'react';
-import { InfraHost } from '../../common/types';
+import { InfraHost } from '../../common/graphql/types';
 import { WaffleMap } from '../components/eui';
 import { MainLayout } from '../components/layouts/main';
 import { withAllHosts } from '../containers/host';

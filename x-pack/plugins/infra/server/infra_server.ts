@@ -4,17 +4,16 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { makeExecutableSchema } from 'graphql-tools';
-import { inputSchema } from '../common/input';
-import { rootSchema } from '../common/root';
-import { createNodeResolvers, nodesSchema } from './graphql/nodes';
+import { IResolvers, makeExecutableSchema } from 'graphql-tools';
+import { schemas } from './graphql';
+import { createNodeResolvers } from './graphql/nodes';
 import { InfraBackendLibs } from './lib/infra_types';
 import { initLegacyLoggingRoutes } from './logging_legacy';
 
 export const initInfraServer = (libs: InfraBackendLibs) => {
   const schema = makeExecutableSchema({
-    resolvers: [createNodeResolvers(libs)],
-    typeDefs: [rootSchema, nodesSchema, inputSchema],
+    resolvers: [createNodeResolvers(libs) as IResolvers],
+    typeDefs: schemas,
   });
 
   libs.framework.registerGraphQLEndpoint('/api/infra/graphql', schema);

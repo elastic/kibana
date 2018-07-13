@@ -6,7 +6,7 @@
 
 // import { graphql } from 'react-apollo';
 // import gql from 'graphql-tag';
-// import { GetAllHosts } from '../../../common/types';
+// import { GetAllHosts } from '../../../common/graphql/types';
 
 // type ChildProps = {
 //   hosts: GetAllHosts.Query['hosts'];

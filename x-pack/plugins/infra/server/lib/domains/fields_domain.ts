@@ -8,7 +8,7 @@ import { get, sortBy } from 'lodash';
 
 import { FieldsAdapter, InfraFrameworkRequest } from '../infra_types';
 
-import { InfraField, InfraIndexPattern } from '../../../common/types';
+import { InfraField, InfraIndexPattern } from '../../../common/graphql/types';
 
 export class InfraFieldsDomain {
   private adapter: FieldsAdapter;

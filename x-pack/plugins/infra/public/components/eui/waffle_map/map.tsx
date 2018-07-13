@@ -6,7 +6,7 @@
 
 import React from 'react';
 import styled from 'styled-components';
-import { InfraHost } from '../../../../common/types';
+import { InfraHost } from '../../../../common/graphql/types';
 import { AutoSizer } from '../../auto_sizer';
 
 interface WaffleMapPlaceholderProps {
