@@ -17,6 +17,8 @@
  * under the License.
  */
 
+// @ts-ignore Types for EuiCallOut, EuiCodeBlock, and EuiEmptyPrompt missing https://github.com/elastic/eui/pull/1010
+import { EuiButton, EuiButtonEmpty, EuiCallOut, EuiCodeBlock, EuiEmptyPrompt } from '@elastic/eui';
 import React from 'react';
 import * as Rx from 'rxjs';
 import { tap } from 'rxjs/operators';
@@ -81,71 +83,49 @@ export class FatalErrorsScreen extends React.Component<Props, State> {
     }
   }
 
-  public onClickGoBack = (e: React.MouseEvent<HTMLButtonElement>) => {
+  public render() {
+    return (
+      <>
+        <EuiEmptyPrompt
+          iconType="alert"
+          iconColor="danger"
+          title={<h2>Oops!</h2>}
+          body={<p>Looks like something went wrong. Refreshing may do the trick.</p>}
+          actions={
+            <>
+              <EuiButton color="primary" fill onClick={this.onClickClearSession}>
+                Clear your session
+              </EuiButton>
+              <EuiButtonEmpty onClick={this.onClickGoBack}>Go Back</EuiButtonEmpty>
+            </>
+          }
+        />
+
+        {this.state.errors.map((error, i) => (
+          <EuiCallOut key={i} title={error.message} color="danger" iconType="cross">
+            <EuiCodeBlock>
+              {`Version: ${this.props.kibanaVersion}` +
+                '\n' +
+                `Build: ${this.props.buildNumber}` +
+                '\n' +
+                (error.stack ? error.stack : '')}
+            </EuiCodeBlock>
+          </EuiCallOut>
+        ))}
+      </>
+    );
+  }
+
+  private onClickGoBack = (e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
     window.history.back();
   };
 
-  public onClickClearSession = (e: React.MouseEvent<HTMLButtonElement>) => {
+  private onClickClearSession = (e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
     localStorage.clear();
     sessionStorage.clear();
     window.location.hash = '';
     window.location.reload();
   };
-
-  public render() {
-    return (
-      <div className="kuiViewContent kuiViewContent--constrainedWidth kuiViewContentItem">
-        <div style={{ textAlign: 'center' }}>
-          <h1 className="kuiTitle kuiVerticalRhythm">Oops!</h1>
-
-          <p className="kuiText kuiVerticalRhythm">
-            Looks like something went wrong. Refreshing may do the trick.
-          </p>
-
-          <div
-            className="kuiButtonGroup kuiVerticalRhythm"
-            style={{ textAlign: 'center', display: 'inline-block' }}
-          >
-            <button className="kuiButton kuiButton--primary" onClick={this.onClickGoBack}>
-              Go back
-            </button>
-
-            <button className="kuiButton kuiButton--hollow" onClick={this.onClickClearSession}>
-              Clear your session
-            </button>
-          </div>
-        </div>
-
-        {this.state.errors.map((error, i) => (
-          <React.Fragment key={i}>
-            <h1>
-              <i className="fa fa-warning-triangle" />
-            </h1>
-            <div className="panel panel-danger">
-              <div className="panel-heading">
-                <h1 className="panel-title">
-                  <i className="fa fa-warning" /> Fatal Error
-                </h1>
-              </div>
-              <div className="panel-body fatal-body">{error.message}</div>
-              <div className="panel-footer">
-                <pre>
-                  {`Version: ${this.props.kibanaVersion}` +
-                    '\n' +
-                    `Build: ${this.props.buildNumber}`}
-                </pre>
-              </div>
-              {error.stack && (
-                <div className="panel-footer">
-                  <pre>{error.stack}</pre>
-                </div>
-              )}
-            </div>
-          </React.Fragment>
-        ))}
-      </div>
-    );
-  }
 }

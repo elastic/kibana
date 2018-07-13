@@ -45,9 +45,9 @@ export class FatalErrorsService {
     });
   }
 
-  public add(error: Error | string, source?: string) {
+  public add = (error: Error | string, source?: string) => {
     this.errorInfo$.next(getErrorInfo(error, source));
-  }
+  };
 
   public start() {
     return {
