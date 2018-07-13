@@ -105,10 +105,7 @@ describe('I18n helper', () => {
     });
 
     test('should filter unique values only by reference', () => {
-      expect(unique([{ foo: 'bar' }, { foo: 'bar' }])).toEqual([
-        { foo: 'bar' },
-        { foo: 'bar' },
-      ]);
+      expect(unique([{ foo: 'bar' }, { foo: 'bar' }])).toEqual([{ foo: 'bar' }, { foo: 'bar' }]);
 
       const value = { foo: 'bar' };
 
