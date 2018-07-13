@@ -8,6 +8,7 @@ import { MemoryBeatsAdapter } from '../../../adapters/beats/memory_beats_adapter
 import { TestingBackendFrameworkAdapter } from '../../../adapters/framework/testing_framework_adapter';
 import { MemoryTagsAdapter } from '../../../adapters/tags/memory_tags_adapter';
 import { MemoryTokensAdapter } from '../../../adapters/tokens/memory_tokens_adapter';
+import { BeatEnrollmentStatus } from '../../../lib';
 
 import { BeatTag, CMBeat } from '../../../../../common/domain_types';
 import { TokenEnrollmentData } from '../../../adapters/tokens/adapter_types';
@@ -84,16 +85,16 @@ describe('Beats Domain Lib', () => {
     });
 
     it('should enroll beat, returning an access token', async () => {
-      const { token } = await tokensLib.getEnrollmentToken(
-        validEnrollmentToken
-      );
+      const { token } = await tokensLib.getEnrollmentToken(validEnrollmentToken);
 
       expect(token).toEqual(validEnrollmentToken);
-      const { accessToken } = await beatsLib.enrollBeat(
+      const { accessToken, status } = await beatsLib.enrollBeat(
+        validEnrollmentToken,
         beatId,
         '192.168.1.1',
         omit(beat, 'enrollment_token')
       );
+      expect(status).toEqual(BeatEnrollmentStatus.Success);
 
       expect(beatsDB.length).toEqual(1);
       expect(beatsDB[0]).toHaveProperty('host_ip');
@@ -126,9 +127,7 @@ describe('Beats Domain Lib', () => {
       await tokensLib.deleteEnrollmentToken(validEnrollmentToken);
       expect(tokensDB.length).toEqual(0);
 
-      const { token } = await tokensLib.getEnrollmentToken(
-        validEnrollmentToken
-      );
+      const { token } = await tokensLib.getEnrollmentToken(validEnrollmentToken);
 
       expect(token).toEqual(null);
     });

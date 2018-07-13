@@ -28,7 +28,6 @@ contractTests('Kibana Database Adapter', {
     return await es.cleanup();
   },
   adapterSetup: () => {
-    return new KibanaDatabaseAdapter(kbnServer.server.plugins
-      .elasticsearch as DatabaseKbnESPlugin);
+    return new KibanaDatabaseAdapter(kbnServer.server.plugins.elasticsearch as DatabaseKbnESPlugin);
   },
 });
