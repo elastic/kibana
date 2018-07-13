@@ -51,7 +51,7 @@ export function CallClientProvider(Private, Promise, es) {
     const searchStrategiesWithRequests = assignSearchRequestsToSearchStrategies(requestsToFetch);
 
     // resolved by respondToSearchRequests()
-    const searchRequestPromises = [];
+    const abortableSearches = [];
     let areAllSearchRequestsAborted = false;
 
     // When we traverse our search requests and send out searches, some of them may fail. We'll
@@ -107,8 +107,8 @@ export function CallClientProvider(Private, Promise, es) {
         return;
       }
 
-      searchRequestPromises.forEach(searchRequestPromise => {
-        searchRequestPromise.abort();
+      abortableSearches.forEach(({ abort }) => {
+        abort();
       });
 
       areAllSearchRequestsAborted = true;
@@ -133,6 +133,7 @@ export function CallClientProvider(Private, Promise, es) {
         const { searchStrategy, searchRequests } = searchStrategyWithSearchRequests;
         const {
           searching,
+          abort,
           failedSearchRequests,
         } = await searchStrategy.search({ searchRequests, es, Promise, serializeFetchParams });
 
@@ -144,7 +145,10 @@ export function CallClientProvider(Private, Promise, es) {
           activeSearchRequests.push(searchRequest);
         });
 
-        searchRequestPromises.push(searching);
+        abortableSearches.push({
+          searching,
+          abort,
+        });
       }
 
       try {
@@ -153,7 +157,7 @@ export function CallClientProvider(Private, Promise, es) {
           return await respondToSearchRequests();
         }
 
-        const segregatedResponses = await Promise.all(searchRequestPromises);
+        const segregatedResponses = await Promise.all(abortableSearches.map(({ searching }) => searching));
 
         // Aggregate the responses returned by all of the search strategies.
         const aggregatedResponses = segregatedResponses.reduce((allResponses, responses) => {
