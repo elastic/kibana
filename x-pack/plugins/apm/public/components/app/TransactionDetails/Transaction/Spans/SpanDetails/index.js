@@ -38,6 +38,7 @@ import SyntaxHighlighter, {
 import { xcode } from 'react-syntax-highlighter/dist/styles';
 
 import sql from 'react-syntax-highlighter/dist/languages/sql';
+import { HeaderXSmall } from '../../../../../shared/UIComponents';
 
 registerLanguage('sql', sql);
 
@@ -174,22 +175,25 @@ function DatabaseContext({ dbContext }) {
   }
 
   return (
-    <DatabaseStatement>
-      <SyntaxHighlighter
-        language={'sql'}
-        style={xcode}
-        customStyle={{
-          color: null,
-          background: null,
-          padding: null,
-          lineHeight: px(unit * 1.5),
-          whiteSpace: 'pre-wrap',
-          overflowX: 'scroll'
-        }}
-      >
-        {dbContext.statement}
-      </SyntaxHighlighter>
-    </DatabaseStatement>
+    <div>
+      <HeaderXSmall>DB Statement</HeaderXSmall>
+      <DatabaseStatement>
+        <SyntaxHighlighter
+          language={'sql'}
+          style={xcode}
+          customStyle={{
+            color: null,
+            background: null,
+            padding: null,
+            lineHeight: px(unit * 1.5),
+            whiteSpace: 'pre-wrap',
+            overflowX: 'scroll'
+          }}
+        >
+          {dbContext.statement}
+        </SyntaxHighlighter>
+      </DatabaseStatement>
+    </div>
   );
 }
 
