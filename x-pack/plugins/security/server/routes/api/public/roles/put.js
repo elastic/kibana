@@ -9,26 +9,6 @@ import Joi from 'joi';
 import { ALL_RESOURCE } from '../../../../../common/constants';
 import { wrapError } from '../../../../lib/errors';
 
-export const schema = Joi.object().keys({
-  metadata: Joi.object().optional(),
-  elasticsearch: Joi.object().keys({
-    cluster: Joi.array().items(Joi.string()),
-    indices: Joi.array().items({
-      names: Joi.array().items(Joi.string()),
-      field_security: Joi.object().keys({
-        grant: Joi.array().items(Joi.string()),
-        except: Joi.array().items(Joi.string()),
-      }),
-      privileges: Joi.array().items(Joi.string()),
-      query: Joi.string().allow(''),
-    }),
-    run_as: Joi.array().items(Joi.string()),
-  }),
-  kibana: Joi.array().items({
-    privileges: Joi.array().items(Joi.string()),
-  }),
-});
-
 const transformKibanaPrivilegeToEs = (application, kibanaPrivilege) => {
   return {
     privileges: kibanaPrivilege.privileges,
@@ -66,8 +46,30 @@ export function initPutRolesApi(
   server,
   callWithRequest,
   routePreCheckLicenseFn,
+  privilegeMap,
   application
 ) {
+
+  const schema = Joi.object().keys({
+    metadata: Joi.object().optional(),
+    elasticsearch: Joi.object().keys({
+      cluster: Joi.array().items(Joi.string()),
+      indices: Joi.array().items({
+        names: Joi.array().items(Joi.string()),
+        field_security: Joi.object().keys({
+          grant: Joi.array().items(Joi.string()),
+          except: Joi.array().items(Joi.string()),
+        }),
+        privileges: Joi.array().items(Joi.string()),
+        query: Joi.string().allow(''),
+      }),
+      run_as: Joi.array().items(Joi.string()),
+    }),
+    kibana: Joi.array().items({
+      privileges: Joi.array().items(Joi.string().valid(Object.keys(privilegeMap))),
+    }),
+  });
+
   server.route({
     method: 'PUT',
     path: '/api/security/role/{name}',

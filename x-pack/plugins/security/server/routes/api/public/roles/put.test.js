@@ -19,6 +19,12 @@ const createMockServer = () => {
 
 const defaultPreCheckLicenseImpl = (request, reply) => reply();
 
+const privilegeMap = {
+  'test-kibana-privilege-1': {},
+  'test-kibana-privilege-2': {},
+  'test-kibana-privilege-3': {},
+};
+
 const putRoleTest = (
   description,
   { name, payload, preCheckLicenseImpl, callWithRequestImpls = [], asserts }
@@ -36,7 +42,8 @@ const putRoleTest = (
       mockServer,
       mockCallWithRequest,
       mockPreCheckLicense,
-      application
+      privilegeMap,
+      application,
     );
     const headers = {
       authorization: 'foo',
@@ -89,6 +96,29 @@ describe('PUT role', () => {
     });
 
     putRoleTest(`requires name in params to not exceed 1024 characters`, {
+      name: 'a'.repeat(1025),
+      payload: {
+        kibana: [
+          {
+            privileges: ['foo']
+          }
+        ]
+      },
+      asserts: {
+        statusCode: 400,
+        result: {
+          error: 'Bad Request',
+          message: `child "name" fails because ["name" length must be less than or equal to 1024 characters long]`,
+          statusCode: 400,
+          validation: {
+            keys: ['name'],
+            source: 'params',
+          },
+        },
+      },
+    });
+
+    putRoleTest(`only allows known Kibana privileges`, {
       name: 'a'.repeat(1025),
       payload: {},
       asserts: {
