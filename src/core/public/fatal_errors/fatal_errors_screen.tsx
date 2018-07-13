@@ -102,8 +102,13 @@ export class FatalErrorsScreen extends React.Component<Props, State> {
             <EuiEmptyPrompt
               iconType="alert"
               iconColor="danger"
-              title={<h2>Oops!</h2>}
-              body={<p>Looks like something went wrong. Refreshing may do the trick.</p>}
+              title={<h2>Something went wrong</h2>}
+              body={
+                <p>
+                  Try refreshing the page. If that doesn't work, go back to the previous page or
+                  clear your session data.
+                </p>
+              }
               actions={[
                 <EuiButton color="primary" fill onClick={this.onClickClearSession}>
                   Clear your session
