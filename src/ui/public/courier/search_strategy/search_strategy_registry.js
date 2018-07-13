@@ -23,9 +23,9 @@ const addSearchStrategy = searchStrategy => {
   searchStrategies.push(searchStrategy);
 };
 
-const getSearchStrategy = (...rest) => {
+const getSearchStrategy = indexPattern => {
   return searchStrategies.find(searchStrategy => {
-    return searchStrategy.isViable(...rest);
+    return searchStrategy.isViable(indexPattern);
   });
 };
 
@@ -48,7 +48,9 @@ const assignSearchRequestsToSearchStrategies = searchRequests => {
   const searchStrategyById = {};
 
   searchRequests.forEach(searchRequest => {
-    const matchingSearchStrategy = getSearchStrategy({ searchRequest });
+
+    const indexPattern = searchRequest.source.getField('index');
+    const matchingSearchStrategy = getSearchStrategy(indexPattern);
 
     const { id } = matchingSearchStrategy;
     let searchStrategyWithRequest = searchStrategyById[id];
@@ -71,7 +73,7 @@ const assignSearchRequestsToSearchStrategies = searchRequests => {
 };
 
 const hasSearchStategyForIndexPattern = indexPattern => {
-  return Boolean(getSearchStrategy({ indexPattern }));
+  return Boolean(getSearchStrategy(indexPattern));
 };
 
 const isRollupIndexPattern = indexPattern => {

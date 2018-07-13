@@ -78,15 +78,13 @@ export const defaultSearchStrategy = {
   },
 
   // Accept multiple criteria for determining viability to be as flexible as possible.
-  isViable: ({ indexPattern, searchRequest }) => {
-    if (!indexPattern && !searchRequest) {
+  isViable: (indexPattern) => {
+    if (!indexPattern) {
       return false;
     }
 
-    const derivedIndexPattern = indexPattern || searchRequest.source.getField('index');
-
     // Basic index patterns don't have `type` defined.
-    return derivedIndexPattern.type == null;
+    return indexPattern.type == null;
   },
 };
 
