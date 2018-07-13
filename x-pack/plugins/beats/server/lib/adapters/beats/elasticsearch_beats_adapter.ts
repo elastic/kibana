@@ -5,7 +5,6 @@
  */
 
 import { flatten, get as _get, omit } from 'lodash';
-import moment from 'moment';
 import { INDEX_NAMES } from '../../../../common/constants';
 import { CMBeat } from '../../../../common/domain_types';
 import { DatabaseAdapter } from '../database/adapter_types';
@@ -85,33 +84,6 @@ export class ElasticsearchBeatsAdapter implements CMBeatsAdapter {
     return _get(response, 'docs', [])
       .filter((b: any) => b.found)
       .map((b: any) => b._source.beat);
-  }
-
-  public async verifyBeats(user: FrameworkUser, beatIds: string[]) {
-    if (!Array.isArray(beatIds) || beatIds.length === 0) {
-      return [];
-    }
-
-    const verifiedOn = moment().toJSON();
-    const body = flatten(
-      beatIds.map(beatId => [
-        { update: { _id: `beat:${beatId}` } },
-        { doc: { beat: { verified_on: verifiedOn } } },
-      ])
-    );
-
-    const response = await this.database.bulk(user, {
-      _sourceInclude: ['beat.id', 'beat.verified_on'],
-      body,
-      index: INDEX_NAMES.BEATS,
-      refresh: 'wait_for',
-      type: '_doc',
-    });
-
-    return _get(response, 'items', []).map(b => ({
-      ..._get(b, 'update.get._source.beat', {}),
-      updateStatus: _get(b, 'update.result', 'unknown error'),
-    }));
   }
 
   public async getAll(user: FrameworkUser) {
