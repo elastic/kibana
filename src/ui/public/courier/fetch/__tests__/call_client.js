@@ -270,7 +270,7 @@ describe('callClient', () => {
     });
   });
 
-  describe('searchRequests with multiple searchStrategies', () => {
+  describe('searchRequests with multiple searchStrategies map correctly to their responses', () => {
     const search = ({ searchRequests }) => {
       return {
         searching: Promise.resolve({
@@ -324,7 +324,7 @@ describe('callClient', () => {
       });
     });
 
-    it('map correctly if the searchRequests are reordered by the searchStrategies', () => {
+    it('if the searchRequests are reordered by the searchStrategies', () => {
       // Add requests in an order which will be reordered by the strategies.
       searchRequests = [ searchRequestA, searchRequestB, searchRequestA2 ];
       const callingClient = callClient(searchRequests);
@@ -334,7 +334,7 @@ describe('callClient', () => {
       });
     });
 
-    it('map correctly if once is aborted', () => {
+    it('if once is aborted', () => {
       // Add requests in an order which will be reordered by the strategies.
       searchRequests = [ searchRequestA, searchRequestB, searchRequestA2 ];
       const callingClient = callClient(searchRequests);
@@ -345,7 +345,7 @@ describe('callClient', () => {
       });
     });
 
-    it('map correctly if one is already aborted', () => {
+    it('if one is already aborted', () => {
       searchRequests = [ searchRequestA, searchRequestB, ABORTED, searchRequestA2 ];
       const callingClient = callClient(searchRequests);
 
