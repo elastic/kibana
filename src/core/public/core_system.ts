@@ -17,10 +17,15 @@
  * under the License.
  */
 
-import { InjectedMetadataService, InjectedMetadataServiceParams } from './injected_metadata';
-import { LegacyPlatformService, LegacyPlatformServiceParams } from './legacy_platform';
+import { InjectedMetadataParams, InjectedMetadataService } from './injected_metadata';
+import { LegacyPlatformParams, LegacyPlatformService } from './legacy_platform';
 
-type Params = InjectedMetadataServiceParams & LegacyPlatformServiceParams;
+interface Params {
+  injectedMetadata: InjectedMetadataParams['injectedMetadata'];
+  rootDomElement: LegacyPlatformParams['rootDomElement'];
+  requireLegacyFiles: LegacyPlatformParams['requireLegacyFiles'];
+  useLegacyTestHarness?: LegacyPlatformParams['useLegacyTestHarness'];
+}
 
 export class CoreSystem {
   private injectedMetadata: InjectedMetadataService;

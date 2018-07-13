@@ -23,14 +23,14 @@ interface Deps {
   injectedMetadata: InjectedMetadataStartContract;
 }
 
-export interface LegacyPlatformServiceParams {
+export interface LegacyPlatformParams {
   rootDomElement: HTMLElement;
   requireLegacyFiles: () => void;
   useLegacyTestHarness?: boolean;
 }
 
 export class LegacyPlatformService {
-  constructor(private params: LegacyPlatformServiceParams) {}
+  constructor(private params: LegacyPlatformParams) {}
 
   public start({ injectedMetadata }: Deps) {
     // Inject parts of the new platform into parts of the legacy platform

@@ -19,7 +19,7 @@
 
 import { deepFreeze } from './deep_freeze';
 
-export interface InjectedMetadataServiceParams {
+export interface InjectedMetadataParams {
   injectedMetadata: {
     legacyMetadata: {
       [key: string]: any;
@@ -28,7 +28,7 @@ export interface InjectedMetadataServiceParams {
 }
 
 export class InjectedMetadataService {
-  constructor(private params: InjectedMetadataServiceParams) {}
+  constructor(private params: InjectedMetadataParams) {}
 
   public start() {
     const state = deepFreeze(this.params.injectedMetadata);
