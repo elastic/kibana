@@ -146,11 +146,7 @@ export function SecurityPageProvider({ getService, getPageObjects }) {
     }
 
     async assignRoleToUser(role) {
-      log.debug(`Adding role ${role} to user`);
-      const privilegeInput =
-        await retry.try(() => find.byCssSelector('[data-test-subj="comboBoxSearchInput"]'));
-      await privilegeInput.type(role);
-      await privilegeInput.type('\n');
+      this.selectRole(role);
     }
 
     async navigateTo() {
@@ -230,7 +226,7 @@ export function SecurityPageProvider({ getService, getPageObjects }) {
               return self.selectRole(roleName);
             })
             .then(function () {
-              return PageObjects.common.sleep(1000);
+              return testSubjects.click('comboBoxToggleListButton');
             });
 
         }, Promise.resolve());
@@ -336,8 +332,10 @@ export function SecurityPageProvider({ getService, getPageObjects }) {
       const dropdown = await testSubjects.find("userFormRolesDropdown");
       const input = await dropdown.findByCssSelector("input");
       await input.type(role);
-      await testSubjects.click(`addRoleOption-${role}`);
-      await testSubjects.find(`userRole-${role}`);
+      const option = await testSubjects.find(`roleOption-${role}`);
+      await option.click();
+      await testSubjects.click('comboBoxToggleListButton');
+      await testSubjects.find(`roleOption-${role}`);
     }
 
     deleteUser(username) {

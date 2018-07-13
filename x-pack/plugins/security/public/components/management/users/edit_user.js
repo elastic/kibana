@@ -107,17 +107,16 @@ export class EditUser extends Component {
       if (e.status === 401) {
         return this.setState({ currentPasswordError: true });
       } else {
-        toastNotifications.addDanger(
-          `Error setting password: ${e.data.message}`
-        );
+        toastNotifications.addDanger(`Error setting password: ${e.data.message}`);
       }
     }
     this.clearPasswordForm();
   };
   saveUser = async () => {
     const { apiClient, changeUrl } = this.props;
-    const { user, password } = this.state;
+    const { user, password, selectedRoles } = this.state;
     const userToSave = { ...user };
+    userToSave.roles = selectedRoles.map(selectedRole => { return selectedRole.label; });
     if (password) {
       userToSave.password = password;
     }
@@ -138,8 +137,7 @@ export class EditUser extends Component {
   };
   passwordFields = () => {
     const { user, currentUser } = this.state;
-    const userIsLoggedInUser =
-      user.username && user.username === currentUser.username;
+    const userIsLoggedInUser = user.username && user.username === currentUser.username;
     return (
       <Fragment>
         {userIsLoggedInUser ? (
@@ -151,9 +149,7 @@ export class EditUser extends Component {
             <EuiFieldText
               name="currentPassword"
               type="password"
-              onChange={event =>
-                this.setState({ currentPassword: event.target.value })
-              }
+              onChange={event => this.setState({ currentPassword: event.target.value })}
             />
           </EuiFormRow>
         ) : null}
@@ -167,9 +163,7 @@ export class EditUser extends Component {
             name="password"
             type="password"
             onChange={event => this.setState({ password: event.target.value })}
-            onBlur={event =>
-              this.setState({ password: event.target.value || '' })
-            }
+            onBlur={event => this.setState({ password: event.target.value || '' })}
           />
         </EuiFormRow>
         <EuiFormRow
@@ -179,12 +173,8 @@ export class EditUser extends Component {
         >
           <EuiFieldText
             data-test-subj="passwordConfirmationInput"
-            onChange={event =>
-              this.setState({ confirmPassword: event.target.value })
-            }
-            onBlur={event =>
-              this.setState({ confirmPassword: event.target.value || '' })
-            }
+            onChange={event => this.setState({ confirmPassword: event.target.value })}
+            onBlur={event => this.setState({ confirmPassword: event.target.value || '' })}
             name="confirm_password"
             type="password"
           />
@@ -193,7 +183,12 @@ export class EditUser extends Component {
     );
   };
   changePasswordForm = () => {
-    const { showChangePasswordForm, password, confirmPassword, user: { username } } = this.state;
+    const {
+      showChangePasswordForm,
+      password,
+      confirmPassword,
+      user: { username },
+    } = this.state;
     if (!showChangePasswordForm) {
       return null;
     }
@@ -201,16 +196,12 @@ export class EditUser extends Component {
       <Fragment>
         {this.passwordFields()}
         {username === 'kibana' ? (
-          <EuiCallOut
-            title="Proceed with caution!"
-            color="warning"
-            iconType="help"
-          >
+          <EuiCallOut title="Proceed with caution!" color="warning" iconType="help">
             <p>
-            After you change the password for the kibana user, you must update the kibana.yml file and restart Kibana.
+              After you change the password for the kibana user, you must update the kibana.yml file
+              and restart Kibana.
             </p>
           </EuiCallOut>
-
         ) : null}
         <EuiFlexGroup gutterSize="s" alignItems="center">
           <EuiFlexItem grow={false}>
@@ -226,10 +217,7 @@ export class EditUser extends Component {
           <EuiButton
             fill
             disabled={
-              !password ||
-              !confirmPassword ||
-              this.passwordError() ||
-              this.confirmPasswordError()
+              !password || !confirmPassword || this.passwordError() || this.confirmPasswordError()
             }
             onClick={() => {
               this.changePassword(password);
@@ -260,13 +248,7 @@ export class EditUser extends Component {
   };
   render() {
     const { changeUrl } = this.props;
-    const {
-      user,
-      roles,
-      selectedRoles,
-      showChangePasswordForm,
-      isNewUser,
-    } = this.state;
+    const { user, roles, selectedRoles, showChangePasswordForm, isNewUser } = this.state;
     const reserved = user.metadata && user.metadata._reserved;
     if (!user || !roles) {
       return null;
@@ -288,11 +270,7 @@ export class EditUser extends Component {
                 <EuiBadge iconType="lock">Reserved</EuiBadge>
               </EuiToolTip>
             ) : (
-              <EuiButton
-                data-test-subj="userFormDeleteButton"
-                color="danger"
-                iconType="trash"
-              >
+              <EuiButton data-test-subj="userFormDeleteButton" color="danger" iconType="trash">
                 Delete user
               </EuiButton>
             )}
@@ -370,7 +348,7 @@ export class EditUser extends Component {
               isDisabled={reserved}
               name="roles"
               options={roles.map(role => {
-                return { label: role.name };
+                return { 'data-test-subj': `roleOption-${role.name}`, label: role.name };
               })}
               selectedOptions={selectedRoles}
             />
@@ -379,7 +357,7 @@ export class EditUser extends Component {
             <EuiFlexGroup gutterSize="s" alignItems="center">
               <EuiFlexItem grow={false}>
                 <EuiButton
-                  data-test-subj="userFormSaveButton"
+                  data-test-subj="userFormCancelButton"
                   onClick={() => changeUrl(USERS_PATH)}
                 >
                   Cancel
@@ -400,9 +378,7 @@ export class EditUser extends Component {
           {showChangePasswordForm ? null : (
             <Fragment>
               <EuiFormRow label="Password">
-                <EuiLink onClick={this.toggleChangePasswordForm}>
-                  Change password
-                </EuiLink>
+                <EuiLink onClick={this.toggleChangePasswordForm}>Change password</EuiLink>
               </EuiFormRow>
             </Fragment>
           )}

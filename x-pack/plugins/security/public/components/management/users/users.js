@@ -7,7 +7,7 @@
 /*! Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one or more contributor license agreements.
  * Licensed under the Elastic License; you may not use this file except in compliance with the Elastic License. */
 
-import React, { Component } from 'react';
+import React, { Component, Fragment } from 'react';
 import {
   EuiButton,
   EuiIcon,
@@ -75,15 +75,9 @@ export class Users extends Component {
         >
           <div>
             <p>
-              You are about to delete {moreThanOne ? 'these' : 'this'} user{moreThanOne
-                ? 's'
-                : ''}:
+              You are about to delete {moreThanOne ? 'these' : 'this'} user{moreThanOne ? 's' : ''}:
             </p>
-            <ul>
-              {selection.map(({ username }) => (
-                <li key={username}>{username}</li>
-              ))}
-            </ul>
+            <ul>{selection.map(({ username }) => <li key={username}>{username}</li>)}</ul>
             <p>This operation cannot be undone.</p>
           </div>
         </EuiConfirmModal>
@@ -137,10 +131,7 @@ export class Users extends Component {
         sortable: true,
         truncateText: true,
         render: username => (
-          <EuiLink
-            data-test-subj="userRowUserName"
-            href={`${path}users/edit/${username}`}
-          >
+          <EuiLink data-test-subj="userRowUserName" href={`${path}users/edit/${username}`}>
             {username}
           </EuiLink>
         ),
@@ -149,17 +140,15 @@ export class Users extends Component {
         field: 'roles',
         name: 'Roles',
         render: rolenames => {
-          const roleLinks = rolenames.map(rolename => {
+          const roleLinks = rolenames.map((rolename, index) => {
             return (
-              <div data-test-subj="userRowUserRoles">
-                <EuiLink href={`${path}roles/edit/${rolename}`}>
-                  {rolename}
-                </EuiLink>
-                <br />
-              </div>
+              <Fragment>
+                <EuiLink href={`${path}roles/edit/${rolename}`}>{rolename}</EuiLink>
+                {index === rolenames.length - 1 ? null : ', '}
+              </Fragment>
             );
           });
-          return roleLinks;
+          return <div data-test-subj="userRowRoles">{roleLinks}</div>;
         },
       },
       {
@@ -177,8 +166,7 @@ export class Users extends Component {
     const selection = {
       itemId: 'username',
       selectable: user => !user.metadata._reserved,
-      selectableMessage: selectable =>
-        !selectable ? 'User is a system user' : undefined,
+      selectableMessage: selectable => (!selectable ? 'User is a system user' : undefined),
       onSelectionChange: selection => this.setState({ selection }),
     };
     const search = {
@@ -193,7 +181,11 @@ export class Users extends Component {
         direction: 'asc',
       },
     };
-
+    const rowProps = () => {
+      return {
+        'data-test-subj': 'userRow',
+      };
+    };
     return (
       <EuiPage>
         {this.confirmDeleteModal()}
@@ -206,6 +198,7 @@ export class Users extends Component {
           loading={users.length === 0}
           search={search}
           sorting={sorting}
+          rowProps={rowProps}
         />
       </EuiPage>
     );
