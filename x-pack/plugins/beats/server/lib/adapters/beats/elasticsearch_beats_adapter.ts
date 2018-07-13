@@ -34,7 +34,7 @@ export class ElasticsearchBeatsAdapter implements CMBeatsAdapter {
       return null;
     }
 
-    return _get(response, '_source.beat');
+    return _get<CMBeat>(response, '_source.beat');
   }
 
   public async insert(beat: CMBeat) {
@@ -81,7 +81,7 @@ export class ElasticsearchBeatsAdapter implements CMBeatsAdapter {
     };
     const response = await this.database.mget(user, params);
 
-    return _get(response, 'docs', [])
+    return _get<CMBeat[]>(response, 'docs', [])
       .filter((b: any) => b.found)
       .map((b: any) => b._source.beat);
   }

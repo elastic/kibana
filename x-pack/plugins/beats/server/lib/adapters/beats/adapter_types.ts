@@ -7,13 +7,12 @@
 import { CMBeat } from '../../../../common/domain_types';
 import { FrameworkUser } from '../framework/adapter_types';
 
-// FIXME: fix getBeatsWithIds return type
 export interface CMBeatsAdapter {
   insert(beat: CMBeat): Promise<void>;
   update(beat: CMBeat): Promise<void>;
-  get(id: string): any;
-  getAll(user: FrameworkUser): any;
-  getWithIds(user: FrameworkUser, beatIds: string[]): any;
+  get(id: string): Promise<CMBeat | null>;
+  getAll(user: FrameworkUser): Promise<CMBeat[] | null>;
+  getWithIds(user: FrameworkUser, beatIds: string[]): Promise<CMBeat[]>;
   removeTagsFromBeats(
     user: FrameworkUser,
     removals: BeatsTagAssignment[]
