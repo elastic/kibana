@@ -68,7 +68,7 @@ export function registerStatsApi(kbnServer, server, config) {
             getUsage(callCluster),
             getClusterUuid(callCluster),
           ]);
-          extended = { usage, clusterUuid };
+          extended = { usage, cluster_uuid: clusterUuid };
         }
 
         /* kibana_stats gets singled out from the collector set as it is used
