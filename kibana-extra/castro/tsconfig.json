@@ -38,7 +38,13 @@
 
     // Disallow inconsistently-cased references to the same file.
     "forceConsistentCasingInFileNames": true,
-    "sourceMap": true
+    "sourceMap": true,
+    "paths": {
+      "*": [
+        "*",
+        "webpackShims/*"
+      ]
+    }
   },
   "include": [
     "server/**/*",

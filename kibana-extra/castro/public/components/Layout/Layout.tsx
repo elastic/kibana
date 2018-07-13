@@ -17,6 +17,7 @@ import {
 import DirectoryTree from './DirectoryTree';
 import CodeBlock from './CodeBlock';
 import FileCode from '../main/FileCode';
+import Editor from './Editor';
 interface State {
     children: Array<any>
     node: any,
@@ -73,7 +74,7 @@ export default class Layout extends React.Component<any, State> {
 
                 <EuiFlexItem>
                     { this.state.node &&
-                        <FileCode file={this.state.workspace +'/'+ this.state.node.path} html={this.state.node.html}/>
+                        <Editor file={this.state.workspace +'/'+ this.state.node.path} blob={this.state.node.blob}/>
                     }
                 </EuiFlexItem>
             </EuiFlexGroup>

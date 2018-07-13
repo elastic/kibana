@@ -2,19 +2,20 @@ import exampleRoute from './server/routes/example';
 import lspRoute from './server/routes/lsp';
 import repositoryRoute from './server/routes/repository';
 import fileRoute from './server/routes/file';
-
+import manacoRoute from './server/routes/monaco';
+import { resolve } from 'path';
 import mappings from './mappings';
 
 export default function (kibana) {
   return new kibana.Plugin({
     require: ['elasticsearch'],
     name: 'castro',
+    publicDir: resolve(__dirname, 'public'),
     uiExports: {
-      
       app: {
         title: 'Castro',
         description: 'castro',
-        main: 'plugins/castro/app'
+        main: 'plugins/castro/app',
       },
       
       hacks: [
@@ -42,6 +43,7 @@ export default function (kibana) {
       lspRoute(server);
       repositoryRoute(server);
       fileRoute(server);
+      manacoRoute(server);
     },
 
   });

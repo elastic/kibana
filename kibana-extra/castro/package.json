@@ -16,7 +16,7 @@
     "test:browser": "plugin-helpers test:browser",
     "build": "plugin-helpers build",
     "start-deps": "node ../../kibana/scripts/es.js snapshot -E path.data=../../data",
-    "debug": " node --inspect ../../kibana/scripts/kibana.js --config ../../config/kibana/kibana.yml  --env.name=development --optimize.enabled=false --plugin-path=."
+    "debug": " node --inspect ../../kibana/scripts/kibana.js --config ../../config/kibana/kibana.yml  --env.name=development --optimize.enabled=true --plugin-path=."
   },
   "devDependencies": {
     "@elastic/eslint-config-kibana": "link:../../kibana/packages/eslint-config-kibana",
@@ -45,6 +45,7 @@
     "git-url-parse": "^9.0.1",
     "highlights": "^3.1.1",
     "javascript-typescript-langserver": "^2.10.0",
+    "monaco-editor": "^0.13.1",
     "nodegit": "^0.22.1",
     "popper.js": "^1.14.3",
     "react-dom": "^16.4.1",
@@ -55,7 +56,6 @@
     "redux-actions": "^2.4.0",
     "redux-saga": "^0.16.0",
     "rimraf": "^2.6.2",
-    "tooltip.js": "^1.2.0",
     "vscode-languageserver": "^4.2.1"
   }
 }

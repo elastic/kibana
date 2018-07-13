@@ -19,7 +19,9 @@ async function getTree() {
     const dirs = {[repodir]: root};
 
     try {
-        const walk = function (dir: string, callback: (parentDir: string, file: string, isFile: boolean) => void) {
+        const walk = function (dir: string, callback: (parentDir: string, file: string, isFile: boolean) => void, depth: number = 3) {
+            if(depth <=0)
+                return;
             let list = fs.readdirSync(dir);
             list.forEach(function (file) {
                 let path = Path.join(dir, file);
@@ -28,7 +30,7 @@ async function getTree() {
                 if (stat && stat.isDirectory()) {
                     /* Recurse into a subdirectory */
                     callback(dir, path, false);
-                    walk(path, callback);
+                    walk(path, callback, depth -1);
                 } else {
                     /* Is a file */
                     callback(dir, path, true)
@@ -79,14 +81,16 @@ async function getTree() {
 async function getFiles() {
     const files = [];
     try {
-        const walk = function (dir: string, callback: (file: string) => void) {
+        const walk = function (dir: string, callback: (file: string) => void, depth: number = 3) {
+            if(depth <= 0)
+                return;
             let list = fs.readdirSync(dir);
             list.forEach(function (file) {
                 let path = Path.join(dir, file);
                 const stat = fs.statSync(path);
                 if (stat && stat.isDirectory()) {
                     /* Recurse into a subdirectory */
-                    walk(path, callback);
+                    walk(path, callback, depth -1);
                 } else {
                     /* Is a file */
                     callback(path)
