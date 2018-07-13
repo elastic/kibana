@@ -4,4 +4,5 @@
 * you may not use this file except in compliance with the Elastic License.
 */
 
-import './register';
+import './agg_type_filter';
+import './agg_type_field_filter';

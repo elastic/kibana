@@ -20,7 +20,7 @@ export function rollup(kibana)  {
         'plugins/rollup/index_pattern_list',
       ],
       visualize: [
-        'plugins/rollup/vis_type_agg_filter',
+        'plugins/rollup/visualize',
       ],
     },
     init: function (server) {
