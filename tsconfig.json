@@ -43,5 +43,8 @@
   },
   "include": [
     "src/**/*"
+  ],
+  "exclude": [
+    "src/**/__fixtures__/**/*"
   ]
 }

@@ -17,28 +17,17 @@
  * under the License.
  */
 
-import { deepFreeze } from './deep_freeze';
+import { deepFreeze } from '../deep_freeze';
 
-export interface InjectedMetadataServiceParams {
-  injectedMetadata: {
-    legacyMetadata: {
-      [key: string]: any;
-    };
-  };
-}
+const obj = deepFreeze({
+  foo: {
+    bar: {
+      baz: 1,
+    },
+  },
+});
 
-export class InjectedMetadataService {
-  constructor(private params: InjectedMetadataServiceParams) {}
-
-  public start() {
-    const state = deepFreeze(this.params.injectedMetadata);
-
-    return {
-      getLegacyMetadata() {
-        return state.legacyMetadata;
-      },
-    };
-  }
-}
-
-export type InjectedMetadataStartContract = ReturnType<InjectedMetadataService['start']>;
+delete obj.foo;
+obj.foo = 1;
+obj.foo.bar.baz = 2;
+obj.foo.bar.box = false;

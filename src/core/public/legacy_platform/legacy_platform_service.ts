@@ -23,12 +23,14 @@ interface Deps {
   injectedMetadata: InjectedMetadataStartContract;
 }
 
+export interface LegacyPlatformServiceParams {
+  rootDomElement: HTMLElement;
+  requireLegacyFiles: () => void;
+  useLegacyTestHarness?: boolean;
+}
+
 export class LegacyPlatformService {
-  constructor(
-    private rootDomElement: HTMLElement,
-    private requireLegacyFiles: () => void,
-    private useLegacyTestHarness: boolean = false
-  ) {}
+  constructor(private params: LegacyPlatformServiceParams) {}
 
   public start({ injectedMetadata }: Deps) {
     // Inject parts of the new platform into parts of the legacy platform
@@ -40,15 +42,15 @@ export class LegacyPlatformService {
     const bootstrapModule = this.loadBootstrapModule();
 
     // require the files that will tie into the legacy platform
-    this.requireLegacyFiles();
+    this.params.requireLegacyFiles();
 
-    bootstrapModule.bootstrap(this.rootDomElement);
+    bootstrapModule.bootstrap(this.params.rootDomElement);
   }
 
   private loadBootstrapModule(): {
     bootstrap: (rootDomElement: HTMLElement) => void;
   } {
-    if (this.useLegacyTestHarness) {
+    if (this.params.useLegacyTestHarness) {
       // wrapped in NODE_ENV check so the `ui/test_harness` module
       // is not included in the distributable
       if (process.env.NODE_ENV !== 'production') {
