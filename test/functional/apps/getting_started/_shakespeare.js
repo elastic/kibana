@@ -59,7 +59,7 @@ export default function ({ getService, getPageObjects }) {
     */
     it('should create initial vertical bar chart', async function () {
       log.debug('create shakespeare vertical bar chart');
-      await PageObjects.common.navigateToUrl('visualize', 'new');
+      await PageObjects.visualize.navigateToNewVisualization();
       await PageObjects.visualize.clickVerticalBarChart();
       await PageObjects.visualize.clickNewSearch('shakes*');
       await PageObjects.visualize.waitForVisualization();
