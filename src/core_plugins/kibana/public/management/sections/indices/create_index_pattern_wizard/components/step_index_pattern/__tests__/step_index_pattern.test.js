@@ -25,6 +25,13 @@ import { Header } from '../components/header';
 jest.mock('../../../lib/ensure_minimum_time', () => ({
   ensureMinimumTime: async (promises) => Array.isArray(promises) ? await Promise.all(promises) : await promises
 }));
+
+jest.mock('ui/chrome', () => ({
+  getUiSettingsClient: () => ({
+    get: () => '',
+  }),
+}));
+
 jest.mock('../../../lib/get_indices', () => ({
   getIndices: (service, query) => {
     if (query.startsWith('e')) {

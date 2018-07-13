@@ -39,7 +39,9 @@ import {
 } from '@elastic/eui';
 
 import { ReactI18n } from '@kbn/i18n';
+import chrome from 'ui/chrome';
 
+const uiSettings = chrome.getUiSettingsClient();
 const { injectI18n, FormattedMessage } = ReactI18n;
 
 export class StepIndexPatternComponent extends Component {
@@ -53,7 +55,7 @@ export class StepIndexPatternComponent extends Component {
   }
 
   static defaultProps = {
-    initialQuery: '',
+    initialQuery: uiSettings.get('indexPattern:placeholder'),
   }
 
   constructor(props) {
