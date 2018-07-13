@@ -42,6 +42,7 @@ import { saveDashboard } from './lib';
 import { showCloneModal } from './top_nav/show_clone_modal';
 import { showSaveModal } from './top_nav/show_save_modal';
 import { showAddPanel } from './top_nav/show_add_panel';
+import { showOptionsPopover } from './top_nav/show_options_popover';
 import { migrateLegacyQuery } from 'ui/utils/migrateLegacyQuery';
 import * as filterActions from 'ui/doc_table/actions/filter';
 import { FilterManagerProvider } from 'ui/filter_manager';
@@ -390,6 +391,9 @@ app.directive('dashboardApp', function ($injector) {
         const listingLimit = config.get('savedObjects:listingLimit');
 
         showAddPanel(chrome.getSavedObjectsClient(), dashboardStateManager.addNewPanel, addNewVis, listingLimit, isLabsEnabled, visTypes);
+      };
+      navActions[TopNavIds.OPTIONS] = (menuItem, navController, anchorElement) => {
+        showOptionsPopover(anchorElement);
       };
       updateViewMode(dashboardStateManager.getViewMode());
 
