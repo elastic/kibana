@@ -35,22 +35,20 @@ export function CallClientProvider(Private, Promise, es) {
 
   function callClient(searchRequests) {
     // merging docs can change status to DUPLICATE, capture new statuses
-    const statuses = mergeDuplicateRequests(searchRequests);
+    const searchRequestsAndStatuses = mergeDuplicateRequests(searchRequests);
 
     // get the actual list of requests that we will be fetching
-    const requestsToFetch = statuses.filter(isRequest);
+    const requestsToFetch = searchRequestsAndStatuses.filter(isRequest);
     let requestsToFetchCount = requestsToFetch.length;
 
     if (requestsToFetchCount === 0) {
       return Promise.resolve([]);
     }
 
-    // This is how we'll provide the consumer with search responses.
+    // This is how we'll provide the consumer with search responses. Resolved by
+    // respondToSearchRequests.
     const defer = Promise.defer();
 
-    const searchStrategiesWithRequests = assignSearchRequestsToSearchStrategies(requestsToFetch);
-
-    // resolved by respondToSearchRequests()
     const abortableSearches = [];
     let areAllSearchRequestsAborted = false;
 
@@ -58,18 +56,14 @@ export function CallClientProvider(Private, Promise, es) {
     // store those that don't fail here.
     const activeSearchRequests = [];
 
-    // for each respond with either the response or ABORTED
-    const respondToSearchRequests = (responses = []) => {
-      const aggregatedSearchRequests = searchStrategiesWithRequests.reduce((allSearchRequests, { searchRequests }) => {
-        return allSearchRequests.concat(searchRequests);
-      }, []);
-
-      return Promise.map(aggregatedSearchRequests, function (searchRequest, searchRequestIndex) {
+    // Respond to each searchRequest with the response or ABORTED.
+    const respondToSearchRequests = (responsesInOriginalRequestOrder = []) => {
+      return Promise.map(searchRequests, function (searchRequest, searchRequestIndex) {
         if (searchRequest.aborted) {
           return ABORTED;
         }
 
-        const status = statuses[searchRequestIndex];
+        const status = searchRequestsAndStatuses[searchRequestIndex];
 
         if (status === ABORTED) {
           return ABORTED;
@@ -86,7 +80,7 @@ export function CallClientProvider(Private, Promise, es) {
           return ABORTED;
         }
 
-        return responses[activeSearchRequestIndex];
+        return responsesInOriginalRequestOrder[activeSearchRequestIndex];
       })
         .then(
           (res) => defer.resolve(res),
@@ -96,7 +90,7 @@ export function CallClientProvider(Private, Promise, es) {
 
     // handle a request being aborted while being fetched
     const requestWasAborted = Promise.method(function (searchRequest, index) {
-      if (statuses[index] === ABORTED) {
+      if (searchRequestsAndStatuses[index] === ABORTED) {
         defer.reject(new Error('Request was aborted twice?'));
       }
 
@@ -117,12 +111,17 @@ export function CallClientProvider(Private, Promise, es) {
     });
 
     // attach abort handlers, close over request index
-    statuses.forEach(function (req, i) {
-      if (!isRequest(req)) return;
-      req.whenAborted(function () {
-        requestWasAborted(req, i).catch(defer.reject);
+    searchRequestsAndStatuses.forEach(function (searchRequest, index) {
+      if (!isRequest(searchRequest)) {
+        return;
+      }
+
+      searchRequest.whenAborted(function () {
+        requestWasAborted(searchRequest, index).catch(defer.reject);
       });
     });
+
+    const searchStrategiesWithRequests = assignSearchRequestsToSearchStrategies(requestsToFetch);
 
     // We're going to create a new async context here, so that the logic within it can execute
     // asynchronously after we've returned a reference to defer.promise.
@@ -160,12 +159,19 @@ export function CallClientProvider(Private, Promise, es) {
 
         const segregatedResponses = await Promise.all(abortableSearches.map(({ searching }) => searching));
 
-        // Aggregate the responses returned by all of the search strategies.
-        const aggregatedResponses = segregatedResponses.reduce((allResponses, responses) => {
-          return allResponses.concat(responses.responses);
-        }, []);
+        // Assigning searchRequests to strategies means that the responses come back in a different
+        // order than the original searchRequests. So we'll put them back in order so that we can
+        // use the order to associate each response with the original request.
+        const responsesInOriginalRequestOrder = new Array(requestsToFetch.length);
+        segregatedResponses.forEach((responses, strategyIndex) => {
+          responses.responses.forEach((response, responseIndex) => {
+            const searchRequest = searchStrategiesWithRequests[strategyIndex].searchRequests[responseIndex];
+            const requestIndex = requestsToFetch.indexOf(searchRequest);
+            responsesInOriginalRequestOrder[requestIndex] = response;
+          });
+        });
 
-        await respondToSearchRequests(aggregatedResponses);
+        await respondToSearchRequests(responsesInOriginalRequestOrder);
       } catch(error) {
         if (errorAllowExplicitIndex.test(error)) {
           return errorAllowExplicitIndex.takeover();
@@ -178,7 +184,7 @@ export function CallClientProvider(Private, Promise, es) {
     // If there are any errors, notify the searchRequests of them.
     defer.promise.catch((err) => {
       searchRequests.forEach((searchRequest, index) => {
-        if (statuses[index] !== ABORTED) {
+        if (searchRequestsAndStatuses[index] !== ABORTED) {
           searchRequest.handleFailure(err);
         }
       });
