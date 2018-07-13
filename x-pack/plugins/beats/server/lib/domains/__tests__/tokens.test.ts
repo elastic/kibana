@@ -36,10 +36,7 @@ describe('Token Domain Lib', () => {
   });
 
   it('should generate webtokens with a qty of 1', async () => {
-    const tokens = await tokensLib.createEnrollmentTokens(
-      framework.internalUser,
-      1
-    );
+    const tokens = await tokensLib.createEnrollmentTokens(framework.internalUser, 1);
 
     expect(tokens.length).toBe(1);
 
@@ -48,15 +45,10 @@ describe('Token Domain Lib', () => {
 
   it('should create the specified number of tokens', async () => {
     const numTokens = chance.integer({ min: 1, max: 20 });
-    const tokensFromApi = await tokensLib.createEnrollmentTokens(
-      framework.internalUser,
-      numTokens
-    );
+    const tokensFromApi = await tokensLib.createEnrollmentTokens(framework.internalUser, numTokens);
 
     expect(tokensFromApi.length).toEqual(numTokens);
-    expect(tokensFromApi).toEqual(
-      tokensDB.map((t: TokenEnrollmentData) => t.token)
-    );
+    expect(tokensFromApi).toEqual(tokensDB.map((t: TokenEnrollmentData) => t.token));
   });
 
   it('should set token expiration to 10 minutes from now by default', async () => {

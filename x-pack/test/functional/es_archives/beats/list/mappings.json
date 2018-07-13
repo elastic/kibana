@@ -77,9 +77,6 @@
               "tags": {
                 "type": "keyword"
               },
-              "central_configuration_yml": {
-                "type": "text"
-              },
               "metadata": {
                 "dynamic": "true",
                 "type": "object"

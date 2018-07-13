@@ -22,14 +22,8 @@ export class CMTagsDomain {
     return await this.adapter.getTagsWithIds(user, tagIds);
   }
 
-  public async saveTag(
-    user: FrameworkUser,
-    tagId: string,
-    configs: ConfigurationBlock[]
-  ) {
-    const { isValid, message } = await this.validateConfigurationBlocks(
-      configs
-    );
+  public async saveTag(user: FrameworkUser, tagId: string, configs: ConfigurationBlock[]) {
+    const { isValid, message } = await this.validateConfigurationBlocks(configs);
     if (!isValid) {
       return { isValid, result: message };
     }
@@ -49,10 +43,7 @@ export class CMTagsDomain {
 
     // If none of the types in the given configuration blocks are uniqueness-enforcing,
     // we don't need to perform any further validation checks.
-    const uniquenessEnforcingTypes = intersection(
-      types,
-      UNIQUENESS_ENFORCING_TYPES
-    );
+    const uniquenessEnforcingTypes = intersection(types, UNIQUENESS_ENFORCING_TYPES);
     if (uniquenessEnforcingTypes.length === 0) {
       return { isValid: true };
     }
