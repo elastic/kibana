@@ -18,11 +18,11 @@
  */
 
 import typeDetect from 'type-detect';
-import { internals } from '../internals';
+import { internals, SchemaLike } from '../internals';
 import { Reference } from '../references';
 import { Type, TypeOptions } from './type';
 
-export class ConditionalType<A, B, C> extends Type<B | C> {
+export class ConditionalType<A extends SchemaLike, B, C> extends Type<B | C> {
   constructor(
     leftOperand: Reference<A>,
     rightOperand: Reference<A> | A,
