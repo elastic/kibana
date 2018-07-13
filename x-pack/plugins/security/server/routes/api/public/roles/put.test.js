@@ -97,13 +97,7 @@ describe('PUT role', () => {
 
     putRoleTest(`requires name in params to not exceed 1024 characters`, {
       name: 'a'.repeat(1025),
-      payload: {
-        kibana: [
-          {
-            privileges: ['foo']
-          }
-        ]
-      },
+      payload: {},
       asserts: {
         statusCode: 400,
         result: {
@@ -119,17 +113,24 @@ describe('PUT role', () => {
     });
 
     putRoleTest(`only allows known Kibana privileges`, {
-      name: 'a'.repeat(1025),
-      payload: {},
+      name: 'foo-role',
+      payload: {
+        kibana: [
+          {
+            privileges: ['foo']
+          }
+        ]
+      },
       asserts: {
         statusCode: 400,
         result: {
           error: 'Bad Request',
-          message: `child "name" fails because ["name" length must be less than or equal to 1024 characters long]`,
+          //eslint-disable-next-line max-len
+          message: `child "kibana" fails because ["kibana" at position 0 fails because [child "privileges" fails because ["privileges" at position 0 fails because ["0" must be one of [test-kibana-privilege-1, test-kibana-privilege-2, test-kibana-privilege-3]]]]]`,
           statusCode: 400,
           validation: {
-            keys: ['name'],
-            source: 'params',
+            keys: ['kibana.0.privileges.0'],
+            source: 'payload',
           },
         },
       },
