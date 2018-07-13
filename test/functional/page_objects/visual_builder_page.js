@@ -5,7 +5,7 @@ export function VisualBuilderPageProvider({ getService, getPageObjects }) {
   const retry = getService('retry');
   const log = getService('log');
   const testSubjects = getService('testSubjects');
-  const PageObjects = getPageObjects(['common', 'header']);
+  const PageObjects = getPageObjects(['common', 'header', 'visualize']);
 
   class VisualBuilderPage {
 
