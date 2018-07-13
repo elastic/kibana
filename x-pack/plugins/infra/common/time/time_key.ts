@@ -14,6 +14,12 @@ export interface TimeKey {
 
 export type Comparator = (firstValue: any, secondValue: any) => number;
 
+export const isTimeKey = (value: any): value is TimeKey =>
+  value &&
+  typeof value === 'object' &&
+  typeof value.time === 'number' &&
+  typeof value.tiebreaker === 'number';
+
 export function compareTimeKeys(
   firstKey: TimeKey,
   secondKey: TimeKey,

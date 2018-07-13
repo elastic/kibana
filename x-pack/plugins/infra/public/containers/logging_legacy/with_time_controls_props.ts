@@ -8,10 +8,11 @@ import { connect } from 'react-redux';
 
 import { isIntervalLoadingPolicy } from '../../utils/loading_state';
 import { bindPlainActionCreators } from '../../utils/typed_redux';
-import { entriesActions, entriesSelectors, State } from './state';
+import { entriesActions, entriesSelectors, sharedSelectors, State, targetActions } from './state';
 
-export const withLiveStreamControlsProps = connect(
+export const withTimeControlsProps = connect(
   (state: State) => ({
+    currentTime: sharedSelectors.selectVisibleMidpointOrTargetTime(state),
     isLiveStreaming: isIntervalLoadingPolicy(
       entriesSelectors.selectEntriesEndLoadingState(state).policy
     ),
@@ -19,5 +20,6 @@ export const withLiveStreamControlsProps = connect(
   bindPlainActionCreators({
     disableLiveStreaming: entriesActions.stopLiveStreaming,
     enableLiveStreaming: entriesActions.startLiveStreaming,
+    jumpToTime: targetActions.jumpToTime,
   })
 );
