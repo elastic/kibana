@@ -221,7 +221,6 @@ export function SecurityPageProvider({ getService, getPageObjects }) {
       await testSubjects.setValue('passwordInput', userObj.password);
       await testSubjects.setValue('passwordConfirmationInput', userObj.confirmPassword);
       await testSubjects.setValue('userFormFullNameInput', userObj.fullname);
-      await testSubjects.setValue('userFormEmailInput', userObj.email);
 
       function addRoles(role) {
         return role.reduce(function (promise, roleName) {
