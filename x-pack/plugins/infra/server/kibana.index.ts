@@ -19,15 +19,15 @@ export const getConfigSchema = (Joi: typeof JoiNamespace) => {
     metricAlias: Joi.string().default('xpack-infra-default-metrics'),
     logAlias: Joi.string().default('xpack-infra-default-logs'),
     fields: Joi.object({
+      container: Joi.string().default('docker.container.name'),
+      hostname: Joi.string().default('beat.hostname'),
       message: Joi.array()
         .items(Joi.string())
         .single()
         .default(['message', '@message']),
-      hostname: Joi.string().default('beat.hostname'),
       pod: Joi.string().default('kubernetes.pod.name'),
-      container: Joi.string().default('docker.container.name'),
-      timestamp: Joi.string().default('@timestamp'),
       tiebreaker: Joi.string().default('_doc'),
+      timestamp: Joi.string().default('@timestamp'),
     }).default(),
   }).default();
 

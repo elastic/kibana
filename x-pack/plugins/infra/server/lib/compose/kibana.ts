@@ -4,9 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { InfraKibanaConfigurationAdapter } from '../adapters/configuration/kibana_configuration_adapter';
 import { ElasticsearchFieldsAdapter } from '../adapters/fields/elasticsearch_fields_adapter';
 import { InfraKibanaBackendFrameworkAdapter } from '../adapters/framework/kibana_framework_adapter';
-import { InfraBackendLibs, InfraDomainLibs } from '../infra_types';
+import { InfraBackendLibs, InfraConfiguration, InfraDomainLibs } from '../infra_types';
 import { ElasticsearchNodesAdapter } from './../adapters/nodes/elasticsearch_nodes_adapter';
 
 import { Server } from 'hapi';
@@ -15,6 +16,7 @@ import { InfraNodesDomain } from '../domains/nodes_domain';
 
 export function compose(server: Server): InfraBackendLibs {
   const framework = new InfraKibanaBackendFrameworkAdapter(server);
+  const configuration = new InfraKibanaConfigurationAdapter<InfraConfiguration>(server);
 
   const domainLibs: InfraDomainLibs = {
     fields: new InfraFieldsDomain(new ElasticsearchFieldsAdapter(framework)),
@@ -22,6 +24,7 @@ export function compose(server: Server): InfraBackendLibs {
   };
 
   const libs: InfraBackendLibs = {
+    configuration,
     framework,
     ...domainLibs,
   };

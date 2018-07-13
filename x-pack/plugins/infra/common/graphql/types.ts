@@ -18,6 +18,8 @@ export interface InfraField {
 export interface Query {
   map?: InfraResponse | null;
   fields?: (InfraField | null)[] | null;
+  source: InfraSource;
+  allSources: InfraSource[];
 }
 
 export interface InfraResponse {
@@ -77,10 +79,32 @@ export interface InfraServiceMetrics {
   count?: number | null;
 }
 
+export interface InfraSource {
+  id: string;
+  configuration: InfraSourceConfiguration;
+}
+
+export interface InfraSourceConfiguration {
+  metricAlias: string;
+  logAlias: string;
+  fields: InfraSourceFields;
+}
+
+export interface InfraSourceFields {
+  container: string;
+  hostname: string;
+  message: string[];
+  pod: string;
+  tiebreaker: string;
+  timestamp: string;
+}
+
 export namespace QueryResolvers {
   export interface Resolvers {
     map?: MapResolver;
     fields?: FieldsResolver;
+    source?: SourceResolver;
+    allSources?: AllSourcesResolver;
   }
 
   export type MapResolver = Resolver<InfraResponse | null, MapArgs>;
@@ -90,13 +114,17 @@ export namespace QueryResolvers {
     filters?: InfraFilter[] | null;
   }
 
-  export type FieldsResolver = Resolver<
-    (InfraField | null)[] | null,
-    FieldsArgs
-  >;
+  export type FieldsResolver = Resolver<(InfraField | null)[] | null, FieldsArgs>;
   export interface FieldsArgs {
     indexPattern?: InfraIndexPattern | null;
   }
+
+  export type SourceResolver = Resolver<InfraSource, SourceArgs>;
+  export interface SourceArgs {
+    id: string;
+  }
+
+  export type AllSourcesResolver = Resolver<InfraSource[]>;
 }
 
 export namespace InfraResponseResolvers {
@@ -225,6 +253,46 @@ export namespace InfraServiceMetricsResolvers {
   export type CountResolver = Resolver<number | null>;
 }
 
+export namespace InfraSourceResolvers {
+  export interface Resolvers {
+    id?: IdResolver;
+    configuration?: ConfigurationResolver;
+  }
+
+  export type IdResolver = Resolver<string>;
+  export type ConfigurationResolver = Resolver<InfraSourceConfiguration>;
+}
+
+export namespace InfraSourceConfigurationResolvers {
+  export interface Resolvers {
+    metricAlias?: MetricAliasResolver;
+    logAlias?: LogAliasResolver;
+    fields?: FieldsResolver;
+  }
+
+  export type MetricAliasResolver = Resolver<string>;
+  export type LogAliasResolver = Resolver<string>;
+  export type FieldsResolver = Resolver<InfraSourceFields>;
+}
+
+export namespace InfraSourceFieldsResolvers {
+  export interface Resolvers {
+    container?: ContainerResolver;
+    hostname?: HostnameResolver;
+    message?: MessageResolver;
+    pod?: PodResolver;
+    tiebreaker?: TiebreakerResolver;
+    timestamp?: TimestampResolver;
+  }
+
+  export type ContainerResolver = Resolver<string>;
+  export type HostnameResolver = Resolver<string>;
+  export type MessageResolver = Resolver<string[]>;
+  export type PodResolver = Resolver<string>;
+  export type TiebreakerResolver = Resolver<string>;
+  export type TimestampResolver = Resolver<string>;
+}
+
 export interface InfraIndexPattern {
   pattern: string /** The index pattern to use, defaults to '*' */;
   timeFieldName: string /** The timefield to use, defaults to @timestamp */;
@@ -269,6 +337,9 @@ export interface MapQueryArgs {
 export interface FieldsQueryArgs {
   indexPattern?: InfraIndexPattern | null;
 }
+export interface SourceQueryArgs {
+  id: string;
+}
 export interface GroupsInfraResponseArgs {
   type: InfraGroupByType;
   field?: string | null;
@@ -308,17 +379,4 @@ export enum InfraMetricTypes {
   derivative = 'derivative',
   moving_average = 'moving_average',
   positive_only = 'positive_only',
-}
-export namespace MapWithLocalState {
-  export type Variables = {};
-
-  export type Query = {
-    __typename?: 'Query';
-    map?: Map | null;
-  };
-
-  export type Map = {
-    __typename?: 'InfraResponse';
-    hosts?: InfraHost[] | null;
-  };
 }

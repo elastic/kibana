@@ -13,6 +13,7 @@ import { getConfigSchema, initServerWithKibana } from './server/kibana.index';
 export function infra(kibana: any) {
   return new kibana.Plugin({
     id: 'infra',
+    configPrefix: 'xpack.infra',
     publicDir: resolve(__dirname, 'public'),
     require: ['kibana', 'elasticsearch'],
     uiExports: {
