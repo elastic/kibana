@@ -10,17 +10,10 @@ interface RandomItem {
 }
 
 export function findNonExistentItems(items: RandomItem[], requestedItems: any) {
-  return requestedItems.reduce(
-    (nonExistentItems: string[], requestedItem: string, idx: number) => {
-      if (
-        items.findIndex(
-          (item: RandomItem) => item && item.id === requestedItem
-        ) === -1
-      ) {
-        nonExistentItems.push(requestedItems[idx]);
-      }
-      return nonExistentItems;
-    },
-    []
-  );
+  return requestedItems.reduce((nonExistentItems: string[], requestedItem: string, idx: number) => {
+    if (items.findIndex((item: RandomItem) => item && item.id === requestedItem) === -1) {
+      nonExistentItems.push(requestedItems[idx]);
+    }
+    return nonExistentItems;
+  }, []);
 }

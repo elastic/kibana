@@ -20,3 +20,9 @@ export interface CMServerLibs extends CMDomainLibs {
   framework: BackendFrameworkAdapter;
   database: DatabaseAdapter;
 }
+
+export enum BeatEnrollmentStatus {
+  Success = 'Success',
+  ExpiredEnrollmentToken = 'Expired enrollment token',
+  InvalidEnrollmentToken = 'Invalid enrollment token',
+}
