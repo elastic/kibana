@@ -1,0 +1,90 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`UrlTemplateFlyout should not render if not visible 1`] = `""`;
+
+exports[`UrlTemplateFlyout should render normally 1`] = `
+<EuiFlyout
+  hideCloseButton={false}
+  onClose={[Function]}
+  ownFocus={false}
+  size="m"
+>
+  <EuiFlyoutBody>
+    <EuiText
+      grow={true}
+    >
+      <h3>
+        Url Template
+      </h3>
+      <p>
+        If a field only contains part of a URL then a 
+        <strong>
+          Url Template
+        </strong>
+         can be used to format the value as a complete URL. The format is a string which uses double curly brace notation 
+        <EuiCode>
+          {{ }}
+        </EuiCode>
+        to inject values. The following values can be accessed:
+      </p>
+      <ul>
+        <li>
+          <EuiCode>
+            value
+          </EuiCode>
+           — The URI-escaped value
+        </li>
+        <li>
+          <EuiCode>
+            rawValue
+          </EuiCode>
+           — The unescaped value
+        </li>
+      </ul>
+      <h4>
+        Examples
+      </h4>
+      <EuiBasicTable
+        columns={
+          Array [
+            Object {
+              "field": "input",
+              "name": "Input",
+              "width": "160px",
+            },
+            Object {
+              "field": "template",
+              "name": "Template",
+            },
+            Object {
+              "field": "output",
+              "name": "Output",
+            },
+          ]
+        }
+        items={
+          Array [
+            Object {
+              "input": 1234,
+              "output": "http://company.net/profiles?user_id=1234",
+              "template": "http://company.net/profiles?user_id={{value}}",
+            },
+            Object {
+              "input": "users/admin",
+              "output": "http://company.net/groups?id=users%2Fadmin",
+              "template": "http://company.net/groups?id={{value}",
+            },
+            Object {
+              "input": "/images/favicon.ico",
+              "output": "http://www.site.com/images/favicon.ico",
+              "template": "http://www.site.com{{rawValue}}",
+            },
+          ]
+        }
+        noItemsMessage="No items found"
+        responsive={true}
+      />
+    </EuiText>
+  </EuiFlyoutBody>
+</EuiFlyout>
+`;

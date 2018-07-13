@@ -47,7 +47,6 @@ import * as filterActions from 'ui/doc_table/actions/filter';
 import { FilterManagerProvider } from 'ui/filter_manager';
 import { EmbeddableFactoriesRegistryProvider } from 'ui/embeddable/embeddable_factories_registry';
 import { DashboardPanelActionsRegistryProvider } from 'ui/dashboard_panel_actions/dashboard_panel_actions_registry';
-import { SavedObjectsClientProvider } from 'ui/saved_objects';
 import { VisTypesRegistryProvider } from 'ui/registry/vis_types';
 import { timefilter } from 'ui/timefilter';
 
@@ -86,7 +85,6 @@ app.directive('dashboardApp', function ($injector) {
 
       panelActionsStore.initializeFromRegistry(panelActionsRegistry);
 
-      const savedObjectsClient = Private(SavedObjectsClientProvider);
       const visTypes = Private(VisTypesRegistryProvider);
       $scope.getEmbeddableFactory = panelType => embeddableFactories.byName[panelType];
 
@@ -160,9 +158,9 @@ app.directive('dashboardApp', function ($injector) {
 
       updateState();
 
-      $scope.refresh = (...args) => {
+      $scope.refresh = () => {
         $rootScope.$broadcast('fetch');
-        courier.fetch(...args);
+        courier.fetch();
       };
       dashboardStateManager.handleTimeChange(timefilter.getTime());
 
@@ -391,7 +389,7 @@ app.directive('dashboardApp', function ($injector) {
         const isLabsEnabled = config.get('visualize:enableLabs');
         const listingLimit = config.get('savedObjects:listingLimit');
 
-        showAddPanel(savedObjectsClient, dashboardStateManager.addNewPanel, addNewVis, listingLimit, isLabsEnabled, visTypes);
+        showAddPanel(chrome.getSavedObjectsClient(), dashboardStateManager.addNewPanel, addNewVis, listingLimit, isLabsEnabled, visTypes);
       };
       updateViewMode(dashboardStateManager.getViewMode());
 

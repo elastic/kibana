@@ -1,0 +1,73 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`PercentFormatEditor should render normally 1`] = `
+<React.Fragment>
+  <EuiFormRow
+    describedByIds={Array []}
+    error={null}
+    fullWidth={false}
+    hasEmptyLabelSpace={false}
+    helpText={
+      <span>
+        <EuiLink
+          color="primary"
+          href="https://adamwdraper.github.io/Numeral-js/"
+          target="_window"
+          type="button"
+        >
+          Documentation 
+          <EuiIcon
+            size="m"
+            type="link"
+          />
+        </EuiLink>
+      </span>
+    }
+    isInvalid={false}
+    label={
+      <span>
+        Numeral.js format pattern (Default: 
+        <EuiCode>
+          0,0.[000]%
+        </EuiCode>
+        )
+      </span>
+    }
+  >
+    <EuiFieldText
+      compressed={false}
+      fullWidth={false}
+      isInvalid={false}
+      isLoading={false}
+      onChange={[Function]}
+      placeholder="0,0.[000]%"
+    />
+  </EuiFormRow>
+  <FormatEditorSamples
+    samples={
+      Array [
+        Object {
+          "input": 0.1,
+          "output": 0.2,
+        },
+        Object {
+          "input": 0.99999,
+          "output": 1.99998,
+        },
+        Object {
+          "input": 1,
+          "output": 2,
+        },
+        Object {
+          "input": 100,
+          "output": 200,
+        },
+        Object {
+          "input": 1000,
+          "output": 2000,
+        },
+      ]
+    }
+  />
+</React.Fragment>
+`;

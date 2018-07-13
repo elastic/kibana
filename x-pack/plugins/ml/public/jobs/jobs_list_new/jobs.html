@@ -1,0 +1,9 @@
+<ml-nav-menu name="jobs"></ml-nav-menu>
+<ml-jobs-page-wrapper>
+  <div class='jobs-stats-bar'>
+    <span ng-if='js.show' class='stat' ng-repeat='js in jobStats'>
+      <span class='stat-label'>{{js.label}}</span>: <span class='stat-value'>{{js.value}}</span>
+    </span>
+  </div>
+  <jobs-page></jobs-page>
+</ml-jobs-page-wrapper>

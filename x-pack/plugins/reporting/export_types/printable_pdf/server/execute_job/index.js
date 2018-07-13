@@ -19,6 +19,11 @@ const KBN_SCREENSHOT_HEADER_BLACKLIST = [
   'content-length',
   'content-type',
   'host',
+  'referer',
+  // `Transfer-Encoding` is hop-by-hop header that is meaningful
+  // only for a single transport-level connection, and shouldn't
+  // be stored by caches or forwarded by proxies.
+  'transfer-encoding',
 ];
 
 function executeJobFn(server) {

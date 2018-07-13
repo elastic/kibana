@@ -35,10 +35,7 @@ function makeMatchers(directory: string, patterns: string[]) {
 }
 
 function parseTsConfig(path: string) {
-  const { error, config } = parseConfigFileTextToJson(
-    path,
-    readFileSync(path, 'utf8')
-  );
+  const { error, config } = parseConfigFileTextToJson(path, readFileSync(path, 'utf8'));
 
   if (error) {
     throw error;
@@ -76,8 +73,6 @@ export class Project {
   }
 
   public isAbsolutePathSelected(path: string) {
-    return testMatchers(this.exclude, path)
-      ? false
-      : testMatchers(this.include, path);
+    return testMatchers(this.exclude, path) ? false : testMatchers(this.include, path);
   }
 }

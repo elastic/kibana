@@ -1,0 +1,118 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`get_buckets_with_initial_anomaly_bounds should return correct buckets 1`] = `
+Array [
+  Object {
+    "anomaly_score": Object {
+      "value": null,
+    },
+    "doc_count": 0,
+    "key": 1530523000000,
+    "key_as_string": "2018-07-02T09:16:40.000Z",
+    "lower": Object {
+      "value": 17688.182675688193,
+    },
+    "upper": Object {
+      "value": 50381.01051622894,
+    },
+  },
+  Object {
+    "anomaly_score": Object {
+      "value": null,
+    },
+    "doc_count": 4,
+    "key": 1530523500000,
+    "key_as_string": "2018-07-02T09:25:00.000Z",
+    "lower": Object {
+      "value": null,
+    },
+    "upper": Object {
+      "value": null,
+    },
+  },
+  Object {
+    "anomaly_score": Object {
+      "value": null,
+    },
+    "doc_count": 0,
+    "key": 1530524000000,
+    "key_as_string": "2018-07-02T09:33:20.000Z",
+    "lower": Object {
+      "value": null,
+    },
+    "upper": Object {
+      "value": null,
+    },
+  },
+  Object {
+    "anomaly_score": Object {
+      "value": 0,
+    },
+    "doc_count": 2,
+    "key": 1530524500000,
+    "key_as_string": "2018-07-02T09:41:40.000Z",
+    "lower": Object {
+      "value": 16034.081569306454,
+    },
+    "upper": Object {
+      "value": 54158.77731018045,
+    },
+  },
+  Object {
+    "anomaly_score": Object {
+      "value": null,
+    },
+    "doc_count": 0,
+    "key": 1530525000000,
+    "key_as_string": "2018-07-02T09:50:00.000Z",
+    "lower": Object {
+      "value": null,
+    },
+    "upper": Object {
+      "value": null,
+    },
+  },
+  Object {
+    "anomaly_score": Object {
+      "value": 0,
+    },
+    "doc_count": 2,
+    "key": 1530525500000,
+    "key_as_string": "2018-07-02T09:58:20.000Z",
+    "lower": Object {
+      "value": 16034.081569306454,
+    },
+    "upper": Object {
+      "value": 54158.77731018045,
+    },
+  },
+  Object {
+    "anomaly_score": Object {
+      "value": null,
+    },
+    "doc_count": 0,
+    "key": 1530526000000,
+    "key_as_string": "2018-07-02T10:06:40.000Z",
+    "lower": Object {
+      "value": null,
+    },
+    "upper": Object {
+      "value": null,
+    },
+  },
+  Object {
+    "anomaly_score": Object {
+      "value": 0,
+    },
+    "doc_count": 2,
+    "key": 1530526500000,
+    "key_as_string": "2018-07-02T10:15:00.000Z",
+    "lower": Object {
+      "value": 16034.081569306454,
+    },
+    "upper": Object {
+      "value": 54158.77731018045,
+    },
+  },
+]
+`;
