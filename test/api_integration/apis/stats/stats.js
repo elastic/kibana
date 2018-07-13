@@ -56,8 +56,6 @@ const assertStatsAndMetrics = body => {
 
 export default function ({ getService }) {
   const supertest = getService('supertest');
-  // TODO possible to use supertestWithoutAuth service as well?
-
   describe('kibana stats api', () => {
     describe('basic', () => {
       it('should return the stats without cluster_uuid with no query string params', () => {

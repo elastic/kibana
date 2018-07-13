@@ -18,6 +18,7 @@
  */
 
 import Joi from 'joi';
+import { boomify } from 'boom';
 import { wrapAuthConfig } from '../../wrap_auth_config';
 import { KIBANA_STATS_TYPE } from '../../constants';
 
@@ -64,11 +65,15 @@ export function registerStatsApi(kbnServer, server, config) {
         if (isExtended) {
           const { callWithRequest } = req.server.plugins.elasticsearch.getCluster('admin');
           const callCluster = (...args) => callWithRequest(req, ...args);
-          const [ usage, clusterUuid ] = await Promise.all([
-            getUsage(callCluster),
-            getClusterUuid(callCluster),
-          ]);
-          extended = { usage, cluster_uuid: clusterUuid };
+          try {
+            const [ usage, clusterUuid ] = await Promise.all([
+              getUsage(callCluster),
+              getClusterUuid(callCluster),
+            ]);
+            extended = { usage, cluster_uuid: clusterUuid };
+          } catch (e) {
+            return reply(boomify(e));
+          }
         }
 
         /* kibana_stats gets singled out from the collector set as it is used
