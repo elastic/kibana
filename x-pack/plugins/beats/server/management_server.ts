@@ -16,10 +16,12 @@ import { createTokensRoute } from './rest_api/tokens/create';
 import { beatsIndexTemplate } from './utils/index_templates';
 
 export const initManagementServer = (libs: CMServerLibs) => {
-  libs.database.putTemplate(libs.framework.internalUser, {
-    name: 'beats-template',
-    body: beatsIndexTemplate,
-  });
+  if (libs.database) {
+    libs.database.putTemplate(libs.framework.internalUser, {
+      name: 'beats-template',
+      body: beatsIndexTemplate,
+    });
+  }
 
   libs.framework.registerRoute(createGetBeatConfigurationRoute(libs));
   libs.framework.registerRoute(createTagAssignmentsRoute(libs));

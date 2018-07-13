@@ -190,6 +190,7 @@ function addNonExistentItemToResponse(
 ) {
   assignments.forEach(({ beatId, tag }: BeatsTagAssignment, idx: any) => {
     const isBeatNonExistent = nonExistentBeatIds.includes(beatId);
+
     const isTagNonExistent = nonExistentTags.includes(tag);
 
     if (isBeatNonExistent && isTagNonExistent) {
