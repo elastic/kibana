@@ -91,7 +91,7 @@ export default function ({ getService }) {
           .expect(200)
           .then(({ body }) => {
             expect(body.cluster_uuid).to.be.a('string');
-            expect(body.usage.kibana).to.be.an('object');
+            expect(body.usage).to.be.an('object'); // no usage collectors have been registered so usage is an empty object
             assertStatsAndMetrics(body);
           });
       });
@@ -103,7 +103,7 @@ export default function ({ getService }) {
           .expect(200)
           .then(({ body }) => {
             expect(body.cluster_uuid).to.be.a('string');
-            expect(body.usage.kibana).to.be.an('object');
+            expect(body.usage).to.be.an('object');
             assertStatsAndMetrics(body);
           });
       });
