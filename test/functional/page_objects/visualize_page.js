@@ -457,6 +457,7 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
         const chartString = await chart.getVisibleText();
         if (chartString === bucketName) {
           await chart.click();
+          await PageObjects.common.sleep(500);
         }
       }
       const getChartTypesPromises = chartTypes.map(getChartType);
@@ -464,13 +465,14 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
     }
 
     async selectAggregation(myString, groupName = 'buckets') {
-      const selector = `[group-name="${groupName}"] [class=vis-editor-agg-editor]:not(.ng-hide) [data-test-subj="visEditorAggSelect"]`;
+      const selector = `[group-name="${groupName}"] vis-editor-agg-params:not(.ng-hide) .agg-select`;
       await retry.try(async () => {
         await find.clickByCssSelector(selector);
         const input = await find.byCssSelector(`${selector} input.ui-select-search`);
         await input.type(myString);
         await remote.pressKeys('\uE006');
       });
+      await PageObjects.common.sleep(500);
     }
 
     async toggleOpenEditor(index, toState = 'true') {
@@ -557,6 +559,7 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
         await input.type(fieldValue);
         await remote.pressKeys('\uE006');
       });
+      await PageObjects.common.sleep(500);
     }
 
     async selectFieldById(fieldValue, id) {
