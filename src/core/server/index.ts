@@ -17,8 +17,6 @@
  * under the License.
  */
 
-export { bootstrap } from './bootstrap';
-
 import { first } from 'rxjs/operators';
 import { ConfigService, Env } from './config';
 import { HttpConfig, HttpModule, HttpServerInfo } from './http';

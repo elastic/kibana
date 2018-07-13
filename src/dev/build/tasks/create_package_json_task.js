@@ -43,6 +43,7 @@ export const CreatePackageJsonTask = {
         node: pkg.engines.node,
       },
       dependencies: transformDependencies(pkg.dependencies),
+      yargs: pkg.yargs,
     };
 
     if (build.isOss()) {

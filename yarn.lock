@@ -378,6 +378,12 @@
     "@types/podium" "*"
     "@types/shot" "*"
 
+"@types/hapi@^13.0.38":
+  version "13.0.38"
+  resolved "https://registry.yarnpkg.com/@types/hapi/-/hapi-13.0.38.tgz#3671ab29fd465d61e394718ce546b7d5ef21a331"
+  dependencies:
+    "@types/node" "*"
+
 "@types/has-ansi@^3.0.0":
   version "3.0.0"
   resolved "https://registry.yarnpkg.com/@types/has-ansi/-/has-ansi-3.0.0.tgz#636403dc4e0b2649421c4158e5c404416f3f0330"
@@ -557,6 +563,10 @@
   dependencies:
     "@types/events" "*"
     "@types/node" "*"
+
+"@types/yargs@^11.1.0":
+  version "11.1.1"
+  resolved "https://registry.yarnpkg.com/@types/yargs/-/yargs-11.1.1.tgz#2e724257167fd6b615dbe4e54301e65fe597433f"
 
 abab@^1.0.0, abab@^1.0.4:
   version "1.0.4"

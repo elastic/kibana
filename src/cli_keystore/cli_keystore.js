@@ -20,7 +20,7 @@
 import { join } from 'path';
 
 import { pkg } from '../utils';
-import Command from '../cli/command';
+import Command from '../legacy/cli/command';
 import { getData } from '../server/path';
 import { Keystore } from '../server/keystore';
 
