@@ -107,11 +107,9 @@ export function CallClientProvider(Private, Promise, es) {
         return;
       }
 
-      if (searchRequestPromises) {
-        searchRequestPromises.forEach(searchRequestPromise => {
-          searchRequestPromise.abort();
-        });
-      }
+      searchRequestPromises.forEach(searchRequestPromise => {
+        searchRequestPromise.abort();
+      });
 
       areAllSearchRequestsAborted = true;
 
