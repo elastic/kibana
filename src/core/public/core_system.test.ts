@@ -17,35 +17,35 @@
  * under the License.
  */
 
-jest.mock('./legacy_platform', () => ({
-  LegacyPlatformService: jest.fn(function MockInjectedMetadataService(this: any) {
+import { InjectedMetadataService } from './injected_metadata';
+import { LegacyPlatformService } from './legacy_platform';
+
+const MockLegacyPlatformService = jest.fn<InjectedMetadataService>(
+  function _MockLegacyPlatformService(this: any) {
     this.start = jest.fn();
-  }),
+  }
+);
+jest.mock('./legacy_platform', () => ({
+  LegacyPlatformService: MockLegacyPlatformService,
 }));
 
 const mockInjectedMetadataStartContract = {};
-jest.mock('./injected_metadata', () => ({
-  InjectedMetadataService: jest.fn(function MockInjectedMetadataService(this: any) {
+const MockInjectedMetadataService = jest.fn<LegacyPlatformService>(
+  function _MockInjectedMetadataService(this: any) {
     this.start = jest.fn().mockReturnValue(mockInjectedMetadataStartContract);
-  }),
+  }
+);
+jest.mock('./injected_metadata', () => ({
+  InjectedMetadataService: MockInjectedMetadataService,
 }));
 
 import { CoreSystem } from './core_system';
-import { InjectedMetadataService } from './injected_metadata';
-import { LegacyPlatformService } from './legacy_platform';
 
 const defaultCoreSystemParams = {
   rootDomElement: null!,
   injectedMetadata: {} as any,
   requireLegacyFiles: jest.fn(),
 };
-
-function getFirstStartMethodMock<
-  T extends typeof InjectedMetadataService | typeof LegacyPlatformService
->(Service: T): jest.MockInstance<T['prototype']['start']> {
-  const mockService: jest.MockInstance<T['prototype']> = Service as any;
-  return mockService.mock.instances[0].start as any;
-}
 
 beforeEach(() => {
   jest.clearAllMocks();
@@ -58,8 +58,8 @@ describe('constructor', () => {
       ...defaultCoreSystemParams,
     });
 
-    expect(InjectedMetadataService).toHaveBeenCalledTimes(1);
-    expect(LegacyPlatformService).toHaveBeenCalledTimes(1);
+    expect(MockInjectedMetadataService).toHaveBeenCalledTimes(1);
+    expect(MockLegacyPlatformService).toHaveBeenCalledTimes(1);
   });
 
   it('passes injectedMetadata param to InjectedMetadataService', () => {
@@ -71,8 +71,8 @@ describe('constructor', () => {
       injectedMetadata,
     });
 
-    expect(InjectedMetadataService).toHaveBeenCalledTimes(1);
-    expect(InjectedMetadataService).toHaveBeenCalledWith({
+    expect(MockInjectedMetadataService).toHaveBeenCalledTimes(1);
+    expect(MockInjectedMetadataService).toHaveBeenCalledWith({
       injectedMetadata,
     });
   });
@@ -90,8 +90,8 @@ describe('constructor', () => {
       useLegacyTestHarness,
     });
 
-    expect(LegacyPlatformService).toHaveBeenCalledTimes(1);
-    expect(LegacyPlatformService).toHaveBeenCalledWith({
+    expect(MockLegacyPlatformService).toHaveBeenCalledTimes(1);
+    expect(MockLegacyPlatformService).toHaveBeenCalledWith({
       rootDomElement,
       requireLegacyFiles,
       useLegacyTestHarness,
@@ -107,13 +107,11 @@ describe('#start()', () => {
 
     expect(core.start()).toBe(undefined);
 
-    const injectedMetadataStartMock = getFirstStartMethodMock(InjectedMetadataService);
-    expect(injectedMetadataStartMock).toHaveBeenCalledTimes(1);
-    expect(injectedMetadataStartMock).toHaveBeenCalledWith();
+    expect(MockInjectedMetadataService.mock.instances[0].start).toHaveBeenCalledTimes(1);
+    expect(MockInjectedMetadataService.mock.instances[0].start).toHaveBeenCalledWith();
 
-    const legacyPlatformStartMock = getFirstStartMethodMock(LegacyPlatformService);
-    expect(legacyPlatformStartMock).toHaveBeenCalledTimes(1);
-    expect(legacyPlatformStartMock).toHaveBeenCalledWith({
+    expect(MockLegacyPlatformService.mock.instances[0].start).toHaveBeenCalledTimes(1);
+    expect(MockLegacyPlatformService.mock.instances[0].start).toHaveBeenCalledWith({
       injectedMetadata: mockInjectedMetadataStartContract,
     });
   });
