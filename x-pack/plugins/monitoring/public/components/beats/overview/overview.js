@@ -79,7 +79,7 @@ export function BeatsOverview({
   ));
 
   return (
-    <EuiPage>
+    <EuiPage style={{ backgroundColor: 'white' }}>
       {renderLatestActive(latestActive, latestTypes, latestVersions)}
 
       <EuiSpacer size="s"/>
