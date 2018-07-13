@@ -18,7 +18,7 @@ import {
   EuiHealth,
   EuiLink,
 } from '@elastic/eui';
-import { Notifier } from 'ui/notify';
+import { toastNotifications } from 'ui/notify';
 import { MonitoringTable } from 'plugins/monitoring/components/table';
 import { Tooltip } from 'plugins/monitoring/components/tooltip';
 import { AlertsIndicator } from 'plugins/monitoring/components/cluster/listing/alerts_indicator';
@@ -39,7 +39,6 @@ const clusterRowFactory = (scope, globalState, kbnUrl, showLicenseExpiration) =>
   return class ClusterRow extends React.Component {
     constructor(props) {
       super(props);
-      this.notify = new Notifier();
     }
 
     changeCluster() {
@@ -53,9 +52,7 @@ const clusterRowFactory = (scope, globalState, kbnUrl, showLicenseExpiration) =>
 
     licenseWarning(message) {
       scope.$evalAsync(() => {
-        this.notify.warning(message, {
-          lifetime: 60000
-        });
+        toastNotifications.addWarning(message);
       });
     }
 
