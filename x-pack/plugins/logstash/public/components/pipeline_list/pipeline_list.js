@@ -5,7 +5,6 @@
  */
 
 import React from 'react';
-import { isEmpty } from 'lodash';
 import pluralize from 'pluralize';
 
 import {
@@ -13,8 +12,10 @@ import {
   EuiButtonEmpty,
   EuiCallOut,
   EuiConfirmModal,
+  EuiEmptyPrompt,
   EuiIconTip,
   EuiInMemoryTable,
+  EuiLoadingSpinner,
   EuiLink,
   EUI_MODAL_CANCEL_BUTTON,
   EuiOverlayMask,
@@ -31,16 +32,19 @@ export class PipelineList extends React.Component {
     super(props);
 
     this.state = {
+      columns: [],
       isForbidden: false,
       isLoading: true,
+      isSelectable: false,
       pageIndex: 0,
       pageSize: INITIAL_PAGE_SIZE,
+      pipelines: [],
       showConfirmDeleteModal: false,
-      selection: [ ],
+      selection: [],
     };
   }
 
-  columns = [
+  getColumns = () => [
     {
       field: 'id',
       name: 'Id',
@@ -99,17 +103,20 @@ export class PipelineList extends React.Component {
     },
   ]
 
+  getEmptyPrompt = () => (
+    <EuiEmptyPrompt
+      title={<h2>No pipelines</h2>}
+      titleSize="xs"
+      body="There are no pipelines defined."
+    />
+  )
+
   componentDidMount = () => {
     const {
       isReadOnly,
       licenseService,
       toastNotifications,
     } = this.props;
-
-    this.setState({
-      message: 'Loading',
-      pipelines: []
-    });
 
     this.loadPipelines()
       .then(() => {
@@ -129,14 +136,32 @@ export class PipelineList extends React.Component {
       toastNotifications,
     } = this.props;
 
+    this.setState({
+      message: (
+        <div>
+          <EuiLoadingSpinner size="m" />
+          &nbsp; Loading....
+        </div>
+      ),
+    });
+
     return pipelinesService.getPipelineList()
       .then(pipelines => {
         this.setState({
+          columns: this.getColumns(),
           isLoading: false,
           isForbidden: false,
+          isSelectable: true,
           pipelines,
         });
 
+        if (!pipelines.length) {
+          this.setState({
+            columns: [],
+            message: this.getEmptyPrompt(),
+            isSelectable: false,
+          });
+        }
       })
       .catch(err => {
         return licenseService.checkValidity()
@@ -299,7 +324,8 @@ export class PipelineList extends React.Component {
       // pageIndex,
       // pageSize,
       // pipelines,
-      selection
+      selection,
+      isSelectable,
     } = this.state;
 
     // const pagination = {
@@ -309,11 +335,17 @@ export class PipelineList extends React.Component {
     //   pageSizeOptions: [2, 3, 5, 8]
     // };
 
-    const selectionOptions = {
-      selectable: ({ isCentrallyManaged }) => isCentrallyManaged,
-      selectableMessage: () => 'the message',
-      onSelectionChange: selection => this.setState({ selection }),
-    };
+    const selectableMessage = (selectable, { id }) => selectable
+      ? `Select pipeline "${id}"`
+      : PIPELINE_NOT_CENTRALLY_MANAGED_TOOLTIP_TEXT;
+
+    const selectionOptions = isSelectable
+      ? {
+        selectable: ({ isCentrallyManaged }) => isCentrallyManaged,
+        selectableMessage,
+        onSelectionChange: selection => this.setState({ selection }),
+      }
+      : null;
 
     const toolsRight = [
       <EuiButton
@@ -356,13 +388,13 @@ export class PipelineList extends React.Component {
 
     return (
       <EuiInMemoryTable
-        columns={this.columns}
+        columns={this.state.columns}
         itemId="id"
         items={this.state.pipelines}
         message={this.state.message}
         search={search}
         sorting={true}
-        isSelectable={true}
+        isSelectable={isSelectable}
         selection={selectionOptions}
       />
     );
@@ -395,9 +427,7 @@ export class PipelineList extends React.Component {
           }
           <div>
             {
-              isEmpty(this.state.pipelines)
-                ? null
-                : this.renderPipelinesTable()
+              this.renderPipelinesTable()
             }
           </div>
         </EuiPageContent>
