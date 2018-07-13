@@ -6,7 +6,7 @@
   "main": "target/index.js",
   "typings": "target/index.d.ts",
   "scripts": {
-    "build": "tsc",
+    "build": "echo 123",
     "kbn:bootstrap": "yarn build"
   },
   "devDependencies": {

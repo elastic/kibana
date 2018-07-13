@@ -28,18 +28,45 @@ function createControlParams(id, label) {
   };
 }
 
-const UNSET_VALUE = '';
+let valueFromFilterBar;
 const mockFilterManager = {
   getValueFromFilterBar: () => {
-    return '';
+    return valueFromFilterBar;
   },
   createFilter: (value) => {
     return `mockKbnFilter:${value}`;
   },
-  getUnsetValue: () => { return UNSET_VALUE; },
   getIndexPattern: () => { return 'mockIndexPattern'; }
 };
 const mockKbnApi = {};
+
+describe('hasChanged', () => {
+  let control;
+
+  beforeEach(() => {
+    control = new Control(createControlParams(3, 'control'), mockFilterManager, mockKbnApi);
+  });
+
+  afterEach(() => {
+    valueFromFilterBar = undefined;
+  });
+
+  test('should be false if value has not changed', () => {
+    expect(control.hasChanged()).to.be(false);
+  });
+
+  test('should be true if value has been set', () => {
+    control.set('new value');
+    expect(control.hasChanged()).to.be(true);
+  });
+
+  test('should be false if value has been set and control is cleared', () => {
+    control.set('new value');
+    control.clear();
+    expect(control.hasChanged()).to.be(false);
+  });
+
+});
 
 describe('ancestors', () => {
 
@@ -57,6 +84,8 @@ describe('ancestors', () => {
       grandParentControl.set('myGrandParentValue');
 
       childControl.setAncestors([parentControl, grandParentControl]);
+      expect(grandParentControl.hasValue()).to.be(true);
+      expect(parentControl.hasValue()).to.be(false);
       expect(childControl.hasUnsetAncestor()).to.be(true);
     });
 
@@ -64,6 +93,8 @@ describe('ancestors', () => {
       parentControl.set('myParentValue');
 
       childControl.setAncestors([parentControl, grandParentControl]);
+      expect(grandParentControl.hasValue()).to.be(false);
+      expect(parentControl.hasValue()).to.be(true);
       expect(childControl.hasUnsetAncestor()).to.be(true);
     });
 
@@ -72,6 +103,8 @@ describe('ancestors', () => {
       parentControl.set('myParentValue');
 
       childControl.setAncestors([parentControl, grandParentControl]);
+      expect(grandParentControl.hasValue()).to.be(true);
+      expect(parentControl.hasValue()).to.be(true);
       expect(childControl.hasUnsetAncestor()).to.be(false);
     });
   });

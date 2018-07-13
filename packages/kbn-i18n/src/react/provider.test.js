@@ -21,7 +21,7 @@ import React from 'react';
 import { intlShape } from 'react-intl';
 import { shallow, mount } from 'enzyme';
 import { I18nProvider } from './provider';
-import { I18nContext } from './context';
+import { injectI18n } from './inject';
 
 describe('I18nProvider', () => {
   it('renders children', () => {
@@ -38,11 +38,12 @@ describe('I18nProvider', () => {
   });
 
   it('provides with context', () => {
-    const childrenMock = jest.fn().mockImplementationOnce(() => <div />);
+    const childrenMock = () => <div />;
+    const WithIntl = injectI18n(childrenMock);
 
-    mount(
+    const wrapper = mount(
       <I18nProvider>
-        <I18nContext>{childrenMock}</I18nContext>
+        <WithIntl />
       </I18nProvider>,
       {
         childContextTypes: {
@@ -51,7 +52,6 @@ describe('I18nProvider', () => {
       }
     );
 
-    expect(childrenMock).toHaveBeenCalled();
-    expect(childrenMock.mock.calls[0]).toBeTruthy();
+    expect(wrapper.find(childrenMock).prop('intl')).toBeTruthy();
   });
 });

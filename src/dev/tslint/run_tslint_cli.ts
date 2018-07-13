@@ -50,15 +50,11 @@ export function runTslintCli() {
       return resolve(opts.project) === project.tsConfigPath;
     }).map(project => ({
       task: () =>
-        execa(
-          'tslint',
-          [...process.argv.slice(2), '--project', project.tsConfigPath],
-          {
-            cwd: project.directory,
-            env: chalk.enabled ? { FORCE_COLOR: 'true' } : {},
-            stdio: ['ignore', 'pipe', 'pipe'],
-          }
-        ).catch(error => {
+        execa('tslint', [...process.argv.slice(2), '--project', project.tsConfigPath], {
+          cwd: project.directory,
+          env: chalk.enabled ? { FORCE_COLOR: 'true' } : {},
+          stdio: ['ignore', 'pipe', 'pipe'],
+        }).catch(error => {
           throw new LintFailure(project, error);
         }),
       title: project.name,
@@ -70,10 +66,12 @@ export function runTslintCli() {
   );
 
   list.run().catch((error: any) => {
+    process.exitCode = 1;
+
     if (!error.errors) {
       log.error('Unhandled execption!');
       log.error(error);
-      process.exit(1);
+      process.exit();
     }
 
     for (const e of error.errors) {

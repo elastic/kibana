@@ -21,7 +21,7 @@ import _ from 'lodash';
 
 import { fatalError } from '../../notify';
 import '../../promises';
-import { requestQueue } from '../_request_queue';
+import { searchRequestQueue } from '../search_request_queue';
 import { FetchSoonProvider } from '../fetch';
 
 export function SearchPollProvider(Private, Promise, $rootScope) {
@@ -82,7 +82,7 @@ export function SearchPollProvider(Private, Promise, $rootScope) {
       // when the promise resolves.
       this._searchPromise = Promise.resolve().then(() => {
         $rootScope.$broadcast('courier:searchRefresh');
-        const requests = requestQueue.getInactive();
+        const requests = searchRequestQueue.getInactive();
 
         // The promise returned from fetchSearchRequests() only resolves when the requests complete.
         // We want to continue even if the requests abort so we return a different promise.
