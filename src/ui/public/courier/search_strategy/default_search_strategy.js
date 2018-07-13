@@ -30,7 +30,7 @@ function getAllFetchParams(searchRequests, Promise) {
   });
 }
 
-function serializeAllFetchParams(fetchParams, searchRequests, serializeFetchParams) {
+async function serializeAllFetchParams(fetchParams, searchRequests, serializeFetchParams) {
   const searcRequestsWithFetchParams = [];
   const failedSearchRequests = [];
 
@@ -48,7 +48,7 @@ function serializeAllFetchParams(fetchParams, searchRequests, serializeFetchPara
   });
 
   return {
-    serializeAllFetchParams: serializeFetchParams(searcRequestsWithFetchParams),
+    serializedFetchParams: await serializeFetchParams(searcRequestsWithFetchParams),
     failedSearchRequests,
   };
 }
