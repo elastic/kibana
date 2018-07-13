@@ -8,7 +8,7 @@ import { resolve } from 'path';
 import { getUserProvider } from './server/lib/get_user';
 import { initAuthenticateApi } from './server/routes/api/v1/authenticate';
 import { initUsersApi } from './server/routes/api/v1/users';
-import { initRolesApi } from './server/routes/api/v1/roles';
+import { initPublicRolesApi } from './server/routes/api/public/roles';
 import { initIndicesApi } from './server/routes/api/v1/indices';
 import { initLoginView } from './server/routes/views/login';
 import { initLogoutView } from './server/routes/views/logout';
@@ -70,11 +70,9 @@ export const security = (kibana) => new kibana.Plugin({
     injectDefaultVars: function (server) {
       const config = server.config();
 
-      const { authorization } = server.plugins.security;
       return {
         secureCookies: config.get('xpack.security.secureCookies'),
         sessionTimeout: config.get('xpack.security.sessionTimeout'),
-        rbacApplication: authorization.application,
       };
     }
   },
@@ -146,7 +144,7 @@ export const security = (kibana) => new kibana.Plugin({
     await initAuthenticator(server);
     initAuthenticateApi(server);
     initUsersApi(server);
-    initRolesApi(server);
+    initPublicRolesApi(server);
     initIndicesApi(server);
     initPrivilegesApi(server);
     initLoginView(server, xpackMainPlugin);
