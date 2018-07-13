@@ -58,7 +58,9 @@ export function CallClientProvider(Private, Promise, es) {
 
     // Respond to each searchRequest with the response or ABORTED.
     const respondToSearchRequests = (responsesInOriginalRequestOrder = []) => {
-      return Promise.map(searchRequests, function (searchRequest, searchRequestIndex) {
+      // We map over searchRequestsAndStatuses because if we were originally provided an ABORTED
+      // request then we'll return that value.
+      return Promise.map(searchRequestsAndStatuses, function (searchRequest, searchRequestIndex) {
         if (searchRequest.aborted) {
           return ABORTED;
         }
@@ -80,7 +82,7 @@ export function CallClientProvider(Private, Promise, es) {
           return ABORTED;
         }
 
-        return responsesInOriginalRequestOrder[activeSearchRequestIndex];
+        return responsesInOriginalRequestOrder[searchRequestIndex];
       })
         .then(
           (res) => defer.resolve(res),
@@ -162,11 +164,11 @@ export function CallClientProvider(Private, Promise, es) {
         // Assigning searchRequests to strategies means that the responses come back in a different
         // order than the original searchRequests. So we'll put them back in order so that we can
         // use the order to associate each response with the original request.
-        const responsesInOriginalRequestOrder = new Array(requestsToFetch.length);
+        const responsesInOriginalRequestOrder = new Array(searchRequestsAndStatuses.length);
         segregatedResponses.forEach((responses, strategyIndex) => {
           responses.responses.forEach((response, responseIndex) => {
             const searchRequest = searchStrategiesWithRequests[strategyIndex].searchRequests[responseIndex];
-            const requestIndex = requestsToFetch.indexOf(searchRequest);
+            const requestIndex = searchRequestsAndStatuses.indexOf(searchRequest);
             responsesInOriginalRequestOrder[requestIndex] = response;
           });
         });

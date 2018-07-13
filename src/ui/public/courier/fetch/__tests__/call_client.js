@@ -27,6 +27,7 @@ import { CallClientProvider } from '../call_client';
 import { RequestStatus } from '../req_status';
 import { SearchRequestProvider } from '../request';
 import { MergeDuplicatesRequestProvider } from '../merge_duplicate_requests';
+import { addSearchStrategy } from '../../search_strategy';
 
 describe('callClient', () => {
   NoDigestPromises.activateForSuite();
@@ -265,6 +266,91 @@ describe('callClient', () => {
 
       return callingClient.then(results => {
         expect(results).to.eql([ 1, ABORTED ]);
+      });
+    });
+  });
+
+  describe('searchRequests with multiple searchStrategies', () => {
+    const search = ({ searchRequests }) => {
+      return {
+        searching: Promise.resolve({
+          responses: searchRequests.map(searchRequest => searchRequest.__testId__),
+        }),
+        failedSearchRequests: [],
+        abort: () => {},
+      };
+    };
+
+    const searchStrategyA = {
+      id: 'a',
+      isViable: indexPattern => {
+        return indexPattern.type === 'a';
+      },
+      search,
+    };
+
+    const searchStrategyB = {
+      id: 'b',
+      isViable: indexPattern => {
+        return indexPattern.type === 'b';
+      },
+      search,
+    };
+
+    let searchRequestA;
+    let searchRequestB;
+    let searchRequestA2;
+
+    beforeEach(() => {
+      addSearchStrategy(searchStrategyA);
+      addSearchStrategy(searchStrategyB);
+
+      searchRequestA = createSearchRequest('a', {
+        source: {
+          getField: () => ({ type: 'a' }),
+        },
+      });
+
+      searchRequestB = createSearchRequest('b', {
+        source: {
+          getField: () => ({ type: 'b' }),
+        },
+      });
+
+      searchRequestA2 = createSearchRequest('a2', {
+        source: {
+          getField: () => ({ type: 'a' }),
+        },
+      });
+    });
+
+    it('map correctly if the searchRequests are reordered by the searchStrategies', () => {
+      // Add requests in an order which will be reordered by the strategies.
+      searchRequests = [ searchRequestA, searchRequestB, searchRequestA2 ];
+      const callingClient = callClient(searchRequests);
+
+      return callingClient.then(results => {
+        expect(results).to.eql(['a', 'b', 'a2']);
+      });
+    });
+
+    it('map correctly if once is aborted', () => {
+      // Add requests in an order which will be reordered by the strategies.
+      searchRequests = [ searchRequestA, searchRequestB, searchRequestA2 ];
+      const callingClient = callClient(searchRequests);
+      searchRequestA2.abort();
+
+      return callingClient.then(results => {
+        expect(results).to.eql(['a', 'b', ABORTED]);
+      });
+    });
+
+    it('map correctly if one is already aborted', () => {
+      searchRequests = [ searchRequestA, searchRequestB, ABORTED, searchRequestA2 ];
+      const callingClient = callClient(searchRequests);
+
+      return callingClient.then(results => {
+        expect(results).to.eql(['a', 'b', ABORTED, 'a2']);
       });
     });
   });

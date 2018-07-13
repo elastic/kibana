@@ -20,6 +20,10 @@
 const searchStrategies = [];
 
 const addSearchStrategy = searchStrategy => {
+  if (searchStrategies.includes(searchStrategy)) {
+    return;
+  }
+
   searchStrategies.push(searchStrategy);
 };
 
