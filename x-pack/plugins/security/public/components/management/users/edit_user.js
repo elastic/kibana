@@ -178,6 +178,7 @@ export class EditUser extends Component {
           error={this.confirmPasswordError()}
         >
           <EuiFieldText
+            data-test-subj="passwordConfirmationInput"
             onChange={event =>
               this.setState({ confirmPassword: event.target.value })
             }
