@@ -75,7 +75,6 @@ describe('Metrics', function () {
       expect(capturedMetrics).toMatchObject({
         last_updated: '2017-04-14T18:35:41.534Z',
         collection_interval_in_millis: 5000,
-        uptime_in_millis: 1980,
         a: [ { b: 2, c: 3 }, { d: 4, e: 5 } ], process: { uptime_ms: 1980 }
       });
     });
@@ -112,28 +111,27 @@ describe('Metrics', function () {
 
       expect(metrics.captureEvent(hapiEvent)).toMatchObject({
         'concurrent_connections': 0,
-        'event_loop_delay': 1.6091690063476562,
         'os': {
-          'cpu': {
-            'load_average': {
-              '15m': 1.89794921875,
-              '1m': 2.20751953125,
-              '5m': 2.02294921875
-            }
+          'load': {
+            '15m': 1.89794921875,
+            '1m': 2.20751953125,
+            '5m': 2.02294921875
           },
-          'mem': {
+          'memory': {
             'free_in_bytes': 12,
             'total_in_bytes': 24,
           },
+          'uptime_in_millis': 12000000,
         },
         'process': {
-          'mem': {
-            'heap_max_in_bytes': 168194048,
-            'heap_used_in_bytes': 130553400,
+          'memory': {
+            'heap': {
+              'total_in_bytes': 168194048,
+              'used_in_bytes': 130553400,
+            },
             'resident_set_size_in_bytes': 193716224,
           },
-          'pid': 8675309,
-          'uptime_ms': 5000000
+          'pid': 8675309
         },
         'requests': {
           'disconnects': 0,
@@ -167,10 +165,10 @@ describe('Metrics', function () {
       };
 
       expect(metrics.captureEvent(hapiEvent)).toMatchObject({
-        process: { mem: {}, pid: 8675309, uptime_ms: 5000000 },
+        process: { memory: { heap: {} }, pid: 8675309, uptime_in_millis: 5000000 },
         os: {
-          cpu: { load_average: {} },
-          mem: { free_in_bytes: 12, total_in_bytes: 24 },
+          load: {},
+          memory: { free_in_bytes: 12, total_in_bytes: 24 },
         },
         response_times: { max_in_millis: 4 },
         requests: { total: 22, disconnects: 0, status_codes: { '200': 22 } },
