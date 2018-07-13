@@ -23,6 +23,8 @@ import {
   EuiPageContent,
 } from '@elastic/eui';
 
+import { InfoAlerts } from './info_alerts';
+
 const INITIAL_PAGE_SIZE = 5;
 const PIPELINE_NOT_CENTRALLY_MANAGED_TOOLTIP_TEXT
   = `This pipeline wasn't created using Centralized Configuration Management. It can't be managed or edited here.`;
@@ -39,7 +41,9 @@ export class PipelineList extends React.Component {
       pageIndex: 0,
       pageSize: INITIAL_PAGE_SIZE,
       pipelines: [],
+      showAddRoleAlert: false,
       showConfirmDeleteModal: false,
+      showEnableMonitoringAlert: false,
       selection: [],
     };
   }
@@ -432,6 +436,10 @@ export class PipelineList extends React.Component {
           </div>
         </EuiPageContent>
         { this.renderConfirmDeletedPipelinesModal() }
+        <InfoAlerts
+          showAddRoleAlert={this.state.showAddRoleAlert}
+          showEnableMonitoringAlert={this.state.showEnableMonitoringAlert}
+        />
       </EuiPage>
     );
   }
