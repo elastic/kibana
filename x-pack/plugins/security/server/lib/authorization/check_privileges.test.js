@@ -19,7 +19,7 @@ const mockActions = {
   version: 'mock-action:version',
 };
 
-const createMockConfig = ({ settings = {} } = {}) => {
+const createMockConfig = (settings = {}) => {
   const mockConfig = {
     get: jest.fn()
   };
@@ -27,12 +27,12 @@ const createMockConfig = ({ settings = {} } = {}) => {
   const defaultSettings = {
     'pkg.version': defaultVersion,
     'kibana.index': defaultKibanaIndex,
+    'xpack.security.authorization.legacyFallback.enabled': true,
   };
 
   mockConfig.get.mockImplementation(key => {
     return key in settings ? settings[key] : defaultSettings[key];
   });
-
 
   return mockConfig;
 };
@@ -49,6 +49,7 @@ const createMockShieldClient = (response) => {
 
 const checkPrivilegesTest = (
   description, {
+    settings,
     privileges,
     applicationPrivilegesResponse,
     indexPrivilegesResponse,
@@ -58,7 +59,7 @@ const checkPrivilegesTest = (
 
   test(description, async () => {
     const username = 'foo-username';
-    const mockConfig = createMockConfig();
+    const mockConfig = createMockConfig(settings);
     const mockShieldClient = createMockShieldClient({
       username,
       application: {
@@ -252,7 +253,7 @@ describe(`with index privileges`, () => {
     }
   });
 
-  checkPrivilegesTest('returns legacy and missing login when checking missing login action', {
+  checkPrivilegesTest('returns legacy and missing login when checking missing login action and fallback is enabled', {
     username: 'foo-username',
     privileges: [
       mockActions.login
@@ -269,7 +270,27 @@ describe(`with index privileges`, () => {
     }
   });
 
-  checkPrivilegesTest('returns legacy and missing version if checking missing version action', {
+  checkPrivilegesTest('returns unauthorized and missing login when checking missing login action and fallback is disabled', {
+    settings: {
+      'xpack.security.authorization.legacyFallback.enabled': false,
+    },
+    username: 'foo-username',
+    privileges: [
+      mockActions.login
+    ],
+    applicationPrivilegesResponse: {
+      [mockActions.login]: false,
+      [mockActions.version]: false,
+    },
+    indexPrivilegesResponse,
+    expectedResult: {
+      result: CHECK_PRIVILEGES_RESULT.UNAUTHORIZED,
+      username: 'foo-username',
+      missing: [mockActions.login],
+    }
+  });
+
+  checkPrivilegesTest('returns legacy and missing version if checking missing version action and fallback is enabled', {
     username: 'foo-username',
     privileges: [
       mockActions.version
@@ -281,6 +302,26 @@ describe(`with index privileges`, () => {
     indexPrivilegesResponse,
     expectedResult: {
       result: CHECK_PRIVILEGES_RESULT.LEGACY,
+      username: 'foo-username',
+      missing: [mockActions.version],
+    }
+  });
+
+  checkPrivilegesTest('returns unauthorized and missing version if checking missing version action and fallback is disabled', {
+    settings: {
+      'xpack.security.authorization.legacyFallback.enabled': false,
+    },
+    username: 'foo-username',
+    privileges: [
+      mockActions.version
+    ],
+    applicationPrivilegesResponse: {
+      [mockActions.login]: false,
+      [mockActions.version]: false,
+    },
+    indexPrivilegesResponse,
+    expectedResult: {
+      result: CHECK_PRIVILEGES_RESULT.UNAUTHORIZED,
       username: 'foo-username',
       missing: [mockActions.version],
     }
@@ -303,7 +344,7 @@ describe(`with index privileges`, () => {
 
 describe('with no application privileges', () => {
   ['create', 'delete', 'read', 'view_index_metadata'].forEach(indexPrivilege => {
-    checkPrivilegesTest(`returns legacy if they have ${indexPrivilege} privilege on the kibana index`, {
+    checkPrivilegesTest(`returns legacy if they have ${indexPrivilege} privilege on the kibana index and fallback is enabled`, {
       username: 'foo-username',
       privileges: [
         `action:saved_objects/${savedObjectTypes[0]}/get`
@@ -322,6 +363,33 @@ describe('with no application privileges', () => {
       },
       expectedResult: {
         result: CHECK_PRIVILEGES_RESULT.LEGACY,
+        username: 'foo-username',
+        missing: [`action:saved_objects/${savedObjectTypes[0]}/get`],
+      }
+    });
+
+    checkPrivilegesTest(`returns unauthorized if they have ${indexPrivilege} privilege on the kibana index and fallback is disabled`, {
+      settings: {
+        'xpack.security.authorization.legacyFallback.enabled': false,
+      },
+      username: 'foo-username',
+      privileges: [
+        `action:saved_objects/${savedObjectTypes[0]}/get`
+      ],
+      applicationPrivilegesResponse: {
+        [mockActions.version]: false,
+        [mockActions.login]: false,
+        [`action:saved_objects/${savedObjectTypes[0]}/get`]: false,
+      },
+      indexPrivilegesResponse: {
+        create: false,
+        delete: false,
+        read: false,
+        view_index_metadata: false,
+        [indexPrivilege]: true
+      },
+      expectedResult: {
+        result: CHECK_PRIVILEGES_RESULT.UNAUTHORIZED,
         username: 'foo-username',
         missing: [`action:saved_objects/${savedObjectTypes[0]}/get`],
       }
