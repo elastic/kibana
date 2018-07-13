@@ -5,10 +5,7 @@
  */
 import { FrameworkRequest, FrameworkUser } from '../framework/adapter_types';
 export interface DatabaseAdapter {
-  putTemplate(
-    user: FrameworkUser,
-    params: DatabasePutTemplateParams
-  ): Promise<any>;
+  putTemplate(user: FrameworkUser, params: DatabasePutTemplateParams): Promise<any>;
   get<Source>(
     user: FrameworkUser,
     params: DatabaseGetParams
@@ -25,27 +22,17 @@ export interface DatabaseAdapter {
     user: FrameworkUser,
     params: DatabaseDeleteDocumentParams
   ): Promise<DatabaseDeleteDocumentResponse>;
-  mget<T>(
-    user: FrameworkUser,
-    params: DatabaseMGetParams
-  ): Promise<DatabaseMGetResponse<T>>;
+  mget<T>(user: FrameworkUser, params: DatabaseMGetParams): Promise<DatabaseMGetResponse<T>>;
   bulk(
     user: FrameworkUser,
     params: DatabaseBulkIndexDocumentsParams
   ): Promise<DatabaseBulkResponse>;
-  search<T>(
-    user: FrameworkUser,
-    params: DatabaseSearchParams
-  ): Promise<DatabaseSearchResponse<T>>;
+  search<T>(user: FrameworkUser, params: DatabaseSearchParams): Promise<DatabaseSearchResponse<T>>;
 }
 
 export interface DatabaseKbnESCluster {
   callWithInternalUser(esMethod: string, options: {}): Promise<any>;
-  callWithRequest(
-    req: FrameworkRequest,
-    esMethod: string,
-    options: {}
-  ): Promise<any>;
+  callWithRequest(req: FrameworkRequest, esMethod: string, options: {}): Promise<any>;
 }
 
 export interface DatabaseKbnESPlugin {
@@ -142,14 +129,11 @@ export interface DatabaseBulkResponse {
   took: number;
   errors: boolean;
   items: Array<
-    | DatabaseDeleteDocumentResponse
-    | DatabaseIndexDocumentResponse
-    | DatabaseUpdateDocumentResponse
+    DatabaseDeleteDocumentResponse | DatabaseIndexDocumentResponse | DatabaseUpdateDocumentResponse
   >;
 }
 
-export interface DatabaseBulkIndexDocumentsParams
-  extends DatabaseGenericParams {
+export interface DatabaseBulkIndexDocumentsParams extends DatabaseGenericParams {
   waitForActiveShards?: string;
   refresh?: DatabaseRefresh;
   routing?: string;
@@ -299,11 +283,7 @@ export interface DatabaseGetParams extends DatabaseGenericParams {
 
 export type DatabaseNameList = string | string[] | boolean;
 export type DatabaseRefresh = boolean | 'true' | 'false' | 'wait_for' | '';
-export type DatabaseVersionType =
-  | 'internal'
-  | 'external'
-  | 'external_gte'
-  | 'force';
+export type DatabaseVersionType = 'internal' | 'external' | 'external_gte' | 'force';
 export type ExpandWildcards = 'open' | 'closed' | 'none' | 'all';
 export type DefaultOperator = 'AND' | 'OR';
 export type DatabaseConflicts = 'abort' | 'proceed';

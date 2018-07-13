@@ -30,10 +30,7 @@ export class ElasticsearchBeatsAdapter implements CMBeatsAdapter {
       type: '_doc',
     };
 
-    const response = await this.database.get(
-      this.framework.internalUser,
-      params
-    );
+    const response = await this.database.get(this.framework.internalUser, params);
     if (!response.found) {
       return null;
     }
@@ -155,13 +152,11 @@ export class ElasticsearchBeatsAdapter implements CMBeatsAdapter {
       refresh: 'wait_for',
       type: '_doc',
     });
-    return _get<any>(response, 'items', []).map(
-      (item: any, resultIdx: number) => ({
-        idxInRequest: removals[resultIdx].idxInRequest,
-        result: item.update.result,
-        status: item.update.status,
-      })
-    );
+    return _get<any>(response, 'items', []).map((item: any, resultIdx: number) => ({
+      idxInRequest: removals[resultIdx].idxInRequest,
+      result: item.update.result,
+      status: item.update.status,
+    }));
   }
 
   public async assignTagsToBeats(
@@ -193,12 +188,10 @@ export class ElasticsearchBeatsAdapter implements CMBeatsAdapter {
       refresh: 'wait_for',
       type: '_doc',
     });
-    return _get<any>(response, 'items', []).map(
-      (item: any, resultIdx: any) => ({
-        idxInRequest: assignments[resultIdx].idxInRequest,
-        result: item.update.result,
-        status: item.update.status,
-      })
-    );
+    return _get<any>(response, 'items', []).map((item: any, resultIdx: any) => ({
+      idxInRequest: assignments[resultIdx].idxInRequest,
+      result: item.update.result,
+      status: item.update.status,
+    }));
   }
 }

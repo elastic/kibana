@@ -5,17 +5,15 @@
  */
 
 import { uniq } from 'lodash';
+import moment from 'moment';
 import { findNonExistentItems } from '../../utils/find_non_existent_items';
 
 import { CMBeat } from '../../../common/domain_types';
-import {
-  BeatsTagAssignment,
-  CMBeatsAdapter,
-} from '../adapters/beats/adapter_types';
+import { BeatsTagAssignment, CMBeatsAdapter } from '../adapters/beats/adapter_types';
 import { FrameworkUser } from '../adapters/framework/adapter_types';
 
 import { CMAssignmentReturn } from '../adapters/beats/adapter_types';
-import { CMDomainLibs } from '../lib';
+import { BeatEnrollmentStatus, CMDomainLibs } from '../lib';
 import { BeatsRemovalReturn } from './../adapters/beats/adapter_types';
 
 export class CMBeatsDomain {
@@ -32,11 +30,11 @@ export class CMBeatsDomain {
     this.tokens = libs.tokens;
   }
 
-  public async update(
-    beatId: string,
-    accessToken: string,
-    beatData: Partial<CMBeat>
-  ) {
+  public async getById(beatId: string) {
+    return await this.adapter.get(beatId);
+  }
+
+  public async update(beatId: string, accessToken: string, beatData: Partial<CMBeat>) {
     const beat = await this.adapter.get(beatId);
 
     const { verified: isAccessTokenValid } = this.tokens.verifyToken(
@@ -52,10 +50,6 @@ export class CMBeatsDomain {
     if (!isAccessTokenValid) {
       return 'invalid-access-token';
     }
-    const isBeatVerified = beat.hasOwnProperty('verified_on');
-    if (!isBeatVerified) {
-      return 'beat-not-verified';
-    }
 
     await this.adapter.update({
       ...beat,
@@ -65,18 +59,34 @@ export class CMBeatsDomain {
 
   // TODO more strongly type this
   public async enrollBeat(
+    enrollmentToken: string,
     beatId: string,
     remoteAddress: string,
     beat: Partial<CMBeat>
-  ) {
+  ): Promise<{ status: string; accessToken?: string }> {
+    const { token, expires_on } = await this.tokens.getEnrollmentToken(enrollmentToken);
+
+    if (expires_on && moment(expires_on).isBefore(moment())) {
+      return { status: BeatEnrollmentStatus.ExpiredEnrollmentToken };
+    }
+    if (!token) {
+      return { status: BeatEnrollmentStatus.InvalidEnrollmentToken };
+    }
+
     const accessToken = this.tokens.generateAccessToken();
+    const verifiedOn = moment().toJSON();
+
     await this.adapter.insert({
       ...beat,
+      verified_on: verifiedOn,
       access_token: accessToken,
       host_ip: remoteAddress,
       id: beatId,
     } as CMBeat);
-    return { accessToken };
+
+    await this.tokens.deleteEnrollmentToken(enrollmentToken);
+
+    return { status: BeatEnrollmentStatus.Success, accessToken };
   }
 
   public async removeTagsFromBeats(
@@ -115,10 +125,7 @@ export class CMBeatsDomain {
       .filter((removal, idx) => response.removals[idx].status === null);
 
     if (validRemovals.length > 0) {
-      const removalResults = await this.adapter.removeTagsFromBeats(
-        user,
-        validRemovals
-      );
+      const removalResults = await this.adapter.removeTagsFromBeats(user, validRemovals);
       return addToResultsToResponse('removals', response, removalResults);
     }
     return response;
@@ -126,33 +133,6 @@ export class CMBeatsDomain {
 
   public async getAllBeats(user: FrameworkUser) {
     return await this.adapter.getAll(user);
-  }
-
-  // TODO cleanup return value, should return a status enum
-  public async verifyBeats(user: FrameworkUser, beatIds: string[]) {
-    const beatsFromEs = await this.adapter.getWithIds(user, beatIds);
-
-    const nonExistentBeatIds = findNonExistentItems(beatsFromEs, beatIds);
-
-    const alreadyVerifiedBeatIds = beatsFromEs
-      .filter((beat: any) => beat.hasOwnProperty('verified_on'))
-      .map((beat: any) => beat.id);
-
-    const toBeVerifiedBeatIds = beatsFromEs
-      .filter((beat: any) => !beat.hasOwnProperty('verified_on'))
-      .map((beat: any) => beat.id);
-
-    const verifications = await this.adapter.verifyBeats(
-      user,
-      toBeVerifiedBeatIds
-    );
-
-    return {
-      alreadyVerifiedBeatIds,
-      nonExistentBeatIds,
-      toBeVerifiedBeatIds,
-      verifiedBeatIds: verifications.map((v: any) => v.id),
-    };
   }
 
   public async assignTagsToBeats(
@@ -191,10 +171,7 @@ export class CMBeatsDomain {
       .filter((assignment, idx) => response.assignments[idx].status === null);
 
     if (validAssignments.length > 0) {
-      const assignmentResults = await this.adapter.assignTagsToBeats(
-        user,
-        validAssignments
-      );
+      const assignmentResults = await this.adapter.assignTagsToBeats(user, validAssignments);
 
       // TODO This should prob not mutate
       return addToResultsToResponse('assignments', response, assignmentResults);
@@ -229,11 +206,7 @@ function addNonExistentItemToResponse(
 }
 
 // TODO dont mutate response
-function addToResultsToResponse(
-  key: string,
-  response: any,
-  assignmentResults: any
-) {
+function addToResultsToResponse(key: string, response: any, assignmentResults: any) {
   assignmentResults.forEach((assignmentResult: any) => {
     const { idxInRequest, status, result } = assignmentResult;
     response[key][idxInRequest].status = status;

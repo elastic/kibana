@@ -5,9 +5,9 @@
  */
 
 import { ElasticsearchBeatsAdapter } from '../adapters/beats/elasticsearch_beats_adapter';
+import { KibanaDatabaseAdapter } from '../adapters/database/kibana_database_adapter';
 import { ElasticsearchTagsAdapter } from '../adapters/tags/elasticsearch_tags_adapter';
 import { ElasticsearchTokensAdapter } from '../adapters/tokens/elasticsearch_tokens_adapter';
-import { KibanaDatabaseAdapter } from './../adapters/database/kibana_database_adapter';
 
 import { KibanaBackendFrameworkAdapter } from '../adapters/framework/kibana_framework_adapter';
 
@@ -22,19 +22,13 @@ export function compose(server: any): CMServerLibs {
   const database = new KibanaDatabaseAdapter(server.plugins.elasticsearch);
 
   const tags = new CMTagsDomain(new ElasticsearchTagsAdapter(database));
-  const tokens = new CMTokensDomain(
-    new ElasticsearchTokensAdapter(database, framework),
-    {
-      framework,
-    }
-  );
-  const beats = new CMBeatsDomain(
-    new ElasticsearchBeatsAdapter(database, framework),
-    {
-      tags,
-      tokens,
-    }
-  );
+  const tokens = new CMTokensDomain(new ElasticsearchTokensAdapter(database, framework), {
+    framework,
+  });
+  const beats = new CMBeatsDomain(new ElasticsearchBeatsAdapter(database, framework), {
+    tags,
+    tokens,
+  });
 
   const domainLibs: CMDomainLibs = {
     beats,

@@ -34,10 +34,7 @@ export const createTagRemovalsRoute = (libs: CMServerLibs) => ({
     }));
 
     try {
-      const response = await libs.beats.removeTagsFromBeats(
-        request.user,
-        tweakedRemovals
-      );
+      const response = await libs.beats.removeTagsFromBeats(request.user, tweakedRemovals);
       reply(response);
     } catch (err) {
       // TODO move this to kibana route thing in adapter

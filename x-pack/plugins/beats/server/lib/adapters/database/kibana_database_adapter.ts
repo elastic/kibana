@@ -30,10 +30,7 @@ export class KibanaDatabaseAdapter implements DatabaseAdapter {
   constructor(kbnElasticSearch: DatabaseKbnESPlugin) {
     this.es = kbnElasticSearch.getCluster('admin');
   }
-  public async putTemplate(
-    user: FrameworkUser,
-    params: DatabasePutTemplateParams
-  ): Promise<any> {
+  public async putTemplate(user: FrameworkUser, params: DatabasePutTemplateParams): Promise<any> {
     const callES = this.getCallType(user);
     const result = await callES('indices.putTemplate', params);
     return result;
@@ -59,10 +56,7 @@ export class KibanaDatabaseAdapter implements DatabaseAdapter {
     // todo
   }
 
-  public async bulk(
-    user: FrameworkUser,
-    params: DatabaseBulkIndexDocumentsParams
-  ): Promise<any> {
+  public async bulk(user: FrameworkUser, params: DatabaseBulkIndexDocumentsParams): Promise<any> {
     const callES = this.getCallType(user);
     const result = await callES('bulk', params);
     return result;
@@ -76,10 +70,7 @@ export class KibanaDatabaseAdapter implements DatabaseAdapter {
     const result = await callES('create', params);
     return result;
   }
-  public async index<T>(
-    user: FrameworkUser,
-    params: DatabaseIndexDocumentParams<T>
-  ): Promise<any> {
+  public async index<T>(user: FrameworkUser, params: DatabaseIndexDocumentParams<T>): Promise<any> {
     const callES = this.getCallType(user);
     const result = await callES('index', params);
     return result;

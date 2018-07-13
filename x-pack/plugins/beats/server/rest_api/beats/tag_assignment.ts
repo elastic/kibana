@@ -34,10 +34,7 @@ export const createTagAssignmentsRoute = (libs: CMServerLibs) => ({
     }));
 
     try {
-      const response = await libs.beats.assignTagsToBeats(
-        request.user,
-        tweakedAssignments
-      );
+      const response = await libs.beats.assignTagsToBeats(request.user, tweakedAssignments);
       reply(response);
     } catch (err) {
       // TODO move this to kibana route thing in adapter
