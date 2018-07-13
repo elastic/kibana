@@ -41,6 +41,7 @@ export default async function (kbnServer, server, config) {
   server.connection({
     host: config.get('server.host'),
     port: config.get('server.port'),
+    tls: config.get('server.ssl.enabled'),
     listener: kbnServer.newPlatform.proxyListener,
     state: {
       strictHeader: false,
