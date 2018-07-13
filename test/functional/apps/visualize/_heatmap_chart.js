@@ -12,7 +12,7 @@ export default function ({ getService, getPageObjects }) {
 
     before(async function () {
       log.debug('navigateToApp visualize');
-      await PageObjects.common.navigateToUrl('visualize', 'new');
+      await PageObjects.visualize.navigateToNewVisualization();
       log.debug('clickHeatmapChart');
       await PageObjects.visualize.clickHeatmapChart();
       await PageObjects.visualize.clickNewSearch();

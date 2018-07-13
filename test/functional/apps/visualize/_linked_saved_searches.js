@@ -39,7 +39,7 @@ export default function ({ getPageObjects, getService }) {
       it('should create a visualization from a saved search', async () => {
         retry.try(async () => {
           // Sometimes navigation to the page fails, so we have this in a retry
-          await PageObjects.common.navigateToUrl('visualize', 'new');
+          await PageObjects.visualize.navigateToNewVisualization();
           await PageObjects.visualize.waitForVisualizationSelectPage();
         });
         await PageObjects.visualize.clickDataTable();

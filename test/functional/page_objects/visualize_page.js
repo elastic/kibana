@@ -14,8 +14,20 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
 
   class VisualizePage {
 
+    async navigateToNewVisualization() {
+      log.debug('navigateToApp visualize new');
+      await PageObjects.common.navigateToUrl('visualize', 'new');
+      await this.waitForVisualizationSelectPage();
+      await PageObjects.header.waitUntilLoadingHasFinished();
+    }
+
     async waitForVisualizationSelectPage() {
-      await testSubjects.find('visualizeSelectTypePage');
+      await retry.try(async () => {
+        const visualizeSelectTypePage = await testSubjects.find('visualizeSelectTypePage');
+        if (!visualizeSelectTypePage.isDisplayed()) {
+          throw new Error('wait for visualization select page');
+        }
+      });
     }
 
     async clickAreaChart() {
@@ -92,6 +104,7 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
 
     async selectTagCloudTag(tagDisplayText) {
       await testSubjects.click(tagDisplayText);
+      await PageObjects.header.waitUntilLoadingHasFinished();
     }
 
     async getTextTag() {
@@ -388,7 +401,7 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
     }
 
     async selectAggregation(myString, groupName = 'buckets') {
-      const selector = `[group-name="${groupName}"] vis-editor-agg-params:not(.ng-hide) .agg-select`;
+      const selector = `[group-name="${groupName}"] [class=vis-editor-agg-editor]:not(.ng-hide) [data-test-subj="visEditorAggSelect"]`;
       await retry.try(async () => {
         await find.clickByCssSelector(selector);
         const input = await find.byCssSelector(`${selector} input.ui-select-search`);
@@ -514,6 +527,7 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
       const input = await find.byCssSelector('input[name="interval"]');
       await input.clearValue();
       await input.type(newValue + '');
+      await PageObjects.common.sleep(1000);
     }
 
     async setSize(newValue) {
@@ -524,6 +538,7 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
 
     async toggleDisabledAgg(agg) {
       await testSubjects.click(`aggregationEditor${agg} disableAggregationBtn`);
+      await PageObjects.header.waitUntilLoadingHasFinished();
     }
 
     async toggleOtherBucket() {
@@ -568,10 +583,12 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
 
     async clickVisEditorTab(tabName) {
       await testSubjects.click('visEditorTab' + tabName);
+      await PageObjects.header.waitUntilLoadingHasFinished();
     }
 
     async selectWMS() {
       await find.clickByCssSelector('input[name="wms.enabled"]');
+      await PageObjects.header.waitUntilLoadingHasFinished();
     }
 
     async ensureSavePanelOpen() {

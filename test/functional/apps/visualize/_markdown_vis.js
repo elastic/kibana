@@ -11,7 +11,7 @@ export default function ({ getPageObjects, getService }) {
 
   describe('visualize app', async () => {
     before(async function () {
-      await PageObjects.common.navigateToUrl('visualize', 'new');
+      await PageObjects.visualize.navigateToNewVisualization();
       await PageObjects.visualize.clickMarkdownWidget();
       await PageObjects.visualize.setMarkdownTxt(markdown);
       await PageObjects.visualize.clickGo();

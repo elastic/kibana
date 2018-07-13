@@ -11,7 +11,7 @@ export default function ({ getService, getPageObjects }) {
 
     before(async function () {
       log.debug('navigateToApp visualize');
-      await PageObjects.common.navigateToUrl('visualize', 'new');
+      await PageObjects.visualize.navigateToNewVisualization();
       log.debug('clickGauge');
       await PageObjects.visualize.clickGauge();
       await PageObjects.visualize.clickNewSearch();
