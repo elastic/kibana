@@ -14,3 +14,4 @@ export { TOOLTIPS } from './tooltips';
 export { PIPELINE } from './pipeline';
 export { MONITORING } from './monitoring';
 export { EDITOR } from './editor';
+export { UPGRADE_FAILURE } from './upgrade_failure';

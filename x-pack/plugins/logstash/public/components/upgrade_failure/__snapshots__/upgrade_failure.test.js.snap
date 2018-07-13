@@ -1,0 +1,43 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`UpgradeFailure component renders component as expected 1`] = `
+<EuiPage
+  restrictWidth={false}
+  style={
+    Object {
+      "minHeight": "100vh",
+    }
+  }
+>
+  <EuiPageContent
+    panelPaddingSize="l"
+  >
+    <EuiEmptyPrompt
+      actions={
+        <UpgradeFailureActions
+          onClose={[MockFunction]}
+          onRetry={[MockFunction]}
+          upgradeButtonText="Try again"
+        />
+      }
+      body={
+        <p
+          style={
+            Object {
+              "textAlign": "left",
+            }
+          }
+        >
+          Before you can add a pipeline, we need to upgrade your configuration.
+        </p>
+      }
+      iconColor="subdued"
+      title={
+        <UpgradeFailureTitle
+          titleText="Upgrade failed"
+        />
+      }
+    />
+  </EuiPageContent>
+</EuiPage>
+`;
