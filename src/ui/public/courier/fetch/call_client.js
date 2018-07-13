@@ -137,6 +137,7 @@ export function CallClientProvider(Private, Promise, es) {
           failedSearchRequests,
         } = await searchStrategy.search({ searchRequests, es, Promise, serializeFetchParams });
 
+        // Collect searchRequests which have successfully been sent.
         searchRequests.forEach(searchRequest => {
           if (failedSearchRequests.includes(searchRequest)) {
             return;
@@ -154,7 +155,7 @@ export function CallClientProvider(Private, Promise, es) {
       try {
         // The request was aborted while we were doing the above logic.
         if (areAllSearchRequestsAborted) {
-          return await respondToSearchRequests();
+          return;
         }
 
         const segregatedResponses = await Promise.all(abortableSearches.map(({ searching }) => searching));
