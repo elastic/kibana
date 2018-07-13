@@ -22,7 +22,7 @@ routes.when(`${EDIT_USERS_PATH}/:username?`, {
       return ShieldUser.getCurrent();
     },
 
-    user($route, ShieldUser, kbnUrl, Promise, Notifier) {
+    user($route, ShieldUser, kbnUrl, Promise) {
       const username = $route.current.params.username;
       if (username != null) {
         return ShieldUser.get({ username }).$promise
@@ -31,8 +31,7 @@ routes.when(`${EDIT_USERS_PATH}/:username?`, {
               return fatalError(response);
             }
 
-            const notifier = new Notifier();
-            notifier.error(`No "${username}" user found.`);
+            toastNotifications.addDanger(`No "${username}" user found.`);
             kbnUrl.redirect(USERS_PATH);
             return Promise.halt();
           });
@@ -56,14 +55,12 @@ routes.when(`${EDIT_USERS_PATH}/:username?`, {
 
     this.isNewUser = $route.current.params.username == null;
 
-    const notifier = new Notifier();
-
     $scope.deleteUser = (user) => {
       const doDelete = () => {
         user.$delete()
           .then(() => toastNotifications.addSuccess('Deleted user'))
           .then($scope.goToUserList)
-          .catch(error => notifier.error(_.get(error, 'data.message')));
+          .catch(error => toastNotifications.addDanger(_.get(error, 'data.message')));
       };
       const confirmModalOptions = {
         confirmButtonText: 'Delete user',
@@ -78,7 +75,7 @@ routes.when(`${EDIT_USERS_PATH}/:username?`, {
       user.$save()
         .then(() => toastNotifications.addSuccess('User updated'))
         .then($scope.goToUserList)
-        .catch(error => notifier.error(_.get(error, 'data.message')));
+        .catch(error => toastNotifications.addDanger(_.get(error, 'data.message')));
     };
 
     $scope.goToUserList = () => {
@@ -99,7 +96,7 @@ routes.when(`${EDIT_USERS_PATH}/:username?`, {
           if (error.status === 401) {
             onIncorrectPassword();
           }
-          else notifier.error(_.get(error, 'data.message'));
+          else toastNotifications.addDanger(_.get(error, 'data.message'));
         });
     };
   }

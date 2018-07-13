@@ -52,8 +52,12 @@ class Timefilter extends SimpleEmitter {
     // Object.assign used for partially composed updates
     const newTime = Object.assign(this.getTime(), time);
     if (areTimePickerValsDifferent(this.getTime(), newTime)) {
-      this._time = newTime;
-      timeHistory.add(newTime);
+      this._time = {
+        from: newTime.from,
+        to: newTime.to,
+        mode: newTime.mode
+      };
+      timeHistory.add(this._time);
       this.emit('timeUpdate');
       this.emit('fetch');
     }
@@ -66,14 +70,20 @@ class Timefilter extends SimpleEmitter {
   /**
    * Set timefilter refresh interval.
    * @param {Object} refreshInterval
-   * @property {number} time.value
+   * @property {number} time.value Refresh interval in milliseconds. Positive integer
    * @property {boolean} time.pause
    */
   setRefreshInterval = (refreshInterval) => {
     // Object.assign used for partially composed updates
     const newRefreshInterval = Object.assign(this.getRefreshInterval(), refreshInterval);
+    if (newRefreshInterval.value < 0) {
+      newRefreshInterval.value = 0;
+    }
     if (areTimePickerValsDifferent(this.getRefreshInterval(), newRefreshInterval)) {
-      this._refreshInterval = newRefreshInterval;
+      this._refreshInterval = {
+        value: newRefreshInterval.value,
+        pause: newRefreshInterval.pause
+      };
       this.emit('refreshIntervalUpdate');
       if (!newRefreshInterval.pause && newRefreshInterval.value !== 0) {
         this.emit('fetch');

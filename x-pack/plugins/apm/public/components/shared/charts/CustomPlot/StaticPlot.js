@@ -13,13 +13,21 @@ import {
 } from 'react-vis';
 import PropTypes from 'prop-types';
 import React, { PureComponent } from 'react';
+import { last } from 'lodash';
 
 import StatusText from './StatusText';
 import { SharedPlot } from './plotUtils';
 
 const X_TICK_TOTAL = 7;
 class StaticPlot extends PureComponent {
-  getSerie(serie) {
+  getVisSeries(series, plotValues) {
+    return series
+      .slice()
+      .reverse()
+      .map(serie => this.getSerie(serie, plotValues));
+  }
+
+  getSerie(serie, plotValues) {
     switch (serie.type) {
       case 'line':
         return (
@@ -45,6 +53,27 @@ class StaticPlot extends PureComponent {
             fill={serie.areaColor}
           />
         );
+      case 'areaMaxHeight':
+        const yMax = last(plotValues.yTickValues);
+        const data = serie.data.map(p => ({
+          x: p.x,
+          y0: 0,
+          y: p.y ? yMax : null
+        }));
+
+        return (
+          <AreaSeries
+            getNull={d => d.y !== null}
+            key={serie.title}
+            xType="time"
+            curve={'curveMonotoneX'}
+            data={data}
+            color={serie.color}
+            stroke={serie.color}
+            fill={serie.areaColor}
+          />
+        );
+
       default:
         throw new Error(`Unknown type ${serie.type}`);
     }
@@ -63,10 +92,7 @@ class StaticPlot extends PureComponent {
         {noHits ? (
           <StatusText text="No data within this time range." />
         ) : (
-          series
-            .slice()
-            .reverse()
-            .map(this.getSerie)
+          this.getVisSeries(series, plotValues)
         )}
       </SharedPlot>
     );

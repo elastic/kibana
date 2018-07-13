@@ -27,12 +27,7 @@ export const unique = (arr = []) => [...new Set(arr)];
 
 const merge = (a, b) =>
   unique([...Object.keys(a), ...Object.keys(b)]).reduce((acc, key) => {
-    if (
-      isObject(a[key]) &&
-      isObject(b[key]) &&
-      !Array.isArray(a[key]) &&
-      !Array.isArray(b[key])
-    ) {
+    if (isObject(a[key]) && isObject(b[key]) && !Array.isArray(a[key]) && !Array.isArray(b[key])) {
       return {
         ...acc,
         [key]: merge(a[key], b[key]),
