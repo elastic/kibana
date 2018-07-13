@@ -272,7 +272,7 @@ export default function ({ getService, getPageObjects }) {
         expect(hasChildControlFilter).to.equal(true);
       });
 
-      it.skip('should clear child control dropdown when parent control value is removed', async () => {
+      it('should clear child control dropdown when parent control value is removed', async () => {
         await PageObjects.visualize.clearComboBox('listControlSelect0');
         await PageObjects.common.sleep(500); // give time for filter to be removed and event handlers to fire
 
