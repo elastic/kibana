@@ -67,7 +67,7 @@ exports[`DurationFormatEditor should render human readable output normally 1`] =
       }
     />
   </EuiFormRow>
-  <FormatEditorSamples
+  <InjectIntl(FormatEditorSamplesComponent)
     samples={
       Array [
         Object {
@@ -203,7 +203,7 @@ exports[`DurationFormatEditor should render non-human readable output normally 1
       onChange={[Function]}
     />
   </EuiFormRow>
-  <FormatEditorSamples
+  <InjectIntl(FormatEditorSamplesComponent)
     samples={
       Array [
         Object {

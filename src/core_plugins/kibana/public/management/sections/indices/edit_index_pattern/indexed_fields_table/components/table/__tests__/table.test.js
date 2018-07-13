@@ -19,10 +19,9 @@
 
 import React from 'react';
 import { shallow } from 'enzyme';
-
-import { Table } from '../table';
-
 import { shallowWithIntl } from 'test_utils/enzyme_helpers';
+
+import { TableComponent } from '../table';
 
 const indexPattern = {
   timeFieldName: 'timestamp'
@@ -36,98 +35,91 @@ const items = [
 
 describe('Table', () => {
   it('should render normally', async () => {
-    const wrapper = shallow(
-      <Table
+    const component = shallowWithIntl(
+      <TableComponent
         indexPattern={indexPattern}
         items={items}
         editField={() => {}}
       />
     );
 
-    const component = shallowWithIntl(wrapper);
     expect(component).toMatchSnapshot();
   });
 
   it('should render normal field name', async () => {
-    const wrapper = shallow(
-      <Table
+    const component = shallowWithIntl(
+      <TableComponent
         indexPattern={indexPattern}
         items={items}
         editField={() => {}}
       />
     );
 
-    const component = shallowWithIntl(wrapper);
     const tableCell = shallow(component.prop('columns')[0].render('Elastic'));
     expect(tableCell).toMatchSnapshot();
   });
 
   it('should render timestamp field name', async () => {
-    const wrapper = shallow(
-      <Table
+    const component = shallowWithIntl(
+      <TableComponent
         indexPattern={indexPattern}
         items={items}
         editField={() => {}}
       />
     );
 
-    const component = shallowWithIntl(wrapper);
     const tableCell = shallow(component.prop('columns')[0].render('timestamp', true));
     expect(tableCell).toMatchSnapshot();
   });
 
   it('should render the boolean template (true)', async () => {
-    const wrapper = shallow(
-      <Table
+    const component = shallowWithIntl(
+      <TableComponent
         indexPattern={indexPattern}
         items={items}
         editField={() => {}}
       />
     );
 
-    const component = shallowWithIntl(wrapper);
     const tableCell = shallow(component.prop('columns')[3].render(true));
     expect(tableCell).toMatchSnapshot();
   });
 
   it('should render the boolean template (false)', async () => {
-    const wrapper = shallow(
-      <Table
+    const component = shallowWithIntl(
+      <TableComponent
         indexPattern={indexPattern}
         items={items}
         editField={() => {}}
       />
     );
 
-    const component = shallowWithIntl(wrapper);
     const tableCell = shallow(component.prop('columns')[3].render(false));
     expect(tableCell).toMatchSnapshot();
   });
 
   it('should render normal type', async () => {
-    const wrapper = shallow(
-      <Table
+    const component = shallowWithIntl(
+      <TableComponent
         indexPattern={indexPattern}
         items={items}
         editField={() => {}}
       />
     );
 
-    const component = shallowWithIntl(wrapper);
     const tableCell = shallow(component.prop('columns')[1].render('string'));
     expect(tableCell).toMatchSnapshot();
   });
 
   it('should render conflicting type', async () => {
-    const wrapper = shallow(
-      <Table
+    const component = shallowWithIntl(
+      <TableComponent
         indexPattern={indexPattern}
         items={items}
         editField={() => {}}
       />
     );
 
-    const component = shallowWithIntl(wrapper);
     const tableCell = shallow(component.prop('columns')[1].render('conflict', true));
     expect(tableCell).toMatchSnapshot();
   });
@@ -135,15 +127,14 @@ describe('Table', () => {
   it('should allow edits', () => {
     const editField = jest.fn();
 
-    const wrapper = shallow(
-      <Table
+    const component = shallowWithIntl(
+      <TableComponent
         indexPattern={indexPattern}
         items={items}
         editField={editField}
       />
     );
 
-    const component = shallowWithIntl(wrapper);
     // Click the edit button
     component.prop('columns')[6].actions[0].onClick();
     expect(editField).toBeCalled();

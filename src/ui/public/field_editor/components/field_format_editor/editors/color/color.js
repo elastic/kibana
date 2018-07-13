@@ -35,9 +35,9 @@ import { DEFAULT_COLOR } from '../../../../../../../core_plugins/kibana/common/f
 
 import { ReactI18n } from '@kbn/i18n';
 
-const { I18nContext, FormattedMessage } = ReactI18n;
+const { injectI18n, FormattedMessage } = ReactI18n;
 
-export class ColorFormatEditor extends DefaultFormatEditor {
+export class ColorFormatEditorComponent extends DefaultFormatEditor {
   static formatId = 'color';
 
   constructor(props) {
@@ -77,7 +77,7 @@ export class ColorFormatEditor extends DefaultFormatEditor {
   }
 
   render() {
-    const { formatParams, fieldType } = this.props;
+    const { formatParams, fieldType, intl } = this.props;
 
     const items = formatParams.colors && formatParams.colors.length && formatParams.colors.map((color, index) => {
       return {
@@ -86,10 +86,11 @@ export class ColorFormatEditor extends DefaultFormatEditor {
       };
     }) || [];
 
-    const getColumns = (intl) => ([
+    const columns = [
       fieldType === 'string' ? {
         field: 'regex',
-        name: intl.formatMessage({ id: 'common.ui.fieldEditor.color.pattern.label', defaultMessage: 'Pattern (regular expression)' }),
+        name: intl.formatMessage(
+          { id: 'common.ui.fieldEditor.color.pattern.label', defaultMessage: 'Pattern (regular expression)' }),
         render: (value, item) => {
           return (
             <EuiFieldText
@@ -169,7 +170,8 @@ export class ColorFormatEditor extends DefaultFormatEditor {
         actions: [
           {
             name: intl.formatMessage({ id: 'common.ui.fieldEditor.color.delete.aria', defaultMessage: 'Delete' }),
-            description: intl.formatMessage({ id: 'common.ui.fieldEditor.color.delete.title', defaultMessage: 'Delete color format' }),
+            description: intl.formatMessage(
+              { id: 'common.ui.fieldEditor.color.delete.title', defaultMessage: 'Delete color format' }),
             onClick: (item) => {
               this.removeColor(item.index);
             },
@@ -180,28 +182,26 @@ export class ColorFormatEditor extends DefaultFormatEditor {
           }
         ],
       }
-    ]);
+    ];
 
     return (
-      <I18nContext>
-        {intl => (
-          <Fragment>
-            <EuiBasicTable
-              items={items}
-              columns={getColumns(intl)}
-            />
-            <EuiSpacer size="m" />
-            <EuiButton
-              iconType="plusInCircle"
-              size="s"
-              onClick={this.addColor}
-            >
-              <FormattedMessage id="common.ui.fieldEditor.color.addColor.button" defaultMessage="Add color"/>
-            </EuiButton>
-            <EuiSpacer size="l" />
-          </Fragment>
-        )}
-      </I18nContext>
+      <Fragment>
+        <EuiBasicTable
+          items={items}
+          columns={columns}
+        />
+        <EuiSpacer size="m" />
+        <EuiButton
+          iconType="plusInCircle"
+          size="s"
+          onClick={this.addColor}
+        >
+          <FormattedMessage id="common.ui.fieldEditor.color.addColor.button" defaultMessage="Add color" />
+        </EuiButton>
+        <EuiSpacer size="l" />
+      </Fragment>
     );
   }
 }
+
+export const ColorFormatEditor = injectI18n(ColorFormatEditorComponent);

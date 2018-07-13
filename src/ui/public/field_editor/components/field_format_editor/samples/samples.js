@@ -29,9 +29,9 @@ import './samples.less';
 
 import { ReactI18n } from '@kbn/i18n';
 
-const { I18nContext } = ReactI18n;
+const { injectI18n } = ReactI18n;
 
-export class FormatEditorSamples extends PureComponent {
+export class FormatEditorSamplesComponent extends PureComponent {
   static propTypes = {
     samples: PropTypes.arrayOf(PropTypes.shape({
       input: PropTypes.any.isRequired,
@@ -40,9 +40,9 @@ export class FormatEditorSamples extends PureComponent {
   };
 
   render() {
-    const { samples } = this.props;
+    const { samples, intl } = this.props;
 
-    const getColumns = (intl) => ([
+    const columns = [
       {
         field: 'input',
         name: intl.formatMessage({ id: 'common.ui.fieldEditor.samples.input.header', defaultMessage: 'Input' }),
@@ -65,24 +65,22 @@ export class FormatEditorSamples extends PureComponent {
           );
         },
       }
-    ]);
+    ];
 
 
     return samples.length ? (
-      <I18nContext>
-        {intl => (
-          <EuiFormRow
-            label={intl.formatMessage({ id: 'common.ui.fieldEditor.samples.header', defaultMessage: 'Samples' })}
-          >
-            <EuiBasicTable
-              className="fieldFormatEditor__samples"
-              compressed={true}
-              items={samples}
-              columns={getColumns(intl)}
-            />
-          </EuiFormRow>
-        )}
-      </I18nContext>
+      <EuiFormRow
+        label={intl.formatMessage({ id: 'common.ui.fieldEditor.samples.header', defaultMessage: 'Samples' })}
+      >
+        <EuiBasicTable
+          className="fieldFormatEditor__samples"
+          compressed={true}
+          items={samples}
+          columns={columns}
+        />
+      </EuiFormRow>
     ) : null;
   }
 }
+
+export const FormatEditorSamples = injectI18n(FormatEditorSamplesComponent);

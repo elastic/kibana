@@ -99,7 +99,7 @@ exports[`UrlTemplateFlyout should render normally 1`] = `
             Object {
               "input": "users/admin",
               "output": "http://company.net/groups?id=users%2Fadmin",
-              "template": "http://company.net/groups?id={{value}",
+              "template": "http://company.net/groups?id={{value}}",
             },
             Object {
               "input": "/images/favicon.ico",

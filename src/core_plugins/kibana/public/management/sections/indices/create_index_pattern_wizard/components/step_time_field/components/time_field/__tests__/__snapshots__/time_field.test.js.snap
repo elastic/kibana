@@ -54,7 +54,23 @@ exports[`TimeField should render a loading state 1`] = `
       </EuiFlexGroup>
     }
   >
-    <I18nContext />
+    <EuiSelect
+      compressed={false}
+      data-test-subj="createIndexPatternTimeFieldSelect"
+      disabled={true}
+      fullWidth={false}
+      hasNoInitialSelection={false}
+      isLoading={false}
+      name="timeField"
+      options={
+        Array [
+          Object {
+            "text": "Loading...",
+            "value": "",
+          },
+        ]
+      }
+    />
   </EuiFormRow>
 </EuiForm>
 `;

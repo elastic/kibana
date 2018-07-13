@@ -18,10 +18,9 @@
  */
 
 import React from 'react';
-import { shallow } from 'enzyme';
 import { shallowWithIntl } from 'test_utils/enzyme_helpers';
 
-import { FieldEditor } from './field_editor';
+import { FieldEditorComponent } from './field_editor';
 
 jest.mock('@elastic/eui', () => ({
   EuiButton: 'eui-button',
@@ -126,8 +125,8 @@ describe('FieldEditor', () => {
   });
 
   it('should render create new scripted field correctly', async () => {
-    const wrapper = shallow(
-      <FieldEditor
+    const component = shallowWithIntl(
+      <FieldEditorComponent
         indexPattern={indexPattern}
         field={field}
         helpers={helpers}
@@ -135,8 +134,7 @@ describe('FieldEditor', () => {
     );
 
     await new Promise(resolve => process.nextTick(resolve));
-    wrapper.update();
-    const component = shallowWithIntl(wrapper);
+    component.update();
     expect(component).toMatchSnapshot();
   });
 
@@ -149,8 +147,8 @@ describe('FieldEditor', () => {
     indexPattern.fields.push(testField);
     indexPattern.fields.byName[testField.name] = testField;
 
-    const wrapper = shallow(
-      <FieldEditor
+    const component = shallowWithIntl(
+      <FieldEditorComponent
         indexPattern={indexPattern}
         field={testField}
         helpers={helpers}
@@ -158,8 +156,7 @@ describe('FieldEditor', () => {
     );
 
     await new Promise(resolve => process.nextTick(resolve));
-    wrapper.update();
-    const component = shallowWithIntl(wrapper);
+    component.update();
     expect(component).toMatchSnapshot();
   });
 
@@ -173,8 +170,8 @@ describe('FieldEditor', () => {
     indexPattern.fields.push(testField);
     indexPattern.fields.byName[testField.name] = testField;
 
-    const wrapper = shallow(
-      <FieldEditor
+    const component = shallowWithIntl(
+      <FieldEditorComponent
         indexPattern={indexPattern}
         field={testField}
         helpers={helpers}
@@ -182,15 +179,14 @@ describe('FieldEditor', () => {
     );
 
     await new Promise(resolve => process.nextTick(resolve));
-    wrapper.update();
-    const component = shallowWithIntl(wrapper);
+    component.update();
     expect(component).toMatchSnapshot();
   });
 
   it('should show conflict field warning', async () => {
     const testField = { ...field };
-    const wrapper = shallow(
-      <FieldEditor
+    const component = shallowWithIntl(
+      <FieldEditorComponent
         indexPattern={indexPattern}
         field={testField}
         helpers={helpers}
@@ -198,9 +194,8 @@ describe('FieldEditor', () => {
     );
 
     await new Promise(resolve => process.nextTick(resolve));
-    wrapper.instance().onFieldChange('name', 'foobar');
-    wrapper.update();
-    const component = shallowWithIntl(wrapper);
+    component.instance().onFieldChange('name', 'foobar');
+    component.update();
     expect(component).toMatchSnapshot();
   });
 });

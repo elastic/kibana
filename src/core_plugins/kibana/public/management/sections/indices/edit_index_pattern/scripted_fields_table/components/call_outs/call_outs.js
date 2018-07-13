@@ -27,47 +27,47 @@ import {
 
 import { ReactI18n } from '@kbn/i18n';
 
-const { I18nContext, FormattedMessage } = ReactI18n;
+const { injectI18n, FormattedMessage } = ReactI18n;
 
-export const CallOuts = ({
+export const CallOutsComponent = ({
   deprecatedLangsInUse,
   painlessDocLink,
+  intl
 }) => {
   if (!deprecatedLangsInUse.length) {
     return null;
   }
 
   return (
-    <I18nContext>
-      {intl => (
-        <div>
-          <EuiCallOut
-            title={intl.formatMessage({
-              id: 'kbn.management.indexPattern.edit.scripted.deprecationLang.header', defaultMessage: 'Deprecation languages in use' })}
-            color="danger"
-            iconType="cross"
-          >
-            <p>
-              <FormattedMessage
-                id="kbn.management.indexPattern.edit.scripted.deprecationLang.label.detail"
-                //eslint-disable-next-line max-len
-                defaultMessage="The following deprecated languages are in use: {deprecatedLangsInUse}. Support for these languages will be removed in the next major version of Kibana and Elasticsearch. Convert you scripted fields to {link} to avoid any problems."
-                values={{
-                  deprecatedLangsInUse: deprecatedLangsInUse.join(', '),
-                  link: (
-                    <EuiLink href={painlessDocLink}>
-                      <FormattedMessage
-                        id="kbn.management.indexPattern.edit.scripted.deprecationLang.label.link"
-                        defaultMessage="Painless"
-                      />
-                    </EuiLink>)
-                }}
-              />
-            </p>
-          </EuiCallOut>
-          <EuiSpacer size="m"/>
-        </div>
-      )}
-    </I18nContext>
+    <div>
+      <EuiCallOut
+        title={intl.formatMessage({
+          id: 'kbn.management.indexPattern.edit.scripted.deprecationLang.header', defaultMessage: 'Deprecation languages in use'
+        })}
+        color="danger"
+        iconType="cross"
+      >
+        <p>
+          <FormattedMessage
+            id="kbn.management.indexPattern.edit.scripted.deprecationLang.label.detail"
+            //eslint-disable-next-line max-len
+            defaultMessage="The following deprecated languages are in use: {deprecatedLangsInUse}. Support for these languages will be removed in the next major version of Kibana and Elasticsearch. Convert you scripted fields to {link} to avoid any problems."
+            values={{
+              deprecatedLangsInUse: deprecatedLangsInUse.join(', '),
+              link: (
+                <EuiLink href={painlessDocLink}>
+                  <FormattedMessage
+                    id="kbn.management.indexPattern.edit.scripted.deprecationLang.label.link"
+                    defaultMessage="Painless"
+                  />
+                </EuiLink>)
+            }}
+          />
+        </p>
+      </EuiCallOut>
+      <EuiSpacer size="m" />
+    </div>
   );
 };
+
+export const CallOuts = injectI18n(CallOutsComponent);

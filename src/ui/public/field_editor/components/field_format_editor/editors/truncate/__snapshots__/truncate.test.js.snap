@@ -24,7 +24,7 @@ exports[`TruncateFormatEditor should render normally 1`] = `
       onChange={[Function]}
     />
   </EuiFormRow>
-  <FormatEditorSamples
+  <InjectIntl(FormatEditorSamplesComponent)
     samples={
       Array [
         Object {

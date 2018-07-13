@@ -18,25 +18,23 @@
  */
 
 import React from 'react';
-import { shallow } from 'enzyme';
 import { shallowWithIntl } from 'test_utils/enzyme_helpers';
 
-import { UrlTemplateFlyout } from './url_template_flyout';
+import { UrlTemplateFlyoutComponent } from './url_template_flyout';
 
 describe('UrlTemplateFlyout', () => {
   it('should render normally', async () => {
-    const wrapper = shallow(
-      <UrlTemplateFlyout
+    const component = shallowWithIntl(
+      <UrlTemplateFlyoutComponent
         isVisible={true}
       />
     );
-    const component = shallowWithIntl(wrapper);
     expect(component).toMatchSnapshot();
   });
 
   it('should not render if not visible', async () => {
-    const component = shallow(
-      <UrlTemplateFlyout />
+    const component = shallowWithIntl(
+      <UrlTemplateFlyoutComponent />
     );
     expect(component).toMatchSnapshot();
   });

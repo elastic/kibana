@@ -18,15 +18,14 @@
  */
 
 import React from 'react';
-import { shallow } from 'enzyme';
 import { shallowWithIntl } from 'test_utils/enzyme_helpers';
 
-import { FormatEditorSamples } from './samples';
+import { FormatEditorSamplesComponent } from './samples';
 
 describe('FormatEditorSamples', () => {
   it('should render normally', async () => {
-    const wrapper = shallow(
-      <FormatEditorSamples
+    const component = shallowWithIntl(
+      <FormatEditorSamplesComponent
         samples={[
           { input: 'test', output: 'TEST' },
           { input: 123, output: 456 },
@@ -35,13 +34,12 @@ describe('FormatEditorSamples', () => {
       />
     );
 
-    const component = shallowWithIntl(wrapper);
     expect(component).toMatchSnapshot();
   });
 
   it('should render nothing if there are no samples', async () => {
-    const component = shallow(
-      <FormatEditorSamples
+    const component = shallowWithIntl(
+      <FormatEditorSamplesComponent
         samples={[]}
       />
     );

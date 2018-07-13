@@ -182,7 +182,15 @@ exports[`ScriptedFieldsTable should show a delete modal 1`] = `
         ]
       }
     />
-    <I18nContext />
+    <eui-overlay-mask>
+      <eui-confirm-modal
+        cancelButtonText="Cancel"
+        confirmButtonText="Delete"
+        onCancel={[Function]}
+        onConfirm={[Function]}
+        title="Delete scripted field '{fieldName}'?"
+      />
+    </eui-overlay-mask>
   </div>
 </I18nProvider>
 `;

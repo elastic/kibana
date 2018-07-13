@@ -18,31 +18,27 @@
  */
 
 import React from 'react';
-import { shallow } from 'enzyme';
-
-import { AddFilter } from '../add_filter';
-
 import { shallowWithIntl } from 'test_utils/enzyme_helpers';
+
+import { AddFilterComponent } from '../add_filter';
 
 describe('AddFilter', () => {
   it('should render normally', async () => {
-    const wrapper = shallow(
-      <AddFilter onAddFilter={() => {}}/>
+    const component = shallowWithIntl(
+      <AddFilterComponent onAddFilter={() => {}}/>
     );
 
-    const component = shallowWithIntl(wrapper.find('I18nContext'));
     expect(component).toMatchSnapshot();
   });
 
   it('should allow adding a filter', async () => {
     const onAddFilter = jest.fn();
-    const wrapper = shallow(
-      <AddFilter onAddFilter={onAddFilter}/>
+    const component = shallowWithIntl(
+      <AddFilterComponent onAddFilter={onAddFilter}/>
     );
 
     // Set a value in the input field
-    wrapper.setState({ filter: 'tim*' });
-    const component = shallowWithIntl(wrapper.find('I18nContext'));
+    component.setState({ filter: 'tim*' });
     // Click the button
     component.find('EuiButton').simulate('click');
     component.update();
@@ -52,11 +48,10 @@ describe('AddFilter', () => {
 
 
   it('should ignore strings with just spaces', async () => {
-    const wrapper = shallow(
-      <AddFilter onAddFilter={() => {}}/>
+    const component = shallowWithIntl(
+      <AddFilterComponent onAddFilter={() => {}}/>
     );
 
-    const component = shallowWithIntl(wrapper.find('I18nContext'));
     // Set a value in the input field
     component.find('EuiFieldText').simulate('keypress', ' ');
     component.update();

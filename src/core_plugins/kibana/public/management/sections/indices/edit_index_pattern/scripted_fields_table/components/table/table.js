@@ -26,9 +26,9 @@ import {
 
 import { ReactI18n } from '@kbn/i18n';
 
-const { I18nContext } = ReactI18n;
+const { injectI18n } = ReactI18n;
 
-export class Table extends PureComponent {
+export class TableComponent extends PureComponent {
   static propTypes = {
     indexPattern: PropTypes.object.isRequired,
     items: PropTypes.array.isRequired,
@@ -53,9 +53,10 @@ export class Table extends PureComponent {
       items,
       editField,
       deleteField,
+      intl,
     } = this.props;
 
-    const getColumns = intl => ([{
+    const columns = [{
       field: 'displayName',
       name: intl.formatMessage({ id: 'kbn.management.indexPattern.edit.scripted.table.name.header', defaultMessage: 'Name' }),
       description: intl.formatMessage({
@@ -103,7 +104,7 @@ export class Table extends PureComponent {
         onClick: deleteField,
       }],
       width: '40px',
-    }]);
+    }];
 
     const pagination = {
       initialPageSize: 10,
@@ -111,18 +112,14 @@ export class Table extends PureComponent {
     };
 
     return (
-      <I18nContext>
-        {intl => {
-          const columns = getColumns(intl);
-
-          return (<EuiInMemoryTable
-            items={items}
-            columns={columns}
-            pagination={pagination}
-            sorting={true}
-          />);
-        }}
-      </I18nContext>
+      <EuiInMemoryTable
+        items={items}
+        columns={columns}
+        pagination={pagination}
+        sorting={true}
+      />
     );
   }
 }
+
+export const Table = injectI18n(TableComponent);

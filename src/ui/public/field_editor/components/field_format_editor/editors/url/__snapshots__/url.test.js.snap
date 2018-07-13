@@ -2,11 +2,11 @@
 
 exports[`UrlFormatEditor should render label template help 1`] = `
 <React.Fragment>
-  <LabelTemplateFlyout
+  <InjectIntl(LabelTemplateFlyout)
     isVisible={true}
     onClose={[Function]}
   />
-  <UrlTemplateFlyout
+  <InjectIntl(UrlTemplateFlyout)
     isVisible={false}
     onClose={[Function]}
   />
@@ -115,7 +115,7 @@ exports[`UrlFormatEditor should render label template help 1`] = `
       value=""
     />
   </EuiFormRow>
-  <FormatEditorSamples
+  <InjectIntl(FormatEditorSamplesComponent)
     samples={Array []}
   />
 </React.Fragment>
@@ -123,11 +123,11 @@ exports[`UrlFormatEditor should render label template help 1`] = `
 
 exports[`UrlFormatEditor should render normally 1`] = `
 <React.Fragment>
-  <LabelTemplateFlyout
+  <InjectIntl(LabelTemplateFlyout)
     isVisible={false}
     onClose={[Function]}
   />
-  <UrlTemplateFlyout
+  <InjectIntl(UrlTemplateFlyout)
     isVisible={false}
     onClose={[Function]}
   />
@@ -236,7 +236,7 @@ exports[`UrlFormatEditor should render normally 1`] = `
       value=""
     />
   </EuiFormRow>
-  <FormatEditorSamples
+  <InjectIntl(FormatEditorSamplesComponent)
     samples={Array []}
   />
 </React.Fragment>
@@ -244,11 +244,11 @@ exports[`UrlFormatEditor should render normally 1`] = `
 
 exports[`UrlFormatEditor should render url template help 1`] = `
 <React.Fragment>
-  <LabelTemplateFlyout
+  <InjectIntl(LabelTemplateFlyout)
     isVisible={false}
     onClose={[Function]}
   />
-  <UrlTemplateFlyout
+  <InjectIntl(UrlTemplateFlyout)
     isVisible={true}
     onClose={[Function]}
   />
@@ -357,7 +357,7 @@ exports[`UrlFormatEditor should render url template help 1`] = `
       value=""
     />
   </EuiFormRow>
-  <FormatEditorSamples
+  <InjectIntl(FormatEditorSamplesComponent)
     samples={Array []}
   />
 </React.Fragment>

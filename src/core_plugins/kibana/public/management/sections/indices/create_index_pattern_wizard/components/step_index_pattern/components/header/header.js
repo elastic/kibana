@@ -32,9 +32,9 @@ import {
 
 import { ReactI18n } from '@kbn/i18n';
 
-const { I18nContext, FormattedMessage } = ReactI18n;
+const { injectI18n, FormattedMessage } = ReactI18n;
 
-export const Header = ({
+export const HeaderComponent = ({
   isInputInvalid,
   errors,
   characterList,
@@ -42,79 +42,79 @@ export const Header = ({
   onQueryChanged,
   goToNextStep,
   isNextStepDisabled,
+  intl,
   ...rest
 }) => (
-  <I18nContext>
-    {intl => (
-      <div {...rest}>
-        <EuiTitle size="s">
-          <h2>
-            <FormattedMessage
-              id="kbn.management.indexPattern.create.step.header"
-              defaultMessage="Step 1 of 2: Define index pattern"
-            />
-          </h2>
-        </EuiTitle>
-        <EuiSpacer size="m"/>
-        <EuiFlexGroup justifyContent="spaceBetween" alignItems="flexEnd">
-          <EuiFlexItem grow={false}>
-            <EuiForm
+  <div {...rest}>
+    <EuiTitle size="s">
+      <h2>
+        <FormattedMessage
+          id="kbn.management.indexPattern.create.step.header"
+          defaultMessage="Step 1 of 2: Define index pattern"
+        />
+      </h2>
+    </EuiTitle>
+    <EuiSpacer size="m" />
+    <EuiFlexGroup justifyContent="spaceBetween" alignItems="flexEnd">
+      <EuiFlexItem grow={false}>
+        <EuiForm
+          isInvalid={isInputInvalid}
+        >
+          <EuiFormRow
+            label={<FormattedMessage
+              id="kbn.management.indexPattern.create.step.indexPattern.label"
+              defaultMessage="Index pattern"
+            />}
+            isInvalid={isInputInvalid}
+            error={errors}
+            helpText={
+              <div>
+                <p>
+                  <FormattedMessage
+                    id="kbn.management.indexPattern.create.step.indexPattern.allow.label"
+                    defaultMessage="You can use a {asterisk} as a wildcard in your index pattern."
+                    values={{ asterisk: <strong>*</strong> }}
+                  />
+                </p>
+                <p>
+                  <FormattedMessage
+                    id="kbn.management.indexPattern.create.step.indexPattern.disallow.label"
+                    defaultMessage="You can't use spaces or the characters {characterList}."
+                    values={{ characterList: <strong>{characterList}</strong> }}
+                  />
+                </p>
+              </div>
+            }
+          >
+            <EuiFieldText
+              name="indexPattern"
+              placeholder={intl.formatMessage({
+                id: 'kbn.management.indexPattern.create.step.indexPattern.placeholder',
+                defaultMessage: 'index-name-*'
+              })}
+              value={query}
               isInvalid={isInputInvalid}
-            >
-              <EuiFormRow
-                label={<FormattedMessage
-                  id="kbn.management.indexPattern.create.step.indexPattern.label"
-                  defaultMessage="Index pattern"
-                />}
-                isInvalid={isInputInvalid}
-                error={errors}
-                helpText={
-                  <div>
-                    <p>
-                      <FormattedMessage
-                        id="kbn.management.indexPattern.create.step.indexPattern.allow.label"
-                        defaultMessage="You can use a {asterisk} as a wildcard in your index pattern."
-                        values={{ asterisk: <strong>*</strong> }}
-                      />
-                    </p>
-                    <p>
-                      <FormattedMessage
-                        id="kbn.management.indexPattern.create.step.indexPattern.disallow.label"
-                        defaultMessage="You can't use spaces or the characters {characterList}."
-                        values={{ characterList: <strong>{characterList}</strong> }}
-                      />
-                    </p>
-                  </div>
-                }
-              >
-                <EuiFieldText
-                  name="indexPattern"
-                  placeholder={intl.formatMessage({
-                    id: 'kbn.management.indexPattern.create.step.indexPattern.placeholder',
-                    defaultMessage: 'index-name-*' })}
-                  value={query}
-                  isInvalid={isInputInvalid}
-                  onChange={onQueryChanged}
-                  data-test-subj="createIndexPatternNameInput"
-                />
-              </EuiFormRow>
-            </EuiForm>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiButton
-              iconType="arrowRight"
-              onClick={() => goToNextStep(query)}
-              isDisabled={isNextStepDisabled}
-              data-test-subj="createIndexPatternGoToStep2Button"
-            >
-              <FormattedMessage
-                id="kbn.management.indexPattern.create.step.nextStep.button"
-                defaultMessage="Next step"
-              />
-            </EuiButton>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </div>
-    )}
-  </I18nContext>
+              onChange={onQueryChanged}
+              data-test-subj="createIndexPatternNameInput"
+            />
+          </EuiFormRow>
+        </EuiForm>
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <EuiButton
+          iconType="arrowRight"
+          onClick={() => goToNextStep(query)}
+          isDisabled={isNextStepDisabled}
+          data-test-subj="createIndexPatternGoToStep2Button"
+        >
+          <FormattedMessage
+            id="kbn.management.indexPattern.create.step.nextStep.button"
+            defaultMessage="Next step"
+          />
+        </EuiButton>
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  </div>
 );
+
+export const Header = injectI18n(HeaderComponent);

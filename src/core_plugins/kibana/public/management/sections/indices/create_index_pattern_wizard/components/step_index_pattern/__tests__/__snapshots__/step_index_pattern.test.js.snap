@@ -1,7 +1,7 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`StepIndexPattern renders errors when input is invalid 1`] = `
-<Header
+<InjectIntl(HeaderComponent)
   characterList="\\\\, /, ?, \\", <, >, |"
   data-test-subj="createIndexPatternStep1Header"
   errors={

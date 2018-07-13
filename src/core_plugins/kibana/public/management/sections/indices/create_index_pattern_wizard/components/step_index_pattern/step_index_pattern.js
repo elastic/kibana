@@ -40,9 +40,9 @@ import {
 
 import { ReactI18n } from '@kbn/i18n';
 
-const { I18nContext, FormattedMessage } = ReactI18n;
+const { injectI18n, FormattedMessage } = ReactI18n;
 
-export class StepIndexPattern extends Component {
+export class StepIndexPatternComponent extends Component {
   static propTypes = {
     allIndices: PropTypes.array.isRequired,
     isIncludingSystemIndices: PropTypes.bool.isRequired,
@@ -226,7 +226,7 @@ export class StepIndexPattern extends Component {
     );
   }
 
-  renderHeader({ exactMatchedIndices: indices }, intl) {
+  renderHeader({ exactMatchedIndices: indices }) {
     const { goToNextStep } = this.props;
     const { query, showingIndexPatternQueryErrors, indexPatternExists } = this.state;
 
@@ -239,7 +239,7 @@ export class StepIndexPattern extends Component {
       containsErrors = true;
     }
     else if (!containsInvalidCharacters(query, ILLEGAL_CHARACTERS)) {
-      errors.push(intl.formatMessage({
+      errors.push(this.props.intl.formatMessage({
         id: 'kbn.management.indexPattern.create.step.invalidCharacters.errorMessage',
         defaultMessage: 'An index pattern cannot contain spaces or the characters: {characterList}'
       }, { characterList }));
@@ -277,9 +277,7 @@ export class StepIndexPattern extends Component {
 
     return (
       <EuiPanel paddingSize="l">
-        <I18nContext>
-          {intl => this.renderHeader(matchedIndices, intl)}
-        </I18nContext>
+        {this.renderHeader(matchedIndices)}
         <EuiSpacer size="s"/>
         {this.renderLoadingState(matchedIndices)}
         {this.renderIndexPatternExists()}
@@ -290,3 +288,5 @@ export class StepIndexPattern extends Component {
     );
   }
 }
+
+export const StepIndexPattern = injectI18n(StepIndexPatternComponent);

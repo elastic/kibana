@@ -33,9 +33,9 @@ import {
 
 import { ReactI18n } from '@kbn/i18n';
 
-const { I18nContext, FormattedMessage } = ReactI18n;
+const { injectI18n, FormattedMessage } = ReactI18n;
 
-export class StaticLookupFormatEditor extends DefaultFormatEditor {
+export class StaticLookupFormatEditorComponent extends DefaultFormatEditor {
   static formatId = 'static_lookup';
 
   onLookupChange = (newLookupParams, index) => {
@@ -68,7 +68,7 @@ export class StaticLookupFormatEditor extends DefaultFormatEditor {
   }
 
   render() {
-    const { formatParams } = this.props;
+    const { formatParams, intl } = this.props;
 
     const items = formatParams.lookupEntries && formatParams.lookupEntries.length && formatParams.lookupEntries.map((lookup, index) => {
       return {
@@ -78,7 +78,7 @@ export class StaticLookupFormatEditor extends DefaultFormatEditor {
     }) || [];
 
 
-    const getColumns = (intl) => ([
+    const columns = [
       {
         field: 'key',
         name: intl.formatMessage({ id: 'common.ui.fieldEditor.staticLookup.key.label', defaultMessage: 'Key' }),
@@ -115,7 +115,8 @@ export class StaticLookupFormatEditor extends DefaultFormatEditor {
         actions: [
           {
             name: intl.formatMessage({ id: 'common.ui.fieldEditor.staticLookup.delete.aria', defaultMessage: 'Delete' }),
-            description: intl.formatMessage({ id: 'common.ui.fieldEditor.staticLookup.delete.title', defaultMessage: 'Delete entry' }),
+            description: intl.formatMessage(
+              { id: 'common.ui.fieldEditor.staticLookup.delete.title', defaultMessage: 'Delete entry' }),
             onClick: (item) => {
               this.removeLookup(item.index);
             },
@@ -127,43 +128,41 @@ export class StaticLookupFormatEditor extends DefaultFormatEditor {
         ],
         width: '30px',
       }
-    ]);
+    ];
 
     return (
-      <I18nContext>
-        {intl => (
-          <Fragment>
-            <EuiBasicTable
-              items={items}
-              columns={getColumns(intl)}
-              style={{ maxWidth: '400px' }}
-            />
-            <EuiSpacer size="m" />
-            <EuiButton
-              iconType="plusInCircle"
-              size="s"
-              onClick={this.addLookup}
-            >
-              <FormattedMessage id="common.ui.fieldEditor.staticLookup.addEntry.button" defaultMessage="Add entry" />
-            </EuiButton>
-            <EuiSpacer size="l" />
-            <EuiFormRow
-              label={intl.formatMessage(
-                { id: 'common.ui.fieldEditor.staticLookup.unknownKey.label', defaultMessage: 'Value for unknown key' })}
-            >
-              <EuiFieldText
-                value={formatParams.unknownKeyValue || ''}
-                placeholder={intl.formatMessage(
-                  { id: 'common.ui.fieldEditor.staticLookup.leaveBlank.placeholder', defaultMessage: 'Leave blank to keep value as-is' })}
-                onChange={(e) => {
-                  this.onChange({ unknownKeyValue: e.target.value });
-                }}
-              />
-            </EuiFormRow>
-            <EuiSpacer size="m" />
-          </Fragment>
-        )}
-      </I18nContext>
+      <Fragment>
+        <EuiBasicTable
+          items={items}
+          columns={columns}
+          style={{ maxWidth: '400px' }}
+        />
+        <EuiSpacer size="m" />
+        <EuiButton
+          iconType="plusInCircle"
+          size="s"
+          onClick={this.addLookup}
+        >
+          <FormattedMessage id="common.ui.fieldEditor.staticLookup.addEntry.button" defaultMessage="Add entry" />
+        </EuiButton>
+        <EuiSpacer size="l" />
+        <EuiFormRow
+          label={intl.formatMessage(
+            { id: 'common.ui.fieldEditor.staticLookup.unknownKey.label', defaultMessage: 'Value for unknown key' })}
+        >
+          <EuiFieldText
+            value={formatParams.unknownKeyValue || ''}
+            placeholder={intl.formatMessage(
+              { id: 'common.ui.fieldEditor.staticLookup.leaveBlank.placeholder', defaultMessage: 'Leave blank to keep value as-is' })}
+            onChange={(e) => {
+              this.onChange({ unknownKeyValue: e.target.value });
+            }}
+          />
+        </EuiFormRow>
+        <EuiSpacer size="m" />
+      </Fragment>
     );
   }
 }
+
+export const StaticLookupFormatEditor = injectI18n(StaticLookupFormatEditorComponent);

@@ -75,9 +75,9 @@ import { copyField, getDefaultFormat } from './lib';
 
 import { ReactI18n } from '@kbn/i18n';
 
-const { I18nContext, FormattedMessage } = ReactI18n;
+const { injectI18n, FormattedMessage } = ReactI18n;
 
-export class FieldEditor extends PureComponent {
+export class FieldEditorComponent extends PureComponent {
   static propTypes = {
     indexPattern: PropTypes.object.isRequired,
     field: PropTypes.object.isRequired,
@@ -217,13 +217,13 @@ export class FieldEditor extends PureComponent {
     return isCreating && existingFieldNames.includes(field.name);
   }
 
-  renderName(intl) {
+  renderName() {
     const { isCreating, field } = this.state;
     const isInvalid = !field.name || !field.name.trim();
 
     return isCreating ? (
       <EuiFormRow
-        label={intl.formatMessage({ id: 'common.ui.fieldEditor.name.label', defaultMessage: 'Name' })}
+        label={this.props.intl.formatMessage({ id: 'common.ui.fieldEditor.name.label', defaultMessage: 'Name' })}
         helpText={this.isDuplicateName() ? (
           <span>
             <EuiIcon type="alert" color="warning" size="s" />&nbsp;
@@ -246,14 +246,15 @@ export class FieldEditor extends PureComponent {
           </span>
         ) : null}
         isInvalid={isInvalid}
-        error={isInvalid ? intl.formatMessage({
+        error={isInvalid ? this.props.intl.formatMessage({
           id: 'common.ui.fieldEditor.name.errorMessage',
           defaultMessage: 'Name is required'
         }) : null}
       >
         <EuiFieldText
           value={field.name || ''}
-          placeholder={intl.formatMessage({ id: 'common.ui.fieldEditor.name.placeholder', defaultMessage: 'New scripted field' })}
+          placeholder={this.props.intl.formatMessage(
+            { id: 'common.ui.fieldEditor.name.placeholder', defaultMessage: 'New scripted field' })}
           data-test-subj="editorFieldName"
           onChange={(e) => { this.onFieldChange('name', e.target.value); }}
           isInvalid={isInvalid}
@@ -262,12 +263,12 @@ export class FieldEditor extends PureComponent {
     ) : null;
   }
 
-  renderLanguage(intl) {
+  renderLanguage() {
     const { field, scriptingLangs, isDeprecatedLang } = this.state;
 
     return field.scripted ? (
       <EuiFormRow
-        label={intl.formatMessage({ id: 'common.ui.fieldEditor.language.label', defaultMessage: 'Language' })}
+        label={this.props.intl.formatMessage({ id: 'common.ui.fieldEditor.language.label', defaultMessage: 'Language' })}
         helpText={isDeprecatedLang ? (
           <span>
             <EuiIcon type="alert" color="warning" size="s" />&nbsp;
@@ -305,11 +306,11 @@ export class FieldEditor extends PureComponent {
     ) : null;
   }
 
-  renderType(intl) {
+  renderType() {
     const { field, fieldTypes } = this.state;
 
     return (
-      <EuiFormRow label={intl.formatMessage({ id: 'common.ui.fieldEditor.type.label', defaultMessage: 'Type' })}>
+      <EuiFormRow label={this.props.intl.formatMessage({ id: 'common.ui.fieldEditor.type.label', defaultMessage: 'Type' })}>
         <EuiSelect
           value={field.type}
           disabled={!field.scripted}
@@ -374,11 +375,11 @@ export class FieldEditor extends PureComponent {
     );
   }
 
-  renderPopularity(intl) {
+  renderPopularity() {
     const { field } = this.state;
 
     return (
-      <EuiFormRow label={intl.formatMessage({ id: 'common.ui.fieldEditor.popularity.label', defaultMessage: 'Popularity' })}>
+      <EuiFormRow label={this.props.intl.formatMessage({ id: 'common.ui.fieldEditor.popularity.label', defaultMessage: 'Popularity' })}>
         <EuiFieldNumber
           value={field.count}
           data-test-subj="editorFieldCount"
@@ -388,21 +389,21 @@ export class FieldEditor extends PureComponent {
     );
   }
 
-  renderScript(intl) {
+  renderScript() {
     const { field } = this.state;
     const isInvalid = !field.script || !field.script.trim();
 
     return field.scripted ? (
       <EuiFormRow
-        label={intl.formatMessage({ id: 'common.ui.fieldEditor.script.label', defaultMessage: 'Script' })}
+        label={this.props.intl.formatMessage({ id: 'common.ui.fieldEditor.script.label', defaultMessage: 'Script' })}
         helpText={(
           <EuiLink onClick={this.showScriptingHelp}>
-            {intl.formatMessage({ id: 'common.ui.fieldEditor.script.help.label', defaultMessage: 'Scripting help' })}
+            {this.props.intl.formatMessage({ id: 'common.ui.fieldEditor.script.help.label', defaultMessage: 'Scripting help' })}
           </EuiLink>
         )}
         isInvalid={isInvalid}
         error={isInvalid
-          ? intl.formatMessage({ id: 'common.ui.fieldEditor.script.errorMessage', defaultMessage: 'Script is required' })
+          ? this.props.intl.formatMessage({ id: 'common.ui.fieldEditor.script.errorMessage', defaultMessage: 'Script is required' })
           : null}
       >
         <EuiTextArea
@@ -427,21 +428,24 @@ export class FieldEditor extends PureComponent {
     });
   }
 
-  renderDeleteModal = (intl) => {
+  renderDeleteModal = () => {
     const { field } = this.state;
 
     return this.state.showDeleteModal ? (
       <EuiOverlayMask>
         <EuiConfirmModal
-          title={intl.formatMessage({ id: 'common.ui.fieldEditor.deleteField.header', defaultMessage: 'Delete field \'{fieldName}\'' },
+          title={this.props.intl.formatMessage(
+            { id: 'common.ui.fieldEditor.deleteField.header', defaultMessage: 'Delete field \'{fieldName}\'' },
             { fieldName: field.name })}
           onCancel={this.hideDeleteModal}
           onConfirm={() => {
             this.hideDeleteModal();
-            this.deleteField(intl);
+            this.deleteField(this.props.intl);
           }}
-          cancelButtonText={intl.formatMessage({ id: 'common.ui.fieldEditor.deleteField.cancel.button', defaultMessage: 'Cancel' })}
-          confirmButtonText={intl.formatMessage({ id: 'common.ui.fieldEditor.deleteField.delete.button', defaultMessage: 'Delete' })}
+          cancelButtonText={this.props.intl.formatMessage(
+            { id: 'common.ui.fieldEditor.deleteField.cancel.button', defaultMessage: 'Cancel' })}
+          confirmButtonText={this.props.intl.formatMessage(
+            { id: 'common.ui.fieldEditor.deleteField.delete.button', defaultMessage: 'Delete' })}
           buttonColor="danger"
           defaultFocusedButton={EUI_MODAL_CONFIRM_BUTTON}
         >
@@ -469,7 +473,7 @@ export class FieldEditor extends PureComponent {
     });
   }
 
-  renderActions(intl) {
+  renderActions() {
     const { isCreating, field } = this.state;
     const { redirectAway } = this.props.helpers;
 
@@ -478,7 +482,7 @@ export class FieldEditor extends PureComponent {
         <EuiFlexItem grow={false}>
           <EuiButton
             fill
-            onClick={this.saveField.bind(this, intl)}
+            onClick={this.saveField}
             isDisabled={this.isSavingDisabled()}
             data-test-subj="fieldSaveButton"
           >
@@ -525,7 +529,7 @@ export class FieldEditor extends PureComponent {
     );
   }
 
-  deleteField = (intl) => {
+  deleteField = () => {
     const { redirectAway } = this.props.helpers;
     const { indexPattern } = this.props;
     const { field } = this.state;
@@ -533,7 +537,7 @@ export class FieldEditor extends PureComponent {
 
     if(remove) {
       remove.then(() => {
-        toastNotifications.addSuccess(intl.formatMessage(
+        toastNotifications.addSuccess(this.props.intl.formatMessage(
           { id: 'common.ui.fieldEditor.deleteField.deleted.header', defaultMessage: 'Deleted \'{fieldName}\'' },
           { fieldName: field.name }));
         redirectAway();
@@ -543,7 +547,7 @@ export class FieldEditor extends PureComponent {
     }
   }
 
-  saveField = (intl) => {
+  saveField = () => {
     const { redirectAway } = this.props.helpers;
     const { indexPattern } = this.props;
     const { fieldFormatId } = this.state;
@@ -565,7 +569,7 @@ export class FieldEditor extends PureComponent {
 
     return indexPattern.save()
       .then(function () {
-        toastNotifications.addSuccess(intl.formatMessage(
+        toastNotifications.addSuccess(this.props.intl.formatMessage(
           { id: 'common.ui.fieldEditor.deleteField.saved.header', defaultMessage: 'Saved \'{fieldName}\'' },
           { fieldName: field.name }));
         redirectAway();
@@ -591,45 +595,44 @@ export class FieldEditor extends PureComponent {
     const { isReady, isCreating, scriptingLangs, field, showScriptingHelp } = this.state;
 
     return isReady ? (
-      <I18nContext>
-        {intl => (
-          <div>
-            <EuiText>
-              <h3>{
-                isCreating
-                  ? <FormattedMessage
-                    id="common.ui.fieldEditor.create.header"
-                    defaultMessage="Create scripted field"
-                  />
-                  : <FormattedMessage
-                    id="common.ui.fieldEditor.edit.header"
-                    defaultMessage="Edit {fieldName}"
-                    values={{ fieldName: field.name }}
-                  />
-              }
-              </h3>
-            </EuiText>
-            <EuiSpacer size="m" />
-            <EuiForm>
-              <ScriptingDisabledCallOut isVisible={field.scripted && !scriptingLangs.length} />
-              <ScriptingWarningCallOut isVisible={field.scripted} />
-              <ScriptingHelpFlyout
-                isVisible={field.scripted && showScriptingHelp}
-                onClose={this.hideScriptingHelp}
+      <div>
+        <EuiText>
+          <h3>{
+            isCreating
+              ? <FormattedMessage
+                id="common.ui.fieldEditor.create.header"
+                defaultMessage="Create scripted field"
               />
-              {this.renderName(intl)}
-              {this.renderLanguage(intl)}
-              {this.renderType(intl)}
-              {this.renderFormat()}
-              {this.renderPopularity(intl)}
-              {this.renderScript(intl)}
-              {this.renderActions(intl)}
-              {this.renderDeleteModal(intl)}
-            </EuiForm>
-            <EuiSpacer size="l" />
-          </div>
-        )}
-      </I18nContext>
+              : <FormattedMessage
+                id="common.ui.fieldEditor.edit.header"
+                defaultMessage="Edit {fieldName}"
+                values={{ fieldName: field.name }}
+              />
+          }
+          </h3>
+        </EuiText>
+        <EuiSpacer size="m" />
+        <EuiForm>
+          <ScriptingDisabledCallOut isVisible={field.scripted && !scriptingLangs.length} />
+          <ScriptingWarningCallOut isVisible={field.scripted} />
+          <ScriptingHelpFlyout
+            isVisible={field.scripted && showScriptingHelp}
+            onClose={this.hideScriptingHelp}
+          />
+          {this.renderName()}
+          {this.renderLanguage()}
+          {this.renderType()}
+          {this.renderFormat()}
+          {this.renderPopularity()}
+          {this.renderScript()}
+          {this.renderActions()}
+          {this.renderDeleteModal()}
+        </EuiForm>
+        <EuiSpacer size="l" />
+      </div>
     ) : null;
   }
 }
+
+
+export const FieldEditor = injectI18n(FieldEditorComponent);

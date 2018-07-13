@@ -18,11 +18,9 @@
  */
 
 import React from 'react';
-import { shallow } from 'enzyme';
-
-import { StepTimeField } from '../step_time_field';
-
 import { shallowWithIntl } from 'test_utils/enzyme_helpers';
+
+import { StepTimeFieldComponent } from '../step_time_field';
 
 jest.mock('../components/header', () => ({ Header: 'Header' }));
 jest.mock('../components/time_field', () => ({ TimeField: 'TimeField' }));
@@ -41,23 +39,21 @@ const indexPatternsService = {
 
 describe('StepTimeField', () => {
   it('should render normally', () => {
-    const wrapper = shallow(
-      <StepTimeField
+    const component = shallowWithIntl(
+      <StepTimeFieldComponent
         indexPattern="ki*"
         indexPatternsService={indexPatternsService}
         goToPreviousStep={noop}
         createIndexPattern={noop}
       />
     );
-
-    const component = shallowWithIntl(wrapper);
 
     expect(component).toMatchSnapshot();
   });
 
   it('should render timeFields', () => {
-    const wrapper = shallow(
-      <StepTimeField
+    const component = shallowWithIntl(
+      <StepTimeFieldComponent
         indexPattern="ki*"
         indexPatternsService={indexPatternsService}
         goToPreviousStep={noop}
@@ -65,20 +61,19 @@ describe('StepTimeField', () => {
       />
     );
 
-    wrapper.setState({
+    component.setState({
       timeFields: [
         { display: '@timestamp', fieldName: '@timestamp' },
         { display: 'name', fieldName: 'name' },
       ]
     });
-    const component = shallowWithIntl(wrapper);
 
     expect(component).toMatchSnapshot();
   });
 
   it('should render a selected timeField', () => {
-    const wrapper = shallow(
-      <StepTimeField
+    const component = shallowWithIntl(
+      <StepTimeFieldComponent
         indexPattern="ki*"
         indexPatternsService={indexPatternsService}
         goToPreviousStep={noop}
@@ -86,7 +81,7 @@ describe('StepTimeField', () => {
       />
     );
 
-    wrapper.setState({
+    component.setState({
       timeFields: [
         { display: '@timestamp', fieldName: '@timestamp' },
         { display: 'name', fieldName: 'name' },
@@ -95,13 +90,12 @@ describe('StepTimeField', () => {
       timeFieldSet: true,
     });
 
-    const component = shallowWithIntl(wrapper);
     expect(component).toMatchSnapshot();
   });
 
   it('should ensure disabled time field options work properly', () => {
-    const component = shallow(
-      <StepTimeField
+    const component = shallowWithIntl(
+      <StepTimeFieldComponent
         indexPattern="ki*"
         indexPatternsService={indexPatternsService}
         goToPreviousStep={noop}
@@ -128,8 +122,8 @@ describe('StepTimeField', () => {
   });
 
   it('should disable the action button if an invalid time field is selected', () => {
-    const wrapper = shallow(
-      <StepTimeField
+    const component = shallowWithIntl(
+      <StepTimeFieldComponent
         indexPattern="ki*"
         indexPatternsService={indexPatternsService}
         goToPreviousStep={noop}
@@ -137,46 +131,44 @@ describe('StepTimeField', () => {
       />
     );
 
-    wrapper.setState({
+    component.setState({
       timeFields: [
         { display: '@timestamp', fieldName: '@timestamp' },
         { display: 'name', fieldName: 'name' },
       ],
     });
 
-    wrapper.instance().onTimeFieldChanged({ target: { value: '' } });
-    wrapper.update();
-    const component = shallowWithIntl(wrapper);
+    component.instance().onTimeFieldChanged({ target: { value: '' } });
+    component.update();
 
     expect(component.find('ActionButtons')).toMatchSnapshot();
   });
 
   it('should enable the action button if the user decides to not select a time field', () => {
-    const wrapper = shallow(
-      <StepTimeField
+    const component = shallowWithIntl(
+      <StepTimeFieldComponent
         indexPattern="ki*"
         indexPatternsService={indexPatternsService}
         goToPreviousStep={noop}
         createIndexPattern={noop}
       />
     );
-    const component = shallowWithIntl(wrapper);
-    wrapper.setState({
+    component.setState({
       timeFields: [
         { display: '@timestamp', fieldName: '@timestamp' },
         { display: 'name', fieldName: 'name' },
       ],
     });
 
-    wrapper.instance().onTimeFieldChanged({ target: { value: undefined } });
+    component.instance().onTimeFieldChanged({ target: { value: undefined } });
     component.update();
 
     expect(component.find('ActionButtons')).toMatchSnapshot();
   });
 
   it('should render advanced options', () => {
-    const wrapper = shallow(
-      <StepTimeField
+    const component = shallowWithIntl(
+      <StepTimeFieldComponent
         indexPattern="ki*"
         indexPatternsService={indexPatternsService}
         goToPreviousStep={noop}
@@ -184,15 +176,14 @@ describe('StepTimeField', () => {
       />
     );
 
-    wrapper.setState({ showingAdvancedOptions: true });
-    const component = shallowWithIntl(wrapper);
+    component.setState({ showingAdvancedOptions: true });
 
     expect(component).toMatchSnapshot();
   });
 
   it('should render advanced options with an index pattern id', () => {
-    const wrapper = shallow(
-      <StepTimeField
+    const component = shallowWithIntl(
+      <StepTimeFieldComponent
         indexPattern="ki*"
         indexPatternsService={indexPatternsService}
         goToPreviousStep={noop}
@@ -200,18 +191,17 @@ describe('StepTimeField', () => {
       />
     );
 
-    wrapper.setState({
+    component.setState({
       showingAdvancedOptions: true,
       indexPatternId: 'foobar',
     });
-    const component = shallowWithIntl(wrapper);
 
     expect(component).toMatchSnapshot();
   });
 
   it('should render a loading state when creating the index pattern', () => {
-    const component = shallow(
-      <StepTimeField
+    const component = shallowWithIntl(
+      <StepTimeFieldComponent
         indexPattern="ki*"
         indexPatternsService={indexPatternsService}
         goToPreviousStep={noop}

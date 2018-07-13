@@ -18,9 +18,9 @@
  */
 
 import React from 'react';
-import { shallow } from 'enzyme';
-import { StepIndexPattern } from '../step_index_pattern';
+import { StepIndexPatternComponent } from '../step_index_pattern';
 import { shallowWithIntl } from 'test_utils/enzyme_helpers';
+import { Header } from '../components/header';
 
 jest.mock('../../../lib/ensure_minimum_time', () => ({
   ensureMinimumTime: async (promises) => Array.isArray(promises) ? await Promise.all(promises) : await promises
@@ -47,8 +47,8 @@ const savedObjectsClient = {
 const goToNextStep = () => {};
 
 const createComponent = props => {
-  return shallow(
-    <StepIndexPattern
+  return shallowWithIntl(
+    <StepIndexPatternComponent
       allIndices={allIndices}
       isIncludingSystemIndices={false}
       esService={esService}
@@ -78,24 +78,14 @@ describe('StepIndexPattern', () => {
   });
 
   it('renders errors when input is invalid', async () => {
-    const wrapper = shallow(<StepIndexPattern
-      allIndices={allIndices}
-      isIncludingSystemIndices={false}
-      esService={esService}
-      savedObjectsClient={savedObjectsClient}
-      goToNextStep={goToNextStep}
-    />);
-
-
-    const instance = wrapper.instance();
+    const component = createComponent();
+    const instance = component.instance();
     instance.onQueryChanged({ target: { value: '?' } });
-    const component = shallowWithIntl(wrapper.find('I18nContext'));
 
     // Ensure all promises resolve
     await new Promise(resolve => process.nextTick(resolve));
     // Ensure the state changes are reflected
     component.update();
-
     expect(component.find('[data-test-subj="createIndexPatternStep1Header"]')).toMatchSnapshot();
   });
 
@@ -120,17 +110,9 @@ describe('StepIndexPattern', () => {
   });
 
   it('disables the next step if the index pattern exists', async () => {
-    const wrapper = shallow(<StepIndexPattern
-      allIndices={allIndices}
-      isIncludingSystemIndices={false}
-      esService={esService}
-      savedObjectsClient={savedObjectsClient}
-      goToNextStep={goToNextStep}
-    />);
-    const component = shallowWithIntl(wrapper.find('I18nContext'));
-    wrapper.setState({ indexPatternExists: true });
-    component.update();
-    expect(component.find('Header').prop('isNextStepDisabled')).toBe(true);
+    const component = createComponent();
+    component.setState({ indexPatternExists: true });
+    expect(component.find(Header).prop('isNextStepDisabled')).toBe(true);
   });
 
   it('ensures the response of the latest request is persisted', async () => {

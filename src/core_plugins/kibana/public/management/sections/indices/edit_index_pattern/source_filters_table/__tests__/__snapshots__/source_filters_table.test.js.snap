@@ -3,7 +3,7 @@
 exports[`SourceFiltersTable should add a filter 1`] = `
 <div>
   <header />
-  <AddFilter
+  <InjectIntl(AddFilterComponent)
     onAddFilter={[Function]}
   />
   <eui-spacer
@@ -44,14 +44,13 @@ exports[`SourceFiltersTable should add a filter 1`] = `
     }
     saveFilter={[Function]}
   />
-  <I18nContext />
 </div>
 `;
 
 exports[`SourceFiltersTable should filter based on the query bar 1`] = `
 <div>
   <header />
-  <AddFilter
+  <InjectIntl(AddFilterComponent)
     onAddFilter={[Function]}
   />
   <eui-spacer
@@ -86,14 +85,13 @@ exports[`SourceFiltersTable should filter based on the query bar 1`] = `
     }
     saveFilter={[Function]}
   />
-  <I18nContext />
 </div>
 `;
 
 exports[`SourceFiltersTable should remove a filter 1`] = `
 <div>
   <header />
-  <AddFilter
+  <InjectIntl(AddFilterComponent)
     onAddFilter={[Function]}
   />
   <eui-spacer
@@ -136,14 +134,13 @@ exports[`SourceFiltersTable should remove a filter 1`] = `
     }
     saveFilter={[Function]}
   />
-  <I18nContext />
 </div>
 `;
 
 exports[`SourceFiltersTable should render normally 1`] = `
 <div>
   <header />
-  <AddFilter
+  <InjectIntl(AddFilterComponent)
     onAddFilter={[Function]}
   />
   <eui-spacer
@@ -186,14 +183,13 @@ exports[`SourceFiltersTable should render normally 1`] = `
     }
     saveFilter={[Function]}
   />
-  <I18nContext />
 </div>
 `;
 
 exports[`SourceFiltersTable should should a loading indicator when saving 1`] = `
 <div>
   <header />
-  <AddFilter
+  <InjectIntl(AddFilterComponent)
     onAddFilter={[Function]}
   />
   <eui-spacer
@@ -222,14 +218,13 @@ exports[`SourceFiltersTable should should a loading indicator when saving 1`] = 
     }
     saveFilter={[Function]}
   />
-  <I18nContext />
 </div>
 `;
 
 exports[`SourceFiltersTable should show a delete modal 1`] = `
 <div>
   <header />
-  <AddFilter
+  <InjectIntl(AddFilterComponent)
     onAddFilter={[Function]}
   />
   <eui-spacer
@@ -258,14 +253,22 @@ exports[`SourceFiltersTable should show a delete modal 1`] = `
     }
     saveFilter={[Function]}
   />
-  <I18nContext />
+  <eui-overlay-mask>
+    <eui-confirm-modal
+      cancelButtonText="Cancel"
+      confirmButtonText="Delete"
+      onCancel={[Function]}
+      onConfirm={[Function]}
+      title="Delete source filter '{value}'?"
+    />
+  </eui-overlay-mask>
 </div>
 `;
 
 exports[`SourceFiltersTable should update a filter 1`] = `
 <div>
   <header />
-  <AddFilter
+  <InjectIntl(AddFilterComponent)
     onAddFilter={[Function]}
   />
   <eui-spacer
@@ -300,6 +303,5 @@ exports[`SourceFiltersTable should update a filter 1`] = `
     }
     saveFilter={[Function]}
   />
-  <I18nContext />
 </div>
 `;

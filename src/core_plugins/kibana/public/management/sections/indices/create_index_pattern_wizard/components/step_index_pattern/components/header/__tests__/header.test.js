@@ -18,14 +18,13 @@
  */
 
 import React from 'react';
-import { Header } from '../header';
-import { shallow } from 'enzyme';
+import { HeaderComponent } from '../header';
 import { shallowWithIntl } from 'test_utils/enzyme_helpers';
 
 describe('Header', () => {
   it('should render normally', () => {
-    const wrapper = shallow(
-      <Header
+    const component = shallowWithIntl(
+      <HeaderComponent
         isInputInvalid={false}
         errors={[]}
         characterList={['%']}
@@ -36,13 +35,12 @@ describe('Header', () => {
       />
     );
 
-    const component = shallowWithIntl(wrapper);
     expect(component).toMatchSnapshot();
   });
 
   it('should mark the input as invalid', () => {
-    const wrapper = shallow(
-      <Header
+    const component = shallowWithIntl(
+      <HeaderComponent
         isInputInvalid={true}
         errors={['Input is invalid']}
         characterList={['%']}
@@ -53,7 +51,6 @@ describe('Header', () => {
       />
     );
 
-    const component = shallowWithIntl(wrapper);
     expect(component).toMatchSnapshot();
   });
 });

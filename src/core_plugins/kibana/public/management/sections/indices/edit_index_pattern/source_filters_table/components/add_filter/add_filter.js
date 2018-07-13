@@ -29,9 +29,9 @@ import {
 
 import { ReactI18n } from '@kbn/i18n';
 
-const { I18nContext, FormattedMessage } = ReactI18n;
+const { injectI18n, FormattedMessage } = ReactI18n;
 
-export class AddFilter extends Component {
+export class AddFilterComponent extends Component {
   static propTypes = {
     onAddFilter: PropTypes.func.isRequired,
   }
@@ -52,30 +52,29 @@ export class AddFilter extends Component {
     const { filter } = this.state;
 
     return (
-      <I18nContext>
-        {intl => (
-          <EuiFlexGroup>
-            <EuiFlexItem grow={10}>
-              <EuiFieldText
-                fullWidth
-                value={filter}
-                onChange={e => this.setState({ filter: e.target.value.trim() })}
-                placeholder={intl.formatMessage({
-                  id: 'kbn.management.indexPattern.edit.source.placeholder',
-                  defaultMessage: 'source filter, accepts wildcards (e.g., `user*` to filter fields starting with \'user\')' })}
-              />
-            </EuiFlexItem>
-            <EuiFlexItem>
-              <EuiButton
-                isDisabled={filter.length === 0}
-                onClick={this.onAddFilter}
-              >
-                <FormattedMessage id="kbn.management.indexPattern.edit.source.add.button" defaultMessage="Add"/>
-              </EuiButton>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        )}
-      </I18nContext>
+      <EuiFlexGroup>
+        <EuiFlexItem grow={10}>
+          <EuiFieldText
+            fullWidth
+            value={filter}
+            onChange={e => this.setState({ filter: e.target.value.trim() })}
+            placeholder={this.props.intl.formatMessage({
+              id: 'kbn.management.indexPattern.edit.source.placeholder',
+              defaultMessage: 'source filter, accepts wildcards (e.g., `user*` to filter fields starting with \'user\')'
+            })}
+          />
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <EuiButton
+            isDisabled={filter.length === 0}
+            onClick={this.onAddFilter}
+          >
+            <FormattedMessage id="kbn.management.indexPattern.edit.source.add.button" defaultMessage="Add" />
+          </EuiButton>
+        </EuiFlexItem>
+      </EuiFlexGroup>
     );
   }
 }
+
+export const AddFilter = injectI18n(AddFilterComponent);

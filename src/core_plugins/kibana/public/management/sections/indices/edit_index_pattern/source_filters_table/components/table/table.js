@@ -30,9 +30,9 @@ import {
 
 import { ReactI18n } from '@kbn/i18n';
 
-const { I18nContext, FormattedMessage } = ReactI18n;
+const { injectI18n, FormattedMessage } = ReactI18n;
 
-export class Table extends Component {
+export class TableComponent extends Component {
   static propTypes = {
     indexPattern: PropTypes.object.isRequired,
     items: PropTypes.array.isRequired,
@@ -69,12 +69,13 @@ export class Table extends Component {
     }
   };
 
-  getColumns(intl) {
+  getColumns() {
     const {
       deleteFilter,
       fieldWildcardMatcher,
       indexPattern,
       saveFilter,
+      intl,
     } = this.props;
 
     return [
@@ -196,25 +197,22 @@ export class Table extends Component {
 
   render() {
     const { items, isSaving } = this.props;
+    const columns = this.getColumns();
     const pagination = {
       initialPageSize: 10,
       pageSizeOptions: [5, 10, 25, 50],
     };
 
     return (
-      <I18nContext>
-        {intl => {
-          const columns = this.getColumns(intl);
-
-          return (<EuiInMemoryTable
-            loading={isSaving}
-            items={items}
-            columns={columns}
-            pagination={pagination}
-            sorting={true}
-          />);
-        }}
-      </I18nContext>
+      <EuiInMemoryTable
+        loading={isSaving}
+        items={items}
+        columns={columns}
+        pagination={pagination}
+        sorting={true}
+      />
     );
   }
 }
+
+export const Table = injectI18n(TableComponent);

@@ -37,9 +37,9 @@ import {
 
 import { ReactI18n } from '@kbn/i18n';
 
-const { I18nProvider, I18nContext } = ReactI18n;
+const { I18nProvider, injectI18n } = ReactI18n;
 
-export class ScriptedFieldsTable extends Component {
+export class ScriptedFieldsTableComponent extends Component {
   static propTypes = {
     indexPattern: PropTypes.object.isRequired,
     fieldFilter: PropTypes.string,
@@ -146,25 +146,25 @@ export class ScriptedFieldsTable extends Component {
     }
 
     return (
-      <I18nContext>
-        {intl => (
-          <EuiOverlayMask>
-            <EuiConfirmModal
-              title={intl.formatMessage(
-                { id: 'kbn.management.indexPattern.edit.scripted.deleteField.label',
-                  defaultMessage: 'Delete scripted field \'{fieldName}\'?' },
-                { fieldName: fieldToDelete.name })}
-              onCancel={this.hideDeleteConfirmationModal}
-              onConfirm={this.deleteField}
-              cancelButtonText={intl.formatMessage({
-                id: 'kbn.management.indexPattern.edit.scripted.deleteField.cancel.button', defaultMessage: 'Cancel' })}
-              confirmButtonText={intl.formatMessage({
-                id: 'kbn.management.indexPattern.edit.scripted.deleteField.delete.button', defaultMessage: 'Delete' })}
-              defaultFocusedButton={EUI_MODAL_CONFIRM_BUTTON}
-            />
-          </EuiOverlayMask>
-        )}
-      </I18nContext>
+      <EuiOverlayMask>
+        <EuiConfirmModal
+          title={this.props.intl.formatMessage(
+            {
+              id: 'kbn.management.indexPattern.edit.scripted.deleteField.label',
+              defaultMessage: 'Delete scripted field \'{fieldName}\'?'
+            },
+            { fieldName: fieldToDelete.name })}
+          onCancel={this.hideDeleteConfirmationModal}
+          onConfirm={this.deleteField}
+          cancelButtonText={this.props.intl.formatMessage({
+            id: 'kbn.management.indexPattern.edit.scripted.deleteField.cancel.button', defaultMessage: 'Cancel'
+          })}
+          confirmButtonText={this.props.intl.formatMessage({
+            id: 'kbn.management.indexPattern.edit.scripted.deleteField.delete.button', defaultMessage: 'Delete'
+          })}
+          defaultFocusedButton={EUI_MODAL_CONFIRM_BUTTON}
+        />
+      </EuiOverlayMask>
     );
   }
 
@@ -198,3 +198,5 @@ export class ScriptedFieldsTable extends Component {
     );
   }
 }
+
+export const ScriptedFieldsTable = injectI18n(ScriptedFieldsTableComponent);

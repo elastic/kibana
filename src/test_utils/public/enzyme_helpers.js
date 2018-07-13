@@ -27,6 +27,10 @@ export function shallowWithIntl(node, { context, childContextTypes, ...props } =
     return node;
   }
 
+  function nodeWithIntlProp(node) {
+    return React.cloneElement(node, { intl });
+  }
+
   const options = {
     context: {
       ...context,
@@ -40,8 +44,8 @@ export function shallowWithIntl(node, { context, childContextTypes, ...props } =
   };
 
   if (React.isValidElement(node)) {
-    return shallow(node, options);
+    return shallow(nodeWithIntlProp(node), options);
   } else {
-    return node.shallow(options);
+    return nodeWithIntlProp(node).shallow(options);
   }
 }

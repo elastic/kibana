@@ -33,9 +33,9 @@ import { Header } from './components/header';
 import { AddFilter } from './components/add_filter';
 import { ReactI18n } from '@kbn/i18n';
 
-const { I18nContext } = ReactI18n;
+const { injectI18n } = ReactI18n;
 
-export class SourceFiltersTable extends Component {
+export class SourceFiltersTableComponent extends Component {
   static propTypes = {
     indexPattern: PropTypes.object.isRequired,
     filterFilter: PropTypes.string,
@@ -154,7 +154,7 @@ export class SourceFiltersTable extends Component {
     this.setState({ isSaving: false });
   };
 
-  renderDeleteConfirmationModal(intl) {
+  renderDeleteConfirmationModal() {
     const { filterToDelete } = this.state;
 
     if (!filterToDelete) {
@@ -164,14 +164,14 @@ export class SourceFiltersTable extends Component {
     return (
       <EuiOverlayMask>
         <EuiConfirmModal
-          title={intl.formatMessage(
+          title={this.props.intl.formatMessage(
             { id: 'kbn.management.indexPattern.edit.source.deleteSourceFilter.label', defaultMessage: 'Delete source filter \'{value}\'?' },
             { value: filterToDelete.value })}
           onCancel={this.hideDeleteConfirmationModal}
           onConfirm={this.deleteFilter}
-          cancelButtonText={intl.formatMessage({
+          cancelButtonText={this.props.intl.formatMessage({
             id: 'kbn.management.indexPattern.edit.source.deleteFilter.cancel.button', defaultMessage: 'Cancel' })}
-          confirmButtonText={intl.formatMessage({
+          confirmButtonText={this.props.intl.formatMessage({
             id: 'kbn.management.indexPattern.edit.source.deleteFilter.delete.button', defaultMessage: 'Delete' })}
           defaultFocusedButton={EUI_MODAL_CONFIRM_BUTTON}
         />
@@ -200,10 +200,10 @@ export class SourceFiltersTable extends Component {
           saveFilter={this.saveFilter}
         />
 
-        <I18nContext>
-          {intl => (this.renderDeleteConfirmationModal(intl))}
-        </I18nContext>
+        {this.renderDeleteConfirmationModal()}
       </div>
     );
   }
 }
+
+export const SourceFiltersTable = injectI18n(SourceFiltersTableComponent);

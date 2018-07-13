@@ -34,15 +34,16 @@ import {
 
 import { ReactI18n } from '@kbn/i18n';
 
-const { I18nContext, FormattedMessage } = ReactI18n;
+const { injectI18n, FormattedMessage } = ReactI18n;
 
-export const TimeField = ({
+export const TimeFieldComponent = ({
   isVisible,
   fetchTimeFields,
   timeFieldOptions,
   isLoading,
   selectedTimeField,
   onTimeFieldChanged,
+  intl,
 }) => (
   <EuiForm>
     { isVisible ?
@@ -90,23 +91,20 @@ export const TimeField = ({
         }
       >
         { isLoading ? (
-          <I18nContext>
-            {intl => (
-              <EuiSelect
-                name="timeField"
-                data-test-subj="createIndexPatternTimeFieldSelect"
-                options={[
-                  {
-                    text: intl.formatMessage({
-                      id: 'kbn.management.indexPattern.create.stepTime.field.loading.dropDown',
-                      defaultMessage: 'Loading...' }),
-                    value: ''
-                  }
-                ]}
-                disabled={true}
-              />
-            )}
-          </I18nContext>
+          <EuiSelect
+            name="timeField"
+            data-test-subj="createIndexPatternTimeFieldSelect"
+            options={[
+              {
+                text: intl.formatMessage({
+                  id: 'kbn.management.indexPattern.create.stepTime.field.loading.dropDown',
+                  defaultMessage: 'Loading...'
+                }),
+                value: ''
+              }
+            ]}
+            disabled={true}
+          />
         ) : (
           <EuiSelect
             name="timeField"
@@ -131,3 +129,5 @@ export const TimeField = ({
     }
   </EuiForm>
 );
+
+export const TimeField = injectI18n(TimeFieldComponent);

@@ -18,28 +18,25 @@
  */
 
 import React from 'react';
-import { shallow } from 'enzyme';
-
-import { CallOuts } from '../call_outs';
-
 import { shallowWithIntl } from 'test_utils/enzyme_helpers';
+
+import { CallOutsComponent } from '../call_outs';
 
 describe('CallOuts', () => {
   it('should render normally', async () => {
-    const wrapper = shallow(
-      <CallOuts
+    const component = shallowWithIntl(
+      <CallOutsComponent
         deprecatedLangsInUse={['php']}
         painlessDocLink="http://www.elastic.co/painlessDocs"
       />
     );
 
-    const component = shallowWithIntl(wrapper);
     expect(component).toMatchSnapshot();
   });
 
   it('should render without any call outs', async () => {
-    const component = shallow(
-      <CallOuts
+    const component = shallowWithIntl(
+      <CallOutsComponent
         deprecatedLangsInUse={[]}
         painlessDocLink="http://www.elastic.co/painlessDocs"
       />

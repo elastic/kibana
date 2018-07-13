@@ -37,9 +37,9 @@ import {
 
 import { ReactI18n } from '@kbn/i18n';
 
-const { I18nContext, FormattedMessage } = ReactI18n;
+const { injectI18n, FormattedMessage } = ReactI18n;
 
-export class StepTimeField extends Component {
+export class StepTimeFieldComponent extends Component {
   static propTypes = {
     indexPattern: PropTypes.string.isRequired,
     indexPatternsService: PropTypes.object.isRequired,
@@ -142,62 +142,60 @@ export class StepTimeField extends Component {
       goToPreviousStep,
     } = this.props;
 
-    const getText = (intl, key) => {
+    const getText = (key) => {
       switch (key) {
-        case timeFieldsTypes.NO_TIME_FIELDS: return intl.formatMessage({
+        case timeFieldsTypes.NO_TIME_FIELDS: return this.props.intl.formatMessage({
           id: 'kbn.management.indexPattern.create.stepTime.noTimeFields.label',
           defaultMessage: 'The indices which match this index pattern don\'t contain any time fields.' });
-        case timeFieldsTypes.NO_TIME_FIELD: return intl.formatMessage({
+        case timeFieldsTypes.NO_TIME_FIELD: return this.props.intl.formatMessage({
           id: 'kbn.management.indexPattern.create.stepTime.noTimeFieldOption.label',
           defaultMessage: 'I don\'t want to use the Time Filter' });
         default: return key;
       }
     };
 
-    const getTimeFieldOptions = intl => (timeFields ?
+    const timeFieldOptions = timeFields ?
       [
         { text: '', value: '' },
         ...timeFields.map(timeField => ({
-          text: getText(intl, timeField.display),
+          text: getText(timeField.display),
           value: timeField.fieldName,
           disabled: timeFields.isDisabled,
         }))
       ]
-      : []);
+      : [];
 
     const showTimeField = !timeFields || timeFields.length > 1;
     const submittable = !showTimeField || timeFieldSet;
 
     return (
-      <I18nContext>
-        {intl => (
-          <EuiPanel paddingSize="l">
-            <Header indexPattern={indexPattern}/>
-            <EuiSpacer size="xs"/>
-            <TimeField
-              isVisible={showTimeField}
-              fetchTimeFields={this.fetchTimeFields}
-              timeFieldOptions={getTimeFieldOptions(intl)}
-              isLoading={isFetchingTimeFields}
-              selectedTimeField={selectedTimeField}
-              onTimeFieldChanged={this.onTimeFieldChanged}
-            />
-            <EuiSpacer size="s"/>
-            <AdvancedOptions
-              isVisible={isAdvancedOptionsVisible}
-              indexPatternId={indexPatternId}
-              toggleAdvancedOptions={this.toggleAdvancedOptions}
-              onChangeIndexPatternId={this.onChangeIndexPatternId}
-            />
-            <EuiSpacer size="m"/>
-            <ActionButtons
-              goToPreviousStep={goToPreviousStep}
-              submittable={submittable}
-              createIndexPattern={this.createIndexPattern}
-            />
-          </EuiPanel>
-        )}
-      </I18nContext>
+      <EuiPanel paddingSize="l">
+        <Header indexPattern={indexPattern} />
+        <EuiSpacer size="xs" />
+        <TimeField
+          isVisible={showTimeField}
+          fetchTimeFields={this.fetchTimeFields}
+          timeFieldOptions={timeFieldOptions}
+          isLoading={isFetchingTimeFields}
+          selectedTimeField={selectedTimeField}
+          onTimeFieldChanged={this.onTimeFieldChanged}
+        />
+        <EuiSpacer size="s" />
+        <AdvancedOptions
+          isVisible={isAdvancedOptionsVisible}
+          indexPatternId={indexPatternId}
+          toggleAdvancedOptions={this.toggleAdvancedOptions}
+          onChangeIndexPatternId={this.onChangeIndexPatternId}
+        />
+        <EuiSpacer size="m" />
+        <ActionButtons
+          goToPreviousStep={goToPreviousStep}
+          submittable={submittable}
+          createIndexPattern={this.createIndexPattern}
+        />
+      </EuiPanel>
     );
   }
 }
+
+export const StepTimeField = injectI18n(StepTimeFieldComponent);
