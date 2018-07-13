@@ -27,8 +27,8 @@ describe('SearchStrategyRegistry', () => {
     test('associates search requests with valid search strategies', () => {
       const searchStrategyA = {
         id: 'a',
-        isViable: ({ searchRequest }) => {
-          return searchRequest.type === 'a';
+        isViable: indexPattern => {
+          return indexPattern === 'a';
         },
       };
 
@@ -36,47 +36,43 @@ describe('SearchStrategyRegistry', () => {
 
       const searchStrategyB = {
         id: 'b',
-        isViable: ({ searchRequest }) => {
-          return searchRequest.type === 'b';
+        isViable: indexPattern => {
+          return indexPattern === 'b';
         },
       };
 
       addSearchStrategy(searchStrategyB);
 
-      const searchRequests = [{
+      const searchRequest0 = {
         id: 0,
-        type: 'b',
-      }, {
+        source: { getField: () => 'b' },
+      };
+
+      const searchRequest1 = {
         id: 1,
-        type: 'a',
-      }, {
+        source: { getField: () => 'a' },
+      };
+
+      const searchRequest2 = {
         id: 2,
-        type: 'a',
-      }, {
+        source: { getField: () => 'a' },
+      };
+
+      const searchRequest3 = {
         id: 3,
-        type: 'b',
-      }];
+        source: { getField: () => 'b' },
+      };
+
+      const searchRequests = [ searchRequest0, searchRequest1, searchRequest2, searchRequest3];
 
       const searchStrategiesWithSearchRequests = assignSearchRequestsToSearchStrategies(searchRequests);
 
       expect(searchStrategiesWithSearchRequests).toEqual([{
         searchStrategy: searchStrategyB,
-        searchRequests: [{
-          id: 0,
-          type: 'b',
-        }, {
-          id: 3,
-          type: 'b',
-        }],
+        searchRequests: [ searchRequest0, searchRequest3 ],
       }, {
         searchStrategy: searchStrategyA,
-        searchRequests: [{
-          id: 1,
-          type: 'a',
-        }, {
-          id: 2,
-          type: 'a',
-        }],
+        searchRequests: [ searchRequest1, searchRequest2 ],
       }]);
     });
   });
