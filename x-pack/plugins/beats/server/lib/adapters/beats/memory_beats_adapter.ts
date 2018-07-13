@@ -5,7 +5,6 @@
  */
 
 import { omit } from 'lodash';
-import moment from 'moment';
 
 import { CMBeat } from '../../../../common/domain_types';
 import { FrameworkUser } from '../framework/adapter_types';
@@ -36,22 +35,6 @@ export class MemoryBeatsAdapter implements CMBeatsAdapter {
   }
 
   public async getWithIds(user: FrameworkUser, beatIds: string[]) {
-    return this.beatsDB.filter(beat => beatIds.includes(beat.id));
-  }
-
-  public async verifyBeats(user: FrameworkUser, beatIds: string[]) {
-    if (!Array.isArray(beatIds) || beatIds.length === 0) {
-      return [];
-    }
-
-    const verifiedOn = moment().toJSON();
-
-    this.beatsDB.forEach((beat, i) => {
-      if (beatIds.includes(beat.id)) {
-        this.beatsDB[i].verified_on = verifiedOn;
-      }
-    });
-
     return this.beatsDB.filter(beat => beatIds.includes(beat.id));
   }
 

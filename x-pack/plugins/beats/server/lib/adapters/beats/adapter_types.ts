@@ -14,7 +14,6 @@ export interface CMBeatsAdapter {
   get(id: string): any;
   getAll(user: FrameworkUser): any;
   getWithIds(user: FrameworkUser, beatIds: string[]): any;
-  verifyBeats(user: FrameworkUser, beatIds: string[]): any;
   removeTagsFromBeats(
     user: FrameworkUser,
     removals: BeatsTagAssignment[]
