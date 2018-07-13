@@ -39,8 +39,6 @@ import {
   toastNotifications
 } from 'ui/notify';
 
-import { ScriptEditor } from './script_editor';
-
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -58,14 +56,18 @@ import {
   EuiSelect,
   EuiSpacer,
   EuiText,
+  EuiTextArea,
   EUI_MODAL_CONFIRM_BUTTON,
 } from '@elastic/eui';
 
 import {
   ScriptingDisabledCallOut,
   ScriptingWarningCallOut,
-  ScriptingHelpFlyout,
 } from './components/scripting_call_outs';
+
+import {
+  ScriptingHelpFlyout,
+} from './components/scripting_help';
 
 import {
   FieldFormatEditor
@@ -342,16 +344,34 @@ export class FieldEditor extends PureComponent {
 
   renderScript() {
     const { field } = this.state;
+    const isInvalid = !field.script || !field.script.trim();
 
     return field.scripted ? (
-      <ScriptEditor
-        indexPattern={this.props.indexPattern}
-        lang={field.lang}
-        name={field.name}
-        script={field.script}
-        onScriptChange={(e) => { this.onFieldChange('script', e.target.value); }}
-        showScriptingHelp={this.showScriptingHelp}
-      />
+      <EuiFormRow
+        label="Script"
+        helpText={(
+          <EuiFlexGroup gutterSize="xs">
+            <EuiFlexItem grow={false}>
+              <EuiIcon type="help" color="primary" />
+            </EuiFlexItem>
+
+            <EuiFlexItem>
+              <EuiLink onClick={this.showScriptingHelp}>
+                Get help with the syntax and preview the results of your script
+              </EuiLink>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        )}
+        isInvalid={isInvalid}
+        error={isInvalid ? 'Script is required' : null}
+      >
+        <EuiTextArea
+          value={field.script}
+          data-test-subj="editorFieldScript"
+          onChange={(e) => { this.onFieldChange('script', e.target.value); }}
+          isInvalid={isInvalid}
+        />
+      </EuiFormRow>
     ) : null;
   }
 
@@ -516,6 +536,10 @@ export class FieldEditor extends PureComponent {
           <ScriptingHelpFlyout
             isVisible={field.scripted && showScriptingHelp}
             onClose={this.hideScriptingHelp}
+            indexPattern={this.props.indexPattern}
+            lang={field.lang}
+            name={field.name}
+            script={field.script}
           />
           {this.renderName()}
           {this.renderLanguage()}

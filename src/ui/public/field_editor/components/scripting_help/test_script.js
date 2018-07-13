@@ -16,29 +16,32 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import './script_editor.less';
+
+import React, { Component, Fragment } from 'react';
 import PropTypes from 'prop-types';
-import React, { Component } from 'react';
 import { kfetch } from 'ui/kfetch';
 
 import {
-  EuiFlexGroup,
-  EuiFlexItem,
   EuiButton,
-  EuiTextArea,
-  EuiLink,
   EuiCodeBlock,
-  EuiCallOut,
   EuiComboBox,
-  EuiFieldNumber,
+  EuiFormRow,
+  EuiText,
+  EuiSpacer,
+  EuiTitle,
+  EuiCallOut,
 } from '@elastic/eui';
 
-export class ScriptEditor extends Component {
-
+export class TestScript extends Component {
   state = {
     isLoading: false,
     sourceFields: [],
-    size: 10,
+  }
+
+  componentDidMount() {
+    if (this.props.script) {
+      this.executeScript();
+    }
   }
 
   executeScript = async () => {
@@ -46,7 +49,7 @@ export class ScriptEditor extends Component {
       indexPattern,
       lang,
       name,
-      script
+      script,
     } = this.props;
 
     this.setState({
@@ -59,6 +62,7 @@ export class ScriptEditor extends Component {
       ignore_unavailable: true,
       timeout: 30000
     };
+
     const search = {
       query: {
         match_all: {}
@@ -66,20 +70,20 @@ export class ScriptEditor extends Component {
       script_fields: {
         [name]: {
           script: {
-            lang: lang,
+            lang,
             source: script
           }
         }
-      }
+      },
+      size: 10,
     };
-    if (!isNaN(this.state.size)) {
-      search.size = this.state.size;
-    }
+
     if (this.state.sourceFields.length > 0) {
       search._source = this.state.sourceFields.map(option => {
         return option.value;
       });
     }
+
     const body = `${JSON.stringify(header)}\n${JSON.stringify(search)}\n`;
     const esResp = await kfetch({ method: 'POST', pathname: '/elasticsearch/_msearch', body });
     // unwrap _msearch response
@@ -88,16 +92,18 @@ export class ScriptEditor extends Component {
     if (scriptResponse.status !== 200) {
       this.setState({
         isLoading: false,
-        previewData: scriptResponse.error
+        previewData: scriptResponse
       });
       return;
     }
 
     this.setState({
       isLoading: false,
-      previewData: scriptResponse.hits.hits.map(hit => {
-        return Object.assign({ _id: hit._id }, hit._source, hit.fields);
-      })
+      previewData: scriptResponse.hits.hits.map(hit => ({
+        _id: hit._id,
+        ...hit._source,
+        ...hit.fields,
+      })),
     });
   }
 
@@ -107,34 +113,42 @@ export class ScriptEditor extends Component {
     });
   }
 
-  onSizeChange = (e) => {
-    this.setState({
-      size: parseInt(e.target.value, 10)
-    });
-  };
-
   renderPreview() {
-    if (!this.state.previewData) {
+    const { previewData } = this.state;
+
+    if (!previewData) {
+      return null;
+    }
+
+    if (previewData.error) {
       return (
         <EuiCallOut
-          title="Test out your scripted fields"
+          title="There's an error in your script"
+          color="danger"
+          iconType="cross"
         >
-          <p>
-            Click the play button to preview the results of your script.
-          </p>
+          <EuiCodeBlock language="json" className="scriptPreviewCodeBlock">
+            {JSON.stringify(previewData.error, null, ' ')}
+          </EuiCodeBlock>
         </EuiCallOut>
       );
     }
 
     return (
-      <EuiCodeBlock language="json" className="scriptPreviewCodeBlock">
-        {JSON.stringify(this.state.previewData, null, ' ')}
-      </EuiCodeBlock>
+      <Fragment>
+        <EuiTitle size="xs"><p>First 10 results</p></EuiTitle>
+        <EuiSpacer size="s" />
+        <EuiCodeBlock language="json" className="scriptPreviewCodeBlock">
+          {JSON.stringify(previewData, null, ' ')}
+        </EuiCodeBlock>
+      </Fragment>
     );
   }
+
   renderToolbar() {
     const fieldsByTypeMap = new Map();
     const fields = [];
+
     this.props.indexPattern.fields
       .filter(field => {
         return !field.name.startsWith('_');
@@ -165,88 +179,56 @@ export class ScriptEditor extends Component {
     });
 
     return (
-      <EuiFlexGroup>
-        <EuiFlexItem grow={false}>
-          <EuiButton
-            onClick={this.executeScript}
-            iconType="play"
-            disabled={this.props.script ? false : true}
-            isLoading={this.state.isLoading}
-          />
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiFieldNumber
-            placeholder="Size"
-            value={this.state.size}
-            onChange={this.onSizeChange}
-            aria-label="Specify the number documents to search for script preview"
-            min="0"
-          />
-        </EuiFlexItem>
-        <EuiFlexItem>
+      <Fragment>
+        <EuiFormRow
+          label="Additional fields"
+        >
           <EuiComboBox
             placeholder="Select..."
             options={fields}
             selectedOptions={this.state.sourceFields}
             onChange={this.onSourceFieldsChange}
           />
-        </EuiFlexItem>
-      </EuiFlexGroup>
+        </EuiFormRow>
+
+        <EuiButton
+          onClick={this.executeScript}
+          disabled={this.props.script ? false : true}
+          isLoading={this.state.isLoading}
+        >
+          Run script
+        </EuiButton>
+      </Fragment>
     );
   }
 
   render() {
-    const {
-      script,
-      onScriptChange,
-      showScriptingHelp
-    } = this.props;
-
-    const isInvalid = !script || !script.trim();
-
     return (
-      <div>
-
-        <label
-          className="euiFormLabel"
-        >
-          Script
-        </label>
-
+      <Fragment>
+        <EuiSpacer />
+        <EuiText>
+          <h3>Preview results</h3>
+          <p>
+            Run your script to preview the first 10 results. You can also select some
+            additional fields to include in your results to gain more context.
+          </p>
+        </EuiText>
+        <EuiSpacer />
         {this.renderToolbar()}
-
-        <EuiFlexGroup>
-          <EuiFlexItem>
-            <EuiTextArea
-              value={script}
-              data-test-subj="editorFieldScript"
-              onChange={onScriptChange}
-              isInvalid={isInvalid}
-            />
-            <div
-              className="euiFormHelpText euiFormRow__text"
-            >
-              <EuiLink onClick={showScriptingHelp}>Scripting help</EuiLink>
-            </div>
-          </EuiFlexItem>
-          <EuiFlexItem>
-            {this.renderPreview()}
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </div>
+        <EuiSpacer />
+        {this.renderPreview()}
+      </Fragment>
     );
   }
 }
 
-ScriptEditor.propTypes = {
+TestScript.propTypes = {
   indexPattern: PropTypes.object.isRequired,
   lang: PropTypes.string.isRequired,
   name: PropTypes.string,
   script: PropTypes.string,
-  onScriptChange: PropTypes.func.isRequired,
-  showScriptingHelp: PropTypes.func.isRequired,
 };
 
-ScriptEditor.defaultProps = {
+TestScript.defaultProps = {
   name: 'myScriptedField',
 };
