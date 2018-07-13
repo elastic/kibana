@@ -19,28 +19,42 @@
 
 const mockLoadOrder: string[] = [];
 
+const mockUiMetadataInit = jest.fn();
 jest.mock('ui/metadata', () => {
   mockLoadOrder.push('ui/metadata');
   return {
-    __newPlatformInit__: jest.fn(),
+    __newPlatformInit__: mockUiMetadataInit,
   };
 });
 
+const mockUiChromeBootstrap = jest.fn();
 jest.mock('ui/chrome', () => {
   mockLoadOrder.push('ui/chrome');
   return {
-    bootstrap: jest.fn(),
+    bootstrap: mockUiChromeBootstrap,
   };
 });
 
+const mockUiTestHarnessBootstrap = jest.fn();
 jest.mock('ui/test_harness', () => {
   mockLoadOrder.push('ui/test_harness');
   return {
-    bootstrap: jest.fn(),
+    bootstrap: mockUiTestHarnessBootstrap,
   };
 });
 
 import { LegacyPlatformService } from './legacy_platform_service';
+
+const injectedMetadataStartContract = {
+  getLegacyMetadata: jest.fn(),
+};
+
+const defaultParams = {
+  rootDomElement: { someDomElement: true } as any,
+  requireLegacyFiles: jest.fn(() => {
+    mockLoadOrder.push('legacy files');
+  }),
+};
 
 beforeEach(() => {
   jest.clearAllMocks();
@@ -49,20 +63,11 @@ beforeEach(() => {
   mockLoadOrder.length = 0;
 });
 
-const injectedMetadataStartContract = {
-  getLegacyMetadata: jest.fn(),
-};
-
-const requireLegacyFiles = jest.fn(() => {
-  mockLoadOrder.push('legacy files');
-});
-
 describe('#start()', () => {
   describe('default', () => {
     it('does not return a start contract', () => {
       const legacyPlatform = new LegacyPlatformService({
-        rootDomElement: null!,
-        requireLegacyFiles,
+        ...defaultParams,
       });
 
       const startContract = legacyPlatform.start({
@@ -76,17 +81,47 @@ describe('#start()', () => {
       injectedMetadataStartContract.getLegacyMetadata.mockReturnValue(legacyMetadata);
 
       const legacyPlatform = new LegacyPlatformService({
-        rootDomElement: null!,
-        requireLegacyFiles,
+        ...defaultParams,
       });
 
       legacyPlatform.start({
         injectedMetadata: injectedMetadataStartContract,
       });
 
-      const newPlatformInit = require('ui/metadata').__newPlatformInit__;
-      expect(newPlatformInit).toHaveBeenCalledTimes(1);
-      expect(newPlatformInit).toHaveBeenCalledWith(legacyMetadata);
+      expect(mockUiMetadataInit).toHaveBeenCalledTimes(1);
+      expect(mockUiMetadataInit).toHaveBeenCalledWith(legacyMetadata);
+    });
+
+    describe('useLegacyTestHarness = false', () => {
+      it('passes the rootDomElement to ui/chrome', () => {
+        const legacyPlatform = new LegacyPlatformService({
+          ...defaultParams,
+        });
+
+        legacyPlatform.start({
+          injectedMetadata: injectedMetadataStartContract,
+        });
+
+        expect(mockUiTestHarnessBootstrap).not.toHaveBeenCalled();
+        expect(mockUiChromeBootstrap).toHaveBeenCalledTimes(1);
+        expect(mockUiChromeBootstrap).toHaveBeenCalledWith(defaultParams.rootDomElement);
+      });
+    });
+    describe('useLegacyTestHarness = true', () => {
+      it('passes the rootDomElement to ui/test_harness', () => {
+        const legacyPlatform = new LegacyPlatformService({
+          ...defaultParams,
+          useLegacyTestHarness: true,
+        });
+
+        legacyPlatform.start({
+          injectedMetadata: injectedMetadataStartContract,
+        });
+
+        expect(mockUiChromeBootstrap).not.toHaveBeenCalled();
+        expect(mockUiTestHarnessBootstrap).toHaveBeenCalledTimes(1);
+        expect(mockUiTestHarnessBootstrap).toHaveBeenCalledWith(defaultParams.rootDomElement);
+      });
     });
   });
 
@@ -94,8 +129,7 @@ describe('#start()', () => {
     describe('useLegacyTestHarness = false', () => {
       it('loads ui/modules before ui/chrome, and both before legacy files', () => {
         const legacyPlatform = new LegacyPlatformService({
-          rootDomElement: null!,
-          requireLegacyFiles,
+          ...defaultParams,
         });
 
         expect(mockLoadOrder).toEqual([]);
@@ -111,8 +145,7 @@ describe('#start()', () => {
     describe('useLegacyTestHarness = true', () => {
       it('loads ui/modules before ui/test_harness, and both before legacy files', () => {
         const legacyPlatform = new LegacyPlatformService({
-          rootDomElement: null!,
-          requireLegacyFiles,
+          ...defaultParams,
           useLegacyTestHarness: true,
         });
 
