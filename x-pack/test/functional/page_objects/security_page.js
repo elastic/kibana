@@ -148,7 +148,7 @@ export function SecurityPageProvider({ getService, getPageObjects }) {
     async assignRoleToUser(role) {
       log.debug(`Adding role ${role} to user`);
       const privilegeInput =
-        await retry.try(() => find.byCssSelector('[data-test-subj="userFormRolesDropdown"] > div > input'));
+        await retry.try(() => find.byCssSelector('[data-test-subj="comboBoxSearchInput"]'));
       await privilegeInput.type(role);
       await privilegeInput.type('\n');
     }
