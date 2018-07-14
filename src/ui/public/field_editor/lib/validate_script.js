@@ -50,8 +50,14 @@ export const executeScript = async ({ name, lang, script, indexPatternTitle, add
   const esResp = await kfetch({ method: 'POST', pathname: '/elasticsearch/_msearch', body });
   // unwrap _msearch response
   return esResp.responses[0];
-}
+};
 
-export const validateScript = async ({ name, lang, script, indexPatternTitle, additionalFields = [] }) => {
+export const isScriptValid = async ({ name, lang, script, indexPatternTitle }) => {
+  const scriptResponse = await executeScript({ name, lang, script, indexPatternTitle });
 
-}
+  if (scriptResponse.status !== 200) {
+    return false;
+  }
+
+  return true;
+};

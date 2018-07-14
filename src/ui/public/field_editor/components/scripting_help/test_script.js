@@ -52,6 +52,10 @@ export class TestScript extends Component {
       executeScript,
     } = this.props;
 
+    if (!script || script.length === 0) {
+      return;
+    }
+
     this.setState({
       isLoading: true,
     });

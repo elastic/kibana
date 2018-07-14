@@ -74,7 +74,7 @@ import {
 } from './components/field_format_editor';
 
 import { FIELD_TYPES_BY_LANG, DEFAULT_FIELD_TYPES } from './constants';
-import { copyField, getDefaultFormat, executeScript } from './lib';
+import { copyField, getDefaultFormat, executeScript, isScriptValid } from './lib';
 
 export class FieldEditor extends PureComponent {
   static propTypes = {
@@ -112,6 +112,8 @@ export class FieldEditor extends PureComponent {
       showScriptingHelp: false,
       showDeleteModal: false,
       hasFormatError: false,
+      hasScriptError: false,
+      isSaving: false,
     };
     this.supportedLangs = getSupportedScriptingLanguages();
     this.deprecatedLangs = getDeprecatedScriptingLanguages();
@@ -342,9 +344,19 @@ export class FieldEditor extends PureComponent {
     );
   }
 
+  onScriptChange = (e) => {
+    this.setState({
+      hasScriptError: false
+    });
+    this.onFieldChange('script', e.target.value);
+  }
+
   renderScript() {
-    const { field } = this.state;
-    const isInvalid = !field.script || !field.script.trim();
+    const { field, hasScriptError } = this.state;
+    const isInvalid = !field.script || !field.script.trim() || hasScriptError;
+    const errorMsg = hasScriptError
+      ? 'Script is invalid. View script preview for details'
+      : 'Script is required';
 
     return field.scripted ? (
       <EuiFormRow
@@ -363,12 +375,12 @@ export class FieldEditor extends PureComponent {
           </EuiFlexGroup>
         )}
         isInvalid={isInvalid}
-        error={isInvalid ? 'Script is required' : null}
+        error={isInvalid ? errorMsg : null}
       >
         <EuiTextArea
           value={field.script}
           data-test-subj="editorFieldScript"
-          onChange={(e) => { this.onFieldChange('script', e.target.value); }}
+          onChange={this.onScriptChange}
           isInvalid={isInvalid}
         />
       </EuiFormRow>
@@ -424,7 +436,7 @@ export class FieldEditor extends PureComponent {
   }
 
   renderActions() {
-    const { isCreating, field } = this.state;
+    const { isCreating, field, isSaving } = this.state;
     const { redirectAway } = this.props.helpers;
 
     return (
@@ -434,6 +446,7 @@ export class FieldEditor extends PureComponent {
             fill
             onClick={this.saveField}
             isDisabled={this.isSavingDisabled()}
+            isLoading={isSaving}
             data-test-subj="fieldSaveButton"
           >
             {isCreating ? 'Create field' : 'Save field'}
@@ -479,12 +492,31 @@ export class FieldEditor extends PureComponent {
     }
   }
 
-  saveField = () => {
-    const { redirectAway } = this.props.helpers;
+  saveField = async () => {
+    const field = this.state.field.toActualField();
     const { indexPattern } = this.props;
     const { fieldFormatId } = this.state;
 
-    const field = this.state.field.toActualField();
+    this.setState({
+      isSaving: true
+    });
+
+    const isValid = await isScriptValid({
+      name: field.name,
+      lang: field.lang,
+      script: field.script,
+      indexPatternTitle: indexPattern.title
+    });
+
+    if (!isValid) {
+      this.setState({
+        hasScriptError: true,
+        isSaving: false
+      });
+      return;
+    }
+
+    const { redirectAway } = this.props.helpers;
     const index = indexPattern.fields.findIndex(f => f.name === field.name);
 
     if (index > -1) {
@@ -507,10 +539,11 @@ export class FieldEditor extends PureComponent {
   }
 
   isSavingDisabled() {
-    const { field, hasFormatError } = this.state;
+    const { field, hasFormatError, hasScriptError } = this.state;
 
     if(
       hasFormatError
+      || hasScriptError
       || !field.name
       || !field.name.trim()
       || (field.scripted && (!field.script || !field.script.trim()))
