@@ -293,13 +293,16 @@ describe('State Management', () => {
           expect(toastNotifications.list[0].title).to.match(/use the share functionality/i);
         });
 
-        it('throws error linking to github when setting item fails', () => {
+        it('triggers fatal error linking to github when setting item fails', () => {
           const { state, hashedItemStore } = setup({ storeInHash: true });
-          sandbox.stub(FatalErrorNS, 'fatalError');
+          const fatalErrorStub = sandbox.stub(FatalErrorNS, 'fatalError');
           sinon.stub(hashedItemStore, 'setItem').returns(false);
-          expect(() => {
-            state.toQueryParam();
-          }).to.throwError(/github\.com/);
+          state.toQueryParam();
+          sinon.assert.calledOnce(fatalErrorStub);
+          sinon.assert.calledWith(fatalErrorStub, sinon.match(error => (
+            error instanceof Error &&
+            error.message.includes('github.com'))
+          ));
         });
 
         it('translateHashToRison should gracefully fallback if parameter can not be parsed', () => {
