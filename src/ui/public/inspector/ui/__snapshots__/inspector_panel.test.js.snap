@@ -66,6 +66,7 @@ exports[`InspectorPanel should render as expected 1`] = `
               aria-label="Closes this dialog"
               className="euiFlyout__closeButton"
               color="text"
+              data-test-subj="euiFlyoutCloseButton"
               iconType="cross"
               onClick={[Function]}
               type="button"
@@ -73,6 +74,7 @@ exports[`InspectorPanel should render as expected 1`] = `
               <button
                 aria-label="Closes this dialog"
                 className="euiButtonIcon euiButtonIcon--text euiFlyout__closeButton"
+                data-test-subj="euiFlyoutCloseButton"
                 onClick={[Function]}
                 type="button"
               >
