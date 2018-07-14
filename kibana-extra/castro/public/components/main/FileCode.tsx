@@ -27,7 +27,7 @@ export default class FileCode extends React.Component<Props, State> {
 
     private lspMethods: TextDocumentMethods;
     private currentEl: Element;
-    private parent: Element
+    private parent: Element;
 
     constructor(props: Props, context: any) {
         super(props, context);

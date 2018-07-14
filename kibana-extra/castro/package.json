@@ -15,7 +15,8 @@
     "test:server": "plugin-helpers test:server",
     "test:browser": "plugin-helpers test:browser",
     "build": "plugin-helpers build",
-    "start-deps": "node ../../kibana/scripts/es.js snapshot -E path.data=../../data"
+    "start-deps": "node ../../kibana/scripts/es.js snapshot -E path.data=../../data",
+    "debug": " node --inspect ../../kibana/scripts/kibana.js --config ../../config/kibana/kibana.yml  --env.name=development --optimize.enabled=false --plugin-path=."
   },
   "devDependencies": {
     "@elastic/eslint-config-kibana": "link:../../kibana/packages/eslint-config-kibana",

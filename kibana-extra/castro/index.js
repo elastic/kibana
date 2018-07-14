@@ -1,6 +1,7 @@
 import exampleRoute from './server/routes/example';
 import lspRoute from './server/routes/lsp';
 import repositoryRoute from './server/routes/repository';
+import fileRoute from './server/routes/file';
 
 import mappings from './mappings';
 
@@ -40,6 +41,7 @@ export default function (kibana) {
       exampleRoute(server);
       lspRoute(server);
       repositoryRoute(server);
+      fileRoute(server);
     },
 
   });
