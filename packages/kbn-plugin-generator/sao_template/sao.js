@@ -89,6 +89,7 @@ module.exports = function({ name }) {
           kebabCase,
           startCase,
           camelCase,
+          snakeCase,
           name,
         },
         answers
