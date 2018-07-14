@@ -27,6 +27,7 @@ import {
   EuiFormRow,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiRange,
 } from '@elastic/eui';
 
 const toState = ({ control }) => {
@@ -122,6 +123,14 @@ export class RangeControl extends Component {
   };
 
   renderControl() {
+    if (!this.props.control.isEnabled()) {
+      return (
+        <EuiRange
+          disabled
+        />
+      );
+    }
+
     return (
       <EuiFormRow
         isInvalid={!this.state.isRangeValid}
