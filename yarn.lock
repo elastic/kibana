@@ -98,9 +98,9 @@
     tabbable "^1.1.0"
     uuid "^3.1.0"
 
-"@elastic/eui@2.0.0":
-  version "2.0.0"
-  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-2.0.0.tgz#0e66547cb4dcd93cd8fc82d01d4889fd5b6ad8e1"
+"@elastic/eui@3.0.0":
+  version "3.0.0"
+  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-3.0.0.tgz#daa51d5ef32e0c00bcf7b53b7acea91df3a3704c"
   dependencies:
     classnames "^2.2.5"
     core-js "^2.5.1"
