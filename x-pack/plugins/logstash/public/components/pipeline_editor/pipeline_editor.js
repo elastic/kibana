@@ -10,81 +10,26 @@ import { TOOLTIPS } from '../../../common/constants/tooltips';
 import {
   EuiButton,
   EuiCodeEditor,
-  EuiConfirmModal,
   EuiFlexGroup,
   EuiFieldNumber,
   EuiFlexItem,
   EuiFieldText,
   EuiForm,
   EuiFormRow,
-  EuiIconTip,
-  EUI_MODAL_CANCEL_BUTTON,
-  EuiOverlayMask,
   EuiPage,
   EuiPageContent,
   EuiSelect,
   EuiSpacer,
 } from '@elastic/eui';
+import { ConfirmDeletePipelineModal } from './confirm_delete_pipeline_modal';
+import { FlexItemSetting } from './flex_item_setting';
+import { FormLabelWithIconTip } from './form_label_with_icon_tip';
 
 const createOptions = value => ({ text: value, value });
 
 const PIPELINE_ID_REQUIRED_ERR_MSG = 'Pipeline ID is required';
 const PIPELINE_ID_FORMAT_ERR_MSG =
   'Pipeline ID must begin with a letter or underscore and contain only letters, underscores, dashes, and numbers';
-
-function getFormLabelWithTooltipIcon(labelText, tooltipText) {
-  if (!labelText && !tooltipText) { return null; }
-
-  return (
-    <div>
-      <span>{labelText}</span>
-      &nbsp;
-      <EuiIconTip content={tooltipText} type="questionInCircle" />
-    </div>
-  );
-}
-
-function FlexItemSetting(props) {
-  const {
-    formRowLabelText,
-    formRowTooltipText,
-  } = props;
-
-  const label = getFormLabelWithTooltipIcon(formRowLabelText, formRowTooltipText);
-
-  return (
-    <EuiFlexItem grow={false}>
-      <EuiFormRow
-        label={label}
-        hasEmptyLabelSpace={!label}
-      >
-        {props.children}
-      </EuiFormRow>
-    </EuiFlexItem>
-  );
-}
-
-function ConfirmDeletePipelineModal({
-  id,
-  cancelDeleteModal,
-  confirmDeletePipeline,
-}) {
-  return (
-    <EuiOverlayMask>
-      <EuiConfirmModal
-        buttonColor="danger"
-        cancelButtonText="Cancel"
-        confirmButtonText="Delete pipeline"
-        defaultFocusedButton={EUI_MODAL_CANCEL_BUTTON}
-        onCancel={cancelDeleteModal}
-        onConfirm={confirmDeletePipeline}
-        title={`Delete pipeline ${id}`}
-      >
-        <p>You cannot recover a deleted pipeline.</p>
-      </EuiConfirmModal>
-    </EuiOverlayMask>
-  );
-}
 
 export class PipelineEditor extends React.Component {
   constructor(props) {
@@ -383,10 +328,11 @@ export class PipelineEditor extends React.Component {
             </EuiFormRow>
             <EuiFormRow
               label={
-                getFormLabelWithTooltipIcon(
-                  'Pipeline workers',
-                  TOOLTIPS.settings['pipeline.workers']
-                )}
+                <FormLabelWithIconTip
+                  formRowLabelText="Pipeline workers"
+                  formRowTooltipText={TOOLTIPS.settings['pipeline.workers']}
+                />
+              }
             >
               <EuiFieldNumber
                 onChange={e => this.handleNumberChange('pipeline.workers', e.target.value)}
