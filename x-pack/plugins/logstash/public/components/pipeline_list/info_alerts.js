@@ -7,6 +7,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { EuiCallOut, EuiCode } from '@elastic/eui';
+import { PIPELINE_LIST } from '../../../common/constants';
 
 function AddRoleAlert() {
   return (
@@ -32,7 +33,7 @@ function EnableMonitoringAlert() {
 function AlertCallOut(props) {
   return (
     <EuiCallOut
-      title="Only pipelines created in Kibana Management appear here"
+      title={PIPELINE_LIST.INFO_ALERTS.CALL_OUT_TITLE}
       color="warning"
       iconType="help"
     >

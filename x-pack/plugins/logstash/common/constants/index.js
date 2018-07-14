@@ -12,6 +12,8 @@ export { PLUGIN } from './plugin';
 export { ES_SCROLL_SETTINGS } from './es_scroll_settings';
 export { TOOLTIPS } from './tooltips';
 export { PIPELINE } from './pipeline';
+export { PIPELINE_EDITOR } from './pipeline_editor';
+export { PIPELINE_LIST } from './pipeline_list';
 export { MONITORING } from './monitoring';
 export { EDITOR } from './editor';
 export { UPGRADE_FAILURE } from './upgrade_failure';

@@ -23,11 +23,8 @@ import {
   EuiPageContent,
 } from '@elastic/eui';
 
+import { PIPELINE_LIST } from '../../../common/constants/pipeline_list';
 import { InfoAlerts } from './info_alerts';
-
-const INITIAL_PAGE_SIZE = 5;
-const PIPELINE_NOT_CENTRALLY_MANAGED_TOOLTIP_TEXT
-  = `This pipeline wasn't created using Centralized Configuration Management. It can't be managed or edited here.`;
 
 export class PipelineList extends React.Component {
   constructor(props) {
@@ -39,7 +36,7 @@ export class PipelineList extends React.Component {
       isLoading: true,
       isSelectable: false,
       pageIndex: 0,
-      pageSize: INITIAL_PAGE_SIZE,
+      pageSize: PIPELINE_LIST.INITIAL_PAGE_SIZE,
       pipelines: [],
       showAddRoleAlert: false,
       showConfirmDeleteModal: false,
@@ -273,7 +270,7 @@ export class PipelineList extends React.Component {
             <span>
               {id} &nbsp;
               <EuiIconTip
-                content={PIPELINE_NOT_CENTRALLY_MANAGED_TOOLTIP_TEXT}
+                content={PIPELINE_LIST.PIPELINE_NOT_CENTRALLY_MANAGED_TOOLTIP_TEXT}
                 type="questionInCircle"
               />
             </span>
@@ -341,7 +338,7 @@ export class PipelineList extends React.Component {
 
     const selectableMessage = (selectable, { id }) => selectable
       ? `Select pipeline "${id}"`
-      : PIPELINE_NOT_CENTRALLY_MANAGED_TOOLTIP_TEXT;
+      : PIPELINE_LIST.PIPELINE_NOT_CENTRALLY_MANAGED_TOOLTIP_TEXT;
 
     const selectionOptions = isSelectable
       ? {

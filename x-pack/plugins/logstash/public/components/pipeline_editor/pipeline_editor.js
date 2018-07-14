@@ -24,12 +24,9 @@ import {
 import { ConfirmDeletePipelineModal } from './confirm_delete_pipeline_modal';
 import { FlexItemSetting } from './flex_item_setting';
 import { FormLabelWithIconTip } from './form_label_with_icon_tip';
+import { PIPELINE_EDITOR } from '../../../common/constants';
 
 const createOptions = value => ({ text: value, value });
-
-const PIPELINE_ID_REQUIRED_ERR_MSG = 'Pipeline ID is required';
-const PIPELINE_ID_FORMAT_ERR_MSG =
-  'Pipeline ID must begin with a letter or underscore and contain only letters, underscores, dashes, and numbers';
 
 export class PipelineEditor extends React.Component {
   constructor(props) {
@@ -127,10 +124,10 @@ export class PipelineEditor extends React.Component {
   onPipelineIdChange = ({ target: { value } }) => {
     const pipelineIdErrors = [];
     if (!value) {
-      pipelineIdErrors.push(PIPELINE_ID_REQUIRED_ERR_MSG);
+      pipelineIdErrors.push(PIPELINE_EDITOR.ID_REQUIRED_ERR_MSG);
     }
     if (!value.match(this.pipelineIdPattern)) {
-      pipelineIdErrors.push(PIPELINE_ID_FORMAT_ERR_MSG);
+      pipelineIdErrors.push(PIPELINE_EDITOR.ID_FORMAT_ERR_MSG);
     }
 
     this.setState({
