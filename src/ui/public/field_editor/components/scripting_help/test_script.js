@@ -19,7 +19,6 @@
 
 import React, { Component, Fragment } from 'react';
 import PropTypes from 'prop-types';
-import { kfetch } from 'ui/kfetch';
 
 import {
   EuiButton,
@@ -35,59 +34,37 @@ import {
 export class TestScript extends Component {
   state = {
     isLoading: false,
-    sourceFields: [],
+    additionalFields: [],
   }
 
   componentDidMount() {
     if (this.props.script) {
-      this.executeScript();
+      this.previewScript();
     }
   }
 
-  executeScript = async () => {
+  previewScript = async () => {
     const {
       indexPattern,
       lang,
       name,
       script,
+      executeScript,
     } = this.props;
 
     this.setState({
       isLoading: true,
     });
 
-    // Using _msearch because _search with index name in path dorks everything up
-    const header = {
-      index: indexPattern.title,
-      ignore_unavailable: true,
-      timeout: 30000
-    };
-
-    const search = {
-      query: {
-        match_all: {}
-      },
-      script_fields: {
-        [name]: {
-          script: {
-            lang,
-            source: script
-          }
-        }
-      },
-      size: 10,
-    };
-
-    if (this.state.sourceFields.length > 0) {
-      search._source = this.state.sourceFields.map(option => {
+    const scriptResponse = await executeScript({
+      name,
+      lang,
+      script,
+      indexPatternTitle: indexPattern.title,
+      additionalFields: this.state.additionalFields.map(option => {
         return option.value;
-      });
-    }
-
-    const body = `${JSON.stringify(header)}\n${JSON.stringify(search)}\n`;
-    const esResp = await kfetch({ method: 'POST', pathname: '/elasticsearch/_msearch', body });
-    // unwrap _msearch response
-    const scriptResponse = esResp.responses[0];
+      })
+    });
 
     if (scriptResponse.status !== 200) {
       this.setState({
@@ -107,9 +84,9 @@ export class TestScript extends Component {
     });
   }
 
-  onSourceFieldsChange = (selectedOptions) => {
+  onAdditionalFieldsChange = (selectedOptions) => {
     this.setState({
-      sourceFields: selectedOptions
+      additionalFields: selectedOptions
     });
   }
 
@@ -194,14 +171,14 @@ export class TestScript extends Component {
           <EuiComboBox
             placeholder="Select..."
             options={fields}
-            selectedOptions={this.state.sourceFields}
-            onChange={this.onSourceFieldsChange}
+            selectedOptions={this.state.additionalFields}
+            onChange={this.onAdditionalFieldsChange}
             data-test-subj="additionalFieldsSelect"
           />
         </EuiFormRow>
 
         <EuiButton
-          onClick={this.executeScript}
+          onClick={this.previewScript}
           disabled={this.props.script ? false : true}
           isLoading={this.state.isLoading}
           data-test-subj="runScriptButton"
@@ -237,6 +214,7 @@ TestScript.propTypes = {
   lang: PropTypes.string.isRequired,
   name: PropTypes.string,
   script: PropTypes.string,
+  executeScript: PropTypes.func.isRequired,
 };
 
 TestScript.defaultProps = {

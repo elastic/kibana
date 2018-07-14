@@ -36,6 +36,7 @@ export const ScriptingHelpFlyout = ({
   lang,
   name,
   script,
+  executeScript,
 }) => {
   const tabs = [{
     id: 'syntax',
@@ -52,6 +53,7 @@ export const ScriptingHelpFlyout = ({
         lang={lang}
         name={name}
         script={script}
+        executeScript={executeScript}
       />
     ),
   }];
@@ -75,4 +77,5 @@ ScriptingHelpFlyout.propTypes = {
   lang: PropTypes.string.isRequired,
   name: PropTypes.string,
   script: PropTypes.string,
+  executeScript: PropTypes.func.isRequired,
 };

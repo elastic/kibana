@@ -74,7 +74,7 @@ import {
 } from './components/field_format_editor';
 
 import { FIELD_TYPES_BY_LANG, DEFAULT_FIELD_TYPES } from './constants';
-import { copyField, getDefaultFormat } from './lib';
+import { copyField, getDefaultFormat, executeScript } from './lib';
 
 export class FieldEditor extends PureComponent {
   static propTypes = {
@@ -540,6 +540,7 @@ export class FieldEditor extends PureComponent {
             lang={field.lang}
             name={field.name}
             script={field.script}
+            executeScript={executeScript}
           />
           {this.renderName()}
           {this.renderLanguage()}
