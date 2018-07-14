@@ -40,7 +40,6 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.settings.clickScriptedFieldsTab();
       await PageObjects.settings.clickAddScriptedField();
       await PageObjects.settings.setScriptedFieldName(SCRIPTED_FIELD_NAME);
-
     });
 
     after(async function afterAll() {

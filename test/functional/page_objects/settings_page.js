@@ -545,7 +545,11 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
         await PageObjects.visualize.setComboBox('additionalFieldsSelect', additionalField);
         await testSubjects.click('runScriptButton');
       }
-      return await testSubjects.getVisibleText('scriptedFieldPreview');
+      let scriptResults;
+      await retry.try(async () => {
+        scriptResults = await testSubjects.getVisibleText('scriptedFieldPreview');
+      });
+      return scriptResults;
     }
 
     async importFile(path, overwriteAll = true) {
