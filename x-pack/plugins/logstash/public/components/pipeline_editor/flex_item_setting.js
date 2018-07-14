@@ -6,31 +6,23 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
-import {
-  EuiFlexItem,
-  EuiFormRow,
-} from '@elastic/eui';
+import { EuiFlexItem, EuiFormRow } from '@elastic/eui';
 import { FormLabelWithIconTip } from './form_label_with_icon_tip';
 
 export function FlexItemSetting(props) {
-  const {
-    formRowLabelText,
-    formRowTooltipText,
-  } = props;
+  const { formRowLabelText, formRowTooltipText } = props;
 
-  const label = (
-    <FormLabelWithIconTip
-      formRowLabelText={formRowLabelText}
-      formRowTooltipText={formRowTooltipText}
-    />
-  );
+  const label =
+    formRowLabelText && formRowTooltipText ? (
+      <FormLabelWithIconTip
+        formRowLabelText={formRowLabelText}
+        formRowTooltipText={formRowTooltipText}
+      />
+    ) : null;
 
   return (
     <EuiFlexItem grow={false}>
-      <EuiFormRow
-        label={label}
-        hasEmptyLabelSpace={!label}
-      >
+      <EuiFormRow label={label} hasEmptyLabelSpace={!label}>
         {props.children}
       </EuiFormRow>
     </EuiFlexItem>

@@ -8,14 +8,12 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { EuiIconTip } from '@elastic/eui';
 
-export function FormLabelWithIconTip({ labelText, tooltipText }) {
-  if (!labelText && !tooltipText) { return null; }
-
+export function FormLabelWithIconTip({ formRowLabelText, formRowTooltipText }) {
   return (
     <div>
-      <span>{labelText}</span>
+      <span>{formRowLabelText}</span>
       &nbsp;
-      <EuiIconTip content={tooltipText} type="questionInCircle" />
+      <EuiIconTip content={formRowTooltipText} type="questionInCircle" />
     </div>
   );
 }
