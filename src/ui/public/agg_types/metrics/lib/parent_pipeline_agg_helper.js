@@ -22,7 +22,7 @@ import _ from 'lodash';
 import { AggConfig } from '../../../vis/agg_config';
 import { Schemas } from '../../../vis/editors/default/schemas';
 import { parentPipelineAggController } from './parent_pipeline_agg_controller';
-import { parentPipelineAggWritter } from './parent_pipeline_agg_writter';
+import { parentPipelineAggWriter } from './parent_pipeline_agg_writer';
 import { forwardModifyAggConfigOnSearchRequestStart } from './nested_agg_helpers';
 
 
@@ -70,7 +70,7 @@ const parentPipelineAggHelper = {
         editor: metricAggTemplate,
         default: 'custom',
         controller: parentPipelineAggController,
-        write: parentPipelineAggWritter
+        write: parentPipelineAggWriter
       }
     ];
   },
@@ -79,7 +79,7 @@ const parentPipelineAggHelper = {
     if (agg.params.customMetric) {
       subAgg = agg.params.customMetric;
     } else {
-      subAgg = agg.vis.getAggConfig().byId[agg.params.metricAgg];
+      subAgg = agg._aggs.byId[agg.params.metricAgg];
     }
     return subAgg.type.getFormat(subAgg);
   }
