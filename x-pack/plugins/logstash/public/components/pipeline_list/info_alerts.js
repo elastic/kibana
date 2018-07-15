@@ -6,42 +6,9 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
-import { EuiCallOut, EuiCode } from '@elastic/eui';
-import { PIPELINE_LIST } from '../../../common/constants';
-
-function AddRoleAlert() {
-  return (
-    <p>
-      <strong>Grant additional privileges. </strong>
-      In Kibana Management, assign the <EuiCode>monitoring_user</EuiCode> role to your Kibana user.
-    </p>
-  );
-}
-
-function EnableMonitoringAlert() {
-  return (
-    <p>
-      <strong>Enable monitoring. </strong>
-      In the <EuiCode>kibana.yml</EuiCode> file, set
-      <EuiCode>xpack.monitoring.enabled</EuiCode> and
-      <EuiCode>xpack.monitoring.ui.enabled</EuiCode> to
-      <EuiCode>true</EuiCode>.
-    </p>
-  );
-}
-
-function AlertCallOut(props) {
-  return (
-    <EuiCallOut
-      title={PIPELINE_LIST.INFO_ALERTS.CALL_OUT_TITLE}
-      color="warning"
-      iconType="help"
-    >
-      <p>How can I see additional pipelines?</p>
-      {props.children}
-    </EuiCallOut>
-  );
-}
+import { AddRoleAlert } from './add_role_alert';
+import { AlertCallOut } from './alert_call_out';
+import { EnableMonitoringAlert } from './enable_monitoring_alert';
 
 export function InfoAlerts({ showAddRoleAlert, showEnableMonitoringAlert }) {
   return showAddRoleAlert || showEnableMonitoringAlert ? (
