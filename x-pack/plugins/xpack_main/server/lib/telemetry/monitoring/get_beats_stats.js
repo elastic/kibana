@@ -28,6 +28,8 @@ const getBaseStats = () => ({
   },
 });
 
+
+
 /*
  * Update a clusters object with processed beat stats
  * @param {Array} results - array of Beats docs from ES
@@ -46,58 +48,62 @@ export function processResults(results = [], { clusters, clusterHostSets, cluste
       clusterModuleSets[clusterUuid] = new Set();
     }
 
-    // beats_stats
-    const { versions, types, outputs } = clusters[clusterUuid];
+    const processBeatsStatsResults = () => {
+      const { versions, types, outputs } = clusters[clusterUuid];
+      const thisVersion = get(hit, '_source.beats_stats.beat.version');
+      if (thisVersion !== undefined) {
+        const thisVersionAccum = versions[thisVersion] || 0;
+        versions[thisVersion] = thisVersionAccum + 1;
+      }
+
+      const thisType = get(hit, '_source.beats_stats.beat.type');
+      if (thisType !== undefined) {
+        const thisTypeAccum = types[thisType] || 0;
+        types[thisType] = thisTypeAccum + 1;
+      }
+
+      const thisOutput = get(hit, '_source.beats_stats.metrics.libbeat.output.type');
+      if (thisOutput !== undefined) {
+        const thisOutputAccum = outputs[thisOutput] || 0;
+        outputs[thisOutput] = thisOutputAccum + 1;
+      }
+
+      const thisEvents = get(hit, '_source.beats_stats.metrics.libbeat.pipeline.events.published');
+      if (thisEvents !== undefined) {
+        clusters[clusterUuid].eventsPublished += thisEvents;
+      }
+
+      const thisHost = get(hit, '_source.beats_stats.beat.host');
+      if (thisHost !== undefined) {
+        const hostsMap = clusterHostSets[clusterUuid];
+        hostsMap.add(thisHost);
+        clusters[clusterUuid].hosts = hostsMap.size;
+      }
+    };
+
+    const processBeatsStateResults = () => {
+      const stateInput = get(hit, '_source.beats_state.state.input');
+      if (stateInput !== undefined) {
+        const inputSet = clusterInputSets[clusterUuid];
+        stateInput.names.forEach(name => inputSet.add(name));
+        clusters[clusterUuid].input.names = Array.from(inputSet);
+        clusters[clusterUuid].input.count += stateInput.count;
+      }
+
+      const stateModule = get(hit, '_source.beats_state.state.module');
+      if (stateModule !== undefined) {
+        const moduleSet = clusterModuleSets[clusterUuid];
+        stateModule.names.forEach(name => moduleSet.add(name));
+        clusters[clusterUuid].module.names = Array.from(moduleSet);
+        clusters[clusterUuid].module.count += stateModule.count;
+      }
+    };
 
     if (get(hit, '_source.type') === 'beats_stats') {
       clusters[clusterUuid].count += 1;
-    }
-
-    const thisVersion = get(hit, '_source.beats_stats.beat.version');
-    if (thisVersion !== undefined) {
-      const thisVersionAccum = versions[thisVersion] || 0;
-      versions[thisVersion] = thisVersionAccum + 1;
-    }
-
-    const thisType = get(hit, '_source.beats_stats.beat.type');
-    if (thisType !== undefined) {
-      const thisTypeAccum = types[thisType] || 0;
-      types[thisType] = thisTypeAccum + 1;
-    }
-
-    const thisOutput = get(hit, '_source.beats_stats.metrics.libbeat.output.type');
-    if (thisOutput !== undefined) {
-      const thisOutputAccum = outputs[thisOutput] || 0;
-      outputs[thisOutput] = thisOutputAccum + 1;
-    }
-
-    const thisEvents = get(hit, '_source.beats_stats.metrics.libbeat.pipeline.events.published');
-    if (thisEvents !== undefined) {
-      clusters[clusterUuid].eventsPublished += thisEvents;
-    }
-
-    const thisHost = get(hit, '_source.beats_stats.beat.host');
-    if (thisHost !== undefined) {
-      const hostsMap = clusterHostSets[clusterUuid];
-      hostsMap.add(thisHost);
-      clusters[clusterUuid].hosts = hostsMap.size;
-    }
-
-    // beats_state
-    const stateInput = get(hit, '_source.beats_state.state.input');
-    if (stateInput !== undefined) {
-      const inputSet = clusterInputSets[clusterUuid];
-      stateInput.names.forEach(name => inputSet.add(name));
-      clusters[clusterUuid].input.names = Array.from(inputSet);
-      clusters[clusterUuid].input.count += stateInput.count;
-    }
-
-    const stateModule = get(hit, '_source.beats_state.state.module');
-    if (stateModule !== undefined) {
-      const moduleSet = clusterModuleSets[clusterUuid];
-      stateModule.names.forEach(name => moduleSet.add(name));
-      clusters[clusterUuid].module.names = Array.from(moduleSet);
-      clusters[clusterUuid].module.count += stateModule.count;
+      processBeatsStatsResults();
+    } else {
+      processBeatsStateResults();
     }
   });
 }
