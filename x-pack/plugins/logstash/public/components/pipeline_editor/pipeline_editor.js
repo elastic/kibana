@@ -26,8 +26,6 @@ import { FlexItemSetting } from './flex_item_setting';
 import { FormLabelWithIconTip } from './form_label_with_icon_tip';
 import { PIPELINE_EDITOR } from '../../../common/constants';
 
-const createOptions = value => ({ text: value, value });
-
 export class PipelineEditor extends React.Component {
   constructor(props) {
     super(props);
@@ -42,33 +40,6 @@ export class PipelineEditor extends React.Component {
       username,
     } = this.props;
 
-    this.queueTypes = ['memory', 'persisted'].map(createOptions);
-    this.units = [
-      {
-        text: 'bytes',
-        value: 'b'
-      },
-      {
-        text: 'kilobytes',
-        value: 'kb'
-      },
-      {
-        text: 'megabytes',
-        value: 'mb'
-      },
-      {
-        text: 'gigabytes',
-        value: 'gb'
-      },
-      {
-        text: 'terabytes',
-        value: 'tb'
-      },
-      {
-        text: 'petabytes',
-        value: 'pb'
-      },
-    ];
     // TODO: clean up this regex pattern
     this.pipelineIdPattern = /[a-zA-Z_][a-zA-Z0-9_\-]*/;
 
@@ -189,12 +160,10 @@ export class PipelineEditor extends React.Component {
 
   handleNumberChange = (settingName, value) => {
     const numberValue = parseInt(value, 10);
-    console.log(`number value: ${numberValue}, value: ${value}`);
     this.handleSettingChange(settingName, isNaN(numberValue) ? value : numberValue);
   }
 
   handleSettingChange = (settingName, value) => {
-    console.log(`setting name: ${settingName}, value: ${value}`);
     const settings = { ...this.state.pipeline.settings };
     settings[settingName] = value;
     this.setState({
@@ -363,7 +332,7 @@ export class PipelineEditor extends React.Component {
               >
                 <EuiSelect
                   onChange={e => this.handleSettingChange('queue.type', e.target.value)}
-                  options={this.queueTypes}
+                  options={PIPELINE_EDITOR.QUEUE_TYPES}
                   value={this.state.pipeline.settings['queue.type']}
                 />
               </FlexItemSetting>
@@ -379,7 +348,7 @@ export class PipelineEditor extends React.Component {
               <FlexItemSetting>
                 <EuiSelect
                   onChange={e => this.handleSettingChange('queue.max_bytes.units', e.target.value)}
-                  options={this.units}
+                  options={PIPELINE_EDITOR.UNITS}
                   value={this.state.pipeline.settings['queue.max_bytes.units']}
                 />
               </FlexItemSetting>
