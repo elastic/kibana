@@ -44,10 +44,6 @@ export class Metrics {
       response_times: {},
       requests: {
         status_codes: {}
-      },
-      sockets: {
-        http: {},
-        https: {}
       }
     };
   }
@@ -105,7 +101,6 @@ export class Metrics {
       },
       requests: keysToSnakeCaseShallow(get(hapiEvent, ['requests', port])),
       concurrent_connections: get(hapiEvent, ['concurrents', port]),
-      sockets: get(hapiEvent, 'sockets')
     };
   }
 
