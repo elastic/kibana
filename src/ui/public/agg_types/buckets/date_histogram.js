@@ -120,8 +120,8 @@ export const dateHistogramBucketAgg = new BucketAggType({
       modifyAggConfigOnSearchRequestStart: function (agg) {
         setBounds(agg, true);
       },
-      write: function (agg, output) {
-        setBounds(agg);
+      write: function (agg, output, aggs) {
+        setBounds(agg, true);
         agg.buckets.setInterval(getInterval(agg));
 
         const interval = agg.buckets.getInterval();
@@ -136,8 +136,8 @@ export const dateHistogramBucketAgg = new BucketAggType({
         }
 
         const scaleMetrics = interval.scaled && interval.scale < 1;
-        if (scaleMetrics) {
-          const all = _.every(agg.vis.getAggConfig().bySchemaGroup.metrics, function (agg) {
+        if (scaleMetrics && aggs) {
+          const all = _.every(aggs.bySchemaGroup.metrics, function (agg) {
             return agg.type && agg.type.isScalable();
           });
           if (all) {

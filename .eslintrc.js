@@ -3,10 +3,7 @@ const { readdirSync } = require('fs');
 const dedent = require('dedent');
 
 module.exports = {
-  extends: [
-    '@elastic/eslint-config-kibana',
-    '@elastic/eslint-config-kibana/jest',
-  ],
+  extends: ['@elastic/eslint-config-kibana', '@elastic/eslint-config-kibana/jest'],
 
   settings: {
     'import/resolver': {
@@ -82,15 +79,12 @@ module.exports = {
             forceNode: false,
             rootPackageName: 'kibana',
             kibanaPath: '.',
-            pluginMap: readdirSync(resolve(__dirname, 'x-pack/plugins')).reduce(
-              (acc, name) => {
-                if (!name.startsWith('_')) {
-                  acc[name] = `x-pack/plugins/${name}`;
-                }
-                return acc;
-              },
-              {}
-            ),
+            pluginMap: readdirSync(resolve(__dirname, 'x-pack/plugins')).reduce((acc, name) => {
+              if (!name.startsWith('_')) {
+                acc[name] = `x-pack/plugins/${name}`;
+              }
+              return acc;
+            }, {}),
           },
         },
       },
