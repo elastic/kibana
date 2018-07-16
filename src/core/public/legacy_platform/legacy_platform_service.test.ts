@@ -65,17 +65,6 @@ beforeEach(() => {
 
 describe('#start()', () => {
   describe('default', () => {
-    it('does not return a start contract', () => {
-      const legacyPlatform = new LegacyPlatformService({
-        ...defaultParams,
-      });
-
-      const startContract = legacyPlatform.start({
-        injectedMetadata: injectedMetadataStartContract,
-      });
-      expect(startContract).toBe(undefined);
-    });
-
     it('passes legacy metadata from injectedVars to ui/metadata', () => {
       const legacyMetadata = { isLegacyMetadata: true };
       injectedMetadataStartContract.getLegacyMetadata.mockReturnValue(legacyMetadata);

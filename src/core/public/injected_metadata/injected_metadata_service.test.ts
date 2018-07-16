@@ -20,17 +20,6 @@
 import { InjectedMetadataService } from './injected_metadata_service';
 
 describe('#start()', () => {
-  it('returns the start contract', () => {
-    const injectedMetadata = new InjectedMetadataService({
-      injectedMetadata: {} as any,
-    });
-
-    const contract = injectedMetadata.start();
-    expect(contract).toEqual({
-      getLegacyMetadata: expect.any(Function),
-    });
-  });
-
   it('deeply freezes its injectedMetadata param', () => {
     const params = {
       injectedMetadata: { foo: true } as any,

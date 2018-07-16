@@ -100,16 +100,22 @@ describe('constructor', () => {
 });
 
 describe('#start()', () => {
-  it('calls lifecycleSystem#start() and injectedMetadata#start()', () => {
-    const core = new CoreSystem({
+  let core;
+
+  beforeAll(() => {
+    core = new CoreSystem({
       ...defaultCoreSystemParams,
     });
 
-    expect(core.start()).toBe(undefined);
+    core.start();
+  });
 
+  it('calls injectedMetadata#start()', () => {
     expect(MockInjectedMetadataService.mock.instances[0].start).toHaveBeenCalledTimes(1);
     expect(MockInjectedMetadataService.mock.instances[0].start).toHaveBeenCalledWith();
+  });
 
+  it('calls lifecycleSystem#start()', () => {
     expect(MockLegacyPlatformService.mock.instances[0].start).toHaveBeenCalledTimes(1);
     expect(MockLegacyPlatformService.mock.instances[0].start).toHaveBeenCalledWith({
       injectedMetadata: mockInjectedMetadataStartContract,
