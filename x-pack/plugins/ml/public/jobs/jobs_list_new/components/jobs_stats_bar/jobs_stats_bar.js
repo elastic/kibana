@@ -106,7 +106,7 @@ export class JobStatsBar extends Component {
     const stats = Object.keys(jobStats).map(k => jobStats[k]);
 
     return (
-      <div className="jobs-stats-bar-new">
+      <div className="jobs-stats-bar">
         {
           stats.filter(s => (s.show)).map(s => <Stat key={s.label} stat={s} />)
         }
