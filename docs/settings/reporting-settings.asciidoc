@@ -57,7 +57,7 @@ How often idle workers poll the index for pending jobs. Defaults to `3000` (3 se
 [[xpack-reporting-q-timeout]]`xpack.reporting.queue.timeout`::
 How long each worker has to produce a report. If your machine is slow or under
 heavy load, you might need to increase this timeout. Specified in milliseconds.
-Defaults to `30000` (30 seconds).
+Defaults to `120000` (two minutes).
 
 [float]
 [[reporting-capture-settings]]

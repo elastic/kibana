@@ -74,7 +74,7 @@ export const reporting = (kibana) => {
           indexInterval: Joi.string().default('week'),
           pollInterval: Joi.number().integer().default(3000),
           pollIntervalErrorMultiplier: Joi.number().integer().default(10),
-          timeout: Joi.number().integer().default(30000),
+          timeout: Joi.number().integer().default(120000),
         }).default(),
         capture: Joi.object({
           record: Joi.boolean().default(false),
