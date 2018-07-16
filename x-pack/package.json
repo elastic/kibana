@@ -103,7 +103,7 @@
     "d3-scale": "1.0.6",
     "dedent": "^0.7.0",
     "dragselect": "1.7.17",
-    "elasticsearch": "13.0.1",
+    "elasticsearch": "^14.1.0",
     "extract-zip": "1.5.0",
     "font-awesome": "4.4.0",
     "get-port": "2.1.0",
