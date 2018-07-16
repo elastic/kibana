@@ -48,9 +48,7 @@ export class FilterListUsagePopover extends Component {
 
     const linkText = `${entityValues.length} ${entityType}${(entityValues.length !== 1) ? 's' : ''}`;
 
-    const listItems = entityValues.map((value) =>
-      <li key={value}>{value}</li>
-    );
+    const listItems = entityValues.map(value => (<li key={value}>{value}</li>));
 
     const button = (
       <EuiButtonEmpty

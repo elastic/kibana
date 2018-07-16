@@ -6,7 +6,7 @@
 
 
 /*
- * React component for the paged grid of filter list items.
+ * React component for a paged grid of items.
  */
 
 import PropTypes from 'prop-types';
@@ -20,15 +20,17 @@ import {
   EuiText
 } from '@elastic/eui';
 
-import { FilterListItemsPagination } from './filter_list_items_pagination';
+import { ItemsGridPagination } from './items_grid_pagination';
 
-const NUMBER_COLUMNS = 4;
+import './styles/main.less';
 
-export function FilterListItemsGrid({
+export function ItemsGrid({
+  numberColumns,
   totalItemCount,
   items,
   selectedItems,
   itemsPerPage,
+  itemsPerPageOptions,
   setItemsPerPage,
   setItemSelected,
   activePage,
@@ -39,7 +41,7 @@ export function FilterListItemsGrid({
       <EuiFlexGroup justifyContent="spaceAround">
         <EuiFlexItem grow={false}>
           <EuiText>
-            <h4>{(totalItemCount === 0) ? 'No items have been added to the filter list' : 'No matching items'}</h4>
+            <h4>{(totalItemCount === 0) ? 'No items have been added' : 'No matching items'}</h4>
           </EuiText>
         </EuiFlexItem>
       </EuiFlexGroup>
@@ -50,10 +52,9 @@ export function FilterListItemsGrid({
   const pageItems = items.slice(startIndex, startIndex + itemsPerPage);
   const gridItems = pageItems.map((item, index) => {
     return (
-      <EuiFlexItem key={`filter_item_${index}`}>
+      <EuiFlexItem key={`ml_grid_item_${index}`}>
         <EuiCheckbox
-          key={`filter_item_${index}`}
-          id={`filter_item_${index}`}
+          id={`ml_grid_item_${index}`}
           label={item}
           checked={(selectedItems.indexOf(item) >= 0)}
           onChange={(e) => { setItemSelected(item, e.target.checked); }}
@@ -65,15 +66,16 @@ export function FilterListItemsGrid({
   return (
     <div>
       <EuiFlexGrid
-        columns={NUMBER_COLUMNS}
+        columns={numberColumns}
         className="eui-textBreakWord"
         gutterSize="m"
       >
         {gridItems}
       </EuiFlexGrid>
-      <FilterListItemsPagination
+      <ItemsGridPagination
         itemCount={items.length}
         itemsPerPage={itemsPerPage}
+        itemsPerPageOptions={itemsPerPageOptions}
         setItemsPerPage={setItemsPerPage}
         activePage={activePage}
         setActivePage={setActivePage}
@@ -82,13 +84,21 @@ export function FilterListItemsGrid({
   );
 
 }
-FilterListItemsGrid.propTypes = {
+ItemsGrid.propTypes = {
+  numberColumns: PropTypes.oneOf([2, 3, 4]),    // In line with EuiFlexGrid which supports 2, 3 or 4 columns.
   totalItemCount: PropTypes.number.isRequired,
   items: PropTypes.array,
   selectedItems: PropTypes.array,
-  itemsPerPage: PropTypes.number.isRequired,
+  itemsPerPage: PropTypes.number,
+  itemsPerPageOptions: PropTypes.arrayOf(PropTypes.number),
   setItemsPerPage: PropTypes.func.isRequired,
   setItemSelected: PropTypes.func.isRequired,
   activePage: PropTypes.number.isRequired,
   setActivePage: PropTypes.func.isRequired
+};
+
+ItemsGrid.defaultProps = {
+  numberColumns: 4,
+  itemsPerPage: 50,
+  itemsPerPageOptions: [50, 100, 500, 1000],
 };

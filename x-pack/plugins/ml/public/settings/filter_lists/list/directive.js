@@ -6,6 +6,8 @@
 
 
 import 'ngreact';
+import React from 'react';
+import ReactDOM from 'react-dom';
 
 import { uiModules } from 'ui/modules';
 const module = uiModules.get('apps/ml', ['react']);
@@ -31,19 +33,23 @@ uiRoutes
       CheckLicense: checkLicense,
       privileges: checkGetJobsPrivilege,
       mlNodeCount: getMlNodeCount,
-      initPromise: initPromise(true)
+      initPromise: initPromise(false)
     }
   });
 
 
 import { FilterLists } from './filter_lists';
 
-module.directive('mlFilterLists', function ($injector) {
-  const reactDirective = $injector.get('reactDirective');
-
-  return reactDirective(
-    FilterLists,
-    undefined,
-    { restrict: 'E' }
-  );
+module.directive('mlFilterLists', function () {
+  return {
+    restrict: 'E',
+    replace: false,
+    scope: {},
+    link: function (scope, element) {
+      ReactDOM.render(
+        React.createElement(FilterLists),
+        element[0]
+      );
+    }
+  };
 });

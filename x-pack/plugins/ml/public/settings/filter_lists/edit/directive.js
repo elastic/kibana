@@ -33,7 +33,7 @@ uiRoutes
       CheckLicense: checkLicense,
       privileges: checkGetJobsPrivilege,
       mlNodeCount: getMlNodeCount,
-      initPromise: initPromise(true)
+      initPromise: initPromise(false)
     }
   })
   .when('/settings/filter_lists/edit_filter_list/:filterId', {
@@ -42,7 +42,7 @@ uiRoutes
       CheckLicense: checkLicense,
       privileges: checkGetJobsPrivilege,
       mlNodeCount: getMlNodeCount,
-      initPromise: initPromise(true)
+      initPromise: initPromise(false)
     }
   });
 

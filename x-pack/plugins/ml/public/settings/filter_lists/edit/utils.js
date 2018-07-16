@@ -13,7 +13,41 @@ export function isValidFilterListId(id) {
   return (id !== undefined) && (id.length > 0) && isJobIdValid(id);
 }
 
-export function addFilterFist(filterId, description, items) {
+
+// Saves a filter list, running an update if the supplied loadedFilterList, holding the
+// original filter list to which edits are being applied, is defined with a filter_id property.
+export function saveFilterList(filterId, description, items, loadedFilterList)  {
+  return new Promise((resolve, reject) => {
+    if (loadedFilterList === undefined || loadedFilterList.filter_id === undefined) {
+      // Create a new filter.
+      addFilterList(filterId,
+        description,
+        items
+      )
+        .then((newFilter) => {
+          resolve(newFilter);
+        })
+        .catch((error) => {
+          reject(error);
+        });
+    } else {
+      // Edit to existing filter.
+      updateFilterList(
+        loadedFilterList,
+        description,
+        items)
+        .then((updatedFilter) => {
+          resolve(updatedFilter);
+        })
+        .catch((error) => {
+          reject(error);
+        });
+
+    }
+  });
+}
+
+export function addFilterList(filterId, description, items) {
   return new Promise((resolve, reject) => {
 
     // First check the filterId isn't already in use by loading the current list of filters.

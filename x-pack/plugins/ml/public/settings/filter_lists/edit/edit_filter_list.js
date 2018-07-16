@@ -30,11 +30,10 @@ import { toastNotifications } from 'ui/notify';
 
 import { EditFilterListHeader } from './header';
 import { EditFilterListToolbar } from './toolbar';
-import { FilterListItemsGrid } from '../components/filter_list_items_grid';
+import { ItemsGrid } from 'plugins/ml/components/items_grid';
 import {
   isValidFilterListId,
-  addFilterFist,
-  updateFilterList
+  saveFilterList
 } from './utils';
 import { ml } from 'plugins/ml/services/ml_api_service';
 
@@ -241,43 +240,23 @@ export class EditFilterList extends Component {
   save = () => {
     this.setState({ saveInProgress: true });
 
-    const filterId = this.props.filterId;
-    if (filterId !== undefined) {
-      // Edit to existing filter.
-      const { loadedFilter, description, items,  } = this.state;
-
-      updateFilterList(
-        loadedFilter,
-        description,
-        items)
-        .then((updatedFilter) => {
-          this.setLoadedFilterState(updatedFilter);
-          returnToFiltersList();
-        })
-        .catch((resp) => {
-          console.log(`Error saving changes to filter ${filterId}:`, resp);
-          toastNotifications.addDanger(`An error occurred saving edits to filter ${filterId}`);
-          this.setState({ saveInProgress: false });
-        });
-
-    } else {
-      // Create a new filter.
-      const { newFilterId, description, items } = this.state;
-      addFilterFist(
-        newFilterId,
-        description,
-        items
-      )
-        .then((newFilter) => {
-          this.setLoadedFilterState(newFilter);
-          returnToFiltersList();
-        })
-        .catch((resp) => {
-          console.log(`Error saving new filter:`, resp);
-          toastNotifications.addDanger('An error occurred saving the new filter');
-          this.setState({ saveInProgress: false });
-        });
-    }
+    const { loadedFilter, newFilterId, description, items } = this.state;
+    const filterId = (this.props.filterId !== undefined) ? this.props.filterId : newFilterId;
+    saveFilterList(
+      filterId,
+      description,
+      items,
+      loadedFilter
+    )
+      .then((savedFilter) => {
+        this.setLoadedFilterState(savedFilter);
+        returnToFiltersList();
+      })
+      .catch((resp) => {
+        console.log(`Error saving filter ${filterId}:`, resp);
+        toastNotifications.addDanger(`An error occurred saving filter ${filterId}`);
+        this.setState({ saveInProgress: false });
+      });
   }
 
   render() {
@@ -319,7 +298,7 @@ export class EditFilterList extends Component {
             selectedItemCount={selectedItems.length}
           />
           <EuiSpacer size="xl" />
-          <FilterListItemsGrid
+          <ItemsGrid
             totalItemCount={totalItemCount}
             items={matchingItems}
             selectedItems={selectedItems}

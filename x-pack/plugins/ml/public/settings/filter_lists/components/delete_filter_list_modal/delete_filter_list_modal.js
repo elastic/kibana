@@ -16,8 +16,7 @@ import {
   EUI_MODAL_CONFIRM_BUTTON,
 } from '@elastic/eui';
 
-import { toastNotifications } from 'ui/notify';
-import { ml } from 'plugins/ml/services/ml_api_service';
+import { deleteFilterLists } from './delete_filter_lists';
 
 /*
  * React modal for confirming deletion of filter lists.
@@ -36,40 +35,18 @@ export class DeleteFilterListModal extends Component {
   }
 
   showModal = () => {
-    this.setState({
-      isModalVisible: true,
-    });
+    this.setState({ isModalVisible: true });
   }
 
-  deleteFilterLists = () => {
+  onConfirmDelete = () => {
     this.doDelete();
   }
 
   async doDelete() {
-    // Delete each of the specified filter lists in turn, waiting for each response
-    // before deleting the next to minimize load on the cluster.
     const { selectedFilterLists, refreshFilterLists } = this.props;
-
-    const messageId = `${(selectedFilterLists.length > 1) ?
-      `${selectedFilterLists.length} filter lists` : selectedFilterLists[0].filter_id}`;
-    toastNotifications.add(`Deleting ${messageId}`);
-
-    for(const filterList of selectedFilterLists) {
-      const filterId = filterList.filter_id;
-      try {
-        await ml.filters.deleteFilter(filterId);
-      } catch (resp) {
-        console.log('Error deleting filter list:', resp);
-        let errorMessage = `An error occurred deleting filter list ${filterList.filter_id}`;
-        if (resp.message) {
-          errorMessage += ` : ${resp.message}`;
-        }
-        toastNotifications.addDanger(errorMessage);
-      }
-    }
+    await deleteFilterLists(selectedFilterLists);
 
     refreshFilterLists();
-    toastNotifications.addSuccess(`${messageId} deleted`);
     this.closeModal();
   }
 
@@ -86,7 +63,7 @@ export class DeleteFilterListModal extends Component {
             title={title}
             className="eui-textBreakWord"
             onCancel={this.closeModal}
-            onConfirm={this.deleteFilterLists}
+            onConfirm={this.onConfirmDelete}
             cancelButtonText="Cancel"
             confirmButtonText="Delete"
             buttonColor="danger"

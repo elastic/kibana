@@ -60,6 +60,8 @@ export class EditDescriptionPopover extends Component {
   }
 
   render() {
+    const { isPopoverOpen, value } = this.state;
+
     const button = (
       <EuiButtonIcon
         size="s"
@@ -76,7 +78,7 @@ export class EditDescriptionPopover extends Component {
           id="filter_list_description_popover"
           ownFocus
           button={button}
-          isOpen={this.state.isPopoverOpen}
+          isOpen={isPopoverOpen}
           closePopover={this.closePopover}
         >
           <div style={{ width: '300px' }}>
@@ -86,7 +88,7 @@ export class EditDescriptionPopover extends Component {
               >
                 <EuiFieldText
                   name="filter_list_description"
-                  value={this.state.value}
+                  value={value}
                   onChange={this.onChange}
                 />
               </EuiFormRow>

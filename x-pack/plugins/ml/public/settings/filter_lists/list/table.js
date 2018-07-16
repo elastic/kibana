@@ -27,6 +27,33 @@ import chrome from 'ui/chrome';
 import { DeleteFilterListModal } from '../components/delete_filter_list_modal';
 
 
+function UsedByIcon({ usedBy }) {
+  // Renders a tick or cross in the 'usedBy' column to indicate whether
+  // the filter list is in use in a detectors in any jobs.
+  let icon;
+  if (usedBy !== undefined && usedBy.jobs.length > 0) {
+    icon = <EuiIcon type="check" aria-label="In use"/>;
+  } else {
+    icon = <EuiIcon type="cross" aria-label="Not in use"/>;
+  }
+
+  return icon;
+}
+UsedByIcon.propTypes = {
+  usedBy: PropTypes.object
+};
+
+function NewFilterButton() {
+  return (
+    <EuiButton
+      key="new_filter_list"
+      href={`${chrome.getBasePath()}/app/ml#/settings/filter_lists/new_filter_list`}
+    >
+      New
+    </EuiButton>
+  );
+}
+
 function getColumns() {
 
   const columns = [
@@ -53,32 +80,16 @@ function getColumns() {
     {
       field: 'used_by',
       name: 'In use',
-      render: (usedBy) => {
-        let icon;
-        if (usedBy !== undefined && usedBy.jobs.length > 0) {
-          icon = <EuiIcon type="check" aria-label="In use"/>;
-        } else {
-          icon = <EuiIcon type="cross" aria-label="Not in use"/>;
-        }
-
-        return icon;
-      },
+      render: (usedBy) => (
+        <UsedByIcon
+          usedBy={usedBy}
+        />
+      ),
       sortable: true
     }
   ];
 
   return columns;
-}
-
-function NewFilterButton() {
-  return (
-    <EuiButton
-      key="new_filter_list"
-      href={`${chrome.getBasePath()}/app/ml#/settings/filter_lists/new_filter_list`}
-    >
-      New
-    </EuiButton>
-  );
 }
 
 function renderToolsRight(selectedFilterLists, refreshFilterLists) {

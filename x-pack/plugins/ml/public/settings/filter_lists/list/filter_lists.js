@@ -50,15 +50,9 @@ export class FilterLists extends Component {
         // Check selected filter lists still exist.
         this.setState((prevState) => {
           const loadedFilterIds = filterLists.map(filterList => filterList.filter_id);
-          const selectedFilterLists = [...prevState.selectedFilterLists];
-
-          // Iterate in reverse to preserve indices if removing items.
-          for (let i = selectedFilterLists.length - 1; i >= 0; i--) {
-            const filterList = selectedFilterLists[i];
-            if (loadedFilterIds.indexOf(filterList.filter_id) === -1) {
-              selectedFilterLists.splice(i, 1);
-            }
-          }
+          const selectedFilterLists = prevState.selectedFilterLists.filter((filterList) => {
+            return (loadedFilterIds.indexOf(filterList.filter_id) !== -1);
+          });
 
           return {
             filterLists,

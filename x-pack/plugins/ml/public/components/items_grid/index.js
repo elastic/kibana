@@ -5,4 +5,4 @@
  */
 
 
-export { FilterListItemsGrid } from './filter_list_items_grid';
+export { ItemsGrid } from './items_grid';

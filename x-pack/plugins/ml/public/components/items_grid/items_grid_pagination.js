@@ -6,7 +6,7 @@
 
 
 /*
- * React component for the pagination controls of the filter list items grid.
+ * React component for the pagination controls of the items grid.
  */
 
 import PropTypes from 'prop-types';
@@ -30,7 +30,7 @@ function getContextMenuItemIcon(menuItemSetting, itemsPerPage) {
 }
 
 
-export class FilterListItemsPagination extends Component {
+export class ItemsGridPagination extends Component {
 
   constructor(props) {
     super(props);
@@ -66,6 +66,7 @@ export class FilterListItemsPagination extends Component {
     const {
       itemCount,
       itemsPerPage,
+      itemsPerPageOptions,
       activePage } = this.props;
 
     const button = (
@@ -82,41 +83,17 @@ export class FilterListItemsPagination extends Component {
 
     const pageCount = Math.ceil(itemCount / itemsPerPage);
 
-    const items = [
-      (
+    const items = itemsPerPageOptions.map((pageSize) => {
+      return (
         <EuiContextMenuItem
-          key="50 items"
-          icon={getContextMenuItemIcon(50, itemsPerPage)}
-          onClick={() => {this.onChangeItemsPerPage(50);}}
+          key={`${pageSize} items`}
+          icon={getContextMenuItemIcon(pageSize, itemsPerPage)}
+          onClick={() => {this.onChangeItemsPerPage(pageSize);}}
         >
-          50 items
+          {pageSize} items
         </EuiContextMenuItem>
-      ), (
-        <EuiContextMenuItem
-          key="100 items"
-          icon={getContextMenuItemIcon(100, itemsPerPage)}
-          onClick={() => {this.onChangeItemsPerPage(100);}}
-        >
-          100 items
-        </EuiContextMenuItem>
-      ), (
-        <EuiContextMenuItem
-          key="500 items"
-          icon={getContextMenuItemIcon(500, itemsPerPage)}
-          onClick={() => {this.onChangeItemsPerPage(500);}}
-        >
-          500 items
-        </EuiContextMenuItem>
-      ), (
-        <EuiContextMenuItem
-          key="1000 items"
-          icon={getContextMenuItemIcon(1000, itemsPerPage)}
-          onClick={() => {this.onChangeItemsPerPage(1000);}}
-        >
-          1000 items
-        </EuiContextMenuItem>
-      ),
-    ];
+      );
+    });
 
     return (
       <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
@@ -130,7 +107,7 @@ export class FilterListItemsPagination extends Component {
           >
             <EuiContextMenuPanel
               items={items}
-              className="ml-filter-item-page-size"
+              className="ml-items-grid-page-size-menu"
             />
           </EuiPopover>
         </EuiFlexItem>
@@ -147,11 +124,12 @@ export class FilterListItemsPagination extends Component {
   }
 
 }
-FilterListItemsPagination.propTypes = {
+ItemsGridPagination.propTypes = {
   itemCount: PropTypes.number.isRequired,
   itemsPerPage: PropTypes.number.isRequired,
+  itemsPerPageOptions: PropTypes.arrayOf(PropTypes.number).isRequired,
   setItemsPerPage: PropTypes.func.isRequired,
   activePage: PropTypes.number.isRequired,
-  setActivePage: PropTypes.func.isRequired
+  setActivePage: PropTypes.func.isRequired,
 };
 
