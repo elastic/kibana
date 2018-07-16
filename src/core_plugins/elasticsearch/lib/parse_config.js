@@ -30,26 +30,35 @@ export function parseConfig(serverConfig = {}, { ignoreCertAndKey = false } = {}
     keepAlive: true,
     ...pick(serverConfig, [
       'plugins', 'apiVersion', 'keepAlive', 'pingTimeout',
-      'requestTimeout', 'log', 'logQueries'
+      'requestTimeout', 'log', 'logQueries', 'sniffOnStart',
+      'sniffInterval', 'sniffOnConnectionFault', 'hosts'
     ])
   };
 
-  const uri = url.parse(serverConfig.url);
-  const httpsURI = uri.protocol === 'https:';
-  const httpURI = uri.protocol === 'http:';
-  const protocolPort = httpsURI && '443' || httpURI && '80';
-  config.host = {
-    host: uri.hostname,
-    port: uri.port || protocolPort,
-    protocol: uri.protocol,
-    path: uri.pathname,
-    query: uri.query,
-    headers: serverConfig.customHeaders
+  const mapHost = nodeUrl => {
+    const uri = url.parse(nodeUrl);
+    const httpsURI = uri.protocol === 'https:';
+    const httpURI = uri.protocol === 'http:';
+    const protocolPort = httpsURI && '443' || httpURI && '80';
+    return {
+      host: uri.hostname,
+      port: uri.port || protocolPort,
+      protocol: uri.protocol,
+      path: uri.pathname,
+      query: uri.query,
+      headers: serverConfig.customHeaders
+    };
   };
+
+  if (serverConfig.hosts) {
+    config.hosts = serverConfig.hosts.map(mapHost);
+  }
 
   // Auth
   if (serverConfig.auth !== false && serverConfig.username && serverConfig.password) {
-    config.host.auth = util.format('%s:%s', serverConfig.username, serverConfig.password);
+    config.hosts.forEach(host => {
+      host.auth = util.format('%s:%s', serverConfig.username, serverConfig.password);
+    });
   }
 
   // SSL

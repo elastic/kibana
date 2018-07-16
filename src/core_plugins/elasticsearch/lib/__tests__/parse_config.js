@@ -27,7 +27,7 @@ describe('plugins/elasticsearch', function () {
 
       beforeEach(function () {
         serverConfig = {
-          url: 'https://localhost:9200',
+          hosts: ['https://localhost:9200'],
           ssl: {
             verificationMode: 'full'
           }
@@ -126,24 +126,24 @@ describe('plugins/elasticsearch', function () {
 
       describe('port', () => {
         it('uses the specified port', () => {
-          const config1 = parseConfig(serverConfig);
-          expect(config1.host.port).to.be('9200');
+          const config1 = parseConfig(serverConfig).hosts[0];
+          expect(config1.port).to.be('9200');
 
-          serverConfig.url = 'https://localhost:555';
-          const config2 = parseConfig(serverConfig);
-          expect(config2.host.port).to.be('555');
+          serverConfig.hosts = ['https://localhost:555'];
+          const config2 = parseConfig(serverConfig).hosts[0];
+          expect(config2.port).to.be('555');
         });
 
         it('uses port 80 if http and no specified port', () => {
-          serverConfig.url = 'http://localhost';
-          const config2 = parseConfig(serverConfig);
-          expect(config2.host.port).to.be('80');
+          serverConfig.hosts = ['http://localhost'];
+          const config2 = parseConfig(serverConfig).hosts[0];
+          expect(config2.port).to.be('80');
         });
 
         it ('uses port 443 if https and no specified port', () => {
-          serverConfig.url = 'https://localhost';
-          const config2 = parseConfig(serverConfig);
-          expect(config2.host.port).to.be('443');
+          serverConfig.hosts = ['https://localhost'];
+          const config2 = parseConfig(serverConfig).hosts[0];
+          expect(config2.port).to.be('443');
         });
       });
     });

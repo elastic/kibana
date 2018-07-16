@@ -52,8 +52,8 @@ certificate and key files. These files are used to verify the identity of Kibana
 `elasticsearch.startupTimeout:`:: *Default: 5000* Time in milliseconds to wait for Elasticsearch at Kibana startup before
 retrying.
 
-`elasticsearch.url:`:: *Default: "http://localhost:9200"* The URL of the Elasticsearch instance to use for all your
-queries.
+`elasticsearch.hosts:`:: *Default: "http://localhost:9200"* The URLs of the Elasticsearch instances to use for all your
+queries.  All nodes listed here must be on the same cluster.
 
 `elasticsearch.username:` and `elasticsearch.password:`:: If your Elasticsearch is protected with basic authentication,
 these settings provide the username and password that the Kibana server uses to perform maintenance on the Kibana index at

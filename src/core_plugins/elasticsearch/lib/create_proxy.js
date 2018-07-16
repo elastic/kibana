@@ -17,61 +17,66 @@
  * under the License.
  */
 
-import createAgent from './create_agent';
-import mapUri from './map_uri';
-import { assign } from 'lodash';
+import Joi from 'joi';
+import Boom from 'boom';
+import { isString } from 'lodash';
 
-export function createPath(prefix, path) {
-  path = path[0] === '/' ? path : `/${path}`;
-  prefix = prefix[0] === '/' ? prefix : `/${prefix}`;
+export function createProxy(server) {
+  const { callWithRequest } =  server.plugins.elasticsearch.getCluster('data');
 
-  return `${prefix}${path}`;
-}
-
-export function createProxy(server, method, path, config) {
-  const proxies = new Map([
-    ['/elasticsearch', server.plugins.elasticsearch.getCluster('data')],
-  ]);
-
-  const responseHandler = function (err, upstreamResponse, request, reply) {
-    if (err) {
-      reply(err);
-      return;
+  server.ext('onRequest', (req, reply) => {
+    try {
+      const contentType = req.headers['content-type'];
+      const applicationNDJSON = 'application/x-ndjson';
+      const textPlain = 'text/plain';
+      const isNDJSON = () => contentType.includes(applicationNDJSON);
+      if (isString(contentType) && isNDJSON()) {
+        req.headers['content-type'] = contentType.replace(applicationNDJSON, textPlain);
+      }
+    } finally {
+      reply.continue();
     }
 
-    if (upstreamResponse.headers.location) {
-      // TODO: Workaround for #8705 until hapi has been updated to >= 15.0.0
-      upstreamResponse.headers.location = encodeURI(upstreamResponse.headers.location);
+  });
+
+  server.route({
+    method: 'POST',
+    path: '/elasticsearch/_msearch',
+    async handler(req, reply) {
+      const { payload } = req;
+      try {
+        const body = payload.split('\n').filter(Boolean).map(JSON.parse);
+        const response = await callWithRequest(req, 'msearch', {
+          body
+        });
+        reply(response);
+      } catch(e) {
+        reply(Boom.badRequest(e));
+      }
+    },
+  });
+
+  server.route({
+    method: 'POST',
+    path: '/elasticsearch/{index}/_search',
+    config: {
+      validate: {
+        params: Joi.object().keys({
+          index: Joi.string().required()
+        })
+      }
+    },
+    async handler(req, reply) {
+      const { body } = req;
+      try {
+        const response = await callWithRequest(req, 'search', {
+          index: req.params.index,
+          body
+        });
+        reply(response);
+      } catch(e) {
+        reply(Boom.badRequest(e));
+      }
     }
-
-    reply(null, upstreamResponse);
-  };
-
-  for (const [proxyPrefix, cluster] of proxies) {
-    const options = {
-      method,
-      path: createPath(proxyPrefix, path),
-      config: {
-        timeout: {
-          socket: cluster.getRequestTimeout()
-        }
-      },
-      handler: {
-        proxy: {
-          mapUri: mapUri(cluster, proxyPrefix),
-          agent: createAgent({
-            url: cluster.getUrl(),
-            ssl: cluster.getSsl()
-          }),
-          xforward: true,
-          timeout: cluster.getRequestTimeout(),
-          onResponse: responseHandler
-        }
-      },
-    };
-
-    assign(options.config, config);
-
-    server.route(options);
-  }
+  });
 }

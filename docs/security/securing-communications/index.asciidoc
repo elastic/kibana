@@ -63,13 +63,13 @@ must have a proxy that provides an HTTPS endpoint for {es}.
 
 --
 
-.. Specify the HTTPS protocol in the `elasticsearch.url` setting in the {kib}
+.. Specify the HTTPS protocol in the `elasticsearch.hosts` setting in the {kib}
 configuration file, `kibana.yml`:
 +
 --
 [source,yaml]
 --------------------------------------------------------------------------------
-elasticsearch.url: "https://<your_elasticsearch_host>.com:9200"
+elasticsearch.hosts: ["https://<your_elasticsearch_host>.com:9200"]
 --------------------------------------------------------------------------------
 --
 

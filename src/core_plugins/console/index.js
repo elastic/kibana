@@ -20,7 +20,7 @@
 import Boom from 'boom';
 import { resolveApi } from './api_server/server';
 import { resolve, join, sep } from 'path';
-import { has, isEmpty } from 'lodash';
+import { has, isEmpty, head } from 'lodash';
 import setHeaders from '../elasticsearch/lib/set_headers';
 import { addExtensionSpecFilePath } from './api_server/spec';
 
@@ -89,7 +89,7 @@ export default function (kibana) {
       const proxyPathFilters = options.proxyFilter.map(str => new RegExp(str));
 
       server.route(createProxyRoute({
-        baseUrl: config.get('elasticsearch.url'),
+        baseUrl: head(config.get('elasticsearch.hosts')),
         pathFilters: proxyPathFilters,
         getConfigForReq(req, uri) {
           const whitelist = config.get('elasticsearch.requestHeadersWhitelist');
@@ -133,7 +133,7 @@ export default function (kibana) {
 
       injectDefaultVars(server) {
         return {
-          elasticsearchUrl: server.config().get('elasticsearch.url')
+          elasticsearchUrl: head(server.config().get('elasticsearch.hosts'))
         };
       },
 

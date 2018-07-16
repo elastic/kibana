@@ -47,7 +47,10 @@ export default function (kibana) {
 
       return object({
         enabled: boolean().default(true),
-        url: string().uri({ scheme: ['http', 'https'] }).default('http://localhost:9200'),
+        sniffOnStart: boolean().default(false),
+        sniffInterval: number().default(0),
+        sniffOnConnectionFault: boolean().default(false),
+        hosts: array().items(string().uri({ scheme: ['http', 'https'] })).single().default('http://localhost:9200'),
         preserveHost: boolean().default(true),
         username: string(),
         password: string(),
@@ -87,9 +90,20 @@ export default function (kibana) {
         };
       };
 
+      const url = () => {
+        return (settings, log) => {
+          const deprecatedUrl = get(settings, 'url');
+          if (!deprecatedUrl) return;
+          set(settings, 'hosts', [deprecatedUrl]);
+          unset(settings, 'url');
+          log(`Config key "elasticsearch.url" is deprecated. It has been replaced with "elasticsearch.hosts"`);
+        };
+      };
+
       return [
         rename('ssl.ca', 'ssl.certificateAuthorities'),
         rename('ssl.cert', 'ssl.certificate'),
+        url(),
         sslVerify(),
       ];
     },
@@ -116,8 +130,7 @@ export default function (kibana) {
       createDataCluster(server);
       createAdminCluster(server);
 
-      createProxy(server, 'POST', '/{index}/_search');
-      createProxy(server, 'POST', '/_msearch');
+      createProxy(server);
 
       // Set up the health check service and start it.
       const { start, waitUntilReady } = healthCheck(this, server);

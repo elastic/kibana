@@ -36,7 +36,7 @@ to use a separate monitoring cluster, see
 default value. For more information, see <<monitoring-settings-kb>>.
 
 .. Identify where to retrieve monitoring data from. If you want to use a
-separate _monitoring cluster_, set `xpack.monitoring.elasticsearch.url` in the
+separate _monitoring cluster_, set `xpack.monitoring.elasticsearch.hosts` in the
 `kibana.yml` file. Otherwise, the monitoring data is stored in the production
 cluster.
 +
@@ -107,7 +107,7 @@ contact your system administrator.
 “Last 1 hour”.  When monitoring data appears in your cluster, the page
 automatically refreshes with the monitoring summary.
 +
-* Check your `xpack.monitoring.elasticsearch.url` setting.
+* Check your `xpack.monitoring.elasticsearch.hosts` setting.
 See <<monitoring-settings-kb, Monitoring Settings in Kibana>>.
 
 
