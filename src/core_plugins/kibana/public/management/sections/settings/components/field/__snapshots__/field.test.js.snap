@@ -195,12 +195,10 @@ exports[`Field for array setting should render user value if there is user value
               grow={true}
               size="xs"
             >
-              <UNDEFINED>
-                Default: 
-                <EuiCode>
-                  default_value
-                </EuiCode>
-              </UNDEFINED>
+              Default: 
+              <EuiCode>
+                default_value
+              </EuiCode>
             </EuiText>
           </UNDEFINED>
         </UNDEFINED>
@@ -461,12 +459,10 @@ exports[`Field for boolean setting should render user value if there is user val
               grow={true}
               size="xs"
             >
-              <UNDEFINED>
-                Default: 
-                <EuiCode>
-                  true
-                </EuiCode>
-              </UNDEFINED>
+              Default: 
+              <EuiCode>
+                true
+              </EuiCode>
             </EuiText>
           </UNDEFINED>
         </UNDEFINED>
@@ -727,12 +723,10 @@ exports[`Field for image setting should render user value if there is user value
               grow={true}
               size="xs"
             >
-              <UNDEFINED>
-                Default: 
-                <EuiCode>
-                  null
-                </EuiCode>
-              </UNDEFINED>
+              Default: 
+              <EuiCode>
+                null
+              </EuiCode>
             </EuiText>
           </UNDEFINED>
         </UNDEFINED>
@@ -942,16 +936,10 @@ exports[`Field for json setting should render default value if there is no user 
               grow={true}
               size="xs"
             >
-              <UNDEFINED>
-                Default:
-                <EuiCodeBlock
-                  language="json"
-                  overflowHeight={null}
-                  paddingSize="s"
-                >
-                  {}
-                </EuiCodeBlock>
-              </UNDEFINED>
+              Default: 
+              <EuiCode>
+                {}
+              </EuiCode>
             </EuiText>
           </UNDEFINED>
         </UNDEFINED>
@@ -1070,16 +1058,10 @@ exports[`Field for json setting should render user value if there is user value 
               grow={true}
               size="xs"
             >
-              <UNDEFINED>
-                Default:
-                <EuiCodeBlock
-                  language="json"
-                  overflowHeight={null}
-                  paddingSize="s"
-                >
-                  {}
-                </EuiCodeBlock>
-              </UNDEFINED>
+              Default: 
+              <EuiCode>
+                {}
+              </EuiCode>
             </EuiText>
           </UNDEFINED>
         </UNDEFINED>
@@ -1389,12 +1371,10 @@ exports[`Field for markdown setting should render user value if there is user va
               grow={true}
               size="xs"
             >
-              <UNDEFINED>
-                Default: 
-                <EuiCode>
-                  null
-                </EuiCode>
-              </UNDEFINED>
+              Default: 
+              <EuiCode>
+                null
+              </EuiCode>
             </EuiText>
           </UNDEFINED>
         </UNDEFINED>
@@ -1674,12 +1654,10 @@ exports[`Field for number setting should render user value if there is user valu
               grow={true}
               size="xs"
             >
-              <UNDEFINED>
-                Default: 
-                <EuiCode>
-                  5
-                </EuiCode>
-              </UNDEFINED>
+              Default: 
+              <EuiCode>
+                5
+              </EuiCode>
             </EuiText>
           </UNDEFINED>
         </UNDEFINED>
@@ -1978,12 +1956,10 @@ exports[`Field for select setting should render user value if there is user valu
               grow={true}
               size="xs"
             >
-              <UNDEFINED>
-                Default: 
-                <EuiCode>
-                  orange
-                </EuiCode>
-              </UNDEFINED>
+              Default: 
+              <EuiCode>
+                orange
+              </EuiCode>
             </EuiText>
           </UNDEFINED>
         </UNDEFINED>
@@ -2265,12 +2241,10 @@ exports[`Field for string setting should render user value if there is user valu
               grow={true}
               size="xs"
             >
-              <UNDEFINED>
-                Default: 
-                <EuiCode>
-                  null
-                </EuiCode>
-              </UNDEFINED>
+              Default: 
+              <EuiCode>
+                null
+              </EuiCode>
             </EuiText>
           </UNDEFINED>
         </UNDEFINED>

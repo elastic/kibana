@@ -1,17 +1,11 @@
 [[managing-indices]]
 == Managing Indices
 
-The *Index Management* UI enables you to view index settings,
+The *Index management* UI enables you to view index settings,
 mappings, and statistics and perform management operations.
 These include refreshing, flushing, clearing the cache, merging segments,
 and closing or deleting indices. The UI provides a convenient way to
 perform bulk operations on multiple indices.
-
-To open the UI, select *Management > Index Management*. If security is enabled,
-you must have the the `monitor` cluster privilege and the `view_index_metadata` 
-and `manage` index privileges to view the data.  See 
-{xpack-ref}/security-privileges.html[Security Privileges] for more
-information.
 
 [role="screenshot"]
 image::images/management-index-management.png[Index Management UI]

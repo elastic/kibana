@@ -38,10 +38,6 @@ import {
   EuiCallOut,
 } from '@elastic/eui';
 
-import chrome from 'ui/chrome';
-
-const uiSettings = chrome.getUiSettingsClient();
-
 export class StepIndexPattern extends Component {
   static propTypes = {
     allIndices: PropTypes.array.isRequired,
@@ -53,7 +49,7 @@ export class StepIndexPattern extends Component {
   }
 
   static defaultProps = {
-    initialQuery: uiSettings.get('indexPattern:placeholder'),
+    initialQuery: '',
   }
 
   constructor(props) {

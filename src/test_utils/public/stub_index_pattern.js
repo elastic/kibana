@@ -25,11 +25,12 @@ import { formatHit } from 'ui/index_patterns/_format_hit';
 import { getComputedFields } from 'ui/index_patterns/_get_computed_fields';
 import { fieldFormats } from 'ui/registry/field_formats';
 import { IndexPatternsFlattenHitProvider } from 'ui/index_patterns/_flatten_hit';
-import { FieldList } from 'ui/index_patterns/_field_list';
+import { IndexPatternsFieldListProvider } from 'ui/index_patterns/_field_list';
 
 export default function (Private) {
 
   const flattenHit = Private(IndexPatternsFlattenHitProvider);
+  const FieldList = Private(IndexPatternsFieldListProvider);
   const IndexPattern = Private(IndexPatternProvider);
 
   function StubIndexPattern(pattern, timeField, fields) {

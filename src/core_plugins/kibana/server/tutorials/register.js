@@ -35,7 +35,6 @@ import { dockerMetricsSpecProvider } from './docker_metrics';
 import { kubernetesMetricsSpecProvider } from './kubernetes_metrics';
 import { netflowSpecProvider } from './netflow';
 import { apmSpecProvider } from './apm';
-import { cephMetricsSpecProvider } from './ceph_metrics';
 
 export function registerTutorials(server) {
   server.registerTutorial(systemLogsSpecProvider);
@@ -56,5 +55,4 @@ export function registerTutorials(server) {
   server.registerTutorial(kubernetesMetricsSpecProvider);
   server.registerTutorial(netflowSpecProvider);
   server.registerTutorial(apmSpecProvider);
-  server.registerTutorial(cephMetricsSpecProvider);
 }

@@ -24,13 +24,6 @@ import { StepIndexPattern } from '../step_index_pattern';
 jest.mock('../../../lib/ensure_minimum_time', () => ({
   ensureMinimumTime: async (promises) => Array.isArray(promises) ? await Promise.all(promises) : await promises
 }));
-
-jest.mock('ui/chrome', () => ({
-  getUiSettingsClient: () => ({
-    get: () => '',
-  }),
-}));
-
 jest.mock('../../../lib/get_indices', () => ({
   getIndices: (service, query) => {
     if (query.startsWith('e')) {

@@ -17,6 +17,7 @@
  * under the License.
  */
 
+import '../filters/short_dots';
 import { IndexPatternMissingIndices } from '../errors';
 import { IndexPatternProvider } from './_index_pattern';
 import { IndexPatternsPatternCacheProvider } from './_pattern_cache';

@@ -28,7 +28,6 @@ import {
   EuiButton,
   EuiButtonEmpty,
   EuiCode,
-  EuiCodeBlock,
   EuiCodeEditor,
   EuiDescribedFormGroup,
   EuiFieldNumber,
@@ -476,22 +475,7 @@ export class Field extends PureComponent {
       <Fragment>
         <EuiSpacer size="s" />
         <EuiText size="xs">
-          { type === 'json' ? (
-            <Fragment>
-              Default:
-              <EuiCodeBlock
-                language="json"
-                paddingSize="s"
-                overflowHeight={defVal.length >= 500 ? 300 : null}
-              >
-                {this.getDisplayedDefaultValue(type, defVal)}
-              </EuiCodeBlock>
-            </Fragment>
-          ) : (
-            <Fragment>
-              Default: <EuiCode>{this.getDisplayedDefaultValue(type, defVal)}</EuiCode>
-            </Fragment>
-          ) }
+          Default: <EuiCode>{this.getDisplayedDefaultValue(type, defVal)}</EuiCode>
         </EuiText>
       </Fragment>
     );

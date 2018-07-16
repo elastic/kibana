@@ -1,14 +1,9 @@
 [[install]]
 == Installing Kibana
 
-[float]
-=== Hosted Kibana
-
 If you are running our hosted Elasticsearch Service on https://www.elastic.co/cloud[Elastic Cloud],
-then {cloud}/ec-enable-kibana.html[Kibana can be enabled] with the flick of a switch.
+then Kibana can be enabled with the https://www.elastic.co/guide/en/cloud/current/ec-enable-kibana.html[flick of a switch].
 
-[float]
-=== Installing Kibana Yourself
 
 NOTE: Starting with version 6.0.0, Kibana only supports 64 bit operating systems.
 

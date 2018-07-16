@@ -31,7 +31,7 @@
                 ng-repeat="item in section.visibleItems"
               >
                 <a
-                  data-test-subj="{{::item.id}}"
+                  data-test-subj="{{::item.name}}"
                   class="euiLink euiLink--primary management-panel__link"
                   ng-class="{ 'management-panel__link--disabled': item.disabled || !item.url }"
                   kbn-href="{{::item.disabled ? '' : item.url}}"

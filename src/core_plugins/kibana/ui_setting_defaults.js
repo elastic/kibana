@@ -487,8 +487,8 @@ export function getUiSettingDefaults() {
     },
     'indexPattern:placeholder': {
       name: 'Index pattern placeholder',
-      value: '',
-      description: `The placeholder for the "Index pattern name" field in "Management > Index Patterns > Create Index Pattern".`,
+      value: 'logstash-*',
+      description: `The placeholder for the field "Index name or pattern" in the "Settings > Indices" tab.`,
     },
     'context:defaultSize': {
       name: 'Context size',

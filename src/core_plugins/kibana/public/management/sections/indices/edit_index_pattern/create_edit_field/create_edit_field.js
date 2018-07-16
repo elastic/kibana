@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { Field } from 'ui/index_patterns/_field';
+import { IndexPatternsFieldProvider } from 'ui/index_patterns/_field';
 import { RegistryFieldFormatEditorsProvider } from 'ui/registry/field_format_editors';
 import { KbnUrlProvider } from 'ui/url';
 import uiRoutes from 'ui/routes';
@@ -90,6 +90,7 @@ uiRoutes
     },
     controllerAs: 'fieldSettings',
     controller: function FieldEditorPageController($scope, $route, $timeout, $http, Private, docTitle, config) {
+      const Field = Private(IndexPatternsFieldProvider);
       const getConfig = (...args) => config.get(...args);
       const fieldFormatEditors = Private(RegistryFieldFormatEditorsProvider);
       const kbnUrl = Private(KbnUrlProvider);

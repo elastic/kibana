@@ -18,7 +18,6 @@ import {
 export class LicenseStatus extends React.PureComponent {
   render() {
     const { isExpired, status, type, expiryDate } = this.props;
-    const typeTitleCase = type.charAt(0).toUpperCase() + type.substr(1).toLowerCase();
     let icon;
     let title;
     let message;
@@ -29,7 +28,7 @@ export class LicenseStatus extends React.PureComponent {
           Your license expired on <strong>{expiryDate}</strong>
         </Fragment>
       );
-      title = `Your ${typeTitleCase} license has expired`;
+      title = `Your ${type} license has expired`;
     } else {
       icon = <EuiIcon color="success" type="checkInCircleFilled" />;
       message = expiryDate ? (
@@ -39,7 +38,7 @@ export class LicenseStatus extends React.PureComponent {
       ) : (
         <Fragment>Your license will never expire.</Fragment>
       );
-      title = `Your ${typeTitleCase} license is ${status.toLowerCase()}`;
+      title = `Your ${type} license is ${status.toLowerCase()}`;
     }
     return (
       <div>

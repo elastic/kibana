@@ -8,12 +8,8 @@
 export function datafeedsProvider(callWithRequest) {
 
   async function forceStartDatafeeds(datafeedIds, start, end) {
-    const jobIds = await getJobIdsByDatafeedId();
-    const doStartsCalled = datafeedIds.reduce((p, c) => {
-      p[c] = false;
-      return p;
-    }, {});
-
+    const jobIds = {};
+    const doStartsCalled = {};
     const results = {};
     const START_TIMEOUT = 10000; // 10s
 
@@ -30,26 +26,29 @@ export function datafeedsProvider(callWithRequest) {
       }
     }
 
+    datafeedIds.forEach((dId) => {
+      const jId = dId.replace('datafeed-', ''); // change this. this should be from a look up from the datafeeds endpoint
+      jobIds[dId] = jId;
+      doStartsCalled[dId] = false;
+    });
+
     for (const datafeedId of datafeedIds) {
       const jobId = jobIds[datafeedId];
-      if (jobId !== undefined) {
-        setTimeout(async () => {
-          // in 10 seconds start the datafeed.
-          // this should give the openJob enough time.
-          // if not, the start request will be queued
-          // behind the open request on the server.
-          results[datafeedId] = await doStart(datafeedId);
-        }, START_TIMEOUT);
 
-        try {
-          if (await openJob(jobId)) {
-            results[datafeedId] = await doStart(datafeedId);
-          }
-        } catch (error) {
-          results[datafeedId] = { started: false, error };
+      setTimeout(async () => {
+        // in 10 seconds start the datafeed.
+        // this should give the openJob enough time.
+        // if not, the start request will be queued
+        // behind the open request on the server.
+        results[datafeedId] = await doStart(datafeedId);
+      }, START_TIMEOUT);
+
+      try {
+        if (await openJob(jobId)) {
+          results[datafeedId] = await doStart(datafeedId);
         }
-      } else {
-        results[datafeedId] = { started: false, error: 'Job has no datafeed' };
+      } catch (error) {
+        results[datafeedId] = { started: false, error };
       }
     }
 
@@ -89,27 +88,9 @@ export function datafeedsProvider(callWithRequest) {
     return callWithRequest('ml.deleteDatafeed', { datafeedId, force: true });
   }
 
-  async function getDatafeedIdsByJobId() {
-    const datafeeds = await callWithRequest('ml.datafeeds');
-    return datafeeds.datafeeds.reduce((p, c) => {
-      p[c.job_id] = c.datafeed_id;
-      return p;
-    }, {});
-  }
-
-  async function getJobIdsByDatafeedId() {
-    const datafeeds = await callWithRequest('ml.datafeeds');
-    return datafeeds.datafeeds.reduce((p, c) => {
-      p[c.datafeed_id] = c.job_id;
-      return p;
-    }, {});
-  }
-
   return {
     forceStartDatafeeds,
     stopDatafeeds,
     forceDeleteDatafeed,
-    getDatafeedIdsByJobId,
-    getJobIdsByDatafeedId,
   };
 }
