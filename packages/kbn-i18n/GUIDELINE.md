@@ -27,7 +27,7 @@ For example the message before translation looks like:
   </p>
   ```
 
-This phrase contains a variable, which represents languages list, and a link (``Painless``). For such cases we divide the message into two parts: the main message, which contains placeholders, and additioanl message, which represents inner meesage.
+This phrase contains a variable, which represents languages list, and a link (``Painless``). For such cases we divide the message into two parts: the main message, which contains placeholders, and additional message, which represents inner message.
 
 It is used the following id naming structure:
 1) the main message id has the type on the second-to-last position, thereby identifying a divided phrase, and the last segment named  ``detail``.
@@ -51,19 +51,21 @@ Mostly such placeholders have meaningful name according to the сontent.
 
 ### Pluralization
 
-I18n engine supports proper plural forms. It uses the [ICU Message syntax](http://userguide.icu-project.org/formatparse/messages) to define a message that has a plural label and and works for all [CLDR languages](http://cldr.unicode.org/) which have pluralization rules defined. The numeric input is mapped to a plural category, some subset of "zero", "one", "two", "few", "many", and "other" depending on the locale and the type of plural.
+I18n engine supports proper plural forms. It uses the [ICU Message syntax](http://userguide.icu-project.org/formatparse/messages) to define a message that has a plural label and works for all [CLDR languages](http://cldr.unicode.org/) which have pluralization rules defined. The numeric input is mapped to a plural category, some subset of "zero", "one", "two", "few", "many", and "other" depending on the locale and the type of plural.
 
 For example:
 ```js
 “kbn.management.indexPattern.create.step.status.success.label.strongIndices“: "{indicesLength, plural, one {# index} other {# indices}}"
 ```
 
+In case when `indicesLength` has value 1, the result string will be "`1 index`". In case when `indicesLength` has value 2 and more, the result string - "`2 indices`".
+
 ## Best practices
 
 
 ### Naming conversation
 
-- Message id should start with namespace. 
+- Message id should start with namespace (`kbn`, `common.ui` and etc.). 
 
     For example:
 
@@ -99,7 +101,7 @@ For example:
   Your index pattern matches <strong>{exactMatchedIndices.length} {exactMatchedIndices.length > 1 ? 'indices' : 'index'}</strong>.
   ```
 
-  After translation:
+  After translation we get the following structure:
   ```js
   <FormattedMessage
     id="kbn.management.indexPattern.create.step.status.success.label.detail"
@@ -125,7 +127,7 @@ For example:
   ```
 
 
-### Define type for message
+### Defining type for message
 
 Each message id should end with a type of the message. For example:
 
@@ -220,51 +222,57 @@ Each message id should end with a type of the message. For example:
 
 The numeric input is mapped to a plural category, some subset of "zero", "one", "two", "few", "many", and "other" depending on the locale and the type of plural. There are languages with multiple plural forms [Language Plural Rules](http://www.unicode.org/cldr/charts/latest/supplemental/language_plural_rules.html).
 
+Here is an example of message translation depending on a plural category:
 ```js
-<FormattedMessage
-    id="kbn.management.indexPattern.create.step.status.matchAny.label.strongIndices"
-    defaultMessage="{allIndicesLength, plural, one {# index} other {# indices}}"
-    values={{ allIndicesLength: allIndices.length }}
-/>
+<span i18n-id="kbn.management.indexPattern.edit.mappingConflict.label"
+      i18n-default-message="{conflictFieldsLength, plural, one {A field is} other {# fields are}} defined as several types (string, integer, etc) across the indices that match this pattern."
+      i18n-values="{ conflictFieldsLength: conflictFields.length }"></span>
 ```
+
+In case when `conflictFieldsLength` has value 1, the result string will be `"A field is defined as several types (string, integer, etc) across the indices that match this pattern."`. In case when `conflictFieldsLength` has value 2 or more, the result string - `"2 fields are defined as several types (string, integer, etc) across the indices that match this pattern."`.
 
 ### Unit tests
 
-Additional adjustments in unit tests are needed only for those components where `I18nContext` component is used. Due to `I18nContext` is implemented using render callback, it is required additional step to render the component's child. You need to pass the `I18nContext` component to `shallowWithIntl` function from `'test_utils/enzyme_helpers'`.
+Additional adjustments in unit tests are needed only for those components where `injectI18n` component is used. Due to `injectI18n` wraps the target component and passes `intl` via `props`, in tests it is requires to render the target component with `intl` object. That required the rendering the target component using `shallowWithIntl` function from `'test_utils/enzyme_helpers'`.
 
-For example, there is a component in which `I18nContext` is used, like in the `AddFilter` component:
+For example, there is a component that is wrapped by `injectI18n`, like in the `AddFilter` component:
 
 ```js
 ...
-render(
-    <I18nContext>
-        {intl => (
+export class AddFilterComponent extends Component {
+  ...
+  render() {
+    const { filter } = this.state;
+    return (
+      <EuiFlexGroup>
+        <EuiFlexItem grow={10}>
           <EuiFieldText
-                fullWidth
-                value={filter}
-                onChange={e => this.setState({ filter: e.target.value.trim() })}
-                placeholder={intl.formatMessage({
-                  id: 'kbn.management.indexPattern.edit.source.placeholder',
-                  defaultMessage: 'source filter, accepts wildcards (e.g., `user*` to filter fields starting with \'user\')' })}
-            />
-        )}
-      </I18nContext>
-)
-...
+            fullWidth
+            value={filter}
+            onChange={e => this.setState({ filter: e.target.value.trim() })}
+            placeholder={this.props.intl.formatMessage({
+              id: 'kbn.management.indexPattern.edit.source.placeholder',
+              defaultMessage: 'source filter, accepts wildcards (e.g., `user*` to filter fields starting with \'user\')'
+            })}
+          />
+        </EuiFlexItem>
+        ...
+      </EuiFlexGroup>
+    );
+  }
+}
+
+export const AddFilter = injectI18n(AddFilterComponent);
 ```
 
-To test the component it is needed to render it using `shallow` and separately render `I18nContext` component using `shallowWithIntl` function to pass `intl` object into the context.
+To test the `AddFilterComponent` component it is needed to render it using `shallowWithIntl` function to pass `intl` object into the `props`.
 
 ```js
 ...
-it('should ignore strings with just spaces', async () => {
-    const wrapper = shallow(
-      <AddFilter onAddFilter={() => {}}/>
+it('should render normally', async () => {
+    const component = shallowWithIntl(
+      <AddFilterComponent onAddFilter={() => {}}/>
     );
-
-    const component = shallowWithIntl(wrapper.find('I18nContext'));
-    component.find('EuiFieldText').simulate('keypress', ' ');
-    component.update();
 
     expect(component).toMatchSnapshot();
 });
