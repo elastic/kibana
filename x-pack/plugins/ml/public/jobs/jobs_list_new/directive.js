@@ -5,11 +5,11 @@
  */
 
 
-import 'ngreact';
+import ReactDOM from 'react-dom';
+import React from 'react';
 
 import { uiModules } from 'ui/modules';
 const module = uiModules.get('apps/ml', ['react']);
-import template from './jobs.html';
 
 import { checkLicense } from 'plugins/ml/license/check_license';
 import { checkGetJobsPrivilege } from 'plugins/ml/privilege/check_privilege';
@@ -19,6 +19,8 @@ import { initPromise } from 'plugins/ml/util/promise';
 
 import uiRoutes from 'ui/routes';
 
+const template = `<ml-nav-menu name="jobs" /><jobs-page />`;
+
 uiRoutes
   .when('/jobs/?', {
     template,
@@ -27,16 +29,21 @@ uiRoutes
       privileges: checkGetJobsPrivilege,
       mlNodeCount: getMlNodeCount,
       loadNewJobDefaults,
-      initPromise: initPromise(true)
+      initPromise: initPromise(false)
     }
   });
 
-
-
 import { JobsPage } from './jobs';
 
-module.directive('jobsPage', function ($injector) {
-  const reactDirective = $injector.get('reactDirective');
-
-  return reactDirective(JobsPage, undefined, { restrict: 'E' }, { });
+module.directive('jobsPage', function () {
+  return {
+    scope: {},
+    restrict: 'E',
+    link: (scope, element) => {
+      ReactDOM.render(
+        React.createElement(JobsPage),
+        element[0]
+      );
+    }
+  };
 });

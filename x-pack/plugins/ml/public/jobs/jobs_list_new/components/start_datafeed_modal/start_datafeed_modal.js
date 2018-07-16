@@ -91,6 +91,8 @@ export class StartDatafeedModal extends Component {
   }
 
   render() {
+    const { jobs } = this.state;
+    const startableJobs = (jobs !== undefined) ? jobs.filter(j => j.hasDatafeed) : [];
     let modal;
 
     if (this.state.isModalVisible) {
@@ -102,7 +104,7 @@ export class StartDatafeedModal extends Component {
           >
             <EuiModalHeader>
               <EuiModalHeaderTitle>
-                Start {(this.state.jobs.length > 1) ? `${this.state.jobs.length} jobs` : this.state.jobs[0].id}
+                Start {(startableJobs.length > 1) ? `${startableJobs.length} jobs` : startableJobs[0].id}
               </EuiModalHeaderTitle>
             </EuiModalHeader>
 
