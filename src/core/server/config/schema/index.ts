@@ -20,7 +20,6 @@
 import { Duration } from 'moment';
 
 import { ByteSizeValue } from './byte_size_value';
-import { SchemaLike } from './internals';
 import { ContextReference, Reference, SiblingReference } from './references';
 import {
   AnyType,
@@ -30,6 +29,7 @@ import {
   ByteSizeOptions,
   ByteSizeType,
   ConditionalType,
+  ConditionalTypeValue,
   DurationOptions,
   DurationType,
   LiteralType,
@@ -147,7 +147,7 @@ function siblingRef<T>(key: string): SiblingReference<T> {
   return new SiblingReference(key);
 }
 
-function conditional<A extends SchemaLike, B, C>(
+function conditional<A extends ConditionalTypeValue, B, C>(
   leftOperand: Reference<A>,
   rightOperand: Reference<A> | A,
   equalType: Type<B>,
