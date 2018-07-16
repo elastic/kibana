@@ -143,7 +143,8 @@ export default class BaseOptimizer {
             ],
             exclude: [],*/
             include: dependencies,
-            exclude: [
+            exclude: [],
+            /*exclude: [
               'JSONStream',
               'tinygradient',
               'mini-css-extract-plugin',
@@ -184,7 +185,7 @@ export default class BaseOptimizer {
               '@kbn/test-subj-selector',
               'bunyan',
               'url-loader'
-            ]
+            ]*/
           },
         ]
       }
@@ -201,8 +202,7 @@ export default class BaseOptimizer {
           node: { fs: 'empty', child_process: 'empty', dns: 'empty', net: 'empty', tls: 'empty' },
           resolve: {
             extensions: ['.js', '.json'],
-            mainFields: ['browser', 'browserify', 'main'],
-            alias: this.uiBundles.getAliases(),
+            mainFields: ['browser', 'browserify', 'main']
           }
         }
       }
@@ -425,9 +425,7 @@ export default class BaseOptimizer {
           'node_modules',
           fromRoot('node_modules'),
         ],
-        alias: this.uiBundles.getAliases(),
-        // unsafeCache: this.unsafeCache,
-        // cacheWithContext: !!this.unsafeCache
+        alias: this.uiBundles.getAliases()
       },
     };
 
