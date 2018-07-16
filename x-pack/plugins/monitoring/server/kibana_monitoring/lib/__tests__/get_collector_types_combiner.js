@@ -30,7 +30,6 @@ const getInitial = () => {
         'requests': {
           'disconnects': 0,
           'total': 2,
-          'status_codes': { '200': 2 }
         },
         'response_times': { 'average': 47, 'max': 47 },
         'timestamp': '2017-07-26T00:14:20.771Z',
@@ -91,7 +90,6 @@ const getResult = () => {
         'requests': {
           'disconnects': 0,
           'total': 2,
-          'status_codes': { '200': 2 }
         },
         'response_times': { 'average': 47, 'max': 47 },
         'timestamp': '2017-07-26T00:14:20.771Z',
