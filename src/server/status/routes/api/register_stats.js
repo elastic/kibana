@@ -42,8 +42,7 @@ export function registerStatsApi(kbnServer, server, config) {
 
   const getUsage = async callCluster => {
     const usage = await collectorSet.bulkFetchUsage(callCluster);
-    const usageObject = collectorSet.toObject(usage);
-    return collectorSet.toApiFieldNames(usageObject);
+    return collectorSet.toObject(usage);
   };
 
   server.route(
@@ -70,7 +69,7 @@ export function registerStatsApi(kbnServer, server, config) {
               getUsage(callCluster),
               getClusterUuid(callCluster),
             ]);
-            extended = { usage, cluster_uuid: clusterUuid };
+            extended = collectorSet.toApiFieldNames({ usage, clusterUuid });
           } catch (e) {
             return reply(boomify(e));
           }

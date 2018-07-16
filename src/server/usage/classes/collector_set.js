@@ -17,6 +17,7 @@
  * under the License.
  */
 
+import { snakeCase } from 'lodash';
 import Promise from 'bluebird';
 import { getCollectorLogger } from '../lib';
 import { Collector } from './collector';
@@ -120,7 +121,9 @@ export class CollectorSet {
       const value = apiData[currName];
 
       let newName = currName;
-      newName = newName.replace('_in_bytes', '_bytes');
+      newName = snakeCase(newName);
+      newName = newName.replace(/^(1|5|15)_m/, '$1m'); // os.load.15m, os.load.5m, os.load.1m
+      newName = newName.replace('_in_millis', '_ms');
       newName = newName.replace('_in_millis', '_ms');
 
       return {
