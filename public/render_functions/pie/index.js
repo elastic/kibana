@@ -1,6 +1,7 @@
-import { debounce } from 'lodash';
-import '../lib/flot-charts';
+import { debounce, includes } from 'lodash';
+import '../../lib/flot-charts';
 import $ from 'jquery';
+import { pie as piePlugin } from './plugins/pie';
 
 export const pie = () => ({
   name: 'pie',
@@ -8,6 +9,8 @@ export const pie = () => ({
   help: 'Render a pie chart from data',
   reuseDomNode: false,
   render(domNode, config, handlers) {
+    if (!includes($.plot.plugins, piePlugin)) $.plot.plugins.push(piePlugin);
+
     config.options.legend.labelBoxBorderColor = 'transparent';
 
     let plot;

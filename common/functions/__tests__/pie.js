@@ -123,39 +123,6 @@ describe('pie', () => {
       });
     });
 
-    describe('strokeColor', () => {
-      it('sets the outline color', () => {
-        let result = fn(testPie, { strokeColor: 'red' }).value.options.series.pie.stroke;
-        expect(result).to.have.property('color', 'red');
-
-        result = fn(testPie, { strokeColor: 'blue' }).value.options.series.pie.stroke;
-        expect(result).to.have.property('color', 'blue');
-      });
-
-      it('defaults to #000000', () => {
-        const result = fn(testPie).value.options.series.pie.stroke;
-        expect(result).to.have.property('color', '#000000');
-      });
-    });
-
-    describe('strokeWidth', () => {
-      it('sets the width of the outline', () => {
-        let result = fn(testPie, { strokeWidth: 2 }).value.options.series.pie.stroke;
-        expect(result).to.have.property('width', 2);
-
-        result = fn(testPie, { strokeWidth: 10 }).value.options.series.pie.stroke;
-        expect(result).to.have.property('width', 10);
-      });
-
-      it('defaults to 0 when provided an invalid strokeWidth', () => {
-        let result = fn(testPie).value.options.series.pie.stroke;
-        expect(result).to.have.property('width', 0);
-
-        result = fn(testPie, { strokeWidth: -100 }).value.options.series.pie.stroke;
-        expect(result).to.have.property('width', 0);
-      });
-    });
-
     describe('font', () => {
       it('sets the font style', () => {
         const result = fn(testPie, { font: fontStyle }).value;

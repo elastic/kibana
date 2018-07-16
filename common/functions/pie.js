@@ -37,16 +37,6 @@ export const pie = () => ({
       default: 100,
       help: 'Percentage of area of container to use as radius for the label circle',
     },
-    strokeColor: {
-      types: ['string'],
-      default: '#000000',
-      help: "A color for the outline of the pie and it's slices",
-    },
-    strokeWidth: {
-      types: ['number'],
-      default: 0,
-      help: 'Weight of stroke in pixels',
-    },
     font: {
       types: ['style'],
       help: 'Label font',
@@ -96,8 +86,7 @@ export const pie = () => ({
               show: true,
               innerRadius: Math.max(args.hole, 0) / 100,
               stroke: {
-                color: args.strokeColor,
-                width: Math.max(args.strokeWidth, 0),
+                width: 0,
               },
               label: {
                 show: args.labels,

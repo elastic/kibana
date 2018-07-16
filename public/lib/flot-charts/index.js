@@ -9,7 +9,6 @@ require('./jquery.flot.canvas');
 require('./jquery.flot.symbol');
 require('./jquery.flot.crosshair');
 require('./jquery.flot.selection');
-require('./jquery.flot.pie');
 require('./jquery.flot.stack');
 require('./jquery.flot.threshold');
 require('./jquery.flot.fillbetween');
