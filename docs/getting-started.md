@@ -11,7 +11,7 @@
 npm install -g backport
 ```
 
-Edit `~/`.backport/config.json`:
+Edit `~/.backport/config.json`:
 
 ```json
 {
@@ -34,18 +34,17 @@ You can create a new access token [here](https://github.com/settings/tokens/new)
 
 **Use `backport`**
 
-Open your terminal and `cd` to the project your want to backport in. Run:
+Open your terminal and `cd` to the project your want to backport. Run:
 
 ```
 backport
 ```
 
-Note: The project folder must contain a `.backportrc.json` file (see "[New project: create project config](#new-project-create-project-config)" for more info)
+Note: It is recommend to add a `.backportrc.json` file to your project folder (see below for more info)
 
 ### New project: create project config
 
-To avoid every user having to configure a project, a project config file should be added to the root of the project.
-Create a file `.backportrc.json` in the root of the project with a similar structur:
+To avoid every user having to configure a project, a `.backportrc.json` file should be added to the root of the project with a similar structure:
 
 ```json
 {
