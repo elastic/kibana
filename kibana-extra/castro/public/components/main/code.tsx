@@ -14,7 +14,6 @@ import {
     EuiCode,
     EuiCodeBlock,
 } from '@elastic/eui';
-import FileCode from './FileCode';
 import "./code.css"
 
 interface State {
@@ -28,16 +27,16 @@ export default class Code extends React.Component<any, State> {
         super(props);
         this.state = {
             path: "HelloWorld.java",
-            content: ` 
+            content: `
              comments  */
              import System.out;
              class HelloWorld {
                 public static void main(String[] args){
-                    // some comments 
+                    // some comments
                     int x = 5;
                     System.out.println("hello world");
                 }
-             } 
+             }
             `,
         }
     }
@@ -80,11 +79,6 @@ export default class Code extends React.Component<any, State> {
                     </EuiButton>
                 </EuiForm>
                 <EuiSpacer size="xl"/>
-                <EuiPanel paddingSize="l" hasShadow>
-                    {this.state.html &&
-                    <FileCode html={this.state.html} file={this.state.path}/>
-                    }
-                </EuiPanel>
                 <EuiPanel paddingSize="l" hasShadow>
                     <EuiCodeBlock language="java">
                         {this.state.content}

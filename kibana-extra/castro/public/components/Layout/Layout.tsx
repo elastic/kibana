@@ -16,7 +16,6 @@ import {
 
 import DirectoryTree from './DirectoryTree';
 import CodeBlock from './CodeBlock';
-import FileCode from '../main/FileCode';
 import Editor from './Editor';
 interface State {
     children: Array<any>

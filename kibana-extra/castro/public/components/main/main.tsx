@@ -18,7 +18,6 @@ import {
 
 import { Link } from 'react-router-dom';
 
-import FileCode from './FileCode';
 import Code from './code';
 import Counter from '../counter';
 import { Entry } from '../../../server/routes/example';
@@ -79,19 +78,6 @@ export class Main extends React.Component<MainProps, MainState> {
                                 <h2>Files</h2>
                             </EuiTitle>
                             <EuiSpacer size="xs"/>
-                            {
-                                this.state.entries.map((entry, idx) =>
-                                    <EuiAccordion
-                                        id={"fid" + idx}
-                                        key={"fid" + idx}
-                                        buttonContent={entry.path}>
-                                        {
-                                            entry.html &&
-                                            <FileCode html={entry.html} file={`${this.state.workspace}/${entry.path}`} />
-                                        }
-                                    </EuiAccordion>
-                                )
-                            }
                         </EuiPageContentBody>
                     </EuiPageContent>
                 </EuiPageBody>
