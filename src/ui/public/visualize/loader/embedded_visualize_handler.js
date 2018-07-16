@@ -22,6 +22,7 @@ import { EventEmitter } from 'events';
 import { visualizationLoader } from './visualization_loader';
 import { VisualizeDataLoader } from './visualize_data_loader';
 import { RenderCompleteHelper } from '../../render_complete';
+import { timefilter } from 'ui/timefilter';
 
 const RENDER_COMPLETE_EVENT = 'render_complete';
 
@@ -71,6 +72,7 @@ export class EmbeddedVisualizeHandler {
     this._vis.on('update', this._handleVisUpdate);
     this._vis.on('reload', this._reloadVis);
     this._uiState.on('change', this._fetchAndRender);
+    timefilter.on('autoRefreshFetch', this._fetchAndRender);
 
     this._visualize = new VisualizeDataLoader(this._vis, Private);
     this._renderCompleteHelper = new RenderCompleteHelper(this._element);
@@ -168,6 +170,7 @@ export class EmbeddedVisualizeHandler {
   destroy() {
     this._destroyed = true;
     this._fetchAndRender.cancel();
+    timefilter.off('autoRefreshFetch', this._fetchAndRender);
     this._vis.removeListener('reload', this._reloadVis);
     this._vis.removeListener('update', this._handleVisUpdate);
     this._element.removeEventListener('renderComplete', this._elementListener);
