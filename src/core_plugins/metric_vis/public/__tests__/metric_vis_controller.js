@@ -42,7 +42,7 @@ describe('metric vis', function () {
     fieldFormatter: () => {
       return formatter;
     },
-    schema: {}
+    type: {}
   };
 
   let metricController;

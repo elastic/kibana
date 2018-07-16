@@ -24,7 +24,7 @@ import { buildPhrasesFilter } from 'ui/filter_manager/lib/phrases';
 
 export class PhraseFilterManager extends FilterManager {
   constructor(controlId, fieldName, indexPattern, queryFilter) {
-    super(controlId, fieldName, indexPattern, queryFilter, []);
+    super(controlId, fieldName, indexPattern, queryFilter);
   }
 
   /**
@@ -58,19 +58,19 @@ export class PhraseFilterManager extends FilterManager {
   getValueFromFilterBar() {
     const kbnFilters = this.findFilters();
     if (kbnFilters.length === 0) {
-      return this.getUnsetValue();
-    } else {
-      return kbnFilters
-        .map((kbnFilter) => {
-          return this._getValueFromFilter(kbnFilter);
-        })
-        .reduce((accumulator, currentValue) => {
-          return accumulator.concat(currentValue);
-        }, [])
-        .map(value => {
-          return { value, label: value };
-        });
+      return;
     }
+
+    return kbnFilters
+      .map((kbnFilter) => {
+        return this._getValueFromFilter(kbnFilter);
+      })
+      .reduce((accumulator, currentValue) => {
+        return accumulator.concat(currentValue);
+      }, [])
+      .map(value => {
+        return { value, label: value };
+      });
   }
 
   /**
@@ -96,19 +96,17 @@ export class PhraseFilterManager extends FilterManager {
 
     // scripted field filter
     if (_.has(kbnFilter, 'script')) {
-      return _.get(kbnFilter, 'script.script.params.value', this.getUnsetValue());
+      return _.get(kbnFilter, 'script.script.params.value');
     }
 
     // single phrase filter
     if (_.has(kbnFilter, ['query', 'match', this.fieldName])) {
-      return _.get(kbnFilter, ['query', 'match', this.fieldName, 'query'], this.getUnsetValue());
+      return _.get(kbnFilter, ['query', 'match', this.fieldName, 'query']);
     }
 
     // single phrase filter from bool filter
     if (_.has(kbnFilter, ['match_phrase', this.fieldName])) {
-      return _.get(kbnFilter, ['match_phrase', this.fieldName], this.getUnsetValue());
+      return _.get(kbnFilter, ['match_phrase', this.fieldName]);
     }
-
-    return this.getUnsetValue();
   }
 }
