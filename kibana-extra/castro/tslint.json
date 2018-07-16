@@ -1,0 +1,27 @@
+{
+  "extends": ["tslint:latest", "tslint-react"],
+  "linterOptions": {
+    "exclude": [
+      "build/*/**",
+      "node_modules/*/**"
+    ]
+  },
+  "rules": {
+    "quotemark": [true, "single", "jsx-double"],
+    "trailing-comma": [true, {"multiline": "never", "singleline": "never"}],
+    "whitespace": [
+      true,
+      "check-branch",
+      "check-decl",
+      "check-operator",
+      "check-module",
+      "check-separator",
+      "check-type",
+      "check-rest-spread",
+      "check-type",
+      "check-typecast",
+      "check-type-operator",
+      "check-preblock"
+    ]
+  }
+}
