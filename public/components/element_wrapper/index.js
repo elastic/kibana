@@ -1,13 +1,7 @@
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
-import { removeElement, setPosition } from '../../state/actions/elements';
-import { selectElement } from '../../state/actions/transient';
 import { getFullscreen, getEditing } from '../../state/selectors/app';
-import {
-  getSelectedElementId,
-  getResolvedArgs,
-  getSelectedPage,
-} from '../../state/selectors/workpad';
+import { getResolvedArgs, getSelectedPage } from '../../state/selectors/workpad';
 import { getState, getValue, getError } from '../../lib/resolved_arg';
 import { ElementWrapper as Component } from './element_wrapper';
 import { createHandlers as createHandlersWithDispatch } from './lib/handlers';
@@ -16,33 +10,27 @@ const mapStateToProps = (state, { element }) => ({
   isFullscreen: getFullscreen(state),
   isEditing: getEditing(state),
   resolvedArg: getResolvedArgs(state, element.id, 'expressionRenderable'),
-  isSelected: element.id === getSelectedElementId(state),
   selectedPage: getSelectedPage(state),
 });
 
 const mapDispatchToProps = (dispatch, { element }) => ({
-  selectElement: isInteractable => () => isInteractable && dispatch(selectElement(element.id)),
-  removeElement: pageId => () => dispatch(removeElement(element.id, pageId)),
-  setPosition: pageId => position => dispatch(setPosition(element.id, pageId, position)),
   createHandlers: pageId => () => createHandlersWithDispatch(element, pageId, dispatch),
 });
 
 const mergeProps = (stateProps, dispatchProps, ownProps) => {
-  const { resolvedArg, selectedPage, isSelected, isFullscreen, isEditing } = stateProps;
+  const { resolvedArg, selectedPage } = stateProps;
   const renderable = getValue(resolvedArg);
   const { element } = ownProps;
 
   return {
-    position: element.position,
-    setPosition: dispatchProps.setPosition(selectedPage),
-    selectElement: dispatchProps.selectElement(!isFullscreen && isEditing),
-    removeElement: dispatchProps.removeElement(selectedPage),
-    createHandlers: dispatchProps.createHandlers(selectedPage),
-    isSelected: isSelected,
     state: getState(resolvedArg),
     error: getError(resolvedArg),
     renderable,
-    ...ownProps,
+    transformMatrix: element.transformMatrix,
+    id: element.id,
+    a: element.a,
+    b: element.b,
+    createHandlers: dispatchProps.createHandlers(selectedPage),
   };
 };
 
@@ -51,6 +39,5 @@ export const ElementWrapper = connect(mapStateToProps, mapDispatchToProps, merge
 ElementWrapper.propTypes = {
   element: PropTypes.shape({
     id: PropTypes.string.isRequired,
-    position: PropTypes.object.isRequired,
   }).isRequired,
 };

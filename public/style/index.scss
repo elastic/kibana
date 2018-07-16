@@ -14,10 +14,13 @@
 @import '../apps/workpad/workpad_app/workpad_app';
 
 // Canvas components
+@import '../components/alignment_guide/alignment_guide';
 @import '../components/arg_add/arg_add';
 @import '../components/arg_add_popover/arg_add_popover';
 @import '../components/arg_form/arg_form';
 @import '../components/asset_manager/asset_manager';
+@import '../components/border_connection/border_connection';
+@import '../components/border_resize_handle/border_resize_handle';
 @import '../components/color_dot/color_dot';
 @import '../components/color_palette/color_palette';
 @import '../components/color_picker_mini/color_picker_mini';
@@ -45,6 +48,7 @@
 @import '../components/refresh_control/refresh_control';
 @import '../components/remove_icon/remove_icon';
 @import '../components/render_with_fn/render_with_fn';
+@import '../components/rotation_handle/rotation_handle';
 @import '../components/shape_preview/shape_preview';
 @import '../components/shape_picker_mini/shape_picker_mini';
 @import '../components/sidebar/sidebar';

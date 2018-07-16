@@ -1,6 +1,7 @@
 import { applyMiddleware, compose } from 'redux';
 import thunkMiddleware from 'redux-thunk';
 import { getWindow } from '../../lib/get_window';
+import { aeroelastic } from './aeroelastic';
 import { esPersistMiddleware } from './es_persist';
 import { fullscreen } from './fullscreen';
 import { historyMiddleware } from './history';
@@ -14,6 +15,7 @@ const middlewares = [
     thunkMiddleware,
     esPersistMiddleware,
     historyMiddleware,
+    aeroelastic,
     fullscreen,
     inFlight,
     appReady,

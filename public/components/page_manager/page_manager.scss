@@ -82,9 +82,8 @@
       height: ($euiSizeXXL + $euiSizeS) * 2;
     }
 
-    .canvas--interactable-actions,
-    .canvas--interactable-meta,
-    .canvas--interactable-resize,
+    .canvas__interactable-actions,
+    .canvas__interactable-resize,
     .canvas__element--remove-icon {
       display: none;
     }
@@ -100,5 +99,9 @@
     &:hover {
       color: $euiColorEmptyShade;
     }
+  }
+
+  .canvas__positionable {
+    position: absolute;
   }
 }

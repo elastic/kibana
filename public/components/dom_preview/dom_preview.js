@@ -64,7 +64,7 @@ export class DomPreview extends React.Component {
 
     this.content.style.cssText = `transform: scale(${scale}); transform-origin: top left; height: ${originalHeight}; width: ${originalWidth};`;
 
-    thumb.style.cssText = 'top: 0; left: 0;';
+    thumb.style.cssText = 'visibility: inherit;';
   };
 
   render() {
