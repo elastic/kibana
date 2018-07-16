@@ -73,9 +73,7 @@ import {
 import { FIELD_TYPES_BY_LANG, DEFAULT_FIELD_TYPES } from './constants';
 import { copyField, getDefaultFormat } from './lib';
 
-import { ReactI18n } from '@kbn/i18n';
-
-const { injectI18n, FormattedMessage } = ReactI18n;
+import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
 
 export class FieldEditorComponent extends PureComponent {
   static propTypes = {

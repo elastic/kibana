@@ -32,9 +32,7 @@ import {
   EuiButton,
 } from '@elastic/eui';
 
-import { ReactI18n } from '@kbn/i18n';
-
-const { FormattedMessage } = ReactI18n;
+import { FormattedMessage } from '@kbn/i18n/react';
 
 export const EmptyState = ({
   onRefresh,

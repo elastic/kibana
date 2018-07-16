@@ -31,9 +31,7 @@ import {
 import { Table } from './components/table';
 import { Header } from './components/header';
 import { AddFilter } from './components/add_filter';
-import { ReactI18n } from '@kbn/i18n';
-
-const { injectI18n } = ReactI18n;
+import { injectI18n } from '@kbn/i18n/react';
 
 export class SourceFiltersTableComponent extends Component {
   static propTypes = {

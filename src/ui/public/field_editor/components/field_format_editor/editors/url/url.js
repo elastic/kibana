@@ -46,9 +46,7 @@ import {
 import chrome from 'ui/chrome';
 import './icons';
 
-import { ReactI18n } from '@kbn/i18n';
-
-const { FormattedMessage } = ReactI18n;
+import { FormattedMessage } from '@kbn/i18n/react';
 
 export class UrlFormatEditor extends DefaultFormatEditor {
   static formatId = 'url';

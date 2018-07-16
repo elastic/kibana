@@ -21,10 +21,9 @@ import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { CreateIndexPatternWizard } from './create_index_pattern_wizard';
 
-import { ReactI18n } from '@kbn/i18n';
+import { I18nProvider } from '@kbn/i18n/react';
 
 const CREATE_INDEX_PATTERN_DOM_ELEMENT_ID = 'createIndexPatternReact';
-const { I18nProvider } = ReactI18n;
 
 export function renderCreateIndexPatternWizard(
   initialQuery,

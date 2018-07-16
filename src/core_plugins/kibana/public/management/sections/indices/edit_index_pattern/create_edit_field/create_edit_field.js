@@ -27,9 +27,7 @@ import template from './create_edit_field.html';
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { FieldEditor } from 'ui/field_editor';
-import { ReactI18n } from '@kbn/i18n';
-
-const { I18nProvider } = ReactI18n;
+import { I18nProvider } from '@kbn/i18n/react';
 
 const REACT_FIELD_EDITOR_ID = 'reactFieldEditor';
 const renderFieldEditor = ($scope, indexPattern, field, {

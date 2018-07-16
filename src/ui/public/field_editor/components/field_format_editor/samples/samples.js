@@ -27,9 +27,7 @@ import {
 
 import './samples.less';
 
-import { ReactI18n } from '@kbn/i18n';
-
-const { injectI18n } = ReactI18n;
+import { injectI18n } from '@kbn/i18n/react';
 
 export class FormatEditorSamplesComponent extends PureComponent {
   static propTypes = {

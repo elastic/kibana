@@ -38,11 +38,10 @@ import {
   EuiCallOut,
 } from '@elastic/eui';
 
-import { ReactI18n } from '@kbn/i18n';
+import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
 import chrome from 'ui/chrome';
 
 const uiSettings = chrome.getUiSettingsClient();
-const { injectI18n, FormattedMessage } = ReactI18n;
 
 export class StepIndexPatternComponent extends Component {
   static propTypes = {

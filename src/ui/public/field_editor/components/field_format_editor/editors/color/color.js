@@ -33,9 +33,7 @@ import {
 
 import { DEFAULT_COLOR } from '../../../../../../../core_plugins/kibana/common/field_formats/types/color_default';
 
-import { ReactI18n } from '@kbn/i18n';
-
-const { injectI18n, FormattedMessage } = ReactI18n;
+import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
 
 export class ColorFormatEditorComponent extends DefaultFormatEditor {
   static formatId = 'color';

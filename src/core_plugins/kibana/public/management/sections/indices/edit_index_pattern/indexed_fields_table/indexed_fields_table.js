@@ -26,9 +26,7 @@ import {
   getFieldFormat
 } from './lib';
 
-import { ReactI18n } from '@kbn/i18n';
-
-const { I18nProvider } = ReactI18n;
+import { I18nProvider } from '@kbn/i18n/react';
 
 export class IndexedFieldsTable extends Component {
   static propTypes = {

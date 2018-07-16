@@ -35,9 +35,7 @@ import {
   CallOuts,
 } from './components';
 
-import { ReactI18n } from '@kbn/i18n';
-
-const { I18nProvider, injectI18n } = ReactI18n;
+import { I18nProvider, injectI18n } from '@kbn/i18n/react';
 
 export class ScriptedFieldsTableComponent extends Component {
   static propTypes = {
