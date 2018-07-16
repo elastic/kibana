@@ -70,8 +70,55 @@ export async function ScreenshotsProvider({ getService }) {
       log.debug('getScreenshotSize');
       const sessionPath = resolve(SESSION_DIRECTORY, 'temp.png');
       await this._take(sessionPath);
-      return await getSize(sessionPath, SESSION_DIRECTORY);
+      return await getSize(sessionPath);
     }
+
+
+
+    /*
+    The comparePngs function will try to scale images of mismatched
+    sizes before doing the comparison, but the matching is much more accurate if
+    the images are in the exact same aspect ratio.
+    To accomadate for different browsers on different OSs, we can take a temp
+    screenshot, get it's size, and then adjust our window size so that the screenshots
+    will be an exact match (if the user's display scaling is 100%).
+    If the display scaling is not 100%, we need to figure out what it is and use
+    that in our new window size calculation.  For example, If I run this test with
+    my display scaling set to 200%, the comparePngs will log this;
+      expected height 686 and width 1280
+      actual height 1372 and width 2560
+    But that's OK, because that's exactly 200% of the baseline image size.
+    */
+    async calibrateForScreenshots(baselineImageSize) {
+      // CALIBRATION STEP
+      const initialSize = await remote.getWindowSize();
+      // take a sample screenshot and get the size
+      let currentSize = await this.getScreenshotSize();
+      log.debug(`################## initial screenshot Size: ${currentSize.width} x ${currentSize.height}`);
+      // determine if there is display scaling and if so, what it is
+      log.debug(`current width / 1280 = ${currentSize.width / 1280}`);
+      log.debug(`current width / 1252 = ${currentSize.width / 1252}`);
+
+      await remote.setWindowSize(initialSize.width + 100, initialSize.height);
+      const tempSize = await this.getScreenshotSize();
+      log.debug(`################ temp  screenshot Size: ${currentSize.width} x ${currentSize.height}`);
+      const ratio = (tempSize.width - currentSize.width) / 100;
+      log.debug(`################ display scaling ratio = ${ratio}`);
+
+      // calculate the new desired size using that ratio.
+      const newSize = { width: (initialSize.width) + (baselineImageSize.width) - currentSize.width / ratio,
+        height: (initialSize.height) + (baselineImageSize.height)  - currentSize.height / ratio };
+      log.debug(`################## setting window size to ${newSize.width} x ${newSize.height}`);
+      log.debug(`################## delta size to ${newSize.width - initialSize.width} x ${newSize.height - initialSize.height}`);
+      await remote.setWindowSize(newSize.width, newSize.height);
+
+      // check again.
+      currentSize = await this.getScreenshotSize();
+      log.debug(`################## second screenshot Size: ${currentSize.width} x ${currentSize.height}`);
+    }
+
+
+
 
   }
 

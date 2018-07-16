@@ -37,8 +37,7 @@ export async function comparePngs(sessionPath, baselinePath, diffPath, sessionDi
   return percent;
 }
 
-export async function getSize(sessionPath, sessionDirectory) {
-  console.log(`comparePngs: ${sessionPath} ${sessionDirectory}`);
+export async function getSize(sessionPath) {
   const session = (await Jimp.read(sessionPath)).clone();
   return { width: session.bitmap.width, height: session.bitmap.height };
 }
