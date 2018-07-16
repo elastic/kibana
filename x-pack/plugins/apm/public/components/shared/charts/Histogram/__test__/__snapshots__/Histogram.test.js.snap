@@ -1407,15 +1407,15 @@ exports[`Histogram when hovering over a non-empty bucket should have correct mar
   font-size: 12px;
 }
 
-.c3 {
-  color: #666666;
-  font-size: 14px;
-}
-
 .c4 {
   color: #999999;
   margin: 8px;
   font-size: 12px;
+}
+
+.c3 {
+  color: #666666;
+  font-size: 14px;
 }
 
 <div

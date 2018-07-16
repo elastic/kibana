@@ -5,6 +5,7 @@
  */
 
 export * from './clear_cache_indices';
+export * from './clear_row_status';
 export * from './close_indices';
 export * from './delete_indices';
 export * from './flush_indices';

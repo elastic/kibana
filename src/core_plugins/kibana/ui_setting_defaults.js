@@ -374,7 +374,6 @@ export function getUiSettingDefaults() {
       name: 'Time picker refresh interval',
       value:
 `{
-  "display": "Off",
   "pause": false,
   "value": 0
 }`,

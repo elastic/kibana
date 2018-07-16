@@ -22,11 +22,9 @@ import { resolve as resolveUrl, format as formatUrl } from 'url';
 import { pick, mapValues } from 'lodash';
 
 import { IndexPatternMissingIndices } from '../errors';
-import { Notifier } from '../notify';
 
 export function createIndexPatternsApiClient($http, basePath) {
   const apiBaseUrl = `${basePath}/api/index_patterns/`;
-  const notify = new Notifier({ location: 'Index Patterns API' });
 
   function join(...uriComponents) {
     return uriComponents.filter(Boolean).map(encodeURIComponent).join('/');
@@ -80,9 +78,7 @@ export function createIndexPatternsApiClient($http, basePath) {
         meta_fields: metaFields,
       });
 
-      return notify.event(`getFieldsForTimePattern(${pattern})`, () => (
-        request('GET', url).then(resp => resp.fields)
-      ));
+      return request('GET', url).then(resp => resp.fields);
     }
 
     getFieldsForWildcard(options = {}) {
@@ -96,9 +92,7 @@ export function createIndexPatternsApiClient($http, basePath) {
         meta_fields: metaFields,
       });
 
-      return notify.event(`getFieldsForWildcard(${pattern})`, () => (
-        request('GET', url).then(resp => resp.fields)
-      ));
+      return request('GET', url).then(resp => resp.fields);
     }
   }
 

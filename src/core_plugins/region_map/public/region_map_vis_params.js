@@ -57,8 +57,8 @@ uiModules.get('kibana/region_map')
               }
 
               $scope.collections.vectorLayers = newVectorLayers;
-              if ($scope.collections.vectorLayers[0] && !$scope.vis.params.selectedLayer) {
-                $scope.vis.params.selectedLayer = $scope.collections.vectorLayers[0];
+              if ($scope.collections.vectorLayers[0] && !$scope.editorState.params.selectedLayer) {
+                $scope.editorState.params.selectedLayer = $scope.collections.vectorLayers[0];
                 onLayerChange();
               }
 
@@ -69,8 +69,8 @@ uiModules.get('kibana/region_map')
               }, 0);
               $scope.collections.vectorLayers = newVectorLayers;
 
-              if ($scope.collections.vectorLayers[0] && !$scope.vis.params.selectedLayer) {
-                $scope.vis.params.selectedLayer = $scope.collections.vectorLayers[0];
+              if ($scope.collections.vectorLayers[0] && !$scope.editorState.params.selectedLayer) {
+                $scope.editorState.params.selectedLayer = $scope.collections.vectorLayers[0];
                 onLayerChange();
               }
 
@@ -89,7 +89,7 @@ uiModules.get('kibana/region_map')
         }
 
         function onLayerChange() {
-          $scope.vis.params.selectedJoinField = $scope.vis.params.selectedLayer.fields[0];
+          $scope.editorState.params.selectedJoinField = $scope.editorState.params.selectedLayer.fields[0];
         }
 
       }

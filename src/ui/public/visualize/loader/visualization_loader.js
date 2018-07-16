@@ -20,12 +20,20 @@
 import _ from 'lodash';
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
-import { Visualization } from 'ui/visualize/visualization';
+import { Visualization } from '../components/visualization';
 
 
 export const visualizationLoader = (element, vis, visData, uiState, params) => {
-  const listenOnChange = _.get(params, 'listenOnChange', false);
-  render(<Visualization vis={vis} visData={visData} uiState={uiState} listenOnChange={listenOnChange} />, element);
+  return new Promise(resolve => {
+    const listenOnChange = _.get(params, 'listenOnChange', false);
+    render(<Visualization
+      vis={vis}
+      visData={visData}
+      uiState={uiState}
+      listenOnChange={listenOnChange}
+      onInit={resolve}
+    />, element);
+  });
 };
 
 visualizationLoader.destroy = (element) => {

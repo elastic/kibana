@@ -11,6 +11,7 @@ import _ from 'lodash';
 import { parseInterval } from 'ui/utils/parse_interval';
 
 import { ML_MEDIAN_PERCENTS } from 'plugins/ml/../common/util/job_utils';
+import { WIZARD_TYPE } from 'plugins/ml/jobs/new_job/simple/components/constants/general';
 import { calculateTextWidth } from 'plugins/ml/util/string_utils';
 import { mlFieldFormatService } from 'plugins/ml/services/field_format_service';
 import { mlJobService } from 'plugins/ml/services/job_service';
@@ -172,6 +173,10 @@ export function SingleMetricJobServiceProvider() {
       if (formConfig.useDedicatedIndex) {
         job.results_index_name = job.job_id;
       }
+
+      job.custom_settings = {
+        created_by: WIZARD_TYPE.SINGLE_METRIC
+      };
 
       // Use the original es agg type rather than the ML version
       // e.g. count rather than high_count
