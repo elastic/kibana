@@ -5,5 +5,4 @@ optimize:
 
 castro:
   enabled: true
-  index: '.castro'
   dataPath: 'castro/data/repos'  # the path relative to your HOME folder

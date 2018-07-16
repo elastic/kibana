@@ -1,8 +1,10 @@
 import * as Hapi from "hapi";
+import Boom from "boom";
 
 import RepositoryService from '../repositoryService';
 import RepositoryUtils from '../../common/repositoryUtils';
-import { Repository, NewRepository } from '../../common/models';
+import { Repository } from '../../model';
+import * as Constants from '../../common/constants';
 
 export default function (server: Hapi.Server) {
 
@@ -11,87 +13,64 @@ export default function (server: Hapi.Server) {
     path: '/api/castro/repo',
     method: 'POST',
     handler: async function(req: Hapi.Request, reply: any) {
-      const repoReq: NewRepository = req.payload;
-      const repoUrl: string = repoReq.url;
-      // TODO check if repo exists.
-      const config = req.server.config();
-      const dataPath: string = config.get('castro.dataPath');
-      const index = config.get('castro.index');
-
-      const es = req.server.plugins.elasticsearch.getCluster("data");
-      const {callWithRequest} = es;
-
+      const repoUrl: string = req.payload.url;
+      const dataPath: string = req.server.config().get('castro.dataPath');
+      const objectClient = req.getSavedObjectsClient();
       const repo: Repository = RepositoryUtils.buildRepository(repoUrl);
-
-      // Check if the repository exists.
-      callWithRequest(req, 'get', {
-        index,
-        type: 'repository',
-        id: repo.uri
-      }).then((response: any) => {
-        console.log(`Repository ${repoUrl} already exists. Skip clone.`);
-        reply().code(304);  // Not Modified
-      }).catch(error => {
-        console.log(`Repository ${repoUrl} does not exist. Go ahead with cloning.`);
-        // Clone the repository
-        const repoService = new RepositoryService(dataPath);
-        repoService.clone(repo);
-
-        if (repo) {
+      try {
+        // Check if the repository already exists
+        await objectClient.get(Constants.REPOSITORY_INDEX_TYPE, repo.uri);
+        const msg = `Repository ${repoUrl} already exists. Skip clone.`;
+        console.log(msg);
+        reply(msg).code(304);  // Not Modified
+      } catch (error) {
+        console.log(`Repository ${repoUrl} does not exist. Go ahead with clone.`);
+        try {
+          // Clone the repository
+          // TODO(mengwei): move this to queue handler.
+          const repoService = new RepositoryService(dataPath);
+          repoService.clone(repo);
           // Persist to elasticsearch
-          const es = req.server.plugins.elasticsearch.getCluster("data");
-          const {callWithRequest} = es;
-          callWithRequest(req, 'create', {
-            index,
-            type: 'repository',
-            id: repo.uri,
-            body: JSON.stringify(repo)
-          }).then((response: any) => {
-            reply(response);
-          });
-        } else {
-          reply('failed to clone the repo.').code(400);
+          const res = await objectClient.create(
+            Constants.REPOSITORY_INDEX_TYPE,
+            repo,
+            {
+              id: repo.uri
+            }
+          )
+          reply(res);
+        } catch (error) {
+          const msg = `Failed to clone repository from ${repoUrl}`;
+          console.error(msg);
+          reply(Boom.badRequest(msg));
         }
-      });
+      }
     }
-  });
+  })
 
   // Remove a git repository
   server.route({
     path: '/api/castro/repo/{uri*3}',
     method: 'DELETE',
     handler: async function(req: Hapi.Request, reply: any) {
-      console.log(`Remove a git repository ${req.params.uri}`);
       const repoUri: string = req.params.uri as string;
-      const config = req.server.config();
-      const index: string = config.get('castro.index');
-      const dataPath: string = config.get('castro.dataPath');
+      const dataPath: string = req.server.config().get('castro.dataPath');
 
-      const es = req.server.plugins.elasticsearch.getCluster("data");
-      const {callWithRequest} = es;
+      const objectClient = req.getSavedObjectsClient();
+      try {
+        // Delete the repository from ES.
+        // If object does not exist in ES, an error will be thrown.
+        await objectClient.delete(Constants.REPOSITORY_INDEX_TYPE, repoUri);
 
-      // Check if the repository exists.
-      callWithRequest(req, 'get', {
-        index,
-        type: 'repository',
-        id: repoUri
-      }).then((response: any) => {
+        // Delete the repository data
         const repoService = new RepositoryService(dataPath);
-
-        repoService.remove(repoUri);
-  
-        callWithRequest(req, 'delete', {
-          index,
-          type: 'repository',
-          id: repoUri
-        }).then((response: any) => {
-          reply(response)
-        });
-      }).catch(error => {
-        console.error(`Repository ${repoUri} does not exist`);
-        // TODO: use Boom for better response code handling
-        reply().code(404);  // Not Found.
-      });
+        await repoService.remove(repoUri);
+        reply();
+      } catch (error) {
+        const msg = `Delete repository ${repoUri} error: ${error}`;
+        console.error(msg);
+        reply(Boom.notFound(msg));
+      }
     }
   })
 
@@ -100,25 +79,20 @@ export default function (server: Hapi.Server) {
     path: '/api/castro/repo/{uri*3}',
     method: 'GET',
     handler: async function(req: Hapi.Request, reply: any) {
-      console.log(`## get a git repository ${req.params.uri}`);
-      const repoUri: string = req.params.uri as string;
-      const config = req.server.config();
-      const index: string = config.get('castro.index');
-
-      const es = req.server.plugins.elasticsearch.getCluster("data");
-      const {callWithRequest} = es;
-      callWithRequest(req, 'get', {
-        index,
-        type: 'repository',
-        id: repoUri
-      }).then((response: any) => {
-        const repo: Repository = response._source;
+      const repoUri = req.params.uri as string;
+      const objectClient = req.getSavedObjectsClient();
+      try {
+        const response = await objectClient.get(
+          Constants.REPOSITORY_INDEX_TYPE,
+          repoUri
+        )
+        const repo: Repository = response.attributes;
         reply(repo);
-      }).catch(error => {
-        console.error(`Get repository ${repoUri} error: ${error}`);
-        // TODO: use Boom for better response code handling
-        reply().code(404);  // Not Found
-      });
+      } catch (error) {
+        const msg = `Get repository ${repoUri} error: ${error}`;
+        console.error(msg);
+        reply(Boom.notFound(msg));
+      };
     }
   })
 
@@ -127,31 +101,23 @@ export default function (server: Hapi.Server) {
     path: '/api/castro/repos',
     method: 'GET',
     handler: async function(req: Hapi.Request, reply: any) {
-      const config = req.server.config();
-      const index: string = config.get('castro.index');
-
-      const es = req.server.plugins.elasticsearch.getCluster("data");
-      const {callWithRequest} = es;
-      callWithRequest(req, 'search', {
-        index,
-        type: 'repository',
-        body: {
-          query: {
-            match_all: {}
-          }
-        }
-      }).then(function (response: any) {
-        const hits: any[] = response.hits.hits;
-        const repos: Repository[] = hits.map(hit => {
-          const repo: Repository = hit._source;
+      const objectClient = req.getSavedObjectsClient();
+      try {
+        const response = await objectClient.find({
+          type: Constants.REPOSITORY_INDEX_TYPE,
+          perPage: 10000
+        })
+        const objects: any[] = response.saved_objects;
+        const repos: Repository[] = objects.map(obj => {
+          const repo: Repository = obj.attributes;
           return repo;
         });
         reply(repos);
-      }).catch(error => {
-        console.error(`Get all repositories error: ${error}`);
-        // TODO: use Boom for better response code handling
-        reply().code(404);
-      });;
+      } catch (error) {
+        const msg = `Get all repositories error: ${error}`;
+        console.error(msg);
+        reply(Boom.notFound(msg));
+      }
     }
   })
 }

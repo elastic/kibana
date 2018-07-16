@@ -1,10 +1,16 @@
 {
-  "person": {
+  "castro-repository": {
     "properties": {
-      "firstName": {
+      "uri": {
         "type": "text"
       },
-      "lastName": {
+      "url": {
+        "type": "text"
+      },
+      "name": {
+        "type": "text"
+      },
+      "org": {
         "type": "text"
       }
     }
