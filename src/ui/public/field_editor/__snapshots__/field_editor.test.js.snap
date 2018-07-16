@@ -17,8 +17,19 @@ exports[`FieldEditor should render create new scripted field correctly 1`] = `
     <scripting-warning-callOut
       isVisible={true}
     />
-    <scripting-help-flyout
+    <ScriptingHelpFlyout
+      executeScript={[Function]}
+      indexPattern={
+        Object {
+          "fields": Array [
+            Object {
+              "name": "foobar",
+            },
+          ],
+        }
+      }
       isVisible={false}
+      lang="painless"
       onClose={[Function]}
     />
     <eui-form-row
@@ -136,11 +147,26 @@ exports[`FieldEditor should render create new scripted field correctly 1`] = `
     <eui-form-row
       error="Script is required"
       helpText={
-        <eui-link
-          onClick={[Function]}
+        <eui-flex-group
+          gutterSize="xs"
         >
-          Scripting help
-        </eui-link>
+          <eui-flex-item
+            grow={false}
+          >
+            <eui-icon
+              color="primary"
+              type="help"
+            />
+          </eui-flex-item>
+          <eui-flex-item>
+            <eui-link
+              data-test-subj="scriptedFieldsHelpLink"
+              onClick={[Function]}
+            >
+              Get help with the syntax and preview the results of your script
+            </eui-link>
+          </eui-flex-item>
+        </eui-flex-group>
       }
       isInvalid={true}
       label="Script"
@@ -159,6 +185,7 @@ exports[`FieldEditor should render create new scripted field correctly 1`] = `
           data-test-subj="fieldSaveButton"
           fill={true}
           isDisabled={true}
+          isLoading={false}
           onClick={[Function]}
         >
           Create field
@@ -199,9 +226,30 @@ exports[`FieldEditor should render edit scripted field correctly 1`] = `
     <scripting-warning-callOut
       isVisible={true}
     />
-    <scripting-help-flyout
+    <ScriptingHelpFlyout
+      executeScript={[Function]}
+      indexPattern={
+        Object {
+          "fields": Array [
+            Object {
+              "name": "foobar",
+            },
+            Object {
+              "format": Format {},
+              "lang": "painless",
+              "name": "test",
+              "script": "doc.test.value",
+              "scripted": true,
+              "type": "number",
+            },
+          ],
+        }
+      }
       isVisible={false}
+      lang="painless"
+      name="test"
       onClose={[Function]}
+      script="doc.test.value"
     />
     <eui-form-row
       helpText={null}
@@ -304,11 +352,26 @@ exports[`FieldEditor should render edit scripted field correctly 1`] = `
     <eui-form-row
       error={null}
       helpText={
-        <eui-link
-          onClick={[Function]}
+        <eui-flex-group
+          gutterSize="xs"
         >
-          Scripting help
-        </eui-link>
+          <eui-flex-item
+            grow={false}
+          >
+            <eui-icon
+              color="primary"
+              type="help"
+            />
+          </eui-flex-item>
+          <eui-flex-item>
+            <eui-link
+              data-test-subj="scriptedFieldsHelpLink"
+              onClick={[Function]}
+            >
+              Get help with the syntax and preview the results of your script
+            </eui-link>
+          </eui-flex-item>
+        </eui-flex-group>
       }
       isInvalid={false}
       label="Script"
@@ -328,6 +391,7 @@ exports[`FieldEditor should render edit scripted field correctly 1`] = `
           data-test-subj="fieldSaveButton"
           fill={true}
           isDisabled={false}
+          isLoading={false}
           onClick={[Function]}
         >
           Save field
@@ -378,8 +442,36 @@ exports[`FieldEditor should show conflict field warning 1`] = `
     <scripting-warning-callOut
       isVisible={true}
     />
-    <scripting-help-flyout
+    <ScriptingHelpFlyout
+      executeScript={[Function]}
+      indexPattern={
+        Object {
+          "fields": Array [
+            Object {
+              "name": "foobar",
+            },
+            Object {
+              "format": Format {},
+              "lang": "painless",
+              "name": "test",
+              "script": "doc.test.value",
+              "scripted": true,
+              "type": "number",
+            },
+            Object {
+              "format": Format {},
+              "lang": "testlang",
+              "name": "test",
+              "script": "doc.test.value",
+              "scripted": true,
+              "type": "number",
+            },
+          ],
+        }
+      }
       isVisible={false}
+      lang="painless"
+      name="foobar"
       onClose={[Function]}
     />
     <eui-form-row
@@ -514,11 +606,26 @@ exports[`FieldEditor should show conflict field warning 1`] = `
     <eui-form-row
       error="Script is required"
       helpText={
-        <eui-link
-          onClick={[Function]}
+        <eui-flex-group
+          gutterSize="xs"
         >
-          Scripting help
-        </eui-link>
+          <eui-flex-item
+            grow={false}
+          >
+            <eui-icon
+              color="primary"
+              type="help"
+            />
+          </eui-flex-item>
+          <eui-flex-item>
+            <eui-link
+              data-test-subj="scriptedFieldsHelpLink"
+              onClick={[Function]}
+            >
+              Get help with the syntax and preview the results of your script
+            </eui-link>
+          </eui-flex-item>
+        </eui-flex-group>
       }
       isInvalid={true}
       label="Script"
@@ -537,6 +644,7 @@ exports[`FieldEditor should show conflict field warning 1`] = `
           data-test-subj="fieldSaveButton"
           fill={true}
           isDisabled={true}
+          isLoading={false}
           onClick={[Function]}
         >
           Create field
@@ -577,9 +685,38 @@ exports[`FieldEditor should show deprecated lang warning 1`] = `
     <scripting-warning-callOut
       isVisible={true}
     />
-    <scripting-help-flyout
+    <ScriptingHelpFlyout
+      executeScript={[Function]}
+      indexPattern={
+        Object {
+          "fields": Array [
+            Object {
+              "name": "foobar",
+            },
+            Object {
+              "format": Format {},
+              "lang": "painless",
+              "name": "test",
+              "script": "doc.test.value",
+              "scripted": true,
+              "type": "number",
+            },
+            Object {
+              "format": Format {},
+              "lang": "testlang",
+              "name": "test",
+              "script": "doc.test.value",
+              "scripted": true,
+              "type": "number",
+            },
+          ],
+        }
+      }
       isVisible={false}
+      lang="testlang"
+      name="test"
       onClose={[Function]}
+      script="doc.test.value"
     />
     <eui-form-row
       helpText={
@@ -738,11 +875,26 @@ exports[`FieldEditor should show deprecated lang warning 1`] = `
     <eui-form-row
       error={null}
       helpText={
-        <eui-link
-          onClick={[Function]}
+        <eui-flex-group
+          gutterSize="xs"
         >
-          Scripting help
-        </eui-link>
+          <eui-flex-item
+            grow={false}
+          >
+            <eui-icon
+              color="primary"
+              type="help"
+            />
+          </eui-flex-item>
+          <eui-flex-item>
+            <eui-link
+              data-test-subj="scriptedFieldsHelpLink"
+              onClick={[Function]}
+            >
+              Get help with the syntax and preview the results of your script
+            </eui-link>
+          </eui-flex-item>
+        </eui-flex-group>
       }
       isInvalid={false}
       label="Script"
@@ -762,6 +914,7 @@ exports[`FieldEditor should show deprecated lang warning 1`] = `
           data-test-subj="fieldSaveButton"
           fill={true}
           isDisabled={false}
+          isLoading={false}
           onClick={[Function]}
         >
           Save field

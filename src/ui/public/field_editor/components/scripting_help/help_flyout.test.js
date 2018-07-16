@@ -26,11 +26,16 @@ jest.mock('ui/documentation_links', () => ({
   getDocLink: (doc) => `(docLink for ${doc})`,
 }));
 
+const indexPatternMock = {};
+
 describe('ScriptingHelpFlyout', () => {
   it('should render normally', async () => {
     const component = shallow(
       <ScriptingHelpFlyout
         isVisible={true}
+        indexPattern={indexPatternMock}
+        lang="painless"
+        executeScript={() => {}}
       />
     );
 
@@ -39,7 +44,11 @@ describe('ScriptingHelpFlyout', () => {
 
   it('should render nothing if not visible', async () => {
     const component = shallow(
-      <ScriptingHelpFlyout />
+      <ScriptingHelpFlyout
+        indexPattern={indexPatternMock}
+        lang="painless"
+        executeScript={() => {}}
+      />
     );
 
     expect(component).toMatchSnapshot();
