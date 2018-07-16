@@ -549,7 +549,7 @@ export class FieldEditorComponent extends PureComponent {
 
   saveField = () => {
     const { redirectAway } = this.props.helpers;
-    const { indexPattern } = this.props;
+    const { indexPattern, intl } = this.props;
     const { fieldFormatId } = this.state;
 
     const field = this.state.field.toActualField();
@@ -569,7 +569,7 @@ export class FieldEditorComponent extends PureComponent {
 
     return indexPattern.save()
       .then(function () {
-        toastNotifications.addSuccess(this.props.intl.formatMessage(
+        toastNotifications.addSuccess(intl.formatMessage(
           { id: 'common.ui.fieldEditor.deleteField.saved.header', defaultMessage: 'Saved \'{fieldName}\'' },
           { fieldName: field.name }));
         redirectAway();
