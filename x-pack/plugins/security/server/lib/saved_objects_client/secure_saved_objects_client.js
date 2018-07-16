@@ -72,7 +72,7 @@ export class SecureSavedObjectsClient {
       types,
       'bulk_get',
       { objects, options },
-      repository => repository.bulkGet(objects)
+      repository => repository.bulkGet(objects, options)
     );
   }
 
@@ -81,7 +81,7 @@ export class SecureSavedObjectsClient {
       type,
       'get',
       { type, id, options },
-      repository => repository.get(type, id)
+      repository => repository.get(type, id, options)
     );
   }
 
