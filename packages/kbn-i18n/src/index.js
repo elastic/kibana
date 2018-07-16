@@ -17,10 +17,8 @@
  * under the License.
  */
 
-import * as i18nCore from './core/i18n';
-import * as loader from './core/loader';
-
-export { formats } from './core/formats';
+import * as i18nCore from './core';
+import * as loader from './loader';
 
 export const i18n = i18nCore;
 export const i18nLoader = loader;
