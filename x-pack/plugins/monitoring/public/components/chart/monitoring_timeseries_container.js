@@ -35,6 +35,7 @@ export function MonitoringTimeseriesContainer({ series, onBrush }) {
           <EuiFlexItem grow={false}>
             <EuiIconTip
               anchorClassName="eui-textRight eui-alignMiddle monitoring-chart-tooltip__trigger"
+              className="monitoring-chart-tooltip__wrapper"
               type="iInCircle"
               position="right"
               content={<InfoTooltip series={series}/>}
