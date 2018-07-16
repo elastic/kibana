@@ -9,11 +9,8 @@ import pluralize from 'pluralize';
 
 import {
   EuiCallOut,
-  EuiConfirmModal,
   EuiEmptyPrompt,
   EuiLoadingSpinner,
-  EUI_MODAL_CANCEL_BUTTON,
-  EuiOverlayMask,
   EuiPage,
   EuiPageContent,
 } from '@elastic/eui';
@@ -21,6 +18,7 @@ import {
 import { PIPELINE_LIST } from '../../../common/constants/pipeline_list';
 import { InfoAlerts } from './info_alerts';
 import { PipelinesTable } from './pipelines_table';
+import { ConfirmDeleteModal } from './confirm_delete_modal';
 
 export class PipelineList extends React.Component {
   constructor(props) {
@@ -179,42 +177,6 @@ export class PipelineList extends React.Component {
     this.hideDeletePipelinesModal();
   }
 
-  renderConfirmDeletedPipelinesModal = () => {
-    if (!this.state.showConfirmDeleteModal) {
-      return null;
-    }
-    const { selection } = this.state;
-    const numPipelinesSelected = selection.length;
-
-    const confirmText = numPipelinesSelected === 1
-      ? {
-        message: 'You cannot recover a deleted pipeline',
-        button: `Delete pipeline`,
-        title: `Delete pipeline "${selection[0].id}"`,
-      }
-      : {
-        message: `You cannot recover deleted pipelines.`,
-        button: `Delete ${numPipelinesSelected} pipelines`,
-        title: `Delete ${numPipelinesSelected} pipelines`,
-      };
-
-    return (
-      <EuiOverlayMask>
-        <EuiConfirmModal
-          buttonColor="danger"
-          cancelButtonText="Cancel"
-          confirmButtonText={confirmText.button}
-          defaultFocusedButton={EUI_MODAL_CANCEL_BUTTON}
-          onCancel={this.cancelDeletePipelines}
-          onConfirm={this.deleteSelectedPipelines}
-          title={confirmText.title}
-        >
-          <p>{confirmText.message}</p>
-        </EuiConfirmModal>
-      </EuiOverlayMask>
-    );
-  }
-
   deleteSelectedPipelines = () => {
     this.hideDeletePipelinesModal();
     const {
@@ -292,6 +254,7 @@ export class PipelineList extends React.Component {
       message,
       pipelines,
       selection,
+      showConfirmDeleteModal,
     } = this.state;
     return (
       <EuiPage style={{ minHeight: '100vh' }}>
@@ -315,7 +278,12 @@ export class PipelineList extends React.Component {
             openPipeline={openPipeline}
           />
         </EuiPageContent>
-        { this.renderConfirmDeletedPipelinesModal() }
+        <ConfirmDeleteModal
+          cancelDeletePipelines={this.cancelDeletePipelines}
+          deleteSelectedPipelines={this.deleteSelectedPipelines}
+          selection={selection}
+          showConfirmDeleteModal={showConfirmDeleteModal}
+        />
         <InfoAlerts
           showAddRoleAlert={this.state.showAddRoleAlert}
           showEnableMonitoringAlert={this.state.showEnableMonitoringAlert}
