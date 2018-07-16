@@ -25,7 +25,7 @@ import { Footer } from './footer';
 import { Introduction } from './introduction';
 import { InstructionSet } from './instruction_set';
 import { RadioButtonGroup } from './radio_button_group';
-import { EuiSpacer, EuiPage, EuiPanel, EuiLink, EuiText } from '@elastic/eui';
+import { EuiSpacer, EuiPage, EuiPanel, EuiLink, EuiText, EuiPageBody } from '@elastic/eui';
 import * as StatusCheckStates from './status_check_states';
 
 const INSTRUCTIONS_TYPE = {
@@ -313,10 +313,15 @@ export class Tutorial extends React.Component {
     }
     return (
       <EuiPage className="home">
+        <EuiPageBody>
 
-        <EuiLink href="#/home">Home</EuiLink> / <EuiLink href="#/home/tutorial_directory">Add Data</EuiLink>
-        <EuiSpacer size="s" />
-        {content}
+          <div>
+            <EuiLink href="#/home">Home</EuiLink> / <EuiLink href="#/home/tutorial_directory">Add Data</EuiLink>
+          </div>
+          <EuiSpacer size="s" />
+          {content}
+
+        </EuiPageBody>
       </EuiPage>
     );
   }
