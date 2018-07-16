@@ -17,6 +17,8 @@
  * under the License.
  */
 
-import Intl from 'intl';
+import * as i18nCore from './core';
+import * as loader from './loader';
 
-global.Intl = Intl;
+export const i18n = i18nCore;
+export const i18nLoader = loader;

@@ -17,6 +17,7 @@
  * under the License.
  */
 
-import './intl_polyfill';
+// eslint-disable-next-line
+import Intl from 'intl';
 
-export * from './browser';
+global.Intl = Intl;
