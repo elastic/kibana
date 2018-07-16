@@ -1,5 +1,6 @@
 import lzString from 'lz-string';
 import { createBrowserHistory, createMemoryHistory, parsePath, createPath } from 'history';
+import { get } from 'lodash';
 import chrome from 'ui/chrome';
 import { APP_ROUTE } from '../../common/lib/constants';
 import { getWindow } from './get_window';
@@ -142,17 +143,21 @@ const getHistoryInstance = win => {
   });
 };
 
-export const historyProvider = win => {
-  const winObj = win || getWindow();
-
+export const historyProvider = (win = getWindow()) => {
   // return cached instance if one exists
-  const instance = instances.get(winObj);
+  const instance = instances.get(win);
   if (instance) return instance;
 
+  // temporary fix for search params before the hash; remove them via location redirect
+  // they can't be preserved given this upstream issue https://github.com/ReactTraining/history/issues/564
+  if (get(win, 'location.search', '').length > 0) {
+    win.location = `${chrome.getBasePath()}${APP_ROUTE}${win.location.hash}`;
+  }
+
   // create and cache wrapped history instance
-  const historyInstance = getHistoryInstance(winObj);
+  const historyInstance = getHistoryInstance(win);
   const wrappedInstance = wrapHistoryInstance(historyInstance);
-  instances.set(winObj, wrappedInstance);
+  instances.set(win, wrappedInstance);
 
   return wrappedInstance;
 };

@@ -51,6 +51,7 @@ export function routerProvider(routes) {
         const match = this.match(pathname);
 
         if (!match) {
+          // TODO: show some kind of error, or redirect somewhere; maybe home?
           console.error('No route found for path: ', pathname);
           return;
         }
