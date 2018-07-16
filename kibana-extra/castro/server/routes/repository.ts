@@ -11,7 +11,7 @@ import RepositoryUtils from '../../common/repositoryUtils';
 import { REPOSITORY_INDEX_TYPE } from '../../mappings';
 import { Repository } from '../../model';
 import { Log } from '../log';
-import RepositoryService from '../repositoryService';
+import { Worker } from '../queue';
 import ServerOptions from '../ServerOptions';
 
 export default function(server: Hapi.Server, options: ServerOptions) {
@@ -21,6 +21,7 @@ export default function(server: Hapi.Server, options: ServerOptions) {
     method: 'POST',
     async handler(req: Hapi.Request, reply: any) {
       const repoUrl: string = req.payload.url;
+      const cloneWorker: Worker = req.server.plugins.castro.cloneWorker;
       const objectClient = req.getSavedObjectsClient();
       const log = new Log(req.server);
 
@@ -34,17 +35,19 @@ export default function(server: Hapi.Server, options: ServerOptions) {
       } catch (error) {
         log.info(`Repository ${repoUrl} does not exist. Go ahead with clone.`);
         try {
-          // Clone the repository
-          // TODO(mengwei): move this to queue handler.
-          const repoService = new RepositoryService(options.repoPath, log);
-          repoService.clone(repo);
           // Persist to elasticsearch
-          const res = await objectClient.create(REPOSITORY_INDEX_TYPE, repo, {
+          await objectClient.create(REPOSITORY_INDEX_TYPE, repo, {
             id: repo.uri,
           });
-          reply(res);
+
+          const payload = {
+            url: repoUrl,
+            dataPath: options.repoPath,
+          };
+          await cloneWorker.enqueueJob(payload, {});
+          reply();
         } catch (error) {
-          const msg = `Failed to clone repository from ${repoUrl}`;
+          const msg = `Issue repository clone request for ${repoUrl} error: ${error}`;
           log.error(msg);
           reply(Boom.badRequest(msg));
         }
@@ -58,19 +61,23 @@ export default function(server: Hapi.Server, options: ServerOptions) {
     method: 'DELETE',
     async handler(req: Hapi.Request, reply: any) {
       const repoUri: string = req.params.uri as string;
+      const deleteWorker: Worker = req.server.plugins.castro.deleteWorker;
       const log = new Log(req.server);
-      const objectClient = req.getSavedObjectsClient();
+
       try {
         // Delete the repository from ES.
         // If object does not exist in ES, an error will be thrown.
-        await objectClient.delete(REPOSITORY_INDEX_TYPE, repoUri);
+        await req.getSavedObjectsClient().delete(REPOSITORY_INDEX_TYPE, repoUri);
 
-        // Delete the repository data
-        const repoService = new RepositoryService(options.repoPath, log);
-        await repoService.remove(repoUri);
+        const payload = {
+          uri: repoUri,
+          dataPath: options.repoPath,
+        };
+        await deleteWorker.enqueueJob(payload, {});
+
         reply();
       } catch (error) {
-        const msg = `Delete repository ${repoUri} error: ${error}`;
+        const msg = `Issue repository delete request for ${repoUri} error: ${error}`;
         log.error(msg);
         reply(Boom.notFound(msg));
       }
@@ -108,8 +115,8 @@ export default function(server: Hapi.Server, options: ServerOptions) {
 
       try {
         const response = await objectClient.find({
-          type: REPOSITORY_INDEX_TYPE,
           perPage: 10000,
+          type: REPOSITORY_INDEX_TYPE,
         });
         const objects: any[] = response.saved_objects;
         const repos: Repository[] = objects.map(obj => {

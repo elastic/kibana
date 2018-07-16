@@ -12,7 +12,7 @@ import { Repository, RepositoryUri } from '../model';
 export default class RepositoryUtils {
   // Generate a Repository instance by parsing repository remote url
   // TODO(mengwei): This is a very naive implementation, need improvements.
-  public static buildRepository(remoteUrl: string): Repository | undefined {
+  public static buildRepository(remoteUrl: string): Repository {
     const repo = GitUrlParse(remoteUrl);
     const uri: RepositoryUri = repo.source + '/' + repo.full_name;
     return {

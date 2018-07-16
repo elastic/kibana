@@ -39,7 +39,17 @@ export class Log implements Logger {
     this.info(message);
   }
 
-  public warn(msg: string): void {
+  public debug(msg: string | any) {
+    if (typeof msg !== 'string') {
+      msg = inspect(msg, {
+        colors: process.stdout.isTTY,
+      });
+    }
+
+    this.server.log([...this.baseTags, 'debug'], msg);
+  }
+
+  public warn(msg: string | any): void {
     if (msg instanceof Error) {
       msg = msg.stack;
     }

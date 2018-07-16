@@ -4,8 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import * as Hapi from 'hapi';
 import { resolve } from 'path';
+
 import mappings from './mappings';
+import { Esqueue } from './server/lib/esqueue';
+import { CloneWorker, DeleteWorker } from './server/queue';
 import exampleRoute from './server/routes/example';
 import fileRoute from './server/routes/file';
 import lspRoute from './server/routes/lsp';
@@ -35,11 +39,31 @@ export default (kibana: any) =>
       return Joi.object({
         enabled: Joi.boolean().default(true),
         dataPath: Joi.string().default('/tmp'),
+        queueIndex: Joi.string().default('.castro-worker-queue'),
       }).default();
     },
 
-    init(server: any, options: any) {
+    init(server: Hapi.Server, options: any) {
+      const queueIndex = server.config().get('castro.queueIndex');
+      const queue = new Esqueue(queueIndex, {
+        // We my consider to provide a different value
+        doctype: 'esqueue',
+        dataSeparator: '.',
+        client: server.plugins.elasticsearch.getCluster('admin'),
+      });
+
+      const cloneWorker = new CloneWorker(queue, server);
+      const deleteWorker = new DeleteWorker(queue, server);
+
+      cloneWorker.bind();
+      deleteWorker.bind();
+
+      server.expose('cloneWorker', cloneWorker);
+      server.expose('deleteWorker', deleteWorker);
+
       const serverOptions = new ServerOptions(options);
+
+      // Add server routes and initialize the plugin here
       exampleRoute(server);
       lspRoute(server, serverOptions);
       repositoryRoute(server, serverOptions);

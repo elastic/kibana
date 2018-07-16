@@ -17,7 +17,7 @@ export default class RepositoryService {
 
   public async clone(repo: Repository): Promise<Repository | null> {
     if (!repo) {
-      return null;
+      throw new Error(`Invalid repository.`);
     } else {
       const localPath = RepositoryUtils.repositoryLocalPath(this.repoVolPath, repo.uri);
       try {
@@ -53,7 +53,7 @@ export default class RepositoryService {
   public async remove(uri: string): Promise<boolean> {
     const localPath = RepositoryUtils.repositoryLocalPath(this.repoVolPath, uri);
     // For now, just `rm -rf`
-    rimraf(localPath, error => {
+    rimraf(localPath, (error: Error) => {
       if (error) {
         this.log.error(`Remove ${localPath} error: ${error}.`);
         throw error;
