@@ -4,7 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { PLUGIN } from './plugin';
-export { INDEX_NAMES } from './index_names';
-export { UNIQUENESS_ENFORCING_TYPES, ConfigurationBlockTypes } from './configuration_blocks';
-export const BASE_PATH = '/management/beats/';
+import React from 'react';
+
+export class NotFoundPage extends React.PureComponent {
+  public render() {
+    return <div>No content found</div>;
+  }
+}

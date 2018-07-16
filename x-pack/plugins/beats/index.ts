@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import Joi from 'joi';
+import { resolve } from 'url';
 import { PLUGIN } from './common/constants';
 import { initServerWithKibana } from './server/kibana.index';
 
@@ -27,6 +28,10 @@ export function beats(kibana: any) {
     require: ['kibana', 'elasticsearch', 'xpack_main'],
     init(server: any) {
       initServerWithKibana(server);
+    },
+    publicDir: resolve(__dirname, 'public'),
+    uiExports: {
+      managementSections: ['plugins/beats'],
     },
   });
 }
