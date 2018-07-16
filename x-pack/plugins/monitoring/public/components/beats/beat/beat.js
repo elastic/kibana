@@ -7,7 +7,7 @@
 import React, { Fragment } from 'react';
 import { MonitoringTimeseriesContainer } from 'plugins/monitoring/components';
 import { formatMetric } from 'plugins/monitoring/lib/format_number';
-import { EuiFlexGrid, EuiFlexItem, EuiSpacer } from '@elastic/eui';
+import { EuiFlexGrid, EuiFlexItem, EuiSpacer, EuiPage } from '@elastic/eui';
 
 function renderTransportAddress(summary) {
   let output = null;
@@ -102,17 +102,19 @@ export function Beat({ summary, metrics, ...props }) {
         </div>
       </div>
 
-      <EuiFlexGrid columns={2} gutterSize="none">
-        {metricsToShow.map((metric, index) => (
-          <EuiFlexItem key={index} style={{ width: '50%' }}>
-            <MonitoringTimeseriesContainer
-              series={metric}
-              {...props}
-            />
-            <EuiSpacer size="m"/>
-          </EuiFlexItem>
-        ))}
-      </EuiFlexGrid>
+      <EuiPage style={{ backgroundColor: 'white' }}>
+        <EuiFlexGrid columns={2} gutterSize="none">
+          {metricsToShow.map((metric, index) => (
+            <EuiFlexItem key={index} style={{ width: '50%' }}>
+              <MonitoringTimeseriesContainer
+                series={metric}
+                {...props}
+              />
+              <EuiSpacer size="m"/>
+            </EuiFlexItem>
+          ))}
+        </EuiFlexGrid>
+      </EuiPage>
     </div>
   );
 }
