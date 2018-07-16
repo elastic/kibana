@@ -82,7 +82,7 @@ export class Metrics {
           },
           resident_set_size_in_bytes: get(hapiEvent, 'psmem.rss'),
         },
-        event_loop_delay: get(hapiEvent, 'psdelay'), // TODO: should be event_loop_delay_ms
+        event_loop_delay: get(hapiEvent, 'psdelay'),
         pid: process.pid,
         uptime_in_millis: process.uptime() * 1000
       },
