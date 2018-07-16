@@ -19,5 +19,4 @@
 
 export { copyField } from './copy_field';
 export { getDefaultFormat } from './get_default_format';
-export { convertSampleInput } from './convert_sample_input';
 export { executeScript, isScriptValid } from './validate_script';
