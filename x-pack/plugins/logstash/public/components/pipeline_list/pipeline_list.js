@@ -8,15 +8,10 @@ import React from 'react';
 import pluralize from 'pluralize';
 
 import {
-  EuiButton,
-  EuiButtonEmpty,
   EuiCallOut,
   EuiConfirmModal,
   EuiEmptyPrompt,
-  EuiIconTip,
-  EuiInMemoryTable,
   EuiLoadingSpinner,
-  EuiLink,
   EUI_MODAL_CANCEL_BUTTON,
   EuiOverlayMask,
   EuiPage,
@@ -25,6 +20,7 @@ import {
 
 import { PIPELINE_LIST } from '../../../common/constants/pipeline_list';
 import { InfoAlerts } from './info_alerts';
+import { PipelinesTable } from './pipelines_table';
 
 export class PipelineList extends React.Component {
   constructor(props) {
@@ -70,6 +66,14 @@ export class PipelineList extends React.Component {
     />
   )
 
+  getErrorPrompt = () => (
+    <EuiEmptyPrompt
+      title={<h2>Error</h2>}
+      titleSize="xs"
+      body="Error encountered while loading pipelines."
+    />
+  )
+
   loadPipelines = () => {
     const {
       isReadOnly,
@@ -90,7 +94,6 @@ export class PipelineList extends React.Component {
     return pipelinesService.getPipelineList()
       .then(pipelines => {
         this.setState({
-          columns: this.getColumns(),
           isLoading: false,
           isForbidden: false,
           isSelectable: true,
@@ -106,6 +109,10 @@ export class PipelineList extends React.Component {
         }
       })
       .catch(err => {
+        this.setState({
+          isLoading: false,
+          message: this.getErrorPrompt(),
+        });
         return licenseService.checkValidity()
           .then(() => {
             if (err.status === 403) {
@@ -118,7 +125,7 @@ export class PipelineList extends React.Component {
               }
             } else {
               this.setState({ isForbidden: false });
-              toastNotifications.addDanger(`Couldn't load pipeline. Error: '${err.statusText}'.`);
+              toastNotifications.addDanger(`Couldn't load pipeline. Error: "${err.statusText}".`);
             }
           });
       });
@@ -256,150 +263,7 @@ export class PipelineList extends React.Component {
     this.showDeletePipelinesModal();
   }
 
-  getColumns = () => [
-    {
-      field: 'id',
-      name: 'Id',
-      sortable: true,
-      render: (id, { isCentrallyManaged }) => {
-        const { openPipeline } = this.props;
-        const openPipelineClicked = () => openPipeline(id);
-        return isCentrallyManaged
-          ? <EuiLink onClick={openPipelineClicked}>{id}</EuiLink>
-          : (
-            <span>
-              {id} &nbsp;
-              <EuiIconTip
-                content={PIPELINE_LIST.PIPELINE_NOT_CENTRALLY_MANAGED_TOOLTIP_TEXT}
-                type="questionInCircle"
-              />
-            </span>
-          );
-      }
-    },
-    {
-      field: 'description',
-      name: 'Description',
-      sortable: true,
-      truncateText: true,
-    },
-    {
-      field: 'lastModifiedHumanized',
-      name: 'Last Modified',
-      sortable: true,
-    },
-    {
-      field: 'username',
-      name: 'Modified By',
-      sortable: true,
-    },
-    {
-      field: 'id',
-      name: '',
-      render: (id, { isCentrallyManaged }) => {
-        const { clonePipeline } = this.props;
-        const cloneClicked = () => { clonePipeline(id); };
-        return isCentrallyManaged
-          ? (
-            <EuiButtonEmpty
-              iconType="copy"
-              onClick={cloneClicked}
-              size="xs"
-            >
-              Clone
-            </EuiButtonEmpty>
-          )
-          : null;
-      },
-      sortable: false,
-    },
-  ]
-
-  renderPipelinesTable = () => {
-    const {
-      createPipeline,
-      isReadOnly,
-    } = this.props;
-    const {
-      // TODO: add pagination once EuiInMemoryTable bug fixed: https://github.com/elastic/eui/issues/1007
-      // pageIndex,
-      // pageSize,
-      // pipelines,
-      selection,
-      isSelectable,
-    } = this.state;
-
-    // const pagination = {
-    //   pageIndex,
-    //   pageSize,
-    //   totalItemCount: pipelines.length,
-    //   pageSizeOptions: [2, 3, 5, 8]
-    // };
-
-    const selectableMessage = (selectable, { id }) => selectable
-      ? `Select pipeline "${id}"`
-      : PIPELINE_LIST.PIPELINE_NOT_CENTRALLY_MANAGED_TOOLTIP_TEXT;
-
-    const selectionOptions = isSelectable
-      ? {
-        selectable: ({ isCentrallyManaged }) => isCentrallyManaged,
-        selectableMessage,
-        onSelectionChange: selection => this.setState({ selection }),
-      }
-      : null;
-
-    const toolsRight = [
-      <EuiButton
-        isDisabled={isReadOnly}
-        key="btnCreatePipeline"
-        fill
-        onClick={createPipeline}
-      >
-        Create pipeline
-      </EuiButton>,
-      <EuiButton
-        isDisabled={!selection.length || isReadOnly}
-        key="btnDeletePipelines"
-        color="danger"
-        onClick={this.onDeleteSelectedPipelines}
-      >
-        Delete
-      </EuiButton>
-    ];
-
-    const search = {
-      box: { incremental: true },
-      filters: [
-        {
-          type: 'field_value_selection',
-          field: 'id',
-          name: 'Id',
-          multiSelect: false,
-          options: this.state.pipelines.map(({ id }) => {
-            return {
-              value: id,
-              name: id,
-              view: id,
-            };
-          }),
-        },
-      ],
-      toolsRight,
-    };
-
-    return (
-      <EuiInMemoryTable
-        columns={this.state.columns}
-        itemId="id"
-        items={this.state.pipelines}
-        message={this.state.message}
-        search={search}
-        sorting={true}
-        isSelectable={isSelectable}
-        selection={selectionOptions}
-      />
-    );
-  }
+  onSelectionChange = selection => this.setState({ selection });
 
   // TODO: add pagination once EuiInMemoryTable bug fixed: https://github.com/elastic/eui/issues/1007
   // onTableChange = (props) => {
@@ -417,6 +281,18 @@ export class PipelineList extends React.Component {
   // };
 
   render() {
+    const {
+      clonePipeline,
+      createPipeline,
+      isReadOnly,
+      openPipeline
+    } = this.props;
+    const {
+      isSelectable,
+      message,
+      pipelines,
+      selection,
+    } = this.state;
     return (
       <EuiPage style={{ minHeight: '100vh' }}>
         <EuiPageContent
@@ -426,11 +302,18 @@ export class PipelineList extends React.Component {
           {
             this.renderNoPermissionCallOut()
           }
-          <div>
-            {
-              this.renderPipelinesTable()
-            }
-          </div>
+          <PipelinesTable
+            clonePipeline={clonePipeline}
+            createPipeline={createPipeline}
+            isReadOnly={isReadOnly}
+            isSelectable={isSelectable}
+            message={message}
+            pipelines={pipelines}
+            selection={selection}
+            onDeleteSelectedPipelines={this.onDeleteSelectedPipelines}
+            onSelectionChange={this.onSelectionChange}
+            openPipeline={openPipeline}
+          />
         </EuiPageContent>
         { this.renderConfirmDeletedPipelinesModal() }
         <InfoAlerts
