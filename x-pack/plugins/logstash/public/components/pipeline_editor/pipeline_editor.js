@@ -56,6 +56,7 @@ export class PipelineEditor extends React.Component {
           'pipeline.batch.delay': settings['pipeline.batch.delay'],
           'pipeline.batch.size': settings['pipeline.batch.size'],
           'pipeline.workers': pipelineWorkers,
+          // TODO: this setting isn't getting saved
           'queue.checkpoint.writes': settings['queue.checkpoint.writes'],
           'queue.max_bytes.number': settings['queue.max_bytes.number'],
           'queue.max_bytes.units': settings['queue.max_bytes.units'],
