@@ -5,8 +5,16 @@
  */
 
 import { last, isFunction, debounce } from 'lodash';
-import $ from 'jquery-flot'; // webpackShim
 import { DEBOUNCE_FAST_MS } from '../../../common/constants';
+
+// this is a temporary hack for testing purposes
+// until we swap out with EUI X/Y chart
+let $;
+try {
+  $ = require('jquery-flot'); // webpackShim
+} catch (e) {
+  $ = require('./__mocks__/jquery-flot'); // testing shim
+}
 
 /**
  * Helper class for operations done by Sparkline component on its flot chart
