@@ -26,18 +26,25 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 
-export const DiscoverUnsupportedRollup = () => (
-  <Fragment>
-    <EuiSpacer size="xl" />
+export const DiscoverUnsupportedIndexPattern = ({ unsupportedType }) => {
+  // This message makes the assumption that X-Pack will support this type, as is the case with
+  // rollup index patterns.
+  const message = `Index patterns based on ${unsupportedType} indices require the` +
+    ` ${unsupportedType} plugin from X-Pack which is either not installed or disabled`;
 
-    <EuiFlexGroup justifyContent="center">
-      <EuiFlexItem grow={false} className="discoverNoResults">
-        <EuiCallOut
-          title="OSS Kibana doesn't support rollup index patterns. Please use X-Pack to search this index pattern."
-          color="danger"
-          iconType="alert"
-        />
-      </EuiFlexItem>
-    </EuiFlexGroup>
-  </Fragment>
-);
+  return (
+    <Fragment>
+      <EuiSpacer size="xl" />
+
+      <EuiFlexGroup justifyContent="center">
+        <EuiFlexItem grow={false} className="discoverNoResults">
+          <EuiCallOut
+            title={message}
+            color="danger"
+            iconType="alert"
+          />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </Fragment>
+  );
+};

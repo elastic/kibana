@@ -17,10 +17,7 @@
  * under the License.
  */
 
-export {
-  assignSearchRequestsToSearchStrategies,
-  addSearchStrategy,
-  hasSearchStategyForIndexPattern,
-} from './search_strategy_registry';
-
-export { isDefaultTypeIndexPattern } from './is_default_type_index_pattern';
+export const isDefaultTypeIndexPattern = indexPattern => {
+  // Default index patterns don't have `type` defined.
+  return indexPattern.type == null;
+};

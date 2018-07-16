@@ -18,6 +18,7 @@
  */
 
 import { addSearchStrategy } from './search_strategy_registry';
+import { isDefaultTypeIndexPattern } from './is_default_type_index_pattern';
 
 function getAllFetchParams(searchRequests, Promise) {
   return Promise.map(searchRequests, (searchRequest) => {
@@ -83,8 +84,7 @@ export const defaultSearchStrategy = {
       return false;
     }
 
-    // Basic index patterns don't have `type` defined.
-    return indexPattern.type == null;
+    return isDefaultTypeIndexPattern(indexPattern);
   },
 };
 

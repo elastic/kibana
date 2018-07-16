@@ -31,5 +31,5 @@ export {
 
 export {
   hasSearchStategyForIndexPattern,
-  isRollupIndexPattern,
+  isDefaultTypeIndexPattern,
 } from './search_strategy';

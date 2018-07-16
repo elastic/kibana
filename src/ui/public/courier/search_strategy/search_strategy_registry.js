@@ -80,13 +80,8 @@ const hasSearchStategyForIndexPattern = indexPattern => {
   return Boolean(getSearchStrategy(indexPattern));
 };
 
-const isRollupIndexPattern = indexPattern => {
-  return indexPattern.type === 'rollup';
-};
-
 export {
   assignSearchRequestsToSearchStrategies,
   addSearchStrategy,
   hasSearchStategyForIndexPattern,
-  isRollupIndexPattern,
 };

@@ -26,8 +26,8 @@ import {
 } from './no_results';
 
 import {
-  DiscoverUnsupportedRollup,
-} from './unsupported_rollup';
+  DiscoverUnsupportedIndexPattern,
+} from './unsupported_index_pattern';
 
 import './timechart';
 
@@ -35,4 +35,7 @@ const app = uiModules.get('apps/discover', ['react']);
 
 app.directive('discoverNoResults', reactDirective => reactDirective(DiscoverNoResults));
 
-app.directive('discoverUnsupportedRollup', reactDirective => reactDirective(DiscoverUnsupportedRollup));
+app.directive(
+  'discoverUnsupportedIndexPattern',
+  reactDirective => reactDirective(DiscoverUnsupportedIndexPattern, ['unsupportedType'])
+);

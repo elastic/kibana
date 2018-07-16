@@ -33,7 +33,7 @@ import 'ui/state_management/app_state';
 import { timefilter } from 'ui/timefilter';
 import 'ui/share';
 import 'ui/query_bar';
-import { hasSearchStategyForIndexPattern, isRollupIndexPattern } from 'ui/courier';
+import { hasSearchStategyForIndexPattern, isDefaultTypeIndexPattern } from 'ui/courier';
 import { toastNotifications, getPainlessError } from 'ui/notify';
 import { VisProvider } from 'ui/vis';
 import { BasicResponseHandlerProvider } from 'ui/vis/response_handlers/basic';
@@ -779,12 +779,13 @@ function discoverController(
 
   // Block the UI from loading if the user has loaded a rollup index pattern but it isn't
   // supported.
-  $scope.isUnsupportedRollup = (
-    isRollupIndexPattern($route.current.locals.ip.loaded)
+  $scope.isUnsupportedIndexPattern = (
+    !isDefaultTypeIndexPattern($route.current.locals.ip.loaded)
     && !hasSearchStategyForIndexPattern($route.current.locals.ip.loaded)
   );
 
-  if ($scope.isUnsupportedRollup) {
+  if ($scope.isUnsupportedIndexPattern) {
+    $scope.unsupportedIndexPatternType = $route.current.locals.ip.loaded.type;
     return;
   }
 
