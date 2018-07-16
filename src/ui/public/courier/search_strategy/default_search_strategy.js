@@ -68,7 +68,7 @@ export const defaultSearchStrategy = {
       failedSearchRequests,
     } = await serializeAllFetchParams(allFetchParams, searchRequests, serializeFetchParams);
 
-    const searching = es.msearch({ body: serializedFetchParams });
+    const searching = es.msearch({ body: serializedFetchParams }).then(({ responses }) => responses);
     const abort = searching.abort;
 
     return {

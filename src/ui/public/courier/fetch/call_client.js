@@ -166,7 +166,7 @@ export function CallClientProvider(Private, Promise, es) {
         // use the order to associate each response with the original request.
         const responsesInOriginalRequestOrder = new Array(searchRequestsAndStatuses.length);
         segregatedResponses.forEach((responses, strategyIndex) => {
-          responses.responses.forEach((response, responseIndex) => {
+          responses.forEach((response, responseIndex) => {
             const searchRequest = searchStrategiesWithRequests[strategyIndex].searchRequests[responseIndex];
             const requestIndex = searchRequestsAndStatuses.indexOf(searchRequest);
             responsesInOriginalRequestOrder[requestIndex] = response;
