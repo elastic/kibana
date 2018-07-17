@@ -60,10 +60,7 @@ describe('bulkCreate', () => {
 
   test('should display error message when bulkCreate request fails', async () => {
     const bulkCreateMock = () => {
-      return new Promise(function () {
-        throw new Error('simulated bulkRequest error');
-      });
-      //throw new Error('simulated bulkRequest error');
+      return Promise.reject(new Error('simulated bulkRequest error'));
     };
     const component = mount(<SavedObjectsInstaller
       bulkCreate={bulkCreateMock}
