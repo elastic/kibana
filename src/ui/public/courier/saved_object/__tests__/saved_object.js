@@ -301,7 +301,7 @@ describe('Saved Object', function () {
     });
 
     it('throws error invalid JSON is detected', async function () {
-      const savedObject = await createInitializedSavedObject({ type: 'dashboard' });
+      const savedObject = await createInitializedSavedObject({ type: 'dashboard', searchSource: true });
       const response = {
         found: true,
         _source: {
