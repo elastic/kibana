@@ -17,7 +17,6 @@
  * under the License.
  */
 
-import * as loader from './loader';
+import * as i18nCore from './core';
 
-export const i18nLoader = loader;
-export * from './browser';
+export const i18n = i18nCore;
