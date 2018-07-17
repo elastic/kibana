@@ -17,34 +17,28 @@
  * under the License.
  */
 
-import { PureComponent } from 'react';
-import PropTypes from 'prop-types';
-import { intlShape } from 'react-intl';
+import { parse } from '@babel/parser';
+
+import { extractI18nCallMessages } from './extract_i18n_call_messages';
+import { isI18nTranslateFunction, traverseNodes } from './utils';
 
 /**
- * Provides intl context to a child component using React render callback pattern
- * @example
- * <I18nContext>
- *   {intl => (
- *     <input
- *       placeholder={intl.formatMessage({
-           id: 'my-id',
-           defaultMessage: 'my default message',
-         })}
- *     />
- *   )}
- * </I18nContext>
+ * Matches `i18n(...)` in `#{i18n('id', { defaultMessage: 'Message text' })}`
  */
-export class I18nContext extends PureComponent {
-  static propTypes = {
-    children: PropTypes.func.isRequired,
-  };
+const JADE_I18N_REGEX = /(?<=\#\{)i18n\((([^)']|'([^'\\]|\\.)*')*\)(?=\}))/g;
 
-  static contextTypes = {
-    intl: intlShape,
-  };
+/**
+ * Example: `#{i18n('message-id', { defaultMessage: 'Message text' })}`
+ */
+export function* extractJadeMessages(buffer) {
+  const expressions = buffer.toString().match(JADE_I18N_REGEX) || [];
 
-  render() {
-    return this.props.children(this.context.intl);
+  for (const expression of expressions) {
+    for (const node of traverseNodes(parse(expression).program.body)) {
+      if (isI18nTranslateFunction(node)) {
+        yield extractI18nCallMessages(node);
+        break;
+      }
+    }
   }
 }

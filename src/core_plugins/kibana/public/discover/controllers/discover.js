@@ -745,24 +745,36 @@ function discoverController(
   }
 
   function resolveIndexPatternLoading() {
-    const props = $route.current.locals.ip;
-    const loaded = props.loaded;
-    const stateVal = props.stateVal;
-    const stateValFound = props.stateValFound;
+    const {
+      loaded: loadedIndexPattern,
+      stateVal,
+      stateValFound,
+    } = $route.current.locals.ip;
 
-    const own = $scope.searchSource.getOwnField('index');
+    const ownIndexPattern = $scope.searchSource.getOwnField('index');
 
-    if (own && !stateVal) return own;
+    if (ownIndexPattern && !stateVal) {
+      return ownIndexPattern;
+    }
+
     if (stateVal && !stateValFound) {
-      const err = '"' + stateVal + '" is not a configured pattern ID. ';
-      if (own) {
-        notify.warning(`${err} Using the saved index pattern: "${own.title}" (${own.id})`);
-        return own;
+      const warningTitle = `"${stateVal}" is not a configured index pattern ID`;
+
+      if (ownIndexPattern) {
+        toastNotifications.addWarning({
+          title: warningTitle,
+          text: `Showing the saved index pattern: "${ownIndexPattern.title}" (${ownIndexPattern.id})`,
+        });
+        return ownIndexPattern;
       }
 
-      notify.warning(`${err} Using the default index pattern: "${loaded.title}" (${loaded.id})`);
+      toastNotifications.addWarning({
+        title: warningTitle,
+        text: `Showing the default index pattern: "${loadedIndexPattern.title}" (${loadedIndexPattern.id})`,
+      });
     }
-    return loaded;
+
+    return loadedIndexPattern;
   }
 
   init();

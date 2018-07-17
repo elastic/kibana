@@ -137,6 +137,10 @@ class ListControl extends Control {
     this.enable = true;
     this.disabledReason = '';
   }
+
+  hasValue() {
+    return typeof this.value !== 'undefined' && this.value.length > 0;
+  }
 }
 
 export async function listControlFactory(controlParams, kbnApi, useTimeFilter) {
