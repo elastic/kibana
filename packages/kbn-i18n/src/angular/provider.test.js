@@ -22,20 +22,6 @@ import 'angular-mocks';
 import { i18nProvider } from './provider';
 import * as i18n from '../core/i18n';
 
-jest.mock('../core/i18n', () => ({
-  addMessages: jest.fn(),
-  getMessages: jest.fn(),
-  setLocale: jest.fn(),
-  getLocale: jest.fn(),
-  setDefaultLocale: jest.fn(),
-  getDefaultLocale: jest.fn(),
-  setFormats: jest.fn(),
-  getFormats: jest.fn(),
-  getRegisteredLocales: jest.fn(),
-  init: jest.fn(),
-  translate: jest.fn(),
-}));
-
 angular.module('app', []).provider('i18n', i18nProvider);
 
 describe('i18nProvider', () => {
@@ -64,15 +50,11 @@ describe('i18nProvider', () => {
   });
 
   it('provides service wrapper under i18n engine', () => {
-    expect(service.addMessages).toEqual(i18n.addMessages);
-    expect(service.getMessages).toEqual(i18n.getMessages);
-    expect(service.setLocale).toEqual(i18n.setLocale);
-    expect(service.getLocale).toEqual(i18n.getLocale);
-    expect(service.setDefaultLocale).toEqual(i18n.setDefaultLocale);
-    expect(service.getDefaultLocale).toEqual(i18n.getDefaultLocale);
-    expect(service.setFormats).toEqual(i18n.setFormats);
-    expect(service.getFormats).toEqual(i18n.getFormats);
-    expect(service.getRegisteredLocales).toEqual(i18n.getRegisteredLocales);
-    expect(service.init).toEqual(i18n.init);
+    const serviceMethodNames = Object.keys(service);
+    const pluginMethodNames = Object.keys(i18n);
+
+    expect([...serviceMethodNames, 'translate'].sort()).toEqual(
+      [...pluginMethodNames, '$get'].sort()
+    );
   });
 });

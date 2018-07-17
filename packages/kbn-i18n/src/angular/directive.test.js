@@ -49,13 +49,13 @@ describe('i18nDirective', () => {
 
   it('provides wrapper under i18n translate function', () => {
     const id = 'id';
-    const defaultMessage = 'default-message';
+    const defaultMessage = 'default-message {word}';
 
     const element = angular.element(
       `<div
         i18n-id="${id}"
         i18n-default-message="${defaultMessage}"
-        values={{}}
+        i18n-values="{ word: 'word' }"
       />`
     );
 
@@ -65,7 +65,7 @@ describe('i18nDirective', () => {
     expect(i18n.translate).toHaveBeenCalledTimes(1);
     expect(i18n.translate).toHaveBeenCalledWith(id, {
       defaultMessage,
-      values: {},
+      values: { word: 'word' },
     });
   });
 });
