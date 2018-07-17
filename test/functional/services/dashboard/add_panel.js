@@ -164,7 +164,7 @@ export function DashboardAddPanelProvider({ getService, getPageObjects }) {
     async addVisualization(vizName) {
       log.debug(`DashboardAddPanel.addVisualization(${vizName})`);
       await this.ensureAddPanelIsShowing();
-      // workaround for timinhg issue with slideout animation
+      // workaround for timing issue with slideout animation
       await PageObjects.common.sleep(500);
       await this.filterEmbeddableNames(`"${vizName.replace('-', ' ')}"`);
       await testSubjects.click(`addPanel${vizName.split(' ').join('-')}`);
