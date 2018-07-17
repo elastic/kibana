@@ -163,7 +163,7 @@ export class Users extends Component {
         render: rolenames => {
           const roleLinks = rolenames.map((rolename, index) => {
             return (
-              <Fragment>
+              <Fragment key={rolename} >
                 <EuiLink href={`${path}roles/edit/${rolename}`}>{rolename}</EuiLink>
                 {index === rolenames.length - 1 ? null : ', '}
               </Fragment>
