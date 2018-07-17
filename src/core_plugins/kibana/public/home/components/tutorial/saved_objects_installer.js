@@ -30,7 +30,7 @@ import {
   EuiCallOut,
 } from '@elastic/eui';
 
-const DEFAULT_BUTTON_LABEL = 'Load/Import Kibana objects';
+const DEFAULT_BUTTON_LABEL = 'Load Kibana objects';
 
 export class SavedObjectsInstaller extends React.Component {
   state = {
@@ -155,7 +155,7 @@ export class SavedObjectsInstaller extends React.Component {
     );
 
     return {
-      title: 'Kibana objects',
+      title: 'Load Kibana objects',
       status: this.state.isInstalled ? 'complete' : 'incomplete',
       children: installStep,
       key: 'installStep'

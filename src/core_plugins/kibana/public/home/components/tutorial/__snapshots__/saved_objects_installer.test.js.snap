@@ -54,7 +54,7 @@ exports[`bulkCreate should display error message when bulkCreate request fails 1
                   onClick={[Function]}
                   type="button"
                 >
-                  Load/Import Kibana objects
+                  Load Kibana objects
                 </EuiButton>
               </EuiFlexItem>
             </EuiFlexGroup>
@@ -70,7 +70,7 @@ exports[`bulkCreate should display error message when bulkCreate request fails 1
           </UNDEFINED>,
           "key": "installStep",
           "status": "incomplete",
-          "title": "Kibana objects",
+          "title": "Load Kibana objects",
         },
       ]
     }
@@ -83,7 +83,7 @@ exports[`bulkCreate should display error message when bulkCreate request fails 1
         key="installStep"
         status="incomplete"
         step={1}
-        title="Kibana objects"
+        title="Load Kibana objects"
       >
         <div
           className="euiStep"
@@ -105,7 +105,7 @@ exports[`bulkCreate should display error message when bulkCreate request fails 1
             <p
               className="euiTitle euiTitle--small euiStep__title"
             >
-              Kibana objects
+              Load Kibana objects
             </p>
           </EuiTitle>
           <div
@@ -171,7 +171,7 @@ exports[`bulkCreate should display error message when bulkCreate request fails 1
                           <span
                             className="euiButton__text"
                           >
-                            Load/Import Kibana objects
+                            Load Kibana objects
                           </span>
                         </span>
                       </button>
@@ -270,7 +270,7 @@ exports[`bulkCreate should display success message when bulkCreate is successful
                   onClick={[Function]}
                   type="button"
                 >
-                  Load/Import Kibana objects
+                  Load Kibana objects
                 </EuiButton>
               </EuiFlexItem>
             </EuiFlexGroup>
@@ -286,7 +286,7 @@ exports[`bulkCreate should display success message when bulkCreate is successful
           </UNDEFINED>,
           "key": "installStep",
           "status": "complete",
-          "title": "Kibana objects",
+          "title": "Load Kibana objects",
         },
       ]
     }
@@ -299,7 +299,7 @@ exports[`bulkCreate should display success message when bulkCreate is successful
         key="installStep"
         status="complete"
         step={1}
-        title="Kibana objects"
+        title="Load Kibana objects"
       >
         <div
           className="euiStep"
@@ -360,7 +360,7 @@ exports[`bulkCreate should display success message when bulkCreate is successful
             <p
               className="euiTitle euiTitle--small euiStep__title"
             >
-              Kibana objects
+              Load Kibana objects
             </p>
           </EuiTitle>
           <div
@@ -426,7 +426,7 @@ exports[`bulkCreate should display success message when bulkCreate is successful
                           <span
                             className="euiButton__text"
                           >
-                            Load/Import Kibana objects
+                            Load Kibana objects
                           </span>
                         </span>
                       </button>
@@ -513,7 +513,7 @@ exports[`renders 1`] = `
                 onClick={[Function]}
                 type="button"
               >
-                Load/Import Kibana objects
+                Load Kibana objects
               </EuiButton>
             </EuiFlexItem>
           </EuiFlexGroup>
@@ -523,7 +523,7 @@ exports[`renders 1`] = `
         </UNDEFINED>,
         "key": "installStep",
         "status": "incomplete",
-        "title": "Kibana objects",
+        "title": "Load Kibana objects",
       },
     ]
   }
