@@ -324,6 +324,8 @@ export function SecurityPageProvider({ getService, getPageObjects }) {
       const dropdown = await testSubjects.find("userFormRolesDropdown");
       const input = await dropdown.findByCssSelector("input");
       await input.type(role);
+      //allow time for dropdown to show up
+      await PageObjects.common.sleep(500);
       await testSubjects.click(`roleOption-${role}`);
       await testSubjects.click('comboBoxToggleListButton');
       await testSubjects.find(`roleOption-${role}`);
