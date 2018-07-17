@@ -30,7 +30,7 @@ export const DiscoverUnsupportedIndexPattern = ({ unsupportedType }) => {
   // This message makes the assumption that X-Pack will support this type, as is the case with
   // rollup index patterns.
   const message = `Index patterns based on ${unsupportedType} indices require the` +
-    ` ${unsupportedType} plugin from X-Pack which is either not installed or disabled`;
+    ` ${unsupportedType} plugin from X-Pack, which is not installed or disabled`;
 
   return (
     <Fragment>
