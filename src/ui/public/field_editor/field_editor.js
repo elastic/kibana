@@ -497,23 +497,25 @@ export class FieldEditor extends PureComponent {
     const { indexPattern } = this.props;
     const { fieldFormatId } = this.state;
 
-    this.setState({
-      isSaving: true
-    });
-
-    const isValid = await isScriptValid({
-      name: field.name,
-      lang: field.lang,
-      script: field.script,
-      indexPatternTitle: indexPattern.title
-    });
-
-    if (!isValid) {
+    if (field.scripted) {
       this.setState({
-        hasScriptError: true,
-        isSaving: false
+        isSaving: true
       });
-      return;
+
+      const isValid = await isScriptValid({
+        name: field.name,
+        lang: field.lang,
+        script: field.script,
+        indexPatternTitle: indexPattern.title
+      });
+
+      if (!isValid) {
+        this.setState({
+          hasScriptError: true,
+          isSaving: false
+        });
+        return;
+      }
     }
 
     const { redirectAway } = this.props.helpers;
