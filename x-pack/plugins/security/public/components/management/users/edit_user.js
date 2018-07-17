@@ -20,11 +20,10 @@ import {
   EuiFieldText,
   EuiPage,
   EuiComboBox,
-  EuiOverlayMask,
-  EuiConfirmModal,
 } from '@elastic/eui';
 import { toastNotifications } from 'ui/notify';
 import { USERS_PATH } from '../../../views/management/management_urls';
+import { ConfirmDelete } from './confirm_delete';
 
 export class EditUser extends Component {
   constructor(props) {
@@ -60,48 +59,12 @@ export class EditUser extends Component {
       selectedRoles: user.roles.map(role => ({ label: role })) || [],
     });
   }
-  confirmDeleteModal = () => {
-    const {
-      showDeleteConfirmation,
-      user: { username },
-    } = this.state;
-    if (!showDeleteConfirmation) {
-      return null;
-    }
-    return (
-      <EuiOverlayMask>
-        <EuiConfirmModal
-          title={`Confirm delete user`}
-          onCancel={() => this.setState({ showDeleteConfirmation: false })}
-          onConfirm={this.deleteUser}
-          cancelButtonText="Cancel"
-          confirmButtonText="Confirm"
-        >
-          <div>
-            <p>You are about to delete this user:</p>
-            <ul>
-              <li>{username}</li>
-            </ul>
-            <p>This operation cannot be undone.</p>
-          </div>
-        </EuiConfirmModal>
-      </EuiOverlayMask>
-    );
-  };
-  deleteUser = async () => {
-    const {
-      users: { username },
-    } = this.state;
-    const { apiClient, changeUrl } = this.props;
-    try {
-      await apiClient.deleteUser(username);
-      toastNotifications.addSuccess(`Deleted user ${username}`);
+  handleDelete = (usernames, errors) => {
+    if (errors.length === 0) {
+      const { changeUrl } = this.props;
       changeUrl(USERS_PATH);
-    } catch (e) {
-      toastNotifications.addDanger(`Error deleting user ${username}`);
     }
   };
-
   passwordError = () => {
     const { password } = this.state;
     if (password !== null && password.length < 6) {
@@ -130,12 +93,6 @@ export class EditUser extends Component {
     const { full_name } = this.state.user;
     if (full_name !== null && !full_name) {
       return 'Full Name is required.';
-    }
-  };
-  emailError = () => {
-    const { email } = this.state.user;
-    if (email !== null && !email) {
-      return 'Valid email is required.';
     }
   };
   changePassword = async () => {
@@ -289,20 +246,37 @@ export class EditUser extends Component {
       (isNewUser && (this.passwordError() || this.confirmPasswordError()))
     );
   };
+  onCancelDelete = () => {
+    this.setState({ showDeleteConfirmation: false });
+  }
   render() {
-    const { changeUrl } = this.props;
-    const { user, roles, selectedRoles, showChangePasswordForm, isNewUser } = this.state;
+    const { changeUrl, apiClient } = this.props;
+    const {
+      user,
+      roles,
+      selectedRoles,
+      showChangePasswordForm,
+      isNewUser,
+      showDeleteConfirmation,
+    } = this.state;
     const reserved = user.metadata && user.metadata._reserved;
     if (!user || !roles) {
       return null;
     }
     return (
       <EuiPage>
-        {this.confirmDeleteModal()}
+        {showDeleteConfirmation ? (
+          <ConfirmDelete
+            onCancel={this.onCancelDelete}
+            apiClient={apiClient}
+            usersToDelete={[user.username]}
+            callback={this.handleDelete}
+          />
+        ) : null}
         <EuiFlexGroup justifyContent="spaceBetween">
           <EuiFlexItem grow={false}>
             <EuiTitle>
-              <h2>{user.username ? `"${user.username}" User` : 'New User'}</h2>
+              <h2>{isNewUser ? 'New User' : `"${user.username}" User`}</h2>
             </EuiTitle>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
@@ -313,7 +287,8 @@ export class EditUser extends Component {
               >
                 <EuiBadge iconType="lock">Reserved</EuiBadge>
               </EuiToolTip>
-            ) : (
+            ) : null}
+            {isNewUser || reserved ? null : (
               <EuiButton
                 onClick={() => {
                   this.setState({ showDeleteConfirmation: true });
@@ -390,7 +365,7 @@ export class EditUser extends Component {
             <EuiFormRow label="Roles">
               <EuiComboBox
                 data-test-subj="userFormRolesDropdown"
-                placeholder="Add a role"
+                placeholder="Add roles"
                 onChange={this.onRolesChange}
                 isDisabled={reserved}
                 name="roles"

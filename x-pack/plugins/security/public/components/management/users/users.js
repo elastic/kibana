@@ -5,17 +5,9 @@
  */
 
 import React, { Component, Fragment } from 'react';
-import {
-  EuiCallOut,
-  EuiButton,
-  EuiIcon,
-  EuiLink,
-  EuiInMemoryTable,
-  EuiPage,
-  EuiOverlayMask,
-  EuiConfirmModal,
-} from '@elastic/eui';
+import { EuiCallOut, EuiButton, EuiIcon, EuiLink, EuiInMemoryTable, EuiPage } from '@elastic/eui';
 import { toastNotifications } from 'ui/notify';
+import { ConfirmDelete } from './confirm_delete';
 
 export class Users extends Component {
   constructor(props) {
@@ -26,6 +18,19 @@ export class Users extends Component {
       showDeleteConfirmation: false,
     };
   }
+  componentDidMount() {
+    this.loadUsers();
+  }
+  handleDelete = (usernames, errors) => {
+    const { users } = this.state;
+    this.setState({
+      selection: [],
+      showDeleteConfirmation: false,
+      users: users.filter(({ username }) => {
+        return !usernames.includes(username) || errors.includes(username);
+      }),
+    });
+  };
   async loadUsers() {
     const { apiClient, changeUrl } = this.props;
     try {
@@ -42,58 +47,6 @@ export class Users extends Component {
       }
     }
   }
-  deleteUsers = () => {
-    const { selection, users } = this.state;
-    const usernames = selection.map(user => user.username);
-    const { apiClient } = this.props;
-    const errors = [];
-    selection.forEach(async ({ username }) => {
-      try {
-        await apiClient.deleteUser(username);
-        toastNotifications.addSuccess(`Deleted user ${username}`);
-      } catch (e) {
-        errors.push(username);
-        toastNotifications.addDanger(`Error deleting user ${username}`);
-      }
-      this.setState({
-        selection: [],
-        showDeleteConfirmation: false,
-        users: users.filter(({ username }) => {
-          return !usernames.includes(username) || errors.includes(username);
-        }),
-      });
-    });
-  };
-  componentDidMount() {
-    this.loadUsers();
-  }
-  confirmDeleteModal = () => {
-    const { showDeleteConfirmation, selection } = this.state;
-    if (!showDeleteConfirmation) {
-      return null;
-    }
-    const moreThanOne = selection.length > 1;
-    return (
-      <EuiOverlayMask>
-        <EuiConfirmModal
-          title={`Confirm delete users`}
-          onCancel={() => this.setState({ showDeleteConfirmation: false })}
-          onConfirm={this.deleteUsers}
-          cancelButtonText="Cancel"
-          confirmButtonText="Confirm"
-        >
-          <div>
-            <p>
-              You are about to delete {moreThanOne ? 'these' : 'this'} user{moreThanOne ? 's' : ''}:
-            </p>
-            <ul>{selection.map(({ username }) => <li key={username}>{username}</li>)}</ul>
-            <p>This operation cannot be undone.</p>
-          </div>
-        </EuiConfirmModal>
-      </EuiOverlayMask>
-    );
-  };
-
   renderToolsRight() {
     const { selection } = this.state;
     if (selection.length === 0) {
@@ -121,8 +74,12 @@ export class Users extends Component {
       </EuiButton>
     );
   }
+  onCancelDelete = () => {
+    this.setState({ showDeleteConfirmation: false });
+  }
   render() {
-    const { users, permissionDenied } = this.state;
+    const { users, permissionDenied, showDeleteConfirmation, selection } = this.state;
+    const { apiClient } = this.props;
     if (permissionDenied) {
       return (
         <EuiCallOut title="Permission denied" color="danger" iconType="cross">
@@ -160,7 +117,7 @@ export class Users extends Component {
         render: rolenames => {
           const roleLinks = rolenames.map((rolename, index) => {
             return (
-              <Fragment key={rolename} >
+              <Fragment key={rolename}>
                 <EuiLink href={`${path}roles/edit/${rolename}`}>{rolename}</EuiLink>
                 {index === rolenames.length - 1 ? null : ', '}
               </Fragment>
@@ -173,7 +130,8 @@ export class Users extends Component {
         field: 'metadata._reserved',
         name: 'Reserved',
         sortable: false,
-        render: reserved => (reserved ? <EuiIcon data-test-subj="reservedUser" type="check" /> : null),
+        render: reserved =>
+          reserved ? <EuiIcon data-test-subj="reservedUser" type="check" /> : null,
       },
     ];
     const pagination = {
@@ -181,7 +139,7 @@ export class Users extends Component {
       pageSizeOptions: [10, 20, 50, 100],
     };
 
-    const selection = {
+    const selectionConfig = {
       itemId: 'username',
       selectable: user => !user.metadata._reserved,
       selectableMessage: selectable => (!selectable ? 'User is a system user' : undefined),
@@ -206,11 +164,18 @@ export class Users extends Component {
     };
     return (
       <EuiPage>
-        {this.confirmDeleteModal()}
+        {showDeleteConfirmation ? (
+          <ConfirmDelete
+            onCancel={this.onCancelDelete}
+            apiClient={apiClient}
+            usersToDelete={selection.map((user) => user.username)}
+            callback={this.handleDelete}
+          />
+        ) : null}
         <EuiInMemoryTable
           itemId="username"
           columns={columns}
-          selection={selection}
+          selection={selectionConfig}
           pagination={pagination}
           items={users}
           loading={users.length === 0}
