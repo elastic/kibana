@@ -6,6 +6,7 @@
 
 import { each } from 'lodash';
 import { toastNotifications } from 'ui/notify';
+import { mlMessageBarService } from 'plugins/ml/components/messagebar/messagebar_service';
 
 import { mlJobService } from 'plugins/ml/services/job_service';
 import { ml } from 'plugins/ml/services/ml_api_service';
@@ -18,11 +19,11 @@ export function loadFullJob(jobId) {
         if (jobs.length) {
           resolve(jobs[0]);
         } else {
-          reject(`Could not find job ${jobId}`);
+          throw new Error(`Could not find job ${jobId}`);
         }
       })
-      .catch(() => {
-        reject(`Could not find job ${jobId}`);
+      .catch((error) => {
+        reject(error);
       });
   });
 }
@@ -35,40 +36,32 @@ export function isStoppable(jobs) {
   return (jobs.find(j => j.datafeedState === DATAFEED_STATE.STARTED) !== undefined);
 }
 
-export function forceStartDatafeeds(jobs, start, end, finish) {
+export function forceStartDatafeeds(jobs, start, end, finish = () => {}) {
   const datafeedIds = jobs.filter(j => j.hasDatafeed).map(j => j.datafeedId);
   mlJobService.forceStartDatafeeds(datafeedIds, start, end)
     .then((resp) => {
       showResults(resp, DATAFEED_STATE.STARTED);
-
-      if (typeof finish === 'function') {
-        finish();
-      }
+      finish();
     })
     .catch((error) => {
+      mlMessageBarService.notify.error(error);
       toastNotifications.addDanger(`Jobs failed to start`, error);
-      if (typeof finish === 'function') {
-        finish();
-      }
+      finish();
     });
 }
 
 
-export function stopDatafeeds(jobs, finish) {
+export function stopDatafeeds(jobs, finish = () => {}) {
   const datafeedIds = jobs.filter(j => j.hasDatafeed).map(j => j.datafeedId);
   mlJobService.stopDatafeeds(datafeedIds)
   	.then((resp) => {
       showResults(resp, DATAFEED_STATE.STOPPED);
-
-      if (typeof finish === 'function') {
-        finish();
-      }
+      finish();
     })
     .catch((error) => {
+      mlMessageBarService.notify.error(error);
       toastNotifications.addDanger(`Jobs failed to stop`, error);
-      if (typeof finish === 'function') {
-        finish();
-      }
+      finish();
     });
 }
 
@@ -76,10 +69,13 @@ function showResults(resp, action) {
   const successes = [];
   const failures = [];
   for (const d in resp) {
-    if (resp[d][action]) {
+    if (resp[d][action] === true || (resp[d][action] === false && resp[d].error.statusCode === 409)) {
       successes.push(d);
     } else {
-      failures.push(d);
+      failures.push({
+        id: d,
+        result: resp[d]
+      });
     }
   }
 
@@ -96,15 +92,16 @@ function showResults(resp, action) {
     actionTextPT = 'deleted';
   }
 
-  if (successes.length > 0) {
-    successes.forEach((s) => {
-      toastNotifications.addSuccess(`${s} ${actionTextPT} successfully`);
-    });
+  if (successes.length > 1) {
+    toastNotifications.addSuccess(`${successes.length} jobs ${actionTextPT} successfully`);
+  } else if (successes.length === 1) {
+    toastNotifications.addSuccess(`${successes[0]} ${actionTextPT} successfully`);
   }
 
   if (failures.length > 0) {
-    failures.forEach((s) => {
-      toastNotifications.addDanger(`${s} failed to ${actionText}`);
+    failures.forEach((f) => {
+      mlMessageBarService.notify.error(f.result.error);
+      toastNotifications.addDanger(`${f.id} failed to ${actionText}`);
     });
   }
 }
@@ -115,26 +112,23 @@ export function cloneJob(jobId) {
       mlJobService.currentJob = job;
       window.location.href = `#/jobs/new_job`;
     })
-    .catch(() => {
+    .catch((error) => {
+      mlMessageBarService.notify.error(error);
       toastNotifications.addDanger(`Could not clone ${jobId}. Job could not be found`);
     });
 }
 
-export function deleteJobs(jobs, finish) {
+export function deleteJobs(jobs, finish = () => {}) {
   const jobIds = jobs.map(j => j.id);
   mlJobService.deleteJobs(jobIds)
   	.then((resp) => {
       showResults(resp, DATAFEED_STATE.DELETED);
-
-      if (typeof finish === 'function') {
-        finish();
-      }
+      finish();
     })
     .catch((error) => {
+      mlMessageBarService.notify.error(error);
       toastNotifications.addDanger(`Jobs failed to delete`, error);
-      if (typeof finish === 'function') {
-        finish();
-      }
+      finish();
     });
 }
 
