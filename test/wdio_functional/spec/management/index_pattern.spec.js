@@ -29,9 +29,18 @@ beforeEach(function () {
   this.driver = browser;
   this.driver.url('/');
   this.homePage = new HomePage(this.driver);
-  this.managementPage = this.home.nav.navigateToManagement();
+  this.managementPage = this.homePage.nav.navigateToManagement();
 });
 
 it('Create New Index Pattern Wizard', function () {
+  this.indexPatternPage = this.managementPage.navigateToIndexPatterns();
+  this.indexPatternPage.createIndexPattern('logstash', false);
+
+  //Get all created index patterns
+  const indexPatterns = this.indexPatternPage.indexPatterns;
+
+  expect(indexPatterns.length).toBe(1);
+  expect(indexPatterns[0]).toBe('logstash*');
+
 });
 

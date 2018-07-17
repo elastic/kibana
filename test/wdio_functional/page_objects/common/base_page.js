@@ -27,6 +27,10 @@ export default class BasePage extends Web {
     this.driver = driver;
   }
 
+  /**
+   * @function nav
+   * @returns {Object} Returns an instance of the class that corresponds to the clicked link.
+   */
   get nav() {
     const self = this;
     return new class Navigation {
@@ -38,26 +42,40 @@ export default class BasePage extends Web {
         this.managementNavLinkSelector =
           this.baseNavLinkSelector + '[@aria-label="Management"]';
       }
+      /**
+        * @function navigateToConsole
+        * @returns {Object} Returns an instance of ConsolePage
+      */
       navigateToConsole() {
-
+        self.driver.click(this.consoleNavLinkSelector);
         const ConsolePage = require('../console/console_page');
         return new ConsolePage(self.driver);
       }
-
+      /**
+        * @function navigateToHome
+        * @returns {Object} Returns an instance of HomePage
+      */
       navigateToHome() {
         self.driver.url('/');
         const HomePage = require('../home/home_page');
-        return new HomePage(this.driver);
+        return new HomePage(self.driver);
       }
-
+      /**
+        * @function navigateToManagement
+        * @returns {Object} Returns an instance of ManagementPage
+      */
       navigateToManagement() {
         self.driver.click(this.managementNavLinkSelector);
         const ManagementPage = require('../management/management_page');
-        return new ManagementPage(this.driver);
+        return new ManagementPage(self.driver);
       }
     };
   }
 
+  /**
+  * @function title
+  * @returns {string} Value of Title of Page.
+  */
   get title() {
     return this.driver.getTitle().toString();
   }

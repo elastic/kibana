@@ -62,6 +62,7 @@ GET _search
     this.init();
   }
   /**
+   * @function changeFontSize
    * @param  {integer} Size of font to change to.
    */
   changeFontSize(size) {
@@ -82,6 +83,9 @@ GET _search
     });
   }
 
+  /**
+   * @function openSittings
+   */
   openSettings() {
     this.driver.waitUntil(() => {
       this.click(this.consoleSettingsButtonSelector);
@@ -89,13 +93,18 @@ GET _search
     });
   }
 
+  /**
+   * @function request (Getter)
+   * @returns  {string} Value of request
+   */
   get request() {
     return this.getElementText(this.requestEditorTextSelector);
   }
 
-  // TODO: Add set request
-  // public set request(requestString) { }
-
+  /**
+   * @function response (Getter)
+   * @returns  {string} Value of response
+   */
   get response() {
     this.driver.waitUntil(() => {
       return (
@@ -107,6 +116,7 @@ GET _search
     return this.getElementText(this.responseEditorTextSelector);
   }
   /**
+   * @function requestFontSize
    * @returns {string} Value of font size in pixels. (i.e 24px)
    */
   get requestFontSize() {
@@ -120,15 +130,16 @@ GET _search
     return value;
   }
 
+  /**
+   * @function clickPlay
+   */
   clickPlay() {
     this.click(this.playButtonSelector);
   }
 
   init() {
-    // logger.debug('Wait for Dev Tools Breadcrumb to exist. ');
     this.driver.waitForExist(this.breadCrumbSelector);
     expect('Dev Tools').toBe(this.getElementText(this.breadCrumbSelector));
-    // logger.debug('Waiting for title to be Console - Kibana');
     this.driver.waitUntil(() => {
       return this.title === 'Console - Kibana';
     });
@@ -138,4 +149,7 @@ GET _search
   // submitRequest(requestText) {
   //   this.clickPlay();
   // }
+
+  // TODO: Add set request
+  // public set request(requestString) { }
 }

@@ -28,7 +28,7 @@ export async function setupWebdriverio() {
   const logger = require('@kbn/dev-utils').createToolingLog('debug');
   logger.pipe(process.stdout);
 
-  const testConfig = await readConfigFile(logger, require.resolve('./config'), {});
+  const testConfig = await readConfigFile(logger, require.resolve('./config'), {}, require('./test_config_schema').schema);
 
   const providers = new ProviderCollection(
     logger,

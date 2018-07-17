@@ -32,7 +32,8 @@ it('should show the default request', function () {
   // Remove all spaces and new line characters to ensure that the content is the same.
   const requestData = stripRequest(this.consolePage.request);
   const defaultRequestData = stripRequest(this.consolePage.DEFAULT_REQUEST);
-  this.logger.info(`Checking if default request is ${this.consolePage.DEFAULT_REQUEST}`);
+
+  //Checking if default request is ${this.consolePage.DEFAULT_REQUEST}
   expect(requestData).toBe(defaultRequestData);
 });
 
@@ -40,21 +41,23 @@ it('default request response should include `"timed_out": false`', function () {
   const expectedResponseContains = '"timed_out": false,';
   this.consolePage.clickPlay();
 
-  this.logger.info('Checking if default response contains "timed_out": false,');
+  //Checking if default response contains "timed_out": false,
   const actualResponse = this.consolePage.response;
   expect(actualResponse).toContain(expectedResponseContains);
 });
 
 it('settings should allow changing the text size', function () {
+
+  //Get the beginning font size (Usually 16)
   const beginningFontSize = this.consolePage.requestFontSize;
 
-  this.logger.info(`Beginning font was ${beginningFontSize}`);
   this.consolePage.changeFontSize(20);
-  this.logger.info('Changed Font size to 20px');
+
+  //Changed Font size to 20px
   expect(this.consolePage.requestFontSize).not.toBe(beginningFontSize);
   expect(this.consolePage.requestFontSize).toBe('20px');
 
-  this.logger.info('Changed Font size to 24px');
+  //Changed Font size to 24px
   this.consolePage.changeFontSize(24);
   expect(this.consolePage.requestFontSize).not.toBe('20px');
   expect(this.consolePage.requestFontSize).toBe('24px');

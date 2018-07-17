@@ -17,8 +17,49 @@
  * under the License.
  */
 
-export default class ManagementPage {
-  constructor() {
+import { testSubjectifySelector } from '../../helpers/helpers';
+import AdvancedSettingsPage from './advanced_settings_page';
+import BasePage from '../common/base_page';
+import IndexPatternPage from './index_pattern_page';
+import SavedObjectsPage from './saved_objects_page';
+
+export default class ManagementPage extends BasePage {
+  constructor(driver) {
+    super(driver);
+    this.managementHeaderSelector = 'h2#tabHeader';
+    this.indexPatternsLinkSelector = testSubjectifySelector('indices', 'css');
+    this.savedObjectsLinkSelector = testSubjectifySelector('objects', 'css');
+    this.advancedSettingsLinkSelector = testSubjectifySelector('settings', 'css');
+    this.init();
+  }
+
+  /**
+    * @function navigateToIndexPatterns
+    * @returns {Object} Returns an instance of IndexPatternPage
+  */
+  navigateToIndexPatterns() {
+    this.click(this.indexPatternsLinkSelector);
+    return new IndexPatternPage(this.driver);
+  }
+
+  /**
+    * @function navigateToSavedObjects
+    * @returns {Object} Returns an instance of SavedObjectsPage
+  */
+  navigateToSavedObjects() {
+    this.click(this.savedObjectsLinkSelector);
+    return new SavedObjectsPage(this.driver);
+  }
+
+  /**
+    * @function navigateToAdvancedSettings
+    * @returns {Object} Returns an instance of AdvancedSettingsPage
+  */
+  navigateToAdvancedSettings() {
+    this.click(this.advancedSettingsLinkSelector);
+    return new AdvancedSettingsPage(this.driver);
+  }
+  init() {
 
   }
 }

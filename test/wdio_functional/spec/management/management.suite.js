@@ -44,7 +44,7 @@ describe('Management App', function () {
   });
 
   after(async function () {
-    try{
+    try {
       this.logger.info('Unloading makelogs data');
       await this.esArchiver.unload('makelogs');
       this.logger.debug('Loading empty kibana');

@@ -33,13 +33,13 @@ exports.config = {
   coloredLogs: true,
   logLevel: 'silent',
   deprecationWarnings: true,
-  waitforTimeout: ci ? 300000 : 180000,
+  waitforTimeout: ci ? 60000 : 30000,
   bail: 0,
   screenshotPath: 'test/failure-screenshots',
   framework: 'mocha',
   mochaOpts: {
     ui: 'bdd',
-    timeout: 300000,
+    timeout: 180000,
     compilers: ['js:babel-register']
   },
   reporters: ['spec', 'dot', 'junit'],
@@ -79,7 +79,7 @@ exports.config = {
   before: function () {
     global.expect = require('expect');
     global.fetch = require('node-fetch');
-    logger.debug('Setting up node environment for tests.');
+    logger.verbose('Setting up node environment for tests.');
     require('../../src/setup_node_env');
     require('./setup_wdio').setupWebdriverio().then(function (providers) {
       global.getService = providers.getService;
@@ -89,6 +89,6 @@ exports.config = {
       logger.error(e);
       process.exit(1);
     });
-    logger.debug('Configuration successful. Starting tests.');
+    logger.verbose('Configuration successful. Starting tests.');
   },
 };

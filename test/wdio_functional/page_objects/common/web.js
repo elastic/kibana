@@ -32,7 +32,7 @@ export default class Web {
    */
   getElementText(selector) {
     this.findElement(selector);
-    this.logger.debug(`\nFound : ${selector}\n`);
+    this.logger.verbose(`\nFound : ${selector}\n`);
     return this.driver.getText(selector).toString();
   }
 
@@ -53,9 +53,9 @@ export default class Web {
    */
   click(selector) {
     this.findElement(selector);
-    this.logger.debug(`\nClicking on: ${selector}\n`);
+    this.logger.verbose(`\nClicking on: ${selector}\n`);
     this.driver.click(selector);
-    this.logger.debug(`\nClicked successfully`);
+    this.logger.verbose(`\nClicked successfully`);
   }
 
   /**
@@ -64,9 +64,9 @@ export default class Web {
    */
   clear(selector) {
     this.findElement(selector);
-    this.logger.debug(`\nClearing values from: ${selector}\n`);
+    this.logger.verbose(`\nClearing values from: ${selector}\n`);
     this.driver.clearElement(selector);
-    this.logger.debug(`\nCleared successfully`);
+    this.logger.verbose(`\nCleared successfully`);
   }
 
   /**
@@ -76,16 +76,16 @@ export default class Web {
    * @throws ElementNotFound
    */
   findElement(selector) {
-    this.logger.debug(
+    this.logger.verbose(
       `\nChecking existance of element with selector: ${selector}\n`
     );
     this.driver.waitForExist(selector);
-    this.logger.debug(`\nIt exists.\n`);
-    this.logger.debug(
+    this.logger.verbose(`\nIt exists.\n`);
+    this.logger.verbose(
       `\nEnsuring visibility of element with selector: ${selector}\n`
     );
     this.driver.waitForVisible(selector);
-    this.logger.debug(`\nIt's visible\n`);
+    this.logger.verbose(`\nIt's visible\n`);
     return this.driver.element(selector);
   }
   /**
@@ -95,11 +95,11 @@ export default class Web {
    * @throws ElementNotFound
    */
   findElements(selector) {
-    this.logger.debug(
+    this.logger.verbose(
       `\nChecking existance of all elements that match: ${selector}\n`
     );
     this.driver.waitForExist(selector);
-    this.logger.debug(`\nAt least one exists.\n`);
+    this.logger.verbose(`\nAt least one exists.\n`);
     return this.driver.elements(selector);
   }
   /**
@@ -113,8 +113,40 @@ export default class Web {
       this.clear(selector);
     }
     this.click(selector);
-    this.driver.addValue(selector, value);
+    for (let i = 0; i < value.length; i++) {
+      this.driver.pause(100);
+      this.driver.addValue(selector, value[i]);
+    }
   }
 
+  /**
+   * @function exists
+   * @param  {string} selector CSS or XPath Selector of Element.
+   * @returns {boolean} Returns true if element exists on page, false otherwise.
+   */
+  exists(selector) {
+    this.findElement(selector);
+    return this.driver.isExisting(selector);
+  }
+
+  /**
+   * @function isVisible
+   * @param  {string} selector CSS or XPath Selector of Element.
+   * @returns {boolean} true if element is visible, false otherwise
+   */
+  isVisible(selector) {
+    this.findElement(selector);
+    return this.driver.isVisible(selector);
+  }
+
+  /**
+   * @function isEnabled
+   * @param  {string} selector CSS or XPath Selector of Element.
+   * @returns {boolean} true if element is enabled, false otherwise
+   */
+  isEnabled(selector) {
+    this.findElement(selector);
+    return this.driver.isEnabled(selector);
+  }
   // protected waitForCondition(callback: () => boolean): void { }
 }
