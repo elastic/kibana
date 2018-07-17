@@ -538,7 +538,10 @@ app.controller('graphuiPlugin', function ($scope, $route, $interval, $http, kbnU
   $scope.saveUrlTemplate = function () {
     const found = $scope.newUrlTemplate.url.search(drillDownRegex) > -1;
     if (!found) {
-      toastNotifications.addWarning('Invalid URL - the url must contain a {{gquery}} string');
+      toastNotifications.addWarning({
+        title: 'Invalid URL',
+        text: 'The url must contain a {{gquery}} string',
+      });
       return;
     }
     if ($scope.newUrlTemplate.templateBeingEdited) {
@@ -717,7 +720,10 @@ app.controller('graphuiPlugin', function ($scope, $route, $interval, $http, kbnU
 
 
   if ($scope.indices.length === 0) {
-    toastNotifications.addWarning('Oops, no data sources. First head over to Kibana settings and define a choice of index pattern');
+    toastNotifications.addWarning({
+      title: 'No data sources',
+      text: 'Head over to Kibana settings and define an index pattern',
+    });
   }
 
 
