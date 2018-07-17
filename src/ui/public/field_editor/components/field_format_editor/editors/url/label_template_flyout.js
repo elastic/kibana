@@ -46,8 +46,9 @@ export const LabelTemplateFlyoutComponent = ({
           <p>
             <FormattedMessage
               id="common.ui.fieldEditor.labelTemplate.label"
-              // eslint-disable-next-line max-len
-              defaultMessage="If the URL in this field is large, it might be useful to provide an alternate template for the text version of the URL. This will be displayed instead of the url, but will still link to the URL. The format is a string which uses double curly brace notation {doubleCurlyBraces} to inject values. The following values can be accessed:"
+              defaultMessage="If the URL in this field is large, it might be useful to provide an alternate template for the text version
+              of the URL. This will be displayed instead of the url, but will still link to the URL. The format is a string which uses
+              double curly brace notation {doubleCurlyBraces} to inject values. The following values can be accessed:"
               values={{ doubleCurlyBraces: <EuiCode>{('{{ }}')}</EuiCode> }}
             />
           </p>

@@ -43,7 +43,6 @@ export const ScriptingWarningCallOutComponent = ({
         <p>
           <FormattedMessage
             id="common.ui.fieldEditor.disabledCallOut.label.detail"
-            // eslint-disable-next-line max-len
             defaultMessage="Please familiarize yourself with {scripFields} and with {scriptsInAggregation} before using scripted fields."
             values={{
               scripFields: (
@@ -67,8 +66,9 @@ export const ScriptingWarningCallOutComponent = ({
         <p>
           <FormattedMessage
             id="common.ui.fieldEditor.disabledCallOut.description.label"
-            // eslint-disable-next-line max-len
-            defaultMessage="Scripted fields can be used to display and aggregate calculated values. As such, they can be very slow, and if done incorrectly, can cause Kibana to be unusable. There's no safety net here. If you make a typo, unexpected exceptions will be thrown all over the place!"
+            defaultMessage="Scripted fields can be used to display and aggregate calculated values. As such, they can be very slow, and
+            if done incorrectly, can cause Kibana to be unusable. There's no safety net here. If you make a typo, unexpected exceptions
+            will be thrown all over the place!"
           />
         </p>
       </EuiCallOut>

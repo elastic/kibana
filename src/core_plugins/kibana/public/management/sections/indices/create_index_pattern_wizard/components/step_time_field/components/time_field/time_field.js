@@ -49,12 +49,10 @@ export const TimeFieldComponent = ({
         label={
           <EuiFlexGroup gutterSize="xs" justifyContent="spaceBetween" alignItems="center">
             <EuiFlexItem grow={false}>
-              <span>
-                <FormattedMessage
-                  id="kbn.management.indexPattern.create.stepTime.field.header"
-                  defaultMessage="Time Filter field name"
-                />
-              </span>
+              <FormattedMessage
+                id="kbn.management.indexPattern.create.stepTime.field.header"
+                defaultMessage="Time Filter field name"
+              />
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               { isLoading ? (
@@ -80,9 +78,13 @@ export const TimeFieldComponent = ({
             <p>
               <FormattedMessage
                 id="kbn.management.indexPattern.create.stepTime.field.label"
-                //eslint-disable-next-line max-len
-                defaultMessage="The Time Filter will use this field to filter your data by time.{newLine}You can choose not to have a time field, but you will not be able to narrow down your data by a time range."
-                values={{ newLine: <br/> }}
+                defaultMessage="The Time Filter will use this field to filter your data by time."
+              />
+            </p>
+            <p>
+              <FormattedMessage
+                id="kbn.management.indexPattern.create.stepTime.fieldWarning.label"
+                defaultMessage="You can choose not to have a time field, but you will not be able to narrow down your data by a time range."
               />
             </p>
           </div>

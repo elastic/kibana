@@ -227,8 +227,8 @@ export class FieldEditorComponent extends PureComponent {
             <EuiIcon type="alert" color="warning" size="s" />&nbsp;
             <FormattedMessage
               id="common.ui.fieldEditor.mappingConflict.label.detail"
-              // eslint-disable-next-line max-len
-              defaultMessage="{mappingConflict} You already have a field with the name {fieldName}. Naming your scripted field with the same name means you won't be able to query both fields at the same time."
+              defaultMessage="{mappingConflict} You already have a field with the name {fieldName}. Naming your scripted field with
+              the same name means you won't be able to query both fields at the same time."
               values={{
                 mappingConflict: (
                   <strong>
@@ -270,15 +270,16 @@ export class FieldEditorComponent extends PureComponent {
         helpText={isDeprecatedLang ? (
           <span>
             <EuiIcon type="alert" color="warning" size="s" />&nbsp;
-            <strong><FormattedMessage
-              id="common.ui.fieldEditor.warning.header"
-              defaultMessage="Deprecation Warning:"
-            />
+            <strong>
+              <FormattedMessage
+                id="common.ui.fieldEditor.warning.header"
+                defaultMessage="Deprecation Warning:"
+              />
             </strong>&nbsp;
             <FormattedMessage
               id="common.ui.fieldEditor.warning.label.detail"
-              // eslint-disable-next-line max-len
-              defaultMessage="{language} is deprecated and support will be removed in the next major version of Kibana and Elasticsearch. We recommend using {painlessLink} for new scripted fields."
+              defaultMessage="{language} is deprecated and support will be removed in the next major version of Kibana and Elasticsearch.
+              We recommend using {painlessLink} for new scripted fields."
               values={{
                 language: <EuiCode>{field.lang}</EuiCode>,
                 painlessLink: (
@@ -346,8 +347,8 @@ export class FieldEditorComponent extends PureComponent {
           helpText={
             <FormattedMessage
               id="common.ui.fieldEditor.format.label"
-              // eslint-disable-next-line max-len
-              defaultMessage="Formatting allows you to control the way that specific values are displayed. It can also cause values to be completely changed and prevent highlighting in Discover from working."
+              defaultMessage="Formatting allows you to control the way that specific values are displayed. It can also cause values to be
+              completely changed and prevent highlighting in Discover from working."
             />
           }
         >
@@ -449,9 +450,18 @@ export class FieldEditorComponent extends PureComponent {
         >
           <p>
             <FormattedMessage
-              id="common.ui.fieldEditor.deleteField.label"
-              defaultMessage="You can't recover a deleted field.{newLine}Are you sure you want to do this?"
-              values={{ newLine: <p/> }}
+              id="common.ui.fieldEditor.deleteField.label.detail"
+              defaultMessage="You can't recover a deleted field. {question}"
+              values={{
+                question: (
+                  <p>
+                    <FormattedMessage
+                      id="common.ui.fieldEditor.deleteField.label.question"
+                      defaultMessage="Are you sure you want to do this?"
+                    />
+                  </p>
+                )
+              }}
             />
           </p>
         </EuiConfirmModal>

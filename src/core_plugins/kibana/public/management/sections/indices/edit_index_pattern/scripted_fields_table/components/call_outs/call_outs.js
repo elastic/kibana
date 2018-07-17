@@ -48,8 +48,8 @@ export const CallOutsComponent = ({
         <p>
           <FormattedMessage
             id="kbn.management.indexPattern.edit.scripted.deprecationLang.label.detail"
-            //eslint-disable-next-line max-len
-            defaultMessage="The following deprecated languages are in use: {deprecatedLangsInUse}. Support for these languages will be removed in the next major version of Kibana and Elasticsearch. Convert you scripted fields to {link} to avoid any problems."
+            defaultMessage="The following deprecated languages are in use: {deprecatedLangsInUse}. Support for these languages will be
+            removed in the next major version of Kibana and Elasticsearch. Convert you scripted fields to {link} to avoid any problems."
             values={{
               deprecatedLangsInUse: deprecatedLangsInUse.join(', '),
               link: (

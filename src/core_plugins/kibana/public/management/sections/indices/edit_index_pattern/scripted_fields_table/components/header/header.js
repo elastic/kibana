@@ -42,8 +42,8 @@ export const Header = ({ addScriptedFieldUrl }) => (
         <p>
           <FormattedMessage
             id="kbn.management.indexPattern.edit.scripted.label"
-            //eslint-disable-next-line max-len
-            defaultMessage="You can use scripted fields in visualizations and display them in your documents. However, you cannot search scripted fields."
+            defaultMessage="You can use scripted fields in visualizations and display them in your documents. However, you cannot search
+            scripted fields."
           />
         </p>
       </EuiText>

@@ -26,5 +26,5 @@ export const intl = {
   formatNumber: jest.fn().mockImplementation(value => value),
   formatPlural: jest.fn().mockImplementation(value => value),
   formatHTMLMessage: jest.fn().mockImplementation(({ defaultMessage }) => defaultMessage),
-  now: jest.fn().mockImplementation(() => new Date()),
+  now: jest.fn().mockImplementation(() => new Date(1531834573179)),
 };

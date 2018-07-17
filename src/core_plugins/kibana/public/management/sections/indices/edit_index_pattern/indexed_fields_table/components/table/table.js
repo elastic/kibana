@@ -39,7 +39,16 @@ export class TableComponent extends PureComponent {
     return value ? <EuiIcon type="dot" color="secondary" aria-label={label}/> : <span/>;
   }
 
-  renderFieldName(name, isTimeField, label, content) {
+  renderFieldName(name, isTimeField, intl) {
+    const label = intl.formatMessage({
+      id: 'kbn.management.indexPattern.edit.fields.table.primaryTime.aria',
+      defaultMessage: 'Primary time field'
+    });
+    const content = intl.formatMessage({
+      id: 'kbn.management.indexPattern.edit.fields.table.primaryTime.tooltip',
+      defaultMessage: 'This field represents the time that events occurred.'
+    });
+
     return (
       <span>
         {name}
@@ -58,7 +67,16 @@ export class TableComponent extends PureComponent {
     );
   }
 
-  renderFieldType(type, isConflict, label, content) {
+  renderFieldType(type, isConflict, intl) {
+    const label = intl.formatMessage({
+      id: 'kbn.management.indexPattern.edit.fields.table.multiType.aria',
+      defaultMessage: 'Multiple type field'
+    });
+    const content = intl.formatMessage({
+      id: 'kbn.management.indexPattern.edit.fields.table.multiType.tooltip',
+      defaultMessage: 'The type of this field changes across indices. It is unavailable for many analysis functions.'
+    });
+
     return (
       <span>
         {type}
@@ -92,13 +110,7 @@ export class TableComponent extends PureComponent {
         dataType: 'string',
         sortable: true,
         render: (value) => {
-          return this.renderFieldName(value,
-            indexPattern.timeFieldName === value,
-            intl.formatMessage({
-              id: 'kbn.management.indexPattern.edit.fields.table.primaryTime.aria', defaultMessage: 'Primary time field' }),
-            intl.formatMessage({
-              id: 'kbn.management.indexPattern.edit.fields.table.primaryTime.tooltip',
-              defaultMessage: 'This field represents the time that events occurred.' }));
+          return this.renderFieldName(value, indexPattern.timeFieldName === value, intl);
         },
         width: '38%',
         'data-test-subj': 'indexedFieldName',
@@ -109,13 +121,7 @@ export class TableComponent extends PureComponent {
         dataType: 'string',
         sortable: true,
         render: (value) => {
-          return this.renderFieldType(value,
-            value === 'conflict',
-            intl.formatMessage({
-              id: 'kbn.management.indexPattern.edit.fields.table.multiType.aria', defaultMessage: 'Multiple type field' }),
-            intl.formatMessage({
-              id: 'kbn.management.indexPattern.edit.fields.table.multiType.tooltip',
-              defaultMessage: 'The type of this field changes across indices. It is unavailable for many analysis functions.' }));
+          return this.renderFieldType(value, value === 'conflict', intl);
         },
         'data-test-subj': 'indexedFieldType',
       },

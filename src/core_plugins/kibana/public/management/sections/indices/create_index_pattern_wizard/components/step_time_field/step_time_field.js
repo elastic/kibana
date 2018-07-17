@@ -142,13 +142,20 @@ export class StepTimeFieldComponent extends Component {
 
     const getText = (key) => {
       switch (key) {
-        case timeFieldsTypes.NO_TIME_FIELDS: return this.props.intl.formatMessage({
-          id: 'kbn.management.indexPattern.create.stepTime.noTimeFields.label',
-          defaultMessage: 'The indices which match this index pattern don\'t contain any time fields.' });
-        case timeFieldsTypes.NO_TIME_FIELD: return this.props.intl.formatMessage({
-          id: 'kbn.management.indexPattern.create.stepTime.noTimeFieldOption.label',
-          defaultMessage: 'I don\'t want to use the Time Filter' });
-        default: return key;
+        case timeFieldsTypes.NO_TIME_FIELDS:
+          return this.props.intl.formatMessage({
+            id: 'kbn.management.indexPattern.create.stepTime.noTimeFields.label',
+            defaultMessage: 'The indices which match this index pattern don\'t contain any time fields.'
+          });
+
+        case timeFieldsTypes.NO_TIME_FIELD:
+          return this.props.intl.formatMessage({
+            id: 'kbn.management.indexPattern.create.stepTime.noTimeFieldOption.label',
+            defaultMessage: 'I don\'t want to use the Time Filter'
+          });
+
+        default:
+          return key;
       }
     };
 

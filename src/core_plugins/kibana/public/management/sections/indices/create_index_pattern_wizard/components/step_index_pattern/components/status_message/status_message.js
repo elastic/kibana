@@ -51,11 +51,12 @@ export const StatusMessage = ({
             id="kbn.management.indexPattern.create.step.status.matchAny.label.detail"
             defaultMessage="Your index pattern can match any of your {strongIndices}, below."
             values={{ strongIndices: (
-              <strong><FormattedMessage
-                id="kbn.management.indexPattern.create.step.status.matchAny.label.strongIndices"
-                defaultMessage="{allIndicesLength, plural, one {# index} other {# indices}}"
-                values={{ allIndicesLength: allIndices.length }}
-              />
+              <strong>
+                <FormattedMessage
+                  id="kbn.management.indexPattern.create.step.status.matchAny.label.strongIndices"
+                  defaultMessage="{allIndicesLength, plural, one {# index} other {# indices}}"
+                  values={{ allIndicesLength: allIndices.length }}
+                />
               </strong>) }}
           />
         </span>
@@ -66,8 +67,8 @@ export const StatusMessage = ({
         <span>
           <FormattedMessage
             id="kbn.management.indexPattern.create.step.status.noSystemIndicesWithPrompt.label"
-            //eslint-disable-next-line max-len
-            defaultMessage="No Elasticsearch indices match your pattern. To view the matching system indices, toggle the switch in the upper right."
+            defaultMessage="No Elasticsearch indices match your pattern. To view the matching system indices, toggle the switch in
+            the upper right."
           />
         </span>
       );
@@ -121,16 +122,17 @@ export const StatusMessage = ({
       <span>
         <FormattedMessage
           id="kbn.management.indexPattern.create.step.status.partialMatch.label.detail"
-          //eslint-disable-next-line max-len
-          defaultMessage="Your index pattern doesn't match any indices, but you have {strongIndices} which {matchedIndicesLength, plural, one {looks} other {look}} similar."
+          defaultMessage="Your index pattern doesn't match any indices, but you have {strongIndices} which
+          {matchedIndicesLength, plural, one {looks} other {look}} similar."
           values={{
             matchedIndicesLength: partialMatchedIndices.length,
             strongIndices: (
-              <strong><FormattedMessage
-                id="kbn.management.indexPattern.create.step.status.partialMatch.label.strongIndices"
-                defaultMessage="{matchedIndicesLength, plural, one {# index} other {# indices}}"
-                values={{ matchedIndicesLength: partialMatchedIndices.length }}
-              />
+              <strong>
+                <FormattedMessage
+                  id="kbn.management.indexPattern.create.step.status.partialMatch.label.strongIndices"
+                  defaultMessage="{matchedIndicesLength, plural, one {# index} other {# indices}}"
+                  values={{ matchedIndicesLength: partialMatchedIndices.length }}
+                />
               </strong>)
           }}
         />
@@ -146,11 +148,12 @@ export const StatusMessage = ({
           id="kbn.management.indexPattern.create.step.status.notMatch.label.detail"
           defaultMessage="The index pattern you've entered doesn't match any indices. You can match any of your {strongIndices}, below."
           values={{ strongIndices: (
-            <strong><FormattedMessage
-              id="kbn.management.indexPattern.create.step.status.notMatch.label.allIndices"
-              defaultMessage="{indicesLength, plural, one {# index} other {# indices}}"
-              values={{ indicesLength: allIndices.length }}
-            />
+            <strong>
+              <FormattedMessage
+                id="kbn.management.indexPattern.create.step.status.notMatch.label.allIndices"
+                defaultMessage="{indicesLength, plural, one {# index} other {# indices}}"
+                values={{ indicesLength: allIndices.length }}
+              />
             </strong>) }}
         />
       </span>

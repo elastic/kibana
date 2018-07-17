@@ -46,8 +46,9 @@ export const UrlTemplateFlyoutComponent = ({
           <p>
             <FormattedMessage
               id="common.ui.fieldEditor.urlTemplate.label.detail"
-              // eslint-disable-next-line max-len
-              defaultMessage="If a field only contains part of a URL then a {strongUrlTemplate} can be used to format the value as a complete URL. The format is a string which uses double curly brace notation {doubleCurlyBraces} to inject values. The following values can be accessed:"
+              defaultMessage="If a field only contains part of a URL then a {strongUrlTemplate} can be used to format the value as
+              a complete URL. The format is a string which uses double curly brace notation {doubleCurlyBraces} to inject values.
+              The following values can be accessed:"
               values={{
                 doubleCurlyBraces: <EuiCode>{('{{ }}')}</EuiCode>,
                 strongUrlTemplate: (

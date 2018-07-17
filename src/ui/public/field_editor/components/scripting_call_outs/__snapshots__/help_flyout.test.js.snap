@@ -148,7 +148,6 @@ exports[`ScriptingHelpFlyout should render normally 1`] = `
           />
         </li>
         <li>
-           
           <FormattedMessage
             defaultMessage="Stored fields are not available"
             id="common.ui.fieldEditor.help.lucene.limits.fields.label"
@@ -156,7 +155,6 @@ exports[`ScriptingHelpFlyout should render normally 1`] = `
           />
         </li>
         <li>
-           
           <FormattedMessage
             defaultMessage="If a field is sparse (only some documents contain a value), documents missing the field will have a value of 0"
             id="common.ui.fieldEditor.help.lucene.limits.sparse.label"

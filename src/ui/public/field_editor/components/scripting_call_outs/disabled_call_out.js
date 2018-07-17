@@ -40,8 +40,8 @@ export const ScriptingDisabledCallOutComponent = ({
         <p>
           <FormattedMessage
             id="common.ui.fieldEditor.disabledCallOut.label"
-            // eslint-disable-next-line max-len
-            defaultMessage="All inline scripting has been disabled in Elasticsearch. You must enable inline scripting for at least one language in order to use scripted fields in Kibana."
+            defaultMessage="All inline scripting has been disabled in Elasticsearch. You must enable inline scripting for at least one
+            language in order to use scripted fields in Kibana."
           />
         </p>
       </EuiCallOut>

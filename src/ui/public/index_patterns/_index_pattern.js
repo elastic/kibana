@@ -479,7 +479,11 @@ export function IndexPatternProvider(Private, config, Promise, confirmModalPromi
                 }
 
                 if (unresolvedCollision) {
-                  toastNotifications.addDanger(i18n('common.ui.indexPattern.create.unableWrite.label', { defaultMessage: 'Unable to write index pattern! Refresh the page to get the most up to date changes for this index pattern.' })); // eslint-disable-line max-len
+                  const message = i18n(
+                    'common.ui.indexPattern.create.unableWrite.label',
+                    { defaultMessage: 'Unable to write index pattern! Refresh the page to get the most up to date changes for this index pattern.' } // eslint-disable-line max-len
+                  );
+                  toastNotifications.addDanger(message);
                   throw err;
                 }
 
