@@ -74,9 +74,14 @@ export function initAngularApi(chrome, internals) {
         const notify = new Notifier();
         const urlOverflow = Private(UrlOverflowServiceProvider);
         const check = () => {
-        // disable long url checks when storing state in session storage
-          if (config.get('state:storeInSessionStorage')) return;
-          if ($location.path() === '/error/url-overflow') return;
+          // disable long url checks when storing state in session storage
+          if (config.get('state:storeInSessionStorage')) {
+            return;
+          }
+
+          if ($location.path() === '/error/url-overflow') {
+            return;
+          }
 
           try {
             if (urlOverflow.check($location.absUrl()) <= URL_LIMIT_WARN_WITHIN) {
