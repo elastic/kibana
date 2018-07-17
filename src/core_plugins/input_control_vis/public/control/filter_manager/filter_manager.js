@@ -21,12 +21,11 @@ import _ from 'lodash';
 
 export class FilterManager {
 
-  constructor(controlId, fieldName, indexPattern, queryFilter, unsetValue) {
+  constructor(controlId, fieldName, indexPattern, queryFilter) {
     this.controlId = controlId;
     this.fieldName = fieldName;
     this.indexPattern = indexPattern;
     this.queryFilter = queryFilter;
-    this.unsetValue = unsetValue;
   }
 
   getIndexPattern() {
@@ -50,9 +49,5 @@ export class FilterManager {
 
   getValueFromFilterBar() {
     throw new Error('Must implement getValueFromFilterBar.');
-  }
-
-  getUnsetValue() {
-    return this.unsetValue;
   }
 }

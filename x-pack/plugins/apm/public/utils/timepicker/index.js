@@ -50,9 +50,13 @@ export function initTimepicker(history, dispatch) {
 
         history.listen(() => {
           updateRefreshRate(dispatch);
-          dispatch(updateTimePickerAction());
           globalState.fetch(); // ensure global state is updated when url changes
         });
+
+        // ensure that redux is notified after timefilter has updated
+        $scope.$listen(timefilter, 'timeUpdate', () =>
+          dispatch(updateTimePickerAction())
+        );
 
         // ensure that timepicker updates when global state changes
         registerTimefilterWithGlobalState(globalState);

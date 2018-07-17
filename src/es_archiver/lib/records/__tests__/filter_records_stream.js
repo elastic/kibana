@@ -52,16 +52,16 @@ describe('esArchiver: createFilterRecordsStream()', () => {
   });
 
   it('produces record values that have a matching type', async () => {
-    const type1 = chance.word();
+    const type1 = chance.word({ length: 5 });
     const output = await createPromiseFromStreams([
       createListStream([
         { type: type1, value: {} },
         { type: type1, value: {} },
-        { type: chance.word(), value: {} },
-        { type: chance.word(), value: {} },
+        { type: chance.word({ length: 10 }), value: {} },
+        { type: chance.word({ length: 10 }), value: {} },
         { type: type1, value: {} },
-        { type: chance.word(), value: {} },
-        { type: chance.word(), value: {} },
+        { type: chance.word({ length: 10 }), value: {} },
+        { type: chance.word({ length: 10 }), value: {} },
       ]),
       createFilterRecordsStream(type1),
       createConcatStream([]),
