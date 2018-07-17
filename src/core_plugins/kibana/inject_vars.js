@@ -21,9 +21,11 @@ export function injectVars(server) {
   const serverConfig = server.config();
   const mapConfig = serverConfig.get('map');
   const legacyWarning = (server => legacyMap =>
-    server.log(['warning', 'deprecated'],
+    server.log(
+      ['warning', 'deprecated'],
       `Use of "${legacyMap}" in the kibana configuration is deprecated. ` +
-      `Use "map.${legacyMap}" instead`))(server);
+        `Use "map.${legacyMap}" instead`
+    ))(server);
 
   let tilemap = mapConfig.tilemap;
   // DEPRECATED SETTINGS
@@ -52,7 +54,7 @@ export function injectVars(server) {
       deprecated: {
         isOverridden: isOverridden,
         config: tilemap,
-      }
-    }
+      },
+    },
   };
 }
