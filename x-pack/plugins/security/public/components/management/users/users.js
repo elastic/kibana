@@ -9,6 +9,7 @@
 
 import React, { Component, Fragment } from 'react';
 import {
+  EuiCallOut,
   EuiButton,
   EuiIcon,
   EuiLink,
@@ -29,9 +30,21 @@ export class Users extends Component {
     };
   }
   async loadUsers() {
-    const { apiClient } = this.props;
-    const users = await apiClient.getUsers();
-    this.setState({ users });
+    const { apiClient, changeUrl } = this.props;
+    try {
+      const users = await apiClient.getUsers();
+      this.setState({ users });
+    } catch (e) {
+      console.log(e);
+      if (e.status === 403) {
+        this.setState({ permissionDenied: true });
+        setTimeout(() => {
+          changeUrl('/management');
+        }, 3000);
+      } else {
+        toastNotifications.addDanger(`Error fetching users: ${e.data.message}`);
+      }
+    }
   }
   deleteUsers = () => {
     const { selection, users } = this.state;
@@ -113,7 +126,16 @@ export class Users extends Component {
     );
   }
   render() {
-    const { users } = this.state;
+    const { users, permissionDenied } = this.state;
+    if (permissionDenied) {
+      return (
+        <EuiCallOut title="Permission denied" color="danger" iconType="cross">
+          <p data-test-subj="permissionDeniedMessage">
+            You do not have permission to manage users.
+          </p>
+        </EuiCallOut>
+      );
+    }
     const path = '#/management/security/';
     const columns = [
       {
@@ -155,7 +177,7 @@ export class Users extends Component {
         field: 'metadata._reserved',
         name: 'Reserved',
         sortable: false,
-        render: reserved => (reserved ? <EuiIcon type="check" /> : null),
+        render: reserved => (reserved ? <EuiIcon data-test-subj="reservedUser" type="check" /> : null),
       },
     ];
     const pagination = {

@@ -13,26 +13,27 @@ import { SECURITY_PATH, USERS_PATH } from './management_urls';
 import { Users } from '../../components/management/users';
 import { createApiClient } from '../../lib/api';
 routes.when(SECURITY_PATH, {
-  redirectTo: USERS_PATH
+  redirectTo: USERS_PATH,
 });
 
-const renderReact = (elem, httpClient) => {
-  render(
-    <Users apiClient={createApiClient(httpClient)} />,
-    elem
-  );
+const renderReact = (elem, httpClient, changeUrl) => {
+  render(<Users changeUrl={changeUrl} apiClient={createApiClient(httpClient)} />, elem);
 };
 
 routes.when(USERS_PATH, {
   template,
-  controller($scope, $route, $q, confirmModal, $http) {
+  controller($scope, $route, $q, confirmModal, $http, kbnUrl) {
     $scope.$on('$destroy', () => {
       const elem = document.getElementById('usersReactRoot');
       if (elem) unmountComponentAtNode(elem);
     });
     $scope.$$postDigest(() => {
       const elem = document.getElementById('usersReactRoot');
-      renderReact(elem, $http);
+      const changeUrl = (url) => {
+        kbnUrl.change(url);
+        $scope.$apply();
+      };
+      renderReact(elem, $http, changeUrl);
     });
-  }
+  },
 });
