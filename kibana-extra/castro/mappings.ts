@@ -8,21 +8,21 @@ export const REPOSITORY_INDEX_TYPE = 'castro-repository';
 
 const mappings = {
   [REPOSITORY_INDEX_TYPE]: {
-    "properties": {
-      "uri": {
-        "type": "text"
+    properties: {
+      uri: {
+        type: 'text',
       },
-      "url": {
-        "type": "text"
+      url: {
+        type: 'text',
       },
-      "name": {
-        "type": "text"
+      name: {
+        type: 'text',
       },
-      "org": {
-        "type": "text"
-      }
-    }
-  }
+      org: {
+        type: 'text',
+      },
+    },
+  },
 };
 
 export default mappings;
