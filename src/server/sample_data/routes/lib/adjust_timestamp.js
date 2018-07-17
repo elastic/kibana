@@ -66,6 +66,11 @@ export function adjustTimestamp(timestamp, currentTimeMarker, now, preserveDayOf
 
   const dayOfWeekDelta = timestampDateOnly.getDay() - nowDateOnly.getDay();
   const daysDeltaInMS = dayOfWeekDelta * MILLISECONDS_IN_DAY + (weekDirection * weekDelta * MILLISECONDS_IN_DAY * 7);
-  const yearMonthDay = (new Date(nowDateOnly.getTime() + daysDeltaInMS)).toISOString().substring(0, 10);
-  return `${yearMonthDay}T${timestamp.substring(11)}`;
+
+  const adjustedTimestamp = (new Date(nowDateOnly.getTime() + daysDeltaInMS));
+  const year = adjustedTimestamp.getFullYear();
+  const month = adjustedTimestamp.getMonth() + 1;
+  const monthString = month < 10 ? `0${month}` : `${month}`;
+  const dateString = adjustedTimestamp.getDate() < 10 ? `0${adjustedTimestamp.getDate()}` : `${adjustedTimestamp.getDate()}`;
+  return `${year}-${monthString}-${dateString}T${timestamp.substring(11)}`;
 }
