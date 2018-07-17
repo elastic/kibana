@@ -29,6 +29,7 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
       await kibanaServer.uiSettings.replace({
         'dateFormat:tz': 'UTC',
         'defaultIndex': 'logstash-*'
+        'telemetry:optIn': false
       });
 
       await kibanaServer.uiSettings.disableToastAutohide();
