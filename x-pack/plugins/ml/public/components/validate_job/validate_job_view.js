@@ -241,7 +241,7 @@ class ValidateJob extends Component {
             )}
             <EuiText>
               Job validation performs certain checks against job configurations and underlying source data
-              and tries to come up with specific advice on how to adjust settings that are more likely to produce insightful results.
+              and provides specific advice on how to adjust settings that are more likely to produce insightful results.
             </EuiText>
             <EuiText>
               For more information, see <EuiLink href={jobTipsUrl} target="_blank">Machine Learning Job Tips</EuiLink>.
