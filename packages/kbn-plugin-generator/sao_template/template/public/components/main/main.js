@@ -30,12 +30,12 @@ export class Main extends React.Component {
     const { title } = this.props;
     return (
       <EuiPage>
-        <EuiPageHeader>
-          <EuiTitle size="l">
-            <h1>{title} Hello World!</h1>
-          </EuiTitle>
-        </EuiPageHeader>
         <EuiPageBody>
+          <EuiPageHeader>
+            <EuiTitle size="l">
+              <h1>{title} Hello World!</h1>
+            </EuiTitle>
+          </EuiPageHeader>
           <EuiPageContent>
             <EuiPageContentHeader>
               <EuiTitle>
