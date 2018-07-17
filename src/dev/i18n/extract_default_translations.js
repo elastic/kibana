@@ -27,8 +27,6 @@ import { extractJadeMessages } from './extract_jade_messages';
 import { extractHandlebarsMessages } from './extract_handlebars_messages';
 import { globAsync, makeDirAsync, accessAsync, readFileAsync, writeFileAsync } from './utils';
 
-const ESCAPE_CHARACTERS_REGEX = /\\([\s\S])|(')/g;
-
 function addMessageToMap(targetMap, key, value) {
   const existingValue = targetMap.get(key);
   if (targetMap.has(key) && existingValue.message !== value.message) {
@@ -102,12 +100,9 @@ export async function extractDefaultTranslations(inputPath) {
   });
 
   for (const [mapKey, mapValue] of defaultMessages) {
-    const key = mapKey.replace(ESCAPE_CHARACTERS_REGEX, '\\$1$2');
-    const value = mapValue.message.replace(ESCAPE_CHARACTERS_REGEX, '\\$1$2').replace('\n', '\\n');
-
     jsonBuffer = Buffer.concat([
       jsonBuffer,
-      Buffer.from(`  '${key}': '${value}',`),
+      Buffer.from(`  '${mapKey}': '${mapValue.message}',`),
       Buffer.from(mapValue.context ? ` // ${mapValue.context}\n` : '\n'),
     ]);
   }

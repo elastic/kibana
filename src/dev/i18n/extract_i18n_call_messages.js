@@ -19,7 +19,7 @@
 
 import { isObjectExpression, isStringLiteral } from '@babel/types';
 
-import { isPropertyWithKey, escapeLineBreak } from './utils';
+import { isPropertyWithKey, formatJSString } from './utils';
 import { DEFAULT_MESSAGE_KEY, CONTEXT_KEY } from './constants';
 
 /**
@@ -50,7 +50,7 @@ export function extractI18nCallMessages(node) {
         );
       }
 
-      message = escapeLineBreak(prop.value.value);
+      message = formatJSString(prop.value.value);
     } else if (isPropertyWithKey(prop, CONTEXT_KEY)) {
       if (!isStringLiteral(prop.value)) {
         throw new Error(
@@ -58,7 +58,7 @@ export function extractI18nCallMessages(node) {
         );
       }
 
-      context = escapeLineBreak(prop.value.value);
+      context = formatJSString(prop.value.value);
     }
   }
 

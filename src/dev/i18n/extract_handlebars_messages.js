@@ -17,6 +17,8 @@
  * under the License.
  */
 
+import { formatJSString } from './utils';
+
 const HBS_REGEX = /(?<=\{\{)([\s\S]*?)(?=\}\})/g;
 const TOKENS_REGEX = /[^'\s]+|(?:'([^'\\]|\\[\s\S])*')/g;
 
@@ -27,7 +29,7 @@ export function* extractHandlebarsMessages(buffer) {
   for (const expression of buffer.toString().match(HBS_REGEX) || []) {
     const tokens = expression.match(TOKENS_REGEX);
 
-    const { functionName, idString, propertiesString } = tokens;
+    const [functionName, idString, propertiesString] = tokens;
 
     if (functionName !== 'i18n') {
       continue;
@@ -41,7 +43,7 @@ export function* extractHandlebarsMessages(buffer) {
       throw new Error('Message id should be a string literal.');
     }
 
-    const messageId = idString.slice(1, -1);
+    const messageId = formatJSString(idString.slice(1, -1));
 
     if (!propertiesString.startsWith(`'`) || !propertiesString.endsWith(`'`)) {
       throw new Error(
@@ -50,7 +52,7 @@ export function* extractHandlebarsMessages(buffer) {
     }
 
     const properties = JSON.parse(propertiesString.slice(1, -1));
-    const message = properties.defaultMessage;
+    const message = formatJSString(properties.defaultMessage);
 
     if (typeof message !== 'string') {
       throw new Error(
@@ -58,7 +60,7 @@ export function* extractHandlebarsMessages(buffer) {
       );
     }
 
-    const context = properties.context;
+    const context = formatJSString(properties.context);
 
     if (context != null && typeof context !== 'string') {
       throw new Error(`Cannot parse "${messageId}" message: context value should be a string.`);

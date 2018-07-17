@@ -21,7 +21,7 @@ import { jsdom } from 'jsdom';
 import { parse } from '@babel/parser';
 import { isDirectiveLiteral, isObjectExpression, isStringLiteral } from '@babel/types';
 
-import { isPropertyWithKey, escapeLineBreak, traverseNodes } from './utils';
+import { isPropertyWithKey, formatHTMLString, formatJSString, traverseNodes } from './utils';
 import { DEFAULT_MESSAGE_KEY, CONTEXT_KEY } from './constants';
 
 /**
@@ -54,13 +54,13 @@ function parseFilterObjectExpression(expression) {
           throw new Error('defaultMessage value should be a string literal.');
         }
 
-        message = escapeLineBreak(property.value.value);
+        message = formatJSString(property.value.value);
       } else if (isPropertyWithKey(property, CONTEXT_KEY)) {
         if (!isStringLiteral(property.value)) {
           throw new Error('context value should be a string literal.');
         }
 
-        context = property.value.value;
+        context = formatJSString(property.value.value);
       }
     }
 
@@ -73,7 +73,7 @@ function parseFilterObjectExpression(expression) {
 function parseIdExpression(expression) {
   for (const node of traverseNodes(parse(expression).program.directives)) {
     if (isDirectiveLiteral(node)) {
-      return node.value;
+      return formatJSString(node.value);
     }
   }
 
@@ -120,17 +120,17 @@ function* getDirectiveMessages(htmlContent) {
   }).defaultView.document;
 
   for (const element of document.querySelectorAll('[i18n-id]')) {
-    const messageId = element.getAttribute('i18n-id');
+    const messageId = formatHTMLString(element.getAttribute('i18n-id'));
     if (!messageId) {
       throw new Error('Empty "i18n-id" value is not allowed.');
     }
 
-    const message = element.getAttribute('i18n-default-message');
+    const message = formatHTMLString(element.getAttribute('i18n-default-message'));
     if (!message) {
       throw new Error(`Cannot parse "${messageId}" message: default message is required.`);
     }
 
-    const context = element.getAttribute('i18n-context');
+    const context = formatHTMLString(element.getAttribute('i18n-context'));
     yield [messageId, { message, context }];
   }
 }

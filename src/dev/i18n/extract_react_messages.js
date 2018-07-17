@@ -19,7 +19,7 @@
 
 import { isJSXIdentifier, isObjectExpression, isStringLiteral } from '@babel/types';
 
-import { isPropertyWithKey, escapeLineBreak } from './utils';
+import { isPropertyWithKey, formatJSString, formatHTMLString } from './utils';
 import { DEFAULT_MESSAGE_KEY, CONTEXT_KEY } from './constants';
 
 function extractMessageId(value) {
@@ -27,7 +27,7 @@ function extractMessageId(value) {
     throw new Error('Message id should be a string literal.');
   }
 
-  return escapeLineBreak(value.value);
+  return value.value;
 }
 
 function extractMessageValue(value, id) {
@@ -35,7 +35,7 @@ function extractMessageValue(value, id) {
     throw new Error(`defaultMessage value should be a string literal for id: ${id}.`);
   }
 
-  return escapeLineBreak(value.value);
+  return value.value;
 }
 
 function extractContextValue(value, id) {
@@ -43,7 +43,7 @@ function extractContextValue(value, id) {
     throw new Error(`context value should be a string literal for id: ${id}.`);
   }
 
-  return escapeLineBreak(value.value);
+  return value.value;
 }
 
 /**
@@ -64,17 +64,25 @@ export function extractIntlMessages(node) {
     CONTEXT_KEY,
   ].map(key => options.properties.find(property => isPropertyWithKey(property, key)));
 
-  const messageId = messageIdProperty ? extractMessageId(messageIdProperty.value) : null;
+  const messageId = messageIdProperty
+    ? formatJSString(extractMessageId(messageIdProperty.value))
+    : undefined;
+
   if (!messageId) {
     throw new Error('Empty "id" value in intl.formatMessage() is not allowed.');
   }
 
-  const message = messageProperty ? extractMessageValue(messageProperty.value, messageId) : null;
+  const message = messageProperty
+    ? formatJSString(extractMessageValue(messageProperty.value, messageId))
+    : undefined;
+
   if (!message) {
     throw new Error(`Default message is required for id: ${messageId}.`);
   }
 
-  const context = contextProperty ? extractContextValue(contextProperty.value, messageId) : null;
+  const context = contextProperty
+    ? formatJSString(extractContextValue(contextProperty.value, messageId))
+    : undefined;
 
   return [messageId, { message, context }];
 }
@@ -91,17 +99,25 @@ export function extractFormattedMessages(node) {
     CONTEXT_KEY,
   ].map(key => node.attributes.find(attribute => isJSXIdentifier(attribute.name, { name: key })));
 
-  const messageId = messageIdProperty ? extractMessageId(messageIdProperty.value) : null;
+  const messageId = messageIdProperty
+    ? formatHTMLString(extractMessageId(messageIdProperty.value))
+    : undefined;
+
   if (!messageId) {
     throw new Error('Empty "id" value in <FormattedMessage> is not allowed.');
   }
 
-  const message = messageProperty ? extractMessageValue(messageProperty.value, messageId) : null;
+  const message = messageProperty
+    ? formatHTMLString(extractMessageValue(messageProperty.value, messageId))
+    : undefined;
+
   if (!message) {
     throw new Error(`Default message is required for id: ${messageId}.`);
   }
 
-  const context = contextProperty ? extractContextValue(contextProperty.value, messageId) : null;
+  const context = contextProperty
+    ? formatHTMLString(extractContextValue(contextProperty.value, messageId))
+    : undefined;
 
   return [messageId, { message, context }];
 }
