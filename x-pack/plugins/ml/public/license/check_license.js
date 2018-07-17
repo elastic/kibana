@@ -7,8 +7,7 @@
 
 import React from 'react';
 import { XPackInfoProvider } from 'plugins/xpack_main/services/xpack_info';
-import { notify, Notifier, banners } from 'ui/notify';
-import _ from 'lodash';
+import { Notifier, banners } from 'ui/notify';
 import chrome from 'ui/chrome';
 import { EuiCallOut } from '@elastic/eui';
 
@@ -36,10 +35,11 @@ export function checkLicense(Private, kbnBaseUrl) {
   // Therefore we need to keep the app enabled but show an info banner to the user.
   if(licenseHasExpired) {
     const message = features.message;
-    const exists = _.find(notify._notifs, (item) => item.content === message);
-    if (!exists) {
+    let expiredLicenseBannerId;
+
+    if (expiredLicenseBannerId === undefined) {
       // Only show the banner once with no way to dismiss it
-      banners.add({
+      expiredLicenseBannerId = banners.add({
         component: (
           <EuiCallOut
             iconType="iInCircle"
