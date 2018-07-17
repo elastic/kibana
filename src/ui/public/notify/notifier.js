@@ -19,7 +19,6 @@
 
 import React from 'react';
 import _ from 'lodash';
-import angular from 'angular';
 import MarkdownIt from 'markdown-it';
 import { metadata } from '../metadata';
 import { formatMsg, formatStack } from './lib';
@@ -310,105 +309,4 @@ Notifier.prototype.banner = function (content = '', name = '') {
   bannerTimeoutId = setTimeout(() => {
     dismissBanner();
   }, Notifier.config.bannerLifetime);
-};
-
-/**
- * Helper for common behavior in custom and directive types
- */
-function getDecoratedCustomConfig(config) {
-  // There is no helper condition that will allow for 2 parameters, as the
-  // other methods have. So check that config is an object
-  if (!_.isPlainObject(config)) {
-    throw new Error('Config param is required, and must be an object');
-  }
-
-  // workaround to allow callers to send `config.type` as `error` instead of
-  // reveal internal implementation that error notifications use a `danger`
-  // style
-  if (config.type === 'error') {
-    config.type = 'danger';
-  }
-
-  const getLifetime = (type) => {
-    switch (type) {
-      case 'danger':
-        return Notifier.config.errorLifetime;
-      default: // info
-        return Notifier.config.infoLifetime;
-    }
-  };
-
-  const customConfig = _.assign({
-    type: 'info',
-    title: 'Notification',
-    lifetime: getLifetime(config.type)
-  }, config);
-
-  const hasActions = _.get(customConfig, 'actions.length');
-  if (hasActions) {
-    customConfig.customActions = customConfig.actions;
-    delete customConfig.actions;
-  } else {
-    customConfig.actions = ['accept'];
-  }
-
-  return customConfig;
-}
-
-/**
- * Display a scope-bound directive using template rendering in the message area
- * @param  {Object} directive - required
- * @param  {Object} config - required
- * @param  {Function} cb - optional
- *
- * directive = {
- *  template: `<p>Hello World! <a ng-click="example.clickHandler()">Click me</a>.`,
- *  controllerAs: 'example',
- *  controller() {
- *    this.clickHandler = () {
- *      // do something
- *    };
- *  }
- * }
- *
- * config = {
- *   title: 'Some Title here',
- *   type: 'info',
- *   actions: [{
- *     text: 'next',
- *     callback: function() { next(); }
- *   }, {
- *     text: 'prev',
- *     callback: function() { prev(); }
- *   }]
- * }
- */
-Notifier.prototype.directive = function (directive, config, cb) {
-  if (!_.isPlainObject(directive)) {
-    throw new Error('Directive param is required, and must be an object');
-  }
-  if (!Notifier.$compile) {
-    throw new Error('Unable to use the directive notification until Angular has initialized.');
-  }
-  if (directive.scope) {
-    throw new Error('Directive should not have a scope definition. Notifier has an internal implementation.');
-  }
-  if (directive.link) {
-    throw new Error('Directive should not have a link function. Notifier has an internal link function helper.');
-  }
-
-  // make a local copy of the directive param (helps unit tests)
-  const localDirective = _.clone(directive, true);
-
-  localDirective.scope = { notif: '=' };
-  localDirective.link = function link($scope, $el) {
-    const $template = angular.element($scope.notif.directive.template);
-    const postLinkFunction = Notifier.$compile($template);
-    $el.html($template);
-    postLinkFunction($scope);
-  };
-
-  const customConfig = getDecoratedCustomConfig(config);
-  customConfig.directive = localDirective;
-  return add(customConfig, cb);
 };

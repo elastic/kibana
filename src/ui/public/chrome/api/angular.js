@@ -17,11 +17,12 @@
  * under the License.
  */
 
+import React, { Fragment } from 'react';
 import _ from 'lodash';
 import { format as formatUrl, parse as parseUrl } from 'url';
 
 import { uiModules } from '../../modules';
-import { Notifier } from '../../notify';
+import { toastNotifications } from '../../notify';
 import { UrlOverflowServiceProvider } from '../../error_url_overflow';
 
 import { directivesProvider } from '../directives';
@@ -71,7 +72,6 @@ export function initAngularApi(chrome, internals) {
           return $location.path().split('/')[1];
         };
 
-        const notify = new Notifier();
         const urlOverflow = Private(UrlOverflowServiceProvider);
         const check = () => {
           // disable long url checks when storing state in session storage
@@ -85,19 +85,15 @@ export function initAngularApi(chrome, internals) {
 
           try {
             if (urlOverflow.check($location.absUrl()) <= URL_LIMIT_WARN_WITHIN) {
-              notify.directive({
-                template: `
-                <p>
-                  The URL has gotten big and may cause Kibana
-                  to stop working. Please either enable the
-                  <code>state:storeInSessionStorage</code>
-                  option in the <a href="#/management/kibana/settings">advanced
-                  settings</a> or simplify the onscreen visuals.
-                </p>
-              `
-              }, {
-                type: 'error',
-                actions: [{ text: 'close' }]
+              toastNotifications.addWarning({
+                title: 'The URL has gotten big and may cause Kibana to stop working',
+                text: (
+                  <Fragment>
+                    Please either enable the <code>state:storeInSessionStorage</code> option
+                    in the <a href="#/management/kibana/settings">advanced settings</a> or
+                    simplify the onscreen visuals
+                  </Fragment>
+                ),
               });
             }
           } catch (e) {
