@@ -9,15 +9,18 @@ import { HashRouter as Router, Route } from 'react-router-dom';
 
 import Layout from './Layout/Layout';
 import { Main } from './main';
+import Repo from './ReposManagement/ReposManagement';
 
 export default props => {
   const renderMain = () => <Main {...props} />;
+  const renderRepos = () => <Repo {...props} />;
 
   return (
     <Router>
       <div>
         <Route path="/" exact={true} render={renderMain} />
         <Route path="/codebrowsing" component={Layout} />
+        <Route path="/repos" render={renderRepos} />
       </div>
     </Router>
   );
