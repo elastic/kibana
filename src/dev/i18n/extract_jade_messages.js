@@ -17,12 +17,28 @@
  * under the License.
  */
 
-import * as angular from './angular';
-import * as react from './react';
-import * as i18nCore from './core/i18n';
+import { parse } from '@babel/parser';
 
-export { formats } from './core/formats';
+import { extractI18nCallMessages } from './extract_i18n_call_messages';
+import { isI18nTranslateFunction, traverseNodes } from './utils';
 
-export const AngularI18n = angular;
-export const ReactI18n = react;
-export const i18n = i18nCore;
+/**
+ * Matches `i18n(...)` in `#{i18n('id', { defaultMessage: 'Message text' })}`
+ */
+const JADE_I18N_REGEX = /(?<=\#\{)i18n\((([^)']|'([^'\\]|\\.)*')*\)(?=\}))/g;
+
+/**
+ * Example: `#{i18n('message-id', { defaultMessage: 'Message text' })}`
+ */
+export function* extractJadeMessages(buffer) {
+  const expressions = buffer.toString().match(JADE_I18N_REGEX) || [];
+
+  for (const expression of expressions) {
+    for (const node of traverseNodes(parse(expression).program.body)) {
+      if (isI18nTranslateFunction(node)) {
+        yield extractI18nCallMessages(node);
+        break;
+      }
+    }
+  }
+}

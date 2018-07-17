@@ -61,7 +61,7 @@ module.exports =
 /******/ 	__webpack_require__.p = "";
 /******/
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = 253);
+/******/ 	return __webpack_require__(__webpack_require__.s = 257);
 /******/ })
 /************************************************************************/
 /******/ ([
@@ -1912,7 +1912,7 @@ function loadLocale(name) {
         try {
             oldLocale = globalLocale._abbr;
             var aliasedRequire = require;
-            __webpack_require__(343)("./" + name);
+            __webpack_require__(347)("./" + name);
             getSetGlobalLocale(oldLocale);
         } catch (e) {}
     }
@@ -4604,7 +4604,7 @@ return hooks;
 
 })));
 
-/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(50)(module)))
+/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(27)(module)))
 
 /***/ }),
 /* 1 */
@@ -4817,12 +4817,12 @@ function __importDefault(mod) {
 "use strict";
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return Subscriber; });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_tslib__ = __webpack_require__(1);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__util_isFunction__ = __webpack_require__(31);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__Observer__ = __webpack_require__(216);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__util_isFunction__ = __webpack_require__(32);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__Observer__ = __webpack_require__(221);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__Subscription__ = __webpack_require__(8);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__internal_symbol_rxSubscriber__ = __webpack_require__(59);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_5__config__ = __webpack_require__(42);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_6__util_hostReportError__ = __webpack_require__(58);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__internal_symbol_rxSubscriber__ = __webpack_require__(64);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_5__config__ = __webpack_require__(43);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_6__util_hostReportError__ = __webpack_require__(63);
 /** PURE_IMPORTS_START tslib,_util_isFunction,_Observer,_Subscription,_internal_symbol_rxSubscriber,_config,_util_hostReportError PURE_IMPORTS_END */
 
 
@@ -4831,31 +4831,13 @@ function __importDefault(mod) {
 
 
 
-/**
- * Implements the {@link Observer} interface and extends the
- * {@link Subscription} class. While the {@link Observer} is the public API for
- * consuming the values of an {@link Observable}, all Observers get converted to
- * a Subscriber, in order to provide Subscription-like capabilities such as
- * `unsubscribe`. Subscriber is a common type in RxJS, and crucial for
- * implementing operators, but it is rarely used as a public API.
- *
- * @class Subscriber<T>
- */
 var Subscriber = /*@__PURE__*/ (function (_super) {
     __WEBPACK_IMPORTED_MODULE_0_tslib__["a" /* __extends */](Subscriber, _super);
-    /**
-     * @param {Observer|function(value: T): void} [destinationOrNext] A partially
-     * defined Observer or a `next` callback function.
-     * @param {function(e: ?any): void} [error] The `error` callback of an
-     * Observer.
-     * @param {function(): void} [complete] The `complete` callback of an
-     * Observer.
-     */
     function Subscriber(destinationOrNext, error, complete) {
         var _this = _super.call(this) || this;
-        /** @internal */ _this.syncErrorValue = null;
-        /** @internal */ _this.syncErrorThrown = false;
-        /** @internal */ _this.syncErrorThrowable = false;
+        _this.syncErrorValue = null;
+        _this.syncErrorThrown = false;
+        _this.syncErrorThrowable = false;
         _this.isStopped = false;
         switch (arguments.length) {
             case 0:
@@ -4867,8 +4849,6 @@ var Subscriber = /*@__PURE__*/ (function (_super) {
                     break;
                 }
                 if (typeof destinationOrNext === 'object') {
-                    // HACK(benlesh): For situations where Node has multiple copies of rxjs in
-                    // node_modules, we cannot rely on `instanceof` checks
                     if (isTrustedSubscriber(destinationOrNext)) {
                         var trustedSubscriber = destinationOrNext[__WEBPACK_IMPORTED_MODULE_4__internal_symbol_rxSubscriber__["a" /* rxSubscriber */]]();
                         _this.syncErrorThrowable = trustedSubscriber.syncErrorThrowable;
@@ -4889,54 +4869,22 @@ var Subscriber = /*@__PURE__*/ (function (_super) {
         return _this;
     }
     Subscriber.prototype[__WEBPACK_IMPORTED_MODULE_4__internal_symbol_rxSubscriber__["a" /* rxSubscriber */]] = function () { return this; };
-    /**
-     * A static factory for a Subscriber, given a (potentially partial) definition
-     * of an Observer.
-     * @param {function(x: ?T): void} [next] The `next` callback of an Observer.
-     * @param {function(e: ?any): void} [error] The `error` callback of an
-     * Observer.
-     * @param {function(): void} [complete] The `complete` callback of an
-     * Observer.
-     * @return {Subscriber<T>} A Subscriber wrapping the (partially defined)
-     * Observer represented by the given arguments.
-     * @nocollapse
-     */
     Subscriber.create = function (next, error, complete) {
         var subscriber = new Subscriber(next, error, complete);
         subscriber.syncErrorThrowable = false;
         return subscriber;
     };
-    /**
-     * The {@link Observer} callback to receive notifications of type `next` from
-     * the Observable, with a value. The Observable may call this method 0 or more
-     * times.
-     * @param {T} [value] The `next` value.
-     * @return {void}
-     */
     Subscriber.prototype.next = function (value) {
         if (!this.isStopped) {
             this._next(value);
         }
     };
-    /**
-     * The {@link Observer} callback to receive notifications of type `error` from
-     * the Observable, with an attached {@link Error}. Notifies the Observer that
-     * the Observable has experienced an error condition.
-     * @param {any} [err] The `error` exception.
-     * @return {void}
-     */
     Subscriber.prototype.error = function (err) {
         if (!this.isStopped) {
             this.isStopped = true;
             this._error(err);
         }
     };
-    /**
-     * The {@link Observer} callback to receive a valueless notification of type
-     * `complete` from the Observable. Notifies the Observer that the Observable
-     * has finished sending push-based notifications.
-     * @return {void}
-     */
     Subscriber.prototype.complete = function () {
         if (!this.isStopped) {
             this.isStopped = true;
@@ -4961,7 +4909,6 @@ var Subscriber = /*@__PURE__*/ (function (_super) {
         this.destination.complete();
         this.unsubscribe();
     };
-    /** @deprecated This is an internal implementation detail, do not use. */
     Subscriber.prototype._unsubscribeAndRecycle = function () {
         var _a = this, _parent = _a._parent, _parents = _a._parents;
         this._parent = null;
@@ -4976,11 +4923,6 @@ var Subscriber = /*@__PURE__*/ (function (_super) {
     return Subscriber;
 }(__WEBPACK_IMPORTED_MODULE_3__Subscription__["a" /* Subscription */]));
 
-/**
- * We need this JSDoc comment for affecting ESDoc.
- * @ignore
- * @extends {Ignored}
- */
 var SafeSubscriber = /*@__PURE__*/ (function (_super) {
     __WEBPACK_IMPORTED_MODULE_0_tslib__["a" /* __extends */](SafeSubscriber, _super);
     function SafeSubscriber(_parentSubscriber, observerOrNext, error, complete) {
@@ -5107,7 +5049,6 @@ var SafeSubscriber = /*@__PURE__*/ (function (_super) {
         }
         return false;
     };
-    /** @deprecated This is an internal implementation detail, do not use. */
     SafeSubscriber.prototype._unsubscribe = function () {
         var _parentSubscriber = this._parentSubscriber;
         this._context = null;
@@ -5134,163 +5075,28 @@ module.exports = require("path");
 
 "use strict";
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return Observable; });
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__util_toSubscriber__ = __webpack_require__(369);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__util_toSubscriber__ = __webpack_require__(377);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__internal_symbol_observable__ = __webpack_require__(24);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__util_pipe__ = __webpack_require__(60);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__config__ = __webpack_require__(42);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__util_pipe__ = __webpack_require__(65);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__config__ = __webpack_require__(43);
 /** PURE_IMPORTS_START _util_toSubscriber,_internal_symbol_observable,_util_pipe,_config PURE_IMPORTS_END */
 
 
 
 
-/**
- * A representation of any set of values over any amount of time. This is the most basic building block
- * of RxJS.
- *
- * @class Observable<T>
- */
 var Observable = /*@__PURE__*/ (function () {
-    /**
-     * @constructor
-     * @param {Function} subscribe the function that is called when the Observable is
-     * initially subscribed to. This function is given a Subscriber, to which new values
-     * can be `next`ed, or an `error` method can be called to raise an error, or
-     * `complete` can be called to notify of a successful completion.
-     */
     function Observable(subscribe) {
-        /** Internal implementation detail, do not use directly. */
         this._isScalar = false;
         if (subscribe) {
             this._subscribe = subscribe;
         }
     }
-    /**
-     * Creates a new Observable, with this Observable as the source, and the passed
-     * operator defined as the new observable's operator.
-     * @method lift
-     * @param {Operator} operator the operator defining the operation to take on the observable
-     * @return {Observable} a new observable with the Operator applied
-     */
     Observable.prototype.lift = function (operator) {
         var observable = new Observable();
         observable.source = this;
         observable.operator = operator;
         return observable;
     };
-    /**
-     * Invokes an execution of an Observable and registers Observer handlers for notifications it will emit.
-     *
-     * <span class="informal">Use it when you have all these Observables, but still nothing is happening.</span>
-     *
-     * `subscribe` is not a regular operator, but a method that calls Observable's internal `subscribe` function. It
-     * might be for example a function that you passed to a {@link create} static factory, but most of the time it is
-     * a library implementation, which defines what and when will be emitted by an Observable. This means that calling
-     * `subscribe` is actually the moment when Observable starts its work, not when it is created, as it is often
-     * thought.
-     *
-     * Apart from starting the execution of an Observable, this method allows you to listen for values
-     * that an Observable emits, as well as for when it completes or errors. You can achieve this in two
-     * following ways.
-     *
-     * The first way is creating an object that implements {@link Observer} interface. It should have methods
-     * defined by that interface, but note that it should be just a regular JavaScript object, which you can create
-     * yourself in any way you want (ES6 class, classic function constructor, object literal etc.). In particular do
-     * not attempt to use any RxJS implementation details to create Observers - you don't need them. Remember also
-     * that your object does not have to implement all methods. If you find yourself creating a method that doesn't
-     * do anything, you can simply omit it. Note however, that if `error` method is not provided, all errors will
-     * be left uncaught.
-     *
-     * The second way is to give up on Observer object altogether and simply provide callback functions in place of its methods.
-     * This means you can provide three functions as arguments to `subscribe`, where first function is equivalent
-     * of a `next` method, second of an `error` method and third of a `complete` method. Just as in case of Observer,
-     * if you do not need to listen for something, you can omit a function, preferably by passing `undefined` or `null`,
-     * since `subscribe` recognizes these functions by where they were placed in function call. When it comes
-     * to `error` function, just as before, if not provided, errors emitted by an Observable will be thrown.
-     *
-     * Whatever style of calling `subscribe` you use, in both cases it returns a Subscription object.
-     * This object allows you to call `unsubscribe` on it, which in turn will stop work that an Observable does and will clean
-     * up all resources that an Observable used. Note that cancelling a subscription will not call `complete` callback
-     * provided to `subscribe` function, which is reserved for a regular completion signal that comes from an Observable.
-     *
-     * Remember that callbacks provided to `subscribe` are not guaranteed to be called asynchronously.
-     * It is an Observable itself that decides when these functions will be called. For example {@link of}
-     * by default emits all its values synchronously. Always check documentation for how given Observable
-     * will behave when subscribed and if its default behavior can be modified with a {@link Scheduler}.
-     *
-     * @example <caption>Subscribe with an Observer</caption>
-     * const sumObserver = {
-     *   sum: 0,
-     *   next(value) {
-     *     console.log('Adding: ' + value);
-     *     this.sum = this.sum + value;
-     *   },
-     *   error() { // We actually could just remove this method,
-     *   },        // since we do not really care about errors right now.
-     *   complete() {
-     *     console.log('Sum equals: ' + this.sum);
-     *   }
-     * };
-     *
-     * Rx.Observable.of(1, 2, 3) // Synchronously emits 1, 2, 3 and then completes.
-     * .subscribe(sumObserver);
-     *
-     * // Logs:
-     * // "Adding: 1"
-     * // "Adding: 2"
-     * // "Adding: 3"
-     * // "Sum equals: 6"
-     *
-     *
-     * @example <caption>Subscribe with functions</caption>
-     * let sum = 0;
-     *
-     * Rx.Observable.of(1, 2, 3)
-     * .subscribe(
-     *   function(value) {
-     *     console.log('Adding: ' + value);
-     *     sum = sum + value;
-     *   },
-     *   undefined,
-     *   function() {
-     *     console.log('Sum equals: ' + sum);
-     *   }
-     * );
-     *
-     * // Logs:
-     * // "Adding: 1"
-     * // "Adding: 2"
-     * // "Adding: 3"
-     * // "Sum equals: 6"
-     *
-     *
-     * @example <caption>Cancel a subscription</caption>
-     * const subscription = Rx.Observable.interval(1000).subscribe(
-     *   num => console.log(num),
-     *   undefined,
-     *   () => console.log('completed!') // Will not be called, even
-     * );                                // when cancelling subscription
-     *
-     *
-     * setTimeout(() => {
-     *   subscription.unsubscribe();
-     *   console.log('unsubscribed!');
-     * }, 2500);
-     *
-     * // Logs:
-     * // 0 after 1s
-     * // 1 after 2s
-     * // "unsubscribed!" after 2.5s
-     *
-     *
-     * @param {Observer|Function} observerOrNext (optional) Either an observer with methods to be called,
-     *  or the first of three possible handlers, which is the handler for each value emitted from the subscribed
-     *  Observable.
-     * @param {Function} error (optional) A handler for a terminal event resulting from an error. If no error handler is provided,
-     *  the error will be thrown as unhandled.
-     * @param {Function} complete (optional) A handler for a terminal event resulting from successful completion.
-     * @return {ISubscription} a subscription reference to the registered handlers
-     * @method subscribe
-     */
     Observable.prototype.subscribe = function (observerOrNext, error, complete) {
         var operator = this.operator;
         var sink = Object(__WEBPACK_IMPORTED_MODULE_0__util_toSubscriber__["a" /* toSubscriber */])(observerOrNext, error, complete);
@@ -5298,7 +5104,9 @@ var Observable = /*@__PURE__*/ (function () {
             operator.call(sink, this.source);
         }
         else {
-            sink.add(this.source || !sink.syncErrorThrowable ? this._subscribe(sink) : this._trySubscribe(sink));
+            sink.add(this.source || (__WEBPACK_IMPORTED_MODULE_3__config__["a" /* config */].useDeprecatedSynchronousErrorHandling && !sink.syncErrorThrowable) ?
+                this._subscribe(sink) :
+                this._trySubscribe(sink));
         }
         if (__WEBPACK_IMPORTED_MODULE_3__config__["a" /* config */].useDeprecatedSynchronousErrorHandling) {
             if (sink.syncErrorThrowable) {
@@ -5310,7 +5118,6 @@ var Observable = /*@__PURE__*/ (function () {
         }
         return sink;
     };
-    /** @deprecated This is an internal implementation detail, do not use. */
     Observable.prototype._trySubscribe = function (sink) {
         try {
             return this._subscribe(sink);
@@ -5323,19 +5130,10 @@ var Observable = /*@__PURE__*/ (function () {
             sink.error(err);
         }
     };
-    /**
-     * @method forEach
-     * @param {Function} next a handler for each value emitted by the observable
-     * @param {PromiseConstructor} [promiseCtor] a constructor function used to instantiate the Promise
-     * @return {Promise} a promise that either resolves on observable completion or
-     *  rejects with the handled error
-     */
     Observable.prototype.forEach = function (next, promiseCtor) {
         var _this = this;
         promiseCtor = getPromiseCtor(promiseCtor);
         return new promiseCtor(function (resolve, reject) {
-            // Must be declared in a separate statement to avoid a RefernceError when
-            // accessing subscription below in the closure due to Temporal Dead Zone.
             var subscription;
             subscription = _this.subscribe(function (value) {
                 try {
@@ -5350,38 +5148,13 @@ var Observable = /*@__PURE__*/ (function () {
             }, reject, resolve);
         });
     };
-    /** @deprecated This is an internal implementation detail, do not use. */
     Observable.prototype._subscribe = function (subscriber) {
         var source = this.source;
         return source && source.subscribe(subscriber);
     };
-    /**
-     * An interop point defined by the es7-observable spec https://github.com/zenparsing/es-observable
-     * @method Symbol.observable
-     * @return {Observable} this instance of the observable
-     */
     Observable.prototype[__WEBPACK_IMPORTED_MODULE_1__internal_symbol_observable__["a" /* observable */]] = function () {
         return this;
     };
-    /* tslint:enable:max-line-length */
-    /**
-     * Used to stitch together functional operators into a chain.
-     * @method pipe
-     * @return {Observable} the Observable result of all of the operators having
-     * been called in the order they were passed in.
-     *
-     * @example
-     *
-     * import { map, filter, scan } from 'rxjs/operators';
-     *
-     * Rx.Observable.interval(1000)
-     *   .pipe(
-     *     filter(x => x % 2 === 0),
-     *     map(x => x + x),
-     *     scan((acc, x) => acc + x)
-     *   )
-     *   .subscribe(x => console.log(x))
-     */
     Observable.prototype.pipe = function () {
         var operations = [];
         for (var _i = 0; _i < arguments.length; _i++) {
@@ -5392,7 +5165,6 @@ var Observable = /*@__PURE__*/ (function () {
         }
         return Object(__WEBPACK_IMPORTED_MODULE_2__util_pipe__["b" /* pipeFromArray */])(operations)(this);
     };
-    /* tslint:enable:max-line-length */
     Observable.prototype.toPromise = function (promiseCtor) {
         var _this = this;
         promiseCtor = getPromiseCtor(promiseCtor);
@@ -5401,30 +5173,12 @@ var Observable = /*@__PURE__*/ (function () {
             _this.subscribe(function (x) { return value = x; }, function (err) { return reject(err); }, function () { return resolve(value); });
         });
     };
-    // HACK: Since TypeScript inherits static properties too, we have to
-    // fight against TypeScript here so Subject can have a different static create signature
-    /**
-     * Creates a new cold Observable by calling the Observable constructor
-     * @static true
-     * @owner Observable
-     * @method create
-     * @param {Function} subscribe? the subscriber function to be passed to the Observable constructor
-     * @return {Observable} a new cold observable
-     * @nocollapse
-     */
     Observable.create = function (subscribe) {
         return new Observable(subscribe);
     };
     return Observable;
 }());
 
-/**
- * Decides between a passed promise constructor from consuming code,
- * A default configured promise constructor, and the native promise
- * constructor and returns it. If nothing can be found, it will throw
- * an error.
- * @param promiseCtor The optional promise constructor to passed by consuming code
- */
 function getPromiseCtor(promiseCtor) {
     if (!promiseCtor) {
         promiseCtor = __WEBPACK_IMPORTED_MODULE_3__config__["a" /* config */].Promise || Promise;
@@ -5448,11 +5202,6 @@ function getPromiseCtor(promiseCtor) {
 /** PURE_IMPORTS_START tslib,_Subscriber PURE_IMPORTS_END */
 
 
-/**
- * We need this JSDoc comment for affecting ESDoc.
- * @ignore
- * @extends {Ignored}
- */
 var OuterSubscriber = /*@__PURE__*/ (function (_super) {
     __WEBPACK_IMPORTED_MODULE_0_tslib__["a" /* __extends */](OuterSubscriber, _super);
     function OuterSubscriber() {
@@ -5479,8 +5228,8 @@ var OuterSubscriber = /*@__PURE__*/ (function (_super) {
 
 "use strict";
 /* harmony export (immutable) */ __webpack_exports__["a"] = subscribeToResult;
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__InnerSubscriber__ = __webpack_require__(383);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__subscribeTo__ = __webpack_require__(230);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__InnerSubscriber__ = __webpack_require__(391);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__subscribeTo__ = __webpack_require__(234);
 /** PURE_IMPORTS_START _InnerSubscriber,_subscribeTo PURE_IMPORTS_END */
 
 
@@ -5504,11 +5253,11 @@ module.exports = require("fs");
 "use strict";
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return Subscription; });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__util_isArray__ = __webpack_require__(11);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__util_isObject__ = __webpack_require__(217);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__util_isFunction__ = __webpack_require__(31);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__util_isObject__ = __webpack_require__(222);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__util_isFunction__ = __webpack_require__(32);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__util_tryCatch__ = __webpack_require__(17);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__util_errorObject__ = __webpack_require__(15);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_5__util_UnsubscriptionError__ = __webpack_require__(218);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__util_errorObject__ = __webpack_require__(14);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_5__util_UnsubscriptionError__ = __webpack_require__(223);
 /** PURE_IMPORTS_START _util_isArray,_util_isObject,_util_isFunction,_util_tryCatch,_util_errorObject,_util_UnsubscriptionError PURE_IMPORTS_END */
 
 
@@ -5516,45 +5265,16 @@ module.exports = require("fs");
 
 
 
-/**
- * Represents a disposable resource, such as the execution of an Observable. A
- * Subscription has one important method, `unsubscribe`, that takes no argument
- * and just disposes the resource held by the subscription.
- *
- * Additionally, subscriptions may be grouped together through the `add()`
- * method, which will attach a child Subscription to the current Subscription.
- * When a Subscription is unsubscribed, all its children (and its grandchildren)
- * will be unsubscribed as well.
- *
- * @class Subscription
- */
 var Subscription = /*@__PURE__*/ (function () {
-    /**
-     * @param {function(): void} [unsubscribe] A function describing how to
-     * perform the disposal of resources when the `unsubscribe` method is called.
-     */
     function Subscription(unsubscribe) {
-        /**
-         * A flag to indicate whether this Subscription has already been unsubscribed.
-         * @type {boolean}
-         */
         this.closed = false;
-        /** @internal */
         this._parent = null;
-        /** @internal */
         this._parents = null;
-        /** @internal */
         this._subscriptions = null;
         if (unsubscribe) {
             this._unsubscribe = unsubscribe;
         }
     }
-    /**
-     * Disposes the resources held by the subscription. May, for instance, cancel
-     * an ongoing Observable execution or cancel any other type of work that
-     * started when the Subscription was created.
-     * @return {void}
-     */
     Subscription.prototype.unsubscribe = function () {
         var hasErrors = false;
         var errors;
@@ -5565,17 +5285,11 @@ var Subscription = /*@__PURE__*/ (function () {
         this.closed = true;
         this._parent = null;
         this._parents = null;
-        // null out _subscriptions first so any child subscriptions that attempt
-        // to remove themselves from this subscription will noop
         this._subscriptions = null;
         var index = -1;
         var len = _parents ? _parents.length : 0;
-        // if this._parent is null, then so is this._parents, and we
-        // don't have to remove ourselves from any parent subscriptions.
         while (_parent) {
             _parent.remove(this);
-            // if this._parents is null or index >= len,
-            // then _parent is set to null, and the loop exits
             _parent = ++index < len && _parents[index] || null;
         }
         if (Object(__WEBPACK_IMPORTED_MODULE_2__util_isFunction__["a" /* isFunction */])(_unsubscribe)) {
@@ -5611,24 +5325,6 @@ var Subscription = /*@__PURE__*/ (function () {
             throw new __WEBPACK_IMPORTED_MODULE_5__util_UnsubscriptionError__["a" /* UnsubscriptionError */](errors);
         }
     };
-    /**
-     * Adds a tear down to be called during the unsubscribe() of this
-     * Subscription.
-     *
-     * If the tear down being added is a subscription that is already
-     * unsubscribed, is the same reference `add` is being called on, or is
-     * `Subscription.EMPTY`, it will not be added.
-     *
-     * If this subscription is already in an `closed` state, the passed
-     * tear down logic will be executed immediately.
-     *
-     * @param {TeardownLogic} teardown The additional logic to execute on
-     * teardown.
-     * @return {Subscription} Returns the Subscription used or created to be
-     * added to the inner subscriptions list. This Subscription can be used with
-     * `remove()` to remove the passed teardown logic from the inner subscriptions
-     * list.
-     */
     Subscription.prototype.add = function (teardown) {
         if (!teardown || (teardown === Subscription.EMPTY)) {
             return Subscription.EMPTY;
@@ -5648,7 +5344,7 @@ var Subscription = /*@__PURE__*/ (function () {
                     subscription.unsubscribe();
                     return subscription;
                 }
-                else if (typeof subscription._addParent !== 'function' /* quack quack */) {
+                else if (typeof subscription._addParent !== 'function') {
                     var tmp = subscription;
                     subscription = new Subscription();
                     subscription._subscriptions = [tmp];
@@ -5662,12 +5358,6 @@ var Subscription = /*@__PURE__*/ (function () {
         subscription._addParent(this);
         return subscription;
     };
-    /**
-     * Removes a Subscription from the internal list of subscriptions that will
-     * unsubscribe during the unsubscribe process of this Subscription.
-     * @param {Subscription} subscription The subscription to remove.
-     * @return {void}
-     */
     Subscription.prototype.remove = function (subscription) {
         var subscriptions = this._subscriptions;
         if (subscriptions) {
@@ -5677,25 +5367,18 @@ var Subscription = /*@__PURE__*/ (function () {
             }
         }
     };
-    /** @internal */
     Subscription.prototype._addParent = function (parent) {
         var _a = this, _parent = _a._parent, _parents = _a._parents;
         if (!_parent || _parent === parent) {
-            // If we don't have a parent, or the new parent is the same as the
-            // current parent, then set this._parent to the new parent.
             this._parent = parent;
         }
         else if (!_parents) {
-            // If there's already one parent, but not multiple, allocate an Array to
-            // store the rest of the parent Subscriptions.
             this._parents = [parent];
         }
         else if (_parents.indexOf(parent) === -1) {
-            // Only add the new parent to the _parents list if it's not already there.
             _parents.push(parent);
         }
     };
-    /** @nocollapse */
     Subscription.EMPTY = (function (empty) {
         empty.closed = true;
         return empty;
@@ -5721,9 +5404,9 @@ function flattenUnsubscriptionErrors(errors) {
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__Observable__ = __webpack_require__(4);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__Subscriber__ = __webpack_require__(2);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__Subscription__ = __webpack_require__(8);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__util_ObjectUnsubscribedError__ = __webpack_require__(44);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_5__SubjectSubscription__ = __webpack_require__(220);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_6__internal_symbol_rxSubscriber__ = __webpack_require__(59);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__util_ObjectUnsubscribedError__ = __webpack_require__(45);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_5__SubjectSubscription__ = __webpack_require__(225);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_6__internal_symbol_rxSubscriber__ = __webpack_require__(64);
 /** PURE_IMPORTS_START tslib,_Observable,_Subscriber,_Subscription,_util_ObjectUnsubscribedError,_SubjectSubscription,_internal_symbol_rxSubscriber PURE_IMPORTS_END */
 
 
@@ -5732,9 +5415,6 @@ function flattenUnsubscriptionErrors(errors) {
 
 
 
-/**
- * @class SubjectSubscriber<T>
- */
 var SubjectSubscriber = /*@__PURE__*/ (function (_super) {
     __WEBPACK_IMPORTED_MODULE_0_tslib__["a" /* __extends */](SubjectSubscriber, _super);
     function SubjectSubscriber(destination) {
@@ -5745,9 +5425,6 @@ var SubjectSubscriber = /*@__PURE__*/ (function (_super) {
     return SubjectSubscriber;
 }(__WEBPACK_IMPORTED_MODULE_2__Subscriber__["a" /* Subscriber */]));
 
-/**
- * @class Subject<T>
- */
 var Subject = /*@__PURE__*/ (function (_super) {
     __WEBPACK_IMPORTED_MODULE_0_tslib__["a" /* __extends */](Subject, _super);
     function Subject() {
@@ -5813,7 +5490,6 @@ var Subject = /*@__PURE__*/ (function (_super) {
         this.closed = true;
         this.observers = null;
     };
-    /** @deprecated This is an internal implementation detail, do not use. */
     Subject.prototype._trySubscribe = function (subscriber) {
         if (this.closed) {
             throw new __WEBPACK_IMPORTED_MODULE_4__util_ObjectUnsubscribedError__["a" /* ObjectUnsubscribedError */]();
@@ -5822,7 +5498,6 @@ var Subject = /*@__PURE__*/ (function (_super) {
             return _super.prototype._trySubscribe.call(this, subscriber);
         }
     };
-    /** @deprecated This is an internal implementation detail, do not use. */
     Subject.prototype._subscribe = function (subscriber) {
         if (this.closed) {
             throw new __WEBPACK_IMPORTED_MODULE_4__util_ObjectUnsubscribedError__["a" /* ObjectUnsubscribedError */]();
@@ -5845,16 +5520,12 @@ var Subject = /*@__PURE__*/ (function (_super) {
         observable.source = this;
         return observable;
     };
-    /**@nocollapse */
     Subject.create = function (destination, source) {
         return new AnonymousSubject(destination, source);
     };
     return Subject;
 }(__WEBPACK_IMPORTED_MODULE_1__Observable__["a" /* Observable */]));
 
-/**
- * @class AnonymousSubject<T>
- */
 var AnonymousSubject = /*@__PURE__*/ (function (_super) {
     __WEBPACK_IMPORTED_MODULE_0_tslib__["a" /* __extends */](AnonymousSubject, _super);
     function AnonymousSubject(destination, source) {
@@ -5881,7 +5552,6 @@ var AnonymousSubject = /*@__PURE__*/ (function (_super) {
             this.destination.complete();
         }
     };
-    /** @deprecated This is an internal implementation detail, do not use. */
     AnonymousSubject.prototype._subscribe = function (subscriber) {
         var source = this.source;
         if (source) {
@@ -5919,118 +5589,13 @@ var isArray = Array.isArray || (function (x) { return x && typeof x.length === '
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return async; });
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__AsyncAction__ = __webpack_require__(32);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__AsyncScheduler__ = __webpack_require__(33);
-/** PURE_IMPORTS_START _AsyncAction,_AsyncScheduler PURE_IMPORTS_END */
-
-
-/**
- *
- * Async Scheduler
- *
- * <span class="informal">Schedule task as if you used setTimeout(task, duration)</span>
- *
- * `async` scheduler schedules tasks asynchronously, by putting them on the JavaScript
- * event loop queue. It is best used to delay tasks in time or to schedule tasks repeating
- * in intervals.
- *
- * If you just want to "defer" task, that is to perform it right after currently
- * executing synchronous code ends (commonly achieved by `setTimeout(deferredTask, 0)`),
- * better choice will be the {@link asap} scheduler.
- *
- * @example <caption>Use async scheduler to delay task</caption>
- * const task = () => console.log('it works!');
- *
- * Rx.Scheduler.async.schedule(task, 2000);
- *
- * // After 2 seconds logs:
- * // "it works!"
- *
- *
- * @example <caption>Use async scheduler to repeat task in intervals</caption>
- * function task(state) {
- *   console.log(state);
- *   this.schedule(state + 1, 1000); // `this` references currently executing Action,
- *                                   // which we reschedule with new state and delay
- * }
- *
- * Rx.Scheduler.async.schedule(task, 3000, 0);
- *
- * // Logs:
- * // 0 after 3s
- * // 1 after 4s
- * // 2 after 5s
- * // 3 after 6s
- *
- * @static true
- * @name async
- * @owner Scheduler
- */
-var async = /*@__PURE__*/ new __WEBPACK_IMPORTED_MODULE_1__AsyncScheduler__["a" /* AsyncScheduler */](__WEBPACK_IMPORTED_MODULE_0__AsyncAction__["a" /* AsyncAction */]);
-//# sourceMappingURL=async.js.map
-
-
-/***/ }),
-/* 13 */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return EMPTY; });
 /* harmony export (immutable) */ __webpack_exports__["b"] = empty;
 /* unused harmony export emptyScheduled */
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__Observable__ = __webpack_require__(4);
 /** PURE_IMPORTS_START _Observable PURE_IMPORTS_END */
 
-/**
- * The same Observable instance returned by any call to {@link empty} without a
- * {@link Scheduler}. It is preferrable to use this over `empty()`.
- */
 var EMPTY = /*@__PURE__*/ new __WEBPACK_IMPORTED_MODULE_0__Observable__["a" /* Observable */](function (subscriber) { return subscriber.complete(); });
-/**
- * Creates an Observable that emits no items to the Observer and immediately
- * emits a complete notification.
- *
- * <span class="informal">Just emits 'complete', and nothing else.
- * </span>
- *
- * <img src="./img/empty.png" width="100%">
- *
- * This static operator is useful for creating a simple Observable that only
- * emits the complete notification. It can be used for composing with other
- * Observables, such as in a {@link mergeMap}.
- *
- * @example <caption>Emit the number 7, then complete.</caption>
- * var result = Rx.Observable.empty().startWith(7);
- * result.subscribe(x => console.log(x));
- *
- * @example <caption>Map and flatten only odd numbers to the sequence 'a', 'b', 'c'</caption>
- * var interval = Rx.Observable.interval(1000);
- * var result = interval.mergeMap(x =>
- *   x % 2 === 1 ? Rx.Observable.of('a', 'b', 'c') : Rx.Observable.empty()
- * );
- * result.subscribe(x => console.log(x));
- *
- * // Results in the following to the console:
- * // x is equal to the count on the interval eg(0,1,2,3,...)
- * // x will occur every 1000ms
- * // if x % 2 is equal to 1 print abc
- * // if x % 2 is not equal to 1 nothing will be output
- *
- * @see {@link create}
- * @see {@link never}
- * @see {@link of}
- * @see {@link throw}
- *
- * @param {Scheduler} [scheduler] A {@link IScheduler} to use for scheduling
- * the emission of the complete notification.
- * @return {Observable} An "empty" Observable: emits only the complete
- * notification.
- * @static true
- * @name empty
- * @owner Observable
- * @deprecated Deprecated in favor of using EMPTY constant.
- */
 function empty(scheduler) {
     return scheduler ? emptyScheduled(scheduler) : EMPTY;
 }
@@ -6041,14 +5606,135 @@ function emptyScheduled(scheduler) {
 
 
 /***/ }),
+/* 13 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return async; });
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__AsyncAction__ = __webpack_require__(33);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__AsyncScheduler__ = __webpack_require__(34);
+/** PURE_IMPORTS_START _AsyncAction,_AsyncScheduler PURE_IMPORTS_END */
+
+
+var async = /*@__PURE__*/ new __WEBPACK_IMPORTED_MODULE_1__AsyncScheduler__["a" /* AsyncScheduler */](__WEBPACK_IMPORTED_MODULE_0__AsyncAction__["a" /* AsyncAction */]);
+//# sourceMappingURL=async.js.map
+
+
+/***/ }),
 /* 14 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return errorObject; });
+/** PURE_IMPORTS_START  PURE_IMPORTS_END */
+var errorObject = { e: {} };
+//# sourceMappingURL=errorObject.js.map
+
+
+/***/ }),
+/* 15 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+/* harmony export (immutable) */ __webpack_exports__["a"] = isScheduler;
+/** PURE_IMPORTS_START  PURE_IMPORTS_END */
+function isScheduler(value) {
+    return value && typeof value.schedule === 'function';
+}
+//# sourceMappingURL=isScheduler.js.map
+
+
+/***/ }),
+/* 16 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+/* harmony export (immutable) */ __webpack_exports__["a"] = map;
+/* unused harmony export MapOperator */
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_tslib__ = __webpack_require__(1);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__Subscriber__ = __webpack_require__(2);
+/** PURE_IMPORTS_START tslib,_Subscriber PURE_IMPORTS_END */
+
+
+function map(project, thisArg) {
+    return function mapOperation(source) {
+        if (typeof project !== 'function') {
+            throw new TypeError('argument is not a function. Are you looking for `mapTo()`?');
+        }
+        return source.lift(new MapOperator(project, thisArg));
+    };
+}
+var MapOperator = /*@__PURE__*/ (function () {
+    function MapOperator(project, thisArg) {
+        this.project = project;
+        this.thisArg = thisArg;
+    }
+    MapOperator.prototype.call = function (subscriber, source) {
+        return source.subscribe(new MapSubscriber(subscriber, this.project, this.thisArg));
+    };
+    return MapOperator;
+}());
+
+var MapSubscriber = /*@__PURE__*/ (function (_super) {
+    __WEBPACK_IMPORTED_MODULE_0_tslib__["a" /* __extends */](MapSubscriber, _super);
+    function MapSubscriber(destination, project, thisArg) {
+        var _this = _super.call(this, destination) || this;
+        _this.project = project;
+        _this.count = 0;
+        _this.thisArg = thisArg || _this;
+        return _this;
+    }
+    MapSubscriber.prototype._next = function (value) {
+        var result;
+        try {
+            result = this.project.call(this.thisArg, value, this.count++);
+        }
+        catch (err) {
+            this.destination.error(err);
+            return;
+        }
+        this.destination.next(result);
+    };
+    return MapSubscriber;
+}(__WEBPACK_IMPORTED_MODULE_1__Subscriber__["a" /* Subscriber */]));
+//# sourceMappingURL=map.js.map
+
+
+/***/ }),
+/* 17 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+/* harmony export (immutable) */ __webpack_exports__["a"] = tryCatch;
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__errorObject__ = __webpack_require__(14);
+/** PURE_IMPORTS_START _errorObject PURE_IMPORTS_END */
+
+var tryCatchTarget;
+function tryCatcher() {
+    try {
+        return tryCatchTarget.apply(this, arguments);
+    }
+    catch (e) {
+        __WEBPACK_IMPORTED_MODULE_0__errorObject__["a" /* errorObject */].e = e;
+        return __WEBPACK_IMPORTED_MODULE_0__errorObject__["a" /* errorObject */];
+    }
+}
+function tryCatch(fn) {
+    tryCatchTarget = fn;
+    return tryCatcher;
+}
+//# sourceMappingURL=tryCatch.js.map
+
+
+/***/ }),
+/* 18 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
-const escapeStringRegexp = __webpack_require__(255);
-const ansiStyles = __webpack_require__(256);
-const stdoutColor = __webpack_require__(260).stdout;
+const escapeStringRegexp = __webpack_require__(52);
+const ansiStyles = __webpack_require__(259);
+const stdoutColor = __webpack_require__(262).stdout;
 
 const template = __webpack_require__(263);
 
@@ -6276,168 +5962,21 @@ module.exports.default = module.exports; // For TypeScript
 
 
 /***/ }),
-/* 15 */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return errorObject; });
-// typeof any so that it we don't have to cast when comparing a result to the error object
-/** PURE_IMPORTS_START  PURE_IMPORTS_END */
-var errorObject = { e: {} };
-//# sourceMappingURL=errorObject.js.map
-
-
-/***/ }),
-/* 16 */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-/* harmony export (immutable) */ __webpack_exports__["a"] = map;
-/* unused harmony export MapOperator */
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_tslib__ = __webpack_require__(1);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__Subscriber__ = __webpack_require__(2);
-/** PURE_IMPORTS_START tslib,_Subscriber PURE_IMPORTS_END */
-
-
-/**
- * Applies a given `project` function to each value emitted by the source
- * Observable, and emits the resulting values as an Observable.
- *
- * <span class="informal">Like [Array.prototype.map()](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/map),
- * it passes each source value through a transformation function to get
- * corresponding output values.</span>
- *
- * <img src="./img/map.png" width="100%">
- *
- * Similar to the well known `Array.prototype.map` function, this operator
- * applies a projection to each value and emits that projection in the output
- * Observable.
- *
- * @example <caption>Map every click to the clientX position of that click</caption>
- * var clicks = Rx.Observable.fromEvent(document, 'click');
- * var positions = clicks.map(ev => ev.clientX);
- * positions.subscribe(x => console.log(x));
- *
- * @see {@link mapTo}
- * @see {@link pluck}
- *
- * @param {function(value: T, index: number): R} project The function to apply
- * to each `value` emitted by the source Observable. The `index` parameter is
- * the number `i` for the i-th emission that has happened since the
- * subscription, starting from the number `0`.
- * @param {any} [thisArg] An optional argument to define what `this` is in the
- * `project` function.
- * @return {Observable<R>} An Observable that emits the values from the source
- * Observable transformed by the given `project` function.
- * @method map
- * @owner Observable
- */
-function map(project, thisArg) {
-    return function mapOperation(source) {
-        if (typeof project !== 'function') {
-            throw new TypeError('argument is not a function. Are you looking for `mapTo()`?');
-        }
-        return source.lift(new MapOperator(project, thisArg));
-    };
-}
-var MapOperator = /*@__PURE__*/ (function () {
-    function MapOperator(project, thisArg) {
-        this.project = project;
-        this.thisArg = thisArg;
-    }
-    MapOperator.prototype.call = function (subscriber, source) {
-        return source.subscribe(new MapSubscriber(subscriber, this.project, this.thisArg));
-    };
-    return MapOperator;
-}());
-
-/**
- * We need this JSDoc comment for affecting ESDoc.
- * @ignore
- * @extends {Ignored}
- */
-var MapSubscriber = /*@__PURE__*/ (function (_super) {
-    __WEBPACK_IMPORTED_MODULE_0_tslib__["a" /* __extends */](MapSubscriber, _super);
-    function MapSubscriber(destination, project, thisArg) {
-        var _this = _super.call(this, destination) || this;
-        _this.project = project;
-        _this.count = 0;
-        _this.thisArg = thisArg || _this;
-        return _this;
-    }
-    // NOTE: This looks unoptimized, but it's actually purposefully NOT
-    // using try/catch optimizations.
-    MapSubscriber.prototype._next = function (value) {
-        var result;
-        try {
-            result = this.project.call(this.thisArg, value, this.count++);
-        }
-        catch (err) {
-            this.destination.error(err);
-            return;
-        }
-        this.destination.next(result);
-    };
-    return MapSubscriber;
-}(__WEBPACK_IMPORTED_MODULE_1__Subscriber__["a" /* Subscriber */]));
-//# sourceMappingURL=map.js.map
-
-
-/***/ }),
-/* 17 */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-/* harmony export (immutable) */ __webpack_exports__["a"] = tryCatch;
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__errorObject__ = __webpack_require__(15);
-/** PURE_IMPORTS_START _errorObject PURE_IMPORTS_END */
-
-var tryCatchTarget;
-function tryCatcher() {
-    try {
-        return tryCatchTarget.apply(this, arguments);
-    }
-    catch (e) {
-        __WEBPACK_IMPORTED_MODULE_0__errorObject__["a" /* errorObject */].e = e;
-        return __WEBPACK_IMPORTED_MODULE_0__errorObject__["a" /* errorObject */];
-    }
-}
-function tryCatch(fn) {
-    tryCatchTarget = fn;
-    return tryCatcher;
-}
-//# sourceMappingURL=tryCatch.js.map
-
-
-/***/ }),
-/* 18 */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-/* harmony export (immutable) */ __webpack_exports__["a"] = isScheduler;
-/** PURE_IMPORTS_START  PURE_IMPORTS_END */
-function isScheduler(value) {
-    return value && typeof value.schedule === 'function';
-}
-//# sourceMappingURL=isScheduler.js.map
-
-
-/***/ }),
 /* 19 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 /* harmony export (immutable) */ __webpack_exports__["a"] = from;
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__Observable__ = __webpack_require__(4);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__util_isPromise__ = __webpack_require__(235);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__util_isArrayLike__ = __webpack_require__(234);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__util_isInteropObservable__ = __webpack_require__(384);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__util_isIterable__ = __webpack_require__(385);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__util_isPromise__ = __webpack_require__(239);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__util_isArrayLike__ = __webpack_require__(238);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__util_isInteropObservable__ = __webpack_require__(392);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__util_isIterable__ = __webpack_require__(393);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_5__fromArray__ = __webpack_require__(21);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_6__fromPromise__ = __webpack_require__(386);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_7__fromIterable__ = __webpack_require__(387);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_8__fromObservable__ = __webpack_require__(388);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_9__util_subscribeTo__ = __webpack_require__(230);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_6__fromPromise__ = __webpack_require__(394);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_7__fromIterable__ = __webpack_require__(395);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_8__fromObservable__ = __webpack_require__(396);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_9__util_subscribeTo__ = __webpack_require__(234);
 /** PURE_IMPORTS_START _Observable,_util_isPromise,_util_isArrayLike,_util_isInteropObservable,_util_isIterable,_fromArray,_fromPromise,_fromIterable,_fromObservable,_util_subscribeTo PURE_IMPORTS_END */
 
 
@@ -6523,7 +6062,7 @@ const log = exports.log = {
 /* harmony export (immutable) */ __webpack_exports__["a"] = fromArray;
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__Observable__ = __webpack_require__(4);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__Subscription__ = __webpack_require__(8);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__util_subscribeToArray__ = __webpack_require__(226);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__util_subscribeToArray__ = __webpack_require__(231);
 /** PURE_IMPORTS_START _Observable,_Subscription,_util_subscribeToArray PURE_IMPORTS_END */
 
 
@@ -6656,7 +6195,6 @@ module.exports = (obj, opts) => {
 
 "use strict";
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return observable; });
-/** Symbol.observable or a string "@@observable". Used for interop */
 /** PURE_IMPORTS_START  PURE_IMPORTS_END */
 var observable = typeof Symbol === 'function' && Symbol.observable || '@@observable';
 //# sourceMappingURL=observable.js.map
@@ -6682,29 +6220,9 @@ function identity(x) {
 "use strict";
 /* harmony export (immutable) */ __webpack_exports__["a"] = multicast;
 /* unused harmony export MulticastOperator */
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__observable_ConnectableObservable__ = __webpack_require__(219);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__observable_ConnectableObservable__ = __webpack_require__(224);
 /** PURE_IMPORTS_START _observable_ConnectableObservable PURE_IMPORTS_END */
 
-/* tslint:enable:max-line-length */
-/**
- * Returns an Observable that emits the results of invoking a specified selector on items
- * emitted by a ConnectableObservable that shares a single subscription to the underlying stream.
- *
- * <img src="./img/multicast.png" width="100%">
- *
- * @param {Function|Subject} subjectOrSubjectFactory - Factory function to create an intermediate subject through
- * which the source sequence's elements will be multicast to the selector function
- * or Subject to push source elements into.
- * @param {Function} [selector] - Optional selector function that can use the multicasted source stream
- * as many times as needed, without causing multiple subscriptions to the source stream.
- * Subscribers to the given source will receive all notifications of the source from the
- * time of the subscription forward.
- * @return {Observable} An Observable that emits the results of invoking the selector
- * on the items emitted by a `ConnectableObservable` that shares a single subscription to
- * the underlying stream.
- * @method multicast
- * @owner Observable
- */
 function multicast(subjectOrSubjectFactory, selector) {
     return function multicastOperatorFunction(source) {
         var subjectFactory;
@@ -6745,6 +6263,34 @@ var MulticastOperator = /*@__PURE__*/ (function () {
 
 /***/ }),
 /* 27 */
+/***/ (function(module, exports) {
+
+module.exports = function(module) {
+	if(!module.webpackPolyfill) {
+		module.deprecate = function() {};
+		module.paths = [];
+		// module.parent = undefined by default
+		if(!module.children) module.children = [];
+		Object.defineProperty(module, "loaded", {
+			enumerable: true,
+			get: function() {
+				return module.l;
+			}
+		});
+		Object.defineProperty(module, "id", {
+			enumerable: true,
+			get: function() {
+				return module.i;
+			}
+		});
+		module.webpackPolyfill = 1;
+	}
+	return module;
+};
+
+
+/***/ }),
+/* 28 */
 /***/ (function(module, exports, __webpack_require__) {
 
 var fs = __webpack_require__(7)
@@ -6769,11 +6315,11 @@ else if (/\bgfs4\b/i.test(process.env.NODE_DEBUG || ''))
 if (/\bgfs4\b/i.test(process.env.NODE_DEBUG || '')) {
   process.on('exit', function() {
     debug(queue)
-    __webpack_require__(28).equal(queue.length, 0)
+    __webpack_require__(29).equal(queue.length, 0)
   })
 }
 
-module.exports = patch(__webpack_require__(75))
+module.exports = patch(__webpack_require__(80))
 if (process.env.TEST_GRACEFUL_FS_GLOBAL_PATCH) {
   module.exports = patch(fs)
 }
@@ -7012,13 +6558,13 @@ function retry () {
 
 
 /***/ }),
-/* 28 */
+/* 29 */
 /***/ (function(module, exports) {
 
 module.exports = require("assert");
 
 /***/ }),
-/* 29 */
+/* 30 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -7063,7 +6609,7 @@ exports.buildProjectGraph = buildProjectGraph;
 exports.topologicallyBatchProjects = topologicallyBatchProjects;
 exports.includeTransitiveProjects = includeTransitiveProjects;
 
-var _glob = __webpack_require__(30);
+var _glob = __webpack_require__(31);
 
 var _glob2 = _interopRequireDefault(_glob);
 
@@ -7073,9 +6619,9 @@ var _path2 = _interopRequireDefault(_path);
 
 var _util = __webpack_require__(10);
 
-var _errors = __webpack_require__(55);
+var _errors = __webpack_require__(60);
 
-var _project = __webpack_require__(82);
+var _project = __webpack_require__(87);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -7182,7 +6728,7 @@ function includeTransitiveProjects(subsetOfProjects, allProjects, { onlyProducti
 }
 
 /***/ }),
-/* 30 */
+/* 31 */
 /***/ (function(module, exports, __webpack_require__) {
 
 // Approach:
@@ -7228,16 +6774,16 @@ function includeTransitiveProjects(subsetOfProjects, allProjects, { onlyProducti
 module.exports = glob
 
 var fs = __webpack_require__(7)
-var rp = __webpack_require__(77)
-var minimatch = __webpack_require__(53)
+var rp = __webpack_require__(82)
+var minimatch = __webpack_require__(58)
 var Minimatch = minimatch.Minimatch
-var inherits = __webpack_require__(78)
-var EE = __webpack_require__(40).EventEmitter
+var inherits = __webpack_require__(83)
+var EE = __webpack_require__(41).EventEmitter
 var path = __webpack_require__(3)
-var assert = __webpack_require__(28)
-var isAbsolute = __webpack_require__(54)
+var assert = __webpack_require__(29)
+var isAbsolute = __webpack_require__(59)
 var globSync = __webpack_require__(278)
-var common = __webpack_require__(79)
+var common = __webpack_require__(84)
 var alphasort = common.alphasort
 var alphasorti = common.alphasorti
 var setopts = common.setopts
@@ -7247,7 +6793,7 @@ var util = __webpack_require__(10)
 var childrenIgnored = common.childrenIgnored
 var isIgnored = common.isIgnored
 
-var once = __webpack_require__(81)
+var once = __webpack_require__(86)
 
 function glob (pattern, options, cb) {
   if (typeof options === 'function') cb = options, options = {}
@@ -7978,7 +7524,7 @@ Glob.prototype._stat2 = function (f, abs, er, stat, cb) {
 
 
 /***/ }),
-/* 31 */
+/* 32 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -7991,21 +7537,16 @@ function isFunction(x) {
 
 
 /***/ }),
-/* 32 */
+/* 33 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return AsyncAction; });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_tslib__ = __webpack_require__(1);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__Action__ = __webpack_require__(371);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__Action__ = __webpack_require__(379);
 /** PURE_IMPORTS_START tslib,_Action PURE_IMPORTS_END */
 
 
-/**
- * We need this JSDoc comment for affecting ESDoc.
- * @ignore
- * @extends {Ignored}
- */
 var AsyncAction = /*@__PURE__*/ (function (_super) {
     __WEBPACK_IMPORTED_MODULE_0_tslib__["a" /* __extends */](AsyncAction, _super);
     function AsyncAction(scheduler, work) {
@@ -8022,39 +7563,14 @@ var AsyncAction = /*@__PURE__*/ (function (_super) {
         if (this.closed) {
             return this;
         }
-        // Always replace the current state with the new state.
         this.state = state;
         var id = this.id;
         var scheduler = this.scheduler;
-        //
-        // Important implementation note:
-        //
-        // Actions only execute once by default, unless rescheduled from within the
-        // scheduled callback. This allows us to implement single and repeat
-        // actions via the same code path, without adding API surface area, as well
-        // as mimic traditional recursion but across asynchronous boundaries.
-        //
-        // However, JS runtimes and timers distinguish between intervals achieved by
-        // serial `setTimeout` calls vs. a single `setInterval` call. An interval of
-        // serial `setTimeout` calls can be individually delayed, which delays
-        // scheduling the next `setTimeout`, and so on. `setInterval` attempts to
-        // guarantee the interval callback will be invoked more precisely to the
-        // interval period, regardless of load.
-        //
-        // Therefore, we use `setInterval` to schedule single and repeat actions.
-        // If the action reschedules itself with the same delay, the interval is not
-        // canceled. If the action doesn't reschedule, or reschedules with a
-        // different delay, the interval will be canceled after scheduled callback
-        // execution.
-        //
         if (id != null) {
             this.id = this.recycleAsyncId(scheduler, id, delay);
         }
-        // Set the pending flag indicating that this action has been scheduled, or
-        // has recursively rescheduled itself.
         this.pending = true;
         this.delay = delay;
-        // If this action has already an async Id, don't request a new one.
         this.id = this.id || this.requestAsyncId(scheduler, this.id, delay);
         return this;
     };
@@ -8068,18 +7584,11 @@ var AsyncAction = /*@__PURE__*/ (function (_super) {
         if (delay === void 0) {
             delay = 0;
         }
-        // If this action is rescheduled with the same delay time, don't clear the interval id.
         if (delay !== null && this.delay === delay && this.pending === false) {
             return id;
         }
-        // Otherwise, if the action's delay time is different from the current delay,
-        // or the action has been rescheduled before it's executed, clear the interval id
         return clearInterval(id) && undefined || undefined;
     };
-    /**
-     * Immediately executes this action and the `work` it contains.
-     * @return {any}
-     */
     AsyncAction.prototype.execute = function (state, delay) {
         if (this.closed) {
             return new Error('executing a cancelled action');
@@ -8090,19 +7599,6 @@ var AsyncAction = /*@__PURE__*/ (function (_super) {
             return error;
         }
         else if (this.pending === false && this.id != null) {
-            // Dequeue if the action didn't reschedule itself. Don't call
-            // unsubscribe(), because the action could reschedule later.
-            // For example:
-            // ```
-            // scheduler.schedule(function doWork(counter) {
-            //   /* ... I'm a busy worker bee ... */
-            //   var originalAction = this;
-            //   /* wait 100ms before rescheduling the action */
-            //   setTimeout(function () {
-            //     originalAction.schedule(counter + 1);
-            //   }, 100);
-            // }, 1000);
-            // ```
             this.id = this.recycleAsyncId(this.scheduler, this.id, null);
         }
     };
@@ -8121,7 +7617,6 @@ var AsyncAction = /*@__PURE__*/ (function (_super) {
             return errorValue;
         }
     };
-    /** @deprecated This is an internal implementation detail, do not use. */
     AsyncAction.prototype._unsubscribe = function () {
         var id = this.id;
         var scheduler = this.scheduler;
@@ -8146,13 +7641,13 @@ var AsyncAction = /*@__PURE__*/ (function (_super) {
 
 
 /***/ }),
-/* 33 */
+/* 34 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return AsyncScheduler; });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_tslib__ = __webpack_require__(1);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__Scheduler__ = __webpack_require__(224);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__Scheduler__ = __webpack_require__(229);
 /** PURE_IMPORTS_START tslib,_Scheduler PURE_IMPORTS_END */
 
 
@@ -8171,20 +7666,7 @@ var AsyncScheduler = /*@__PURE__*/ (function (_super) {
             }
         }) || this;
         _this.actions = [];
-        /**
-         * A flag to indicate whether the Scheduler is currently executing a batch of
-         * queued actions.
-         * @type {boolean}
-         * @deprecated internal use only
-         */
         _this.active = false;
-        /**
-         * An internal ID used to track the latest asynchronous task such as those
-         * coming from `setTimeout`, `setInterval`, `requestAnimationFrame`, and
-         * others.
-         * @type {any}
-         * @deprecated internal use only
-         */
         _this.scheduled = undefined;
         return _this;
     }
@@ -8211,7 +7693,7 @@ var AsyncScheduler = /*@__PURE__*/ (function (_super) {
             if (error = action.execute(action.state, action.delay)) {
                 break;
             }
-        } while (action = actions.shift()); // exhaust the scheduler queue
+        } while (action = actions.shift());
         this.active = false;
         if (error) {
             while (action = actions.shift()) {
@@ -8227,7 +7709,7 @@ var AsyncScheduler = /*@__PURE__*/ (function (_super) {
 
 
 /***/ }),
-/* 34 */
+/* 35 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -8235,16 +7717,6 @@ var AsyncScheduler = /*@__PURE__*/ (function (_super) {
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_tslib__ = __webpack_require__(1);
 /** PURE_IMPORTS_START tslib PURE_IMPORTS_END */
 
-/**
- * An error thrown when an element was queried at a certain index of an
- * Observable, but no such index or position exists in that sequence.
- *
- * @see {@link elementAt}
- * @see {@link take}
- * @see {@link takeLast}
- *
- * @class ArgumentOutOfRangeError
- */
 var ArgumentOutOfRangeError = /*@__PURE__*/ (function (_super) {
     __WEBPACK_IMPORTED_MODULE_0_tslib__["a" /* __extends */](ArgumentOutOfRangeError, _super);
     function ArgumentOutOfRangeError() {
@@ -8260,7 +7732,7 @@ var ArgumentOutOfRangeError = /*@__PURE__*/ (function (_super) {
 
 
 /***/ }),
-/* 35 */
+/* 36 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -8268,16 +7740,6 @@ var ArgumentOutOfRangeError = /*@__PURE__*/ (function (_super) {
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_tslib__ = __webpack_require__(1);
 /** PURE_IMPORTS_START tslib PURE_IMPORTS_END */
 
-/**
- * An error thrown when an Observable or a sequence was queried but has no
- * elements.
- *
- * @see {@link first}
- * @see {@link last}
- * @see {@link single}
- *
- * @class EmptyError
- */
 var EmptyError = /*@__PURE__*/ (function (_super) {
     __WEBPACK_IMPORTED_MODULE_0_tslib__["a" /* __extends */](EmptyError, _super);
     function EmptyError() {
@@ -8293,7 +7755,7 @@ var EmptyError = /*@__PURE__*/ (function (_super) {
 
 
 /***/ }),
-/* 36 */
+/* 37 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -8308,15 +7770,12 @@ function getSymbolIterator() {
     return Symbol.iterator;
 }
 var iterator = /*@__PURE__*/ getSymbolIterator();
-/**
- * @deprecated use {@link iterator} instead
- */
 var $$iterator = iterator;
 //# sourceMappingURL=iterator.js.map
 
 
 /***/ }),
-/* 37 */
+/* 38 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -8334,63 +7793,11 @@ var $$iterator = iterator;
 
 
 
-/* tslint:enable:max-line-length */
-/**
- * Projects each source value to an Observable which is merged in the output
- * Observable.
- *
- * <span class="informal">Maps each value to an Observable, then flattens all of
- * these inner Observables using {@link mergeAll}.</span>
- *
- * <img src="./img/mergeMap.png" width="100%">
- *
- * Returns an Observable that emits items based on applying a function that you
- * supply to each item emitted by the source Observable, where that function
- * returns an Observable, and then merging those resulting Observables and
- * emitting the results of this merger.
- *
- * @example <caption>Map and flatten each letter to an Observable ticking every 1 second</caption>
- * var letters = Rx.Observable.of('a', 'b', 'c');
- * var result = letters.mergeMap(x =>
- *   Rx.Observable.interval(1000).map(i => x+i)
- * );
- * result.subscribe(x => console.log(x));
- *
- * // Results in the following:
- * // a0
- * // b0
- * // c0
- * // a1
- * // b1
- * // c1
- * // continues to list a,b,c with respective ascending integers
- *
- * @see {@link concatMap}
- * @see {@link exhaustMap}
- * @see {@link merge}
- * @see {@link mergeAll}
- * @see {@link mergeMapTo}
- * @see {@link mergeScan}
- * @see {@link switchMap}
- *
- * @param {function(value: T, ?index: number): ObservableInput} project A function
- * that, when applied to an item emitted by the source Observable, returns an
- * Observable.
- * @param {number} [concurrent=Number.POSITIVE_INFINITY] Maximum number of input
- * Observables being subscribed to concurrently.
- * @return {Observable} An Observable that emits the result of applying the
- * projection function (and the optional `resultSelector`) to each item emitted
- * by the source Observable and merging the results of the Observables obtained
- * from this transformation.
- * @method mergeMap
- * @owner Observable
- */
 function mergeMap(project, resultSelector, concurrent) {
     if (concurrent === void 0) {
         concurrent = Number.POSITIVE_INFINITY;
     }
     if (typeof resultSelector === 'function') {
-        // DEPRECATED PATH
         return function (source) { return source.pipe(mergeMap(function (a, i) { return Object(__WEBPACK_IMPORTED_MODULE_4__observable_from__["a" /* from */])(project(a, i)).pipe(Object(__WEBPACK_IMPORTED_MODULE_3__map__["a" /* map */])(function (b, ii) { return resultSelector(a, b, i, ii); })); }, concurrent)); };
     }
     else if (typeof resultSelector === 'number') {
@@ -8412,11 +7819,6 @@ var MergeMapOperator = /*@__PURE__*/ (function () {
     return MergeMapOperator;
 }());
 
-/**
- * We need this JSDoc comment for affecting ESDoc.
- * @ignore
- * @extends {Ignored}
- */
 var MergeMapSubscriber = /*@__PURE__*/ (function (_super) {
     __WEBPACK_IMPORTED_MODULE_0_tslib__["a" /* __extends */](MergeMapSubscriber, _super);
     function MergeMapSubscriber(destination, project, concurrent) {
@@ -8483,7 +7885,7 @@ var MergeMapSubscriber = /*@__PURE__*/ (function (_super) {
 
 
 /***/ }),
-/* 38 */
+/* 39 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -8493,37 +7895,6 @@ var MergeMapSubscriber = /*@__PURE__*/ (function (_super) {
 /** PURE_IMPORTS_START tslib,_Subscriber PURE_IMPORTS_END */
 
 
-/* tslint:enable:max-line-length */
-/**
- * Emits a given value if the source Observable completes without emitting any
- * `next` value, otherwise mirrors the source Observable.
- *
- * <span class="informal">If the source Observable turns out to be empty, then
- * this operator will emit a default value.</span>
- *
- * <img src="./img/defaultIfEmpty.png" width="100%">
- *
- * `defaultIfEmpty` emits the values emitted by the source Observable or a
- * specified default value if the source Observable is empty (completes without
- * having emitted any `next` value).
- *
- * @example <caption>If no clicks happen in 5 seconds, then emit "no clicks"</caption>
- * var clicks = Rx.Observable.fromEvent(document, 'click');
- * var clicksBeforeFive = clicks.takeUntil(Rx.Observable.interval(5000));
- * var result = clicksBeforeFive.defaultIfEmpty('no clicks');
- * result.subscribe(x => console.log(x));
- *
- * @see {@link empty}
- * @see {@link last}
- *
- * @param {any} [defaultValue=null] The default value used if the source
- * Observable is empty.
- * @return {Observable} An Observable that emits either the specified
- * `defaultValue` if the source Observable emits no items, or the values emitted
- * by the source Observable.
- * @method defaultIfEmpty
- * @owner Observable
- */
 function defaultIfEmpty(defaultValue) {
     if (defaultValue === void 0) {
         defaultValue = null;
@@ -8539,11 +7910,6 @@ var DefaultIfEmptyOperator = /*@__PURE__*/ (function () {
     };
     return DefaultIfEmptyOperator;
 }());
-/**
- * We need this JSDoc comment for affecting ESDoc.
- * @ignore
- * @extends {Ignored}
- */
 var DefaultIfEmptySubscriber = /*@__PURE__*/ (function (_super) {
     __WEBPACK_IMPORTED_MODULE_0_tslib__["a" /* __extends */](DefaultIfEmptySubscriber, _super);
     function DefaultIfEmptySubscriber(destination, defaultValue) {
@@ -8568,7 +7934,7 @@ var DefaultIfEmptySubscriber = /*@__PURE__*/ (function (_super) {
 
 
 /***/ }),
-/* 39 */
+/* 40 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -8578,46 +7944,6 @@ var DefaultIfEmptySubscriber = /*@__PURE__*/ (function (_super) {
 /** PURE_IMPORTS_START tslib,_Subscriber PURE_IMPORTS_END */
 
 
-/* tslint:enable:max-line-length */
-/**
- * Filter items emitted by the source Observable by only emitting those that
- * satisfy a specified predicate.
- *
- * <span class="informal">Like
- * [Array.prototype.filter()](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/filter),
- * it only emits a value from the source if it passes a criterion function.</span>
- *
- * <img src="./img/filter.png" width="100%">
- *
- * Similar to the well-known `Array.prototype.filter` method, this operator
- * takes values from the source Observable, passes them through a `predicate`
- * function and only emits those values that yielded `true`.
- *
- * @example <caption>Emit only click events whose target was a DIV element</caption>
- * var clicks = Rx.Observable.fromEvent(document, 'click');
- * var clicksOnDivs = clicks.filter(ev => ev.target.tagName === 'DIV');
- * clicksOnDivs.subscribe(x => console.log(x));
- *
- * @see {@link distinct}
- * @see {@link distinctUntilChanged}
- * @see {@link distinctUntilKeyChanged}
- * @see {@link ignoreElements}
- * @see {@link partition}
- * @see {@link skip}
- *
- * @param {function(value: T, index: number): boolean} predicate A function that
- * evaluates each value emitted by the source Observable. If it returns `true`,
- * the value is emitted, if `false` the value is not passed to the output
- * Observable. The `index` parameter is the number `i` for the i-th source
- * emission that has happened since the subscription, starting from the number
- * `0`.
- * @param {any} [thisArg] An optional argument to determine the value of `this`
- * in the `predicate` function.
- * @return {Observable} An Observable of values from the source that were
- * allowed by the `predicate` function.
- * @method filter
- * @owner Observable
- */
 function filter(predicate, thisArg) {
     return function filterOperatorFunction(source) {
         return source.lift(new FilterOperator(predicate, thisArg));
@@ -8633,11 +7959,6 @@ var FilterOperator = /*@__PURE__*/ (function () {
     };
     return FilterOperator;
 }());
-/**
- * We need this JSDoc comment for affecting ESDoc.
- * @ignore
- * @extends {Ignored}
- */
 var FilterSubscriber = /*@__PURE__*/ (function (_super) {
     __WEBPACK_IMPORTED_MODULE_0_tslib__["a" /* __extends */](FilterSubscriber, _super);
     function FilterSubscriber(destination, predicate, thisArg) {
@@ -8647,8 +7968,6 @@ var FilterSubscriber = /*@__PURE__*/ (function (_super) {
         _this.count = 0;
         return _this;
     }
-    // the try catch block below is left specifically for
-    // optimization and perf reasons. a tryCatcher is not necessary here.
     FilterSubscriber.prototype._next = function (value) {
         var result;
         try {
@@ -8668,13 +7987,13 @@ var FilterSubscriber = /*@__PURE__*/ (function (_super) {
 
 
 /***/ }),
-/* 40 */
+/* 41 */
 /***/ (function(module, exports) {
 
 module.exports = require("events");
 
 /***/ }),
-/* 41 */
+/* 42 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -8752,31 +8071,15 @@ function transformDependencies(dependencies = {}) {
 }
 
 /***/ }),
-/* 42 */
+/* 43 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return config; });
 /** PURE_IMPORTS_START  PURE_IMPORTS_END */
 var _enable_super_gross_mode_that_will_cause_bad_things = false;
-/**
- * The global configuration object for RxJS, used to configure things
- * like what Promise contructor should used to create Promises
- */
 var config = {
-    /**
-     * The promise constructor used by default for methods such as
-     * {@link toPromise} and {@link forEach}
-     */
     Promise: undefined,
-    /**
-     * If true, turns on synchronous error rethrowing, which is a deprecated behavior
-     * in v6 and higher. This behavior enables bad patterns like wrapping a subscribe
-     * call in a try/catch block. It also enables producer interference, a nasty bug
-     * where a multicast can be broken for all observers by a downstream consumer with
-     * an unhandled error. DO NOT USE THIS FLAG UNLESS IT'S NEEDED TO BY TIME
-     * FOR MIGRATION REASONS.
-     */
     set useDeprecatedSynchronousErrorHandling(value) {
         if (value) {
             var error = /*@__PURE__*/ new Error();
@@ -8795,19 +8098,18 @@ var config = {
 
 
 /***/ }),
-/* 43 */
+/* 44 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 /* harmony export (immutable) */ __webpack_exports__["a"] = noop;
-/* tslint:disable:no-empty */
 /** PURE_IMPORTS_START  PURE_IMPORTS_END */
 function noop() { }
 //# sourceMappingURL=noop.js.map
 
 
 /***/ }),
-/* 44 */
+/* 45 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -8815,15 +8117,6 @@ function noop() { }
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_tslib__ = __webpack_require__(1);
 /** PURE_IMPORTS_START tslib PURE_IMPORTS_END */
 
-/**
- * An error thrown when an action is invalid because the object has been
- * unsubscribed.
- *
- * @see {@link Subject}
- * @see {@link BehaviorSubject}
- *
- * @class ObjectUnsubscribedError
- */
 var ObjectUnsubscribedError = /*@__PURE__*/ (function (_super) {
     __WEBPACK_IMPORTED_MODULE_0_tslib__["a" /* __extends */](ObjectUnsubscribedError, _super);
     function ObjectUnsubscribedError() {
@@ -8839,32 +8132,18 @@ var ObjectUnsubscribedError = /*@__PURE__*/ (function (_super) {
 
 
 /***/ }),
-/* 45 */
+/* 46 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return Notification; });
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__observable_empty__ = __webpack_require__(13);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__observable_of__ = __webpack_require__(63);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__observable_throwError__ = __webpack_require__(64);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__observable_empty__ = __webpack_require__(12);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__observable_of__ = __webpack_require__(68);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__observable_throwError__ = __webpack_require__(70);
 /** PURE_IMPORTS_START _observable_empty,_observable_of,_observable_throwError PURE_IMPORTS_END */
 
 
 
-/**
- * Represents a push-based event or value that an {@link Observable} can emit.
- * This class is particularly useful for operators that manage notifications,
- * like {@link materialize}, {@link dematerialize}, {@link observeOn}, and
- * others. Besides wrapping the actual delivered value, it also annotates it
- * with metadata of, for instance, what type of push message it is (`next`,
- * `error`, or `complete`).
- *
- * @see {@link materialize}
- * @see {@link dematerialize}
- * @see {@link observeOn}
- *
- * @class Notification<T>
- */
 var Notification = /*@__PURE__*/ (function () {
     function Notification(kind, value, error) {
         this.kind = kind;
@@ -8872,11 +8151,6 @@ var Notification = /*@__PURE__*/ (function () {
         this.error = error;
         this.hasValue = kind === 'N';
     }
-    /**
-     * Delivers to the given `observer` the value wrapped by this Notification.
-     * @param {Observer} observer
-     * @return
-     */
     Notification.prototype.observe = function (observer) {
         switch (this.kind) {
             case 'N':
@@ -8887,14 +8161,6 @@ var Notification = /*@__PURE__*/ (function () {
                 return observer.complete && observer.complete();
         }
     };
-    /**
-     * Given some {@link Observer} callbacks, deliver the value represented by the
-     * current Notification to the correctly corresponding callback.
-     * @param {function(value: T): void} next An Observer `next` callback.
-     * @param {function(err: any): void} [error] An Observer `error` callback.
-     * @param {function(): void} [complete] An Observer `complete` callback.
-     * @return {any}
-     */
     Notification.prototype.do = function (next, error, complete) {
         var kind = this.kind;
         switch (kind) {
@@ -8906,15 +8172,6 @@ var Notification = /*@__PURE__*/ (function () {
                 return complete && complete();
         }
     };
-    /**
-     * Takes an Observer or its individual callback functions, and calls `observe`
-     * or `do` methods accordingly.
-     * @param {Observer|function(value: T): void} nextOrObserver An Observer or
-     * the `next` callback.
-     * @param {function(err: any): void} [error] An Observer `error` callback.
-     * @param {function(): void} [complete] An Observer `complete` callback.
-     * @return {any}
-     */
     Notification.prototype.accept = function (nextOrObserver, error, complete) {
         if (nextOrObserver && typeof nextOrObserver.next === 'function') {
             return this.observe(nextOrObserver);
@@ -8923,11 +8180,6 @@ var Notification = /*@__PURE__*/ (function () {
             return this.do(nextOrObserver, error, complete);
         }
     };
-    /**
-     * Returns a simple Observable that just delivers the notification represented
-     * by this Notification instance.
-     * @return {any}
-     */
     Notification.prototype.toObservable = function () {
         var kind = this.kind;
         switch (kind) {
@@ -8940,36 +8192,15 @@ var Notification = /*@__PURE__*/ (function () {
         }
         throw new Error('unexpected notification kind value');
     };
-    /**
-     * A shortcut to create a Notification instance of the type `next` from a
-     * given value.
-     * @param {T} value The `next` value.
-     * @return {Notification<T>} The "next" Notification representing the
-     * argument.
-     * @nocollapse
-     */
     Notification.createNext = function (value) {
         if (typeof value !== 'undefined') {
             return new Notification('N', value);
         }
         return Notification.undefinedValueNotification;
     };
-    /**
-     * A shortcut to create a Notification instance of the type `error` from a
-     * given error.
-     * @param {any} [err] The `error` error.
-     * @return {Notification<T>} The "error" Notification representing the
-     * argument.
-     * @nocollapse
-     */
     Notification.createError = function (err) {
         return new Notification('E', undefined, err);
     };
-    /**
-     * A shortcut to create a Notification instance of the type `complete`.
-     * @return {Notification<any>} The valueless "complete" Notification.
-     * @nocollapse
-     */
     Notification.createComplete = function () {
         return Notification.completeNotification;
     };
@@ -8982,7 +8213,7 @@ var Notification = /*@__PURE__*/ (function () {
 
 
 /***/ }),
-/* 46 */
+/* 47 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -8994,9 +8225,6 @@ var Notification = /*@__PURE__*/ (function () {
 
 
 
-/**
- * @class AsyncSubject<T>
- */
 var AsyncSubject = /*@__PURE__*/ (function (_super) {
     __WEBPACK_IMPORTED_MODULE_0_tslib__["a" /* __extends */](AsyncSubject, _super);
     function AsyncSubject() {
@@ -9006,7 +8234,6 @@ var AsyncSubject = /*@__PURE__*/ (function (_super) {
         _this.hasCompleted = false;
         return _this;
     }
-    /** @deprecated This is an internal implementation detail, do not use. */
     AsyncSubject.prototype._subscribe = function (subscriber) {
         if (this.hasError) {
             subscriber.error(this.thrownError);
@@ -9044,7 +8271,35 @@ var AsyncSubject = /*@__PURE__*/ (function (_super) {
 
 
 /***/ }),
-/* 47 */
+/* 48 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+/* harmony export (immutable) */ __webpack_exports__["a"] = concat;
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__util_isScheduler__ = __webpack_require__(15);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__of__ = __webpack_require__(68);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__from__ = __webpack_require__(19);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__operators_concatAll__ = __webpack_require__(240);
+/** PURE_IMPORTS_START _util_isScheduler,_of,_from,_operators_concatAll PURE_IMPORTS_END */
+
+
+
+
+function concat() {
+    var observables = [];
+    for (var _i = 0; _i < arguments.length; _i++) {
+        observables[_i] = arguments[_i];
+    }
+    if (observables.length === 1 || (observables.length === 2 && Object(__WEBPACK_IMPORTED_MODULE_0__util_isScheduler__["a" /* isScheduler */])(observables[1]))) {
+        return Object(__WEBPACK_IMPORTED_MODULE_2__from__["a" /* from */])(observables[0]);
+    }
+    return Object(__WEBPACK_IMPORTED_MODULE_3__operators_concatAll__["a" /* concatAll */])()(__WEBPACK_IMPORTED_MODULE_1__of__["a" /* of */].apply(void 0, observables));
+}
+//# sourceMappingURL=concat.js.map
+
+
+/***/ }),
+/* 49 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -9053,49 +8308,22 @@ var AsyncSubject = /*@__PURE__*/ (function (_super) {
 /** PURE_IMPORTS_START _isArray PURE_IMPORTS_END */
 
 function isNumeric(val) {
-    // parseFloat NaNs numeric-cast false positives (null|true|false|"")
-    // ...but misinterprets leading-number strings, particularly hex literals ("0x...")
-    // subtraction forces infinities to NaN
-    // adding 1 corrects loss of precision from parseFloat (#15100)
     return !Object(__WEBPACK_IMPORTED_MODULE_0__isArray__["a" /* isArray */])(val) && (val - parseFloat(val) + 1) >= 0;
 }
 //# sourceMappingURL=isNumeric.js.map
 
 
 /***/ }),
-/* 48 */
+/* 50 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return throwIfEmpty; });
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__tap__ = __webpack_require__(245);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__util_EmptyError__ = __webpack_require__(35);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__tap__ = __webpack_require__(249);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__util_EmptyError__ = __webpack_require__(36);
 /** PURE_IMPORTS_START _tap,_util_EmptyError PURE_IMPORTS_END */
 
 
-/**
- * If the source observable completes without emitting a value, it will emit
- * an error. The error will be created at that time by the optional
- * `errorFactory` argument, otherwise, the error will be {@link ErrorEmpty}.
- *
- * @example
- *
- * const click$ = fromEvent(button, 'click');
- *
- * clicks$.pipe(
- *   takeUntil(timer(1000)),
- *   throwIfEmpty(
- *     () => new Error('the button was not clicked within 1 second')
- *   ),
- * )
- * .subscribe({
- *   next() { console.log('The button was clicked'); },
- *   error(err) { console.error(err); },
- * });
- * @param {Function} [errorFactory] A factory function called to produce the
- * error to be thrown when the source observable completes without emitting a
- * value.
- */
 var throwIfEmpty = function (errorFactory) {
     if (errorFactory === void 0) {
         errorFactory = defaultErrorFactory;
@@ -9117,71 +8345,21 @@ function defaultErrorFactory() {
 
 
 /***/ }),
-/* 49 */
+/* 51 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 /* harmony export (immutable) */ __webpack_exports__["a"] = reduce;
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__scan__ = __webpack_require__(72);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__takeLast__ = __webpack_require__(71);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__defaultIfEmpty__ = __webpack_require__(38);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__util_pipe__ = __webpack_require__(60);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__scan__ = __webpack_require__(77);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__takeLast__ = __webpack_require__(76);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__defaultIfEmpty__ = __webpack_require__(39);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__util_pipe__ = __webpack_require__(65);
 /** PURE_IMPORTS_START _scan,_takeLast,_defaultIfEmpty,_util_pipe PURE_IMPORTS_END */
 
 
 
 
-/* tslint:enable:max-line-length */
-/**
- * Applies an accumulator function over the source Observable, and returns the
- * accumulated result when the source completes, given an optional seed value.
- *
- * <span class="informal">Combines together all values emitted on the source,
- * using an accumulator function that knows how to join a new source value into
- * the accumulation from the past.</span>
- *
- * <img src="./img/reduce.png" width="100%">
- *
- * Like
- * [Array.prototype.reduce()](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/reduce),
- * `reduce` applies an `accumulator` function against an accumulation and each
- * value of the source Observable (from the past) to reduce it to a single
- * value, emitted on the output Observable. Note that `reduce` will only emit
- * one value, only when the source Observable completes. It is equivalent to
- * applying operator {@link scan} followed by operator {@link last}.
- *
- * Returns an Observable that applies a specified `accumulator` function to each
- * item emitted by the source Observable. If a `seed` value is specified, then
- * that value will be used as the initial value for the accumulator. If no seed
- * value is specified, the first item of the source is used as the seed.
- *
- * @example <caption>Count the number of click events that happened in 5 seconds</caption>
- * var clicksInFiveSeconds = Rx.Observable.fromEvent(document, 'click')
- *   .takeUntil(Rx.Observable.interval(5000));
- * var ones = clicksInFiveSeconds.mapTo(1);
- * var seed = 0;
- * var count = ones.reduce((acc, one) => acc + one, seed);
- * count.subscribe(x => console.log(x));
- *
- * @see {@link count}
- * @see {@link expand}
- * @see {@link mergeScan}
- * @see {@link scan}
- *
- * @param {function(acc: R, value: T, index: number): R} accumulator The accumulator function
- * called on each source value.
- * @param {R} [seed] The initial accumulation value.
- * @return {Observable<R>} An Observable that emits a single value that is the
- * result of accumulating the values emitted by the source Observable.
- * @method reduce
- * @owner Observable
- */
 function reduce(accumulator, seed) {
-    // providing a seed of `undefined` *should* be valid and trigger
-    // hasSeed! so don't use `seed !== undefined` checks!
-    // For this reason, we have to check it here at the original call site
-    // otherwise inside Operator/Subscriber we won't know if `undefined`
-    // means they didn't provide anything or if they literally provided `undefined`
     if (arguments.length >= 2) {
         return function reduceOperatorFunctionWithSeed(source) {
             return Object(__WEBPACK_IMPORTED_MODULE_3__util_pipe__["a" /* pipe */])(Object(__WEBPACK_IMPORTED_MODULE_0__scan__["a" /* scan */])(accumulator, seed), Object(__WEBPACK_IMPORTED_MODULE_1__takeLast__["a" /* takeLast */])(1), Object(__WEBPACK_IMPORTED_MODULE_2__defaultIfEmpty__["a" /* defaultIfEmpty */])(seed))(source);
@@ -9197,35 +8375,130 @@ function reduce(accumulator, seed) {
 
 
 /***/ }),
-/* 50 */
-/***/ (function(module, exports) {
+/* 52 */
+/***/ (function(module, exports, __webpack_require__) {
 
-module.exports = function(module) {
-	if(!module.webpackPolyfill) {
-		module.deprecate = function() {};
-		module.paths = [];
-		// module.parent = undefined by default
-		if(!module.children) module.children = [];
-		Object.defineProperty(module, "loaded", {
-			enumerable: true,
-			get: function() {
-				return module.l;
-			}
-		});
-		Object.defineProperty(module, "id", {
-			enumerable: true,
-			get: function() {
-				return module.i;
-			}
-		});
-		module.webpackPolyfill = 1;
+"use strict";
+
+
+var matchOperatorsRe = /[|\\{}()[\]^$+*?.]/g;
+
+module.exports = function (str) {
+	if (typeof str !== 'string') {
+		throw new TypeError('Expected a string');
 	}
-	return module;
+
+	return str.replace(matchOperatorsRe, '\\$&');
 };
 
 
 /***/ }),
-/* 51 */
+/* 53 */
+/***/ (function(module, exports, __webpack_require__) {
+
+var conversions = __webpack_require__(79);
+var route = __webpack_require__(261);
+
+var convert = {};
+
+var models = Object.keys(conversions);
+
+function wrapRaw(fn) {
+	var wrappedFn = function (args) {
+		if (args === undefined || args === null) {
+			return args;
+		}
+
+		if (arguments.length > 1) {
+			args = Array.prototype.slice.call(arguments);
+		}
+
+		return fn(args);
+	};
+
+	// preserve .conversion property if there is one
+	if ('conversion' in fn) {
+		wrappedFn.conversion = fn.conversion;
+	}
+
+	return wrappedFn;
+}
+
+function wrapRounded(fn) {
+	var wrappedFn = function (args) {
+		if (args === undefined || args === null) {
+			return args;
+		}
+
+		if (arguments.length > 1) {
+			args = Array.prototype.slice.call(arguments);
+		}
+
+		var result = fn(args);
+
+		// we're assuming the result is an array here.
+		// see notice in conversions.js; don't use box types
+		// in conversion functions.
+		if (typeof result === 'object') {
+			for (var len = result.length, i = 0; i < len; i++) {
+				result[i] = Math.round(result[i]);
+			}
+		}
+
+		return result;
+	};
+
+	// preserve .conversion property if there is one
+	if ('conversion' in fn) {
+		wrappedFn.conversion = fn.conversion;
+	}
+
+	return wrappedFn;
+}
+
+models.forEach(function (fromModel) {
+	convert[fromModel] = {};
+
+	Object.defineProperty(convert[fromModel], 'channels', {value: conversions[fromModel].channels});
+	Object.defineProperty(convert[fromModel], 'labels', {value: conversions[fromModel].labels});
+
+	var routes = route(fromModel);
+	var routeModels = Object.keys(routes);
+
+	routeModels.forEach(function (toModel) {
+		var fn = routes[toModel];
+
+		convert[fromModel][toModel] = wrapRounded(fn);
+		convert[fromModel][toModel].raw = wrapRaw(fn);
+	});
+});
+
+module.exports = convert;
+
+
+/***/ }),
+/* 54 */
+/***/ (function(module, exports) {
+
+module.exports = require("os");
+
+/***/ }),
+/* 55 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+module.exports = (flag, argv) => {
+	argv = argv || process.argv;
+	const prefix = flag.startsWith('-') ? '' : (flag.length === 1 ? '-' : '--');
+	const pos = argv.indexOf(prefix + flag);
+	const terminatorPos = argv.indexOf('--');
+	return pos !== -1 && (terminatorPos === -1 ? true : pos < terminatorPos);
+};
+
+
+/***/ }),
+/* 56 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -9344,7 +8617,7 @@ var _fs = __webpack_require__(7);
 
 var _fs2 = _interopRequireDefault(_fs);
 
-var _mkdirp = __webpack_require__(76);
+var _mkdirp = __webpack_require__(81);
 
 var _mkdirp2 = _interopRequireDefault(_mkdirp);
 
@@ -9386,7 +8659,7 @@ exports.readFile = readFile;
 exports.mkdirp = mkdirp;
 
 /***/ }),
-/* 52 */
+/* 57 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -9473,7 +8746,7 @@ let parallelize = exports.parallelize = (() => {
 function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, arguments); return new Promise(function (resolve, reject) { function step(key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { return Promise.resolve(value).then(function (value) { step("next", value); }, function (err) { step("throw", err); }); } } return step("next"); }); }; }
 
 /***/ }),
-/* 53 */
+/* 58 */
 /***/ (function(module, exports, __webpack_require__) {
 
 module.exports = minimatch
@@ -10402,7 +9675,7 @@ function regExpEscape (s) {
 
 
 /***/ }),
-/* 54 */
+/* 59 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -10429,7 +9702,7 @@ module.exports.win32 = win32;
 
 
 /***/ }),
-/* 55 */
+/* 60 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -10465,16 +9738,16 @@ class CliError extends Error {
 exports.CliError = CliError;
 
 /***/ }),
-/* 56 */
+/* 61 */
 /***/ (function(module, exports, __webpack_require__) {
 
 // Note: since nyc uses this module to output coverage, any lines
 // that are in the direct sync flow of nyc's outputCoverage are
 // ignored, since we can never get coverage for them.
-var assert = __webpack_require__(28)
+var assert = __webpack_require__(29)
 var signals = __webpack_require__(307)
 
-var EE = __webpack_require__(40)
+var EE = __webpack_require__(41)
 /* istanbul ignore if */
 if (typeof EE !== 'function') {
   EE = EE.EventEmitter
@@ -10628,22 +9901,17 @@ function processEmit (ev, arg) {
 
 
 /***/ }),
-/* 57 */
+/* 62 */
 /***/ (function(module, exports) {
 
 module.exports = require("child_process");
 
 /***/ }),
-/* 58 */
+/* 63 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 /* harmony export (immutable) */ __webpack_exports__["a"] = hostReportError;
-/**
- * Throws an error on another job so that it's picked up by the runtime's
- * uncaught error handling mechanism.
- * @param err the error to throw
- */
 /** PURE_IMPORTS_START  PURE_IMPORTS_END */
 function hostReportError(err) {
     setTimeout(function () { throw err; });
@@ -10652,7 +9920,7 @@ function hostReportError(err) {
 
 
 /***/ }),
-/* 59 */
+/* 64 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -10662,24 +9930,20 @@ function hostReportError(err) {
 var rxSubscriber = (typeof Symbol === 'function' && typeof Symbol.for === 'function')
     ? /*@__PURE__*/ Symbol.for('rxSubscriber')
     : '@@rxSubscriber';
-/**
- * @deprecated use rxSubscriber instead
- */
 var $$rxSubscriber = rxSubscriber;
 //# sourceMappingURL=rxSubscriber.js.map
 
 
 /***/ }),
-/* 60 */
+/* 65 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 /* harmony export (immutable) */ __webpack_exports__["a"] = pipe;
 /* harmony export (immutable) */ __webpack_exports__["b"] = pipeFromArray;
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__noop__ = __webpack_require__(43);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__noop__ = __webpack_require__(44);
 /** PURE_IMPORTS_START _noop PURE_IMPORTS_END */
 
-/* tslint:enable:max-line-length */
 function pipe() {
     var fns = [];
     for (var _i = 0; _i < arguments.length; _i++) {
@@ -10687,7 +9951,6 @@ function pipe() {
     }
     return pipeFromArray(fns);
 }
-/* @internal */
 function pipeFromArray(fns) {
     if (!fns) {
         return __WEBPACK_IMPORTED_MODULE_0__noop__["a" /* noop */];
@@ -10703,7 +9966,7 @@ function pipeFromArray(fns) {
 
 
 /***/ }),
-/* 61 */
+/* 66 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -10758,29 +10021,6 @@ var RefCountSubscriber = /*@__PURE__*/ (function (_super) {
             this.connection = null;
             return;
         }
-        ///
-        // Compare the local RefCountSubscriber's connection Subscription to the
-        // connection Subscription on the shared ConnectableObservable. In cases
-        // where the ConnectableObservable source synchronously emits values, and
-        // the RefCountSubscriber's downstream Observers synchronously unsubscribe,
-        // execution continues to here before the RefCountOperator has a chance to
-        // supply the RefCountSubscriber with the shared connection Subscription.
-        // For example:
-        // ```
-        // Observable.range(0, 10)
-        //   .publish()
-        //   .refCount()
-        //   .take(5)
-        //   .subscribe();
-        // ```
-        // In order to account for this case, RefCountSubscriber should only dispose
-        // the ConnectableObservable's shared connection Subscription if the
-        // connection Subscription exists, *and* either:
-        //   a. RefCountSubscriber doesn't have a reference to the shared connection
-        //      Subscription yet, or,
-        //   b. RefCountSubscriber's connection Subscription reference is identical
-        //      to the shared connection Subscription
-        ///
         var connection = this.connection;
         var sharedConnection = connectable._connection;
         this.connection = null;
@@ -10794,18 +10034,18 @@ var RefCountSubscriber = /*@__PURE__*/ (function (_super) {
 
 
 /***/ }),
-/* 62 */
+/* 67 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return ReplaySubject; });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_tslib__ = __webpack_require__(1);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__Subject__ = __webpack_require__(9);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__scheduler_queue__ = __webpack_require__(223);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__scheduler_queue__ = __webpack_require__(228);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__Subscription__ = __webpack_require__(8);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__operators_observeOn__ = __webpack_require__(225);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_5__util_ObjectUnsubscribedError__ = __webpack_require__(44);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_6__SubjectSubscription__ = __webpack_require__(220);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__operators_observeOn__ = __webpack_require__(230);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_5__util_ObjectUnsubscribedError__ = __webpack_require__(45);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_6__SubjectSubscription__ = __webpack_require__(225);
 /** PURE_IMPORTS_START tslib,_Subject,_scheduler_queue,_Subscription,_operators_observeOn,_util_ObjectUnsubscribedError,_SubjectSubscription PURE_IMPORTS_END */
 
 
@@ -10814,9 +10054,6 @@ var RefCountSubscriber = /*@__PURE__*/ (function (_super) {
 
 
 
-/**
- * @class ReplaySubject<T>
- */
 var ReplaySubject = /*@__PURE__*/ (function (_super) {
     __WEBPACK_IMPORTED_MODULE_0_tslib__["a" /* __extends */](ReplaySubject, _super);
     function ReplaySubject(bufferSize, windowTime, scheduler) {
@@ -10844,8 +10081,6 @@ var ReplaySubject = /*@__PURE__*/ (function (_super) {
     ReplaySubject.prototype.nextInfiniteTimeWindow = function (value) {
         var _events = this._events;
         _events.push(value);
-        // Since this method is invoked in every next() call than the buffer
-        // can overgrow the max size only by one item
         if (_events.length > this._bufferSize) {
             _events.shift();
         }
@@ -10856,9 +10091,7 @@ var ReplaySubject = /*@__PURE__*/ (function (_super) {
         this._trimBufferThenGetEvents();
         _super.prototype.next.call(this, value);
     };
-    /** @deprecated This is an internal implementation detail, do not use. */
     ReplaySubject.prototype._subscribe = function (subscriber) {
-        // When `_infiniteTimeWindow === true` then the buffer is already trimmed
         var _infiniteTimeWindow = this._infiniteTimeWindow;
         var _events = _infiniteTimeWindow ? this._events : this._trimBufferThenGetEvents();
         var scheduler = this.scheduler;
@@ -10905,9 +10138,6 @@ var ReplaySubject = /*@__PURE__*/ (function (_super) {
         var _events = this._events;
         var eventsCount = _events.length;
         var spliceCount = 0;
-        // Trim events that fall out of the time window.
-        // Start at the front of the list. Break early once
-        // we encounter an event that falls within the window.
         while (spliceCount < eventsCount) {
             if ((now - _events[spliceCount].time) < _windowTime) {
                 break;
@@ -10936,15 +10166,15 @@ var ReplayEvent = /*@__PURE__*/ (function () {
 
 
 /***/ }),
-/* 63 */
+/* 68 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 /* harmony export (immutable) */ __webpack_exports__["a"] = of;
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__util_isScheduler__ = __webpack_require__(18);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__util_isScheduler__ = __webpack_require__(15);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__fromArray__ = __webpack_require__(21);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__empty__ = __webpack_require__(13);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__scalar__ = __webpack_require__(227);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__empty__ = __webpack_require__(12);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__scalar__ = __webpack_require__(69);
 /** PURE_IMPORTS_START _util_isScheduler,_fromArray,_empty,_scalar PURE_IMPORTS_END */
 
 
@@ -10975,7 +10205,28 @@ function of() {
 
 
 /***/ }),
-/* 64 */
+/* 69 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+/* harmony export (immutable) */ __webpack_exports__["a"] = scalar;
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__Observable__ = __webpack_require__(4);
+/** PURE_IMPORTS_START _Observable PURE_IMPORTS_END */
+
+function scalar(value) {
+    var result = new __WEBPACK_IMPORTED_MODULE_0__Observable__["a" /* Observable */](function (subscriber) {
+        subscriber.next(value);
+        subscriber.complete();
+    });
+    result._isScalar = true;
+    result.value = value;
+    return result;
+}
+//# sourceMappingURL=scalar.js.map
+
+
+/***/ }),
+/* 70 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -10983,50 +10234,6 @@ function of() {
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__Observable__ = __webpack_require__(4);
 /** PURE_IMPORTS_START _Observable PURE_IMPORTS_END */
 
-/**
- * Creates an Observable that emits no items to the Observer and immediately
- * emits an error notification.
- *
- * <span class="informal">Just emits 'error', and nothing else.
- * </span>
- *
- * <img src="./img/throw.png" width="100%">
- *
- * This static operator is useful for creating a simple Observable that only
- * emits the error notification. It can be used for composing with other
- * Observables, such as in a {@link mergeMap}.
- *
- * @example <caption>Emit the number 7, then emit an error.</caption>
- * import { throwError, concat, of } from 'rxjs/create';
- *
- * const result = concat(of(7), throwError(new Error('oops!')));
- * result.subscribe(x => console.log(x), e => console.error(e));
- *
- * @example <caption>Map and flatten numbers to the sequence 'a', 'b', 'c', but throw an error for 13</caption>
- * import { throwError, interval, of } from 'rxjs/create';
- * import { mergeMap } from 'rxjs/operators';
- *
- * interval(1000).pipe(
- *   mergeMap(x => x === 13 ?
- *     throwError('Thirteens are bad') :
- *     of('a', 'b', 'c')
- *   )
- * ).subscribe(x => console.log(x), e => console.error(e));
- *
- * @see {@link create}
- * @see {@link empty}
- * @see {@link never}
- * @see {@link of}
- *
- * @param {any} error The particular Error to pass to the error notification.
- * @param {Scheduler} [scheduler] A {@link IScheduler} to use for scheduling
- * the emission of the error notification.
- * @return {Observable} An error Observable: emits only the error notification
- * using the given error argument.
- * @static true
- * @name throw
- * @owner Observable
- */
 function throwError(error, scheduler) {
     if (!scheduler) {
         return new __WEBPACK_IMPORTED_MODULE_0__Observable__["a" /* Observable */](function (subscriber) { return subscriber.error(error); });
@@ -11043,7 +10250,7 @@ function dispatch(_a) {
 
 
 /***/ }),
-/* 65 */
+/* 71 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -11051,7 +10258,7 @@ function dispatch(_a) {
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return CombineLatestOperator; });
 /* unused harmony export CombineLatestSubscriber */
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_tslib__ = __webpack_require__(1);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__util_isScheduler__ = __webpack_require__(18);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__util_isScheduler__ = __webpack_require__(15);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__util_isArray__ = __webpack_require__(11);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__OuterSubscriber__ = __webpack_require__(5);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__util_subscribeToResult__ = __webpack_require__(6);
@@ -11064,112 +10271,6 @@ function dispatch(_a) {
 
 
 var NONE = {};
-/* tslint:enable:max-line-length */
-/**
- * Combines multiple Observables to create an Observable whose values are
- * calculated from the latest values of each of its input Observables.
- *
- * <span class="informal">Whenever any input Observable emits a value, it
- * computes a formula using the latest values from all the inputs, then emits
- * the output of that formula.</span>
- *
- * <img src="./img/combineLatest.png" width="100%">
- *
- * `combineLatest` combines the values from all the Observables passed as
- * arguments. This is done by subscribing to each Observable in order and,
- * whenever any Observable emits, collecting an array of the most recent
- * values from each Observable. So if you pass `n` Observables to operator,
- * returned Observable will always emit an array of `n` values, in order
- * corresponding to order of passed Observables (value from the first Observable
- * on the first place and so on).
- *
- * Static version of `combineLatest` accepts either an array of Observables
- * or each Observable can be put directly as an argument. Note that array of
- * Observables is good choice, if you don't know beforehand how many Observables
- * you will combine. Passing empty array will result in Observable that
- * completes immediately.
- *
- * To ensure output array has always the same length, `combineLatest` will
- * actually wait for all input Observables to emit at least once,
- * before it starts emitting results. This means if some Observable emits
- * values before other Observables started emitting, all that values but last
- * will be lost. On the other hand, is some Observable does not emit value but
- * completes, resulting Observable will complete at the same moment without
- * emitting anything, since it will be now impossible to include value from
- * completed Observable in resulting array. Also, if some input Observable does
- * not emit any value and never completes, `combineLatest` will also never emit
- * and never complete, since, again, it will wait for all streams to emit some
- * value.
- *
- * If at least one Observable was passed to `combineLatest` and all passed Observables
- * emitted something, resulting Observable will complete when all combined
- * streams complete. So even if some Observable completes, result of
- * `combineLatest` will still emit values when other Observables do. In case
- * of completed Observable, its value from now on will always be the last
- * emitted value. On the other hand, if any Observable errors, `combineLatest`
- * will error immediately as well, and all other Observables will be unsubscribed.
- *
- * `combineLatest` accepts as optional parameter `project` function, which takes
- * as arguments all values that would normally be emitted by resulting Observable.
- * `project` can return any kind of value, which will be then emitted by Observable
- * instead of default array. Note that `project` does not take as argument that array
- * of values, but values themselves. That means default `project` can be imagined
- * as function that takes all its arguments and puts them into an array.
- *
- *
- * @example <caption>Combine two timer Observables</caption>
- * const firstTimer = Rx.Observable.timer(0, 1000); // emit 0, 1, 2... after every second, starting from now
- * const secondTimer = Rx.Observable.timer(500, 1000); // emit 0, 1, 2... after every second, starting 0,5s from now
- * const combinedTimers = Rx.Observable.combineLatest(firstTimer, secondTimer);
- * combinedTimers.subscribe(value => console.log(value));
- * // Logs
- * // [0, 0] after 0.5s
- * // [1, 0] after 1s
- * // [1, 1] after 1.5s
- * // [2, 1] after 2s
- *
- *
- * @example <caption>Combine an array of Observables</caption>
- * const observables = [1, 5, 10].map(
- *   n => Rx.Observable.of(n).delay(n * 1000).startWith(0) // emit 0 and then emit n after n seconds
- * );
- * const combined = Rx.Observable.combineLatest(observables);
- * combined.subscribe(value => console.log(value));
- * // Logs
- * // [0, 0, 0] immediately
- * // [1, 0, 0] after 1s
- * // [1, 5, 0] after 5s
- * // [1, 5, 10] after 10s
- *
- *
- * @example <caption>Use project function to dynamically calculate the Body-Mass Index</caption>
- * var weight = Rx.Observable.of(70, 72, 76, 79, 75);
- * var height = Rx.Observable.of(1.76, 1.77, 1.78);
- * var bmi = Rx.Observable.combineLatest(weight, height, (w, h) => w / (h * h));
- * bmi.subscribe(x => console.log('BMI is ' + x));
- *
- * // With output to console:
- * // BMI is 24.212293388429753
- * // BMI is 23.93948099205209
- * // BMI is 23.671253629592222
- *
- *
- * @see {@link combineAll}
- * @see {@link merge}
- * @see {@link withLatestFrom}
- *
- * @param {ObservableInput} observable1 An input Observable to combine with other Observables.
- * @param {ObservableInput} observable2 An input Observable to combine with other Observables.
- * More than one input Observables may be given as arguments
- * or an array of Observables may be given as the first argument.
- * @param {function} [project] An optional function to project the values from
- * the combined latest values into a new value on the output Observable.
- * @param {Scheduler} [scheduler=null] The IScheduler to use for subscribing to
- * each input Observable.
- * @return {Observable} An Observable of projected values from the most recent
- * values from each input Observable, or an array of the most recent values from
- * each input Observable.
- */
 function combineLatest() {
     var observables = [];
     for (var _i = 0; _i < arguments.length; _i++) {
@@ -11183,8 +10284,6 @@ function combineLatest() {
     if (typeof observables[observables.length - 1] === 'function') {
         resultSelector = observables.pop();
     }
-    // if the first and only other argument besides the resultSelector is an array
-    // assume it's been called with `combineLatest([obs1, obs2, obs3], resultSelector)`
     if (observables.length === 1 && Object(__WEBPACK_IMPORTED_MODULE_2__util_isArray__["a" /* isArray */])(observables[0])) {
         observables = observables[0];
     }
@@ -11200,11 +10299,6 @@ var CombineLatestOperator = /*@__PURE__*/ (function () {
     return CombineLatestOperator;
 }());
 
-/**
- * We need this JSDoc comment for affecting ESDoc.
- * @ignore
- * @extends {Ignored}
- */
 var CombineLatestSubscriber = /*@__PURE__*/ (function (_super) {
     __WEBPACK_IMPORTED_MODULE_0_tslib__["a" /* __extends */](CombineLatestSubscriber, _super);
     function CombineLatestSubscriber(destination, resultSelector) {
@@ -11273,182 +10367,16 @@ var CombineLatestSubscriber = /*@__PURE__*/ (function (_super) {
 
 
 /***/ }),
-/* 66 */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-/* harmony export (immutable) */ __webpack_exports__["a"] = concat;
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__util_isScheduler__ = __webpack_require__(18);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__of__ = __webpack_require__(63);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__from__ = __webpack_require__(19);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__operators_concatAll__ = __webpack_require__(236);
-/** PURE_IMPORTS_START _util_isScheduler,_of,_from,_operators_concatAll PURE_IMPORTS_END */
-
-
-
-
-/* tslint:enable:max-line-length */
-/**
- * Creates an output Observable which sequentially emits all values from given
- * Observable and then moves on to the next.
- *
- * <span class="informal">Concatenates multiple Observables together by
- * sequentially emitting their values, one Observable after the other.</span>
- *
- * <img src="./img/concat.png" width="100%">
- *
- * `concat` joins multiple Observables together, by subscribing to them one at a time and
- * merging their results into the output Observable. You can pass either an array of
- * Observables, or put them directly as arguments. Passing an empty array will result
- * in Observable that completes immediately.
- *
- * `concat` will subscribe to first input Observable and emit all its values, without
- * changing or affecting them in any way. When that Observable completes, it will
- * subscribe to then next Observable passed and, again, emit its values. This will be
- * repeated, until the operator runs out of Observables. When last input Observable completes,
- * `concat` will complete as well. At any given moment only one Observable passed to operator
- * emits values. If you would like to emit values from passed Observables concurrently, check out
- * {@link merge} instead, especially with optional `concurrent` parameter. As a matter of fact,
- * `concat` is an equivalent of `merge` operator with `concurrent` parameter set to `1`.
- *
- * Note that if some input Observable never completes, `concat` will also never complete
- * and Observables following the one that did not complete will never be subscribed. On the other
- * hand, if some Observable simply completes immediately after it is subscribed, it will be
- * invisible for `concat`, which will just move on to the next Observable.
- *
- * If any Observable in chain errors, instead of passing control to the next Observable,
- * `concat` will error immediately as well. Observables that would be subscribed after
- * the one that emitted error, never will.
- *
- * If you pass to `concat` the same Observable many times, its stream of values
- * will be "replayed" on every subscription, which means you can repeat given Observable
- * as many times as you like. If passing the same Observable to `concat` 1000 times becomes tedious,
- * you can always use {@link repeat}.
- *
- * @example <caption>Concatenate a timer counting from 0 to 3 with a synchronous sequence from 1 to 10</caption>
- * var timer = Rx.Observable.interval(1000).take(4);
- * var sequence = Rx.Observable.range(1, 10);
- * var result = Rx.Observable.concat(timer, sequence);
- * result.subscribe(x => console.log(x));
- *
- * // results in:
- * // 0 -1000ms-> 1 -1000ms-> 2 -1000ms-> 3 -immediate-> 1 ... 10
- *
- *
- * @example <caption>Concatenate an array of 3 Observables</caption>
- * var timer1 = Rx.Observable.interval(1000).take(10);
- * var timer2 = Rx.Observable.interval(2000).take(6);
- * var timer3 = Rx.Observable.interval(500).take(10);
- * var result = Rx.Observable.concat([timer1, timer2, timer3]); // note that array is passed
- * result.subscribe(x => console.log(x));
- *
- * // results in the following:
- * // (Prints to console sequentially)
- * // -1000ms-> 0 -1000ms-> 1 -1000ms-> ... 9
- * // -2000ms-> 0 -2000ms-> 1 -2000ms-> ... 5
- * // -500ms-> 0 -500ms-> 1 -500ms-> ... 9
- *
- *
- * @example <caption>Concatenate the same Observable to repeat it</caption>
- * const timer = Rx.Observable.interval(1000).take(2);
- *
- * Rx.Observable.concat(timer, timer) // concating the same Observable!
- * .subscribe(
- *   value => console.log(value),
- *   err => {},
- *   () => console.log('...and it is done!')
- * );
- *
- * // Logs:
- * // 0 after 1s
- * // 1 after 2s
- * // 0 after 3s
- * // 1 after 4s
- * // "...and it is done!" also after 4s
- *
- * @see {@link concatAll}
- * @see {@link concatMap}
- * @see {@link concatMapTo}
- *
- * @param {ObservableInput} input1 An input Observable to concatenate with others.
- * @param {ObservableInput} input2 An input Observable to concatenate with others.
- * More than one input Observables may be given as argument.
- * @param {Scheduler} [scheduler=null] An optional IScheduler to schedule each
- * Observable subscription on.
- * @return {Observable} All values of each passed Observable merged into a
- * single Observable, in order, in serial fashion.
- * @static true
- * @name concat
- * @owner Observable
- */
-function concat() {
-    var observables = [];
-    for (var _i = 0; _i < arguments.length; _i++) {
-        observables[_i] = arguments[_i];
-    }
-    if (observables.length === 1 || (observables.length === 2 && Object(__WEBPACK_IMPORTED_MODULE_0__util_isScheduler__["a" /* isScheduler */])(observables[1]))) {
-        return Object(__WEBPACK_IMPORTED_MODULE_2__from__["a" /* from */])(observables[0]);
-    }
-    return Object(__WEBPACK_IMPORTED_MODULE_3__operators_concatAll__["a" /* concatAll */])()(__WEBPACK_IMPORTED_MODULE_1__of__["a" /* of */].apply(void 0, observables));
-}
-//# sourceMappingURL=concat.js.map
-
-
-/***/ }),
-/* 67 */
+/* 72 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 /* harmony export (immutable) */ __webpack_exports__["a"] = mergeAll;
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__mergeMap__ = __webpack_require__(37);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__mergeMap__ = __webpack_require__(38);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__util_identity__ = __webpack_require__(25);
 /** PURE_IMPORTS_START _mergeMap,_util_identity PURE_IMPORTS_END */
 
 
-/**
- * Converts a higher-order Observable into a first-order Observable which
- * concurrently delivers all values that are emitted on the inner Observables.
- *
- * <span class="informal">Flattens an Observable-of-Observables.</span>
- *
- * <img src="./img/mergeAll.png" width="100%">
- *
- * `mergeAll` subscribes to an Observable that emits Observables, also known as
- * a higher-order Observable. Each time it observes one of these emitted inner
- * Observables, it subscribes to that and delivers all the values from the
- * inner Observable on the output Observable. The output Observable only
- * completes once all inner Observables have completed. Any error delivered by
- * a inner Observable will be immediately emitted on the output Observable.
- *
- * @example <caption>Spawn a new interval Observable for each click event, and blend their outputs as one Observable</caption>
- * var clicks = Rx.Observable.fromEvent(document, 'click');
- * var higherOrder = clicks.map((ev) => Rx.Observable.interval(1000));
- * var firstOrder = higherOrder.mergeAll();
- * firstOrder.subscribe(x => console.log(x));
- *
- * @example <caption>Count from 0 to 9 every second for each click, but only allow 2 concurrent timers</caption>
- * var clicks = Rx.Observable.fromEvent(document, 'click');
- * var higherOrder = clicks.map((ev) => Rx.Observable.interval(1000).take(10));
- * var firstOrder = higherOrder.mergeAll(2);
- * firstOrder.subscribe(x => console.log(x));
- *
- * @see {@link combineAll}
- * @see {@link concatAll}
- * @see {@link exhaust}
- * @see {@link merge}
- * @see {@link mergeMap}
- * @see {@link mergeMapTo}
- * @see {@link mergeScan}
- * @see {@link switch}
- * @see {@link zipAll}
- *
- * @param {number} [concurrent=Number.POSITIVE_INFINITY] Maximum number of inner
- * Observables being subscribed to concurrently.
- * @return {Observable} An Observable that emits values coming from all the
- * inner Observables emitted by the source Observable.
- * @method mergeAll
- * @owner Observable
- */
 function mergeAll(concurrent) {
     if (concurrent === void 0) {
         concurrent = Number.POSITIVE_INFINITY;
@@ -11459,64 +10387,18 @@ function mergeAll(concurrent) {
 
 
 /***/ }),
-/* 68 */
+/* 73 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 /* harmony export (immutable) */ __webpack_exports__["a"] = defer;
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__Observable__ = __webpack_require__(4);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__from__ = __webpack_require__(19);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__empty__ = __webpack_require__(13);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__empty__ = __webpack_require__(12);
 /** PURE_IMPORTS_START _Observable,_from,_empty PURE_IMPORTS_END */
 
- // lol
 
-/**
- * Creates an Observable that, on subscribe, calls an Observable factory to
- * make an Observable for each new Observer.
- *
- * <span class="informal">Creates the Observable lazily, that is, only when it
- * is subscribed.
- * </span>
- *
- * <img src="./img/defer.png" width="100%">
- *
- * `defer` allows you to create the Observable only when the Observer
- * subscribes, and create a fresh Observable for each Observer. It waits until
- * an Observer subscribes to it, and then it generates an Observable,
- * typically with an Observable factory function. It does this afresh for each
- * subscriber, so although each subscriber may think it is subscribing to the
- * same Observable, in fact each subscriber gets its own individual
- * Observable.
- *
- * @example <caption>Subscribe to either an Observable of clicks or an Observable of interval, at random</caption>
- * var clicksOrInterval = Rx.Observable.defer(function () {
- *   if (Math.random() > 0.5) {
- *     return Rx.Observable.fromEvent(document, 'click');
- *   } else {
- *     return Rx.Observable.interval(1000);
- *   }
- * });
- * clicksOrInterval.subscribe(x => console.log(x));
- *
- * // Results in the following behavior:
- * // If the result of Math.random() is greater than 0.5 it will listen
- * // for clicks anywhere on the "document"; when document is clicked it
- * // will log a MouseEvent object to the console. If the result is less
- * // than 0.5 it will emit ascending numbers, one every second(1000ms).
- *
- * @see {@link create}
- *
- * @param {function(): SubscribableOrPromise} observableFactory The Observable
- * factory function to invoke for each Observer that subscribes to the output
- * Observable. May also return a Promise, which will be converted on the fly
- * to an Observable.
- * @return {Observable} An Observable whose Observers' subscriptions trigger
- * an invocation of the given Observable factory function.
- * @static true
- * @name defer
- * @owner Observable
- */
+
 function defer(observableFactory) {
     return new __WEBPACK_IMPORTED_MODULE_0__Observable__["a" /* Observable */](function (subscriber) {
         var input;
@@ -11535,7 +10417,7 @@ function defer(observableFactory) {
 
 
 /***/ }),
-/* 69 */
+/* 74 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -11548,7 +10430,7 @@ function defer(observableFactory) {
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__Subscriber__ = __webpack_require__(2);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__OuterSubscriber__ = __webpack_require__(5);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_5__util_subscribeToResult__ = __webpack_require__(6);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_6__internal_symbol_iterator__ = __webpack_require__(36);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_6__internal_symbol_iterator__ = __webpack_require__(37);
 /** PURE_IMPORTS_START tslib,_fromArray,_util_isArray,_Subscriber,_OuterSubscriber,_util_subscribeToResult,_.._internal_symbol_iterator PURE_IMPORTS_END */
 
 
@@ -11557,38 +10439,6 @@ function defer(observableFactory) {
 
 
 
-/* tslint:enable:max-line-length */
-/**
- * Combines multiple Observables to create an Observable whose values are calculated from the values, in order, of each
- * of its input Observables.
- *
- * If the latest parameter is a function, this function is used to compute the created value from the input values.
- * Otherwise, an array of the input values is returned.
- *
- * @example <caption>Combine age and name from different sources</caption>
- *
- * let age$ = Observable.of<number>(27, 25, 29);
- * let name$ = Observable.of<string>('Foo', 'Bar', 'Beer');
- * let isDev$ = Observable.of<boolean>(true, true, false);
- *
- * Observable
- *     .zip(age$,
- *          name$,
- *          isDev$,
- *          (age: number, name: string, isDev: boolean) => ({ age, name, isDev }))
- *     .subscribe(x => console.log(x));
- *
- * // outputs
- * // { age: 27, name: 'Foo', isDev: true }
- * // { age: 25, name: 'Bar', isDev: true }
- * // { age: 29, name: 'Beer', isDev: false }
- *
- * @param observables
- * @return {Observable<R>}
- * @static true
- * @name zip
- * @owner Observable
- */
 function zip() {
     var observables = [];
     for (var _i = 0; _i < arguments.length; _i++) {
@@ -11610,11 +10460,6 @@ var ZipOperator = /*@__PURE__*/ (function () {
     return ZipOperator;
 }());
 
-/**
- * We need this JSDoc comment for affecting ESDoc.
- * @ignore
- * @extends {Ignored}
- */
 var ZipSubscriber = /*@__PURE__*/ (function (_super) {
     __WEBPACK_IMPORTED_MODULE_0_tslib__["a" /* __extends */](ZipSubscriber, _super);
     function ZipSubscriber(destination, resultSelector, values) {
@@ -11654,7 +10499,7 @@ var ZipSubscriber = /*@__PURE__*/ (function (_super) {
                 this.add(iterator.subscribe(iterator, i));
             }
             else {
-                this.active--; // not an observable
+                this.active--;
             }
         }
     };
@@ -11668,7 +10513,6 @@ var ZipSubscriber = /*@__PURE__*/ (function (_super) {
         var iterators = this.iterators;
         var len = iterators.length;
         var destination = this.destination;
-        // abort if not all of them have values
         for (var i = 0; i < len; i++) {
             var iterator = iterators[i];
             if (typeof iterator.hasValue === 'function' && !iterator.hasValue()) {
@@ -11680,8 +10524,6 @@ var ZipSubscriber = /*@__PURE__*/ (function (_super) {
         for (var i = 0; i < len; i++) {
             var iterator = iterators[i];
             var result = iterator.next();
-            // check to see if it's completed now that you've gotten
-            // the next value.
             if (iterator.hasCompleted()) {
                 shouldComplete = true;
             }
@@ -11757,11 +10599,6 @@ var StaticArrayIterator = /*@__PURE__*/ (function () {
     };
     return StaticArrayIterator;
 }());
-/**
- * We need this JSDoc comment for affecting ESDoc.
- * @ignore
- * @extends {Ignored}
- */
 var ZipBufferIterator = /*@__PURE__*/ (function (_super) {
     __WEBPACK_IMPORTED_MODULE_0_tslib__["a" /* __extends */](ZipBufferIterator, _super);
     function ZipBufferIterator(destination, parent, observable) {
@@ -11776,8 +10613,6 @@ var ZipBufferIterator = /*@__PURE__*/ (function (_super) {
     ZipBufferIterator.prototype[__WEBPACK_IMPORTED_MODULE_6__internal_symbol_iterator__["a" /* iterator */]] = function () {
         return this;
     };
-    // NOTE: there is actually a name collision here with Subscriber.next and Iterator.next
-    //    this is legit because `next()` will never be called by a subscription in this case.
     ZipBufferIterator.prototype.next = function () {
         var buffer = this.buffer;
         if (buffer.length === 0 && this.isComplete) {
@@ -11815,53 +10650,20 @@ var ZipBufferIterator = /*@__PURE__*/ (function (_super) {
 
 
 /***/ }),
-/* 70 */
+/* 75 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 /* harmony export (immutable) */ __webpack_exports__["a"] = take;
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_tslib__ = __webpack_require__(1);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__Subscriber__ = __webpack_require__(2);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__util_ArgumentOutOfRangeError__ = __webpack_require__(34);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__observable_empty__ = __webpack_require__(13);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__util_ArgumentOutOfRangeError__ = __webpack_require__(35);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__observable_empty__ = __webpack_require__(12);
 /** PURE_IMPORTS_START tslib,_Subscriber,_util_ArgumentOutOfRangeError,_observable_empty PURE_IMPORTS_END */
 
 
 
 
-/**
- * Emits only the first `count` values emitted by the source Observable.
- *
- * <span class="informal">Takes the first `count` values from the source, then
- * completes.</span>
- *
- * <img src="./img/take.png" width="100%">
- *
- * `take` returns an Observable that emits only the first `count` values emitted
- * by the source Observable. If the source emits fewer than `count` values then
- * all of its values are emitted. After that, it completes, regardless if the
- * source completes.
- *
- * @example <caption>Take the first 5 seconds of an infinite 1-second interval Observable</caption>
- * var interval = Rx.Observable.interval(1000);
- * var five = interval.take(5);
- * five.subscribe(x => console.log(x));
- *
- * @see {@link takeLast}
- * @see {@link takeUntil}
- * @see {@link takeWhile}
- * @see {@link skip}
- *
- * @throws {ArgumentOutOfRangeError} When using `take(i)`, it delivers an
- * ArgumentOutOrRangeError to the Observer's `error` callback if `i < 0`.
- *
- * @param {number} count The maximum number of `next` values to emit.
- * @return {Observable<T>} An Observable that emits only the first `count`
- * values emitted by the source Observable, or all of the values from the source
- * if the source emits fewer than `count` values.
- * @method take
- * @owner Observable
- */
 function take(count) {
     return function (source) {
         if (count === 0) {
@@ -11884,11 +10686,6 @@ var TakeOperator = /*@__PURE__*/ (function () {
     };
     return TakeOperator;
 }());
-/**
- * We need this JSDoc comment for affecting ESDoc.
- * @ignore
- * @extends {Ignored}
- */
 var TakeSubscriber = /*@__PURE__*/ (function (_super) {
     __WEBPACK_IMPORTED_MODULE_0_tslib__["a" /* __extends */](TakeSubscriber, _super);
     function TakeSubscriber(destination, total) {
@@ -11914,56 +10711,20 @@ var TakeSubscriber = /*@__PURE__*/ (function (_super) {
 
 
 /***/ }),
-/* 71 */
+/* 76 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 /* harmony export (immutable) */ __webpack_exports__["a"] = takeLast;
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_tslib__ = __webpack_require__(1);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__Subscriber__ = __webpack_require__(2);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__util_ArgumentOutOfRangeError__ = __webpack_require__(34);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__observable_empty__ = __webpack_require__(13);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__util_ArgumentOutOfRangeError__ = __webpack_require__(35);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__observable_empty__ = __webpack_require__(12);
 /** PURE_IMPORTS_START tslib,_Subscriber,_util_ArgumentOutOfRangeError,_observable_empty PURE_IMPORTS_END */
 
 
 
 
-/**
- * Emits only the last `count` values emitted by the source Observable.
- *
- * <span class="informal">Remembers the latest `count` values, then emits those
- * only when the source completes.</span>
- *
- * <img src="./img/takeLast.png" width="100%">
- *
- * `takeLast` returns an Observable that emits at most the last `count` values
- * emitted by the source Observable. If the source emits fewer than `count`
- * values then all of its values are emitted. This operator must wait until the
- * `complete` notification emission from the source in order to emit the `next`
- * values on the output Observable, because otherwise it is impossible to know
- * whether or not more values will be emitted on the source. For this reason,
- * all values are emitted synchronously, followed by the complete notification.
- *
- * @example <caption>Take the last 3 values of an Observable with many values</caption>
- * var many = Rx.Observable.range(1, 100);
- * var lastThree = many.pipe(takeLast(3));
- * lastThree.subscribe(x => console.log(x));
- *
- * @see {@link take}
- * @see {@link takeUntil}
- * @see {@link takeWhile}
- * @see {@link skip}
- *
- * @throws {ArgumentOutOfRangeError} When using `takeLast(i)`, it delivers an
- * ArgumentOutOrRangeError to the Observer's `error` callback if `i < 0`.
- *
- * @param {number} count The maximum number of values to emit from the end of
- * the sequence of values emitted by the source Observable.
- * @return {Observable<T>} An Observable that emits at most the last count
- * values emitted by the source Observable.
- * @method takeLast
- * @owner Observable
- */
 function takeLast(count) {
     return function takeLastOperatorFunction(source) {
         if (count === 0) {
@@ -11986,11 +10747,6 @@ var TakeLastOperator = /*@__PURE__*/ (function () {
     };
     return TakeLastOperator;
 }());
-/**
- * We need this JSDoc comment for affecting ESDoc.
- * @ignore
- * @extends {Ignored}
- */
 var TakeLastSubscriber = /*@__PURE__*/ (function (_super) {
     __WEBPACK_IMPORTED_MODULE_0_tslib__["a" /* __extends */](TakeLastSubscriber, _super);
     function TakeLastSubscriber(destination, total) {
@@ -12031,7 +10787,7 @@ var TakeLastSubscriber = /*@__PURE__*/ (function (_super) {
 
 
 /***/ }),
-/* 72 */
+/* 77 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -12041,51 +10797,8 @@ var TakeLastSubscriber = /*@__PURE__*/ (function (_super) {
 /** PURE_IMPORTS_START tslib,_Subscriber PURE_IMPORTS_END */
 
 
-/* tslint:enable:max-line-length */
-/**
- * Applies an accumulator function over the source Observable, and returns each
- * intermediate result, with an optional seed value.
- *
- * <span class="informal">It's like {@link reduce}, but emits the current
- * accumulation whenever the source emits a value.</span>
- *
- * <img src="./img/scan.png" width="100%">
- *
- * Combines together all values emitted on the source, using an accumulator
- * function that knows how to join a new source value into the accumulation from
- * the past. Is similar to {@link reduce}, but emits the intermediate
- * accumulations.
- *
- * Returns an Observable that applies a specified `accumulator` function to each
- * item emitted by the source Observable. If a `seed` value is specified, then
- * that value will be used as the initial value for the accumulator. If no seed
- * value is specified, the first item of the source is used as the seed.
- *
- * @example <caption>Count the number of click events</caption>
- * var clicks = Rx.Observable.fromEvent(document, 'click');
- * var ones = clicks.mapTo(1);
- * var seed = 0;
- * var count = ones.scan((acc, one) => acc + one, seed);
- * count.subscribe(x => console.log(x));
- *
- * @see {@link expand}
- * @see {@link mergeScan}
- * @see {@link reduce}
- *
- * @param {function(acc: R, value: T, index: number): R} accumulator
- * The accumulator function called on each source value.
- * @param {T|R} [seed] The initial accumulation value.
- * @return {Observable<R>} An observable of the accumulated values.
- * @method scan
- * @owner Observable
- */
 function scan(accumulator, seed) {
     var hasSeed = false;
-    // providing a seed of `undefined` *should* be valid and trigger
-    // hasSeed! so don't use `seed !== undefined` checks!
-    // For this reason, we have to check it here at the original call site
-    // otherwise inside Operator/Subscriber we won't know if `undefined`
-    // means they didn't provide anything or if they literally provided `undefined`
     if (arguments.length >= 2) {
         hasSeed = true;
     }
@@ -12107,11 +10820,6 @@ var ScanOperator = /*@__PURE__*/ (function () {
     };
     return ScanOperator;
 }());
-/**
- * We need this JSDoc comment for affecting ESDoc.
- * @ignore
- * @extends {Ignored}
- */
 var ScanSubscriber = /*@__PURE__*/ (function (_super) {
     __WEBPACK_IMPORTED_MODULE_0_tslib__["a" /* __extends */](ScanSubscriber, _super);
     function ScanSubscriber(destination, accumulator, _seed, hasSeed) {
@@ -12160,7 +10868,7 @@ var ScanSubscriber = /*@__PURE__*/ (function (_super) {
 
 
 /***/ }),
-/* 73 */
+/* 78 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -12176,46 +10884,6 @@ var ScanSubscriber = /*@__PURE__*/ (function (_super) {
 
 
 
-/* tslint:enable:max-line-length */
-/**
- * Projects each source value to an Observable which is merged in the output
- * Observable, emitting values only from the most recently projected Observable.
- *
- * <span class="informal">Maps each value to an Observable, then flattens all of
- * these inner Observables using {@link switch}.</span>
- *
- * <img src="./img/switchMap.png" width="100%">
- *
- * Returns an Observable that emits items based on applying a function that you
- * supply to each item emitted by the source Observable, where that function
- * returns an (so-called "inner") Observable. Each time it observes one of these
- * inner Observables, the output Observable begins emitting the items emitted by
- * that inner Observable. When a new inner Observable is emitted, `switchMap`
- * stops emitting items from the earlier-emitted inner Observable and begins
- * emitting items from the new one. It continues to behave like this for
- * subsequent inner Observables.
- *
- * @example <caption>Rerun an interval Observable on every click event</caption>
- * var clicks = Rx.Observable.fromEvent(document, 'click');
- * var result = clicks.switchMap((ev) => Rx.Observable.interval(1000));
- * result.subscribe(x => console.log(x));
- *
- * @see {@link concatMap}
- * @see {@link exhaustMap}
- * @see {@link mergeMap}
- * @see {@link switch}
- * @see {@link switchMapTo}
- *
- * @param {function(value: T, ?index: number): ObservableInput} project A function
- * that, when applied to an item emitted by the source Observable, returns an
- * Observable.
- * @return {Observable} An Observable that emits the result of applying the
- * projection function (and the optional `resultSelector`) to each item emitted
- * by the source Observable and taking only the values from the most recently
- * projected inner Observable.
- * @method switchMap
- * @owner Observable
- */
 function switchMap(project, resultSelector) {
     if (typeof resultSelector === 'function') {
         return function (source) { return source.pipe(switchMap(function (a, i) { return Object(__WEBPACK_IMPORTED_MODULE_4__observable_from__["a" /* from */])(project(a, i)).pipe(Object(__WEBPACK_IMPORTED_MODULE_3__map__["a" /* map */])(function (b, ii) { return resultSelector(a, b, i, ii); })); })); };
@@ -12231,11 +10899,6 @@ var SwitchMapOperator = /*@__PURE__*/ (function () {
     };
     return SwitchMapOperator;
 }());
-/**
- * We need this JSDoc comment for affecting ESDoc.
- * @ignore
- * @extends {Ignored}
- */
 var SwitchMapSubscriber = /*@__PURE__*/ (function (_super) {
     __WEBPACK_IMPORTED_MODULE_0_tslib__["a" /* __extends */](SwitchMapSubscriber, _super);
     function SwitchMapSubscriber(destination, project) {
@@ -12288,11 +10951,11 @@ var SwitchMapSubscriber = /*@__PURE__*/ (function (_super) {
 
 
 /***/ }),
-/* 74 */
+/* 79 */
 /***/ (function(module, exports, __webpack_require__) {
 
 /* MIT license */
-var cssKeywords = __webpack_require__(258);
+var cssKeywords = __webpack_require__(260);
 
 // NOTE: conversions should only return primitive values (i.e. arrays, or
 //       values that give correct `typeof` results).
@@ -13155,7 +11818,7 @@ convert.rgb.gray = function (rgb) {
 
 
 /***/ }),
-/* 75 */
+/* 80 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -13183,7 +11846,7 @@ function clone (obj) {
 
 
 /***/ }),
-/* 76 */
+/* 81 */
 /***/ (function(module, exports, __webpack_require__) {
 
 var path = __webpack_require__(3);
@@ -13287,7 +11950,7 @@ mkdirP.sync = function sync (p, opts, made) {
 
 
 /***/ }),
-/* 77 */
+/* 82 */
 /***/ (function(module, exports, __webpack_require__) {
 
 module.exports = realpath
@@ -13359,7 +12022,7 @@ function unmonkeypatch () {
 
 
 /***/ }),
-/* 78 */
+/* 83 */
 /***/ (function(module, exports, __webpack_require__) {
 
 try {
@@ -13372,7 +12035,7 @@ try {
 
 
 /***/ }),
-/* 79 */
+/* 84 */
 /***/ (function(module, exports, __webpack_require__) {
 
 exports.alphasort = alphasort
@@ -13390,8 +12053,8 @@ function ownProp (obj, field) {
 }
 
 var path = __webpack_require__(3)
-var minimatch = __webpack_require__(53)
-var isAbsolute = __webpack_require__(54)
+var minimatch = __webpack_require__(58)
+var isAbsolute = __webpack_require__(59)
 var Minimatch = minimatch.Minimatch
 
 function alphasorti (a, b) {
@@ -13618,7 +12281,7 @@ function childrenIgnored (self, path) {
 
 
 /***/ }),
-/* 80 */
+/* 85 */
 /***/ (function(module, exports) {
 
 // Returns a wrapper function that returns a wrapped callback
@@ -13657,10 +12320,10 @@ function wrappy (fn, cb) {
 
 
 /***/ }),
-/* 81 */
+/* 86 */
 /***/ (function(module, exports, __webpack_require__) {
 
-var wrappy = __webpack_require__(80)
+var wrappy = __webpack_require__(85)
 module.exports = wrappy(once)
 module.exports.strict = wrappy(onceStrict)
 
@@ -13705,7 +12368,7 @@ function onceStrict (fn) {
 
 
 /***/ }),
-/* 82 */
+/* 87 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -13718,7 +12381,7 @@ exports.Project = undefined;
 
 var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
 
-var _chalk = __webpack_require__(14);
+var _chalk = __webpack_require__(18);
 
 var _chalk2 = _interopRequireDefault(_chalk);
 
@@ -13726,11 +12389,11 @@ var _path = __webpack_require__(3);
 
 var _util = __webpack_require__(10);
 
-var _errors = __webpack_require__(55);
+var _errors = __webpack_require__(60);
 
 var _log = __webpack_require__(20);
 
-var _package_json = __webpack_require__(41);
+var _package_json = __webpack_require__(42);
 
 var _scripts = __webpack_require__(310);
 
@@ -13861,7 +12524,7 @@ function normalizePath(path) {
 }
 
 /***/ }),
-/* 83 */
+/* 88 */
 /***/ (function(module, exports, __webpack_require__) {
 
 module.exports = normalize
@@ -13906,13 +12569,13 @@ function ucFirst (string) {
 
 
 /***/ }),
-/* 84 */
+/* 89 */
 /***/ (function(module, exports) {
 
 module.exports = require("url");
 
 /***/ }),
-/* 85 */
+/* 90 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -13987,7 +12650,7 @@ Object.keys(gitHosts).forEach(function (name) {
 
 
 /***/ }),
-/* 86 */
+/* 91 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -14049,7 +12712,7 @@ module.exports = (obj, opts) => {
 
 
 /***/ }),
-/* 87 */
+/* 92 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -14139,7 +12802,7 @@ module.exports.sync = (input, opts) => {
 
 
 /***/ }),
-/* 88 */
+/* 93 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -14147,7 +12810,7 @@ module.exports.sync = (input, opts) => {
 
 var path = __webpack_require__(3);
 var which = __webpack_require__(315);
-var LRU = __webpack_require__(89);
+var LRU = __webpack_require__(94);
 
 var commandCache = new LRU({ max: 50, maxAge: 30 * 1000 });  // Cache just for 30sec
 
@@ -14177,7 +12840,7 @@ module.exports = resolveCommand;
 
 
 /***/ }),
-/* 89 */
+/* 94 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -14651,7 +13314,7 @@ function Entry (key, value, length, now, maxAge) {
 
 
 /***/ }),
-/* 90 */
+/* 95 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -14688,12 +13351,12 @@ module.exports = escapeArgument;
 
 
 /***/ }),
-/* 91 */
+/* 96 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
-const chalk = __webpack_require__(14);
+const chalk = __webpack_require__(338);
 
 const isSupported = process.platform !== 'win32' || process.env.CI || process.env.TERM === 'xterm-256color';
 
@@ -14715,7 +13378,7 @@ module.exports = isSupported ? main : fallbacks;
 
 
 /***/ }),
-/* 92 */
+/* 97 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -14730,9 +13393,9 @@ var stream = __webpack_require__(22);
 var util = __webpack_require__(10);
 var fs = __webpack_require__(7);
 
-var byline = __webpack_require__(339);
-var through = __webpack_require__(341);
-var duplexer = __webpack_require__(342);
+var byline = __webpack_require__(343);
+var through = __webpack_require__(345);
+var duplexer = __webpack_require__(346);
 var moment = __webpack_require__(0);
 
 module.exports = Logger;
@@ -14894,7 +13557,7 @@ function lineMerger(host) {
 
 
 /***/ }),
-/* 93 */
+/* 98 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -14973,7 +13636,7 @@ return af;
 
 
 /***/ }),
-/* 94 */
+/* 99 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -15121,7 +13784,7 @@ return ar;
 
 
 /***/ }),
-/* 95 */
+/* 100 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -15186,7 +13849,7 @@ return arDz;
 
 
 /***/ }),
-/* 96 */
+/* 101 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -15251,7 +13914,7 @@ return arKw;
 
 
 /***/ }),
-/* 97 */
+/* 102 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -15383,7 +14046,7 @@ return arLy;
 
 
 /***/ }),
-/* 98 */
+/* 103 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -15449,7 +14112,7 @@ return arMa;
 
 
 /***/ }),
-/* 99 */
+/* 104 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -15560,7 +14223,7 @@ return arSa;
 
 
 /***/ }),
-/* 100 */
+/* 105 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -15625,7 +14288,7 @@ return arTn;
 
 
 /***/ }),
-/* 101 */
+/* 106 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -15736,7 +14399,7 @@ return az;
 
 
 /***/ }),
-/* 102 */
+/* 107 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -15876,7 +14539,7 @@ return be;
 
 
 /***/ }),
-/* 103 */
+/* 108 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -15972,7 +14635,7 @@ return bg;
 
 
 /***/ }),
-/* 104 */
+/* 109 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -16037,7 +14700,7 @@ return bm;
 
 
 /***/ }),
-/* 105 */
+/* 110 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -16162,7 +14825,7 @@ return bn;
 
 
 /***/ }),
-/* 106 */
+/* 111 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -16287,7 +14950,7 @@ return bo;
 
 
 /***/ }),
-/* 107 */
+/* 112 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -16401,7 +15064,7 @@ return br;
 
 
 /***/ }),
-/* 108 */
+/* 113 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -16559,7 +15222,7 @@ return bs;
 
 
 /***/ }),
-/* 109 */
+/* 114 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -16653,7 +15316,7 @@ return ca;
 
 
 /***/ }),
-/* 110 */
+/* 115 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -16838,7 +15501,7 @@ return cs;
 
 
 /***/ }),
-/* 111 */
+/* 116 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -16907,7 +15570,7 @@ return cv;
 
 
 /***/ }),
-/* 112 */
+/* 117 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -16994,7 +15657,7 @@ return cy;
 
 
 /***/ }),
-/* 113 */
+/* 118 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -17060,7 +15723,7 @@ return da;
 
 
 /***/ }),
-/* 114 */
+/* 119 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -17144,7 +15807,7 @@ return de;
 
 
 /***/ }),
-/* 115 */
+/* 120 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -17229,7 +15892,7 @@ return deAt;
 
 
 /***/ }),
-/* 116 */
+/* 121 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -17313,7 +15976,7 @@ return deCh;
 
 
 /***/ }),
-/* 117 */
+/* 122 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -17419,7 +16082,7 @@ return dv;
 
 
 /***/ }),
-/* 118 */
+/* 123 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -17525,7 +16188,7 @@ return el;
 
 
 /***/ }),
-/* 119 */
+/* 124 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -17598,7 +16261,7 @@ return enAu;
 
 
 /***/ }),
-/* 120 */
+/* 125 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -17667,7 +16330,7 @@ return enCa;
 
 
 /***/ }),
-/* 121 */
+/* 126 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -17740,7 +16403,7 @@ return enGb;
 
 
 /***/ }),
-/* 122 */
+/* 127 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -17813,7 +16476,7 @@ return enIe;
 
 
 /***/ }),
-/* 123 */
+/* 128 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -17886,7 +16549,7 @@ return enNz;
 
 
 /***/ }),
-/* 124 */
+/* 129 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -17965,7 +16628,7 @@ return eo;
 
 
 /***/ }),
-/* 125 */
+/* 130 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -18063,7 +16726,7 @@ return es;
 
 
 /***/ }),
-/* 126 */
+/* 131 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -18160,7 +16823,7 @@ return esDo;
 
 
 /***/ }),
-/* 127 */
+/* 132 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -18249,7 +16912,7 @@ return esUs;
 
 
 /***/ }),
-/* 128 */
+/* 133 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -18336,7 +16999,7 @@ return et;
 
 
 /***/ }),
-/* 129 */
+/* 134 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -18408,7 +17071,7 @@ return eu;
 
 
 /***/ }),
-/* 130 */
+/* 135 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -18521,7 +17184,7 @@ return fa;
 
 
 /***/ }),
-/* 131 */
+/* 136 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -18636,7 +17299,7 @@ return fi;
 
 
 /***/ }),
-/* 132 */
+/* 137 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -18702,7 +17365,7 @@ return fo;
 
 
 /***/ }),
-/* 133 */
+/* 138 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -18791,7 +17454,7 @@ return fr;
 
 
 /***/ }),
-/* 134 */
+/* 139 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -18871,7 +17534,7 @@ return frCa;
 
 
 /***/ }),
-/* 135 */
+/* 140 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -18955,7 +17618,7 @@ return frCh;
 
 
 /***/ }),
-/* 136 */
+/* 141 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -19036,7 +17699,7 @@ return fy;
 
 
 /***/ }),
-/* 137 */
+/* 142 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -19118,7 +17781,7 @@ return gd;
 
 
 /***/ }),
-/* 138 */
+/* 143 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -19201,7 +17864,7 @@ return gl;
 
 
 /***/ }),
-/* 139 */
+/* 144 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -19330,7 +17993,7 @@ return gomLatn;
 
 
 /***/ }),
-/* 140 */
+/* 145 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -19460,7 +18123,7 @@ return gu;
 
 
 /***/ }),
-/* 141 */
+/* 146 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -19565,7 +18228,7 @@ return he;
 
 
 /***/ }),
-/* 142 */
+/* 147 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -19695,7 +18358,7 @@ return hi;
 
 
 /***/ }),
-/* 143 */
+/* 148 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -19855,7 +18518,7 @@ return hr;
 
 
 /***/ }),
-/* 144 */
+/* 149 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -19971,7 +18634,7 @@ return hu;
 
 
 /***/ }),
-/* 145 */
+/* 150 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -20072,7 +18735,7 @@ return hyAm;
 
 
 /***/ }),
-/* 146 */
+/* 151 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -20161,7 +18824,7 @@ return id;
 
 
 /***/ }),
-/* 147 */
+/* 152 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -20299,7 +18962,7 @@ return is;
 
 
 /***/ }),
-/* 148 */
+/* 153 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -20375,7 +19038,7 @@ return it;
 
 
 /***/ }),
-/* 149 */
+/* 154 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -20461,7 +19124,7 @@ return ja;
 
 
 /***/ }),
-/* 150 */
+/* 155 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -20550,7 +19213,7 @@ return jv;
 
 
 /***/ }),
-/* 151 */
+/* 156 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -20645,7 +19308,7 @@ return ka;
 
 
 /***/ }),
-/* 152 */
+/* 157 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -20738,7 +19401,7 @@ return kk;
 
 
 /***/ }),
-/* 153 */
+/* 158 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -20802,7 +19465,7 @@ return km;
 
 
 /***/ }),
-/* 154 */
+/* 159 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -20934,7 +19597,7 @@ return kn;
 
 
 /***/ }),
-/* 155 */
+/* 160 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -21022,7 +19685,7 @@ return ko;
 
 
 /***/ }),
-/* 156 */
+/* 161 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -21116,7 +19779,7 @@ return ky;
 
 
 /***/ }),
-/* 157 */
+/* 162 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -21259,7 +19922,7 @@ return lb;
 
 
 /***/ }),
-/* 158 */
+/* 163 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -21335,7 +19998,7 @@ return lo;
 
 
 /***/ }),
-/* 159 */
+/* 164 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -21459,7 +20122,7 @@ return lt;
 
 
 /***/ }),
-/* 160 */
+/* 165 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -21563,7 +20226,7 @@ return lv;
 
 
 /***/ }),
-/* 161 */
+/* 166 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -21681,7 +20344,7 @@ return me;
 
 
 /***/ }),
-/* 162 */
+/* 167 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -21751,7 +20414,7 @@ return mi;
 
 
 /***/ }),
-/* 163 */
+/* 168 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -21847,7 +20510,7 @@ return mk;
 
 
 /***/ }),
-/* 164 */
+/* 169 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -21934,7 +20597,7 @@ return ml;
 
 
 /***/ }),
-/* 165 */
+/* 170 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -22101,7 +20764,7 @@ return mr;
 
 
 /***/ }),
-/* 166 */
+/* 171 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -22189,7 +20852,7 @@ return ms;
 
 
 /***/ }),
-/* 167 */
+/* 172 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -22278,7 +20941,7 @@ return msMy;
 
 
 /***/ }),
-/* 168 */
+/* 173 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -22344,7 +21007,7 @@ return mt;
 
 
 /***/ }),
-/* 169 */
+/* 174 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -22446,7 +21109,7 @@ return my;
 
 
 /***/ }),
-/* 170 */
+/* 175 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -22515,7 +21178,7 @@ return nb;
 
 
 /***/ }),
-/* 171 */
+/* 176 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -22644,7 +21307,7 @@ return ne;
 
 
 /***/ }),
-/* 172 */
+/* 177 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -22738,7 +21401,7 @@ return nl;
 
 
 /***/ }),
-/* 173 */
+/* 178 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -22832,7 +21495,7 @@ return nlBe;
 
 
 /***/ }),
-/* 174 */
+/* 179 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -22898,7 +21561,7 @@ return nn;
 
 
 /***/ }),
-/* 175 */
+/* 180 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -23028,7 +21691,7 @@ return paIn;
 
 
 /***/ }),
-/* 176 */
+/* 181 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -23160,7 +21823,7 @@ return pl;
 
 
 /***/ }),
-/* 177 */
+/* 182 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -23231,7 +21894,7 @@ return pt;
 
 
 /***/ }),
-/* 178 */
+/* 183 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -23298,7 +21961,7 @@ return ptBr;
 
 
 /***/ }),
-/* 179 */
+/* 184 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -23380,7 +22043,7 @@ return ro;
 
 
 /***/ }),
-/* 180 */
+/* 185 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -23570,7 +22233,7 @@ return ru;
 
 
 /***/ }),
-/* 181 */
+/* 186 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -23674,7 +22337,7 @@ return sd;
 
 
 /***/ }),
-/* 182 */
+/* 187 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -23741,7 +22404,7 @@ return se;
 
 
 /***/ }),
-/* 183 */
+/* 188 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -23818,7 +22481,7 @@ return si;
 
 
 /***/ }),
-/* 184 */
+/* 189 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -23981,7 +22644,7 @@ return sk;
 
 
 /***/ }),
-/* 185 */
+/* 190 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -24160,7 +22823,7 @@ return sl;
 
 
 /***/ }),
-/* 186 */
+/* 191 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -24236,7 +22899,7 @@ return sq;
 
 
 /***/ }),
-/* 187 */
+/* 192 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -24353,7 +23016,7 @@ return sr;
 
 
 /***/ }),
-/* 188 */
+/* 193 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -24470,7 +23133,7 @@ return srCyrl;
 
 
 /***/ }),
-/* 189 */
+/* 194 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -24565,7 +23228,7 @@ return ss;
 
 
 /***/ }),
-/* 190 */
+/* 195 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -24640,7 +23303,7 @@ return sv;
 
 
 /***/ }),
-/* 191 */
+/* 196 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -24705,7 +23368,7 @@ return sw;
 
 
 /***/ }),
-/* 192 */
+/* 197 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -24841,7 +23504,7 @@ return ta;
 
 
 /***/ }),
-/* 193 */
+/* 198 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -24936,7 +23599,7 @@ return te;
 
 
 /***/ }),
-/* 194 */
+/* 199 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -25010,7 +23673,7 @@ return tet;
 
 
 /***/ }),
-/* 195 */
+/* 200 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -25083,7 +23746,7 @@ return th;
 
 
 /***/ }),
-/* 196 */
+/* 201 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -25151,7 +23814,7 @@ return tlPh;
 
 
 /***/ }),
-/* 197 */
+/* 202 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -25279,7 +23942,7 @@ return tlh;
 
 
 /***/ }),
-/* 198 */
+/* 203 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -25375,7 +24038,7 @@ return tr;
 
 
 /***/ }),
-/* 199 */
+/* 204 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -25473,7 +24136,7 @@ return tzl;
 
 
 /***/ }),
-/* 200 */
+/* 205 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -25537,7 +24200,7 @@ return tzm;
 
 
 /***/ }),
-/* 201 */
+/* 206 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -25601,7 +24264,7 @@ return tzmLatn;
 
 
 /***/ }),
-/* 202 */
+/* 207 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -25759,7 +24422,7 @@ return uk;
 
 
 /***/ }),
-/* 203 */
+/* 208 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -25864,7 +24527,7 @@ return ur;
 
 
 /***/ }),
-/* 204 */
+/* 209 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -25928,7 +24591,7 @@ return uz;
 
 
 /***/ }),
-/* 205 */
+/* 210 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -25992,7 +24655,7 @@ return uzLatn;
 
 
 /***/ }),
-/* 206 */
+/* 211 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -26077,7 +24740,7 @@ return vi;
 
 
 /***/ }),
-/* 207 */
+/* 212 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -26151,7 +24814,7 @@ return xPseudo;
 
 
 /***/ }),
-/* 208 */
+/* 213 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -26217,7 +24880,7 @@ return yo;
 
 
 /***/ }),
-/* 209 */
+/* 214 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -26334,7 +24997,7 @@ return zhCn;
 
 
 /***/ }),
-/* 210 */
+/* 215 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -26445,7 +25108,7 @@ return zhHk;
 
 
 /***/ }),
-/* 211 */
+/* 216 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -26555,18 +25218,18 @@ return zhTw;
 
 
 /***/ }),
-/* 212 */
+/* 217 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 const path = __webpack_require__(3);
-const globby = __webpack_require__(348);
-const isPathCwd = __webpack_require__(352);
-const isPathInCwd = __webpack_require__(353);
+const globby = __webpack_require__(352);
+const isPathCwd = __webpack_require__(356);
+const isPathInCwd = __webpack_require__(357);
 const pify = __webpack_require__(23);
-const rimraf = __webpack_require__(356);
-const pMap = __webpack_require__(357);
+const rimraf = __webpack_require__(360);
+const pMap = __webpack_require__(361);
 
 const rimrafP = pify(rimraf);
 
@@ -26632,22 +25295,22 @@ module.exports.sync = (patterns, opts) => {
 
 
 /***/ }),
-/* 213 */
+/* 218 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
-module.exports = typeof Promise === 'function' ? Promise : __webpack_require__(349);
+module.exports = typeof Promise === 'function' ? Promise : __webpack_require__(353);
 
 
 /***/ }),
-/* 214 */
+/* 219 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
-var arrayUniq = __webpack_require__(350);
+var arrayUniq = __webpack_require__(354);
 
 module.exports = function () {
 	return arrayUniq([].concat.apply([], arguments));
@@ -26655,7 +25318,7 @@ module.exports = function () {
 
 
 /***/ }),
-/* 215 */
+/* 220 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -26752,13 +25415,13 @@ module.exports = shouldUseNative() ? Object.assign : function (target, source) {
 
 
 /***/ }),
-/* 216 */
+/* 221 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return empty; });
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__config__ = __webpack_require__(42);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__util_hostReportError__ = __webpack_require__(58);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__config__ = __webpack_require__(43);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__util_hostReportError__ = __webpack_require__(63);
 /** PURE_IMPORTS_START _config,_util_hostReportError PURE_IMPORTS_END */
 
 
@@ -26779,7 +25442,7 @@ var empty = {
 
 
 /***/ }),
-/* 217 */
+/* 222 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -26792,7 +25455,7 @@ function isObject(x) {
 
 
 /***/ }),
-/* 218 */
+/* 223 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -26800,10 +25463,6 @@ function isObject(x) {
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_tslib__ = __webpack_require__(1);
 /** PURE_IMPORTS_START tslib PURE_IMPORTS_END */
 
-/**
- * An error thrown when one or more errors have occurred during the
- * `unsubscribe` of a {@link Subscription}.
- */
 var UnsubscriptionError = /*@__PURE__*/ (function (_super) {
     __WEBPACK_IMPORTED_MODULE_0_tslib__["a" /* __extends */](UnsubscriptionError, _super);
     function UnsubscriptionError(errors) {
@@ -26821,7 +25480,7 @@ var UnsubscriptionError = /*@__PURE__*/ (function (_super) {
 
 
 /***/ }),
-/* 219 */
+/* 224 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -26832,7 +25491,7 @@ var UnsubscriptionError = /*@__PURE__*/ (function (_super) {
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__Observable__ = __webpack_require__(4);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__Subscriber__ = __webpack_require__(2);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__Subscription__ = __webpack_require__(8);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_5__operators_refCount__ = __webpack_require__(61);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_5__operators_refCount__ = __webpack_require__(66);
 /** PURE_IMPORTS_START tslib,_Subject,_Observable,_Subscriber,_Subscription,_operators_refCount PURE_IMPORTS_END */
 
 
@@ -26840,9 +25499,6 @@ var UnsubscriptionError = /*@__PURE__*/ (function (_super) {
 
 
 
-/**
- * @class ConnectableObservable<T>
- */
 var ConnectableObservable = /*@__PURE__*/ (function (_super) {
     __WEBPACK_IMPORTED_MODULE_0_tslib__["a" /* __extends */](ConnectableObservable, _super);
     function ConnectableObservable(source, subjectFactory) {
@@ -26850,11 +25506,9 @@ var ConnectableObservable = /*@__PURE__*/ (function (_super) {
         _this.source = source;
         _this.subjectFactory = subjectFactory;
         _this._refCount = 0;
-        /** @internal */
         _this._isComplete = false;
         return _this;
     }
-    /** @deprecated This is an internal implementation detail, do not use. */
     ConnectableObservable.prototype._subscribe = function (subscriber) {
         return this.getSubject().subscribe(subscriber);
     };
@@ -26971,29 +25625,6 @@ var RefCountSubscriber = /*@__PURE__*/ (function (_super) {
             this.connection = null;
             return;
         }
-        ///
-        // Compare the local RefCountSubscriber's connection Subscription to the
-        // connection Subscription on the shared ConnectableObservable. In cases
-        // where the ConnectableObservable source synchronously emits values, and
-        // the RefCountSubscriber's downstream Observers synchronously unsubscribe,
-        // execution continues to here before the RefCountOperator has a chance to
-        // supply the RefCountSubscriber with the shared connection Subscription.
-        // For example:
-        // ```
-        // Observable.range(0, 10)
-        //   .publish()
-        //   .refCount()
-        //   .take(5)
-        //   .subscribe();
-        // ```
-        // In order to account for this case, RefCountSubscriber should only dispose
-        // the ConnectableObservable's shared connection Subscription if the
-        // connection Subscription exists, *and* either:
-        //   a. RefCountSubscriber doesn't have a reference to the shared connection
-        //      Subscription yet, or,
-        //   b. RefCountSubscriber's connection Subscription reference is identical
-        //      to the shared connection Subscription
-        ///
         var connection = this.connection;
         var sharedConnection = connectable._connection;
         this.connection = null;
@@ -27007,7 +25638,7 @@ var RefCountSubscriber = /*@__PURE__*/ (function (_super) {
 
 
 /***/ }),
-/* 220 */
+/* 225 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -27017,11 +25648,6 @@ var RefCountSubscriber = /*@__PURE__*/ (function (_super) {
 /** PURE_IMPORTS_START tslib,_Subscription PURE_IMPORTS_END */
 
 
-/**
- * We need this JSDoc comment for affecting ESDoc.
- * @ignore
- * @extends {Ignored}
- */
 var SubjectSubscription = /*@__PURE__*/ (function (_super) {
     __WEBPACK_IMPORTED_MODULE_0_tslib__["a" /* __extends */](SubjectSubscription, _super);
     function SubjectSubscription(subject, subscriber) {
@@ -27054,7 +25680,7 @@ var SubjectSubscription = /*@__PURE__*/ (function (_super) {
 
 
 /***/ }),
-/* 221 */
+/* 226 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -27071,74 +25697,6 @@ var SubjectSubscription = /*@__PURE__*/ (function (_super) {
 
 
 
-/* tslint:enable:max-line-length */
-/**
- * Groups the items emitted by an Observable according to a specified criterion,
- * and emits these grouped items as `GroupedObservables`, one
- * {@link GroupedObservable} per group.
- *
- * <img src="./img/groupBy.png" width="100%">
- *
- * @example <caption>Group objects by id and return as array</caption>
- * Observable.of<Obj>({id: 1, name: 'aze1'},
- *                    {id: 2, name: 'sf2'},
- *                    {id: 2, name: 'dg2'},
- *                    {id: 1, name: 'erg1'},
- *                    {id: 1, name: 'df1'},
- *                    {id: 2, name: 'sfqfb2'},
- *                    {id: 3, name: 'qfs3'},
- *                    {id: 2, name: 'qsgqsfg2'}
- *     )
- *     .groupBy(p => p.id)
- *     .flatMap( (group$) => group$.reduce((acc, cur) => [...acc, cur], []))
- *     .subscribe(p => console.log(p));
- *
- * // displays:
- * // [ { id: 1, name: 'aze1' },
- * //   { id: 1, name: 'erg1' },
- * //   { id: 1, name: 'df1' } ]
- * //
- * // [ { id: 2, name: 'sf2' },
- * //   { id: 2, name: 'dg2' },
- * //   { id: 2, name: 'sfqfb2' },
- * //   { id: 2, name: 'qsgqsfg2' } ]
- * //
- * // [ { id: 3, name: 'qfs3' } ]
- *
- * @example <caption>Pivot data on the id field</caption>
- * Observable.of<Obj>({id: 1, name: 'aze1'},
- *                    {id: 2, name: 'sf2'},
- *                    {id: 2, name: 'dg2'},
- *                    {id: 1, name: 'erg1'},
- *                    {id: 1, name: 'df1'},
- *                    {id: 2, name: 'sfqfb2'},
- *                    {id: 3, name: 'qfs1'},
- *                    {id: 2, name: 'qsgqsfg2'}
- *                   )
- *     .groupBy(p => p.id, p => p.name)
- *     .flatMap( (group$) => group$.reduce((acc, cur) => [...acc, cur], ["" + group$.key]))
- *     .map(arr => ({'id': parseInt(arr[0]), 'values': arr.slice(1)}))
- *     .subscribe(p => console.log(p));
- *
- * // displays:
- * // { id: 1, values: [ 'aze1', 'erg1', 'df1' ] }
- * // { id: 2, values: [ 'sf2', 'dg2', 'sfqfb2', 'qsgqsfg2' ] }
- * // { id: 3, values: [ 'qfs1' ] }
- *
- * @param {function(value: T): K} keySelector A function that extracts the key
- * for each item.
- * @param {function(value: T): R} [elementSelector] A function that extracts the
- * return element for each item.
- * @param {function(grouped: GroupedObservable<K,R>): Observable<any>} [durationSelector]
- * A function that returns an Observable to determine how long each group should
- * exist.
- * @return {Observable<GroupedObservable<K,R>>} An Observable that emits
- * GroupedObservables, each of which corresponds to a unique key value and each
- * of which emits those items from the source Observable that share that key
- * value.
- * @method groupBy
- * @owner Observable
- */
 function groupBy(keySelector, elementSelector, durationSelector, subjectSelector) {
     return function (source) {
         return source.lift(new GroupByOperator(keySelector, elementSelector, durationSelector, subjectSelector));
@@ -27156,11 +25714,6 @@ var GroupByOperator = /*@__PURE__*/ (function () {
     };
     return GroupByOperator;
 }());
-/**
- * We need this JSDoc comment for affecting ESDoc.
- * @ignore
- * @extends {Ignored}
- */
 var GroupBySubscriber = /*@__PURE__*/ (function (_super) {
     __WEBPACK_IMPORTED_MODULE_0_tslib__["a" /* __extends */](GroupBySubscriber, _super);
     function GroupBySubscriber(destination, keySelector, elementSelector, durationSelector, subjectSelector) {
@@ -27257,11 +25810,6 @@ var GroupBySubscriber = /*@__PURE__*/ (function (_super) {
     };
     return GroupBySubscriber;
 }(__WEBPACK_IMPORTED_MODULE_1__Subscriber__["a" /* Subscriber */]));
-/**
- * We need this JSDoc comment for affecting ESDoc.
- * @ignore
- * @extends {Ignored}
- */
 var GroupDurationSubscriber = /*@__PURE__*/ (function (_super) {
     __WEBPACK_IMPORTED_MODULE_0_tslib__["a" /* __extends */](GroupDurationSubscriber, _super);
     function GroupDurationSubscriber(key, group, parent) {
@@ -27274,7 +25822,6 @@ var GroupDurationSubscriber = /*@__PURE__*/ (function (_super) {
     GroupDurationSubscriber.prototype._next = function (value) {
         this.complete();
     };
-    /** @deprecated This is an internal implementation detail, do not use. */
     GroupDurationSubscriber.prototype._unsubscribe = function () {
         var _a = this, parent = _a.parent, key = _a.key;
         this.key = this.parent = null;
@@ -27284,17 +25831,8 @@ var GroupDurationSubscriber = /*@__PURE__*/ (function (_super) {
     };
     return GroupDurationSubscriber;
 }(__WEBPACK_IMPORTED_MODULE_1__Subscriber__["a" /* Subscriber */]));
-/**
- * An Observable representing values belonging to the same group represented by
- * a common key. The values emitted by a GroupedObservable come from the source
- * Observable. The common key is available as the field `key` on a
- * GroupedObservable instance.
- *
- * @class GroupedObservable<K, T>
- */
 var GroupedObservable = /*@__PURE__*/ (function (_super) {
     __WEBPACK_IMPORTED_MODULE_0_tslib__["a" /* __extends */](GroupedObservable, _super);
-    /** @deprecated Do not construct this type. Internal use only */
     function GroupedObservable(key, groupSubject, refCountSubscription) {
         var _this = _super.call(this) || this;
         _this.key = key;
@@ -27302,7 +25840,6 @@ var GroupedObservable = /*@__PURE__*/ (function (_super) {
         _this.refCountSubscription = refCountSubscription;
         return _this;
     }
-    /** @deprecated This is an internal implementation detail, do not use. */
     GroupedObservable.prototype._subscribe = function (subscriber) {
         var subscription = new __WEBPACK_IMPORTED_MODULE_2__Subscription__["a" /* Subscription */]();
         var _a = this, refCountSubscription = _a.refCountSubscription, groupSubject = _a.groupSubject;
@@ -27315,11 +25852,6 @@ var GroupedObservable = /*@__PURE__*/ (function (_super) {
     return GroupedObservable;
 }(__WEBPACK_IMPORTED_MODULE_3__Observable__["a" /* Observable */]));
 
-/**
- * We need this JSDoc comment for affecting ESDoc.
- * @ignore
- * @extends {Ignored}
- */
 var InnerRefCountSubscription = /*@__PURE__*/ (function (_super) {
     __WEBPACK_IMPORTED_MODULE_0_tslib__["a" /* __extends */](InnerRefCountSubscription, _super);
     function InnerRefCountSubscription(parent) {
@@ -27344,21 +25876,18 @@ var InnerRefCountSubscription = /*@__PURE__*/ (function (_super) {
 
 
 /***/ }),
-/* 222 */
+/* 227 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return BehaviorSubject; });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_tslib__ = __webpack_require__(1);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__Subject__ = __webpack_require__(9);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__util_ObjectUnsubscribedError__ = __webpack_require__(44);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__util_ObjectUnsubscribedError__ = __webpack_require__(45);
 /** PURE_IMPORTS_START tslib,_Subject,_util_ObjectUnsubscribedError PURE_IMPORTS_END */
 
 
 
-/**
- * @class BehaviorSubject<T>
- */
 var BehaviorSubject = /*@__PURE__*/ (function (_super) {
     __WEBPACK_IMPORTED_MODULE_0_tslib__["a" /* __extends */](BehaviorSubject, _super);
     function BehaviorSubject(_value) {
@@ -27373,7 +25902,6 @@ var BehaviorSubject = /*@__PURE__*/ (function (_super) {
         enumerable: true,
         configurable: true
     });
-    /** @deprecated This is an internal implementation detail, do not use. */
     BehaviorSubject.prototype._subscribe = function (subscriber) {
         var subscription = _super.prototype._subscribe.call(this, subscriber);
         if (subscription && !subscription.closed) {
@@ -27402,106 +25930,26 @@ var BehaviorSubject = /*@__PURE__*/ (function (_super) {
 
 
 /***/ }),
-/* 223 */
+/* 228 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return queue; });
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__QueueAction__ = __webpack_require__(370);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__QueueScheduler__ = __webpack_require__(372);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__QueueAction__ = __webpack_require__(378);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__QueueScheduler__ = __webpack_require__(380);
 /** PURE_IMPORTS_START _QueueAction,_QueueScheduler PURE_IMPORTS_END */
 
 
-/**
- *
- * Queue Scheduler
- *
- * <span class="informal">Put every next task on a queue, instead of executing it immediately</span>
- *
- * `queue` scheduler, when used with delay, behaves the same as {@link async} scheduler.
- *
- * When used without delay, it schedules given task synchronously - executes it right when
- * it is scheduled. However when called recursively, that is when inside the scheduled task,
- * another task is scheduled with queue scheduler, instead of executing immediately as well,
- * that task will be put on a queue and wait for current one to finish.
- *
- * This means that when you execute task with `queue` scheduler, you are sure it will end
- * before any other task scheduled with that scheduler will start.
- *
- * @examples <caption>Schedule recursively first, then do something</caption>
- *
- * Rx.Scheduler.queue.schedule(() => {
- *   Rx.Scheduler.queue.schedule(() => console.log('second')); // will not happen now, but will be put on a queue
- *
- *   console.log('first');
- * });
- *
- * // Logs:
- * // "first"
- * // "second"
- *
- *
- * @example <caption>Reschedule itself recursively</caption>
- *
- * Rx.Scheduler.queue.schedule(function(state) {
- *   if (state !== 0) {
- *     console.log('before', state);
- *     this.schedule(state - 1); // `this` references currently executing Action,
- *                               // which we reschedule with new state
- *     console.log('after', state);
- *   }
- * }, 0, 3);
- *
- * // In scheduler that runs recursively, you would expect:
- * // "before", 3
- * // "before", 2
- * // "before", 1
- * // "after", 1
- * // "after", 2
- * // "after", 3
- *
- * // But with queue it logs:
- * // "before", 3
- * // "after", 3
- * // "before", 2
- * // "after", 2
- * // "before", 1
- * // "after", 1
- *
- *
- * @static true
- * @name queue
- * @owner Scheduler
- */
 var queue = /*@__PURE__*/ new __WEBPACK_IMPORTED_MODULE_1__QueueScheduler__["a" /* QueueScheduler */](__WEBPACK_IMPORTED_MODULE_0__QueueAction__["a" /* QueueAction */]);
 //# sourceMappingURL=queue.js.map
 
 
 /***/ }),
-/* 224 */
+/* 229 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return Scheduler; });
-/**
- * An execution context and a data structure to order tasks and schedule their
- * execution. Provides a notion of (potentially virtual) time, through the
- * `now()` getter method.
- *
- * Each unit of work in a Scheduler is called an {@link Action}.
- *
- * ```ts
- * class Scheduler {
- *   now(): number;
- *   schedule(work, delay?, state?): Subscription;
- * }
- * ```
- *
- * @class Scheduler
- * @deprecated Scheduler is an internal implementation detail of RxJS, and
- * should not be used directly. Rather, create your own class and implement
- * {@link SchedulerLike}
- */
 var Scheduler = /*@__PURE__*/ (function () {
     function Scheduler(SchedulerAction, now) {
         if (now === void 0) {
@@ -27510,30 +25958,12 @@ var Scheduler = /*@__PURE__*/ (function () {
         this.SchedulerAction = SchedulerAction;
         this.now = now;
     }
-    /**
-     * Schedules a function, `work`, for execution. May happen at some point in
-     * the future, according to the `delay` parameter, if specified. May be passed
-     * some context object, `state`, which will be passed to the `work` function.
-     *
-     * The given arguments will be processed an stored as an Action object in a
-     * queue of actions.
-     *
-     * @param {function(state: ?T): ?Subscription} work A function representing a
-     * task, or some unit of work to be executed by the Scheduler.
-     * @param {number} [delay] Time to wait before executing the work, where the
-     * time unit is implicit and defined by the Scheduler itself.
-     * @param {T} [state] Some contextual data that the `work` function uses when
-     * called by the Scheduler.
-     * @return {Subscription} A subscription in order to be able to unsubscribe
-     * the scheduled work.
-     */
     Scheduler.prototype.schedule = function (work, delay, state) {
         if (delay === void 0) {
             delay = 0;
         }
         return new this.SchedulerAction(this, work).schedule(state, delay);
     };
-    /** @nocollapse */
     Scheduler.now = Date.now ? Date.now : function () { return +new Date(); };
     return Scheduler;
 }());
@@ -27542,7 +25972,7 @@ var Scheduler = /*@__PURE__*/ (function () {
 
 
 /***/ }),
-/* 225 */
+/* 230 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -27552,57 +25982,11 @@ var Scheduler = /*@__PURE__*/ (function () {
 /* unused harmony export ObserveOnMessage */
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_tslib__ = __webpack_require__(1);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__Subscriber__ = __webpack_require__(2);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__Notification__ = __webpack_require__(45);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__Notification__ = __webpack_require__(46);
 /** PURE_IMPORTS_START tslib,_Subscriber,_Notification PURE_IMPORTS_END */
 
 
 
-/**
- *
- * Re-emits all notifications from source Observable with specified scheduler.
- *
- * <span class="informal">Ensure a specific scheduler is used, from outside of an Observable.</span>
- *
- * `observeOn` is an operator that accepts a scheduler as a first parameter, which will be used to reschedule
- * notifications emitted by the source Observable. It might be useful, if you do not have control over
- * internal scheduler of a given Observable, but want to control when its values are emitted nevertheless.
- *
- * Returned Observable emits the same notifications (nexted values, complete and error events) as the source Observable,
- * but rescheduled with provided scheduler. Note that this doesn't mean that source Observables internal
- * scheduler will be replaced in any way. Original scheduler still will be used, but when the source Observable emits
- * notification, it will be immediately scheduled again - this time with scheduler passed to `observeOn`.
- * An anti-pattern would be calling `observeOn` on Observable that emits lots of values synchronously, to split
- * that emissions into asynchronous chunks. For this to happen, scheduler would have to be passed into the source
- * Observable directly (usually into the operator that creates it). `observeOn` simply delays notifications a
- * little bit more, to ensure that they are emitted at expected moments.
- *
- * As a matter of fact, `observeOn` accepts second parameter, which specifies in milliseconds with what delay notifications
- * will be emitted. The main difference between {@link delay} operator and `observeOn` is that `observeOn`
- * will delay all notifications - including error notifications - while `delay` will pass through error
- * from source Observable immediately when it is emitted. In general it is highly recommended to use `delay` operator
- * for any kind of delaying of values in the stream, while using `observeOn` to specify which scheduler should be used
- * for notification emissions in general.
- *
- * @example <caption>Ensure values in subscribe are called just before browser repaint.</caption>
- * const intervals = Rx.Observable.interval(10); // Intervals are scheduled
- *                                               // with async scheduler by default...
- *
- * intervals
- * .observeOn(Rx.Scheduler.animationFrame)       // ...but we will observe on animationFrame
- * .subscribe(val => {                           // scheduler to ensure smooth animation.
- *   someDiv.style.height = val + 'px';
- * });
- *
- * @see {@link delay}
- *
- * @param {SchedulerLike} scheduler Scheduler that will be used to reschedule notifications from source Observable.
- * @param {number} [delay] Number of milliseconds that states with what delay every notification should be rescheduled.
- * @return {Observable<T>} Observable that emits the same notifications as the source Observable,
- * but with provided scheduler.
- *
- * @method observeOn
- * @owner Observable
- */
 function observeOn(scheduler, delay) {
     if (delay === void 0) {
         delay = 0;
@@ -27625,11 +26009,6 @@ var ObserveOnOperator = /*@__PURE__*/ (function () {
     return ObserveOnOperator;
 }());
 
-/**
- * We need this JSDoc comment for affecting ESDoc.
- * @ignore
- * @extends {Ignored}
- */
 var ObserveOnSubscriber = /*@__PURE__*/ (function (_super) {
     __WEBPACK_IMPORTED_MODULE_0_tslib__["a" /* __extends */](ObserveOnSubscriber, _super);
     function ObserveOnSubscriber(destination, scheduler, delay) {
@@ -27641,7 +26020,6 @@ var ObserveOnSubscriber = /*@__PURE__*/ (function (_super) {
         _this.delay = delay;
         return _this;
     }
-    /** @nocollapse */
     ObserveOnSubscriber.dispatch = function (arg) {
         var notification = arg.notification, destination = arg.destination;
         notification.observe(destination);
@@ -27674,15 +26052,11 @@ var ObserveOnMessage = /*@__PURE__*/ (function () {
 
 
 /***/ }),
-/* 226 */
+/* 231 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return subscribeToArray; });
-/**
- * Subscribes to an ArrayLike with a subscriber
- * @param array The array or array-like to subscribe to
- */
 /** PURE_IMPORTS_START  PURE_IMPORTS_END */
 var subscribeToArray = function (array) {
     return function (subscriber) {
@@ -27698,77 +26072,22 @@ var subscribeToArray = function (array) {
 
 
 /***/ }),
-/* 227 */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-/* harmony export (immutable) */ __webpack_exports__["a"] = scalar;
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__Observable__ = __webpack_require__(4);
-/** PURE_IMPORTS_START _Observable PURE_IMPORTS_END */
-
-function scalar(value) {
-    var result = new __WEBPACK_IMPORTED_MODULE_0__Observable__["a" /* Observable */](function (subscriber) {
-        subscriber.next(value);
-        subscriber.complete();
-    });
-    result._isScalar = true;
-    result.value = value;
-    return result;
-}
-//# sourceMappingURL=scalar.js.map
-
-
-/***/ }),
-/* 228 */
+/* 232 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return asap; });
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__AsapAction__ = __webpack_require__(373);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__AsapScheduler__ = __webpack_require__(375);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__AsapAction__ = __webpack_require__(381);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__AsapScheduler__ = __webpack_require__(383);
 /** PURE_IMPORTS_START _AsapAction,_AsapScheduler PURE_IMPORTS_END */
 
 
-/**
- *
- * Asap Scheduler
- *
- * <span class="informal">Perform task as fast as it can be performed asynchronously</span>
- *
- * `asap` scheduler behaves the same as {@link async} scheduler when you use it to delay task
- * in time. If however you set delay to `0`, `asap` will wait for current synchronously executing
- * code to end and then it will try to execute given task as fast as possible.
- *
- * `asap` scheduler will do its best to minimize time between end of currently executing code
- * and start of scheduled task. This makes it best candidate for performing so called "deferring".
- * Traditionally this was achieved by calling `setTimeout(deferredTask, 0)`, but that technique involves
- * some (although minimal) unwanted delay.
- *
- * Note that using `asap` scheduler does not necessarily mean that your task will be first to process
- * after currently executing code. In particular, if some task was also scheduled with `asap` before,
- * that task will execute first. That being said, if you need to schedule task asynchronously, but
- * as soon as possible, `asap` scheduler is your best bet.
- *
- * @example <caption>Compare async and asap scheduler</caption>
- *
- * Rx.Scheduler.async.schedule(() => console.log('async')); // scheduling 'async' first...
- * Rx.Scheduler.asap.schedule(() => console.log('asap'));
- *
- * // Logs:
- * // "asap"
- * // "async"
- * // ... but 'asap' goes first!
- *
- * @static true
- * @name asap
- * @owner Scheduler
- */
 var asap = /*@__PURE__*/ new __WEBPACK_IMPORTED_MODULE_1__AsapScheduler__["a" /* AsapScheduler */](__WEBPACK_IMPORTED_MODULE_0__AsapAction__["a" /* AsapAction */]);
 //# sourceMappingURL=asap.js.map
 
 
 /***/ }),
-/* 229 */
+/* 233 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -27776,17 +26095,11 @@ var asap = /*@__PURE__*/ new __WEBPACK_IMPORTED_MODULE_1__AsapScheduler__["a" /*
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_tslib__ = __webpack_require__(1);
 /** PURE_IMPORTS_START tslib PURE_IMPORTS_END */
 
-/**
- * An error thrown when duetime elapses.
- *
- * @see {@link timeout}
- *
- * @class TimeoutError
- */
 var TimeoutError = /*@__PURE__*/ (function (_super) {
     __WEBPACK_IMPORTED_MODULE_0_tslib__["a" /* __extends */](TimeoutError, _super);
     function TimeoutError() {
         var _this = _super.call(this, 'Timeout has occurred') || this;
+        _this.name = 'TimeoutError';
         Object.setPrototypeOf(_this, TimeoutError.prototype);
         return _this;
     }
@@ -27797,20 +26110,20 @@ var TimeoutError = /*@__PURE__*/ (function (_super) {
 
 
 /***/ }),
-/* 230 */
+/* 234 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return subscribeTo; });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__Observable__ = __webpack_require__(4);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__subscribeToArray__ = __webpack_require__(226);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__subscribeToPromise__ = __webpack_require__(231);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__subscribeToIterable__ = __webpack_require__(232);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__subscribeToObservable__ = __webpack_require__(233);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_5__isArrayLike__ = __webpack_require__(234);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_6__isPromise__ = __webpack_require__(235);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_7__isObject__ = __webpack_require__(217);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_8__symbol_iterator__ = __webpack_require__(36);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__subscribeToArray__ = __webpack_require__(231);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__subscribeToPromise__ = __webpack_require__(235);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__subscribeToIterable__ = __webpack_require__(236);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__subscribeToObservable__ = __webpack_require__(237);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_5__isArrayLike__ = __webpack_require__(238);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_6__isPromise__ = __webpack_require__(239);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_7__isObject__ = __webpack_require__(222);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_8__symbol_iterator__ = __webpack_require__(37);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_9__symbol_observable__ = __webpack_require__(24);
 /** PURE_IMPORTS_START _Observable,_subscribeToArray,_subscribeToPromise,_subscribeToIterable,_subscribeToObservable,_isArrayLike,_isPromise,_isObject,_symbol_iterator,_symbol_observable PURE_IMPORTS_END */
 
@@ -27836,6 +26149,9 @@ var subscribeTo = function (result) {
             }
         };
     }
+    else if (result && typeof result[__WEBPACK_IMPORTED_MODULE_9__symbol_observable__["a" /* observable */]] === 'function') {
+        return Object(__WEBPACK_IMPORTED_MODULE_4__subscribeToObservable__["a" /* subscribeToObservable */])(result);
+    }
     else if (Object(__WEBPACK_IMPORTED_MODULE_5__isArrayLike__["a" /* isArrayLike */])(result)) {
         return Object(__WEBPACK_IMPORTED_MODULE_1__subscribeToArray__["a" /* subscribeToArray */])(result);
     }
@@ -27844,9 +26160,6 @@ var subscribeTo = function (result) {
     }
     else if (result && typeof result[__WEBPACK_IMPORTED_MODULE_8__symbol_iterator__["a" /* iterator */]] === 'function') {
         return Object(__WEBPACK_IMPORTED_MODULE_3__subscribeToIterable__["a" /* subscribeToIterable */])(result);
-    }
-    else if (result && typeof result[__WEBPACK_IMPORTED_MODULE_9__symbol_observable__["a" /* observable */]] === 'function') {
-        return Object(__WEBPACK_IMPORTED_MODULE_4__subscribeToObservable__["a" /* subscribeToObservable */])(result);
     }
     else {
         var value = Object(__WEBPACK_IMPORTED_MODULE_7__isObject__["a" /* isObject */])(result) ? 'an invalid object' : "'" + result + "'";
@@ -27859,12 +26172,12 @@ var subscribeTo = function (result) {
 
 
 /***/ }),
-/* 231 */
+/* 235 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return subscribeToPromise; });
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__hostReportError__ = __webpack_require__(58);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__hostReportError__ = __webpack_require__(63);
 /** PURE_IMPORTS_START _hostReportError PURE_IMPORTS_END */
 
 var subscribeToPromise = function (promise) {
@@ -27883,12 +26196,12 @@ var subscribeToPromise = function (promise) {
 
 
 /***/ }),
-/* 232 */
+/* 236 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return subscribeToIterable; });
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__symbol_iterator__ = __webpack_require__(36);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__symbol_iterator__ = __webpack_require__(37);
 /** PURE_IMPORTS_START _symbol_iterator PURE_IMPORTS_END */
 
 var subscribeToIterable = function (iterable) {
@@ -27905,7 +26218,6 @@ var subscribeToIterable = function (iterable) {
                 break;
             }
         } while (true);
-        // Finalize the iterator if it happens to be a Generator
         if (typeof iterator.return === 'function') {
             subscriber.add(function () {
                 if (iterator.return) {
@@ -27920,7 +26232,7 @@ var subscribeToIterable = function (iterable) {
 
 
 /***/ }),
-/* 233 */
+/* 237 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -27928,16 +26240,10 @@ var subscribeToIterable = function (iterable) {
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__symbol_observable__ = __webpack_require__(24);
 /** PURE_IMPORTS_START _symbol_observable PURE_IMPORTS_END */
 
-/**
- * Subscribes to an object that implements Symbol.observable with the given
- * Subscriber.
- * @param obj An object that implements Symbol.observable
- */
 var subscribeToObservable = function (obj) {
     return function (subscriber) {
         var obs = obj[__WEBPACK_IMPORTED_MODULE_0__symbol_observable__["a" /* observable */]]();
         if (typeof obs.subscribe !== 'function') {
-            // Should be caught by observable subscribe function error handling.
             throw new TypeError('Provided object does not correctly implement Symbol.observable');
         }
         else {
@@ -27949,7 +26255,7 @@ var subscribeToObservable = function (obj) {
 
 
 /***/ }),
-/* 234 */
+/* 238 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -27960,7 +26266,7 @@ var isArrayLike = (function (x) { return x && typeof x.length === 'number' && ty
 
 
 /***/ }),
-/* 235 */
+/* 239 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -27973,62 +26279,14 @@ function isPromise(value) {
 
 
 /***/ }),
-/* 236 */
+/* 240 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 /* harmony export (immutable) */ __webpack_exports__["a"] = concatAll;
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__mergeAll__ = __webpack_require__(67);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__mergeAll__ = __webpack_require__(72);
 /** PURE_IMPORTS_START _mergeAll PURE_IMPORTS_END */
 
-/**
- * Converts a higher-order Observable into a first-order Observable by
- * concatenating the inner Observables in order.
- *
- * <span class="informal">Flattens an Observable-of-Observables by putting one
- * inner Observable after the other.</span>
- *
- * <img src="./img/concatAll.png" width="100%">
- *
- * Joins every Observable emitted by the source (a higher-order Observable), in
- * a serial fashion. It subscribes to each inner Observable only after the
- * previous inner Observable has completed, and merges all of their values into
- * the returned observable.
- *
- * __Warning:__ If the source Observable emits Observables quickly and
- * endlessly, and the inner Observables it emits generally complete slower than
- * the source emits, you can run into memory issues as the incoming Observables
- * collect in an unbounded buffer.
- *
- * Note: `concatAll` is equivalent to `mergeAll` with concurrency parameter set
- * to `1`.
- *
- * @example <caption>For each click event, tick every second from 0 to 3, with no concurrency</caption>
- * var clicks = Rx.Observable.fromEvent(document, 'click');
- * var higherOrder = clicks.map(ev => Rx.Observable.interval(1000).take(4));
- * var firstOrder = higherOrder.concatAll();
- * firstOrder.subscribe(x => console.log(x));
- *
- * // Results in the following:
- * // (results are not concurrent)
- * // For every click on the "document" it will emit values 0 to 3 spaced
- * // on a 1000ms interval
- * // one click = 1000ms-> 0 -1000ms-> 1 -1000ms-> 2 -1000ms-> 3
- *
- * @see {@link combineAll}
- * @see {@link concat}
- * @see {@link concatMap}
- * @see {@link concatMapTo}
- * @see {@link exhaust}
- * @see {@link mergeAll}
- * @see {@link switch}
- * @see {@link zipAll}
- *
- * @return {Observable} An Observable emitting values from all the inner
- * Observables concatenated.
- * @method concatAll
- * @owner Observable
- */
 function concatAll() {
     return Object(__WEBPACK_IMPORTED_MODULE_0__mergeAll__["a" /* mergeAll */])(1);
 }
@@ -28036,81 +26294,20 @@ function concatAll() {
 
 
 /***/ }),
-/* 237 */
+/* 241 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 /* harmony export (immutable) */ __webpack_exports__["a"] = merge;
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__Observable__ = __webpack_require__(4);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__util_isScheduler__ = __webpack_require__(18);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__operators_mergeAll__ = __webpack_require__(67);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__util_isScheduler__ = __webpack_require__(15);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__operators_mergeAll__ = __webpack_require__(72);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__fromArray__ = __webpack_require__(21);
 /** PURE_IMPORTS_START _Observable,_util_isScheduler,_operators_mergeAll,_fromArray PURE_IMPORTS_END */
 
 
 
 
-/* tslint:enable:max-line-length */
-/**
- * Creates an output Observable which concurrently emits all values from every
- * given input Observable.
- *
- * <span class="informal">Flattens multiple Observables together by blending
- * their values into one Observable.</span>
- *
- * <img src="./img/merge.png" width="100%">
- *
- * `merge` subscribes to each given input Observable (as arguments), and simply
- * forwards (without doing any transformation) all the values from all the input
- * Observables to the output Observable. The output Observable only completes
- * once all input Observables have completed. Any error delivered by an input
- * Observable will be immediately emitted on the output Observable.
- *
- * @example <caption>Merge together two Observables: 1s interval and clicks</caption>
- * var clicks = Rx.Observable.fromEvent(document, 'click');
- * var timer = Rx.Observable.interval(1000);
- * var clicksOrTimer = Rx.Observable.merge(clicks, timer);
- * clicksOrTimer.subscribe(x => console.log(x));
- *
- * // Results in the following:
- * // timer will emit ascending values, one every second(1000ms) to console
- * // clicks logs MouseEvents to console everytime the "document" is clicked
- * // Since the two streams are merged you see these happening
- * // as they occur.
- *
- * @example <caption>Merge together 3 Observables, but only 2 run concurrently</caption>
- * var timer1 = Rx.Observable.interval(1000).take(10);
- * var timer2 = Rx.Observable.interval(2000).take(6);
- * var timer3 = Rx.Observable.interval(500).take(10);
- * var concurrent = 2; // the argument
- * var merged = Rx.Observable.merge(timer1, timer2, timer3, concurrent);
- * merged.subscribe(x => console.log(x));
- *
- * // Results in the following:
- * // - First timer1 and timer2 will run concurrently
- * // - timer1 will emit a value every 1000ms for 10 iterations
- * // - timer2 will emit a value every 2000ms for 6 iterations
- * // - after timer1 hits it's max iteration, timer2 will
- * //   continue, and timer3 will start to run concurrently with timer2
- * // - when timer2 hits it's max iteration it terminates, and
- * //   timer3 will continue to emit a value every 500ms until it is complete
- *
- * @see {@link mergeAll}
- * @see {@link mergeMap}
- * @see {@link mergeMapTo}
- * @see {@link mergeScan}
- *
- * @param {...ObservableInput} observables Input Observables to merge together.
- * @param {number} [concurrent=Number.POSITIVE_INFINITY] Maximum number of input
- * Observables being subscribed to concurrently.
- * @param {Scheduler} [scheduler=null] The IScheduler to use for managing
- * concurrency of input Observables.
- * @return {Observable} an Observable that emits items that are the result of
- * every input Observable.
- * @static true
- * @name merge
- * @owner Observable
- */
 function merge() {
     var observables = [];
     for (var _i = 0; _i < arguments.length; _i++) {
@@ -28137,44 +26334,18 @@ function merge() {
 
 
 /***/ }),
-/* 238 */
+/* 242 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return NEVER; });
 /* harmony export (immutable) */ __webpack_exports__["b"] = never;
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__Observable__ = __webpack_require__(4);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__util_noop__ = __webpack_require__(43);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__util_noop__ = __webpack_require__(44);
 /** PURE_IMPORTS_START _Observable,_util_noop PURE_IMPORTS_END */
 
 
-/**
- * An Observable that emits no items to the Observer and never completes.
- *
- * <img src="./img/never.png" width="100%">
- *
- * A simple Observable that emits neither values nor errors nor the completion
- * notification. It can be used for testing purposes or for composing with other
- * Observables. Please note that by never emitting a complete notification, this
- * Observable keeps the subscription from being disposed automatically.
- * Subscriptions need to be manually disposed.
- *
- * @example <caption>Emit the number 7, then never emit anything else (not even complete).</caption>
- * function info() {
- *   console.log('Will not be called');
- * }
- * var result = NEVER.startWith(7);
- * result.subscribe(x => console.log(x), info, info);
- *
- * @see {@link create}
- * @see {@link EMPTY}
- * @see {@link of}
- * @see {@link throwError}
- */
 var NEVER = /*@__PURE__*/ new __WEBPACK_IMPORTED_MODULE_0__Observable__["a" /* Observable */](__WEBPACK_IMPORTED_MODULE_1__util_noop__["a" /* noop */]);
-/**
- * @deprecated Deprecated in favor of using NEVER constant.
- */
 function never() {
     return NEVER;
 }
@@ -28182,7 +26353,7 @@ function never() {
 
 
 /***/ }),
-/* 239 */
+/* 243 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -28205,8 +26376,6 @@ function race() {
     for (var _i = 0; _i < arguments.length; _i++) {
         observables[_i] = arguments[_i];
     }
-    // if the only argument is an array, it was most likely called with
-    // `race([obs1, obs2, ...])`
     if (observables.length === 1) {
         if (Object(__WEBPACK_IMPORTED_MODULE_1__util_isArray__["a" /* isArray */])(observables[0])) {
             observables = observables[0];
@@ -28226,11 +26395,6 @@ var RaceOperator = /*@__PURE__*/ (function () {
     return RaceOperator;
 }());
 
-/**
- * We need this JSDoc comment for affecting ESDoc.
- * @ignore
- * @extends {Ignored}
- */
 var RaceSubscriber = /*@__PURE__*/ (function (_super) {
     __WEBPACK_IMPORTED_MODULE_0_tslib__["a" /* __extends */](RaceSubscriber, _super);
     function RaceSubscriber(destination) {
@@ -28282,62 +26446,20 @@ var RaceSubscriber = /*@__PURE__*/ (function (_super) {
 
 
 /***/ }),
-/* 240 */
+/* 244 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 /* harmony export (immutable) */ __webpack_exports__["a"] = timer;
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__Observable__ = __webpack_require__(4);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__scheduler_async__ = __webpack_require__(12);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__util_isNumeric__ = __webpack_require__(47);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__util_isScheduler__ = __webpack_require__(18);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__scheduler_async__ = __webpack_require__(13);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__util_isNumeric__ = __webpack_require__(49);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__util_isScheduler__ = __webpack_require__(15);
 /** PURE_IMPORTS_START _Observable,_scheduler_async,_util_isNumeric,_util_isScheduler PURE_IMPORTS_END */
 
 
 
 
-/**
- * Creates an Observable that starts emitting after an `initialDelay` and
- * emits ever increasing numbers after each `period` of time thereafter.
- *
- * <span class="informal">Its like {@link interval}, but you can specify when
- * should the emissions start.</span>
- *
- * <img src="./img/timer.png" width="100%">
- *
- * `timer` returns an Observable that emits an infinite sequence of ascending
- * integers, with a constant interval of time, `period` of your choosing
- * between those emissions. The first emission happens after the specified
- * `initialDelay`. The initial delay may be a {@link Date}. By default, this
- * operator uses the `async` IScheduler to provide a notion of time, but you
- * may pass any IScheduler to it. If `period` is not specified, the output
- * Observable emits only one value, `0`. Otherwise, it emits an infinite
- * sequence.
- *
- * @example <caption>Emits ascending numbers, one every second (1000ms), starting after 3 seconds</caption>
- * var numbers = Rx.Observable.timer(3000, 1000);
- * numbers.subscribe(x => console.log(x));
- *
- * @example <caption>Emits one number after five seconds</caption>
- * var numbers = Rx.Observable.timer(5000);
- * numbers.subscribe(x => console.log(x));
- *
- * @see {@link interval}
- * @see {@link delay}
- *
- * @param {number|Date} [dueTime] The initial delay time to wait before
- * emitting the first value of `0`.
- * @param {number|SchedulerLike} [periodOrScheduler] The period of time between emissions of the
- * subsequent numbers.
- * @param {SchedulerLike} [scheduler=async] The IScheduler to use for scheduling
- * the emission of values, and providing a notion of "time".
- * @return {Observable} An Observable that emits a `0` after the
- * `initialDelay` and ever increasing numbers after each `period` of time
- * thereafter.
- * @static true
- * @name timer
- * @owner Observable
- */
 function timer(dueTime, periodOrScheduler, scheduler) {
     if (dueTime === void 0) {
         dueTime = 0;
@@ -28377,14 +26499,14 @@ function dispatch(state) {
 
 
 /***/ }),
-/* 241 */
+/* 245 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 /* harmony export (immutable) */ __webpack_exports__["a"] = audit;
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_tslib__ = __webpack_require__(1);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__util_tryCatch__ = __webpack_require__(17);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__util_errorObject__ = __webpack_require__(15);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__util_errorObject__ = __webpack_require__(14);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__OuterSubscriber__ = __webpack_require__(5);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__util_subscribeToResult__ = __webpack_require__(6);
 /** PURE_IMPORTS_START tslib,_util_tryCatch,_util_errorObject,_OuterSubscriber,_util_subscribeToResult PURE_IMPORTS_END */
@@ -28393,46 +26515,6 @@ function dispatch(state) {
 
 
 
-/**
- * Ignores source values for a duration determined by another Observable, then
- * emits the most recent value from the source Observable, then repeats this
- * process.
- *
- * <span class="informal">It's like {@link auditTime}, but the silencing
- * duration is determined by a second Observable.</span>
- *
- * <img src="./img/audit.png" width="100%">
- *
- * `audit` is similar to `throttle`, but emits the last value from the silenced
- * time window, instead of the first value. `audit` emits the most recent value
- * from the source Observable on the output Observable as soon as its internal
- * timer becomes disabled, and ignores source values while the timer is enabled.
- * Initially, the timer is disabled. As soon as the first source value arrives,
- * the timer is enabled by calling the `durationSelector` function with the
- * source value, which returns the "duration" Observable. When the duration
- * Observable emits a value or completes, the timer is disabled, then the most
- * recent source value is emitted on the output Observable, and this process
- * repeats for the next source value.
- *
- * @example <caption>Emit clicks at a rate of at most one click per second</caption>
- * var clicks = Rx.Observable.fromEvent(document, 'click');
- * var result = clicks.audit(ev => Rx.Observable.interval(1000));
- * result.subscribe(x => console.log(x));
- *
- * @see {@link auditTime}
- * @see {@link debounce}
- * @see {@link delayWhen}
- * @see {@link sample}
- * @see {@link throttle}
- *
- * @param {function(value: T): SubscribableOrPromise} durationSelector A function
- * that receives a value from the source Observable, for computing the silencing
- * duration, returned as an Observable or a Promise.
- * @return {Observable<T>} An Observable that performs rate-limiting of
- * emissions from the source Observable.
- * @method audit
- * @owner Observable
- */
 function audit(durationSelector) {
     return function auditOperatorFunction(source) {
         return source.lift(new AuditOperator(durationSelector));
@@ -28447,11 +26529,6 @@ var AuditOperator = /*@__PURE__*/ (function () {
     };
     return AuditOperator;
 }());
-/**
- * We need this JSDoc comment for affecting ESDoc.
- * @ignore
- * @extends {Ignored}
- */
 var AuditSubscriber = /*@__PURE__*/ (function (_super) {
     __WEBPACK_IMPORTED_MODULE_0_tslib__["a" /* __extends */](AuditSubscriber, _super);
     function AuditSubscriber(destination, durationSelector) {
@@ -28504,66 +26581,14 @@ var AuditSubscriber = /*@__PURE__*/ (function (_super) {
 
 
 /***/ }),
-/* 242 */
+/* 246 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 /* harmony export (immutable) */ __webpack_exports__["a"] = concatMap;
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__mergeMap__ = __webpack_require__(37);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__mergeMap__ = __webpack_require__(38);
 /** PURE_IMPORTS_START _mergeMap PURE_IMPORTS_END */
 
-/* tslint:enable:max-line-length */
-/**
- * Projects each source value to an Observable which is merged in the output
- * Observable, in a serialized fashion waiting for each one to complete before
- * merging the next.
- *
- * <span class="informal">Maps each value to an Observable, then flattens all of
- * these inner Observables using {@link concatAll}.</span>
- *
- * <img src="./img/concatMap.png" width="100%">
- *
- * Returns an Observable that emits items based on applying a function that you
- * supply to each item emitted by the source Observable, where that function
- * returns an (so-called "inner") Observable. Each new inner Observable is
- * concatenated with the previous inner Observable.
- *
- * __Warning:__ if source values arrive endlessly and faster than their
- * corresponding inner Observables can complete, it will result in memory issues
- * as inner Observables amass in an unbounded buffer waiting for their turn to
- * be subscribed to.
- *
- * Note: `concatMap` is equivalent to `mergeMap` with concurrency parameter set
- * to `1`.
- *
- * @example <caption>For each click event, tick every second from 0 to 3, with no concurrency</caption>
- * var clicks = Rx.Observable.fromEvent(document, 'click');
- * var result = clicks.concatMap(ev => Rx.Observable.interval(1000).take(4));
- * result.subscribe(x => console.log(x));
- *
- * // Results in the following:
- * // (results are not concurrent)
- * // For every click on the "document" it will emit values 0 to 3 spaced
- * // on a 1000ms interval
- * // one click = 1000ms-> 0 -1000ms-> 1 -1000ms-> 2 -1000ms-> 3
- *
- * @see {@link concat}
- * @see {@link concatAll}
- * @see {@link concatMapTo}
- * @see {@link exhaustMap}
- * @see {@link mergeMap}
- * @see {@link switchMap}
- *
- * @param {function(value: T, ?index: number): ObservableInput} project A function
- * that, when applied to an item emitted by the source Observable, returns an
- * Observable.
- * @return {Observable} An Observable that emits the result of applying the
- * projection function (and the optional `resultSelector`) to each item emitted
- * by the source Observable and taking values from each projected inner
- * Observable sequentially.
- * @method concatMap
- * @owner Observable
- */
 function concatMap(project, resultSelector) {
     return Object(__WEBPACK_IMPORTED_MODULE_0__mergeMap__["a" /* mergeMap */])(project, resultSelector, 1);
 }
@@ -28571,7 +26596,7 @@ function concatMap(project, resultSelector) {
 
 
 /***/ }),
-/* 243 */
+/* 247 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -28584,7 +26609,7 @@ function isDate(value) {
 
 
 /***/ }),
-/* 244 */
+/* 248 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -28592,52 +26617,12 @@ function isDate(value) {
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_tslib__ = __webpack_require__(1);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__Subscriber__ = __webpack_require__(2);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__util_tryCatch__ = __webpack_require__(17);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__util_errorObject__ = __webpack_require__(15);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__util_errorObject__ = __webpack_require__(14);
 /** PURE_IMPORTS_START tslib,_Subscriber,_util_tryCatch,_util_errorObject PURE_IMPORTS_END */
 
 
 
 
-/* tslint:enable:max-line-length */
-/**
- * Returns an Observable that emits all items emitted by the source Observable that are distinct by comparison from the previous item.
- *
- * If a comparator function is provided, then it will be called for each item to test for whether or not that value should be emitted.
- *
- * If a comparator function is not provided, an equality check is used by default.
- *
- * @example <caption>A simple example with numbers</caption>
- * Observable.of(1, 1, 2, 2, 2, 1, 1, 2, 3, 3, 4)
- *   .distinctUntilChanged()
- *   .subscribe(x => console.log(x)); // 1, 2, 1, 2, 3, 4
- *
- * @example <caption>An example using a compare function</caption>
- * interface Person {
- *    age: number,
- *    name: string
- * }
- *
- * Observable.of<Person>(
- *     { age: 4, name: 'Foo'},
- *     { age: 7, name: 'Bar'},
- *     { age: 5, name: 'Foo'})
- *     { age: 6, name: 'Foo'})
- *     .distinctUntilChanged((p: Person, q: Person) => p.name === q.name)
- *     .subscribe(x => console.log(x));
- *
- * // displays:
- * // { age: 4, name: 'Foo' }
- * // { age: 7, name: 'Bar' }
- * // { age: 5, name: 'Foo' }
- *
- * @see {@link distinct}
- * @see {@link distinctUntilKeyChanged}
- *
- * @param {function} [compare] Optional comparison function called to test if an item is distinct from the previous item in the source.
- * @return {Observable} An Observable that emits items from the source Observable with distinct values.
- * @method distinctUntilChanged
- * @owner Observable
- */
 function distinctUntilChanged(compare, keySelector) {
     return function (source) { return source.lift(new DistinctUntilChangedOperator(compare, keySelector)); };
 }
@@ -28651,11 +26636,6 @@ var DistinctUntilChangedOperator = /*@__PURE__*/ (function () {
     };
     return DistinctUntilChangedOperator;
 }());
-/**
- * We need this JSDoc comment for affecting ESDoc.
- * @ignore
- * @extends {Ignored}
- */
 var DistinctUntilChangedSubscriber = /*@__PURE__*/ (function (_super) {
     __WEBPACK_IMPORTED_MODULE_0_tslib__["a" /* __extends */](DistinctUntilChangedSubscriber, _super);
     function DistinctUntilChangedSubscriber(destination, compare, keySelector) {
@@ -28700,62 +26680,20 @@ var DistinctUntilChangedSubscriber = /*@__PURE__*/ (function (_super) {
 
 
 /***/ }),
-/* 245 */
+/* 249 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 /* harmony export (immutable) */ __webpack_exports__["a"] = tap;
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_tslib__ = __webpack_require__(1);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__Subscriber__ = __webpack_require__(2);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__util_noop__ = __webpack_require__(43);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__util_isFunction__ = __webpack_require__(31);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__util_noop__ = __webpack_require__(44);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__util_isFunction__ = __webpack_require__(32);
 /** PURE_IMPORTS_START tslib,_Subscriber,_util_noop,_util_isFunction PURE_IMPORTS_END */
 
 
 
 
-/* tslint:enable:max-line-length */
-/**
- * Perform a side effect for every emission on the source Observable, but return
- * an Observable that is identical to the source.
- *
- * <span class="informal">Intercepts each emission on the source and runs a
- * function, but returns an output which is identical to the source as long as errors don't occur.</span>
- *
- * <img src="./img/do.png" width="100%">
- *
- * Returns a mirrored Observable of the source Observable, but modified so that
- * the provided Observer is called to perform a side effect for every value,
- * error, and completion emitted by the source. Any errors that are thrown in
- * the aforementioned Observer or handlers are safely sent down the error path
- * of the output Observable.
- *
- * This operator is useful for debugging your Observables for the correct values
- * or performing other side effects.
- *
- * Note: this is different to a `subscribe` on the Observable. If the Observable
- * returned by `do` is not subscribed, the side effects specified by the
- * Observer will never happen. `do` therefore simply spies on existing
- * execution, it does not trigger an execution to happen like `subscribe` does.
- *
- * @example <caption>Map every click to the clientX position of that click, while also logging the click event</caption>
- * var clicks = Rx.Observable.fromEvent(document, 'click');
- * var positions = clicks
- *   .do(ev => console.log(ev))
- *   .map(ev => ev.clientX);
- * positions.subscribe(x => console.log(x));
- *
- * @see {@link map}
- * @see {@link subscribe}
- *
- * @param {Observer|function} [nextOrObserver] A normal Observer object or a
- * callback for `next`.
- * @param {function} [error] Callback for errors in the source.
- * @param {function} [complete] Callback for the completion of the source.
- * @return {Observable} An Observable identical to the source, but runs the
- * specified Observer or callback(s) for each item.
- * @name tap
- */
 function tap(nextOrObserver, error, complete) {
     return function tapOperatorFunction(source) {
         return source.lift(new DoOperator(nextOrObserver, error, complete));
@@ -28772,11 +26710,6 @@ var DoOperator = /*@__PURE__*/ (function () {
     };
     return DoOperator;
 }());
-/**
- * We need this JSDoc comment for affecting ESDoc.
- * @ignore
- * @extends {Ignored}
- */
 var TapSubscriber = /*@__PURE__*/ (function (_super) {
     __WEBPACK_IMPORTED_MODULE_0_tslib__["a" /* __extends */](TapSubscriber, _super);
     function TapSubscriber(destination, observerOrNext, error, complete) {
@@ -28834,7 +26767,7 @@ var TapSubscriber = /*@__PURE__*/ (function (_super) {
 
 
 /***/ }),
-/* 246 */
+/* 250 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -28846,39 +26779,6 @@ var TapSubscriber = /*@__PURE__*/ (function (_super) {
 /** PURE_IMPORTS_START tslib,_Subscriber PURE_IMPORTS_END */
 
 
-/**
- * Emits only the first value emitted by the source Observable that meets some
- * condition.
- *
- * <span class="informal">Finds the first value that passes some test and emits
- * that.</span>
- *
- * <img src="./img/find.png" width="100%">
- *
- * `find` searches for the first item in the source Observable that matches the
- * specified condition embodied by the `predicate`, and returns the first
- * occurrence in the source. Unlike {@link first}, the `predicate` is required
- * in `find`, and does not emit an error if a valid value is not found.
- *
- * @example <caption>Find and emit the first click that happens on a DIV element</caption>
- * var clicks = Rx.Observable.fromEvent(document, 'click');
- * var result = clicks.find(ev => ev.target.tagName === 'DIV');
- * result.subscribe(x => console.log(x));
- *
- * @see {@link filter}
- * @see {@link first}
- * @see {@link findIndex}
- * @see {@link take}
- *
- * @param {function(value: T, index: number, source: Observable<T>): boolean} predicate
- * A function called with each item to test for condition matching.
- * @param {any} [thisArg] An optional argument to determine the value of `this`
- * in the `predicate` function.
- * @return {Observable<T>} An Observable of the first item that matches the
- * condition.
- * @method find
- * @owner Observable
- */
 function find(predicate, thisArg) {
     if (typeof predicate !== 'function') {
         throw new TypeError('predicate is not a function');
@@ -28898,11 +26798,6 @@ var FindValueOperator = /*@__PURE__*/ (function () {
     return FindValueOperator;
 }());
 
-/**
- * We need this JSDoc comment for affecting ESDoc.
- * @ignore
- * @extends {Ignored}
- */
 var FindValueSubscriber = /*@__PURE__*/ (function (_super) {
     __WEBPACK_IMPORTED_MODULE_0_tslib__["a" /* __extends */](FindValueSubscriber, _super);
     function FindValueSubscriber(destination, predicate, source, yieldIndex, thisArg) {
@@ -28942,7 +26837,7 @@ var FindValueSubscriber = /*@__PURE__*/ (function (_super) {
 
 
 /***/ }),
-/* 247 */
+/* 251 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -28959,46 +26854,6 @@ var defaultThrottleConfig = {
     leading: true,
     trailing: false
 };
-/**
- * Emits a value from the source Observable, then ignores subsequent source
- * values for a duration determined by another Observable, then repeats this
- * process.
- *
- * <span class="informal">It's like {@link throttleTime}, but the silencing
- * duration is determined by a second Observable.</span>
- *
- * <img src="./img/throttle.png" width="100%">
- *
- * `throttle` emits the source Observable values on the output Observable
- * when its internal timer is disabled, and ignores source values when the timer
- * is enabled. Initially, the timer is disabled. As soon as the first source
- * value arrives, it is forwarded to the output Observable, and then the timer
- * is enabled by calling the `durationSelector` function with the source value,
- * which returns the "duration" Observable. When the duration Observable emits a
- * value or completes, the timer is disabled, and this process repeats for the
- * next source value.
- *
- * @example <caption>Emit clicks at a rate of at most one click per second</caption>
- * var clicks = Rx.Observable.fromEvent(document, 'click');
- * var result = clicks.throttle(ev => Rx.Observable.interval(1000));
- * result.subscribe(x => console.log(x));
- *
- * @see {@link audit}
- * @see {@link debounce}
- * @see {@link delayWhen}
- * @see {@link sample}
- * @see {@link throttleTime}
- *
- * @param {function(value: T): SubscribableOrPromise} durationSelector A function
- * that receives a value from the source Observable, for computing the silencing
- * duration for each source value, returned as an Observable or a Promise.
- * @param {Object} config a configuration object to define `leading` and `trailing` behavior. Defaults
- * to `{ leading: true, trailing: false }`.
- * @return {Observable<T>} An Observable that performs the throttle operation to
- * limit the rate of emissions from the source.
- * @method throttle
- * @owner Observable
- */
 function throttle(durationSelector, config) {
     if (config === void 0) {
         config = defaultThrottleConfig;
@@ -29016,11 +26871,6 @@ var ThrottleOperator = /*@__PURE__*/ (function () {
     };
     return ThrottleOperator;
 }());
-/**
- * We need this JSDoc comment for affecting ESDoc
- * @ignore
- * @extends {Ignored}
- */
 var ThrottleSubscriber = /*@__PURE__*/ (function (_super) {
     __WEBPACK_IMPORTED_MODULE_0_tslib__["a" /* __extends */](ThrottleSubscriber, _super);
     function ThrottleSubscriber(destination, durationSelector, _leading, _trailing) {
@@ -29090,14 +26940,14 @@ var ThrottleSubscriber = /*@__PURE__*/ (function (_super) {
 
 
 /***/ }),
-/* 248 */
+/* 252 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 /* harmony export (immutable) */ __webpack_exports__["a"] = timeoutWith;
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_tslib__ = __webpack_require__(1);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__scheduler_async__ = __webpack_require__(12);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__util_isDate__ = __webpack_require__(243);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__scheduler_async__ = __webpack_require__(13);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__util_isDate__ = __webpack_require__(247);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__OuterSubscriber__ = __webpack_require__(5);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__util_subscribeToResult__ = __webpack_require__(6);
 /** PURE_IMPORTS_START tslib,_scheduler_async,_util_isDate,_OuterSubscriber,_util_subscribeToResult PURE_IMPORTS_END */
@@ -29106,54 +26956,6 @@ var ThrottleSubscriber = /*@__PURE__*/ (function (_super) {
 
 
 
-/* tslint:enable:max-line-length */
-/**
- *
- * Errors if Observable does not emit a value in given time span, in case of which
- * subscribes to the second Observable.
- *
- * <span class="informal">It's a version of `timeout` operator that let's you specify fallback Observable.</span>
- *
- * <img src="./img/timeoutWith.png" width="100%">
- *
- * `timeoutWith` is a variation of `timeout` operator. It behaves exactly the same,
- * still accepting as a first argument either a number or a Date, which control - respectively -
- * when values of source Observable should be emitted or when it should complete.
- *
- * The only difference is that it accepts a second, required parameter. This parameter
- * should be an Observable which will be subscribed when source Observable fails any timeout check.
- * So whenever regular `timeout` would emit an error, `timeoutWith` will instead start re-emitting
- * values from second Observable. Note that this fallback Observable is not checked for timeouts
- * itself, so it can emit values and complete at arbitrary points in time. From the moment of a second
- * subscription, Observable returned from `timeoutWith` simply mirrors fallback stream. When that
- * stream completes, it completes as well.
- *
- * Scheduler, which in case of `timeout` is provided as as second argument, can be still provided
- * here - as a third, optional parameter. It still is used to schedule timeout checks and -
- * as a consequence - when second Observable will be subscribed, since subscription happens
- * immediately after failing check.
- *
- * @example <caption>Add fallback observable</caption>
- * const seconds = Rx.Observable.interval(1000);
- * const minutes = Rx.Observable.interval(60 * 1000);
- *
- * seconds.timeoutWith(900, minutes)
- *     .subscribe(
- *         value => console.log(value), // After 900ms, will start emitting `minutes`,
- *                                      // since first value of `seconds` will not arrive fast enough.
- *         err => console.log(err) // Would be called after 900ms in case of `timeout`,
- *                                 // but here will never be called.
- *     );
- *
- * @param {number|Date} due Number specifying period within which Observable must emit values
- *                          or Date specifying before when Observable should complete
- * @param {Observable<T>} withObservable Observable which will be subscribed if source fails timeout check.
- * @param {Scheduler} [scheduler] Scheduler controlling when timeout checks occur.
- * @return {Observable<T>} Observable that mirrors behaviour of source or, when timeout check fails, of an Observable
- *                          passed as a second parameter.
- * @method timeoutWith
- * @owner Observable
- */
 function timeoutWith(due, withObservable, scheduler) {
     if (scheduler === void 0) {
         scheduler = __WEBPACK_IMPORTED_MODULE_1__scheduler_async__["a" /* async */];
@@ -29176,11 +26978,6 @@ var TimeoutWithOperator = /*@__PURE__*/ (function () {
     };
     return TimeoutWithOperator;
 }());
-/**
- * We need this JSDoc comment for affecting ESDoc.
- * @ignore
- * @extends {Ignored}
- */
 var TimeoutWithSubscriber = /*@__PURE__*/ (function (_super) {
     __WEBPACK_IMPORTED_MODULE_0_tslib__["a" /* __extends */](TimeoutWithSubscriber, _super);
     function TimeoutWithSubscriber(destination, absoluteTimeout, waitFor, withObservable, scheduler) {
@@ -29201,11 +26998,6 @@ var TimeoutWithSubscriber = /*@__PURE__*/ (function (_super) {
     TimeoutWithSubscriber.prototype.scheduleTimeout = function () {
         var action = this.action;
         if (action) {
-            // Recycle the action if we've already scheduled one. All the production
-            // Scheduler Actions mutate their state/delay time and return themeselves.
-            // VirtualActions are immutable, so they create and return a clone. In this
-            // case, we need to set the action reference to the most recent VirtualAction,
-            // to ensure that's the one we clone from next time.
             this.action = action.schedule(this, this.waitFor);
         }
         else {
@@ -29218,7 +27010,6 @@ var TimeoutWithSubscriber = /*@__PURE__*/ (function (_super) {
         }
         _super.prototype._next.call(this, value);
     };
-    /** @deprecated This is an internal implementation detail, do not use. */
     TimeoutWithSubscriber.prototype._unsubscribe = function () {
         this.action = null;
         this.scheduler = null;
@@ -29230,18 +27021,18 @@ var TimeoutWithSubscriber = /*@__PURE__*/ (function (_super) {
 
 
 /***/ }),
-/* 249 */
+/* 253 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
-const ansiRegex = __webpack_require__(485);
+const ansiRegex = __webpack_require__(494);
 
 module.exports = input => typeof input === 'string' ? input.replace(ansiRegex(), '') : input;
 
 
 /***/ }),
-/* 250 */
+/* 254 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -29291,12 +27082,12 @@ function getProjectPaths(rootPath, options) {
    */
 
 /***/ }),
-/* 251 */
+/* 255 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
-const NestedError = __webpack_require__(252);
+const NestedError = __webpack_require__(256);
 
 class CpFileError extends NestedError {
 	constructor(message, nested) {
@@ -29310,10 +27101,10 @@ module.exports = CpFileError;
 
 
 /***/ }),
-/* 252 */
+/* 256 */
 /***/ (function(module, exports, __webpack_require__) {
 
-var inherits = __webpack_require__(78);
+var inherits = __webpack_require__(83);
 
 var NestedError = function (message, nested) {
     this.nested = nested;
@@ -29364,7 +27155,7 @@ module.exports = NestedError;
 
 
 /***/ }),
-/* 253 */
+/* 257 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -29374,7 +27165,7 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 
-var _cli = __webpack_require__(254);
+var _cli = __webpack_require__(258);
 
 Object.defineProperty(exports, 'run', {
   enumerable: true,
@@ -29383,7 +27174,7 @@ Object.defineProperty(exports, 'run', {
   }
 });
 
-var _production = __webpack_require__(488);
+var _production = __webpack_require__(497);
 
 Object.defineProperty(exports, 'buildProductionProjects', {
   enumerable: true,
@@ -29398,7 +27189,7 @@ Object.defineProperty(exports, 'prepareExternalProjectDependencies', {
   }
 });
 
-var _package_json = __webpack_require__(41);
+var _package_json = __webpack_require__(42);
 
 Object.defineProperty(exports, 'transformDependencies', {
   enumerable: true,
@@ -29408,7 +27199,7 @@ Object.defineProperty(exports, 'transformDependencies', {
 });
 
 /***/ }),
-/* 254 */
+/* 258 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -29459,7 +27250,7 @@ let run = exports.run = (() => {
     };
 })();
 
-var _chalk = __webpack_require__(14);
+var _chalk = __webpack_require__(18);
 
 var _chalk2 = _interopRequireDefault(_chalk);
 
@@ -29475,7 +27266,7 @@ var _path = __webpack_require__(3);
 
 var _commands = __webpack_require__(266);
 
-var _run = __webpack_require__(481);
+var _run = __webpack_require__(490);
 
 var _log = __webpack_require__(20);
 
@@ -29523,30 +27314,12 @@ function help() {
 }
 
 /***/ }),
-/* 255 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-var matchOperatorsRe = /[|\\{}()[\]^$+*?.]/g;
-
-module.exports = function (str) {
-	if (typeof str !== 'string') {
-		throw new TypeError('Expected a string');
-	}
-
-	return str.replace(matchOperatorsRe, '\\$&');
-};
-
-
-/***/ }),
-/* 256 */
+/* 259 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 /* WEBPACK VAR INJECTION */(function(module) {
-const colorConvert = __webpack_require__(257);
+const colorConvert = __webpack_require__(53);
 
 const wrapAnsi16 = (fn, offset) => function () {
 	const code = fn.apply(colorConvert, arguments);
@@ -29649,29 +27422,42 @@ function assembleStyles() {
 		});
 	}
 
+	const ansi2ansi = n => n;
 	const rgb2rgb = (r, g, b) => [r, g, b];
 
 	styles.color.close = '\u001B[39m';
 	styles.bgColor.close = '\u001B[49m';
 
-	styles.color.ansi = {};
-	styles.color.ansi256 = {};
+	styles.color.ansi = {
+		ansi: wrapAnsi16(ansi2ansi, 0)
+	};
+	styles.color.ansi256 = {
+		ansi256: wrapAnsi256(ansi2ansi, 0)
+	};
 	styles.color.ansi16m = {
 		rgb: wrapAnsi16m(rgb2rgb, 0)
 	};
 
-	styles.bgColor.ansi = {};
-	styles.bgColor.ansi256 = {};
+	styles.bgColor.ansi = {
+		ansi: wrapAnsi16(ansi2ansi, 10)
+	};
+	styles.bgColor.ansi256 = {
+		ansi256: wrapAnsi256(ansi2ansi, 10)
+	};
 	styles.bgColor.ansi16m = {
 		rgb: wrapAnsi16m(rgb2rgb, 10)
 	};
 
-	for (const key of Object.keys(colorConvert)) {
+	for (let key of Object.keys(colorConvert)) {
 		if (typeof colorConvert[key] !== 'object') {
 			continue;
 		}
 
 		const suite = colorConvert[key];
+
+		if (key === 'ansi16') {
+			key = 'ansi';
+		}
 
 		if ('ansi16' in suite) {
 			styles.color.ansi[key] = wrapAnsi16(suite.ansi16, 0);
@@ -29698,94 +27484,10 @@ Object.defineProperty(module, 'exports', {
 	get: assembleStyles
 });
 
-/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(50)(module)))
+/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(27)(module)))
 
 /***/ }),
-/* 257 */
-/***/ (function(module, exports, __webpack_require__) {
-
-var conversions = __webpack_require__(74);
-var route = __webpack_require__(259);
-
-var convert = {};
-
-var models = Object.keys(conversions);
-
-function wrapRaw(fn) {
-	var wrappedFn = function (args) {
-		if (args === undefined || args === null) {
-			return args;
-		}
-
-		if (arguments.length > 1) {
-			args = Array.prototype.slice.call(arguments);
-		}
-
-		return fn(args);
-	};
-
-	// preserve .conversion property if there is one
-	if ('conversion' in fn) {
-		wrappedFn.conversion = fn.conversion;
-	}
-
-	return wrappedFn;
-}
-
-function wrapRounded(fn) {
-	var wrappedFn = function (args) {
-		if (args === undefined || args === null) {
-			return args;
-		}
-
-		if (arguments.length > 1) {
-			args = Array.prototype.slice.call(arguments);
-		}
-
-		var result = fn(args);
-
-		// we're assuming the result is an array here.
-		// see notice in conversions.js; don't use box types
-		// in conversion functions.
-		if (typeof result === 'object') {
-			for (var len = result.length, i = 0; i < len; i++) {
-				result[i] = Math.round(result[i]);
-			}
-		}
-
-		return result;
-	};
-
-	// preserve .conversion property if there is one
-	if ('conversion' in fn) {
-		wrappedFn.conversion = fn.conversion;
-	}
-
-	return wrappedFn;
-}
-
-models.forEach(function (fromModel) {
-	convert[fromModel] = {};
-
-	Object.defineProperty(convert[fromModel], 'channels', {value: conversions[fromModel].channels});
-	Object.defineProperty(convert[fromModel], 'labels', {value: conversions[fromModel].labels});
-
-	var routes = route(fromModel);
-	var routeModels = Object.keys(routes);
-
-	routeModels.forEach(function (toModel) {
-		var fn = routes[toModel];
-
-		convert[fromModel][toModel] = wrapRounded(fn);
-		convert[fromModel][toModel].raw = wrapRaw(fn);
-	});
-});
-
-module.exports = convert;
-
-
-/***/ }),
-/* 258 */
+/* 260 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -29944,10 +27646,10 @@ module.exports = {
 
 
 /***/ }),
-/* 259 */
+/* 261 */
 /***/ (function(module, exports, __webpack_require__) {
 
-var conversions = __webpack_require__(74);
+var conversions = __webpack_require__(79);
 
 /*
 	this function routes a model to all other models.
@@ -30047,13 +27749,13 @@ module.exports = function (fromModel) {
 
 
 /***/ }),
-/* 260 */
+/* 262 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
-const os = __webpack_require__(261);
-const hasFlag = __webpack_require__(262);
+const os = __webpack_require__(54);
+const hasFlag = __webpack_require__(55);
 
 const env = process.env;
 
@@ -30137,14 +27839,16 @@ function supportsColor(stream) {
 		return /^(9\.(0*[1-9]\d*)\.|\d{2,}\.)/.test(env.TEAMCITY_VERSION) ? 1 : 0;
 	}
 
+	if (env.COLORTERM === 'truecolor') {
+		return 3;
+	}
+
 	if ('TERM_PROGRAM' in env) {
 		const version = parseInt((env.TERM_PROGRAM_VERSION || '').split('.')[0], 10);
 
 		switch (env.TERM_PROGRAM) {
 			case 'iTerm.app':
 				return version >= 3 ? 3 : 2;
-			case 'Hyper':
-				return 3;
 			case 'Apple_Terminal':
 				return 2;
 			// No default
@@ -30179,27 +27883,6 @@ module.exports = {
 	supportsColor: getSupportLevel,
 	stdout: getSupportLevel(process.stdout),
 	stderr: getSupportLevel(process.stderr)
-};
-
-
-/***/ }),
-/* 261 */
-/***/ (function(module, exports) {
-
-module.exports = require("os");
-
-/***/ }),
-/* 262 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-module.exports = (flag, argv) => {
-	argv = argv || process.argv;
-	const prefix = flag.startsWith('-') ? '' : (flag.length === 1 ? '-' : '--');
-	const pos = argv.indexOf(prefix + flag);
-	const terminatorPos = argv.indexOf('--');
-	return pos !== -1 && (terminatorPos === -1 ? true : pos < terminatorPos);
 };
 
 
@@ -30586,11 +28269,11 @@ exports.commands = undefined;
 
 var _bootstrap = __webpack_require__(267);
 
-var _clean = __webpack_require__(347);
+var _clean = __webpack_require__(351);
 
-var _run = __webpack_require__(365);
+var _run = __webpack_require__(373);
 
-var _watch = __webpack_require__(366);
+var _watch = __webpack_require__(374);
 
 /*
  * Licensed to Elasticsearch B.V. under one or more contributor
@@ -30629,7 +28312,7 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.BootstrapCommand = undefined;
 
-var _chalk = __webpack_require__(14);
+var _chalk = __webpack_require__(18);
 
 var _chalk2 = _interopRequireDefault(_chalk);
 
@@ -30637,9 +28320,9 @@ var _link_project_executables = __webpack_require__(268);
 
 var _log = __webpack_require__(20);
 
-var _parallelize = __webpack_require__(52);
+var _parallelize = __webpack_require__(57);
 
-var _projects = __webpack_require__(29);
+var _projects = __webpack_require__(30);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -30757,11 +28440,11 @@ let linkProjectExecutables = exports.linkProjectExecutables = (() => {
 
 var _path = __webpack_require__(3);
 
-var _chalk = __webpack_require__(14);
+var _chalk = __webpack_require__(18);
 
 var _chalk2 = _interopRequireDefault(_chalk);
 
-var _fs = __webpack_require__(51);
+var _fs = __webpack_require__(56);
 
 var _log = __webpack_require__(20);
 
@@ -30803,9 +28486,9 @@ function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, a
 module.exports = cmdShim
 cmdShim.ifExists = cmdShimIfExists
 
-var fs = __webpack_require__(27)
+var fs = __webpack_require__(28)
 
-var mkdir = __webpack_require__(76)
+var mkdir = __webpack_require__(81)
   , path = __webpack_require__(3)
   , shebangExpr = /^#\!\s*(?:\/usr\/bin\/env)?\s*([^ \t]+)(.*)$/
 
@@ -30976,7 +28659,7 @@ function times(n, ok, cb) {
 /* 270 */
 /***/ (function(module, exports, __webpack_require__) {
 
-var fs = __webpack_require__(75)
+var fs = __webpack_require__(80)
 var constants = __webpack_require__(271)
 
 var origCwd = process.cwd
@@ -32076,15 +29759,15 @@ module.exports = globSync
 globSync.GlobSync = GlobSync
 
 var fs = __webpack_require__(7)
-var rp = __webpack_require__(77)
-var minimatch = __webpack_require__(53)
+var rp = __webpack_require__(82)
+var minimatch = __webpack_require__(58)
 var Minimatch = minimatch.Minimatch
-var Glob = __webpack_require__(30).Glob
+var Glob = __webpack_require__(31).Glob
 var util = __webpack_require__(10)
 var path = __webpack_require__(3)
-var assert = __webpack_require__(28)
-var isAbsolute = __webpack_require__(54)
-var common = __webpack_require__(79)
+var assert = __webpack_require__(29)
+var isAbsolute = __webpack_require__(59)
+var common = __webpack_require__(84)
 var alphasort = common.alphasort
 var alphasorti = common.alphasorti
 var setopts = common.setopts
@@ -32564,9 +30247,9 @@ GlobSync.prototype._makeAbs = function (f) {
 /* 279 */
 /***/ (function(module, exports, __webpack_require__) {
 
-var wrappy = __webpack_require__(80)
+var wrappy = __webpack_require__(85)
 var reqs = Object.create(null)
-var once = __webpack_require__(81)
+var once = __webpack_require__(86)
 
 module.exports = wrappy(inflight)
 
@@ -32648,7 +30331,7 @@ module.exports = (fp, opts) => {
 		})
 		.then(x => {
 			if (opts.normalize !== false) {
-				__webpack_require__(83)(x);
+				__webpack_require__(88)(x);
 			}
 
 			return x;
@@ -32667,7 +30350,7 @@ module.exports.sync = (fp, opts) => {
 	const x = loadJsonFile.sync(fp);
 
 	if (opts.normalize !== false) {
-		__webpack_require__(83)(x);
+		__webpack_require__(88)(x);
 	}
 
 	return x;
@@ -32681,7 +30364,7 @@ module.exports.sync = (fp, opts) => {
 "use strict";
 
 const path = __webpack_require__(3);
-const fs = __webpack_require__(27);
+const fs = __webpack_require__(28);
 const stripBom = __webpack_require__(282);
 const parseJson = __webpack_require__(283);
 const pify = __webpack_require__(23);
@@ -33008,7 +30691,7 @@ var hostedGitInfo = __webpack_require__(295)
 var isBuiltinModule = __webpack_require__(297)
 var depTypes = ["dependencies","devDependencies","optionalDependencies"]
 var extractDescription = __webpack_require__(299)
-var url = __webpack_require__(84)
+var url = __webpack_require__(89)
 var typos = __webpack_require__(300)
 
 var fixer = module.exports = {
@@ -36214,7 +33897,7 @@ if (typeof module !== 'undefined' && __webpack_require__.c[__webpack_require__.s
 }
 }
 
-/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(50)(module)))
+/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(27)(module)))
 
 /***/ }),
 /* 293 */
@@ -36471,8 +34154,8 @@ module.exports = ["Glide","Abstyles","AFL-1.1","AFL-1.2","AFL-2.0","AFL-2.1","AF
 
 "use strict";
 
-var url = __webpack_require__(84)
-var gitHosts = __webpack_require__(85)
+var url = __webpack_require__(89)
+var gitHosts = __webpack_require__(90)
 var GitHost = module.exports = __webpack_require__(296)
 
 var protocolToRepresentationMap = {
@@ -36599,7 +34282,7 @@ function parseGitUrl (giturl) {
 
 "use strict";
 
-var gitHosts = __webpack_require__(85)
+var gitHosts = __webpack_require__(90)
 var extend = Object.assign || __webpack_require__(10)._extend
 
 var GitHost = module.exports = function (type, user, auth, project, committish, defaultRepresentation, opts) {
@@ -36817,7 +34500,7 @@ module.exports = {"repositories":"'repositories' (plural) Not supported. Please 
 
 const path = __webpack_require__(3);
 const writeJsonFile = __webpack_require__(304);
-const sortKeys = __webpack_require__(86);
+const sortKeys = __webpack_require__(91);
 
 const opts = {detectIndent: true};
 
@@ -36876,10 +34559,10 @@ module.exports.sync = (fp, data) => {
 "use strict";
 
 const path = __webpack_require__(3);
-const fs = __webpack_require__(27);
+const fs = __webpack_require__(28);
 const writeFileAtomic = __webpack_require__(305);
-const sortKeys = __webpack_require__(86);
-const makeDir = __webpack_require__(87);
+const sortKeys = __webpack_require__(91);
+const makeDir = __webpack_require__(92);
 const pify = __webpack_require__(23);
 const detectIndent = __webpack_require__(309);
 
@@ -36960,9 +34643,9 @@ module.exports.sync = writeFileSync
 module.exports._getTmpname = getTmpname // for testing
 module.exports._cleanupOnExit = cleanupOnExit
 
-var fs = __webpack_require__(27)
+var fs = __webpack_require__(28)
 var MurmurHash3 = __webpack_require__(306)
-var onExit = __webpack_require__(56)
+var onExit = __webpack_require__(61)
 var path = __webpack_require__(3)
 var activeFiles = {}
 
@@ -37518,7 +35201,7 @@ exports.runScriptInPackage = exports.installInDir = undefined;
  */
 let installInDir = exports.installInDir = (() => {
     var _ref = _asyncToGenerator(function* (directory, extraArgs = []) {
-        const options = ['install', '--non-interactive', '--mutex file', ...extraArgs];
+        const options = ['install', '--check-files', '--non-interactive', '--mutex file', ...extraArgs];
         // We pass the mutex flag to ensure only one instance of yarn runs at any
         // given time (e.g. to avoid conflicts).
         yield (0, _child_process.spawn)('yarn', options, {
@@ -37619,7 +35302,7 @@ var _extends = Object.assign || function (target) { for (var i = 1; i < argument
 exports.spawn = spawn;
 exports.spawnStreaming = spawnStreaming;
 
-var _chalk = __webpack_require__(14);
+var _chalk = __webpack_require__(18);
 
 var _chalk2 = _interopRequireDefault(_chalk);
 
@@ -37627,11 +35310,11 @@ var _execa = __webpack_require__(312);
 
 var _execa2 = _interopRequireDefault(_execa);
 
-var _logSymbols = __webpack_require__(91);
+var _logSymbols = __webpack_require__(96);
 
 var _logSymbols2 = _interopRequireDefault(_logSymbols);
 
-var _strongLogTransformer = __webpack_require__(338);
+var _strongLogTransformer = __webpack_require__(342);
 
 var _strongLogTransformer2 = _interopRequireDefault(_strongLogTransformer);
 
@@ -37671,7 +35354,7 @@ function spawnStreaming(command, args, opts, { prefix }) {
 "use strict";
 
 const path = __webpack_require__(3);
-const childProcess = __webpack_require__(57);
+const childProcess = __webpack_require__(62);
 const util = __webpack_require__(10);
 const crossSpawn = __webpack_require__(313);
 const stripEof = __webpack_require__(329);
@@ -37679,7 +35362,7 @@ const npmRunPath = __webpack_require__(330);
 const isStream = __webpack_require__(332);
 const _getStream = __webpack_require__(333);
 const pFinally = __webpack_require__(335);
-const onExit = __webpack_require__(56);
+const onExit = __webpack_require__(61);
 const errname = __webpack_require__(336);
 const stdio = __webpack_require__(337);
 
@@ -38041,7 +35724,7 @@ module.exports.spawn = util.deprecate(module.exports, 'execa.spawn() is deprecat
 "use strict";
 
 
-var cp = __webpack_require__(57);
+var cp = __webpack_require__(62);
 var parse = __webpack_require__(314);
 var enoent = __webpack_require__(327);
 
@@ -38107,9 +35790,9 @@ module.exports._enoent = enoent;
 "use strict";
 
 
-var resolveCommand = __webpack_require__(88);
+var resolveCommand = __webpack_require__(93);
 var hasEmptyArgumentBug = __webpack_require__(322);
-var escapeArgument = __webpack_require__(90);
+var escapeArgument = __webpack_require__(95);
 var escapeCommand = __webpack_require__(323);
 var readShebang = __webpack_require__(324);
 
@@ -39061,7 +36744,7 @@ module.exports = hasEmptyArgumentBug();
 "use strict";
 
 
-var escapeArgument = __webpack_require__(90);
+var escapeArgument = __webpack_require__(95);
 
 function escapeCommand(command) {
     // Do not escape if this command is not dangerous..
@@ -39081,7 +36764,7 @@ module.exports = escapeCommand;
 
 
 var fs = __webpack_require__(7);
-var LRU = __webpack_require__(89);
+var LRU = __webpack_require__(94);
 var shebangCommand = __webpack_require__(325);
 
 var shebangCache = new LRU({ max: 50, maxAge: 30 * 1000 });  // Cache just for 30sec
@@ -39160,7 +36843,7 @@ module.exports = /^#!.*/;
 
 
 var isWin = process.platform === 'win32';
-var resolveCommand = __webpack_require__(88);
+var resolveCommand = __webpack_require__(93);
 
 var isNode10 = process.version.indexOf('v0.10.') === 0;
 
@@ -39239,7 +36922,7 @@ module.exports.notFoundError = notFoundError;
 "use strict";
 
 
-module.exports = __webpack_require__(57).spawnSync;
+module.exports = __webpack_require__(62).spawnSync;
 
 
 /***/ }),
@@ -39592,17 +37275,683 @@ module.exports = opts => {
 /* 338 */
 /***/ (function(module, exports, __webpack_require__) {
 
+"use strict";
+
+const escapeStringRegexp = __webpack_require__(52);
+const ansiStyles = __webpack_require__(339);
+const stdoutColor = __webpack_require__(340).stdout;
+
+const template = __webpack_require__(341);
+
+const isSimpleWindowsTerm = process.platform === 'win32' && !(process.env.TERM || '').toLowerCase().startsWith('xterm');
+
+// `supportsColor.level` → `ansiStyles.color[name]` mapping
+const levelMapping = ['ansi', 'ansi', 'ansi256', 'ansi16m'];
+
+// `color-convert` models to exclude from the Chalk API due to conflicts and such
+const skipModels = new Set(['gray']);
+
+const styles = Object.create(null);
+
+function applyOptions(obj, options) {
+	options = options || {};
+
+	// Detect level if not set manually
+	const scLevel = stdoutColor ? stdoutColor.level : 0;
+	obj.level = options.level === undefined ? scLevel : options.level;
+	obj.enabled = 'enabled' in options ? options.enabled : obj.level > 0;
+}
+
+function Chalk(options) {
+	// We check for this.template here since calling `chalk.constructor()`
+	// by itself will have a `this` of a previously constructed chalk object
+	if (!this || !(this instanceof Chalk) || this.template) {
+		const chalk = {};
+		applyOptions(chalk, options);
+
+		chalk.template = function () {
+			const args = [].slice.call(arguments);
+			return chalkTag.apply(null, [chalk.template].concat(args));
+		};
+
+		Object.setPrototypeOf(chalk, Chalk.prototype);
+		Object.setPrototypeOf(chalk.template, chalk);
+
+		chalk.template.constructor = Chalk;
+
+		return chalk.template;
+	}
+
+	applyOptions(this, options);
+}
+
+// Use bright blue on Windows as the normal blue color is illegible
+if (isSimpleWindowsTerm) {
+	ansiStyles.blue.open = '\u001B[94m';
+}
+
+for (const key of Object.keys(ansiStyles)) {
+	ansiStyles[key].closeRe = new RegExp(escapeStringRegexp(ansiStyles[key].close), 'g');
+
+	styles[key] = {
+		get() {
+			const codes = ansiStyles[key];
+			return build.call(this, this._styles ? this._styles.concat(codes) : [codes], this._empty, key);
+		}
+	};
+}
+
+styles.visible = {
+	get() {
+		return build.call(this, this._styles || [], true, 'visible');
+	}
+};
+
+ansiStyles.color.closeRe = new RegExp(escapeStringRegexp(ansiStyles.color.close), 'g');
+for (const model of Object.keys(ansiStyles.color.ansi)) {
+	if (skipModels.has(model)) {
+		continue;
+	}
+
+	styles[model] = {
+		get() {
+			const level = this.level;
+			return function () {
+				const open = ansiStyles.color[levelMapping[level]][model].apply(null, arguments);
+				const codes = {
+					open,
+					close: ansiStyles.color.close,
+					closeRe: ansiStyles.color.closeRe
+				};
+				return build.call(this, this._styles ? this._styles.concat(codes) : [codes], this._empty, model);
+			};
+		}
+	};
+}
+
+ansiStyles.bgColor.closeRe = new RegExp(escapeStringRegexp(ansiStyles.bgColor.close), 'g');
+for (const model of Object.keys(ansiStyles.bgColor.ansi)) {
+	if (skipModels.has(model)) {
+		continue;
+	}
+
+	const bgModel = 'bg' + model[0].toUpperCase() + model.slice(1);
+	styles[bgModel] = {
+		get() {
+			const level = this.level;
+			return function () {
+				const open = ansiStyles.bgColor[levelMapping[level]][model].apply(null, arguments);
+				const codes = {
+					open,
+					close: ansiStyles.bgColor.close,
+					closeRe: ansiStyles.bgColor.closeRe
+				};
+				return build.call(this, this._styles ? this._styles.concat(codes) : [codes], this._empty, model);
+			};
+		}
+	};
+}
+
+const proto = Object.defineProperties(() => {}, styles);
+
+function build(_styles, _empty, key) {
+	const builder = function () {
+		return applyStyle.apply(builder, arguments);
+	};
+
+	builder._styles = _styles;
+	builder._empty = _empty;
+
+	const self = this;
+
+	Object.defineProperty(builder, 'level', {
+		enumerable: true,
+		get() {
+			return self.level;
+		},
+		set(level) {
+			self.level = level;
+		}
+	});
+
+	Object.defineProperty(builder, 'enabled', {
+		enumerable: true,
+		get() {
+			return self.enabled;
+		},
+		set(enabled) {
+			self.enabled = enabled;
+		}
+	});
+
+	// See below for fix regarding invisible grey/dim combination on Windows
+	builder.hasGrey = this.hasGrey || key === 'gray' || key === 'grey';
+
+	// `__proto__` is used because we must return a function, but there is
+	// no way to create a function with a different prototype
+	builder.__proto__ = proto; // eslint-disable-line no-proto
+
+	return builder;
+}
+
+function applyStyle() {
+	// Support varags, but simply cast to string in case there's only one arg
+	const args = arguments;
+	const argsLen = args.length;
+	let str = String(arguments[0]);
+
+	if (argsLen === 0) {
+		return '';
+	}
+
+	if (argsLen > 1) {
+		// Don't slice `arguments`, it prevents V8 optimizations
+		for (let a = 1; a < argsLen; a++) {
+			str += ' ' + args[a];
+		}
+	}
+
+	if (!this.enabled || this.level <= 0 || !str) {
+		return this._empty ? '' : str;
+	}
+
+	// Turns out that on Windows dimmed gray text becomes invisible in cmd.exe,
+	// see https://github.com/chalk/chalk/issues/58
+	// If we're on Windows and we're dealing with a gray color, temporarily make 'dim' a noop.
+	const originalDim = ansiStyles.dim.open;
+	if (isSimpleWindowsTerm && this.hasGrey) {
+		ansiStyles.dim.open = '';
+	}
+
+	for (const code of this._styles.slice().reverse()) {
+		// Replace any instances already present with a re-opening code
+		// otherwise only the part of the string until said closing code
+		// will be colored, and the rest will simply be 'plain'.
+		str = code.open + str.replace(code.closeRe, code.open) + code.close;
+
+		// Close the styling before a linebreak and reopen
+		// after next line to fix a bleed issue on macOS
+		// https://github.com/chalk/chalk/pull/92
+		str = str.replace(/\r?\n/g, `${code.close}$&${code.open}`);
+	}
+
+	// Reset the original `dim` if we changed it to work around the Windows dimmed gray issue
+	ansiStyles.dim.open = originalDim;
+
+	return str;
+}
+
+function chalkTag(chalk, strings) {
+	if (!Array.isArray(strings)) {
+		// If chalk() was called by itself or with a string,
+		// return the string itself as a string.
+		return [].slice.call(arguments, 1).join(' ');
+	}
+
+	const args = [].slice.call(arguments, 2);
+	const parts = [strings.raw[0]];
+
+	for (let i = 1; i < strings.length; i++) {
+		parts.push(String(args[i - 1]).replace(/[{}\\]/g, '\\$&'));
+		parts.push(String(strings.raw[i]));
+	}
+
+	return template(chalk, parts.join(''));
+}
+
+Object.defineProperties(Chalk.prototype, styles);
+
+module.exports = Chalk(); // eslint-disable-line new-cap
+module.exports.supportsColor = stdoutColor;
+module.exports.default = module.exports; // For TypeScript
+
+
+/***/ }),
+/* 339 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+/* WEBPACK VAR INJECTION */(function(module) {
+const colorConvert = __webpack_require__(53);
+
+const wrapAnsi16 = (fn, offset) => function () {
+	const code = fn.apply(colorConvert, arguments);
+	return `\u001B[${code + offset}m`;
+};
+
+const wrapAnsi256 = (fn, offset) => function () {
+	const code = fn.apply(colorConvert, arguments);
+	return `\u001B[${38 + offset};5;${code}m`;
+};
+
+const wrapAnsi16m = (fn, offset) => function () {
+	const rgb = fn.apply(colorConvert, arguments);
+	return `\u001B[${38 + offset};2;${rgb[0]};${rgb[1]};${rgb[2]}m`;
+};
+
+function assembleStyles() {
+	const codes = new Map();
+	const styles = {
+		modifier: {
+			reset: [0, 0],
+			// 21 isn't widely supported and 22 does the same thing
+			bold: [1, 22],
+			dim: [2, 22],
+			italic: [3, 23],
+			underline: [4, 24],
+			inverse: [7, 27],
+			hidden: [8, 28],
+			strikethrough: [9, 29]
+		},
+		color: {
+			black: [30, 39],
+			red: [31, 39],
+			green: [32, 39],
+			yellow: [33, 39],
+			blue: [34, 39],
+			magenta: [35, 39],
+			cyan: [36, 39],
+			white: [37, 39],
+			gray: [90, 39],
+
+			// Bright color
+			redBright: [91, 39],
+			greenBright: [92, 39],
+			yellowBright: [93, 39],
+			blueBright: [94, 39],
+			magentaBright: [95, 39],
+			cyanBright: [96, 39],
+			whiteBright: [97, 39]
+		},
+		bgColor: {
+			bgBlack: [40, 49],
+			bgRed: [41, 49],
+			bgGreen: [42, 49],
+			bgYellow: [43, 49],
+			bgBlue: [44, 49],
+			bgMagenta: [45, 49],
+			bgCyan: [46, 49],
+			bgWhite: [47, 49],
+
+			// Bright color
+			bgBlackBright: [100, 49],
+			bgRedBright: [101, 49],
+			bgGreenBright: [102, 49],
+			bgYellowBright: [103, 49],
+			bgBlueBright: [104, 49],
+			bgMagentaBright: [105, 49],
+			bgCyanBright: [106, 49],
+			bgWhiteBright: [107, 49]
+		}
+	};
+
+	// Fix humans
+	styles.color.grey = styles.color.gray;
+
+	for (const groupName of Object.keys(styles)) {
+		const group = styles[groupName];
+
+		for (const styleName of Object.keys(group)) {
+			const style = group[styleName];
+
+			styles[styleName] = {
+				open: `\u001B[${style[0]}m`,
+				close: `\u001B[${style[1]}m`
+			};
+
+			group[styleName] = styles[styleName];
+
+			codes.set(style[0], style[1]);
+		}
+
+		Object.defineProperty(styles, groupName, {
+			value: group,
+			enumerable: false
+		});
+
+		Object.defineProperty(styles, 'codes', {
+			value: codes,
+			enumerable: false
+		});
+	}
+
+	const rgb2rgb = (r, g, b) => [r, g, b];
+
+	styles.color.close = '\u001B[39m';
+	styles.bgColor.close = '\u001B[49m';
+
+	styles.color.ansi = {};
+	styles.color.ansi256 = {};
+	styles.color.ansi16m = {
+		rgb: wrapAnsi16m(rgb2rgb, 0)
+	};
+
+	styles.bgColor.ansi = {};
+	styles.bgColor.ansi256 = {};
+	styles.bgColor.ansi16m = {
+		rgb: wrapAnsi16m(rgb2rgb, 10)
+	};
+
+	for (const key of Object.keys(colorConvert)) {
+		if (typeof colorConvert[key] !== 'object') {
+			continue;
+		}
+
+		const suite = colorConvert[key];
+
+		if ('ansi16' in suite) {
+			styles.color.ansi[key] = wrapAnsi16(suite.ansi16, 0);
+			styles.bgColor.ansi[key] = wrapAnsi16(suite.ansi16, 10);
+		}
+
+		if ('ansi256' in suite) {
+			styles.color.ansi256[key] = wrapAnsi256(suite.ansi256, 0);
+			styles.bgColor.ansi256[key] = wrapAnsi256(suite.ansi256, 10);
+		}
+
+		if ('rgb' in suite) {
+			styles.color.ansi16m[key] = wrapAnsi16m(suite.rgb, 0);
+			styles.bgColor.ansi16m[key] = wrapAnsi16m(suite.rgb, 10);
+		}
+	}
+
+	return styles;
+}
+
+// Make the export immutable
+Object.defineProperty(module, 'exports', {
+	enumerable: true,
+	get: assembleStyles
+});
+
+/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(27)(module)))
+
+/***/ }),
+/* 340 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+const os = __webpack_require__(54);
+const hasFlag = __webpack_require__(55);
+
+const env = process.env;
+
+let forceColor;
+if (hasFlag('no-color') ||
+	hasFlag('no-colors') ||
+	hasFlag('color=false')) {
+	forceColor = false;
+} else if (hasFlag('color') ||
+	hasFlag('colors') ||
+	hasFlag('color=true') ||
+	hasFlag('color=always')) {
+	forceColor = true;
+}
+if ('FORCE_COLOR' in env) {
+	forceColor = env.FORCE_COLOR.length === 0 || parseInt(env.FORCE_COLOR, 10) !== 0;
+}
+
+function translateLevel(level) {
+	if (level === 0) {
+		return false;
+	}
+
+	return {
+		level,
+		hasBasic: true,
+		has256: level >= 2,
+		has16m: level >= 3
+	};
+}
+
+function supportsColor(stream) {
+	if (forceColor === false) {
+		return 0;
+	}
+
+	if (hasFlag('color=16m') ||
+		hasFlag('color=full') ||
+		hasFlag('color=truecolor')) {
+		return 3;
+	}
+
+	if (hasFlag('color=256')) {
+		return 2;
+	}
+
+	if (stream && !stream.isTTY && forceColor !== true) {
+		return 0;
+	}
+
+	const min = forceColor ? 1 : 0;
+
+	if (process.platform === 'win32') {
+		// Node.js 7.5.0 is the first version of Node.js to include a patch to
+		// libuv that enables 256 color output on Windows. Anything earlier and it
+		// won't work. However, here we target Node.js 8 at minimum as it is an LTS
+		// release, and Node.js 7 is not. Windows 10 build 10586 is the first Windows
+		// release that supports 256 colors. Windows 10 build 14931 is the first release
+		// that supports 16m/TrueColor.
+		const osRelease = os.release().split('.');
+		if (
+			Number(process.versions.node.split('.')[0]) >= 8 &&
+			Number(osRelease[0]) >= 10 &&
+			Number(osRelease[2]) >= 10586
+		) {
+			return Number(osRelease[2]) >= 14931 ? 3 : 2;
+		}
+
+		return 1;
+	}
+
+	if ('CI' in env) {
+		if (['TRAVIS', 'CIRCLECI', 'APPVEYOR', 'GITLAB_CI'].some(sign => sign in env) || env.CI_NAME === 'codeship') {
+			return 1;
+		}
+
+		return min;
+	}
+
+	if ('TEAMCITY_VERSION' in env) {
+		return /^(9\.(0*[1-9]\d*)\.|\d{2,}\.)/.test(env.TEAMCITY_VERSION) ? 1 : 0;
+	}
+
+	if ('TERM_PROGRAM' in env) {
+		const version = parseInt((env.TERM_PROGRAM_VERSION || '').split('.')[0], 10);
+
+		switch (env.TERM_PROGRAM) {
+			case 'iTerm.app':
+				return version >= 3 ? 3 : 2;
+			case 'Hyper':
+				return 3;
+			case 'Apple_Terminal':
+				return 2;
+			// No default
+		}
+	}
+
+	if (/-256(color)?$/i.test(env.TERM)) {
+		return 2;
+	}
+
+	if (/^screen|^xterm|^vt100|^rxvt|color|ansi|cygwin|linux/i.test(env.TERM)) {
+		return 1;
+	}
+
+	if ('COLORTERM' in env) {
+		return 1;
+	}
+
+	if (env.TERM === 'dumb') {
+		return min;
+	}
+
+	return min;
+}
+
+function getSupportLevel(stream) {
+	const level = supportsColor(stream);
+	return translateLevel(level);
+}
+
+module.exports = {
+	supportsColor: getSupportLevel,
+	stdout: getSupportLevel(process.stdout),
+	stderr: getSupportLevel(process.stderr)
+};
+
+
+/***/ }),
+/* 341 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+const TEMPLATE_REGEX = /(?:\\(u[a-f\d]{4}|x[a-f\d]{2}|.))|(?:\{(~)?(\w+(?:\([^)]*\))?(?:\.\w+(?:\([^)]*\))?)*)(?:[ \t]|(?=\r?\n)))|(\})|((?:.|[\r\n\f])+?)/gi;
+const STYLE_REGEX = /(?:^|\.)(\w+)(?:\(([^)]*)\))?/g;
+const STRING_REGEX = /^(['"])((?:\\.|(?!\1)[^\\])*)\1$/;
+const ESCAPE_REGEX = /\\(u[a-f\d]{4}|x[a-f\d]{2}|.)|([^\\])/gi;
+
+const ESCAPES = new Map([
+	['n', '\n'],
+	['r', '\r'],
+	['t', '\t'],
+	['b', '\b'],
+	['f', '\f'],
+	['v', '\v'],
+	['0', '\0'],
+	['\\', '\\'],
+	['e', '\u001B'],
+	['a', '\u0007']
+]);
+
+function unescape(c) {
+	if ((c[0] === 'u' && c.length === 5) || (c[0] === 'x' && c.length === 3)) {
+		return String.fromCharCode(parseInt(c.slice(1), 16));
+	}
+
+	return ESCAPES.get(c) || c;
+}
+
+function parseArguments(name, args) {
+	const results = [];
+	const chunks = args.trim().split(/\s*,\s*/g);
+	let matches;
+
+	for (const chunk of chunks) {
+		if (!isNaN(chunk)) {
+			results.push(Number(chunk));
+		} else if ((matches = chunk.match(STRING_REGEX))) {
+			results.push(matches[2].replace(ESCAPE_REGEX, (m, escape, chr) => escape ? unescape(escape) : chr));
+		} else {
+			throw new Error(`Invalid Chalk template style argument: ${chunk} (in style '${name}')`);
+		}
+	}
+
+	return results;
+}
+
+function parseStyle(style) {
+	STYLE_REGEX.lastIndex = 0;
+
+	const results = [];
+	let matches;
+
+	while ((matches = STYLE_REGEX.exec(style)) !== null) {
+		const name = matches[1];
+
+		if (matches[2]) {
+			const args = parseArguments(name, matches[2]);
+			results.push([name].concat(args));
+		} else {
+			results.push([name]);
+		}
+	}
+
+	return results;
+}
+
+function buildStyle(chalk, styles) {
+	const enabled = {};
+
+	for (const layer of styles) {
+		for (const style of layer.styles) {
+			enabled[style[0]] = layer.inverse ? null : style.slice(1);
+		}
+	}
+
+	let current = chalk;
+	for (const styleName of Object.keys(enabled)) {
+		if (Array.isArray(enabled[styleName])) {
+			if (!(styleName in current)) {
+				throw new Error(`Unknown Chalk style: ${styleName}`);
+			}
+
+			if (enabled[styleName].length > 0) {
+				current = current[styleName].apply(current, enabled[styleName]);
+			} else {
+				current = current[styleName];
+			}
+		}
+	}
+
+	return current;
+}
+
+module.exports = (chalk, tmp) => {
+	const styles = [];
+	const chunks = [];
+	let chunk = [];
+
+	// eslint-disable-next-line max-params
+	tmp.replace(TEMPLATE_REGEX, (m, escapeChar, inverse, style, close, chr) => {
+		if (escapeChar) {
+			chunk.push(unescape(escapeChar));
+		} else if (style) {
+			const str = chunk.join('');
+			chunk = [];
+			chunks.push(styles.length === 0 ? str : buildStyle(chalk, styles)(str));
+			styles.push({inverse, styles: parseStyle(style)});
+		} else if (close) {
+			if (styles.length === 0) {
+				throw new Error('Found extraneous } in Chalk template literal');
+			}
+
+			chunks.push(buildStyle(chalk, styles)(chunk.join('')));
+			chunk = [];
+			styles.pop();
+		} else {
+			chunk.push(chr);
+		}
+	});
+
+	chunks.push(chunk.join(''));
+
+	if (styles.length > 0) {
+		const errMsg = `Chalk template literal is missing ${styles.length} closing bracket${styles.length === 1 ? '' : 's'} (\`}\`)`;
+		throw new Error(errMsg);
+	}
+
+	return chunks.join('');
+};
+
+
+/***/ }),
+/* 342 */
+/***/ (function(module, exports, __webpack_require__) {
+
 // Copyright IBM Corp. 2014. All Rights Reserved.
 // Node module: strong-log-transformer
 // This file is licensed under the Artistic License 2.0.
 // License text available at https://opensource.org/licenses/Artistic-2.0
 
-module.exports = __webpack_require__(92);
-module.exports.cli = __webpack_require__(344);
+module.exports = __webpack_require__(97);
+module.exports.cli = __webpack_require__(348);
 
 
 /***/ }),
-/* 339 */
+/* 343 */
 /***/ (function(module, exports, __webpack_require__) {
 
 // Copyright (C) 2011-2015 John Hewson
@@ -39627,7 +37976,7 @@ module.exports.cli = __webpack_require__(344);
 
 var stream = __webpack_require__(22),
     util = __webpack_require__(10),
-    timers = __webpack_require__(340);
+    timers = __webpack_require__(344);
 
 // convinience API
 module.exports = function(readStream, options) {
@@ -39763,13 +38112,13 @@ LineStream.prototype._reencode = function(line, chunkEncoding) {
 
 
 /***/ }),
-/* 340 */
+/* 344 */
 /***/ (function(module, exports) {
 
 module.exports = require("timers");
 
 /***/ }),
-/* 341 */
+/* 345 */
 /***/ (function(module, exports, __webpack_require__) {
 
 var Stream = __webpack_require__(22)
@@ -39883,7 +38232,7 @@ function through (write, end, opts) {
 
 
 /***/ }),
-/* 342 */
+/* 346 */
 /***/ (function(module, exports, __webpack_require__) {
 
 var Stream = __webpack_require__(22)
@@ -39976,248 +38325,248 @@ function duplex(writer, reader) {
 
 
 /***/ }),
-/* 343 */
+/* 347 */
 /***/ (function(module, exports, __webpack_require__) {
 
 var map = {
-	"./af": 93,
-	"./af.js": 93,
-	"./ar": 94,
-	"./ar-dz": 95,
-	"./ar-dz.js": 95,
-	"./ar-kw": 96,
-	"./ar-kw.js": 96,
-	"./ar-ly": 97,
-	"./ar-ly.js": 97,
-	"./ar-ma": 98,
-	"./ar-ma.js": 98,
-	"./ar-sa": 99,
-	"./ar-sa.js": 99,
-	"./ar-tn": 100,
-	"./ar-tn.js": 100,
-	"./ar.js": 94,
-	"./az": 101,
-	"./az.js": 101,
-	"./be": 102,
-	"./be.js": 102,
-	"./bg": 103,
-	"./bg.js": 103,
-	"./bm": 104,
-	"./bm.js": 104,
-	"./bn": 105,
-	"./bn.js": 105,
-	"./bo": 106,
-	"./bo.js": 106,
-	"./br": 107,
-	"./br.js": 107,
-	"./bs": 108,
-	"./bs.js": 108,
-	"./ca": 109,
-	"./ca.js": 109,
-	"./cs": 110,
-	"./cs.js": 110,
-	"./cv": 111,
-	"./cv.js": 111,
-	"./cy": 112,
-	"./cy.js": 112,
-	"./da": 113,
-	"./da.js": 113,
-	"./de": 114,
-	"./de-at": 115,
-	"./de-at.js": 115,
-	"./de-ch": 116,
-	"./de-ch.js": 116,
-	"./de.js": 114,
-	"./dv": 117,
-	"./dv.js": 117,
-	"./el": 118,
-	"./el.js": 118,
-	"./en-au": 119,
-	"./en-au.js": 119,
-	"./en-ca": 120,
-	"./en-ca.js": 120,
-	"./en-gb": 121,
-	"./en-gb.js": 121,
-	"./en-ie": 122,
-	"./en-ie.js": 122,
-	"./en-nz": 123,
-	"./en-nz.js": 123,
-	"./eo": 124,
-	"./eo.js": 124,
-	"./es": 125,
-	"./es-do": 126,
-	"./es-do.js": 126,
-	"./es-us": 127,
-	"./es-us.js": 127,
-	"./es.js": 125,
-	"./et": 128,
-	"./et.js": 128,
-	"./eu": 129,
-	"./eu.js": 129,
-	"./fa": 130,
-	"./fa.js": 130,
-	"./fi": 131,
-	"./fi.js": 131,
-	"./fo": 132,
-	"./fo.js": 132,
-	"./fr": 133,
-	"./fr-ca": 134,
-	"./fr-ca.js": 134,
-	"./fr-ch": 135,
-	"./fr-ch.js": 135,
-	"./fr.js": 133,
-	"./fy": 136,
-	"./fy.js": 136,
-	"./gd": 137,
-	"./gd.js": 137,
-	"./gl": 138,
-	"./gl.js": 138,
-	"./gom-latn": 139,
-	"./gom-latn.js": 139,
-	"./gu": 140,
-	"./gu.js": 140,
-	"./he": 141,
-	"./he.js": 141,
-	"./hi": 142,
-	"./hi.js": 142,
-	"./hr": 143,
-	"./hr.js": 143,
-	"./hu": 144,
-	"./hu.js": 144,
-	"./hy-am": 145,
-	"./hy-am.js": 145,
-	"./id": 146,
-	"./id.js": 146,
-	"./is": 147,
-	"./is.js": 147,
-	"./it": 148,
-	"./it.js": 148,
-	"./ja": 149,
-	"./ja.js": 149,
-	"./jv": 150,
-	"./jv.js": 150,
-	"./ka": 151,
-	"./ka.js": 151,
-	"./kk": 152,
-	"./kk.js": 152,
-	"./km": 153,
-	"./km.js": 153,
-	"./kn": 154,
-	"./kn.js": 154,
-	"./ko": 155,
-	"./ko.js": 155,
-	"./ky": 156,
-	"./ky.js": 156,
-	"./lb": 157,
-	"./lb.js": 157,
-	"./lo": 158,
-	"./lo.js": 158,
-	"./lt": 159,
-	"./lt.js": 159,
-	"./lv": 160,
-	"./lv.js": 160,
-	"./me": 161,
-	"./me.js": 161,
-	"./mi": 162,
-	"./mi.js": 162,
-	"./mk": 163,
-	"./mk.js": 163,
-	"./ml": 164,
-	"./ml.js": 164,
-	"./mr": 165,
-	"./mr.js": 165,
-	"./ms": 166,
-	"./ms-my": 167,
-	"./ms-my.js": 167,
-	"./ms.js": 166,
-	"./mt": 168,
-	"./mt.js": 168,
-	"./my": 169,
-	"./my.js": 169,
-	"./nb": 170,
-	"./nb.js": 170,
-	"./ne": 171,
-	"./ne.js": 171,
-	"./nl": 172,
-	"./nl-be": 173,
-	"./nl-be.js": 173,
-	"./nl.js": 172,
-	"./nn": 174,
-	"./nn.js": 174,
-	"./pa-in": 175,
-	"./pa-in.js": 175,
-	"./pl": 176,
-	"./pl.js": 176,
-	"./pt": 177,
-	"./pt-br": 178,
-	"./pt-br.js": 178,
-	"./pt.js": 177,
-	"./ro": 179,
-	"./ro.js": 179,
-	"./ru": 180,
-	"./ru.js": 180,
-	"./sd": 181,
-	"./sd.js": 181,
-	"./se": 182,
-	"./se.js": 182,
-	"./si": 183,
-	"./si.js": 183,
-	"./sk": 184,
-	"./sk.js": 184,
-	"./sl": 185,
-	"./sl.js": 185,
-	"./sq": 186,
-	"./sq.js": 186,
-	"./sr": 187,
-	"./sr-cyrl": 188,
-	"./sr-cyrl.js": 188,
-	"./sr.js": 187,
-	"./ss": 189,
-	"./ss.js": 189,
-	"./sv": 190,
-	"./sv.js": 190,
-	"./sw": 191,
-	"./sw.js": 191,
-	"./ta": 192,
-	"./ta.js": 192,
-	"./te": 193,
-	"./te.js": 193,
-	"./tet": 194,
-	"./tet.js": 194,
-	"./th": 195,
-	"./th.js": 195,
-	"./tl-ph": 196,
-	"./tl-ph.js": 196,
-	"./tlh": 197,
-	"./tlh.js": 197,
-	"./tr": 198,
-	"./tr.js": 198,
-	"./tzl": 199,
-	"./tzl.js": 199,
-	"./tzm": 200,
-	"./tzm-latn": 201,
-	"./tzm-latn.js": 201,
-	"./tzm.js": 200,
-	"./uk": 202,
-	"./uk.js": 202,
-	"./ur": 203,
-	"./ur.js": 203,
-	"./uz": 204,
-	"./uz-latn": 205,
-	"./uz-latn.js": 205,
-	"./uz.js": 204,
-	"./vi": 206,
-	"./vi.js": 206,
-	"./x-pseudo": 207,
-	"./x-pseudo.js": 207,
-	"./yo": 208,
-	"./yo.js": 208,
-	"./zh-cn": 209,
-	"./zh-cn.js": 209,
-	"./zh-hk": 210,
-	"./zh-hk.js": 210,
-	"./zh-tw": 211,
-	"./zh-tw.js": 211
+	"./af": 98,
+	"./af.js": 98,
+	"./ar": 99,
+	"./ar-dz": 100,
+	"./ar-dz.js": 100,
+	"./ar-kw": 101,
+	"./ar-kw.js": 101,
+	"./ar-ly": 102,
+	"./ar-ly.js": 102,
+	"./ar-ma": 103,
+	"./ar-ma.js": 103,
+	"./ar-sa": 104,
+	"./ar-sa.js": 104,
+	"./ar-tn": 105,
+	"./ar-tn.js": 105,
+	"./ar.js": 99,
+	"./az": 106,
+	"./az.js": 106,
+	"./be": 107,
+	"./be.js": 107,
+	"./bg": 108,
+	"./bg.js": 108,
+	"./bm": 109,
+	"./bm.js": 109,
+	"./bn": 110,
+	"./bn.js": 110,
+	"./bo": 111,
+	"./bo.js": 111,
+	"./br": 112,
+	"./br.js": 112,
+	"./bs": 113,
+	"./bs.js": 113,
+	"./ca": 114,
+	"./ca.js": 114,
+	"./cs": 115,
+	"./cs.js": 115,
+	"./cv": 116,
+	"./cv.js": 116,
+	"./cy": 117,
+	"./cy.js": 117,
+	"./da": 118,
+	"./da.js": 118,
+	"./de": 119,
+	"./de-at": 120,
+	"./de-at.js": 120,
+	"./de-ch": 121,
+	"./de-ch.js": 121,
+	"./de.js": 119,
+	"./dv": 122,
+	"./dv.js": 122,
+	"./el": 123,
+	"./el.js": 123,
+	"./en-au": 124,
+	"./en-au.js": 124,
+	"./en-ca": 125,
+	"./en-ca.js": 125,
+	"./en-gb": 126,
+	"./en-gb.js": 126,
+	"./en-ie": 127,
+	"./en-ie.js": 127,
+	"./en-nz": 128,
+	"./en-nz.js": 128,
+	"./eo": 129,
+	"./eo.js": 129,
+	"./es": 130,
+	"./es-do": 131,
+	"./es-do.js": 131,
+	"./es-us": 132,
+	"./es-us.js": 132,
+	"./es.js": 130,
+	"./et": 133,
+	"./et.js": 133,
+	"./eu": 134,
+	"./eu.js": 134,
+	"./fa": 135,
+	"./fa.js": 135,
+	"./fi": 136,
+	"./fi.js": 136,
+	"./fo": 137,
+	"./fo.js": 137,
+	"./fr": 138,
+	"./fr-ca": 139,
+	"./fr-ca.js": 139,
+	"./fr-ch": 140,
+	"./fr-ch.js": 140,
+	"./fr.js": 138,
+	"./fy": 141,
+	"./fy.js": 141,
+	"./gd": 142,
+	"./gd.js": 142,
+	"./gl": 143,
+	"./gl.js": 143,
+	"./gom-latn": 144,
+	"./gom-latn.js": 144,
+	"./gu": 145,
+	"./gu.js": 145,
+	"./he": 146,
+	"./he.js": 146,
+	"./hi": 147,
+	"./hi.js": 147,
+	"./hr": 148,
+	"./hr.js": 148,
+	"./hu": 149,
+	"./hu.js": 149,
+	"./hy-am": 150,
+	"./hy-am.js": 150,
+	"./id": 151,
+	"./id.js": 151,
+	"./is": 152,
+	"./is.js": 152,
+	"./it": 153,
+	"./it.js": 153,
+	"./ja": 154,
+	"./ja.js": 154,
+	"./jv": 155,
+	"./jv.js": 155,
+	"./ka": 156,
+	"./ka.js": 156,
+	"./kk": 157,
+	"./kk.js": 157,
+	"./km": 158,
+	"./km.js": 158,
+	"./kn": 159,
+	"./kn.js": 159,
+	"./ko": 160,
+	"./ko.js": 160,
+	"./ky": 161,
+	"./ky.js": 161,
+	"./lb": 162,
+	"./lb.js": 162,
+	"./lo": 163,
+	"./lo.js": 163,
+	"./lt": 164,
+	"./lt.js": 164,
+	"./lv": 165,
+	"./lv.js": 165,
+	"./me": 166,
+	"./me.js": 166,
+	"./mi": 167,
+	"./mi.js": 167,
+	"./mk": 168,
+	"./mk.js": 168,
+	"./ml": 169,
+	"./ml.js": 169,
+	"./mr": 170,
+	"./mr.js": 170,
+	"./ms": 171,
+	"./ms-my": 172,
+	"./ms-my.js": 172,
+	"./ms.js": 171,
+	"./mt": 173,
+	"./mt.js": 173,
+	"./my": 174,
+	"./my.js": 174,
+	"./nb": 175,
+	"./nb.js": 175,
+	"./ne": 176,
+	"./ne.js": 176,
+	"./nl": 177,
+	"./nl-be": 178,
+	"./nl-be.js": 178,
+	"./nl.js": 177,
+	"./nn": 179,
+	"./nn.js": 179,
+	"./pa-in": 180,
+	"./pa-in.js": 180,
+	"./pl": 181,
+	"./pl.js": 181,
+	"./pt": 182,
+	"./pt-br": 183,
+	"./pt-br.js": 183,
+	"./pt.js": 182,
+	"./ro": 184,
+	"./ro.js": 184,
+	"./ru": 185,
+	"./ru.js": 185,
+	"./sd": 186,
+	"./sd.js": 186,
+	"./se": 187,
+	"./se.js": 187,
+	"./si": 188,
+	"./si.js": 188,
+	"./sk": 189,
+	"./sk.js": 189,
+	"./sl": 190,
+	"./sl.js": 190,
+	"./sq": 191,
+	"./sq.js": 191,
+	"./sr": 192,
+	"./sr-cyrl": 193,
+	"./sr-cyrl.js": 193,
+	"./sr.js": 192,
+	"./ss": 194,
+	"./ss.js": 194,
+	"./sv": 195,
+	"./sv.js": 195,
+	"./sw": 196,
+	"./sw.js": 196,
+	"./ta": 197,
+	"./ta.js": 197,
+	"./te": 198,
+	"./te.js": 198,
+	"./tet": 199,
+	"./tet.js": 199,
+	"./th": 200,
+	"./th.js": 200,
+	"./tl-ph": 201,
+	"./tl-ph.js": 201,
+	"./tlh": 202,
+	"./tlh.js": 202,
+	"./tr": 203,
+	"./tr.js": 203,
+	"./tzl": 204,
+	"./tzl.js": 204,
+	"./tzm": 205,
+	"./tzm-latn": 206,
+	"./tzm-latn.js": 206,
+	"./tzm.js": 205,
+	"./uk": 207,
+	"./uk.js": 207,
+	"./ur": 208,
+	"./ur.js": 208,
+	"./uz": 209,
+	"./uz-latn": 210,
+	"./uz-latn.js": 210,
+	"./uz.js": 209,
+	"./vi": 211,
+	"./vi.js": 211,
+	"./x-pseudo": 212,
+	"./x-pseudo.js": 212,
+	"./yo": 213,
+	"./yo.js": 213,
+	"./zh-cn": 214,
+	"./zh-cn.js": 214,
+	"./zh-hk": 215,
+	"./zh-hk.js": 215,
+	"./zh-tw": 216,
+	"./zh-tw.js": 216
 };
 function webpackContext(req) {
 	return __webpack_require__(webpackContextResolve(req));
@@ -40233,10 +38582,10 @@ webpackContext.keys = function webpackContextKeys() {
 };
 webpackContext.resolve = webpackContextResolve;
 module.exports = webpackContext;
-webpackContext.id = 343;
+webpackContext.id = 347;
 
 /***/ }),
-/* 344 */
+/* 348 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -40247,11 +38596,11 @@ webpackContext.id = 343;
 
 
 
-var minimist = __webpack_require__(345);
+var minimist = __webpack_require__(349);
 var path = __webpack_require__(3);
 
-var Logger = __webpack_require__(92);
-var pkg = __webpack_require__(346);
+var Logger = __webpack_require__(97);
+var pkg = __webpack_require__(350);
 
 module.exports = cli;
 
@@ -40304,7 +38653,7 @@ function usage($0, p) {
 
 
 /***/ }),
-/* 345 */
+/* 349 */
 /***/ (function(module, exports) {
 
 module.exports = function (args, opts) {
@@ -40505,13 +38854,13 @@ function isNumber (x) {
 
 
 /***/ }),
-/* 346 */
+/* 350 */
 /***/ (function(module, exports) {
 
 module.exports = {"name":"strong-log-transformer","version":"1.0.6","description":"Stream transformer that prefixes lines with timestamps and other things.","author":"Ryan Graham <ryan@strongloop.com>","license":"Artistic-2.0","repository":{"type":"git","url":"git://github.com/strongloop/strong-log-transformer"},"keywords":["logging","streams"],"bugs":{"url":"https://github.com/strongloop/strong-log-transformer/issues"},"homepage":"https://github.com/strongloop/strong-log-transformer","directories":{"test":"test"},"bin":{"sl-log-transformer":"bin/sl-log-transformer.js"},"main":"index.js","scripts":{"test":"tap --coverage --coverage-report=cobertura test/test-*"},"dependencies":{"byline":"^5.0.0","duplexer":"^0.1.1","minimist":"^0.1.0","moment":"^2.6.0","through":"^2.3.4"},"devDependencies":{"tap":"^1.3.2"}}
 
 /***/ }),
-/* 347 */
+/* 351 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -40522,21 +38871,21 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.CleanCommand = undefined;
 
-var _chalk = __webpack_require__(14);
+var _chalk = __webpack_require__(18);
 
 var _chalk2 = _interopRequireDefault(_chalk);
 
-var _del = __webpack_require__(212);
+var _del = __webpack_require__(217);
 
 var _del2 = _interopRequireDefault(_del);
 
-var _ora = __webpack_require__(358);
+var _ora = __webpack_require__(362);
 
 var _ora2 = _interopRequireDefault(_ora);
 
 var _path = __webpack_require__(3);
 
-var _fs = __webpack_require__(51);
+var _fs = __webpack_require__(56);
 
 var _log = __webpack_require__(20);
 
@@ -40591,16 +38940,16 @@ const CleanCommand = exports.CleanCommand = {
 };
 
 /***/ }),
-/* 348 */
+/* 352 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
-var Promise = __webpack_require__(213);
-var arrayUnion = __webpack_require__(214);
-var objectAssign = __webpack_require__(215);
-var glob = __webpack_require__(30);
-var pify = __webpack_require__(351);
+var Promise = __webpack_require__(218);
+var arrayUnion = __webpack_require__(219);
+var objectAssign = __webpack_require__(220);
+var glob = __webpack_require__(31);
+var pify = __webpack_require__(355);
 
 var globP = pify(glob, Promise).bind(glob);
 
@@ -40686,7 +39035,7 @@ module.exports.hasMagic = function (patterns, opts) {
 
 
 /***/ }),
-/* 349 */
+/* 353 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -40985,7 +39334,7 @@ module.exports = Promise;
 
 
 /***/ }),
-/* 350 */
+/* 354 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -41054,7 +39403,7 @@ if ('Set' in global) {
 
 
 /***/ }),
-/* 351 */
+/* 355 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -41129,7 +39478,7 @@ pify.all = pify;
 
 
 /***/ }),
-/* 352 */
+/* 356 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -41142,12 +39491,12 @@ module.exports = function (str) {
 
 
 /***/ }),
-/* 353 */
+/* 357 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
-var isPathInside = __webpack_require__(354);
+var isPathInside = __webpack_require__(358);
 
 module.exports = function (str) {
 	return isPathInside(str, process.cwd());
@@ -41155,13 +39504,13 @@ module.exports = function (str) {
 
 
 /***/ }),
-/* 354 */
+/* 358 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 var path = __webpack_require__(3);
-var pathIsInside = __webpack_require__(355);
+var pathIsInside = __webpack_require__(359);
 
 module.exports = function (a, b) {
 	a = path.resolve(a);
@@ -41176,7 +39525,7 @@ module.exports = function (a, b) {
 
 
 /***/ }),
-/* 355 */
+/* 359 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -41211,16 +39560,16 @@ function stripTrailingSep(thePath) {
 
 
 /***/ }),
-/* 356 */
+/* 360 */
 /***/ (function(module, exports, __webpack_require__) {
 
 module.exports = rimraf
 rimraf.sync = rimrafSync
 
-var assert = __webpack_require__(28)
+var assert = __webpack_require__(29)
 var path = __webpack_require__(3)
 var fs = __webpack_require__(7)
-var glob = __webpack_require__(30)
+var glob = __webpack_require__(31)
 var _0666 = parseInt('666', 8)
 
 var defaultGlobOpts = {
@@ -41581,7 +39930,7 @@ function rmkidsSync (p, options) {
 
 
 /***/ }),
-/* 357 */
+/* 361 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -41655,15 +40004,15 @@ module.exports = (iterable, mapper, opts) => new Promise((resolve, reject) => {
 
 
 /***/ }),
-/* 358 */
+/* 362 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
-const chalk = __webpack_require__(14);
-const cliCursor = __webpack_require__(359);
-const cliSpinners = __webpack_require__(363);
-const logSymbols = __webpack_require__(91);
+const chalk = __webpack_require__(363);
+const cliCursor = __webpack_require__(367);
+const cliSpinners = __webpack_require__(371);
+const logSymbols = __webpack_require__(96);
 
 class Ora {
 	constructor(options) {
@@ -41810,12 +40159,678 @@ module.exports.promise = (action, options) => {
 
 
 /***/ }),
-/* 359 */
+/* 363 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
-const restoreCursor = __webpack_require__(360);
+const escapeStringRegexp = __webpack_require__(52);
+const ansiStyles = __webpack_require__(364);
+const stdoutColor = __webpack_require__(365).stdout;
+
+const template = __webpack_require__(366);
+
+const isSimpleWindowsTerm = process.platform === 'win32' && !(process.env.TERM || '').toLowerCase().startsWith('xterm');
+
+// `supportsColor.level` → `ansiStyles.color[name]` mapping
+const levelMapping = ['ansi', 'ansi', 'ansi256', 'ansi16m'];
+
+// `color-convert` models to exclude from the Chalk API due to conflicts and such
+const skipModels = new Set(['gray']);
+
+const styles = Object.create(null);
+
+function applyOptions(obj, options) {
+	options = options || {};
+
+	// Detect level if not set manually
+	const scLevel = stdoutColor ? stdoutColor.level : 0;
+	obj.level = options.level === undefined ? scLevel : options.level;
+	obj.enabled = 'enabled' in options ? options.enabled : obj.level > 0;
+}
+
+function Chalk(options) {
+	// We check for this.template here since calling `chalk.constructor()`
+	// by itself will have a `this` of a previously constructed chalk object
+	if (!this || !(this instanceof Chalk) || this.template) {
+		const chalk = {};
+		applyOptions(chalk, options);
+
+		chalk.template = function () {
+			const args = [].slice.call(arguments);
+			return chalkTag.apply(null, [chalk.template].concat(args));
+		};
+
+		Object.setPrototypeOf(chalk, Chalk.prototype);
+		Object.setPrototypeOf(chalk.template, chalk);
+
+		chalk.template.constructor = Chalk;
+
+		return chalk.template;
+	}
+
+	applyOptions(this, options);
+}
+
+// Use bright blue on Windows as the normal blue color is illegible
+if (isSimpleWindowsTerm) {
+	ansiStyles.blue.open = '\u001B[94m';
+}
+
+for (const key of Object.keys(ansiStyles)) {
+	ansiStyles[key].closeRe = new RegExp(escapeStringRegexp(ansiStyles[key].close), 'g');
+
+	styles[key] = {
+		get() {
+			const codes = ansiStyles[key];
+			return build.call(this, this._styles ? this._styles.concat(codes) : [codes], this._empty, key);
+		}
+	};
+}
+
+styles.visible = {
+	get() {
+		return build.call(this, this._styles || [], true, 'visible');
+	}
+};
+
+ansiStyles.color.closeRe = new RegExp(escapeStringRegexp(ansiStyles.color.close), 'g');
+for (const model of Object.keys(ansiStyles.color.ansi)) {
+	if (skipModels.has(model)) {
+		continue;
+	}
+
+	styles[model] = {
+		get() {
+			const level = this.level;
+			return function () {
+				const open = ansiStyles.color[levelMapping[level]][model].apply(null, arguments);
+				const codes = {
+					open,
+					close: ansiStyles.color.close,
+					closeRe: ansiStyles.color.closeRe
+				};
+				return build.call(this, this._styles ? this._styles.concat(codes) : [codes], this._empty, model);
+			};
+		}
+	};
+}
+
+ansiStyles.bgColor.closeRe = new RegExp(escapeStringRegexp(ansiStyles.bgColor.close), 'g');
+for (const model of Object.keys(ansiStyles.bgColor.ansi)) {
+	if (skipModels.has(model)) {
+		continue;
+	}
+
+	const bgModel = 'bg' + model[0].toUpperCase() + model.slice(1);
+	styles[bgModel] = {
+		get() {
+			const level = this.level;
+			return function () {
+				const open = ansiStyles.bgColor[levelMapping[level]][model].apply(null, arguments);
+				const codes = {
+					open,
+					close: ansiStyles.bgColor.close,
+					closeRe: ansiStyles.bgColor.closeRe
+				};
+				return build.call(this, this._styles ? this._styles.concat(codes) : [codes], this._empty, model);
+			};
+		}
+	};
+}
+
+const proto = Object.defineProperties(() => {}, styles);
+
+function build(_styles, _empty, key) {
+	const builder = function () {
+		return applyStyle.apply(builder, arguments);
+	};
+
+	builder._styles = _styles;
+	builder._empty = _empty;
+
+	const self = this;
+
+	Object.defineProperty(builder, 'level', {
+		enumerable: true,
+		get() {
+			return self.level;
+		},
+		set(level) {
+			self.level = level;
+		}
+	});
+
+	Object.defineProperty(builder, 'enabled', {
+		enumerable: true,
+		get() {
+			return self.enabled;
+		},
+		set(enabled) {
+			self.enabled = enabled;
+		}
+	});
+
+	// See below for fix regarding invisible grey/dim combination on Windows
+	builder.hasGrey = this.hasGrey || key === 'gray' || key === 'grey';
+
+	// `__proto__` is used because we must return a function, but there is
+	// no way to create a function with a different prototype
+	builder.__proto__ = proto; // eslint-disable-line no-proto
+
+	return builder;
+}
+
+function applyStyle() {
+	// Support varags, but simply cast to string in case there's only one arg
+	const args = arguments;
+	const argsLen = args.length;
+	let str = String(arguments[0]);
+
+	if (argsLen === 0) {
+		return '';
+	}
+
+	if (argsLen > 1) {
+		// Don't slice `arguments`, it prevents V8 optimizations
+		for (let a = 1; a < argsLen; a++) {
+			str += ' ' + args[a];
+		}
+	}
+
+	if (!this.enabled || this.level <= 0 || !str) {
+		return this._empty ? '' : str;
+	}
+
+	// Turns out that on Windows dimmed gray text becomes invisible in cmd.exe,
+	// see https://github.com/chalk/chalk/issues/58
+	// If we're on Windows and we're dealing with a gray color, temporarily make 'dim' a noop.
+	const originalDim = ansiStyles.dim.open;
+	if (isSimpleWindowsTerm && this.hasGrey) {
+		ansiStyles.dim.open = '';
+	}
+
+	for (const code of this._styles.slice().reverse()) {
+		// Replace any instances already present with a re-opening code
+		// otherwise only the part of the string until said closing code
+		// will be colored, and the rest will simply be 'plain'.
+		str = code.open + str.replace(code.closeRe, code.open) + code.close;
+
+		// Close the styling before a linebreak and reopen
+		// after next line to fix a bleed issue on macOS
+		// https://github.com/chalk/chalk/pull/92
+		str = str.replace(/\r?\n/g, `${code.close}$&${code.open}`);
+	}
+
+	// Reset the original `dim` if we changed it to work around the Windows dimmed gray issue
+	ansiStyles.dim.open = originalDim;
+
+	return str;
+}
+
+function chalkTag(chalk, strings) {
+	if (!Array.isArray(strings)) {
+		// If chalk() was called by itself or with a string,
+		// return the string itself as a string.
+		return [].slice.call(arguments, 1).join(' ');
+	}
+
+	const args = [].slice.call(arguments, 2);
+	const parts = [strings.raw[0]];
+
+	for (let i = 1; i < strings.length; i++) {
+		parts.push(String(args[i - 1]).replace(/[{}\\]/g, '\\$&'));
+		parts.push(String(strings.raw[i]));
+	}
+
+	return template(chalk, parts.join(''));
+}
+
+Object.defineProperties(Chalk.prototype, styles);
+
+module.exports = Chalk(); // eslint-disable-line new-cap
+module.exports.supportsColor = stdoutColor;
+module.exports.default = module.exports; // For TypeScript
+
+
+/***/ }),
+/* 364 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+/* WEBPACK VAR INJECTION */(function(module) {
+const colorConvert = __webpack_require__(53);
+
+const wrapAnsi16 = (fn, offset) => function () {
+	const code = fn.apply(colorConvert, arguments);
+	return `\u001B[${code + offset}m`;
+};
+
+const wrapAnsi256 = (fn, offset) => function () {
+	const code = fn.apply(colorConvert, arguments);
+	return `\u001B[${38 + offset};5;${code}m`;
+};
+
+const wrapAnsi16m = (fn, offset) => function () {
+	const rgb = fn.apply(colorConvert, arguments);
+	return `\u001B[${38 + offset};2;${rgb[0]};${rgb[1]};${rgb[2]}m`;
+};
+
+function assembleStyles() {
+	const codes = new Map();
+	const styles = {
+		modifier: {
+			reset: [0, 0],
+			// 21 isn't widely supported and 22 does the same thing
+			bold: [1, 22],
+			dim: [2, 22],
+			italic: [3, 23],
+			underline: [4, 24],
+			inverse: [7, 27],
+			hidden: [8, 28],
+			strikethrough: [9, 29]
+		},
+		color: {
+			black: [30, 39],
+			red: [31, 39],
+			green: [32, 39],
+			yellow: [33, 39],
+			blue: [34, 39],
+			magenta: [35, 39],
+			cyan: [36, 39],
+			white: [37, 39],
+			gray: [90, 39],
+
+			// Bright color
+			redBright: [91, 39],
+			greenBright: [92, 39],
+			yellowBright: [93, 39],
+			blueBright: [94, 39],
+			magentaBright: [95, 39],
+			cyanBright: [96, 39],
+			whiteBright: [97, 39]
+		},
+		bgColor: {
+			bgBlack: [40, 49],
+			bgRed: [41, 49],
+			bgGreen: [42, 49],
+			bgYellow: [43, 49],
+			bgBlue: [44, 49],
+			bgMagenta: [45, 49],
+			bgCyan: [46, 49],
+			bgWhite: [47, 49],
+
+			// Bright color
+			bgBlackBright: [100, 49],
+			bgRedBright: [101, 49],
+			bgGreenBright: [102, 49],
+			bgYellowBright: [103, 49],
+			bgBlueBright: [104, 49],
+			bgMagentaBright: [105, 49],
+			bgCyanBright: [106, 49],
+			bgWhiteBright: [107, 49]
+		}
+	};
+
+	// Fix humans
+	styles.color.grey = styles.color.gray;
+
+	for (const groupName of Object.keys(styles)) {
+		const group = styles[groupName];
+
+		for (const styleName of Object.keys(group)) {
+			const style = group[styleName];
+
+			styles[styleName] = {
+				open: `\u001B[${style[0]}m`,
+				close: `\u001B[${style[1]}m`
+			};
+
+			group[styleName] = styles[styleName];
+
+			codes.set(style[0], style[1]);
+		}
+
+		Object.defineProperty(styles, groupName, {
+			value: group,
+			enumerable: false
+		});
+
+		Object.defineProperty(styles, 'codes', {
+			value: codes,
+			enumerable: false
+		});
+	}
+
+	const rgb2rgb = (r, g, b) => [r, g, b];
+
+	styles.color.close = '\u001B[39m';
+	styles.bgColor.close = '\u001B[49m';
+
+	styles.color.ansi = {};
+	styles.color.ansi256 = {};
+	styles.color.ansi16m = {
+		rgb: wrapAnsi16m(rgb2rgb, 0)
+	};
+
+	styles.bgColor.ansi = {};
+	styles.bgColor.ansi256 = {};
+	styles.bgColor.ansi16m = {
+		rgb: wrapAnsi16m(rgb2rgb, 10)
+	};
+
+	for (const key of Object.keys(colorConvert)) {
+		if (typeof colorConvert[key] !== 'object') {
+			continue;
+		}
+
+		const suite = colorConvert[key];
+
+		if ('ansi16' in suite) {
+			styles.color.ansi[key] = wrapAnsi16(suite.ansi16, 0);
+			styles.bgColor.ansi[key] = wrapAnsi16(suite.ansi16, 10);
+		}
+
+		if ('ansi256' in suite) {
+			styles.color.ansi256[key] = wrapAnsi256(suite.ansi256, 0);
+			styles.bgColor.ansi256[key] = wrapAnsi256(suite.ansi256, 10);
+		}
+
+		if ('rgb' in suite) {
+			styles.color.ansi16m[key] = wrapAnsi16m(suite.rgb, 0);
+			styles.bgColor.ansi16m[key] = wrapAnsi16m(suite.rgb, 10);
+		}
+	}
+
+	return styles;
+}
+
+// Make the export immutable
+Object.defineProperty(module, 'exports', {
+	enumerable: true,
+	get: assembleStyles
+});
+
+/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(27)(module)))
+
+/***/ }),
+/* 365 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+const os = __webpack_require__(54);
+const hasFlag = __webpack_require__(55);
+
+const env = process.env;
+
+let forceColor;
+if (hasFlag('no-color') ||
+	hasFlag('no-colors') ||
+	hasFlag('color=false')) {
+	forceColor = false;
+} else if (hasFlag('color') ||
+	hasFlag('colors') ||
+	hasFlag('color=true') ||
+	hasFlag('color=always')) {
+	forceColor = true;
+}
+if ('FORCE_COLOR' in env) {
+	forceColor = env.FORCE_COLOR.length === 0 || parseInt(env.FORCE_COLOR, 10) !== 0;
+}
+
+function translateLevel(level) {
+	if (level === 0) {
+		return false;
+	}
+
+	return {
+		level,
+		hasBasic: true,
+		has256: level >= 2,
+		has16m: level >= 3
+	};
+}
+
+function supportsColor(stream) {
+	if (forceColor === false) {
+		return 0;
+	}
+
+	if (hasFlag('color=16m') ||
+		hasFlag('color=full') ||
+		hasFlag('color=truecolor')) {
+		return 3;
+	}
+
+	if (hasFlag('color=256')) {
+		return 2;
+	}
+
+	if (stream && !stream.isTTY && forceColor !== true) {
+		return 0;
+	}
+
+	const min = forceColor ? 1 : 0;
+
+	if (process.platform === 'win32') {
+		// Node.js 7.5.0 is the first version of Node.js to include a patch to
+		// libuv that enables 256 color output on Windows. Anything earlier and it
+		// won't work. However, here we target Node.js 8 at minimum as it is an LTS
+		// release, and Node.js 7 is not. Windows 10 build 10586 is the first Windows
+		// release that supports 256 colors. Windows 10 build 14931 is the first release
+		// that supports 16m/TrueColor.
+		const osRelease = os.release().split('.');
+		if (
+			Number(process.versions.node.split('.')[0]) >= 8 &&
+			Number(osRelease[0]) >= 10 &&
+			Number(osRelease[2]) >= 10586
+		) {
+			return Number(osRelease[2]) >= 14931 ? 3 : 2;
+		}
+
+		return 1;
+	}
+
+	if ('CI' in env) {
+		if (['TRAVIS', 'CIRCLECI', 'APPVEYOR', 'GITLAB_CI'].some(sign => sign in env) || env.CI_NAME === 'codeship') {
+			return 1;
+		}
+
+		return min;
+	}
+
+	if ('TEAMCITY_VERSION' in env) {
+		return /^(9\.(0*[1-9]\d*)\.|\d{2,}\.)/.test(env.TEAMCITY_VERSION) ? 1 : 0;
+	}
+
+	if ('TERM_PROGRAM' in env) {
+		const version = parseInt((env.TERM_PROGRAM_VERSION || '').split('.')[0], 10);
+
+		switch (env.TERM_PROGRAM) {
+			case 'iTerm.app':
+				return version >= 3 ? 3 : 2;
+			case 'Hyper':
+				return 3;
+			case 'Apple_Terminal':
+				return 2;
+			// No default
+		}
+	}
+
+	if (/-256(color)?$/i.test(env.TERM)) {
+		return 2;
+	}
+
+	if (/^screen|^xterm|^vt100|^rxvt|color|ansi|cygwin|linux/i.test(env.TERM)) {
+		return 1;
+	}
+
+	if ('COLORTERM' in env) {
+		return 1;
+	}
+
+	if (env.TERM === 'dumb') {
+		return min;
+	}
+
+	return min;
+}
+
+function getSupportLevel(stream) {
+	const level = supportsColor(stream);
+	return translateLevel(level);
+}
+
+module.exports = {
+	supportsColor: getSupportLevel,
+	stdout: getSupportLevel(process.stdout),
+	stderr: getSupportLevel(process.stderr)
+};
+
+
+/***/ }),
+/* 366 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+const TEMPLATE_REGEX = /(?:\\(u[a-f\d]{4}|x[a-f\d]{2}|.))|(?:\{(~)?(\w+(?:\([^)]*\))?(?:\.\w+(?:\([^)]*\))?)*)(?:[ \t]|(?=\r?\n)))|(\})|((?:.|[\r\n\f])+?)/gi;
+const STYLE_REGEX = /(?:^|\.)(\w+)(?:\(([^)]*)\))?/g;
+const STRING_REGEX = /^(['"])((?:\\.|(?!\1)[^\\])*)\1$/;
+const ESCAPE_REGEX = /\\(u[a-f\d]{4}|x[a-f\d]{2}|.)|([^\\])/gi;
+
+const ESCAPES = new Map([
+	['n', '\n'],
+	['r', '\r'],
+	['t', '\t'],
+	['b', '\b'],
+	['f', '\f'],
+	['v', '\v'],
+	['0', '\0'],
+	['\\', '\\'],
+	['e', '\u001B'],
+	['a', '\u0007']
+]);
+
+function unescape(c) {
+	if ((c[0] === 'u' && c.length === 5) || (c[0] === 'x' && c.length === 3)) {
+		return String.fromCharCode(parseInt(c.slice(1), 16));
+	}
+
+	return ESCAPES.get(c) || c;
+}
+
+function parseArguments(name, args) {
+	const results = [];
+	const chunks = args.trim().split(/\s*,\s*/g);
+	let matches;
+
+	for (const chunk of chunks) {
+		if (!isNaN(chunk)) {
+			results.push(Number(chunk));
+		} else if ((matches = chunk.match(STRING_REGEX))) {
+			results.push(matches[2].replace(ESCAPE_REGEX, (m, escape, chr) => escape ? unescape(escape) : chr));
+		} else {
+			throw new Error(`Invalid Chalk template style argument: ${chunk} (in style '${name}')`);
+		}
+	}
+
+	return results;
+}
+
+function parseStyle(style) {
+	STYLE_REGEX.lastIndex = 0;
+
+	const results = [];
+	let matches;
+
+	while ((matches = STYLE_REGEX.exec(style)) !== null) {
+		const name = matches[1];
+
+		if (matches[2]) {
+			const args = parseArguments(name, matches[2]);
+			results.push([name].concat(args));
+		} else {
+			results.push([name]);
+		}
+	}
+
+	return results;
+}
+
+function buildStyle(chalk, styles) {
+	const enabled = {};
+
+	for (const layer of styles) {
+		for (const style of layer.styles) {
+			enabled[style[0]] = layer.inverse ? null : style.slice(1);
+		}
+	}
+
+	let current = chalk;
+	for (const styleName of Object.keys(enabled)) {
+		if (Array.isArray(enabled[styleName])) {
+			if (!(styleName in current)) {
+				throw new Error(`Unknown Chalk style: ${styleName}`);
+			}
+
+			if (enabled[styleName].length > 0) {
+				current = current[styleName].apply(current, enabled[styleName]);
+			} else {
+				current = current[styleName];
+			}
+		}
+	}
+
+	return current;
+}
+
+module.exports = (chalk, tmp) => {
+	const styles = [];
+	const chunks = [];
+	let chunk = [];
+
+	// eslint-disable-next-line max-params
+	tmp.replace(TEMPLATE_REGEX, (m, escapeChar, inverse, style, close, chr) => {
+		if (escapeChar) {
+			chunk.push(unescape(escapeChar));
+		} else if (style) {
+			const str = chunk.join('');
+			chunk = [];
+			chunks.push(styles.length === 0 ? str : buildStyle(chalk, styles)(str));
+			styles.push({inverse, styles: parseStyle(style)});
+		} else if (close) {
+			if (styles.length === 0) {
+				throw new Error('Found extraneous } in Chalk template literal');
+			}
+
+			chunks.push(buildStyle(chalk, styles)(chunk.join('')));
+			chunk = [];
+			styles.pop();
+		} else {
+			chunk.push(chr);
+		}
+	});
+
+	chunks.push(chunk.join(''));
+
+	if (styles.length > 0) {
+		const errMsg = `Chalk template literal is missing ${styles.length} closing bracket${styles.length === 1 ? '' : 's'} (\`}\`)`;
+		throw new Error(errMsg);
+	}
+
+	return chunks.join('');
+};
+
+
+/***/ }),
+/* 367 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+const restoreCursor = __webpack_require__(368);
 
 let hidden = false;
 
@@ -41856,13 +40871,13 @@ exports.toggle = (force, stream) => {
 
 
 /***/ }),
-/* 360 */
+/* 368 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
-const onetime = __webpack_require__(361);
-const signalExit = __webpack_require__(56);
+const onetime = __webpack_require__(369);
+const signalExit = __webpack_require__(61);
 
 module.exports = onetime(() => {
 	signalExit(() => {
@@ -41872,12 +40887,12 @@ module.exports = onetime(() => {
 
 
 /***/ }),
-/* 361 */
+/* 369 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
-const mimicFn = __webpack_require__(362);
+const mimicFn = __webpack_require__(370);
 
 module.exports = (fn, opts) => {
 	// TODO: Remove this in v3
@@ -41918,7 +40933,7 @@ module.exports = (fn, opts) => {
 
 
 /***/ }),
-/* 362 */
+/* 370 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -41934,22 +40949,22 @@ module.exports = (to, from) => {
 
 
 /***/ }),
-/* 363 */
+/* 371 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
-module.exports = __webpack_require__(364);
+module.exports = __webpack_require__(372);
 
 
 /***/ }),
-/* 364 */
+/* 372 */
 /***/ (function(module, exports) {
 
 module.exports = {"dots":{"interval":80,"frames":["⠋","⠙","⠹","⠸","⠼","⠴","⠦","⠧","⠇","⠏"]},"dots2":{"interval":80,"frames":["⣾","⣽","⣻","⢿","⡿","⣟","⣯","⣷"]},"dots3":{"interval":80,"frames":["⠋","⠙","⠚","⠞","⠖","⠦","⠴","⠲","⠳","⠓"]},"dots4":{"interval":80,"frames":["⠄","⠆","⠇","⠋","⠙","⠸","⠰","⠠","⠰","⠸","⠙","⠋","⠇","⠆"]},"dots5":{"interval":80,"frames":["⠋","⠙","⠚","⠒","⠂","⠂","⠒","⠲","⠴","⠦","⠖","⠒","⠐","⠐","⠒","⠓","⠋"]},"dots6":{"interval":80,"frames":["⠁","⠉","⠙","⠚","⠒","⠂","⠂","⠒","⠲","⠴","⠤","⠄","⠄","⠤","⠴","⠲","⠒","⠂","⠂","⠒","⠚","⠙","⠉","⠁"]},"dots7":{"interval":80,"frames":["⠈","⠉","⠋","⠓","⠒","⠐","⠐","⠒","⠖","⠦","⠤","⠠","⠠","⠤","⠦","⠖","⠒","⠐","⠐","⠒","⠓","⠋","⠉","⠈"]},"dots8":{"interval":80,"frames":["⠁","⠁","⠉","⠙","⠚","⠒","⠂","⠂","⠒","⠲","⠴","⠤","⠄","⠄","⠤","⠠","⠠","⠤","⠦","⠖","⠒","⠐","⠐","⠒","⠓","⠋","⠉","⠈","⠈"]},"dots9":{"interval":80,"frames":["⢹","⢺","⢼","⣸","⣇","⡧","⡗","⡏"]},"dots10":{"interval":80,"frames":["⢄","⢂","⢁","⡁","⡈","⡐","⡠"]},"dots11":{"interval":100,"frames":["⠁","⠂","⠄","⡀","⢀","⠠","⠐","⠈"]},"dots12":{"interval":80,"frames":["⢀⠀","⡀⠀","⠄⠀","⢂⠀","⡂⠀","⠅⠀","⢃⠀","⡃⠀","⠍⠀","⢋⠀","⡋⠀","⠍⠁","⢋⠁","⡋⠁","⠍⠉","⠋⠉","⠋⠉","⠉⠙","⠉⠙","⠉⠩","⠈⢙","⠈⡙","⢈⠩","⡀⢙","⠄⡙","⢂⠩","⡂⢘","⠅⡘","⢃⠨","⡃⢐","⠍⡐","⢋⠠","⡋⢀","⠍⡁","⢋⠁","⡋⠁","⠍⠉","⠋⠉","⠋⠉","⠉⠙","⠉⠙","⠉⠩","⠈⢙","⠈⡙","⠈⠩","⠀⢙","⠀⡙","⠀⠩","⠀⢘","⠀⡘","⠀⠨","⠀⢐","⠀⡐","⠀⠠","⠀⢀","⠀⡀"]},"line":{"interval":130,"frames":["-","\\","|","/"]},"line2":{"interval":100,"frames":["⠂","-","–","—","–","-"]},"pipe":{"interval":100,"frames":["┤","┘","┴","└","├","┌","┬","┐"]},"simpleDots":{"interval":400,"frames":[".  ",".. ","...","   "]},"simpleDotsScrolling":{"interval":200,"frames":[".  ",".. ","..."," ..","  .","   "]},"star":{"interval":70,"frames":["✶","✸","✹","✺","✹","✷"]},"star2":{"interval":80,"frames":["+","x","*"]},"flip":{"interval":70,"frames":["_","_","_","-","`","`","'","´","-","_","_","_"]},"hamburger":{"interval":100,"frames":["☱","☲","☴"]},"growVertical":{"interval":120,"frames":["▁","▃","▄","▅","▆","▇","▆","▅","▄","▃"]},"growHorizontal":{"interval":120,"frames":["▏","▎","▍","▌","▋","▊","▉","▊","▋","▌","▍","▎"]},"balloon":{"interval":140,"frames":[" ",".","o","O","@","*"," "]},"balloon2":{"interval":120,"frames":[".","o","O","°","O","o","."]},"noise":{"interval":100,"frames":["▓","▒","░"]},"bounce":{"interval":120,"frames":["⠁","⠂","⠄","⠂"]},"boxBounce":{"interval":120,"frames":["▖","▘","▝","▗"]},"boxBounce2":{"interval":100,"frames":["▌","▀","▐","▄"]},"triangle":{"interval":50,"frames":["◢","◣","◤","◥"]},"arc":{"interval":100,"frames":["◜","◠","◝","◞","◡","◟"]},"circle":{"interval":120,"frames":["◡","⊙","◠"]},"squareCorners":{"interval":180,"frames":["◰","◳","◲","◱"]},"circleQuarters":{"interval":120,"frames":["◴","◷","◶","◵"]},"circleHalves":{"interval":50,"frames":["◐","◓","◑","◒"]},"squish":{"interval":100,"frames":["╫","╪"]},"toggle":{"interval":250,"frames":["⊶","⊷"]},"toggle2":{"interval":80,"frames":["▫","▪"]},"toggle3":{"interval":120,"frames":["□","■"]},"toggle4":{"interval":100,"frames":["■","□","▪","▫"]},"toggle5":{"interval":100,"frames":["▮","▯"]},"toggle6":{"interval":300,"frames":["ဝ","၀"]},"toggle7":{"interval":80,"frames":["⦾","⦿"]},"toggle8":{"interval":100,"frames":["◍","◌"]},"toggle9":{"interval":100,"frames":["◉","◎"]},"toggle10":{"interval":100,"frames":["㊂","㊀","㊁"]},"toggle11":{"interval":50,"frames":["⧇","⧆"]},"toggle12":{"interval":120,"frames":["☗","☖"]},"toggle13":{"interval":80,"frames":["=","*","-"]},"arrow":{"interval":100,"frames":["←","↖","↑","↗","→","↘","↓","↙"]},"arrow2":{"interval":80,"frames":["⬆️ ","↗️ ","➡️ ","↘️ ","⬇️ ","↙️ ","⬅️ ","↖️ "]},"arrow3":{"interval":120,"frames":["▹▹▹▹▹","▸▹▹▹▹","▹▸▹▹▹","▹▹▸▹▹","▹▹▹▸▹","▹▹▹▹▸"]},"bouncingBar":{"interval":80,"frames":["[    ]","[=   ]","[==  ]","[=== ]","[ ===]","[  ==]","[   =]","[    ]","[   =]","[  ==]","[ ===]","[====]","[=== ]","[==  ]","[=   ]"]},"bouncingBall":{"interval":80,"frames":["( ●    )","(  ●   )","(   ●  )","(    ● )","(     ●)","(    ● )","(   ●  )","(  ●   )","( ●    )","(●     )"]},"smiley":{"interval":200,"frames":["😄 ","😝 "]},"monkey":{"interval":300,"frames":["🙈 ","🙈 ","🙉 ","🙊 "]},"hearts":{"interval":100,"frames":["💛 ","💙 ","💜 ","💚 ","❤️ "]},"clock":{"interval":100,"frames":["🕐 ","🕑 ","🕒 ","🕓 ","🕔 ","🕕 ","🕖 ","🕗 ","🕘 ","🕙 ","🕚 "]},"earth":{"interval":180,"frames":["🌍 ","🌎 ","🌏 "]},"moon":{"interval":80,"frames":["🌑 ","🌒 ","🌓 ","🌔 ","🌕 ","🌖 ","🌗 ","🌘 "]},"runner":{"interval":140,"frames":["🚶 ","🏃 "]},"pong":{"interval":80,"frames":["▐⠂       ▌","▐⠈       ▌","▐ ⠂      ▌","▐ ⠠      ▌","▐  ⡀     ▌","▐  ⠠     ▌","▐   ⠂    ▌","▐   ⠈    ▌","▐    ⠂   ▌","▐    ⠠   ▌","▐     ⡀  ▌","▐     ⠠  ▌","▐      ⠂ ▌","▐      ⠈ ▌","▐       ⠂▌","▐       ⠠▌","▐       ⡀▌","▐      ⠠ ▌","▐      ⠂ ▌","▐     ⠈  ▌","▐     ⠂  ▌","▐    ⠠   ▌","▐    ⡀   ▌","▐   ⠠    ▌","▐   ⠂    ▌","▐  ⠈     ▌","▐  ⠂     ▌","▐ ⠠      ▌","▐ ⡀      ▌","▐⠠       ▌"]},"shark":{"interval":120,"frames":["▐|\\____________▌","▐_|\\___________▌","▐__|\\__________▌","▐___|\\_________▌","▐____|\\________▌","▐_____|\\_______▌","▐______|\\______▌","▐_______|\\_____▌","▐________|\\____▌","▐_________|\\___▌","▐__________|\\__▌","▐___________|\\_▌","▐____________|\\▌","▐____________/|▌","▐___________/|_▌","▐__________/|__▌","▐_________/|___▌","▐________/|____▌","▐_______/|_____▌","▐______/|______▌","▐_____/|_______▌","▐____/|________▌","▐___/|_________▌","▐__/|__________▌","▐_/|___________▌","▐/|____________▌"]},"dqpb":{"interval":100,"frames":["d","q","p","b"]},"weather":{"interval":100,"frames":["☀️ ","☀️ ","☀️ ","🌤 ","⛅️ ","🌥 ","☁️ ","🌧 ","🌨 ","🌧 ","🌨 ","🌧 ","🌨 ","⛈ ","🌨 ","🌧 ","🌨 ","☁️ ","🌥 ","⛅️ ","🌤 ","☀️ ","☀️ "]},"christmas":{"interval":400,"frames":["🌲","🎄"]}}
 
 /***/ }),
-/* 365 */
+/* 373 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -41960,15 +40975,15 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.RunCommand = undefined;
 
-var _chalk = __webpack_require__(14);
+var _chalk = __webpack_require__(18);
 
 var _chalk2 = _interopRequireDefault(_chalk);
 
 var _log = __webpack_require__(20);
 
-var _parallelize = __webpack_require__(52);
+var _parallelize = __webpack_require__(57);
 
-var _projects = __webpack_require__(29);
+var _projects = __webpack_require__(30);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -42021,7 +41036,7 @@ const RunCommand = exports.RunCommand = {
 };
 
 /***/ }),
-/* 366 */
+/* 374 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -42032,17 +41047,17 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.WatchCommand = undefined;
 
-var _chalk = __webpack_require__(14);
+var _chalk = __webpack_require__(18);
 
 var _chalk2 = _interopRequireDefault(_chalk);
 
 var _log = __webpack_require__(20);
 
-var _parallelize = __webpack_require__(52);
+var _parallelize = __webpack_require__(57);
 
-var _projects = __webpack_require__(29);
+var _projects = __webpack_require__(30);
 
-var _watch = __webpack_require__(367);
+var _watch = __webpack_require__(375);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -42124,7 +41139,7 @@ const WatchCommand = exports.WatchCommand = {
 };
 
 /***/ }),
-/* 367 */
+/* 375 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -42135,11 +41150,11 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.waitUntilWatchIsReady = waitUntilWatchIsReady;
 
-var _rxjs = __webpack_require__(368);
+var _rxjs = __webpack_require__(376);
 
 var Rx = _interopRequireWildcard(_rxjs);
 
-var _operators = __webpack_require__(399);
+var _operators = __webpack_require__(407);
 
 function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj.default = obj; return newObj; } }
 
@@ -42193,151 +41208,121 @@ function waitUntilWatchIsReady(stream, opts = {}) {
 }
 
 /***/ }),
-/* 368 */
+/* 376 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__internal_Observable__ = __webpack_require__(4);
 /* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "Observable", function() { return __WEBPACK_IMPORTED_MODULE_0__internal_Observable__["a"]; });
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__internal_observable_ConnectableObservable__ = __webpack_require__(219);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__internal_observable_ConnectableObservable__ = __webpack_require__(224);
 /* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "ConnectableObservable", function() { return __WEBPACK_IMPORTED_MODULE_1__internal_observable_ConnectableObservable__["a"]; });
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__internal_operators_groupBy__ = __webpack_require__(221);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__internal_operators_groupBy__ = __webpack_require__(226);
 /* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "GroupedObservable", function() { return __WEBPACK_IMPORTED_MODULE_2__internal_operators_groupBy__["a"]; });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__internal_symbol_observable__ = __webpack_require__(24);
 /* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "observable", function() { return __WEBPACK_IMPORTED_MODULE_3__internal_symbol_observable__["a"]; });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__internal_Subject__ = __webpack_require__(9);
 /* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "Subject", function() { return __WEBPACK_IMPORTED_MODULE_4__internal_Subject__["a"]; });
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_5__internal_BehaviorSubject__ = __webpack_require__(222);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_5__internal_BehaviorSubject__ = __webpack_require__(227);
 /* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "BehaviorSubject", function() { return __WEBPACK_IMPORTED_MODULE_5__internal_BehaviorSubject__["a"]; });
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_6__internal_ReplaySubject__ = __webpack_require__(62);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_6__internal_ReplaySubject__ = __webpack_require__(67);
 /* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "ReplaySubject", function() { return __WEBPACK_IMPORTED_MODULE_6__internal_ReplaySubject__["a"]; });
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_7__internal_AsyncSubject__ = __webpack_require__(46);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_7__internal_AsyncSubject__ = __webpack_require__(47);
 /* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "AsyncSubject", function() { return __WEBPACK_IMPORTED_MODULE_7__internal_AsyncSubject__["a"]; });
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_8__internal_scheduler_asap__ = __webpack_require__(228);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_8__internal_scheduler_asap__ = __webpack_require__(232);
 /* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "asapScheduler", function() { return __WEBPACK_IMPORTED_MODULE_8__internal_scheduler_asap__["a"]; });
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_9__internal_scheduler_async__ = __webpack_require__(12);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_9__internal_scheduler_async__ = __webpack_require__(13);
 /* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "asyncScheduler", function() { return __WEBPACK_IMPORTED_MODULE_9__internal_scheduler_async__["a"]; });
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_10__internal_scheduler_queue__ = __webpack_require__(223);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_10__internal_scheduler_queue__ = __webpack_require__(228);
 /* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "queueScheduler", function() { return __WEBPACK_IMPORTED_MODULE_10__internal_scheduler_queue__["a"]; });
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_11__internal_scheduler_animationFrame__ = __webpack_require__(376);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_11__internal_scheduler_animationFrame__ = __webpack_require__(384);
 /* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "animationFrameScheduler", function() { return __WEBPACK_IMPORTED_MODULE_11__internal_scheduler_animationFrame__["a"]; });
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_12__internal_scheduler_VirtualTimeScheduler__ = __webpack_require__(379);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_12__internal_scheduler_VirtualTimeScheduler__ = __webpack_require__(387);
 /* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "VirtualTimeScheduler", function() { return __WEBPACK_IMPORTED_MODULE_12__internal_scheduler_VirtualTimeScheduler__["b"]; });
 /* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "VirtualAction", function() { return __WEBPACK_IMPORTED_MODULE_12__internal_scheduler_VirtualTimeScheduler__["a"]; });
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_13__internal_Scheduler__ = __webpack_require__(224);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_13__internal_Scheduler__ = __webpack_require__(229);
 /* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "Scheduler", function() { return __WEBPACK_IMPORTED_MODULE_13__internal_Scheduler__["a"]; });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_14__internal_Subscription__ = __webpack_require__(8);
 /* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "Subscription", function() { return __WEBPACK_IMPORTED_MODULE_14__internal_Subscription__["a"]; });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_15__internal_Subscriber__ = __webpack_require__(2);
 /* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "Subscriber", function() { return __WEBPACK_IMPORTED_MODULE_15__internal_Subscriber__["a"]; });
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_16__internal_Notification__ = __webpack_require__(45);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_16__internal_Notification__ = __webpack_require__(46);
 /* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "Notification", function() { return __WEBPACK_IMPORTED_MODULE_16__internal_Notification__["a"]; });
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_17__internal_util_pipe__ = __webpack_require__(60);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_17__internal_util_pipe__ = __webpack_require__(65);
 /* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "pipe", function() { return __WEBPACK_IMPORTED_MODULE_17__internal_util_pipe__["a"]; });
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_18__internal_util_noop__ = __webpack_require__(43);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_18__internal_util_noop__ = __webpack_require__(44);
 /* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "noop", function() { return __WEBPACK_IMPORTED_MODULE_18__internal_util_noop__["a"]; });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_19__internal_util_identity__ = __webpack_require__(25);
 /* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "identity", function() { return __WEBPACK_IMPORTED_MODULE_19__internal_util_identity__["a"]; });
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_20__internal_util_isObservable__ = __webpack_require__(380);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_20__internal_util_isObservable__ = __webpack_require__(388);
 /* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "isObservable", function() { return __WEBPACK_IMPORTED_MODULE_20__internal_util_isObservable__["a"]; });
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_21__internal_util_ArgumentOutOfRangeError__ = __webpack_require__(34);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_21__internal_util_ArgumentOutOfRangeError__ = __webpack_require__(35);
 /* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "ArgumentOutOfRangeError", function() { return __WEBPACK_IMPORTED_MODULE_21__internal_util_ArgumentOutOfRangeError__["a"]; });
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_22__internal_util_EmptyError__ = __webpack_require__(35);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_22__internal_util_EmptyError__ = __webpack_require__(36);
 /* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "EmptyError", function() { return __WEBPACK_IMPORTED_MODULE_22__internal_util_EmptyError__["a"]; });
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_23__internal_util_ObjectUnsubscribedError__ = __webpack_require__(44);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_23__internal_util_ObjectUnsubscribedError__ = __webpack_require__(45);
 /* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "ObjectUnsubscribedError", function() { return __WEBPACK_IMPORTED_MODULE_23__internal_util_ObjectUnsubscribedError__["a"]; });
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_24__internal_util_UnsubscriptionError__ = __webpack_require__(218);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_24__internal_util_UnsubscriptionError__ = __webpack_require__(223);
 /* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "UnsubscriptionError", function() { return __WEBPACK_IMPORTED_MODULE_24__internal_util_UnsubscriptionError__["a"]; });
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_25__internal_util_TimeoutError__ = __webpack_require__(229);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_25__internal_util_TimeoutError__ = __webpack_require__(233);
 /* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "TimeoutError", function() { return __WEBPACK_IMPORTED_MODULE_25__internal_util_TimeoutError__["a"]; });
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_26__internal_observable_bindCallback__ = __webpack_require__(381);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_26__internal_observable_bindCallback__ = __webpack_require__(389);
 /* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "bindCallback", function() { return __WEBPACK_IMPORTED_MODULE_26__internal_observable_bindCallback__["a"]; });
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_27__internal_observable_bindNodeCallback__ = __webpack_require__(382);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_27__internal_observable_bindNodeCallback__ = __webpack_require__(390);
 /* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "bindNodeCallback", function() { return __WEBPACK_IMPORTED_MODULE_27__internal_observable_bindNodeCallback__["a"]; });
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_28__internal_observable_combineLatest__ = __webpack_require__(65);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_28__internal_observable_combineLatest__ = __webpack_require__(71);
 /* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "combineLatest", function() { return __WEBPACK_IMPORTED_MODULE_28__internal_observable_combineLatest__["b"]; });
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_29__internal_observable_concat__ = __webpack_require__(66);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_29__internal_observable_concat__ = __webpack_require__(48);
 /* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "concat", function() { return __WEBPACK_IMPORTED_MODULE_29__internal_observable_concat__["a"]; });
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_30__internal_observable_defer__ = __webpack_require__(68);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_30__internal_observable_defer__ = __webpack_require__(73);
 /* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "defer", function() { return __WEBPACK_IMPORTED_MODULE_30__internal_observable_defer__["a"]; });
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_31__internal_observable_empty__ = __webpack_require__(13);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_31__internal_observable_empty__ = __webpack_require__(12);
 /* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "empty", function() { return __WEBPACK_IMPORTED_MODULE_31__internal_observable_empty__["b"]; });
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_32__internal_observable_forkJoin__ = __webpack_require__(389);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_32__internal_observable_forkJoin__ = __webpack_require__(397);
 /* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "forkJoin", function() { return __WEBPACK_IMPORTED_MODULE_32__internal_observable_forkJoin__["a"]; });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_33__internal_observable_from__ = __webpack_require__(19);
 /* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "from", function() { return __WEBPACK_IMPORTED_MODULE_33__internal_observable_from__["a"]; });
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_34__internal_observable_fromEvent__ = __webpack_require__(390);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_34__internal_observable_fromEvent__ = __webpack_require__(398);
 /* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "fromEvent", function() { return __WEBPACK_IMPORTED_MODULE_34__internal_observable_fromEvent__["a"]; });
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_35__internal_observable_fromEventPattern__ = __webpack_require__(391);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_35__internal_observable_fromEventPattern__ = __webpack_require__(399);
 /* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "fromEventPattern", function() { return __WEBPACK_IMPORTED_MODULE_35__internal_observable_fromEventPattern__["a"]; });
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_36__internal_observable_generate__ = __webpack_require__(392);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_36__internal_observable_generate__ = __webpack_require__(400);
 /* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "generate", function() { return __WEBPACK_IMPORTED_MODULE_36__internal_observable_generate__["a"]; });
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_37__internal_observable_iif__ = __webpack_require__(393);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_37__internal_observable_iif__ = __webpack_require__(401);
 /* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "iif", function() { return __WEBPACK_IMPORTED_MODULE_37__internal_observable_iif__["a"]; });
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_38__internal_observable_interval__ = __webpack_require__(394);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_38__internal_observable_interval__ = __webpack_require__(402);
 /* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "interval", function() { return __WEBPACK_IMPORTED_MODULE_38__internal_observable_interval__["a"]; });
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_39__internal_observable_merge__ = __webpack_require__(237);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_39__internal_observable_merge__ = __webpack_require__(241);
 /* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "merge", function() { return __WEBPACK_IMPORTED_MODULE_39__internal_observable_merge__["a"]; });
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_40__internal_observable_never__ = __webpack_require__(238);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_40__internal_observable_never__ = __webpack_require__(242);
 /* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "never", function() { return __WEBPACK_IMPORTED_MODULE_40__internal_observable_never__["b"]; });
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_41__internal_observable_of__ = __webpack_require__(63);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_41__internal_observable_of__ = __webpack_require__(68);
 /* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "of", function() { return __WEBPACK_IMPORTED_MODULE_41__internal_observable_of__["a"]; });
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_42__internal_observable_onErrorResumeNext__ = __webpack_require__(395);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_42__internal_observable_onErrorResumeNext__ = __webpack_require__(403);
 /* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "onErrorResumeNext", function() { return __WEBPACK_IMPORTED_MODULE_42__internal_observable_onErrorResumeNext__["a"]; });
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_43__internal_observable_pairs__ = __webpack_require__(396);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_43__internal_observable_pairs__ = __webpack_require__(404);
 /* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "pairs", function() { return __WEBPACK_IMPORTED_MODULE_43__internal_observable_pairs__["a"]; });
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_44__internal_observable_race__ = __webpack_require__(239);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_44__internal_observable_race__ = __webpack_require__(243);
 /* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "race", function() { return __WEBPACK_IMPORTED_MODULE_44__internal_observable_race__["a"]; });
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_45__internal_observable_range__ = __webpack_require__(397);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_45__internal_observable_range__ = __webpack_require__(405);
 /* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "range", function() { return __WEBPACK_IMPORTED_MODULE_45__internal_observable_range__["a"]; });
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_46__internal_observable_throwError__ = __webpack_require__(64);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_46__internal_observable_throwError__ = __webpack_require__(70);
 /* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "throwError", function() { return __WEBPACK_IMPORTED_MODULE_46__internal_observable_throwError__["a"]; });
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_47__internal_observable_timer__ = __webpack_require__(240);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_47__internal_observable_timer__ = __webpack_require__(244);
 /* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "timer", function() { return __WEBPACK_IMPORTED_MODULE_47__internal_observable_timer__["a"]; });
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_48__internal_observable_using__ = __webpack_require__(398);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_48__internal_observable_using__ = __webpack_require__(406);
 /* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "using", function() { return __WEBPACK_IMPORTED_MODULE_48__internal_observable_using__["a"]; });
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_49__internal_observable_zip__ = __webpack_require__(69);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_49__internal_observable_zip__ = __webpack_require__(74);
 /* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "zip", function() { return __WEBPACK_IMPORTED_MODULE_49__internal_observable_zip__["b"]; });
 /* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "EMPTY", function() { return __WEBPACK_IMPORTED_MODULE_31__internal_observable_empty__["a"]; });
 /* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "NEVER", function() { return __WEBPACK_IMPORTED_MODULE_40__internal_observable_never__["a"]; });
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_50__internal_config__ = __webpack_require__(42);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_50__internal_config__ = __webpack_require__(43);
 /* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "config", function() { return __WEBPACK_IMPORTED_MODULE_50__internal_config__["a"]; });
-/* Observable */
 /** PURE_IMPORTS_START  PURE_IMPORTS_END */
 
 
 
 
-/* Subjects */
-
-
-
-
-/* Schedulers */
-
-
-
-
-
-
-/* Subscription */
-
-
-/* Notification */
-
-/* Utils */
-
-
-
-
-/* Error types */
-
-
-
-
-
-/* Static observable creation exports */
 
 
 
@@ -42362,23 +41347,43 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 
 
 
-/* Constants */
 
 
-/* Config */
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 //# sourceMappingURL=index.js.map
 
 
 /***/ }),
-/* 369 */
+/* 377 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 /* harmony export (immutable) */ __webpack_exports__["a"] = toSubscriber;
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__Subscriber__ = __webpack_require__(2);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__symbol_rxSubscriber__ = __webpack_require__(59);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__Observer__ = __webpack_require__(216);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__symbol_rxSubscriber__ = __webpack_require__(64);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__Observer__ = __webpack_require__(221);
 /** PURE_IMPORTS_START _Subscriber,_symbol_rxSubscriber,_Observer PURE_IMPORTS_END */
 
 
@@ -42401,21 +41406,16 @@ function toSubscriber(nextOrObserver, error, complete) {
 
 
 /***/ }),
-/* 370 */
+/* 378 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return QueueAction; });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_tslib__ = __webpack_require__(1);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__AsyncAction__ = __webpack_require__(32);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__AsyncAction__ = __webpack_require__(33);
 /** PURE_IMPORTS_START tslib,_AsyncAction PURE_IMPORTS_END */
 
 
-/**
- * We need this JSDoc comment for affecting ESDoc.
- * @ignore
- * @extends {Ignored}
- */
 var QueueAction = /*@__PURE__*/ (function (_super) {
     __WEBPACK_IMPORTED_MODULE_0_tslib__["a" /* __extends */](QueueAction, _super);
     function QueueAction(scheduler, work) {
@@ -42445,13 +41445,9 @@ var QueueAction = /*@__PURE__*/ (function (_super) {
         if (delay === void 0) {
             delay = 0;
         }
-        // If delay exists and is greater than 0, or if the delay is null (the
-        // action wasn't rescheduled) but was originally scheduled as an async
-        // action, then recycle as an async action.
         if ((delay !== null && delay > 0) || (delay === null && this.delay > 0)) {
             return _super.prototype.requestAsyncId.call(this, scheduler, id, delay);
         }
-        // Otherwise flush the scheduler starting with this action.
         return scheduler.flush(this);
     };
     return QueueAction;
@@ -42461,7 +41457,7 @@ var QueueAction = /*@__PURE__*/ (function (_super) {
 
 
 /***/ }),
-/* 371 */
+/* 379 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -42471,35 +41467,11 @@ var QueueAction = /*@__PURE__*/ (function (_super) {
 /** PURE_IMPORTS_START tslib,_Subscription PURE_IMPORTS_END */
 
 
-/**
- * A unit of work to be executed in a {@link Scheduler}. An action is typically
- * created from within a Scheduler and an RxJS user does not need to concern
- * themselves about creating and manipulating an Action.
- *
- * ```ts
- * class Action<T> extends Subscription {
- *   new (scheduler: Scheduler, work: (state?: T) => void);
- *   schedule(state?: T, delay: number = 0): Subscription;
- * }
- * ```
- *
- * @class Action<T>
- */
 var Action = /*@__PURE__*/ (function (_super) {
     __WEBPACK_IMPORTED_MODULE_0_tslib__["a" /* __extends */](Action, _super);
     function Action(scheduler, work) {
         return _super.call(this) || this;
     }
-    /**
-     * Schedules this action on its parent Scheduler for execution. May be passed
-     * some context object, `state`. May happen at some point in the future,
-     * according to the `delay` parameter, if specified.
-     * @param {T} [state] Some contextual data that the `work` function uses when
-     * called by the Scheduler.
-     * @param {number} [delay] Time to wait before executing the work, where the
-     * time unit is implicit and defined by the Scheduler.
-     * @return {void}
-     */
     Action.prototype.schedule = function (state, delay) {
         if (delay === void 0) {
             delay = 0;
@@ -42513,13 +41485,13 @@ var Action = /*@__PURE__*/ (function (_super) {
 
 
 /***/ }),
-/* 372 */
+/* 380 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return QueueScheduler; });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_tslib__ = __webpack_require__(1);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__AsyncScheduler__ = __webpack_require__(33);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__AsyncScheduler__ = __webpack_require__(34);
 /** PURE_IMPORTS_START tslib,_AsyncScheduler PURE_IMPORTS_END */
 
 
@@ -42535,23 +41507,18 @@ var QueueScheduler = /*@__PURE__*/ (function (_super) {
 
 
 /***/ }),
-/* 373 */
+/* 381 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return AsapAction; });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_tslib__ = __webpack_require__(1);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__util_Immediate__ = __webpack_require__(374);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__AsyncAction__ = __webpack_require__(32);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__util_Immediate__ = __webpack_require__(382);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__AsyncAction__ = __webpack_require__(33);
 /** PURE_IMPORTS_START tslib,_util_Immediate,_AsyncAction PURE_IMPORTS_END */
 
 
 
-/**
- * We need this JSDoc comment for affecting ESDoc.
- * @ignore
- * @extends {Ignored}
- */
 var AsapAction = /*@__PURE__*/ (function (_super) {
     __WEBPACK_IMPORTED_MODULE_0_tslib__["a" /* __extends */](AsapAction, _super);
     function AsapAction(scheduler, work) {
@@ -42564,35 +41531,23 @@ var AsapAction = /*@__PURE__*/ (function (_super) {
         if (delay === void 0) {
             delay = 0;
         }
-        // If delay is greater than 0, request as an async action.
         if (delay !== null && delay > 0) {
             return _super.prototype.requestAsyncId.call(this, scheduler, id, delay);
         }
-        // Push the action to the end of the scheduler queue.
         scheduler.actions.push(this);
-        // If a microtask has already been scheduled, don't schedule another
-        // one. If a microtask hasn't been scheduled yet, schedule one now. Return
-        // the current scheduled microtask id.
         return scheduler.scheduled || (scheduler.scheduled = __WEBPACK_IMPORTED_MODULE_1__util_Immediate__["a" /* Immediate */].setImmediate(scheduler.flush.bind(scheduler, null)));
     };
     AsapAction.prototype.recycleAsyncId = function (scheduler, id, delay) {
         if (delay === void 0) {
             delay = 0;
         }
-        // If delay exists and is greater than 0, or if the delay is null (the
-        // action wasn't rescheduled) but was originally scheduled as an async
-        // action, then recycle as an async action.
         if ((delay !== null && delay > 0) || (delay === null && this.delay > 0)) {
             return _super.prototype.recycleAsyncId.call(this, scheduler, id, delay);
         }
-        // If the scheduler queue is empty, cancel the requested microtask and
-        // set the scheduled flag to undefined so the next AsapAction will schedule
-        // its own.
         if (scheduler.actions.length === 0) {
             __WEBPACK_IMPORTED_MODULE_1__util_Immediate__["a" /* Immediate */].clearImmediate(id);
             scheduler.scheduled = undefined;
         }
-        // Return undefined so the action knows to request a new async id if it's rescheduled.
         return undefined;
     };
     return AsapAction;
@@ -42602,7 +41557,7 @@ var AsapAction = /*@__PURE__*/ (function (_super) {
 
 
 /***/ }),
-/* 374 */
+/* 382 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -42631,13 +41586,13 @@ var Immediate = {
 
 
 /***/ }),
-/* 375 */
+/* 383 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return AsapScheduler; });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_tslib__ = __webpack_require__(1);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__AsyncScheduler__ = __webpack_require__(33);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__AsyncScheduler__ = __webpack_require__(34);
 /** PURE_IMPORTS_START tslib,_AsyncScheduler PURE_IMPORTS_END */
 
 
@@ -42674,66 +41629,31 @@ var AsapScheduler = /*@__PURE__*/ (function (_super) {
 
 
 /***/ }),
-/* 376 */
+/* 384 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return animationFrame; });
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__AnimationFrameAction__ = __webpack_require__(377);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__AnimationFrameScheduler__ = __webpack_require__(378);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__AnimationFrameAction__ = __webpack_require__(385);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__AnimationFrameScheduler__ = __webpack_require__(386);
 /** PURE_IMPORTS_START _AnimationFrameAction,_AnimationFrameScheduler PURE_IMPORTS_END */
 
 
-/**
- *
- * Animation Frame Scheduler
- *
- * <span class="informal">Perform task when `window.requestAnimationFrame` would fire</span>
- *
- * When `animationFrame` scheduler is used with delay, it will fall back to {@link async} scheduler
- * behaviour.
- *
- * Without delay, `animationFrame` scheduler can be used to create smooth browser animations.
- * It makes sure scheduled task will happen just before next browser content repaint,
- * thus performing animations as efficiently as possible.
- *
- * @example <caption>Schedule div height animation</caption>
- * const div = document.querySelector('.some-div');
- *
- * Rx.Scheduler.animationFrame.schedule(function(height) {
- *   div.style.height = height + "px";
- *
- *   this.schedule(height + 1);  // `this` references currently executing Action,
- *                               // which we reschedule with new state
- * }, 0, 0);
- *
- * // You will see .some-div element growing in height
- *
- *
- * @static true
- * @name animationFrame
- * @owner Scheduler
- */
 var animationFrame = /*@__PURE__*/ new __WEBPACK_IMPORTED_MODULE_1__AnimationFrameScheduler__["a" /* AnimationFrameScheduler */](__WEBPACK_IMPORTED_MODULE_0__AnimationFrameAction__["a" /* AnimationFrameAction */]);
 //# sourceMappingURL=animationFrame.js.map
 
 
 /***/ }),
-/* 377 */
+/* 385 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return AnimationFrameAction; });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_tslib__ = __webpack_require__(1);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__AsyncAction__ = __webpack_require__(32);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__AsyncAction__ = __webpack_require__(33);
 /** PURE_IMPORTS_START tslib,_AsyncAction PURE_IMPORTS_END */
 
 
-/**
- * We need this JSDoc comment for affecting ESDoc.
- * @ignore
- * @extends {Ignored}
- */
 var AnimationFrameAction = /*@__PURE__*/ (function (_super) {
     __WEBPACK_IMPORTED_MODULE_0_tslib__["a" /* __extends */](AnimationFrameAction, _super);
     function AnimationFrameAction(scheduler, work) {
@@ -42746,35 +41666,23 @@ var AnimationFrameAction = /*@__PURE__*/ (function (_super) {
         if (delay === void 0) {
             delay = 0;
         }
-        // If delay is greater than 0, request as an async action.
         if (delay !== null && delay > 0) {
             return _super.prototype.requestAsyncId.call(this, scheduler, id, delay);
         }
-        // Push the action to the end of the scheduler queue.
         scheduler.actions.push(this);
-        // If an animation frame has already been requested, don't request another
-        // one. If an animation frame hasn't been requested yet, request one. Return
-        // the current animation frame request id.
         return scheduler.scheduled || (scheduler.scheduled = requestAnimationFrame(function () { return scheduler.flush(null); }));
     };
     AnimationFrameAction.prototype.recycleAsyncId = function (scheduler, id, delay) {
         if (delay === void 0) {
             delay = 0;
         }
-        // If delay exists and is greater than 0, or if the delay is null (the
-        // action wasn't rescheduled) but was originally scheduled as an async
-        // action, then recycle as an async action.
         if ((delay !== null && delay > 0) || (delay === null && this.delay > 0)) {
             return _super.prototype.recycleAsyncId.call(this, scheduler, id, delay);
         }
-        // If the scheduler queue is empty, cancel the requested animation frame and
-        // set the scheduled flag to undefined so the next AnimationFrameAction will
-        // request its own.
         if (scheduler.actions.length === 0) {
             cancelAnimationFrame(id);
             scheduler.scheduled = undefined;
         }
-        // Return undefined so the action knows to request a new async id if it's rescheduled.
         return undefined;
     };
     return AnimationFrameAction;
@@ -42784,13 +41692,13 @@ var AnimationFrameAction = /*@__PURE__*/ (function (_super) {
 
 
 /***/ }),
-/* 378 */
+/* 386 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return AnimationFrameScheduler; });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_tslib__ = __webpack_require__(1);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__AsyncScheduler__ = __webpack_require__(33);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__AsyncScheduler__ = __webpack_require__(34);
 /** PURE_IMPORTS_START tslib,_AsyncScheduler PURE_IMPORTS_END */
 
 
@@ -42827,15 +41735,15 @@ var AnimationFrameScheduler = /*@__PURE__*/ (function (_super) {
 
 
 /***/ }),
-/* 379 */
+/* 387 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "b", function() { return VirtualTimeScheduler; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return VirtualAction; });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_tslib__ = __webpack_require__(1);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__AsyncAction__ = __webpack_require__(32);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__AsyncScheduler__ = __webpack_require__(33);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__AsyncAction__ = __webpack_require__(33);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__AsyncScheduler__ = __webpack_require__(34);
 /** PURE_IMPORTS_START tslib,_AsyncAction,_AsyncScheduler PURE_IMPORTS_END */
 
 
@@ -42855,11 +41763,6 @@ var VirtualTimeScheduler = /*@__PURE__*/ (function (_super) {
         _this.index = -1;
         return _this;
     }
-    /**
-     * Prompt the Scheduler to execute all of its queued actions, therefore
-     * clearing its queue.
-     * @return {void}
-     */
     VirtualTimeScheduler.prototype.flush = function () {
         var _a = this, actions = _a.actions, maxFrames = _a.maxFrames;
         var error, action;
@@ -42879,11 +41782,6 @@ var VirtualTimeScheduler = /*@__PURE__*/ (function (_super) {
     return VirtualTimeScheduler;
 }(__WEBPACK_IMPORTED_MODULE_2__AsyncScheduler__["a" /* AsyncScheduler */]));
 
-/**
- * We need this JSDoc comment for affecting ESDoc.
- * @ignore
- * @extends {Ignored}
- */
 var VirtualAction = /*@__PURE__*/ (function (_super) {
     __WEBPACK_IMPORTED_MODULE_0_tslib__["a" /* __extends */](VirtualAction, _super);
     function VirtualAction(scheduler, work, index) {
@@ -42906,10 +41804,6 @@ var VirtualAction = /*@__PURE__*/ (function (_super) {
             return _super.prototype.schedule.call(this, state, delay);
         }
         this.active = false;
-        // If an action is rescheduled, we save allocations by mutating its state,
-        // pushing it to the end of the scheduler queue, and recycling the action.
-        // But since the VirtualTimeScheduler is used for testing, VirtualActions
-        // must be immutable so they can be inspected later.
         var action = new VirtualAction(this.scheduler, this.work);
         this.add(action);
         return action.schedule(state, delay);
@@ -42961,7 +41855,7 @@ var VirtualAction = /*@__PURE__*/ (function (_super) {
 
 
 /***/ }),
-/* 380 */
+/* 388 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -42969,151 +41863,35 @@ var VirtualAction = /*@__PURE__*/ (function (_super) {
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__Observable__ = __webpack_require__(4);
 /** PURE_IMPORTS_START _Observable PURE_IMPORTS_END */
 
-/**
- * Tests to see if the object is an RxJS {@link Observable}
- * @param obj the object to test
- */
 function isObservable(obj) {
-    return obj && obj instanceof __WEBPACK_IMPORTED_MODULE_0__Observable__["a" /* Observable */] || (typeof obj.lift === 'function' && typeof obj.subscribe === 'function');
+    return !!obj && (obj instanceof __WEBPACK_IMPORTED_MODULE_0__Observable__["a" /* Observable */] || (typeof obj.lift === 'function' && typeof obj.subscribe === 'function'));
 }
 //# sourceMappingURL=isObservable.js.map
 
 
 /***/ }),
-/* 381 */
+/* 389 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 /* harmony export (immutable) */ __webpack_exports__["a"] = bindCallback;
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__Observable__ = __webpack_require__(4);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__AsyncSubject__ = __webpack_require__(46);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__AsyncSubject__ = __webpack_require__(47);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__operators_map__ = __webpack_require__(16);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__util_isArray__ = __webpack_require__(11);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__util_isScheduler__ = __webpack_require__(18);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__util_isScheduler__ = __webpack_require__(15);
 /** PURE_IMPORTS_START _Observable,_AsyncSubject,_operators_map,_util_isArray,_util_isScheduler PURE_IMPORTS_END */
 
 
 
 
 
-// tslint:enable:max-line-length
-/**
- * Converts a callback API to a function that returns an Observable.
- *
- * <span class="informal">Give it a function `f` of type `f(x, callback)` and
- * it will return a function `g` that when called as `g(x)` will output an
- * Observable.</span>
- *
- * `bindCallback` is not an operator because its input and output are not
- * Observables. The input is a function `func` with some parameters, the
- * last parameter must be a callback function that `func` calls when it is
- * done.
- *
- * The output of `bindCallback` is a function that takes the same parameters
- * as `func`, except the last one (the callback). When the output function
- * is called with arguments it will return an Observable. If function `func`
- * calls its callback with one argument the Observable will emit that value.
- * If on the other hand the callback is called with multiple values the resulting
- * Observable will emit an array with said values as arguments.
- *
- * It is very important to remember that input function `func` is not called
- * when the output function is, but rather when the Observable returned by the output
- * function is subscribed. This means if `func` makes an AJAX request, that request
- * will be made every time someone subscribes to the resulting Observable, but not before.
- *
- * The last optional parameter - {@link Scheduler} - can be used to control when the call
- * to `func` happens after someone subscribes to Observable, as well as when results
- * passed to callback will be emitted. By default, the subscription to  an Observable calls `func`
- * synchronously, but using `Scheduler.async` as the last parameter will defer the call to `func`,
- * just like wrapping the call in `setTimeout` with a timeout of `0` would. If you use the async Scheduler
- * and call `subscribe` on the output Observable all function calls that are currently executing
- * will end before `func` is invoked.
- *
- * By default results passed to the callback are emitted immediately after `func` invokes the callback.
- * In particular, if the callback is called synchronously the subscription of the resulting Observable
- * will call the `next` function synchronously as well.  If you want to defer that call,
- * you may use `Scheduler.async` just as before.  This means that by using `Scheduler.async` you can
- * ensure that `func` always calls its callback asynchronously, thus avoiding terrifying Zalgo.
- *
- * Note that the Observable created by the output function will always emit a single value
- * and then complete immediately. If `func` calls the callback multiple times, values from subsequent
- * calls will not appear in the stream. If you need to listen for multiple calls,
- *  you probably want to use {@link fromEvent} or {@link fromEventPattern} instead.
- *
- * If `func` depends on some context (`this` property) and is not already bound the context of `func`
- * will be the context that the output function has at call time. In particular, if `func`
- * is called as a method of some objec and if `func` is not already bound, in order to preserve the context
- * it is recommended that the context of the output function is set to that object as well.
- *
- * If the input function calls its callback in the "node style" (i.e. first argument to callback is
- * optional error parameter signaling whether the call failed or not), {@link bindNodeCallback}
- * provides convenient error handling and probably is a better choice.
- * `bindCallback` will treat such functions the same as any other and error parameters
- * (whether passed or not) will always be interpreted as regular callback argument.
- *
- *
- * @example <caption>Convert jQuery's getJSON to an Observable API</caption>
- * // Suppose we have jQuery.getJSON('/my/url', callback)
- * var getJSONAsObservable = bindCallback(jQuery.getJSON);
- * var result = getJSONAsObservable('/my/url');
- * result.subscribe(x => console.log(x), e => console.error(e));
- *
- *
- * @example <caption>Receive an array of arguments passed to a callback</caption>
- * someFunction((a, b, c) => {
- *   console.log(a); // 5
- *   console.log(b); // 'some string'
- *   console.log(c); // {someProperty: 'someValue'}
- * });
- *
- * const boundSomeFunction = bindCallback(someFunction);
- * boundSomeFunction().subscribe(values => {
- *   console.log(values) // [5, 'some string', {someProperty: 'someValue'}]
- * });
- *
- *
- * @example <caption>Compare behaviour with and without async Scheduler</caption>
- * function iCallMyCallbackSynchronously(cb) {
- *   cb();
- * }
- *
- * const boundSyncFn = bindCallback(iCallMyCallbackSynchronously);
- * const boundAsyncFn = bindCallback(iCallMyCallbackSynchronously, null, Rx.Scheduler.async);
- *
- * boundSyncFn().subscribe(() => console.log('I was sync!'));
- * boundAsyncFn().subscribe(() => console.log('I was async!'));
- * console.log('This happened...');
- *
- * // Logs:
- * // I was sync!
- * // This happened...
- * // I was async!
- *
- *
- * @example <caption>Use bindCallback on an object method</caption>
- * const boundMethod = bindCallback(someObject.methodWithCallback);
- * boundMethod.call(someObject) // make sure methodWithCallback has access to someObject
- * .subscribe(subscriber);
- *
- *
- * @see {@link bindNodeCallback}
- * @see {@link from}
- * @see {@link fromPromise}
- *
- * @param {function} func A function with a callback as the last parameter.
- * @param {Scheduler} [scheduler] The scheduler on which to schedule the
- * callbacks.
- * @return {function(...params: *): Observable} A function which returns the
- * Observable that delivers the same values the callback would deliver.
- * @name bindCallback
- */
 function bindCallback(callbackFunc, resultSelector, scheduler) {
     if (resultSelector) {
         if (Object(__WEBPACK_IMPORTED_MODULE_4__util_isScheduler__["a" /* isScheduler */])(resultSelector)) {
             scheduler = resultSelector;
         }
         else {
-            // DEPRECATED PATH
             return function () {
                 var args = [];
                 for (var _i = 0; _i < arguments.length; _i++) {
@@ -43204,15 +41982,15 @@ function dispatchError(state) {
 
 
 /***/ }),
-/* 382 */
+/* 390 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 /* harmony export (immutable) */ __webpack_exports__["a"] = bindNodeCallback;
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__Observable__ = __webpack_require__(4);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__AsyncSubject__ = __webpack_require__(46);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__AsyncSubject__ = __webpack_require__(47);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__operators_map__ = __webpack_require__(16);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__util_isScheduler__ = __webpack_require__(18);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__util_isScheduler__ = __webpack_require__(15);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__util_isArray__ = __webpack_require__(11);
 /** PURE_IMPORTS_START _Observable,_AsyncSubject,_operators_map,_util_isScheduler,_util_isArray PURE_IMPORTS_END */
 
@@ -43220,115 +41998,12 @@ function dispatchError(state) {
 
 
 
-/**
- * Converts a Node.js-style callback API to a function that returns an
- * Observable.
- *
- * <span class="informal">It's just like {@link bindCallback}, but the
- * callback is expected to be of type `callback(error, result)`.</span>
- *
- * `bindNodeCallback` is not an operator because its input and output are not
- * Observables. The input is a function `func` with some parameters, but the
- * last parameter must be a callback function that `func` calls when it is
- * done. The callback function is expected to follow Node.js conventions,
- * where the first argument to the callback is an error object, signaling
- * whether call was successful. If that object is passed to callback, it means
- * something went wrong.
- *
- * The output of `bindNodeCallback` is a function that takes the same
- * parameters as `func`, except the last one (the callback). When the output
- * function is called with arguments, it will return an Observable.
- * If `func` calls its callback with error parameter present, Observable will
- * error with that value as well. If error parameter is not passed, Observable will emit
- * second parameter. If there are more parameters (third and so on),
- * Observable will emit an array with all arguments, except first error argument.
- *
- * Note that `func` will not be called at the same time output function is,
- * but rather whenever resulting Observable is subscribed. By default call to
- * `func` will happen synchronously after subscription, but that can be changed
- * with proper {@link Scheduler} provided as optional third parameter. Scheduler
- * can also control when values from callback will be emitted by Observable.
- * To find out more, check out documentation for {@link bindCallback}, where
- * Scheduler works exactly the same.
- *
- * As in {@link bindCallback}, context (`this` property) of input function will be set to context
- * of returned function, when it is called.
- *
- * After Observable emits value, it will complete immediately. This means
- * even if `func` calls callback again, values from second and consecutive
- * calls will never appear on the stream. If you need to handle functions
- * that call callbacks multiple times, check out {@link fromEvent} or
- * {@link fromEventPattern} instead.
- *
- * Note that `bindNodeCallback` can be used in non-Node.js environments as well.
- * "Node.js-style" callbacks are just a convention, so if you write for
- * browsers or any other environment and API you use implements that callback style,
- * `bindNodeCallback` can be safely used on that API functions as well.
- *
- * Remember that Error object passed to callback does not have to be an instance
- * of JavaScript built-in `Error` object. In fact, it does not even have to an object.
- * Error parameter of callback function is interpreted as "present", when value
- * of that parameter is truthy. It could be, for example, non-zero number, non-empty
- * string or boolean `true`. In all of these cases resulting Observable would error
- * with that value. This means usually regular style callbacks will fail very often when
- * `bindNodeCallback` is used. If your Observable errors much more often then you
- * would expect, check if callback really is called in Node.js-style and, if not,
- * switch to {@link bindCallback} instead.
- *
- * Note that even if error parameter is technically present in callback, but its value
- * is falsy, it still won't appear in array emitted by Observable.
- *
- *
- * @example <caption>Read a file from the filesystem and get the data as an Observable</caption>
- * import * as fs from 'fs';
- * var readFileAsObservable = bindNodeCallback(fs.readFile);
- * var result = readFileAsObservable('./roadNames.txt', 'utf8');
- * result.subscribe(x => console.log(x), e => console.error(e));
- *
- *
- * @example <caption>Use on function calling callback with multiple arguments</caption>
- * someFunction((err, a, b) => {
- *   console.log(err); // null
- *   console.log(a); // 5
- *   console.log(b); // "some string"
- * });
- * var boundSomeFunction = bindNodeCallback(someFunction);
- * boundSomeFunction()
- * .subscribe(value => {
- *   console.log(value); // [5, "some string"]
- * });
- *
- * @example <caption>Use on function calling callback in regular style</caption>
- * someFunction(a => {
- *   console.log(a); // 5
- * });
- * var boundSomeFunction = bindNodeCallback(someFunction);
- * boundSomeFunction()
- * .subscribe(
- *   value => {}             // never gets called
- *   err => console.log(err) // 5
- * );
- *
- *
- * @see {@link bindCallback}
- * @see {@link from}
- * @see {@link fromPromise}
- *
- * @param {function} func Function with a Node.js-style callback as the last parameter.
- * @param {Scheduler} [scheduler] The scheduler on which to schedule the
- * callbacks.
- * @return {function(...params: *): Observable} A function which returns the
- * Observable that delivers the same values the Node.js callback would
- * deliver.
- * @name bindNodeCallback
- */
 function bindNodeCallback(callbackFunc, resultSelector, scheduler) {
     if (resultSelector) {
         if (Object(__WEBPACK_IMPORTED_MODULE_3__util_isScheduler__["a" /* isScheduler */])(resultSelector)) {
             scheduler = resultSelector;
         }
         else {
-            // DEPRECATED PATH
             return function () {
                 var args = [];
                 for (var _i = 0; _i < arguments.length; _i++) {
@@ -43427,7 +42102,7 @@ function dispatchError(arg) {
 
 
 /***/ }),
-/* 383 */
+/* 391 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -43437,11 +42112,6 @@ function dispatchError(arg) {
 /** PURE_IMPORTS_START tslib,_Subscriber PURE_IMPORTS_END */
 
 
-/**
- * We need this JSDoc comment for affecting ESDoc.
- * @ignore
- * @extends {Ignored}
- */
 var InnerSubscriber = /*@__PURE__*/ (function (_super) {
     __WEBPACK_IMPORTED_MODULE_0_tslib__["a" /* __extends */](InnerSubscriber, _super);
     function InnerSubscriber(parent, outerValue, outerIndex) {
@@ -43470,7 +42140,7 @@ var InnerSubscriber = /*@__PURE__*/ (function (_super) {
 
 
 /***/ }),
-/* 384 */
+/* 392 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -43478,7 +42148,6 @@ var InnerSubscriber = /*@__PURE__*/ (function (_super) {
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__symbol_observable__ = __webpack_require__(24);
 /** PURE_IMPORTS_START _symbol_observable PURE_IMPORTS_END */
 
-/** Identifies an input as being Observable (but not necessary an Rx Observable) */
 function isInteropObservable(input) {
     return input && typeof input[__WEBPACK_IMPORTED_MODULE_0__symbol_observable__["a" /* observable */]] === 'function';
 }
@@ -43486,15 +42155,14 @@ function isInteropObservable(input) {
 
 
 /***/ }),
-/* 385 */
+/* 393 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 /* harmony export (immutable) */ __webpack_exports__["a"] = isIterable;
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__symbol_iterator__ = __webpack_require__(36);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__symbol_iterator__ = __webpack_require__(37);
 /** PURE_IMPORTS_START _symbol_iterator PURE_IMPORTS_END */
 
-/** Identifies an input as being an Iterable */
 function isIterable(input) {
     return input && typeof input[__WEBPACK_IMPORTED_MODULE_0__symbol_iterator__["a" /* iterator */]] === 'function';
 }
@@ -43502,14 +42170,14 @@ function isIterable(input) {
 
 
 /***/ }),
-/* 386 */
+/* 394 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 /* harmony export (immutable) */ __webpack_exports__["a"] = fromPromise;
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__Observable__ = __webpack_require__(4);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__Subscription__ = __webpack_require__(8);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__util_subscribeToPromise__ = __webpack_require__(231);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__util_subscribeToPromise__ = __webpack_require__(235);
 /** PURE_IMPORTS_START _Observable,_Subscription,_util_subscribeToPromise PURE_IMPORTS_END */
 
 
@@ -43539,15 +42207,15 @@ function fromPromise(input, scheduler) {
 
 
 /***/ }),
-/* 387 */
+/* 395 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 /* harmony export (immutable) */ __webpack_exports__["a"] = fromIterable;
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__Observable__ = __webpack_require__(4);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__Subscription__ = __webpack_require__(8);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__symbol_iterator__ = __webpack_require__(36);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__util_subscribeToIterable__ = __webpack_require__(232);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__symbol_iterator__ = __webpack_require__(37);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__util_subscribeToIterable__ = __webpack_require__(236);
 /** PURE_IMPORTS_START _Observable,_Subscription,_symbol_iterator,_util_subscribeToIterable PURE_IMPORTS_END */
 
 
@@ -43565,7 +42233,6 @@ function fromIterable(input, scheduler) {
             var sub = new __WEBPACK_IMPORTED_MODULE_1__Subscription__["a" /* Subscription */]();
             var iterator;
             sub.add(function () {
-                // Finalize generators
                 if (iterator && typeof iterator.return === 'function') {
                     iterator.return();
                 }
@@ -43604,7 +42271,7 @@ function fromIterable(input, scheduler) {
 
 
 /***/ }),
-/* 388 */
+/* 396 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -43612,7 +42279,7 @@ function fromIterable(input, scheduler) {
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__Observable__ = __webpack_require__(4);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__Subscription__ = __webpack_require__(8);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__symbol_observable__ = __webpack_require__(24);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__util_subscribeToObservable__ = __webpack_require__(233);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__util_subscribeToObservable__ = __webpack_require__(237);
 /** PURE_IMPORTS_START _Observable,_Subscription,_symbol_observable,_util_subscribeToObservable PURE_IMPORTS_END */
 
 
@@ -43641,7 +42308,7 @@ function fromObservable(input, scheduler) {
 
 
 /***/ }),
-/* 389 */
+/* 397 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -43649,7 +42316,7 @@ function fromObservable(input, scheduler) {
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_tslib__ = __webpack_require__(1);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__Observable__ = __webpack_require__(4);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__util_isArray__ = __webpack_require__(11);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__empty__ = __webpack_require__(13);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__empty__ = __webpack_require__(12);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__util_subscribeToResult__ = __webpack_require__(6);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_5__OuterSubscriber__ = __webpack_require__(5);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_6__operators_map__ = __webpack_require__(16);
@@ -43661,109 +42328,6 @@ function fromObservable(input, scheduler) {
 
 
 
-/* tslint:enable:max-line-length */
-/**
- * Joins last values emitted by passed Observables.
- *
- * <span class="informal">Wait for Observables to complete and then combine last values they emitted.</span>
- *
- * <img src="./img/forkJoin.png" width="100%">
- *
- * `forkJoin` is an operator that takes any number of Observables which can be passed either as an array
- * or directly as arguments. If no input Observables are provided, resulting stream will complete
- * immediately.
- *
- * `forkJoin` will wait for all passed Observables to complete and then it will emit an array with last
- * values from corresponding Observables. So if you pass `n` Observables to the operator, resulting
- * array will have `n` values, where first value is the last thing emitted by the first Observable,
- * second value is the last thing emitted by the second Observable and so on. That means `forkJoin` will
- * not emit more than once and it will complete after that. If you need to emit combined values not only
- * at the end of lifecycle of passed Observables, but also throughout it, try out {@link combineLatest}
- * or {@link zip} instead.
- *
- * In order for resulting array to have the same length as the number of input Observables, whenever any of
- * that Observables completes without emitting any value, `forkJoin` will complete at that moment as well
- * and it will not emit anything either, even if it already has some last values from other Observables.
- * Conversely, if there is an Observable that never completes, `forkJoin` will never complete as well,
- * unless at any point some other Observable completes without emitting value, which brings us back to
- * the previous case. Overall, in order for `forkJoin` to emit a value, all Observables passed as arguments
- * have to emit something at least once and complete.
- *
- * If any input Observable errors at some point, `forkJoin` will error as well and all other Observables
- * will be immediately unsubscribed.
- *
- * Optionally `forkJoin` accepts project function, that will be called with values which normally
- * would land in emitted array. Whatever is returned by project function, will appear in output
- * Observable instead. This means that default project can be thought of as a function that takes
- * all its arguments and puts them into an array. Note that project function will be called only
- * when output Observable is supposed to emit a result.
- *
- * @example <caption>Use forkJoin with operator emitting immediately</caption>
- * import { forkJoin, of } from 'rxjs';
- *
- * const observable = forkJoin(
- *   of(1, 2, 3, 4),
- *   of(5, 6, 7, 8)
- * );
- * observable.subscribe(
- *   value => console.log(value),
- *   err => {},
- *   () => console.log('This is how it ends!')
- * );
- *
- * // Logs:
- * // [4, 8]
- * // "This is how it ends!"
- *
- *
- * @example <caption>Use forkJoin with operator emitting after some time</caption>
- * import { forkJoin, interval } from 'rxjs';
- * import { take } from 'rxjs/operators';
- *
- * const observable = forkJoin(
- *   interval(1000).pipe(take(3)), // emit 0, 1, 2 every second and complete
- *   interval(500).pipe(take(4)) // emit 0, 1, 2, 3 every half a second and complete
- * );
- * observable.subscribe(
- *   value => console.log(value),
- *   err => {},
- *   () => console.log('This is how it ends!')
- * );
- *
- * // Logs:
- * // [2, 3] after 3 seconds
- * // "This is how it ends!" immediately after
- *
- *
- * @example <caption>Use forkJoin with project function</caption>
- * import { jorkJoin, interval } from 'rxjs';
- * import { take } from 'rxjs/operators';
- *
- * const observable = forkJoin(
- *   interval(1000).pipe(take(3)), // emit 0, 1, 2 every second and complete
- *   interval(500).pipe(take(4)), // emit 0, 1, 2, 3 every half a second and complete
- *   (n, m) => n + m
- * );
- * observable.subscribe(
- *   value => console.log(value),
- *   err => {},
- *   () => console.log('This is how it ends!')
- * );
- *
- * // Logs:
- * // 5 after 3 seconds
- * // "This is how it ends!" immediately after
- *
- * @see {@link combineLatest}
- * @see {@link zip}
- *
- * @param {...ObservableInput} sources Any number of Observables provided either as an array or as an arguments
- * passed directly to the operator.
- * @param {function} [project] Function that takes values emitted by input Observables and returns value
- * that will appear in resulting Observable instead of default array.
- * @return {Observable} Observable emitting either an array of last values emitted by passed Observables
- * or value from project function.
- */
 function forkJoin() {
     var sources = [];
     for (var _i = 0; _i < arguments.length; _i++) {
@@ -43771,11 +42335,8 @@ function forkJoin() {
     }
     var resultSelector;
     if (typeof sources[sources.length - 1] === 'function') {
-        // DEPRECATED PATH
         resultSelector = sources.pop();
     }
-    // if the first and only other argument is an array
-    // assume it's been called with `forkJoin([obs1, obs2, obs3])`
     if (sources.length === 1 && Object(__WEBPACK_IMPORTED_MODULE_2__util_isArray__["a" /* isArray */])(sources[0])) {
         sources = sources[0];
     }
@@ -43783,18 +42344,12 @@ function forkJoin() {
         return __WEBPACK_IMPORTED_MODULE_3__empty__["a" /* EMPTY */];
     }
     if (resultSelector) {
-        // DEPRECATED PATH
         return forkJoin(sources).pipe(Object(__WEBPACK_IMPORTED_MODULE_6__operators_map__["a" /* map */])(function (args) { return resultSelector.apply(void 0, args); }));
     }
     return new __WEBPACK_IMPORTED_MODULE_1__Observable__["a" /* Observable */](function (subscriber) {
         return new ForkJoinSubscriber(subscriber, sources);
     });
 }
-/**
- * We need this JSDoc comment for affecting ESDoc.
- * @ignore
- * @extends {Ignored}
- */
 var ForkJoinSubscriber = /*@__PURE__*/ (function (_super) {
     __WEBPACK_IMPORTED_MODULE_0_tslib__["a" /* __extends */](ForkJoinSubscriber, _super);
     function ForkJoinSubscriber(destination, sources) {
@@ -43842,14 +42397,14 @@ var ForkJoinSubscriber = /*@__PURE__*/ (function (_super) {
 
 
 /***/ }),
-/* 390 */
+/* 398 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 /* harmony export (immutable) */ __webpack_exports__["a"] = fromEvent;
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__Observable__ = __webpack_require__(4);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__util_isArray__ = __webpack_require__(11);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__util_isFunction__ = __webpack_require__(31);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__util_isFunction__ = __webpack_require__(32);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__operators_map__ = __webpack_require__(16);
 /** PURE_IMPORTS_START _Observable,_util_isArray,_util_isFunction,_operators_map PURE_IMPORTS_END */
 
@@ -43857,126 +42412,12 @@ var ForkJoinSubscriber = /*@__PURE__*/ (function (_super) {
 
 
 var toString = Object.prototype.toString;
-/* tslint:enable:max-line-length */
-/**
- * Creates an Observable that emits events of a specific type coming from the
- * given event target.
- *
- * <span class="informal">Creates an Observable from DOM events, or Node.js
- * EventEmitter events or others.</span>
- *
- * <img src="./img/fromEvent.png" width="100%">
- *
- * `fromEvent` accepts as a first argument event target, which is an object with methods
- * for registering event handler functions. As a second argument it takes string that indicates
- * type of event we want to listen for. `fromEvent` supports selected types of event targets,
- * which are described in detail below. If your event target does not match any of the ones listed,
- * you should use {@link fromEventPattern}, which can be used on arbitrary APIs.
- * When it comes to APIs supported by `fromEvent`, their methods for adding and removing event
- * handler functions have different names, but they all accept a string describing event type
- * and function itself, which will be called whenever said event happens.
- *
- * Every time resulting Observable is subscribed, event handler function will be registered
- * to event target on given event type. When that event fires, value
- * passed as a first argument to registered function will be emitted by output Observable.
- * When Observable is unsubscribed, function will be unregistered from event target.
- *
- * Note that if event target calls registered function with more than one argument, second
- * and following arguments will not appear in resulting stream. In order to get access to them,
- * you can pass to `fromEvent` optional project function, which will be called with all arguments
- * passed to event handler. Output Observable will then emit value returned by project function,
- * instead of the usual value.
- *
- * Remember that event targets listed below are checked via duck typing. It means that
- * no matter what kind of object you have and no matter what environment you work in,
- * you can safely use `fromEvent` on that object if it exposes described methods (provided
- * of course they behave as was described above). So for example if Node.js library exposes
- * event target which has the same method names as DOM EventTarget, `fromEvent` is still
- * a good choice.
- *
- * If the API you use is more callback then event handler oriented (subscribed
- * callback function fires only once and thus there is no need to manually
- * unregister it), you should use {@link bindCallback} or {@link bindNodeCallback}
- * instead.
- *
- * `fromEvent` supports following types of event targets:
- *
- * **DOM EventTarget**
- *
- * This is an object with `addEventListener` and `removeEventListener` methods.
- *
- * In the browser, `addEventListener` accepts - apart from event type string and event
- * handler function arguments - optional third parameter, which is either an object or boolean,
- * both used for additional configuration how and when passed function will be called. When
- * `fromEvent` is used with event target of that type, you can provide this values
- * as third parameter as well.
- *
- * **Node.js EventEmitter**
- *
- * An object with `addListener` and `removeListener` methods.
- *
- * **JQuery-style event target**
- *
- * An object with `on` and `off` methods
- *
- * **DOM NodeList**
- *
- * List of DOM Nodes, returned for example by `document.querySelectorAll` or `Node.childNodes`.
- *
- * Although this collection is not event target in itself, `fromEvent` will iterate over all Nodes
- * it contains and install event handler function in every of them. When returned Observable
- * is unsubscribed, function will be removed from all Nodes.
- *
- * **DOM HtmlCollection**
- *
- * Just as in case of NodeList it is a collection of DOM nodes. Here as well event handler function is
- * installed and removed in each of elements.
- *
- *
- * @example <caption>Emits clicks happening on the DOM document</caption>
- * var clicks = fromEvent(document, 'click');
- * clicks.subscribe(x => console.log(x));
- *
- * // Results in:
- * // MouseEvent object logged to console every time a click
- * // occurs on the document.
- *
- *
- * @example <caption>Use addEventListener with capture option</caption>
- * var clicksInDocument = fromEvent(document, 'click', true); // note optional configuration parameter
- *                                                                          // which will be passed to addEventListener
- * var clicksInDiv = fromEvent(someDivInDocument, 'click');
- *
- * clicksInDocument.subscribe(() => console.log('document'));
- * clicksInDiv.subscribe(() => console.log('div'));
- *
- * // By default events bubble UP in DOM tree, so normally
- * // when we would click on div in document
- * // "div" would be logged first and then "document".
- * // Since we specified optional `capture` option, document
- * // will catch event when it goes DOWN DOM tree, so console
- * // will log "document" and then "div".
- *
- * @see {@link bindCallback}
- * @see {@link bindNodeCallback}
- * @see {@link fromEventPattern}
- *
- * @param {FromEventTarget<T>} target The DOM EventTarget, Node.js
- * EventEmitter, JQuery-like event target, NodeList or HTMLCollection to attach the event handler to.
- * @param {string} eventName The event name of interest, being emitted by the
- * `target`.
- * @param {EventListenerOptions} [options] Options to pass through to addEventListener
- * @return {Observable<T>}
- * @name fromEvent
- */
 function fromEvent(target, eventName, options, resultSelector) {
     if (Object(__WEBPACK_IMPORTED_MODULE_2__util_isFunction__["a" /* isFunction */])(options)) {
-        // DEPRECATED PATH
         resultSelector = options;
         options = undefined;
     }
     if (resultSelector) {
-        // DEPRECATED PATH
         return fromEvent(target, eventName, options).pipe(Object(__WEBPACK_IMPORTED_MODULE_3__operators_map__["a" /* map */])(function (args) { return Object(__WEBPACK_IMPORTED_MODULE_1__util_isArray__["a" /* isArray */])(args) ? resultSelector.apply(void 0, args) : resultSelector(args); }));
     }
     return new __WEBPACK_IMPORTED_MODULE_0__Observable__["a" /* Observable */](function (subscriber) {
@@ -44031,66 +42472,22 @@ function isEventTarget(sourceObj) {
 
 
 /***/ }),
-/* 391 */
+/* 399 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 /* harmony export (immutable) */ __webpack_exports__["a"] = fromEventPattern;
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__Observable__ = __webpack_require__(4);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__util_isArray__ = __webpack_require__(11);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__util_isFunction__ = __webpack_require__(31);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__util_isFunction__ = __webpack_require__(32);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__operators_map__ = __webpack_require__(16);
 /** PURE_IMPORTS_START _Observable,_util_isArray,_util_isFunction,_operators_map PURE_IMPORTS_END */
 
 
 
 
-/* tslint:enable:max-line-length */
-/**
- * Creates an Observable from an API based on addHandler/removeHandler
- * functions.
- *
- * <span class="informal">Converts any addHandler/removeHandler API to an
- * Observable.</span>
- *
- * <img src="./img/fromEventPattern.png" width="100%">
- *
- * Creates an Observable by using the `addHandler` and `removeHandler`
- * functions to add and remove the handlers. The `addHandler` is
- * called when the output Observable is subscribed, and `removeHandler` is
- * called when the Subscription is unsubscribed.
- *
- * @example <caption>Emits clicks happening on the DOM document</caption>
- * function addClickHandler(handler) {
- *   document.addEventListener('click', handler);
- * }
- *
- * function removeClickHandler(handler) {
- *   document.removeEventListener('click', handler);
- * }
- *
- * var clicks = fromEventPattern(
- *   addClickHandler,
- *   removeClickHandler
- * );
- * clicks.subscribe(x => console.log(x));
- *
- * @see {@link from}
- * @see {@link fromEvent}
- *
- * @param {function(handler: Function): any} addHandler A function that takes
- * a `handler` function as argument and attaches it somehow to the actual
- * source of events.
- * @param {function(handler: Function, signal?: any): void} [removeHandler] An optional function that
- * takes a `handler` function as argument and removes it in case it was
- * previously attached using `addHandler`. if addHandler returns signal to teardown when remove,
- * removeHandler function will forward it.
- * @return {Observable<T>}
- * @name fromEventPattern
- */
 function fromEventPattern(addHandler, removeHandler, resultSelector) {
     if (resultSelector) {
-        // DEPRECATED PATH
         return fromEventPattern(addHandler, removeHandler).pipe(Object(__WEBPACK_IMPORTED_MODULE_3__operators_map__["a" /* map */])(function (args) { return Object(__WEBPACK_IMPORTED_MODULE_1__util_isArray__["a" /* isArray */])(args) ? resultSelector.apply(void 0, args) : resultSelector(args); }));
     }
     return new __WEBPACK_IMPORTED_MODULE_0__Observable__["a" /* Observable */](function (subscriber) {
@@ -44119,14 +42516,14 @@ function fromEventPattern(addHandler, removeHandler, resultSelector) {
 
 
 /***/ }),
-/* 392 */
+/* 400 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 /* harmony export (immutable) */ __webpack_exports__["a"] = generate;
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__Observable__ = __webpack_require__(4);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__util_identity__ = __webpack_require__(25);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__util_isScheduler__ = __webpack_require__(18);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__util_isScheduler__ = __webpack_require__(15);
 /** PURE_IMPORTS_START _Observable,_util_identity,_util_isScheduler PURE_IMPORTS_END */
 
 
@@ -44255,97 +42652,16 @@ function dispatch(state) {
 
 
 /***/ }),
-/* 393 */
+/* 401 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 /* harmony export (immutable) */ __webpack_exports__["a"] = iif;
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__defer__ = __webpack_require__(68);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__empty__ = __webpack_require__(13);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__defer__ = __webpack_require__(73);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__empty__ = __webpack_require__(12);
 /** PURE_IMPORTS_START _defer,_empty PURE_IMPORTS_END */
 
 
-/**
- * Decides at subscription time which Observable will actually be subscribed.
- *
- * <span class="informal">`If` statement for Observables.</span>
- *
- * `if` accepts a condition function and two Observables. When
- * an Observable returned by the operator is subscribed, condition function will be called.
- * Based on what boolean it returns at that moment, consumer will subscribe either to
- * the first Observable (if condition was true) or to the second (if condition was false). Condition
- * function may also not return anything - in that case condition will be evaluated as false and
- * second Observable will be subscribed.
- *
- * Note that Observables for both cases (true and false) are optional. If condition points to an Observable that
- * was left undefined, resulting stream will simply complete immediately. That allows you to, rather
- * then controlling which Observable will be subscribed, decide at runtime if consumer should have access
- * to given Observable or not.
- *
- * If you have more complex logic that requires decision between more than two Observables, {@link defer}
- * will probably be a better choice. Actually `if` can be easily implemented with {@link defer}
- * and exists only for convenience and readability reasons.
- *
- *
- * @example <caption>Change at runtime which Observable will be subscribed</caption>
- * let subscribeToFirst;
- * const firstOrSecond = Rx.Observable.if(
- *   () => subscribeToFirst,
- *   Rx.Observable.of('first'),
- *   Rx.Observable.of('second')
- * );
- *
- * subscribeToFirst = true;
- * firstOrSecond.subscribe(value => console.log(value));
- *
- * // Logs:
- * // "first"
- *
- * subscribeToFirst = false;
- * firstOrSecond.subscribe(value => console.log(value));
- *
- * // Logs:
- * // "second"
- *
- *
- * @example <caption>Control an access to an Observable</caption>
- * let accessGranted;
- * const observableIfYouHaveAccess = Rx.Observable.if(
- *   () => accessGranted,
- *   Rx.Observable.of('It seems you have an access...') // Note that only one Observable is passed to the operator.
- * );
- *
- * accessGranted = true;
- * observableIfYouHaveAccess.subscribe(
- *   value => console.log(value),
- *   err => {},
- *   () => console.log('The end')
- * );
- *
- * // Logs:
- * // "It seems you have an access..."
- * // "The end"
- *
- * accessGranted = false;
- * observableIfYouHaveAccess.subscribe(
- *   value => console.log(value),
- *   err => {},
- *   () => console.log('The end')
- * );
- *
- * // Logs:
- * // "The end"
- *
- * @see {@link defer}
- *
- * @param {function(): boolean} condition Condition which Observable should be chosen.
- * @param {Observable} [trueObservable] An Observable that will be subscribed if condition is true.
- * @param {Observable} [falseObservable] An Observable that will be subscribed if condition is false.
- * @return {Observable} Either first or second Observable, depending on condition.
- * @static true
- * @name iif
- * @owner Observable
- */
 function iif(condition, trueResult, falseResult) {
     if (trueResult === void 0) {
         trueResult = __WEBPACK_IMPORTED_MODULE_1__empty__["a" /* EMPTY */];
@@ -44359,51 +42675,18 @@ function iif(condition, trueResult, falseResult) {
 
 
 /***/ }),
-/* 394 */
+/* 402 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 /* harmony export (immutable) */ __webpack_exports__["a"] = interval;
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__Observable__ = __webpack_require__(4);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__scheduler_async__ = __webpack_require__(12);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__util_isNumeric__ = __webpack_require__(47);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__scheduler_async__ = __webpack_require__(13);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__util_isNumeric__ = __webpack_require__(49);
 /** PURE_IMPORTS_START _Observable,_scheduler_async,_util_isNumeric PURE_IMPORTS_END */
 
 
 
-/**
- * Creates an Observable that emits sequential numbers every specified
- * interval of time, on a specified IScheduler.
- *
- * <span class="informal">Emits incremental numbers periodically in time.
- * </span>
- *
- * <img src="./img/interval.png" width="100%">
- *
- * `interval` returns an Observable that emits an infinite sequence of
- * ascending integers, with a constant interval of time of your choosing
- * between those emissions. The first emission is not sent immediately, but
- * only after the first period has passed. By default, this operator uses the
- * `async` IScheduler to provide a notion of time, but you may pass any
- * IScheduler to it.
- *
- * @example <caption>Emits ascending numbers, one every second (1000ms)</caption>
- * var numbers = Rx.Observable.interval(1000);
- * numbers.subscribe(x => console.log(x));
- *
- * @see {@link timer}
- * @see {@link delay}
- *
- * @param {number} [period=0] The interval size in milliseconds (by default)
- * or the time unit determined by the scheduler's clock.
- * @param {Scheduler} [scheduler=async] The IScheduler to use for scheduling
- * the emission of values, and providing a notion of "time".
- * @return {Observable} An Observable that emits a sequential number each time
- * interval.
- * @static true
- * @name interval
- * @owner Observable
- */
 function interval(period, scheduler) {
     if (period === void 0) {
         period = 0;
@@ -44431,7 +42714,7 @@ function dispatch(state) {
 
 
 /***/ }),
-/* 395 */
+/* 403 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -44439,69 +42722,12 @@ function dispatch(state) {
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__Observable__ = __webpack_require__(4);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__from__ = __webpack_require__(19);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__util_isArray__ = __webpack_require__(11);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__empty__ = __webpack_require__(13);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__empty__ = __webpack_require__(12);
 /** PURE_IMPORTS_START _Observable,_from,_util_isArray,_empty PURE_IMPORTS_END */
 
 
 
 
-/* tslint:enable:max-line-length */
-/**
- * When any of the provided Observable emits an complete or error notification, it immediately subscribes to the next one
- * that was passed.
- *
- * <span class="informal">Execute series of Observables no matter what, even if it means swallowing errors.</span>
- *
- * <img src="./img/onErrorResumeNext.png" width="100%">
- *
- * `onErrorResumeNext` Will subscribe to each observable source it is provided, in order.
- * If the source it's subscribed to emits an error or completes, it will move to the next source
- * without error.
- *
- * If `onErrorResumeNext` is provided no arguments, or a single, empty array, it will return {@link EMPTY}.
- *
- * `onErrorResumeNext` is basically {@link concat}, only it will continue, even if one of its
- * sources emits an error.
- *
- * Note that there is no way to handle any errors thrown by sources via the resuult of
- * `onErrorResumeNext`. If you want to handle errors thrown in any given source, you can
- * always use the {@link catchError} operator on them before passing them into `onErrorResumeNext`.
- *
- * @example <caption>Subscribe to the next Observable after map fails</caption>
- * import { onErrorResumeNext, of } from 'rxjs/create';
- * import { map } from 'rxjs/operators';
- *
- * onErrorResumeNext(
- *  of(1, 2, 3, 0).pipe(
- *    map(x => {
- *      if (x === 0) throw Error();
- *      return 10 / x;
- *    })
- *  ),
- *  of(1, 2, 3),
- * )
- * .subscribe(
- *   val => console.log(val),
- *   err => console.log(err),          // Will never be called.
- *   () => console.log('done')
- * );
- *
- * // Logs:
- * // 10
- * // 5
- * // 3.3333333333333335
- * // 1
- * // 2
- * // 3
- * // "done"
- *
- * @see {@link concat}
- * @see {@link catch}
- *
- * @param {...ObservableInput} sources Observables (or anything that *is* observable) passed either directly or as an array.
- * @return {Observable} An Observable that concatenates all sources, one after the other,
- * ignoring all errors, such that any error causes it to move on to the next source.
- */
 function onErrorResumeNext() {
     var sources = [];
     for (var _i = 0; _i < arguments.length; _i++) {
@@ -44527,7 +42753,7 @@ function onErrorResumeNext() {
 
 
 /***/ }),
-/* 396 */
+/* 404 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -44538,37 +42764,6 @@ function onErrorResumeNext() {
 /** PURE_IMPORTS_START _Observable,_Subscription PURE_IMPORTS_END */
 
 
-/**
- * Convert an object into an observable sequence of [key, value] pairs
- * using an optional IScheduler to enumerate the object.
- *
- * @example <caption>Converts a javascript object to an Observable</caption>
- * var obj = {
- *   foo: 42,
- *   bar: 56,
- *   baz: 78
- * };
- *
- * var source = Rx.Observable.pairs(obj);
- *
- * var subscription = source.subscribe(
- *   function (x) {
- *     console.log('Next: %s', x);
- *   },
- *   function (err) {
- *     console.log('Error: %s', err);
- *   },
- *   function () {
- *     console.log('Completed');
- *   });
- *
- * @param {Object} obj The object to inspect and turn into an
- * Observable sequence.
- * @param {Scheduler} [scheduler] An optional IScheduler to run the
- * enumeration of the input sequence on.
- * @returns {(Observable<[string, T]>)} An observable sequence of
- * [key, value] pairs from the object.
- */
 function pairs(obj, scheduler) {
     if (!scheduler) {
         return new __WEBPACK_IMPORTED_MODULE_0__Observable__["a" /* Observable */](function (subscriber) {
@@ -44591,7 +42786,6 @@ function pairs(obj, scheduler) {
         });
     }
 }
-/** @internal */
 function dispatch(state) {
     var keys = state.keys, index = state.index, subscriber = state.subscriber, subscription = state.subscription, obj = state.obj;
     if (!subscriber.closed) {
@@ -44609,7 +42803,7 @@ function dispatch(state) {
 
 
 /***/ }),
-/* 397 */
+/* 405 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -44618,36 +42812,6 @@ function dispatch(state) {
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__Observable__ = __webpack_require__(4);
 /** PURE_IMPORTS_START _Observable PURE_IMPORTS_END */
 
-/**
- * Creates an Observable that emits a sequence of numbers within a specified
- * range.
- *
- * <span class="informal">Emits a sequence of numbers in a range.</span>
- *
- * <img src="./img/range.png" width="100%">
- *
- * `range` operator emits a range of sequential integers, in order, where you
- * select the `start` of the range and its `length`. By default, uses no
- * IScheduler and just delivers the notifications synchronously, but may use
- * an optional IScheduler to regulate those deliveries.
- *
- * @example <caption>Emits the numbers 1 to 10</caption>
- * var numbers = Rx.Observable.range(1, 10);
- * numbers.subscribe(x => console.log(x));
- *
- * @see {@link timer}
- * @see {@link interval}
- *
- * @param {number} [start=0] The value of the first integer in the sequence.
- * @param {number} [count=0] The number of sequential integers to generate.
- * @param {Scheduler} [scheduler] A {@link IScheduler} to use for scheduling
- * the emissions of the notifications.
- * @return {Observable} An Observable of numbers that emits a finite range of
- * sequential integers.
- * @static true
- * @name range
- * @owner Observable
- */
 function range(start, count, scheduler) {
     if (start === void 0) {
         start = 0;
@@ -44657,6 +42821,7 @@ function range(start, count, scheduler) {
     }
     return new __WEBPACK_IMPORTED_MODULE_0__Observable__["a" /* Observable */](function (subscriber) {
         var index = 0;
+        var current = start;
         if (scheduler) {
             return scheduler.schedule(dispatch, 0, {
                 index: index, count: count, start: start, subscriber: subscriber
@@ -44668,7 +42833,7 @@ function range(start, count, scheduler) {
                     subscriber.complete();
                     break;
                 }
-                subscriber.next(start++);
+                subscriber.next(current++);
                 if (subscriber.closed) {
                     break;
                 }
@@ -44677,7 +42842,6 @@ function range(start, count, scheduler) {
         return undefined;
     });
 }
-/** @internal */
 function dispatch(state) {
     var start = state.start, index = state.index, count = state.count, subscriber = state.subscriber;
     if (index >= count) {
@@ -44696,46 +42860,18 @@ function dispatch(state) {
 
 
 /***/ }),
-/* 398 */
+/* 406 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 /* harmony export (immutable) */ __webpack_exports__["a"] = using;
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__Observable__ = __webpack_require__(4);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__from__ = __webpack_require__(19);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__empty__ = __webpack_require__(13);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__empty__ = __webpack_require__(12);
 /** PURE_IMPORTS_START _Observable,_from,_empty PURE_IMPORTS_END */
 
- // from from from! LAWL
 
-/**
- * Creates an Observable that uses a resource which will be disposed at the same time as the Observable.
- *
- * <span class="informal">Use it when you catch yourself cleaning up after an Observable.</span>
- *
- * `using` is a factory operator, which accepts two functions. First function returns a disposable resource.
- * It can be an arbitrary object that implements `unsubscribe` method. Second function will be injected with
- * that object and should return an Observable. That Observable can use resource object during its execution.
- * Both functions passed to `using` will be called every time someone subscribes - neither an Observable nor
- * resource object will be shared in any way between subscriptions.
- *
- * When Observable returned by `using` is subscribed, Observable returned from the second function will be subscribed
- * as well. All its notifications (nexted values, completion and error events) will be emitted unchanged by the output
- * Observable. If however someone unsubscribes from the Observable or source Observable completes or errors by itself,
- * the `unsubscribe` method on resource object will be called. This can be used to do any necessary clean up, which
- * otherwise would have to be handled by hand. Note that complete or error notifications are not emitted when someone
- * cancels subscription to an Observable via `unsubscribe`, so `using` can be used as a hook, allowing you to make
- * sure that all resources which need to exist during an Observable execution will be disposed at appropriate time.
- *
- * @see {@link defer}
- *
- * @param {function(): ISubscription} resourceFactory A function which creates any resource object
- * that implements `unsubscribe` method.
- * @param {function(resource: ISubscription): Observable<T>} observableFactory A function which
- * creates an Observable, that can use injected resource object.
- * @return {Observable<T>} An Observable that behaves the same as Observable returned by `observableFactory`, but
- * which - when completed, errored or unsubscribed - will also call `unsubscribe` on created resource object.
- */
+
 function using(resourceFactory, observableFactory) {
     return new __WEBPACK_IMPORTED_MODULE_0__Observable__["a" /* Observable */](function (subscriber) {
         var resource;
@@ -44768,218 +42904,220 @@ function using(resourceFactory, observableFactory) {
 
 
 /***/ }),
-/* 399 */
+/* 407 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__internal_operators_audit__ = __webpack_require__(241);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__internal_operators_audit__ = __webpack_require__(245);
 /* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "audit", function() { return __WEBPACK_IMPORTED_MODULE_0__internal_operators_audit__["a"]; });
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__internal_operators_auditTime__ = __webpack_require__(400);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__internal_operators_auditTime__ = __webpack_require__(408);
 /* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "auditTime", function() { return __WEBPACK_IMPORTED_MODULE_1__internal_operators_auditTime__["a"]; });
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__internal_operators_buffer__ = __webpack_require__(401);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__internal_operators_buffer__ = __webpack_require__(409);
 /* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "buffer", function() { return __WEBPACK_IMPORTED_MODULE_2__internal_operators_buffer__["a"]; });
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__internal_operators_bufferCount__ = __webpack_require__(402);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__internal_operators_bufferCount__ = __webpack_require__(410);
 /* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "bufferCount", function() { return __WEBPACK_IMPORTED_MODULE_3__internal_operators_bufferCount__["a"]; });
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__internal_operators_bufferTime__ = __webpack_require__(403);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__internal_operators_bufferTime__ = __webpack_require__(411);
 /* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "bufferTime", function() { return __WEBPACK_IMPORTED_MODULE_4__internal_operators_bufferTime__["a"]; });
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_5__internal_operators_bufferToggle__ = __webpack_require__(404);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_5__internal_operators_bufferToggle__ = __webpack_require__(412);
 /* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "bufferToggle", function() { return __WEBPACK_IMPORTED_MODULE_5__internal_operators_bufferToggle__["a"]; });
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_6__internal_operators_bufferWhen__ = __webpack_require__(405);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_6__internal_operators_bufferWhen__ = __webpack_require__(413);
 /* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "bufferWhen", function() { return __WEBPACK_IMPORTED_MODULE_6__internal_operators_bufferWhen__["a"]; });
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_7__internal_operators_catchError__ = __webpack_require__(406);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_7__internal_operators_catchError__ = __webpack_require__(414);
 /* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "catchError", function() { return __WEBPACK_IMPORTED_MODULE_7__internal_operators_catchError__["a"]; });
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_8__internal_operators_combineAll__ = __webpack_require__(407);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_8__internal_operators_combineAll__ = __webpack_require__(415);
 /* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "combineAll", function() { return __WEBPACK_IMPORTED_MODULE_8__internal_operators_combineAll__["a"]; });
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_9__internal_operators_combineLatest__ = __webpack_require__(408);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_9__internal_operators_combineLatest__ = __webpack_require__(416);
 /* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "combineLatest", function() { return __WEBPACK_IMPORTED_MODULE_9__internal_operators_combineLatest__["a"]; });
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_10__internal_operators_concat__ = __webpack_require__(409);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_10__internal_operators_concat__ = __webpack_require__(417);
 /* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "concat", function() { return __WEBPACK_IMPORTED_MODULE_10__internal_operators_concat__["a"]; });
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_11__internal_operators_concatAll__ = __webpack_require__(236);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_11__internal_operators_concatAll__ = __webpack_require__(240);
 /* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "concatAll", function() { return __WEBPACK_IMPORTED_MODULE_11__internal_operators_concatAll__["a"]; });
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_12__internal_operators_concatMap__ = __webpack_require__(242);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_12__internal_operators_concatMap__ = __webpack_require__(246);
 /* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "concatMap", function() { return __WEBPACK_IMPORTED_MODULE_12__internal_operators_concatMap__["a"]; });
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_13__internal_operators_concatMapTo__ = __webpack_require__(410);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_13__internal_operators_concatMapTo__ = __webpack_require__(418);
 /* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "concatMapTo", function() { return __WEBPACK_IMPORTED_MODULE_13__internal_operators_concatMapTo__["a"]; });
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_14__internal_operators_count__ = __webpack_require__(411);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_14__internal_operators_count__ = __webpack_require__(419);
 /* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "count", function() { return __WEBPACK_IMPORTED_MODULE_14__internal_operators_count__["a"]; });
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_15__internal_operators_debounce__ = __webpack_require__(412);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_15__internal_operators_debounce__ = __webpack_require__(420);
 /* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "debounce", function() { return __WEBPACK_IMPORTED_MODULE_15__internal_operators_debounce__["a"]; });
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_16__internal_operators_debounceTime__ = __webpack_require__(413);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_16__internal_operators_debounceTime__ = __webpack_require__(421);
 /* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "debounceTime", function() { return __WEBPACK_IMPORTED_MODULE_16__internal_operators_debounceTime__["a"]; });
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_17__internal_operators_defaultIfEmpty__ = __webpack_require__(38);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_17__internal_operators_defaultIfEmpty__ = __webpack_require__(39);
 /* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "defaultIfEmpty", function() { return __WEBPACK_IMPORTED_MODULE_17__internal_operators_defaultIfEmpty__["a"]; });
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_18__internal_operators_delay__ = __webpack_require__(414);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_18__internal_operators_delay__ = __webpack_require__(422);
 /* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "delay", function() { return __WEBPACK_IMPORTED_MODULE_18__internal_operators_delay__["a"]; });
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_19__internal_operators_delayWhen__ = __webpack_require__(415);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_19__internal_operators_delayWhen__ = __webpack_require__(423);
 /* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "delayWhen", function() { return __WEBPACK_IMPORTED_MODULE_19__internal_operators_delayWhen__["a"]; });
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_20__internal_operators_dematerialize__ = __webpack_require__(416);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_20__internal_operators_dematerialize__ = __webpack_require__(424);
 /* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "dematerialize", function() { return __WEBPACK_IMPORTED_MODULE_20__internal_operators_dematerialize__["a"]; });
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_21__internal_operators_distinct__ = __webpack_require__(417);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_21__internal_operators_distinct__ = __webpack_require__(425);
 /* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "distinct", function() { return __WEBPACK_IMPORTED_MODULE_21__internal_operators_distinct__["a"]; });
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_22__internal_operators_distinctUntilChanged__ = __webpack_require__(244);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_22__internal_operators_distinctUntilChanged__ = __webpack_require__(248);
 /* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "distinctUntilChanged", function() { return __WEBPACK_IMPORTED_MODULE_22__internal_operators_distinctUntilChanged__["a"]; });
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_23__internal_operators_distinctUntilKeyChanged__ = __webpack_require__(418);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_23__internal_operators_distinctUntilKeyChanged__ = __webpack_require__(426);
 /* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "distinctUntilKeyChanged", function() { return __WEBPACK_IMPORTED_MODULE_23__internal_operators_distinctUntilKeyChanged__["a"]; });
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_24__internal_operators_elementAt__ = __webpack_require__(419);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_24__internal_operators_elementAt__ = __webpack_require__(427);
 /* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "elementAt", function() { return __WEBPACK_IMPORTED_MODULE_24__internal_operators_elementAt__["a"]; });
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_25__internal_operators_every__ = __webpack_require__(420);
-/* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "every", function() { return __WEBPACK_IMPORTED_MODULE_25__internal_operators_every__["a"]; });
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_26__internal_operators_exhaust__ = __webpack_require__(421);
-/* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "exhaust", function() { return __WEBPACK_IMPORTED_MODULE_26__internal_operators_exhaust__["a"]; });
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_27__internal_operators_exhaustMap__ = __webpack_require__(422);
-/* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "exhaustMap", function() { return __WEBPACK_IMPORTED_MODULE_27__internal_operators_exhaustMap__["a"]; });
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_28__internal_operators_expand__ = __webpack_require__(423);
-/* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "expand", function() { return __WEBPACK_IMPORTED_MODULE_28__internal_operators_expand__["a"]; });
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_29__internal_operators_filter__ = __webpack_require__(39);
-/* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "filter", function() { return __WEBPACK_IMPORTED_MODULE_29__internal_operators_filter__["a"]; });
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_30__internal_operators_finalize__ = __webpack_require__(424);
-/* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "finalize", function() { return __WEBPACK_IMPORTED_MODULE_30__internal_operators_finalize__["a"]; });
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_31__internal_operators_find__ = __webpack_require__(246);
-/* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "find", function() { return __WEBPACK_IMPORTED_MODULE_31__internal_operators_find__["b"]; });
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_32__internal_operators_findIndex__ = __webpack_require__(425);
-/* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "findIndex", function() { return __WEBPACK_IMPORTED_MODULE_32__internal_operators_findIndex__["a"]; });
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_33__internal_operators_first__ = __webpack_require__(426);
-/* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "first", function() { return __WEBPACK_IMPORTED_MODULE_33__internal_operators_first__["a"]; });
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_34__internal_operators_groupBy__ = __webpack_require__(221);
-/* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "groupBy", function() { return __WEBPACK_IMPORTED_MODULE_34__internal_operators_groupBy__["b"]; });
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_35__internal_operators_ignoreElements__ = __webpack_require__(427);
-/* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "ignoreElements", function() { return __WEBPACK_IMPORTED_MODULE_35__internal_operators_ignoreElements__["a"]; });
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_36__internal_operators_isEmpty__ = __webpack_require__(428);
-/* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "isEmpty", function() { return __WEBPACK_IMPORTED_MODULE_36__internal_operators_isEmpty__["a"]; });
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_37__internal_operators_last__ = __webpack_require__(429);
-/* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "last", function() { return __WEBPACK_IMPORTED_MODULE_37__internal_operators_last__["a"]; });
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_38__internal_operators_map__ = __webpack_require__(16);
-/* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "map", function() { return __WEBPACK_IMPORTED_MODULE_38__internal_operators_map__["a"]; });
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_39__internal_operators_mapTo__ = __webpack_require__(430);
-/* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "mapTo", function() { return __WEBPACK_IMPORTED_MODULE_39__internal_operators_mapTo__["a"]; });
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_40__internal_operators_materialize__ = __webpack_require__(431);
-/* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "materialize", function() { return __WEBPACK_IMPORTED_MODULE_40__internal_operators_materialize__["a"]; });
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_41__internal_operators_max__ = __webpack_require__(432);
-/* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "max", function() { return __WEBPACK_IMPORTED_MODULE_41__internal_operators_max__["a"]; });
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_42__internal_operators_merge__ = __webpack_require__(433);
-/* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "merge", function() { return __WEBPACK_IMPORTED_MODULE_42__internal_operators_merge__["a"]; });
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_43__internal_operators_mergeAll__ = __webpack_require__(67);
-/* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "mergeAll", function() { return __WEBPACK_IMPORTED_MODULE_43__internal_operators_mergeAll__["a"]; });
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_44__internal_operators_mergeMap__ = __webpack_require__(37);
-/* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "mergeMap", function() { return __WEBPACK_IMPORTED_MODULE_44__internal_operators_mergeMap__["a"]; });
-/* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "flatMap", function() { return __WEBPACK_IMPORTED_MODULE_44__internal_operators_mergeMap__["a"]; });
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_45__internal_operators_mergeMapTo__ = __webpack_require__(434);
-/* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "mergeMapTo", function() { return __WEBPACK_IMPORTED_MODULE_45__internal_operators_mergeMapTo__["a"]; });
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_46__internal_operators_mergeScan__ = __webpack_require__(435);
-/* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "mergeScan", function() { return __WEBPACK_IMPORTED_MODULE_46__internal_operators_mergeScan__["a"]; });
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_47__internal_operators_min__ = __webpack_require__(436);
-/* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "min", function() { return __WEBPACK_IMPORTED_MODULE_47__internal_operators_min__["a"]; });
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_48__internal_operators_multicast__ = __webpack_require__(26);
-/* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "multicast", function() { return __WEBPACK_IMPORTED_MODULE_48__internal_operators_multicast__["a"]; });
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_49__internal_operators_observeOn__ = __webpack_require__(225);
-/* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "observeOn", function() { return __WEBPACK_IMPORTED_MODULE_49__internal_operators_observeOn__["b"]; });
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_50__internal_operators_onErrorResumeNext__ = __webpack_require__(437);
-/* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "onErrorResumeNext", function() { return __WEBPACK_IMPORTED_MODULE_50__internal_operators_onErrorResumeNext__["a"]; });
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_51__internal_operators_pairwise__ = __webpack_require__(438);
-/* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "pairwise", function() { return __WEBPACK_IMPORTED_MODULE_51__internal_operators_pairwise__["a"]; });
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_52__internal_operators_partition__ = __webpack_require__(439);
-/* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "partition", function() { return __WEBPACK_IMPORTED_MODULE_52__internal_operators_partition__["a"]; });
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_53__internal_operators_pluck__ = __webpack_require__(441);
-/* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "pluck", function() { return __WEBPACK_IMPORTED_MODULE_53__internal_operators_pluck__["a"]; });
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_54__internal_operators_publish__ = __webpack_require__(442);
-/* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "publish", function() { return __WEBPACK_IMPORTED_MODULE_54__internal_operators_publish__["a"]; });
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_55__internal_operators_publishBehavior__ = __webpack_require__(443);
-/* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "publishBehavior", function() { return __WEBPACK_IMPORTED_MODULE_55__internal_operators_publishBehavior__["a"]; });
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_56__internal_operators_publishLast__ = __webpack_require__(444);
-/* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "publishLast", function() { return __WEBPACK_IMPORTED_MODULE_56__internal_operators_publishLast__["a"]; });
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_57__internal_operators_publishReplay__ = __webpack_require__(445);
-/* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "publishReplay", function() { return __WEBPACK_IMPORTED_MODULE_57__internal_operators_publishReplay__["a"]; });
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_58__internal_operators_race__ = __webpack_require__(446);
-/* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "race", function() { return __WEBPACK_IMPORTED_MODULE_58__internal_operators_race__["a"]; });
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_59__internal_operators_reduce__ = __webpack_require__(49);
-/* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "reduce", function() { return __WEBPACK_IMPORTED_MODULE_59__internal_operators_reduce__["a"]; });
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_60__internal_operators_repeat__ = __webpack_require__(447);
-/* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "repeat", function() { return __WEBPACK_IMPORTED_MODULE_60__internal_operators_repeat__["a"]; });
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_61__internal_operators_repeatWhen__ = __webpack_require__(448);
-/* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "repeatWhen", function() { return __WEBPACK_IMPORTED_MODULE_61__internal_operators_repeatWhen__["a"]; });
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_62__internal_operators_retry__ = __webpack_require__(449);
-/* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "retry", function() { return __WEBPACK_IMPORTED_MODULE_62__internal_operators_retry__["a"]; });
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_63__internal_operators_retryWhen__ = __webpack_require__(450);
-/* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "retryWhen", function() { return __WEBPACK_IMPORTED_MODULE_63__internal_operators_retryWhen__["a"]; });
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_64__internal_operators_refCount__ = __webpack_require__(61);
-/* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "refCount", function() { return __WEBPACK_IMPORTED_MODULE_64__internal_operators_refCount__["a"]; });
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_65__internal_operators_sample__ = __webpack_require__(451);
-/* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "sample", function() { return __WEBPACK_IMPORTED_MODULE_65__internal_operators_sample__["a"]; });
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_66__internal_operators_sampleTime__ = __webpack_require__(452);
-/* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "sampleTime", function() { return __WEBPACK_IMPORTED_MODULE_66__internal_operators_sampleTime__["a"]; });
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_67__internal_operators_scan__ = __webpack_require__(72);
-/* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "scan", function() { return __WEBPACK_IMPORTED_MODULE_67__internal_operators_scan__["a"]; });
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_68__internal_operators_sequenceEqual__ = __webpack_require__(453);
-/* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "sequenceEqual", function() { return __WEBPACK_IMPORTED_MODULE_68__internal_operators_sequenceEqual__["a"]; });
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_69__internal_operators_share__ = __webpack_require__(454);
-/* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "share", function() { return __WEBPACK_IMPORTED_MODULE_69__internal_operators_share__["a"]; });
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_70__internal_operators_shareReplay__ = __webpack_require__(455);
-/* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "shareReplay", function() { return __WEBPACK_IMPORTED_MODULE_70__internal_operators_shareReplay__["a"]; });
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_71__internal_operators_single__ = __webpack_require__(456);
-/* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "single", function() { return __WEBPACK_IMPORTED_MODULE_71__internal_operators_single__["a"]; });
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_72__internal_operators_skip__ = __webpack_require__(457);
-/* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "skip", function() { return __WEBPACK_IMPORTED_MODULE_72__internal_operators_skip__["a"]; });
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_73__internal_operators_skipLast__ = __webpack_require__(458);
-/* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "skipLast", function() { return __WEBPACK_IMPORTED_MODULE_73__internal_operators_skipLast__["a"]; });
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_74__internal_operators_skipUntil__ = __webpack_require__(459);
-/* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "skipUntil", function() { return __WEBPACK_IMPORTED_MODULE_74__internal_operators_skipUntil__["a"]; });
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_75__internal_operators_skipWhile__ = __webpack_require__(460);
-/* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "skipWhile", function() { return __WEBPACK_IMPORTED_MODULE_75__internal_operators_skipWhile__["a"]; });
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_76__internal_operators_startWith__ = __webpack_require__(461);
-/* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "startWith", function() { return __WEBPACK_IMPORTED_MODULE_76__internal_operators_startWith__["a"]; });
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_77__internal_operators_subscribeOn__ = __webpack_require__(462);
-/* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "subscribeOn", function() { return __WEBPACK_IMPORTED_MODULE_77__internal_operators_subscribeOn__["a"]; });
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_78__internal_operators_switchAll__ = __webpack_require__(464);
-/* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "switchAll", function() { return __WEBPACK_IMPORTED_MODULE_78__internal_operators_switchAll__["a"]; });
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_79__internal_operators_switchMap__ = __webpack_require__(73);
-/* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "switchMap", function() { return __WEBPACK_IMPORTED_MODULE_79__internal_operators_switchMap__["a"]; });
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_80__internal_operators_switchMapTo__ = __webpack_require__(465);
-/* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "switchMapTo", function() { return __WEBPACK_IMPORTED_MODULE_80__internal_operators_switchMapTo__["a"]; });
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_81__internal_operators_take__ = __webpack_require__(70);
-/* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "take", function() { return __WEBPACK_IMPORTED_MODULE_81__internal_operators_take__["a"]; });
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_82__internal_operators_takeLast__ = __webpack_require__(71);
-/* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "takeLast", function() { return __WEBPACK_IMPORTED_MODULE_82__internal_operators_takeLast__["a"]; });
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_83__internal_operators_takeUntil__ = __webpack_require__(466);
-/* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "takeUntil", function() { return __WEBPACK_IMPORTED_MODULE_83__internal_operators_takeUntil__["a"]; });
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_84__internal_operators_takeWhile__ = __webpack_require__(467);
-/* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "takeWhile", function() { return __WEBPACK_IMPORTED_MODULE_84__internal_operators_takeWhile__["a"]; });
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_85__internal_operators_tap__ = __webpack_require__(245);
-/* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "tap", function() { return __WEBPACK_IMPORTED_MODULE_85__internal_operators_tap__["a"]; });
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_86__internal_operators_throttle__ = __webpack_require__(247);
-/* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "throttle", function() { return __WEBPACK_IMPORTED_MODULE_86__internal_operators_throttle__["b"]; });
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_87__internal_operators_throttleTime__ = __webpack_require__(468);
-/* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "throttleTime", function() { return __WEBPACK_IMPORTED_MODULE_87__internal_operators_throttleTime__["a"]; });
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_88__internal_operators_throwIfEmpty__ = __webpack_require__(48);
-/* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "throwIfEmpty", function() { return __WEBPACK_IMPORTED_MODULE_88__internal_operators_throwIfEmpty__["a"]; });
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_89__internal_operators_timeInterval__ = __webpack_require__(469);
-/* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "timeInterval", function() { return __WEBPACK_IMPORTED_MODULE_89__internal_operators_timeInterval__["a"]; });
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_90__internal_operators_timeout__ = __webpack_require__(470);
-/* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "timeout", function() { return __WEBPACK_IMPORTED_MODULE_90__internal_operators_timeout__["a"]; });
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_91__internal_operators_timeoutWith__ = __webpack_require__(248);
-/* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "timeoutWith", function() { return __WEBPACK_IMPORTED_MODULE_91__internal_operators_timeoutWith__["a"]; });
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_92__internal_operators_timestamp__ = __webpack_require__(471);
-/* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "timestamp", function() { return __WEBPACK_IMPORTED_MODULE_92__internal_operators_timestamp__["a"]; });
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_93__internal_operators_toArray__ = __webpack_require__(472);
-/* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "toArray", function() { return __WEBPACK_IMPORTED_MODULE_93__internal_operators_toArray__["a"]; });
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_94__internal_operators_window__ = __webpack_require__(473);
-/* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "window", function() { return __WEBPACK_IMPORTED_MODULE_94__internal_operators_window__["a"]; });
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_95__internal_operators_windowCount__ = __webpack_require__(474);
-/* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "windowCount", function() { return __WEBPACK_IMPORTED_MODULE_95__internal_operators_windowCount__["a"]; });
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_96__internal_operators_windowTime__ = __webpack_require__(475);
-/* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "windowTime", function() { return __WEBPACK_IMPORTED_MODULE_96__internal_operators_windowTime__["a"]; });
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_97__internal_operators_windowToggle__ = __webpack_require__(476);
-/* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "windowToggle", function() { return __WEBPACK_IMPORTED_MODULE_97__internal_operators_windowToggle__["a"]; });
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_98__internal_operators_windowWhen__ = __webpack_require__(477);
-/* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "windowWhen", function() { return __WEBPACK_IMPORTED_MODULE_98__internal_operators_windowWhen__["a"]; });
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_99__internal_operators_withLatestFrom__ = __webpack_require__(478);
-/* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "withLatestFrom", function() { return __WEBPACK_IMPORTED_MODULE_99__internal_operators_withLatestFrom__["a"]; });
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_100__internal_operators_zip__ = __webpack_require__(479);
-/* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "zip", function() { return __WEBPACK_IMPORTED_MODULE_100__internal_operators_zip__["a"]; });
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_101__internal_operators_zipAll__ = __webpack_require__(480);
-/* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "zipAll", function() { return __WEBPACK_IMPORTED_MODULE_101__internal_operators_zipAll__["a"]; });
-/* Operator exports */
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_25__internal_operators_endWith__ = __webpack_require__(428);
+/* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "endWith", function() { return __WEBPACK_IMPORTED_MODULE_25__internal_operators_endWith__["a"]; });
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_26__internal_operators_every__ = __webpack_require__(429);
+/* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "every", function() { return __WEBPACK_IMPORTED_MODULE_26__internal_operators_every__["a"]; });
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_27__internal_operators_exhaust__ = __webpack_require__(430);
+/* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "exhaust", function() { return __WEBPACK_IMPORTED_MODULE_27__internal_operators_exhaust__["a"]; });
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_28__internal_operators_exhaustMap__ = __webpack_require__(431);
+/* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "exhaustMap", function() { return __WEBPACK_IMPORTED_MODULE_28__internal_operators_exhaustMap__["a"]; });
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_29__internal_operators_expand__ = __webpack_require__(432);
+/* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "expand", function() { return __WEBPACK_IMPORTED_MODULE_29__internal_operators_expand__["a"]; });
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_30__internal_operators_filter__ = __webpack_require__(40);
+/* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "filter", function() { return __WEBPACK_IMPORTED_MODULE_30__internal_operators_filter__["a"]; });
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_31__internal_operators_finalize__ = __webpack_require__(433);
+/* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "finalize", function() { return __WEBPACK_IMPORTED_MODULE_31__internal_operators_finalize__["a"]; });
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_32__internal_operators_find__ = __webpack_require__(250);
+/* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "find", function() { return __WEBPACK_IMPORTED_MODULE_32__internal_operators_find__["b"]; });
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_33__internal_operators_findIndex__ = __webpack_require__(434);
+/* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "findIndex", function() { return __WEBPACK_IMPORTED_MODULE_33__internal_operators_findIndex__["a"]; });
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_34__internal_operators_first__ = __webpack_require__(435);
+/* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "first", function() { return __WEBPACK_IMPORTED_MODULE_34__internal_operators_first__["a"]; });
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_35__internal_operators_groupBy__ = __webpack_require__(226);
+/* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "groupBy", function() { return __WEBPACK_IMPORTED_MODULE_35__internal_operators_groupBy__["b"]; });
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_36__internal_operators_ignoreElements__ = __webpack_require__(436);
+/* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "ignoreElements", function() { return __WEBPACK_IMPORTED_MODULE_36__internal_operators_ignoreElements__["a"]; });
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_37__internal_operators_isEmpty__ = __webpack_require__(437);
+/* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "isEmpty", function() { return __WEBPACK_IMPORTED_MODULE_37__internal_operators_isEmpty__["a"]; });
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_38__internal_operators_last__ = __webpack_require__(438);
+/* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "last", function() { return __WEBPACK_IMPORTED_MODULE_38__internal_operators_last__["a"]; });
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_39__internal_operators_map__ = __webpack_require__(16);
+/* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "map", function() { return __WEBPACK_IMPORTED_MODULE_39__internal_operators_map__["a"]; });
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_40__internal_operators_mapTo__ = __webpack_require__(439);
+/* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "mapTo", function() { return __WEBPACK_IMPORTED_MODULE_40__internal_operators_mapTo__["a"]; });
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_41__internal_operators_materialize__ = __webpack_require__(440);
+/* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "materialize", function() { return __WEBPACK_IMPORTED_MODULE_41__internal_operators_materialize__["a"]; });
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_42__internal_operators_max__ = __webpack_require__(441);
+/* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "max", function() { return __WEBPACK_IMPORTED_MODULE_42__internal_operators_max__["a"]; });
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_43__internal_operators_merge__ = __webpack_require__(442);
+/* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "merge", function() { return __WEBPACK_IMPORTED_MODULE_43__internal_operators_merge__["a"]; });
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_44__internal_operators_mergeAll__ = __webpack_require__(72);
+/* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "mergeAll", function() { return __WEBPACK_IMPORTED_MODULE_44__internal_operators_mergeAll__["a"]; });
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_45__internal_operators_mergeMap__ = __webpack_require__(38);
+/* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "mergeMap", function() { return __WEBPACK_IMPORTED_MODULE_45__internal_operators_mergeMap__["a"]; });
+/* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "flatMap", function() { return __WEBPACK_IMPORTED_MODULE_45__internal_operators_mergeMap__["a"]; });
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_46__internal_operators_mergeMapTo__ = __webpack_require__(443);
+/* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "mergeMapTo", function() { return __WEBPACK_IMPORTED_MODULE_46__internal_operators_mergeMapTo__["a"]; });
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_47__internal_operators_mergeScan__ = __webpack_require__(444);
+/* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "mergeScan", function() { return __WEBPACK_IMPORTED_MODULE_47__internal_operators_mergeScan__["a"]; });
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_48__internal_operators_min__ = __webpack_require__(445);
+/* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "min", function() { return __WEBPACK_IMPORTED_MODULE_48__internal_operators_min__["a"]; });
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_49__internal_operators_multicast__ = __webpack_require__(26);
+/* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "multicast", function() { return __WEBPACK_IMPORTED_MODULE_49__internal_operators_multicast__["a"]; });
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_50__internal_operators_observeOn__ = __webpack_require__(230);
+/* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "observeOn", function() { return __WEBPACK_IMPORTED_MODULE_50__internal_operators_observeOn__["b"]; });
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_51__internal_operators_onErrorResumeNext__ = __webpack_require__(446);
+/* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "onErrorResumeNext", function() { return __WEBPACK_IMPORTED_MODULE_51__internal_operators_onErrorResumeNext__["a"]; });
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_52__internal_operators_pairwise__ = __webpack_require__(447);
+/* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "pairwise", function() { return __WEBPACK_IMPORTED_MODULE_52__internal_operators_pairwise__["a"]; });
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_53__internal_operators_partition__ = __webpack_require__(448);
+/* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "partition", function() { return __WEBPACK_IMPORTED_MODULE_53__internal_operators_partition__["a"]; });
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_54__internal_operators_pluck__ = __webpack_require__(450);
+/* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "pluck", function() { return __WEBPACK_IMPORTED_MODULE_54__internal_operators_pluck__["a"]; });
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_55__internal_operators_publish__ = __webpack_require__(451);
+/* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "publish", function() { return __WEBPACK_IMPORTED_MODULE_55__internal_operators_publish__["a"]; });
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_56__internal_operators_publishBehavior__ = __webpack_require__(452);
+/* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "publishBehavior", function() { return __WEBPACK_IMPORTED_MODULE_56__internal_operators_publishBehavior__["a"]; });
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_57__internal_operators_publishLast__ = __webpack_require__(453);
+/* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "publishLast", function() { return __WEBPACK_IMPORTED_MODULE_57__internal_operators_publishLast__["a"]; });
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_58__internal_operators_publishReplay__ = __webpack_require__(454);
+/* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "publishReplay", function() { return __WEBPACK_IMPORTED_MODULE_58__internal_operators_publishReplay__["a"]; });
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_59__internal_operators_race__ = __webpack_require__(455);
+/* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "race", function() { return __WEBPACK_IMPORTED_MODULE_59__internal_operators_race__["a"]; });
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_60__internal_operators_reduce__ = __webpack_require__(51);
+/* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "reduce", function() { return __WEBPACK_IMPORTED_MODULE_60__internal_operators_reduce__["a"]; });
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_61__internal_operators_repeat__ = __webpack_require__(456);
+/* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "repeat", function() { return __WEBPACK_IMPORTED_MODULE_61__internal_operators_repeat__["a"]; });
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_62__internal_operators_repeatWhen__ = __webpack_require__(457);
+/* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "repeatWhen", function() { return __WEBPACK_IMPORTED_MODULE_62__internal_operators_repeatWhen__["a"]; });
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_63__internal_operators_retry__ = __webpack_require__(458);
+/* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "retry", function() { return __WEBPACK_IMPORTED_MODULE_63__internal_operators_retry__["a"]; });
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_64__internal_operators_retryWhen__ = __webpack_require__(459);
+/* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "retryWhen", function() { return __WEBPACK_IMPORTED_MODULE_64__internal_operators_retryWhen__["a"]; });
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_65__internal_operators_refCount__ = __webpack_require__(66);
+/* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "refCount", function() { return __WEBPACK_IMPORTED_MODULE_65__internal_operators_refCount__["a"]; });
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_66__internal_operators_sample__ = __webpack_require__(460);
+/* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "sample", function() { return __WEBPACK_IMPORTED_MODULE_66__internal_operators_sample__["a"]; });
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_67__internal_operators_sampleTime__ = __webpack_require__(461);
+/* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "sampleTime", function() { return __WEBPACK_IMPORTED_MODULE_67__internal_operators_sampleTime__["a"]; });
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_68__internal_operators_scan__ = __webpack_require__(77);
+/* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "scan", function() { return __WEBPACK_IMPORTED_MODULE_68__internal_operators_scan__["a"]; });
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_69__internal_operators_sequenceEqual__ = __webpack_require__(462);
+/* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "sequenceEqual", function() { return __WEBPACK_IMPORTED_MODULE_69__internal_operators_sequenceEqual__["a"]; });
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_70__internal_operators_share__ = __webpack_require__(463);
+/* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "share", function() { return __WEBPACK_IMPORTED_MODULE_70__internal_operators_share__["a"]; });
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_71__internal_operators_shareReplay__ = __webpack_require__(464);
+/* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "shareReplay", function() { return __WEBPACK_IMPORTED_MODULE_71__internal_operators_shareReplay__["a"]; });
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_72__internal_operators_single__ = __webpack_require__(465);
+/* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "single", function() { return __WEBPACK_IMPORTED_MODULE_72__internal_operators_single__["a"]; });
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_73__internal_operators_skip__ = __webpack_require__(466);
+/* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "skip", function() { return __WEBPACK_IMPORTED_MODULE_73__internal_operators_skip__["a"]; });
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_74__internal_operators_skipLast__ = __webpack_require__(467);
+/* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "skipLast", function() { return __WEBPACK_IMPORTED_MODULE_74__internal_operators_skipLast__["a"]; });
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_75__internal_operators_skipUntil__ = __webpack_require__(468);
+/* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "skipUntil", function() { return __WEBPACK_IMPORTED_MODULE_75__internal_operators_skipUntil__["a"]; });
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_76__internal_operators_skipWhile__ = __webpack_require__(469);
+/* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "skipWhile", function() { return __WEBPACK_IMPORTED_MODULE_76__internal_operators_skipWhile__["a"]; });
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_77__internal_operators_startWith__ = __webpack_require__(470);
+/* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "startWith", function() { return __WEBPACK_IMPORTED_MODULE_77__internal_operators_startWith__["a"]; });
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_78__internal_operators_subscribeOn__ = __webpack_require__(471);
+/* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "subscribeOn", function() { return __WEBPACK_IMPORTED_MODULE_78__internal_operators_subscribeOn__["a"]; });
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_79__internal_operators_switchAll__ = __webpack_require__(473);
+/* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "switchAll", function() { return __WEBPACK_IMPORTED_MODULE_79__internal_operators_switchAll__["a"]; });
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_80__internal_operators_switchMap__ = __webpack_require__(78);
+/* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "switchMap", function() { return __WEBPACK_IMPORTED_MODULE_80__internal_operators_switchMap__["a"]; });
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_81__internal_operators_switchMapTo__ = __webpack_require__(474);
+/* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "switchMapTo", function() { return __WEBPACK_IMPORTED_MODULE_81__internal_operators_switchMapTo__["a"]; });
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_82__internal_operators_take__ = __webpack_require__(75);
+/* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "take", function() { return __WEBPACK_IMPORTED_MODULE_82__internal_operators_take__["a"]; });
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_83__internal_operators_takeLast__ = __webpack_require__(76);
+/* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "takeLast", function() { return __WEBPACK_IMPORTED_MODULE_83__internal_operators_takeLast__["a"]; });
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_84__internal_operators_takeUntil__ = __webpack_require__(475);
+/* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "takeUntil", function() { return __WEBPACK_IMPORTED_MODULE_84__internal_operators_takeUntil__["a"]; });
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_85__internal_operators_takeWhile__ = __webpack_require__(476);
+/* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "takeWhile", function() { return __WEBPACK_IMPORTED_MODULE_85__internal_operators_takeWhile__["a"]; });
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_86__internal_operators_tap__ = __webpack_require__(249);
+/* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "tap", function() { return __WEBPACK_IMPORTED_MODULE_86__internal_operators_tap__["a"]; });
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_87__internal_operators_throttle__ = __webpack_require__(251);
+/* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "throttle", function() { return __WEBPACK_IMPORTED_MODULE_87__internal_operators_throttle__["b"]; });
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_88__internal_operators_throttleTime__ = __webpack_require__(477);
+/* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "throttleTime", function() { return __WEBPACK_IMPORTED_MODULE_88__internal_operators_throttleTime__["a"]; });
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_89__internal_operators_throwIfEmpty__ = __webpack_require__(50);
+/* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "throwIfEmpty", function() { return __WEBPACK_IMPORTED_MODULE_89__internal_operators_throwIfEmpty__["a"]; });
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_90__internal_operators_timeInterval__ = __webpack_require__(478);
+/* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "timeInterval", function() { return __WEBPACK_IMPORTED_MODULE_90__internal_operators_timeInterval__["a"]; });
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_91__internal_operators_timeout__ = __webpack_require__(479);
+/* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "timeout", function() { return __WEBPACK_IMPORTED_MODULE_91__internal_operators_timeout__["a"]; });
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_92__internal_operators_timeoutWith__ = __webpack_require__(252);
+/* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "timeoutWith", function() { return __WEBPACK_IMPORTED_MODULE_92__internal_operators_timeoutWith__["a"]; });
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_93__internal_operators_timestamp__ = __webpack_require__(480);
+/* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "timestamp", function() { return __WEBPACK_IMPORTED_MODULE_93__internal_operators_timestamp__["a"]; });
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_94__internal_operators_toArray__ = __webpack_require__(481);
+/* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "toArray", function() { return __WEBPACK_IMPORTED_MODULE_94__internal_operators_toArray__["a"]; });
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_95__internal_operators_window__ = __webpack_require__(482);
+/* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "window", function() { return __WEBPACK_IMPORTED_MODULE_95__internal_operators_window__["a"]; });
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_96__internal_operators_windowCount__ = __webpack_require__(483);
+/* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "windowCount", function() { return __WEBPACK_IMPORTED_MODULE_96__internal_operators_windowCount__["a"]; });
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_97__internal_operators_windowTime__ = __webpack_require__(484);
+/* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "windowTime", function() { return __WEBPACK_IMPORTED_MODULE_97__internal_operators_windowTime__["a"]; });
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_98__internal_operators_windowToggle__ = __webpack_require__(485);
+/* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "windowToggle", function() { return __WEBPACK_IMPORTED_MODULE_98__internal_operators_windowToggle__["a"]; });
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_99__internal_operators_windowWhen__ = __webpack_require__(486);
+/* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "windowWhen", function() { return __WEBPACK_IMPORTED_MODULE_99__internal_operators_windowWhen__["a"]; });
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_100__internal_operators_withLatestFrom__ = __webpack_require__(487);
+/* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "withLatestFrom", function() { return __WEBPACK_IMPORTED_MODULE_100__internal_operators_withLatestFrom__["a"]; });
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_101__internal_operators_zip__ = __webpack_require__(488);
+/* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "zip", function() { return __WEBPACK_IMPORTED_MODULE_101__internal_operators_zip__["a"]; });
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_102__internal_operators_zipAll__ = __webpack_require__(489);
+/* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "zipAll", function() { return __WEBPACK_IMPORTED_MODULE_102__internal_operators_zipAll__["a"]; });
 /** PURE_IMPORTS_START  PURE_IMPORTS_END */
+
 
 
 
@@ -45087,60 +43225,18 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 
 
 /***/ }),
-/* 400 */
+/* 408 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 /* harmony export (immutable) */ __webpack_exports__["a"] = auditTime;
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__scheduler_async__ = __webpack_require__(12);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__audit__ = __webpack_require__(241);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__observable_timer__ = __webpack_require__(240);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__scheduler_async__ = __webpack_require__(13);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__audit__ = __webpack_require__(245);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__observable_timer__ = __webpack_require__(244);
 /** PURE_IMPORTS_START _scheduler_async,_audit,_observable_timer PURE_IMPORTS_END */
 
 
 
-/**
- * Ignores source values for `duration` milliseconds, then emits the most recent
- * value from the source Observable, then repeats this process.
- *
- * <span class="informal">When it sees a source values, it ignores that plus
- * the next ones for `duration` milliseconds, and then it emits the most recent
- * value from the source.</span>
- *
- * <img src="./img/auditTime.png" width="100%">
- *
- * `auditTime` is similar to `throttleTime`, but emits the last value from the
- * silenced time window, instead of the first value. `auditTime` emits the most
- * recent value from the source Observable on the output Observable as soon as
- * its internal timer becomes disabled, and ignores source values while the
- * timer is enabled. Initially, the timer is disabled. As soon as the first
- * source value arrives, the timer is enabled. After `duration` milliseconds (or
- * the time unit determined internally by the optional `scheduler`) has passed,
- * the timer is disabled, then the most recent source value is emitted on the
- * output Observable, and this process repeats for the next source value.
- * Optionally takes a {@link IScheduler} for managing timers.
- *
- * @example <caption>Emit clicks at a rate of at most one click per second</caption>
- * var clicks = Rx.Observable.fromEvent(document, 'click');
- * var result = clicks.auditTime(1000);
- * result.subscribe(x => console.log(x));
- *
- * @see {@link audit}
- * @see {@link debounceTime}
- * @see {@link delay}
- * @see {@link sampleTime}
- * @see {@link throttleTime}
- *
- * @param {number} duration Time to wait before emitting the most recent source
- * value, measured in milliseconds or the time unit determined internally
- * by the optional `scheduler`.
- * @param {Scheduler} [scheduler=async] The {@link IScheduler} to use for
- * managing the timers that handle the rate-limiting behavior.
- * @return {Observable<T>} An Observable that performs rate-limiting of
- * emissions from the source Observable.
- * @method auditTime
- * @owner Observable
- */
 function auditTime(duration, scheduler) {
     if (scheduler === void 0) {
         scheduler = __WEBPACK_IMPORTED_MODULE_0__scheduler_async__["a" /* async */];
@@ -45151,7 +43247,7 @@ function auditTime(duration, scheduler) {
 
 
 /***/ }),
-/* 401 */
+/* 409 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -45163,38 +43259,6 @@ function auditTime(duration, scheduler) {
 
 
 
-/**
- * Buffers the source Observable values until `closingNotifier` emits.
- *
- * <span class="informal">Collects values from the past as an array, and emits
- * that array only when another Observable emits.</span>
- *
- * <img src="./img/buffer.png" width="100%">
- *
- * Buffers the incoming Observable values until the given `closingNotifier`
- * Observable emits a value, at which point it emits the buffer on the output
- * Observable and starts a new buffer internally, awaiting the next time
- * `closingNotifier` emits.
- *
- * @example <caption>On every click, emit array of most recent interval events</caption>
- * var clicks = Rx.Observable.fromEvent(document, 'click');
- * var interval = Rx.Observable.interval(1000);
- * var buffered = interval.buffer(clicks);
- * buffered.subscribe(x => console.log(x));
- *
- * @see {@link bufferCount}
- * @see {@link bufferTime}
- * @see {@link bufferToggle}
- * @see {@link bufferWhen}
- * @see {@link window}
- *
- * @param {Observable<any>} closingNotifier An Observable that signals the
- * buffer to be emitted on the output Observable.
- * @return {Observable<T[]>} An Observable of buffers, which are arrays of
- * values.
- * @method buffer
- * @owner Observable
- */
 function buffer(closingNotifier) {
     return function bufferOperatorFunction(source) {
         return source.lift(new BufferOperator(closingNotifier));
@@ -45209,11 +43273,6 @@ var BufferOperator = /*@__PURE__*/ (function () {
     };
     return BufferOperator;
 }());
-/**
- * We need this JSDoc comment for affecting ESDoc.
- * @ignore
- * @extends {Ignored}
- */
 var BufferSubscriber = /*@__PURE__*/ (function (_super) {
     __WEBPACK_IMPORTED_MODULE_0_tslib__["a" /* __extends */](BufferSubscriber, _super);
     function BufferSubscriber(destination, closingNotifier) {
@@ -45236,7 +43295,7 @@ var BufferSubscriber = /*@__PURE__*/ (function (_super) {
 
 
 /***/ }),
-/* 402 */
+/* 410 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -45246,47 +43305,6 @@ var BufferSubscriber = /*@__PURE__*/ (function (_super) {
 /** PURE_IMPORTS_START tslib,_Subscriber PURE_IMPORTS_END */
 
 
-/**
- * Buffers the source Observable values until the size hits the maximum
- * `bufferSize` given.
- *
- * <span class="informal">Collects values from the past as an array, and emits
- * that array only when its size reaches `bufferSize`.</span>
- *
- * <img src="./img/bufferCount.png" width="100%">
- *
- * Buffers a number of values from the source Observable by `bufferSize` then
- * emits the buffer and clears it, and starts a new buffer each
- * `startBufferEvery` values. If `startBufferEvery` is not provided or is
- * `null`, then new buffers are started immediately at the start of the source
- * and when each buffer closes and is emitted.
- *
- * @example <caption>Emit the last two click events as an array</caption>
- * var clicks = Rx.Observable.fromEvent(document, 'click');
- * var buffered = clicks.bufferCount(2);
- * buffered.subscribe(x => console.log(x));
- *
- * @example <caption>On every click, emit the last two click events as an array</caption>
- * var clicks = Rx.Observable.fromEvent(document, 'click');
- * var buffered = clicks.bufferCount(2, 1);
- * buffered.subscribe(x => console.log(x));
- *
- * @see {@link buffer}
- * @see {@link bufferTime}
- * @see {@link bufferToggle}
- * @see {@link bufferWhen}
- * @see {@link pairwise}
- * @see {@link windowCount}
- *
- * @param {number} bufferSize The maximum size of the buffer emitted.
- * @param {number} [startBufferEvery] Interval at which to start a new buffer.
- * For example if `startBufferEvery` is `2`, then a new buffer will be started
- * on every other value from the source. A new buffer is started at the
- * beginning of the source by default.
- * @return {Observable<T[]>} An Observable of arrays of buffered values.
- * @method bufferCount
- * @owner Observable
- */
 function bufferCount(bufferSize, startBufferEvery) {
     if (startBufferEvery === void 0) {
         startBufferEvery = null;
@@ -45311,11 +43329,6 @@ var BufferCountOperator = /*@__PURE__*/ (function () {
     };
     return BufferCountOperator;
 }());
-/**
- * We need this JSDoc comment for affecting ESDoc.
- * @ignore
- * @extends {Ignored}
- */
 var BufferCountSubscriber = /*@__PURE__*/ (function (_super) {
     __WEBPACK_IMPORTED_MODULE_0_tslib__["a" /* __extends */](BufferCountSubscriber, _super);
     function BufferCountSubscriber(destination, bufferSize) {
@@ -45341,11 +43354,6 @@ var BufferCountSubscriber = /*@__PURE__*/ (function (_super) {
     };
     return BufferCountSubscriber;
 }(__WEBPACK_IMPORTED_MODULE_1__Subscriber__["a" /* Subscriber */]));
-/**
- * We need this JSDoc comment for affecting ESDoc.
- * @ignore
- * @extends {Ignored}
- */
 var BufferSkipCountSubscriber = /*@__PURE__*/ (function (_super) {
     __WEBPACK_IMPORTED_MODULE_0_tslib__["a" /* __extends */](BufferSkipCountSubscriber, _super);
     function BufferSkipCountSubscriber(destination, bufferSize, startBufferEvery) {
@@ -45387,64 +43395,20 @@ var BufferSkipCountSubscriber = /*@__PURE__*/ (function (_super) {
 
 
 /***/ }),
-/* 403 */
+/* 411 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 /* harmony export (immutable) */ __webpack_exports__["a"] = bufferTime;
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_tslib__ = __webpack_require__(1);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__scheduler_async__ = __webpack_require__(12);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__scheduler_async__ = __webpack_require__(13);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__Subscriber__ = __webpack_require__(2);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__util_isScheduler__ = __webpack_require__(18);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__util_isScheduler__ = __webpack_require__(15);
 /** PURE_IMPORTS_START tslib,_scheduler_async,_Subscriber,_util_isScheduler PURE_IMPORTS_END */
 
 
 
 
-/* tslint:enable:max-line-length */
-/**
- * Buffers the source Observable values for a specific time period.
- *
- * <span class="informal">Collects values from the past as an array, and emits
- * those arrays periodically in time.</span>
- *
- * <img src="./img/bufferTime.png" width="100%">
- *
- * Buffers values from the source for a specific time duration `bufferTimeSpan`.
- * Unless the optional argument `bufferCreationInterval` is given, it emits and
- * resets the buffer every `bufferTimeSpan` milliseconds. If
- * `bufferCreationInterval` is given, this operator opens the buffer every
- * `bufferCreationInterval` milliseconds and closes (emits and resets) the
- * buffer every `bufferTimeSpan` milliseconds. When the optional argument
- * `maxBufferSize` is specified, the buffer will be closed either after
- * `bufferTimeSpan` milliseconds or when it contains `maxBufferSize` elements.
- *
- * @example <caption>Every second, emit an array of the recent click events</caption>
- * var clicks = Rx.Observable.fromEvent(document, 'click');
- * var buffered = clicks.bufferTime(1000);
- * buffered.subscribe(x => console.log(x));
- *
- * @example <caption>Every 5 seconds, emit the click events from the next 2 seconds</caption>
- * var clicks = Rx.Observable.fromEvent(document, 'click');
- * var buffered = clicks.bufferTime(2000, 5000);
- * buffered.subscribe(x => console.log(x));
- *
- * @see {@link buffer}
- * @see {@link bufferCount}
- * @see {@link bufferToggle}
- * @see {@link bufferWhen}
- * @see {@link windowTime}
- *
- * @param {number} bufferTimeSpan The amount of time to fill each buffer array.
- * @param {number} [bufferCreationInterval] The interval at which to start new
- * buffers.
- * @param {number} [maxBufferSize] The maximum buffer size.
- * @param {Scheduler} [scheduler=async] The scheduler on which to schedule the
- * intervals that determine buffer boundaries.
- * @return {Observable<T[]>} An observable of arrays of buffered values.
- * @method bufferTime
- * @owner Observable
- */
 function bufferTime(bufferTimeSpan) {
     var length = arguments.length;
     var scheduler = __WEBPACK_IMPORTED_MODULE_1__scheduler_async__["a" /* async */];
@@ -45482,11 +43446,6 @@ var Context = /*@__PURE__*/ (function () {
     }
     return Context;
 }());
-/**
- * We need this JSDoc comment for affecting ESDoc.
- * @ignore
- * @extends {Ignored}
- */
 var BufferTimeSubscriber = /*@__PURE__*/ (function (_super) {
     __WEBPACK_IMPORTED_MODULE_0_tslib__["a" /* __extends */](BufferTimeSubscriber, _super);
     function BufferTimeSubscriber(destination, bufferTimeSpan, bufferCreationInterval, maxBufferSize, scheduler) {
@@ -45538,7 +43497,6 @@ var BufferTimeSubscriber = /*@__PURE__*/ (function (_super) {
         }
         _super.prototype._complete.call(this);
     };
-    /** @deprecated This is an internal implementation detail, do not use. */
     BufferTimeSubscriber.prototype._unsubscribe = function () {
         this.contexts = null;
     };
@@ -45597,7 +43555,7 @@ function dispatchBufferClose(arg) {
 
 
 /***/ }),
-/* 404 */
+/* 412 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -45611,44 +43569,6 @@ function dispatchBufferClose(arg) {
 
 
 
-/**
- * Buffers the source Observable values starting from an emission from
- * `openings` and ending when the output of `closingSelector` emits.
- *
- * <span class="informal">Collects values from the past as an array. Starts
- * collecting only when `opening` emits, and calls the `closingSelector`
- * function to get an Observable that tells when to close the buffer.</span>
- *
- * <img src="./img/bufferToggle.png" width="100%">
- *
- * Buffers values from the source by opening the buffer via signals from an
- * Observable provided to `openings`, and closing and sending the buffers when
- * a Subscribable or Promise returned by the `closingSelector` function emits.
- *
- * @example <caption>Every other second, emit the click events from the next 500ms</caption>
- * var clicks = Rx.Observable.fromEvent(document, 'click');
- * var openings = Rx.Observable.interval(1000);
- * var buffered = clicks.bufferToggle(openings, i =>
- *   i % 2 ? Rx.Observable.interval(500) : Rx.Observable.empty()
- * );
- * buffered.subscribe(x => console.log(x));
- *
- * @see {@link buffer}
- * @see {@link bufferCount}
- * @see {@link bufferTime}
- * @see {@link bufferWhen}
- * @see {@link windowToggle}
- *
- * @param {SubscribableOrPromise<O>} openings A Subscribable or Promise of notifications to start new
- * buffers.
- * @param {function(value: O): SubscribableOrPromise} closingSelector A function that takes
- * the value emitted by the `openings` observable and returns a Subscribable or Promise,
- * which, when it emits, signals that the associated buffer should be emitted
- * and cleared.
- * @return {Observable<T[]>} An observable of arrays of buffered values.
- * @method bufferToggle
- * @owner Observable
- */
 function bufferToggle(openings, closingSelector) {
     return function bufferToggleOperatorFunction(source) {
         return source.lift(new BufferToggleOperator(openings, closingSelector));
@@ -45664,11 +43584,6 @@ var BufferToggleOperator = /*@__PURE__*/ (function () {
     };
     return BufferToggleOperator;
 }());
-/**
- * We need this JSDoc comment for affecting ESDoc.
- * @ignore
- * @extends {Ignored}
- */
 var BufferToggleSubscriber = /*@__PURE__*/ (function (_super) {
     __WEBPACK_IMPORTED_MODULE_0_tslib__["a" /* __extends */](BufferToggleSubscriber, _super);
     function BufferToggleSubscriber(destination, openings, closingSelector) {
@@ -45759,7 +43674,7 @@ var BufferToggleSubscriber = /*@__PURE__*/ (function (_super) {
 
 
 /***/ }),
-/* 405 */
+/* 413 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -45767,7 +43682,7 @@ var BufferToggleSubscriber = /*@__PURE__*/ (function (_super) {
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_tslib__ = __webpack_require__(1);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__Subscription__ = __webpack_require__(8);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__util_tryCatch__ = __webpack_require__(17);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__util_errorObject__ = __webpack_require__(15);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__util_errorObject__ = __webpack_require__(14);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__OuterSubscriber__ = __webpack_require__(5);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_5__util_subscribeToResult__ = __webpack_require__(6);
 /** PURE_IMPORTS_START tslib,_Subscription,_util_tryCatch,_util_errorObject,_OuterSubscriber,_util_subscribeToResult PURE_IMPORTS_END */
@@ -45777,39 +43692,6 @@ var BufferToggleSubscriber = /*@__PURE__*/ (function (_super) {
 
 
 
-/**
- * Buffers the source Observable values, using a factory function of closing
- * Observables to determine when to close, emit, and reset the buffer.
- *
- * <span class="informal">Collects values from the past as an array. When it
- * starts collecting values, it calls a function that returns an Observable that
- * tells when to close the buffer and restart collecting.</span>
- *
- * <img src="./img/bufferWhen.png" width="100%">
- *
- * Opens a buffer immediately, then closes the buffer when the observable
- * returned by calling `closingSelector` function emits a value. When it closes
- * the buffer, it immediately opens a new buffer and repeats the process.
- *
- * @example <caption>Emit an array of the last clicks every [1-5] random seconds</caption>
- * var clicks = Rx.Observable.fromEvent(document, 'click');
- * var buffered = clicks.bufferWhen(() =>
- *   Rx.Observable.interval(1000 + Math.random() * 4000)
- * );
- * buffered.subscribe(x => console.log(x));
- *
- * @see {@link buffer}
- * @see {@link bufferCount}
- * @see {@link bufferTime}
- * @see {@link bufferToggle}
- * @see {@link windowWhen}
- *
- * @param {function(): Observable} closingSelector A function that takes no
- * arguments and returns an Observable that signals buffer closure.
- * @return {Observable<T[]>} An observable of arrays of buffered values.
- * @method bufferWhen
- * @owner Observable
- */
 function bufferWhen(closingSelector) {
     return function (source) {
         return source.lift(new BufferWhenOperator(closingSelector));
@@ -45824,11 +43706,6 @@ var BufferWhenOperator = /*@__PURE__*/ (function () {
     };
     return BufferWhenOperator;
 }());
-/**
- * We need this JSDoc comment for affecting ESDoc.
- * @ignore
- * @extends {Ignored}
- */
 var BufferWhenSubscriber = /*@__PURE__*/ (function (_super) {
     __WEBPACK_IMPORTED_MODULE_0_tslib__["a" /* __extends */](BufferWhenSubscriber, _super);
     function BufferWhenSubscriber(destination, closingSelector) {
@@ -45848,7 +43725,6 @@ var BufferWhenSubscriber = /*@__PURE__*/ (function (_super) {
         }
         _super.prototype._complete.call(this);
     };
-    /** @deprecated This is an internal implementation detail, do not use. */
     BufferWhenSubscriber.prototype._unsubscribe = function () {
         this.buffer = null;
         this.subscribing = false;
@@ -45894,7 +43770,7 @@ var BufferWhenSubscriber = /*@__PURE__*/ (function (_super) {
 
 
 /***/ }),
-/* 406 */
+/* 414 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -45906,63 +43782,6 @@ var BufferWhenSubscriber = /*@__PURE__*/ (function (_super) {
 
 
 
-/**
- * Catches errors on the observable to be handled by returning a new observable or throwing an error.
- *
- * <img src="./img/catch.png" width="100%">
- *
- * @example <caption>Continues with a different Observable when there's an error</caption>
- *
- * Observable.of(1, 2, 3, 4, 5)
- *   .map(n => {
- * 	   if (n == 4) {
- * 	     throw 'four!';
- *     }
- *	   return n;
- *   })
- *   .catch(err => Observable.of('I', 'II', 'III', 'IV', 'V'))
- *   .subscribe(x => console.log(x));
- *   // 1, 2, 3, I, II, III, IV, V
- *
- * @example <caption>Retries the caught source Observable again in case of error, similar to retry() operator</caption>
- *
- * Observable.of(1, 2, 3, 4, 5)
- *   .map(n => {
- * 	   if (n === 4) {
- * 	     throw 'four!';
- *     }
- * 	   return n;
- *   })
- *   .catch((err, caught) => caught)
- *   .take(30)
- *   .subscribe(x => console.log(x));
- *   // 1, 2, 3, 1, 2, 3, ...
- *
- * @example <caption>Throws a new error when the source Observable throws an error</caption>
- *
- * Observable.of(1, 2, 3, 4, 5)
- *   .map(n => {
- *     if (n == 4) {
- *       throw 'four!';
- *     }
- *     return n;
- *   })
- *   .catch(err => {
- *     throw 'error in source. Details: ' + err;
- *   })
- *   .subscribe(
- *     x => console.log(x),
- *     err => console.log(err)
- *   );
- *   // 1, 2, 3, error in source. Details: four!
- *
- * @param {function} selector a function that takes as arguments `err`, which is the error, and `caught`, which
- *  is the source observable, in case you'd like to "retry" that observable by returning it again. Whatever observable
- *  is returned by the `selector` will be used to continue the observable chain.
- * @return {Observable} An observable that originates from either the source or the observable returned by the
- *  catch `selector` function.
- * @name catchError
- */
 function catchError(selector) {
     return function catchErrorOperatorFunction(source) {
         var operator = new CatchOperator(selector);
@@ -45979,11 +43798,6 @@ var CatchOperator = /*@__PURE__*/ (function () {
     };
     return CatchOperator;
 }());
-/**
- * We need this JSDoc comment for affecting ESDoc.
- * @ignore
- * @extends {Ignored}
- */
 var CatchSubscriber = /*@__PURE__*/ (function (_super) {
     __WEBPACK_IMPORTED_MODULE_0_tslib__["a" /* __extends */](CatchSubscriber, _super);
     function CatchSubscriber(destination, selector, caught) {
@@ -45992,11 +43806,6 @@ var CatchSubscriber = /*@__PURE__*/ (function (_super) {
         _this.caught = caught;
         return _this;
     }
-    // NOTE: overriding `error` instead of `_error` because we don't want
-    // to have this flag this subscriber as `isStopped`. We can mimic the
-    // behavior of the RetrySubscriber (from the `retry` operator), where
-    // we unsubscribe from our source chain, reset our Subscriber flags,
-    // then subscribe to the selector result.
     CatchSubscriber.prototype.error = function (err) {
         if (!this.isStopped) {
             var result = void 0;
@@ -46017,12 +43826,12 @@ var CatchSubscriber = /*@__PURE__*/ (function (_super) {
 
 
 /***/ }),
-/* 407 */
+/* 415 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 /* harmony export (immutable) */ __webpack_exports__["a"] = combineAll;
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__observable_combineLatest__ = __webpack_require__(65);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__observable_combineLatest__ = __webpack_require__(71);
 /** PURE_IMPORTS_START _observable_combineLatest PURE_IMPORTS_END */
 
 function combineAll(project) {
@@ -46032,23 +43841,19 @@ function combineAll(project) {
 
 
 /***/ }),
-/* 408 */
+/* 416 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 /* harmony export (immutable) */ __webpack_exports__["a"] = combineLatest;
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__util_isArray__ = __webpack_require__(11);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__observable_combineLatest__ = __webpack_require__(65);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__observable_combineLatest__ = __webpack_require__(71);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__observable_from__ = __webpack_require__(19);
 /** PURE_IMPORTS_START _util_isArray,_observable_combineLatest,_observable_from PURE_IMPORTS_END */
 
 
 
 var none = {};
-/* tslint:enable:max-line-length */
-/**
- * @deprecated Deprecated in favor of static combineLatest.
- */
 function combineLatest() {
     var observables = [];
     for (var _i = 0; _i < arguments.length; _i++) {
@@ -46058,8 +43863,6 @@ function combineLatest() {
     if (typeof observables[observables.length - 1] === 'function') {
         project = observables.pop();
     }
-    // if the first and only other argument besides the resultSelector is an array
-    // assume it's been called with `combineLatest([obs1, obs2, obs3], project)`
     if (observables.length === 1 && Object(__WEBPACK_IMPORTED_MODULE_0__util_isArray__["a" /* isArray */])(observables[0])) {
         observables = observables[0].slice();
     }
@@ -46069,18 +43872,14 @@ function combineLatest() {
 
 
 /***/ }),
-/* 409 */
+/* 417 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 /* harmony export (immutable) */ __webpack_exports__["a"] = concat;
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__observable_concat__ = __webpack_require__(66);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__observable_concat__ = __webpack_require__(48);
 /** PURE_IMPORTS_START _observable_concat PURE_IMPORTS_END */
 
-/* tslint:enable:max-line-length */
-/**
- * @deprecated Deprecated in favor of static concat.
- */
 function concat() {
     var observables = [];
     for (var _i = 0; _i < arguments.length; _i++) {
@@ -46092,63 +43891,14 @@ function concat() {
 
 
 /***/ }),
-/* 410 */
+/* 418 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 /* harmony export (immutable) */ __webpack_exports__["a"] = concatMapTo;
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__concatMap__ = __webpack_require__(242);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__concatMap__ = __webpack_require__(246);
 /** PURE_IMPORTS_START _concatMap PURE_IMPORTS_END */
 
-/* tslint:enable:max-line-length */
-/**
- * Projects each source value to the same Observable which is merged multiple
- * times in a serialized fashion on the output Observable.
- *
- * <span class="informal">It's like {@link concatMap}, but maps each value
- * always to the same inner Observable.</span>
- *
- * <img src="./img/concatMapTo.png" width="100%">
- *
- * Maps each source value to the given Observable `innerObservable` regardless
- * of the source value, and then flattens those resulting Observables into one
- * single Observable, which is the output Observable. Each new `innerObservable`
- * instance emitted on the output Observable is concatenated with the previous
- * `innerObservable` instance.
- *
- * __Warning:__ if source values arrive endlessly and faster than their
- * corresponding inner Observables can complete, it will result in memory issues
- * as inner Observables amass in an unbounded buffer waiting for their turn to
- * be subscribed to.
- *
- * Note: `concatMapTo` is equivalent to `mergeMapTo` with concurrency parameter
- * set to `1`.
- *
- * @example <caption>For each click event, tick every second from 0 to 3, with no concurrency</caption>
- * var clicks = Rx.Observable.fromEvent(document, 'click');
- * var result = clicks.concatMapTo(Rx.Observable.interval(1000).take(4));
- * result.subscribe(x => console.log(x));
- *
- * // Results in the following:
- * // (results are not concurrent)
- * // For every click on the "document" it will emit values 0 to 3 spaced
- * // on a 1000ms interval
- * // one click = 1000ms-> 0 -1000ms-> 1 -1000ms-> 2 -1000ms-> 3
- *
- * @see {@link concat}
- * @see {@link concatAll}
- * @see {@link concatMap}
- * @see {@link mergeMapTo}
- * @see {@link switchMapTo}
- *
- * @param {ObservableInput} innerObservable An Observable to replace each value from
- * the source Observable.
- * @return {Observable} An observable of values merged together by joining the
- * passed observable with itself, one after the other, for each value emitted
- * from the source.
- * @method concatMapTo
- * @owner Observable
- */
 function concatMapTo(innerObservable, resultSelector) {
     return Object(__WEBPACK_IMPORTED_MODULE_0__concatMap__["a" /* concatMap */])(function () { return innerObservable; }, resultSelector);
 }
@@ -46156,7 +43906,7 @@ function concatMapTo(innerObservable, resultSelector) {
 
 
 /***/ }),
-/* 411 */
+/* 419 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -46166,54 +43916,6 @@ function concatMapTo(innerObservable, resultSelector) {
 /** PURE_IMPORTS_START tslib,_Subscriber PURE_IMPORTS_END */
 
 
-/**
- * Counts the number of emissions on the source and emits that number when the
- * source completes.
- *
- * <span class="informal">Tells how many values were emitted, when the source
- * completes.</span>
- *
- * <img src="./img/count.png" width="100%">
- *
- * `count` transforms an Observable that emits values into an Observable that
- * emits a single value that represents the number of values emitted by the
- * source Observable. If the source Observable terminates with an error, `count`
- * will pass this error notification along without emitting a value first. If
- * the source Observable does not terminate at all, `count` will neither emit
- * a value nor terminate. This operator takes an optional `predicate` function
- * as argument, in which case the output emission will represent the number of
- * source values that matched `true` with the `predicate`.
- *
- * @example <caption>Counts how many seconds have passed before the first click happened</caption>
- * var seconds = Rx.Observable.interval(1000);
- * var clicks = Rx.Observable.fromEvent(document, 'click');
- * var secondsBeforeClick = seconds.takeUntil(clicks);
- * var result = secondsBeforeClick.count();
- * result.subscribe(x => console.log(x));
- *
- * @example <caption>Counts how many odd numbers are there between 1 and 7</caption>
- * var numbers = Rx.Observable.range(1, 7);
- * var result = numbers.count(i => i % 2 === 1);
- * result.subscribe(x => console.log(x));
- *
- * // Results in:
- * // 4
- *
- * @see {@link max}
- * @see {@link min}
- * @see {@link reduce}
- *
- * @param {function(value: T, i: number, source: Observable<T>): boolean} [predicate] A
- * boolean function to select what values are to be counted. It is provided with
- * arguments of:
- * - `value`: the value from the source Observable.
- * - `index`: the (zero-based) "index" of the value from the source Observable.
- * - `source`: the source Observable instance itself.
- * @return {Observable} An Observable of one number that represents the count as
- * described above.
- * @method count
- * @owner Observable
- */
 function count(predicate) {
     return function (source) { return source.lift(new CountOperator(predicate, source)); };
 }
@@ -46227,11 +43929,6 @@ var CountOperator = /*@__PURE__*/ (function () {
     };
     return CountOperator;
 }());
-/**
- * We need this JSDoc comment for affecting ESDoc.
- * @ignore
- * @extends {Ignored}
- */
 var CountSubscriber = /*@__PURE__*/ (function (_super) {
     __WEBPACK_IMPORTED_MODULE_0_tslib__["a" /* __extends */](CountSubscriber, _super);
     function CountSubscriber(destination, predicate, source) {
@@ -46273,7 +43970,7 @@ var CountSubscriber = /*@__PURE__*/ (function (_super) {
 
 
 /***/ }),
-/* 412 */
+/* 420 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -46285,48 +43982,6 @@ var CountSubscriber = /*@__PURE__*/ (function (_super) {
 
 
 
-/**
- * Emits a value from the source Observable only after a particular time span
- * determined by another Observable has passed without another source emission.
- *
- * <span class="informal">It's like {@link debounceTime}, but the time span of
- * emission silence is determined by a second Observable.</span>
- *
- * <img src="./img/debounce.png" width="100%">
- *
- * `debounce` delays values emitted by the source Observable, but drops previous
- * pending delayed emissions if a new value arrives on the source Observable.
- * This operator keeps track of the most recent value from the source
- * Observable, and spawns a duration Observable by calling the
- * `durationSelector` function. The value is emitted only when the duration
- * Observable emits a value or completes, and if no other value was emitted on
- * the source Observable since the duration Observable was spawned. If a new
- * value appears before the duration Observable emits, the previous value will
- * be dropped and will not be emitted on the output Observable.
- *
- * Like {@link debounceTime}, this is a rate-limiting operator, and also a
- * delay-like operator since output emissions do not necessarily occur at the
- * same time as they did on the source Observable.
- *
- * @example <caption>Emit the most recent click after a burst of clicks</caption>
- * var clicks = Rx.Observable.fromEvent(document, 'click');
- * var result = clicks.debounce(() => Rx.Observable.interval(1000));
- * result.subscribe(x => console.log(x));
- *
- * @see {@link audit}
- * @see {@link debounceTime}
- * @see {@link delayWhen}
- * @see {@link throttle}
- *
- * @param {function(value: T): SubscribableOrPromise} durationSelector A function
- * that receives a value from the source Observable, for computing the timeout
- * duration for each source value, returned as an Observable or a Promise.
- * @return {Observable} An Observable that delays the emissions of the source
- * Observable by the specified duration Observable returned by
- * `durationSelector`, and may drop some values if they occur too frequently.
- * @method debounce
- * @owner Observable
- */
 function debounce(durationSelector) {
     return function (source) { return source.lift(new DebounceOperator(durationSelector)); };
 }
@@ -46339,11 +43994,6 @@ var DebounceOperator = /*@__PURE__*/ (function () {
     };
     return DebounceOperator;
 }());
-/**
- * We need this JSDoc comment for affecting ESDoc.
- * @ignore
- * @extends {Ignored}
- */
 var DebounceSubscriber = /*@__PURE__*/ (function (_super) {
     __WEBPACK_IMPORTED_MODULE_0_tslib__["a" /* __extends */](DebounceSubscriber, _super);
     function DebounceSubscriber(destination, durationSelector) {
@@ -46396,11 +44046,6 @@ var DebounceSubscriber = /*@__PURE__*/ (function (_super) {
                 subscription.unsubscribe();
                 this.remove(subscription);
             }
-            // This must be done *before* passing the value
-            // along to the destination because it's possible for
-            // the value to synchronously re-enter this operator
-            // recursively if the duration selector Observable
-            // emits synchronously
             this.value = null;
             this.hasValue = false;
             _super.prototype._next.call(this, value);
@@ -46412,64 +44057,18 @@ var DebounceSubscriber = /*@__PURE__*/ (function (_super) {
 
 
 /***/ }),
-/* 413 */
+/* 421 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 /* harmony export (immutable) */ __webpack_exports__["a"] = debounceTime;
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_tslib__ = __webpack_require__(1);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__Subscriber__ = __webpack_require__(2);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__scheduler_async__ = __webpack_require__(12);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__scheduler_async__ = __webpack_require__(13);
 /** PURE_IMPORTS_START tslib,_Subscriber,_scheduler_async PURE_IMPORTS_END */
 
 
 
-/**
- * Emits a value from the source Observable only after a particular time span
- * has passed without another source emission.
- *
- * <span class="informal">It's like {@link delay}, but passes only the most
- * recent value from each burst of emissions.</span>
- *
- * <img src="./img/debounceTime.png" width="100%">
- *
- * `debounceTime` delays values emitted by the source Observable, but drops
- * previous pending delayed emissions if a new value arrives on the source
- * Observable. This operator keeps track of the most recent value from the
- * source Observable, and emits that only when `dueTime` enough time has passed
- * without any other value appearing on the source Observable. If a new value
- * appears before `dueTime` silence occurs, the previous value will be dropped
- * and will not be emitted on the output Observable.
- *
- * This is a rate-limiting operator, because it is impossible for more than one
- * value to be emitted in any time window of duration `dueTime`, but it is also
- * a delay-like operator since output emissions do not occur at the same time as
- * they did on the source Observable. Optionally takes a {@link IScheduler} for
- * managing timers.
- *
- * @example <caption>Emit the most recent click after a burst of clicks</caption>
- * var clicks = Rx.Observable.fromEvent(document, 'click');
- * var result = clicks.debounceTime(1000);
- * result.subscribe(x => console.log(x));
- *
- * @see {@link auditTime}
- * @see {@link debounce}
- * @see {@link delay}
- * @see {@link sampleTime}
- * @see {@link throttleTime}
- *
- * @param {number} dueTime The timeout duration in milliseconds (or the time
- * unit determined internally by the optional `scheduler`) for the window of
- * time required to wait for emission silence before emitting the most recent
- * source value.
- * @param {Scheduler} [scheduler=async] The {@link IScheduler} to use for
- * managing the timers that handle the timeout for each value.
- * @return {Observable} An Observable that delays the emissions of the source
- * Observable by the specified `dueTime`, and may drop some values if they occur
- * too frequently.
- * @method debounceTime
- * @owner Observable
- */
 function debounceTime(dueTime, scheduler) {
     if (scheduler === void 0) {
         scheduler = __WEBPACK_IMPORTED_MODULE_2__scheduler_async__["a" /* async */];
@@ -46486,11 +44085,6 @@ var DebounceTimeOperator = /*@__PURE__*/ (function () {
     };
     return DebounceTimeOperator;
 }());
-/**
- * We need this JSDoc comment for affecting ESDoc.
- * @ignore
- * @extends {Ignored}
- */
 var DebounceTimeSubscriber = /*@__PURE__*/ (function (_super) {
     __WEBPACK_IMPORTED_MODULE_0_tslib__["a" /* __extends */](DebounceTimeSubscriber, _super);
     function DebounceTimeSubscriber(destination, dueTime, scheduler) {
@@ -46516,11 +44110,6 @@ var DebounceTimeSubscriber = /*@__PURE__*/ (function (_super) {
         this.clearDebounce();
         if (this.hasValue) {
             var lastValue = this.lastValue;
-            // This must be done *before* passing the value
-            // along to the destination because it's possible for
-            // the value to synchronously re-enter this operator
-            // recursively when scheduled with things like
-            // VirtualScheduler/TestScheduler.
             this.lastValue = null;
             this.hasValue = false;
             this.destination.next(lastValue);
@@ -46543,61 +44132,22 @@ function dispatchNext(subscriber) {
 
 
 /***/ }),
-/* 414 */
+/* 422 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 /* harmony export (immutable) */ __webpack_exports__["a"] = delay;
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_tslib__ = __webpack_require__(1);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__scheduler_async__ = __webpack_require__(12);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__util_isDate__ = __webpack_require__(243);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__scheduler_async__ = __webpack_require__(13);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__util_isDate__ = __webpack_require__(247);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__Subscriber__ = __webpack_require__(2);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__Notification__ = __webpack_require__(45);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__Notification__ = __webpack_require__(46);
 /** PURE_IMPORTS_START tslib,_scheduler_async,_util_isDate,_Subscriber,_Notification PURE_IMPORTS_END */
 
 
 
 
 
-/**
- * Delays the emission of items from the source Observable by a given timeout or
- * until a given Date.
- *
- * <span class="informal">Time shifts each item by some specified amount of
- * milliseconds.</span>
- *
- * <img src="./img/delay.png" width="100%">
- *
- * If the delay argument is a Number, this operator time shifts the source
- * Observable by that amount of time expressed in milliseconds. The relative
- * time intervals between the values are preserved.
- *
- * If the delay argument is a Date, this operator time shifts the start of the
- * Observable execution until the given date occurs.
- *
- * @example <caption>Delay each click by one second</caption>
- * var clicks = Rx.Observable.fromEvent(document, 'click');
- * var delayedClicks = clicks.delay(1000); // each click emitted after 1 second
- * delayedClicks.subscribe(x => console.log(x));
- *
- * @example <caption>Delay all clicks until a future date happens</caption>
- * var clicks = Rx.Observable.fromEvent(document, 'click');
- * var date = new Date('March 15, 2050 12:00:00'); // in the future
- * var delayedClicks = clicks.delay(date); // click emitted only after that date
- * delayedClicks.subscribe(x => console.log(x));
- *
- * @see {@link debounceTime}
- * @see {@link delayWhen}
- *
- * @param {number|Date} delay The delay duration in milliseconds (a `number`) or
- * a `Date` until which the emission of the source items is delayed.
- * @param {Scheduler} [scheduler=async] The IScheduler to use for
- * managing the timers that handle the time-shift for each item.
- * @return {Observable} An Observable that delays the emissions of the source
- * Observable by the specified timeout or Date.
- * @method delay
- * @owner Observable
- */
 function delay(delay, scheduler) {
     if (scheduler === void 0) {
         scheduler = __WEBPACK_IMPORTED_MODULE_1__scheduler_async__["a" /* async */];
@@ -46616,11 +44166,6 @@ var DelayOperator = /*@__PURE__*/ (function () {
     };
     return DelayOperator;
 }());
-/**
- * We need this JSDoc comment for affecting ESDoc.
- * @ignore
- * @extends {Ignored}
- */
 var DelaySubscriber = /*@__PURE__*/ (function (_super) {
     __WEBPACK_IMPORTED_MODULE_0_tslib__["a" /* __extends */](DelaySubscriber, _super);
     function DelaySubscriber(destination, delay, scheduler) {
@@ -46690,7 +44235,7 @@ var DelayMessage = /*@__PURE__*/ (function () {
 
 
 /***/ }),
-/* 415 */
+/* 423 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -46706,51 +44251,6 @@ var DelayMessage = /*@__PURE__*/ (function () {
 
 
 
-/**
- * Delays the emission of items from the source Observable by a given time span
- * determined by the emissions of another Observable.
- *
- * <span class="informal">It's like {@link delay}, but the time span of the
- * delay duration is determined by a second Observable.</span>
- *
- * <img src="./img/delayWhen.png" width="100%">
- *
- * `delayWhen` time shifts each emitted value from the source Observable by a
- * time span determined by another Observable. When the source emits a value,
- * the `delayDurationSelector` function is called with the source value as
- * argument, and should return an Observable, called the "duration" Observable.
- * The source value is emitted on the output Observable only when the duration
- * Observable emits a value or completes.
- *
- * Optionally, `delayWhen` takes a second argument, `subscriptionDelay`, which
- * is an Observable. When `subscriptionDelay` emits its first value or
- * completes, the source Observable is subscribed to and starts behaving like
- * described in the previous paragraph. If `subscriptionDelay` is not provided,
- * `delayWhen` will subscribe to the source Observable as soon as the output
- * Observable is subscribed.
- *
- * @example <caption>Delay each click by a random amount of time, between 0 and 5 seconds</caption>
- * var clicks = Rx.Observable.fromEvent(document, 'click');
- * var delayedClicks = clicks.delayWhen(event =>
- *   Rx.Observable.interval(Math.random() * 5000)
- * );
- * delayedClicks.subscribe(x => console.log(x));
- *
- * @see {@link debounce}
- * @see {@link delay}
- *
- * @param {function(value: T): Observable} delayDurationSelector A function that
- * returns an Observable for each value emitted by the source Observable, which
- * is then used to delay the emission of that item on the output Observable
- * until the Observable returned from this function emits a value.
- * @param {Observable} subscriptionDelay An Observable that triggers the
- * subscription to the source Observable once it emits any value.
- * @return {Observable} An Observable that delays the emissions of the source
- * Observable by an amount of time specified by the Observable returned by
- * `delayDurationSelector`.
- * @method delayWhen
- * @owner Observable
- */
 function delayWhen(delayDurationSelector, subscriptionDelay) {
     if (subscriptionDelay) {
         return function (source) {
@@ -46769,11 +44269,6 @@ var DelayWhenOperator = /*@__PURE__*/ (function () {
     };
     return DelayWhenOperator;
 }());
-/**
- * We need this JSDoc comment for affecting ESDoc.
- * @ignore
- * @extends {Ignored}
- */
 var DelayWhenSubscriber = /*@__PURE__*/ (function (_super) {
     __WEBPACK_IMPORTED_MODULE_0_tslib__["a" /* __extends */](DelayWhenSubscriber, _super);
     function DelayWhenSubscriber(destination, delayDurationSelector) {
@@ -46781,7 +44276,6 @@ var DelayWhenSubscriber = /*@__PURE__*/ (function (_super) {
         _this.delayDurationSelector = delayDurationSelector;
         _this.completed = false;
         _this.delayNotifierSubscriptions = [];
-        _this.values = [];
         return _this;
     }
     DelayWhenSubscriber.prototype.notifyNext = function (outerValue, innerValue, outerIndex, innerIndex, innerSub) {
@@ -46817,13 +44311,10 @@ var DelayWhenSubscriber = /*@__PURE__*/ (function (_super) {
     DelayWhenSubscriber.prototype.removeSubscription = function (subscription) {
         subscription.unsubscribe();
         var subscriptionIdx = this.delayNotifierSubscriptions.indexOf(subscription);
-        var value = null;
         if (subscriptionIdx !== -1) {
-            value = this.values[subscriptionIdx];
             this.delayNotifierSubscriptions.splice(subscriptionIdx, 1);
-            this.values.splice(subscriptionIdx, 1);
         }
-        return value;
+        return subscription.outerValue;
     };
     DelayWhenSubscriber.prototype.tryDelay = function (delayNotifier, value) {
         var notifierSubscription = Object(__WEBPACK_IMPORTED_MODULE_4__util_subscribeToResult__["a" /* subscribeToResult */])(this, delayNotifier, value);
@@ -46831,7 +44322,6 @@ var DelayWhenSubscriber = /*@__PURE__*/ (function (_super) {
             this.add(notifierSubscription);
             this.delayNotifierSubscriptions.push(notifierSubscription);
         }
-        this.values.push(value);
     };
     DelayWhenSubscriber.prototype.tryComplete = function () {
         if (this.completed && this.delayNotifierSubscriptions.length === 0) {
@@ -46840,11 +44330,6 @@ var DelayWhenSubscriber = /*@__PURE__*/ (function (_super) {
     };
     return DelayWhenSubscriber;
 }(__WEBPACK_IMPORTED_MODULE_3__OuterSubscriber__["a" /* OuterSubscriber */]));
-/**
- * We need this JSDoc comment for affecting ESDoc.
- * @ignore
- * @extends {Ignored}
- */
 var SubscriptionDelayObservable = /*@__PURE__*/ (function (_super) {
     __WEBPACK_IMPORTED_MODULE_0_tslib__["a" /* __extends */](SubscriptionDelayObservable, _super);
     function SubscriptionDelayObservable(source, subscriptionDelay) {
@@ -46853,17 +44338,11 @@ var SubscriptionDelayObservable = /*@__PURE__*/ (function (_super) {
         _this.subscriptionDelay = subscriptionDelay;
         return _this;
     }
-    /** @deprecated This is an internal implementation detail, do not use. */
     SubscriptionDelayObservable.prototype._subscribe = function (subscriber) {
         this.subscriptionDelay.subscribe(new SubscriptionDelaySubscriber(subscriber, this.source));
     };
     return SubscriptionDelayObservable;
 }(__WEBPACK_IMPORTED_MODULE_2__Observable__["a" /* Observable */]));
-/**
- * We need this JSDoc comment for affecting ESDoc.
- * @ignore
- * @extends {Ignored}
- */
 var SubscriptionDelaySubscriber = /*@__PURE__*/ (function (_super) {
     __WEBPACK_IMPORTED_MODULE_0_tslib__["a" /* __extends */](SubscriptionDelaySubscriber, _super);
     function SubscriptionDelaySubscriber(parent, source) {
@@ -46896,7 +44375,7 @@ var SubscriptionDelaySubscriber = /*@__PURE__*/ (function (_super) {
 
 
 /***/ }),
-/* 416 */
+/* 424 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -46906,46 +44385,6 @@ var SubscriptionDelaySubscriber = /*@__PURE__*/ (function (_super) {
 /** PURE_IMPORTS_START tslib,_Subscriber PURE_IMPORTS_END */
 
 
-/**
- * Converts an Observable of {@link Notification} objects into the emissions
- * that they represent.
- *
- * <span class="informal">Unwraps {@link Notification} objects as actual `next`,
- * `error` and `complete` emissions. The opposite of {@link materialize}.</span>
- *
- * <img src="./img/dematerialize.png" width="100%">
- *
- * `dematerialize` is assumed to operate an Observable that only emits
- * {@link Notification} objects as `next` emissions, and does not emit any
- * `error`. Such Observable is the output of a `materialize` operation. Those
- * notifications are then unwrapped using the metadata they contain, and emitted
- * as `next`, `error`, and `complete` on the output Observable.
- *
- * Use this operator in conjunction with {@link materialize}.
- *
- * @example <caption>Convert an Observable of Notifications to an actual Observable</caption>
- * var notifA = new Rx.Notification('N', 'A');
- * var notifB = new Rx.Notification('N', 'B');
- * var notifE = new Rx.Notification('E', void 0,
- *   new TypeError('x.toUpperCase is not a function')
- * );
- * var materialized = Rx.Observable.of(notifA, notifB, notifE);
- * var upperCase = materialized.dematerialize();
- * upperCase.subscribe(x => console.log(x), e => console.error(e));
- *
- * // Results in:
- * // A
- * // B
- * // TypeError: x.toUpperCase is not a function
- *
- * @see {@link Notification}
- * @see {@link materialize}
- *
- * @return {Observable} An Observable that emits items and notifications
- * embedded in Notification objects emitted by the source Observable.
- * @method dematerialize
- * @owner Observable
- */
 function dematerialize() {
     return function dematerializeOperatorFunction(source) {
         return source.lift(new DeMaterializeOperator());
@@ -46959,11 +44398,6 @@ var DeMaterializeOperator = /*@__PURE__*/ (function () {
     };
     return DeMaterializeOperator;
 }());
-/**
- * We need this JSDoc comment for affecting ESDoc.
- * @ignore
- * @extends {Ignored}
- */
 var DeMaterializeSubscriber = /*@__PURE__*/ (function (_super) {
     __WEBPACK_IMPORTED_MODULE_0_tslib__["a" /* __extends */](DeMaterializeSubscriber, _super);
     function DeMaterializeSubscriber(destination) {
@@ -46978,7 +44412,7 @@ var DeMaterializeSubscriber = /*@__PURE__*/ (function (_super) {
 
 
 /***/ }),
-/* 417 */
+/* 425 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -46991,51 +44425,6 @@ var DeMaterializeSubscriber = /*@__PURE__*/ (function (_super) {
 
 
 
-/**
- * Returns an Observable that emits all items emitted by the source Observable that are distinct by comparison from previous items.
- *
- * If a keySelector function is provided, then it will project each value from the source observable into a new value that it will
- * check for equality with previously projected values. If a keySelector function is not provided, it will use each value from the
- * source observable directly with an equality check against previous values.
- *
- * In JavaScript runtimes that support `Set`, this operator will use a `Set` to improve performance of the distinct value checking.
- *
- * In other runtimes, this operator will use a minimal implementation of `Set` that relies on an `Array` and `indexOf` under the
- * hood, so performance will degrade as more values are checked for distinction. Even in newer browsers, a long-running `distinct`
- * use might result in memory leaks. To help alleviate this in some scenarios, an optional `flushes` parameter is also provided so
- * that the internal `Set` can be "flushed", basically clearing it of values.
- *
- * @example <caption>A simple example with numbers</caption>
- * Observable.of(1, 1, 2, 2, 2, 1, 2, 3, 4, 3, 2, 1)
- *   .distinct()
- *   .subscribe(x => console.log(x)); // 1, 2, 3, 4
- *
- * @example <caption>An example using a keySelector function</caption>
- * interface Person {
- *    age: number,
- *    name: string
- * }
- *
- * Observable.of<Person>(
- *     { age: 4, name: 'Foo'},
- *     { age: 7, name: 'Bar'},
- *     { age: 5, name: 'Foo'})
- *     .distinct((p: Person) => p.name)
- *     .subscribe(x => console.log(x));
- *
- * // displays:
- * // { age: 4, name: 'Foo' }
- * // { age: 7, name: 'Bar' }
- *
- * @see {@link distinctUntilChanged}
- * @see {@link distinctUntilKeyChanged}
- *
- * @param {function} [keySelector] Optional function to select which value you want to check as distinct.
- * @param {Observable} [flushes] Optional Observable for flushing the internal HashSet of the operator.
- * @return {Observable} An Observable that emits items from the source Observable with distinct values.
- * @method distinct
- * @owner Observable
- */
 function distinct(keySelector, flushes) {
     return function (source) { return source.lift(new DistinctOperator(keySelector, flushes)); };
 }
@@ -47049,11 +44438,6 @@ var DistinctOperator = /*@__PURE__*/ (function () {
     };
     return DistinctOperator;
 }());
-/**
- * We need this JSDoc comment for affecting ESDoc.
- * @ignore
- * @extends {Ignored}
- */
 var DistinctSubscriber = /*@__PURE__*/ (function (_super) {
     __WEBPACK_IMPORTED_MODULE_0_tslib__["a" /* __extends */](DistinctSubscriber, _super);
     function DistinctSubscriber(destination, keySelector, flushes) {
@@ -47105,72 +44489,14 @@ var DistinctSubscriber = /*@__PURE__*/ (function (_super) {
 
 
 /***/ }),
-/* 418 */
+/* 426 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 /* harmony export (immutable) */ __webpack_exports__["a"] = distinctUntilKeyChanged;
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__distinctUntilChanged__ = __webpack_require__(244);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__distinctUntilChanged__ = __webpack_require__(248);
 /** PURE_IMPORTS_START _distinctUntilChanged PURE_IMPORTS_END */
 
-/* tslint:enable:max-line-length */
-/**
- * Returns an Observable that emits all items emitted by the source Observable that are distinct by comparison from the previous item,
- * using a property accessed by using the key provided to check if the two items are distinct.
- *
- * If a comparator function is provided, then it will be called for each item to test for whether or not that value should be emitted.
- *
- * If a comparator function is not provided, an equality check is used by default.
- *
- * @example <caption>An example comparing the name of persons</caption>
- *
- *  interface Person {
- *     age: number,
- *     name: string
- *  }
- *
- * Observable.of<Person>(
- *     { age: 4, name: 'Foo'},
- *     { age: 7, name: 'Bar'},
- *     { age: 5, name: 'Foo'},
- *     { age: 6, name: 'Foo'})
- *     .distinctUntilKeyChanged('name')
- *     .subscribe(x => console.log(x));
- *
- * // displays:
- * // { age: 4, name: 'Foo' }
- * // { age: 7, name: 'Bar' }
- * // { age: 5, name: 'Foo' }
- *
- * @example <caption>An example comparing the first letters of the name</caption>
- *
- * interface Person {
- *     age: number,
- *     name: string
- *  }
- *
- * Observable.of<Person>(
- *     { age: 4, name: 'Foo1'},
- *     { age: 7, name: 'Bar'},
- *     { age: 5, name: 'Foo2'},
- *     { age: 6, name: 'Foo3'})
- *     .distinctUntilKeyChanged('name', (x: string, y: string) => x.substring(0, 3) === y.substring(0, 3))
- *     .subscribe(x => console.log(x));
- *
- * // displays:
- * // { age: 4, name: 'Foo1' }
- * // { age: 7, name: 'Bar' }
- * // { age: 5, name: 'Foo2' }
- *
- * @see {@link distinct}
- * @see {@link distinctUntilChanged}
- *
- * @param {string} key String key for object property lookup on each item.
- * @param {function} [compare] Optional comparison function called to test if an item is distinct from the previous item in the source.
- * @return {Observable} An Observable that emits items from the source Observable with distinct values based on the key specified.
- * @method distinctUntilKeyChanged
- * @owner Observable
- */
 function distinctUntilKeyChanged(key, compare) {
     return Object(__WEBPACK_IMPORTED_MODULE_0__distinctUntilChanged__["a" /* distinctUntilChanged */])(function (x, y) { return compare ? compare(x[key], y[key]) : x[key] === y[key]; });
 }
@@ -47178,64 +44504,22 @@ function distinctUntilKeyChanged(key, compare) {
 
 
 /***/ }),
-/* 419 */
+/* 427 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 /* harmony export (immutable) */ __webpack_exports__["a"] = elementAt;
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__util_ArgumentOutOfRangeError__ = __webpack_require__(34);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__filter__ = __webpack_require__(39);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__throwIfEmpty__ = __webpack_require__(48);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__defaultIfEmpty__ = __webpack_require__(38);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__take__ = __webpack_require__(70);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__util_ArgumentOutOfRangeError__ = __webpack_require__(35);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__filter__ = __webpack_require__(40);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__throwIfEmpty__ = __webpack_require__(50);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__defaultIfEmpty__ = __webpack_require__(39);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__take__ = __webpack_require__(75);
 /** PURE_IMPORTS_START _util_ArgumentOutOfRangeError,_filter,_throwIfEmpty,_defaultIfEmpty,_take PURE_IMPORTS_END */
 
 
 
 
 
-/**
- * Emits the single value at the specified `index` in a sequence of emissions
- * from the source Observable.
- *
- * <span class="informal">Emits only the i-th value, then completes.</span>
- *
- * <img src="./img/elementAt.png" width="100%">
- *
- * `elementAt` returns an Observable that emits the item at the specified
- * `index` in the source Observable, or a default value if that `index` is out
- * of range and the `default` argument is provided. If the `default` argument is
- * not given and the `index` is out of range, the output Observable will emit an
- * `ArgumentOutOfRangeError` error.
- *
- * @example <caption>Emit only the third click event</caption>
- * var clicks = Rx.Observable.fromEvent(document, 'click');
- * var result = clicks.elementAt(2);
- * result.subscribe(x => console.log(x));
- *
- * // Results in:
- * // click 1 = nothing
- * // click 2 = nothing
- * // click 3 = MouseEvent object logged to console
- *
- * @see {@link first}
- * @see {@link last}
- * @see {@link skip}
- * @see {@link single}
- * @see {@link take}
- *
- * @throws {ArgumentOutOfRangeError} When using `elementAt(i)`, it delivers an
- * ArgumentOutOrRangeError to the Observer's `error` callback if `i < 0` or the
- * Observable has completed before emitting the i-th `next` notification.
- *
- * @param {number} index Is the number `i` for the i-th source emission that has
- * happened since the subscription, starting from the number `0`.
- * @param {T} [defaultValue] The default value returned for missing indices.
- * @return {Observable} An Observable that emits a single item, if it is found.
- * Otherwise, will emit the default value if given. If not, then emits an error.
- * @method elementAt
- * @owner Observable
- */
 function elementAt(index, defaultValue) {
     if (index < 0) {
         throw new __WEBPACK_IMPORTED_MODULE_0__util_ArgumentOutOfRangeError__["a" /* ArgumentOutOfRangeError */]();
@@ -47251,7 +44535,52 @@ function elementAt(index, defaultValue) {
 
 
 /***/ }),
-/* 420 */
+/* 428 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+/* harmony export (immutable) */ __webpack_exports__["a"] = endWith;
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__observable_fromArray__ = __webpack_require__(21);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__observable_scalar__ = __webpack_require__(69);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__observable_empty__ = __webpack_require__(12);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__observable_concat__ = __webpack_require__(48);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__util_isScheduler__ = __webpack_require__(15);
+/** PURE_IMPORTS_START _observable_fromArray,_observable_scalar,_observable_empty,_observable_concat,_util_isScheduler PURE_IMPORTS_END */
+
+
+
+
+
+function endWith() {
+    var array = [];
+    for (var _i = 0; _i < arguments.length; _i++) {
+        array[_i] = arguments[_i];
+    }
+    return function (source) {
+        var scheduler = array[array.length - 1];
+        if (Object(__WEBPACK_IMPORTED_MODULE_4__util_isScheduler__["a" /* isScheduler */])(scheduler)) {
+            array.pop();
+        }
+        else {
+            scheduler = null;
+        }
+        var len = array.length;
+        if (len === 1 && !scheduler) {
+            return Object(__WEBPACK_IMPORTED_MODULE_3__observable_concat__["a" /* concat */])(source, Object(__WEBPACK_IMPORTED_MODULE_1__observable_scalar__["a" /* scalar */])(array[0]));
+        }
+        else if (len > 0) {
+            return Object(__WEBPACK_IMPORTED_MODULE_3__observable_concat__["a" /* concat */])(source, Object(__WEBPACK_IMPORTED_MODULE_0__observable_fromArray__["a" /* fromArray */])(array, scheduler));
+        }
+        else {
+            return Object(__WEBPACK_IMPORTED_MODULE_3__observable_concat__["a" /* concat */])(source, Object(__WEBPACK_IMPORTED_MODULE_2__observable_empty__["b" /* empty */])(scheduler));
+        }
+    };
+}
+//# sourceMappingURL=endWith.js.map
+
+
+/***/ }),
+/* 429 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -47261,20 +44590,6 @@ function elementAt(index, defaultValue) {
 /** PURE_IMPORTS_START tslib,_Subscriber PURE_IMPORTS_END */
 
 
-/**
- * Returns an Observable that emits whether or not every item of the source satisfies the condition specified.
- *
- * @example <caption>A simple example emitting true if all elements are less than 5, false otherwise</caption>
- *  Observable.of(1, 2, 3, 4, 5, 6)
- *     .every(x => x < 5)
- *     .subscribe(x => console.log(x)); // -> false
- *
- * @param {function} predicate A function for determining if an item meets a specified condition.
- * @param {any} [thisArg] Optional object to use for `this` in the callback.
- * @return {Observable} An Observable of booleans that determines if all items of the source Observable meet the condition specified.
- * @method every
- * @owner Observable
- */
 function every(predicate, thisArg) {
     return function (source) { return source.lift(new EveryOperator(predicate, thisArg, source)); };
 }
@@ -47289,11 +44604,6 @@ var EveryOperator = /*@__PURE__*/ (function () {
     };
     return EveryOperator;
 }());
-/**
- * We need this JSDoc comment for affecting ESDoc.
- * @ignore
- * @extends {Ignored}
- */
 var EverySubscriber = /*@__PURE__*/ (function (_super) {
     __WEBPACK_IMPORTED_MODULE_0_tslib__["a" /* __extends */](EverySubscriber, _super);
     function EverySubscriber(destination, predicate, thisArg, source) {
@@ -47331,7 +44641,7 @@ var EverySubscriber = /*@__PURE__*/ (function (_super) {
 
 
 /***/ }),
-/* 421 */
+/* 430 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -47343,41 +44653,6 @@ var EverySubscriber = /*@__PURE__*/ (function (_super) {
 
 
 
-/**
- * Converts a higher-order Observable into a first-order Observable by dropping
- * inner Observables while the previous inner Observable has not yet completed.
- *
- * <span class="informal">Flattens an Observable-of-Observables by dropping the
- * next inner Observables while the current inner is still executing.</span>
- *
- * <img src="./img/exhaust.png" width="100%">
- *
- * `exhaust` subscribes to an Observable that emits Observables, also known as a
- * higher-order Observable. Each time it observes one of these emitted inner
- * Observables, the output Observable begins emitting the items emitted by that
- * inner Observable. So far, it behaves like {@link mergeAll}. However,
- * `exhaust` ignores every new inner Observable if the previous Observable has
- * not yet completed. Once that one completes, it will accept and flatten the
- * next inner Observable and repeat this process.
- *
- * @example <caption>Run a finite timer for each click, only if there is no currently active timer</caption>
- * var clicks = Rx.Observable.fromEvent(document, 'click');
- * var higherOrder = clicks.map((ev) => Rx.Observable.interval(1000).take(5));
- * var result = higherOrder.exhaust();
- * result.subscribe(x => console.log(x));
- *
- * @see {@link combineAll}
- * @see {@link concatAll}
- * @see {@link switch}
- * @see {@link mergeAll}
- * @see {@link exhaustMap}
- * @see {@link zipAll}
- *
- * @return {Observable} An Observable that takes a source of Observables and propagates the first observable
- * exclusively until it completes before subscribing to the next.
- * @method exhaust
- * @owner Observable
- */
 function exhaust() {
     return function (source) { return source.lift(new SwitchFirstOperator()); };
 }
@@ -47389,11 +44664,6 @@ var SwitchFirstOperator = /*@__PURE__*/ (function () {
     };
     return SwitchFirstOperator;
 }());
-/**
- * We need this JSDoc comment for affecting ESDoc.
- * @ignore
- * @extends {Ignored}
- */
 var SwitchFirstSubscriber = /*@__PURE__*/ (function (_super) {
     __WEBPACK_IMPORTED_MODULE_0_tslib__["a" /* __extends */](SwitchFirstSubscriber, _super);
     function SwitchFirstSubscriber(destination) {
@@ -47427,7 +44697,7 @@ var SwitchFirstSubscriber = /*@__PURE__*/ (function (_super) {
 
 
 /***/ }),
-/* 422 */
+/* 431 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -47443,47 +44713,8 @@ var SwitchFirstSubscriber = /*@__PURE__*/ (function (_super) {
 
 
 
-/* tslint:enable:max-line-length */
-/**
- * Projects each source value to an Observable which is merged in the output
- * Observable only if the previous projected Observable has completed.
- *
- * <span class="informal">Maps each value to an Observable, then flattens all of
- * these inner Observables using {@link exhaust}.</span>
- *
- * <img src="./img/exhaustMap.png" width="100%">
- *
- * Returns an Observable that emits items based on applying a function that you
- * supply to each item emitted by the source Observable, where that function
- * returns an (so-called "inner") Observable. When it projects a source value to
- * an Observable, the output Observable begins emitting the items emitted by
- * that projected Observable. However, `exhaustMap` ignores every new projected
- * Observable if the previous projected Observable has not yet completed. Once
- * that one completes, it will accept and flatten the next projected Observable
- * and repeat this process.
- *
- * @example <caption>Run a finite timer for each click, only if there is no currently active timer</caption>
- * var clicks = Rx.Observable.fromEvent(document, 'click');
- * var result = clicks.exhaustMap((ev) => Rx.Observable.interval(1000).take(5));
- * result.subscribe(x => console.log(x));
- *
- * @see {@link concatMap}
- * @see {@link exhaust}
- * @see {@link mergeMap}
- * @see {@link switchMap}
- *
- * @param {function(value: T, ?index: number): ObservableInput} project A function
- * that, when applied to an item emitted by the source Observable, returns an
- * Observable.
- * @return {Observable} An Observable containing projected Observables
- * of each item of the source, ignoring projected Observables that start before
- * their preceding Observable has completed.
- * @method exhaustMap
- * @owner Observable
- */
 function exhaustMap(project, resultSelector) {
     if (resultSelector) {
-        // DEPRECATED PATH
         return function (source) { return source.pipe(exhaustMap(function (a, i) { return Object(__WEBPACK_IMPORTED_MODULE_4__observable_from__["a" /* from */])(project(a, i)).pipe(Object(__WEBPACK_IMPORTED_MODULE_3__map__["a" /* map */])(function (b, ii) { return resultSelector(a, b, i, ii); })); })); };
     }
     return function (source) {
@@ -47499,11 +44730,6 @@ var ExhauseMapOperator = /*@__PURE__*/ (function () {
     };
     return ExhauseMapOperator;
 }());
-/**
- * We need this JSDoc comment for affecting ESDoc.
- * @ignore
- * @extends {Ignored}
- */
 var ExhaustMapSubscriber = /*@__PURE__*/ (function (_super) {
     __WEBPACK_IMPORTED_MODULE_0_tslib__["a" /* __extends */](ExhaustMapSubscriber, _super);
     function ExhaustMapSubscriber(destination, project) {
@@ -47556,7 +44782,7 @@ var ExhaustMapSubscriber = /*@__PURE__*/ (function (_super) {
 
 
 /***/ }),
-/* 423 */
+/* 432 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -47565,7 +44791,7 @@ var ExhaustMapSubscriber = /*@__PURE__*/ (function (_super) {
 /* unused harmony export ExpandSubscriber */
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_tslib__ = __webpack_require__(1);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__util_tryCatch__ = __webpack_require__(17);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__util_errorObject__ = __webpack_require__(15);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__util_errorObject__ = __webpack_require__(14);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__OuterSubscriber__ = __webpack_require__(5);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__util_subscribeToResult__ = __webpack_require__(6);
 /** PURE_IMPORTS_START tslib,_util_tryCatch,_util_errorObject,_OuterSubscriber,_util_subscribeToResult PURE_IMPORTS_END */
@@ -47574,52 +44800,6 @@ var ExhaustMapSubscriber = /*@__PURE__*/ (function (_super) {
 
 
 
-/* tslint:enable:max-line-length */
-/**
- * Recursively projects each source value to an Observable which is merged in
- * the output Observable.
- *
- * <span class="informal">It's similar to {@link mergeMap}, but applies the
- * projection function to every source value as well as every output value.
- * It's recursive.</span>
- *
- * <img src="./img/expand.png" width="100%">
- *
- * Returns an Observable that emits items based on applying a function that you
- * supply to each item emitted by the source Observable, where that function
- * returns an Observable, and then merging those resulting Observables and
- * emitting the results of this merger. *Expand* will re-emit on the output
- * Observable every source value. Then, each output value is given to the
- * `project` function which returns an inner Observable to be merged on the
- * output Observable. Those output values resulting from the projection are also
- * given to the `project` function to produce new output values. This is how
- * *expand* behaves recursively.
- *
- * @example <caption>Start emitting the powers of two on every click, at most 10 of them</caption>
- * var clicks = Rx.Observable.fromEvent(document, 'click');
- * var powersOfTwo = clicks
- *   .mapTo(1)
- *   .expand(x => Rx.Observable.of(2 * x).delay(1000))
- *   .take(10);
- * powersOfTwo.subscribe(x => console.log(x));
- *
- * @see {@link mergeMap}
- * @see {@link mergeScan}
- *
- * @param {function(value: T, index: number) => Observable} project A function
- * that, when applied to an item emitted by the source or the output Observable,
- * returns an Observable.
- * @param {number} [concurrent=Number.POSITIVE_INFINITY] Maximum number of input
- * Observables being subscribed to concurrently.
- * @param {Scheduler} [scheduler=null] The IScheduler to use for subscribing to
- * each projected inner Observable.
- * @return {Observable} An Observable that emits the source values and also
- * result of applying the projection function to each value emitted on the
- * output Observable and and merging the results of the Observables obtained
- * from this transformation.
- * @method expand
- * @owner Observable
- */
 function expand(project, concurrent, scheduler) {
     if (concurrent === void 0) {
         concurrent = Number.POSITIVE_INFINITY;
@@ -47642,11 +44822,6 @@ var ExpandOperator = /*@__PURE__*/ (function () {
     return ExpandOperator;
 }());
 
-/**
- * We need this JSDoc comment for affecting ESDoc.
- * @ignore
- * @extends {Ignored}
- */
 var ExpandSubscriber = /*@__PURE__*/ (function (_super) {
     __WEBPACK_IMPORTED_MODULE_0_tslib__["a" /* __extends */](ExpandSubscriber, _super);
     function ExpandSubscriber(destination, project, concurrent, scheduler) {
@@ -47722,7 +44897,7 @@ var ExpandSubscriber = /*@__PURE__*/ (function (_super) {
 
 
 /***/ }),
-/* 424 */
+/* 433 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -47734,14 +44909,6 @@ var ExpandSubscriber = /*@__PURE__*/ (function (_super) {
 
 
 
-/**
- * Returns an Observable that mirrors the source Observable, but will call a specified function when
- * the source terminates on complete or error.
- * @param {function} callback Function to be called when source terminates.
- * @return {Observable} An Observable that mirrors the source, but will call the specified function on termination.
- * @method finally
- * @owner Observable
- */
 function finalize(callback) {
     return function (source) { return source.lift(new FinallyOperator(callback)); };
 }
@@ -47754,11 +44921,6 @@ var FinallyOperator = /*@__PURE__*/ (function () {
     };
     return FinallyOperator;
 }());
-/**
- * We need this JSDoc comment for affecting ESDoc.
- * @ignore
- * @extends {Ignored}
- */
 var FinallySubscriber = /*@__PURE__*/ (function (_super) {
     __WEBPACK_IMPORTED_MODULE_0_tslib__["a" /* __extends */](FinallySubscriber, _super);
     function FinallySubscriber(destination, callback) {
@@ -47772,48 +44934,14 @@ var FinallySubscriber = /*@__PURE__*/ (function (_super) {
 
 
 /***/ }),
-/* 425 */
+/* 434 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 /* harmony export (immutable) */ __webpack_exports__["a"] = findIndex;
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__operators_find__ = __webpack_require__(246);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__operators_find__ = __webpack_require__(250);
 /** PURE_IMPORTS_START _operators_find PURE_IMPORTS_END */
 
-/**
- * Emits only the index of the first value emitted by the source Observable that
- * meets some condition.
- *
- * <span class="informal">It's like {@link find}, but emits the index of the
- * found value, not the value itself.</span>
- *
- * <img src="./img/findIndex.png" width="100%">
- *
- * `findIndex` searches for the first item in the source Observable that matches
- * the specified condition embodied by the `predicate`, and returns the
- * (zero-based) index of the first occurrence in the source. Unlike
- * {@link first}, the `predicate` is required in `findIndex`, and does not emit
- * an error if a valid value is not found.
- *
- * @example <caption>Emit the index of first click that happens on a DIV element</caption>
- * var clicks = Rx.Observable.fromEvent(document, 'click');
- * var result = clicks.findIndex(ev => ev.target.tagName === 'DIV');
- * result.subscribe(x => console.log(x));
- *
- * @see {@link filter}
- * @see {@link find}
- * @see {@link first}
- * @see {@link take}
- *
- * @param {function(value: T, index: number, source: Observable<T>): boolean} predicate
- * A function called with each item to test for condition matching.
- * @param {any} [thisArg] An optional argument to determine the value of `this`
- * in the `predicate` function.
- * @return {Observable} An Observable of the index of the first item that
- * matches the condition.
- * @method find
- * @owner Observable
- */
 function findIndex(predicate, thisArg) {
     return function (source) { return source.lift(new __WEBPACK_IMPORTED_MODULE_0__operators_find__["a" /* FindValueOperator */](predicate, source, true, thisArg)); };
 }
@@ -47821,16 +44949,16 @@ function findIndex(predicate, thisArg) {
 
 
 /***/ }),
-/* 426 */
+/* 435 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 /* harmony export (immutable) */ __webpack_exports__["a"] = first;
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__util_EmptyError__ = __webpack_require__(35);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__filter__ = __webpack_require__(39);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__take__ = __webpack_require__(70);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__defaultIfEmpty__ = __webpack_require__(38);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__throwIfEmpty__ = __webpack_require__(48);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__util_EmptyError__ = __webpack_require__(36);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__filter__ = __webpack_require__(40);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__take__ = __webpack_require__(75);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__defaultIfEmpty__ = __webpack_require__(39);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__throwIfEmpty__ = __webpack_require__(50);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_5__util_identity__ = __webpack_require__(25);
 /** PURE_IMPORTS_START _util_EmptyError,_filter,_take,_defaultIfEmpty,_throwIfEmpty,_util_identity PURE_IMPORTS_END */
 
@@ -47839,49 +44967,6 @@ function findIndex(predicate, thisArg) {
 
 
 
-/**
- * Emits only the first value (or the first value that meets some condition)
- * emitted by the source Observable.
- *
- * <span class="informal">Emits only the first value. Or emits only the first
- * value that passes some test.</span>
- *
- * <img src="./img/first.png" width="100%">
- *
- * If called with no arguments, `first` emits the first value of the source
- * Observable, then completes. If called with a `predicate` function, `first`
- * emits the first value of the source that matches the specified condition. It
- * may also take a `resultSelector` function to produce the output value from
- * the input value, and a `defaultValue` to emit in case the source completes
- * before it is able to emit a valid value. Throws an error if `defaultValue`
- * was not provided and a matching element is not found.
- *
- * @example <caption>Emit only the first click that happens on the DOM</caption>
- * var clicks = Rx.Observable.fromEvent(document, 'click');
- * var result = clicks.first();
- * result.subscribe(x => console.log(x));
- *
- * @example <caption>Emits the first click that happens on a DIV</caption>
- * var clicks = Rx.Observable.fromEvent(document, 'click');
- * var result = clicks.first(ev => ev.target.tagName === 'DIV');
- * result.subscribe(x => console.log(x));
- *
- * @see {@link filter}
- * @see {@link find}
- * @see {@link take}
- *
- * @throws {EmptyError} Delivers an EmptyError to the Observer's `error`
- * callback if the Observable completes before any `next` notification was sent.
- *
- * @param {function(value: T, index: number, source: Observable<T>): boolean} [predicate]
- * An optional function called with each item to test for condition matching.
- * @param {R} [defaultValue] The default value emitted in case no valid value
- * was found on the source.
- * @return {Observable<T|R>} An Observable of the first item that matches the
- * condition.
- * @method first
- * @owner Observable
- */
 function first(predicate, defaultValue) {
     var hasDefaultValue = arguments.length >= 2;
     return function (source) { return source.pipe(predicate ? Object(__WEBPACK_IMPORTED_MODULE_1__filter__["a" /* filter */])(function (v, i) { return predicate(v, i, source); }) : __WEBPACK_IMPORTED_MODULE_5__util_identity__["a" /* identity */], Object(__WEBPACK_IMPORTED_MODULE_2__take__["a" /* take */])(1), hasDefaultValue ? Object(__WEBPACK_IMPORTED_MODULE_3__defaultIfEmpty__["a" /* defaultIfEmpty */])(defaultValue) : Object(__WEBPACK_IMPORTED_MODULE_4__throwIfEmpty__["a" /* throwIfEmpty */])(function () { return new __WEBPACK_IMPORTED_MODULE_0__util_EmptyError__["a" /* EmptyError */](); })); };
@@ -47890,7 +44975,7 @@ function first(predicate, defaultValue) {
 
 
 /***/ }),
-/* 427 */
+/* 436 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -47900,16 +44985,6 @@ function first(predicate, defaultValue) {
 /** PURE_IMPORTS_START tslib,_Subscriber PURE_IMPORTS_END */
 
 
-/**
- * Ignores all items emitted by the source Observable and only passes calls of `complete` or `error`.
- *
- * <img src="./img/ignoreElements.png" width="100%">
- *
- * @return {Observable} An empty Observable that only calls `complete`
- * or `error`, based on which one is called by the source Observable.
- * @method ignoreElements
- * @owner Observable
- */
 function ignoreElements() {
     return function ignoreElementsOperatorFunction(source) {
         return source.lift(new IgnoreElementsOperator());
@@ -47923,18 +44998,12 @@ var IgnoreElementsOperator = /*@__PURE__*/ (function () {
     };
     return IgnoreElementsOperator;
 }());
-/**
- * We need this JSDoc comment for affecting ESDoc.
- * @ignore
- * @extends {Ignored}
- */
 var IgnoreElementsSubscriber = /*@__PURE__*/ (function (_super) {
     __WEBPACK_IMPORTED_MODULE_0_tslib__["a" /* __extends */](IgnoreElementsSubscriber, _super);
     function IgnoreElementsSubscriber() {
         return _super !== null && _super.apply(this, arguments) || this;
     }
     IgnoreElementsSubscriber.prototype._next = function (unused) {
-        // Do nothing
     };
     return IgnoreElementsSubscriber;
 }(__WEBPACK_IMPORTED_MODULE_1__Subscriber__["a" /* Subscriber */]));
@@ -47942,7 +45011,7 @@ var IgnoreElementsSubscriber = /*@__PURE__*/ (function (_super) {
 
 
 /***/ }),
-/* 428 */
+/* 437 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -47963,11 +45032,6 @@ var IsEmptyOperator = /*@__PURE__*/ (function () {
     };
     return IsEmptyOperator;
 }());
-/**
- * We need this JSDoc comment for affecting ESDoc.
- * @ignore
- * @extends {Ignored}
- */
 var IsEmptySubscriber = /*@__PURE__*/ (function (_super) {
     __WEBPACK_IMPORTED_MODULE_0_tslib__["a" /* __extends */](IsEmptySubscriber, _super);
     function IsEmptySubscriber(destination) {
@@ -47990,16 +45054,16 @@ var IsEmptySubscriber = /*@__PURE__*/ (function (_super) {
 
 
 /***/ }),
-/* 429 */
+/* 438 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 /* harmony export (immutable) */ __webpack_exports__["a"] = last;
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__util_EmptyError__ = __webpack_require__(35);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__filter__ = __webpack_require__(39);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__takeLast__ = __webpack_require__(71);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__throwIfEmpty__ = __webpack_require__(48);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__defaultIfEmpty__ = __webpack_require__(38);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__util_EmptyError__ = __webpack_require__(36);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__filter__ = __webpack_require__(40);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__takeLast__ = __webpack_require__(76);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__throwIfEmpty__ = __webpack_require__(50);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__defaultIfEmpty__ = __webpack_require__(39);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_5__util_identity__ = __webpack_require__(25);
 /** PURE_IMPORTS_START _util_EmptyError,_filter,_takeLast,_throwIfEmpty,_defaultIfEmpty,_util_identity PURE_IMPORTS_END */
 
@@ -48008,23 +45072,6 @@ var IsEmptySubscriber = /*@__PURE__*/ (function (_super) {
 
 
 
-/**
- * Returns an Observable that emits only the last item emitted by the source Observable.
- * It optionally takes a predicate function as a parameter, in which case, rather than emitting
- * the last item from the source Observable, the resulting Observable will emit the last item
- * from the source Observable that satisfies the predicate.
- *
- * <img src="./img/last.png" width="100%">
- *
- * @throws {EmptyError} Delivers an EmptyError to the Observer's `error`
- * callback if the Observable completes before any `next` notification was sent.
- * @param {function} [predicate] - The condition any source emitted item has to satisfy.
- * @param {any} [defaultValue] - An optional default value to provide if last
- * predicate isn't met or no values were emitted.
- * @return {Observable} An Observable that emits only the last item satisfying the given condition
- * from the source, or an NoSuchElementException if no such items are emitted.
- * @throws - Throws if no items that match the predicate are emitted by the source Observable.
- */
 function last(predicate, defaultValue) {
     var hasDefaultValue = arguments.length >= 2;
     return function (source) { return source.pipe(predicate ? Object(__WEBPACK_IMPORTED_MODULE_1__filter__["a" /* filter */])(function (v, i) { return predicate(v, i, source); }) : __WEBPACK_IMPORTED_MODULE_5__util_identity__["a" /* identity */], Object(__WEBPACK_IMPORTED_MODULE_2__takeLast__["a" /* takeLast */])(1), hasDefaultValue ? Object(__WEBPACK_IMPORTED_MODULE_4__defaultIfEmpty__["a" /* defaultIfEmpty */])(defaultValue) : Object(__WEBPACK_IMPORTED_MODULE_3__throwIfEmpty__["a" /* throwIfEmpty */])(function () { return new __WEBPACK_IMPORTED_MODULE_0__util_EmptyError__["a" /* EmptyError */](); })); };
@@ -48033,7 +45080,7 @@ function last(predicate, defaultValue) {
 
 
 /***/ }),
-/* 430 */
+/* 439 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -48043,32 +45090,6 @@ function last(predicate, defaultValue) {
 /** PURE_IMPORTS_START tslib,_Subscriber PURE_IMPORTS_END */
 
 
-/**
- * Emits the given constant value on the output Observable every time the source
- * Observable emits a value.
- *
- * <span class="informal">Like {@link map}, but it maps every source value to
- * the same output value every time.</span>
- *
- * <img src="./img/mapTo.png" width="100%">
- *
- * Takes a constant `value` as argument, and emits that whenever the source
- * Observable emits a value. In other words, ignores the actual source value,
- * and simply uses the emission moment to know when to emit the given `value`.
- *
- * @example <caption>Map every click to the string 'Hi'</caption>
- * var clicks = Rx.Observable.fromEvent(document, 'click');
- * var greetings = clicks.mapTo('Hi');
- * greetings.subscribe(x => console.log(x));
- *
- * @see {@link map}
- *
- * @param {any} value The value to map each source value to.
- * @return {Observable} An Observable that emits the given `value` every time
- * the source Observable emits something.
- * @method mapTo
- * @owner Observable
- */
 function mapTo(value) {
     return function (source) { return source.lift(new MapToOperator(value)); };
 }
@@ -48081,11 +45102,6 @@ var MapToOperator = /*@__PURE__*/ (function () {
     };
     return MapToOperator;
 }());
-/**
- * We need this JSDoc comment for affecting ESDoc.
- * @ignore
- * @extends {Ignored}
- */
 var MapToSubscriber = /*@__PURE__*/ (function (_super) {
     __WEBPACK_IMPORTED_MODULE_0_tslib__["a" /* __extends */](MapToSubscriber, _super);
     function MapToSubscriber(destination, value) {
@@ -48102,62 +45118,18 @@ var MapToSubscriber = /*@__PURE__*/ (function (_super) {
 
 
 /***/ }),
-/* 431 */
+/* 440 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 /* harmony export (immutable) */ __webpack_exports__["a"] = materialize;
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_tslib__ = __webpack_require__(1);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__Subscriber__ = __webpack_require__(2);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__Notification__ = __webpack_require__(45);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__Notification__ = __webpack_require__(46);
 /** PURE_IMPORTS_START tslib,_Subscriber,_Notification PURE_IMPORTS_END */
 
 
 
-/**
- * Represents all of the notifications from the source Observable as `next`
- * emissions marked with their original types within {@link Notification}
- * objects.
- *
- * <span class="informal">Wraps `next`, `error` and `complete` emissions in
- * {@link Notification} objects, emitted as `next` on the output Observable.
- * </span>
- *
- * <img src="./img/materialize.png" width="100%">
- *
- * `materialize` returns an Observable that emits a `next` notification for each
- * `next`, `error`, or `complete` emission of the source Observable. When the
- * source Observable emits `complete`, the output Observable will emit `next` as
- * a Notification of type "complete", and then it will emit `complete` as well.
- * When the source Observable emits `error`, the output will emit `next` as a
- * Notification of type "error", and then `complete`.
- *
- * This operator is useful for producing metadata of the source Observable, to
- * be consumed as `next` emissions. Use it in conjunction with
- * {@link dematerialize}.
- *
- * @example <caption>Convert a faulty Observable to an Observable of Notifications</caption>
- * var letters = Rx.Observable.of('a', 'b', 13, 'd');
- * var upperCase = letters.map(x => x.toUpperCase());
- * var materialized = upperCase.materialize();
- * materialized.subscribe(x => console.log(x));
- *
- * // Results in the following:
- * // - Notification {kind: "N", value: "A", error: undefined, hasValue: true}
- * // - Notification {kind: "N", value: "B", error: undefined, hasValue: true}
- * // - Notification {kind: "E", value: undefined, error: TypeError:
- * //   x.toUpperCase is not a function at MapSubscriber.letters.map.x
- * //   [as project] (http://1…, hasValue: false}
- *
- * @see {@link Notification}
- * @see {@link dematerialize}
- *
- * @return {Observable<Notification<T>>} An Observable that emits
- * {@link Notification} objects that wrap the original emissions from the source
- * Observable with metadata.
- * @method materialize
- * @owner Observable
- */
 function materialize() {
     return function materializeOperatorFunction(source) {
         return source.lift(new MaterializeOperator());
@@ -48171,11 +45143,6 @@ var MaterializeOperator = /*@__PURE__*/ (function () {
     };
     return MaterializeOperator;
 }());
-/**
- * We need this JSDoc comment for affecting ESDoc.
- * @ignore
- * @extends {Ignored}
- */
 var MaterializeSubscriber = /*@__PURE__*/ (function (_super) {
     __WEBPACK_IMPORTED_MODULE_0_tslib__["a" /* __extends */](MaterializeSubscriber, _super);
     function MaterializeSubscriber(destination) {
@@ -48200,45 +45167,14 @@ var MaterializeSubscriber = /*@__PURE__*/ (function (_super) {
 
 
 /***/ }),
-/* 432 */
+/* 441 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 /* harmony export (immutable) */ __webpack_exports__["a"] = max;
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__reduce__ = __webpack_require__(49);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__reduce__ = __webpack_require__(51);
 /** PURE_IMPORTS_START _reduce PURE_IMPORTS_END */
 
-/**
- * The Max operator operates on an Observable that emits numbers (or items that can be compared with a provided function),
- * and when source Observable completes it emits a single item: the item with the largest value.
- *
- * <img src="./img/max.png" width="100%">
- *
- * @example <caption>Get the maximal value of a series of numbers</caption>
- * Rx.Observable.of(5, 4, 7, 2, 8)
- *   .max()
- *   .subscribe(x => console.log(x)); // -> 8
- *
- * @example <caption>Use a comparer function to get the maximal item</caption>
- * interface Person {
- *   age: number,
- *   name: string
- * }
- * Observable.of<Person>({age: 7, name: 'Foo'},
- *                       {age: 5, name: 'Bar'},
- *                       {age: 9, name: 'Beer'})
- *           .max<Person>((a: Person, b: Person) => a.age < b.age ? -1 : 1)
- *           .subscribe((x: Person) => console.log(x.name)); // -> 'Beer'
- * }
- *
- * @see {@link min}
- *
- * @param {Function} [comparer] - Optional comparer function that it will use instead of its default to compare the
- * value of two items.
- * @return {Observable} An Observable that emits item with the largest value.
- * @method max
- * @owner Observable
- */
 function max(comparer) {
     var max = (typeof comparer === 'function')
         ? function (x, y) { return comparer(x, y) > 0 ? x : y; }
@@ -48249,18 +45185,14 @@ function max(comparer) {
 
 
 /***/ }),
-/* 433 */
+/* 442 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 /* harmony export (immutable) */ __webpack_exports__["a"] = merge;
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__observable_merge__ = __webpack_require__(237);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__observable_merge__ = __webpack_require__(241);
 /** PURE_IMPORTS_START _observable_merge PURE_IMPORTS_END */
 
-/* tslint:enable:max-line-length */
-/**
- * @deprecated Deprecated in favor of static merge.
- */
 function merge() {
     var observables = [];
     for (var _i = 0; _i < arguments.length; _i++) {
@@ -48272,49 +45204,14 @@ function merge() {
 
 
 /***/ }),
-/* 434 */
+/* 443 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 /* harmony export (immutable) */ __webpack_exports__["a"] = mergeMapTo;
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__mergeMap__ = __webpack_require__(37);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__mergeMap__ = __webpack_require__(38);
 /** PURE_IMPORTS_START _mergeMap PURE_IMPORTS_END */
 
-/* tslint:enable:max-line-length */
-/**
- * Projects each source value to the same Observable which is merged multiple
- * times in the output Observable.
- *
- * <span class="informal">It's like {@link mergeMap}, but maps each value always
- * to the same inner Observable.</span>
- *
- * <img src="./img/mergeMapTo.png" width="100%">
- *
- * Maps each source value to the given Observable `innerObservable` regardless
- * of the source value, and then merges those resulting Observables into one
- * single Observable, which is the output Observable.
- *
- * @example <caption>For each click event, start an interval Observable ticking every 1 second</caption>
- * var clicks = Rx.Observable.fromEvent(document, 'click');
- * var result = clicks.mergeMapTo(Rx.Observable.interval(1000));
- * result.subscribe(x => console.log(x));
- *
- * @see {@link concatMapTo}
- * @see {@link merge}
- * @see {@link mergeAll}
- * @see {@link mergeMap}
- * @see {@link mergeScan}
- * @see {@link switchMapTo}
- *
- * @param {ObservableInput} innerObservable An Observable to replace each value from
- * the source Observable.
- * @param {number} [concurrent=Number.POSITIVE_INFINITY] Maximum number of input
- * Observables being subscribed to concurrently.
- * @return {Observable} An Observable that emits items from the given
- * `innerObservable`
- * @method mergeMapTo
- * @owner Observable
- */
 function mergeMapTo(innerObservable, resultSelector, concurrent) {
     if (concurrent === void 0) {
         concurrent = Number.POSITIVE_INFINITY;
@@ -48331,7 +45228,7 @@ function mergeMapTo(innerObservable, resultSelector, concurrent) {
 
 
 /***/ }),
-/* 435 */
+/* 444 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -48340,7 +45237,7 @@ function mergeMapTo(innerObservable, resultSelector, concurrent) {
 /* unused harmony export MergeScanSubscriber */
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_tslib__ = __webpack_require__(1);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__util_tryCatch__ = __webpack_require__(17);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__util_errorObject__ = __webpack_require__(15);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__util_errorObject__ = __webpack_require__(14);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__util_subscribeToResult__ = __webpack_require__(6);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__OuterSubscriber__ = __webpack_require__(5);
 /** PURE_IMPORTS_START tslib,_util_tryCatch,_util_errorObject,_util_subscribeToResult,_OuterSubscriber PURE_IMPORTS_END */
@@ -48349,37 +45246,6 @@ function mergeMapTo(innerObservable, resultSelector, concurrent) {
 
 
 
-/**
- * Applies an accumulator function over the source Observable where the
- * accumulator function itself returns an Observable, then each intermediate
- * Observable returned is merged into the output Observable.
- *
- * <span class="informal">It's like {@link scan}, but the Observables returned
- * by the accumulator are merged into the outer Observable.</span>
- *
- * @example <caption>Count the number of click events</caption>
- * const click$ = Rx.Observable.fromEvent(document, 'click');
- * const one$ = click$.mapTo(1);
- * const seed = 0;
- * const count$ = one$.mergeScan((acc, one) => Rx.Observable.of(acc + one), seed);
- * count$.subscribe(x => console.log(x));
- *
- * // Results:
- * 1
- * 2
- * 3
- * 4
- * // ...and so on for each click
- *
- * @param {function(acc: R, value: T): Observable<R>} accumulator
- * The accumulator function called on each source value.
- * @param seed The initial accumulation value.
- * @param {number} [concurrent=Number.POSITIVE_INFINITY] Maximum number of
- * input Observables being subscribed to concurrently.
- * @return {Observable<R>} An observable of the accumulated values.
- * @method mergeScan
- * @owner Observable
- */
 function mergeScan(accumulator, seed, concurrent) {
     if (concurrent === void 0) {
         concurrent = Number.POSITIVE_INFINITY;
@@ -48398,11 +45264,6 @@ var MergeScanOperator = /*@__PURE__*/ (function () {
     return MergeScanOperator;
 }());
 
-/**
- * We need this JSDoc comment for affecting ESDoc.
- * @ignore
- * @extends {Ignored}
- */
 var MergeScanSubscriber = /*@__PURE__*/ (function (_super) {
     __WEBPACK_IMPORTED_MODULE_0_tslib__["a" /* __extends */](MergeScanSubscriber, _super);
     function MergeScanSubscriber(destination, accumulator, acc, concurrent) {
@@ -48473,45 +45334,14 @@ var MergeScanSubscriber = /*@__PURE__*/ (function (_super) {
 
 
 /***/ }),
-/* 436 */
+/* 445 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 /* harmony export (immutable) */ __webpack_exports__["a"] = min;
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__reduce__ = __webpack_require__(49);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__reduce__ = __webpack_require__(51);
 /** PURE_IMPORTS_START _reduce PURE_IMPORTS_END */
 
-/**
- * The Min operator operates on an Observable that emits numbers (or items that can be compared with a provided function),
- * and when source Observable completes it emits a single item: the item with the smallest value.
- *
- * <img src="./img/min.png" width="100%">
- *
- * @example <caption>Get the minimal value of a series of numbers</caption>
- * Rx.Observable.of(5, 4, 7, 2, 8)
- *   .min()
- *   .subscribe(x => console.log(x)); // -> 2
- *
- * @example <caption>Use a comparer function to get the minimal item</caption>
- * interface Person {
- *   age: number,
- *   name: string
- * }
- * Observable.of<Person>({age: 7, name: 'Foo'},
- *                       {age: 5, name: 'Bar'},
- *                       {age: 9, name: 'Beer'})
- *           .min<Person>( (a: Person, b: Person) => a.age < b.age ? -1 : 1)
- *           .subscribe((x: Person) => console.log(x.name)); // -> 'Bar'
- * }
- *
- * @see {@link max}
- *
- * @param {Function} [comparer] - Optional comparer function that it will use instead of its default to compare the
- * value of two items.
- * @return {Observable<R>} An Observable that emits item with the smallest value.
- * @method min
- * @owner Observable
- */
 function min(comparer) {
     var min = (typeof comparer === 'function')
         ? function (x, y) { return comparer(x, y) < 0 ? x : y; }
@@ -48522,7 +45352,7 @@ function min(comparer) {
 
 
 /***/ }),
-/* 437 */
+/* 446 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -48539,68 +45369,6 @@ function min(comparer) {
 
 
 
-/* tslint:enable:max-line-length */
-/**
- * When any of the provided Observable emits an complete or error notification, it immediately subscribes to the next one
- * that was passed.
- *
- * <span class="informal">Execute series of Observables no matter what, even if it means swallowing errors.</span>
- *
- * <img src="./img/onErrorResumeNext.png" width="100%">
- *
- * `onErrorResumeNext` is an operator that accepts a series of Observables, provided either directly as
- * arguments or as an array. If no single Observable is provided, returned Observable will simply behave the same
- * as the source.
- *
- * `onErrorResumeNext` returns an Observable that starts by subscribing and re-emitting values from the source Observable.
- * When its stream of values ends - no matter if Observable completed or emitted an error - `onErrorResumeNext`
- * will subscribe to the first Observable that was passed as an argument to the method. It will start re-emitting
- * its values as well and - again - when that stream ends, `onErrorResumeNext` will proceed to subscribing yet another
- * Observable in provided series, no matter if previous Observable completed or ended with an error. This will
- * be happening until there is no more Observables left in the series, at which point returned Observable will
- * complete - even if the last subscribed stream ended with an error.
- *
- * `onErrorResumeNext` can be therefore thought of as version of {@link concat} operator, which is more permissive
- * when it comes to the errors emitted by its input Observables. While `concat` subscribes to the next Observable
- * in series only if previous one successfully completed, `onErrorResumeNext` subscribes even if it ended with
- * an error.
- *
- * Note that you do not get any access to errors emitted by the Observables. In particular do not
- * expect these errors to appear in error callback passed to {@link subscribe}. If you want to take
- * specific actions based on what error was emitted by an Observable, you should try out {@link catch} instead.
- *
- *
- * @example <caption>Subscribe to the next Observable after map fails</caption>
- * Rx.Observable.of(1, 2, 3, 0)
- *   .map(x => {
- *       if (x === 0) { throw Error(); }
-         return 10 / x;
- *   })
- *   .onErrorResumeNext(Rx.Observable.of(1, 2, 3))
- *   .subscribe(
- *     val => console.log(val),
- *     err => console.log(err),          // Will never be called.
- *     () => console.log('that\'s it!')
- *   );
- *
- * // Logs:
- * // 10
- * // 5
- * // 3.3333333333333335
- * // 1
- * // 2
- * // 3
- * // "that's it!"
- *
- * @see {@link concat}
- * @see {@link catch}
- *
- * @param {...ObservableInput} observables Observables passed either directly or as an array.
- * @return {Observable} An Observable that emits values from source Observable, but - if it errors - subscribes
- * to the next passed Observable and so on, until it completes or runs out of Observables.
- * @method onErrorResumeNext
- * @owner Observable
- */
 function onErrorResumeNext() {
     var nextSources = [];
     for (var _i = 0; _i < arguments.length; _i++) {
@@ -48611,7 +45379,6 @@ function onErrorResumeNext() {
     }
     return function (source) { return source.lift(new OnErrorResumeNextOperator(nextSources)); };
 }
-/* tslint:enable:max-line-length */
 function onErrorResumeNextStatic() {
     var nextSources = [];
     for (var _i = 0; _i < arguments.length; _i++) {
@@ -48668,7 +45435,7 @@ var OnErrorResumeNextSubscriber = /*@__PURE__*/ (function (_super) {
 
 
 /***/ }),
-/* 438 */
+/* 447 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -48678,41 +45445,6 @@ var OnErrorResumeNextSubscriber = /*@__PURE__*/ (function (_super) {
 /** PURE_IMPORTS_START tslib,_Subscriber PURE_IMPORTS_END */
 
 
-/**
- * Groups pairs of consecutive emissions together and emits them as an array of
- * two values.
- *
- * <span class="informal">Puts the current value and previous value together as
- * an array, and emits that.</span>
- *
- * <img src="./img/pairwise.png" width="100%">
- *
- * The Nth emission from the source Observable will cause the output Observable
- * to emit an array [(N-1)th, Nth] of the previous and the current value, as a
- * pair. For this reason, `pairwise` emits on the second and subsequent
- * emissions from the source Observable, but not on the first emission, because
- * there is no previous value in that case.
- *
- * @example <caption>On every click (starting from the second), emit the relative distance to the previous click</caption>
- * var clicks = Rx.Observable.fromEvent(document, 'click');
- * var pairs = clicks.pairwise();
- * var distance = pairs.map(pair => {
- *   var x0 = pair[0].clientX;
- *   var y0 = pair[0].clientY;
- *   var x1 = pair[1].clientX;
- *   var y1 = pair[1].clientY;
- *   return Math.sqrt(Math.pow(x0 - x1, 2) + Math.pow(y0 - y1, 2));
- * });
- * distance.subscribe(x => console.log(x));
- *
- * @see {@link buffer}
- * @see {@link bufferCount}
- *
- * @return {Observable<Array<T>>} An Observable of pairs (as arrays) of
- * consecutive values from the source Observable.
- * @method pairwise
- * @owner Observable
- */
 function pairwise() {
     return function (source) { return source.lift(new PairwiseOperator()); };
 }
@@ -48724,11 +45456,6 @@ var PairwiseOperator = /*@__PURE__*/ (function () {
     };
     return PairwiseOperator;
 }());
-/**
- * We need this JSDoc comment for affecting ESDoc.
- * @ignore
- * @extends {Ignored}
- */
 var PairwiseSubscriber = /*@__PURE__*/ (function (_super) {
     __WEBPACK_IMPORTED_MODULE_0_tslib__["a" /* __extends */](PairwiseSubscriber, _super);
     function PairwiseSubscriber(destination) {
@@ -48751,57 +45478,16 @@ var PairwiseSubscriber = /*@__PURE__*/ (function (_super) {
 
 
 /***/ }),
-/* 439 */
+/* 448 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 /* harmony export (immutable) */ __webpack_exports__["a"] = partition;
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__util_not__ = __webpack_require__(440);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__filter__ = __webpack_require__(39);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__util_not__ = __webpack_require__(449);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__filter__ = __webpack_require__(40);
 /** PURE_IMPORTS_START _util_not,_filter PURE_IMPORTS_END */
 
 
-/**
- * Splits the source Observable into two, one with values that satisfy a
- * predicate, and another with values that don't satisfy the predicate.
- *
- * <span class="informal">It's like {@link filter}, but returns two Observables:
- * one like the output of {@link filter}, and the other with values that did not
- * pass the condition.</span>
- *
- * <img src="./img/partition.png" width="100%">
- *
- * `partition` outputs an array with two Observables that partition the values
- * from the source Observable through the given `predicate` function. The first
- * Observable in that array emits source values for which the predicate argument
- * returns true. The second Observable emits source values for which the
- * predicate returns false. The first behaves like {@link filter} and the second
- * behaves like {@link filter} with the predicate negated.
- *
- * @example <caption>Partition click events into those on DIV elements and those elsewhere</caption>
- * var clicks = Rx.Observable.fromEvent(document, 'click');
- * var parts = clicks.partition(ev => ev.target.tagName === 'DIV');
- * var clicksOnDivs = parts[0];
- * var clicksElsewhere = parts[1];
- * clicksOnDivs.subscribe(x => console.log('DIV clicked: ', x));
- * clicksElsewhere.subscribe(x => console.log('Other clicked: ', x));
- *
- * @see {@link filter}
- *
- * @param {function(value: T, index: number): boolean} predicate A function that
- * evaluates each value emitted by the source Observable. If it returns `true`,
- * the value is emitted on the first Observable in the returned array, if
- * `false` the value is emitted on the second Observable in the array. The
- * `index` parameter is the number `i` for the i-th source emission that has
- * happened since the subscription, starting from the number `0`.
- * @param {any} [thisArg] An optional argument to determine the value of `this`
- * in the `predicate` function.
- * @return {[Observable<T>, Observable<T>]} An array with two Observables: one
- * with values that passed the predicate, and another with values that did not
- * pass the predicate.
- * @method partition
- * @owner Observable
- */
 function partition(predicate, thisArg) {
     return function (source) {
         return [
@@ -48814,7 +45500,7 @@ function partition(predicate, thisArg) {
 
 
 /***/ }),
-/* 440 */
+/* 449 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -48832,7 +45518,7 @@ function not(pred, thisArg) {
 
 
 /***/ }),
-/* 441 */
+/* 450 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -48840,32 +45526,6 @@ function not(pred, thisArg) {
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__map__ = __webpack_require__(16);
 /** PURE_IMPORTS_START _map PURE_IMPORTS_END */
 
-/**
- * Maps each source value (an object) to its specified nested property.
- *
- * <span class="informal">Like {@link map}, but meant only for picking one of
- * the nested properties of every emitted object.</span>
- *
- * <img src="./img/pluck.png" width="100%">
- *
- * Given a list of strings describing a path to an object property, retrieves
- * the value of a specified nested property from all values in the source
- * Observable. If a property can't be resolved, it will return `undefined` for
- * that value.
- *
- * @example <caption>Map every click to the tagName of the clicked target element</caption>
- * var clicks = Rx.Observable.fromEvent(document, 'click');
- * var tagNames = clicks.pluck('target', 'tagName');
- * tagNames.subscribe(x => console.log(x));
- *
- * @see {@link map}
- *
- * @param {...string} properties The nested properties to pluck from each source
- * value (an object).
- * @return {Observable} A new Observable of property values from the source values.
- * @method pluck
- * @owner Observable
- */
 function pluck() {
     var properties = [];
     for (var _i = 0; _i < arguments.length; _i++) {
@@ -48897,7 +45557,7 @@ function plucker(props, length) {
 
 
 /***/ }),
-/* 442 */
+/* 451 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -48907,20 +45567,6 @@ function plucker(props, length) {
 /** PURE_IMPORTS_START _Subject,_multicast PURE_IMPORTS_END */
 
 
-/* tslint:enable:max-line-length */
-/**
- * Returns a ConnectableObservable, which is a variety of Observable that waits until its connect method is called
- * before it begins emitting items to those Observers that have subscribed to it.
- *
- * <img src="./img/publish.png" width="100%">
- *
- * @param {Function} [selector] - Optional selector function which can use the multicasted source sequence as many times
- * as needed, without causing multiple subscriptions to the source sequence.
- * Subscribers to the given source will receive all notifications of the source from the time of the subscription on.
- * @return A ConnectableObservable that upon connection causes the source Observable to emit items to its Observers.
- * @method publish
- * @owner Observable
- */
 function publish(selector) {
     return selector ?
         Object(__WEBPACK_IMPORTED_MODULE_1__multicast__["a" /* multicast */])(function () { return new __WEBPACK_IMPORTED_MODULE_0__Subject__["a" /* Subject */](); }, selector) :
@@ -48930,22 +45576,16 @@ function publish(selector) {
 
 
 /***/ }),
-/* 443 */
+/* 452 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 /* harmony export (immutable) */ __webpack_exports__["a"] = publishBehavior;
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__BehaviorSubject__ = __webpack_require__(222);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__BehaviorSubject__ = __webpack_require__(227);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__multicast__ = __webpack_require__(26);
 /** PURE_IMPORTS_START _BehaviorSubject,_multicast PURE_IMPORTS_END */
 
 
-/**
- * @param value
- * @return {ConnectableObservable<T>}
- * @method publishBehavior
- * @owner Observable
- */
 function publishBehavior(value) {
     return function (source) { return Object(__WEBPACK_IMPORTED_MODULE_1__multicast__["a" /* multicast */])(new __WEBPACK_IMPORTED_MODULE_0__BehaviorSubject__["a" /* BehaviorSubject */](value))(source); };
 }
@@ -48953,12 +45593,12 @@ function publishBehavior(value) {
 
 
 /***/ }),
-/* 444 */
+/* 453 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 /* harmony export (immutable) */ __webpack_exports__["a"] = publishLast;
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__AsyncSubject__ = __webpack_require__(46);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__AsyncSubject__ = __webpack_require__(47);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__multicast__ = __webpack_require__(26);
 /** PURE_IMPORTS_START _AsyncSubject,_multicast PURE_IMPORTS_END */
 
@@ -48970,17 +45610,16 @@ function publishLast() {
 
 
 /***/ }),
-/* 445 */
+/* 454 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 /* harmony export (immutable) */ __webpack_exports__["a"] = publishReplay;
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__ReplaySubject__ = __webpack_require__(62);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__ReplaySubject__ = __webpack_require__(67);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__multicast__ = __webpack_require__(26);
 /** PURE_IMPORTS_START _ReplaySubject,_multicast PURE_IMPORTS_END */
 
 
-/* tslint:enable:max-line-length */
 function publishReplay(bufferSize, windowTime, selectorOrScheduler, scheduler) {
     if (selectorOrScheduler && typeof selectorOrScheduler !== 'function') {
         scheduler = selectorOrScheduler;
@@ -48993,33 +45632,22 @@ function publishReplay(bufferSize, windowTime, selectorOrScheduler, scheduler) {
 
 
 /***/ }),
-/* 446 */
+/* 455 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 /* harmony export (immutable) */ __webpack_exports__["a"] = race;
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__util_isArray__ = __webpack_require__(11);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__observable_race__ = __webpack_require__(239);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__observable_race__ = __webpack_require__(243);
 /** PURE_IMPORTS_START _util_isArray,_observable_race PURE_IMPORTS_END */
 
 
-/* tslint:enable:max-line-length */
-/**
- * Returns an Observable that mirrors the first source Observable to emit an item
- * from the combination of this Observable and supplied Observables.
- * @param {...Observables} ...observables Sources used to race for which Observable emits first.
- * @return {Observable} An Observable that mirrors the output of the first Observable to emit an item.
- * @method race
- * @owner Observable
- */
 function race() {
     var observables = [];
     for (var _i = 0; _i < arguments.length; _i++) {
         observables[_i] = arguments[_i];
     }
     return function raceOperatorFunction(source) {
-        // if the only argument is an array, it was most likely called with
-        // `pair([obs1, obs2, ...])`
         if (observables.length === 1 && Object(__WEBPACK_IMPORTED_MODULE_0__util_isArray__["a" /* isArray */])(observables[0])) {
             observables = observables[0];
         }
@@ -49030,30 +45658,18 @@ function race() {
 
 
 /***/ }),
-/* 447 */
+/* 456 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 /* harmony export (immutable) */ __webpack_exports__["a"] = repeat;
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_tslib__ = __webpack_require__(1);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__Subscriber__ = __webpack_require__(2);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__observable_empty__ = __webpack_require__(13);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__observable_empty__ = __webpack_require__(12);
 /** PURE_IMPORTS_START tslib,_Subscriber,_observable_empty PURE_IMPORTS_END */
 
 
 
-/**
- * Returns an Observable that repeats the stream of items emitted by the source Observable at most count times.
- *
- * <img src="./img/repeat.png" width="100%">
- *
- * @param {number} [count] The number of times the source Observable items are repeated, a count of 0 will yield
- * an empty Observable.
- * @return {Observable} An Observable that repeats the stream of items emitted by the source Observable at most
- * count times.
- * @method repeat
- * @owner Observable
- */
 function repeat(count) {
     if (count === void 0) {
         count = -1;
@@ -49080,11 +45696,6 @@ var RepeatOperator = /*@__PURE__*/ (function () {
     };
     return RepeatOperator;
 }());
-/**
- * We need this JSDoc comment for affecting ESDoc.
- * @ignore
- * @extends {Ignored}
- */
 var RepeatSubscriber = /*@__PURE__*/ (function (_super) {
     __WEBPACK_IMPORTED_MODULE_0_tslib__["a" /* __extends */](RepeatSubscriber, _super);
     function RepeatSubscriber(destination, count, source) {
@@ -49111,7 +45722,7 @@ var RepeatSubscriber = /*@__PURE__*/ (function (_super) {
 
 
 /***/ }),
-/* 448 */
+/* 457 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -49119,7 +45730,7 @@ var RepeatSubscriber = /*@__PURE__*/ (function (_super) {
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_tslib__ = __webpack_require__(1);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__Subject__ = __webpack_require__(9);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__util_tryCatch__ = __webpack_require__(17);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__util_errorObject__ = __webpack_require__(15);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__util_errorObject__ = __webpack_require__(14);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__OuterSubscriber__ = __webpack_require__(5);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_5__util_subscribeToResult__ = __webpack_require__(6);
 /** PURE_IMPORTS_START tslib,_Subject,_util_tryCatch,_util_errorObject,_OuterSubscriber,_util_subscribeToResult PURE_IMPORTS_END */
@@ -49129,20 +45740,6 @@ var RepeatSubscriber = /*@__PURE__*/ (function (_super) {
 
 
 
-/**
- * Returns an Observable that mirrors the source Observable with the exception of a `complete`. If the source
- * Observable calls `complete`, this method will emit to the Observable returned from `notifier`. If that Observable
- * calls `complete` or `error`, then this method will call `complete` or `error` on the child subscription. Otherwise
- * this method will resubscribe to the source Observable.
- *
- * <img src="./img/repeatWhen.png" width="100%">
- *
- * @param {function(notifications: Observable): Observable} notifier - Receives an Observable of notifications with
- * which a user can `complete` or `error`, aborting the repetition.
- * @return {Observable} The source Observable modified with repeat logic.
- * @method repeatWhen
- * @owner Observable
- */
 function repeatWhen(notifier) {
     return function (source) { return source.lift(new RepeatWhenOperator(notifier)); };
 }
@@ -49155,11 +45752,6 @@ var RepeatWhenOperator = /*@__PURE__*/ (function () {
     };
     return RepeatWhenOperator;
 }());
-/**
- * We need this JSDoc comment for affecting ESDoc.
- * @ignore
- * @extends {Ignored}
- */
 var RepeatWhenSubscriber = /*@__PURE__*/ (function (_super) {
     __WEBPACK_IMPORTED_MODULE_0_tslib__["a" /* __extends */](RepeatWhenSubscriber, _super);
     function RepeatWhenSubscriber(destination, notifier, source) {
@@ -49191,7 +45783,6 @@ var RepeatWhenSubscriber = /*@__PURE__*/ (function (_super) {
             this.notifications.next();
         }
     };
-    /** @deprecated This is an internal implementation detail, do not use. */
     RepeatWhenSubscriber.prototype._unsubscribe = function () {
         var _a = this, notifications = _a.notifications, retriesSubscription = _a.retriesSubscription;
         if (notifications) {
@@ -49204,7 +45795,6 @@ var RepeatWhenSubscriber = /*@__PURE__*/ (function (_super) {
         }
         this.retries = null;
     };
-    /** @deprecated This is an internal implementation detail, do not use. */
     RepeatWhenSubscriber.prototype._unsubscribeAndRecycle = function () {
         var _unsubscribe = this._unsubscribe;
         this._unsubscribe = null;
@@ -49227,7 +45817,7 @@ var RepeatWhenSubscriber = /*@__PURE__*/ (function (_super) {
 
 
 /***/ }),
-/* 449 */
+/* 458 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -49237,22 +45827,6 @@ var RepeatWhenSubscriber = /*@__PURE__*/ (function (_super) {
 /** PURE_IMPORTS_START tslib,_Subscriber PURE_IMPORTS_END */
 
 
-/**
- * Returns an Observable that mirrors the source Observable with the exception of an `error`. If the source Observable
- * calls `error`, this method will resubscribe to the source Observable for a maximum of `count` resubscriptions (given
- * as a number parameter) rather than propagating the `error` call.
- *
- * <img src="./img/retry.png" width="100%">
- *
- * Any and all items emitted by the source Observable will be emitted by the resulting Observable, even those emitted
- * during failed subscriptions. For example, if an Observable fails at first but emits [1, 2] then succeeds the second
- * time and emits: [1, 2, 3, 4, 5] then the complete stream of emissions and notifications
- * would be: [1, 2, 1, 2, 3, 4, 5, `complete`].
- * @param {number} count - Number of retry attempts before failing.
- * @return {Observable} The source Observable modified with the retry logic.
- * @method retry
- * @owner Observable
- */
 function retry(count) {
     if (count === void 0) {
         count = -1;
@@ -49269,11 +45843,6 @@ var RetryOperator = /*@__PURE__*/ (function () {
     };
     return RetryOperator;
 }());
-/**
- * We need this JSDoc comment for affecting ESDoc.
- * @ignore
- * @extends {Ignored}
- */
 var RetrySubscriber = /*@__PURE__*/ (function (_super) {
     __WEBPACK_IMPORTED_MODULE_0_tslib__["a" /* __extends */](RetrySubscriber, _super);
     function RetrySubscriber(destination, count, source) {
@@ -49300,7 +45869,7 @@ var RetrySubscriber = /*@__PURE__*/ (function (_super) {
 
 
 /***/ }),
-/* 450 */
+/* 459 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -49308,7 +45877,7 @@ var RetrySubscriber = /*@__PURE__*/ (function (_super) {
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_tslib__ = __webpack_require__(1);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__Subject__ = __webpack_require__(9);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__util_tryCatch__ = __webpack_require__(17);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__util_errorObject__ = __webpack_require__(15);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__util_errorObject__ = __webpack_require__(14);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__OuterSubscriber__ = __webpack_require__(5);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_5__util_subscribeToResult__ = __webpack_require__(6);
 /** PURE_IMPORTS_START tslib,_Subject,_util_tryCatch,_util_errorObject,_OuterSubscriber,_util_subscribeToResult PURE_IMPORTS_END */
@@ -49318,20 +45887,6 @@ var RetrySubscriber = /*@__PURE__*/ (function (_super) {
 
 
 
-/**
- * Returns an Observable that mirrors the source Observable with the exception of an `error`. If the source Observable
- * calls `error`, this method will emit the Throwable that caused the error to the Observable returned from `notifier`.
- * If that Observable calls `complete` or `error` then this method will call `complete` or `error` on the child
- * subscription. Otherwise this method will resubscribe to the source Observable.
- *
- * <img src="./img/retryWhen.png" width="100%">
- *
- * @param {function(errors: Observable): Observable} notifier - Receives an Observable of notifications with which a
- * user can `complete` or `error`, aborting the retry.
- * @return {Observable} The source Observable modified with retry logic.
- * @method retryWhen
- * @owner Observable
- */
 function retryWhen(notifier) {
     return function (source) { return source.lift(new RetryWhenOperator(notifier, source)); };
 }
@@ -49345,11 +45900,6 @@ var RetryWhenOperator = /*@__PURE__*/ (function () {
     };
     return RetryWhenOperator;
 }());
-/**
- * We need this JSDoc comment for affecting ESDoc.
- * @ignore
- * @extends {Ignored}
- */
 var RetryWhenSubscriber = /*@__PURE__*/ (function (_super) {
     __WEBPACK_IMPORTED_MODULE_0_tslib__["a" /* __extends */](RetryWhenSubscriber, _super);
     function RetryWhenSubscriber(destination, notifier, source) {
@@ -49382,7 +45932,6 @@ var RetryWhenSubscriber = /*@__PURE__*/ (function (_super) {
             errors.next(err);
         }
     };
-    /** @deprecated This is an internal implementation detail, do not use. */
     RetryWhenSubscriber.prototype._unsubscribe = function () {
         var _a = this, errors = _a.errors, retriesSubscription = _a.retriesSubscription;
         if (errors) {
@@ -49408,7 +45957,7 @@ var RetryWhenSubscriber = /*@__PURE__*/ (function (_super) {
 
 
 /***/ }),
-/* 451 */
+/* 460 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -49420,40 +45969,6 @@ var RetryWhenSubscriber = /*@__PURE__*/ (function (_super) {
 
 
 
-/**
- * Emits the most recently emitted value from the source Observable whenever
- * another Observable, the `notifier`, emits.
- *
- * <span class="informal">It's like {@link sampleTime}, but samples whenever
- * the `notifier` Observable emits something.</span>
- *
- * <img src="./img/sample.png" width="100%">
- *
- * Whenever the `notifier` Observable emits a value or completes, `sample`
- * looks at the source Observable and emits whichever value it has most recently
- * emitted since the previous sampling, unless the source has not emitted
- * anything since the previous sampling. The `notifier` is subscribed to as soon
- * as the output Observable is subscribed.
- *
- * @example <caption>On every click, sample the most recent "seconds" timer</caption>
- * var seconds = Rx.Observable.interval(1000);
- * var clicks = Rx.Observable.fromEvent(document, 'click');
- * var result = seconds.sample(clicks);
- * result.subscribe(x => console.log(x));
- *
- * @see {@link audit}
- * @see {@link debounce}
- * @see {@link sampleTime}
- * @see {@link throttle}
- *
- * @param {Observable<any>} notifier The Observable to use for sampling the
- * source Observable.
- * @return {Observable<T>} An Observable that emits the results of sampling the
- * values emitted by the source Observable whenever the notifier Observable
- * emits value or completes.
- * @method sample
- * @owner Observable
- */
 function sample(notifier) {
     return function (source) { return source.lift(new SampleOperator(notifier)); };
 }
@@ -49469,11 +45984,6 @@ var SampleOperator = /*@__PURE__*/ (function () {
     };
     return SampleOperator;
 }());
-/**
- * We need this JSDoc comment for affecting ESDoc.
- * @ignore
- * @extends {Ignored}
- */
 var SampleSubscriber = /*@__PURE__*/ (function (_super) {
     __WEBPACK_IMPORTED_MODULE_0_tslib__["a" /* __extends */](SampleSubscriber, _super);
     function SampleSubscriber() {
@@ -49503,54 +46013,18 @@ var SampleSubscriber = /*@__PURE__*/ (function (_super) {
 
 
 /***/ }),
-/* 452 */
+/* 461 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 /* harmony export (immutable) */ __webpack_exports__["a"] = sampleTime;
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_tslib__ = __webpack_require__(1);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__Subscriber__ = __webpack_require__(2);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__scheduler_async__ = __webpack_require__(12);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__scheduler_async__ = __webpack_require__(13);
 /** PURE_IMPORTS_START tslib,_Subscriber,_scheduler_async PURE_IMPORTS_END */
 
 
 
-/**
- * Emits the most recently emitted value from the source Observable within
- * periodic time intervals.
- *
- * <span class="informal">Samples the source Observable at periodic time
- * intervals, emitting what it samples.</span>
- *
- * <img src="./img/sampleTime.png" width="100%">
- *
- * `sampleTime` periodically looks at the source Observable and emits whichever
- * value it has most recently emitted since the previous sampling, unless the
- * source has not emitted anything since the previous sampling. The sampling
- * happens periodically in time every `period` milliseconds (or the time unit
- * defined by the optional `scheduler` argument). The sampling starts as soon as
- * the output Observable is subscribed.
- *
- * @example <caption>Every second, emit the most recent click at most once</caption>
- * var clicks = Rx.Observable.fromEvent(document, 'click');
- * var result = clicks.sampleTime(1000);
- * result.subscribe(x => console.log(x));
- *
- * @see {@link auditTime}
- * @see {@link debounceTime}
- * @see {@link delay}
- * @see {@link sample}
- * @see {@link throttleTime}
- *
- * @param {number} period The sampling period expressed in milliseconds or the
- * time unit determined internally by the optional `scheduler`.
- * @param {Scheduler} [scheduler=async] The {@link IScheduler} to use for
- * managing the timers that handle the sampling.
- * @return {Observable<T>} An Observable that emits the results of sampling the
- * values emitted by the source Observable at the specified time interval.
- * @method sampleTime
- * @owner Observable
- */
 function sampleTime(period, scheduler) {
     if (scheduler === void 0) {
         scheduler = __WEBPACK_IMPORTED_MODULE_2__scheduler_async__["a" /* async */];
@@ -49567,11 +46041,6 @@ var SampleTimeOperator = /*@__PURE__*/ (function () {
     };
     return SampleTimeOperator;
 }());
-/**
- * We need this JSDoc comment for affecting ESDoc.
- * @ignore
- * @extends {Ignored}
- */
 var SampleTimeSubscriber = /*@__PURE__*/ (function (_super) {
     __WEBPACK_IMPORTED_MODULE_0_tslib__["a" /* __extends */](SampleTimeSubscriber, _super);
     function SampleTimeSubscriber(destination, period, scheduler) {
@@ -49603,7 +46072,7 @@ function dispatchNotification(state) {
 
 
 /***/ }),
-/* 453 */
+/* 462 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -49613,64 +46082,12 @@ function dispatchNotification(state) {
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_tslib__ = __webpack_require__(1);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__Subscriber__ = __webpack_require__(2);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__util_tryCatch__ = __webpack_require__(17);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__util_errorObject__ = __webpack_require__(15);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__util_errorObject__ = __webpack_require__(14);
 /** PURE_IMPORTS_START tslib,_Subscriber,_util_tryCatch,_util_errorObject PURE_IMPORTS_END */
 
 
 
 
-/**
- * Compares all values of two observables in sequence using an optional comparor function
- * and returns an observable of a single boolean value representing whether or not the two sequences
- * are equal.
- *
- * <span class="informal">Checks to see of all values emitted by both observables are equal, in order.</span>
- *
- * <img src="./img/sequenceEqual.png" width="100%">
- *
- * `sequenceEqual` subscribes to two observables and buffers incoming values from each observable. Whenever either
- * observable emits a value, the value is buffered and the buffers are shifted and compared from the bottom
- * up; If any value pair doesn't match, the returned observable will emit `false` and complete. If one of the
- * observables completes, the operator will wait for the other observable to complete; If the other
- * observable emits before completing, the returned observable will emit `false` and complete. If one observable never
- * completes or emits after the other complets, the returned observable will never complete.
- *
- * @example <caption>figure out if the Konami code matches</caption>
- * var code = Rx.Observable.from([
- *  "ArrowUp",
- *  "ArrowUp",
- *  "ArrowDown",
- *  "ArrowDown",
- *  "ArrowLeft",
- *  "ArrowRight",
- *  "ArrowLeft",
- *  "ArrowRight",
- *  "KeyB",
- *  "KeyA",
- *  "Enter" // no start key, clearly.
- * ]);
- *
- * var keys = Rx.Observable.fromEvent(document, 'keyup')
- *  .map(e => e.code);
- * var matches = keys.bufferCount(11, 1)
- *  .mergeMap(
- *    last11 =>
- *      Rx.Observable.from(last11)
- *        .sequenceEqual(code)
- *   );
- * matches.subscribe(matched => console.log('Successful cheat at Contra? ', matched));
- *
- * @see {@link combineLatest}
- * @see {@link zip}
- * @see {@link withLatestFrom}
- *
- * @param {Observable} compareTo The observable sequence to compare the source sequence to.
- * @param {function} [comparor] An optional function to compare each value pair
- * @return {Observable} An Observable of a single boolean value representing whether or not
- * the values emitted by both observables were equal in sequence.
- * @method sequenceEqual
- * @owner Observable
- */
 function sequenceEqual(compareTo, comparor) {
     return function (source) { return source.lift(new SequenceEqualOperator(compareTo, comparor)); };
 }
@@ -49685,11 +46102,6 @@ var SequenceEqualOperator = /*@__PURE__*/ (function () {
     return SequenceEqualOperator;
 }());
 
-/**
- * We need this JSDoc comment for affecting ESDoc.
- * @ignore
- * @extends {Ignored}
- */
 var SequenceEqualSubscriber = /*@__PURE__*/ (function (_super) {
     __WEBPACK_IMPORTED_MODULE_0_tslib__["a" /* __extends */](SequenceEqualSubscriber, _super);
     function SequenceEqualSubscriber(destination, compareTo, comparor) {
@@ -49778,13 +46190,13 @@ var SequenceEqualCompareToSubscriber = /*@__PURE__*/ (function (_super) {
 
 
 /***/ }),
-/* 454 */
+/* 463 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 /* harmony export (immutable) */ __webpack_exports__["a"] = share;
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__multicast__ = __webpack_require__(26);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__refCount__ = __webpack_require__(61);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__refCount__ = __webpack_require__(66);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__Subject__ = __webpack_require__(9);
 /** PURE_IMPORTS_START _multicast,_refCount,_Subject PURE_IMPORTS_END */
 
@@ -49793,18 +46205,6 @@ var SequenceEqualCompareToSubscriber = /*@__PURE__*/ (function (_super) {
 function shareSubjectFactory() {
     return new __WEBPACK_IMPORTED_MODULE_2__Subject__["a" /* Subject */]();
 }
-/**
- * Returns a new Observable that multicasts (shares) the original Observable. As long as there is at least one
- * Subscriber this Observable will be subscribed and emitting data. When all subscribers have unsubscribed it will
- * unsubscribe from the source Observable. Because the Observable is multicasting it makes the stream `hot`.
- * This is an alias for .multicast(() => new Subject()).refCount().
- *
- * <img src="./img/share.png" width="100%">
- *
- * @return {Observable<T>} An Observable that upon connection causes the source Observable to emit items to its Observers.
- * @method share
- * @owner Observable
- */
 function share() {
     return function (source) { return Object(__WEBPACK_IMPORTED_MODULE_1__refCount__["a" /* refCount */])()(Object(__WEBPACK_IMPORTED_MODULE_0__multicast__["a" /* multicast */])(shareSubjectFactory)(source)); };
 }
@@ -49812,18 +46212,14 @@ function share() {
 
 
 /***/ }),
-/* 455 */
+/* 464 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 /* harmony export (immutable) */ __webpack_exports__["a"] = shareReplay;
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__ReplaySubject__ = __webpack_require__(62);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__ReplaySubject__ = __webpack_require__(67);
 /** PURE_IMPORTS_START _ReplaySubject PURE_IMPORTS_END */
 
-/**
- * @method shareReplay
- * @owner Observable
- */
 function shareReplay(bufferSize, windowTime, scheduler) {
     return function (source) { return source.lift(shareReplayOperator(bufferSize, windowTime, scheduler)); };
 }
@@ -49864,35 +46260,18 @@ function shareReplayOperator(bufferSize, windowTime, scheduler) {
 
 
 /***/ }),
-/* 456 */
+/* 465 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 /* harmony export (immutable) */ __webpack_exports__["a"] = single;
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_tslib__ = __webpack_require__(1);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__Subscriber__ = __webpack_require__(2);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__util_EmptyError__ = __webpack_require__(35);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__util_EmptyError__ = __webpack_require__(36);
 /** PURE_IMPORTS_START tslib,_Subscriber,_util_EmptyError PURE_IMPORTS_END */
 
 
 
-/**
- * Returns an Observable that emits the single item emitted by the source Observable that matches a specified
- * predicate, if that Observable emits one such item. If the source Observable emits more than one such item or no
- * items, notify of an IllegalArgumentException or NoSuchElementException respectively. If the source Observable
- * emits items but none match the specified predicate then `undefined` is emiited.
- *
- * <img src="./img/single.png" width="100%">
- *
- * @throws {EmptyError} Delivers an EmptyError to the Observer's `error`
- * callback if the Observable completes before any `next` notification was sent.
- * @param {Function} predicate - A predicate function to evaluate items emitted by the source Observable.
- * @return {Observable<T>} An Observable that emits the single item emitted by the source Observable that matches
- * the predicate or `undefined` when no items match.
- *
- * @method single
- * @owner Observable
- */
 function single(predicate) {
     return function (source) { return source.lift(new SingleOperator(predicate, source)); };
 }
@@ -49906,11 +46285,6 @@ var SingleOperator = /*@__PURE__*/ (function () {
     };
     return SingleOperator;
 }());
-/**
- * We need this JSDoc comment for affecting ESDoc.
- * @ignore
- * @extends {Ignored}
- */
 var SingleSubscriber = /*@__PURE__*/ (function (_super) {
     __WEBPACK_IMPORTED_MODULE_0_tslib__["a" /* __extends */](SingleSubscriber, _super);
     function SingleSubscriber(destination, predicate, source) {
@@ -49965,7 +46339,7 @@ var SingleSubscriber = /*@__PURE__*/ (function (_super) {
 
 
 /***/ }),
-/* 457 */
+/* 466 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -49975,17 +46349,6 @@ var SingleSubscriber = /*@__PURE__*/ (function (_super) {
 /** PURE_IMPORTS_START tslib,_Subscriber PURE_IMPORTS_END */
 
 
-/**
- * Returns an Observable that skips the first `count` items emitted by the source Observable.
- *
- * <img src="./img/skip.png" width="100%">
- *
- * @param {Number} count - The number of times, items emitted by source Observable should be skipped.
- * @return {Observable} An Observable that skips values emitted by the source Observable.
- *
- * @method skip
- * @owner Observable
- */
 function skip(count) {
     return function (source) { return source.lift(new SkipOperator(count)); };
 }
@@ -49998,11 +46361,6 @@ var SkipOperator = /*@__PURE__*/ (function () {
     };
     return SkipOperator;
 }());
-/**
- * We need this JSDoc comment for affecting ESDoc.
- * @ignore
- * @extends {Ignored}
- */
 var SkipSubscriber = /*@__PURE__*/ (function (_super) {
     __WEBPACK_IMPORTED_MODULE_0_tslib__["a" /* __extends */](SkipSubscriber, _super);
     function SkipSubscriber(destination, total) {
@@ -50022,50 +46380,18 @@ var SkipSubscriber = /*@__PURE__*/ (function (_super) {
 
 
 /***/ }),
-/* 458 */
+/* 467 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 /* harmony export (immutable) */ __webpack_exports__["a"] = skipLast;
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_tslib__ = __webpack_require__(1);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__Subscriber__ = __webpack_require__(2);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__util_ArgumentOutOfRangeError__ = __webpack_require__(34);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__util_ArgumentOutOfRangeError__ = __webpack_require__(35);
 /** PURE_IMPORTS_START tslib,_Subscriber,_util_ArgumentOutOfRangeError PURE_IMPORTS_END */
 
 
 
-/**
- * Skip the last `count` values emitted by the source Observable.
- *
- * <img src="./img/skipLast.png" width="100%">
- *
- * `skipLast` returns an Observable that accumulates a queue with a length
- * enough to store the first `count` values. As more values are received,
- * values are taken from the front of the queue and produced on the result
- * sequence. This causes values to be delayed.
- *
- * @example <caption>Skip the last 2 values of an Observable with many values</caption>
- * var many = Rx.Observable.range(1, 5);
- * var skipLastTwo = many.skipLast(2);
- * skipLastTwo.subscribe(x => console.log(x));
- *
- * // Results in:
- * // 1 2 3
- *
- * @see {@link skip}
- * @see {@link skipUntil}
- * @see {@link skipWhile}
- * @see {@link take}
- *
- * @throws {ArgumentOutOfRangeError} When using `skipLast(i)`, it throws
- * ArgumentOutOrRangeError if `i < 0`.
- *
- * @param {number} count Number of elements to skip from the end of the source Observable.
- * @returns {Observable<T>} An Observable that skips the last count values
- * emitted by the source Observable.
- * @method skipLast
- * @owner Observable
- */
 function skipLast(count) {
     return function (source) { return source.lift(new SkipLastOperator(count)); };
 }
@@ -50078,8 +46404,6 @@ var SkipLastOperator = /*@__PURE__*/ (function () {
     }
     SkipLastOperator.prototype.call = function (subscriber, source) {
         if (this._skipCount === 0) {
-            // If we don't want to skip any values then just subscribe
-            // to Subscriber without any further logic.
             return source.subscribe(new __WEBPACK_IMPORTED_MODULE_1__Subscriber__["a" /* Subscriber */](subscriber));
         }
         else {
@@ -50088,11 +46412,6 @@ var SkipLastOperator = /*@__PURE__*/ (function () {
     };
     return SkipLastOperator;
 }());
-/**
- * We need this JSDoc comment for affecting ESDoc.
- * @ignore
- * @extends {Ignored}
- */
 var SkipLastSubscriber = /*@__PURE__*/ (function (_super) {
     __WEBPACK_IMPORTED_MODULE_0_tslib__["a" /* __extends */](SkipLastSubscriber, _super);
     function SkipLastSubscriber(destination, _skipCount) {
@@ -50122,7 +46441,7 @@ var SkipLastSubscriber = /*@__PURE__*/ (function (_super) {
 
 
 /***/ }),
-/* 459 */
+/* 468 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -50134,18 +46453,6 @@ var SkipLastSubscriber = /*@__PURE__*/ (function (_super) {
 
 
 
-/**
- * Returns an Observable that skips items emitted by the source Observable until a second Observable emits an item.
- *
- * <img src="./img/skipUntil.png" width="100%">
- *
- * @param {Observable} notifier - The second Observable that has to emit an item before the source Observable's elements begin to
- * be mirrored by the resulting Observable.
- * @return {Observable<T>} An Observable that skips items from the source Observable until the second Observable emits
- * an item, then emits the remaining items.
- * @method skipUntil
- * @owner Observable
- */
 function skipUntil(notifier) {
     return function (source) { return source.lift(new SkipUntilOperator(notifier)); };
 }
@@ -50158,11 +46465,6 @@ var SkipUntilOperator = /*@__PURE__*/ (function () {
     };
     return SkipUntilOperator;
 }());
-/**
- * We need this JSDoc comment for affecting ESDoc.
- * @ignore
- * @extends {Ignored}
- */
 var SkipUntilSubscriber = /*@__PURE__*/ (function (_super) {
     __WEBPACK_IMPORTED_MODULE_0_tslib__["a" /* __extends */](SkipUntilSubscriber, _super);
     function SkipUntilSubscriber(destination, notifier) {
@@ -50178,10 +46480,11 @@ var SkipUntilSubscriber = /*@__PURE__*/ (function (_super) {
     };
     SkipUntilSubscriber.prototype.notifyNext = function (outerValue, innerValue, outerIndex, innerIndex, innerSub) {
         this.hasValue = true;
-        this.innerSubscription.unsubscribe();
+        if (this.innerSubscription) {
+            this.innerSubscription.unsubscribe();
+        }
     };
     SkipUntilSubscriber.prototype.notifyComplete = function () {
-        /* do nothing */
     };
     return SkipUntilSubscriber;
 }(__WEBPACK_IMPORTED_MODULE_1__OuterSubscriber__["a" /* OuterSubscriber */]));
@@ -50189,7 +46492,7 @@ var SkipUntilSubscriber = /*@__PURE__*/ (function (_super) {
 
 
 /***/ }),
-/* 460 */
+/* 469 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -50199,18 +46502,6 @@ var SkipUntilSubscriber = /*@__PURE__*/ (function (_super) {
 /** PURE_IMPORTS_START tslib,_Subscriber PURE_IMPORTS_END */
 
 
-/**
- * Returns an Observable that skips all items emitted by the source Observable as long as a specified condition holds
- * true, but emits all further source items as soon as the condition becomes false.
- *
- * <img src="./img/skipWhile.png" width="100%">
- *
- * @param {Function} predicate - A function to test each item emitted from the source Observable.
- * @return {Observable<T>} An Observable that begins emitting items emitted by the source Observable when the
- * specified predicate becomes false.
- * @method skipWhile
- * @owner Observable
- */
 function skipWhile(predicate) {
     return function (source) { return source.lift(new SkipWhileOperator(predicate)); };
 }
@@ -50223,11 +46514,6 @@ var SkipWhileOperator = /*@__PURE__*/ (function () {
     };
     return SkipWhileOperator;
 }());
-/**
- * We need this JSDoc comment for affecting ESDoc.
- * @ignore
- * @extends {Ignored}
- */
 var SkipWhileSubscriber = /*@__PURE__*/ (function (_super) {
     __WEBPACK_IMPORTED_MODULE_0_tslib__["a" /* __extends */](SkipWhileSubscriber, _super);
     function SkipWhileSubscriber(destination, predicate) {
@@ -50261,37 +46547,22 @@ var SkipWhileSubscriber = /*@__PURE__*/ (function (_super) {
 
 
 /***/ }),
-/* 461 */
+/* 470 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 /* harmony export (immutable) */ __webpack_exports__["a"] = startWith;
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__observable_fromArray__ = __webpack_require__(21);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__observable_scalar__ = __webpack_require__(227);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__observable_empty__ = __webpack_require__(13);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__observable_concat__ = __webpack_require__(66);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__util_isScheduler__ = __webpack_require__(18);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__observable_scalar__ = __webpack_require__(69);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__observable_empty__ = __webpack_require__(12);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__observable_concat__ = __webpack_require__(48);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__util_isScheduler__ = __webpack_require__(15);
 /** PURE_IMPORTS_START _observable_fromArray,_observable_scalar,_observable_empty,_observable_concat,_util_isScheduler PURE_IMPORTS_END */
 
 
 
 
 
-/* tslint:enable:max-line-length */
-/**
- * Returns an Observable that emits the items you specify as arguments before it begins to emit
- * items emitted by the source Observable.
- *
- * <img src="./img/startWith.png" width="100%">
- *
- * @param {...T} values - Items you want the modified Observable to emit first.
- * @param {Scheduler} [scheduler] - A {@link IScheduler} to use for scheduling
- * the emissions of the `next` notifications.
- * @return {Observable} An Observable that emits the items in the specified Iterable and then emits the items
- * emitted by the source Observable.
- * @method startWith
- * @owner Observable
- */
 function startWith() {
     var array = [];
     for (var _i = 0; _i < arguments.length; _i++) {
@@ -50321,25 +46592,14 @@ function startWith() {
 
 
 /***/ }),
-/* 462 */
+/* 471 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 /* harmony export (immutable) */ __webpack_exports__["a"] = subscribeOn;
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__observable_SubscribeOnObservable__ = __webpack_require__(463);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__observable_SubscribeOnObservable__ = __webpack_require__(472);
 /** PURE_IMPORTS_START _observable_SubscribeOnObservable PURE_IMPORTS_END */
 
-/**
- * Asynchronously subscribes Observers to this Observable on the specified IScheduler.
- *
- * <img src="./img/subscribeOn.png" width="100%">
- *
- * @param {Scheduler} scheduler - The IScheduler to perform subscription actions on.
- * @return {Observable<T>} The source Observable modified so that its subscriptions happen on the specified IScheduler.
- .
- * @method subscribeOn
- * @owner Observable
- */
 function subscribeOn(scheduler, delay) {
     if (delay === void 0) {
         delay = 0;
@@ -50362,25 +46622,20 @@ var SubscribeOnOperator = /*@__PURE__*/ (function () {
 
 
 /***/ }),
-/* 463 */
+/* 472 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return SubscribeOnObservable; });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_tslib__ = __webpack_require__(1);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__Observable__ = __webpack_require__(4);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__scheduler_asap__ = __webpack_require__(228);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__util_isNumeric__ = __webpack_require__(47);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__scheduler_asap__ = __webpack_require__(232);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__util_isNumeric__ = __webpack_require__(49);
 /** PURE_IMPORTS_START tslib,_Observable,_scheduler_asap,_util_isNumeric PURE_IMPORTS_END */
 
 
 
 
-/**
- * We need this JSDoc comment for affecting ESDoc.
- * @extends {Ignored}
- * @hide true
- */
 var SubscribeOnObservable = /*@__PURE__*/ (function (_super) {
     __WEBPACK_IMPORTED_MODULE_0_tslib__["a" /* __extends */](SubscribeOnObservable, _super);
     function SubscribeOnObservable(source, delayTime, scheduler) {
@@ -50402,7 +46657,6 @@ var SubscribeOnObservable = /*@__PURE__*/ (function (_super) {
         }
         return _this;
     }
-    /** @nocollapse */
     SubscribeOnObservable.create = function (source, delay, scheduler) {
         if (delay === void 0) {
             delay = 0;
@@ -50412,12 +46666,10 @@ var SubscribeOnObservable = /*@__PURE__*/ (function (_super) {
         }
         return new SubscribeOnObservable(source, delay, scheduler);
     };
-    /** @nocollapse */
     SubscribeOnObservable.dispatch = function (arg) {
         var source = arg.source, subscriber = arg.subscriber;
         return this.add(source.subscribe(subscriber));
     };
-    /** @deprecated This is an internal implementation detail, do not use. */
     SubscribeOnObservable.prototype._subscribe = function (subscriber) {
         var delay = this.delayTime;
         var source = this.source;
@@ -50433,12 +46685,12 @@ var SubscribeOnObservable = /*@__PURE__*/ (function (_super) {
 
 
 /***/ }),
-/* 464 */
+/* 473 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 /* harmony export (immutable) */ __webpack_exports__["a"] = switchAll;
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__switchMap__ = __webpack_require__(73);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__switchMap__ = __webpack_require__(78);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__util_identity__ = __webpack_require__(25);
 /** PURE_IMPORTS_START _switchMap,_util_identity PURE_IMPORTS_END */
 
@@ -50450,49 +46702,14 @@ function switchAll() {
 
 
 /***/ }),
-/* 465 */
+/* 474 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 /* harmony export (immutable) */ __webpack_exports__["a"] = switchMapTo;
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__switchMap__ = __webpack_require__(73);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__switchMap__ = __webpack_require__(78);
 /** PURE_IMPORTS_START _switchMap PURE_IMPORTS_END */
 
-/* tslint:enable:max-line-length */
-/**
- * Projects each source value to the same Observable which is flattened multiple
- * times with {@link switch} in the output Observable.
- *
- * <span class="informal">It's like {@link switchMap}, but maps each value
- * always to the same inner Observable.</span>
- *
- * <img src="./img/switchMapTo.png" width="100%">
- *
- * Maps each source value to the given Observable `innerObservable` regardless
- * of the source value, and then flattens those resulting Observables into one
- * single Observable, which is the output Observable. The output Observables
- * emits values only from the most recently emitted instance of
- * `innerObservable`.
- *
- * @example <caption>Rerun an interval Observable on every click event</caption>
- * var clicks = Rx.Observable.fromEvent(document, 'click');
- * var result = clicks.switchMapTo(Rx.Observable.interval(1000));
- * result.subscribe(x => console.log(x));
- *
- * @see {@link concatMapTo}
- * @see {@link switch}
- * @see {@link switchMap}
- * @see {@link mergeMapTo}
- *
- * @param {ObservableInput} innerObservable An Observable to replace each value from
- * the source Observable.
- * @return {Observable} An Observable that emits items from the given
- * `innerObservable` (and optionally transformed through `resultSelector`) every
- * time a value is emitted on the source Observable, and taking only the values
- * from the most recently projected inner Observable.
- * @method switchMapTo
- * @owner Observable
- */
 function switchMapTo(innerObservable, resultSelector) {
     return resultSelector ? Object(__WEBPACK_IMPORTED_MODULE_0__switchMap__["a" /* switchMap */])(function () { return innerObservable; }, resultSelector) : Object(__WEBPACK_IMPORTED_MODULE_0__switchMap__["a" /* switchMap */])(function () { return innerObservable; });
 }
@@ -50500,7 +46717,7 @@ function switchMapTo(innerObservable, resultSelector) {
 
 
 /***/ }),
-/* 466 */
+/* 475 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -50512,40 +46729,6 @@ function switchMapTo(innerObservable, resultSelector) {
 
 
 
-/**
- * Emits the values emitted by the source Observable until a `notifier`
- * Observable emits a value.
- *
- * <span class="informal">Lets values pass until a second Observable,
- * `notifier`, emits a value. Then, it completes.</span>
- *
- * <img src="./img/takeUntil.png" width="100%">
- *
- * `takeUntil` subscribes and begins mirroring the source Observable. It also
- * monitors a second Observable, `notifier` that you provide. If the `notifier`
- * emits a value, the output Observable stops mirroring the source Observable
- * and completes. If the `notifier` doesn't emit any value and completes
- * then `takeUntil` will pass all values.
- *
- * @example <caption>Tick every second until the first click happens</caption>
- * var interval = Rx.Observable.interval(1000);
- * var clicks = Rx.Observable.fromEvent(document, 'click');
- * var result = interval.takeUntil(clicks);
- * result.subscribe(x => console.log(x));
- *
- * @see {@link take}
- * @see {@link takeLast}
- * @see {@link takeWhile}
- * @see {@link skip}
- *
- * @param {Observable} notifier The Observable whose first emitted value will
- * cause the output Observable of `takeUntil` to stop emitting values from the
- * source Observable.
- * @return {Observable<T>} An Observable that emits the values from the source
- * Observable until such time as `notifier` emits its first value.
- * @method takeUntil
- * @owner Observable
- */
 function takeUntil(notifier) {
     return function (source) { return source.lift(new TakeUntilOperator(notifier)); };
 }
@@ -50564,11 +46747,6 @@ var TakeUntilOperator = /*@__PURE__*/ (function () {
     };
     return TakeUntilOperator;
 }());
-/**
- * We need this JSDoc comment for affecting ESDoc.
- * @ignore
- * @extends {Ignored}
- */
 var TakeUntilSubscriber = /*@__PURE__*/ (function (_super) {
     __WEBPACK_IMPORTED_MODULE_0_tslib__["a" /* __extends */](TakeUntilSubscriber, _super);
     function TakeUntilSubscriber(destination) {
@@ -50578,7 +46756,6 @@ var TakeUntilSubscriber = /*@__PURE__*/ (function (_super) {
         this.complete();
     };
     TakeUntilSubscriber.prototype.notifyComplete = function () {
-        // noop
     };
     return TakeUntilSubscriber;
 }(__WEBPACK_IMPORTED_MODULE_1__OuterSubscriber__["a" /* OuterSubscriber */]));
@@ -50586,7 +46763,7 @@ var TakeUntilSubscriber = /*@__PURE__*/ (function (_super) {
 
 
 /***/ }),
-/* 467 */
+/* 476 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -50596,42 +46773,6 @@ var TakeUntilSubscriber = /*@__PURE__*/ (function (_super) {
 /** PURE_IMPORTS_START tslib,_Subscriber PURE_IMPORTS_END */
 
 
-/**
- * Emits values emitted by the source Observable so long as each value satisfies
- * the given `predicate`, and then completes as soon as this `predicate` is not
- * satisfied.
- *
- * <span class="informal">Takes values from the source only while they pass the
- * condition given. When the first value does not satisfy, it completes.</span>
- *
- * <img src="./img/takeWhile.png" width="100%">
- *
- * `takeWhile` subscribes and begins mirroring the source Observable. Each value
- * emitted on the source is given to the `predicate` function which returns a
- * boolean, representing a condition to be satisfied by the source values. The
- * output Observable emits the source values until such time as the `predicate`
- * returns false, at which point `takeWhile` stops mirroring the source
- * Observable and completes the output Observable.
- *
- * @example <caption>Emit click events only while the clientX property is greater than 200</caption>
- * var clicks = Rx.Observable.fromEvent(document, 'click');
- * var result = clicks.takeWhile(ev => ev.clientX > 200);
- * result.subscribe(x => console.log(x));
- *
- * @see {@link take}
- * @see {@link takeLast}
- * @see {@link takeUntil}
- * @see {@link skip}
- *
- * @param {function(value: T, index: number): boolean} predicate A function that
- * evaluates a value emitted by the source Observable and returns a boolean.
- * Also takes the (zero-based) index as the second argument.
- * @return {Observable<T>} An Observable that emits the values from the source
- * Observable so long as each value satisfies the condition defined by the
- * `predicate`, then completes.
- * @method takeWhile
- * @owner Observable
- */
 function takeWhile(predicate) {
     return function (source) { return source.lift(new TakeWhileOperator(predicate)); };
 }
@@ -50644,11 +46785,6 @@ var TakeWhileOperator = /*@__PURE__*/ (function () {
     };
     return TakeWhileOperator;
 }());
-/**
- * We need this JSDoc comment for affecting ESDoc.
- * @ignore
- * @extends {Ignored}
- */
 var TakeWhileSubscriber = /*@__PURE__*/ (function (_super) {
     __WEBPACK_IMPORTED_MODULE_0_tslib__["a" /* __extends */](TakeWhileSubscriber, _super);
     function TakeWhileSubscriber(destination, predicate) {
@@ -50684,61 +46820,20 @@ var TakeWhileSubscriber = /*@__PURE__*/ (function (_super) {
 
 
 /***/ }),
-/* 468 */
+/* 477 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 /* harmony export (immutable) */ __webpack_exports__["a"] = throttleTime;
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_tslib__ = __webpack_require__(1);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__Subscriber__ = __webpack_require__(2);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__scheduler_async__ = __webpack_require__(12);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__throttle__ = __webpack_require__(247);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__scheduler_async__ = __webpack_require__(13);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__throttle__ = __webpack_require__(251);
 /** PURE_IMPORTS_START tslib,_Subscriber,_scheduler_async,_throttle PURE_IMPORTS_END */
 
 
 
 
-/**
- * Emits a value from the source Observable, then ignores subsequent source
- * values for `duration` milliseconds, then repeats this process.
- *
- * <span class="informal">Lets a value pass, then ignores source values for the
- * next `duration` milliseconds.</span>
- *
- * <img src="./img/throttleTime.png" width="100%">
- *
- * `throttleTime` emits the source Observable values on the output Observable
- * when its internal timer is disabled, and ignores source values when the timer
- * is enabled. Initially, the timer is disabled. As soon as the first source
- * value arrives, it is forwarded to the output Observable, and then the timer
- * is enabled. After `duration` milliseconds (or the time unit determined
- * internally by the optional `scheduler`) has passed, the timer is disabled,
- * and this process repeats for the next source value. Optionally takes a
- * {@link IScheduler} for managing timers.
- *
- * @example <caption>Emit clicks at a rate of at most one click per second</caption>
- * var clicks = Rx.Observable.fromEvent(document, 'click');
- * var result = clicks.throttleTime(1000);
- * result.subscribe(x => console.log(x));
- *
- * @see {@link auditTime}
- * @see {@link debounceTime}
- * @see {@link delay}
- * @see {@link sampleTime}
- * @see {@link throttle}
- *
- * @param {number} duration Time to wait before emitting another value after
- * emitting the last value, measured in milliseconds or the time unit determined
- * internally by the optional `scheduler`.
- * @param {Scheduler} [scheduler=async] The {@link IScheduler} to use for
- * managing the timers that handle the throttling.
- * @param {Object} config a configuration object to define `leading` and
- * `trailing` behavior. Defaults to `{ leading: true, trailing: false }`.
- * @return {Observable<T>} An Observable that performs the throttle operation to
- * limit the rate of emissions from the source.
- * @method throttleTime
- * @owner Observable
- */
 function throttleTime(duration, scheduler, config) {
     if (scheduler === void 0) {
         scheduler = __WEBPACK_IMPORTED_MODULE_2__scheduler_async__["a" /* async */];
@@ -50760,11 +46855,6 @@ var ThrottleTimeOperator = /*@__PURE__*/ (function () {
     };
     return ThrottleTimeOperator;
 }());
-/**
- * We need this JSDoc comment for affecting ESDoc.
- * @ignore
- * @extends {Ignored}
- */
 var ThrottleTimeSubscriber = /*@__PURE__*/ (function (_super) {
     __WEBPACK_IMPORTED_MODULE_0_tslib__["a" /* __extends */](ThrottleTimeSubscriber, _super);
     function ThrottleTimeSubscriber(destination, duration, scheduler, leading, trailing) {
@@ -50823,15 +46913,15 @@ function dispatchNext(arg) {
 
 
 /***/ }),
-/* 469 */
+/* 478 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 /* harmony export (immutable) */ __webpack_exports__["a"] = timeInterval;
 /* unused harmony export TimeInterval */
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__scheduler_async__ = __webpack_require__(12);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__scan__ = __webpack_require__(72);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__observable_defer__ = __webpack_require__(68);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__scheduler_async__ = __webpack_require__(13);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__scan__ = __webpack_require__(77);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__observable_defer__ = __webpack_require__(73);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__map__ = __webpack_require__(16);
 /** PURE_IMPORTS_START _scheduler_async,_scan,_observable_defer,_map PURE_IMPORTS_END */
 
@@ -50844,9 +46934,7 @@ function timeInterval(scheduler) {
     }
     return function (source) {
         return Object(__WEBPACK_IMPORTED_MODULE_2__observable_defer__["a" /* defer */])(function () {
-            return source.pipe(
-            // HACK: the typings seem off with scan
-            Object(__WEBPACK_IMPORTED_MODULE_1__scan__["a" /* scan */])(function (_a, value) {
+            return source.pipe(Object(__WEBPACK_IMPORTED_MODULE_1__scan__["a" /* scan */])(function (_a, value) {
                 var current = _a.current;
                 return ({ value: value, current: scheduler.now(), last: current });
             }, { current: scheduler.now(), value: undefined, last: undefined }), Object(__WEBPACK_IMPORTED_MODULE_3__map__["a" /* map */])(function (_a) {
@@ -50868,85 +46956,20 @@ var TimeInterval = /*@__PURE__*/ (function () {
 
 
 /***/ }),
-/* 470 */
+/* 479 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 /* harmony export (immutable) */ __webpack_exports__["a"] = timeout;
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__scheduler_async__ = __webpack_require__(12);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__util_TimeoutError__ = __webpack_require__(229);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__timeoutWith__ = __webpack_require__(248);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__observable_throwError__ = __webpack_require__(64);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__scheduler_async__ = __webpack_require__(13);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__util_TimeoutError__ = __webpack_require__(233);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__timeoutWith__ = __webpack_require__(252);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__observable_throwError__ = __webpack_require__(70);
 /** PURE_IMPORTS_START _scheduler_async,_util_TimeoutError,_timeoutWith,_observable_throwError PURE_IMPORTS_END */
 
 
 
 
-/**
- *
- * Errors if Observable does not emit a value in given time span.
- *
- * <span class="informal">Timeouts on Observable that doesn't emit values fast enough.</span>
- *
- * <img src="./img/timeout.png" width="100%">
- *
- * `timeout` operator accepts as an argument either a number or a Date.
- *
- * If number was provided, it returns an Observable that behaves like a source
- * Observable, unless there is a period of time where there is no value emitted.
- * So if you provide `100` as argument and first value comes after 50ms from
- * the moment of subscription, this value will be simply re-emitted by the resulting
- * Observable. If however after that 100ms passes without a second value being emitted,
- * stream will end with an error and source Observable will be unsubscribed.
- * These checks are performed throughout whole lifecycle of Observable - from the moment
- * it was subscribed to, until it completes or errors itself. Thus every value must be
- * emitted within specified period since previous value.
- *
- * If provided argument was Date, returned Observable behaves differently. It throws
- * if Observable did not complete before provided Date. This means that periods between
- * emission of particular values do not matter in this case. If Observable did not complete
- * before provided Date, source Observable will be unsubscribed. Other than that, resulting
- * stream behaves just as source Observable.
- *
- * `timeout` accepts also a Scheduler as a second parameter. It is used to schedule moment (or moments)
- * when returned Observable will check if source stream emitted value or completed.
- *
- * @example <caption>Check if ticks are emitted within certain timespan</caption>
- * const seconds = Rx.Observable.interval(1000);
- *
- * seconds.timeout(1100) // Let's use bigger timespan to be safe,
- *                       // since `interval` might fire a bit later then scheduled.
- * .subscribe(
- *     value => console.log(value), // Will emit numbers just as regular `interval` would.
- *     err => console.log(err) // Will never be called.
- * );
- *
- * seconds.timeout(900).subscribe(
- *     value => console.log(value), // Will never be called.
- *     err => console.log(err) // Will emit error before even first value is emitted,
- *                             // since it did not arrive within 900ms period.
- * );
- *
- * @example <caption>Use Date to check if Observable completed</caption>
- * const seconds = Rx.Observable.interval(1000);
- *
- * seconds.timeout(new Date("December 17, 2020 03:24:00"))
- * .subscribe(
- *     value => console.log(value), // Will emit values as regular `interval` would
- *                                  // until December 17, 2020 at 03:24:00.
- *     err => console.log(err) // On December 17, 2020 at 03:24:00 it will emit an error,
- *                             // since Observable did not complete by then.
- * );
- *
- * @see {@link timeoutWith}
- *
- * @param {number|Date} due Number specifying period within which Observable must emit values
- *                          or Date specifying before when Observable should complete
- * @param {Scheduler} [scheduler] Scheduler controlling when timeout checks occur.
- * @return {Observable<T>} Observable that mirrors behaviour of source, unless timeout checks fail.
- * @method timeout
- * @owner Observable
- */
 function timeout(due, scheduler) {
     if (scheduler === void 0) {
         scheduler = __WEBPACK_IMPORTED_MODULE_0__scheduler_async__["a" /* async */];
@@ -50957,29 +46980,22 @@ function timeout(due, scheduler) {
 
 
 /***/ }),
-/* 471 */
+/* 480 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 /* harmony export (immutable) */ __webpack_exports__["a"] = timestamp;
 /* unused harmony export Timestamp */
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__scheduler_async__ = __webpack_require__(12);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__scheduler_async__ = __webpack_require__(13);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__map__ = __webpack_require__(16);
 /** PURE_IMPORTS_START _scheduler_async,_map PURE_IMPORTS_END */
 
 
-/**
- * @param scheduler
- * @return {Observable<Timestamp<any>>|WebSocketSubject<T>|Observable<T>}
- * @method timestamp
- * @owner Observable
- */
 function timestamp(scheduler) {
     if (scheduler === void 0) {
         scheduler = __WEBPACK_IMPORTED_MODULE_0__scheduler_async__["a" /* async */];
     }
     return Object(__WEBPACK_IMPORTED_MODULE_1__map__["a" /* map */])(function (value) { return new Timestamp(value, scheduler.now()); });
-    // return (source: Observable<T>) => source.lift(new TimestampOperator(scheduler));
 }
 var Timestamp = /*@__PURE__*/ (function () {
     function Timestamp(value, timestamp) {
@@ -50993,12 +47009,12 @@ var Timestamp = /*@__PURE__*/ (function () {
 
 
 /***/ }),
-/* 472 */
+/* 481 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 /* harmony export (immutable) */ __webpack_exports__["a"] = toArray;
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__reduce__ = __webpack_require__(49);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__reduce__ = __webpack_require__(51);
 /** PURE_IMPORTS_START _reduce PURE_IMPORTS_END */
 
 function toArrayReducer(arr, item, index) {
@@ -51015,7 +47031,7 @@ function toArray() {
 
 
 /***/ }),
-/* 473 */
+/* 482 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -51029,42 +47045,6 @@ function toArray() {
 
 
 
-/**
- * Branch out the source Observable values as a nested Observable whenever
- * `windowBoundaries` emits.
- *
- * <span class="informal">It's like {@link buffer}, but emits a nested Observable
- * instead of an array.</span>
- *
- * <img src="./img/window.png" width="100%">
- *
- * Returns an Observable that emits windows of items it collects from the source
- * Observable. The output Observable emits connected, non-overlapping
- * windows. It emits the current window and opens a new one whenever the
- * Observable `windowBoundaries` emits an item. Because each window is an
- * Observable, the output is a higher-order Observable.
- *
- * @example <caption>In every window of 1 second each, emit at most 2 click events</caption>
- * var clicks = Rx.Observable.fromEvent(document, 'click');
- * var interval = Rx.Observable.interval(1000);
- * var result = clicks.window(interval)
- *   .map(win => win.take(2)) // each window has at most 2 emissions
- *   .mergeAll(); // flatten the Observable-of-Observables
- * result.subscribe(x => console.log(x));
- *
- * @see {@link windowCount}
- * @see {@link windowTime}
- * @see {@link windowToggle}
- * @see {@link windowWhen}
- * @see {@link buffer}
- *
- * @param {Observable<any>} windowBoundaries An Observable that completes the
- * previous window and starts a new window.
- * @return {Observable<Observable<T>>} An Observable of windows, which are
- * Observables emitting values of the source Observable.
- * @method window
- * @owner Observable
- */
 function window(windowBoundaries) {
     return function windowOperatorFunction(source) {
         return source.lift(new WindowOperator(windowBoundaries));
@@ -51084,11 +47064,6 @@ var WindowOperator = /*@__PURE__*/ (function () {
     };
     return WindowOperator;
 }());
-/**
- * We need this JSDoc comment for affecting ESDoc.
- * @ignore
- * @extends {Ignored}
- */
 var WindowSubscriber = /*@__PURE__*/ (function (_super) {
     __WEBPACK_IMPORTED_MODULE_0_tslib__["a" /* __extends */](WindowSubscriber, _super);
     function WindowSubscriber(destination) {
@@ -51117,7 +47092,6 @@ var WindowSubscriber = /*@__PURE__*/ (function (_super) {
         this.window.complete();
         this.destination.complete();
     };
-    /** @deprecated This is an internal implementation detail, do not use. */
     WindowSubscriber.prototype._unsubscribe = function () {
         this.window = null;
     };
@@ -51136,7 +47110,7 @@ var WindowSubscriber = /*@__PURE__*/ (function (_super) {
 
 
 /***/ }),
-/* 474 */
+/* 483 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -51148,54 +47122,6 @@ var WindowSubscriber = /*@__PURE__*/ (function (_super) {
 
 
 
-/**
- * Branch out the source Observable values as a nested Observable with each
- * nested Observable emitting at most `windowSize` values.
- *
- * <span class="informal">It's like {@link bufferCount}, but emits a nested
- * Observable instead of an array.</span>
- *
- * <img src="./img/windowCount.png" width="100%">
- *
- * Returns an Observable that emits windows of items it collects from the source
- * Observable. The output Observable emits windows every `startWindowEvery`
- * items, each containing no more than `windowSize` items. When the source
- * Observable completes or encounters an error, the output Observable emits
- * the current window and propagates the notification from the source
- * Observable. If `startWindowEvery` is not provided, then new windows are
- * started immediately at the start of the source and when each window completes
- * with size `windowSize`.
- *
- * @example <caption>Ignore every 3rd click event, starting from the first one</caption>
- * var clicks = Rx.Observable.fromEvent(document, 'click');
- * var result = clicks.windowCount(3)
- *   .map(win => win.skip(1)) // skip first of every 3 clicks
- *   .mergeAll(); // flatten the Observable-of-Observables
- * result.subscribe(x => console.log(x));
- *
- * @example <caption>Ignore every 3rd click event, starting from the third one</caption>
- * var clicks = Rx.Observable.fromEvent(document, 'click');
- * var result = clicks.windowCount(2, 3)
- *   .mergeAll(); // flatten the Observable-of-Observables
- * result.subscribe(x => console.log(x));
- *
- * @see {@link window}
- * @see {@link windowTime}
- * @see {@link windowToggle}
- * @see {@link windowWhen}
- * @see {@link bufferCount}
- *
- * @param {number} windowSize The maximum number of values emitted by each
- * window.
- * @param {number} [startWindowEvery] Interval at which to start a new window.
- * For example if `startWindowEvery` is `2`, then a new window will be started
- * on every other value from the source. A new window is started at the
- * beginning of the source by default.
- * @return {Observable<Observable<T>>} An Observable of windows, which in turn
- * are Observable of values.
- * @method windowCount
- * @owner Observable
- */
 function windowCount(windowSize, startWindowEvery) {
     if (startWindowEvery === void 0) {
         startWindowEvery = 0;
@@ -51214,11 +47140,6 @@ var WindowCountOperator = /*@__PURE__*/ (function () {
     };
     return WindowCountOperator;
 }());
-/**
- * We need this JSDoc comment for affecting ESDoc.
- * @ignore
- * @extends {Ignored}
- */
 var WindowCountSubscriber = /*@__PURE__*/ (function (_super) {
     __WEBPACK_IMPORTED_MODULE_0_tslib__["a" /* __extends */](WindowCountSubscriber, _super);
     function WindowCountSubscriber(destination, windowSize, startWindowEvery) {
@@ -51278,17 +47199,17 @@ var WindowCountSubscriber = /*@__PURE__*/ (function (_super) {
 
 
 /***/ }),
-/* 475 */
+/* 484 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 /* harmony export (immutable) */ __webpack_exports__["a"] = windowTime;
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_tslib__ = __webpack_require__(1);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__Subject__ = __webpack_require__(9);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__scheduler_async__ = __webpack_require__(12);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__scheduler_async__ = __webpack_require__(13);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__Subscriber__ = __webpack_require__(2);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__util_isNumeric__ = __webpack_require__(47);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_5__util_isScheduler__ = __webpack_require__(18);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__util_isNumeric__ = __webpack_require__(49);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_5__util_isScheduler__ = __webpack_require__(15);
 /** PURE_IMPORTS_START tslib,_Subject,_scheduler_async,_Subscriber,_util_isNumeric,_util_isScheduler PURE_IMPORTS_END */
 
 
@@ -51351,11 +47272,6 @@ var CountedSubject = /*@__PURE__*/ (function (_super) {
     });
     return CountedSubject;
 }(__WEBPACK_IMPORTED_MODULE_1__Subject__["a" /* Subject */]));
-/**
- * We need this JSDoc comment for affecting ESDoc.
- * @ignore
- * @extends {Ignored}
- */
 var WindowTimeSubscriber = /*@__PURE__*/ (function (_super) {
     __WEBPACK_IMPORTED_MODULE_0_tslib__["a" /* __extends */](WindowTimeSubscriber, _super);
     function WindowTimeSubscriber(destination, windowTimeSpan, windowCreationInterval, maxWindowSize, scheduler) {
@@ -51452,7 +47368,7 @@ function dispatchWindowClose(state) {
 
 
 /***/ }),
-/* 476 */
+/* 485 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -51461,7 +47377,7 @@ function dispatchWindowClose(state) {
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__Subject__ = __webpack_require__(9);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__Subscription__ = __webpack_require__(8);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__util_tryCatch__ = __webpack_require__(17);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__util_errorObject__ = __webpack_require__(15);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__util_errorObject__ = __webpack_require__(14);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_5__OuterSubscriber__ = __webpack_require__(5);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_6__util_subscribeToResult__ = __webpack_require__(6);
 /** PURE_IMPORTS_START tslib,_Subject,_Subscription,_util_tryCatch,_util_errorObject,_OuterSubscriber,_util_subscribeToResult PURE_IMPORTS_END */
@@ -51472,47 +47388,6 @@ function dispatchWindowClose(state) {
 
 
 
-/**
- * Branch out the source Observable values as a nested Observable starting from
- * an emission from `openings` and ending when the output of `closingSelector`
- * emits.
- *
- * <span class="informal">It's like {@link bufferToggle}, but emits a nested
- * Observable instead of an array.</span>
- *
- * <img src="./img/windowToggle.png" width="100%">
- *
- * Returns an Observable that emits windows of items it collects from the source
- * Observable. The output Observable emits windows that contain those items
- * emitted by the source Observable between the time when the `openings`
- * Observable emits an item and when the Observable returned by
- * `closingSelector` emits an item.
- *
- * @example <caption>Every other second, emit the click events from the next 500ms</caption>
- * var clicks = Rx.Observable.fromEvent(document, 'click');
- * var openings = Rx.Observable.interval(1000);
- * var result = clicks.windowToggle(openings, i =>
- *   i % 2 ? Rx.Observable.interval(500) : Rx.Observable.empty()
- * ).mergeAll();
- * result.subscribe(x => console.log(x));
- *
- * @see {@link window}
- * @see {@link windowCount}
- * @see {@link windowTime}
- * @see {@link windowWhen}
- * @see {@link bufferToggle}
- *
- * @param {Observable<O>} openings An observable of notifications to start new
- * windows.
- * @param {function(value: O): Observable} closingSelector A function that takes
- * the value emitted by the `openings` observable and returns an Observable,
- * which, when it emits (either `next` or `complete`), signals that the
- * associated window should complete.
- * @return {Observable<Observable<T>>} An observable of windows, which in turn
- * are Observables.
- * @method windowToggle
- * @owner Observable
- */
 function windowToggle(openings, closingSelector) {
     return function (source) { return source.lift(new WindowToggleOperator(openings, closingSelector)); };
 }
@@ -51526,11 +47401,6 @@ var WindowToggleOperator = /*@__PURE__*/ (function () {
     };
     return WindowToggleOperator;
 }());
-/**
- * We need this JSDoc comment for affecting ESDoc.
- * @ignore
- * @extends {Ignored}
- */
 var WindowToggleSubscriber = /*@__PURE__*/ (function (_super) {
     __WEBPACK_IMPORTED_MODULE_0_tslib__["a" /* __extends */](WindowToggleSubscriber, _super);
     function WindowToggleSubscriber(destination, openings, closingSelector) {
@@ -51578,7 +47448,6 @@ var WindowToggleSubscriber = /*@__PURE__*/ (function (_super) {
         }
         _super.prototype._complete.call(this);
     };
-    /** @deprecated This is an internal implementation detail, do not use. */
     WindowToggleSubscriber.prototype._unsubscribe = function () {
         var contexts = this.contexts;
         this.contexts = null;
@@ -51644,7 +47513,7 @@ var WindowToggleSubscriber = /*@__PURE__*/ (function (_super) {
 
 
 /***/ }),
-/* 477 */
+/* 486 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -51652,7 +47521,7 @@ var WindowToggleSubscriber = /*@__PURE__*/ (function (_super) {
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_tslib__ = __webpack_require__(1);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__Subject__ = __webpack_require__(9);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__util_tryCatch__ = __webpack_require__(17);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__util_errorObject__ = __webpack_require__(15);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__util_errorObject__ = __webpack_require__(14);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__OuterSubscriber__ = __webpack_require__(5);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_5__util_subscribeToResult__ = __webpack_require__(6);
 /** PURE_IMPORTS_START tslib,_Subject,_util_tryCatch,_util_errorObject,_OuterSubscriber,_util_subscribeToResult PURE_IMPORTS_END */
@@ -51662,44 +47531,6 @@ var WindowToggleSubscriber = /*@__PURE__*/ (function (_super) {
 
 
 
-/**
- * Branch out the source Observable values as a nested Observable using a
- * factory function of closing Observables to determine when to start a new
- * window.
- *
- * <span class="informal">It's like {@link bufferWhen}, but emits a nested
- * Observable instead of an array.</span>
- *
- * <img src="./img/windowWhen.png" width="100%">
- *
- * Returns an Observable that emits windows of items it collects from the source
- * Observable. The output Observable emits connected, non-overlapping windows.
- * It emits the current window and opens a new one whenever the Observable
- * produced by the specified `closingSelector` function emits an item. The first
- * window is opened immediately when subscribing to the output Observable.
- *
- * @example <caption>Emit only the first two clicks events in every window of [1-5] random seconds</caption>
- * var clicks = Rx.Observable.fromEvent(document, 'click');
- * var result = clicks
- *   .windowWhen(() => Rx.Observable.interval(1000 + Math.random() * 4000))
- *   .map(win => win.take(2)) // each window has at most 2 emissions
- *   .mergeAll(); // flatten the Observable-of-Observables
- * result.subscribe(x => console.log(x));
- *
- * @see {@link window}
- * @see {@link windowCount}
- * @see {@link windowTime}
- * @see {@link windowToggle}
- * @see {@link bufferWhen}
- *
- * @param {function(): Observable} closingSelector A function that takes no
- * arguments and returns an Observable that signals (on either `next` or
- * `complete`) when to close the previous window and start a new one.
- * @return {Observable<Observable<T>>} An observable of windows, which in turn
- * are Observables.
- * @method windowWhen
- * @owner Observable
- */
 function windowWhen(closingSelector) {
     return function windowWhenOperatorFunction(source) {
         return source.lift(new WindowOperator(closingSelector));
@@ -51714,11 +47545,6 @@ var WindowOperator = /*@__PURE__*/ (function () {
     };
     return WindowOperator;
 }());
-/**
- * We need this JSDoc comment for affecting ESDoc.
- * @ignore
- * @extends {Ignored}
- */
 var WindowSubscriber = /*@__PURE__*/ (function (_super) {
     __WEBPACK_IMPORTED_MODULE_0_tslib__["a" /* __extends */](WindowSubscriber, _super);
     function WindowSubscriber(destination, closingSelector) {
@@ -51785,7 +47611,7 @@ var WindowSubscriber = /*@__PURE__*/ (function (_super) {
 
 
 /***/ }),
-/* 478 */
+/* 487 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -51797,45 +47623,6 @@ var WindowSubscriber = /*@__PURE__*/ (function (_super) {
 
 
 
-/* tslint:enable:max-line-length */
-/**
- * Combines the source Observable with other Observables to create an Observable
- * whose values are calculated from the latest values of each, only when the
- * source emits.
- *
- * <span class="informal">Whenever the source Observable emits a value, it
- * computes a formula using that value plus the latest values from other input
- * Observables, then emits the output of that formula.</span>
- *
- * <img src="./img/withLatestFrom.png" width="100%">
- *
- * `withLatestFrom` combines each value from the source Observable (the
- * instance) with the latest values from the other input Observables only when
- * the source emits a value, optionally using a `project` function to determine
- * the value to be emitted on the output Observable. All input Observables must
- * emit at least one value before the output Observable will emit a value.
- *
- * @example <caption>On every click event, emit an array with the latest timer event plus the click event</caption>
- * var clicks = Rx.Observable.fromEvent(document, 'click');
- * var timer = Rx.Observable.interval(1000);
- * var result = clicks.withLatestFrom(timer);
- * result.subscribe(x => console.log(x));
- *
- * @see {@link combineLatest}
- *
- * @param {ObservableInput} other An input Observable to combine with the source
- * Observable. More than one input Observables may be given as argument.
- * @param {Function} [project] Projection function for combining values
- * together. Receives all values in order of the Observables passed, where the
- * first parameter is a value from the source Observable. (e.g.
- * `a.withLatestFrom(b, c, (a1, b1, c1) => a1 + b1 + c1)`). If this is not
- * passed, arrays will be emitted on the output Observable.
- * @return {Observable} An Observable of projected values from the most recent
- * values from each input Observable, or an array of the most recent values from
- * each input Observable.
- * @method withLatestFrom
- * @owner Observable
- */
 function withLatestFrom() {
     var args = [];
     for (var _i = 0; _i < arguments.length; _i++) {
@@ -51860,11 +47647,6 @@ var WithLatestFromOperator = /*@__PURE__*/ (function () {
     };
     return WithLatestFromOperator;
 }());
-/**
- * We need this JSDoc comment for affecting ESDoc.
- * @ignore
- * @extends {Ignored}
- */
 var WithLatestFromSubscriber = /*@__PURE__*/ (function (_super) {
     __WEBPACK_IMPORTED_MODULE_0_tslib__["a" /* __extends */](WithLatestFromSubscriber, _super);
     function WithLatestFromSubscriber(destination, observables, project) {
@@ -51894,7 +47676,6 @@ var WithLatestFromSubscriber = /*@__PURE__*/ (function (_super) {
         }
     };
     WithLatestFromSubscriber.prototype.notifyComplete = function () {
-        // noop
     };
     WithLatestFromSubscriber.prototype._next = function (value) {
         if (this.toRespond.length === 0) {
@@ -51924,18 +47705,14 @@ var WithLatestFromSubscriber = /*@__PURE__*/ (function (_super) {
 
 
 /***/ }),
-/* 479 */
+/* 488 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 /* harmony export (immutable) */ __webpack_exports__["a"] = zip;
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__observable_zip__ = __webpack_require__(69);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__observable_zip__ = __webpack_require__(74);
 /** PURE_IMPORTS_START _observable_zip PURE_IMPORTS_END */
 
-/* tslint:enable:max-line-length */
-/**
- * @deprecated Deprecated in favor of static zip.
- */
 function zip() {
     var observables = [];
     for (var _i = 0; _i < arguments.length; _i++) {
@@ -51949,12 +47726,12 @@ function zip() {
 
 
 /***/ }),
-/* 480 */
+/* 489 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 /* harmony export (immutable) */ __webpack_exports__["a"] = zipAll;
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__observable_zip__ = __webpack_require__(69);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__observable_zip__ = __webpack_require__(74);
 /** PURE_IMPORTS_START _observable_zip PURE_IMPORTS_END */
 
 function zipAll(project) {
@@ -51964,7 +47741,7 @@ function zipAll(project) {
 
 
 /***/ }),
-/* 481 */
+/* 490 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -52018,27 +47795,27 @@ let runCommand = exports.runCommand = (() => {
     };
 })();
 
-var _chalk = __webpack_require__(14);
+var _chalk = __webpack_require__(18);
 
 var _chalk2 = _interopRequireDefault(_chalk);
 
-var _indentString = __webpack_require__(482);
+var _indentString = __webpack_require__(491);
 
 var _indentString2 = _interopRequireDefault(_indentString);
 
-var _wrapAnsi = __webpack_require__(483);
+var _wrapAnsi = __webpack_require__(492);
 
 var _wrapAnsi2 = _interopRequireDefault(_wrapAnsi);
 
-var _config = __webpack_require__(250);
+var _config = __webpack_require__(254);
 
-var _errors = __webpack_require__(55);
+var _errors = __webpack_require__(60);
 
 var _log = __webpack_require__(20);
 
-var _projects = __webpack_require__(29);
+var _projects = __webpack_require__(30);
 
-var _projects_tree = __webpack_require__(487);
+var _projects_tree = __webpack_require__(496);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -52070,7 +47847,7 @@ function toArray(value) {
 }
 
 /***/ }),
-/* 482 */
+/* 491 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -52104,13 +47881,13 @@ module.exports = (str, count, opts) => {
 
 
 /***/ }),
-/* 483 */
+/* 492 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
-const stringWidth = __webpack_require__(484);
-const stripAnsi = __webpack_require__(249);
+const stringWidth = __webpack_require__(493);
+const stripAnsi = __webpack_require__(253);
 
 const ESCAPES = new Set([
 	'\u001B',
@@ -52304,13 +48081,13 @@ module.exports = (str, cols, opts) => {
 
 
 /***/ }),
-/* 484 */
+/* 493 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
-const stripAnsi = __webpack_require__(249);
-const isFullwidthCodePoint = __webpack_require__(486);
+const stripAnsi = __webpack_require__(253);
+const isFullwidthCodePoint = __webpack_require__(495);
 
 module.exports = str => {
 	if (typeof str !== 'string' || str.length === 0) {
@@ -52347,7 +48124,7 @@ module.exports = str => {
 
 
 /***/ }),
-/* 485 */
+/* 494 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -52364,7 +48141,7 @@ module.exports = () => {
 
 
 /***/ }),
-/* 486 */
+/* 495 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -52417,7 +48194,7 @@ module.exports = x => {
 
 
 /***/ }),
-/* 487 */
+/* 496 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -52428,7 +48205,7 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.renderProjectsTree = renderProjectsTree;
 
-var _chalk = __webpack_require__(14);
+var _chalk = __webpack_require__(18);
 
 var _chalk2 = _interopRequireDefault(_chalk);
 
@@ -52559,7 +48336,7 @@ function addProjectToTree(tree, pathParts, project) {
 }
 
 /***/ }),
-/* 488 */
+/* 497 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -52569,7 +48346,7 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 
-var _build_production_projects = __webpack_require__(489);
+var _build_production_projects = __webpack_require__(498);
 
 Object.defineProperty(exports, 'buildProductionProjects', {
   enumerable: true,
@@ -52578,7 +48355,7 @@ Object.defineProperty(exports, 'buildProductionProjects', {
   }
 });
 
-var _prepare_project_dependencies = __webpack_require__(500);
+var _prepare_project_dependencies = __webpack_require__(509);
 
 Object.defineProperty(exports, 'prepareExternalProjectDependencies', {
   enumerable: true,
@@ -52588,7 +48365,7 @@ Object.defineProperty(exports, 'prepareExternalProjectDependencies', {
 });
 
 /***/ }),
-/* 489 */
+/* 498 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -52633,7 +48410,9 @@ let getProductionProjects = (() => {
     var _ref2 = _asyncToGenerator(function* (rootPath) {
         const projectPaths = (0, _config.getProjectPaths)(rootPath, {});
         const projects = yield (0, _projects.getProjects)(rootPath, projectPaths);
-        const productionProjects = (0, _projects.includeTransitiveProjects)([projects.get('kibana')], projects, { onlyProductionDependencies: true });
+        const productionProjects = (0, _projects.includeTransitiveProjects)([projects.get('kibana')], projects, {
+            onlyProductionDependencies: true
+        });
         // We remove Kibana, as we're already building Kibana
         productionProjects.delete('kibana');
         return productionProjects;
@@ -52709,25 +48488,25 @@ let copyToBuild = (() => {
     };
 })();
 
-var _cpy = __webpack_require__(490);
+var _cpy = __webpack_require__(499);
 
 var _cpy2 = _interopRequireDefault(_cpy);
 
-var _del = __webpack_require__(212);
+var _del = __webpack_require__(217);
 
 var _del2 = _interopRequireDefault(_del);
 
 var _path = __webpack_require__(3);
 
-var _config = __webpack_require__(250);
+var _config = __webpack_require__(254);
 
-var _fs = __webpack_require__(51);
+var _fs = __webpack_require__(56);
 
 var _log = __webpack_require__(20);
 
-var _package_json = __webpack_require__(41);
+var _package_json = __webpack_require__(42);
 
-var _projects = __webpack_require__(29);
+var _projects = __webpack_require__(30);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -52751,17 +48530,17 @@ function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, a
                                                                                                                                                                                                                                                                                                                                                                                                                                                                             */
 
 /***/ }),
-/* 490 */
+/* 499 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
-const EventEmitter = __webpack_require__(40);
+const EventEmitter = __webpack_require__(41);
 const path = __webpack_require__(3);
-const arrify = __webpack_require__(491);
-const globby = __webpack_require__(492);
-const cpFile = __webpack_require__(494);
-const CpyError = __webpack_require__(499);
+const arrify = __webpack_require__(500);
+const globby = __webpack_require__(501);
+const cpFile = __webpack_require__(503);
+const CpyError = __webpack_require__(508);
 
 const preprocessSrcPath = (srcPath, opts) => opts.cwd ? path.resolve(opts.cwd, srcPath) : srcPath;
 
@@ -52855,7 +48634,7 @@ module.exports = (src, dest, opts) => {
 
 
 /***/ }),
-/* 491 */
+/* 500 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -52870,16 +48649,16 @@ module.exports = function (val) {
 
 
 /***/ }),
-/* 492 */
+/* 501 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
-var Promise = __webpack_require__(213);
-var arrayUnion = __webpack_require__(214);
-var objectAssign = __webpack_require__(215);
-var glob = __webpack_require__(30);
-var pify = __webpack_require__(493);
+var Promise = __webpack_require__(218);
+var arrayUnion = __webpack_require__(219);
+var objectAssign = __webpack_require__(220);
+var glob = __webpack_require__(31);
+var pify = __webpack_require__(502);
 
 var globP = pify(glob, Promise).bind(glob);
 
@@ -52965,7 +48744,7 @@ module.exports.hasMagic = function (patterns, opts) {
 
 
 /***/ }),
-/* 493 */
+/* 502 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -53040,17 +48819,17 @@ pify.all = pify;
 
 
 /***/ }),
-/* 494 */
+/* 503 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 const path = __webpack_require__(3);
 const fsConstants = __webpack_require__(7).constants;
-const Buffer = __webpack_require__(495).Buffer;
-const CpFileError = __webpack_require__(251);
-const fs = __webpack_require__(497);
-const ProgressEmitter = __webpack_require__(498);
+const Buffer = __webpack_require__(504).Buffer;
+const CpFileError = __webpack_require__(255);
+const fs = __webpack_require__(506);
+const ProgressEmitter = __webpack_require__(507);
 
 module.exports = (src, dest, opts) => {
 	if (!src || !dest) {
@@ -53200,11 +48979,11 @@ module.exports.sync = (src, dest, opts) => {
 
 
 /***/ }),
-/* 495 */
+/* 504 */
 /***/ (function(module, exports, __webpack_require__) {
 
 /* eslint-disable node/no-deprecated-api */
-var buffer = __webpack_require__(496)
+var buffer = __webpack_require__(505)
 var Buffer = buffer.Buffer
 
 // alternative to using Object.keys for old browsers
@@ -53268,21 +49047,21 @@ SafeBuffer.allocUnsafeSlow = function (size) {
 
 
 /***/ }),
-/* 496 */
+/* 505 */
 /***/ (function(module, exports) {
 
 module.exports = require("buffer");
 
 /***/ }),
-/* 497 */
+/* 506 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
-const fs = __webpack_require__(27);
-const makeDir = __webpack_require__(87);
+const fs = __webpack_require__(28);
+const makeDir = __webpack_require__(92);
 const pify = __webpack_require__(23);
-const CpFileError = __webpack_require__(251);
+const CpFileError = __webpack_require__(255);
 
 const fsP = pify(fs);
 
@@ -53427,12 +49206,12 @@ if (fs.copyFileSync) {
 
 
 /***/ }),
-/* 498 */
+/* 507 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
-const EventEmitter = __webpack_require__(40);
+const EventEmitter = __webpack_require__(41);
 
 const written = new WeakMap();
 
@@ -53469,12 +49248,12 @@ module.exports = ProgressEmitter;
 
 
 /***/ }),
-/* 499 */
+/* 508 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
-const NestedError = __webpack_require__(252);
+const NestedError = __webpack_require__(256);
 
 class CpyError extends NestedError {
 	constructor(message, nested) {
@@ -53488,7 +49267,7 @@ module.exports = CpyError;
 
 
 /***/ }),
-/* 500 */
+/* 509 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -53528,9 +49307,9 @@ let prepareExternalProjectDependencies = exports.prepareExternalProjectDependenc
     };
 })();
 
-var _package_json = __webpack_require__(41);
+var _package_json = __webpack_require__(42);
 
-var _project = __webpack_require__(82);
+var _project = __webpack_require__(87);
 
 function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, arguments); return new Promise(function (resolve, reject) { function step(key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { return Promise.resolve(value).then(function (value) { step("next", value); }, function (err) { step("throw", err); }); } } return step("next"); }); }; } /*
                                                                                                                                                                                                                                                                                                                                                                                                                                                                             * Licensed to Elasticsearch B.V. under one or more contributor
