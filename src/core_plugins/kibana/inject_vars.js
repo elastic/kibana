@@ -19,38 +19,39 @@
 
 export function injectVars(server) {
   const serverConfig = server.config();
-
-  //DEPRECATED SETTINGS
-  //if the url is set, the old settings must be used.
-  //keeping this logic for backward compatibility.
-  const configuredUrl = serverConfig.get('tilemap.url');
-  const isOverridden = typeof configuredUrl === 'string' && configuredUrl !== '';
   const mapConfig = serverConfig.get('map');
+  const legacyWarning = (server => legacyMap =>
+    server.log(['warning', 'deprecated'],
+      `Use of "${legacyMap}" in the kibana configuration is deprecated. ` +
+      `Use "map.${legacyMap}" instead`))(server);
 
-  // Fall back to top-level legacy map config settings if needed. Warn on usage
-  const tilemapsConfig = serverConfig.get('map.tilemap') || serverConfig.get('tilemap');
-  const regionmapsConfig = serverConfig.get('map.regionmap') || serverConfig.get('regionmap');
+  let tilemap = mapConfig.tilemap;
+  // DEPRECATED SETTINGS
+  // If neither the url nor settings have been modified, try legacy
+  if (!tilemap.url && tilemap.options.default) {
+    tilemap = serverConfig.get('tilemap');
+    // If any of the legacy settings have been modified, issue warning
+    (tilemap.url || !tilemap.options.default) && legacyWarning('tilemap');
+  }
+  // If url is set, old settings must be used for backward compatibility
+  const isOverridden = typeof tilemap.url === 'string' && tilemap.url !== '';
 
-  ['tilemap', 'regionmap'].forEach(legacyMap => {
-    const hasLegacyMap = serverConfig.has(legacyMap);
-    const legacyMapDef = serverConfig.get(legacyMap);
-    if (hasLegacyMap && typeof legacyMapDef !== 'undefined') {
-      server.log(['warning', 'deprecated'],
-        `Use of "${legacyMap}" in the kibana configuration is deprecated. ` +
-        `Use "map.${legacyMap}" instead`);
-    }
-  });
-
-  regionmapsConfig.layers = (regionmapsConfig.layers) ? regionmapsConfig.layers : [];
+  let regionmap = mapConfig.regionmap;
+  //DEPRECATED SETTINGS
+  // If no layers have been specified, try legacy
+  if (!regionmap.layers.length) {
+    regionmap = serverConfig.get('regionmap');
+    regionmap.layers.length && legacyWarning('regionmap');
+  }
 
   return {
     kbnDefaultAppId: serverConfig.get('kibana.defaultAppId'),
-    regionmapsConfig: regionmapsConfig,
+    regionmapsConfig: regionmap,
     mapConfig: mapConfig,
     tilemapsConfig: {
       deprecated: {
         isOverridden: isOverridden,
-        config: tilemapsConfig,
+        config: tilemap,
       }
     }
   };
