@@ -17,12 +17,7 @@ export interface FrameworkAdapter {
   // Insstance vars
   appState?: object;
   kbnVersion?: string;
-  registerManagementSection(
-    sectionName: string,
-    pluginId: string,
-    displayName: string,
-    basePath: string
-  ): void;
+  registerManagementSection(pluginId: string, displayName: string, basePath: string): void;
 
   // Methods
   setUISettings(key: string, value: any): void;

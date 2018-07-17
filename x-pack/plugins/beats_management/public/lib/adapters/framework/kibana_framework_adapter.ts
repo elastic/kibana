@@ -25,12 +25,13 @@ export class KibanaFrameworkAdapter implements FrameworkAdapter {
   private management: any;
   private adapterService: KibanaAdapterServiceProvider;
   private rootComponent: React.ReactElement<any> | null = null;
+  private uiModule: IModule;
 
   constructor(uiModule: IModule, management: any) {
     this.adapterService = new KibanaAdapterServiceProvider();
     this.management = management;
+    this.uiModule = uiModule;
     this.appState = {};
-    this.register(uiModule);
   }
 
   public setUISettings = (key: string, value: any) => {
@@ -43,19 +44,24 @@ export class KibanaFrameworkAdapter implements FrameworkAdapter {
     this.adapterService.callOrBuffer(() => (this.rootComponent = component));
   };
 
-  public registerManagementSection(
-    sectionName: string,
-    pluginId: string,
-    displayName: string,
-    basePath: string
-  ) {
-    const esSection = this.management.getSection(sectionName);
-    esSection.register(pluginId, {
+  public registerManagementSection(pluginId: string, displayName: string, basePath: string) {
+    const registerSection = () =>
+      this.management.register(pluginId, {
+        display: displayName,
+        order: 30,
+      });
+    const getSection = () => this.management.getSection(pluginId);
+
+    const section = this.management.hasItem(pluginId) ? getSection() : registerSection();
+
+    section.register(pluginId, {
       visible: true,
       display: displayName,
       order: 30,
       url: `#/${basePath}`,
     });
+
+    this.register(this.uiModule);
   }
 
   private register = (adapterModule: IModule) => {

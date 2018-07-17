@@ -15,9 +15,9 @@ import { PageRouter } from './routes';
 // TODO use theme provided from parentApp when kibana supports it
 import '@elastic/eui/dist/eui_theme_light.css';
 
-async function startApp(libs: any) {
+function startApp(libs: any) {
   const history = createHashHistory();
-  libs.framework.registerManagementSection('beats', 'beats', 'Beats Management', BASE_PATH);
+  libs.framework.registerManagementSection('beats', 'Beats Management', BASE_PATH);
   libs.framework.render(<PageRouter history={history} />);
 }
 

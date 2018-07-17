@@ -9,8 +9,8 @@ import { UNIQUENESS_ENFORCING_TYPES } from '../../../common/constants';
 import { ConfigurationBlock } from '../../../common/domain_types';
 import { FrameworkUser } from '../adapters/framework/adapter_types';
 
+import { entries } from '../../utils/polyfills';
 import { CMTagsAdapter } from '../adapters/tags/adapter_types';
-import { entries } from './../../utils/polyfills';
 
 export class CMTagsDomain {
   private adapter: CMTagsAdapter;
