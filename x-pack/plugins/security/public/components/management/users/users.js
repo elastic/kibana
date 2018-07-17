@@ -35,7 +35,6 @@ export class Users extends Component {
       const users = await apiClient.getUsers();
       this.setState({ users });
     } catch (e) {
-      console.log(e);
       if (e.status === 403) {
         this.setState({ permissionDenied: true });
         setTimeout(() => {
