@@ -139,7 +139,7 @@ export class Users extends Component {
         field: 'metadata._reserved',
         name: 'Reserved',
         sortable: false,
-        width: 100,
+        width: '100px',
         align: 'right',
         render: reserved =>
           reserved ? <EuiIcon data-test-subj="reservedUser" type="lock" /> : null,
@@ -213,6 +213,7 @@ export class Users extends Component {
                 search={search}
                 sorting={sorting}
                 rowProps={rowProps}
+                isSelectable
               />
 
             </EuiPageContentBody>
