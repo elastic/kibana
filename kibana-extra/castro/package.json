@@ -3,6 +3,8 @@
   "version": "0.0.1",
   "description": "castro",
   "main": "index.js",
+  "private": true,
+  "license": "Elastic-License",
   "kibana": {
     "version": "kibana",
     "templateVersion": "1.0.0"
