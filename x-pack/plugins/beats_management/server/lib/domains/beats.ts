@@ -13,8 +13,8 @@ import { BeatsTagAssignment, CMBeatsAdapter } from '../adapters/beats/adapter_ty
 import { FrameworkUser } from '../adapters/framework/adapter_types';
 
 import { CMAssignmentReturn } from '../adapters/beats/adapter_types';
+import { BeatsRemovalReturn } from '../adapters/beats/adapter_types';
 import { BeatEnrollmentStatus, CMDomainLibs } from '../lib';
-import { BeatsRemovalReturn } from './../adapters/beats/adapter_types';
 
 export class CMBeatsDomain {
   private adapter: CMBeatsAdapter;

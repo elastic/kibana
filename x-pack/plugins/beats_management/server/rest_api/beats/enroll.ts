@@ -7,8 +7,8 @@ import Joi from 'joi';
 import { omit } from 'lodash';
 import { FrameworkRequest } from '../../lib/adapters/framework/adapter_types';
 import { CMServerLibs } from '../../lib/lib';
+import { BeatEnrollmentStatus } from '../../lib/lib';
 import { wrapEsError } from '../../utils/error_wrappers';
-import { BeatEnrollmentStatus } from './../../lib/lib';
 
 // TODO: add license check pre-hook
 // TODO: write to Kibana audit log file
