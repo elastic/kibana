@@ -215,6 +215,20 @@ class bank_account {}
 class bankAccount {}
 ```
 
+## Prefix private class methods with an underscore
+
+Identifying private class methods makes it easier to differentiate a class's public and internal
+APIs, and makes private methods easier to mark as `private` when the code is migrated to TypeScript.
+
+```js
+// good
+class BankAccount {
+  addFunds() {}
+
+  _calculateInterest() {}
+}
+```
+
 ## Magic numbers/strings
 
 These are numbers (or other values) simply used in line in your code. *Do not

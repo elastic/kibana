@@ -39,6 +39,10 @@
     esutils "^2.0.2"
     js-tokens "^3.0.0"
 
+"@babel/parser@7.0.0-beta.52":
+  version "7.0.0-beta.52"
+  resolved "https://registry.yarnpkg.com/@babel/parser/-/parser-7.0.0-beta.52.tgz#4e935b62cd9bf872bd37bcf1f63d82fe7b0237a2"
+
 "@babel/template@7.0.0-beta.31":
   version "7.0.0-beta.31"
   resolved "https://registry.yarnpkg.com/@babel/template/-/template-7.0.0-beta.31.tgz#577bb29389f6c497c3e7d014617e7d6713f68bda"
