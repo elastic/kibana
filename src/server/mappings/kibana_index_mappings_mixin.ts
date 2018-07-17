@@ -17,6 +17,7 @@
  * under the License.
  */
 
+import { Server } from 'hapi';
 import { IndexMappings } from './index_mappings';
 
 /**
@@ -27,27 +28,27 @@ import { IndexMappings } from './index_mappings';
  */
 const BASE_SAVED_OBJECT_MAPPINGS = {
   doc: {
-    dynamic: 'strict',
+    dynamic: 'strict' as 'strict',
     properties: {
       type: {
-        type: 'keyword'
+        type: 'keyword',
       },
       updated_at: {
-        type: 'date'
+        type: 'date',
       },
       config: {
         dynamic: true,
         properties: {
           buildNum: {
-            type: 'keyword'
-          }
-        }
+            type: 'keyword',
+          },
+        },
       },
-    }
-  }
+    },
+  },
 };
 
-export function kibanaIndexMappingsMixin(kbnServer, server) {
+export function kibanaIndexMappingsMixin(kbnServer: any, server: Server) {
   const mappings = new IndexMappings(
     BASE_SAVED_OBJECT_MAPPINGS,
     kbnServer.uiExports.savedObjectMappings

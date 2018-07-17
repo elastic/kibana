@@ -17,14 +17,17 @@
  * under the License.
  */
 
-export {
-  kibanaIndexMappingsMixin
-} from './kibana_index_mappings_mixin';
+export interface EsMapping {
+  type?: string;
+  dynamic?: true | false | 'strict';
+  properties?: {
+    [key: string]: EsMapping;
+  };
+  fields?: {
+    [key: string]: EsMapping;
+  };
+}
 
-export {
-  getTypes,
-  getRootType,
-  getProperty,
-  getRootProperties,
-  getRootPropertiesObjects,
-} from './lib';
+export interface EsMappings {
+  [esTypeName: string]: EsMapping;
+}

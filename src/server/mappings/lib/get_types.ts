@@ -17,22 +17,14 @@
  * under the License.
  */
 
-import { getTypes } from './get_types';
+import { EsMappings } from './types';
 
 /**
- *  Get the singular root type in the EsMappingsDsl
- *  object. If there are no types, or there are more
- *  that one type, this function will throw an error.
+ *  Get the names of the types defined in the EsMappingsDsl
  *
- *  @param  {EsMappingsDsl} mappings
- *  @return {string}
+ *  @param  {EsMappings} mappings
+ *  @return {Array<string>}
  */
-export function getRootType(mappings) {
-  const allTypes = getTypes(mappings);
-
-  if (allTypes.length !== 1) {
-    throw new TypeError(`Unable to get root type of mappings object with ${allTypes.length} root types.`);
-  }
-
-  return allTypes[0];
+export function getTypes(mappings: EsMappings) {
+  return Object.keys(mappings).filter(type => type !== '_default_');
 }

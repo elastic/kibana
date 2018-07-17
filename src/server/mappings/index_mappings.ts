@@ -19,10 +19,18 @@
 
 import { cloneDeep, isPlainObject } from 'lodash';
 
+// @ts-ignore not transforming utils right now
 import { formatListAsProse } from '../../utils';
-import { getRootProperties, getRootType } from './lib';
+import { EsMapping, EsMappings, getRootProperties, getRootType } from './lib';
 
-const DEFAULT_INITIAL_DSL = {
+interface MappingExtension {
+  pluginId?: string;
+  properties: {
+    [key: string]: EsMapping;
+  };
+}
+
+const DEFAULT_INITIAL_DSL: EsMappings = {
   rootType: {
     type: 'object',
     properties: {},
@@ -30,61 +38,63 @@ const DEFAULT_INITIAL_DSL = {
 };
 
 export class IndexMappings {
-  constructor(initialDsl = DEFAULT_INITIAL_DSL, mappingExtensions = []) {
-    this._dsl = cloneDeep(initialDsl);
-    if (!isPlainObject(this._dsl)) {
+  private dsl: EsMappings = this.initialDsl;
+
+  constructor(
+    private initialDsl: EsMappings = DEFAULT_INITIAL_DSL,
+    mappingExtensions: MappingExtension[] = []
+  ) {
+    if (!isPlainObject(this.dsl)) {
       throw new TypeError('initial mapping must be an object');
     }
 
     // ensure that we have a properties object in the dsl
     // and that the dsl can be parsed with getRootProperties() and kin
-    this._setProperties(getRootProperties(this._dsl) || {});
+    this.setProperties(getRootProperties(this.dsl) || {});
 
     // extend this._dsl with each extension (which currently come from uiExports.savedObjectMappings)
     mappingExtensions.forEach(({ properties, pluginId }) => {
-      const rootProperties = getRootProperties(this._dsl);
+      const rootProperties = getRootProperties(this.dsl);
 
-      const conflicts = Object.keys(properties)
-        .filter(key => rootProperties.hasOwnProperty(key));
+      const conflicts = Object.keys(properties).filter(key => rootProperties.hasOwnProperty(key));
 
-      const illegal = Object.keys(properties)
-        .filter(key => key.startsWith('_'));
+      const illegal = Object.keys(properties).filter(key => key.startsWith('_'));
 
       if (conflicts.length) {
         const props = formatListAsProse(conflicts);
         const owner = pluginId ? `registered by plugin ${pluginId} ` : '';
-        throw new Error(
-          `Mappings for ${props} ${owner}have already been defined`
-        );
+        throw new Error(`Mappings for ${props} ${owner}have already been defined`);
       }
 
       if (illegal.length) {
         const props = formatListAsProse(illegal);
         const owner = pluginId ? `registered by plugin ${pluginId} ` : '';
         throw new Error(
-          `Property name${props.length > 1 ? 's' : ''} ${props} ${owner}are not allowed to start with an underscore (_)`
+          `Property name${
+            props.length > 1 ? 's' : ''
+          } ${props} ${owner}are not allowed to start with an underscore (_)`
         );
       }
 
-      this._setProperties({
+      this.setProperties({
         ...rootProperties,
-        ...properties
+        ...properties,
       });
     });
   }
 
-  getDsl() {
-    return cloneDeep(this._dsl);
+  public getDsl() {
+    return cloneDeep(this.dsl);
   }
 
-  _setProperties(newProperties) {
-    const rootType = getRootType(this._dsl);
-    this._dsl = {
-      ...this._dsl,
+  private setProperties(newProperties: MappingExtension['properties']) {
+    const rootType = getRootType(this.dsl);
+    this.dsl = {
+      ...this.dsl,
       [rootType]: {
-        ...this._dsl[rootType],
-        properties: newProperties
-      }
+        ...this.dsl[rootType],
+        properties: newProperties,
+      },
     };
   }
 }

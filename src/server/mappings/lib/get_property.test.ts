@@ -25,12 +25,12 @@ const MAPPINGS = {
       foo: {
         properties: {
           name: {
-            type: 'text'
+            type: 'text',
           },
           description: {
-            type: 'text'
-          }
-        }
+            type: 'text',
+          },
+        },
       },
       bar: {
         properties: {
@@ -38,20 +38,17 @@ const MAPPINGS = {
             type: 'text',
             fields: {
               box: {
-                type: 'keyword'
-              }
-            }
-          }
-        }
-      }
-    }
-  }
+                type: 'keyword',
+              },
+            },
+          },
+        },
+      },
+    },
+  },
 };
 
-function runTest(key, mapping) {
-  expect(typeof key === 'string' || Array.isArray(key)).toBeTruthy();
-  expect(typeof mapping).toBe('object');
-
+function runTest(key: string | string[], mapping: { [key: string]: any }) {
   expect(getProperty(MAPPINGS, key)).toBe(mapping);
 }
 

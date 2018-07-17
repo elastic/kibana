@@ -240,6 +240,7 @@
     "@types/execa": "^0.9.0",
     "@types/getopts": "^2.0.0",
     "@types/glob": "^5.0.35",
+    "@types/hapi": "^15.0.2",
     "@types/hapi-latest": "npm:@types/hapi@17.0.12",
     "@types/has-ansi": "^3.0.0",
     "@types/jest": "^22.2.3",

@@ -353,6 +353,12 @@
     "@types/podium" "*"
     "@types/shot" "*"
 
+"@types/hapi@^15.0.2":
+  version "15.0.2"
+  resolved "https://registry.yarnpkg.com/@types/hapi/-/hapi-15.0.2.tgz#59c77434e6e3fe96e7153c14981219b6a2f0326c"
+  dependencies:
+    "@types/node" "*"
+
 "@types/has-ansi@^3.0.0":
   version "3.0.0"
   resolved "https://registry.yarnpkg.com/@types/has-ansi/-/has-ansi-3.0.0.tgz#636403dc4e0b2649421c4158e5c404416f3f0330"
