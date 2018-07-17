@@ -1,0 +1,4 @@
+{
+  "browser": "../target/web/react",
+  "main": "../target/node/react"
+}

@@ -50,6 +50,7 @@ export default function ({ getService, getPageObjects }) {
       expect(isInstalled).to.be(true);
     });
 
+    // Skipping issue # 20807
     describe.skip('dashboard', () => {
       after(async () => {
         await PageObjects.common.navigateToUrl('home', 'tutorial_directory/sampleData');

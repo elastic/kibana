@@ -300,11 +300,29 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
     }
 
     async clearComboBox(comboBoxSelector) {
+      log.debug(`clearComboBox for comboBoxSelector:${comboBoxSelector}`);
       const comboBox = await testSubjects.find(comboBoxSelector);
-      const clearBtn = await comboBox.findByCssSelector('[data-test-subj="comboBoxClearButton"]');
-      await clearBtn.click();
-      await PageObjects.common.sleep(1000);
+      await retry.try(async () => {
+        const clearButtonExists = await this.doesComboBoxClearButtonExist(comboBox);
+        if (!clearButtonExists) {
+          log.debug('Unable to clear comboBox, comboBoxClearButton does not exist');
+          return;
+        }
+
+        const clearBtn = await comboBox.findByCssSelector('[data-test-subj="comboBoxClearButton"]');
+        await clearBtn.click();
+
+        const clearButtonStillExists = await this.doesComboBoxClearButtonExist(comboBox);
+        if (clearButtonStillExists) {
+          throw new Error('Failed to clear comboBox');
+        }
+      });
       await this.closeComboBoxOptionsList(comboBox);
+    }
+
+    async doesComboBoxClearButtonExist(comboBoxElement) {
+      return await find.exists(
+        async () => await comboBoxElement.findByCssSelector('[data-test-subj="comboBoxClearButton"]'));
     }
 
     async closeComboBoxOptionsList(comboBoxElement) {
