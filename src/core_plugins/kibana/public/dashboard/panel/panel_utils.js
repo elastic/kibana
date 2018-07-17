@@ -22,6 +22,7 @@ import { DEFAULT_PANEL_WIDTH, DEFAULT_PANEL_HEIGHT } from '../dashboard_constant
 import chrome from 'ui/chrome';
 
 const PANEL_HEIGHT_SCALE_FACTOR = 5;
+const PANEL_HEIGHT_SCALE_FACTOR_WITH_MARGINS = 4;
 const PANEL_WIDTH_SCALE_FACTOR = 4;
 
 export class PanelUtils {
@@ -55,17 +56,20 @@ export class PanelUtils {
   // 1) decrease column height from 100 to 20.
   // 2) increase rows from 12 to 48
   // Need to scale pre 6.3 panels so they maintain the same layout
-  static convertPanelDataPre_6_3(panel) { // eslint-disable-line camelcase
+  static convertPanelDataPre_6_3(panel, useMargins) { // eslint-disable-line camelcase
     ['w', 'x', 'h', 'y'].forEach(key => {
       if (!_.has(panel.gridData, key)) {
         throw new Error(`Unable to migrate panel data for "6.3.0" backwards compatibility, panel does not contain expected field: ${key}`);
       }
     });
 
+    // see https://github.com/elastic/kibana/issues/20635 on why the scale factor changes when margins are being used
+    const heightScaleFactor = useMargins ? PANEL_HEIGHT_SCALE_FACTOR_WITH_MARGINS : PANEL_HEIGHT_SCALE_FACTOR;
+
     panel.gridData.w = panel.gridData.w * PANEL_WIDTH_SCALE_FACTOR;
     panel.gridData.x = panel.gridData.x * PANEL_WIDTH_SCALE_FACTOR;
-    panel.gridData.h = panel.gridData.h * PANEL_HEIGHT_SCALE_FACTOR;
-    panel.gridData.y = panel.gridData.y * PANEL_HEIGHT_SCALE_FACTOR;
+    panel.gridData.h = panel.gridData.h * heightScaleFactor;
+    panel.gridData.y = panel.gridData.y * heightScaleFactor;
     panel.version = chrome.getKibanaVersion();
 
     return panel;

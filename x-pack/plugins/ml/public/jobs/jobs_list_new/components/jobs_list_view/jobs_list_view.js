@@ -18,12 +18,14 @@ import { DeleteJobModal } from '../delete_job_modal';
 import { StartDatafeedModal } from '../start_datafeed_modal';
 import { MultiJobActions } from '../multi_job_actions';
 
+import PropTypes from 'prop-types';
 import React, {
   Component
 } from 'react';
 
 const DEFAULT_REFRESH_INTERVAL_MS = 30000;
 const MINIMUM_REFRESH_INTERVAL_MS = 5000;
+let jobsRefreshInterval =  null;
 
 export class JobsListView extends Component {
   constructor(props) {
@@ -35,7 +37,7 @@ export class JobsListView extends Component {
       fullJobsList: {},
       selectedJobs: [],
       itemIdToExpandedRowMap: {},
-      filterClauses: []
+      filterClauses: [],
     };
 
     this.updateFunctions = {};
@@ -45,10 +47,10 @@ export class JobsListView extends Component {
     this.showStartDatafeedModal = () => {};
 
     this.blockRefresh = false;
-    this.refreshInterval = null;
   }
 
   componentDidMount() {
+    timefilter.disableTimeRangeSelector();
     timefilter.enableAutoRefreshSelector();
 
     this.initAutoRefresh();
@@ -56,6 +58,7 @@ export class JobsListView extends Component {
   }
 
   componentWillUnmount() {
+    timefilter.off('refreshIntervalUpdate');
     this.clearRefreshInterval();
   }
 
@@ -93,13 +96,13 @@ export class JobsListView extends Component {
     this.clearRefreshInterval();
     if (interval >= MINIMUM_REFRESH_INTERVAL_MS) {
       this.blockRefresh = false;
-      this.refreshInterval = setInterval(() => (this.refreshJobSummaryList()), interval);
+      jobsRefreshInterval = setInterval(() => (this.refreshJobSummaryList()), interval);
     }
   }
 
   clearRefreshInterval() {
     this.blockRefresh = true;
-    clearInterval(this.refreshInterval);
+    clearInterval(jobsRefreshInterval);
   }
 
   toggleRow = (jobId) => {
@@ -117,6 +120,7 @@ export class JobsListView extends Component {
             jobId={jobId}
             job={this.state.fullJobsList[jobId]}
             addYourself={this.addUpdateFunction}
+            removeYourself={this.removeUpdateFunction}
           />
         );
       } else {
@@ -124,6 +128,7 @@ export class JobsListView extends Component {
           <JobDetails
             jobId={jobId}
             addYourself={this.addUpdateFunction}
+            removeYourself={this.removeUpdateFunction}
           />
         );
       }
@@ -227,6 +232,7 @@ export class JobsListView extends Component {
           const filteredJobsSummaryList = filterJobs(jobsSummaryList, this.state.filterClauses);
           this.setState({ jobsSummaryList, filteredJobsSummaryList, fullJobsList }, () => {
             this.refreshSelectedJobs();
+            this.props.updateJobStats(jobsSummaryList);
           });
 
           Object.keys(this.updateFunctions).forEach((j) => {
@@ -281,3 +287,6 @@ export class JobsListView extends Component {
     );
   }
 }
+JobsListView.propTypes = {
+  updateJobStats: PropTypes.func.isRequired,
+};

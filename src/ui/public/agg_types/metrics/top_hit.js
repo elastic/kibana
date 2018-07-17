@@ -113,7 +113,7 @@ export const topHitMetricAgg = new MetricAggType({
       ],
       controller: function ($scope) {
         $scope.options = [];
-        $scope.$watchGroup([ 'agg.vis.type.name', 'agg.params.field.type' ], function ([ visName, fieldType ]) {
+        $scope.$watchGroup([ 'vis.type.name', 'agg.params.field.type' ], function ([ visName, fieldType ]) {
           if (fieldType && visName) {
             $scope.options = _.filter($scope.aggParam.options, option => {
               return option.isCompatibleVis(visName) && option.isCompatibleType(fieldType);
@@ -137,7 +137,7 @@ export const topHitMetricAgg = new MetricAggType({
       editor: null,
       filterFieldTypes: [ 'number', 'date', 'ip',  'string' ],
       default: function (agg) {
-        return agg.vis.indexPattern.timeFieldName;
+        return agg._indexPattern.timeFieldName;
       },
       write: _.noop // prevent default write, it is handled below
     },
@@ -187,7 +187,7 @@ export const topHitMetricAgg = new MetricAggType({
     const path = agg.params.field.name;
 
     let values = _(hits).map(hit => {
-      return path === '_source' ? hit._source : agg.vis.indexPattern.flattenHit(hit, true)[path];
+      return path === '_source' ? hit._source : agg._indexPattern.flattenHit(hit, true)[path];
     })
       .flatten()
       .value();

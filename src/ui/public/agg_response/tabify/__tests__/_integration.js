@@ -48,7 +48,7 @@ describe('tabifyAggResponse Integration', function () {
     });
     normalizeIds(vis);
 
-    const resp = tabifyAggResponse(vis.getAggConfig().getResponseAggs(), fixtures.metricOnly, {
+    const resp = tabifyAggResponse(vis.getAggConfig(), fixtures.metricOnly, {
       canSplit: false,
       isHierarchical: vis.isHierarchical()
     });
@@ -174,7 +174,7 @@ describe('tabifyAggResponse Integration', function () {
       // only complete rows, and only put the metrics at the end.
 
       vis.isHierarchical = _.constant(false);
-      const tabbed = tabifyAggResponse(vis.getAggConfig().getResponseAggs(), esResp, { isHierarchical: vis.isHierarchical() });
+      const tabbed = tabifyAggResponse(vis.getAggConfig(), esResp, { isHierarchical: vis.isHierarchical() });
 
       expectRootGroup(tabbed, function expectTable(table, splitKey) {
         expectColumns(table, [src, os, avg]);
@@ -200,7 +200,7 @@ describe('tabifyAggResponse Integration', function () {
       // the existing bucket and it's metric
 
       vis.isHierarchical = _.constant(true);
-      const tabbed = tabifyAggResponse(vis.getAggConfig().getResponseAggs(), esResp, {
+      const tabbed = tabifyAggResponse(vis.getAggConfig(), esResp, {
         partialRows: true,
         isHierarchical: vis.isHierarchical()
       });
@@ -235,7 +235,7 @@ describe('tabifyAggResponse Integration', function () {
       // the end
 
       vis.isHierarchical = _.constant(true);
-      const tabbed = tabifyAggResponse(vis.getAggConfig().getResponseAggs(), esResp, {
+      const tabbed = tabifyAggResponse(vis.getAggConfig(), esResp, {
         partialRows: true,
         minimalColumns: true,
         isHierarchical: vis.isHierarchical()
@@ -268,7 +268,7 @@ describe('tabifyAggResponse Integration', function () {
       // create metric columns after each bucket
 
       vis.isHierarchical = _.constant(false);
-      const tabbed = tabifyAggResponse(vis.getAggConfig().getResponseAggs(), esResp, {
+      const tabbed = tabifyAggResponse(vis.getAggConfig(), esResp, {
         minimalColumns: false,
         isHierarchical: vis.isHierarchical()
       });

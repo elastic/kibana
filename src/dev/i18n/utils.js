@@ -17,13 +17,26 @@
  * under the License.
  */
 
+import {
+  isCallExpression,
+  isIdentifier,
+  isObjectProperty,
+  isMemberExpression,
+  isNode,
+} from '@babel/types';
 import fs from 'fs';
 import glob from 'glob';
 import { promisify } from 'util';
-import { isNode } from '@babel/types';
+
+const ESCAPE_LINE_BREAK_REGEX = /(?<!\\)\\\n/g;
+const ESCAPE_SINGLE_QUOTE_REGEX = /\\([\s\S])|(')/g;
+const HTML_LINE_BREAK_REGEX = /[\s]*\n[\s]*/g;
 
 export const readFileAsync = promisify(fs.readFile);
+export const writeFileAsync = promisify(fs.writeFile);
 export const globAsync = promisify(glob);
+export const makeDirAsync = promisify(fs.mkdir);
+export const accessAsync = promisify(fs.access);
 
 export function arraysDiff(left = [], right = []) {
   const leftDiff = left.filter(value => !right.includes(value));
@@ -31,39 +44,57 @@ export function arraysDiff(left = [], right = []) {
   return [leftDiff, rightDiff];
 }
 
+export function isPropertyWithKey(property, identifierName) {
+  return isObjectProperty(property) && isIdentifier(property.key, { name: identifierName });
+}
+
 /**
- * Workaround of @babel/traverse typescript bug: https://github.com/babel/babel/issues/8262
+ * Detect angular i18n service call or `@kbn/i18n` translate function call.
+ *
+ * Service call example: `i18n('message-id', { defaultMessage: 'Message text'})`
+ *
+ * `@kbn/i18n` example: `i18n.translate('message-id', { defaultMessage: 'Message text'})`
  */
-export function* traverseNodes(nodes, extractMessagesFromNode) {
+export function isI18nTranslateFunction(node) {
+  return (
+    isCallExpression(node) &&
+    (isIdentifier(node.callee, { name: 'i18n' }) ||
+      (isMemberExpression(node.callee) &&
+        isIdentifier(node.callee.object, { name: 'i18n' }) &&
+        isIdentifier(node.callee.property, { name: 'translate' })))
+  );
+}
+
+export function formatJSString(string) {
+  return (string || '')
+    .replace(ESCAPE_LINE_BREAK_REGEX, '')
+    .replace(ESCAPE_SINGLE_QUOTE_REGEX, '\\$1$2')
+    .replace('\n', '\\n');
+}
+
+export function formatHTMLString(string) {
+  return (string || '')
+    .replace(ESCAPE_SINGLE_QUOTE_REGEX, '\\$1$2')
+    .replace(HTML_LINE_BREAK_REGEX, ' ');
+}
+
+/**
+ * Traverse an array of nodes using default depth-first traversal algorithm.
+ * We don't use `@babel/traverse` because of its bug: https://github.com/babel/babel/issues/8262
+ *
+ * @generator
+ * @param {object[]} nodes array of nodes or objects with Node values
+ * @yields {Node} each node
+ */
+export function* traverseNodes(nodes) {
   for (const node of nodes) {
-    let stop = false;
-    let message;
-
     if (isNode(node)) {
-      message = extractMessagesFromNode({
-        node,
-        stop() {
-          stop = true;
-        },
-      });
+      yield node;
     }
 
-    if (message) {
-      yield message;
-    }
-
-    if (stop) {
-      break;
-    }
-
+    // if node is an object / array, traverse all of its object values
     if (node && typeof node === 'object') {
-      const values = Object.values(node).filter(
-        value => value && typeof value === 'object'
-      );
-
-      if (values.length > 0) {
-        yield* traverseNodes(values, extractMessagesFromNode);
-      }
+      yield* traverseNodes(Object.values(node).filter(value => value && typeof value === 'object'));
     }
   }
 }

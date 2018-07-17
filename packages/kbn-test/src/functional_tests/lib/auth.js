@@ -62,9 +62,7 @@ async function updateCredentials(port, auth, username, password, retries = 10) {
     return await updateCredentials(port, auth, username, password, retries - 1);
   }
 
-  throw new Error(
-    `${statusCode} response, expected 200 -- ${JSON.stringify(body)}`
-  );
+  throw new Error(`${statusCode} response, expected 200 -- ${JSON.stringify(body)}`);
 }
 
 export async function setupUsers(log, config) {
@@ -75,10 +73,7 @@ export async function setupUsers(log, config) {
   let auth = `elastic:${DEFAULT_SUPERUSER_PASS}`;
 
   // list of updates we need to apply
-  const updates = [
-    config.get('servers.elasticsearch'),
-    config.get('servers.kibana'),
-  ];
+  const updates = [config.get('servers.elasticsearch'), config.get('servers.kibana')];
 
   for (const { username, password } of updates) {
     log.info('setting %j user password to %j', username, password);

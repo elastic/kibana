@@ -9,6 +9,13 @@ import sinon from 'sinon';
 import expect from 'expect.js';
 import beatsStatsResultSet from './fixtures/beats_stats_results';
 
+const getBaseOptions = () => ({
+  clusters: {},
+  clusterHostSets: {},
+  clusterInputSets: {},
+  clusterModuleSets: {},
+});
+
 describe('Get Beats Stats', () => {
   describe('fetchBeatsStats', () => {
     const clusterUuids = ['aCluster', 'bCluster', 'cCluster'];
@@ -60,12 +67,11 @@ describe('Get Beats Stats', () => {
   describe('processResults', () => {
     it('should summarize empty results', () => {
       const resultsEmpty = undefined;
-      const clusters = {};
-      const clusterHostMaps = {};
 
-      processResults(resultsEmpty, clusters, clusterHostMaps);
+      const options = getBaseOptions();
+      processResults(resultsEmpty, options);
 
-      expect(clusters).to.eql({});
+      expect(options.clusters).to.eql({});
     });
 
     it('should summarize single result with some missing fields', () => {
@@ -74,6 +80,7 @@ describe('Get Beats Stats', () => {
           hits: [
             {
               _source: {
+                type: 'beats_stats',
                 cluster_uuid: 'FlV4ckTxQ0a78hmBkzzc9A',
                 beats_stats: {
                   metrics: { libbeat: { output: { type: 'elasticsearch' } } }, // missing events published
@@ -84,11 +91,11 @@ describe('Get Beats Stats', () => {
           ],
         },
       };
-      const clusters = {};
-      const clusterHostMaps = {};
-      processResults(results, clusters, clusterHostMaps);
 
-      expect(clusters).to.eql({
+      const options = getBaseOptions();
+      processResults(results, options);
+
+      expect(options.clusters).to.eql({
         FlV4ckTxQ0a78hmBkzzc9A: {
           count: 1,
           versions: {},
@@ -96,21 +103,28 @@ describe('Get Beats Stats', () => {
           outputs: { elasticsearch: 1 },
           eventsPublished: 0,
           hosts: 0,
+          input: {
+            count: 0,
+            names: [],
+          },
+          module: {
+            count: 0,
+            names: [],
+          },
         },
       });
     });
 
     it('should summarize stats from hits across multiple result objects', () => {
 
-      const clusters = {};
-      const clusterHostMaps = {};
+      const options = getBaseOptions();
 
       // beatsStatsResultSet is an array of many small query results
       beatsStatsResultSet.forEach(results => {
-        processResults(results, clusters, clusterHostMaps);
+        processResults(results, options);
       });
 
-      expect(clusters).to.eql({
+      expect(options.clusters).to.eql({
         W7hppdX7R229Oy3KQbZrTw: {
           count: 5,
           versions: { '7.0.0-alpha1': 5 },
@@ -118,6 +132,14 @@ describe('Get Beats Stats', () => {
           outputs: { elasticsearch: 5 },
           eventsPublished: 80875,
           hosts: 1,
+          module: {
+            count: 1,
+            names: [ 'ferrari' ],
+          },
+          input: {
+            count: 1,
+            names: [ 'firehose' ],
+          },
         },
         FlV4ckTxQ0a78hmBkzzc9A: {
           count: 405,
@@ -135,6 +157,14 @@ describe('Get Beats Stats', () => {
           outputs: { elasticsearch: 405 },
           eventsPublished: 723985,
           hosts: 1,
+          input: {
+            count: 0,
+            names: [],
+          },
+          module: {
+            count: 0,
+            names: [],
+          },
         },
       });
     });
