@@ -17,57 +17,5 @@
  * under the License.
  */
 
-import 'isomorphic-fetch';
-import url from 'url';
-import chrome from '../chrome';
-import { metadata } from '../metadata';
-import { merge } from 'lodash';
-
-class FetchError extends Error {
-  constructor(res, body) {
-    super(res.statusText);
-    this.res = res;
-    this.body = body;
-    Error.captureStackTrace(this, FetchError);
-  }
-}
-
-export async function kfetch(fetchOptions, kibanaOptions) {
-  // fetch specific options with defaults
-  const { pathname, query, ...combinedFetchOptions } = merge(
-    {
-      method: 'GET',
-      credentials: 'same-origin',
-      headers: {
-        'Content-Type': 'application/json',
-        'kbn-version': metadata.version,
-      },
-    },
-    fetchOptions
-  );
-
-  // kibana specific options with defaults
-  const combinedKibanaOptions = {
-    prependBasePath: true,
-    ...kibanaOptions,
-  };
-
-  const fullUrl = url.format({
-    pathname: combinedKibanaOptions.prependBasePath ? chrome.addBasePath(pathname) : pathname,
-    query,
-  });
-
-  const res = await fetch(fullUrl, combinedFetchOptions);
-
-  if (!res.ok) {
-    let body;
-    try {
-      body = await res.json();
-    } catch (err) {
-      // ignore error, may not be able to get body for response that is not ok
-    }
-    throw new FetchError(res, body);
-  }
-
-  return res.json();
-}
+export { kfetch } from './kfetch';
+export { kfetchAbortable } from './kfetch_abortable';

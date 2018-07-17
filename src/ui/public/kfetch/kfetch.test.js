@@ -18,11 +18,12 @@
  */
 
 import fetchMock from 'fetch-mock';
-import { kfetch } from './index';
+import { kfetch } from './kfetch';
 
 jest.mock('../chrome', () => ({
   addBasePath: path => `myBase/${path}`,
 }));
+
 jest.mock('../metadata', () => ({
   metadata: {
     version: 'my-version',

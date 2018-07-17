@@ -17,12 +17,23 @@
  * under the License.
  */
 
-import * as angular from './angular';
-import * as react from './react';
-import * as i18nCore from './core/i18n';
+import { kfetchAbortable } from './kfetch_abortable';
 
-export { formats } from './core/formats';
+jest.mock('../chrome', () => ({
+  addBasePath: path => `myBase/${path}`,
+}));
 
-export const AngularI18n = angular;
-export const ReactI18n = react;
-export const i18n = i18nCore;
+jest.mock('../metadata', () => ({
+  metadata: {
+    version: 'my-version',
+  },
+}));
+
+describe('kfetchAbortable', () => {
+  it('should return an object with a fetching promise and an abort callback', () => {
+    const { fetching, abort } = kfetchAbortable({ pathname: 'my/path' });
+    expect(typeof fetching.then).toBe('function');
+    expect(typeof fetching.catch).toBe('function');
+    expect(typeof abort).toBe('function');
+  });
+});
