@@ -65,8 +65,9 @@ export default function ({ getService, getPageObjects }) {
           await PageObjects.settings.clickLinkText('new-user');
           const currentUrl = await remote.getCurrentUrl();
           expect(currentUrl).to.contain(EDIT_USERS_PATH);
-
           const userNameInput = await testSubjects.find('userFormUserNameInput');
+          // allow time for user to load
+          await PageObjects.common.sleep(500);
           const userName = await userNameInput.getProperty('value');
           expect(userName).to.equal('new-user');
         });
