@@ -51,9 +51,6 @@ const assertStatsAndMetrics = body => {
   expect(body.requests.total).to.be.a('number');
   expect(body.requests.disconnects).to.be.a('number');
 
-  expect(body.sockets.http.total).to.be.a('number');
-  expect(body.sockets.https.total).to.be.a('number');
-
   expect(body.concurrent_connections).to.be.a('number');
 };
 
