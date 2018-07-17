@@ -14,8 +14,6 @@ import { CloudDetector } from '../../../cloud';
  * @return {Object} the revealed `push` and `flush` modules
  */
 export function opsBuffer(server) {
-  let host = null;
-
   // determine the cloud service in the background
   const cloudDetector = new CloudDetector();
   cloudDetector.detectCloudService();
@@ -24,14 +22,12 @@ export function opsBuffer(server) {
 
   return {
     push(event) {
-      host = event.host;
       eventRoller.addEvent(event);
       server.log(['debug', LOGGING_TAG, KIBANA_MONITORING_LOGGING_TAG], 'Received Kibana Ops event data');
     },
 
     flush() {
       return {
-        host,
         cloud: cloudDetector.getCloudDetails(),
         ...eventRoller.flush()
       };
