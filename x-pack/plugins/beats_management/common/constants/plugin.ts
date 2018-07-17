@@ -5,5 +5,5 @@
  */
 
 export const PLUGIN = {
-  ID: 'beats',
+  ID: 'beats_management',
 };

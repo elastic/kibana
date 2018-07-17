@@ -31,7 +31,7 @@ export function beats(kibana: any) {
     },
     publicDir: resolve(__dirname, 'public'),
     uiExports: {
-      managementSections: ['plugins/beats'],
+      managementSections: ['plugins/beats_management'],
     },
   });
 }
