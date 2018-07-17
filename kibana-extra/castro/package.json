@@ -10,7 +10,6 @@
   "scripts": {
     "_preinstall": "node ../../kibana/preinstall_check",
     "kbn": "node ../../kibana/scripts/kbn",
-    "lint": "eslint **/*.js",
     "tslint": "tslint -c tslint.json '**/*.{ts,tsx}'",
     "start": "plugin-helpers start --config ../config/kibana/kibana.yml",
     "test:server": "plugin-helpers test:server",
@@ -20,8 +19,6 @@
     "debug": " node --inspect ../../kibana/scripts/kibana.js --config ../../config/kibana/kibana.yml  --env.name=development --optimize.enabled=true --plugin-path=."
   },
   "devDependencies": {
-    "@elastic/eslint-config-kibana": "link:../../kibana/packages/eslint-config-kibana",
-    "@elastic/eslint-import-resolver-kibana": "^0.9.0",
     "@elastic/eui": "^0.0.51",
     "@kbn/plugin-helpers": "link:../../kibana/packages/kbn-plugin-helpers",
     "@types/elasticsearch": "^5.0.24",
@@ -31,14 +28,6 @@
     "@types/react-dom": "^16.0.6",
     "@types/react-redux": "^6.0.2",
     "@types/redux-actions": "^2.3.0",
-    "babel-eslint": "^8.0.2",
-    "eslint": "^4.11.0",
-    "eslint-plugin-babel": "^4.1.1",
-    "eslint-plugin-import": "^2.3.0",
-    "eslint-plugin-jest": "^21.3.2",
-    "eslint-plugin-mocha": "^4.9.0",
-    "eslint-plugin-prefer-object-spread": "^1.2.1",
-    "eslint-plugin-react": "^7.0.1",
     "expect.js": "^0.3.1",
     "mocha": "^5.2.0",
     "tslint": "^5.10.0",
