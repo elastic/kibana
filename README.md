@@ -10,22 +10,20 @@ See the [contributing guide](./CONTRIBUTING.md) for instructions setting up your
 
   - `./gradlew bootstrap`
 
-    Create or update the Kibana checkout in the `kibana` directory and install dependencies in both Kibana and CodeSearch.
-
-    > ***IMPORTANT:*** Use this script instead of `yarn` to install dependencies, when switching branches, and re-run it whenever your dependencies change.
+    Clone or update the local Kibana checkout, then install dependencies in Kibana and codesearch. This task is automatically run by all other tasks and is pretty aggressively cached. If you experience issues and want to bypass the cache run it with the `--no-build-cache` flag.
 
   - `./gradlew startDeps`
 
-    Start an elasticsearch instance using a nightly snapshot
+    Start an elasticsearch instance using a nightly snapshot.
 
   - `./gradlew startKibana`
 
-    Start kibana and have it include the codesearch plugin
+    Start kibana and have it include the codesearch plugin.
 
   - `./gradlew lint`
 
-    Lint the sourcecode with [`tslint`](https://github.com/palantir/tslint)
+    Lint the sourcecode with [`tslint`](https://github.com/palantir/tslint).
 
   - `./gradlew lintFix`
 
-    Lint the sourcecode with [`tslint`](https://github.com/palantir/tslint) and fix any auto-fixable errors
+    Lint the sourcecode with [`tslint`](https://github.com/palantir/tslint) and fix any auto-fixable errors.
