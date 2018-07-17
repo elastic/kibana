@@ -16,7 +16,7 @@ import { watcher } from './plugins/watcher';
 import { grokdebugger } from './plugins/grokdebugger';
 import { dashboardMode } from './plugins/dashboard_mode';
 import { logstash } from './plugins/logstash';
-import { beats } from './plugins/beats';
+import { beats } from './plugins/beats_management';
 import { apm } from './plugins/apm';
 import { licenseManagement } from './plugins/license_management';
 import { cloud } from './plugins/cloud';

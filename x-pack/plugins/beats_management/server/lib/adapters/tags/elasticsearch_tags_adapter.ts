@@ -6,7 +6,7 @@
 
 import { get } from 'lodash';
 import { INDEX_NAMES } from '../../../../common/constants';
-import { FrameworkUser } from './../framework/adapter_types';
+import { FrameworkUser } from '../framework/adapter_types';
 
 import { BeatTag } from '../../../../common/domain_types';
 import { DatabaseAdapter } from '../database/adapter_types';
