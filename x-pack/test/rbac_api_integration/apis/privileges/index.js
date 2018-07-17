@@ -9,6 +9,8 @@ export default function ({ getService }) {
   describe('privileges', () => {
     it(`get should return privileges`, async () => {
       const supertest = getService('supertest');
+      const kibanaServer = getService('kibanaServer');
+      const version = await kibanaServer.version.get();
 
       await supertest
         .get(`/api/security/v1/privileges`)
@@ -18,14 +20,14 @@ export default function ({ getService }) {
             {
               application: 'kibana-.kibana',
               name: 'all',
-              actions: ['version:7.0.0-alpha1', 'action:*'],
+              actions: [`version:${version}`, 'action:*'],
               metadata: {},
             },
             {
               application: 'kibana-.kibana',
               name: 'read',
               actions: [
-                'version:7.0.0-alpha1',
+                `version:${version}`,
                 'action:login',
                 'action:saved_objects/config/get',
                 'action:saved_objects/config/bulk_get',
