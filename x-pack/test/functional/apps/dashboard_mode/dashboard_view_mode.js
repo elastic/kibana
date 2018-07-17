@@ -57,12 +57,11 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.settings.navigateTo();
         await PageObjects.security.clickUsersSection();
         await PageObjects.security.clickCreateNewUser();
-        await PageObjects.security.assignRoleToUser('kibana_dashboard_only_user');
         await testSubjects.setValue('userFormUserNameInput', 'dashuser');
         await testSubjects.setValue('passwordInput', '123456');
         await testSubjects.setValue('passwordConfirmationInput', '123456');
         await testSubjects.setValue('userFormFullNameInput', 'dashuser');
-
+        await PageObjects.security.assignRoleToUser('kibana_dashboard_only_user');
         await PageObjects.security.assignRoleToUser('logstash-data');
 
         await PageObjects.security.clickSaveEditUser();

@@ -19,11 +19,12 @@ import {
   EuiTitle,
   EuiForm,
   EuiFormRow,
-  EuiText,
   EuiToolTip,
   EuiFieldText,
   EuiPage,
   EuiComboBox,
+  EuiOverlayMask,
+  EuiConfirmModal,
 } from '@elastic/eui';
 import { toastNotifications } from 'ui/notify';
 import { USERS_PATH } from '../../../views/management/management_urls';
@@ -34,6 +35,7 @@ export class EditUser extends Component {
     this.state = {
       isNewUser: true,
       currentUser: {},
+      showDeleteConfirmation: false,
       user: {
         username: null,
         full_name: null,
@@ -61,6 +63,48 @@ export class EditUser extends Component {
       selectedRoles: user.roles.map(role => ({ label: role })) || [],
     });
   }
+  confirmDeleteModal = () => {
+    const {
+      showDeleteConfirmation,
+      user: { username },
+    } = this.state;
+    if (!showDeleteConfirmation) {
+      return null;
+    }
+    return (
+      <EuiOverlayMask>
+        <EuiConfirmModal
+          title={`Confirm delete user`}
+          onCancel={() => this.setState({ showDeleteConfirmation: false })}
+          onConfirm={this.deleteUser}
+          cancelButtonText="Cancel"
+          confirmButtonText="Confirm"
+        >
+          <div>
+            <p>You are about to delete this user:</p>
+            <ul>
+              <li>{username}</li>
+            </ul>
+            <p>This operation cannot be undone.</p>
+          </div>
+        </EuiConfirmModal>
+      </EuiOverlayMask>
+    );
+  };
+  deleteUser = async () => {
+    const {
+      users: { username },
+    } = this.state;
+    const { apiClient, changeUrl } = this.props;
+    try {
+      await apiClient.deleteUser(username);
+      toastNotifications.addSuccess(`Deleted user ${username}`);
+      changeUrl(USERS_PATH);
+    } catch (e) {
+      toastNotifications.addDanger(`Error deleting user ${username}`);
+    }
+  };
+
   passwordError = () => {
     const { password } = this.state;
     if (password !== null && password.length < 6) {
@@ -116,7 +160,9 @@ export class EditUser extends Component {
     const { apiClient, changeUrl } = this.props;
     const { user, password, selectedRoles } = this.state;
     const userToSave = { ...user };
-    userToSave.roles = selectedRoles.map(selectedRole => { return selectedRole.label; });
+    userToSave.roles = selectedRoles.map(selectedRole => {
+      return selectedRole.label;
+    });
     if (password) {
       userToSave.password = password;
     }
@@ -255,6 +301,7 @@ export class EditUser extends Component {
     }
     return (
       <EuiPage>
+        {this.confirmDeleteModal()}
         <EuiFlexGroup justifyContent="spaceBetween">
           <EuiFlexItem grow={false}>
             <EuiTitle>
@@ -270,7 +317,14 @@ export class EditUser extends Component {
                 <EuiBadge iconType="lock">Reserved</EuiBadge>
               </EuiToolTip>
             ) : (
-              <EuiButton data-test-subj="userFormDeleteButton" color="danger" iconType="trash">
+              <EuiButton
+                onClick={() => {
+                  this.setState({ showDeleteConfirmation: true });
+                }}
+                data-test-subj="userFormDeleteButton"
+                color="danger"
+                iconType="trash"
+              >
                 Delete user
               </EuiButton>
             )}
@@ -283,30 +337,25 @@ export class EditUser extends Component {
             error={this.usernameError()}
             label="Username"
           >
-            {isNewUser ? (
-              <EuiFieldText
-                onBlur={event =>
-                  this.setState({
-                    user: {
-                      ...this.state.user,
-                      username: event.target.value || '',
-                    },
-                  })
-                }
-                value={user.username}
-                name="username"
-                data-test-subj="userFormUserNameInput"
-                onChange={event => {
-                  this.setState({
-                    user: { ...this.state.user, username: event.target.value },
-                  });
-                }}
-              />
-            ) : (
-              <EuiText>
-                <p>{user.username}</p>
-              </EuiText>
-            )}
+            <EuiFieldText
+              onBlur={event =>
+                this.setState({
+                  user: {
+                    ...this.state.user,
+                    username: event.target.value || '',
+                  },
+                })
+              }
+              value={user.username}
+              name="username"
+              data-test-subj="userFormUserNameInput"
+              disabled={!isNewUser}
+              onChange={event => {
+                this.setState({
+                  user: { ...this.state.user, username: event.target.value },
+                });
+              }}
+            />
           </EuiFormRow>
           {isNewUser ? this.passwordFields() : null}
           {reserved ? null : (
