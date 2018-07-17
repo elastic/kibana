@@ -1271,7 +1271,7 @@ Array [
   align-items: center;
   font-size: 12px;
   color: #666666;
-  cursor: pointer;
+  cursor: initial;
   opacity: 1;
   -webkit-user-select: none;
   -moz-user-select: none;

@@ -30,21 +30,21 @@ export default class Legend extends PureComponent {
   render() {
     const {
       onClick,
-      color,
       text,
+      color = colors.apmBlue,
       fontSize = fontSizes.small,
       radius = units.minus - 1,
       disabled = false,
-      clickable = true,
-      className
+      clickable = false,
+      ...rest
     } = this.props;
     return (
       <Container
         onClick={onClick}
         disabled={disabled}
-        clickable={clickable}
+        clickable={clickable || Boolean(onClick)}
         fontSize={fontSize}
-        className={className}
+        {...rest}
       >
         <Indicator color={color} radius={radius} />
         {text}

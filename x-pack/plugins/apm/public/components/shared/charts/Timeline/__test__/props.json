@@ -1,5 +1,5 @@
 {
-  "width": 100,
+  "width": 1000,
   "duration": 204683,
   "height": 116,
   "margins": {
@@ -8,5 +8,10 @@
     "right": 50,
     "bottom": 0
   },
-  "animation": null
+  "animation": null,
+  "agentMarks": [
+    { "label": 100, "name": "timeToFirstByte", "us": 100000 },
+    { "label": 110, "name": "domInteractive", "us": 110000 },
+    { "label": 190, "name": "domComplete", "us": 190000 }
+  ]
 }
