@@ -40,7 +40,8 @@ const elementToShape = (element, i) => {
   const cx = position.left + a;
   const cy = position.top + b;
   const z = i; // painter's algo: latest item goes to top
-  const angleRadians = position.angle / 180 * Math.PI;
+  // multiplying the angle with -1 as `transform: matrix3d` uses a left-handed coordinate system
+  const angleRadians = -position.angle / 180 * Math.PI;
   const transformMatrix = aero.matrix.multiply(
     aero.matrix.translate(cx, cy, z),
     aero.matrix.rotateZ(angleRadians)
@@ -57,27 +58,32 @@ const elementToShape = (element, i) => {
 
 const updateGlobalPositions = (setPosition, { shapes, gestureEnd }, elems) => {
   shapes.forEach((shape, i) => {
-    // get existing position information from element
     const elemPos = elems[i] && elems[i].position;
-    const oldProps = elemPos && {
-      left: elemPos.left,
-      top: elemPos.top,
-      width: elemPos.width,
-      height: elemPos.height,
-      angle: Math.round(elemPos.angle),
-    };
+    if (elemPos && gestureEnd) {
+      // get existing position information from element
+      const oldProps = {
+        left: elemPos.left,
+        top: elemPos.top,
+        width: elemPos.width,
+        height: elemPos.height,
+        angle: Math.round(elemPos.angle),
+      };
 
-    // cast shape into element-like object to compare
-    const newProps = {
-      left: shape.transformMatrix[12] - shape.a,
-      top: shape.transformMatrix[13] - shape.b,
-      width: shape.a * 2,
-      height: shape.b * 2,
-      angle: Math.round(Math.acos(shape.transformMatrix[0]) * 180 / Math.PI),
-    };
+      const z0 = Math.acos(shape.transformMatrix[0]) * 180 / Math.PI;
+      const z1 = Math.asin(shape.transformMatrix[1]) * 180 / Math.PI;
 
-    if (gestureEnd && !shallowEqual(oldProps, newProps)) {
-      setPosition(shape.id, newProps);
+      // cast shape into element-like object to compare
+      const newProps = {
+        left: shape.transformMatrix[12] - shape.a,
+        top: shape.transformMatrix[13] - shape.b,
+        width: shape.a * 2,
+        height: shape.b * 2,
+        angle: Math.round(z1 > 0 ? z0 : -z0),
+      };
+
+      if (!shallowEqual(oldProps, newProps)) {
+        setPosition(shape.id, newProps);
+      }
     }
   });
 };
