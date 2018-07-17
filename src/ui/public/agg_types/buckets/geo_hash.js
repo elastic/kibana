@@ -119,10 +119,12 @@ export function AggTypesBucketsGeoHashProvider(Private, config) {
           } else {
             mapCollar = lastMapCollar;
           }
-          const boundingBox = {};
-          boundingBox[agg.getField().name] = {
-            top_left: mapCollar.top_left,
-            bottom_right: mapCollar.bottom_right
+          const boundingBox = {
+            ignore_unmapped: true,
+            [agg.getField().name]: {
+              top_left: mapCollar.top_left,
+              bottom_right: mapCollar.bottom_right
+            }
           };
           aggs.push(new AggConfig(agg.vis, {
             type: 'filter',
