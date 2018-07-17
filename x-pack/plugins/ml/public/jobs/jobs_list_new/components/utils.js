@@ -107,7 +107,7 @@ function showResults(resp, action) {
 }
 
 export function cloneJob(jobId) {
-  loadFullJob(jobId + '1')
+  loadFullJob(jobId)
     .then((job) => {
       mlJobService.currentJob = job;
       window.location.href = `#/jobs/new_job`;
