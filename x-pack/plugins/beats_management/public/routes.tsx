@@ -4,24 +4,19 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { History } from 'history';
 import React from 'react';
-import { Route, Router, Switch } from 'react-router-dom';
+import { HashRouter, Route, Switch } from 'react-router-dom';
 
 import { NotFoundPage } from './pages/404';
 import { HomePage } from './pages/home';
 
-interface RouterProps {
-  history: History;
-}
-
-export const PageRouter: React.SFC<RouterProps> = ({ history }) => {
+export const PageRouter: React.SFC<{}> = () => {
   return (
-    <Router history={history}>
+    <HashRouter basename="/management/beats_management">
       <Switch>
         <Route path="/" exact={true} component={HomePage} />
         <Route component={NotFoundPage} />
       </Switch>
-    </Router>
+    </HashRouter>
   );
 };
