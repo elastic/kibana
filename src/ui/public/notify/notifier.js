@@ -17,19 +17,11 @@
  * under the License.
  */
 
-import React from 'react';
 import _ from 'lodash';
-import MarkdownIt from 'markdown-it';
 import { metadata } from '../metadata';
 import { formatMsg, formatStack } from './lib';
 import { fatalError } from './fatal_error';
-import { banners } from './banners';
 import '../render_directive';
-
-import {
-  EuiCallOut,
-  EuiButton,
-} from '@elastic/eui';
 
 const notifs = [];
 
@@ -257,56 +249,4 @@ Notifier.prototype.error = function (err, opts, cb) {
     stack: formatStack(err)
   }, _.pick(opts, overridableOptions));
   return add(config, cb);
-};
-
-/**
- * Display a banner message
- * @param  {String} content
- * @param  {String} name
- */
-let bannerId;
-let bannerTimeoutId;
-Notifier.prototype.banner = function (content = '', name = '') {
-  const BANNER_PRIORITY = 100;
-
-  const dismissBanner = () => {
-    banners.remove(bannerId);
-    clearTimeout(bannerTimeoutId);
-  };
-
-  const markdownIt = new MarkdownIt({
-    html: false,
-    linkify: true
-  });
-
-  const banner = (
-    <EuiCallOut
-      title="Attention"
-      iconType="help"
-    >
-      <div
-        /*
-         * Justification for dangerouslySetInnerHTML:
-         * The notifier relies on `markdown-it` to produce safe and correct HTML.
-         */
-        dangerouslySetInnerHTML={{ __html: markdownIt.render(content) }} //eslint-disable-line react/no-danger
-        data-test-subj={name ? `banner-${name}` : null}
-      />
-
-      <EuiButton type="primary" size="s" onClick={dismissBanner}>
-        Dismiss
-      </EuiButton>
-    </EuiCallOut>
-  );
-
-  bannerId = banners.set({
-    component: banner,
-    id: bannerId,
-    priority: BANNER_PRIORITY,
-  });
-
-  clearTimeout(bannerTimeoutId);
-  bannerTimeoutId = setTimeout(() => {
-    dismissBanner();
-  }, Notifier.config.bannerLifetime);
 };
