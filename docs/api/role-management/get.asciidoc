@@ -58,7 +58,8 @@ representation of the roles.
 --------------------------------------------------
 
 
-To retrieve a specific role, issue a GET request to the `/api/security/role/<rolename>` endpoint:
+To retrieve a specific role from Elasticsearch's `native` realm, issue a GET request to
+the `/api/security/role/<rolename>` endpoint:
 
 [source,js]
 --------------------------------------------------
