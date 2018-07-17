@@ -5,7 +5,20 @@
  */
 
 import React, { Component, Fragment } from 'react';
-import { EuiCallOut, EuiButton, EuiIcon, EuiLink, EuiInMemoryTable, EuiPage } from '@elastic/eui';
+import {
+  EuiButton,
+  EuiIcon,
+  EuiLink,
+  EuiInMemoryTable,
+  EuiPage,
+  EuiPageBody,
+  EuiPageContent,
+  EuiTitle,
+  EuiPageContentHeader,
+  EuiPageContentHeaderSection,
+  EuiPageContentBody,
+  EuiEmptyPrompt,
+} from '@elastic/eui';
 import { toastNotifications } from 'ui/notify';
 import { ConfirmDelete } from './confirm_delete';
 
@@ -47,27 +60,16 @@ export class Users extends Component {
       }
     }
   }
-  renderToolsRight() {
+  renderToolsLeft() {
     const { selection } = this.state;
     if (selection.length === 0) {
-      return (
-        <EuiButton
-          data-test-subj="createUserButton"
-          href="#/management/security/users/edit"
-          fill
-          iconType="plusInCircle"
-        >
-          Create user
-        </EuiButton>
-      );
+      return;
     }
-
     const numSelected = selection.length;
     return (
       <EuiButton
         data-test-subj="deleteUserButton"
         color="danger"
-        iconType="trash"
         onClick={() => this.setState({ showDeleteConfirmation: true })}
       >
         Delete {numSelected} user{numSelected > 1 ? 's' : ''}
@@ -82,11 +84,18 @@ export class Users extends Component {
     const { apiClient } = this.props;
     if (permissionDenied) {
       return (
-        <EuiCallOut title="Permission denied" color="danger" iconType="cross">
-          <p data-test-subj="permissionDeniedMessage">
-            You do not have permission to manage users.
-          </p>
-        </EuiCallOut>
+        <EuiPage className="mgtUsersListingPage">
+          <EuiPageBody>
+            <EuiPageContent verticalPosition="center" horizontalPosition="center" className="mgtUsersListingPage__content">
+              <EuiEmptyPrompt
+                iconType="securityApp"
+                iconColor={null}
+                title={<h2>Permission denied</h2>}
+                body={<p data-test-subj="permissionDeniedMessage">You do not have permission to manage users.</p>}
+              />
+            </EuiPageContent>
+          </EuiPageBody>
+        </EuiPage>
       );
     }
     const path = '#/management/security/';
@@ -130,8 +139,10 @@ export class Users extends Component {
         field: 'metadata._reserved',
         name: 'Reserved',
         sortable: false,
+        width: 100,
+        align: 'right',
         render: reserved =>
-          reserved ? <EuiIcon data-test-subj="reservedUser" type="check" /> : null,
+          reserved ? <EuiIcon data-test-subj="reservedUser" type="lock" /> : null,
       },
     ];
     const pagination = {
@@ -146,7 +157,7 @@ export class Users extends Component {
       onSelectionChange: selection => this.setState({ selection }),
     };
     const search = {
-      toolsRight: this.renderToolsRight(),
+      toolsLeft: this.renderToolsLeft(),
       box: {
         incremental: true,
       },
@@ -163,26 +174,50 @@ export class Users extends Component {
       };
     };
     return (
-      <EuiPage>
-        {showDeleteConfirmation ? (
-          <ConfirmDelete
-            onCancel={this.onCancelDelete}
-            apiClient={apiClient}
-            usersToDelete={selection.map((user) => user.username)}
-            callback={this.handleDelete}
-          />
-        ) : null}
-        <EuiInMemoryTable
-          itemId="username"
-          columns={columns}
-          selection={selectionConfig}
-          pagination={pagination}
-          items={users}
-          loading={users.length === 0}
-          search={search}
-          sorting={sorting}
-          rowProps={rowProps}
-        />
+      <EuiPage className="mgtUsersListingPage">
+        <EuiPageBody>
+          <EuiPageContent verticalPosition="center" horizontalPosition="center" className="mgtUsersListingPage__content">
+            <EuiPageContentHeader>
+              <EuiPageContentHeaderSection>
+                <EuiTitle>
+                  <h2>Users</h2>
+                </EuiTitle>
+              </EuiPageContentHeaderSection>
+              <EuiPageContentHeaderSection>
+                <EuiButton
+                  data-test-subj="createUserButton"
+                  href="#/management/security/users/edit"
+                >
+                  Create new user
+                </EuiButton>
+              </EuiPageContentHeaderSection>
+            </EuiPageContentHeader>
+            <EuiPageContentBody>
+
+              {showDeleteConfirmation ? (
+                <ConfirmDelete
+                  onCancel={this.onCancelDelete}
+                  apiClient={apiClient}
+                  usersToDelete={selection.map((user) => user.username)}
+                  callback={this.handleDelete}
+                />
+              ) : null}
+
+              <EuiInMemoryTable
+                itemId="username"
+                columns={columns}
+                selection={selectionConfig}
+                pagination={pagination}
+                items={users}
+                loading={users.length === 0}
+                search={search}
+                sorting={sorting}
+                rowProps={rowProps}
+              />
+
+            </EuiPageContentBody>
+          </EuiPageContent>
+        </EuiPageBody>
       </EuiPage>
     );
   }

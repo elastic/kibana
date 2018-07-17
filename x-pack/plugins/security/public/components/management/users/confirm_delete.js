@@ -38,7 +38,7 @@ export class ConfirmDelete extends Component {
           onCancel={onCancel}
           onConfirm={this.deleteUsers}
           cancelButtonText="Cancel"
-          confirmButtonText="Confirm"
+          confirmButtonText="Delete"
           buttonColor="danger"
         >
           <div>

@@ -6,10 +6,9 @@
 /* eslint camelcase: 0 */
 import React, { Component, Fragment } from 'react';
 import {
-  EuiBadge,
   EuiButton,
   EuiCallOut,
-  EuiSpacer,
+  EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
   EuiLink,
@@ -17,9 +16,17 @@ import {
   EuiForm,
   EuiFormRow,
   EuiToolTip,
+  EuiIcon,
   EuiFieldText,
   EuiPage,
   EuiComboBox,
+  EuiPageBody,
+  EuiPageContent,
+  EuiPageContentHeader,
+  EuiPageContentHeaderSection,
+  EuiPageContentBody,
+  EuiHorizontalRule,
+  EuiSpacer,
 } from '@elastic/eui';
 import { toastNotifications } from 'ui/notify';
 import { USERS_PATH } from '../../../views/management/management_urls';
@@ -154,7 +161,7 @@ export class EditUser extends Component {
           </EuiFormRow>
         ) : null}
         <EuiFormRow
-          label="Password"
+          label={userIsLoggedInUser ? "New Password" : "Password"}
           isInvalid={!!this.passwordError()}
           error={this.passwordError()}
         >
@@ -194,37 +201,44 @@ export class EditUser extends Component {
     }
     return (
       <Fragment>
+        <EuiHorizontalRule />
         {this.passwordFields()}
         {username === 'kibana' ? (
-          <EuiCallOut title="Proceed with caution!" color="warning" iconType="help">
-            <p>
-              After you change the password for the kibana user, you must update the kibana.yml file
-              and restart Kibana.
-            </p>
-          </EuiCallOut>
+          <Fragment>
+            <EuiCallOut title="Extra step needed" color="warning" iconType="help">
+              <p>
+                After you change the password for the kibana user, you must update the kibana.yml file
+                and restart Kibana.
+              </p>
+            </EuiCallOut>
+            <EuiSpacer />
+          </Fragment>
         ) : null}
-        <EuiFlexGroup gutterSize="s" alignItems="center">
+        <EuiFlexGroup>
           <EuiFlexItem grow={false}>
             <EuiButton
+              size="s"
+              fill
+              disabled={
+                !password || !confirmPassword || this.passwordError() || this.confirmPasswordError()
+              }
+              onClick={() => {
+                this.changePassword(password);
+              }}
+            >
+              Save password
+            </EuiButton>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiButtonEmpty
+              size="s"
               onClick={() => {
                 this.clearPasswordForm();
               }}
             >
               Cancel
-            </EuiButton>
+            </EuiButtonEmpty>
           </EuiFlexItem>
-          <EuiFlexItem grow={false} />
-          <EuiButton
-            fill
-            disabled={
-              !password || !confirmPassword || this.passwordError() || this.confirmPasswordError()
-            }
-            onClick={() => {
-              this.changePassword(password);
-            }}
-          >
-            Save password
-          </EuiButton>
         </EuiFlexGroup>
       </Fragment>
     );
@@ -264,149 +278,164 @@ export class EditUser extends Component {
       return null;
     }
     return (
-      <EuiPage>
-        {showDeleteConfirmation ? (
-          <ConfirmDelete
-            onCancel={this.onCancelDelete}
-            apiClient={apiClient}
-            usersToDelete={[user.username]}
-            callback={this.handleDelete}
-          />
-        ) : null}
-        <EuiFlexGroup justifyContent="spaceBetween">
-          <EuiFlexItem grow={false}>
-            <EuiTitle>
-              <h2>{isNewUser ? 'New User' : `"${user.username}" User`}</h2>
-            </EuiTitle>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            {reserved ? (
-              <EuiToolTip
-                position="bottom"
-                content="Reserved users are built-in and cannot be removed or modified. Only the password may be changed."
-              >
-                <EuiBadge iconType="lock">Reserved</EuiBadge>
-              </EuiToolTip>
-            ) : null}
-            {isNewUser || reserved ? null : (
-              <EuiButton
-                onClick={() => {
-                  this.setState({ showDeleteConfirmation: true });
-                }}
-                data-test-subj="userFormDeleteButton"
-                color="danger"
-                iconType="trash"
-              >
-                Delete user
-              </EuiButton>
-            )}
-          </EuiFlexItem>
-        </EuiFlexGroup>
-        <EuiSpacer />
-        <form onSubmit={(event) => { event.preventDefault(); }}>
-          <EuiForm>
-            <EuiFormRow
-              isInvalid={!!this.usernameError()}
-              error={this.usernameError()}
-              label="Username"
-            >
-              <EuiFieldText
-                onBlur={event =>
-                  this.setState({
-                    user: {
-                      ...this.state.user,
-                      username: event.target.value || '',
-                    },
-                  })
-                }
-                value={user.username || ''}
-                name="username"
-                data-test-subj="userFormUserNameInput"
-                disabled={!isNewUser}
-                onChange={event => {
-                  this.setState({
-                    user: { ...this.state.user, username: event.target.value },
-                  });
-                }}
-              />
-            </EuiFormRow>
-            {isNewUser ? this.passwordFields() : null}
-            {reserved ? null : (
-              <Fragment>
-                <EuiFormRow
-                  isInvalid={!!this.fullnameError()}
-                  error={this.fullnameError()}
-                  label="Full name"
-                >
-                  <EuiFieldText
-                    onBlur={event =>
-                      this.setState({
-                        user: {
-                          ...this.state.user,
-                          full_name: event.target.value || '',
-                        },
-                      })
-                    }
-                    data-test-subj="userFormFullNameInput"
-                    name="full_name"
-                    value={user.full_name || ''}
-                    onChange={event => {
-                      this.setState({
-                        user: {
-                          ...this.state.user,
-                          full_name: event.target.value,
-                        },
-                      });
-                    }}
-                  />
-                </EuiFormRow>
-              </Fragment>
-            )}
-            <EuiFormRow label="Roles">
-              <EuiComboBox
-                data-test-subj="userFormRolesDropdown"
-                placeholder="Add roles"
-                onChange={this.onRolesChange}
-                isDisabled={reserved}
-                name="roles"
-                options={roles.map(role => {
-                  return { 'data-test-subj': `roleOption-${role.name}`, label: role.name };
-                })}
-                selectedOptions={selectedRoles}
-              />
-            </EuiFormRow>
-            {reserved ? null : (
-              <EuiFlexGroup gutterSize="s" alignItems="center">
-                <EuiFlexItem grow={false}>
-                  <EuiButton
-                    data-test-subj="userFormCancelButton"
-                    onClick={() => changeUrl(USERS_PATH)}
+      <EuiPage className="mgtUsersEditPage">
+        <EuiPageBody>
+          <EuiPageContent className="mgtUsersEditPage__content">
+            <EuiPageContentHeader>
+              <EuiPageContentHeaderSection>
+                <EuiTitle>
+                  <h2>
+                    {isNewUser ? 'New User' : `"${user.username}" User`} &nbsp;
+
+                    {reserved ? (
+                      <EuiToolTip
+                        content={'Reserved users are built-in and cannot be removed or modified. Only the password may be changed.'}
+                      >
+                        <EuiIcon style={{ verticalAlign: "super" }} type={'lock'} />
+                      </EuiToolTip>
+                    ) : null}
+                  </h2>
+                </EuiTitle>
+              </EuiPageContentHeaderSection>
+            </EuiPageContentHeader>
+            <EuiPageContentBody>
+
+              {showDeleteConfirmation ? (
+                <ConfirmDelete
+                  onCancel={this.onCancelDelete}
+                  apiClient={apiClient}
+                  usersToDelete={[user.username]}
+                  callback={this.handleDelete}
+                />
+              ) : null}
+
+              <form onSubmit={(event) => { event.preventDefault(); }}>
+                <EuiForm>
+                  <EuiFormRow
+                    isInvalid={!!this.usernameError()}
+                    error={this.usernameError()}
+                    helpText={!isNewUser && !reserved ? "Username's cannot be changed after creation." : null}
+                    label="Username"
                   >
-                    Cancel
-                  </EuiButton>
-                </EuiFlexItem>
-                <EuiFlexItem grow={false} />
-                <EuiButton
-                  disabled={this.cannotSaveUser()}
-                  fill
-                  data-test-subj="userFormSaveButton"
-                  onClick={() => this.saveUser()}
-                >
-                  Save
-                </EuiButton>
-              </EuiFlexGroup>
-            )}
-            <EuiSpacer />
-            {showChangePasswordForm ? null : (
-              <Fragment>
-                <EuiFormRow label="Password">
-                  <EuiLink onClick={this.toggleChangePasswordForm}>Change password</EuiLink>
-                </EuiFormRow>
-              </Fragment>
-            )}
-            {this.changePasswordForm()}
-          </EuiForm>
-        </form>
+                    <EuiFieldText
+                      onBlur={event =>
+                        this.setState({
+                          user: {
+                            ...this.state.user,
+                            username: event.target.value || '',
+                          },
+                        })
+                      }
+                      value={user.username || ''}
+                      name="username"
+                      data-test-subj="userFormUserNameInput"
+                      disabled={!isNewUser}
+                      onChange={event => {
+                        this.setState({
+                          user: { ...this.state.user, username: event.target.value },
+                        });
+                      }}
+                    />
+                  </EuiFormRow>
+                  {isNewUser ? this.passwordFields() : null}
+                  {reserved ? null : (
+                    <EuiFormRow
+                      isInvalid={!!this.fullnameError()}
+                      error={this.fullnameError()}
+                      label="Full name"
+                    >
+                      <EuiFieldText
+                        onBlur={event =>
+                          this.setState({
+                            user: {
+                              ...this.state.user,
+                              full_name: event.target.value || '',
+                            },
+                          })
+                        }
+                        data-test-subj="userFormFullNameInput"
+                        name="full_name"
+                        value={user.full_name || ''}
+                        onChange={event => {
+                          this.setState({
+                            user: {
+                              ...this.state.user,
+                              full_name: event.target.value,
+                            },
+                          });
+                        }}
+                      />
+                    </EuiFormRow>
+                  )}
+                  <EuiFormRow label="Roles">
+                    <EuiComboBox
+                      data-test-subj="userFormRolesDropdown"
+                      placeholder="Add roles"
+                      onChange={this.onRolesChange}
+                      isDisabled={reserved}
+                      name="roles"
+                      options={roles.map(role => {
+                        return { 'data-test-subj': `roleOption-${role.name}`, label: role.name };
+                      })}
+                      selectedOptions={selectedRoles}
+                    />
+                  </EuiFormRow>
+
+                  {isNewUser || showChangePasswordForm ? null : (
+                    <EuiFormRow label="Password">
+                      <EuiLink onClick={this.toggleChangePasswordForm}>Change password</EuiLink>
+                    </EuiFormRow>
+                  )}
+                  {this.changePasswordForm()}
+
+                  <EuiHorizontalRule />
+
+                  {reserved &&
+                    <EuiButton onClick={() => changeUrl(USERS_PATH)}>
+                      Return to user list
+                    </EuiButton>
+                  }
+                  {reserved ? null : (
+                    <EuiFlexGroup responsive={false}>
+                      <EuiFlexItem grow={false}>
+                        <EuiButton
+                          disabled={this.cannotSaveUser()}
+                          fill
+                          data-test-subj="userFormSaveButton"
+                          onClick={() => this.saveUser()}
+                        >
+                          {isNewUser ? 'Create user' : 'Update user'}
+                        </EuiButton>
+                      </EuiFlexItem>
+                      <EuiFlexItem grow={false}>
+                        <EuiButtonEmpty
+                          data-test-subj="userFormCancelButton"
+                          onClick={() => changeUrl(USERS_PATH)}
+                        >
+                          Cancel
+                        </EuiButtonEmpty>
+                      </EuiFlexItem>
+                      <EuiFlexItem grow={true} />
+                      {isNewUser || reserved ? null : (
+                        <EuiFlexItem grow={false}>
+                          <EuiButton
+                            onClick={() => {
+                              this.setState({ showDeleteConfirmation: true });
+                            }}
+                            data-test-subj="userFormDeleteButton"
+                            color="danger"
+                          >
+                            Delete user
+                          </EuiButton>
+                        </EuiFlexItem>
+                      )}
+                    </EuiFlexGroup>
+                  )}
+                </EuiForm>
+              </form>
+            </EuiPageContentBody>
+          </EuiPageContent>
+        </EuiPageBody>
       </EuiPage>
     );
   }
