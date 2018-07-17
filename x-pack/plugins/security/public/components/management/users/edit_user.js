@@ -303,7 +303,7 @@ export class EditUser extends Component {
           </EuiFlexItem>
         </EuiFlexGroup>
         <EuiSpacer />
-        <form>
+        <form onSubmit={(event) => { event.preventDefault(); }}>
           <EuiForm>
             <EuiFormRow
               isInvalid={!!this.usernameError()}
