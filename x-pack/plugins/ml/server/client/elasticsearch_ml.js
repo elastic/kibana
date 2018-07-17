@@ -537,7 +537,7 @@ export const elasticsearchJsPlugin = (Client, config, components) => {
       {
         fmt: '/_xpack/ml/filters/<%=filterId%>/_update',
         req: {
-          jobId: {
+          filterId: {
             type: 'string'
           }
         }
