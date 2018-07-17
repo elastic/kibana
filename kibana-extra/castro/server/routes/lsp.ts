@@ -5,16 +5,11 @@
  */
 
 import * as Hapi from 'hapi';
-import { serve } from 'javascript-typescript-langserver/lib/server';
 
 import { Log } from '../log';
-import { LanguageServerProxy } from '../lsp/proxy';
+import { LanguageServerController } from '../lsp/controller';
 
 import * as Path from 'path';
-
-const lspPort = 20000;
-
-export const proxy = new LanguageServerProxy(lspPort, '127.0.0.1', console);
 
 export default async function(server: Hapi.Server) {
   const repodir = Path.join(__dirname, '../../');
@@ -22,14 +17,13 @@ export default async function(server: Hapi.Server) {
 
   log.info('root dir is ' + repodir);
 
-  // start a embedded language server for js/ts
-  serve({
-    clusterSize: 1,
-    lspPort,
-  });
+  const controller = new LanguageServerController('127.0.0.1', console, server);
 
-  proxy.listen();
-  await proxy
+  // TODO read from config which LSP should be used
+  await controller.launchTypescript();
+
+  controller.listen();
+  await controller
     .initialize({}, [
       {
         uri: `file://${repodir}`,
@@ -45,7 +39,7 @@ export default async function(server: Hapi.Server) {
         // is it a json ?
         const method = req.params.method;
         if (method) {
-          proxy.receiveRequest(`textDocument/${method}`, req.payload).then(
+          controller.receiveRequest(`textDocument/${method}`, req.payload).then(
             result => {
               reply.response(result);
             },

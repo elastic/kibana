@@ -15,13 +15,13 @@ import {
 
 import { RequestMessage } from 'vscode-jsonrpc/lib/messages';
 
-import { createConnection, IConnection } from 'vscode-languageserver';
 import {
   ClientCapabilities,
   InitializedNotification,
   InitializeResult,
   WorkspaceFolder,
-} from 'vscode-languageserver-protocol';
+} from 'vscode-languageserver-protocol/lib/main';
+import { createConnection, IConnection } from 'vscode-languageserver/lib/main';
 
 import { HttpMessageReader } from './HttpMessageReader';
 import { HttpMessageWriter } from './HttpMessageWriter';
@@ -68,28 +68,6 @@ export class LanguageServerProxy {
     });
   }
 
-  public connect(): Promise<MessageConnection> {
-    if (this.clientConnection) {
-      return Promise.resolve(this.clientConnection);
-    }
-    return new Promise(resolve => {
-      const socket = net.connect(this.targetPort, this.targetHost);
-      socket.on('connect', () => {
-        const reader = new SocketMessageReader(socket);
-        const writer = new SocketMessageWriter(socket);
-        this.clientConnection = createMessageConnection(reader, writer, this.logger);
-        this.clientConnection.listen();
-        socket.on('end', () => {
-          if (this.clientConnection) {
-            this.clientConnection.dispose();
-          }
-          this.clientConnection = null;
-        });
-        resolve(this.clientConnection);
-      });
-    });
-  }
-
   public async initialize(
     clientCapabilities: ClientCapabilities,
     workspaceFolders: [WorkspaceFolder]
@@ -125,5 +103,27 @@ export class LanguageServerProxy {
       });
     });
     this.conn.listen();
+  }
+
+  private connect(): Promise<MessageConnection> {
+    if (this.clientConnection) {
+      return Promise.resolve(this.clientConnection);
+    }
+    return new Promise(resolve => {
+      const socket = net.connect(this.targetPort, this.targetHost);
+      socket.on('connect', () => {
+        const reader = new SocketMessageReader(socket);
+        const writer = new SocketMessageWriter(socket);
+        this.clientConnection = createMessageConnection(reader, writer, this.logger);
+        this.clientConnection.listen();
+        socket.on('end', () => {
+          if (this.clientConnection) {
+            this.clientConnection.dispose();
+          }
+          this.clientConnection = null;
+        });
+        resolve(this.clientConnection);
+      });
+    });
   }
 }
