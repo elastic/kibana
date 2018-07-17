@@ -10,7 +10,7 @@
   "scripts": {
     "_preinstall": "node ../../kibana/preinstall_check",
     "kbn": "node ../../kibana/scripts/kbn",
-    "tslint": "tslint -c tslint.json '**/*.{ts,tsx}'",
+    "tslint": "tslint --project tsconfig.json --format stylish",
     "start": "plugin-helpers start --config ../config/kibana/kibana.yml",
     "test:server": "plugin-helpers test:server",
     "test:browser": "plugin-helpers test:browser",

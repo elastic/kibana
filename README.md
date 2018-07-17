@@ -21,3 +21,11 @@ See the [contributing guide](./CONTRIBUTING.md) for instructions setting up your
   - `./gradlew startKibana`
 
     Start kibana and have it include the codesearch plugin
+
+  - `./gradlew lint`
+
+    Lint the sourcecode with [`tslint`](https://github.com/palantir/tslint)
+
+  - `./gradlew lintFix`
+
+    Lint the sourcecode with [`tslint`](https://github.com/palantir/tslint) and fix any auto-fixable errors

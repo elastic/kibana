@@ -4,10 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import $ from 'jquery';
+import events from 'events';
 
-$(document.body).on('keypress', event => {
-  if (event.which === 58) {
-    alert('boo!');
-  }
-});
+export class HttpRequestEmitter extends events.EventEmitter {}

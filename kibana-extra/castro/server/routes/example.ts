@@ -1,151 +1,169 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License;
+ * you may not use this file except in compliance with the Elastic License.
+ */
+
 import * as Hapi from 'hapi';
 
-import {computeRanges, render, tokenizeLines} from '../highlights';
+import { computeRanges, render, tokenizeLines } from '../highlights';
+import { Log } from '../log';
 
-const Path = require("path");
-const fs = require('fs');
+import * as fs from 'fs';
+import * as Path from 'path';
 
-const repodir = Path.join(__dirname, "../../");
+const repodir = Path.join(__dirname, '../../');
 
 export interface Entry {
-    path: string;
-    blob: string;
-    isBinary?: boolean;
-    html?: string;
+  path: string;
+  blob: string;
+  isBinary?: boolean;
+  html?: string;
 }
 
-async function getTree() {
-    const root = {name: 'root', path: repodir, children: []};
-    const dirs = {[repodir]: root};
+async function getTree(log: Log) {
+  const root = { name: 'root', path: repodir, children: [] };
+  const dirs = { [repodir]: root };
 
-    try {
-        const walk = function (dir: string, callback: (parentDir: string, file: string, isFile: boolean) => void, depth: number = 3) {
-            if(depth <=0)
-                return;
-            let list = fs.readdirSync(dir);
-            list.forEach(function (file) {
-                let path = Path.join(dir, file);
-                const stat = fs.statSync(path);
+  try {
+    const walk = (
+      dir: string,
+      callback: (parentDir: string, file: string, isFile: boolean) => void,
+      depth: number = 3
+    ) => {
+      if (depth <= 0) {
+        return;
+      }
+      const list = fs.readdirSync(dir);
+      list.forEach(file => {
+        const path = Path.join(dir, file);
+        const stat = fs.statSync(path);
 
-                if (stat && stat.isDirectory()) {
-                    /* Recurse into a subdirectory */
-                    callback(dir, path, false);
-                    walk(path, callback, depth -1);
-                } else {
-                    /* Is a file */
-                    callback(dir, path, true)
-                }
-            });
-        };
-        walk(repodir, (parentDir, path, isFile) => {
-
-            const parent = dirs[parentDir];
-            if (parent) {
-                if (isFile) {
-                    if ((path.endsWith(".ts") || path.endsWith(".js") || path.endsWith(".tsx"))) {
-                        const blob = fs.readFileSync(path, "utf8");
-                        const lines = tokenizeLines(path, blob);
-                        computeRanges(lines);
-                        let e = {
-                            path: Path.relative(repodir, path),
-                            isBinary: false,
-                            blob,
-                            html: render(lines),
-                            name: Path.basename(path)
-                        };
-                        parent.children.push(e);
-                    }
-                } else {
-                    const dirname = Path.basename(path);
-                    if (!(dirname === "node_modules" || dirname[0] === "." || dirname === "build")) {
-                        const newDir = {
-                            path: Path.relative(repodir, path),
-                            name: dirname,
-                            children: []
-                        };
-                        parent.children.push(newDir);
-                        dirs[path] = newDir;
-                    }
-                }
-            }
-        });
-    } catch (e) {
-        console.log(e)
-    }
-    return {
-        workspace: repodir,
-        root
-    };
-}
-
-async function getFiles() {
-    const files = [];
-    try {
-        const walk = function (dir: string, callback: (file: string) => void, depth: number = 3) {
-            if(depth <= 0)
-                return;
-            let list = fs.readdirSync(dir);
-            list.forEach(function (file) {
-                let path = Path.join(dir, file);
-                const stat = fs.statSync(path);
-                if (stat && stat.isDirectory()) {
-                    /* Recurse into a subdirectory */
-                    walk(path, callback, depth -1);
-                } else {
-                    /* Is a file */
-                    callback(path)
-                }
-            });
-        };
-        walk(repodir, path => {
-            if (!path.includes("node_modules") && (path.endsWith(".ts") || path.endsWith(".js") || path.endsWith(".tsx"))) {
-                console.log(path);
-                const blob = fs.readFileSync(path, "utf8");
-                const lines = tokenizeLines(path, blob);
-                computeRanges(lines);
-                let e: Entry = {
-                    path: Path.relative(repodir, path),
-                    isBinary: false,
-                    blob,
-                    html: render(lines)
-                };
-                files.push(e);
-            }
-        });
-    } catch (e) {
-        console.log(e)
-    }
-    return {
-        workspace: repodir,
-        entries: files
-    };
-}
-
-export default function (server: Hapi.Server) {
-    server.route({
-        path: '/api/castro/example',
-        method: 'GET',
-        handler(req: Hapi.Request, reply: any) {
-            getFiles().then((result) => reply(result), err => reply(err).code(500))
+        if (stat && stat.isDirectory()) {
+          /* Recurse into a subdirectory */
+          callback(dir, path, false);
+          walk(path, callback, depth - 1);
+        } else {
+          /* Is a file */
+          callback(dir, path, true);
         }
-    });
-    server.route({
-        path: '/api/castro/tree',
-        method: 'GET',
-        handler(req: Hapi.Request, reply: any) {
-            getTree().then((result) => reply(result), err => reply(err).code(500))
-        }
-    });
-    server.route({
-        path: '/api/castro/highlight/{path}',
-        method: 'POST',
-        handler(req: Hapi.Request, reply: any) {
-            const {content} = req.payload;
-            const path = req.params.path;
-            const lines = tokenizeLines(path, content);
+      });
+    };
+
+    walk(repodir, (parentDir, path, isFile) => {
+      const parent = dirs[parentDir];
+      if (parent) {
+        if (isFile) {
+          if (path.endsWith('.ts') || path.endsWith('.js') || path.endsWith('.tsx')) {
+            const blob = fs.readFileSync(path, 'utf8');
+            const lines = tokenizeLines(path, blob);
             computeRanges(lines);
-            const result = render(lines);
-            reply(result)
+            const e = {
+              path: Path.relative(repodir, path),
+              isBinary: false,
+              blob,
+              html: render(lines),
+              name: Path.basename(path),
+            };
+            parent.children.push(e);
+          }
+        } else {
+          const dirname = Path.basename(path);
+          if (!(dirname === 'node_modules' || dirname[0] === '.' || dirname === 'build')) {
+            const newDir = {
+              path: Path.relative(repodir, path),
+              name: dirname,
+              children: [],
+            };
+            parent.children.push(newDir);
+            dirs[path] = newDir;
+          }
         }
+      }
     });
+  } catch (e) {
+    log.error(e);
+  }
+  return {
+    workspace: repodir,
+    root,
+  };
+}
+
+async function getFiles(log: Log) {
+  const files = [];
+  try {
+    const walk = (dir: string, callback: (file: string) => void, depth: number = 3) => {
+      if (depth <= 0) {
+        return;
+      }
+      const list = fs.readdirSync(dir);
+      list.forEach(file => {
+        const path = Path.join(dir, file);
+        const stat = fs.statSync(path);
+        if (stat && stat.isDirectory()) {
+          /* Recurse into a subdirectory */
+          walk(path, callback, depth - 1);
+        } else {
+          /* Is a file */
+          callback(path);
+        }
+      });
+    };
+    walk(repodir, path => {
+      if (
+        !path.includes('node_modules') &&
+        (path.endsWith('.ts') || path.endsWith('.js') || path.endsWith('.tsx'))
+      ) {
+        log.info(path);
+        const blob = fs.readFileSync(path, 'utf8');
+        const lines = tokenizeLines(path, blob);
+        computeRanges(lines);
+        const e: Entry = {
+          path: Path.relative(repodir, path),
+          isBinary: false,
+          blob,
+          html: render(lines),
+        };
+        files.push(e);
+      }
+    });
+  } catch (e) {
+    log.error(e);
+  }
+  return {
+    workspace: repodir,
+    entries: files,
+  };
+}
+
+export default function(server: Hapi.Server) {
+  server.route({
+    path: '/api/castro/example',
+    method: 'GET',
+    handler(req: Hapi.Request, reply: any) {
+      const log = new Log(server, ['codesearch', 'getFiles']);
+      getFiles(log).then(result => reply(result), err => reply(err).code(500));
+    },
+  });
+  server.route({
+    path: '/api/castro/tree',
+    method: 'GET',
+    handler(req: Hapi.Request, reply: any) {
+      const log = new Log(server, ['codesearch', 'getTree']);
+      getTree(log).then(result => reply(result), err => reply(err).code(500));
+    },
+  });
+  server.route({
+    path: '/api/castro/highlight/{path}',
+    method: 'POST',
+    handler(req: Hapi.Request, reply: any) {
+      const { content } = req.payload;
+      const path = req.params.path;
+      const lines = tokenizeLines(path, content);
+      computeRanges(lines);
+      const result = render(lines);
+      reply(result);
+    },
+  });
 }

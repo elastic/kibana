@@ -37,6 +37,14 @@ task startDeps(type: YarnTask, dependsOn: [yarn]) {
   args = ['start-deps']
 }
 
+task lint(type: YarnTask, dependsOn: [yarn]) {
+  args = ['tslint']
+}
+
+task lintFix(type: YarnTask, dependsOn: [yarn]) {
+  args = ['tslint', '--fix']
+}
+
 task clean(type: Delete) {
   delete "build", "node_modules", "common"
 }

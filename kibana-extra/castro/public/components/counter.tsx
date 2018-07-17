@@ -1,62 +1,67 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License;
+ * you may not use this file except in compliance with the Elastic License.
+ */
+
 import React from 'react';
-import { Dispatch, bindActionCreators } from 'redux';
 import { connect } from 'react-redux';
+import { bindActionCreators, Dispatch } from 'redux';
 
+import { decrease, increase } from '../actions';
 import { RootState } from '../reducers';
-import { increase, decrease } from '../actions';
 
-import {
-  EuiButton
-} from '@elastic/eui';
+import { EuiButton } from '@elastic/eui';
 
 interface Props {
-  count: number,
-  onIncrease: ((amount: number) => void),
-  onDecrease: ((amount: number) => void)
+  count: number;
+  onIncrease: ((amount: number) => void);
+  onDecrease: ((amount: number) => void);
 }
 
-interface State {
-}
-
-class Counter extends React.Component<Props, State> {
+class Counter extends React.Component<Props> {
   constructor(props: Props) {
     super(props);
     this.state = {};
   }
 
-  increase(): void {
-    console.log("Click increase.");
+  public increase = () => {
+    console.log('Click increase.'); // tslint:disable-line no-console
     this.props.onIncrease(1);
-  }
+  };
 
-  decrease(): void {
-    console.log("Click decrease.");
+  public decrease = () => {
+    console.log('Click decrease.'); // tslint:disable-line no-console
     this.props.onDecrease(1);
-  }
+  };
 
-  render() {
+  public render() {
     return (
       <div>
         <p>Current Count: {this.props.count}</p>
-        <EuiButton size="s" fill onClick={() => this.increase()}>
+        <EuiButton size="s" fill={true} onClick={this.increase}>
           Increase
         </EuiButton>
-        <EuiButton size="s" fill onClick={() => this.decrease()}>
+        <EuiButton size="s" fill={true} onClick={this.decrease}>
           Decrease
         </EuiButton>
       </div>
-    )
+    );
   }
 }
 
 const mapStateToProps = (state: RootState) => ({
-  count: state.count
+  count: state.count,
 });
 
-const mapDispatchToProps = (dispatch: Dispatch) => bindActionCreators({
-  onIncrease: increase,
-  onDecrease: decrease
-}, dispatch);
+const mapDispatchToProps = (dispatch: Dispatch) =>
+  bindActionCreators(
+    {
+      onIncrease: increase,
+      onDecrease: decrease,
+    },
+    dispatch
+  );
 
 const CounterContainer = connect(mapStateToProps, mapDispatchToProps)(Counter);
 
