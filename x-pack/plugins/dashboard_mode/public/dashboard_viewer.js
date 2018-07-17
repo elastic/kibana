@@ -51,7 +51,7 @@ chrome
     $controller(KibanaRootController, { $scope, courier, config });
   });
 
-uiModules.get('kibana').run(Notifier.pullMessageFromUrl);
+uiModules.get('kibana').run(Notifier.showAppRedirectNotification);
 
 // If there is a configured kbnDefaultAppId, and it is a dashboard ID, we'll
 // show that dashboard, otherwise, we'll show the default dasbhoard landing page.

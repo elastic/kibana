@@ -7,7 +7,9 @@
 
 import React from 'react';
 import { XPackInfoProvider } from 'plugins/xpack_main/services/xpack_info';
-import { Notifier, banners } from 'ui/notify';
+import { banners, APP_REDIRECT_MESSAGE_PARAM } from 'ui/notify';
+import _ from 'lodash';
+
 import chrome from 'ui/chrome';
 import { EuiCallOut } from '@elastic/eui';
 
@@ -20,12 +22,8 @@ export function checkLicense(Private, kbnBaseUrl) {
 
   const licenseAllowsToShowThisPage = features.isAvailable;
   if (!licenseAllowsToShowThisPage) {
-    const message = features.message;
-    let queryString = `?${Notifier.QS_PARAM_LOCATION}=Machine Learning&`;
-    queryString += `${Notifier.QS_PARAM_LEVEL}=error&${Notifier.QS_PARAM_MESSAGE}=${message}`;
-    const url = `${chrome.addBasePath(kbnBaseUrl)}#${queryString}`;
-
-    window.location.href = url;
+    const { message } = features;
+    window.location.href = `${chrome.addBasePath(kbnBaseUrl)}#?${APP_REDIRECT_MESSAGE_PARAM}=${message}`;
     return Promise.halt();
   }
 

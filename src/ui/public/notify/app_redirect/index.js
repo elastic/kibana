@@ -17,10 +17,21 @@
  * under the License.
  */
 
-export { notify } from './notify';
-export { Notifier } from './notifier';
-export { getPainlessError } from './lib';
-export { fatalError, fatalErrorInternals, addFatalErrorCallback } from './fatal_error';
-export { GlobalToastList, toastNotifications } from './toasts';
-export { GlobalBannerList, banners } from './banners';
-export { APP_REDIRECT_MESSAGE_PARAM, showAppRedirectNotification } from './app_redirect';
+import { toastNotifications } from '../toasts';
+
+export const APP_REDIRECT_MESSAGE_PARAM = 'app_redirect_message';
+
+// If an app needs to redirect, e.g. due to an expired license, it can surface a message via
+// the URL query params.
+export const showAppRedirectNotification = ($location) => {
+  const queryString = $location.search();
+
+  if (!queryString.notif_msg) {
+    return;
+  }
+
+  const message = queryString[APP_REDIRECT_MESSAGE_PARAM];
+  $location.search(APP_REDIRECT_MESSAGE_PARAM, null);
+
+  toastNotifications.addDanger(message);
+};

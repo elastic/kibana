@@ -20,7 +20,6 @@
 import _ from 'lodash';
 import { metadata } from '../metadata';
 import { formatMsg, formatStack } from './lib';
-import { fatalError } from './fatal_error';
 import '../render_directive';
 
 const notifs = [];
@@ -194,33 +193,6 @@ Notifier.config = {
 
 Notifier.applyConfig = function (config) {
   _.merge(Notifier.config, config);
-};
-
-// "Constants"
-Notifier.QS_PARAM_MESSAGE = 'notif_msg';
-Notifier.QS_PARAM_LEVEL = 'notif_lvl';
-Notifier.QS_PARAM_LOCATION = 'notif_loc';
-
-Notifier.pullMessageFromUrl = ($location) => {
-  const queryString = $location.search();
-  if (!queryString.notif_msg) {
-    return;
-  }
-  const message = queryString[Notifier.QS_PARAM_MESSAGE];
-  const config = queryString[Notifier.QS_PARAM_LOCATION] ? { location: queryString[Notifier.QS_PARAM_LOCATION] } : {};
-  const level = queryString[Notifier.QS_PARAM_LEVEL] || 'info';
-
-  $location.search(Notifier.QS_PARAM_MESSAGE, null);
-  $location.search(Notifier.QS_PARAM_LOCATION, null);
-  $location.search(Notifier.QS_PARAM_LEVEL, null);
-
-  const notifier = new Notifier(config);
-
-  if (level === 'fatal') {
-    fatalError(message);
-  } else {
-    notifier[level](message);
-  }
 };
 
 // simply a pointer to the global notif list

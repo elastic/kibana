@@ -69,4 +69,4 @@ routes
 
 chrome.setRootController('kibana', KibanaRootController);
 
-uiModules.get('kibana').run(Notifier.pullMessageFromUrl);
+uiModules.get('kibana').run(Notifier.showAppRedirectNotification);
