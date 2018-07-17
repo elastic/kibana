@@ -53,7 +53,24 @@ export class SavedObjectsInstaller extends React.Component {
       isInstalling: true,
     });
 
-    const resp = await this.props.bulkCreate(this.props.savedObjects, { overwrite: this.state.overwrite });
+    let resp;
+    try {
+      resp = await this.props.bulkCreate(this.props.savedObjects, { overwrite: this.state.overwrite });
+    } catch (error) {
+      if (!this._isMounted) {
+        return;
+      }
+
+      this.setState({
+        isInstalling: false,
+        installStatusMsg: `Request failed, Error: ${error.message}`,
+        isInstalled: false,
+        overwrite: false,
+        buttonLabel: DEFAULT_BUTTON_LABEL
+      });
+      return;
+    }
+
     if (!this._isMounted) {
       return;
     }
