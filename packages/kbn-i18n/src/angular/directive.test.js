@@ -21,11 +21,6 @@ import angular from 'angular';
 import 'angular-mocks';
 import { i18nDirective } from './directive';
 import { i18nProvider } from './provider';
-import * as i18n from '../core/i18n';
-
-jest.mock('../core/i18n', () => ({
-  translate: jest.fn(),
-}));
 
 angular
   .module('app', [])
@@ -43,13 +38,11 @@ describe('i18nDirective', () => {
       scope = $rootScope.$new();
     })
   );
-  beforeEach(() => {
-    jest.resetAllMocks();
-  });
 
-  it('provides wrapper under i18n translate function', () => {
+  it('inserts correct translation html content', () => {
     const id = 'id';
     const defaultMessage = 'default-message {word}';
+    const compiledContent = 'default-message word';
 
     const element = angular.element(
       `<div
@@ -62,10 +55,6 @@ describe('i18nDirective', () => {
     compile(element)(scope);
     scope.$digest();
 
-    expect(i18n.translate).toHaveBeenCalledTimes(1);
-    expect(i18n.translate).toHaveBeenCalledWith(id, {
-      defaultMessage,
-      values: { word: 'word' },
-    });
+    expect(element.html()).toEqual(compiledContent);
   });
 });
