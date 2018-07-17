@@ -9,7 +9,7 @@ import { BASE_PATH } from '../common/constants';
 import { compose } from './lib/compose/kibana';
 // import * as euiVars from '@elastic/eui/dist/eui_theme_k6_light.json';
 // import { ThemeProvider } from 'styled-components';
-import { PageRouter } from './routes';
+import { PageRouter } from './router';
 
 // TODO use theme provided from parentApp when kibana supports it
 import '@elastic/eui/dist/eui_theme_light.css';

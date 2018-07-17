@@ -5,7 +5,7 @@
  */
 
 import { BeatTag } from '../../../../common/domain_types';
-import { FrameworkUser } from './../framework/adapter_types';
+import { FrameworkUser } from '../framework/adapter_types';
 import { CMTagsAdapter } from './adapter_types';
 
 export class MemoryTagsAdapter implements CMTagsAdapter {

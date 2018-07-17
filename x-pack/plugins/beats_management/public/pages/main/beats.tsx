@@ -5,10 +5,9 @@
  */
 
 import React from 'react';
-import { PrimaryLayout } from '../components/layouts/primary';
 
-export class HomePage extends React.PureComponent {
+export class BeatsPage extends React.PureComponent {
   public render() {
-    return <PrimaryLayout title="Beats">Home</PrimaryLayout>;
+    return <div>beats table and stuff</div>;
   }
 }
