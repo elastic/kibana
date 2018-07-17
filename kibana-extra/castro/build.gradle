@@ -27,22 +27,27 @@ task setupKibana(type: com.palominolabs.gradle.task.git.clone.GitCloneTask) {
 
 task bootstrap(type: YarnTask, dependsOn: [yarn, setupKibana]) {
   args = ['kbn', 'bootstrap']
+  environment = ['FORCE_COLOR': 'true']
 }
 
 task startKibana(type: YarnTask, dependsOn: [yarn]) {
-  args = ['start']
+  args = ['start', '--logging.json=false']
+  environment = ['FORCE_COLOR': 'true']
 }
 
 task startDeps(type: YarnTask, dependsOn: [yarn]) {
   args = ['start-deps']
+  environment = ['FORCE_COLOR': 'true']
 }
 
 task lint(type: YarnTask, dependsOn: [yarn]) {
   args = ['tslint']
+  environment = ['FORCE_COLOR': 'true']
 }
 
 task lintFix(type: YarnTask, dependsOn: [yarn]) {
   args = ['tslint', '--fix']
+  environment = ['FORCE_COLOR': 'true']
 }
 
 task clean(type: Delete) {
