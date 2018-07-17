@@ -22,7 +22,6 @@ import { CallClientProvider } from './call_client';
 import { CallResponseHandlersProvider } from './call_response_handlers';
 import { ContinueIncompleteProvider } from './continue_incomplete';
 import { RequestStatus } from './req_status';
-import { location } from './notifier';
 
 /**
  * Fetch now provider should be used if you want the results searched and returned immediately.
@@ -53,7 +52,7 @@ export function FetchNowProvider(Private, Promise) {
 
       return searchRequest.retry();
     }))
-      .catch(error => fatalError(error, location));
+      .catch(error => fatalError(error, 'Courier fetch'));
   }
 
   function fetchSearchResults(searchRequests) {
