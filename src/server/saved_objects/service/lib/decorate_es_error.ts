@@ -26,28 +26,28 @@ const {
   NoConnections,
   RequestTimeout,
   Conflict,
-  401: NotAuthorized,
-  403: Forbidden,
+  AuthenticationException,
+  AuthorizationException,
   NotFound,
-  BadRequest
+  BadRequest,
 } = elasticsearch.errors;
 
 import {
-  decorateBadRequestError,
-  decorateNotAuthorizedError,
-  decorateForbiddenError,
   createGenericNotFoundError,
+  decorateBadRequestError,
   decorateConflictError,
   decorateEsUnavailableError,
+  decorateForbiddenError,
   decorateGeneralError,
+  decorateNotAuthorizedError,
 } from './errors';
 
-export function decorateEsError(error) {
+export function decorateEsError(error: any) {
   if (!(error instanceof Error)) {
     throw new Error('Expected an instance of Error');
   }
 
-  const { reason } = get(error, 'body.error', {});
+  const { reason }: { reason: string } = get(error, 'body.error', {} as any);
   if (
     error instanceof ConnectionFault ||
     error instanceof ServiceUnavailable ||
@@ -61,11 +61,11 @@ export function decorateEsError(error) {
     return decorateConflictError(error, reason);
   }
 
-  if (error instanceof NotAuthorized) {
+  if (error instanceof AuthenticationException) {
     return decorateNotAuthorizedError(error, reason);
   }
 
-  if (error instanceof Forbidden) {
+  if (error instanceof AuthorizationException) {
     return decorateForbiddenError(error, reason);
   }
 

@@ -17,34 +17,19 @@
  * under the License.
  */
 
-import { SavedObjectsRepository } from './repository';
-
 /**
- * Provider for the Saved Object Repository.
+ * Provides an array of paths for ES source filtering
  */
-export class SavedObjectsRepositoryProvider {
-
-  constructor({
-    index,
-    mappings,
-    onBeforeWrite
-  }) {
-    this._index = index;
-    this._mappings = mappings;
-    this._onBeforeWrite = onBeforeWrite;
+export function includedFields(type: string | string[] = '*', fields?: string | string[]) {
+  if (!fields || fields.length === 0) {
+    return;
   }
 
-  getRepository(callCluster) {
+  // convert to an array
+  const sourceFields = typeof fields === 'string' ? [fields] : fields;
 
-    if (typeof callCluster !== 'function') {
-      throw new TypeError('Repository requires a "callCluster" function to be provided.');
-    }
-
-    return new SavedObjectsRepository({
-      index: this._index,
-      mappings: this._mappings,
-      onBeforeWrite: this._onBeforeWrite,
-      callCluster
-    });
-  }
+  return sourceFields
+    .map(f => `${type}.${f}`)
+    .concat('type')
+    .concat(fields); // v5 compatibility
 }

@@ -17,5 +17,28 @@
  * under the License.
  */
 
-export { savedObjectsMixin } from './saved_objects_mixin';
-export { SavedObjectsClient } from './service';
+function assertNonEmptyString(value: string, name: string) {
+  if (!value || typeof value !== 'string') {
+    throw new TypeError(`Expected "${value}" to be a ${name}`);
+  }
+}
+
+/**
+ *  Trim the prefix from the id of a saved object doc
+ *
+ *  @param  {string} id
+ *  @param  {string} type
+ *  @return {string}
+ */
+export function trimIdPrefix(id: string, type: string) {
+  assertNonEmptyString(id, 'document id');
+  assertNonEmptyString(type, 'saved object type');
+
+  const prefix = `${type}:`;
+
+  if (!id.startsWith(prefix)) {
+    return id;
+  }
+
+  return id.slice(prefix.length);
+}

@@ -17,15 +17,33 @@
  * under the License.
  */
 
-import { SavedObjectsRepository, ScopedSavedObjectsClientProvider, SavedObjectsRepositoryProvider } from './lib';
+import Hapi from 'hapi';
+
+import {
+  SavedObjectsRepository,
+  SavedObjectsRepositoryProvider,
+  ScopedSavedObjectsClientProvider,
+} from './lib';
 import { SavedObjectsClient } from './saved_objects_client';
 
-export function createSavedObjectsService(server) {
+type ArgsType<T> = T extends (...args: infer Y) => any ? Y : never;
+
+function bind<T extends { [k in keyof T]: (...args: any[]) => any }>(obj: T, method: keyof T) {
+  const fn = obj[method];
+  return (...args: ArgsType<typeof fn>): ReturnType<typeof fn> => {
+    return obj[method](...args);
+  };
+}
+
+export function createSavedObjectsService(server: Hapi.Server) {
+  const config = (server as any).config();
+  const mappings = (server as any).getKibanaIndexMappingsDsl();
+
   const onBeforeWrite = async () => {
     const adminCluster = server.plugins.elasticsearch.getCluster('admin');
 
     try {
-      const index = server.config().get('kibana.index');
+      const index = config.get('kibana.index');
       await adminCluster.callWithInternalUser('indices.putTemplate', {
         name: `kibana_index_template:${index}`,
         body: {
@@ -34,13 +52,12 @@ export function createSavedObjectsService(server) {
             number_of_shards: 1,
             auto_expand_replicas: '0-1',
           },
-          mappings: server.getKibanaIndexMappingsDsl(),
+          mappings,
         },
       });
     } catch (error) {
       server.log(['debug', 'savedObjects'], {
-        tmpl:
-          'Attempt to write indexTemplate for SavedObjects index failed: <%= err.message %>',
+        tmpl: 'Attempt to write indexTemplate for SavedObjects index failed: <%= err.message %>',
         es: {
           resp: error.body,
           status: error.status,
@@ -59,37 +76,33 @@ export function createSavedObjectsService(server) {
   };
 
   const repositoryProvider = new SavedObjectsRepositoryProvider({
-    index: server.config().get('kibana.index'),
-    mappings: server.getKibanaIndexMappingsDsl(),
+    index: config.get('kibana.index'),
+    mappings,
     onBeforeWrite,
   });
 
   const scopedClientProvider = new ScopedSavedObjectsClientProvider({
-    index: server.config().get('kibana.index'),
-    mappings: server.getKibanaIndexMappingsDsl(),
-    onBeforeWrite,
-    defaultClientFactory({
-      request,
-    }) {
+    defaultClientFactory({ request }) {
       const { callWithRequest } = server.plugins.elasticsearch.getCluster('admin');
-      const callCluster = (...args) => callWithRequest(request, ...args);
+
+      const callCluster = <T>(method: string, params?: any): Promise<T> =>
+        callWithRequest(request, method, params);
 
       const repository = repositoryProvider.getRepository(callCluster);
 
       return new SavedObjectsClient(repository);
-    }
+    },
   });
 
   return {
     SavedObjectsClient,
     SavedObjectsRepository,
-    getSavedObjectsRepository: (...args) =>
-      repositoryProvider.getRepository(...args),
-    getScopedSavedObjectsClient: (...args) =>
-      scopedClientProvider.getClient(...args),
-    setScopedSavedObjectsClientFactory: (...args) =>
-      scopedClientProvider.setClientFactory(...args),
-    addScopedSavedObjectsClientWrapperFactory: (...args) =>
-      scopedClientProvider.addClientWrapperFactory(...args),
+    getSavedObjectsRepository: bind(repositoryProvider, 'getRepository'),
+    getScopedSavedObjectsClient: bind(scopedClientProvider, 'getClient'),
+    setScopedSavedObjectsClientFactory: bind(scopedClientProvider, 'setClientFactory'),
+    addScopedSavedObjectsClientWrapperFactory: bind(
+      scopedClientProvider,
+      'addClientWrapperFactory'
+    ),
   };
 }

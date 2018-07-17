@@ -23,12 +23,12 @@ test('requires "callCluster" to be provided', () => {
   const provider = new SavedObjectsRepositoryProvider({
     index: 'idx',
     mappings: {
-      foo: {}
+      foo: {},
     },
-    onBeforeWrite: jest.fn()
+    onBeforeWrite: jest.fn(),
   });
 
-  expect(() => provider.getRepository({})).toThrowErrorMatchingSnapshot();
+  expect(() => provider.getRepository({} as any)).toThrowErrorMatchingSnapshot();
 });
 
 test('creates a valid Repository', async () => {
@@ -37,17 +37,17 @@ test('creates a valid Repository', async () => {
     mappings: {
       foo: {
         properties: {
-          field: { type: 'string' }
-        }
-      }
+          field: { type: 'string' },
+        },
+      },
     },
-    onBeforeWrite: jest.fn()
+    onBeforeWrite: jest.fn(),
   };
 
   const provider = new SavedObjectsRepositoryProvider(properties);
 
   const callCluster = jest.fn().mockReturnValue({
-    _id: 'new'
+    _id: 'new',
   });
 
   const repository = provider.getRepository(callCluster);
@@ -56,7 +56,10 @@ test('creates a valid Repository', async () => {
 
   expect(callCluster).toHaveBeenCalledTimes(1);
   expect(properties.onBeforeWrite).toHaveBeenCalledTimes(1);
-  expect(callCluster).toHaveBeenCalledWith('index', expect.objectContaining({
-    index: properties.index
-  }));
+  expect(callCluster).toHaveBeenCalledWith(
+    'index',
+    expect.objectContaining({
+      index: properties.index,
+    })
+  );
 });

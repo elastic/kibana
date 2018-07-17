@@ -25,4 +25,6 @@ export {
   getProperty,
   getRootProperties,
   getRootPropertiesObjects,
+  EsMappings,
+  EsMapping,
 } from './lib';

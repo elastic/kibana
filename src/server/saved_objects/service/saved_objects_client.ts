@@ -17,15 +17,12 @@
  * under the License.
  */
 
-import {
-  errors,
-} from './lib';
+import { SavedObjectsRepository } from './lib';
+import * as errors from './lib/errors';
+
+type ArgsType<T> = T extends (...args: infer A) => any ? A : unknown;
 
 export class SavedObjectsClient {
-  constructor(repository) {
-    this._repository = repository;
-  }
-
   /**
    * ## SavedObjectsClient errors
    *
@@ -88,103 +85,58 @@ export class SavedObjectsClient {
    * `action.auto_create_index` setting prevents it from being created automatically
    * so we throw a special 503 with the intention of informing the user that their
    * Elasticsearch settings need to be updated.
-   *
-   * @type {ErrorHelpers} see ./lib/errors
    */
-  static errors = errors
-  errors = errors
+  public static errors = errors;
+  public errors = errors;
+
+  constructor(private repository: SavedObjectsRepository) {}
 
   /**
-   * Persists an object
-   *
-   * @param {string} type
-   * @param {object} attributes
-   * @param {object} [options={}]
-   * @property {string} [options.id] - force id on creation, not recommended
-   * @property {boolean} [options.overwrite=false]
-   * @returns {promise} - { id, type, version, attributes }
-  */
-  async create(type, attributes = {}, options = {}) {
-    return this._repository.create(type, attributes, options);
+   * Persist an object
+   */
+  public async create(type: string, attributes = {}, options = {}) {
+    return this.repository.create(type, attributes, options);
   }
 
   /**
-   * Creates multiple documents at once
-   *
-   * @param {array} objects - [{ type, id, attributes }]
-   * @param {object} [options={}]
-   * @property {boolean} [options.overwrite=false] - overwrites existing documents
-   * @returns {promise} - { saved_objects: [{ id, type, version, attributes, error: { message } }]}
+   * Create multiple objects at once
    */
-  async bulkCreate(objects, options = {}) {
-    return this._repository.bulkCreate(objects, options);
+  public async bulkCreate(...args: ArgsType<SavedObjectsRepository['bulkCreate']>) {
+    return this.repository.bulkCreate(...args);
   }
 
   /**
-   * Deletes an object
-   *
-   * @param {string} type
-   * @param {string} id
-   * @returns {promise}
+   * Delete an object
    */
-  async delete(type, id) {
-    return this._repository.delete(type, id);
+  public async delete(...args: ArgsType<SavedObjectsRepository['delete']>) {
+    return this.repository.delete(...args);
   }
 
   /**
-   * @param {object} [options={}]
-   * @property {(string|Array<string>)} [options.type]
-   * @property {string} [options.search]
-   * @property {Array<string>} [options.searchFields] - see Elasticsearch Simple Query String
-   *                                        Query field argument for more information
-   * @property {integer} [options.page=1]
-   * @property {integer} [options.perPage=20]
-   * @property {string} [options.sortField]
-   * @property {string} [options.sortOrder]
-   * @property {Array<string>} [options.fields]
-   * @returns {promise} - { saved_objects: [{ id, type, version, attributes }], total, per_page, page }
+   * Find pages of objects
    */
-  async find(options = {}) {
-    return this._repository.find(options);
+  public async find(...args: ArgsType<SavedObjectsRepository['find']>) {
+    return this.repository.find(...args);
   }
 
   /**
-   * Returns an array of objects by id
-   *
-   * @param {array} objects - an array ids, or an array of objects containing id and optionally type
-   * @returns {promise} - { saved_objects: [{ id, type, version, attributes }] }
-   * @example
-   *
-   * bulkGet([
-   *   { id: 'one', type: 'config' },
-   *   { id: 'foo', type: 'index-pattern' }
-   * ])
+   * Get a multiple objects at once
    */
-  async bulkGet(objects = []) {
-    return this._repository.bulkGet(objects);
+  public async bulkGet(...args: ArgsType<SavedObjectsRepository['bulkGet']>) {
+    return this.repository.bulkGet(...args);
   }
 
   /**
-   * Gets a single object
-   *
-   * @param {string} type
-   * @param {string} id
-   * @returns {promise} - { id, type, version, attributes }
+   * Get a single object
    */
-  async get(type, id) {
-    return this._repository.get(type, id);
+  public async get(...args: ArgsType<SavedObjectsRepository['get']>) {
+    return this.repository.get(...args);
   }
 
   /**
-   * Updates an object
-   *
-   * @param {string} type
-   * @param {string} id
-   * @param {object} [options={}]
-   * @property {integer} options.version - ensures version matches that of persisted object
-   * @returns {promise}
+   * Update an object
    */
-  async update(type, id, attributes, options = {}) {
-    return this._repository.update(type, id, attributes, options);
+  public async update(...args: ArgsType<SavedObjectsRepository['update']>) {
+    return this.repository.update(...args);
   }
 }

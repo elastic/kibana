@@ -21,12 +21,12 @@ import { errors as esErrors } from 'elasticsearch';
 
 import { decorateEsError } from './decorate_es_error';
 import {
-  isEsUnavailableError,
-  isConflictError,
-  isNotAuthorizedError,
-  isForbiddenError,
-  isNotFoundError,
   isBadRequestError,
+  isConflictError,
+  isEsUnavailableError,
+  isForbiddenError,
+  isNotAuthorizedError,
+  isNotFoundError,
 } from './errors';
 
 describe('savedObjectsClient/decorateEsError', () => {
@@ -78,7 +78,7 @@ describe('savedObjectsClient/decorateEsError', () => {
   });
 
   it('makes es.Forbidden a SavedObjectsClient/Forbidden error', () => {
-    const error = new esErrors.Forbidden();
+    const error = new esErrors.AuthorizationException();
     expect(isForbiddenError(error)).toBe(false);
     expect(decorateEsError(error)).toBe(error);
     expect(isForbiddenError(error)).toBe(true);
