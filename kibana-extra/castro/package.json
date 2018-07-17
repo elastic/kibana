@@ -14,9 +14,13 @@
     "start": "plugin-helpers start --config ../config/kibana/kibana.yml",
     "test:server": "plugin-helpers test:server",
     "test:browser": "plugin-helpers test:browser",
+    "precommit": "lint-staged",
     "build": "plugin-helpers build",
     "start-deps": "node ../../kibana/scripts/es.js snapshot -E path.data=../../data",
     "debug": " node --inspect ../../kibana/scripts/kibana.js --config ../../config/kibana/kibana.yml  --env.name=development --optimize.enabled=true --plugin-path=."
+  },
+  "lint-staged": {
+    "*.{ts,tsx}": "yarn run tslint"
   },
   "devDependencies": {
     "@elastic/eui": "^0.0.51",
@@ -29,6 +33,8 @@
     "@types/react-redux": "^6.0.2",
     "@types/redux-actions": "^2.3.0",
     "expect.js": "^0.3.1",
+    "husky": "^0.14.3",
+    "lint-staged": "^7.2.0",
     "mocha": "^5.2.0",
     "tslint": "^5.10.0",
     "tslint-react": "^3.6.0",
