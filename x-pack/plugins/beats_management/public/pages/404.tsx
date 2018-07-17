@@ -4,6 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export const PLUGIN = {
-  ID: 'beats',
-};
+import React from 'react';
+
+export class NotFoundPage extends React.PureComponent {
+  public render() {
+    return <div>No content found</div>;
+  }
+}
