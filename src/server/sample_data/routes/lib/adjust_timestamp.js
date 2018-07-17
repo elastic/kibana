@@ -20,6 +20,19 @@
 
 const MILLISECONDS_IN_DAY = 86400000;
 
+
+function iso8601ToDateIgnoringTime(iso8601) {
+  const split = iso8601.split('-');
+  const year = parseInt(split[0]);
+  const month = parseInt(split[1]) - 1; // javascript months are zero-based indexed
+  const date = parseInt(split[2]);
+  return new Date(year, month, date);
+}
+
+function toDateOnly(date) {
+  return new Date(date.getFullYear(), date.getMonth(), date.getDate());
+}
+
 /**
  * Convert timestamp to timestamp that is relative to now
  *
@@ -30,19 +43,29 @@ const MILLISECONDS_IN_DAY = 86400000;
  * @return {String} ISO8601 formated data string YYYY-MM-dd'T'HH:mm:ss.SSS of timestamp adjusted to now
  */
 export function adjustTimestamp(timestamp, currentTimeMarker, now, preserveDayOfWeekTimeOfDay) {
-  const timestampDate = new Date(Date.parse(timestamp));
-
   if (!preserveDayOfWeekTimeOfDay) {
     // Move timestamp relative to now, preserving distance between currentTimeMarker and timestamp
+    const timestampDate = new Date(Date.parse(timestamp));
     const timeDelta = timestampDate.getTime() - currentTimeMarker.getTime();
     return (new Date(now.getTime() + timeDelta)).toISOString();
   }
 
   // Move timestamp to current week, preserving day of week and time of day
-  const weekDelta = Math.round((timestampDate.getTime() - currentTimeMarker.getTime()) / (MILLISECONDS_IN_DAY * 7));
-  const dayOfWeekDelta = timestampDate.getDay() - now.getDay();
-  const daysDelta = dayOfWeekDelta * MILLISECONDS_IN_DAY + (weekDelta * MILLISECONDS_IN_DAY * 7);
-  const yearMonthDay = (new Date(now.getTime() + daysDelta)).toISOString().substring(0, 10);
-  return `${yearMonthDay}T${timestamp.substring(11)}`;
+  const timestampDateOnly = iso8601ToDateIgnoringTime(timestamp);
+  const nowDateOnly = toDateOnly(now);
+  const currentTimeMarkerDateOnly = toDateOnly(currentTimeMarker);
 
+  let partialWeek = 0;
+  if (timestampDateOnly.getDay() > currentTimeMarkerDateOnly.getDay()
+    && timestampDateOnly.getTime() < currentTimeMarkerDateOnly.getTime()) {
+    partialWeek = 1;
+  }
+  const unroundedWeekDelta = (timestampDateOnly.getTime() - currentTimeMarkerDateOnly.getTime()) / (MILLISECONDS_IN_DAY * 7);
+  const weekDelta = partialWeek + Math.floor(Math.abs(unroundedWeekDelta));
+  const weekDirection = timestampDateOnly.getTime() < currentTimeMarkerDateOnly.getTime() ? -1 : 1;
+
+  const dayOfWeekDelta = timestampDateOnly.getDay() - nowDateOnly.getDay();
+  const daysDeltaInMS = dayOfWeekDelta * MILLISECONDS_IN_DAY + (weekDirection * weekDelta * MILLISECONDS_IN_DAY * 7);
+  const yearMonthDay = (new Date(nowDateOnly.getTime() + daysDeltaInMS)).toISOString().substring(0, 10);
+  return `${yearMonthDay}T${timestamp.substring(11)}`;
 }

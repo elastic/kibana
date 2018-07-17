@@ -20,10 +20,10 @@
 
 import { adjustTimestamp } from './adjust_timestamp';
 
-const currentTimeMarker = new Date(Date.parse('2018-01-02T00:00:00Z'));
-const now = new Date(Date.parse('2018-04-25T18:24:58.650Z')); // Wednesday
-
 describe('relative to now', () => {
+  const currentTimeMarker = new Date(Date.parse('2018-01-02T00:00:00Z'));
+  const now = new Date(Date.parse('2018-04-25T18:24:58.650Z')); // Wednesday
+
   test('adjusts time to 10 minutes in past from now', () => {
     const originalTimestamp = '2018-01-01T23:50:00Z'; // -10 minutes relative to currentTimeMarker
     const timestamp = adjustTimestamp(originalTimestamp, currentTimeMarker, now, false);
@@ -38,36 +38,87 @@ describe('relative to now', () => {
 });
 
 describe('preserve day of week and time of day', () => {
-  test('adjusts time to monday of the same week as now', () => {
-    const originalTimestamp = '2018-01-01T23:50:00Z'; // Monday, same week relative to currentTimeMarker
-    const timestamp = adjustTimestamp(originalTimestamp, currentTimeMarker, now, true);
-    expect(timestamp).toBe('2018-04-23T23:50:00Z');
+  const currentTimeMarker = new Date(Date.parse('2018-01-02T00:00:00')); //Tuesday
+  const now = new Date(Date.parse('2018-04-25T18:24:58.650')); // Wednesday
+
+  describe('2 weeks before', () => {
+    test('should properly adjust timestamp when day is before now day of week', () => {
+      const originalTimestamp = '2017-12-18T23:50:00'; // Monday, -2 week relative to currentTimeMarker
+      const timestamp = adjustTimestamp(originalTimestamp, currentTimeMarker, now, true);
+      expect(timestamp).toBe('2018-04-09T23:50:00'); // Monday 2 week before now week
+    });
+
+    test('should properly adjust timestamp when day is same as now day of week', () => {
+      const originalTimestamp = '2017-12-20T23:50:00'; // Wednesday, -2 week relative to currentTimeMarker
+      const timestamp = adjustTimestamp(originalTimestamp, currentTimeMarker, now, true);
+      expect(timestamp).toBe('2018-04-11T23:50:00'); // Wednesday 2 week before now week
+    });
+
+    test('should properly adjust timestamp when day is after now day of week', () => {
+      const originalTimestamp = '2017-12-22T16:16:50'; // Friday, -2 week relative to currentTimeMarker
+      const timestamp = adjustTimestamp(originalTimestamp, currentTimeMarker, now, true);
+      expect(timestamp).toBe('2018-04-13T16:16:50'); // Friday 2 week before now week
+    });
   });
 
-  test('adjusts time to friday of the same week as now', () => {
-    const originalTimestamp = '2017-12-29T23:50:00Z'; // Friday, same week relative to currentTimeMarker
-    const timestamp = adjustTimestamp(originalTimestamp, currentTimeMarker, now, true);
-    expect(timestamp).toBe('2018-04-27T23:50:00Z');
+  describe('week before', () => {
+    test('should properly adjust timestamp when day is before now day of week', () => {
+      const originalTimestamp = '2017-12-25T23:50:00'; // Monday, -1 week relative to currentTimeMarker
+      const timestamp = adjustTimestamp(originalTimestamp, currentTimeMarker, now, true);
+      expect(timestamp).toBe('2018-04-16T23:50:00'); // Monday 1 week before now week
+    });
+
+    test('should properly adjust timestamp when day is same as now day of week', () => {
+      const originalTimestamp = '2017-12-27T23:50:00'; // Wednesday, -1 week relative to currentTimeMarker
+      const timestamp = adjustTimestamp(originalTimestamp, currentTimeMarker, now, true);
+      expect(timestamp).toBe('2018-04-18T23:50:00'); // Wednesday 1 week before now week
+    });
+
+    test('should properly adjust timestamp when day is after now day of week', () => {
+      const originalTimestamp = '2017-12-29T16:16:50'; // Friday, -1 week relative to currentTimeMarker
+      const timestamp = adjustTimestamp(originalTimestamp, currentTimeMarker, now, true);
+      expect(timestamp).toBe('2018-04-20T16:16:50'); // Friday 1 week before now week
+    });
   });
 
-  test('adjusts time to monday of the previous week as now', () => {
-    const originalTimestamp = '2017-12-25T23:50:00Z'; // Monday, previous week relative to currentTimeMarker
-    const timestamp = adjustTimestamp(originalTimestamp, currentTimeMarker, now, true);
-    expect(timestamp).toBe('2018-04-16T23:50:00Z');
+  describe('same week', () => {
+    test('should properly adjust timestamp when day is before now day of week', () => {
+      const originalTimestamp = '2018-01-01T23:50:00'; // Monday, same week relative to currentTimeMarker
+      const timestamp = adjustTimestamp(originalTimestamp, currentTimeMarker, now, true);
+      expect(timestamp).toBe('2018-04-23T23:50:00'); // Monday same week as now
+    });
+
+    test('should properly adjust timestamp when day is same as now day of week', () => {
+      const originalTimestamp = '2018-01-03T23:50:00'; // Wednesday, same week relative to currentTimeMarker
+      const timestamp = adjustTimestamp(originalTimestamp, currentTimeMarker, now, true);
+      expect(timestamp).toBe('2018-04-25T23:50:00'); // Wednesday same week as now
+    });
+
+    test('should properly adjust timestamp when day is after now day of week', () => {
+      const originalTimestamp = '2018-01-05T16:16:50'; // Friday, same week relative to currentTimeMarker
+      const timestamp = adjustTimestamp(originalTimestamp, currentTimeMarker, now, true);
+      expect(timestamp).toBe('2018-04-27T16:16:50'); // Friday same week as now
+    });
   });
 
-  test('adjusts time to friday of the week after now', () => {
-    const originalTimestamp = '2018-01-05T23:50:00Z'; // Friday, next week relative to currentTimeMarker
-    const timestamp = adjustTimestamp(originalTimestamp, currentTimeMarker, now, true);
-    expect(timestamp).toBe('2018-05-04T23:50:00Z');
-  });
+  describe('week after', () => {
+    test('should properly adjust timestamp when day is before now day of week', () => {
+      const originalTimestamp = '2018-01-08T23:50:00'; // Monday, 1 week after relative to currentTimeMarker
+      const timestamp = adjustTimestamp(originalTimestamp, currentTimeMarker, now, true);
+      expect(timestamp).toBe('2018-04-23T23:50:00'); // Monday 1 week after now week
+    });
 
-  test('adjusts timestamp to correct day of week even when UTC day is on different day.', () => {
-    const currentTimeMarker = new Date(Date.parse('2018-01-02T00:00:00')); // Tuesday
-    const now = new Date(Date.parse('2018-06-14T10:38')); // Thurs
-    const originalTimestamp = '2018-01-01T17:57:25'; // Monday
-    const timestamp = adjustTimestamp(originalTimestamp, currentTimeMarker, now, true);
-    expect(timestamp).toBe('2018-06-11T17:57:25'); // Monday
+    test('should properly adjust timestamp when day is same as now day of week', () => {
+      const originalTimestamp = '2018-01-10T23:50:00'; // Wednesday, same week relative to currentTimeMarker
+      const timestamp = adjustTimestamp(originalTimestamp, currentTimeMarker, now, true);
+      expect(timestamp).toBe('2018-05-02T23:50:00'); // Wednesday 1 week after now week
+    });
+
+    test('should properly adjust timestamp when day is after now day of week', () => {
+      const originalTimestamp = '2018-01-12T16:16:50'; // Friday, same week relative to currentTimeMarker
+      const timestamp = adjustTimestamp(originalTimestamp, currentTimeMarker, now, true);
+      expect(timestamp).toBe('2018-05-04T16:16:50'); // Friday 1 week after now week
+    });
   });
 });
 
