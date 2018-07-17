@@ -22,7 +22,9 @@ import { defaultsDeep } from 'lodash';
 import { Config } from './config';
 import { transformDeprecations } from './transform_deprecations';
 
-async function getSettingsFromFile(log, path, settingOverrides) {
+import { schema as defaultSchema } from './schema';
+
+async function getSettingsFromFile(log, path, settingOverrides, schema) {
   log.debug('Loading config file from %j', path);
 
   const configModule = require(path);
@@ -40,6 +42,7 @@ async function getSettingsFromFile(log, path, settingOverrides) {
           settings: await getSettingsFromFile(log, ...args),
           primary: false,
           path,
+          schema
         });
       }
     })
@@ -49,10 +52,11 @@ async function getSettingsFromFile(log, path, settingOverrides) {
   return transformDeprecations(settingsWithDefaults, logDeprecation);
 }
 
-export async function readConfigFile(log, path, settingOverrides) {
+export async function readConfigFile(log, path, settingOverrides, schema = defaultSchema) {
   return new Config({
-    settings: await getSettingsFromFile(log, path, settingOverrides),
+    settings: await getSettingsFromFile(log, path, settingOverrides, schema),
     primary: true,
     path,
+    schema
   });
 }

@@ -323,5 +323,19 @@ module.exports = {
       files: ['x-pack/plugins/monitoring/public/**/*'],
       env: { browser: true },
     },
+    /**
+     * Webdriver IO
+     * Functional Test Overrides
+     */
+    {
+      files: ['test/wdio_functional/**/*'],
+      env: {
+        mocha: true,
+      },
+      globals: {
+        browser: true,
+        expect: true,
+      },
+    },
   ],
 };

@@ -20,8 +20,6 @@
 import { get, has, cloneDeep } from 'lodash';
 import toPath from 'lodash/internal/toPath';
 
-import { schema } from './schema';
-
 const $values = Symbol('values');
 
 export class Config {
@@ -30,7 +28,9 @@ export class Config {
       settings = {},
       primary = false,
       path,
+      schema
     } = options;
+    this.schema = options.schema;
 
     if (!path) {
       throw new TypeError('path is a required option');
@@ -83,7 +83,7 @@ export class Config {
 
     const path = toPath(key);
     if (!path.length) return true;
-    return recursiveHasCheck(path, this[$values], schema);
+    return recursiveHasCheck(path, this[$values], this.schema);
   }
 
   get(key, defaultValue) {
