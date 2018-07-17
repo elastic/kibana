@@ -7,8 +7,8 @@
 import Boom from 'boom';
 import * as Hapi from 'hapi';
 
-import { REPOSITORY_INDEX_TYPE } from '../../mappings';
 import RepositoryUtils from '../../common/repositoryUtils';
+import { REPOSITORY_INDEX_TYPE } from '../../mappings';
 import { Repository } from '../../model';
 import { Log } from '../log';
 import RepositoryService from '../repositoryService';
