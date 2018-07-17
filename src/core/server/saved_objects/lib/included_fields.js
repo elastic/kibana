@@ -17,13 +17,21 @@
  * under the License.
  */
 
-export { SavedObjectsRepository } from './repository';
-export { ScopedSavedObjectsClientProvider } from './scoped_client_provider';
-export { SavedObjectsRepositoryProvider } from './repository_provider';
+/**
+ * Provides an array of paths for ES source filtering
+ *
+ * @param {string} type
+ * @param {string|array} fields
+ * @returns {array}
+ */
+export function includedFields(type, fields) {
+  if (!fields || fields.length === 0) return;
 
-import * as errors from './errors';
-export { errors };
+  // convert to an array
+  const sourceFields = typeof fields === 'string' ? [fields] : fields;
+  const sourceType = type || '*';
 
-export { trimIdPrefix } from './trim_id_prefix';
-export { includedFields } from './included_fields';
-export { decorateEsError } from './decorate_es_error';
+  return sourceFields.map(f => `${sourceType}.${f}`)
+    .concat('type')
+    .concat(fields); // v5 compatibility
+}

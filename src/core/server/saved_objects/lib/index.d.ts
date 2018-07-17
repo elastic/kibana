@@ -5,6 +5,7 @@ declare const lib: {
   errors: {
     isNotFoundError: any;
     createEsAutoCreateIndexError: any;
+    createGenericNotFoundError: any;
   };
 };
 

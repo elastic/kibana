@@ -17,13 +17,30 @@
  * under the License.
  */
 
-export { SavedObjectsRepository } from './repository';
-export { ScopedSavedObjectsClientProvider } from './scoped_client_provider';
-export { SavedObjectsRepositoryProvider } from './repository_provider';
+import Boom from 'boom';
 
-import * as errors from './errors';
-export { errors };
+import { getQueryParams } from './query_params';
+import { getSortingParams } from './sorting_params';
 
-export { trimIdPrefix } from './trim_id_prefix';
-export { includedFields } from './included_fields';
-export { decorateEsError } from './decorate_es_error';
+export function getSearchDsl(mappings, options = {}) {
+  const {
+    type,
+    search,
+    searchFields,
+    sortField,
+    sortOrder
+  } = options;
+
+  if (!type && sortField) {
+    throw Boom.notAcceptable('Cannot sort without filtering by type');
+  }
+
+  if (sortOrder && !sortField) {
+    throw Boom.notAcceptable('sortOrder requires a sortField');
+  }
+
+  return {
+    ...getQueryParams(mappings, type, search, searchFields),
+    ...getSortingParams(mappings, type, sortField, sortOrder),
+  };
+}

@@ -17,4 +17,34 @@
  * under the License.
  */
 
-export { AccessFacade } from './access_facade';
+import { SavedObjectsRepository } from './repository';
+
+/**
+ * Provider for the Saved Object Repository.
+ */
+export class SavedObjectsRepositoryProvider {
+
+  constructor({
+    index,
+    mappings,
+    onBeforeWrite
+  }) {
+    this._index = index;
+    this._mappings = mappings;
+    this._onBeforeWrite = onBeforeWrite;
+  }
+
+  getRepository(callCluster) {
+
+    if (typeof callCluster !== 'function') {
+      throw new TypeError('Repository requires a "callCluster" function to be provided.');
+    }
+
+    return new SavedObjectsRepository({
+      index: this._index,
+      mappings: this._mappings,
+      onBeforeWrite: this._onBeforeWrite,
+      callCluster
+    });
+  }
+}

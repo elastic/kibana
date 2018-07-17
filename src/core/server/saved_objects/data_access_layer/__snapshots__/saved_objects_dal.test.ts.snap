@@ -1,0 +1,51 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`saved objects data access #bulkCreate method creates documents 1`] = `Array []`;
+
+exports[`saved objects data access #constructor creates an instance with onBeforeWrite 1`] = `
+SavedObjectsDAL {
+  "index": ".foo",
+  "mappings": Object {
+    "foo": Object {},
+  },
+  "onBeforeWrite": [Function],
+  "type": "foo",
+  "unwrappedCallCluster": [Function],
+}
+`;
+
+exports[`saved objects data access #constructor creates an instance without onBeforeWrite 1`] = `
+SavedObjectsDAL {
+  "index": ".kibana",
+  "mappings": Object {
+    "foo": Object {},
+  },
+  "onBeforeWrite": [Function],
+  "type": "foo",
+  "unwrappedCallCluster": [Function],
+}
+`;
+
+exports[`saved objects data access #create method creates document with ES create action, setting id 1`] = `
+Object {
+  "attributes": Object {
+    "attr": "bar",
+  },
+  "id": "foo",
+  "type": "foo",
+  "updated_at": "2018-07-17T09:36:14.791Z",
+  "version": "bar",
+}
+`;
+
+exports[`saved objects data access #create method creates document with ES index action, generating id 1`] = `
+Object {
+  "attributes": Object {
+    "attr": "bar",
+  },
+  "id": "foo",
+  "type": "foo",
+  "updated_at": "2018-07-17T09:36:14.791Z",
+  "version": "bar",
+}
+`;

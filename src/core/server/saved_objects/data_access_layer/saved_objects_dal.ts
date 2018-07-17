@@ -20,27 +20,38 @@
 import uuid from 'uuid';
 
 import { getRootType } from '../../../../server/mappings';
-import { getSearchDsl } from '../../../../server/saved_objects/service/lib/search_dsl';
-import { trimIdPrefix } from '../../../../server/saved_objects/service/lib';
-import { includedFields } from '../../../../server/saved_objects/service/lib';
-import { decorateEsError } from '../../../../server/saved_objects/service/lib';
-import * as errors from '../../../../server/saved_objects/service/lib';
+import { getSearchDsl } from '../lib/search_dsl';
+import { trimIdPrefix } from '../lib/';
+import { includedFields } from '../lib/';
+import { decorateEsError } from '../lib/';
+import { errors } from '../lib/';
 
-export interface AccessFacadeOptions {
+export interface SavedObjectsDALOptions {
   index: string;
   mappings: { [key: string]: any };
   callCluster: () => any;
   onBeforeWrite?: () => void;
 }
 
-export class AccessFacade {
+export interface SavedObjectsDALCreateOptions {
+  id?: string;
+  overwrite?: boolean;
+}
+
+export interface SavedObjectsDALObject {
+  id?: string;
+  type: string;
+  attributes: { [key: string]: any };
+}
+
+export class SavedObjectsDAL {
   private readonly index: string;
   private readonly mappings: { [key: string]: any };
   private readonly onBeforeWrite: () => void;
   private readonly type: string;
-  private readonly unwrappedCallCluster: () => any;
+  private readonly unwrappedCallCluster: (method: string, params: any) => any;
 
-  constructor(options: AccessFacadeOptions) {
+  constructor(options: SavedObjectsDALOptions) {
     const { index, mappings, callCluster, onBeforeWrite = () => {} } = options;
 
     this.index = index;
@@ -55,24 +66,26 @@ export class AccessFacade {
    *
    * @param {string} type
    * @param {object} attributes
-   * @param {object} [options={}]
+   * @param {SavedObjectsDALCreateOptions} [options={}]
    * @property {string} [options.id] - force id on creation, not recommended
    * @property {boolean} [options.overwrite=false]
-   * @returns {promise} - { id, type, version, attributes }
+   * @returns {promise} - { id, type, updated_at, version, attributes }
    */
-  async create(type: string, attributes = {}, options = {}) {
-    // TODO: check for empty type?
-
-    const { id, overwrite = false } = options;
+  async create(
+    type: string,
+    attributes = {},
+    options: SavedObjectsDALCreateOptions = { overwrite: false }
+  ) {
+    const { id, overwrite } = options;
 
     const method = id && !overwrite ? 'create' : 'index';
-    const time = this._getCurrentTime();
+    const time = this.getCurrentTime();
 
     try {
-      const response = await this._writeToCluster(method, {
-        id: this._generateEsId(type, id),
-        type: this._type,
-        index: this._index,
+      const response = await this.writeToCluster(method, {
+        id: this.generateEsId(type, id),
+        type: this.type,
+        index: this.index,
         refresh: 'wait_for',
         body: {
           type,
@@ -90,7 +103,6 @@ export class AccessFacade {
       };
     } catch (error) {
       if (errors.isNotFoundError(error)) {
-        // See "503s from missing index" above
         throw errors.createEsAutoCreateIndexError();
       }
 
@@ -106,17 +118,20 @@ export class AccessFacade {
    * @property {boolean} [options.overwrite=false] - overwrites existing documents
    * @returns {promise} - [{ id, type, version, attributes, error: { message } }]
    */
-  async bulkCreate(objects, options = {}) {
-    const { overwrite = false } = options;
-    const time = this._getCurrentTime();
-    const objectToBulkRequest = object => {
+  async bulkCreate(
+    objects: Array<SavedObjectsDALObject>,
+    options: SavedObjectsDALCreateOptions = { overwrite: false }
+  ) {
+    const { overwrite } = options;
+    const time = this.getCurrentTime();
+    const objectToBulkRequest = (object: SavedObjectsDALObject) => {
       const method = object.id && !overwrite ? 'create' : 'index';
 
       return [
         {
           [method]: {
-            _id: this._generateEsId(object.type, object.id),
-            _type: this._type,
+            _id: this.generateEsId(object.type, object.id),
+            _type: this.type,
           },
         },
         {
@@ -127,16 +142,16 @@ export class AccessFacade {
       ];
     };
 
-    const { items } = await this._writeToCluster('bulk', {
-      index: this._index,
+    const { items } = await this.writeToCluster('bulk', {
+      index: this.index,
       refresh: 'wait_for',
       body: objects.reduce(
-        (acc, object) => [...acc, ...objectToBulkRequest(object)],
+        (acc, obj) => [...acc, ...objectToBulkRequest(obj)],
         []
       ),
     });
 
-    return items.map((response, i) => {
+    return items.map((response: any, i: number) => {
       const { error, _id: responseId, _version: version } = Object.values(
         response
       )[0];
@@ -170,11 +185,11 @@ export class AccessFacade {
    * @param {string} id
    * @returns {promise}
    */
-  async delete(type, id) {
-    const response = await this._writeToCluster('delete', {
-      id: this._generateEsId(type, id),
-      type: this._type,
-      index: this._index,
+  async delete(type: string, id: string) {
+    const response = await this.writeToCluster('delete', {
+      id: this.generateEsId(type, id),
+      type: this.type,
+      index: this.index,
       refresh: 'wait_for',
       ignore: [404],
     });
@@ -252,7 +267,7 @@ export class AccessFacade {
       },
     };
 
-    const response = await this._callCluster('search', esOptions);
+    const response = await this.callCluster('search', esOptions);
 
     if (response.status === 404) {
       // 404 is only possible here if the index is missing, which
@@ -299,11 +314,11 @@ export class AccessFacade {
       return { saved_objects: [] };
     }
 
-    const response = await this._callCluster('mget', {
+    const response = await this.callCluster('mget', {
       index: this._index,
       body: {
         docs: objects.map(object => ({
-          _id: this._generateEsId(object.type, object.id),
+          _id: this.generateEsId(object.type, object.id),
           _type: this._type,
         })),
       },
@@ -341,8 +356,8 @@ export class AccessFacade {
    * @returns {promise} - { id, type, version, attributes }
    */
   async get(type, id) {
-    const response = await this._callCluster('get', {
-      id: this._generateEsId(type, id),
+    const response = await this.callCluster('get', {
+      id: this.generateEsId(type, id),
       type: this._type,
       index: this._index,
       ignore: [404],
@@ -376,9 +391,9 @@ export class AccessFacade {
    * @returns {promise}
    */
   async update(type, id, attributes, options = {}) {
-    const time = this._getCurrentTime();
-    const response = await this._writeToCluster('update', {
-      id: this._generateEsId(type, id),
+    const time = this.getCurrentTime();
+    const response = await this.writeToCluster('update', {
+      id: this.generateEsId(type, id),
       type: this._type,
       index: this._index,
       version: options.version,
@@ -406,28 +421,28 @@ export class AccessFacade {
     };
   }
 
-  async _writeToCluster(method, params) {
+  private async writeToCluster(method: string, params = {}) {
     try {
-      await this._onBeforeWrite();
-      return await this._callCluster(method, params);
+      await this.onBeforeWrite();
+      return await this.callCluster(method, params);
     } catch (err) {
       throw decorateEsError(err);
     }
   }
 
-  async _callCluster(method, params) {
+  private async callCluster(method: string, params = {}) {
     try {
-      return await this._unwrappedCallCluster(method, params);
+      return await this.unwrappedCallCluster(method, params);
     } catch (err) {
       throw decorateEsError(err);
     }
   }
 
-  _generateEsId(type, id) {
+  private generateEsId(type, id) {
     return `${type}:${id || uuid.v1()}`;
   }
 
-  _getCurrentTime() {
+  private getCurrentTime() {
     return new Date().toISOString();
   }
 }

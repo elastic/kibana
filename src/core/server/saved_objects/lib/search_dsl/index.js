@@ -17,13 +17,4 @@
  * under the License.
  */
 
-export { SavedObjectsRepository } from './repository';
-export { ScopedSavedObjectsClientProvider } from './scoped_client_provider';
-export { SavedObjectsRepositoryProvider } from './repository_provider';
-
-import * as errors from './errors';
-export { errors };
-
-export { trimIdPrefix } from './trim_id_prefix';
-export { includedFields } from './included_fields';
-export { decorateEsError } from './decorate_es_error';
+export { getSearchDsl } from './search_dsl';
