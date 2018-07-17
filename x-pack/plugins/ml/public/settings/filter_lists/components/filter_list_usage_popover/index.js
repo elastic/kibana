@@ -5,8 +5,4 @@
  */
 
 
-
-import './styles/main.less';
-import './settings_controller';
-import './scheduled_events';
-import './filter_lists';
+export { FilterListUsagePopover } from './filter_list_usage_popover';
