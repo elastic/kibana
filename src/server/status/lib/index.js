@@ -17,4 +17,4 @@
  * under the License.
  */
 
-export { sourceKibana } from './source_kibana';
+export { getKibanaInfoForStats } from './get_kibana_info_for_stats';

@@ -7,7 +7,7 @@
 import { get } from 'lodash';
 import { XPACK_DEFAULT_ADMIN_EMAIL_UI_SETTING } from '../../../../../server/lib/constants';
 import { KIBANA_SETTINGS_TYPE } from '../../../common/constants';
-import { sourceKibana } from '../lib';
+import { getKibanaInfoForStats } from '../lib';
 
 /*
  * Check if Cluster Alert email notifications is enabled in config
@@ -80,7 +80,7 @@ export function getSettingsCollector(server, kbnServer) {
       shouldUseNull = !!defaultAdminEmail;
 
       return {
-        kibana: sourceKibana(server, kbnServer),
+        kibana: getKibanaInfoForStats(server, kbnServer),
         ...kibanaSettingsData
       };
     }

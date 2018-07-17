@@ -29,7 +29,7 @@ const snapshotRegex = /-snapshot/i;
  * @param {String} host Kibana host
  * @return {Object} The object containing a "kibana" field and source instance details.
  */
-export function sourceKibana(server, kbnServer) {
+export function getKibanaInfoForStats(server, kbnServer) {
   const config = server.config();
   const status = kbnServer.status.toJSON();
 

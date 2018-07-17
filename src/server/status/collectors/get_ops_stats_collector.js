@@ -19,7 +19,7 @@
 
 
 import { KIBANA_STATS_TYPE } from '../constants';
-import { sourceKibana } from '../lib';
+import { getKibanaInfoForStats } from '../lib';
 
 /*
  * Initialize a collector for Kibana Ops Stats
@@ -41,7 +41,7 @@ export function getOpsStatsCollector(server, kbnServer) {
     type: KIBANA_STATS_TYPE,
     fetch: () => {
       return {
-        kibana: sourceKibana(server, kbnServer),
+        kibana: getKibanaInfoForStats(server, kbnServer),
         ...kbnServer.metrics // latest metrics captured from the ops event listener in src/server/status/index
       };
     }

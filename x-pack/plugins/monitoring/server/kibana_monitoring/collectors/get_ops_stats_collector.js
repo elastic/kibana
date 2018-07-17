@@ -6,7 +6,7 @@
 
 import { KIBANA_STATS_TYPE } from '../../../common/constants';
 import { opsBuffer } from './ops_buffer';
-import { sourceKibana } from '../lib';
+import { getKibanaInfoForStats } from '../lib';
 
 /*
  * Initialize a collector for Kibana Ops Stats
@@ -49,7 +49,7 @@ export function getOpsStatsCollector(server, kbnServer) {
     init: start,
     fetch: () => {
       return {
-        kibana: sourceKibana(server, kbnServer),
+        kibana: getKibanaInfoForStats(server, kbnServer),
         ...buffer.flush()
       };
     }
