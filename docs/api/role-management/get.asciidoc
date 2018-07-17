@@ -1,0 +1,91 @@
+[[role-management-api-get]]
+=== Get Roles
+
+To retrieve all roles from Elasticsearch's `native` realm, issue a GET request to the 
+`/api/security/role` endpoint:
+
+[source,js]
+--------------------------------------------------
+GET /api/security/role
+--------------------------------------------------
+// KIBANA
+
+A succesful call returns a response code of `200` and a response body containing a JSON 
+representation of the roles.
+
+[source,js]
+--------------------------------------------------
+[
+  {
+    "name": "my_kibana_role",
+    "metadata" : {
+      "version" : 1
+    },
+    "transient_metadata": {
+      "enabled": true
+    },
+    "elasticsearch": {
+      "indices": [ ],
+      "cluster": [ ],
+      "run_as": [ ]
+    },
+    "kibana": [ {
+        "privileges": [ "all" ]
+    } ],
+  },
+  {
+    "name": "my_admin_role",
+    "metadata" : {
+      "version" : 1
+    },
+    "transient_metadata": {
+      "enabled": true
+    },
+    "elasticsearch": {
+      "cluster" : [ "all" ],
+      "indices" : [ {
+        "names" : [ "index1", "index2" ],
+        "privileges" : [ "all" ],
+        "field_security" : {
+          "grant" : [ "title", "body" ]
+        },
+        "query" : "{\"match\": {\"title\": \"foo\"}}"
+      } ],
+    },
+    "kibana": [ ]
+  }
+]
+--------------------------------------------------
+
+
+To retrieve a specific role, issue a GET request to the `/api/security/role/<rolename>` endpoint:
+
+[source,js]
+--------------------------------------------------
+GET /api/security/role/my_kibana_role
+--------------------------------------------------
+// KIBANA
+
+A successful call returns a response code of `200` and a response body containing a JSON 
+representation of the role.
+
+[source,js]
+--------------------------------------------------
+{
+  "name": "my_kibana_role",
+  "metadata" : {
+    "version" : 1
+  },
+  "transient_metadata": {
+    "enabled": true
+  },
+  "elasticsearch": {
+    "cluster": [ ],
+    "indices": [ ],
+    "run_as": [ ]
+  },
+  "kibana": [ {
+      "privileges": [ "all" ]
+  } ],
+}
+--------------------------------------------------
