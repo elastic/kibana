@@ -90,6 +90,12 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.header.setAbsoluteRange(fromTime, toTime);
     });
 
+    after(async () => {
+      // Get rid of the timestamp added in this test.
+      const currentUrl = await remote.getCurrentUrl();
+      await remote.get(currentUrl, false);
+    });
+
     it('adding visualizations', async () => {
       await dashboardAddPanel.addEveryVisualization('"Rendering Test"');
 
