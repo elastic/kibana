@@ -28,7 +28,7 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
 
       await kibanaServer.uiSettings.replace({
         'dateFormat:tz': 'UTC',
-        'defaultIndex': 'logstash-*'
+        'defaultIndex': 'logstash-*',
         'telemetry:optIn': false
       });
 
