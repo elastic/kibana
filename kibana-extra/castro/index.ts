@@ -4,16 +4,16 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import exampleRoute from './server/routes/example';
-import lspRoute from './server/routes/lsp';
-import repositoryRoute from './server/routes/repository';
-import fileRoute from './server/routes/file';
-import manacoRoute from './server/routes/monaco';
 import { resolve } from 'path';
 import mappings from './mappings';
+import exampleRoute from './server/routes/example';
+import fileRoute from './server/routes/file';
+import lspRoute from './server/routes/lsp';
+import manacoRoute from './server/routes/monaco';
+import repositoryRoute from './server/routes/repository';
 
-export default function (kibana) {
-  return new kibana.Plugin({
+export default (kibana: any) =>
+  new kibana.Plugin({
     require: ['elasticsearch'],
     name: 'castro',
     publicDir: resolve(__dirname, 'public'),
@@ -24,21 +24,19 @@ export default function (kibana) {
         main: 'plugins/castro/app',
       },
 
-      hacks: [
-        'plugins/castro/hack'
-      ],
+      hacks: ['plugins/castro/hack'],
 
-      mappings
+      mappings,
     },
 
-    config(Joi) {
+    config(Joi: any) {
       return Joi.object({
         enabled: Joi.boolean().default(true),
-        dataPath: Joi.string().default('/tmp')
+        dataPath: Joi.string().default('/tmp'),
       }).default();
     },
 
-    init(server, options) {
+    init(server: any, _: any) {
       // Add server routes and initialize the plugin here
       exampleRoute(server);
       lspRoute(server);
@@ -46,6 +44,4 @@ export default function (kibana) {
       fileRoute(server);
       manacoRoute(server);
     },
-
   });
-};
