@@ -273,9 +273,7 @@ describe('callClient', () => {
   describe('searchRequests with multiple searchStrategies map correctly to their responses', () => {
     const search = ({ searchRequests }) => {
       return {
-        searching: Promise.resolve({
-          responses: searchRequests.map(searchRequest => searchRequest.__testId__),
-        }),
+        searching: Promise.resolve(searchRequests.map(searchRequest => searchRequest.__testId__)),
         failedSearchRequests: [],
         abort: () => {},
       };
