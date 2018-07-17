@@ -7,7 +7,7 @@
 import Boom from 'boom';
 import * as Hapi from 'hapi';
 
-import * as Constants from '../../common/constants';
+import { REPOSITORY_INDEX_TYPE } from '../../mappings';
 import RepositoryUtils from '../../common/repositoryUtils';
 import { Repository } from '../../model';
 import { Log } from '../log';
@@ -27,7 +27,7 @@ export default function(server: Hapi.Server) {
       const repo: Repository = RepositoryUtils.buildRepository(repoUrl);
       try {
         // Check if the repository already exists
-        await objectClient.get(Constants.REPOSITORY_INDEX_TYPE, repo.uri);
+        await objectClient.get(REPOSITORY_INDEX_TYPE, repo.uri);
         const msg = `Repository ${repoUrl} already exists. Skip clone.`;
         log.info(msg);
         reply(msg).code(304); // Not Modified
@@ -39,7 +39,7 @@ export default function(server: Hapi.Server) {
           const repoService = new RepositoryService(dataPath, log);
           repoService.clone(repo);
           // Persist to elasticsearch
-          const res = await objectClient.create(Constants.REPOSITORY_INDEX_TYPE, repo, {
+          const res = await objectClient.create(REPOSITORY_INDEX_TYPE, repo, {
             id: repo.uri,
           });
           reply(res);
@@ -65,7 +65,7 @@ export default function(server: Hapi.Server) {
       try {
         // Delete the repository from ES.
         // If object does not exist in ES, an error will be thrown.
-        await objectClient.delete(Constants.REPOSITORY_INDEX_TYPE, repoUri);
+        await objectClient.delete(REPOSITORY_INDEX_TYPE, repoUri);
 
         // Delete the repository data
         const repoService = new RepositoryService(dataPath, log);
@@ -89,7 +89,7 @@ export default function(server: Hapi.Server) {
       const log = new Log(req.server);
 
       try {
-        const response = await objectClient.get(Constants.REPOSITORY_INDEX_TYPE, repoUri);
+        const response = await objectClient.get(REPOSITORY_INDEX_TYPE, repoUri);
         const repo: Repository = response.attributes;
         reply(repo);
       } catch (error) {
@@ -110,7 +110,7 @@ export default function(server: Hapi.Server) {
 
       try {
         const response = await objectClient.find({
-          type: Constants.REPOSITORY_INDEX_TYPE,
+          type: REPOSITORY_INDEX_TYPE,
           perPage: 10000,
         });
         const objects: any[] = response.saved_objects;
