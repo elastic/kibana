@@ -81,6 +81,10 @@ describe('Saved Object', function () {
     return savedObject.init();
   }
 
+  const mock409FetchError = {
+    res: { status: 409 }
+  };
+
   beforeEach(ngMock.module(
     'kibana',
     StubIndexPatternsApiClientModule,
@@ -104,7 +108,7 @@ describe('Saved Object', function () {
     describe('with confirmOverwrite', function () {
       function stubConfirmOverwrite() {
         window.confirm = sinon.stub().returns(true);
-        sinon.stub(esDataStub, 'create').returns(BluebirdPromise.reject({ status: 409 }));
+        sinon.stub(esDataStub, 'create').returns(BluebirdPromise.reject(mock409FetchError));
       }
 
       describe('when true', function () {
@@ -112,7 +116,7 @@ describe('Saved Object', function () {
           stubESResponse(getMockedDocResponse('myId'));
           return createInitializedSavedObject({ type: 'dashboard', id: 'myId' }).then(savedObject => {
             const createStub = sinon.stub(savedObjectsClientStub, 'create');
-            createStub.onFirstCall().returns(BluebirdPromise.reject({ statusCode: 409 }));
+            createStub.onFirstCall().returns(BluebirdPromise.reject(mock409FetchError));
             createStub.onSecondCall().returns(BluebirdPromise.resolve({ id: 'myId' }));
 
             stubConfirmOverwrite();
@@ -135,7 +139,7 @@ describe('Saved Object', function () {
           return createInitializedSavedObject({ type: 'dashboard', id: 'HI' }).then(savedObject => {
             window.confirm = sinon.stub().returns(false);
 
-            sinon.stub(savedObjectsClientStub, 'create').returns(BluebirdPromise.reject({ statusCode: 409 }));
+            sinon.stub(savedObjectsClientStub, 'create').returns(BluebirdPromise.reject(mock409FetchError));
 
             savedObject.lastSavedTitle = 'original title';
             savedObject.title = 'new title';
@@ -154,7 +158,7 @@ describe('Saved Object', function () {
           return createInitializedSavedObject({ type: 'dashboard', id: 'myId' }).then(savedObject => {
             stubConfirmOverwrite();
 
-            sinon.stub(savedObjectsClientStub, 'create').returns(BluebirdPromise.reject({ statusCode: 409 }));
+            sinon.stub(savedObjectsClientStub, 'create').returns(BluebirdPromise.reject(mock409FetchError));
 
             return savedObject.save({ confirmOverwrite: true })
               .then(() => {

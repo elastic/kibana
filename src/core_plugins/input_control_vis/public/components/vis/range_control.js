@@ -27,20 +27,25 @@ import {
   EuiFormRow,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiRange,
 } from '@elastic/eui';
 
-const toState = (props) => {
+const toState = ({ control }) => {
+  const sliderValue = control.hasValue() ?
+    control.value :
+    // InputRange component does not have an "empty state"
+    // Faking an empty state by setting the slider value range to length of zero anchored at the range minimum
+    {
+      min: control.min,
+      max: control.min
+    };
   const state = {
-    sliderValue: props.control.value,
-    minValue: '',
-    maxValue: '',
+    sliderValue,
+    minValue: control.hasValue() ? control.value.min : '',
+    maxValue: control.hasValue() ? control.value.max : '',
     isRangeValid: true,
     errorMessage: '',
   };
-  if (props.control.hasValue()) {
-    state.minValue = props.control.value.min;
-    state.maxValue = props.control.value.max;
-  }
   return state;
 };
 
@@ -118,6 +123,14 @@ export class RangeControl extends Component {
   };
 
   renderControl() {
+    if (!this.props.control.isEnabled()) {
+      return (
+        <EuiRange
+          disabled
+        />
+      );
+    }
+
     return (
       <EuiFormRow
         isInvalid={!this.state.isRangeValid}
@@ -128,7 +141,6 @@ export class RangeControl extends Component {
           <EuiFlexItem grow={false}>
             <input
               id={`${this.props.control.id}_min`}
-              disabled={!this.props.control.isEnabled()}
               name="min"
               type="number"
               data-test-subj="rangeControlMinInputValue"
@@ -141,7 +153,6 @@ export class RangeControl extends Component {
           </EuiFlexItem>
           <EuiFlexItem className="inputRangeContainer">
             <InputRange
-              disabled={!this.props.control.isEnabled()}
               maxValue={this.props.control.max}
               minValue={this.props.control.min}
               step={this.props.control.options.step}
@@ -156,7 +167,6 @@ export class RangeControl extends Component {
           <EuiFlexItem grow={false}>
             <input
               id={`${this.props.control.id}_max`}
-              disabled={!this.props.control.isEnabled()}
               name="max"
               type="number"
               className="euiFieldNumber"

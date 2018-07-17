@@ -29,7 +29,7 @@ const TabifyResponseHandlerProvider = function (Private) {
     handler: function (vis, response) {
       return new Promise((resolve) => {
 
-        const tableGroup = aggResponse.tabify(vis.getAggConfig().getResponseAggs(), response, {
+        const tableGroup = aggResponse.tabify(vis.getAggConfig(), response, {
           canSplit: true,
           asAggConfigResults: _.get(vis, 'type.responseHandlerConfig.asAggConfigResults', false),
           isHierarchical: vis.isHierarchical()
