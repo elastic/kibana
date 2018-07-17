@@ -12,6 +12,7 @@ import chrome from 'ui/chrome';
 import { EuiCallOut } from '@elastic/eui';
 
 let licenseHasExpired = true;
+let expiredLicenseBannerId;
 
 export function checkLicense(Private, kbnBaseUrl) {
   const xpackInfo = Private(XPackInfoProvider);
@@ -35,8 +36,6 @@ export function checkLicense(Private, kbnBaseUrl) {
   // Therefore we need to keep the app enabled but show an info banner to the user.
   if(licenseHasExpired) {
     const message = features.message;
-    let expiredLicenseBannerId;
-
     if (expiredLicenseBannerId === undefined) {
       // Only show the banner once with no way to dismiss it
       expiredLicenseBannerId = banners.add({
