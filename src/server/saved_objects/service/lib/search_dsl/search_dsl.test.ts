@@ -18,8 +18,8 @@
  */
 
 import sinon from 'sinon';
-import { getSearchDsl } from './search_dsl';
 import * as queryParamsNS from './query_params';
+import { getSearchDsl } from './search_dsl';
 import * as sortParamsNS from './sorting_params';
 
 describe('getSearchDsl', () => {
@@ -29,18 +29,24 @@ describe('getSearchDsl', () => {
   describe('validation', () => {
     it('throws when sortField is passed without type', () => {
       expect(() => {
-        getSearchDsl({}, {
-          type: undefined,
-          sortField: 'title'
-        });
+        getSearchDsl(
+          {},
+          {
+            type: undefined,
+            sortField: 'title',
+          }
+        );
       }).toThrowError(/sort without .+ type/);
     });
     it('throws when sortOrder without sortField', () => {
       expect(() => {
-        getSearchDsl({}, {
-          type: 'foo',
-          sortOrder: 'desc'
-        });
+        getSearchDsl(
+          {},
+          {
+            type: 'foo',
+            sortOrder: 'desc',
+          }
+        );
       }).toThrowError(/sortOrder requires a sortField/);
     });
   });
@@ -57,13 +63,7 @@ describe('getSearchDsl', () => {
 
       getSearchDsl(mappings, opts);
       sinon.assert.calledOnce(spy);
-      sinon.assert.calledWithExactly(
-        spy,
-        mappings,
-        opts.type,
-        opts.search,
-        opts.searchFields,
-      );
+      sinon.assert.calledWithExactly(spy, mappings, opts.type, opts.search, opts.searchFields);
     });
 
     it('passes (mappings, type, sortField, sortOrder) to getSortingParams', () => {
@@ -72,18 +72,12 @@ describe('getSearchDsl', () => {
       const opts = {
         type: 'foo',
         sortField: 'bar',
-        sortOrder: 'baz'
+        sortOrder: 'baz',
       };
 
       getSearchDsl(mappings, opts);
       sinon.assert.calledOnce(spy);
-      sinon.assert.calledWithExactly(
-        spy,
-        mappings,
-        opts.type,
-        opts.sortField,
-        opts.sortOrder,
-      );
+      sinon.assert.calledWithExactly(spy, mappings, opts.type, opts.sortField, opts.sortOrder);
     });
 
     it('returns combination of getQueryParams and getSortingParams', () => {

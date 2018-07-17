@@ -19,17 +19,21 @@
 
 import Boom from 'boom';
 
+import { EsMappings } from '../../../../mappings';
+
 import { getQueryParams } from './query_params';
 import { getSortingParams } from './sorting_params';
 
-export function getSearchDsl(mappings, options = {}) {
-  const {
-    type,
-    search,
-    searchFields,
-    sortField,
-    sortOrder
-  } = options;
+interface Options {
+  type?: string | string[];
+  search?: string;
+  searchFields?: string[];
+  sortField?: string;
+  sortOrder?: string;
+}
+
+export function getSearchDsl(mappings: EsMappings, options: Options = {}) {
+  const { type, search, searchFields, sortField, sortOrder } = options;
 
   if (!type && sortField) {
     throw Boom.notAcceptable('Cannot sort without filtering by type');

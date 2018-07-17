@@ -19,9 +19,14 @@
 
 import Boom from 'boom';
 
-import { getProperty } from '../../../../mappings';
+import { EsMappings, getProperty } from '../../../../mappings';
 
-export function getSortingParams(mappings, type, sortField, sortOrder) {
+export function getSortingParams(
+  mappings: EsMappings,
+  type?: string | string[],
+  sortField?: string,
+  sortOrder?: string
+) {
   if (!sortField) {
     return {};
   }
@@ -29,19 +34,22 @@ export function getSortingParams(mappings, type, sortField, sortOrder) {
   if (Array.isArray(type)) {
     const rootField = getProperty(mappings, sortField);
     if (!rootField) {
-      throw Boom.badRequest(`Unable to sort multiple types by field ${sortField}, not a root property`);
+      throw Boom.badRequest(
+        `Unable to sort multiple types by field ${sortField}, not a root property`
+      );
     }
 
     return {
-      sort: [{
-        [sortField]: {
-          order: sortOrder,
-          unmapped_type: rootField.type
-        }
-      }]
+      sort: [
+        {
+          [sortField]: {
+            order: sortOrder,
+            unmapped_type: rootField.type,
+          },
+        },
+      ],
     };
   }
-
 
   const key = `${type}.${sortField}`;
   const field = getProperty(mappings, key);
@@ -50,11 +58,13 @@ export function getSortingParams(mappings, type, sortField, sortOrder) {
   }
 
   return {
-    sort: [{
-      [key]: {
-        order: sortOrder,
-        unmapped_type: field.type
-      }
-    }]
+    sort: [
+      {
+        [key]: {
+          order: sortOrder,
+          unmapped_type: field.type,
+        },
+      },
+    ],
   };
 }
