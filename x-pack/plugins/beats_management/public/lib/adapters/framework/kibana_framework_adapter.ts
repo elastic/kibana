@@ -7,16 +7,13 @@
 import { IModule, IScope } from 'angular';
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
+
 import {
   BufferedKibanaServiceCall,
-  Chrome,
   FrameworkAdapter,
   KibanaAdapterServiceRefs,
   KibanaUIConfig,
-  UiKibanaAdapterScope,
 } from '../../lib';
-
-const ROOT_ELEMENT_ID = 'react-beats-cm-root';
 
 export class KibanaFrameworkAdapter implements FrameworkAdapter {
   public appState: object;
@@ -26,11 +23,13 @@ export class KibanaFrameworkAdapter implements FrameworkAdapter {
   private adapterService: KibanaAdapterServiceProvider;
   private rootComponent: React.ReactElement<any> | null = null;
   private uiModule: IModule;
+  private routes: any;
 
-  constructor(uiModule: IModule, management: any) {
+  constructor(uiModule: IModule, management: any, routes: any) {
     this.adapterService = new KibanaAdapterServiceProvider();
     this.management = management;
     this.uiModule = uiModule;
+    this.routes = routes;
     this.appState = {};
   }
 
@@ -41,7 +40,7 @@ export class KibanaFrameworkAdapter implements FrameworkAdapter {
   };
 
   public render = (component: React.ReactElement<any>) => {
-    this.adapterService.callOrBuffer(() => (this.rootComponent = component));
+    this.rootComponent = component;
   };
 
   public registerManagementSection(pluginId: string, displayName: string, basePath: string) {
@@ -58,73 +57,51 @@ export class KibanaFrameworkAdapter implements FrameworkAdapter {
       visible: true,
       display: displayName,
       order: 30,
-      url: `#/${basePath}`,
+      url: `#${basePath}`,
     });
 
     this.register(this.uiModule);
   }
 
+  private manageAngularLifecycle($scope: any, $route: any, elem: any) {
+    const lastRoute = $route.current;
+    const deregister = $scope.$on('$locationChangeSuccess', () => {
+      const currentRoute = $route.current;
+      // if templates are the same we are on the same route
+      if (lastRoute.$$route.template === currentRoute.$$route.template) {
+        // this prevents angular from destroying scope
+        $route.current = lastRoute;
+      }
+    });
+    $scope.$on('$destroy', () => {
+      if (deregister) {
+        deregister();
+      }
+      // manually unmount component when scope is destroyed
+      if (elem) {
+        ReactDOM.unmountComponentAtNode(elem);
+      }
+    });
+  }
+
   private register = (adapterModule: IModule) => {
-    adapterModule.provider('kibanaAdapter', this.adapterService);
-
-    adapterModule.directive('beatsCMKibanaAdapter', () => ({
-      controller: ($scope: UiKibanaAdapterScope, $element: JQLite) => ({
-        $onDestroy: () => {
-          const targetRootElement = $element[0].querySelector(`#${ROOT_ELEMENT_ID}`);
-
-          if (targetRootElement) {
-            ReactDOM.unmountComponentAtNode(targetRootElement);
-          }
-        },
-        $onInit: () => {
-          $scope.topNavMenu = [];
-        },
-        $postLink: () => {
-          $scope.$watchGroup([], ([targetElement]) => {
-            if (!targetElement) {
-              return;
-            }
-
-            ReactDOM.unmountComponentAtNode(targetElement);
+    const adapter = this;
+    this.routes.when(`/management/beats_management/?`, {
+      template: '<beats-cm><div id="beatsReactRoot" style="flex-grow: 1;"></div></beats-cm>',
+      controllerAs: 'beatsManagement',
+      // tslint:disable-next-line: max-classes-per-file
+      controller: class BeatsManagementController {
+        constructor($scope: any, $route: any) {
+          $scope.$$postDigest(() => {
+            const elem = document.getElementById('beatsReactRoot');
+            ReactDOM.render(adapter.rootComponent as React.ReactElement<any>, elem);
+            adapter.manageAngularLifecycle($scope, $route, elem);
           });
-          $scope.$watchGroup(
-            [() => this.rootComponent, () => $element[0].querySelector(`#${ROOT_ELEMENT_ID}`)],
-            ([rootComponent, targetElement]) => {
-              if (!targetElement) {
-                return;
-              }
-
-              if (rootComponent) {
-                ReactDOM.render(rootComponent, targetElement);
-              } else {
-                ReactDOM.unmountComponentAtNode(targetElement);
-              }
-            }
-          );
-        },
-      }),
-      scope: true,
-      template: `
-        <div
-          id="${ROOT_ELEMENT_ID}"
-          style="display: flex; flex-direction: column; align-items: stretch; flex: 1 0 0; overflow: hidden;"
-        ></div>
-      `,
-    }));
-
-    adapterModule.run((
-      chrome: Chrome,
-      config: KibanaUIConfig,
-      kbnVersion: string,
-      Private: <Provider>(provider: Provider) => Provider,
-      // @ts-ignore: inject kibanaAdapter to force eager instatiation
-      kibanaAdapter: any
-    ) => {
-      this.kbnVersion = kbnVersion;
-
-      chrome.setRootTemplate(
-        '<beats-cm-ui-kibana-adapter style="display: flex; align-items: stretch; flex: 1 0 0;"></beats-cm-ui-kibana-adapter>'
-      );
+          $scope.$onInit = () => {
+            $scope.topNavMenu = [];
+          };
+        }
+      },
     });
   };
 }

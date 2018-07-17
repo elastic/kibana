@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { createHashHistory } from 'history';
 import React from 'react';
 import { BASE_PATH } from '../common/constants';
 import { compose } from './lib/compose/kibana';
@@ -16,9 +15,8 @@ import { PageRouter } from './routes';
 import '@elastic/eui/dist/eui_theme_light.css';
 
 function startApp(libs: any) {
-  const history = createHashHistory();
   libs.framework.registerManagementSection('beats', 'Beats Management', BASE_PATH);
-  libs.framework.render(<PageRouter history={history} />);
+  libs.framework.render(<PageRouter />);
 }
 
 startApp(compose());
