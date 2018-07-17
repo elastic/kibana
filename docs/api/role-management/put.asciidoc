@@ -1,0 +1,32 @@
+[[role-management-api-put]]
+=== Create or Update Roles
+
+To create or update a role in Elasticsearch's `native` realm, issue a PUT request to the 
+`/api/security/role/<rolename>` endpoint:
+
+[source,js]
+--------------------------------------------------
+PUT /api/security/role/my_kibana_role
+{
+  "metadata" : {
+    "version" : 1
+  },
+  "elasticsearch": {
+    "cluster" : [ "all" ],
+    "indices" : [ {
+      "names" : [ "index1", "index2" ],
+      "privileges" : [ "all" ],
+      "field_security" : {
+        "grant" : [ "title", "body" ]
+      },
+      "query" : "{\"match\": {\"title\": \"foo\"}}"
+    } ],
+  },
+  "kibana": [ {
+      "privileges": [ "all" ]
+  } ],
+}
+--------------------------------------------------
+// KIBANA
+
+A successful call returns a response code of `204` and no response body.
