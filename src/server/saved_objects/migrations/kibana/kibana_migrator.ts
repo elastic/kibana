@@ -135,7 +135,6 @@ export class KibanaMigrator {
   public migrateIndex() {
     const { server } = this.kbnServer;
     const config = server.config();
-
     const migrator = new IndexMigrator({
       batchSize: config.get('migrations.batchSize'),
       callCluster: createCallCluster(server),
@@ -167,9 +166,7 @@ function createCallCluster(server: Server): any {
 
 async function waitForElasticsearch(server: Server) {
   if (!server.plugins.elasticsearch) {
-    throw new Error(
-      `Saved objects cannot initialize without the elasticsearch plugin.`
-    );
+    throw new Error(`Saved objects cannot initialize without the elasticsearch plugin.`);
   }
   await server.plugins.elasticsearch.waitUntilReady();
   return server.plugins.elasticsearch.getCluster('admin').callWithInternalUser;
@@ -201,10 +198,7 @@ function sanitizePlugins(plugins: KibanaPlugin[]): SanitizedPlugin[] {
  * two plugins attempt to define the same property (e.g. the same mapping or
  * same migration type).
  */
-function validateAndMerge(
-  plugins: SanitizedPlugin[],
-  property: keyof SanitizedPlugin
-) {
+function validateAndMerge(plugins: SanitizedPlugin[], property: keyof SanitizedPlugin) {
   return plugins.filter(p => !!p[property]).reduce((acc, plugin) => {
     assertNoDuplicateProperties(acc, plugin, property);
 
@@ -220,10 +214,6 @@ function assertNoDuplicateProperties(
   const source = plugin[property] as any;
   const duplicate = Object.keys(dest).find(k => !!source[k]);
   if (duplicate) {
-    throw new Error(
-      `Plugin ${
-        plugin.id
-      } is attempting to redefine ${property} "${duplicate}".`
-    );
+    throw new Error(`Plugin ${plugin.id} is attempting to redefine ${property} "${duplicate}".`);
   }
 }

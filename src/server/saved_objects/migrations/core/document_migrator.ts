@@ -43,6 +43,14 @@
  * (e.g. dash -> dashboard), the document will be passed through *all* of the new property's
  * transforms (if there are any). You can't convert a document from one type to a specific version
  * of another type; only from one type to version 0 of another.
+ *
+ * One last gotcha is that any docs which have no migrationVersion are assumed to be up-to-date.
+ * This is because Kibana UI and other clients really can't be expected build the migrationVersion
+ * in a reliable way. Instead, callers of our APIs are expected to send us up-to-date documents,
+ * and those documents are simply given a stamp of approval by this transformer. If the client(s)
+ * send us documents with migrationVersion specified, we will migrate them as appropriate. This means
+ * for data import scenarios, any documetns being imported should be explicitly given an empty
+ * migrationVersion property {} if no such property exists.
 */
 
 import _ from 'lodash';
@@ -157,6 +165,14 @@ function buildDocumentTransform({
   return function transformDoc(doc: SavedObjectDoc): SavedObjectDoc {
     assertCanTransform(doc, kibanaVersion);
 
+    // If there's no migrationVersion, we assume it is up to date.
+    // This is to allow API clients to just pass us documents w/ no migrationVersion
+    // when creating / updating documents. Data import and index migration logic
+    // will ensure that this property exists, so those docs will be migrated.
+    if (!doc.migrationVersion) {
+      return markAsUpToDate(doc, migrations);
+    }
+
     while (true) {
       const prop = nextUnmigratedProp(doc, migrations);
       if (!prop) {
@@ -164,6 +180,24 @@ function buildDocumentTransform({
       }
       doc = migrateProp(doc, prop, migrations);
     }
+  };
+}
+
+/**
+ * Sets the doc's migrationVersion to be the most recent version
+ */
+function markAsUpToDate(doc: SavedObjectDoc, migrations: ActiveMigrations) {
+  const migrationVersion = Object.keys(doc)
+    .concat(doc.type)
+    .filter(prop => !!migrations[prop])
+    .reduce((acc, prop) => {
+      const { latestVersion } = migrations[prop];
+      return _.set(acc, prop, latestVersion);
+    }, {});
+
+  return {
+    ...doc,
+    migrationVersion,
   };
 }
 

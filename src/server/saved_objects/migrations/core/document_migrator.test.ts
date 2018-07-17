@@ -36,6 +36,7 @@ describe('DocumentMigrator', () => {
       id: 'me',
       type: 'user',
       attributes: { name: 'Christopher' },
+      migrationVersion: {},
     });
     expect(actual).toEqual({
       id: 'me',
@@ -60,6 +61,7 @@ describe('DocumentMigrator', () => {
       type: 'user',
       attributes: { name: 'Tyler' },
       acl: 'anyone',
+      migrationVersion: {},
     });
     expect(actual).toEqual({
       id: 'me',
@@ -84,11 +86,41 @@ describe('DocumentMigrator', () => {
       id: 'me',
       type: 'user',
       attributes: { name: 'Tyler' },
+      migrationVersion: {},
     });
     expect(actual).toEqual({
       id: 'me',
       type: 'user',
       attributes: { name: 'Tyler' },
+      migrationVersion: {},
+    });
+  });
+
+  it('assumes documents w/ undefined migrationVersion are up to date', () => {
+    const kibanaVersion = '8.9.1';
+    const migrator = new DocumentMigrator({
+      kibanaVersion,
+      migrations: {
+        user: { '1.0.0': setAttr('aaa', 'A') },
+        bbb: { '2.3.4': setAttr('bbb', 'B') },
+        ccc: { '1.0.0': setAttr('ccc', 'C') },
+      },
+    });
+    const actual = migrator.migrate({
+      id: 'me',
+      type: 'user',
+      attributes: { name: 'Tyler' },
+      bbb: 'Shazm',
+    });
+    expect(actual).toEqual({
+      id: 'me',
+      type: 'user',
+      attributes: { name: 'Tyler' },
+      bbb: 'Shazm',
+      migrationVersion: {
+        user: '1.0.0',
+        bbb: '2.3.4',
+      },
     });
   });
 
@@ -207,6 +239,7 @@ describe('DocumentMigrator', () => {
       type: 'foo',
       attributes: { name: 'Callie' },
       dawg: 'Yo',
+      migrationVersion: {},
     });
     expect(actual).toEqual({
       id: 'smelly',
@@ -223,10 +256,7 @@ describe('DocumentMigrator', () => {
       kibanaVersion,
       migrations: {
         cat: {
-          '1.0.0': setAttr(
-            'attributes.name',
-            (name: string) => `Kitty ${name}`
-          ),
+          '1.0.0': setAttr('attributes.name', (name: string) => `Kitty ${name}`),
         },
         dog: {
           '2.2.4': setAttr('type', 'cat'),
@@ -237,6 +267,7 @@ describe('DocumentMigrator', () => {
       id: 'smelly',
       type: 'dog',
       attributes: { name: 'Callie' },
+      migrationVersion: {},
     });
     expect(actual).toEqual({
       id: 'smelly',
@@ -263,6 +294,7 @@ describe('DocumentMigrator', () => {
         id: 'smelly',
         type: 'dog',
         attributes: {},
+        migrationVersion: {},
       });
       expect('Did not throw').toEqual('But it should have!');
     } catch (error) {
@@ -305,9 +337,5 @@ function renameAttr(path: string, newPath: string) {
 
 function setAttr(path: string, value: any) {
   return (doc: SavedObjectDoc) =>
-    _.set(
-      doc,
-      path,
-      _.isFunction(value) ? value(_.get(doc, path)) : value
-    ) as SavedObjectDoc;
+    _.set(doc, path, _.isFunction(value) ? value(_.get(doc, path)) : value) as SavedObjectDoc;
 }

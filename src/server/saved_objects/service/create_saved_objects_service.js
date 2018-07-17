@@ -20,10 +20,11 @@
 import { SavedObjectsRepository, ScopedSavedObjectsClientProvider, SavedObjectsRepositoryProvider } from './lib';
 import { SavedObjectsClient } from './saved_objects_client';
 
-export function createSavedObjectsService(server) {
+export function createSavedObjectsService(server, migrator) {
   const repositoryProvider = new SavedObjectsRepositoryProvider({
     index: server.config().get('kibana.index'),
     mappings: server.getKibanaIndexMappingsDsl(),
+    migrator,
   });
 
   const scopedClientProvider = new ScopedSavedObjectsClientProvider({

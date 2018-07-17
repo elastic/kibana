@@ -35,12 +35,14 @@ export class SavedObjectsRepository {
     const {
       index,
       mappings,
+      migrator,
       callCluster,
       onBeforeWrite = () => {},
     } = options;
 
     this._index = index;
     this._mappings = mappings;
+    this._migrator = migrator;
     this._type = getRootType(this._mappings);
     this._onBeforeWrite = onBeforeWrite;
     this._unwrappedCallCluster = callCluster;
@@ -54,36 +56,47 @@ export class SavedObjectsRepository {
    * @param {object} [options={}]
    * @property {string} [options.id] - force id on creation, not recommended
    * @property {boolean} [options.overwrite=false]
+   * @property {object} [options.migrationVersion=undefined]
    * @returns {promise} - { id, type, version, attributes }
   */
   async create(type, attributes = {}, options = {}) {
     const {
       id,
-      overwrite = false
+      migrationVersion,
+      overwrite = false,
     } = options;
 
     const method = id && !overwrite ? 'create' : 'index';
     const time = this._getCurrentTime();
 
     try {
+      const migrated = this._migrator.migrateDocument({
+        id,
+        type,
+        attributes,
+        migrationVersion,
+      });
+
       const response = await this._writeToCluster(method, {
-        id: this._generateEsId(type, id),
+        id: this._generateEsId(migrated.type, migrated.id),
         type: this._type,
         index: this._index,
         refresh: 'wait_for',
         body: {
-          type,
+          type: migrated.type,
           updated_at: time,
-          [type]: attributes
+          [migrated.type]: migrated.attributes,
+          migrationVersion: migrated.migrationVersion,
         },
       });
 
       return {
-        id: trimIdPrefix(response._id, type),
-        type,
+        id: trimIdPrefix(response._id, migrated.type),
+        type: migrated.type,
         updated_at: time,
         version: response._version,
-        attributes
+        attributes: migrated.attributes,
+        migrationVersion: migrated.migrationVersion,
       };
     } catch (error) {
       if (errors.isNotFoundError(error)) {
@@ -98,7 +111,7 @@ export class SavedObjectsRepository {
   /**
    * Creates multiple documents at once
    *
-   * @param {array} objects - [{ type, id, attributes }]
+   * @param {array} objects - [{ type, id, attributes, migrationVersion }]
    * @param {object} [options={}]
    * @property {boolean} [options.overwrite=false] - overwrites existing documents
    * @returns {promise} -  {saved_objects: [[{ id, type, version, attributes, error: { message } }]}
@@ -110,18 +123,25 @@ export class SavedObjectsRepository {
     const time = this._getCurrentTime();
     const objectToBulkRequest = (object) => {
       const method = object.id && !overwrite ? 'create' : 'index';
+      const migrated = this._migrator.migrateDocument({
+        id: object.id,
+        type: object.type,
+        attributes: object.attributes,
+        migrationVersion: object.migrationVersion,
+      });
 
       return [
         {
           [method]: {
-            _id: this._generateEsId(object.type, object.id),
+            _id: this._generateEsId(migrated.type, migrated.id),
             _type: this._type,
           }
         },
         {
-          type: object.type,
+          type: migrated.type,
           updated_at: time,
-          [object.type]: object.attributes
+          [migrated.type]: migrated.attributes,
+          migrationVersion: migrated.migrationVersion,
         }
       ];
     };
@@ -286,6 +306,7 @@ export class SavedObjectsRepository {
           ...updatedAt && { updated_at: updatedAt },
           version: hit._version,
           attributes: hit._source[type],
+          migrationVersion: hit._source.migrationVersion,
         };
       }),
     };
@@ -336,7 +357,8 @@ export class SavedObjectsRepository {
           type,
           ...time && { updated_at: time },
           version: doc._version,
-          attributes: doc._source[type]
+          attributes: doc._source[type],
+          migrationVersion: doc._source.migrationVersion,
         };
       })
     };
@@ -371,7 +393,8 @@ export class SavedObjectsRepository {
       type,
       ...updatedAt && { updated_at: updatedAt },
       version: response._version,
-      attributes: response._source[type]
+      attributes: response._source[type],
+      migrationVersion: response._source.migrationVersion,
     };
   }
 

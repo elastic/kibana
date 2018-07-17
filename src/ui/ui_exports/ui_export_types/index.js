@@ -24,6 +24,7 @@ export {
 
 export {
   mappings,
+  migrations,
 } from './saved_object_mappings';
 
 export {
