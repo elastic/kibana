@@ -41,6 +41,23 @@ describe('i18nDirective', () => {
 
   it('inserts correct translation html content', () => {
     const id = 'id';
+    const defaultMessage = 'default-message';
+
+    const element = angular.element(
+      `<div
+        i18n-id="${id}"
+        i18n-default-message="${defaultMessage}"
+      />`
+    );
+
+    compile(element)(scope);
+    scope.$digest();
+
+    expect(element.html()).toEqual(defaultMessage);
+  });
+
+  it('inserts correct translation html content with values', () => {
+    const id = 'id';
     const defaultMessage = 'default-message {word}';
     const compiledContent = 'default-message word';
 
