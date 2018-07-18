@@ -17,9 +17,6 @@
  * under the License.
  */
 
-import fetchMock from 'fetch-mock';
-import { kfetch } from './kfetch';
-
 jest.mock('../chrome', () => ({
   addBasePath: (path: string) => `myBase/${path}`,
 }));
@@ -29,6 +26,9 @@ jest.mock('../metadata', () => ({
     version: 'my-version',
   },
 }));
+
+import fetchMock from 'fetch-mock';
+import { kfetch } from './kfetch';
 
 describe('kfetch', () => {
   const matcherName: any = /my\/path/;

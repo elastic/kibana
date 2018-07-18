@@ -17,8 +17,6 @@
  * under the License.
  */
 
-import { kfetchAbortable } from './kfetch_abortable';
-
 jest.mock('../chrome', () => ({
   addBasePath: (path: string) => `myBase/${path}`,
 }));
@@ -28,6 +26,8 @@ jest.mock('../metadata', () => ({
     version: 'my-version',
   },
 }));
+
+import { kfetchAbortable } from './kfetch_abortable';
 
 describe('kfetchAbortable', () => {
   it('should return an object with a fetching promise and an abort callback', () => {
