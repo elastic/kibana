@@ -29,15 +29,15 @@ export function loadFullJob(jobId) {
 }
 
 export function isStartable(jobs) {
-  return (jobs.find(j => j.datafeedState === DATAFEED_STATE.STOPPED) !== undefined);
+  return jobs.some(j => j.datafeedState === DATAFEED_STATE.STOPPED);
 }
 
 export function isStoppable(jobs) {
-  return (jobs.find(j => j.datafeedState === DATAFEED_STATE.STARTED) !== undefined);
+  return jobs.some(j => j.datafeedState === DATAFEED_STATE.STARTED);
 }
 
 export function isClosable(jobs) {
-  return (jobs.find(j => (j.datafeedState === DATAFEED_STATE.STOPPED) && (j.jobState !== JOB_STATE.CLOSED)) !== undefined);
+  return jobs.some(j => (j.datafeedState === DATAFEED_STATE.STOPPED) && (j.jobState !== JOB_STATE.CLOSED));
 }
 
 export function forceStartDatafeeds(jobs, start, end, finish = () => {}) {
