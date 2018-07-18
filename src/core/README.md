@@ -13,9 +13,9 @@ logic, expose new routes or replace old ones handled by the "legacy" Kibana curr
 
 Once config has been loaded and validated by the "legacy" Kibana it's passed to the `core` where some of its parts will 
 be additionally validated so that we can make config validation stricter with the new config validation system. Even though
-new system provided by the `core` is also based on Joi internally it is complemented with custom rules tailored to our
-needs (e.g. `byteSize`, `duration` etc.). That means that config values that are accepted by the "legacy" Kibana may be 
-rejected by the `core`.
+the new validation system provided by the `core` is also based on Joi internally it is complemented with custom rules
+tailored to our needs (e.g. `byteSize`, `duration` etc.). That means that config values that are accepted by the "legacy"
+Kibana may be rejected by the `core`.
 
 One can also define new configuration keys under `__newPlatform` if these keys are supposed to be used by the `core` only
 and should not be validated by the "legacy" Kibana, e.g.
