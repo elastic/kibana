@@ -19,11 +19,10 @@
 
 import expect from 'expect.js';
 
-export default function ({ getPageObjects, getService }) {
-  const retry = getService('retry');
+export default function ({ getPageObjects }) {
   const PageObjects = getPageObjects(['common', 'discover', 'visualize', 'header']);
 
-  describe.skip('visualize app', function () {
+  describe('visualize app', function () {
     const fromTime = '2015-09-19 06:31:44.000';
     const toTime = '2015-09-23 18:31:44.000';
 
@@ -37,11 +36,7 @@ export default function ({ getPageObjects, getService }) {
       });
 
       it('should create a visualization from a saved search', async () => {
-        retry.try(async () => {
-          // Sometimes navigation to the page fails, so we have this in a retry
-          await PageObjects.common.navigateToUrl('visualize', 'new');
-          await PageObjects.visualize.waitForVisualizationSelectPage();
-        });
+        await PageObjects.visualize.navigateToNewVisualization();
         await PageObjects.visualize.clickDataTable();
         await PageObjects.visualize.clickSavedSearch(savedSearchName);
         await PageObjects.header.setAbsoluteRange(fromTime, toTime);

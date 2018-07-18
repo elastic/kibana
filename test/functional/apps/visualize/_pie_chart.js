@@ -11,7 +11,7 @@ export default function ({ getService, getPageObjects }) {
     before(async function () {
 
       log.debug('navigateToApp visualize');
-      await PageObjects.common.navigateToUrl('visualize', 'new');
+      await PageObjects.visualize.navigateToNewVisualization();
       log.debug('clickPieChart');
       await PageObjects.visualize.clickPieChart();
       await PageObjects.visualize.clickNewSearch();
@@ -77,7 +77,7 @@ export default function ({ getService, getPageObjects }) {
     it('should show other and missing bucket', async function () {
       const expectedTableData =  [ 'win 8', 'win xp', 'win 7', 'ios', 'Missing', 'Other' ];
 
-      await PageObjects.common.navigateToUrl('visualize', 'new');
+      await PageObjects.visualize.navigateToNewVisualization();
       log.debug('clickPieChart');
       await PageObjects.visualize.clickPieChart();
       await PageObjects.visualize.clickNewSearch();
@@ -142,6 +142,7 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.visualize.toggleDisabledAgg(2);
         await PageObjects.visualize.clickGo();
         await PageObjects.header.waitUntilLoadingHasFinished();
+        await PageObjects.common.sleep(2000);
 
         const expectedTableData =  [
           '0', 'win 7', 'win xp', 'win 8', 'ios', 'osx', '40,000', 'win 8', 'ios', 'win 7', 'win xp', 'osx', '80,000',

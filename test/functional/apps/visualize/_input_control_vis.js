@@ -10,7 +10,7 @@ export default function ({ getService, getPageObjects }) {
 
   describe('input control visualization', () => {
     before(async () => {
-      await PageObjects.common.navigateToUrl('visualize', 'new');
+      await PageObjects.visualize.navigateToNewVisualization();
       await PageObjects.visualize.clickInputControlVis();
       // set time range to time with no documents - input controls do not use time filter be default
       await PageObjects.header.setAbsoluteRange('2017-01-01', '2017-01-02');
@@ -166,7 +166,7 @@ export default function ({ getService, getPageObjects }) {
     describe('nested controls', () => {
 
       before(async () => {
-        await PageObjects.common.navigateToUrl('visualize', 'new');
+        await PageObjects.visualize.navigateToNewVisualization();
         await PageObjects.visualize.clickInputControlVis();
         await PageObjects.visualize.clickVisEditorTab('controls');
 
