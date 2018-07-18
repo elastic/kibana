@@ -17,12 +17,20 @@
  * under the License.
  */
 
-export let metadata = null;
+type Freezable = { [k: string]: any } | any[];
 
-export function __newPlatformInit__(legacyMetadata) {
-  if (metadata === null) {
-    metadata = legacyMetadata;
-  } else {
-    throw new Error('ui/metadata can only be initialized once');
+type RecursiveReadOnly<T> = T extends Freezable
+  ? Readonly<{ [K in keyof T]: RecursiveReadOnly<T[K]> }>
+  : T;
+
+export function deepFreeze<T extends Freezable>(object: T) {
+  // for any properties that reference an object, makes sure that object is
+  // recursively frozen as well
+  for (const value of Object.values(object)) {
+    if (value !== null && typeof value === 'object') {
+      deepFreeze(value);
+    }
   }
+
+  return Object.freeze(object) as RecursiveReadOnly<T>;
 }

@@ -17,12 +17,17 @@
  * under the License.
  */
 
-export let metadata = null;
+import { deepFreeze } from '../deep_freeze';
 
-export function __newPlatformInit__(legacyMetadata) {
-  if (metadata === null) {
-    metadata = legacyMetadata;
-  } else {
-    throw new Error('ui/metadata can only be initialized once');
-  }
-}
+const obj = deepFreeze({
+  foo: {
+    bar: {
+      baz: 1,
+    },
+  },
+});
+
+delete obj.foo;
+obj.foo = 1;
+obj.foo.bar.baz = 2;
+obj.foo.bar.box = false;
