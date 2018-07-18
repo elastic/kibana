@@ -47,6 +47,30 @@ export function jobsProvider(callWithRequest) {
     return results;
   }
 
+  async function closeJobs(jobIds) {
+    const results = {};
+    for (const jobId of jobIds) {
+      try {
+        await callWithRequest('ml.closeJob', { jobId });
+        results[jobId] = { closed: true };
+      } catch (error) {
+        if (error.statusCode === 409) {
+          // if we receive a 409, the job might be in a failed state
+          // so try again but with a force close.
+          try {
+            await callWithRequest('ml.closeJob', { jobId, force: true });
+            results[jobId] = { closed: true };
+          } catch (error2) {
+            results[jobId] = { closed: false, error: error2 };
+          }
+        } else {
+          results[jobId] = { closed: false, error };
+        }
+      }
+    }
+    return results;
+  }
+
   async function jobsSummary(jobIds = []) {
     const fullJobsList = await createFullJobsList();
     const auditMessages = await getAuditMessagesSummary();
@@ -276,6 +300,7 @@ export function jobsProvider(callWithRequest) {
   return {
     forceDeleteJob,
     deleteJobs,
+    closeJobs,
     jobsSummary,
     createFullJobsList,
     getAllGroups,
