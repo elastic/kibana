@@ -17,7 +17,9 @@
  * under the License.
  */
 
-import { kfetch } from './kfetch';
+import { kfetch, KFetchKibanaOptions, KFetchOptions } from './kfetch';
+
+type Omit<T, K> = Pick<T, Exclude<keyof T, K>>;
 
 function createAbortable() {
   const abortController = new AbortController();
@@ -29,7 +31,10 @@ function createAbortable() {
   };
 }
 
-export function kfetchAbortable(fetchOptions, kibanaOptions) {
+export function kfetchAbortable(
+  fetchOptions?: Omit<KFetchOptions, 'signal'>,
+  kibanaOptions?: KFetchKibanaOptions
+) {
   const { signal, abort } = createAbortable();
   const fetching = kfetch({ ...fetchOptions, signal }, kibanaOptions);
 

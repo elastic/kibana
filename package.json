@@ -240,6 +240,7 @@
     "@types/classnames": "^2.2.3",
     "@types/eslint": "^4.16.2",
     "@types/execa": "^0.9.0",
+    "@types/fetch-mock": "^5.12.2",
     "@types/getopts": "^2.0.0",
     "@types/glob": "^5.0.35",
     "@types/hapi-latest": "npm:@types/hapi@17.0.12",

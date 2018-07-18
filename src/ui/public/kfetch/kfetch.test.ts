@@ -21,7 +21,7 @@ import fetchMock from 'fetch-mock';
 import { kfetch } from './kfetch';
 
 jest.mock('../chrome', () => ({
-  addBasePath: path => `myBase/${path}`,
+  addBasePath: (path: string) => `myBase/${path}`,
 }));
 
 jest.mock('../metadata', () => ({
@@ -31,14 +31,10 @@ jest.mock('../metadata', () => ({
 }));
 
 describe('kfetch', () => {
-  const matcherName = /my\/path/;
+  const matcherName: any = /my\/path/;
 
   describe('resolves', () => {
-    beforeEach(() =>
-      fetchMock.get({
-        matcher: matcherName,
-        response: new Response(JSON.stringify({ foo: 'bar' })),
-      }));
+    beforeEach(() => fetchMock.get(matcherName, new Response(JSON.stringify({ foo: 'bar' }))));
     afterEach(() => fetchMock.restore());
 
     it('should return response', async () => {
@@ -95,11 +91,8 @@ describe('kfetch', () => {
 
   describe('rejects', () => {
     beforeEach(() => {
-      fetchMock.get({
-        matcher: matcherName,
-        response: {
-          status: 404,
-        },
+      fetchMock.get(matcherName, {
+        status: 404,
       });
     });
     afterEach(() => fetchMock.restore());
@@ -107,7 +100,7 @@ describe('kfetch', () => {
     it('should throw custom error containing response object', () => {
       return kfetch({
         pathname: 'my/path',
-        query: { a: 'b' }
+        query: { a: 'b' },
       }).catch(e => {
         expect(e.message).toBe('Not Found');
         expect(e.res.status).toBe(404);

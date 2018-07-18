@@ -20,7 +20,7 @@
 import { kfetchAbortable } from './kfetch_abortable';
 
 jest.mock('../chrome', () => ({
-  addBasePath: path => `myBase/${path}`,
+  addBasePath: (path: string) => `myBase/${path}`,
 }));
 
 jest.mock('../metadata', () => ({
