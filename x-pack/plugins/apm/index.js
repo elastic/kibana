@@ -42,7 +42,7 @@ export function apm(kibana) {
           enabled: Joi.boolean().default(true)
         }).default(),
         enabled: Joi.boolean().default(true),
-        indexPattern: Joi.string().default('apm*'),
+        indexPattern: Joi.string().default('apm-*'),
         minimumBucketSize: Joi.number().default(15),
         bucketTargetCount: Joi.number().default(27)
       }).default();
