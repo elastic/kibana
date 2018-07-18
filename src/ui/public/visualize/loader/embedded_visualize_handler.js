@@ -72,7 +72,7 @@ export class EmbeddedVisualizeHandler {
     this._vis.on('update', this._handleVisUpdate);
     this._vis.on('reload', this._reloadVis);
     this._uiState.on('change', this._fetchAndRender);
-    timefilter.on('autoRefreshFetch', this._fetchAndRender);
+    timefilter.on('autoRefreshFetch', this._reloadVis);
 
     this._visualize = new VisualizeDataLoader(this._vis, Private);
     this._renderCompleteHelper = new RenderCompleteHelper(this._element);

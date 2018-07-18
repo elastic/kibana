@@ -270,7 +270,6 @@ function VisEditor(
 
     timefilter.enableAutoRefreshSelector();
     $scope.$listenAndDigestAsync(timefilter, 'timeUpdate', updateTimeRange);
-    $scope.$listenAndDigestAsync(timefilter, 'autoRefreshFetch', updateTimeRange);
 
     // update the searchSource when filters update
     $scope.$listen(queryFilter, 'update', function () {
