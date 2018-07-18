@@ -18,8 +18,8 @@ export interface InfraField {
 export interface Query {
   map?: InfraResponse | null;
   fields?: (InfraField | null)[] | null;
-  source: InfraSource;
-  allSources: InfraSource[];
+  source: InfraSource /** Get an infrastructure data source by id */;
+  allSources: InfraSource[] /** Get a list of all infrastructure data sources */;
 }
 
 export interface InfraResponse {
@@ -78,33 +78,33 @@ export interface InfraService {
 export interface InfraServiceMetrics {
   count?: number | null;
 }
-
+/** A source of infrastructure data */
 export interface InfraSource {
-  id: string;
-  configuration: InfraSourceConfiguration;
+  id: string /** The id of the source */;
+  configuration: InfraSourceConfiguration /** The raw configuration of the source */;
 }
-
+/** A set of configuration options for an infrastructure data source */
 export interface InfraSourceConfiguration {
-  metricAlias: string;
-  logAlias: string;
-  fields: InfraSourceFields;
+  metricAlias: string /** The alias to read metric data from */;
+  logAlias: string /** The alias to read log data from */;
+  fields: InfraSourceFields /** The field mapping to use for this source */;
 }
-
+/** A mapping of semantic fields to their document counterparts */
 export interface InfraSourceFields {
-  container: string;
-  hostname: string;
-  message: string[];
-  pod: string;
-  tiebreaker: string;
-  timestamp: string;
+  container: string /** The field to identify a container by */;
+  hostname: string /** The fields to identify a host by */;
+  message: string[] /** The fields that may contain the log event message. The first field found win. */;
+  pod: string /** The field to identify a pod by */;
+  tiebreaker: string /** The field to use as a tiebreaker for log events that have identical timestamps */;
+  timestamp: string /** The field to use as a timestamp for metrics and logs */;
 }
 
 export namespace QueryResolvers {
   export interface Resolvers {
     map?: MapResolver;
     fields?: FieldsResolver;
-    source?: SourceResolver;
-    allSources?: AllSourcesResolver;
+    source?: SourceResolver /** Get an infrastructure data source by id */;
+    allSources?: AllSourcesResolver /** Get a list of all infrastructure data sources */;
   }
 
   export type MapResolver = Resolver<InfraResponse | null, MapArgs>;
@@ -121,7 +121,7 @@ export namespace QueryResolvers {
 
   export type SourceResolver = Resolver<InfraSource, SourceArgs>;
   export interface SourceArgs {
-    id: string;
+    id: string /** The id of the source */;
   }
 
   export type AllSourcesResolver = Resolver<InfraSource[]>;
@@ -252,37 +252,37 @@ export namespace InfraServiceMetricsResolvers {
 
   export type CountResolver = Resolver<number | null>;
 }
-
+/** A source of infrastructure data */
 export namespace InfraSourceResolvers {
   export interface Resolvers {
-    id?: IdResolver;
-    configuration?: ConfigurationResolver;
+    id?: IdResolver /** The id of the source */;
+    configuration?: ConfigurationResolver /** The raw configuration of the source */;
   }
 
   export type IdResolver = Resolver<string>;
   export type ConfigurationResolver = Resolver<InfraSourceConfiguration>;
 }
-
+/** A set of configuration options for an infrastructure data source */
 export namespace InfraSourceConfigurationResolvers {
   export interface Resolvers {
-    metricAlias?: MetricAliasResolver;
-    logAlias?: LogAliasResolver;
-    fields?: FieldsResolver;
+    metricAlias?: MetricAliasResolver /** The alias to read metric data from */;
+    logAlias?: LogAliasResolver /** The alias to read log data from */;
+    fields?: FieldsResolver /** The field mapping to use for this source */;
   }
 
   export type MetricAliasResolver = Resolver<string>;
   export type LogAliasResolver = Resolver<string>;
   export type FieldsResolver = Resolver<InfraSourceFields>;
 }
-
+/** A mapping of semantic fields to their document counterparts */
 export namespace InfraSourceFieldsResolvers {
   export interface Resolvers {
-    container?: ContainerResolver;
-    hostname?: HostnameResolver;
-    message?: MessageResolver;
-    pod?: PodResolver;
-    tiebreaker?: TiebreakerResolver;
-    timestamp?: TimestampResolver;
+    container?: ContainerResolver /** The field to identify a container by */;
+    hostname?: HostnameResolver /** The fields to identify a host by */;
+    message?: MessageResolver /** The fields that may contain the log event message. The first field found win. */;
+    pod?: PodResolver /** The field to identify a pod by */;
+    tiebreaker?: TiebreakerResolver /** The field to use as a tiebreaker for log events that have identical timestamps */;
+    timestamp?: TimestampResolver /** The field to use as a timestamp for metrics and logs */;
   }
 
   export type ContainerResolver = Resolver<string>;
@@ -338,7 +338,7 @@ export interface FieldsQueryArgs {
   indexPattern?: InfraIndexPattern | null;
 }
 export interface SourceQueryArgs {
-  id: string;
+  id: string /** The id of the source */;
 }
 export interface GroupsInfraResponseArgs {
   type: InfraGroupByType;
