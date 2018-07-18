@@ -53,7 +53,7 @@ export function actionsMenuContent(showEditJobFlyout, showDeleteJobModal, showSt
     }, {
       name: 'Edit job',
       description: 'Edit job',
-      icon: 'copy',
+      icon: 'pencil',
       enabled: () => (canUpdateJob && canUpdateDatafeed),
       onClick: (item) => {
         showEditJobFlyout(item);
