@@ -108,6 +108,9 @@ export class EsQueryParser {
     }
 
     this._injectContextVars(body.aggs, false);
+
+    this._injectContextVars(body.script_fields, false);
+
     return { dataObject, url };
   }
 
