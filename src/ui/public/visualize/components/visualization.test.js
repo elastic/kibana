@@ -40,24 +40,7 @@ class VisualizationStub {
   }
 }
 
-describe('Visualization', () => {
-  const vis = {
-    _setUiState: function (uiState) {
-      this.uiState = uiState;
-    },
-    getUiState: function () {
-      return this.uiState;
-    },
-    params: {
-
-    },
-    type: {
-      title: 'new vis',
-      requiresSearch: true,
-      handleNoResults: true,
-      visualization: VisualizationStub
-    }
-  };
+describe('<Visualization/>', () => {
 
   const visData = {
     hits: { total: 1 }
@@ -68,6 +51,28 @@ describe('Visualization', () => {
     on: () => {},
     set: () => {}
   };
+
+  let vis;
+
+  beforeEach(() => {
+    vis = {
+      _setUiState: function (uiState) {
+        this.uiState = uiState;
+      },
+      getUiState: function () {
+        return this.uiState;
+      },
+      params: {
+
+      },
+      type: {
+        title: 'new vis',
+        requiresSearch: true,
+        handleNoResults: true,
+        visualization: VisualizationStub
+      }
+    };
+  });
 
   it('should display no result message when length of data is 0', () => {
     const data = { hits: { total: 0 } };
@@ -80,17 +85,18 @@ describe('Visualization', () => {
     expect(wrapper.text()).not.toBe('No results found');
   });
 
-  it('should not allow to change listenOnChange', () => {
-    const wrapper = mount(<Visualization vis={vis} visData={visData} uiState={uiState} listenOnChange={true} />);
-    const error = 'Changing listenOnChange or uiState props is not allowed!';
-    expect(() => wrapper.setProps({ listenOnChange: false })).toThrow(error);
-  });
-
-  it('should call onInit when rendering a chart', () => {
-
-  });
-
   it('should call onInit when rendering no data', () => {
-
+    const spy = jest.fn();
+    const noData = { hits: { total: 0 } };
+    mount(
+      <Visualization
+        vis={vis}
+        visData={noData}
+        uiState={uiState}
+        listenOnChange={false}
+        onInit={spy}
+      />
+    );
+    expect(spy).toHaveBeenCalled();
   });
 });

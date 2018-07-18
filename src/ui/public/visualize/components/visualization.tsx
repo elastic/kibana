@@ -18,7 +18,7 @@
  */
 
 import { get } from 'lodash';
-import React, { Component } from 'react';
+import React from 'react';
 
 import { PersistedState } from '../../persisted_state';
 import { Vis } from '../../vis';
@@ -48,7 +48,7 @@ interface VisualizationState {
   showNoResultsMessage: boolean;
 }
 
-export class Visualization extends Component<VisualizationProps, VisualizationState> {
+export class Visualization extends React.Component<VisualizationProps, VisualizationState> {
   public static getDerivedStateFromProps(
     props: VisualizationProps,
     prevState: VisualizationState
@@ -94,6 +94,18 @@ export class Visualization extends Component<VisualizationProps, VisualizationSt
         )}
       </div>
     );
+  }
+
+  public componentDidMount() {
+    if (this.state.showNoResultsMessage && this.props.onInit) {
+      this.props.onInit();
+    }
+  }
+
+  public componentDidUpdate() {
+    if (this.state.showNoResultsMessage && this.props.onInit) {
+      this.props.onInit();
+    }
   }
 
   public componentWillUnmount() {

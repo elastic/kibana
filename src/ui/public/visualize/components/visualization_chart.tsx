@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import React, { Component } from 'react';
+import React from 'react';
 import * as Rx from 'rxjs';
 import { debounceTime, filter, share, switchMap, tap } from 'rxjs/operators';
 
@@ -34,7 +34,7 @@ interface VisualizationChartProps {
   visData: any;
 }
 
-class VisualizationChart extends Component<VisualizationChartProps> {
+class VisualizationChart extends React.Component<VisualizationChartProps> {
   private resizeChecker?: ResizeChecker;
   private visualization?: VisualizationController;
   private chartDiv = React.createRef<HTMLDivElement>();
