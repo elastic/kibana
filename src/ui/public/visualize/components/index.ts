@@ -17,18 +17,4 @@
  * under the License.
  */
 
-import React from 'react';
-import { render } from 'enzyme';
-import { VisualizationNoResults } from './visualization_noresults';
-
-describe('VisualizationNoResults', () => {
-  it('should render according to snapshot', () => {
-    const wrapper = render(<VisualizationNoResults />);
-    expect(wrapper).toMatchSnapshot();
-  });
-
-  it('should set html', () => {
-    const wrapper = render(<VisualizationNoResults />);
-    expect(wrapper.text()).toBe('No results found');
-  });
-});
+export * from './visualization';

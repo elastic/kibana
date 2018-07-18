@@ -17,18 +17,23 @@
  * under the License.
  */
 
-import React from 'react';
-import { render } from 'enzyme';
-import { VisualizationNoResults } from './visualization_noresults';
+import { Vis } from '..';
+import { Status } from '../update_status';
 
-describe('VisualizationNoResults', () => {
-  it('should render according to snapshot', () => {
-    const wrapper = render(<VisualizationNoResults />);
-    expect(wrapper).toMatchSnapshot();
-  });
+export class VisualizationController {
+  constructor(element: HTMLElement, vis: Vis);
+  public render(visData: any, update: { [key in Status]: boolean }): Promise<void>;
+  public destroy(): void;
+  public isLoaded?(): Promise<void> | void;
+}
 
-  it('should set html', () => {
-    const wrapper = render(<VisualizationNoResults />);
-    expect(wrapper.text()).toBe('No results found');
-  });
-});
+export interface VisType {
+  visualization: typeof VisualizationController;
+  isAccessible?: boolean;
+
+  // Since we haven't typed everything here yet, we basically "any" the rest
+  // of that interface. This should be removed as soon as this type definition
+  // has been completed. But that way we at least have typing for a couple of
+  // properties on that type.
+  [key: string]: any;
+}

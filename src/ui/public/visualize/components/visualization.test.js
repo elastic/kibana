@@ -85,4 +85,12 @@ describe('Visualization', () => {
     const error = 'Changing listenOnChange or uiState props is not allowed!';
     expect(() => wrapper.setProps({ listenOnChange: false })).toThrow(error);
   });
+
+  it('should call onInit when rendering a chart', () => {
+
+  });
+
+  it('should call onInit when rendering no data', () => {
+
+  });
 });

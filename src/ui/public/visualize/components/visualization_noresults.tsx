@@ -18,17 +18,18 @@
  */
 
 import React from 'react';
-import { render } from 'enzyme';
-import { VisualizationNoResults } from './visualization_noresults';
 
-describe('VisualizationNoResults', () => {
-  it('should render according to snapshot', () => {
-    const wrapper = render(<VisualizationNoResults />);
-    expect(wrapper).toMatchSnapshot();
-  });
-
-  it('should set html', () => {
-    const wrapper = render(<VisualizationNoResults />);
-    expect(wrapper.text()).toBe('No results found');
-  });
-});
+export const VisualizationNoResults: React.SFC<{}> = () => {
+  return (
+    <div className="text-center visualize-error visualize-chart">
+      <div className="item top" />
+      <div className="item">
+        <h2 aria-hidden="true">
+          <i aria-hidden="true" className="fa fa-meh-o" />
+        </h2>
+        <h4>No results found</h4>
+      </div>
+      <div className="item bottom" />
+    </div>
+  );
+};

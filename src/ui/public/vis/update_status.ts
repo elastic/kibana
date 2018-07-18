@@ -17,6 +17,7 @@
  * under the License.
  */
 
+import { PersistedState } from '../persisted_state';
 import { calculateObjectHash } from './lib/calculate_object_hash';
 import { Vis } from './vis';
 
@@ -57,7 +58,7 @@ function hasSizeChanged(size: Size, oldSize?: Size): boolean {
 function getUpdateStatus<T extends Status>(
   requiresUpdateStatus: T[] = [],
   obj: any,
-  param: { vis: Vis; visData: any; uiState: any }
+  param: { vis: Vis; visData: any; uiState: PersistedState }
 ): { [reqStats in T]: boolean } {
   const status = {} as { [reqStats in T]: boolean };
 
