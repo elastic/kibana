@@ -20,10 +20,14 @@
 export const TRYCLOUD_OPTION1 = {
   title: 'Option 1: Try module in Elastic Cloud',
   textPre: 'Go to [Elastic Cloud](https://www.elastic.co/cloud/as-a-service/signup?blade=kib). Register if you ' +
-           'don\'t have an account.\n' +
-           ' 1. Select **Create Cluster**, leave size slider at 4 GB RAM, and click **Create**.\n' +
-           ' 2. Wait for the cluster plan to complete.\n' +
-           ' 3. Go to the new Cloud Kibana instance and follow the Kibana Home instructions.'
+           'do not already have an account. Free 14-day trial available. Log into the Elastic Cloud console\n\n' +
+
+           'To create a cluster, in Elastic Cloud console:\n' +
+           ' 1. Select **Create Deployment** and specify the **Deployment Name**\n' +
+           '    Modify the other deployment options as needed (or not, the defaults are great to get started)\n' +
+           ' 2. Click **Create Deployment**\n' +
+           ' 3. Wait until deployment creation completes\n`' +
+           ' 4. Go to the new cloud Kibana instance and follow the Kibana Home instructions'
 
 };
 
@@ -31,5 +35,5 @@ export const TRYCLOUD_OPTION2 = {
   title: 'Option 2: Connect local Kibana to a Cloud instance',
   textPre: 'If you are running this Kibana instance against a hosted Elasticsearch instance,' +
            ' proceed with manual setup.\n\n' +
-           'In **Overview > Endpoints**, note **Elasticsearch** as `<es_url>`.'
+           'Save the **Elasticsearch** endpoint as `<es_url>` and the cluster **Password** as `<password>` for your records'
 };
