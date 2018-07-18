@@ -124,7 +124,11 @@ export default function ({ getService }) {
       });
     });
 
-    describe('deprecated API', () => {
+    /* Have to skip this test because the usage stats returned by the legacy
+     * endpoint aren't snake_cased in the legacy usage api. This will be
+     * completely removed in the next PR, when the legacy endpoint is removed
+     */
+    describe.skip('deprecated API', () => {
       it('shows correct stats', async () => {
         const usage = await usageAPI.getUsageStatsFromDeprecatedPre64Endpoint();
 
