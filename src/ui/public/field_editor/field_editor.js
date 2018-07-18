@@ -440,39 +440,45 @@ export class FieldEditor extends PureComponent {
     const { redirectAway } = this.props.helpers;
 
     return (
-      <EuiFlexGroup>
-        <EuiFlexItem grow={false}>
-          <EuiButton
-            fill
-            onClick={this.saveField}
-            isDisabled={this.isSavingDisabled()}
-            isLoading={isSaving}
-            data-test-subj="fieldSaveButton"
-          >
-            {isCreating ? 'Create field' : 'Save field'}
-          </EuiButton>
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiButtonEmpty
-            onClick={redirectAway}
-            data-test-subj="fieldCancelButton"
-          >
-            Cancel
-          </EuiButtonEmpty>
-        </EuiFlexItem>
-        {
-          !isCreating && field.scripted ? (
-            <EuiFlexItem grow={false}>
-              <EuiButtonEmpty
-                color="danger"
-                onClick={this.showDeleteModal}
-              >
-                Delete
-              </EuiButtonEmpty>
-            </EuiFlexItem>
-          ) : null
-        }
-      </EuiFlexGroup>
+      <EuiFormRow>
+        <EuiFlexGroup>
+          <EuiFlexItem grow={false}>
+            <EuiButton
+              fill
+              onClick={this.saveField}
+              isDisabled={this.isSavingDisabled()}
+              isLoading={isSaving}
+              data-test-subj="fieldSaveButton"
+            >
+              {isCreating ? 'Create field' : 'Save field'}
+            </EuiButton>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiButtonEmpty
+              onClick={redirectAway}
+              data-test-subj="fieldCancelButton"
+            >
+              Cancel
+            </EuiButtonEmpty>
+          </EuiFlexItem>
+          {
+            !isCreating && field.scripted ? (
+              <EuiFlexItem>
+                <EuiFlexGroup justifyContent="flexEnd">
+                  <EuiFlexItem grow={false}>
+                    <EuiButtonEmpty
+                      color="danger"
+                      onClick={this.showDeleteModal}
+                    >
+                      Delete
+                    </EuiButtonEmpty>
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              </EuiFlexItem>
+            ) : null
+          }
+        </EuiFlexGroup>
+      </EuiFormRow>
     );
   }
 

@@ -179,31 +179,33 @@ exports[`FieldEditor should render create new scripted field correctly 1`] = `
         onChange={[Function]}
       />
     </eui-form-row>
-    <eui-flex-group>
-      <eui-flex-item
-        grow={false}
-      >
-        <eui-button
-          data-test-subj="fieldSaveButton"
-          fill={true}
-          isDisabled={true}
-          isLoading={false}
-          onClick={[Function]}
+    <eui-form-row>
+      <eui-flex-group>
+        <eui-flex-item
+          grow={false}
         >
-          Create field
-        </eui-button>
-      </eui-flex-item>
-      <eui-flex-item
-        grow={false}
-      >
-        <eui-button-empty
-          data-test-subj="fieldCancelButton"
-          onClick={[Function]}
+          <eui-button
+            data-test-subj="fieldSaveButton"
+            fill={true}
+            isDisabled={true}
+            isLoading={false}
+            onClick={[Function]}
+          >
+            Create field
+          </eui-button>
+        </eui-flex-item>
+        <eui-flex-item
+          grow={false}
         >
-          Cancel
-        </eui-button-empty>
-      </eui-flex-item>
-    </eui-flex-group>
+          <eui-button-empty
+            data-test-subj="fieldCancelButton"
+            onClick={[Function]}
+          >
+            Cancel
+          </eui-button-empty>
+        </eui-flex-item>
+      </eui-flex-group>
+    </eui-form-row>
   </eui-form>
   <eui-spacer
     size="l"
@@ -387,41 +389,49 @@ exports[`FieldEditor should render edit scripted field correctly 1`] = `
         value="doc.test.value"
       />
     </eui-form-row>
-    <eui-flex-group>
-      <eui-flex-item
-        grow={false}
-      >
-        <eui-button
-          data-test-subj="fieldSaveButton"
-          fill={true}
-          isDisabled={false}
-          isLoading={false}
-          onClick={[Function]}
+    <eui-form-row>
+      <eui-flex-group>
+        <eui-flex-item
+          grow={false}
         >
-          Save field
-        </eui-button>
-      </eui-flex-item>
-      <eui-flex-item
-        grow={false}
-      >
-        <eui-button-empty
-          data-test-subj="fieldCancelButton"
-          onClick={[Function]}
+          <eui-button
+            data-test-subj="fieldSaveButton"
+            fill={true}
+            isDisabled={false}
+            isLoading={false}
+            onClick={[Function]}
+          >
+            Save field
+          </eui-button>
+        </eui-flex-item>
+        <eui-flex-item
+          grow={false}
         >
-          Cancel
-        </eui-button-empty>
-      </eui-flex-item>
-      <eui-flex-item
-        grow={false}
-      >
-        <eui-button-empty
-          color="danger"
-          onClick={[Function]}
-        >
-          Delete
-        </eui-button-empty>
-      </eui-flex-item>
-    </eui-flex-group>
+          <eui-button-empty
+            data-test-subj="fieldCancelButton"
+            onClick={[Function]}
+          >
+            Cancel
+          </eui-button-empty>
+        </eui-flex-item>
+        <eui-flex-item>
+          <eui-flex-group
+            justifyContent="flexEnd"
+          >
+            <eui-flex-item
+              grow={false}
+            >
+              <eui-button-empty
+                color="danger"
+                onClick={[Function]}
+              >
+                Delete
+              </eui-button-empty>
+            </eui-flex-item>
+          </eui-flex-group>
+        </eui-flex-item>
+      </eui-flex-group>
+    </eui-form-row>
   </eui-form>
   <eui-spacer
     size="l"
@@ -642,31 +652,33 @@ exports[`FieldEditor should show conflict field warning 1`] = `
         onChange={[Function]}
       />
     </eui-form-row>
-    <eui-flex-group>
-      <eui-flex-item
-        grow={false}
-      >
-        <eui-button
-          data-test-subj="fieldSaveButton"
-          fill={true}
-          isDisabled={true}
-          isLoading={false}
-          onClick={[Function]}
+    <eui-form-row>
+      <eui-flex-group>
+        <eui-flex-item
+          grow={false}
         >
-          Create field
-        </eui-button>
-      </eui-flex-item>
-      <eui-flex-item
-        grow={false}
-      >
-        <eui-button-empty
-          data-test-subj="fieldCancelButton"
-          onClick={[Function]}
+          <eui-button
+            data-test-subj="fieldSaveButton"
+            fill={true}
+            isDisabled={true}
+            isLoading={false}
+            onClick={[Function]}
+          >
+            Create field
+          </eui-button>
+        </eui-flex-item>
+        <eui-flex-item
+          grow={false}
         >
-          Cancel
-        </eui-button-empty>
-      </eui-flex-item>
-    </eui-flex-group>
+          <eui-button-empty
+            data-test-subj="fieldCancelButton"
+            onClick={[Function]}
+          >
+            Cancel
+          </eui-button-empty>
+        </eui-flex-item>
+      </eui-flex-group>
+    </eui-form-row>
   </eui-form>
   <eui-spacer
     size="l"
@@ -914,41 +926,49 @@ exports[`FieldEditor should show deprecated lang warning 1`] = `
         value="doc.test.value"
       />
     </eui-form-row>
-    <eui-flex-group>
-      <eui-flex-item
-        grow={false}
-      >
-        <eui-button
-          data-test-subj="fieldSaveButton"
-          fill={true}
-          isDisabled={false}
-          isLoading={false}
-          onClick={[Function]}
+    <eui-form-row>
+      <eui-flex-group>
+        <eui-flex-item
+          grow={false}
         >
-          Save field
-        </eui-button>
-      </eui-flex-item>
-      <eui-flex-item
-        grow={false}
-      >
-        <eui-button-empty
-          data-test-subj="fieldCancelButton"
-          onClick={[Function]}
+          <eui-button
+            data-test-subj="fieldSaveButton"
+            fill={true}
+            isDisabled={false}
+            isLoading={false}
+            onClick={[Function]}
+          >
+            Save field
+          </eui-button>
+        </eui-flex-item>
+        <eui-flex-item
+          grow={false}
         >
-          Cancel
-        </eui-button-empty>
-      </eui-flex-item>
-      <eui-flex-item
-        grow={false}
-      >
-        <eui-button-empty
-          color="danger"
-          onClick={[Function]}
-        >
-          Delete
-        </eui-button-empty>
-      </eui-flex-item>
-    </eui-flex-group>
+          <eui-button-empty
+            data-test-subj="fieldCancelButton"
+            onClick={[Function]}
+          >
+            Cancel
+          </eui-button-empty>
+        </eui-flex-item>
+        <eui-flex-item>
+          <eui-flex-group
+            justifyContent="flexEnd"
+          >
+            <eui-flex-item
+              grow={false}
+            >
+              <eui-button-empty
+                color="danger"
+                onClick={[Function]}
+              >
+                Delete
+              </eui-button-empty>
+            </eui-flex-item>
+          </eui-flex-group>
+        </eui-flex-item>
+      </eui-flex-group>
+    </eui-form-row>
   </eui-form>
   <eui-spacer
     size="l"
