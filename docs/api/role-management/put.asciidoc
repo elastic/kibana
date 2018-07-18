@@ -14,7 +14,7 @@ that begin with `_` are reserved for system usage.
 `elasticsearch`:: (object) Optional Elasticsearch cluster and index privileges, valid keys are 
 `cluster`, `indices` and `run_as`. For more information, see {xpack-ref}/defining-roles.html[Defining Roles].
 
-`kibana`:: (list) A list of objects that specify the Kibana Privileges.
+`kibana`:: (list) A list of objects that specify the <<kibana-privileges>>.
 
 ==== Authorization
 

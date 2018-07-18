@@ -1,0 +1,14 @@
+[role="xpack"]
+[[kibana-privileges]]
+=== Kibana privileges
+
+This section lists the Kibana privileges that you can assign to a role.
+
+[horizontal]
+`all`::
+All Kibana privileges, can read, write and delete saved searches, dashboards, visualizations,
+short urls, timelion sheets, graph workspaces, index patterns and advanced settings.
+
+`read`::
+Can read saved searches, dashboards, visualiations, short urls, timelion sheets, graph workspaces,
+index patterns and advanced settings.
