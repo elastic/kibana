@@ -17,11 +17,5 @@
  * under the License.
  */
 
-import { DLLBundlerCompiler } from './compiler';
-export { DLLBundlerCompiler };
-export { DLLBundlerBridgePlugin } from './bridge_plugin';
-
-const dllConfig = process.env.dllConfig;
-console.log(process.env);
-const dllLog = process.env.dllLog || (() => {});
-new DLLBundlerCompiler(dllConfig, dllLog);
+export { DLLBundlerCompiler } from './compiler';
+export { DLLBundlerPlugin } from './plugin';

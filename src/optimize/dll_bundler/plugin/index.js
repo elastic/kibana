@@ -17,4 +17,4 @@
  * under the License.
  */
 
-export { BridgePlugin as DLLBundlerBridgePlugin } from './bridge_plugin';
+export { Plugin as DLLBundlerPlugin } from './plugin';

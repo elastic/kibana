@@ -25,8 +25,7 @@ import webpack from 'webpack';
 import Stats from 'webpack/lib/Stats';
 import webpackMerge from 'webpack-merge';
 import UglifyJsPlugin from 'uglifyjs-webpack-plugin';
-import cp from 'child_process';
-import { DLLBundlerCompiler, DLLBundlerBridgePlugin } from './dll_bundler';
+import { DLLBundlerPlugin } from './dll_bundler';
 
 import { defaults } from 'lodash';
 
@@ -72,24 +71,8 @@ export default class BaseOptimizer {
     return this.compiler;
   }
 
-  shouldStartDLLCompiler() {
-    return !IS_KIBANA_DISTRIBUTABLE
-      || DLLBundlerCompiler.existsDLLsFromConfig(this.getDLLConfig());
-  }
-
   async init() {
     if (this.isCompilerReady()) return this;
-
-    if (this.shouldStartDLLCompiler()) {
-      this.dllCompilerProcess = cp.fork(
-        fromRoot('.', '/src/optimize/dll_bundler/index.js'),
-        {
-          env: {
-            dllConfig: 29
-          }
-        }
-      );
-    }
 
     const compilerConfig = this.getConfig();
     this.compiler = webpack(compilerConfig);
@@ -116,12 +99,6 @@ export default class BaseOptimizer {
     });
   }
 
-  getDLLBundlerBridgePlugin() {
-    return this.shouldStartDLLCompiler()
-      ? new DLLBundlerBridgePlugin({ compilerProcess: this.dllCompilerProcess })
-      : {};
-  }
-
   getDLLConfig() {
     return {
       dllEntries: [
@@ -133,7 +110,6 @@ export default class BaseOptimizer {
       isDistributable: IS_KIBANA_DISTRIBUTABLE,
       outputPath: `${this.uiBundles.getWorkingDir()}/dlls`,
       publicPath: PUBLIC_PATH_PLACEHOLDER,
-      log: this.log,
       mergeConfig: {
         node: { fs: 'empty', child_process: 'empty', dns: 'empty', net: 'empty', tls: 'empty' },
         resolve: {
@@ -249,12 +225,10 @@ export default class BaseOptimizer {
       },
 
       plugins: [
-        this.getDLLBundlerBridgePlugin(),
-
-        new webpack.DllReferencePlugin({
+        /*new webpack.DllReferencePlugin({
           context: fromRoot('.'),
           manifest: require(`${this.uiBundles.getWorkingDir()}/dlls/vendor.json`)
-        }),
+        }),*/
 
         new MiniCssExtractPlugin({
           filename: '[name].style.css',
@@ -431,8 +405,30 @@ export default class BaseOptimizer {
       }
     };
 
+    const dllBundlerPlugin = {
+      plugins: [
+        new DLLBundlerPlugin({
+          dllConfig: this.getDLLConfig(),
+          entryPathDiscoverConfig: (() => {
+            return webpackMerge(
+              commonConfig,
+              dllBundlerPlugin,
+              IS_KIBANA_DISTRIBUTABLE
+                ? {}
+                : transpileTsConfig,
+              this.uiBundles.isDevMode()
+                ? webpackMerge(watchingConfig, supportEnzymeConfig)
+                : productionConfig
+            );
+          })(),
+          log: this.log
+        }),
+      ]
+    };
+
     return webpackMerge(
       commonConfig,
+      dllBundlerPlugin,
       IS_KIBANA_DISTRIBUTABLE
         ? {}
         : transpileTsConfig,

@@ -19,13 +19,16 @@
 
 import NormalModule from 'webpack/lib/NormalModule';
 import { fromRoot } from '../../../utils';
+import { DLLBundlerCompiler } from '../compiler';
 
-export class BridgePlugin {
-  constructor({ compilerProcess }) {
-    this.compilerProcess = compilerProcess;
+export class Plugin {
+  constructor({ dllConfig, entryPathDiscoverConfig,  log }) {
+    const sanitizedLog = log || (() => {});
+
+    this.dllCompiler = new DLLBundlerCompiler(dllConfig, sanitizedLog);
+    this.entryPathDiscoverConfig = entryPathDiscoverConfig;
+    this.log = sanitizedLog;
     this.nodeModulesEntryPaths = {};
-
-    this.stopCompilerWhenNeeded();
   }
 
   apply(compiler) {
@@ -36,10 +39,17 @@ export class BridgePlugin {
       }
     });
 
+    compiler.hooks.afterPlugins.tap({
+      name: 'dllBundlerBridgePlugin-checkIfDllIsNeeded',
+      fn: () => {
+        console.log('sdhsadhkasdhisahdkjhsakjdhjksahdjksadjkasdjkhasjkdhaksjhdkjlhsadjkhsajkdhjksahdjksahjkdhasjkhdjk');
+      }
+    });
+
     compiler.hooks.done.tap({
       name: 'dllBundlerBridgePlugin-sendEntryPaths',
       fn: () => {
-        this.sendEntryPaths();
+        // this.sendEntryPaths();
       }
     });
 
@@ -68,7 +78,7 @@ export class BridgePlugin {
       resolver(result, (err, data) => {
         if (err) return callback(err);
 
-        // Ignored
+        // Ignored3
         if (!data) return callback();
 
         // direct module
@@ -106,21 +116,6 @@ export class BridgePlugin {
           return callback(null, createdModule);
         });
       });
-    });
-  }
-
-  sendEntryPaths() {
-    if (this.compilerProcess && this.compilerProcess.send) {
-      this.compilerProcess.send({
-        type: 'dllEntryPaths',
-        content: this.nodeModulesEntryPaths
-      });
-    }
-  }
-
-  stopCompilerWhenNeeded() {
-    process.on('exit', () => {
-      this.compilerProcess.kill();
     });
   }
 }
