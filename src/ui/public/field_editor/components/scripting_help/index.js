@@ -17,31 +17,4 @@
  * under the License.
  */
 
-import React from 'react';
-import { shallow } from 'enzyme';
-
-import { ScriptingHelpFlyout } from './help_flyout';
-
-jest.mock('ui/documentation_links', () => ({
-  getDocLink: (doc) => `(docLink for ${doc})`,
-}));
-
-describe('ScriptingHelpFlyout', () => {
-  it('should render normally', async () => {
-    const component = shallow(
-      <ScriptingHelpFlyout
-        isVisible={true}
-      />
-    );
-
-    expect(component).toMatchSnapshot();
-  });
-
-  it('should render nothing if not visible', async () => {
-    const component = shallow(
-      <ScriptingHelpFlyout />
-    );
-
-    expect(component).toMatchSnapshot();
-  });
-});
+export { ScriptingHelpFlyout } from './help_flyout';
