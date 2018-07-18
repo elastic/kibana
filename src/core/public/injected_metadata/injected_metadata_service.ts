@@ -17,12 +17,34 @@
  * under the License.
  */
 
-export let metadata = null;
+import { deepFreeze } from './deep_freeze';
 
-export function __newPlatformInit__(legacyMetadata) {
-  if (metadata === null) {
-    metadata = legacyMetadata;
-  } else {
-    throw new Error('ui/metadata can only be initialized once');
+export interface InjectedMetadataParams {
+  injectedMetadata: {
+    legacyMetadata: {
+      [key: string]: any;
+    };
+  };
+}
+
+/**
+ * Provides access to the metadata that is injected by the
+ * server into the page. The metadata is actually defined
+ * in the entry file for the bundle containing the new platform
+ * and is read from the DOM in most cases.
+ */
+export class InjectedMetadataService {
+  constructor(private readonly params: InjectedMetadataParams) {}
+
+  public start() {
+    const state = deepFreeze(this.params.injectedMetadata);
+
+    return {
+      getLegacyMetadata() {
+        return state.legacyMetadata;
+      },
+    };
   }
 }
+
+export type InjectedMetadataStartContract = ReturnType<InjectedMetadataService['start']>;

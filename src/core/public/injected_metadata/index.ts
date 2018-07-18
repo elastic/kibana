@@ -17,12 +17,8 @@
  * under the License.
  */
 
-export let metadata = null;
-
-export function __newPlatformInit__(legacyMetadata) {
-  if (metadata === null) {
-    metadata = legacyMetadata;
-  } else {
-    throw new Error('ui/metadata can only be initialized once');
-  }
-}
+export {
+  InjectedMetadataService,
+  InjectedMetadataParams,
+  InjectedMetadataStartContract,
+} from './injected_metadata_service';
