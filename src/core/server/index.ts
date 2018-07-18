@@ -33,7 +33,7 @@ export class Server {
   }
 
   public async start() {
-    this.log.info('starting server :tada:');
+    this.log.debug('starting server :tada:');
 
     const router = new Router('/core');
     router.get({ path: '/', validate: false }, async (req, res) => res.ok({ version: '0.0.1' }));
