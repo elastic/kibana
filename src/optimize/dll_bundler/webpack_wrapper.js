@@ -20,7 +20,7 @@
 import webpack from 'webpack';
 import supportsColor from 'supports-color';
 
-export default async function (config) {
+export async function runWebpack(config) {
   return new Promise((resolve) => {
     webpack(config, (err, stats) => {
       if (err) {
@@ -40,5 +40,24 @@ export default async function (config) {
 
       resolve();
     });
+  });
+}
+
+export function watchWebpack(config) {
+  return webpack(config).watch({ aggregateTimeout: 200 }, (err, stats) => {
+    if (err) {
+      console.error(err.stack || err);
+      if (err.details) {
+        console.error(err.details);
+      }
+      return;
+    }
+
+    const statsColors = process.stdout.isTTY === true ? supportsColor.stdout : false;
+    const statsString = stats.toString({
+      colors: statsColors
+    });
+
+    process.stdout.write(`${statsString}\n`);
   });
 }
