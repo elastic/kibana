@@ -34,11 +34,12 @@ export class Compiler {
       true);
   }
 
-  constructor(options) {
+  constructor(options, log) {
     this.dllEntries = options.dllEntries;
     this.isDistributable = options.isDistributable;
     this.outputPath = options.outputPath;
     this.dllsConfigs = this.createDLLsConfigs(options);
+    this.log =  log;
 
     this.upsertDllEntryFile();
     this.touchDllManifests();

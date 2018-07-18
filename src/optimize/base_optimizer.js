@@ -22,11 +22,10 @@ import os from 'os';
 import Boom from 'boom';
 import MiniCssExtractPlugin from 'mini-css-extract-plugin';
 import webpack from 'webpack';
-import NormalModule from 'webpack/lib/NormalModule';
 import Stats from 'webpack/lib/Stats';
 import webpackMerge from 'webpack-merge';
 import UglifyJsPlugin from 'uglifyjs-webpack-plugin';
-// import childProcess from 'child_process';
+import cp from 'child_process';
 import { DLLBundlerCompiler, DLLBundlerBridgePlugin } from './dll_bundler';
 
 import { defaults } from 'lodash';
@@ -81,84 +80,23 @@ export default class BaseOptimizer {
   async init() {
     if (this.isCompilerReady()) return this;
 
-    this.nodeModulesEntryPaths = {};
-
     if (this.shouldStartDLLCompiler()) {
-      // const dllCompilerConfig = this.getDLLConfig();
-      // this.dllCompilerProcess = childProcess.spawn('./dll_bundler.js', null, { env: { config: dllCompilerConfig } });
+      this.dllCompilerProcess = cp.fork(
+        fromRoot('.', '/src/optimize/dll_bundler/index.js'),
+        {
+          env: {
+            dllConfig: 29
+          }
+        }
+      );
     }
 
     const compilerConfig = this.getConfig();
     this.compiler = webpack(compilerConfig);
 
-    this.setupCompilerHooks();
     this.writeStatsHook();
 
     return this;
-  }
-
-  nodeModulesEntryPathsHook() {
-    this.compiler.hooks.compile.tap({
-      name: 'kibana-nodeModulesEntryPaths-builder',
-      fn: ({ normalModuleFactory }) => {
-        normalModuleFactory.hooks.factory.tap('NormalModuleFactory', () => (result, callback) => {
-          const resolver = normalModuleFactory.hooks.resolver.call(null);
-
-          // Ignored
-          if (!resolver) return callback();
-
-          resolver(result, (err, data) => {
-            if (err) return callback(err);
-
-            // Ignored
-            if (!data) return callback();
-
-            // direct module
-            if (typeof data.source === 'function') return callback(null, data);
-
-            normalModuleFactory.hooks.afterResolve.callAsync(data, (err, result) => {
-              if (err) return callback(err);
-
-              // Ignored
-              if (!result) return callback();
-
-              // // // TODO: CODE FILTERING AND PATH CONSTRUCT FOR NODE_MODULES TO INCLUDE
-              if (!!this.nodeModulesEntryPaths[result.request]) {
-                return callback();
-              }
-
-              const nodeModulesPath = fromRoot('./node_modules');
-
-              if (!result.request.includes('loader')
-                && result.request.includes(nodeModulesPath)) {
-                this.nodeModulesEntryPaths[result.request] = true;
-              }
-              // // //
-
-              let createdModule = normalModuleFactory.hooks.createModule.call(result);
-              if (!createdModule) {
-                if (!result.request) {
-                  return callback(new Error('Empty dependency (no request)'));
-                }
-
-                createdModule = new NormalModule(result);
-              }
-
-              createdModule = normalModuleFactory.hooks.module.call(createdModule, result);
-
-              return callback(null, createdModule);
-            });
-          });
-        });
-      }
-    });
-
-    this.compiler.hooks.shouldEmit.tap({
-      name: 'kibana-nodeModulesEntryPaths-skipEmit',
-      fn: () => {
-        return false;
-      }
-    });
   }
 
   writeStatsHook() {
@@ -178,13 +116,9 @@ export default class BaseOptimizer {
     });
   }
 
-  setupCompilerHooks() {
-    this.nodeModulesEntryPathsHook();
-  }
-
   getDLLBundlerBridgePlugin() {
     return this.shouldStartDLLCompiler()
-      ? new DLLBundlerBridgePlugin({ dllProcess: this.dllCompilerProcess })
+      ? new DLLBundlerBridgePlugin({ compilerProcess: this.dllCompilerProcess })
       : {};
   }
 
@@ -196,9 +130,10 @@ export default class BaseOptimizer {
         }
       ],
       context: fromRoot('.'),
-      isProduction: IS_KIBANA_DISTRIBUTABLE,
+      isDistributable: IS_KIBANA_DISTRIBUTABLE,
       outputPath: `${this.uiBundles.getWorkingDir()}/dlls`,
       publicPath: PUBLIC_PATH_PLACEHOLDER,
+      log: this.log,
       mergeConfig: {
         node: { fs: 'empty', child_process: 'empty', dns: 'empty', net: 'empty', tls: 'empty' },
         resolve: {

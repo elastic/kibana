@@ -17,20 +17,110 @@
  * under the License.
  */
 
+import NormalModule from 'webpack/lib/NormalModule';
+import { fromRoot } from '../../../utils';
+
 export class BridgePlugin {
   constructor({ compilerProcess }) {
     this.compilerProcess = compilerProcess;
     this.nodeModulesEntryPaths = {};
+
+    this.stopCompilerWhenNeeded();
   }
 
   apply(compiler) {
-    // Setup callback for accessing a compilation:
-    compiler.plugin('compilation', (compilation) => {
+    compiler.hooks.compile.tap({
+      name: 'dllBundlerBridgePlugin-buildEntryPaths',
+      fn: ({ normalModuleFactory }) => {
+        this.buildEntryPaths(normalModuleFactory);
+      }
+    });
 
-      // Now setup callbacks for accessing compilation steps:
-      compilation.plugin('optimize', () => {
-        console.log('Assets are being optimized.');
+    compiler.hooks.done.tap({
+      name: 'dllBundlerBridgePlugin-sendEntryPaths',
+      fn: () => {
+        this.sendEntryPaths();
+      }
+    });
+
+    /*compiler.hooks.shouldEmit.tap({
+      name: 'dllBundlerBridgePlugin-defineNextStep',
+      fn: () => {
+        return false;
+      }
+    });
+
+    compiler.hooks.done.tapAsync({
+      name: 'dllBundlerBridgePlugin-endCycle',
+      fn: (stats, cb) => {
+        cb(null, stats);
+      }
+    });*/
+  }
+
+  buildEntryPaths(normalModuleFactory) {
+    normalModuleFactory.hooks.factory.tap('NormalModuleFactory', () => (result, callback) => {
+      const resolver = normalModuleFactory.hooks.resolver.call(null);
+
+      // Ignored
+      if (!resolver) return callback();
+
+      resolver(result, (err, data) => {
+        if (err) return callback(err);
+
+        // Ignored
+        if (!data) return callback();
+
+        // direct module
+        if (typeof data.source === 'function') return callback(null, data);
+
+        normalModuleFactory.hooks.afterResolve.callAsync(data, (err, result) => {
+          if (err) return callback(err);
+
+          // Ignored
+          if (!result) return callback();
+
+          // Build NodeModulesEntryPaths
+          if (!!this.nodeModulesEntryPaths[result.request]) {
+            return callback();
+          }
+
+          const nodeModulesPath = fromRoot('./node_modules');
+
+          if (!result.request.includes('loader')
+            && result.request.includes(nodeModulesPath)) {
+            this.nodeModulesEntryPaths[result.request] = true;
+          }
+
+          let createdModule = normalModuleFactory.hooks.createModule.call(result);
+          if (!createdModule) {
+            if (!result.request) {
+              return callback(new Error('Empty dependency (no request)'));
+            }
+
+            createdModule = new NormalModule(result);
+          }
+
+          createdModule = normalModuleFactory.hooks.module.call(createdModule, result);
+
+          return callback(null, createdModule);
+        });
       });
+    });
+  }
+
+  sendEntryPaths() {
+    if (this.compilerProcess && this.compilerProcess.send) {
+      this.compilerProcess.send({
+        type: 'dllEntryPaths',
+        content: this.nodeModulesEntryPaths
+      });
+    }
+  }
+
+  stopCompilerWhenNeeded() {
+    process.on('exit', () => {
+      this.compilerProcess.kill();
     });
   }
 }

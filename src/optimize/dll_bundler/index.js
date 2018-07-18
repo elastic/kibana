@@ -18,11 +18,10 @@
  */
 
 import { DLLBundlerCompiler } from './compiler';
-import { DLLBundlerBridgePlugin } from './bridge_plugin';
+export { DLLBundlerCompiler };
+export { DLLBundlerBridgePlugin } from './bridge_plugin';
 
-export default () => {
-  const dllConfig = process.env.config;
-  new DLLBundlerCompiler(dllConfig);
-};
-
-export { DLLBundlerCompiler, DLLBundlerBridgePlugin };
+const dllConfig = process.env.dllConfig;
+console.log(process.env);
+const dllLog = process.env.dllLog || (() => {});
+new DLLBundlerCompiler(dllConfig, dllLog);
