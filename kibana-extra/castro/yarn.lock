@@ -47,6 +47,10 @@
   version "1.2.0"
   resolved "https://registry.yarnpkg.com/@types/events/-/events-1.2.0.tgz#81a6731ce4df43619e5c8c945383b3e62a89ea86"
 
+"@types/git-url-parse@^9.0.0":
+  version "9.0.0"
+  resolved "http://registry.npm.taobao.org/@types/git-url-parse/download/@types/git-url-parse-9.0.0.tgz#aac1315a44fa4ed5a52c3820f6c3c2fb79cbd12d"
+
 "@types/hapi@^15.0.0":
   version "15.0.2"
   resolved "https://registry.yarnpkg.com/@types/hapi/-/hapi-15.0.2.tgz#59c77434e6e3fe96e7153c14981219b6a2f0326c"

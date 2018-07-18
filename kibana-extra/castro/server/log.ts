@@ -6,8 +6,9 @@
 
 import Hapi from 'hapi';
 import { inspect } from 'util';
+import { Logger } from 'vscode-jsonrpc';
 
-export class Log {
+export class Log implements Logger {
   constructor(private server: Hapi.Server, private baseTags: string[] = ['codesearch']) {}
 
   public info(msg: string | any) {
@@ -32,5 +33,23 @@ export class Log {
     }
 
     this.server.log([...this.baseTags, 'error'], msg);
+  }
+
+  public log(message: string): void {
+    this.info(message);
+  }
+
+  public warn(msg: string): void {
+    if (msg instanceof Error) {
+      msg = msg.stack;
+    }
+
+    if (typeof msg !== 'string') {
+      msg = inspect(msg, {
+        colors: process.stdout.isTTY,
+      });
+    }
+
+    this.server.log([...this.baseTags, 'warning'], msg);
   }
 }

@@ -19,7 +19,7 @@
     "precommit": "lint-staged",
     "build": "plugin-helpers build",
     "start-deps": "node ../../kibana/scripts/es.js snapshot -E path.data=../../data",
-    "debug": " node --inspect ../../kibana/scripts/kibana.js --config ../../config/kibana/kibana.yml  --env.name=development --optimize.enabled=true --plugin-path=."
+    "debug": " node --inspect ../../kibana/scripts/kibana.js --config ../../config/kibana/kibana.yml  --env.name=development --optimize.enabled=false --plugin-path=."
   },
   "lint-staged": {
     "*.{ts,tsx}": "yarn run tslint"
@@ -43,6 +43,7 @@
     "typescript": "^2.9.2"
   },
   "dependencies": {
+    "@types/git-url-parse": "^9.0.0",
     "boom": "^7.2.0",
     "git-url-parse": "^9.0.1",
     "get-port": "^3.2.0",
@@ -62,6 +63,7 @@
     "redux-actions": "^2.4.0",
     "redux-saga": "^0.16.0",
     "rimraf": "^2.6.2",
+    "vscode-jsonrpc": "^3.6.2",
     "vscode-languageserver": "^4.2.1"
   }
 }

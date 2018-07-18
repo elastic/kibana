@@ -11,6 +11,7 @@ import fileRoute from './server/routes/file';
 import lspRoute from './server/routes/lsp';
 import manacoRoute from './server/routes/monaco';
 import repositoryRoute from './server/routes/repository';
+import ServerOptions from './server/ServerOptions';
 
 export default (kibana: any) =>
   new kibana.Plugin({
@@ -36,12 +37,12 @@ export default (kibana: any) =>
       }).default();
     },
 
-    init(server: any, _: any) {
-      // Add server routes and initialize the plugin here
+    init(server: any, options: any) {
+      const serverOptions = new ServerOptions(options);
       exampleRoute(server);
-      lspRoute(server);
-      repositoryRoute(server);
-      fileRoute(server);
+      lspRoute(server, serverOptions);
+      repositoryRoute(server, serverOptions);
+      fileRoute(server, serverOptions);
       manacoRoute(server);
     },
   });

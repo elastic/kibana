@@ -6,6 +6,7 @@
 
 import GitUrlParse from 'git-url-parse';
 
+import path from 'path';
 import { Repository, RepositoryUri } from '../model';
 
 export default class RepositoryUtils {
@@ -23,7 +24,7 @@ export default class RepositoryUtils {
   }
 
   // Return the local data path of a given repository.
-  public static repositoryLocalPath(dataPath: string, repoUri: RepositoryUri) {
-    return `${process.env.HOME}/${dataPath}/${repoUri}`;
+  public static repositoryLocalPath(repoPath: string, repoUri: RepositoryUri) {
+    return path.join(repoPath, repoUri);
   }
 }

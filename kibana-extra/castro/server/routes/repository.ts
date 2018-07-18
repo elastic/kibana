@@ -12,15 +12,15 @@ import { REPOSITORY_INDEX_TYPE } from '../../mappings';
 import { Repository } from '../../model';
 import { Log } from '../log';
 import RepositoryService from '../repositoryService';
+import ServerOptions from '../ServerOptions';
 
-export default function(server: Hapi.Server) {
+export default function(server: Hapi.Server, options: ServerOptions) {
   // Clone a git repository
   server.route({
     path: '/api/castro/repo',
     method: 'POST',
     async handler(req: Hapi.Request, reply: any) {
       const repoUrl: string = req.payload.url;
-      const dataPath: string = req.server.config().get('castro.dataPath');
       const objectClient = req.getSavedObjectsClient();
       const log = new Log(req.server);
 
@@ -36,7 +36,7 @@ export default function(server: Hapi.Server) {
         try {
           // Clone the repository
           // TODO(mengwei): move this to queue handler.
-          const repoService = new RepositoryService(dataPath, log);
+          const repoService = new RepositoryService(options.repoPath, log);
           repoService.clone(repo);
           // Persist to elasticsearch
           const res = await objectClient.create(REPOSITORY_INDEX_TYPE, repo, {
@@ -58,9 +58,7 @@ export default function(server: Hapi.Server) {
     method: 'DELETE',
     async handler(req: Hapi.Request, reply: any) {
       const repoUri: string = req.params.uri as string;
-      const dataPath: string = req.server.config().get('castro.dataPath');
       const log = new Log(req.server);
-
       const objectClient = req.getSavedObjectsClient();
       try {
         // Delete the repository from ES.
@@ -68,7 +66,7 @@ export default function(server: Hapi.Server) {
         await objectClient.delete(REPOSITORY_INDEX_TYPE, repoUri);
 
         // Delete the repository data
-        const repoService = new RepositoryService(dataPath, log);
+        const repoService = new RepositoryService(options.repoPath, log);
         await repoService.remove(repoUri);
         reply();
       } catch (error) {

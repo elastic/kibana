@@ -8,14 +8,15 @@ import * as Hapi from 'hapi';
 
 import { Log } from '../log';
 import { LanguageServerController } from '../lsp/controller';
+import { WorkspaceHandler } from '../lsp/WorkspaceHandler';
+import ServerOptions from '../ServerOptions';
 
-import * as Path from 'path';
-
-export default async function(server: Hapi.Server) {
-  const repodir = Path.join(__dirname, '../../');
+export default async function(server: Hapi.Server, options: ServerOptions) {
   const log = new Log(server);
 
-  log.info('root dir is ' + repodir);
+  const workspacePath: string = options.workspacePath;
+
+  const repoPath: string = options.repoPath;
 
   const controller = new LanguageServerController('127.0.0.1', console, server);
 
@@ -26,7 +27,7 @@ export default async function(server: Hapi.Server) {
   await controller
     .initialize({}, [
       {
-        uri: `file://${repodir}`,
+        uri: `file://${workspacePath}`,
         name: 'root',
       },
     ])
@@ -39,7 +40,12 @@ export default async function(server: Hapi.Server) {
         // is it a json ?
         const method = req.params.method;
         if (method) {
-          controller.receiveRequest(`textDocument/${method}`, req.payload).then(
+          const workspaceHandler = new WorkspaceHandler(repoPath, workspacePath, log);
+          const { method: fullMethod, payload } = await workspaceHandler.resolveRequest(
+            method,
+            req.payload
+          );
+          controller.receiveRequest(fullMethod, payload).then(
             result => {
               reply.response(result);
             },

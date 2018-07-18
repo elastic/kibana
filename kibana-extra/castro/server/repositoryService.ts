@@ -15,7 +15,7 @@ import { Log } from './log';
 export default class RepositoryService {
   constructor(private readonly repoVolPath: string, private log: Log) {}
 
-  public async clone(repo: Repository): Promise<Repository> {
+  public async clone(repo: Repository): Promise<Repository | null> {
     if (!repo) {
       return null;
     } else {
