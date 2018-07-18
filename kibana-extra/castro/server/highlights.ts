@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { CodeLine } from 'model';
+import { CodeLine } from '../model';
 
 import Selector from 'first-mate-select-grammar';
 import Highlights from 'highlights';

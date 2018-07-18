@@ -17,13 +17,13 @@ const defaultState: RootState = {
 
 const reducer = handleActions(
   {
-    [increase]: (state: RootState, action: any) => {
+    [String(increase)]: (state: RootState, action: any) => {
       console.log('Receive increase action with payload: ' + action.payload); // tslint:disable-line no-console
       return {
         count: state.count + action.payload,
       };
     },
-    [decrease]: (state: RootState, action: any) => {
+    [String(decrease)]: (state: RootState, action: any) => {
       console.log('Receive decrease action with payload: ' + action.payload); // tslint:disable-line no-console
       return {
         count: state.count - action.payload,

@@ -4,7 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { createAction } from 'redux-actions';
+declare module 'ui/chrome' {
+  class UiChrome {
+    public setRootController(name: string, provider: (...args: any[]) => any): void;,
+  }
 
-export const increase = createAction<number>('INCREASE');
-export const decrease = createAction<number>('DECREASE');
+  const chrome: UiChrome;
+
+  export default chrome;
+}

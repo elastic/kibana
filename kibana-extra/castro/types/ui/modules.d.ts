@@ -4,7 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { createAction } from 'redux-actions';
+declare module 'ui/modules' {
+  import angular from 'angular';
 
-export const increase = createAction<number>('INCREASE');
-export const decrease = createAction<number>('DECREASE');
+  export const uiModules: {
+    get(name: string): angular.IModule;
+  };
+}

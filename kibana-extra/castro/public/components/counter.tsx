@@ -15,8 +15,8 @@ import { EuiButton } from '@elastic/eui';
 
 interface Props {
   count: number;
-  onIncrease: ((amount: number) => void);
-  onDecrease: ((amount: number) => void);
+  onIncrease: typeof increase;
+  onDecrease: typeof decrease;
 }
 
 class Counter extends React.Component<Props> {

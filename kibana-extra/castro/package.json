@@ -19,7 +19,8 @@
     "precommit": "lint-staged",
     "build": "plugin-helpers build",
     "start-deps": "node ../../kibana/scripts/es.js snapshot -E path.data=../../data",
-    "debug": " node --inspect ../../kibana/scripts/kibana.js --config ../../config/kibana/kibana.yml  --env.name=development --optimize.enabled=false --plugin-path=."
+    "debug": "node --inspect ../../kibana/scripts/kibana.js --config ../../config/kibana/kibana.yml --env.name=development --optimize.enabled=false --plugin-path=.",
+    "type-check": "tsc --project tsconfig.json --noEmit --pretty"
   },
   "lint-staged": {
     "*.{ts,tsx}": "yarn run tslint"
@@ -27,17 +28,20 @@
   "devDependencies": {
     "@elastic/eui": "^3.0.0",
     "@kbn/plugin-helpers": "link:../../kibana/packages/kbn-plugin-helpers",
+    "@types/angular": "^1.6.48",
     "@types/boom": "^7.2.0",
     "@types/elasticsearch": "^5.0.24",
+    "@types/file-type": "^5.2.1",
     "@types/get-port": "^3.2.0 ",
+    "@types/git-url-parse": "^9.0.0",
     "@types/hapi": "^15.0.0",
     "@types/nodegit": "^0.22.1",
     "@types/react": "^16.3.16",
     "@types/react-dom": "^16.0.6",
     "@types/react-redux": "^6.0.2",
+    "@types/react-router-dom": "^4.2.7",
     "@types/redux-actions": "^2.3.0",
-    "@types/file-type": "^5.2.1",
-    "@types/git-url-parse": "^9.0.0",
+    "@types/rimraf": "^2.0.2",
     "expect.js": "^0.3.1",
     "husky": "^0.14.3",
     "lint-staged": "^7.2.0",
@@ -47,7 +51,6 @@
     "typescript": "^2.9.2"
   },
   "dependencies": {
-
     "boom": "^7.2.0",
     "file-type": "^8.1.0",
     "get-port": "^3.2.0",

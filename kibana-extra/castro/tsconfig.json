@@ -1,10 +1,14 @@
 {
   "extends": "../../kibana/tsconfig.json",
   "compilerOptions": {
+    "baseUrl": ".",
     "paths": {
       "*": [
         "*",
         "webpackShims/*"
+      ],
+      "ui/*": [
+        "../../kibana/src/ui/public/*"
       ]
     }
   },

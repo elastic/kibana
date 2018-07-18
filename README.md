@@ -28,6 +28,14 @@ See the [contributing guide](./CONTRIBUTING.md) for instructions setting up your
 
     Lint the sourcecode with [`tslint`](https://github.com/palantir/tslint) and fix any auto-fixable errors.
 
+  - `./gradlew typeCheck`
+
+    Check types in the source code with the TypeScript compiler.
+
+  - `./gradlew typeCheckWatch`
+
+    Check types in the source code with the TypeScript compiler once initially and again whenever a source file changes.
+
 ## License
 
 All files in this repository are subject to the Elastic License. See [`LICENSE.txt`](./LICENSE.txt) for details.
