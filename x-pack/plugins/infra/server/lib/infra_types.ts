@@ -28,7 +28,6 @@ export interface InfraConfiguration {
     partitionFactor: number;
   };
   sources: {
-    default: InfraSourceConfiguration;
     [sourceName: string]: InfraSourceConfiguration;
   };
 }

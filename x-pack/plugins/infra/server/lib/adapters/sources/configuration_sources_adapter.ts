@@ -4,14 +4,21 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { InfraConfiguration } from '../../infra_types';
 import { InfraConfigurationAdapter } from '../configuration';
-import { InfraSourceConfiguration, InfraSourcesAdapter } from './adapter_types';
+import {
+  InfraSourceConfigurations,
+  InfraSourcesAdapter,
+  PartialInfraSourceConfigurations,
+} from './adapter_types';
+
+interface ConfigurationWithSources {
+  sources?: PartialInfraSourceConfigurations;
+}
 
 export class InfraConfigurationSourcesAdapter implements InfraSourcesAdapter {
-  private readonly configuration: InfraConfigurationAdapter<InfraConfiguration>;
+  private readonly configuration: InfraConfigurationAdapter<ConfigurationWithSources>;
 
-  constructor(configuration: InfraConfigurationAdapter<InfraConfiguration>) {
+  constructor(configuration: InfraConfigurationAdapter<ConfigurationWithSources>) {
     this.configuration = configuration;
   }
 
@@ -27,28 +34,29 @@ export class InfraConfigurationSourcesAdapter implements InfraSourcesAdapter {
   }
 
   public async getAll() {
-    const sourceConfigurations = (await this.configuration.get()).sources;
+    const sourceConfigurations = (await this.configuration.get()).sources || {
+      default: DEFAULT_SOURCE,
+    };
     const sourceConfigurationsWithDefault = {
       ...sourceConfigurations,
       default: {
         ...DEFAULT_SOURCE,
         ...(sourceConfigurations.default || {}),
       },
-    };
+    } as PartialInfraSourceConfigurations;
 
-    return Object.entries(sourceConfigurationsWithDefault).reduce<{
-      [sourceId: string]: InfraSourceConfiguration;
-    }>(
-      (result, [sourceId, sourceConfiguration]) => ({
-        ...result,
-        [sourceId]: {
-          ...sourceConfiguration,
-          fields: {
-            ...DEFAULT_FIELDS,
-            ...sourceConfiguration.fields,
+    return Object.entries(sourceConfigurationsWithDefault).reduce<InfraSourceConfigurations>(
+      (result, [sourceId, sourceConfiguration]) =>
+        ({
+          ...result,
+          [sourceId]: {
+            ...sourceConfiguration,
+            fields: {
+              ...DEFAULT_FIELDS,
+              ...(sourceConfiguration.fields || {}),
+            },
           },
-        },
-      }),
+        } as InfraSourceConfigurations),
       {}
     );
   }

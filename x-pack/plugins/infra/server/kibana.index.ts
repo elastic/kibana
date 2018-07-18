@@ -38,8 +38,8 @@ export const getConfigSchema = (Joi: typeof JoiNamespace) => {
   const InfraRootConfigSchema = Joi.object({
     enabled: Joi.boolean().default(true),
     query: Joi.object({
-      partitionSize: Joi.number().default(75),
-      partitionFactor: Joi.number().default(1.2),
+      partitionSize: Joi.number(),
+      partitionFactor: Joi.number(),
     }).default(),
     sources: Joi.object()
       .keys({

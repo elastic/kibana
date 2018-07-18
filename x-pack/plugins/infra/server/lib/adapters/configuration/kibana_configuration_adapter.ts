@@ -27,8 +27,20 @@ export class InfraKibanaConfigurationAdapter<Configuration>
       throw new Error('Failed to access configuration of server.');
     }
 
+    const configuration = config.get('xpack.infra') || {};
+    const configurationWithDefaults = {
+      enabled: true,
+      query: {
+        partitionSize: 75,
+        partitionFactor: 1.2,
+        ...(configuration.query || {}),
+      },
+      sources: {},
+      ...configuration,
+    } as Configuration;
+
     // we assume this to be the configuration because Kibana would have already validated it
-    return config.get('xpack.infra') as Configuration;
+    return configurationWithDefaults;
   }
 }
 

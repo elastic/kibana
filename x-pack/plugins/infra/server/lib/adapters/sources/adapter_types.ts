@@ -6,9 +6,7 @@
 
 export interface InfraSourcesAdapter {
   get(sourceId: string): Promise<InfraSourceConfiguration>;
-  getAll(): Promise<{
-    [sourceId: string]: InfraSourceConfiguration;
-  }>;
+  getAll(): Promise<InfraSourceConfigurations>;
 }
 
 export interface InfraSourceConfiguration {
@@ -23,3 +21,21 @@ export interface InfraSourceConfiguration {
     timestamp: string;
   };
 }
+
+export interface InfraSourceConfigurations {
+  [sourceId: string]: InfraSourceConfiguration;
+}
+
+export type PartialInfraSourceConfigurations = {
+  default?: PartialInfraDefaultSourceConfiguration;
+} & {
+  [sourceId: string]: PartialInfraSourceConfiguration;
+};
+
+export type PartialInfraDefaultSourceConfiguration = {
+  fields?: Partial<InfraSourceConfiguration['fields']>;
+} & Partial<Pick<InfraSourceConfiguration, Exclude<keyof InfraSourceConfiguration, 'fields'>>>;
+
+export type PartialInfraSourceConfiguration = {
+  fields?: Partial<InfraSourceConfiguration['fields']>;
+} & Pick<InfraSourceConfiguration, Exclude<keyof InfraSourceConfiguration, 'fields'>>;
