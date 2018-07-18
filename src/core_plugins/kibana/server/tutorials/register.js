@@ -27,6 +27,7 @@ import { nginxMetricsSpecProvider } from './nginx_metrics';
 import { mysqlLogsSpecProvider } from './mysql_logs';
 import { mysqlMetricsSpecProvider } from './mysql_metrics';
 import { mongodbMetricsSpecProvider } from './mongodb_metrics';
+import { osqueryLogsSpecProvider } from './osquery_logs';
 import { phpfpmMetricsSpecProvider } from './php_fpm_metrics';
 import { postgresqlMetricsSpecProvider } from './postgresql_metrics';
 import { redisLogsSpecProvider } from './redis_logs';
@@ -48,6 +49,7 @@ export function registerTutorials(server) {
   server.registerTutorial(mysqlLogsSpecProvider);
   server.registerTutorial(mysqlMetricsSpecProvider);
   server.registerTutorial(mongodbMetricsSpecProvider);
+  server.registerTutorial(osqueryLogsSpecProvider);
   server.registerTutorial(phpfpmMetricsSpecProvider);
   server.registerTutorial(postgresqlMetricsSpecProvider);
   server.registerTutorial(redisLogsSpecProvider);
