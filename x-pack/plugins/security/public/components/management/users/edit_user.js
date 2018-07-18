@@ -15,8 +15,8 @@ import {
   EuiTitle,
   EuiForm,
   EuiFormRow,
-  EuiToolTip,
   EuiIcon,
+  EuiText,
   EuiFieldText,
   EuiPage,
   EuiComboBox,
@@ -284,21 +284,21 @@ export class EditUser extends Component {
             <EuiPageContentHeader>
               <EuiPageContentHeaderSection>
                 <EuiTitle>
-                  <h2>
-                    {isNewUser ? 'New User' : `"${user.username}" User`} &nbsp;
-
-                    {reserved ? (
-                      <EuiToolTip
-                        content={'Reserved users are built-in and cannot be removed or modified. Only the password may be changed.'}
-                      >
-                        <EuiIcon style={{ verticalAlign: "super" }} type={'lock'} />
-                      </EuiToolTip>
-                    ) : null}
-                  </h2>
+                  <h2>{isNewUser ? 'New user' : `Edit "${user.username}" user`}</h2>
                 </EuiTitle>
               </EuiPageContentHeaderSection>
+              {reserved &&
+                <EuiPageContentHeaderSection>
+                  <EuiIcon type="lock" size="l" color="subdued" />
+                </EuiPageContentHeaderSection>
+              }
             </EuiPageContentHeader>
             <EuiPageContentBody>
+              {reserved &&
+                <EuiText size="s" color="subdued">
+                  <p>Reserved users are built-in and cannot be removed or modified. Only the password may be changed.</p>
+                </EuiText>
+              }
 
               {showDeleteConfirmation ? (
                 <ConfirmDelete
@@ -418,7 +418,7 @@ export class EditUser extends Component {
                       <EuiFlexItem grow={true} />
                       {isNewUser || reserved ? null : (
                         <EuiFlexItem grow={false}>
-                          <EuiButton
+                          <EuiButtonEmpty
                             onClick={() => {
                               this.setState({ showDeleteConfirmation: true });
                             }}
@@ -426,7 +426,7 @@ export class EditUser extends Component {
                             color="danger"
                           >
                             Delete user
-                          </EuiButton>
+                          </EuiButtonEmpty>
                         </EuiFlexItem>
                       )}
                     </EuiFlexGroup>
