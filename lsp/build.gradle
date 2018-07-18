@@ -1,0 +1,29 @@
+buildscript {
+  repositories {
+    maven {
+      url "https://plugins.gradle.org/m2/"
+    }
+  }
+  dependencies {
+    classpath "com.moowork.gradle:gradle-node-plugin:1.2.0"
+  }
+}
+
+project("javascript-typescript-langserver") {
+  apply plugin: "com.moowork.node"
+
+  node {
+    version = rootProject.nodeVersion
+    yarnVersion = rootProject.yarnVersion
+    download = true
+  }
+
+  tasks.withType(NpmTask) { task ->
+    task.environment = ['FORCE_COLOR': 'true']
+  }
+
+  // TODO run a
+  task build(type: NpmTask, dependsOn: "npm_install") {
+    args = ['run', "build"]
+  }
+}

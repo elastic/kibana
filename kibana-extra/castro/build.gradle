@@ -50,29 +50,27 @@ task bootstrap(type: YarnTask, dependsOn: [yarnSetup, checkoutKibana])  {
   )
 
   args = ['kbn', 'bootstrap']
-  environment = ['FORCE_COLOR': 'true']
 }
 
-task startKibana(type: YarnTask, dependsOn: [bootstrap]) {
+task startKibana(type: YarnTask, dependsOn: [bootstrap, ":lsp:javascript-typescript-langserver:build"]) {
   args = ['start', '--logging.json=false']
-  environment = ['FORCE_COLOR': 'true']
 }
 
 task startDeps(type: YarnTask, dependsOn: [bootstrap]) {
   args = ['start-deps']
-  environment = ['FORCE_COLOR': 'true']
 }
 
 task lint(type: YarnTask, dependsOn: [bootstrap]) {
   args = ['tslint']
-  environment = ['FORCE_COLOR': 'true']
 }
 
 task lintFix(type: YarnTask, dependsOn: [bootstrap]) {
   args = ['tslint', '--fix']
-  environment = ['FORCE_COLOR': 'true']
 }
 
+tasks.withType(YarnTask) { task ->
+  task.environment = ['FORCE_COLOR': 'true']
+}
 task typeCheck(type: YarnTask, dependsOn: [bootstrap]) {
   args = ['type-check']
   environment = ['FORCE_COLOR': 'true']

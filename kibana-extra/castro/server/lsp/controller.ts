@@ -14,9 +14,8 @@ import {
 import { Log } from '../log';
 import { LanguageServerProxy } from './proxy';
 
+import childProcess from 'child_process';
 import getPort from 'get-port';
-
-import { serve } from 'javascript-typescript-langserver/lib/server';
 
 /**
  * Manage different LSP servers and forward request to different LSP using LanguageServerProxy, currently
@@ -70,11 +69,23 @@ export class LanguageServerController {
     const port = await getPort({ port: 20000 });
 
     this.log.info('Launch Typescript Language Server at port ' + port);
-    // TODO move it to subprocess
-    serve({
-      clusterSize: 1,
-      lspPort: port,
-    });
+    childProcess.spawn(
+      'node',
+      [
+        '../lsp/javascript-typescript-langserver/lib/language-server',
+        '-p',
+        port.toString(),
+        '-c',
+        '1',
+      ],
+      {
+        detached: true,
+        stdio: 'inherit',
+      }
+    );
+
+    // TODO get rid of that
+    childProcess.execSync('sleep 2');
 
     this.lsps.push(new LanguageServerProxy(port, this.targetHost, this.lspLogger));
   }
