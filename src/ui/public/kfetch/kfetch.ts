@@ -76,8 +76,8 @@ export function kfetch(fetchOptions?: KFetchOptions, kibanaOptions?: KFetchKiban
     try {
       // attempt to read the body of the response
       return reject(new FetchError(res, await res.json()));
-    } catch (err) {
-      // ignore error if we are not be able to get body for response
+    } catch (_) {
+      // send FetchError without the body if we are not be able to read the body for some reason
       return reject(new FetchError(res));
     }
   });
