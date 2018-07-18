@@ -83,7 +83,7 @@ export class Users extends Component {
       return (
         <EuiPage className="mgtUsersListingPage">
           <EuiPageBody>
-            <EuiPageContent horizontalPosition="center" className="mgtUsersListingPage__content">
+            <EuiPageContent horizontalPosition="center">
               <EuiEmptyPrompt
                 iconType="securityApp"
                 iconColor={null}
@@ -188,7 +188,7 @@ export class Users extends Component {
     return (
       <EuiPage className="mgtUsersListingPage">
         <EuiPageBody>
-          <EuiPageContent verticalPosition="center" horizontalPosition="center" className="mgtUsersListingPage__content">
+          <EuiPageContent className="mgtUsersListingPage__content">
             <EuiPageContentHeader>
               <EuiPageContentHeaderSection>
                 <EuiTitle>
