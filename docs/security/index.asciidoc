@@ -23,3 +23,5 @@ authentication and built-in users, see
 You can manage roles on the *Management* / *Security* / *Roles* page.  For more
 information, see
 {xpack-ref}/authorization.html[Configuring Role-based Access Control].
+
+include::kibana-privileges.asciidoc[]

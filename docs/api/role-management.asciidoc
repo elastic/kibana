@@ -9,7 +9,7 @@ This is a stable API, and breaking changes should only occur in major versions a
 clearly documented in the breaking changes documentation for that release.
 ==========================
 
-The role management API allows people to manage roles that grant Kibana Privileges.
+The role management API allows people to manage roles that grant <<kibana-privileges>>.
 It is *not* supported to do so using the
 {ref}/security-api-roles.html[Elasticsearch Role Management APIs], and doing 
 so will likely cause Kibana's authorization to behave unexpectedly. 
