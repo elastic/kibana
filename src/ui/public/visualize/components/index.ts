@@ -17,4 +17,4 @@
  * under the License.
  */
 
-export * from './visualization';
+export { Visualization } from './visualization';
