@@ -28,7 +28,7 @@ export const UI_EXPORT_DEFAULTS = {
 
   webpackAliases: {
     ui: resolve(ROOT, 'src/ui/public'),
-    ui_framework: resolve(ROOT, 'ui_framework'),
+    '__kibanaCore__$': resolve(ROOT, 'src/core/public'),
     test_harness: resolve(ROOT, 'src/test_harness/public'),
     querystring: 'querystring-browser',
     moment$: resolve(ROOT, 'webpackShims/moment'),
@@ -56,6 +56,9 @@ export const UI_EXPORT_DEFAULTS = {
     embeddableFactories: [
       'plugins/kibana/visualize/embeddable/visualize_embeddable_factory_provider',
       'plugins/kibana/discover/embeddable/search_embeddable_factory_provider',
-    ]
+    ],
+    search: [
+      'ui/courier/search_strategy/default_search_strategy',
+    ],
   },
 };
