@@ -18,7 +18,7 @@
  */
 
 import { resolve } from 'path';
-import { formats } from '@kbn/i18n';
+import { i18n } from '@kbn/i18n';
 import JSON5 from 'json5';
 
 import { extractHtmlMessages } from './extract_html_messages';
@@ -93,7 +93,9 @@ export async function extractDefaultTranslations(inputPath) {
   );
 
   // .slice(0, -1): remove closing curly brace from json to append messages
-  let jsonBuffer = Buffer.from(JSON5.stringify({ formats }, { quote: `'`, space: 2 }).slice(0, -1));
+  let jsonBuffer = Buffer.from(
+    JSON5.stringify({ formats: i18n.formats }, { quote: `'`, space: 2 }).slice(0, -1)
+  );
 
   const defaultMessages = [...defaultMessagesMap].sort(([key1], [key2]) => {
     return key1 < key2 ? -1 : 1;
