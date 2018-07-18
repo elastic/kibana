@@ -58,6 +58,22 @@ it('prevents changing properties on nested children of argument', () => {
   }).toThrowError(`read only property 'box'`);
 });
 
+it('prevents adding items to a frozen array', () => {
+  const frozen = deepFreeze({ foo: [1] });
+  expect(() => {
+    // @ts-ignore ts knows this shouldn't be possible, but just making sure
+    frozen.foo.push(2);
+  }).toThrowError(`object is not extensible`);
+});
+
+it('prevents reassigning items in a frozen array', () => {
+  const frozen = deepFreeze({ foo: [1] });
+  expect(() => {
+    // @ts-ignore ts knows this shouldn't be possible, but just making sure
+    frozen.foo[0] = 2;
+  }).toThrowError(`read only property '0'`);
+});
+
 it('types return values to prevent mutations in typescript', async () => {
   const result = await execa.stdout(
     'tsc',
