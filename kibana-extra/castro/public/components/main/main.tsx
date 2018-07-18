@@ -57,15 +57,16 @@ export class Main extends React.Component<MainProps, MainState> {
     const { title } = this.props;
     return (
       <EuiPage>
-        <EuiPageHeader>
-          <EuiTitle size="l">
-            <h1>Hello {title}!</h1>
-          </EuiTitle>
-          <EuiButton>
-            <Link to="/codebrowsing">browsing code</Link>
-          </EuiButton>
-        </EuiPageHeader>
         <EuiPageBody>
+          <EuiPageHeader>
+            <EuiTitle size="l">
+              <h1>Hello {title}!</h1>
+            </EuiTitle>
+            <EuiButton>
+              <Link to="/codebrowsing">browsing code</Link>
+            </EuiButton>
+          </EuiPageHeader>
+
           <EuiPageContent>
             <EuiPageContentHeader>
               <EuiTitle>

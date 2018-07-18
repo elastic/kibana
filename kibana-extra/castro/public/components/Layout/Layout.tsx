@@ -16,6 +16,7 @@ import {
   EuiHeaderSectionItemButton,
   EuiIcon,
   EuiPage,
+  EuiPageBody,
 } from '@elastic/eui';
 
 import DirectoryTree from './DirectoryTree';
@@ -61,26 +62,28 @@ export default class Layout extends React.Component<any, State> {
 
     return (
       <EuiPage>
-        <EuiHeader>
-          <EuiHeaderSection>
-            <EuiHeaderSectionItem border="right">
-              <EuiHeaderLogo>Code Browsing</EuiHeaderLogo>
-            </EuiHeaderSectionItem>
-          </EuiHeaderSection>
+        <EuiPageBody>
+          <EuiHeader>
+            <EuiHeaderSection>
+              <EuiHeaderSectionItem border="right">
+                <EuiHeaderLogo>Code Browsing</EuiHeaderLogo>
+              </EuiHeaderSectionItem>
+            </EuiHeaderSection>
 
-          <EuiHeaderSection side="right">
-            <EuiHeaderSectionItemButton aria-label="Search">
-              <EuiIcon type="search" size="m" />
-            </EuiHeaderSectionItemButton>
-          </EuiHeaderSection>
-        </EuiHeader>
-        <EuiFlexGroup>
-          <EuiFlexItem style={{ maxWidth: 300 }}>
-            <DirectoryTree items={this.state.children} onClick={this.onClick} />
-          </EuiFlexItem>
+            <EuiHeaderSection side="right">
+              <EuiHeaderSectionItemButton aria-label="Search">
+                <EuiIcon type="search" size="m" />
+              </EuiHeaderSectionItemButton>
+            </EuiHeaderSection>
+          </EuiHeader>
+          <EuiFlexGroup>
+            <EuiFlexItem style={{ maxWidth: 300 }}>
+              <DirectoryTree items={this.state.children} onClick={this.onClick} />
+            </EuiFlexItem>
 
-          <EuiFlexItem>{editor}</EuiFlexItem>
-        </EuiFlexGroup>
+            <EuiFlexItem>{editor}</EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiPageBody>
       </EuiPage>
     );
   }

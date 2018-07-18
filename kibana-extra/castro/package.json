@@ -25,7 +25,7 @@
     "*.{ts,tsx}": "yarn run tslint"
   },
   "devDependencies": {
-    "@elastic/eui": "^0.0.51",
+    "@elastic/eui": "^3.0.0",
     "@kbn/plugin-helpers": "link:../../kibana/packages/kbn-plugin-helpers",
     "@types/elasticsearch": "^5.0.24",
     "@types/hapi": "^15.0.0",
