@@ -117,7 +117,7 @@ describe('#start()', () => {
 
   it('calls lifecycleSystem#start()', () => {
     startCore();
-    const [mockInstance] = MockInjectedMetadataService.mock.instances;
+    const [mockInstance] = MockLegacyPlatformService.mock.instances;
     expect(mockInstance.start).toHaveBeenCalledTimes(1);
     expect(mockInstance.start).toHaveBeenCalledWith({
       injectedMetadata: mockInjectedMetadataStartContract,
