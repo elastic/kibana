@@ -138,10 +138,7 @@ export default class KbnServer {
    * @return undefined
    */
   async listen() {
-    const {
-      server,
-      config,
-    } = this;
+    const { server } = this;
 
     await this.ready();
     await fromNode(cb => server.start(cb));
@@ -151,11 +148,6 @@ export default class KbnServer {
       process.send(['WORKER_LISTENING']);
     }
 
-    server.log(['listening', 'info'], `Server running at ${server.info.uri}${
-      config.get('server.rewriteBasePath')
-        ? config.get('server.basePath')
-        : ''
-    }`);
     return server;
   }
 
