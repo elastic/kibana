@@ -23,8 +23,11 @@ import { Home } from './home';
 import { FeatureCatalogueCategory } from 'ui/registry/feature_catalogue';
 
 const addBasePath = (url) => { return `base_path/${url}`; };
+const findMock = () => {
+  return Promise.resolve({ total: 1 });
+};
 
-test('should render home component', () => {
+test('should render home component', async () => {
   const recentlyAccessed = [
     {
       label: 'my vis',
@@ -37,22 +40,37 @@ test('should render home component', () => {
     directories={[]}
     apmUiEnabled={true}
     recentlyAccessed={recentlyAccessed}
+    find={findMock}
   />);
+
+  // Ensure all promises resolve
+  await new Promise(resolve => process.nextTick(resolve));
+  // Ensure the state changes are reflected
+  component.update();
+
+
   expect(component).toMatchSnapshot(); // eslint-disable-line
 });
 
-test('should not contain RecentlyAccessed panel when there is no recentlyAccessed history', () => {
+test('should not contain RecentlyAccessed panel when there is no recentlyAccessed history', async () => {
   const component = shallow(<Home
     addBasePath={addBasePath}
     directories={[]}
     apmUiEnabled={true}
     recentlyAccessed={[]}
+    find={findMock}
   />);
+
+  // Ensure all promises resolve
+  await new Promise(resolve => process.nextTick(resolve));
+  // Ensure the state changes are reflected
+  component.update();
+
   expect(component).toMatchSnapshot(); // eslint-disable-line
 });
 
 describe('directories', () => {
-  test('should render DATA directory entry in "Explore Data" panel', () => {
+  test('should render DATA directory entry in "Explore Data" panel', async () => {
     const directoryEntry = {
       id: 'dashboard',
       title: 'Dashboard',
@@ -68,11 +86,18 @@ describe('directories', () => {
       directories={[directoryEntry]}
       apmUiEnabled={true}
       recentlyAccessed={[]}
+      find={findMock}
     />);
+
+    // Ensure all promises resolve
+    await new Promise(resolve => process.nextTick(resolve));
+    // Ensure the state changes are reflected
+    component.update();
+
     expect(component).toMatchSnapshot(); // eslint-disable-line
   });
 
-  test('should render ADMIN directory entry in "Manage" panel', () => {
+  test('should render ADMIN directory entry in "Manage" panel', async () => {
     const directoryEntry = {
       id: 'index_patterns',
       title: 'Index Patterns',
@@ -88,11 +113,18 @@ describe('directories', () => {
       directories={[directoryEntry]}
       apmUiEnabled={true}
       recentlyAccessed={[]}
+      find={findMock}
     />);
+
+    // Ensure all promises resolve
+    await new Promise(resolve => process.nextTick(resolve));
+    // Ensure the state changes are reflected
+    component.update();
+
     expect(component).toMatchSnapshot(); // eslint-disable-line
   });
 
-  test('should not render directory entry when showOnHomePage is false', () => {
+  test('should not render directory entry when showOnHomePage is false', async () => {
     const directoryEntry = {
       id: 'management',
       title: 'Management',
@@ -108,7 +140,13 @@ describe('directories', () => {
       directories={[directoryEntry]}
       apmUiEnabled={true}
       recentlyAccessed={[]}
+      find={findMock}
     />);
+    // Ensure all promises resolve
+    await new Promise(resolve => process.nextTick(resolve));
+    // Ensure the state changes are reflected
+    component.update();
+
     expect(component).toMatchSnapshot(); // eslint-disable-line
   });
 });

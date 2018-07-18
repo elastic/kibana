@@ -40,11 +40,11 @@ export function HomeApp({
   getConfig,
   setConfig,
   clearIndexPatternsCache,
-  bulkCreate,
 }) {
 
   const isCloudEnabled = chrome.getInjected('isCloudEnabled', false);
   const apmUiEnabled = chrome.getInjected('apmUiEnabled', true);
+  const savedObjectsClient = chrome.getSavedObjectsClient();
 
   const renderTutorialDirectory = (props) => {
     return (
@@ -67,7 +67,7 @@ export function HomeApp({
         getTutorial={getTutorial}
         replaceTemplateStrings={replaceTemplateStrings}
         tutorialId={props.match.params.id}
-        bulkCreate={bulkCreate}
+        bulkCreate={savedObjectsClient.bulkCreate}
       />
     );
   };
@@ -99,6 +99,7 @@ export function HomeApp({
             directories={directories}
             apmUiEnabled={apmUiEnabled}
             recentlyAccessed={recentlyAccessed}
+            find={savedObjectsClient.find}
           />
         </Route>
       </Switch>
@@ -121,5 +122,4 @@ HomeApp.propTypes = {
   getConfig: PropTypes.func.isRequired,
   setConfig: PropTypes.func.isRequired,
   clearIndexPatternsCache: PropTypes.func.isRequired,
-  bulkCreate: PropTypes.func.isRequired,
 };

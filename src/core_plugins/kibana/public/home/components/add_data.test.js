@@ -24,6 +24,7 @@ import { AddData } from './add_data';
 test('render', () => {
   const component = shallow(<AddData
     apmUiEnabled={false}
+    isNewKibanaInstance={false}
   />);
   expect(component).toMatchSnapshot(); // eslint-disable-line
 });
@@ -31,6 +32,15 @@ test('render', () => {
 test('apmUiEnabled', () => {
   const component = shallow(<AddData
     apmUiEnabled={true}
+    isNewKibanaInstance={false}
+  />);
+  expect(component).toMatchSnapshot(); // eslint-disable-line
+});
+
+test('isNewKibanaInstance', () => {
+  const component = shallow(<AddData
+    apmUiEnabled={false}
+    isNewKibanaInstance={true}
   />);
   expect(component).toMatchSnapshot(); // eslint-disable-line
 });

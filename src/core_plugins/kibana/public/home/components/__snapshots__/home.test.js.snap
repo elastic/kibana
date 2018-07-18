@@ -8,6 +8,7 @@ exports[`directories should not render directory entry when showOnHomePage is fa
   <EuiPageBody>
     <AddData
       apmUiEnabled={true}
+      isNewKibanaInstance={false}
     />
     <EuiSpacer
       size="l"
@@ -121,6 +122,7 @@ exports[`directories should render ADMIN directory entry in "Manage" panel 1`] =
   <EuiPageBody>
     <AddData
       apmUiEnabled={true}
+      isNewKibanaInstance={false}
     />
     <EuiSpacer
       size="l"
@@ -253,6 +255,7 @@ exports[`directories should render DATA directory entry in "Explore Data" panel 
   <EuiPageBody>
     <AddData
       apmUiEnabled={true}
+      isNewKibanaInstance={false}
     />
     <EuiSpacer
       size="l"
@@ -385,6 +388,7 @@ exports[`should not contain RecentlyAccessed panel when there is no recentlyAcce
   <EuiPageBody>
     <AddData
       apmUiEnabled={true}
+      isNewKibanaInstance={false}
     />
     <EuiSpacer
       size="l"
@@ -514,6 +518,7 @@ exports[`should render home component 1`] = `
     </React.Fragment>
     <AddData
       apmUiEnabled={true}
+      isNewKibanaInstance={false}
     />
     <EuiSpacer
       size="l"
