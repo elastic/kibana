@@ -7,6 +7,7 @@
 import d3 from 'd3';
 import 'ace';
 import rison from 'rison-node';
+import React from 'react';
 
 // import the uiExports that we want to "use"
 import 'uiExports/fieldFormats';
@@ -718,11 +719,13 @@ app.controller('graphuiPlugin', function ($scope, $route, $interval, $http, kbnU
       .on('zoom', redraw));
 
 
+  const managementUrl = chrome.getNavLinkById('kibana:management').url;
+  const url = `${managementUrl}/kibana/indices`;
 
   if ($scope.indices.length === 0) {
     toastNotifications.addWarning({
       title: 'No data sources',
-      text: 'Head over to Kibana settings and define an index pattern',
+      text: <p>Go to <a href={url}>Management &gt; Index Patterns</a> and create an index pattern</p>,
     });
   }
 
