@@ -36,6 +36,17 @@ import { kubernetesMetricsSpecProvider } from './kubernetes_metrics';
 import { netflowSpecProvider } from './netflow';
 import { apmSpecProvider } from './apm';
 import { cephMetricsSpecProvider } from './ceph_metrics';
+import { aerospikeMetricsSpecProvider } from './aerospike_metrics';
+import { couchbaseMetricsSpecProvider } from './couchbase_metrics';
+import { dropwizardMetricsSpecProvider } from './dropwizard_metrics';
+import { elasticsearchMetricsSpecProvider } from './elasticsearch_metrics';
+import { etcdMetricsSpecProvider } from './etcd_metrics';
+import { haproxyMetricsSpecProvider } from './haproxy_metrics';
+import { kafkaMetricsSpecProvider } from './kafka_metrics';
+import { kibanaMetricsSpecProvider } from './kibana_metrics';
+import { memcachedMetricsSpecProvider } from './memcached_metrics';
+import { muninMetricsSpecProvider } from './munin_metrics';
+import { windowsMetricsSpecProvider } from './windows_metrics';
 
 export function registerTutorials(server) {
   server.registerTutorial(systemLogsSpecProvider);
@@ -57,4 +68,15 @@ export function registerTutorials(server) {
   server.registerTutorial(netflowSpecProvider);
   server.registerTutorial(apmSpecProvider);
   server.registerTutorial(cephMetricsSpecProvider);
+  server.registerTutorial(aerospikeMetricsSpecProvider);
+  server.registerTutorial(couchbaseMetricsSpecProvider);
+  server.registerTutorial(dropwizardMetricsSpecProvider);
+  server.registerTutorial(elasticsearchMetricsSpecProvider);
+  server.registerTutorial(etcdMetricsSpecProvider);
+  server.registerTutorial(haproxyMetricsSpecProvider);
+  server.registerTutorial(kafkaMetricsSpecProvider);
+  server.registerTutorial(kibanaMetricsSpecProvider);
+  server.registerTutorial(memcachedMetricsSpecProvider);
+  server.registerTutorial(muninMetricsSpecProvider);
+  server.registerTutorial(windowsMetricsSpecProvider);
 }
