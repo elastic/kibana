@@ -35,6 +35,7 @@ import { redisLogsSpecProvider } from './redis_logs';
 import { redisMetricsSpecProvider } from './redis_metrics';
 import { dockerMetricsSpecProvider } from './docker_metrics';
 import { kubernetesMetricsSpecProvider } from './kubernetes_metrics';
+import { uwsgiMetricsSpecProvider } from './uwsgi_metrics';
 import { netflowSpecProvider } from './netflow';
 import { apmSpecProvider } from './apm';
 import { cephMetricsSpecProvider } from './ceph_metrics';
@@ -58,6 +59,7 @@ export function registerTutorials(server) {
   server.registerTutorial(redisMetricsSpecProvider);
   server.registerTutorial(dockerMetricsSpecProvider);
   server.registerTutorial(kubernetesMetricsSpecProvider);
+  server.registerTutorial(uwsgiMetricsSpecProvider);
   server.registerTutorial(netflowSpecProvider);
   server.registerTutorial(apmSpecProvider);
   server.registerTutorial(cephMetricsSpecProvider);
