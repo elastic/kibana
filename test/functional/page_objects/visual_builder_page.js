@@ -32,7 +32,7 @@ export function VisualBuilderPageProvider({ getService, getPageObjects }) {
       const fromTime = '2015-09-19 06:31:44.000';
       const toTime = '2015-09-22 18:31:44.000';
       log.debug('navigateToApp visualize');
-      await PageObjects.common.navigateToUrl('visualize', 'new');
+      await PageObjects.visualize.navigateToNewVisualization();
       await PageObjects.header.waitUntilLoadingHasFinished();
       log.debug('clickVisualBuilderChart');
       await find.clickByPartialLinkText('Visual Builder');
