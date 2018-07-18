@@ -56,7 +56,7 @@ const defaultParams = {
   }),
 };
 
-beforeEach(() => {
+afterEach(() => {
   jest.clearAllMocks();
   injectedMetadataStartContract.getLegacyMetadata.mockReset();
   jest.resetModules();
