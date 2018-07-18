@@ -54,9 +54,10 @@ export function jobsProvider(callWithRequest) {
         await callWithRequest('ml.closeJob', { jobId });
         results[jobId] = { closed: true };
       } catch (error) {
-        if (error.statusCode === 409) {
-          // if we receive a 409, the job might be in a failed state
-          // so try again but with a force close.
+        if (error.statusCode === 409 && error.response.includes('datafeed') === false) {
+          // the close job request may fail (409) if the job has failed or if the datafeed hasn't been stopped.
+          // if the job has failed we want to attempt a force close.
+          // however, if we received a 409 due to the datafeed being started we should not attempt a force close.
           try {
             await callWithRequest('ml.closeJob', { jobId, force: true });
             results[jobId] = { closed: true };
