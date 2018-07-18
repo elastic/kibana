@@ -83,11 +83,11 @@ export class KibanaMigrator {
    */
   constructor({ kbnServer }: { kbnServer: KbnServer }) {
     this.kbnServer = kbnServer;
-    this.mappingProperties = mergeProperties(kbnServer.uiExports.savedObjectMappings);
+    this.mappingProperties = mergeProperties(kbnServer.uiExports.savedObjectMappings || []);
     this.documentMigrator = new DocumentMigrator({
       kibanaVersion: kbnServer.version,
-      migrations: kbnServer.uiExports.savedObjectMigrations,
-      validateDoc: docValidator(kbnServer.uiExports.savedObjectValidations),
+      migrations: kbnServer.uiExports.savedObjectMigrations || {},
+      validateDoc: docValidator(kbnServer.uiExports.savedObjectValidations || {}),
     });
   }
 
