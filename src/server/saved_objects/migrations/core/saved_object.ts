@@ -17,7 +17,24 @@
  * under the License.
  */
 
-import { RawDoc, SavedObjectDoc } from './types';
+import { RawDoc } from './call_cluster';
+
+export interface MigrationVersion {
+  [type: string]: string;
+}
+
+export interface SavedObjectDoc {
+  attributes: any;
+  id: string;
+  type: string;
+  migrationVersion?: MigrationVersion;
+
+  // We're going to allow for miscellaneous root-level properties
+  // in saved objects, which amount to meta-information that various
+  // plugins can put on any saved object. Things like security ACLs
+  // might fall into this category.
+  [rootProp: string]: any;
+}
 
 /**
  * Converts a document from the format that is stored in elasticsearch to the saved object client format.

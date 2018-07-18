@@ -19,8 +19,9 @@
 
 import _ from 'lodash';
 import sinon from 'sinon';
-import { IndexMigrator, MigrationOpts } from './index_migrator';
-import { SavedObjectDoc } from './types';
+import { CallCluster } from './call_cluster';
+import { IndexMigrator } from './index_migrator';
+import { SavedObjectDoc } from './saved_object';
 
 describe('IndexMigrator', () => {
   test('patches the index mappings if the index is already migrated', async () => {
@@ -265,9 +266,7 @@ describe('IndexMigrator', () => {
       type: 'foo',
       attributes: { name: 'Baz' },
     });
-    expect(
-      callCluster.args.filter(([action]) => action === 'bulk').length
-    ).toEqual(2);
+    expect(callCluster.args.filter(([action]) => action === 'bulk').length).toEqual(2);
     sinon.assert.calledWith(callCluster, 'bulk', {
       body: [
         { index: { _id: 'foo:1', _index: '.kibana_2', _type: 'doc' } },
@@ -283,7 +282,7 @@ describe('IndexMigrator', () => {
   });
 });
 
-function defaultOpts(): MigrationOpts {
+function defaultOpts() {
   return {
     batchSize: 10,
     callCluster: sinon.stub(),
@@ -340,15 +339,13 @@ function withIndex(callCluster: sinon.SinonStub, opts: any = {}) {
     .returns(searchResult(docs.length));
 
   callCluster.withArgs('bulk').returns(Promise.resolve({ items: [] }));
-  callCluster
-    .withArgs('count')
-    .returns(Promise.resolve({ count: numOutOfDate }));
+  callCluster.withArgs('count').returns(Promise.resolve({ count: numOutOfDate }));
 }
 
-function clusterStub(opts: MigrationOpts) {
+function clusterStub(opts: { callCluster: CallCluster }) {
   return opts.callCluster as sinon.SinonStub;
 }
 
-function ranMigration(opts: MigrationOpts) {
+function ranMigration(opts: { callCluster: CallCluster }) {
   return clusterStub(opts).calledWith('indices.create', sinon.match.any);
 }

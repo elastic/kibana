@@ -17,31 +17,19 @@
  * under the License.
  */
 
-///////////////////////////////////////////////////////////////////
-// The core, public interface for migrations
-///////////////////////////////////////////////////////////////////
-
-export type LogFn = (path: string[], message: string) => void;
-
-///////////////////////////////////////////////////////////////////
-// elasticsearch.js wrapper function type definition
-///////////////////////////////////////////////////////////////////
-
+/**
+ * Defines the signature of the subset of elasticsearch.js that
+ * migrations use.
+ */
 export interface CallCluster {
   (path: 'bulk', opts: { body: object[] }): Promise<BulkResult>;
   (path: 'count', opts: CountOpts): Promise<{ count: number }>;
   (path: 'clearScroll', opts: { scrollId: string }): Promise<any>;
-  (path: 'indices.create' | 'indices.delete', opts: IndexCreationOpts): Promise<
-    any
-  >;
+  (path: 'indices.create' | 'indices.delete', opts: IndexCreationOpts): Promise<any>;
   (path: 'indices.exists', opts: IndexOpts): Promise<boolean>;
   (path: 'indices.existsAlias', opts: { name: string }): Promise<boolean>;
-  (path: 'indices.get', opts: IndexOpts & Ignorable): Promise<
-    IndicesInfo | NotFound
-  >;
-  (path: 'indices.getAlias', opts: { name: string } & Ignorable): Promise<
-    AliasResult | NotFound
-  >;
+  (path: 'indices.get', opts: IndexOpts & Ignorable): Promise<IndicesInfo | NotFound>;
+  (path: 'indices.getAlias', opts: { name: string } & Ignorable): Promise<AliasResult | NotFound>;
   (path: 'indices.getMapping', opts: IndexOpts): Promise<MappingResult>;
   (path: 'indices.getSettings', opts: IndexOpts): Promise<IndexSettingsResult>;
   (path: 'indices.putMapping', opts: PutMappingOpts): Promise<any>;
@@ -54,7 +42,7 @@ export interface CallCluster {
 }
 
 ///////////////////////////////////////////////////////////////////
-// elasticsearch.js method argument types
+// callCluster argument type definitions
 ///////////////////////////////////////////////////////////////////
 
 export interface Ignorable {
@@ -136,7 +124,7 @@ export interface ScrollOpts {
 }
 
 ///////////////////////////////////////////////////////////////////
-// elasticsearch.js method return value types
+// callCluster result type definitions
 ///////////////////////////////////////////////////////////////////
 
 export interface NotFound {
@@ -169,6 +157,12 @@ export interface IndexSettingsResult {
   };
 }
 
+export interface RawDoc {
+  _id: string;
+  _source: any;
+  _type?: string;
+}
+
 export interface SearchResults {
   hits: {
     hits: RawDoc[];
@@ -189,37 +183,6 @@ export interface IndicesInfo {
   [index: string]: IndexInfo;
 }
 
-///////////////////////////////////////////////////////////////////
-// Documents
-///////////////////////////////////////////////////////////////////
-
-export interface RawDoc {
-  _id: string;
-  _source: any;
-  _type?: string;
-}
-
-export interface SavedObjectDoc {
-  attributes: any;
-  id: string;
-  type: string;
-  migrationVersion?: MigrationVersion;
-
-  // We're going to allow for miscellaneous root-level properties
-  // in saved objects, which amount to meta-information that various
-  // plugins can put on any saved object. Things like security ACLs
-  // might fall into this category.
-  [rootProp: string]: any;
-}
-
-///////////////////////////////////////////////////////////////////
-// Migration plugin and dependent types
-///////////////////////////////////////////////////////////////////
-
-export interface MigrationVersion {
-  [type: string]: string;
-}
-
 export interface MappingProperties {
   [type: string]: any;
 }
@@ -231,23 +194,4 @@ export interface DocMapping {
 
 export interface IndexMapping {
   doc: DocMapping;
-}
-
-export type TransformFn = (doc: SavedObjectDoc) => SavedObjectDoc;
-
-export interface VersionTransforms {
-  [version: string]: TransformFn;
-}
-
-export interface MigrationDefinition {
-  [type: string]: VersionTransforms;
-}
-
-export interface BatchReader {
-  read: () => Promise<SavedObjectDoc[]>;
-  close: () => Promise<void>;
-}
-
-export interface BatchWriter {
-  write: (docs: SavedObjectDoc[]) => Promise<void>;
 }

@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { LogFn } from './types';
+export type LogFn = (path: string[], message: string) => void;
 
 export interface Logger {
   debug: (msg: string) => void;

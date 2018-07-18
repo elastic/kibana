@@ -22,7 +22,7 @@
 */
 
 import _ from 'lodash';
-import { IndexMapping, MappingProperties } from './types';
+import { IndexMapping, MappingProperties } from './call_cluster';
 
 /**
  * Creates an index mapping with the core properties required by saved object
@@ -86,10 +86,7 @@ function validateAndMerge(dest: MappingProperties, source: MappingProperties) {
   return Object.assign(dest, source);
 }
 
-function assertUniqueProperties(
-  dest: MappingProperties,
-  source: MappingProperties
-) {
+function assertUniqueProperties(dest: MappingProperties, source: MappingProperties) {
   const duplicate = Object.keys(source).find(prop => !!dest[prop]);
   if (duplicate) {
     throw new Error(`Cannot redefine core mapping "${duplicate}".`);
@@ -99,8 +96,6 @@ function assertUniqueProperties(
 function assertValidPropertyNames(source: MappingProperties) {
   const invalidProp = Object.keys(source).find(k => k.startsWith('_'));
   if (invalidProp) {
-    throw new Error(
-      `Invalid mapping "${invalidProp}". Mappings cannot start with _.`
-    );
+    throw new Error(`Invalid mapping "${invalidProp}". Mappings cannot start with _.`);
   }
 }

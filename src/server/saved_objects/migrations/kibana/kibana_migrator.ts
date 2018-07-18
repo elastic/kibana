@@ -33,10 +33,6 @@ import {
 } from '../core';
 import { DocumentMigrator, IDocumentMigrator } from '../core/document_migrator';
 
-/***********************************************************************
- * Type definitions for the expected shape of KbnServer
- ***********************************************************************/
-
 export interface KbnServer {
   server: Server;
   version: string;

@@ -19,13 +19,13 @@
 
 import _ from 'lodash';
 import { buildActiveMappings } from './build_active_mappings';
+import { CallCluster, IndexMapping, MappingProperties } from './call_cluster';
 import { IDocumentMigrator } from './document_migrator';
 import { ElasticIndex } from './elastic_index';
 import { coordinateMigration } from './migration_coordinator';
-import { Logger, MigrationLogger } from './migration_logger';
-import { CallCluster, IndexMapping, LogFn, MappingProperties } from './types';
+import { LogFn, Logger, MigrationLogger } from './migration_logger';
 
-export type MigrationResult =
+type MigrationResult =
   | { status: 'skipped' }
   | {
       status: 'migrated';
@@ -34,7 +34,7 @@ export type MigrationResult =
       elapsedMs: number;
     };
 
-export interface MigrationOpts {
+interface MigrationOpts {
   batchSize: number;
   pollInterval: number;
   scrollDuration: string;

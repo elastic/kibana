@@ -21,8 +21,13 @@
  * This provides a batch reader interface for reading batches of docs out of an index.
 */
 
-import { rawToSavedObject } from './saved_object';
-import { BatchReader, CallCluster } from './types';
+import { CallCluster } from './call_cluster';
+import { rawToSavedObject, SavedObjectDoc } from './saved_object';
+
+export interface BatchReader {
+  read: () => Promise<SavedObjectDoc[]>;
+  close: () => Promise<void>;
+}
 
 interface Opts {
   batchSize: number;

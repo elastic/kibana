@@ -55,7 +55,17 @@
 
 import _ from 'lodash';
 import Semver from 'semver';
-import { MigrationDefinition, MigrationVersion, SavedObjectDoc, TransformFn } from './types';
+import { MigrationVersion, SavedObjectDoc } from './saved_object';
+
+export interface VersionTransforms {
+  [version: string]: TransformFn;
+}
+
+export interface MigrationDefinition {
+  [type: string]: VersionTransforms;
+}
+
+export type TransformFn = (doc: SavedObjectDoc) => SavedObjectDoc;
 
 type ValidateDoc = (doc: SavedObjectDoc) => void;
 

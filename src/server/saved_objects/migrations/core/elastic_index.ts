@@ -19,15 +19,8 @@
 
 import _ from 'lodash';
 import { BatchIndexReader } from './batch_index_reader';
-import { savedObjectToRaw } from './saved_object';
-import {
-  AliasAction,
-  CallCluster,
-  IndexMapping,
-  MigrationVersion,
-  NotFound,
-  SavedObjectDoc,
-} from './types';
+import { AliasAction, CallCluster, IndexMapping, NotFound } from './call_cluster';
+import { MigrationVersion, SavedObjectDoc, savedObjectToRaw } from './saved_object';
 
 /*
  * This module contains various functions for querying and manipulating

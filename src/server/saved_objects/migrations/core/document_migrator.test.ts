@@ -19,7 +19,7 @@
 
 import _ from 'lodash';
 import { DocumentMigrator } from './document_migrator';
-import { SavedObjectDoc } from './types';
+import { SavedObjectDoc } from './saved_object';
 
 describe('DocumentMigrator', () => {
   it('migrates type and attributes', () => {
