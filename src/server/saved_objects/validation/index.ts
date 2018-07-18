@@ -53,7 +53,7 @@ export type ValidateDoc = (doc: SavedObjectDoc) => void;
  * @param {Validators} validators
  * @param {SavedObjectDoc} doc
  */
-export function docValidator(validators: PropertyValidators): ValidateDoc {
+export function docValidator(validators: PropertyValidators = {}): ValidateDoc {
   return function validateDoc(doc: SavedObjectDoc) {
     Object.keys(doc)
       .concat(doc.type)

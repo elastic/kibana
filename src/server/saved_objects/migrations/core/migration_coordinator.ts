@@ -20,8 +20,8 @@
 /*
  * This provides a mechanism for preventing multiple Kibana instances from
  * simultaneously running migrations on the same index. It synchronizes this
- * by creating / deleting a temporary index as essentially, an expensive, distributed
- * mutex.
+ * by handling index creation conflicts, and putting this instance into a
+ * poll loop that periodically checks to see if the index is migrated.
  *
  * The reason we have to coordinate this, rather than letting each Kibana instance
  * perform duplicate work, is that if we allowed each Kibana to simply run migrations in
@@ -35,89 +35,76 @@
 */
 
 import _ from 'lodash';
-import { ElasticIndex } from './elastic_index';
 import { Logger } from './migration_logger';
-import { CallCluster } from './types';
 
 const DEFAULT_POLL_INTERVAL = 15000;
 
 interface Opts {
-  callCluster: CallCluster;
-  index: string;
+  runMigration: () => Promise<any>;
+  isMigrated: () => Promise<boolean>;
   log: Logger;
   pollInterval?: number;
 }
 
 /**
- * Coordinates the running of a function such that it will only run in one Kibana
- * instance at a time.
+ * Runs the migration specified by opts. If the migration fails due to an index
+ * creation conflict, this falls into a polling loop, checking every pollInterval
+ * milliseconds if the index is migrated.
  *
  * @export
- * @class MigrationCoordinator
+ * @param {Opts} opts
+ * @prop {Migration} runMigration - A function that runs the index migration
+ * @prop {IsMigrated} isMigrated - A function which checks if the index is already migrated
+ * @prop {Logger} log - The migration logger
+ * @prop {number} pollInterval - How often, in ms, to check that the index is migrated
+ * @returns
  */
-export class MigrationCoordinator {
-  private lockIndex: ElasticIndex;
-  private index: string;
-  private log: Logger;
-  private pollInterval: number;
+export async function coordinateMigration(opts: Opts) {
+  try {
+    await opts.runMigration();
+  } catch (error) {
+    if (handleIndexExists(error, opts.log)) {
+      return waitForMigration(opts.isMigrated, opts.pollInterval);
+    }
+    throw error;
+  }
+}
 
-  // If the lock is already held by someone else, we want to make sure to log this,
-  // as it could indicate a previous migration exited ungracefully and needs to be
-  // cleaned up. But we only want to log it once, so we don't spam the logs while polling.
-  private warnLockExists = _.once((error?: object) => {
-    const { index, lockIndex, log } = this;
-
-    log.warning(
-      `Migration of index "${index}" appears to be underway. ` +
-        `If migrations are not underway, you can delete the lock index "${lockIndex}" ` +
-        `and restart Kibana. ` +
-        `${error ? JSON.stringify(error) : ''}`
-    );
-  });
-
-  constructor(opts: Opts) {
-    this.lockIndex = new ElasticIndex({
-      callCluster: opts.callCluster,
-      index: `${opts.index}_migration_lock`,
-    });
-    this.index = opts.index;
-    this.log = opts.log;
-    this.pollInterval = opts.pollInterval || DEFAULT_POLL_INTERVAL;
+/**
+ * If the specified error is an index exists error, this logs a warning,
+ * and is the cue for us to fall into a polling loop, waiting for some
+ * other Kibana instance to complete the migration.
+ */
+function handleIndexExists(error: any, log: Logger) {
+  const isIndexExistsError =
+    _.get(error, 'body.error.type') === 'resource_already_exists_exception';
+  if (!isIndexExistsError) {
+    return false;
   }
 
-  /**
-   * Waits for opts.run to complete. If opts.run is running on an other instance, this
-   * will wait for that to complete before attempting to run locally.
-   *
-   * @returns {Promise<void>}
-   * @memberof MigrationCoordinator
-   */
-  public async run(fn: () => Promise<any>) {
-    while (true) {
-      const lock = await this.acquireLock();
+  const index = _.get(error, 'body.error.index');
 
-      if (lock) {
-        return fn().then(lock.release);
-      }
+  log.warning(
+    `Index ${index} already exists. This may be because another Kibana instance ` +
+      `is running migrations. If no other Kibana instance is running migrations, ` +
+      `you can get past this error by deleting ${index} and restarting Kibnaa.`
+  );
 
-      await sleep(this.pollInterval);
+  return true;
+}
+
+/**
+ * Polls isMigrated every pollInterval milliseconds until it returns true.
+ */
+async function waitForMigration(
+  isMigrated: () => Promise<boolean>,
+  pollInterval = DEFAULT_POLL_INTERVAL
+) {
+  while (true) {
+    if (await isMigrated()) {
+      return;
     }
-  }
-
-  /**
-   * Attempt to create the lock index, and fail gracfully if it already exists.
-   */
-  private async acquireLock() {
-    const { lockIndex, log } = this;
-    const lockAcquired = await lockIndex.create();
-
-    if (!lockAcquired) {
-      return this.warnLockExists();
-    }
-
-    return {
-      release: () => lockIndex.deleteIndex(),
-    };
+    await sleep(pollInterval);
   }
 }
 

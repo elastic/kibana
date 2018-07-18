@@ -121,13 +121,7 @@ export class ElasticIndex {
    * @prop {string} scrollDuration - The scroll duration used for scrolling through the index
    * @memberof BatchIndexWriter
    */
-  public reader({
-    batchSize,
-    scrollDuration,
-  }: {
-    batchSize: number;
-    scrollDuration: string;
-  }) {
+  public reader({ batchSize, scrollDuration }: { batchSize: number; scrollDuration: string }) {
     return new BatchIndexReader({
       batchSize,
       callCluster: this.callCluster,
@@ -184,9 +178,7 @@ export class ElasticIndex {
    *
    * @param {MigrationVersion} migrationVersion - The latest versions of the migrations
    */
-  public async hasMigrations(
-    migrationVersion: MigrationVersion
-  ): Promise<boolean> {
+  public async hasMigrations(migrationVersion: MigrationVersion): Promise<boolean> {
     const { callCluster, index } = this;
     const indexInfo = await this.fetchInfo();
 
@@ -198,28 +190,26 @@ export class ElasticIndex {
       body: {
         query: {
           bool: {
-            should: Object.entries(migrationVersion).map(
-              ([type, latestVersion]) => ({
-                bool: {
-                  must: [
-                    {
-                      exists: {
-                        field: type,
-                      },
+            should: Object.entries(migrationVersion).map(([type, latestVersion]) => ({
+              bool: {
+                must: [
+                  {
+                    exists: {
+                      field: type,
                     },
-                    {
-                      bool: {
-                        must_not: {
-                          term: {
-                            [`migrationVersion.${type}`]: latestVersion,
-                          },
+                  },
+                  {
+                    bool: {
+                      must_not: {
+                        term: {
+                          [`migrationVersion.${type}`]: latestVersion,
                         },
                       },
                     },
-                  ],
-                },
-              })
-            ),
+                  },
+                ],
+              },
+            })),
           },
         },
       },
@@ -252,23 +242,10 @@ export class ElasticIndex {
   public async create(mappings?: IndexMapping) {
     const { callCluster, index } = this;
 
-    try {
-      await callCluster('indices.create', {
-        body: { mappings },
-        index,
-      });
-
-      return true;
-    } catch (error) {
-      const isIndexExistsError =
-        _.get(error, 'body.error.type') === 'resource_already_exists_exception';
-
-      if (isIndexExistsError) {
-        return false;
-      }
-
-      throw error;
-    }
+    await callCluster('indices.create', {
+      body: { mappings },
+      index,
+    });
   }
 
   /**
@@ -301,7 +278,7 @@ export class ElasticIndex {
       waitForCompletion: true,
     });
 
-    await this.claimAlias(index, [{ remove_index: { index } }]);
+    await this.claimAlias(index, [{ remove_index: { index } }], originalIndex);
   }
 
   /**
@@ -309,8 +286,12 @@ export class ElasticIndex {
    * alias, meaning that it will only point to one index at a time, so we
    * remove any other indices from the alias.
    */
-  public async claimAlias(alias: string, aliasActions: AliasAction[] = []) {
-    const { callCluster, index } = this;
+  public async claimAlias(
+    alias: string,
+    aliasActions: AliasAction[] = [],
+    index: string = this.index
+  ) {
+    const { callCluster } = this;
     const result = await callCluster('indices.getAlias', {
       ignore: [404],
       name: alias,
@@ -324,9 +305,7 @@ export class ElasticIndex {
 
     await callCluster('indices.updateAliases', {
       body: {
-        actions: aliasActions
-          .concat(removeActions)
-          .concat({ add: { index, alias } }),
+        actions: aliasActions.concat(removeActions).concat({ add: { index, alias } }),
       },
     });
 

@@ -21,7 +21,7 @@ import _ from 'lodash';
 import { buildActiveMappings } from './build_active_mappings';
 import { IDocumentMigrator } from './document_migrator';
 import { ElasticIndex } from './elastic_index';
-import { MigrationCoordinator } from './migration_coordinator';
+import { coordinateMigration } from './migration_coordinator';
 import { Logger, MigrationLogger } from './migration_logger';
 import { CallCluster, IndexMapping, LogFn, MappingProperties } from './types';
 
@@ -104,9 +104,9 @@ export class IndexMigrator {
     };
   }
 
-  private isMigrated() {
+  private isMigrated = () => {
     return this.sourceIndex.hasMigrations(this.documentMigrator.migrationVersion);
-  }
+  };
 
   /**
    * Computes information necessary to migrate the index.
@@ -145,59 +145,41 @@ export class IndexMigrator {
    * will only run on one Kibana instance at a time.
    */
   private async migrateIndex() {
-    const { callCluster, sourceIndex, log } = this;
+    const { sourceIndex, log } = this;
     const context = await this.migrationContext();
     const { destIndex, fullMappings, sourceInfo } = context;
-    const coordinator = new MigrationCoordinator({
-      callCluster,
-      index: sourceIndex.name,
-      log,
+
+    await coordinateMigration({
+      isMigrated: this.isMigrated,
+      log: this.log,
       pollInterval: this.pollInterval,
-    });
+      runMigration: async () => {
+        // It can happen that the index was not migrated prior to us
+        // obtaining the migration lock, but that it is now migrated,
+        // as another instance may have obtained the lock first and
+        // performed the migration.
+        log.debug('Re-checking migration status');
+        if (await this.isMigrated()) {
+          return;
+        }
 
-    await coordinator.run(async () => {
-      // It can happen that the index was not migrated prior to us
-      // obtaining the migration lock, but that it is now migrated,
-      // as another instance may have obtained the lock first and
-      // performed the migration.
-      log.debug('Re-checking migration status');
-      if (await this.isMigrated()) {
-        return;
-      }
+        log.debug(`Creating index ${destIndex}`);
+        await destIndex.create(fullMappings);
 
-      log.debug(`Creating index ${destIndex}`);
-      await this.createIndex(destIndex, fullMappings);
+        if (sourceInfo.exists) {
+          log.debug(`Ensuring ${sourceIndex} is an alias`);
+          await sourceIndex.convertToAlias();
 
-      if (sourceInfo.exists) {
-        log.debug(`Ensuring ${sourceIndex} is an alias`);
-        await sourceIndex.convertToAlias();
+          log.debug(`Migrating ${sourceIndex} docs to ${destIndex}`);
+          await this.migrateDocs(destIndex);
+        }
 
-        log.debug(`Migrating ${sourceIndex} docs to ${destIndex}`);
-        await this.migrateDocs(destIndex);
-      }
-
-      log.debug(`Pointing ${sourceIndex} alias to ${destIndex}`);
-      await destIndex.claimAlias(sourceIndex.name);
+        log.debug(`Pointing ${sourceIndex} alias to ${destIndex}`);
+        await destIndex.claimAlias(sourceIndex.name);
+      },
     });
 
     return context;
-  }
-
-  /**
-   * Creates the specified index, logging a (hopefully) useful error and then
-   * failing if the index already exists.
-   */
-  private async createIndex(index: ElasticIndex, mappings: IndexMapping) {
-    if (!(await index.create(mappings))) {
-      this.log.warning(
-        `Index "${index}" already exists. This may indicate that a previous migration ` +
-          `failed, or it could be due to other factors. If you are sure that index "${index}" ` +
-          `is not in use, you can delete it to get past this error. If you do this, you will lose ` +
-          `any data that was in the index.`
-      );
-
-      throw new Error(`Index ${index} already exists.`);
-    }
   }
 
   /**
@@ -215,6 +197,7 @@ export class IndexMigrator {
       if (!originalDocs || !originalDocs.length) {
         return;
       }
+
       await destIndex.write(originalDocs.map(this.documentMigrator.migrate));
     }
   }

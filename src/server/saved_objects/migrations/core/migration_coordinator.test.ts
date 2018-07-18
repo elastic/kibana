@@ -19,106 +19,67 @@
 
 import _ from 'lodash';
 import sinon from 'sinon';
-import { MigrationCoordinator } from './migration_coordinator';
+import { coordinateMigration } from './migration_coordinator';
 
-describe('MigrationCoordinator', () => {
-  test('warns if the lock index exists', async () => {
-    const index = '.foo';
-    const callCluster = sinon.stub();
+describe('coordinateMigration', () => {
+  test('waits for isMigrated, if there is an index conflict', async () => {
     const log = logStub();
     const pollInterval = 1;
-    const run = sinon.stub().returns(Promise.resolve());
+    const runMigration = sinon.spy(() => {
+      throw { body: { error: { index: '.foo', type: 'resource_already_exists_exception' } } };
+    });
+    const isMigrated = sinon.stub();
 
-    callCluster
-      .withArgs('indices.create', sinon.match.any)
-      .onCall(0)
-      .throws({
-        body: { error: { type: 'resource_already_exists_exception' } },
-      })
-      .onCall(1)
-      .throws({
-        body: { error: { type: 'resource_already_exists_exception' } },
-      })
-      .onCall(2)
-      .returns(Promise.resolve());
+    isMigrated
+      .onFirstCall()
+      .returns(Promise.resolve(false))
+      .onSecondCall()
+      .returns(Promise.resolve(true));
 
-    const coordinator = new MigrationCoordinator({
-      callCluster,
-      index,
+    await coordinateMigration({
       log,
+      runMigration,
       pollInterval,
+      isMigrated,
     });
 
-    await coordinator.run(run);
-
-    sinon.assert.calledOnce(run);
-    expect(
-      log.warning.args.filter((msg: any) =>
-        /you can delete the lock index "\.foo_migration_lock"/.test(msg)
-      ).length
-    ).toEqual(1);
+    sinon.assert.calledOnce(runMigration);
+    sinon.assert.calledTwice(isMigrated);
+    expect(log.warning.args.filter((msg: any) => /deleting \.foo/.test(msg)).length).toEqual(1);
   });
 
-  test('deletes the lock after run completes', async () => {
-    const index = '.foo';
-    const callCluster = sinon.stub();
+  test('does not poll if the runMigration succeeds', async () => {
     const log = logStub();
     const pollInterval = 1;
-    const deleteAction = 'indices.delete';
-    const run = sinon.spy(() => {
-      return Promise.resolve().then(() =>
-        sinon.assert.neverCalledWith(callCluster, deleteAction, sinon.match.any)
-      );
-    });
+    const runMigration = sinon.spy(() => Promise.resolve());
+    const isMigrated = sinon.spy(() => Promise.resolve(true));
 
-    callCluster
-      .withArgs('indices.exists', sinon.match.any)
-      .returns(Promise.resolve(false));
-
-    callCluster
-      .withArgs('indices.create', sinon.match.any)
-      .onCall(0)
-      .returns(Promise.resolve());
-
-    const coordinator = new MigrationCoordinator({
-      callCluster,
-      index,
+    await coordinateMigration({
       log,
+      runMigration,
       pollInterval,
+      isMigrated,
     });
-
-    await coordinator.run(run);
-
-    sinon.assert.calledOnce(run);
-    sinon.assert.calledWith(callCluster, deleteAction, {
-      index: '.foo_migration_lock',
-    });
+    sinon.assert.notCalled(isMigrated);
   });
 
   test('does not swallow exceptions', async () => {
-    const index = '.foo';
-    const callCluster = sinon.stub();
     const log = logStub();
     const pollInterval = 1;
-    const run = sinon.spy();
-
-    callCluster
-      .withArgs('indices.exists', sinon.match.any)
-      .returns(Promise.resolve(false));
-
-    callCluster
-      .withArgs('indices.create', sinon.match.any)
-      .throws(new Error('Whoopsie!'));
-
-    const coordinator = new MigrationCoordinator({
-      callCluster,
-      index,
-      log,
-      pollInterval,
+    const runMigration = sinon.spy(() => {
+      throw new Error('Doh');
     });
+    const isMigrated = sinon.spy(() => Promise.resolve(true));
 
-    expect(coordinator.run(run)).rejects.toThrow(/Whoopsie!/);
-    sinon.assert.notCalled(run);
+    await expect(
+      coordinateMigration({
+        log,
+        runMigration,
+        pollInterval,
+        isMigrated,
+      })
+    ).rejects.toThrow(/Doh/);
+    sinon.assert.notCalled(isMigrated);
   });
 });
 
