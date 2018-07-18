@@ -12,21 +12,20 @@ const snapshotRegex = /-snapshot/i;
  * This provides a common structure to apply to all Kibana monitoring documents so that they can be commonly
  * searched, field-collapsed, and aggregated against.
  *
- * 'sourceKibana' is akin to the `source_node` details in Elasticsearch nodes.
- *
  * @param {Object} kbnServer manager of Kibana services - see `src/server/kbn_server` in Kibana core
  * @param {Object} config Server config
  * @param {String} host Kibana host
  * @return {Object} The object containing a "kibana" field and source instance details.
  */
-export function sourceKibana(kbnServer, config, host) {
+export function getKibanaInfoForStats(server, kbnServer) {
+  const config = server.config();
   const status = kbnServer.status.toJSON();
 
   return {
     uuid: config.get('server.uuid'),
     name: config.get('server.name'),
     index: config.get('kibana.index'),
-    host,
+    host: config.get('server.host'),
     transport_address: `${config.get('server.host')}:${config.get('server.port')}`,
     version: kbnServer.version.replace(snapshotRegex, ''),
     snapshot: snapshotRegex.test(kbnServer.version),
