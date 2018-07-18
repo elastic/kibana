@@ -115,14 +115,7 @@ export default function ({ getService, getPageObjects }) {
         it('clicking the non-primary basic cluster shows a toast message', async () => {
           const basicClusterLink = await clusterList.getClusterLink(UNSUPPORTED_CLUSTER_UUID);
           await basicClusterLink.click();
-
-          const actualMessage = await PageObjects.header.getToastMessage();
-          const expectedMessage = (
-            `You can't view the "staging" cluster because the Basic license does not support multi-cluster monitoring.
-Need to monitor multiple clusters? Get a license with full functionality to enjoy multi-cluster monitoring.`
-          );
-          expect(actualMessage).to.be(expectedMessage);
-          await PageObjects.header.clickToastOK();
+          expect(await testSubjects.exists('monitoringLicenseWarning', 2000)).to.be(true);
         });
 
         it('clicking the primary basic cluster goes to overview', async () => {
