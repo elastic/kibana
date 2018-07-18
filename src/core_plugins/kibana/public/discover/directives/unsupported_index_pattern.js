@@ -17,32 +17,34 @@
  * under the License.
  */
 
-import 'ngreact';
+import React, { Fragment } from 'react';
 
 import {
-  KuiToolBarSearchBox,
-} from '@kbn/ui-framework/components';
-
-import {
-  EuiConfirmModal,
-  EuiIcon,
-  EuiColorPicker,
-  EuiIconTip,
   EuiCallOut,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiSpacer,
 } from '@elastic/eui';
 
-import { uiModules } from './modules';
+export const DiscoverUnsupportedIndexPattern = ({ unsupportedType }) => {
+  // This message makes the assumption that X-Pack will support this type, as is the case with
+  // rollup index patterns.
+  const message = `Index patterns based on ${unsupportedType} indices require the` +
+    ` ${unsupportedType} plugin from X-Pack, which is not installed or disabled`;
 
-const app = uiModules.get('app/kibana', ['react']);
+  return (
+    <Fragment>
+      <EuiSpacer size="xl" />
 
-app.directive('toolBarSearchBox', reactDirective => reactDirective(KuiToolBarSearchBox));
-
-app.directive('confirmModal', reactDirective => reactDirective(EuiConfirmModal));
-
-app.directive('icon', reactDirective => reactDirective(EuiIcon));
-
-app.directive('colorPicker', reactDirective => reactDirective(EuiColorPicker));
-
-app.directive('iconTip', reactDirective => reactDirective(EuiIconTip, ['content', 'type', 'position', 'title']));
-
-app.directive('callOut', reactDirective => reactDirective(EuiCallOut, ['title', 'color', 'size', 'iconType', 'children']));
+      <EuiFlexGroup justifyContent="center">
+        <EuiFlexItem grow={false} className="discoverNoResults">
+          <EuiCallOut
+            title={message}
+            color="danger"
+            iconType="alert"
+          />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </Fragment>
+  );
+};
