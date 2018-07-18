@@ -67,34 +67,38 @@ const DEFAULT_TAB = 'timeline';
 
 export function getAgentMarks(transaction) {
   const duration = get(transaction, TRANSACTION_DURATION);
-  const threshold = duration / 50;
+  const threshold = duration / 100 * 2;
 
   return sortBy(
     Object.entries(get(transaction, 'transaction.marks.agent', [])),
     '1'
   )
-    .map(([name, ms]) => ({ name, label: ms, us: ms * 1000 }))
+    .map(([name, ms]) => ({
+      name,
+      timeLabel: ms * 1000,
+      timeAxis: ms * 1000
+    }))
     .reduce((acc, curItem) => {
-      const prevUs = get(last(acc), 'us');
-      const nextValidUs = prevUs + threshold;
-      const isTooClose = prevUs != null && nextValidUs > curItem.us;
-      const canFit = nextValidUs <= duration;
+      const prevTime = get(last(acc), 'timeAxis');
+      const nextValidTime = prevTime + threshold;
+      const isTooClose = prevTime != null && nextValidTime > curItem.timeAxis;
+      const canFit = nextValidTime <= duration;
 
       if (isTooClose && canFit) {
-        acc.push({ ...curItem, us: nextValidUs });
+        acc.push({ ...curItem, timeAxis: nextValidTime });
       } else {
         acc.push(curItem);
       }
       return acc;
     }, [])
     .reduceRight((acc, curItem) => {
-      const prevUs = get(last(acc), 'us');
-      const nextValidUs = prevUs - threshold;
-      const isTooClose = prevUs != null && nextValidUs < curItem.us;
-      const canFit = nextValidUs >= 0;
+      const prevTime = get(last(acc), 'timeAxis');
+      const nextValidTime = prevTime - threshold;
+      const isTooClose = prevTime != null && nextValidTime < curItem.timeAxis;
+      const canFit = nextValidTime >= 0;
 
       if (isTooClose && canFit) {
-        acc.push({ ...curItem, us: nextValidUs });
+        acc.push({ ...curItem, timeAxis: nextValidTime });
       } else {
         acc.push(curItem);
       }

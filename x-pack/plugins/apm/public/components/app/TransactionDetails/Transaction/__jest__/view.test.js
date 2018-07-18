@@ -21,9 +21,9 @@ describe('TransactionDetailsView', () => {
         }
       };
       expect(getAgentMarks(transaction)).toEqual([
-        { name: 'timeToFirstByte', label: 10, us: 10000 },
-        { name: 'domInteractive', label: 117, us: 117000 },
-        { name: 'domComplete', label: 118, us: 118000 }
+        { name: 'timeToFirstByte', timeLabel: 10000, timeAxis: 10000 },
+        { name: 'domInteractive', timeLabel: 117000, timeAxis: 117000 },
+        { name: 'domComplete', timeLabel: 118000, timeAxis: 118000 }
       ]);
     });
 
@@ -49,15 +49,15 @@ describe('TransactionDetailsView', () => {
         }
       };
       expect(getAgentMarks(transaction)).toEqual([
-        { label: 0, name: 'a', us: 0 },
-        { label: 10, name: 'b', us: 20000 },
-        { label: 11, name: 'c', us: 40000 },
-        { label: 12, name: 'd', us: 60000 },
-        { label: 968, name: 'e', us: 910000 },
-        { label: 969, name: 'f', us: 930000 },
-        { label: 970, name: 'timeToFirstByte', us: 950000 },
-        { label: 980, name: 'domInteractive', us: 970000 },
-        { label: 990, name: 'domComplete', us: 990000 }
+        { timeLabel: 0, name: 'a', timeAxis: 0 },
+        { timeLabel: 10000, name: 'b', timeAxis: 20000 },
+        { timeLabel: 11000, name: 'c', timeAxis: 40000 },
+        { timeLabel: 12000, name: 'd', timeAxis: 60000 },
+        { timeLabel: 968000, name: 'e', timeAxis: 910000 },
+        { timeLabel: 969000, name: 'f', timeAxis: 930000 },
+        { timeLabel: 970000, name: 'timeToFirstByte', timeAxis: 950000 },
+        { timeLabel: 980000, name: 'domInteractive', timeAxis: 970000 },
+        { timeLabel: 990000, name: 'domComplete', timeAxis: 990000 }
       ]);
     });
   });

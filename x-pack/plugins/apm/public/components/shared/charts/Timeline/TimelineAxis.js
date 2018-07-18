@@ -10,7 +10,7 @@ import _ from 'lodash';
 import { Sticky } from 'react-sticky';
 import { XYPlot, XAxis } from 'react-vis';
 import LastTickValue from './LastTickValue';
-import CircleMarker from './CircleMarker';
+import AgentMarker from './AgentMarker';
 import { colors, px } from '../../../../style/variables';
 import { getTimeFormatter } from '../../../../utils/formatters';
 
@@ -64,10 +64,10 @@ function TimelineAxis({ header, plotValues, agentMarks }) {
               <LastTickValue x={xScale(xMax)} value={tickFormat(xMax)} />
 
               {agentMarks.map(agentMark => (
-                <CircleMarker
-                  key={agentMark.us}
+                <AgentMarker
+                  key={agentMark.timeAxis}
                   agentMark={agentMark}
-                  x={xScale(agentMark.us)}
+                  x={xScale(agentMark.timeAxis)}
                 />
               ))}
             </XYPlot>

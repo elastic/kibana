@@ -20,7 +20,9 @@ class VerticalLines extends PureComponent {
       xMax
     } = this.props.plotValues;
 
-    const agentMarkTimes = this.props.agentMarks.map(({ us }) => us);
+    const agentMarkTimes = this.props.agentMarks.map(
+      ({ timeAxis }) => timeAxis
+    );
 
     return (
       <div

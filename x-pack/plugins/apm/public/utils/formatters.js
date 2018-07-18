@@ -7,7 +7,7 @@
 import { memoize } from 'lodash';
 import numeral from '@elastic/numeral';
 
-const UNIT_CUT_OFF = 10 * 1000000;
+const UNIT_CUT_OFF = 10 * 1000000; // 10 seconds in microseconds
 
 export function asSeconds(value, withUnit = true) {
   const formatted = asDecimal(value / 1000000);
@@ -34,6 +34,9 @@ export function timeUnit(max) {
   return max > UNIT_CUT_OFF ? 's' : 'ms';
 }
 
+/*
+ * value: time in microseconds
+ */
 export function asTime(value) {
   return getTimeFormatter(value)(value);
 }
