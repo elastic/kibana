@@ -1,6 +1,3 @@
--
-  var appName = 'kibana';
-
 block vars
 
 doctype html
@@ -16,63 +13,63 @@ html(lang='en')
         font-style: normal;
         font-weight: 300;
         src: local('Open Sans Light'), local('OpenSans-Light'),
-             url('#{kibanaPayload.basePath}/ui/fonts/open_sans/open_sans_v15_latin_300.woff2') format('woff2'),
-             url('#{kibanaPayload.basePath}/ui/fonts/open_sans/open_sans_v15_latin_300.woff') format('woff'),
-             url('#{kibanaPayload.basePath}/ui/fonts/open_sans/open_sans_v15_latin_300.ttf') format('truetype'),
-             url('#{kibanaPayload.basePath}/ui/fonts/open_sans/open_sans_v15_latin_300.svg#OpenSans') format('svg');
+             url('#{uiPublicUrl}/fonts/open_sans/open_sans_v15_latin_300.woff2') format('woff2'),
+             url('#{uiPublicUrl}/fonts/open_sans/open_sans_v15_latin_300.woff') format('woff'),
+             url('#{uiPublicUrl}/fonts/open_sans/open_sans_v15_latin_300.ttf') format('truetype'),
+             url('#{uiPublicUrl}/fonts/open_sans/open_sans_v15_latin_300.svg#OpenSans') format('svg');
       }
       @font-face {
         font-family: 'Open Sans';
         font-style: normal;
         font-weight: 400;
         src: local('Open Sans'), local('OpenSans'),
-             url('#{kibanaPayload.basePath}/ui/fonts/open_sans/open_sans_v15_latin_regular.woff2') format('woff2'),
-             url('#{kibanaPayload.basePath}/ui/fonts/open_sans/open_sans_v15_latin_regular.woff') format('woff'),
-             url('#{kibanaPayload.basePath}/ui/fonts/open_sans/open_sans_v15_latin_regular.ttf') format('truetype'),
-             url('#{kibanaPayload.basePath}/ui/fonts/open_sans/open_sans_v15_latin_regular.svg#OpenSans') format('svg');
+             url('#{uiPublicUrl}/fonts/open_sans/open_sans_v15_latin_regular.woff2') format('woff2'),
+             url('#{uiPublicUrl}/fonts/open_sans/open_sans_v15_latin_regular.woff') format('woff'),
+             url('#{uiPublicUrl}/fonts/open_sans/open_sans_v15_latin_regular.ttf') format('truetype'),
+             url('#{uiPublicUrl}/fonts/open_sans/open_sans_v15_latin_regular.svg#OpenSans') format('svg');
       }
       @font-face {
         font-family: 'Open Sans';
         font-style: normal;
         font-weight: 600;
         src: local('Open Sans SemiBold'), local('OpenSans-SemiBold'),
-             url('#{kibanaPayload.basePath}/ui/fonts/open_sans/open_sans_v15_latin_600.woff2') format('woff2'),
-             url('#{kibanaPayload.basePath}/ui/fonts/open_sans/open_sans_v15_latin_600.woff') format('woff'),
-             url('#{kibanaPayload.basePath}/ui/fonts/open_sans/open_sans_v15_latin_600.ttf') format('truetype'),
-             url('#{kibanaPayload.basePath}/ui/fonts/open_sans/open_sans_v15_latin_600.svg#OpenSans') format('svg');
+             url('#{uiPublicUrl}/fonts/open_sans/open_sans_v15_latin_600.woff2') format('woff2'),
+             url('#{uiPublicUrl}/fonts/open_sans/open_sans_v15_latin_600.woff') format('woff'),
+             url('#{uiPublicUrl}/fonts/open_sans/open_sans_v15_latin_600.ttf') format('truetype'),
+             url('#{uiPublicUrl}/fonts/open_sans/open_sans_v15_latin_600.svg#OpenSans') format('svg');
       }
       @font-face {
         font-family: 'Open Sans';
         font-style: normal;
         font-weight: 700;
         src: local('Open Sans Bold'), local('OpenSans-Bold'),
-             url('#{kibanaPayload.basePath}/ui/fonts/open_sans/open_sans_v15_latin_700.woff2') format('woff2'),
-             url('#{kibanaPayload.basePath}/ui/fonts/open_sans/open_sans_v15_latin_700.woff') format('woff'),
-             url('#{kibanaPayload.basePath}/ui/fonts/open_sans/open_sans_v15_latin_700.ttf') format('truetype'),
-             url('#{kibanaPayload.basePath}/ui/fonts/open_sans/open_sans_v15_latin_700.svg#OpenSans') format('svg');
+             url('#{uiPublicUrl}/fonts/open_sans/open_sans_v15_latin_700.woff2') format('woff2'),
+             url('#{uiPublicUrl}/fonts/open_sans/open_sans_v15_latin_700.woff') format('woff'),
+             url('#{uiPublicUrl}/fonts/open_sans/open_sans_v15_latin_700.ttf') format('truetype'),
+             url('#{uiPublicUrl}/fonts/open_sans/open_sans_v15_latin_700.svg#OpenSans') format('svg');
       }
 
     //- Favicons (generated from http://realfavicongenerator.net/)
     link(
-      rel='apple-touch-icon' sizes='180x180' href='#{kibanaPayload.basePath}/ui/favicons/apple-touch-icon.png'
+      rel='apple-touch-icon' sizes='180x180' href='#{uiPublicUrl}/favicons/apple-touch-icon.png'
     )
     link(
-      rel='icon' type='image/png' href='#{kibanaPayload.basePath}/ui/favicons/favicon-32x32.png' sizes='32x32'
+      rel='icon' type='image/png' href='#{uiPublicUrl}/favicons/favicon-32x32.png' sizes='32x32'
     )
     link(
-      rel='icon' type='image/png' href='#{kibanaPayload.basePath}/ui/favicons/favicon-16x16.png' sizes='16x16'
+      rel='icon' type='image/png' href='#{uiPublicUrl}/favicons/favicon-16x16.png' sizes='16x16'
     )
     link(
-      rel='manifest' href='#{kibanaPayload.basePath}/ui/favicons/manifest.json'
+      rel='manifest' href='#{uiPublicUrl}/favicons/manifest.json'
     )
     link(
-      rel='mask-icon' href='#{kibanaPayload.basePath}/ui/favicons/safari-pinned-tab.svg' color='#e8488b'
+      rel='mask-icon' href='#{uiPublicUrl}/favicons/safari-pinned-tab.svg' color='#e8488b'
     )
     link(
-      rel='shortcut icon' href='#{kibanaPayload.basePath}/ui/favicons/favicon.ico'
+      rel='shortcut icon' href='#{uiPublicUrl}/favicons/favicon.ico'
     )
     meta(
-      name='msapplication-config' content='#{kibanaPayload.basePath}/ui/favicons/browserconfig.xml'
+      name='msapplication-config' content='#{uiPublicUrl}/favicons/browserconfig.xml'
     )
     meta(
       name='theme-color' content='#ffffff'
@@ -120,6 +117,6 @@ html(lang='en')
     //- good because we may use them to override EUI styles.
     style#themeCss
 
-  body(kbn-chrome, id='#{appName}-body')
-    kbn-initial-state(data=JSON.stringify(kibanaPayload))
+  body
+    kbn-injected-metadata(data=JSON.stringify(injectedMetadata))
     block content
