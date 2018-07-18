@@ -32,7 +32,7 @@ export const KIBANA_SETTINGS_TYPE = 'kibana_settings';
  * The type name used within the Monitoring index to publish Kibana usage stats.
  * @type {string}
  */
-export const KIBANA_USAGE_TYPE = 'kibana';
+export const KIBANA_USAGE_TYPE = 'kibana_usage';
 
 /*
  * Key for the localStorage service

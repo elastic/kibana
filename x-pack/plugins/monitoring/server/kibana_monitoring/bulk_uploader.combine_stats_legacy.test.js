@@ -4,13 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { KIBANA_STATS_TYPE, KIBANA_USAGE_TYPE, KIBANA_SETTINGS_TYPE } from '../../common/constants';
 import { KIBANA_REPORTING_TYPE } from '../../../reporting/common/constants';
 import { BulkUploader } from './bulk_uploader';
 
 const getInitial = () => {
   return [
     [
-      { 'index': { '_type': 'kibana_stats' } },
+      { 'index': { '_type': KIBANA_STATS_TYPE } },
       {
         'host': 'tsullivan.local',
         'concurrent_connections': 0,
@@ -37,7 +38,7 @@ const getInitial = () => {
       }
     ],
     [
-      { 'index': { '_type': 'kibana' } },
+      { 'index': { '_type': KIBANA_USAGE_TYPE } },
       {
         'dashboard': { 'total': 0 },
         'visualization': { 'total': 0 },
@@ -63,7 +64,7 @@ const getInitial = () => {
       }
     ],
     [
-      { 'index': { '_type': 'kibana_settings' } },
+      { 'index': { '_type': KIBANA_SETTINGS_TYPE } },
       { 'xpack': { 'defaultAdminEmail': 'tim@elastic.co' } }
     ]
   ];
