@@ -31,7 +31,8 @@ import {
   EuiTableRowCell,
   EuiTableRowCellCheckbox,
   EuiTitle,
-  EuiText
+  EuiText,
+  EuiPageBody
 } from '@elastic/eui';
 
 import { IndexActionsContextMenu } from '../../components';
@@ -214,78 +215,80 @@ export class IndexTable extends Component {
 
     return (
       <EuiPage>
-        <EuiFlexGroup justifyContent="spaceBetween" alignItems="flexEnd">
-          <EuiFlexItem grow={false}>
-            <EuiTitle size="l">
-              <h1>Index management</h1>
-            </EuiTitle>
-            <EuiSpacer size="s" />
-            <EuiText>
-              <p>Update your Elasticsearch indices individually or in bulk</p>
-            </EuiText>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiSwitch
-              id="checkboxShowSystemIndices"
-              checked={showSystemIndices}
-              onChange={event => showSystemIndicesChanged(event.target.checked)}
-              label="Include system indices"
-            />
-          </EuiFlexItem>
-        </EuiFlexGroup>
-        <EuiSpacer />
-        <EuiFlexGroup gutterSize="l" alignItems="center">
-          {atLeastOneItemSelected ? (
+        <EuiPageBody>
+          <EuiFlexGroup justifyContent="spaceBetween" alignItems="flexEnd">
             <EuiFlexItem grow={false}>
-              <Route
-                key="menu"
-                render={() => (
-                  <IndexActionsContextMenu
-                    indexNames={Object.keys(selectedIndicesMap)}
-                    resetSelection={() => {
-                      this.setState({ selectedIndicesMap: {} });
-                    }}
-                  />
-                )}
+              <EuiTitle size="l">
+                <h1>Index management</h1>
+              </EuiTitle>
+              <EuiSpacer size="s" />
+              <EuiText>
+                <p>Update your Elasticsearch indices individually or in bulk</p>
+              </EuiText>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiSwitch
+                id="checkboxShowSystemIndices"
+                checked={showSystemIndices}
+                onChange={event => showSystemIndicesChanged(event.target.checked)}
+                label="Include system indices"
               />
             </EuiFlexItem>
-          ) : null}
-          <EuiFlexItem>
-            <EuiFieldSearch
-              fullWidth
-              value={filter}
-              onChange={event => {
-                filterChanged(event.target.value);
-              }}
-              data-test-subj="indexTableFilterInput"
-              placeholder="Search"
-              aria-label="Search indices"
-            />
-          </EuiFlexItem>
-        </EuiFlexGroup>
-
-        <EuiSpacer size="m" />
-
-        {indices.length > 0 ? (
-          <EuiTable>
-            <EuiTableHeader>
-              <EuiTableHeaderCellCheckbox>
-                <EuiCheckbox
-                  id="selectAllIndexes"
-                  checked={this.areAllItemsSelected()}
-                  onChange={this.toggleAll}
-                  type="inList"
+          </EuiFlexGroup>
+          <EuiSpacer />
+          <EuiFlexGroup gutterSize="l" alignItems="center">
+            {atLeastOneItemSelected ? (
+              <EuiFlexItem grow={false}>
+                <Route
+                  key="menu"
+                  render={() => (
+                    <IndexActionsContextMenu
+                      indexNames={Object.keys(selectedIndicesMap)}
+                      resetSelection={() => {
+                        this.setState({ selectedIndicesMap: {} });
+                      }}
+                    />
+                  )}
                 />
-              </EuiTableHeaderCellCheckbox>
-              {this.buildHeader()}
-            </EuiTableHeader>
-            <EuiTableBody>{this.buildRows()}</EuiTableBody>
-          </EuiTable>
-        ) : (
-          <NoMatch />
-        )}
-        <EuiSpacer size="m" />
-        {indices.length > 0 ? this.renderPager() : null}
+              </EuiFlexItem>
+            ) : null}
+            <EuiFlexItem>
+              <EuiFieldSearch
+                fullWidth
+                value={filter}
+                onChange={event => {
+                  filterChanged(event.target.value);
+                }}
+                data-test-subj="indexTableFilterInput"
+                placeholder="Search"
+                aria-label="Search indices"
+              />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+
+          <EuiSpacer size="m" />
+
+          {indices.length > 0 ? (
+            <EuiTable>
+              <EuiTableHeader>
+                <EuiTableHeaderCellCheckbox>
+                  <EuiCheckbox
+                    id="selectAllIndexes"
+                    checked={this.areAllItemsSelected()}
+                    onChange={this.toggleAll}
+                    type="inList"
+                  />
+                </EuiTableHeaderCellCheckbox>
+                {this.buildHeader()}
+              </EuiTableHeader>
+              <EuiTableBody>{this.buildRows()}</EuiTableBody>
+            </EuiTable>
+          ) : (
+            <NoMatch />
+          )}
+          <EuiSpacer size="m" />
+          {indices.length > 0 ? this.renderPager() : null}
+        </EuiPageBody>
       </EuiPage>
     );
   }

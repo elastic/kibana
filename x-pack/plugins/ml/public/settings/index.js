@@ -9,3 +9,4 @@
 import './styles/main.less';
 import './settings_controller';
 import './scheduled_events';
+import './filter_lists';

@@ -47,6 +47,7 @@ exports[`Inspector Data View component should render empty state 1`] = `
           >
             <EuiTextColor
               color="subdued"
+              component="span"
             >
               <span
                 className="euiTextColor euiTextColor--subdued"
