@@ -359,31 +359,31 @@ export class FieldEditor extends PureComponent {
       : 'Script is required';
 
     return field.scripted ? (
-      <EuiFormRow
-        label="Script"
-        helpText={(
-          <EuiFlexGroup gutterSize="xs">
-            <EuiFlexItem grow={false}>
-              <EuiIcon type="help" color="primary" />
-            </EuiFlexItem>
-
-            <EuiFlexItem>
-              <EuiLink onClick={this.showScriptingHelp} data-test-subj="scriptedFieldsHelpLink">
-                Get help with the syntax and preview the results of your script
-              </EuiLink>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        )}
-        isInvalid={isInvalid}
-        error={isInvalid ? errorMsg : null}
-      >
-        <EuiTextArea
-          value={field.script}
-          data-test-subj="editorFieldScript"
-          onChange={this.onScriptChange}
+      <Fragment>
+        <EuiFormRow
+          label="Script"
           isInvalid={isInvalid}
-        />
-      </EuiFormRow>
+          error={isInvalid ? errorMsg : null}
+        >
+          <EuiTextArea
+            value={field.script}
+            data-test-subj="editorFieldScript"
+            onChange={this.onScriptChange}
+            isInvalid={isInvalid}
+          />
+        </EuiFormRow>
+
+        <EuiFormRow>
+          <Fragment>
+            <EuiText>Access fields with <code>{`doc['some_field'].value`}</code>.</EuiText>
+            <br />
+            <EuiLink onClick={this.showScriptingHelp} data-test-subj="scriptedFieldsHelpLink">
+              Get help with the syntax and preview the results of your script.
+            </EuiLink>
+          </Fragment>
+        </EuiFormRow>
+
+      </Fragment>
     ) : null;
   }
 

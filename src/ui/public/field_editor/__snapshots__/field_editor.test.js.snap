@@ -146,39 +146,37 @@ exports[`FieldEditor should render create new scripted field correctly 1`] = `
         onChange={[Function]}
       />
     </eui-form-row>
-    <eui-form-row
-      error="Script is required"
-      helpText={
-        <eui-flex-group
-          gutterSize="xs"
-        >
-          <eui-flex-item
-            grow={false}
-          >
-            <eui-icon
-              color="primary"
-              type="help"
-            />
-          </eui-flex-item>
-          <eui-flex-item>
-            <eui-link
-              data-test-subj="scriptedFieldsHelpLink"
-              onClick={[Function]}
-            >
-              Get help with the syntax and preview the results of your script
-            </eui-link>
-          </eui-flex-item>
-        </eui-flex-group>
-      }
-      isInvalid={true}
-      label="Script"
-    >
-      <eui-textArea
-        data-test-subj="editorFieldScript"
+    <React.Fragment>
+      <eui-form-row
+        error="Script is required"
         isInvalid={true}
-        onChange={[Function]}
-      />
-    </eui-form-row>
+        label="Script"
+      >
+        <eui-textArea
+          data-test-subj="editorFieldScript"
+          isInvalid={true}
+          onChange={[Function]}
+        />
+      </eui-form-row>
+      <eui-form-row>
+        <React.Fragment>
+          <eui-text>
+            Access fields with 
+            <code>
+              doc['some_field'].value
+            </code>
+            .
+          </eui-text>
+          <br />
+          <eui-link
+            data-test-subj="scriptedFieldsHelpLink"
+            onClick={[Function]}
+          >
+            Get help with the syntax and preview the results of your script.
+          </eui-link>
+        </React.Fragment>
+      </eui-form-row>
+    </React.Fragment>
     <eui-form-row>
       <eui-flex-group>
         <eui-flex-item
@@ -355,40 +353,38 @@ exports[`FieldEditor should render edit scripted field correctly 1`] = `
         onChange={[Function]}
       />
     </eui-form-row>
-    <eui-form-row
-      error={null}
-      helpText={
-        <eui-flex-group
-          gutterSize="xs"
-        >
-          <eui-flex-item
-            grow={false}
-          >
-            <eui-icon
-              color="primary"
-              type="help"
-            />
-          </eui-flex-item>
-          <eui-flex-item>
-            <eui-link
-              data-test-subj="scriptedFieldsHelpLink"
-              onClick={[Function]}
-            >
-              Get help with the syntax and preview the results of your script
-            </eui-link>
-          </eui-flex-item>
-        </eui-flex-group>
-      }
-      isInvalid={false}
-      label="Script"
-    >
-      <eui-textArea
-        data-test-subj="editorFieldScript"
+    <React.Fragment>
+      <eui-form-row
+        error={null}
         isInvalid={false}
-        onChange={[Function]}
-        value="doc.test.value"
-      />
-    </eui-form-row>
+        label="Script"
+      >
+        <eui-textArea
+          data-test-subj="editorFieldScript"
+          isInvalid={false}
+          onChange={[Function]}
+          value="doc.test.value"
+        />
+      </eui-form-row>
+      <eui-form-row>
+        <React.Fragment>
+          <eui-text>
+            Access fields with 
+            <code>
+              doc['some_field'].value
+            </code>
+            .
+          </eui-text>
+          <br />
+          <eui-link
+            data-test-subj="scriptedFieldsHelpLink"
+            onClick={[Function]}
+          >
+            Get help with the syntax and preview the results of your script.
+          </eui-link>
+        </React.Fragment>
+      </eui-form-row>
+    </React.Fragment>
     <eui-form-row>
       <eui-flex-group>
         <eui-flex-item
@@ -619,39 +615,37 @@ exports[`FieldEditor should show conflict field warning 1`] = `
         onChange={[Function]}
       />
     </eui-form-row>
-    <eui-form-row
-      error="Script is required"
-      helpText={
-        <eui-flex-group
-          gutterSize="xs"
-        >
-          <eui-flex-item
-            grow={false}
-          >
-            <eui-icon
-              color="primary"
-              type="help"
-            />
-          </eui-flex-item>
-          <eui-flex-item>
-            <eui-link
-              data-test-subj="scriptedFieldsHelpLink"
-              onClick={[Function]}
-            >
-              Get help with the syntax and preview the results of your script
-            </eui-link>
-          </eui-flex-item>
-        </eui-flex-group>
-      }
-      isInvalid={true}
-      label="Script"
-    >
-      <eui-textArea
-        data-test-subj="editorFieldScript"
+    <React.Fragment>
+      <eui-form-row
+        error="Script is required"
         isInvalid={true}
-        onChange={[Function]}
-      />
-    </eui-form-row>
+        label="Script"
+      >
+        <eui-textArea
+          data-test-subj="editorFieldScript"
+          isInvalid={true}
+          onChange={[Function]}
+        />
+      </eui-form-row>
+      <eui-form-row>
+        <React.Fragment>
+          <eui-text>
+            Access fields with 
+            <code>
+              doc['some_field'].value
+            </code>
+            .
+          </eui-text>
+          <br />
+          <eui-link
+            data-test-subj="scriptedFieldsHelpLink"
+            onClick={[Function]}
+          >
+            Get help with the syntax and preview the results of your script.
+          </eui-link>
+        </React.Fragment>
+      </eui-form-row>
+    </React.Fragment>
     <eui-form-row>
       <eui-flex-group>
         <eui-flex-item
@@ -892,40 +886,38 @@ exports[`FieldEditor should show deprecated lang warning 1`] = `
         onChange={[Function]}
       />
     </eui-form-row>
-    <eui-form-row
-      error={null}
-      helpText={
-        <eui-flex-group
-          gutterSize="xs"
-        >
-          <eui-flex-item
-            grow={false}
-          >
-            <eui-icon
-              color="primary"
-              type="help"
-            />
-          </eui-flex-item>
-          <eui-flex-item>
-            <eui-link
-              data-test-subj="scriptedFieldsHelpLink"
-              onClick={[Function]}
-            >
-              Get help with the syntax and preview the results of your script
-            </eui-link>
-          </eui-flex-item>
-        </eui-flex-group>
-      }
-      isInvalid={false}
-      label="Script"
-    >
-      <eui-textArea
-        data-test-subj="editorFieldScript"
+    <React.Fragment>
+      <eui-form-row
+        error={null}
         isInvalid={false}
-        onChange={[Function]}
-        value="doc.test.value"
-      />
-    </eui-form-row>
+        label="Script"
+      >
+        <eui-textArea
+          data-test-subj="editorFieldScript"
+          isInvalid={false}
+          onChange={[Function]}
+          value="doc.test.value"
+        />
+      </eui-form-row>
+      <eui-form-row>
+        <React.Fragment>
+          <eui-text>
+            Access fields with 
+            <code>
+              doc['some_field'].value
+            </code>
+            .
+          </eui-text>
+          <br />
+          <eui-link
+            data-test-subj="scriptedFieldsHelpLink"
+            onClick={[Function]}
+          >
+            Get help with the syntax and preview the results of your script.
+          </eui-link>
+        </React.Fragment>
+      </eui-form-row>
+    </React.Fragment>
     <eui-form-row>
       <eui-flex-group>
         <eui-flex-item
