@@ -95,13 +95,16 @@ export class IndexMigrator {
 
     const startTime = Date.now();
     const { destIndex } = await this.migrateIndex();
-
-    return {
+    const result: MigrationResult = {
       status: 'migrated',
       sourceIndex: this.sourceIndex.toString(),
       destIndex: destIndex.toString(),
       elapsedMs: Date.now() - startTime,
     };
+
+    this.log.info(`Migrated ${this.sourceIndex} in ${result.elapsedMs}ms`);
+
+    return result;
   }
 
   private isMigrated = () => {
@@ -158,23 +161,23 @@ export class IndexMigrator {
         // obtaining the migration lock, but that it is now migrated,
         // as another instance may have obtained the lock first and
         // performed the migration.
-        log.debug('Re-checking migration status');
+        log.info('Re-checking migration status');
         if (await this.isMigrated()) {
           return;
         }
 
-        log.debug(`Creating index ${destIndex}`);
+        log.info(`Creating index ${destIndex}`);
         await destIndex.create(fullMappings);
 
         if (sourceInfo.exists) {
-          log.debug(`Ensuring ${sourceIndex} is an alias`);
+          log.info(`Ensuring ${sourceIndex} is an alias`);
           await sourceIndex.convertToAlias();
 
-          log.debug(`Migrating ${sourceIndex} docs to ${destIndex}`);
+          log.info(`Migrating ${sourceIndex} docs to ${destIndex}`);
           await this.migrateDocs(destIndex);
         }
 
-        log.debug(`Pointing ${sourceIndex} alias to ${destIndex}`);
+        log.info(`Pointing ${sourceIndex} alias to ${destIndex}`);
         await destIndex.claimAlias(sourceIndex.name);
       },
     });
