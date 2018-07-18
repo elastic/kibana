@@ -160,7 +160,7 @@ export function RegionMapsVisualizationProvider(Private, config) {
           toastNotifications.addWarning({
             title: `Couldn't show ${event.mismatches.length} ${event.mismatches.length > 1 ? 'results' : 'result'} on the map`,
             text: `You can fix this by ensuring that each of these terms can be matched to a corresponding shape `
-              + `on that shape's join field:${event.mismatches.join(',')}.`
+              + `on that shape's join field:${event.mismatches.join(',')}`
           });
         }
       });
