@@ -7,7 +7,7 @@
       <select
         id="colorSchema"
         class="kuiSelect kuiSideBarSelect"
-        ng-model="vis.params.colorSchema"
+        ng-model="editorState.params.colorSchema"
         ng-options="mode for mode in collections.colorSchemas"
       ></select>
     </div>
@@ -26,7 +26,7 @@
       Reverse Color Schema
     </label>
     <div class="kuiSideBarFormRow__control">
-      <input class="kuiCheckBox" id="invertColors" type="checkbox" ng-model="vis.params.invertColors">
+      <input class="kuiCheckBox" id="invertColors" type="checkbox" ng-model="editorState.params.invertColors">
     </div>
   </div>
 
@@ -38,7 +38,7 @@
       <select
         id="axisScale"
         class="kuiSelect kuiSideBarSelect"
-        ng-model="vis.params.valueAxes[0].scale.type"
+        ng-model="editorState.params.valueAxes[0].scale.type"
         ng-options="mode for mode in collections.scales"
       ></select>
     </div>
@@ -49,20 +49,20 @@
       Scale to Data Bounds
     </label>
     <div class="kuiSideBarFormRow__control">
-      <input class="kuiCheckBox" id="defaultYExtents" type="checkbox" ng-model="vis.params.valueAxes[0].scale.defaultYExtents">
+      <input class="kuiCheckBox" id="defaultYExtents" type="checkbox" ng-model="editorState.params.valueAxes[0].scale.defaultYExtents">
     </div>
   </div>
 
-  <div class="kuiSideBarFormRow" ng-if="!vis.params.setColorRange">
+  <div class="kuiSideBarFormRow" ng-if="!editorState.params.setColorRange">
     <label class="kuiSideBarFormRow__label" for="percentageMode">
       Percentage Mode
     </label>
     <div class="kuiSideBarFormRow__control">
-      <input class="kuiCheckBox" id="percentageMode" type="checkbox" ng-model="vis.params.percentageMode">
+      <input class="kuiCheckBox" id="percentageMode" type="checkbox" ng-model="editorState.params.percentageMode">
     </div>
   </div>
 
-  <div class="kuiSideBarFormRow" ng-if="!vis.params.setColorRange">
+  <div class="kuiSideBarFormRow" ng-if="!editorState.params.setColorRange">
     <label class="kuiSideBarFormRow__label" for="colorsNumber">
       Number of colors
     </label>
@@ -70,7 +70,7 @@
       <input
         id="colorsNumber"
         class="kuiSideBarInput"
-        ng-model="vis.params.colorsNumber"
+        ng-model="editorState.params.colorsNumber"
         type="number"
         greater-than="1"
         less-than="11"
@@ -99,7 +99,7 @@
       </div>
       <input
         aria-label="Enable custom ranges"
-        ng-model="vis.params.setColorRange"
+        ng-model="editorState.params.setColorRange"
         type="checkbox"
         class="kuiSideBarSectionTitle__action"
         ng-click="toggleColorRangeSection(true)"
@@ -109,12 +109,12 @@
 
     <div
       id="heatmapOptionsRanges"
-      ng-if="vis.params.setColorRange"
+      ng-if="editorState.params.setColorRange"
       ng-show="showColorRange"
       class="kuiSideBarCollapsibleSection"
     >
       <div class="kuiSideBarSection">
-        <table class="vis-editor-agg-editor-ranges form-group" ng-show="vis.params.colorsRange.length">
+        <table class="vis-editor-agg-editor-ranges form-group" ng-show="editorState.params.colorsRange.length">
           <tr>
             <th scope="col">
               <label id="heatmapCustomRangeFrom">From</label>
@@ -124,7 +124,7 @@
             </th>
           </tr>
 
-          <tr ng-repeat="range in vis.params.colorsRange track by $index">
+          <tr ng-repeat="range in editorState.params.colorsRange track by $index">
             <td>
               <input
                 aria-labelledby="heatmapCustomRangeFrom"
@@ -157,7 +157,7 @@
           </tr>
         </table>
 
-        <div class="hintbox" ng-show="!vis.params.colorsRange.length">
+        <div class="hintbox" ng-show="!editorState.params.colorsRange.length">
           <p>
             <span class="kuiIcon fa-danger text-danger"></span>
             <strong>Required:</strong> You must specify at least one range.
@@ -198,14 +198,14 @@
       </div>
       <input
         aria-label="Show labels"
-        ng-model="vis.params.valueAxes[0].labels.show"
+        ng-model="editorState.params.valueAxes[0].labels.show"
         type="checkbox"
         class="kuiSideBarSectionTitle__action"
       >
     </div>
     <div
       id="heatmapOptionsLabels"
-      ng-if="vis.params.valueAxes[0].labels.show"
+      ng-if="editorState.params.valueAxes[0].labels.show"
       ng-show="showLabels"
       class="kuiSideBarCollapsibleSection"
     >
@@ -224,11 +224,11 @@
             Overwrite automatic color
           </label>
           <div class="kuiSideBarFormRow__control">
-            <input class="kuiCheckBox" id="overwriteColor" type="checkbox" ng-model="vis.params.valueAxes[0].labels.overwriteColor">
+            <input class="kuiCheckBox" id="overwriteColor" type="checkbox" ng-model="editorState.params.valueAxes[0].labels.overwriteColor">
           </div>
         </div>
 
-        <div class="kuiSideBarFormRow" ng-show="vis.params.valueAxes[0].labels.overwriteColor">
+        <div class="kuiSideBarFormRow" ng-show="editorState.params.valueAxes[0].labels.overwriteColor">
           <label class="kuiSideBarFormRow__label" for="labelColor">
             Color
           </label>
@@ -236,7 +236,7 @@
             <input
               id="labelColor"
               class="kuiSideBarInput"
-              ng-model="vis.params.valueAxes[0].labels.color"
+              ng-model="editorState.params.valueAxes[0].labels.color"
             >
           </div>
         </div>

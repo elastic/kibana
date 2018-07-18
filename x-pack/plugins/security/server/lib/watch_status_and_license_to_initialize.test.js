@@ -5,7 +5,7 @@
  */
 
 import { EventEmitter } from 'events';
-import { watchStatusAndLicenseToInitialize } from './watch_status_and_license_to_initialize';
+import { watchStatusAndLicenseToInitialize, RETRY_SCALE_DURATION, RETRY_DURATION_MAX } from './watch_status_and_license_to_initialize';
 
 const createMockXpackMainPluginAndFeature = (featureId) => {
   const licenseChangeCallbacks = [];
@@ -62,6 +62,15 @@ const createMockDownstreamPlugin = (id) => {
   };
 };
 
+const advanceRetry = async (initializeCount) => {
+  await Promise.resolve();
+  let duration = initializeCount * RETRY_SCALE_DURATION;
+  if (duration > RETRY_DURATION_MAX) {
+    duration = RETRY_DURATION_MAX;
+  }
+  jest.advanceTimersByTime(duration);
+};
+
 ['red', 'yellow', 'disabled'].forEach(state => {
   test(`mirrors ${state} immediately`, () => {
     const pluginId = 'foo-plugin';
@@ -115,7 +124,7 @@ test(`sets downstream plugin's status to green when initialize resolves`, (done)
   });
 });
 
-test(`sets downstream plugin's status to red when initialize rejects 20 times`, (done) => {
+test(`sets downstream plugin's status to red when initialize initially rejects, and continually polls initialize`, (done) => {
   jest.useFakeTimers();
 
   const pluginId = 'foo-plugin';
@@ -126,15 +135,25 @@ test(`sets downstream plugin's status to red when initialize rejects 20 times`, 
   mockFeature.mock.setLicenseCheckResults(licenseCheckResults);
   const downstreamPlugin = createMockDownstreamPlugin(pluginId);
 
+  let isRed = false;
   let initializeCount = 0;
   const initializeMock = jest.fn().mockImplementation(() => {
     ++initializeCount;
 
+    // on the second retry, ensure we already set the status to red
+    if (initializeCount === 2) {
+      expect(isRed).toBe(true);
+    }
+
+    // this should theoretically continue indefinitely, but we only have so long to run the tests
+    if (initializeCount === 100) {
+      done();
+    }
+
     // everytime this is called, we have to wait for a new promise to be resolved
     // allowing the Promise the we return below to run, and then advance the timers
-    setImmediate(async () => {
-      await Promise.resolve();
-      jest.advanceTimersByTime(initializeCount * 100);
+    setImmediate(() => {
+      advanceRetry(initializeCount);
     });
     return Promise.reject(new Error(errorMessage));
   });
@@ -144,9 +163,8 @@ test(`sets downstream plugin's status to red when initialize rejects 20 times`, 
   expect(initializeMock).toHaveBeenCalledTimes(1);
   expect(initializeMock).toHaveBeenCalledWith(licenseCheckResults);
   downstreamPlugin.status.red.mockImplementation(message => {
-    expect(initializeCount).toBe(20);
+    isRed = true;
     expect(message).toBe(errorMessage);
-    done();
   });
 });
 
@@ -167,9 +185,8 @@ test(`sets downstream plugin's status to green when initialize resolves after re
 
     // everytime this is called, we have to wait for a new promise to be resolved
     // allowing the Promise the we return below to run, and then advance the timers
-    setImmediate(async () => {
-      await Promise.resolve();
-      jest.advanceTimersByTime(initializeCount * 100);
+    setImmediate(() => {
+      advanceRetry(initializeCount);
     });
 
     if (initializeCount >= 10) {
@@ -183,6 +200,10 @@ test(`sets downstream plugin's status to green when initialize resolves after re
 
   expect(initializeMock).toHaveBeenCalledTimes(1);
   expect(initializeMock).toHaveBeenCalledWith(licenseCheckResults);
+  downstreamPlugin.status.red.mockImplementation(message => {
+    expect(initializeCount).toBeLessThan(10);
+    expect(message).toBe(errorMessage);
+  });
   downstreamPlugin.status.green.mockImplementation(message => {
     expect(initializeCount).toBe(10);
     expect(message).toBe('Ready');

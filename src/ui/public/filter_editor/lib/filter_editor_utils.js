@@ -104,3 +104,8 @@ export function buildFilter({ indexPattern, field, operator, params, filterBuild
 export function areIndexPatternsProvided(indexPatterns) {
   return _.compact(indexPatterns).length !== 0;
 }
+
+export function isFilterPinned(filter, pinnedByDefault) {
+  if (!filter.hasOwnProperty('$state')) return pinnedByDefault;
+  return filter.$state.store === 'globalState';
+}

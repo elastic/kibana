@@ -1,0 +1,13 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`with a malformed Elasticsearch response throws a validation error when an extra index privilege is present in the response 1`] = `[Error: Invalid response received from Elasticsearch has_privilege endpoint. ValidationError: child "index" fails because [child "default-index" fails because ["oopsAnExtraPrivilege" is not allowed]]]`;
+
+exports[`with a malformed Elasticsearch response throws a validation error when an extra privilege is present in the response 1`] = `[Error: Invalid response received from Elasticsearch has_privilege endpoint. ValidationError: child "application" fails because [child "kibana-our_application" fails because [child "&#x2a;" fails because ["oops-an-unexpected-privilege" is not allowed]]]]`;
+
+exports[`with a malformed Elasticsearch response throws a validation error when index privileges are missing in the response 1`] = `[Error: Invalid response received from Elasticsearch has_privilege endpoint. ValidationError: child "index" fails because [child "default-index" fails because [child "read" fails because ["read" is required]]]]`;
+
+exports[`with a malformed Elasticsearch response throws a validation error when privileges are missing in the response 1`] = `[Error: Invalid response received from Elasticsearch has_privilege endpoint. ValidationError: child "application" fails because [child "kibana-our_application" fails because [child "&#x2a;" fails because [child "mock-action:version" fails because ["mock-action:version" is required]]]]]`;
+
+exports[`with index privileges throws error if missing version privilege and has login privilege 1`] = `[Error: Multiple versions of Kibana are running against the same Elasticsearch cluster, unable to authorize user.]`;
+
+exports[`with no index privileges throws error if missing version privilege and has login privilege 1`] = `[Error: Multiple versions of Kibana are running against the same Elasticsearch cluster, unable to authorize user.]`;

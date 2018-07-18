@@ -5,27 +5,48 @@
  */
 
 import React from 'react';
-import orderBy from 'lodash.orderby';
 import { createSelector } from 'reselect';
 import { Request } from 'react-redux-request';
-import { loadTransactionList } from '../../services/rest';
-import { withInitialData } from './helpers';
+import { loadTransactionList } from '../../services/rest/apm';
+import { createInitialDataSelector } from './helpers';
 
 const ID = 'transactionList';
 const INITIAL_DATA = [];
+const withInitialData = createInitialDataSelector(INITIAL_DATA);
+
+const getRelativeImpact = (impact, impactMin, impactMax) =>
+  Math.max((impact - impactMin) / Math.max(impactMax - impactMin, 1) * 100, 1);
+
+function getWithRelativeImpact(items) {
+  const impacts = items.map(({ impact }) => impact);
+  const impactMin = Math.min(...impacts);
+  const impactMax = Math.max(...impacts);
+
+  return items.map(item => {
+    return {
+      ...item,
+      impactRelative: getRelativeImpact(item.impact, impactMin, impactMax)
+    };
+  });
+}
 
 export const getTransactionList = createSelector(
-  state => withInitialData(state.reactReduxRequest[ID], INITIAL_DATA),
-  state => state.sorting.transaction,
-  (transactionList = {}, transactionSorting) => {
-    const { key: sortKey, descending } = transactionSorting;
-
+  state => withInitialData(state.reactReduxRequest[ID]),
+  transactionList => {
     return {
       ...transactionList,
-      data: orderBy(transactionList.data, sortKey, descending ? 'desc' : 'asc')
+      data: getWithRelativeImpact(transactionList.data)
     };
   }
 );
+
+// export function getTransactionList(state) {
+//   const transactionList = withInitialData(state.reactReduxRequest[ID]);
+//   return {
+//     ...transactionList,
+
+//   };
+// }
 
 export function TransactionListRequest({ urlParams, render }) {
   const { serviceName, start, end, transactionType, kuery } = urlParams;

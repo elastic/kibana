@@ -24,8 +24,7 @@ import { Project } from '../utils/project';
  * All external projects are located within `../kibana-extra/{plugin}` relative
  * to Kibana itself.
  */
-const isKibanaDep = (depVersion: string) =>
-  depVersion.includes('../../kibana/');
+const isKibanaDep = (depVersion: string) => depVersion.includes('../../kibana/');
 
 /**
  * This prepares the dependencies for an _external_ project.
@@ -49,9 +48,7 @@ export async function prepareExternalProjectDependencies(projectPath: string) {
     if (isLinkDependency(depVersion) && !isKibanaDep(depVersion)) {
       // For non-Kibana packages we need to set up symlinks during the
       // installation process, but this is not something we support yet.
-      throw new Error(
-        'This plugin is using `link:` dependencies for non-Kibana packages'
-      );
+      throw new Error('This plugin is using `link:` dependencies for non-Kibana packages');
     }
   }
 }

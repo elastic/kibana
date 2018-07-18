@@ -8,7 +8,7 @@ import 'angular-resource';
 import { uiModules } from 'ui/modules';
 
 const module = uiModules.get('security', ['ngResource']);
-module.service('ApplicationPrivilege', ($resource, chrome) => {
+module.service('ApplicationPrivileges', ($resource, chrome) => {
   const baseUrl = chrome.addBasePath('/api/security/v1/privileges');
   return $resource(baseUrl);
 });

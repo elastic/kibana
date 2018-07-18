@@ -7,7 +7,7 @@
 import { createErrorGroupWatch } from '../createErrorGroupWatch';
 import mustache from 'mustache';
 import chrome from 'ui/chrome';
-import * as rest from '../../../../../services/rest';
+import * as rest from '../../../../../services/rest/watcher';
 import { isObject, isArray, isString } from 'lodash';
 import esResponse from './esResponse.json';
 

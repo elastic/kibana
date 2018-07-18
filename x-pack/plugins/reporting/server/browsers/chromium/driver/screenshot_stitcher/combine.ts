@@ -69,11 +69,11 @@ export function $combine(
           png.width !== screenshot.rectangle.width ||
           png.height !== screenshot.rectangle.height
         ) {
-          const errorMessage = `Screenshot captured with width:${
-            png.width
-          } and height: ${png.height}) is not of expected width: ${
-            screenshot.rectangle.width
-          } and height: ${screenshot.rectangle.height}`;
+          const errorMessage = `Screenshot captured with width:${png.width} and height: ${
+            png.height
+          }) is not of expected width: ${screenshot.rectangle.width} and height: ${
+            screenshot.rectangle.height
+          }`;
 
           logger.error(errorMessage);
           throw new Error(errorMessage);
@@ -90,19 +90,9 @@ export function $combine(
       // fixed, this should probably get pared down.
       logger.debug(`Output dimensions is ${JSON.stringify(outputSize)}`);
       logger.debug(`Input png w: ${png.width} and h: ${png.height}`);
-      logger.debug(
-        `Creating output png with ${JSON.stringify(screenshot.rectangle)}`
-      );
+      logger.debug(`Creating output png with ${JSON.stringify(screenshot.rectangle)}`);
       const { rectangle } = screenshot;
-      png.bitblt(
-        output,
-        0,
-        0,
-        rectangle.width,
-        rectangle.height,
-        rectangle.x,
-        rectangle.y
-      );
+      png.bitblt(output, 0, 0, rectangle.width, rectangle.height, rectangle.x, rectangle.y);
       return output;
     }, new PNG({ width: outputSize.width, height: outputSize.height }))
   );

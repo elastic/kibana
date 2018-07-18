@@ -196,18 +196,17 @@ function discoverController(
   $scope.searchSource = savedSearch.searchSource;
   $scope.indexPattern = resolveIndexPatternLoading();
   $scope.searchSource
-    .set('index', $scope.indexPattern)
-    .highlightAll(true)
-    .version(true);
+    .setField('index', $scope.indexPattern)
+    .setField('highlightAll', true)
+    .setField('version', true);
 
   // searchSource which applies time range
-  const timeRangeSearchSource = savedSearch.searchSource.new();
-  timeRangeSearchSource.set('filter', () => {
+  const timeRangeSearchSource = savedSearch.searchSource.create();
+  timeRangeSearchSource.setField('filter', () => {
     return timefilter.createFilter($scope.indexPattern);
   });
 
-  $scope.searchSource.inherits(timeRangeSearchSource);
-
+  $scope.searchSource.setParent(timeRangeSearchSource);
 
   const pageTitleSuffix = savedSearch.id && savedSearch.title ? `: ${savedSearch.title}` : '';
   docTitle.change(`Discover${pageTitleSuffix}`);
@@ -258,26 +257,26 @@ function discoverController(
   };
 
   this.getSharingData = async () => {
-    const searchSource = $scope.searchSource.clone();
+    const searchSource = $scope.searchSource.createCopy();
 
     const { searchFields, selectFields } = await getSharingDataFields();
-    searchSource.set('fields', searchFields);
-    searchSource.set('sort', getSort($state.sort, $scope.indexPattern));
-    searchSource.set('highlight', null);
-    searchSource.set('highlightAll', null);
-    searchSource.set('aggs', null);
-    searchSource.set('size', null);
+    searchSource.setField('fields', searchFields);
+    searchSource.setField('sort', getSort($state.sort, $scope.indexPattern));
+    searchSource.setField('highlight', null);
+    searchSource.setField('highlightAll', null);
+    searchSource.setField('aggs', null);
+    searchSource.setField('size', null);
 
     const body = await searchSource.getSearchRequestBody();
     return {
       searchRequest: {
-        index: searchSource.get('index').title,
+        index: searchSource.getField('index').title,
         body
       },
       fields: selectFields,
       metaFields: $scope.indexPattern.metaFields,
       conflictedTypesFields: $scope.indexPattern.fields.filter(f => f.type === 'conflict').map(f => f.name),
-      indexPatternId: searchSource.get('index').id
+      indexPatternId: searchSource.getField('index').id
     };
   };
 
@@ -293,7 +292,7 @@ function discoverController(
 
   function getStateDefaults() {
     return {
-      query: $scope.searchSource.get('query') || {
+      query: $scope.searchSource.getField('query') || {
         query: '',
         language: localStorage.get('kibana.userQueryLanguage') || config.get('search:queryLanguage')
       },
@@ -301,7 +300,7 @@ function discoverController(
       columns: savedSearch.columns.length > 0 ? savedSearch.columns : config.get('defaultColumns').slice(),
       index: $scope.indexPattern.id,
       interval: 'auto',
-      filters: _.cloneDeep($scope.searchSource.getOwn('filter'))
+      filters: _.cloneDeep($scope.searchSource.getOwnField('filter'))
     };
   }
 
@@ -344,7 +343,7 @@ function discoverController(
           if (!sort) return;
 
           // get the current sort from {key: val} to ["key", "val"];
-          const currentSort = _.pairs($scope.searchSource.get('sort')).pop();
+          const currentSort = _.pairs($scope.searchSource.getField('sort')).pop();
 
           // if the searchSource doesn't know, tell it so
           if (!angular.equals(sort, currentSort)) $scope.fetch();
@@ -535,7 +534,11 @@ function discoverController(
     }
 
     $scope.updateTime();
-    if (sort[0] === '_score') segmented.setMaxSegments(1);
+
+    if (sort[0] === '_score') {
+      segmented.setMaxSegments(1);
+    }
+
     segmented.setDirection(sortBy === 'time' ? (sort[1] || 'desc') : 'desc');
     segmented.setSortFn(sortFn);
     segmented.setSize($scope.opts.sampleSize);
@@ -549,14 +552,14 @@ function discoverController(
       flushResponseData();
     });
 
-    segmented.on('segment', notify.timed('handle each segment', function (resp) {
+    segmented.on('segment', (resp) => {
       if (resp._shards.failed > 0) {
         $scope.failures = _.union($scope.failures, resp._shards.failures);
         $scope.failures = _.uniq($scope.failures, false, function (failure) {
           return failure.index + failure.shard + failure.reason;
         });
       }
-    }));
+    });
 
     segmented.on('mergedSegment', function (merged) {
       $scope.mergedEsResp = merged;
@@ -567,40 +570,38 @@ function discoverController(
           .resolve(responseHandler($scope.vis, merged))
           .then(resp => {
             $scope.visData = resp;
-            const visEl = $element.find('.visualization-container')[0];
+            const visEl = $element.find('#discoverHistogram')[0];
             visualizationLoader(visEl, $scope.vis, $scope.visData, $scope.uiState, { listenOnChange: true });
           });
       }
 
       $scope.hits = merged.hits.total;
 
-      const indexPattern = $scope.searchSource.get('index');
+      const indexPattern = $scope.searchSource.getField('index');
 
       // the merge rows, use a new array to help watchers
       $scope.rows = merged.hits.hits.slice();
 
-      notify.event('flatten hit and count fields', function () {
-        let counts = $scope.fieldCounts;
+      let counts = $scope.fieldCounts;
 
-        // if we haven't counted yet, or need a fresh count because we are sorting, reset the counts
-        if (!counts || sortFn) counts = $scope.fieldCounts = {};
+      // if we haven't counted yet, or need a fresh count because we are sorting, reset the counts
+      if (!counts || sortFn) counts = $scope.fieldCounts = {};
 
-        $scope.rows.forEach(function (hit) {
-          // skip this work if we have already done it
-          if (hit.$$_counted) return;
+      $scope.rows.forEach(function (hit) {
+        // skip this work if we have already done it
+        if (hit.$$_counted) return;
 
-          // when we are sorting results, we need to redo the counts each time because the
-          // "top 500" may change with each response, so don't mark this as counted
-          if (!sortFn) hit.$$_counted = true;
+        // when we are sorting results, we need to redo the counts each time because the
+        // "top 500" may change with each response, so don't mark this as counted
+        if (!sortFn) hit.$$_counted = true;
 
-          const fields = _.keys(indexPattern.flattenHit(hit));
-          let n = fields.length;
-          let field;
-          while (field = fields[--n]) {
-            if (counts[field]) counts[field] += 1;
-            else counts[field] = 1;
-          }
-        });
+        const fields = _.keys(indexPattern.flattenHit(hit));
+        let n = fields.length;
+        let field;
+        while (field = fields[--n]) {
+          if (counts[field]) counts[field] += 1;
+          else counts[field] = 1;
+        }
       });
     });
 
@@ -648,10 +649,10 @@ function discoverController(
 
   $scope.updateDataSource = Promise.method(function updateDataSource() {
     $scope.searchSource
-      .size($scope.opts.sampleSize)
-      .sort(getSort($state.sort, $scope.indexPattern))
-      .query(!$state.query ? null : $state.query)
-      .set('filter', queryFilter.getFilters());
+      .setField('size', $scope.opts.sampleSize)
+      .setField('sort', getSort($state.sort, $scope.indexPattern))
+      .setField('query', !$state.query ? null : $state.query)
+      .setField('filter', queryFilter.getFilters());
   });
 
   $scope.setSortOrder = function setSortOrder(columnName, direction) {
@@ -733,7 +734,7 @@ function discoverController(
         return $scope.vis.getAggConfig().onSearchRequestStart(searchSource, searchRequest);
       });
 
-      $scope.searchSource.aggs(function () {
+      $scope.searchSource.setField('aggs', function () {
         return $scope.vis.getAggConfig().toDsl();
       });
     }
@@ -744,24 +745,36 @@ function discoverController(
   }
 
   function resolveIndexPatternLoading() {
-    const props = $route.current.locals.ip;
-    const loaded = props.loaded;
-    const stateVal = props.stateVal;
-    const stateValFound = props.stateValFound;
+    const {
+      loaded: loadedIndexPattern,
+      stateVal,
+      stateValFound,
+    } = $route.current.locals.ip;
 
-    const own = $scope.searchSource.getOwn('index');
+    const ownIndexPattern = $scope.searchSource.getOwnField('index');
 
-    if (own && !stateVal) return own;
+    if (ownIndexPattern && !stateVal) {
+      return ownIndexPattern;
+    }
+
     if (stateVal && !stateValFound) {
-      const err = '"' + stateVal + '" is not a configured pattern ID. ';
-      if (own) {
-        notify.warning(`${err} Using the saved index pattern: "${own.title}" (${own.id})`);
-        return own;
+      const warningTitle = `"${stateVal}" is not a configured index pattern ID`;
+
+      if (ownIndexPattern) {
+        toastNotifications.addWarning({
+          title: warningTitle,
+          text: `Showing the saved index pattern: "${ownIndexPattern.title}" (${ownIndexPattern.id})`,
+        });
+        return ownIndexPattern;
       }
 
-      notify.warning(`${err} Using the default index pattern: "${loaded.title}" (${loaded.id})`);
+      toastNotifications.addWarning({
+        title: warningTitle,
+        text: `Showing the default index pattern: "${loadedIndexPattern.title}" (${loadedIndexPattern.id})`,
+      });
     }
-    return loaded;
+
+    return loadedIndexPattern;
   }
 
   init();

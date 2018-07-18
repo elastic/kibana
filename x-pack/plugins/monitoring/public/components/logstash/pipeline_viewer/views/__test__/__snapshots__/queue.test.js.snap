@@ -1,0 +1,19 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Queue component renders default elements 1`] = `
+<div>
+  <StatementListHeading
+    iconType="logstashQueue"
+    title="Queue"
+  />
+  <EuiSpacer
+    size="s"
+  />
+  <EuiText
+    className="pipelineViewer__queueMessage"
+    grow={true}
+  >
+    Queue metrics not available
+  </EuiText>
+</div>
+`;

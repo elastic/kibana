@@ -4,23 +4,31 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import * as Rx from 'rxjs';
-import { catchError, mergeMap, map, retryWhen, switchMap, tap } from 'rxjs/operators';
+import { catchError, mergeMap, map, switchMap, tap } from 'rxjs/operators';
 
-export const retryStrategy = ({
-  maxAttempts,
-  scalingDuration,
-}) => (errors) => {
-  return errors.pipe(
-    mergeMap((error, i) => {
-      const attempt = i + 1;
+export const RETRY_SCALE_DURATION = 100;
+export const RETRY_DURATION_MAX = 10000;
 
-      if (attempt >= maxAttempts) {
-        return Rx.throwError(error);
-      }
+const calculateDuration = i => {
+  const duration = i * RETRY_SCALE_DURATION;
+  if (duration > RETRY_DURATION_MAX) {
+    return RETRY_DURATION_MAX;
+  }
 
-      return Rx.timer(attempt * scalingDuration);
-    })
-  );
+  return duration;
+};
+
+// we can't use a retryWhen here, because we want to propagate the red status and then retry
+const propagateRedStatusAndScaleRetry = () => {
+  let i = 0;
+  return (err, caught) =>
+    Rx.concat(
+      Rx.of({
+        state: 'red',
+        message: err.message
+      }),
+      Rx.timer(calculateDuration(++i)).pipe(mergeMap(() => caught))
+    );
 };
 
 export function watchStatusAndLicenseToInitialize(xpackMainPlugin, downstreamPlugin, initialize) {
@@ -58,15 +66,11 @@ export function watchStatusAndLicenseToInitialize(xpackMainPlugin, downstreamPlu
 
         return Rx.defer(() => initialize(license))
           .pipe(
-            retryWhen(retryStrategy({ maxAttempts: 20, scalingDuration: 100 })),
             map(() => ({
               state: 'green',
               message: 'Ready',
             })),
-            catchError(err => Rx.of({
-              state: 'red',
-              message: err.message
-            }))
+            catchError(propagateRedStatusAndScaleRetry())
           );
       }),
       tap(({ state, message }) => {

@@ -25,9 +25,11 @@ export default async function ({ readConfigFile }) {
     servers: config.xpack.api.get('servers'),
     services: {
       es: EsProvider,
+      esSupertestWithoutAuth: config.xpack.api.get('services.esSupertestWithoutAuth'),
       supertest: config.kibana.api.get('services.supertest'),
       supertestWithoutAuth: config.xpack.api.get('services.supertestWithoutAuth'),
       esArchiver: config.kibana.functional.get('services.esArchiver'),
+      kibanaServer: config.kibana.functional.get('services.kibanaServer'),
     },
     junit: {
       reportName: 'X-Pack RBAC API Integration Tests',

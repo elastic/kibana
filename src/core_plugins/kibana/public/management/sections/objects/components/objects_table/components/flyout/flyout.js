@@ -144,7 +144,7 @@ export class Flyout extends Component {
     );
 
     const byId = groupBy(conflictedIndexPatterns, ({ obj }) =>
-      obj.searchSource.getOwn('index')
+      obj.searchSource.getOwnField('index')
     );
     const conflicts = Object.entries(byId).reduce(
       (accum, [existingIndexPatternId, list]) => {
