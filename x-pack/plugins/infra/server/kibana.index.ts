@@ -15,21 +15,25 @@ export const initServerWithKibana = (hapiServer: Server) => {
 };
 
 export const getConfigSchema = (Joi: typeof JoiNamespace) => {
-  const InfraSourceConfigSchema = Joi.object({
-    metricAlias: Joi.string().default('xpack-infra-default-metrics'),
-    logAlias: Joi.string().default('xpack-infra-default-logs'),
+  const InfraDefaultSourceConfigSchema = Joi.object({
+    metricAlias: Joi.string(),
+    logAlias: Joi.string(),
     fields: Joi.object({
-      container: Joi.string().default('docker.container.name'),
-      hostname: Joi.string().default('beat.hostname'),
+      container: Joi.string(),
+      hostname: Joi.string(),
       message: Joi.array()
         .items(Joi.string())
-        .single()
-        .default(['message', '@message']),
-      pod: Joi.string().default('kubernetes.pod.name'),
-      tiebreaker: Joi.string().default('_doc'),
-      timestamp: Joi.string().default('@timestamp'),
-    }).default(),
-  }).default();
+        .single(),
+      pod: Joi.string(),
+      tiebreaker: Joi.string(),
+      timestamp: Joi.string(),
+    }),
+  });
+
+  const InfraSourceConfigSchema = InfraDefaultSourceConfigSchema.keys({
+    metricAlias: Joi.reach(InfraDefaultSourceConfigSchema, 'metricAlias').required(),
+    logAlias: Joi.reach(InfraDefaultSourceConfigSchema, 'logAlias').required(),
+  });
 
   const InfraRootConfigSchema = Joi.object({
     enabled: Joi.boolean().default(true),
@@ -39,7 +43,7 @@ export const getConfigSchema = (Joi: typeof JoiNamespace) => {
     }).default(),
     sources: Joi.object()
       .keys({
-        default: InfraSourceConfigSchema,
+        default: InfraDefaultSourceConfigSchema,
       })
       .pattern(/.*/, InfraSourceConfigSchema)
       .default(),

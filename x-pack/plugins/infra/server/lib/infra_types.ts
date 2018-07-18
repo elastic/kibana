@@ -6,6 +6,7 @@
 
 import { InfraConfigurationAdapter } from './adapters/configuration';
 import { InfraBackendFrameworkAdapter, InfraFrameworkRequest } from './adapters/framework';
+import { InfraSourceConfiguration, InfraSourcesAdapter } from './adapters/sources';
 import { InfraFieldsDomain } from './domains/fields_domain';
 import { InfraNodesDomain } from './domains/nodes_domain';
 
@@ -15,21 +16,9 @@ export interface InfraDomainLibs {
 }
 
 export interface InfraBackendLibs extends InfraDomainLibs {
-  framework: InfraBackendFrameworkAdapter;
   configuration: InfraConfigurationAdapter<InfraConfiguration>;
-}
-
-export interface InfraSourceConfiguration {
-  metricAlias: string;
-  logAlias: string;
-  fields: {
-    container: string;
-    hostname: string;
-    message: string[];
-    pod: string;
-    tiebreaker: string;
-    timestamp: string;
-  };
+  framework: InfraBackendFrameworkAdapter;
+  sources: InfraSourcesAdapter;
 }
 
 export interface InfraConfiguration {

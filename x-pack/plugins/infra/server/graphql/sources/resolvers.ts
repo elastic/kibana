@@ -5,11 +5,10 @@
  */
 
 import { QueryResolvers } from '../../../common/graphql/types';
-import { InfraConfigurationAdapter } from '../../lib/adapters/configuration';
-import { InfraConfiguration } from '../../lib/infra_types';
+import { InfraSourcesAdapter } from '../../lib/adapters/sources';
 
 interface SourcesResolversDeps {
-  configuration: InfraConfigurationAdapter<InfraConfiguration>;
+  sources: InfraSourcesAdapter;
 }
 
 export const createSourcesResolvers = (
@@ -19,12 +18,7 @@ export const createSourcesResolvers = (
 } => ({
   Query: {
     async source(root, args) {
-      const sourceConfigurations = (await libs.configuration.get()).sources;
-      const requestedSourceConfiguration = sourceConfigurations[args.id];
-
-      if (!requestedSourceConfiguration) {
-        throw new Error(`Failed to find source '${args.id}'`);
-      }
+      const requestedSourceConfiguration = await libs.sources.get(args.id);
 
       return {
         id: args.id,
@@ -32,7 +26,8 @@ export const createSourcesResolvers = (
       };
     },
     async allSources() {
-      const sourceConfigurations = (await libs.configuration.get()).sources;
+      const sourceConfigurations = await libs.sources.getAll();
+
       return Object.entries(sourceConfigurations).map(([sourceName, sourceConfiguration]) => ({
         id: sourceName,
         configuration: sourceConfiguration,
