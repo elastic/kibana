@@ -45,7 +45,7 @@ describe('i18nFilter', () => {
     jest.resetAllMocks();
   });
 
-  it('provides wrapper under i18n translate function', () => {
+  it('provides wrapper around i18n engine', () => {
     const id = 'id';
     const defaultMessage = 'default-message';
     const values = {};

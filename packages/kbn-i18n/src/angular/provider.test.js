@@ -45,11 +45,11 @@ describe('i18nProvider', () => {
     jest.resetAllMocks();
   });
 
-  it('provides wrapper under i18n engine', () => {
+  it('provides wrapper around i18n engine', () => {
     expect(provider).toEqual(i18n.translate);
   });
 
-  it('provides service wrapper under i18n engine', () => {
+  it('provides service wrapper around i18n engine', () => {
     const serviceMethodNames = Object.keys(service);
     const pluginMethodNames = Object.keys(i18n);
 
