@@ -75,31 +75,31 @@ export class EditUser extends Component {
   passwordError = () => {
     const { password } = this.state;
     if (password !== null && password.length < 6) {
-      return 'Password must be at least 6 characters.';
+      return 'Password must be at least 6 characters';
     }
   };
   currentPasswordError = () => {
     const { currentPasswordError } = this.state;
     if (currentPasswordError) {
-      return 'The Current Password you entered is incorrect.';
+      return 'The current password you entered is incorrect';
     }
   };
   confirmPasswordError = () => {
     const { password, confirmPassword } = this.state;
     if (password && confirmPassword !== null && password !== confirmPassword) {
-      return 'Passwords do not match.';
+      return 'Passwords do not match';
     }
   };
   usernameError = () => {
     const { username } = this.state.user;
     if (username !== null && !username) {
-      return 'Username is required.';
+      return 'Username is required';
     }
   };
   fullnameError = () => {
     const { full_name } = this.state.user;
     if (full_name !== null && !full_name) {
-      return 'Full Name is required.';
+      return 'Full name is required';
     }
   };
   changePassword = async () => {
