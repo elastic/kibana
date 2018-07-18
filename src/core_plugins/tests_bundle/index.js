@@ -74,7 +74,7 @@ export default (kibana) => {
         } else {
           // add the modules from all of the apps
           for (const app of uiApps) {
-            modules.app(app.getMainModuleId());
+            modules.add(app.getMainModuleId());
           }
 
           for (const plugin of plugins) {
