@@ -240,6 +240,9 @@ uiModules.get('apps/management')
     });
 
     $scope.refreshFields = function () {
+      const confirmMessage = i18n('kbn.management.editIndexPattern.refresh.label', {
+        defaultMessage: 'This action resets the popularity counter of each field.'
+      });
       const confirmModalOptions = {
         confirmButtonText: i18n('kbn.management.editIndexPattern.refresh.button', { defaultMessage: 'Refresh' }),
         onConfirm: async () => {
@@ -249,9 +252,7 @@ uiModules.get('apps/management')
         title: i18n('kbn.management.editIndexPattern.refresh.header', { defaultMessage: 'Refresh field list?' })
       };
       confirmModal(
-        i18n('kbn.management.editIndexPattern.refresh.label', {
-          defaultMessage: 'This action resets the popularity counter of each field.'
-        }),
+        confirmMessage,
         confirmModalOptions
       );
     };
@@ -287,9 +288,10 @@ uiModules.get('apps/management')
 
     $scope.setIndexPatternsTimeField = function (field) {
       if (field.type !== 'date') {
-        notify.error(i18n('kbn.management.editIndexPattern.notDate.errorMessage', {
+        const errorMessage = i18n('kbn.management.editIndexPattern.notDate.errorMessage', {
           defaultMessage: 'That field is a {fieldType} not a date.', values: { fieldType: field.type }
-        }));
+        });
+        notify.error(errorMessage);
         return;
       }
       $scope.indexPattern.timeFieldName = field.name;

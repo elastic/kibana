@@ -176,7 +176,7 @@ export class StepTimeFieldComponent extends Component {
     return (
       <EuiPanel paddingSize="l">
         <Header indexPattern={indexPattern} />
-        <EuiSpacer size="xs" />
+        <EuiSpacer size="xs"/>
         <TimeField
           isVisible={showTimeField}
           fetchTimeFields={this.fetchTimeFields}
@@ -185,14 +185,14 @@ export class StepTimeFieldComponent extends Component {
           selectedTimeField={selectedTimeField}
           onTimeFieldChanged={this.onTimeFieldChanged}
         />
-        <EuiSpacer size="s" />
+        <EuiSpacer size="s"/>
         <AdvancedOptions
           isVisible={isAdvancedOptionsVisible}
           indexPatternId={indexPatternId}
           toggleAdvancedOptions={this.toggleAdvancedOptions}
           onChangeIndexPatternId={this.onChangeIndexPatternId}
         />
-        <EuiSpacer size="m" />
+        <EuiSpacer size="m"/>
         <ActionButtons
           goToPreviousStep={goToPreviousStep}
           submittable={submittable}

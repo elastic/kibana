@@ -52,7 +52,7 @@ export const HeaderComponent = ({
         />
       </h2>
     </EuiTitle>
-    <EuiSpacer size="m" />
+    <EuiSpacer size="m"/>
     <EuiFlexGroup justifyContent="spaceBetween" alignItems="flexEnd">
       <EuiFlexItem grow={false}>
         <EuiForm

@@ -241,10 +241,14 @@ export class StepIndexPatternComponent extends Component {
       containsErrors = true;
     }
     else if (!containsInvalidCharacters(query, ILLEGAL_CHARACTERS)) {
-      errors.push(this.props.intl.formatMessage({
-        id: 'kbn.management.createIndexPattern.step.invalidCharacters.errorMessage',
-        defaultMessage: 'An index pattern cannot contain spaces or the characters: {characterList}'
-      }, { characterList }));
+      const errorMessage = this.props.intl.formatMessage(
+        {
+          id: 'kbn.management.createIndexPattern.step.invalidCharacters.errorMessage',
+          defaultMessage: 'An index pattern cannot contain spaces or the characters: {characterList}'
+        },
+        { characterList });
+
+      errors.push(errorMessage);
       containsErrors = true;
     }
 

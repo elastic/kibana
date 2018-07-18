@@ -84,11 +84,10 @@ export function IndexPatternsIntervalsProvider(i18n) {
     if (typeof interval === 'string') {
       interval = _.find(intervals, { name: interval });
       if (!interval) {
-        throw new Error(i18n('common.ui.indexPattern.create.intervals.errorMessage',
-          {
-            values: { intervals: _.pluck(intervals, 'name') },
-            defaultMessage: 'Interval must be one of {intervals}'
-          }));
+        const errorMessage = i18n('common.ui.indexPattern.create.intervals.errorMessage',
+          { values: { intervals: _.pluck(intervals, 'name') }, defaultMessage: 'Interval must be one of {intervals}' });
+
+        throw new Error(errorMessage);
       }
     }
 

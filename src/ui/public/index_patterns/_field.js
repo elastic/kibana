@@ -41,13 +41,14 @@ export function Field(indexPattern, spec, i18n) {
   // find the type for this field, fallback to unknown type
   let type = getKbnFieldType(spec.type);
   if (spec.type && !type) {
-    toastNotifications.addDanger({
-      title: i18n('common.ui.indexPattern.create.unknownField.header', { values: { type: spec.type },
-        defaultMessage: 'Unknown field type {type}' }),
-      text: i18n('common.ui.indexPattern.create.unknownField.errorMessage',
-        { values: { name: spec.name, title: indexPattern.title },
-          defaultMessage: 'Field {name} in indexPattern {title} is using an unknown field type.' })
+    const title = i18n('common.ui.indexPattern.create.unknownField.header',
+      { values: { type: spec.type }, defaultMessage: 'Unknown field type {type}' });
+    const text = i18n('common.ui.indexPattern.create.unknownField.errorMessage', { values: { name: spec.name, title: indexPattern.title },
+      defaultMessage: 'Field {name} in indexPattern {title} is using an unknown field type.' });
 
+    toastNotifications.addDanger({
+      title: title,
+      text: text
     });
   }
 

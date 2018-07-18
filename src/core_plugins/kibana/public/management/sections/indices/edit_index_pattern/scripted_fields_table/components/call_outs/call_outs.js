@@ -63,7 +63,7 @@ export const CallOutsComponent = ({
           />
         </p>
       </EuiCallOut>
-      <EuiSpacer size="m" />
+      <EuiSpacer size="m"/>
     </div>
   );
 };

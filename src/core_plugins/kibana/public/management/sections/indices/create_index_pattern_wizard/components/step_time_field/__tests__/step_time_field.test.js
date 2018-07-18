@@ -153,6 +153,7 @@ describe('StepTimeField', () => {
         createIndexPattern={noop}
       />
     );
+
     component.setState({
       timeFields: [
         { display: '@timestamp', fieldName: '@timestamp' },

@@ -39,7 +39,8 @@ export class TableComponent extends PureComponent {
     return value ? <EuiIcon type="dot" color="secondary" aria-label={label}/> : <span/>;
   }
 
-  renderFieldName(name, isTimeField, intl) {
+  renderFieldName(name, isTimeField) {
+    const { intl } = this.props;
     const label = intl.formatMessage({
       id: 'kbn.management.editIndexPattern.fields.table.primaryTime.aria',
       defaultMessage: 'Primary time field'
@@ -67,7 +68,8 @@ export class TableComponent extends PureComponent {
     );
   }
 
-  renderFieldType(type, isConflict, intl) {
+  renderFieldType(type, isConflict) {
+    const { intl } = this.props;
     const label = intl.formatMessage({
       id: 'kbn.management.editIndexPattern.fields.table.multiType.aria',
       defaultMessage: 'Multiple type field'
@@ -110,7 +112,7 @@ export class TableComponent extends PureComponent {
         dataType: 'string',
         sortable: true,
         render: (value) => {
-          return this.renderFieldName(value, indexPattern.timeFieldName === value, intl);
+          return this.renderFieldName(value, indexPattern.timeFieldName === value);
         },
         width: '38%',
         'data-test-subj': 'indexedFieldName',
@@ -121,7 +123,7 @@ export class TableComponent extends PureComponent {
         dataType: 'string',
         sortable: true,
         render: (value) => {
-          return this.renderFieldType(value, value === 'conflict', intl);
+          return this.renderFieldType(value, value === 'conflict');
         },
         'data-test-subj': 'indexedFieldType',
       },

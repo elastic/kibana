@@ -450,17 +450,10 @@ export class FieldEditorComponent extends PureComponent {
         >
           <p>
             <FormattedMessage
-              id="common.ui.fieldEditor.deleteField.label.detail"
-              defaultMessage="You can't recover a deleted field. {question}"
+              id="common.ui.fieldEditor.deleteField.label"
+              defaultMessage="You can't recover a deleted field.{separator}Are you sure you want to do this?"
               values={{
-                question: (
-                  <p>
-                    <FormattedMessage
-                      id="common.ui.fieldEditor.deleteField.label.question"
-                      defaultMessage="Are you sure you want to do this?"
-                    />
-                  </p>
-                )
+                separator: <span><br/><br/></span>
               }}
             />
           </p>
@@ -545,9 +538,10 @@ export class FieldEditorComponent extends PureComponent {
 
     if(remove) {
       remove.then(() => {
-        toastNotifications.addSuccess(this.props.intl.formatMessage(
+        const message = this.props.intl.formatMessage(
           { id: 'common.ui.fieldEditor.deleteField.deleted.header', defaultMessage: 'Deleted \'{fieldName}\'' },
-          { fieldName: field.name }));
+          { fieldName: field.name });
+        toastNotifications.addSuccess(message);
         redirectAway();
       });
     } else {
@@ -577,9 +571,10 @@ export class FieldEditorComponent extends PureComponent {
 
     return indexPattern.save()
       .then(function () {
-        toastNotifications.addSuccess(intl.formatMessage(
+        const message = intl.formatMessage(
           { id: 'common.ui.fieldEditor.deleteField.saved.header', defaultMessage: 'Saved \'{fieldName}\'' },
-          { fieldName: field.name }));
+          { fieldName: field.name });
+        toastNotifications.addSuccess(message);
         redirectAway();
       });
   }

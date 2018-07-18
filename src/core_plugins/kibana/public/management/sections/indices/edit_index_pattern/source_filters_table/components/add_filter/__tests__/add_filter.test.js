@@ -39,13 +39,13 @@ describe('AddFilter', () => {
 
     // Set a value in the input field
     component.setState({ filter: 'tim*' });
+
     // Click the button
     component.find('EuiButton').simulate('click');
     component.update();
 
     expect(onAddFilter).toBeCalledWith('tim*');
   });
-
 
   it('should ignore strings with just spaces', async () => {
     const component = shallowWithIntl(
