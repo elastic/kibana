@@ -7,8 +7,6 @@
 import { EuiButton, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import React from 'react';
 
-import './Repo.css';
-
 import { Repository } from '../../../model/repository';
 
 interface RepoProps {

@@ -23,6 +23,7 @@ export default (kibana: any) =>
         title: 'Castro',
         description: 'castro',
         main: 'plugins/castro/app',
+        styleSheetPath: resolve(__dirname, 'public/styles.scss'),
       },
 
       hacks: ['plugins/castro/hack'],

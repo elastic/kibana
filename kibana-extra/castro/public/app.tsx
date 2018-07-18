@@ -12,7 +12,6 @@ import { uiModules } from 'ui/modules';
 
 import 'ui/autoload/styles';
 import App from './components/App';
-import './less/main.less';
 import store from './stores';
 
 const app = uiModules.get('apps/castro');

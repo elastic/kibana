@@ -17,7 +17,6 @@ import {
   EuiSpacer,
   EuiTextArea,
 } from '@elastic/eui';
-import './code.css';
 
 interface State {
   path: string;
