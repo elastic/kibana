@@ -32,6 +32,7 @@ export default function AgentMarker({ agentMark, x }) {
       }}
     >
       <EuiToolTip
+        id={agentMark.name}
         position="top"
         content={
           <div>

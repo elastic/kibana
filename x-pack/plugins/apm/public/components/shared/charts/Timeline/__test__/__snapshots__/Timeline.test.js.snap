@@ -542,7 +542,7 @@ exports[`Timeline should render with data 1`] = `
                 className="euiToolTipAnchor"
               >
                 <div
-                  aria-describedby="otgzn0bx"
+                  aria-describedby="timeToFirstByte"
                   className="c0"
                   disabled={false}
                   fontSize="12px"
@@ -571,7 +571,7 @@ exports[`Timeline should render with data 1`] = `
                 className="euiToolTipAnchor"
               >
                 <div
-                  aria-describedby="2hvxbhkd"
+                  aria-describedby="domInteractive"
                   className="c0"
                   disabled={false}
                   fontSize="12px"
@@ -600,7 +600,7 @@ exports[`Timeline should render with data 1`] = `
                 className="euiToolTipAnchor"
               >
                 <div
-                  aria-describedby="66srt6oo"
+                  aria-describedby="domComplete"
                   className="c0"
                   disabled={false}
                   fontSize="12px"
