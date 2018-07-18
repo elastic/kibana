@@ -17,6 +17,7 @@
  * under the License.
  */
 
+import './options_popover.less';
 import React from 'react';
 import ReactDOM from 'react-dom';
 
@@ -44,6 +45,7 @@ export function showOptionsPopover(anchorElement) {
   document.body.appendChild(container);
   const element = (
     <EuiWrappingPopover
+      className="dashOptionsPopover"
       id="popover"
       button={anchorElement}
       isOpen={true}
