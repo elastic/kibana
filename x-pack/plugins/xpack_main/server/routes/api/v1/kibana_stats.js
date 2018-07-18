@@ -11,6 +11,7 @@ import { wrap } from 'boom';
 import { callClusterFactory } from '../../../lib/call_cluster_factory';
 import { getKibanaUsageCollector } from '../../../../../monitoring/server/kibana_monitoring/collectors';
 import { getReportingUsageCollector } from '../../../../../reporting/server/usage';
+import { getSpacesUsageCollector } from '../../../../../spaces/server/lib/get_spaces_usage_collector';
 
 export function kibanaStatsRoute(server) {
   server.route({
@@ -24,17 +25,20 @@ export function kibanaStatsRoute(server) {
       try {
         const kibanaUsageCollector = getKibanaUsageCollector(server);
         const reportingUsageCollector = getReportingUsageCollector(server);
+        const spacesUsageCollector = getSpacesUsageCollector(server);
 
-        const [ kibana, reporting ] = await Promise.all([
+        const [kibana, reporting, spaces] = await Promise.all([
           kibanaUsageCollector.fetch(callCluster),
           reportingUsageCollector.fetch(callCluster),
+          spacesUsageCollector.fetch(callCluster),
         ]);
 
         reply({
           kibana,
           reporting,
+          spaces,
         });
-      } catch(err) {
+      } catch (err) {
         req.log(['error'], err);
 
         if (err.isBoom) {

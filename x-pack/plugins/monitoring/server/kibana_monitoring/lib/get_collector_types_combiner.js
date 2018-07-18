@@ -11,6 +11,7 @@ import {
   KIBANA_USAGE_TYPE,
 } from '../../../common/constants';
 import { KIBANA_REPORTING_TYPE } from '../../../../reporting/common/constants';
+import { KIBANA_SPACES_MONITORING_TYPE } from '../../../../spaces/common/constants';
 import { sourceKibana } from './source_kibana';
 
 /*
@@ -39,17 +40,20 @@ export function getCollectorTypesCombiner(kbnServer, config, _sourceKibana = sou
 
     // kibana usage and stats
     let statsResult;
-    const [ statsHeader, statsPayload ] = findItem(KIBANA_STATS_TYPE);
-    const [ reportingHeader, reportingPayload ] = findItem(KIBANA_REPORTING_TYPE);
+    const [statsHeader, statsPayload] = findItem(KIBANA_STATS_TYPE);
+    const [reportingHeader, reportingPayload] = findItem(KIBANA_REPORTING_TYPE);
+    const [spacesHeader, spacesPayload] = findItem(KIBANA_SPACES_MONITORING_TYPE);
 
     // sourceKibana uses "host" from the kibana stats payload
     const host = get(statsPayload, 'host');
     const kibana = _sourceKibana(kbnServer, config, host);
 
     if (statsHeader && statsPayload) {
-      const [ usageHeader, usagePayload ] = findItem(KIBANA_USAGE_TYPE);
+      const [usageHeader, usagePayload] = findItem(KIBANA_USAGE_TYPE);
       const kibanaUsage = (usageHeader && usagePayload) ? usagePayload : null;
       const reportingUsage = (reportingHeader && reportingPayload) ? reportingPayload : null; // this is an abstraction leak
+      const spacesUsage = (spacesHeader && spacesPayload) ? spacesPayload : null; //this is an abstraction leak
+
       statsResult = [
         statsHeader,
         {
@@ -63,11 +67,14 @@ export function getCollectorTypesCombiner(kbnServer, config, _sourceKibana = sou
       if (reportingUsage) {
         set(statsResult, '[1].usage.xpack.reporting', reportingUsage); // this is an abstraction leak
       }
+      if (spacesUsage) {
+        set(statsResult, '[1].usage.xpack.spaces', spacesUsage); // this is an abstraction leak
+      }
     }
 
     // kibana settings
     let settingsResult;
-    const [ settingsHeader, settingsPayload ] = findItem(KIBANA_SETTINGS_TYPE);
+    const [settingsHeader, settingsPayload] = findItem(KIBANA_SETTINGS_TYPE);
     if (settingsHeader && settingsPayload) {
       settingsResult = [
         settingsHeader,
@@ -81,7 +88,7 @@ export function getCollectorTypesCombiner(kbnServer, config, _sourceKibana = sou
     // return new payload with the combined data
     // adds usage data to stats data
     // strips usage out as a top-level type
-    const result = [ statsResult, settingsResult ];
+    const result = [statsResult, settingsResult];
 
     // remove result items that are undefined
     return result.filter(Boolean);
