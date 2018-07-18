@@ -27,6 +27,12 @@ export interface InjectedMetadataParams {
   };
 }
 
+/**
+ * Provides access to the metadata that is injected by the
+ * server into the page. The metadata is actually defined
+ * in the entry file for the bundle containing the new platform
+ * and is read from the DOM in most cases.
+ */
 export class InjectedMetadataService {
   constructor(private params: InjectedMetadataParams) {}
 

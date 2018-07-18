@@ -29,6 +29,13 @@ export interface LegacyPlatformParams {
   useLegacyTestHarness?: boolean;
 }
 
+/**
+ * The LegacyPlatformService is responsible for initializing
+ * the legacy platform by injecting parts of the new platform
+ * services into the legacy platform modules, like ui/modules,
+ * and then bootstraping the ui/chrome or ui/test_harness to
+ * start either the app or browser tests.
+ */
 export class LegacyPlatformService {
   constructor(private params: LegacyPlatformParams) {}
 
