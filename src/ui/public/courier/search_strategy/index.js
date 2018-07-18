@@ -17,25 +17,10 @@
  * under the License.
  */
 
-import 'ngreact';
-import './no_results.less';
-import { uiModules } from 'ui/modules';
+export {
+  assignSearchRequestsToSearchStrategies,
+  addSearchStrategy,
+  hasSearchStategyForIndexPattern,
+} from './search_strategy_registry';
 
-import {
-  DiscoverNoResults,
-} from './no_results';
-
-import {
-  DiscoverUnsupportedIndexPattern,
-} from './unsupported_index_pattern';
-
-import './timechart';
-
-const app = uiModules.get('apps/discover', ['react']);
-
-app.directive('discoverNoResults', reactDirective => reactDirective(DiscoverNoResults));
-
-app.directive(
-  'discoverUnsupportedIndexPattern',
-  reactDirective => reactDirective(DiscoverUnsupportedIndexPattern, ['unsupportedType'])
-);
+export { isDefaultTypeIndexPattern } from './is_default_type_index_pattern';
