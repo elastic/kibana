@@ -355,7 +355,7 @@ export class FieldEditor extends PureComponent {
     const { field, hasScriptError } = this.state;
     const isInvalid = !field.script || !field.script.trim() || hasScriptError;
     const errorMsg = hasScriptError
-      ? 'Script is invalid. View script preview for details'
+      ? (<span data-test-subj="invalidScriptError">Script is invalid. View script preview for details</span>)
       : 'Script is required';
 
     return field.scripted ? (

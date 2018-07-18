@@ -36,7 +36,7 @@ export default function ({ getService, getPageObjects }) {
   const log = getService('log');
   const remote = getService('remote');
   const retry = getService('retry');
-  const find = getService('find');
+  const testSubjects = getService('testSubjects');
   const PageObjects = getPageObjects(['common', 'header', 'settings', 'visualize', 'discover']);
 
   describe('scripted fields', () => {
@@ -66,8 +66,8 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.settings.setScriptedFieldScript(`doc['iHaveNoClosingTick].value`);
       await PageObjects.settings.clickSaveScriptedField();
       await retry.try(async () => {
-        const formErrorExists = await find.existsByDisplayedByCssSelector('.euiFormErrorText');
-        expect(formErrorExists).to.be(true);
+        const invalidScriptErrorExists = await testSubjects.exists('invalidScriptError');
+        expect(invalidScriptErrorExists).to.be(true);
       });
     });
 
