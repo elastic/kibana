@@ -69,11 +69,19 @@ export class Home extends Component {
         perPage: 1
       });
     } catch (error) {
+      if (!this._isMounted) {
+        return;
+      }
+
       // ignore error - find is not critical for page functioning,
       // just used to add some extra styling when there are no index-patterns
       this.setState({
         isLoading: false
       });
+      return;
+    }
+
+    if (!this._isMounted) {
       return;
     }
 
