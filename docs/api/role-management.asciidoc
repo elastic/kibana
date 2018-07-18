@@ -14,10 +14,10 @@ It is *not* supported to do so using the
 {ref}/security-api-roles.html[Elasticsearch Role Management APIs], and doing 
 so will likely cause Kibana's authorization to behave unexpectedly. 
 
-<<role-management-api-put>>
-<<role-management-api-get>>
-<<role-management-api-delete>>
+* <<role-management-api-put>>
+* <<role-management-api-get>>
+* <<role-management-api-delete>>
 
-include::role-management/get.asciidoc[]
 include::role-management/put.asciidoc[]
+include::role-management/get.asciidoc[]
 include::role-management/delete.asciidoc[]
