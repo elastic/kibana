@@ -45,16 +45,13 @@ export class Users extends Component {
     });
   };
   async loadUsers() {
-    const { apiClient, changeUrl } = this.props;
+    const { apiClient } = this.props;
     try {
       const users = await apiClient.getUsers();
       this.setState({ users });
     } catch (e) {
       if (e.status === 403) {
         this.setState({ permissionDenied: true });
-        setTimeout(() => {
-          changeUrl('/management');
-        }, 3000);
       } else {
         toastNotifications.addDanger(`Error fetching users: ${e.data.message}`);
       }
@@ -80,13 +77,13 @@ export class Users extends Component {
     this.setState({ showDeleteConfirmation: false });
   }
   render() {
-    const { users, permissionDenied, showDeleteConfirmation, selection } = this.state;
+    const { users, filter, permissionDenied, showDeleteConfirmation, selection } = this.state;
     const { apiClient } = this.props;
     if (permissionDenied) {
       return (
         <EuiPage className="mgtUsersListingPage">
           <EuiPageBody>
-            <EuiPageContent verticalPosition="center" horizontalPosition="center" className="mgtUsersListingPage__content">
+            <EuiPageContent horizontalPosition="center" className="mgtUsersListingPage__content">
               <EuiEmptyPrompt
                 iconType="securityApp"
                 iconColor={null}
@@ -141,8 +138,12 @@ export class Users extends Component {
         sortable: false,
         width: '100px',
         align: 'right',
+        description:
+          'Reserved users are built-in and cannot be removed. Only the password can be changed.',
         render: reserved =>
-          reserved ? <EuiIcon data-test-subj="reservedUser" type="lock" /> : null,
+          reserved ? (
+            <EuiIcon aria-label="Reserved user" data-test-subj="reservedUser" type="check" />
+          ) : null,
       },
     ];
     const pagination = {
@@ -161,6 +162,11 @@ export class Users extends Component {
       box: {
         incremental: true,
       },
+      onChange: query => {
+        this.setState({
+          filter: query.queryText,
+        });
+      },
     };
     const sorting = {
       sort: {
@@ -173,6 +179,12 @@ export class Users extends Component {
         'data-test-subj': 'userRow',
       };
     };
+    const usersToShow = filter
+      ? users.filter(({ username, roles }) => {
+        const normalized = `${username} ${roles.join(' ')}`.toLowerCase();
+        const normalizedQuery = filter.toLowerCase();
+        return normalized.indexOf(normalizedQuery) !== -1;
+      }) : users;
     return (
       <EuiPage className="mgtUsersListingPage">
         <EuiPageBody>
@@ -208,7 +220,7 @@ export class Users extends Component {
                 columns={columns}
                 selection={selectionConfig}
                 pagination={pagination}
-                items={users}
+                items={usersToShow}
                 loading={users.length === 0}
                 search={search}
                 sorting={sorting}

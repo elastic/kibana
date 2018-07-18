@@ -149,7 +149,7 @@ export class EditUser extends Component {
       <Fragment>
         {userIsLoggedInUser ? (
           <EuiFormRow
-            label="Current Password"
+            label="Current password"
             isInvalid={!!this.currentPasswordError()}
             error={this.currentPasswordError()}
           >
@@ -161,7 +161,7 @@ export class EditUser extends Component {
           </EuiFormRow>
         ) : null}
         <EuiFormRow
-          label={userIsLoggedInUser ? "New Password" : "Password"}
+          label={userIsLoggedInUser ? "New password" : "Password"}
           isInvalid={!!this.passwordError()}
           error={this.passwordError()}
         >
@@ -174,7 +174,7 @@ export class EditUser extends Component {
           />
         </EuiFormRow>
         <EuiFormRow
-          label="Confirm Password"
+          label="Confirm password"
           isInvalid={!!this.confirmPasswordError()}
           error={this.confirmPasswordError()}
         >
