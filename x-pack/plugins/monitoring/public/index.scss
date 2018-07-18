@@ -1,0 +1,15 @@
+// EUI global scope
+@import '../../../../src/ui/public/styles/_styling_constants';
+
+// Monitoring plugin styles
+
+// Prefix all styles with "mon" to avoid conflicts.
+// Examples
+//   monChart
+//   monChart__legend
+//   monChart__legend--small
+//   monChart__legend-isLoading
+
+@import 'components/chart/index';
+@import 'components/no_data/index';
+@import 'components/sparkline/index';

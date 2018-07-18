@@ -16,7 +16,6 @@ import {
 import { CheckingSettings } from './checking_settings';
 import { ReasonFound, WeTried } from './reasons';
 import { CheckerErrors } from './checker_errors';
-import '../../less/components/no_data.less';
 
 function NoDataMessage(props) {
   const { isLoading, reason, checkMessage } = props;
