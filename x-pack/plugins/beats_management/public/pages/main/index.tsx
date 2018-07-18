@@ -4,10 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-// @ts-ignore
-import { EuiTab, EuiTabs } from '@elastic/eui';
+import {
+  // @ts-ignore
+  EuiTab,
+  // @ts-ignore
+  EuiTabs,
+} from '@elastic/eui';
 import React from 'react';
-import { Route, Switch, withRouter } from 'react-router-dom';
+import { Redirect, Route, Switch, withRouter } from 'react-router-dom';
 import { PrimaryLayout } from '../../components/layouts/primary';
 import { ActivityPage } from './activity';
 import { BeatsPage } from './beats';
@@ -17,7 +21,14 @@ interface MainPagesProps {
   history: any;
 }
 
-class MainPagesComponent extends React.PureComponent<MainPagesProps> {
+interface MainPagesState {
+  selectedTabId: string;
+  enrollBeat?: {
+    enrollmentToken: string;
+  } | null;
+}
+
+class MainPagesComponent extends React.PureComponent<MainPagesProps, MainPagesState> {
   constructor(props: any) {
     super(props);
 
@@ -25,6 +36,18 @@ class MainPagesComponent extends React.PureComponent<MainPagesProps> {
       selectedTabId: '/',
     };
   }
+  public toggleEnrollBeat = () => {
+    if (this.state.enrollBeat) {
+      return this.setState({
+        enrollBeat: null,
+      });
+    }
+
+    // TODO: create a real enromment token
+    return this.setState({
+      enrollBeat: { enrollmentToken: '5g3i4ug5uy34g' },
+    });
+  };
 
   public onSelectedTabChanged = (id: string) => {
     this.props.history.push(id);
@@ -60,10 +83,23 @@ class MainPagesComponent extends React.PureComponent<MainPagesProps> {
       </EuiTab>
     ));
     return (
-      <PrimaryLayout title="Beats">
+      <PrimaryLayout
+        title="Beats"
+        actionSection={
+          <Switch>
+            <Route path="/beats/:action?/:enrollmentToken?" render={BeatsPage.ActionArea} />
+          </Switch>
+        }
+      >
         <EuiTabs>{renderedTabs}</EuiTabs>
+
         <Switch>
-          <Route path="/" exact={true} component={BeatsPage} />
+          <Route
+            path="/"
+            exact={true}
+            render={() => <Redirect from="/" exact={true} to="/beats" />}
+          />
+          <Route path="/beats/:action?/:enrollmentToken?" component={BeatsPage} />
           <Route path="/activity" exact={true} component={ActivityPage} />
           <Route path="/tags" exact={true} component={TagsPage} />
         </Switch>

@@ -5,32 +5,37 @@
  */
 
 import React from 'react';
+import styled from 'styled-components';
 
-import {
-  EuiPage,
-  EuiPageBody,
-  EuiPageContent,
-  EuiPageContentBody,
-  EuiPageContentHeader,
-  EuiPageContentHeaderSection,
-  EuiTitle,
-} from '@elastic/eui';
+import { EuiPage, EuiPageBody, EuiPageContent, EuiPageContentBody, EuiTitle } from '@elastic/eui';
 
 interface PrimaryLayoutProps {
   title: string;
+  actionSection: React.ReactNode;
 }
 
-export const PrimaryLayout: React.SFC<PrimaryLayoutProps> = ({ title, children }) => (
+const HeaderContainer = styled.div`
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  padding: 24px 24px 0;
+  margin-bottom: 16px;
+`;
+
+export const PrimaryLayout: React.SFC<PrimaryLayoutProps> = ({
+  actionSection,
+  title,
+  children,
+}) => (
   <EuiPage>
     <EuiPageBody>
       <EuiPageContent>
-        <EuiPageContentHeader>
-          <EuiPageContentHeaderSection>
-            <EuiTitle>
-              <h2>{title}</h2>
-            </EuiTitle>
-          </EuiPageContentHeaderSection>
-        </EuiPageContentHeader>
+        <HeaderContainer>
+          <EuiTitle>
+            <h1>{title}</h1>
+          </EuiTitle>
+          {actionSection}
+        </HeaderContainer>
         <EuiPageContentBody>{children}</EuiPageContentBody>
       </EuiPageContent>
     </EuiPageBody>
