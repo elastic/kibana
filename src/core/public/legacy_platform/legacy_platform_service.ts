@@ -37,7 +37,7 @@ export interface LegacyPlatformParams {
  * start either the app or browser tests.
  */
 export class LegacyPlatformService {
-  constructor(private params: LegacyPlatformParams) {}
+  constructor(private readonly params: LegacyPlatformParams) {}
 
   public start({ injectedMetadata }: Deps) {
     // Inject parts of the new platform into parts of the legacy platform
