@@ -25,8 +25,8 @@ import chrome from '../chrome';
 // @ts-ignore not really worth typing
 import { metadata } from '../metadata';
 
-class FetchError<T extends any> extends Error {
-  constructor(public readonly res: Response, public readonly body?: T) {
+class FetchError extends Error {
+  constructor(public readonly res: Response, public readonly body?: any) {
     super(res.statusText);
     Error.captureStackTrace(this, FetchError);
   }
@@ -41,10 +41,7 @@ export interface KFetchKibanaOptions {
   prependBasePath?: boolean;
 }
 
-export function kfetch<T extends any>(
-  fetchOptions?: KFetchOptions,
-  kibanaOptions?: KFetchKibanaOptions
-) {
+export function kfetch(fetchOptions?: KFetchOptions, kibanaOptions?: KFetchKibanaOptions) {
   // fetch specific options with defaults
   const { pathname, query, ...combinedFetchOptions } = merge(
     {
@@ -69,21 +66,20 @@ export function kfetch<T extends any>(
     query,
   });
 
-  const fetching = new Promise(async (resolve, reject) => {
+  const fetching = new Promise<any>(async (resolve, reject) => {
     const res = await fetch(fullUrl, combinedFetchOptions);
 
     if (res.ok) {
-      return resolve((await res.json()) as T);
+      return resolve(await res.json());
     }
 
     try {
       // attempt to read the body of the response
-      return reject(new FetchError<T>(res, await res.json()));
+      return reject(new FetchError(res, await res.json()));
     } catch (err) {
       // ignore error if we are not be able to get body for response
+      return reject(new FetchError(res));
     }
-
-    return reject(new FetchError<T>(res));
   });
 
   return fetching;
