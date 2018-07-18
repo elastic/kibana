@@ -34,7 +34,7 @@ export default (kibana) => {
 
     uiExports: {
       async __bundleProvider__(kbnServer) {
-        const modules = [];
+        const modules = new Set();
 
         const {
           config,
@@ -64,8 +64,8 @@ export default (kibana) => {
 
             // add the modules from all of this plugins apps
             for (const app of uiApps) {
-              if (app.getPluginId() === pluginId && !modules.includes(app.getMainModuleId())) {
-                modules.push(app.getMainModuleId());
+              if (app.getPluginId() === pluginId) {
+                modules.add(app.getMainModuleId());
               }
             }
 
@@ -74,9 +74,7 @@ export default (kibana) => {
         } else {
           // add the modules from all of the apps
           for (const app of uiApps) {
-            if (!modules.includes(app.getMainModuleId())) {
-              modules.push(app.getMainModuleId());
-            }
+            modules.app(app.getMainModuleId());
           }
 
           for (const plugin of plugins) {
@@ -85,7 +83,7 @@ export default (kibana) => {
         }
 
         const testFiles = await findSourceFiles(testGlobs);
-        for (const f of testFiles) modules.push(f);
+        for (const f of testFiles) modules.add(f);
 
         if (config.get('tests_bundle.instrument')) {
           uiBundles.addPostLoader({
@@ -97,7 +95,7 @@ export default (kibana) => {
 
         uiBundles.add({
           id: 'tests',
-          modules,
+          modules: [...modules],
           template: createTestEntryTemplate(uiSettingDefaults),
         });
       },
