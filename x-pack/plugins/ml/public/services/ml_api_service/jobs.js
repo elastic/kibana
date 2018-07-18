@@ -71,6 +71,16 @@ export const jobs = {
     });
   },
 
+  closeJobs(jobIds) {
+    return http({
+      url: `${basePath}/jobs/close_jobs`,
+      method: 'POST',
+      data: {
+        jobIds,
+      }
+    });
+  },
+
   jobAuditMessages(jobId, from) {
     const jobIdString = (jobId !== undefined) ? `/${jobId}` : '';
     const fromString = (from !== undefined) ? `?from=${from}` : '';
