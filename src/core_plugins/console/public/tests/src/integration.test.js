@@ -33,7 +33,7 @@ describe('Integration', () => {
   beforeEach(() => {
     // Set up our document body
     document.body.innerHTML =
-      '<div><div id="editor" /><div id="editor_actions" /><div id="copy_as_curl" /><kbn-initial-state data="{}"/></div>';
+      '<div><div id="editor" /><div id="editor_actions" /><div id="copy_as_curl" /></div>';
 
     input = initializeInput(
       $('#editor'),
