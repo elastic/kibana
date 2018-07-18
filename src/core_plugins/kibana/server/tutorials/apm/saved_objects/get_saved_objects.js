@@ -17,41 +17,14 @@
  * under the License.
  */
 
-import _ from 'lodash';
+import indexPattern from './index_pattern.json';
+import staticSavedObjects from './saved_objects.json';
 
-export class SavedObject {
-  constructor(client, { id, type, version, attributes, error } = {}) {
-    this._client = client;
-    this.id = id;
-    this.type = type;
-    this.attributes = attributes || {};
-    this._version = version;
-    if (error) {
-      this.error = error;
-    }
-  }
+function getIndexPattern(apmIndexPattern) {
+  indexPattern.attributes.title = apmIndexPattern;
+  return indexPattern;
+}
 
-  get(key) {
-    return _.get(this.attributes, key);
-  }
-
-  set(key, value) {
-    return _.set(this.attributes, key, value);
-  }
-
-  has(key) {
-    return _.has(this.attributes, key);
-  }
-
-  save() {
-    if (this.id) {
-      return this._client.update(this.type, this.id, this.attributes);
-    } else {
-      return this._client.create(this.type, this.attributes);
-    }
-  }
-
-  delete() {
-    return this._client.delete(this.type, this.id);
-  }
+export function getSavedObjects(server) {
+  return [getIndexPattern(server), ...staticSavedObjects];
 }
