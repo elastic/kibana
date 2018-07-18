@@ -17,41 +17,16 @@
  * under the License.
  */
 
-import _ from 'lodash';
+import expect from 'expect.js';
+import { getSavedObjects } from './get_saved_objects';
 
-export class SavedObject {
-  constructor(client, { id, type, version, attributes, error } = {}) {
-    this._client = client;
-    this.id = id;
-    this.type = type;
-    this.attributes = attributes || {};
-    this._version = version;
-    if (error) {
-      this.error = error;
-    }
-  }
+const indexPatternTitle = 'dynamic index pattern title';
 
-  get(key) {
-    return _.get(this.attributes, key);
-  }
-
-  set(key, value) {
-    return _.set(this.attributes, key, value);
-  }
-
-  has(key) {
-    return _.has(this.attributes, key);
-  }
-
-  save() {
-    if (this.id) {
-      return this._client.update(this.type, this.id, this.attributes);
-    } else {
-      return this._client.create(this.type, this.attributes);
-    }
-  }
-
-  delete() {
-    return this._client.delete(this.type, this.id);
-  }
-}
+test('should dynamically set index title to "xpack.apm.indexPattern" yaml config value', () => {
+  const savedObjects = getSavedObjects(indexPatternTitle);
+  const indexPattern = savedObjects[0];
+  expect(indexPattern.type).to.be('index-pattern');
+  // if index pattern id changes, ensure other saved objects point to the new id
+  expect(indexPattern.id).to.be('12e52550-6354-11e8-9d01-ed6a4badd083');
+  expect(indexPattern.attributes.title).to.be(indexPatternTitle);
+});
