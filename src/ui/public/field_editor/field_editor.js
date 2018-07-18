@@ -559,6 +559,29 @@ export class FieldEditor extends PureComponent {
   render() {
     const { isReady, isCreating, scriptingLangs, field, showScriptingHelp } = this.state;
 
+    let scriptDisabledCallout;
+    let scriptWarningCallout;
+    let scriptHelpFlyout;
+    if (field.scripted) {
+      scriptDisabledCallout = (
+        <ScriptingDisabledCallOut isVisible={!scriptingLangs.length} />
+      );
+      scriptWarningCallout = (
+        <ScriptingWarningCallOut isVisible />
+      );
+      scriptHelpFlyout = (
+        <ScriptingHelpFlyout
+          isVisible={showScriptingHelp}
+          onClose={this.hideScriptingHelp}
+          indexPattern={this.props.indexPattern}
+          lang={field.lang}
+          name={field.name}
+          script={field.script}
+          executeScript={executeScript}
+        />
+      );
+    }
+
     return isReady ? (
       <div>
         <EuiText>
@@ -566,17 +589,9 @@ export class FieldEditor extends PureComponent {
         </EuiText>
         <EuiSpacer size="m" />
         <EuiForm>
-          <ScriptingDisabledCallOut isVisible={field.scripted && !scriptingLangs.length} />
-          <ScriptingWarningCallOut isVisible={field.scripted} />
-          <ScriptingHelpFlyout
-            isVisible={field.scripted && showScriptingHelp}
-            onClose={this.hideScriptingHelp}
-            indexPattern={this.props.indexPattern}
-            lang={field.lang}
-            name={field.name}
-            script={field.script}
-            executeScript={executeScript}
-          />
+          {scriptDisabledCallout}
+          {scriptWarningCallout}
+          {scriptHelpFlyout}
           {this.renderName()}
           {this.renderLanguage()}
           {this.renderType()}
