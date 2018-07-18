@@ -72,9 +72,9 @@ export default function ({ getService, getPageObjects }) {
         roles: ['rbac_read'] });
       log.debug('After Add user: , userObj.userName');
       const users1 = indexBy(await PageObjects.security.getElasticsearchUsers(), 'username');
-      const user = users.kibanareadonly;
+      const user = users1.kibanareadonly;
       log.debug('actualUsers = %j', users1);
-      //log.debug('roles: ', user.roles);
+      log.debug('roles: ', user.roles);
       expect(user.roles).to.eql(['rbac_read']);
       expect(user.fullname).to.eql('kibanareadonlyFirst kibanareadonlyLast');
       expect(user.reserved).to.be(false);
@@ -126,7 +126,6 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.security.logout();
 
     });
-
 
     after(async function () {
       await PageObjects.security.logout();
