@@ -24,10 +24,10 @@ export const TRYCLOUD_OPTION1 = {
 
            'To create a cluster, in Elastic Cloud console:\n' +
            ' 1. Select **Create Deployment** and specify the **Deployment Name**\n' +
-           '    Modify the other deployment options as needed (or not, the defaults are great to get started)\n' +
-           ' 2. Click **Create Deployment**\n' +
-           ' 3. Wait until deployment creation completes\n`' +
-           ' 4. Go to the new cloud Kibana instance and follow the Kibana Home instructions'
+           ' 2. Modify the other deployment options as needed (or not, the defaults are great to get started)\n' +
+           ' 3. Click **Create Deployment**\n' +
+           ' 4. Wait until deployment creation completes\n`' +
+           ' 5. Go to the new cloud Kibana instance and follow the Kibana Home instructions'
 
 };
 
