@@ -27,3 +27,15 @@ Start Kibana with codesearch
 ```bash
 ./gradlew startKibana
 ```
+
+In order to develop code intelligence feature, you need to checkout submodule:
+
+```bash
+./scripts/update
+```
+
+then run
+
+```bash
+./gradlew lsp:javascript:build
+```
