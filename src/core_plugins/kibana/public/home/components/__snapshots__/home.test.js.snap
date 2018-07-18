@@ -5,7 +5,9 @@ exports[`directories should not render directory entry when showOnHomePage is fa
   className="home"
   restrictWidth={false}
 >
-  <EuiPageBody>
+  <EuiPageBody
+    restrictWidth={false}
+  >
     <AddData
       apmUiEnabled={true}
     />
@@ -118,7 +120,9 @@ exports[`directories should render ADMIN directory entry in "Manage" panel 1`] =
   className="home"
   restrictWidth={false}
 >
-  <EuiPageBody>
+  <EuiPageBody
+    restrictWidth={false}
+  >
     <AddData
       apmUiEnabled={true}
     />
@@ -250,7 +254,9 @@ exports[`directories should render DATA directory entry in "Explore Data" panel 
   className="home"
   restrictWidth={false}
 >
-  <EuiPageBody>
+  <EuiPageBody
+    restrictWidth={false}
+  >
     <AddData
       apmUiEnabled={true}
     />
@@ -382,7 +388,9 @@ exports[`should not contain RecentlyAccessed panel when there is no recentlyAcce
   className="home"
   restrictWidth={false}
 >
-  <EuiPageBody>
+  <EuiPageBody
+    restrictWidth={false}
+  >
     <AddData
       apmUiEnabled={true}
     />
@@ -495,7 +503,9 @@ exports[`should render home component 1`] = `
   className="home"
   restrictWidth={false}
 >
-  <EuiPageBody>
+  <EuiPageBody
+    restrictWidth={false}
+  >
     <React.Fragment>
       <RecentlyAccessed
         recentlyAccessed={
