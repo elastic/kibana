@@ -41,9 +41,6 @@ if (query && query.mocha) {
 
 setupTestSharding();
 
-// allows test_harness.less to have higher priority selectors
-document.body.setAttribute('id', 'test-harness-body');
-
 before(() => {
   // prevent accidental ajax requests
   sinon.useFakeXMLHttpRequest();
@@ -84,7 +81,10 @@ afterEach(function () {
 });
 
 // Kick off mocha, called at the end of test entry files
-export function bootstrap() {
+export function bootstrap(targetDomElement) {
+  // allows test_harness.less to have higher priority selectors
+  targetDomElement.setAttribute('id', 'test-harness-body');
+
   // load the hacks since we aren't actually bootstrapping the
   // chrome, which is where the hacks would normally be loaded
   require('uiExports/hacks');

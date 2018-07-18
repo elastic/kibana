@@ -19,6 +19,8 @@
 
 import { createSavedObjectsService } from './service';
 import { KibanaMigrator } from './migrations';
+import { docValidator } from './validation';
+
 import {
   createBulkCreateRoute,
   createBulkGetRoute,
@@ -71,9 +73,7 @@ export function savedObjectsMixin(kbnServer, server) {
       return savedObjectsClientCache.get(request);
     }
 
-    const savedObjectsClient = server.savedObjects.getScopedSavedObjectsClient(
-      request
-    );
+    const savedObjectsClient = server.savedObjects.getScopedSavedObjectsClient(request);
 
     savedObjectsClientCache.set(request, savedObjectsClient);
     return savedObjectsClient;

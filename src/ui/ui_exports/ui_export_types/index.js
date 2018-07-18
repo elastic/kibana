@@ -28,6 +28,10 @@ export {
 } from './saved_object_mappings';
 
 export {
+  validations,
+} from './saved_object_validations';
+
+export {
   app,
   apps,
 } from './ui_apps';
@@ -52,7 +56,8 @@ export {
   home,
   visTypeEnhancers,
   aliases,
-  visualize
+  visualize,
+  search,
 } from './ui_app_extensions';
 
 export {
