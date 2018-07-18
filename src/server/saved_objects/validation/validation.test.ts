@@ -52,4 +52,8 @@ describe('docValidator', () => {
     expect(validators.a.args).toEqual([[{ type: 'a', b: 'foo' }]]);
     expect(validators.b.args).toEqual([[{ type: 'a', b: 'foo' }]]);
   });
+
+  test('does not fail if there are no validators defined', () => {
+    expect(() => docValidator()({ type: 'a', b: 'foo' })).not.toThrow();
+  });
 });

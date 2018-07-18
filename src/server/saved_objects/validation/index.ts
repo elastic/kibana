@@ -51,7 +51,7 @@ export interface PropertyValidators {
  * @param {Validators} validators
  * @param {SavedObjectDoc} doc
  */
-export function docValidator(validators: PropertyValidators) {
+export function docValidator(validators: PropertyValidators = {}) {
   return function validateDoc(doc: SavedObjectDoc) {
     Object.keys(doc)
       .concat(doc.type)
