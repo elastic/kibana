@@ -27,6 +27,7 @@ exports[`LoadingIndices should render normally 1`] = `
     >
       <EuiTextColor
         color="subdued"
+        component="span"
       >
         <FormattedMessage
           defaultMessage="Looking for matching indices..."
@@ -46,6 +47,7 @@ exports[`LoadingIndices should render normally 1`] = `
     >
       <EuiTextColor
         color="subdued"
+        component="span"
       >
         <FormattedMessage
           defaultMessage="Just a sec..."

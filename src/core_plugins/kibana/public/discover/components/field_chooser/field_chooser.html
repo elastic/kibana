@@ -31,8 +31,10 @@
     </div>
   </div>
 
-  <div class="discover-sidebar-list-header sidebar-list-header">
-    <h3 class="sidebar-list-header-label" id="selected_fields" tabindex="0">Selected Fields</h3>
+  <div class="discover-sidebar-list-header sidebar-list-header" ng-if="fields.length">
+    <h3 class="sidebar-list-header-label" id="selected_fields" tabindex="0">
+      Selected fields
+    </h3>
   </div>
   <ul class="list-unstyled discover-selected-fields" >
     <discover-field
@@ -46,9 +48,9 @@
     </discover-field>
   </ul>
 
-  <div class="sidebar-list-header sidebar-item euiFlexGroup euiFlexGroup--gutterMedium">
+  <div class="sidebar-list-header sidebar-item euiFlexGroup euiFlexGroup--gutterMedium" ng-if="fields.length">
     <h3 class="euiFlexItem sidebar-list-header-label" id="available_fields" tabindex="0">
-      Available Fields
+      Available fields
     </h3>
 
     <div class="euiFlexItem euiFlexItem--flexGrowZero">
@@ -128,7 +130,7 @@
       <div class="form-group">
         <label for="discoverFieldChooserHideMissingFields">
           <input id="discoverFieldChooserHideMissingFields" type="checkbox" ng-model="filter.vals.missing">
-          Hide Missing Fields
+          Hide missing fields
         </label>
       </div>
       <button
@@ -136,7 +138,7 @@
         ng-disabled="!filter.active"
         class="kuiButton kuiButton--danger kuiButton--fullWidth"
       >
-        Reset Filters
+        Reset filters
       </button>
     </form>
   </div>
