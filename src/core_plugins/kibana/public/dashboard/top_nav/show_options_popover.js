@@ -26,26 +26,28 @@ import {
 
 let isOpen = false;
 
+const container = document.createElement('div');
+
+const onClose = () => {
+  ReactDOM.unmountComponentAtNode(container);
+  isOpen = false;
+};
+
 export function showOptionsPopover(anchorElement) {
   if (isOpen) {
+    onClose();
     return;
   }
 
   isOpen = true;
-
-  const container = document.createElement('div');
-  const onClose = () => {
-    ReactDOM.unmountComponentAtNode(container);
-    isOpen = false;
-  };
 
   document.body.appendChild(container);
   const element = (
     <EuiWrappingPopover
       id="popover"
       button={anchorElement}
-      isOpen={isOpen}
-      closePopover={() => {}}
+      isOpen={true}
+      closePopover={onClose}
     >
       <div>Normal JSX content populates the popover.</div>
     </EuiWrappingPopover>
