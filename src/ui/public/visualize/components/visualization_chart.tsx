@@ -121,7 +121,7 @@ class VisualizationChart extends Component<VisualizationChartProps> {
     // have rendered and the div is always rendered into the tree (i.e. not
     // inside any condition).
     this.resizeChecker = new ResizeChecker(this.containerDiv.current);
-    this.resizeChecker.on('resize', this.startRenderVisualization);
+    this.resizeChecker.on('resize', () => this.startRenderVisualization());
 
     this.startRenderVisualization();
   }
