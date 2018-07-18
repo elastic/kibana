@@ -12431,6 +12431,7 @@ class Project {
         this.path = projectPath;
         this.packageJsonLocation = (0, _path.resolve)(this.path, 'package.json');
         this.nodeModulesLocation = (0, _path.resolve)(this.path, 'node_modules');
+        this.optimizeLocation = (0, _path.resolve)(this.path, 'optimize');
         this.targetLocation = (0, _path.resolve)(this.path, 'target');
         this.productionDependencies = this.json.dependencies || {};
         this.devDependencies = this.json.devDependencies || {};
@@ -26149,9 +26150,6 @@ var subscribeTo = function (result) {
             }
         };
     }
-    else if (result && typeof result[__WEBPACK_IMPORTED_MODULE_9__symbol_observable__["a" /* observable */]] === 'function') {
-        return Object(__WEBPACK_IMPORTED_MODULE_4__subscribeToObservable__["a" /* subscribeToObservable */])(result);
-    }
     else if (Object(__WEBPACK_IMPORTED_MODULE_5__isArrayLike__["a" /* isArrayLike */])(result)) {
         return Object(__WEBPACK_IMPORTED_MODULE_1__subscribeToArray__["a" /* subscribeToArray */])(result);
     }
@@ -26160,6 +26158,9 @@ var subscribeTo = function (result) {
     }
     else if (result && typeof result[__WEBPACK_IMPORTED_MODULE_8__symbol_iterator__["a" /* iterator */]] === 'function') {
         return Object(__WEBPACK_IMPORTED_MODULE_3__subscribeToIterable__["a" /* subscribeToIterable */])(result);
+    }
+    else if (result && typeof result[__WEBPACK_IMPORTED_MODULE_9__symbol_observable__["a" /* observable */]] === 'function') {
+        return Object(__WEBPACK_IMPORTED_MODULE_4__subscribeToObservable__["a" /* subscribeToObservable */])(result);
     }
     else {
         var value = Object(__WEBPACK_IMPORTED_MODULE_7__isObject__["a" /* isObject */])(result) ? 'an invalid object' : "'" + result + "'";
@@ -38923,6 +38924,9 @@ const CleanCommand = exports.CleanCommand = {
                 }
                 if (yield (0, _fs.isDirectory)(project.targetLocation)) {
                     directoriesToDelete.push(project.targetLocation);
+                }
+                if (yield (0, _fs.isDirectory)(project.optimizeLocation)) {
+                    directoriesToDelete.push(project.optimizeLocation);
                 }
             }
             if (directoriesToDelete.length === 0) {
