@@ -11,6 +11,7 @@ rules:
   no-unused-variable: true
   object-literal-sort-keys: false
   interface-name: false
+  no-default-export: true
   require-license-header:
     - true
     - |-
