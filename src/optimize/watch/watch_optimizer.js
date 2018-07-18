@@ -51,7 +51,7 @@ export default class WatchOptimizer extends BaseOptimizer {
 
     await super.init();
 
-    this.compiler.hooks.watchRun.tapAsync(this.compilerWatchRunTap);
+    this.compiler.hooks.watchRun.tap(this.compilerWatchRunTap);
     this.compiler.hooks.done.tap(this.compilerDoneTap);
     this.compiler.watch({ aggregateTimeout: 200 }, this.compilerWatchErrorHandler);
 
@@ -102,13 +102,10 @@ export default class WatchOptimizer extends BaseOptimizer {
 
   compilerWatchRunTap = {
     name: 'kibana-compilerWatchRunTap',
-    fn: async (arg, cb) => {
+    fn: () => {
       this.status$.next({
         type: STATUS.RUNNING
       });
-
-      // await this.dllCompiler.run();
-      cb();
     }
   }
 

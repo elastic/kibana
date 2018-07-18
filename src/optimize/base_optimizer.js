@@ -22,14 +22,16 @@ import os from 'os';
 import Boom from 'boom';
 import MiniCssExtractPlugin from 'mini-css-extract-plugin';
 import webpack from 'webpack';
+import NormalModule from 'webpack/lib/NormalModule';
 import Stats from 'webpack/lib/Stats';
 import webpackMerge from 'webpack-merge';
 import UglifyJsPlugin from 'uglifyjs-webpack-plugin';
-import { Compiler as DLLCompiler } from './dll_bundler';
+// import childProcess from 'child_process';
+import { DLLBundlerCompiler, DLLBundlerBridgePlugin } from './dll_bundler';
 
 import { defaults } from 'lodash';
 
-import { IS_KIBANA_DISTRIBUTABLE, fromRoot, pkg } from '../utils';
+import { IS_KIBANA_DISTRIBUTABLE, fromRoot } from '../utils';
 
 import { PUBLIC_PATH_PLACEHOLDER } from './public_path_placeholder';
 
@@ -67,19 +69,99 @@ export default class BaseOptimizer {
     }
   }
 
-  areCompilersReady() {
-    return this.compiler && this.dllCompiler;
+  isCompilerReady() {
+    return this.compiler;
+  }
+
+  shouldStartDLLCompiler() {
+    return !IS_KIBANA_DISTRIBUTABLE
+      || DLLBundlerCompiler.existsDLLsFromConfig(this.getDLLConfig());
   }
 
   async init() {
-    if (this.areCompilersReady()) return this;
+    if (this.isCompilerReady()) return this;
 
-    const dllCompilerConfig = this.getDLLConfig();
-    this.dllCompiler = new DLLCompiler(dllCompilerConfig);
+    this.nodeModulesEntryPaths = {};
+
+    if (this.shouldStartDLLCompiler()) {
+      // const dllCompilerConfig = this.getDLLConfig();
+      // this.dllCompilerProcess = childProcess.spawn('./dll_bundler.js', null, { env: { config: dllCompilerConfig } });
+    }
 
     const compilerConfig = this.getConfig();
     this.compiler = webpack(compilerConfig);
 
+    this.setupCompilerHooks();
+    this.writeStatsHook();
+
+    return this;
+  }
+
+  nodeModulesEntryPathsHook() {
+    this.compiler.hooks.compile.tap({
+      name: 'kibana-nodeModulesEntryPaths-builder',
+      fn: ({ normalModuleFactory }) => {
+        normalModuleFactory.hooks.factory.tap('NormalModuleFactory', () => (result, callback) => {
+          const resolver = normalModuleFactory.hooks.resolver.call(null);
+
+          // Ignored
+          if (!resolver) return callback();
+
+          resolver(result, (err, data) => {
+            if (err) return callback(err);
+
+            // Ignored
+            if (!data) return callback();
+
+            // direct module
+            if (typeof data.source === 'function') return callback(null, data);
+
+            normalModuleFactory.hooks.afterResolve.callAsync(data, (err, result) => {
+              if (err) return callback(err);
+
+              // Ignored
+              if (!result) return callback();
+
+              // // // TODO: CODE FILTERING AND PATH CONSTRUCT FOR NODE_MODULES TO INCLUDE
+              if (!!this.nodeModulesEntryPaths[result.request]) {
+                return callback();
+              }
+
+              const nodeModulesPath = fromRoot('./node_modules');
+
+              if (!result.request.includes('loader')
+                && result.request.includes(nodeModulesPath)) {
+                this.nodeModulesEntryPaths[result.request] = true;
+              }
+              // // //
+
+              let createdModule = normalModuleFactory.hooks.createModule.call(result);
+              if (!createdModule) {
+                if (!result.request) {
+                  return callback(new Error('Empty dependency (no request)'));
+                }
+
+                createdModule = new NormalModule(result);
+              }
+
+              createdModule = normalModuleFactory.hooks.module.call(createdModule, result);
+
+              return callback(null, createdModule);
+            });
+          });
+        });
+      }
+    });
+
+    this.compiler.hooks.shouldEmit.tap({
+      name: 'kibana-nodeModulesEntryPaths-skipEmit',
+      fn: () => {
+        return false;
+      }
+    });
+  }
+
+  writeStatsHook() {
     this.compiler.hooks.done.tap({
       name: 'kibana-writeStatsJson',
       fn: stats => {
@@ -94,116 +176,34 @@ export default class BaseOptimizer {
         });
       }
     });
+  }
 
-    return this;
+  setupCompilerHooks() {
+    this.nodeModulesEntryPathsHook();
+  }
+
+  getDLLBundlerBridgePlugin() {
+    return this.shouldStartDLLCompiler()
+      ? new DLLBundlerBridgePlugin({ dllProcess: this.dllCompilerProcess })
+      : {};
   }
 
   getDLLConfig() {
-    const dependencies = Object.keys(pkg.dependencies);
-
-    const dllBundles = [
-      {
-        dllEntries: [
-          {
-            name: 'vendor',
-            /*include: [
-              'x-pack',
-              'angular',
-              'angular-elastic',
-              'd3',
-              'd3-cloud',
-              'elasticsearch-browser',
-              'jquery',
-              'moment',
-              'moment-timezone',
-              'ngreact',
-              'react',
-              'react-addons-shallow-compare',
-              'react-anything-sortable',
-              'react-color',
-              'react-dom',
-              'react-grid-layout',
-              'react-input-range',
-              'react-markdown',
-              'react-redux',
-              'react-router-dom',
-              'react-sizeme',
-              'react-toggle',
-              'reactcss',
-              'redux',
-              'redux-actions',
-              'redux-thunk',
-              'rxjs',
-              'uuid',
-              'vega-lib',
-              'vega-lite',
-              'vega-schema-url-parser',
-              'vega-tooltip',
-              'yauzl'
-            ],
-            exclude: [],*/
-            include: dependencies,
-            exclude: [],
-            /*exclude: [
-              'JSONStream',
-              'tinygradient',
-              'mini-css-extract-plugin',
-              'x-pack',
-              'webpack',
-              '@kbn/pm',
-              '@kbn/babel-preset',
-              '@kbn/ui-framework',
-              '@kbn/datemath',
-              'font-awesome',
-              'handlebars',
-              '@kbn/babel-preset',
-              'babel-loader',
-              'babel-core',
-              'babel-polyfill',
-              'babel-register',
-              'body-parser',
-              'vision',
-              'uglifyjs-webpack-plugin',
-              'postcss-loader',
-              'even-better',
-              'jade',
-              'jade-loader',
-              '@kbn/es',
-              'prop-types',
-              'node-fetch',
-              'fetch-mock',
-              'autoprefixer',
-              'css-loader',
-              'less',
-              'less-loader',
-              '@elastic/eui',
-              '@elastic/filesaver',
-              '@elastic/numeral',
-              '@elastic/ui-ace',
-              '@kbn/babel-preset',
-              '@kbn/i18n',
-              '@kbn/test-subj-selector',
-              'bunyan',
-              'url-loader'
-            ]*/
-          },
-        ]
-      }
-    ];
-
     return {
-      dllBundles,
-      options: {
-        context: fromRoot('.'),
-        isProduction: IS_KIBANA_DISTRIBUTABLE,
-        outputPath: this.uiBundles.getWorkingDir(),
-        publicPath: PUBLIC_PATH_PLACEHOLDER,
-        mergeConfig: {
-          node: { fs: 'empty', child_process: 'empty', dns: 'empty', net: 'empty', tls: 'empty' },
-          resolve: {
-            extensions: ['.js', '.json'],
-            mainFields: ['browser', 'browserify', 'main']
-          }
+      dllEntries: [
+        {
+          name: 'vendor'
+        }
+      ],
+      context: fromRoot('.'),
+      isProduction: IS_KIBANA_DISTRIBUTABLE,
+      outputPath: `${this.uiBundles.getWorkingDir()}/dlls`,
+      publicPath: PUBLIC_PATH_PLACEHOLDER,
+      mergeConfig: {
+        node: { fs: 'empty', child_process: 'empty', dns: 'empty', net: 'empty', tls: 'empty' },
+        resolve: {
+          extensions: ['.js', '.json'],
+          mainFields: ['browser', 'browserify', 'main']
         }
       }
     };
@@ -302,15 +302,6 @@ export default class BaseOptimizer {
       optimization: {
         splitChunks: {
           cacheGroups: {
-            /*vendors: {
-              name: 'vendors',
-              test: /[\\/]node_modules[\\/]/,
-              priority: -10,
-              minSize: 0,
-              minChunks: 1,
-              maxInitialRequests: Infinity,
-              maxAsyncRequests: Infinity,
-            },*/
             commons: {
               name: 'commons',
               chunks: 'initial',
@@ -323,13 +314,15 @@ export default class BaseOptimizer {
       },
 
       plugins: [
-        new MiniCssExtractPlugin({
-          filename: '[name].style.css',
-        }),
+        this.getDLLBundlerBridgePlugin(),
 
         new webpack.DllReferencePlugin({
           context: fromRoot('.'),
           manifest: require(`${this.uiBundles.getWorkingDir()}/dlls/vendor.json`)
+        }),
+
+        new MiniCssExtractPlugin({
+          filename: '[name].style.css',
         }),
 
         // replace imports for `uiExports/*` modules with a synthetic module
@@ -549,7 +542,6 @@ export default class BaseOptimizer {
   }
 
   async run(...args) {
-    await this.dllCompiler.run();
     await this.compiler.run(args);
   }
 }
