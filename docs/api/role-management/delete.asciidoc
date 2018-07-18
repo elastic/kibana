@@ -1,7 +1,7 @@
 [[role-management-api-delete]]
 === Delete Role
 
-To delete a role, submit a DELETE request to the `/api/security/role/<rolename>`
+To delete a role in Elasticsearch's `native realm, submit a DELETE request to the `/api/security/role/<rolename>`
 endpoint:
 
 [source,js]
