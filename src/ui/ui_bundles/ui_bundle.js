@@ -92,6 +92,17 @@ export class UiBundle {
     ));
   }
 
+  /**
+   * Determine if the cache for this bundle is valid by
+   * checking that the entry file exists, has the content we
+   * expect based on the argument for this bundle, and that both
+   * the style file and output for this bundle exist. In this
+   * scenario we assume the cache is valid.
+   *
+   * When the `optimize.useBundleCache` config is set to `false`
+   * (the default when running in development) we don't even call
+   * this method and bundles are always recreated.
+   */
   async isCacheValid() {
     if (await this.readEntryFile() !== this.renderContent()) {
       return false;
