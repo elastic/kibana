@@ -30,6 +30,7 @@ import { mongodbMetricsSpecProvider } from './mongodb_metrics';
 import { osqueryLogsSpecProvider } from './osquery_logs';
 import { phpfpmMetricsSpecProvider } from './php_fpm_metrics';
 import { postgresqlMetricsSpecProvider } from './postgresql_metrics';
+import { rabbitmqMetricsSpecProvider } from './rabbitmq_metrics';
 import { redisLogsSpecProvider } from './redis_logs';
 import { redisMetricsSpecProvider } from './redis_metrics';
 import { dockerMetricsSpecProvider } from './docker_metrics';
@@ -52,6 +53,7 @@ export function registerTutorials(server) {
   server.registerTutorial(osqueryLogsSpecProvider);
   server.registerTutorial(phpfpmMetricsSpecProvider);
   server.registerTutorial(postgresqlMetricsSpecProvider);
+  server.registerTutorial(rabbitmqMetricsSpecProvider);
   server.registerTutorial(redisLogsSpecProvider);
   server.registerTutorial(redisMetricsSpecProvider);
   server.registerTutorial(dockerMetricsSpecProvider);
