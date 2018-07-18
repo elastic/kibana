@@ -10,7 +10,7 @@ GET /api/security/role
 --------------------------------------------------
 // KIBANA
 
-A succesful call returns a response code of `200` and a response body containing a JSON 
+A successful call returns a response code of `200` and a response body containing a JSON 
 representation of the roles.
 
 [source,js]
