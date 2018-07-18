@@ -110,14 +110,16 @@ describe('#start()', () => {
 
   it('calls injectedMetadata#start()', () => {
     startCore();
-    expect(MockInjectedMetadataService.mock.instances[0].start).toHaveBeenCalledTimes(1);
-    expect(MockInjectedMetadataService.mock.instances[0].start).toHaveBeenCalledWith();
+    const [mockInstance] = MockInjectedMetadataService.mock.instances;
+    expect(mockInstance.start).toHaveBeenCalledTimes(1);
+    expect(mockInstance.start).toHaveBeenCalledWith();
   });
 
   it('calls lifecycleSystem#start()', () => {
     startCore();
-    expect(MockLegacyPlatformService.mock.instances[0].start).toHaveBeenCalledTimes(1);
-    expect(MockLegacyPlatformService.mock.instances[0].start).toHaveBeenCalledWith({
+    const [mockInstance] = MockInjectedMetadataService.mock.instances;
+    expect(mockInstance.start).toHaveBeenCalledTimes(1);
+    expect(mockInstance.start).toHaveBeenCalledWith({
       injectedMetadata: mockInjectedMetadataStartContract,
     });
   });
