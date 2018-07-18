@@ -151,10 +151,9 @@ export class BulkUploader {
     const [ reportingHeader, reportingPayload ] = findItem(KIBANA_REPORTING_TYPE);
 
     if (statsHeader && statsPayload) {
-      statsHeader.index._type = 'kibana_stats';
+      statsHeader.index._type = 'kibana_stats'; // HACK to convert kibana_stats_monitoring to just kibana_stats for bwc
       const [ usageHeader, usagePayload ] = findItem(KIBANA_USAGE_TYPE);
       const kibanaUsage = (usageHeader && usagePayload) ? usagePayload : null;
-
       const reportingUsage = (reportingHeader && reportingPayload) ? reportingPayload : null;
       statsResult = [ statsHeader, statsPayload ];
       if (kibanaUsage) {
