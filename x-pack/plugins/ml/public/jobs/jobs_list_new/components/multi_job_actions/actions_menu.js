@@ -82,7 +82,7 @@ export class MultiJobActionsMenu extends Component {
       items.push(
         <EuiContextMenuItem
           key="close job"
-          icon="stop"
+          icon="cross"
           disabled={(this.canCloseJob === false)}
           onClick={() => { closeJobs(this.props.jobs); this.closePopover(); }}
         >

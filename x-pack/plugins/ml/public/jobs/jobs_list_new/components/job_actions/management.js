@@ -48,7 +48,7 @@ export function actionsMenuContent(showEditJobFlyout, showDeleteJobModal, showSt
     }, {
       name: 'Close job',
       description: 'Close job',
-      icon: 'stop',
+      icon: 'cross',
       enabled: () => (canCloseJob),
       available: (item) => (isClosable([item])),
       onClick: (item) => {
