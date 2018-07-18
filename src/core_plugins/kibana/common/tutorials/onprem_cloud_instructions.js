@@ -20,13 +20,15 @@
 export const TRYCLOUD_OPTION1 = {
   title: 'Option 1: Try module in Elastic Cloud',
   textPre: 'Go to [Elastic Cloud](https://www.elastic.co/cloud/as-a-service/signup?blade=kib). Register if you ' +
-           'do not already have an account. Free 14-day trial available. Log into the Elastic Cloud console\n\n' +
+           'do not already have an account. Free 14-day trial available.\n\n' +
+
+           'Log into the Elastic Cloud console\n\n' +
 
            'To create a cluster, in Elastic Cloud console:\n' +
            ' 1. Select **Create Deployment** and specify the **Deployment Name**\n' +
            ' 2. Modify the other deployment options as needed (or not, the defaults are great to get started)\n' +
            ' 3. Click **Create Deployment**\n' +
-           ' 4. Wait until deployment creation completes\n`' +
+           ' 4. Wait until deployment creation completes\n' +
            ' 5. Go to the new cloud Kibana instance and follow the Kibana Home instructions'
 
 };
