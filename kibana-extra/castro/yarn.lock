@@ -39,6 +39,10 @@
   version "0.7.0"
   resolved "https://registry.yarnpkg.com/@sindresorhus/is/-/is-0.7.0.tgz#9a06f4f137ee84d7df0460c1fdb1135ffa6c50fd"
 
+"@types/boom@^7.2.0":
+  version "7.2.0"
+  resolved "https://registry.yarnpkg.com/@types/boom/-/boom-7.2.0.tgz#19c36cbb5811a7493f0f2e37f31d42b28df1abc1"
+
 "@types/elasticsearch@^5.0.24":
   version "5.0.25"
   resolved "https://registry.yarnpkg.com/@types/elasticsearch/-/elasticsearch-5.0.25.tgz#717255a52acd9fa3ba165072d43a242283b1c898"
@@ -52,6 +56,10 @@
   resolved "http://registry.npm.taobao.org/@types/file-type/download/@types/file-type-5.2.1.tgz#e7af49e08187b6b7598509c5e416669d25fa3461"
   dependencies:
     "@types/node" "*"
+
+"@types/get-port@^3.2.0 ":
+  version "3.2.0"
+  resolved "https://registry.yarnpkg.com/@types/get-port/-/get-port-3.2.0.tgz#f9e0a11443cc21336470185eae3dfba4495d29bc"
 
 "@types/git-url-parse@^9.0.0":
   version "9.0.0"
@@ -67,9 +75,9 @@
   version "10.5.2"
   resolved "https://registry.yarnpkg.com/@types/node/-/node-10.5.2.tgz#f19f05314d5421fe37e74153254201a7bf00a707"
 
-"@types/nodegit@^0.18.8":
-  version "0.18.8"
-  resolved "https://registry.yarnpkg.com/@types/nodegit/-/nodegit-0.18.8.tgz#183ceb43fd494cc413d36c54014c8639f1fe60db"
+"@types/nodegit@^0.22.1":
+  version "0.22.3"
+  resolved "https://registry.yarnpkg.com/@types/nodegit/-/nodegit-0.22.3.tgz#4f127bf57b0ef42dbc014cee2ca60002c1322a81"
   dependencies:
     "@types/events" "*"
     "@types/node" "*"
