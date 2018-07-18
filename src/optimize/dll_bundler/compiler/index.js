@@ -17,4 +17,4 @@
  * under the License.
  */
 
-export { Compiler } from './compiler';
+export { Compiler as DLLBundlerCompiler } from './compiler';

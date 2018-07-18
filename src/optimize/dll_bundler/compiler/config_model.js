@@ -32,7 +32,7 @@ function generateDLLS({ context, entries, output }) {
     entry: finalEntries,
     context,
     output: {
-      filename: `dlls/${output.dllName}.dll.js`,
+      filename: `/${output.dllName}.dll.js`,
       path: output.path,
       publicPath: output.publicPath,
       library: output.dllName
@@ -41,7 +41,7 @@ function generateDLLS({ context, entries, output }) {
       new webpack.DllPlugin({
         context,
         name: output.dllName,
-        path: `${output.path}/dlls/${output.manifestName}.json`
+        path: `${output.path}/${output.manifestName}.json`
       })
     ]
   };
@@ -84,7 +84,7 @@ function unoptimized(options) {
 }
 
 export default (options = {}) => {
-  if (options.isProduction) {
+  if (options.isDistributable) {
     return webpackMerge(optimized(options), options.mergeConfig);
   }
 
