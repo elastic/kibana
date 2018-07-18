@@ -476,6 +476,30 @@ export class FieldEditor extends PureComponent {
     );
   }
 
+  renderScriptingPanels = () => {
+    const { scriptingLangs, field, showScriptingHelp } = this.state;
+
+    if (!field.scripted) {
+      return;
+    }
+
+    return (
+      <Fragment>
+        <ScriptingDisabledCallOut isVisible={!scriptingLangs.length} />
+        <ScriptingWarningCallOut isVisible />
+        <ScriptingHelpFlyout
+          isVisible={showScriptingHelp}
+          onClose={this.hideScriptingHelp}
+          indexPattern={this.props.indexPattern}
+          lang={field.lang}
+          name={field.name}
+          script={field.script}
+          executeScript={executeScript}
+        />
+      </Fragment>
+    );
+  }
+
   deleteField = () => {
     const { redirectAway } = this.props.helpers;
     const { indexPattern } = this.props;
@@ -557,30 +581,7 @@ export class FieldEditor extends PureComponent {
   }
 
   render() {
-    const { isReady, isCreating, scriptingLangs, field, showScriptingHelp } = this.state;
-
-    let scriptDisabledCallout;
-    let scriptWarningCallout;
-    let scriptHelpFlyout;
-    if (field.scripted) {
-      scriptDisabledCallout = (
-        <ScriptingDisabledCallOut isVisible={!scriptingLangs.length} />
-      );
-      scriptWarningCallout = (
-        <ScriptingWarningCallOut isVisible />
-      );
-      scriptHelpFlyout = (
-        <ScriptingHelpFlyout
-          isVisible={showScriptingHelp}
-          onClose={this.hideScriptingHelp}
-          indexPattern={this.props.indexPattern}
-          lang={field.lang}
-          name={field.name}
-          script={field.script}
-          executeScript={executeScript}
-        />
-      );
-    }
+    const { isReady, isCreating, field } = this.state;
 
     return isReady ? (
       <div>
@@ -589,9 +590,7 @@ export class FieldEditor extends PureComponent {
         </EuiText>
         <EuiSpacer size="m" />
         <EuiForm>
-          {scriptDisabledCallout}
-          {scriptWarningCallout}
-          {scriptHelpFlyout}
+          {this.renderScriptingPanels()}
           {this.renderName()}
           {this.renderLanguage()}
           {this.renderType()}

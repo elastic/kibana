@@ -11,27 +11,29 @@ exports[`FieldEditor should render create new scripted field correctly 1`] = `
     size="m"
   />
   <eui-form>
-    <scripting-disabled-callOut
-      isVisible={false}
-    />
-    <scripting-warning-callOut
-      isVisible={true}
-    />
-    <ScriptingHelpFlyout
-      executeScript={[Function]}
-      indexPattern={
-        Object {
-          "fields": Array [
-            Object {
-              "name": "foobar",
-            },
-          ],
+    <React.Fragment>
+      <scripting-disabled-callOut
+        isVisible={false}
+      />
+      <scripting-warning-callOut
+        isVisible={true}
+      />
+      <ScriptingHelpFlyout
+        executeScript={[Function]}
+        indexPattern={
+          Object {
+            "fields": Array [
+              Object {
+                "name": "foobar",
+              },
+            ],
+          }
         }
-      }
-      isVisible={false}
-      lang="painless"
-      onClose={[Function]}
-    />
+        isVisible={false}
+        lang="painless"
+        onClose={[Function]}
+      />
+    </React.Fragment>
     <eui-form-row
       error="Name is required"
       helpText={null}
@@ -220,37 +222,39 @@ exports[`FieldEditor should render edit scripted field correctly 1`] = `
     size="m"
   />
   <eui-form>
-    <scripting-disabled-callOut
-      isVisible={false}
-    />
-    <scripting-warning-callOut
-      isVisible={true}
-    />
-    <ScriptingHelpFlyout
-      executeScript={[Function]}
-      indexPattern={
-        Object {
-          "fields": Array [
-            Object {
-              "name": "foobar",
-            },
-            Object {
-              "format": Format {},
-              "lang": "painless",
-              "name": "test",
-              "script": "doc.test.value",
-              "scripted": true,
-              "type": "number",
-            },
-          ],
+    <React.Fragment>
+      <scripting-disabled-callOut
+        isVisible={false}
+      />
+      <scripting-warning-callOut
+        isVisible={true}
+      />
+      <ScriptingHelpFlyout
+        executeScript={[Function]}
+        indexPattern={
+          Object {
+            "fields": Array [
+              Object {
+                "name": "foobar",
+              },
+              Object {
+                "format": Format {},
+                "lang": "painless",
+                "name": "test",
+                "script": "doc.test.value",
+                "scripted": true,
+                "type": "number",
+              },
+            ],
+          }
         }
-      }
-      isVisible={false}
-      lang="painless"
-      name="test"
-      onClose={[Function]}
-      script="doc.test.value"
-    />
+        isVisible={false}
+        lang="painless"
+        name="test"
+        onClose={[Function]}
+        script="doc.test.value"
+      />
+    </React.Fragment>
     <eui-form-row
       helpText={null}
       label="Language"
@@ -436,44 +440,46 @@ exports[`FieldEditor should show conflict field warning 1`] = `
     size="m"
   />
   <eui-form>
-    <scripting-disabled-callOut
-      isVisible={false}
-    />
-    <scripting-warning-callOut
-      isVisible={true}
-    />
-    <ScriptingHelpFlyout
-      executeScript={[Function]}
-      indexPattern={
-        Object {
-          "fields": Array [
-            Object {
-              "name": "foobar",
-            },
-            Object {
-              "format": Format {},
-              "lang": "painless",
-              "name": "test",
-              "script": "doc.test.value",
-              "scripted": true,
-              "type": "number",
-            },
-            Object {
-              "format": Format {},
-              "lang": "testlang",
-              "name": "test",
-              "script": "doc.test.value",
-              "scripted": true,
-              "type": "number",
-            },
-          ],
+    <React.Fragment>
+      <scripting-disabled-callOut
+        isVisible={false}
+      />
+      <scripting-warning-callOut
+        isVisible={true}
+      />
+      <ScriptingHelpFlyout
+        executeScript={[Function]}
+        indexPattern={
+          Object {
+            "fields": Array [
+              Object {
+                "name": "foobar",
+              },
+              Object {
+                "format": Format {},
+                "lang": "painless",
+                "name": "test",
+                "script": "doc.test.value",
+                "scripted": true,
+                "type": "number",
+              },
+              Object {
+                "format": Format {},
+                "lang": "testlang",
+                "name": "test",
+                "script": "doc.test.value",
+                "scripted": true,
+                "type": "number",
+              },
+            ],
+          }
         }
-      }
-      isVisible={false}
-      lang="painless"
-      name="foobar"
-      onClose={[Function]}
-    />
+        isVisible={false}
+        lang="painless"
+        name="foobar"
+        onClose={[Function]}
+      />
+    </React.Fragment>
     <eui-form-row
       error={null}
       helpText={
@@ -679,45 +685,47 @@ exports[`FieldEditor should show deprecated lang warning 1`] = `
     size="m"
   />
   <eui-form>
-    <scripting-disabled-callOut
-      isVisible={false}
-    />
-    <scripting-warning-callOut
-      isVisible={true}
-    />
-    <ScriptingHelpFlyout
-      executeScript={[Function]}
-      indexPattern={
-        Object {
-          "fields": Array [
-            Object {
-              "name": "foobar",
-            },
-            Object {
-              "format": Format {},
-              "lang": "painless",
-              "name": "test",
-              "script": "doc.test.value",
-              "scripted": true,
-              "type": "number",
-            },
-            Object {
-              "format": Format {},
-              "lang": "testlang",
-              "name": "test",
-              "script": "doc.test.value",
-              "scripted": true,
-              "type": "number",
-            },
-          ],
+    <React.Fragment>
+      <scripting-disabled-callOut
+        isVisible={false}
+      />
+      <scripting-warning-callOut
+        isVisible={true}
+      />
+      <ScriptingHelpFlyout
+        executeScript={[Function]}
+        indexPattern={
+          Object {
+            "fields": Array [
+              Object {
+                "name": "foobar",
+              },
+              Object {
+                "format": Format {},
+                "lang": "painless",
+                "name": "test",
+                "script": "doc.test.value",
+                "scripted": true,
+                "type": "number",
+              },
+              Object {
+                "format": Format {},
+                "lang": "testlang",
+                "name": "test",
+                "script": "doc.test.value",
+                "scripted": true,
+                "type": "number",
+              },
+            ],
+          }
         }
-      }
-      isVisible={false}
-      lang="testlang"
-      name="test"
-      onClose={[Function]}
-      script="doc.test.value"
-    />
+        isVisible={false}
+        lang="testlang"
+        name="test"
+        onClose={[Function]}
+        script="doc.test.value"
+      />
+    </React.Fragment>
     <eui-form-row
       helpText={
         <span>
