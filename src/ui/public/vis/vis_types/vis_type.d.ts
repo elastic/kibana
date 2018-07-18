@@ -28,6 +28,7 @@ export class VisualizationController {
 }
 
 export interface VisType {
+  title: string;
   visualization: typeof VisualizationController;
   isAccessible?: boolean;
 
