@@ -11,7 +11,7 @@ exports[`AdvancedOptions should hide if not showing 1`] = `
   >
     <FormattedMessage
       defaultMessage="Show advanced options"
-      id="kbn.management.indexPattern.create.stepTime.options.show.button"
+      id="kbn.management.createIndexPattern.stepTime.options.show.button"
       values={Object {}}
     />
   </EuiButtonEmpty>
@@ -32,7 +32,7 @@ exports[`AdvancedOptions should render normally 1`] = `
   >
     <FormattedMessage
       defaultMessage="Show advanced options"
-      id="kbn.management.indexPattern.create.stepTime.options.show.button"
+      id="kbn.management.createIndexPattern.stepTime.options.show.button"
       values={Object {}}
     />
   </EuiButtonEmpty>

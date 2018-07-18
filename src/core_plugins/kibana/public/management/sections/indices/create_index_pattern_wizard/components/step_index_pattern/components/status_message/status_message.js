@@ -48,12 +48,12 @@ export const StatusMessage = ({
       statusMessage = (
         <span>
           <FormattedMessage
-            id="kbn.management.indexPattern.create.step.status.matchAny.label.detail"
+            id="kbn.management.createIndexPattern.step.status.matchAny.label.detail"
             defaultMessage="Your index pattern can match any of your {strongIndices}, below."
             values={{ strongIndices: (
               <strong>
                 <FormattedMessage
-                  id="kbn.management.indexPattern.create.step.status.matchAny.label.strongIndices"
+                  id="kbn.management.createIndexPattern.step.status.matchAny.label.strongIndices"
                   defaultMessage="{allIndicesLength, plural, one {# index} other {# indices}}"
                   values={{ allIndicesLength: allIndices.length }}
                 />
@@ -66,7 +66,7 @@ export const StatusMessage = ({
       statusMessage = (
         <span>
           <FormattedMessage
-            id="kbn.management.indexPattern.create.step.status.noSystemIndicesWithPrompt.label"
+            id="kbn.management.createIndexPattern.step.status.noSystemIndicesWithPrompt.label"
             defaultMessage="No Elasticsearch indices match your pattern. To view the matching system indices, toggle the switch in
             the upper right."
           />
@@ -78,7 +78,7 @@ export const StatusMessage = ({
       statusMessage = (
         <span>
           <FormattedMessage
-            id="kbn.management.indexPattern.create.step.status.noSystemIndices.label"
+            id="kbn.management.createIndexPattern.step.status.noSystemIndices.label"
             defaultMessage="No Elasticsearch indices match your pattern."
           />
         </span>
@@ -92,20 +92,20 @@ export const StatusMessage = ({
       <span>
         &nbsp;
         <FormattedMessage
-          id="kbn.management.indexPattern.create.step.status.success.label.detail"
+          id="kbn.management.createIndexPattern.step.status.success.label.detail"
           defaultMessage="{strongSuccess} Your index pattern matches {strongIndices}."
           values={{
             strongSuccess: (
               <strong>
                 <FormattedMessage
-                  id="kbn.management.indexPattern.create.step.status.success.label.strongSuccess"
+                  id="kbn.management.createIndexPattern.step.status.success.label.strongSuccess"
                   defaultMessage="Success!"
                 />
               </strong>),
             strongIndices: (
               <strong>
                 <FormattedMessage
-                  id="kbn.management.indexPattern.create.step.status.success.label.strongIndices"
+                  id="kbn.management.createIndexPattern.step.status.success.label.strongIndices"
                   defaultMessage="{indicesLength, plural, one {# index} other {# indices}}"
                   values={{ indicesLength: exactMatchedIndices.length }}
                 />
@@ -121,7 +121,7 @@ export const StatusMessage = ({
     statusMessage = (
       <span>
         <FormattedMessage
-          id="kbn.management.indexPattern.create.step.status.partialMatch.label.detail"
+          id="kbn.management.createIndexPattern.step.status.partialMatch.label.detail"
           defaultMessage="Your index pattern doesn't match any indices, but you have {strongIndices} which
           {matchedIndicesLength, plural, one {looks} other {look}} similar."
           values={{
@@ -129,7 +129,7 @@ export const StatusMessage = ({
             strongIndices: (
               <strong>
                 <FormattedMessage
-                  id="kbn.management.indexPattern.create.step.status.partialMatch.label.strongIndices"
+                  id="kbn.management.createIndexPattern.step.status.partialMatch.label.strongIndices"
                   defaultMessage="{matchedIndicesLength, plural, one {# index} other {# indices}}"
                   values={{ matchedIndicesLength: partialMatchedIndices.length }}
                 />
@@ -145,12 +145,12 @@ export const StatusMessage = ({
     statusMessage = (
       <span>
         <FormattedMessage
-          id="kbn.management.indexPattern.create.step.status.notMatch.label.detail"
+          id="kbn.management.createIndexPattern.step.status.notMatch.label.detail"
           defaultMessage="The index pattern you've entered doesn't match any indices. You can match any of your {strongIndices}, below."
           values={{ strongIndices: (
             <strong>
               <FormattedMessage
-                id="kbn.management.indexPattern.create.step.status.notMatch.label.allIndices"
+                id="kbn.management.createIndexPattern.step.status.notMatch.label.allIndices"
                 defaultMessage="{indicesLength, plural, one {# index} other {# indices}}"
                 values={{ indicesLength: allIndices.length }}
               />

@@ -8,7 +8,7 @@ exports[`Header should mark the input as invalid 1`] = `
     <h2>
       <FormattedMessage
         defaultMessage="Step 1 of 2: Define index pattern"
-        id="kbn.management.indexPattern.create.step.header"
+        id="kbn.management.createIndexPattern.step.header"
         values={Object {}}
       />
     </h2>
@@ -46,7 +46,7 @@ exports[`Header should mark the input as invalid 1`] = `
               <p>
                 <FormattedMessage
                   defaultMessage="You can use a {asterisk} as a wildcard in your index pattern."
-                  id="kbn.management.indexPattern.create.step.indexPattern.allow.label"
+                  id="kbn.management.createIndexPattern.step.indexPattern.allow.label"
                   values={
                     Object {
                       "asterisk": <strong>
@@ -59,7 +59,7 @@ exports[`Header should mark the input as invalid 1`] = `
               <p>
                 <FormattedMessage
                   defaultMessage="You can't use spaces or the characters {characterList}."
-                  id="kbn.management.indexPattern.create.step.indexPattern.disallow.label"
+                  id="kbn.management.createIndexPattern.step.indexPattern.disallow.label"
                   values={
                     Object {
                       "characterList": <strong>
@@ -75,7 +75,7 @@ exports[`Header should mark the input as invalid 1`] = `
           label={
             <FormattedMessage
               defaultMessage="Index pattern"
-              id="kbn.management.indexPattern.create.step.indexPattern.label"
+              id="kbn.management.createIndexPattern.step.indexPattern.label"
               values={Object {}}
             />
           }
@@ -110,7 +110,7 @@ exports[`Header should mark the input as invalid 1`] = `
       >
         <FormattedMessage
           defaultMessage="Next step"
-          id="kbn.management.indexPattern.create.step.nextStep.button"
+          id="kbn.management.createIndexPattern.step.nextStep.button"
           values={Object {}}
         />
       </EuiButton>
@@ -127,7 +127,7 @@ exports[`Header should render normally 1`] = `
     <h2>
       <FormattedMessage
         defaultMessage="Step 1 of 2: Define index pattern"
-        id="kbn.management.indexPattern.create.step.header"
+        id="kbn.management.createIndexPattern.step.header"
         values={Object {}}
       />
     </h2>
@@ -161,7 +161,7 @@ exports[`Header should render normally 1`] = `
               <p>
                 <FormattedMessage
                   defaultMessage="You can use a {asterisk} as a wildcard in your index pattern."
-                  id="kbn.management.indexPattern.create.step.indexPattern.allow.label"
+                  id="kbn.management.createIndexPattern.step.indexPattern.allow.label"
                   values={
                     Object {
                       "asterisk": <strong>
@@ -174,7 +174,7 @@ exports[`Header should render normally 1`] = `
               <p>
                 <FormattedMessage
                   defaultMessage="You can't use spaces or the characters {characterList}."
-                  id="kbn.management.indexPattern.create.step.indexPattern.disallow.label"
+                  id="kbn.management.createIndexPattern.step.indexPattern.disallow.label"
                   values={
                     Object {
                       "characterList": <strong>
@@ -190,7 +190,7 @@ exports[`Header should render normally 1`] = `
           label={
             <FormattedMessage
               defaultMessage="Index pattern"
-              id="kbn.management.indexPattern.create.step.indexPattern.label"
+              id="kbn.management.createIndexPattern.step.indexPattern.label"
               values={Object {}}
             />
           }
@@ -225,7 +225,7 @@ exports[`Header should render normally 1`] = `
       >
         <FormattedMessage
           defaultMessage="Next step"
-          id="kbn.management.indexPattern.create.step.nextStep.button"
+          id="kbn.management.createIndexPattern.step.nextStep.button"
           values={Object {}}
         />
       </EuiButton>

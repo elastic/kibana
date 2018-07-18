@@ -8,7 +8,7 @@ exports[`Header should render normally 1`] = `
     <h2>
       <FormattedMessage
         defaultMessage="Step 2 of 2: Configure settings"
-        id="kbn.management.indexPattern.create.stepTime.header"
+        id="kbn.management.createIndexPattern.stepTime.header"
         values={Object {}}
       />
     </h2>
@@ -22,7 +22,7 @@ exports[`Header should render normally 1`] = `
   >
     <FormattedMessage
       defaultMessage="You've defined {indexPattern} as your index pattern. Now you can specify some settings before we create it."
-      id="kbn.management.indexPattern.create.stepTime.label"
+      id="kbn.management.createIndexPattern.stepTime.label"
       values={
         Object {
           "indexPattern": <strong>

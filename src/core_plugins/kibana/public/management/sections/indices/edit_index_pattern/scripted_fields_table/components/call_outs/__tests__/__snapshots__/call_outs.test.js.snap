@@ -11,7 +11,7 @@ exports[`CallOuts should render normally 1`] = `
     <p>
       <FormattedMessage
         defaultMessage="The following deprecated languages are in use: {deprecatedLangsInUse}. Support for these languages will be removed in the next major version of Kibana and Elasticsearch. Convert you scripted fields to {link} to avoid any problems."
-        id="kbn.management.indexPattern.edit.scripted.deprecationLang.label.detail"
+        id="kbn.management.editIndexPattern.scripted.deprecationLang.label.detail"
         values={
           Object {
             "deprecatedLangsInUse": "php",
@@ -22,7 +22,7 @@ exports[`CallOuts should render normally 1`] = `
             >
               <FormattedMessage
                 defaultMessage="Painless"
-                id="kbn.management.indexPattern.edit.scripted.deprecationLang.label.link"
+                id="kbn.management.editIndexPattern.scripted.deprecationLang.label.link"
                 values={Object {}}
               />
             </EuiLink>,

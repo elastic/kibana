@@ -50,7 +50,7 @@ export const TimeFieldComponent = ({
           <EuiFlexGroup gutterSize="xs" justifyContent="spaceBetween" alignItems="center">
             <EuiFlexItem grow={false}>
               <FormattedMessage
-                id="kbn.management.indexPattern.create.stepTime.field.header"
+                id="kbn.management.createIndexPattern.stepTime.field.header"
                 defaultMessage="Time Filter field name"
               />
             </EuiFlexItem>
@@ -64,7 +64,7 @@ export const TimeFieldComponent = ({
                     onClick={fetchTimeFields}
                   >
                     <FormattedMessage
-                      id="kbn.management.indexPattern.create.stepTime.refresh.button"
+                      id="kbn.management.createIndexPattern.stepTime.refresh.button"
                       defaultMessage="Refresh"
                     />
                   </EuiLink>
@@ -77,13 +77,13 @@ export const TimeFieldComponent = ({
           <div>
             <p>
               <FormattedMessage
-                id="kbn.management.indexPattern.create.stepTime.field.label"
+                id="kbn.management.createIndexPattern.stepTime.field.label"
                 defaultMessage="The Time Filter will use this field to filter your data by time."
               />
             </p>
             <p>
               <FormattedMessage
-                id="kbn.management.indexPattern.create.stepTime.fieldWarning.label"
+                id="kbn.management.createIndexPattern.stepTime.fieldWarning.label"
                 defaultMessage="You can choose not to have a time field, but you will not be able to narrow down your data by a time range."
               />
             </p>
@@ -97,7 +97,7 @@ export const TimeFieldComponent = ({
             options={[
               {
                 text: intl.formatMessage({
-                  id: 'kbn.management.indexPattern.create.stepTime.field.loading.dropDown',
+                  id: 'kbn.management.createIndexPattern.stepTime.field.loading.dropDown',
                   defaultMessage: 'Loading...'
                 }),
                 value: ''
@@ -121,7 +121,7 @@ export const TimeFieldComponent = ({
       <EuiText>
         <p>
           <FormattedMessage
-            id="kbn.management.indexPattern.create.stepTime.field.noTimeFields.label"
+            id="kbn.management.createIndexPattern.stepTime.field.noTimeFields.label"
             defaultMessage="The indices which match this index pattern don't contain any time fields."
           />
         </p>

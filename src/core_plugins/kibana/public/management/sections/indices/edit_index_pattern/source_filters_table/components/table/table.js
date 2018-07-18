@@ -79,9 +79,9 @@ export class TableComponent extends Component {
     return [
       {
         field: 'value',
-        name: intl.formatMessage({ id: 'kbn.management.indexPattern.edit.source.table.filter.header', defaultMessage: 'Filter' }),
+        name: intl.formatMessage({ id: 'kbn.management.editIndexPattern.source.table.filter.header', defaultMessage: 'Filter' }),
         description: intl.formatMessage({
-          id: 'kbn.management.indexPattern.edit.source.table.filter.description', defaultMessage: 'Filter name' }),
+          id: 'kbn.management.editIndexPattern.source.table.filter.description', defaultMessage: 'Filter name' }),
         dataType: 'string',
         sortable: true,
         render: (value, filter) => {
@@ -102,9 +102,9 @@ export class TableComponent extends Component {
       {
         field: 'value',
         name: intl.formatMessage({
-          id: 'kbn.management.indexPattern.edit.source.table.matches.header', defaultMessage: 'Matches' }),
+          id: 'kbn.management.editIndexPattern.source.table.matches.header', defaultMessage: 'Matches' }),
         description: intl.formatMessage({
-          id: 'kbn.management.indexPattern.edit.source.table.matches.description',
+          id: 'kbn.management.editIndexPattern.source.table.matches.description',
           defaultMessage: 'Language used for the field' }),
         dataType: 'string',
         sortable: true,
@@ -126,7 +126,7 @@ export class TableComponent extends Component {
           return (
             <em>
               <FormattedMessage
-                id="kbn.management.indexPattern.edit.source.table.notMatched.label"
+                id="kbn.management.editIndexPattern.source.table.notMatched.label"
                 defaultMessage="The source filter doesn't match any known fields."
               />
             </em>
@@ -152,7 +152,7 @@ export class TableComponent extends Component {
                   }}
                   iconType="checkInCircleFilled"
                   aria-label={intl.formatMessage({
-                    id: 'kbn.management.indexPattern.edit.source.table.save.aria', defaultMessage: 'Save' })}
+                    id: 'kbn.management.editIndexPattern.source.table.save.aria', defaultMessage: 'Save' })}
                 />
                 <EuiButtonIcon
                   size="s"
@@ -161,7 +161,7 @@ export class TableComponent extends Component {
                   }}
                   iconType="cross"
                   aria-label={intl.formatMessage({
-                    id: 'kbn.management.indexPattern.edit.source.table.cancel.aria', defaultMessage: 'Cancel' })}
+                    id: 'kbn.management.editIndexPattern.source.table.cancel.aria', defaultMessage: 'Cancel' })}
                 />
               </Fragment>
             );
@@ -175,7 +175,7 @@ export class TableComponent extends Component {
                 onClick={() => deleteFilter(filter)}
                 iconType="trash"
                 aria-label={intl.formatMessage({
-                  id: 'kbn.management.indexPattern.edit.source.table.delete.aria', defaultMessage: 'Delete' })}
+                  id: 'kbn.management.editIndexPattern.source.table.delete.aria', defaultMessage: 'Delete' })}
               />
               <EuiButtonIcon
                 size="s"
@@ -184,7 +184,7 @@ export class TableComponent extends Component {
                 }
                 iconType="pencil"
                 aria-label={intl.formatMessage({
-                  id: 'kbn.management.indexPattern.edit.source.table.edit.aria', defaultMessage: 'Edit' })}
+                  id: 'kbn.management.editIndexPattern.source.table.edit.aria', defaultMessage: 'Edit' })}
               />
             </Fragment>
           );

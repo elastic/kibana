@@ -101,7 +101,7 @@ export class IndicesList extends Component {
         onClick={this.openPerPageControl}
       >
         <FormattedMessage
-          id="kbn.management.indexPattern.create.step.paging.label"
+          id="kbn.management.createIndexPattern.step.paging.label"
           defaultMessage="Rows per page: {perPage}"
           values={{ perPage }}
         />

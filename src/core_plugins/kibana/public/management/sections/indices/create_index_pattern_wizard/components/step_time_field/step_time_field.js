@@ -125,7 +125,7 @@ export class StepTimeFieldComponent extends Component {
             <EuiFlexItem grow={false}>
               <EuiText>
                 <FormattedMessage
-                  id="kbn.management.indexPattern.create.stepTime.creating.label"
+                  id="kbn.management.createIndexPattern.stepTime.creating.label"
                   defaultMessage="Creating index pattern..."
                 />
               </EuiText>
@@ -144,13 +144,13 @@ export class StepTimeFieldComponent extends Component {
       switch (key) {
         case timeFieldsTypes.NO_TIME_FIELDS:
           return this.props.intl.formatMessage({
-            id: 'kbn.management.indexPattern.create.stepTime.noTimeFields.label',
+            id: 'kbn.management.createIndexPattern.stepTime.noTimeFields.label',
             defaultMessage: 'The indices which match this index pattern don\'t contain any time fields.'
           });
 
         case timeFieldsTypes.NO_TIME_FIELD:
           return this.props.intl.formatMessage({
-            id: 'kbn.management.indexPattern.create.stepTime.noTimeFieldOption.label',
+            id: 'kbn.management.createIndexPattern.stepTime.noTimeFieldOption.label',
             defaultMessage: 'I don\'t want to use the Time Filter'
           });
 

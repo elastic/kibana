@@ -56,47 +56,47 @@ export class TableComponent extends PureComponent {
 
     const columns = [{
       field: 'displayName',
-      name: intl.formatMessage({ id: 'kbn.management.indexPattern.edit.scripted.table.name.header', defaultMessage: 'Name' }),
+      name: intl.formatMessage({ id: 'kbn.management.editIndexPattern.scripted.table.name.header', defaultMessage: 'Name' }),
       description: intl.formatMessage({
-        id: 'kbn.management.indexPattern.edit.scripted.table.name.description', defaultMessage: 'Name of the field' }),
+        id: 'kbn.management.editIndexPattern.scripted.table.name.description', defaultMessage: 'Name of the field' }),
       dataType: 'string',
       sortable: true,
       width: '38%',
     }, {
       field: 'lang',
-      name: intl.formatMessage({ id: 'kbn.management.indexPattern.edit.scripted.table.lang.header', defaultMessage: 'Lang' }),
+      name: intl.formatMessage({ id: 'kbn.management.editIndexPattern.scripted.table.lang.header', defaultMessage: 'Lang' }),
       description: intl.formatMessage({
-        id: 'kbn.management.indexPattern.edit.scripted.table.lang.description',
+        id: 'kbn.management.editIndexPattern.scripted.table.lang.description',
         defaultMessage: 'Language used for the field' }),
       dataType: 'string',
       sortable: true,
       'data-test-subj': 'scriptedFieldLang',
     }, {
       field: 'script',
-      name: intl.formatMessage({ id: 'kbn.management.indexPattern.edit.scripted.table.script.header', defaultMessage: 'Script' }),
+      name: intl.formatMessage({ id: 'kbn.management.editIndexPattern.scripted.table.script.header', defaultMessage: 'Script' }),
       description: intl.formatMessage({
-        id: 'kbn.management.indexPattern.edit.scripted.table.script.description', defaultMessage: 'Script for the field' }),
+        id: 'kbn.management.editIndexPattern.scripted.table.script.description', defaultMessage: 'Script for the field' }),
       dataType: 'string',
       sortable: true,
     }, {
       field: 'name',
-      name: intl.formatMessage({ id: 'kbn.management.indexPattern.edit.scripted.table.format.header', defaultMessage: 'Format' }),
+      name: intl.formatMessage({ id: 'kbn.management.editIndexPattern.scripted.table.format.header', defaultMessage: 'Format' }),
       description: intl.formatMessage({
-        id: 'kbn.management.indexPattern.edit.scripted.table.format.description', defaultMessage: 'Format used for the field' }),
+        id: 'kbn.management.editIndexPattern.scripted.table.format.description', defaultMessage: 'Format used for the field' }),
       render: this.renderFormatCell,
       sortable: false,
     }, {
       name: '',
       actions: [{
-        name: intl.formatMessage({ id: 'kbn.management.indexPattern.edit.scripted.table.edit.header', defaultMessage: 'Edit' }),
+        name: intl.formatMessage({ id: 'kbn.management.editIndexPattern.scripted.table.edit.header', defaultMessage: 'Edit' }),
         description: intl.formatMessage({
-          id: 'kbn.management.indexPattern.edit.scripted.table.edit.description', defaultMessage: 'Edit this field' }),
+          id: 'kbn.management.editIndexPattern.scripted.table.edit.description', defaultMessage: 'Edit this field' }),
         icon: 'pencil',
         onClick: editField,
       }, {
-        name: intl.formatMessage({ id: 'kbn.management.indexPattern.edit.scripted.table.delete.header', defaultMessage: 'Delete' }),
+        name: intl.formatMessage({ id: 'kbn.management.editIndexPattern.scripted.table.delete.header', defaultMessage: 'Delete' }),
         description: intl.formatMessage({
-          id: 'kbn.management.indexPattern.edit.scripted.table.delete.description', defaultMessage: 'Delete this field' }),
+          id: 'kbn.management.editIndexPattern.scripted.table.delete.description', defaultMessage: 'Delete this field' }),
         icon: 'trash',
         color: 'danger',
         onClick: deleteField,

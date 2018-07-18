@@ -211,7 +211,7 @@ export class StepIndexPatternComponent extends Component {
     return (
       <EuiCallOut
         title={<FormattedMessage
-          id="kbn.management.indexPattern.create.step.warning.header"
+          id="kbn.management.createIndexPattern.step.warning.header"
           defaultMessage="Whoops!"
         />}
         iconType="help"
@@ -219,7 +219,7 @@ export class StepIndexPatternComponent extends Component {
       >
         <p>
           <FormattedMessage
-            id="kbn.management.indexPattern.create.step.warning.label"
+            id="kbn.management.createIndexPattern.step.warning.label"
             defaultMessage="There's already an index pattern called `{query}`"
             values={{ query }}
           />
@@ -242,7 +242,7 @@ export class StepIndexPatternComponent extends Component {
     }
     else if (!containsInvalidCharacters(query, ILLEGAL_CHARACTERS)) {
       errors.push(this.props.intl.formatMessage({
-        id: 'kbn.management.indexPattern.create.step.invalidCharacters.errorMessage',
+        id: 'kbn.management.createIndexPattern.step.invalidCharacters.errorMessage',
         defaultMessage: 'An index pattern cannot contain spaces or the characters: {characterList}'
       }, { characterList }));
       containsErrors = true;

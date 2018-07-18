@@ -148,17 +148,17 @@ export class ScriptedFieldsTableComponent extends Component {
         <EuiConfirmModal
           title={this.props.intl.formatMessage(
             {
-              id: 'kbn.management.indexPattern.edit.scripted.deleteField.label',
+              id: 'kbn.management.editIndexPattern.scripted.deleteField.label',
               defaultMessage: 'Delete scripted field \'{fieldName}\'?'
             },
             { fieldName: fieldToDelete.name })}
           onCancel={this.hideDeleteConfirmationModal}
           onConfirm={this.deleteField}
           cancelButtonText={this.props.intl.formatMessage({
-            id: 'kbn.management.indexPattern.edit.scripted.deleteField.cancel.button', defaultMessage: 'Cancel'
+            id: 'kbn.management.editIndexPattern.scripted.deleteField.cancel.button', defaultMessage: 'Cancel'
           })}
           confirmButtonText={this.props.intl.formatMessage({
-            id: 'kbn.management.indexPattern.edit.scripted.deleteField.delete.button', defaultMessage: 'Delete'
+            id: 'kbn.management.editIndexPattern.scripted.deleteField.delete.button', defaultMessage: 'Delete'
           })}
           defaultFocusedButton={EUI_MODAL_CONFIRM_BUTTON}
         />

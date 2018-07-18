@@ -47,7 +47,7 @@ export const HeaderComponent = ({
     <EuiTitle size="s">
       <h2>
         <FormattedMessage
-          id="kbn.management.indexPattern.create.step.header"
+          id="kbn.management.createIndexPattern.step.header"
           defaultMessage="Step 1 of 2: Define index pattern"
         />
       </h2>
@@ -60,7 +60,7 @@ export const HeaderComponent = ({
         >
           <EuiFormRow
             label={<FormattedMessage
-              id="kbn.management.indexPattern.create.step.indexPattern.label"
+              id="kbn.management.createIndexPattern.step.indexPattern.label"
               defaultMessage="Index pattern"
             />}
             isInvalid={isInputInvalid}
@@ -69,14 +69,14 @@ export const HeaderComponent = ({
               <div>
                 <p>
                   <FormattedMessage
-                    id="kbn.management.indexPattern.create.step.indexPattern.allow.label"
+                    id="kbn.management.createIndexPattern.step.indexPattern.allow.label"
                     defaultMessage="You can use a {asterisk} as a wildcard in your index pattern."
                     values={{ asterisk: <strong>*</strong> }}
                   />
                 </p>
                 <p>
                   <FormattedMessage
-                    id="kbn.management.indexPattern.create.step.indexPattern.disallow.label"
+                    id="kbn.management.createIndexPattern.step.indexPattern.disallow.label"
                     defaultMessage="You can't use spaces or the characters {characterList}."
                     values={{ characterList: <strong>{characterList}</strong> }}
                   />
@@ -87,7 +87,7 @@ export const HeaderComponent = ({
             <EuiFieldText
               name="indexPattern"
               placeholder={intl.formatMessage({
-                id: 'kbn.management.indexPattern.create.step.indexPattern.placeholder',
+                id: 'kbn.management.createIndexPattern.step.indexPattern.placeholder',
                 defaultMessage: 'index-name-*'
               })}
               value={query}
@@ -106,7 +106,7 @@ export const HeaderComponent = ({
           data-test-subj="createIndexPatternGoToStep2Button"
         >
           <FormattedMessage
-            id="kbn.management.indexPattern.create.step.nextStep.button"
+            id="kbn.management.createIndexPattern.step.nextStep.button"
             defaultMessage="Next step"
           />
         </EuiButton>
