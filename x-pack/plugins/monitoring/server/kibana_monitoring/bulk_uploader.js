@@ -4,12 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { get, set, isEmpty, flatten } from 'lodash';
+import { get, set, isEmpty, flatten, uniq } from 'lodash';
 import { callClusterFactory } from '../../../xpack_main';
 import {
   LOGGING_TAG,
   KIBANA_MONITORING_LOGGING_TAG,
-  KIBANA_STATS_TYPE,
+  KIBANA_STATS_TYPE_MONITORING,
   KIBANA_SETTINGS_TYPE,
   KIBANA_USAGE_TYPE,
 } from '../../common/constants';
@@ -131,18 +131,30 @@ export class BulkUploader {
     }
   }
 
+  static checkPayloadTypesUnique(payload) {
+    const ids = payload.map(item => item[0].index._type);
+    const uniques = uniq(ids);
+    if (ids.length !== uniques.length) {
+      throw new Error('Duplicate collector type identifiers found in payload! ' + ids.join(','));
+    }
+  }
+
   static combineStatsLegacy(payload) {
+    BulkUploader.checkPayloadTypesUnique(payload);
+
     // default the item to [] to allow destructuring
     const findItem = type => payload.find(item => get(item, '[0].index._type') === type) || [];
 
     // kibana usage and stats
     let statsResult;
-    const [ statsHeader, statsPayload ] = findItem(KIBANA_STATS_TYPE);
+    const [ statsHeader, statsPayload ] = findItem(KIBANA_STATS_TYPE_MONITORING);
     const [ reportingHeader, reportingPayload ] = findItem(KIBANA_REPORTING_TYPE);
 
     if (statsHeader && statsPayload) {
+      statsHeader.index._type = 'kibana_stats';
       const [ usageHeader, usagePayload ] = findItem(KIBANA_USAGE_TYPE);
       const kibanaUsage = (usageHeader && usagePayload) ? usagePayload : null;
+
       const reportingUsage = (reportingHeader && reportingPayload) ? reportingPayload : null;
       statsResult = [ statsHeader, statsPayload ];
       if (kibanaUsage) {

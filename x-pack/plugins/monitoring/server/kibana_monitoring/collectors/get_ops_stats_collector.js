@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { KIBANA_STATS_TYPE } from '../../../common/constants';
+import { KIBANA_STATS_TYPE_MONITORING } from '../../../common/constants';
 import { opsBuffer } from './ops_buffer';
 import { getKibanaInfoForStats } from '../lib';
 
@@ -45,7 +45,7 @@ export function getOpsStatsCollector(server, kbnServer) {
 
   const { collectorSet } = server.usage;
   return collectorSet.makeStatsCollector({
-    type: KIBANA_STATS_TYPE,
+    type: KIBANA_STATS_TYPE_MONITORING,
     init: start,
     fetch: () => {
       return {
