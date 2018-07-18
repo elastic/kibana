@@ -17,8 +17,6 @@
  * under the License.
  */
 
-import Angular from 'angular';
-
 declare class Chrome {
   public addBasePath<T = string>(path: T): T;
 }
