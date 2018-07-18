@@ -1,0 +1,99 @@
+{
+  "rows": [
+    {
+      "xAxisLabel": "@timestamp per day",
+      "indexPattern": "c85d40c0-837f-11e8-aa0a-c1e0f6dce300",
+      "xAxisField": {
+        "name": "@timestamp",
+        "type": "date",
+        "count": 0,
+        "scripted": false,
+        "searchable": true,
+        "aggregatable": true,
+        "readFromDocValues": true,
+        "$$hashKey": "object:208"
+      },
+      "ordered": {
+        "date": true,
+        "interval": "P1D",
+        "min": "2018-07-08T05:00:00.000Z",
+        "max": "2018-07-09T14:14:22.521Z"
+      },
+      "yAxisLabel": "Count",
+      "series": [
+        {
+          "label": "Count",
+          "aggLabel": "Count",
+          "aggId": "1",
+          "count": 0,
+          "values": [
+            {
+              "x": 1531026000000,
+              "y": 14,
+              "aggConfigResult": {
+                "key": 14,
+                "value": 14,
+                "aggConfig": {
+                  "id": "1",
+                  "enabled": true,
+                  "type": "count",
+                  "schema": "metric",
+                  "params": {}
+                },
+                "$parent": {
+                  "key": 1531026000000,
+                  "value": 1531026000000,
+                  "aggConfig": {
+                    "id": "2",
+                    "enabled": true,
+                    "type": "date_histogram",
+                    "schema": "segment",
+                    "params": {
+                      "field": "@timestamp",
+                      "interval": "d",
+                      "customInterval": "2h",
+                      "min_doc_count": 1,
+                      "extended_bounds": {}
+                    }
+                  },
+                  "$parent": {
+                    "key": 1514786400000,
+                    "value": 1514786400000,
+                    "aggConfig": {
+                      "id": "3",
+                      "enabled": true,
+                      "type": "date_histogram",
+                      "schema": "split",
+                      "params": {
+                        "field": "@timestamp",
+                        "interval": "y",
+                        "customInterval": "2h",
+                        "min_doc_count": 1,
+                        "extended_bounds": {},
+                        "row": true
+                      }
+                    },
+                    "type": "bucket"
+                  },
+                  "type": "bucket"
+                },
+                "type": "metric"
+              },
+              "extraMetrics": [],
+              "aggConfig": {
+                "id": "1",
+                "enabled": true,
+                "type": "count",
+                "schema": "metric",
+                "params": {}
+              },
+              "series": "Count"
+            }
+          ]
+        }
+      ],
+      "label": "2018: @timestamp per year"
+    }
+  ],
+  "hits": 14
+}

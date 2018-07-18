@@ -1,0 +1,59 @@
+@vis-hover-opacity: 0.8;
+@lightgrey: #ccc;
+@lightblack: #aaa;
+
+.calendar-vis-container {
+
+  .calendar-chart {
+    flex-direction: column;
+    overflow: auto;
+  }
+
+  rect {
+    opacity: 1;
+
+    &:hover {
+      opacity: @vis-hover-opacity;
+    }
+  }
+
+  circle {
+    opacity: 0;
+
+    &:hover {
+      opacity: 1;
+      stroke-width: 10px;
+      stroke-opacity: @vis-hover-opacity;
+    }
+  }
+
+  .day {
+    stroke: @lightgrey;
+    stroke-width: 1px;
+    fill: transparent;
+  }
+
+  .data-day {
+    cursor: pointer;
+    stroke: @lightgrey;
+    stroke-width: 1px;
+  }
+
+  .month {
+    fill: none;
+    stroke: #000;
+    stroke-width: 1px;
+  }
+
+  .month-label {
+    font-family: sans-serif;
+    text-anchor: middle;
+    fill: @lightblack;
+  }
+
+  .day-label {
+    font-family: sans-serif;
+    fill: @lightblack;
+  }
+
+}

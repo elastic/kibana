@@ -54,5 +54,6 @@ export default function ({ getService, loadTestFile }) {
     loadTestFile(require.resolve('./_vega_chart'));
     loadTestFile(require.resolve('./_lab_mode'));
     loadTestFile(require.resolve('./_linked_saved_searches.js'));
+    loadTestFile(require.resolve('./_calendar_vis.js'));
   });
 }

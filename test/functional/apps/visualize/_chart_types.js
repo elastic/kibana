@@ -45,6 +45,7 @@ export default function ({ getService, getPageObjects }) {
         'Region Map',
         'Timelion',
         'Visual Builder',
+        'Calendar',
         'Controls',
         'Markdown',
         'Tag Cloud',

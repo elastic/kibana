@@ -1,0 +1,404 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`LegendBar should collapse and expand when click the arrow 1`] = `
+<div
+  className="vislib-container calendar-vis-container"
+>
+  <div
+    className="visualize-legend calendar-vis-legend"
+  >
+    <LegendBar
+      colorFunc={[Function]}
+      dispatch={
+        Object {
+          "handler": Object {
+            "bindEl": [Function],
+            "el": <div />,
+            "error": [Function],
+            "removeError": [Function],
+          },
+        }
+      }
+      getUiState={[Function]}
+      position="vislib-container--legend-right"
+      renderComplete={
+        [MockFunction] {
+          "calls": Array [
+            Array [],
+            Array [],
+          ],
+        }
+      }
+      setUiState={[Function]}
+      visConfig={
+        CalendarVisConfig {
+          "_values": Object {
+            "addLegend": true,
+            "addTooltip": true,
+            "alerts": Array [],
+            "categoryAxes": Array [
+              Object {
+                "id": "CategoryAxis-1",
+                "position": "top",
+                "scale": Object {
+                  "type": "MONTHS",
+                },
+                "type": "category",
+              },
+              Object {
+                "id": "CategoryAxis-2",
+                "position": "left",
+                "scale": Object {
+                  "type": "WEEKS",
+                },
+                "type": "category",
+              },
+            ],
+            "colorSchema": "Greens",
+            "colorsNumber": 4,
+            "colorsRange": Array [],
+            "enableHover": false,
+            "grid": Object {
+              "cellSize": 15,
+              "style": "rect",
+              "xOffset": 20,
+              "yOffset": 20,
+            },
+            "handleNoResults": false,
+            "invertColors": false,
+            "legend": Object {
+              "labels": Array [
+                "0 - 4",
+                "4 - 8",
+                "8 - 12",
+                "12 - 15",
+              ],
+            },
+            "legendPosition": "right",
+            "percentageMode": false,
+            "setColorRange": false,
+            "style": Object {
+              "margin": Object {
+                "bottom": 5,
+                "left": 3,
+                "right": 3,
+                "top": 10,
+              },
+            },
+            "times": Array [],
+            "type": "heatmap_year",
+            "valueAxes": Array [
+              Object {
+                "id": "ValueAxis-1",
+                "labels": Object {
+                  "color": "#555",
+                  "overwriteColor": false,
+                  "rotate": 0,
+                  "show": false,
+                },
+                "scale": Object {
+                  "defaultYExtents": false,
+                  "type": "linear",
+                },
+                "show": false,
+                "type": "value",
+              },
+            ],
+          },
+        }
+      }
+    >
+      <div
+        className="legend-col-wrapper"
+      >
+        <button
+          aria-expanded={false}
+          aria-label="Toggle legend"
+          className="kuiCollapseButton legend-collapse-button"
+          onClick={[Function]}
+          type="button"
+        >
+          <span
+            className="kuiIcon fa-chevron-circle-left"
+          />
+        </button>
+      </div>
+    </LegendBar>
+  </div>
+</div>
+`;
+
+exports[`LegendBar should render a full LegendBar component, default position to the right 1`] = `
+<div
+  className="vislib-container calendar-vis-container"
+>
+  <div
+    className="visualize-legend calendar-vis-legend"
+  >
+    <LegendBar
+      colorFunc={[Function]}
+      dispatch={
+        Object {
+          "handler": Object {
+            "bindEl": [Function],
+            "el": <div />,
+            "error": [Function],
+            "removeError": [Function],
+          },
+        }
+      }
+      getUiState={[Function]}
+      position="vislib-container--legend-right"
+      renderComplete={
+        [MockFunction] {
+          "calls": Array [
+            Array [],
+          ],
+        }
+      }
+      setUiState={[Function]}
+      visConfig={
+        CalendarVisConfig {
+          "_values": Object {
+            "addLegend": true,
+            "addTooltip": true,
+            "alerts": Array [],
+            "categoryAxes": Array [
+              Object {
+                "id": "CategoryAxis-1",
+                "position": "top",
+                "scale": Object {
+                  "type": "MONTHS",
+                },
+                "type": "category",
+              },
+              Object {
+                "id": "CategoryAxis-2",
+                "position": "left",
+                "scale": Object {
+                  "type": "WEEKS",
+                },
+                "type": "category",
+              },
+            ],
+            "colorSchema": "Greens",
+            "colorsNumber": 4,
+            "colorsRange": Array [],
+            "enableHover": false,
+            "grid": Object {
+              "cellSize": 15,
+              "style": "rect",
+              "xOffset": 20,
+              "yOffset": 20,
+            },
+            "handleNoResults": false,
+            "invertColors": false,
+            "legend": Object {
+              "labels": Array [
+                "0 - 4",
+                "4 - 8",
+                "8 - 12",
+                "12 - 15",
+              ],
+            },
+            "legendPosition": "right",
+            "percentageMode": false,
+            "setColorRange": false,
+            "style": Object {
+              "margin": Object {
+                "bottom": 5,
+                "left": 3,
+                "right": 3,
+                "top": 10,
+              },
+            },
+            "times": Array [],
+            "type": "heatmap_year",
+            "valueAxes": Array [
+              Object {
+                "id": "ValueAxis-1",
+                "labels": Object {
+                  "color": "#555",
+                  "overwriteColor": false,
+                  "rotate": 0,
+                  "show": false,
+                },
+                "scale": Object {
+                  "defaultYExtents": false,
+                  "type": "linear",
+                },
+                "show": false,
+                "type": "value",
+              },
+            ],
+          },
+        }
+      }
+    >
+      <div
+        className="legend-col-wrapper"
+      >
+        <button
+          aria-expanded={true}
+          aria-label="Toggle legend"
+          className="kuiCollapseButton legend-collapse-button"
+          onClick={[Function]}
+          type="button"
+        >
+          <span
+            className="kuiIcon fa-chevron-circle-right"
+          />
+        </button>
+        <ul
+          className="legend-ul"
+        >
+          <li
+            className="legend-value color"
+            data-label="0 - 4"
+            key="0"
+            onMouseEnter={[Function]}
+            onMouseLeave={[Function]}
+          >
+            <Legend
+              colorFunc={[Function]}
+              legendData={
+                Object {
+                  "label": "0 - 4",
+                }
+              }
+            >
+              <div
+                className="legend-value-container"
+              >
+                <div
+                  aria-label="0 - 4, toggle options"
+                  className="legend-value-title legend-value-truncate"
+                  kbn-accessible-click="true"
+                >
+                  <i
+                    className="fa fa-circle"
+                    style={
+                      Object {
+                        "color": "rgb(247,252,245)",
+                      }
+                    }
+                  />
+                  0 - 4
+                </div>
+              </div>
+            </Legend>
+          </li>
+          <li
+            className="legend-value color"
+            data-label="4 - 8"
+            key="1"
+            onMouseEnter={[Function]}
+            onMouseLeave={[Function]}
+          >
+            <Legend
+              colorFunc={[Function]}
+              legendData={
+                Object {
+                  "label": "4 - 8",
+                }
+              }
+            >
+              <div
+                className="legend-value-container"
+              >
+                <div
+                  aria-label="4 - 8, toggle options"
+                  className="legend-value-title legend-value-truncate"
+                  kbn-accessible-click="true"
+                >
+                  <i
+                    className="fa fa-circle"
+                    style={
+                      Object {
+                        "color": "rgb(199,233,192)",
+                      }
+                    }
+                  />
+                  4 - 8
+                </div>
+              </div>
+            </Legend>
+          </li>
+          <li
+            className="legend-value color"
+            data-label="8 - 12"
+            key="2"
+            onMouseEnter={[Function]}
+            onMouseLeave={[Function]}
+          >
+            <Legend
+              colorFunc={[Function]}
+              legendData={
+                Object {
+                  "label": "8 - 12",
+                }
+              }
+            >
+              <div
+                className="legend-value-container"
+              >
+                <div
+                  aria-label="8 - 12, toggle options"
+                  className="legend-value-title legend-value-truncate"
+                  kbn-accessible-click="true"
+                >
+                  <i
+                    className="fa fa-circle"
+                    style={
+                      Object {
+                        "color": "rgb(116,196,118)",
+                      }
+                    }
+                  />
+                  8 - 12
+                </div>
+              </div>
+            </Legend>
+          </li>
+          <li
+            className="legend-value color"
+            data-label="12 - 15"
+            key="3"
+            onMouseEnter={[Function]}
+            onMouseLeave={[Function]}
+          >
+            <Legend
+              colorFunc={[Function]}
+              legendData={
+                Object {
+                  "label": "12 - 15",
+                }
+              }
+            >
+              <div
+                className="legend-value-container"
+              >
+                <div
+                  aria-label="12 - 15, toggle options"
+                  className="legend-value-title legend-value-truncate"
+                  kbn-accessible-click="true"
+                >
+                  <i
+                    className="fa fa-circle"
+                    style={
+                      Object {
+                        "color": "rgb(35,139,69)",
+                      }
+                    }
+                  />
+                  12 - 15
+                </div>
+              </div>
+            </Legend>
+          </li>
+        </ul>
+      </div>
+    </LegendBar>
+  </div>
+</div>
+`;

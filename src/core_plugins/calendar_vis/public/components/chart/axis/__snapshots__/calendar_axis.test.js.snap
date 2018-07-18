@@ -1,0 +1,79 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`CalendarAxis - default should render a month axis 1`] = `
+<svg
+  id="month-labels"
+>
+  <text
+    class="month-label"
+    style="font-size: 12;"
+    x="85"
+    y="50"
+  >
+    Jul
+  </text>
+</svg>
+`;
+
+exports[`CalendarAxis - default should render a week axis 1`] = `
+<svg
+  id="day-labels"
+>
+  <text
+    class="day-label"
+    style="font-size: 12;"
+    x="5"
+    y="68.3"
+  >
+    Sun
+  </text>
+  <text
+    class="day-label"
+    style="font-size: 12;"
+    x="5"
+    y="84.05"
+  >
+    Mon
+  </text>
+  <text
+    class="day-label"
+    style="font-size: 12;"
+    x="5"
+    y="99.8"
+  >
+    Tue
+  </text>
+  <text
+    class="day-label"
+    style="font-size: 12;"
+    x="5"
+    y="115.55"
+  >
+    Wed
+  </text>
+  <text
+    class="day-label"
+    style="font-size: 12;"
+    x="5"
+    y="131.3"
+  >
+    Thu
+  </text>
+  <text
+    class="day-label"
+    style="font-size: 12;"
+    x="5"
+    y="147.05"
+  >
+    Fri
+  </text>
+  <text
+    class="day-label"
+    style="font-size: 12;"
+    x="5"
+    y="162.8"
+  >
+    Sat
+  </text>
+</svg>
+`;
