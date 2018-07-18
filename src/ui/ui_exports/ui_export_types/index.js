@@ -25,11 +25,8 @@ export {
 export {
   mappings,
   migrations,
-} from './saved_object_mappings';
-
-export {
   validations,
-} from './saved_object_validations';
+} from './saved_object';
 
 export {
   app,

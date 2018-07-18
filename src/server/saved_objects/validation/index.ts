@@ -40,8 +40,10 @@ interface SavedObjectDoc {
  * @interface Validators
  */
 export interface PropertyValidators {
-  [prop: string]: (doc: SavedObjectDoc) => void;
+  [prop: string]: ValidateDoc;
 }
+
+export type ValidateDoc = (doc: SavedObjectDoc) => void;
 
 /**
  * Creates a function which uses a dictionary of property validators to validate
@@ -51,7 +53,7 @@ export interface PropertyValidators {
  * @param {Validators} validators
  * @param {SavedObjectDoc} doc
  */
-export function docValidator(validators: PropertyValidators) {
+export function docValidator(validators: PropertyValidators): ValidateDoc {
   return function validateDoc(doc: SavedObjectDoc) {
     Object.keys(doc)
       .concat(doc.type)

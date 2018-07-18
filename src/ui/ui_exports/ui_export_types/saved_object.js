@@ -18,7 +18,7 @@
  */
 
 import { flatConcatAtType, mergeAtType } from './reduce';
-import { alias, mapSpec, wrap, uniqueKeys } from './modify_reduce';
+import { alias, mapSpec, uniqueKeys, wrap } from './modify_reduce';
 
 // mapping types
 export const mappings = wrap(
@@ -30,5 +30,12 @@ export const mappings = wrap(
   flatConcatAtType
 );
 
-// migration types
-export const migrations = wrap(uniqueKeys(), mergeAtType);
+// Combines the `migrations` property of each plugin,
+// ensuring that properties are unique across plugins.
+// See saved_objects/migrations for more details.
+export const migrations = wrap(alias('savedObjectMigrations'), uniqueKeys(), mergeAtType);
+
+// Combines the `validations` property of each plugin,
+// ensuring that properties are unique across plugins.
+// See saved_objects/validation for more details.
+export const validations = wrap(alias('savedObjectValidations'), uniqueKeys(), mergeAtType);

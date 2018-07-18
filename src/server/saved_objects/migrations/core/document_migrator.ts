@@ -57,6 +57,8 @@ import _ from 'lodash';
 import Semver from 'semver';
 import { MigrationDefinition, MigrationVersion, SavedObjectDoc, TransformFn } from './types';
 
+type ValidateDoc = (doc: SavedObjectDoc) => void;
+
 export interface IDocumentMigrator {
   migrationVersion: MigrationVersion;
   migrate: TransformFn;
@@ -65,6 +67,7 @@ export interface IDocumentMigrator {
 export interface DocumentMigratorOpts {
   kibanaVersion: string;
   migrations: MigrationDefinition;
+  validateDoc: ValidateDoc;
 }
 
 interface Transform {
@@ -89,6 +92,8 @@ export class DocumentMigrator implements IDocumentMigrator {
    * @param {DocumentMigratorOpts} opts
    * @prop {string} kibanaVersion - The current version of Kibana
    * @prop {MigrationDefinition} migrations - The migrations that will be used to migrate documents
+   * @prop {ValidateDoc} validateDoc - A function which, given a document throws an error if it is
+   *   not up to date. This is used to ensure we don't let unmigrated documents slip through.
    * @memberof DocumentMigrator
    */
   constructor(opts: DocumentMigratorOpts) {
@@ -96,6 +101,7 @@ export class DocumentMigrator implements IDocumentMigrator {
     this.transformDoc = buildDocumentTransform({
       kibanaVersion: opts.kibanaVersion,
       migrations: this.migrations,
+      validateDoc: opts.validateDoc,
     });
   }
 
@@ -158,11 +164,13 @@ function buildActiveMigrations(migrations: MigrationDefinition): ActiveMigration
 function buildDocumentTransform({
   kibanaVersion,
   migrations,
+  validateDoc,
 }: {
   kibanaVersion: string;
   migrations: ActiveMigrations;
+  validateDoc: ValidateDoc;
 }): TransformFn {
-  return function transformDoc(doc: SavedObjectDoc): SavedObjectDoc {
+  function transformDoc(doc: SavedObjectDoc): SavedObjectDoc {
     assertCanTransform(doc, kibanaVersion);
 
     // If there's no migrationVersion, we assume it is up to date.
@@ -180,6 +188,12 @@ function buildDocumentTransform({
       }
       doc = migrateProp(doc, prop, migrations);
     }
+  }
+
+  return function transformAndValidate(doc: SavedObjectDoc) {
+    const result = transformDoc(doc);
+    validateDoc(result);
+    return result;
   };
 }
 

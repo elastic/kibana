@@ -25,14 +25,14 @@ describe('KibanaMigrator', () => {
   describe('migratorOptsFromKbnServer', () => {
     it('returns full index mappings w/ core properties', () => {
       const { kbnServer } = mockKbnServer();
-      kbnServer.pluginSpecs = [
+      kbnServer.uiExports.savedObjectMappings = [
         {
-          getId: () => 'aaa',
-          getExportSpecs: () => ({ mappings: { amap: { type: 'text' } } }),
+          pluginId: 'aaa',
+          properties: { amap: { type: 'text' } },
         },
         {
-          getId: () => 'bbb',
-          getExportSpecs: () => ({ mappings: { bmap: { type: 'text' } } }),
+          pluginId: 'bbb',
+          properties: { bmap: { type: 'text' } },
         },
       ];
       const mappings = new KibanaMigrator({ kbnServer }).getActiveMappings();
@@ -41,19 +41,19 @@ describe('KibanaMigrator', () => {
 
     it('Fails if duplicate mappings are defined', () => {
       const { kbnServer } = mockKbnServer();
-      kbnServer.pluginSpecs = [
+      kbnServer.uiExports.savedObjectMappings = [
         {
-          getId: () => 'aaa',
-          getExportSpecs: () => ({ mappings: { amap: { type: 'text' } } }),
+          pluginId: 'aaa',
+          properties: { amap: { type: 'text' } },
         },
         {
-          getId: () => 'bbb',
-          getExportSpecs: () => ({ mappings: { amap: { type: 'long' } } }),
+          pluginId: 'bbb',
+          properties: { amap: { type: 'long' } },
         },
       ];
-      expect(() =>
-        new KibanaMigrator({ kbnServer }).getActiveMappings()
-      ).toThrow(/Plugin bbb is attempting to redefine mappings "amap"/);
+      expect(() => new KibanaMigrator({ kbnServer }).getActiveMappings()).toThrow(
+        /Plugin bbb is attempting to redefine mapping "amap"/
+      );
     });
 
     it('exposes callCluster as a function that waits for elasticsearch before running', async () => {
@@ -74,31 +74,8 @@ describe('KibanaMigrator', () => {
           return Promise.resolve().then(() => ++count);
         },
       };
-      await expect(
-        new KibanaMigrator({ kbnServer }).migrateIndex()
-      ).rejects.toThrow(/Doh!/);
+      await expect(new KibanaMigrator({ kbnServer }).migrateIndex()).rejects.toThrow(/Doh!/);
       expect(count).toEqual(1);
-    });
-
-    it('Fails if duplicate migrations are defined', () => {
-      const { kbnServer } = mockKbnServer();
-      kbnServer.pluginSpecs = [
-        {
-          getId: () => 'aaa',
-          getExportSpecs: () => ({
-            migrations: { foo: { '1.2.3': _.identity } },
-          }),
-        },
-        {
-          getId: () => 'bbb',
-          getExportSpecs: () => ({
-            migrations: { foo: { '1.2.3': _.identity } },
-          }),
-        },
-      ];
-      expect(() => new KibanaMigrator({ kbnServer })).toThrow(
-        /Plugin bbb is attempting to redefine migrations "foo"/
-      );
     });
   });
 });
@@ -107,7 +84,11 @@ function mockKbnServer({ configValues }: { configValues?: any } = {}) {
   const callCluster = sinon.stub();
   const kbnServer: KbnServer = {
     version: '8.2.3',
-    pluginSpecs: [] as any,
+    uiExports: {
+      savedObjectValidations: {},
+      savedObjectMigrations: {},
+      savedObjectMappings: [],
+    },
     server: {
       config: () => ({
         get: ((name: string) => {

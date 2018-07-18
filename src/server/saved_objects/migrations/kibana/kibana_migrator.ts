@@ -22,13 +22,13 @@
  * (the shape of the mappings and documents in the index).
  */
 
+import { docValidator } from '../../validation';
 import {
   buildActiveMappings,
   CallCluster,
   IndexMigrator,
   LogFn,
   MappingProperties,
-  MigrationDefinition,
   SavedObjectDoc,
 } from '../core';
 import { DocumentMigrator, IDocumentMigrator } from '../core/document_migrator';
@@ -38,19 +38,13 @@ import { DocumentMigrator, IDocumentMigrator } from '../core/document_migrator';
  ***********************************************************************/
 
 export interface KbnServer {
-  pluginSpecs: KibanaPlugin[];
   server: Server;
   version: string;
-}
-
-interface KibanaPlugin {
-  getId: (() => string);
-  getExportSpecs: (() => KibanaPluginSpec | undefined);
-}
-
-interface KibanaPluginSpec {
-  mappings?: MappingProperties;
-  migrations?: MigrationDefinition;
+  uiExports: {
+    savedObjectMappings: any[];
+    savedObjectMigrations: any;
+    savedObjectValidations: any;
+  };
 }
 
 interface Server {
@@ -67,14 +61,6 @@ interface Server {
 interface ElasticsearchPlugin {
   getCluster: ((name: 'admin') => { callWithInternalUser: CallCluster });
   waitUntilReady: () => Promise<any>;
-}
-
-interface SanitizedPlugin extends KibanaPluginSpec {
-  id: string;
-}
-
-export function getActiveMappings({ kbnServer }: { kbnServer: KbnServer }) {
-  return;
 }
 
 /**
@@ -96,12 +82,12 @@ export class KibanaMigrator {
    * @memberof KibanaMigrator
    */
   constructor({ kbnServer }: { kbnServer: KbnServer }) {
-    const plugins = sanitizePlugins(kbnServer.pluginSpecs);
     this.kbnServer = kbnServer;
-    this.mappingProperties = validateAndMerge(plugins, 'mappings');
+    this.mappingProperties = mergeProperties(kbnServer.uiExports.savedObjectMappings);
     this.documentMigrator = new DocumentMigrator({
       kibanaVersion: kbnServer.version,
-      migrations: validateAndMerge(plugins, 'migrations'),
+      migrations: kbnServer.uiExports.savedObjectMigrations,
+      validateDoc: docValidator(kbnServer.uiExports.savedObjectValidations),
     });
   }
 
@@ -173,47 +159,15 @@ async function waitForElasticsearch(server: Server) {
 }
 
 /**
- * Converts plugins into a compacted list of { id, mappings, migrations } objects,
- * which are easier to manipulate functionally.
- *
- * @param {KibanaPlugin[]} plugins
- * @returns {SanitizedPlugin[]}
+ * Merges savedObjectMappings properties into a single object, verifying that
+ * no mappings are redefined.
  */
-function sanitizePlugins(plugins: KibanaPlugin[]): SanitizedPlugin[] {
-  return plugins.filter(p => !!p.getExportSpecs()).map(p => {
-    const { mappings, migrations } = p.getExportSpecs()!;
-
-    return {
-      id: p.getId(),
-      mappings,
-      migrations,
-    };
-  });
-}
-
-/**
- * For each plugin, if it contains the specified property, merges the value of
- * the specified property into a single object. (e.g. merges all mappings or
- * all migrations into a single mapping or migration) and throws an error if
- * two plugins attempt to define the same property (e.g. the same mapping or
- * same migration type).
- */
-function validateAndMerge(plugins: SanitizedPlugin[], property: keyof SanitizedPlugin) {
-  return plugins.filter(p => !!p[property]).reduce((acc, plugin) => {
-    assertNoDuplicateProperties(acc, plugin, property);
-
-    return Object.assign(acc, plugin[property]);
+function mergeProperties(mappings: any[]): MappingProperties {
+  return mappings.reduce((acc, { pluginId, properties }) => {
+    const duplicate = Object.keys(properties).find(k => acc.hasOwnProperty(k));
+    if (duplicate) {
+      throw new Error(`Plugin ${pluginId} is attempting to redefine mapping "${duplicate}".`);
+    }
+    return Object.assign(acc, properties);
   }, {});
-}
-
-function assertNoDuplicateProperties(
-  dest: object,
-  plugin: SanitizedPlugin,
-  property: keyof SanitizedPlugin
-) {
-  const source = plugin[property] as any;
-  const duplicate = Object.keys(dest).find(k => !!source[k]);
-  if (duplicate) {
-    throw new Error(`Plugin ${plugin.id} is attempting to redefine ${property} "${duplicate}".`);
-  }
 }
