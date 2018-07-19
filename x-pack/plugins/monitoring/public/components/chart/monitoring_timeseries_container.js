@@ -28,8 +28,8 @@ export function MonitoringTimeseriesContainer({ series, onBrush }) {
   const units = getUnits(series);
   const bucketSize = get(first(series), 'bucket_size'); // bucket size will be the same for all metrics in all series
 
-  const seriesScreenReaderTextList = [`Interval: ${bucketSize}`];
-  seriesScreenReaderTextList.push(...series.map(item => `${item.metric.label}: ${item.metric.description}`));
+  const seriesScreenReaderTextList = [`Interval: ${bucketSize}`]
+    .concat(series.map(item => `${item.metric.label}: ${item.metric.description}`));
 
   return (
     <div className="monitoring-chart__container">
@@ -46,7 +46,7 @@ export function MonitoringTimeseriesContainer({ series, onBrush }) {
               <KuiInfoButton aria-labelledby={`monitoringChart${titleForAriaIds}`} />
               <EuiScreenReaderOnly>
                 <span id={`monitoringChart${titleForAriaIds}`}>
-                  {seriesScreenReaderTextList.join('.')}
+                  {seriesScreenReaderTextList.join('. ')}
                 </span>
               </EuiScreenReaderOnly>
             </Fragment>
