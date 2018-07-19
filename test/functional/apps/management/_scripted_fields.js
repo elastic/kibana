@@ -36,6 +36,7 @@ export default function ({ getService, getPageObjects }) {
   const log = getService('log');
   const remote = getService('remote');
   const retry = getService('retry');
+  const testSubjects = getService('testSubjects');
   const PageObjects = getPageObjects(['common', 'header', 'settings', 'visualize', 'discover']);
 
   describe('scripted fields', () => {
@@ -54,6 +55,20 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.settings.navigateTo();
       await PageObjects.settings.clickKibanaIndices();
       await PageObjects.settings.removeIndexPattern();
+    });
+
+    it('should not allow saving of invalid scripts', async function () {
+      await PageObjects.settings.navigateTo();
+      await PageObjects.settings.clickKibanaIndices();
+      await PageObjects.settings.clickScriptedFieldsTab();
+      await PageObjects.settings.clickAddScriptedField();
+      await PageObjects.settings.setScriptedFieldName('doomedScriptedField');
+      await PageObjects.settings.setScriptedFieldScript(`doc['iHaveNoClosingTick].value`);
+      await PageObjects.settings.clickSaveScriptedField();
+      await retry.try(async () => {
+        const invalidScriptErrorExists = await testSubjects.exists('invalidScriptError');
+        expect(invalidScriptErrorExists).to.be(true);
+      });
     });
 
     describe('creating and using Painless numeric scripted fields', function describeIndexTests() {

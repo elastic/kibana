@@ -192,9 +192,7 @@ uses I18n engine under the hood:
 ```js
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { ReactI18n } from '@kbn/i18n';
-
-const { I18nProvider } = ReactI18n;
+import { I18nProvider } from '@kbn/i18n/react';
 
 ReactDOM.render(
   <I18nProvider>
@@ -209,9 +207,7 @@ ReactDOM.render(
 After that we can use `FormattedMessage` components inside `RootComponent`:
 ```js
 import React, { Component } from 'react';
-import { ReactI18n } from '@kbn/i18n';
-
-const { FormattedMessage } = ReactI18n;
+import { FormattedMessage } from '@kbn/i18n/react';
 
 class RootComponent extends Component {
   constructor(props) {
@@ -259,9 +255,7 @@ React component as a pure function:
 
 ```js
 import React from 'react';
-import { ReactI18n } from '@kbn/i18n';
-
-const { injectI18n, intlShape } = ReactI18n;
+import { injectI18n, intlShape } from '@kbn/i18n/react';
 
 const MyComponentContent = ({ intl }) => (
   <input
@@ -284,10 +278,7 @@ React component as a class:
 
 ```js
 import React from 'react';
-import PropTypes from 'prop-types';
-import { ReactI18n } from '@kbn/i18n';
-
-const { injectI18n, intlShape } = ReactI18n;
+import { injectI18n, intlShape } from '@kbn/i18n/react';
 
 class MyComponentContent extends React.Component {
   static propTypes = {

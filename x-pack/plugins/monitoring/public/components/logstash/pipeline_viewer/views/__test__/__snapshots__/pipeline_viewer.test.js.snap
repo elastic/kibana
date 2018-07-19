@@ -4,77 +4,79 @@ exports[`PipelineViewer component passes expected props 1`] = `
 <EuiPage
   restrictWidth={false}
 >
-  <EuiPageContent
-    className="pipelineViewer"
-    horizontalPosition="center"
-    panelPaddingSize="l"
-    verticalPosition="center"
-  >
-    <StatementSection
-      detailVertex={null}
-      elements={
-        Array [
-          Object {
-            "depth": 0,
-            "id": "standardInput",
-            "parentId": null,
-          },
-        ]
-      }
-      headingText="Inputs"
-      iconType="logstashInput"
-      onShowVertexDetails={[Function]}
-    />
-    <EuiSpacer
-      size="l"
-    />
-    <Queue
-      queue={
-        Object {
-          "hasExplicitId": false,
-          "id": "__QUEUE__",
-          "meta": null,
-          "stats": Array [],
+  <EuiPageBody>
+    <EuiPageContent
+      className="pipelineViewer"
+      horizontalPosition="center"
+      panelPaddingSize="l"
+      verticalPosition="center"
+    >
+      <StatementSection
+        detailVertex={null}
+        elements={
+          Array [
+            Object {
+              "depth": 0,
+              "id": "standardInput",
+              "parentId": null,
+            },
+          ]
         }
-      }
-    />
-    <EuiSpacer
-      size="l"
-    />
-    <StatementSection
-      detailVertex={null}
-      elements={
-        Array [
+        headingText="Inputs"
+        iconType="logstashInput"
+        onShowVertexDetails={[Function]}
+      />
+      <EuiSpacer
+        size="l"
+      />
+      <Queue
+        queue={
           Object {
-            "depth": 0,
-            "id": "mutate",
-            "parentId": null,
-          },
-        ]
-      }
-      headingText="Filters"
-      iconType="logstashFilter"
-      onShowVertexDetails={[Function]}
-    />
-    <EuiSpacer
-      size="l"
-    />
-    <StatementSection
-      detailVertex={null}
-      elements={
-        Array [
-          Object {
-            "depth": 0,
-            "id": "elasticsearch",
-            "parentId": null,
-          },
-        ]
-      }
-      headingText="Outputs"
-      iconType="logstashOutput"
-      onShowVertexDetails={[Function]}
-    />
-  </EuiPageContent>
+            "hasExplicitId": false,
+            "id": "__QUEUE__",
+            "meta": null,
+            "stats": Array [],
+          }
+        }
+      />
+      <EuiSpacer
+        size="l"
+      />
+      <StatementSection
+        detailVertex={null}
+        elements={
+          Array [
+            Object {
+              "depth": 0,
+              "id": "mutate",
+              "parentId": null,
+            },
+          ]
+        }
+        headingText="Filters"
+        iconType="logstashFilter"
+        onShowVertexDetails={[Function]}
+      />
+      <EuiSpacer
+        size="l"
+      />
+      <StatementSection
+        detailVertex={null}
+        elements={
+          Array [
+            Object {
+              "depth": 0,
+              "id": "elasticsearch",
+              "parentId": null,
+            },
+          ]
+        }
+        headingText="Outputs"
+        iconType="logstashOutput"
+        onShowVertexDetails={[Function]}
+      />
+    </EuiPageContent>
+  </EuiPageBody>
 </EuiPage>
 `;
 
@@ -82,96 +84,98 @@ exports[`PipelineViewer component renders DetailDrawer when selected vertex is n
 <EuiPage
   restrictWidth={false}
 >
-  <EuiPageContent
-    className="pipelineViewer"
-    horizontalPosition="center"
-    panelPaddingSize="l"
-    verticalPosition="center"
-  >
-    <StatementSection
-      detailVertex={
-        Object {
-          "id": "stdin",
-        }
-      }
-      elements={
-        Array [
+  <EuiPageBody>
+    <EuiPageContent
+      className="pipelineViewer"
+      horizontalPosition="center"
+      panelPaddingSize="l"
+      verticalPosition="center"
+    >
+      <StatementSection
+        detailVertex={
           Object {
-            "depth": 0,
-            "id": "standardInput",
-            "parentId": null,
-          },
-        ]
-      }
-      headingText="Inputs"
-      iconType="logstashInput"
-      onShowVertexDetails={[Function]}
-    />
-    <EuiSpacer
-      size="l"
-    />
-    <Queue
-      queue={
-        Object {
-          "hasExplicitId": false,
-          "id": "__QUEUE__",
-          "meta": null,
-          "stats": Array [],
+            "id": "stdin",
+          }
         }
-      }
-    />
-    <EuiSpacer
-      size="l"
-    />
-    <StatementSection
-      detailVertex={
-        Object {
-          "id": "stdin",
+        elements={
+          Array [
+            Object {
+              "depth": 0,
+              "id": "standardInput",
+              "parentId": null,
+            },
+          ]
         }
-      }
-      elements={
-        Array [
+        headingText="Inputs"
+        iconType="logstashInput"
+        onShowVertexDetails={[Function]}
+      />
+      <EuiSpacer
+        size="l"
+      />
+      <Queue
+        queue={
           Object {
-            "depth": 0,
-            "id": "mutate",
-            "parentId": null,
-          },
-        ]
-      }
-      headingText="Filters"
-      iconType="logstashFilter"
-      onShowVertexDetails={[Function]}
-    />
-    <EuiSpacer
-      size="l"
-    />
-    <StatementSection
-      detailVertex={
-        Object {
-          "id": "stdin",
+            "hasExplicitId": false,
+            "id": "__QUEUE__",
+            "meta": null,
+            "stats": Array [],
+          }
         }
-      }
-      elements={
-        Array [
+      />
+      <EuiSpacer
+        size="l"
+      />
+      <StatementSection
+        detailVertex={
           Object {
-            "depth": 0,
-            "id": "elasticsearch",
-            "parentId": null,
-          },
-        ]
-      }
-      headingText="Outputs"
-      iconType="logstashOutput"
-      onShowVertexDetails={[Function]}
-    />
-    <DetailDrawer
-      onHide={[Function]}
-      vertex={
-        Object {
-          "id": "stdin",
+            "id": "stdin",
+          }
         }
-      }
-    />
-  </EuiPageContent>
+        elements={
+          Array [
+            Object {
+              "depth": 0,
+              "id": "mutate",
+              "parentId": null,
+            },
+          ]
+        }
+        headingText="Filters"
+        iconType="logstashFilter"
+        onShowVertexDetails={[Function]}
+      />
+      <EuiSpacer
+        size="l"
+      />
+      <StatementSection
+        detailVertex={
+          Object {
+            "id": "stdin",
+          }
+        }
+        elements={
+          Array [
+            Object {
+              "depth": 0,
+              "id": "elasticsearch",
+              "parentId": null,
+            },
+          ]
+        }
+        headingText="Outputs"
+        iconType="logstashOutput"
+        onShowVertexDetails={[Function]}
+      />
+      <DetailDrawer
+        onHide={[Function]}
+        vertex={
+          Object {
+            "id": "stdin",
+          }
+        }
+      />
+    </EuiPageContent>
+  </EuiPageBody>
 </EuiPage>
 `;
