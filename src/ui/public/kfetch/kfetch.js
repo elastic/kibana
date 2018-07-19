@@ -17,7 +17,6 @@
  * under the License.
  */
 
-import 'isomorphic-fetch';
 import url from 'url';
 import chrome from '../chrome';
 import { metadata } from '../metadata';
