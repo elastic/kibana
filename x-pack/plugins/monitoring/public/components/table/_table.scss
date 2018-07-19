@@ -7,56 +7,53 @@
   width: 100%;
 }
 
-.monitoringTableCell__ClusterCell__expired,
-.monitoringTableCell__offline {
-  color: @esDarkGray;
+.monTableCell__clusterCellExpired,
+.monTableCell__offline {
+  color: $euiTextColor;
 }
 
-.monitoringTableCell__ClusterCell__license {
+.monTableCell__clusterCellLiscense {
   font-size: 16px;
 }
-.monitoringTableCell__ClusterCell__expiration {
-  color: #666977;
-  line-height: 14px;
-  font-size: 12px;
+.monTableCell__clusterCellExpiration {
+  color: $euiColorDarkShade;
+  @include euiFontSizeS;
 }
 
-.monitoringTableCell__name,
-.monitoringTableCell__status,
-.monitoringTableCell__version {
-  font-size: 18px;
+.monTableCell__name,
+.monTableCell__status,
+.monTableCell__version {
+  @include euiFontSizeM;
 }
 
-.monitoringTableCell__transportAddress {
-  color: #666977;
-  line-height: 14px;
-  font-size: 12px;
+.monTableCell__transportAddress {
+  color: $euiColorDarkShade;
+  @include euiFontSizeS;
 }
 
-.monitoringTableCell__number {
-  font-size: 30px;
+.monTableCell__number {
+  @include euiFontSizeXL;
 }
 
-.monitoringTableCell__splitNumber {
-  font-size: 18px;
-  line-height: 22px;
+.monTableCell__splitNumber {
+  @include euiFontSizeM;
 }
 
-.monitoringTableCell__MetricCell__metric {
+.monTableCell__metricCellMetric {
   display: inline-block;
-  font-size: 30px;
+  @include euiFontSizeXL;
 }
 
-.monitoringTableCell__MetricCell__slopeArrow {
+.monTableCell__metricCellSlopeArrow {
   display: inline-block;
-  margin-left: 5px;
-  font-size: 30px;
+  margin-left: $euiSizeXS;
+  @include euiFontSizeXL;
 }
 
-.monitoringTableCell__MetricCell__minMax {
+.monTableCell__metricCellMixMax {
   display: inline-block;
   text-align: right;
-  margin-left: 5px;
-  color: #666977;
-  font-size: 12px;
+  margin-left: $euiSizeXS;
+  color: $euiColorDarkShade;
+  @include euiFontSizeS;
 }

@@ -392,7 +392,7 @@ export class MonitoringTable extends React.Component {
   }
 
   render() {
-    const classes = classNames(this.props.className, 'monitoringTable');
+    const classes = classNames(this.props.className, 'monTable');
 
     let table; // This will come out to either be the KuiTable or a "No Data" message
 

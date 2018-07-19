@@ -1,5 +1,8 @@
-// EUI global scope
+// Import the EUI global scope so we can use EUI constants
 @import '../../../../src/ui/public/styles/_styling_constants';
+
+// Temporary hacks
+@import 'hacks';
 
 // Monitoring plugin styles
 
@@ -13,3 +16,4 @@
 @import 'components/chart/index';
 @import 'components/no_data/index';
 @import 'components/sparkline/index';
+@import 'components/table/index';
