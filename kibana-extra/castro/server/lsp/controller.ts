@@ -24,7 +24,7 @@ import getPort from 'get-port';
 export class LanguageServerController {
   /** Map from langauge type to Lsp Server Controller */
   private lsps: LanguageServerProxy[] = [];
-  private readonly targetHost?: string;
+  private readonly targetHost: string;
   private readonly lspLogger?: Logger;
   private log: Log;
 
@@ -84,9 +84,14 @@ export class LanguageServerController {
       }
     );
 
-    // TODO get rid of that
-    childProcess.execSync('sleep 2');
+    const proxy = new LanguageServerProxy(port, this.targetHost, this.lspLogger);
 
-    this.lsps.push(new LanguageServerProxy(port, this.targetHost, this.lspLogger));
+    process.on('exit', () => {
+      // TODO sync call exit api of LSP
+      // https://microsoft.github.io/language-server-protocol/specification#exit
+      // proxy.exit();
+    });
+
+    this.lsps.push(proxy);
   }
 }

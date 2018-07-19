@@ -37,11 +37,11 @@ export class LanguageServerProxy {
   private sequenceNumber = 0;
   private httpEmitter = new HttpRequestEmitter();
   private replies = createRepliesMap();
-  private readonly targetHost?: string;
+  private readonly targetHost: string;
   private readonly targetPort: number;
   private readonly logger?: Logger;
 
-  constructor(targetPort: number, targetHost?: string, logger?: Logger) {
+  constructor(targetPort: number, targetHost: string, logger?: Logger) {
     this.targetHost = targetHost;
     this.targetPort = targetPort;
     this.logger = logger;
@@ -110,20 +110,33 @@ export class LanguageServerProxy {
       return Promise.resolve(this.clientConnection);
     }
     return new Promise(resolve => {
-      const socket = net.connect(this.targetPort, this.targetHost);
+      const socket = new net.Socket();
+
       socket.on('connect', () => {
         const reader = new SocketMessageReader(socket);
         const writer = new SocketMessageWriter(socket);
         this.clientConnection = createMessageConnection(reader, writer, this.logger);
         this.clientConnection.listen();
-        socket.on('end', () => {
-          if (this.clientConnection) {
-            this.clientConnection.dispose();
-          }
-          this.clientConnection = null;
-        });
         resolve(this.clientConnection);
       });
+
+      socket.on('end', () => {
+        if (this.clientConnection) {
+          this.clientConnection.dispose();
+        }
+        this.clientConnection = null;
+      });
+
+      socket.on('close', () => {
+        // Reconnect after 1 second
+        setTimeout(() => socket.connect(this.targetPort, this.targetHost), 1000);
+      });
+
+      socket.on('error', () => void 0);
+      socket.on('timeout', () => void 0);
+      socket.on('drain', () => void 0);
+
+      socket.connect(this.targetPort, this.targetHost);
     });
   }
 }
