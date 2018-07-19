@@ -28,7 +28,15 @@ interface BeatsPageState {
 }
 
 export class BeatsPage extends React.PureComponent<BeatsPageProps, BeatsPageState> {
-  public static ActionArea = ({ match, history }: { match: any; history: any }) => (
+  public static ActionArea = ({
+    match,
+    history,
+    libs,
+  }: {
+    match: any;
+    history: any;
+    libs: FrontendLibs;
+  }) => (
     <div>
       <EuiButtonEmpty
         onClick={() => {
@@ -41,8 +49,9 @@ export class BeatsPage extends React.PureComponent<BeatsPageProps, BeatsPageStat
       <EuiButton
         size="s"
         color="primary"
-        onClick={() => {
-          history.push('/beats/enroll/foobar');
+        onClick={async () => {
+          const TokenObj = await libs.tokens.createEnrollmentToken();
+          history.push(`/beats/enroll/${TokenObj.token}`);
         }}
       >
         Enroll Beats
