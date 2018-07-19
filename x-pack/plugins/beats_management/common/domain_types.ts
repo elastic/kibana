@@ -19,13 +19,20 @@ export interface CMBeat {
   host_ip: string;
   host_name: string;
   ephemeral_id?: string;
+  last_updated?: string;
+  event_rate?: string;
   local_configuration_yml?: string;
   tags?: string[];
   central_configuration_yml?: string;
   metadata?: {};
 }
 
+export interface CMPopulatedBeat extends CMBeat {
+  fullTags: BeatTag[];
+}
+
 export interface BeatTag {
   id: string;
   configuration_blocks: ConfigurationBlock[];
+  color?: string;
 }

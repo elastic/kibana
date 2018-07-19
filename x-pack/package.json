@@ -29,6 +29,7 @@
     "@kbn/test": "link:../packages/kbn-test",
     "@types/boom": "^4.3.8",
     "@types/chance": "^1.0.1",
+    "@types/enzyme": "^3.1.12",
     "@types/history": "^4.6.2",
     "@types/jest": "^22.2.3",
     "@types/joi": "^10.4.0",

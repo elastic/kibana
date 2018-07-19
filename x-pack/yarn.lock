@@ -126,6 +126,10 @@
   version "1.0.1"
   resolved "https://registry.yarnpkg.com/@types/chance/-/chance-1.0.1.tgz#c10703020369602c40dd9428cc6e1437027116df"
 
+"@types/cheerio@*":
+  version "0.22.8"
+  resolved "https://registry.yarnpkg.com/@types/cheerio/-/cheerio-0.22.8.tgz#5702f74f78b73e13f1eb1bd435c2c9de61a250d4"
+
 "@types/delay@^2.0.1":
   version "2.0.1"
   resolved "https://registry.yarnpkg.com/@types/delay/-/delay-2.0.1.tgz#61bcf318a74b61e79d1658fbf054f984c90ef901"
@@ -133,6 +137,13 @@
 "@types/elasticsearch@^5.0.24":
   version "5.0.24"
   resolved "https://registry.yarnpkg.com/@types/elasticsearch/-/elasticsearch-5.0.24.tgz#b09082d2ba3d8ae1627ea771bd2fbd2851e4a035"
+
+"@types/enzyme@^3.1.12":
+  version "3.1.12"
+  resolved "https://registry.yarnpkg.com/@types/enzyme/-/enzyme-3.1.12.tgz#293bb07c1ef5932d37add3879e72e0f5bc614f3c"
+  dependencies:
+    "@types/cheerio" "*"
+    "@types/react" "*"
 
 "@types/events@*":
   version "1.2.0"
