@@ -29,10 +29,7 @@ const filterByName = propFilter('name');
  * This filter checks the defined aggFilter in the schemas of that visualization
  * and limits available aggregations based on that.
  */
-aggTypeFilters.addFilter(
-  (aggType: AggType, indexPatterns: IndexPattern, aggConfig: AggConfig) => {
-    const doesSchemaAllowAggType =
-      filterByName([aggType], aggConfig.schema.aggFilter).length !== 0;
-    return doesSchemaAllowAggType;
-  }
-);
+aggTypeFilters.addFilter((aggType: AggType, indexPatterns: IndexPattern, aggConfig: AggConfig) => {
+  const doesSchemaAllowAggType = filterByName([aggType], aggConfig.schema.aggFilter).length !== 0;
+  return doesSchemaAllowAggType;
+});

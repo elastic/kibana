@@ -7,10 +7,6 @@
 import { get, uniq } from 'lodash';
 import { CHECK_PRIVILEGES_RESULT } from '../authorization/check_privileges';
 
-const getPrivilege = (type, action) => {
-  return `action:saved_objects/${type}/${action}`;
-};
-
 export class SecureSavedObjectsClient {
   constructor(options) {
     const {
@@ -20,6 +16,7 @@ export class SecureSavedObjectsClient {
       checkPrivileges,
       auditLogger,
       savedObjectTypes,
+      actions,
     } = options;
 
     this.errors = errors;
@@ -28,6 +25,7 @@ export class SecureSavedObjectsClient {
     this._checkPrivileges = checkPrivileges;
     this._auditLogger = auditLogger;
     this._savedObjectTypes = savedObjectTypes;
+    this._actions = actions;
   }
 
   async create(type, attributes = {}, options = {}) {
@@ -94,9 +92,9 @@ export class SecureSavedObjectsClient {
     );
   }
 
-  async _checkSavedObjectPrivileges(privileges) {
+  async _checkSavedObjectPrivileges(actions) {
     try {
-      return await this._checkPrivileges(privileges);
+      return await this._checkPrivileges(actions);
     } catch(error) {
       const { reason } = get(error, 'body.error', {});
       throw this.errors.decorateGeneralError(error, reason);
@@ -105,8 +103,8 @@ export class SecureSavedObjectsClient {
 
   async _execute(typeOrTypes, action, args, fn) {
     const types = Array.isArray(typeOrTypes) ? typeOrTypes : [typeOrTypes];
-    const privileges = types.map(type => getPrivilege(type, action));
-    const { result, username, missing } = await this._checkSavedObjectPrivileges(privileges);
+    const actions = types.map(type => this._actions.getSavedObjectAction(type, action));
+    const { result, username, missing } = await this._checkSavedObjectPrivileges(actions);
 
     switch (result) {
       case CHECK_PRIVILEGES_RESULT.AUTHORIZED:
@@ -116,7 +114,7 @@ export class SecureSavedObjectsClient {
         return await fn(this._callWithRequestRepository);
       case CHECK_PRIVILEGES_RESULT.UNAUTHORIZED:
         this._auditLogger.savedObjectsAuthorizationFailure(username, action, types, missing, args);
-        const msg = `Unable to ${action} ${types.sort().join(',')}, missing ${missing.sort().join(',')}`;
+        const msg = `Unable to ${action} ${[...types].sort().join(',')}, missing ${[...missing].sort().join(',')}`;
         throw this.errors.decorateForbiddenError(new Error(msg));
       default:
         throw new Error('Unexpected result from hasPrivileges');
@@ -128,7 +126,7 @@ export class SecureSavedObjectsClient {
 
     // we have to filter for only their authorized types
     const types = this._savedObjectTypes;
-    const typesToPrivilegesMap = new Map(types.map(type => [type, getPrivilege(type, action)]));
+    const typesToPrivilegesMap = new Map(types.map(type => [type, this._actions.getSavedObjectAction(type, action)]));
     const { result, username, missing } = await this._checkSavedObjectPrivileges(Array.from(typesToPrivilegesMap.values()));
 
     if (result === CHECK_PRIVILEGES_RESULT.LEGACY) {

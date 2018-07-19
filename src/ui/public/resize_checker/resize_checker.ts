@@ -28,9 +28,7 @@ function validateElArg(el: HTMLElement) {
   const $el = $(el);
 
   if ($el.length !== 1) {
-    throw new TypeError(
-      'ResizeChecker must be constructed with a single DOM element.'
-    );
+    throw new TypeError('ResizeChecker must be constructed with a single DOM element.');
   }
 
   return $el.get(0);

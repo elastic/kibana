@@ -11,27 +11,29 @@ import { LogstashPanel } from './logstash_panel';
 import { AlertsPanel } from './alerts_panel';
 import { BeatsPanel } from './beats_panel';
 
-import { EuiPage } from '@elastic/eui';
+import { EuiPage, EuiPageBody } from '@elastic/eui';
 
 export function Overview(props) {
   return (
     <EuiPage>
-      <AlertsPanel alerts={props.cluster.alerts} changeUrl={props.changeUrl} />
+      <EuiPageBody>
+        <AlertsPanel alerts={props.cluster.alerts} changeUrl={props.changeUrl} />
 
-      <ElasticsearchPanel
-        {...props.cluster.elasticsearch}
-        version={props.cluster.version}
-        ml={props.cluster.ml}
-        changeUrl={props.changeUrl}
-        license={props.cluster.license}
-        showLicenseExpiration={props.showLicenseExpiration}
-      />
+        <ElasticsearchPanel
+          {...props.cluster.elasticsearch}
+          version={props.cluster.version}
+          ml={props.cluster.ml}
+          changeUrl={props.changeUrl}
+          license={props.cluster.license}
+          showLicenseExpiration={props.showLicenseExpiration}
+        />
 
-      <KibanaPanel {...props.cluster.kibana} changeUrl={props.changeUrl} />
+        <KibanaPanel {...props.cluster.kibana} changeUrl={props.changeUrl} />
 
-      <LogstashPanel {...props.cluster.logstash} changeUrl={props.changeUrl} />
+        <LogstashPanel {...props.cluster.logstash} changeUrl={props.changeUrl} />
 
-      <BeatsPanel {...props.cluster.beats} changeUrl={props.changeUrl} />
+        <BeatsPanel {...props.cluster.beats} changeUrl={props.changeUrl} />
+      </EuiPageBody>
     </EuiPage>
   );
 }

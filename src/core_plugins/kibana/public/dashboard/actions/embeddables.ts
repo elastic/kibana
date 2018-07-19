@@ -20,11 +20,7 @@
 import _ from 'lodash';
 import { Dispatch } from 'redux';
 import { createAction } from 'redux-actions';
-import {
-  CoreKibanaState,
-  getEmbeddableCustomization,
-  getPanel,
-} from '../../selectors';
+import { CoreKibanaState, getEmbeddableCustomization, getPanel } from '../../selectors';
 import { PanelId, PanelState } from '../selectors';
 import { updatePanel } from './panels';
 
@@ -40,10 +36,7 @@ export enum EmbeddableActionTypeKeys {
 }
 
 export interface EmbeddableIsInitializingAction
-  extends KibanaAction<
-      EmbeddableActionTypeKeys.EMBEDDABLE_IS_INITIALIZING,
-      PanelId
-    > {}
+  extends KibanaAction<EmbeddableActionTypeKeys.EMBEDDABLE_IS_INITIALIZING, PanelId> {}
 
 export interface EmbeddableIsInitializedActionPayload {
   panelId: PanelId;
@@ -62,16 +55,10 @@ export interface SetStagedFilterActionPayload {
 }
 
 export interface SetStagedFilterAction
-  extends KibanaAction<
-      EmbeddableActionTypeKeys.SET_STAGED_FILTER,
-      SetStagedFilterActionPayload
-    > {}
+  extends KibanaAction<EmbeddableActionTypeKeys.SET_STAGED_FILTER, SetStagedFilterActionPayload> {}
 
 export interface ClearStagedFiltersAction
-  extends KibanaAction<
-      EmbeddableActionTypeKeys.CLEAR_STAGED_FILTERS,
-      undefined
-    > {}
+  extends KibanaAction<EmbeddableActionTypeKeys.CLEAR_STAGED_FILTERS, undefined> {}
 
 export interface EmbeddableErrorActionPayload {
   error: string | object;
@@ -79,10 +66,7 @@ export interface EmbeddableErrorActionPayload {
 }
 
 export interface EmbeddableErrorAction
-  extends KibanaAction<
-      EmbeddableActionTypeKeys.EMBEDDABLE_ERROR,
-      EmbeddableErrorActionPayload
-    > {}
+  extends KibanaAction<EmbeddableActionTypeKeys.EMBEDDABLE_ERROR, EmbeddableErrorActionPayload> {}
 
 export type EmbeddableActions =
   | EmbeddableIsInitializingAction
@@ -94,15 +78,13 @@ export type EmbeddableActions =
 export const embeddableIsInitializing = createAction<PanelId>(
   EmbeddableActionTypeKeys.EMBEDDABLE_IS_INITIALIZING
 );
-export const embeddableIsInitialized = createAction<
-  EmbeddableIsInitializedActionPayload
->(EmbeddableActionTypeKeys.EMBEDDABLE_IS_INITIALIZED);
+export const embeddableIsInitialized = createAction<EmbeddableIsInitializedActionPayload>(
+  EmbeddableActionTypeKeys.EMBEDDABLE_IS_INITIALIZED
+);
 export const setStagedFilter = createAction<SetStagedFilterActionPayload>(
   EmbeddableActionTypeKeys.SET_STAGED_FILTER
 );
-export const clearStagedFilters = createAction(
-  EmbeddableActionTypeKeys.CLEAR_STAGED_FILTERS
-);
+export const clearStagedFilters = createAction(EmbeddableActionTypeKeys.CLEAR_STAGED_FILTERS);
 export const embeddableError = createAction<EmbeddableErrorActionPayload>(
   EmbeddableActionTypeKeys.EMBEDDABLE_ERROR
 );
@@ -120,10 +102,7 @@ export function embeddableStateChanged(changeData: {
   embeddableState: EmbeddableState;
 }) {
   const { panelId, embeddableState } = changeData;
-  return (
-    dispatch: Dispatch<CoreKibanaState>,
-    getState: () => CoreKibanaState
-  ) => {
+  return (dispatch: Dispatch<CoreKibanaState>, getState: () => CoreKibanaState) => {
     // Translate embeddableState to things redux cares about.
     const customization = getEmbeddableCustomization(getState(), panelId);
     if (!_.isEqual(embeddableState.customization, customization)) {
@@ -136,9 +115,7 @@ export function embeddableStateChanged(changeData: {
     }
 
     if (embeddableState.stagedFilter) {
-      dispatch(
-        setStagedFilter({ stagedFilter: embeddableState.stagedFilter, panelId })
-      );
+      dispatch(setStagedFilter({ stagedFilter: embeddableState.stagedFilter, panelId }));
     }
   };
 }

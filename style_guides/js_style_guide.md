@@ -41,9 +41,9 @@ cheap syntactic pleasures.
 [the opposition]: http://blog.izs.me/post/2353458699/an-open-letter-to-javascript-leaders-regarding
 [hnsemicolons]: http://news.ycombinator.com/item?id=1547647
 
-## 120 characters per line
+## 100 characters per line
 
-Try to limit your lines to 80 characters. If it feels right, you can go up to 120 characters.
+You should limit your lines to 100 chars. Prettier will check for that line width where enabled.
 
 ## Use `const` for variables
 
@@ -213,6 +213,20 @@ class BankAccount {}
 // bad
 class bank_account {}
 class bankAccount {}
+```
+
+## Prefix private class methods with an underscore
+
+Identifying private class methods makes it easier to differentiate a class's public and internal
+APIs, and makes private methods easier to mark as `private` when the code is migrated to TypeScript.
+
+```js
+// good
+class BankAccount {
+  addFunds() {}
+
+  _calculateInterest() {}
+}
 ```
 
 ## Magic numbers/strings

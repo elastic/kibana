@@ -6,7 +6,7 @@
 
 import routes from 'ui/routes';
 import 'ui/url';
-import { Notifier } from 'ui/notify';
+import { toastNotifications } from 'ui/notify';
 import template from './watch_detail_route.html';
 import 'plugins/watcher/services/watch';
 import './components/watch_detail';
@@ -36,14 +36,12 @@ routes
         const watchService = $injector.get('xpackWatcherWatchService');
         const kbnUrl = $injector.get('kbnUrl');
 
-        const notifier = new Notifier({ location: 'Watcher' });
-
         const watchId = $route.current.params.id;
 
         return watchService.loadWatch(watchId)
           .catch(err => {
             if (err.status !== 403) {
-              notifier.error(err);
+              toastNotifications.addDanger(err.data.message);
             }
 
             kbnUrl.redirect('/management/elasticsearch/watcher/watches');
@@ -55,14 +53,12 @@ routes
         const watchService = $injector.get('xpackWatcherWatchService');
         const kbnUrl = $injector.get('kbnUrl');
 
-        const notifier = new Notifier({ location: 'Watcher' });
-
         const watchId = $route.current.params.id;
 
         return watchService.loadWatchHistory(watchId, WATCH_HISTORY.INITIAL_RANGE)
           .catch(err => {
             if (err.status !== 403) {
-              notifier.error(err);
+              toastNotifications.addDanger(err.data.message);
             }
 
             kbnUrl.redirect('/management/elasticsearch/watcher/watches');

@@ -25,12 +25,8 @@ const path = require('path');
 beforeEach(() => {
   mockFs({
     '/data': {
-      'snapshot.zip': fs.readFileSync(
-        path.resolve(__dirname, '__fixtures__/snapshot.zip')
-      ),
-      'snapshot.tar.gz': fs.readFileSync(
-        path.resolve(__dirname, '__fixtures__/snapshot.tar.gz')
-      ),
+      'snapshot.zip': fs.readFileSync(path.resolve(__dirname, '__fixtures__/snapshot.zip')),
+      'snapshot.tar.gz': fs.readFileSync(path.resolve(__dirname, '__fixtures__/snapshot.tar.gz')),
     },
     '/.es': {},
   });

@@ -122,11 +122,11 @@ export default function ({ getService }) {
       });
     };
 
-    const createExpectRbacForbidden = (canLogin, type) => resp => {
+    const createExpectRbacForbidden = (type) => resp => {
       expect(resp.body).to.eql({
         statusCode: 403,
         error: 'Forbidden',
-        message: `Unable to find ${type}, missing ${canLogin ? '' : 'action:login,'}action:saved_objects/${type}/find`
+        message: `Unable to find ${type}, missing action:saved_objects/${type}/find`
       });
     };
 
@@ -202,22 +202,22 @@ export default function ({ getService }) {
         normal: {
           description: 'forbidden login and find visualization message',
           statusCode: 403,
-          response: createExpectRbacForbidden(false, 'visualization'),
+          response: createExpectRbacForbidden('visualization'),
         },
         unknownType: {
           description: 'forbidden login and find wigwags message',
           statusCode: 403,
-          response: createExpectRbacForbidden(false, 'wigwags'),
+          response: createExpectRbacForbidden('wigwags'),
         },
         pageBeyondTotal: {
           description: 'forbidden login and find visualization message',
           statusCode: 403,
-          response: createExpectRbacForbidden(false, 'visualization'),
+          response: createExpectRbacForbidden('visualization'),
         },
         unknownSearchField: {
           description: 'forbidden login and find wigwags message',
           statusCode: 403,
-          response: createExpectRbacForbidden(false, 'wigwags'),
+          response: createExpectRbacForbidden('wigwags'),
         },
         noType: {
           description: `forbidded can't find any types`,
@@ -377,7 +377,7 @@ export default function ({ getService }) {
         unknownType: {
           description: 'forbidden find wigwags message',
           statusCode: 403,
-          response: createExpectRbacForbidden(true, 'wigwags'),
+          response: createExpectRbacForbidden('wigwags'),
         },
         pageBeyondTotal: {
           description: 'empty result',
@@ -387,7 +387,7 @@ export default function ({ getService }) {
         unknownSearchField: {
           description: 'forbidden find wigwags message',
           statusCode: 403,
-          response: createExpectRbacForbidden(true, 'wigwags'),
+          response: createExpectRbacForbidden('wigwags'),
         },
         noType: {
           description: 'all objects',

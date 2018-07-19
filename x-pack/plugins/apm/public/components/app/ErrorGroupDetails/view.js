@@ -11,6 +11,7 @@ import { get } from 'lodash';
 import { HeaderLarge } from '../../shared/UIComponents';
 import DetailView from './DetailView';
 import Distribution from './Distribution';
+import { KueryBar } from '../../shared/KueryBar';
 
 import { EuiText, EuiBadge } from '@elastic/eui';
 import {
@@ -85,6 +86,8 @@ function ErrorGroupDetails({ urlParams, location }) {
                 <UnhandledBadge color="warning">Unhandled</UnhandledBadge>
               )}
             </HeaderLarge>
+
+            <KueryBar />
 
             {showDetails && (
               <Titles>

@@ -38,14 +38,7 @@ import {
   JAVA_CLIENT_INSTRUCTIONS,
 } from './apm_client_instructions';
 
-export function onPremInstructions(server) {
-  let apmIndexPattern = 'apm*';
-  try {
-    apmIndexPattern = server.config().get('xpack.apm.indexPattern');
-  } catch (error) {
-    // ignore error when config does not contain 'xpack.apm.indexPattern'.
-    // This is expected when APM plugin is not running.
-  }
+export function onPremInstructions(apmIndexPattern) {
 
   return {
     instructionSets: [
@@ -144,7 +137,7 @@ export function onPremInstructions(server) {
         statusCheck: {
           title: 'Agent status',
           text:
-            'Make sure you application is running, and the agents are sending data',
+            'Make sure your application is running and the agents are sending data.',
           btnLabel: 'Check agent status',
           success: 'Data successfully received from one or more agents',
           error: `No data has been received from agents yet`,

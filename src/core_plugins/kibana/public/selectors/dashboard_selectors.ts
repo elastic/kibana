@@ -23,9 +23,8 @@ import * as DashboardSelectors from '../dashboard/selectors';
 import { PanelId } from '../dashboard/selectors/types';
 import { CoreKibanaState } from './types';
 
-export const getDashboard = (
-  state: CoreKibanaState
-): DashboardSelectors.DashboardState => state.dashboard;
+export const getDashboard = (state: CoreKibanaState): DashboardSelectors.DashboardState =>
+  state.dashboard;
 
 export const getPanels = (state: CoreKibanaState) =>
   DashboardSelectors.getPanels(getDashboard(state));
@@ -38,23 +37,14 @@ export const getEmbeddables = (state: CoreKibanaState) =>
   DashboardSelectors.getEmbeddables(getDashboard(state));
 export const getEmbeddableError = (state: CoreKibanaState, panelId: PanelId) =>
   DashboardSelectors.getEmbeddableError(getDashboard(state), panelId);
-export const getEmbeddableInitialized = (
-  state: CoreKibanaState,
-  panelId: PanelId
-) => DashboardSelectors.getEmbeddableInitialized(getDashboard(state), panelId);
-export const getEmbeddableCustomization = (
-  state: CoreKibanaState,
-  panelId: PanelId
-) =>
+export const getEmbeddableInitialized = (state: CoreKibanaState, panelId: PanelId) =>
+  DashboardSelectors.getEmbeddableInitialized(getDashboard(state), panelId);
+export const getEmbeddableCustomization = (state: CoreKibanaState, panelId: PanelId) =>
   DashboardSelectors.getEmbeddableCustomization(getDashboard(state), panelId);
-export const getEmbeddableStagedFilter = (
-  state: CoreKibanaState,
-  panelId: PanelId
-) => DashboardSelectors.getEmbeddableStagedFilter(getDashboard(state), panelId);
-export const getEmbeddableMetadata = (
-  state: CoreKibanaState,
-  panelId: PanelId
-) => DashboardSelectors.getEmbeddableMetadata(getDashboard(state), panelId);
+export const getEmbeddableStagedFilter = (state: CoreKibanaState, panelId: PanelId) =>
+  DashboardSelectors.getEmbeddableStagedFilter(getDashboard(state), panelId);
+export const getEmbeddableMetadata = (state: CoreKibanaState, panelId: PanelId) =>
+  DashboardSelectors.getEmbeddableMetadata(getDashboard(state), panelId);
 
 export const getStagedFilters = (state: CoreKibanaState): Filters =>
   DashboardSelectors.getStagedFilters(getDashboard(state));
@@ -62,9 +52,7 @@ export const getViewMode = (state: CoreKibanaState): DashboardViewMode =>
   DashboardSelectors.getViewMode(getDashboard(state));
 export const getFullScreenMode = (state: CoreKibanaState): boolean =>
   DashboardSelectors.getFullScreenMode(getDashboard(state));
-export const getMaximizedPanelId = (
-  state: CoreKibanaState
-): PanelId | undefined =>
+export const getMaximizedPanelId = (state: CoreKibanaState): PanelId | undefined =>
   DashboardSelectors.getMaximizedPanelId(getDashboard(state));
 export const getUseMargins = (state: CoreKibanaState): boolean =>
   DashboardSelectors.getUseMargins(getDashboard(state));

@@ -24,7 +24,7 @@ import '../../promises';
 import { searchRequestQueue } from '../search_request_queue';
 import { FetchSoonProvider } from '../fetch';
 
-export function SearchPollProvider(Private, Promise, $rootScope) {
+export function SearchPollProvider(Private, Promise) {
   const fetchSoon = Private(FetchSoonProvider);
 
   class SearchPoll {
@@ -81,7 +81,6 @@ export function SearchPollProvider(Private, Promise, $rootScope) {
       // We use resolve() here instead of try() because the latter won't trigger a $digest
       // when the promise resolves.
       this._searchPromise = Promise.resolve().then(() => {
-        $rootScope.$broadcast('courier:searchRefresh');
         const requests = searchRequestQueue.getInactive();
 
         // The promise returned from fetchSearchRequests() only resolves when the requests complete.

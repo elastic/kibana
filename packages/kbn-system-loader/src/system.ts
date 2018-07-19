@@ -26,9 +26,7 @@ import {
 } from './system_types';
 
 function isPromise(obj: any) {
-  return (
-    obj != null && typeof obj === 'object' && typeof obj.then === 'function'
-  );
+  return obj != null && typeof obj === 'object' && typeof obj.then === 'function';
 }
 
 export class System<C, M extends SystemMetadata, D extends SystemsType, E> {
@@ -56,19 +54,14 @@ export class System<C, M extends SystemMetadata, D extends SystemsType, E> {
 
   public getExposedValues(): E {
     if (this.systemInstance === undefined) {
-      throw new Error(
-        'trying to get the exposed value of a system that is NOT running'
-      );
+      throw new Error('trying to get the exposed value of a system that is NOT running');
     }
 
     return this.exposedValues!;
   }
 
   public start(kibanaValues: C, dependenciesValues: D) {
-    this.systemInstance = new this.systemClass(
-      kibanaValues,
-      dependenciesValues
-    );
+    this.systemInstance = new this.systemClass(kibanaValues, dependenciesValues);
     const exposedValues = this.systemInstance.start();
 
     if (isPromise(exposedValues)) {
@@ -79,8 +72,7 @@ export class System<C, M extends SystemMetadata, D extends SystemsType, E> {
       );
     }
 
-    this.exposedValues =
-      exposedValues === undefined ? ({} as E) : exposedValues;
+    this.exposedValues = exposedValues === undefined ? ({} as E) : exposedValues;
   }
 
   public stop() {
@@ -91,9 +83,7 @@ export class System<C, M extends SystemMetadata, D extends SystemsType, E> {
 
     if (isPromise(stoppedResponse)) {
       throw new Error(
-        `A promise was returned when stopping [${
-          this.name
-        }], but systems must stop synchronously.`
+        `A promise was returned when stopping [${this.name}], but systems must stop synchronously.`
       );
     }
   }

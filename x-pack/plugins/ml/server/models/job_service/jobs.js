@@ -4,9 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+
+import { JOB_STATE, DATAFEED_STATE } from '../../../common/constants/states';
 import { datafeedsProvider } from './datafeeds';
 import { jobAuditMessagesProvider } from '../job_audit_messages';
 import { CalendarManager } from '../calendar';
+import { fillResultsWithTimeouts, isRequestTimeout } from './error_utils';
 import moment from 'moment';
 import { uniq } from 'lodash';
 
@@ -14,7 +17,7 @@ const TIME_FORMAT = 'YYYY-MM-DD HH:mm:ss';
 
 export function jobsProvider(callWithRequest) {
 
-  const { forceDeleteDatafeed } = datafeedsProvider(callWithRequest);
+  const { forceDeleteDatafeed, getDatafeedIdsByJobId } = datafeedsProvider(callWithRequest);
   const { getAuditMessagesSummary } = jobAuditMessagesProvider(callWithRequest);
   const calMngr = new CalendarManager(callWithRequest);
 
@@ -24,24 +27,62 @@ export function jobsProvider(callWithRequest) {
 
   async function deleteJobs(jobIds) {
     const results = {};
-    const datafeedIds = jobIds.reduce((p, c) => {
-      p[c] = `datafeed-${c}`;
-      return p;
-    }, {});
+    const datafeedIds = await getDatafeedIdsByJobId();
 
     for (const jobId of jobIds) {
       try {
-        const datafeedResp = await forceDeleteDatafeed(datafeedIds[jobId]);
+        const datafeedResp = (datafeedIds[jobId] === undefined) ?
+          { acknowledged: true } :
+          await forceDeleteDatafeed(datafeedIds[jobId]);
+
         if (datafeedResp.acknowledged) {
           try {
             await forceDeleteJob(jobId);
             results[jobId] = { deleted: true };
           } catch (error) {
+            if (isRequestTimeout(error)) {
+              return fillResultsWithTimeouts(results, jobId, jobIds, DATAFEED_STATE.DELETED);
+            }
             results[jobId] = { deleted: false, error };
           }
         }
       } catch (error) {
+        if (isRequestTimeout(error)) {
+          return fillResultsWithTimeouts(results, datafeedIds[jobId], jobIds, DATAFEED_STATE.DELETED);
+        }
         results[jobId] = { deleted: false, error };
+      }
+    }
+    return results;
+  }
+
+  async function closeJobs(jobIds) {
+    const results = {};
+    for (const jobId of jobIds) {
+      try {
+        await callWithRequest('ml.closeJob', { jobId });
+        results[jobId] = { closed: true };
+      } catch (error) {
+        if (isRequestTimeout(error)) {
+          return fillResultsWithTimeouts(results, jobId, jobIds, JOB_STATE.CLOSED);
+        }
+
+        if (error.statusCode === 409 && (error.response && error.response.includes('datafeed') === false)) {
+          // the close job request may fail (409) if the job has failed or if the datafeed hasn't been stopped.
+          // if the job has failed we want to attempt a force close.
+          // however, if we received a 409 due to the datafeed being started we should not attempt a force close.
+          try {
+            await callWithRequest('ml.closeJob', { jobId, force: true });
+            results[jobId] = { closed: true };
+          } catch (error2) {
+            if (isRequestTimeout(error)) {
+              return fillResultsWithTimeouts(results, jobId, jobIds, JOB_STATE.CLOSED);
+            }
+            results[jobId] = { closed: false, error: error2 };
+          }
+        } else {
+          results[jobId] = { closed: false, error };
+        }
       }
     }
     return results;
@@ -56,7 +97,7 @@ export function jobsProvider(callWithRequest) {
     }, {});
 
     const jobs = fullJobsList.map((job) => {
-      const hasDatafeed = (job.datafeed_config !== undefined);
+      const hasDatafeed = (typeof job.datafeed_config === 'object' && Object.keys(job.datafeed_config).length);
       const {
         earliest: earliestTimeStamp,
         latest: latestTimeStamp } = earliestAndLatestTimeStamps(job.data_counts);
@@ -64,7 +105,7 @@ export function jobsProvider(callWithRequest) {
       const tempJob = {
         id: job.job_id,
         description: (job.description || ''),
-        groups: (job.groups || []),
+        groups: (Array.isArray(job.groups) ? job.groups.sort() : []),
         processed_record_count: job.data_counts.processed_record_count,
         memory_status: (job.model_size_stats) ? job.model_size_stats.memory_status : '',
         jobState: job.state,
@@ -223,61 +264,11 @@ export function jobsProvider(callWithRequest) {
     return obj;
   }
 
-  async function getAllGroups() {
-    const groups = {};
-    const jobIds = {};
-    const [ JOBS, CALENDARS ] = [0, 1];
-    const results = await Promise.all([
-      callWithRequest('ml.jobs'),
-      calMngr.getAllCalendars(),
-    ]);
-
-    if (results[JOBS] && results[JOBS].jobs) {
-      results[JOBS].jobs.forEach((job) => {
-        jobIds[job.job_id] = null;
-        if (job.groups !== undefined) {
-          job.groups.forEach((g) => {
-            if (groups[g] === undefined) {
-              groups[g] = {
-                id: g,
-                jobIds: [job.job_id],
-                calendarIds: []
-              };
-            } else {
-              groups[g].jobIds.push(job.job_id);
-            }
-
-          });
-
-        }
-      });
-    }
-    if (results[CALENDARS]) {
-      results[CALENDARS].forEach((cal) => {
-        cal.job_ids.forEach((jId) => {
-          if (jobIds[jId] === undefined) {
-            if (groups[jId] === undefined) {
-              groups[jId] = {
-                id: jId,
-                jobIds: [],
-                calendarIds: [cal.calendar_id]
-              };
-            } else {
-              groups[jId].calendarIds.push(cal.calendar_id);
-            }
-          }
-        });
-      });
-    }
-
-    return Object.keys(groups).map(g => groups[g]);
-  }
-
   return {
     forceDeleteJob,
     deleteJobs,
+    closeJobs,
     jobsSummary,
     createFullJobsList,
-    getAllGroups,
   };
 }

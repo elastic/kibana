@@ -24,21 +24,21 @@ export class RenderCompleteHelper {
     this.setup();
   }
 
-  public destroy() {
+  public destroy = () => {
     this.element.removeEventListener('renderStart', this.start);
     this.element.removeEventListener('renderComplete', this.complete);
-  }
+  };
 
-  public setup() {
+  public setup = () => {
     this.element.setAttribute(attributeName, 'false');
     this.element.addEventListener('renderStart', this.start);
     this.element.addEventListener('renderComplete', this.complete);
-  }
+  };
 
-  public disable() {
+  public disable = () => {
     this.element.setAttribute(attributeName, 'disabled');
     this.destroy();
-  }
+  };
 
   private start = () => {
     this.element.setAttribute(attributeName, 'false');

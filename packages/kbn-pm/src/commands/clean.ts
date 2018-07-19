@@ -27,8 +27,7 @@ import { log } from '../utils/log';
 import { ICommand } from './';
 
 export const CleanCommand: ICommand = {
-  description:
-    'Remove the node_modules and target directories from all projects.',
+  description: 'Remove the node_modules and target directories from all projects.',
   name: 'clean',
 
   async run(projects, projectGraph, { rootPath }) {

@@ -98,13 +98,13 @@ export const termsBucketAgg = new BucketAggType({
     };
   },
   createFilter: createFilterTerms,
-  postFlightRequest: async (resp, aggConfigs, aggConfig, searchSource) => {
+  postFlightRequest: async (resp, aggConfigs, aggConfig, searchSource, inspectorAdapters) => {
     const nestedSearchSource = searchSource.createChild();
     if (aggConfig.params.otherBucket) {
       const filterAgg = buildOtherBucketAgg(aggConfigs, aggConfig, resp);
       nestedSearchSource.setField('aggs', filterAgg);
 
-      const request = aggConfigs.vis.API.inspectorAdapters.requests.start('Other bucket', {
+      const request = inspectorAdapters.requests.start('Other bucket', {
         description: `This request counts the number of documents that fall
           outside the criterion of the data buckets.`
       });
@@ -212,12 +212,11 @@ export const termsBucketAgg = new BucketAggType({
           params.orderAgg = params.orderAgg || paramDef.makeOrderAgg(agg);
         }
       },
-      write: function (agg, output) {
-        const vis = agg.vis;
+      write: function (agg, output, aggs) {
         const dir = agg.params.order.val;
         const order = output.params.order = {};
 
-        let orderAgg = agg.params.orderAgg || vis.aggs.getResponseAggById(agg.params.orderBy);
+        let orderAgg = agg.params.orderAgg || aggs.getResponseAggById(agg.params.orderBy);
 
         // TODO: This works around an Elasticsearch bug the always casts terms agg scripts to strings
         // thus causing issues with filtering. This probably causes other issues since float might not
@@ -245,7 +244,7 @@ export const termsBucketAgg = new BucketAggType({
 
         const orderAggId = orderAgg.id;
         if (orderAgg.parentId) {
-          orderAgg = vis.aggs.byId[orderAgg.parentId];
+          orderAgg = aggs.byId[orderAgg.parentId];
         }
 
         output.subAggs = (output.subAggs || []).concat(orderAgg);

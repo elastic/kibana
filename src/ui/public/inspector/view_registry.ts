@@ -46,9 +46,7 @@ class InspectorViewRegistry extends EventEmitter {
     }
     this.views.push(view);
     // Keep registry sorted by the order property
-    this.views.sort(
-      (a, b) => (a.order || Number.MAX_VALUE) - (b.order || Number.MAX_VALUE)
-    );
+    this.views.sort((a, b) => (a.order || Number.MAX_VALUE) - (b.order || Number.MAX_VALUE));
     this.emit('change');
   }
 
@@ -71,9 +69,7 @@ class InspectorViewRegistry extends EventEmitter {
     if (!adapters) {
       return [];
     }
-    return this.views.filter(
-      view => !view.shouldShow || view.shouldShow(adapters)
-    );
+    return this.views.filter(view => !view.shouldShow || view.shouldShow(adapters));
   }
 }
 

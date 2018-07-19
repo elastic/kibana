@@ -42,8 +42,7 @@ const options = {
     desc: 'Pattern to select which tests to run.',
   },
   updateBaselines: {
-    desc:
-      'Replace baseline screenshots with whatever is generated from the test.',
+    desc: 'Replace baseline screenshots with whatever is generated from the test.',
   },
   verbose: { desc: 'Log everything.' },
   debug: { desc: 'Run in debug mode.' },
@@ -125,9 +124,7 @@ function validateOptions(userOptions) {
       // Validate enum flags
       (options[key].choices && !options[key].choices.includes(val))
     ) {
-      throw new Error(
-        `functional_tests: invalid argument [${val}] to option [${key}]`
-      );
+      throw new Error(`functional_tests: invalid argument [${val}] to option [${key}]`);
     }
   });
 }

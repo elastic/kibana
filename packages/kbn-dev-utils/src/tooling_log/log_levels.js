@@ -31,8 +31,7 @@ export function parseLogLevel(name) {
   const i = LEVELS.indexOf(name);
 
   if (i === -1) {
-    const msg =
-      `Invalid log level "${name}" ` + `(expected one of ${LEVELS.join(',')})`;
+    const msg = `Invalid log level "${name}" ` + `(expected one of ${LEVELS.join(',')})`;
     throw new Error(msg);
   }
 

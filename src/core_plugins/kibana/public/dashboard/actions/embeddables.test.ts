@@ -41,17 +41,13 @@ describe('staged filters', () => {
   });
 
   test('can set a staged filter', () => {
-    store.dispatch(
-      setStagedFilter({ stagedFilter: ['imafilter'], panelId: 'foo1' })
-    );
+    store.dispatch(setStagedFilter({ stagedFilter: ['imafilter'], panelId: 'foo1' }));
     const stagedFilters = getStagedFilters(store.getState());
     expect(stagedFilters.length).toBe(1);
   });
 
   test('getStagedFilters returns filters for all embeddables', () => {
-    store.dispatch(
-      setStagedFilter({ stagedFilter: ['imafilter'], panelId: 'foo2' })
-    );
+    store.dispatch(setStagedFilter({ stagedFilter: ['imafilter'], panelId: 'foo2' }));
     const stagedFilters = getStagedFilters(store.getState());
     expect(stagedFilters.length).toBe(2);
   });

@@ -28,24 +28,16 @@ export enum MetadataActionTypeKeys {
 export type UpdateTitleActionPayload = string;
 
 export interface UpdateTitleAction
-  extends KibanaAction<
-      MetadataActionTypeKeys.UPDATE_TITLE,
-      UpdateTitleActionPayload
-    > {}
+  extends KibanaAction<MetadataActionTypeKeys.UPDATE_TITLE, UpdateTitleActionPayload> {}
 
 export type UpdateDescriptionActionPayload = string;
 
 export interface UpdateDescriptionAction
-  extends KibanaAction<
-      MetadataActionTypeKeys.UPDATE_DESCRIPTION,
-      UpdateDescriptionActionPayload
-    > {}
+  extends KibanaAction<MetadataActionTypeKeys.UPDATE_DESCRIPTION, UpdateDescriptionActionPayload> {}
 
 export type MetadataActions = UpdateDescriptionAction | UpdateTitleAction;
 
 export const updateDescription = createAction<UpdateDescriptionAction>(
   MetadataActionTypeKeys.UPDATE_DESCRIPTION
 );
-export const updateTitle = createAction<UpdateTitleAction>(
-  MetadataActionTypeKeys.UPDATE_TITLE
-);
+export const updateTitle = createAction<UpdateTitleAction>(MetadataActionTypeKeys.UPDATE_TITLE);

@@ -53,11 +53,7 @@ exports.installArchive = async function installArchive(archive, options = {}) {
   log.info('extracted to %s', chalk.bold(installPath));
 
   if (license !== 'oss') {
-    await appendToConfig(
-      installPath,
-      'xpack.license.self_generated.type',
-      license
-    );
+    await appendToConfig(installPath, 'xpack.license.self_generated.type', license);
 
     await appendToConfig(installPath, 'xpack.security.enabled', 'true');
     await configureKeystore(installPath, password, log);
@@ -94,11 +90,7 @@ function rmrfSync(path) {
  * @param {String} value
  */
 async function appendToConfig(installPath, key, value) {
-  fs.appendFileSync(
-    path.resolve(installPath, ES_CONFIG),
-    `${key}: ${value}\n`,
-    'utf8'
-  );
+  fs.appendFileSync(path.resolve(installPath, ES_CONFIG), `${key}: ${value}\n`, 'utf8');
 }
 
 /**

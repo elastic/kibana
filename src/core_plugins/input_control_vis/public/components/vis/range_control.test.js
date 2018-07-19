@@ -51,6 +51,29 @@ test('renders RangeControl', () => {
   expect(component).toMatchSnapshot(); // eslint-disable-line
 });
 
+test('disabled', () => {
+  const disabledRangeControl = {
+    id: 'mock-range-control',
+    isEnabled: () => { return false; },
+    options: {
+      decimalPlaces: 0,
+      step: 1
+    },
+    type: 'range',
+    label: 'range control',
+    disabledReason: 'control is disabled to test rendering when disabled',
+    hasValue: () => {
+      return false;
+    }
+  };
+  const component = shallow(<RangeControl
+    control={disabledRangeControl}
+    controlIndex={0}
+    stageFilter={() => {}}
+  />);
+  expect(component).toMatchSnapshot(); // eslint-disable-line
+});
+
 describe('min and max input values', () => {
   const component = mount(<RangeControl
     control={control}

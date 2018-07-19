@@ -105,7 +105,7 @@ export class MetricVisComponent extends Component {
       table.columns.forEach((column, columnIndex) => {
         const aggConfig = column.aggConfig;
 
-        if (aggConfig && aggConfig.schema.group === 'buckets') {
+        if (aggConfig && aggConfig.type.type === 'buckets') {
           bucketAgg = aggConfig;
           // Store the current index, so we later know in which position in the
           // row array, the bucket agg key will be, so we can create filters on it.

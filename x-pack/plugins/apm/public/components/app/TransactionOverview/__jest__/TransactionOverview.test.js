@@ -11,7 +11,6 @@ import { toJson } from '../../../../utils/testHelpers';
 
 const setup = () => {
   const props = {
-    changeTransactionSorting: () => {},
     license: {
       data: {
         features: {
@@ -19,7 +18,6 @@ const setup = () => {
         }
       }
     },
-    transactionSorting: {},
     hasDynamicBaseline: false,
     location: {},
     urlParams: { transactionType: 'request', serviceName: 'MyServiceName' }

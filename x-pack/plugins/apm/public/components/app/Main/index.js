@@ -9,12 +9,13 @@ import styled from 'styled-components';
 import { Route, Switch } from 'react-router-dom';
 import { routes } from './routeConfig';
 import ScrollToTopOnPathChange from './ScrollToTopOnPathChange';
-import { px, units, unit } from '../../../style/variables';
+import { px, units, unit, elements } from '../../../style/variables';
 import ConnectRouterToRedux from '../../shared/ConnectRouterToRedux';
 
 const MainContainer = styled.div`
   min-width: ${px(unit * 50)};
   padding: ${px(units.plus)};
+  min-height: calc(100vh - ${elements.topNav});
 `;
 
 export default function Main() {

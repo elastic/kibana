@@ -21,10 +21,7 @@ jest.mock('./fs');
 
 import { resolve } from 'path';
 
-import {
-  absolutePathSnapshotSerializer,
-  stripAnsiSnapshotSerializer,
-} from '../test_helpers';
+import { absolutePathSnapshotSerializer, stripAnsiSnapshotSerializer } from '../test_helpers';
 import { linkProjectExecutables } from './link_project_executables';
 import { Project } from './project';
 import { buildProjectGraph } from './projects';

@@ -43,11 +43,7 @@ export async function screenshotStitcher(
   const screenshotClips$ = $getClips(outputClip, maxDimensionBeforeZoom);
 
   const screenshots$ = screenshotClips$.pipe(
-    mergeMap(
-      clip => captureScreenshotFn(clip),
-      (clip, data) => ({ clip, data }),
-      1
-    )
+    mergeMap(clip => captureScreenshotFn(clip), (clip, data) => ({ clip, data }), 1)
   );
 
   // when we take the screenshots we don't have to scale the rects

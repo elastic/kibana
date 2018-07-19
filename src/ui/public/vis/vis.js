@@ -44,6 +44,10 @@ import { Inspector } from '../inspector';
 import { RequestAdapter, DataAdapter } from '../inspector/adapters';
 
 const getTerms = (table, columnIndex, rowIndex) => {
+  if (rowIndex === -1) {
+    return [];
+  }
+
   // get only rows where cell value matches current row for all the fields before columnIndex
   const rows = table.rows.filter(row => row.every((cell, i) => cell === table.rows[rowIndex][i] || i >= columnIndex));
   const terms = rows.map(row => row[columnIndex]);
@@ -94,10 +98,13 @@ export function VisProvider(Private, indexPatterns, getAppState) {
             const appState = getAppState();
             filterBarClickHandler(appState)(event);
           },
-          addFilter: (data, columnIndex, rowIndex) => {
+          addFilter: (data, columnIndex, rowIndex, cellValue) => {
             const agg = data.columns[columnIndex].aggConfig;
             let filter = [];
-            const value = data.rows[rowIndex][columnIndex];
+            const value = rowIndex > -1 ? data.rows[rowIndex][columnIndex] : cellValue;
+            if (!value) {
+              return;
+            }
             if (agg.type.name === 'terms' && agg.params.otherBucket) {
               const terms = getTerms(data, columnIndex, rowIndex);
               filter = agg.createFilter(value, { terms });
