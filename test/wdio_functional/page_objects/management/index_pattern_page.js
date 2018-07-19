@@ -18,27 +18,28 @@
  */
 
 import BasePage from '../common/base_page';
-import { testSubjectifySelector } from '../../helpers/helpers';
+import { createTestSubjectSelectorCss } from '../../helpers/helpers';
 
 export default class IndexPatternPage extends BasePage {
   constructor(driver) {
     super(driver);
     this.driver = driver;
-    this.createIndexPatternHeaderLocator = 'h1.euiTitle';
-    this.createIndexPatternNameInputLocator = testSubjectifySelector('createIndexPatternNameInput', 'css');
-    this.createIndexPatternStep2ButtonLocator = testSubjectifySelector('createIndexPatternGoToStep2Button', 'css');
-    this.createIndexPatternCreateButtonLocator = testSubjectifySelector('createIndexPatternCreateButton', 'css');
-    this.createIndexPatternTimeFieldSelectLocator = testSubjectifySelector('createIndexPatternTimeFieldSelect', 'css');
-    this.indexPatternsLinksLocator = testSubjectifySelector('indexPatternLink', 'css');
-    this.indexPatternTitleLocator = testSubjectifySelector('indexPatternTitle', 'css');
+    this.createIndexPatternHeaderSelector = 'h1.euiTitle';
+    this.createIndexPatternNameInputSelector = createTestSubjectSelectorCss('createIndexPatternNameInput');
+    this.createIndexPatternStep2ButtonSelector = createTestSubjectSelectorCss('createIndexPatternGoToStep2Button');
+    this.createIndexPatternCreateButtonSelector = createTestSubjectSelectorCss('createIndexPatternCreateButton');
+    this.createIndexPatternTimeFieldSelectSelector = createTestSubjectSelectorCss('createIndexPatternTimeFieldSelect');
+    this.indexPatternsLinksSelector = createTestSubjectSelectorCss('indexPatternLink');
+    this.indexPatternTitleSelector = createTestSubjectSelectorCss('indexPatternTitle');
     this.init();
   }
   init() {
-    expect('Create index pattern').toBe(this.getElementText(this.createIndexPatternHeaderLocator));
+    expect('Create index pattern').toBe(this.getElementText(this.createIndexPatternHeaderSelector));
     this.driver.waitUntil(() => {
       return this.title === 'Kibana';
     });
-    expect(this.isEnabled(this.createIndexPatternStep2ButtonLocator)).toBe(false);
+    this.logger.debug('Step 2 button should not be enabled.');
+    expect(this.isEnabled(this.createIndexPatternStep2ButtonSelector)).toBe(false);
   }
 
   /**
@@ -47,30 +48,36 @@ export default class IndexPatternPage extends BasePage {
     * @param {boolean} [useTimeStamp=true] whether to filter on timestamps in step 2
   */
   createIndexPattern(name = 'logstash', useTimeStamp = true) {
-    this.type(this.createIndexPatternNameInputLocator, name, true);
+    this.logger.debug(`Creating index pattern with the name ${name}`);
+    this.type(this.createIndexPatternNameInputSelector, name, true);
 
     this.logger.debug('Waiting until Step 2 Button enabled.');
-    this.driver.waitForEnabled(this.createIndexPatternStep2ButtonLocator);
+    this.driver.waitForEnabled(this.createIndexPatternStep2ButtonSelector);
 
-    expect(this.isEnabled(this.createIndexPatternStep2ButtonLocator)).toBe(true);
-    this.click(this.createIndexPatternStep2ButtonLocator);
+    expect(this.isEnabled(this.createIndexPatternStep2ButtonSelector)).toBe(true);
+    this.click(this.createIndexPatternStep2ButtonSelector);
 
-    this.driver.waitForVisible(this.createIndexPatternCreateButtonLocator);
-    this.driver.waitForVisible(this.createIndexPatternTimeFieldSelectLocator);
+    this.driver.waitForVisible(this.createIndexPatternCreateButtonSelector);
+    this.driver.waitForVisible(this.createIndexPatternTimeFieldSelectSelector);
 
+    //TODO: Add data test subject for the selector for the timestamp select.
+    this.logger.debug(`Use timestamp is set to ${useTimeStamp}`);
     let selectText;
     if (useTimeStamp) {
       selectText = '@timestamp';
     } else {
       selectText = 'I don\'t want to use the Time Filter';
     }
-    this.driver.selectByVisibleText(this.createIndexPatternTimeFieldSelectLocator, selectText);
-    this.driver.waitForEnabled(this.createIndexPatternCreateButtonLocator);
+    this.driver.selectByVisibleText(this.createIndexPatternTimeFieldSelectSelector, selectText);
 
-    this.click(this.createIndexPatternCreateButtonLocator);
+    this.logger.debug('Waiting for create button to become enabled.');
+    this.driver.waitForEnabled(this.createIndexPatternCreateButtonSelector);
 
-    this.driver.waitForVisible(this.indexPatternTitleLocator);
-    expect(this.getElementText(this.indexPatternTitleLocator)).toBe(`${name}*`);
+    this.click(this.createIndexPatternCreateButtonSelector);
+
+    this.logger.debug(`Waiting until title is for index pattern is ${name}`);
+    this.driver.waitForVisible(this.indexPatternTitleSelector);
+    expect(this.getElementText(this.indexPatternTitleSelector)).toBe(`${name}*`);
   }
 
   /**
@@ -78,15 +85,17 @@ export default class IndexPatternPage extends BasePage {
     * @returns [string] Names of all of the existing indexPatterns
   */
   get indexPatterns() {
-    let indexPatterns = this.findElements(this.indexPatternsLinksLocator);
+    this.logger.debug('Getting all index patterns.');
+    let indexPatterns = this.findElements(this.indexPatternsLinksSelector);
     if (!Array.isArray(indexPatterns)) {
       indexPatterns = [indexPatterns];
 
     }
     const indexPatternNames = [];
     for (let i = 0; i < indexPatterns.length; i++) {
-      console.log(indexPatterns[i].getText());
-      indexPatternNames.push(indexPatterns[i].getText());
+      const indexPatternName = indexPatterns[i].getText();
+      this.logger.debug(`Found index pattern with the name ${indexPatternName}`);
+      indexPatternNames.push(indexPatternName);
     }
     return indexPatternNames;
   }

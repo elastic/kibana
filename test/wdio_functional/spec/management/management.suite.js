@@ -25,14 +25,9 @@ describe('Management App', function () {
     try {
       this.esArchiver = await global.getService('esArchiver');
       this.logger = await global.getService('log');
-      this.logger.info('Loading makelogs data');
-      this.logger.debug('Unloading logstash_functional');
       await this.esArchiver.unload('logstash_functional');
-      this.logger.debug('Loading empty kibana');
       await this.esArchiver.load('empty_kibana');
-      this.logger.debug('Loading make logs if necessary.');
       await this.esArchiver.loadIfNeeded('makelogs');
-      this.logger.debug('Data Loaded');
     } catch (e) {
       this.logger.error('Data load failed.');
       this.logger.error(e);
@@ -45,9 +40,7 @@ describe('Management App', function () {
 
   after(async function () {
     try {
-      this.logger.info('Unloading makelogs data');
       await this.esArchiver.unload('makelogs');
-      this.logger.debug('Loading empty kibana');
       await this.esArchiver.unload('empty_kibana');
     } catch (e) {
       this.logger.error('Data unload failed.');

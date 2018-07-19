@@ -17,7 +17,9 @@
  * under the License.
  */
 
-import { testSubjectifySelector } from '../../helpers/helpers';
+import {
+  createTestSubjectSelectorXpath
+} from '../../helpers/helpers';
 import Web from './web';
 
 export default class BasePage extends Web {
@@ -36,17 +38,18 @@ export default class BasePage extends Web {
     return new class Navigation {
       constructor() {
         this.baseNavLinkSelector =
-          '//a' + testSubjectifySelector('appLink', 'xpath');
+          `//a${createTestSubjectSelectorXpath('appLink')}`;
         this.consoleNavLinkSelector =
-          this.baseNavLinkSelector + '[@aria-label="Dev Tools"]';
+          `${this.baseNavLinkSelector}[@aria-label="Dev Tools"]`;
         this.managementNavLinkSelector =
-          this.baseNavLinkSelector + '[@aria-label="Management"]';
+          `${this.baseNavLinkSelector}[@aria-label="Management"]`;
       }
       /**
         * @function navigateToConsole
         * @returns {Object} Returns an instance of ConsolePage
       */
       navigateToConsole() {
+        self.logger.debug('Navigating to console page.');
         self.driver.click(this.consoleNavLinkSelector);
         const ConsolePage = require('../console/console_page');
         return new ConsolePage(self.driver);
@@ -56,6 +59,7 @@ export default class BasePage extends Web {
         * @returns {Object} Returns an instance of HomePage
       */
       navigateToHome() {
+        self.logger.debug('Navigating to home page');
         self.driver.url('/');
         const HomePage = require('../home/home_page');
         return new HomePage(self.driver);
@@ -65,6 +69,7 @@ export default class BasePage extends Web {
         * @returns {Object} Returns an instance of ManagementPage
       */
       navigateToManagement() {
+        self.logger.debug('Navigating to management.');
         self.driver.click(this.managementNavLinkSelector);
         const ManagementPage = require('../management/management_page');
         return new ManagementPage(self.driver);

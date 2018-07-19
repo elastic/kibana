@@ -17,7 +17,10 @@
  * under the License.
  */
 import expect from 'expect';
-import { testSubjectifySelector } from '../../helpers/helpers';
+import {
+  createTestSubjectSelectorCss,
+  createTestSubjectSelectorXpath
+} from '../../helpers/helpers';
 import BasePage from '../common/base_page';
 
 export default class ConsolePage extends BasePage {
@@ -25,30 +28,18 @@ export default class ConsolePage extends BasePage {
   constructor(driver) {
     super(driver);
     this.breadCrumbSelector = 'div.kuiLocalBreadcrumb';
-    this.requestEditorSelector = testSubjectifySelector(
-      'request-editor',
-      'css'
-    );
+    this.requestEditorSelector = createTestSubjectSelectorCss('request-editor');
     this.editorContentSelector = 'div.ace_scroller > div.ace_content';
     this.requestEditorTextSelector =
-      this.requestEditorSelector + ' > ' + this.editorContentSelector;
-    this.playButtonSelector = testSubjectifySelector(
-      'send-request-button',
-      'css'
-    );
+      `${this.requestEditorSelector} > ${this.editorContentSelector}`;
+    this.playButtonSelector = createTestSubjectSelectorCss('send-request-button');
     this.responseEditorSelector = '#output';
     this.responseEditorTextSelector =
-      this.responseEditorSelector + ' > ' + this.editorContentSelector;
+      `${this.responseEditorSelector} > ${this.editorContentSelector}`;
     this.consoleSettingsButtonSelector =
-      '//button' + testSubjectifySelector('consoleSettingsButton', 'xpath');
-    this.fontSizeInputSelector = testSubjectifySelector(
-      'setting-font-size-input',
-      'css'
-    );
-    this.saveSettingsButton = testSubjectifySelector(
-      'settings-save-button',
-      'css'
-    );
+      `//button${createTestSubjectSelectorXpath('consoleSettingsButton')}`;
+    this.fontSizeInputSelector = createTestSubjectSelectorCss('setting-font-size-input');
+    this.saveSettingsButton = createTestSubjectSelectorCss('settings-save-button');
     this.DEFAULT_REQUEST = `
     
 GET _search

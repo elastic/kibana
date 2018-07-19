@@ -48,17 +48,12 @@ it('default request response should include `"timed_out": false`', function () {
 
 it('settings should allow changing the text size', function () {
 
-  //Get the beginning font size (Usually 16)
-  const beginningFontSize = this.consolePage.requestFontSize;
-
   this.consolePage.changeFontSize(20);
 
   //Changed Font size to 20px
-  expect(this.consolePage.requestFontSize).not.toBe(beginningFontSize);
   expect(this.consolePage.requestFontSize).toBe('20px');
 
   //Changed Font size to 24px
   this.consolePage.changeFontSize(24);
-  expect(this.consolePage.requestFontSize).not.toBe('20px');
   expect(this.consolePage.requestFontSize).toBe('24px');
 });

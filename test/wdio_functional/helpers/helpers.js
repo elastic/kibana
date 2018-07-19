@@ -24,8 +24,10 @@ export function stripRequest(requestString) {
     .replace(/\s+/g, '');
 }
 
-export function testSubjectifySelector(selector, strategy) {
-  return strategy === 'xpath'
-    ? `[@data-test-subj="${selector}"]`
-    : `[data-test-subj="${selector}"]`;
+export function createTestSubjectSelectorCss(selector) {
+  return `[data-test-subj="${selector}"]`;
+}
+
+export function createTestSubjectSelectorXpath(selector) {
+  return `[@data-test-subj="${selector}"]`;
 }

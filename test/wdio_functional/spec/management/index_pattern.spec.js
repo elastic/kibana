@@ -36,7 +36,6 @@ it('Create New Index Pattern Wizard', function () {
   this.indexPatternPage = this.managementPage.navigateToIndexPatterns();
   this.indexPatternPage.createIndexPattern('logstash', false);
 
-  //Get all created index patterns
   const indexPatterns = this.indexPatternPage.indexPatterns;
 
   expect(indexPatterns.length).toBe(1);

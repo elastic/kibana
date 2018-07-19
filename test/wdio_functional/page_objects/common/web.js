@@ -148,5 +148,4 @@ export default class Web {
     this.findElement(selector);
     return this.driver.isEnabled(selector);
   }
-  // protected waitForCondition(callback: () => boolean): void { }
 }

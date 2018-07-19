@@ -16,12 +16,12 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import expect from 'expect';
 import BasePage from '../common/base_page';
 
 export default class HomePage extends BasePage {
   constructor(driver) {
     super(driver);
+    //TODO: Add data test subject to this title to use.
     this.addDataHeaderSelector =
       '//h3[contains(@class, "euiTitle") and text()="Add Data to Kibana"]';
     this.init();
@@ -29,9 +29,7 @@ export default class HomePage extends BasePage {
 
   init() {
     this.driver.waitForExist(this.addDataHeaderSelector);
-    expect('Add Data to Kibana').toBe(
-      this.getElementText(this.addDataHeaderSelector)
-    );
+    //TODO: Need to update this to the app name once added.
     this.driver.waitUntil(() => {
       return this.title === 'Kibana';
     });

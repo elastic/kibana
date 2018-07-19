@@ -180,6 +180,10 @@ module.exports = function (grunt) {
       ],
     },
 
+    wdioTests: {
+
+    },
+
     functionalTestsDevServer: {
       cmd: process.execPath,
       args: [

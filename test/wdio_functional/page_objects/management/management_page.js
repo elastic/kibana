@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { testSubjectifySelector } from '../../helpers/helpers';
+import { createTestSubjectSelectorCss } from '../../helpers/helpers';
 import AdvancedSettingsPage from './advanced_settings_page';
 import BasePage from '../common/base_page';
 import IndexPatternPage from './index_pattern_page';
@@ -27,9 +27,9 @@ export default class ManagementPage extends BasePage {
   constructor(driver) {
     super(driver);
     this.managementHeaderSelector = 'h2#tabHeader';
-    this.indexPatternsLinkSelector = testSubjectifySelector('indices', 'css');
-    this.savedObjectsLinkSelector = testSubjectifySelector('objects', 'css');
-    this.advancedSettingsLinkSelector = testSubjectifySelector('settings', 'css');
+    this.indexPatternsLinkSelector = createTestSubjectSelectorCss('indices');
+    this.savedObjectsLinkSelector = createTestSubjectSelectorCss('objects');
+    this.advancedSettingsLinkSelector = createTestSubjectSelectorCss('settings');
     this.init();
   }
 
@@ -38,6 +38,7 @@ export default class ManagementPage extends BasePage {
     * @returns {Object} Returns an instance of IndexPatternPage
   */
   navigateToIndexPatterns() {
+    this.logger.debug('Navigating to the index pattern page.');
     this.click(this.indexPatternsLinkSelector);
     return new IndexPatternPage(this.driver);
   }
@@ -47,6 +48,7 @@ export default class ManagementPage extends BasePage {
     * @returns {Object} Returns an instance of SavedObjectsPage
   */
   navigateToSavedObjects() {
+    this.logger.debug('Navigating to the saved objects page.');
     this.click(this.savedObjectsLinkSelector);
     return new SavedObjectsPage(this.driver);
   }
@@ -56,6 +58,7 @@ export default class ManagementPage extends BasePage {
     * @returns {Object} Returns an instance of AdvancedSettingsPage
   */
   navigateToAdvancedSettings() {
+    this.logger.debug('Navigating to the advanced settings page.');
     this.click(this.advancedSettingsLinkSelector);
     return new AdvancedSettingsPage(this.driver);
   }
