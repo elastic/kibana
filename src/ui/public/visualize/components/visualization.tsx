@@ -21,6 +21,7 @@ import { get } from 'lodash';
 import React from 'react';
 
 import { PersistedState } from '../../persisted_state';
+import { memoizeLast } from '../../utils/memoize';
 import { Vis } from '../../vis';
 import { VisualizationChart } from './visualization_chart';
 import { VisualizationNoResults } from './visualization_noresults';
@@ -43,48 +44,35 @@ interface VisualizationProps {
   visData: any;
 }
 
-interface VisualizationState {
-  showNoResultsMessage: boolean;
-}
-
-export class Visualization extends React.Component<VisualizationProps, VisualizationState> {
-  public static getDerivedStateFromProps(
-    props: VisualizationProps,
-    prevState: VisualizationState
-  ): Partial<VisualizationState> | null {
+export class Visualization extends React.Component<VisualizationProps> {
+  public static getDerivedStateFromProps(props: VisualizationProps): void {
     const uiStateChanged = props.uiState && props.uiState !== props.vis.getUiState();
     if (uiStateChanged) {
       throw new Error('Changing uiState props is not allowed!');
     }
-
-    const showNoResultsMessage = shouldShowNoResultsMessage(props.vis, props.visData);
-    if (prevState.showNoResultsMessage !== showNoResultsMessage) {
-      return { showNoResultsMessage };
-    }
-    return null;
   }
+
+  private showNoResultsMessage = memoizeLast(shouldShowNoResultsMessage);
 
   constructor(props: VisualizationProps) {
     super(props);
 
-    const { vis, visData, uiState, listenOnChange } = props;
+    const { vis, uiState, listenOnChange } = props;
 
     vis._setUiState(props.uiState);
     if (listenOnChange) {
       uiState.on('change', this.onUiStateChanged);
     }
-
-    this.state = {
-      showNoResultsMessage: shouldShowNoResultsMessage(vis, visData),
-    };
   }
 
   public render() {
     const { vis, visData, onInit, uiState } = this.props;
 
+    const noResults = this.showNoResultsMessage(vis, visData);
+
     return (
       <div className="visualization">
-        {this.state.showNoResultsMessage ? (
+        {noResults ? (
           <VisualizationNoResults onInit={onInit} />
         ) : (
           <VisualizationChart vis={vis} visData={visData} onInit={onInit} uiState={uiState} />
