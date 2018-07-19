@@ -17,6 +17,7 @@
 
 This section summarizes the changes in each release.
 
+* <<release-notes-6.3.2>>
 * <<release-notes-6.3.1>>
 * <<release-notes-6.3.0>>
 * <<release-notes-6.2.4>>
@@ -72,6 +73,46 @@ This section summarizes the changes in each release.
 //[float]
 //=== Known Issues
 ////
+
+
+[[release-notes-6.3.2]]
+== {kib} 6.3.2
+coming[6.3.2]
+
+[float]
+=== Bug Fixes
+Discover::
+* [Fixes #19445] Removes outdated Aria attribute {pull}20532[#20532]
+
+Monitoring::
+* Fixes issues with sorting and filtering of {es} nodes {pull}20383[#20383]
++
+This issue fixes the sorting and filtering of rows in the table of {es} nodes 
+in the {kib} Monitoring UI.
+
+Platform::
+* Defaults to running the {es} functional test server from a snapshot locally 
+in the {xpack} directory {pull}20585[#20585]
+
+Sharing::
+* [Fixes #20635] Changes the scale factor when upgrading panels with 
+margins {pull}20684[#20684]
++
+This change reduces the scale factor to 4 when migrating panels that are in 
+a dashboard with margins.
+
+* Fixes issue with running Chromium headless over HTTP when accessing {kib} 
+publicly via HTTPS {pull}20528[#20528]
+
+Visualization::
+* [Fixes #19378, #16884] Fixes editor sidebar to better handle long field 
+names {pull}20455[#20455]
+* [Fixes #20240] Fixes issues with the flickering of visualizations on 
+refresh {pull}20817[#20817]
+* Adds distinct links and float tags to Region Map docs {pull}20361[#20361]
+* Avoids shard failures when performing bbox filter on coordinate 
+maps {pull}19548[#19548] 
+* Fixes disabled aggregations in the visualization editor {pull}18796[#18796]
 
 [[release-notes-6.3.1]]
 == {kib} 6.3.1
