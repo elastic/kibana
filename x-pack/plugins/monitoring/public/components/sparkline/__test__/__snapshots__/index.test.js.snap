@@ -3,7 +3,7 @@
 exports[`Sparkline component does not show tooltip initially 1`] = `
 <div>
   <div
-    className="sparkline"
+    className="monSparkline"
   />
 </div>
 `;
@@ -11,7 +11,7 @@ exports[`Sparkline component does not show tooltip initially 1`] = `
 exports[`Sparkline component shows tooltip on hover 1`] = `
 <div>
   <div
-    className="sparkline"
+    className="monSparkline"
   />
   <div
     className="monSparklineTooltip__container"

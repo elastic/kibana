@@ -187,6 +187,7 @@ exports[`after fetch renders call to action when no dashboards exist 1`] = `
   restrictWidth={false}
 >
   <EuiPageBody>
+  >
     <EuiPageContent
       className="dashboardLandingPageContent"
       horizontalPosition="center"
@@ -213,7 +214,7 @@ exports[`after fetch renders call to action when no dashboards exist 1`] = `
                 You can combine data views from any Kibana app into one dashboard and see everything in one place.
               </p>
               <p>
-                New to Kibana? 
+                New to Kibana?
                 <EuiLink
                   color="primary"
                   href="#/home/tutorial_directory/sampleData"
@@ -452,15 +453,15 @@ exports[`after fetch renders warning when listingLimit is exceeded 1`] = `
             title="Listing limit exceeded"
           >
             <p>
-              You have 
+              You have
               2
-               dashboards, but your 
+               dashboards, but your
               <strong>
                 listingLimit
               </strong>
-               setting prevents the table below from displaying more than 
+               setting prevents the table below from displaying more than
               1
-              . You can change this setting under 
+              . You can change this setting under
               <EuiLink
                 color="primary"
                 href="#/management/kibana/settings"
