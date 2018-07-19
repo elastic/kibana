@@ -33,7 +33,7 @@ it('should show the default request', function () {
   const requestData = stripRequest(this.consolePage.request);
   const defaultRequestData = stripRequest(this.consolePage.DEFAULT_REQUEST);
 
-  //Checking if default request is ${this.consolePage.DEFAULT_REQUEST}
+  this.logger.info(`Checking if default request is ${this.consolePage.DEFAULT_REQUEST}`);
   expect(requestData).toBe(defaultRequestData);
 });
 
@@ -41,19 +41,18 @@ it('default request response should include `"timed_out": false`', function () {
   const expectedResponseContains = '"timed_out": false,';
   this.consolePage.clickPlay();
 
-  //Checking if default response contains "timed_out": false,
+  this.logger.info('Checking if default response contains "timed_out": false,');
   const actualResponse = this.consolePage.response;
   expect(actualResponse).toContain(expectedResponseContains);
 });
 
 it('settings should allow changing the text size', function () {
 
+  this.logger.info('Changing font size to 20px');
   this.consolePage.changeFontSize(20);
-
-  //Changed Font size to 20px
   expect(this.consolePage.requestFontSize).toBe('20px');
 
-  //Changed Font size to 24px
+  this.logger.info('Changing font size to 24px');
   this.consolePage.changeFontSize(24);
   expect(this.consolePage.requestFontSize).toBe('24px');
 });

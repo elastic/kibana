@@ -33,7 +33,7 @@ exports.config = {
   coloredLogs: true,
   logLevel: 'silent',
   deprecationWarnings: true,
-  waitforTimeout: ci ? 60000 : 30000,
+  waitforTimeout: ci ? 60000 : 45000,
   bail: 0,
   screenshotPath: 'test/failure-screenshots',
   framework: 'mocha',
@@ -55,11 +55,6 @@ exports.config = {
   baseUrl: 'http://localhost:5620',
   capabilities: [
     {
-      browserName: 'chrome',
-      version: ci ? '58' : null,
-      platform: 'macOS 10.12',
-    },
-    {
       maxInstances: 1,
       browserName: 'firefox',
       version: ci ? '56' : null,
@@ -67,10 +62,26 @@ exports.config = {
   ],
   onPrepare: function (config, capabilities) {
     if (ci || process.platform === 'win32') {
-      capabilities.push({
-        browserName: 'internet explorer',
-        killInstances: true,
-      });
+      capabilities.push(
+        {
+          browserName: 'internet explorer',
+          killInstances: true,
+        },
+        {
+          browserName: 'chrome',
+          version: ci ? '58' : null,
+          platform: ci ? 'macOS 10.12' : null,
+          chromeOptions: {
+            args: ['--headless', '--disable-gpu', 'window-size=1200,1100']
+          }
+        });
+    } else {
+      capabilities.push(
+        {
+          browserName: 'chrome',
+          version: ci ? '58' : null,
+          platform: ci ? 'macOS 10.12' : null
+        });
     }
     if (ci && process.platform !== 'win32') {
       capabilities[1].platform = 'macOS 10.12';

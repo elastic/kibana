@@ -32,7 +32,7 @@ export default class Web {
    */
   getElementText(selector) {
     this.findElement(selector);
-    this.logger.verbose(`\nFound : ${selector}\n`);
+    this.logger.verbose(`Found : ${selector}`);
     return this.driver.getText(selector).toString();
   }
 
@@ -53,9 +53,9 @@ export default class Web {
    */
   click(selector) {
     this.findElement(selector);
-    this.logger.verbose(`\nClicking on: ${selector}\n`);
+    this.logger.verbose(`Clicking on: ${selector}`);
     this.driver.click(selector);
-    this.logger.verbose(`\nClicked successfully`);
+    this.logger.verbose(`Clicked successfully`);
   }
 
   /**
@@ -64,9 +64,9 @@ export default class Web {
    */
   clear(selector) {
     this.findElement(selector);
-    this.logger.verbose(`\nClearing values from: ${selector}\n`);
+    this.logger.verbose(`Clearing values from: ${selector}`);
     this.driver.clearElement(selector);
-    this.logger.verbose(`\nCleared successfully`);
+    this.logger.verbose(`Cleared successfully`);
   }
 
   /**
@@ -77,15 +77,15 @@ export default class Web {
    */
   findElement(selector) {
     this.logger.verbose(
-      `\nChecking existance of element with selector: ${selector}\n`
+      `Checking existence of element with selector: ${selector}`
     );
     this.driver.waitForExist(selector);
-    this.logger.verbose(`\nIt exists.\n`);
+    this.logger.verbose(`It exists.`);
     this.logger.verbose(
-      `\nEnsuring visibility of element with selector: ${selector}\n`
+      `Ensuring visibility of element with selector: ${selector}`
     );
     this.driver.waitForVisible(selector);
-    this.logger.verbose(`\nIt's visible\n`);
+    this.logger.verbose(`It's visible`);
     return this.driver.element(selector);
   }
   /**
@@ -96,10 +96,10 @@ export default class Web {
    */
   findElements(selector) {
     this.logger.verbose(
-      `\nChecking existance of all elements that match: ${selector}\n`
+      `Checking existence of all elements that match: ${selector}`
     );
     this.driver.waitForExist(selector);
-    this.logger.verbose(`\nAt least one exists.\n`);
+    this.logger.verbose(`At least one exists.`);
     return this.driver.elements(selector);
   }
   /**
@@ -109,13 +109,17 @@ export default class Web {
    * @param {boolean} clear    Whether to clear current value first.
    */
   type(selector, value, clear = true) {
+    if (!value) {
+      throw new Error(`Invalid value given: ${value}`);
+    }
+    const sanitizedValue = String(value);
     if (clear) {
       this.clear(selector);
     }
     this.click(selector);
-    for (let i = 0; i < value.length; i++) {
-      this.driver.pause(100);
-      this.driver.addValue(selector, value[i]);
+    for (let i = 0; i < sanitizedValue.length; i++) {
+      this.driver.pause(50);
+      this.driver.addValue(selector, sanitizedValue[i]);
     }
   }
 

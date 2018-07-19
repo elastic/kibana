@@ -75,7 +75,7 @@ GET _search
   }
 
   /**
-   * @function openSittings
+   * @function openSettings
    */
   openSettings() {
     this.driver.waitUntil(() => {
