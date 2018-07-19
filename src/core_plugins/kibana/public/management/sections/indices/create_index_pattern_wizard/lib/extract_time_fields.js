@@ -17,14 +17,17 @@
  * under the License.
  */
 
-import { timeFieldsTypes } from './time_fields_types';
+import { i18n } from '@kbn/i18n';
 
 export function extractTimeFields(fields) {
   const dateFields = fields.filter(field => field.type === 'date');
+  const label = i18n.translate('kbn.management.indexPattern.create.stepTime.noTimeFields.label', {
+    defaultMessage: 'The indices which match this index pattern don\'t contain any time fields.'
+  });
 
   if (dateFields.length === 0) {
     return [{
-      display: timeFieldsTypes.NO_TIME_FIELDS,
+      display: label,
     }];
   }
 
@@ -33,8 +36,11 @@ export function extractTimeFields(fields) {
     display: '───',
     fieldName: '',
   };
+  const noTimeFieldLabel = i18n.translate('kbn.management.indexPattern.create.stepTime.noTimeFieldOption.label', {
+    defaultMessage: 'I don\'t want to use the Time Filter'
+  });
   const noTimeFieldOption = {
-    display: timeFieldsTypes.NO_TIME_FIELD,
+    display: noTimeFieldLabel,
     fieldName: undefined,
   };
 

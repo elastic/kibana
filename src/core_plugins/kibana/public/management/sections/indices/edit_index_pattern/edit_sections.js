@@ -18,8 +18,9 @@
  */
 
 import _ from 'lodash';
+import { i18n } from '@kbn/i18n';
 
-export function IndicesEditSectionsProvider(i18n) {
+export function IndicesEditSectionsProvider() {
 
   return function (indexPattern) {
     const fieldCount = _.countBy(indexPattern.fields, function (field) {
@@ -34,17 +35,17 @@ export function IndicesEditSectionsProvider(i18n) {
 
     return [
       {
-        title: i18n('kbn.management.editIndexPattern.tabs.fields.header', { defaultMessage: 'Fields' }),
+        title: i18n.translate('kbn.management.editIndexPattern.tabs.fields.header', { defaultMessage: 'Fields' }),
         index: 'indexedFields',
         count: fieldCount.indexed
       },
       {
-        title: i18n('kbn.management.editIndexPattern.tabs.scripted.header', { defaultMessage: 'Scripted fields' }),
+        title: i18n.translate('kbn.management.editIndexPattern.tabs.scripted.header', { defaultMessage: 'Scripted fields' }),
         index: 'scriptedFields',
         count: fieldCount.scripted
       },
       {
-        title: i18n('kbn.management.editIndexPattern.tabs.source.header', { defaultMessage: 'Source filters' }),
+        title: i18n.translate('kbn.management.editIndexPattern.tabs.source.header', { defaultMessage: 'Source filters' }),
         index: 'sourceFilters',
         count: fieldCount.sourceFilters
       }

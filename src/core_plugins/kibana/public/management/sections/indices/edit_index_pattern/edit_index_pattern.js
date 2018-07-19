@@ -33,6 +33,7 @@ import { SourceFiltersTable } from './source_filters_table';
 import { IndexedFieldsTable } from './indexed_fields_table';
 import { ScriptedFieldsTable } from './scripted_fields_table';
 import { I18nProvider } from '@kbn/i18n/react';
+import { i18n } from '@kbn/i18n';
 
 const REACT_SOURCE_FILTERS_DOM_ELEMENT_ID = 'reactSourceFiltersTable';
 const REACT_INDEXED_FIELDS_DOM_ELEMENT_ID = 'reactIndexedFieldsTable';
@@ -180,7 +181,7 @@ uiRoutes
 
 uiModules.get('apps/management')
   .controller('managementIndicesEdit', function (
-    $scope, $location, $route, config, indexPatterns, Notifier, Private, AppState, docTitle, confirmModal, i18n) {
+    $scope, $location, $route, config, indexPatterns, Notifier, Private, AppState, docTitle, confirmModal) {
     const notify = new Notifier();
     const $state = $scope.state = new AppState();
     const { fieldWildcardMatcher } = Private(FieldWildcardProvider);
@@ -240,16 +241,16 @@ uiModules.get('apps/management')
     });
 
     $scope.refreshFields = function () {
-      const confirmMessage = i18n('kbn.management.editIndexPattern.refresh.label', {
+      const confirmMessage = i18n.translate('kbn.management.editIndexPattern.refresh.label', {
         defaultMessage: 'This action resets the popularity counter of each field.'
       });
       const confirmModalOptions = {
-        confirmButtonText: i18n('kbn.management.editIndexPattern.refresh.button', { defaultMessage: 'Refresh' }),
+        confirmButtonText: i18n.translate('kbn.management.editIndexPattern.refresh.button', { defaultMessage: 'Refresh' }),
         onConfirm: async () => {
           await $scope.indexPattern.init(true);
           $scope.fields = $scope.indexPattern.getNonScriptedFields();
         },
-        title: i18n('kbn.management.editIndexPattern.refresh.header', { defaultMessage: 'Refresh field list?' })
+        title: i18n.translate('kbn.management.editIndexPattern.refresh.header', { defaultMessage: 'Refresh field list?' })
       };
       confirmModal(
         confirmMessage,
@@ -275,9 +276,9 @@ uiModules.get('apps/management')
       }
 
       const confirmModalOptions = {
-        confirmButtonText: i18n('kbn.management.editIndexPattern.delete.button', { defaultMessage: 'Delete' }),
+        confirmButtonText: i18n.translate('kbn.management.editIndexPattern.delete.button', { defaultMessage: 'Delete' }),
         onConfirm: doRemove,
-        title: i18n('kbn.management.editIndexPattern.delete.header', { defaultMessage: 'Delete index pattern?' })
+        title: i18n.translate('kbn.management.editIndexPattern.delete.header', { defaultMessage: 'Delete index pattern?' })
       };
       confirmModal('', confirmModalOptions);
     };
@@ -288,7 +289,7 @@ uiModules.get('apps/management')
 
     $scope.setIndexPatternsTimeField = function (field) {
       if (field.type !== 'date') {
-        const errorMessage = i18n('kbn.management.editIndexPattern.notDate.errorMessage', {
+        const errorMessage = i18n.translate('kbn.management.editIndexPattern.notDate.errorMessage', {
           defaultMessage: 'That field is a {fieldType} not a date.', values: { fieldType: field.type }
         });
         notify.error(errorMessage);

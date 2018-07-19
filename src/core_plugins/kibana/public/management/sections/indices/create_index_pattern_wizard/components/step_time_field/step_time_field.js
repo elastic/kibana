@@ -19,7 +19,7 @@
 
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import { ensureMinimumTime, extractTimeFields, timeFieldsTypes } from '../../lib';
+import { ensureMinimumTime, extractTimeFields } from '../../lib';
 
 import { Header } from './components/header';
 import { TimeField } from './components/time_field';
@@ -140,30 +140,11 @@ export class StepTimeFieldComponent extends Component {
       goToPreviousStep,
     } = this.props;
 
-    const getText = (key) => {
-      switch (key) {
-        case timeFieldsTypes.NO_TIME_FIELDS:
-          return this.props.intl.formatMessage({
-            id: 'kbn.management.createIndexPattern.stepTime.noTimeFields.label',
-            defaultMessage: 'The indices which match this index pattern don\'t contain any time fields.'
-          });
-
-        case timeFieldsTypes.NO_TIME_FIELD:
-          return this.props.intl.formatMessage({
-            id: 'kbn.management.createIndexPattern.stepTime.noTimeFieldOption.label',
-            defaultMessage: 'I don\'t want to use the Time Filter'
-          });
-
-        default:
-          return key;
-      }
-    };
-
     const timeFieldOptions = timeFields ?
       [
         { text: '', value: '' },
         ...timeFields.map(timeField => ({
-          text: getText(timeField.display),
+          text: timeField.display,
           value: timeField.fieldName,
           disabled: timeFields.isDisabled,
         }))

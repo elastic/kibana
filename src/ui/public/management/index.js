@@ -19,8 +19,6 @@
 
 import { ManagementSection } from './section';
 
-export { sectionTypes } from './section_keys';
-export { translateSectionName } from './section_translate_helper';
 export const management = new ManagementSection('management', {
   display: 'Management'
 });

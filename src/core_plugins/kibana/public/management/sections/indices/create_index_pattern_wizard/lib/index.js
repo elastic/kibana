@@ -28,5 +28,3 @@ export { getMatchedIndices } from './get_matched_indices';
 export { containsInvalidCharacters } from './contains_invalid_characters';
 
 export { extractTimeFields } from './extract_time_fields';
-
-export { timeFieldsTypes } from './time_fields_types';

@@ -28,6 +28,7 @@ import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { FieldEditor } from 'ui/field_editor';
 import { I18nProvider } from '@kbn/i18n/react';
+import { i18n } from '@kbn/i18n';
 
 const REACT_FIELD_EDITOR_ID = 'reactFieldEditor';
 const renderFieldEditor = ($scope, indexPattern, field, {
@@ -92,7 +93,7 @@ uiRoutes
       }
     },
     controllerAs: 'fieldSettings',
-    controller: function FieldEditorPageController($scope, $route, $timeout, $http, Private, docTitle, config, i18n) {
+    controller: function FieldEditorPageController($scope, $route, $timeout, $http, Private, docTitle, config) {
       const getConfig = (...args) => config.get(...args);
       const fieldFormatEditors = Private(RegistryFieldFormatEditorsProvider);
       const kbnUrl = Private(KbnUrlProvider);
@@ -106,7 +107,7 @@ uiRoutes
         this.field = this.indexPattern.fields.byName[fieldName];
 
         if (!this.field) {
-          const message = i18n('kbn.management.editIndexPattern.scripted.noField.label',
+          const message = i18n.translate('kbn.management.editIndexPattern.scripted.noField.label',
             {
               defaultMessage: '\'{indexPatternTitle}\' index pattern doesn\'t have a scripted field called \'{fieldName}\'',
               values: { indexPatternTitle: this.indexPattern.title, fieldName }
@@ -125,7 +126,7 @@ uiRoutes
         });
       }
       else {
-        const errorMessage = i18n('kbn.management.editIndexPattern.scripted.unknownMode.errorMessage',
+        const errorMessage = i18n.translate('kbn.management.editIndexPattern.scripted.unknownMode.errorMessage',
           {
             defaultMessage: 'unknown fieldSettings mode {mode}',
             values: { mode: this.mode }
@@ -133,7 +134,7 @@ uiRoutes
         throw new Error(errorMessage);
       }
 
-      const defaultFieldName = i18n('kbn.management.editIndexPattern.scripted.newField.placeholder',
+      const defaultFieldName = i18n.translate('kbn.management.editIndexPattern.scripted.newField.placeholder',
         { defaultMessage: 'New Scripted Field' });
       docTitle.change([this.field.name || defaultFieldName, this.indexPattern.title]);
 

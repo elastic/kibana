@@ -18,7 +18,6 @@
  */
 
 import { extractTimeFields } from '../extract_time_fields';
-import { timeFieldsTypes } from '../time_fields_types';
 
 describe('extractTimeFields', () => {
   it('should handle no date fields', () => {
@@ -28,7 +27,7 @@ describe('extractTimeFields', () => {
     ];
 
     expect(extractTimeFields(fields)).toEqual([
-      { display: timeFieldsTypes.NO_TIME_FIELDS }
+      { display: `The indices which match this index pattern don't contain any time fields.` }
     ]);
   });
 
@@ -40,7 +39,7 @@ describe('extractTimeFields', () => {
     expect(extractTimeFields(fields)).toEqual([
       { display: '@timestamp', fieldName: '@timestamp' },
       { isDisabled: true, display: '───', fieldName: '' },
-      { display: timeFieldsTypes.NO_TIME_FIELD, fieldName: undefined },
+      { display: `I don't want to use the Time Filter`, fieldName: undefined },
     ]);
   });
 });

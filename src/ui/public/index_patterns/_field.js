@@ -24,8 +24,9 @@ import { getKbnFieldType } from '../../../utils';
 import { shortenDottedString } from '../../../core_plugins/kibana/common/utils/shorten_dotted_string';
 import { toastNotifications } from 'ui/notify';
 import chrome from 'ui/chrome';
+import { i18n } from '@kbn/i18n';
 
-export function Field(indexPattern, spec, i18n) {
+export function Field(indexPattern, spec) {
   // unwrap old instances of Field
   if (spec instanceof Field) spec = spec.$$spec;
 
@@ -41,9 +42,10 @@ export function Field(indexPattern, spec, i18n) {
   // find the type for this field, fallback to unknown type
   let type = getKbnFieldType(spec.type);
   if (spec.type && !type) {
-    const title = i18n('common.ui.indexPattern.create.unknownField.header',
+    const title = i18n.translate('common.ui.indexPattern.create.unknownField.header',
       { values: { type: spec.type }, defaultMessage: 'Unknown field type {type}' });
-    const text = i18n('common.ui.indexPattern.create.unknownField.errorMessage', { values: { name: spec.name, title: indexPattern.title },
+    const text = i18n.translate('common.ui.indexPattern.create.unknownField.errorMessage', {
+      values: { name: spec.name, title: indexPattern.title },
       defaultMessage: 'Field {name} in indexPattern {title} is using an unknown field type.' });
 
     toastNotifications.addDanger({
