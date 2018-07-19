@@ -44,7 +44,6 @@ interface VisualizationProps {
 }
 
 interface VisualizationState {
-  listenOnChange: boolean;
   showNoResultsMessage: boolean;
 }
 
@@ -53,10 +52,9 @@ export class Visualization extends React.Component<VisualizationProps, Visualiza
     props: VisualizationProps,
     prevState: VisualizationState
   ): Partial<VisualizationState> | null {
-    const listenOnChangeChanged = props.listenOnChange !== prevState.listenOnChange;
     const uiStateChanged = props.uiState && props.uiState !== props.vis.getUiState();
-    if (listenOnChangeChanged || uiStateChanged) {
-      throw new Error('Changing listenOnChange or uiState props is not allowed!');
+    if (uiStateChanged) {
+      throw new Error('Changing uiState props is not allowed!');
     }
 
     const showNoResultsMessage = shouldShowNoResultsMessage(props.vis, props.visData);
@@ -77,7 +75,6 @@ export class Visualization extends React.Component<VisualizationProps, Visualiza
     }
 
     this.state = {
-      listenOnChange,
       showNoResultsMessage: shouldShowNoResultsMessage(vis, visData),
     };
   }
@@ -98,6 +95,18 @@ export class Visualization extends React.Component<VisualizationProps, Visualiza
 
   public componentWillUnmount() {
     this.props.uiState.off('change', this.onUiStateChanged);
+  }
+
+  public componentDidUpdate(prevProps: VisualizationProps) {
+    const { listenOnChange } = this.props;
+    // If the listenOnChange prop changed, we need to register or deregister from uiState
+    if (prevProps.listenOnChange !== listenOnChange) {
+      if (listenOnChange) {
+        this.props.uiState.on('change', this.onUiStateChanged);
+      } else {
+        this.props.uiState.off('change', this.onUiStateChanged);
+      }
+    }
   }
 
   /**
