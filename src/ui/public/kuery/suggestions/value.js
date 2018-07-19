@@ -17,7 +17,6 @@
  * under the License.
  */
 
-import 'isomorphic-fetch';
 import { flatten, memoize } from 'lodash';
 import { escapeQuotes } from './escape_kuery';
 import { kfetch } from '../../kfetch';
