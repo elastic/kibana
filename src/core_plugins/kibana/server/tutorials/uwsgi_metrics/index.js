@@ -20,33 +20,31 @@
 import { TUTORIAL_CATEGORY } from '../../../common/tutorials/tutorial_category';
 import { onPremInstructions, cloudInstructions, onPremCloudInstructions } from '../../../common/tutorials/metricbeat_instructions';
 
-export function postgresqlMetricsSpecProvider() {
-  const moduleName = 'postgresql';
+export function uwsgiMetricsSpecProvider() {
+  const moduleName = 'uwsgi';
   return {
-    id: 'postgresqlMetrics',
-    name: 'PostgreSQL metrics',
+    id: 'uwsgiMetrics',
+    name: 'uWSGI metrics',
     category: TUTORIAL_CATEGORY.METRICS,
+    shortDescription: 'Fetch internal metrics from the uWSGI server.',
+    longDescription: 'The `uwsgi` Metricbeat module fetches internal metrics from the uWSGI server.' +
+                     ' [Learn more]({config.docs.beats.metricbeat}/metricbeat-module-uwsgi.html).',
+    //euiIconType: 'logouWSGI',
     isBeta: true,
-    shortDescription: 'Fetch internal metrics from PostgreSQL.',
-    longDescription: 'The `postgresql` Metricbeat module fetches internal metrics from the PostgreSQL server.' +
-                     ' [Learn more]({config.docs.beats.metricbeat}/metricbeat-module-postgresql.html).',
-    //euiIconType: 'logoPostgreSQL',
     artifacts: {
       dashboards: [
-      /*
         {
-          id: 'TODO',
-          linkLabel: 'PostgreSQL metrics dashboard',
+          id: '32fca290-f0af-11e7-b9ff-9f96241065de',
+          linkLabel: 'uWSGI metrics dashboard',
           isOverview: true
         }
-      */
       ],
       exportedFields: {
-        documentationUrl: '{config.docs.beats.metricbeat}/exported-fields-postgresql.html'
+        documentationUrl: '{config.docs.beats.metricbeat}/exported-fields-uwsgi.html'
       }
     },
     completionTimeMinutes: 10,
-    //previewImagePath: '/plugins/kibana/home/tutorial_resources/postgresql_metrics/screenshot.png',
+    previewImagePath: '/plugins/kibana/home/tutorial_resources/uwsgi_metrics/screenshot.png',
     onPrem: onPremInstructions(moduleName),
     elasticCloud: cloudInstructions(moduleName),
     onPremElasticCloud: onPremCloudInstructions(moduleName)
