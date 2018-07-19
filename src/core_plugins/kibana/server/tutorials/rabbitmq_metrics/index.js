@@ -20,33 +20,31 @@
 import { TUTORIAL_CATEGORY } from '../../../common/tutorials/tutorial_category';
 import { onPremInstructions, cloudInstructions, onPremCloudInstructions } from '../../../common/tutorials/metricbeat_instructions';
 
-export function postgresqlMetricsSpecProvider() {
-  const moduleName = 'postgresql';
+export function rabbitmqMetricsSpecProvider() {
+  const moduleName = 'rabbitmq';
   return {
-    id: 'postgresqlMetrics',
-    name: 'PostgreSQL metrics',
+    id: 'rabbitmqMetrics',
+    name: 'RabbitMQ metrics',
     category: TUTORIAL_CATEGORY.METRICS,
+    shortDescription: 'Fetch internal metrics from the RabbitMQ server.',
+    longDescription: 'The `rabbitmq` Metricbeat module fetches internal metrics from the RabbitMQ server.' +
+                     ' [Learn more]({config.docs.beats.metricbeat}/metricbeat-module-rabbitmq.html).',
+    //euiIconType: 'logoRabbitMQ',
     isBeta: true,
-    shortDescription: 'Fetch internal metrics from PostgreSQL.',
-    longDescription: 'The `postgresql` Metricbeat module fetches internal metrics from the PostgreSQL server.' +
-                     ' [Learn more]({config.docs.beats.metricbeat}/metricbeat-module-postgresql.html).',
-    //euiIconType: 'logoPostgreSQL',
     artifacts: {
       dashboards: [
-      /*
         {
-          id: 'TODO',
-          linkLabel: 'PostgreSQL metrics dashboard',
+          id: 'AV4YobKIge1VCbKU_qVo',
+          linkLabel: 'RabbitMQ metrics dashboard',
           isOverview: true
         }
-      */
       ],
       exportedFields: {
-        documentationUrl: '{config.docs.beats.metricbeat}/exported-fields-postgresql.html'
+        documentationUrl: '{config.docs.beats.metricbeat}/exported-fields-rabbitmq.html'
       }
     },
     completionTimeMinutes: 10,
-    //previewImagePath: '/plugins/kibana/home/tutorial_resources/postgresql_metrics/screenshot.png',
+    previewImagePath: '/plugins/kibana/home/tutorial_resources/rabbitmq_metrics/screenshot.png',
     onPrem: onPremInstructions(moduleName),
     elasticCloud: cloudInstructions(moduleName),
     onPremElasticCloud: onPremCloudInstructions(moduleName)
