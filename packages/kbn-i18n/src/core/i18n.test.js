@@ -21,25 +21,24 @@ describe('I18n engine', () => {
   let i18n;
 
   beforeEach(() => {
-    jest.resetModules();
     i18n = require('./i18n');
   });
 
+  afterEach(() => {
+    // isolate modules for every test so that local module state doesn't conflict between tests
+    jest.resetModules();
+  });
+
   describe('addMessages', () => {
-    test('should throw error if new messages are not specified', () => {
-      expect(() => i18n.addMessages()).toThrow();
+    test('should throw error if locale is not specified or empty', () => {
+      expect(() => i18n.addMessages({ foo: 'bar' })).toThrowErrorMatchingSnapshot();
+      expect(() => i18n.addMessages({ locale: '' })).toThrowErrorMatchingSnapshot();
     });
 
-    test('should throw error if new messages are empty object', () => {
-      expect(() => i18n.addMessages({})).toThrow();
-    });
-
-    test('should throw error if locale is not specified', () => {
-      expect(() => i18n.addMessages({ foo: 'bar' })).toThrow();
-    });
-
-    test('should throw error if locale is empty string', () => {
-      expect(() => i18n.addMessages({ locale: '' })).toThrow();
+    test('should throw error if locale specified in messages is different from one provided as second argument', () => {
+      expect(() =>
+        i18n.addMessages({ foo: 'bar', locale: 'en' }, 'ru')
+      ).toThrowErrorMatchingSnapshot();
     });
 
     test('should add messages if locale prop is passed as second argument', () => {
@@ -101,6 +100,48 @@ describe('I18n engine', () => {
         ['d.e.f']: 'bar',
       });
     });
+
+    test('should override messages with the same locale and id', () => {
+      const locale = 'ru';
+
+      i18n.setLocale(locale);
+      i18n.addMessages({
+        locale,
+        ['a.b.c']: 'foo',
+      });
+
+      expect(i18n.getMessages()).toEqual({
+        locale: 'ru',
+        ['a.b.c']: 'foo',
+      });
+
+      i18n.addMessages({
+        locale,
+        ['a.b.c']: 'bar',
+      });
+
+      expect(i18n.getMessages()).toEqual({
+        locale: 'ru',
+        ['a.b.c']: 'bar',
+      });
+    });
+
+    test('should add messages with normalized passed locale', () => {
+      const locale = 'en-us';
+      i18n.setLocale(locale);
+
+      i18n.addMessages(
+        {
+          ['a.b.c']: 'bar',
+        },
+        'en_US'
+      );
+
+      expect(i18n.getLocale()).toBe(locale);
+      expect(i18n.getMessages()).toEqual({
+        ['a.b.c']: 'bar',
+      });
+    });
   });
 
   describe('getMessages', () => {
@@ -139,15 +180,12 @@ describe('I18n engine', () => {
   });
 
   describe('setLocale', () => {
-    test('should throw error if locale is not a string', () => {
+    test('should throw error if locale is not a non-empty string', () => {
       expect(() => i18n.setLocale(undefined)).toThrow();
       expect(() => i18n.setLocale(null)).toThrow();
       expect(() => i18n.setLocale(true)).toThrow();
       expect(() => i18n.setLocale(5)).toThrow();
       expect(() => i18n.setLocale({})).toThrow();
-    });
-
-    test('should throw error if locale is empty string', () => {
       expect(() => i18n.setLocale('')).toThrow();
     });
 
@@ -175,15 +213,12 @@ describe('I18n engine', () => {
   });
 
   describe('setDefaultLocale', () => {
-    test('should throw error if locale is not a string', () => {
+    test('should throw error if locale is not a non-empty string', () => {
       expect(() => i18n.setDefaultLocale(undefined)).toThrow();
       expect(() => i18n.setDefaultLocale(null)).toThrow();
       expect(() => i18n.setDefaultLocale(true)).toThrow();
       expect(() => i18n.setDefaultLocale(5)).toThrow();
       expect(() => i18n.setDefaultLocale({})).toThrow();
-    });
-
-    test('should throw error if locale is empty string', () => {
       expect(() => i18n.setDefaultLocale('')).toThrow();
     });
 
@@ -229,15 +264,12 @@ describe('I18n engine', () => {
   });
 
   describe('setFormats', () => {
-    test('should throw error if formats parameter is not an object', () => {
+    test('should throw error if formats parameter is not a non-empty object', () => {
       expect(() => i18n.setFormats(undefined)).toThrow();
       expect(() => i18n.setFormats(null)).toThrow();
       expect(() => i18n.setFormats(true)).toThrow();
       expect(() => i18n.setFormats(5)).toThrow();
       expect(() => i18n.setFormats('foo')).toThrow();
-    });
-
-    test('should throw error if formats parameter is empty object', () => {
       expect(() => i18n.setFormats({})).toThrow();
     });
 
@@ -268,8 +300,6 @@ describe('I18n engine', () => {
         date: {
           short: {
             month: 'long',
-            day: 'numeric',
-            year: 'numeric',
           },
         },
       });
@@ -332,20 +362,17 @@ describe('I18n engine', () => {
   });
 
   describe('translate', () => {
-    test('should throw error if id is not a string', () => {
-      expect(() => i18n.translate(undefined)).toThrow();
-      expect(() => i18n.translate(null)).toThrow();
-      expect(() => i18n.translate(true)).toThrow();
-      expect(() => i18n.translate(5)).toThrow();
-      expect(() => i18n.translate({})).toThrow();
-    });
-
-    test('should throw error if id is empty string', () => {
-      expect(() => i18n.translate('')).toThrow();
+    test('should throw error if id is not a non-empty string', () => {
+      expect(() => i18n.translate(undefined)).toThrowErrorMatchingSnapshot();
+      expect(() => i18n.translate(null)).toThrowErrorMatchingSnapshot();
+      expect(() => i18n.translate(true)).toThrowErrorMatchingSnapshot();
+      expect(() => i18n.translate(5)).toThrowErrorMatchingSnapshot();
+      expect(() => i18n.translate({})).toThrowErrorMatchingSnapshot();
+      expect(() => i18n.translate('')).toThrowErrorMatchingSnapshot();
     });
 
     test('should throw error if translation message and defaultMessage are not provided', () => {
-      expect(() => i18n.translate('foo')).toThrow();
+      expect(() => i18n.translate('foo')).toThrowErrorMatchingSnapshot();
     });
 
     test('should return message as is if values are not provided', () => {
@@ -359,6 +386,14 @@ describe('I18n engine', () => {
 
     test('should return default message as is if values are not provided', () => {
       expect(i18n.translate('a.b.c', { defaultMessage: 'foo' })).toBe('foo');
+    });
+
+    test('should not return defaultMessage as is if values are provided', () => {
+      i18n.init({
+        locale: 'en',
+        ['a.b.c']: 'foo',
+      });
+      expect(i18n.translate('a.b.c', { defaultMessage: 'bar' })).toBe('foo');
     });
 
     test('should interpolate variables', () => {
@@ -451,7 +486,7 @@ describe('I18n engine', () => {
       });
       i18n.setDefaultLocale('en');
 
-      expect(() => i18n.translate('a.b.c', { values: { foo: 0 } })).toThrow();
+      expect(() => i18n.translate('a.b.c', { values: { foo: 0 } })).toThrowErrorMatchingSnapshot();
 
       expect(() =>
         i18n.translate('d.e.f', {
@@ -462,7 +497,26 @@ describe('I18n engine', () => {
                              other {# photos.}
                           }`,
         })
-      ).toThrow();
+      ).toThrowErrorMatchingSnapshot();
+    });
+
+    // TODO: implement fallback to short locale, if translation for full one is not provided
+    test.skip('should fallback format to short one, if translation for full one is not provided', () => {
+      i18n.addMessages({
+        locale: 'ru',
+        one: 'один',
+        two: 'два',
+      });
+
+      i18n.addMessages({
+        locale: 'ru_BY',
+        one: 'адын',
+      });
+
+      i18n.setLocale('ru_BY');
+
+      expect(i18n.translate('one')).toBe('адын');
+      expect(i18n.translate('two')).toBe('два');
     });
 
     test('should format messages with percent formatter', () => {
@@ -674,14 +728,16 @@ describe('I18n engine', () => {
       });
       i18n.setDefaultLocale('en');
 
-      expect(() => i18n.translate('a.b.c', { values: { total: 1 } })).toThrow();
+      expect(() =>
+        i18n.translate('a.b.c', { values: { total: 1 } })
+      ).toThrowErrorMatchingSnapshot();
 
       expect(() =>
         i18n.translate('d.e.f', {
           values: { total: 1000 },
           defaultMessage: 'Your total is {total, bar}',
         })
-      ).toThrow();
+      ).toThrowErrorMatchingSnapshot();
     });
   });
 

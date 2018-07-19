@@ -23,17 +23,21 @@ describe('I18n loader', () => {
   let i18nLoader;
 
   beforeEach(() => {
-    jest.resetModules();
     i18nLoader = require('./loader');
+  });
+
+  afterEach(() => {
+    // isolate modules for every test so that local module state doesn't conflict between tests
+    jest.resetModules();
   });
 
   describe('registerTranslationFile', () => {
     test('should throw error if path to translation file is not specified', () => {
-      expect(() => i18nLoader.registerTranslationFile()).toThrow();
+      expect(() => i18nLoader.registerTranslationFile()).toThrowErrorMatchingSnapshot();
     });
 
     test('should throw error if path to translation file is not an absolute', () => {
-      expect(() => i18nLoader.registerTranslationFile('./en.json')).toThrow();
+      expect(() => i18nLoader.registerTranslationFile('./en.json')).toThrowErrorMatchingSnapshot();
     });
 
     test('should throw error if path to translation file does not have an extension', () => {
