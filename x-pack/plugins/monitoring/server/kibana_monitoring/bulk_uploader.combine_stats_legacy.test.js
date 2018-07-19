@@ -6,6 +6,7 @@
 
 import { KIBANA_STATS_TYPE_MONITORING, KIBANA_USAGE_TYPE, KIBANA_SETTINGS_TYPE } from '../../common/constants';
 import { KIBANA_REPORTING_TYPE } from '../../../reporting/common/constants';
+import { KIBANA_SPACES_MONITORING_TYPE } from '../../../spaces/common/constants';
 import { BulkUploader } from './bulk_uploader';
 
 const getInitial = () => {
@@ -64,7 +65,7 @@ const getInitial = () => {
       }
     ],
     [
-      { 'index': { '_type': 'spaces_stats' } },
+      { 'index': { '_type': KIBANA_SPACES_MONITORING_TYPE } },
       {
         'available': true,
         'enabled': true,
@@ -157,10 +158,10 @@ describe('Collector Types Combiner', () => {
     it('provides combined stats/usage data', () => {
       // default gives all the data types
       const initial = getInitial();
-      const trimmedInitial = [ initial[0], initial[1], initial[2] ]; // just stats, usage and reporting, no settings
+      const trimmedInitial = [initial[0], initial[1], initial[2], initial[3]]; // just stats, usage reporting, and spaces, no settings
       const result = BulkUploader.combineStatsLegacy(trimmedInitial);
       const expectedResult = getResult();
-      const trimmedExpectedResult = [ expectedResult[0] ]; // single combined item
+      const trimmedExpectedResult = [expectedResult[0]]; // single combined item
       expect(result).toEqual(trimmedExpectedResult);
     });
   });
@@ -168,11 +169,11 @@ describe('Collector Types Combiner', () => {
     it('provides settings, and stats data', () => {
       // default gives all the data types
       const initial = getInitial();
-      const trimmedInitial = [ initial[0], initial[3] ]; // just stats and settings, no usage or reporting
+      const trimmedInitial = [initial[0], initial[4]]; // just stats and settings, no usage or reporting
       const result = BulkUploader.combineStatsLegacy(trimmedInitial);
       const expectedResult = getResult();
       delete expectedResult[0][1].usage; // usage stats should not be present in the result
-      const trimmedExpectedResult = [ expectedResult[0], expectedResult[1] ];
+      const trimmedExpectedResult = [expectedResult[0], expectedResult[1]];
       expect(result).toEqual(trimmedExpectedResult);
     });
   });
@@ -180,10 +181,10 @@ describe('Collector Types Combiner', () => {
     it('provides settings data', () => {
       // default gives all the data types
       const initial = getInitial();
-      const trimmedInitial = [ initial[3] ]; // just settings
+      const trimmedInitial = [initial[4]]; // just settings
       const result = BulkUploader.combineStatsLegacy(trimmedInitial);
       const expectedResult = getResult();
-      const trimmedExpectedResult = [ expectedResult[1] ]; // just settings
+      const trimmedExpectedResult = [expectedResult[1]]; // just settings
       expect(result).toEqual(trimmedExpectedResult);
     });
   });
@@ -191,12 +192,12 @@ describe('Collector Types Combiner', () => {
   it('throws an error if duplicate types are registered', () => {
     const combineWithDuplicate = () => {
       const initial = getInitial();
-      const withDuplicate = [ initial[0] ].concat(initial);
+      const withDuplicate = [initial[0]].concat(initial);
       return BulkUploader.combineStatsLegacy(withDuplicate);
     };
     expect(combineWithDuplicate).toThrow(
       'Duplicate collector type identifiers found in payload! ' +
-      'kibana_stats_monitoring,kibana_stats_monitoring,kibana,reporting,kibana_settings'
+      'kibana_stats_monitoring,kibana_stats_monitoring,kibana,reporting,spaces,kibana_settings'
     );
   });
 });

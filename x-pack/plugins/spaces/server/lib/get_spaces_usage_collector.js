@@ -40,14 +40,14 @@ export function getSpacesUsageCollector(server) {
       const xpackInfo = server.plugins.xpack_main.info;
       const config = server.config();
       const available = xpackInfo && xpackInfo.isAvailable(); // some form of spaces is available for all valid licenses
-      const enabled = config.get('xpack.spaces.enabled'); // follow ES behavior: if its not available then its not enabled
-      const spacesAvailable = available && enabled;
+      const enabled = config.get('xpack.spaces.enabled');
+      const spacesAvailableAndEnabled = available && enabled;
 
-      const usageStats = await getSpacesUsage(callCluster, server, spacesAvailable);
+      const usageStats = await getSpacesUsage(callCluster, server, spacesAvailableAndEnabled);
 
       return {
         available,
-        enabled: available && enabled, // similar behavior as _xpack API in ES
+        enabled: spacesAvailableAndEnabled, // similar behavior as _xpack API in ES
         ...usageStats,
       };
     }

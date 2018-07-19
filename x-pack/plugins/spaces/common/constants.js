@@ -20,4 +20,4 @@ export const MAX_SPACE_INITIALS = 2;
  * The type name used within the Monitoring index to publish spaces stats.
  * @type {string}
  */
-export const KIBANA_SPACES_MONITORING_TYPE = 'spaces_stats';
+export const KIBANA_SPACES_MONITORING_TYPE = 'spaces';

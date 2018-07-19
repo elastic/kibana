@@ -18,6 +18,7 @@ import {
   sendBulkPayload,
   monitoringBulk,
 } from './lib';
+import { KIBANA_SPACES_MONITORING_TYPE } from '../../../spaces/common/constants';
 
 const LOGGING_TAGS = [LOGGING_TAG, KIBANA_MONITORING_LOGGING_TAG];
 
@@ -43,7 +44,7 @@ export class BulkUploader {
       throw new Error('interval number of milliseconds is required');
     }
 
-    this._timer =  null;
+    this._timer = null;
     this._interval = interval;
     this._log = {
       debug: message => server.log(['debug', ...LOGGING_TAGS], message),
@@ -147,34 +148,40 @@ export class BulkUploader {
 
     // kibana usage and stats
     let statsResult;
-    const [ statsHeader, statsPayload ] = findItem(KIBANA_STATS_TYPE_MONITORING);
-    const [ reportingHeader, reportingPayload ] = findItem(KIBANA_REPORTING_TYPE);
+    const [statsHeader, statsPayload] = findItem(KIBANA_STATS_TYPE_MONITORING);
+    const [reportingHeader, reportingPayload] = findItem(KIBANA_REPORTING_TYPE);
+    const [spacesHeader, spacesPayload] = findItem(KIBANA_SPACES_MONITORING_TYPE);
 
     if (statsHeader && statsPayload) {
       statsHeader.index._type = 'kibana_stats'; // HACK to convert kibana_stats_monitoring to just kibana_stats for bwc
-      const [ usageHeader, usagePayload ] = findItem(KIBANA_USAGE_TYPE);
+      const [usageHeader, usagePayload] = findItem(KIBANA_USAGE_TYPE);
       const kibanaUsage = (usageHeader && usagePayload) ? usagePayload : null;
       const reportingUsage = (reportingHeader && reportingPayload) ? reportingPayload : null;
-      statsResult = [ statsHeader, statsPayload ];
+      const spacesUsage = (spacesHeader && spacesPayload) ? spacesPayload : null;
+      statsResult = [statsHeader, statsPayload];
+
       if (kibanaUsage) {
         set(statsResult, '[1].usage', kibanaUsage);
       }
       if (reportingUsage) {
         set(statsResult, '[1].usage.xpack.reporting', reportingUsage);
       }
+      if (spacesUsage) {
+        set(statsResult, '[1].usage.xpack.spaces', spacesUsage);
+      }
     }
 
     // kibana settings
     let settingsResult;
-    const [ settingsHeader, settingsPayload ] = findItem(KIBANA_SETTINGS_TYPE);
+    const [settingsHeader, settingsPayload] = findItem(KIBANA_SETTINGS_TYPE);
     if (settingsHeader && settingsPayload) {
-      settingsResult = [ settingsHeader, settingsPayload ];
+      settingsResult = [settingsHeader, settingsPayload];
     }
 
     // return new payload with the combined data
     // adds usage data to stats data
     // strips usage out as a top-level type
-    const result = [ statsResult, settingsResult ];
+    const result = [statsResult, settingsResult];
 
     // remove result items that are undefined
     return result.filter(Boolean);
