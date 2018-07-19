@@ -50,7 +50,9 @@ const handleMouseDown = (commit, e, isEditable) => {
 
 const keyCode = key => (key === 'Meta' ? 'MetaLeft' : 'Key' + key.toUpperCase());
 
-const handleKeyDown = (commit, { key }, editable, remove) => {
+const handleKeyDown = (commit, e, editable, remove) => {
+  e.preventDefault();
+  const key = e.key;
   if (editable) {
     if (key === 'Backspace' || key === 'Delete') {
       remove();
