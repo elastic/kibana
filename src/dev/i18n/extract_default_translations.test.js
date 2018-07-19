@@ -18,7 +18,6 @@
  */
 
 import { resolve } from 'path';
-import JSON5 from 'json5';
 import fs from 'fs';
 import { promisify } from 'util';
 
@@ -41,8 +40,6 @@ describe('dev/i18n/extract_default_translations', () => {
     await unlinkAsync(resolve(PLUGIN_PATH, 'translations', 'en.json'));
     await removeDirAsync(resolve(PLUGIN_PATH, 'translations'));
 
-    const extractedObject = JSON5.parse(extractedJSONBuffer.toString());
-
-    expect(extractedObject).toHaveProperty('formats');
+    expect(extractedJSONBuffer.toString()).toMatchSnapshot();
   });
 });
