@@ -29,7 +29,7 @@ export class Plugin {
     this.dllConfig = dllConfig;
     this.log = log || (() => {});
 
-    this.dllCompiler = new DLLBundlerCompiler(dllConfig, this.log);
+    this.dllCompiler = new DLLBundlerCompiler(this.dllConfig, this.log);
     this.entryPathsCompiler = null;
     this.entryPaths = {};
   }
@@ -124,6 +124,7 @@ export class Plugin {
 
           if (!result.request.includes('loader')
             && result.request.includes(nodeModulesPath)) {
+            // TODO: Improve the way we build relative path for result.request
             const relativeRequestPath = result.request.replace(`${fromRoot('.')}/`, '../../../');
             const normalizedRequestPath = path.normalize(relativeRequestPath);
 
