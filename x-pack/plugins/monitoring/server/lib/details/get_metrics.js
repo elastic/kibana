@@ -6,12 +6,11 @@
 
 import moment from 'moment';
 import { isPlainObject } from 'lodash';
-import Promise from 'bluebird';
 import { checkParam } from '../error_missing_required';
 import { getSeries } from './get_series';
 import { calculateTimeseriesInterval } from '../calculate_timeseries_interval';
 
-export function getMetrics(req, indexPattern, metricSet = [], filters = []) {
+export async function getMetrics(req, indexPattern, metricSet = [], filters = []) {
   checkParam(indexPattern, 'indexPattern in details/getMetrics');
   checkParam(metricSet, 'metricSet in details/getMetrics');
 
@@ -22,7 +21,7 @@ export function getMetrics(req, indexPattern, metricSet = [], filters = []) {
   const minIntervalSeconds = config.get('xpack.monitoring.min_interval_seconds');
   const bucketSize = calculateTimeseriesInterval(min, max, minIntervalSeconds);
 
-  return Promise.map(metricSet, metric => {
+  const rows = await Promise.all(metricSet.map(async (metric) => {
     // metric names match the literal metric name, but they can be supplied in groups or individually
     let metricNames;
 
@@ -32,18 +31,18 @@ export function getMetrics(req, indexPattern, metricSet = [], filters = []) {
       metricNames = [ metric ];
     }
 
-    return Promise.map(metricNames, metricName => {
-      return getSeries(req, indexPattern, metricName, filters, { min, max, bucketSize });
-    });
-  })
-    .then(rows => {
-      const data = {};
-      metricSet.forEach((key, index) => {
-      // keyName must match the value stored in the html template
-        const keyName = isPlainObject(key) ? key.name : key;
-        data[keyName] = rows[index];
-      });
+    return await Promise.all(metricNames.map(async (metricName) => {
+      return await getSeries(req, indexPattern, metricName, filters, { min, max, bucketSize });
+    }));
+  }));
 
-      return data;
-    });
+  const data = {};
+  metricSet.forEach((key, index) => {
+  // keyName must match the value stored in the html template
+    const keyName = isPlainObject(key) ? key.name : key;
+    data[keyName] = rows[index];
+  });
+
+  return data;
+
 }
