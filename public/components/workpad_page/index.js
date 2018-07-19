@@ -37,14 +37,31 @@ const mergeProps = (stateProps, { removeElement }, props) => {
   };
 };
 
+const getRootElementId = (lookup, id) => {
+  if (!lookup.has(id)) {
+    return null;
+  }
+  const element = lookup.get(id);
+  return element.parent ? getRootElementId(lookup, element.parent) : element.id;
+};
+
 export const WorkpadPage = compose(
   connect(mapStateToProps, mapDispatchToProps, mergeProps),
   withState('updateCount', 'setUpdateCount', 0), // TODO: remove this, see setUpdateCount below
   withProps(({ updateCount, setUpdateCount, page, removeElement }) => {
     const { shapes, selectedShapes = [] } = aeroelastic.getStore(page.id).currentScene;
-
+    const elementLookup = new Map(page.elements.map(element => [element.id, element]));
+    const shapeLookup = new Map(shapes.map(shape => [shape.id, shape]));
+    const elements = shapes.map(
+      shape =>
+        elementLookup.has(shape.id)
+          ? // instead of just combining `element` with `shape`, we make property transfer explicit
+            { ...shape, filter: elementLookup.get(shape.id).filter }
+          : shape
+    );
+    const selectedElements = selectedShapes.map(id => getRootElementId(shapeLookup, id));
     return {
-      elements: shapes,
+      elements,
       selectedShapes,
       commit: (...args) => {
         aeroelastic.commit(page.id, ...args);
@@ -52,8 +69,9 @@ export const WorkpadPage = compose(
         setUpdateCount(updateCount + 1);
       },
       remove: () => {
-        if (selectedShapes && selectedShapes.length === 1) {
-          removeElement(page.id)(selectedShapes[0]);
+        // currently, handle the removal of one element, exploiting multiselect subsequently
+        if (selectedElements[0]) {
+          removeElement(page.id)(selectedElements[0]);
         }
       },
     };
