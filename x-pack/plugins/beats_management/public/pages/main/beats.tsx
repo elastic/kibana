@@ -7,9 +7,9 @@
 import {
   EuiButton,
   EuiButtonEmpty,
+  EuiLoadingSpinner,
   EuiModal,
   EuiModalBody,
-  EuiModalFooter,
   EuiModalHeader,
   EuiModalHeaderTitle,
   EuiOverlayMask,
@@ -59,18 +59,29 @@ export class BeatsPage extends React.PureComponent<BeatsPageProps, BeatsPageStat
 
       {match.params.enrollmentToken != null && (
         <EuiOverlayMask>
-          <EuiModal onClose={() => history.push('/beats')} style={{ width: '800px' }}>
+          <EuiModal onClose={() => history.push('/beats')} style={{ width: '600px' }}>
             <EuiModalHeader>
-              <EuiModalHeaderTitle>Enroll Beats</EuiModalHeaderTitle>
+              <EuiModalHeaderTitle>Enroll a new Beat</EuiModalHeaderTitle>
             </EuiModalHeader>
 
-            <EuiModalBody>
-              Enrollment UI here for enrollment token of: {match.params.enrollmentToken}
+            <EuiModalBody style={{ textAlign: 'center' }}>
+              To enroll a Beat with Centeral Management, run this command on the host that has Beats
+              installed.
+              <br />
+              <br />
+              <br />
+              <div className="euiFormControlLayout euiFormControlLayout--fullWidth">
+                <div className="euiFieldText euiFieldText--fullWidth" style={{ textAlign: 'left' }}>
+                  $ beats enroll {window.location.protocol}//{window.location.host} {match.params.enrollmentToken}
+                </div>
+              </div>
+              <br />
+              <br />
+              <EuiLoadingSpinner size="l" />
+              <br />
+              <br />
+              Waiting for enroll command to be run...
             </EuiModalBody>
-
-            <EuiModalFooter>
-              <EuiButtonEmpty onClick={() => history.push('/beats')}>Cancel</EuiButtonEmpty>
-            </EuiModalFooter>
           </EuiModal>
         </EuiOverlayMask>
       )}
