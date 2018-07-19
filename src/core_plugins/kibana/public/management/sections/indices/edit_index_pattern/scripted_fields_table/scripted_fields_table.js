@@ -143,23 +143,23 @@ export class ScriptedFieldsTableComponent extends Component {
       return null;
     }
 
+    const { intl } = this.props;
+    const title = intl.formatMessage(
+      { id: 'kbn.management.editIndexPattern.scripted.deleteField.label', defaultMessage: 'Delete scripted field \'{fieldName}\'?' },
+      { fieldName: fieldToDelete.name });
+    const cancelButtonText = intl.formatMessage(
+      { id: 'kbn.management.editIndexPattern.scripted.deleteField.cancel.button', defaultMessage: 'Cancel' });
+    const confirmButtonText = intl.formatMessage(
+      { id: 'kbn.management.editIndexPattern.scripted.deleteField.delete.button', defaultMessage: 'Delete' });
+
     return (
       <EuiOverlayMask>
         <EuiConfirmModal
-          title={this.props.intl.formatMessage(
-            {
-              id: 'kbn.management.editIndexPattern.scripted.deleteField.label',
-              defaultMessage: 'Delete scripted field \'{fieldName}\'?'
-            },
-            { fieldName: fieldToDelete.name })}
+          title={title}
           onCancel={this.hideDeleteConfirmationModal}
           onConfirm={this.deleteField}
-          cancelButtonText={this.props.intl.formatMessage({
-            id: 'kbn.management.editIndexPattern.scripted.deleteField.cancel.button', defaultMessage: 'Cancel'
-          })}
-          confirmButtonText={this.props.intl.formatMessage({
-            id: 'kbn.management.editIndexPattern.scripted.deleteField.delete.button', defaultMessage: 'Delete'
-          })}
+          cancelButtonText={cancelButtonText}
+          confirmButtonText={confirmButtonText}
           defaultFocusedButton={EUI_MODAL_CONFIRM_BUTTON}
         />
       </EuiOverlayMask>

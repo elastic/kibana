@@ -34,6 +34,7 @@ import {
 } from '../../samples';
 
 import { FormattedMessage } from '@kbn/i18n/react';
+import { i18n } from '@kbn/i18n';
 
 export class DurationFormatEditor extends DefaultFormatEditor {
   static formatId = 'duration';
@@ -49,7 +50,9 @@ export class DurationFormatEditor extends DefaultFormatEditor {
     let error = null;
 
     if(!nextProps.format.isHuman() && nextProps.formatParams.outputPrecision > 20) {
-      error = 'Decimal places must be between 0 and 20';
+      error = i18n.translate('common.ui.fieldEditor.duraction.errorMessage', {
+        defaultMessage: 'Decimal places must be between 0 and 20'
+      });
       nextProps.onError(error);
       return {
         ...output,

@@ -154,6 +154,7 @@ export class SourceFiltersTableComponent extends Component {
 
   renderDeleteConfirmationModal() {
     const { filterToDelete } = this.state;
+    const { intl } = this.props;
 
     if (!filterToDelete) {
       return null;
@@ -162,14 +163,14 @@ export class SourceFiltersTableComponent extends Component {
     return (
       <EuiOverlayMask>
         <EuiConfirmModal
-          title={this.props.intl.formatMessage(
+          title={intl.formatMessage(
             { id: 'kbn.management.editIndexPattern.source.deleteSourceFilter.label', defaultMessage: 'Delete source filter \'{value}\'?' },
             { value: filterToDelete.value })}
           onCancel={this.hideDeleteConfirmationModal}
           onConfirm={this.deleteFilter}
-          cancelButtonText={this.props.intl.formatMessage({
+          cancelButtonText={intl.formatMessage({
             id: 'kbn.management.editIndexPattern.source.deleteFilter.cancel.button', defaultMessage: 'Cancel' })}
-          confirmButtonText={this.props.intl.formatMessage({
+          confirmButtonText={intl.formatMessage({
             id: 'kbn.management.editIndexPattern.source.deleteFilter.delete.button', defaultMessage: 'Delete' })}
           defaultFocusedButton={EUI_MODAL_CONFIRM_BUTTON}
         />

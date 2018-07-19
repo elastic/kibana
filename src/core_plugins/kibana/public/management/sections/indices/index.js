@@ -79,7 +79,7 @@ uiModules.get('apps/management')
   });
 
 management.getSection('kibana').register('indices', {
-  display: i18n.translate('common.ui.management.section.indexPatterns.header', { defaultMessage: 'Index Patterns' }),
+  display: i18n.translate('kbn.management.indexPattern.sections.header', { defaultMessage: 'Index Patterns' }),
   order: 0,
   url: '#/management/kibana/indices/'
 });

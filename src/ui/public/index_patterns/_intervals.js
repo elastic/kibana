@@ -32,27 +32,27 @@ export function IndexPatternsIntervalsProvider() {
       {
         name: 'hours',
         startOf: 'hour',
-        display: i18n.translate('common.ui.indexPattern.create.intervals.hourly.header', { defaultMessage: 'Hourly' })
+        display: i18n.translate('common.ui.indexPattern.intervals.hourly.header', { defaultMessage: 'Hourly' })
       },
       {
         name: 'days',
         startOf: 'day',
-        display: i18n.translate('common.ui.indexPattern.create.intervals.daily.header', { defaultMessage: 'Daily' })
+        display: i18n.translate('common.ui.indexPattern.intervals.daily.header', { defaultMessage: 'Daily' })
       },
       {
         name: 'weeks',
         startOf: 'isoWeek',
-        display: i18n.translate('common.ui.indexPattern.create.intervals.weekly.header', { defaultMessage: 'Weekly' })
+        display: i18n.translate('common.ui.indexPattern.intervals.weekly.header', { defaultMessage: 'Weekly' })
       },
       {
         name: 'months',
         startOf: 'month',
-        display: i18n.translate('common.ui.indexPattern.create.intervals.monthly.monthly', { defaultMessage: 'Monthly' })
+        display: i18n.translate('common.ui.indexPattern.intervals.monthly.monthly', { defaultMessage: 'Monthly' })
       },
       {
         name: 'years',
         startOf: 'year',
-        display: i18n.translate('common.ui.indexPattern.create.intervals.yearly.header', { defaultMessage: 'Yearly' })
+        display: i18n.translate('common.ui.indexPattern.intervals.yearly.header', { defaultMessage: 'Yearly' })
       }
     ]
   });
@@ -85,7 +85,7 @@ export function IndexPatternsIntervalsProvider() {
     if (typeof interval === 'string') {
       interval = _.find(intervals, { name: interval });
       if (!interval) {
-        const errorMessage = i18n.translate('common.ui.indexPattern.create.intervals.errorMessage',
+        const errorMessage = i18n.translate('common.ui.indexPattern.intervals.errorMessage',
           { values: { intervals: _.pluck(intervals, 'name') }, defaultMessage: 'Interval must be one of {intervals}' });
 
         throw new Error(errorMessage);

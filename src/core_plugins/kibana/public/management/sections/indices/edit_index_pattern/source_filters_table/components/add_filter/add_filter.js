@@ -48,6 +48,10 @@ export class AddFilterComponent extends Component {
 
   render() {
     const { filter } = this.state;
+    const placeholder = this.props.intl.formatMessage({
+      id: 'kbn.management.editIndexPattern.source.placeholder',
+      defaultMessage: 'source filter, accepts wildcards (e.g., `user*` to filter fields starting with \'user\')'
+    });
 
     return (
       <EuiFlexGroup>
@@ -56,10 +60,7 @@ export class AddFilterComponent extends Component {
             fullWidth
             value={filter}
             onChange={e => this.setState({ filter: e.target.value.trim() })}
-            placeholder={this.props.intl.formatMessage({
-              id: 'kbn.management.editIndexPattern.source.placeholder',
-              defaultMessage: 'source filter, accepts wildcards (e.g., `user*` to filter fields starting with \'user\')'
-            })}
+            placeholder={placeholder}
           />
         </EuiFlexItem>
         <EuiFlexItem>

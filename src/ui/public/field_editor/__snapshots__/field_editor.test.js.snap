@@ -168,18 +168,28 @@ exports[`FieldEditor should render create new scripted field correctly 1`] = `
       <eui-form-row>
         <React.Fragment>
           <eui-text>
-            Access fields with 
-            <code>
-              doc['some_field'].value
-            </code>
-            .
+            <FormattedMessage
+              defaultMessage="Access fields with {code}."
+              id="common.ui.fieldEditor.script.accessWith.label"
+              values={
+                Object {
+                  "code": <code>
+                    doc['some_field'].value
+                  </code>,
+                }
+              }
+            />
           </eui-text>
           <br />
           <eui-link
             data-test-subj="scriptedFieldsHelpLink"
             onClick={[Function]}
           >
-            Get help with the syntax and preview the results of your script.
+            <FormattedMessage
+              defaultMessage="Get help with the syntax and preview the results of your script."
+              id="common.ui.fieldEditor.script.getHelp.label"
+              values={Object {}}
+            />
           </eui-link>
         </React.Fragment>
       </eui-form-row>
@@ -395,18 +405,28 @@ exports[`FieldEditor should render edit scripted field correctly 1`] = `
       <eui-form-row>
         <React.Fragment>
           <eui-text>
-            Access fields with 
-            <code>
-              doc['some_field'].value
-            </code>
-            .
+            <FormattedMessage
+              defaultMessage="Access fields with {code}."
+              id="common.ui.fieldEditor.script.accessWith.label"
+              values={
+                Object {
+                  "code": <code>
+                    doc['some_field'].value
+                  </code>,
+                }
+              }
+            />
           </eui-text>
           <br />
           <eui-link
             data-test-subj="scriptedFieldsHelpLink"
             onClick={[Function]}
           >
-            Get help with the syntax and preview the results of your script.
+            <FormattedMessage
+              defaultMessage="Get help with the syntax and preview the results of your script."
+              id="common.ui.fieldEditor.script.getHelp.label"
+              values={Object {}}
+            />
           </eui-link>
         </React.Fragment>
       </eui-form-row>
@@ -685,18 +705,28 @@ exports[`FieldEditor should show conflict field warning 1`] = `
       <eui-form-row>
         <React.Fragment>
           <eui-text>
-            Access fields with 
-            <code>
-              doc['some_field'].value
-            </code>
-            .
+            <FormattedMessage
+              defaultMessage="Access fields with {code}."
+              id="common.ui.fieldEditor.script.accessWith.label"
+              values={
+                Object {
+                  "code": <code>
+                    doc['some_field'].value
+                  </code>,
+                }
+              }
+            />
           </eui-text>
           <br />
           <eui-link
             data-test-subj="scriptedFieldsHelpLink"
             onClick={[Function]}
           >
-            Get help with the syntax and preview the results of your script.
+            <FormattedMessage
+              defaultMessage="Get help with the syntax and preview the results of your script."
+              id="common.ui.fieldEditor.script.getHelp.label"
+              values={Object {}}
+            />
           </eui-link>
         </React.Fragment>
       </eui-form-row>
@@ -990,18 +1020,28 @@ exports[`FieldEditor should show deprecated lang warning 1`] = `
       <eui-form-row>
         <React.Fragment>
           <eui-text>
-            Access fields with 
-            <code>
-              doc['some_field'].value
-            </code>
-            .
+            <FormattedMessage
+              defaultMessage="Access fields with {code}."
+              id="common.ui.fieldEditor.script.accessWith.label"
+              values={
+                Object {
+                  "code": <code>
+                    doc['some_field'].value
+                  </code>,
+                }
+              }
+            />
           </eui-text>
           <br />
           <eui-link
             data-test-subj="scriptedFieldsHelpLink"
             onClick={[Function]}
           >
-            Get help with the syntax and preview the results of your script.
+            <FormattedMessage
+              defaultMessage="Get help with the syntax and preview the results of your script."
+              id="common.ui.fieldEditor.script.getHelp.label"
+              values={Object {}}
+            />
           </eui-link>
         </React.Fragment>
       </eui-form-row>
