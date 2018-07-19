@@ -14,8 +14,20 @@ import {
   EuiModalHeaderTitle,
   EuiOverlayMask,
 } from '@elastic/eui';
+
+import { CMBeat } from '../../../common/domain_types';
+import { FrontendLibs } from '../../lib/lib';
+
 import React from 'react';
-export class BeatsPage extends React.PureComponent {
+interface BeatsPageProps {
+  libs: FrontendLibs;
+}
+
+interface BeatsPageState {
+  beats: CMBeat[];
+}
+
+export class BeatsPage extends React.PureComponent<BeatsPageProps, BeatsPageState> {
   public static ActionArea = ({ match, history }: { match: any; history: any }) => (
     <div>
       <EuiButtonEmpty
@@ -55,7 +67,22 @@ export class BeatsPage extends React.PureComponent {
       )}
     </div>
   );
+  constructor(props: BeatsPageProps) {
+    super(props);
+
+    this.state = {
+      beats: [],
+    };
+
+    this.loadBeats();
+  }
   public render() {
-    return <div>beats table and stuff</div>;
+    return <div>beats table and stuff - {this.state.beats.length}</div>;
+  }
+  private async loadBeats() {
+    const beats = await this.props.libs.beats.getAll();
+    this.setState({
+      beats,
+    });
   }
 }

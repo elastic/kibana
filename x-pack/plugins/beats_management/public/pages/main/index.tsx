@@ -11,14 +11,16 @@ import {
   EuiTabs,
 } from '@elastic/eui';
 import React from 'react';
-import { Redirect, Route, Switch, withRouter } from 'react-router-dom';
+import { Redirect, Route, Switch } from 'react-router-dom';
 import { PrimaryLayout } from '../../components/layouts/primary';
+import { FrontendLibs } from '../../lib/lib';
 import { ActivityPage } from './activity';
 import { BeatsPage } from './beats';
 import { TagsPage } from './tags';
 
 interface MainPagesProps {
   history: any;
+  libs: FrontendLibs;
 }
 
 interface MainPagesState {
@@ -28,7 +30,7 @@ interface MainPagesState {
   } | null;
 }
 
-class MainPagesComponent extends React.PureComponent<MainPagesProps, MainPagesState> {
+export class MainPages extends React.PureComponent<MainPagesProps, MainPagesState> {
   constructor(props: any) {
     super(props);
 
@@ -99,12 +101,22 @@ class MainPagesComponent extends React.PureComponent<MainPagesProps, MainPagesSt
             exact={true}
             render={() => <Redirect from="/" exact={true} to="/beats" />}
           />
-          <Route path="/beats/:action?/:enrollmentToken?" component={BeatsPage} />
-          <Route path="/activity" exact={true} component={ActivityPage} />
-          <Route path="/tags" exact={true} component={TagsPage} />
+          <Route
+            path="/beats/:action?/:enrollmentToken?"
+            render={(props: any) => <BeatsPage libs={this.props.libs} {...props} />}
+          />
+          <Route
+            path="/activity"
+            exact={true}
+            render={(props: any) => <ActivityPage libs={this.props.libs} {...props} />}
+          />
+          <Route
+            path="/tags"
+            exact={true}
+            render={(props: any) => <TagsPage libs={this.props.libs} {...props} />}
+          />
         </Switch>
       </PrimaryLayout>
     );
   }
 }
-export const MainPages = withRouter<any>(MainPagesComponent);

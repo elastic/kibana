@@ -16,10 +16,10 @@ import { MemoryBeatsAdapter } from '../adapters/beats/memory_beats_adapter';
 import { KibanaFrameworkAdapter } from '../adapters/framework/kibana_framework_adapter';
 import { MemoryTagsAdapter } from '../adapters/tags/memory_tags_adapter';
 import { MemoryTokensAdapter } from '../adapters/tokens/memory_tokens_adapter';
+
 import { FrontendDomainLibs, FrontendLibs } from '../lib';
 
 export function compose(): FrontendLibs {
-  // const kbnVersion = (window as any).__KBN__.version;
   const tags = new MemoryTagsAdapter([]);
   const tokens = new MemoryTokensAdapter([]);
   const beats = new MemoryBeatsAdapter([]);
@@ -32,10 +32,9 @@ export function compose(): FrontendLibs {
   const pluginUIModule = uiModules.get('app/beats_management');
 
   const framework = new KibanaFrameworkAdapter(pluginUIModule, management, routes);
-
   const libs: FrontendLibs = {
-    framework,
     ...domainLibs,
+    framework,
   };
   return libs;
 }

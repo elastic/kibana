@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { FrameworkAuthenticatedUser } from '../framework/adapter_types';
 import { CMTokensAdapter, TokenEnrollmentData } from './adapter_types';
 
 export class MemoryTokensAdapter implements CMTokensAdapter {
@@ -28,7 +27,7 @@ export class MemoryTokensAdapter implements CMTokensAdapter {
     });
   }
 
-  public async upsertTokens(user: FrameworkAuthenticatedUser, tokens: TokenEnrollmentData[]) {
+  public async upsertTokens(tokens: TokenEnrollmentData[]) {
     tokens.forEach(token => {
       const existingIndex = this.tokenDB.findIndex(t => t.token === token.token);
       if (existingIndex !== -1) {
