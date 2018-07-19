@@ -88,24 +88,12 @@ export class Visualization extends React.Component<VisualizationProps, Visualiza
     return (
       <div className="visualization">
         {this.state.showNoResultsMessage ? (
-          <VisualizationNoResults />
+          <VisualizationNoResults onInit={onInit} />
         ) : (
           <VisualizationChart vis={vis} visData={visData} onInit={onInit} uiState={uiState} />
         )}
       </div>
     );
-  }
-
-  public componentDidMount() {
-    if (this.state.showNoResultsMessage && this.props.onInit) {
-      this.props.onInit();
-    }
-  }
-
-  public componentDidUpdate() {
-    if (this.state.showNoResultsMessage && this.props.onInit) {
-      this.props.onInit();
-    }
   }
 
   public componentWillUnmount() {
