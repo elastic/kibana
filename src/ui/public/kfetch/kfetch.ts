@@ -18,21 +18,30 @@
  */
 
 import 'isomorphic-fetch';
+import { merge } from 'lodash';
 import url from 'url';
 import chrome from '../chrome';
+
+// @ts-ignore not really worth typing
 import { metadata } from '../metadata';
-import { merge } from 'lodash';
 
 class FetchError extends Error {
-  constructor(res, body) {
+  constructor(public readonly res: Response, public readonly body?: any) {
     super(res.statusText);
-    this.res = res;
-    this.body = body;
     Error.captureStackTrace(this, FetchError);
   }
 }
 
-export function kfetch(fetchOptions, kibanaOptions) {
+export interface KFetchOptions extends RequestInit {
+  pathname?: string;
+  query?: { [key: string]: string | number | boolean };
+}
+
+export interface KFetchKibanaOptions {
+  prependBasePath?: boolean;
+}
+
+export function kfetch(fetchOptions: KFetchOptions, kibanaOptions?: KFetchKibanaOptions) {
   // fetch specific options with defaults
   const { pathname, query, ...combinedFetchOptions } = merge(
     {
@@ -43,7 +52,7 @@ export function kfetch(fetchOptions, kibanaOptions) {
         'kbn-version': metadata.version,
       },
     },
-    fetchOptions,
+    fetchOptions
   );
 
   // kibana specific options with defaults
@@ -57,20 +66,20 @@ export function kfetch(fetchOptions, kibanaOptions) {
     query,
   });
 
-  const fetching = new Promise(async (resolve, reject) => {
+  const fetching = new Promise<any>(async (resolve, reject) => {
     const res = await fetch(fullUrl, combinedFetchOptions);
 
-    if (!res.ok) {
-      let body;
-      try {
-        body = await res.json();
-      } catch (err) {
-        // ignore error, may not be able to get body for response that is not ok
-      }
-      return reject(new FetchError(res, body));
+    if (res.ok) {
+      return resolve(await res.json());
     }
 
-    resolve(res.json());
+    try {
+      // attempt to read the body of the response
+      return reject(new FetchError(res, await res.json()));
+    } catch (_) {
+      // send FetchError without the body if we are not be able to read the body for some reason
+      return reject(new FetchError(res));
+    }
   });
 
   return fetching;
