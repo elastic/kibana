@@ -65,6 +65,9 @@ export class Main extends React.Component<MainProps, MainState> {
             <EuiButton>
               <Link to="/codebrowsing">browsing code</Link>
             </EuiButton>
+            <EuiButton>
+              <Link to="/repos">repos management</Link>
+            </EuiButton>
           </EuiPageHeader>
 
           <EuiPageContent>
