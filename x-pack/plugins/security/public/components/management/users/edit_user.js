@@ -32,7 +32,7 @@ import { toastNotifications } from 'ui/notify';
 import { USERS_PATH } from '../../../views/management/management_urls';
 import { ConfirmDelete } from './confirm_delete';
 const validEmailRegex = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/; //eslint-disable-line max-len
-
+const validUsernameRegex = /[a-zA-Z_][a-zA-Z0-9_@\-\$\.]*/;
 export class EditUser extends Component {
   constructor(props) {
     super(props);
@@ -96,6 +96,8 @@ export class EditUser extends Component {
     const { username } = this.state.user;
     if (username !== null && !username) {
       return 'Username is required';
+    } else if (!username.match(validUsernameRegex)) {
+      return 'Username contains invalid character(s)';
     }
   };
   fullnameError = () => {
