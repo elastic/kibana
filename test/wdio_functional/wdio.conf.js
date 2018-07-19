@@ -58,7 +58,19 @@ exports.config = {
       maxInstances: 1,
       browserName: 'firefox',
       version: ci ? '56' : null,
+      //TODO: Debug why Elements are not found in FF Headless mode before activating.
+      // 'moz:firefoxOptions': {
+      //   args: ci ? ['-headless', '--window-size=1200,1100'] : []
+      // }
     },
+    {
+      browserName: 'chrome',
+      version: ci ? '58' : null,
+      platform: ci ? 'macOS 10.12' : null,
+      chromeOptions: {
+        args: ci ? ['--headless', '--disable-gpu', 'window-size=1200,1100'] : []
+      }
+    }
   ],
   onPrepare: function (config, capabilities) {
     if (ci || process.platform === 'win32') {
@@ -66,21 +78,6 @@ exports.config = {
         {
           browserName: 'internet explorer',
           killInstances: true,
-        },
-        {
-          browserName: 'chrome',
-          version: ci ? '58' : null,
-          platform: ci ? 'macOS 10.12' : null,
-          chromeOptions: {
-            args: ['--headless', '--disable-gpu', 'window-size=1200,1100']
-          }
-        });
-    } else {
-      capabilities.push(
-        {
-          browserName: 'chrome',
-          version: ci ? '58' : null,
-          platform: ci ? 'macOS 10.12' : null
         });
     }
     if (ci && process.platform !== 'win32') {
