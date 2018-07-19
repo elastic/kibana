@@ -13,6 +13,8 @@ export const sourcesSchema = gql`
     id: ID!
     "The raw configuration of the source"
     configuration: InfraSourceConfiguration!
+    "The status of the source"
+    status: InfraSourceStatus!
   }
 
   "A set of configuration options for an infrastructure data source"
@@ -39,6 +41,10 @@ export const sourcesSchema = gql`
     tiebreaker: String!
     "The field to use as a timestamp for metrics and logs"
     timestamp: String!
+  }
+
+  type InfraSourceStatus {
+    metricIndices: [String!]!
   }
 
   extend type Query {

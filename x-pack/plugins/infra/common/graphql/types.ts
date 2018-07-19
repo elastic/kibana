@@ -82,6 +82,7 @@ export interface InfraServiceMetrics {
 export interface InfraSource {
   id: string /** The id of the source */;
   configuration: InfraSourceConfiguration /** The raw configuration of the source */;
+  status: InfraSourceStatus /** The status of the source */;
 }
 /** A set of configuration options for an infrastructure data source */
 export interface InfraSourceConfiguration {
@@ -97,6 +98,10 @@ export interface InfraSourceFields {
   pod: string /** The field to identify a pod by */;
   tiebreaker: string /** The field to use as a tiebreaker for log events that have identical timestamps */;
   timestamp: string /** The field to use as a timestamp for metrics and logs */;
+}
+
+export interface InfraSourceStatus {
+  metricIndices: string[];
 }
 
 export namespace QueryResolvers {
@@ -257,10 +262,12 @@ export namespace InfraSourceResolvers {
   export interface Resolvers {
     id?: IdResolver /** The id of the source */;
     configuration?: ConfigurationResolver /** The raw configuration of the source */;
+    status?: StatusResolver /** The status of the source */;
   }
 
   export type IdResolver = Resolver<string>;
   export type ConfigurationResolver = Resolver<InfraSourceConfiguration>;
+  export type StatusResolver = Resolver<InfraSourceStatus>;
 }
 /** A set of configuration options for an infrastructure data source */
 export namespace InfraSourceConfigurationResolvers {
@@ -291,6 +298,14 @@ export namespace InfraSourceFieldsResolvers {
   export type PodResolver = Resolver<string>;
   export type TiebreakerResolver = Resolver<string>;
   export type TimestampResolver = Resolver<string>;
+}
+
+export namespace InfraSourceStatusResolvers {
+  export interface Resolvers {
+    metricIndices?: MetricIndicesResolver;
+  }
+
+  export type MetricIndicesResolver = Resolver<string[]>;
 }
 
 export interface InfraIndexPattern {

@@ -34,5 +34,4 @@ export interface InfraConfiguration {
 
 export interface InfraContext {
   req: InfraFrameworkRequest;
-  libs: InfraBackendLibs;
 }
