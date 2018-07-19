@@ -24,42 +24,32 @@ import { getSavedObjects } from './saved_objects/get_saved_objects';
 
 const apmIntro = 'Collect in-depth performance metrics and errors from inside your applications.';
 
-const ENABLED_KEY = 'xpack.apm.ui.enabled';
-function isEnabled(config) {
-  if (config.has(ENABLED_KEY)) {
-    return config.get(ENABLED_KEY);
+function getOrDefault(config, key, defaultValue) {
+  if (config.has(key)) {
+    return config.get(key);
   }
 
-  return false;
-}
-
-const TITLE_KEY = 'xpack.apm.indexPattern';
-const DEFAULT_TITLE = 'apm*';
-function getIndexPatternTitle(config) {
-  if (config.has(TITLE_KEY)) {
-    return config.get(TITLE_KEY);
-  }
-
-  return DEFAULT_TITLE;
+  return defaultValue;
 }
 
 export function apmSpecProvider(server) {
   const config = server.config();
-  const apmIndexPattern = getIndexPatternTitle(config);
+  const apmIndexPattern = getOrDefault(config, 'xpack.apm.indexPattern', 'apm-*');
 
   const artifacts = {
     dashboards: [
       {
         id: '8d3ed660-7828-11e7-8c47-65b845b5cfb3',
         linkLabel: 'APM dashboard',
-        isOverview: true
-      }
-    ]
+        isOverview: true,
+      },
+    ],
   };
-  if (isEnabled(config)) {
+  const isUIEnabled = getOrDefault(config, 'xpack.apm.ui.enabled', false);
+  if (isUIEnabled) {
     artifacts.application = {
       path: '/app/apm',
-      label: 'Launch APM'
+      label: 'Launch APM',
     };
   }
 
@@ -68,7 +58,8 @@ export function apmSpecProvider(server) {
     name: 'APM',
     category: TUTORIAL_CATEGORY.OTHER,
     shortDescription: apmIntro,
-    longDescription: 'Application Performance Monitoring (APM) collects in-depth' +
+    longDescription:
+      'Application Performance Monitoring (APM) collects in-depth' +
       ' performance metrics and errors from inside your application.' +
       ' It allows you to monitor the performance of thousands of applications in real time.' +
       ' [Learn more]({config.docs.base_url}guide/en/apm/get-started/{config.docs.version}/index.html).',
@@ -78,7 +69,8 @@ export function apmSpecProvider(server) {
     elasticCloud: ELASTIC_CLOUD_INSTRUCTIONS,
     previewImagePath: '/plugins/kibana/home/tutorial_resources/apm/apm.png',
     savedObjects: getSavedObjects(apmIndexPattern),
-    savedObjectsInstallMsg: 'Load index pattern, visualizations, and pre-defined dashboards.' +
+    savedObjectsInstallMsg:
+      'Load index pattern, visualizations, and pre-defined dashboards.' +
       ' An index pattern is required for some features in the APM UI.',
   };
 }

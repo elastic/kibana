@@ -38,11 +38,24 @@ export function apm(kibana) {
 
     config(Joi) {
       return Joi.object({
+        // display menu item
         ui: Joi.object({
           enabled: Joi.boolean().default(true)
         }).default(),
+
+        // enable plugin
         enabled: Joi.boolean().default(true),
+
+        // Kibana Index pattern
         indexPattern: Joi.string().default('apm-*'),
+
+        // ES Indices
+        errorIndices: Joi.string().default('apm-*-error-*'),
+        onboardingIndices: Joi.string().default('apm-*'), // TODO: change to "apm-*-onboarding-*"
+        spanIndices: Joi.string().default('apm-*-span-*'),
+        transactionIndices: Joi.string().default('apm-*-transaction-*'),
+
+        // buckets
         minimumBucketSize: Joi.number().default(15),
         bucketTargetCount: Joi.number().default(27)
       }).default();
