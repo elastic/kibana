@@ -292,7 +292,7 @@ export function SecurityPageProvider({ getService, getPageObjects }) {
 
             }, Promise.resolve());
           }
-          return addKibanaPriv(userObj.applications[0].privileges);
+          return addKibanaPriv(userObj.kibana);
         })
 
         .then(function () {

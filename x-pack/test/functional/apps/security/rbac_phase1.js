@@ -8,7 +8,7 @@ import expect from 'expect.js';
 import { indexBy } from 'lodash';
 export default function ({ getService, getPageObjects }) {
 
-  const PageObjects = getPageObjects(['security', 'settings', 'monitoring', 'discover', 'common', 'reporting', 'visualize', 'header']);
+  const PageObjects = getPageObjects(['security', 'settings', 'common', 'visualize', 'header']);
   const log = getService('log');
   const esArchiver = getService('esArchiver');
   const remote = getService('remote');
@@ -25,30 +25,19 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.settings.navigateTo();
       await PageObjects.security.clickElasticsearchRoles();
       await PageObjects.security.addRole('rbac_all', {
-        "applications": [
-          {
-            "application": "kibana",
-            "resources": ["default"],
-            "privileges": ["all"]
-          }
-        ],
+        "kibana": ["all"],
         "indices": [{
           "names": [ "logstash-*" ],
-          "privileges": [ "all" ]
+          "privileges": [ "read", "view_index_metadata" ]
         }]
       });
+
       await PageObjects.security.clickElasticsearchRoles();
       await PageObjects.security.addRole('rbac_read', {
-        "applications": [
-          {
-            "application": "kibana",
-            "resources": ["default"],
-            "privileges": ["read"]
-          }
-        ],
+        "kibana": ["read"],
         "indices": [{
           "names": [ "logstash-*" ],
-          "privileges": [ "read" ]
+          "privileges": [ "read", "view_index_metadata" ]
         }]
       });
       await PageObjects.security.clickElasticsearchUsers();
