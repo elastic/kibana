@@ -96,7 +96,7 @@ export class EditUser extends Component {
     const { username } = this.state.user;
     if (username !== null && !username) {
       return 'Username is required';
-    } else if (!username.match(validUsernameRegex)) {
+    } else if (username && !username.match(validUsernameRegex)) {
       return 'Username must begin with a letter or underscore and contain only letters, underscores, and numbers';
     }
   };
