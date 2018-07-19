@@ -13,8 +13,6 @@ import {
   KuiToolBarText
 } from '@kbn/ui-framework/components';
 
-import './toolbar.css';
-
 export function MonitoringTableToolBar(props) {
   const searchBox = props.showSearchBox
     ? (
