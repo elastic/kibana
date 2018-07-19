@@ -58,6 +58,8 @@ export function getShardStats(req, esIndexPattern, cluster, { includeNodes = fal
     }
   };
 
+  console.log('CHRIS', JSON.stringify(params));
+
   const { callWithRequest } = req.server.plugins.elasticsearch.getCluster('monitoring');
   return callWithRequest(req, 'search', params)
     .then(resp => {
