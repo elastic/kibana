@@ -33,8 +33,7 @@ describe('I18nProvider', () => {
       </I18nProvider>
     );
 
-    expect(wrapper.children().length).toEqual(1);
-    expect(wrapper.children().type()).toEqual(ChildrenMock);
+    expect(wrapper.children()).toMatchSnapshot();
   });
 
   it('provides with context', () => {
@@ -52,6 +51,6 @@ describe('I18nProvider', () => {
       }
     );
 
-    expect(wrapper.find(childrenMock).prop('intl')).toBeTruthy();
+    expect(wrapper.find(childrenMock).prop('intl')).toMatchSnapshot();
   });
 });

@@ -24,7 +24,7 @@ import { i18nFilter } from './filter';
 import * as i18n from '../core/i18n';
 
 jest.mock('../core/i18n', () => ({
-  translate: jest.fn(),
+  translate: jest.fn().mockImplementation(() => 'translation'),
 }));
 
 angular
@@ -41,7 +41,7 @@ describe('i18nFilter', () => {
       filter = i18nFilter;
     })
   );
-  beforeEach(() => {
+  afterEach(() => {
     jest.resetAllMocks();
   });
 
@@ -50,9 +50,10 @@ describe('i18nFilter', () => {
     const defaultMessage = 'default-message';
     const values = {};
 
-    filter(id, { defaultMessage, values });
+    const result = filter(id, { defaultMessage, values });
 
     expect(i18n.translate).toHaveBeenCalledTimes(1);
     expect(i18n.translate).toHaveBeenCalledWith(id, { defaultMessage, values });
+    expect(result).toEqual('translation');
   });
 });

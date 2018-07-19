@@ -41,9 +41,6 @@ describe('i18nProvider', () => {
       provider = i18n;
     })
   );
-  beforeEach(() => {
-    jest.resetAllMocks();
-  });
 
   it('provides wrapper around i18n engine', () => {
     expect(provider).toEqual(i18n.translate);
