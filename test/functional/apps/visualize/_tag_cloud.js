@@ -35,14 +35,16 @@ export default function ({ getService, getPageObjects }) {
 
     before(async function () {
       log.debug('navigateToApp visualize');
-      await PageObjects.common.navigateToUrl('visualize', 'new');
+      await PageObjects.visualize.navigateToNewVisualization();
       log.debug('clickTagCloud');
       await PageObjects.visualize.clickTagCloud();
       await PageObjects.visualize.clickNewSearch();
       log.debug('Set absolute time range from \"' + fromTime + '\" to \"' + toTime + '\"');
       await PageObjects.header.setAbsoluteRange(fromTime, toTime);
+      await PageObjects.common.sleep(1000);
       log.debug('select Tags');
       await PageObjects.visualize.clickBucket('Tags');
+      await PageObjects.common.sleep(1000);
       log.debug('Click aggregation Terms');
       await PageObjects.visualize.selectAggregation('Terms');
       log.debug('Click field machine.ram');
@@ -51,6 +53,7 @@ export default function ({ getService, getPageObjects }) {
       });
       await PageObjects.visualize.selectOrderBy('_key');
       await PageObjects.visualize.clickGo();
+      await PageObjects.header.waitUntilLoadingHasFinished();
     });
 
 
@@ -140,9 +143,9 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.settings.clickKibanaIndices();
         await PageObjects.settings.filterField(termsField);
         await PageObjects.settings.openControlsByName(termsField);
-        await PageObjects.settings.setFieldFormat('Bytes');
+        await PageObjects.settings.setFieldFormat('bytes');
         await PageObjects.settings.controlChangeSave();
-        await PageObjects.common.navigateToUrl('visualize', 'new');
+        await PageObjects.visualize.navigateToNewVisualization();
         await PageObjects.visualize.loadSavedVisualization(vizName1);
         await PageObjects.header.waitUntilLoadingHasFinished();
         await PageObjects.header.setAbsoluteRange(fromTime, toTime);
@@ -155,7 +158,7 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.settings.clickKibanaIndices();
         await PageObjects.settings.filterField(termsField);
         await PageObjects.settings.openControlsByName(termsField);
-        await PageObjects.settings.setFieldFormat('- default - ');
+        await PageObjects.settings.setFieldFormat('');
         await PageObjects.settings.controlChangeSave();
       });
 
@@ -167,7 +170,7 @@ export default function ({ getService, getPageObjects }) {
 
       it('should apply filter with unformatted value', async function () {
         await PageObjects.visualize.selectTagCloudTag('30GB');
-        await PageObjects.common.sleep(500);
+        await PageObjects.header.waitUntilLoadingHasFinished();
         const data = await PageObjects.visualize.getTextTag();
         expect(data).to.eql([ '30GB' ]);
       });

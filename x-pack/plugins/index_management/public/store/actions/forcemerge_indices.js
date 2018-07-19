@@ -6,7 +6,7 @@
 
 import { createAction } from "redux-actions";
 import { forcemergeIndices as request } from "../../services";
-import { reloadIndices } from "../actions";
+import { clearRowStatus, reloadIndices } from "../actions";
 import { toastNotifications } from 'ui/notify';
 
 export const forcemergeIndicesStart = createAction(
@@ -18,7 +18,8 @@ export const forcemergeIndices = ({ indexNames, maxNumSegments }) => async (disp
   try {
     await request(indexNames, maxNumSegments);
   } catch (error) {
-    return toastNotifications.addDanger(error.data.message);
+    toastNotifications.addDanger(error.data.message);
+    return dispatch(clearRowStatus({ indexNames }));
   }
   dispatch(reloadIndices(indexNames));
   toastNotifications.addSuccess(`Successfully force merged: [${indexNames.join(", ")}]`);

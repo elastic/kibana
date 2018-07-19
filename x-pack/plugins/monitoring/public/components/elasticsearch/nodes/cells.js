@@ -33,14 +33,14 @@ const metricVal = (metric, format, isPercent) => {
   return formatMetric(metric, format);
 };
 
-function MetricCell({ isOnline, metric = {}, isPercent }) {
+function MetricCell({ isOnline, metric = {}, isPercent, ...props }) {
   if (isOnline) {
     const { lastVal, maxVal, minVal, slope } = get(metric, 'summary', {});
     const format = get(metric, 'metric.format');
 
     return (
       <KuiTableRowCell>
-        <div className="monitoringTableCell__MetricCell__metric">
+        <div className="monitoringTableCell__MetricCell__metric" data-test-subj={props['data-test-subj']}>
           { metricVal(lastVal, format, isPercent) }
         </div>
         <span className={`monitoringTableCell__MetricCell__slopeArrow fa fa-long-arrow-${getSlopeArrow(slope)}`} />

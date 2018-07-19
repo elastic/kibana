@@ -42,13 +42,8 @@ uiModules
         $scope.$bind('groupName', attr.groupName);
         $scope.$bind('indexPattern', attr.indexPattern);
 
-        const aggTypeSubscription = aggTypeFilters
-          .filter$(aggTypes.byType[$scope.groupName], $scope.indexPattern, $scope.agg)
-          .subscribe(aggTypes => $scope.aggTypeOptions = aggTypes);
-
-        $scope.$on('$destroy', () => {
-          aggTypeSubscription.unsubscribe();
-        });
+        $scope.aggTypeOptions = aggTypeFilters
+          .filter(aggTypes.byType[$scope.groupName], $scope.indexPattern, $scope.agg);
 
         $scope.advancedToggled = false;
 

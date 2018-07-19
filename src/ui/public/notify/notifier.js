@@ -39,17 +39,6 @@ const {
   buildNum,
 } = metadata;
 
-const consoleGroups = ('group' in window.console) && ('groupCollapsed' in window.console) && ('groupEnd' in window.console);
-
-const log = _.bindKey(console, 'log');
-
-function now() {
-  if (window.performance && window.performance.now) {
-    return window.performance.now();
-  }
-  return Date.now();
-}
-
 function closeNotif(notif, cb = _.noop, key) {
   return function () {
     // this === notif
@@ -198,9 +187,6 @@ export function Notifier(opts) {
   self.from = opts.location;
 
   const notificationLevels = [
-    'event',
-    'lifecycle',
-    'timed',
     'error',
     'warning',
   ];
@@ -252,49 +238,6 @@ Notifier.pullMessageFromUrl = ($location) => {
 
 // simply a pointer to the global notif list
 Notifier.prototype._notifs = notifs;
-
-/**
- * Log a sometimes redundant event
- * @param {string} name - The name of the group
- * @param {boolean} success - Simple flag stating whether the event succeeded
- */
-Notifier.prototype.event = createGroupLogger('event', {
-  open: true
-});
-
-/**
- * Log a major, important, event in the lifecycle of the application
- * @param {string} name - The name of the lifecycle event
- * @param {boolean} success - Simple flag stating whether the lifecycle event succeeded
- */
-Notifier.prototype.lifecycle = createGroupLogger('lifecycle', {
-  open: true
-});
-
-/**
- * Wrap a function so that it's execution time gets logged.
- *
- * @param {function} fn - the function to wrap, it's .name property is
- *                      read so make sure to set it
- * @return {function} - the wrapped function
- */
-Notifier.prototype.timed = function (name, fn) {
-  const self = this;
-
-  if (typeof name === 'function') {
-    fn = name;
-    name = fn.name;
-  }
-
-  return function WrappedNotifierFunction() {
-    const cntx = this;
-    const args = arguments;
-
-    return self.event(name, function () {
-      return fn.apply(cntx, args);
-    });
-  };
-};
 
 const overridableOptions = ['lifetime', 'icon'];
 
@@ -521,96 +464,3 @@ Notifier.prototype.directive = function (directive, config, cb) {
   customConfig.directive = localDirective;
   return add(customConfig, cb);
 };
-
-Notifier.prototype.describeError = formatMsg.describeError;
-
-if (log === _.noop) {
-  Notifier.prototype.log = _.noop;
-} else {
-  Notifier.prototype.log = function () {
-    const args = [].slice.apply(arguments);
-    if (this.from) args.unshift(this.from + ':');
-    log.apply(null, args);
-  };
-}
-
-// general functionality used by .event() and .lifecycle()
-function createGroupLogger(type, opts) {
-  // Track the groups managed by this logger
-  const groups = window[type + 'Groups'] = {};
-
-  return function logger(name, success) {
-    let status; // status of the timer
-    let exec; // function to execute and wrap
-    let ret; // return value
-
-    const complete = function (val) { logger(name, true); return val; };
-    const failure = function (err) { logger(name, false); throw err; };
-
-    if (typeof success === 'function' || success === void 0) {
-      // start
-      groups[name] = now();
-      if (success) {
-        // success === the function to time
-        exec = success;
-      } else {
-        // function that can report on the success or failure of an op, and pass their value along
-        ret = complete;
-        ret.failure = failure;
-      }
-    }
-    else {
-      groups[name] = now() - (groups[name] || 0);
-      const time = ' in ' + groups[name].toFixed(2) + 'ms';
-
-      // end
-      if (success) {
-        status = 'complete' + time;
-      } else {
-        groups[name] = false;
-        status = 'failure' + time;
-      }
-    }
-
-    if (consoleGroups) {
-      if (status) {
-        console.log(status); // eslint-disable-line no-console
-        console.groupEnd(); // eslint-disable-line no-console
-      } else {
-        if (opts.open) {
-          console.group(name); // eslint-disable-line no-console
-        } else {
-          console.groupCollapsed(name); // eslint-disable-line no-console
-        }
-      }
-    } else {
-      log('KBN: ' + name + (status ? ' - ' + status : ''));
-    }
-
-    if (exec) {
-      try {
-        ret = exec();
-      } catch (e) {
-        return failure(e);
-      }
-
-      if (ret && typeof ret.then === 'function') {
-        // return a new promise that proxies the value
-        // and logs about the promise outcome
-        return ret.then(function (val) {
-          complete();
-          return val;
-        }, function (err) {
-          failure(err);
-          throw err;
-        });
-      }
-
-      // the function executed fine, and didn't return a promise, move along
-      complete();
-    }
-
-    return ret;
-  };
-}
-

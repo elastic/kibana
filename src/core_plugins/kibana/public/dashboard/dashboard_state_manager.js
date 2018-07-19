@@ -579,8 +579,8 @@ export class DashboardStateManager {
    */
   applyFilters(query, filters) {
     this.appState.query = query;
-    this.savedDashboard.searchSource.set('query', query);
-    this.savedDashboard.searchSource.set('filter', filters);
+    this.savedDashboard.searchSource.setField('query', query);
+    this.savedDashboard.searchSource.setField('filter', filters);
     this.saveState();
   }
 

@@ -50,6 +50,9 @@ module.directive('mlNavMenu', function () {
         calendars_list: { label: 'Calendar Management', url: '#/settings/calendars_list' },
         new_calendar: { label: 'New Calendar', url: '#/settings/calendars_list/new_calendar' },
         edit_calendar: { label: 'Edit Calendar', url: '#/settings/calendars_list/edit_calendar' },
+        filter_lists: { label: 'Filter Lists', url: '#/settings/filter_lists' },
+        new_filter_list: { label: 'New Filter List', url: '#/settings/filter_lists/new' },
+        edit_filter_list: { label: 'Edit Filter List', url: '#/settings/filter_lists/edit' },
       };
 
       const breadcrumbs = [{ label: 'Machine Learning', url: '#/' }];

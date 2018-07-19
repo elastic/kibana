@@ -192,9 +192,7 @@ uses I18n engine under the hood:
 ```js
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { ReactI18n } from '@kbn/i18n';
-
-const { I18nProvider } = ReactI18n;
+import { I18nProvider } from '@kbn/i18n/react';
 
 ReactDOM.render(
   <I18nProvider>
@@ -209,9 +207,7 @@ ReactDOM.render(
 After that we can use `FormattedMessage` components inside `RootComponent`:
 ```js
 import React, { Component } from 'react';
-import { ReactI18n } from '@kbn/i18n';
-
-const { FormattedMessage } = ReactI18n;
+import { FormattedMessage } from '@kbn/i18n/react';
 
 class RootComponent extends Component {
   constructor(props) {
@@ -252,22 +248,47 @@ and added as a comment next to translation message at `defaultMessages.json`
 
 
 #### Attributes translation in React
-React wrapper provides an API to inject the imperative formatting API into a React
-component by using render callback pattern. This should be used when your React
-component needs to format data to a string value where a React element is not
-suitable; e.g., a `title` or `aria` attribute. In order to use it, you should
-wrap your components into `I18nContext` component. The child of this component
-should be a function that takes `intl` object into parameters:
+
+React wrapper provides an ability to inject the imperative formatting API into a React component via its props using `injectI18n` Higher-Order Component. This should be used when your React component needs to format data to a string value where a React element is not suitable; e.g., a `title` or `aria` attribute. In order to use it you should wrap your component with `injectI18n` Higher-Order Component. The formatting API will be provided to the wrapped component via `props.intl`.
+
+React component as a pure function:
 
 ```js
 import React from 'react';
-import { ReactI18n } from '@kbn/i18n';
+import { injectI18n, intlShape } from '@kbn/i18n/react';
 
-const { I18nContext } = ReactI18n;
+const MyComponentContent = ({ intl }) => (
+  <input
+    type="text"
+    placeholder={intl.formatMessage({
+      id: 'KIBANA-MANAGEMENT-OBJECTS-SEARCH_PLACEHOLDER',
+      defaultMessage: 'Search',
+    })}
+  />
+);
 
-const MyComponent = () => (
-  <I18nContext>
-    {intl => (
+MyComponentContent.propTypes = {
+  intl: intlShape.isRequired,
+};
+
+export const MyComponent = injectI18n(MyComponentContent);
+```
+
+React component as a class:
+
+```js
+import React from 'react';
+import { injectI18n, intlShape } from '@kbn/i18n/react';
+
+class MyComponentContent extends React.Component {
+  static propTypes = {
+    intl: intlShape.isRequired,
+  };
+
+  render() {
+    const { intl } = this.props;
+
+    return (
       <input
         type="text"
         placeholder={intl.formatMessage({
@@ -275,9 +296,11 @@ const MyComponent = () => (
           defaultMessage: 'Search',
         })}
       />
-    )}
-  </I18nContext>
-);
+    );
+  }
+}
+
+export const MyComponent = injectI18n(MyComponentContent);
 ```
 
 ## Angular

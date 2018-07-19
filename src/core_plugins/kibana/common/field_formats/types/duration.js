@@ -32,7 +32,7 @@ const inputFormats = [
   { text: 'Nanoseconds', kind: 'nanoseconds' },
   { text: 'Microseconds', kind: 'microseconds' },
   { text: 'Milliseconds', kind: 'milliseconds' },
-  DEFAULT_INPUT_FORMAT,
+  { ...DEFAULT_INPUT_FORMAT },
   { text: 'Minutes', kind: 'minutes' },
   { text: 'Hours', kind: 'hours' },
   { text: 'Days', kind: 'days' },
@@ -42,7 +42,7 @@ const inputFormats = [
 ];
 const DEFAULT_OUTPUT_FORMAT = { text: 'Human Readable', method: 'humanize' };
 const outputFormats = [
-  DEFAULT_OUTPUT_FORMAT,
+  { ...DEFAULT_OUTPUT_FORMAT },
   { text: 'Milliseconds', method: 'asMilliseconds' },
   { text: 'Seconds', method: 'asSeconds' },
   { text: 'Minutes', method: 'asMinutes' },

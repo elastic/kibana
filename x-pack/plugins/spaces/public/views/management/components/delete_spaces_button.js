@@ -61,7 +61,8 @@ export class DeleteSpacesButton extends Component {
   deleteSpaces = () => {
     const {
       spacesManager,
-      spaces
+      spaces,
+      spacesNavState,
     } = this.props;
 
     const deleteOperations = spaces.map(space => spacesManager.deleteSpace(space));
@@ -81,6 +82,9 @@ export class DeleteSpacesButton extends Component {
         if (this.props.onDelete) {
           this.props.onDelete();
         }
+
+        spacesNavState.refreshSpacesList();
+
       })
       .catch(error => {
         const {
@@ -95,5 +99,6 @@ export class DeleteSpacesButton extends Component {
 DeleteSpacesButton.propTypes = {
   spaces: PropTypes.array.isRequired,
   spacesManager: PropTypes.object.isRequired,
+  spacesNavState: PropTypes.object.isRequired,
   onDelete: PropTypes.func
 };

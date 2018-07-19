@@ -50,18 +50,18 @@ export class SpacesSavedObjectsClient {
 
   async bulkCreate(objects, options = {}) {
     const spaceId = await this._getSpaceId();
-    const objectsToCreate = objects.map(o => {
-      if (this._shouldAssignSpaceId(o.type, spaceId)) {
+    const objectsToCreate = objects.map(object => {
+      if (this._shouldAssignSpaceId(object.type, spaceId)) {
         return {
-          ...o,
-          id: this._generateDocumentId(spaceId, o.id),
+          ...object,
+          id: this._generateDocumentId(spaceId, object.id),
           extraBodyProperties: {
-            ...o.extraBodyProperties,
+            ...object.extraBodyProperties,
             spaceId
           }
         };
       }
-      return o;
+      return object;
     });
 
     const result = await this._client.bulkCreate(objectsToCreate, options);
@@ -105,9 +105,9 @@ export class SpacesSavedObjectsClient {
     // ES 'mget' does not support queries, so we have to filter results after the fact.
     const thisSpaceId = await this._getSpaceId();
 
-    const objectsToQuery = objects.map(o => ({
-      ...o,
-      id: this._generateDocumentId(thisSpaceId, o.id)
+    const objectsToQuery = objects.map(object => ({
+      ...object,
+      id: this._generateDocumentId(thisSpaceId, object.id)
     }));
 
     const extraSourceProperties = this._collectExtraSourceProperties(['spaceId', 'type'], options.extraSourceProperties);

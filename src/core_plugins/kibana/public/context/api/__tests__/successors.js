@@ -95,7 +95,7 @@ describe('context app', function () {
         []
       )
         .then((hits) => {
-          const intervals = searchSourceStub.set.args
+          const intervals = searchSourceStub.setField.args
             .filter(([property]) => property === 'query')
             .map(([, { query }]) => _.get(query, ['constant_score', 'filter', 'range', '@timestamp']));
 
@@ -133,7 +133,7 @@ describe('context app', function () {
         []
       )
         .then((hits) => {
-          const intervals = searchSourceStub.set.args
+          const intervals = searchSourceStub.setField.args
             .filter(([property]) => property === 'query')
             .map(([, { query }]) => _.get(query, ['constant_score', 'filter', 'range', '@timestamp']));
 
@@ -179,9 +179,9 @@ describe('context app', function () {
         []
       )
         .then(() => {
-          const inheritsSpy = searchSourceStub.inherits;
-          expect(inheritsSpy.alwaysCalledWith(false)).to.be(true);
-          expect(inheritsSpy.called).to.be(true);
+          const setParentSpy = searchSourceStub.setParent;
+          expect(setParentSpy.alwaysCalledWith(false)).to.be(true);
+          expect(setParentSpy.called).to.be(true);
         });
     });
   });

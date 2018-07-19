@@ -27,7 +27,7 @@ import { uiModules } from '../modules';
 import { addFatalErrorCallback } from '../notify';
 import '../promises';
 
-import { requestQueue } from './_request_queue';
+import { searchRequestQueue } from './search_request_queue';
 import { FetchSoonProvider } from './fetch';
 import { SearchPollProvider } from './search_poll';
 
@@ -61,9 +61,9 @@ uiModules.get('kibana/courier').service('courier', ($rootScope, Private) => {
         searchPoll.pause();
 
         // And abort all pending requests.
-        _.invoke(requestQueue, 'abort');
+        searchRequestQueue.abortAll();
 
-        if (requestQueue.length) {
+        if (searchRequestQueue.getCount()) {
           throw new Error('Aborting all pending requests failed.');
         }
       });
@@ -74,12 +74,12 @@ uiModules.get('kibana/courier').service('courier', ($rootScope, Private) => {
     /**
      * Fetch the pending requests.
      */
-    fetch = () => {
+    fetch() {
       fetchSoon.fetchQueued().then(() => {
         // Reset the timer using the time that we get this response as the starting point.
         searchPoll.resetTimer();
       });
-    };
+    }
   }
 
   return new Courier();

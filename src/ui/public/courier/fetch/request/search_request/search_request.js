@@ -17,10 +17,9 @@
  * under the License.
  */
 
-import _ from 'lodash';
 import moment from 'moment';
 
-import { requestQueue } from '../../../_request_queue';
+import { searchRequestQueue } from '../../../search_request_queue';
 
 export function SearchRequestProvider(Promise) {
   class SearchRequest {
@@ -28,38 +27,65 @@ export function SearchRequestProvider(Promise) {
       if (!errorHandler) {
         throw new Error('errorHandler is required');
       }
+
       this.errorHandler = errorHandler;
       this.source = source;
       this.defer = defer || Promise.defer();
       this.abortedDefer = Promise.defer();
       this.type = 'search';
-      requestQueue.push(this);
+
+      // Track execution time.
+      this.moment = undefined;
+      this.ms = undefined;
+
+      // Lifecycle state.
+      this.started = false;
+      this.stopped = false;
+      this._isFetchRequested = false;
+
+      searchRequestQueue.add(this);
     }
 
     /**
-     *  Called by the loopers to find requests that should be sent to the
-     *  fetch() module. When a module is sent to fetch() it's _fetchRequested flag
-     *  is set, and this consults that flag so requests are not send to fetch()
+     *  Called by the searchPoll to find requests that should be sent to the
+     *  fetchSoon module. When a module is sent to fetchSoon its _isFetchRequested flag
+     *  is set, and this consults that flag so requests are not send to fetchSoon
      *  multiple times.
      *
      *  @return {Boolean}
      */
     canStart() {
-      return !this._fetchRequested && !this.stopped && !this.source._fetchDisabled;
+      if (this.source._fetchDisabled) {
+        return false;
+      }
+
+      if (this.stopped) {
+        return false;
+      }
+
+      if (this._isFetchRequested) {
+        return false;
+      }
+
+      return true;
     }
 
     /**
-     *  Used to find requests that were previously sent to the fetch() module but
+     *  Used to find requests that were previously sent to the fetchSoon module but
      *  have not been started yet, so they can be started.
      *
      *  @return {Boolean}
      */
     isFetchRequestedAndPending() {
-      return this._fetchRequested && !this.started;
+      if (this.started) {
+        return false;
+      }
+
+      return this._isFetchRequested;
     }
 
     /**
-     *  Called by the fetch() module when this request has been sent to
+     *  Called by the fetchSoon module when this request has been sent to
      *  be fetched. At that point the request is somewhere between `ready-to-start`
      *  and `started`. The fetch module then waits a short period of time to
      *  allow requests to build up in the request queue, and then immediately
@@ -68,7 +94,7 @@ export function SearchRequestProvider(Promise) {
      *  @return {undefined}
      */
     _setFetchRequested() {
-      this._fetchRequested = true;
+      this._isFetchRequested = true;
     }
 
     start() {
@@ -119,7 +145,7 @@ export function SearchRequestProvider(Promise) {
       if (this.stopped) return;
       this.stopped = true;
       this.source.requestIsStopped(this);
-      _.pull(requestQueue, this);
+      searchRequestQueue.remove(this);
     }
 
     abort() {

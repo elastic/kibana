@@ -66,7 +66,7 @@ export class SpaceSelector extends Component {
     let filteredSpaces = spaces;
     if (searchTerm) {
       filteredSpaces = spaces
-        .filter(s => s.name.toLowerCase().indexOf(searchTerm) >= 0 || s.description.toLowerCase().indexOf(searchTerm) >= 0);
+        .filter(space => space.name.toLowerCase().indexOf(searchTerm) >= 0 || space.description.toLowerCase().indexOf(searchTerm) >= 0);
     }
 
     return (

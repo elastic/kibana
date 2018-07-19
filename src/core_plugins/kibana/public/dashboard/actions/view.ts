@@ -37,16 +37,10 @@ export enum ViewActionTypeKeys {
 }
 
 export interface UpdateViewModeAction
-  extends KibanaAction<
-      ViewActionTypeKeys.UPDATE_VIEW_MODE,
-      DashboardViewMode
-    > {}
+  extends KibanaAction<ViewActionTypeKeys.UPDATE_VIEW_MODE, DashboardViewMode> {}
 
 export interface SetVisibleContextMenuPanelIdAction
-  extends KibanaAction<
-      ViewActionTypeKeys.SET_VISIBLE_CONTEXT_MENU_PANEL_ID,
-      PanelId
-    > {}
+  extends KibanaAction<ViewActionTypeKeys.SET_VISIBLE_CONTEXT_MENU_PANEL_ID, PanelId> {}
 
 export interface MaximizePanelAction
   extends KibanaAction<ViewActionTypeKeys.MAXIMIZE_PANEl, PanelId> {}
@@ -55,10 +49,7 @@ export interface MinimizePanelAction
   extends KibanaAction<ViewActionTypeKeys.MINIMIZE_PANEL, undefined> {}
 
 export interface UpdateIsFullScreenModeAction
-  extends KibanaAction<
-      ViewActionTypeKeys.UPDATE_IS_FULL_SCREEN_MODE,
-      boolean
-    > {}
+  extends KibanaAction<ViewActionTypeKeys.UPDATE_IS_FULL_SCREEN_MODE, boolean> {}
 
 export interface UpdateUseMarginsAction
   extends KibanaAction<ViewActionTypeKeys.UPDATE_USE_MARGINS, boolean> {}
@@ -72,8 +63,7 @@ export interface UpdateTimeRangeAction
 export interface UpdateFiltersAction
   extends KibanaAction<ViewActionTypeKeys.UPDATE_FILTERS, Filters> {}
 
-export interface UpdateQueryAction
-  extends KibanaAction<ViewActionTypeKeys.UPDATE_QUERY, Query> {}
+export interface UpdateQueryAction extends KibanaAction<ViewActionTypeKeys.UPDATE_QUERY, Query> {}
 
 export type ViewActions =
   | UpdateViewModeAction
@@ -87,29 +77,19 @@ export type ViewActions =
   | UpdateFiltersAction
   | UpdateQueryAction;
 
-export const updateViewMode = createAction<string>(
-  ViewActionTypeKeys.UPDATE_VIEW_MODE
-);
+export const updateViewMode = createAction<string>(ViewActionTypeKeys.UPDATE_VIEW_MODE);
 export const setVisibleContextMenuPanelId = createAction<PanelId>(
   ViewActionTypeKeys.SET_VISIBLE_CONTEXT_MENU_PANEL_ID
 );
-export const maximizePanel = createAction<PanelId>(
-  ViewActionTypeKeys.MAXIMIZE_PANEl
-);
+export const maximizePanel = createAction<PanelId>(ViewActionTypeKeys.MAXIMIZE_PANEl);
 export const minimizePanel = createAction(ViewActionTypeKeys.MINIMIZE_PANEL);
 export const updateIsFullScreenMode = createAction<boolean>(
   ViewActionTypeKeys.UPDATE_IS_FULL_SCREEN_MODE
 );
-export const updateUseMargins = createAction<boolean>(
-  ViewActionTypeKeys.UPDATE_USE_MARGINS
-);
+export const updateUseMargins = createAction<boolean>(ViewActionTypeKeys.UPDATE_USE_MARGINS);
 export const updateHidePanelTitles = createAction<boolean>(
   ViewActionTypeKeys.UPDATE_HIDE_PANEL_TITLES
 );
-export const updateTimeRange = createAction<TimeRange>(
-  ViewActionTypeKeys.UPDATE_TIME_RANGE
-);
-export const updateFilters = createAction<Filters>(
-  ViewActionTypeKeys.UPDATE_FILTERS
-);
+export const updateTimeRange = createAction<TimeRange>(ViewActionTypeKeys.UPDATE_TIME_RANGE);
+export const updateFilters = createAction<Filters>(ViewActionTypeKeys.UPDATE_FILTERS);
 export const updateQuery = createAction<Query>(ViewActionTypeKeys.UPDATE_QUERY);

@@ -4,9 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import React from 'react';
+import { toastNotifications } from 'ui/notify';
+import { MarkdownSimple } from 'ui/markdown';
 import chrome from 'ui/chrome';
 import { PLUGIN, ROUTES } from '../../../common/constants';
-import { Notifier } from 'ui/notify';
 
 export class LicenseService {
   constructor(xpackInfoService, kbnUrlService, $timeout, $http) {
@@ -15,8 +17,6 @@ export class LicenseService {
     this.kbnUrlService = kbnUrlService;
     this.$timeout = $timeout;
     this.basePath = chrome.addBasePath(ROUTES.API_ROOT);
-
-    this.notifier = new Notifier({ location: 'Watcher' });
   }
 
   get showLinks() {
@@ -36,7 +36,9 @@ export class LicenseService {
   }
 
   notifyAndRedirect() {
-    this.notifier.error(this.xpackInfoService.get(`features.${PLUGIN.ID}.message`));
+    toastNotifications.addDanger({
+      title: <MarkdownSimple>{this.xpackInfoService.get(`features.${PLUGIN.ID}.message`)}</MarkdownSimple>,
+    });
     this.kbnUrlService.redirect('/management');
   }
 

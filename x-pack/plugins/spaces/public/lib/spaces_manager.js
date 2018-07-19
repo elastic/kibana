@@ -3,9 +3,13 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+import { toastNotifications } from 'ui/notify';
 
-export class SpacesManager {
+import { EventEmitter } from 'events';
+
+export class SpacesManager extends EventEmitter {
   constructor(httpAgent, chrome) {
+    super();
     this._httpAgent = httpAgent;
     this._baseUrl = chrome.addBasePath(`/api/spaces/v1`);
   }
@@ -42,7 +46,21 @@ export class SpacesManager {
       .then(response => {
         if (response.data && response.data.location) {
           window.location = response.data.location;
+        } else {
+          this._displayError();
         }
-      });
+      })
+      .catch(() => this._displayError());
+  }
+
+  async requestRefresh() {
+    this.emit('request_refresh');
+  }
+
+  _displayError() {
+    toastNotifications.addDanger({
+      title: 'Unable to change your Space',
+      text: 'please try again later'
+    });
   }
 }

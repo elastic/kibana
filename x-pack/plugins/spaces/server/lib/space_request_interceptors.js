@@ -77,8 +77,8 @@ export function initSpacesRequestInterceptors(server) {
           });
         }
 
-      } catch (e) {
-        return reply(wrapError(e));
+      } catch (error) {
+        return reply(wrapError(error));
       }
     }
 

@@ -70,6 +70,7 @@ export class SpacesGridPage extends Component {
         <DeleteSpacesButton
           spaces={this.state.selectedSpaces}
           spacesManager={this.props.spacesManager}
+          spacesNavState={this.props.spacesNavState}
           onDelete={this.loadGrid}
         />
       );
@@ -140,5 +141,6 @@ export class SpacesGridPage extends Component {
 
 SpacesGridPage.propTypes = {
   spacesManager: PropTypes.object.isRequired,
+  spacesNavState: PropTypes.object.isRequired,
   breadcrumbs: PropTypes.array.isRequired,
 };

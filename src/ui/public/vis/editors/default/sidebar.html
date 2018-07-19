@@ -146,6 +146,7 @@
 
     <div class="vis-editor-config" ng-repeat="tab in vis.type.editorConfig.optionTabs" ng-show="sidebar.section == tab.name">
       <vis-editor-vis-options
+        editor-state="state"
         vis="vis"
         vis-data="visData"
         ui-state="uiState"

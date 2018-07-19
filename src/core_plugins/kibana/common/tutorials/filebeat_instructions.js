@@ -17,6 +17,12 @@
  * under the License.
  */
 
+import { INSTRUCTION_VARIANT } from './instruction_variant';
+import {
+  TRYCLOUD_OPTION1,
+  TRYCLOUD_OPTION2
+} from './onprem_cloud_instructions';
+
 export const FILEBEAT_INSTRUCTIONS = {
   INSTALL: {
     OSX: {
@@ -183,3 +189,185 @@ export const FILEBEAT_INSTRUCTIONS = {
     }
   }
 };
+
+export const FILEBEAT_CLOUD_INSTRUCTIONS = {
+  CONFIG: {
+    OSX: {
+      title: 'Edit the configuration',
+      textPre: 'Modify `filebeat.yml` to set the connection information for Elastic Cloud:',
+      commands: [
+        'cloud.id: "{config.cloud.id}"',
+        'cloud.auth: "elastic:<password>"'
+      ],
+      textPost: 'Where `<password>` is the password of the `elastic` user.'
+    },
+    DEB: {
+      title: 'Edit the configuration',
+      textPre: 'Modify `/etc/filebeat/filebeat.yml` to set the connection information for Elastic Cloud:',
+      commands: [
+        'cloud.id: "{config.cloud.id}"',
+        'cloud.auth: "elastic:<password>"'
+      ],
+      textPost: 'Where `<password>` is the password of the `elastic` user.'
+    },
+    RPM: {
+      title: 'Edit the configuration',
+      textPre: 'Modify `/etc/filebeat/filebeat.yml` to set the connection information for Elastic Cloud:',
+      commands: [
+        'cloud.id: "{config.cloud.id}"',
+        'cloud.auth: "elastic:<password>"'
+      ],
+      textPost: 'Where `<password>` is the password of the `elastic` user.'
+    },
+    WINDOWS: {
+      title: 'Edit the configuration',
+      textPre: 'Modify `C:\\Program Files\\Filebeat\\filebeat.yml` to set the connection information for Elastic Cloud:',
+      commands: [
+        'cloud.id: "{config.cloud.id}"',
+        'cloud.auth: "elastic:<password>"'
+      ],
+      textPost: 'Where `<password>` is the password of the `elastic` user.'
+    }
+  }
+};
+
+export function filebeatEnableInstructions(moduleName) {
+  return {
+    OSX: {
+      title: 'Enable and configure the ' + moduleName + ' module',
+      textPre: 'From the installation directory, run:',
+      commands: [
+        './filebeat modules enable ' + moduleName,
+      ],
+      textPost: 'Modify the settings in the `modules.d/' + moduleName + '.yml` file.'
+    },
+    DEB: {
+      title: 'Enable and configure the ' + moduleName + ' module',
+      commands: [
+        'sudo filebeat modules enable ' + moduleName,
+      ],
+      textPost: 'Modify the settings in the `/etc/filebeat/modules.d/' + moduleName + '.yml` file.'
+    },
+    RPM: {
+      title: 'Enable and configure the ' + moduleName + ' module',
+      commands: [
+        'sudo filebeat modules enable ' + moduleName,
+      ],
+      textPost: 'Modify the settings in the `/etc/filebeat/modules.d/' + moduleName + '.yml` file.'
+    },
+    WINDOWS: {
+      title: 'Enable and configure the ' + moduleName + ' module',
+      textPre: 'From the `C:\\Program Files\\Filebeat` folder, run:',
+      commands: [
+        'PS C:\\Program Files\\Filebeat> filebeat.exe modules enable ' + moduleName,
+      ],
+      textPost: 'Modify the settings in the `modules.d/' + moduleName + '.yml` file.'
+    }
+  };
+}
+
+export function filebeatStatusCheck(moduleName) {
+  return {
+    title: 'Module status',
+    text: 'Check that data is received from the Filebeat `' + moduleName + '` module',
+    btnLabel: 'Check data',
+    success: 'Data successfully received from this module',
+    error: 'No data has been received from this module yet',
+    esHitsCheck: {
+      index: 'filebeat-*',
+      query: {
+        bool: {
+          filter: {
+            term: {
+              'fileset.module': moduleName
+            }
+          }
+        }
+      }
+    }
+  };
+}
+
+export function onPremInstructions(moduleName, platforms, geoipRequired, uaRequired) {
+  const variants = [];
+  for (let i = 0; i < platforms.length; i++) {
+    const platform = platforms[i];
+    const instructions = [];
+    if (geoipRequired && uaRequired) {
+      instructions.push(FILEBEAT_INSTRUCTIONS.PLUGINS.GEOIP_AND_UA);
+    } else if (geoipRequired) {
+      instructions.push(FILEBEAT_INSTRUCTIONS.PLUGINS.GEOIP);
+    }
+    instructions.push(FILEBEAT_INSTRUCTIONS.INSTALL[platform]);
+    instructions.push(FILEBEAT_INSTRUCTIONS.CONFIG[platform]);
+    instructions.push(filebeatEnableInstructions(moduleName)[platform]);
+    instructions.push(FILEBEAT_INSTRUCTIONS.START[platform]);
+    variants.push({
+      id: INSTRUCTION_VARIANT[platform],
+      instructions: instructions
+    });
+  }
+  return {
+    instructionSets: [
+      {
+        title: 'Getting Started',
+        instructionVariants: variants,
+        statusCheck: filebeatStatusCheck(moduleName)
+      }
+    ]
+  };
+}
+
+export function onPremCloudInstructions(moduleName, platforms) {
+  const variants = [];
+  for (let i = 0; i < platforms.length; i++) {
+    const platform = platforms[i];
+    variants.push({
+      id: INSTRUCTION_VARIANT[platform],
+      instructions: [
+        TRYCLOUD_OPTION1,
+        TRYCLOUD_OPTION2,
+        FILEBEAT_INSTRUCTIONS.INSTALL[platform],
+        FILEBEAT_INSTRUCTIONS.CONFIG[platform],
+        filebeatEnableInstructions(moduleName)[platform],
+        FILEBEAT_INSTRUCTIONS.START[platform]
+      ]
+    });
+  }
+
+  return {
+    instructionSets: [
+      {
+        title: 'Getting Started',
+        instructionVariants: variants,
+        statusCheck: filebeatStatusCheck(moduleName)
+      }
+    ]
+  };
+}
+
+export function cloudInstructions(moduleName, platforms) {
+  const variants = [];
+  for (let i = 0; i < platforms.length; i++) {
+    const platform = platforms[i];
+    variants.push({
+      id: INSTRUCTION_VARIANT[platform],
+      instructions: [
+        FILEBEAT_INSTRUCTIONS.INSTALL[platform],
+        FILEBEAT_CLOUD_INSTRUCTIONS.CONFIG[platform],
+        filebeatEnableInstructions(moduleName)[platform],
+        FILEBEAT_INSTRUCTIONS.START[platform]
+      ]
+    });
+  }
+
+  return {
+    instructionSets: [
+      {
+        title: 'Getting Started',
+        instructionVariants: variants,
+        statusCheck: filebeatStatusCheck(moduleName)
+      }
+    ]
+  };
+}

@@ -12,7 +12,7 @@
         Show
       </label>
       <div class="kuiSideBarFormRow__control">
-        <input class="kuiCheckBox" id="categoryAxisShow" type="checkbox" ng-model="vis.params.categoryAxes[0].show">
+        <input class="kuiCheckBox" id="categoryAxisShow" type="checkbox" ng-model="editorState.params.categoryAxes[0].show">
       </div>
     </div>
 
@@ -24,7 +24,7 @@
         <select
           id="categoryAxisPosition"
           class="kuiSelect kuiSideBarSelect"
-          ng-model="vis.params.categoryAxes[0].position"
+          ng-model="editorState.params.categoryAxes[0].position"
           ng-options="mode for mode in vis.type.editorConfig.collections.positions"
         ></select>
       </div>
@@ -66,7 +66,7 @@
             Show Labels
           </label>
           <div class="kuiSideBarFormRow__control">
-            <input class="kuiCheckBox" id="categoryAxisShowLabels" type="checkbox" ng-model="vis.params.categoryAxes[0].labels.show">
+            <input class="kuiCheckBox" id="categoryAxisShowLabels" type="checkbox" ng-model="editorState.params.categoryAxes[0].labels.show">
           </div>
         </div>
 
@@ -75,7 +75,7 @@
             Filter Labels
           </label>
           <div class="kuiSideBarFormRow__control">
-            <input class="kuiCheckBox" id="categoryAxisShowFilter" type="checkbox" ng-model="vis.params.categoryAxes[0].labels.filter">
+            <input class="kuiCheckBox" id="categoryAxisShowFilter" type="checkbox" ng-model="editorState.params.categoryAxes[0].labels.filter">
           </div>
         </div>
 
@@ -87,7 +87,7 @@
             <select
               id="categoryAxisRotateLabels"
               class="kuiSelect kuiSideBarSelect"
-              ng-model="vis.params.categoryAxes[0].labels.rotate"
+              ng-model="editorState.params.categoryAxes[0].labels.rotate"
               ng-options="mode.value as mode.name for mode in rotateOptions"
             ></select>
           </div>
@@ -102,7 +102,7 @@
               id="categoryAxisTruncateLabels"
               class="kuiInput kuiSideBarInput"
               type="number"
-              ng-model="vis.params.categoryAxes[0].labels.truncate"
+              ng-model="editorState.params.categoryAxes[0].labels.truncate"
             >
           </div>
         </div>

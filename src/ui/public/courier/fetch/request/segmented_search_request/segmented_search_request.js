@@ -21,16 +21,11 @@ import _ from 'lodash';
 import { timefilter } from 'ui/timefilter';
 import { SearchRequestProvider } from '../search_request';
 import { SegmentedHandleProvider } from './segmented_handle';
-import { Notifier } from '../../../../notify';
 import { pushAll } from '../../../../utils/collection';
 
 export function SegmentedSearchRequestProvider(Private, config) {
   const SearchRequest = Private(SearchRequestProvider);
   const SegmentedHandle = Private(SegmentedHandleProvider);
-
-  const notify = new Notifier({
-    location: 'Segmented Fetch'
-  });
 
   class SegmentedSearchRequest extends SearchRequest {
     constructor({ source, defer, errorHandler, initFn }) {
@@ -200,7 +195,7 @@ export function SegmentedSearchRequestProvider(Private, config) {
 
     _createQueue() {
       const timeBounds = timefilter.getBounds();
-      const indexPattern = this.source.get('index');
+      const indexPattern = this.source.getField('index');
       this._queueCreated = false;
 
       return indexPattern.toDetailedIndexList(timeBounds.min, timeBounds.max, this._direction)
@@ -250,9 +245,7 @@ export function SegmentedSearchRequestProvider(Private, config) {
       pushAll(hits, mergedHits);
 
       if (sortFn) {
-        notify.event('resort rows', function () {
-          mergedHits.sort(sortFn);
-        });
+        mergedHits.sort(sortFn);
       }
 
       if (_.isNumber(desiredSize)) {
@@ -305,7 +298,7 @@ export function SegmentedSearchRequestProvider(Private, config) {
 
     _detectHitsWindow(hits) {
       hits = hits || [];
-      const indexPattern = this.source.get('index');
+      const indexPattern = this.source.getField('index');
       const desiredSize = this._desiredSize;
 
       const size = _.size(hits);
@@ -348,8 +341,6 @@ export function SegmentedSearchRequestProvider(Private, config) {
       return someOverlap ? desiredSize : 0;
     }
   }
-
-  SegmentedSearchRequest.prototype.mergedSegment = notify.timed('merge response segment', SegmentedSearchRequest.prototype.mergedSegment);
 
   return SegmentedSearchRequest;
 }

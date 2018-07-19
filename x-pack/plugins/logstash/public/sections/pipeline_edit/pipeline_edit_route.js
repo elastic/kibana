@@ -5,7 +5,7 @@
  */
 
 import routes from 'ui/routes';
-import { Notifier } from 'ui/notify';
+import { toastNotifications } from 'ui/notify';
 import template from './pipeline_edit_route.html';
 import 'plugins/logstash/services/pipeline';
 import 'plugins/logstash/services/license';
@@ -40,8 +40,6 @@ routes
         const licenseService = $injector.get('logstashLicenseService');
         const kbnUrl = $injector.get('kbnUrl');
 
-        const notifier = new Notifier({ location: 'Logstash' });
-
         const pipelineId = $route.current.params.id;
 
         if (!pipelineId) return new Pipeline();
@@ -52,7 +50,7 @@ routes
             return licenseService.checkValidity()
               .then(() => {
                 if (err.status !== 403) {
-                  notifier.error(err);
+                  toastNotifications.addDanger(`Couldn't load pipeline. Error: '${err.statusText}'.`);
                 }
 
                 kbnUrl.redirect('/management/logstash/pipelines');

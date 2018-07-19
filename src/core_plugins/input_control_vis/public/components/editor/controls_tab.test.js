@@ -49,6 +49,8 @@ const scopeMock = {
       savedObjectsClient: savedObjectsClientMock,
       indexPatterns: indexPatternsMock
     },
+  },
+  editorState: {
     params: {
       'controls': [
         {
@@ -87,118 +89,138 @@ beforeEach(() => {
 test('renders ControlsTab', () => {
   const component = shallow(<ControlsTab
     scope={scopeMock}
+    editorState={scopeMock.editorState}
     stageEditorParams={stageEditorParams}
   />);
   expect(component).toMatchSnapshot(); // eslint-disable-line
 });
 
-test('add control btn', () => {
-  const component = mount(<ControlsTab
-    scope={scopeMock}
-    stageEditorParams={stageEditorParams}
-  />);
-  findTestSubject(component, 'inputControlEditorAddBtn').simulate('click');
-  // Use custom match function since control.id is dynamically generated and never the same.
-  sinon.assert.calledWith(stageEditorParams, sinon.match((newParams) => {
-    if (newParams.controls.length !== 3) {
-      return false;
-    }
-    return true;
-  }, 'control not added to vis.params'));
-});
+describe('behavior', () => {
+  // Mock MutationObserver used in EuiAccordion
+  beforeAll(() => {
+    global.MutationObserver = class {
+      constructor() {}
+      disconnect() {}
+      observe() {}
+    };
+  });
 
-test('remove control btn', () => {
-  const component = mount(<ControlsTab
-    scope={scopeMock}
-    stageEditorParams={stageEditorParams}
-  />);
-  findTestSubject(component, 'inputControlEditorRemoveControl0').simulate('click');
-  const expectedParams = {
-    'controls': [
-      {
-        'id': '2',
-        'indexPattern': 'indexPattern1',
-        'fieldName': 'numberField',
-        'label': '',
-        'type': 'range',
-        'options': {
-          'step': 1
-        }
+  afterAll(() => {
+    delete global.MutationObserver;
+  });
+
+  test('add control button', () => {
+    const component = mount(<ControlsTab
+      scope={scopeMock}
+      editorState={scopeMock.editorState}
+      stageEditorParams={stageEditorParams}
+    />);
+    findTestSubject(component, 'inputControlEditorAddBtn').simulate('click');
+    // Use custom match function since control.id is dynamically generated and never the same.
+    sinon.assert.calledWith(stageEditorParams, sinon.match((newParams) => {
+      if (newParams.controls.length !== 3) {
+        return false;
       }
-    ]
-  };
-  sinon.assert.calledWith(stageEditorParams, sinon.match(expectedParams));
-});
+      return true;
+    }, 'control not added to editorState.params'));
+  });
+
+  test('remove control button', () => {
+    const component = mount(<ControlsTab
+      scope={scopeMock}
+      editorState={scopeMock.editorState}
+      stageEditorParams={stageEditorParams}
+    />);
+    findTestSubject(component, 'inputControlEditorRemoveControl0').simulate('click');
+    const expectedParams = {
+      'controls': [
+        {
+          'id': '2',
+          'indexPattern': 'indexPattern1',
+          'fieldName': 'numberField',
+          'label': '',
+          'type': 'range',
+          'options': {
+            'step': 1
+          }
+        }
+      ]
+    };
+    sinon.assert.calledWith(stageEditorParams, sinon.match(expectedParams));
+  });
 
 
-test('move down control btn', () => {
-  const component = mount(<ControlsTab
-    scope={scopeMock}
-    stageEditorParams={stageEditorParams}
-  />);
-  findTestSubject(component, 'inputControlEditorMoveDownControl0').simulate('click');
-  const expectedParams = {
-    'controls': [
-      {
-        'id': '2',
-        'indexPattern': 'indexPattern1',
-        'fieldName': 'numberField',
-        'label': '',
-        'type': 'range',
-        'options': {
-          'step': 1
+  test('move down control button', () => {
+    const component = mount(<ControlsTab
+      scope={scopeMock}
+      editorState={scopeMock.editorState}
+      stageEditorParams={stageEditorParams}
+    />);
+    findTestSubject(component, 'inputControlEditorMoveDownControl0').simulate('click');
+    const expectedParams = {
+      'controls': [
+        {
+          'id': '2',
+          'indexPattern': 'indexPattern1',
+          'fieldName': 'numberField',
+          'label': '',
+          'type': 'range',
+          'options': {
+            'step': 1
+          }
+        },
+        {
+          'id': '1',
+          'indexPattern': 'indexPattern1',
+          'fieldName': 'keywordField',
+          'label': 'custom label',
+          'type': 'list',
+          'options': {
+            'type': 'terms',
+            'multiselect': true,
+            'size': 5,
+            'order': 'desc'
+          }
         }
-      },
-      {
-        'id': '1',
-        'indexPattern': 'indexPattern1',
-        'fieldName': 'keywordField',
-        'label': 'custom label',
-        'type': 'list',
-        'options': {
-          'type': 'terms',
-          'multiselect': true,
-          'size': 5,
-          'order': 'desc'
-        }
-      }
-    ]
-  };
-  sinon.assert.calledWith(stageEditorParams, sinon.match(expectedParams));
-});
+      ]
+    };
+    sinon.assert.calledWith(stageEditorParams, sinon.match(expectedParams));
+  });
 
-test('move up control btn', () => {
-  const component = mount(<ControlsTab
-    scope={scopeMock}
-    stageEditorParams={stageEditorParams}
-  />);
-  findTestSubject(component, 'inputControlEditorMoveUpControl1').simulate('click');
-  const expectedParams = {
-    'controls': [
-      {
-        'id': '2',
-        'indexPattern': 'indexPattern1',
-        'fieldName': 'numberField',
-        'label': '',
-        'type': 'range',
-        'options': {
-          'step': 1
+  test('move up control button', () => {
+    const component = mount(<ControlsTab
+      scope={scopeMock}
+      editorState={scopeMock.editorState}
+      stageEditorParams={stageEditorParams}
+    />);
+    findTestSubject(component, 'inputControlEditorMoveUpControl1').simulate('click');
+    const expectedParams = {
+      'controls': [
+        {
+          'id': '2',
+          'indexPattern': 'indexPattern1',
+          'fieldName': 'numberField',
+          'label': '',
+          'type': 'range',
+          'options': {
+            'step': 1
+          }
+        },
+        {
+          'id': '1',
+          'indexPattern': 'indexPattern1',
+          'fieldName': 'keywordField',
+          'label': 'custom label',
+          'type': 'list',
+          'options': {
+            'type': 'terms',
+            'multiselect': true,
+            'size': 5,
+            'order': 'desc'
+          }
         }
-      },
-      {
-        'id': '1',
-        'indexPattern': 'indexPattern1',
-        'fieldName': 'keywordField',
-        'label': 'custom label',
-        'type': 'list',
-        'options': {
-          'type': 'terms',
-          'multiselect': true,
-          'size': 5,
-          'order': 'desc'
-        }
-      }
-    ]
-  };
-  sinon.assert.calledWith(stageEditorParams, sinon.match(expectedParams));
+      ]
+    };
+    sinon.assert.calledWith(stageEditorParams, sinon.match(expectedParams));
+  });
 });

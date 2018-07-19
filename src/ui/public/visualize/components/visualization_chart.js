@@ -38,7 +38,7 @@ export class VisualizationChart extends Component {
       tap(() => {
         dispatchRenderStart(this.chartDiv.current);
       }),
-      filter(({ vis, visData, container }) => vis && vis.initialized && container && (!vis.type.requiresSearch || visData)),
+      filter(({ vis, visData, container }) => vis && container && (!vis.type.requiresSearch || visData)),
       debounceTime(100),
       switchMap(async ({ vis, visData, container }) => {
         vis.size = [container.clientWidth, container.clientHeight];
@@ -85,23 +85,18 @@ export class VisualizationChart extends Component {
   };
 
   componentDidMount() {
-    const { vis, listenOnChange } = this.props;
+    const { vis, onInit } = this.props;
     const Visualization = vis.type.visualization;
 
     this.visualization = new Visualization(this.chartDiv.current, vis);
 
-    if (this.visualization.isLoaded) {
-      this.visualization.isLoaded().then(() => {
-        vis.initialized = true;
-      });
-    } else {
-      vis.initialized = true;
+    if (onInit) {
+      const visLoaded = this.visualization.isLoaded ? this.visualization.isLoaded() : true;
+      Promise.resolve(visLoaded).then(onInit);
     }
 
-    if (listenOnChange) {
-      this.resizeChecker = new ResizeChecker(this.containerDiv.current);
-      this.resizeChecker.on('resize', this._startRenderVisualization);
-    }
+    this.resizeChecker = new ResizeChecker(this.containerDiv.current);
+    this.resizeChecker.on('resize', this._startRenderVisualization);
 
     this._startRenderVisualization();
   }

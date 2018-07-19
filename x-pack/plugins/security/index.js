@@ -8,7 +8,7 @@ import { resolve } from 'path';
 import { getUserProvider } from './server/lib/get_user';
 import { initAuthenticateApi } from './server/routes/api/v1/authenticate';
 import { initUsersApi } from './server/routes/api/v1/users';
-import { initRolesApi } from './server/routes/api/v1/roles';
+import { initPublicRolesApi } from './server/routes/api/public/roles';
 import { initIndicesApi } from './server/routes/api/v1/indices';
 import { initLoginView } from './server/routes/views/login';
 import { initLogoutView } from './server/routes/views/logout';
@@ -17,11 +17,10 @@ import { authenticateFactory } from './server/lib/auth_redirect';
 import { checkLicense } from './server/lib/check_license';
 import { initAuthenticator } from './server/lib/authentication/authenticator';
 import { initPrivilegesApi } from './server/routes/api/v1/privileges';
-import { checkPrivilegesWithRequestFactory } from './server/lib/authorization/check_privileges';
 import { SecurityAuditLogger } from './server/lib/audit_logger';
 import { AuditLogger } from '../../server/lib/audit_logger';
 import { SecureSavedObjectsClient } from './server/lib/saved_objects_client/secure_saved_objects_client';
-import { registerPrivilegesWithCluster } from './server/lib/privileges';
+import { initAuthorizationService, registerPrivilegesWithCluster } from './server/lib/authorization';
 import { watchStatusAndLicenseToInitialize } from '../../server/lib/watch_status_and_license_to_initialize';
 
 export const security = (kibana) => new kibana.Plugin({
@@ -43,11 +42,10 @@ export const security = (kibana) => new kibana.Plugin({
         hostname: Joi.string().hostname(),
         port: Joi.number().integer().min(0).max(65535)
       }).default(),
-      rbac: Joi.object({
-        application: Joi.string().default('kibana').regex(
-          /[a-zA-Z0-9-_]+/,
-          `may contain alphanumeric characters (a-z, A-Z, 0-9), underscores and hyphens`
-        ),
+      authorization: Joi.object({
+        legacyFallback: Joi.object({
+          enabled: Joi.boolean().default(true)
+        }).default()
       }).default(),
       audit: Joi.object({
         enabled: Joi.boolean().default(false)
@@ -80,7 +78,6 @@ export const security = (kibana) => new kibana.Plugin({
       return {
         secureCookies: config.get('xpack.security.secureCookies'),
         sessionTimeout: config.get('xpack.security.sessionTimeout'),
-        rbacApplication: config.get('xpack.security.rbac.application'),
       };
     }
   },
@@ -98,12 +95,6 @@ export const security = (kibana) => new kibana.Plugin({
     // to re-compute the license check results for this plugin
     xpackInfoFeature.registerLicenseCheckResultsGenerator(checkLicense);
 
-    watchStatusAndLicenseToInitialize(xpackMainPlugin, plugin, async (license) => {
-      if (license.allowRbac) {
-        await registerPrivilegesWithCluster(server);
-      }
-    });
-
     validateConfig(config, message => server.log(['security', 'warning'], message));
 
     // Create a Hapi auth scheme that should be applied to each request.
@@ -113,10 +104,18 @@ export const security = (kibana) => new kibana.Plugin({
     // automatically assigned to all routes that don't contain an auth config.
     server.auth.strategy('session', 'login', 'required');
 
-    const auditLogger = new SecurityAuditLogger(server.config(), new AuditLogger(server, 'security'));
-    const checkPrivilegesWithRequest = checkPrivilegesWithRequestFactory(server);
-    const { savedObjects } = server;
+    // exposes server.plugins.security.authorization
+    initAuthorizationService(server);
 
+    watchStatusAndLicenseToInitialize(xpackMainPlugin, plugin, async (license) => {
+      if (license.allowRbac) {
+        await registerPrivilegesWithCluster(server);
+      }
+    });
+
+    const auditLogger = new SecurityAuditLogger(server.config(), new AuditLogger(server, 'security'));
+
+    const { savedObjects } = server;
     savedObjects.setScopedSavedObjectsClientFactory(({
       request,
     }) => {
@@ -130,7 +129,8 @@ export const security = (kibana) => new kibana.Plugin({
         return new savedObjects.SavedObjectsClient(callWithRequestRepository);
       }
 
-      const checkPrivileges = checkPrivilegesWithRequest(request);
+      const { authorization } = server.plugins.security;
+      const checkPrivileges = authorization.checkPrivilegesWithRequest(request);
       const internalRepository = savedObjects.getSavedObjectsRepository(callWithInternalUser);
 
       return new SecureSavedObjectsClient({
@@ -140,6 +140,7 @@ export const security = (kibana) => new kibana.Plugin({
         checkPrivileges,
         auditLogger,
         savedObjectTypes: savedObjects.types,
+        actions: authorization.actions,
       });
     });
 
@@ -148,7 +149,7 @@ export const security = (kibana) => new kibana.Plugin({
     await initAuthenticator(server);
     initAuthenticateApi(server);
     initUsersApi(server);
-    initRolesApi(server);
+    initPublicRolesApi(server);
     initIndicesApi(server);
     initPrivilegesApi(server);
     initLoginView(server, xpackMainPlugin);

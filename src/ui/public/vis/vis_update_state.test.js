@@ -97,4 +97,17 @@ describe('updateOldState', () => {
     });
   });
 
+  describe('property name conversion', () => {
+    it('should update showMeticsAtAllLevels to showMetricsAtAllLevels', () => {
+      const oldState = {
+        params: {
+          showMeticsAtAllLevels: false
+        }
+      };
+      const state = updateOldState(oldState);
+      expect(state.params.showMetricsAtAllLevels).toBe(false);
+      expect(state.params.showMeticsAtAllLevels).toBe(undefined);
+    });
+  });
+
 });

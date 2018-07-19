@@ -485,7 +485,7 @@ describe('within a space', () => {
 
       const result = await client.get(type, id, options);
 
-      expect(result).toBe(SAVED_OBJECTS['space_1:' + id]);
+      expect(result).toEqual({ "id": "object_1", "spaceId": "space_1", "type": "foo" });
     });
 
     test(`returns error when the object belongs to a different space`, async () => {

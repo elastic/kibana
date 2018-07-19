@@ -7,31 +7,29 @@
 import React from 'react';
 import { last } from 'lodash';
 import {
-  EuiTitle,
-  EuiText,
+  EuiBadge,
+  EuiCodeBlock,
+  EuiFlexGroup,
+  EuiFlexItem,
   EuiFlyout,
-  EuiFlyoutHeader,
   EuiFlyoutBody,
+  EuiFlyoutHeader,
+  EuiIcon,
+  EuiSpacer,
   EuiTable,
   EuiTableBody,
   EuiTableRow,
   EuiTableRowCell,
-  EuiCodeBlock,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiSpacer,
-  EuiBadge,
+  EuiText,
+  EuiTitle,
 } from '@elastic/eui';
 import { Sparkline } from '../../../sparkline';
 import { formatMetric } from '../../../../lib/format_number';
-import { LOGSTASH } from '../../../../../common/constants';
 
 function renderIcon(vertex) {
   return (
-    <img
-      src={vertex.icon}
-      width={LOGSTASH.PIPELINE_VIEWER.ICON.WIDTH_PX}
-      height={LOGSTASH.PIPELINE_VIEWER.ICON.HEIGHT_PX}
+    <EuiIcon
+      type={vertex.iconType}
       className="lspvDetailDrawerIcon"
     />
   );

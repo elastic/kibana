@@ -44,6 +44,10 @@ import { Inspector } from '../inspector';
 import { RequestAdapter, DataAdapter } from '../inspector/adapters';
 
 const getTerms = (table, columnIndex, rowIndex) => {
+  if (rowIndex === -1) {
+    return [];
+  }
+
   // get only rows where cell value matches current row for all the fields before columnIndex
   const rows = table.rows.filter(row => row.every((cell, i) => cell === table.rows[rowIndex][i] || i >= columnIndex));
   const terms = rows.map(row => row[columnIndex]);
@@ -94,10 +98,13 @@ export function VisProvider(Private, indexPatterns, getAppState) {
             const appState = getAppState();
             filterBarClickHandler(appState)(event);
           },
-          addFilter: (data, columnIndex, rowIndex) => {
+          addFilter: (data, columnIndex, rowIndex, cellValue) => {
             const agg = data.columns[columnIndex].aggConfig;
             let filter = [];
-            const value = data.rows[rowIndex][columnIndex];
+            const value = rowIndex > -1 ? data.rows[rowIndex][columnIndex] : cellValue;
+            if (!value) {
+              return;
+            }
             if (agg.type.name === 'terms' && agg.params.otherBucket) {
               const terms = getTerms(data, columnIndex, rowIndex);
               filter = agg.createFilter(value, { terms });
@@ -161,10 +168,6 @@ export function VisProvider(Private, indexPatterns, getAppState) {
       return adapters;
     }
 
-    isEditorMode() {
-      return this.editorMode || false;
-    }
-
     setCurrentState(state) {
       this.title = state.title || '';
       const type = state.type || this.type;
@@ -189,16 +192,14 @@ export function VisProvider(Private, indexPatterns, getAppState) {
 
     setState(state, updateCurrentState = true) {
       this._state = _.cloneDeep(state);
-      if (updateCurrentState) this.resetState();
+      if (updateCurrentState) {
+        this.setCurrentState(this._state);
+      }
     }
 
     updateState() {
       this.setState(this.getCurrentState(true));
       this.emit('update');
-    }
-
-    resetState() {
-      this.setCurrentState(this._state);
     }
 
     forceReload() {
@@ -209,12 +210,30 @@ export function VisProvider(Private, indexPatterns, getAppState) {
       return {
         title: this.title,
         type: this.type.name,
-        params: this.params,
+        params: _.cloneDeep(this.params),
         aggs: this.aggs
           .map(agg => agg.toJSON())
           .filter(agg => includeDisabled || agg.enabled)
           .filter(Boolean)
       };
+    }
+
+    getSerializableState(state) {
+      return {
+        title: state.title,
+        type: state.type,
+        params: _.cloneDeep(state.params),
+        aggs: state.aggs
+          .map(agg => agg.toJSON())
+          .filter(agg => agg.enabled)
+          .filter(Boolean)
+      };
+    }
+
+    copyCurrentState(includeDisabled = false) {
+      const state = this.getCurrentState(includeDisabled);
+      state.aggs = new AggConfigs(this, state.aggs);
+      return state;
     }
 
     getStateInternal(includeDisabled) {

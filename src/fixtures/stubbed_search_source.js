@@ -27,16 +27,15 @@ export default function stubSearchSource(Private, $q, Promise) {
 
   let onResultsCount = 0;
   return {
-    sort: sinon.spy(),
-    size: sinon.spy(),
+    setField: sinon.spy(),
     fetch: sinon.spy(),
     destroy: sinon.spy(),
-    get: function (param) {
+    getField: function (param) {
       switch (param) {
         case 'index':
           return indexPattern;
         default:
-          throw new Error('Param "' + param + '" is not implemented in the stubbed search source');
+          throw new Error(`Param "${param}" is not implemented in the stubbed search source`);
       }
     },
     crankResults: function () {

@@ -38,11 +38,11 @@ export default function ({ getService }) {
       });
     };
 
-    const createExpectRbacForbidden = canLogin => resp => {
+    const expectRbacForbidden = resp => {
       expect(resp.body).to.eql({
         statusCode: 403,
         error: 'Forbidden',
-        message: `Unable to update visualization, missing ${canLogin ? '' : 'action:login,'}action:saved_objects/visualization/update`
+        message: `Unable to update visualization, missing action:saved_objects/visualization/update`
       });
     };
 
@@ -97,11 +97,11 @@ export default function ({ getService }) {
       tests: {
         exists: {
           statusCode: 403,
-          response: createExpectRbacForbidden(false),
+          response: expectRbacForbidden,
         },
         doesntExist: {
           statusCode: 403,
-          response: createExpectRbacForbidden(false),
+          response: expectRbacForbidden,
         },
       }
     });
@@ -182,11 +182,11 @@ export default function ({ getService }) {
       tests: {
         exists: {
           statusCode: 403,
-          response: createExpectRbacForbidden(true),
+          response: expectRbacForbidden,
         },
         doesntExist: {
           statusCode: 403,
-          response: createExpectRbacForbidden(true),
+          response: expectRbacForbidden,
         },
       }
     });

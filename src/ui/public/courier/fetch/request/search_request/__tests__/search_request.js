@@ -22,13 +22,13 @@ import sinon from 'sinon';
 import expect from 'expect.js';
 
 import { SearchRequestProvider } from '../search_request';
-import { requestQueue } from '../../../../_request_queue';
+import { searchRequestQueue } from '../../../../search_request_queue';
 
 describe('ui/courier/fetch search request', () => {
   beforeEach(ngMock.module('kibana'));
 
   afterEach(() => {
-    requestQueue.clear();
+    searchRequestQueue.removeAll();
   });
 
   it('throws exception when created without errorHandler', ngMock.inject((Private) => {

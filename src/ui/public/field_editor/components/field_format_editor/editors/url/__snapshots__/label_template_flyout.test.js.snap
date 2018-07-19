@@ -1,0 +1,88 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`LabelTemplateFlyout should not render if not visible 1`] = `""`;
+
+exports[`LabelTemplateFlyout should render normally 1`] = `
+<EuiFlyout
+  hideCloseButton={false}
+  onClose={[Function]}
+  ownFocus={false}
+  size="m"
+>
+  <EuiFlyoutBody>
+    <EuiText
+      grow={true}
+    >
+      <h3>
+        Label Template
+      </h3>
+      <p>
+        If the URL in this field is large, it might be useful to provide an alternate template for the text version of the URL. This will be displayed instead of the url, but will still link to the URL. The format is a string which uses double curly brace notation 
+        <EuiCode>
+          {{ }}
+        </EuiCode>
+        to inject values. The following values can be accessed:
+      </p>
+      <ul>
+        <li>
+          <EuiCode>
+            value
+          </EuiCode>
+           — The fields value
+        </li>
+        <li>
+          <EuiCode>
+            url
+          </EuiCode>
+           — The formatted URL
+        </li>
+      </ul>
+      <h4>
+        Examples
+      </h4>
+      <EuiBasicTable
+        columns={
+          Array [
+            Object {
+              "field": "input",
+              "name": "Input",
+              "width": "160px",
+            },
+            Object {
+              "field": "urlTemplate",
+              "name": "URL Template",
+            },
+            Object {
+              "field": "labelTemplate",
+              "name": "Label Template",
+            },
+            Object {
+              "field": "output",
+              "name": "Output",
+              "render": [Function],
+            },
+          ]
+        }
+        items={
+          Array [
+            Object {
+              "input": 1234,
+              "labelTemplate": "User #{{value}}",
+              "output": "<a href=\\"http://company.net/profiles?user_id=1234\\">User #1234</a>",
+              "urlTemplate": "http://company.net/profiles?user_id={{value}}",
+            },
+            Object {
+              "input": "/assets/main.css",
+              "labelTemplate": "View Asset",
+              "output": "<a href=\\"http://site.com/assets/main.css\\">View Asset</a>",
+              "urlTemplate": "http://site.com{{rawValue}}",
+            },
+          ]
+        }
+        noItemsMessage="No items found"
+        responsive={true}
+      />
+    </EuiText>
+  </EuiFlyoutBody>
+</EuiFlyout>
+`;

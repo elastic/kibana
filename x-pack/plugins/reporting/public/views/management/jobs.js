@@ -7,7 +7,7 @@
 import 'angular-paging';
 import 'plugins/reporting/services/job_queue';
 import 'plugins/reporting/less/main.less';
-import { Notifier } from 'ui/notify';
+import { toastNotifications } from 'ui/notify';
 import { XPackInfoProvider } from 'plugins/xpack_main/services/xpack_info';
 
 import routes from 'ui/routes';
@@ -39,7 +39,6 @@ routes.when('/management/kibana/reporting', {
   controllerAs: 'jobsCtrl',
   controller($scope, $route, $window, $interval, reportingJobQueue, kbnUrl, Private, reportingPollConfig) {
     const { jobsRefresh } = reportingPollConfig;
-    const notifier = new Notifier({ location: 'Reporting' });
     const xpackInfo = Private(XPackInfoProvider);
 
     this.loading = false;
@@ -53,7 +52,7 @@ routes.when('/management/kibana/reporting', {
     };
 
     const notifyAndRedirectToManagementOverviewPage = () => {
-      notifier.error(xpackInfo.get('features.reporting.management.message'));
+      toastNotifications.addDanger(xpackInfo.get('features.reporting.management.message'));
       kbnUrl.redirect('/management');
       return Promise.reject();
     };
@@ -77,7 +76,7 @@ routes.when('/management/kibana/reporting', {
           }
 
           if (err.status !== 401 && err.status !== 403) {
-            notifier.error(err.statusText || 'Request failed');
+            toastNotifications.addDanger(err.statusText || 'Request failed');
           }
 
           return {

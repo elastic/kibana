@@ -20,8 +20,6 @@ function formatHit(hit, indexName) {
 
 async function fetchStats(callWithRequest, indexName) {
   const params = {
-    ignore_unavailable: true,
-    allow_no_indices: false,
     expand_wildcards: 'none',
     index: indexName,
   };

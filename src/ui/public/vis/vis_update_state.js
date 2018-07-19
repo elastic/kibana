@@ -49,6 +49,14 @@ function convertTermAggregation(visState) {
   }
 }
 
+function convertPropertyNames(visState) {
+  // 'showMeticsAtAllLevels' is a legacy typo we'll fix by changing it to 'showMetricsAtAllLevels'.
+  if (typeof _.get(visState, 'params.showMeticsAtAllLevels') === 'boolean') {
+    visState.params.showMetricsAtAllLevels = visState.params.showMeticsAtAllLevels;
+    delete visState.params.showMeticsAtAllLevels;
+  }
+}
+
 /**
  * This function is responsible for updating old visStates - the actual saved object
  * object - into the format, that will be required by the current Kibana version.
@@ -61,6 +69,7 @@ export const updateOldState = (visState) => {
   const newState = _.cloneDeep(visState);
 
   convertTermAggregation(newState);
+  convertPropertyNames(newState);
 
   if (visState.type === 'gauge' && visState.fontSize) {
     delete newState.fontSize;

@@ -23,6 +23,13 @@ import { getHighlightHtml } from '../../highlight/highlight_html';
 const templateMatchRE = /{{([\s\S]+?)}}/g;
 const whitelistUrlSchemes = ['http://', 'https://'];
 
+const URL_TYPES = [
+  { kind: 'a', text: 'Link' },
+  { kind: 'img', text: 'Image' },
+  { kind: 'audio', text: 'Audio' }
+];
+const DEFAULT_URL_TYPE = 'a';
+
 export function createUrlFormat(FieldFormat) {
   class UrlFormat extends FieldFormat {
     constructor(params) {
@@ -32,7 +39,7 @@ export function createUrlFormat(FieldFormat) {
 
     getParamDefaults() {
       return {
-        type: 'a',
+        type: DEFAULT_URL_TYPE,
         urlTemplate: null,
         labelTemplate: null
       };
@@ -96,6 +103,7 @@ export function createUrlFormat(FieldFormat) {
       'unknown',
       'conflict'
     ];
+    static urlTypes = URL_TYPES;
   }
 
   UrlFormat.prototype._convert = {

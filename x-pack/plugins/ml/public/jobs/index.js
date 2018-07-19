@@ -8,6 +8,7 @@
 
 import './styles/main.less';
 import './jobs_list';
+import './jobs_list_new';
 import './new_job/advanced';
 import './new_job/simple/single_metric';
 import './new_job/simple/multi_metric';

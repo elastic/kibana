@@ -1,0 +1,1175 @@
+{
+  "took": 14,
+  "timed_out": false,
+  "_shards": {
+    "total": 5,
+    "successful": 5,
+    "skipped": 0,
+    "failed": 0
+  },
+  "hits": {
+    "total": 4117,
+    "max_score": 0,
+    "hits": []
+  },
+  "aggregations": {
+    "ml_avg_response_times": {
+      "buckets": [
+        {
+          "key_as_string": "2018-06-04T12:00:00.000Z",
+          "key": 1528113600000,
+          "doc_count": 60,
+          "anomaly_score": {
+            "value": 0.07062823
+          },
+          "upper": {
+            "value": 26781.294783193
+          },
+          "lower": {
+            "value": 734.6120832292385
+          }
+        },
+        {
+          "key_as_string": "2018-06-04T15:00:00.000Z",
+          "key": 1528124400000,
+          "doc_count": 48,
+          "anomaly_score": {
+            "value": 0
+          },
+          "upper": {
+            "value": 27505.95012649385
+          },
+          "lower": {
+            "value": 737.7398559597923
+          }
+        },
+        {
+          "key_as_string": "2018-06-04T18:00:00.000Z",
+          "key": 1528135200000,
+          "doc_count": 48,
+          "anomaly_score": {
+            "value": 0
+          },
+          "upper": {
+            "value": 27831.385094457328
+          },
+          "lower": {
+            "value": 740.6510789069575
+          }
+        },
+        {
+          "key_as_string": "2018-06-04T21:00:00.000Z",
+          "key": 1528146000000,
+          "doc_count": 48,
+          "anomaly_score": {
+            "value": 0
+          },
+          "upper": {
+            "value": 28113.842130309873
+          },
+          "lower": {
+            "value": 743.0092006506535
+          }
+        },
+        {
+          "key_as_string": "2018-06-05T00:00:00.000Z",
+          "key": 1528156800000,
+          "doc_count": 48,
+          "anomaly_score": {
+            "value": 0
+          },
+          "upper": {
+            "value": 28166.937431054437
+          },
+          "lower": {
+            "value": 745.266369017907
+          }
+        },
+        {
+          "key_as_string": "2018-06-05T03:00:00.000Z",
+          "key": 1528167600000,
+          "doc_count": 50,
+          "anomaly_score": {
+            "value": 0.0214167
+          },
+          "upper": {
+            "value": 28506.23990430994
+          },
+          "lower": {
+            "value": 747.3207728528188
+          }
+        },
+        {
+          "key_as_string": "2018-06-05T06:00:00.000Z",
+          "key": 1528178400000,
+          "doc_count": 48,
+          "anomaly_score": {
+            "value": 0
+          },
+          "upper": {
+            "value": 29019.425285291298
+          },
+          "lower": {
+            "value": 749.6894207909651
+          }
+        },
+        {
+          "key_as_string": "2018-06-05T09:00:00.000Z",
+          "key": 1528189200000,
+          "doc_count": 51,
+          "anomaly_score": {
+            "value": 0.05939392
+          },
+          "upper": {
+            "value": 29293.392326541318
+          },
+          "lower": {
+            "value": 752.7726473096143
+          }
+        },
+        {
+          "key_as_string": "2018-06-05T12:00:00.000Z",
+          "key": 1528200000000,
+          "doc_count": 50,
+          "anomaly_score": {
+            "value": 0.01836784
+          },
+          "upper": {
+            "value": 29812.56398272085
+          },
+          "lower": {
+            "value": 754.7407389918743
+          }
+        },
+        {
+          "key_as_string": "2018-06-05T15:00:00.000Z",
+          "key": 1528210800000,
+          "doc_count": 48,
+          "anomaly_score": {
+            "value": 0
+          },
+          "upper": {
+            "value": 30060.955415439636
+          },
+          "lower": {
+            "value": 757.2268079827784
+          }
+        },
+        {
+          "key_as_string": "2018-06-05T18:00:00.000Z",
+          "key": 1528221600000,
+          "doc_count": 48,
+          "anomaly_score": {
+            "value": 0
+          },
+          "upper": {
+            "value": 30376.319798106222
+          },
+          "lower": {
+            "value": 758.3112520555287
+          }
+        },
+        {
+          "key_as_string": "2018-06-05T21:00:00.000Z",
+          "key": 1528232400000,
+          "doc_count": 48,
+          "anomaly_score": {
+            "value": 0
+          },
+          "upper": {
+            "value": 30627.243996529527
+          },
+          "lower": {
+            "value": 761.9827340264112
+          }
+        },
+        {
+          "key_as_string": "2018-06-06T00:00:00.000Z",
+          "key": 1528243200000,
+          "doc_count": 48,
+          "anomaly_score": {
+            "value": 0
+          },
+          "upper": {
+            "value": 31035.75952712361
+          },
+          "lower": {
+            "value": 771.7209606007517
+          }
+        },
+        {
+          "key_as_string": "2018-06-06T03:00:00.000Z",
+          "key": 1528254000000,
+          "doc_count": 48,
+          "anomaly_score": {
+            "value": 0
+          },
+          "upper": {
+            "value": 31062.244462967443
+          },
+          "lower": {
+            "value": 822.9174906119024
+          }
+        },
+        {
+          "key_as_string": "2018-06-06T06:00:00.000Z",
+          "key": 1528264800000,
+          "doc_count": 48,
+          "anomaly_score": {
+            "value": 0
+          },
+          "upper": {
+            "value": 31463.705363442183
+          },
+          "lower": {
+            "value": 867.1132870297309
+          }
+        },
+        {
+          "key_as_string": "2018-06-06T09:00:00.000Z",
+          "key": 1528275600000,
+          "doc_count": 48,
+          "anomaly_score": {
+            "value": 0
+          },
+          "upper": {
+            "value": 31743.78493690837
+          },
+          "lower": {
+            "value": 871.6217257693573
+          }
+        },
+        {
+          "key_as_string": "2018-06-06T12:00:00.000Z",
+          "key": 1528286400000,
+          "doc_count": 86,
+          "anomaly_score": {
+            "value": 93.09271062370188
+          },
+          "upper": {
+            "value": 42784.833235636936
+          },
+          "lower": {
+            "value": 630.1794765317344
+          }
+        },
+        {
+          "key_as_string": "2018-06-06T15:00:00.000Z",
+          "key": 1528297200000,
+          "doc_count": 94,
+          "anomaly_score": {
+            "value": 94.91969
+          },
+          "upper": {
+            "value": 34441.21907642463
+          },
+          "lower": {
+            "value": 871.0283056454996
+          }
+        },
+        {
+          "key_as_string": "2018-06-06T18:00:00.000Z",
+          "key": 1528308000000,
+          "doc_count": 76,
+          "anomaly_score": {
+            "value": 0.737564554333639
+          },
+          "upper": {
+            "value": 35467.552283525925
+          },
+          "lower": {
+            "value": 872.694053998953
+          }
+        },
+        {
+          "key_as_string": "2018-06-06T21:00:00.000Z",
+          "key": 1528318800000,
+          "doc_count": 62,
+          "anomaly_score": {
+            "value": 0.2233028643272195
+          },
+          "upper": {
+            "value": 36793.04873774251
+          },
+          "lower": {
+            "value": 872.8967719351887
+          }
+        },
+        {
+          "key_as_string": "2018-06-07T00:00:00.000Z",
+          "key": 1528329600000,
+          "doc_count": 56,
+          "anomaly_score": {
+            "value": 4.367981
+          },
+          "upper": {
+            "value": 37663.180967734144
+          },
+          "lower": {
+            "value": 873.2094351335686
+          }
+        },
+        {
+          "key_as_string": "2018-06-07T03:00:00.000Z",
+          "key": 1528340400000,
+          "doc_count": 74,
+          "anomaly_score": {
+            "value": 10.94823
+          },
+          "upper": {
+            "value": 38704.9736025016
+          },
+          "lower": {
+            "value": 872.096335158222
+          }
+        },
+        {
+          "key_as_string": "2018-06-07T06:00:00.000Z",
+          "key": 1528351200000,
+          "doc_count": 50,
+          "anomaly_score": {
+            "value": 0.025502508470513552
+          },
+          "upper": {
+            "value": 39411.4696425657
+          },
+          "lower": {
+            "value": 870.7141079237686
+          }
+        },
+        {
+          "key_as_string": "2018-06-07T09:00:00.000Z",
+          "key": 1528362000000,
+          "doc_count": 52,
+          "anomaly_score": {
+            "value": 0.04643894365231562
+          },
+          "upper": {
+            "value": 40436.89001900413
+          },
+          "lower": {
+            "value": 865.6904233415615
+          }
+        },
+        {
+          "key_as_string": "2018-06-07T12:00:00.000Z",
+          "key": 1528372800000,
+          "doc_count": 52,
+          "anomaly_score": {
+            "value": 0.08232853094836577
+          },
+          "upper": {
+            "value": 41583.671803791396
+          },
+          "lower": {
+            "value": 864.5587212551438
+          }
+        },
+        {
+          "key_as_string": "2018-06-07T15:00:00.000Z",
+          "key": 1528383600000,
+          "doc_count": 48,
+          "anomaly_score": {
+            "value": 0
+          },
+          "upper": {
+            "value": 41918.88300390927
+          },
+          "lower": {
+            "value": 862.0456649399898
+          }
+        },
+        {
+          "key_as_string": "2018-06-07T18:00:00.000Z",
+          "key": 1528394400000,
+          "doc_count": 48,
+          "anomaly_score": {
+            "value": 0
+          },
+          "upper": {
+            "value": 42346.34733913561
+          },
+          "lower": {
+            "value": 862.6952960489333
+          }
+        },
+        {
+          "key_as_string": "2018-06-07T21:00:00.000Z",
+          "key": 1528405200000,
+          "doc_count": 50,
+          "anomaly_score": {
+            "value": 0.09328928850624264
+          },
+          "upper": {
+            "value": 43503.30873034762
+          },
+          "lower": {
+            "value": 859.02865711764
+          }
+        },
+        {
+          "key_as_string": "2018-06-08T00:00:00.000Z",
+          "key": 1528416000000,
+          "doc_count": 50,
+          "anomaly_score": {
+            "value": 0.01490678070537287
+          },
+          "upper": {
+            "value": 43582.32622523151
+          },
+          "lower": {
+            "value": 853.1249075544679
+          }
+        },
+        {
+          "key_as_string": "2018-06-08T03:00:00.000Z",
+          "key": 1528426800000,
+          "doc_count": 50,
+          "anomaly_score": {
+            "value": 0.025631694904640304
+          },
+          "upper": {
+            "value": 44583.7194942183
+          },
+          "lower": {
+            "value": 850.0412997919607
+          }
+        },
+        {
+          "key_as_string": "2018-06-08T06:00:00.000Z",
+          "key": 1528437600000,
+          "doc_count": 48,
+          "anomaly_score": {
+            "value": 0
+          },
+          "upper": {
+            "value": 45027.0923125673
+          },
+          "lower": {
+            "value": 846.9251200783423
+          }
+        },
+        {
+          "key_as_string": "2018-06-08T09:00:00.000Z",
+          "key": 1528448400000,
+          "doc_count": 52,
+          "anomaly_score": {
+            "value": 0.1775235302080928
+          },
+          "upper": {
+            "value": 46355.1414826366
+          },
+          "lower": {
+            "value": 839.9462033017412
+          }
+        },
+        {
+          "key_as_string": "2018-06-08T12:00:00.000Z",
+          "key": 1528459200000,
+          "doc_count": 48,
+          "anomaly_score": {
+            "value": 0
+          },
+          "upper": {
+            "value": 46997.18507921725
+          },
+          "lower": {
+            "value": 740.8424736560071
+          }
+        },
+        {
+          "key_as_string": "2018-06-08T15:00:00.000Z",
+          "key": 1528470000000,
+          "doc_count": 48,
+          "anomaly_score": {
+            "value": 0
+          },
+          "upper": {
+            "value": 47730.52441880603
+          },
+          "lower": {
+            "value": 675.2681661332581
+          }
+        },
+        {
+          "key_as_string": "2018-06-08T18:00:00.000Z",
+          "key": 1528480800000,
+          "doc_count": 50,
+          "anomaly_score": {
+            "value": 0
+          },
+          "upper": {
+            "value": 48709.29810572524
+          },
+          "lower": {
+            "value": 672.90202453507
+          }
+        },
+        {
+          "key_as_string": "2018-06-08T21:00:00.000Z",
+          "key": 1528491600000,
+          "doc_count": 50,
+          "anomaly_score": {
+            "value": 0
+          },
+          "upper": {
+            "value": 49406.64628717409
+          },
+          "lower": {
+            "value": 676.0944399455826
+          }
+        },
+        {
+          "key_as_string": "2018-06-09T00:00:00.000Z",
+          "key": 1528502400000,
+          "doc_count": 48,
+          "anomaly_score": {
+            "value": 0
+          },
+          "upper": {
+            "value": 73477.3874808886
+          },
+          "lower": {
+            "value": 682.4396257998045
+          }
+        },
+        {
+          "key_as_string": "2018-06-09T03:00:00.000Z",
+          "key": 1528513200000,
+          "doc_count": 48,
+          "anomaly_score": {
+            "value": 0
+          },
+          "upper": {
+            "value": 73487.82525090317
+          },
+          "lower": {
+            "value": 686.44341250381
+          }
+        },
+        {
+          "key_as_string": "2018-06-09T06:00:00.000Z",
+          "key": 1528524000000,
+          "doc_count": 48,
+          "anomaly_score": {
+            "value": 0
+          },
+          "upper": {
+            "value": 72962.57745081023
+          },
+          "lower": {
+            "value": 690.5371630779586
+          }
+        },
+        {
+          "key_as_string": "2018-06-09T09:00:00.000Z",
+          "key": 1528534800000,
+          "doc_count": 48,
+          "anomaly_score": {
+            "value": 0
+          },
+          "upper": {
+            "value": 72489.77380542927
+          },
+          "lower": {
+            "value": 695.8034104561633
+          }
+        },
+        {
+          "key_as_string": "2018-06-09T12:00:00.000Z",
+          "key": 1528545600000,
+          "doc_count": 48,
+          "anomaly_score": {
+            "value": 0
+          },
+          "upper": {
+            "value": 72463.76348179985
+          },
+          "lower": {
+            "value": 707.6839448592744
+          }
+        },
+        {
+          "key_as_string": "2018-06-09T15:00:00.000Z",
+          "key": 1528556400000,
+          "doc_count": 50,
+          "anomaly_score": {
+            "value": 0.18086821490763677
+          },
+          "upper": {
+            "value": 72996.2561390666
+          },
+          "lower": {
+            "value": 781.8674002616508
+          }
+        },
+        {
+          "key_as_string": "2018-06-09T18:00:00.000Z",
+          "key": 1528567200000,
+          "doc_count": 48,
+          "anomaly_score": {
+            "value": 0
+          },
+          "upper": {
+            "value": 73169.30855560771
+          },
+          "lower": {
+            "value": 846.540373740061
+          }
+        },
+        {
+          "key_as_string": "2018-06-09T21:00:00.000Z",
+          "key": 1528578000000,
+          "doc_count": 48,
+          "anomaly_score": {
+            "value": 0
+          },
+          "upper": {
+            "value": 73491.08437587181
+          },
+          "lower": {
+            "value": 860.5368537637945
+          }
+        },
+        {
+          "key_as_string": "2018-06-10T00:00:00.000Z",
+          "key": 1528588800000,
+          "doc_count": 49,
+          "anomaly_score": {
+            "value": 0
+          },
+          "upper": {
+            "value": 72389.78456634001
+          },
+          "lower": {
+            "value": 863.0293573898325
+          }
+        },
+        {
+          "key_as_string": "2018-06-10T03:00:00.000Z",
+          "key": 1528599600000,
+          "doc_count": 48,
+          "anomaly_score": {
+            "value": 0
+          },
+          "upper": {
+            "value": 72311.41927730369
+          },
+          "lower": {
+            "value": 863.4144235290587
+          }
+        },
+        {
+          "key_as_string": "2018-06-10T06:00:00.000Z",
+          "key": 1528610400000,
+          "doc_count": 48,
+          "anomaly_score": {
+            "value": 0
+          },
+          "upper": {
+            "value": 71383.41956191002
+          },
+          "lower": {
+            "value": 863.6781514985616
+          }
+        },
+        {
+          "key_as_string": "2018-06-10T09:00:00.000Z",
+          "key": 1528621200000,
+          "doc_count": 48,
+          "anomaly_score": {
+            "value": 0
+          },
+          "upper": {
+            "value": 74565.86466696904
+          },
+          "lower": {
+            "value": 863.4492510434609
+          }
+        },
+        {
+          "key_as_string": "2018-06-10T12:00:00.000Z",
+          "key": 1528632000000,
+          "doc_count": 48,
+          "anomaly_score": {
+            "value": 0
+          },
+          "upper": {
+            "value": 71304.14035324028
+          },
+          "lower": {
+            "value": 863.1958870174615
+          }
+        },
+        {
+          "key_as_string": "2018-06-10T15:00:00.000Z",
+          "key": 1528642800000,
+          "doc_count": 48,
+          "anomaly_score": {
+            "value": 0
+          },
+          "upper": {
+            "value": 72434.51561823535
+          },
+          "lower": {
+            "value": 862.6161500045084
+          }
+        },
+        {
+          "key_as_string": "2018-06-10T18:00:00.000Z",
+          "key": 1528653600000,
+          "doc_count": 48,
+          "anomaly_score": {
+            "value": 0
+          },
+          "upper": {
+            "value": 71664.49530601672
+          },
+          "lower": {
+            "value": 861.9526316405551
+          }
+        },
+        {
+          "key_as_string": "2018-06-10T21:00:00.000Z",
+          "key": 1528664400000,
+          "doc_count": 48,
+          "anomaly_score": {
+            "value": 0
+          },
+          "upper": {
+            "value": 71264.41362778837
+          },
+          "lower": {
+            "value": 861.1638627191994
+          }
+        },
+        {
+          "key_as_string": "2018-06-11T00:00:00.000Z",
+          "key": 1528675200000,
+          "doc_count": 48,
+          "anomaly_score": {
+            "value": 0
+          },
+          "upper": {
+            "value": 49087.805718943775
+          },
+          "lower": {
+            "value": 860.1741427701811
+          }
+        },
+        {
+          "key_as_string": "2018-06-11T03:00:00.000Z",
+          "key": 1528686000000,
+          "doc_count": 48,
+          "anomaly_score": {
+            "value": 0
+          },
+          "upper": {
+            "value": 49089.84051479006
+          },
+          "lower": {
+            "value": 862.4069845546885
+          }
+        },
+        {
+          "key_as_string": "2018-06-11T06:00:00.000Z",
+          "key": 1528696800000,
+          "doc_count": 60,
+          "anomaly_score": {
+            "value": 2.718289217634223
+          },
+          "upper": {
+            "value": 51834.13246654848
+          },
+          "lower": {
+            "value": 862.7834836635291
+          }
+        },
+        {
+          "key_as_string": "2018-06-11T09:00:00.000Z",
+          "key": 1528707600000,
+          "doc_count": 48,
+          "anomaly_score": {
+            "value": 0
+          },
+          "upper": {
+            "value": 51136.66870946708
+          },
+          "lower": {
+            "value": 863.5914163409548
+          }
+        },
+        {
+          "key_as_string": "2018-06-11T12:00:00.000Z",
+          "key": 1528718400000,
+          "doc_count": 48,
+          "anomaly_score": {
+            "value": 0
+          },
+          "upper": {
+            "value": 50968.889501405334
+          },
+          "lower": {
+            "value": 865.9550918866486
+          }
+        },
+        {
+          "key_as_string": "2018-06-11T15:00:00.000Z",
+          "key": 1528729200000,
+          "doc_count": 48,
+          "anomaly_score": {
+            "value": 0
+          },
+          "upper": {
+            "value": 51039.136906324355
+          },
+          "lower": {
+            "value": 866.5727896346234
+          }
+        },
+        {
+          "key_as_string": "2018-06-11T18:00:00.000Z",
+          "key": 1528740000000,
+          "doc_count": 48,
+          "anomaly_score": {
+            "value": 0
+          },
+          "upper": {
+            "value": 50450.44063039239
+          },
+          "lower": {
+            "value": 866.4824432593966
+          }
+        },
+        {
+          "key_as_string": "2018-06-11T21:00:00.000Z",
+          "key": 1528750800000,
+          "doc_count": 48,
+          "anomaly_score": {
+            "value": 0
+          },
+          "upper": {
+            "value": 49883.2079974308
+          },
+          "lower": {
+            "value": 869.2106974966512
+          }
+        },
+        {
+          "key_as_string": "2018-06-12T00:00:00.000Z",
+          "key": 1528761600000,
+          "doc_count": 48,
+          "anomaly_score": {
+            "value": 0
+          },
+          "upper": {
+            "value": 50019.796552072105
+          },
+          "lower": {
+            "value": 869.7908032042425
+          }
+        },
+        {
+          "key_as_string": "2018-06-12T03:00:00.000Z",
+          "key": 1528772400000,
+          "doc_count": 48,
+          "anomaly_score": {
+            "value": 0
+          },
+          "upper": {
+            "value": 50352.19806206938
+          },
+          "lower": {
+            "value": 872.0969808877924
+          }
+        },
+        {
+          "key_as_string": "2018-06-12T06:00:00.000Z",
+          "key": 1528783200000,
+          "doc_count": 48,
+          "anomaly_score": {
+            "value": 0
+          },
+          "upper": {
+            "value": 49893.959882267525
+          },
+          "lower": {
+            "value": 873.8327021716271
+          }
+        },
+        {
+          "key_as_string": "2018-06-12T09:00:00.000Z",
+          "key": 1528794000000,
+          "doc_count": 48,
+          "anomaly_score": {
+            "value": 0
+          },
+          "upper": {
+            "value": 49882.868445094966
+          },
+          "lower": {
+            "value": 875.6449156690691
+          }
+        },
+        {
+          "key_as_string": "2018-06-12T12:00:00.000Z",
+          "key": 1528804800000,
+          "doc_count": 48,
+          "anomaly_score": {
+            "value": 0
+          },
+          "upper": {
+            "value": 49766.53895122279
+          },
+          "lower": {
+            "value": 874.6294655070553
+          }
+        },
+        {
+          "key_as_string": "2018-06-12T15:00:00.000Z",
+          "key": 1528815600000,
+          "doc_count": 50,
+          "anomaly_score": {
+            "value": 0
+          },
+          "upper": {
+            "value": 49424.25380462067
+          },
+          "lower": {
+            "value": 878.2077083935897
+          }
+        },
+        {
+          "key_as_string": "2018-06-12T18:00:00.000Z",
+          "key": 1528826400000,
+          "doc_count": 50,
+          "anomaly_score": {
+            "value": 0
+          },
+          "upper": {
+            "value": 50079.967231416216
+          },
+          "lower": {
+            "value": 879.6702185935983
+          }
+        },
+        {
+          "key_as_string": "2018-06-12T21:00:00.000Z",
+          "key": 1528837200000,
+          "doc_count": 48,
+          "anomaly_score": {
+            "value": 0
+          },
+          "upper": {
+            "value": 49447.853072406695
+          },
+          "lower": {
+            "value": 880.9475908626134
+          }
+        },
+        {
+          "key_as_string": "2018-06-13T00:00:00.000Z",
+          "key": 1528848000000,
+          "doc_count": 51,
+          "anomaly_score": {
+            "value": 0
+          },
+          "upper": {
+            "value": 49628.237099331986
+          },
+          "lower": {
+            "value": 883.2355577302953
+          }
+        },
+        {
+          "key_as_string": "2018-06-13T03:00:00.000Z",
+          "key": 1528858800000,
+          "doc_count": 50,
+          "anomaly_score": {
+            "value": 0
+          },
+          "upper": {
+            "value": 49121.655177004985
+          },
+          "lower": {
+            "value": 885.0345875232065
+          }
+        },
+        {
+          "key_as_string": "2018-06-13T06:00:00.000Z",
+          "key": 1528869600000,
+          "doc_count": 50,
+          "anomaly_score": {
+            "value": 0
+          },
+          "upper": {
+            "value": 49439.75445560749
+          },
+          "lower": {
+            "value": 886.8375619687324
+          }
+        },
+        {
+          "key_as_string": "2018-06-13T09:00:00.000Z",
+          "key": 1528880400000,
+          "doc_count": 48,
+          "anomaly_score": {
+            "value": 0
+          },
+          "upper": {
+            "value": 49095.91031920496
+          },
+          "lower": {
+            "value": 888.2875318407426
+          }
+        },
+        {
+          "key_as_string": "2018-06-13T12:00:00.000Z",
+          "key": 1528891200000,
+          "doc_count": 50,
+          "anomaly_score": {
+            "value": 0
+          },
+          "upper": {
+            "value": 48584.97256737151
+          },
+          "lower": {
+            "value": 887.4807424937617
+          }
+        },
+        {
+          "key_as_string": "2018-06-13T15:00:00.000Z",
+          "key": 1528902000000,
+          "doc_count": 50,
+          "anomaly_score": {
+            "value": 0
+          },
+          "upper": {
+            "value": 48401.4014885278
+          },
+          "lower": {
+            "value": 885.3782512926099
+          }
+        },
+        {
+          "key_as_string": "2018-06-13T18:00:00.000Z",
+          "key": 1528912800000,
+          "doc_count": 50,
+          "anomaly_score": {
+            "value": 0
+          },
+          "upper": {
+            "value": 48303.662251777845
+          },
+          "lower": {
+            "value": 883.9626695681782
+          }
+        },
+        {
+          "key_as_string": "2018-06-13T21:00:00.000Z",
+          "key": 1528923600000,
+          "doc_count": 48,
+          "anomaly_score": {
+            "value": 0
+          },
+          "upper": {
+            "value": 48079.01124458592
+          },
+          "lower": {
+            "value": 881.5723811019918
+          }
+        },
+        {
+          "key_as_string": "2018-06-14T00:00:00.000Z",
+          "key": 1528934400000,
+          "doc_count": 60,
+          "anomaly_score": {
+            "value": 66.42568
+          },
+          "upper": {
+            "value": 58715.507088231585
+          },
+          "lower": {
+            "value": 0
+          }
+        },
+        {
+          "key_as_string": "2018-06-14T03:00:00.000Z",
+          "key": 1528945200000,
+          "doc_count": 55,
+          "anomaly_score": {
+            "value": 0
+          },
+          "upper": {
+            "value": 49868.15796918666
+          },
+          "lower": {
+            "value": 0
+          }
+        },
+        {
+          "key_as_string": "2018-06-14T06:00:00.000Z",
+          "key": 1528956000000,
+          "doc_count": 53,
+          "anomaly_score": {
+            "value": 0.060750193569274885
+          },
+          "upper": {
+            "value": 50310.902258087066
+          },
+          "lower": {
+            "value": 2003.2599232283408
+          }
+        },
+        {
+          "key_as_string": "2018-06-14T09:00:00.000Z",
+          "key": 1528966800000,
+          "doc_count": 62,
+          "anomaly_score": {
+            "value": 0.2831448638843196
+          },
+          "upper": {
+            "value": 51642.47679276076
+          },
+          "lower": {
+            "value": 1346.2241502014724
+          }
+        },
+        {
+          "key_as_string": "2018-06-14T12:00:00.000Z",
+          "key": 1528977600000,
+          "doc_count": 4,
+          "anomaly_score": {
+            "value": 0
+          },
+          "upper": {
+            "value": 50550.64218576831
+          },
+          "lower": {
+            "value": 1317.070500756407
+          }
+        }
+      ]
+    },
+    "top_hits": {
+      "hits": {
+        "total": 4117,
+        "max_score": null,
+        "hits": [
+          {
+            "_index": ".ml-anomalies-shared",
+            "_type": "doc",
+            "_id": "opbeans-node-request-high_mean_response_time_model_plot_1528170300000_900_0_29791_0",
+            "_score": null,
+            "_source": {
+              "bucket_span": 900
+            },
+            "sort": [
+              900
+            ]
+          }
+        ]
+      }
+    }
+  }
+}

@@ -21,12 +21,14 @@ chromeNavControlsRegistry.register(constant({
   template
 }));
 
-const module = uiModules.get('spaces', ['kibana']);
+const module = uiModules.get('spaces_nav', ['kibana']);
+
+let spacesManager;
 
 module.controller('spacesNavController', ($scope, $http, chrome, activeSpace) => {
   const domNode = document.getElementById(`spacesNavReactRoot`);
 
-  const spacesManager = new SpacesManager($http, chrome);
+  spacesManager = new SpacesManager($http, chrome);
 
   render(<NavControlModal spacesManager={spacesManager} activeSpace={activeSpace} />, domNode);
 
@@ -35,4 +37,14 @@ module.controller('spacesNavController', ($scope, $http, chrome, activeSpace) =>
     unmountComponentAtNode(domNode);
   });
 
+});
+
+module.service('spacesNavState', () => {
+  return {
+    refreshSpacesList: () => {
+      if (spacesManager) {
+        spacesManager.requestRefresh();
+      }
+    }
+  };
 });

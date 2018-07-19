@@ -28,6 +28,10 @@ export function isFilterable(field) {
 }
 
 export function getFromSavedObject(savedObject) {
+  if (!savedObject) {
+    return null;
+  }
+
   return {
     fields: JSON.parse(savedObject.attributes.fields),
     title: savedObject.attributes.title,

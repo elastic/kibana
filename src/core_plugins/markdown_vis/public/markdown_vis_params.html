@@ -6,10 +6,10 @@
     </div>
     <div class="kuiSideBarFormRow">
       <label class="kuiSideBarFormRow__label" for="markdownVisFontSize">
-        Font Size (<span ng-bind="vis.params.fontSize"></span>pt)
+        Font Size (<span ng-bind="editorState.params.fontSize"></span>pt)
       </label>
       <div class="kuiSideBarFormRow__control">
-        <input id="markdownVisFontSize" type="range" ng-model="vis.params.fontSize" class="form-control" min="8" max="36" />
+        <input id="markdownVisFontSize" type="range" ng-model="editorState.params.fontSize" class="form-control" min="8" max="36" />
       </div>
     </div>
     <div class="kuiSideBarFormRow">
@@ -20,14 +20,14 @@
         <input
           id="markdownVisOpenLinksInNewTab"
           type="checkbox"
-          ng-model="vis.params.openLinksInNewTab"
+          ng-model="editorState.params.openLinksInNewTab"
           class="kuiCheckBox"
         />
       </div>
     </div>
     <textarea
       id="markdownVisInput"
-      ng-model="vis.params.markdown"
+      ng-model="editorState.params.markdown"
       class="form-control"
       rows="20"
       data-test-subj="markdownTextarea"

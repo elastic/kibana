@@ -32,9 +32,9 @@
 
     <span
       ng-show="timefilterValues.refreshInterval.value > 0"
-      aria-label="{{ 'Data will refresh every ' + timefilterValues.refreshInterval.display }}"
+      aria-label="Data will refresh every {{timefilterValues.display.refreshInterval}}"
     >
-      {{ timefilterValues.refreshInterval.display }}
+      {{ timefilterValues.display.refreshInterval }}
     </span>
   </button>
 
@@ -61,11 +61,12 @@
     aria-haspopup="true"
   >
     <span aria-hidden="true" class="kuiIcon fa-clock-o"></span>
-    <pretty-duration
-      from="timefilterValues.time.from"
-      to="timefilterValues.time.to"
+    <span
+      aria-label="Current time range is {{timefilterValues.display.time}}"
       data-test-subj="globalTimepickerRange"
-    ></pretty-duration>
+    >
+      {{timefilterValues.display.time}}
+    </span>
   </button>
 
   <button

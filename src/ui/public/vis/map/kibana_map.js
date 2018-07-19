@@ -647,7 +647,6 @@ export class KibanaMap extends EventEmitter {
       if (!centerFromUIState || centerFromMap.lon !== centerFromUIState[1] || centerFromMap.lat !== centerFromUIState[0]) {
         visualization.uiStateVal('mapCenter', [centerFromMap.lat, centerFromMap.lon]);
       }
-      visualization.sessionState.mapBounds = this.getBounds();
     }
 
     this._leafletMap.on('resize', () => {

@@ -7,7 +7,7 @@
 import { uiModules } from 'ui/modules';
 import { InitAfterBindingsWorkaround } from 'ui/compat';
 import moment from 'moment-timezone';
-import { Notifier, toastNotifications } from 'ui/notify';
+import { toastNotifications } from 'ui/notify';
 import 'ui/config';
 import 'ui/url';
 import 'ui/table_info';
@@ -48,8 +48,6 @@ app.directive('watchDetail', function ($injector) {
     controllerAs: 'watchDetail',
     controller: class WatchDetailController extends InitAfterBindingsWorkaround {
       initAfterBindings($scope) {
-        this.notifier = new Notifier({ location: 'Watcher' });
-
         // history settings
         this.isHistoryLoading = false;
         this.historyRange = this.initialHistoryRange;
@@ -82,7 +80,7 @@ app.directive('watchDetail', function ($injector) {
           })
           .catch(err => {
             return licenseService.checkValidity()
-              .then(() => this.notifier.error(err));
+              .then(() => toastNotifications.addDanger(err));
           });
       }
 
@@ -122,7 +120,7 @@ app.directive('watchDetail', function ($injector) {
           })
           .catch(err => {
             return licenseService.checkValidity()
-              .then(() => this.notifier.error(err));
+              .then(() => toastNotifications.addDanger(err));
           });
       }
 
@@ -137,7 +135,7 @@ app.directive('watchDetail', function ($injector) {
           })
           .catch(err => {
             return licenseService.checkValidity()
-              .then(() => this.notifier.error(err));
+              .then(() => toastNotifications.addDanger(err));
           });
       };
 
@@ -148,7 +146,7 @@ app.directive('watchDetail', function ($injector) {
           })
           .catch(err => {
             return licenseService.checkValidity()
-              .then(() => this.notifier.error(err));
+              .then(() => toastNotifications.addDanger(err));
           });
       }
 
@@ -169,7 +167,7 @@ app.directive('watchDetail', function ($injector) {
           })
           .catch(err => {
             return licenseService.checkValidity()
-              .then(() => this.notifier.error(err));
+              .then(() => toastNotifications.addDanger(err));
           });
       }
 

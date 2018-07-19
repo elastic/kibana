@@ -17,7 +17,6 @@
  * under the License.
  */
 
-import { first } from 'rxjs/operators';
 import { AggTypeFilters } from './agg_type_filters';
 
 describe('AggTypeFilters', () => {
@@ -31,46 +30,31 @@ describe('AggTypeFilters', () => {
 
   it('should filter nothing without registered filters', async () => {
     const aggTypes = [{ name: 'count' }, { name: 'sum' }];
-    const observable = registry.filter$(aggTypes, indexPattern, aggConfig);
-    const filtered = await observable.pipe(first()).toPromise();
+    const filtered = registry.filter(aggTypes, indexPattern, aggConfig);
     expect(filtered).toEqual(aggTypes);
-  });
-
-  it('should emit a new filtered list when registering a new filter', async () => {
-    const aggTypes = [{ name: 'count' }, { name: 'sum' }];
-    const observable = registry.filter$(aggTypes, indexPattern, aggConfig);
-    const spy = jest.fn();
-    observable.subscribe(spy);
-    expect(spy).toHaveBeenCalledTimes(1);
-    registry.addFilter(() => true);
-    expect(spy).toHaveBeenCalledTimes(2);
   });
 
   it('should pass all aggTypes to the registered filter', async () => {
     const aggTypes = [{ name: 'count' }, { name: 'sum' }];
     const filter = jest.fn();
     registry.addFilter(filter);
-    await registry
-      .filter$(aggTypes, indexPattern, aggConfig)
-      .pipe(first())
-      .toPromise();
+    registry.filter(aggTypes, indexPattern, aggConfig);
     expect(filter).toHaveBeenCalledWith(aggTypes[0], indexPattern, aggConfig);
     expect(filter).toHaveBeenCalledWith(aggTypes[1], indexPattern, aggConfig);
   });
 
   it('should allow registered filters to filter out aggTypes', async () => {
     const aggTypes = [{ name: 'count' }, { name: 'sum' }, { name: 'avg' }];
-    const observable = registry.filter$(aggTypes, indexPattern, aggConfig);
-    let filtered = await observable.pipe(first()).toPromise();
+    let filtered = registry.filter(aggTypes, indexPattern, aggConfig);
     expect(filtered).toEqual(aggTypes);
 
     registry.addFilter(() => true);
     registry.addFilter(aggType => aggType.name !== 'count');
-    filtered = await observable.pipe(first()).toPromise();
+    filtered = registry.filter(aggTypes, indexPattern, aggConfig);
     expect(filtered).toEqual([aggTypes[1], aggTypes[2]]);
 
     registry.addFilter(aggType => aggType.name !== 'avg');
-    filtered = await observable.pipe(first()).toPromise();
+    filtered = registry.filter(aggTypes, indexPattern, aggConfig);
     expect(filtered).toEqual([aggTypes[1]]);
   });
 });

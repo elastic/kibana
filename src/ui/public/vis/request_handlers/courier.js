@@ -33,8 +33,8 @@ const CourierRequestHandlerProvider = function () {
    * This function builds tabular data from the response and attaches it to the
    * inspector. It will only be called when the data view in the inspector is opened.
    */
-  async function buildTabularInspectorData(vis, searchSource, responseAggs) {
-    const table = tabifyAggResponse(responseAggs, searchSource.finalResponse, {
+  async function buildTabularInspectorData(vis, searchSource, aggConfigs) {
+    const table = tabifyAggResponse(aggConfigs, searchSource.finalResponse, {
       canSplit: false,
       asAggConfigResults: false,
       partialRows: true,
@@ -82,8 +82,8 @@ const CourierRequestHandlerProvider = function () {
       // Using callParentStartHandlers: true we make sure, that the parent searchSource
       // onSearchRequestStart will be called properly even though we use an inherited
       // search source.
-      const timeFilterSearchSource = searchSource.makeChild({ callParentStartHandlers: true });
-      const requestSearchSource = timeFilterSearchSource.makeChild({ callParentStartHandlers: true });
+      const timeFilterSearchSource = searchSource.createChild({ callParentStartHandlers: true });
+      const requestSearchSource = timeFilterSearchSource.createChild({ callParentStartHandlers: true });
 
       // For now we need to mirror the history of the passed search source, since
       // the spy panel wouldn't work otherwise.
@@ -96,7 +96,7 @@ const CourierRequestHandlerProvider = function () {
         }
       });
 
-      requestSearchSource.aggs(function () {
+      requestSearchSource.setField('aggs', function () {
         return aggs.toDsl();
       });
 
@@ -104,12 +104,12 @@ const CourierRequestHandlerProvider = function () {
         return aggs.onSearchRequestStart(searchSource, searchRequest);
       });
 
-      timeFilterSearchSource.set('filter', () => {
-        return getTime(searchSource.get('index'), timeRange);
+      timeFilterSearchSource.setField('filter', () => {
+        return getTime(searchSource.getField('index'), timeRange);
       });
 
-      requestSearchSource.set('filter', filters);
-      requestSearchSource.set('query', query);
+      requestSearchSource.setField('filter', filters);
+      requestSearchSource.setField('query', query);
 
       const shouldQuery = (requestBodyHash) => {
         if (!searchSource.lastQuery || forceFetch) return true;
@@ -121,7 +121,7 @@ const CourierRequestHandlerProvider = function () {
         return requestSearchSource.getSearchRequestBody().then(q => {
           const queryHash = calculateObjectHash(q);
           if (shouldQuery(queryHash)) {
-            const lastResponseAggs = vis.getAggConfig().getResponseAggs();
+            const lastAggConfig = vis.getAggConfig();
             vis.API.inspectorAdapters.requests.reset();
             const request = vis.API.inspectorAdapters.requests.start('Data', {
               description: `This request queries Elasticsearch to fetch the data for the visualization.`,
@@ -140,15 +140,20 @@ const CourierRequestHandlerProvider = function () {
             }).then(async resp => {
               for (const agg of aggs) {
                 if (_.has(agg, 'type.postFlightRequest')) {
-                  const nestedSearchSource = requestSearchSource.makeChild();
-                  resp = await agg.type.postFlightRequest(resp, aggs, agg, nestedSearchSource);
+                  resp = await agg.type.postFlightRequest(
+                    resp,
+                    aggs,
+                    agg,
+                    requestSearchSource,
+                    vis.API.inspectorAdapters
+                  );
                 }
               }
 
               searchSource.finalResponse = resp;
 
               vis.API.inspectorAdapters.data.setTabularLoader(
-                () => buildTabularInspectorData(vis, searchSource, lastResponseAggs),
+                () => buildTabularInspectorData(vis, searchSource, lastAggConfig),
                 { returnsFormattedValues: true }
               );
 

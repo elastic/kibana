@@ -17,7 +17,7 @@ const XY_HEIGHT = unit * 16;
 const XY_MARGIN = {
   top: unit,
   left: unit * 5,
-  right: unit,
+  right: 0,
   bottom: unit * 2
 };
 

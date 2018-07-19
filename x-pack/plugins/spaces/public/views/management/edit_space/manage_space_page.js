@@ -193,6 +193,7 @@ export class ManageSpacePage extends Component {
           <DeleteSpacesButton
             spaces={[this.state.space]}
             spacesManager={this.props.spacesManager}
+            spacesNavState={this.props.spacesNavState}
             onDelete={this.backToSpacesList}
           />
         </EuiFlexItem>
@@ -290,6 +291,7 @@ export class ManageSpacePage extends Component {
 
       action
         .then(result => {
+          this.props.spacesNavState.refreshSpacesList();
           toastNotifications.addSuccess(`Saved '${result.data.name}'`);
           window.location.hash = `#/management/spaces/list`;
         })
@@ -393,5 +395,6 @@ export class ManageSpacePage extends Component {
 ManageSpacePage.propTypes = {
   space: PropTypes.string,
   spacesManager: PropTypes.object,
+  spacesNavState: PropTypes.object.isRequired,
   breadcrumbs: PropTypes.array.isRequired,
 };
