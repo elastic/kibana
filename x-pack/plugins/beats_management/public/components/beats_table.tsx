@@ -5,7 +5,6 @@
  */
 
 import {
-  // @ts-ignore
   EuiBadge,
   EuiButton,
   EuiContextMenu,
@@ -17,6 +16,7 @@ import {
   EuiPopover,
 } from '@elastic/eui';
 import React from 'react';
+import styled from 'styled-components';
 import { CMPopulatedBeat } from '../../common/domain_types';
 
 const columns = [
@@ -72,6 +72,10 @@ interface BeatsTableState {
   selection: CMPopulatedBeat[];
   isBulkPopoverOpen: boolean;
 }
+
+const TableContainer = styled.div`
+  padding: 16px;
+`;
 
 export class BeatsTable extends React.Component<BeatsTableProps, BeatsTableState> {
   constructor(props: BeatsTableProps) {
@@ -168,22 +172,24 @@ export class BeatsTable extends React.Component<BeatsTableProps, BeatsTableState
     };
 
     return (
-      <EuiInMemoryTable
-        columns={columns}
-        items={items.map((beat, index) => {
-          return {
-            ...beat,
-            key: `beat${index}`,
-          };
-        })}
-        itemId="id"
-        isSelectable={true}
-        pagination={pagination}
-        responsive={true}
-        search={search}
-        selection={selectionOptions}
-        sorting={true}
-      />
+      <TableContainer>
+        <EuiInMemoryTable
+          columns={columns}
+          items={items.map((beat, index) => {
+            return {
+              ...beat,
+              key: `beat${index}`,
+            };
+          })}
+          itemId="id"
+          isSelectable={true}
+          pagination={pagination}
+          responsive={true}
+          search={search}
+          selection={selectionOptions}
+          sorting={true}
+        />
+      </TableContainer>
     );
   }
 
