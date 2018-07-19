@@ -152,7 +152,8 @@ export class UiBundlesController {
       await mkdirpAsync(this._workingDir);
     } else {
       // delete all children of the working directory
-      await del(this.resolvePath('*'), `!${ this.resolvePath('*.dll.*') }`);
+      // TODO: Review THIS HERE
+      await del([this.resolvePath('*'), '!' + this.resolvePath('dlls')]);
     }
 
     // write the entry/style files for each bundle
