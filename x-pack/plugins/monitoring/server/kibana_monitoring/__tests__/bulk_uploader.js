@@ -52,8 +52,7 @@ describe('BulkUploader', () => {
       ]);
 
       const uploader = new BulkUploader(server, {
-        interval: FETCH_INTERVAL,
-        combineTypes: noop,
+        interval: FETCH_INTERVAL
       });
 
       uploader.start(collectors);
@@ -82,16 +81,11 @@ describe('BulkUploader', () => {
     });
 
     it('should run the bulk upload handler', done => {
-      const combineTypes = sinon.spy(data => {
-        return [data[0][0], { ...data[0][1], combined: true }];
-      });
-
       const collectors = new MockCollectorSet(server, [
         { fetch: () => ({ type: 'type_collector_test', result: { testData: 12345 } }) }
       ]);
       const uploader = new BulkUploader(server, {
-        interval: FETCH_INTERVAL,
-        combineTypes,
+        interval: FETCH_INTERVAL
       });
 
       uploader.start(collectors);
@@ -109,13 +103,6 @@ describe('BulkUploader', () => {
         expect(loggingCalls[1].args).to.eql([
           ['debug', 'monitoring-ui', 'kibana-monitoring'],
           'Uploading bulk stats payload to the local cluster',
-        ]);
-
-        // un-flattened
-        const combineCalls = combineTypes.getCalls();
-        expect(combineCalls.length).to.be.greaterThan(0); // should be 1-2 fetch and combine cycles
-        expect(combineCalls[0].args).to.eql([
-          [[{ index: { _type: 'type_collector_test' } }, { testData: 12345 }]],
         ]);
 
         done();

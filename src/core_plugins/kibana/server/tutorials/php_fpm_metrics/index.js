@@ -26,6 +26,7 @@ export function phpfpmMetricsSpecProvider() {
     id: 'phpfpmMetrics',
     name: 'PHP-FPM metrics',
     category: TUTORIAL_CATEGORY.METRICS,
+    isBeta: true,
     shortDescription: 'Fetch internal metrics from PHP-FPM.',
     longDescription: 'The `php_fpm` Metricbeat module fetches internal metrics from the PHP-FPM server.' +
                      ' [Learn more]({config.docs.beats.metricbeat}/metricbeat-module-php_fpm.html).',
