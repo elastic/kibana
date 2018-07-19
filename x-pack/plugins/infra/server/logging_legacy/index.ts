@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { InfraBackendFrameworkAdapter } from '../lib/infra_types';
+import { InfraBackendFrameworkAdapter } from '../lib/adapters/framework';
 import { initAdjacentLogEntriesRoutes } from './adjacent_log_entries';
 import { initAdjacentSearchResultsRoutes } from './adjacent_search_results';
 import { initContainedSearchResultsRoutes } from './contained_search_results';

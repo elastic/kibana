@@ -4,11 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import {
-  InfraDatabaseSearchResponse,
-  InfraESQuery,
-  InfraNodeRequestOptions,
-} from '../../../infra_types';
+import { InfraDatabaseSearchResponse } from '../../framework';
+import { InfraESQuery, InfraNodeRequestOptions } from '../adapter_types';
 import { createQuery } from './create_query';
 
 interface CardinalityOfFieldParams {

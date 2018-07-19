@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { InfraESSearchBody, InfraProcesorRequestOptions } from '../../../infra_types';
-import { createLastNProcessor } from '../../../processors/last';
+import { InfraESSearchBody, InfraProcesorRequestOptions } from '../adapter_types';
+import { createLastNProcessor } from '../processors/last';
 
 export function createNodeRequestBody(options: InfraProcesorRequestOptions): InfraESSearchBody {
   const requestProcessor = createLastNProcessor(options);

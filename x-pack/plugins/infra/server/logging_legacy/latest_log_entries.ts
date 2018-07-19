@@ -16,7 +16,7 @@ import {
   InfraBackendFrameworkAdapter,
   InfraDatabaseSearchResponse,
   InfraWrappableRequest,
-} from '../lib/infra_types';
+} from '../lib/adapters/framework';
 import { fetchAdjacentEntries } from './adjacent_log_entries';
 import { indicesSchema, logEntryFieldsMappingSchema, timestampSchema } from './schemas';
 

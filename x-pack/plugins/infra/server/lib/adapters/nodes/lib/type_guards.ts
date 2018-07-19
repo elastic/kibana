@@ -5,8 +5,7 @@
  */
 
 import { InfraGroupBy, InfraGroupByType } from '../../../../../common/graphql/types';
-
-import { InfraGroupByFilters, InfraGroupByTerms } from '../../../infra_types';
+import { InfraGroupByFilters, InfraGroupByTerms } from '../adapter_types';
 
 export function isGroupByFilters(value: InfraGroupBy): value is InfraGroupByFilters {
   return value.type === InfraGroupByType.filters;

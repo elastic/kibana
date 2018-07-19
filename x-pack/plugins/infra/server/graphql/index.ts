@@ -7,5 +7,6 @@
 import { rootSchema } from '../../common/graphql/root/schema.gql';
 import { fieldsSchema } from './fields/schema.gql';
 import { nodesSchema } from './nodes/schema.gql';
+import { sourcesSchema } from './sources/schema.gql';
 
-export const schemas = [rootSchema, nodesSchema, fieldsSchema];
+export const schemas = [rootSchema, nodesSchema, fieldsSchema, sourcesSchema];

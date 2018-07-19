@@ -5,32 +5,23 @@
  */
 
 import { cloneDeep, set } from 'lodash';
-import {
-  NODE_REQUEST_PARTITION_FACTOR,
-  NODE_REQUEST_PARTITION_SIZE,
-} from '../../../../common/constants';
+
 import {
   InfraESSearchBody,
   InfraProcesorRequestOptions,
   InfraProcessor,
   InfraProcessorChainFn,
   InfraProcessorTransformer,
-} from '../../infra_types';
+} from '../../adapter_types';
+import { createQuery } from '../../lib/create_query';
 
-export const nodesProcessor: InfraProcessor<InfraProcesorRequestOptions, InfraESSearchBody> = (
+export const queryProcessor: InfraProcessor<InfraProcesorRequestOptions, InfraESSearchBody> = (
   options: InfraProcesorRequestOptions
 ): InfraProcessorChainFn<InfraESSearchBody> => {
   return (next: InfraProcessorTransformer<InfraESSearchBody>) => (doc: InfraESSearchBody) => {
     const result = cloneDeep(doc);
-    set(result, 'aggs.waffle.aggs.nodes.terms', {
-      field: options.nodeField,
-      include: {
-        num_partitions: options.numberOfPartitions,
-        partition: options.partitionId,
-      },
-      order: { _key: 'asc' },
-      size: NODE_REQUEST_PARTITION_SIZE * NODE_REQUEST_PARTITION_FACTOR,
-    });
+    set(result, 'size', 0);
+    set(result, 'query', createQuery(options.nodeOptions));
     return next(result);
   };
 };

@@ -4,14 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { extractGroupPaths, InfraPathItem } from './extract_group_paths';
-
-import { findOrCreateGroupWithNodes, findOrCreateGroupWithSubGroups } from './find_or_create_group';
-
-import { InfraBucket, InfraNodeRequestOptions } from '../../../infra_types';
-
 import { set } from 'lodash';
+
 import { InfraGroup, InfraGroupBy } from '../../../../../common/graphql/types';
+import { InfraBucket, InfraNodeRequestOptions } from '../adapter_types';
+import { extractGroupPaths, InfraPathItem } from './extract_group_paths';
+import { findOrCreateGroupWithNodes, findOrCreateGroupWithSubGroups } from './find_or_create_group';
 
 export function convertNodesResponseToGroups(
   options: InfraNodeRequestOptions,

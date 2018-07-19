@@ -18,7 +18,7 @@ import {
   InfraBackendFrameworkAdapter,
   InfraDatabaseSearchResponse,
   InfraWrappableRequest,
-} from '../lib/infra_types';
+} from '../lib/adapters/framework';
 import { convertHitToSearchResult } from './converters';
 import { isHighlightedHit, SortedHit } from './elasticsearch';
 import { indicesSchema, logEntryFieldsMappingSchema, logEntryTimeSchema } from './schemas';

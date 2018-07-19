@@ -5,12 +5,13 @@
  */
 
 import { times } from 'lodash';
-import { NODE_REQUEST_PARTITION_SIZE } from '../../../../../common/constants';
+
 import {
   InfraESMSearchBody,
   InfraNodeRequestOptions,
   InfraProcesorRequestOptions,
-} from '../../../infra_types';
+} from '../adapter_types';
+import { NODE_REQUEST_PARTITION_SIZE } from '../constants';
 import { createNodeRequestBody } from './create_node_request_body';
 
 export function createPartitionBodies(

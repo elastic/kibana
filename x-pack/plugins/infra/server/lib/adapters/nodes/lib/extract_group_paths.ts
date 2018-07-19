@@ -4,10 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { InfraGroupBy } from '../../../../../common/graphql/types';
+import { InfraBucket, InfraNode, InfraNodeRequestOptions } from '../adapter_types';
 import { createNodeItem } from './create_node_item';
 
-import { InfraGroupBy } from '../../../../../common/graphql/types';
-import { InfraBucket, InfraNode, InfraNodeRequestOptions } from '../../../infra_types';
 export interface InfraPathItem {
   path: string[];
   nodeItem: InfraNode;

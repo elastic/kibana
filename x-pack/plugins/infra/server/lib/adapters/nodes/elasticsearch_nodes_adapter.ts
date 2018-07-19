@@ -4,17 +4,16 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { InfraBackendFrameworkAdapter, InfraFrameworkRequest } from '../framework';
 import {
-  InfraBackendFrameworkAdapter,
   InfraBucket,
-  InfraFrameworkRequest,
   InfraNodeRequestOptions,
   InfraNodesAdapter,
   InfraNodesAggregations,
-} from '../../infra_types';
+} from './adapter_types';
 
-import { DOMAIN_TO_FIELD } from '../../../../common/constants';
 import { InfraResponse } from '../../../../common/graphql/types';
+import { DOMAIN_TO_FIELD } from './constants';
 import { calculateCardinalityOfNodeField } from './lib/calculate_cardinality';
 import { createPartitionBodies } from './lib/create_partition_bodies';
 import { processNodes } from './lib/process_nodes';
