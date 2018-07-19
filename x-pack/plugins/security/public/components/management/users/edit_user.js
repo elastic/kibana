@@ -97,7 +97,7 @@ export class EditUser extends Component {
     if (username !== null && !username) {
       return 'Username is required';
     } else if (!username.match(validUsernameRegex)) {
-      return 'Username contains invalid character(s)';
+      return 'Username must begin with a letter or underscore and contain only letters, underscores, and numbers';
     }
   };
   fullnameError = () => {
