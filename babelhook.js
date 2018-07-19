@@ -32,6 +32,10 @@ const options = {
           pattern: 'plugins/canvas/apps',
           location: resolve(__dirname, 'tasks', 'mocks', 'noop'),
         },
+        {
+          pattern: '/state/store',
+          location: resolve(__dirname, 'tasks', 'mocks', 'stateStore'),
+        },
       ],
     ],
   ],
