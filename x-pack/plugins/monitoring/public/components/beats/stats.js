@@ -22,9 +22,9 @@ export function Stats({ stats }) {
   });
 
   return (
-    <div className="monitoring-summary-status" role="status">
+    <div className="monSummaryStatus" role="status">
       <div
-        className="monitoring-summary-status__content"
+        className="monSummaryStatus__content"
         data-test-subj="beatsSummaryStatus"
       >
         <div>

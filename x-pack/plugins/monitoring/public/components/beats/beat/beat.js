@@ -24,9 +24,9 @@ export function Beat({ summary, metrics, ...props }) {
   return (
     <div>
       <div role="status">
-        <div className="monitoring-summary-status">
+        <div className="monSummaryStatus">
           <div
-            className="monitoring-summary-status__content"
+            className="monSummaryStatus__content"
             data-test-subj="beatSummaryStatus01"
           >
             <div>
@@ -58,9 +58,9 @@ export function Beat({ summary, metrics, ...props }) {
           </div>
         </div>
 
-        <div className="monitoring-summary-status" role="status">
+        <div className="monSummaryStatus" role="status">
           <div
-            className="monitoring-summary-status__content"
+            className="monSummaryStatus__content"
             data-test-subj="beatSummaryStatus02"
           >
             <div>
