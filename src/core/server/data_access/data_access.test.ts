@@ -22,7 +22,7 @@ import sinon from 'sinon';
 // use this NotFound error
 // import elasticsearch from 'elasticsearch';
 // import { NotFound } from elasticsearch.errors;
-import { decorateEsError, trimIdPrefix, errors } from '../lib';
+import { decorateEsError, trimIdPrefix, errors } from './lib';
 const errorsMock = {
   isNotFoundError: jest.fn(() => true),
   createEsAutoCreateIndexError: jest.fn(() => {
@@ -35,9 +35,9 @@ jest.mock('../lib', () => ({
   trimIdPrefix: jest.fn(id => id),
 }));
 
-import { SavedObjectsDAL } from './saved_objects_dal';
+import { DataAccess } from './data_access';
 
-describe('saved objects data access', () => {
+describe('kibana objects data access', () => {
   const mockFields = { updated_at: '2018-07-17T09:36:14.791Z' };
   const mockCallCluster = jest.fn(() => ({
     _id: 'foo',
@@ -53,7 +53,7 @@ describe('saved objects data access', () => {
         },
         callCluster: () => {},
       };
-      const dal = new SavedObjectsDAL(options);
+      const dal = new DataAccess(options);
       expect(dal).toMatchSnapshot();
     });
 
@@ -66,7 +66,7 @@ describe('saved objects data access', () => {
         onBeforeWrite: () => {},
         callCluster: () => {},
       };
-      const dal = new SavedObjectsDAL(options);
+      const dal = new DataAccess(options);
       expect(dal).toMatchSnapshot();
     });
   });
@@ -80,7 +80,7 @@ describe('saved objects data access', () => {
         },
         callCluster: mockCallCluster,
       };
-      const dal = new SavedObjectsDAL(options);
+      const dal = new DataAccess(options);
       const rtn = await dal.create('foo', { attr: 'bar' });
       const withMock = {
         ...rtn,
@@ -101,7 +101,7 @@ describe('saved objects data access', () => {
         },
         callCluster: mockCallCluster,
       };
-      const dal = new SavedObjectsDAL(options);
+      const dal = new DataAccess(options);
       const rtn = await dal.create('foo', { attr: 'bar' }, { id: 'baz' });
       const withMock = {
         ...rtn,
@@ -127,7 +127,7 @@ describe('saved objects data access', () => {
         },
       };
 
-      const dal = new SavedObjectsDAL(options);
+      const dal = new DataAccess(options);
       try {
         await dal.create('foo');
       } catch (err) {
@@ -156,7 +156,7 @@ describe('saved objects data access', () => {
         callCluster,
       };
 
-      const dal = new SavedObjectsDAL(options);
+      const dal = new DataAccess(options);
       const rtn = await dal.bulkCreate([
         {
           type: 'foo',

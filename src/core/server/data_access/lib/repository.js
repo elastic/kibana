@@ -20,77 +20,61 @@
 import uuid from 'uuid';
 
 import { getRootType } from '../../../../server/mappings';
-import { getSearchDsl } from '../lib/search_dsl';
-import { trimIdPrefix } from '../lib/';
-import { includedFields } from '../lib/';
-import { decorateEsError } from '../lib/';
-import { errors } from '../lib/';
+import { getSearchDsl } from './search_dsl';
+import { trimIdPrefix } from './trim_id_prefix';
+import { includedFields } from './included_fields';
+import { decorateEsError } from './decorate_es_error';
+import * as errors from './errors';
 
-export interface SavedObjectsDALOptions {
-  index: string;
-  mappings: { [key: string]: any };
-  callCluster: () => any;
-  onBeforeWrite?: () => void;
-}
 
-export interface SavedObjectsDALCreateOptions {
-  id?: string;
-  overwrite?: boolean;
-}
+// BEWARE: The SavedObjectClient depends on the implementation details of the SavedObjectsRepository
+// so any breaking changes to this repository are considered breaking changes to the SavedObjectsClient.
 
-export interface SavedObjectsDALObject {
-  id?: string;
-  type: string;
-  attributes: { [key: string]: any };
-}
+export class SavedObjectsRepository {
+  constructor(options) {
+    const {
+      index,
+      mappings,
+      callCluster,
+      onBeforeWrite = () => {},
+    } = options;
 
-export class SavedObjectsDAL {
-  private readonly index: string;
-  private readonly mappings: { [key: string]: any };
-  private readonly onBeforeWrite: () => void;
-  private readonly type: string;
-  private readonly unwrappedCallCluster: (method: string, params: any) => any;
-
-  constructor(options: SavedObjectsDALOptions) {
-    const { index, mappings, callCluster, onBeforeWrite = () => {} } = options;
-
-    this.index = index;
-    this.mappings = mappings;
-    this.onBeforeWrite = onBeforeWrite;
-    this.type = getRootType(mappings);
-    this.unwrappedCallCluster = callCluster;
+    this._index = index;
+    this._mappings = mappings;
+    this._type = getRootType(this._mappings);
+    this._onBeforeWrite = onBeforeWrite;
+    this._unwrappedCallCluster = callCluster;
   }
 
   /**
-   * Persist an object
+   * Persists an object
    *
    * @param {string} type
    * @param {object} attributes
-   * @param {SavedObjectsDALCreateOptions} [options={}]
+   * @param {object} [options={}]
    * @property {string} [options.id] - force id on creation, not recommended
    * @property {boolean} [options.overwrite=false]
-   * @returns {promise} - { id, type, updated_at, version, attributes }
-   */
-  async create(
-    type: string,
-    attributes = {},
-    options: SavedObjectsDALCreateOptions = { overwrite: false }
-  ) {
-    const { id, overwrite } = options;
+   * @returns {promise} - { id, type, version, attributes }
+  */
+  async create(type, attributes = {}, options = {}) {
+    const {
+      id,
+      overwrite = false
+    } = options;
 
     const method = id && !overwrite ? 'create' : 'index';
-    const time = this.getCurrentTime();
+    const time = this._getCurrentTime();
 
     try {
-      const response = await this.writeToCluster(method, {
-        id: this.generateEsId(type, id),
-        type: this.type,
-        index: this.index,
+      const response = await this._writeToCluster(method, {
+        id: this._generateEsId(type, id),
+        type: this._type,
+        index: this._index,
         refresh: 'wait_for',
         body: {
           type,
           updated_at: time,
-          [type]: attributes,
+          [type]: attributes
         },
       });
 
@@ -99,10 +83,11 @@ export class SavedObjectsDAL {
         type,
         updated_at: time,
         version: response._version,
-        attributes,
+        attributes
       };
     } catch (error) {
       if (errors.isNotFoundError(error)) {
+        // See "503s from missing index" above
         throw errors.createEsAutoCreateIndexError();
       }
 
@@ -118,53 +103,58 @@ export class SavedObjectsDAL {
    * @property {boolean} [options.overwrite=false] - overwrites existing documents
    * @returns {promise} - [{ id, type, version, attributes, error: { message } }]
    */
-  async bulkCreate(
-    objects: Array<SavedObjectsDALObject>,
-    options: SavedObjectsDALCreateOptions = { overwrite: false }
-  ) {
-    const { overwrite } = options;
-    const time = this.getCurrentTime();
-    const objectToBulkRequest = (object: SavedObjectsDALObject) => {
+  async bulkCreate(objects, options = {}) {
+    const {
+      overwrite = false
+    } = options;
+    const time = this._getCurrentTime();
+    const objectToBulkRequest = (object) => {
       const method = object.id && !overwrite ? 'create' : 'index';
 
       return [
         {
           [method]: {
-            _id: this.generateEsId(object.type, object.id),
-            _type: this.type,
-          },
+            _id: this._generateEsId(object.type, object.id),
+            _type: this._type,
+          }
         },
         {
           type: object.type,
           updated_at: time,
-          [object.type]: object.attributes,
-        },
+          [object.type]: object.attributes
+        }
       ];
     };
 
-    const { items } = await this.writeToCluster('bulk', {
-      index: this.index,
+    const { items } = await this._writeToCluster('bulk', {
+      index: this._index,
       refresh: 'wait_for',
-      body: objects.reduce(
-        (acc, obj) => [...acc, ...objectToBulkRequest(obj)],
-        []
-      ),
+      body: objects.reduce((acc, object) => ([
+        ...acc,
+        ...objectToBulkRequest(object)
+      ]), []),
     });
 
-    return items.map((response: any, i: number) => {
-      const { error, _id: responseId, _version: version } = Object.values(
-        response
-      )[0];
+    return items.map((response, i) => {
+      const {
+        error,
+        _id: responseId,
+        _version: version,
+      } = Object.values(response)[0];
 
-      const { id = responseId, type, attributes } = objects[i];
+      const {
+        id = responseId,
+        type,
+        attributes,
+      } = objects[i];
 
       if (error) {
         return {
           id,
           type,
           error: {
-            message: error.reason || JSON.stringify(error),
-          },
+            message: error.reason || JSON.stringify(error)
+          }
         };
       }
 
@@ -173,7 +163,7 @@ export class SavedObjectsDAL {
         type,
         updated_at: time,
         version,
-        attributes,
+        attributes
       };
     });
   }
@@ -185,11 +175,11 @@ export class SavedObjectsDAL {
    * @param {string} id
    * @returns {promise}
    */
-  async delete(type: string, id: string) {
-    const response = await this.writeToCluster('delete', {
-      id: this.generateEsId(type, id),
-      type: this.type,
-      index: this.index,
+  async delete(type, id) {
+    const response = await this._writeToCluster('delete', {
+      id: this._generateEsId(type, id),
+      type: this._type,
+      index: this._index,
       refresh: 'wait_for',
       ignore: [404],
     });
@@ -200,19 +190,14 @@ export class SavedObjectsDAL {
     }
 
     const docNotFound = response.result === 'not_found';
-    const indexNotFound =
-      response.error && response.error.type === 'index_not_found_exception';
+    const indexNotFound = response.error && response.error.type === 'index_not_found_exception';
     if (docNotFound || indexNotFound) {
       // see "404s from missing index" above
       throw errors.createGenericNotFoundError(type, id);
     }
 
     throw new Error(
-      `Unexpected Elasticsearch DELETE response: ${JSON.stringify({
-        type,
-        id,
-        response,
-      })}`
+      `Unexpected Elasticsearch DELETE response: ${JSON.stringify({ type, id, response, })}`
     );
   }
 
@@ -262,12 +247,12 @@ export class SavedObjectsDAL {
           searchFields,
           type,
           sortField,
-          sortOrder,
-        }),
-      },
+          sortOrder
+        })
+      }
     };
 
-    const response = await this.callCluster('search', esOptions);
+    const response = await this._callCluster('search', esOptions);
 
     if (response.status === 404) {
       // 404 is only possible here if the index is missing, which
@@ -276,7 +261,7 @@ export class SavedObjectsDAL {
         page,
         per_page: perPage,
         total: 0,
-        saved_objects: [],
+        saved_objects: []
       };
     }
 
@@ -289,7 +274,7 @@ export class SavedObjectsDAL {
         return {
           id: trimIdPrefix(hit._id, type),
           type,
-          ...(updatedAt && { updated_at: updatedAt }),
+          ...updatedAt && { updated_at: updatedAt },
           version: hit._version,
           attributes: hit._source[type],
         };
@@ -314,14 +299,14 @@ export class SavedObjectsDAL {
       return { saved_objects: [] };
     }
 
-    const response = await this.callCluster('mget', {
+    const response = await this._callCluster('mget', {
       index: this._index,
       body: {
         docs: objects.map(object => ({
-          _id: this.generateEsId(object.type, object.id),
+          _id: this._generateEsId(object.type, object.id),
           _type: this._type,
-        })),
-      },
+        }))
+      }
     });
 
     return {
@@ -332,7 +317,7 @@ export class SavedObjectsDAL {
           return {
             id,
             type,
-            error: { statusCode: 404, message: 'Not found' },
+            error: { statusCode: 404, message: 'Not found' }
           };
         }
 
@@ -340,11 +325,11 @@ export class SavedObjectsDAL {
         return {
           id,
           type,
-          ...(time && { updated_at: time }),
+          ...time && { updated_at: time },
           version: doc._version,
-          attributes: doc._source[type],
+          attributes: doc._source[type]
         };
-      }),
+      })
     };
   }
 
@@ -356,11 +341,11 @@ export class SavedObjectsDAL {
    * @returns {promise} - { id, type, version, attributes }
    */
   async get(type, id) {
-    const response = await this.callCluster('get', {
-      id: this.generateEsId(type, id),
+    const response = await this._callCluster('get', {
+      id: this._generateEsId(type, id),
       type: this._type,
       index: this._index,
-      ignore: [404],
+      ignore: [404]
     });
 
     const docNotFound = response.found === false;
@@ -375,14 +360,14 @@ export class SavedObjectsDAL {
     return {
       id,
       type,
-      ...(updatedAt && { updated_at: updatedAt }),
+      ...updatedAt && { updated_at: updatedAt },
       version: response._version,
-      attributes: response._source[type],
+      attributes: response._source[type]
     };
   }
 
   /**
-   * Update an object
+   * Updates an object
    *
    * @param {string} type
    * @param {string} id
@@ -391,9 +376,9 @@ export class SavedObjectsDAL {
    * @returns {promise}
    */
   async update(type, id, attributes, options = {}) {
-    const time = this.getCurrentTime();
-    const response = await this.writeToCluster('update', {
-      id: this.generateEsId(type, id),
+    const time = this._getCurrentTime();
+    const response = await this._writeToCluster('update', {
+      id: this._generateEsId(type, id),
       type: this._type,
       index: this._index,
       version: options.version,
@@ -402,8 +387,8 @@ export class SavedObjectsDAL {
       body: {
         doc: {
           updated_at: time,
-          [type]: attributes,
-        },
+          [type]: attributes
+        }
       },
     });
 
@@ -417,32 +402,32 @@ export class SavedObjectsDAL {
       type,
       updated_at: time,
       version: response._version,
-      attributes,
+      attributes
     };
   }
 
-  private async writeToCluster(method: string, params = {}) {
+  async _writeToCluster(method, params) {
     try {
-      await this.onBeforeWrite();
-      return await this.callCluster(method, params);
+      await this._onBeforeWrite();
+      return await this._callCluster(method, params);
     } catch (err) {
       throw decorateEsError(err);
     }
   }
 
-  private async callCluster(method: string, params = {}) {
+  async _callCluster(method, params) {
     try {
-      return await this.unwrappedCallCluster(method, params);
+      return await this._unwrappedCallCluster(method, params);
     } catch (err) {
       throw decorateEsError(err);
     }
   }
 
-  private generateEsId(type, id) {
+  _generateEsId(type, id) {
     return `${type}:${id || uuid.v1()}`;
   }
 
-  private getCurrentTime() {
+  _getCurrentTime() {
     return new Date().toISOString();
   }
 }
