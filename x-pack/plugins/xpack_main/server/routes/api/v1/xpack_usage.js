@@ -16,7 +16,7 @@ const getClusterUuid = async callCluster => {
  * @throws {Error} if the Monitoring CollectorSet is not ready
  */
 const getUsage = (callCluster, server) => {
-  const { collectorSet } = server.plugins.monitoring;
+  const { collectorSet } = server.usage;
   return collectorSet.bulkFetchUsage(callCluster);
 };
 
