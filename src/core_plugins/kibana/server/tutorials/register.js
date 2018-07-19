@@ -22,6 +22,7 @@ import { systemMetricsSpecProvider } from './system_metrics';
 import { apacheLogsSpecProvider } from './apache_logs';
 import { apacheMetricsSpecProvider } from './apache_metrics';
 import { kafkaLogsSpecProvider } from './kafka_logs';
+import { logstashLogsSpecProvider } from './logstash_logs';
 import { nginxLogsSpecProvider } from './nginx_logs';
 import { nginxMetricsSpecProvider } from './nginx_metrics';
 import { mysqlLogsSpecProvider } from './mysql_logs';
@@ -58,6 +59,7 @@ export function registerTutorials(server) {
   server.registerTutorial(apacheLogsSpecProvider);
   server.registerTutorial(apacheMetricsSpecProvider);
   server.registerTutorial(kafkaLogsSpecProvider);
+  server.registerTutorial(logstashLogsSpecProvider);
   server.registerTutorial(nginxLogsSpecProvider);
   server.registerTutorial(nginxMetricsSpecProvider);
   server.registerTutorial(mysqlLogsSpecProvider);
