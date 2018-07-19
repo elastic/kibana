@@ -26,8 +26,8 @@ import configSetupMixin from './config/setup';
 import httpMixin from './http';
 import { loggingMixin } from './logging';
 import warningsMixin from './warnings';
-import { statusMixin } from './status';
 import { usageMixin } from './usage';
+import { statusMixin } from './status';
 import pidMixin from './pid';
 import { configDeprecationWarningsMixin } from './config/deprecation_warnings';
 import configCompleteMixin from './config/complete';
@@ -68,8 +68,8 @@ export default class KbnServer {
       loggingMixin,
       configDeprecationWarningsMixin,
       warningsMixin,
-      statusMixin,
       usageMixin,
+      statusMixin,
 
       // writes pid file
       pidMixin,

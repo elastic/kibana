@@ -18,6 +18,7 @@
  */
 
 import os from 'os';
+import v8 from 'v8';
 import { get, isObject, merge } from 'lodash';
 import { keysToSnakeCaseShallow } from '../../../utils/case_conversion';
 import { getAllStats as cGroupStats } from './cgroup';
@@ -32,19 +33,17 @@ export class Metrics {
   static getStubMetrics() {
     return {
       process: {
-        mem: {}
+        memory: {
+          heap: {}
+        }
       },
       os: {
         cpu: {},
-        mem: {}
+        memory: {}
       },
       response_times: {},
       requests: {
         status_codes: {}
-      },
-      sockets: {
-        http: {},
-        https: {}
       }
     };
   }
@@ -56,53 +55,52 @@ export class Metrics {
 
     const metrics = {
       last_updated: timestamp,
-      collection_interval_in_millis: this.config.get('ops.interval'),
-      uptime_in_millis: event.process.uptime_ms, // TODO: deprecate this field, data should only have process.uptime_ms
+      collection_interval_in_millis: this.config.get('ops.interval')
     };
 
     return merge(metrics, event, cgroup);
   }
 
   captureEvent(hapiEvent) {
+    const heapStats = v8.getHeapStatistics();
     const port = this.config.get('server.port');
-
     const avgInMillis = get(hapiEvent, ['responseTimes', port, 'avg']); // sadly, it's possible for this to be NaN
     const maxInMillis = get(hapiEvent, ['responseTimes', port, 'max']);
 
     return {
       process: {
-        mem: {
-          // https://nodejs.org/docs/latest-v8.x/api/process.html#process_process_memoryusage
-          heap_max_in_bytes: get(hapiEvent, 'psmem.heapTotal'),
-          heap_used_in_bytes: get(hapiEvent, 'psmem.heapUsed'),
+        memory: {
+          heap: {
+            // https://nodejs.org/docs/latest-v8.x/api/process.html#process_process_memoryusage
+            total_in_bytes: get(hapiEvent, 'psmem.heapTotal'),
+            used_in_bytes: get(hapiEvent, 'psmem.heapUsed'),
+            size_limit: heapStats.heap_size_limit
+          },
           resident_set_size_in_bytes: get(hapiEvent, 'psmem.rss'),
-          external_in_bytes: get(hapiEvent, 'psmem.external')
         },
+        event_loop_delay: get(hapiEvent, 'psdelay'),
         pid: process.pid,
-        uptime_ms: process.uptime() * 1000
+        uptime_in_millis: process.uptime() * 1000
       },
       os: {
-        cpu: {
-          load_average: {
-            '1m': get(hapiEvent, 'osload.0'),
-            '5m': get(hapiEvent, 'osload.1'),
-            '15m': get(hapiEvent, 'osload.2')
-          }
+        load: {
+          '1m': get(hapiEvent, 'osload.0'),
+          '5m': get(hapiEvent, 'osload.1'),
+          '15m': get(hapiEvent, 'osload.2')
         },
-        mem: {
+        memory: {
+          total_in_bytes: os.totalmem(),
           free_in_bytes: os.freemem(),
-          total_in_bytes: os.totalmem()
-        }
+          used_in_bytes: get(hapiEvent, 'osmem.total') - get(hapiEvent, 'osmem.free')
+        },
+        uptime_in_millis: os.uptime() * 1000
       },
       response_times: {
-        // TODO: rename to use `_ms` suffix per beats naming conventions
         avg_in_millis: isNaN(avgInMillis) ? undefined : avgInMillis, // convert NaN to undefined
         max_in_millis: maxInMillis
       },
       requests: keysToSnakeCaseShallow(get(hapiEvent, ['requests', port])),
       concurrent_connections: get(hapiEvent, ['concurrents', port]),
-      sockets: get(hapiEvent, 'sockets'),
-      event_loop_delay: get(hapiEvent, 'psdelay')
     };
   }
 

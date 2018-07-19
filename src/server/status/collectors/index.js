@@ -17,4 +17,4 @@
  * under the License.
  */
 
-export { MetricsCollector } from './metrics_collector';
+export { getOpsStatsCollector } from './get_ops_stats_collector';
