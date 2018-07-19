@@ -5,4 +5,4 @@
  */
 
 
-import './jobs_directive';
+import './directive';

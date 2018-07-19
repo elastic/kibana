@@ -14,7 +14,7 @@ const TIME_FORMAT = 'YYYY-MM-DD HH:mm:ss';
 
 export function jobsProvider(callWithRequest) {
 
-  const { forceDeleteDatafeed } = datafeedsProvider(callWithRequest);
+  const { forceDeleteDatafeed, getDatafeedIdsByJobId } = datafeedsProvider(callWithRequest);
   const { getAuditMessagesSummary } = jobAuditMessagesProvider(callWithRequest);
   const calMngr = new CalendarManager(callWithRequest);
 
@@ -24,14 +24,14 @@ export function jobsProvider(callWithRequest) {
 
   async function deleteJobs(jobIds) {
     const results = {};
-    const datafeedIds = jobIds.reduce((p, c) => {
-      p[c] = `datafeed-${c}`;
-      return p;
-    }, {});
+    const datafeedIds = await getDatafeedIdsByJobId();
 
     for (const jobId of jobIds) {
       try {
-        const datafeedResp = await forceDeleteDatafeed(datafeedIds[jobId]);
+        const datafeedResp = (datafeedIds[jobId] === undefined) ?
+          { acknowledged: true } :
+          await forceDeleteDatafeed(datafeedIds[jobId]);
+
         if (datafeedResp.acknowledged) {
           try {
             await forceDeleteJob(jobId);
@@ -47,6 +47,31 @@ export function jobsProvider(callWithRequest) {
     return results;
   }
 
+  async function closeJobs(jobIds) {
+    const results = {};
+    for (const jobId of jobIds) {
+      try {
+        await callWithRequest('ml.closeJob', { jobId });
+        results[jobId] = { closed: true };
+      } catch (error) {
+        if (error.statusCode === 409 && (error.response && error.response.includes('datafeed') === false)) {
+          // the close job request may fail (409) if the job has failed or if the datafeed hasn't been stopped.
+          // if the job has failed we want to attempt a force close.
+          // however, if we received a 409 due to the datafeed being started we should not attempt a force close.
+          try {
+            await callWithRequest('ml.closeJob', { jobId, force: true });
+            results[jobId] = { closed: true };
+          } catch (error2) {
+            results[jobId] = { closed: false, error: error2 };
+          }
+        } else {
+          results[jobId] = { closed: false, error };
+        }
+      }
+    }
+    return results;
+  }
+
   async function jobsSummary(jobIds = []) {
     const fullJobsList = await createFullJobsList();
     const auditMessages = await getAuditMessagesSummary();
@@ -56,7 +81,7 @@ export function jobsProvider(callWithRequest) {
     }, {});
 
     const jobs = fullJobsList.map((job) => {
-      const hasDatafeed = (job.datafeed_config !== undefined);
+      const hasDatafeed = (typeof job.datafeed_config === 'object' && Object.keys(job.datafeed_config).length);
       const {
         earliest: earliestTimeStamp,
         latest: latestTimeStamp } = earliestAndLatestTimeStamps(job.data_counts);
@@ -64,7 +89,7 @@ export function jobsProvider(callWithRequest) {
       const tempJob = {
         id: job.job_id,
         description: (job.description || ''),
-        groups: (job.groups || []),
+        groups: (Array.isArray(job.groups) ? job.groups.sort() : []),
         processed_record_count: job.data_counts.processed_record_count,
         memory_status: (job.model_size_stats) ? job.model_size_stats.memory_status : '',
         jobState: job.state,
@@ -276,6 +301,7 @@ export function jobsProvider(callWithRequest) {
   return {
     forceDeleteJob,
     deleteJobs,
+    closeJobs,
     jobsSummary,
     createFullJobsList,
     getAllGroups,

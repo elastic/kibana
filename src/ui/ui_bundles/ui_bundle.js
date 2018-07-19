@@ -18,7 +18,7 @@
  */
 
 import { fromNode as fcb } from 'bluebird';
-import { readFile, writeFile, unlink, stat } from 'fs';
+import { readFile, writeFile, stat } from 'fs';
 
 // We normalize all path separators to `/` in generated files
 function normalizePath(path) {
@@ -86,31 +86,31 @@ export class UiBundle {
     ));
   }
 
-  async hasStyleFile() {
-    return await fcb(cb => {
-      return stat(this.getStylePath(), error => {
-        cb(null, !(error && error.code === 'ENOENT'));
-      });
-    });
-  }
-
   async touchStyleFile() {
     return await fcb(cb => (
       writeFile(this.getStylePath(), '', 'utf8', cb)
     ));
   }
 
-  async clearBundleFile() {
-    try {
-      await fcb(cb => unlink(this.getOutputPath(), cb));
-    } catch (e) {
-      return null;
-    }
-  }
-
+  /**
+   * Determine if the cache for this bundle is valid by
+   * checking that the entry file exists, has the content we
+   * expect based on the argument for this bundle, and that both
+   * the style file and output for this bundle exist. In this
+   * scenario we assume the cache is valid.
+   *
+   * When the `optimize.useBundleCache` config is set to `false`
+   * (the default when running in development) we don't even call
+   * this method and bundles are always recreated.
+   */
   async isCacheValid() {
+    if (await this.readEntryFile() !== this.renderContent()) {
+      return false;
+    }
+
     try {
       await fcb(cb => stat(this.getOutputPath(), cb));
+      await fcb(cb => stat(this.getStylePath(), cb));
       return true;
     }
     catch (e) {
