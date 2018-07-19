@@ -21,7 +21,7 @@ export function MonitoringTimeseriesContainer({ series, onBrush }) {
   const units = getUnits(series);
 
   return (
-    <div className="monitoring-chart__container">
+    <div className="monChart__container">
       <h2 className="euiTitle">
         { getTitle(series) }{ units ? ` (${units})` : '' }
         <OverlayTrigger
@@ -29,7 +29,7 @@ export function MonitoringTimeseriesContainer({ series, onBrush }) {
           trigger="click"
           overlay={<Tooltip><InfoTooltip series={series}/></Tooltip>}
         >
-          <span className="monitoring-chart-tooltip__trigger overlay-trigger">
+          <span className="monChart__tooltipTrigger overlay-trigger">
             <KuiInfoButton />
           </span>
         </OverlayTrigger>

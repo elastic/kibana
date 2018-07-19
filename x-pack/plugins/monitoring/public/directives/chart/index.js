@@ -41,7 +41,7 @@ uiModule.directive('monitoringChart', () => {
 
       scope.$watch('series', series => {
         render(
-          <div className="monitoring-chart__container">
+          <div className="monChart__container">
             <h2 className="euiTitle">
               { getTitle(series) }{ units ? ` (${units})` : '' }
               <OverlayTrigger
@@ -53,7 +53,7 @@ uiModule.directive('monitoringChart', () => {
                   </Tooltip>
                 }
               >
-                <span className="monitoring-chart-tooltip__trigger overlay-trigger">
+                <span className="monChart__tooltipTrigger overlay-trigger">
                   <KuiInfoButton />
                 </span>
               </OverlayTrigger>
