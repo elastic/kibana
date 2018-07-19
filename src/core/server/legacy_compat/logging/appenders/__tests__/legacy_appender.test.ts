@@ -86,6 +86,20 @@ test('`append()` correctly pushes records to legacy platform.', () => {
       message: 'message-8-with-message',
       timestamp,
     },
+    {
+      context: 'context-9.sub-context-9',
+      level: LogLevel.Info,
+      message: 'message-9-with-message',
+      timestamp,
+      meta: { someValue: 3 },
+    },
+    {
+      context: 'context-10.sub-context-10',
+      level: LogLevel.Info,
+      message: 'message-10-with-message',
+      timestamp,
+      meta: { tags: ['tag1', 'tag2'] },
+    },
   ];
 
   const rawKbnServerMock = {
