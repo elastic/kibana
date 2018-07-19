@@ -31,6 +31,7 @@ import {
 import { toastNotifications } from 'ui/notify';
 import { USERS_PATH } from '../../../views/management/management_urls';
 import { ConfirmDelete } from './confirm_delete';
+const validEmailRegex = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/; //eslint-disable-line max-len
 
 export class EditUser extends Component {
   constructor(props) {
@@ -40,6 +41,7 @@ export class EditUser extends Component {
       currentUser: {},
       showDeleteConfirmation: false,
       user: {
+        email: null,
         username: null,
         full_name: null,
         roles: [],
@@ -102,6 +104,12 @@ export class EditUser extends Component {
       return 'Full name is required';
     }
   };
+  emailError = () => {
+    const { email } = this.state.user;
+    if (email !== null && (!email || !email.match(validEmailRegex))) {
+      return 'A valid email address is required';
+    }
+  };
   changePassword = async () => {
     const { apiClient } = this.props;
     const { user, password, currentPassword } = this.state;
@@ -161,7 +169,7 @@ export class EditUser extends Component {
           </EuiFormRow>
         ) : null}
         <EuiFormRow
-          label={userIsLoggedInUser ? "New password" : "Password"}
+          label={userIsLoggedInUser ? 'New password' : 'Password'}
           isInvalid={!!this.passwordError()}
           error={this.passwordError()}
         >
@@ -207,8 +215,8 @@ export class EditUser extends Component {
           <Fragment>
             <EuiCallOut title="Extra step needed" color="warning" iconType="help">
               <p>
-                After you change the password for the kibana user, you must update the kibana.yml file
-                and restart Kibana.
+                After you change the password for the kibana user, you must update the kibana.yml
+                file and restart Kibana.
               </p>
             </EuiCallOut>
             <EuiSpacer />
@@ -257,12 +265,14 @@ export class EditUser extends Component {
     return (
       !user.username ||
       !user.full_name ||
+      !user.email ||
+      this.emailError() ||
       (isNewUser && (this.passwordError() || this.confirmPasswordError()))
     );
   };
   onCancelDelete = () => {
     this.setState({ showDeleteConfirmation: false });
-  }
+  };
   render() {
     const { changeUrl, apiClient } = this.props;
     const {
@@ -287,18 +297,21 @@ export class EditUser extends Component {
                   <h2>{isNewUser ? 'New user' : `Edit "${user.username}" user`}</h2>
                 </EuiTitle>
               </EuiPageContentHeaderSection>
-              {reserved &&
+              {reserved && (
                 <EuiPageContentHeaderSection>
                   <EuiIcon type="lock" size="l" color="subdued" />
                 </EuiPageContentHeaderSection>
-              }
+              )}
             </EuiPageContentHeader>
             <EuiPageContentBody>
-              {reserved &&
+              {reserved && (
                 <EuiText size="s" color="subdued">
-                  <p>Reserved users are built-in and cannot be removed or modified. Only the password may be changed.</p>
+                  <p>
+                    Reserved users are built-in and cannot be removed or modified. Only the password
+                    may be changed.
+                  </p>
                 </EuiText>
-              }
+              )}
 
               {showDeleteConfirmation ? (
                 <ConfirmDelete
@@ -309,12 +322,20 @@ export class EditUser extends Component {
                 />
               ) : null}
 
-              <form onSubmit={(event) => { event.preventDefault(); }}>
+              <form
+                onSubmit={event => {
+                  event.preventDefault();
+                }}
+              >
                 <EuiForm>
                   <EuiFormRow
                     isInvalid={!!this.usernameError()}
                     error={this.usernameError()}
-                    helpText={!isNewUser && !reserved ? "Username's cannot be changed after creation." : null}
+                    helpText={
+                      !isNewUser && !reserved
+                        ? "Username's cannot be changed after creation."
+                        : null
+                    }
                     label="Username"
                   >
                     <EuiFieldText
@@ -339,33 +360,62 @@ export class EditUser extends Component {
                   </EuiFormRow>
                   {isNewUser ? this.passwordFields() : null}
                   {reserved ? null : (
-                    <EuiFormRow
-                      isInvalid={!!this.fullnameError()}
-                      error={this.fullnameError()}
-                      label="Full name"
-                    >
-                      <EuiFieldText
-                        onBlur={event =>
-                          this.setState({
-                            user: {
-                              ...this.state.user,
-                              full_name: event.target.value || '',
-                            },
-                          })
-                        }
-                        data-test-subj="userFormFullNameInput"
-                        name="full_name"
-                        value={user.full_name || ''}
-                        onChange={event => {
-                          this.setState({
-                            user: {
-                              ...this.state.user,
-                              full_name: event.target.value,
-                            },
-                          });
-                        }}
-                      />
-                    </EuiFormRow>
+                    <Fragment>
+                      <EuiFormRow
+                        isInvalid={!!this.fullnameError()}
+                        error={this.fullnameError()}
+                        label="Full name"
+                      >
+                        <EuiFieldText
+                          onBlur={event =>
+                            this.setState({
+                              user: {
+                                ...this.state.user,
+                                full_name: event.target.value || '',
+                              },
+                            })
+                          }
+                          data-test-subj="userFormFullNameInput"
+                          name="full_name"
+                          value={user.full_name || ''}
+                          onChange={event => {
+                            this.setState({
+                              user: {
+                                ...this.state.user,
+                                full_name: event.target.value,
+                              },
+                            });
+                          }}
+                        />
+                      </EuiFormRow>
+                      <EuiFormRow
+                        isInvalid={!!this.emailError()}
+                        error={this.emailError()}
+                        label="Email address"
+                      >
+                        <EuiFieldText
+                          onBlur={event =>
+                            this.setState({
+                              user: {
+                                ...this.state.user,
+                                email: event.target.value || '',
+                              },
+                            })
+                          }
+                          data-test-subj="userFormEmailInput"
+                          name="email"
+                          value={user.email || ''}
+                          onChange={event => {
+                            this.setState({
+                              user: {
+                                ...this.state.user,
+                                email: event.target.value,
+                              },
+                            });
+                          }}
+                        />
+                      </EuiFormRow>
+                    </Fragment>
                   )}
                   <EuiFormRow label="Roles">
                     <EuiComboBox
@@ -390,11 +440,9 @@ export class EditUser extends Component {
 
                   <EuiHorizontalRule />
 
-                  {reserved &&
-                    <EuiButton onClick={() => changeUrl(USERS_PATH)}>
-                      Return to user list
-                    </EuiButton>
-                  }
+                  {reserved && (
+                    <EuiButton onClick={() => changeUrl(USERS_PATH)}>Return to user list</EuiButton>
+                  )}
                   {reserved ? null : (
                     <EuiFlexGroup responsive={false}>
                       <EuiFlexItem grow={false}>

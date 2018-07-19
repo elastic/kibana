@@ -118,6 +118,12 @@ export class Users extends Component {
         ),
       },
       {
+        field: 'email',
+        name: 'Email Address',
+        sortable: true,
+        truncateText: true,
+      },
+      {
         field: 'roles',
         name: 'Roles',
         render: rolenames => {
