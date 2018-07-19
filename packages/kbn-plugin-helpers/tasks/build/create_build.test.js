@@ -88,10 +88,13 @@ describe('creating the build', () => {
     const sassPath = 'public/styles.scss';
     const cssPath = resolve(PLUGIN_BUILD_TARGET, 'public/styles.css');
 
-    // set skipInstallDependencies to true for these tests
-    beforeEach(() => (PLUGIN.styleSheetToCompile = sassPath));
-    // set it back to false after
+    beforeEach(() => {
+      PLUGIN.skipInstallDependencies = true;
+      PLUGIN.styleSheetToCompile = sassPath;
+    });
+
     afterEach(() => {
+      PLUGIN.skipInstallDependencies = false;
       PLUGIN.styleSheetToCompile = undefined;
       unlink(cssPath);
     });

@@ -4,8 +4,10 @@
 [float]
 === Hosted Kibana
 
-If you are running our hosted Elasticsearch Service on https://www.elastic.co/cloud[Elastic Cloud],
-then {cloud}/ec-enable-kibana.html[Kibana can be enabled] with the flick of a switch.
+If you are running our
+https://www.elastic.co/cloud/elasticsearch-service[hosted Elasticsearch Service]
+on Elastic Cloud, you can {cloud}/ec-enable-kibana.html[enable Kibana] with
+the flick of a switch.
 
 [float]
 === Installing Kibana Yourself

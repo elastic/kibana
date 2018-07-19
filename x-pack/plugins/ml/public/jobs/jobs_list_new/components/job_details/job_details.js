@@ -117,5 +117,5 @@ JobDetails.propTypes = {
   jobId: PropTypes.string.isRequired,
   job: PropTypes.object,
   addYourself: PropTypes.func.isRequired,
-  removeYourself: PropTypes.func,
+  removeYourself: PropTypes.func.isRequired,
 };
