@@ -35,13 +35,13 @@ export class Plugin {
   }
 
   apply(compiler) {
+    this.referenceDLLs(compiler);
+
     compiler.hooks.watchRun.tapAsync({
       name: 'dllBundlerBridgePlugin-checkIfDllIsNeeded',
       fn: async (a, cb) => {
         await this.runEntryPathsCompiler(compiler.options);
         await this.runDLLsCompiler();
-
-        this.referenceDLLs(compiler);
 
         cb();
       }
@@ -50,13 +50,13 @@ export class Plugin {
 
   async runEntryPathsCompiler(mainCompilerConfig) {
     return new Promise((resolve) => {
-      this.entryPathsCompiler = webpack(mainCompilerConfig);
-
       // Filter out this own plugin from the main compiler
       // config to avoid exceed max stack size
       remove(mainCompilerConfig.plugins, (plugin) => {
         return plugin === this;
       });
+
+      this.entryPathsCompiler = webpack(mainCompilerConfig);
 
       this.entryPathsCompiler.hooks.compile.tap({
         name: 'dllBundlerBridgePlugin-buildEntryPaths-start',
@@ -88,7 +88,7 @@ export class Plugin {
     this.dllConfig.dllEntries.forEach((entry) => {
       new webpack.DllReferencePlugin({
         context: this.dllConfig.context,
-        manifest: require(`${this.dllConfig.outputPath}/${entry.name}.json`),
+        manifest: require.resolve(`${this.dllConfig.outputPath}/${entry.name}.json`),
       }).apply(mainCompiler);
     });
   }
