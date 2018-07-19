@@ -4,19 +4,19 @@ monitoring-main[page="pipeline"] {
   min-height: 100vh;
 }
 
-.pipelineViewer {
+.monPipelineViewer {
   max-width: 1000px;
 }
 
-.pipelineViewer__statement {
+.monPipelineViewer__statement {
   padding-left: $euiSizeM;
 }
 
-.pipelineViewer__plugin {
+.monPipelineViewer__plugin {
   margin-left: $euiSizeXS;
 }
 
-.pipelineViewer__spaceContainer {
+.monPipelineViewer__spaceContainer {
   background-color: $euiColorEmptyShade;
   align-self: stretch;
   display: flex;
@@ -24,7 +24,7 @@ monitoring-main[page="pipeline"] {
   border-bottom: solid 2px $euiColorEmptyShade;
 }
 
-.pipelineViewer__spacer {
+.monPipelineViewer__spacer {
   width: $euiSizeM;
   align-self: stretch;
   margin-left: $euiSizeM;
@@ -41,7 +41,7 @@ monitoring-main[page="pipeline"] {
   }
 }
 
-.pipelineViewer__metric {
+.monPipelineViewer__metric {
   text-align: right;
 
   &--cpuTime {
@@ -57,13 +57,13 @@ monitoring-main[page="pipeline"] {
   }
 }
 
-.pipelineViewer__queueMessage {
+.monPipelineViewer__queueMessage {
   margin-left: $euiSizeL;
   color: $euiColorDarkShade;
 }
 
-.pipelineViewer__list {
-  .pipelineViewer__listItem {
+.monPipelineViewer__list {
+  .monPipelineViewer__listItem {
     display: flex;
     min-height: $euiSizeXL;
     align-items: center;
@@ -75,7 +75,7 @@ monitoring-main[page="pipeline"] {
   }
 }
 
-.pipelineViewer__conditional {
+.monPipelineViewer__conditional {
   font-weight: bold;
 }
 
@@ -92,16 +92,16 @@ img.lspvDetailDrawerIcon {
 }
 
 @include screenSmall {
-  .pipelineViewer {
-    .pipelineViewer__spacer {
+  .monPipelineViewer {
+    .monPipelineViewer__spacer {
       border: none;
     }
 
-    .pipelineViewer__metricFlexItem {
+    .monPipelineViewer__metricFlexItem {
       margin-bottom: $euiSizeXS !important;
     }
 
-    .pipelineViewer__metric {
+    .monPipelineViewer__metric {
       text-align: left;
       padding-left: $euiSizeXL;
     }
