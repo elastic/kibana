@@ -7,8 +7,6 @@
 import { CMBeat } from '../../../../common/domain_types';
 
 export interface CMBeatsAdapter {
-  insert(beat: CMBeat): Promise<void>;
-  update(beat: CMBeat): Promise<void>;
   get(id: string): Promise<CMBeat | null>;
   getAll(): Promise<CMBeat[]>;
   getWithIds(beatIds: string[]): Promise<CMBeat[]>;

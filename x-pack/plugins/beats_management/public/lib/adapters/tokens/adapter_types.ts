@@ -9,7 +9,5 @@ export interface TokenEnrollmentData {
 }
 
 export interface CMTokensAdapter {
-  deleteEnrollmentToken(enrollmentToken: string): Promise<void>;
-  getEnrollmentToken(enrollmentToken: string): Promise<TokenEnrollmentData>;
-  upsertTokens(tokens: TokenEnrollmentData[]): Promise<TokenEnrollmentData[]>;
+  createEnrollmentToken(): Promise<TokenEnrollmentData>;
 }

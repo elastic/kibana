@@ -21,7 +21,7 @@ import { FrontendDomainLibs, FrontendLibs } from '../lib';
 
 export function compose(): FrontendLibs {
   const tags = new MemoryTagsAdapter([]);
-  const tokens = new MemoryTokensAdapter([]);
+  const tokens = new MemoryTokensAdapter();
   const beats = new MemoryBeatsAdapter([]);
 
   const domainLibs: FrontendDomainLibs = {

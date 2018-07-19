@@ -20,19 +20,6 @@ export class MemoryBeatsAdapter implements CMBeatsAdapter {
     return this.beatsDB.find(beat => beat.id === id) || null;
   }
 
-  public async insert(beat: CMBeat) {
-    this.beatsDB.push(beat);
-  }
-
-  public async update(beat: CMBeat) {
-    const beatIndex = this.beatsDB.findIndex(b => b.id === beat.id);
-
-    this.beatsDB[beatIndex] = {
-      ...this.beatsDB[beatIndex],
-      ...beat,
-    };
-  }
-
   public async getWithIds(beatIds: string[]) {
     return this.beatsDB.filter(beat => beatIds.includes(beat.id));
   }
