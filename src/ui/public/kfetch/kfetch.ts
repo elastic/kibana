@@ -41,7 +41,7 @@ export interface KFetchKibanaOptions {
   prependBasePath?: boolean;
 }
 
-export function kfetch(fetchOptions?: KFetchOptions, kibanaOptions?: KFetchKibanaOptions) {
+export function kfetch(fetchOptions: KFetchOptions, kibanaOptions?: KFetchKibanaOptions) {
   // fetch specific options with defaults
   const { pathname, query, ...combinedFetchOptions } = merge(
     {
