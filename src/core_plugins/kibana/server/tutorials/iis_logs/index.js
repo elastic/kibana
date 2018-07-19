@@ -20,31 +20,33 @@
 import { TUTORIAL_CATEGORY } from '../../../common/tutorials/tutorial_category';
 import { onPremInstructions, cloudInstructions, onPremCloudInstructions } from '../../../common/tutorials/filebeat_instructions';
 
-export function elasticsearchLogsSpecProvider() {
-  const moduleName = 'elasticsearch';
+export function iisLogsSpecProvider() {
+  const moduleName = 'iis';
   const geoipRequired = false;
   const uaRequired = false;
-  const platforms = ['OSX', 'DEB', 'RPM', 'WINDOWS'];
+  const platforms = ['WINDOWS'];
   return {
-    id: 'elasticsearchLogs',
-    name: 'Elasticsearch logs',
+    id: 'iisLogs',
+    name: 'IIS logs',
     category: TUTORIAL_CATEGORY.LOGGING,
-    isBeta: true,
-    shortDescription: 'Collect and parse logs created by Elasticsearch.',
-    longDescription: 'The `elasticsearch` Filebeat module parses logs created by Elasticsearch.' +
-                     ' [Learn more]({config.docs.beats.filebeat}/filebeat-module-elasticsearch.html).',
-    euiIconType: 'logoElasticsearch',
+    shortDescription: 'Collect and parse access and error logs created by the IIS HTTP server.',
+    longDescription: 'The `iis` Filebeat module parses access and error logs created by the IIS HTTP server.' +
+                     ' [Learn more]({config.docs.beats.filebeat}/filebeat-module-iis.html).',
+    //euiIconType: 'logoIIS',
     artifacts: {
-      application: {
-        label: 'Discover',
-        path: '/app/kibana#/discover'
-      },
-      dashboards: [],
+      dashboards: [
+        {
+          id: '4278ad30-fe16-11e7-a3b0-d13028918f9f',
+          linkLabel: 'IIS logs dashboard',
+          isOverview: true
+        }
+      ],
       exportedFields: {
-        documentationUrl: '{config.docs.beats.filebeat}/exported-fields-elasticsearch.html'
+        documentationUrl: '{config.docs.beats.filebeat}/exported-fields-iis.html'
       }
     },
     completionTimeMinutes: 10,
+    previewImagePath: '/plugins/kibana/home/tutorial_resources/iis_logs/screenshot.png',
     onPrem: onPremInstructions(moduleName, platforms, geoipRequired, uaRequired),
     elasticCloud: cloudInstructions(moduleName, platforms),
     onPremElasticCloud: onPremCloudInstructions(moduleName, platforms)
