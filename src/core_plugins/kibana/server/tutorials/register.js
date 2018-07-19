@@ -41,6 +41,7 @@ import { dockerMetricsSpecProvider } from './docker_metrics';
 import { kubernetesMetricsSpecProvider } from './kubernetes_metrics';
 import { uwsgiMetricsSpecProvider } from './uwsgi_metrics';
 import { netflowSpecProvider } from './netflow';
+import { traefikLogsSpecProvider } from './traefik_logs';
 import { apmSpecProvider } from './apm';
 import { cephMetricsSpecProvider } from './ceph_metrics';
 import { aerospikeMetricsSpecProvider } from './aerospike_metrics';
@@ -80,6 +81,7 @@ export function registerTutorials(server) {
   server.registerTutorial(kubernetesMetricsSpecProvider);
   server.registerTutorial(uwsgiMetricsSpecProvider);
   server.registerTutorial(netflowSpecProvider);
+  server.registerTutorial(traefikLogsSpecProvider);
   server.registerTutorial(apmSpecProvider);
   server.registerTutorial(cephMetricsSpecProvider);
   server.registerTutorial(aerospikeMetricsSpecProvider);
