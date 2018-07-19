@@ -20,6 +20,10 @@ buildScan {
   }
 }
 
+task checkoutSubmodule(type: Exec) {
+ commandLine "bash", "-c", "git submodule update --init --remote --rebase"
+}
+
 //task startDeps(type: Exec) {
 //  commandLine "docker-compose", "up", "-d"
 //}

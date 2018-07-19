@@ -18,4 +18,6 @@ project("javascript-typescript-langserver") {
   task build(type: NpmTask, dependsOn: "npm_install") {
     args = ['run', "build"]
   }
+
+  tasks.nodeSetup.dependsOn(rootProject.tasks.checkoutSubmodule);
 }

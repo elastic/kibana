@@ -1,8 +1,0 @@
-#!/bin/bash
-
-cd $(dirname $0)/..
-
-#git fetch --prune origin +refs/tags/v*:refs/tags/v*
-#git pull --rebase --tags
-
-git submodule update --init --remote --rebase
