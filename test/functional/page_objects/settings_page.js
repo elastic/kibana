@@ -25,8 +25,9 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
   const config = getService('config');
   const remote = getService('remote');
   const find = getService('find');
+  const flyout = getService('flyout');
   const testSubjects = getService('testSubjects');
-  const PageObjects = getPageObjects(['header', 'common']);
+  const PageObjects = getPageObjects(['header', 'common', 'visualize']);
 
   const defaultFindTimeout = config.get('timeouts.find');
 
@@ -501,6 +502,54 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
       const field = await testSubjects.find('editorFieldScript');
       await field.clearValue();
       await field.type(script);
+    }
+
+    async openScriptedFieldHelp(activeTab) {
+      log.debug('open Scripted Fields help');
+      let isOpen = await testSubjects.exists('scriptedFieldsHelpFlyout');
+      if (!isOpen) {
+        await retry.try(async () => {
+          await testSubjects.click('scriptedFieldsHelpLink');
+          isOpen = await testSubjects.exists('scriptedFieldsHelpFlyout');
+          if (!isOpen) {
+            throw new Error('Failed to open scripted fields help');
+          }
+        });
+      }
+
+      if (activeTab) {
+        await testSubjects.click(activeTab);
+      }
+    }
+
+    async closeScriptedFieldHelp() {
+      log.debug('close Scripted Fields help');
+      let isOpen = await testSubjects.exists('scriptedFieldsHelpFlyout');
+      if (isOpen) {
+        await retry.try(async () => {
+          await flyout.close('scriptedFieldsHelpFlyout');
+          isOpen = await testSubjects.exists('scriptedFieldsHelpFlyout');
+          if (isOpen) {
+            throw new Error('Failed to close scripted fields help');
+          }
+        });
+      }
+    }
+
+    async executeScriptedField(script, additionalField) {
+      log.debug('execute Scripted Fields help');
+      await this.closeScriptedFieldHelp(); // ensure script help is closed so script input is not blocked
+      await this.setScriptedFieldScript(script);
+      await this.openScriptedFieldHelp('testTab');
+      if (additionalField) {
+        await PageObjects.visualize.setComboBox('additionalFieldsSelect', additionalField);
+        await testSubjects.click('runScriptButton');
+      }
+      let scriptResults;
+      await retry.try(async () => {
+        scriptResults = await testSubjects.getVisibleText('scriptedFieldPreview');
+      });
+      return scriptResults;
     }
 
     async importFile(path, overwriteAll = true) {

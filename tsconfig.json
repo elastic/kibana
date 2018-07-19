@@ -39,9 +39,15 @@
     "moduleResolution": "node",
 
     // Disallow inconsistently-cased references to the same file.
-    "forceConsistentCasingInFileNames": true
+    "forceConsistentCasingInFileNames": true,
+
+    // Disable the breaking keyof behaviour introduced in TS 2.9.2 until EUI is updated to support that too
+    "keyofStringsOnly": true
   },
   "include": [
     "src/**/*"
+  ],
+  "exclude": [
+    "src/**/__fixtures__/**/*"
   ]
 }

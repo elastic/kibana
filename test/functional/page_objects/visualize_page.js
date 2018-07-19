@@ -34,8 +34,20 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
 
   class VisualizePage {
 
+    async navigateToNewVisualization() {
+      log.debug('navigateToApp visualize new');
+      await PageObjects.common.navigateToUrl('visualize', 'new');
+      await this.waitForVisualizationSelectPage();
+      await PageObjects.header.waitUntilLoadingHasFinished();
+    }
+
     async waitForVisualizationSelectPage() {
-      await testSubjects.find('visualizeSelectTypePage');
+      await retry.try(async () => {
+        const visualizeSelectTypePage = await testSubjects.find('visualizeSelectTypePage');
+        if (!visualizeSelectTypePage.isDisplayed()) {
+          throw new Error('wait for visualization select page');
+        }
+      });
     }
 
     async clickAreaChart() {
@@ -112,6 +124,7 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
 
     async selectTagCloudTag(tagDisplayText) {
       await testSubjects.click(tagDisplayText);
+      await PageObjects.header.waitUntilLoadingHasFinished();
     }
 
     async getTextTag() {
@@ -236,12 +249,14 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
     async setComboBox(comboBoxSelector, value) {
       const comboBox = await testSubjects.find(comboBoxSelector);
       await this.setComboBoxElement(comboBox, value);
+      await PageObjects.common.sleep(1000);
     }
 
     async setComboBoxElement(element, value) {
       const input = await element.findByTagName('input');
       await input.clearValue();
       await input.type(value);
+      await PageObjects.common.sleep(500);
       await find.clickByCssSelector('.euiComboBoxOption');
       await this.closeComboBoxOptionsList(element);
     }
@@ -251,6 +266,7 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
       const input = await comboBox.findByTagName('input');
       await input.clearValue();
       await input.type(value);
+      await PageObjects.common.sleep(500);
       await this.closeComboBoxOptionsList(comboBox);
     }
 
@@ -284,10 +300,29 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
     }
 
     async clearComboBox(comboBoxSelector) {
+      log.debug(`clearComboBox for comboBoxSelector:${comboBoxSelector}`);
       const comboBox = await testSubjects.find(comboBoxSelector);
-      const clearBtn = await comboBox.findByCssSelector('[data-test-subj="comboBoxClearButton"]');
-      await clearBtn.click();
+      await retry.try(async () => {
+        const clearButtonExists = await this.doesComboBoxClearButtonExist(comboBox);
+        if (!clearButtonExists) {
+          log.debug('Unable to clear comboBox, comboBoxClearButton does not exist');
+          return;
+        }
+
+        const clearBtn = await comboBox.findByCssSelector('[data-test-subj="comboBoxClearButton"]');
+        await clearBtn.click();
+
+        const clearButtonStillExists = await this.doesComboBoxClearButtonExist(comboBox);
+        if (clearButtonStillExists) {
+          throw new Error('Failed to clear comboBox');
+        }
+      });
       await this.closeComboBoxOptionsList(comboBox);
+    }
+
+    async doesComboBoxClearButtonExist(comboBoxElement) {
+      return await find.exists(
+        async () => await comboBoxElement.findByCssSelector('[data-test-subj="comboBoxClearButton"]'));
     }
 
     async closeComboBoxOptionsList(comboBoxElement) {
@@ -300,6 +335,17 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
 
     async addInputControl() {
       await testSubjects.click('inputControlEditorAddBtn');
+      await PageObjects.header.waitUntilLoadingHasFinished();
+    }
+
+    async inputControlSubmit() {
+      await testSubjects.click('inputControlSubmitBtn');
+      await PageObjects.header.waitUntilLoadingHasFinished();
+    }
+
+    async inputControlClear() {
+      await testSubjects.click('inputControlClearBtn');
+      await PageObjects.header.waitUntilLoadingHasFinished();
     }
 
     async checkCheckbox(selector) {
@@ -429,6 +475,7 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
         const chartString = await chart.getVisibleText();
         if (chartString === bucketName) {
           await chart.click();
+          await PageObjects.common.sleep(500);
         }
       }
       const getChartTypesPromises = chartTypes.map(getChartType);
@@ -443,6 +490,7 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
         await input.type(myString);
         await remote.pressKeys('\uE006');
       });
+      await PageObjects.common.sleep(500);
     }
 
     async toggleOpenEditor(index, toState = 'true') {
@@ -529,6 +577,7 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
         await input.type(fieldValue);
         await remote.pressKeys('\uE006');
       });
+      await PageObjects.common.sleep(500);
     }
 
     async selectFieldById(fieldValue, id) {
@@ -562,6 +611,7 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
       const input = await find.byCssSelector('input[name="interval"]');
       await input.clearValue();
       await input.type(newValue + '');
+      await PageObjects.common.sleep(1000);
     }
 
     async setSize(newValue) {
@@ -572,6 +622,7 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
 
     async toggleDisabledAgg(agg) {
       await testSubjects.click(`aggregationEditor${agg} disableAggregationBtn`);
+      await PageObjects.header.waitUntilLoadingHasFinished();
     }
 
     async toggleOtherBucket() {
@@ -616,10 +667,12 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
 
     async clickVisEditorTab(tabName) {
       await testSubjects.click('visEditorTab' + tabName);
+      await PageObjects.header.waitUntilLoadingHasFinished();
     }
 
     async selectWMS() {
       await find.clickByCssSelector('input[name="wms.enabled"]');
+      await PageObjects.header.waitUntilLoadingHasFinished();
     }
 
     async ensureSavePanelOpen() {

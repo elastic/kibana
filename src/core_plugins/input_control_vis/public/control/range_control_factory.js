@@ -68,24 +68,17 @@ class RangeControl extends Control {
       return;
     }
 
-    let minMaxReturnedFromAggregation = true;
-    let min = _.get(resp, 'aggregations.minAgg.value');
-    let max = _.get(resp, 'aggregations.maxAgg.value');
+    const min = _.get(resp, 'aggregations.minAgg.value');
+    const max = _.get(resp, 'aggregations.maxAgg.value');
+
     if (min === null || max === null) {
-      min = 0;
-      max = 1;
-      minMaxReturnedFromAggregation = false;
-    }
-
-    if (!minMaxReturnedFromAggregation) {
       this.disable(noValuesDisableMsg(fieldName, indexPattern.title));
-    } else {
-      this.min = min;
-      this.max = max;
-      this.enable = true;
+      return;
     }
 
-    return 'done';
+    this.min = min;
+    this.max = max;
+    this.enable = true;
   }
 }
 

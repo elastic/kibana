@@ -27,6 +27,7 @@ import {
   EuiFormRow,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiRange,
 } from '@elastic/eui';
 
 const toState = ({ control }) => {
@@ -122,6 +123,14 @@ export class RangeControl extends Component {
   };
 
   renderControl() {
+    if (!this.props.control.isEnabled()) {
+      return (
+        <EuiRange
+          disabled
+        />
+      );
+    }
+
     return (
       <EuiFormRow
         isInvalid={!this.state.isRangeValid}
@@ -132,7 +141,6 @@ export class RangeControl extends Component {
           <EuiFlexItem grow={false}>
             <input
               id={`${this.props.control.id}_min`}
-              disabled={!this.props.control.isEnabled()}
               name="min"
               type="number"
               data-test-subj="rangeControlMinInputValue"
@@ -145,7 +153,6 @@ export class RangeControl extends Component {
           </EuiFlexItem>
           <EuiFlexItem className="inputRangeContainer">
             <InputRange
-              disabled={!this.props.control.isEnabled()}
               maxValue={this.props.control.max}
               minValue={this.props.control.min}
               step={this.props.control.options.step}
@@ -160,7 +167,6 @@ export class RangeControl extends Component {
           <EuiFlexItem grow={false}>
             <input
               id={`${this.props.control.id}_max`}
-              disabled={!this.props.control.isEnabled()}
               name="max"
               type="number"
               className="euiFieldNumber"
