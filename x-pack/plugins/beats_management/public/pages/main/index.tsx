@@ -56,7 +56,7 @@ class MainPagesComponent extends React.PureComponent<MainPagesProps, MainPagesSt
   public render() {
     const tabs = [
       {
-        id: '/',
+        id: '/beats',
         name: 'Beats List',
         disabled: false,
       },
