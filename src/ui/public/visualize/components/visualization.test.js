@@ -48,7 +48,7 @@ describe('<Visualization/>', () => {
 
   const uiState = {
     on: () => {},
-    on: () => {},
+    off: () => {},
     set: () => {}
   };
 
