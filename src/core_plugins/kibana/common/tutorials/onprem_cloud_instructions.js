@@ -29,7 +29,7 @@ export const TRYCLOUD_OPTION1 = {
            ' 2. Modify the other deployment options as needed (or not, the defaults are great to get started)\n' +
            ' 3. Click **Create Deployment**\n' +
            ' 4. Wait until deployment creation completes\n' +
-           ' 5. Go to the new cloud Kibana instance and follow the Kibana Home instructions'
+           ' 5. Go to the new Cloud Kibana instance and follow the Kibana Home instructions'
 
 };
 
