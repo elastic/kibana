@@ -18,10 +18,10 @@ that grant the user appropriate data access. For information on roles
 and privileges, see {xpack-ref}/authorization.html[User Authorization].
 
 The `kibana_dashboard_only_user` role is 
-preconfigured with read only permissions on the `.kibana` index.
+preconfigured with read only permissions to Kibana.
 
 IMPORTANT: If you assign users the `kibana_dashboard_only_user` role, along with a role 
-with write permissions on the `.kibana` index, they *will* have write access, 
+with write permissions to Kibana, they *will* have write access, 
 even though the controls remain hidden in the {kib} UI.
 
 IMPORTANT: If you also assign users the reserved `superuser` role, they will be able to see 
