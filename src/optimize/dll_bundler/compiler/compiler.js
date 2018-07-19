@@ -18,7 +18,7 @@
  */
 
 import configModel from './config_model';
-import { runWebpack, watchWebpack } from '../webpack_wrapper';
+import { runWebpack } from '../webpack_wrapper';
 import fs from 'fs';
 
 export class Compiler {
@@ -41,9 +41,10 @@ export class Compiler {
     this.dllsConfigs = this.createDLLsConfigs(options);
     this.log =  log;
 
-    this.upsertDllEntryFile();
-    this.touchDllManifests();
-    this.setupProcessBus();
+    if (!this.existsDLLs()) {
+      this.upsertDllEntryFile();
+      this.touchDllManifests();
+    }
   }
 
   createDLLsConfigs(options) {
@@ -68,7 +69,7 @@ export class Compiler {
 
     const data = entryPaths.reduce(
       (accumulator, currentValue) => {
-        return accumulator + `require('${currentValue}')\n`;
+        return accumulator + `require('${currentValue}');\n`;
       },
       '\n'
     );
@@ -86,46 +87,13 @@ export class Compiler {
     });
   }
 
-  setupProcessBus() {
-    if (!this.isDistributable) {
-      this.watch();
-    }
-
-    process.on('message', async ({ type, content }) => {
-      if (type !== 'dllEntryPaths') {
-        return;
-      }
-
-      content.forEach(({ entryPaths, name }) => {
-        this.upsertDllEntryFile(entryPaths, name);
-      });
-
-      if (this.isDistributable) {
-        await this.run();
-        this.exitIfDLLsExists();
-      }
-    });
-  }
-
   existsDLLs() {
     return Compiler.existsDLLsFromConfig({ dllEntries: this.dllEntries, outputPath: this.outputPath });
-  }
-
-  exitIfDLLsExists() {
-    if (this.existsDLLs()) {
-      process.exit(1);
-    }
   }
 
   async run() {
     for (const dllConfig of this.dllsConfigs) {
       await runWebpack(dllConfig());
-    }
-  }
-
-  watch() {
-    for (const dllConfig of this.dllsConfigs) {
-      watchWebpack(dllConfig());
     }
   }
 }

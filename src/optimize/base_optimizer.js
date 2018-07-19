@@ -225,11 +225,6 @@ export default class BaseOptimizer {
       },
 
       plugins: [
-        /*new webpack.DllReferencePlugin({
-          context: fromRoot('.'),
-          manifest: require(`${this.uiBundles.getWorkingDir()}/dlls/vendor.json`)
-        }),*/
-
         new MiniCssExtractPlugin({
           filename: '[name].style.css',
         }),
@@ -409,18 +404,6 @@ export default class BaseOptimizer {
       plugins: [
         new DLLBundlerPlugin({
           dllConfig: this.getDLLConfig(),
-          entryPathDiscoverConfig: (() => {
-            return webpackMerge(
-              commonConfig,
-              dllBundlerPlugin,
-              IS_KIBANA_DISTRIBUTABLE
-                ? {}
-                : transpileTsConfig,
-              this.uiBundles.isDevMode()
-                ? webpackMerge(watchingConfig, supportEnzymeConfig)
-                : productionConfig
-            );
-          })(),
           log: this.log
         }),
       ]

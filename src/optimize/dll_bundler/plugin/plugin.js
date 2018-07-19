@@ -20,52 +20,70 @@
 import NormalModule from 'webpack/lib/NormalModule';
 import { fromRoot } from '../../../utils';
 import { DLLBundlerCompiler } from '../compiler';
+import webpack from 'webpack';
+import path from 'path';
 
 export class Plugin {
-  constructor({ dllConfig, entryPathDiscoverConfig,  log }) {
-    const sanitizedLog = log || (() => {});
+  constructor({ dllConfig, log }) {
+    this.dllConfig = dllConfig;
+    this.log = log || (() => {});
 
-    this.dllCompiler = new DLLBundlerCompiler(dllConfig, sanitizedLog);
-    this.entryPathDiscoverConfig = entryPathDiscoverConfig;
-    this.log = sanitizedLog;
-    this.nodeModulesEntryPaths = {};
+    this.dllCompiler = new DLLBundlerCompiler(dllConfig, this.log);
+    this.entryPathsCompiler = null;
+    this.entryPaths = {};
   }
 
   apply(compiler) {
-    compiler.hooks.compile.tap({
-      name: 'dllBundlerBridgePlugin-buildEntryPaths',
-      fn: ({ normalModuleFactory }) => {
-        this.buildEntryPaths(normalModuleFactory);
-      }
-    });
-
-    compiler.hooks.afterPlugins.tap({
+    compiler.hooks.watchRun.tapAsync({
       name: 'dllBundlerBridgePlugin-checkIfDllIsNeeded',
-      fn: () => {
-        console.log('sdhsadhkasdhisahdkjhsakjdhjksahdjksadjkasdjkhasjkdhaksjhdkjlhsadjkhsajkdhjksahdjksahjkdhasjkhdjk');
+      fn: async (a, cb) => {
+        await this.runEntryPathsCompiler(compiler.options);
+        await this.runDLLsCompiler();
+
+        this.referenceDLLs(compiler);
+
+        cb();
       }
     });
+  }
 
-    compiler.hooks.done.tap({
-      name: 'dllBundlerBridgePlugin-sendEntryPaths',
-      fn: () => {
-        // this.sendEntryPaths();
-      }
+  async runEntryPathsCompiler(mainCompilerConfig) {
+    return new Promise((resolve) => {
+      this.entryPathsCompiler = webpack(mainCompilerConfig);
+
+      this.entryPathsCompiler.hooks.compile.tap({
+        name: 'dllBundlerBridgePlugin-buildEntryPaths-start',
+        fn: ({ normalModuleFactory }) => {
+          this.buildEntryPaths(normalModuleFactory);
+        }
+      });
+
+      this.entryPathsCompiler.hooks.done.tap({
+        name: 'dllBundlerBridgePlugin-buildEntryPaths-done',
+        fn: () => {
+          this.entryPathsCompiler = null;
+        }
+      });
+
+      this.entryPathsCompiler.run(() => {
+        resolve();
+      });
     });
+  }
 
-    /*compiler.hooks.shouldEmit.tap({
-      name: 'dllBundlerBridgePlugin-defineNextStep',
-      fn: () => {
-        return false;
-      }
+  async runDLLsCompiler() {
+    this.dllCompiler = new DLLBundlerCompiler(this.dllConfig, this.log);
+    this.dllCompiler.upsertDllEntryFile(Object.keys(this.entryPaths));
+    await this.dllCompiler.run();
+  }
+
+  referenceDLLs(mainCompiler) {
+    this.dllConfig.dllEntries.forEach((entry) => {
+      new webpack.DllReferencePlugin({
+        context: this.dllConfig.context,
+        manifest: require(`${this.dllConfig.outputPath}/${entry.name}.json`),
+      }).apply(mainCompiler);
     });
-
-    compiler.hooks.done.tapAsync({
-      name: 'dllBundlerBridgePlugin-endCycle',
-      fn: (stats, cb) => {
-        cb(null, stats);
-      }
-    });*/
   }
 
   buildEntryPaths(normalModuleFactory) {
@@ -90,8 +108,8 @@ export class Plugin {
           // Ignored
           if (!result) return callback();
 
-          // Build NodeModulesEntryPaths
-          if (!!this.nodeModulesEntryPaths[result.request]) {
+          // Build NodeModules EntryPaths
+          if (!!this.entryPaths[result.request]) {
             return callback();
           }
 
@@ -99,7 +117,10 @@ export class Plugin {
 
           if (!result.request.includes('loader')
             && result.request.includes(nodeModulesPath)) {
-            this.nodeModulesEntryPaths[result.request] = true;
+            const relativeRequestPath = result.request.replace(`${fromRoot('.')}/`, '../../../');
+            const normalizedRequestPath = path.normalize(relativeRequestPath);
+
+            this.entryPaths[normalizedRequestPath] = true;
           }
 
           let createdModule = normalModuleFactory.hooks.createModule.call(result);

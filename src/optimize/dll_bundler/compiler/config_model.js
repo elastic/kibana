@@ -22,17 +22,16 @@ import webpackMerge from 'webpack-merge';
 
 function generateDLLS({ context, entries, output }) {
   const finalEntries = {};
-  const ignore = ignoreList => key => !ignoreList.includes(key);
 
   entries.forEach((entry) => {
-    finalEntries[entry.name] = entry.include.filter(ignore(entry.exclude));
+    finalEntries[entry.name] = [`${output.path}/${entry.name}.entry.dll.js`];
   });
 
   return {
     entry: finalEntries,
     context,
     output: {
-      filename: `/${output.dllName}.dll.js`,
+      filename: `${output.dllName}.dll.js`,
       path: output.path,
       publicPath: output.publicPath,
       library: output.dllName
@@ -47,32 +46,11 @@ function generateDLLS({ context, entries, output }) {
   };
 }
 
-function optimized(options) {
+function common(options) {
   return webpackMerge(
-    {
-      mode: 'production'
-    },
     generateDLLS({
       context: options.context,
-      entries: options.dllBundle.dllEntries,
-      output: {
-        manifestName: '[name]',
-        dllName: '[name]_[chunkhash:8]',
-        path: options.outputPath,
-        publicPath: options.publicPath
-      }
-    })
-  );
-}
-
-function unoptimized(options) {
-  return webpackMerge(
-    {
-      mode: 'development'
-    },
-    generateDLLS({
-      context: options.context,
-      entries: options.dllBundle.dllEntries,
+      entries: options.dllEntries,
       output: {
         manifestName: '[name]',
         dllName: '[name]',
@@ -83,10 +61,26 @@ function unoptimized(options) {
   );
 }
 
+function optimized() {
+  return webpackMerge(
+    {
+      mode: 'production'
+    }
+  );
+}
+
+function unoptimized() {
+  return webpackMerge(
+    {
+      mode: 'development'
+    }
+  );
+}
+
 export default (options = {}) => {
   if (options.isDistributable) {
-    return webpackMerge(optimized(options), options.mergeConfig);
+    return webpackMerge(common(options), optimized(), options.mergeConfig);
   }
 
-  return webpackMerge(unoptimized(options), options.mergeConfig);
+  return webpackMerge(common(options), unoptimized(), options.mergeConfig);
 };
