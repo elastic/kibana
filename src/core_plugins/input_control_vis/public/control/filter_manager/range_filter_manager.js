@@ -66,16 +66,17 @@ export class RangeFilterManager extends FilterManager {
   getValueFromFilterBar() {
     const kbnFilters = this.findFilters();
     if (kbnFilters.length === 0) {
-      return this.getUnsetValue();
-    } else {
-      let range = null;
-      if (_.has(kbnFilters[0], 'script')) {
-        range = _.get(kbnFilters[0], 'script.script.params');
-      } else {
-        range = _.get(kbnFilters[0], ['range', this.fieldName]);
-      }
-
-      return fromRange(range);
+      return;
     }
+
+    let range = null;
+    if (_.has(kbnFilters[0], 'script')) {
+      range = _.get(kbnFilters[0], 'script.script.params');
+    } else {
+      range = _.get(kbnFilters[0], ['range', this.fieldName]);
+    }
+
+    return fromRange(range);
+
   }
 }

@@ -292,7 +292,7 @@ export function SavedObjectProvider(Promise, Private, Notifier, confirmModalProm
       return savedObjectsClient.create(esType, source, { id: this.id })
         .catch(err => {
           // record exists, confirm overwriting
-          if (_.get(err, 'statusCode') === 409) {
+          if (_.get(err, 'res.status') === 409) {
             const confirmMessage = `Are you sure you want to overwrite ${this.title}?`;
 
             return confirmModalPromise(confirmMessage, { confirmButtonText: `Overwrite ${this.getDisplayName()}` })

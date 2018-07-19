@@ -146,7 +146,7 @@ export class DashboardGrid extends React.Component {
       }
 
       if (panelVersion.major < 6 || (panelVersion.major === 6 && panelVersion.minor < 3)) {
-        PanelUtils.convertPanelDataPre_6_3(panel);
+        PanelUtils.convertPanelDataPre_6_3(panel, this.props.useMargins);
       }
 
       return panel.gridData;

@@ -154,7 +154,7 @@ export function RegionMapsVisualizationProvider(Private, Notifier, config) {
         }
 
         const rowIndex = this._chartData.tables[0].rows.findIndex(row => row[0] === event);
-        this._vis.API.events.addFilter(this._chartData.tables[0], 0, rowIndex);
+        this._vis.API.events.addFilter(this._chartData.tables[0], 0, rowIndex, event);
       });
       this._choroplethLayer.on('styleChanged', (event) => {
         const shouldShowWarning = this._vis.params.isDisplayWarning && config.get('visualization:regionmap:showWarnings');

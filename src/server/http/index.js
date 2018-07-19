@@ -37,10 +37,17 @@ export default async function (kbnServer, server, config) {
 
   // Note that all connection options configured here should be exactly the same
   // as in `getServerOptions()` in the new platform (see `src/core/server/http/http_tools`).
+  //
+  // The only exception is `tls` property: TLS is entirely handled by the new
+  // platform and we don't have to duplicate all TLS related settings here, we just need
+  // to indicate to Hapi connection that TLS is used so that it can use correct protocol
+  // name in `server.info` and `request.connection.info` that are used throughout Kibana.
+  //
   // Any change SHOULD BE applied in both places.
   server.connection({
     host: config.get('server.host'),
     port: config.get('server.port'),
+    tls: config.get('server.ssl.enabled'),
     listener: kbnServer.newPlatform.proxyListener,
     state: {
       strictHeader: false,
@@ -92,7 +99,6 @@ export default async function (kbnServer, server, config) {
     const customHeaders = {
       ...config.get('server.customResponseHeaders'),
       'kbn-name': kbnServer.name,
-      'kbn-version': kbnServer.version,
     };
 
     if (response.isBoom) {

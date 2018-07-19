@@ -118,6 +118,7 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.settings.clickKibanaSavedObjects();
       await PageObjects.settings.importFile(path.join(__dirname, 'exports', '_import_objects_saved_search.json'));
       await PageObjects.header.waitUntilLoadingHasFinished();
+      await PageObjects.settings.clickImportDone();
 
       await PageObjects.settings.navigateTo();
       await PageObjects.settings.clickKibanaSavedObjects();
@@ -150,6 +151,7 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.settings.importFile(path.join(__dirname, 'exports', '_import_objects_saved_search.json'));
       // Wait for all the saves to happen
       await PageObjects.header.waitUntilLoadingHasFinished();
+      await PageObjects.settings.clickImportDone();
 
       // Second, we need to delete the index pattern
       await PageObjects.settings.navigateTo();

@@ -17,22 +17,35 @@
  * under the License.
  */
 
-import { ErrorAutoCreateIndexProvider } from '../error_auto_create_index';
+import chrome from '../chrome';
 
-import { SavedObjectsClient } from './saved_objects_client';
+// Provide an angular wrapper around savedObjectClient so all actions get resolved in an Angular Promise
+// If you do not need the promise to execute in an angular digest cycle then you should not use this
+// and get savedObjectClient directly from chrome.
+export function SavedObjectsClientProvider(Promise) {
+  const savedObjectsClient = chrome.getSavedObjectsClient();
 
-export function SavedObjectsClientProvider($http, $q, Private) {
-  const errorAutoCreateIndex = Private(ErrorAutoCreateIndexProvider);
-
-  return new SavedObjectsClient({
-    $http,
-    PromiseConstructor: $q,
-    onCreateFailure(error) {
-      if (errorAutoCreateIndex.test(error)) {
-        return errorAutoCreateIndex.takeover();
-      }
-
-      throw error;
-    }
-  });
+  return {
+    create: (...args) => {
+      return Promise.resolve(savedObjectsClient.create(...args));
+    },
+    bulkCreate: (...args) => {
+      return Promise.resolve(savedObjectsClient.bulkCreate(...args));
+    },
+    delete: (...args) => {
+      return Promise.resolve(savedObjectsClient.delete(...args));
+    },
+    find: (...args) => {
+      return Promise.resolve(savedObjectsClient.find(...args));
+    },
+    get: (...args) => {
+      return Promise.resolve(savedObjectsClient.get(...args));
+    },
+    bulkGet: (...args) => {
+      return Promise.resolve(savedObjectsClient.bulkGet(...args));
+    },
+    update: (...args) => {
+      return Promise.resolve(savedObjectsClient.update(...args));
+    },
+  };
 }

@@ -28,6 +28,7 @@ import {
   EuiIcon,
   EuiColorPicker,
   EuiIconTip,
+  EuiCallOut,
 } from '@elastic/eui';
 
 import { uiModules } from './modules';
@@ -43,3 +44,5 @@ app.directive('icon', reactDirective => reactDirective(EuiIcon));
 app.directive('colorPicker', reactDirective => reactDirective(EuiColorPicker));
 
 app.directive('iconTip', reactDirective => reactDirective(EuiIconTip, ['content', 'type', 'position', 'title']));
+
+app.directive('callOut', reactDirective => reactDirective(EuiCallOut, ['title', 'color', 'size', 'iconType', 'children']));

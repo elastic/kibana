@@ -5,6 +5,9 @@
  */
 
 
+import { notify } from 'ui/notify';
+import { MLRequestFailure } from 'plugins/ml/util/ml_error';
+
 const messages = [];
 
 
@@ -56,6 +59,16 @@ function expandErrorMessageObj(resp) {
   return txt;
 }
 
+function errorNotify(text, resp) {
+  let err = null;
+  if (typeof text === 'object' && text.response !== undefined) {
+    resp = text.response;
+  } else {
+    err = new Error(text);
+  }
+  notify.error(new MLRequestFailure(err, resp));
+}
+
 export const mlMessageBarService = {
   getMessages,
   addMessage,
@@ -63,5 +76,8 @@ export const mlMessageBarService = {
   clear,
   info,
   warning,
-  error
+  error,
+  notify: {
+    error: errorNotify
+  }
 };
