@@ -26,14 +26,15 @@ import {
  * @param server {Object} HapiJS server instance
  */
 export const init = (monitoringPlugin, server) => {
+  const kbnServer = monitoringPlugin.kbnServer;
   const config = server.config();
   const { collectorSet } = server.usage;
   /*
    * Register collector objects for stats to show up in the APIs
    */
-  collectorSet.register(getOpsStatsCollector(server));
+  collectorSet.register(getOpsStatsCollector(server, kbnServer));
   collectorSet.register(getKibanaUsageCollector(server));
-  collectorSet.register(getSettingsCollector(server));
+  collectorSet.register(getSettingsCollector(server, kbnServer));
 
   /*
    * Instantiate and start the internal background task that calls collector
@@ -53,7 +54,7 @@ export const init = (monitoringPlugin, server) => {
     }
   });
 
-  const bulkUploader = initBulkUploader(monitoringPlugin.kbnServer, server);
+  const bulkUploader = initBulkUploader(kbnServer, server);
   const kibanaCollectionEnabled = config.get('xpack.monitoring.kibana.collection.enabled');
   const { info: xpackMainInfo } = xpackMainPlugin;
 

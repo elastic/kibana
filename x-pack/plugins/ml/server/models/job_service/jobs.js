@@ -47,6 +47,31 @@ export function jobsProvider(callWithRequest) {
     return results;
   }
 
+  async function closeJobs(jobIds) {
+    const results = {};
+    for (const jobId of jobIds) {
+      try {
+        await callWithRequest('ml.closeJob', { jobId });
+        results[jobId] = { closed: true };
+      } catch (error) {
+        if (error.statusCode === 409 && (error.response && error.response.includes('datafeed') === false)) {
+          // the close job request may fail (409) if the job has failed or if the datafeed hasn't been stopped.
+          // if the job has failed we want to attempt a force close.
+          // however, if we received a 409 due to the datafeed being started we should not attempt a force close.
+          try {
+            await callWithRequest('ml.closeJob', { jobId, force: true });
+            results[jobId] = { closed: true };
+          } catch (error2) {
+            results[jobId] = { closed: false, error: error2 };
+          }
+        } else {
+          results[jobId] = { closed: false, error };
+        }
+      }
+    }
+    return results;
+  }
+
   async function jobsSummary(jobIds = []) {
     const fullJobsList = await createFullJobsList();
     const auditMessages = await getAuditMessagesSummary();
@@ -276,6 +301,7 @@ export function jobsProvider(callWithRequest) {
   return {
     forceDeleteJob,
     deleteJobs,
+    closeJobs,
     jobsSummary,
     createFullJobsList,
     getAllGroups,

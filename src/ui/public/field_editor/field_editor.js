@@ -63,15 +63,18 @@ import {
 import {
   ScriptingDisabledCallOut,
   ScriptingWarningCallOut,
-  ScriptingHelpFlyout,
 } from './components/scripting_call_outs';
+
+import {
+  ScriptingHelpFlyout,
+} from './components/scripting_help';
 
 import {
   FieldFormatEditor
 } from './components/field_format_editor';
 
 import { FIELD_TYPES_BY_LANG, DEFAULT_FIELD_TYPES } from './constants';
-import { copyField, getDefaultFormat } from './lib';
+import { copyField, getDefaultFormat, executeScript, isScriptValid } from './lib';
 
 import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
 
@@ -111,6 +114,8 @@ export class FieldEditorComponent extends PureComponent {
       showScriptingHelp: false,
       showDeleteModal: false,
       hasFormatError: false,
+      hasScriptError: false,
+      isSaving: false,
     };
     this.supportedLangs = getSupportedScriptingLanguages();
     this.deprecatedLangs = getDeprecatedScriptingLanguages();
@@ -388,30 +393,50 @@ export class FieldEditorComponent extends PureComponent {
     );
   }
 
+  onScriptChange = (e) => {
+    this.setState({
+      hasScriptError: false
+    });
+    this.onFieldChange('script', e.target.value);
+  }
+
   renderScript() {
-    const { field } = this.state;
-    const isInvalid = !field.script || !field.script.trim();
+    const { field, hasScriptError } = this.state;
+    const isInvalid = !field.script || !field.script.trim() || hasScriptError;
+    const errorMsg = hasScriptError
+      ? (
+        <span data-test-subj="invalidScriptError">
+          {this.props.intl.formatMessage({
+            id: 'common.ui.fieldEditor.scriptInvalid.errorMessage', defaultMessage: 'Script is invalid. View script preview for details' })}
+        </span>)
+      : this.props.intl.formatMessage({ id: 'common.ui.fieldEditor.scriptRequired.errorMessage', defaultMessage: 'Script is required' });
 
     return field.scripted ? (
-      <EuiFormRow
-        label={this.props.intl.formatMessage({ id: 'common.ui.fieldEditor.script.label', defaultMessage: 'Script' })}
-        helpText={(
-          <EuiLink onClick={this.showScriptingHelp}>
-            {this.props.intl.formatMessage({ id: 'common.ui.fieldEditor.script.help.label', defaultMessage: 'Scripting help' })}
-          </EuiLink>
-        )}
-        isInvalid={isInvalid}
-        error={isInvalid
-          ? this.props.intl.formatMessage({ id: 'common.ui.fieldEditor.script.errorMessage', defaultMessage: 'Script is required' })
-          : null}
-      >
-        <EuiTextArea
-          value={field.script}
-          data-test-subj="editorFieldScript"
-          onChange={(e) => { this.onFieldChange('script', e.target.value); }}
+      <Fragment>
+        <EuiFormRow
+          label={this.props.intl.formatMessage({ id: 'common.ui.fieldEditor.script.label', defaultMessage: 'Script' })}
           isInvalid={isInvalid}
-        />
-      </EuiFormRow>
+          error={isInvalid ? errorMsg : null}
+        >
+          <EuiTextArea
+            value={field.script}
+            data-test-subj="editorFieldScript"
+            onChange={this.onScriptChange}
+            isInvalid={isInvalid}
+          />
+        </EuiFormRow>
+
+        <EuiFormRow>
+          <Fragment>
+            <EuiText>Access fields with <code>{`doc['some_field'].value`}</code>.</EuiText>
+            <br />
+            <EuiLink onClick={this.showScriptingHelp} data-test-subj="scriptedFieldsHelpLink">
+              Get help with the syntax and preview the results of your script.
+            </EuiLink>
+          </Fragment>
+        </EuiFormRow>
+
+      </Fragment>
     ) : null;
   }
 
@@ -475,58 +500,88 @@ export class FieldEditorComponent extends PureComponent {
   }
 
   renderActions() {
-    const { isCreating, field } = this.state;
+    const { isCreating, field, isSaving } = this.state;
     const { redirectAway } = this.props.helpers;
 
     return (
-      <EuiFlexGroup>
-        <EuiFlexItem grow={false}>
-          <EuiButton
-            fill
-            onClick={this.saveField}
-            isDisabled={this.isSavingDisabled()}
-            data-test-subj="fieldSaveButton"
-          >
-            {isCreating ?
-              <FormattedMessage
-                id="common.ui.fieldEditor.actions.create.button"
-                defaultMessage="Create field"
-              />
-              :
-              <FormattedMessage
-                id="common.ui.fieldEditor.actions.save.button"
-                defaultMessage="Save field"
-              />}
-          </EuiButton>
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiButtonEmpty
-            onClick={redirectAway}
-            data-test-subj="fieldCancelButton"
-          >
-            <FormattedMessage
-              id="common.ui.fieldEditor.actions.cancel.button"
-              defaultMessage="Cancel"
-            />
-
-          </EuiButtonEmpty>
-        </EuiFlexItem>
-        {
-          !isCreating && field.scripted ? (
-            <EuiFlexItem grow={false}>
-              <EuiButtonEmpty
-                color="danger"
-                onClick={this.showDeleteModal}
-              >
+      <EuiFormRow>
+        <EuiFlexGroup>
+          <EuiFlexItem grow={false}>
+            <EuiButton
+              fill
+              onClick={this.saveField}
+              isDisabled={this.isSavingDisabled()}
+              isLoading={isSaving}
+              data-test-subj="fieldSaveButton"
+            >
+              {isCreating ?
                 <FormattedMessage
-                  id="common.ui.fieldEditor.actions.delete.button"
-                  defaultMessage="Delete"
+                  id="common.ui.fieldEditor.actions.create.button"
+                  defaultMessage="Create field"
                 />
-              </EuiButtonEmpty>
-            </EuiFlexItem>
-          ) : null
-        }
-      </EuiFlexGroup>
+                :
+                <FormattedMessage
+                  id="common.ui.fieldEditor.actions.save.button"
+                  defaultMessage="Save field"
+                />}
+            </EuiButton>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiButtonEmpty
+              onClick={redirectAway}
+              data-test-subj="fieldCancelButton"
+            >
+              <FormattedMessage
+                id="common.ui.fieldEditor.actions.cancel.button"
+                defaultMessage="Cancel"
+              />
+            </EuiButtonEmpty>
+          </EuiFlexItem>
+          {
+            !isCreating && field.scripted ? (
+              <EuiFlexItem>
+                <EuiFlexGroup justifyContent="flexEnd">
+                  <EuiFlexItem grow={false}>
+                    <EuiButtonEmpty
+                      color="danger"
+                      onClick={this.showDeleteModal}
+                    >
+                      <FormattedMessage
+                        id="common.ui.fieldEditor.actions.delete.button"
+                        defaultMessage="Delete"
+                      />
+                    </EuiButtonEmpty>
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              </EuiFlexItem>
+            ) : null
+          }
+        </EuiFlexGroup>
+      </EuiFormRow>
+    );
+  }
+
+  renderScriptingPanels = () => {
+    const { scriptingLangs, field, showScriptingHelp } = this.state;
+
+    if (!field.scripted) {
+      return;
+    }
+
+    return (
+      <Fragment>
+        <ScriptingDisabledCallOut isVisible={!scriptingLangs.length} />
+        <ScriptingWarningCallOut isVisible />
+        <ScriptingHelpFlyout
+          isVisible={showScriptingHelp}
+          onClose={this.hideScriptingHelp}
+          indexPattern={this.props.indexPattern}
+          lang={field.lang}
+          name={field.name}
+          script={field.script}
+          executeScript={executeScript}
+        />
+      </Fragment>
     );
   }
 
@@ -549,12 +604,33 @@ export class FieldEditorComponent extends PureComponent {
     }
   }
 
-  saveField = () => {
-    const { redirectAway } = this.props.helpers;
+  saveField = async () => {
+    const field = this.state.field.toActualField();
     const { indexPattern, intl } = this.props;
     const { fieldFormatId } = this.state;
 
-    const field = this.state.field.toActualField();
+    if (field.scripted) {
+      this.setState({
+        isSaving: true
+      });
+
+      const isValid = await isScriptValid({
+        name: field.name,
+        lang: field.lang,
+        script: field.script,
+        indexPatternTitle: indexPattern.title
+      });
+
+      if (!isValid) {
+        this.setState({
+          hasScriptError: true,
+          isSaving: false
+        });
+        return;
+      }
+    }
+
+    const { redirectAway } = this.props.helpers;
     const index = indexPattern.fields.findIndex(f => f.name === field.name);
 
     if (index > -1) {
@@ -580,10 +656,11 @@ export class FieldEditorComponent extends PureComponent {
   }
 
   isSavingDisabled() {
-    const { field, hasFormatError } = this.state;
+    const { field, hasFormatError, hasScriptError } = this.state;
 
     if(
       hasFormatError
+      || hasScriptError
       || !field.name
       || !field.name.trim()
       || (field.scripted && (!field.script || !field.script.trim()))
@@ -595,7 +672,7 @@ export class FieldEditorComponent extends PureComponent {
   }
 
   render() {
-    const { isReady, isCreating, scriptingLangs, field, showScriptingHelp } = this.state;
+    const { isReady, isCreating, field } = this.state;
 
     return isReady ? (
       <div>
@@ -616,12 +693,7 @@ export class FieldEditorComponent extends PureComponent {
         </EuiText>
         <EuiSpacer size="m" />
         <EuiForm>
-          <ScriptingDisabledCallOut isVisible={field.scripted && !scriptingLangs.length} />
-          <ScriptingWarningCallOut isVisible={field.scripted} />
-          <ScriptingHelpFlyout
-            isVisible={field.scripted && showScriptingHelp}
-            onClose={this.hideScriptingHelp}
-          />
+          {this.renderScriptingPanels()}
           {this.renderName()}
           {this.renderLanguage()}
           {this.renderType()}
@@ -636,6 +708,5 @@ export class FieldEditorComponent extends PureComponent {
     ) : null;
   }
 }
-
 
 export const FieldEditor = injectI18n(FieldEditorComponent);

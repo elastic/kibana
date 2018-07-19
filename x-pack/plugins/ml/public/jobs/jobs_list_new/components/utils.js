@@ -10,7 +10,7 @@ import { mlMessageBarService } from 'plugins/ml/components/messagebar/messagebar
 
 import { mlJobService } from 'plugins/ml/services/job_service';
 import { ml } from 'plugins/ml/services/ml_api_service';
-import { DATAFEED_STATE } from 'plugins/ml/../common/constants/states';
+import { JOB_STATE, DATAFEED_STATE } from 'plugins/ml/../common/constants/states';
 
 export function loadFullJob(jobId) {
   return new Promise((resolve, reject) => {
@@ -29,11 +29,15 @@ export function loadFullJob(jobId) {
 }
 
 export function isStartable(jobs) {
-  return (jobs.find(j => j.datafeedState === DATAFEED_STATE.STOPPED) !== undefined);
+  return jobs.some(j => j.datafeedState === DATAFEED_STATE.STOPPED);
 }
 
 export function isStoppable(jobs) {
-  return (jobs.find(j => j.datafeedState === DATAFEED_STATE.STARTED) !== undefined);
+  return jobs.some(j => j.datafeedState === DATAFEED_STATE.STARTED);
+}
+
+export function isClosable(jobs) {
+  return jobs.some(j => (j.datafeedState === DATAFEED_STATE.STOPPED) && (j.jobState !== JOB_STATE.CLOSED));
 }
 
 export function forceStartDatafeeds(jobs, start, end, finish = () => {}) {
@@ -69,7 +73,8 @@ function showResults(resp, action) {
   const successes = [];
   const failures = [];
   for (const d in resp) {
-    if (resp[d][action] === true || (resp[d][action] === false && resp[d].error.statusCode === 409)) {
+    if (resp[d][action] === true ||
+      (resp[d][action] === false && (resp[d].error.statusCode === 409 && action === DATAFEED_STATE.STARTED))) {
       successes.push(d);
     } else {
       failures.push({
@@ -90,7 +95,11 @@ function showResults(resp, action) {
   } else if (action === DATAFEED_STATE.DELETED) {
     actionText = 'delete';
     actionTextPT = 'deleted';
+  } else if (action === JOB_STATE.CLOSED) {
+    actionText = 'close';
+    actionTextPT = 'closed';
   }
+
 
   if (successes.length > 1) {
     toastNotifications.addSuccess(`${successes.length} jobs ${actionTextPT} successfully`);
@@ -115,6 +124,20 @@ export function cloneJob(jobId) {
     .catch((error) => {
       mlMessageBarService.notify.error(error);
       toastNotifications.addDanger(`Could not clone ${jobId}. Job could not be found`);
+    });
+}
+
+export function closeJobs(jobs, finish = () => {}) {
+  const jobIds = jobs.map(j => j.id);
+  mlJobService.closeJobs(jobIds)
+  	.then((resp) => {
+      showResults(resp, JOB_STATE.CLOSED);
+      finish();
+    })
+    .catch((error) => {
+      mlMessageBarService.notify.error(error);
+      toastNotifications.addDanger(`Jobs failed to close`, error);
+      finish();
     });
 }
 
