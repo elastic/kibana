@@ -22,6 +22,7 @@ import { fromRoot } from '../../../utils';
 import { DLLBundlerCompiler } from '../compiler';
 import webpack from 'webpack';
 import path from 'path';
+import { remove } from 'lodash';
 
 export class Plugin {
   constructor({ dllConfig, log }) {
@@ -50,6 +51,12 @@ export class Plugin {
   async runEntryPathsCompiler(mainCompilerConfig) {
     return new Promise((resolve) => {
       this.entryPathsCompiler = webpack(mainCompilerConfig);
+
+      // Filter out this own plugin from the main compiler
+      // config to avoid exceed max stack size
+      remove(mainCompilerConfig.plugins, (plugin) => {
+        return plugin === this;
+      });
 
       this.entryPathsCompiler.hooks.compile.tap({
         name: 'dllBundlerBridgePlugin-buildEntryPaths-start',
@@ -96,7 +103,7 @@ export class Plugin {
       resolver(result, (err, data) => {
         if (err) return callback(err);
 
-        // Ignored3
+        // Ignored
         if (!data) return callback();
 
         // direct module
