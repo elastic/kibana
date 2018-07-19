@@ -35,11 +35,11 @@ export function NoData(props) {
 
   return (
     <EuiPage>
-      <EuiPageBody>
+      <EuiPageBody restrictWidth={600}>
         <EuiPageContent
           verticalPosition="center"
           horizontalPosition="center"
-          className="noData__content"
+          className="eui-textCenter"
         >
           <EuiIcon type="monitoringApp" size="xxl" />
           <EuiSpacer size="m" />

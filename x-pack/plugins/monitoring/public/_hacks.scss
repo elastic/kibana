@@ -1,17 +1,20 @@
-// NOTE: Temporary fix to allow page items to vertically align to the
-// breadcrumbs and tabs. Overrides a UI Framework class
-.page-row {
-  padding: 0 $euiSizeS;
-  margin: $euiSizeS 0;
-}
-
 .monitoring-tooltip__trigger,
 .monitoring-tooltip__trigger:hover {
   // override code in pivotal-ui/react/tooltip that forces the color to be blue
   color: $euiTextColor;
 }
 
+// We need background colors till more of Kibana is converted
+.tab-no-data, .tab-overview {
+  background: $euiColorLightestShade;
+}
+
 // match style of kbn-tooltip
 .pui-tooltip-inner {
   font-size: $euiFontSizeXS;
+}
+
+// SASSTODO: Remove font awesome
+.betaIcon {
+  color: $euiColorDarkShade;
 }

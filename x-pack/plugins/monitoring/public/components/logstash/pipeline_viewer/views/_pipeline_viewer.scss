@@ -1,7 +1,6 @@
-@import (reference) '~ui/styles/variables/colors';
-
+// SASSTODO: Hack for lack of body background
 monitoring-main[page="pipeline"] {
-  background: @globalColorLightestGray;
+  background: $euiColorLightestShade;
   min-height: 100vh;
 }
 
@@ -10,26 +9,26 @@ monitoring-main[page="pipeline"] {
 }
 
 .pipelineViewer__statement {
-  padding-left: 12px;
+  padding-left: $euiSizeM;
 }
 
 .pipelineViewer__plugin {
-  margin-left: 4px;
+  margin-left: $euiSizeXS;
 }
 
 .pipelineViewer__spaceContainer {
-  background-color: white;
+  background-color: $euiColorEmptyShade;
   align-self: stretch;
   display: flex;
   // Separates the left border spaces properly
-  border-bottom: solid 2px white;
+  border-bottom: solid 2px $euiColorEmptyShade;
 }
 
 .pipelineViewer__spacer {
-  width: 12px;
+  width: $euiSizeM;
   align-self: stretch;
-  margin-left: 12px;
-  border-left: 1px @globalColorMediumGray dashed;
+  margin-left: $euiSizeM;
+  border-left: 1px $euiBorderColor dashed;
 
   // This allows the border to be flush
   &:last-child {
@@ -38,7 +37,7 @@ monitoring-main[page="pipeline"] {
 
   &:first-child {
     // Odd number is because of the single pixel border.
-    margin-left: 23px;
+    margin-left: $euiSizeL - 1px;
   }
 }
 
@@ -46,32 +45,32 @@ monitoring-main[page="pipeline"] {
   text-align: right;
 
   &--cpuTime {
-    width: 40px;
+    width: $euiSizeXXL;
   }
 
   &--events, &--eventsEmitted {
-    width: 160px;
+    width: $euiSizeXXL * 4;
   }
 
   &--eventMillis {
-    width: 80px;
+    width: $euiSizeXXL * 2;
   }
 }
 
 .pipelineViewer__queueMessage {
-  margin-left: 24px;
-  color: @globalColorDarkGray;
+  margin-left: $euiSizeL;
+  color: $euiColorDarkShade;
 }
 
 .pipelineViewer__list {
   .pipelineViewer__listItem {
     display: flex;
-    min-height: 32px;
+    min-height: $euiSizeXL;
     align-items: center;
-    padding-right: 12px;
+    padding-right: $euiSizeM;
 
     &:nth-child(2n+1) {
-      background: #fafafa;
+      background: tintOrShade($euiColorLightestShade, 2%, 2%);
     }
   }
 }
@@ -80,35 +79,35 @@ monitoring-main[page="pipeline"] {
   font-weight: bold;
 }
 
-@media (max-width: 768px) {
+.monitoring-summary-status {
+  border-bottom: 1px solid $euiColorDarkestShade;
+}
+
+img.lspvDetailDrawerIcon {
+  display: inline;
+  margin: 0 $euiSizeXS 0 0;
+  width: auto;
+  vertical-align: middle;
+}
+
+// SASSTODO: Why is this width here?
+.lspvDetailDrawerSparklineContainer {
+  width: 7vw;
+}
+
+@include screenSmall {
   .pipelineViewer {
     .pipelineViewer__spacer {
       border: none;
     }
 
     .pipelineViewer__metricFlexItem {
-      margin-bottom: 4px !important;
+      margin-bottom: $euiSizeXS !important;
     }
 
     .pipelineViewer__metric {
       text-align: left;
-      padding-left: 32px;
+      padding-left: $euiSizeXL;
     }
   }
-}
-
-
-.monitoring-summary-status {
-  border-bottom: 1px solid #d4d4d4;
-}
-
-img.lspvDetailDrawerIcon {
-  display: inline;
-  margin: 0 5px 0 0;
-  width: auto;
-  vertical-align: middle;
-}
-
-.lspvDetailDrawerSparklineContainer {
-  width: 7vw;
 }
