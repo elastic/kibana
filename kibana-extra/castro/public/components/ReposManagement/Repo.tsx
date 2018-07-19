@@ -23,11 +23,11 @@ class Repo extends React.Component<RepoProps, any> {
   };
 
   public render() {
-    const { name } = this.props.repo;
+    const { name, uri } = this.props.repo;
     return (
       <EuiFlexGroup className="repoContainer">
         <EuiFlexItem>
-          <div>{name}</div>
+          <a href={`#/${uri}`}>{name}</a>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiButton onClick={this.deleteRepo}>Delete</EuiButton>

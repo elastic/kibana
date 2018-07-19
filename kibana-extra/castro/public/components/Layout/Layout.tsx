@@ -18,47 +18,44 @@ import {
   EuiPage,
   EuiPageBody,
 } from '@elastic/eui';
+import { match } from 'react-router-dom';
 
 import DirectoryTree from './DirectoryTree';
 import Editor from './Editor';
 interface State {
   children: any[];
-  node: any;
-  workspace?: string;
+}
+interface Props {
+  match: match<{ [key: string]: string }>;
 }
 
-export default class Layout extends React.Component<any, State> {
-  constructor(props) {
+export default class Layout extends React.Component<Props, State> {
+  constructor(props: Props) {
     super(props);
     this.state = {
       children: [],
-      node: null,
-      workspace: '',
     };
   }
 
   public componentDidMount() {
-    fetch('../api/castro/tree')
+    const { resource, org, repo } = this.props.match.params;
+    fetch(`../api/castro/repo/${resource}/${org}/${repo}/tree/head`)
       .then(resp => resp.json())
       .then((json: any) => {
         this.setState({
-          workspace: json.workspace,
-          children: json.root.children,
+          children: json.children,
         });
       });
   }
 
-  public onClick = node => {
-    this.setState({ node });
+  public onClick = (node: any) => {
+    const { resource, org, repo } = this.props.match.params;
+    window.location.hash = `${resource}/${org}/${repo}/${node.path}`;
   };
 
   public render() {
-    const editor = this.state.node && (
-      <Editor
-        file={this.state.workspace + '/' + this.state.node.path}
-        blob={this.state.node.blob}
-      />
-    );
+    const { resource, org, repo, path } = this.props.match.params;
+    const editor = path && <Editor file={path} repoUri={`${resource}/${org}/${repo}`} />;
 
     return (
       <EuiPage>

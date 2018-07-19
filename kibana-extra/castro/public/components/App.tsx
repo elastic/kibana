@@ -21,6 +21,7 @@ export default props => {
         <Route path="/" exact={true} render={renderMain} />
         <Route path="/codebrowsing" component={Layout} />
         <Route path="/repos" render={renderRepos} />
+        <Route path="/:resource/:org/:repo/:path*" component={Layout} />
       </div>
     </Router>
   );
