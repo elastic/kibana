@@ -11,7 +11,7 @@ exports[`TruncateFormatEditor should render normally 1`] = `
     label={
       <FormattedMessage
         defaultMessage="Field length"
-        id="common.ui.fieldEditor.truncate.length.label"
+        id="common.ui.fieldEditor.truncate.lengthLabel"
         values={Object {}}
       />
     }

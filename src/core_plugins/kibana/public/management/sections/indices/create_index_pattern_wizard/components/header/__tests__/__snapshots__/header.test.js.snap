@@ -11,7 +11,7 @@ exports[`Header should render normally 1`] = `
     <h1>
       <FormattedMessage
         defaultMessage="Create index pattern"
-        id="kbn.management.createIndexPattern.header"
+        id="kbn.management.createIndexPatternHeader"
         values={Object {}}
       />
     </h1>
@@ -39,7 +39,7 @@ exports[`Header should render normally 1`] = `
           >
             <FormattedMessage
               defaultMessage="Kibana uses index patterns to retrieve data from Elasticsearch indices for things like visualizations."
-              id="kbn.management.createIndexPattern.label"
+              id="kbn.management.createIndexPatternLabel"
               values={Object {}}
             />
           </EuiTextColor>
@@ -55,7 +55,7 @@ exports[`Header should render normally 1`] = `
         label={
           <FormattedMessage
             defaultMessage="Include system indices"
-            id="kbn.management.createIndexPattern.includeSystemIndices.toggleSwitch"
+            id="kbn.management.createIndexPattern.includeSystemIndicesToggleSwitch"
             values={Object {}}
           />
         }
@@ -80,7 +80,7 @@ exports[`Header should render without including system indices 1`] = `
     <h1>
       <FormattedMessage
         defaultMessage="Create index pattern"
-        id="kbn.management.createIndexPattern.header"
+        id="kbn.management.createIndexPatternHeader"
         values={Object {}}
       />
     </h1>
@@ -108,7 +108,7 @@ exports[`Header should render without including system indices 1`] = `
           >
             <FormattedMessage
               defaultMessage="Kibana uses index patterns to retrieve data from Elasticsearch indices for things like visualizations."
-              id="kbn.management.createIndexPattern.label"
+              id="kbn.management.createIndexPatternLabel"
               values={Object {}}
             />
           </EuiTextColor>
@@ -124,7 +124,7 @@ exports[`Header should render without including system indices 1`] = `
         label={
           <FormattedMessage
             defaultMessage="Include system indices"
-            id="kbn.management.createIndexPattern.includeSystemIndices.toggleSwitch"
+            id="kbn.management.createIndexPattern.includeSystemIndicesToggleSwitch"
             values={Object {}}
           />
         }

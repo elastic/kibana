@@ -44,7 +44,7 @@ function displayBanner() {
         color="warning"
         iconType="iInCircle"
         title={
-          i18n.translate('common.ui.indexPattern.banner.label',
+          i18n.translate('common.ui.indexPattern.bannerLabel',
             //eslint-disable-next-line max-len
             { defaultMessage: 'In order to visualize and explore data in Kibana, you\'ll need to create an index pattern to retrieve data from Elasticsearch.' })
         }

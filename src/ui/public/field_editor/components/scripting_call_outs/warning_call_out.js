@@ -36,25 +36,25 @@ export const ScriptingWarningCallOutComponent = ({
   return isVisible ? (
     <Fragment>
       <EuiCallOut
-        title={intl.formatMessage({ id: 'common.ui.fieldEditor.warningCallOut.header', defaultMessage: 'Proceed with caution' })}
+        title={intl.formatMessage({ id: 'common.ui.fieldEditor.warningCallOutHeader', defaultMessage: 'Proceed with caution' })}
         color="warning"
         iconType="alert"
       >
         <p>
           <FormattedMessage
-            id="common.ui.fieldEditor.disabledCallOut.label.detail"
+            id="common.ui.fieldEditor.warningCallOutLabel.callOutDetail"
             defaultMessage="Please familiarize yourself with {scripFields} and with {scriptsInAggregation} before using scripted fields."
             values={{
               scripFields: (
                 <EuiLink target="_window" href={getDocLink('scriptedFields.scriptFields')}>
-                  <FormattedMessage id="common.ui.fieldEditor.disabledCallOut.label.scripFields" defaultMessage="script fields" />&nbsp;
+                  <FormattedMessage id="common.ui.fieldEditor.warningCallOutLabel.scripFieldsLink" defaultMessage="script fields" />&nbsp;
                   <EuiIcon type="link" />
                 </EuiLink>
               ),
               scriptsInAggregation: (
                 <EuiLink target="_window" href={getDocLink('scriptedFields.scriptAggs')}>
                   <FormattedMessage
-                    id="common.ui.fieldEditor.disabledCallOut.label.scriptsInAggregation"
+                    id="common.ui.fieldEditor.warningCallOutLabel.scriptsInAggregationLink"
                     defaultMessage="scripts in aggregations"
                   />&nbsp;
                   <EuiIcon type="link" />
@@ -65,7 +65,7 @@ export const ScriptingWarningCallOutComponent = ({
         </p>
         <p>
           <FormattedMessage
-            id="common.ui.fieldEditor.disabledCallOut.description.label"
+            id="common.ui.fieldEditor.warningCallOut.descriptionLabel"
             defaultMessage="Scripted fields can be used to display and aggregate calculated values. As such, they can be very slow, and
             if done incorrectly, can cause Kibana to be unusable. There's no safety net here. If you make a typo, unexpected exceptions
             will be thrown all over the place!"

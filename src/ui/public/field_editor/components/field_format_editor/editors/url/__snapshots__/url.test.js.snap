@@ -17,7 +17,7 @@ exports[`UrlFormatEditor should render label template help 1`] = `
     label={
       <FormattedMessage
         defaultMessage="Type"
-        id="common.ui.fieldEditor.url.type.label"
+        id="common.ui.fieldEditor.url.typeLabel"
         values={Object {}}
       />
     }
@@ -60,7 +60,7 @@ exports[`UrlFormatEditor should render label template help 1`] = `
       >
         <FormattedMessage
           defaultMessage="URL template help"
-          id="common.ui.fieldEditor.url.template.help.button"
+          id="common.ui.fieldEditor.url.template.helpButton"
           values={Object {}}
         />
       </EuiLink>
@@ -69,7 +69,7 @@ exports[`UrlFormatEditor should render label template help 1`] = `
     label={
       <FormattedMessage
         defaultMessage="URL template"
-        id="common.ui.fieldEditor.url.urlTemplate.label"
+        id="common.ui.fieldEditor.url.urlTemplateLabel"
         values={Object {}}
       />
     }
@@ -101,7 +101,7 @@ exports[`UrlFormatEditor should render label template help 1`] = `
     label={
       <FormattedMessage
         defaultMessage="Label template"
-        id="common.ui.fieldEditor.url.labelTemplate.label"
+        id="common.ui.fieldEditor.url.labelTemplateLabel"
         values={Object {}}
       />
     }
@@ -138,7 +138,7 @@ exports[`UrlFormatEditor should render normally 1`] = `
     label={
       <FormattedMessage
         defaultMessage="Type"
-        id="common.ui.fieldEditor.url.type.label"
+        id="common.ui.fieldEditor.url.typeLabel"
         values={Object {}}
       />
     }
@@ -181,7 +181,7 @@ exports[`UrlFormatEditor should render normally 1`] = `
       >
         <FormattedMessage
           defaultMessage="URL template help"
-          id="common.ui.fieldEditor.url.template.help.button"
+          id="common.ui.fieldEditor.url.template.helpButton"
           values={Object {}}
         />
       </EuiLink>
@@ -190,7 +190,7 @@ exports[`UrlFormatEditor should render normally 1`] = `
     label={
       <FormattedMessage
         defaultMessage="URL template"
-        id="common.ui.fieldEditor.url.urlTemplate.label"
+        id="common.ui.fieldEditor.url.urlTemplateLabel"
         values={Object {}}
       />
     }
@@ -222,7 +222,7 @@ exports[`UrlFormatEditor should render normally 1`] = `
     label={
       <FormattedMessage
         defaultMessage="Label template"
-        id="common.ui.fieldEditor.url.labelTemplate.label"
+        id="common.ui.fieldEditor.url.labelTemplateLabel"
         values={Object {}}
       />
     }
@@ -259,7 +259,7 @@ exports[`UrlFormatEditor should render url template help 1`] = `
     label={
       <FormattedMessage
         defaultMessage="Type"
-        id="common.ui.fieldEditor.url.type.label"
+        id="common.ui.fieldEditor.url.typeLabel"
         values={Object {}}
       />
     }
@@ -302,7 +302,7 @@ exports[`UrlFormatEditor should render url template help 1`] = `
       >
         <FormattedMessage
           defaultMessage="URL template help"
-          id="common.ui.fieldEditor.url.template.help.button"
+          id="common.ui.fieldEditor.url.template.helpButton"
           values={Object {}}
         />
       </EuiLink>
@@ -311,7 +311,7 @@ exports[`UrlFormatEditor should render url template help 1`] = `
     label={
       <FormattedMessage
         defaultMessage="URL template"
-        id="common.ui.fieldEditor.url.urlTemplate.label"
+        id="common.ui.fieldEditor.url.urlTemplateLabel"
         values={Object {}}
       />
     }
@@ -343,7 +343,7 @@ exports[`UrlFormatEditor should render url template help 1`] = `
     label={
       <FormattedMessage
         defaultMessage="Label template"
-        id="common.ui.fieldEditor.url.labelTemplate.label"
+        id="common.ui.fieldEditor.url.labelTemplateLabel"
         values={Object {}}
       />
     }

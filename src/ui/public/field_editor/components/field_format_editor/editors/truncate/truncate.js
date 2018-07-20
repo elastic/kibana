@@ -53,7 +53,7 @@ export class TruncateFormatEditor extends DefaultFormatEditor {
     return (
       <Fragment>
         <EuiFormRow
-          label={<FormattedMessage id="common.ui.fieldEditor.truncate.length.label" defaultMessage="Field length"/>}
+          label={<FormattedMessage id="common.ui.fieldEditor.truncate.lengthLabel" defaultMessage="Field length"/>}
           isInvalid={!!error}
           error={error}
         >

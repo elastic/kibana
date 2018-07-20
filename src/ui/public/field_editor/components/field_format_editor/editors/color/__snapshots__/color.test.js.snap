@@ -74,7 +74,7 @@ exports[`ColorFormatEditor should render multiple colors 1`] = `
   >
     <FormattedMessage
       defaultMessage="Add color"
-      id="common.ui.fieldEditor.color.addColor.button"
+      id="common.ui.fieldEditor.color.addColorButton"
       values={Object {}}
     />
   </EuiButton>
@@ -151,7 +151,7 @@ exports[`ColorFormatEditor should render other type normally (range field) 1`] =
   >
     <FormattedMessage
       defaultMessage="Add color"
-      id="common.ui.fieldEditor.color.addColor.button"
+      id="common.ui.fieldEditor.color.addColorButton"
       values={Object {}}
     />
   </EuiButton>
@@ -228,7 +228,7 @@ exports[`ColorFormatEditor should render string type normally (regex field) 1`] 
   >
     <FormattedMessage
       defaultMessage="Add color"
-      id="common.ui.fieldEditor.color.addColor.button"
+      id="common.ui.fieldEditor.color.addColorButton"
       values={Object {}}
     />
   </EuiButton>

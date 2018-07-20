@@ -227,19 +227,19 @@ export class FieldEditorComponent extends PureComponent {
 
     return isCreating ? (
       <EuiFormRow
-        label={intl.formatMessage({ id: 'common.ui.fieldEditor.name.label', defaultMessage: 'Name' })}
+        label={intl.formatMessage({ id: 'common.ui.fieldEditor.nameLabel', defaultMessage: 'Name' })}
         helpText={this.isDuplicateName() ? (
           <span>
             <EuiIcon type="alert" color="warning" size="s" />&nbsp;
             <FormattedMessage
-              id="common.ui.fieldEditor.mappingConflict.label.detail"
+              id="common.ui.fieldEditor.mappingConflictLabel.mappingConflictDetail"
               defaultMessage="{mappingConflict} You already have a field with the name {fieldName}. Naming your scripted field with
               the same name means you won't be able to query both fields at the same time."
               values={{
                 mappingConflict: (
                   <strong>
                     <FormattedMessage
-                      id="common.ui.fieldEditor.mappingConflict.label.mappingConflict"
+                      id="common.ui.fieldEditor.mappingConflictLabel.mappingConflictLabel"
                       defaultMessage="Mapping Conflict:"
                     />
                   </strong>
@@ -251,14 +251,14 @@ export class FieldEditorComponent extends PureComponent {
         ) : null}
         isInvalid={isInvalid}
         error={isInvalid ? intl.formatMessage({
-          id: 'common.ui.fieldEditor.name.errorMessage',
+          id: 'common.ui.fieldEditor.nameErrorMessage',
           defaultMessage: 'Name is required'
         }) : null}
       >
         <EuiFieldText
           value={field.name || ''}
           placeholder={intl.formatMessage(
-            { id: 'common.ui.fieldEditor.name.placeholder', defaultMessage: 'New scripted field' })}
+            { id: 'common.ui.fieldEditor.namePlaceholder', defaultMessage: 'New scripted field' })}
           data-test-subj="editorFieldName"
           onChange={(e) => { this.onFieldChange('name', e.target.value); }}
           isInvalid={isInvalid}
@@ -269,21 +269,22 @@ export class FieldEditorComponent extends PureComponent {
 
   renderLanguage() {
     const { field, scriptingLangs, isDeprecatedLang } = this.state;
+    const { intl } = this.props;
 
     return field.scripted ? (
       <EuiFormRow
-        label={this.props.intl.formatMessage({ id: 'common.ui.fieldEditor.language.label', defaultMessage: 'Language' })}
+        label={intl.formatMessage({ id: 'common.ui.fieldEditor.languageLabel', defaultMessage: 'Language' })}
         helpText={isDeprecatedLang ? (
           <span>
             <EuiIcon type="alert" color="warning" size="s" />&nbsp;
             <strong>
               <FormattedMessage
-                id="common.ui.fieldEditor.warning.header"
+                id="common.ui.fieldEditor.warningHeader"
                 defaultMessage="Deprecation Warning:"
               />
             </strong>&nbsp;
             <FormattedMessage
-              id="common.ui.fieldEditor.warning.label.detail"
+              id="common.ui.fieldEditor.warningLabel.warningDetail"
               defaultMessage="{language} is deprecated and support will be removed in the next major version of Kibana and Elasticsearch.
               We recommend using {painlessLink} for new scripted fields."
               values={{
@@ -291,7 +292,7 @@ export class FieldEditorComponent extends PureComponent {
                 painlessLink: (
                   <EuiLink target="_window" href={getDocLink('scriptedFields.painless')}>
                     <FormattedMessage
-                      id="common.ui.fieldEditor.warning.label.painlessLink"
+                      id="common.ui.fieldEditor.warningLabel.painlessLink"
                       defaultMessage="Painless"
                     />
                   </EuiLink>
@@ -313,9 +314,10 @@ export class FieldEditorComponent extends PureComponent {
 
   renderType() {
     const { field, fieldTypes } = this.state;
+    const { intl } = this.props;
 
     return (
-      <EuiFormRow label={this.props.intl.formatMessage({ id: 'common.ui.fieldEditor.type.label', defaultMessage: 'Type' })}>
+      <EuiFormRow label={intl.formatMessage({ id: 'common.ui.fieldEditor.typeLabel', defaultMessage: 'Type' })}>
         <EuiSelect
           value={field.type}
           disabled={!field.scripted}
@@ -335,14 +337,14 @@ export class FieldEditorComponent extends PureComponent {
     const defaultFormat = fieldTypeFormats[0] && fieldTypeFormats[0].resolvedTitle;
     const label = defaultFormat
       ? (<FormattedMessage
-        id="common.ui.fieldEditor.defaultFormat.header"
+        id="common.ui.fieldEditor.defaultFormatHeader"
         defaultMessage="Format (Default: {defaultFormat})"
         values={{
           defaultFormat: <EuiCode>{defaultFormat}</EuiCode>
         }}
       />)
       : (<FormattedMessage
-        id="common.ui.fieldEditor.format.header"
+        id="common.ui.fieldEditor.formatHeader"
         defaultMessage="Format"
       />);
 
@@ -352,7 +354,7 @@ export class FieldEditorComponent extends PureComponent {
           label={label}
           helpText={
             <FormattedMessage
-              id="common.ui.fieldEditor.format.label"
+              id="common.ui.fieldEditor.formatLabel"
               defaultMessage="Formatting allows you to control the way that specific values are displayed. It can also cause values to be
               completely changed and prevent highlighting in Discover from working."
             />
@@ -382,9 +384,10 @@ export class FieldEditorComponent extends PureComponent {
 
   renderPopularity() {
     const { field } = this.state;
+    const { intl } = this.props;
 
     return (
-      <EuiFormRow label={this.props.intl.formatMessage({ id: 'common.ui.fieldEditor.popularity.label', defaultMessage: 'Popularity' })}>
+      <EuiFormRow label={intl.formatMessage({ id: 'common.ui.fieldEditor.popularityLabel', defaultMessage: 'Popularity' })}>
         <EuiFieldNumber
           value={field.count}
           data-test-subj="editorFieldCount"
@@ -409,14 +412,14 @@ export class FieldEditorComponent extends PureComponent {
       ? (
         <span data-test-subj="invalidScriptError">
           {intl.formatMessage({
-            id: 'common.ui.fieldEditor.scriptInvalid.errorMessage', defaultMessage: 'Script is invalid. View script preview for details' })}
+            id: 'common.ui.fieldEditor.scriptInvalidErrorMessage', defaultMessage: 'Script is invalid. View script preview for details' })}
         </span>)
-      : intl.formatMessage({ id: 'common.ui.fieldEditor.scriptRequired.errorMessage', defaultMessage: 'Script is required' });
+      : intl.formatMessage({ id: 'common.ui.fieldEditor.scriptRequiredErrorMessage', defaultMessage: 'Script is required' });
 
     return field.scripted ? (
       <Fragment>
         <EuiFormRow
-          label={intl.formatMessage({ id: 'common.ui.fieldEditor.script.label', defaultMessage: 'Script' })}
+          label={intl.formatMessage({ id: 'common.ui.fieldEditor.scriptLabel', defaultMessage: 'Script' })}
           isInvalid={isInvalid}
           error={isInvalid ? errorMsg : null}
         >
@@ -432,7 +435,7 @@ export class FieldEditorComponent extends PureComponent {
           <Fragment>
             <EuiText>
               <FormattedMessage
-                id="common.ui.fieldEditor.script.accessWith.label"
+                id="common.ui.fieldEditor.script.accessWithLabel"
                 defaultMessage="Access fields with {code}."
                 values={{ code: <code>{`doc['some_field'].value`}</code> }}
               />
@@ -440,7 +443,7 @@ export class FieldEditorComponent extends PureComponent {
             <br />
             <EuiLink onClick={this.showScriptingHelp} data-test-subj="scriptedFieldsHelpLink">
               <FormattedMessage
-                id="common.ui.fieldEditor.script.getHelp.label"
+                id="common.ui.fieldEditor.script.getHelpLabel"
                 defaultMessage="Get help with the syntax and preview the results of your script."
               />
             </EuiLink>
@@ -471,7 +474,7 @@ export class FieldEditorComponent extends PureComponent {
       <EuiOverlayMask>
         <EuiConfirmModal
           title={intl.formatMessage(
-            { id: 'common.ui.fieldEditor.deleteField.header', defaultMessage: 'Delete field \'{fieldName}\'' },
+            { id: 'common.ui.fieldEditor.deleteFieldHeader', defaultMessage: 'Delete field \'{fieldName}\'' },
             { fieldName: field.name })}
           onCancel={this.hideDeleteModal}
           onConfirm={() => {
@@ -479,15 +482,15 @@ export class FieldEditorComponent extends PureComponent {
             this.deleteField();
           }}
           cancelButtonText={intl.formatMessage(
-            { id: 'common.ui.fieldEditor.deleteField.cancel.button', defaultMessage: 'Cancel' })}
+            { id: 'common.ui.fieldEditor.deleteField.cancelButton', defaultMessage: 'Cancel' })}
           confirmButtonText={intl.formatMessage(
-            { id: 'common.ui.fieldEditor.deleteField.delete.button', defaultMessage: 'Delete' })}
+            { id: 'common.ui.fieldEditor.deleteField.deleteButton', defaultMessage: 'Delete' })}
           buttonColor="danger"
           defaultFocusedButton={EUI_MODAL_CONFIRM_BUTTON}
         >
           <p>
             <FormattedMessage
-              id="common.ui.fieldEditor.deleteField.label"
+              id="common.ui.fieldEditor.deleteFieldLabel"
               defaultMessage="You can't recover a deleted field.{separator}Are you sure you want to do this?"
               values={{
                 separator: <span><br/><br/></span>
@@ -528,12 +531,12 @@ export class FieldEditorComponent extends PureComponent {
             >
               {isCreating ?
                 <FormattedMessage
-                  id="common.ui.fieldEditor.actions.create.button"
+                  id="common.ui.fieldEditor.actions.createButton"
                   defaultMessage="Create field"
                 />
                 :
                 <FormattedMessage
-                  id="common.ui.fieldEditor.actions.save.button"
+                  id="common.ui.fieldEditor.actions.saveButton"
                   defaultMessage="Save field"
                 />}
             </EuiButton>
@@ -544,7 +547,7 @@ export class FieldEditorComponent extends PureComponent {
               data-test-subj="fieldCancelButton"
             >
               <FormattedMessage
-                id="common.ui.fieldEditor.actions.cancel.button"
+                id="common.ui.fieldEditor.actions.cancelButton"
                 defaultMessage="Cancel"
               />
             </EuiButtonEmpty>
@@ -559,7 +562,7 @@ export class FieldEditorComponent extends PureComponent {
                       onClick={this.showDeleteModal}
                     >
                       <FormattedMessage
-                        id="common.ui.fieldEditor.actions.delete.button"
+                        id="common.ui.fieldEditor.actions.deleteButton"
                         defaultMessage="Delete"
                       />
                     </EuiButtonEmpty>
@@ -606,7 +609,7 @@ export class FieldEditorComponent extends PureComponent {
     if(remove) {
       remove.then(() => {
         const message = intl.formatMessage(
-          { id: 'common.ui.fieldEditor.deleteField.deleted.header', defaultMessage: 'Deleted \'{fieldName}\'' },
+          { id: 'common.ui.fieldEditor.deleteField.deletedHeader', defaultMessage: 'Deleted \'{fieldName}\'' },
           { fieldName: field.name });
         toastNotifications.addSuccess(message);
         redirectAway();
@@ -660,7 +663,7 @@ export class FieldEditorComponent extends PureComponent {
     return indexPattern.save()
       .then(function () {
         const message = intl.formatMessage(
-          { id: 'common.ui.fieldEditor.deleteField.saved.header', defaultMessage: 'Saved \'{fieldName}\'' },
+          { id: 'common.ui.fieldEditor.deleteField.savedHeader', defaultMessage: 'Saved \'{fieldName}\'' },
           { fieldName: field.name });
         toastNotifications.addSuccess(message);
         redirectAway();
@@ -692,11 +695,11 @@ export class FieldEditorComponent extends PureComponent {
           <h3>{
             isCreating
               ? <FormattedMessage
-                id="common.ui.fieldEditor.create.header"
+                id="common.ui.fieldEditor.createHeader"
                 defaultMessage="Create scripted field"
               />
               : <FormattedMessage
-                id="common.ui.fieldEditor.edit.header"
+                id="common.ui.fieldEditor.editHeader"
                 defaultMessage="Edit {fieldName}"
                 values={{ fieldName: field.name }}
               />

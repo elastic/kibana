@@ -23,7 +23,7 @@ export const getDefaultFormat = (Format) => {
   class DefaultFormat extends Format {
     static id = '';
     static resolvedTitle = Format.title;
-    static title = i18n.translate('common.ui.fieldEditor.defaultFormat.dropDown', { defaultMessage: '- Default -' });
+    static title = i18n.translate('common.ui.fieldEditor.defaultFormatDropDown', { defaultMessage: '- Default -' });
   }
 
   return DefaultFormat;

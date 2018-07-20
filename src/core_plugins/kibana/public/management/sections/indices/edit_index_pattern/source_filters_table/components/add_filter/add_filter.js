@@ -48,8 +48,9 @@ export class AddFilterComponent extends Component {
 
   render() {
     const { filter } = this.state;
-    const placeholder = this.props.intl.formatMessage({
-      id: 'kbn.management.editIndexPattern.source.placeholder',
+    const { intl } = this.props;
+    const placeholder = intl.formatMessage({
+      id: 'kbn.management.editIndexPattern.sourcePlaceholder',
       defaultMessage: 'source filter, accepts wildcards (e.g., `user*` to filter fields starting with \'user\')'
     });
 
@@ -68,7 +69,7 @@ export class AddFilterComponent extends Component {
             isDisabled={filter.length === 0}
             onClick={this.onAddFilter}
           >
-            <FormattedMessage id="kbn.management.editIndexPattern.source.add.button" defaultMessage="Add" />
+            <FormattedMessage id="kbn.management.editIndexPattern.source.addButton" defaultMessage="Add" />
           </EuiButton>
         </EuiFlexItem>
       </EuiFlexGroup>

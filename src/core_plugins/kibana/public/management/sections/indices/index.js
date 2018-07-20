@@ -79,7 +79,7 @@ uiModules.get('apps/management')
   });
 
 management.getSection('kibana').register('indices', {
-  display: i18n.translate('kbn.management.indexPattern.sections.header', { defaultMessage: 'Index Patterns' }),
+  display: i18n.translate('kbn.management.indexPattern.sectionsHeader', { defaultMessage: 'Index Patterns' }),
   order: 0,
   url: '#/management/kibana/indices/'
 });
@@ -87,8 +87,8 @@ management.getSection('kibana').register('indices', {
 FeatureCatalogueRegistryProvider.register(() => {
   return {
     id: 'index_patterns',
-    title: i18n.translate('kbn.management.indexPattern.header', { defaultMessage: 'Index Patterns' }),
-    description: i18n.translate('kbn.management.indexPattern.label',
+    title: i18n.translate('kbn.management.indexPatternHeader', { defaultMessage: 'Index Patterns' }),
+    description: i18n.translate('kbn.management.indexPatternLabel',
       { defaultMessage: 'Manage the index patterns that help retrieve your data from Elasticsearch.' }),
     icon: 'indexPatternApp',
     path: '/app/kibana#/management/kibana/indices',

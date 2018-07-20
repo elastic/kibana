@@ -120,7 +120,7 @@ export function IndexPatternProvider(Private, config, Promise, confirmModalPromi
 
     if (indexPattern.isUnsupportedTimePattern()) {
       if (!isUserAwareOfUnsupportedTimePattern(indexPattern)) {
-        const warning = i18n.translate('common.ui.indexPattern.warning.label',
+        const warning = i18n.translate('common.ui.indexPattern.warningLabel',
           { values: { title: indexPattern.title, link: kbnUrl.getRouteHref(indexPattern, 'edit') },
             //eslint-disable-next-line max-len
             defaultMessage: 'Support for time-intervals has been removed. View the ["{title}" index pattern in management]({link}) for more information.'
@@ -415,7 +415,7 @@ export function IndexPatternProvider(Private, config, Promise, confirmModalPromi
 
       // We found a duplicate but we aren't allowing override, show the warn modal
       if (!allowOverride) {
-        const confirmMessage = i18n.translate('common.ui.indexPattern.titleExists.label', { values: { title: this.title },
+        const confirmMessage = i18n.translate('common.ui.indexPattern.titleExistsLabel', { values: { title: this.title },
           defaultMessage: 'An index pattern with the title \'{title}\' already exists.' });
         try {
           await confirmModalPromise(confirmMessage, { confirmButtonText: 'Go to existing pattern' });
@@ -433,9 +433,9 @@ export function IndexPatternProvider(Private, config, Promise, confirmModalPromi
       // We can override and we want to prompt for confirmation
       try {
         await confirmModalPromise(
-          i18n.translate('common.ui.indexPattern.confirmOverwrite.label', { values: { title: this.title },
+          i18n.translate('common.ui.indexPattern.confirmOverwriteLabel', { values: { title: this.title },
             defaultMessage: 'Are you sure you want to overwrite \'{title}\'?' }),
-          { confirmButtonText: i18n.translate('common.ui.indexPattern.confirmOverwrite.button', { defaultMessage: 'Overwrite' })
+          { confirmButtonText: i18n.translate('common.ui.indexPattern.confirmOverwriteButton', { defaultMessage: 'Overwrite' })
           });
       } catch (err) {
         // They changed their mind
@@ -483,7 +483,7 @@ export function IndexPatternProvider(Private, config, Promise, confirmModalPromi
 
                 if (unresolvedCollision) {
                   const message = i18n.translate(
-                    'common.ui.indexPattern.unableWrite.label',
+                    'common.ui.indexPattern.unableWriteLabel',
                     { defaultMessage: 'Unable to write index pattern! Refresh the page to get the most up to date changes for this index pattern.' } // eslint-disable-line max-len
                   );
                   toastNotifications.addDanger(message);

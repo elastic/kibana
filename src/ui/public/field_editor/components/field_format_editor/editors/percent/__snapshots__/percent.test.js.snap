@@ -17,7 +17,7 @@ exports[`PercentFormatEditor should render normally 1`] = `
         >
           <FormattedMessage
             defaultMessage="Documentation"
-            id="common.ui.fieldEditor.number.documentaion.label"
+            id="common.ui.fieldEditor.number.documentaionLabel"
             values={Object {}}
           />
            
@@ -32,7 +32,7 @@ exports[`PercentFormatEditor should render normally 1`] = `
     label={
       <FormattedMessage
         defaultMessage="Numeral.js format pattern (Default: {defaultPattern})"
-        id="common.ui.fieldEditor.number.numeral.label"
+        id="common.ui.fieldEditor.number.numeralLabel"
         values={
           Object {
             "defaultPattern": <EuiCode>

@@ -35,17 +35,17 @@ export function IndicesEditSectionsProvider() {
 
     return [
       {
-        title: i18n.translate('kbn.management.editIndexPattern.tabs.fields.header', { defaultMessage: 'Fields' }),
+        title: i18n.translate('kbn.management.editIndexPattern.tabs.fieldsHeader', { defaultMessage: 'Fields' }),
         index: 'indexedFields',
         count: fieldCount.indexed
       },
       {
-        title: i18n.translate('kbn.management.editIndexPattern.tabs.scripted.header', { defaultMessage: 'Scripted fields' }),
+        title: i18n.translate('kbn.management.editIndexPattern.tabs.scriptedHeader', { defaultMessage: 'Scripted fields' }),
         index: 'scriptedFields',
         count: fieldCount.scripted
       },
       {
-        title: i18n.translate('kbn.management.editIndexPattern.tabs.source.header', { defaultMessage: 'Source filters' }),
+        title: i18n.translate('kbn.management.editIndexPattern.tabs.sourceHeader', { defaultMessage: 'Source filters' }),
         index: 'sourceFilters',
         count: fieldCount.sourceFilters
       }

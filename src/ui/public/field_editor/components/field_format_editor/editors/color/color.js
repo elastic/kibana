@@ -88,7 +88,7 @@ export class ColorFormatEditorComponent extends DefaultFormatEditor {
       fieldType === 'string' ? {
         field: 'regex',
         name: intl.formatMessage(
-          { id: 'common.ui.fieldEditor.color.pattern.label', defaultMessage: 'Pattern (regular expression)' }),
+          { id: 'common.ui.fieldEditor.color.patternLabel', defaultMessage: 'Pattern (regular expression)' }),
         render: (value, item) => {
           return (
             <EuiFieldText
@@ -103,7 +103,7 @@ export class ColorFormatEditorComponent extends DefaultFormatEditor {
         }
       } : {
         field: 'range',
-        name: intl.formatMessage({ id: 'common.ui.fieldEditor.color.range.label', defaultMessage: 'Range (min:max)' }),
+        name: intl.formatMessage({ id: 'common.ui.fieldEditor.color.rangeLabel', defaultMessage: 'Range (min:max)' }),
         render: (value, item) => {
           return (
             <EuiFieldText
@@ -119,7 +119,7 @@ export class ColorFormatEditorComponent extends DefaultFormatEditor {
       },
       {
         field: 'text',
-        name: intl.formatMessage({ id: 'common.ui.fieldEditor.color.text.label', defaultMessage: 'Text color' }),
+        name: intl.formatMessage({ id: 'common.ui.fieldEditor.color.textColorLabel', defaultMessage: 'Text color' }),
         render: (color, item) => {
           return (
             <EuiColorPicker
@@ -135,7 +135,7 @@ export class ColorFormatEditorComponent extends DefaultFormatEditor {
       },
       {
         field: 'background',
-        name: intl.formatMessage({ id: 'common.ui.fieldEditor.color.background.label', defaultMessage: 'Background color' }),
+        name: intl.formatMessage({ id: 'common.ui.fieldEditor.color.backgroundLabel', defaultMessage: 'Background color' }),
         render: (color, item) => {
           return (
             <EuiColorPicker
@@ -150,7 +150,7 @@ export class ColorFormatEditorComponent extends DefaultFormatEditor {
         }
       },
       {
-        name: intl.formatMessage({ id: 'common.ui.fieldEditor.color.example.label', defaultMessage: 'Example' }),
+        name: intl.formatMessage({ id: 'common.ui.fieldEditor.color.exampleLabel', defaultMessage: 'Example' }),
         render: (item) => {
           return (
             <div
@@ -167,9 +167,9 @@ export class ColorFormatEditorComponent extends DefaultFormatEditor {
       {
         actions: [
           {
-            name: intl.formatMessage({ id: 'common.ui.fieldEditor.color.delete.aria', defaultMessage: 'Delete' }),
+            name: intl.formatMessage({ id: 'common.ui.fieldEditor.color.deleteAria', defaultMessage: 'Delete' }),
             description: intl.formatMessage(
-              { id: 'common.ui.fieldEditor.color.delete.title', defaultMessage: 'Delete color format' }),
+              { id: 'common.ui.fieldEditor.color.deleteTitle', defaultMessage: 'Delete color format' }),
             onClick: (item) => {
               this.removeColor(item.index);
             },
@@ -194,7 +194,7 @@ export class ColorFormatEditorComponent extends DefaultFormatEditor {
           size="s"
           onClick={this.addColor}
         >
-          <FormattedMessage id="common.ui.fieldEditor.color.addColor.button" defaultMessage="Add color" />
+          <FormattedMessage id="common.ui.fieldEditor.color.addColorButton" defaultMessage="Add color" />
         </EuiButton>
         <EuiSpacer size="l" />
       </Fragment>

@@ -50,7 +50,7 @@ export class DurationFormatEditor extends DefaultFormatEditor {
     let error = null;
 
     if(!nextProps.format.isHuman() && nextProps.formatParams.outputPrecision > 20) {
-      error = i18n.translate('common.ui.fieldEditor.duraction.errorMessage', {
+      error = i18n.translate('common.ui.fieldEditor.durationErrorMessage', {
         defaultMessage: 'Decimal places must be between 0 and 20'
       });
       nextProps.onError(error);
@@ -74,7 +74,7 @@ export class DurationFormatEditor extends DefaultFormatEditor {
     return (
       <Fragment>
         <EuiFormRow
-          label={<FormattedMessage id="common.ui.fieldEditor.duraction.inputFormat.label" defaultMessage="Input format"/>}
+          label={<FormattedMessage id="common.ui.fieldEditor.duration.inputFormatLabel" defaultMessage="Input format"/>}
           isInvalid={!!error}
           error={hasDecimalError ? null : error}
         >
@@ -93,7 +93,7 @@ export class DurationFormatEditor extends DefaultFormatEditor {
           />
         </EuiFormRow>
         <EuiFormRow
-          label={<FormattedMessage id="common.ui.fieldEditor.duraction.outputFormat.label" defaultMessage="Output format"/>}
+          label={<FormattedMessage id="common.ui.fieldEditor.duration.outputFormatLabel" defaultMessage="Output format"/>}
           isInvalid={!!error}
         >
           <EuiSelect
@@ -113,7 +113,7 @@ export class DurationFormatEditor extends DefaultFormatEditor {
         {
           !format.isHuman() ? (
             <EuiFormRow
-              label={<FormattedMessage id="common.ui.fieldEditor.duraction.decimalPlaces.label" defaultMessage="Decimal places"/>}
+              label={<FormattedMessage id="common.ui.fieldEditor.duration.decimalPlacesLabel" defaultMessage="Decimal places"/>}
               isInvalid={!!error}
               error={hasDecimalError ? error : null}
             >

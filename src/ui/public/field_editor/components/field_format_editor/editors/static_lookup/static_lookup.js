@@ -79,7 +79,7 @@ export class StaticLookupFormatEditorComponent extends DefaultFormatEditor {
     const columns = [
       {
         field: 'key',
-        name: intl.formatMessage({ id: 'common.ui.fieldEditor.staticLookup.key.label', defaultMessage: 'Key' }),
+        name: intl.formatMessage({ id: 'common.ui.fieldEditor.staticLookup.keyLabel', defaultMessage: 'Key' }),
         render: (value, item) => {
           return (
             <EuiFieldText
@@ -95,7 +95,7 @@ export class StaticLookupFormatEditorComponent extends DefaultFormatEditor {
       },
       {
         field: 'value',
-        name: intl.formatMessage({ id: 'common.ui.fieldEditor.staticLookup.value.label', defaultMessage: 'Value' }),
+        name: intl.formatMessage({ id: 'common.ui.fieldEditor.staticLookup.valueLabel', defaultMessage: 'Value' }),
         render: (value, item) => {
           return (
             <EuiFieldText
@@ -112,9 +112,9 @@ export class StaticLookupFormatEditorComponent extends DefaultFormatEditor {
       {
         actions: [
           {
-            name: intl.formatMessage({ id: 'common.ui.fieldEditor.staticLookup.delete.aria', defaultMessage: 'Delete' }),
+            name: intl.formatMessage({ id: 'common.ui.fieldEditor.staticLookup.deleteAria', defaultMessage: 'Delete' }),
             description: intl.formatMessage(
-              { id: 'common.ui.fieldEditor.staticLookup.delete.title', defaultMessage: 'Delete entry' }),
+              { id: 'common.ui.fieldEditor.staticLookup.deleteTitle', defaultMessage: 'Delete entry' }),
             onClick: (item) => {
               this.removeLookup(item.index);
             },
@@ -141,17 +141,17 @@ export class StaticLookupFormatEditorComponent extends DefaultFormatEditor {
           size="s"
           onClick={this.addLookup}
         >
-          <FormattedMessage id="common.ui.fieldEditor.staticLookup.addEntry.button" defaultMessage="Add entry" />
+          <FormattedMessage id="common.ui.fieldEditor.staticLookup.addEntryButton" defaultMessage="Add entry" />
         </EuiButton>
         <EuiSpacer size="l" />
         <EuiFormRow
           label={intl.formatMessage(
-            { id: 'common.ui.fieldEditor.staticLookup.unknownKey.label', defaultMessage: 'Value for unknown key' })}
+            { id: 'common.ui.fieldEditor.staticLookup.unknownKeyLabel', defaultMessage: 'Value for unknown key' })}
         >
           <EuiFieldText
             value={formatParams.unknownKeyValue || ''}
             placeholder={intl.formatMessage(
-              { id: 'common.ui.fieldEditor.staticLookup.leaveBlank.placeholder', defaultMessage: 'Leave blank to keep value as-is' })}
+              { id: 'common.ui.fieldEditor.staticLookup.leaveBlankPlaceholder', defaultMessage: 'Leave blank to keep value as-is' })}
             onChange={(e) => {
               this.onChange({ unknownKeyValue: e.target.value });
             }}

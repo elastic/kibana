@@ -41,11 +41,11 @@ export const UrlTemplateFlyoutComponent = ({
       <EuiFlyoutBody>
         <EuiText>
           <h3>
-            <FormattedMessage id="common.ui.fieldEditor.urlTemplate.header" defaultMessage="Url Template" />
+            <FormattedMessage id="common.ui.fieldEditor.urlTemplateHeader" defaultMessage="Url Template" />
           </h3>
           <p>
             <FormattedMessage
-              id="common.ui.fieldEditor.urlTemplate.label.detail"
+              id="common.ui.fieldEditor.urlTemplateLabel.fieldDetail"
               defaultMessage="If a field only contains part of a URL then a {strongUrlTemplate} can be used to format the value as
               a complete URL. The format is a string which uses double curly brace notation {doubleCurlyBraces} to inject values.
               The following values can be accessed:"
@@ -54,7 +54,7 @@ export const UrlTemplateFlyoutComponent = ({
                 strongUrlTemplate: (
                   <strong>
                     <FormattedMessage
-                      id="common.ui.fieldEditor.urlTemplate.label.strongUrlTemplate"
+                      id="common.ui.fieldEditor.urlTemplateLabel.strongUrlTemplateLabel"
                       defaultMessage="Url Template"
                     />
                   </strong>)
@@ -64,15 +64,15 @@ export const UrlTemplateFlyoutComponent = ({
           <ul>
             <li>
               <EuiCode>value</EuiCode> &mdash;&nbsp;
-              <FormattedMessage id="common.ui.fieldEditor.urlTemplate.value.label" defaultMessage="The URI-escaped value" />
+              <FormattedMessage id="common.ui.fieldEditor.urlTemplate.valueLabel" defaultMessage="The URI-escaped value" />
             </li>
             <li>
               <EuiCode>rawValue</EuiCode> &mdash;&nbsp;
-              <FormattedMessage id="common.ui.fieldEditor.urlTemplate.rawValue.label" defaultMessage="The unescaped value" />
+              <FormattedMessage id="common.ui.fieldEditor.urlTemplate.rawValueLabel" defaultMessage="The unescaped value" />
             </li>
           </ul>
           <h4>
-            <FormattedMessage id="common.ui.fieldEditor.urlTemplate.examples.header" defaultMessage="Examples" />
+            <FormattedMessage id="common.ui.fieldEditor.urlTemplate.examplesHeader" defaultMessage="Examples" />
           </h4>
           <EuiBasicTable
             items={[
@@ -95,16 +95,16 @@ export const UrlTemplateFlyoutComponent = ({
             columns={[
               {
                 field: 'input',
-                name: intl.formatMessage({ id: 'common.ui.fieldEditor.urlTemplate.input.header', defaultMessage: 'Input' }),
+                name: intl.formatMessage({ id: 'common.ui.fieldEditor.urlTemplate.inputHeader', defaultMessage: 'Input' }),
                 width: '160px',
               },
               {
                 field: 'template',
-                name: intl.formatMessage({ id: 'common.ui.fieldEditor.urlTemplate.template.header', defaultMessage: 'Template' }),
+                name: intl.formatMessage({ id: 'common.ui.fieldEditor.urlTemplate.templateHeader', defaultMessage: 'Template' }),
               },
               {
                 field: 'output',
-                name: intl.formatMessage({ id: 'common.ui.fieldEditor.urlTemplate.output.header', defaultMessage: 'Output' }),
+                name: intl.formatMessage({ id: 'common.ui.fieldEditor.urlTemplate.outputHeader', defaultMessage: 'Output' }),
               },
             ]}
           />

@@ -42,11 +42,11 @@ export class TableComponent extends PureComponent {
   renderFieldName(name, isTimeField) {
     const { intl } = this.props;
     const label = intl.formatMessage({
-      id: 'kbn.management.editIndexPattern.fields.table.primaryTime.aria',
+      id: 'kbn.management.editIndexPattern.fields.table.primaryTimeAria',
       defaultMessage: 'Primary time field'
     });
     const content = intl.formatMessage({
-      id: 'kbn.management.editIndexPattern.fields.table.primaryTime.tooltip',
+      id: 'kbn.management.editIndexPattern.fields.table.primaryTimeTooltip',
       defaultMessage: 'This field represents the time that events occurred.'
     });
 
@@ -71,11 +71,11 @@ export class TableComponent extends PureComponent {
   renderFieldType(type, isConflict) {
     const { intl } = this.props;
     const label = intl.formatMessage({
-      id: 'kbn.management.editIndexPattern.fields.table.multiType.aria',
+      id: 'kbn.management.editIndexPattern.fields.table.multiTypeAria',
       defaultMessage: 'Multiple type field'
     });
     const content = intl.formatMessage({
-      id: 'kbn.management.editIndexPattern.fields.table.multiType.tooltip',
+      id: 'kbn.management.editIndexPattern.fields.table.multiTypeTooltip',
       defaultMessage: 'The type of this field changes across indices. It is unavailable for many analysis functions.'
     });
 
@@ -108,7 +108,7 @@ export class TableComponent extends PureComponent {
     const columns = [
       {
         field: 'displayName',
-        name: intl.formatMessage({ id: 'kbn.management.editIndexPattern.fields.table.name.header', defaultMessage: 'Name' }),
+        name: intl.formatMessage({ id: 'kbn.management.editIndexPattern.fields.table.nameHeader', defaultMessage: 'Name' }),
         dataType: 'string',
         sortable: true,
         render: (value) => {
@@ -119,7 +119,7 @@ export class TableComponent extends PureComponent {
       },
       {
         field: 'type',
-        name: intl.formatMessage({ id: 'kbn.management.editIndexPattern.fields.table.type.header', defaultMessage: 'Type' }),
+        name: intl.formatMessage({ id: 'kbn.management.editIndexPattern.fields.table.typeHeader', defaultMessage: 'Type' }),
         dataType: 'string',
         sortable: true,
         render: (value) => {
@@ -129,51 +129,51 @@ export class TableComponent extends PureComponent {
       },
       {
         field: 'format',
-        name: intl.formatMessage({ id: 'kbn.management.editIndexPattern.fields.table.format.header', defaultMessage: 'Format' }),
+        name: intl.formatMessage({ id: 'kbn.management.editIndexPattern.fields.table.formatHeader', defaultMessage: 'Format' }),
         dataType: 'string',
         sortable: true,
       },
       {
         field: 'searchable',
-        name: intl.formatMessage({ id: 'kbn.management.editIndexPattern.fields.table.searchable.header', defaultMessage: 'Searchable' }),
+        name: intl.formatMessage({ id: 'kbn.management.editIndexPattern.fields.table.searchableHeader', defaultMessage: 'Searchable' }),
         description: intl.formatMessage({
-          id: 'kbn.management.editIndexPattern.fields.table.searchable.description',
+          id: 'kbn.management.editIndexPattern.fields.table.searchableDescription',
           defaultMessage: 'These fields can be used in the filter bar' }),
         dataType: 'boolean',
         sortable: true,
         render: (value) => this.renderBooleanTemplate(value, intl.formatMessage({
-          id: 'kbn.management.editIndexPattern.fields.table.isSearchable.aria', defaultMessage: 'Is searchable' })),
+          id: 'kbn.management.editIndexPattern.fields.table.isSearchableAria', defaultMessage: 'Is searchable' })),
       },
       {
         field: 'aggregatable',
         name: intl.formatMessage({
-          id: 'kbn.management.editIndexPattern.fields.table.aggregatable.label', defaultMessage: 'Aggregatable' }),
+          id: 'kbn.management.editIndexPattern.fields.table.aggregatableLabel', defaultMessage: 'Aggregatable' }),
         description: intl.formatMessage({
-          id: 'kbn.management.editIndexPattern.fields.table.aggregatable.description',
+          id: 'kbn.management.editIndexPattern.fields.table.aggregatableDescription',
           defaultMessage: 'These fields can be used in visualization aggregations' }),
         dataType: 'boolean',
         sortable: true,
         render: (value) => this.renderBooleanTemplate(value, intl.formatMessage({
-          id: 'kbn.management.editIndexPattern.fields.table.isAggregatable.aria', defaultMessage: 'Is aggregatable' })),
+          id: 'kbn.management.editIndexPattern.fields.table.isAggregatableAria', defaultMessage: 'Is aggregatable' })),
       },
       {
         field: 'excluded',
-        name: intl.formatMessage({ id: 'kbn.management.editIndexPattern.fields.table.excluded.label', defaultMessage: 'Excluded' }),
+        name: intl.formatMessage({ id: 'kbn.management.editIndexPattern.fields.table.excludedLabel', defaultMessage: 'Excluded' }),
         description: intl.formatMessage({
-          id: 'kbn.management.editIndexPattern.fields.table.excluded.description',
+          id: 'kbn.management.editIndexPattern.fields.table.excludedDescription',
           defaultMessage: 'Fields that are excluded from _source when it is fetched' }),
         dataType: 'boolean',
         sortable: true,
         render: (value) => this.renderBooleanTemplate(value, intl.formatMessage({
-          id: 'kbn.management.editIndexPattern.fields.table.isExcluded.aria', defaultMessage: 'Is excluded' })),
+          id: 'kbn.management.editIndexPattern.fields.table.isExcludedAria', defaultMessage: 'Is excluded' })),
       },
       {
         name: '',
         actions: [
           {
-            name: intl.formatMessage({ id: 'kbn.management.editIndexPattern.fields.table.edit.label', defaultMessage: 'Edit' }),
+            name: intl.formatMessage({ id: 'kbn.management.editIndexPattern.fields.table.editLabel', defaultMessage: 'Edit' }),
             description: intl.formatMessage({
-              id: 'kbn.management.editIndexPattern.fields.table.edit.description', defaultMessage: 'Edit' }),
+              id: 'kbn.management.editIndexPattern.fields.table.editDescription', defaultMessage: 'Edit' }),
             icon: 'pencil',
             onClick: editField,
             type: 'icon',

@@ -33,7 +33,7 @@ export const convertSampleInput = (converter, inputs) => {
       };
     });
   } catch(e) {
-    error = i18n.translate('common.ui.fieldEditor.default.errorMessage', {
+    error = i18n.translate('common.ui.fieldEditor.defaultErrorMessage', {
       defaultMessage: 'An error occurred while trying to use this format configuration: {message}',
       values: { message: e.message }
     });

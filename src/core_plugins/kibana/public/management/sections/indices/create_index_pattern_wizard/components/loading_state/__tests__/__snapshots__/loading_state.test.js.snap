@@ -35,7 +35,7 @@ exports[`LoadingState should render normally 1`] = `
           >
             <FormattedMessage
               defaultMessage="Checking for Elasticsearch data"
-              id="kbn.management.createIndexPattern.loadingState.checking.label"
+              id="kbn.management.createIndexPattern.loadingState.checkingLabel"
               values={Object {}}
             />
           </h2>
@@ -72,7 +72,7 @@ exports[`LoadingState should render normally 1`] = `
           >
             <FormattedMessage
               defaultMessage="Reticulating splines..."
-              id="kbn.management.createIndexPattern.loadingState.reticulating.label"
+              id="kbn.management.createIndexPattern.loadingState.reticulatingLabel"
               values={Object {}}
             />
           </EuiText>

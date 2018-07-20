@@ -55,7 +55,7 @@ export class NumberFormatEditor extends DefaultFormatEditor {
         <EuiFormRow
           label={
             <FormattedMessage
-              id="common.ui.fieldEditor.number.numeral.label"
+              id="common.ui.fieldEditor.number.numeralLabel"
               defaultMessage="Numeral.js format pattern (Default: {defaultPattern})"
               values={{ defaultPattern: <EuiCode>{defaultPattern}</EuiCode> }}
             />
@@ -63,7 +63,7 @@ export class NumberFormatEditor extends DefaultFormatEditor {
           helpText={
             <span>
               <EuiLink target="_window" href="https://adamwdraper.github.io/Numeral-js/">
-                <FormattedMessage id="common.ui.fieldEditor.number.documentaion.label" defaultMessage="Documentation" />&nbsp;
+                <FormattedMessage id="common.ui.fieldEditor.number.documentaionLabel" defaultMessage="Documentation" />&nbsp;
                 <EuiIcon type="link" />
               </EuiLink>
             </span>

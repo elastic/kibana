@@ -241,16 +241,16 @@ uiModules.get('apps/management')
     });
 
     $scope.refreshFields = function () {
-      const confirmMessage = i18n.translate('kbn.management.editIndexPattern.refresh.label', {
+      const confirmMessage = i18n.translate('kbn.management.editIndexPattern.refreshLabel', {
         defaultMessage: 'This action resets the popularity counter of each field.'
       });
       const confirmModalOptions = {
-        confirmButtonText: i18n.translate('kbn.management.editIndexPattern.refresh.button', { defaultMessage: 'Refresh' }),
+        confirmButtonText: i18n.translate('kbn.management.editIndexPattern.refreshButton', { defaultMessage: 'Refresh' }),
         onConfirm: async () => {
           await $scope.indexPattern.init(true);
           $scope.fields = $scope.indexPattern.getNonScriptedFields();
         },
-        title: i18n.translate('kbn.management.editIndexPattern.refresh.header', { defaultMessage: 'Refresh field list?' })
+        title: i18n.translate('kbn.management.editIndexPattern.refreshHeader', { defaultMessage: 'Refresh field list?' })
       };
       confirmModal(
         confirmMessage,
@@ -276,9 +276,9 @@ uiModules.get('apps/management')
       }
 
       const confirmModalOptions = {
-        confirmButtonText: i18n.translate('kbn.management.editIndexPattern.delete.button', { defaultMessage: 'Delete' }),
+        confirmButtonText: i18n.translate('kbn.management.editIndexPattern.deleteButton', { defaultMessage: 'Delete' }),
         onConfirm: doRemove,
-        title: i18n.translate('kbn.management.editIndexPattern.delete.header', { defaultMessage: 'Delete index pattern?' })
+        title: i18n.translate('kbn.management.editIndexPattern.deleteHeader', { defaultMessage: 'Delete index pattern?' })
       };
       confirmModal('', confirmModalOptions);
     };
@@ -289,7 +289,7 @@ uiModules.get('apps/management')
 
     $scope.setIndexPatternsTimeField = function (field) {
       if (field.type !== 'date') {
-        const errorMessage = i18n.translate('kbn.management.editIndexPattern.notDate.errorMessage', {
+        const errorMessage = i18n.translate('kbn.management.editIndexPattern.notDateErrorMessage', {
           defaultMessage: 'That field is a {fieldType} not a date.', values: { fieldType: field.type }
         });
         notify.error(errorMessage);

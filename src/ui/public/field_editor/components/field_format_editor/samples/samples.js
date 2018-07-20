@@ -43,14 +43,14 @@ export class FormatEditorSamplesComponent extends PureComponent {
     const columns = [
       {
         field: 'input',
-        name: intl.formatMessage({ id: 'common.ui.fieldEditor.samples.input.header', defaultMessage: 'Input' }),
+        name: intl.formatMessage({ id: 'common.ui.fieldEditor.samples.inputHeader', defaultMessage: 'Input' }),
         render: (input) => {
           return typeof input === 'object' ? JSON.stringify(input) : input;
         },
       },
       {
         field: 'output',
-        name: intl.formatMessage({ id: 'common.ui.fieldEditor.samples.output.header', defaultMessage: 'Output' }),
+        name: intl.formatMessage({ id: 'common.ui.fieldEditor.samples.outputHeader', defaultMessage: 'Output' }),
         render: (output) => {
           return (
             <div
@@ -68,7 +68,7 @@ export class FormatEditorSamplesComponent extends PureComponent {
 
     return samples.length ? (
       <EuiFormRow
-        label={intl.formatMessage({ id: 'common.ui.fieldEditor.samples.header', defaultMessage: 'Samples' })}
+        label={intl.formatMessage({ id: 'common.ui.fieldEditor.samplesHeader', defaultMessage: 'Samples' })}
       >
         <EuiBasicTable
           className="fieldFormatEditor__samples"

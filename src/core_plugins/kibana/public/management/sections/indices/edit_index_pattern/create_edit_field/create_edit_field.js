@@ -107,7 +107,7 @@ uiRoutes
         this.field = this.indexPattern.fields.byName[fieldName];
 
         if (!this.field) {
-          const message = i18n.translate('kbn.management.editIndexPattern.scripted.noField.label',
+          const message = i18n.translate('kbn.management.editIndexPattern.scripted.noFieldLabel',
             {
               defaultMessage: '\'{indexPatternTitle}\' index pattern doesn\'t have a scripted field called \'{fieldName}\'',
               values: { indexPatternTitle: this.indexPattern.title, fieldName }
@@ -126,7 +126,7 @@ uiRoutes
         });
       }
       else {
-        const errorMessage = i18n.translate('kbn.management.editIndexPattern.scripted.unknownMode.errorMessage',
+        const errorMessage = i18n.translate('kbn.management.editIndexPattern.scripted.unknownModeErrorMessage',
           {
             defaultMessage: 'unknown fieldSettings mode {mode}',
             values: { mode: this.mode }
@@ -134,7 +134,7 @@ uiRoutes
         throw new Error(errorMessage);
       }
 
-      const defaultFieldName = i18n.translate('kbn.management.editIndexPattern.scripted.newField.placeholder',
+      const defaultFieldName = i18n.translate('kbn.management.editIndexPattern.scripted.newFieldPlaceholder',
         { defaultMessage: 'New Scripted Field' });
       docTitle.change([this.field.name || defaultFieldName, this.indexPattern.title]);
 

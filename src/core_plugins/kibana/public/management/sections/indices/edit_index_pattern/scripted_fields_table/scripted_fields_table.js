@@ -145,12 +145,12 @@ export class ScriptedFieldsTableComponent extends Component {
 
     const { intl } = this.props;
     const title = intl.formatMessage(
-      { id: 'kbn.management.editIndexPattern.scripted.deleteField.label', defaultMessage: 'Delete scripted field \'{fieldName}\'?' },
+      { id: 'kbn.management.editIndexPattern.scripted.deleteFieldLabel', defaultMessage: 'Delete scripted field \'{fieldName}\'?' },
       { fieldName: fieldToDelete.name });
     const cancelButtonText = intl.formatMessage(
-      { id: 'kbn.management.editIndexPattern.scripted.deleteField.cancel.button', defaultMessage: 'Cancel' });
+      { id: 'kbn.management.editIndexPattern.scripted.deleteField.cancelButton', defaultMessage: 'Cancel' });
     const confirmButtonText = intl.formatMessage(
-      { id: 'kbn.management.editIndexPattern.scripted.deleteField.delete.button', defaultMessage: 'Delete' });
+      { id: 'kbn.management.editIndexPattern.scripted.deleteField.deleteButton', defaultMessage: 'Delete' });
 
     return (
       <EuiOverlayMask>
