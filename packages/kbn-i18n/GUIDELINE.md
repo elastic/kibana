@@ -4,7 +4,7 @@
 
 ### Message types
 
-The IDs (names) for messages are descriptive of the string, and its role in the interface (button, label, header, etc.). Each message id ends with a descriptive type.
+The IDs (names) chosen for message keys are descriptive of the string, and its role in the interface (button, label, header, etc.). Each message id ends with a descriptive type. Types are defined at the end of ID by combining to the last segment using camel case.
 
 The following types are supported:
 - header
@@ -16,6 +16,7 @@ The following types are supported:
 - aria
 - errorMessage
 - toggleSwitch
+- link and etc.
 
 There is one more complex case, when we have to divide a single expression into different labels. 
 
@@ -30,22 +31,24 @@ For example the message before translation looks like:
 This phrase contains a variable, which represents languages list, and a link (``Painless``). For such cases we divide the message into two parts: the main message, which contains placeholders, and additional message, which represents inner message.
 
 It is used the following id naming structure:
-1) the main message id has the type on the second-to-last position, thereby identifying a divided phrase, and the last segment named  ``detail``.
+1) the main message id has the type on the second-to-last position, thereby identifying a divided phrase, and the last segment ends with  ``Detail``.
 ```js
-“kbn.management.indexPattern.edit.scripted.deprecationLang.label.detail”: "The following deprecated languages are in use: {deprecatedLangsInUse}. Support for these languages will be removed in the next major version of Kibana and Elasticsearch. Convert you scripted fields to {link} to avoid any problems."
+“kbn.management.editIndexPattern.scripted.deprecationLangLabel.deprecationLangDetail”: "The following deprecated languages are in use: {deprecatedLangsInUse}. Support for these languages will be removed in the next major version of Kibana and Elasticsearch. Convert you scripted fields to {link} to avoid any problems."
 ```
-2) The inner message id has the type on the second-to-last position and the name of the variable from the placeholder in the main message (in this case ``link``) as the last segment.
+2) The inner message id has the type on the second-to-last position and the name of the variable from the placeholder in the main message (in this case ``link``) as the last segment that ends with own type.
+
+For example:
 ```js
 
-“kbn.management.indexPattern.edit.scripted.deprecationLang.label.link”: "Painless"
+“kbn.management.editIndexPattern.scripted.deprecationLangLabel.painlessLink”: "Painless"
 ```
 
 ### Attribute with variables interpolation
 
 Messages can contain placeholders for embedding a value of a variable. For example:
 ```js
-“kbn.management.indexPattern.edit.scripted.deleteField.label“: "Delete scripted field '{fieldName}'?"
-“kbn.management.indexPattern.edit.scripted.noField.label“: "'{indexPatternTitle}' index pattern doesn't have a scripted field called '{fieldName}'"
+“kbn.management.editIndexPattern.scripted.deleteFieldLabel“: "Delete scripted field '{fieldName}'?"
+“kbn.management.editIndexPattern.scripted.noFieldLabel“: "'{indexPatternTitle}' index pattern doesn't have a scripted field called '{fieldName}'"
 ```
 Mostly such placeholders have meaningful name according to the сontent.
 
@@ -55,7 +58,7 @@ I18n engine supports proper plural forms. It uses the [ICU Message syntax](http:
 
 For example:
 ```js
-“kbn.management.indexPattern.create.step.status.success.label.strongIndices“: "{indicesLength, plural, one {# index} other {# indices}}"
+“kbn.management.createIndexPattern.step.status.successLabel.strongIndicesLabel“: "{indicesLength, plural, one {# index} other {# indices}}"
 ```
 
 In case when `indicesLength` has value 1, the result string will be "`1 index`". In case when `indicesLength` has value 2 and more, the result string - "`2 indices`".
@@ -65,13 +68,15 @@ In case when `indicesLength` has value 1, the result string will be "`1 index`".
 
 ### Naming conversation
 
+The IDs (names) chosen for message keys should always be descriptive of the string, and its role in the interface (button label, title, etc.). Think of them as long variable names. When you have to change a key ID, adding a progressive number to the existing key should always be used as a last resort.
+
 - Message id should start with namespace (`kbn`, `common.ui` and etc.). 
 
     For example:
 
   ```js
-  “kbn.management.indexPattern.create.stepTime.options.pattern.header“
-  “common.ui.indexPattern.create.warning.label“
+  “kbn.management.createIndexPattern.stepTime.options.patternHeader“
+  “common.ui.indexPattern.warningLabel“
   ```
 
 - Use camelCase for naming segments, comprising several words.
@@ -79,21 +84,21 @@ In case when `indicesLength` has value 1, the result string will be "`1 index`".
 - Each message id should end with a type. For example:
 
   ```js
-  “kbn.management.indexPattern.edit.createIndex.button”
-  “kbn.management.indexPattern.edit.mappingConflict.header”
-  “kbn.management.indexPattern.edit.mappingConflict.label”
-  “kbn.management.indexPattern.edit.fields.filter.aria”
-  “kbn.management.indexPattern.edit.fields.filter.placeholder”
-  “kbn.management.indexPattern.edit.refresh.tooltip”
-  “kbn.management.indexPattern.edit.fields.allTypes.dropDown”
-  “kbn.management.indexPattern.create.includeSystemIndices.toggleSwitch”
-  “kbn.management.indexPattern.edit.wrongType.errorMessage”
-  “kbn.management.indexPattern.edit.scripted.table.name.description”
+  “kbn.management.editIndexPattern.createIndexButton”
+  “kbn.management.editIndexPattern.mappingConflictHeader”
+  “kbn.management.editIndexPattern.mappingConflictLabel”
+  “kbn.management.editIndexPattern.fields.filterAria”
+  “kbn.management.editIndexPattern.fields.filterPlaceholder”
+  “kbn.management.editIndexPattern.refreshTooltip”
+  “kbn.management.editIndexPattern.fields.allTypesDropDown”
+  “kbn.management.createIndexPattern.includeSystemIndicesToggleSwitch”
+  “kbn.management.editIndexPattern.wrongTypeErrorMessage”
+  “kbn.management.editIndexPattern.scripted.table.nameDescription”
   ```
 
 - For complex messagges, that is divided into several parts, use the folllowing approach:
-  - the main message id should have the type on the second-to-last position, thereby identifying a divided phrase, and the last segment should be named ``detail``,
-  - the inner message id should have the type on the second-to-last position and the name of the variable from the placeholder in the main message as the last segment.
+  - the main message id should have the type on the second-to-last position, thereby identifying a divided phrase, and the last segment should end with ``Detail``,
+  - the inner message id should have the type on the second-to-last position and the name of the variable from the placeholder in the main message as the last segment that ends with its own type.
 
   For example before the translation there was a message:
   ```js
@@ -104,20 +109,20 @@ In case when `indicesLength` has value 1, the result string will be "`1 index`".
   After translation we get the following structure:
   ```js
   <FormattedMessage
-    id="kbn.management.indexPattern.create.step.status.success.label.detail"
+    id="kbn.management.createIndexPattern.step.status.successLabel.successDetail"
     defaultMessage="{strongSuccess} Your index pattern matches {strongIndices}."
     values={{
       strongSuccess: (
         <strong>
           <FormattedMessage
-            id="kbn.management.indexPattern.create.step.status.success.label.strongSuccess"
+            id="kbn.management.createIndexPattern.step.status.successLabel.strongSuccessLabel"
             defaultMessage="Success!"
           />
         </strong>),
       strongIndices: (
         <strong>
           <FormattedMessage
-            id="kbn.management.indexPattern.create.step.status.success.label.strongIndices"
+            id="kbn.management.createIndexPattern.step.status.successLabel.strongIndicesLabel"
             defaultMessage="{indicesLength, plural, one {# index} other {# indices}}"
             values={{ indicesLength: exactMatchedIndices.length }}
           />
@@ -136,7 +141,7 @@ Each message id should end with a type of the message. For example:
   ```js
   <h1>
       <FormattedMessage
-        id="kbn.management.indexPattern.create.header"
+        id="kbn.management.createIndexPatternHeader"
         defaultMessage="Create index pattern"
       />
   </h1>
@@ -147,7 +152,7 @@ Each message id should end with a type of the message. For example:
   ```js
   <EuiTextColor color="subdued">
       <FormattedMessage
-        id="kbn.management.indexPattern.create.label"
+        id="kbn.management.createIndexPatternLabel"
         defaultMessage="Kibana uses index patterns to retrieve data from Elasticsearch indices for things like visualizations."
       />
   </EuiTextColor>
@@ -158,7 +163,7 @@ Each message id should end with a type of the message. For example:
   ```js
 
   <EuiButton data-test-subj="addScriptedFieldLink" href={addScriptedFieldUrl}>
-       <FormattedMessage id="kbn.management.indexPattern.edit.scripted.addField.button" defaultMessage="Add scripted field"/>
+       <FormattedMessage id="kbn.management.editIndexPattern.scripted.addFieldButton" defaultMessage="Add scripted field"/>
   </EuiButton>
   ```
 
@@ -167,7 +172,7 @@ Each message id should end with a type of the message. For example:
   ```js
   <select ng-model="indexedFieldTypeFilter" ng-options="o for o in indexedFieldTypes">
       <option value=""
-          i18n-id="kbn.management.indexPattern.edit.fields.allTypes.dropDown"
+          i18n-id="kbn.management.editIndexPattern.fields.allTypesDropDown"
           i18n-default-message="All field types"></option>
   </select>
   ```
@@ -178,7 +183,7 @@ Each message id should end with a type of the message. For example:
   <EuiFieldText
       name="indexPatternId"
       placeholder={intl.formatMessage({
-        id: 'kbn.management.indexPattern.create.stepTime.options.pattern.placeholder',
+        id: 'kbn.management.createIndexPattern.stepTime.options.patternPlaceholder',
         defaultMessage: 'custom-index-pattern-id' })}
   />
   ```
@@ -187,8 +192,8 @@ Each message id should end with a type of the message. For example:
 
   ```js
   <button
-      aria-label="{{'kbn.management.indexPattern.edit.remove.aria' | i18n: {defaultMessage: 'Remove index pattern'} }}"
-      tooltip="{{'kbn.management.indexPattern.edit.remove.tooltip' | i18n: {defaultMessage: 'Remove index pattern'} }}"
+      aria-label="{{'kbn.management.editIndexPattern.removeAria' | i18n: {defaultMessage: 'Remove index pattern'} }}"
+      tooltip="{{'kbn.management.editIndexPattern.removeTooltip' | i18n: {defaultMessage: 'Remove index pattern'} }}"
       >
   </button>
   ```
@@ -199,7 +204,7 @@ Each message id should end with a type of the message. For example:
   errors.push(
       intl.formatMessage(
               {
-                  id: 'kbn.management.indexPattern.create.step.invalidCharacters.errorMessage',
+                  id: 'kbn.management.createIndexPattern.step.invalidCharactersErrorMessage',
                   defaultMessage: 'An index pattern cannot contain spaces or the characters: {characterList}'
               },
               { characterList }
@@ -211,7 +216,7 @@ Each message id should end with a type of the message. For example:
   ```js
   <EuiSwitch
       label={<FormattedMessage
-        id="kbn.management.indexPattern.create.includeSystemIndices.toggleSwitch"
+        id="kbn.management.createIndexPattern.includeSystemIndicesToggleSwitch"
         defaultMessage="Include system indices"
       />}
   />
@@ -224,12 +229,27 @@ The numeric input is mapped to a plural category, some subset of "zero", "one", 
 
 Here is an example of message translation depending on a plural category:
 ```js
-<span i18n-id="kbn.management.indexPattern.edit.mappingConflict.label"
+<span i18n-id="kbn.management.editIndexPattern.mappingConflictLabel"
       i18n-default-message="{conflictFieldsLength, plural, one {A field is} other {# fields are}} defined as several types (string, integer, etc) across the indices that match this pattern."
       i18n-values="{ conflictFieldsLength: conflictFields.length }"></span>
 ```
 
 In case when `conflictFieldsLength` has value 1, the result string will be `"A field is defined as several types (string, integer, etc) across the indices that match this pattern."`. In case when `conflictFieldsLength` has value 2 or more, the result string - `"2 fields are defined as several types (string, integer, etc) across the indices that match this pattern."`.
+
+### Splitting
+
+Splitting sentences into several keys often inadvertently presumes a grammar, a sentence structure, and such composite strings are often very difficult to translate.
+
+- Do not divide a single sentence into different labels unless you have absolutely no other choice.
+- Do not divide sentences that belong together into separate labels.
+
+  For example:
+
+  `The following dialogue box indicates progress. You can close it and the process will continue to run in the background.`
+
+  If this sentence is separated it’s possible that the context of the `'it'` in `'close it'` will be lost.
+
+
 
 ### Unit tests
 
