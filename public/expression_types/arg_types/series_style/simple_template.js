@@ -7,7 +7,8 @@ import { ColorPickerMini } from '../../../components/color_picker_mini';
 import { TooltipIcon } from '../../../components/tooltip_icon';
 
 export const SimpleTemplate = props => {
-  const { argValue, onValueChange, labels, workpad } = props;
+  const { typeInstance, argValue, onValueChange, labels, workpad } = props;
+  const { name } = typeInstance;
   const chain = get(argValue, 'chain.0', {});
   const chainArgs = get(chain, 'arguments', {});
   const color = get(chainArgs, 'color.0', '');
@@ -62,15 +63,16 @@ export const SimpleTemplate = props => {
           </EuiFlexItem>
         </Fragment>
       )}
-      {(!labels || labels.length === 0) && (
-        <EuiFlexItem grow={false}>
-          <TooltipIcon
-            placement="left"
-            icon="warning"
-            text="Data has no series to style, add a color dimension"
-          />
-        </EuiFlexItem>
-      )}
+      {name !== 'defaultStyle' &&
+        (labels || labels.length === 0) && (
+          <EuiFlexItem grow={false}>
+            <TooltipIcon
+              placement="left"
+              icon="warning"
+              text="Data has no series to style, add a color dimension"
+            />
+          </EuiFlexItem>
+        )}
     </EuiFlexGroup>
   );
 };
@@ -84,4 +86,5 @@ SimpleTemplate.propTypes = {
   workpad: PropTypes.shape({
     colors: PropTypes.array.isRequired,
   }).isRequired,
+  typeInstance: PropTypes.shape({ name: PropTypes.string.isRequired }).isRequired,
 };

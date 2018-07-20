@@ -22,6 +22,11 @@ export const pie = () => ({
       types: ['seriesStyle', 'null'],
       help: 'A style of a specific series',
     },
+    radius: {
+      type: ['string', 'number'],
+      help: `Radius of the pie as a percentage (between 0 and 1) of the available space. Set to 'auto' to automatically set radius`,
+      default: 'auto',
+    },
     hole: {
       types: ['number'],
       default: 0,
@@ -46,6 +51,11 @@ export const pie = () => ({
       types: ['string', 'boolean'],
       help: 'Legend position, nw, sw, ne, se or false',
       default: false,
+    },
+    tilt: {
+      types: ['number'],
+      default: 1,
+      help: 'Percentage of tilt where 1 is fully vertical and 0 is completely flat',
     },
   },
   fn: (context, args) => {
@@ -92,6 +102,8 @@ export const pie = () => ({
                 show: args.labels,
                 radius: (args.labelRadius >= 0 ? args.labelRadius : 100) / 100,
               },
+              tilt: args.tilt,
+              radius: args.radius,
             },
             bubbles: {
               show: false,

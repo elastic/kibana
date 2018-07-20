@@ -6,6 +6,8 @@ import { font } from './font';
 import { imageUpload } from './image_upload';
 import { number } from './number';
 import { palette } from './palette';
+import { percentage } from './percentage';
+import { range } from './range';
 import { select } from './select';
 import { seriesStyle } from './series_style';
 import { shape } from './shape';
@@ -22,6 +24,8 @@ export const argTypeSpecs = [
   imageUpload,
   number,
   palette,
+  percentage,
+  range,
   select,
   seriesStyle,
   shape,

@@ -5,7 +5,7 @@ export const pie = () => ({
   displayName: 'Pie chart',
   width: 300,
   height: 300,
-  help: 'An customizable element for making pie charts from your data',
+  help: 'A customizable element for making pie charts from your data',
   image: header,
   expression: `filters
 | demodata
