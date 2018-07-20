@@ -17,8 +17,25 @@
  * under the License.
  */
 
-export { AggConfig } from './agg_config';
-export { Vis, VisProvider } from './vis';
-export { VisualizationController, VisType } from './vis_types/vis_type';
-export * from './request_handlers';
-export * from './response_handlers';
+interface Toast extends ToastDescription {
+  id: number;
+}
+
+interface ToastDescription {
+  title: string;
+  color?: string;
+  iconType?: string;
+  text?: string;
+  'data-test-subj'?: string;
+}
+
+export interface ToastNotifications {
+  onChange(changeCallback: () => void): void;
+  remove(toast: Toast): void;
+  add(toast: ToastDescription | string): Toast;
+  addSuccess(toast: ToastDescription | string): Toast;
+  addWarning(toast: ToastDescription | string): Toast;
+  addDanger(toast: ToastDescription | string): Toast;
+}
+
+export const toastNotifications: ToastNotifications;

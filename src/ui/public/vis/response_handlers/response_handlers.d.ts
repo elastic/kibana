@@ -17,8 +17,11 @@
  * under the License.
  */
 
-export { AggConfig } from './agg_config';
-export { Vis, VisProvider } from './vis';
-export { VisualizationController, VisType } from './vis_types/vis_type';
-export * from './request_handlers';
-export * from './response_handlers';
+import { Vis } from '../vis';
+
+export type ResponseHandler = (vis: Vis, response: any) => any;
+
+export interface ResponseHandlerDescription {
+  name: string;
+  handler: ResponseHandler;
+}

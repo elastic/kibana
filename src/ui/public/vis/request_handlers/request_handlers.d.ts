@@ -17,8 +17,25 @@
  * under the License.
  */
 
-export { AggConfig } from './agg_config';
-export { Vis, VisProvider } from './vis';
-export { VisualizationController, VisType } from './vis_types/vis_type';
-export * from './request_handlers';
-export * from './response_handlers';
+import { SearchSource } from '../../courier';
+import { QueryFilter } from '../../filter_bar/query_filter';
+import { Filters, Query, TimeRange } from '../../visualize';
+import { AggConfigs } from '../agg_configs';
+import { Vis } from '../vis';
+
+export interface RequestHandlerParams {
+  searchSource: SearchSource;
+  aggs: AggConfigs;
+  timeRange?: TimeRange;
+  query?: Query;
+  filters?: Filters;
+  forceFetch: boolean;
+  queryFilter: QueryFilter;
+}
+
+export type RequestHandler = (vis: Vis, params: RequestHandlerParams) => any;
+
+export interface RequestHandlerDescription {
+  name: string;
+  handler: RequestHandler;
+}
