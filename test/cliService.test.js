@@ -1,11 +1,12 @@
+const rimraf = require('rimraf');
 const axios = require('axios');
 const nock = require('nock');
 const httpAdapter = require('axios/lib/adapters/http');
-
-const cliService = require('../src/cli/cliService');
-const rpc = require('../src/lib/rpc');
-const commitMock = require('./mocks/commit.json');
 const { exec } = require('child_process');
+
+const rpc = require('../src/lib/rpc');
+const cliService = require('../src/cli/cliService');
+const commitMock = require('./mocks/commit.json');
 
 axios.defaults.host = 'http://localhost';
 axios.defaults.adapter = httpAdapter;
@@ -170,5 +171,23 @@ describe('withPullRequest', () => {
         pullRequest: undefined
       }
     ]);
+  });
+});
+
+describe('maybeSetupRepo', () => {
+  it('should delete repo if an error occurs', async () => {
+    expect.assertions(1);
+    jest.spyOn(rpc, 'mkdirp').mockImplementationOnce(() => {
+      throw new Error();
+    });
+
+    try {
+      await cliService.maybeSetupRepo('elastic', 'kibana', 'sqren');
+    } catch (e) {
+      expect(rimraf).toHaveBeenCalledWith(
+        '/myHomeDir/.backport/repositories/elastic/kibana',
+        expect.any(Function)
+      );
+    }
   });
 });

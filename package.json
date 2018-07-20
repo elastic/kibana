@@ -63,6 +63,7 @@
     "lodash.isempty": "^4.4.0",
     "mkdirp": "^0.5.1",
     "ora": "^2.1.0",
+    "rimraf": "^2.6.2",
     "strip-json-comments": "^2.0.1",
     "yargs": "^11.0.0"
   },

@@ -18,6 +18,7 @@ const {
   createAndCheckoutBranch,
   push,
   repoExists,
+  deleteRepo,
   setupRepo,
   isIndexDirty,
   verifyGithubSshAuth
@@ -121,6 +122,7 @@ async function maybeSetupRepo(owner, repoName, username) {
     spinner.succeed();
   } catch (e) {
     spinner.stop();
+    await deleteRepo(owner, repoName);
     throw e;
   }
 }

@@ -1,4 +1,5 @@
 const { exec } = require('child_process');
+const rimraf = require('rimraf');
 
 const env = require('./env');
 const rpc = require('./rpc');
@@ -26,6 +27,13 @@ async function setupRepo(owner, repoName, username, callback) {
   await rpc.mkdirp(env.getRepoOwnerPath(owner));
   await cloneRepo(owner, repoName, callback);
   return addRemote(owner, repoName, username);
+}
+
+function deleteRepo(owner, repoName) {
+  return new Promise(resolve => {
+    const repoPath = env.getRepoPath(owner, repoName);
+    rimraf(repoPath, resolve);
+  });
 }
 
 function getRemoteUrl(owner, repoName) {
@@ -141,5 +149,6 @@ module.exports = {
   push,
   repoExists,
   resetAndPullMaster,
+  deleteRepo,
   setupRepo
 };
