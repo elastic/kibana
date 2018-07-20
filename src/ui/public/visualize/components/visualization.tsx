@@ -45,13 +45,6 @@ interface VisualizationProps {
 }
 
 export class Visualization extends React.Component<VisualizationProps> {
-  public static getDerivedStateFromProps(props: VisualizationProps): void {
-    const uiStateChanged = props.uiState && props.uiState !== props.vis.getUiState();
-    if (uiStateChanged) {
-      throw new Error('Changing uiState props is not allowed!');
-    }
-  }
-
   private showNoResultsMessage = memoizeLast(shouldShowNoResultsMessage);
 
   constructor(props: VisualizationProps) {
@@ -79,6 +72,13 @@ export class Visualization extends React.Component<VisualizationProps> {
         )}
       </div>
     );
+  }
+
+  public shouldComponentUpdate(nextProps: VisualizationProps): boolean {
+    if (nextProps.uiState !== this.props.uiState) {
+      throw new Error('Changing uiState on <Visualization/> is not supported!');
+    }
+    return true;
   }
 
   public componentWillUnmount() {
