@@ -6,7 +6,7 @@
 
 declare module 'ui/chrome' {
   class UiChrome {
-    public setRootController(name: string, provider: (...args: any[]) => any): void;,
+    public setRootController(name: string, provider: (...args: any[]) => any): void;
   }
 
   const chrome: UiChrome;
