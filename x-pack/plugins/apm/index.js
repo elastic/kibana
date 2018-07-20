@@ -30,7 +30,7 @@ export function apm(kibana) {
         return {
           mlEnabled: config.get('xpack.ml.enabled'),
           apmUiEnabled: config.get('xpack.apm.ui.enabled'),
-          apmIndexPattern: config.get('xpack.apm.indexPattern')
+          apmIndexPattern: config.get('apm_core.indexPattern')
         };
       },
       hacks: ['plugins/apm/hacks/toggle_app_link_in_nav']
@@ -45,15 +45,6 @@ export function apm(kibana) {
 
         // enable plugin
         enabled: Joi.boolean().default(true),
-
-        // Kibana Index pattern
-        indexPattern: Joi.string().default('apm-*'),
-
-        // ES Indices
-        errorIndices: Joi.string().default('apm-*-error-*'),
-        onboardingIndices: Joi.string().default('apm-*'), // TODO: change to "apm-*-onboarding-*"
-        spanIndices: Joi.string().default('apm-*-span-*'),
-        transactionIndices: Joi.string().default('apm-*-transaction-*'),
 
         // buckets
         minimumBucketSize: Joi.number().default(15),
