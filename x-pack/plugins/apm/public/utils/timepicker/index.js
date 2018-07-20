@@ -50,18 +50,22 @@ export function initTimepicker(history, dispatch) {
 
         history.listen(() => {
           updateRefreshRate(dispatch);
-          globalState.fetch();
+          globalState.fetch(); // ensure global state is updated when url changes
         });
-        timefilter.enableTimeRangeSelector();
-        timefilter.enableAutoRefreshSelector();
 
-        updateRefreshRate(dispatch);
-
+        // ensure that redux is notified after timefilter has updated
         $scope.$listen(timefilter, 'timeUpdate', () =>
           dispatch(updateTimePickerAction())
         );
 
+        // ensure that timepicker updates when global state changes
         registerTimefilterWithGlobalState(globalState);
+
+        timefilter.enableTimeRangeSelector();
+        timefilter.enableAutoRefreshSelector();
+
+        dispatch(updateTimePickerAction());
+        updateRefreshRate(dispatch);
 
         Promise.all([waitForAngularReady]).then(resolve);
       });

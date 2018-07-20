@@ -36,11 +36,7 @@ describe('ErrorGroupOverview -> List', () => {
   it('should render with data', () => {
     const storeState = { location: {} };
     const wrapper = mountWithRouterAndStore(
-      <List
-        items={props.items}
-        changeServiceSorting={props.changeServiceSorting}
-        serviceSorting={props.serviceSorting}
-      />,
+      <List items={props.items} />,
       storeState
     );
 

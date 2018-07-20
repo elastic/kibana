@@ -6,7 +6,6 @@
 
 import 'ui/filters/moment';
 import { uiModules } from 'ui/modules';
-import { Notifier } from 'ui/notify';
 import 'ui/pager_control';
 import 'ui/pager';
 import 'ui/table_info';
@@ -48,7 +47,6 @@ app.directive('watchHistory', function ($injector) {
         this.pageOfHistoryItems = [];
 
         this.historyRange = this.initialRange;
-        this.notifier = new Notifier({ location: 'Watcher' });
         this.pager = pagerFactory.create(this.historyItems.length, PAGINATION.PAGE_SIZE, 1);
 
         // react to data and UI changes

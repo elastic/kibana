@@ -22,6 +22,13 @@ export const filters = {
     });
   },
 
+  filtersStats() {
+    return http({
+      url: `${basePath}/filters/_stats`,
+      method: 'GET'
+    });
+  },
+
   addFilter(
     filterId,
     description,
@@ -41,7 +48,7 @@ export const filters = {
     filterId,
     description,
     addItems,
-    deleteItems
+    removeItems
   ) {
     return http({
       url: `${basePath}/filters/${filterId}`,
@@ -49,7 +56,7 @@ export const filters = {
       data: {
         description,
         addItems,
-        deleteItems
+        removeItems
       }
     });
   },

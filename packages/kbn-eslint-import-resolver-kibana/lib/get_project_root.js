@@ -27,12 +27,8 @@ function getConfig(config) {
     projectRoot: true,
   };
 
-  if (!config || !config['@elastic/eslint-import-resolver-kibana'])
-    return defaults;
-  return Object.assign(
-    defaults,
-    config['@elastic/eslint-import-resolver-kibana']
-  );
+  if (!config || !config['@elastic/eslint-import-resolver-kibana']) return defaults;
+  return Object.assign(defaults, config['@elastic/eslint-import-resolver-kibana']);
 }
 
 function getRootPackageDir(dirRoot, dir, rootPackageName) {
@@ -54,8 +50,7 @@ function getRootPackageDir(dirRoot, dir, rootPackageName) {
     // recurse until a matching package.json is found
     return getRootPackageDir(dirRoot, dirname(dir), rootPackageName);
   } catch (e) {
-    if (e.code === 'ENOENT')
-      return getRootPackageDir(dirRoot, dirname(dir), rootPackageName);
+    if (e.code === 'ENOENT') return getRootPackageDir(dirRoot, dirname(dir), rootPackageName);
     throw e;
   }
 }

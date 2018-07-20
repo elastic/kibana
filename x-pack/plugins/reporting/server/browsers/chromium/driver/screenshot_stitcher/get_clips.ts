@@ -13,10 +13,7 @@ import { Rectangle } from './types';
  * @param largeRectangle - A big rectangle that might be broken down into smaller rectangles
  * @param max - Maximum width or height any single clip should have
  */
-export function $getClips(
-  largeRectangle: Rectangle,
-  max: number
-): Rx.Observable<Rectangle> {
+export function $getClips(largeRectangle: Rectangle, max: number): Rx.Observable<Rectangle> {
   const rectanglesGenerator = function*(): IterableIterator<Rectangle> {
     const columns = Math.ceil(largeRectangle.width / max) || 1;
     const rows = Math.ceil(largeRectangle.height / max) || 1;
@@ -25,8 +22,7 @@ export function $getClips(
       for (let column = 0; column < columns; ++column) {
         yield {
           height: row === rows - 1 ? largeRectangle.height - row * max : max,
-          width:
-            column === columns - 1 ? largeRectangle.width - column * max : max,
+          width: column === columns - 1 ? largeRectangle.width - column * max : max,
           x: column * max + largeRectangle.x,
           y: row * max + largeRectangle.y,
         };

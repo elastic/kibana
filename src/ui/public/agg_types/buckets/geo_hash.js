@@ -159,8 +159,7 @@ export const geoHashBucketAgg = new BucketAggType({
         enabled: true,
         params: {
           field: agg.getField()
-        },
-        schema: 'metric'
+        }
       }));
     }
 

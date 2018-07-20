@@ -33,6 +33,11 @@ export async function getEncodedEsQuery(kuery) {
   }
 
   const indexPattern = await getAPMIndexPattern();
+
+  if (!indexPattern) {
+    return;
+  }
+
   const esFilterQuery = convertKueryToEsQuery(kuery, indexPattern);
   return encodeURIComponent(JSON.stringify(esFilterQuery));
 }
@@ -95,19 +100,12 @@ export async function loadTransactionDistribution({
   });
 }
 
-export async function loadSpans({
-  serviceName,
-  start,
-  end,
-  transactionId,
-  kuery
-}) {
+export async function loadSpans({ serviceName, start, end, transactionId }) {
   return callApi({
     pathname: `/api/apm/services/${serviceName}/transactions/${transactionId}/spans`,
     query: {
       start,
-      end,
-      esFilterQuery: await getEncodedEsQuery(kuery)
+      end
     }
   });
 }
@@ -165,9 +163,8 @@ export async function loadErrorGroupList({
   end,
   kuery,
   size,
-  q,
-  sortBy,
-  sortOrder
+  sortField,
+  sortDirection
 }) {
   return callApi({
     pathname: `/api/apm/services/${serviceName}/errors`,
@@ -175,9 +172,8 @@ export async function loadErrorGroupList({
       start,
       end,
       size,
-      q,
-      sortBy,
-      sortOrder,
+      sortField,
+      sortDirection,
       esFilterQuery: await getEncodedEsQuery(kuery)
     }
   });

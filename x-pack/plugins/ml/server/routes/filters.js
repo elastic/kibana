@@ -18,6 +18,11 @@ function getAllFilters(callWithRequest) {
   return mgr.getAllFilters();
 }
 
+function getAllFilterStats(callWithRequest) {
+  const mgr = new FilterManager(callWithRequest);
+  return mgr.getAllFilterStats();
+}
+
 function getFilter(callWithRequest, filterId) {
   const mgr = new FilterManager(callWithRequest);
   return mgr.getFilter(filterId);
@@ -33,9 +38,9 @@ function updateFilter(
   filterId,
   description,
   addItems,
-  deleteItems) {
+  removeItems) {
   const mgr = new FilterManager(callWithRequest);
-  return mgr.updateFilter(filterId, description, addItems, deleteItems);
+  return mgr.updateFilter(filterId, description, addItems, removeItems);
 }
 
 function deleteFilter(callWithRequest, filterId) {
@@ -51,6 +56,20 @@ export function filtersRoutes(server, commonRouteConfig) {
     handler(request, reply) {
       const callWithRequest = callWithRequestFactory(server, request);
       return getAllFilters(callWithRequest)
+        .then(resp => reply(resp))
+        .catch(resp => reply(wrapError(resp)));
+    },
+    config: {
+      ...commonRouteConfig
+    }
+  });
+
+  server.route({
+    method: 'GET',
+    path: '/api/ml/filters/_stats',
+    handler(request, reply) {
+      const callWithRequest = callWithRequestFactory(server, request);
+      return getAllFilterStats(callWithRequest)
         .then(resp => reply(resp))
         .catch(resp => reply(wrapError(resp)));
     },
@@ -101,7 +120,7 @@ export function filtersRoutes(server, commonRouteConfig) {
         filterId,
         payload.description,
         payload.addItems,
-        payload.deleteItems)
+        payload.removeItems)
         .then(resp => reply(resp))
         .catch(resp => reply(wrapError(resp)));
     },

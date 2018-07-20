@@ -26,7 +26,7 @@ import { VisProvider } from 'ui/vis';
 import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
 import { AppStateProvider } from 'ui/state_management/app_state';
 
-describe('Controller', function () {
+describe('Table Vis Controller', function () {
   let $rootScope;
   let $compile;
   let Private;
@@ -106,7 +106,7 @@ describe('Controller', function () {
     expect(!$scope.tableGroups).to.be.ok();
     expect(!$scope.hasSomeRows).to.be.ok();
 
-    attachEsResponseToScope(tabifyAggResponse(vis.getAggConfig().getResponseAggs(), fixtures.oneRangeBucket, {
+    attachEsResponseToScope(tabifyAggResponse(vis.getAggConfig(), fixtures.oneRangeBucket, {
       isHierarchical: vis.isHierarchical()
     }));
 
@@ -121,7 +121,7 @@ describe('Controller', function () {
     const vis = new OneRangeVis();
     initController(vis);
 
-    attachEsResponseToScope(tabifyAggResponse(vis.getAggConfig().getResponseAggs(), fixtures.oneRangeBucket, {
+    attachEsResponseToScope(tabifyAggResponse(vis.getAggConfig(), fixtures.oneRangeBucket, {
       isHierarchical: vis.isHierarchical()
     }));
     removeEsResponseFromScope();
@@ -142,7 +142,7 @@ describe('Controller', function () {
     const resp = _.cloneDeep(fixtures.oneRangeBucket);
     resp.aggregations.agg_2.buckets = {};
 
-    attachEsResponseToScope(tabifyAggResponse(vis.getAggConfig().getResponseAggs(), resp, {
+    attachEsResponseToScope(tabifyAggResponse(vis.getAggConfig(), resp, {
       isHierarchical: vis.isHierarchical()
     }));
 
@@ -158,7 +158,7 @@ describe('Controller', function () {
     const resp = _.cloneDeep(fixtures.oneRangeBucket);
     resp.aggregations.agg_2.buckets = {};
 
-    attachEsResponseToScope(tabifyAggResponse(vis.getAggConfig().getResponseAggs(), resp, {
+    attachEsResponseToScope(tabifyAggResponse(vis.getAggConfig(), resp, {
       isHierarchical: vis.isHierarchical()
     }));
 

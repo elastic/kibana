@@ -29,9 +29,7 @@ export async function runElasticsearch({ config, options }) {
 
   const cluster = createEsTestCluster({
     port: config.get('servers.elasticsearch.port'),
-    password: !isOss
-      ? DEFAULT_SUPERUSER_PASS
-      : config.get('servers.elasticsearch.password'),
+    password: !isOss ? DEFAULT_SUPERUSER_PASS : config.get('servers.elasticsearch.password'),
     license: config.get('esTestCluster.license'),
     log,
     basePath: resolve(KIBANA_ROOT, '.es'),
