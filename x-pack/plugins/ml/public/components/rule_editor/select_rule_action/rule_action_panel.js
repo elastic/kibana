@@ -47,9 +47,13 @@ export function RuleActionPanel({
   setEditRuleIndex,
   deleteRuleAtIndex,
 }) {
-
   const detector = job.analysis_config.detectors[detectorIndex];
-  const rule = detector.custom_rules[ruleIndex];
+  const rules = detector.custom_rules;
+  if (rules === undefined || ruleIndex >= rules.length) {
+    return null;
+  }
+
+  const rule = rules[ruleIndex];
 
   const descriptionListItems = [
     {

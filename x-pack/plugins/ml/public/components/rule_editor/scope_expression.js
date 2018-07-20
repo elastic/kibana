@@ -28,7 +28,7 @@ import {
 import { FILTER_TYPE } from '../../../common/constants/detector_rule';
 import { filterTypeToText } from './utils';
 
-// Rise the popovers above GuidePageSideNav
+// Raise the popovers above GuidePageSideNav
 const POPOVER_STYLE = { zIndex: '200' };
 
 function getFilterListOptions(filterListIds) {

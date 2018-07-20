@@ -29,7 +29,7 @@ import {
 import { APPLIES_TO, OPERATOR } from '../../../common/constants/detector_rule';
 import { appliesToText, operatorToText } from './utils';
 
-// Rise the popovers above GuidePageSideNav
+// Raise the popovers above GuidePageSideNav
 const POPOVER_STYLE = { zIndex: '200' };
 
 

@@ -49,7 +49,7 @@ export function ConditionsSection({
   }
 
   return (
-    <div>
+    <React.Fragment>
       {expressions}
       <EuiSpacer size="s" />
       <EuiButtonEmpty
@@ -57,7 +57,7 @@ export function ConditionsSection({
       >
         Add new condition
       </EuiButtonEmpty>
-    </div>
+    </React.Fragment>
   );
 
 }

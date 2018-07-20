@@ -65,7 +65,7 @@ export class DeleteRuleModal extends Component {
     }
 
     return (
-      <div>
+      <React.Fragment>
         <EuiLink
           color="danger"
           onClick={() => this.showModal()}
@@ -73,7 +73,7 @@ export class DeleteRuleModal extends Component {
           Delete rule
         </EuiLink>
         {modal}
-      </div>
+      </React.Fragment>
     );
   }
 }

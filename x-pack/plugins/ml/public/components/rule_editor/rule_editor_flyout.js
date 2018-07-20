@@ -84,19 +84,26 @@ export class RuleEditorFlyout extends Component {
   showFlyout = (anomaly) => {
     let ruleIndex = -1;
     const job = mlJobService.getJob(anomaly.jobId);
-    if (job !== undefined) {
-      this.partitioningFieldNames = getPartitioningFieldNames(job, anomaly.detectorIndex);
-
-      // Check if any rules are configured for this detector.
-      const detectorIndex = anomaly.detectorIndex;
-      const detector = job.analysis_config.detectors[detectorIndex];
-      if (detector.custom_rules === undefined) {
-        ruleIndex = 0;
-      }
-
-    } else {
+    if (job === undefined) {
+      // No details found for this job, display an error and
+      // don't open the Flyout as no edits can be made without the job.
       toastNotifications.addDanger(
-        `Error obtaining details for job ID ${anomaly.jobId}`);
+        `Unable to configure rules as an error occurred obtaining details for job ID ${anomaly.jobId}`);
+      this.setState({
+        job,
+        isFlyoutVisible: false
+      });
+
+      return;
+    }
+
+    this.partitioningFieldNames = getPartitioningFieldNames(job, anomaly.detectorIndex);
+
+    // Check if any rules are configured for this detector.
+    const detectorIndex = anomaly.detectorIndex;
+    const detector = job.analysis_config.detectors[detectorIndex];
+    if (detector.custom_rules === undefined) {
+      ruleIndex = 0;
     }
 
     let isConditionsEnabled = false;
@@ -400,6 +407,9 @@ export class RuleEditorFlyout extends Component {
         </EuiFlyout>
       );
     } else {
+      const conditionsText = 'Add numeric conditions to take action according ' +
+        'to the actual or typical values of the anomaly. Multiple conditions are ' +
+        'combined using AND.';
       flyout = (
         <EuiFlyout
           className="ml-rule-editor-flyout"
@@ -443,7 +453,7 @@ export class RuleEditorFlyout extends Component {
             <EuiCheckbox
               id="enable_conditions_checkbox"
               className="scope-enable-checkbox"
-              label="Add numeric conditions to take action according to the actual or typical values of the anomaly"
+              label={conditionsText}
               checked={isConditionsEnabled}
               onChange={this.onConditionsEnabledChange}
               disabled={!hasPartitioningFields}
@@ -513,9 +523,9 @@ export class RuleEditorFlyout extends Component {
     }
 
     return (
-      <div>
+      <React.Fragment>
         {flyout}
-      </div>
+      </React.Fragment>
     );
 
   }
