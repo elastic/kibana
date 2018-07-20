@@ -20,7 +20,7 @@ import {
   EuiPanel,
 } from '@elastic/eui';
 
-import { DeleteSpacesButton, PageHeader } from '../components';
+import { DeleteSpacesButton } from '../components';
 import { SpaceAvatar } from '../../components';
 
 import { Notifier, toastNotifications } from 'ui/notify';
@@ -77,7 +77,6 @@ export class ManageSpacePage extends Component {
 
     return (
       <EuiPage className="editSpacePage">
-        <PageHeader breadcrumbs={this.props.breadcrumbs} />
         <EuiForm>
           {this.getFormHeading()}
 
@@ -396,5 +395,4 @@ ManageSpacePage.propTypes = {
   space: PropTypes.string,
   spacesManager: PropTypes.object,
   spacesNavState: PropTypes.object.isRequired,
-  breadcrumbs: PropTypes.array.isRequired,
 };

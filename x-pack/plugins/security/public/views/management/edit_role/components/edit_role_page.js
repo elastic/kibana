@@ -20,7 +20,6 @@ import {
   EuiFlexItem,
   EuiButton,
 } from '@elastic/eui';
-import { PageHeader } from './page_header';
 import { saveRole, deleteRole } from '../../../../objects';
 import { isReservedRole } from '../../../../lib/role';
 import { RoleValidator } from '../lib/validate_role';
@@ -36,7 +35,6 @@ export class EditRolePage extends Component {
     indexPatterns: PropTypes.array.isRequired,
     httpClient: PropTypes.func.isRequired,
     rbacEnabled: PropTypes.bool.isRequired,
-    rbacApplication: PropTypes.string,
     allowDocumentLevelSecurity: PropTypes.bool.isRequired,
     allowFieldLevelSecurity: PropTypes.bool.isRequired,
     kibanaAppPrivileges: PropTypes.array.isRequired,
@@ -56,7 +54,6 @@ export class EditRolePage extends Component {
   render() {
     return (
       <EuiPage className="editRolePage">
-        <PageHeader breadcrumbs={this.props.breadcrumbs} />
         <EuiForm {...this.state.formError}>
           {this.getFormTitle()}
 
@@ -169,7 +166,6 @@ export class EditRolePage extends Component {
         <EuiSpacer />
         <KibanaPrivileges
           kibanaAppPrivileges={this.props.kibanaAppPrivileges}
-          rbacApplication={this.props.rbacApplication}
           spaces={this.props.spaces}
           editable={!isReservedRole(this.state.role)}
           spacesEnabled={this.props.spaces.length > 1}
@@ -237,8 +233,8 @@ export class EditRolePage extends Component {
         ...this.state.role
       };
 
-      role.indices = role.indices.filter(i => !this.isPlaceholderPrivilege(i));
-      role.indices.forEach((index) => index.query || delete index.query);
+      role.elasticsearch.indices = role.elasticsearch.indices.filter(i => !this.isPlaceholderPrivilege(i));
+      role.elasticsearch.indices.forEach((index) => index.query || delete index.query);
 
       saveRole(httpClient, role)
         .then(() => {

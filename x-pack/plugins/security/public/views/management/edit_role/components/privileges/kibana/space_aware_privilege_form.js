@@ -20,12 +20,6 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { isReservedRole } from '../../../../../../lib/role';
-import {
-  addPrivilegeToRole,
-  setRolePrivilege,
-  removePrivilegeFromRole,
-  removePrivilegeFromRoleResources
-} from '../../../lib/role_privilege';
 import { copyRole } from '../../../lib/copy_role';
 import { getAvailablePermissions } from '../../../lib/get_available_permissions';
 import { PrivilegeSpaceTable } from './privilege_space_table';
@@ -194,19 +188,13 @@ export class SpaceAwarePrivilegeForm extends Component {
       privilegeForms: updatedPrivileges
     });
 
-    const {
-      rbacApplication
-    } = this.props;
-
-    console.log('form change', { selectedSpaceIds, selectedPrivilege });
-
     const role = copyRole(this.props.role);
 
     if (!selectedSpaceIds.length || !selectedPrivilege) {
       return;
     }
 
-    addPrivilegeToRole(selectedPrivilege, role, rbacApplication, selectedSpaceIds);
+    // addPrivilegeToRole(selectedPrivilege, role, selectedSpaceIds);
 
     this.props.onChange(role);
   }
@@ -219,14 +207,9 @@ export class SpaceAwarePrivilegeForm extends Component {
       privilegeForms: updatedPrivileges
     });
 
-    const {
-      rbacApplication
-    } = this.props;
-
-
     const role = copyRole(this.props.role);
 
-    removePrivilegeFromRoleResources(removedPrivilege.privilege, role, rbacApplication, removedPrivilege.spaces);
+    // removePrivilegeFromRoleResources(removedPrivilege.privilege, role, removedPrivilege.spaces);
 
     this.props.onChange(role);
   }
@@ -237,11 +220,11 @@ export class SpaceAwarePrivilegeForm extends Component {
 
     const role = copyRole(this.props.role);
 
-    setRolePrivilege({
-      application: this.props.rbacApplication,
-      resources: ['*'],
-      privileges: [privilege]
-    }, role, this.props.rbacApplication);
+    // setRolePrivilege({
+    //   application: this.props.rbacApplication,
+    //   resources: ['*'],
+    //   privileges: [privilege]
+    // }, role, this.props.rbacApplication);
 
     this.props.onChange(role);
   }
@@ -249,7 +232,7 @@ export class SpaceAwarePrivilegeForm extends Component {
   onRemoveSpacePrivilege = (privilegeName) => {
     const role = copyRole(this.props.role);
 
-    removePrivilegeFromRole(privilegeName, role, this.props.rbacApplication);
+    // removePrivilegeFromRole(privilegeName, role, this.props.rbacApplication);
 
     this.props.onChange(role);
   }
@@ -261,7 +244,7 @@ export class SpaceAwarePrivilegeForm extends Component {
       rbacApplication,
     } = this.props;
 
-    setRolePrivilege(rolePrivilege, role, rbacApplication);
+    // setRolePrivilege(rolePrivilege, role, rbacApplication);
 
     this.props.onChange(role);
   };

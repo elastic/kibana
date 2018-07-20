@@ -6,16 +6,17 @@
 
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import { getKibanaPrivileges } from '../../../lib/get_application_privileges';
 import { NO_PRIVILEGE_VALUE } from '../../../lib/constants';
+import { isReservedRole } from '../../../../../../lib/role';
+import { getKibanaPrivilegesViewModel, getKibanaPrivileges } from '../../../lib/get_application_privileges';
+
+import { CollapsiblePanel } from '../../collapsible_panel';
 import {
   EuiDescribedFormGroup,
   EuiFormRow,
   EuiSelect,
 } from '@elastic/eui';
-import { isReservedRole } from '../../../../../../lib/role';
 import { copyRole } from '../../../lib/copy_role';
-import { setApplicationPrivileges } from '../../../lib/set_application_privileges';
 
 export class StandardPrivilegeForm extends Component {
   static propTypes = {
@@ -23,16 +24,29 @@ export class StandardPrivilegeForm extends Component {
     role: PropTypes.object.isRequired,
     rbacApplication: PropTypes.string.isRequired,
     onChange: PropTypes.func.isRequired,
+  };
+
+  idPrefix = () => `id_`;
+
+  privilegeToId = (privilege) => `${this.idPrefix()}${privilege}`;
+
+  idToPrivilege = (id) => id.split(this.idPrefix())[1];
+
+  render() {
+    return (
+      <CollapsiblePanel iconType={'logoKibana'} title={'Kibana'}>
+        {this.getForm()}
+      </CollapsiblePanel>
+    );
   }
 
   render() {
     const {
       kibanaAppPrivileges,
       role,
-      rbacApplication,
     } = this.props;
 
-    const kibanaPrivileges = getKibanaPrivileges(kibanaAppPrivileges, role, rbacApplication);
+    const kibanaPrivileges = getKibanaPrivilegesViewModel(kibanaAppPrivileges, role.kibana);
 
     const options = [
       { value: NO_PRIVILEGE_VALUE, text: 'none' },
@@ -68,12 +82,12 @@ export class StandardPrivilegeForm extends Component {
     if (privilege === NO_PRIVILEGE_VALUE) {
       // unsetting all privileges -- only necessary until RBAC Phase 3
       const noPrivileges = {};
-      setApplicationPrivileges(noPrivileges, role, this.props.rbacApplication);
+      role.kibana = getKibanaPrivileges(noPrivileges);
     } else {
       const newPrivileges = {
         [privilege]: true
       };
-      setApplicationPrivileges(newPrivileges, role, this.props.rbacApplication);
+      role.kibana = getKibanaPrivileges(newPrivileges);
     }
 
     this.props.onChange(role);
