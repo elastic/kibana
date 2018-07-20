@@ -54,6 +54,7 @@ import { kafkaMetricsSpecProvider } from './kafka_metrics';
 import { kibanaMetricsSpecProvider } from './kibana_metrics';
 import { memcachedMetricsSpecProvider } from './memcached_metrics';
 import { muninMetricsSpecProvider } from './munin_metrics';
+import { vSphereMetricsSpecProvider } from './vsphere_metrics';
 import { windowsMetricsSpecProvider } from './windows_metrics';
 import { golangMetricsSpecProvider } from './golang_metrics';
 import { logstashMetricsSpecProvider } from './logstash_metrics';
@@ -98,6 +99,7 @@ export function registerTutorials(server) {
   server.registerTutorial(kibanaMetricsSpecProvider);
   server.registerTutorial(memcachedMetricsSpecProvider);
   server.registerTutorial(muninMetricsSpecProvider);
+  server.registerTutorial(vSphereMetricsSpecProvider);
   server.registerTutorial(windowsMetricsSpecProvider);
   server.registerTutorial(golangMetricsSpecProvider);
   server.registerTutorial(logstashMetricsSpecProvider);
