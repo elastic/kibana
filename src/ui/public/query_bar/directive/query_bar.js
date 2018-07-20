@@ -84,15 +84,15 @@ module.directive('queryBar', function () {
         const { localQuery: { query, language } } = this;
         const recentSearchSuggestions = this.getRecentSearchSuggestions(query);
 
-        const suggestionsProvider = getAutocompleteProvider(language);
-        if (!suggestionsProvider) return recentSearchSuggestions;
+        const autocompleteProvider = getAutocompleteProvider(language);
+        if (!autocompleteProvider) return recentSearchSuggestions;
 
         const legacyIndexPatterns = await this.getIndexPatterns();
         const indexPatterns = getFromLegacyIndexPattern(legacyIndexPatterns);
-        const getSuggestions = suggestionsProvider({ config, indexPatterns });
+        const getAutocompleteSuggestions = autocompleteProvider({ config, indexPatterns });
 
         const { selectionStart, selectionEnd } = $element.find('input')[0];
-        const suggestions = await getSuggestions({ query, selectionStart, selectionEnd });
+        const suggestions = await getAutocompleteSuggestions({ query, selectionStart, selectionEnd });
         return [...suggestions, ...recentSearchSuggestions];
       };
 

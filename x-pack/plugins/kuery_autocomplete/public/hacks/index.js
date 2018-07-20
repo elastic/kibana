@@ -10,11 +10,11 @@ import { getSuggestionsProvider as field } from './field';
 import { getSuggestionsProvider as value } from './value';
 import { getSuggestionsProvider as operator } from './operator';
 import { getSuggestionsProvider as conjunction } from './conjunction';
-import { setAutocompleteProvider } from 'ui/autocomplete_providers';
+import { addAutocompleteProvider } from 'ui/autocomplete_providers';
 
 const cursorSymbol = '@kuery-cursor@';
 
-setAutocompleteProvider('kuery', ({ config, indexPatterns, boolFilter }) => {
+addAutocompleteProvider('kuery', ({ config, indexPatterns, boolFilter }) => {
   const getSuggestionsByType = mapValues({ field, value, operator, conjunction }, provider => {
     return provider({ config, indexPatterns, boolFilter });
   });

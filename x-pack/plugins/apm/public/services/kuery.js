@@ -18,18 +18,18 @@ export async function getSuggestions(
   apmIndexPattern,
   boolFilter
 ) {
-  const getSuggestionsProvider = getAutocompleteProvider('kuery');
-  if (!getSuggestionsProvider) return [];
+  const autocompleteProvider = getAutocompleteProvider('kuery');
+  if (!autocompleteProvider) return [];
   const config = {
     get: () => true
   };
 
-  const getKuerySuggestions = getSuggestionsProvider({
+  const getAutocompleteSuggestions = autocompleteProvider({
     config,
     indexPatterns: [apmIndexPattern],
     boolFilter
   });
-  return getKuerySuggestions({
+  return getAutocompleteSuggestions({
     query,
     selectionStart,
     selectionEnd: selectionStart

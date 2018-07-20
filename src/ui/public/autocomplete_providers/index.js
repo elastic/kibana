@@ -19,7 +19,7 @@
 
 const autocompleteProviders = new Map();
 
-export function setAutocompleteProvider(language, provider) {
+export function addAutocompleteProvider(language, provider) {
   autocompleteProviders.set(language, provider);
 }
 
