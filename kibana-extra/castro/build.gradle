@@ -68,15 +68,14 @@ task lintFix(type: YarnTask, dependsOn: [bootstrap]) {
   args = ['tslint', '--fix']
 }
 
-tasks.withType(YarnTask) { task ->
-  task.environment = ['FORCE_COLOR': 'true']
-}
 task typeCheck(type: YarnTask, dependsOn: [bootstrap]) {
   args = ['type-check']
-  environment = ['FORCE_COLOR': 'true']
 }
 
 task typeCheckWatch(type: YarnTask, dependsOn: [bootstrap]) {
   args = ['type-check', '--watch']
-  environment = ['FORCE_COLOR': 'true']
+}
+
+tasks.withType(YarnTask) { task ->
+  task.environment = ['FORCE_COLOR': 'true']
 }
