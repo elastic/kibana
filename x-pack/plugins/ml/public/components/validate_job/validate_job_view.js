@@ -106,9 +106,11 @@ const Callout = ({ message }) => (
     <EuiCallOut
       color={statusToEuiColor(message.status)}
       size="s"
-      title={<Message message={message} />}
+      title={message.heading || <Message message={message} />}
       iconType={statusToEuiIconType(message.status)}
-    />
+    >
+      {message.heading && <Message message={message} />}
+    </EuiCallOut>
     <EuiSpacer size="m" />
   </React.Fragment>
 );

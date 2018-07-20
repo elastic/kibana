@@ -58,7 +58,8 @@
   },
   "bucket_span_valid": {
     "status": "SUCCESS",
-    "text": "Bucket span format of \"{{bucketSpan}}\" is valid.",
+    "heading": "Bucket span",
+    "text": "Format of \"{{bucketSpan}}\" is valid.",
     "url": "https://www.elastic.co/guide/en/elasticsearch/reference/{{version}}/ml-job-resource.html#ml-analysisconfig"
   },
   "bucket_span_invalid": {
@@ -83,6 +84,7 @@
   },
   "detectors_function_not_empty": {
     "status": "SUCCESS",
+    "heading": "Detector functions",
     "text": "Detector functions are present in all detectors.",
     "url": "https://www.elastic.co/guide/en/elasticsearch/reference/{{version}}/ml-job-resource.html#ml-detectorconfig"
   },
@@ -126,7 +128,8 @@
   },
   "job_id_valid": {
     "status": "SUCCESS",
-    "text": "Job id format is valid (lowercase alphanumeric (a-z and 0-9) characters, hyphens or underscores, starts and ends with an alphanumeric character).",
+    "heading": "Job id format is valid.",
+    "text": "Lowercase alphanumeric (a-z and 0-9) characters, hyphens or underscores, starts and ends with an alphanumeric character.",
     "url": "https://www.elastic.co/guide/en/elasticsearch/reference/{{version}}/ml-job-resource.html#ml-job-resource"
   },
   "job_group_id_invalid": {
@@ -136,7 +139,8 @@
   },
   "job_group_id_valid": {
     "status": "SUCCESS",
-    "text": "Job group id formats are valid (lowercase alphanumeric (a-z and 0-9) characters, hyphens or underscores, starts and ends with an alphanumeric character).",
+    "heading": "Job group id formats are valid.",
+    "text": "Lowercase alphanumeric (a-z and 0-9) characters, hyphens or underscores, starts and ends with an alphanumeric character.",
     "url": "https://www.elastic.co/guide/en/elasticsearch/reference/{{version}}/ml-job-resource.html#ml-job-resource"
   },
   "skipped_extended_tests": {
@@ -145,16 +149,19 @@
   },
   "success_cardinality": {
     "status": "SUCCESS",
+    "heading": "Cardinality",
     "text": "Cardinality of detector fields is within recommended bounds.",
     "url": "https://www.elastic.co/guide/en/kibana/{{version}}/job-tips.html#cardinality"
   },
   "success_bucket_span": {
     "status": "SUCCESS",
+    "heading": "Bucket span.",
     "text": "Bucket span checks passed.",
     "url": "https://www.elastic.co/guide/en/kibana/{{version}}/job-tips.html#bucket-span"
   },
   "success_influencers": {
     "status": "SUCCESS",
+    "heading": "Influencers",
     "text": "Influencer configuration is valid.",
     "url": "https://www.elastic.co/guide/en/kibana/{{version}}/job-tips.html#influencers"
   },
@@ -176,11 +183,13 @@
   },
   "success_mml": {
     "status": "SUCCESS",
-    "text": "Model memory limit is valid and within the estimated model memory limit."
+    "heading": "Model memory limit.",
+    "text": "valid and within the estimated model memory limit."
   },
   "success_time_range": {
     "status": "SUCCESS",
-    "text": "Time range is valid and long enough to model patterns in the data."
+    "heading": "Time range",
+    "text": "Valid and long enough to model patterns in the data."
   },
   "time_field_invalid": {
     "status": "ERROR",
