@@ -41,7 +41,7 @@ export class ClusterPrivileges extends Component {
       label: i
     }));
 
-    const selectionMap = (role.cluster || [])
+    const selectionMap = (role.elasticsearch.cluster || [])
       .map(k => ({ [k]: true }))
       .reduce((acc, o) => ({ ...acc, ...o }), {});
 
@@ -58,7 +58,7 @@ export class ClusterPrivileges extends Component {
   };
 
   onClusterPrivilegesChange = (privilege) => {
-    const { cluster } = this.props.role;
+    const { cluster } = this.props.role.elasticsearch;
     const indexOfExistingPrivilege = cluster.indexOf(privilege);
 
     const shouldRemove = indexOfExistingPrivilege >= 0;

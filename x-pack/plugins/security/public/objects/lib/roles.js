@@ -4,11 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import chrome from 'ui/chrome';
+import { omit } from 'lodash';
 
-const apiBase = chrome.addBasePath(`/api/security/v1/roles`);
+const apiBase = chrome.addBasePath(`/api/security/role`);
 
 export async function saveRole($http, role) {
-  return await $http.post(`${apiBase}/${role.name}`, role);
+  const data = omit(role, 'name', 'transient_metadata', '_unrecognized_applications');
+  return await $http.put(`${apiBase}/${role.name}`, data);
 }
 
 export async function deleteRole($http, name) {

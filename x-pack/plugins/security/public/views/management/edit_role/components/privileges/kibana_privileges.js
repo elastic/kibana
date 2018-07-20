@@ -7,8 +7,7 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { isReservedRole } from '../../../../../lib/role';
-import { getKibanaPrivileges } from '../../lib/get_application_privileges';
-import { setApplicationPrivileges } from '../../lib/set_application_privileges';
+import { getKibanaPrivilegesViewModel, getKibanaPrivileges } from '../../lib/get_application_privileges';
 
 import { CollapsiblePanel } from '../collapsible_panel';
 import {
@@ -27,7 +26,7 @@ export class KibanaPrivileges extends Component {
     onChange: PropTypes.func.isRequired,
   };
 
-  idPrefix = () => `${this.props.rbacApplication}_`;
+  idPrefix = () => `id_`;
 
   privilegeToId = (privilege) => `${this.idPrefix()}${privilege}`;
 
@@ -45,10 +44,9 @@ export class KibanaPrivileges extends Component {
     const {
       kibanaAppPrivileges,
       role,
-      rbacApplication
     } = this.props;
 
-    const kibanaPrivileges = getKibanaPrivileges(kibanaAppPrivileges, role, rbacApplication);
+    const kibanaPrivileges = getKibanaPrivilegesViewModel(kibanaAppPrivileges, role.kibana);
 
     const options = [
       { value: noPrivilegeValue, text: 'none' },
@@ -80,7 +78,7 @@ export class KibanaPrivileges extends Component {
   onKibanaPrivilegesChange = (e) => {
     const role = {
       ...this.props.role,
-      applications: [...this.props.role.applications]
+      kibana: [...this.props.role.kibana]
     };
 
     const privilege = e.target.value;
@@ -88,12 +86,12 @@ export class KibanaPrivileges extends Component {
     if (privilege === noPrivilegeValue) {
       // unsetting all privileges -- only necessary until RBAC Phase 3
       const noPrivileges = {};
-      setApplicationPrivileges(noPrivileges, role, this.props.rbacApplication);
+      role.kibana = getKibanaPrivileges(noPrivileges);
     } else {
       const newPrivileges = {
         [privilege]: true
       };
-      setApplicationPrivileges(newPrivileges, role, this.props.rbacApplication);
+      role.kibana = getKibanaPrivileges(newPrivileges);
     }
 
     this.props.onChange(role);

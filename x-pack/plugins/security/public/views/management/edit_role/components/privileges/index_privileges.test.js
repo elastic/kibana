@@ -13,9 +13,11 @@ import { RoleValidator } from '../../lib/validate_role';
 test('it renders without crashing', () => {
   const props = {
     role: {
-      cluster: [],
-      indices: [],
-      run_as: []
+      elasticsearch: {
+        cluster: [],
+        indices: [],
+        run_as: [],
+      },
     },
     httpClient: jest.fn(),
     onChange: jest.fn(),
@@ -31,16 +33,18 @@ test('it renders without crashing', () => {
 test('it renders a IndexPrivilegeForm for each privilege on the role', () => {
   const props = {
     role: {
-      cluster: [],
-      indices: [{
-        names: ['foo*'],
-        privileges: ['all'],
-        query: '*',
-        field_security: {
-          grant: ['some_field']
-        }
-      }],
-      run_as: []
+      elasticsearch: {
+        cluster: [],
+        indices: [{
+          names: ['foo*'],
+          privileges: ['all'],
+          query: '*',
+          field_security: {
+            grant: ['some_field']
+          }
+        }],
+        run_as: [],
+      },
     },
     httpClient: jest.fn(),
     onChange: jest.fn(),

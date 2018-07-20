@@ -94,7 +94,7 @@ export class ElasticsearchPrivileges extends Component {
             <EuiComboBox
               placeholder={this.props.editable ? 'Add a user...' : null}
               options={this.props.runAsUsers.map(username => ({ id: username, label: username }))}
-              selectedOptions={this.props.role.run_as.map(u => ({ label: u }))}
+              selectedOptions={this.props.role.elasticsearch.run_as.map(u => ({ label: u }))}
               onChange={this.onRunAsUserChange}
               isDisabled={!this.props.editable}
             />
@@ -129,7 +129,7 @@ export class ElasticsearchPrivileges extends Component {
   addIndexPrivilege = () => {
     const { role } = this.props;
 
-    const newIndices = [...role.indices, {
+    const newIndices = [...role.elasticsearch.indices, {
       names: [],
       privileges: [],
       field_security: {
@@ -139,14 +139,20 @@ export class ElasticsearchPrivileges extends Component {
 
     this.props.onChange({
       ...this.props.role,
-      indices: newIndices
+      elasticsearch: {
+        ...this.props.role.elasticsearch,
+        indices: newIndices
+      }
     });
   };
 
   onClusterPrivilegesChange = (cluster) => {
     const role = {
       ...this.props.role,
-      cluster
+      elasticsearch: {
+        ...this.props.role.elasticsearch,
+        cluster,
+      },
     };
 
     this.props.onChange(role);
@@ -155,7 +161,10 @@ export class ElasticsearchPrivileges extends Component {
   onRunAsUserChange = (users) => {
     const role = {
       ...this.props.role,
-      run_as: users.map(u => u.label)
+      elasticsearch: {
+        ...this.props.role.elasticsearch,
+        run_as: users.map(u => u.label),
+      },
     };
 
     this.props.onChange(role);

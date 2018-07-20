@@ -26,11 +26,11 @@ export class IndexPrivileges extends Component {
   }
 
   componentDidMount() {
-    this.loadAvailableFields(this.props.role.indices);
+    this.loadAvailableFields(this.props.role.elasticsearch.indices);
   }
 
   render() {
-    const { indices = [] } = this.props.role;
+    const { indices = [] } = this.props.role.elasticsearch;
 
     const {
       indexPatterns,
@@ -67,7 +67,7 @@ export class IndexPrivileges extends Component {
   addIndexPrivilege = () => {
     const { role } = this.props;
 
-    const newIndices = [...role.indices, {
+    const newIndices = [...role.elasticsearch.indices, {
       names: [],
       privileges: [],
       field_security: {
@@ -77,21 +77,27 @@ export class IndexPrivileges extends Component {
 
     this.props.onChange({
       ...this.props.role,
-      indices: newIndices
+      elasticsearch: {
+        ...this.props.role.elasticsearch,
+        indices: newIndices,
+      },
     });
   };
 
   onIndexPrivilegeChange = (privilegeIndex) => {
     return (updatedPrivilege) => {
       const { role } = this.props;
-      const { indices } = role;
+      const { indices } = role.elasticsearch;
 
       const newIndices = [...indices];
       newIndices[privilegeIndex] = updatedPrivilege;
 
       this.props.onChange({
         ...this.props.role,
-        indices: newIndices
+        elasticsearch: {
+          ...this.props.role.elasticsearch,
+          indices: newIndices,
+        },
       });
 
       this.loadAvailableFields(newIndices);
@@ -102,12 +108,15 @@ export class IndexPrivileges extends Component {
     return () => {
       const { role } = this.props;
 
-      const newIndices = [...role.indices];
+      const newIndices = [...role.elasticsearch.indices];
       newIndices.splice(privilegeIndex, 1);
 
       this.props.onChange({
         ...this.props.role,
-        indices: newIndices
+        elasticsearch: {
+          ...this.props.role.elasticsearch,
+          indices: newIndices
+        },
       });
     };
   }

@@ -10,11 +10,11 @@ import { ClusterPrivileges } from './cluster_privileges';
 import { EuiCheckboxGroup } from '@elastic/eui';
 
 test('it renders without crashing', () => {
-  const wrapper = shallow(<ClusterPrivileges role={{}} onChange={jest.fn()} />);
+  const wrapper = shallow(<ClusterPrivileges role={{ elasticsearch: {} }} onChange={jest.fn()} />);
   expect(wrapper).toMatchSnapshot();
 });
 
 test('it renders 2 checkbox groups of privileges', () => {
-  const wrapper = mount(<ClusterPrivileges role={{}} onChange={jest.fn()} />);
+  const wrapper = mount(<ClusterPrivileges role={{ elasticsearch: {} }} onChange={jest.fn()} />);
   expect(wrapper.find(EuiCheckboxGroup)).toHaveLength(2);
 });

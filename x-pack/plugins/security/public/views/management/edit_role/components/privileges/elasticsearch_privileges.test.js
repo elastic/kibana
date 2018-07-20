@@ -14,9 +14,11 @@ import { RoleValidator } from '../../lib/validate_role';
 test('it renders without crashing', () => {
   const props = {
     role: {
-      cluster: [],
-      indices: [],
-      run_as: []
+      elasticsearch: {
+        cluster: [],
+        indices: [],
+        run_as: [],
+      },
     },
     editable: true,
     httpClient: jest.fn(),
@@ -34,9 +36,11 @@ test('it renders without crashing', () => {
 test('it renders ClusterPrivileges', () => {
   const props = {
     role: {
-      cluster: [],
-      indices: [],
-      run_as: []
+      elasticsearch: {
+        cluster: [],
+        indices: [],
+        run_as: [],
+      },
     },
     editable: true,
     httpClient: jest.fn(),
@@ -54,9 +58,11 @@ test('it renders ClusterPrivileges', () => {
 test('it renders IndexPrivileges', () => {
   const props = {
     role: {
-      cluster: [],
-      indices: [],
-      run_as: []
+      elasticsearch: {
+        cluster: [],
+        indices: [],
+        run_as: [],
+      },
     },
     editable: true,
     httpClient: jest.fn(),

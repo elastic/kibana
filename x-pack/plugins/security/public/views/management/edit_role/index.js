@@ -51,10 +51,13 @@ routes.when(`${EDIT_ROLES_PATH}/:name?`, {
 
       } else {
         role = Promise.resolve(new ShieldRole({
-          cluster: [],
-          indices: [],
-          run_as: [],
-          applications: []
+          elasticsearch: {
+            cluster: [],
+            indices: [],
+            run_as: [],
+          },
+          kibana: [],
+          _unrecognized_applications: [],
         }));
       }
 
