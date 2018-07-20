@@ -35,13 +35,7 @@ export function vSphereMetricsSpecProvider() {
         label: 'Discover',
         path: '/app/kibana#/discover'
       },
-      dashboards: [
-        /*{
-          id: 'TODO',
-          linkLabel: 'vSphere metrics dashboard',
-          isOverview: true
-        }*/
-      ],
+      dashboards: [],
       exportedFields: {
         documentationUrl: '{config.docs.beats.metricbeat}/exported-fields-vsphere.html'
       }
