@@ -51,10 +51,13 @@ routes.when(`${EDIT_ROLES_PATH}/:name?`, {
 
       } else {
         role = Promise.resolve(new ShieldRole({
-          cluster: [],
-          indices: [],
-          run_as: [],
-          applications: []
+          elasticsearch: {
+            cluster: [],
+            indices: [],
+            run_as: [],
+          },
+          kibana: [],
+          _unrecognized_applications: [],
         }));
       }
 
@@ -91,46 +94,31 @@ routes.when(`${EDIT_ROLES_PATH}/:name?`, {
     const allowFieldLevelSecurity = xpackInfo.get('features.security.allowRoleFieldLevelSecurity');
     const rbacApplication = chrome.getInjected('rbacApplication');
 
-    const domNode = document.getElementById('editRoleReactRoot');
-
     const {
       users,
       indexPatterns,
     } = $route.current.locals;
 
-    const routeBreadcrumbs = routes.getBreadcrumbs();
+    $scope.$$postDigest(() => {
+      const domNode = document.getElementById('editRoleReactRoot');
 
-    render(<EditRolePage
-      runAsUsers={users}
-      role={role}
-      kibanaAppPrivileges={kibanaApplicationPrivilege}
-      indexPatterns={indexPatterns}
-      rbacEnabled={true}
-      rbacApplication={rbacApplication}
-      httpClient={$http}
-      breadcrumbs={transformBreadcrumbs(routeBreadcrumbs)}
-      allowDocumentLevelSecurity={allowDocumentLevelSecurity}
-      allowFieldLevelSecurity={allowFieldLevelSecurity}
-      notifier={Notifier}
-    />, domNode);
+      render(<EditRolePage
+        runAsUsers={users}
+        role={role}
+        kibanaAppPrivileges={kibanaApplicationPrivilege}
+        indexPatterns={indexPatterns}
+        rbacEnabled={true}
+        rbacApplication={rbacApplication}
+        httpClient={$http}
+        allowDocumentLevelSecurity={allowDocumentLevelSecurity}
+        allowFieldLevelSecurity={allowFieldLevelSecurity}
+        notifier={Notifier}
+      />, domNode);
 
-    // unmount react on controller destroy
-    $scope.$on('$destroy', () => {
-      unmountComponentAtNode(domNode);
+      // unmount react on controller destroy
+      $scope.$on('$destroy', () => {
+        unmountComponentAtNode(domNode);
+      });
     });
   }
 });
-
-function transformBreadcrumbs(routeBreadcrumbs) {
-  const indexOfEdit = routeBreadcrumbs.findIndex(b => b.id === 'edit');
-
-  const hasEntryAfterEdit = indexOfEdit >= 0 && indexOfEdit < (routeBreadcrumbs.length - 1);
-
-  if (hasEntryAfterEdit) {
-    // The entry after 'edit' is the name of the role being edited (if any). We don't want to use the "humanized" version of the role name here
-    const roleName = routeBreadcrumbs[indexOfEdit + 1];
-    roleName.display = roleName.id;
-  }
-
-  return routeBreadcrumbs.filter(b => b.id !== 'edit');
-}
