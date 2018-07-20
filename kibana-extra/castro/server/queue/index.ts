@@ -91,3 +91,4 @@ export abstract class AbstractWorker implements Worker {
 
 export * from './cloneWorker';
 export * from './deleteWorker';
+export * from './updateWorker';

@@ -62,4 +62,26 @@ export class RepositoryService {
     });
     return true;
   }
+
+  public async update(uri: string): Promise<boolean> {
+    const localPath = RepositoryUtils.repositoryLocalPath(this.repoVolPath, uri);
+    try {
+      const repo = await Git.Repository.open(localPath);
+      await repo.fetchAll();
+      await repo.mergeBranches(
+        'master',
+        'origin/master',
+        Git.Signature.default(repo),
+        Git.Merge.PREFERENCE.FASTFORWARD_ONLY
+      );
+      const headCommit = await repo.getHeadCommit();
+      // TODO: persistent the sha to project update status.
+      this.log.info(`Update repository to revision ${headCommit.sha()}`);
+    } catch (error) {
+      const msg = `update repository ${uri} error: ${error}`;
+      this.log.info(msg);
+      throw new Error(msg);
+    }
+    return true;
+  }
 }
