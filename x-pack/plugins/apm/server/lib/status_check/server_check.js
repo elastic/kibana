@@ -8,7 +8,7 @@ export async function getServerStatus({ setup }) {
   const { client, config } = setup;
 
   const params = {
-    index: config.get('xpack.apm.onboardingIndices'),
+    index: config.get('apm_core.onboardingIndices'),
     body: {
       size: 0,
       query: {

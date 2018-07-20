@@ -24,7 +24,7 @@ export async function getBuckets({
   const bucketTargetCount = config.get('xpack.apm.bucketTargetCount');
 
   const params = {
-    index: config.get('xpack.apm.transactionIndices'),
+    index: config.get('apm_core.transactionIndices'),
     body: {
       size: 0,
       query: {

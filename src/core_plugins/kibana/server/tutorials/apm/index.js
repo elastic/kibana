@@ -34,7 +34,7 @@ function getOrDefault(config, key, defaultValue) {
 
 export function apmSpecProvider(server) {
   const config = server.config();
-  const apmIndexPattern = getOrDefault(config, 'xpack.apm.indexPattern', 'apm-*');
+  const apmIndexPattern = getOrDefault(config, 'apm_core.indexPattern', 'apm-*');
 
   const artifacts = {
     dashboards: [

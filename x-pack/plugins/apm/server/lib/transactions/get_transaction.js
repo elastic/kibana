@@ -11,7 +11,7 @@ async function getTransaction({ transactionId, setup }) {
   const { start, end, esFilterQuery, client, config } = setup;
 
   const params = {
-    index: config.get('xpack.apm.transactionIndices'),
+    index: config.get('apm_core.transactionIndices'),
     body: {
       size: 1,
       query: {

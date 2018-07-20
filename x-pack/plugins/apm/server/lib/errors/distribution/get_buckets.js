@@ -10,7 +10,7 @@ export async function getBuckets({ serviceName, groupId, bucketSize, setup }) {
   const { start, end, esFilterQuery, client, config } = setup;
 
   const params = {
-    index: config.get('xpack.apm.errorIndices'),
+    index: config.get('apm_core.errorIndices'),
     body: {
       size: 0,
       query: {

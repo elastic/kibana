@@ -17,8 +17,8 @@ export async function getServices({ setup }) {
 
   const params = {
     index: [
-      config.get('xpack.apm.errorIndices'),
-      config.get('xpack.apm.transactionIndices')
+      config.get('apm_core.errorIndices'),
+      config.get('apm_core.transactionIndices')
     ],
     body: {
       size: 0,
