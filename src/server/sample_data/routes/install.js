@@ -22,7 +22,7 @@ import Joi from 'joi';
 import { loadData } from './lib/load_data';
 import { createIndexName } from './lib/create_index_name';
 import {
-  dateToISO8601IgnoringTime,
+  dateToIso8601IgnoringTime,
   translateTimeRelativeToDifference,
   translateTimeRelativeToWeek
 } from './lib/translate_timestamp';
@@ -84,7 +84,7 @@ export const createInstallRoute = () => ({
         return reply(errMsg).code(err.status);
       }
 
-      const nowReference = dateToISO8601IgnoringTime(new Date());
+      const nowReference = dateToIso8601IgnoringTime(new Date());
       function updateTimestamps(doc) {
         sampleDataset.timeFields.forEach(timeFieldName => {
           if (doc[timeFieldName]) {
