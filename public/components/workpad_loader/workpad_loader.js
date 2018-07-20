@@ -5,6 +5,7 @@ import { sortByOrder } from 'lodash';
 import { EuiFlexGroup, EuiFlexItem, EuiBasicTable, EuiButtonIcon, EuiSpacer } from '@elastic/eui';
 import { ConfirmModal } from '../confirm_modal';
 import { Link } from '../link';
+import { Tooltip } from '../tooltip';
 import { WorkpadUpload } from './workpad_upload';
 import { WorkpadCreate } from './workpad_create';
 import { WorkpadSearch } from './workpad_search';
@@ -17,6 +18,7 @@ export class WorkpadLoader extends React.PureComponent {
     createWorkpad: PropTypes.func.isRequired,
     findWorkpads: PropTypes.func.isRequired,
     downloadWorkpad: PropTypes.func.isRequired,
+    cloneWorkpad: PropTypes.func.isRequired,
     removeWorkpad: PropTypes.func.isRequired,
     onClose: PropTypes.func.isRequired,
     workpads: PropTypes.object,
@@ -52,6 +54,12 @@ export class WorkpadLoader extends React.PureComponent {
     this.props.createWorkpad(workpad);
   };
 
+  // clone existing workpad
+  cloneWorkpad = workpad => {
+    this.setState({ createPending: true });
+    this.props.cloneWorkpad(workpad.id);
+  };
+
   // Workpad remove methods
   removeConfirm = deletingWorkpad => this.setState({ deletingWorkpad });
 
@@ -83,19 +91,32 @@ export class WorkpadLoader extends React.PureComponent {
         render: workpad => (
           <EuiFlexGroup gutterSize="xs" alignItems="center">
             <EuiFlexItem grow={false}>
-              <EuiButtonIcon
-                iconType="exportAction"
-                onClick={() => this.downloadWorkpad(workpad)}
-                aria-label="Export Workpad"
-              />
+              <Tooltip text="Download">
+                <EuiButtonIcon
+                  iconType="exportAction"
+                  onClick={() => this.downloadWorkpad(workpad)}
+                  aria-label="Download Workpad"
+                />
+              </Tooltip>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <Tooltip text="Clone">
+                <EuiButtonIcon
+                  iconType="copy"
+                  onClick={() => this.cloneWorkpad(workpad)}
+                  aria-label="Clone Workpad"
+                />
+              </Tooltip>
             </EuiFlexItem>
             <EuiFlexItem>
-              <EuiButtonIcon
-                iconType="trash"
-                color="danger"
-                onClick={() => this.removeConfirm(workpad)}
-                aria-label="Delete Workpad"
-              />
+              <Tooltip text="Delete">
+                <EuiButtonIcon
+                  iconType="trash"
+                  color="danger"
+                  onClick={() => this.removeConfirm(workpad)}
+                  aria-label="Delete Workpad"
+                />
+              </Tooltip>
             </EuiFlexItem>
           </EuiFlexGroup>
         ),

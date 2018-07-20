@@ -4,6 +4,7 @@ import { compose, withState, getContext, withHandlers } from 'recompose';
 import fileSaver from 'file-saver';
 import * as workpadService from '../../lib/workpad_service';
 import { getWorkpad } from '../../state/selectors/workpad';
+import { getId } from '../../lib/get_id';
 import { WorkpadLoader as Component } from './workpad_loader';
 
 const mapStateToProps = state => ({
@@ -40,6 +41,15 @@ export const WorkpadLoader = compose(
       const workpad = await workpadService.get(workpadId);
       const jsonBlob = new Blob([JSON.stringify(workpad)], { type: 'application/json' });
       fileSaver.saveAs(jsonBlob, `canvas-workpad-${workpad.name}-${workpad.id}.json`);
+    },
+
+    // Clone workpad given an id
+    cloneWorkpad: props => async workpadId => {
+      const workpad = await workpadService.get(workpadId);
+      workpad.name += ' - Copy';
+      workpad.id = getId('workpad');
+      await workpadService.create(workpad);
+      props.router.navigateTo('loadWorkpad', { id: workpad.id, page: 1 });
     },
 
     // Remove workpad given an id
