@@ -30,7 +30,7 @@ function iso8601ToDateIgnoringTime(iso8601) {
   return new Date(year, month, date);
 }
 
-export function dateToISO8601IgnoringTime(date) {
+export function dateToIso8601IgnoringTime(date) {
   // not using "Date.toISOString" because only using Date methods that deal with local time
   const year = date.getFullYear();
   const month = date.getMonth() + 1;
@@ -46,10 +46,10 @@ export function translateTimeRelativeToDifference(source, sourceReference, targe
   const sourceReferenceDate = iso8601ToDateIgnoringTime(sourceReference);
   const targetReferenceDate = iso8601ToDateIgnoringTime(targetReference);
 
-  const delta = sourceDate.getTime() - sourceReferenceDate.getTime();
-  const translatedDate = (new Date(targetReferenceDate.getTime() + delta));
+  const timeDelta = sourceDate.getTime() - sourceReferenceDate.getTime();
+  const translatedDate = (new Date(targetReferenceDate.getTime() + timeDelta));
 
-  return `${dateToISO8601IgnoringTime(translatedDate)}T${source.substring(11)}`;
+  return `${dateToIso8601IgnoringTime(translatedDate)}T${source.substring(11)}`;
 }
 
 // Translate source timestamp by targetReference timestamp,
@@ -58,13 +58,18 @@ export function translateTimeRelativeToWeek(source, sourceReference, targetRefer
   const sourceReferenceDate = iso8601ToDateIgnoringTime(sourceReference);
   const targetReferenceDate = iso8601ToDateIgnoringTime(targetReference);
 
-  // targetReference only provides the week of year information.
-  const referenceDayOfWeekDelta = sourceReferenceDate.getDay() - targetReferenceDate.getDay();
-  const targetReferenceSameDayOfWeekAsSourceReference =
-    new Date(targetReferenceDate.getTime() + (referenceDayOfWeekDelta * MILLISECONDS_IN_DAY));
+  // If these dates were in the same week, how many days apart would they be?
+  const dayOfWeekDelta = sourceReferenceDate.getDay() - targetReferenceDate.getDay();
+
+  // If we pretend that the targetReference is actually the same day of the week as the
+  // sourceReference, then we can translate the source to the target while preserving their
+  // days of the week.
+  const normalizationDelta = dayOfWeekDelta * MILLISECONDS_IN_DAY;
+  const normalizedTargetReference =
+    dateToIso8601IgnoringTime(new Date(targetReferenceDate.getTime() + normalizationDelta));
 
   return translateTimeRelativeToDifference(
     source,
     sourceReference,
-    dateToISO8601IgnoringTime(targetReferenceSameDayOfWeekAsSourceReference));
+    normalizedTargetReference);
 }
