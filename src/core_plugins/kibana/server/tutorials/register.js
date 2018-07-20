@@ -50,6 +50,10 @@ import { kibanaMetricsSpecProvider } from './kibana_metrics';
 import { memcachedMetricsSpecProvider } from './memcached_metrics';
 import { muninMetricsSpecProvider } from './munin_metrics';
 import { windowsMetricsSpecProvider } from './windows_metrics';
+import { golangMetricsSpecProvider } from './golang_metrics';
+import { logstashMetricsSpecProvider } from './logstash_metrics';
+import { prometheusMetricsSpecProvider } from './prometheus_metrics';
+import { zookeeperMetricsSpecProvider } from './zookeeper_metrics';
 
 export function registerTutorials(server) {
   server.registerTutorial(systemLogsSpecProvider);
@@ -85,4 +89,8 @@ export function registerTutorials(server) {
   server.registerTutorial(memcachedMetricsSpecProvider);
   server.registerTutorial(muninMetricsSpecProvider);
   server.registerTutorial(windowsMetricsSpecProvider);
+  server.registerTutorial(golangMetricsSpecProvider);
+  server.registerTutorial(logstashMetricsSpecProvider);
+  server.registerTutorial(prometheusMetricsSpecProvider);
+  server.registerTutorial(zookeeperMetricsSpecProvider);
 }
