@@ -13,10 +13,11 @@ import {
   SocketMessageWriter,
 } from 'vscode-jsonrpc';
 
-import { RequestMessage } from 'vscode-jsonrpc/lib/messages';
+import { RequestMessage, ResponseMessage } from 'vscode-jsonrpc/lib/messages';
 
 import {
   ClientCapabilities,
+  ExitNotification,
   InitializedNotification,
   InitializeResult,
   WorkspaceFolder,
@@ -33,7 +34,7 @@ export class LanguageServerProxy {
 
   private conn: IConnection;
   private clientConnection: MessageConnection | null = null;
-
+  private closed: boolean = false;
   private sequenceNumber = 0;
   private httpEmitter = new HttpRequestEmitter();
   private replies = createRepliesMap();
@@ -58,7 +59,7 @@ export class LanguageServerProxy {
       method,
       params,
     };
-    return new Promise((resolve, reject) => {
+    return new Promise<ResponseMessage>((resolve, reject) => {
       if (this.logger) {
         this.logger.log(`emit message ${JSON.stringify(message)}`);
       }
@@ -105,10 +106,32 @@ export class LanguageServerProxy {
     this.conn.listen();
   }
 
+  /**
+   * send a exit request to Language Server
+   * https://microsoft.github.io/language-server-protocol/specification#exit
+   */
+  public async exit() {
+    if (this.clientConnection) {
+      if (this.logger) {
+        this.logger.info('sending `shutdown` request to language server.');
+      }
+      const clientConn = this.clientConnection;
+      await clientConn.sendRequest('shutdown').then(() => {
+        if (this.logger) {
+          this.logger.info('sending `exit` notification to language server.');
+        }
+        clientConn.sendNotification(ExitNotification.type);
+        this.conn.dispose(); // stop listening
+      });
+    }
+    this.closed = true; // stop the socket reconnect
+  }
+
   private connect(): Promise<MessageConnection> {
     if (this.clientConnection) {
       return Promise.resolve(this.clientConnection);
     }
+    this.closed = false;
     return new Promise(resolve => {
       const socket = new net.Socket();
 
@@ -128,8 +151,10 @@ export class LanguageServerProxy {
       });
 
       socket.on('close', () => {
-        // Reconnect after 1 second
-        setTimeout(() => socket.connect(this.targetPort, this.targetHost), 1000);
+        if (!this.closed) {
+          // Reconnect after 1 second
+          setTimeout(() => socket.connect(this.targetPort, this.targetHost), 1000);
+        }
       });
 
       socket.on('error', () => void 0);

@@ -18,7 +18,7 @@ export default async function(server: Hapi.Server, options: ServerOptions) {
 
   const repoPath: string = options.repoPath;
 
-  const controller = new LanguageServerController('127.0.0.1', console, server);
+  const controller = new LanguageServerController('127.0.0.1', log, server);
 
   // TODO read from config which LSP should be used
   await controller.launchTypescript();

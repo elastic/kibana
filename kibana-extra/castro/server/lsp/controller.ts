@@ -14,8 +14,11 @@ import {
 import { Log } from '../log';
 import { LanguageServerProxy } from './proxy';
 
-import childProcess from 'child_process';
+import { ChildProcess, spawn } from 'child_process';
 import getPort from 'get-port';
+import path from 'path';
+// @ts-ignore
+import signals from 'signal-exit/signals';
 
 /**
  * Manage different LSP servers and forward request to different LSP using LanguageServerProxy, currently
@@ -69,10 +72,13 @@ export class LanguageServerController {
     const port = await getPort({ port: 20000 });
 
     this.log.info('Launch Typescript Language Server at port ' + port);
-    childProcess.spawn(
+    const child = spawn(
       'node',
       [
-        '../lsp/javascript-typescript-langserver/lib/language-server',
+        path.resolve(
+          __dirname,
+          '../../../../lsp/javascript-typescript-langserver/lib/language-server'
+        ),
         '-p',
         port.toString(),
         '-c',
@@ -83,15 +89,29 @@ export class LanguageServerController {
         stdio: 'inherit',
       }
     );
-
     const proxy = new LanguageServerProxy(port, this.targetHost, this.lspLogger);
 
-    process.on('exit', () => {
-      // TODO sync call exit api of LSP
-      // https://microsoft.github.io/language-server-protocol/specification#exit
-      // proxy.exit();
-    });
-
+    this.closeOnExit(proxy, child);
     this.lsps.push(proxy);
+  }
+
+  private async closeOnExit(proxy: LanguageServerProxy, child: ChildProcess) {
+    let childTerminated = false;
+    child.on('exit', () => (childTerminated = true));
+    const listeners: { [signal: string]: () => void } = {};
+    signals.forEach((signal: string) => {
+      const listener = async () => {
+        await proxy.exit();
+        if (!childTerminated) {
+          child.kill(signal);
+          this.log.info(`sent ${signal} to language server, pid:${child.pid}`);
+        }
+        process.removeListener(signal, listeners[signal]);
+        process.kill(process.pid, signal);
+      };
+      listeners[signal] = listener;
+      process.on(signal, listener);
+    });
+    return proxy;
   }
 }
