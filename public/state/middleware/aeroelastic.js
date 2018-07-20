@@ -56,6 +56,9 @@ const elementToShape = (element, i) => {
   };
 };
 
+// todo move to functions or utils
+const clamp = (low, high, value) => Math.min(high, Math.max(low, value));
+
 const updateGlobalPositions = (setPosition, { shapes, gestureEnd }, elems) => {
   shapes.forEach((shape, i) => {
     const elemPos = elems[i] && elems[i].position;
@@ -69,8 +72,9 @@ const updateGlobalPositions = (setPosition, { shapes, gestureEnd }, elems) => {
         angle: Math.round(elemPos.angle),
       };
 
-      const z0 = Math.acos(shape.transformMatrix[0]) * 180 / Math.PI;
-      const z1 = Math.asin(shape.transformMatrix[1]) * 180 / Math.PI;
+      // clamping is needed, otherwise inevitable floating point inaccuracies can cause NaN
+      const z0 = Math.acos(clamp(-1, 1, shape.transformMatrix[0])) * 180 / Math.PI;
+      const z1 = Math.asin(clamp(-1, 1, shape.transformMatrix[1])) * 180 / Math.PI;
 
       // cast shape into element-like object to compare
       const newProps = {

@@ -45,7 +45,7 @@ const shapesAtPoint = (shapes, x, y) =>
     const B = (y - centerPoint[1] - A * y0) / y1;
     const rightSlope = rightPoint[2] - centerPoint[2];
     const upSlope = upPoint[2] - centerPoint[2];
-    const z = centerPoint[2] + rightSlope * A + upSlope * B;
+    const z = centerPoint[2] + (y1 ? rightSlope * A + upSlope * B : 0); // handle degenerate case: y1 === 0 (infinite slope)
 
     // We go full tilt with the inverse transform approach because that's general enough to handle any non-pathological
     // composition of transforms. Eg. this is a description of the idea: https://math.stackexchange.com/a/1685315

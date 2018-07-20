@@ -275,7 +275,10 @@ const rotationManipulation = ({ shape, directShape, cursorPosition: { x, y } }) 
   );
   const oldAngle = Math.atan2(centerPosition[1] - vector[1], centerPosition[0] - vector[0]);
   const newAngle = Math.atan2(centerPosition[1] - y, centerPosition[0] - x);
-  const result = matrix.rotateZ(oldAngle - newAngle);
+  const closest45deg = Math.round(newAngle / (Math.PI / 4)) * Math.PI / 4;
+  const absDiff = Math.abs(closest45deg - newAngle);
+  const newSnappedAngle = absDiff < config.rotateSnapInRad ? closest45deg : newAngle;
+  const result = matrix.rotateZ(oldAngle - newSnappedAngle);
   return { transforms: [result], shapes: [shape.id] };
 };
 
