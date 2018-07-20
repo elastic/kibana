@@ -70,4 +70,40 @@ describe('CollectorSet', () => {
       }]);
     });
   });
+
+  describe('toApiFieldNames', () => {
+    it('should snake_case and convert field names to api standards', () => {
+      const apiData = {
+        os: {
+          load: {
+            '15m': 2.3525390625,
+            '1m': 2.22412109375,
+            '5m': 2.4462890625
+          },
+          memory: {
+            free_in_bytes: 458280960,
+            total_in_bytes: 17179869184,
+            used_in_bytes: 16721588224
+          },
+          uptime_in_millis: 137844000
+        },
+        daysOfTheWeek: [
+          'monday',
+          'tuesday',
+          'wednesday',
+        ]
+      };
+
+      const collectors = new CollectorSet();
+      const result = collectors.toApiFieldNames(apiData);
+      expect(result).to.eql({
+        os: {
+          load: { '15m': 2.3525390625, '1m': 2.22412109375, '5m': 2.4462890625 },
+          memory: { free_bytes: 458280960, total_bytes: 17179869184, used_bytes: 16721588224 },
+          uptime_ms: 137844000,
+        },
+        days_of_the_week: ['monday', 'tuesday', 'wednesday'],
+      });
+    });
+  });
 });
