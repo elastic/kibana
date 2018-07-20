@@ -26,9 +26,9 @@ export function verifyJSON(json) {
   const jsonAST = parse(`+${json}`);
   let namespace = '';
 
-  traverseNodes(jsonAST.program.body, ({ node, stop }) => {
+  for (const node of traverseNodes(jsonAST.program.body)) {
     if (!isObjectExpression(node)) {
-      return;
+      continue;
     }
 
     if (!node.properties.some(prop => prop.key.name === 'formats')) {
@@ -43,7 +43,7 @@ export function verifyJSON(json) {
         }
 
         if (namespace !== messageNamespace) {
-          throw 'All messages should start with the same namespace.';
+          throw 'All messages ids should start with the same namespace.';
         }
       }
     }
@@ -51,13 +51,13 @@ export function verifyJSON(json) {
     const idsSet = new Set();
     for (const id of node.properties.map(prop => prop.key.value)) {
       if (idsSet.has(id)) {
-        throw `Ids duplicate: ${id}`;
+        throw `Ids collision: ${id}`;
       }
       idsSet.add(id);
     }
 
-    stop();
-  }).next();
+    break;
+  }
 
   return namespace;
 }

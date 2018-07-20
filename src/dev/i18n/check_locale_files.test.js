@@ -1,0 +1,74 @@
+/*
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
+import { resolve, join } from 'path';
+
+import { checkFile, checkLocaleFiles } from './check_locale_files';
+
+const pluginsPaths = [
+  resolve(__dirname, '__fixtures__', 'test_plugin_1'),
+  resolve(__dirname, '__fixtures__', 'test_plugin_2'),
+  resolve(__dirname, '__fixtures__', 'test_plugin_3'),
+  resolve(__dirname, '__fixtures__', 'test_plugin_4'),
+  resolve(__dirname, '__fixtures__', 'test_plugin_5'),
+];
+
+describe('dev/i18n/check_locale_files', () => {
+  describe('checkFile', () => {
+    it('returns namespace of a valid JSON file', async () => {
+      const localePath1 = join(pluginsPaths[0], 'translations', 'valid.json');
+      const localePath2 = join(pluginsPaths[1], 'translations', 'valid.json');
+
+      expect(await checkFile(localePath1)).toBe('test_plugin_1');
+      expect(await checkFile(localePath2)).toBe('test_plugin_2');
+    });
+
+    it('throws an error for unused id and missing id', async () => {
+      const localeWithMissingMessage = join(pluginsPaths[2], 'translations', 'missing.json');
+      const localeWithUnusedMessage = join(pluginsPaths[2], 'translations', 'unused.json');
+
+      expect(checkFile(localeWithMissingMessage)).rejects.toEqual(
+        new Error(
+          `\nMissing translations in locale file ${localeWithMissingMessage}:\ntest_plugin_3.id_2`
+        )
+      );
+
+      expect(checkFile(localeWithUnusedMessage)).rejects.toEqual(
+        new Error(
+          `\nUnused translations in locale file ${localeWithUnusedMessage}:\ntest_plugin_3.id_3`
+        )
+      );
+    });
+  });
+
+  describe('checkLocaleFiles', () => {
+    it('validates locale files in multiple plugins', async () => {
+      expect(await checkLocaleFiles([pluginsPaths[0], pluginsPaths[1]])).toBe(undefined);
+    });
+
+    it('throws an error for namespaces collision', async () => {
+      expect(checkLocaleFiles([pluginsPaths[3], pluginsPaths[4]])).rejects.toEqual(
+        new Error(
+          `Error in ${pluginsPaths[4]} plugin valid.json locale file
+Locale file namespace should be unique for each plugin`
+        )
+      );
+    });
+  });
+});

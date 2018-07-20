@@ -23,15 +23,13 @@ import JSON5 from 'json5';
 import { arraysDiff, globAsync, readFileAsync } from './utils';
 import { verifyJSON } from './verify_locale_json';
 
-async function checkFile(localePath) {
+export async function checkFile(localePath) {
   let errorMessage = '';
 
   const defaultMessagesBuffer = await readFileAsync(
     path.resolve(path.dirname(localePath), 'en.json')
   );
-  const defaultMessagesIds = Object.keys(
-    JSON5.parse(defaultMessagesBuffer.toString())
-  );
+  const defaultMessagesIds = Object.keys(JSON5.parse(defaultMessagesBuffer.toString()));
 
   const localeBuffer = await readFileAsync(localePath);
 
@@ -45,10 +43,7 @@ async function checkFile(localePath) {
   const translations = JSON5.parse(localeBuffer.toString());
   const translationsIds = Object.keys(translations);
 
-  const [unusedTranslations, missingTranslations] = arraysDiff(
-    translationsIds,
-    defaultMessagesIds
-  );
+  const [unusedTranslations, missingTranslations] = arraysDiff(translationsIds, defaultMessagesIds);
 
   if (unusedTranslations.length > 0) {
     errorMessage += `\nUnused translations in locale file ${localePath}:
@@ -92,9 +87,7 @@ export async function checkLocaleFiles(pluginsPaths) {
   for (const locale of pluginsMapByLocale.keys()) {
     const namespaces = [];
     for (const pluginPath of pluginsMapByLocale.get(locale)) {
-      const namespace = await checkFile(
-        path.resolve(pluginPath, 'translations', locale)
-      );
+      const namespace = await checkFile(path.resolve(pluginPath, 'translations', locale));
       if (namespaces.includes(namespace)) {
         throw new Error(
           `Error in ${pluginPath} plugin ${locale} locale file\nLocale file namespace should be unique for each plugin`
