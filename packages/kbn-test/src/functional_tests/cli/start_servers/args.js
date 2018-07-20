@@ -111,9 +111,7 @@ function validateOptions(userOptions) {
       // Validate enum flags
       (options[key].choices && !options[key].choices.includes(val))
     ) {
-      throw new Error(
-        `functional_tests_server: invalid argument [${val}] to option [${key}]`
-      );
+      throw new Error(`functional_tests_server: invalid argument [${val}] to option [${key}]`);
     }
   });
 }

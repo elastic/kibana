@@ -330,19 +330,21 @@ describe('SavedObjectsRepository', () => {
         { type: 'index-pattern', id: 'two', attributes: { title: 'Test Two' } }
       ]);
 
-      expect(response).toEqual([
-        {
-          id: 'one',
-          type: 'config',
-          error: { message: 'type[config] missing' }
-        }, {
-          id: 'two',
-          type: 'index-pattern',
-          version: 2,
-          ...mockTimestampFields,
-          attributes: { title: 'Test Two' },
-        }
-      ]);
+      expect(response).toEqual({
+        saved_objects: [
+          {
+            id: 'one',
+            type: 'config',
+            error: { message: 'type[config] missing' }
+          }, {
+            id: 'two',
+            type: 'index-pattern',
+            version: 2,
+            ...mockTimestampFields,
+            attributes: { title: 'Test Two' },
+          }
+        ]
+      });
     });
 
     it('formats Elasticsearch response', async () => {
@@ -368,21 +370,23 @@ describe('SavedObjectsRepository', () => {
         { type: 'index-pattern', id: 'two', attributes: { title: 'Test Two' } }
       ]);
 
-      expect(response).toEqual([
-        {
-          id: 'one',
-          type: 'config',
-          version: 2,
-          ...mockTimestampFields,
-          attributes: { title: 'Test One' },
-        }, {
-          id: 'two',
-          type: 'index-pattern',
-          version: 2,
-          ...mockTimestampFields,
-          attributes: { title: 'Test Two' },
-        }
-      ]);
+      expect(response).toEqual({
+        saved_objects: [
+          {
+            id: 'one',
+            type: 'config',
+            version: 2,
+            ...mockTimestampFields,
+            attributes: { title: 'Test One' },
+          }, {
+            id: 'two',
+            type: 'index-pattern',
+            version: 2,
+            ...mockTimestampFields,
+            attributes: { title: 'Test Two' },
+          }
+        ]
+      });
     });
 
     it('appends extraBodyProperties to each created object', async () => {

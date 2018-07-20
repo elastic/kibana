@@ -10,7 +10,7 @@ import _ from 'lodash';
 import angular from 'angular';
 import dateMath from '@kbn/datemath';
 import { isJobIdValid, prefixDatafeedId } from 'plugins/ml/../common/util/job_utils';
-import { createSearchItems, createResultsUrl, addNewJobToRecentlyAccessed } from 'plugins/ml/jobs/new_job/utils/new_job_utils';
+import { createSearchItems, addNewJobToRecentlyAccessed } from 'plugins/ml/jobs/new_job/utils/new_job_utils';
 
 import 'plugins/kibana/visualize/styles/main.less';
 
@@ -469,7 +469,7 @@ module
         $scope.overallState = SAVE_STATE.SAVED;
       }
 
-      $scope.resultsUrl = createResultsUrl(
+      $scope.resultsUrl = mlJobService.createResultsUrl(
         jobIds,
         $scope.formConfig.start,
         $scope.formConfig.end,

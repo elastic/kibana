@@ -40,7 +40,7 @@ import { mlMessageBarService } from 'plugins/ml/components/messagebar/messagebar
 import { initPromise } from 'plugins/ml/util/promise';
 
 uiRoutes
-  .when('/jobs/?', {
+  .when('/jobs_old/?', {
     template,
     resolve: {
       CheckLicense: checkLicense,
@@ -148,7 +148,7 @@ module.controller('MlJobsList',
 
     $scope.cloneJob = function (job) {
       mlJobService.currentJob = job;
-      $location.path('jobs/new_job/advanced');
+      $location.path('jobs/new_job');
     };
 
     $scope.closeJob = function (job) {

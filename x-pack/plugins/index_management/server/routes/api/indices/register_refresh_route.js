@@ -15,8 +15,6 @@ function getIndexArrayFromPayload(payload) {
 
 async function refreshIndices(callWithRequest, indices) {
   const params = {
-    ignoreUnavailable: true,
-    allowNoIndices: false,
     expandWildcards: 'none',
     index: indices
   };

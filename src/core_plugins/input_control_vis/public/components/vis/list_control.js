@@ -19,6 +19,7 @@
 
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
+import _ from 'lodash';
 import { FormRow } from './form_row';
 
 import {
@@ -28,8 +29,36 @@ import {
 
 export class ListControl extends Component {
 
+  state = {
+    isLoading: false
+  }
+
+  componentDidMount = () => {
+    this._isMounted = true;
+  }
+
+  componentWillUnmount = () => {
+    this._isMounted = false;
+  }
+
   handleOnChange = (selectedOptions) => {
     this.props.stageFilter(this.props.controlIndex, selectedOptions);
+  }
+
+  debouncedFetch = _.debounce(async (searchValue) => {
+    await this.props.fetchOptions(searchValue);
+
+    if (this._isMounted) {
+      this.setState({
+        isLoading: false,
+      });
+    }
+  }, 300);
+
+  onSearchChange = (searchValue) => {
+    this.setState({
+      isLoading: true,
+    }, this.debouncedFetch.bind(null, searchValue));
   }
 
   renderControl() {
@@ -54,6 +83,9 @@ export class ListControl extends Component {
       <EuiComboBox
         placeholder="Select..."
         options={options}
+        isLoading={this.state.isLoading}
+        async={this.props.dynamicOptions}
+        onSearchChange={this.props.dynamicOptions ? this.onSearchChange : undefined}
         selectedOptions={this.props.selectedOptions}
         onChange={this.handleOnChange}
         singleSelection={!this.props.multiselect}
@@ -87,11 +119,19 @@ ListControl.propTypes = {
   selectedOptions: PropTypes.arrayOf(comboBoxOptionShape).isRequired,
   options: PropTypes.arrayOf(comboBoxOptionShape),
   disableMsg: PropTypes.string,
-  multiselect: PropTypes.bool.isRequired,
+  multiselect: PropTypes.bool,
+  dynamicOptions: PropTypes.bool,
   controlIndex: PropTypes.number.isRequired,
-  stageFilter: PropTypes.func.isRequired
+  stageFilter: PropTypes.func.isRequired,
+  fetchOptions: PropTypes.func,
 };
 
 ListControl.defaultProps = {
+  dynamicOptions: false,
+  multiselect: true,
+};
+
+ListControl.defaultProps = {
+  selectedOptions: [],
   options: [],
 };

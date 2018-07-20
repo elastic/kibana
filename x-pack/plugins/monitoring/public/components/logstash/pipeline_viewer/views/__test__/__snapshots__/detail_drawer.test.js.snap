@@ -23,10 +23,9 @@ exports[`DetailDrawer component If vertices shows basic info and no stats for if
         component="div"
         grow={false}
       >
-        <img
+        <EuiIcon
           className="lspvDetailDrawerIcon"
-          height={18}
-          width={18}
+          size="m"
         />
       </EuiFlexItem>
       <EuiFlexItem
@@ -91,10 +90,9 @@ exports[`DetailDrawer component Plugin vertices Plugin does not have explicit ID
         component="div"
         grow={false}
       >
-        <img
+        <EuiIcon
           className="lspvDetailDrawerIcon"
-          height={18}
-          width={18}
+          size="m"
         />
       </EuiFlexItem>
       <EuiFlexItem
@@ -381,10 +379,9 @@ exports[`DetailDrawer component Plugin vertices Plugin has explicit ID shows bas
         component="div"
         grow={false}
       >
-        <img
+        <EuiIcon
           className="lspvDetailDrawerIcon"
-          height={18}
-          width={18}
+          size="m"
         />
       </EuiFlexItem>
       <EuiFlexItem
@@ -667,10 +664,9 @@ exports[`DetailDrawer component Queue vertices shows basic info and no stats for
         component="div"
         grow={false}
       >
-        <img
+        <EuiIcon
           className="lspvDetailDrawerIcon"
-          height={18}
-          width={18}
+          size="m"
         />
       </EuiFlexItem>
       <EuiFlexItem
@@ -725,10 +721,9 @@ exports[`DetailDrawer component shows vertex title 1`] = `
         component="div"
         grow={false}
       >
-        <img
+        <EuiIcon
           className="lspvDetailDrawerIcon"
-          height={18}
-          width={18}
+          size="m"
         />
       </EuiFlexItem>
       <EuiFlexItem

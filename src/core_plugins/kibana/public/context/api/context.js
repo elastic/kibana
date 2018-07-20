@@ -33,8 +33,8 @@ import { reverseSortDirection } from './utils/sorting';
 /**
  * @typedef {Object} SearchSourceT
  * @prop {function(): Promise<SearchResult>} fetch
- * @prop {function(string, any): SearchSourceT} set
- * @prop {function(any): SearchSourceT} inherits
+ * @prop {function(string, any): SearchSourceT} setField
+ * @prop {function(any): SearchSourceT} setParent
  */
 
 /**
@@ -162,9 +162,9 @@ function fetchContextProvider(indexPatterns, Private) {
     const indexPattern = await indexPatterns.get(indexPatternId);
 
     return new SearchSource()
-      .inherits(false)
-      .set('index', indexPattern)
-      .set('filter', filters);
+      .setParent(false)
+      .setField('index', indexPattern)
+      .setField('filter', filters);
   }
 
   /**
@@ -209,8 +209,8 @@ function fetchContextProvider(indexPatterns, Private) {
     };
 
     const response = await searchSource
-      .set('size', maxCount)
-      .set('query', {
+      .setField('size', maxCount)
+      .setField('query', {
         query: {
           constant_score: {
             filter: {
@@ -225,15 +225,15 @@ function fetchContextProvider(indexPatterns, Private) {
         },
         language: 'lucene'
       })
-      .set('searchAfter', [
+      .setField('searchAfter', [
         afterTimeValue !== null ? afterTimeValue : startTimeValue,
         tieBreakerValue,
       ])
-      .set('sort', [
+      .setField('sort', [
         { [timeField]: timeSortDirection },
         { [tieBreakerField]: tieBreakerSortDirection },
       ])
-      .set('version', true)
+      .setField('version', true)
       .fetch();
 
     return response.hits ? response.hits.hits : [];

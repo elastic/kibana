@@ -115,7 +115,7 @@ export class SavedObjectsClient {
    * @param {array} objects - [{ type, id, attributes, extraBodyProperties }]
    * @param {object} [options={}]
    * @property {boolean} [options.overwrite=false] - overwrites existing documents
-   * @returns {promise} - [{ id, type, version, attributes, error: { message } }]
+   * @returns {promise} - { saved_objects: [{ id, type, version, attributes, error: { message } }]}
    */
   async bulkCreate(objects, options = {}) {
     return this._repository.bulkCreate(objects, options);

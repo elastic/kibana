@@ -25,11 +25,11 @@ export default function ({ getService }) {
       });
     };
 
-    const createExpectRbacForbidden = canLogin => resp => {
+    const expectRbacForbidden = resp => {
       expect(resp.body).to.eql({
         statusCode: 403,
         error: 'Forbidden',
-        message: `Unable to delete dashboard, missing ${canLogin ? '' : 'action:login,'}action:saved_objects/dashboard/delete`
+        message: `Unable to delete dashboard, missing action:saved_objects/dashboard/delete`
       });
     };
 
@@ -73,11 +73,11 @@ export default function ({ getService }) {
       tests: {
         actualId: {
           statusCode: 403,
-          response: createExpectRbacForbidden(false),
+          response: expectRbacForbidden,
         },
         invalidId: {
           statusCode: 403,
-          response: createExpectRbacForbidden(false),
+          response: expectRbacForbidden,
         }
       }
     });
@@ -158,11 +158,11 @@ export default function ({ getService }) {
       tests: {
         actualId: {
           statusCode: 403,
-          response: createExpectRbacForbidden(true),
+          response: expectRbacForbidden,
         },
         invalidId: {
           statusCode: 403,
-          response: createExpectRbacForbidden(true),
+          response: expectRbacForbidden,
         }
       }
     });

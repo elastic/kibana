@@ -26,6 +26,7 @@ export function setupRequest(req, reply) {
             req.query
           )}`
         );
+        console.log(`GET ${params.index}/_search`);
         console.log(JSON.stringify(params.body, null, 4));
       }
       return cluster.callWithRequest(req, type, params);

@@ -19,7 +19,7 @@
 
 import _ from 'lodash';
 import './index_header';
-import './scripted_field_editor';
+import './create_edit_field';
 import { KbnUrlProvider } from 'ui/url';
 import { IndicesEditSectionsProvider } from './edit_sections';
 import { fatalError } from 'ui/notify';

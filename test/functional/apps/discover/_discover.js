@@ -57,7 +57,7 @@ export default function ({ getService, getPageObjects }) {
       const queryName1 = 'Query # 1';
 
       it('should show correct time range string by timepicker', async function () {
-        const actualTimeString = await PageObjects.discover.getTimespanText();
+        const actualTimeString = await PageObjects.header.getPrettyDuration();
 
         const expectedTimeString = `${fromTimeString} to ${toTimeString}`;
         expect(actualTimeString).to.be(expectedTimeString);

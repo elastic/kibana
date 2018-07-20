@@ -17,8 +17,6 @@ async function flushIndices(callWithRequest, indices) {
   const params = {
     force: true,
     waitIfOngoing: true,
-    ignoreUnavailable: true,
-    allowNoIndices: false,
     expandWildcards: 'none',
     index: indices
   };
