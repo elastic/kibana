@@ -260,23 +260,25 @@ describe('IndexMigrator', () => {
       id: '1',
       type: 'foo',
       attributes: { name: 'Bar' },
+      migrationVersion: {},
     });
     sinon.assert.calledWith(migrateDoc, {
       id: '2',
       type: 'foo',
       attributes: { name: 'Baz' },
+      migrationVersion: {},
     });
     expect(callCluster.args.filter(([action]) => action === 'bulk').length).toEqual(2);
     sinon.assert.calledWith(callCluster, 'bulk', {
       body: [
         { index: { _id: 'foo:1', _index: '.kibana_2', _type: 'doc' } },
-        { foo: { name: 1 }, type: 'foo' },
+        { foo: { name: 1 }, type: 'foo', migrationVersion: {} },
       ],
     });
     sinon.assert.calledWith(callCluster, 'bulk', {
       body: [
         { index: { _id: 'foo:2', _index: '.kibana_2', _type: 'doc' } },
-        { foo: { name: 2 }, type: 'foo' },
+        { foo: { name: 2 }, type: 'foo', migrationVersion: {} },
       ],
     });
   });
