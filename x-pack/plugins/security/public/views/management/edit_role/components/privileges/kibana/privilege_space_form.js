@@ -19,7 +19,7 @@ export class PrivilegeSpaceForm extends Component {
   static propTypes = {
     availableSpaces: PropTypes.array.isRequired,
     selectedSpaceIds: PropTypes.array.isRequired,
-    kibanaPrivileges: PropTypes.object.isRequired,
+    kibanaPrivileges: PropTypes.array.isRequired,
     selectedPrivilege: PropTypes.string,
     onChange: PropTypes.func.isRequired,
     onDelete: PropTypes.func.isRequired,

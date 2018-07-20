@@ -6,14 +6,13 @@
 
 import { pick, identity } from 'lodash';
 import Joi from 'joi';
-import { ALL_RESOURCE } from '../../../../../common/constants';
 import { wrapError } from '../../../../lib/errors';
 
-const transformKibanaPrivilegeToEs = (application, kibanaPrivilege) => {
+const transformKibanaPrivilegeToEs = (application, privileges, resource) => {
   return {
-    privileges: kibanaPrivilege.privileges,
+    privileges,
     application,
-    resources: [ALL_RESOURCE],
+    resources: [resource],
   };
 };
 
@@ -22,7 +21,7 @@ const transformRolesToEs = (
   payload,
   existingApplications = []
 ) => {
-  const { elasticsearch = {}, kibana = [] } = payload;
+  const { elasticsearch = {}, kibana = {} } = payload;
   const otherApplications = existingApplications.filter(
     roleApplication => roleApplication.application !== application
   );
@@ -33,9 +32,10 @@ const transformRolesToEs = (
     indices: elasticsearch.indices || [],
     run_as: elasticsearch.run_as || [],
     applications: [
-      ...kibana.map(kibanaPrivilege =>
-        transformKibanaPrivilegeToEs(application, kibanaPrivilege)
-      ),
+      ...Object.keys(kibana).map(resource => {
+        const privileges = kibana[resource];
+        return transformKibanaPrivilegeToEs(application, privileges, resource);
+      }),
       ...otherApplications,
     ],
   }, identity);
@@ -64,9 +64,7 @@ export function initPutRolesApi(
       }),
       run_as: Joi.array().items(Joi.string()),
     }),
-    kibana: Joi.array().items({
-      privileges: Joi.array().items(Joi.string().valid(Object.keys(privilegeMap))),
-    }),
+    kibana: Joi.object().pattern(/^/, Joi.array().items(Joi.string().valid(Object.keys(privilegeMap))))
   });
 
   server.route({

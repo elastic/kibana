@@ -28,8 +28,6 @@ export function initSpacesApi(server) {
 
   const config = server.config();
 
-  const { spaces: spacesService } = server;
-
   async function checkForDuplicateContext(space) {
     return {};
     const query = createDuplicateContextQuery(config.get('kibana.index'), space);
@@ -131,7 +129,6 @@ export function initSpacesApi(server) {
       }
 
       const createdSpace = convertSavedObjectToSpace(result);
-      spacesService._onSpaceChange('create', createdSpace, request);
       return reply(createdSpace);
     },
     config: {
@@ -169,8 +166,6 @@ export function initSpacesApi(server) {
       }
 
       const updatedSpace = convertSavedObjectToSpace(result);
-      spacesService._onSpaceChange('update', updatedSpace, request);
-
       return reply(updatedSpace);
     },
     config: {
@@ -203,8 +198,6 @@ export function initSpacesApi(server) {
       } catch (error) {
         return reply(wrapError(error));
       }
-
-      spacesService._onSpaceChange('delete', existingSpace, request);
 
       return reply(result).code(204);
     },

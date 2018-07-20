@@ -6,23 +6,15 @@
 
 import { NO_PRIVILEGE_VALUE } from './constants';
 
-export function getAvailablePermissions(minimumPrivilege, kibanaPrivileges) {
+export function getAvailablePermissions(minimumPrivilege) {
   switch (minimumPrivilege) {
     case NO_PRIVILEGE_VALUE:
-      return kibanaPrivileges;
+      return ['read', 'all'];
     case 'read':
-      return filterPrivileges(kibanaPrivileges, ['read', 'all']);
+      return ['read', 'all'];
     case 'all':
-      return filterPrivileges(kibanaPrivileges, ['all']);
+      return ['all'];
     default:
       throw new Error(`Unexpected minimumPrivilege value: ${minimumPrivilege}`);
   }
-}
-
-function filterPrivileges(allPrivileges, privilegesToKeep) {
-  console.log(allPrivileges);
-  return Object
-    .keys(allPrivileges)
-    .filter(privilege => privilegesToKeep.indexOf(privilege) >= 0)
-    .reduce((acc, key) => ({ ...acc, [key]: allPrivileges[key] }), {});
 }

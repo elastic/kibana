@@ -115,21 +115,19 @@ describe('PUT role', () => {
     putRoleTest(`only allows known Kibana privileges`, {
       name: 'foo-role',
       payload: {
-        kibana: [
-          {
-            privileges: ['foo']
-          }
-        ]
+        kibana: {
+          [ALL_RESOURCE]: ['foo']
+        }
       },
       asserts: {
         statusCode: 400,
         result: {
           error: 'Bad Request',
           //eslint-disable-next-line max-len
-          message: `child "kibana" fails because ["kibana" at position 0 fails because [child "privileges" fails because ["privileges" at position 0 fails because ["0" must be one of [test-kibana-privilege-1, test-kibana-privilege-2, test-kibana-privilege-3]]]]]`,
+          message: `child "kibana" fails because [child "&#x2a;" fails because ["&#x2a;" at position 0 fails because ["0" must be one of [test-kibana-privilege-1, test-kibana-privilege-2, test-kibana-privilege-3]]]]`,
           statusCode: 400,
           validation: {
-            keys: ['kibana.0.privileges.0'],
+            keys: ['kibana.&#x2a;.0'],
             source: 'payload',
           },
         },
@@ -157,7 +155,7 @@ describe('PUT role', () => {
       name: 'foo-role',
       payload: {},
       preCheckLicenseImpl: defaultPreCheckLicenseImpl,
-      callWithRequestImpls: [async () => ({}), async () => {}],
+      callWithRequestImpls: [async () => ({}), async () => { }],
       asserts: {
         callWithRequests: [
           ['shield.getRole', { name: 'foo-role', ignore: [404] }],
@@ -191,7 +189,7 @@ describe('PUT role', () => {
             {
               field_security: {
                 grant: ['test-field-security-grant-1', 'test-field-security-grant-2'],
-                except: [ 'test-field-security-except-1', 'test-field-security-except-2' ]
+                except: ['test-field-security-except-1', 'test-field-security-except-2']
               },
               names: ['test-index-name-1', 'test-index-name-2'],
               privileges: ['test-index-privilege-1', 'test-index-privilege-2'],
@@ -200,17 +198,13 @@ describe('PUT role', () => {
           ],
           run_as: ['test-run-as-1', 'test-run-as-2'],
         },
-        kibana: [
-          {
-            privileges: ['test-kibana-privilege-1', 'test-kibana-privilege-2'],
-          },
-          {
-            privileges: ['test-kibana-privilege-3'],
-          },
-        ],
+        kibana: {
+          [ALL_RESOURCE]: ['test-kibana-privilege-1', 'test-kibana-privilege-2'],
+          ['other-resource']: ['test-kibana-privilege-3'],
+        }
       },
       preCheckLicenseImpl: defaultPreCheckLicenseImpl,
-      callWithRequestImpls: [async () => ({}), async () => {}],
+      callWithRequestImpls: [async () => ({}), async () => { }],
       asserts: {
         callWithRequests: [
           ['shield.getRole', { name: 'foo-role', ignore: [404] }],
@@ -231,7 +225,7 @@ describe('PUT role', () => {
                   {
                     application,
                     privileges: ['test-kibana-privilege-3'],
-                    resources: [ALL_RESOURCE],
+                    resources: ['other-resource'],
                   },
                 ],
                 cluster: ['test-cluster-privilege'],
@@ -239,7 +233,7 @@ describe('PUT role', () => {
                   {
                     field_security: {
                       grant: ['test-field-security-grant-1', 'test-field-security-grant-2'],
-                      except: [ 'test-field-security-except-1', 'test-field-security-except-2' ]
+                      except: ['test-field-security-except-1', 'test-field-security-except-2']
                     },
                     names: ['test-index-name-1', 'test-index-name-2'],
                     privileges: [
@@ -272,7 +266,7 @@ describe('PUT role', () => {
             {
               field_security: {
                 grant: ['test-field-security-grant-1', 'test-field-security-grant-2'],
-                except: [ 'test-field-security-except-1', 'test-field-security-except-2' ]
+                except: ['test-field-security-except-1', 'test-field-security-except-2']
               },
               names: ['test-index-name-1', 'test-index-name-2'],
               privileges: ['test-index-privilege-1', 'test-index-privilege-2'],
@@ -281,14 +275,10 @@ describe('PUT role', () => {
           ],
           run_as: ['test-run-as-1', 'test-run-as-2'],
         },
-        kibana: [
-          {
-            privileges: ['test-kibana-privilege-1', 'test-kibana-privilege-2'],
-          },
-          {
-            privileges: ['test-kibana-privilege-3'],
-          },
-        ],
+        kibana: {
+          [ALL_RESOURCE]: ['test-kibana-privilege-1', 'test-kibana-privilege-2'],
+          ['other-resource']: ['test-kibana-privilege-3'],
+        },
       },
       preCheckLicenseImpl: defaultPreCheckLicenseImpl,
       callWithRequestImpls: [
@@ -305,7 +295,7 @@ describe('PUT role', () => {
               {
                 field_security: {
                   grant: ['old-field-security-grant-1', 'old-field-security-grant-2'],
-                  except: [ 'old-field-security-except-1', 'old-field-security-except-2' ]
+                  except: ['old-field-security-except-1', 'old-field-security-except-2']
                 },
                 names: ['old-index-name'],
                 privileges: ['old-privilege'],
@@ -322,7 +312,7 @@ describe('PUT role', () => {
             ],
           },
         }),
-        async () => {},
+        async () => { },
       ],
       asserts: {
         callWithRequests: [
@@ -344,7 +334,7 @@ describe('PUT role', () => {
                   {
                     application,
                     privileges: ['test-kibana-privilege-3'],
-                    resources: [ALL_RESOURCE],
+                    resources: ['other-resource'],
                   },
                 ],
                 cluster: ['test-cluster-privilege'],
@@ -352,7 +342,7 @@ describe('PUT role', () => {
                   {
                     field_security: {
                       grant: ['test-field-security-grant-1', 'test-field-security-grant-2'],
-                      except: [ 'test-field-security-except-1', 'test-field-security-except-2' ]
+                      except: ['test-field-security-except-1', 'test-field-security-except-2']
                     },
                     names: ['test-index-name-1', 'test-index-name-2'],
                     privileges: [
@@ -394,17 +384,10 @@ describe('PUT role', () => {
             ],
             run_as: ['test-run-as-1', 'test-run-as-2'],
           },
-          kibana: [
-            {
-              privileges: [
-                'test-kibana-privilege-1',
-                'test-kibana-privilege-2',
-              ],
-            },
-            {
-              privileges: ['test-kibana-privilege-3'],
-            },
-          ],
+          kibana: {
+            [ALL_RESOURCE]: ['test-kibana-privilege-1', 'test-kibana-privilege-2'],
+            ['other-resource']: ['test-kibana-privilege-3'],
+          },
         },
         preCheckLicenseImpl: defaultPreCheckLicenseImpl,
         callWithRequestImpls: [
@@ -443,7 +426,7 @@ describe('PUT role', () => {
               ],
             },
           }),
-          async () => {},
+          async () => { },
         ],
         asserts: {
           callWithRequests: [
@@ -465,7 +448,7 @@ describe('PUT role', () => {
                     {
                       application,
                       privileges: ['test-kibana-privilege-3'],
-                      resources: [ALL_RESOURCE],
+                      resources: ['other-resource'],
                     },
                     {
                       application: 'logstash-foo',

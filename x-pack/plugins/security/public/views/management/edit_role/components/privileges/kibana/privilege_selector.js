@@ -14,7 +14,7 @@ import { NO_PRIVILEGE_VALUE } from '../../../lib/constants';
 
 export class PrivilegeSelector extends Component {
   static propTypes = {
-    kibanaPrivileges: PropTypes.object.isRequired,
+    kibanaPrivileges: PropTypes.array.isRequired,
     onChange: PropTypes.func.isRequired,
     value: PropTypes.string,
     allowNone: PropTypes.bool,
@@ -36,7 +36,7 @@ export class PrivilegeSelector extends Component {
       options.push({ value: NO_PRIVILEGE_VALUE, text: 'none' });
     }
 
-    options.push(...Object.keys(kibanaPrivileges).map(p => ({
+    options.push(...kibanaPrivileges.map(p => ({
       value: p,
       text: p
     })));
@@ -45,7 +45,7 @@ export class PrivilegeSelector extends Component {
       <EuiSelect
         options={options}
         hasNoInitialSelection={!allowNone}
-        value={value}
+        value={value || ''}
         onChange={this.onChange}
         disabled={disabled}
       />

@@ -6,6 +6,7 @@
 import Hapi from 'hapi';
 import Boom from 'boom';
 import { initGetRolesApi } from './get';
+import { ALL_RESOURCE } from '../../../../../common/constants';
 
 const application = 'kibana-.kibana';
 
@@ -132,7 +133,7 @@ describe('GET roles', () => {
               ],
               run_as: ['other_user'],
             },
-            kibana: [],
+            kibana: {},
             _unrecognized_applications: [],
           },
         ],
@@ -181,21 +182,16 @@ describe('GET roles', () => {
               indices: [],
               run_as: [],
             },
-            kibana: [
-              {
-                privileges: ['read'],
-              },
-              {
-                privileges: ['all'],
-              },
-            ],
+            kibana: {
+              [ALL_RESOURCE]: ['read', 'all']
+            },
             _unrecognized_applications: [],
           },
         ],
       },
     });
 
-    getRolesTest(`excludes resources other than * from kibana privileges`, {
+    getRolesTest(`groups kibana privileges by resource`, {
       callWithRequestImpl: async () => ({
         first_role: {
           cluster: [],
@@ -243,7 +239,11 @@ describe('GET roles', () => {
               indices: [],
               run_as: [],
             },
-            kibana: [],
+            kibana: {
+              '*': ['read'],
+              default: ['read'],
+              'some-other-space': ['read'],
+            },
             _unrecognized_applications: [],
           },
         ],
@@ -287,7 +287,7 @@ describe('GET roles', () => {
               indices: [],
               run_as: [],
             },
-            kibana: [],
+            kibana: {},
             _unrecognized_applications: ['kibana-.another-kibana']
           },
         ],
@@ -416,7 +416,7 @@ describe('GET role', () => {
             ],
             run_as: ['other_user'],
           },
-          kibana: [],
+          kibana: {},
           _unrecognized_applications: [],
         },
       },
@@ -464,20 +464,15 @@ describe('GET role', () => {
             indices: [],
             run_as: [],
           },
-          kibana: [
-            {
-              privileges: ['read'],
-            },
-            {
-              privileges: ['all'],
-            },
-          ],
+          kibana: {
+            [ALL_RESOURCE]: ['read', 'all']
+          },
           _unrecognized_applications: [],
         },
       },
     });
 
-    getRoleTest(`excludes resources other than * from kibana privileges`, {
+    getRoleTest(`groups kibana privileges by resource`, {
       name: 'first_role',
       callWithRequestImpl: async () => ({
         first_role: {
@@ -497,7 +492,7 @@ describe('GET role', () => {
             },
             {
               application,
-              privileges: ['read'],
+              privileges: ['read', 'all'],
               resources: ['some-other-space'],
             },
           ],
@@ -525,7 +520,11 @@ describe('GET role', () => {
             indices: [],
             run_as: [],
           },
-          kibana: [],
+          kibana: {
+            ['*']: ['read'],
+            default: ['read'],
+            ['some-other-space']: ['read', 'all']
+          },
           _unrecognized_applications: [],
         },
       },
@@ -568,7 +567,7 @@ describe('GET role', () => {
             indices: [],
             run_as: [],
           },
-          kibana: [],
+          kibana: {},
           _unrecognized_applications: ['kibana-.another-kibana'],
         },
       },

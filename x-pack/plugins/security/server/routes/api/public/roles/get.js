@@ -5,7 +5,6 @@
  */
 import _ from 'lodash';
 import Boom from 'boom';
-import { ALL_RESOURCE } from '../../../../../common/constants';
 import { wrapError } from '../../../../lib/errors';
 
 export function initGetRolesApi(server, callWithRequest, routePreCheckLicenseFn, application) {
@@ -14,8 +13,17 @@ export function initGetRolesApi(server, callWithRequest, routePreCheckLicenseFn,
     return roleApplications
       .filter(roleApplication => roleApplication.application === application)
       .filter(roleApplication => roleApplication.resources.length > 0)
-      .filter(roleApplication => roleApplication.resources.every(resource => resource === ALL_RESOURCE))
-      .map(roleApplication => ({ privileges: roleApplication.privileges }));
+      .map(roleApplication => ({ privileges: roleApplication.privileges, resources: roleApplication.resources }))
+      .reduce((acc, roleApplication) => {
+        roleApplication.resources.forEach(resource => {
+          if (acc[resource]) {
+            acc[resource] = _.uniq([...acc[resource], ...roleApplication.privileges]);
+          } else {
+            acc[resource] = _.uniq(roleApplication.privileges);
+          }
+        });
+        return acc;
+      }, {});
   };
 
   const transformUnrecognizedApplicationsFromEs = (roleApplications) => {

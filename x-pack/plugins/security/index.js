@@ -12,7 +12,6 @@ import { initPublicRolesApi } from './server/routes/api/public/roles';
 import { initIndicesApi } from './server/routes/api/v1/indices';
 import { initLoginView } from './server/routes/views/login';
 import { initLogoutView } from './server/routes/views/logout';
-import { initSpaceChangeCallbacks } from './server/lib/space_change_callbacks';
 import { validateConfig } from './server/lib/validate_config';
 import { authenticateFactory } from './server/lib/auth_redirect';
 import { checkLicense } from './server/lib/check_license';
@@ -144,8 +143,6 @@ export const security = (kibana) => new kibana.Plugin({
         actions: authorization.actions,
       });
     });
-
-    initSpaceChangeCallbacks(server, xpackInfo);
 
     getUserProvider(server);
 

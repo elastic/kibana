@@ -11,6 +11,7 @@ import {
   EuiFlexItem,
   EuiText,
   EuiInMemoryTable,
+  EuiButtonIcon,
 } from '@elastic/eui';
 import { PrivilegeSelector } from './privilege_selector';
 import { SpaceAvatar } from '../../../../../../../../spaces/public/views/components/space_avatar';
@@ -51,28 +52,29 @@ export class PrivilegeSpaceTable extends Component {
         }, {
           field: 'privilege',
           name: 'Privilege',
-          render: (privilege) => {
+          render: (privilege, record) => {
             return (
               <PrivilegeSelector
                 kibanaPrivileges={kibanaPrivileges}
                 value={privilege}
                 disabled={isReservedRole(role)}
-                onChange={this.onEditSpacePermissionsClick}
+                onChange={this.onSpacePermissionChange(record)}
               />
             );
           }
         }, {
           name: 'Actions',
           actions: [{
-            name: 'Edit',
-            description: 'Edit permissions for this space',
-            icon: 'pencil',
-            onClick: this.onEditSpacePermissionsClick
-          }, {
-            name: 'Delete',
-            description: 'Remove custom permissions for this space',
-            icon: 'trash',
-            onClick: this.onDeleteSpacePermissionsClick
+            render: (record) => {
+              return (
+                <EuiButtonIcon
+                  aria-label={'Remove custom privileges for this space'}
+                  color={'danger'}
+                  onClick={() => this.onDeleteSpacePermissionsClick(record)}
+                  iconType={'trash'}
+                />
+              );
+            }
           }]
         }]}
         items={tableItems}
@@ -80,18 +82,31 @@ export class PrivilegeSpaceTable extends Component {
     );
   }
 
-  onEditSpacePermissionsClick = () => {
+  onSpacePermissionChange = (record) => (selectedPrivilege) => {
+    const { id: spaceId } = record.space;
 
+    const updatedPrivileges = {
+      ...this.props.spacePrivileges
+    };
+    updatedPrivileges[spaceId] = [selectedPrivilege];
+    this.props.onChange(updatedPrivileges);
   }
 
-  onDeleteSpacePermissionsClick = () => {
+  onDeleteSpacePermissionsClick = (record) => {
+    const { id: spaceId } = record.space;
 
+    const updatedPrivileges = {
+      ...this.props.spacePrivileges
+    };
+    delete updatedPrivileges[spaceId];
+    this.props.onChange(updatedPrivileges);
   }
 }
 
 PrivilegeSpaceTable.propTypes = {
   role: PropTypes.object.isRequired,
   spaces: PropTypes.array.isRequired,
-  kibanaPrivileges: PropTypes.object.isRequired,
+  kibanaPrivileges: PropTypes.array.isRequired,
   spacePrivileges: PropTypes.object.isRequired,
+  onChange: PropTypes.func.isRequired,
 };
