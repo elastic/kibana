@@ -22,7 +22,7 @@ export class PrivilegeSpaceTable extends Component {
     const {
       role,
       spaces,
-      kibanaPrivileges,
+      availablePrivileges,
       spacePrivileges,
     } = this.props;
 
@@ -55,7 +55,7 @@ export class PrivilegeSpaceTable extends Component {
           render: (privilege, record) => {
             return (
               <PrivilegeSelector
-                kibanaPrivileges={kibanaPrivileges}
+                availablePrivileges={availablePrivileges}
                 value={privilege}
                 disabled={isReservedRole(role)}
                 onChange={this.onSpacePermissionChange(record)}
@@ -106,7 +106,7 @@ export class PrivilegeSpaceTable extends Component {
 PrivilegeSpaceTable.propTypes = {
   role: PropTypes.object.isRequired,
   spaces: PropTypes.array.isRequired,
-  kibanaPrivileges: PropTypes.array.isRequired,
+  availablePrivileges: PropTypes.array.isRequired,
   spacePrivileges: PropTypes.object.isRequired,
   onChange: PropTypes.func.isRequired,
 };

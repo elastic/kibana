@@ -19,7 +19,7 @@ export class PrivilegeSpaceForm extends Component {
   static propTypes = {
     availableSpaces: PropTypes.array.isRequired,
     selectedSpaceIds: PropTypes.array.isRequired,
-    kibanaPrivileges: PropTypes.array.isRequired,
+    availablePrivileges: PropTypes.array.isRequired,
     selectedPrivilege: PropTypes.string,
     onChange: PropTypes.func.isRequired,
     onDelete: PropTypes.func.isRequired,
@@ -29,7 +29,7 @@ export class PrivilegeSpaceForm extends Component {
     const {
       availableSpaces,
       selectedSpaceIds,
-      kibanaPrivileges,
+      availablePrivileges,
       selectedPrivilege,
     } = this.props;
 
@@ -42,7 +42,7 @@ export class PrivilegeSpaceForm extends Component {
         </EuiFlexItem>
         <EuiFlexItem>
           <EuiFormRow label={"Privilege"}>
-            <PrivilegeSelector kibanaPrivileges={kibanaPrivileges} value={selectedPrivilege} onChange={this.onPrivilegeChange} />
+            <PrivilegeSelector availablePrivileges={availablePrivileges} value={selectedPrivilege} onChange={this.onPrivilegeChange} />
           </EuiFormRow>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>

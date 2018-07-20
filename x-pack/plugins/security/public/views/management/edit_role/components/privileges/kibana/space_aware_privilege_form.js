@@ -61,8 +61,6 @@ export class SpaceAwarePrivilegeForm extends Component {
 
     const { availablePrivileges, assignedPrivileges } = getKibanaPrivilegesViewModel(kibanaAppPrivileges, role.kibana);
 
-
-
     const basePrivilege = assignedPrivileges[ALL_RESOURCE].length > 0 ? assignedPrivileges[ALL_RESOURCE][0] : NO_PRIVILEGE_VALUE;
 
     return (
@@ -73,7 +71,7 @@ export class SpaceAwarePrivilegeForm extends Component {
         >
           <EuiFormRow hasEmptyLabelSpace>
             <PrivilegeSelector
-              kibanaPrivileges={availablePrivileges}
+              availablePrivileges={availablePrivileges}
               value={basePrivilege}
               disabled={isReservedRole(role)}
               allowNone={true}
@@ -126,7 +124,7 @@ export class SpaceAwarePrivilegeForm extends Component {
             <PrivilegeSpaceTable
               role={role}
               spaces={spaces}
-              kibanaPrivileges={availablePrivileges}
+              availablePrivileges={availablePrivileges}
               spacePrivileges={spacePrivileges}
               onChange={this.onExistingSpacePrivilegesChange}
             />
@@ -196,7 +194,7 @@ export class SpaceAwarePrivilegeForm extends Component {
         key={index}
         availableSpaces={availableSpaces}
         selectedSpaceIds={selectedSpaceIds}
-        kibanaPrivileges={getAvailablePermissions(basePrivilege)}
+        availablePrivileges={getAvailablePermissions(basePrivilege)}
         selectedPrivilege={privilege}
         onChange={this.onPrivilegeSpacePermissionChange(index)}
         onDelete={this.onPrivilegeSpacePermissionDelete(index)}
