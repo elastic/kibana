@@ -31,7 +31,7 @@ import {
   MappingProperties,
   SavedObjectDoc,
 } from '../core';
-import { DocumentMigrator, IDocumentMigrator } from '../core/document_migrator';
+import { DocumentMigrator, VersionedTransformer } from '../core/document_migrator';
 
 export interface KbnServer {
   server: Server;
@@ -67,7 +67,7 @@ interface ElasticsearchPlugin {
  */
 export class KibanaMigrator {
   private kbnServer: KbnServer;
-  private documentMigrator: IDocumentMigrator;
+  private documentMigrator: VersionedTransformer;
   private mappingProperties: MappingProperties;
 
   /**

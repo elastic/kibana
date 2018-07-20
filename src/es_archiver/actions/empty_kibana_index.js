@@ -16,35 +16,11 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import { migrateKibanaIndex, deleteKibanaIndices, createStats } from '../lib';
 
-export {
-  createIndexDocRecordsStream,
-  createGenerateDocRecordsStream,
-} from './docs';
-
-export {
-  createCreateIndexStream,
-  createDeleteIndexStream,
-  createGenerateIndexRecordsStream,
-  deleteKibanaIndices,
-  migrateKibanaIndex,
-} from './indices';
-
-export {
-  createFilterRecordsStream,
-} from './records';
-
-export {
-  createStats,
-} from './stats';
-
-export {
-  isGzip,
-  prioritizeMappings,
-  createParseArchiveStreams,
-  createFormatArchiveStreams,
-} from './archives';
-
-export {
-  readDirectory
-} from './directory';
+export async function emptyKibanaIndexAction({ client, log }) {
+  const stats = createStats('emptyKibanaIndex', log);
+  await deleteKibanaIndices({ client, stats });
+  await migrateKibanaIndex({ client, log, stats });
+  return stats;
+}
