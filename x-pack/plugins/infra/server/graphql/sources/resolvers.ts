@@ -6,11 +6,12 @@
 
 import { InfraSourceResolvers, QueryResolvers } from '../../../common/graphql/types';
 import {
-  InfraBackendFrameworkAdapter,
   InfraResolvedResult,
+  InfraResolverOf,
   InfraResolverWithFields,
 } from '../../lib/adapters/framework';
 import { InfraContext } from '../../lib/infra_types';
+import { InfraSourceStatus } from '../../lib/source_status';
 import { InfraSources } from '../../lib/sources';
 
 export type QuerySourceResolver = InfraResolverWithFields<
@@ -25,16 +26,15 @@ export type QueryAllSourcesResolver = InfraResolverWithFields<
   InfraContext,
   'id' | 'configuration'
 >;
-export type InfraSourceStatusResolver = InfraResolverWithFields<
+export type InfraSourceStatusResolver = InfraResolverOf<
   InfraSourceResolvers.StatusResolver,
   InfraResolvedResult<QuerySourceResolver>,
-  InfraContext,
-  'metricIndices' | 'logIndices'
+  InfraContext
 >;
 
 interface SourcesResolversDeps {
-  framework: InfraBackendFrameworkAdapter;
   sources: InfraSources;
+  sourceStatus: InfraSourceStatus;
 }
 
 export const createSourcesResolvers = (
@@ -69,19 +69,17 @@ export const createSourcesResolvers = (
   InfraSource: {
     async status(source, args, { req }) {
       return {
+        metricAliasExists: async () => {
+          return await libs.sourceStatus.hasMetricAlias(req, source.id);
+        },
         metricIndices: async () => {
-          const result = await libs.framework.callWithRequest(req, 'indices.getAlias', {
-            name: source.configuration.metricAlias,
-          });
-          const indexNames = Object.keys(result);
-          return indexNames;
+          return await libs.sourceStatus.getMetricIndexNames(req, source.id);
+        },
+        logAliasExists: async () => {
+          return await libs.sourceStatus.hasLogAlias(req, source.id);
         },
         logIndices: async () => {
-          const result = await libs.framework.callWithRequest(req, 'indices.getAlias', {
-            name: source.configuration.logAlias,
-          });
-          const indexNames = Object.keys(result);
-          return indexNames;
+          return await libs.sourceStatus.getLogIndexNames(req, source.id);
         },
       };
     },

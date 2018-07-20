@@ -45,6 +45,10 @@ export const sourcesSchema = gql`
 
   "The status of an infrastructure data source"
   type InfraSourceStatus {
+    "Whether the configured metric alias exists"
+    metricAliasExists: Boolean!
+    "Whether the configured log alias exists"
+    logAliasExists: Boolean!
     "The list of indices in the metric alias"
     metricIndices: [String!]!
     "The list of indices in the log alias"

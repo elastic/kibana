@@ -33,6 +33,11 @@ export interface InfraBackendFrameworkAdapter {
   ): Promise<InfraDatabaseFieldCapsResponse>;
   callWithRequest(
     req: InfraFrameworkRequest,
+    method: 'indices.existsAlias',
+    options?: object
+  ): Promise<boolean>;
+  callWithRequest(
+    req: InfraFrameworkRequest,
     method: 'indices.getAlias',
     options?: object
   ): Promise<InfraDatabaseGetAliasResponse>;

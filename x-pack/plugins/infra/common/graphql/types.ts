@@ -44,6 +44,8 @@ export interface InfraSourceFields {
 }
 /** The status of an infrastructure data source */
 export interface InfraSourceStatus {
+  metricAliasExists: boolean /** Whether the configured metric alias exists */;
+  logAliasExists: boolean /** Whether the configured log alias exists */;
   metricIndices: string[] /** The list of indices in the metric alias */;
   logIndices: string[] /** The list of indices in the log alias */;
 }
@@ -175,10 +177,14 @@ export namespace InfraSourceFieldsResolvers {
 /** The status of an infrastructure data source */
 export namespace InfraSourceStatusResolvers {
   export interface Resolvers {
+    metricAliasExists?: MetricAliasExistsResolver /** Whether the configured metric alias exists */;
+    logAliasExists?: LogAliasExistsResolver /** Whether the configured log alias exists */;
     metricIndices?: MetricIndicesResolver /** The list of indices in the metric alias */;
     logIndices?: LogIndicesResolver /** The list of indices in the log alias */;
   }
 
+  export type MetricAliasExistsResolver = Resolver<boolean>;
+  export type LogAliasExistsResolver = Resolver<boolean>;
   export type MetricIndicesResolver = Resolver<string[]>;
   export type LogIndicesResolver = Resolver<string[]>;
 }

@@ -8,6 +8,7 @@ import { InfraConfigurationAdapter } from './adapters/configuration';
 import { InfraBackendFrameworkAdapter, InfraFrameworkRequest } from './adapters/framework';
 import { InfraFieldsDomain } from './domains/fields_domain';
 import { InfraNodesDomain } from './domains/nodes_domain';
+import { InfraSourceStatus } from './source_status';
 import { InfraSourceConfigurations, InfraSources } from './sources';
 
 export interface InfraDomainLibs {
@@ -19,6 +20,7 @@ export interface InfraBackendLibs extends InfraDomainLibs {
   configuration: InfraConfigurationAdapter<InfraConfiguration>;
   framework: InfraBackendFrameworkAdapter;
   sources: InfraSources;
+  sourceStatus: InfraSourceStatus;
 }
 
 export interface InfraConfiguration {
