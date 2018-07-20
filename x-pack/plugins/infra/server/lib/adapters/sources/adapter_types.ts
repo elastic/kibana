@@ -4,27 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export interface InfraSourcesAdapter {
-  get(sourceId: string): Promise<InfraSourceConfiguration>;
-  getAll(): Promise<InfraSourceConfigurations>;
-}
-
-export interface InfraSourceConfiguration {
-  metricAlias: string;
-  logAlias: string;
-  fields: {
-    container: string;
-    hostname: string;
-    message: string[];
-    pod: string;
-    tiebreaker: string;
-    timestamp: string;
-  };
-}
-
-export interface InfraSourceConfigurations {
-  [sourceId: string]: InfraSourceConfiguration;
-}
+import { InfraSourceConfiguration } from '../../sources';
 
 export type PartialInfraSourceConfigurations = {
   default?: PartialInfraDefaultSourceConfiguration;

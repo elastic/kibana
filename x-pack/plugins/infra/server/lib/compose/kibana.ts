@@ -13,12 +13,13 @@ import { InfraConfigurationSourcesAdapter } from '../adapters/sources/configurat
 import { InfraFieldsDomain } from '../domains/fields_domain';
 import { InfraNodesDomain } from '../domains/nodes_domain';
 import { InfraBackendLibs, InfraConfiguration, InfraDomainLibs } from '../infra_types';
+import { InfraSources } from '../sources';
 import { ElasticsearchNodesAdapter } from './../adapters/nodes/elasticsearch_nodes_adapter';
 
 export function compose(server: Server): InfraBackendLibs {
   const configuration = new InfraKibanaConfigurationAdapter<InfraConfiguration>(server);
   const framework = new InfraKibanaBackendFrameworkAdapter(server);
-  const sources = new InfraConfigurationSourcesAdapter(configuration);
+  const sources = new InfraSources(new InfraConfigurationSourcesAdapter(configuration));
 
   const domainLibs: InfraDomainLibs = {
     fields: new InfraFieldsDomain(new ElasticsearchFieldsAdapter(framework)),

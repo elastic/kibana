@@ -4,4 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { InfraSourcesAdapter, InfraSourceConfiguration } from './adapter_types';
+export { InfraConfigurationSourcesAdapter } from './configuration_sources_adapter';

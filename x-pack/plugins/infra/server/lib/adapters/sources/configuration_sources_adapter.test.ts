@@ -14,16 +14,18 @@ describe('the InfraConfigurationSourcesAdapter', () => {
       new InfraInmemoryConfigurationAdapter({ sources: {} })
     );
 
-    expect(await sourcesAdapter.get('default')).toEqual({
-      metricAlias: expect.any(String),
-      logAlias: expect.any(String),
-      fields: {
-        container: expect.any(String),
-        hostname: expect.any(String),
-        message: expect.arrayContaining([expect.any(String)]),
-        pod: expect.any(String),
-        tiebreaker: expect.any(String),
-        timestamp: expect.any(String),
+    expect(await sourcesAdapter.getAll()).toMatchObject({
+      default: {
+        metricAlias: expect.any(String),
+        logAlias: expect.any(String),
+        fields: {
+          container: expect.any(String),
+          hostname: expect.any(String),
+          message: expect.arrayContaining([expect.any(String)]),
+          pod: expect.any(String),
+          tiebreaker: expect.any(String),
+          timestamp: expect.any(String),
+        },
       },
     });
   });
@@ -37,9 +39,11 @@ describe('the InfraConfigurationSourcesAdapter', () => {
       })
     );
 
-    expect(await sourcesAdapter.get('default')).toMatchObject({
-      metricAlias: expect.any(String),
-      logAlias: expect.any(String),
+    expect(await sourcesAdapter.getAll()).toMatchObject({
+      default: {
+        metricAlias: expect.any(String),
+        logAlias: expect.any(String),
+      },
     });
   });
 
@@ -58,16 +62,18 @@ describe('the InfraConfigurationSourcesAdapter', () => {
       })
     );
 
-    expect(await sourcesAdapter.get('default')).toMatchObject({
-      metricAlias: 'METRIC_ALIAS',
-      logAlias: 'LOG_ALIAS',
-      fields: {
-        container: 'DIFFERENT_CONTAINER_FIELD',
-        hostname: expect.any(String),
-        message: expect.arrayContaining([expect.any(String)]),
-        pod: expect.any(String),
-        tiebreaker: expect.any(String),
-        timestamp: expect.any(String),
+    expect(await sourcesAdapter.getAll()).toMatchObject({
+      default: {
+        metricAlias: 'METRIC_ALIAS',
+        logAlias: 'LOG_ALIAS',
+        fields: {
+          container: 'DIFFERENT_CONTAINER_FIELD',
+          hostname: expect.any(String),
+          message: expect.arrayContaining([expect.any(String)]),
+          pod: expect.any(String),
+          tiebreaker: expect.any(String),
+          timestamp: expect.any(String),
+        },
       },
     });
   });
@@ -87,16 +93,18 @@ describe('the InfraConfigurationSourcesAdapter', () => {
       })
     );
 
-    expect(await sourcesAdapter.get('sourceOne')).toEqual({
-      metricAlias: 'METRIC_ALIAS',
-      logAlias: 'LOG_ALIAS',
-      fields: {
-        container: 'DIFFERENT_CONTAINER_FIELD',
-        hostname: expect.any(String),
-        message: expect.arrayContaining([expect.any(String)]),
-        pod: expect.any(String),
-        tiebreaker: expect.any(String),
-        timestamp: expect.any(String),
+    expect(await sourcesAdapter.getAll()).toMatchObject({
+      sourceOne: {
+        metricAlias: 'METRIC_ALIAS',
+        logAlias: 'LOG_ALIAS',
+        fields: {
+          container: 'DIFFERENT_CONTAINER_FIELD',
+          hostname: expect.any(String),
+          message: expect.arrayContaining([expect.any(String)]),
+          pod: expect.any(String),
+          tiebreaker: expect.any(String),
+          timestamp: expect.any(String),
+        },
       },
     });
   });

@@ -11,8 +11,8 @@ import {
   InfraResolverWithFields,
   InfraResolverWithoutFields,
 } from '../../lib/adapters/framework';
-import { InfraSourcesAdapter } from '../../lib/adapters/sources';
 import { InfraContext } from '../../lib/infra_types';
+import { InfraSources } from '../../lib/sources';
 
 type QuerySourceResolver = InfraResolverWithoutFields<
   QueryResolvers.SourceResolver,
@@ -35,7 +35,7 @@ type InfraSourceStatusResolver = InfraResolverWithFields<
 
 interface SourcesResolversDeps {
   framework: InfraBackendFrameworkAdapter;
-  sources: InfraSourcesAdapter;
+  sources: InfraSources;
 }
 
 export const createSourcesResolvers = (
@@ -51,7 +51,7 @@ export const createSourcesResolvers = (
 } => ({
   Query: {
     async source(root, args) {
-      const requestedSourceConfiguration = await libs.sources.get(args.id);
+      const requestedSourceConfiguration = await libs.sources.getConfiguration(args.id);
 
       return {
         id: args.id,
@@ -59,7 +59,7 @@ export const createSourcesResolvers = (
       };
     },
     async allSources() {
-      const sourceConfigurations = await libs.sources.getAll();
+      const sourceConfigurations = await libs.sources.getAllConfigurations();
 
       return Object.entries(sourceConfigurations).map(([sourceName, sourceConfiguration]) => ({
         id: sourceName,

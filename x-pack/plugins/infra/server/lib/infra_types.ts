@@ -6,9 +6,9 @@
 
 import { InfraConfigurationAdapter } from './adapters/configuration';
 import { InfraBackendFrameworkAdapter, InfraFrameworkRequest } from './adapters/framework';
-import { InfraSourceConfiguration, InfraSourcesAdapter } from './adapters/sources';
 import { InfraFieldsDomain } from './domains/fields_domain';
 import { InfraNodesDomain } from './domains/nodes_domain';
+import { InfraSourceConfigurations, InfraSources } from './sources';
 
 export interface InfraDomainLibs {
   fields: InfraFieldsDomain;
@@ -18,7 +18,7 @@ export interface InfraDomainLibs {
 export interface InfraBackendLibs extends InfraDomainLibs {
   configuration: InfraConfigurationAdapter<InfraConfiguration>;
   framework: InfraBackendFrameworkAdapter;
-  sources: InfraSourcesAdapter;
+  sources: InfraSources;
 }
 
 export interface InfraConfiguration {
@@ -27,9 +27,7 @@ export interface InfraConfiguration {
     partitionSize: number;
     partitionFactor: number;
   };
-  sources: {
-    [sourceName: string]: InfraSourceConfiguration;
-  };
+  sources: InfraSourceConfigurations;
 }
 
 export interface InfraContext {
