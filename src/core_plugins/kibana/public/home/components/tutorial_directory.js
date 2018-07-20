@@ -97,7 +97,8 @@ export class TutorialDirectory extends React.Component {
         description: tutorialConfig.shortDescription,
         url: this.props.addBasePath(`#/home/tutorial/${tutorialConfig.id}`),
         elasticCloud: tutorialConfig.elasticCloud,
-        isBeta: tutorialConfig.isBeta,
+        // Beta label is skipped on the tutorial overview page for now. Too many beta labels.
+        //isBeta: tutorialConfig.isBeta,
       };
     });
 
