@@ -1,0 +1,13 @@
+{
+  "compilerOptions": {
+    "strict": true,
+    "skipLibCheck": true,
+    "lib": [
+      "esnext"
+    ]
+  },
+  "include": [
+    "frozen_object_mutation.ts",
+    "../deep_freeze.ts"
+  ]
+}

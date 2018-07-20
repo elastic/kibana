@@ -72,6 +72,7 @@ describe('isCloudEnabled is false', () => {
       getTutorial={getTutorial}
       replaceTemplateStrings={replaceTemplateStrings}
       tutorialId={'my_testing_tutorial'}
+      bulkCreate={() => {}}
     />);
     loadTutorialPromise.then(() => {
       component.update();
@@ -95,6 +96,7 @@ describe('isCloudEnabled is false', () => {
       getTutorial={getBasicTutorial}
       replaceTemplateStrings={replaceTemplateStrings}
       tutorialId={'my_testing_tutorial'}
+      bulkCreate={() => {}}
     />);
     loadBasicTutorialPromise.then(() => {
       component.update();
@@ -109,6 +111,7 @@ describe('isCloudEnabled is false', () => {
       getTutorial={getTutorial}
       replaceTemplateStrings={replaceTemplateStrings}
       tutorialId={'my_testing_tutorial'}
+      bulkCreate={() => {}}
     />);
     loadTutorialPromise.then(() => {
       component.update();
@@ -126,6 +129,7 @@ test('should render ELASTIC_CLOUD instructions when isCloudEnabled is true', () 
     getTutorial={getTutorial}
     replaceTemplateStrings={replaceTemplateStrings}
     tutorialId={'my_testing_tutorial'}
+    bulkCreate={() => {}}
   />);
   loadTutorialPromise.then(() => {
     component.update();
