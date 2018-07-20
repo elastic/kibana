@@ -218,7 +218,7 @@ export class PipelineEditor extends React.Component {
   render() {
     return (
       <EuiPage
-        data-test-subj="pipelineEdit pipelineEdit-{{pipelineEdit.pipeline.id}}"
+        data-test-subj={`pipelineEdit pipelineEdit-${this.state.pipeline.id}`}
       >
         <EuiPageContent
           style={{

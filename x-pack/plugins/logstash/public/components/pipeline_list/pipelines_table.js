@@ -23,7 +23,7 @@ function getColumns(openPipeline, clonePipeline) {
       render: (id, { isCentrallyManaged }) => {
         const openPipelineClicked = () => openPipeline(id);
         return isCentrallyManaged
-          ? <EuiLink onClick={openPipelineClicked}>{id}</EuiLink>
+          ? <EuiLink onClick={openPipelineClicked} data-test-subj="cellId">{id}</EuiLink>
           : (
             <span>
               {id} &nbsp;
@@ -112,9 +112,10 @@ export function PipelinesTable({
   const toolsRight = [
     <EuiButton
       isDisabled={isReadOnly}
-      key="btnCreatePipeline"
+      key="btnAdd"
       fill
       onClick={createPipeline}
+      data-test-subj="btnAdd"
     >
       Create pipeline
     </EuiButton>,
@@ -123,13 +124,14 @@ export function PipelinesTable({
       key="btnDeletePipelines"
       color="danger"
       onClick={onDeleteSelectedPipelines}
+      data-test-subj="btnDelete"
     >
       Delete
     </EuiButton>
   ];
 
   const search = {
-    box: { incremental: true },
+    box: { incremental: true, 'data-test-subj': 'filter' },
     filters: [
       {
         type: 'field_value_selection',
@@ -160,6 +162,7 @@ export function PipelinesTable({
       sorting={true}
       isSelectable={isSelectable}
       selection={selectionOptions}
+      data-test-subj="pipelineTable"
     />
   );
 }

@@ -257,7 +257,7 @@ export class PipelineList extends React.Component {
       showConfirmDeleteModal,
     } = this.state;
     return (
-      <EuiPage style={{ minHeight: '100vh' }}>
+      <EuiPage style={{ minHeight: '100vh' }} data-test-subj="pipelineList">
         <EuiPageContent
           verticalPosition="center"
           horizontalPosition="center"
