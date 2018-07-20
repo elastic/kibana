@@ -18,7 +18,7 @@ import {
 describe('getDashboardModeAuthScope()', () => {
   async function test({ userRoles, dashRoles, expected }) {
     const request = {
-      getUiSettingsService() {
+      async getUiSettingsService() {
         return {
           async get(key) {
             expect(key).to.equal(CONFIG_DASHBOARD_ONLY_MODE_ROLES);

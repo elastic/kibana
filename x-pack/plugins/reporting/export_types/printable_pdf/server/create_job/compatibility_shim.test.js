@@ -16,7 +16,7 @@ const createMockServer = () => {
 
 const createMockRequest = () => {
   return {
-    getSavedObjectsClient: once(function () {
+    getSavedObjectsClient: once(async function () {
       return {
         get: jest.fn()
       };
@@ -42,7 +42,8 @@ test(`gets the title from the savedObject`, async () => {
   const createJobMock = jest.fn();
   const mockRequest = createMockRequest();
   const title = 'savedTitle';
-  mockRequest.getSavedObjectsClient().get.mockReturnValue({
+  const mockSavedObjectsClient = await mockRequest.getSavedObjectsClient();
+  mockSavedObjectsClient.get.mockReturnValue({
     attributes: {
       title
     }

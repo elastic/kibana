@@ -32,7 +32,7 @@ export function docExistsSuite() {
       initialSettings
     } = options;
 
-    const { kbnServer, uiSettings, callCluster } = getServices();
+    const { kbnServer, uiSettings, callCluster } = await getServices();
 
     // delete the kibana index to ensure we start fresh
     await callCluster('indices.delete', {

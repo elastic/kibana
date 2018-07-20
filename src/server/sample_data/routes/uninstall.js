@@ -51,8 +51,9 @@ export const createUninstallRoute = () => ({
         return reply(`Unable to delete sample data index "${index}", error: ${err.message}`).code(err.status);
       }
 
-      const deletePromises = sampleDataset.savedObjects.map((savedObjectJson) => {
-        return request.getSavedObjectsClient().delete(savedObjectJson.type, savedObjectJson.id);
+      const deletePromises = sampleDataset.savedObjects.map(async (savedObjectJson) => {
+        const savedObjectsClient = await request.getSavedObjectsClient();
+        return savedObjectsClient.delete(savedObjectJson.type, savedObjectJson.id);
       });
       try {
         await Promise.all(deletePromises);

@@ -150,7 +150,7 @@ export default async function (kbnServer, server, config) {
         const url = await shortUrlLookup.getUrl(request.params.urlId, request);
         shortUrlAssertValid(url);
 
-        const uiSettings = request.getUiSettingsService();
+        const uiSettings = await request.getUiSettingsService();
         const stateStoreInSessionStorage = await uiSettings.get('state:storeInSessionStorage');
         if (!stateStoreInSessionStorage) {
           reply().redirect(config.get('server.basePath') + url);

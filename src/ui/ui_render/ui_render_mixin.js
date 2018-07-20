@@ -107,7 +107,7 @@ export function uiRenderMixin(kbnServer, server, config) {
   });
 
   async function getLegacyKibanaPayload({ app, request, includeUserProvidedConfig, injectedVarsOverrides }) {
-    const uiSettings = request.getUiSettingsService();
+    const uiSettings = await request.getUiSettingsService();
     const translations = await request.getUiTranslations();
 
     return {

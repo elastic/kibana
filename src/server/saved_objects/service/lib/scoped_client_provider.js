@@ -50,8 +50,8 @@ export class ScopedSavedObjectsClientProvider {
     this._clientFactory = customClientFactory;
   }
 
-  getClient(request) {
-    const client = this._clientFactory({
+  async getClient(request) {
+    const client = await this._clientFactory({
       request,
     });
 

@@ -22,7 +22,7 @@ const superuserRole = 'superuser';
  *  @return {Promise<Array<string>|void>}
  */
 export async function getDashboardModeAuthScope(request, user) {
-  const uiSettings = request.getUiSettingsService();
+  const uiSettings = await request.getUiSettingsService();
   const dashboardOnlyModeRoles = await uiSettings.get(CONFIG_DASHBOARD_ONLY_MODE_ROLES);
   if (!dashboardOnlyModeRoles || user.roles.length === 0) {
     return;

@@ -121,7 +121,7 @@ describe('CSV Execute Job', function () {
   describe('uiSettings', function () {
     it('passed scoped SavedObjectsClient to uiSettingsServiceFactory', async function () {
       const returnValue = Symbol();
-      mockServer.savedObjects.getScopedSavedObjectsClient.returns(returnValue);
+      mockServer.savedObjects.getScopedSavedObjectsClient.returns(Promise.resolve(returnValue));
       const executeJob = executeJobFactory(mockServer);
       await executeJob({ headers: encryptedHeaders, fields: [], searchRequest: { index: null, body: null } }, cancellationToken);
       expect(mockServer.uiSettingsServiceFactory.calledOnce).to.be(true);
