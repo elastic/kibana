@@ -4,11 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import Hapi from 'hapi';
-
 import { Esqueue, events as esqueueEvents } from '@castro/esqueue';
 import { Job as JobInternal } from '@castro/esqueue/job';
 import { Worker as WorkerInternal } from '@castro/esqueue/worker';
+
+import { Log } from '../log';
 
 export interface Job {
   payload: any;
@@ -26,7 +26,7 @@ export abstract class AbstractWorker implements Worker {
   // The id of the worker. Also serves as the id of the job this worker consumes.
   protected id = '';
 
-  constructor(protected readonly queue: Esqueue, protected readonly server: Hapi.Server) {}
+  constructor(protected readonly queue: Esqueue, protected readonly log: Log) {}
 
   // Assemble jobs, for now most of the job object construction should be the same.
   public createJob(payload: any, options: any): Job {
@@ -86,6 +86,8 @@ export abstract class AbstractWorker implements Worker {
       // log.error(`Job timeout exceeded: (${res.job.id}`)
       return;
     });
+
+    return this;
   }
 }
 

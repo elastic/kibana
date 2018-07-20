@@ -5,7 +5,6 @@
  */
 
 import { Esqueue } from '@castro/esqueue';
-import * as Hapi from 'hapi';
 
 import { AbstractWorker, Job } from '.';
 import { RepositoryUtils } from '../../common/repositoryUtils';
@@ -15,11 +14,8 @@ import { RepositoryService } from '../repositoryService';
 export class CloneWorker extends AbstractWorker {
   public id: string = 'clone';
 
-  private log: Log;
-
-  constructor(protected readonly queue: Esqueue, protected readonly server: Hapi.Server) {
-    super(queue, server);
-    this.log = new Log(this.server);
+  constructor(protected readonly queue: Esqueue, protected readonly log: Log) {
+    super(queue, log);
   }
 
   public async executeJob(job: Job) {

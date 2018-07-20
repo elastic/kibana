@@ -68,6 +68,7 @@ export class RepositoryService {
     try {
       const repo = await Git.Repository.open(localPath);
       await repo.fetchAll();
+      // TODO: We may want check the default branch.
       await repo.mergeBranches(
         'master',
         'origin/master',
@@ -75,7 +76,7 @@ export class RepositoryService {
         Git.Merge.PREFERENCE.FASTFORWARD_ONLY
       );
       const headCommit = await repo.getHeadCommit();
-      // TODO: persistent the sha to project update status.
+      // TODO: persist the sha to project update status.
       this.log.info(`Update repository to revision ${headCommit.sha()}`);
     } catch (error) {
       const msg = `update repository ${uri} error: ${error}`;

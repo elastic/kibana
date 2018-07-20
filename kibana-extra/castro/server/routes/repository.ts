@@ -11,17 +11,21 @@ import { RepositoryUtils } from '../../common/repositoryUtils';
 import { REPOSITORY_INDEX_TYPE } from '../../mappings';
 import { Repository } from '../../model';
 import { Log } from '../log';
-import { Worker } from '../queue';
+import { CloneWorker, DeleteWorker } from '../queue';
 import { ServerOptions } from '../ServerOptions';
 
-export function repositoryRoute(server: Hapi.Server, options: ServerOptions) {
+export function repositoryRoute(
+  server: Hapi.Server,
+  options: ServerOptions,
+  cloneWorker: CloneWorker,
+  deleteWorker: DeleteWorker
+) {
   // Clone a git repository
   server.route({
     path: '/api/castro/repo',
     method: 'POST',
     async handler(req: Hapi.Request, reply: any) {
       const repoUrl: string = req.payload.url;
-      const cloneWorker: Worker = req.server.plugins.castro.cloneWorker;
       const objectClient = req.getSavedObjectsClient();
       const log = new Log(req.server);
 
@@ -61,7 +65,6 @@ export function repositoryRoute(server: Hapi.Server, options: ServerOptions) {
     method: 'DELETE',
     async handler(req: Hapi.Request, reply: any) {
       const repoUri: string = req.params.uri as string;
-      const deleteWorker: Worker = req.server.plugins.castro.deleteWorker;
       const log = new Log(req.server);
 
       try {

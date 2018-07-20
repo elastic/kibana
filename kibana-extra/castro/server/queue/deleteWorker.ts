@@ -5,7 +5,6 @@
  */
 
 import { Esqueue } from '@castro/esqueue';
-import * as Hapi from 'hapi';
 
 import { AbstractWorker, Job } from '.';
 import { Log } from '../log';
@@ -14,11 +13,8 @@ import { RepositoryService } from '../repositoryService';
 export class DeleteWorker extends AbstractWorker {
   public id: string = 'delete';
 
-  private log: Log;
-
-  constructor(protected readonly queue: Esqueue, protected readonly server: Hapi.Server) {
-    super(queue, server);
-    this.log = new Log(this.server);
+  constructor(protected readonly queue: Esqueue, protected readonly log: Log) {
+    super(queue, log);
   }
 
   public async executeJob(job: Job) {

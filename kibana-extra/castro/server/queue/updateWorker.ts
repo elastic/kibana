@@ -4,21 +4,17 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import * as Hapi from 'hapi';
+import { Esqueue } from '@castro/esqueue';
 
 import { AbstractWorker, Job } from '.';
-import { Esqueue } from '../../lib/esqueue';
 import { Log } from '../log';
-import RepositoryService from '../repositoryService';
+import { RepositoryService } from '../repositoryService';
 
 export class UpdateWorker extends AbstractWorker {
   public id: string = 'update';
 
-  private log: Log;
-
-  constructor(protected readonly queue: Esqueue, protected readonly server: Hapi.Server) {
-    super(queue, server);
-    this.log = new Log(this.server);
+  constructor(protected readonly queue: Esqueue, protected readonly log: Log) {
+    super(queue, log);
   }
 
   public async executeJob(job: Job) {

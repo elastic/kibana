@@ -9,6 +9,7 @@ import * as Hapi from 'hapi';
 import { resolve } from 'path';
 
 import { mappings } from './mappings';
+import { Log } from './server/log';
 import { CloneWorker, DeleteWorker, UpdateWorker } from './server/queue';
 import { exampleRoute } from './server/routes/example';
 import { fileRoute } from './server/routes/file';
@@ -16,6 +17,7 @@ import { lspRoute } from './server/routes/lsp';
 import { monacoRoute } from './server/routes/monaco';
 import { repositoryRoute } from './server/routes/repository';
 import { ServerOptions } from './server/ServerOptions';
+import { UpdateScheduler } from './server/updateScheduler';
 
 // tslint:disable-next-line no-default-export
 export default (kibana: any) =>
@@ -53,36 +55,24 @@ export default (kibana: any) =>
         dataSeparator: '.',
         client: server.plugins.elasticsearch.getCluster('admin').getClient(),
       });
-
-      const cloneWorker = new CloneWorker(queue, server);
-      const deleteWorker = new DeleteWorker(queue, server);
-      const updateWorker = new UpdateWorker(queue, server);
-
-      cloneWorker.bind();
-      deleteWorker.bind();
-      updateWorker.bind();
-
-      server.expose('cloneWorker', cloneWorker);
-      server.expose('deleteWorker', deleteWorker);
-      server.expose('updateWorker', updateWorker);
+      const log = new Log(server);
+      const cloneWorker = new CloneWorker(queue, log).bind();
+      const deleteWorker = new DeleteWorker(queue, log).bind();
+      const updateWorker = new UpdateWorker(queue, log).bind();
 
       const serverOptions = new ServerOptions(options);
       const client = server.plugins.elasticsearch.getCluster('admin');
       const callCluster = async (method: string, params: any) => {
-        await client.callWithInternalUser(method, params);
+        return await client.callWithInternalUser(method, params);
       };
 
-      const schedulerOpts: UpdateSchedulerOptions = {
-        updateFrequencyMs: server.config().get('castro.updateFreqencyMs'),
-        serverOptions,
-      };
-      const scheduler = new UpdateScheduler(updateWorker, schedulerOpts, callCluster);
+      const scheduler = new UpdateScheduler(updateWorker, serverOptions, callCluster);
       scheduler.start();
 
       // Add server routes and initialize the plugin here
       exampleRoute(server);
       lspRoute(server, serverOptions);
-      repositoryRoute(server, serverOptions);
+      repositoryRoute(server, serverOptions, cloneWorker, deleteWorker);
       fileRoute(server, serverOptions);
       monacoRoute(server);
     },

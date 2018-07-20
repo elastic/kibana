@@ -7,25 +7,21 @@
 import { REPOSITORY_INDEX_TYPE } from '../mappings';
 import { Poller } from './lib/poller';
 import { UpdateWorker } from './server/queue';
-import ServerOptions from './ServerOptions';
+import { ServerOptions } from './ServerOptions';
 
-export interface UpdateSchedulerOptions {
-  updateFrequencyMs: string;
-  serverOptions: ServerOptions;
-}
-export default class UpdateScheduler {
+export class UpdateScheduler {
   private poller: Poller;
 
   constructor(
     private readonly updateWorker: UpdateWorker,
-    private readonly options: UpdateSchedulerOptions,
+    private readonly serverOptions: ServerOptions,
     private readonly callCluster: (m: string, params: any) => any
   ) {
     this.poller = new Poller({
       functionToPoll: () => {
         return this.schedule();
       },
-      pollFrequencyInMillis: options.updateFrequencyMs,
+      pollFrequencyInMillis: this.serverOptions.updateFrequencyMs,
       trailing: true,
       continuePollingOnError: true,
       pollFrequencyErrorMultiplier: 2,
@@ -59,7 +55,7 @@ export default class UpdateScheduler {
         const uri = hit._source[REPOSITORY_INDEX_TYPE].uri;
         const payload = {
           uri,
-          dataPath: this.options.serverOptions.repoPath,
+          dataPath: this.serverOptions.repoPath,
         };
         this.updateWorker.enqueueJob(payload, {});
       });

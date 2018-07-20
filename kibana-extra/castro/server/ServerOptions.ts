@@ -28,4 +28,8 @@ export class ServerOptions {
       return Path.resolve(os.homedir(), dataPath);
     }
   }
+
+  public get updateFrequencyMs(): number {
+    return this.options.updateFreqencyMs;
+  }
 }
