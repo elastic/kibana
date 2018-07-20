@@ -35,15 +35,13 @@ export function CallResponseHandlersProvider(Private, Promise) {
 
       if (response.timed_out) {
         toastNotifications.addWarning({
-          title: 'The data shown may be incomplete',
-          text: 'All or part of your request has timed out',
+          title: 'Data might be incomplete because your request timed out',
         });
       }
 
       if (response._shards && response._shards.failed) {
         toastNotifications.addWarning({
-          title: 'Shard failure',
-          text: `${response._shards.failed} of ${response._shards.total} shards failed`,
+          title: '${response._shards.failed} of ${response._shards.total} shards failed',
         });
       }
 

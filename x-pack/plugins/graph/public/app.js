@@ -541,7 +541,7 @@ app.controller('graphuiPlugin', function ($scope, $route, $interval, $http, kbnU
     if (!found) {
       toastNotifications.addWarning({
         title: 'Invalid URL',
-        text: 'The url must contain a {{gquery}} string',
+        text: 'The URL must contain a {{gquery}} string',
       });
       return;
     }
@@ -724,7 +724,7 @@ app.controller('graphuiPlugin', function ($scope, $route, $interval, $http, kbnU
 
   if ($scope.indices.length === 0) {
     toastNotifications.addWarning({
-      title: 'No data sources',
+      title: 'No data source',
       text: <p>Go to <a href={url}>Management &gt; Index Patterns</a> and create an index pattern</p>,
     });
   }

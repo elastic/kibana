@@ -122,12 +122,11 @@ export function IndexPatternProvider(Private, config, Promise, confirmModalPromi
     if (indexPattern.isUnsupportedTimePattern()) {
       if (!isUserAwareOfUnsupportedTimePattern(indexPattern)) {
         toastNotifications.addWarning({
-          title: 'Support for time-intervals has been removed',
+          title: 'Support for time intervals was removed',
           text: (
             <Fragment>
-              View the {' '}
-              <a href={kbnUrl.getRouteHref(indexPattern, 'edit')}>{indexPattern.title} index pattern in management</a>
-              {' '} for more information
+              For more information, view the {' '}
+              <a href={kbnUrl.getRouteHref(indexPattern, 'edit')}>{indexPattern.title} index pattern</a>
             </Fragment>
           ),
         });

@@ -158,9 +158,8 @@ export function RegionMapsVisualizationProvider(Private, config) {
         const shouldShowWarning = this._vis.params.isDisplayWarning && config.get('visualization:regionmap:showWarnings');
         if (event.mismatches.length > 0 && shouldShowWarning) {
           toastNotifications.addWarning({
-            title: `Couldn't show ${event.mismatches.length} ${event.mismatches.length > 1 ? 'results' : 'result'} on the map`,
-            text: `You can fix this by ensuring that each of these terms can be matched to a corresponding shape `
-              + `on that shape's join field:${event.mismatches.join(',')}`
+            title: `Unable to show ${event.mismatches.length} ${event.mismatches.length > 1 ? 'results' : 'result'} on map`,
+            text: `Ensure that each of these term matches a shape on that shape's join field: ${event.mismatches.join(', ')}`,
           });
         }
       });

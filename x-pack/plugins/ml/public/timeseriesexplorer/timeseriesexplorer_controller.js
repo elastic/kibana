@@ -129,7 +129,7 @@ module.controller('MlTimeSeriesExplorerController', function (
           selectedJobIds = _.without(selectedJobIds, ...invalidIds);
           if (invalidIds.length > 0) {
             const s = invalidIds.length === 1 ? '' : 's';
-            let warningText = `Requested job${s} ${invalidIds} cannot be viewed in this dashboard`;
+            let warningText = `You can't view requested job${s} ${invalidIds} in this dashboard`;
             if (selectedJobIds.length === 0 && timeSeriesJobIds.length > 0) {
               warningText += ', auto selecting first job';
             }
@@ -140,13 +140,13 @@ module.controller('MlTimeSeriesExplorerController', function (
           // if more than one job or a group has been loaded from the URL
             if (selectedJobIds.length > 1) {
             // if more than one job, select the first job from the selection.
-              toastNotifications.addWarning('Only one job may be viewed at a time in this dashboard');
+              toastNotifications.addWarning('You can only view one job at a time in this dashboard');
               mlJobSelectService.setJobIds([selectedJobIds[0]]);
             } else {
             // if a group has been loaded
               if (selectedJobIds.length > 0) {
               // if the group contains valid jobs, select the first
-                toastNotifications.addWarning('Only one job may be viewed at a time in this dashboard');
+                toastNotifications.addWarning('You can only view one job at a time in this dashboard');
                 mlJobSelectService.setJobIds([selectedJobIds[0]]);
               } else if ($scope.jobs.length > 0) {
               // if there are no valid jobs in the group but there are valid jobs
