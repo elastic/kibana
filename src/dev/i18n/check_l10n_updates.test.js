@@ -30,8 +30,14 @@ const log = {
   success: jest.fn(),
 };
 
-const plugin = path.resolve(__dirname, '__fixtures__', 'test_plugin');
+const plugin = path.resolve(__dirname, '__fixtures__', 'check_l10n_updates', 'test_plugin');
 const cachePath = path.resolve(plugin, 'translations', 'messages_cache.json');
+const cacheFilesDir = path.resolve(
+  __dirname,
+  '__fixtures__',
+  'check_l10n_updates',
+  'messages_cache_files'
+);
 
 async function copyFile(source, dest) {
   return new Promise((resolve, reject) => {
@@ -61,10 +67,7 @@ describe('dev/i18n/check_l10n_updates', () => {
   });
 
   it('logs out ids of new messages', async () => {
-    await copyFile(
-      path.resolve(__dirname, '__fixtures__', 'messages_cache_files', 'messages_cache_1.json'),
-      cachePath
-    );
+    await copyFile(path.join(cacheFilesDir, 'messages_cache_1.json'), cachePath);
 
     await checkUpdates(plugin, log);
     expect(log.success).toBeCalledWith(`New messages ids in ${plugin}:\ntest_plugin.id_2`);
@@ -73,10 +76,7 @@ describe('dev/i18n/check_l10n_updates', () => {
 
   it('logs out ids of removed messages', async () => {
     log.success.mockClear();
-    await copyFile(
-      path.resolve(__dirname, '__fixtures__', 'messages_cache_files', 'messages_cache_2.json'),
-      cachePath
-    );
+    await copyFile(path.join(cacheFilesDir, 'messages_cache_2.json'), cachePath);
 
     await checkUpdates(plugin, log);
     expect(log.success).toBeCalledWith(`Removed messages ids from ${plugin}:\ntest_plugin.id_3`);
@@ -85,10 +85,7 @@ describe('dev/i18n/check_l10n_updates', () => {
 
   it('logs out ids of new and removed messages', async () => {
     log.success.mockClear();
-    await copyFile(
-      path.resolve(__dirname, '__fixtures__', 'messages_cache_files', 'messages_cache_3.json'),
-      cachePath
-    );
+    await copyFile(path.join(cacheFilesDir, 'messages_cache_3.json'), cachePath);
 
     await checkUpdates(plugin, log);
     expect(log.success.mock.calls).toEqual([

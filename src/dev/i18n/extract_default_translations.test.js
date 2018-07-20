@@ -27,7 +27,7 @@ const readFileAsync = promisify(fs.readFile);
 const removeDirAsync = promisify(fs.rmdir);
 const unlinkAsync = promisify(fs.unlink);
 
-const PLUGIN_PATH = resolve(__dirname, '__fixtures__', 'test_plugin');
+const PLUGIN_PATH = resolve(__dirname, '__fixtures__', 'extract_default_translations', 'test_plugin');
 
 describe('dev/i18n/extract_default_translations', () => {
   it('injects default formats into en.json', async () => {
