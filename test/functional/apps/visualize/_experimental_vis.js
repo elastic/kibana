@@ -29,7 +29,7 @@ export default ({ getService, getPageObjects }) => {
 
       beforeEach(async () => {
         log.debug('navigateToApp visualize');
-        await PageObjects.common.navigateToUrl('visualize', 'new');
+        await PageObjects.visualize.navigateToNewVisualization();
         await PageObjects.visualize.waitForVisualizationSelectPage();
       });
 

@@ -22,13 +22,12 @@ import ngMock from 'ng_mock';
 import expect from 'expect.js';
 import sinon from 'sinon';
 import { Notifier } from '..';
+import { metadata } from 'ui/metadata';
 
 describe('Notifier', function () {
   let $interval;
   let notifier;
   let params;
-  const version = window.__KBN__.version;
-  const buildNum = window.__KBN__.buildNum;
   const message = 'Oh, the humanity!';
   const customText = 'fooMarkup';
   const customParams = {
@@ -334,13 +333,13 @@ describe('Notifier', function () {
     describe('when version is configured', function () {
       it('adds version to notification', function () {
         const notification = notify(fnName);
-        expect(notification.info.version).to.equal(version);
+        expect(notification.info.version).to.equal(metadata.version);
       });
     });
     describe('when build number is configured', function () {
       it('adds buildNum to notification', function () {
         const notification = notify(fnName);
-        expect(notification.info.buildNum).to.equal(buildNum);
+        expect(notification.info.buildNum).to.equal(metadata.buildNum);
       });
     });
   }

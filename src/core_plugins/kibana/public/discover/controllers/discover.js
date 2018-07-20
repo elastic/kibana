@@ -28,12 +28,12 @@ import 'ui/visualize';
 import 'ui/fixed_scroll';
 import 'ui/directives/validate_json';
 import 'ui/filters/moment';
-import 'ui/courier';
 import 'ui/index_patterns';
 import 'ui/state_management/app_state';
 import { timefilter } from 'ui/timefilter';
 import 'ui/share';
 import 'ui/query_bar';
+import { hasSearchStategyForIndexPattern, isDefaultTypeIndexPattern } from 'ui/courier';
 import { toastNotifications, getPainlessError } from 'ui/notify';
 import { VisProvider } from 'ui/vis';
 import { BasicResponseHandlerProvider } from 'ui/vis/response_handlers/basic';
@@ -195,6 +195,7 @@ function discoverController(
   // the actual courier.SearchSource
   $scope.searchSource = savedSearch.searchSource;
   $scope.indexPattern = resolveIndexPatternLoading();
+
   $scope.searchSource
     .setField('index', $scope.indexPattern)
     .setField('highlightAll', true)
@@ -236,7 +237,6 @@ function discoverController(
       });
     });
   };
-
 
   const getSharingDataFields = async () => {
     const selectedFields = $state.columns;
@@ -775,6 +775,18 @@ function discoverController(
     }
 
     return loadedIndexPattern;
+  }
+
+  // Block the UI from loading if the user has loaded a rollup index pattern but it isn't
+  // supported.
+  $scope.isUnsupportedIndexPattern = (
+    !isDefaultTypeIndexPattern($route.current.locals.ip.loaded)
+    && !hasSearchStategyForIndexPattern($route.current.locals.ip.loaded)
+  );
+
+  if ($scope.isUnsupportedIndexPattern) {
+    $scope.unsupportedIndexPatternType = $route.current.locals.ip.loaded.type;
+    return;
   }
 
   init();

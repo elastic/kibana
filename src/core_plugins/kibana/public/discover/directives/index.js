@@ -25,8 +25,17 @@ import {
   DiscoverNoResults,
 } from './no_results';
 
+import {
+  DiscoverUnsupportedIndexPattern,
+} from './unsupported_index_pattern';
+
 import './timechart';
 
 const app = uiModules.get('apps/discover', ['react']);
 
 app.directive('discoverNoResults', reactDirective => reactDirective(DiscoverNoResults));
+
+app.directive(
+  'discoverUnsupportedIndexPattern',
+  reactDirective => reactDirective(DiscoverUnsupportedIndexPattern, ['unsupportedType'])
+);

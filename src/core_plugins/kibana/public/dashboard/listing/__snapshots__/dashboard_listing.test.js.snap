@@ -19,6 +19,7 @@ exports[`after fetch hideWriteControls 1`] = `
         <h2>
           <EuiTextColor
             color="subdued"
+            component="span"
           >
             Looks like you don't have any dashboards.
           </EuiTextColor>
