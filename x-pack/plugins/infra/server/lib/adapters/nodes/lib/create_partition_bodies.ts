@@ -19,7 +19,7 @@ export function createPartitionBodies(
   nodeField: string,
   nodeOptions: InfraNodeRequestOptions
 ): InfraESMSearchBody[] {
-  const { indexPattern }: InfraNodeRequestOptions = nodeOptions;
+  const { sourceConfiguration }: InfraNodeRequestOptions = nodeOptions;
   const bodies: InfraESMSearchBody[] = [];
   const numberOfPartitions: number = Math.ceil(totalNodes / NODE_REQUEST_PARTITION_SIZE);
   times(numberOfPartitions, (partitionId: number): void => {
@@ -29,7 +29,9 @@ export function createPartitionBodies(
       numberOfPartitions,
       partitionId,
     };
-    bodies.push({ index: indexPattern.pattern });
+    bodies.push({
+      index: [sourceConfiguration.logAlias, sourceConfiguration.metricAlias],
+    });
     bodies.push(createNodeRequestBody(processorOptions));
   });
   return bodies;

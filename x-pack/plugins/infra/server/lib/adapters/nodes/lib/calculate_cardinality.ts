@@ -25,7 +25,7 @@ export async function calculateCardinalityOfNodeField(
   nodeField: string,
   options: InfraNodeRequestOptions
 ): Promise<number> {
-  const { indexPattern }: InfraNodeRequestOptions = options;
+  const { sourceConfiguration }: InfraNodeRequestOptions = options;
   const body: CardinalityOfFieldParams = {
     aggs: {
       nodeCount: {
@@ -38,7 +38,7 @@ export async function calculateCardinalityOfNodeField(
 
   const resp = await search<CardinalityAggregation>({
     body,
-    index: indexPattern.pattern,
+    index: [sourceConfiguration.logAlias, sourceConfiguration.metricAlias],
   });
 
   if (resp.aggregations) {

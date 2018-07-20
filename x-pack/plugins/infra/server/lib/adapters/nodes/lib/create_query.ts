@@ -22,14 +22,14 @@ import { convertInputFilterToESQuery } from '../lib/convert_input_filter_to_es_q
 import { isGroupByFilters, isGroupByTerms } from './type_guards';
 
 export function createQuery(options: InfraNodeRequestOptions): InfraESQuery {
-  const { timerange, indexPattern, groupBy, filters }: InfraNodeRequestOptions = options;
+  const { timerange, sourceConfiguration, groupBy, filters }: InfraNodeRequestOptions = options;
   const mustClause: InfraESQuery[] = [];
   const shouldClause: InfraESQuery[] = [];
   const filterClause: InfraESQuery[] = [];
 
   const rangeFilter: InfraESRangeQuery = {
     range: {
-      [indexPattern.timeFieldName]: {
+      [sourceConfiguration.fields.timestamp]: {
         format: 'epoch_millis',
         gte: timerange.from,
         lte: timerange.to,

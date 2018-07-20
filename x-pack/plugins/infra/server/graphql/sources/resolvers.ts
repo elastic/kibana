@@ -9,24 +9,23 @@ import {
   InfraBackendFrameworkAdapter,
   InfraResolvedResult,
   InfraResolverWithFields,
-  InfraResolverWithoutFields,
 } from '../../lib/adapters/framework';
 import { InfraContext } from '../../lib/infra_types';
 import { InfraSources } from '../../lib/sources';
 
-type QuerySourceResolver = InfraResolverWithoutFields<
+export type QuerySourceResolver = InfraResolverWithFields<
   QueryResolvers.SourceResolver,
   null,
   InfraContext,
-  'status'
+  'id' | 'configuration'
 >;
-type QueryAllSourcesResolver = InfraResolverWithoutFields<
+export type QueryAllSourcesResolver = InfraResolverWithFields<
   QueryResolvers.AllSourcesResolver,
   null,
   InfraContext,
-  'status'
+  'id' | 'configuration'
 >;
-type InfraSourceStatusResolver = InfraResolverWithFields<
+export type InfraSourceStatusResolver = InfraResolverWithFields<
   InfraSourceResolvers.StatusResolver,
   InfraResolvedResult<QuerySourceResolver>,
   InfraContext,
