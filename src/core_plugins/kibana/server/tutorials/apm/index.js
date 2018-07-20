@@ -24,32 +24,32 @@ import { getSavedObjects } from './saved_objects/get_saved_objects';
 
 const apmIntro = 'Collect in-depth performance metrics and errors from inside your applications.';
 
-function getOrDefault(config, key, defaultValue) {
-  if (config.has(key)) {
-    return config.get(key);
+function isEnabled(config) {
+  const ENABLED_KEY = 'xpack.apm.ui.enabled';
+  if (config.has(ENABLED_KEY)) {
+    return config.get(ENABLED_KEY);
   }
 
-  return defaultValue;
+  return false;
 }
 
 export function apmSpecProvider(server) {
   const config = server.config();
-  const apmIndexPattern = getOrDefault(config, 'apm_core.indexPattern', 'apm-*');
+  const apmIndexPattern = config.get('apm_core.indexPattern');
 
   const artifacts = {
     dashboards: [
       {
         id: '8d3ed660-7828-11e7-8c47-65b845b5cfb3',
         linkLabel: 'APM dashboard',
-        isOverview: true,
-      },
-    ],
+        isOverview: true
+      }
+    ]
   };
-  const isUIEnabled = getOrDefault(config, 'xpack.apm.ui.enabled', false);
-  if (isUIEnabled) {
+  if (isEnabled(config)) {
     artifacts.application = {
       path: '/app/apm',
-      label: 'Launch APM',
+      label: 'Launch APM'
     };
   }
 
@@ -58,8 +58,7 @@ export function apmSpecProvider(server) {
     name: 'APM',
     category: TUTORIAL_CATEGORY.OTHER,
     shortDescription: apmIntro,
-    longDescription:
-      'Application Performance Monitoring (APM) collects in-depth' +
+    longDescription: 'Application Performance Monitoring (APM) collects in-depth' +
       ' performance metrics and errors from inside your application.' +
       ' It allows you to monitor the performance of thousands of applications in real time.' +
       ' [Learn more]({config.docs.base_url}guide/en/apm/get-started/{config.docs.version}/index.html).',
@@ -69,8 +68,7 @@ export function apmSpecProvider(server) {
     elasticCloud: ELASTIC_CLOUD_INSTRUCTIONS,
     previewImagePath: '/plugins/kibana/home/tutorial_resources/apm/apm.png',
     savedObjects: getSavedObjects(apmIndexPattern),
-    savedObjectsInstallMsg:
-      'Load index pattern, visualizations, and pre-defined dashboards.' +
+    savedObjectsInstallMsg: 'Load index pattern, visualizations, and pre-defined dashboards.' +
       ' An index pattern is required for some features in the APM UI.',
   };
 }

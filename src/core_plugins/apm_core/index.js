@@ -20,7 +20,6 @@
 export default function apmCore(kibana) {
   return new kibana.Plugin({
     id: 'apm_core',
-    require: ['elasticsearch'],
 
     config(Joi) {
       return Joi.object({
