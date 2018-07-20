@@ -32,6 +32,36 @@ export default function ({ loadTestFile, getService }) {
           }
         });
 
+      await supertest.put('/api/security/role/kibana_mixed_user')
+        .send({
+          elasticsearch: {
+            indices: [{
+              names: ['.kibana'],
+              privileges: ['manage', 'read', 'index', 'delete']
+            }]
+          },
+          kibana: [
+            {
+              privileges: ['all']
+            }
+          ]
+        });
+
+      await supertest.put('/api/security/role/kibana_mixed_dashboard_only_user')
+        .send({
+          elasticsearch: {
+            indices: [{
+              names: ['.kibana'],
+              privileges: ['read', 'view_index_metadata']
+            }]
+          },
+          kibana: [
+            {
+              privileges: ['read']
+            }
+          ]
+        });
+
       await supertest.put('/api/security/role/kibana_rbac_user')
         .send({
           kibana: [
@@ -77,6 +107,26 @@ export default function ({ loadTestFile, getService }) {
           roles: ["kibana_legacy_dashboard_only_user"],
           full_name: 'a kibana legacy dashboard only user',
           email: 'a_kibana_legacy_dashboard_only_user@elastic.co',
+        }
+      });
+
+      await es.shield.putUser({
+        username: AUTHENTICATION.KIBANA_MIXED_USER.USERNAME,
+        body: {
+          password: AUTHENTICATION.KIBANA_MIXED_USER.PASSWORD,
+          roles: ['kibana_mixed_user'],
+          full_name: 'a kibana mixed user',
+          email: 'a_kibana_mixed_user@elastic.co',
+        }
+      });
+
+      await es.shield.putUser({
+        username: AUTHENTICATION.KIBANA_MIXED_DASHBOARD_ONLY_USER.USERNAME,
+        body: {
+          password: AUTHENTICATION.KIBANA_MIXED_DASHBOARD_ONLY_USER.PASSWORD,
+          roles: ["kibana_mixed_dashboard_only_user"],
+          full_name: 'a kibana mixed dashboard only user',
+          email: 'a_kibana_mixed_dashboard_only_user@elastic.co',
         }
       });
 

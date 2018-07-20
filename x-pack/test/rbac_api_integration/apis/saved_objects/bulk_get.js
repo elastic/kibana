@@ -146,6 +146,32 @@ export default function ({ getService }) {
       }
     });
 
+    bulkGetTest(`kibana mixed user`, {
+      auth: {
+        username: AUTHENTICATION.KIBANA_MIXED_USER.USERNAME,
+        password: AUTHENTICATION.KIBANA_MIXED_USER.PASSWORD,
+      },
+      tests: {
+        default: {
+          statusCode: 200,
+          response: expectResults,
+        },
+      }
+    });
+
+    bulkGetTest(`kibana mixed dashboard only user`, {
+      auth: {
+        username: AUTHENTICATION.KIBANA_MIXED_DASHBOARD_ONLY_USER.USERNAME,
+        password: AUTHENTICATION.KIBANA_MIXED_DASHBOARD_ONLY_USER.PASSWORD,
+      },
+      tests: {
+        default: {
+          statusCode: 200,
+          response: expectResults,
+        },
+      }
+    });
+
     bulkGetTest(`kibana rbac user`, {
       auth: {
         username: AUTHENTICATION.KIBANA_RBAC_USER.USERNAME,

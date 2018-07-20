@@ -157,6 +157,40 @@ export default function ({ getService }) {
       }
     });
 
+    updateTest(`kibana mixed user`, {
+      auth: {
+        username: AUTHENTICATION.KIBANA_MIXED_USER.USERNAME,
+        password: AUTHENTICATION.KIBANA_MIXED_USER.PASSWORD,
+      },
+      tests: {
+        exists: {
+          statusCode: 200,
+          response: expectResults,
+        },
+        doesntExist: {
+          statusCode: 404,
+          response: expectNotFound,
+        },
+      }
+    });
+
+    updateTest(`kibana mixed dashboard only user`, {
+      auth: {
+        username: AUTHENTICATION.KIBANA_MIXED_DASHBOARD_ONLY_USER.USERNAME,
+        password: AUTHENTICATION.KIBANA_MIXED_DASHBOARD_ONLY_USER.PASSWORD,
+      },
+      tests: {
+        exists: {
+          statusCode: 403,
+          response: expectRbacForbidden,
+        },
+        doesntExist: {
+          statusCode: 403,
+          response: expectRbacForbidden,
+        },
+      }
+    });
+
     updateTest(`kibana rbac user`, {
       auth: {
         username: AUTHENTICATION.KIBANA_RBAC_USER.USERNAME,

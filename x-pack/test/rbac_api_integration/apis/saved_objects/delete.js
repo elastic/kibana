@@ -133,6 +133,40 @@ export default function ({ getService }) {
       }
     });
 
+    deleteTest(`kibana mixed user`, {
+      auth: {
+        username: AUTHENTICATION.KIBANA_MIXED_USER.USERNAME,
+        password: AUTHENTICATION.KIBANA_MIXED_USER.PASSWORD,
+      },
+      tests: {
+        actualId: {
+          statusCode: 200,
+          response: expectEmpty,
+        },
+        invalidId: {
+          statusCode: 404,
+          response: expectNotFound,
+        }
+      }
+    });
+
+    deleteTest(`kibana mixed dashboard only user`, {
+      auth: {
+        username: AUTHENTICATION.KIBANA_MIXED_DASHBOARD_ONLY_USER.USERNAME,
+        password: AUTHENTICATION.KIBANA_MIXED_DASHBOARD_ONLY_USER.PASSWORD,
+      },
+      tests: {
+        actualId: {
+          statusCode: 403,
+          response: expectRbacForbidden,
+        },
+        invalidId: {
+          statusCode: 403,
+          response: expectRbacForbidden,
+        }
+      }
+    });
+
     deleteTest(`kibana rbac user`, {
       auth: {
         username: AUTHENTICATION.KIBANA_RBAC_USER.USERNAME,

@@ -117,6 +117,32 @@ export default function ({ getService }) {
       }
     });
 
+    createTest(`kibana mixed user`, {
+      auth: {
+        username: AUTHENTICATION.KIBANA_MIXED_USER.USERNAME,
+        password: AUTHENTICATION.KIBANA_MIXED_USER.PASSWORD,
+      },
+      tests: {
+        default: {
+          statusCode: 200,
+          response: expectResults,
+        },
+      }
+    });
+
+    createTest(`kibana mixed dashboard only user`, {
+      auth: {
+        username: AUTHENTICATION.KIBANA_MIXED_DASHBOARD_ONLY_USER.USERNAME,
+        password: AUTHENTICATION.KIBANA_MIXED_DASHBOARD_ONLY_USER.PASSWORD,
+      },
+      tests: {
+        default: {
+          statusCode: 403,
+          response: expectRbacForbidden,
+        },
+      }
+    });
+
     createTest(`kibana rbac user`, {
       auth: {
         username: AUTHENTICATION.KIBANA_RBAC_USER.USERNAME,
