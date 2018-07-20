@@ -50,7 +50,7 @@ Array [
     [Function],
   ],
   Array [
-    "git push sqren backport/6.2/pr-myPullRequest --force",
+    "git push sqren backport/6.2/pr-myPullRequest:backport/6.2/pr-myPullRequest --force",
     Object {
       "cwd": "/myHomeDir/.backport/repositories/elastic/kibana",
       "maxBuffer": 104857600,
@@ -105,7 +105,7 @@ Array [
     [Function],
   ],
   Array [
-    "git push sqren backport/6.2/pr-myPullRequest --force",
+    "git push sqren backport/6.2/pr-myPullRequest:backport/6.2/pr-myPullRequest --force",
     Object {
       "cwd": "/myHomeDir/.backport/repositories/elastic/kibana",
       "maxBuffer": 104857600,
@@ -160,7 +160,7 @@ Array [
     [Function],
   ],
   Array [
-    "git push sqren backport/6.2/pr-myPullRequest --force",
+    "git push sqren backport/6.2/pr-myPullRequest:backport/6.2/pr-myPullRequest --force",
     Object {
       "cwd": "/myHomeDir/.backport/repositories/elastic/kibana",
       "maxBuffer": 104857600,
@@ -215,7 +215,7 @@ Array [
     [Function],
   ],
   Array [
-    "git push sqren backport/6.2/pr-myPullRequest --force",
+    "git push sqren backport/6.2/pr-myPullRequest:backport/6.2/pr-myPullRequest --force",
     Object {
       "cwd": "/myHomeDir/.backport/repositories/elastic/kibana",
       "maxBuffer": 104857600,

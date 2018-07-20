@@ -91,7 +91,7 @@ function createAndCheckoutBranch(owner, repoName, baseBranch, featureBranch) {
 }
 
 function push(owner, repoName, username, branchName) {
-  return rpc.exec(`git push ${username} ${branchName} --force`, {
+  return rpc.exec(`git push ${username} ${branchName}:${branchName} --force`, {
     cwd: env.getRepoPath(owner, repoName)
   });
 }
