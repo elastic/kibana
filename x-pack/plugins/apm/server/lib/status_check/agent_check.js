@@ -11,8 +11,8 @@ export async function getAgentStatus({ setup }) {
 
   const params = {
     index: [
-      config.get('apm_core.errorIndices'),
-      config.get('apm_core.transactionIndices')
+      config.get('apm_oss.errorIndices'),
+      config.get('apm_oss.transactionIndices')
     ],
     body: {
       size: 0,

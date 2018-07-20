@@ -11,7 +11,7 @@ export async function getErrorGroup({ serviceName, groupId, setup }) {
   const { start, end, esFilterQuery, client, config } = setup;
 
   const params = {
-    index: config.get('apm_core.errorIndices'),
+    index: config.get('apm_oss.errorIndices'),
     body: {
       size: 1,
       query: {

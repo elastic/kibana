@@ -17,9 +17,9 @@
  * under the License.
  */
 
-export default function apmCore(kibana) {
+export default function apmOss(kibana) {
   return new kibana.Plugin({
-    id: 'apm_core',
+    id: 'apm_oss',
 
     config(Joi) {
       return Joi.object({
@@ -31,7 +31,7 @@ export default function apmCore(kibana) {
 
         // ES Indices
         errorIndices: Joi.string().default('apm-*-error-*'),
-        onboardingIndices: Joi.string().default('apm-*'), // TODO: change to "apm-*-onboarding-*" when APM-Server is ready
+        onboardingIndices: Joi.string().default('apm-*-onboarding-*'),
         spanIndices: Joi.string().default('apm-*-span-*'),
         transactionIndices: Joi.string().default('apm-*-transaction-*'),
       }).default();

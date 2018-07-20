@@ -12,7 +12,7 @@ import { initStatusApi } from './server/routes/status_check';
 
 export function apm(kibana) {
   return new kibana.Plugin({
-    require: ['kibana', 'elasticsearch', 'xpack_main', 'apm_core'],
+    require: ['kibana', 'elasticsearch', 'xpack_main', 'apm_oss'],
     id: 'apm',
     configPrefix: 'xpack.apm',
     publicDir: resolve(__dirname, 'public'),
@@ -30,7 +30,7 @@ export function apm(kibana) {
         return {
           mlEnabled: config.get('xpack.ml.enabled'),
           apmUiEnabled: config.get('xpack.apm.ui.enabled'),
-          apmIndexPattern: config.get('apm_core.indexPattern')
+          apmIndexPattern: config.get('apm_oss.indexPattern')
         };
       },
       hacks: ['plugins/apm/hacks/toggle_app_link_in_nav']
