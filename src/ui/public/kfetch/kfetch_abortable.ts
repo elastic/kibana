@@ -17,23 +17,29 @@
  * under the License.
  */
 
-import { kfetchAbortable } from './kfetch_abortable';
+import { kfetch, KFetchKibanaOptions, KFetchOptions } from './kfetch';
 
-jest.mock('../chrome', () => ({
-  addBasePath: path => `myBase/${path}`,
-}));
+type Omit<T, K> = Pick<T, Exclude<keyof T, K>>;
 
-jest.mock('../metadata', () => ({
-  metadata: {
-    version: 'my-version',
-  },
-}));
+function createAbortable() {
+  const abortController = new AbortController();
+  const { signal, abort } = abortController;
 
-describe('kfetchAbortable', () => {
-  it('should return an object with a fetching promise and an abort callback', () => {
-    const { fetching, abort } = kfetchAbortable({ pathname: 'my/path' });
-    expect(typeof fetching.then).toBe('function');
-    expect(typeof fetching.catch).toBe('function');
-    expect(typeof abort).toBe('function');
-  });
-});
+  return {
+    signal,
+    abort: abort.bind(abortController),
+  };
+}
+
+export function kfetchAbortable(
+  fetchOptions?: Omit<KFetchOptions, 'signal'>,
+  kibanaOptions?: KFetchKibanaOptions
+) {
+  const { signal, abort } = createAbortable();
+  const fetching = kfetch({ ...fetchOptions, signal }, kibanaOptions);
+
+  return {
+    fetching,
+    abort,
+  };
+}
