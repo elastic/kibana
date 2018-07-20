@@ -17,22 +17,29 @@
  * under the License.
  */
 
+/*
+ * This file provides helper functions for transforming documents to/from
+ * the saved object format during index migrations.
+ */
+
 import { RawDoc } from './call_cluster';
 
 export interface MigrationVersion {
   [type: string]: string;
 }
 
+/**
+ * A saved object type definition that allows for miscellaneous, unknown
+ * properties, as current discussions around security, ACLs, etc indicate
+ * that future props are likely to be added. Migrations support this
+ * scenario out of the box.
+ */
 export interface SavedObjectDoc {
   attributes: any;
   id: string;
   type: string;
   migrationVersion?: MigrationVersion;
 
-  // We're going to allow for miscellaneous root-level properties
-  // in saved objects, which amount to meta-information that various
-  // plugins can put on any saved object. Things like security ACLs
-  // might fall into this category.
   [rootProp: string]: any;
 }
 

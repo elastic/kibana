@@ -17,6 +17,11 @@
  * under the License.
  */
 
+/*
+ * This file provides a helper class for ensuring that all logging
+ * in the migration system is done in a fairly uniform way.
+ */
+
 export type LogFn = (path: string[], message: string) => void;
 
 export interface Logger {

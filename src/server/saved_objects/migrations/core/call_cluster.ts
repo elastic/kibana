@@ -18,9 +18,11 @@
  */
 
 /**
- * Defines the signature of the subset of elasticsearch.js that
- * migrations use.
+ * This file is nothing more than type signatures for the subset of
+ * elasticsearch.js that migrations use. There is no actual logic /
+ * funcationality contained here.
  */
+
 export interface CallCluster {
   (path: 'bulk', opts: { body: object[] }): Promise<BulkResult>;
   (path: 'count', opts: CountOpts): Promise<{ count: number }>;

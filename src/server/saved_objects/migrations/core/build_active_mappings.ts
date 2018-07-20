@@ -80,22 +80,15 @@ function defaultMapping(): IndexMapping {
 }
 
 function validateAndMerge(dest: MappingProperties, source: MappingProperties) {
-  assertUniqueProperties(dest, source);
-  assertValidPropertyNames(source);
+  Object.keys(source).forEach(k => {
+    if (k.startsWith('_')) {
+      throw new Error(`Invalid mapping "${k}". Mappings cannot start with _.`);
+    }
+
+    if (dest.hasOwnProperty(k)) {
+      throw new Error(`Cannot redefine core mapping "${k}".`);
+    }
+  });
 
   return Object.assign(dest, source);
-}
-
-function assertUniqueProperties(dest: MappingProperties, source: MappingProperties) {
-  const duplicate = Object.keys(source).find(prop => !!dest[prop]);
-  if (duplicate) {
-    throw new Error(`Cannot redefine core mapping "${duplicate}".`);
-  }
-}
-
-function assertValidPropertyNames(source: MappingProperties) {
-  const invalidProp = Object.keys(source).find(k => k.startsWith('_'));
-  if (invalidProp) {
-    throw new Error(`Invalid mapping "${invalidProp}". Mappings cannot start with _.`);
-  }
 }

@@ -37,76 +37,82 @@
  * This way, we keep looping until there are no transforms left to apply, and we properly
  * handle property addition / deletion / renaming.
  * 
- * A caveat is that this means we can't allow transforms to modify the doc's migrationVersion.
- * If migrations were allowed to modify migrationVersion, we could get into an infinite loop,
- * so we explicitly disallow that. This means that if you *do* decide to rename a property
- * (e.g. dash -> dashboard), the document will be passed through *all* of the new property's
- * transforms (if there are any). You can't convert a document from one type to a specific version
- * of another type; only from one type to version 0 of another.
+ * A caveat is that this means we must restrict what a migration can do to the doc's
+ * migrationVersion itself. We allow only these kinds of changes:
+ *
+ * - Add a new property to migrationVersion
+ * - Move a migrationVersion property forward to a later version
+ *
+ * Migrations *cannot* move a migrationVersion property backwards (e.g. from 2.0.0 to 1.0.0), and they
+ * cannot clear a migrationVersion property, as allowing either of these could produce infinite loops.
+ * However, we do wish to allow migrations to modify migrationVersion if they wish, so that
+ * they could transform a type from "foo" to a specific version of "bar".
  *
  * One last gotcha is that any docs which have no migrationVersion are assumed to be up-to-date.
  * This is because Kibana UI and other clients really can't be expected build the migrationVersion
  * in a reliable way. Instead, callers of our APIs are expected to send us up-to-date documents,
- * and those documents are simply given a stamp of approval by this transformer. If the client(s)
- * send us documents with migrationVersion specified, we will migrate them as appropriate. This means
- * for data import scenarios, any documetns being imported should be explicitly given an empty
- * migrationVersion property {} if no such property exists.
+ * and those documents are simply given a stamp of approval by this transformer. This is why it is
+ * important for migration authors to *also* write a saved object validation that will prevent this
+ * assumption from inserting out-of-date documents into the index.
+ * 
+ * If the client(s) send us documents with migrationVersion specified, we will migrate them as
+ * appropriate. This means for data import scenarios, any documetns being imported should be explicitly
+ * given an empty migrationVersion property {} if no such property exists.
 */
 
 import _ from 'lodash';
 import Semver from 'semver';
 import { MigrationVersion, SavedObjectDoc } from './saved_object';
 
-export interface VersionTransforms {
-  [version: string]: TransformFn;
-}
-
-export interface MigrationDefinition {
-  [type: string]: VersionTransforms;
-}
-
-export type TransformFn = (doc: SavedObjectDoc) => SavedObjectDoc;
-
+type TransformFn = (doc: SavedObjectDoc) => SavedObjectDoc;
 type ValidateDoc = (doc: SavedObjectDoc) => void;
 
-export interface IDocumentMigrator {
-  migrationVersion: MigrationVersion;
-  migrate: TransformFn;
+interface MigrationDefinition {
+  [type: string]: { [version: string]: TransformFn };
 }
 
-export interface DocumentMigratorOpts {
+interface Opts {
   kibanaVersion: string;
   migrations: MigrationDefinition;
   validateDoc: ValidateDoc;
 }
 
-interface Transform {
-  version: string;
-  transform: TransformFn;
-}
-
 interface ActiveMigrations {
-  [type: string]: { latestVersion: string; transforms: Transform[] };
+  [type: string]: {
+    latestVersion: string;
+    transforms: Array<{
+      version: string;
+      transform: TransformFn;
+    }>;
+  };
 }
 
 /**
  * Manages migration of individual documents.
  */
-export class DocumentMigrator implements IDocumentMigrator {
+export interface VersionedTransformer {
+  migrationVersion: MigrationVersion;
+  migrate: TransformFn;
+}
+
+/**
+ * A concrete implementation of the VersionedTransformer interface.
+ */
+export class DocumentMigrator implements VersionedTransformer {
   private migrations: ActiveMigrations;
   private transformDoc: TransformFn;
 
   /**
    * Creates an instance of DocumentMigrator.
    *
-   * @param {DocumentMigratorOpts} opts
+   * @param {Opts} opts
    * @prop {string} kibanaVersion - The current version of Kibana
    * @prop {MigrationDefinition} migrations - The migrations that will be used to migrate documents
    * @prop {ValidateDoc} validateDoc - A function which, given a document throws an error if it is
    *   not up to date. This is used to ensure we don't let unmigrated documents slip through.
    * @memberof DocumentMigrator
    */
-  constructor(opts: DocumentMigratorOpts) {
+  constructor(opts: Opts) {
     this.migrations = buildActiveMigrations(opts.migrations);
     this.transformDoc = buildDocumentTransform({
       kibanaVersion: opts.kibanaVersion,
@@ -139,13 +145,10 @@ export class DocumentMigrator implements IDocumentMigrator {
 }
 
 /**
- * Converts a migration definition into a format that is more efficient for
- * transforming documents. The SortedMigrations data structure makes it really easy
- * to find out what the latestVersion of a property is, and also gives us an ordered list
- * of transforms per property so that we are guaranteed to apply transforms in the right order.
- *
- * @param {MigrationDefinition} migrations
- * @returns {SortedMigrations}
+ * Converts migrations from a format that is convenient for callers to a format that
+ * is convenient for our internal usage:
+ * From: { type: { version: fn } }
+ * To:   { type: { latestVersion: string, transforms: [{ version: string, transform: fn }] } }
  */
 function buildActiveMigrations(migrations: MigrationDefinition): ActiveMigrations {
   return _.mapValues(migrations, (versions, prop) => {
@@ -155,7 +158,6 @@ function buildActiveMigrations(migrations: MigrationDefinition): ActiveMigration
         transform: wrapWithTry(version, prop!, transform),
       }))
       .sort((a, b) => Semver.compare(a.version, b.version));
-
     return {
       latestVersion: _.last(transforms).version,
       transforms,
@@ -164,12 +166,7 @@ function buildActiveMigrations(migrations: MigrationDefinition): ActiveMigration
 }
 
 /**
- * Creates a function which migrates any document that is passed to it.
- *
- * @param opts
- * @prop {string} kibanaVersion - The current version of Kibana. Docs with greater versions will be rejected.
- * @prop {MigrationDictionary} migrations - A dictionary of type -> version -> transformFunction used to migrate saved object documents
- * @returns {TransformFn}
+ * Creates a function which migrates and validates any document that is passed to it.
  */
 function buildDocumentTransform({
   kibanaVersion,
@@ -180,59 +177,58 @@ function buildDocumentTransform({
   migrations: ActiveMigrations;
   validateDoc: ValidateDoc;
 }): TransformFn {
-  function transformDoc(doc: SavedObjectDoc): SavedObjectDoc {
-    assertCanTransform(doc, kibanaVersion);
-
-    // If there's no migrationVersion, we assume it is up to date.
-    // This is to allow API clients to just pass us documents w/ no migrationVersion
-    // when creating / updating documents. Data import and index migration logic
-    // will ensure that this property exists, so those docs will be migrated.
-    if (!doc.migrationVersion) {
-      return markAsUpToDate(doc, migrations);
-    }
-
-    while (true) {
-      const prop = nextUnmigratedProp(doc, migrations);
-      if (!prop) {
-        return doc;
-      }
-      doc = migrateProp(doc, prop, migrations);
-    }
-  }
-
   return function transformAndValidate(doc: SavedObjectDoc) {
-    const result = transformDoc(doc);
+    assertCanTransform(doc, kibanaVersion);
+    const result = doc.migrationVersion
+      ? applyMigrations(doc, migrations)
+      : markAsUpToDate(doc, migrations);
     validateDoc(result);
     return result;
   };
+}
+
+function applyMigrations(doc: SavedObjectDoc, migrations: ActiveMigrations) {
+  while (true) {
+    const prop = nextUnmigratedProp(doc, migrations);
+    if (!prop) {
+      return doc;
+    }
+    doc = migrateProp(doc, prop, migrations);
+  }
+}
+
+/**
+ * Gets the doc's props, handling the special case of "type".
+ */
+function props(doc: SavedObjectDoc) {
+  return Object.keys(doc).concat(doc.type);
+}
+
+/**
+ * Looks up the prop version in a saved object document or in our latest migrations.
+ */
+function propVersion(doc: SavedObjectDoc | ActiveMigrations, prop: string) {
+  return (
+    (doc[prop] && doc[prop].latestVersion) || (doc.migrationVersion && doc.migrationVersion[prop])
+  );
 }
 
 /**
  * Sets the doc's migrationVersion to be the most recent version
  */
 function markAsUpToDate(doc: SavedObjectDoc, migrations: ActiveMigrations) {
-  const migrationVersion = Object.keys(doc)
-    .concat(doc.type)
-    .filter(prop => !!migrations[prop])
-    .reduce((acc, prop) => {
-      const { latestVersion } = migrations[prop];
-      return _.set(acc, prop, latestVersion);
-    }, {});
-
   return {
     ...doc,
-    migrationVersion,
+    migrationVersion: props(doc).reduce((acc, prop) => {
+      const version = propVersion(migrations, prop);
+      return version ? _.set(acc, prop, version) : acc;
+    }, {}),
   };
 }
 
 /**
  * If a specific transform function fails, this tacks on a bit of information
  * about the document and transform that caused the failure.
- *
- * @param {string} version
- * @param {string} prop
- * @param {TransformFn} transform
- * @returns
  */
 function wrapWithTry(version: string, prop: string, transform: TransformFn) {
   return function tryTransformDoc(doc: SavedObjectDoc) {
@@ -251,84 +247,103 @@ function wrapWithTry(version: string, prop: string, transform: TransformFn) {
 
 /**
  * Throws an exception if the doc has props with a later version than the current Kibana instance.
- *
- * @param {SavedObjectDoc} doc
- * @param {string} kibanaVersion
  */
 function assertCanTransform(doc: SavedObjectDoc, kibanaVersion: string) {
-  const { migrationVersion } = doc;
-  const invalidProp =
-    migrationVersion &&
-    Object.keys(migrationVersion).find(prop => Semver.gt(migrationVersion[prop], kibanaVersion));
+  const futureEntry = Object.entries(doc.migrationVersion || {}).find(([, v]) =>
+    Semver.gt(v, kibanaVersion)
+  );
 
-  if (invalidProp) {
+  if (futureEntry) {
     throw new Error(
-      `Document ${doc.id} has property ${invalidProp} which is belongs to a` +
-        ` more recent version of Kibana (${migrationVersion![invalidProp]}).`
+      `Document ${doc.id} has property ${futureEntry[0]} which is belongs to a` +
+        ` more recent version of Kibana (${futureEntry[1]}).`
     );
   }
 }
 
 /**
- * Finds the first unmigrated property in the specified document. Saved object documents
- * have a special case for the "type" and "attributes" property, which is the core of what
- * the document is about. All other properties are non-core properties, e.g. metadata like
- * security ACLs or migrationVersion or whatever. These non-core properties are treated generally,
- * and the type / attributes property is treated specifically.
- *
- * @param {SavedObjectDoc} doc
- * @param {ActiveMigrations} migrations
- * @returns
+ * Finds the first unmigrated property in the specified document.
  */
 function nextUnmigratedProp(doc: SavedObjectDoc, migrations: ActiveMigrations) {
-  const isOutdatedProp = (prop: string) => {
-    const latestVersion = migrations[prop] && migrations[prop].latestVersion;
-    return !!latestVersion && latestVersion !== propVersion(doc, prop);
-  };
-
-  return isOutdatedProp(doc.type) ? doc.type : Object.keys(doc).find(isOutdatedProp);
-}
-
-function propVersion(doc: SavedObjectDoc, prop: string) {
-  return (doc.migrationVersion && doc.migrationVersion[prop]) || '0.0.0';
+  return props(doc).find(p => propVersion(migrations, p) !== propVersion(doc, p));
 }
 
 /**
  * Applies any relevent migrations to the document for the specified property.
- *
- * @param {SavedObjectDoc} doc
- * @param {string} prop
- * @param {ActiveMigrations} migrations
- * @returns {SavedObjectDoc}
  */
 function migrateProp(
   doc: SavedObjectDoc,
   prop: string,
   migrations: ActiveMigrations
 ): SavedObjectDoc {
-  const { transforms } = migrations[prop];
-  const minVersion = propVersion(doc, prop);
   const originalType = doc.type;
-  let { migrationVersion = {} } = doc;
+  let migrationVersion = _.clone(doc.migrationVersion) || {};
+  const typeChanged = () => !doc.hasOwnProperty(prop) || doc.type !== originalType;
 
-  for (const { version, transform } of transforms) {
-    if (Semver.gt(version, minVersion)) {
-      doc = transform(doc);
+  for (const { version, transform } of applicableTransforms(migrations, doc, prop)) {
+    doc = transform(doc);
+    migrationVersion = updateMigrationVersion(doc, migrationVersion, prop, version);
+    doc.migrationVersion = _.clone(migrationVersion);
 
-      // Safeguard against transforms overwriting migrationVersion
-      migrationVersion = { ...migrationVersion, [prop]: version };
-      doc.migrationVersion = migrationVersion;
-
-      // The transform removed or renamed its property, so we won't apply
-      // any further transforms to it. There likely *aren't* any further
-      // transforms, but it is possible that we rename a prop foo -> bar,
-      // and then a later bar transform renames it back to foo, in which
-      // case, we'll pick up where we left off.
-      if (!doc.hasOwnProperty(prop) || doc.type !== originalType) {
-        break;
-      }
+    if (typeChanged()) {
+      break;
     }
   }
 
   return doc;
+}
+
+/**
+ * Retrieves any prop transforms that have not been applied to doc.
+ */
+function applicableTransforms(migrations: ActiveMigrations, doc: SavedObjectDoc, prop: string) {
+  const minVersion = propVersion(doc, prop);
+  const { transforms } = migrations[prop];
+  return minVersion
+    ? transforms.filter(({ version }) => Semver.gt(version, minVersion))
+    : transforms;
+}
+
+/**
+ * Updates the document's migrationVersion, ensuring that the calling transform
+ * has not mutated migrationVersion in an unsupported way.
+ */
+function updateMigrationVersion(
+  doc: SavedObjectDoc,
+  migrationVersion: MigrationVersion,
+  prop: string,
+  version: string
+) {
+  assertNoDowngrades(doc, migrationVersion, prop, version);
+  const docVersion = propVersion(doc, prop) || '0.0.0';
+  const maxVersion = Semver.gt(docVersion, version) ? docVersion : version;
+  return { ...(doc.migrationVersion || migrationVersion), [prop]: maxVersion };
+}
+
+/**
+ * Transforms that remove or downgrade migrationVersion properties are not allowed,
+ * as this could get us into an infinite loop. So, we explicitly check for that here.
+ */
+function assertNoDowngrades(
+  doc: SavedObjectDoc,
+  migrationVersion: MigrationVersion,
+  prop: string,
+  version: string
+) {
+  const docVersion = doc.migrationVersion;
+  if (!docVersion) {
+    return;
+  }
+
+  const downgrade = Object.keys(migrationVersion).find(
+    k => !docVersion.hasOwnProperty(k) || Semver.lt(docVersion[k], migrationVersion[k])
+  );
+
+  if (downgrade) {
+    throw new Error(
+      `Migration "${prop} v ${version}" attempted to ` +
+        `downgrade "migrationVersion.${downgrade}" from ${migrationVersion[downgrade]} ` +
+        `to ${docVersion[downgrade]}.`
+    );
+  }
 }

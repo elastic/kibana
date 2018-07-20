@@ -286,6 +286,110 @@ describe('DocumentMigrator', () => {
     });
   });
 
+  it('disallows updating a migrationVersion prop to a lower version', () => {
+    const kibanaVersion = '18.9.1';
+    const migrator = new DocumentMigrator({
+      kibanaVersion,
+      migrations: {
+        cat: {
+          '1.0.0': setAttr('migrationVersion.foo', '3.2.1'),
+        },
+      },
+      validateDoc: _.noop,
+    });
+
+    expect(() =>
+      migrator.migrate({
+        id: 'smelly',
+        type: 'cat',
+        attributes: { name: 'Boo' },
+        migrationVersion: { foo: '4.5.6' },
+      })
+    ).toThrow(
+      /Migration "cat v 1.0.0" attempted to downgrade "migrationVersion.foo" from 4.5.6 to 3.2.1./
+    );
+  });
+
+  it('disallows removing a migrationVersion prop', () => {
+    const kibanaVersion = '18.9.1';
+    const migrator = new DocumentMigrator({
+      kibanaVersion,
+      migrations: {
+        cat: {
+          '1.0.0': setAttr('migrationVersion', {}),
+        },
+      },
+      validateDoc: _.noop,
+    });
+    expect(() =>
+      migrator.migrate({
+        id: 'smelly',
+        type: 'cat',
+        attributes: { name: 'Boo' },
+        migrationVersion: { foo: '4.5.6' },
+      })
+    ).toThrow(
+      /Migration "cat v 1.0.0" attempted to downgrade "migrationVersion.foo" from 4.5.6 to undefined./
+    );
+  });
+
+  it('allows updating a migrationVersion prop to a later version', () => {
+    const kibanaVersion = '18.9.1';
+    const migrator = new DocumentMigrator({
+      kibanaVersion,
+      migrations: {
+        cat: {
+          '1.0.0': setAttr('migrationVersion.cat', '2.9.1'),
+          '2.0.0': () => {
+            throw new Error('POW!');
+          },
+          '2.9.1': () => {
+            throw new Error('BANG!');
+          },
+          '3.0.0': setAttr('attributes.name', 'Shiny'),
+        },
+      },
+      validateDoc: _.noop,
+    });
+    const actual = migrator.migrate({
+      id: 'smelly',
+      type: 'cat',
+      attributes: { name: 'Boo' },
+      migrationVersion: { cat: '0.5.6' },
+    });
+    expect(actual).toEqual({
+      id: 'smelly',
+      type: 'cat',
+      attributes: { name: 'Shiny' },
+      migrationVersion: { cat: '3.0.0' },
+    });
+  });
+
+  it('allows adding props to migrationVersion', () => {
+    const kibanaVersion = '18.9.1';
+    const migrator = new DocumentMigrator({
+      kibanaVersion,
+      migrations: {
+        cat: {
+          '1.0.0': setAttr('migrationVersion.foo', '5.6.7'),
+        },
+      },
+      validateDoc: _.noop,
+    });
+    const actual = migrator.migrate({
+      id: 'smelly',
+      type: 'cat',
+      attributes: { name: 'Boo' },
+      migrationVersion: {},
+    });
+    expect(actual).toEqual({
+      id: 'smelly',
+      type: 'cat',
+      attributes: { name: 'Boo' },
+      migrationVersion: { cat: '1.0.0', foo: '5.6.7' },
+    });
+  });
+
   it('decorates transform errors with details about what doc and transform failed', () => {
     const kibanaVersion = '8.9.1';
     const migrator = new DocumentMigrator({

@@ -18,9 +18,13 @@
  */
 
 import _ from 'lodash';
-import { BatchIndexReader } from './batch_index_reader';
 import { AliasAction, CallCluster, IndexMapping, NotFound } from './call_cluster';
-import { MigrationVersion, SavedObjectDoc, savedObjectToRaw } from './saved_object';
+import {
+  MigrationVersion,
+  rawToSavedObject,
+  SavedObjectDoc,
+  savedObjectToRaw,
+} from './saved_object';
 
 /*
  * This module contains various functions for querying and manipulating
@@ -79,14 +83,12 @@ export class ElasticIndex {
   }
 
   /**
-   * Fetches information about the index.
+   * A slight enhancement to indices.get, that adds indexName, and validates that the
+   * index mappings are somewhat what we expect.
    */
   public async fetchInfo(): Promise<FullIndexInfo> {
     const { callCluster, index } = this;
-    const result = await callCluster('indices.get', {
-      ignore: [404],
-      index,
-    });
+    const result = await callCluster('indices.get', { ignore: [404], index });
 
     if ((result as NotFound).status === 404) {
       return {
@@ -99,15 +101,12 @@ export class ElasticIndex {
 
     const [indexName, indexInfo] = Object.entries(result)[0];
 
-    return assertIsSupportedIndex({
-      ...indexInfo,
-      exists: true,
-      indexName,
-    });
+    return assertIsSupportedIndex({ ...indexInfo, exists: true, indexName });
   }
 
   /**
-   * Creates a reader for the documents in the index.
+   * Creates a reader function that serves up batches of documents from the index. We aren't using
+   * an async generator, as that feature currently breaks Kibana's tooling.
    *
    * @param Opts
    * @prop {number} batchSize - The number of documents to read at a time
@@ -115,12 +114,29 @@ export class ElasticIndex {
    * @memberof BatchIndexWriter
    */
   public reader({ batchSize, scrollDuration }: { batchSize: number; scrollDuration: string }) {
-    return new BatchIndexReader({
-      batchSize,
-      callCluster: this.callCluster,
-      index: this.index,
-      scrollDuration,
-    });
+    const { callCluster, index } = this;
+    const scroll = scrollDuration;
+    let scrollId: string | undefined;
+
+    const nextBatch = () =>
+      scrollId !== undefined
+        ? callCluster('scroll', { scroll, scrollId })
+        : callCluster('search', { body: { size: batchSize }, index, scroll });
+
+    const close = async () => scrollId && (await callCluster('clearScroll', { scrollId }));
+
+    return async function read() {
+      const result = await nextBatch();
+      const docs = result.hits.hits.map(rawToSavedObject);
+
+      scrollId = result._scroll_id;
+
+      if (!docs.length) {
+        await close();
+      }
+
+      return docs;
+    };
   }
 
   /**
@@ -186,20 +202,8 @@ export class ElasticIndex {
             should: Object.entries(migrationVersion).map(([type, latestVersion]) => ({
               bool: {
                 must: [
-                  {
-                    exists: {
-                      field: type,
-                    },
-                  },
-                  {
-                    bool: {
-                      must_not: {
-                        term: {
-                          [`migrationVersion.${type}`]: latestVersion,
-                        },
-                      },
-                    },
-                  },
+                  { exists: { field: type } },
+                  { bool: { must_not: { term: { [`migrationVersion.${type}`]: latestVersion } } } },
                 ],
               },
             })),
@@ -220,11 +224,7 @@ export class ElasticIndex {
    */
   public putMappings(mappings: IndexMapping) {
     const { callCluster, index } = this;
-    return callCluster('indices.putMapping', {
-      body: mappings.doc,
-      index,
-      type: 'doc',
-    });
+    return callCluster('indices.putMapping', { body: mappings.doc, index, type: 'doc' });
   }
 
   /**
@@ -234,11 +234,7 @@ export class ElasticIndex {
    */
   public async create(mappings?: IndexMapping) {
     const { callCluster, index } = this;
-
-    await callCluster('indices.create', {
-      body: { mappings },
-      index,
-    });
+    await callCluster('indices.create', { body: { mappings }, index });
   }
 
   /**
@@ -285,16 +281,9 @@ export class ElasticIndex {
     index: string = this.index
   ) {
     const { callCluster } = this;
-    const result = await callCluster('indices.getAlias', {
-      ignore: [404],
-      name: alias,
-    });
-
+    const result = await callCluster('indices.getAlias', { ignore: [404], name: alias });
     const aliasInfo = (result as NotFound).status === 404 ? {} : result;
-
-    const removeActions = Object.keys(aliasInfo).map(key => ({
-      remove: { index: key, alias },
-    }));
+    const removeActions = Object.keys(aliasInfo).map(key => ({ remove: { index: key, alias } }));
 
     await callCluster('indices.updateAliases', {
       body: {
