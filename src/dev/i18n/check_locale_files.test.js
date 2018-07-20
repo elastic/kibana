@@ -17,31 +17,33 @@
  * under the License.
  */
 
-import { resolve, join } from 'path';
+import path from 'path';
 
 import { checkFile, checkLocaleFiles } from './check_locale_files';
 
+const testsFixturesRoot = path.resolve(__dirname, '__fixtures__', 'check_locale_files');
+
 const pluginsPaths = [
-  resolve(__dirname, '__fixtures__', 'test_plugin_1'),
-  resolve(__dirname, '__fixtures__', 'test_plugin_2'),
-  resolve(__dirname, '__fixtures__', 'test_plugin_3'),
-  resolve(__dirname, '__fixtures__', 'test_plugin_4'),
-  resolve(__dirname, '__fixtures__', 'test_plugin_5'),
+  path.join(testsFixturesRoot, 'test_plugin_1'),
+  path.join(testsFixturesRoot, 'test_plugin_2'),
+  path.join(testsFixturesRoot, 'test_plugin_3'),
+  path.join(testsFixturesRoot, 'test_plugin_4'),
+  path.join(testsFixturesRoot, 'test_plugin_5'),
 ];
 
 describe('dev/i18n/check_locale_files', () => {
   describe('checkFile', () => {
     it('returns namespace of a valid JSON file', async () => {
-      const localePath1 = join(pluginsPaths[0], 'translations', 'valid.json');
-      const localePath2 = join(pluginsPaths[1], 'translations', 'valid.json');
+      const localePath1 = path.join(pluginsPaths[0], 'translations', 'valid.json');
+      const localePath2 = path.join(pluginsPaths[1], 'translations', 'valid.json');
 
       expect(await checkFile(localePath1)).toBe('test_plugin_1');
       expect(await checkFile(localePath2)).toBe('test_plugin_2');
     });
 
     it('throws an error for unused id and missing id', async () => {
-      const localeWithMissingMessage = join(pluginsPaths[2], 'translations', 'missing.json');
-      const localeWithUnusedMessage = join(pluginsPaths[2], 'translations', 'unused.json');
+      const localeWithMissingMessage = path.join(pluginsPaths[2], 'translations', 'missing.json');
+      const localeWithUnusedMessage = path.join(pluginsPaths[2], 'translations', 'unused.json');
 
       expect(checkFile(localeWithMissingMessage)).rejects.toEqual(
         new Error(

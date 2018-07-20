@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { resolve } from 'path';
+import path from 'path';
 import fs from 'fs';
 import { promisify } from 'util';
 
@@ -27,18 +27,23 @@ const readFileAsync = promisify(fs.readFile);
 const removeDirAsync = promisify(fs.rmdir);
 const unlinkAsync = promisify(fs.unlink);
 
-const PLUGIN_PATH = resolve(__dirname, '__fixtures__', 'test_plugin');
+const PLUGIN_PATH = path.resolve(
+  __dirname,
+  '__fixtures__',
+  'extract_default_translations',
+  'test_plugin'
+);
 
 describe('dev/i18n/extract_default_translations', () => {
   it('injects default formats into en.json', async () => {
     await extractDefaultTranslations(PLUGIN_PATH);
 
     const extractedJSONBuffer = await readFileAsync(
-      resolve(PLUGIN_PATH, 'translations', 'en.json')
+      path.resolve(PLUGIN_PATH, 'translations', 'en.json')
     );
 
-    await unlinkAsync(resolve(PLUGIN_PATH, 'translations', 'en.json'));
-    await removeDirAsync(resolve(PLUGIN_PATH, 'translations'));
+    await unlinkAsync(path.resolve(PLUGIN_PATH, 'translations', 'en.json'));
+    await removeDirAsync(path.resolve(PLUGIN_PATH, 'translations'));
 
     expect(extractedJSONBuffer.toString()).toMatchSnapshot();
   });
