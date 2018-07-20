@@ -17,6 +17,8 @@
  * under the License.
  */
 
+jest.mock('ui/kfetch', () => ({}));
+
 import React from 'react';
 import { shallow } from 'enzyme';
 

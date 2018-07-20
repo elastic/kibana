@@ -24,7 +24,7 @@ export default function ({ getService, getPageObjects }) {
   const PageObjects = getPageObjects(['common', 'header', 'discover', 'settings']);
 
   // Flaky: https://github.com/elastic/kibana/issues/19743
-  describe.skip('visualize lab mode', () => {
+  describe('visualize lab mode', () => {
 
     it('disabling does not break loading saved searches', async () => {
       await PageObjects.common.navigateToUrl('discover', '');
