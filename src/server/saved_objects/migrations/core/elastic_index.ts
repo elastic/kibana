@@ -257,6 +257,12 @@ export class ElasticIndex {
     }
 
     const originalIndex = `${index}_original`;
+    const info = await this.fetchInfo();
+
+    await callCluster('indices.create', {
+      body: { mappings: info.mappings },
+      index: originalIndex,
+    });
 
     await callCluster('reindex', {
       body: {

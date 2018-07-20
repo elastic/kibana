@@ -170,4 +170,13 @@ A high-level overview of the core folder follows. Each file in the core folder c
 
 ## Testing
 
-Run jest tests: `node scripts/jest --testPathPattern=migrations --watch`
+Run jest tests:
+
+`node scripts/jest --testPathPattern=migrations --watch`
+
+Run integration tests:
+
+```
+node scripts/functional_test_server
+node scripts/functional_test_runner --config test/api_integration/config.js --grep migration
+```
