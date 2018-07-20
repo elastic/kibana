@@ -83,7 +83,7 @@ export default function ({ getService, getPageObjects }) {
         const script = `if (doc[\'machine.ram\'].size() == 0) {
           return -1;
         } else {
-          return doc[\'machine.ram\'].value / (1024 * 1024 * 1024)';
+          return doc[\'machine.ram\'].value / (1024 * 1024 * 1024);
         }`;
         await PageObjects.settings.addScriptedField(scriptedPainlessFieldName, 'painless', 'number', null, '1', script);
         await retry.try(async function () {
