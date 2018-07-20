@@ -31,6 +31,10 @@ export function vSphereMetricsSpecProvider() {
                      ' [Learn more]({config.docs.beats.metricbeat}/metricbeat-module-vsphere.html).',
     //euiIconType: 'logoVSphere',
     artifacts: {
+      application: {
+        label: 'Discover',
+        path: '/app/kibana#/discover'
+      },
       dashboards: [
         /*{
           id: 'TODO',
