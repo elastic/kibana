@@ -14,11 +14,11 @@ import {
   KIBANA_USAGE_TYPE,
 } from '../../common/constants';
 import { KIBANA_REPORTING_TYPE } from '../../../reporting/common/constants';
+import { KIBANA_SPACES_MONITORING_TYPE } from '../../../spaces/common/constants';
 import {
   sendBulkPayload,
   monitoringBulk,
 } from './lib';
-import { KIBANA_SPACES_MONITORING_TYPE } from '../../../spaces/common/constants';
 
 const LOGGING_TAGS = [LOGGING_TAG, KIBANA_MONITORING_LOGGING_TAG];
 
