@@ -20,7 +20,6 @@ import {
   EuiFlexItem,
   EuiButton,
 } from '@elastic/eui';
-import { PageHeader } from './page_header';
 import { saveRole, deleteRole } from '../../../../objects';
 import { isReservedRole } from '../../../../lib/role';
 import { RoleValidator } from '../lib/validate_role';
@@ -54,7 +53,6 @@ export class EditRolePage extends Component {
   render() {
     return (
       <EuiPage className="editRolePage">
-        <PageHeader breadcrumbs={this.props.breadcrumbs} />
         <EuiForm {...this.state.formError}>
           {this.getFormTitle()}
 
