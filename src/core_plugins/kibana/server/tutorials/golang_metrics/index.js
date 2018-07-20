@@ -31,11 +31,13 @@ export function golangMetricsSpecProvider() {
     longDescription: 'The `' + moduleName + '` Metricbeat module fetches internal metrics from a Golang app.' +
                      ' [Learn more]({config.docs.beats.metricbeat}/metricbeat-module-' + moduleName + '.html).',
     artifacts: {
-      application: {
-        label: 'Discover',
-        path: '/app/kibana#/discover'
-      },
-      dashboards: [],
+      dashboards: [
+        {
+          id: 'f2dc7320-f519-11e6-a3c9-9d1f7c42b045',
+          linkLabel: 'Golang metrics dashboard',
+          isOverview: true
+        }
+      ],
       exportedFields: {
         documentationUrl: '{config.docs.beats.metricbeat}/exported-fields-' + moduleName + '.html'
       }
