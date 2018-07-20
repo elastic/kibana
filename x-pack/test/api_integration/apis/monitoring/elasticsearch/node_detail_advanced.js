@@ -36,7 +36,6 @@ export default function ({ getService }) {
         })
         .expect(200);
 
-      console.log(JSON.stringify(body));
       expect(body).to.eql(nodeDetailFixture);
     });
   });
