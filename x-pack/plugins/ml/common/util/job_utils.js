@@ -381,8 +381,8 @@ export function basicJobValidation(job, fields, limits) {
   return {
     messages,
     valid,
-    contains(id) { return _.some(messages, { id }); },
-    find(id) { return _.find(messages, { id }); }
+    contains: id =>  (messages.some(m => id === m.id)),
+    find: id => (messages.find(m => id === m.id)),
   };
 }
 
@@ -409,8 +409,8 @@ export function validateModelMemoryLimit(job, limits) {
   return {
     valid,
     messages,
-    contains(id) { return _.some(messages, { id }); },
-    find(id) { return _.find(messages, { id }); }
+    contains: id =>  (messages.some(m => id === m.id)),
+    find: id => (messages.find(m => id === m.id)),
   };
 }
 
@@ -434,7 +434,7 @@ export function validateGroupNames(job) {
   return {
     valid,
     messages,
-    contains(id) { return _.some(messages, { id }); },
-    find(id) { return _.find(messages, { id }); }
+    contains: id =>  (messages.some(m => id === m.id)),
+    find: id => (messages.find(m => id === m.id)),
   };
 }
