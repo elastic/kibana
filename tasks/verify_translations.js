@@ -58,7 +58,7 @@ async function verifyTranslations(uiExports) {
   // Search files for used translation keys
   const translationPatterns = [
     { regexp: 'i18n\\(\'(.*)\'\\)',
-      parsePaths: [fromRoot('src/ui/ui_render/views/*.jade')] }
+      parsePaths: [fromRoot('src/ui/ui_render/views/*.pug')] }
   ];
   for (const { regexp, parsePaths } of translationPatterns) {
     const keys = await i18nVerify.getTranslationKeys(regexp, parsePaths);

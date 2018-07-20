@@ -49,7 +49,7 @@ export async function extractDefaultTranslations(inputPath) {
 
       if (resolvedPath.endsWith('.html')) {
         paths.htmlEntries.push(resolvedPath);
-      } else if (resolvedPath.endsWith('.jade')) {
+      } else if (resolvedPath.endsWith('.jade') || resolvedPath.endsWith('.pug')) {
         paths.jadeEntries.push(resolvedPath);
       } else if (resolvedPath.endsWith('.hbs') || resolvedPath.endsWith('.handlebars')) {
         paths.hbsFiles.push(resolvedPath);
