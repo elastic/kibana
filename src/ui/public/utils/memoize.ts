@@ -17,32 +17,42 @@
  * under the License.
  */
 
+interface MemoizedCall {
+  args: any[];
+  returnValue: any;
+  this: any;
+}
+
+// A symbol expressing, that the memoized function has never been called
+const neverCalled: unique symbol = Symbol();
+type NeverCalled = typeof neverCalled;
+
 /**
  * A simple memoize function, that only stores the last returned value
  * and uses the identity of all passed parameters as a cache key.
  */
 function memoizeLast<T extends (...args: any[]) => any>(func: T): T {
-  let prevResult: any;
-  let called: boolean = false;
-  let prevThis: any;
-  let prevArgs: any[];
+  let prevCall: MemoizedCall | NeverCalled = neverCalled;
 
   // We need to use a `function` here for proper this passing.
   // tslint:disable-next-line:only-arrow-functions
   const memoizedFunction = function(this: any, ...args: any[]) {
     if (
-      called &&
-      prevThis === this &&
-      prevArgs.length === args.length &&
-      args.every((arg, index) => arg === prevArgs[index])
+      prevCall !== neverCalled &&
+      prevCall.this === this &&
+      prevCall.args.length === args.length &&
+      prevCall.args.every((arg, index) => arg === args[index])
     ) {
-      return prevResult;
+      return prevCall.returnValue;
     }
-    called = true;
-    prevThis = this;
-    prevArgs = args;
-    prevResult = func.apply(this, args);
-    return prevResult;
+
+    prevCall = {
+      args,
+      this: this,
+      returnValue: func.apply(this, args),
+    };
+
+    return prevCall.returnValue;
   } as T;
 
   return memoizedFunction;
