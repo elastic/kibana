@@ -140,6 +140,40 @@ export default function ({ getService }) {
       }
     });
 
+    getTest(`kibana dual-privileges user`, {
+      auth: {
+        username: AUTHENTICATION.KIBANA_DUAL_PRIVILEGES_USER.USERNAME,
+        password: AUTHENTICATION.KIBANA_DUAL_PRIVILEGES_USER.PASSWORD,
+      },
+      tests: {
+        exists: {
+          statusCode: 200,
+          response: expectResults,
+        },
+        doesntExist: {
+          statusCode: 404,
+          response: expectNotFound,
+        },
+      }
+    });
+
+    getTest(`kibana dual-privileges dashboard only user`, {
+      auth: {
+        username: AUTHENTICATION.KIBANA_DUAL_PRIVILEGES_DASHBOARD_ONLY_USER.USERNAME,
+        password: AUTHENTICATION.KIBANA_DUAL_PRIVILEGES_DASHBOARD_ONLY_USER.PASSWORD,
+      },
+      tests: {
+        exists: {
+          statusCode: 200,
+          response: expectResults,
+        },
+        doesntExist: {
+          statusCode: 404,
+          response: expectNotFound,
+        },
+      }
+    });
+
     getTest(`kibana rbac user`, {
       auth: {
         username: AUTHENTICATION.KIBANA_RBAC_USER.USERNAME,
