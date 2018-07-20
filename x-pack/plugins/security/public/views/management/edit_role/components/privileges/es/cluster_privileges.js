@@ -7,8 +7,8 @@
 import React, { Component } from 'react';
 import _ from 'lodash';
 import PropTypes from 'prop-types';
-import { getClusterPrivileges } from '../../../../../services/role_privileges';
-import { isReservedRole } from '../../../../../lib/role';
+import { getClusterPrivileges } from '../../../../../../services/role_privileges';
+import { isReservedRole } from '../../../../../../lib/role';
 import {
   EuiCheckboxGroup,
   EuiFlexGroup,

@@ -20,8 +20,8 @@ import {
 import './elasticsearch_privileges.less';
 import { ClusterPrivileges } from './cluster_privileges';
 import { IndexPrivileges } from './index_privileges';
-import { CollapsiblePanel } from '../collapsible_panel';
-import { documentationLinks } from '../../../../../documentation_links';
+import { CollapsiblePanel } from '../../collapsible_panel';
+import { documentationLinks } from '../../../../../../documentation_links';
 
 export class ElasticsearchPrivileges extends Component {
   static propTypes = {

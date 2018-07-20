@@ -16,7 +16,7 @@ import {
   EuiHorizontalRule,
   EuiButtonIcon,
 } from '@elastic/eui';
-import { getIndexPrivileges } from '../../../../../services/role_privileges';
+import { getIndexPrivileges } from '../../../../../../services/role_privileges';
 
 const fromOption = (option) => option.label;
 const toOption = (value) => ({ label: value });

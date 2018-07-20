@@ -6,9 +6,9 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import _ from 'lodash';
-import { isReservedRole, isRoleEnabled } from '../../../../../lib/role';
+import { isReservedRole, isRoleEnabled } from '../../../../../../lib/role';
 import { IndexPrivilegeForm } from './index_privilege_form';
-import { getFields } from '../../../../../objects';
+import { getFields } from '../../../../../../objects';
 
 export class IndexPrivileges extends Component {
   static propTypes = {

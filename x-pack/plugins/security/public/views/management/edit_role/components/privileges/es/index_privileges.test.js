@@ -8,7 +8,7 @@ import React from 'react';
 import { shallow, mount } from 'enzyme';
 import { IndexPrivileges } from './index_privileges';
 import { IndexPrivilegeForm } from './index_privilege_form';
-import { RoleValidator } from '../../lib/validate_role';
+import { RoleValidator } from '../../../lib/validate_role';
 
 test('it renders without crashing', () => {
   const props = {

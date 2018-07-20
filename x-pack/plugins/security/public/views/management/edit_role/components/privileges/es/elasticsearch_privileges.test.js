@@ -9,7 +9,7 @@ import { shallow, mount } from 'enzyme';
 import { IndexPrivileges } from './index_privileges';
 import { ClusterPrivileges } from './cluster_privileges';
 import { ElasticsearchPrivileges } from './elasticsearch_privileges';
-import { RoleValidator } from '../../lib/validate_role';
+import { RoleValidator } from '../../../lib/validate_role';
 
 test('it renders without crashing', () => {
   const props = {

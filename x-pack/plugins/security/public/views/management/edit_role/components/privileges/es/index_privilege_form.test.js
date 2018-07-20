@@ -6,7 +6,7 @@
 import React from 'react';
 import { shallow, mount } from 'enzyme';
 import { IndexPrivilegeForm } from './index_privilege_form';
-import { RoleValidator } from '../../lib/validate_role';
+import { RoleValidator } from '../../../lib/validate_role';
 import { EuiSwitch, EuiTextArea, EuiButtonIcon } from '@elastic/eui';
 
 test('it renders without crashing', () => {
