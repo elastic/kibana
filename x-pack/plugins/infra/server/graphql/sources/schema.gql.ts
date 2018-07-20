@@ -43,8 +43,12 @@ export const sourcesSchema = gql`
     timestamp: String!
   }
 
+  "The status of an infrastructure data source"
   type InfraSourceStatus {
+    "The list of indices in the metric alias"
     metricIndices: [String!]!
+    "The list of indices in the log alias"
+    logIndices: [String!]!
   }
 
   extend type Query {

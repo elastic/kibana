@@ -30,7 +30,7 @@ type InfraSourceStatusResolver = InfraResolverWithFields<
   InfraSourceResolvers.StatusResolver,
   InfraResolvedResult<QuerySourceResolver>,
   InfraContext,
-  'metricIndices'
+  'metricIndices' | 'logIndices'
 >;
 
 interface SourcesResolversDeps {
@@ -73,6 +73,13 @@ export const createSourcesResolvers = (
         metricIndices: async () => {
           const result = await libs.framework.callWithRequest(req, 'indices.getAlias', {
             name: source.configuration.metricAlias,
+          });
+          const indexNames = Object.keys(result);
+          return indexNames;
+        },
+        logIndices: async () => {
+          const result = await libs.framework.callWithRequest(req, 'indices.getAlias', {
+            name: source.configuration.logAlias,
           });
           const indexNames = Object.keys(result);
           return indexNames;

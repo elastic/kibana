@@ -99,9 +99,10 @@ export interface InfraSourceFields {
   tiebreaker: string /** The field to use as a tiebreaker for log events that have identical timestamps */;
   timestamp: string /** The field to use as a timestamp for metrics and logs */;
 }
-
+/** The status of an infrastructure data source */
 export interface InfraSourceStatus {
-  metricIndices: string[];
+  metricIndices: string[] /** The list of indices in the metric alias */;
+  logIndices: string[] /** The list of indices in the log alias */;
 }
 
 export namespace QueryResolvers {
@@ -299,13 +300,15 @@ export namespace InfraSourceFieldsResolvers {
   export type TiebreakerResolver = Resolver<string>;
   export type TimestampResolver = Resolver<string>;
 }
-
+/** The status of an infrastructure data source */
 export namespace InfraSourceStatusResolvers {
   export interface Resolvers {
-    metricIndices?: MetricIndicesResolver;
+    metricIndices?: MetricIndicesResolver /** The list of indices in the metric alias */;
+    logIndices?: LogIndicesResolver /** The list of indices in the log alias */;
   }
 
   export type MetricIndicesResolver = Resolver<string[]>;
+  export type LogIndicesResolver = Resolver<string[]>;
 }
 
 export interface InfraIndexPattern {
