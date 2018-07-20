@@ -24,6 +24,7 @@ import { VersionedTransformer } from './document_migrator';
 import { ElasticIndex, FullIndexInfo } from './elastic_index';
 import { coordinateMigration } from './migration_coordinator';
 import { LogFn, Logger, MigrationLogger } from './migration_logger';
+import { SavedObjectDoc } from './saved_object';
 
 type MigrationResult =
   | { status: 'skipped' }
@@ -214,6 +215,8 @@ async function runMigration(context: Context) {
 async function migrateDocs(context: Context) {
   const { destIndex, sourceIndex, batchSize, scrollDuration, documentMigrator } = context;
   const read = sourceIndex.reader({ batchSize, scrollDuration });
+  const migrateDoc = (doc: SavedObjectDoc) =>
+    documentMigrator.migrate(doc.migrationVersion ? doc : { ...doc, migrationVersion: {} });
 
   while (true) {
     const originalDocs = await read();
@@ -222,6 +225,6 @@ async function migrateDocs(context: Context) {
       return;
     }
 
-    await destIndex.write(originalDocs.map(documentMigrator.migrate));
+    await destIndex.write(originalDocs.map(migrateDoc));
   }
 }
