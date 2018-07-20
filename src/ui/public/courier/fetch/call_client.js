@@ -165,6 +165,7 @@ export function CallClientProvider(Private, Promise, es) {
         // order than the original searchRequests. So we'll put them back in order so that we can
         // use the order to associate each response with the original request.
         const responsesInOriginalRequestOrder = new Array(searchRequestsAndStatuses.length);
+
         segregatedResponses.forEach((responses, strategyIndex) => {
           responses.forEach((response, responseIndex) => {
             const searchRequest = searchStrategiesWithRequests[strategyIndex].searchRequests[responseIndex];
@@ -185,9 +186,9 @@ export function CallClientProvider(Private, Promise, es) {
 
     // If there are any errors, notify the searchRequests of them.
     defer.promise.catch((err) => {
-      searchRequests.forEach((searchRequest, index) => {
-        if (searchRequestsAndStatuses[index] !== ABORTED) {
-          searchRequest.handleFailure(err);
+      searchRequestsAndStatuses.forEach((searchRequestOrStatus) => {
+        if (searchRequestOrStatus !== ABORTED) {
+          searchRequestOrStatus.handleFailure(err);
         }
       });
     });

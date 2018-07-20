@@ -52,7 +52,10 @@ export function FetchNowProvider(Private, Promise) {
 
       return searchRequest.retry();
     }))
-      .catch(error => fatalError(error, 'Courier fetch'));
+      .catch(error => {
+        // If any of the searchRequests resolve with an error, kill Kibana.
+        fatalError(error, 'Courier fetch');
+      });
   }
 
   function fetchSearchResults(searchRequests) {

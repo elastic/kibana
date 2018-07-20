@@ -121,6 +121,23 @@ describe('callClient', () => {
     });
   });
 
+  describe('errors', () => {
+    it(`cause searchRequest.handleFailure() to be called with the ES error that's thrown`, async () => {
+      esShouldError = true;
+      const searchRequest = createSearchRequest(1);
+
+      const handleFailureSpy = sinon.spy();
+      searchRequest.handleFailure = handleFailureSpy;
+
+      searchRequests = [ searchRequest ];
+      try {
+        await callClient(searchRequests);
+      } catch(e) {
+        sinon.assert.calledWith(handleFailureSpy, 'fake es error');
+      }
+    });
+  });
+
   describe('implementation', () => {
     it('calls es.msearch() once, regardless of number of searchRequests', () => {
       expect(fakeSearch.callCount).to.be(0);
@@ -140,21 +157,6 @@ describe('callClient', () => {
       searchRequests = [ searchRequest ];
       await callClient(searchRequests);
       expect(whenAbortedSpy.callCount).to.be(1);
-    });
-
-    it(`calls searchRequest.handleFailure() with the ES error that's thrown`, async () => {
-      esShouldError = true;
-      const searchRequest = createSearchRequest(1);
-
-      const handleFailureSpy = sinon.spy();
-      searchRequest.handleFailure = handleFailureSpy;
-
-      searchRequests = [ searchRequest ];
-      try {
-        await callClient(searchRequests);
-      } catch(e) {
-        sinon.assert.calledWith(handleFailureSpy, 'fake es error');
-      }
     });
   });
 
