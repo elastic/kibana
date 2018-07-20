@@ -110,7 +110,7 @@ names {pull}20455[#20455]
 * [Fixes #20240] Fixes issues with the flickering of visualizations on 
 refresh {pull}20817[#20817]
 * Adds distinct links and float tags to Region Map docs {pull}20361[#20361]
-* Avoids shard failures when performing bbox filter on coordinate 
+* Avoids shard failures when performing a `geo_bounding_box` filter on coordinate 
 maps {pull}19548[#19548] 
 * Fixes disabled aggregations in the visualization editor {pull}18796[#18796]
 
