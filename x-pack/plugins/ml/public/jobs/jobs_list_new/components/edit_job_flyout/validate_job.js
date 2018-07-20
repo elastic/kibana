@@ -21,7 +21,6 @@ export function validateModelMemoryLimit(mml) {
     }
   };
   const validationResults = validateModelMemoryLimitUtils(tempJob, limits);
-
   const { valid } = validationResults;
 
   const modelMemoryLimit = {

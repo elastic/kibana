@@ -131,11 +131,13 @@ export class EditJobFlyout extends Component {
       jobGroupsValidationError = validateGroupNames(jobDetails.jobGroups).message;
     }
 
+    const valid = (jobModelMemoryLimitValidationError === '' && jobGroupsValidationError === '');
+
     this.setState({
       ...jobDetails,
       jobModelMemoryLimitValidationError,
       jobGroupsValidationError,
-      valid: (jobModelMemoryLimitValidationError === '' && jobGroupsValidationError === '')
+      valid,
     });
   }
 
