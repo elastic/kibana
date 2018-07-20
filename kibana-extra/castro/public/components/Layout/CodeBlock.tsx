@@ -8,22 +8,12 @@ import React from 'react';
 
 import { EuiCodeBlock } from '@elastic/eui';
 
-const codeSnippet = `var y = function(le) {
-	return function(f) {
-		return f(f);
-	}(function(f) {
-		return le(
-			function(x) { return (f(f))(x); }
-		);
-	});
-};`;
+interface Props {
+  code: string;
+  language: string;
+}
 
-export default class CodeBlock extends React.PureComponent {
-  public static defaultProps = {
-    code: codeSnippet,
-    language: 'js',
-  };
-
+export default class CodeBlock extends React.PureComponent<Props, any> {
   public render() {
     return (
       <EuiCodeBlock language={this.props.language} className="codeBlock">
