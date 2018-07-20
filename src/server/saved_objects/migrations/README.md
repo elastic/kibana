@@ -1,88 +1,172 @@
 # Saved Object Migrations
 
-This is the system that manages the versioning of saved object indices. It manages changes to the index, including mappings, index templates, and changes to the shape of documents from one version of Kibana to another.
+Migrations are the mechanism by which saved object indices are kept up to date with the Kibana system. Plugin authors write their plugins to work with a certain set of mappings, and documents of a certain shape. Migrations ensure that the index actually conforms to those expectations.
 
-## General migration process
+## How it works
 
-* Store a migrationVersion with each document `{ migrationVersion: { dashboard: '6.4.3' } }`
-* When Kibana starts, check if the index needs migrating
-  * Run an agg query that counts the number of documents whose migrationVersion does not meet expectations
-  * If any are out of date, run migrations
-* Index migration
-  * Ensure the index is aliased, do a reindex if the index is not aliased
-  * Create a destination index to which all documents from the original index will be moved after they are upgraded
-    * The destination index gets all mappings defined by enabled plugins as well as any mappings in the old index
-    * Con: We never actually delete a mapping :/
-    * Pro: We never have to drop docs :)
-    * If a plugin wants to "delete" a mapping, they can modify it to be useless: `{ dashboard: { type: 'boolean' } }`
-  * Move all docs, passing them through the appropriate migrations
-  * Point the alias to the new index and wait for it to refresh
-* Multiple Kibana instances are coordinated so that they don't run migrations in parallel
-  * This is because allowing all instances to run migrations would lead to edge cases where errors were improperly ignored
-  * Coordination is done by creating / deleting a "lock" index `.kibana_migration_lock` where `.kibana` is the configured index name
+To illustrate how migrations work, let's walk through an example, using a fictional plugin: `FanciPlugin`.
+
+FanciPlugin 1.0 had a mappping that looked like this:
+
+```js
+{
+  fanci: {
+    properties: {
+      fanciName: { type: 'keyword' },
+    },
+  },
+}
+```
+
+But in 2.0, it was decided that `fanciName` should be renamed to `title`.
+
+So, FanciPlugin 2.0 has a mapping that looks like this:
+
+```js
+{
+  fanci: {
+    properties: {
+      title: { type: 'keyword' },
+    },
+  },
+}
+```
+
+Note, the `fanciName` property is gone altogether. The problem is that lots of people have used FanciPlugin 1.0, and there are lots of documents out in the wild that have the `fanciName` property. FanciPlugin 2.0 won't know how to handle these documents, as it now expects that property to be called `title`.
+
+To solve this problem, the FanciPlugin authors write a migration which will take all 1.0 documents and transform them into 2.0 documents.
+
+To FanciPlugin's uiExports is modified to look like this:
+
+```js
+uiExports: {
+  migrations: {
+    // This is whatever value your document's "type" field is
+    fanci: {
+      // This is the version of the plugin for which this migration was written, and
+      // should follow semver conventions.
+      '2.0.0': (doc) => {
+        // Here, we modify doc to have the shape we expect in 2.0.0
+        const { fanciName } = doc.attributes;
+
+        delete doc.attributes.fanciName;
+        doc.attributes.title = fanciName;
+
+        return doc;
+      },
+    },
+  },
+  // ... normal uiExport stuff
+}
+```
+
+Now, whenever Kibana boots, if FanciPlugin is enabled, Kibana scans its index for any documents that have type 'fanci' and have a `migrationVersion.fanci` property that is anything other than `2.0.0`. If any such documents are found, the index is determined to be out of date (or at least of the wrong version), and Kibana attempts to migrate the index.
+
+At the end of the migration, Kibana's fanci documents will look something like this:
+
+```js
+{
+  id: 'someid',
+  type: 'fanci',
+  attributes: {
+    title: 'Shazm!',
+  },
+  migrationVersion: { fanci: '2.0.0' },
+}
+```
+
+Note, the migrationVersion property has been added, and it contains information about what migrations were applied to it.
+
+## Migrating the index
+
+When Kibana boots, it performs a check to see if it needs to migrate its index.
+
+If the Kibana index does not exist, or if it is out of date, it is migrated whenever Kibana starts, and before Kibana serves any requests. Let's say our index was named `.kibana`, and it is out of date. The following will occur:
+
+* If `.kibana` is not an alias, it will be converted to one:
+  * Reindex `.kibana` into `.kibana_original`
+  * Delete `.kibana`
+  * Create an alias `.kibana` that points to `.kibana_original`
+* Create a `.kibana_1` index
+* Copy all documents from `.kibana` into `.kibana_1`, running them through any applicable migrations
+* Point the `.kibana` alias to `.kibana_1`
+
+If the `.kibana` alias exists, and it does not contain any outdated documents, it will not be migrated, but it will have its mappings patched to ensure they are up to date with the mappings defined by the Kibana system, and Kibana boots normally.
+
+## Migrating Kibana clusters
+
+If Kibana is being run in a cluster, migrations will be coordinated so that they only run on one Kibana instance at a time. This is done in a fairly rudimentary way. Let's say we have two Kibana instances, kibana1 and kibana2.
+
+* kibana1 and kibana2 both start simultaneously and detect that migrations need to run
+* kibana1 begins migration and creates index `.kibana_4`
+* kibana2 tries to begin migrations, but fails with the error `.kibana_4 already exists`
+* kibana2 logs that it failed to create the migration index, and instead begins polling
+  * Every few seconds, kibana2 instance checks the `.kibana` index to see if it is done migrating
+  * Once `.kibana` is determined to be up to date, the kibana2 instance continues booting
+
+In this example, if the `.kibana_4` index existed prior to Kibana booting, the entire migration process will fail, as all Kibana instances will assume another instance is migrating to the `.kibana_4` index. This problem is only fixable by deleting the `.kibana_4` index (probably after backing it up or reindexing it to another index).
+
+## Import / export
+
+If a user attempts to ipmort FanciPlugin 1.0 documents into a Kibana system that is running FanciPlugin 2.0, those documents will be migrated prior to being persisted in the Kibana index.
+
+## Validation
+
+It might happen that a user modifies their FanciPlugin 1.0 export file to have fanci documents with a migrationVersion of 2.0.0. In this scenario, Kibana will store those documents as if they are up to date, even though they are not, and the result will be unspecified behavior.
+
+Similarly, Kibana server APIs assume that they are sent up to date documents, unless a document specifies a migrationVersion. This means that out-of-date callers of our APIs will send us out-of-date documents, and those documents will be accepted and stored as if they are up-to-date.
+
+To prevent this problem from happening, migration authors should _always_ write a [validation](../validation) function that throws an error if a document is not up to date, and this validation function should always be updated any time a new migration is added for the relevent document types.
+
+## Document ownership
+
+In the eyes of the migration system, only one plugin can own a saved object type, or a root-level property on a saved object.
+
+So, let's say we have a document that looks like this:
+
+```js
+{
+  type: 'dashboard',
+  attributes: { whatever: 'here' },
+  securityKey: '324234234kjlke2',
+}
+```
+
+In this document, one plugin might own the `dashboard` type, and another plugin might own the `securityKey` type. If two or more plugins define migrations `{ migrations: { securityKey: { ... } } }`, Kibana will fail to start.
 
 ## Disabled plugins
 
-If a plugin is disabled, we need to know what the last supported version was so that we can reject incoming documents that would make the index inconsistent. To do this:
+If a plugin is disbled, all of its documents are retained in the Kibana index. They can be imported and exported. When the plugin is re-enabled, Kibana will migrate any out of date documents that were imported or retained while it was disabled.
 
-* Store "migrationVersion" in the mapping \_meta field
-  * This is a dictionary of `doc_type: semver`
-  * Allows us to know the migration version info of disabled types / plugins
+## Configuration
 
-## Saved object API
+Kibana index migrations expose a few config settings which might be tweaked:
 
-* Assume docs w/ no migration version are up to date (see [this comment](https://github.com/elastic/kibana/issues/15100#issuecomment-400000325))
-* Docs w/ migration version are migrated if need be
-* Modify import logic to add an empty migrationVersion property to docs that have no migration version
-  * This will force migrations to run on those docs (since docs w/ no migrationVersion are assumed by the REST API to be up to date)
-* If we receive a document whose migration version is greater than that of our index,
-  * Reject it
-* If we receive a CREATE document whose migration version is less than / equal to our index
-  * Migrate it if the requisite plugins are available
-  * Save it if the requisite plugins are unavailable (this will trigger a full index migration when the plugin is enabled)
-* If we receive an UPDATE document whose version is less than our index
-  * Reject it
-
-## Migration version
-
-Migrations add an index mapping for a `migrationVersion` property which looks something like this:
-
-```js
-migrationVersion: '1.2.3',
-```
-
-This is stored per-document. Future versions of Kibana may allow multiple plugins to define migrations for a single document type (e.g. maybe a security plugin which adds acls to various documents, and may want to migrate the acl property). If that ends up becoming a reality, we won't need to change the `migrationVersion` mapping; it will simply be used as an array, instead: `migrationVersion: ['dashboard:1.2.3', 'acl:3.4.5']`.
-
-Each migrated index also has a `migrationVersion` which is stored in the index's mapping metdata and is used to quickly determine whether or not an index needs to be migrated. This `migrationVersion` might look something like this:
-
-```js
-_meta.migrationVersion: ['dashboard:1.2.3', 'acl:3.4.5']
-```
-
-Here, the format is `type:version`. It is stored this way simply so that the index migration version is compatible with the possible future multi-type document `migrationVersion`. If it is ever stored in a document, it won't require an explosion in properties.
+* `migrations.scrollDuration` - The [scroll](https://www.elastic.co/guide/en/elasticsearch/reference/current/search-request-scroll.html#scroll-search-context) value used to read batches of documents from the source index. Defaults to `15m`.
+* `migrations.batchSize` - The number of documents to read / transform / write at a time during index migrations
+* `migrations.pollInterval` - How often, in milliseconsds, secondary Kibana instances will poll to see if the primary Kibana instance has finished migrating the index.
 
 ## Source code
 
-* `core` - Exposes a catch-all object which can migrate an index or document, and build the mappings for an index
-* `kibana_index` - Kibana index-specific migration logic, converts a Kibana server instance into a migrator
+The migrations source code is grouped into two folders:
 
-Core logic is broken into a handful of modules:
+* `core` - Contains index-agnostic, general migration logic, which could be reused for indices other than `.kibana`
+* `kibana` - Contains a relatively light-weight wrapper around core, which provides `.kibana` index-specific logic
 
-* `core_migrator` - The public face of the core migration logic, exposes functionality to:
-  * Migrate a document to the latest version
-  * Migrate an elastic index to the latest version
-  * Retrieve the mappings supported by the migrator
-* `batch_array_reader` - Provides a reader that provides batches of documents from an array
-* `batch_index_reader` - Provides a reader that provides batches of documents from an elastic index
-* `build_active_mappings` - Builds and validates the index mappings supported by the system
-* `build_active_migrations` - Transforms migrations as defined by plugins into a shape that is more optimal for running migrations
-* `build_document_transform` - Creates a function which applies migrations to any document which is passed to it
-* `elastic_index` - Helper methods for manipulating an elastic index
-* `migration_coordinator` - Logic to ensure that a function runs only on one Kibana instance at a time
-* `migration_logger` - A simple helper for logging during index migrations
-* `index_migrator` - The entry point for migrating all documents (and mappings) in an index
-* `saved_objects` - Functions for converting migration documents to / from the saved object client format
-* `types` - Type definitions that are used across the various functions, classes, and modules of the migration system
+Generally, the code eschews classes in favor of functions and basic data structures. The publicly exported code is all class-based, however, in an attempt to conform to Kibana norms.
+
+### Core
+
+A high-level overview of the core folder follows. Each file in the core folder contains fairly detailed comments, if more info is desired.
+
+* `build_active_mappings.ts` - Contains logic to build the index mappings object
+* `call_cluster.ts` - This is just a TypeScript definitions file, really, defining the elasticsearch.js subset used by the migration codebase
+* `document_migrator.ts` - Logic for migrating individual documents
+* `elastic_index.ts` - An uuber class that exposes methods for querying and modifying an elastic search index
+* `index_migrator.ts` - This is the meat and potatoes, the logical flow that manages the migration of an index
+* `migration_coordinator.ts` - A function which attempts to run a migration, and if it gets an index exists error, falls back to a polling mechanism to wait for another Kibana instance to finish migrating the index
+* `migration_logger.ts` - The basic logging mechanism used by index migrations
+* `saved_objects.ts` - Utility functions for converting documents to / from the saved object format
 
 ## Testing
 
