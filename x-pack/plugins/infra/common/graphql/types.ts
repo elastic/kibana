@@ -25,7 +25,7 @@ export interface InfraSource {
   id: string /** The id of the source */;
   configuration: InfraSourceConfiguration /** The raw configuration of the source */;
   status: InfraSourceStatus /** The status of the source */;
-  map?: InfraResponse | null;
+  map?: InfraResponse | null /** A hierarchy of hosts, pods, containers, services or arbitrary groups */;
 }
 /** A set of configuration options for an infrastructure data source */
 export interface InfraSourceConfiguration {
@@ -130,7 +130,7 @@ export namespace InfraSourceResolvers {
     id?: IdResolver /** The id of the source */;
     configuration?: ConfigurationResolver /** The raw configuration of the source */;
     status?: StatusResolver /** The status of the source */;
-    map?: MapResolver;
+    map?: MapResolver /** A hierarchy of hosts, pods, containers, services or arbitrary groups */;
   }
 
   export type IdResolver = Resolver<string>;
