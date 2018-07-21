@@ -25,11 +25,11 @@ export class Poller {
     this._isRunning = false;
   }
 
-  public getPollFrequency() {
+  getPollFrequency() {
     return this.pollFrequencyInMillis;
   }
 
-  public _poll() {
+  _poll() {
     return this.functionToPoll()
       .then(this.successFunction)
       .then(() => {
@@ -56,7 +56,7 @@ export class Poller {
       });
   }
 
-  public start() {
+  start() {
     if (this._isRunning) {
       return;
     }
@@ -69,7 +69,7 @@ export class Poller {
     }
   }
 
-  public stop() {
+  stop() {
     if (!this._isRunning) {
       return;
     }
@@ -79,7 +79,7 @@ export class Poller {
     this._timeoutId = null;
   }
 
-  public isRunning() {
+  isRunning() {
     return this._isRunning;
   }
 }
