@@ -5,9 +5,9 @@
  */
 
 import { REPOSITORY_INDEX_TYPE } from '../mappings';
-import { Poller } from './lib/poller';
-import { UpdateWorker } from './server/queue';
-import { ServerOptions } from './ServerOptions';
+import { Poller } from './poller';
+import { UpdateWorker } from './queue';
+import { ServerOptions } from './server_options';
 
 export class UpdateScheduler {
   private poller: Poller;
