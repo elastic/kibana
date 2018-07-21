@@ -4,11 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { Esqueue } from '@castro/esqueue';
 import * as Hapi from 'hapi';
 
 import { AbstractWorker, Job } from '.';
 import RepositoryUtils from '../../common/repositoryUtils';
-import { Esqueue } from '../../lib/esqueue';
 import { Log } from '../log';
 import RepositoryService from '../repositoryService';
 

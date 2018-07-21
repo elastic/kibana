@@ -5,17 +5,18 @@
  */
 
 import events from 'events';
+
 import Puid from 'puid';
+
 import { constants } from './constants';
 import { createIndex } from './helpers/create_index';
-import { isPlainObject } from 'lodash';
 
 const puid = new Puid();
 
 export class Job extends events.EventEmitter {
   constructor(queue, index, type, payload, options = {}) {
     if (typeof type !== 'string') throw new Error('Type must be a string');
-    if (!isPlainObject(payload)) throw new Error('Payload must be a plain object');
+    if (payload && typeof payload === 'object') throw new Error('Payload must be a plain object');
 
     super();
 

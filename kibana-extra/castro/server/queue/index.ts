@@ -6,9 +6,9 @@
 
 import Hapi from 'hapi';
 
-import { Esqueue, events as esqueueEvents } from '../lib/esqueue';
-import { Job as JobInternal } from '../lib/esqueue/job';
-import { Worker as WorkerInternal } from '../lib/esqueue/worker';
+import { Esqueue, events as esqueueEvents } from '@castro/esqueue';
+import { Job as JobInternal } from '@castro/esqueue/job';
+import { Worker as WorkerInternal } from '@castro/esqueue/worker';
 
 export interface Job {
   payload: any;

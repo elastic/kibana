@@ -13,11 +13,13 @@ import { EventEmitter } from 'events';
 import { Job } from './job';
 import { Worker } from './worker';
 import { constants } from './constants';
-import { createClient } from './helpers/create_client';
 import { indexTimestamp } from './helpers/index_timestamp';
-import { omit } from 'lodash';
 
-export { events } from './constants/events';
+function omit(obj, keysToOmit) {
+  return Object.keys(obj).reduce((acc, key) => (
+    keysToOmit.includes(key) ? acc : { ...acc, [key]: obj[key] }
+  ), {})
+}
 
 export class Esqueue extends EventEmitter {
   constructor(index, options = {}) {
@@ -30,9 +32,9 @@ export class Esqueue extends EventEmitter {
       timeout: constants.DEFAULT_SETTING_TIMEOUT,
       doctype: constants.DEFAULT_SETTING_DOCTYPE,
       dateSeparator: constants.DEFAULT_SETTING_DATE_SEPARATOR,
-      ...omit(options, [ 'client' ])
+      ...omit(options, ['client'])
     };
-    this.client = createClient(options.client || {});
+    this.client = options.client;
     this._logger = options.logger || function () {};
     this._workers = [];
     this._initTasks().catch((err) => this.emit(constants.EVENT_QUEUE_ERROR, err));
@@ -44,7 +46,7 @@ export class Esqueue extends EventEmitter {
     ];
 
     return Promise.all(initTasks).catch((err) => {
-      this._logger(['initTasks', 'error'], err);
+      this._logger(err, ['initTasks', 'error']);
       throw err;
     });
   }

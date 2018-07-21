@@ -5,8 +5,6 @@
  */
 import React from 'react';
 
-import { some } from 'lodash';
-
 import { EuiIcon, EuiSideNav } from '@elastic/eui';
 
 import { FileTree as Tree, FileTreeItemType } from '../../../model';
@@ -55,8 +53,7 @@ export default class FileTree extends React.Component<Props, any> {
   };
 
   public treeToItems = (node: Tree): any => {
-    const forceOpen = some(
-      Array.from(this.props.forceOpenPaths),
+    const forceOpen = Array.from(this.props.forceOpenPaths).some(
       (p: string) => p.indexOf(node.path || '') === 0
     );
     const data = {

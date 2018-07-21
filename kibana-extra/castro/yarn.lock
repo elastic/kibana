@@ -2,6 +2,10 @@
 # yarn lockfile v1
 
 
+"@castro/esqueue@link:packages/castro-esqueue":
+  version "0.0.0"
+  uid ""
+
 "@elastic/eui@^3.0.0":
   version "3.1.0"
   resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-3.1.0.tgz#ae5ab51f5d4fd5f4f67bd9349c6f4f921cf4d1ce"
@@ -3474,9 +3478,9 @@ pseudomap@^1.0.2:
   version "1.0.2"
   resolved "https://registry.yarnpkg.com/pseudomap/-/pseudomap-1.0.2.tgz#f052a28da70e618917ef0a8ac34c1ae5a68286b3"
 
-puid@^1.0.7:
-  version "1.0.7"
-  resolved "https://registry.yarnpkg.com/puid/-/puid-1.0.7.tgz#fa638a737d7b20419059d93965aed36ca20e1c84"
+puid@1.0.5:
+  version "1.0.5"
+  resolved "https://registry.yarnpkg.com/puid/-/puid-1.0.5.tgz#8d387bf05fb239c5e6f45902c49470084009638c"
 
 pump@^2.0.0:
   version "2.0.1"

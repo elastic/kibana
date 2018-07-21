@@ -4,8 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { isFunction } from 'lodash';
-
 export class CancellationToken {
   constructor() {
     this.isCancelled = false;
@@ -13,7 +11,7 @@ export class CancellationToken {
   }
 
   on = (callback) => {
-    if (!isFunction(callback)) {
+    if (typeof callback !== 'function') {
       throw new Error('Expected callback to be a function');
     }
 
