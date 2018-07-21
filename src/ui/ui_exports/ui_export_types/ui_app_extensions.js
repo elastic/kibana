@@ -37,6 +37,7 @@ export const visTypes = appExtension;
 export const visResponseHandlers = appExtension;
 export const visRequestHandlers = appExtension;
 export const visEditorTypes = appExtension;
+export const autocompleteProviders = appExtension;
 export const savedObjectTypes = appExtension;
 export const embeddableFactories = appExtension;
 export const dashboardPanelActions = appExtension;
