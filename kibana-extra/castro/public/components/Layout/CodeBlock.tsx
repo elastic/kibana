@@ -13,7 +13,7 @@ interface Props {
   language: string;
 }
 
-export default class CodeBlock extends React.PureComponent<Props, any> {
+export class CodeBlock extends React.PureComponent<Props, any> {
   public render() {
     return (
       <EuiCodeBlock language={this.props.language} className="codeBlock">

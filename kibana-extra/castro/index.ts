@@ -7,16 +7,17 @@
 import * as Hapi from 'hapi';
 import { resolve } from 'path';
 
-import mappings from './mappings';
+import { mappings } from './mappings';
 import { Esqueue } from './server/lib/esqueue';
 import { CloneWorker, DeleteWorker } from './server/queue';
-import exampleRoute from './server/routes/example';
-import fileRoute from './server/routes/file';
-import lspRoute from './server/routes/lsp';
-import manacoRoute from './server/routes/monaco';
-import repositoryRoute from './server/routes/repository';
-import ServerOptions from './server/ServerOptions';
+import { exampleRoute } from './server/routes/example';
+import { fileRoute } from './server/routes/file';
+import { lspRoute } from './server/routes/lsp';
+import { monacoRoute } from './server/routes/monaco';
+import { repositoryRoute } from './server/routes/repository';
+import { ServerOptions } from './server/ServerOptions';
 
+// tslint:disable-next-line no-default-export
 export default (kibana: any) =>
   new kibana.Plugin({
     require: ['elasticsearch'],
@@ -68,6 +69,6 @@ export default (kibana: any) =>
       lspRoute(server, serverOptions);
       repositoryRoute(server, serverOptions);
       fileRoute(server, serverOptions);
-      manacoRoute(server);
+      monacoRoute(server);
     },
   });

@@ -8,9 +8,9 @@ import React from 'react';
 
 import { EuiButton, EuiFieldText } from '@elastic/eui';
 
-import Repo from './Repo';
+import { Repo } from './Repo';
 
-class ReposManagement extends React.Component {
+export class ReposManagement extends React.Component {
   public state = {
     repos: [],
     importRepoField: '',
@@ -69,5 +69,3 @@ class ReposManagement extends React.Component {
     );
   }
 }
-
-export default ReposManagement;

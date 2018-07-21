@@ -15,7 +15,7 @@ interface RepoProps {
   deleteRepoSuccessCallBack: (repo: Repository) => any;
 }
 
-class Repo extends React.Component<RepoProps, any> {
+export class Repo extends React.Component<RepoProps, any> {
   public deleteRepo = () => {
     this.props.httpClient.delete(`../api/castro/repo/${this.props.repo.uri}`).then(() => {
       this.props.deleteRepoSuccessCallBack(this.props.repo);
@@ -36,5 +36,3 @@ class Repo extends React.Component<RepoProps, any> {
     );
   }
 }
-
-export default Repo;

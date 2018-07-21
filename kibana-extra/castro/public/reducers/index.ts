@@ -15,7 +15,7 @@ const defaultState: RootState = {
   count: 0,
 };
 
-const reducer = handleActions(
+export const reducer = handleActions(
   {
     [String(increase)]: (state: RootState, action: any) => {
       console.log('Receive increase action with payload: ' + action.payload); // tslint:disable-line no-console
@@ -32,5 +32,3 @@ const reducer = handleActions(
   },
   defaultState
 );
-
-export default reducer;

@@ -24,8 +24,8 @@ import { kfetch } from 'ui/kfetch';
 
 import { FileTree as Tree } from '../../../model';
 
-import FileTree from '../FileTree/FileTree';
-import Editor from './Editor';
+import { FileTree } from '../FileTree/FileTree';
+import { Editor } from './Editor';
 
 import { history } from '../../utils/url';
 
@@ -38,7 +38,7 @@ interface Props {
   match: match<{ [key: string]: string }>;
 }
 
-export default class Layout extends React.Component<Props, State> {
+export class Layout extends React.Component<Props, State> {
   constructor(props: Props) {
     super(props);
     this.state = {

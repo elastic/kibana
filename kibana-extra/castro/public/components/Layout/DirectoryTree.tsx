@@ -12,7 +12,7 @@ interface Props<T = any> {
   onClick: (node: T) => void;
 }
 
-export default class DirectoryTree extends React.Component<Props, any> {
+export class DirectoryTree extends React.Component<Props, any> {
   public to = node => {
     const data = {
       id: node.name,

@@ -45,7 +45,7 @@ function entry2Tree(entry: TreeEntry): FileTree {
   };
 }
 
-export default class GitOperations {
+export class GitOperations {
   private repoRoot: string;
 
   constructor(repoRoot: string) {

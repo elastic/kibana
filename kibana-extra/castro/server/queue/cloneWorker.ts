@@ -8,9 +8,9 @@ import { Esqueue } from '@castro/esqueue';
 import * as Hapi from 'hapi';
 
 import { AbstractWorker, Job } from '.';
-import RepositoryUtils from '../../common/repositoryUtils';
+import { RepositoryUtils } from '../../common/repositoryUtils';
 import { Log } from '../log';
-import RepositoryService from '../repositoryService';
+import { RepositoryService } from '../repositoryService';
 
 export class CloneWorker extends AbstractWorker {
   public id: string = 'clone';

@@ -7,7 +7,7 @@
 import os from 'os';
 import Path from 'path';
 
-export default class ServerOptions {
+export class ServerOptions {
   private options: any;
   constructor(options: any) {
     this.options = options;

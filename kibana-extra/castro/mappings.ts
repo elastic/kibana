@@ -6,7 +6,7 @@
 
 export const REPOSITORY_INDEX_TYPE = 'castro-repository';
 
-const mappings = {
+export const mappings = {
   [REPOSITORY_INDEX_TYPE]: {
     properties: {
       uri: {
@@ -24,5 +24,3 @@ const mappings = {
     },
   },
 };
-
-export default mappings;

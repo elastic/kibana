@@ -9,9 +9,9 @@ import * as Hapi from 'hapi';
 import { Log } from '../log';
 import { LanguageServerController } from '../lsp/controller';
 import { WorkspaceHandler } from '../lsp/WorkspaceHandler';
-import ServerOptions from '../ServerOptions';
+import { ServerOptions } from '../ServerOptions';
 
-export default async function(server: Hapi.Server, options: ServerOptions) {
+export async function lspRoute(server: Hapi.Server, options: ServerOptions) {
   const log = new Log(server);
 
   const workspacePath: string = options.workspacePath;

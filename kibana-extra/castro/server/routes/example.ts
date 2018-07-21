@@ -137,7 +137,7 @@ async function getFiles(log: Log) {
   };
 }
 
-export default function(server: Hapi.Server) {
+export function exampleRoute(server: Hapi.Server) {
   server.route({
     path: '/api/castro/example',
     method: 'GET',

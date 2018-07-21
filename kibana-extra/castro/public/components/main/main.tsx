@@ -20,8 +20,8 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 
 import { Entry } from '../../../server/routes/example';
-import Counter from '../counter';
-import Code from './code';
+import { CounterContainer } from '../counter';
+import { Code } from './code';
 
 interface MainProps {
   title: string;
@@ -77,7 +77,7 @@ export class Main extends React.Component<MainProps, MainState> {
               </EuiTitle>
             </EuiPageContentHeader>
             <EuiPageContentBody>
-              <Counter />
+              <CounterContainer />
               <EuiSpacer size="xl" />
               <Code httpClient={this.props.httpClient} />
               <EuiSpacer size="xl" />

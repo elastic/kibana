@@ -19,7 +19,7 @@ interface Props<T = Tree> {
   activePath: string;
 }
 
-export default class FileTree extends React.Component<Props, any> {
+export class FileTree extends React.Component<Props, any> {
   public getItemRenderer = (node: Tree, forceOpen: boolean) => () => {
     const className = this.props.activePath === node.path ? 'activeFileNode' : 'fileNode';
     const onClick = () => this.props.onClick(node.path || '');

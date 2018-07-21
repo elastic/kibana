@@ -7,10 +7,10 @@
 import Boom from 'boom';
 import fileType from 'file-type';
 import * as Hapi from 'hapi';
-import GitOperations from '../GitOperations';
-import ServerOptions from '../ServerOptions';
+import { GitOperations } from '../GitOperations';
+import { ServerOptions } from '../ServerOptions';
 
-export default function(server: Hapi.Server, options: ServerOptions) {
+export function fileRoute(server: Hapi.Server, options: ServerOptions) {
   server.route({
     path: '/api/castro/repo/{site}/{org}/{repo}/tree/{rev}/{path*}',
     method: 'GET',

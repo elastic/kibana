@@ -7,13 +7,13 @@
 import React from 'react';
 import { HashRouter as Router, Route } from 'react-router-dom';
 
-import Layout from './Layout/Layout';
+import { Layout } from './Layout/Layout';
 import { Main } from './main';
-import Repo from './ReposManagement/ReposManagement';
+import { ReposManagement } from './ReposManagement/ReposManagement';
 
-export default props => {
+export const App = props => {
   const renderMain = () => <Main {...props} />;
-  const renderRepos = () => <Repo {...props} />;
+  const renderRepos = () => <ReposManagement {...props} />;
 
   return (
     <Router>

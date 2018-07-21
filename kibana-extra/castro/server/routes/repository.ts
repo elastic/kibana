@@ -7,14 +7,14 @@
 import Boom from 'boom';
 import * as Hapi from 'hapi';
 
-import RepositoryUtils from '../../common/repositoryUtils';
+import { RepositoryUtils } from '../../common/repositoryUtils';
 import { REPOSITORY_INDEX_TYPE } from '../../mappings';
 import { Repository } from '../../model';
 import { Log } from '../log';
 import { Worker } from '../queue';
-import ServerOptions from '../ServerOptions';
+import { ServerOptions } from '../ServerOptions';
 
-export default function(server: Hapi.Server, options: ServerOptions) {
+export function repositoryRoute(server: Hapi.Server, options: ServerOptions) {
   // Clone a git repository
   server.route({
     path: '/api/castro/repo',

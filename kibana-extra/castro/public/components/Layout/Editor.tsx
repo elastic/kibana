@@ -17,7 +17,7 @@ interface Props {
   repoUri: string;
 }
 
-export default class Editor extends React.Component<Props> {
+export class Editor extends React.Component<Props> {
   private lspMethods: TextDocumentMethods;
   private container: HTMLElement | undefined;
   private editor: any | undefined;

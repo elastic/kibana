@@ -8,7 +8,7 @@ import * as Hapi from 'hapi';
 
 import Path from 'path';
 
-export default function(server: Hapi.Server) {
+export function monacoRoute(server: Hapi.Server) {
   server.route({
     method: 'GET',
     path: '/monaco/{param*}',

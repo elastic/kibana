@@ -7,12 +7,12 @@
 import Git from 'nodegit';
 import rimraf from 'rimraf';
 
-import RepositoryUtils from '../common/repositoryUtils';
+import { RepositoryUtils } from '../common/repositoryUtils';
 import { Repository } from '../model';
 import { Log } from './log';
 
 // This is the service for any kind of repository handling, e.g. clone, update, delete, etc.
-export default class RepositoryService {
+export class RepositoryService {
   constructor(private readonly repoVolPath: string, private log: Log) {}
 
   public async clone(repo: Repository): Promise<Repository | null> {

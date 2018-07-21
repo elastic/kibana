@@ -9,7 +9,7 @@ import * as Hapi from 'hapi';
 
 import { AbstractWorker, Job } from '.';
 import { Log } from '../log';
-import RepositoryService from '../repositoryService';
+import { RepositoryService } from '../repositoryService';
 
 export class DeleteWorker extends AbstractWorker {
   public id: string = 'delete';

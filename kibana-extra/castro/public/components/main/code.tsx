@@ -24,7 +24,7 @@ interface State {
   html?: string;
 }
 
-export default class Code extends React.Component<any, State> {
+export class Code extends React.Component<any, State> {
   constructor(props: any) {
     super(props);
     this.state = {
