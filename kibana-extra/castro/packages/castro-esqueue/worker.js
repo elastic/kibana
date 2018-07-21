@@ -10,7 +10,7 @@ import moment from 'moment';
 import { constants } from './constants';
 import { WorkerTimeoutError, UnspecifiedWorkerError } from './helpers/errors';
 import { CancellationToken } from './helpers/cancellation_token';
-import { Poller } from '../poller';
+import { Poller } from './helpers/poller';
 
 const puid = new Puid();
 
