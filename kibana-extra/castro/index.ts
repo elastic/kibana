@@ -51,7 +51,7 @@ export default (kibana: any) =>
         // We my consider to provide a different value
         doctype: 'esqueue',
         dataSeparator: '.',
-        client: server.plugins.elasticsearch.getCluster('admin'),
+        client: server.plugins.elasticsearch.getCluster('admin').getClient(),
       });
 
       const cloneWorker = new CloneWorker(queue, server);
