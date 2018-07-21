@@ -10,9 +10,6 @@ describe('get_shard_allocation', () => {
 
   const exampleShardSource = {
     cluster_uuid: "Xb_iFZeMSDialSlUwnH53w",
-    source_node: {
-      uuid: "X7Cq5UJ9TrS6gWVLItV-0A"
-    },
     state_uuid: "Xobm9shMQGa2p52j-Vh61A",
     type: "shards",
     timestamp: "2018-07-05T23:59:51.259Z",
