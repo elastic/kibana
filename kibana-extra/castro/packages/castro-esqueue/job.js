@@ -16,7 +16,7 @@ const puid = new Puid();
 export class Job extends events.EventEmitter {
   constructor(queue, index, type, payload, options = {}) {
     if (typeof type !== 'string') throw new Error('Type must be a string');
-    if (payload && typeof payload === 'object') throw new Error('Payload must be a plain object');
+    if (!payload || typeof payload !== 'object') throw new Error('Payload must be a plain object');
 
     super();
 
