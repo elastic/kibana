@@ -8,7 +8,7 @@ import { Logger } from 'vscode-jsonrpc';
 import { Message, ResponseMessage } from 'vscode-jsonrpc/lib/messages';
 import { AbstractMessageWriter, MessageWriter } from 'vscode-jsonrpc/lib/messageWriter';
 
-import { RepliesMap } from './RepliesMap';
+import { RepliesMap } from './replies_map';
 
 export class HttpMessageWriter extends AbstractMessageWriter implements MessageWriter {
   private replies: RepliesMap;

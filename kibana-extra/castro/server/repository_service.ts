@@ -7,7 +7,7 @@
 import Git from 'nodegit';
 import rimraf from 'rimraf';
 
-import { RepositoryUtils } from '../common/repositoryUtils';
+import { RepositoryUtils } from '../common/repository_utils';
 import { Repository } from '../model';
 import { Log } from './log';
 

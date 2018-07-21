@@ -24,8 +24,8 @@ import { kfetch } from 'ui/kfetch';
 
 import { FileTree as Tree } from '../../../model';
 
-import { FileTree } from '../FileTree/FileTree';
-import { Editor } from './Editor';
+import { FileTree } from '../file_tree/file_tree';
+import { Editor } from './editor';
 
 import { history } from '../../utils/url';
 

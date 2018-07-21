@@ -16,8 +16,8 @@ import { fileRoute } from './server/routes/file';
 import { lspRoute } from './server/routes/lsp';
 import { monacoRoute } from './server/routes/monaco';
 import { repositoryRoute } from './server/routes/repository';
-import { ServerOptions } from './server/ServerOptions';
-import { UpdateScheduler } from './server/updateScheduler';
+import { ServerOptions } from './server/server_options';
+import { UpdateScheduler } from './server/update_scheduler';
 
 // tslint:disable-next-line no-default-export
 export default (kibana: any) =>

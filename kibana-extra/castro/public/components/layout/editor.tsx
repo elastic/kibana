@@ -7,7 +7,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 
-import { LspRestClient, TextDocumentMethods } from '../../../common/LspClient';
+import { LspRestClient, TextDocumentMethods } from '../../../common/lsp_client';
 
 import { initMonaco, Monaco } from 'init-monaco';
 import { Hover } from 'vscode-languageserver';

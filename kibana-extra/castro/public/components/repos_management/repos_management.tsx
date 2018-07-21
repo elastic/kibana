@@ -8,7 +8,7 @@ import React from 'react';
 
 import { EuiButton, EuiFieldText } from '@elastic/eui';
 
-import { Repo } from './Repo';
+import { Repo } from './repo';
 
 export class ReposManagement extends React.Component {
   public state = {

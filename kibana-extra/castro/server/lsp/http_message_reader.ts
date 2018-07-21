@@ -10,7 +10,7 @@ import {
   MessageReader,
 } from 'vscode-jsonrpc/lib/messageReader';
 
-import { HttpRequestEmitter } from './HttpRequestEmitter';
+import { HttpRequestEmitter } from './http_request_emitter';
 
 export class HttpMessageReader extends AbstractMessageReader implements MessageReader {
   private httpEmitter: HttpRequestEmitter;

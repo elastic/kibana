@@ -11,7 +11,7 @@ import chrome from 'ui/chrome';
 import { uiModules } from 'ui/modules';
 
 import 'ui/autoload/styles';
-import { App } from './components/App';
+import { App } from './components/app';
 import { store } from './stores';
 
 const app = uiModules.get('apps/castro');

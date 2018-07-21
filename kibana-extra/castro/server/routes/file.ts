@@ -7,8 +7,8 @@
 import Boom from 'boom';
 import fileType from 'file-type';
 import * as Hapi from 'hapi';
-import { GitOperations } from '../GitOperations';
-import { ServerOptions } from '../ServerOptions';
+import { GitOperations } from '../git_operations';
+import { ServerOptions } from '../server_options';
 
 export function fileRoute(server: Hapi.Server, options: ServerOptions) {
   server.route({

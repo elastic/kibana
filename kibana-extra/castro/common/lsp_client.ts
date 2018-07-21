@@ -6,7 +6,7 @@
 
 import { ResponseError, ResponseErrorLiteral, ResponseMessage } from 'vscode-jsonrpc/lib/messages';
 
-export { TextDocumentMethods } from './TextDocumentMethods';
+export { TextDocumentMethods } from './text_document_methods';
 
 export interface LspClient {
   sendRequest(method: string, params: any): Promise<ResponseMessage>;

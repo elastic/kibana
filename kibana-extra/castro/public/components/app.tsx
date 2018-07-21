@@ -7,9 +7,9 @@
 import React from 'react';
 import { HashRouter as Router, Route } from 'react-router-dom';
 
-import { Layout } from './Layout/Layout';
+import { Layout } from './layout/layout';
 import { Main } from './main';
-import { ReposManagement } from './ReposManagement/ReposManagement';
+import { ReposManagement } from './repos_management/repos_management';
 
 export const App = props => {
   const renderMain = () => <Main {...props} />;

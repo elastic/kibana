@@ -6,22 +6,21 @@
 
 import { Esqueue } from '@castro/esqueue';
 
-import { AbstractWorker, Job } from '.';
-import { RepositoryUtils } from '../../common/repositoryUtils';
 import { Log } from '../log';
-import { RepositoryService } from '../repositoryService';
+import { RepositoryService } from '../repository_service';
+import { AbstractWorker } from './abstract_worker';
+import { Job } from './job';
 
-export class CloneWorker extends AbstractWorker {
-  public id: string = 'clone';
+export class DeleteWorker extends AbstractWorker {
+  public id: string = 'delete';
 
   constructor(protected readonly queue: Esqueue, protected readonly log: Log) {
     super(queue, log);
   }
 
   public async executeJob(job: Job) {
-    const { url, dataPath } = job.payload;
+    const { uri, dataPath } = job.payload;
     const repoService = new RepositoryService(dataPath, this.log);
-    const repo = RepositoryUtils.buildRepository(url);
-    await repoService.clone(repo);
+    await repoService.remove(uri);
   }
 }

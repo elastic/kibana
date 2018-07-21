@@ -23,9 +23,11 @@
     "type-check": "tsc --project tsconfig.json --noEmit --pretty"
   },
   "lint-staged": {
-    "*.{ts,tsx}": "yarn run tslint"
+    "*.{ts,tsx}": "yarn run tslint",
+    "*.{js,ts,tsx}": "check_precommit_filenames"
   },
   "devDependencies": {
+    "@castro/filename-check": "link:packages/castro-filename-check",
     "@elastic/eui": "^3.0.0",
     "@kbn/plugin-helpers": "link:../../kibana/packages/kbn-plugin-helpers",
     "@types/angular": "^1.6.48",

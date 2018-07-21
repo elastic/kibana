@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { LspClient } from './LspClient';
+import { LspClient } from './lsp_client';
 
 export class LspMethod<INPUT, OUTPUT> {
   private client: LspClient;

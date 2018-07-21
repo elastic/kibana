@@ -10,7 +10,7 @@ import { Clone, Commit, Error, Repository, Reset } from 'nodegit';
 import path from 'path';
 import Url from 'url';
 import { TextDocumentPositionParams } from 'vscode-languageserver';
-import { GitOperations } from '../GitOperations';
+import { GitOperations } from '../git_operations';
 import { Log } from '../log';
 
 export class WorkspaceHandler {

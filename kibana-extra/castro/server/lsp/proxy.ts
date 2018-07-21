@@ -24,10 +24,10 @@ import {
 } from 'vscode-languageserver-protocol/lib/main';
 import { createConnection, IConnection } from 'vscode-languageserver/lib/main';
 
-import { HttpMessageReader } from './HttpMessageReader';
-import { HttpMessageWriter } from './HttpMessageWriter';
-import { HttpRequestEmitter } from './HttpRequestEmitter';
-import { createRepliesMap } from './RepliesMap';
+import { HttpMessageReader } from './http_message_reader';
+import { HttpMessageWriter } from './http_message_writer';
+import { HttpRequestEmitter } from './http_request_emitter';
+import { createRepliesMap } from './replies_map';
 
 export class LanguageServerProxy {
   public initialized: boolean = false;

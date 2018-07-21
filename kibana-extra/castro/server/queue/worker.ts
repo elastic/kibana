@@ -4,7 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export * from './clone_worker';
-export * from './delete_worker';
-export * from './update_worker';
-export * from './worker';
+import { Job } from './job';
+
+export interface Worker {
+  createJob(payload: any, options: any): Job;
+  executeJob(job: Job): void;
+  enqueueJob(payload: any, options: any): void;
+}

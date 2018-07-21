@@ -1,5 +1,6 @@
 gen/
 bin/
+!/kibana-extra/castro/packages/castro-filename-check/bin/
 .DS_Store
 .gradle/
 .idea/
