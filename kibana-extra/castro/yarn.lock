@@ -63,8 +63,8 @@
   resolved "https://registry.yarnpkg.com/@sindresorhus/is/-/is-0.7.0.tgz#9a06f4f137ee84d7df0460c1fdb1135ffa6c50fd"
 
 "@types/angular@^1.6.48":
-  version "1.6.48"
-  resolved "https://registry.yarnpkg.com/@types/angular/-/angular-1.6.48.tgz#e8f77bf41d00d3293421cbaaed2bafb4d5f399f9"
+  version "1.6.49"
+  resolved "https://registry.yarnpkg.com/@types/angular/-/angular-1.6.49.tgz#8a5dd666100155d27cda9801f961360eb24b8d96"
 
 "@types/boom@^7.2.0":
   version "7.2.0"
@@ -140,8 +140,8 @@
     redux "^4.0.0"
 
 "@types/react-router-dom@^4.2.7":
-  version "4.2.7"
-  resolved "https://registry.yarnpkg.com/@types/react-router-dom/-/react-router-dom-4.2.7.tgz#9d36bfe175f916dd8d7b6b0237feed6cce376b4c"
+  version "4.3.0"
+  resolved "https://registry.yarnpkg.com/@types/react-router-dom/-/react-router-dom-4.3.0.tgz#c91796d02deb3a5b24bc1c5db4a255df0d18b8b5"
   dependencies:
     "@types/history" "*"
     "@types/react" "*"
@@ -1419,8 +1419,8 @@ extend-shallow@^3.0.0, extend-shallow@^3.0.2:
     is-extendable "^1.0.1"
 
 extend@^3.0.0, extend@~3.0.0, extend@~3.0.1:
-  version "3.0.1"
-  resolved "https://registry.yarnpkg.com/extend/-/extend-3.0.1.tgz#a755ea7bc1adfcc5a31ce7e762dbaadc5e636444"
+  version "3.0.2"
+  resolved "https://registry.yarnpkg.com/extend/-/extend-3.0.2.tgz#f8b1136b4071fbd8eb140aff858b1019ec2915fa"
 
 external-editor@^1.1.0:
   version "1.1.1"

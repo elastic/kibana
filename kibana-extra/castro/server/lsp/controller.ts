@@ -30,6 +30,7 @@ export class LanguageServerController {
   private readonly targetHost: string;
   private readonly lspLogger?: Logger;
   private log: Log;
+  private readonly detach: boolean = false;
 
   constructor(targetHost: string, lspLoger: Logger, server: Hapi.Server) {
     this.targetHost = targetHost;
@@ -69,29 +70,36 @@ export class LanguageServerController {
 
   /** Lancuch a LSP proxy and register a proxy */
   public async launchTypescript() {
-    const port = await getPort({ port: 20000 });
+    let port = 2089;
 
-    this.log.info('Launch Typescript Language Server at port ' + port);
-    const child = spawn(
-      'node',
-      [
-        path.resolve(
-          __dirname,
-          '../../../../lsp/javascript-typescript-langserver/lib/language-server'
-        ),
-        '-p',
-        port.toString(),
-        '-c',
-        '1',
-      ],
-      {
-        detached: true,
-        stdio: 'inherit',
-      }
-    );
+    if (!this.detach) {
+      port = await getPort();
+    }
+
     const proxy = new LanguageServerProxy(port, this.targetHost, this.lspLogger);
 
-    this.closeOnExit(proxy, child);
+    if (!this.detach) {
+      this.log.info('Launch Typescript Language Server at port ' + port);
+      const child = spawn(
+        'node',
+        [
+          path.resolve(
+            __dirname,
+            '../../../../lsp/javascript-typescript-langserver/lib/language-server'
+          ),
+          '-p',
+          port.toString(),
+          '-c',
+          '1',
+        ],
+        {
+          detached: true,
+          stdio: 'inherit',
+        }
+      );
+      this.closeOnExit(proxy, child);
+    }
+
     this.lsps.push(proxy);
   }
 
