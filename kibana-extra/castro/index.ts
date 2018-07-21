@@ -7,8 +7,9 @@
 import * as Hapi from 'hapi';
 import { resolve } from 'path';
 
+import { Esqueue } from '@castro/esqueue';
+
 import { mappings } from './mappings';
-import { Esqueue } from './server/lib/esqueue';
 import { CloneWorker, DeleteWorker } from './server/queue';
 import { exampleRoute } from './server/routes/example';
 import { fileRoute } from './server/routes/file';
