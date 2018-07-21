@@ -68,10 +68,11 @@ export class RepositoryService {
     try {
       const repo = await Git.Repository.open(localPath);
       await repo.fetchAll();
-      // TODO: We may want check the default branch.
+      const currentBranch = await repo.getCurrentBranch();
+      const currentBranchName = currentBranch.shorthand();
       await repo.mergeBranches(
-        'master',
-        'origin/master',
+        currentBranchName,
+        `origin/${currentBranchName}`,
         Git.Signature.default(repo),
         Git.Merge.PREFERENCE.FASTFORWARD_ONLY
       );
