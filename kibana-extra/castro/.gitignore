@@ -3,4 +3,5 @@ node_modules
 /build/
 *.js
 !packages/castro-esqueue/**/*.js
+!server/lib/**/*.js
 /public/styles.css
