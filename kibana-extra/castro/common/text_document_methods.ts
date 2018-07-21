@@ -11,8 +11,8 @@ import {
   TextDocumentPositionParams,
 } from 'vscode-languageserver';
 
-import { LspClient } from './LspClient';
-import { LspMethod } from './LspMethod';
+import { LspClient } from './lsp_client';
+import { LspMethod } from './lsp_method';
 
 export class TextDocumentMethods {
   public documentSymbol: LspMethod<DocumentSymbolParams, SymbolInformation[]>;
