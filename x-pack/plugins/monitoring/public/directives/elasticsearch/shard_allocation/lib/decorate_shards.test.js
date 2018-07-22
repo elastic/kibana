@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import expect from 'expect.js';
 import { decorateShards } from './decorate_shards';
 
 const nodes = {
@@ -39,7 +38,7 @@ describe('decorateShards', () => {
       state: 'RELOCATING'
     };
     const result = decorateShards([ shard ], nodes);
-    expect(result[0]).to.be.eql({
+    expect(result[0]).toMatchObject({
       index: 'test',
       node: '8WuXSoE6Q_-etoIhx0R3ag',
       nodeName: 'node01',
@@ -63,7 +62,7 @@ describe('decorateShards', () => {
     };
     // pass nodes object with only node01 value
     const result = decorateShards([ shard ], { '8WuXSoE6Q_-etoIhx0R3ag': nodes['8WuXSoE6Q_-etoIhx0R3ag'] });
-    expect(result[0]).to.be.eql({
+    expect(result[0]).toMatchObject({
       index: 'test',
       node: '8WuXSoE6Q_-etoIhx0R3ag',
       nodeName: 'node01',
@@ -87,7 +86,7 @@ describe('decorateShards', () => {
       state: 'STARTED'
     };
     const result = decorateShards([ shard ], nodes);
-    expect(result[0]).to.be.eql({
+    expect(result[0]).toMatchObject({
       index: 'test2',
       node: 'ZRnQRUBBQHugqD-rqicFJw',
       nodeName: 'node02',
@@ -110,7 +109,7 @@ describe('decorateShards', () => {
       state: 'INITIALIZING'
     };
     const result = decorateShards([ shard ], nodes);
-    expect(result[0]).to.be.eql({
+    expect(result[0]).toMatchObject({
       index: 'test2',
       node: '8WuXSoE6Q_-etoIhx0R3ag',
       nodeName: 'node01',
@@ -133,7 +132,7 @@ describe('decorateShards', () => {
       state: 'UNASSIGNED'
     };
     const result = decorateShards([ shard ], nodes);
-    expect(result[0]).to.be.eql({
+    expect(result[0]).toMatchObject({
       index: 'test2',
       node: null,
       nodeName: null,
