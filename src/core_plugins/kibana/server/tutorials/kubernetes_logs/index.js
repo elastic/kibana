@@ -71,6 +71,10 @@ export function kubernetesLogsSpecProvider() {
                      ' [Learn more]({config.docs.beats.filebeat}/running-on-kubernetes.html).',
     euiIconType: 'logoKubernetes',
     artifacts: {
+      application: {
+        label: 'Discover',
+        path: '/app/kibana#/discover'
+      },
       dashboards: [],
       exportedFields: {
         documentationUrl: '{config.docs.beats.filebeat}/exported-fields-kubernetes-processor.html'
