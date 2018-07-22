@@ -25,7 +25,7 @@ export function getShardAggs(config, includeNodes) {
   };
   const nodesAgg = {
     terms: {
-      field: `shard.node`,
+      field: 'shard.node',
       size: maxBucketSize
     },
     aggs: {
