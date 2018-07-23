@@ -11,6 +11,18 @@ import React, { Component } from 'react';
 
 import { JsonTooltip } from '../json_tooltip/json_tooltip';
 
+// Component for creating a form label including a hoverable icon
+// to provide additional information in a tooltip. Label and tooltip
+// text elements get unique ids based on label-id so they can be
+// referenced by attributes, for example:
+//
+// <FormLabel labelId="uid">Label Text</FormLabel>
+// <input
+//   type="text"
+//   aria-labelledby="ml_aria_label_uid"
+//   aria-describedby="ml_aria_description_uid"
+// />
+//
 // Writing this as a class based component because stateless components
 // cannot use ref(). Once angular is completely gone this can be rewritten
 // as a function stateless component.
