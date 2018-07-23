@@ -6,11 +6,13 @@ export const SimpleMathFunction = ({ onChange, value, inputRef }) => {
   const options = [
     { text: 'Value', value: '' },
     { text: 'Average', value: 'mean' },
-    { text: 'Sum', value: 'sum' },
     { text: 'Count', value: 'size' },
+    { text: 'First', value: 'first' },
+    { text: 'Last', value: 'last' },
     { text: 'Max', value: 'max' },
-    { text: 'Min', value: 'min' },
     { text: 'Median', value: 'median' },
+    { text: 'Min', value: 'min' },
+    { text: 'Sum', value: 'sum' },
   ];
 
   return (
