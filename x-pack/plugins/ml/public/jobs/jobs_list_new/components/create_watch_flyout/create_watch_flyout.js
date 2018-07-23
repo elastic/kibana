@@ -81,9 +81,7 @@ export class CreateWatchModal extends Component {
   showFlyout = (jobId) => {
     loadFullJob(jobId)
     	.then((job) => {
-
         const bucketSpan = job.analysis_config.bucket_span;
-        // mlCreateWatchService.reset();
         mlCreateWatchService.config.includeInfluencers = (job.analysis_config.influencers.length > 0);
 
         this.setState({
@@ -99,28 +97,15 @@ export class CreateWatchModal extends Component {
   }
 
   save = () => {
-    // const start = moment.isMoment(this.state.startTime) ? this.state.startTime.valueOf() : this.state.startTime;
-    // const end = moment.isMoment(this.state.endTime) ? this.state.endTime.valueOf() : this.state.endTime;
-    // forceStartDatafeeds(this.state.jobs, start, end, this.refreshJobs);
-    console.log(mlCreateWatchService.config);
     mlCreateWatchService.createNewWatch(this.state.jobId)
     	.then((resp) => {
-        // debugger
         toastNotifications.addSuccess(getSuccessToast(resp.id, resp.url));
         this.closeFlyout();
       })
       .catch((error) => {
         toastNotifications.addDanger(`Could not save watch`);
         console.error(error);
-
-        // msgs.clear();
-        // msgs.error('Watch could not be saved');
-        // if (typeof resp === 'string') {
-        //   msgs.error(resp);
-        // }
-        // $scope.status.watch = null;
       });
-    // this.closeFlyout();
   }
 
 
@@ -169,7 +154,6 @@ export class CreateWatchModal extends Component {
                 <EuiButton
                   onClick={this.save}
                   fill
-                  // isDisabled={(valid === false)}
                 >
                   Save
                 </EuiButton>
