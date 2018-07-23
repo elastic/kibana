@@ -12,5 +12,6 @@ import { schemas as serverSchemas } from '../server/graphql';
 export const schemas = [...serverSchemas, ...clientSchemas];
 
 // this default export is used to feed the combined types to the gql-gen tool
-// which generates the corresponding typescript types
+// which generates the corresponding typescript types.
+// tslint:disable-next-line:no-default-export
 export default buildSchemaFromTypeDefinitions(schemas);
