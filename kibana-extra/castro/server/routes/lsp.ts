@@ -12,40 +12,32 @@ import { WorkspaceHandler } from '../lsp/workspace_handler';
 import { ServerOptions } from '../server_options';
 
 export async function lspRoute(server: Hapi.Server, options: ServerOptions) {
-  const log = new Log(server);
-
   const workspacePath: string = options.workspacePath;
 
   const repoPath: string = options.repoPath;
 
-  const controller = new LanguageServerController('127.0.0.1', log, server);
+  const controller = new LanguageServerController('127.0.0.1', server);
 
   // TODO read from config which LSP should be used
   await controller.launchTypescript();
-
-  controller.listen();
-  await controller
-    .initialize({}, [
-      {
-        uri: `file://${workspacePath}`,
-        name: 'root',
-      },
-    ])
-    .then(result => log.info(result));
 
   server.route({
     path: '/api/lsp/textDocument/{method}',
     async handler(req: Hapi.Request, reply: Hapi.IReply) {
       if (typeof req.payload === 'object' && req.payload != null) {
-        // is it a json ?
         const method = req.params.method;
         if (method) {
-          const workspaceHandler = new WorkspaceHandler(repoPath, workspacePath, log);
-          const { method: fullMethod, payload } = await workspaceHandler.resolveRequest(
-            method,
-            req.payload
+          const workspaceHandler = new WorkspaceHandler(
+            repoPath,
+            workspacePath,
+            new Log(server, ['LSP', 'workspace'])
           );
-          controller.receiveRequest(fullMethod, payload).then(
+          const request = {
+            method: `textDocument/${method}`,
+            params: req.payload,
+          };
+          await workspaceHandler.handleRequest(request);
+          controller.handleRequest(request).then(
             result => {
               reply.response(result);
             },

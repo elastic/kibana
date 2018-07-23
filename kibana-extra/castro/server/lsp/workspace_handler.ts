@@ -10,6 +10,7 @@ import { Clone, Commit, Error, Repository, Reset } from 'nodegit';
 import path from 'path';
 import Url from 'url';
 import { TextDocumentPositionParams } from 'vscode-languageserver';
+import { LspRequest } from '../../model';
 import { GitOperations } from '../git_operations';
 import { Log } from '../log';
 
@@ -54,30 +55,27 @@ export class WorkspaceHandler {
     return workspaceRepo;
   }
 
-  public async resolveRequest(
-    method: string,
-    payload: any
-  ): Promise<{ method: string; payload: any }> {
+  public async handleRequest(request: LspRequest): Promise<void> {
+    const { method, params } = request;
     switch (method) {
-      case 'hover':
-        const params: TextDocumentPositionParams = payload;
-        params.textDocument.uri = await this.resolveUri(params.textDocument.uri);
+      case 'textDocument/hover':
+        const payload: TextDocumentPositionParams = params;
+        const { filePath, workspacePath } = await this.resolveUri(params.textDocument.uri);
+        if (filePath) {
+          payload.textDocument.uri = request.resolvedFilePath = filePath;
+          request.workspacePath = workspacePath;
+        }
         break;
       default:
       // do nothing
     }
-
-    return {
-      method: `textDocument/${method}`,
-      payload,
-    };
   }
 
   /**
    * convert a git uri to absolute file path, checkout code into workspace
    * @param uri the uri
    */
-  private async resolveUri(uri: string): Promise<string> {
+  private async resolveUri(uri: string) {
     if (uri.startsWith('git://')) {
       const url = Url.parse(uri);
       const domain = url.hostname;
@@ -86,9 +84,17 @@ export class WorkspaceHandler {
       const filePath = url.hash ? url.hash.substr(1) : '/';
       const repositoryUri = `${domain}/${repo}`;
       const workspaceRepo = await this.openWorkspace(repositoryUri, revision);
-      return `file://${path.resolve(workspaceRepo.workdir(), filePath)}`;
+      return {
+        workspacePath: workspaceRepo.workdir(),
+        filePath: `file://${path.resolve(workspaceRepo.workdir(), filePath)}`,
+        uri,
+      };
     } else {
-      return uri;
+      return {
+        workspacePath: undefined,
+        filePath: undefined,
+        uri,
+      };
     }
   }
 

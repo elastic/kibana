@@ -4,8 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export * from './highlight';
-export * from './search';
-export * from './repository';
-export * from './task';
-export * from './lsp';
+export interface LspRequest {
+  method: string;
+  params: any;
+  documentUri?: string; // assert one uri per request for now.
+  resolvedFilePath?: string;
+  workspacePath?: string;
+}

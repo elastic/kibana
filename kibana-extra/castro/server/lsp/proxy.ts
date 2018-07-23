@@ -24,12 +24,17 @@ import {
 } from 'vscode-languageserver-protocol/lib/main';
 import { createConnection, IConnection } from 'vscode-languageserver/lib/main';
 
+import { LspRequest } from '../../model';
 import { HttpMessageReader } from './http_message_reader';
 import { HttpMessageWriter } from './http_message_writer';
 import { HttpRequestEmitter } from './http_request_emitter';
 import { createRepliesMap } from './replies_map';
 
-export class LanguageServerProxy {
+export interface ILanguageServerHandler {
+  handleRequest(request: LspRequest): Promise<ResponseMessage>;
+}
+
+export class LanguageServerProxy implements ILanguageServerHandler {
   public initialized: boolean = false;
 
   private conn: IConnection;
@@ -51,7 +56,9 @@ export class LanguageServerProxy {
       new HttpMessageWriter(this.replies, logger)
     );
   }
-
+  public handleRequest(request: LspRequest): Promise<ResponseMessage> {
+    return this.receiveRequest(request.method, request.params);
+  }
   public receiveRequest(method: string, params: any) {
     const message: RequestMessage = {
       jsonrpc: '2.0',
@@ -81,8 +88,10 @@ export class LanguageServerProxy {
       rootUri,
       capabilities: clientCapabilities,
     };
-
     return await clientConn.sendRequest('initialize', params).then(r => {
+      if (this.logger) {
+        this.logger.log(`initialized at ${rootUri}`);
+      }
       clientConn.sendNotification(InitializedNotification.type, {});
       this.initialized = true;
       return r as InitializeResult;
@@ -92,7 +101,7 @@ export class LanguageServerProxy {
   public listen() {
     this.conn.onRequest((method: string, ...params) => {
       if (this.logger) {
-        this.logger.log('received rest request method: ' + method);
+        this.logger.log('received request method: ' + method);
       }
 
       return this.connect().then(clientConn => {
@@ -106,6 +115,13 @@ export class LanguageServerProxy {
     this.conn.listen();
   }
 
+  public async shutdown() {
+    const clientConn = await this.connect();
+    if (this.logger) {
+      this.logger.log(`sending shutdown request`);
+    }
+    return await clientConn.sendRequest('shutdown');
+  }
   /**
    * send a exit request to Language Server
    * https://microsoft.github.io/language-server-protocol/specification#exit

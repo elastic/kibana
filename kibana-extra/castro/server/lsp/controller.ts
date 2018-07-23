@@ -5,61 +5,39 @@
  */
 import * as Hapi from 'hapi';
 
-import { Logger } from 'vscode-jsonrpc';
-import {
-  ClientCapabilities,
-  InitializeResult,
-  WorkspaceFolder,
-} from 'vscode-languageserver-protocol/lib/main';
 import { Log } from '../log';
-import { LanguageServerProxy } from './proxy';
+import { ILanguageServerHandler, LanguageServerProxy } from './proxy';
 
 import { ChildProcess, spawn } from 'child_process';
 import getPort from 'get-port';
 import path from 'path';
 // @ts-ignore
 import signals from 'signal-exit/signals';
+import { ResponseMessage } from 'vscode-jsonrpc/lib/messages';
+import { LspRequest } from '../../model';
+import { RequestExpander } from './request_expander';
 
 /**
  * Manage different LSP servers and forward request to different LSP using LanguageServerProxy, currently
  * we just use forward request to all the LSP servers we are running.
  */
-export class LanguageServerController {
+export class LanguageServerController implements ILanguageServerHandler {
   /** Map from langauge type to Lsp Server Controller */
-  private lsps: LanguageServerProxy[] = [];
+  private lsps: ILanguageServerHandler[] = [];
   private readonly targetHost: string;
-  private readonly lspLogger?: Logger;
   private log: Log;
   private readonly detach: boolean = false;
+  private server: Hapi.Server;
 
-  constructor(targetHost: string, lspLoger: Logger, server: Hapi.Server) {
+  constructor(targetHost: string, server: Hapi.Server) {
     this.targetHost = targetHost;
-    this.lspLogger = lspLoger;
     this.log = new Log(server);
+    this.server = server;
   }
 
-  public listen() {
-    for (const lsp of this.lsps) {
-      lsp.listen();
-    }
-  }
-
-  public async initialize(
-    clientCapabilities: ClientCapabilities,
-    workspaceFolders: [WorkspaceFolder]
-  ): Promise<InitializeResult> {
-    const allPromises: Array<Promise<InitializeResult>> = this.lsps.map(lsp =>
-      lsp.initialize(clientCapabilities, workspaceFolders)
-    );
-    return Promise.all(allPromises).then(values => {
-      // TODO: combile the values
-      return values[0];
-    });
-  }
-
-  public receiveRequest(method: string, params: any) {
-    const allPromises: Array<Promise<{}>> = this.lsps.map(lsp =>
-      lsp.receiveRequest(method, params)
+  public handleRequest(request: LspRequest) {
+    const allPromises: Array<Promise<ResponseMessage>> = this.lsps.map(lsp =>
+      lsp.handleRequest(request)
     );
 
     return Promise.all(allPromises).then(values => {
@@ -75,8 +53,8 @@ export class LanguageServerController {
     if (!this.detach) {
       port = await getPort();
     }
-
-    const proxy = new LanguageServerProxy(port, this.targetHost, this.lspLogger);
+    const log = new Log(this.server, ['LSP', `ts@${this.targetHost}:${port}`]);
+    const proxy = new LanguageServerProxy(port, this.targetHost, log);
 
     if (!this.detach) {
       this.log.info('Launch Typescript Language Server at port ' + port);
@@ -99,8 +77,8 @@ export class LanguageServerController {
       );
       this.closeOnExit(proxy, child);
     }
-
-    this.lsps.push(proxy);
+    proxy.listen();
+    this.lsps.push(new RequestExpander(proxy));
   }
 
   private async closeOnExit(proxy: LanguageServerProxy, child: ChildProcess) {
