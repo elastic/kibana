@@ -22,10 +22,9 @@ export class SpacesSavedObjectsClient {
     this.errors = baseClient.errors;
 
     this._client = baseClient;
-    this._request = request;
     this._types = types;
 
-    this._spaceUrlContext = spacesService.getUrlContext(this._request);
+    this._spaceUrlContext = spacesService.getUrlContext(request);
   }
 
   async create(type, attributes = {}, options = {}) {
@@ -38,8 +37,8 @@ export class SpacesSavedObjectsClient {
 
     if (this._shouldAssignSpaceId(type, spaceId)) {
       createOptions.id = this._generateDocumentId(spaceId, options.id);
-      createOptions.extraBodyProperties = {
-        ...options.extraBodyProperties,
+      createOptions.extraDocumentProperties = {
+        ...options.extraDocumentProperties,
         spaceId
       };
     }
@@ -55,8 +54,8 @@ export class SpacesSavedObjectsClient {
         return {
           ...object,
           id: this._generateDocumentId(spaceId, object.id),
-          extraBodyProperties: {
-            ...object.extraBodyProperties,
+          extraDocumentProperties: {
+            ...object.extraDocumentProperties,
             spaceId
           }
         };
@@ -91,9 +90,11 @@ export class SpacesSavedObjectsClient {
       types = [types];
     }
 
+    const filters = options.filters || [];
+
     const spaceId = await this._getSpaceId();
 
-    spaceOptions.filters = getSpacesQueryFilters(spaceId, types);
+    spaceOptions.filters = [...filters, ...getSpacesQueryFilters(spaceId, types)];
 
     const result = await this._client.find({ ...options, ...spaceOptions });
     result.saved_objects.map(object => this._trimSpaceId(spaceId, object));
@@ -110,10 +111,10 @@ export class SpacesSavedObjectsClient {
       id: this._generateDocumentId(thisSpaceId, object.id)
     }));
 
-    const extraSourceProperties = this._collectExtraSourceProperties(['spaceId', 'type'], options.extraSourceProperties);
+    const extraDocumentProperties = this._collectExtraDocumentProperties(['spaceId', 'type'], options.extraDocumentProperties);
 
     const result = await this._client.bulkGet(objectsToQuery, {
-      extraSourceProperties
+      extraDocumentProperties
     });
 
     result.saved_objects = result.saved_objects.map(savedObject => {
@@ -145,10 +146,10 @@ export class SpacesSavedObjectsClient {
       documentId = this._generateDocumentId(spaceId, id);
     }
 
-    const extraSourceProperties = this._collectExtraSourceProperties(['spaceId'], options.extraSourceProperties);
+    const extraDocumentProperties = this._collectExtraDocumentProperties(['spaceId'], options.extraDocumentProperties);
 
     const response = await this._client.get(type, documentId, {
-      extraSourceProperties
+      extraDocumentProperties
     });
 
     const { spaceId: objectSpaceId = DEFAULT_SPACE_ID } = response;
@@ -179,8 +180,8 @@ export class SpacesSavedObjectsClient {
       documentId = this._generateDocumentId(spaceId, id);
 
       if (this._shouldAssignSpaceId(type, spaceId)) {
-        updateOptions.extraBodyProperties = {
-          ...options.extraBodyProperties,
+        updateOptions.extraDocumentProperties = {
+          ...options.extraDocumentProperties,
           spaceId
         };
       }
@@ -239,7 +240,7 @@ export class SpacesSavedObjectsClient {
     return savedObject;
   }
 
-  _collectExtraSourceProperties(thisClientProperties, optionalProperties = []) {
+  _collectExtraDocumentProperties(thisClientProperties, optionalProperties = []) {
     return uniq([...thisClientProperties, ...optionalProperties]).value();
   }
 }
