@@ -3,32 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { stripSpaceUrlContext, getSpaceUrlContext, addSpaceUrlContext } from './spaces_url_parser';
-
-describe('stripSpaceUrlContext', () => {
-  test('it removes the space url context from the base path when the space is not at the root', () => {
-    const basePath = `/foo/s/my-space`;
-    expect(stripSpaceUrlContext(basePath)).toEqual('/foo');
-  });
-
-  test('it removes the space url context from the base path when the space is the root', () => {
-    const basePath = `/s/my-space`;
-    expect(stripSpaceUrlContext(basePath)).toEqual('');
-  });
-
-  test(`it doesn't change base paths without a space url context`, () => {
-    const basePath = `/this/is/a-base-path/ok`;
-    expect(stripSpaceUrlContext(basePath)).toEqual(basePath);
-  });
-
-  test('it accepts no parameters', () => {
-    expect(stripSpaceUrlContext()).toEqual('');
-  });
-
-  test('it remove the trailing slash', () => {
-    expect(stripSpaceUrlContext('/')).toEqual('');
-  });
-});
+import { getSpaceUrlContext, addSpaceUrlContext } from './spaces_url_parser';
 
 describe('getSpaceUrlContext', () => {
   test('it identifies the space url context', () => {

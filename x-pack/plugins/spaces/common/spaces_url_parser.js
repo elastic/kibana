@@ -18,31 +18,6 @@ export function getSpaceUrlContext(basePath = '/') {
   return urlContext;
 }
 
-export function stripSpaceUrlContext(basePath = '/') {
-  const currentSpaceUrlContext = getSpaceUrlContext(basePath);
-
-  let basePathWithoutSpace;
-  if (currentSpaceUrlContext) {
-    const indexOfSpaceContext = basePath.indexOf(`/s/${currentSpaceUrlContext}`);
-
-    const startsWithSpace = indexOfSpaceContext === 0;
-
-    if (startsWithSpace) {
-      basePathWithoutSpace = '/';
-    } else {
-      basePathWithoutSpace = basePath.substring(0, indexOfSpaceContext);
-    }
-  } else {
-    basePathWithoutSpace = basePath;
-  }
-
-  if (basePathWithoutSpace.endsWith('/')) {
-    return basePathWithoutSpace.substr(0, -1);
-  }
-
-  return basePathWithoutSpace;
-}
-
 export function addSpaceUrlContext(basePath = '/', urlContext = '', requestedPath = '') {
   if (requestedPath && !requestedPath.startsWith('/')) {
     throw new Error(`path must start with a /`);

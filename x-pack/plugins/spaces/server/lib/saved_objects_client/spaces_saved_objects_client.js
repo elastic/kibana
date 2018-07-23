@@ -21,10 +21,9 @@ export class SpacesSavedObjectsClient {
     this.errors = baseClient.errors;
 
     this._client = baseClient;
-    this._request = request;
     this._types = types;
 
-    this._spaceUrlContext = spacesService.getUrlContext(this._request);
+    this._spaceUrlContext = spacesService.getUrlContext(request);
   }
 
   async create(type, attributes = {}, options = {}) {
@@ -37,8 +36,8 @@ export class SpacesSavedObjectsClient {
     };
 
     if (shouldAssignSpaceId) {
-      createOptions.extraBodyProperties = {
-        ...options.extraBodyProperties,
+      createOptions.extraDocumentProperties = {
+        ...options.extraDocumentProperties,
         spaceId
       };
     }
@@ -53,8 +52,8 @@ export class SpacesSavedObjectsClient {
       if (shouldAssignSpaceId) {
         return {
           ...object,
-          extraBodyProperties: {
-            ...object.extraBodyProperties,
+          extraDocumentProperties: {
+            ...object.extraDocumentProperties,
             spaceId
           }
         };
@@ -81,9 +80,11 @@ export class SpacesSavedObjectsClient {
       types = [types];
     }
 
+    const filters = options.filters || [];
+
     const spaceId = await this._getSpaceId();
 
-    spaceOptions.filters = getSpacesQueryFilters(spaceId, types);
+    spaceOptions.filters = [...filters, ...getSpacesQueryFilters(spaceId, types)];
 
     return await this._client.find({ ...options, ...spaceOptions });
   }
@@ -92,11 +93,11 @@ export class SpacesSavedObjectsClient {
     // ES 'mget' does not support queries, so we have to filter results after the fact.
     const thisSpaceId = await this._getSpaceId();
 
-    const extraSourceProperties = this._collectExtraSourceProperties(['spaceId', 'type'], options.extraSourceProperties);
+    const extraDocumentProperties = this._collectExtraDocumentProperties(['spaceId', 'type'], options.extraDocumentProperties);
 
     const result = await this._client.bulkGet(objects, {
       ...options,
-      extraSourceProperties
+      extraDocumentProperties
     });
 
     result.saved_objects = result.saved_objects.map(savedObject => {
@@ -121,11 +122,11 @@ export class SpacesSavedObjectsClient {
   async get(type, id, options = {}) {
     // ES 'get' does not support queries, so we have to filter results after the fact.
 
-    const extraSourceProperties = this._collectExtraSourceProperties(['spaceId'], options.extraSourceProperties);
+    const extraDocumentProperties = this._collectExtraDocumentProperties(['spaceId'], options.extraDocumentProperties);
 
     const response = await this._client.get(type, id, {
       ...options,
-      extraSourceProperties
+      extraDocumentProperties
     });
 
     const { spaceId: objectSpaceId = DEFAULT_SPACE_ID } = response;
@@ -148,8 +149,8 @@ export class SpacesSavedObjectsClient {
 
       const spaceId = await this._getSpaceId();
       if (spaceId !== DEFAULT_SPACE_ID) {
-        options.extraBodyProperties = {
-          ...options.extraBodyProperties,
+        options.extraDocumentProperties = {
+          ...options.extraDocumentProperties,
           spaceId
         };
       }
@@ -186,7 +187,7 @@ export class SpacesSavedObjectsClient {
     return null;
   }
 
-  _collectExtraSourceProperties(thisClientProperties, optionalProperties = []) {
+  _collectExtraDocumentProperties(thisClientProperties, optionalProperties = []) {
     return uniq([...thisClientProperties, ...optionalProperties]).value();
   }
 }
