@@ -35,7 +35,8 @@
   },
   "categorization_filters_valid": {
     "status": "SUCCESS",
-    "text": "Categorization filters"
+    "text": "Categorization filters checks passed.",
+    "url": "https://www.elastic.co/guide/en/x-pack/{{version}}/ml-configuring-categories.html#ml-configuring-categories"
   },
   "categorization_filters_invalid": {
     "status": "ERROR",
@@ -48,11 +49,13 @@
   },
   "bucket_span_estimation_mismatch": {
     "status": "INFO",
+    "heading": "Bucket span",
     "text": "Current bucket span is \"{{currentBucketSpan}}\", but bucket span estimation returned \"{{estimateBucketSpan}}\".",
     "url": "https://www.elastic.co/guide/en/kibana/{{version}}/job-tips.html#bucket-span"
   },
   "bucket_span_high": {
     "status": "INFO",
+    "heading": "Bucket span",
     "text": "Bucket span is 1 day or more. Be aware that days are considered as UTC days, not local days.",
     "url": "https://www.elastic.co/guide/en/kibana/{{version}}/job-tips.html#bucket-span"
   },
@@ -64,6 +67,7 @@
   },
   "bucket_span_invalid": {
     "status": "ERROR",
+    "heading": "Bucket span",
     "text": "The specified bucket span is not a valid time interval format e.g. 10m, 1h. It also needs to be higher than zero.",
     "url": "https://www.elastic.co/guide/en/elasticsearch/reference/{{version}}/ml-job-resource.html#ml-analysisconfig"
   },
@@ -84,8 +88,8 @@
   },
   "detectors_function_not_empty": {
     "status": "SUCCESS",
-    "heading": "Detector functions",
-    "text": "Detector functions are present in all detectors.",
+    "heading": "Dectector functions",
+    "text": "Presence of detector functions validated in all detectors.",
     "url": "https://www.elastic.co/guide/en/elasticsearch/reference/{{version}}/ml-job-resource.html#ml-detectorconfig"
   },
   "index_fields_invalid": {
@@ -155,14 +159,13 @@
   },
   "success_bucket_span": {
     "status": "SUCCESS",
-    "heading": "Bucket span.",
-    "text": "Bucket span checks passed.",
+    "heading": "Bucket span",
+    "text": "Format of \"{{bucketSpan}}\" is valid and passed validation checks.",
     "url": "https://www.elastic.co/guide/en/kibana/{{version}}/job-tips.html#bucket-span"
   },
   "success_influencers": {
     "status": "SUCCESS",
-    "heading": "Influencers",
-    "text": "Influencer configuration is valid.",
+    "text": "Influencer configuration passed the validation checks.",
     "url": "https://www.elastic.co/guide/en/kibana/{{version}}/job-tips.html#influencers"
   },
   "estimated_mml_greater_than_max_mml": {
@@ -183,8 +186,9 @@
   },
   "success_mml": {
     "status": "SUCCESS",
-    "heading": "Model memory limit.",
-    "text": "valid and within the estimated model memory limit."
+    "heading": "Model memory limit",
+    "text": "Valid and within the estimated model memory limit.",
+    "url": "https://www.elastic.co/guide/en/x-pack/{{version}}/ml-gs-job1-manage.html#ml-gs-job1-manage"
   },
   "success_time_range": {
     "status": "SUCCESS",
@@ -197,10 +201,12 @@
   },
   "time_range_short": {
     "status": "WARNING",
+    "heading": "Time range",
     "text": "The selected or available time range might be too short. The recommended minimum time range should be at least {{minTimeSpanReadable}} and {{bucketSpanCompareFactor}} times the bucket span."
   },
   "time_range_before_epoch": {
     "status": "WARNING",
+    "heading": "Time range",
     "text": "The selected or available time range contains data with timestamps before the UNIX epoch beginning. Timestamps before 01/01/1970 00:00:00 (UTC) are not supported for machine learning jobs."
   }
 }
