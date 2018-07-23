@@ -6,5 +6,5 @@
 
 
 
-import './form_label';
+import './form_label_directive';
 import './styles/main.less';
