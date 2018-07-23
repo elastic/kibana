@@ -178,7 +178,7 @@ export function SecurityPageProvider({ getService, getPageObjects }) {
         const rolesElement = await user.findByCssSelector('[data-test-subj="userRowRoles"]');
         let reserved = false;
         try {
-          reserved = !!(await user.findByCssSelector('[data-test-subj="reservedUser"]'));
+          reserved = !!(await user.setFindTimeout(500).findByCssSelector('[data-test-subj="reservedUser"]'));
         } catch(e) {
           //ignoring, just means user is not reserved
         }
