@@ -72,7 +72,7 @@ export default ({ getService }) => {
       });
 
       // The docs in the original index are unchanged
-      assert.deepEqual(await indexDocs({ callCluster, index: `${index}_original` }), [
+      assert.deepEqual(await fetchDocs({ callCluster, index: `${index}_original` }), [
         { id: 'foo:a', type: 'foo', foo: { name: 'Foo A' } },
         { id: 'foo:e', type: 'foo', foo: { name: 'Fooey' } },
         { id: 'bar:i', type: 'bar', bar: { nomnom: 33 } },
@@ -80,7 +80,7 @@ export default ({ getService }) => {
       ]);
 
       // The docs in the alias have been migrated
-      assert.deepEqual(await indexDocs({ callCluster, index }), [
+      assert.deepEqual(await fetchDocs({ callCluster, index }), [
         { id: 'foo:a', type: 'foo', migrationVersion: { foo: '1.0.0' }, foo: { name: 'FOO A' } },
         { id: 'foo:e', type: 'foo', migrationVersion: { foo: '1.0.0' }, foo: { name: 'FOOEY' } },
         { id: 'bar:i', type: 'bar', migrationVersion: { bar: '1.9.0' }, bar: { mynum: 68 } },
@@ -125,7 +125,7 @@ export default ({ getService }) => {
       await migrateIndex({ callCluster, index, migrations, mappingProperties });
 
       // The index for the initial migration has not been destroyed...
-      assert.deepEqual(await indexDocs({ callCluster, index: `${index}_1` }), [
+      assert.deepEqual(await fetchDocs({ callCluster, index: `${index}_1` }), [
         { id: 'foo:a', type: 'foo', migrationVersion: { foo: '1.0.0' }, foo: { name: 'FOO A' } },
         { id: 'foo:e', type: 'foo', migrationVersion: { foo: '1.0.0' }, foo: { name: 'FOOEY' } },
         { id: 'bar:i', type: 'bar', migrationVersion: { bar: '1.9.0' }, bar: { mynum: 68 } },
@@ -133,7 +133,7 @@ export default ({ getService }) => {
       ]);
 
       // The docs were migrated again...
-      assert.deepEqual(await indexDocs({ callCluster, index }), [
+      assert.deepEqual(await fetchDocs({ callCluster, index }), [
         { id: 'foo:a', type: 'foo', migrationVersion: { foo: '2.0.1' }, foo: { name: 'FOO Av2' } },
         { id: 'foo:e', type: 'foo', migrationVersion: { foo: '2.0.1' }, foo: { name: 'FOOEYv2' } },
         {
@@ -148,6 +148,57 @@ export default ({ getService }) => {
           migrationVersion: { bar: '2.3.4' },
           bar: { mynum: 6, name: 'NAME o' },
         },
+      ]);
+    });
+
+    it('Coordinates migrations across the Kibana cluster', async () => {
+      const index = '.migration-c';
+      const originalDocs = [
+        { id: 'foo:lotr', type: 'foo', foo: { name: 'Lord of the Rings' } },
+      ];
+
+      const mappingProperties = {
+        foo: { properties: { name: { type: 'text' } } },
+      };
+
+      const migrations = {
+        foo: {
+          '1.0.0': doc => _.set(doc, 'attributes.name', 'LOTR'),
+        },
+      };
+
+      await createIndex({ callCluster, index });
+      await createDocs({ callCluster, index, docs: originalDocs });
+
+      const result = await Promise.all([
+        migrateIndex({ callCluster, index, migrations, mappingProperties }),
+        migrateIndex({ callCluster, index, migrations, mappingProperties }),
+      ]);
+
+      // The polling instance and the migrating instance should both
+      // return a similar migraiton result.
+      assert.deepEqual(
+        result.map(({ status, destIndex }) => ({ status, destIndex })),
+        [
+          { status: 'migrated', destIndex: '.migration-c_1' },
+          { status: 'migrated', destIndex: '.migration-c_1' },
+        ],
+      );
+
+      // It only created the original and the dest
+      assert.deepEqual(
+        _.pluck(await callCluster('cat.indices', { index: '.migration-c*', format: 'json' }), 'index').sort(),
+        ['.migration-c_1', '.migration-c_original'],
+      );
+
+      // The docs in the original index are unchanged
+      assert.deepEqual(await fetchDocs({ callCluster, index: `${index}_original` }), [
+        { id: 'foo:lotr', type: 'foo', foo: { name: 'Lord of the Rings' } },
+      ]);
+
+      // The docs in the alias have been migrated
+      assert.deepEqual(await fetchDocs({ callCluster, index }), [
+        { id: 'foo:lotr', type: 'foo', migrationVersion: { foo: '1.0.0' }, foo: { name: 'LOTR' } },
       ]);
     });
   });
@@ -191,14 +242,14 @@ async function migrateIndex({ callCluster, index, migrations, mappingProperties,
     index,
     log: _.noop,
     mappingProperties,
-    pollInterval: 100,
+    pollInterval: 50,
     scrollDuration: '5m',
   });
 
   return await migrator.migrate();
 }
 
-async function indexDocs({ callCluster, index }) {
+async function fetchDocs({ callCluster, index }) {
   const {
     hits: { hits },
   } = await callCluster('search', { index, type: 'doc' });
