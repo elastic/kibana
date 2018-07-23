@@ -25,6 +25,8 @@ import {
 
 import { has } from 'lodash';
 
+import { parseInterval } from 'ui/utils/parse_interval';
+
 import { ml } from 'plugins/ml/services/ml_api_service';
 import { SelectSeverity } from 'plugins/ml/components/controls/select_severity/select_severity';
 import { mlCreateWatchService } from './create_watch_service';
@@ -51,6 +53,20 @@ export class CreateWatch extends Component {
   }
 
   componentDidMount() {
+    // make the interval 2 times the bucket span
+    if (this.state.bucketSpan) {
+      const intervalObject = parseInterval(this.state.bucketSpan);
+      let bs = intervalObject.asMinutes() * 2;
+      if (bs < 1) {
+        bs = 1;
+      }
+
+      const interval = `${bs}m`;
+      this.setState({ interval }, () => {
+        this.config.interval = interval;
+      });
+    }
+
     // load elasticsearch settings to see if email has been configured
     ml.getNotificationSettings().then((resp) => {
       if (has(resp, 'defaults.xpack.notification.email')) {
