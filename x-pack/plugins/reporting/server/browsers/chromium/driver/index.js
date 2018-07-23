@@ -10,7 +10,7 @@ import moment from 'moment';
 import { promisify, delay } from 'bluebird';
 import { transformFn } from './transform_fn';
 import { ignoreSSLErrorsBehavior } from './ignore_ssl_errors';
-import { screenshotStitcher } from './screenshot_stitcher';
+import { screenshotStitcher, CapturePngSizeError } from './screenshot_stitcher';
 
 export class HeadlessChromiumDriver {
   constructor(client, { maxScreenshotDimension, logger }) {
@@ -102,10 +102,12 @@ export class HeadlessChromiumDriver {
           return data;
         }, this._logger);
       } catch (error) {
-        this._logger.error(`[Try ${retryCount}] Caught error generating screenshots: ${error.message}`);
-        if (retryCount === MAX_RETRIES) {
+        const isCapturePngSizeError = error instanceof CapturePngSizeError;
+        if (!isCapturePngSizeError || retryCount === MAX_RETRIES) {
           throw error;
         } else {
+          this._logger.error(error.message);
+          this._logger.error('Trying again...');
           retryCount++;
         }
       }
