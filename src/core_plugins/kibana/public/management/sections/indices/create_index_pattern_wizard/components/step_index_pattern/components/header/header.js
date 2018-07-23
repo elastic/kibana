@@ -38,7 +38,6 @@ export const Header = ({
   onQueryChanged,
   goToNextStep,
   isNextStepDisabled,
-  allowWildcards,
   ...rest
 }) => (
   <div {...rest}>
@@ -59,18 +58,14 @@ export const Header = ({
             error={errors}
             helpText={
               <div>
-                {
-                  allowWildcards ? (
-                    <p>You can use a <strong>*</strong> as a wildcard in your index pattern.</p>
-                  ) : ''
-                }
+                <p>You can use a <strong>*</strong> as a wildcard in your index pattern.</p>
                 <p>You can&apos;t use spaces or the characters <strong>{characterList}</strong>.</p>
               </div>
             }
           >
             <EuiFieldText
               name="indexPattern"
-              placeholder={allowWildcards ? 'index-name-*' : 'index-name'}
+              placeholder="index-name-*"
               value={query}
               isInvalid={isInputInvalid}
               onChange={onQueryChanged}

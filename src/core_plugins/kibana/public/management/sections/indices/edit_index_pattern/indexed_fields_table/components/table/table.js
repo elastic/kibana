@@ -50,7 +50,7 @@ export class Table extends PureComponent {
               type="questionInCircle"
               color="primary"
               aria-label="Additional field information"
-              content={field.info.map(info => <div>{info}</div>)}
+              content={field.info.map((info, i) => <div key={i}>{info}</div>)}
             />
           </span>
         ) : null}

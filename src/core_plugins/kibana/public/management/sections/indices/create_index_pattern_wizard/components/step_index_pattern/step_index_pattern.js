@@ -69,11 +69,10 @@ export class StepIndexPattern extends Component {
       query: props.initialQuery,
       appendedWildcard: false,
       showingIndexPatternQueryErrors: false,
-      allowWildcards: indexPatternCreationType.getAllowWildcards(),
       indexPatternName: indexPatternCreationType.getIndexPatternName(),
     };
 
-    this.ILLEGAL_CHARACTERS = indexPatternCreationType.illegalCharacters(ILLEGAL_CHARACTERS);
+    this.ILLEGAL_CHARACTERS = [...ILLEGAL_CHARACTERS];
     this.lastQuery = null;
   }
 
@@ -137,11 +136,11 @@ export class StepIndexPattern extends Component {
   }
 
   onQueryChanged = e => {
-    const { appendedWildcard, allowWildcards } = this.state;
+    const { appendedWildcard } = this.state;
     const { target } = e;
 
     let query = target.value;
-    if (query.length === 1 && allowWildcards && canAppendWildcard(query)) {
+    if (query.length === 1 && canAppendWildcard(query)) {
       query += '*';
       this.setState({ appendedWildcard: true });
       setTimeout(() => target.setSelectionRange(1, 1));
@@ -227,7 +226,7 @@ export class StepIndexPattern extends Component {
 
   renderHeader({ exactMatchedIndices: indices }) {
     const { goToNextStep, indexPatternCreationType } = this.props;
-    const { query, showingIndexPatternQueryErrors, indexPatternExists, indexPatternName, allowWildcards } = this.state;
+    const { query, showingIndexPatternQueryErrors, indexPatternExists, indexPatternName } = this.state;
 
     let containsErrors = false;
     const errors = [];
@@ -259,7 +258,6 @@ export class StepIndexPattern extends Component {
         onQueryChanged={this.onQueryChanged}
         goToNextStep={goToNextStep}
         isNextStepDisabled={isNextStepDisabled}
-        allowWildcards={allowWildcards}
       />
     );
   }

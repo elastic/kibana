@@ -98,9 +98,6 @@ uiModules.get('apps/management')
           $scope.$evalAsync(() => kbnUrl.change(url));
         });
 
-        $scope.editingId = $route.current.params.indexPatternId;
-        config.bindToScope($scope, 'defaultIndex');
-
         const renderList = () => {
           $scope.indexPatternList = $route.current.locals.indexPatterns.map(pattern => {
             const id = pattern.id;
@@ -133,13 +130,11 @@ uiModules.get('apps/management')
           updateIndexPatternList($scope, indexPatternCreationOptions, $scope.defaultIndex, $scope.indexPatternList);
         };
 
-        $scope.$watch('defaultIndex', renderList);
-
-        renderList();
-
-        $scope.$on('$destroy', () => {
-          destroyIndexPatternList();
-        });
+        $scope.$on('$destroy', () => destroyIndexPatternList());
+        $scope.editingId = $route.current.params.indexPatternId;
+        $scope.$watch('defaultIndex', () => renderList());
+        config.bindToScope($scope, 'defaultIndex');
+        $scope.$apply();
       }
     };
   });
