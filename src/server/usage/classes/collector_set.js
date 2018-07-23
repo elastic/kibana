@@ -117,10 +117,15 @@ export class CollectorSet {
       }
     };
 
-    return Object.keys(apiData).reduce((accum, currName) => {
-      const value = apiData[currName];
+    // handle array and return early, or return a reduced object
 
-      let newName = currName;
+    if (Array.isArray(apiData)) {
+      return apiData.map(getValueOrRecurse);
+    }
+
+    return Object.keys(apiData).reduce((accum, field) => {
+      const value = apiData[field];
+      let newName = field;
       newName = snakeCase(newName);
       newName = newName.replace(/^(1|5|15)_m/, '$1m'); // os.load.15m, os.load.5m, os.load.1m
       newName = newName.replace('_in_bytes', '_bytes');
