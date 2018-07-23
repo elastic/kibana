@@ -500,25 +500,6 @@ describe('I18n engine', () => {
       ).toThrowErrorMatchingSnapshot();
     });
 
-    // TODO: implement fallback to short locale, if translation for full one is not provided
-    test.skip('should fallback format to short one, if translation for full one is not provided', () => {
-      i18n.addMessages({
-        locale: 'ru',
-        one: 'один',
-        two: 'два',
-      });
-
-      i18n.addMessages({
-        locale: 'ru_BY',
-        one: 'адын',
-      });
-
-      i18n.setLocale('ru_BY');
-
-      expect(i18n.translate('one')).toBe('адын');
-      expect(i18n.translate('two')).toBe('два');
-    });
-
     test('should format messages with percent formatter', () => {
       i18n.init({
         locale: 'en',
