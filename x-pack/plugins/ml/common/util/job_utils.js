@@ -88,6 +88,24 @@ export function isTimeSeriesViewFunction(functionName) {
   return mlFunctionToESAggregation(functionName) !== null;
 }
 
+// Returns the names of the partition, by, and over fields for the detector with the
+// specified index from the supplied ML job configuration.
+export function getPartitioningFieldNames(job, detectorIndex) {
+  const fieldNames = [];
+  const detector = job.analysis_config.detectors[detectorIndex];
+  if (_.has(detector, 'partition_field_name')) {
+    fieldNames.push(detector.partition_field_name);
+  }
+  if (_.has(detector, 'by_field_name')) {
+    fieldNames.push(detector.by_field_name);
+  }
+  if (_.has(detector, 'over_field_name')) {
+    fieldNames.push(detector.over_field_name);
+  }
+
+  return fieldNames;
+}
+
 // Returns a flag to indicate whether model plot has been enabled for a job.
 // If model plot is enabled for a job with a terms filter (comma separated
 // list of partition or by field names), performs additional checks that
