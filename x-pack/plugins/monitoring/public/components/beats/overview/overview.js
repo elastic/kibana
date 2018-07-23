@@ -9,7 +9,7 @@ import { LatestActive } from './latest_active';
 import { LatestVersions } from './latest_versions';
 import { LatestTypes } from './latest_types';
 import { Stats } from '../';
-import { MonitoringTimeseriesContainer } from 'plugins/monitoring/components';
+import { MonitoringTimeseriesContainer } from '../../chart';
 import { EuiCallOut } from '@elastic/eui';
 
 function renderLatestActive(latestActive, latestTypes, latestVersions) {

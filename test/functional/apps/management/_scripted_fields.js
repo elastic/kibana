@@ -80,7 +80,11 @@ export default function ({ getService, getPageObjects }) {
         const startingCount = parseInt(await PageObjects.settings.getScriptedFieldsTabCount());
         await PageObjects.settings.clickScriptedFieldsTab();
         await log.debug('add scripted field');
-        const script = 'doc[\'machine.ram\'].value / (1024 * 1024 * 1024)';
+        const script = `if (doc['machine.ram'].size() == 0) {
+          return -1;
+        } else {
+          return doc['machine.ram'].value / (1024 * 1024 * 1024);
+        }`;
         await PageObjects.settings.addScriptedField(scriptedPainlessFieldName, 'painless', 'number', null, '1', script);
         await retry.try(async function () {
           expect(parseInt(await PageObjects.settings.getScriptedFieldsTabCount())).to.be(startingCount + 1);

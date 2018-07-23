@@ -203,9 +203,9 @@ server_url: ''`.split('\n'),
 
 export const JS_CLIENT_INSTRUCTIONS = [
   {
-    title: 'Enable frontend support in the APM server',
+    title: 'Enable Real User Monitoring support in the APM server',
     textPre:
-      'Please refer to [the documentation]({config.docs.base_url}guide/en/apm/server/{config.docs.version}/frontend.html).',
+      'Please refer to [the documentation]({config.docs.base_url}guide/en/apm/server/{config.docs.version}/rum.html).',
   },
   {
     title: 'Install the APM agent',
