@@ -44,6 +44,7 @@ describe('CreateIndexPatternWizardRender', () => {
         es: {},
         indexPatterns: {},
         savedObjectsClient: {},
+        fieldsFetcher: {},
         config: {},
         changeUrl: () => {},
       }

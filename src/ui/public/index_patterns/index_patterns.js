@@ -22,7 +22,6 @@ import { IndexPatternProvider } from './_index_pattern';
 import { IndexPatternsPatternCacheProvider } from './_pattern_cache';
 import { IndexPatternsGetProvider } from './_get';
 import { IndexPatternsIntervalsProvider } from './_intervals';
-import { FieldsFetcher } from './fields_fetcher';
 import { fieldFormats } from '../registry/field_formats';
 import { uiModules } from '../modules';
 const module = uiModules.get('kibana/index_patterns');
@@ -68,7 +67,6 @@ export function IndexPatternsProvider(Notifier, Private, config) {
   self.getTitles = getProvider('attributes.title');
   self.getFields = getProvider.multiple;
   self.intervals = Private(IndexPatternsIntervalsProvider);
-  self.fieldsFetcher = new FieldsFetcher();
   self.fieldFormats = fieldFormats;
   self.IndexPattern = IndexPattern;
 }

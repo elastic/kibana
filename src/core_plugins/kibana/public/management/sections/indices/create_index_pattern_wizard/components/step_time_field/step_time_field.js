@@ -38,7 +38,7 @@ import {
 export class StepTimeField extends Component {
   static propTypes = {
     indexPattern: PropTypes.string.isRequired,
-    indexPatternsService: PropTypes.object.isRequired,
+    fieldsFetcher: PropTypes.object.isRequired,
     goToPreviousStep: PropTypes.func.isRequired,
     createIndexPattern: PropTypes.func.isRequired,
   }
@@ -62,10 +62,10 @@ export class StepTimeField extends Component {
   }
 
   fetchTimeFields = async () => {
-    const { indexPatternsService, indexPattern } = this.props;
+    const { fieldsFetcher, indexPattern } = this.props;
 
     this.setState({ isFetchingTimeFields: true });
-    const fields = await ensureMinimumTime(indexPatternsService.fieldsFetcher.fetchForWildcard(indexPattern));
+    const fields = await ensureMinimumTime(fieldsFetcher.fetchForWildcard(indexPattern));
     const timeFields = extractTimeFields(fields);
 
     this.setState({ timeFields, isFetchingTimeFields: false });

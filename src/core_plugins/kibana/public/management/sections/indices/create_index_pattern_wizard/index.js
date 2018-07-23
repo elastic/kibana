@@ -17,10 +17,10 @@
  * under the License.
  */
 
-import { SavedObjectsClientProvider } from 'ui/saved_objects';
 import uiRoutes from 'ui/routes';
 import angularTemplate from './angular_template.html';
 import 'ui/index_patterns';
+import chrome from 'ui/chrome';
 
 import { renderCreateIndexPatternWizard, destroyCreateIndexPatternWizard } from './render';
 
@@ -35,7 +35,8 @@ uiRoutes.when('/management/kibana/index', {
         config: $injector.get('config'),
         es: $injector.get('es'),
         indexPatterns: $injector.get('indexPatterns'),
-        savedObjectsClient: $injector.get('Private')(SavedObjectsClientProvider),
+        savedObjectsClient: chrome.getSavedObjectsClient(),
+        fieldsFetcher: chrome.getSavedObjectsClient(),
         changeUrl: url => {
           $scope.$evalAsync(() => kbnUrl.changePath(url));
         },

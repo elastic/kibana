@@ -87,22 +87,17 @@ jest.mock('ui/chrome',
         }
       };
     },
-  }), { virtual: true });
-
-jest.mock('../fields_fetcher', () => {
-  class MockFieldsFetcher {
-    async fetch() {
-      return [
-        { name: 'fieldName1' },
-        { name: 'fieldName2' }
-      ];
+    getFieldsFetcher: () => {
+      return {
+        async fetch() {
+          return [
+            { name: 'fieldName1' },
+            { name: 'fieldName2' }
+          ];
+        }
+      };
     }
-  }
-
-  return {
-    FieldsFetcher: MockFieldsFetcher
-  };
-});
+  }), { virtual: true });
 
 jest.mock('../unsupported_time_patterns', () => ({
   IsUserAwareOfUnsupportedTimePatternProvider: jest.fn(),

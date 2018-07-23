@@ -31,10 +31,8 @@ jest.mock('../../../lib/extract_time_fields', () => ({
 }));
 
 const noop = () => {};
-const indexPatternsService = {
-  fieldsFetcher: {
-    fetchForWildcard: noop,
-  }
+const fieldsFetcher = {
+  fetchForWildcard: noop,
 };
 
 describe('StepTimeField', () => {
@@ -42,7 +40,7 @@ describe('StepTimeField', () => {
     const component = shallow(
       <StepTimeField
         indexPattern="ki*"
-        indexPatternsService={indexPatternsService}
+        fieldsFetcher={fieldsFetcher}
         goToPreviousStep={noop}
         createIndexPattern={noop}
       />
@@ -55,7 +53,7 @@ describe('StepTimeField', () => {
     const component = shallow(
       <StepTimeField
         indexPattern="ki*"
-        indexPatternsService={indexPatternsService}
+        fieldsFetcher={fieldsFetcher}
         goToPreviousStep={noop}
         createIndexPattern={noop}
       />
@@ -75,7 +73,7 @@ describe('StepTimeField', () => {
     const component = shallow(
       <StepTimeField
         indexPattern="ki*"
-        indexPatternsService={indexPatternsService}
+        fieldsFetcher={fieldsFetcher}
         goToPreviousStep={noop}
         createIndexPattern={noop}
       />
@@ -97,7 +95,7 @@ describe('StepTimeField', () => {
     const component = shallow(
       <StepTimeField
         indexPattern="ki*"
-        indexPatternsService={indexPatternsService}
+        fieldsFetcher={fieldsFetcher}
         goToPreviousStep={noop}
         createIndexPattern={noop}
       />
@@ -125,7 +123,7 @@ describe('StepTimeField', () => {
     const component = shallow(
       <StepTimeField
         indexPattern="ki*"
-        indexPatternsService={indexPatternsService}
+        fieldsFetcher={fieldsFetcher}
         goToPreviousStep={noop}
         createIndexPattern={noop}
       />
@@ -148,7 +146,7 @@ describe('StepTimeField', () => {
     const component = shallow(
       <StepTimeField
         indexPattern="ki*"
-        indexPatternsService={indexPatternsService}
+        fieldsFetcher={fieldsFetcher}
         goToPreviousStep={noop}
         createIndexPattern={noop}
       />
@@ -171,7 +169,7 @@ describe('StepTimeField', () => {
     const component = shallow(
       <StepTimeField
         indexPattern="ki*"
-        indexPatternsService={indexPatternsService}
+        fieldsFetcher={fieldsFetcher}
         goToPreviousStep={noop}
         createIndexPattern={noop}
       />
@@ -186,7 +184,7 @@ describe('StepTimeField', () => {
     const component = shallow(
       <StepTimeField
         indexPattern="ki*"
-        indexPatternsService={indexPatternsService}
+        fieldsFetcher={fieldsFetcher}
         goToPreviousStep={noop}
         createIndexPattern={noop}
       />
@@ -204,7 +202,7 @@ describe('StepTimeField', () => {
     const component = shallow(
       <StepTimeField
         indexPattern="ki*"
-        indexPatternsService={indexPatternsService}
+        fieldsFetcher={fieldsFetcher}
         goToPreviousStep={noop}
         createIndexPattern={noop}
       />

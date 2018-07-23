@@ -37,6 +37,7 @@ export class CreateIndexPatternWizard extends Component {
       es: PropTypes.object.isRequired,
       indexPatterns: PropTypes.object.isRequired,
       savedObjectsClient: PropTypes.object.isRequired,
+      fieldsFetcher: PropTypes.object.isRequired,
       config: PropTypes.object.isRequired,
       changeUrl: PropTypes.func.isRequired,
     }).isRequired,

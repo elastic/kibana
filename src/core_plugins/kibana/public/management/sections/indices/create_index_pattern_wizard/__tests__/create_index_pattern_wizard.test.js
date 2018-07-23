@@ -41,6 +41,7 @@ const services = {
   es: {},
   indexPatterns: {},
   savedObjectsClient: {},
+  fieldsFetcher: {},
   config: {},
   changeUrl: () => {},
   scopeApply: () => {},

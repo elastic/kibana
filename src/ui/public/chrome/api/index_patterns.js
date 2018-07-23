@@ -17,5 +17,12 @@
  * under the License.
  */
 
-export { IndexPatternsProvider } from './index_patterns';
-export { FieldsFetcher } from './fields_fetcher';
+import { FieldsFetcher } from '../../index_patterns';
+
+export function initIndexPatterns(chrome) {
+  const fieldsFetcher = new FieldsFetcher();
+
+  chrome.getFieldsFetcher = function () {
+    return fieldsFetcher;
+  };
+}
