@@ -258,7 +258,7 @@ export function basicJobValidation(job, fields, limits) {
     } = validateGroupNames(job);
 
     messages.push(...groupsMessages);
-    valid = groupsValid;
+    valid = (valid && groupsValid);
 
     // Analysis Configuration
     if (job.analysis_config.categorization_filters) {
@@ -372,7 +372,7 @@ export function basicJobValidation(job, fields, limits) {
     } = validateModelMemoryLimit(job, limits);
 
     messages.push(...mmlMessages);
-    valid = mmlValid;
+    valid = (valid && mmlValid);
 
   } else {
     valid = false;
