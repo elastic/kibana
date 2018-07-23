@@ -27,6 +27,7 @@ const columns = [
   { title: 'State', sortKey: 'state' },
   { title: 'Processed Records', sortKey: 'data_counts.processed_record_count' },
   { title: 'Model Size', sortKey: 'model_size_stats.model_bytes' },
+  { title: 'Forecasts', sortKey: 'forecasts_stats.total' },
   { title: 'Node', sortKey: 'node.name' }
 ];
 const jobRowFactory = (scope, kbnUrl) => {
@@ -56,6 +57,7 @@ const jobRowFactory = (scope, kbnUrl) => {
         </KuiTableRowCell>
         <KuiTableRowCell>{ numeral(props.data_counts.processed_record_count).format(LARGE_ABBREVIATED) }</KuiTableRowCell>
         <KuiTableRowCell>{ numeral(props.model_size_stats.model_bytes).format(LARGE_BYTES) }</KuiTableRowCell>
+        <KuiTableRowCell>{ numeral(props.forecasts_stats.total).format(LARGE_ABBREVIATED) }</KuiTableRowCell>
         <KuiTableRowCell>
           { getNode(props.node) }
         </KuiTableRowCell>

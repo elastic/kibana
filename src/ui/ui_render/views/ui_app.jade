@@ -110,4 +110,4 @@ block content
     .kibanaWelcomeText
       | #{i18n('UI-WELCOME_MESSAGE', { defaultMessage: 'Loading Kibana' })}
 
-  script(src='#{bundlePath}/app/#{app.getId()}/bootstrap.js')
+  script(src=bootstrapScriptUrl)

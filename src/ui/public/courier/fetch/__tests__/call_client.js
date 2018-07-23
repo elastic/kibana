@@ -27,6 +27,7 @@ import { CallClientProvider } from '../call_client';
 import { RequestStatus } from '../req_status';
 import { SearchRequestProvider } from '../request';
 import { MergeDuplicatesRequestProvider } from '../merge_duplicate_requests';
+import { addSearchStrategy } from '../../search_strategy';
 
 describe('callClient', () => {
   NoDigestPromises.activateForSuite();
@@ -42,14 +43,18 @@ describe('callClient', () => {
   let esPromiseAbortSpy;
 
   const createSearchRequest = (id, overrides = {}) => {
+    const { source: overrideSource, ...rest } = overrides;
+
     const source = {
       _flatten: () => ({}),
       requestIsStopped: () => {},
+      getField: () => 'indexPattern',
+      ...overrideSource
     };
 
     const errorHandler = () => {};
 
-    const searchRequest = new SearchRequest({ source, errorHandler, ...overrides });
+    const searchRequest = new SearchRequest({ source, errorHandler, ...rest });
     searchRequest.__testId__ = id;
     return searchRequest;
   };
@@ -145,8 +150,11 @@ describe('callClient', () => {
       searchRequest.handleFailure = handleFailureSpy;
 
       searchRequests = [ searchRequest ];
-      await callClient(searchRequests);
-      sinon.assert.calledWith(handleFailureSpy, 'fake es error');
+      try {
+        await callClient(searchRequests);
+      } catch(e) {
+        sinon.assert.calledWith(handleFailureSpy, 'fake es error');
+      }
     });
   });
 
@@ -227,7 +235,7 @@ describe('callClient', () => {
       });
     });
 
-    it(`aborting all searchRequests calls abort() on the promise returned by es.msearch()`, () => {
+    it(`aborting all searchRequests calls abort() on the promise returned by searchStrategy.search()`, () => {
       esRequestDelay = 100;
 
       const searchRequest1 = createSearchRequest();
@@ -258,6 +266,89 @@ describe('callClient', () => {
 
       return callingClient.then(results => {
         expect(results).to.eql([ 1, ABORTED ]);
+      });
+    });
+  });
+
+  describe('searchRequests with multiple searchStrategies map correctly to their responses', () => {
+    const search = ({ searchRequests }) => {
+      return {
+        searching: Promise.resolve(searchRequests.map(searchRequest => searchRequest.__testId__)),
+        failedSearchRequests: [],
+        abort: () => {},
+      };
+    };
+
+    const searchStrategyA = {
+      id: 'a',
+      isViable: indexPattern => {
+        return indexPattern.type === 'a';
+      },
+      search,
+    };
+
+    const searchStrategyB = {
+      id: 'b',
+      isViable: indexPattern => {
+        return indexPattern.type === 'b';
+      },
+      search,
+    };
+
+    let searchRequestA;
+    let searchRequestB;
+    let searchRequestA2;
+
+    beforeEach(() => {
+      addSearchStrategy(searchStrategyA);
+      addSearchStrategy(searchStrategyB);
+
+      searchRequestA = createSearchRequest('a', {
+        source: {
+          getField: () => ({ type: 'a' }),
+        },
+      });
+
+      searchRequestB = createSearchRequest('b', {
+        source: {
+          getField: () => ({ type: 'b' }),
+        },
+      });
+
+      searchRequestA2 = createSearchRequest('a2', {
+        source: {
+          getField: () => ({ type: 'a' }),
+        },
+      });
+    });
+
+    it('if the searchRequests are reordered by the searchStrategies', () => {
+      // Add requests in an order which will be reordered by the strategies.
+      searchRequests = [ searchRequestA, searchRequestB, searchRequestA2 ];
+      const callingClient = callClient(searchRequests);
+
+      return callingClient.then(results => {
+        expect(results).to.eql(['a', 'b', 'a2']);
+      });
+    });
+
+    it('if one is aborted after being provided', () => {
+      // Add requests in an order which will be reordered by the strategies.
+      searchRequests = [ searchRequestA, searchRequestB, searchRequestA2 ];
+      const callingClient = callClient(searchRequests);
+      searchRequestA2.abort();
+
+      return callingClient.then(results => {
+        expect(results).to.eql(['a', 'b', ABORTED]);
+      });
+    });
+
+    it(`if one is already aborted when it's provided`, () => {
+      searchRequests = [ searchRequestA, searchRequestB, ABORTED, searchRequestA2 ];
+      const callingClient = callClient(searchRequests);
+
+      return callingClient.then(results => {
+        expect(results).to.eql(['a', 'b', ABORTED, 'a2']);
       });
     });
   });

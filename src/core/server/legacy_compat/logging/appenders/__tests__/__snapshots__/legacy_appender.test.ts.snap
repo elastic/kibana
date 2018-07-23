@@ -72,5 +72,25 @@ Array [
     "message-8-with-message",
     2012-02-01T11:22:33.044Z,
   ],
+  Array [
+    Array [
+      "info",
+      "context-9",
+      "sub-context-9",
+    ],
+    "message-9-with-message",
+    2012-02-01T11:22:33.044Z,
+  ],
+  Array [
+    Array [
+      "info",
+      "context-10",
+      "sub-context-10",
+      "tag1",
+      "tag2",
+    ],
+    "message-10-with-message",
+    2012-02-01T11:22:33.044Z,
+  ],
 ]
 `;

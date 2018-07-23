@@ -1,7 +1,7 @@
 {
   "name": "@kbn/i18n",
-  "browser": "./target/web",
-  "main": "./target/node",
+  "browser": "./target/web/browser.js",
+  "main": "./target/node/index.js",
   "module": "./src/index.js",
   "version": "1.0.0",
   "license": "Apache-2.0",

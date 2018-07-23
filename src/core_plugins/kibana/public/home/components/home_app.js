@@ -40,6 +40,7 @@ export function HomeApp({
   getConfig,
   setConfig,
   clearIndexPatternsCache,
+  bulkCreate,
 }) {
 
   const isCloudEnabled = chrome.getInjected('isCloudEnabled', false);
@@ -66,6 +67,7 @@ export function HomeApp({
         getTutorial={getTutorial}
         replaceTemplateStrings={replaceTemplateStrings}
         tutorialId={props.match.params.id}
+        bulkCreate={bulkCreate}
       />
     );
   };
@@ -119,4 +121,5 @@ HomeApp.propTypes = {
   getConfig: PropTypes.func.isRequired,
   setConfig: PropTypes.func.isRequired,
   clearIndexPatternsCache: PropTypes.func.isRequired,
+  bulkCreate: PropTypes.func.isRequired,
 };

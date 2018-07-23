@@ -21,11 +21,6 @@ import classNames from 'classnames';
 import PropTypes from 'prop-types';
 import React from 'react';
 
-// TODO: Remove once EUI has typing for EuiFlyoutBody
-declare module '@elastic/eui' {
-  export const EuiFlyoutBody: React.SFC<any>;
-}
-
 import { EuiFlyoutBody } from '@elastic/eui';
 
 /**

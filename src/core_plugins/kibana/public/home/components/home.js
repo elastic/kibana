@@ -33,6 +33,7 @@ import {
   EuiFlexItem,
   EuiFlexGrid,
   EuiText,
+  EuiPageBody,
 } from '@elastic/eui';
 
 import { FeatureCatalogueCategory } from 'ui/registry/feature_catalogue';
@@ -72,62 +73,63 @@ export function Home({ addBasePath, directories, apmUiEnabled, recentlyAccessed 
 
   return (
     <EuiPage className="home">
+      <EuiPageBody>
 
-      {recentlyAccessedPanel}
+        {recentlyAccessedPanel}
 
-      <AddData
-        apmUiEnabled={apmUiEnabled}
-      />
+        <AddData
+          apmUiEnabled={apmUiEnabled}
+        />
 
-      <EuiSpacer size="l" />
+        <EuiSpacer size="l" />
 
-      <EuiFlexGroup>
-        <EuiFlexItem>
-          <EuiPanel paddingSize="l">
-            <EuiTitle>
-              <h3>
-                Visualize and Explore Data
-              </h3>
-            </EuiTitle>
-            <EuiSpacer size="m"/>
-            <EuiFlexGrid columns={2}>
-              { renderDirectories(FeatureCatalogueCategory.DATA) }
-            </EuiFlexGrid>
-          </EuiPanel>
-        </EuiFlexItem>
-        <EuiFlexItem>
-          <EuiPanel paddingSize="l">
-            <EuiTitle>
-              <h3>
-                Manage and Administer the Elastic Stack
-              </h3>
-            </EuiTitle>
-            <EuiSpacer size="m"/>
-            <EuiFlexGrid columns={2}>
-              { renderDirectories(FeatureCatalogueCategory.ADMIN) }
-            </EuiFlexGrid>
-          </EuiPanel>
-        </EuiFlexItem>
-      </EuiFlexGroup>
+        <EuiFlexGroup>
+          <EuiFlexItem>
+            <EuiPanel paddingSize="l">
+              <EuiTitle>
+                <h3>
+                  Visualize and Explore Data
+                </h3>
+              </EuiTitle>
+              <EuiSpacer size="m"/>
+              <EuiFlexGrid columns={2}>
+                { renderDirectories(FeatureCatalogueCategory.DATA) }
+              </EuiFlexGrid>
+            </EuiPanel>
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <EuiPanel paddingSize="l">
+              <EuiTitle>
+                <h3>
+                  Manage and Administer the Elastic Stack
+                </h3>
+              </EuiTitle>
+              <EuiSpacer size="m"/>
+              <EuiFlexGrid columns={2}>
+                { renderDirectories(FeatureCatalogueCategory.ADMIN) }
+              </EuiFlexGrid>
+            </EuiPanel>
+          </EuiFlexItem>
+        </EuiFlexGroup>
 
-      <EuiSpacer size="l" />
+        <EuiSpacer size="l" />
 
-      <EuiFlexGroup justifyContent="center">
-        <EuiFlexItem grow={false}>
-          <EuiText>
-            <p>
-              Didn’t find what you were looking for?
-            </p>
-          </EuiText>
-          <EuiSpacer size="s" />
-          <EuiButton
-            href="#/home/feature_directory"
-          >
-            View full directory of Kibana plugins
-          </EuiButton>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-
+        <EuiFlexGroup justifyContent="center">
+          <EuiFlexItem grow={false}>
+            <EuiText>
+              <p>
+                Didn’t find what you were looking for?
+              </p>
+            </EuiText>
+            <EuiSpacer size="s" />
+            <EuiButton
+              href="#/home/feature_directory"
+            >
+              View full directory of Kibana plugins
+            </EuiButton>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiPageBody>
     </EuiPage>
   );
 }

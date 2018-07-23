@@ -44,6 +44,6 @@ describe('ui bundles / appEntryTemplate', () => {
       'baz'
     ];
     bundle.getRequires.returns(requires);
-    expect(appEntryTemplate(bundle)).to.contain(requires.join('\n'));
+    expect(appEntryTemplate(bundle)).to.contain(requires.join('\n  '));
   });
 });

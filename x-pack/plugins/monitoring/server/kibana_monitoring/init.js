@@ -5,7 +5,6 @@
  */
 
 import { BulkUploader } from './bulk_uploader';
-import { getCollectorTypesCombiner } from './lib';
 
 /**
  * Initialize different types of Kibana Monitoring
@@ -16,13 +15,11 @@ import { getCollectorTypesCombiner } from './lib';
  * @param {Object} kbnServer manager of Kibana services - see `src/server/kbn_server` in Kibana core
  * @param {Object} server HapiJS server instance
  */
-export function initBulkUploader(kbnServer, server) {
+export function initBulkUploader(_kbnServer, server) {
 
   const config = server.config();
   const interval = config.get('xpack.monitoring.kibana.collection.interval');
   return new BulkUploader(server, {
-    interval,
-    combineTypes: getCollectorTypesCombiner(kbnServer, config)
+    interval
   });
 }
-

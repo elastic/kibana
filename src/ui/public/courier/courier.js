@@ -74,12 +74,12 @@ uiModules.get('kibana/courier').service('courier', ($rootScope, Private) => {
     /**
      * Fetch the pending requests.
      */
-    fetch = () => {
+    fetch() {
       fetchSoon.fetchQueued().then(() => {
         // Reset the timer using the time that we get this response as the starting point.
         searchPoll.resetTimer();
       });
-    };
+    }
   }
 
   return new Courier();
