@@ -117,11 +117,12 @@ export class CollectorSet {
       }
     };
 
-    if (!Array.isArray(apiData)) {
+    if (Array.isArray(apiData)) {
+      return apiData.map(getValueOrRecurse);
+    } else {
       return Object.keys(apiData).reduce((accum, field) => {
         const value = apiData[field];
         let newName = field;
-
         newName = snakeCase(newName);
         newName = newName.replace(/^(1|5|15)_m/, '$1m'); // os.load.15m, os.load.5m, os.load.1m
         newName = newName.replace('_in_bytes', '_bytes');
@@ -132,8 +133,6 @@ export class CollectorSet {
           [newName]: getValueOrRecurse(value),
         };
       }, {});
-    } else {
-      return apiData;
     }
   }
 }

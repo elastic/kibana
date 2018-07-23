@@ -28,6 +28,7 @@ describe('CollectorSet', () => {
     let server;
     let init;
     let fetch;
+
     beforeEach(() => {
       server = { log: sinon.spy() };
       init = noop;
@@ -72,6 +73,12 @@ describe('CollectorSet', () => {
   });
 
   describe('toApiFieldNames', () => {
+    let collectorSet;
+
+    beforeEach(() => {
+      collectorSet = new CollectorSet();
+    });
+
     it('should snake_case and convert field names to api standards', () => {
       const apiData = {
         os: {
@@ -94,8 +101,7 @@ describe('CollectorSet', () => {
         ]
       };
 
-      const collectors = new CollectorSet();
-      const result = collectors.toApiFieldNames(apiData);
+      const result = collectorSet.toApiFieldNames(apiData);
       expect(result).to.eql({
         os: {
           load: { '15m': 2.3525390625, '1m': 2.22412109375, '5m': 2.4462890625 },
@@ -105,5 +111,35 @@ describe('CollectorSet', () => {
         days_of_the_week: ['monday', 'tuesday', 'wednesday'],
       });
     });
+
+    it('should correct object key fields nested in arrays', () => {
+      const apiData = {
+        daysOfTheWeek: [
+          {
+            dayName: 'monday',
+            dayIndex: 1
+          },
+          {
+            dayName: 'tuesday',
+            dayIndex: 2
+          },
+          {
+            dayName: 'wednesday',
+            dayIndex: 3
+          }
+        ]
+      };
+
+      const result = collectorSet.toApiFieldNames(apiData);
+      expect(result).to.eql({
+        days_of_the_week: [
+          { day_index: 1, day_name: 'monday' },
+          { day_index: 2, day_name: 'tuesday' },
+          { day_index: 3, day_name: 'wednesday' },
+        ],
+      });
+    });
   });
 });
+
+
