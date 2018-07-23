@@ -72,7 +72,10 @@ export async function validateBucketSpan(callWithRequest, job, duration) {
 
   if (SKIP_BUCKET_SPAN_ESTIMATION) {
     if (messages.length === 0) {
-      messages.push({ id: 'success_bucket_span' });
+      messages.push({
+        id: 'success_bucket_span',
+        bucketSpan: job.analysis_config.bucket_span
+      });
     }
     return messages;
   }
@@ -151,7 +154,10 @@ export async function validateBucketSpan(callWithRequest, job, duration) {
   }
 
   if (messages.length === 0) {
-    messages.push({ id: 'success_bucket_span' });
+    messages.push({
+      id: 'success_bucket_span',
+      bucketSpan: job.analysis_config.bucket_span
+    });
   }
 
   return messages;

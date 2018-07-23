@@ -350,7 +350,10 @@ export function basicJobValidation(job, fields, limits) {
         messages.push({ id: 'bucket_span_invalid' });
         valid = false;
       } else {
-        messages.push({ id: 'bucket_span_valid' });
+        messages.push({
+          id: 'bucket_span_valid',
+          bucketSpan: job.analysis_config.bucket_span
+        });
       }
     }
 
