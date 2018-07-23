@@ -165,17 +165,5 @@ module.exports = function (grunt) {
         '--dev_mode.enabled=false',
       ],
     },
-
-    functionalTestsDevServer: {
-      cmd: process.execPath,
-      args: [
-        'scripts/functional_tests_server',
-        '--config', 'test/functional/config.js',
-        '--debug',
-        '--',
-        '--server.maxPayloadBytes=1648576',
-        '--dev_mode.enabled=false',
-      ],
-    },
   };
 };
