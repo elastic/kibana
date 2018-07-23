@@ -120,13 +120,22 @@ export function IndexPatternProvider(Private, config, Promise, confirmModalPromi
 
     if (indexPattern.isUnsupportedTimePattern()) {
       if (!isUserAwareOfUnsupportedTimePattern(indexPattern)) {
-        const warning = i18n.translate('common.ui.indexPattern.warningLabel',
-          { values: { title: indexPattern.title, link: kbnUrl.getRouteHref(indexPattern, 'edit') },
-            //eslint-disable-next-line max-len
-            defaultMessage: 'Support for time-intervals has been removed. View the ["{title}" index pattern in management]({link}) for more information.'
-          });
+        const warningTitle = i18n.translate('common.ui.indexPattern.warningTitle', {
+          defaultMessage: 'Support for time intervals was removed',
+        });
 
-        notify.warning(warning, { lifetime: Infinity });
+        const warningText = i18n.translate('common.ui.indexPattern.warningText', {
+          defaultMessage: 'For more information, view the ["{title}" index pattern in management]({link})',
+          values: {
+            title: indexPattern.title,
+            link: kbnUrl.getRouteHref(indexPattern, 'edit'),
+          },
+        });
+
+        toastNotifications.addWarning({
+          title: warningTitle,
+          text: warningText,
+        });
       }
     }
 
