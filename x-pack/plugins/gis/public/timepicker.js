@@ -5,9 +5,14 @@
  */
 
 import moment from 'moment';
-import { uiModules } from 'ui/modules';
+import {
+  uiModules
+} from 'ui/modules';
 import chrome from 'ui/chrome';
 import 'ui/autoload/all';
+import {
+  timefilter
+} from 'ui/timefilter';
 
 
 // hack to wait for angular template to be ready
@@ -34,21 +39,20 @@ export function initTimepicker(callback) {
 
   uiModules
     .get('app/gis', [])
-    .controller('TimePickerController', ($scope, timefilter) => {
+    .controller('TimePickerController', ($scope) => {
       // Add APM feedback menu
       // TODO: move this somewhere else
       $scope.topNavMenu = [];
       timefilter.setTime = (from, to) => {
-        timefilter.time.from = moment(from).toISOString();
-        timefilter.time.to = moment(to).toISOString();
+        timefilter.getTime().from = moment(from).toISOString();
+        timefilter.getTime().to = moment(to).toISOString();
         $scope.$apply();
       };
       timefilter.enableTimeRangeSelector();
       timefilter.enableAutoRefreshSelector();
-      timefilter.init();
 
+      // TODO: Update redux with timepicker values
 
       Promise.all([waitForAngularReady]).then(callback);
     });
 }
-
