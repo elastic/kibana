@@ -20,6 +20,20 @@ export function validateJob(job, checks) {
     item.valid = true;
   });
 
+  populateValidationMessages(validationResults, checks);
+
+  _.each(checks, (item) => {
+    if (item.valid === false) {
+      valid = false;
+    }
+  });
+
+  return valid;
+}
+
+export function populateValidationMessages(validationResults, checks) {
+  const limits = newJobLimits();
+
   if (validationResults.contains('job_id_empty')) {
     checks.jobId.valid = false;
   } else if (validationResults.contains('job_id_invalid')) {
@@ -47,12 +61,4 @@ export function validateJob(job, checks) {
     const msg = 'Duplicate detectors were found.';
     checks.duplicateDetectors.message = msg;
   }
-
-  _.each(checks, (item) => {
-    if (item.valid === false) {
-      valid = false;
-    }
-  });
-
-  return valid;
 }

@@ -17,10 +17,6 @@
  * under the License.
  */
 
-import { Notifier } from '../../notify';
-
-export const location = 'Courier fetch';
-
-export const courierNotifier = new Notifier({
-  location,
-});
+// It's currenty hard to properly type PersistedState, since it dynamically
+// inherits the class passed into the constructor.
+export type PersistedState = any;
