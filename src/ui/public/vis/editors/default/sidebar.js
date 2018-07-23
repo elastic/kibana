@@ -23,6 +23,8 @@ import './vis_options';
 import { uiModules } from '../../../modules';
 import sidebarTemplate from './sidebar.html';
 
+import './sidebar.less';
+
 uiModules
   .get('app/visualize')
   .directive('visEditorSidebar', function () {
@@ -32,6 +34,8 @@ uiModules
       scope: true,
       controllerAs: 'sidebar',
       controller: function ($scope) {
+        this.persistentError = undefined;
+
         $scope.$watch('vis.type', (visType) => {
           if (visType) {
             this.showData = visType.schemas.buckets || visType.schemas.metrics;
@@ -45,6 +49,21 @@ uiModules
             }
             this.section = this.section || (this.showData ? 'data' : _.get(visType, 'editorConfig.optionTabs[0].name'));
           }
+        });
+
+        // TODO: This doesn't update when requestError is set.
+        $scope.$watch('vis.requestError', (requestError) => {
+          if (requestError && requestError.messsage) {
+            const { message } = requestError;
+            const isRollupError = message.includes('rollup');
+
+            if (isRollupError) {
+              this.persistentError = message;
+              return;
+            }
+          }
+
+          this.persistentError = undefined;
         });
       }
     };
