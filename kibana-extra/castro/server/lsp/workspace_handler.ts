@@ -58,7 +58,7 @@ export class WorkspaceHandler {
   public async handleRequest(request: LspRequest): Promise<void> {
     const { method, params } = request;
     switch (method) {
-      case 'textDocument/hover':
+      case 'textDocument/hover': {
         const payload: TextDocumentPositionParams = params;
         const { filePath, workspacePath } = await this.resolveUri(params.textDocument.uri);
         if (filePath) {
@@ -66,6 +66,16 @@ export class WorkspaceHandler {
           request.workspacePath = workspacePath;
         }
         break;
+      }
+      case 'textDocument/full': {
+        const payload: TextDocumentPositionParams = params;
+        const { filePath, workspacePath } = await this.resolveUri(params.textDocument.uri);
+        if (filePath) {
+          payload.textDocument.uri = request.resolvedFilePath = filePath;
+          request.workspacePath = workspacePath;
+        }
+        break;
+      }
       default:
       // do nothing
     }
