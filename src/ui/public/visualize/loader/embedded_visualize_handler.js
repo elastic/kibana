@@ -170,7 +170,7 @@ export class EmbeddedVisualizeHandler {
   destroy() {
     this._destroyed = true;
     this._fetchAndRender.cancel();
-    timefilter.off('autoRefreshFetch', this._fetchAndRender);
+    timefilter.off('autoRefreshFetch', this._reloadVis);
     this._vis.removeListener('reload', this._reloadVis);
     this._vis.removeListener('update', this._handleVisUpdate);
     this._element.removeEventListener('renderComplete', this._elementListener);
