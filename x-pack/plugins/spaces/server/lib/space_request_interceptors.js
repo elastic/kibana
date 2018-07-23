@@ -9,12 +9,14 @@ import { addSpaceUrlContext, getSpaceUrlContext } from './spaces_url_parser';
 
 export function initSpacesRequestInterceptors(server) {
 
+  const serverBasePath = server.config().get('server.basePath');
+
   server.ext('onRequest', async function spacesOnRequestHandler(request, reply) {
     const path = request.path;
 
     // If navigating within the context of a space, then we store the Space's URL Context on the request,
     // and rewrite the request to not include the space identifier in the URL.
-    const spaceUrlContext = getSpaceUrlContext(path);
+    const spaceUrlContext = getSpaceUrlContext(path, serverBasePath);
 
     if (spaceUrlContext) {
       const reqBasePath = `/s/${spaceUrlContext}`;

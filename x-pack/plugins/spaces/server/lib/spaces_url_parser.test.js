@@ -6,19 +6,43 @@
 import { getSpaceUrlContext, addSpaceUrlContext } from './spaces_url_parser';
 
 describe('getSpaceUrlContext', () => {
-  test('it identifies the space url context', () => {
-    const basePath = `/s/my-awesome-space-lives-here`;
-    expect(getSpaceUrlContext(basePath)).toEqual('my-awesome-space-lives-here');
+  describe('without a serverBasePath defined', () => {
+    test('it identifies the space url context', () => {
+      const basePath = `/s/my-awesome-space-lives-here`;
+      expect(getSpaceUrlContext(basePath)).toEqual('my-awesome-space-lives-here');
+    });
+
+    test('ignores space identifiers in the middle of the path', () => {
+      const basePath = `/this/is/a/crazy/path/s/my-awesome-space-lives-here`;
+      expect(getSpaceUrlContext(basePath)).toEqual('');
+    });
+
+    test('it handles base url without a space url context', () => {
+      const basePath = `/this/is/a/crazy/path/s`;
+      expect(getSpaceUrlContext(basePath)).toEqual('');
+    });
   });
 
-  test('ignores space identifiers in the middle of the path', () => {
-    const basePath = `/this/is/a/crazy/path/s/my-awesome-space-lives-here`;
-    expect(getSpaceUrlContext(basePath)).toEqual('');
-  });
+  describe('with a serverBasePath defined', () => {
+    test('it identifies the space url context', () => {
+      const basePath = `/s/my-awesome-space-lives-here`;
+      expect(getSpaceUrlContext(basePath, '/')).toEqual('my-awesome-space-lives-here');
+    });
 
-  test('it handles base url without a space url context', () => {
-    const basePath = `/this/is/a/crazy/path/s`;
-    expect(getSpaceUrlContext(basePath)).toEqual('');
+    test('it identifies the space url context following the server base path', () => {
+      const basePath = `/server-base-path-here/s/my-awesome-space-lives-here`;
+      expect(getSpaceUrlContext(basePath, '/server-base-path-here')).toEqual('my-awesome-space-lives-here');
+    });
+
+    test('ignores space identifiers in the middle of the path', () => {
+      const basePath = `/this/is/a/crazy/path/s/my-awesome-space-lives-here`;
+      expect(getSpaceUrlContext(basePath, '/this/is/a')).toEqual('');
+    });
+
+    test('it handles base url without a space url context', () => {
+      const basePath = `/this/is/a/crazy/path/s`;
+      expect(getSpaceUrlContext(basePath, basePath)).toEqual('');
+    });
   });
 });
 
