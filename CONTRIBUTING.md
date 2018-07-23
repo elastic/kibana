@@ -160,7 +160,7 @@ Install the version of Node.js listed in the `.node-version` file. This can be a
 nvm use
 ```
 
-Install the latest version of [yarn](https://yarnpkg.com).
+Install [yarn](https://yarnpkg.com) version 1.6 or 1.9. Yarn 1.7 includes a bug preventing `yarn kbn bootstrap` from completing successfully.
 
 Bootstrap Kibana and install all the dependencies
 
