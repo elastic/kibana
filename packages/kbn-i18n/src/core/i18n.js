@@ -75,7 +75,7 @@ export function addMessages(newMessages = {}, locale = newMessages.locale) {
 
   if (newMessages.locale && newMessages.locale !== locale) {
     throw new Error(
-      '[I18n] A `locale` in the messages object is different from one provided as second argument.'
+      '[I18n] A `locale` in the messages object is different from the one provided as a second argument.'
     );
   }
 
