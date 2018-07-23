@@ -15,7 +15,7 @@ describe('interceptors', () => {
 
   beforeEach(() => {
     teardowns.push(() => sandbox.restore());
-    request = async (path, setupFn = () => { }) => {
+    request = async (path, setupFn = () => { }, testConfig = {}) => {
 
       const server = new Server();
 
@@ -23,6 +23,19 @@ describe('interceptors', () => {
 
       const spacesService = createSpacesService(server);
       server.decorate('server', 'spaces', spacesService);
+
+      const config = {
+        'server.basePath': '/foo',
+        ...testConfig,
+      };
+
+      server.decorate('server', 'config', jest.fn(() => {
+        return {
+          get: jest.fn(key => {
+            return config[key];
+          })
+        };
+      }));
 
       initSpacesRequestInterceptors(server);
 
@@ -119,15 +132,6 @@ describe('interceptors', () => {
     };
 
     const setupTest = (server, spaces, testHandler) => {
-      // Mock server.config()
-      server.decorate('server', 'config', () => {
-        return {
-          get: (key) => {
-            return config[key];
-          }
-        };
-      });
-
       // Mock server.getSavedObjectsClient()
       server.decorate('request', 'getSavedObjectsClient', () => {
         return {
@@ -169,7 +173,7 @@ describe('interceptors', () => {
 
         await request('/', (server) => {
           setupTest(server, spaces, testHandler);
-        });
+        }, config);
 
         expect(testHandler).toHaveBeenCalledTimes(1);
       });
@@ -202,7 +206,7 @@ describe('interceptors', () => {
 
         await request('/', (server) => {
           setupTest(server, spaces, testHandler);
-        });
+        }, config);
 
         expect(testHandler).toHaveBeenCalledTimes(1);
       });
@@ -247,7 +251,7 @@ describe('interceptors', () => {
           });
 
           setupTest(server, spaces, testHandler);
-        });
+        }, config);
 
         expect(getHiddenUiAppHandler).toHaveBeenCalledTimes(1);
         expect(getHiddenUiAppHandler).toHaveBeenCalledWith('space_selector');
