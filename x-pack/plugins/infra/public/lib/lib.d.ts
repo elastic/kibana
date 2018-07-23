@@ -24,7 +24,7 @@ export interface InfraFrontendLibs {
 export type InfraTimezoneProvider = () => string;
 
 export interface InfraFrameworkAdapter {
-  // Insstance vars
+  // Instance vars
   appState?: object;
   dateFormat?: string;
   kbnVersion?: string;
@@ -38,30 +38,17 @@ export interface InfraFrameworkAdapter {
 }
 
 export interface InfraFramworkAdapterConstructable {
-  new (
-    uiModule: IModule,
-    timezoneProvider: InfraTimezoneProvider
-  ): InfraFrameworkAdapter;
+  new (uiModule: IModule, timezoneProvider: InfraTimezoneProvider): InfraFrameworkAdapter;
 }
 
 // TODO: replace AxiosRequestConfig with something more defined
 export type InfraRequestConfig = AxiosRequestConfig;
 
 export interface InfraApiAdapter {
-  kbnVersion: string;
-
   get<T>(url: string, config?: InfraRequestConfig | undefined): Promise<T>;
-  post(
-    url: string,
-    data?: any,
-    config?: AxiosRequestConfig | undefined
-  ): Promise<object>;
+  post(url: string, data?: any, config?: AxiosRequestConfig | undefined): Promise<object>;
   delete(url: string, config?: InfraRequestConfig | undefined): Promise<object>;
-  put(
-    url: string,
-    data?: any,
-    config?: InfraRequestConfig | undefined
-  ): Promise<object>;
+  put(url: string, data?: any, config?: InfraRequestConfig | undefined): Promise<object>;
 }
 
 export interface InfraObservableApiPostParams<RequestBody extends {} = {}> {
@@ -95,9 +82,7 @@ export interface InfraKibanaAdapterServiceRefs {
   rootScope: IScope;
 }
 
-export type InfraBufferedKibanaServiceCall<ServiceRefs> = (
-  serviceRefs: ServiceRefs
-) => void;
+export type InfraBufferedKibanaServiceCall<ServiceRefs> = (serviceRefs: ServiceRefs) => void;
 
 export interface InfraChrome {
   setRootTemplate(template: string): void;
