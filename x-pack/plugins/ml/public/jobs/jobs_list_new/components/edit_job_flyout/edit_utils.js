@@ -46,8 +46,11 @@ export function saveJob(job, newJobData, finish) {
           if (resp.success) {
             saveDatafeedWrapper();
           } else {
-            reject();
+            reject(resp);
           }
+        })
+        .catch((error) => {
+          reject(error);
         });
     } else {
       saveDatafeedWrapper();
