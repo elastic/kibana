@@ -69,6 +69,7 @@ export function VislibVisualizationsHeatmapChartProvider(Private) {
       const zScale = this.getValueAxis().getScale();
       const [min, max] = zScale.domain();
       const labels = [];
+      const maxColorCnt = 10;
       if (cfg.get('setColorRange')) {
         colorsRange.forEach(range => {
           const from = isFinite(range.from) ? zAxisFormatter(range.from) : range.from;
@@ -90,10 +91,10 @@ export function VislibVisualizationsHeatmapChartProvider(Private) {
           } else {
             val = val * (max - min) + min;
             nextVal = nextVal * (max - min) + min;
-            if (max - min > 10) {
-              let valInt = Math.ceil(val);
+            if (max - min > maxColorCnt) {
+              const valInt = Math.ceil(val);
               if (i === 0) {
-                val = (valInt === val ? val : valInt -1);
+                val = (valInt === val ? val : valInt - 1);
               }
               else{
                 val = valInt;
