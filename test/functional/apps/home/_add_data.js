@@ -21,7 +21,7 @@ import expect from 'expect.js';
 
 export default function ({ getService, getPageObjects }) {
   const retry = getService('retry');
-  const PageObjects = getPageObjects(['common', 'header', 'home']);
+  const PageObjects = getPageObjects(['common', 'header', 'home', 'dashboard']);
 
   describe('add data tutorials', function describeIndexTests() {
 
@@ -32,6 +32,26 @@ export default function ({ getService, getPageObjects }) {
         const tutorialExists = await PageObjects.home.doesSynopsisExist('netflow');
         expect(tutorialExists).to.be(true);
       });
+    });
+
+    describe('apm', function describeIndexTests() {
+
+      it('should install saved objects', async ()=> {
+        await PageObjects.common.navigateToUrl('home', 'tutorial_directory');
+        await PageObjects.header.waitUntilLoadingHasFinished();
+        await retry.try(async () => {
+          await PageObjects.home.clickSynopsis('apm');
+        });
+
+        await PageObjects.home.loadSavedObjects();
+
+        await PageObjects.common.navigateToApp('dashboard');
+
+        await PageObjects.dashboard.searchForDashboardWithName('APM');
+        const countOfDashboards = await PageObjects.dashboard.getCountOfDashboardsInListingTable();
+        expect(countOfDashboards).to.equal(5);
+      });
+
     });
 
   });
