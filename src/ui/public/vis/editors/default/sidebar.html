@@ -19,6 +19,15 @@
     </div>
 
     <nav class="navbar navbar-default subnav visEditorSidebar__nav">
+      <div class="visEditorSidebarError" ng-if="sidebar.persistentError">
+        <call-out
+          color="'danger'"
+          iconType="'alert'"
+          title="sidebar.persistentError"
+          size="'s'"
+        />
+      </div>
+
       <div class="container-fluid">
 
         <!-- tabs -->

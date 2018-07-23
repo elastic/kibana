@@ -4,6 +4,4 @@
 * you may not use this file except in compliance with the Elastic License.
 */
 
-export { registerIndicesRoute } from './indices';
-export { registerFieldsForWildcardRoute } from './index_patterns';
-export { registerSearchRoute } from './search';
+import './register';

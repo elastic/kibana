@@ -73,7 +73,11 @@ export function FetchNowProvider(Private, Promise) {
     return startRequests(searchRequests)
       .then(function () {
         replaceAbortedRequests();
-        return callClient(searchRequests);
+        return callClient(searchRequests)
+          .catch(() => {
+            // Silently swallow errors that result from search requests so the consumer can surface
+            // them as notifications instead of courier forcing fatal errors.
+          });
       })
       .then(function (responses) {
         replaceAbortedRequests();
