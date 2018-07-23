@@ -35,12 +35,14 @@ export class SavedObjectsRepository {
     const {
       index,
       mappings,
+      validateDoc,
       callCluster,
       onBeforeWrite = () => {},
     } = options;
 
     this._index = index;
     this._mappings = mappings;
+    this._validateDoc = validateDoc;
     this._type = getRootType(this._mappings);
     this._onBeforeWrite = onBeforeWrite;
     this._unwrappedCallCluster = callCluster;
@@ -64,6 +66,8 @@ export class SavedObjectsRepository {
 
     const method = id && !overwrite ? 'create' : 'index';
     const time = this._getCurrentTime();
+
+    this._validateDoc({ id, type, attributes });
 
     try {
       const response = await this._writeToCluster(method, {
@@ -110,6 +114,8 @@ export class SavedObjectsRepository {
     const time = this._getCurrentTime();
     const objectToBulkRequest = (object) => {
       const method = object.id && !overwrite ? 'create' : 'index';
+
+      this._validateDoc(object);
 
       return [
         {

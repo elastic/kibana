@@ -17,15 +17,10 @@
  * under the License.
  */
 
-const pluginId = (pluginSpec) => pluginSpec.id ? pluginSpec.id() : pluginSpec.getId();
+import { mergeAtType } from './reduce';
+import { alias, uniqueKeys, wrap } from './modify_reduce';
 
-export const uniqueKeys = (sourceType) => (next) => (acc, spec, type, pluginSpec) => {
-  const duplicates = Object.keys(spec)
-    .filter(key => acc[type] && acc[type].hasOwnProperty(key));
-
-  if (duplicates.length) {
-    throw new Error(`${pluginId(pluginSpec)} defined duplicate ${sourceType || type} values: ${duplicates}`);
-  }
-
-  return next(acc, spec, type, pluginSpec);
-};
+// Combines the `validations` property of each plugin,
+// ensuring that properties are unique across plugins.
+// See saved_objects/validation for more details.
+export const validations = wrap(alias('savedObjectValidations'), uniqueKeys(), mergeAtType);
