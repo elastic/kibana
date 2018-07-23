@@ -7,9 +7,9 @@
 import { resolve } from 'path';
 import { PLUGIN } from './common/constants';
 import { registerLicenseChecker } from './server/lib/register_license_checker';
-import { registerIndicesRoute, registerFieldsForWildcardRoute } from './server/routes/api';
+import { registerIndicesRoute, registerFieldsForWildcardRoute, registerSearchRoute } from './server/routes/api';
 
-export function rollup(kibana)  {
+export function rollup(kibana) {
   return new kibana.Plugin({
     id: PLUGIN.ID,
     publicDir: resolve(__dirname, 'public'),
@@ -22,11 +22,15 @@ export function rollup(kibana)  {
       visualize: [
         'plugins/rollup/visualize',
       ],
+      search: [
+        'plugins/rollup/search',
+      ],
     },
     init: function (server) {
       registerLicenseChecker(server);
       registerIndicesRoute(server);
       registerFieldsForWildcardRoute(server);
+      registerSearchRoute(server);
     }
   });
 }
