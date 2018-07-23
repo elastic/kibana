@@ -9,7 +9,7 @@ The tool uses Babel to parse code and build an AST for each file or JS expressio
 
 ### I18n examples and restrictions of the syntax
 
-**Global restriction**: Values of `id`, `defaultMessages` and `context` properties must be string literals. Identifiers, template literals and any other expressions are disallowed.
+**Global restriction**: Values of `id`, `defaultMessage` and `context` properties must be string literals. Identifiers, template literals and any other expressions are disallowed.
 
 #### Angular (.html)
 
@@ -85,27 +85,25 @@ The tool uses Babel to parse code and build an AST for each file or JS expressio
 #### JavaScript (primarily server-side) (.js, .ts, .jsx, .tsx)
 
 ```js
-intl(
-  'plugin_namespace.message_id',
-  {
-    values: { /*object*/ },
-    defaultMessage: 'Default message string literal',
-    context: 'Message context'
+intl('plugin_namespace.message_id', {
+  values: {
+    /*object*/
   },
-);
+  defaultMessage: 'Default message string literal',
+  context: 'Message context',
+});
 ```
 
 or
 
 ```js
-intl.translate(
-  'plugin_namespace.message_id',
-  {
-    values: { /*object*/ },
-    defaultMessage: 'Default message string literal',
-    context: 'Message context'
+intl.translate('plugin_namespace.message_id', {
+  values: {
+    /*object*/
   },
-);
+  defaultMessage: 'Default message string literal',
+  context: 'Message context',
+});
 ```
 
 `values` and `context` properties are optional.\
@@ -139,16 +137,19 @@ The third token (the second argument of i18n function call) should be a string l
 node scripts/extract_default_translations path/to/plugin path/to/another/plugin ...
 ```
 
-`path/to/plugin` is a path to a root directory where messages searching should start, `en.json` will be created in `path/to/plugin/translations`.
+`path/to/plugin` is an example of path to a root directory where messages searching should start, `en.json` will be created in `translations` directory in each of mentioned plugins.
 In case of parsing issues, exception with the necessary information will be thrown to console and extraction will be aborted.
 
 ### Output
 
+`plugin_root/translations/en.json`
+
 The tool generates a partly plain JSON5 file. It contains injected `formats` object and plain structured `id: message` pairs.\
-If `context` is provided for a message, then its value will be written to result JSON as a comment after `id: message, \\ `.\
+If `context` is provided for a message, then its value will be written to result JSON as a comment after `id: message, \\`.\
 Messages are sorted by id, but `formats` object is always on top of JSON.
 
 **Example**:
+
 ```js
 {
   formats: {
@@ -163,13 +164,19 @@ Messages are sorted by id, but `formats` object is always on top of JSON.
 
 ### Description
 
-The tool checks locale files primarily for unused messages, missing messages and key duplicates.\
-In addition to its primary features, it throws exceptions if:
+The tool is used for verifying locale files and finding unused messages, missing messages and key duplications.\
+
+### Requirements
+
+`plugin_root/translations/en.json` should be extracted first using the extraction tool.
+
+### Notes
+
+The tool throws exceptions if
+
 * locale file has more than one namespace for ids;
 * two or more plugins have the same namespace;
 * formats object is missing in locale file.
-
-`en.json` is required to use the tool.
 
 ### Usage
 
@@ -177,22 +184,23 @@ In addition to its primary features, it throws exceptions if:
 node scripts/check_locale_files path/to/plugin path/to/another/plugin
 ```
 
-The tool checks namespaces collisions only for provided directories, so plugins shouldn't be verified one-by-one - it will hide possible namespaces collision.
+The tool checks namespaces collisions only for provided directories, so plugins shouldn't be verified one-by-one - this will hide possible namespaces collision.
 
 ### Output
 
 The tool outputs only information about exceptions. If all locale files are valid, output will be empty.
 
-[WIP]
-
 ## Default messages updates checking tool
 
 ### Description
 
-The tool checks default messages updates and outputs information about messages removed or added since the last check.
+The tool is used to get default messages updates (new messages and removed messages) and outputs information about messages ids removed or added since the last check.
 
-`en.json` is required to use the tool.
-The tool compares `en.json` with `messages_cache.json` and outputs a list of new messages ids and a list of removed messages ids if they're not empty, then it updates messages_cache.json.
+The tool compares `en.json` with `messages_cache.json` and outputs a list of new messages ids and a list of removed messages ids if they're not empty, then it updates `messages_cache.json`.
+
+### Requirements
+
+`plugin_root/translations/en.json` should be extracted first using the extraction tool.
 
 ### Usage
 
@@ -202,7 +210,7 @@ node scripts/check_l10n_updates path/to/plugin path/to/another/plugin
 
 ### Output
 
-The tool creates or updates a `messages_cache.json` which contains an array of ids, extracted from `en.json`.\
-`formats` property is ignored by the tool, so `messages_cache.json` contains only messages ids.
+`plugin_root/translations/messages_cache.json` is created or updated if it already exists.
 
-[WIP]
+The tool creates or updates a `messages_cache.json` which contains an array of messages ids, extracted from `en.json`.\
+`formats` property is ignored by the tool, so `messages_cache.json` contains only messages ids.
