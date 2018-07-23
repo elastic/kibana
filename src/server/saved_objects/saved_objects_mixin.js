@@ -19,7 +19,6 @@
 
 import { createSavedObjectsService } from './service';
 import { KibanaMigrator } from './migrations';
-import { docValidator } from './validation';
 
 import {
   createBulkCreateRoute,
