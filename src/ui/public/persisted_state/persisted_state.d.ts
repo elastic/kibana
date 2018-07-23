@@ -17,6 +17,6 @@
  * under the License.
  */
 
-export * from './visualization';
-export * from './visualization_chart';
-export * from './visualization_noresults';
+// It's currenty hard to properly type PersistedState, since it dynamically
+// inherits the class passed into the constructor.
+export type PersistedState = any;
