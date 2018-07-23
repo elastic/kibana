@@ -22,7 +22,6 @@ import {
 } from '@elastic/eui';
 
 import { formatDate } from '@elastic/eui/lib/services/format';
-import 'ui/timefilter';
 
 const TIME_FORMAT = 'MMMM Do YYYY, HH:mm:ss';
 

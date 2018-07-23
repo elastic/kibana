@@ -116,7 +116,7 @@ module.directive('mlRows', function ($compile, getAppState, Private) {
             if (rowScope &&
                 rowScope.expandable &&
                 rowScope.expandElement && // the tag name of the element which contains the expanded row's contents
-                row.join('') !== '') {    // empty rows are passed in as an array of empty cols, ie ['','','']
+                row.join('') !== '') {    // empty rows are passed in as an array of empty cols, i.e., ['','','']
 
               if (rowScope.open === undefined) {
                 rowScope.open = false;

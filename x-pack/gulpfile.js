@@ -26,7 +26,7 @@ const getFlags = require('./gulp_helpers/get_flags');
 
 const pkg = require('./package.json');
 const { ensureAllBrowsersDownloaded } = require('./plugins/reporting/server/browsers');
-const { createAutoJunitReporter, generateNoticeFromSource } = require('../src/dev');
+const { createAutoJUnitReporter, generateNoticeFromSource } = require('../src/dev');
 
 const buildDir = path.resolve(__dirname, 'build');
 const buildTarget = path.resolve(buildDir, 'plugin');
@@ -35,7 +35,7 @@ const coverageDir = path.resolve(__dirname, 'coverage');
 
 const MOCHA_OPTIONS = {
   ui: 'bdd',
-  reporter: createAutoJunitReporter({
+  reporter: createAutoJUnitReporter({
     reportName: 'X-Pack Mocha Tests',
     rootDirectory: __dirname,
   }),

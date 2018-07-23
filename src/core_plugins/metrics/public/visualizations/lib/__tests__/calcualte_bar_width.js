@@ -20,7 +20,7 @@
 import { expect } from 'chai';
 import calculateBarWidth from '../calculate_bar_width';
 
-describe('calculateBarWidth(series, divisor, multipier)', () => {
+describe('calculateBarWidth(series, divisor, multiplier)', () => {
 
   it('returns default bar width', () => {
     const series = [{ data: [[100, 100], [200, 100]] }];

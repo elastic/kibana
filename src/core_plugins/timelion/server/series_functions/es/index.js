@@ -35,13 +35,13 @@ export default new Datasource('es', {
       types: ['string', 'null'],
       multi: true,
       help: 'An elasticsearch metric agg: avg, sum, min, max, percentiles or cardinality, followed by a field.' +
-        ' Eg "sum:bytes", "percentiles:bytes:95,99,99.9" or just "count"'
+        ' E.g., "sum:bytes", "percentiles:bytes:95,99,99.9" or just "count"'
     },
     {
       name: 'split',
       types: ['string', 'null'],
       multi: true,
-      help: 'An elasticsearch field to split the series on and a limit. Eg, "hostname:10" to get the top 10 hostnames'
+      help: 'An elasticsearch field to split the series on and a limit. E.g., "hostname:10" to get the top 10 hostnames'
     },
     {
       name: 'index',

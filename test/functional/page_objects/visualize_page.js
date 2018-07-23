@@ -34,28 +34,45 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
 
   class VisualizePage {
 
+    async navigateToNewVisualization() {
+      log.debug('navigateToApp visualize new');
+      await PageObjects.common.navigateToUrl('visualize', 'new');
+      await this.waitForVisualizationSelectPage();
+      await PageObjects.header.waitUntilLoadingHasFinished();
+    }
+
     async waitForVisualizationSelectPage() {
-      await testSubjects.find('visualizeSelectTypePage');
+      await retry.try(async () => {
+        const visualizeSelectTypePage = await testSubjects.find('visualizeSelectTypePage');
+        if (!visualizeSelectTypePage.isDisplayed()) {
+          throw new Error('wait for visualization select page');
+        }
+      });
     }
 
     async clickAreaChart() {
       await find.clickByPartialLinkText('Area');
+      await PageObjects.header.waitUntilLoadingHasFinished();
     }
 
     async clickDataTable() {
       await find.clickByPartialLinkText('Data Table');
+      await PageObjects.header.waitUntilLoadingHasFinished();
     }
 
     async clickLineChart() {
       await find.clickByPartialLinkText('Line');
+      await PageObjects.header.waitUntilLoadingHasFinished();
     }
 
     async clickRegionMap() {
       await find.clickByPartialLinkText('Region Map');
+      await PageObjects.header.waitUntilLoadingHasFinished();
     }
 
     async clickMarkdownWidget() {
       await find.clickByPartialLinkText('Markdown');
+      await PageObjects.header.waitUntilLoadingHasFinished();
     }
 
     async clickAddMetric() {
@@ -68,30 +85,37 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
 
     async clickMetric() {
       await find.clickByPartialLinkText('Metric');
+      await PageObjects.header.waitUntilLoadingHasFinished();
     }
 
     async clickGauge() {
       await find.clickByPartialLinkText('Gauge');
+      await PageObjects.header.waitUntilLoadingHasFinished();
     }
 
     async clickPieChart() {
       await find.clickByPartialLinkText('Pie');
+      await PageObjects.header.waitUntilLoadingHasFinished();
     }
 
     async clickTileMap() {
       await find.clickByPartialLinkText('Coordinate Map');
+      await PageObjects.header.waitUntilLoadingHasFinished();
     }
 
     async clickTagCloud() {
       await find.clickByPartialLinkText('Tag Cloud');
+      await PageObjects.header.waitUntilLoadingHasFinished();
     }
 
     async clickVega() {
       await find.clickByPartialLinkText('Vega');
+      await PageObjects.header.waitUntilLoadingHasFinished();
     }
 
     async clickVisualBuilder() {
       await find.clickByPartialLinkText('Visual Builder');
+      await PageObjects.header.waitUntilLoadingHasFinished();
     }
 
     async clickEditorSidebarCollapse() {
@@ -100,6 +124,7 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
 
     async selectTagCloudTag(tagDisplayText) {
       await testSubjects.click(tagDisplayText);
+      await PageObjects.header.waitUntilLoadingHasFinished();
     }
 
     async getTextTag() {
@@ -118,14 +143,17 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
 
     async clickVerticalBarChart() {
       await find.clickByPartialLinkText('Vertical Bar');
+      await PageObjects.header.waitUntilLoadingHasFinished();
     }
 
     async clickHeatmapChart() {
       await find.clickByPartialLinkText('Heat Map');
+      await PageObjects.header.waitUntilLoadingHasFinished();
     }
 
     async clickInputControlVis() {
       await find.clickByPartialLinkText('Controls');
+      await PageObjects.header.waitUntilLoadingHasFinished();
     }
 
     async getChartTypeCount() {
@@ -221,14 +249,25 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
     async setComboBox(comboBoxSelector, value) {
       const comboBox = await testSubjects.find(comboBoxSelector);
       await this.setComboBoxElement(comboBox, value);
+      await PageObjects.common.sleep(1000);
     }
 
     async setComboBoxElement(element, value) {
       const input = await element.findByTagName('input');
       await input.clearValue();
       await input.type(value);
+      await PageObjects.common.sleep(500);
       await find.clickByCssSelector('.euiComboBoxOption');
       await this.closeComboBoxOptionsList(element);
+    }
+
+    async filterComboBoxOptions(comboBoxSelector, value) {
+      const comboBox = await testSubjects.find(comboBoxSelector);
+      const input = await comboBox.findByTagName('input');
+      await input.clearValue();
+      await input.type(value);
+      await PageObjects.common.sleep(500);
+      await this.closeComboBoxOptionsList(comboBox);
     }
 
     async getComboBoxOptions(comboBoxSelector) {
@@ -261,10 +300,29 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
     }
 
     async clearComboBox(comboBoxSelector) {
+      log.debug(`clearComboBox for comboBoxSelector:${comboBoxSelector}`);
       const comboBox = await testSubjects.find(comboBoxSelector);
-      const clearBtn = await comboBox.findByCssSelector('[data-test-subj="comboBoxClearButton"]');
-      await clearBtn.click();
+      await retry.try(async () => {
+        const clearButtonExists = await this.doesComboBoxClearButtonExist(comboBox);
+        if (!clearButtonExists) {
+          log.debug('Unable to clear comboBox, comboBoxClearButton does not exist');
+          return;
+        }
+
+        const clearBtn = await comboBox.findByCssSelector('[data-test-subj="comboBoxClearButton"]');
+        await clearBtn.click();
+
+        const clearButtonStillExists = await this.doesComboBoxClearButtonExist(comboBox);
+        if (clearButtonStillExists) {
+          throw new Error('Failed to clear comboBox');
+        }
+      });
       await this.closeComboBoxOptionsList(comboBox);
+    }
+
+    async doesComboBoxClearButtonExist(comboBoxElement) {
+      return await find.exists(
+        async () => await comboBoxElement.findByCssSelector('[data-test-subj="comboBoxClearButton"]'));
     }
 
     async closeComboBoxOptionsList(comboBoxElement) {
@@ -277,6 +335,17 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
 
     async addInputControl() {
       await testSubjects.click('inputControlEditorAddBtn');
+      await PageObjects.header.waitUntilLoadingHasFinished();
+    }
+
+    async inputControlSubmit() {
+      await testSubjects.click('inputControlSubmitBtn');
+      await PageObjects.header.waitUntilLoadingHasFinished();
+    }
+
+    async inputControlClear() {
+      await testSubjects.click('inputControlClearBtn');
+      await PageObjects.header.waitUntilLoadingHasFinished();
     }
 
     async checkCheckbox(selector) {
@@ -309,10 +378,6 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
         throw new Error(`Unable to find option '${optionText}' in select ${selectId}. Available options: ${optionsText.join(',')}`);
       }
       await options[optionIndex].click();
-    }
-
-    async clickGoButton() {
-      await testSubjects.click('timepickerGoButton');
     }
 
     async isInspectorButtonEnabled() {
@@ -352,8 +417,12 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
 
     async setInspectorTablePageSize(size) {
       const panel = await testSubjects.find('inspectorPanel');
-      await find.clickByButtonText('Rows per page: 10', panel);
-      await find.clickByButtonText(`${size} rows`, panel);
+      await find.clickByButtonText('Rows per page: 20', panel);
+      // The buttons for setting table page size are in a popover element. This popover
+      // element appears as if it's part of the inspectorPanel but it's really attached
+      // to the body element by a portal.
+      const tableSizesPopover = await find.byCssSelector('.euiPanel');
+      await find.clickByButtonText(`${size} rows`, tableSizesPopover);
     }
 
     async getMetric() {
@@ -362,7 +431,7 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
     }
 
     async getGaugeValue() {
-      const elements = await find.allByCssSelector('visualize .chart svg');
+      const elements = await find.allByCssSelector('[data-test-subj="visualizationLoader"] .chart svg');
       return await Promise.all(elements.map(async element => await element.getVisibleText()));
     }
 
@@ -406,6 +475,7 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
         const chartString = await chart.getVisibleText();
         if (chartString === bucketName) {
           await chart.click();
+          await PageObjects.common.sleep(500);
         }
       }
       const getChartTypesPromises = chartTypes.map(getChartType);
@@ -420,6 +490,7 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
         await input.type(myString);
         await remote.pressKeys('\uE006');
       });
+      await PageObjects.common.sleep(500);
     }
 
     async toggleOpenEditor(index, toState = 'true') {
@@ -506,6 +577,7 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
         await input.type(fieldValue);
         await remote.pressKeys('\uE006');
       });
+      await PageObjects.common.sleep(500);
     }
 
     async selectFieldById(fieldValue, id) {
@@ -539,6 +611,7 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
       const input = await find.byCssSelector('input[name="interval"]');
       await input.clearValue();
       await input.type(newValue + '');
+      await PageObjects.common.sleep(1000);
     }
 
     async setSize(newValue) {
@@ -549,6 +622,7 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
 
     async toggleDisabledAgg(agg) {
       await testSubjects.click(`aggregationEditor${agg} disableAggregationBtn`);
+      await PageObjects.header.waitUntilLoadingHasFinished();
     }
 
     async toggleOtherBucket() {
@@ -575,6 +649,7 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
 
     async clickOptions() {
       await find.clickByPartialLinkText('Options');
+      await PageObjects.header.waitUntilLoadingHasFinished();
     }
 
     async clickMetricsAndAxes() {
@@ -592,10 +667,12 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
 
     async clickVisEditorTab(tabName) {
       await testSubjects.click('visEditorTab' + tabName);
+      await PageObjects.header.waitUntilLoadingHasFinished();
     }
 
     async selectWMS() {
       await find.clickByCssSelector('input[name="wms.enabled"]');
+      await PageObjects.header.waitUntilLoadingHasFinished();
     }
 
     async ensureSavePanelOpen() {
@@ -634,6 +711,7 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
       // or extended character sets
       // https://github.com/elastic/kibana/issues/6300
       await input.type(vizName.replace('-', ' '));
+      await PageObjects.header.waitUntilLoadingHasFinished();
     }
 
     async clickVisualizationByName(vizName) {
@@ -656,6 +734,7 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
 
     async openSavedVisualization(vizName) {
       await this.clickVisualizationByName(vizName);
+      await PageObjects.header.waitUntilLoadingHasFinished();
     }
 
     async getXAxisLabels() {
@@ -746,7 +825,7 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
 
     // Returns value per pixel
     async getChartYAxisRatio(axis = 'ValueAxis-1') {
-      // 1). get the maximim chart Y-Axis marker value and Y position
+      // 1). get the maximum chart Y-Axis marker value and Y position
       const maxYAxisChartMarker = await retry.try(
         async () => await find.byCssSelector(`div.y-axis-div-wrapper > div > svg > g.${axis} > g:last-of-type.tick`)
       );
@@ -843,7 +922,7 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
     }
 
     async waitForVisualization() {
-      return await find.byCssSelector('visualization');
+      return await find.byCssSelector('.visualization');
     }
 
     async getZoomSelectors(zoomSelector) {

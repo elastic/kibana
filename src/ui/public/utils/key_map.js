@@ -115,7 +115,7 @@ export const keyMap = {
   192: 'graveAccent',
   219: 'openBracket',
   220: 'backSlash',
-  221: 'closeBraket',
+  221: 'closeBracket',
   222: 'singleQuote',
   224: 'meta'
 };

@@ -21,8 +21,8 @@ import expect from 'expect.js';
 import ngMock from 'ng_mock';
 import * as _ from 'lodash';
 
-import { createCourierStub, createSearchSourceStubProvider } from './_stubs';
-import { SearchSourceProvider } from 'ui/courier/data_source/search_source';
+import { createIndexPatternsStub, createSearchSourceStubProvider } from './_stubs';
+import { SearchSourceProvider } from 'ui/courier';
 
 import { fetchContextProvider } from '../context';
 
@@ -36,7 +36,7 @@ describe('context app', function () {
     let getSearchSourceStub;
 
     beforeEach(ngMock.module(function createServiceStubs($provide) {
-      $provide.value('courier', createCourierStub());
+      $provide.value('indexPatterns', createIndexPatternsStub());
     }));
 
     beforeEach(ngMock.inject(function createPrivateStubs(Private) {
@@ -95,7 +95,7 @@ describe('context app', function () {
         []
       )
         .then((hits) => {
-          const intervals = searchSourceStub.set.args
+          const intervals = searchSourceStub.setField.args
             .filter(([property]) => property === 'query')
             .map(([, { query }]) => _.get(query, ['constant_score', 'filter', 'range', '@timestamp']));
 
@@ -133,7 +133,7 @@ describe('context app', function () {
         []
       )
         .then((hits) => {
-          const intervals = searchSourceStub.set.args
+          const intervals = searchSourceStub.setField.args
             .filter(([property]) => property === 'query')
             .map(([, { query }]) => _.get(query, ['constant_score', 'filter', 'range', '@timestamp']));
 
@@ -179,9 +179,9 @@ describe('context app', function () {
         []
       )
         .then(() => {
-          const inheritsSpy = searchSourceStub.inherits;
-          expect(inheritsSpy.alwaysCalledWith(false)).to.be(true);
-          expect(inheritsSpy.called).to.be(true);
+          const setParentSpy = searchSourceStub.setParent;
+          expect(setParentSpy.alwaysCalledWith(false)).to.be(true);
+          expect(setParentSpy.called).to.be(true);
         });
     });
   });

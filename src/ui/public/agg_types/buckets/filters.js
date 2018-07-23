@@ -19,11 +19,10 @@
 
 import _ from 'lodash';
 import angular from 'angular';
-import { luceneStringToDsl } from '../../courier/data_source/build_query/lucene_string_to_dsl.js';
 
 import { BucketAggType } from './_bucket_agg_type';
 import { createFilterFilters } from './create_filter/filters';
-import { decorateQuery } from '../../courier/data_source/_decorate_query';
+import { decorateQuery, luceneStringToDsl } from '../../courier';
 import filtersTemplate from '../controls/filters.html';
 
 export const filtersBucketAgg = new BucketAggType({

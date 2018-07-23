@@ -56,11 +56,13 @@ export class TagCloudVisualization {
 
     this._feedbackNode = document.createElement('div');
     this._containerNode.appendChild(this._feedbackNode);
-    this._feedbackMessage = render(<FeedbackMessage />, this._feedbackNode);
+    this._feedbackMessage = React.createRef();
+    render(<FeedbackMessage ref={this._feedbackMessage} />, this._feedbackNode);
 
     this._labelNode = document.createElement('div');
     this._containerNode.appendChild(this._labelNode);
-    this._label = render(<Label />, this._labelNode);
+    this._label = React.createRef();
+    render(<Label ref={this._label} />, this._labelNode);
 
   }
 
@@ -83,17 +85,17 @@ export class TagCloudVisualization {
 
     const hasAggDefined = this._vis.aggs[0] && this._vis.aggs[1];
     if (!hasAggDefined) {
-      this._feedbackMessage.setState({
+      this._feedbackMessage.current.setState({
         shouldShowTruncate: false,
         shouldShowIncomplete: false
       });
       return;
     }
-    this._label.setState({
+    this._label.current.setState({
       label: `${this._vis.aggs[0].makeLabel()} - ${this._vis.aggs[1].makeLabel()}`,
       shouldShowLabel: this._vis.params.showLabel
     });
-    this._feedbackMessage.setState({
+    this._feedbackMessage.current.setState({
       shouldShowTruncate: this._truncated,
       shouldShowIncomplete: this._tagCloud.getStatus() === TagCloud.STATUS.INCOMPLETE
     });

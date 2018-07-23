@@ -95,7 +95,7 @@ describe('dev/build/lib/fs', () => {
       expect(await read(destination)).to.be('bar');
     });
 
-    it('writes conent to a file with missing parents', async () => {
+    it('writes content to a file with missing parents', async () => {
       const destination = resolve(TMP, 'a/b/c/d/e');
 
       expect(await write(destination, 'bar')).to.be(undefined);

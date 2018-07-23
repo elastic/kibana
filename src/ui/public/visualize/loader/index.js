@@ -17,4 +17,4 @@
  * under the License.
  */
 
-export * from './loader';
+export * from './visualize_loader';

@@ -4,7 +4,7 @@ exports[`KuiScreenReaderOnly adds an accessibility class to a child element and 
 <p
   class="kuiScreenReaderOnly foo bar"
 >
-  This paragraph is not visibile to sighted users but will be read by screenreaders.
+  This paragraph is not visible to sighted users but will be read by screenreaders.
 </p>
 `;
 
@@ -12,6 +12,6 @@ exports[`KuiScreenReaderOnly adds an accessibility class to a child element when
 <p
   class="kuiScreenReaderOnly"
 >
-  This paragraph is not visibile to sighted users but will be read by screenreaders.
+  This paragraph is not visible to sighted users but will be read by screenreaders.
 </p>
 `;

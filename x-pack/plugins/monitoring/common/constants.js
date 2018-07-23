@@ -22,7 +22,7 @@ export const MONITORING_SYSTEM_API_VERSION = '6';
  * The type name used within the Monitoring index to publish Kibana ops stats.
  * @type {string}
  */
-export const KIBANA_STATS_TYPE = 'kibana_stats';
+export const KIBANA_STATS_TYPE_MONITORING = 'kibana_stats_monitoring'; // similar to KIBANA_STATS_TYPE but rolled up into 10s stats from 5s intervals through ops_buffer
 /**
  * The type name used within the Monitoring index to publish Kibana stats.
  * @type {string}
@@ -30,6 +30,7 @@ export const KIBANA_STATS_TYPE = 'kibana_stats';
 export const KIBANA_SETTINGS_TYPE = 'kibana_settings';
 /**
  * The type name used within the Monitoring index to publish Kibana usage stats.
+ * NOTE: this string shows as-is in the stats API as a field name for the kibana usage stats
  * @type {string}
  */
 export const KIBANA_USAGE_TYPE = 'kibana';
@@ -116,38 +117,6 @@ export const CLOUD_METADATA_SERVICES = {
  * Constants used by Logstash monitoring code
  */
 export const LOGSTASH = {
-
-  /**
-   * Constants used by Logstash Pipeline Viewer code
-   */
-  PIPELINE_VIEWER: {
-    GRAPH: {
-      EDGES: {
-        SVG_CLASS: 'lspvEdge',
-        LABEL_RADIUS: 8,
-        // This is something we may play with later.
-        // 1 seems to be the best value however, without it the edges sometimes make weird loops in complex graphs
-        ROUTING_MARGIN_PX: 1,
-        ARROW_START: 5
-      },
-      VERTICES: {
-        BORDER_RADIUS_PX: 4,
-        MARGIN_PX: 35,
-        WIDTH_PX: 320,
-        HEIGHT_PX: 85,
-
-        /**
-         * Vertical distance between vertices, as measured from top-border-to-top-border
-         */
-        VERTICAL_DISTANCE_PX: 20
-      }
-    },
-    ICON: {
-      HEIGHT_PX: 18,
-      WIDTH_PX: 18
-    }
-  },
-
   MAJOR_VER_REQD_FOR_PIPELINES: 6,
 
   /*

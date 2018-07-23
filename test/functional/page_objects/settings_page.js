@@ -25,8 +25,9 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
   const config = getService('config');
   const remote = getService('remote');
   const find = getService('find');
+  const flyout = getService('flyout');
   const testSubjects = getService('testSubjects');
-  const PageObjects = getPageObjects(['header', 'common']);
+  const PageObjects = getPageObjects(['header', 'common', 'visualize']);
 
   const defaultFindTimeout = config.get('timeouts.find');
 
@@ -44,6 +45,7 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
 
     async clickKibanaSettings() {
       await this.clickLinkText('Advanced Settings');
+      await PageObjects.header.waitUntilLoadingHasFinished();
     }
 
     async clickKibanaSavedObjects() {
@@ -260,14 +262,13 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
     }
 
     async increasePopularity() {
-      await testSubjects.click('fieldIncreasePopularityButton');
-      await PageObjects.header.waitUntilLoadingHasFinished();
+      const field = await testSubjects.find('editorFieldCount');
+      await field.clearValue();
+      await field.type('1');
     }
 
-    getPopularity() {
-      return remote.setFindTimeout(defaultFindTimeout)
-        .findByCssSelector('input[ng-model="editor.field.count"]')
-        .getProperty('value');
+    async getPopularity() {
+      return await testSubjects.getProperty('editorFieldCount', 'value');
     }
 
     async controlChangeCancel() {
@@ -397,15 +398,15 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
         // Date adds moment.js format pattern (Default: "MMMM Do YYYY, HH:mm:ss.SSS")
         // String adds Transform
         switch(format.format) {
-          case 'Url':
+          case 'url':
             await this.setScriptedFieldUrlType(format.type);
             await this.setScriptedFieldUrlTemplate(format.template);
             await this.setScriptedFieldUrlLabelTemplate(format.labelTemplate);
             break;
-          case 'Date':
+          case 'date':
             await this.setScriptedFieldDatePattern(format.datePattern);
             break;
-          case 'String':
+          case 'string':
             await this.setScriptedFieldStringTransform(format.stringTransform);
             break;
         }
@@ -422,80 +423,133 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
 
     async clickSaveScriptedField() {
       log.debug('click Save Scripted Field');
-      await remote.setFindTimeout(defaultFindTimeout)
-        .findByCssSelector('button[aria-label="Create Field"]')
-        .click();
+      await testSubjects.click('fieldSaveButton');
+      await PageObjects.header.waitUntilLoadingHasFinished();
     }
 
     async setScriptedFieldName(name) {
       log.debug('set scripted field name = ' + name);
-      await testSubjects.setValue('editorFieldName', name);
+      const field = await testSubjects.find('editorFieldName');
+      await field.clearValue();
+      await field.type(name);
     }
 
     async setScriptedFieldLanguage(language) {
       log.debug('set scripted field language = ' + language);
       await remote.setFindTimeout(defaultFindTimeout)
-        .findByCssSelector('select[data-test-subj="editorFieldLang"] > option[label="' + language + '"]')
+        .findByCssSelector('select[data-test-subj="editorFieldLang"] > option[value="' + language + '"]')
         .click();
     }
 
     async setScriptedFieldType(type) {
       log.debug('set scripted field type = ' + type);
       await remote.setFindTimeout(defaultFindTimeout)
-        .findByCssSelector('select[data-test-subj="editorFieldType"] > option[label="' + type + '"]')
+        .findByCssSelector('select[data-test-subj="editorFieldType"] > option[value="' + type + '"]')
         .click();
     }
 
     async setFieldFormat(format) {
       log.debug('set scripted field format = ' + format);
       await remote.setFindTimeout(defaultFindTimeout)
-        .findByCssSelector('select[data-test-subj="editorSelectedFormatId"] > option[label="' + format + '"]')
+        .findByCssSelector('select[data-test-subj="editorSelectedFormatId"] > option[value="' + format + '"]')
         .click();
     }
 
     async setScriptedFieldUrlType(type) {
       log.debug('set scripted field Url type = ' + type);
       await remote.setFindTimeout(defaultFindTimeout)
-        .findByCssSelector('select[ng-model="editor.formatParams.type"] > option[label="' + type + '"]')
+        .findByCssSelector('select[data-test-subj="urlEditorType"] > option[value="' + type + '"]')
         .click();
     }
 
     async setScriptedFieldUrlTemplate(template) {
       log.debug('set scripted field Url Template = ' + template);
       await remote.setFindTimeout(defaultFindTimeout)
-        .findByCssSelector('input[ng-model="editor.formatParams.labelTemplate"]')
+        .findByCssSelector('input[data-test-subj="urlEditorUrlTemplate"]')
         .type(template);
     }
 
     async setScriptedFieldUrlLabelTemplate(labelTemplate) {
       log.debug('set scripted field Url Label Template = ' + labelTemplate);
       await remote.setFindTimeout(defaultFindTimeout)
-        .findByCssSelector('input[ng-model="editor.formatParams.labelTemplate"]')
+        .findByCssSelector('input[data-test-subj="urlEditorLabelTemplate"]')
         .type(labelTemplate);
     }
 
     async setScriptedFieldDatePattern(datePattern) {
       log.debug('set scripted field Date Pattern = ' + datePattern);
       await remote.setFindTimeout(defaultFindTimeout)
-        .findByCssSelector('input[ng-model="model"]')
+        .findByCssSelector('input[data-test-subj="dateEditorPattern"]')
         .clearValue().type(datePattern);
     }
 
     async setScriptedFieldStringTransform(stringTransform) {
       log.debug('set scripted field string Transform = ' + stringTransform);
       await remote.setFindTimeout(defaultFindTimeout)
-        .findByCssSelector('select[ng-model="editor.formatParams.transform"] > option[label="' + stringTransform + '"]')
+        .findByCssSelector('select[data-test-subj="stringEditorTransform"] > option[value="' + stringTransform + '"]')
         .click();
     }
 
     async setScriptedFieldPopularity(popularity) {
       log.debug('set scripted field popularity = ' + popularity);
-      await testSubjects.setValue('editorFieldCount', popularity);
+      const field = await testSubjects.find('editorFieldCount');
+      await field.clearValue();
+      await field.type(popularity);
     }
 
     async setScriptedFieldScript(script) {
       log.debug('set scripted field script = ' + script);
-      await testSubjects.setValue('editorFieldScript', script);
+      const field = await testSubjects.find('editorFieldScript');
+      await field.clearValue();
+      await field.type(script);
+    }
+
+    async openScriptedFieldHelp(activeTab) {
+      log.debug('open Scripted Fields help');
+      let isOpen = await testSubjects.exists('scriptedFieldsHelpFlyout');
+      if (!isOpen) {
+        await retry.try(async () => {
+          await testSubjects.click('scriptedFieldsHelpLink');
+          isOpen = await testSubjects.exists('scriptedFieldsHelpFlyout');
+          if (!isOpen) {
+            throw new Error('Failed to open scripted fields help');
+          }
+        });
+      }
+
+      if (activeTab) {
+        await testSubjects.click(activeTab);
+      }
+    }
+
+    async closeScriptedFieldHelp() {
+      log.debug('close Scripted Fields help');
+      let isOpen = await testSubjects.exists('scriptedFieldsHelpFlyout');
+      if (isOpen) {
+        await retry.try(async () => {
+          await flyout.close('scriptedFieldsHelpFlyout');
+          isOpen = await testSubjects.exists('scriptedFieldsHelpFlyout');
+          if (isOpen) {
+            throw new Error('Failed to close scripted fields help');
+          }
+        });
+      }
+    }
+
+    async executeScriptedField(script, additionalField) {
+      log.debug('execute Scripted Fields help');
+      await this.closeScriptedFieldHelp(); // ensure script help is closed so script input is not blocked
+      await this.setScriptedFieldScript(script);
+      await this.openScriptedFieldHelp('testTab');
+      if (additionalField) {
+        await PageObjects.visualize.setComboBox('additionalFieldsSelect', additionalField);
+        await testSubjects.click('runScriptButton');
+      }
+      let scriptResults;
+      await retry.try(async () => {
+        scriptResults = await testSubjects.getVisibleText('scriptedFieldPreview');
+      });
+      return scriptResults;
     }
 
     async importFile(path, overwriteAll = true) {

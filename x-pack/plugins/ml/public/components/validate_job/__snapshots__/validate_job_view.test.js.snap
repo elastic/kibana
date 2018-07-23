@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`ValidateJob renders button and modal with a messsage 1`] = `
+exports[`ValidateJob renders button and modal with a message 1`] = `
 <div>
   <EuiButton
     color="primary"

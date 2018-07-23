@@ -3,34 +3,29 @@
 
 You can create a threshold alert to periodically check when your data goes above or below a certain threshold within a given time interval. It's one of the most common type of alerts that you can create using Watcher. For more advanced watches, see the <<watcher-create-advanced-watch>>.
 
-To create a new threshold alert:
+To create a threshold alert:
 
-. Select the `Create new watch` button
-image:management/watcher-ui/images/create-watch-select.png["Create a Watch",link="management/watcher-ui/images/create-watch-select.png"]
-
-. Select `Threshold Alert`
-
-Next, let's look at the UI and how to use it.
+* Click the *Create threshold alert* button.
 
 ==== Inputs & Triggers
 
-To create a threshold alert, you need to first configure the inputs and triggers.
+You must first configure the inputs and triggers.
 
 . Add a `name` for the alert.
 . Choose one or more indices that have a time-based field as the alert input.
 . Configure a trigger interval.
-
++
+[role="screenshot"]
 image:management/watcher-ui/images/threshold-alert/create-threshold-alert-created.png["Created Threshold Alert",link="management/watcher-ui/images/threshold-alert/create-threshold-alert-created.png"]
-
-Next, you will be able to specify the conditions to trigger the alert.
 
 ==== Condition
 
 Here, you can configure the condition that will cause alert to trigger. The UI is interactive and selecting the various elements within the expression will display a UI to change the values.
 
+[role="screenshot"]
 image:management/watcher-ui/images/threshold-alert/threshold-alert-aggType.png["Threshold Alert Agg Type",link="management/watcher-ui/images/threshold-alert/threshold-alert-aggType.png"]
 
-Let's look at a few examples of common alerts based on x-pack monitoring data:
+Here are a few examples of common alerts based on x-pack monitoring data:
 
 * High heap usage:
 image:management/watcher-ui/images/threshold-alert/high-heap-usage.png["Threshold Alert Example High Heap Usage",link="management/watcher-ui/images/threshold-alert/high-heap-usage.png"]

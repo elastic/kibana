@@ -111,7 +111,7 @@ app.directive('indexSelect', ($injector) => {
 
       /**
        * This method powers the `group-by` within ui-select to group
-       * our indices array based on the souce
+       * our indices array based on the source
        *
        * @param {object} index
        */

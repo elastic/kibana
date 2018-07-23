@@ -1,0 +1,111 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`display help for start servers CLI displays as expected 1`] = `
+"Start Functional Test Servers
+
+Usage:
+  node scripts/functional_tests_server --help
+  node scripts/functional_tests_server [--config <file>]
+  node scripts/functional_tests_server [options] [-- --<other args>]
+
+Options:
+  --help                         Display this menu and exit. 
+  --config <file>                Pass in a config 
+  --esFrom <snapshot|source>     Build Elasticsearch from source or run from snapshot. Default: snapshot
+  --kibana-install-dir <dir>     Run Kibana from existing install directory instead of from source. 
+  --verbose                      Log everything. 
+  --debug                        Run in debug mode. 
+  --quiet                        Only log errors. 
+  --silent                       Log nothing."
+`;
+
+exports[`process options for start servers CLI accepts debug option 1`] = `
+Object {
+  "config": Array [
+    "foo",
+  ],
+  "createLogger": [Function],
+  "debug": true,
+  "extraKbnOpts": undefined,
+}
+`;
+
+exports[`process options for start servers CLI accepts empty config value if default passed 1`] = `
+Object {
+  "config": Array [
+    "foo",
+  ],
+  "createLogger": [Function],
+  "extraKbnOpts": undefined,
+}
+`;
+
+exports[`process options for start servers CLI accepts extra server options 1`] = `
+Object {
+  "_": Object {
+    "server.foo": "bar",
+  },
+  "config": Array [
+    "foo",
+  ],
+  "createLogger": [Function],
+  "extraKbnOpts": Object {
+    "server.foo": "bar",
+  },
+}
+`;
+
+exports[`process options for start servers CLI accepts quiet option 1`] = `
+Object {
+  "config": Array [
+    "foo",
+  ],
+  "createLogger": [Function],
+  "extraKbnOpts": undefined,
+  "quiet": true,
+}
+`;
+
+exports[`process options for start servers CLI accepts silent option 1`] = `
+Object {
+  "config": Array [
+    "foo",
+  ],
+  "createLogger": [Function],
+  "extraKbnOpts": undefined,
+  "silent": true,
+}
+`;
+
+exports[`process options for start servers CLI accepts source value for esFrom 1`] = `
+Object {
+  "config": Array [
+    "foo",
+  ],
+  "createLogger": [Function],
+  "esFrom": "source",
+  "extraKbnOpts": undefined,
+}
+`;
+
+exports[`process options for start servers CLI accepts string value for kibana-install-dir 1`] = `
+Object {
+  "config": Array [
+    "foo",
+  ],
+  "createLogger": [Function],
+  "extraKbnOpts": undefined,
+  "kibana-install-dir": "foo",
+}
+`;
+
+exports[`process options for start servers CLI accepts verbose option 1`] = `
+Object {
+  "config": Array [
+    "foo",
+  ],
+  "createLogger": [Function],
+  "extraKbnOpts": undefined,
+  "verbose": true,
+}
+`;

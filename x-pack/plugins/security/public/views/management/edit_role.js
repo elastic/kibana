@@ -24,7 +24,7 @@ import { EDIT_ROLES_PATH, ROLES_PATH } from './management_urls';
 routes.when(`${EDIT_ROLES_PATH}/:name?`, {
   template,
   resolve: {
-    role($route, ShieldRole, kbnUrl, Promise, Notifier) {
+    role($route, ShieldRole, kbnUrl, Promise) {
       const name = $route.current.params.name;
       if (name != null) {
         return ShieldRole.get({ name }).$promise
@@ -34,8 +34,7 @@ routes.when(`${EDIT_ROLES_PATH}/:name?`, {
               return fatalError(response);
             }
 
-            const notifier = new Notifier();
-            notifier.error(`No "${name}" role found.`);
+            toastNotifications.addDanger(`No "${name}" role found.`);
             kbnUrl.redirect(ROLES_PATH);
             return Promise.halt();
           });
@@ -62,7 +61,6 @@ routes.when(`${EDIT_ROLES_PATH}/:name?`, {
     const $route = $injector.get('$route');
     const kbnUrl = $injector.get('kbnUrl');
     const shieldPrivileges = $injector.get('shieldPrivileges');
-    const Notifier = $injector.get('Notifier');
     const Private = $injector.get('Private');
     const confirmModal = $injector.get('confirmModal');
     const shieldIndices = $injector.get('shieldIndices');
@@ -76,14 +74,12 @@ routes.when(`${EDIT_ROLES_PATH}/:name?`, {
     this.isNewRole = $route.current.params.name == null;
     this.fieldOptions = {};
 
-    const notifier = new Notifier();
-
     $scope.deleteRole = (role) => {
       const doDelete = () => {
         role.$delete()
           .then(() => toastNotifications.addSuccess('Deleted role'))
           .then($scope.goToRoleList)
-          .catch(error => notifier.error(_.get(error, 'data.message')));
+          .catch(error => toastNotifications.addDanger(_.get(error, 'data.message')));
       };
       const confirmModalOptions = {
         confirmButtonText: 'Delete role',
@@ -98,7 +94,7 @@ routes.when(`${EDIT_ROLES_PATH}/:name?`, {
       return role.$save()
         .then(() => toastNotifications.addSuccess('Updated role'))
         .then($scope.goToRoleList)
-        .catch(error => notifier.error(_.get(error, 'data.message')));
+        .catch(error => toastNotifications.addDanger(_.get(error, 'data.message')));
     };
 
     $scope.goToRoleList = () => {

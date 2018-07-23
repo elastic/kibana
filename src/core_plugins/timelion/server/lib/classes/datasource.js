@@ -20,7 +20,7 @@
 import loadFunctions from '../load_functions.js';
 const fitFunctions  = loadFunctions('fit_functions');
 import TimelionFunction from './timelion_function';
-import offsetTime from '../offset_time';
+import { offsetTime, preprocessOffset } from '../offset_time';
 import _ from 'lodash';
 
 
@@ -40,7 +40,10 @@ export default class Datasource extends TimelionFunction {
     config.args.push({
       name: 'offset',
       types: ['string', 'null'],
-      help: 'Offset the series retrieval by a date expression. Eg -1M to make events from one month ago appear as if they are happening now'
+      help: 'Offset the series retrieval by a date expression, ' +
+        'e.g., -1M to make events from one month ago appear as if they are happening now. ' +
+        'Offset the series relative to the charts overall time range, by using the value "timerange", ' +
+        'e.g. "timerange:-2" will specify an offset that is twice the overall chart time range to the past.'
     });
 
     config.args.push({
@@ -53,16 +56,18 @@ export default class Datasource extends TimelionFunction {
     const originalFunction = config.fn;
     config.fn = function (args, tlConfig) {
       const config = _.clone(tlConfig);
-      if (args.byName.offset) {
+      let offset = args.byName.offset;
+      if (offset) {
+        offset = preprocessOffset(offset, tlConfig.time.from, tlConfig.time.to);
         config.time = _.cloneDeep(tlConfig.time);
-        config.time.from = offsetTime(config.time.from, args.byName.offset);
-        config.time.to = offsetTime(config.time.to, args.byName.offset);
+        config.time.from = offsetTime(config.time.from, offset);
+        config.time.to = offsetTime(config.time.to, offset);
       }
 
       return Promise.resolve(originalFunction(args, config)).then(function (seriesList) {
         seriesList.list = _.map(seriesList.list, function (series) {
           if (series.data.length === 0) throw new Error(name + '() returned no results');
-          series.data = offsetSeries(series.data, args.byName.offset);
+          series.data = offsetSeries(series.data, offset);
           series.fit = args.byName.fit || series.fit || 'nearest';
           return series;
         });

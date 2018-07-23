@@ -62,7 +62,7 @@ describe('Private module loader', function () {
     }).to.throwException(/circular/i);
   });
 
-  it('allways provides the same instance form the Provider', function () {
+  it('always provides the same instance form the Provider', function () {
     function Provider() {
       return {};
     }

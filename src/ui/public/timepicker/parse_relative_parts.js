@@ -27,7 +27,7 @@ export function parseRelativeString(part) {
   const matches = _.isString(part) && part.match(/now(([\-\+])([0-9]+)([smhdwMy])(\/[smhdwMy])?)?/);
 
   const isNow = matches && !matches[1];
-  const opperator = matches && matches[2];
+  const operator = matches && matches[2];
   const count = matches && matches[3];
   const unit = matches && matches[4];
   const roundBy = matches && matches[5];
@@ -39,7 +39,7 @@ export function parseRelativeString(part) {
   if (count && unit) {
     results.count = parseInt(count, 10);
     results.unit = unit;
-    if (opperator === '+') results.unit += '+';
+    if (operator === '+') results.unit += '+';
     results.round = roundBy ? true : false;
     return results;
 

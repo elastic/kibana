@@ -18,15 +18,13 @@
  */
 
 import { uiModules } from 'ui/modules';
+import { toastNotifications } from 'ui/notify';
 import regionMapVisParamsTemplate from './region_map_vis_params.html';
 import { mapToLayerWithId } from './util';
 import '../../tile_map/public/editors/wms_options';
 
 uiModules.get('kibana/region_map')
-  .directive('regionMapVisParams', function (serviceSettings, regionmapsConfig, Notifier) {
-
-    const notify = new Notifier({ location: 'Region map' });
-
+  .directive('regionMapVisParams', function (serviceSettings, regionmapsConfig) {
     return {
       restrict: 'E',
       template: regionMapVisParamsTemplate,
@@ -57,8 +55,8 @@ uiModules.get('kibana/region_map')
               }
 
               $scope.collections.vectorLayers = newVectorLayers;
-              if ($scope.collections.vectorLayers[0] && !$scope.vis.params.selectedLayer) {
-                $scope.vis.params.selectedLayer = $scope.collections.vectorLayers[0];
+              if ($scope.collections.vectorLayers[0] && !$scope.editorState.params.selectedLayer) {
+                $scope.editorState.params.selectedLayer = $scope.collections.vectorLayers[0];
                 onLayerChange();
               }
 
@@ -69,8 +67,8 @@ uiModules.get('kibana/region_map')
               }, 0);
               $scope.collections.vectorLayers = newVectorLayers;
 
-              if ($scope.collections.vectorLayers[0] && !$scope.vis.params.selectedLayer) {
-                $scope.vis.params.selectedLayer = $scope.collections.vectorLayers[0];
+              if ($scope.collections.vectorLayers[0] && !$scope.editorState.params.selectedLayer) {
+                $scope.editorState.params.selectedLayer = $scope.collections.vectorLayers[0];
                 onLayerChange();
               }
 
@@ -84,12 +82,12 @@ uiModules.get('kibana/region_map')
 
             })
             .catch(function (error) {
-              notify.warning(error.message);
+              toastNotifications.addWarning(error.message);
             });
         }
 
         function onLayerChange() {
-          $scope.vis.params.selectedJoinField = $scope.vis.params.selectedLayer.fields[0];
+          $scope.editorState.params.selectedJoinField = $scope.editorState.params.selectedLayer.fields[0];
         }
 
       }

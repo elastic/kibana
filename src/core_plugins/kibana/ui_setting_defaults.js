@@ -374,7 +374,6 @@ export function getUiSettingDefaults() {
       name: 'Time picker refresh interval',
       value:
 `{
-  "display": "Off",
   "pause": false,
   "value": 0
 }`,
@@ -488,8 +487,8 @@ export function getUiSettingDefaults() {
     },
     'indexPattern:placeholder': {
       name: 'Index pattern placeholder',
-      value: 'logstash-*',
-      description: `The placeholder for the field "Index name or pattern" in the "Settings > Indices" tab.`,
+      value: '',
+      description: `The placeholder for the "Index pattern name" field in "Management > Index Patterns > Create Index Pattern".`,
     },
     'context:defaultSize': {
       name: 'Context size',

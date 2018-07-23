@@ -30,11 +30,7 @@ import {
   isLinkDependency,
   readPackageJson,
 } from './package_json';
-import {
-  installInDir,
-  runScriptInPackage,
-  runScriptInPackageStreaming,
-} from './scripts';
+import { installInDir, runScriptInPackage, runScriptInPackageStreaming } from './scripts';
 
 interface IBuildConfig {
   skip?: boolean;
@@ -80,9 +76,7 @@ export class Project {
   }
 
   public ensureValidProjectDependency(project: Project) {
-    const relativePathToProject = normalizePath(
-      relative(this.path, project.path)
-    );
+    const relativePathToProject = normalizePath(relative(this.path, project.path));
 
     const versionInPackageJson = this.allDependencies[project.name];
     const expectedVersionInPackageJson = `link:${relativePathToProject}`;
@@ -125,10 +119,7 @@ export class Project {
    * instead of everything located in the project directory.
    */
   public getIntermediateBuildDirectory() {
-    return resolvePath(
-      this.path,
-      this.getBuildConfig().intermediateBuildDirectory || '.'
-    );
+    return resolvePath(this.path, this.getBuildConfig().intermediateBuildDirectory || '.');
   }
 
   public hasScript(name: string) {
@@ -169,9 +160,7 @@ export class Project {
   public async runScript(scriptName: string, args: string[] = []) {
     log.write(
       chalk.bold(
-        `\n\nRunning script [${chalk.green(scriptName)}] in [${chalk.green(
-          this.name
-        )}]:\n`
+        `\n\nRunning script [${chalk.green(scriptName)}] in [${chalk.green(this.name)}]:\n`
       )
     );
     return runScriptInPackage(scriptName, args, this);
@@ -186,11 +175,7 @@ export class Project {
   }
 
   public async installDependencies({ extraArgs }: { extraArgs: string[] }) {
-    log.write(
-      chalk.bold(
-        `\n\nInstalling dependencies in [${chalk.green(this.name)}]:\n`
-      )
-    );
+    log.write(chalk.bold(`\n\nInstalling dependencies in [${chalk.green(this.name)}]:\n`));
     return installInDir(this.path, extraArgs);
   }
 }

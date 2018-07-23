@@ -23,7 +23,7 @@ export function createFilterRange(aggConfig, key) {
   return buildRangeFilter(
     aggConfig.params.field,
     key,
-    aggConfig.vis.indexPattern,
+    aggConfig._indexPattern,
     aggConfig.fieldFormatter()(key)
   );
 }

@@ -24,7 +24,7 @@ A histogram visualization that supports area, line, bar, and steps along with
 multiple y-axis. You can fully customize the colors, points, line thickness
 and fill opacity. This visualization also supports time shifting to compare two
 time periods. This visualization also supports annotations which can be loaded from
-a seperate index based on a query.
+a separate index based on a query.
 
 image:images/tsvb-timeseries.png["Time Series Visualization"]
 

@@ -19,7 +19,7 @@
 
 
 /**
- * These patterns are used to identifiy files that are not supposed
+ * These patterns are used to identify files that are not supposed
  * to be snake_case because their names are determined by other
  * systems or rules.
  *

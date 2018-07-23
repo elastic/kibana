@@ -3,10 +3,7 @@ const { readdirSync } = require('fs');
 const dedent = require('dedent');
 
 module.exports = {
-  extends: [
-    '@elastic/eslint-config-kibana',
-    '@elastic/eslint-config-kibana/jest',
-  ],
+  extends: ['@elastic/eslint-config-kibana', '@elastic/eslint-config-kibana/jest'],
 
   settings: {
     'import/resolver': {
@@ -31,6 +28,7 @@ module.exports = {
         'packages/kbn-pm/**/*',
         'packages/kbn-es/**/*',
         'packages/kbn-datemath/**/*',
+        'packages/kbn-i18n/**/*',
         'packages/kbn-dev-utils/**/*',
         'packages/kbn-plugin-helpers/**/*',
         'packages/kbn-plugin-generator/**/*',
@@ -81,15 +79,12 @@ module.exports = {
             forceNode: false,
             rootPackageName: 'kibana',
             kibanaPath: '.',
-            pluginMap: readdirSync(resolve(__dirname, 'x-pack/plugins')).reduce(
-              (acc, name) => {
-                if (!name.startsWith('_')) {
-                  acc[name] = `x-pack/plugins/${name}`;
-                }
-                return acc;
-              },
-              {}
-            ),
+            pluginMap: readdirSync(resolve(__dirname, 'x-pack/plugins')).reduce((acc, name) => {
+              if (!name.startsWith('_')) {
+                acc[name] = `x-pack/plugins/${name}`;
+              }
+              return acc;
+            }, {}),
           },
         },
       },
@@ -120,6 +115,7 @@ module.exports = {
         'packages/kbn-ui-framework/doc_site/**/*',
         'packages/kbn-ui-framework/generator-kui/**/*',
         'packages/kbn-ui-framework/Gruntfile.js',
+        'packages/kbn-es/src/**/*',
         'x-pack/{dev-tools,gulp_helpers,scripts,test,build_chromium}/**/*',
         'x-pack/**/{__tests__,__test__,__jest__,__fixtures__,__mocks__}/**/*',
         'x-pack/**/*.test.js',
@@ -199,7 +195,7 @@ module.exports = {
 
     /**
      * Files that require Apache 2.0 headers, settings
-     * are overriden below for files that require Elastic
+     * are overridden below for files that require Elastic
      * Licence headers
      */
     {

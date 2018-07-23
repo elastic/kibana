@@ -26,7 +26,7 @@ import del from 'del';
 import Mocha from 'mocha';
 import expect from 'expect.js';
 
-import { setupJunitReportGeneration } from '../junit_report_generation';
+import { setupJUnitReportGeneration } from '../junit_report_generation';
 
 const PROJECT_DIR = resolve(__dirname, 'fixtures/project');
 const DURATION_REGEX = /^\d+\.\d{3}$/;
@@ -40,7 +40,7 @@ describe('dev/mocha/junit report generation', () => {
   it('reports on failed setup hooks', async () => {
     const mocha = new Mocha({
       reporter: function Runner(runner) {
-        setupJunitReportGeneration(runner, {
+        setupJUnitReportGeneration(runner, {
           reportName: 'test',
           rootDirectory: PROJECT_DIR
         });

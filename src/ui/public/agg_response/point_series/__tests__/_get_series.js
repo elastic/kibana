@@ -167,7 +167,7 @@ describe('getSeries', function () {
     });
   });
 
-  it('produces multiple series if there is a series aspect and multipl y aspects', function () {
+  it('produces multiple series if there is a series aspect and multiple y aspects', function () {
     const rows = [
       ['0', 3, 4],
       ['1', 3, 4],

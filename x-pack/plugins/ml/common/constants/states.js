@@ -11,7 +11,8 @@ export const DATAFEED_STATE = {
   STARTED: 'started',
   STARTING: 'starting',
   STOPPED: 'stopped',
-  STOPPING: 'stopping'
+  STOPPING: 'stopping',
+  DELETED: 'deleted'
 };
 
 export const FORECAST_REQUEST_STATE = {

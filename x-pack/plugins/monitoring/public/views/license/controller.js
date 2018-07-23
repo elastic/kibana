@@ -11,12 +11,12 @@ import chrome from 'ui/chrome';
 import { formatDateTimeLocal } from '../../../common/formatting';
 import { MANAGEMENT_BASE_PATH } from 'plugins/xpack_main/components';
 import { License } from 'plugins/monitoring/components';
+import { timefilter } from 'ui/timefilter';
 
 const REACT_NODE_ID = 'licenseReact';
 
 export class LicenseViewController {
   constructor($injector, $scope) {
-    const timefilter = $injector.get('timefilter');
     timefilter.disableTimeRangeSelector();
     timefilter.disableAutoRefreshSelector();
 

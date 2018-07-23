@@ -18,3 +18,4 @@ For more information about the components of Elastic APM, see
 
 include::getting-started.asciidoc[]
 include::bottlenecks.asciidoc[]
+include::using-the-apm-ui.asciidoc[]

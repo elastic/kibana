@@ -8,10 +8,18 @@ import React from 'react';
 import { shallow } from 'enzyme';
 import TransactionOverview from '../view';
 import { toJson } from '../../../../utils/testHelpers';
-jest.mock('../../../../utils/timepicker', () => {});
 
 const setup = () => {
   const props = {
+    license: {
+      data: {
+        features: {
+          ml: { isAvailable: true }
+        }
+      }
+    },
+    hasDynamicBaseline: false,
+    location: {},
     urlParams: { transactionType: 'request', serviceName: 'MyServiceName' }
   };
 

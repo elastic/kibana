@@ -23,7 +23,7 @@
  * want to use snapshot tests for a component, that uses the htmlIdGenerator.
  * By default every test run would result in different ids and thus not be comparable.
  * You can solve this by just importing this file. It will mock the htmlIdGenerator
- * for the test file that imported it to produce static, but therfore potentially
+ * for the test file that imported it to produce static, but therefore potentially
  * duplicate ids.
  *
  * import 'test_utils/html_id_generator';

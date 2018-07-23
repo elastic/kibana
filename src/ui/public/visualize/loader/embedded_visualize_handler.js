@@ -17,7 +17,11 @@
  * under the License.
  */
 
+import { debounce } from 'lodash';
 import { EventEmitter } from 'events';
+import { visualizationLoader } from './visualization_loader';
+import { VisualizeDataLoader } from './visualize_data_loader';
+import { RenderCompleteHelper } from '../../render_complete';
 
 const RENDER_COMPLETE_EVENT = 'render_complete';
 
@@ -26,19 +30,91 @@ const RENDER_COMPLETE_EVENT = 'render_complete';
  * with the visualization.
  */
 export class EmbeddedVisualizeHandler {
-  constructor(element, scope, savedObject) {
+  constructor(element, savedObject, params) {
+    const { searchSource, vis } = savedObject;
+
+    const {
+      appState,
+      uiState,
+      queryFilter,
+      timeRange,
+      filters,
+      query,
+      Private,
+    } = params;
+
+    const aggs = vis.getAggConfig();
+
     this._element = element;
-    this._scope = scope;
-    this._savedObject = savedObject;
+    this._params = { uiState, queryFilter, searchSource, aggs, timeRange, filters, query };
+
     this._listeners = new EventEmitter();
     // Listen to the first RENDER_COMPLETE_EVENT to resolve this promise
     this._firstRenderComplete = new Promise(resolve => {
       this._listeners.once(RENDER_COMPLETE_EVENT, resolve);
     });
-    this._element.on('renderComplete', () => {
+
+    this._elementListener = () => {
       this._listeners.emit(RENDER_COMPLETE_EVENT);
-    });
+    };
+
+    this._element.addEventListener('renderComplete', this._elementListener);
+
+    this._loaded = false;
+    this._destroyed = false;
+
+    this._appState = appState;
+    this._vis = vis;
+    this._vis._setUiState(uiState);
+    this._uiState = this._vis.getUiState();
+
+    this._vis.on('update', this._handleVisUpdate);
+    this._vis.on('reload', this._reloadVis);
+    this._uiState.on('change', this._fetchAndRender);
+
+    this._visualize = new VisualizeDataLoader(this._vis, Private);
+    this._renderCompleteHelper = new RenderCompleteHelper(this._element);
+
+    this._render();
   }
+
+  _handleVisUpdate = () => {
+    const visState = this._vis.getState();
+    if (this._appState) {
+      this._appState.vis = visState;
+      this._appState.save();
+    }
+
+    this._fetchAndRender();
+  };
+
+  _reloadVis = () => {
+    this._fetchAndRender(true);
+  };
+
+  _fetch = (forceFetch) => {
+    // we need to update this before fetch
+    this._params.aggs = this._vis.getAggConfig();
+
+    return this._visualize.fetch(this._params, forceFetch);
+  };
+
+  _render = (visData) => {
+    return visualizationLoader(this._element, this._vis, visData, this._uiState, { listenOnChange: false }).then(() => {
+      if (!this._loaded) {
+        this._loaded = true;
+        this._fetchAndRender();
+      }
+    });
+  };
+
+  _fetchAndRender = debounce((forceFetch = false) => {
+    if (this._destroyed) {
+      return;
+    }
+
+    return this._fetch(forceFetch).then(this._render);
+  }, 100);
 
   /**
    * Update properties of the embedded visualization. This method does not allow
@@ -47,29 +123,42 @@ export class EmbeddedVisualizeHandler {
    *
    * @param {Object} [params={}] The parameters that should be updated.
    * @property {Object} [timeRange] A new time range for this visualization.
+   * @property {Object} [filters] New filters for this visualization.
+   * @property {Object} [query] A new query for this visualization.
    * @property {Object} [dataAttrs] An object of data attributes to modify. The
    *    key will be the name of the data attribute and the value the value that
    *    attribute will get. Use null to remove a specific data attribute from the visualization.
    */
   update(params = {}) {
-    this._scope.$evalAsync(() => {
-      if (params.hasOwnProperty('timeRange')) {
-        this._scope.timeRange = params.timeRange;
-      }
-      if (params.hasOwnProperty('filters')) {
-        this._scope.filters = params.filters;
-      }
-      if (params.hasOwnProperty('query')) {
-        this._scope.query = params.query;
-      }
+    // Apply data- attributes to the element if specified
+    if (params.dataAttrs) {
+      Object.keys(params.dataAttrs).forEach(key => {
+        if (params.dataAttrs[key] === null) {
+          this._element.removeAttribute(`data-${key}`);
+          return;
+        }
 
-      // Apply data- attributes to the element if specified
-      if (params.dataAttrs) {
-        Object.keys(params.dataAttrs).forEach(key => {
-          this._element.attr(`data-${key}`, params.dataAttrs[key]);
-        });
-      }
-    });
+        this._element.setAttribute(`data-${key}`, params.dataAttrs[key]);
+      });
+    }
+
+    let fetchRequired = false;
+    if (params.hasOwnProperty('timeRange')) {
+      fetchRequired = true;
+      this._params.timeRange = params.timeRange;
+    }
+    if (params.hasOwnProperty('filters')) {
+      fetchRequired = true;
+      this._params.filters = params.filters;
+    }
+    if (params.hasOwnProperty('query')) {
+      fetchRequired = true;
+      this._params.query = params.query;
+    }
+
+    if (fetchRequired) {
+      this._fetchAndRender();
+    }
   }
 
   /**
@@ -77,7 +166,14 @@ export class EmbeddedVisualizeHandler {
    * called whenever you remove the visualization.
    */
   destroy() {
-    this._scope.$destroy();
+    this._destroyed = true;
+    this._fetchAndRender.cancel();
+    this._vis.removeListener('reload', this._reloadVis);
+    this._vis.removeListener('update', this._handleVisUpdate);
+    this._element.removeEventListener('renderComplete', this._elementListener);
+    this._uiState.off('change', this._fetchAndRender);
+    visualizationLoader.destroy(this._element);
+    this._renderCompleteHelper.destroy();
   }
 
   /**
@@ -95,12 +191,12 @@ export class EmbeddedVisualizeHandler {
    * @return {InspectorSession} An inspector session to interact with the opened inspector.
    */
   openInspector() {
-    return this._savedObject.vis.openInspector();
+    return this._vis.openInspector();
   }
 
   /**
    * Returns a promise, that will resolve (without a value) once the first rendering of
-   * the visualization has finished. If you want to listen to concecutive rendering
+   * the visualization has finished. If you want to listen to consecutive rendering
    * events, look into the `addRenderCompleteListener` method.
    *
    * @returns {Promise} Promise, that resolves as soon as the visualization is done rendering

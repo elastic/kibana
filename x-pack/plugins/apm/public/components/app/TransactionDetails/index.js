@@ -10,6 +10,7 @@ import { getUrlParams } from '../../../store/urlParams';
 
 function mapStateToProps(state = {}) {
   return {
+    location: state.location,
     urlParams: getUrlParams(state)
   };
 }

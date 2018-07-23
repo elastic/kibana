@@ -76,7 +76,7 @@ describe('KuiCodeEditor', () => {
     });
 
     describe('interaction', () => {
-      test('bluring the ace textbox should call a passed onBlur prop', () => {
+      test('blurring the ace textbox should call a passed onBlur prop', () => {
         const blurSpy = sinon.spy();
         const el = mount(<KuiCodeEditor onBlur={blurSpy}/>);
         el.instance().onBlurAce();

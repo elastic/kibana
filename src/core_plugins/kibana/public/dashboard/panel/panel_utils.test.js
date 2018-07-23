@@ -63,3 +63,21 @@ test('convertPanelDataPre_6_3 scales panel dimensions', () => {
   expect(updatedPanel.gridData.y).toBe(25);
   expect(updatedPanel.version).toBe('6.3.0');
 });
+
+test('convertPanelDataPre_6_3 with margins scales panel dimensions', () => {
+  const oldPanel = {
+    gridData: {
+      h: 3,
+      w: 7,
+      x: 2,
+      y: 5,
+    },
+    version: '6.2.0'
+  };
+  const updatedPanel = PanelUtils.convertPanelDataPre_6_3(oldPanel, true);
+  expect(updatedPanel.gridData.w).toBe(28);
+  expect(updatedPanel.gridData.h).toBe(12);
+  expect(updatedPanel.gridData.x).toBe(8);
+  expect(updatedPanel.gridData.y).toBe(20);
+  expect(updatedPanel.version).toBe('6.3.0');
+});

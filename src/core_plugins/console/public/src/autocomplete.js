@@ -874,7 +874,7 @@ export default function (editor) {
       case 'paren.rparen':
       case 'punctuation.colon':
       case 'punctuation.comma':
-      case 'UNKOWN':
+      case 'UNKNOWN':
         return;
     }
 

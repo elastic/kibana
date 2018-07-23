@@ -17,6 +17,6 @@
  * under the License.
  */
 
-export { createAutoJunitReporter } from './auto_junit_reporter';
-export { setupJunitReportGeneration } from './junit_report_generation';
+export { createAutoJUnitReporter } from './auto_junit_reporter';
+export { setupJUnitReportGeneration } from './junit_report_generation';
 export { runMochaCli } from './run_mocha_cli';

@@ -247,7 +247,7 @@ export class PersistedState {
     // sanity check; verify that there are actually changes
     if (_.isEqual(this._mergedState, this._defaultState)) this._changedState = {};
 
-    if (!silent && stateChanged) this.emit('change');
+    if (!silent && stateChanged) this.emit('change', key);
 
     return this;
   }

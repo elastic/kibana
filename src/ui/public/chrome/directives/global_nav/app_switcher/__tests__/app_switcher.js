@@ -127,7 +127,7 @@ describe('appSwitcher directive', function () {
       { url: url }
     ]));
 
-    it('just prevents propogation (no reload)', function () {
+    it('just prevents propagation (no reload)', function () {
       const event = new $.Event('click');
 
       expect(env.location.reload.callCount).to.be(0);
@@ -150,7 +150,7 @@ describe('appSwitcher directive', function () {
       { url: url }
     ]));
 
-    it('calls window.location.reload and prevents propogation', function () {
+    it('calls window.location.reload and prevents propagation', function () {
       const event = new $.Event('click');
 
       expect(env.location.reload.callCount).to.be(0);
@@ -175,7 +175,7 @@ describe('appSwitcher directive', function () {
       { url: url }
     ]));
 
-    it('calls window.location.reload and prevents propogation', function () {
+    it('calls window.location.reload and prevents propagation', function () {
       const event = new $.Event('click');
 
       expect(env.location.reload.callCount).to.be(0);

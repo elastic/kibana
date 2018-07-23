@@ -64,7 +64,7 @@ module.exports = function (grunt) {
     'test:jest_integration',
     'test:projects',
     'test:browser',
-    'test:api'
+    'run:apiIntegrationTests'
   ]);
 
   grunt.registerTask('test:dev', [
@@ -75,44 +75,18 @@ module.exports = function (grunt) {
 
   grunt.registerTask('test:ui', [
     'checkPlugins',
-    'run:testEsServer',
-    'run:funcTestServer',
-    'functional_test_runner:functional',
-    'stop:testEsServer',
-    'stop:funcTestServer'
+    'run:functionalTests',
   ]);
 
   grunt.registerTask('test:uiRelease', [
     'checkPlugins',
-    'run:testEsServer',
-    'run:ossDistFuncTestServer',
-    'functional_test_runner:functional',
-    'stop:testEsServer',
-    'stop:ossDistFuncTestServer'
+    'run:functionalTestsRelease',
   ]);
 
   grunt.registerTask('test:ui:server', [
     'checkPlugins',
-    'run:testEsServer',
-    'run:devFuncTestServer:keepalive'
+    'run:functionalTestsDevServer',
   ]);
-
-  grunt.registerTask('test:api', [
-    'run:testEsServer',
-    'run:apiTestServer',
-    'functional_test_runner:apiIntegration',
-    'stop:testEsServer',
-    'stop:apiTestServer'
-  ]);
-
-  grunt.registerTask('test:api:server', [
-    'run:testEsServer',
-    'run:devApiTestServer:keepalive'
-  ]);
-
-  grunt.registerTask('test:api:runner', () => {
-    grunt.fail.fatal('test:api:runner has moved, use: `node scripts/functional_test_runner --config test/api_integration/config.js`');
-  });
 
   grunt.registerTask('test', subTask => {
     if (subTask) grunt.fail.fatal(`invalid task "test:${subTask}"`);

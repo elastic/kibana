@@ -37,7 +37,7 @@ describe('Filter Bar Directive', function () {
       expect(results).to.not.contain(filters[1]);
     });
 
-    it('should ignore the disabed attribute when comparing ', function () {
+    it('should ignore the disabled attribute when comparing ', function () {
       const existing = [
         { range: { bytes: { from: 0, to: 1024 } } },
         { meta: { disabled: true }, query: { match: { _term: { query: 'apache', type: 'phrase' } } } }
