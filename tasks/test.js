@@ -58,8 +58,8 @@ module.exports = function (grunt) {
   grunt.registerTask('test:coverage', [ 'run:testCoverageServer', 'karma:coverage' ]);
 
   grunt.registerTask('test:quick', [
-    'test:server',
     'checkPlugins',
+    'test:server',
     'run:functionalTests',
     'test:jest',
     'test:jest_integration',
