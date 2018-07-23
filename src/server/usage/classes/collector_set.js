@@ -117,22 +117,24 @@ export class CollectorSet {
       }
     };
 
+    // handle array and return early, or return a reduced object
+
     if (Array.isArray(apiData)) {
       return apiData.map(getValueOrRecurse);
-    } else {
-      return Object.keys(apiData).reduce((accum, field) => {
-        const value = apiData[field];
-        let newName = field;
-        newName = snakeCase(newName);
-        newName = newName.replace(/^(1|5|15)_m/, '$1m'); // os.load.15m, os.load.5m, os.load.1m
-        newName = newName.replace('_in_bytes', '_bytes');
-        newName = newName.replace('_in_millis', '_ms');
-
-        return {
-          ...accum,
-          [newName]: getValueOrRecurse(value),
-        };
-      }, {});
     }
+
+    return Object.keys(apiData).reduce((accum, field) => {
+      const value = apiData[field];
+      let newName = field;
+      newName = snakeCase(newName);
+      newName = newName.replace(/^(1|5|15)_m/, '$1m'); // os.load.15m, os.load.5m, os.load.1m
+      newName = newName.replace('_in_bytes', '_bytes');
+      newName = newName.replace('_in_millis', '_ms');
+
+      return {
+        ...accum,
+        [newName]: getValueOrRecurse(value),
+      };
+    }, {});
   }
 }
