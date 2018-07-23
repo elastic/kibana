@@ -17,12 +17,18 @@
  * under the License.
  */
 
-export {
-  assignSearchRequestsToSearchStrategies,
-  addSearchStrategy,
-  hasSearchStategyForIndexPattern,
-} from './search_strategy_registry';
+export class SearchError extends Error {
+  constructor({ status, title, message, path }) {
+    super(message);
+    this.name = 'SearchError';
+    this.status = status;
+    this.title = title;
+    this.message = message;
+    this.path = path;
+    Error.captureStackTrace(this, SearchError);
 
-export { isDefaultTypeIndexPattern } from './is_default_type_index_pattern';
-
-export { SearchError } from './search_error';
+    // Babel doesn't support traditional `extends` syntax for built-in classes.
+    // https://babeljs.io/docs/en/caveats/#classes
+    Object.setPrototypeOf(this, SearchError.prototype);
+  }
+}
