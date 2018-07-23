@@ -59,7 +59,8 @@ module.exports = function (grunt) {
 
   grunt.registerTask('test:quick', [
     'test:server',
-    'test:ui',
+    'checkPlugins',
+    'run:functionalTests',
     'test:jest',
     'test:jest_integration',
     'test:projects',
@@ -71,21 +72,6 @@ module.exports = function (grunt) {
     'checkPlugins',
     'run:devBrowserTestServer',
     'karma:dev'
-  ]);
-
-  grunt.registerTask('test:ui', [
-    'checkPlugins',
-    'run:functionalTests',
-  ]);
-
-  grunt.registerTask('test:uiRelease', [
-    'checkPlugins',
-    'run:functionalTestsRelease',
-  ]);
-
-  grunt.registerTask('test:ui:server', [
-    'checkPlugins',
-    'run:functionalTestsDevServer',
   ]);
 
   grunt.registerTask('test', subTask => {
