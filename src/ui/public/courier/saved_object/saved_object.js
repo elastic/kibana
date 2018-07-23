@@ -124,10 +124,8 @@ export function SavedObjectProvider(Promise, Private, Notifier, confirmModalProm
 
       // This detects a scenario where documents with invalid JSON properties have been imported into the saved object index.
       // (This happened in issue #20308)
-      if (typeof searchSourceValues !== 'object') {
-        throw new InvalidJSONProperty(
-          `Invalid JSON in ${esType} "${this.id}". Expected searchSourceJSON to be a JSON object, but got a ${typeof searchSourceValues}.`
-        );
+      if (!searchSourceValues || typeof searchSourceValues !== 'object') {
+        throw new InvalidJSONProperty(`Invalid searchSourceJSON in ${esType} "${this.id}".`);
       }
 
       const searchSourceFields = this.searchSource.getFields();
