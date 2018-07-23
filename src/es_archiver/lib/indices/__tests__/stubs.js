@@ -56,6 +56,8 @@ const createEsClientError = (errorType) => {
   return err;
 };
 
+const indexAlias = (aliases, index) => Object.keys(aliases).find((k) => aliases[k] === index);
+
 export const createStubClient = (existingIndices = [], aliases = {}) => ({
   indices: {
     get: sinon.spy(async ({ index }) => {
@@ -73,11 +75,17 @@ export const createStubClient = (existingIndices = [], aliases = {}) => ({
     existsAlias: sinon.spy(({ name }) => {
       return Promise.resolve(aliases.hasOwnProperty(name));
     }),
-    getAlias: sinon.spy(({ name }) => {
-      const index = aliases[name];
-      return index
-        ? Promise.resolve({ [index]: { aliases: { [name]: {} } } })
-        : Promise.resolve({ status: 404 });
+    getAlias: sinon.spy(async ({ index, name }) => {
+      if (index && existingIndices.indexOf(index) >= 0) {
+        const result = indexAlias(aliases, index);
+        return { [index]: { aliases: result ? { [result]: {} } : {} } };
+      }
+
+      if (name && aliases[name]) {
+        return { [aliases[name]]: { aliases: { [name]: {} } } };
+      }
+
+      return { status: 404 };
     }),
     updateAliases: sinon.spy(async ({ body }) => {
       body.actions.forEach(({ add: { index, alias } }) => {
