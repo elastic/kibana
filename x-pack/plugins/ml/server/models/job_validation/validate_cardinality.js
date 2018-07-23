@@ -42,10 +42,23 @@ const validateFactory = (callWithRequest, job) => {
     if (relevantDetectors.length > 0) {
       try {
         const uniqueFieldNames = _.uniq(relevantDetectors.map(f => f[fieldName]));
+
+        // use fieldCaps endpoint to get data about whether fields are aggregatable
+        const fieldCaps = await callWithRequest('fieldCaps', {
+          index: job.datafeed_config.indices.join(','),
+          fields: uniqueFieldNames
+        });
+
+        // parse fieldCaps to return an array of just the fields which are aggregatable
+        const aggregatableFieldNames = Object.keys(fieldCaps.fields).filter((field) => {
+          const fieldType = Object.keys(fieldCaps.fields[field])[0];
+          return fieldCaps.fields[field][fieldType].aggregatable;
+        });
+
         const stats = await dv.checkAggregatableFieldsExist(
           job.datafeed_config.indices.join(','),
           job.datafeed_config.query,
-          uniqueFieldNames,
+          aggregatableFieldNames,
           0,
           job.data_description.time_field
         );
