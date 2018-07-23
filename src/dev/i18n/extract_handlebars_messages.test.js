@@ -19,7 +19,9 @@
 
 import { extractHandlebarsMessages } from './extract_handlebars_messages';
 
-const handlebarsSourceBuffer = Buffer.from(`
+describe('dev/i18n/extract_handlebars_messages', () => {
+  it('extracts handlebars default messages', () => {
+    const handlebarsSourceBuffer = Buffer.from(`\
 window.onload = function () {
   (function next() {
     var failure = function () {
@@ -27,8 +29,8 @@ window.onload = function () {
 
       var err = document.createElement('h1');
       err.style['color'] = 'white';
-      err.innerText = '{{i18n 'ui.id-1'\
- '{"defaultMessage": "Message text", "context": "Message context"}'}}';
+      err.innerText = '{{i18n 'ui.id-1' \
+'{"defaultMessage": "Message text", "context": "Message context"}'}}';
 
       document.body.innerHTML = err.outerHTML;
     }
@@ -36,11 +38,33 @@ window.onload = function () {
 };
 `);
 
-describe('extractHandlebarsMessages', () => {
-  it('extracts handlebars default messages', () => {
     const actual = Array.from(extractHandlebarsMessages(handlebarsSourceBuffer));
     const expected = [['ui.id-1', { message: 'Message text', context: 'Message context' }]];
 
     expect(actual).toEqual(expected);
+  });
+
+  it('throws on wrong arguments amount', () => {
+    const handlebarsSourceBuffer = Buffer.from(`\
+window.onload = function () {
+  err.innerText = '{{i18n 'ui.id-1'}}';
+};
+`);
+
+    expect(() => extractHandlebarsMessages(handlebarsSourceBuffer).next()).toThrow(
+      'Wrong arguments amount for handlebars i18n call.'
+    );
+  });
+
+  it('throws on wrong properties argument type', () => {
+    const handlebarsSourceBuffer = Buffer.from(`\
+window.onload = function () {
+  err.innerText = '{{i18n 'ui.id-1' propertiesJSONIdentifier}}';
+};
+`);
+
+    expect(() => extractHandlebarsMessages(handlebarsSourceBuffer).next()).toThrow(
+      `Cannot parse "ui.id-1" message: properties string should be a string literal.`
+    );
   });
 });

@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { extractHtmlMessages, getDirectiveMessages } from './extract_html_messages';
+import { extractHtmlMessages } from './extract_html_messages';
 
 const htmlSourceBuffer = Buffer.from(`
 <div name="dashboard">
@@ -37,43 +37,14 @@ const htmlSourceBuffer = Buffer.from(`
 </div>
 `);
 
-const directiveMessageSource = `
-<div name="dashboard">
-  <div>
-    <p
-      i18n-id="kbn.dashboard.id-1"
-      i18n-default-message="Message text 1"
-      i18n-context="Message context"
-    ></p>
-  </div>
-</div>
-<a
-  href="/"
-  i18n-id="kbn.dashboard.id-2"
-  i18n-default-message="Message
-text
-2"
-></a>;
-`;
 
-describe('extractHtmlMessages', () => {
+describe('dev/i18n/extract_html_messages', () => {
   it('extracts default messages from HTML', () => {
     const actual = Array.from(extractHtmlMessages(htmlSourceBuffer));
     const expected = [
       ['kbn.dashboard.id-1', { message: 'Message text 1', context: 'Message context 1' }],
       ['kbn.dashboard.id-2', { message: 'Message text 2' }],
       ['kbn.dashboard.id-3', { message: 'Message text 3', context: 'Message context 3' }],
-    ];
-    expect(actual.sort()).toEqual(expected.sort());
-  });
-});
-
-describe('getDirectiveMessages', () => {
-  it('extracts directive message', () => {
-    const actual = Array.from(getDirectiveMessages(directiveMessageSource));
-    const expected = [
-      ['kbn.dashboard.id-1', { message: 'Message text 1', context: 'Message context' }],
-      ['kbn.dashboard.id-2', { message: 'Message text 2' }],
     ];
     expect(actual.sort()).toEqual(expected.sort());
   });

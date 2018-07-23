@@ -114,7 +114,7 @@ function* getFilterMessages(htmlContent) {
   }
 }
 
-export function* getDirectiveMessages(htmlContent) {
+function* getDirectiveMessages(htmlContent) {
   const document = jsdom(htmlContent, {
     features: { ProcessExternalResources: false },
   }).defaultView.document;
