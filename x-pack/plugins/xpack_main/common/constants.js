@@ -42,6 +42,12 @@ export const LOGSTASH_SYSTEM_ID = 'logstash';
 export const REPORTING_SYSTEM_ID = 'reporting';
 
 /**
+ * The name of the Kibana System ID used to look up Reporting stats through the Monitoring system.
+ * @type {string}
+ */
+export const CANVAS_SYSTEM_ID = 'canvas';
+
+/**
  * The amount of time, in milliseconds, to wait between reports when enabled.
  *
  * Currently 24 hours.

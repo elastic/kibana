@@ -8,6 +8,7 @@ import { get, set, merge } from 'lodash';
 import {
   KIBANA_SYSTEM_ID,
   LOGSTASH_SYSTEM_ID,
+  CANVAS_SYSTEM_ID,
   REPORTING_SYSTEM_ID,
   BEATS_SYSTEM_ID,
 } from '../../../../common/constants';
@@ -15,6 +16,7 @@ import { getClusterUuids } from './get_cluster_uuids';
 import { getElasticsearchStats } from './get_es_stats';
 import { getKibanaStats } from './get_kibana_stats';
 import { getReportingStats } from './get_reporting_stats';
+import { getCanvasStats } from './get_canvas_stats';
 import { getBeatsStats } from './get_beats_stats';
 import { getHighLevelStats } from './get_high_level_stats';
 
@@ -66,13 +68,16 @@ function getAllStatsWithCaller(server, callCluster, start, end) {
       }
 
       return Promise.all([
-        getElasticsearchStats(server, callCluster, clusterUuids),           // cluster_stats, stack_stats.xpack, cluster_name/uuid, license, version
-        getKibanaStats(server, callCluster, clusterUuids, start, end),      // stack_stats.kibana
+        getElasticsearchStats(server, callCluster, clusterUuids), // cluster_stats, stack_stats.xpack, cluster_name/uuid, license, version
+        getKibanaStats(server, callCluster, clusterUuids, start, end), // stack_stats.kibana
         getHighLevelStats(server, callCluster, clusterUuids, start, end, LOGSTASH_SYSTEM_ID), // stack_stats.logstash
-        getReportingStats(server, callCluster, clusterUuids, start, end),   // stack_stats.xpack.reporting
-        getBeatsStats(server, callCluster, clusterUuids, start, end),      // stack_stats.beats
-      ])
-        .then(([esClusters, kibana, logstash, reporting, beats]) => handleAllStats(esClusters, { kibana, logstash, reporting, beats }));
+        getReportingStats(server, callCluster, clusterUuids, start, end), // stack_stats.xpack.reporting
+        getCanvasStats(server, callCluster, clusterUuids, start, end), // stack_stats.xpack.kibana_canvas
+        getBeatsStats(server, callCluster, clusterUuids, start, end), // stack_stats.beats
+      ]).then(([esClusters, kibana, logstash, reporting, canvas, beats]) => {
+        return handleAllStats(esClusters, { kibana, logstash, reporting, canvas, beats });
+      }
+      );
     });
 }
 
@@ -85,12 +90,13 @@ function getAllStatsWithCaller(server, callCluster, start, end) {
  * @param {Object} logstash The Logstash nodes keyed by Cluster UUID
  * @return {Array} The clusters joined with the Kibana and Logstash instances under each cluster's {@code stack_stats}.
  */
-export function handleAllStats(clusters, { kibana, logstash, reporting, beats }) {
+export function handleAllStats(clusters, { kibana, logstash, reporting, canvas, beats }) {
   return clusters.map(cluster => {
     // if they are using Kibana or Logstash, then add it to the cluster details under cluster.stack_stats
     addStackStats(cluster, kibana, KIBANA_SYSTEM_ID);
     addStackStats(cluster, logstash, LOGSTASH_SYSTEM_ID);
     addStackStats(cluster, beats, BEATS_SYSTEM_ID);
+    addXPackStats(cluster, canvas, CANVAS_SYSTEM_ID);
     addXPackStats(cluster, reporting, REPORTING_SYSTEM_ID);
     mergeXPackStats(cluster, kibana, 'graph_workspace', 'graph'); // copy graph_workspace info out of kibana, merge it into stack_stats.xpack.graph
 
