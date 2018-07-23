@@ -4,21 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { Component, Fragment } from 'react';
+import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import {
-  EuiCallOut,
-  EuiText,
-  EuiModal,
-  EuiModalHeader,
-  EuiModalHeaderTitle,
-  EuiModalBody,
-  EuiOverlayMask,
   EuiAvatar,
-  EuiSpacer,
+  EuiPopover,
 } from '@elastic/eui';
-import { SpaceCards, SpaceAvatar } from '../components';
+import { SpaceAvatar } from '../components';
 import { Notifier } from 'ui/notify';
+import { SpacesTable } from './components/spaces_table';
 
 export class NavControlModal extends Component {
   state = {
@@ -77,17 +71,15 @@ export class NavControlModal extends Component {
   }
 
   render() {
-    let modal;
-    if (this.state.isOpen) {
-      modal = (
-        <EuiOverlayMask>
-          {this.getActivePortal()}
-        </EuiOverlayMask>
-      );
-    }
+    const button = this.getActiveSpaceButton();
+    const popover = (
+      <EuiPopover button={button} isOpen={this.state.isOpen} closePopover={this.closePortal} anchorPosition={'rightCenter'}>
+        <SpacesTable spaces={this.state.spaces || []} onSelectSpace={() => { }} />
+      </EuiPopover>
+    );
 
     return (
-      <div>{this.getActiveSpaceButton()}{modal}</div>
+      <div>{popover}</div>
     );
   }
 
@@ -130,36 +122,6 @@ export class NavControlModal extends Component {
       </div>
     );
   };
-
-  getActivePortal = () => {
-    let callout;
-
-    if (!this.state.activeSpaceExists) {
-      callout = (
-        <Fragment>
-          <EuiCallOut title={'Your space is no longer available'}>
-            <EuiText>
-              Please choose a new Space to continue using Kibana
-            </EuiText>
-          </EuiCallOut>
-          <EuiSpacer />
-        </Fragment>
-      );
-
-    }
-
-    return (
-      <EuiModal onClose={this.closePortal} className={'selectSpaceModal'}>
-        <EuiModalHeader>
-          <EuiModalHeaderTitle>Select a space</EuiModalHeaderTitle>
-        </EuiModalHeader>
-        <EuiModalBody>
-          {callout}
-          <SpaceCards spaces={this.state.spaces} />
-        </EuiModalBody>
-      </EuiModal>
-    );
-  }
 
   togglePortal = () => {
     const isOpening = !this.state.isOpen;
