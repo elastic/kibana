@@ -28,7 +28,7 @@ const changeFunctions = {
   [Status.DATA]: ($scope) => $scope.visData = { foo: 'new' },
   [Status.PARAMS]: ($scope) => $scope.vis.params = { foo: 'new' },
   [Status.RESIZE]: ($scope) => $scope.vis.size = [50, 50],
-  [Status.TIME]: ($scope) => $scope.vis.API.timeFilter.getBounds = () => [100, 100],
+  [Status.TIME]: ($scope) => $scope.vis.filters.timeRange = { from: 'now-7d', to: 'now' },
   [Status.UI_STATE]: ($scope) => $scope.uiState = { foo: 'new' },
 };
 
@@ -41,11 +41,7 @@ describe('getUpdateStatus', () => {
         size: [100, 100],
         params: {
         },
-        API: {
-          timeFilter: {
-            getBounds: () => [50, 50]
-          }
-        }
+        filters: {}
       },
       uiState: {},
       visData: {}

@@ -28,12 +28,12 @@ import 'ui/visualize';
 import 'ui/fixed_scroll';
 import 'ui/directives/validate_json';
 import 'ui/filters/moment';
-import 'ui/courier';
 import 'ui/index_patterns';
 import 'ui/state_management/app_state';
 import { timefilter } from 'ui/timefilter';
 import 'ui/share';
 import 'ui/query_bar';
+import { hasSearchStategyForIndexPattern, isDefaultTypeIndexPattern } from 'ui/courier';
 import { toastNotifications, getPainlessError } from 'ui/notify';
 import { VisProvider } from 'ui/vis';
 import { BasicResponseHandlerProvider } from 'ui/vis/response_handlers/basic';
@@ -195,6 +195,7 @@ function discoverController(
   // the actual courier.SearchSource
   $scope.searchSource = savedSearch.searchSource;
   $scope.indexPattern = resolveIndexPatternLoading();
+
   $scope.searchSource
     .setField('index', $scope.indexPattern)
     .setField('highlightAll', true)
@@ -236,7 +237,6 @@ function discoverController(
       });
     });
   };
-
 
   const getSharingDataFields = async () => {
     const selectedFields = $state.columns;
@@ -745,24 +745,48 @@ function discoverController(
   }
 
   function resolveIndexPatternLoading() {
-    const props = $route.current.locals.ip;
-    const loaded = props.loaded;
-    const stateVal = props.stateVal;
-    const stateValFound = props.stateValFound;
+    const {
+      loaded: loadedIndexPattern,
+      stateVal,
+      stateValFound,
+    } = $route.current.locals.ip;
 
-    const own = $scope.searchSource.getOwnField('index');
+    const ownIndexPattern = $scope.searchSource.getOwnField('index');
 
-    if (own && !stateVal) return own;
+    if (ownIndexPattern && !stateVal) {
+      return ownIndexPattern;
+    }
+
     if (stateVal && !stateValFound) {
-      const err = '"' + stateVal + '" is not a configured pattern ID. ';
-      if (own) {
-        notify.warning(`${err} Using the saved index pattern: "${own.title}" (${own.id})`);
-        return own;
+      const warningTitle = `"${stateVal}" is not a configured index pattern ID`;
+
+      if (ownIndexPattern) {
+        toastNotifications.addWarning({
+          title: warningTitle,
+          text: `Showing the saved index pattern: "${ownIndexPattern.title}" (${ownIndexPattern.id})`,
+        });
+        return ownIndexPattern;
       }
 
-      notify.warning(`${err} Using the default index pattern: "${loaded.title}" (${loaded.id})`);
+      toastNotifications.addWarning({
+        title: warningTitle,
+        text: `Showing the default index pattern: "${loadedIndexPattern.title}" (${loadedIndexPattern.id})`,
+      });
     }
-    return loaded;
+
+    return loadedIndexPattern;
+  }
+
+  // Block the UI from loading if the user has loaded a rollup index pattern but it isn't
+  // supported.
+  $scope.isUnsupportedIndexPattern = (
+    !isDefaultTypeIndexPattern($route.current.locals.ip.loaded)
+    && !hasSearchStategyForIndexPattern($route.current.locals.ip.loaded)
+  );
+
+  if ($scope.isUnsupportedIndexPattern) {
+    $scope.unsupportedIndexPatternType = $route.current.locals.ip.loaded.type;
+    return;
   }
 
   init();

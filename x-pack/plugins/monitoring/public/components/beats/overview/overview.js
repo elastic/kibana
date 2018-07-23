@@ -9,7 +9,7 @@ import { LatestActive } from './latest_active';
 import { LatestVersions } from './latest_versions';
 import { LatestTypes } from './latest_types';
 import { Stats } from '../';
-import { MonitoringTimeseriesContainer } from '../../';
+import { MonitoringTimeseriesContainer } from '../../chart';
 import {
   EuiCallOut,
   EuiTitle,

@@ -113,7 +113,7 @@ export const topHitMetricAgg = new MetricAggType({
       ],
       controller: function ($scope) {
         $scope.options = [];
-        $scope.$watchGroup([ 'agg.vis.type.name', 'agg.params.field.type' ], function ([ visName, fieldType ]) {
+        $scope.$watchGroup([ 'vis.type.name', 'agg.params.field.type' ], function ([ visName, fieldType ]) {
           if (fieldType && visName) {
             $scope.options = _.filter($scope.aggParam.options, option => {
               return option.isCompatibleVis(visName) && option.isCompatibleType(fieldType);
