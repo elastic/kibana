@@ -5,4 +5,4 @@
  */
 
 
-import './select_severity_directive';
+export { CreateWatchModal } from './create_watch_flyout';

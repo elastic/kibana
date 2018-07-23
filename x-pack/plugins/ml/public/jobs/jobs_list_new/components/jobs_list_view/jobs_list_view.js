@@ -16,6 +16,7 @@ import { JobFilterBar } from '../job_filter_bar';
 import { EditJobFlyout } from '../edit_job_flyout';
 import { DeleteJobModal } from '../delete_job_modal';
 import { StartDatafeedModal } from '../start_datafeed_modal';
+import { CreateWatchModal } from '../create_watch_flyout';
 import { MultiJobActions } from '../multi_job_actions';
 
 import PropTypes from 'prop-types';
@@ -45,6 +46,7 @@ export class JobsListView extends Component {
     this.showEditJobFlyout = () => {};
     this.showDeleteJobModal = () => {};
     this.showStartDatafeedModal = () => {};
+    this.showCreateWatchModal = () => {};
 
     this.blockRefresh = false;
   }
@@ -191,6 +193,17 @@ export class JobsListView extends Component {
     this.showStartDatafeedModal = () => {};
   }
 
+  setShowCreateWatchModalFunction = (func) => {
+    this.showCreateWatchModal = func;
+  }
+  unsetShowCreateWatchModalFunction = () => {
+    this.showCreateWatchModal = () => {};
+  }
+  getShowCreateWatchModalFunction = () => {
+    return this.showCreateWatchModal;
+  }
+
+
   selectJobChange = (selectedJobs) => {
     this.setState({ selectedJobs });
   }
@@ -281,7 +294,13 @@ export class JobsListView extends Component {
         <StartDatafeedModal
           setShowFunction={this.setShowStartDatafeedModalFunction}
           unsetShowFunction={this.unsetShowDeleteJobModalFunction}
+          getShowCreateWatchModalFunction={this.getShowCreateWatchModalFunction}
           refreshJobs={() => this.refreshJobSummaryList(true)}
+        />
+        <CreateWatchModal
+          setShowFunction={this.setShowCreateWatchModalFunction}
+          unsetShowFunction={this.unsetShowCreateWatchModalFunction}
+          compile={this.props.compile}
         />
       </div>
     );
