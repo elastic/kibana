@@ -71,20 +71,20 @@ export class SpaceSelector extends Component {
 
     return (
       <EuiPage className="spaceSelector__page">
-        <EuiPageHeader className="spaceSelector__heading">
-          <EuiPageHeaderSection className="spaceSelector__logoHeader">
-            <div className="spaceSelector__logoCircle">
-              <EuiIcon size="xxl" type={`logoKibana`} />
-            </div>
-
-            <EuiSpacer />
-
-            <EuiTitle size="l">
-              <EuiTextColor color="ghost"><p>Select your space</p></EuiTextColor>
-            </EuiTitle>
-          </EuiPageHeaderSection>
-        </EuiPageHeader>
         <EuiPageBody>
+          <EuiPageHeader className="spaceSelector__heading">
+            <EuiPageHeaderSection className="spaceSelector__logoHeader">
+              <div className="spaceSelector__logoCircle">
+                <EuiIcon size="xxl" type={`logoKibana`} />
+              </div>
+
+              <EuiSpacer />
+
+              <EuiTitle size="l">
+                <EuiTextColor color="ghost"><p>Select your space</p></EuiTextColor>
+              </EuiTitle>
+            </EuiPageHeaderSection>
+          </EuiPageHeader>
           <EuiPageContent className="spaceSelector__pageContent">
 
             <EuiFlexGroup direction="column" alignItems="center" responsive={false}>
