@@ -37,6 +37,7 @@ module.directive('mlFormLabel', function () {
     link: (scope, element, attrs, ctrl, transclude) => {
       const props = {
         labelId: scope.labelId,
+        labelClassName: 'kuiFormLabel',
         // transclude the label text/elements from the angular template
         // to the labelRef from the react component.
         ref: c => angular.element(c.labelRef.current).append(transclude())

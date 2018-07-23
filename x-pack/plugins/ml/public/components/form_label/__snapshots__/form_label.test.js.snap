@@ -3,7 +3,7 @@
 exports[`FormLabel Basic initialization 1`] = `
 <React.Fragment>
   <label
-    className="kuiFormLabel"
+    className="euiFormLabel"
     id="ml_aria_label_undefined"
   />
   <Component
@@ -15,7 +15,7 @@ exports[`FormLabel Basic initialization 1`] = `
 exports[`FormLabel Full initialization 1`] = `
 <React.Fragment>
   <label
-    className="kuiFormLabel"
+    className="euiFormLabel"
     id="ml_aria_label_uid"
   >
     Label Text

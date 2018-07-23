@@ -20,10 +20,13 @@ export class FormLabel extends Component {
     this.labelRef = React.createRef();
   }
   render() {
-    const { labelId, children } = this.props;
+    // labelClassName is used so we can override the class with 'kuiFormLabel'
+    // when used in an angular context. Once the component is no longer used from
+    // within angular, this prop can be removed and the className can be hardcoded.
+    const { labelId, labelClassName = 'euiFormLabel', children } = this.props;
     return (
       <React.Fragment>
-        <label className="kuiFormLabel" id={`ml_aria_label_${labelId}`} ref={this.labelRef}>{children}</label>
+        <label className={labelClassName} id={`ml_aria_label_${labelId}`} ref={this.labelRef}>{children}</label>
         <JsonTooltip id={labelId} position="top" />
       </React.Fragment>
     );
