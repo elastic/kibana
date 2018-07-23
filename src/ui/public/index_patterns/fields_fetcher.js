@@ -17,32 +17,34 @@
  * under the License.
  */
 
-export function createFieldsFetcher(apiClient, config) {
-  class FieldsFetcher {
-    fetch(indexPattern) {
-      if (indexPattern.isTimeBasedInterval()) {
-        const interval = indexPattern.getInterval().name;
-        return this.fetchForTimePattern(indexPattern.title, interval);
-      }
+import { IndexPatternsApiClient } from './index_patterns_api_client';
+import chrome from 'ui/chrome';
 
-      return this.fetchForWildcard(indexPattern.title);
+const apiClient = new IndexPatternsApiClient();
+const config = chrome.getUiSettingsClient();
+
+export class FieldsFetcher {
+  fetch(indexPattern) {
+    if (indexPattern.isTimeBasedInterval()) {
+      const interval = indexPattern.getInterval().name;
+      return this.fetchForTimePattern(indexPattern.title, interval);
     }
 
-    fetchForTimePattern(indexPatternId) {
-      return apiClient.getFieldsForTimePattern({
-        pattern: indexPatternId,
-        lookBack: config.get('indexPattern:fieldMapping:lookBack'),
-        metaFields: config.get('metaFields'),
-      });
-    }
-
-    fetchForWildcard(indexPatternId) {
-      return apiClient.getFieldsForWildcard({
-        pattern: indexPatternId,
-        metaFields: config.get('metaFields'),
-      });
-    }
+    return this.fetchForWildcard(indexPattern.title);
   }
 
-  return new FieldsFetcher();
+  fetchForTimePattern(indexPatternId) {
+    return apiClient.getFieldsForTimePattern({
+      pattern: indexPatternId,
+      lookBack: config.get('indexPattern:fieldMapping:lookBack'),
+      metaFields: config.get('metaFields'),
+    });
+  }
+
+  fetchForWildcard(indexPatternId) {
+    return apiClient.getFieldsForWildcard({
+      pattern: indexPatternId,
+      metaFields: config.get('metaFields'),
+    });
+  }
 }

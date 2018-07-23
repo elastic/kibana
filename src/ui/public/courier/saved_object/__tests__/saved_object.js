@@ -26,8 +26,6 @@ import { SavedObjectProvider } from '../saved_object';
 import { IndexPatternProvider } from '../../../index_patterns/_index_pattern';
 import { SavedObjectsClientProvider } from '../../../saved_objects';
 
-import { StubIndexPatternsApiClientModule } from '../../../index_patterns/__tests__/stub_index_patterns_api_client';
-
 describe('Saved Object', function () {
   require('test_utils/no_digest_promises').activateForSuite();
 
@@ -87,7 +85,6 @@ describe('Saved Object', function () {
 
   beforeEach(ngMock.module(
     'kibana',
-    StubIndexPatternsApiClientModule,
     // Use the native window.confirm instead of our specialized version to make testing
     // this easier.
     function ($provide) {

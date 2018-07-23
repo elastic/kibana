@@ -31,9 +31,6 @@ import { IndexPatternProvider } from '../_index_pattern';
 import NoDigestPromises from 'test_utils/no_digest_promises';
 import { toastNotifications } from '../../notify';
 
-import { FieldsFetcherProvider } from '../fields_fetcher_provider';
-import { StubIndexPatternsApiClientModule } from './stub_index_patterns_api_client';
-import { IndexPatternsApiClientProvider } from '../index_patterns_api_client_provider';
 import { IsUserAwareOfUnsupportedTimePatternProvider } from '../unsupported_time_patterns';
 import { SavedObjectsClientProvider } from '../../saved_objects';
 
@@ -41,18 +38,16 @@ describe('index pattern', function () {
   NoDigestPromises.activateForSuite();
 
   let IndexPattern;
-  let fieldsFetcher;
   let mockLogstashFields;
   let savedObjectsClient;
   let savedObjectsResponse;
   const indexPatternId = 'test-pattern';
   let indexPattern;
   let intervals;
-  let indexPatternsApiClient;
   let defaultTimeField;
   let isUserAwareOfUnsupportedTimePattern;
 
-  beforeEach(ngMock.module('kibana', StubIndexPatternsApiClientModule, (PrivateProvider) => {
+  beforeEach(ngMock.module('kibana', (PrivateProvider) => {
     isUserAwareOfUnsupportedTimePattern = sinon.stub().returns(false);
     PrivateProvider.swap(IsUserAwareOfUnsupportedTimePatternProvider, () => {
       return isUserAwareOfUnsupportedTimePattern;
@@ -77,8 +72,6 @@ describe('index pattern', function () {
     ]);
 
     IndexPattern = Private(IndexPatternProvider);
-    fieldsFetcher = Private(FieldsFetcherProvider);
-    indexPatternsApiClient = Private(IndexPatternsApiClientProvider);
   }));
 
   // create an indexPattern instance for each test
@@ -158,38 +151,6 @@ describe('index pattern', function () {
       expect(respNames).to.eql(notScriptedNames);
     });
 
-  });
-
-  describe('refresh fields', function () {
-    it('should fetch fields from the fieldsFetcher', async function () {
-      expect(indexPattern.fields.length).to.be.greaterThan(2);
-
-      sinon.spy(fieldsFetcher, 'fetch');
-      indexPatternsApiClient.swapStubNonScriptedFields([
-        { name: 'foo' },
-        { name: 'bar' }
-      ]);
-
-      await indexPattern.refreshFields();
-      sinon.assert.calledOnce(fieldsFetcher.fetch);
-
-      const newFields = indexPattern.getNonScriptedFields();
-      expect(newFields).to.have.length(2);
-      expect(newFields.map(f => f.name)).to.eql(['foo', 'bar']);
-    });
-
-    it('should preserve the scripted fields', async function () {
-      // add spy to indexPattern.getScriptedFields
-      sinon.spy(indexPattern, 'getScriptedFields');
-
-      // refresh fields, which will fetch
-      await indexPattern.refreshFields();
-
-      // called to append scripted fields to the response from mapper.getFieldsForIndexPattern
-      sinon.assert.calledOnce(indexPattern.getScriptedFields);
-      expect(indexPattern.getScriptedFields().map(f => f.name))
-        .to.eql(mockLogstashFields.filter(f => f.scripted).map(f => f.name));
-    });
   });
 
   describe('add and remove scripted fields', function () {

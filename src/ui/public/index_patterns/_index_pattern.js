@@ -32,7 +32,7 @@ import { IndexPatternsIntervalsProvider } from './_intervals';
 import { FieldList } from './_field_list';
 import { IndexPatternsFlattenHitProvider } from './_flatten_hit';
 import { IndexPatternsPatternCacheProvider } from './_pattern_cache';
-import { FieldsFetcherProvider } from './fields_fetcher_provider';
+import { FieldsFetcher } from './fields_fetcher';
 import { IsUserAwareOfUnsupportedTimePatternProvider } from './unsupported_time_patterns';
 import { SavedObjectsClientProvider, findObjectByTitle } from '../saved_objects';
 
@@ -51,7 +51,7 @@ const MAX_ATTEMPTS_TO_RESOLVE_CONFLICTS = 3;
 export function IndexPatternProvider(Private, config, Promise, confirmModalPromise, kbnUrl) {
   const getConfig = (...args) => config.get(...args);
   const getIds = Private(IndexPatternsGetProvider)('id');
-  const fieldsFetcher = Private(FieldsFetcherProvider);
+  const fieldsFetcher = new FieldsFetcher();
   const intervals = Private(IndexPatternsIntervalsProvider);
   const mappingSetup = Private(UtilsMappingSetupProvider);
   const flattenHit = Private(IndexPatternsFlattenHitProvider);
