@@ -116,6 +116,16 @@ export class KibanaMigrator {
    */
   public migrateIndex() {
     const { server } = this.kbnServer;
+
+    // We can't do anything if the elasticsearch plugin has been disabled.
+    if (!server.plugins.elasticsearch) {
+      server.log(
+        ['warning', 'migration'],
+        'The elasticsearch plugin is disabled. Skipping migrations.'
+      );
+      return { status: 'skipped' };
+    }
+
     const config = server.config();
     const migrator = new IndexMigrator({
       batchSize: config.get('migrations.batchSize'),
@@ -140,18 +150,11 @@ function createCallCluster(server: Server): any {
   let callCluster: CallCluster;
   return async (path: any, opts: any) => {
     if (!callCluster) {
-      callCluster = await waitForElasticsearch(server);
+      await server.plugins.elasticsearch!.waitUntilReady();
+      callCluster = server.plugins.elasticsearch!.getCluster('admin').callWithInternalUser;
     }
     return await callCluster(path, opts);
   };
-}
-
-async function waitForElasticsearch(server: Server) {
-  if (!server.plugins.elasticsearch) {
-    throw new Error(`Saved objects cannot initialize without the elasticsearch plugin.`);
-  }
-  await server.plugins.elasticsearch.waitUntilReady();
-  return server.plugins.elasticsearch.getCluster('admin').callWithInternalUser;
 }
 
 /**
