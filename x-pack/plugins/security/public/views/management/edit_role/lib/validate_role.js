@@ -35,11 +35,11 @@ export class RoleValidator {
   validateIndexPrivileges(role) {
     if (!this._shouldValidate) return valid();
 
-    if (!Array.isArray(role.indices)) {
-      throw new TypeError(`Expected role.indices to be an array`);
+    if (!Array.isArray(role.elasticsearch.indices)) {
+      throw new TypeError(`Expected role.elasticsearch.indices to be an array`);
     }
 
-    const areIndicesValid = role.indices
+    const areIndicesValid = role.elasticsearch.indices
       .map(this.validateIndexPrivilege.bind(this))
       .find((result) => result.isInvalid) == null;
 

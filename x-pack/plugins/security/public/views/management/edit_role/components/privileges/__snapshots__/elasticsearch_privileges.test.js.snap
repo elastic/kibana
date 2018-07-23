@@ -39,9 +39,11 @@ exports[`it renders without crashing 1`] = `
           onChange={[Function]}
           role={
             Object {
-              "cluster": Array [],
-              "indices": Array [],
-              "run_as": Array [],
+              "elasticsearch": Object {
+                "cluster": Array [],
+                "indices": Array [],
+                "run_as": Array [],
+              },
             }
           }
         />
@@ -129,9 +131,11 @@ exports[`it renders without crashing 1`] = `
       onChange={[MockFunction]}
       role={
         Object {
-          "cluster": Array [],
-          "indices": Array [],
-          "run_as": Array [],
+          "elasticsearch": Object {
+            "cluster": Array [],
+            "indices": Array [],
+            "run_as": Array [],
+          },
         }
       }
       validator={

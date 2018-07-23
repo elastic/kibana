@@ -60,10 +60,13 @@ describe('validateIndexPrivileges', () => {
 
   test('it ignores privilegs with no indices defined', () => {
     const role = {
-      indices: [{
-        names: [],
-        privileges: []
-      }]
+      elasticsearch: {
+        indices: [{
+          names: [],
+          privileges: []
+        }]
+      }
+
     };
 
     expect(validator.validateIndexPrivileges(role)).toEqual({
@@ -73,10 +76,13 @@ describe('validateIndexPrivileges', () => {
 
   test('it requires privilges when an index is defined', () => {
     const role = {
-      indices: [{
-        names: ['index-*'],
-        privileges: []
-      }]
+      elasticsearch: {
+        indices: [{
+          names: ['index-*'],
+          privileges: []
+        }]
+      }
+
     };
 
     expect(validator.validateIndexPrivileges(role)).toEqual({
@@ -86,7 +92,9 @@ describe('validateIndexPrivileges', () => {
 
   test('it throws when indices is not an array', () => {
     const role = {
-      indices: null
+      elasticsearch: {
+        indices: null
+      }
     };
 
     expect(() => validator.validateIndexPrivileges(role)).toThrowErrorMatchingSnapshot();

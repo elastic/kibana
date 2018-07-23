@@ -4,5 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { PageHeader } from './page_header';
 export { DeleteSpacesButton } from './delete_spaces_button';

@@ -21,19 +21,20 @@ const reactRootNodeId = 'manageSpacesReactRoot';
 routes.when('/management/spaces/list', {
   template,
   controller: function ($scope, $http, chrome, spacesNavState) {
-    const domNode = document.getElementById(reactRootNodeId);
+    $scope.$$postDigest(() => {
+      const domNode = document.getElementById(reactRootNodeId);
 
-    const spacesManager = new SpacesManager($http, chrome);
+      const spacesManager = new SpacesManager($http, chrome);
 
-    render(<SpacesGridPage
-      breadcrumbs={routes.getBreadcrumbs()}
-      spacesManager={spacesManager}
-      spacesNavState={spacesNavState}
-    />, domNode);
+      render(<SpacesGridPage
+        spacesManager={spacesManager}
+        spacesNavState={spacesNavState}
+      />, domNode);
 
-    // unmount react on controller destroy
-    $scope.$on('$destroy', () => {
-      unmountComponentAtNode(domNode);
+      // unmount react on controller destroy
+      $scope.$on('$destroy', () => {
+        unmountComponentAtNode(domNode);
+      });
     });
   }
 });
@@ -41,19 +42,20 @@ routes.when('/management/spaces/list', {
 routes.when('/management/spaces/create', {
   template,
   controller: function ($scope, $http, chrome, spacesNavState) {
-    const domNode = document.getElementById(reactRootNodeId);
+    $scope.$$postDigest(() => {
+      const domNode = document.getElementById(reactRootNodeId);
 
-    const spacesManager = new SpacesManager($http, chrome);
+      const spacesManager = new SpacesManager($http, chrome);
 
-    render(<ManageSpacePage
-      breadcrumbs={routes.getBreadcrumbs()}
-      spacesManager={spacesManager}
-      spacesNavState={spacesNavState}
-    />, domNode);
+      render(<ManageSpacePage
+        spacesManager={spacesManager}
+        spacesNavState={spacesNavState}
+      />, domNode);
 
-    // unmount react on controller destroy
-    $scope.$on('$destroy', () => {
-      unmountComponentAtNode(domNode);
+      // unmount react on controller destroy
+      $scope.$on('$destroy', () => {
+        unmountComponentAtNode(domNode);
+      });
     });
   }
 });
@@ -65,28 +67,26 @@ routes.when('/management/spaces/edit', {
 routes.when('/management/spaces/edit/:space', {
   template,
   controller: function ($scope, $http, $route, chrome, spacesNavState) {
-    const domNode = document.getElementById(reactRootNodeId);
+    $scope.$$postDigest(() => {
 
-    const { space } = $route.current.params;
+      const domNode = document.getElementById(reactRootNodeId);
 
-    const spacesManager = new SpacesManager($http, chrome);
+      const { space } = $route.current.params;
 
-    render(<ManageSpacePage
-      httpAgent={$http}
-      space={space}
-      chrome={chrome}
-      breadcrumbs={transformBreadcrumbs(routes.getBreadcrumbs())}
-      spacesManager={spacesManager}
-      spacesNavState={spacesNavState}
-    />, domNode);
+      const spacesManager = new SpacesManager($http, chrome);
 
-    // unmount react on controller destroy
-    $scope.$on('$destroy', () => {
-      unmountComponentAtNode(domNode);
+      render(<ManageSpacePage
+        httpAgent={$http}
+        space={space}
+        chrome={chrome}
+        spacesManager={spacesManager}
+        spacesNavState={spacesNavState}
+      />, domNode);
+
+      // unmount react on controller destroy
+      $scope.$on('$destroy', () => {
+        unmountComponentAtNode(domNode);
+      });
     });
   }
 });
-
-function transformBreadcrumbs(routeBreadcrumbs) {
-  return routeBreadcrumbs.filter(b => b.id !== 'edit');
-}

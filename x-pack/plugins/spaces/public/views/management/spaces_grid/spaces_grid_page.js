@@ -19,7 +19,7 @@ import {
   EuiLink,
 } from '@elastic/eui';
 
-import { DeleteSpacesButton, PageHeader } from '../components';
+import { DeleteSpacesButton } from '../components';
 import { isReservedSpace } from '../../../../common';
 
 export class SpacesGridPage extends Component {
@@ -36,7 +36,6 @@ export class SpacesGridPage extends Component {
   render() {
     return (
       <EuiPage>
-        <PageHeader breadcrumbs={this.props.breadcrumbs} />
         <EuiPageContent>
           <EuiFlexGroup justifyContent={'spaceBetween'}>
             <EuiFlexItem grow={false}>
@@ -142,5 +141,4 @@ export class SpacesGridPage extends Component {
 SpacesGridPage.propTypes = {
   spacesManager: PropTypes.object.isRequired,
   spacesNavState: PropTypes.object.isRequired,
-  breadcrumbs: PropTypes.array.isRequired,
 };

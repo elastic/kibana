@@ -11,16 +11,19 @@ import {
   EuiButtonEmpty,
   EuiSpacer,
   EuiPage,
+  EuiPageBody,
+  EuiPageContent,
   EuiForm,
   EuiFormRow,
   EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
   EuiButton,
-  EuiPanel,
+  EuiPageContentBody,
+  EuiHorizontalRule,
 } from '@elastic/eui';
 
-import { DeleteSpacesButton, PageHeader } from '../components';
+import { DeleteSpacesButton } from '../components';
 import { SpaceAvatar } from '../../components';
 
 import { Notifier, toastNotifications } from 'ui/notify';
@@ -76,80 +79,84 @@ export class ManageSpacePage extends Component {
     } = this.state.space;
 
     return (
-      <EuiPage className="editSpacePage">
-        <PageHeader breadcrumbs={this.props.breadcrumbs} />
-        <EuiForm>
-          {this.getFormHeading()}
+      <EuiPage className="manageSpacePage">
+        <EuiPageBody>
+          <EuiPageContent className="manageSpacePage__content">
+            <EuiPageContentBody>
+              <EuiForm>
+                {this.getFormHeading()}
 
-          <EuiSpacer />
+                <EuiSpacer />
 
-          <EuiPanel>
-            <EuiFlexGroup>
-              <EuiFlexItem style={{ maxWidth: '400px' }}>
+                <EuiFlexGroup>
+                  <EuiFlexItem style={{ maxWidth: '400px' }}>
+                    <EuiFormRow
+                      label="Name"
+                      {...this.validator.validateSpaceName(this.state.space)}
+                    >
+                      <EuiFieldText
+                        name="name"
+                        placeholder={'Awesome space'}
+                        value={name}
+                        onChange={this.onNameChange}
+                      />
+                    </EuiFormRow>
+                  </EuiFlexItem>
+                  {
+                    name && (
+                      <EuiFlexItem grow={false}>
+                        <EuiFlexGroup responsive={false}>
+                          <EuiFlexItem grow={false}>
+                            <EuiFormRow hasEmptyLabelSpace={true}>
+                              <SpaceAvatar space={this.state.space} />
+                            </EuiFormRow>
+                          </EuiFlexItem>
+                          <CustomizeSpaceAvatar space={this.state.space} onChange={this.onAvatarChange} />
+                        </EuiFlexGroup>
+                      </EuiFlexItem>
+                    )
+                  }
+                </EuiFlexGroup>
+
+                <EuiSpacer />
+
+                {isReservedSpace(this.state.space)
+                  ? null
+                  : (
+                    <Fragment>
+                      <UrlContext
+                        space={this.state.space}
+                        editingExistingSpace={this.editingExistingSpace()}
+                        editable={true}
+                        onChange={this.onUrlContextChange}
+                        validator={this.validator}
+                      />
+                    </Fragment>
+                  )
+                }
+
                 <EuiFormRow
-                  label="Name"
-                  {...this.validator.validateSpaceName(this.state.space)}
+                  label="Description"
+                  {...this.validator.validateSpaceDescription(this.state.space)}
                 >
                   <EuiFieldText
-                    name="name"
-                    placeholder={'Awesome space'}
-                    value={name}
-                    onChange={this.onNameChange}
+                    name="description"
+                    placeholder={'This is where the magic happens'}
+                    value={description}
+                    onChange={this.onDescriptionChange}
                   />
                 </EuiFormRow>
-              </EuiFlexItem>
-              {
-                name && (
-                  <EuiFlexItem grow={false}>
-                    <EuiFlexGroup responsive={false}>
-                      <EuiFlexItem grow={false}>
-                        <EuiFormRow hasEmptyLabelSpace={true}>
-                          <SpaceAvatar space={this.state.space} />
-                        </EuiFormRow>
-                      </EuiFlexItem>
-                      <CustomizeSpaceAvatar space={this.state.space} onChange={this.onAvatarChange} />
-                    </EuiFlexGroup>
-                  </EuiFlexItem>
-                )
-              }
-            </EuiFlexGroup>
 
-            <EuiSpacer />
+                <EuiSpacer />
 
-            {isReservedSpace(this.state.space)
-              ? null
-              : (
-                <Fragment>
-                  <UrlContext
-                    space={this.state.space}
-                    editingExistingSpace={this.editingExistingSpace()}
-                    editable={true}
-                    onChange={this.onUrlContextChange}
-                    validator={this.validator}
-                  />
-                </Fragment>
-              )
-            }
+                <EuiHorizontalRule />
 
-            <EuiFormRow
-              label="Description"
-              {...this.validator.validateSpaceDescription(this.state.space)}
-            >
-              <EuiFieldText
-                name="description"
-                placeholder={'This is where the magic happens'}
-                value={description}
-                onChange={this.onDescriptionChange}
-              />
-            </EuiFormRow>
+                {this.getFormButtons()}
 
-          </EuiPanel>
-
-          <EuiSpacer />
-
-          {this.getFormButtons()}
-
-        </EuiForm>
+              </EuiForm>
+            </EuiPageContentBody>
+          </EuiPageContent>
+        </EuiPageBody>
       </EuiPage>
     );
   }
@@ -396,5 +403,4 @@ ManageSpacePage.propTypes = {
   space: PropTypes.string,
   spacesManager: PropTypes.object,
   spacesNavState: PropTypes.object.isRequired,
-  breadcrumbs: PropTypes.array.isRequired,
 };

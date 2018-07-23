@@ -95,7 +95,6 @@ function restartNotifTimer(notif, cb) {
 
 const typeToButtonClassMap = {
   danger: 'kuiButton--danger', // NOTE: `error` type is internally named as `danger`
-  warning: 'kuiButton--warning',
   info: 'kuiButton--primary',
 };
 const buttonHierarchyClass = (index) => {
@@ -108,7 +107,6 @@ const buttonHierarchyClass = (index) => {
 };
 const typeToAlertClassMap = {
   danger: `alert-danger`,
-  warning: `alert-warning`,
   info: `alert-info`,
 };
 
@@ -188,7 +186,6 @@ export function Notifier(opts) {
 
   const notificationLevels = [
     'error',
-    'warning',
   ];
 
   notificationLevels.forEach(function (m) {
@@ -199,7 +196,6 @@ export function Notifier(opts) {
 Notifier.config = {
   bannerLifetime: 3000000,
   errorLifetime: 300000,
-  warningLifetime: 10000,
   infoLifetime: 5000,
   setInterval: window.setInterval,
   clearInterval: window.clearInterval
@@ -260,28 +256,6 @@ Notifier.prototype.error = function (err, opts, cb) {
     lifetime: Notifier.config.errorLifetime,
     actions: ['report', 'accept'],
     stack: formatStack(err)
-  }, _.pick(opts, overridableOptions));
-  return add(config, cb);
-};
-
-/**
- * Warn the user abort something
- * @param  {String} msg
- * @param  {Function} cb
- */
-Notifier.prototype.warning = function (msg, opts, cb) {
-  if (_.isFunction(opts)) {
-    cb = opts;
-    opts = {};
-  }
-
-  const config = _.assign({
-    type: 'warning',
-    content: formatMsg(msg, this.from),
-    icon: 'warning',
-    title: 'Warning',
-    lifetime: Notifier.config.warningLifetime,
-    actions: ['accept']
   }, _.pick(opts, overridableOptions));
   return add(config, cb);
 };
@@ -357,8 +331,6 @@ function getDecoratedCustomConfig(config) {
 
   const getLifetime = (type) => {
     switch (type) {
-      case 'warning':
-        return Notifier.config.warningLifetime;
       case 'danger':
         return Notifier.config.errorLifetime;
       default: // info
@@ -382,30 +354,6 @@ function getDecoratedCustomConfig(config) {
 
   return customConfig;
 }
-
-/**
- * Display a custom message
- * @param  {String} msg - required
- * @param  {Object} config - required
- * @param  {Function} cb - optional
- *
- * config = {
- *   title: 'Some Title here',
- *   type: 'info',
- *   actions: [{
- *     text: 'next',
- *     callback: function() { next(); }
- *   }, {
- *     text: 'prev',
- *     callback: function() { prev(); }
- *   }]
- * }
- */
-Notifier.prototype.custom = function (msg, config, cb) {
-  const customConfig = getDecoratedCustomConfig(config);
-  customConfig.content = formatMsg(msg, this.from);
-  return add(customConfig, cb);
-};
 
 /**
  * Display a scope-bound directive using template rendering in the message area

@@ -15,8 +15,6 @@ import { replaceInjectedVars } from './server/lib/replace_injected_vars';
 import { setupXPackMain } from './server/lib/setup_xpack_main';
 import {
   xpackInfoRoute,
-  xpackUsageRoute,
-  kibanaStatsRoute,
   telemetryRoute,
 } from './server/routes/api/v1';
 import {
@@ -111,8 +109,6 @@ export const xpackMain = (kibana) => {
 
       // register routes
       xpackInfoRoute(server);
-      xpackUsageRoute(server); // To replace kibanaStatsRoute
-      kibanaStatsRoute(server); // Only used internally. Remove in the next major.
       telemetryRoute(server);
     }
   });
