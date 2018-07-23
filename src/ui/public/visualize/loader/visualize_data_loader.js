@@ -16,6 +16,8 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+
+import React, { Fragment } from 'react';
 import { isEqual } from 'lodash';
 import { VisRequestHandlersRegistryProvider } from '../../registry/vis_request_handlers';
 import { VisResponseHandlersRegistryProvider } from '../../registry/vis_response_handlers';
@@ -25,6 +27,7 @@ import {
 } from '../../elasticsearch_errors';
 
 import { toastNotifications } from 'ui/notify';
+import { SearchError } from 'ui/courier';
 
 function getHandler(from, name) {
   if (typeof name === 'function') return name;
@@ -62,24 +65,41 @@ export class VisualizeDataLoader {
 
       this._previousVisState = this._vis.getState();
       this._previousRequestHandlerResponse = requestHandlerResponse;
+      this._vis.requestError = undefined;
 
       if (!canSkipResponseHandler) {
         this._visData = await Promise.resolve(this._responseHandler(this._vis, requestHandlerResponse));
       }
       return this._visData;
     }
-    catch (e) {
+    catch (error) {
       props.searchSource.cancelQueued();
-      this._vis.requestError = e;
-      if (isTermSizeZeroError(e)) {
-        return toastNotifications.addDanger(
-          `Your visualization ('${props.vis.title}') has an error: it has a term ` +
-          `aggregation with a size of 0. Please set it to a number greater than 0 to resolve ` +
-          `the error.`
-        );
+      this._vis.requestError = error;
+
+      if (isTermSizeZeroError(error)) {
+        return toastNotifications.addDanger({
+          title: `Visualization ('${this._vis.title}') has term aggregation of size 0`,
+          text: `Set it to a size greater than 0`,
+        });
       }
-      toastNotifications.addDanger(e);
+
+      if (error instanceof SearchError) {
+        const { message, path, status } = error;
+        return toastNotifications.addDanger({
+          title: `Visualization '${this._vis.title}' search failed`,
+          text: (
+            <Fragment>
+              <p>{message}</p>
+              <p><code>{status} {path}</code></p>
+            </Fragment>
+          ),
+        });
+      }
+
+      toastNotifications.addDanger({
+        title: `Visualization '${this._vis.title}' has an error`,
+        text: error,
+      });
     }
   }
-
 }
