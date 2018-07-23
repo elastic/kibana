@@ -19,3 +19,4 @@
 
 export { AggConfig } from './agg_config';
 export { Vis, VisProvider } from './vis';
+export { VisualizationController, VisType } from './vis_types/vis_type';

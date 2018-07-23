@@ -17,6 +17,16 @@
  * under the License.
  */
 
-export type Vis = any;
+import { VisType } from './vis_types/vis_type';
+
+export interface Vis {
+  type: VisType;
+
+  // Since we haven't typed everything here yet, we basically "any" the rest
+  // of that interface. This should be removed as soon as this type definition
+  // has been completed. But that way we at least have typing for a couple of
+  // properties on that type.
+  [key: string]: any;
+}
 
 export type VisProvider = (...dependencies: any[]) => Vis;

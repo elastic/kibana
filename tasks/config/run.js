@@ -179,16 +179,5 @@ module.exports = function (grunt) {
         '--server.maxPayloadBytes=1648576',
       ],
     },
-
-    functionalTestsDevServer: {
-      cmd: process.execPath,
-      args: [
-        'scripts/functional_tests_server',
-        '--config', 'test/functional/config.js',
-        '--debug',
-        '--',
-        '--server.maxPayloadBytes=1648576',
-      ],
-    },
   };
 };

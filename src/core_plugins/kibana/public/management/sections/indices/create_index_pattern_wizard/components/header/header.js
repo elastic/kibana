@@ -50,6 +50,7 @@ export const Header = ({
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <EuiSwitch
+          id="checkboxShowSystemIndices"
           label="Include system indices"
           checked={isIncludingSystemIndices}
           onChange={onChangeIncludingSystemIndices}

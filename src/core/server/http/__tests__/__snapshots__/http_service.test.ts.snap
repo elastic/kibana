@@ -18,14 +18,14 @@ Object {
 
 exports[`register route handler 1`] = `
 Object {
-  "debug": Array [],
-  "error": Array [],
-  "fatal": Array [],
-  "info": Array [
+  "debug": Array [
     Array [
       "registering route handler for [/foo]",
     ],
   ],
+  "error": Array [],
+  "fatal": Array [],
+  "info": Array [],
   "log": Array [],
   "trace": Array [],
   "warn": Array [],
