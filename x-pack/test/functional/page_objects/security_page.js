@@ -176,18 +176,13 @@ export function SecurityPageProvider({ getService, getPageObjects }) {
         const fullnameElement = await user.findByCssSelector('[data-test-subj="userRowFullName"]');
         const usernameElement = await user.findByCssSelector('[data-test-subj="userRowUserName"]');
         const rolesElement = await user.findByCssSelector('[data-test-subj="userRowRoles"]');
-        let reserved = false;
-        try {
-          reserved = !!(await user.setFindTimeout(500).findByCssSelector('[data-test-subj="reservedUser"]'));
-        } catch(e) {
-          //ignoring, just means user is not reserved
-        }
+        const isReservedElementVisible =  await user.findByCssSelector('td:last-child');
 
         return {
           username: await usernameElement.getVisibleText(),
           fullname: await fullnameElement.getVisibleText(),
           roles: (await rolesElement.getVisibleText()).split(',').map(role => role.trim()),
-          reserved
+          reserved: (await isReservedElementVisible.getProperty('innerHTML')).includes('reservedUser')
         };
       });
     }
