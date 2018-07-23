@@ -10,4 +10,11 @@ export interface Worker {
   createJob(payload: any, options: any): Job;
   executeJob(job: Job): void;
   enqueueJob(payload: any, options: any): void;
+
+  onJobEnqueued(res: any): void;
+  onJobCompleted(res: any): void;
+  onJobExecutionError(res: any): void;
+  onJobTimeOut(res: any): void;
+
+  updateProgress(uri: string, progress: number): void;
 }

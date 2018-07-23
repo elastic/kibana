@@ -7,6 +7,8 @@
 import { Esqueue } from '@castro/esqueue';
 
 import { RepositoryUtils } from '../../common/repository_utils';
+import { REPOSITORY_CLONE_STATUS_INDEX_TYPE } from '../../mappings';
+import { WorkerProgress } from '../../model/repository';
 import { Log } from '../log';
 import { RepositoryService } from '../repository_service';
 import { AbstractWorker } from './abstract_worker';
@@ -15,7 +17,11 @@ import { Job } from './job';
 export class CloneWorker extends AbstractWorker {
   public id: string = 'clone';
 
-  constructor(protected readonly queue: Esqueue, protected readonly log: Log) {
+  constructor(
+    protected readonly queue: Esqueue,
+    protected readonly log: Log,
+    private readonly objectsClient: any
+  ) {
     super(queue, log);
   }
 
@@ -23,6 +29,28 @@ export class CloneWorker extends AbstractWorker {
     const { url, dataPath } = job.payload;
     const repoService = new RepositoryService(dataPath, this.log);
     const repo = RepositoryUtils.buildRepository(url);
-    await repoService.clone(repo);
+    return await repoService.clone(repo);
+  }
+
+  public async onJobEnqueued(job: Job) {
+    const { url } = job.payload;
+    const repo = RepositoryUtils.buildRepository(url);
+    const progress: WorkerProgress = {
+      uri: repo.uri,
+      progress: 0,
+      timestamp: new Date(),
+    };
+    return await this.objectsClient.create(REPOSITORY_CLONE_STATUS_INDEX_TYPE, progress, {
+      id: repo.uri,
+    });
+  }
+
+  public async updateProgress(uri: string, progress: number) {
+    const p: WorkerProgress = {
+      uri,
+      progress,
+      timestamp: new Date(),
+    };
+    return await this.objectsClient.update(REPOSITORY_CLONE_STATUS_INDEX_TYPE, p.uri, p);
   }
 }

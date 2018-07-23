@@ -5,6 +5,8 @@
  */
 
 export const REPOSITORY_INDEX_TYPE = 'castro-repository';
+export const REPOSITORY_CLONE_STATUS_INDEX_TYPE = 'castro-repository-clone-status';
+export const REPOSITORY_DELETE_STATUS_INDEX_TYPE = 'castro-repository-delete-status';
 
 export const mappings = {
   [REPOSITORY_INDEX_TYPE]: {
@@ -20,6 +22,32 @@ export const mappings = {
       },
       org: {
         type: 'text',
+      },
+    },
+  },
+  [REPOSITORY_CLONE_STATUS_INDEX_TYPE]: {
+    properties: {
+      uri: {
+        type: 'text',
+      },
+      progress: {
+        type: 'integer',
+      },
+      timestamp: {
+        type: 'date',
+      },
+    },
+  },
+  [REPOSITORY_DELETE_STATUS_INDEX_TYPE]: {
+    properties: {
+      uri: {
+        type: 'text',
+      },
+      progress: {
+        type: 'integer',
+      },
+      timestamp: {
+        type: 'date',
       },
     },
   },

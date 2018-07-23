@@ -34,3 +34,26 @@ export enum FileTreeItemType {
   Directory,
   Submodule,
 }
+
+export interface WorkerResult {
+  uri: string;
+}
+export interface CloneWorkerResult extends WorkerResult {
+  repo: Repository;
+}
+
+export interface DeleteWorkerResult extends WorkerResult {
+  res: boolean;
+}
+
+export interface UpdateWorkerResult extends WorkerResult {
+  branch: string;
+  revision: string;
+}
+
+export interface WorkerProgress {
+  // Job payload repository uri.
+  uri: string;
+  progress: number;
+  timestamp: Date;
+}

@@ -8,14 +8,14 @@ import Git from 'nodegit';
 import rimraf from 'rimraf';
 
 import { RepositoryUtils } from '../common/repository_utils';
-import { Repository } from '../model';
+import { CloneWorkerResult, DeleteWorkerResult, Repository, UpdateWorkerResult } from '../model';
 import { Log } from './log';
 
 // This is the service for any kind of repository handling, e.g. clone, update, delete, etc.
 export class RepositoryService {
   constructor(private readonly repoVolPath: string, private log: Log) {}
 
-  public async clone(repo: Repository): Promise<Repository | null> {
+  public async clone(repo: Repository): Promise<CloneWorkerResult> {
     if (!repo) {
       throw new Error(`Invalid repository.`);
     } else {
@@ -36,12 +36,16 @@ export class RepositoryService {
           // }
         );
         const headCommit = await gitRepo.getHeadCommit();
+        const headRevision = headCommit.sha();
         this.log.info(
           `Clone repository from ${
             repo.url
-          } to ${localPath} done with head revision ${headCommit.sha()}`
+          } to ${localPath} done with head revision ${headRevision}`
         );
-        return repo;
+        return {
+          uri: repo.uri,
+          repo,
+        };
       } catch (error) {
         const msg = `Clone repository from ${repo.url} to ${localPath} error: ${error}`;
         this.log.error(msg);
@@ -50,7 +54,7 @@ export class RepositoryService {
     }
   }
 
-  public async remove(uri: string): Promise<boolean> {
+  public async remove(uri: string): Promise<DeleteWorkerResult> {
     const localPath = RepositoryUtils.repositoryLocalPath(this.repoVolPath, uri);
     // For now, just `rm -rf`
     rimraf(localPath, (error: Error) => {
@@ -60,14 +64,18 @@ export class RepositoryService {
       }
       this.log.info(`Remove ${localPath} done.`);
     });
-    return true;
+    return {
+      uri,
+      res: true,
+    };
   }
 
-  public async update(uri: string): Promise<boolean> {
+  public async update(uri: string): Promise<UpdateWorkerResult> {
     const localPath = RepositoryUtils.repositoryLocalPath(this.repoVolPath, uri);
     try {
       const repo = await Git.Repository.open(localPath);
       await repo.fetchAll();
+      // TODO(mengwei): deal with the case when the default branch has changed.
       const currentBranch = await repo.getCurrentBranch();
       const currentBranchName = currentBranch.shorthand();
       await repo.mergeBranches(
@@ -77,13 +85,16 @@ export class RepositoryService {
         Git.Merge.PREFERENCE.FASTFORWARD_ONLY
       );
       const headCommit = await repo.getHeadCommit();
-      // TODO: persist the sha to project update status.
-      this.log.info(`Update repository to revision ${headCommit.sha()}`);
+      this.log.debug(`Update repository to revision ${headCommit.sha()}`);
+      return {
+        uri,
+        branch: currentBranchName,
+        revision: headCommit.sha(),
+      };
     } catch (error) {
       const msg = `update repository ${uri} error: ${error}`;
       this.log.info(msg);
       throw new Error(msg);
     }
-    return true;
   }
 }

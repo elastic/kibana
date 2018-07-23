@@ -8,6 +8,7 @@ import { Esqueue, events as esqueueEvents } from '@castro/esqueue';
 import { Job as JobInternal } from '@castro/esqueue/job';
 import { Worker as WorkerInternal } from '@castro/esqueue/worker';
 
+import { WorkerResult } from '../../model/repository';
 import { Log } from '../log';
 import { Job } from './job';
 import { Worker } from './worker';
@@ -27,9 +28,11 @@ export abstract class AbstractWorker implements Worker {
     };
   }
 
-  public async executeJob(job: Job) {
+  public async executeJob(job: Job): Promise<WorkerResult> {
     // This is an abstract class. Do nothing here. You should override this.
-    return;
+    return new Promise<WorkerResult>((resolve, _) => {
+      resolve();
+    });
   }
 
   // Enqueue the job.
@@ -37,8 +40,9 @@ export abstract class AbstractWorker implements Worker {
     const job: Job = this.createJob(payload, options);
     return new Promise((resolve, reject) => {
       const jobInternal: JobInternal = this.queue.addJob(this.id, job, {});
-      jobInternal.on(esqueueEvents.EVENT_JOB_CREATED, (createdJob: JobInternal) => {
+      jobInternal.on(esqueueEvents.EVENT_JOB_CREATED, async (createdJob: JobInternal) => {
         if (createdJob.id === jobInternal.id) {
+          await this.onJobEnqueued(job);
           resolve(jobInternal);
         }
       });
@@ -52,8 +56,7 @@ export abstract class AbstractWorker implements Worker {
         ...payload,
         cancellationToken,
       };
-      this.executeJob(job);
-      return;
+      return this.executeJob(job);
     };
 
     const workerOptions = {
@@ -63,20 +66,44 @@ export abstract class AbstractWorker implements Worker {
 
     const queueWorker: WorkerInternal = this.queue.registerWorker(this.id, workerFn, workerOptions);
 
-    // TODO(mengwei): will register callbacks from params.
-    queueWorker.on(esqueueEvents.EVENT_WORKER_COMPLETE, (res: any) => {
-      // log.error(`Woker completed: (${res.job.id})`);
-      return;
+    queueWorker.on(esqueueEvents.EVENT_WORKER_COMPLETE, async (res: any) => {
+      const result = res.output.content;
+      await this.onJobCompleted(result);
     });
-    queueWorker.on(esqueueEvents.EVENT_WORKER_JOB_EXECUTION_ERROR, (res: any) => {
-      // log.error(`Worker error: (${res.job.id}`)
-      return;
+    queueWorker.on(esqueueEvents.EVENT_WORKER_JOB_EXECUTION_ERROR, async (res: any) => {
+      await this.onJobExecutionError(res);
     });
-    queueWorker.on(esqueueEvents.EVENT_WORKER_JOB_TIMEOUT, (res: any) => {
-      // log.error(`Job timeout exceeded: (${res.job.id}`)
-      return;
+    queueWorker.on(esqueueEvents.EVENT_WORKER_JOB_TIMEOUT, async (res: any) => {
+      await this.onJobTimeOut(res);
     });
 
     return this;
+  }
+
+  public async onJobEnqueued(job: Job) {
+    this.log.info(`${this.id} job enqueued with result ${JSON.stringify(job)}`);
+    return await this.updateProgress(job.payload.uri, 0);
+  }
+
+  public async onJobCompleted(res: WorkerResult) {
+    this.log.info(`${this.id} job completed with result ${JSON.stringify(res)}`);
+    return await this.updateProgress(res.uri, 100);
+  }
+
+  public async onJobExecutionError(res: any) {
+    this.log.info(`${this.id} job execution error ${JSON.stringify(res)}.`);
+    return await this.updateProgress(res.job.payload.uri, -100);
+  }
+
+  public async onJobTimeOut(res: any) {
+    this.log.info(`${this.id} job timed out ${JSON.stringify(res)}`);
+    return await this.updateProgress(res.job.payload.uri, -200);
+  }
+
+  public async updateProgress(uri: string, progress: number) {
+    // This is an abstract class. Do nothing here. You should override this.
+    return new Promise<WorkerResult>((resolve, _) => {
+      resolve();
+    });
   }
 }

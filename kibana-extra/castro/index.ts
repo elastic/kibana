@@ -49,22 +49,28 @@ export default (kibana: any) =>
 
     init(server: Hapi.Server, options: any) {
       const queueIndex = server.config().get('castro.queueIndex');
+      const adminClient = server.plugins.elasticsearch.getCluster('admin');
       const queue = new Esqueue(queueIndex, {
         // We may consider to provide a different value
         doctype: 'esqueue',
         dataSeparator: '.',
-        client: server.plugins.elasticsearch.getCluster('admin').getClient(),
+        client: adminClient.getClient(),
       });
       const log = new Log(server);
-      const cloneWorker = new CloneWorker(queue, log).bind();
-      const deleteWorker = new DeleteWorker(queue, log).bind();
-      const updateWorker = new UpdateWorker(queue, log).bind();
-
       const serverOptions = new ServerOptions(options);
       const client = server.plugins.elasticsearch.getCluster('admin');
       const callCluster = async (method: string, params: any) => {
         return await client.callWithInternalUser(method, params);
       };
+
+      const repository = server.savedObjects.getSavedObjectsRepository(
+        adminClient.callWithInternalUser
+      );
+      const objectsClient = new server.savedObjects.SavedObjectsClient(repository);
+
+      const cloneWorker = new CloneWorker(queue, log, objectsClient).bind();
+      const deleteWorker = new DeleteWorker(queue, log, objectsClient).bind();
+      const updateWorker = new UpdateWorker(queue, log, objectsClient).bind();
 
       const scheduler = new UpdateScheduler(updateWorker, serverOptions, callCluster);
       scheduler.start();
