@@ -400,7 +400,7 @@ export class Flyout extends Component {
           iconType="help"
         >
           <p>
-            Imported {importCount} of {importCount + failedImports.length} objects.
+            Failed to import {failedImports.length} of {importCount + failedImports.length} objects.
           </p>
           <p>
             {failedImports.map(({ error }) => error.message || '').join(' ')}
