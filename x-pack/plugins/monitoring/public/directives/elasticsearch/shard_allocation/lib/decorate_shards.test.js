@@ -81,7 +81,6 @@ describe('decorateShards', () => {
       node: 'ZRnQRUBBQHugqD-rqicFJw',
       primary: true,
       relocating_node: null,
-      resolver: '127.0.0.1:9301',
       shard: 3,
       state: 'STARTED'
     };
