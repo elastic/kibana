@@ -14,7 +14,7 @@ import { SpaceAvatar } from '../components';
 import { Notifier } from 'ui/notify';
 import { SpacesTable } from './components/spaces_table';
 
-export class NavControlModal extends Component {
+export class NavControlPopover extends Component {
   state = {
     isOpen: false,
     loading: false,
@@ -72,9 +72,13 @@ export class NavControlModal extends Component {
 
   render() {
     const button = this.getActiveSpaceButton();
+    if (!button) {
+      return null;
+    }
+
     const popover = (
       <EuiPopover button={button} isOpen={this.state.isOpen} closePopover={this.closePortal} anchorPosition={'rightCenter'}>
-        <SpacesTable spaces={this.state.spaces || []} onSelectSpace={() => { }} />
+        <SpacesTable spaces={this.state.spaces || []} onSelectSpace={this.onSelectSpace} />
       </EuiPopover>
     );
 
@@ -145,7 +149,7 @@ export class NavControlModal extends Component {
   }
 }
 
-NavControlModal.propTypes = {
+NavControlPopover.propTypes = {
   activeSpace: PropTypes.object,
   spacesManager: PropTypes.object.isRequired
 };

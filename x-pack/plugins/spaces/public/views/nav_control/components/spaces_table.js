@@ -61,10 +61,10 @@ export class SpacesTable extends Component {
       width: '100%',
       render: (value, record) => {
         return (
-          <EuiLink onClick={() => { }} style={{ width: '100%' }}>
+          <EuiLink onClick={() => this.props.onSelectSpace(record)} style={{ width: '100%' }}>
             <EuiFlexGroup alignItems="baseline">
               <EuiFlexItem grow={false}>
-                <SpaceAvatar space={record} />
+                <SpaceAvatar space={record} size="s" />
               </EuiFlexItem>
               <EuiFlexItem style={{ maxWidth: '300px' }}>
                 <EuiText grow={false}><p className="eui-textTruncate">{value}</p></EuiText>

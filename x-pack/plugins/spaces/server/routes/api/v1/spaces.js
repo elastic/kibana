@@ -60,10 +60,12 @@ export function initSpacesApi(server) {
 
       try {
         const result = await client.find({
-          type: 'space'
+          type: 'space',
+          sortField: 'name.keyword',
         });
 
         spaces = result.saved_objects.map(convertSavedObjectToSpace);
+
       } catch (error) {
         return reply(wrapError(error));
       }
