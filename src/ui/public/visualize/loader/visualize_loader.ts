@@ -23,7 +23,6 @@
  * are up to date.
  */
 
-// @ts-ignore implicit-any Does not have typings yet
 import chrome from '../../chrome';
 // @ts-ignore implicit-any
 import { FilterBarQueryFilterProvider } from '../../filter_bar/query_filter';
@@ -145,7 +144,7 @@ function VisualizeLoaderProvider(savedVisualizations: any, Private: IPrivate) {
  * @return A promise, that resolves to the visualize loader.
  */
 function getVisualizeLoader(): Promise<VisualizeLoader> {
-  return chrome.dangerouslyGetActiveInjector().then(($injector: any) => {
+  return chrome.dangerouslyGetActiveInjector().then($injector => {
     const Private: IPrivate = $injector.get('Private');
     return Private(VisualizeLoaderProvider);
   });
