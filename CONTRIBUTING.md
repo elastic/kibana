@@ -161,7 +161,7 @@ nvm use
 ```
 
 Install the latest version of [yarn](https://yarnpkg.com). (**Important:** Due to a [bug in yarn 1.7.0](https://github.com/yarnpkg/yarn/issues/5876)
-you can't use that yarn version. Please use any other version.)
+you can't use that yarn version. Please check the `package.json` `engine` entry for supported yarn versions.)
 
 Bootstrap Kibana and install all the dependencies
 
