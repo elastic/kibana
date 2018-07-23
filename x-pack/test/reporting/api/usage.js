@@ -123,25 +123,5 @@ export default function ({ getService }) {
         reportingAPI.expectAllTimeJobTypeTotalStats(usage, 'printable_pdf', 23);
       });
     });
-
-    describe('deprecated API', () => {
-      it('shows correct stats', async () => {
-        const usage = await usageAPI.getUsageStatsFromDeprecatedPre64Endpoint();
-
-        reportingAPI.expectRecentPdfAppStats(usage, 'visualization', 2);
-        reportingAPI.expectRecentPdfAppStats(usage, 'dashboard', 2);
-        reportingAPI.expectRecentPdfLayoutStats(usage, 'preserve_layout', 2);
-        reportingAPI.expectRecentPdfLayoutStats(usage, 'print', 2);
-        reportingAPI.expectRecentJobTypeTotalStats(usage, 'csv', 1);
-        reportingAPI.expectRecentJobTypeTotalStats(usage, 'printable_pdf', 4);
-
-        reportingAPI.expectAllTimePdfAppStats(usage, 'visualization', 5);
-        reportingAPI.expectAllTimePdfAppStats(usage, 'dashboard', 5);
-        reportingAPI.expectAllTimePdfLayoutStats(usage, 'preserve_layout', 5);
-        reportingAPI.expectAllTimePdfLayoutStats(usage, 'print', 5);
-        reportingAPI.expectAllTimeJobTypeTotalStats(usage, 'csv', 4);
-        reportingAPI.expectAllTimeJobTypeTotalStats(usage, 'printable_pdf', 23);
-      });
-    });
   });
 }

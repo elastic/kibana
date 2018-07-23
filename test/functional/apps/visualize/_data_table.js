@@ -33,7 +33,7 @@ export default function ({ getService, getPageObjects }) {
 
     before(async function () {
       log.debug('navigateToApp visualize');
-      await PageObjects.common.navigateToUrl('visualize', 'new');
+      await PageObjects.visualize.navigateToNewVisualization();
       log.debug('clickDataTable');
       await PageObjects.visualize.clickDataTable();
       log.debug('clickNewSearch');
@@ -90,7 +90,7 @@ export default function ({ getService, getPageObjects }) {
     });
 
     it('should show correct data for a data table with date histogram', async () => {
-      await PageObjects.common.navigateToUrl('visualize', 'new');
+      await PageObjects.visualize.navigateToNewVisualization();
       await PageObjects.visualize.clickDataTable();
       await PageObjects.visualize.clickNewSearch();
       await PageObjects.header.setAbsoluteRange(fromTime, toTime);
@@ -110,7 +110,7 @@ export default function ({ getService, getPageObjects }) {
     });
 
     it('should show correct data for a data table with date histogram', async () => {
-      await PageObjects.common.navigateToUrl('visualize', 'new');
+      await PageObjects.visualize.navigateToNewVisualization();
       await PageObjects.visualize.clickDataTable();
       await PageObjects.visualize.clickNewSearch();
       await PageObjects.header.setAbsoluteRange(fromTime, toTime);
@@ -131,6 +131,7 @@ export default function ({ getService, getPageObjects }) {
     it('should correctly filter for applied time filter on the main timefield', async () => {
       await filterBar.addFilter('@timestamp', 'is between', ['2015-09-19', '2015-09-21']);
       await PageObjects.header.waitUntilLoadingHasFinished();
+      await PageObjects.common.sleep(1000);
       const data = await PageObjects.visualize.getTableVisData();
       expect(data.trim().split('\n')).to.be.eql([
         '2015-09-20', '4,757',

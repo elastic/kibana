@@ -26,6 +26,7 @@ export function postgresqlMetricsSpecProvider() {
     id: 'postgresqlMetrics',
     name: 'PostgreSQL metrics',
     category: TUTORIAL_CATEGORY.METRICS,
+    isBeta: true,
     shortDescription: 'Fetch internal metrics from PostgreSQL.',
     longDescription: 'The `postgresql` Metricbeat module fetches internal metrics from the PostgreSQL server.' +
                      ' [Learn more]({config.docs.beats.metricbeat}/metricbeat-module-postgresql.html).',

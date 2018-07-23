@@ -60,6 +60,11 @@
 
       <div class="discover-wrapper col-md-10">
         <div class="discover-content">
+          <discover-unsupported-index-pattern
+            ng-if="isUnsupportedIndexPattern"
+            unsupported-type="unsupportedIndexPatternType"
+          ></discover-unsupported-index-pattern>
+
           <discover-no-results
             ng-show="resultState === 'none'"
             top-nav-toggle="kbnTopNav.toggle"

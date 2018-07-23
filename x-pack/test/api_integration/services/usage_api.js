@@ -12,26 +12,18 @@ export function UsageAPIProvider({ getService }) {
   return {
     async getUsageStatsNoAuth() {
       const { body } = await supertestNoAuth
-        .get('/api/_xpack/usage')
+        .get('/api/stats?extended=true')
         .set('kbn-xsrf', 'xxx')
         .expect(401);
-      return body;
+      return body.usage;
     },
 
     async getUsageStats() {
       const { body } = await supertest
-        .get('/api/_xpack/usage')
+        .get('/api/stats?extended=true')
         .set('kbn-xsrf', 'xxx')
         .expect(200);
-      return body;
-    },
-
-    async getUsageStatsFromDeprecatedPre64Endpoint() {
-      const { body } = await supertest
-        .get('/api/_kibana/v1/stats')
-        .set('kbn-xsrf', 'xxx')
-        .expect(200);
-      return body;
+      return body.usage;
     },
   };
 }

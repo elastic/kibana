@@ -10,5 +10,6 @@ export default function ({ loadTestFile }) {
     loadTestFile(require.resolve('./monitoring'));
     loadTestFile(require.resolve('./xpack_main'));
     loadTestFile(require.resolve('./logstash'));
+    loadTestFile(require.resolve('./kibana'));
   });
 }

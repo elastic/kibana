@@ -119,11 +119,12 @@ export function createProc(name, { cmd, args, cwd, env, stdin, log }) {
       await withTimeout(
         async () => {
           await treeKillAsync(childProcess.pid, signal);
+          await this.getOutcomePromise();
         },
         STOP_TIMEOUT,
         async () => {
           log.warning(
-            `Proc "${name}" was sent "${signal}" and didn't exit after ${STOP_TIMEOUT} ms, sending SIGKILL`
+            `Proc "${name}" was sent "${signal}" didn't emit the "exit" or "error" events after ${STOP_TIMEOUT} ms, sending SIGKILL`
           );
           await treeKillAsync(childProcess.pid, 'SIGKILL');
         }

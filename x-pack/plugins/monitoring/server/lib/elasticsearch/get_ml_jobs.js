@@ -37,6 +37,7 @@ export function getMlJobs(req, esIndexPattern) {
       'hits.hits._source.job_stats.state',
       'hits.hits._source.job_stats.data_counts.processed_record_count',
       'hits.hits._source.job_stats.model_size_stats.model_bytes',
+      'hits.hits._source.job_stats.forecasts_stats.total',
       'hits.hits._source.job_stats.node.id',
       'hits.hits._source.job_stats.node.name'
     ],

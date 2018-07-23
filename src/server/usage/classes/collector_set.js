@@ -17,6 +17,7 @@
  * under the License.
  */
 
+import { snakeCase } from 'lodash';
 import Promise from 'bluebird';
 import { getCollectorLogger } from '../lib';
 import { Collector } from './collector';
@@ -64,6 +65,10 @@ export class CollectorSet {
     }
   }
 
+  getCollectorByType(type) {
+    return this._collectors.find(c => c.type === type);
+  }
+
   /*
    * Call a bunch of fetch methods and then do them in bulk
    * @param {Array} collectors - an array of collectors, default to all registered collectors
@@ -89,18 +94,41 @@ export class CollectorSet {
 
   async bulkFetchUsage(callCluster) {
     const usageCollectors = this._collectors.filter(c => c instanceof UsageCollector);
-    const bulk = await this.bulkFetch(callCluster, usageCollectors);
+    return this.bulkFetch(callCluster, usageCollectors);
+  }
 
-    // summarize each type of stat
-    return bulk.reduce((accumulatedStats, currentStat) => {
-      /* Suffix removal is a temporary hack: some types have `_stats` suffix
-       * because of how monitoring bulk upload needed to combine types. It can
-       * be removed when bulk upload goes away
-       */
-      const statType = currentStat.type.replace('_stats', '');
+  // convert an array of fetched stats results into key/object
+  toObject(statsData) {
+    return statsData.reduce((accumulatedStats, { type, result }) => {
       return {
         ...accumulatedStats,
-        [statType]: currentStat.result,
+        [type]: result,
+      };
+    }, {});
+  }
+
+  // rename fields to use api conventions
+  toApiFieldNames(apiData) {
+    const getValueOrRecurse = value => {
+      if (value == null || typeof value !== 'object') {
+        return value;
+      } else {
+        return this.toApiFieldNames(value); // recurse
+      }
+    };
+
+    return Object.keys(apiData).reduce((accum, currName) => {
+      const value = apiData[currName];
+
+      let newName = currName;
+      newName = snakeCase(newName);
+      newName = newName.replace(/^(1|5|15)_m/, '$1m'); // os.load.15m, os.load.5m, os.load.1m
+      newName = newName.replace('_in_bytes', '_bytes');
+      newName = newName.replace('_in_millis', '_ms');
+
+      return {
+        ...accum,
+        [newName]: getValueOrRecurse(value),
       };
     }, {});
   }
