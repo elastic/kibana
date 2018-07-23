@@ -17,6 +17,6 @@
  * under the License.
  */
 
-import { MutationObserver } from '../polyfills/mutation_observer';
+const MutationObserver = require('mutation-observer');
 
 Object.defineProperty(window, 'MutationObserver', { value: MutationObserver });
