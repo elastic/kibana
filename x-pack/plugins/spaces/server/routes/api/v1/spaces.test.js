@@ -17,7 +17,7 @@ jest.mock('../../../../../../server/lib/get_client_shield', () => {
   return {
     getClient: () => {
       return {
-        callWithInternalUser: jest.fn(() => {})
+        callWithInternalUser: jest.fn(() => { })
       };
     }
   };
@@ -48,10 +48,19 @@ describe('Spaces API', () => {
   const teardowns = [];
   let request;
 
+  const baseConfig = {
+    'server.basePath': ''
+  };
+
   beforeEach(() => {
-    request = async (method, path, setupFn = () => { }) => {
+    request = async (method, path, setupFn = () => { }, testConfig = {}) => {
 
       const server = new Server();
+
+      const config = {
+        ...baseConfig,
+        ...testConfig
+      };
 
       server.connection({ port: 0 });
 
@@ -59,7 +68,7 @@ describe('Spaces API', () => {
 
       server.decorate('server', 'config', jest.fn(() => {
         return {
-          get: () => ''
+          get: (key) => config[key]
         };
       }));
 
@@ -147,5 +156,35 @@ describe('Spaces API', () => {
       error: "Bad Request",
       message: "This Space cannot be deleted because it is reserved."
     });
+  });
+
+  test('POST space/{id}/select should respond with the new space location', async () => {
+    const response = await request('POST', '/api/spaces/v1/space/a-space/select');
+
+    const {
+      statusCode,
+      payload
+    } = response;
+
+    expect(statusCode).toEqual(200);
+
+    const result = JSON.parse(payload);
+    expect(result.location).toEqual('/s/a-space');
+  });
+
+  test('POST space/{id}/select should respond with the new space location when a baseUrl is provided', async () => {
+    const response = await request('POST', '/api/spaces/v1/space/a-space/select', () => { }, {
+      'server.basePath': '/my/base/path'
+    });
+
+    const {
+      statusCode,
+      payload
+    } = response;
+
+    expect(statusCode).toEqual(200);
+
+    const result = JSON.parse(payload);
+    expect(result.location).toEqual('/my/base/path/s/a-space');
   });
 });

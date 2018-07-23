@@ -139,6 +139,10 @@ export class NavControlModal extends Component {
       isOpen: false
     });
   }
+
+  onSelectSpace = (space) => {
+    this.props.spacesManager.changeSelectedSpace(space);
+  }
 }
 
 NavControlModal.propTypes = {
