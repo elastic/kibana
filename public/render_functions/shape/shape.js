@@ -8,7 +8,6 @@ export const shape = () => ({
   reuseDomNode: true,
   render(domNode, config, handlers) {
     const { shape, fill, border, borderWidth, maintainAspect } = config;
-
     const parser = new DOMParser();
     const [shapeSvg] = parser
       .parseFromString(shapes[shape], 'image/svg+xml')
@@ -22,14 +21,34 @@ export const shape = () => ({
     shapeContent.setAttribute('stroke-miterlimit', 999);
     shapeContent.setAttribute('vector-effect', 'non-scaling-stroke');
 
-    shapeSvg.style.padding = borderWidth / 2;
     shapeSvg.setAttribute('preserveAspectRatio', maintainAspect ? 'xMidYmid meet' : 'none');
+
+    const initialViewBox = shapeSvg
+      .getAttribute('viewBox')
+      .split(' ')
+      .map(v => parseInt(v, 10));
 
     const draw = () => {
       const width = domNode.offsetWidth;
       const height = domNode.offsetHeight;
+
+      // adjust viewBox based on border width
+      let [minX, minY, maxX, maxY] = initialViewBox;
+
+      const xScale = (maxX - minX) / width;
+      const yScale = (maxY - minY) / height;
+      const borderOffset = borderWidth / 2;
+      const xOffset = borderOffset * xScale;
+      const yOffset = borderOffset * yScale;
+
+      minX -= xOffset; // min-x
+      minY -= yOffset; // min-y
+      maxX += xOffset * 2; // width
+      maxY += yOffset * 2; // height
+
       shapeSvg.setAttribute('width', width);
       shapeSvg.setAttribute('height', height);
+      shapeSvg.setAttribute('viewBox', [minX, minY, maxX, maxY].join(' '));
 
       const oldShape = domNode.firstElementChild;
       if (oldShape) domNode.removeChild(oldShape);
