@@ -4,7 +4,6 @@ import { routes } from '../../apps';
 import { LOCALSTORAGE_LASTPAGE } from '../../../common/lib/constants';
 import { shortcutManager } from '../../lib/shortcut_manager';
 import { storage } from '../../lib/storage';
-import { UpdateModal } from '../update_modal';
 import { Router } from '../router';
 
 export class App extends React.PureComponent {
@@ -44,7 +43,6 @@ export class App extends React.PureComponent {
 
     return (
       <div className="canvas canvas__container">
-        <UpdateModal />
         <Router
           routes={routes}
           restoreRoute={restoreRoute}
