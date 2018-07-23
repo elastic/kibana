@@ -51,7 +51,7 @@ export function Field(indexPattern, spec) {
 
   let format = spec.format;
   if (!format || !(format instanceof FieldFormat)) {
-    format = indexPattern.fieldFormatMap[spec.name] || fieldFormats.getDefaultInstance(spec.type);
+    format = (indexPattern.fieldFormatMap && indexPattern.fieldFormatMap[spec.name]) || fieldFormats.getDefaultInstance(spec.type);
   }
 
   const indexed = !!spec.indexed;

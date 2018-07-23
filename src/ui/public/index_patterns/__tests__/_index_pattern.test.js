@@ -73,11 +73,36 @@ jest.mock('../_pattern_cache', () => ({
   }
 }));
 
-jest.mock('../fields_fetcher_provider', () => ({
-  FieldsFetcherProvider: {
-    fetch: jest.fn().mockImplementation(() => ([]))
+jest.mock('ui/chrome',
+  () => ({
+    getUiSettingsClient: () => {
+      return {
+        get: (key) => {
+          switch(key) {
+            case 'shortDots:enable':
+              return false;
+            default:
+              throw new Error(`Unexpected config key: ${key}`);
+          }
+        }
+      };
+    },
+  }), { virtual: true });
+
+jest.mock('../fields_fetcher', () => {
+  class MockFieldsFetcher {
+    async fetch() {
+      return [
+        { name: 'fieldName1' },
+        { name: 'fieldName2' }
+      ];
+    }
   }
-}));
+
+  return {
+    FieldsFetcher: MockFieldsFetcher
+  };
+});
 
 jest.mock('../unsupported_time_patterns', () => ({
   IsUserAwareOfUnsupportedTimePatternProvider: jest.fn(),
@@ -158,5 +183,31 @@ describe('IndexPattern', () => {
     }
 
     expect(result.statusCode).toBe(409);
+  });
+
+  describe('refresh fields', function () {
+    const IndexPattern = IndexPatternProvider(Private, config, Promise, confirmModalPromise, kbnUrl); // eslint-disable-line new-cap
+    let indexPattern;
+
+    beforeEach(async () => {
+      indexPattern = new IndexPattern('foo');
+      await indexPattern.init();
+    });
+
+    it('should fetch fields with fieldsFetcher', async function () {
+      await indexPattern.refreshFields();
+
+      expect(indexPattern.fields.length).toBe(2);
+      expect(indexPattern.fields.map(f => f.name)).toEqual(['fieldName1', 'fieldName2']);
+    });
+
+    it('should preserve the scripted fields', async function () {
+      indexPattern.addScriptedField('myScriptedField', `doc['fieldName1'].value`);
+
+      await indexPattern.refreshFields();
+
+      expect(indexPattern.fields.length).toBe(3);
+      expect(indexPattern.fields.map(f => f.name)).toEqual(['fieldName1', 'fieldName2', 'myScriptedField']);
+    });
   });
 });
