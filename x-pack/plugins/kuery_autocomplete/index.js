@@ -15,7 +15,9 @@ export const kueryAutocomplete = (kibana) => new kibana.Plugin({
     enabled: Joi.boolean().default(true)
   }).default(),
   uiExports: {
-    hacks: ['plugins/kuery_autocomplete/hacks'],
+    autocompleteProviders: [
+      'plugins/kuery_autocomplete/autocomplete_providers'
+    ],
   },
   init: () => {}
 });
