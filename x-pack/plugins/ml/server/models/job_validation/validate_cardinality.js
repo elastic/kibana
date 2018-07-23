@@ -65,10 +65,17 @@ const validateFactory = (callWithRequest, job) => {
               });
             }
           } else {
-            messages.push({
-              id: 'field_not_aggregatable',
-              fieldName: uniqueFieldName
-            });
+            // when the job is using categorization and the field name is set to 'mlcategory',
+            // then don't report the field as not being able to be aggregated.
+            if (!(
+              typeof job.analysis_config.categorization_field_name !== 'undefined' &&
+              uniqueFieldName === 'mlcategory'
+            )) {
+              messages.push({
+                id: 'field_not_aggregatable',
+                fieldName: uniqueFieldName
+              });
+            }
           }
         });
       } catch (e) {

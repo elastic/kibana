@@ -291,6 +291,40 @@ describe('ML - validateJob', () => {
     );
   });
 
+  it('categorization job using mlcategory passes aggregatable field check', () => {
+    const payload = {
+      job: {
+        job_id: 'categorization_test',
+        analysis_config: {
+          bucket_span: '15m',
+          detectors: [{
+            function: 'count',
+            by_field_name: 'mlcategory'
+          }],
+          categorization_field_name: 'message_text',
+          influencers: []
+        },
+        data_description: { time_field: '@timestamp' },
+        datafeed_config: { indices: [] }
+      },
+      fields: { testField: {} }
+    };
+
+    return validateJob(callWithRequest, payload).then(
+      (messages) => {
+        const ids = messages.map(m => m.id);
+        expect(ids).to.eql([
+          'job_id_valid',
+          'detectors_function_not_empty',
+          'index_fields_valid',
+          'success_cardinality',
+          'time_field_invalid',
+          'influencer_low_suggestion'
+        ]);
+      }
+    );
+  });
+
   // the following two tests validate the correct template rendering of
   // urls in messages with {{version}} in them to be replaced with the
   // specified version. (defaulting to 'current')
