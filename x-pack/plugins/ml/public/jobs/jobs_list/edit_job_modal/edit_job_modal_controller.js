@@ -14,7 +14,7 @@ import numeral from '@elastic/numeral';
 
 import { calculateDatafeedFrequencyDefaultSeconds } from 'plugins/ml/../common/util/job_utils';
 import { parseInterval } from 'plugins/ml/../common/util/parse_interval';
-import { customUrlEditorService } from 'plugins/ml/jobs/components/custom_url_editor/custom_url_editor_service';
+import { customUrlEditorService } from 'plugins/ml/jobs/components/custom_url_editor_old/custom_url_editor_service';
 import { isWebUrl } from 'plugins/ml/util/string_utils';
 import { newJobLimits } from 'plugins/ml/jobs/new_job/utils/new_job_defaults';
 import { mlJobService } from 'plugins/ml/services/job_service';
