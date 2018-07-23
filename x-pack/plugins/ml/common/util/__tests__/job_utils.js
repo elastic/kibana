@@ -12,6 +12,7 @@ import {
   isTimeSeriesViewJob,
   isTimeSeriesViewDetector,
   isTimeSeriesViewFunction,
+  getPartitioningFieldNames,
   isModelPlotEnabled,
   isJobVersionGte,
   mlFunctionToESAggregation,
@@ -198,6 +199,68 @@ describe('ML - job utils', () => {
       expect(isTimeSeriesViewFunction('time_of_day')).to.be(false);
       expect(isTimeSeriesViewFunction('time_of_week')).to.be(false);
       expect(isTimeSeriesViewFunction('lat_long')).to.be(false);
+    });
+  });
+
+  describe('getPartitioningFieldNames', () => {
+    const job = {
+      analysis_config: {
+        detectors: [
+          {
+            function: 'count',
+            detector_description: 'count'
+          },
+          {
+            function: 'count',
+            partition_field_name: 'clientip',
+            detector_description: 'Count by clientip'
+          },
+          {
+            function: 'freq_rare',
+            by_field_name: 'uri',
+            over_field_name: 'clientip',
+            detector_description: 'Freq rare URI'
+          },
+          {
+            function: 'sum',
+            field_name: 'bytes',
+            by_field_name: 'uri',
+            over_field_name: 'clientip',
+            partition_field_name: 'method',
+            detector_description: 'sum bytes'
+          },
+        ]
+      }
+    };
+
+    it('returns empty array for a detector with no partitioning fields', () => {
+      const resp = getPartitioningFieldNames(job, 0);
+      expect(resp).to.be.an('array');
+      expect(resp).to.be.empty();
+    });
+
+    it('returns expected array for a detector with a partition field', () => {
+      const resp = getPartitioningFieldNames(job, 1);
+      expect(resp).to.be.an('array');
+      expect(resp).to.have.length(1);
+      expect(resp).to.contain('clientip');
+    });
+
+    it('returns expected array for a detector with by and over fields', () => {
+      const resp = getPartitioningFieldNames(job, 2);
+      expect(resp).to.be.an('array');
+      expect(resp).to.have.length(2);
+      expect(resp).to.contain('uri');
+      expect(resp).to.contain('clientip');
+    });
+
+    it('returns expected array for a detector with partition, by and over fields', () => {
+      const resp = getPartitioningFieldNames(job, 3);
+      expect(resp).to.be.an('array');
+      expect(resp).to.have.length(3);
+      expect(resp).to.contain('uri');
+      expect(resp).to.contain('clientip');
+      expect(resp).to.contain('method');
     });
   });
 
