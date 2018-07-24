@@ -82,6 +82,7 @@ export class EmbeddedVisualizeHandler {
       query,
       queryFilter,
       filters,
+      uiState,
       aggs: vis.getAggConfig(),
       forceFetch: false,
     };

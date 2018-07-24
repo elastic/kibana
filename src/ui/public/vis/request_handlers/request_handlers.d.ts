@@ -19,6 +19,7 @@
 
 import { SearchSource } from '../../courier';
 import { QueryFilter } from '../../filter_bar/query_filter';
+import { PersistedState } from '../../persisted_state';
 import { Filters, Query, TimeRange } from '../../visualize';
 import { AggConfigs } from '../agg_configs';
 import { Vis } from '../vis';
@@ -31,6 +32,7 @@ export interface RequestHandlerParams {
   filters?: Filters;
   forceFetch: boolean;
   queryFilter: QueryFilter;
+  uiState: PersistedState;
 }
 
 export type RequestHandler = (vis: Vis, params: RequestHandlerParams) => any;
