@@ -42,6 +42,7 @@ export default ({ getService }) => {
         { id: 'foo:e', type: 'foo', foo: { name: 'Fooey' } },
         { id: 'bar:i', type: 'bar', bar: { nomnom: 33 } },
         { id: 'bar:o', type: 'bar', bar: { nomnom: 2 } },
+        { id: 'baz:u', type: 'baz', baz: { title: 'Terrific!' } },
       ];
 
       const mappingProperties = {
@@ -77,6 +78,7 @@ export default ({ getService }) => {
         { id: 'foo:e', type: 'foo', foo: { name: 'Fooey' } },
         { id: 'bar:i', type: 'bar', bar: { nomnom: 33 } },
         { id: 'bar:o', type: 'bar', bar: { nomnom: 2 } },
+        { id: 'baz:u', type: 'baz', baz: { title: 'Terrific!' } },
       ]);
 
       // The docs in the alias have been migrated
@@ -85,6 +87,7 @@ export default ({ getService }) => {
         { id: 'foo:e', type: 'foo', migrationVersion: { foo: '1.0.0' }, foo: { name: 'FOOEY' } },
         { id: 'bar:i', type: 'bar', migrationVersion: { bar: '1.9.0' }, bar: { mynum: 68 } },
         { id: 'bar:o', type: 'bar', migrationVersion: { bar: '1.9.0' }, bar: { mynum: 6 } },
+        { id: 'baz:u', type: 'baz', baz: { title: 'Terrific!' } },
       ]);
     });
 
@@ -210,6 +213,7 @@ async function createIndex({ callCluster, index }) {
     type: { type: 'keyword' },
     foo: { properties: { name: { type: 'keyword' } } },
     bar: { properties: { nomnom: { type: 'integer' } } },
+    baz: { properties: { title: { type: 'keyword' } } },
   };
   await callCluster('indices.create', {
     index,

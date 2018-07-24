@@ -95,7 +95,6 @@ describe('DocumentMigrator', () => {
       id: 'me',
       type: 'user',
       attributes: { name: 'Tyler' },
-      migrationVersion: {},
     });
   });
 

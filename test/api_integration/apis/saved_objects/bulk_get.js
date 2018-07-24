@@ -54,7 +54,6 @@ export default function ({ getService }) {
               saved_objects: [
                 {
                   id: 'dd7caf20-9efd-11e7-acb3-3dab96693fab',
-                  migrationVersion: {},
                   type: 'visualization',
                   updated_at: '2017-09-21T18:51:23.794Z',
                   version: resp.body.saved_objects[0].version,
@@ -78,7 +77,6 @@ export default function ({ getService }) {
                 },
                 {
                   id: '7.0.0-alpha1',
-                  migrationVersion: {},
                   type: 'config',
                   updated_at: '2017-09-21T18:49:16.302Z',
                   version: resp.body.saved_objects[2].version,

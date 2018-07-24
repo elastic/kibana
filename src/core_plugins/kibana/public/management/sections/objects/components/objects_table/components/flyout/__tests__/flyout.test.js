@@ -141,17 +141,14 @@ describe('Flyout', () => {
       {
         _id: '1',
         _type: 'search',
-        _migrationVersion: {},
       },
       {
         _id: '2',
         _type: 'index-pattern',
-        _migrationVersion: {},
       },
       {
         _id: '3',
         _type: 'invalid',
-        _migrationVersion: {},
       },
     ];
 
@@ -199,7 +196,7 @@ describe('Flyout', () => {
       expect(importFile).toHaveBeenCalledWith(mockFile);
       // Remove the last element from data since it should be filtered out
       expect(resolveSavedObjects).toHaveBeenCalledWith(
-        mockData.slice(0, 2),
+        mockData.slice(0, 2).map((doc) => ({ ...doc, _migrationVersion: {} })),
         true,
         defaultProps.services,
         defaultProps.indexPatterns

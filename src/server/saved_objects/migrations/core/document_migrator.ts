@@ -183,6 +183,14 @@ function buildDocumentTransform({
       ? applyMigrations(doc, migrations)
       : markAsUpToDate(doc, migrations);
     validateDoc(result);
+
+    // In order to keep tests a bit more stable, we won't
+    // tack on an empy migrationVersion to docs that have
+    // no migrations defined.
+    if (_.isEmpty(result.migrationVersion)) {
+      delete result.migrationVersion;
+    }
+
     return result;
   };
 }
