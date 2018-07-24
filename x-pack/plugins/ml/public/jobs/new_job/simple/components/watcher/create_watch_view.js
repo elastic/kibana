@@ -188,7 +188,7 @@ export class CreateWatch extends Component {
           {
             this.state.watchAlreadyExists &&
             <EuiCallOut
-              title={`Warning, watch ml-${this.state.jobId} already exists, clicking apply with overwrite the original.`}
+              title={`Warning, watch ml-${this.state.jobId} already exists, clicking apply will overwrite the original.`}
             />
           }
         </div>
