@@ -37,7 +37,7 @@ export default function (server) {
     handler: async (request, reply) => {
       try {
         const uiSettingsService = await request.getUiSettingsService();
-        const uiSettings = uiSettingsService.getAll();
+        const uiSettings = await uiSettingsService.getAll();
 
         const tlConfig = require('../handlers/lib/tl_config.js')({
           server,
