@@ -154,11 +154,8 @@ export class EditJobFlyout extends Component {
   }
 
   setCustomUrls = (jobCustomUrls) => {
-    this.setState({
-      ...jobCustomUrls
-    });
+    this.setState({ jobCustomUrls });
   }
-
 
   save = () => {
     const newJobData = {
@@ -170,6 +167,7 @@ export class EditJobFlyout extends Component {
       datafeedQueryDelay: this.state.datafeedQueryDelay,
       datafeedFrequency: this.state.datafeedFrequency,
       datafeedScrollSize: this.state.datafeedScrollSize,
+      customUrls: this.state.jobCustomUrls,
     };
 
     saveJob(this.state.job, newJobData)
