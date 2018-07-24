@@ -8,7 +8,7 @@
 
 import _ from 'lodash';
 import { hasPrimaryChildren } from '../lib/hasPrimaryChildren';
-import { decorateShards } from '../lib/decorateShards';
+import { decorateShards } from '../lib/decorate_shards';
 
 export function nodesByIndices() {
   return function nodesByIndicesFn(shards, nodes) {
@@ -30,7 +30,7 @@ export function nodesByIndices() {
     }
 
     function createIndexAddShard(obj, shard) {
-      const node = shard.resolver || 'unassigned';
+      const node = shard.node || 'unassigned';
       const index = shard.index;
       if (!obj[node]) {
         createNode(obj, nodes[node], node);
