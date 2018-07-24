@@ -700,6 +700,13 @@ class-utils@^0.3.5:
     isobject "^3.0.0"
     static-extend "^0.1.1"
 
+classifier@~0.1.0:
+  version "0.1.0"
+  resolved "https://registry.yarnpkg.com/classifier/-/classifier-0.1.0.tgz#e2b185bba63bbf927cf7770eea1eb70aeb3f9596"
+  dependencies:
+    redis ">=0.7.0"
+    underscore ">=1.1.0"
+
 classnames@^2.2.3, classnames@^2.2.5:
   version "2.2.6"
   resolved "https://registry.yarnpkg.com/classnames/-/classnames-2.2.6.tgz#43935bffdd291f326dad0a205309b38d00f650ce"
@@ -1186,6 +1193,10 @@ dir-glob@^2.0.0:
 dom-walk@^0.1.0:
   version "0.1.1"
   resolved "https://registry.yarnpkg.com/dom-walk/-/dom-walk-0.1.1.tgz#672226dc74c8f799ad35307df936aba11acd6018"
+
+double-ended-queue@^2.1.0-0:
+  version "2.1.0-0"
+  resolved "https://registry.yarnpkg.com/double-ended-queue/-/double-ended-queue-2.1.0-0.tgz#103d3527fd31528f40188130c841efdd78264e5c"
 
 duplexer3@^0.1.4:
   version "0.1.4"
@@ -2587,6 +2598,18 @@ klaw@^1.0.0:
   optionalDependencies:
     graceful-fs "^4.1.9"
 
+language-classifier@0.0.1:
+  version "0.0.1"
+  resolved "https://registry.yarnpkg.com/language-classifier/-/language-classifier-0.0.1.tgz#b0c44cab331948e68a879cd63d5c1da68936774b"
+  dependencies:
+    classifier "~0.1.0"
+
+language-detect@^1.1.0:
+  version "1.1.0"
+  resolved "https://registry.yarnpkg.com/language-detect/-/language-detect-1.1.0.tgz#274bb8f58bec499cef2a8cfdb1028124eebb18e1"
+  dependencies:
+    language-classifier "0.0.1"
+
 lazy-cache@^1.0.3:
   version "1.0.4"
   resolved "https://registry.yarnpkg.com/lazy-cache/-/lazy-cache-1.0.4.tgz#a1d78fc3a50474cb80845d3b3b6e1da49a446e8e"
@@ -3792,6 +3815,22 @@ redent@^1.0.0:
     indent-string "^2.1.0"
     strip-indent "^1.0.1"
 
+redis-commands@^1.2.0:
+  version "1.3.5"
+  resolved "https://registry.yarnpkg.com/redis-commands/-/redis-commands-1.3.5.tgz#4495889414f1e886261180b1442e7295602d83a2"
+
+redis-parser@^2.6.0:
+  version "2.6.0"
+  resolved "https://registry.yarnpkg.com/redis-parser/-/redis-parser-2.6.0.tgz#52ed09dacac108f1a631c07e9b69941e7a19504b"
+
+redis@>=0.7.0:
+  version "2.8.0"
+  resolved "https://registry.yarnpkg.com/redis/-/redis-2.8.0.tgz#202288e3f58c49f6079d97af7a10e1303ae14b02"
+  dependencies:
+    double-ended-queue "^2.1.0-0"
+    redis-commands "^1.2.0"
+    redis-parser "^2.6.0"
+
 reduce-reducers@^0.1.0:
   version "0.1.5"
   resolved "https://registry.yarnpkg.com/reduce-reducers/-/reduce-reducers-0.1.5.tgz#ff77ca8068ff41007319b8b4b91533c7e0e54576"
@@ -4658,6 +4697,10 @@ underscore-plus@1.x, underscore-plus@^1, underscore-plus@^1.5.1:
   resolved "https://registry.yarnpkg.com/underscore-plus/-/underscore-plus-1.6.8.tgz#894b5132763e9e5ce9d50f2687b68dba6082de22"
   dependencies:
     underscore "~1.8.3"
+
+underscore@>=1.1.0:
+  version "1.9.1"
+  resolved "https://registry.yarnpkg.com/underscore/-/underscore-1.9.1.tgz#06dce34a0e68a7babc29b365b8e74b8925203961"
 
 underscore@~1.8.3:
   version "1.8.3"

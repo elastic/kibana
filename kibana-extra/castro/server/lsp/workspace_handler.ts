@@ -9,18 +9,20 @@ import fs from 'fs';
 import { Clone, Commit, Error, Repository, Reset } from 'nodegit';
 import path from 'path';
 import Url from 'url';
-import { TextDocumentPositionParams } from 'vscode-languageserver';
+import { ResponseMessage } from 'vscode-jsonrpc/lib/messages';
+import { Location, TextDocumentPositionParams } from 'vscode-languageserver';
+// #todo this may have problem in prod distribution
+import { Full } from '../../../../lsp/javascript-typescript-langserver/src/lsp-extend';
 import { LspRequest } from '../../model';
 import { GitOperations } from '../git_operations';
 import { Log } from '../log';
 
 export class WorkspaceHandler {
-  private workspacePath: string;
   private git: GitOperations;
   private log: Log;
+  private revisionMap: { [uri: string]: string } = {};
 
-  constructor(repoPath: string, workspacePath: string, log: Log) {
-    this.workspacePath = workspacePath;
+  constructor(readonly repoPath: string, private readonly workspacePath: string, log: Log) {
     this.git = new GitOperations(repoPath);
     this.log = log;
   }
@@ -52,13 +54,15 @@ export class WorkspaceHandler {
         throw Boom.internal(`checkout workspace to commit ${targetCommit.sha()} failed.`);
       }
     }
+    this.setWorkspaceRevision(workspaceRepo, headCommit);
     return workspaceRepo;
   }
 
   public async handleRequest(request: LspRequest): Promise<void> {
     const { method, params } = request;
     switch (method) {
-      case 'textDocument/hover': {
+      case 'textDocument/hover':
+      case 'textDocument/full':
         const payload: TextDocumentPositionParams = params;
         const { filePath, workspacePath } = await this.resolveUri(params.textDocument.uri);
         if (filePath) {
@@ -66,18 +70,50 @@ export class WorkspaceHandler {
           request.workspacePath = workspacePath;
         }
         break;
-      }
-      case 'textDocument/full': {
-        const payload: TextDocumentPositionParams = params;
-        const { filePath, workspacePath } = await this.resolveUri(params.textDocument.uri);
-        if (filePath) {
-          payload.textDocument.uri = request.resolvedFilePath = filePath;
-          request.workspacePath = workspacePath;
-        }
-        break;
-      }
       default:
       // do nothing
+    }
+  }
+
+  public handleResponse(request: LspRequest, response: ResponseMessage): ResponseMessage {
+    const { method } = request;
+    switch (method) {
+      case 'textDocument/full':
+        const result = response.result as Full[];
+        for (const full of result) {
+          if (full.symbols) {
+            for (const symbol of full.symbols) {
+              this.convertLocation(symbol.symbolInformation.location);
+            }
+          }
+          if (full.references) {
+            for (const reference of full.references) {
+              this.convertLocation(reference.location);
+            }
+          }
+        }
+        return response;
+      default:
+        return response;
+    }
+  }
+
+  private convertLocation(location: Location) {
+    const uri = location.uri;
+    if (uri && uri.startsWith('file://')) {
+      const filePath = uri.substring('file://'.length);
+      if (filePath.startsWith(this.workspacePath)) {
+        const relativePath = path.relative(this.workspacePath, filePath);
+        const regex = /^(.*?\/.*?\/.*?)\/(.*?)\/(.*)$/;
+        const m = relativePath.match(regex);
+        if (m) {
+          const repoUri = m[1];
+          const revision = m[2];
+          const gitRevision = this.revisionMap[`${repoUri}/${revision}`] || revision;
+          const file = m[3];
+          location.uri = `git://${repoUri}?${gitRevision}#${file}`;
+        }
+      }
     }
   }
 
@@ -144,5 +180,10 @@ export class WorkspaceHandler {
     const workspaceDir = path.join(this.workspacePath, repositoryUri, revision);
     this.log.info(`clone workspace ${workspaceDir} from url ${bareRepo.path()}`);
     return await Clone.clone(bareRepo.path(), workspaceDir);
+  }
+
+  private setWorkspaceRevision(workspaceRepo: Repository, headCommit: Commit) {
+    const workspaceRelativePath = path.relative(this.workspacePath, workspaceRepo.workdir());
+    this.revisionMap[workspaceRelativePath] = headCommit.sha().substring(0, 7);
   }
 }

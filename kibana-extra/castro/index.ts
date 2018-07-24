@@ -10,6 +10,7 @@ import { resolve } from 'path';
 import { mappings } from './mappings';
 import { Server } from './server/kibana_types';
 import { Log } from './server/log';
+import { LspService } from './server/lsp/lsp_service';
 import { CloneWorker, DeleteWorker, UpdateWorker } from './server/queue';
 import { exampleRoute } from './server/routes/example';
 import { fileRoute } from './server/routes/file';
@@ -77,9 +78,16 @@ export default (kibana: any) =>
 
       // Add server routes and initialize the plugin here
       exampleRoute(server);
-      lspRoute(server, serverOptions);
+
       repositoryRoute(server, serverOptions, cloneWorker, deleteWorker);
       fileRoute(server, serverOptions);
       monacoRoute(server);
+
+      const lspService = new LspService('127.0.0.1', server, serverOptions);
+
+      lspService.launchServers().then(() => {
+        // register lsp route after language server launched
+        lspRoute(server, serverOptions, lspService);
+      });
     },
   });

@@ -4,42 +4,20 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ResponseError } from 'vscode-jsonrpc';
-
 import { Server } from '../kibana_types';
-import { Log } from '../log';
-import { LanguageServerController } from '../lsp/controller';
-import { WorkspaceHandler } from '../lsp/workspace_handler';
+import { ResponseError } from 'vscode-jsonrpc';
+import { LspService } from '../lsp/lsp_service';
 import { ServerOptions } from '../server_options';
 
-export async function lspRoute(server: Server, options: ServerOptions) {
-  const workspacePath: string = options.workspacePath;
-
-  const repoPath: string = options.repoPath;
-
-  const controller = new LanguageServerController('127.0.0.1', server);
-
-  // TODO read from config which LSP should be used
-  await controller.launchTypescript();
-
+export function lspRoute(server: Server, options: ServerOptions, lspService: LspService) {
   server.route({
     path: '/api/lsp/textDocument/{method}',
     async handler(req, reply) {
       if (typeof req.payload === 'object' && req.payload != null) {
         const method = req.params.method;
         if (method) {
-          const workspaceHandler = new WorkspaceHandler(
-            repoPath,
-            workspacePath,
-            new Log(server, ['LSP', 'workspace'])
-          );
-          const request = {
-            method: `textDocument/${method}`,
-            params: req.payload,
-          };
           try {
-            await workspaceHandler.handleRequest(request);
-            const result = await controller.handleRequest(request);
+            const result = await lspService.sendRequest(`textDocument/${method}`, req.payload);
             reply.response(result);
           } catch (error) {
             if (error instanceof ResponseError) {
