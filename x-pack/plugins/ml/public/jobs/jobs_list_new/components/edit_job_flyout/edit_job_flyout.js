@@ -26,6 +26,7 @@ import {
 import { JobDetails, Detectors, Datafeed, CustomUrls } from './tabs';
 import { saveJob } from './edit_utils';
 import { loadFullJob } from '../utils';
+import { validateModelMemoryLimit, validateGroupNames } from './validate_job';
 import { toastNotifications } from 'ui/notify';
 
 export class EditJobFlyout extends Component {
@@ -46,6 +47,9 @@ export class EditJobFlyout extends Component {
       datafeedQueryDelay: '',
       datafeedFrequency: '',
       datafeedScrollSize: '',
+      jobModelMemoryLimitValidationError: '',
+      jobGroupsValidationError: '',
+      valid: true,
     };
 
     this.refreshJobs = this.props.refreshJobs;
@@ -111,12 +115,29 @@ export class EditJobFlyout extends Component {
       datafeedQueryDelay: (hasDatafeed) ? datafeedConfig.query_delay : '',
       datafeedFrequency: (hasDatafeed) ? frequency : '',
       datafeedScrollSize: (hasDatafeed) ? +datafeedConfig.scroll_size : '',
+      jobModelMemoryLimitValidationError: '',
+      jobGroupsValidationError: '',
     });
   }
 
   setJobDetails = (jobDetails) => {
+    let { jobModelMemoryLimitValidationError, jobGroupsValidationError } = this.state;
+
+    if (jobDetails.jobModelMemoryLimit !== undefined) {
+      jobModelMemoryLimitValidationError = validateModelMemoryLimit(jobDetails.jobModelMemoryLimit).message;
+    }
+
+    if (jobDetails.jobGroups !== undefined) {
+      jobGroupsValidationError = validateGroupNames(jobDetails.jobGroups).message;
+    }
+
+    const valid = (jobModelMemoryLimitValidationError === '' && jobGroupsValidationError === '');
+
     this.setState({
-      ...jobDetails
+      ...jobDetails,
+      jobModelMemoryLimitValidationError,
+      jobGroupsValidationError,
+      valid,
     });
   }
 
@@ -180,6 +201,9 @@ export class EditJobFlyout extends Component {
         datafeedQueryDelay,
         datafeedFrequency,
         datafeedScrollSize,
+        jobGroupsValidationError,
+        jobModelMemoryLimitValidationError,
+        valid,
       } = this.state;
 
       const tabs = [{
@@ -190,6 +214,8 @@ export class EditJobFlyout extends Component {
           jobGroups={jobGroups}
           jobModelMemoryLimit={jobModelMemoryLimit}
           setJobDetails={this.setJobDetails}
+          jobGroupsValidationError={jobGroupsValidationError}
+          jobModelMemoryLimitValidationError={jobModelMemoryLimitValidationError}
         />,
       }, {
         id: 'detectors',
@@ -258,6 +284,7 @@ export class EditJobFlyout extends Component {
                 <EuiButton
                   onClick={this.save}
                   fill
+                  isDisabled={(valid === false)}
                 >
                   Save
                 </EuiButton>

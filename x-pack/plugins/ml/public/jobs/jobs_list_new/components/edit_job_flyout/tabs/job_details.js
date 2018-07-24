@@ -30,6 +30,8 @@ export class JobDetails extends Component {
       groups: [],
       selectedGroups: [],
       mml: '',
+      mmlValidationError: '',
+      groupsValidationError: '',
     };
 
     this.setJobDetails = props.setJobDetails;
@@ -56,6 +58,8 @@ export class JobDetails extends Component {
       description: props.jobDescription,
       selectedGroups,
       mml: props.jobModelMemoryLimit,
+      mmlValidationError: props.jobModelMemoryLimitValidationError,
+      groupsValidationError: props.jobGroupsValidationError,
     };
   }
 
@@ -104,6 +108,8 @@ export class JobDetails extends Component {
       selectedGroups,
       mml,
       groups,
+      mmlValidationError,
+      groupsValidationError,
     } = this.state;
     return (
       <React.Fragment>
@@ -119,6 +125,8 @@ export class JobDetails extends Component {
           </EuiFormRow>
           <EuiFormRow
             label="Job groups"
+            isInvalid={(groupsValidationError !== '')}
+            error={groupsValidationError}
           >
             <EuiComboBox
               placeholder="Select or create groups"
@@ -127,14 +135,20 @@ export class JobDetails extends Component {
               onChange={this.onGroupsChange}
               onCreateOption={this.onCreateGroup}
               isClearable={true}
+              isInvalid={(groupsValidationError !== '')}
+              error={groupsValidationError}
             />
           </EuiFormRow>
           <EuiFormRow
             label="Model memory limit"
+            isInvalid={(mmlValidationError !== '')}
+            error={mmlValidationError}
           >
             <EuiFieldText
               value={mml}
               onChange={this.onMmlChange}
+              isInvalid={(mmlValidationError !== '')}
+              error={mmlValidationError}
             />
           </EuiFormRow>
         </EuiForm>

@@ -37,6 +37,7 @@ import { mlAnomaliesTableService } from './anomalies_table_service';
 import { mlFieldFormatService } from 'plugins/ml/services/field_format_service';
 import { getSeverityColor } from 'plugins/ml/../common/util/anomaly_utils';
 import { formatValue } from 'plugins/ml/formatters/format_value';
+import { RuleEditorFlyout } from 'plugins/ml/components/rule_editor';
 
 
 const INFLUENCERS_LIMIT = 5;    // Maximum number of influencers to display before a 'show more' link is added.
@@ -53,7 +54,10 @@ function renderTime(date, aggregationInterval) {
 }
 
 function showLinksMenuForItem(item) {
-  return item.isTimeSeriesViewDetector ||
+  // TODO - add in checking of user privileges to see if they can view / edit rules.
+  const canViewRules = true;
+  return canViewRules ||
+    item.isTimeSeriesViewDetector ||
     item.entityName === 'mlcategory' ||
     item.customUrls !== undefined;
 }
@@ -65,9 +69,11 @@ function getColumns(
   interval,
   timefilter,
   showViewSeriesLink,
+  showRuleEditorFlyout,
   itemIdToExpandedRowMap,
   toggleRow,
   filter) {
+
   const columns = [
     {
       name: '',
@@ -186,12 +192,11 @@ function getColumns(
     sortable: true
   });
 
-  const showExamples = items.some(item => item.entityName === 'mlcategory');
   const showLinks = (showViewSeriesLink === true) || items.some(item => showLinksMenuForItem(item));
 
   if (showLinks === true) {
     columns.push({
-      name: 'links',
+      name: 'actions',
       render: (item) => {
         if (showLinksMenuForItem(item) === true) {
           return (
@@ -201,6 +206,7 @@ function getColumns(
               isAggregatedData={isAggregatedData}
               interval={interval}
               timefilter={timefilter}
+              showRuleEditorFlyout={showRuleEditorFlyout}
             />
           );
         } else {
@@ -211,6 +217,7 @@ function getColumns(
     });
   }
 
+  const showExamples = items.some(item => item.entityName === 'mlcategory');
   if (showExamples === true) {
     columns.push({
       name: 'category examples',
@@ -238,7 +245,8 @@ class AnomaliesTable extends Component {
     super(props);
 
     this.state = {
-      itemIdToExpandedRowMap: {}
+      itemIdToExpandedRowMap: {},
+      showRuleEditorFlyout: () => {}
     };
   }
 
@@ -313,6 +321,19 @@ class AnomaliesTable extends Component {
     }
   };
 
+  setShowRuleEditorFlyoutFunction = (func) => {
+    this.setState({
+      showRuleEditorFlyout: func
+    });
+  }
+
+  unsetShowRuleEditorFlyoutFunction = () => {
+    const showRuleEditorFlyout = () => {};
+    this.setState({
+      showRuleEditorFlyout
+    });
+  }
+
   render() {
     const { timefilter, tableData, filter } = this.props;
 
@@ -336,6 +357,7 @@ class AnomaliesTable extends Component {
       tableData.interval,
       timefilter,
       tableData.showViewSeriesLink,
+      this.state.showRuleEditorFlyout,
       this.state.itemIdToExpandedRowMap,
       this.toggleRow,
       filter);
@@ -355,20 +377,26 @@ class AnomaliesTable extends Component {
     };
 
     return (
-      <EuiInMemoryTable
-        className="ml-anomalies-table eui-textBreakWord"
-        items={tableData.anomalies}
-        columns={columns}
-        pagination={{
-          pageSizeOptions: [10, 25, 100],
-          initialPageSize: 25
-        }}
-        sorting={sorting}
-        itemId="rowId"
-        itemIdToExpandedRowMap={this.state.itemIdToExpandedRowMap}
-        compressed={true}
-        rowProps={getRowProps}
-      />
+      <React.Fragment>
+        <RuleEditorFlyout
+          setShowFunction={this.setShowRuleEditorFlyoutFunction}
+          unsetShowFunction={this.unsetShowRuleEditorFlyoutFunction}
+        />
+        <EuiInMemoryTable
+          className="ml-anomalies-table eui-textBreakWord"
+          items={tableData.anomalies}
+          columns={columns}
+          pagination={{
+            pageSizeOptions: [10, 25, 100],
+            initialPageSize: 25
+          }}
+          sorting={sorting}
+          itemId="rowId"
+          itemIdToExpandedRowMap={this.state.itemIdToExpandedRowMap}
+          compressed={true}
+          rowProps={getRowProps}
+        />
+      </React.Fragment>
     );
   }
 }

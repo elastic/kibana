@@ -18,13 +18,16 @@
  */
 
 import ServerStatus from './server_status';
-import { MetricsCollector } from './metrics_collector';
-import { Metrics } from './metrics_collector/metrics';
+import { Metrics } from './lib/metrics';
 import { registerStatusPage, registerStatusApi, registerStatsApi } from './routes';
+import { getOpsStatsCollector } from './collectors';
 
 export function statusMixin(kbnServer, server, config) {
-  const collector = new MetricsCollector(server, config);
   kbnServer.status = new ServerStatus(kbnServer.server);
+
+  const statsCollector = getOpsStatsCollector(server, kbnServer);
+  const { collectorSet } = server.usage;
+  collectorSet.register(statsCollector);
 
   const { ['even-better']: evenBetter } = server.plugins;
 
@@ -32,16 +35,12 @@ export function statusMixin(kbnServer, server, config) {
     const metrics = new Metrics(config, server);
 
     evenBetter.monitor.on('ops', event => {
-      // for status API (to deprecate in next major)
-      metrics.capture(event).then(data => { kbnServer.metrics = data; });
-
-      // for metrics API (replacement API)
-      collector.collect(event); // collect() is async, but here we aren't depending on the return value
+      metrics.capture(event).then(data => { kbnServer.metrics = data; }); // captures (performs transforms on) the latest event data and stashes the metrics for status/stats API payload
     });
   }
 
   // init routes
   registerStatusPage(kbnServer, server, config);
   registerStatusApi(kbnServer, server, config);
-  registerStatsApi(kbnServer, server, config, collector);
+  registerStatsApi(kbnServer, server, config);
 }
