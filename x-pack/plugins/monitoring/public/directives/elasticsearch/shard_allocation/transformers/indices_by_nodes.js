@@ -7,7 +7,7 @@
 
 
 import _ from 'lodash';
-import { decorateShards } from '../lib/decorateShards';
+import { decorateShards } from '../lib/decorate_shards';
 
 export function indicesByNodes() {
   return function indicesByNodesFn(shards, nodes) {
@@ -29,8 +29,7 @@ export function indicesByNodes() {
     }
 
     function createNodeAddShard(obj, shard) {
-      const node = shard.resolver;
-      const index = shard.index;
+      const { node, index } = shard;
 
       // If the node is null then it's an unassigned shard and we need to
       // add it to the unassigned array.
