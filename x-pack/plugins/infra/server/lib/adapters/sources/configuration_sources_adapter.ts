@@ -4,12 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { InfraSourceConfigurations, InfraSourcesAdapter } from '../../sources';
 import { InfraConfigurationAdapter } from '../configuration';
-import {
-  InfraSourceConfigurations,
-  InfraSourcesAdapter,
-  PartialInfraSourceConfigurations,
-} from './adapter_types';
+import { PartialInfraSourceConfigurations } from './adapter_types';
 
 interface ConfigurationWithSources {
   sources?: PartialInfraSourceConfigurations;
@@ -20,17 +17,6 @@ export class InfraConfigurationSourcesAdapter implements InfraSourcesAdapter {
 
   constructor(configuration: InfraConfigurationAdapter<ConfigurationWithSources>) {
     this.configuration = configuration;
-  }
-
-  public async get(sourceId: string) {
-    const sourceConfigurations = await this.getAll();
-    const requestedSourceConfiguration = sourceConfigurations[sourceId];
-
-    if (!requestedSourceConfiguration) {
-      throw new Error(`Failed to find source '${sourceId}'`);
-    }
-
-    return requestedSourceConfiguration;
   }
 
   public async getAll() {

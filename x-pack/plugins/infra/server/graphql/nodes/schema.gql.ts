@@ -142,11 +142,8 @@ export const nodesSchema: any = gql`
     services: [InfraService!]
   }
 
-  extend type Query {
-    map(
-      indexPattern: InfraIndexPattern!
-      timerange: InfraTimerange!
-      filters: [InfraFilter!]
-    ): InfraResponse
+  extend type InfraSource {
+    "A hierarchy of hosts, pods, containers, services or arbitrary groups"
+    map(timerange: InfraTimerange!, filters: [InfraFilter!]): InfraResponse
   }
 `;

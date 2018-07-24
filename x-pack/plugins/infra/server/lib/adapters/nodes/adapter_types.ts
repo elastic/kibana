@@ -11,12 +11,12 @@ import {
   InfraGroupByFilter,
   InfraGroupByType,
   InfraHost,
-  InfraIndexPattern,
   InfraPod,
   InfraResponse,
   InfraService,
   InfraTimerange,
 } from '../../../../common/graphql/types';
+import { InfraSourceConfiguration } from '../../sources';
 import { InfraFrameworkRequest } from '../framework';
 
 export interface InfraNodesAdapter {
@@ -74,7 +74,7 @@ export interface InfraESBoolQuery {
 }
 
 export interface InfraESMSearchHeader {
-  index: string;
+  index: string[] | string;
 }
 
 export interface InfraESSearchBody {
@@ -89,7 +89,7 @@ export type InfraESMSearchBody = InfraESSearchBody | InfraESMSearchHeader;
 export interface InfraNodeRequestOptions {
   nodeType: InfraNodeType;
   nodesKey: InfraNodesKey;
-  indexPattern: InfraIndexPattern;
+  sourceConfiguration: InfraSourceConfiguration;
   timerange: InfraTimerange;
   groupBy: InfraGroupBy[];
   metrics: string[];
