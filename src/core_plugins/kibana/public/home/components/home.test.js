@@ -131,3 +131,68 @@ describe('directories', () => {
     expect(component).toMatchSnapshot(); // eslint-disable-line
   });
 });
+
+describe('isNewKibanaInstance', () => {
+  test('should set isNewKibanaInstance to true when there are no index patterns', async () => {
+    const component = shallow(<Home
+      addBasePath={addBasePath}
+      directories={[]}
+      apmUiEnabled={true}
+      recentlyAccessed={[]}
+      find={
+        () => {
+          return Promise.resolve({ total: 0 });
+        }
+      }
+    />);
+
+    // Ensure all promises resolve
+    await new Promise(resolve => process.nextTick(resolve));
+    // Ensure the state changes are reflected
+    component.update();
+
+    expect(component).toMatchSnapshot(); // eslint-disable-line
+  });
+
+  test('should set isNewKibanaInstance to false when there are index patterns', async () => {
+    const component = shallow(<Home
+      addBasePath={addBasePath}
+      directories={[]}
+      apmUiEnabled={true}
+      recentlyAccessed={[]}
+      find={
+        () => {
+          return Promise.resolve({ total: 1 });
+        }
+      }
+    />);
+
+    // Ensure all promises resolve
+    await new Promise(resolve => process.nextTick(resolve));
+    // Ensure the state changes are reflected
+    component.update();
+
+    expect(component).toMatchSnapshot(); // eslint-disable-line
+  });
+
+  test('should safely handle execeptions', async () => {
+    const component = shallow(<Home
+      addBasePath={addBasePath}
+      directories={[]}
+      apmUiEnabled={true}
+      recentlyAccessed={[]}
+      find={
+        () => {
+          throw new Error('simulated find error');
+        }
+      }
+    />);
+
+    // Ensure all promises resolve
+    await new Promise(resolve => process.nextTick(resolve));
+    // Ensure the state changes are reflected
+    component.update();
+
+    expect(component).toMatchSnapshot(); // eslint-disable-line
+  });
+});
