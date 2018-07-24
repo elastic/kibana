@@ -102,7 +102,6 @@ describe('Event Roller', () => {
       requests: {
         disconnects: 0,
         total: 138, // 103 + 35
-        status_codes: { '200': 20, '304': 118 }
       },
       response_times: {
         average: 5.213592233009709, // max of 5.213592233009709, 4.6

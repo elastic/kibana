@@ -50,7 +50,7 @@ export default function TimelineHeader({ legends, transactionName }) {
       </TooltipOverlay>
       <Legends>
         {legends.map(({ color, label }) => (
-          <Legend clickable={false} key={color} color={color} text={label} />
+          <Legend key={color} color={color} text={label} />
         ))}
       </Legends>
     </TimelineHeaderContainer>
