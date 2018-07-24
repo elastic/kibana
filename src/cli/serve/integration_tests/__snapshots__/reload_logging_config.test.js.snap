@@ -15,6 +15,16 @@ Object {
     },
     Object {
       "@timestamp": "## @timestamp ##",
+      "message": "The elasticsearch plugin is disabled. Skipping migrations.",
+      "pid": "## PID ##",
+      "tags": Array [
+        "warning",
+        "migration",
+      ],
+      "type": "log",
+    },
+    Object {
+      "@timestamp": "## @timestamp ##",
       "message": "Server running at http://localhost:8274",
       "pid": "## PID ##",
       "tags": Array [
