@@ -17,12 +17,14 @@
  * under the License.
  */
 
+import { FatalErrorsService } from './fatal_errors';
 import { InjectedMetadataService } from './injected_metadata';
 import { LegacyPlatformService } from './legacy_platform';
 
 const MockLegacyPlatformService = jest.fn<LegacyPlatformService>(
   function _MockLegacyPlatformService(this: any) {
     this.start = jest.fn();
+    this.stop = jest.fn();
   }
 );
 jest.mock('./legacy_platform', () => ({
@@ -39,7 +41,19 @@ jest.mock('./injected_metadata', () => ({
   InjectedMetadataService: MockInjectedMetadataService,
 }));
 
+const mockFatalErrorsStartContract = {};
+const MockFatalErrorsService = jest.fn<FatalErrorsService>(function _MockFatalErrorsService(
+  this: any
+) {
+  this.start = jest.fn().mockReturnValue(mockFatalErrorsStartContract);
+  this.add = jest.fn();
+});
+jest.mock('./fatal_errors', () => ({
+  FatalErrorsService: MockFatalErrorsService,
+}));
+
 import { CoreSystem } from './core_system';
+jest.spyOn(CoreSystem.prototype, 'stop');
 
 const defaultCoreSystemParams = {
   rootDomElement: null!,
@@ -97,6 +111,86 @@ describe('constructor', () => {
       useLegacyTestHarness,
     });
   });
+
+  it('passes injectedMetadata, rootDomElement, and a stopCoreSystem function to FatalErrorsService', () => {
+    const rootDomElement = { rootDomElement: true } as any;
+    const injectedMetadata = { injectedMetadata: true } as any;
+
+    const coreSystem = new CoreSystem({
+      ...defaultCoreSystemParams,
+      rootDomElement,
+      injectedMetadata,
+    });
+
+    expect(MockFatalErrorsService).toHaveBeenCalledTimes(1);
+    expect(MockFatalErrorsService).toHaveBeenLastCalledWith({
+      rootDomElement,
+      injectedMetadata: expect.any(MockInjectedMetadataService),
+      stopCoreSystem: expect.any(Function),
+    });
+
+    const [{ stopCoreSystem }] = MockFatalErrorsService.mock.calls[0];
+
+    expect(coreSystem.stop).not.toHaveBeenCalled();
+    stopCoreSystem();
+    expect(coreSystem.stop).toHaveBeenCalled();
+  });
+});
+
+describe('#stop', () => {
+  it('does not call #stop() on legacyPlatform if start was not called', () => {
+    const coreSystem = new CoreSystem({
+      ...defaultCoreSystemParams,
+    });
+
+    const legacyPlatformService = MockLegacyPlatformService.mock.instances[0];
+
+    expect(legacyPlatformService.stop).not.toHaveBeenCalled();
+    coreSystem.stop();
+    expect(legacyPlatformService.stop).not.toHaveBeenCalled();
+  });
+
+  it('does not call #stop on legacyPlatform if it threw when starting', () => {
+    const coreSystem = new CoreSystem({
+      ...defaultCoreSystemParams,
+    });
+
+    const legacyPlatformService = MockLegacyPlatformService.mock.instances[0];
+    const fatalErrorsService = MockFatalErrorsService.mock.instances[0];
+
+    const legacyStartError = new Error('fail');
+    (legacyPlatformService.start as any).mockImplementation(() => {
+      throw legacyStartError;
+    });
+
+    expect(legacyPlatformService.stop).not.toHaveBeenCalled();
+    expect(fatalErrorsService.add).not.toHaveBeenCalled();
+    coreSystem.start();
+    expect(fatalErrorsService.add).toHaveBeenCalled();
+    expect(fatalErrorsService.add).toHaveBeenCalledWith(legacyStartError);
+
+    // this would normally be called as a result of `fatalErrorsService.add()`, but since we're stubbing make sure it wasn't and call it manually
+    expect(coreSystem.stop).not.toHaveBeenCalled();
+    coreSystem.stop();
+
+    // still not calling legacyPlatformService because it didn't start successfully
+    expect(legacyPlatformService.stop).not.toHaveBeenCalledTimes(1);
+  });
+
+  it('calls stop on legacyPlatform when it started completly', () => {
+    const coreSystem = new CoreSystem({
+      ...defaultCoreSystemParams,
+    });
+
+    const legacyPlatformService = MockLegacyPlatformService.mock.instances[0];
+
+    expect(legacyPlatformService.stop).not.toHaveBeenCalled();
+    coreSystem.start();
+    expect(legacyPlatformService.stop).not.toHaveBeenCalled();
+    coreSystem.stop();
+    expect(legacyPlatformService.stop).toHaveBeenCalledTimes(1);
+    expect(legacyPlatformService.stop).toHaveBeenLastCalledWith();
+  });
 });
 
 describe('#start()', () => {
@@ -121,6 +215,7 @@ describe('#start()', () => {
     expect(mockInstance.start).toHaveBeenCalledTimes(1);
     expect(mockInstance.start).toHaveBeenCalledWith({
       injectedMetadata: mockInjectedMetadataStartContract,
+      fatalErrors: mockFatalErrorsStartContract,
     });
   });
 });

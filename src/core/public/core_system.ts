@@ -38,6 +38,7 @@ export class CoreSystem {
   private fatalErrors: FatalErrorsService;
   private injectedMetadata: InjectedMetadataService;
   private legacyPlatform: LegacyPlatformService;
+  private legacyPlatformStarted = false;
 
   constructor(params: Params) {
     const { rootDomElement, injectedMetadata, requireLegacyFiles, useLegacyTestHarness } = params;
@@ -66,12 +67,15 @@ export class CoreSystem {
       const injectedMetadata = this.injectedMetadata.start();
       const fatalErrors = this.fatalErrors.start();
       this.legacyPlatform.start({ injectedMetadata, fatalErrors });
+      this.legacyPlatformStarted = true;
     } catch (error) {
       this.fatalErrors.add(error);
     }
   }
 
   public stop() {
-    this.legacyPlatform.stop();
+    if (this.legacyPlatformStarted) {
+      this.legacyPlatform.stop();
+    }
   }
 }
