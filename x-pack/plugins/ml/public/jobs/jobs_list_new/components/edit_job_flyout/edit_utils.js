@@ -6,6 +6,7 @@
 
 
 import { difference } from 'lodash';
+import chrome from 'ui/chrome';
 import { newJobLimits } from 'plugins/ml/jobs/new_job/utils/new_job_defaults';
 import { mlJobService } from 'plugins/ml/services/job_service';
 
@@ -76,6 +77,68 @@ function saveDatafeed(datafeedData, job) {
   });
 }
 
+export function loadSavedDashboards(maxNumber) {
+  // Loads the list of saved dashboards, as used in editing custom URLs.
+  return new Promise((resolve, reject) => {
+
+    const savedObjectsClient = chrome.getSavedObjectsClient();
+    savedObjectsClient.find({
+      type: 'dashboard',
+      fields: ['title'],
+      perPage: maxNumber
+    })
+      .then((resp)=> {
+        const savedObjects = resp.savedObjects;
+        if (savedObjects !== undefined) {
+          const dashboards = savedObjects.map(savedObj => {
+            return { id: savedObj.id, title: savedObj.attributes.title };
+          });
+
+          dashboards.sort((dash1, dash2) => {
+            return dash1.title.localeCompare(dash2.title);
+          });
+
+          resolve(dashboards);
+        }
+      })
+      .catch((resp) => {
+        reject(resp);
+      });
+  });
+}
+
+export function loadIndexPatterns(maxNumber) {
+  // Loads the list of Kibana index patterns, as used in editing custom URLs.
+  // TODO - amend loadIndexPatterns in index_utils.js to do the request,
+  // without needing an Angular Provider.
+  return new Promise((resolve, reject) => {
+
+    const savedObjectsClient = chrome.getSavedObjectsClient();
+    savedObjectsClient.find({
+      type: 'index-pattern',
+      fields: ['title'],
+      perPage: maxNumber
+    })
+      .then((resp)=> {
+        const savedObjects = resp.savedObjects;
+        if (savedObjects !== undefined) {
+          const indexPatterns = savedObjects.map(savedObj => {
+            return { id: savedObj.id, title: savedObj.attributes.title };
+          });
+
+          indexPatterns.sort((dash1, dash2) => {
+            return dash1.title.localeCompare(dash2.title);
+          });
+
+          resolve(indexPatterns);
+        }
+      })
+      .catch((resp) => {
+        reject(resp);
+      });
+  });
+}
+
 function extractDescription(job, newJobData) {
   const description = newJobData.description;
   if (newJobData.description !== job.description) {
@@ -131,8 +194,9 @@ function extractDetectorDescriptions(job, newJobData) {
 
 function extractCustomSettings(job, newJobData) {
   const settingsData = {};
-  if (job.custom_settings && newJobData) {
+  if (job.custom_settings && newJobData && newJobData.customUrls) {
     settingsData.custom_settings = job.custom_settings;
+    settingsData.custom_settings.custom_urls = newJobData.customUrls;
   }
   return settingsData;
 }
