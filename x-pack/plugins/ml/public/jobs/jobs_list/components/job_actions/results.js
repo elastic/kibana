@@ -9,8 +9,7 @@ import PropTypes from 'prop-types';
 import React from 'react';
 
 import {
-  EuiIcon,
-  EuiLink,
+  EuiButtonIcon,
 } from '@elastic/eui';
 
 import chrome from 'ui/chrome';
@@ -39,13 +38,19 @@ export function ResultLinks({ jobs })  {
   return (
     <React.Fragment>
       {(jobs.length < 2) &&
-        <EuiLink href={getLink('timeseriesexplorer', jobs)} >
-          <EuiIcon type="stats" />
-        </EuiLink>
+        <EuiButtonIcon
+          href={getLink('timeseriesexplorer', jobs)}
+          iconType="stats"
+          aria-label="View results in single metric viewer"
+          className="results-button"
+        />
       }
-      <EuiLink href={getLink('explorer', jobs)} >
-        <EuiIcon type="tableOfContents" />
-      </EuiLink>
+      <EuiButtonIcon
+        href={getLink('explorer', jobs)}
+        iconType="tableOfContents"
+        aria-label="View results in anomaly explorer"
+        className="results-button"
+      />
       <div className="actions-border"/>
     </React.Fragment>
   );
