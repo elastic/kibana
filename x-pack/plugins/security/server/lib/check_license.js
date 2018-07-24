@@ -33,7 +33,7 @@ export function checkLicense(xPackInfo) {
       showLinks: false,
       allowRoleDocumentLevelSecurity: false,
       allowRoleFieldLevelSecurity: false,
-      loginMessage: 'Login is currently disabled. Administrators should consult the Kibana logs for more details.'
+      layout: xPackInfo.isXpackUnavailable() ? 'error-xpack-unavailable' : 'error-es-unavailable'
     };
   }
 

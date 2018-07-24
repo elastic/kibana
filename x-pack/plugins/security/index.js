@@ -101,13 +101,14 @@ export const security = (kibana) => new kibana.Plugin({
     server.injectUiAppVars('login', () => {
       const pluginId = 'security';
       const xpackInfo = server.plugins.xpack_main.info;
-      const { showLogin, loginMessage, allowLogin } = xpackInfo.feature(pluginId).getLicenseCheckResults() || {};
+      const { showLogin, loginMessage, allowLogin, layout = 'form' } = xpackInfo.feature(pluginId).getLicenseCheckResults() || {};
 
       return {
         loginState: {
           showLogin,
           allowLogin,
-          loginMessage
+          loginMessage,
+          layout,
         }
       };
     });
