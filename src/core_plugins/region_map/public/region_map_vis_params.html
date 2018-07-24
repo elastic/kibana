@@ -22,9 +22,13 @@
     </div>
 
     <div class="kuiSideBarFormRow" ng-hide="!editorState.params.emsHotLink">
-      <div class="kuiSideBarFormRow__control">
-        Preview <a ng-href="{{editorState.params.emsHotLink}}" target="_">{{editorState.params.selectedLayer.name}} on the Elastic Maps Service</a>
-      </div>
+        <a
+          class="ems-hotlink"
+          target="_blank"
+          rel="noopener noreferrer"
+          ng-href="{{editorState.params.emsHotLink}}"
+          target="_blank">Preview {{editorState.params.selectedLayer.name}} on the Elastic Maps Service
+        </a>
     </div>
 
     <div class="kuiSideBarFormRow">
