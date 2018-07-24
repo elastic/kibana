@@ -35,7 +35,7 @@ const prepareLogLine = str =>
     '[## timestamp ##]'
   ));
 
-describe('Server logging configuration', function () {
+describe.skip('Server logging configuration', function () {
   let child;
   let isJson;
 
