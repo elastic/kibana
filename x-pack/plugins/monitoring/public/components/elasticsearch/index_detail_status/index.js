@@ -18,7 +18,7 @@ export function IndexDetailStatus({ stats }) {
     status
   } = stats;
 
-  const children = [
+  const metrics = [
     {
       label: 'Total',
       value: formatMetric(dataSize.total, '0.0 b'),
@@ -54,7 +54,7 @@ export function IndexDetailStatus({ stats }) {
 
   return (
     <SummaryStatus
-      children={children}
+      metrics={metrics}
       status={status}
       IconComponent={IconComponent}
       data-test-subj="elasticsearchIndexDetailStatus"

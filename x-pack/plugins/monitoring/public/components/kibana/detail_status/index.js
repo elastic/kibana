@@ -18,7 +18,7 @@ export function DetailStatus({ stats }) {
     status
   } = stats;
 
-  const children = [
+  const metrics = [
     {
       value: transportAddress,
       dataTestSubj: 'transportAddress'
@@ -48,7 +48,7 @@ export function DetailStatus({ stats }) {
 
   return (
     <SummaryStatus
-      children={children}
+      metrics={metrics}
       status={status}
       IconComponent={IconComponent}
       data-test-subj="kibanaDetailStatus"

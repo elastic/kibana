@@ -22,7 +22,7 @@ export function ClusterStatus({ stats }) {
     status
   } = stats;
 
-  const children = [
+  const metrics = [
     {
       label: 'Nodes',
       value: nodesCount,
@@ -68,7 +68,7 @@ export function ClusterStatus({ stats }) {
 
   return (
     <SummaryStatus
-      children={children}
+      metrics={metrics}
       status={status}
       IconComponent={IconComponent}
       data-test-subj="elasticsearchClusterStatus"

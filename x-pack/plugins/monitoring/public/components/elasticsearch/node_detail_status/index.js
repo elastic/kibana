@@ -23,7 +23,7 @@ export function NodeDetailStatus({ stats }) {
     isOnline,
   } = stats;
 
-  const children = [
+  const metrics = [
     {
       value: transportAddress,
       dataTestSubj: 'transportAddress'
@@ -73,7 +73,7 @@ export function NodeDetailStatus({ stats }) {
 
   return (
     <SummaryStatus
-      children={children}
+      metrics={metrics}
       status={status}
       isOnline={isOnline}
       IconComponent={IconComponent}
