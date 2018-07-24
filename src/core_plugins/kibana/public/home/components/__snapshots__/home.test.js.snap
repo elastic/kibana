@@ -8,6 +8,7 @@ exports[`directories should not render directory entry when showOnHomePage is fa
   <EuiPageBody>
     <AddData
       apmUiEnabled={true}
+      isNewKibanaInstance={false}
     />
     <EuiSpacer
       size="l"
@@ -121,6 +122,7 @@ exports[`directories should render ADMIN directory entry in "Manage" panel 1`] =
   <EuiPageBody>
     <AddData
       apmUiEnabled={true}
+      isNewKibanaInstance={false}
     />
     <EuiSpacer
       size="l"
@@ -253,6 +255,7 @@ exports[`directories should render DATA directory entry in "Explore Data" panel 
   <EuiPageBody>
     <AddData
       apmUiEnabled={true}
+      isNewKibanaInstance={false}
     />
     <EuiSpacer
       size="l"
@@ -377,6 +380,348 @@ exports[`directories should render DATA directory entry in "Explore Data" panel 
 </EuiPage>
 `;
 
+exports[`isNewKibanaInstance should safely handle execeptions 1`] = `
+<EuiPage
+  className="home"
+  restrictWidth={false}
+>
+  <EuiPageBody>
+    <AddData
+      apmUiEnabled={true}
+      isNewKibanaInstance={false}
+    />
+    <EuiSpacer
+      size="l"
+    />
+    <EuiFlexGroup
+      alignItems="stretch"
+      component="div"
+      direction="row"
+      gutterSize="l"
+      justifyContent="flexStart"
+      responsive={true}
+      wrap={false}
+    >
+      <EuiFlexItem
+        component="div"
+        grow={true}
+      >
+        <EuiPanel
+          grow={true}
+          hasShadow={false}
+          paddingSize="l"
+        >
+          <EuiTitle
+            size="m"
+          >
+            <h3>
+              Visualize and Explore Data
+            </h3>
+          </EuiTitle>
+          <EuiSpacer
+            size="m"
+          />
+          <EuiFlexGrid
+            columns={2}
+            gutterSize="l"
+          />
+        </EuiPanel>
+      </EuiFlexItem>
+      <EuiFlexItem
+        component="div"
+        grow={true}
+      >
+        <EuiPanel
+          grow={true}
+          hasShadow={false}
+          paddingSize="l"
+        >
+          <EuiTitle
+            size="m"
+          >
+            <h3>
+              Manage and Administer the Elastic Stack
+            </h3>
+          </EuiTitle>
+          <EuiSpacer
+            size="m"
+          />
+          <EuiFlexGrid
+            columns={2}
+            gutterSize="l"
+          />
+        </EuiPanel>
+      </EuiFlexItem>
+    </EuiFlexGroup>
+    <EuiSpacer
+      size="l"
+    />
+    <EuiFlexGroup
+      alignItems="stretch"
+      component="div"
+      direction="row"
+      gutterSize="l"
+      justifyContent="center"
+      responsive={true}
+      wrap={false}
+    >
+      <EuiFlexItem
+        component="div"
+        grow={false}
+      >
+        <EuiText
+          grow={true}
+        >
+          <p>
+            Didn’t find what you were looking for?
+          </p>
+        </EuiText>
+        <EuiSpacer
+          size="s"
+        />
+        <EuiButton
+          color="primary"
+          fill={false}
+          href="#/home/feature_directory"
+          iconSide="left"
+          type="button"
+        >
+          View full directory of Kibana plugins
+        </EuiButton>
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  </EuiPageBody>
+</EuiPage>
+`;
+
+exports[`isNewKibanaInstance should set isNewKibanaInstance to false when there are index patterns 1`] = `
+<EuiPage
+  className="home"
+  restrictWidth={false}
+>
+  <EuiPageBody>
+    <AddData
+      apmUiEnabled={true}
+      isNewKibanaInstance={false}
+    />
+    <EuiSpacer
+      size="l"
+    />
+    <EuiFlexGroup
+      alignItems="stretch"
+      component="div"
+      direction="row"
+      gutterSize="l"
+      justifyContent="flexStart"
+      responsive={true}
+      wrap={false}
+    >
+      <EuiFlexItem
+        component="div"
+        grow={true}
+      >
+        <EuiPanel
+          grow={true}
+          hasShadow={false}
+          paddingSize="l"
+        >
+          <EuiTitle
+            size="m"
+          >
+            <h3>
+              Visualize and Explore Data
+            </h3>
+          </EuiTitle>
+          <EuiSpacer
+            size="m"
+          />
+          <EuiFlexGrid
+            columns={2}
+            gutterSize="l"
+          />
+        </EuiPanel>
+      </EuiFlexItem>
+      <EuiFlexItem
+        component="div"
+        grow={true}
+      >
+        <EuiPanel
+          grow={true}
+          hasShadow={false}
+          paddingSize="l"
+        >
+          <EuiTitle
+            size="m"
+          >
+            <h3>
+              Manage and Administer the Elastic Stack
+            </h3>
+          </EuiTitle>
+          <EuiSpacer
+            size="m"
+          />
+          <EuiFlexGrid
+            columns={2}
+            gutterSize="l"
+          />
+        </EuiPanel>
+      </EuiFlexItem>
+    </EuiFlexGroup>
+    <EuiSpacer
+      size="l"
+    />
+    <EuiFlexGroup
+      alignItems="stretch"
+      component="div"
+      direction="row"
+      gutterSize="l"
+      justifyContent="center"
+      responsive={true}
+      wrap={false}
+    >
+      <EuiFlexItem
+        component="div"
+        grow={false}
+      >
+        <EuiText
+          grow={true}
+        >
+          <p>
+            Didn’t find what you were looking for?
+          </p>
+        </EuiText>
+        <EuiSpacer
+          size="s"
+        />
+        <EuiButton
+          color="primary"
+          fill={false}
+          href="#/home/feature_directory"
+          iconSide="left"
+          type="button"
+        >
+          View full directory of Kibana plugins
+        </EuiButton>
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  </EuiPageBody>
+</EuiPage>
+`;
+
+exports[`isNewKibanaInstance should set isNewKibanaInstance to true when there are no index patterns 1`] = `
+<EuiPage
+  className="home"
+  restrictWidth={false}
+>
+  <EuiPageBody>
+    <AddData
+      apmUiEnabled={true}
+      isNewKibanaInstance={true}
+    />
+    <EuiSpacer
+      size="l"
+    />
+    <EuiFlexGroup
+      alignItems="stretch"
+      component="div"
+      direction="row"
+      gutterSize="l"
+      justifyContent="flexStart"
+      responsive={true}
+      wrap={false}
+    >
+      <EuiFlexItem
+        component="div"
+        grow={true}
+      >
+        <EuiPanel
+          grow={true}
+          hasShadow={false}
+          paddingSize="l"
+        >
+          <EuiTitle
+            size="m"
+          >
+            <h3>
+              Visualize and Explore Data
+            </h3>
+          </EuiTitle>
+          <EuiSpacer
+            size="m"
+          />
+          <EuiFlexGrid
+            columns={2}
+            gutterSize="l"
+          />
+        </EuiPanel>
+      </EuiFlexItem>
+      <EuiFlexItem
+        component="div"
+        grow={true}
+      >
+        <EuiPanel
+          grow={true}
+          hasShadow={false}
+          paddingSize="l"
+        >
+          <EuiTitle
+            size="m"
+          >
+            <h3>
+              Manage and Administer the Elastic Stack
+            </h3>
+          </EuiTitle>
+          <EuiSpacer
+            size="m"
+          />
+          <EuiFlexGrid
+            columns={2}
+            gutterSize="l"
+          />
+        </EuiPanel>
+      </EuiFlexItem>
+    </EuiFlexGroup>
+    <EuiSpacer
+      size="l"
+    />
+    <EuiFlexGroup
+      alignItems="stretch"
+      component="div"
+      direction="row"
+      gutterSize="l"
+      justifyContent="center"
+      responsive={true}
+      wrap={false}
+    >
+      <EuiFlexItem
+        component="div"
+        grow={false}
+      >
+        <EuiText
+          grow={true}
+        >
+          <p>
+            Didn’t find what you were looking for?
+          </p>
+        </EuiText>
+        <EuiSpacer
+          size="s"
+        />
+        <EuiButton
+          color="primary"
+          fill={false}
+          href="#/home/feature_directory"
+          iconSide="left"
+          type="button"
+        >
+          View full directory of Kibana plugins
+        </EuiButton>
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  </EuiPageBody>
+</EuiPage>
+`;
+
 exports[`should not contain RecentlyAccessed panel when there is no recentlyAccessed history 1`] = `
 <EuiPage
   className="home"
@@ -385,6 +730,7 @@ exports[`should not contain RecentlyAccessed panel when there is no recentlyAcce
   <EuiPageBody>
     <AddData
       apmUiEnabled={true}
+      isNewKibanaInstance={false}
     />
     <EuiSpacer
       size="l"
@@ -514,6 +860,7 @@ exports[`should render home component 1`] = `
     </React.Fragment>
     <AddData
       apmUiEnabled={true}
+      isNewKibanaInstance={false}
     />
     <EuiSpacer
       size="l"
