@@ -17,16 +17,24 @@
  * under the License.
  */
 
-import expect from 'expect.js';
-import { getSavedObjects } from './get_saved_objects';
+export default function apmOss(kibana) {
+  return new kibana.Plugin({
+    id: 'apm_oss',
 
-const indexPatternTitle = 'dynamic index pattern title';
+    config(Joi) {
+      return Joi.object({
+        // enable plugin
+        enabled: Joi.boolean().default(true),
 
-test('should dynamically set index title to "apm_oss.indexPattern" yaml config value', () => {
-  const savedObjects = getSavedObjects(indexPatternTitle);
-  const indexPattern = savedObjects[0];
-  expect(indexPattern.type).to.be('index-pattern');
-  // if index pattern id changes, ensure other saved objects point to the new id
-  expect(indexPattern.id).to.be('12e52550-6354-11e8-9d01-ed6a4badd083');
-  expect(indexPattern.attributes.title).to.be(indexPatternTitle);
-});
+        // Kibana Index pattern
+        indexPattern: Joi.string().default('apm-*'),
+
+        // ES Indices
+        errorIndices: Joi.string().default('apm-*-error-*'),
+        onboardingIndices: Joi.string().default('apm-*-onboarding-*'),
+        spanIndices: Joi.string().default('apm-*-span-*'),
+        transactionIndices: Joi.string().default('apm-*-transaction-*'),
+      }).default();
+    },
+  });
+}
