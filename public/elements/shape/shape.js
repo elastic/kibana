@@ -1,4 +1,4 @@
-import header from './header.svg';
+import header from './header.png';
 
 export const shape = () => ({
   name: 'shape',
