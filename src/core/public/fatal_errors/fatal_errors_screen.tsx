@@ -20,11 +20,11 @@
 import {
   EuiButton,
   EuiButtonEmpty,
-  // @ts-ignore Types for EuiCallOut missing https://github.com/elastic/eui/pull/1010
+  // @ts-ignore EuiCallOut not available until we upgrade to EUI 3.1.0
   EuiCallOut,
-  // @ts-ignore Types for EuiCodeBlock missing https://github.com/elastic/eui/pull/1010
+  // @ts-ignore EuiCodeBlock not available until we upgrade to EUI 3.1.0
   EuiCodeBlock,
-  // @ts-ignore Types for EuiEmptyPrompt missing https://github.com/elastic/eui/pull/1010
+  // @ts-ignore EuiEmptyPrompt not available until we upgrade to EUI 3.1.0
   EuiEmptyPrompt,
   EuiPage,
   EuiPageBody,
@@ -63,20 +63,10 @@ export class FatalErrorsScreen extends React.Component<Props, State> {
     this.subscription = this.props.errorInfo$
       .pipe(
         tap(error => {
-          this.setState(state => {
-            const isDuplicate = state.errors.some(
-              existing => JSON.stringify(existing) === JSON.stringify(error)
-            );
-
-            if (isDuplicate) {
-              return state;
-            }
-
-            return {
-              ...state,
-              errors: [...state.errors, error],
-            };
-          });
+          this.setState(state => ({
+            ...state,
+            errors: [...state.errors, error],
+          }));
         })
       )
       .subscribe({
@@ -110,10 +100,17 @@ export class FatalErrorsScreen extends React.Component<Props, State> {
                 </p>
               }
               actions={[
-                <EuiButton color="primary" fill onClick={this.onClickClearSession}>
+                <EuiButton
+                  color="primary"
+                  fill
+                  onClick={this.onClickClearSession}
+                  data-test-subj="clearSession"
+                >
                   Clear your session
                 </EuiButton>,
-                <EuiButtonEmpty onClick={this.onClickGoBack}>Go back</EuiButtonEmpty>,
+                <EuiButtonEmpty onClick={this.onClickGoBack} data-test-subj="goBack">
+                  Go back
+                </EuiButtonEmpty>,
               ]}
             />
             {this.state.errors.map((error, i) => (

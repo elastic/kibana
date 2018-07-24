@@ -33,8 +33,7 @@ export interface FatalErrorsParams {
 }
 
 export class FatalErrorsService {
-  public errorInfo$ = new Rx.ReplaySubject<ErrorInfo>(Infinity);
-  public subscription?: Rx.Subscription;
+  private errorInfo$ = new Rx.ReplaySubject<ErrorInfo>(Infinity);
 
   constructor(private params: FatalErrorsParams) {
     this.errorInfo$.pipe(first(), tap(this.onFirstError)).subscribe({
@@ -56,7 +55,7 @@ export class FatalErrorsService {
       console.error(error);
     }
 
-    throw err;
+    throw error;
   };
 
   public start() {
