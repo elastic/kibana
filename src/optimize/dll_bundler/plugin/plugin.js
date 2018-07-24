@@ -76,7 +76,6 @@ export class Plugin {
   }
 
   apply(compiler) {
-    console.log('merdq1');
     this.bindToCompiler(compiler);
 
     new webpack.DllReferencePlugin({
@@ -116,32 +115,36 @@ export class Plugin {
 
       this.entryPathsCompiler.hooks.emit.tapPromise('DynamicDllPlugin', async (compilation) => {
         const requests = [];
+        const requires  = [];
 
         for (const module of compilation.modules) {
           // re-include requires for modules already handled by the dll
           if (module.delegateData) {
             const absoluteResource = path.resolve(this.dllConfig.context, module.request);
             requests.push(`${path.relative(this.dllConfig.outputPath, absoluteResource)}`);
+            requires.push(`require(${path.relative(this.dllConfig.outputPath, absoluteResource)});`);
           }
 
           // include requires for modules that need to be added to the dll
           if (module.type === DLL_ENTRY_STUB_MODULE_TYPE) {
             requests.push(`${path.relative(this.dllConfig.outputPath, module.resource)}`);
+            requires.push(`require(${path.relative(this.dllConfig.outputPath, module.resource)});`);
           }
 
         }
 
         console.log('done, ', requests.length);
 
+        // const same = this.isSame(this.entryPaths, requests);
+        // const oldContent = await readFileAsync(this.entryPath, 'utf8');
+        // const newContent = '\n' + requires.sort().join('\n');
 
-        const same = this.isSame(this.entryPaths, requests);
+        this.entryPaths = requests.slice(0);
 
-        console.log(same);
-
-        if (!same) {
-          this.entryPaths = requests.slice(0);
-          await this.runDLLsCompiler();
-        }
+        //if (oldContent !== newContent) {
+        this.entryPaths = requests.sort().slice(0);
+        // await this.runDLLsCompiler();
+        //}
       });
 
       this.entryPathsCompiler.run(() => {
