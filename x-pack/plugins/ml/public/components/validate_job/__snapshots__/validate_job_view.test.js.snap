@@ -31,6 +31,25 @@ exports[`ValidateJob renders button and modal with a message 1`] = `
         }
       }
     />
+    <EuiText
+      grow={true}
+    >
+      Job validation performs certain checks against job configurations and underlying source data and provides specific advice on how to adjust settings that are more likely to produce insightful results.
+    </EuiText>
+    <EuiText
+      grow={true}
+    >
+      For more information, see 
+      <EuiLink
+        color="primary"
+        href="https://www.elastic.co/guide/en/kibana/my-metadata-branch/job-tips.html"
+        target="_blank"
+        type="button"
+      >
+        Machine Learning Job Tips
+      </EuiLink>
+      .
+    </EuiText>
   </Modal>
 </div>
 `;
@@ -71,6 +90,26 @@ exports[`ValidateJob renders the button and modal with a success message 1`] = `
   <Modal
     close={[Function]}
     title="Validate job test-id"
-  />
+  >
+    <EuiText
+      grow={true}
+    >
+      Job validation performs certain checks against job configurations and underlying source data and provides specific advice on how to adjust settings that are more likely to produce insightful results.
+    </EuiText>
+    <EuiText
+      grow={true}
+    >
+      For more information, see 
+      <EuiLink
+        color="primary"
+        href="https://www.elastic.co/guide/en/kibana/my-metadata-branch/job-tips.html"
+        target="_blank"
+        type="button"
+      >
+        Machine Learning Job Tips
+      </EuiLink>
+      .
+    </EuiText>
+  </Modal>
 </div>
 `;
