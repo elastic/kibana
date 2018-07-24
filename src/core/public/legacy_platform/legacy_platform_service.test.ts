@@ -17,6 +17,8 @@
  * under the License.
  */
 
+import angular from 'angular';
+
 const mockLoadOrder: string[] = [];
 
 const mockUiMetadataInit = jest.fn();
@@ -186,5 +188,52 @@ describe('#start()', () => {
         ]);
       });
     });
+  });
+});
+
+describe('#stop()', () => {
+  it('does nothing if angular was not bootstrapped to rootDomElement', () => {
+    const rootDomElement = document.createElement('div');
+    rootDomElement.innerHTML = `
+      <h1>foo</h1>
+      <h2>bar</h2>
+    `;
+
+    const legacyPlatform = new LegacyPlatformService({
+      ...defaultParams,
+      rootDomElement,
+    });
+
+    legacyPlatform.stop();
+    expect(rootDomElement).toMatchSnapshot();
+  });
+
+  it('destroys the angular scope and empties the rootDomElement if angular is bootstraped to rootDomElement', () => {
+    const rootDomElement = document.createElement('div');
+    const scopeDestroySpy = jest.fn();
+
+    const legacyPlatform = new LegacyPlatformService({
+      ...defaultParams,
+      rootDomElement,
+    });
+
+    // simulate bootstraping with a module "foo"
+    angular.module('foo', []).directive('bar', () => ({
+      restrict: 'E',
+      link($scope) {
+        $scope.$on('$destroy', scopeDestroySpy);
+      },
+    }));
+
+    rootDomElement.innerHTML = `
+      <bar></bar>
+    `;
+
+    angular.bootstrap(rootDomElement, ['foo']);
+
+    legacyPlatform.stop();
+
+    expect(rootDomElement).toMatchSnapshot();
+    expect(scopeDestroySpy).toHaveBeenCalledTimes(1);
   });
 });

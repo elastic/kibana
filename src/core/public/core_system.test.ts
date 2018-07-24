@@ -138,7 +138,7 @@ describe('constructor', () => {
 });
 
 describe('#stop', () => {
-  it('does not call #stop() on legacyPlatform if start was not called', () => {
+  it('call legacyPlatform.stop()', () => {
     const coreSystem = new CoreSystem({
       ...defaultCoreSystemParams,
     });
@@ -147,49 +147,7 @@ describe('#stop', () => {
 
     expect(legacyPlatformService.stop).not.toHaveBeenCalled();
     coreSystem.stop();
-    expect(legacyPlatformService.stop).not.toHaveBeenCalled();
-  });
-
-  it('does not call #stop on legacyPlatform if it threw when starting', () => {
-    const coreSystem = new CoreSystem({
-      ...defaultCoreSystemParams,
-    });
-
-    const legacyPlatformService = MockLegacyPlatformService.mock.instances[0];
-    const fatalErrorsService = MockFatalErrorsService.mock.instances[0];
-
-    const legacyStartError = new Error('fail');
-    (legacyPlatformService.start as any).mockImplementation(() => {
-      throw legacyStartError;
-    });
-
-    expect(legacyPlatformService.stop).not.toHaveBeenCalled();
-    expect(fatalErrorsService.add).not.toHaveBeenCalled();
-    coreSystem.start();
-    expect(fatalErrorsService.add).toHaveBeenCalled();
-    expect(fatalErrorsService.add).toHaveBeenCalledWith(legacyStartError);
-
-    // this would normally be called as a result of `fatalErrorsService.add()`, but since we're stubbing make sure it wasn't and call it manually
-    expect(coreSystem.stop).not.toHaveBeenCalled();
-    coreSystem.stop();
-
-    // still not calling legacyPlatformService because it didn't start successfully
-    expect(legacyPlatformService.stop).not.toHaveBeenCalledTimes(1);
-  });
-
-  it('calls stop on legacyPlatform when it started completly', () => {
-    const coreSystem = new CoreSystem({
-      ...defaultCoreSystemParams,
-    });
-
-    const legacyPlatformService = MockLegacyPlatformService.mock.instances[0];
-
-    expect(legacyPlatformService.stop).not.toHaveBeenCalled();
-    coreSystem.start();
-    expect(legacyPlatformService.stop).not.toHaveBeenCalled();
-    coreSystem.stop();
-    expect(legacyPlatformService.stop).toHaveBeenCalledTimes(1);
-    expect(legacyPlatformService.stop).toHaveBeenLastCalledWith();
+    expect(legacyPlatformService.stop).toHaveBeenCalled();
   });
 });
 
