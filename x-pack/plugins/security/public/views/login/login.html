@@ -46,12 +46,13 @@
 
   <div class="euiText loginErrorEsUnavailable" ng-if="login.layout === 'error-es-unavailable'">
     <p class="euiTitle euiTitle--medium euiTextColor euiTextColor--danger">Cannot connect to the Elasticsearch cluster currently configured for Kibana.</p>
-    <p>Refer to the Kibana logs for more details.</p>
+    <p>Refer to the Kibana logs for more details and refresh to try again.</p>
   </div>
 
   <div class="euiText loginErrorXpackUnavailable" ng-if="login.layout === 'error-xpack-unavailable'">
     <p class="euiTitle euiTitle--medium euiTextColor euiTextColor--danger">Cannot connect to an Elasticsearch cluster running the OSS distribution from an instance of Kibana that has a Basic license or above.</p>
     <p>Upgrade Elasticsearch to the default distribution, or use the OSS version of Kibana.</p>
+    <p>Refresh to try again.</p>
   </div>
 
 </div>
