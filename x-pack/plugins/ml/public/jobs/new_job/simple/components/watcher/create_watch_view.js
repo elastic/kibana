@@ -27,8 +27,8 @@ import { has } from 'lodash';
 
 import { parseInterval } from 'ui/utils/parse_interval';
 
-import { ml } from 'plugins/ml/services/ml_api_service';
-import { SelectSeverity } from 'plugins/ml/components/controls/select_severity/select_severity';
+import { ml } from '../../../../../services/ml_api_service';
+import { SelectSeverity } from '../../../../../components/controls/select_severity/select_severity';
 import { mlCreateWatchService } from './create_watch_service';
 const STATUS = mlCreateWatchService.STATUS;
 

@@ -5,4 +5,4 @@
  */
 
 
-export { CreateWatchModal } from './create_watch_flyout';
+export { CreateWatchFlyout } from './create_watch_flyout';

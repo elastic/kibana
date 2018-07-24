@@ -46,7 +46,7 @@ export class StartDatafeedModal extends Component {
 
     this.initialSpecifiedStartTime = moment();
     this.refreshJobs = this.props.refreshJobs;
-    this.getShowCreateWatchModalFunction = this.props.getShowCreateWatchModalFunction;
+    this.getShowCreateWatchFlyoutFunction = this.props.getShowCreateWatchFlyoutFunction;
   }
 
   componentDidMount() {
@@ -77,7 +77,7 @@ export class StartDatafeedModal extends Component {
     this.setState({ isModalVisible: false });
   }
 
-  showModal = (jobs, showCreateWatchModal) => {
+  showModal = (jobs, showCreateWatchFlyout) => {
     const startTime = undefined;
     const endTime = moment();
     const initialSpecifiedStartTime = getLowestLatestTime(jobs);
@@ -88,7 +88,7 @@ export class StartDatafeedModal extends Component {
       startTime,
       endTime,
       initialSpecifiedStartTime,
-      showCreateWatchModal,
+      showCreateWatchFlyout,
       allowCreateWatch,
       createWatch: false,
     });
@@ -101,7 +101,7 @@ export class StartDatafeedModal extends Component {
     forceStartDatafeeds(jobs, start, end, () => {
       if (this.state.createWatch && jobs.length === 1) {
         const jobId = jobs[0].id;
-        this.getShowCreateWatchModalFunction()(jobId);
+        this.getShowCreateWatchFlyoutFunction()(jobId);
       }
       this.refreshJobs();
     });

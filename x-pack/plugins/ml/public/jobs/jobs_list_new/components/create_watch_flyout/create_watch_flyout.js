@@ -24,8 +24,8 @@ import {
 
 import { toastNotifications } from 'ui/notify';
 import { loadFullJob } from '../utils';
-import { mlCreateWatchService } from 'plugins/ml/jobs/new_job/simple/components/watcher/create_watch_service';
-import { CreateWatch } from 'plugins/ml/jobs/new_job/simple/components/watcher/create_watch_view';
+import { mlCreateWatchService } from '../../../../jobs/new_job/simple/components/watcher/create_watch_service';
+import { CreateWatch } from '../../../../jobs/new_job/simple/components/watcher/create_watch_view';
 
 
 function getSuccessToast(id, url) {
@@ -50,7 +50,7 @@ function getSuccessToast(id, url) {
   };
 }
 
-export class CreateWatchModal extends Component {
+export class CreateWatchFlyout extends Component {
   constructor(props) {
     super(props);
 
@@ -58,8 +58,6 @@ export class CreateWatchModal extends Component {
       jobId: null,
       bucketSpan: null,
     };
-
-    this.compile = props.compile;
   }
 
   componentDidMount() {
@@ -171,7 +169,7 @@ export class CreateWatchModal extends Component {
 
   }
 }
-CreateWatchModal.propTypes = {
+CreateWatchFlyout.propTypes = {
   setShowFunction: PropTypes.func.isRequired,
   unsetShowFunction: PropTypes.func.isRequired,
 };
