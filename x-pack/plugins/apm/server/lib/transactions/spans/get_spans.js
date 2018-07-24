@@ -15,7 +15,7 @@ async function getSpans({ transactionId, setup }) {
   const { start, end, client, config } = setup;
 
   const params = {
-    index: config.get('xpack.apm.indexPattern'),
+    index: config.get('apm_oss.spanIndices'),
     body: {
       size: 500,
       query: {
