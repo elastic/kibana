@@ -32,6 +32,7 @@ import { EntityCell } from './entity_cell';
 import { InfluencersCell } from './influencers_cell';
 import { AnomalyDetails } from './anomaly_details';
 import { LinksMenu } from './links_menu';
+import { checkPermission } from 'plugins/ml/privilege/check_privilege';
 
 import { mlAnomaliesTableService } from './anomalies_table_service';
 import { mlFieldFormatService } from 'plugins/ml/services/field_format_service';
@@ -54,12 +55,11 @@ function renderTime(date, aggregationInterval) {
 }
 
 function showLinksMenuForItem(item) {
-  // TODO - add in checking of user privileges to see if they can view / edit rules.
-  const canViewRules = true;
-  return canViewRules ||
+  const canUpdateJob = checkPermission('canUpdateJob');
+  return (canUpdateJob ||
     item.isTimeSeriesViewDetector ||
     item.entityName === 'mlcategory' ||
-    item.customUrls !== undefined;
+    item.customUrls !== undefined);
 }
 
 function getColumns(
