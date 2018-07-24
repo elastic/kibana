@@ -85,7 +85,7 @@ export class HttpService implements CoreService {
           'Router will **not** be applied.'
       );
     } else {
-      this.log.info(`registering route handler for [${router.path}]`);
+      this.log.debug(`registering route handler for [${router.path}]`);
       this.httpServer.registerRouter(router);
     }
   }
