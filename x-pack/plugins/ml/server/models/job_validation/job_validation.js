@@ -104,6 +104,9 @@ export async function validateJob(callWithRequest, payload, kbnVersion = 'curren
     return uniqWithIsEqual(validationMessages).map(message => {
       if (typeof messages[message.id] !== 'undefined') {
         // render the message template with the provided metadata
+        if (typeof messages[message.id].heading !== 'undefined') {
+          message.heading = renderTemplate(messages[message.id].heading, message);
+        }
         message.text = renderTemplate(messages[message.id].text, message);
         // check if the error message provides a link with further information
         // if so, add it to the message to be returned with it
