@@ -32,6 +32,7 @@ import {
 import { toastNotifications } from 'ui/notify';
 
 import { ActionsSection } from './actions_section';
+import { checkPermission } from 'plugins/ml/privilege/check_privilege';
 import { ConditionsSection } from './conditions_section';
 import { ScopeSection } from './scope_section';
 import { SelectRuleAction } from './select_rule_action';
@@ -67,6 +68,7 @@ export class RuleEditorFlyout extends Component {
     };
 
     this.partitioningFieldNames = [];
+    this.canGetFilters = checkPermission('canGetFilters');
   }
 
   componentDidMount() {
@@ -121,7 +123,7 @@ export class RuleEditorFlyout extends Component {
       isFlyoutVisible: true
     });
 
-    if (this.partitioningFieldNames.length > 0) {
+    if (this.partitioningFieldNames.length > 0 && this.canGetFilters) {
       // Load the current list of filters.
       ml.filters.filters()
         .then((filters) => {
