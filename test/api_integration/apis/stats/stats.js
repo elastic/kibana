@@ -47,7 +47,6 @@ const assertStatsAndMetrics = body => {
   expect(body.response_times.avg_ms).not.to.be(null); // ok if is undefined
   expect(body.response_times.max_ms).not.to.be(null); // ok if is undefined
 
-  expect(body.requests.status_codes).to.be.an('object');
   expect(body.requests.total).to.be.a('number');
   expect(body.requests.disconnects).to.be.a('number');
 
