@@ -47,4 +47,6 @@ to Kibana's advanced setting.
 === Deprecated kibana.yml setting `xpack.monitoring.node_resolver` has been removed
 *Details:* This setting has been deprecated since 5.6, when it was explicitly recommended to use `uuid` as its value.
 
-*Impact:* The setting is no longer needed to use the best way to determine node uniqueness, its persistent UUID.
+*Impact:* This setting is no longer necessary. If you enable {monitoring} across the Elastic Stack, a monitoring agent runs
+on each Elasticsearch node, Logstash node, Kibana instance, and Beat to collect and index metrics. Each node and instance is
+considered unique based on its persistent UUID, which is written to the path.data directory when the node or instance starts.
