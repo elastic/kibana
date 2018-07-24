@@ -48,6 +48,8 @@ export class LanguageServerController implements ILanguageServerHandler {
         // try again with file contents;
         lang = detect.contents(file, fs.readFileSync(file, 'utf8'));
       }
+      // TODO(yulong): discussed with Fuyao offline, the code here create some exceptions.
+      lang = 'typescript';
       return this.dispatchRequest(lang, request);
     } else {
       return Promise.reject(
