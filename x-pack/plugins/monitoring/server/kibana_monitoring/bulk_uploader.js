@@ -149,7 +149,7 @@ export class BulkUploader {
     let statsResult;
     const [ statsHeader, statsPayload ] = findItem(KIBANA_STATS_TYPE_MONITORING);
     const [ reportingHeader, reportingPayload ] = findItem(KIBANA_REPORTING_TYPE);
-    const [ canvasHeader, canvasPayload ] = findItem('kibana_canvas');
+    const [ canvasHeader, canvasPayload ] = findItem('canvas'); // TODO replace with constant
 
     if (statsHeader && statsPayload) {
       statsHeader.index._type = 'kibana_stats'; // HACK to convert kibana_stats_monitoring to just kibana_stats for bwc
