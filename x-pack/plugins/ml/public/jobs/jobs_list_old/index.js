@@ -7,12 +7,12 @@
 
 
 import './styles/main.less';
-import './jobs_list';
-import './jobs_list_old';
-import './new_job/advanced';
-import './new_job/simple/single_metric';
-import './new_job/simple/multi_metric';
-import './new_job/simple/population';
-import './new_job/simple/recognize';
-import './new_job/wizard';
+import './jobs_list_controller';
+import './edit_job_modal';
+import './job_timepicker_modal';
+import './delete_job_modal';
+import './create_watch_modal';
+import './expanded_row';
+import 'ui/directives/confirm_click';
+import 'plugins/ml/components/paginated_table';
 import 'plugins/ml/components/validate_job';
