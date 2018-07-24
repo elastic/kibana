@@ -3,7 +3,7 @@
 === Advanced Configuration for Dashboard Only Mode
 
 If {security} is enabled, Kibana has a built-in `kibana_dashboard_only_user` 
-role that grants read only access to Kibana. This role is sufficient
+role that grants read only access to {kib}. This role is sufficient
 for most use cases.  However, if your setup requires a custom {kib} index, you can create
 your own roles and tag them as *Dashboard only mode*.
 

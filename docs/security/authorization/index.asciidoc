@@ -3,13 +3,13 @@
 === Kibana authorization
 
 Prior to {kib} 6.4, it was required to give {kib} users access to the underlying `.kibana`
-index in Elasticsearch. This allowed {kib} to defer to the {es} authorization model, and 
+index in {es}. This allowed {kib} to defer to the {es} authorization model, and 
 create roles that had either read-only or read-and-write access to all Dashboards, Visualizations, 
 Saved Searches, etc. that are stored in the `.kibana` index. This approach requires you to know
 the details of where and how data is stored by {kib}.
 
-Kibana privileges allow you to grant access to Kibana features without concerning yourself with
-the way the data is stored in Elasticsearch. To create a role with <<kibana-privileges>>, you can either
+Kibana privileges allow you to grant access to {kib} features without concerning yourself with
+the way the data is stored in {es}. To create a role with <<kibana-privileges>>, you can either
 use the *Management / Security / Roles* page in {kib} or you can use {kib}'s <<role-management-api>>.
 
 The `kibana_user` and `kibana_dashboard_only_user` roles have been automatically updated to use
@@ -18,12 +18,12 @@ Kibana privileges, so no user intervention is required.
 [[xpack-security-authorization-legacy-fallback]]
 ==== Legacy Fallback
 
-Granting access to Kibana using index privileges on the `.kibana` index is deprecated starting in 
-Kibana 6.4, but will continue functioning until 7.0. This is enabled using an authorization legacy
+Granting access to {kib} using index privileges on the `.kibana` index is deprecated starting in 
+{kib} 6.4, but will continue functioning until 7.0. This is enabled using an authorization legacy
 fallback, which can be disabled by setting `xpack.security.authorization.legacyFallback` to `false`
 in the kibana.yml. 
 
-When a user logs into Kibana with roles that rely upon index privileges to `.kibana`, {kib} will log 
+When a user logs into {kib} with roles that rely upon index privileges to `.kibana`, {kib} will log 
 the following deprecation warning.
 
 [source,js]

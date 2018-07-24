@@ -1,7 +1,7 @@
 [[role-management-api-put]]
 === Create or Update Roles
 
-To create or update a role in Elasticsearch's `native` realm, issue a PUT request to the 
+To create or update a role in {es}'s `native` realm, issue a PUT request to the 
 `/api/security/role/<rolename>` endpoint.
 
 ==== Request Body
@@ -11,7 +11,7 @@ The following parameters can be specified in the body of a PUT request to add or
 `metadata`:: (object) Optional meta-data. Within the `metadata` object, keys
 that begin with `_` are reserved for system usage.
 
-`elasticsearch`:: (object) Optional Elasticsearch cluster and index privileges, valid keys are 
+`elasticsearch`:: (object) Optional {es} cluster and index privileges, valid keys are 
 `cluster`, `indices` and `run_as`. For more information, see {xpack-ref}/defining-roles.html[Defining Roles].
 
 `kibana`:: (list) A list of objects that specify the <<kibana-privileges>>.

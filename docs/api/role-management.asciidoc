@@ -11,8 +11,8 @@ clearly documented in the breaking changes documentation for that release.
 
 The role management API allows people to manage roles that grant <<kibana-privileges>>.
 It is *not* supported to do so using the
-{ref}/security-api-roles.html[Elasticsearch Role Management APIs], and doing 
-so will likely cause Kibana's authorization to behave unexpectedly. 
+{ref}/security-api-roles.html[{es} Role Management APIs], and doing 
+so will likely cause {kib}'s authorization to behave unexpectedly. 
 
 * <<role-management-api-put>>
 * <<role-management-api-get>>

@@ -4,14 +4,14 @@
 
 You can enable auditing to keep track of security-related events such as
 authorization success and failures. Logging these events enables you
-to monitor Kibana for suspicious activity and provides evidence in the
+to monitor {kib} for suspicious activity and provides evidence in the
 event of an attack.
 
-The Kibana audit logs should be used in conjunction with Elasticsearch's
+The {kib} audit logs should be used in conjunction with {es}'s
 audit logging to get a hollistic view of all security related events. 
-Kibana defers to Elasticsearch's security model for authentication, data
+{kib} defers to {es}'s security model for authentication, data
 index authorization, and features that are driven by cluster-wide privileges.
-For more information on enabling audit logging in Elasticsearch, see
+For more information on enabling audit logging in {es}, see
 {ref}/auditing.html[Auditing Security Events].
 
 [IMPORTANT]
@@ -20,7 +20,7 @@ Audit logs are **disabled** by default. To enable this functionality, you
 must set `xpack.security.audit.enabled` to `true` in `kibana.yml`.
 ============================================================================
 
-Audit logging uses the standard Kibana logging output, which can be configured
+Audit logging uses the standard {kib} logging output, which can be configured
 in the `kibana.yml` and is discussed in <<settings>>
 
 ==== Audit event types
