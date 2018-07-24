@@ -55,8 +55,15 @@ async function copyFile(source, dest) {
 }
 
 describe('dev/i18n/check_l10n_updates', () => {
-  it('creates messages_cache.json', async () => {
+  beforeEach(() => {
     log.success.mockClear();
+  });
+
+  afterEach(async () => {
+    await unlinkAsync(cachePath);
+  });
+
+  it('creates messages_cache.json', async () => {
     await checkUpdates(plugin, log);
 
     expect(log.success).toBeCalledWith(
@@ -71,20 +78,16 @@ describe('dev/i18n/check_l10n_updates', () => {
 
     await checkUpdates(plugin, log);
     expect(log.success).toBeCalledWith(`New messages ids in ${plugin}:\ntest_plugin.id_2`);
-    await unlinkAsync(cachePath);
   });
 
   it('logs out ids of removed messages', async () => {
-    log.success.mockClear();
     await copyFile(path.join(cacheFilesDir, 'messages_cache_2.json'), cachePath);
 
     await checkUpdates(plugin, log);
     expect(log.success).toBeCalledWith(`Removed messages ids from ${plugin}:\ntest_plugin.id_3`);
-    await unlinkAsync(cachePath);
   });
 
   it('logs out ids of new and removed messages', async () => {
-    log.success.mockClear();
     await copyFile(path.join(cacheFilesDir, 'messages_cache_3.json'), cachePath);
 
     await checkUpdates(plugin, log);
@@ -92,6 +95,5 @@ describe('dev/i18n/check_l10n_updates', () => {
       [`New messages ids in ${plugin}:\ntest_plugin.id_2`],
       [`Removed messages ids from ${plugin}:\ntest_plugin.id_4`],
     ]);
-    await unlinkAsync(cachePath);
   });
 });

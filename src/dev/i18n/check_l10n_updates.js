@@ -20,7 +20,7 @@
 import path from 'path';
 import JSON5 from 'json5';
 
-import { arraysDiff, readFileAsync, writeFileAsync, accessAsync } from './utils';
+import { difference, readFileAsync, writeFileAsync, accessAsync } from './utils';
 
 export async function checkUpdates(pluginPath, log) {
   const defaultMessagesBuffer = await readFileAsync(
@@ -42,7 +42,8 @@ export async function checkUpdates(pluginPath, log) {
   const defaultMessagesIds = Object.keys(defaultMessagesObject);
   const cachedMessagesIds = JSON5.parse(messagesCacheBuffer.toString());
 
-  const [addedMessages, removedMessages] = arraysDiff(defaultMessagesIds, cachedMessagesIds);
+  const addedMessages = difference(defaultMessagesIds, cachedMessagesIds);
+  const removedMessages = difference(cachedMessagesIds, defaultMessagesIds);
 
   if (addedMessages.length > 0) {
     log.success(`New messages ids in ${pluginPath}:\n${addedMessages.join(', ')}`);
