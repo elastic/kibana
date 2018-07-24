@@ -5,6 +5,9 @@
  */
 
 
+import { JOB_STATE, DATAFEED_STATE } from '../../../common/constants/states';
+import { fillResultsWithTimeouts, isRequestTimeout } from './error_utils';
+
 export function datafeedsProvider(callWithRequest) {
 
   async function forceStartDatafeeds(datafeedIds, start, end) {
@@ -15,7 +18,6 @@ export function datafeedsProvider(callWithRequest) {
     }, {});
 
     const results = {};
-    const START_TIMEOUT = 10000; // 10s
 
     async function doStart(datafeedId) {
       if (doStartsCalled[datafeedId] === false) {
@@ -33,19 +35,19 @@ export function datafeedsProvider(callWithRequest) {
     for (const datafeedId of datafeedIds) {
       const jobId = jobIds[datafeedId];
       if (jobId !== undefined) {
-        setTimeout(async () => {
-          // in 10 seconds start the datafeed.
-          // this should give the openJob enough time.
-          // if not, the start request will be queued
-          // behind the open request on the server.
-          results[datafeedId] = await doStart(datafeedId);
-        }, START_TIMEOUT);
-
         try {
           if (await openJob(jobId)) {
             results[datafeedId] = await doStart(datafeedId);
           }
         } catch (error) {
+          if (isRequestTimeout(error)) {
+            // if the open request times out, start the datafeed anyway
+            // then break out of the loop so no more requests are fired.
+            // use fillResultsWithTimeouts to add a timeout error to each
+            // remaining job
+            results[datafeedId] = await doStart(datafeedId);
+            return fillResultsWithTimeouts(results, datafeedId, datafeedIds, JOB_STATE.OPENED);
+          }
           results[datafeedId] = { started: false, error };
         }
       } else {
@@ -79,7 +81,13 @@ export function datafeedsProvider(callWithRequest) {
     const results = {};
 
     for (const datafeedId of datafeedIds) {
-      results[datafeedId] = await callWithRequest('ml.stopDatafeed', { datafeedId });
+      try {
+        results[datafeedId] = await callWithRequest('ml.stopDatafeed', { datafeedId });
+      } catch (error) {
+        if (isRequestTimeout(error)) {
+          return fillResultsWithTimeouts(results, datafeedId, datafeedIds, DATAFEED_STATE.STOPPED);
+        }
+      }
     }
 
     return results;

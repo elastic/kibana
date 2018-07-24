@@ -20,8 +20,12 @@ export function getPrivileges() {
     canUpdateJob: false,
     canUpdateDatafeed: false,
     canPreviewDatafeed: false,
+    canGetCalendars: false,
     canCreateCalendar: false,
     canDeleteCalendar: false,
+    canGetFilters: false,
+    canCreateFilter: false,
+    canDeleteFilter: false,
   };
 
   return new Promise((resolve, reject) => {
@@ -31,6 +35,7 @@ export function getPrivileges() {
         'cluster:monitor/xpack/ml/job/stats/get',
         'cluster:monitor/xpack/ml/datafeeds/get',
         'cluster:monitor/xpack/ml/datafeeds/stats/get',
+        'cluster:monitor/xpack/ml/calendars/get',
         'cluster:admin/xpack/ml/job/put',
         'cluster:admin/xpack/ml/job/delete',
         'cluster:admin/xpack/ml/job/update',
@@ -48,14 +53,17 @@ export function getPrivileges() {
         'cluster:admin/xpack/ml/calendars/jobs/update',
         'cluster:admin/xpack/ml/calendars/events/post',
         'cluster:admin/xpack/ml/calendars/events/delete',
+        'cluster:admin/xpack/ml/filters/put',
+        'cluster:admin/xpack/ml/filters/get',
+        'cluster:admin/xpack/ml/filters/update',
+        'cluster:admin/xpack/ml/filters/delete',
       ]
     };
 
     ml.checkPrivilege(priv)
       .then((resp) => {
-
-      // if security has been disabled, securityDisabled is returned from the endpoint
-      // therefore set all privileges to true
+        // if security has been disabled, securityDisabled is returned from the endpoint
+        // therefore set all privileges to true
         if (resp.securityDisabled) {
           Object.keys(privileges).forEach(k => privileges[k] = true);
         } else {
@@ -110,6 +118,10 @@ export function getPrivileges() {
             privileges.canPreviewDatafeed = true;
           }
 
+          if (resp.cluster['cluster:monitor/xpack/ml/calendars/get']) {
+            privileges.canGetCalendars = true;
+          }
+
           if (resp.cluster['cluster:admin/xpack/ml/calendars/put'] &&
             resp.cluster['cluster:admin/xpack/ml/calendars/jobs/update'] &&
             resp.cluster['cluster:admin/xpack/ml/calendars/events/post']) {
@@ -120,6 +132,20 @@ export function getPrivileges() {
             resp.cluster['cluster:admin/xpack/ml/calendars/events/delete']) {
             privileges.canDeleteCalendar = true;
           }
+
+          if (resp.cluster['cluster:admin/xpack/ml/filters/get']) {
+            privileges.canGetFilters = true;
+          }
+
+          if (resp.cluster['cluster:admin/xpack/ml/filters/put'] &&
+            resp.cluster['cluster:admin/xpack/ml/filters/update']) {
+            privileges.canCreateFilter = true;
+          }
+
+          if (resp.cluster['cluster:admin/xpack/ml/filters/delete']) {
+            privileges.canDeleteFilter = true;
+          }
+
         }
 
         resolve(privileges);

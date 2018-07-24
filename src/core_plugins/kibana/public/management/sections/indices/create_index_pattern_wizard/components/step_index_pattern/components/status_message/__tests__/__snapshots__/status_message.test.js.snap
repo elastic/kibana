@@ -7,6 +7,7 @@ exports[`StatusMessage should render with exact matches 1`] = `
 >
   <EuiTextColor
     color="secondary"
+    component="span"
   >
     <EuiIcon
       size="m"
@@ -36,6 +37,7 @@ exports[`StatusMessage should render with no partial matches 1`] = `
 >
   <EuiTextColor
     color="default"
+    component="span"
   >
     <span>
       The index pattern you've entered doesn't match any indices. You can match any of your 
@@ -56,6 +58,7 @@ exports[`StatusMessage should render with partial matches 1`] = `
 >
   <EuiTextColor
     color="default"
+    component="span"
   >
     <span>
       Your index pattern doesn't match any indices, but you have 
@@ -79,6 +82,7 @@ exports[`StatusMessage should render without a query 1`] = `
 >
   <EuiTextColor
     color="default"
+    component="span"
   >
     <span>
       Your index pattern can match any of your 
@@ -99,6 +103,7 @@ exports[`StatusMessage should show that no indices exist 1`] = `
 >
   <EuiTextColor
     color="default"
+    component="span"
   >
     <span>
       No Elasticsearch indices match your pattern.
@@ -114,6 +119,7 @@ exports[`StatusMessage should show that system indices exist 1`] = `
 >
   <EuiTextColor
     color="default"
+    component="span"
   >
     <span>
       No Elasticsearch indices match your pattern. To view the matching system indices, toggle the switch in the upper right.

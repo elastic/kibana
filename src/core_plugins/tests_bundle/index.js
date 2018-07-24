@@ -17,8 +17,6 @@
  * under the License.
  */
 
-import { union } from 'lodash';
-
 import { fromRoot } from '../../utils';
 
 import findSourceFiles from './find_source_files';
@@ -36,7 +34,7 @@ export default (kibana) => {
 
     uiExports: {
       async __bundleProvider__(kbnServer) {
-        let modules = [];
+        const modules = new Set();
 
         const {
           config,
@@ -67,7 +65,7 @@ export default (kibana) => {
             // add the modules from all of this plugins apps
             for (const app of uiApps) {
               if (app.getPluginId() === pluginId) {
-                modules = union(modules, app.getModules());
+                modules.add(app.getMainModuleId());
               }
             }
 
@@ -76,7 +74,7 @@ export default (kibana) => {
         } else {
           // add the modules from all of the apps
           for (const app of uiApps) {
-            modules = union(modules, app.getModules());
+            modules.add(app.getMainModuleId());
           }
 
           for (const plugin of plugins) {
@@ -85,7 +83,7 @@ export default (kibana) => {
         }
 
         const testFiles = await findSourceFiles(testGlobs);
-        for (const f of testFiles) modules.push(f);
+        for (const f of testFiles) modules.add(f);
 
         if (config.get('tests_bundle.instrument')) {
           uiBundles.addPostLoader({
@@ -97,7 +95,7 @@ export default (kibana) => {
 
         uiBundles.add({
           id: 'tests',
-          modules,
+          modules: [...modules],
           template: createTestEntryTemplate(uiSettingDefaults),
         });
       },

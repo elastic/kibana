@@ -48,8 +48,9 @@ module.exports = function (grunt) {
   grunt.registerTask('test:coverage', ['run:testCoverageServer', 'karma:coverage']);
 
   grunt.registerTask('test:quick', [
+    'checkPlugins',
     'test:server',
-    'test:ui',
+    'run:functionalTests',
     'test:jest',
     'test:jest_integration',
     'test:projects',
@@ -58,16 +59,6 @@ module.exports = function (grunt) {
   ]);
 
   grunt.registerTask('test:dev', ['checkPlugins', 'run:devBrowserTestServer', 'karma:dev']);
-
-  grunt.registerTask('test:ui', ['checkPlugins', 'run:functionalTests', 'run:panelActionTests']);
-
-  grunt.registerTask('test:uiRelease', [
-    'checkPlugins',
-    'run:panelActionTests',
-    'run:functionalTestsRelease',
-  ]);
-
-  grunt.registerTask('test:ui:server', ['checkPlugins', 'run:functionalTestsDevServer']);
 
   grunt.registerTask('test', subTask => {
     if (subTask) grunt.fail.fatal(`invalid task "test:${subTask}"`);

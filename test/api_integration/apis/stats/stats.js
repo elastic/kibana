@@ -20,85 +20,90 @@
 import expect from 'expect.js';
 
 const assertStatsAndMetrics = body => {
-  expect(body.status.overall.state).to.be('green');
-  expect(body.status.statuses).to.be.an('array');
-  const kibanaPlugin = body.status.statuses.find(s => {
-    return s.id.indexOf('plugin:kibana') === 0;
-  });
-  expect(kibanaPlugin.state).to.be('green');
+  expect(body.kibana.name).to.be.a('string');
+  expect(body.kibana.uuid).to.be.a('string');
+  expect(body.kibana.host).to.be.a('string');
+  expect(body.kibana.transport_address).to.be.a('string');
+  expect(body.kibana.version).to.be.a('string');
+  expect(body.kibana.snapshot).to.be.a('boolean');
+  expect(body.kibana.status).to.be('green');
 
-  expect(body.name).to.be.a('string');
-  expect(body.uuid).to.be.a('string');
+  expect(body.process.memory.heap.total_bytes).to.be.a('number');
+  expect(body.process.memory.heap.used_bytes).to.be.a('number');
+  expect(body.process.memory.heap.size_limit).to.be.a('number');
+  expect(body.process.memory.resident_set_size_bytes).to.be.a('number');
+  expect(body.process.pid).to.be.a('number');
+  expect(body.process.uptime_ms).to.be.a('number');
+  expect(body.process.event_loop_delay).to.be.a('number');
 
-  expect(body.version.number).to.be.a('string');
+  expect(body.os.memory.free_bytes).to.be.a('number');
+  expect(body.os.memory.total_bytes).to.be.a('number');
+  expect(body.os.uptime_ms).to.be.a('number');
 
-  expect(body.process.mem.external_in_bytes).to.be.an('number');
-  expect(body.process.mem.heap_max_in_bytes).to.be.an('number');
-  expect(body.process.mem.heap_used_in_bytes).to.be.an('number');
-  expect(body.process.mem.resident_set_size_in_bytes).to.be.an('number');
-  expect(body.process.pid).to.be.an('number');
-  expect(body.process.uptime_ms).to.be.an('number');
+  expect(body.os.load['1m']).to.be.a('number');
+  expect(body.os.load['5m']).to.be.a('number');
+  expect(body.os.load['15m']).to.be.a('number');
 
-  expect(body.os.cpu.load_average['1m']).to.be.a('number');
+  expect(body.response_times.avg_ms).not.to.be(null); // ok if is undefined
+  expect(body.response_times.max_ms).not.to.be(null); // ok if is undefined
 
-  expect(body.response_times.avg_in_millis).not.to.be(null); // ok if is undefined
-  expect(body.response_times.max_in_millis).not.to.be(null); // ok if is undefined
-
-  expect(body.requests.status_codes).to.be.an('object');
-
-  expect(body.sockets.http).to.be.an('object');
-  expect(body.sockets.https).to.be.an('object');
+  expect(body.requests.total).to.be.a('number');
+  expect(body.requests.disconnects).to.be.a('number');
 
   expect(body.concurrent_connections).to.be.a('number');
-
-  expect(body.event_loop_delay).to.be.an('number');
 };
 
 export default function ({ getService }) {
   const supertest = getService('supertest');
-
   describe('kibana stats api', () => {
-    it('should return the stats and metric fields without cluster_uuid when extended param is not present', () => {
-      return supertest
-        .get('/api/stats')
-        .expect('Content-Type', /json/)
-        .expect(200)
-        .then(({ body }) => {
-          expect(body.cluster_uuid).to.be(undefined);
-          assertStatsAndMetrics(body);
-        });
-    });
-    it('should return the stats and metric fields without cluster_uuid when extended param is given as false', () => {
-      return supertest
-        .get('/api/stats?extended=false')
-        .expect('Content-Type', /json/)
-        .expect(200)
-        .then(({ body }) => {
-          expect(body.cluster_uuid).to.be(undefined);
-          assertStatsAndMetrics(body);
-        });
-    });
-
-    it('should return the stats and metric fields with cluster_uuid when extended param is present', () => {
-      return supertest
-        .get('/api/stats?extended')
-        .expect('Content-Type', /json/)
-        .expect(200)
-        .then(({ body }) => {
-          expect(body.cluster_uuid).to.be.a('string');
-          assertStatsAndMetrics(body);
-        });
+    describe('basic', () => {
+      it('should return the stats without cluster_uuid with no query string params', () => {
+        return supertest
+          .get('/api/stats')
+          .expect('Content-Type', /json/)
+          .expect(200)
+          .then(({ body }) => {
+            expect(body.cluster_uuid).to.be(undefined);
+            assertStatsAndMetrics(body);
+          });
+      });
+      it(`should return the stats without cluster_uuid with 'extended' query string param = false`, () => {
+        return supertest
+          .get('/api/stats?extended=false')
+          .expect('Content-Type', /json/)
+          .expect(200)
+          .then(({ body }) => {
+            expect(body.cluster_uuid).to.be(undefined);
+            assertStatsAndMetrics(body);
+          });
+      });
     });
 
-    it('should return the stats and metric fields with cluster_uuid when extended param is given as true', () => {
-      return supertest
-        .get('/api/stats?extended=true')
-        .expect('Content-Type', /json/)
-        .expect(200)
-        .then(({ body }) => {
-          expect(body.cluster_uuid).to.be.a('string');
-          assertStatsAndMetrics(body);
-        });
+    // TODO load an es archive and verify the counts in saved object usage info
+    describe('extended', () => {
+      it(`should return the stats, cluster_uuid, and usage with 'extended' query string param present`, () => {
+        return supertest
+          .get('/api/stats?extended')
+          .expect('Content-Type', /json/)
+          .expect(200)
+          .then(({ body }) => {
+            expect(body.cluster_uuid).to.be.a('string');
+            expect(body.usage).to.be.an('object'); // no usage collectors have been registered so usage is an empty object
+            assertStatsAndMetrics(body);
+          });
+      });
+
+      it(`should return the stats, cluster_uuid, and usage with 'extended' query string param = true`, () => {
+        return supertest
+          .get('/api/stats?extended=true')
+          .expect('Content-Type', /json/)
+          .expect(200)
+          .then(({ body }) => {
+            expect(body.cluster_uuid).to.be.a('string');
+            expect(body.usage).to.be.an('object');
+            assertStatsAndMetrics(body);
+          });
+      });
     });
   });
 }

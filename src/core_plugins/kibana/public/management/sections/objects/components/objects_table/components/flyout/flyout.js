@@ -136,6 +136,7 @@ export class Flyout extends Component {
       conflictedSavedObjectsLinkedToSavedSearches,
       conflictedSearchDocs,
       importedObjectCount,
+      failedImports,
     } = await resolveSavedObjects(
       contents,
       isOverwriteAllChecked,
@@ -166,6 +167,7 @@ export class Flyout extends Component {
       conflictedIndexPatterns,
       conflictedSavedObjectsLinkedToSavedSearches,
       conflictedSearchDocs,
+      failedImports,
       conflicts,
       importCount: importedObjectCount,
       isLoading: false,
@@ -373,6 +375,7 @@ export class Flyout extends Component {
       isOverwriteAllChecked,
       wasImportSuccessful,
       importCount,
+      failedImports = [],
     } = this.state;
 
     if (isLoading) {
@@ -386,6 +389,23 @@ export class Flyout extends Component {
             </EuiText>
           </EuiFlexItem>
         </EuiFlexGroup>
+      );
+    }
+
+    if (failedImports.length) {
+      return (
+        <EuiCallOut
+          title="Import failed"
+          color="warning"
+          iconType="help"
+        >
+          <p>
+            Failed to import {failedImports.length} of {importCount + failedImports.length} objects.
+          </p>
+          <p>
+            {failedImports.map(({ error }) => error.message || '').join(' ')}
+          </p>
+        </EuiCallOut>
       );
     }
 
