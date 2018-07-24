@@ -22,12 +22,13 @@ import {
   EuiFlexItem,
   EuiHealth,
   EuiInMemoryTable,
-  EuiText
+  EuiText,
 } from '@elastic/eui';
 
 import { formatDate } from '@elastic/eui/lib/services/format';
 
 import { DescriptionCell } from './description_cell';
+import { DetectorCell } from './detector_cell';
 import { EntityCell } from './entity_cell';
 import { InfluencersCell } from './influencers_cell';
 import { AnomalyDetails } from './anomaly_details';
@@ -106,6 +107,12 @@ function getColumns(
     {
       field: 'detector',
       name: 'detector',
+      render: (detectorDescription, item) => (
+        <DetectorCell
+          detectorDescription={detectorDescription}
+          numberOfRules={item.rulesLength}
+        />
+      ),
       sortable: true
     }
   ];
