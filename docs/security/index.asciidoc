@@ -20,11 +20,16 @@ authentication and built-in users, see
 [float]
 === Roles
 
-You can manage roles on the *Management* / *Security* / *Roles* page.  For more
-information, see
-{xpack-ref}/authorization.html[Configuring Role-based Access Control].
+To manage roles that are stored in Elasticsearch's `native` realm, you can use the
+*Management* / *Security* / *Roles* page, or {kib}'s <<role-management-api>>.
 
-To manage roles which grant <<kibana-privileges>> and are stored in Elasticsearch's
-`native` realm, use {kib}'s <<role-management-api>>. 
+[NOTE]
+============================================================================
+It is *not* supported to manage Roles which grant <<kibana-privileges>> using 
+{es}'s {ref}/security-api-roles.html[Role Management APIs], and 
+doing so will likely cause Kibana's authorization to behave unexpectedly. 
+============================================================================
+
+For more information, see {xpack-ref}/authorization.html[Configuring Role-based Access Control].
 
 include::authorization/kibana-privileges.asciidoc[]
