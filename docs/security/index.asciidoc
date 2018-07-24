@@ -27,4 +27,4 @@ information, see
 To manage roles which grant <<kibana-privileges>> and are stored in Elasticsearch's
 `native` realm, use {kib}'s <<role-management-api>>. 
 
-include::authorization/index.asciidoc[]
+include::authorization/kibana-privileges.asciidoc[]
