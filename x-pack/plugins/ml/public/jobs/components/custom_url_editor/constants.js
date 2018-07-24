@@ -4,8 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+export const URL_TYPE = {
+  KIBANA_DASHBOARD: 'KIBANA_DASHBOARD',
+  KIBANA_DISCOVER: 'KIBANA_DISCOVER',
+  OTHER: 'OTHER'
+};
 
-
-import './edit_job_modal_controller';
-import 'plugins/ml/jobs/components/custom_url_editor_old';
-import 'plugins/ml/components/job_group_select';
+export const TIME_RANGE_TYPE = {
+  AUTO: 'auto',
+  INTERVAL: 'interval'
+};
