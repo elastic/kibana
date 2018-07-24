@@ -152,4 +152,35 @@ export default class Web {
     this.findElement(selector);
     return this.driver.isEnabled(selector);
   }
+
+  /**
+   * @function waitForVisible
+   * @param  {string} selector CSS or XPath Selector of Element.
+   */
+  waitForVisible(selector) {
+    this.driver.waitForVisible(selector);
+  }
+
+  /**
+   * @function waitForEnabled
+   * @param  {string} selector CSS or XPath Selector of Element.
+   */
+  waitForEnabled(selector) {
+    this.driver.waitForEnabled(selector);
+  }
+
+  /**
+   * @function waitForExist
+   * @param  {string} selector CSS or XPath Selector of Element.
+   */
+  waitForExist(selector) {
+    this.driver.waitForExist(selector);
+  }
+  /**
+   * @function waitForCondition
+   * @param  {function} function that evaluates to a boolean to wait for.
+   */
+  waitForCondition(conditionFunc) {
+    this.driver.waitUntil(conditionFunc);
+  }
 }

@@ -50,7 +50,7 @@ export default class BasePage extends Web {
       */
       navigateToConsole() {
         self.logger.debug('Navigating to console page.');
-        self.driver.click(this.consoleNavLinkSelector);
+        self.click(this.consoleNavLinkSelector);
         const ConsolePage = require('../console/console_page');
         return new ConsolePage(self.driver);
       }
@@ -70,7 +70,7 @@ export default class BasePage extends Web {
       */
       navigateToManagement() {
         self.logger.debug('Navigating to management.');
-        self.driver.click(this.managementNavLinkSelector);
+        self.click(this.managementNavLinkSelector);
         const ManagementPage = require('../management/management_page');
         return new ManagementPage(self.driver);
       }

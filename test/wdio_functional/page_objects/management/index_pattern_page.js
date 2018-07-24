@@ -57,10 +57,11 @@ export default class IndexPatternPage extends BasePage {
     expect(this.isEnabled(this.createIndexPatternStep2ButtonSelector)).toBe(true);
     this.click(this.createIndexPatternStep2ButtonSelector);
 
-    this.driver.waitForVisible(this.createIndexPatternCreateButtonSelector);
-    this.driver.waitForVisible(this.createIndexPatternTimeFieldSelectSelector);
+    this.waitForVisible(this.createIndexPatternCreateButtonSelector);
+    this.waitForVisible(this.createIndexPatternTimeFieldSelectSelector);
 
     //TODO: Add data test subject for the selector for the timestamp select.
+    //TODO: Use driver.selectByAttribute for data test subj.
     this.logger.debug(`Use timestamp is set to ${useTimeStamp}`);
     let selectText;
     if (useTimeStamp) {
@@ -71,12 +72,12 @@ export default class IndexPatternPage extends BasePage {
     this.driver.selectByVisibleText(this.createIndexPatternTimeFieldSelectSelector, selectText);
 
     this.logger.debug('Waiting for create button to become enabled.');
-    this.driver.waitForEnabled(this.createIndexPatternCreateButtonSelector);
+    this.waitForEnabled(this.createIndexPatternCreateButtonSelector);
 
     this.click(this.createIndexPatternCreateButtonSelector);
 
     this.logger.debug(`Waiting until title is for index pattern is ${name}`);
-    this.driver.waitForVisible(this.indexPatternTitleSelector);
+    this.waitForVisible(this.indexPatternTitleSelector);
     expect(this.getElementText(this.indexPatternTitleSelector)).toBe(`${name}*`);
   }
 

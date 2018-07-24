@@ -61,7 +61,7 @@ GET _search
     this.type(this.fontSizeInputSelector, String(size), true);
     this.click(this.saveSettingsButton);
 
-    this.driver.waitUntil(() => {
+    this.waitForCondition(() => {
       const fontValues = this.getCssPropertyValue(
         this.requestEditorTextSelector +
         ':nth-child(1)  .ace_line:nth-child(1)',
@@ -78,9 +78,9 @@ GET _search
    * @function openSettings
    */
   openSettings() {
-    this.driver.waitUntil(() => {
+    this.waitForCondition(() => {
       this.click(this.consoleSettingsButtonSelector);
-      return this.driver.isVisible(this.fontSizeInputSelector);
+      return this.isVisible(this.fontSizeInputSelector);
     });
   }
 
@@ -97,7 +97,7 @@ GET _search
    * @returns  {string} Value of response
    */
   get response() {
-    this.driver.waitUntil(() => {
+    this.waitForCondition(() => {
       return (
         this.getElementText(this.responseEditorTextSelector)
           .replace('{', '')
@@ -131,7 +131,7 @@ GET _search
   init() {
     this.driver.waitForExist(this.breadCrumbSelector);
     expect('Dev Tools').toBe(this.getElementText(this.breadCrumbSelector));
-    this.driver.waitUntil(() => {
+    this.waitForCondition(() => {
       return this.title === 'Console - Kibana';
     });
   }

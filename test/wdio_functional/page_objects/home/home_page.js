@@ -30,7 +30,7 @@ export default class HomePage extends BasePage {
   init() {
     this.driver.waitForExist(this.addDataHeaderSelector);
     //TODO: Need to update this to the app name once added.
-    this.driver.waitUntil(() => {
+    this.waitForCondition(() => {
       return this.title === 'Kibana';
     });
   }
