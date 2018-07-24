@@ -2,9 +2,8 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { EuiSelect } from '@elastic/eui';
 
-export const SimpleMathFunction = ({ onChange, value, inputRef }) => {
+export const SimpleMathFunction = ({ onChange, value, inputRef, onlymath }) => {
   const options = [
-    { text: 'Value', value: '' },
     { text: 'Average', value: 'mean' },
     { text: 'Count', value: 'size' },
     { text: 'First', value: 'first' },
@@ -14,6 +13,8 @@ export const SimpleMathFunction = ({ onChange, value, inputRef }) => {
     { text: 'Min', value: 'min' },
     { text: 'Sum', value: 'sum' },
   ];
+
+  if (!onlymath) options.unshift({ text: 'Value', value: '' });
 
   return (
     <EuiSelect
@@ -29,4 +30,5 @@ SimpleMathFunction.propTypes = {
   onChange: PropTypes.func,
   value: PropTypes.string,
   inputRef: PropTypes.func,
+  onlymath: PropTypes.bool,
 };

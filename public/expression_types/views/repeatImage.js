@@ -5,7 +5,7 @@ export const repeatImage = () => ({
   name: 'repeatImage',
   displayName: 'Repeating Image',
   help: '',
-  modelArgs: [['size', { label: 'Count' }]],
+  modelArgs: [['_', { label: 'Value' }]],
   args: [
     {
       name: 'image',

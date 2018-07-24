@@ -19,7 +19,11 @@ const DatacolumnArgInput = ({
   setMathFunction,
   renderError,
   argId,
+  typeInstance,
 }) => {
+  const allowedTypes = typeInstance.options.allowedTypes || false;
+  const onlyShowMathFunctions = typeInstance.options.onlyMath || false;
+
   if (mathValue.error) {
     renderError();
     return null;
@@ -52,6 +56,7 @@ const DatacolumnArgInput = ({
   const options = [{ value: '', text: 'select column', disabled: true }];
 
   sortBy(columns, 'name').forEach(column => {
+    if (allowedTypes && !allowedTypes.includes(column.type)) return;
     options.push({ value: column.name, text: column.name });
   });
 
@@ -62,6 +67,7 @@ const DatacolumnArgInput = ({
           id={argId}
           value={mathValue.fn}
           inputRef={ref => (inputRefs.fn = ref)}
+          onlymath={onlyShowMathFunctions}
           onChange={updateFunctionValue}
         />
       </EuiFlexItem>

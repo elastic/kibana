@@ -6,8 +6,7 @@ export const repeatImage = () => ({
   help: 'Repeats an image N times',
   image: header,
   expression: `demodata
-| pointseries size="mean(cost)"
-| getCell
+| math "mean(cost)"
 | repeatImage image=null
 | render`,
 });

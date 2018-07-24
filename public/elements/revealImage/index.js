@@ -6,8 +6,7 @@ export const revealImage = () => ({
   help: 'Reveals a percentage of an image',
   image: header,
   expression: `demodata
-| pointseries size="sum(min(cost) / max(cost))"
-| getCell
+| math "sum(min(cost) / max(cost))"
 | revealImage origin=bottom image=null
 | render`,
 });

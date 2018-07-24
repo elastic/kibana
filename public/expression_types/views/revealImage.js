@@ -5,7 +5,7 @@ export const revealImage = () => ({
   name: 'revealImage',
   displayName: 'Reveal Image',
   help: '',
-  modelArgs: [['size', { label: 'Percentage (Between 0 & 1)' }]],
+  modelArgs: [['_', { label: 'Value' }]],
   args: [
     {
       name: 'image',
