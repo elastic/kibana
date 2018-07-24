@@ -140,9 +140,9 @@ export class CreateWatch extends Component {
                 </label>
               </div>
               Now - <EuiFieldText
+                id="selectInterval"
                 value={this.state.interval}
                 onChange={this.onIntervalChange}
-                aria-label="Use aria labels when no actual label is in use"
               />
             </div>
 
@@ -157,6 +157,7 @@ export class CreateWatch extends Component {
               </div>
               <div className="dropdown-group">
                 <SelectSeverity
+                  id="selectSeverity"
                   mlSelectSeverityService={mlSelectSeverityService}
                 />
               </div>
@@ -179,7 +180,7 @@ export class CreateWatch extends Component {
                     value={this.state.email}
                     onChange={this.onEmailChange}
                     placeholder="email address"
-                    aria-label="Use aria labels when no actual label is in use"
+                    aria-label="Watch email address"
                   />
                 </div>
               }
