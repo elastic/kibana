@@ -20,10 +20,8 @@ import {
 export function DetectorCell({ detectorDescription, numberOfRules }) {
   let rulesIcon;
   if (numberOfRules !== undefined && numberOfRules > 0) {
-    const numRules = (numberOfRules === 1) ? '1 rule' : `${numberOfRules} rules`;
-    const tooltipContent = `${numRules} configured for this detector`;
     rulesIcon = (
-      <EuiToolTip content={tooltipContent}>
+      <EuiToolTip content="rules have been configured for this detector">
         <EuiIcon
           type="controlsHorizontal"
           className="detector-rules-icon"
