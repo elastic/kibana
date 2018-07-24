@@ -5,7 +5,7 @@
  */
 
 import getosSync from 'getos';
-import { promisify } from 'util';
+import { promisify } from 'bluebird';
 
 const getos = promisify(getosSync);
 

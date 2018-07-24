@@ -28,7 +28,7 @@ export function createJestConfig({
     },
     setupFiles: [
       `${kibanaDirectory}/src/dev/jest/setup/babel_polyfill.js`,
-      `${kibanaDirectory}/src/dev/jest/setup/polyfills.js`,
+      `<rootDir>/dev-tools/jest/setup/polyfills.js`,
       `<rootDir>/dev-tools/jest/setup/enzyme.js`,
     ],
     testMatch: [
