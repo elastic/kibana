@@ -57,10 +57,11 @@ exports[`StatusMessage should render with no partial matches 1`] = `
   >
     <span>
       <FormattedMessage
-        defaultMessage="The index pattern you've entered doesn't match any indices. You can match any of your {strongIndices}, below."
+        defaultMessage="The index pattern you've entered doesn't match any indices. You can match {indicesLength, plural, one {your} other {any of your}} {strongIndices}, below."
         id="kbn.management.createIndexPattern.step.status.notMatchLabel.notMatchDetail"
         values={
           Object {
+            "allIndicesLength": 2,
             "strongIndices": <strong>
               <FormattedMessage
                 defaultMessage="{indicesLength, plural, one {# index} other {# indices}}"
@@ -131,15 +132,7 @@ exports[`StatusMessage should render without a query 1`] = `
         values={
           Object {
             "strongIndices": <strong>
-              <FormattedMessage
-                defaultMessage="{allIndicesLength, plural, one {# index} other {# indices}}"
-                id="kbn.management.createIndexPattern.step.status.matchAnyLabel.strongIndicesLabel"
-                values={
-                  Object {
-                    "allIndicesLength": 2,
-                  }
-                }
-              />
+              2
             </strong>,
           }
         }
