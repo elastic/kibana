@@ -23,8 +23,7 @@ class Timeline extends PureComponent {
   );
 
   render() {
-    const { width, duration, header } = this.props;
-
+    const { width, duration, header, agentMarks } = this.props;
     if (duration == null || !width) {
       return null;
     }
@@ -33,14 +32,19 @@ class Timeline extends PureComponent {
 
     return (
       <div>
-        <TimelineAxis plotValues={plotValues} header={header} />
-        <VerticalLines plotValues={plotValues} />
+        <TimelineAxis
+          plotValues={plotValues}
+          agentMarks={agentMarks}
+          header={header}
+        />
+        <VerticalLines plotValues={plotValues} agentMarks={agentMarks} />
       </div>
     );
   }
 }
 
 Timeline.propTypes = {
+  agentMarks: PropTypes.array,
   duration: PropTypes.number.isRequired,
   height: PropTypes.number.isRequired,
   header: PropTypes.node,

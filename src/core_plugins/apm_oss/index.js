@@ -17,6 +17,24 @@
  * under the License.
  */
 
-export * from './visualization';
-export * from './visualization_chart';
-export * from './visualization_noresults';
+export default function apmOss(kibana) {
+  return new kibana.Plugin({
+    id: 'apm_oss',
+
+    config(Joi) {
+      return Joi.object({
+        // enable plugin
+        enabled: Joi.boolean().default(true),
+
+        // Kibana Index pattern
+        indexPattern: Joi.string().default('apm-*'),
+
+        // ES Indices
+        errorIndices: Joi.string().default('apm-*-error-*'),
+        onboardingIndices: Joi.string().default('apm-*-onboarding-*'),
+        spanIndices: Joi.string().default('apm-*-span-*'),
+        transactionIndices: Joi.string().default('apm-*-transaction-*'),
+      }).default();
+    },
+  });
+}

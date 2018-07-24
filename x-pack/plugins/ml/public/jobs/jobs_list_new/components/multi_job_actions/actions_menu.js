@@ -58,7 +58,7 @@ export class MultiJobActionsMenu extends Component {
         size="s"
         onClick={this.onButtonClick}
         iconType="gear"
-        aria-label="Next"
+        aria-label="Management actions"
         color="text"
         disabled={(this.canDeleteJob === false && this.canStartStopDatafeed === false)}
       />

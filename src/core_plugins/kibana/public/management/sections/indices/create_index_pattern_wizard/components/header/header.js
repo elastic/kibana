@@ -65,6 +65,7 @@ export const Header = ({
             id="kbn.management.createIndexPattern.includeSystemIndicesToggleSwitch"
             defaultMessage="Include system indices"
           />}
+          id="checkboxShowSystemIndices"
           checked={isIncludingSystemIndices}
           onChange={onChangeIncludingSystemIndices}
         />
