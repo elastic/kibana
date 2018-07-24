@@ -22,6 +22,7 @@ import {
   ScopedSavedObjectsClientProvider,
   SavedObjectsRepositoryProvider,
 } from './lib';
+import { getRootPropertiesObjects } from '../../mappings';
 import { SavedObjectsClient } from './saved_objects_client';
 
 export function createSavedObjectsService(server, migrator) {
@@ -61,17 +62,21 @@ export function createSavedObjectsService(server, migrator) {
     }
   };
 
+  const mappings = server.getKibanaIndexMappingsDsl();
   const repositoryProvider = new SavedObjectsRepositoryProvider({
     index: server.config().get('kibana.index'),
-    mappings: server.getKibanaIndexMappingsDsl(),
     migrator,
+    mappings,
     onBeforeWrite,
   });
 
   const scopedClientProvider = new ScopedSavedObjectsClientProvider({
     index: server.config().get('kibana.index'),
-    mappings: server.getKibanaIndexMappingsDsl(),
-    defaultClientFactory({ request }) {
+    mappings,
+    onBeforeWrite,
+    defaultClientFactory({
+      request,
+    }) {
       const { callWithRequest } = server.plugins.elasticsearch.getCluster('admin');
       const callCluster = (...args) => callWithRequest(request, ...args);
 
@@ -82,6 +87,7 @@ export function createSavedObjectsService(server, migrator) {
   });
 
   return {
+    types: Object.keys(getRootPropertiesObjects(mappings)),
     SavedObjectsClient,
     SavedObjectsRepository,
     getSavedObjectsRepository: (...args) => repositoryProvider.getRepository(...args),
