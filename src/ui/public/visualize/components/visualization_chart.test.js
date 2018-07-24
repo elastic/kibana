@@ -41,7 +41,7 @@ class VisualizationStub {
   }
 }
 
-describe('VisualizationChart', () => {
+describe('<VisualizationChart/>', () => {
   const vis = {
     type: {
       title: 'Test Visualization',
