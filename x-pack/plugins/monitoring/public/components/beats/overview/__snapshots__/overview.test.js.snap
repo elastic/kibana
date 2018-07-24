@@ -23,104 +23,122 @@ exports[`Overview that overview page renders normally 1`] = `
         component="div"
         grow={true}
       >
-        <EuiTitle
-          size="s"
+        <EuiPanel
+          grow={true}
+          hasShadow={false}
+          paddingSize="m"
         >
-          <h3>
-            Active Beats in Last Day
-          </h3>
-        </EuiTitle>
-        <EuiSpacer
-          size="s"
-        />
-        <LatestActive
-          latestActive={
-            Array [
-              Object {
-                "count": 5,
-                "range": "last1m",
-              },
-              Object {
-                "count": 5,
-                "range": "last5m",
-              },
-              Object {
-                "count": 5,
-                "range": "last20m",
-              },
-              Object {
-                "count": 6,
-                "range": "last1h",
-              },
-              Object {
-                "count": 10,
-                "range": "last1d",
-              },
-            ]
-          }
-        />
+          <EuiTitle
+            size="s"
+          >
+            <h3>
+              Active Beats in Last Day
+            </h3>
+          </EuiTitle>
+          <EuiSpacer
+            size="s"
+          />
+          <LatestActive
+            latestActive={
+              Array [
+                Object {
+                  "count": 5,
+                  "range": "last1m",
+                },
+                Object {
+                  "count": 5,
+                  "range": "last5m",
+                },
+                Object {
+                  "count": 5,
+                  "range": "last20m",
+                },
+                Object {
+                  "count": 6,
+                  "range": "last1h",
+                },
+                Object {
+                  "count": 10,
+                  "range": "last1d",
+                },
+              ]
+            }
+          />
+        </EuiPanel>
       </EuiFlexItem>
       <EuiFlexItem
         component="div"
         grow={true}
       >
-        <EuiTitle
-          size="s"
+        <EuiPanel
+          grow={true}
+          hasShadow={false}
+          paddingSize="m"
         >
-          <h3>
-            Top 5 Beat Types in Last Day
-          </h3>
-        </EuiTitle>
-        <EuiSpacer
-          size="s"
-        />
-        <LatestTypes
-          latestTypes={
-            Array [
-              Object {
-                "count": 4,
-                "type": "Packetbeat",
-              },
-              Object {
-                "count": 4,
-                "type": "Metricbeat",
-              },
-              Object {
-                "count": 2,
-                "type": "Heartbeat",
-              },
-            ]
-          }
-        />
+          <EuiTitle
+            size="s"
+          >
+            <h3>
+              Top 5 Beat Types in Last Day
+            </h3>
+          </EuiTitle>
+          <EuiSpacer
+            size="s"
+          />
+          <LatestTypes
+            latestTypes={
+              Array [
+                Object {
+                  "count": 4,
+                  "type": "Packetbeat",
+                },
+                Object {
+                  "count": 4,
+                  "type": "Metricbeat",
+                },
+                Object {
+                  "count": 2,
+                  "type": "Heartbeat",
+                },
+              ]
+            }
+          />
+        </EuiPanel>
       </EuiFlexItem>
       <EuiFlexItem
         component="div"
         grow={true}
       >
-        <EuiTitle
-          size="s"
+        <EuiPanel
+          grow={true}
+          hasShadow={false}
+          paddingSize="m"
         >
-          <h3>
-            Top 5 Versions in Last Day
-          </h3>
-        </EuiTitle>
-        <EuiSpacer
-          size="s"
-        />
-        <LatestVersions
-          latestVersions={
-            Array [
-              Object {
-                "count": 8,
-                "version": "6.3.1",
-              },
-              Object {
-                "count": 2,
-                "version": "6.3.0",
-              },
-            ]
-          }
-        />
+          <EuiTitle
+            size="s"
+          >
+            <h3>
+              Top 5 Versions in Last Day
+            </h3>
+          </EuiTitle>
+          <EuiSpacer
+            size="s"
+          />
+          <LatestVersions
+            latestVersions={
+              Array [
+                Object {
+                  "count": 8,
+                  "version": "6.3.1",
+                },
+                Object {
+                  "count": 2,
+                  "version": "6.3.0",
+                },
+              ]
+            }
+          />
+        </EuiPanel>
       </EuiFlexItem>
     </EuiFlexGroup>
     <EuiSpacer
@@ -130,7 +148,7 @@ exports[`Overview that overview page renders normally 1`] = `
       stats={Array []}
     />
     <EuiSpacer
-      size="xs"
+      size="s"
     />
     <EuiFlexGroup
       alignItems="stretch"
@@ -151,9 +169,15 @@ exports[`Overview that overview page renders normally 1`] = `
           }
         }
       >
-        <MonitoringTimeseriesContainer
-          series={1}
-        />
+        <EuiPanel
+          grow={true}
+          hasShadow={false}
+          paddingSize="m"
+        >
+          <MonitoringTimeseriesContainer
+            series={1}
+          />
+        </EuiPanel>
       </EuiFlexItem>
       <EuiFlexItem
         component="div"
@@ -165,9 +189,15 @@ exports[`Overview that overview page renders normally 1`] = `
           }
         }
       >
-        <MonitoringTimeseriesContainer
-          series={1}
-        />
+        <EuiPanel
+          grow={true}
+          hasShadow={false}
+          paddingSize="m"
+        >
+          <MonitoringTimeseriesContainer
+            series={1}
+          />
+        </EuiPanel>
       </EuiFlexItem>
       <EuiFlexItem
         component="div"
@@ -179,9 +209,15 @@ exports[`Overview that overview page renders normally 1`] = `
           }
         }
       >
-        <MonitoringTimeseriesContainer
-          series={1}
-        />
+        <EuiPanel
+          grow={true}
+          hasShadow={false}
+          paddingSize="m"
+        >
+          <MonitoringTimeseriesContainer
+            series={1}
+          />
+        </EuiPanel>
       </EuiFlexItem>
       <EuiFlexItem
         component="div"
@@ -193,9 +229,15 @@ exports[`Overview that overview page renders normally 1`] = `
           }
         }
       >
-        <MonitoringTimeseriesContainer
-          series={1}
-        />
+        <EuiPanel
+          grow={true}
+          hasShadow={false}
+          paddingSize="m"
+        >
+          <MonitoringTimeseriesContainer
+            series={1}
+          />
+        </EuiPanel>
       </EuiFlexItem>
     </EuiFlexGroup>
   </EuiPageBody>
@@ -227,7 +269,7 @@ up, but you don't seem to have any activity within the last day."
       stats={Array []}
     />
     <EuiSpacer
-      size="xs"
+      size="s"
     />
     <EuiFlexGroup
       alignItems="stretch"
@@ -248,9 +290,15 @@ up, but you don't seem to have any activity within the last day."
           }
         }
       >
-        <MonitoringTimeseriesContainer
-          series={1}
-        />
+        <EuiPanel
+          grow={true}
+          hasShadow={false}
+          paddingSize="m"
+        >
+          <MonitoringTimeseriesContainer
+            series={1}
+          />
+        </EuiPanel>
       </EuiFlexItem>
       <EuiFlexItem
         component="div"
@@ -262,9 +310,15 @@ up, but you don't seem to have any activity within the last day."
           }
         }
       >
-        <MonitoringTimeseriesContainer
-          series={1}
-        />
+        <EuiPanel
+          grow={true}
+          hasShadow={false}
+          paddingSize="m"
+        >
+          <MonitoringTimeseriesContainer
+            series={1}
+          />
+        </EuiPanel>
       </EuiFlexItem>
       <EuiFlexItem
         component="div"
@@ -276,9 +330,15 @@ up, but you don't seem to have any activity within the last day."
           }
         }
       >
-        <MonitoringTimeseriesContainer
-          series={1}
-        />
+        <EuiPanel
+          grow={true}
+          hasShadow={false}
+          paddingSize="m"
+        >
+          <MonitoringTimeseriesContainer
+            series={1}
+          />
+        </EuiPanel>
       </EuiFlexItem>
       <EuiFlexItem
         component="div"
@@ -290,9 +350,15 @@ up, but you don't seem to have any activity within the last day."
           }
         }
       >
-        <MonitoringTimeseriesContainer
-          series={1}
-        />
+        <EuiPanel
+          grow={true}
+          hasShadow={false}
+          paddingSize="m"
+        >
+          <MonitoringTimeseriesContainer
+            series={1}
+          />
+        </EuiPanel>
       </EuiFlexItem>
     </EuiFlexGroup>
   </EuiPageBody>

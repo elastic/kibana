@@ -18,6 +18,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiPageBody,
+  EuiPanel
 } from '@elastic/eui';
 
 function renderLatestActive(latestActive, latestTypes, latestVersions) {
@@ -25,19 +26,25 @@ function renderLatestActive(latestActive, latestTypes, latestVersions) {
     return (
       <EuiFlexGroup wrap>
         <EuiFlexItem>
-          <EuiTitle size="s"><h3>Active Beats in Last Day</h3></EuiTitle>
-          <EuiSpacer size="s"/>
-          <LatestActive latestActive={latestActive} />
+          <EuiPanel>
+            <EuiTitle size="s"><h3>Active Beats in Last Day</h3></EuiTitle>
+            <EuiSpacer size="s"/>
+            <LatestActive latestActive={latestActive} />
+          </EuiPanel>
         </EuiFlexItem>
         <EuiFlexItem>
-          <EuiTitle size="s"><h3>Top 5 Beat Types in Last Day</h3></EuiTitle>
-          <EuiSpacer size="s"/>
-          <LatestTypes latestTypes={latestTypes} />
+          <EuiPanel>
+            <EuiTitle size="s"><h3>Top 5 Beat Types in Last Day</h3></EuiTitle>
+            <EuiSpacer size="s"/>
+            <LatestTypes latestTypes={latestTypes} />
+          </EuiPanel>
         </EuiFlexItem>
         <EuiFlexItem>
-          <EuiTitle size="s"><h3>Top 5 Versions in Last Day</h3></EuiTitle>
-          <EuiSpacer size="s"/>
-          <LatestVersions latestVersions={latestVersions} />
+          <EuiPanel>
+            <EuiTitle size="s"><h3>Top 5 Versions in Last Day</h3></EuiTitle>
+            <EuiSpacer size="s"/>
+            <LatestVersions latestVersions={latestVersions} />
+          </EuiPanel>
         </EuiFlexItem>
       </EuiFlexGroup>
     );
@@ -72,10 +79,12 @@ export function BeatsOverview({
 
   const charts = seriesToShow.map((data, index) => (
     <EuiFlexItem style={{ minWidth: '45%' }} key={index}>
-      <MonitoringTimeseriesContainer
-        series={data}
-        {...props}
-      />
+      <EuiPanel>
+        <MonitoringTimeseriesContainer
+          series={data}
+          {...props}
+        />
+      </EuiPanel>
     </EuiFlexItem>
   ));
 
@@ -83,13 +92,9 @@ export function BeatsOverview({
     <EuiPage style={{ backgroundColor: 'white' }}>
       <EuiPageBody>
         {renderLatestActive(latestActive, latestTypes, latestVersions)}
-
         <EuiSpacer size="s"/>
-
         <Stats stats={stats} />
-
-        <EuiSpacer size="xs"/>
-
+        <EuiSpacer size="s"/>
         <EuiFlexGroup wrap>
           {charts}
         </EuiFlexGroup>
