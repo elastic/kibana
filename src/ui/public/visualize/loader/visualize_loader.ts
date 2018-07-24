@@ -24,7 +24,6 @@
  */
 
 import chrome from '../../chrome';
-// @ts-ignore implicit-any
 import { FilterBarQueryFilterProvider } from '../../filter_bar/query_filter';
 import { IPrivate } from '../../private';
 import { EmbeddedVisualizeHandler } from './embedded_visualize_handler';

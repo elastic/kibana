@@ -35,7 +35,7 @@ export interface RequestHandlerParams {
   uiState: PersistedState;
 }
 
-export type RequestHandler = (vis: Vis, params: RequestHandlerParams) => any;
+export type RequestHandler = <T>(vis: Vis, params: RequestHandlerParams) => T;
 
 export interface RequestHandlerDescription {
   name: string;

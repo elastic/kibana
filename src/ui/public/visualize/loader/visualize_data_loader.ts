@@ -18,9 +18,7 @@
  */
 import { isEqual } from 'lodash';
 
-// @ts-ignore
 import { VisRequestHandlersRegistryProvider as RequestHandlersProvider } from '../../registry/vis_request_handlers';
-// @ts-ignore
 import { VisResponseHandlersRegistryProvider as ResponseHandlerProvider } from '../../registry/vis_response_handlers';
 
 import { IPrivate } from '../../private';

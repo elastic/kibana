@@ -18,3 +18,5 @@
  */
 
 export type QueryFilter = any;
+
+export const FilterBarQueryFilterProvider: () => QueryFilter;
