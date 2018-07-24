@@ -20,6 +20,7 @@
 import './add_data.less';
 import React from 'react';
 import PropTypes from 'prop-types';
+import classNames from 'classnames';
 
 import {
   EuiButton,
@@ -35,7 +36,7 @@ import {
   EuiHorizontalRule,
 } from '@elastic/eui';
 
-export function AddData({ apmUiEnabled }) {
+export function AddData({ apmUiEnabled, isNewKibanaInstance }) {
 
   const renderCards = () => {
     const getApmCard = () =>  (
@@ -116,6 +117,8 @@ export function AddData({ apmUiEnabled }) {
     );
   };
 
+  const footerItemClasses = classNames('addDataFooterItem', { 'addDataFooterItem_highlight': isNewKibanaInstance });
+
   return (
     <EuiPanel paddingSize="l">
       <EuiFlexGroup>
@@ -138,23 +141,23 @@ export function AddData({ apmUiEnabled }) {
       <EuiHorizontalRule />
 
       <EuiFlexGroup justifyContent="spaceAround">
-        <EuiFlexItem grow={false}>
+        <EuiFlexItem className={footerItemClasses}>
           <EuiText>
             <strong style={{ height: 38 }}>
-              Need data?
+              Sample Data
             </strong>
             <EuiLink
               style={{ marginLeft: 8 }}
               href="#/home/tutorial_directory/sampleData"
             >
-              Load sample data, visualizations, and dashboards
+              Load a data set and a Kibana dashboard
             </EuiLink>
           </EuiText>
         </EuiFlexItem>
-        <EuiFlexItem grow={false}>
+        <EuiFlexItem className={footerItemClasses}>
           <EuiText>
             <strong style={{ height: 38 }}>
-              Have data?
+              Your Data
             </strong>
             <EuiLink
               style={{ marginLeft: 8 }}
@@ -174,4 +177,5 @@ export function AddData({ apmUiEnabled }) {
 
 AddData.propTypes = {
   apmUiEnabled: PropTypes.bool.isRequired,
+  isNewKibanaInstance: PropTypes.bool.isRequired,
 };
