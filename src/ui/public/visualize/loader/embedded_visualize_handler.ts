@@ -230,35 +230,35 @@ export class EmbeddedVisualizeHandler {
    *    (i.e. ignore caching in case it supports it). If at least one call to this
    *    passed `true` the debounced fetch and render will be a force fetch.
    */
-  private fetchAndRender(forceFetch = false): void {
+  private fetchAndRender = (forceFetch = false): void => {
     this.shouldForceNextFetch = forceFetch || this.shouldForceNextFetch;
     this.debouncedFetchAndRender();
-  }
+  };
 
-  private handleVisUpdate() {
+  private handleVisUpdate = () => {
     if (this.appState) {
       this.appState.vis = this.vis.getState();
       this.appState.save();
     }
 
     this.fetchAndRender();
-  }
+  };
 
   /**
    * Force the fetch of new data and renders the chart again.
    */
-  private reload() {
+  private reload = () => {
     this.fetchAndRender(true);
-  }
+  };
 
-  private fetch(forceFetch: boolean = false) {
+  private fetch = (forceFetch: boolean = false) => {
     this.dataLoaderParams.aggs = this.vis.getAggConfig();
     this.dataLoaderParams.forceFetch = forceFetch;
 
     return this.dataLoader.fetch(this.dataLoaderParams);
-  }
+  };
 
-  private render(visData: any = null) {
+  private render = (visData: any = null) => {
     return visualizationLoader
       .render(this.element, this.vis, visData, this.uiState, {
         listenOnChange: false,
@@ -269,5 +269,5 @@ export class EmbeddedVisualizeHandler {
           this.fetchAndRender();
         }
       });
-  }
+  };
 }
