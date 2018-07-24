@@ -26,6 +26,7 @@ import {
 import { JobDetails, Detectors, Datafeed, CustomUrls } from './tabs';
 import { saveJob } from './edit_utils';
 import { loadFullJob } from '../utils';
+import { validateModelMemoryLimit, validateGroupNames } from './validate_job';
 import { toastNotifications } from 'ui/notify';
 
 export class EditJobFlyout extends Component {
@@ -35,7 +36,7 @@ export class EditJobFlyout extends Component {
     this.state = {
       job: {},
       hasDatafeed: false,
-      isModalVisible: false,
+      isFlyoutVisible: false,
       jobDescription: '',
       jobGroups: [],
       jobModelMemoryLimit: '',
@@ -46,6 +47,9 @@ export class EditJobFlyout extends Component {
       datafeedQueryDelay: '',
       datafeedFrequency: '',
       datafeedScrollSize: '',
+      jobModelMemoryLimitValidationError: '',
+      jobGroupsValidationError: '',
+      valid: true,
     };
 
     this.refreshJobs = this.props.refreshJobs;
@@ -64,7 +68,7 @@ export class EditJobFlyout extends Component {
   }
 
   closeFlyout = () => {
-    this.setState({ isModalVisible: false });
+    this.setState({ isFlyoutVisible: false });
   }
 
   showFlyout = (jobLite) => {
@@ -74,7 +78,7 @@ export class EditJobFlyout extends Component {
         this.extractJob(job, hasDatafeed);
         this.setState({
           job,
-          isModalVisible: true,
+          isFlyoutVisible: true,
         });
       })
       .catch((error) => {
@@ -111,12 +115,29 @@ export class EditJobFlyout extends Component {
       datafeedQueryDelay: (hasDatafeed) ? datafeedConfig.query_delay : '',
       datafeedFrequency: (hasDatafeed) ? frequency : '',
       datafeedScrollSize: (hasDatafeed) ? +datafeedConfig.scroll_size : '',
+      jobModelMemoryLimitValidationError: '',
+      jobGroupsValidationError: '',
     });
   }
 
   setJobDetails = (jobDetails) => {
+    let { jobModelMemoryLimitValidationError, jobGroupsValidationError } = this.state;
+
+    if (jobDetails.jobModelMemoryLimit !== undefined) {
+      jobModelMemoryLimitValidationError = validateModelMemoryLimit(jobDetails.jobModelMemoryLimit).message;
+    }
+
+    if (jobDetails.jobGroups !== undefined) {
+      jobGroupsValidationError = validateGroupNames(jobDetails.jobGroups).message;
+    }
+
+    const valid = (jobModelMemoryLimitValidationError === '' && jobGroupsValidationError === '');
+
     this.setState({
-      ...jobDetails
+      ...jobDetails,
+      jobModelMemoryLimitValidationError,
+      jobGroupsValidationError,
+      valid,
     });
   }
 
@@ -133,11 +154,8 @@ export class EditJobFlyout extends Component {
   }
 
   setCustomUrls = (jobCustomUrls) => {
-    this.setState({
-      ...jobCustomUrls
-    });
+    this.setState({ jobCustomUrls });
   }
-
 
   save = () => {
     const newJobData = {
@@ -149,6 +167,7 @@ export class EditJobFlyout extends Component {
       datafeedQueryDelay: this.state.datafeedQueryDelay,
       datafeedFrequency: this.state.datafeedFrequency,
       datafeedScrollSize: this.state.datafeedScrollSize,
+      customUrls: this.state.jobCustomUrls,
     };
 
     saveJob(this.state.job, newJobData)
@@ -166,7 +185,7 @@ export class EditJobFlyout extends Component {
   render() {
     let flyout;
 
-    if (this.state.isModalVisible) {
+    if (this.state.isFlyoutVisible) {
       const {
         job,
         jobDescription,
@@ -180,6 +199,9 @@ export class EditJobFlyout extends Component {
         datafeedQueryDelay,
         datafeedFrequency,
         datafeedScrollSize,
+        jobGroupsValidationError,
+        jobModelMemoryLimitValidationError,
+        valid,
       } = this.state;
 
       const tabs = [{
@@ -190,6 +212,8 @@ export class EditJobFlyout extends Component {
           jobGroups={jobGroups}
           jobModelMemoryLimit={jobModelMemoryLimit}
           setJobDetails={this.setJobDetails}
+          jobGroupsValidationError={jobGroupsValidationError}
+          jobModelMemoryLimitValidationError={jobModelMemoryLimitValidationError}
         />,
       }, {
         id: 'detectors',
@@ -258,6 +282,7 @@ export class EditJobFlyout extends Component {
                 <EuiButton
                   onClick={this.save}
                   fill
+                  isDisabled={(valid === false)}
                 >
                   Save
                 </EuiButton>

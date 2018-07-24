@@ -19,8 +19,7 @@
 
 import expect from 'expect.js';
 
-export default function ({ getPageObjects, getService }) {
-  const retry = getService('retry');
+export default function ({ getPageObjects }) {
   const PageObjects = getPageObjects(['common', 'discover', 'visualize', 'header']);
 
   // Blocked by: https://github.com/elastic/kibana/issues/19750
@@ -38,11 +37,7 @@ export default function ({ getPageObjects, getService }) {
       });
 
       it('should create a visualization from a saved search', async () => {
-        retry.try(async () => {
-          // Sometimes navigation to the page fails, so we have this in a retry
-          await PageObjects.common.navigateToUrl('visualize', 'new');
-          await PageObjects.visualize.waitForVisualizationSelectPage();
-        });
+        await PageObjects.visualize.navigateToNewVisualization();
         await PageObjects.visualize.clickDataTable();
         await PageObjects.visualize.clickSavedSearch(savedSearchName);
         await PageObjects.header.setAbsoluteRange(fromTime, toTime);

@@ -19,6 +19,9 @@ import {
   EuiModalHeader,
   EuiModalHeaderTitle,
   EuiOverlayMask,
+  EuiHorizontalRule,
+  EuiCheckbox,
+
 } from '@elastic/eui';
 
 import moment from 'moment';
@@ -36,19 +39,19 @@ export class StartDatafeedModal extends Component {
       isModalVisible: false,
       startTime: moment(),
       endTime: moment(),
+      createWatch: false,
+      allowCreateWatch: false,
       initialSpecifiedStartTime: moment()
     };
 
     this.initialSpecifiedStartTime = moment();
     this.refreshJobs = this.props.refreshJobs;
+    this.getShowCreateWatchFlyoutFunction = this.props.getShowCreateWatchFlyoutFunction;
   }
 
   componentDidMount() {
     if (typeof this.props.setShowFunction === 'function') {
       this.props.setShowFunction(this.showModal);
-    }
-    if (typeof this.props.saveFunction === 'function') {
-      this.externalSave = this.props.saveFunction;
     }
   }
 
@@ -66,31 +69,53 @@ export class StartDatafeedModal extends Component {
     this.setState({ endTime: time });
   }
 
+  setCreateWatch = (e) => {
+    this.setState({ createWatch: e.target.checked });
+  }
+
   closeModal = () => {
     this.setState({ isModalVisible: false });
   }
 
-  showModal = (jobs) => {
+  showModal = (jobs, showCreateWatchFlyout) => {
     const startTime = undefined;
     const endTime = moment();
     const initialSpecifiedStartTime = getLowestLatestTime(jobs);
+    const allowCreateWatch = (jobs.length === 1);
     this.setState({
       jobs,
       isModalVisible: true,
       startTime,
       endTime,
-      initialSpecifiedStartTime
+      initialSpecifiedStartTime,
+      showCreateWatchFlyout,
+      allowCreateWatch,
+      createWatch: false,
     });
   }
 
   save = () => {
+    const { jobs } = this.state;
     const start = moment.isMoment(this.state.startTime) ? this.state.startTime.valueOf() : this.state.startTime;
     const end = moment.isMoment(this.state.endTime) ? this.state.endTime.valueOf() : this.state.endTime;
-    forceStartDatafeeds(this.state.jobs, start, end, this.refreshJobs);
+    forceStartDatafeeds(jobs, start, end, () => {
+      if (this.state.createWatch && jobs.length === 1) {
+        const jobId = jobs[0].id;
+        this.getShowCreateWatchFlyoutFunction()(jobId);
+      }
+      this.refreshJobs();
+    });
     this.closeModal();
   }
 
   render() {
+    const {
+      jobs,
+      initialSpecifiedStartTime,
+      endTime,
+      createWatch
+    } = this.state;
+    const startableJobs = (jobs !== undefined) ? jobs.filter(j => j.hasDatafeed) : [];
     let modal;
 
     if (this.state.isModalVisible) {
@@ -102,17 +127,29 @@ export class StartDatafeedModal extends Component {
           >
             <EuiModalHeader>
               <EuiModalHeaderTitle>
-                Start {(this.state.jobs.length > 1) ? `${this.state.jobs.length} jobs` : this.state.jobs[0].id}
+                Start {(startableJobs.length > 1) ? `${startableJobs.length} jobs` : startableJobs[0].id}
               </EuiModalHeaderTitle>
             </EuiModalHeader>
 
             <EuiModalBody>
               <TimeRangeSelector
-                startTime={this.state.initialSpecifiedStartTime}
-                endTime={this.state.endTime}
+                startTime={initialSpecifiedStartTime}
+                endTime={endTime}
                 setStartTime={this.setStartTime}
                 setEndTime={this.setEndTime}
               />
+              {
+                this.state.endTime === undefined &&
+                <div className="create-watch">
+                  <EuiHorizontalRule />
+                  <EuiCheckbox
+                    id="createWatch"
+                    label="Create watch after datafeed has started"
+                    checked={createWatch}
+                    onChange={this.setCreateWatch}
+                  />
+                </div>
+              }
             </EuiModalBody>
 
             <EuiModalFooter>

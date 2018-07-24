@@ -16,6 +16,7 @@ import { JobFilterBar } from '../job_filter_bar';
 import { EditJobFlyout } from '../edit_job_flyout';
 import { DeleteJobModal } from '../delete_job_modal';
 import { StartDatafeedModal } from '../start_datafeed_modal';
+import { CreateWatchFlyout } from '../create_watch_flyout';
 import { MultiJobActions } from '../multi_job_actions';
 
 import PropTypes from 'prop-types';
@@ -25,6 +26,7 @@ import React, {
 
 const DEFAULT_REFRESH_INTERVAL_MS = 30000;
 const MINIMUM_REFRESH_INTERVAL_MS = 5000;
+let jobsRefreshInterval =  null;
 
 export class JobsListView extends Component {
   constructor(props) {
@@ -44,9 +46,9 @@ export class JobsListView extends Component {
     this.showEditJobFlyout = () => {};
     this.showDeleteJobModal = () => {};
     this.showStartDatafeedModal = () => {};
+    this.showCreateWatchFlyout = () => {};
 
     this.blockRefresh = false;
-    this.refreshInterval = null;
   }
 
   componentDidMount() {
@@ -58,6 +60,7 @@ export class JobsListView extends Component {
   }
 
   componentWillUnmount() {
+    timefilter.off('refreshIntervalUpdate');
     this.clearRefreshInterval();
   }
 
@@ -95,13 +98,13 @@ export class JobsListView extends Component {
     this.clearRefreshInterval();
     if (interval >= MINIMUM_REFRESH_INTERVAL_MS) {
       this.blockRefresh = false;
-      this.refreshInterval = setInterval(() => (this.refreshJobSummaryList()), interval);
+      jobsRefreshInterval = setInterval(() => (this.refreshJobSummaryList()), interval);
     }
   }
 
   clearRefreshInterval() {
     this.blockRefresh = true;
-    clearInterval(this.refreshInterval);
+    clearInterval(jobsRefreshInterval);
   }
 
   toggleRow = (jobId) => {
@@ -119,6 +122,7 @@ export class JobsListView extends Component {
             jobId={jobId}
             job={this.state.fullJobsList[jobId]}
             addYourself={this.addUpdateFunction}
+            removeYourself={this.removeUpdateFunction}
           />
         );
       } else {
@@ -126,6 +130,7 @@ export class JobsListView extends Component {
           <JobDetails
             jobId={jobId}
             addYourself={this.addUpdateFunction}
+            removeYourself={this.removeUpdateFunction}
           />
         );
       }
@@ -187,6 +192,17 @@ export class JobsListView extends Component {
   unsetShowStartDatafeedModalFunction = () => {
     this.showStartDatafeedModal = () => {};
   }
+
+  setShowCreateWatchFlyoutFunction = (func) => {
+    this.showCreateWatchFlyout = func;
+  }
+  unsetShowCreateWatchFlyoutFunction = () => {
+    this.showCreateWatchFlyout = () => {};
+  }
+  getShowCreateWatchFlyoutFunction = () => {
+    return this.showCreateWatchFlyout;
+  }
+
 
   selectJobChange = (selectedJobs) => {
     this.setState({ selectedJobs });
@@ -278,7 +294,13 @@ export class JobsListView extends Component {
         <StartDatafeedModal
           setShowFunction={this.setShowStartDatafeedModalFunction}
           unsetShowFunction={this.unsetShowDeleteJobModalFunction}
+          getShowCreateWatchFlyoutFunction={this.getShowCreateWatchFlyoutFunction}
           refreshJobs={() => this.refreshJobSummaryList(true)}
+        />
+        <CreateWatchFlyout
+          setShowFunction={this.setShowCreateWatchFlyoutFunction}
+          unsetShowFunction={this.unsetShowCreateWatchFlyoutFunction}
+          compile={this.props.compile}
         />
       </div>
     );

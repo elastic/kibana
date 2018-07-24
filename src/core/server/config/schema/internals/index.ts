@@ -22,6 +22,7 @@ import {
   JoiRoot,
   Reference,
   Rules,
+  SchemaLike,
   State,
   ValidationErrorItem,
   ValidationOptions,
@@ -31,7 +32,7 @@ import { isDuration } from 'moment';
 import { ByteSizeValue, ensureByteSizeValue } from '../byte_size_value';
 import { ensureDuration } from '../duration';
 
-export { AnySchema, Reference, ValidationErrorItem };
+export { AnySchema, Reference, SchemaLike, ValidationErrorItem };
 
 function isMap<K, V>(o: any): o is Map<K, V> {
   return o instanceof Map;

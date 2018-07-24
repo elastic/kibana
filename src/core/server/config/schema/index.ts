@@ -29,6 +29,7 @@ import {
   ByteSizeOptions,
   ByteSizeType,
   ConditionalType,
+  ConditionalTypeValue,
   DurationOptions,
   DurationType,
   LiteralType,
@@ -146,7 +147,7 @@ function siblingRef<T>(key: string): SiblingReference<T> {
   return new SiblingReference(key);
 }
 
-function conditional<A, B, C>(
+function conditional<A extends ConditionalTypeValue, B, C>(
   leftOperand: Reference<A>,
   rightOperand: Reference<A> | A,
   equalType: Type<B>,

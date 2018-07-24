@@ -10,8 +10,10 @@ import { mlNodesAvailable } from 'plugins/ml/ml_nodes_check/check_ml_nodes';
 import {
   stopDatafeeds,
   cloneJob,
+  closeJobs,
   isStartable,
   isStoppable,
+  isClosable,
 } from '../utils';
 
 export function actionsMenuContent(showEditJobFlyout, showDeleteJobModal, showStartDatafeedModal, refreshJobs) {
@@ -20,6 +22,7 @@ export function actionsMenuContent(showEditJobFlyout, showDeleteJobModal, showSt
   const canDeleteJob = checkPermission('canDeleteJob');
   const canUpdateDatafeed = checkPermission('canUpdateDatafeed');
   const canStartStopDatafeed = (checkPermission('canStartStopDatafeed') && mlNodesAvailable());
+  const canCloseJob = (checkPermission('canCloseJob') && mlNodesAvailable());
 
   return [
     {
@@ -43,6 +46,16 @@ export function actionsMenuContent(showEditJobFlyout, showDeleteJobModal, showSt
         closeMenu(true);
       }
     }, {
+      name: 'Close job',
+      description: 'Close job',
+      icon: 'cross',
+      enabled: () => (canCloseJob),
+      available: (item) => (isClosable([item])),
+      onClick: (item) => {
+        closeJobs([item], refreshJobs);
+        closeMenu(true);
+      }
+    }, {
       name: 'Clone job',
       description: 'Clone job',
       icon: 'copy',
@@ -53,7 +66,7 @@ export function actionsMenuContent(showEditJobFlyout, showDeleteJobModal, showSt
     }, {
       name: 'Edit job',
       description: 'Edit job',
-      icon: 'copy',
+      icon: 'pencil',
       enabled: () => (canUpdateJob && canUpdateDatafeed),
       onClick: (item) => {
         showEditJobFlyout(item);

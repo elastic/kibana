@@ -49,6 +49,7 @@ function getRoute() {
         const getter = indexPatterns.getIds;
         getter.clearCache();
       };
+      $scope.bulkCreate = chrome.getSavedObjectsClient().bulkCreate;
     }
   };
 }

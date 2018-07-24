@@ -27,6 +27,7 @@ exports[`LoadingIndices should render normally 1`] = `
     >
       <EuiTextColor
         color="subdued"
+        component="span"
       >
         Looking for matching indices...
       </EuiTextColor>
@@ -42,6 +43,7 @@ exports[`LoadingIndices should render normally 1`] = `
     >
       <EuiTextColor
         color="subdued"
+        component="span"
       >
         Just a sec...
       </EuiTextColor>
