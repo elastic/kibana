@@ -434,7 +434,16 @@ dashboard-viewport-provider {
   }
 }
 
-.dashboardLandingPage {
+// Mimics EuiPageBackground
+dashboard-listing {
+  background-color: @globalColorLightestGray;
   min-height: 100vh;
+}
+
+.dashboardLandingPage {
   background: @globalColorLightestGray;
+}
+
+.dashboardLandingPageContent {
+  max-width: 1000px !important; // Temp fix till EUI@3.0.2 is merged
 }

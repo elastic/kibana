@@ -19,7 +19,6 @@ describe('check_license', function () {
       feature: sinon.stub(),
       license: sinon.stub({
         isOneOf() {},
-        isActive() {}
       })
     };
 
@@ -37,7 +36,8 @@ describe('check_license', function () {
       showLinks: false,
       allowRoleDocumentLevelSecurity: false,
       allowRoleFieldLevelSecurity: false,
-      layout: 'error-es-unavailable'
+      layout: 'error-es-unavailable',
+      allowRbac: false,
     });
   });
 
@@ -52,14 +52,14 @@ describe('check_license', function () {
       showLinks: false,
       allowRoleDocumentLevelSecurity: false,
       allowRoleFieldLevelSecurity: false,
-      layout: 'error-xpack-unavailable'
+      layout: 'error-xpack-unavailable',
+      allowRbac: false,
     });
   });
 
 
   it('should not show login page or other security elements if license is basic.', () => {
     mockXPackInfo.license.isOneOf.withArgs(['basic']).returns(true);
-    mockXPackInfo.license.isActive.returns(true);
     mockXPackInfo.feature.withArgs('security').returns({
       isEnabled: () => { return true; }
     });
@@ -71,13 +71,13 @@ describe('check_license', function () {
       showLinks: false,
       allowRoleDocumentLevelSecurity: false,
       allowRoleFieldLevelSecurity: false,
+      allowRbac: false,
       linksMessage: 'Your Basic license does not support Security. Please upgrade your license.'
     });
   });
 
   it('should not show login page or other security elements if security is disabled in Elasticsearch.', () => {
     mockXPackInfo.license.isOneOf.withArgs(['basic']).returns(false);
-    mockXPackInfo.license.isActive.returns(true);
     mockXPackInfo.feature.withArgs('security').returns({
       isEnabled: () => { return false; }
     });
@@ -89,93 +89,45 @@ describe('check_license', function () {
       showLinks: false,
       allowRoleDocumentLevelSecurity: false,
       allowRoleFieldLevelSecurity: false,
+      allowRbac: false,
       linksMessage: 'Access is denied because Security is disabled in Elasticsearch.'
     });
   });
 
-  it('should allow to login but forbid document level security if license is not platinum, trial or basic.', () => {
-    const isBasicOrTrialOrPlatinumMatcher = sinon.match(
-      (licenses) => licenses.includes('basic')
-        || licenses.includes('trial')
-        || licenses.includes('platinum')
-    );
+  it('should allow to login and allow RBAC but forbid document level security if license is not platinum or trial.', () => {
     mockXPackInfo.license.isOneOf
-      .returns(true)
-      .withArgs(isBasicOrTrialOrPlatinumMatcher).returns(false);
+      .returns(false)
+      .withArgs(['platinum', 'trial']).returns(false);
     mockXPackInfo.feature.withArgs('security').returns({
       isEnabled: () => { return true; }
     });
 
-    mockXPackInfo.license.isActive.returns(true);
     expect(checkLicense(mockXPackInfo)).to.be.eql({
       showLogin: true,
       allowLogin: true,
       showLinks: true,
       allowRoleDocumentLevelSecurity: false,
-      allowRoleFieldLevelSecurity: false
-    });
-
-    mockXPackInfo.license.isActive.returns(false);
-    expect(checkLicense(mockXPackInfo)).to.be.eql({
-      showLogin: true,
-      allowLogin: true,
-      showLinks: true,
-      allowRoleDocumentLevelSecurity: false,
-      allowRoleFieldLevelSecurity: false
+      allowRoleFieldLevelSecurity: false,
+      allowRbac: true,
     });
   });
 
-  it('should allow to login and document level security if license is platinum.', () => {
+  it('should allow to login, allow RBAC and document level security if license is platinum or trial.', () => {
     mockXPackInfo.license.isOneOf
       .returns(false)
-      .withArgs(sinon.match((licenses) => licenses.includes('platinum'))).returns(true);
+      .withArgs(['platinum', 'trial']).returns(true);
     mockXPackInfo.feature.withArgs('security').returns({
       isEnabled: () => { return true; }
     });
 
-    mockXPackInfo.license.isActive.returns(true);
     expect(checkLicense(mockXPackInfo)).to.be.eql({
       showLogin: true,
       allowLogin: true,
       showLinks: true,
       allowRoleDocumentLevelSecurity: true,
-      allowRoleFieldLevelSecurity: true
-    });
-
-    mockXPackInfo.license.isActive.returns(false);
-    expect(checkLicense(mockXPackInfo)).to.be.eql({
-      showLogin: true,
-      allowLogin: true,
-      showLinks: true,
-      allowRoleDocumentLevelSecurity: true,
-      allowRoleFieldLevelSecurity: true
+      allowRoleFieldLevelSecurity: true,
+      allowRbac: true,
     });
   });
 
-  it('should allow to login and document level security if license is trial.', () => {
-    mockXPackInfo.license.isOneOf
-      .returns(false)
-      .withArgs(sinon.match((licenses) => licenses.includes('trial'))).returns(true);
-    mockXPackInfo.feature.withArgs('security').returns({
-      isEnabled: () => { return true; }
-    });
-
-    mockXPackInfo.license.isActive.returns(true);
-    expect(checkLicense(mockXPackInfo)).to.be.eql({
-      showLogin: true,
-      allowLogin: true,
-      showLinks: true,
-      allowRoleDocumentLevelSecurity: true,
-      allowRoleFieldLevelSecurity: true
-    });
-
-    mockXPackInfo.license.isActive.returns(false);
-    expect(checkLicense(mockXPackInfo)).to.be.eql({
-      showLogin: true,
-      allowLogin: true,
-      showLinks: true,
-      allowRoleDocumentLevelSecurity: true,
-      allowRoleFieldLevelSecurity: true
-    });
-  });
 });
