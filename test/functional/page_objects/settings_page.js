@@ -92,8 +92,7 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
     }
 
     async toggleAdvancedSettingCheckbox(propertyName) {
-      const checkbox = await testSubjects.find(`advancedSetting-editField-${propertyName}`);
-      await checkbox.click();
+      testSubjects.click(`advancedSetting-editField-${propertyName}`);
       await PageObjects.header.waitUntilLoadingHasFinished();
       await testSubjects.click(`advancedSetting-saveEditField-${propertyName}`);
       await PageObjects.header.waitUntilLoadingHasFinished();
