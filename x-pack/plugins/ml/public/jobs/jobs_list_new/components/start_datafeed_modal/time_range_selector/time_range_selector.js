@@ -51,6 +51,9 @@ export class TimeRangeSelector extends Component {
       case 0:
         this.setEndTime(undefined);
         break;
+      case 1:
+        this.setEndTime(moment());
+        break;
       default:
         break;
     }

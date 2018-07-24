@@ -36,7 +36,7 @@ export class EditJobFlyout extends Component {
     this.state = {
       job: {},
       hasDatafeed: false,
-      isModalVisible: false,
+      isFlyoutVisible: false,
       jobDescription: '',
       jobGroups: [],
       jobModelMemoryLimit: '',
@@ -68,7 +68,7 @@ export class EditJobFlyout extends Component {
   }
 
   closeFlyout = () => {
-    this.setState({ isModalVisible: false });
+    this.setState({ isFlyoutVisible: false });
   }
 
   showFlyout = (jobLite) => {
@@ -78,7 +78,7 @@ export class EditJobFlyout extends Component {
         this.extractJob(job, hasDatafeed);
         this.setState({
           job,
-          isModalVisible: true,
+          isFlyoutVisible: true,
         });
       })
       .catch((error) => {
@@ -185,7 +185,7 @@ export class EditJobFlyout extends Component {
   render() {
     let flyout;
 
-    if (this.state.isModalVisible) {
+    if (this.state.isFlyoutVisible) {
       const {
         job,
         jobDescription,
