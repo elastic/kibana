@@ -27,10 +27,10 @@ import { getMlNodeCount, mlNodesAvailable, permissionToViewMlNodeCount } from 'p
 
 
 import template from './jobs_list.html';
-import deleteJobTemplate from 'plugins/ml/jobs/jobs_list/delete_job_modal/delete_job_modal.html';
-import editJobTemplate from 'plugins/ml/jobs/jobs_list/edit_job_modal/edit_job_modal.html';
-import createWatchTemplate from 'plugins/ml/jobs/jobs_list/create_watch_modal/create_watch_modal.html';
-import { buttonsEnabledChecks } from 'plugins/ml/jobs/jobs_list/buttons_enabled_checks';
+import deleteJobTemplate from 'plugins/ml/jobs/jobs_list_old/delete_job_modal/delete_job_modal.html';
+import editJobTemplate from 'plugins/ml/jobs/jobs_list_old/edit_job_modal/edit_job_modal.html';
+import createWatchTemplate from 'plugins/ml/jobs/jobs_list_old/create_watch_modal/create_watch_modal.html';
+import { buttonsEnabledChecks } from 'plugins/ml/jobs/jobs_list_old/buttons_enabled_checks';
 import { cloudServiceProvider } from 'plugins/ml/services/cloud_service';
 import { loadNewJobDefaults } from 'plugins/ml/jobs/new_job/utils/new_job_defaults';
 import { mlJobService } from 'plugins/ml/services/job_service';
