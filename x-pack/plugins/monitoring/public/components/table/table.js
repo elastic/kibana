@@ -433,7 +433,7 @@ export class MonitoringTable extends React.Component {
     }
 
     return (
-      <KuiControlledTable className={classes} data-test-subj={`${this.props.className}Container`}>
+      <KuiControlledTable className={classes} data-test-subj={`${this.props.className}Container`} style={{ margin: 10 }}>
         { this.getToolBar(numVisibleRows, numAvailableRows) }
         { table }
         { this.getFooter(numVisibleRows, numAvailableRows, this.props.alwaysShowPageControls) }
