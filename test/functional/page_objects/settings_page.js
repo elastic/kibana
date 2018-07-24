@@ -75,13 +75,9 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
     }
 
     async setAdvancedSettingsSelect(propertyName, propertyValue) {
-      let option;
-      await retry.try(async () => {
-        option = await remote.findByCssSelector(
-          `[data-test-subj="advancedSetting-editField-${propertyName}"] option[value="${propertyValue}"]`
-        );
-      });
-      await option.click();
+      await find.clickByCssSelector(
+        `[data-test-subj="advancedSetting-editField-${propertyName}"] option[value="${propertyValue}"]`
+      );
       await PageObjects.header.waitUntilLoadingHasFinished();
       await testSubjects.click(`advancedSetting-saveEditField-${propertyName}`);
       await PageObjects.header.waitUntilLoadingHasFinished();
