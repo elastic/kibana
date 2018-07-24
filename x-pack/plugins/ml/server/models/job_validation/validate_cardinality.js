@@ -49,11 +49,17 @@ const validateFactory = (callWithRequest, job) => {
           fields: uniqueFieldNames
         });
 
+        let aggregatableFieldNames = [];
         // parse fieldCaps to return an array of just the fields which are aggregatable
-        const aggregatableFieldNames = Object.keys(fieldCaps.fields).filter((field) => {
-          const fieldType = Object.keys(fieldCaps.fields[field])[0];
-          return fieldCaps.fields[field][fieldType].aggregatable;
-        });
+        if (typeof fieldCaps === 'object' && typeof fieldCaps.fields === 'object') {
+          aggregatableFieldNames = uniqueFieldNames.filter((field) => {
+            if (typeof fieldCaps.fields[field] !== 'undefined') {
+              const fieldType = Object.keys(fieldCaps.fields[field])[0];
+              return fieldCaps.fields[field][fieldType].aggregatable;
+            }
+            return false;
+          });
+        }
 
         const stats = await dv.checkAggregatableFieldsExist(
           job.datafeed_config.indices.join(','),
