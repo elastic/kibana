@@ -125,3 +125,4 @@ NOTE: This must be a user who has been assigned the `kibana_user` role.
 include::authentication/index.asciidoc[]
 include::securing-communications/index.asciidoc[]
 include::{kib-repo-dir}/settings/security-settings.asciidoc[]
+include::audit-logging.asciidoc[]

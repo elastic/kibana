@@ -20,6 +20,10 @@ hidden in this {kib} instance. If `xpack.security.enabled` is set to `true` in
 {security} entirely, see the
 {ref}/security-settings.html[{es} Security Settings].
 
+`xpack.security.audit.enabled`::
+Set to `true` to enable audit logging for security events, this is set to `false` by default.
+For more details see <<xpack-security-audit-logging>>.
+
 [float]
 [[security-ui-settings]]
 ==== User Interface Security Settings
