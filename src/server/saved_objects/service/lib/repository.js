@@ -35,8 +35,8 @@ export class SavedObjectsRepository {
     const {
       index,
       mappings,
-      migrator,
       callCluster,
+      migrator = { migrateDocument: (doc) => doc },
       onBeforeWrite = () => {},
     } = options;
 

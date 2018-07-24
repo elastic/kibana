@@ -141,14 +141,17 @@ describe('Flyout', () => {
       {
         _id: '1',
         _type: 'search',
+        _migrationVersion: {},
       },
       {
         _id: '2',
         _type: 'index-pattern',
+        _migrationVersion: {},
       },
       {
         _id: '3',
         _type: 'invalid',
+        _migrationVersion: {},
       },
     ];
 
