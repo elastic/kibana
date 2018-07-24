@@ -18,16 +18,39 @@
  */
 
 import React from 'react';
+import { intlShape } from 'react-intl';
+import { shallow, mount } from 'enzyme';
+import { I18nProvider } from './provider';
+import { injectI18n } from './inject';
 
-export function VisualizationNoResults() {
-  return (
-    <div className="text-center visualize-error visualize-chart">
-      <div className="item top" />
-      <div className="item">
-        <h2 aria-hidden="true"><i aria-hidden="true" className="fa fa-meh-o" /></h2>
-        <h4>No results found</h4>
-      </div>
-      <div className="item bottom" />
-    </div>
-  );
-}
+describe('I18nProvider', () => {
+  it('renders children', () => {
+    const ChildrenMock = () => {};
+
+    const wrapper = shallow(
+      <I18nProvider>
+        <ChildrenMock />
+      </I18nProvider>
+    );
+
+    expect(wrapper.children()).toMatchSnapshot();
+  });
+
+  it('provides with context', () => {
+    const childrenMock = () => <div />;
+    const WithIntl = injectI18n(childrenMock);
+
+    const wrapper = mount(
+      <I18nProvider>
+        <WithIntl />
+      </I18nProvider>,
+      {
+        childContextTypes: {
+          intl: intlShape,
+        },
+      }
+    );
+
+    expect(wrapper.find(childrenMock).prop('intl')).toMatchSnapshot();
+  });
+});
