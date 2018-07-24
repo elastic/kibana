@@ -43,7 +43,17 @@ jest.mock('ui/test_harness', () => {
   };
 });
 
+const mockFatalErrorInit = jest.fn();
+jest.mock('ui/notify/fatal_error', () => {
+  mockLoadOrder.push('ui/notify/fatal_error');
+  return {
+    __newPlatformInit__: mockFatalErrorInit,
+  };
+});
+
 import { LegacyPlatformService } from './legacy_platform_service';
+
+const fatalErrorsStartContract = {} as any;
 
 const injectedMetadataStartContract = {
   getLegacyMetadata: jest.fn(),
@@ -74,11 +84,26 @@ describe('#start()', () => {
       });
 
       legacyPlatform.start({
+        fatalErrors: fatalErrorsStartContract,
         injectedMetadata: injectedMetadataStartContract,
       });
 
       expect(mockUiMetadataInit).toHaveBeenCalledTimes(1);
       expect(mockUiMetadataInit).toHaveBeenCalledWith(legacyMetadata);
+    });
+
+    it('passes fatalErrors service to ui/notify/fatal_errors', () => {
+      const legacyPlatform = new LegacyPlatformService({
+        ...defaultParams,
+      });
+
+      legacyPlatform.start({
+        fatalErrors: fatalErrorsStartContract,
+        injectedMetadata: injectedMetadataStartContract,
+      });
+
+      expect(mockFatalErrorInit).toHaveBeenCalledTimes(1);
+      expect(mockFatalErrorInit).toHaveBeenCalledWith(fatalErrorsStartContract);
     });
 
     describe('useLegacyTestHarness = false', () => {
@@ -88,6 +113,7 @@ describe('#start()', () => {
         });
 
         legacyPlatform.start({
+          fatalErrors: fatalErrorsStartContract,
           injectedMetadata: injectedMetadataStartContract,
         });
 
@@ -104,6 +130,7 @@ describe('#start()', () => {
         });
 
         legacyPlatform.start({
+          fatalErrors: fatalErrorsStartContract,
           injectedMetadata: injectedMetadataStartContract,
         });
 
@@ -124,10 +151,16 @@ describe('#start()', () => {
         expect(mockLoadOrder).toEqual([]);
 
         legacyPlatform.start({
+          fatalErrors: fatalErrorsStartContract,
           injectedMetadata: injectedMetadataStartContract,
         });
 
-        expect(mockLoadOrder).toEqual(['ui/metadata', 'ui/chrome', 'legacy files']);
+        expect(mockLoadOrder).toEqual([
+          'ui/metadata',
+          'ui/notify/fatal_error',
+          'ui/chrome',
+          'legacy files',
+        ]);
       });
     });
 
@@ -141,10 +174,16 @@ describe('#start()', () => {
         expect(mockLoadOrder).toEqual([]);
 
         legacyPlatform.start({
+          fatalErrors: fatalErrorsStartContract,
           injectedMetadata: injectedMetadataStartContract,
         });
 
-        expect(mockLoadOrder).toEqual(['ui/metadata', 'ui/test_harness', 'legacy files']);
+        expect(mockLoadOrder).toEqual([
+          'ui/metadata',
+          'ui/notify/fatal_error',
+          'ui/test_harness',
+          'legacy files',
+        ]);
       });
     });
   });
