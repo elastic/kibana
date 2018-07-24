@@ -8,7 +8,7 @@ import React from 'react';
 import { ClusterStatus } from '../cluster_status';
 import { ShardActivity } from '../shard_activity';
 import { MonitoringTimeseriesContainer } from '../../chart';
-import { EuiPage, EuiFlexGrid, EuiFlexItem, EuiSpacer } from '@elastic/eui';
+import { EuiPage, EuiFlexGrid, EuiFlexItem, EuiSpacer, EuiPageBody } from '@elastic/eui';
 
 export function ElasticsearchOverview({
   clusterStatus,
@@ -25,23 +25,23 @@ export function ElasticsearchOverview({
 
   return (
     <EuiPage style={{ backgroundColor: 'white' }}>
-      <ClusterStatus stats={clusterStatus} />
+      <EuiPageBody>
+        <ClusterStatus stats={clusterStatus} />
 
-      <EuiFlexGrid columns={2} gutterSize="none">
-        {metricsToShow.map((metric, index) => (
-          <EuiFlexItem key={index} style={{ width: '50%' }}>
-            <MonitoringTimeseriesContainer
-              series={metric}
-              {...props}
-            />
-            <EuiSpacer size="m"/>
-          </EuiFlexItem>
-        ))}
-      </EuiFlexGrid>
+        <EuiFlexGrid columns={2} gutterSize="none">
+          {metricsToShow.map((metric, index) => (
+            <EuiFlexItem key={index} style={{ width: '50%' }}>
+              <MonitoringTimeseriesContainer
+                series={metric}
+                {...props}
+              />
+              <EuiSpacer size="m"/>
+            </EuiFlexItem>
+          ))}
+        </EuiFlexGrid>
 
-      {/* <div className="page-row"> */}
-      <ShardActivity data={shardActivity} {...props} />
-      {/* </div> */}
+        <ShardActivity data={shardActivity} {...props} />
+      </EuiPageBody>
     </EuiPage>
   );
 }
