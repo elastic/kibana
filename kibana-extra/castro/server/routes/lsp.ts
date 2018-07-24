@@ -6,6 +6,7 @@
 
 import * as Hapi from 'hapi';
 
+import { ResponseError } from 'vscode-jsonrpc';
 import { Log } from '../log';
 import { LanguageServerController } from '../lsp/controller';
 import { WorkspaceHandler } from '../lsp/workspace_handler';
@@ -36,13 +37,23 @@ export async function lspRoute(server: Hapi.Server, options: ServerOptions) {
             method: `textDocument/${method}`,
             params: req.payload,
           };
-          await workspaceHandler.handleRequest(request);
-          controller.handleRequest(request).then(
-            result => {
-              reply.response(result);
-            },
-            error => reply.response(error).code(500)
-          );
+          try {
+            await workspaceHandler.handleRequest(request);
+            const result = await controller.handleRequest(request);
+            reply.response(result);
+          } catch (error) {
+            if (error instanceof ResponseError) {
+              reply
+                .response(error.toJson())
+                .type('json')
+                .code(503); // different code for LS errors and other internal errors.
+            } else {
+              reply
+                .response(JSON.stringify(error))
+                .type('json')
+                .code(500);
+            }
+          }
         } else {
           reply.response('missing `method` in request').code(400);
         }

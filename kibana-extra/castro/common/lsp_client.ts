@@ -4,9 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ResponseError, ResponseErrorLiteral, ResponseMessage } from 'vscode-jsonrpc/lib/messages';
+import { ResponseError, ResponseMessage } from 'vscode-jsonrpc/lib/messages';
 
 export { TextDocumentMethods } from './text_document_methods';
+import { kfetch } from 'ui/kfetch';
 
 export interface LspClient {
   sendRequest(method: string, params: any): Promise<ResponseMessage>;
@@ -14,25 +15,21 @@ export interface LspClient {
 
 export class LspRestClient implements LspClient {
   private baseUri: string;
-  private customHeaders: { [header: string]: string };
 
-  constructor(baseUri: string, customHeaders: { [header: string]: string } = {}) {
+  constructor(baseUri: string) {
     this.baseUri = baseUri;
-    this.customHeaders = customHeaders;
   }
 
   public async sendRequest(method: string, params: any): Promise<ResponseMessage> {
-    const headers = new Headers(this.customHeaders);
-    headers.append('Content-Type', 'application/json');
-    const response = await fetch(`${this.baseUri}/${method}`, {
-      method: 'POST',
-      headers,
-      body: JSON.stringify(params),
-    });
-    if (response.ok) {
-      return (await response.json()) as ResponseMessage;
-    } else {
-      const error = (await response.json()) as ResponseErrorLiteral<any>;
+    try {
+      const response = await kfetch({
+        pathname: `${this.baseUri}/${method}`,
+        method: 'POST',
+        body: JSON.stringify(params),
+      });
+      return response as ResponseMessage;
+    } catch (e) {
+      const error = e.body;
       throw new ResponseError<any>(error.code, error.message, error.data);
     }
   }

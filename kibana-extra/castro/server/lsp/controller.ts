@@ -9,11 +9,14 @@ import { Log } from '../log';
 import { ILanguageServerHandler, LanguageServerProxy } from './proxy';
 
 import { ChildProcess, spawn } from 'child_process';
+import fs from 'fs';
 import getPort from 'get-port';
+// @ts-ignore
+import * as detect from 'language-detect';
 import path from 'path';
 // @ts-ignore
 import signals from 'signal-exit/signals';
-import { ResponseMessage } from 'vscode-jsonrpc/lib/messages';
+import { ErrorCodes, ResponseError } from 'vscode-jsonrpc';
 import { LspRequest } from '../../model';
 import { RequestExpander } from './request_expander';
 
@@ -23,11 +26,11 @@ import { RequestExpander } from './request_expander';
  */
 export class LanguageServerController implements ILanguageServerHandler {
   /** Map from langauge type to Lsp Server Controller */
-  private lsps: ILanguageServerHandler[] = [];
+  private languageServers: { [name: string]: ILanguageServerHandler } = {};
   private readonly targetHost: string;
   private log: Log;
   private readonly detach: boolean = false;
-  private server: Hapi.Server;
+  private readonly server: Hapi.Server;
 
   constructor(targetHost: string, server: Hapi.Server) {
     this.targetHost = targetHost;
@@ -36,14 +39,40 @@ export class LanguageServerController implements ILanguageServerHandler {
   }
 
   public handleRequest(request: LspRequest) {
-    const allPromises: Array<Promise<ResponseMessage>> = this.lsps.map(lsp =>
-      lsp.handleRequest(request)
-    );
-
-    return Promise.all(allPromises).then(values => {
-      // TODO: combile the values
-      return values[0];
-    });
+    const file = request.resolvedFilePath;
+    if (file) {
+      // #todo add test for this
+      // try  file name first, without read contents
+      let lang = detect.filename(file);
+      if (!lang) {
+        // try again with file contents;
+        lang = detect.contents(file, fs.readFileSync(file, 'utf8'));
+      }
+      return this.dispatchRequest(lang, request);
+    } else {
+      return Promise.reject(
+        new ResponseError(ErrorCodes.UnknownErrorCode, `can't detect language without a file`)
+      );
+    }
+  }
+  public dispatchRequest(lang: string, request: LspRequest) {
+    if (lang) {
+      const handler = this.languageServers[lang.toLowerCase()];
+      if (handler) {
+        return handler.handleRequest(request);
+      } else {
+        return Promise.reject(
+          new ResponseError(ErrorCodes.UnknownErrorCode, `no server found for language ${lang}`)
+        );
+      }
+    } else {
+      return Promise.reject(
+        new ResponseError(
+          ErrorCodes.UnknownErrorCode,
+          `can't detect language from file:${request.resolvedFilePath}`
+        )
+      );
+    }
   }
 
   /** Lancuch a LSP proxy and register a proxy */
@@ -78,14 +107,15 @@ export class LanguageServerController implements ILanguageServerHandler {
       this.closeOnExit(proxy, child);
     }
     proxy.listen();
-    this.lsps.push(new RequestExpander(proxy));
+    const handler = new RequestExpander(proxy);
+    this.registerServer(['typescript', 'javascript', 'html'], handler);
   }
 
-  private async closeOnExit(proxy: LanguageServerProxy, child: ChildProcess) {
+  private closeOnExit(proxy: LanguageServerProxy, child: ChildProcess) {
     let childTerminated = false;
     child.on('exit', () => (childTerminated = true));
     const listeners: { [signal: string]: () => void } = {};
-    signals.forEach((signal: string) => {
+    signals.forEach((signal: NodeJS.Signals) => {
       const listener = async () => {
         await proxy.exit();
         if (!childTerminated) {
@@ -98,6 +128,11 @@ export class LanguageServerController implements ILanguageServerHandler {
       listeners[signal] = listener;
       process.on(signal, listener);
     });
-    return proxy;
+  }
+
+  private registerServer(languages: string[], handler: RequestExpander) {
+    for (const language of languages) {
+      this.languageServers[language.toLowerCase()] = handler;
+    }
   }
 }

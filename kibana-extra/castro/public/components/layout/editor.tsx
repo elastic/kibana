@@ -24,7 +24,7 @@ export class Editor extends React.Component<Props> {
 
   constructor(props: Props, context: any) {
     super(props, context);
-    const lspClient = new LspRestClient('../api/lsp', { 'kbn-xsrf': '1' });
+    const lspClient = new LspRestClient('../api/lsp');
     this.lspMethods = new TextDocumentMethods(lspClient);
   }
 

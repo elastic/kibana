@@ -62,6 +62,7 @@
     "highlights": "^3.1.1",
     "history": "^4.7.2",
     "javascript-typescript-langserver": "^2.10.0",
+    "language-detect": "^1.1.0",
     "moment": "^2.22.2",
     "monaco-editor": "^0.13.1",
     "nodegit": "^0.22.1",

@@ -7,7 +7,7 @@
 export interface LspRequest {
   method: string;
   params: any;
-  documentUri?: string; // assert one uri per request for now.
+  documentUri?: string; // assert there is only one uri per request for now.
   resolvedFilePath?: string;
   workspacePath?: string;
 }
