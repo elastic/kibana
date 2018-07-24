@@ -129,7 +129,7 @@ export class CreateWatch extends Component {
     if (status === null || status === STATUS.SAVING || status === STATUS.SAVE_FAILED) {
       return (
         <div className="create-watch">
-          <div className="form-group">
+          <div className="form-group form-group-flex">
             <div className="sub-form-group">
               <div>
                 <label
