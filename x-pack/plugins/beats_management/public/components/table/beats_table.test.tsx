@@ -6,15 +6,13 @@
 
 import { shallow } from 'enzyme';
 import React from 'react';
-import { CMPopulatedBeat } from '../../common/domain_types';
+import { CMPopulatedBeat } from '../../../common/domain_types';
 import { BeatsTable } from './beats_table';
 
 describe('BeatsTable component', () => {
   let items: CMPopulatedBeat[];
   let beat;
-  let onBulkEdit: any;
-  let onBulkDelete: any;
-  let onBulkAssignTags: any;
+  let onBulkAction: any;
 
   beforeEach(() => {
     beat = {
@@ -23,7 +21,7 @@ describe('BeatsTable component', () => {
       type: 'type',
       host_ip: 'ip',
       host_name: 'name',
-      fullTags: [
+      full_tags: [
         {
           id: 'Production',
           configuration_blocks: [],
@@ -31,20 +29,11 @@ describe('BeatsTable component', () => {
       ],
     };
     items = [beat];
-    onBulkEdit = jest.fn();
-    onBulkDelete = jest.fn();
-    onBulkAssignTags = jest.fn();
+    onBulkAction = jest.fn();
   });
 
   it('matches snapshot', () => {
-    const wrapper = shallow(
-      <BeatsTable
-        items={items}
-        onBulkEdit={onBulkEdit}
-        onBulkDelete={onBulkDelete}
-        onBulkAssignTags={onBulkAssignTags}
-      />
-    );
+    const wrapper = shallow(<BeatsTable items={items} onBulkAction={onBulkAction} />);
     expect(wrapper).toMatchSnapshot();
   });
 });

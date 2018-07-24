@@ -1,0 +1,97 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`BeatsTable component matches snapshot 1`] = `
+<styled.div>
+  <BulkActionControlBar
+    onBulkAction={[Function]}
+    onSearchQueryChange={[Function]}
+    tagOptions={
+      Array [
+        Object {
+          "value": "Production",
+        },
+      ]
+    }
+    typeOptions={
+      Array [
+        Object {
+          "value": "type",
+        },
+      ]
+    }
+  />
+  <EuiInMemoryTable
+    columns={
+      Array [
+        Object {
+          "field": "id",
+          "name": "Beat name",
+          "render": [Function],
+          "sortable": true,
+        },
+        Object {
+          "field": "type",
+          "name": "Type",
+          "sortable": true,
+        },
+        Object {
+          "field": "full_tags",
+          "name": "Tags",
+          "render": [Function],
+          "sortable": false,
+        },
+        Object {
+          "field": "event_rate",
+          "name": "Event rate",
+          "sortable": true,
+        },
+        Object {
+          "field": "last_updated",
+          "name": "Last config update",
+          "sortable": true,
+        },
+      ]
+    }
+    isSelectable={true}
+    itemId="id"
+    items={
+      Array [
+        Object {
+          "access_token": "access",
+          "full_tags": Array [
+            Object {
+              "configuration_blocks": Array [],
+              "id": "Production",
+            },
+          ],
+          "host_ip": "ip",
+          "host_name": "name",
+          "id": "beatid",
+          "type": "type",
+        },
+      ]
+    }
+    pagination={
+      Object {
+        "pageIndex": 0,
+        "pageSize": 5,
+        "pageSizeOptions": Array [
+          3,
+          5,
+          8,
+        ],
+        "totalItemCount": 1,
+      }
+    }
+    responsive={true}
+    selection={
+      Object {
+        "onSelectionChange": [Function],
+        "selectable": [Function],
+        "selectableMessage": [Function],
+      }
+    }
+    sorting={true}
+  />
+</styled.div>
+`;

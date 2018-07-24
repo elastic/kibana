@@ -28,7 +28,7 @@ export interface CMBeat {
 }
 
 export interface CMPopulatedBeat extends CMBeat {
-  fullTags: BeatTag[];
+  full_tags: BeatTag[];
 }
 
 export interface BeatTag {
