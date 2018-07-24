@@ -108,7 +108,8 @@ export default class BaseOptimizer {
       ],
       context: fromRoot('.'),
       isDistributable: IS_KIBANA_DISTRIBUTABLE,
-      outputPath: `${this.uiBundles.getWorkingDir()}/dlls`,
+      outputPath: `${this.uiBundles.getWorkingDir()}`,
+      ub: this.uiBundles,
       publicPath: PUBLIC_PATH_PLACEHOLDER,
       mergeConfig: {
         node: { fs: 'empty', child_process: 'empty', dns: 'empty', net: 'empty', tls: 'empty' },

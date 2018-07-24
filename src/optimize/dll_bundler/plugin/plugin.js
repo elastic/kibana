@@ -17,39 +17,77 @@
  * under the License.
  */
 
-import NormalModule from 'webpack/lib/NormalModule';
-import { fromRoot } from '../../../utils';
+import RawModule from 'webpack/lib/RawModule';
 import { DLLBundlerCompiler } from '../compiler';
 import webpack from 'webpack';
 import path from 'path';
-import { remove } from 'lodash';
+import fs from 'fs';
+import { promisify } from 'util';
+import mkdirp from 'mkdirp';
+import { isEmpty, difference, remove } from 'lodash';
+
+const readFileAsync = promisify(fs.readFile);
+const realPathAsync = promisify(fs.realpath);
+const mkdirpAsync = promisify(mkdirp);
+const existsAsync = promisify(fs.exists);
+const writeFileAsync = promisify(fs.writeFile);
+
+const DLL_ENTRY_STUB_MODULE_TYPE = 'javascript/dll-entry-stub';
+
+function inNodeModules(checkPath) {
+  return checkPath.includes(`${path.sep}node_modules${path.sep}`);
+}
 
 export class Plugin {
   constructor({ dllConfig, log }) {
     this.dllConfig = dllConfig;
     this.log = log || (() => {});
+    this.entryPath = this.dllConfig.ub.resolvePath('vendor.entry.dll.js');
+    this.manifestPath = this.dllConfig.ub.resolvePath('vendor.manifest.dll.json');
+    this.entryPaths = [];
+    this.waitForBundlerEntryFile = false;
+  }
 
-    this.dllCompiler = new DLLBundlerCompiler(this.dllConfig, this.log);
-    this.entryPathsCompiler = null;
-    this.entryPaths = {};
+  async ensureManifestExists() {
+    const exists = await existsAsync(this.manifestPath);
+    if (!exists) {
+      await mkdirpAsync(path.dirname(this.manifestPath));
+      await writeFileAsync(
+        this.manifestPath,
+        JSON.stringify({
+          name: 'vendor',
+          content: {},
+        }),
+        'utf8'
+      );
+    }
+  }
+
+  async readCurrentManifest() {
+    return JSON.parse(await readFileAsync(this.manifestPath, 'utf8'));
+  }
+
+  async ensureEntryExists() {
+    const exists = await existsAsync(this.entryPath);
+    if (!exists) {
+      await mkdirpAsync(path.dirname(this.entryPath));
+      await writeFileAsync(this.entryPath, '', 'utf8');
+    }
   }
 
   apply(compiler) {
-    this.referenceDLLs(compiler);
+    console.log('merdq1');
+    this.bindToCompiler(compiler);
 
-    compiler.hooks.watchRun.tapAsync({
-      name: 'dllBundlerBridgePlugin-checkIfDllIsNeeded',
-      fn: async (a, cb) => {
-        await this.runEntryPathsCompiler(compiler.options);
-        await this.runDLLsCompiler();
-
-        cb();
-      }
-    });
+    new webpack.DllReferencePlugin({
+      context: this.dllConfig.context,
+      manifest: this.manifestPath,
+    }).apply(compiler);
   }
 
-  async runEntryPathsCompiler(mainCompilerConfig) {
+  runEntryPathsCompiler(compiler) {
     return new Promise((resolve) => {
+      const mainCompilerConfig = compiler.options;
       // Filter out this own plugin from the main compiler
       // config to avoid exceed max stack size
       remove(mainCompilerConfig.plugins, (plugin) => {
@@ -58,17 +96,51 @@ export class Plugin {
 
       this.entryPathsCompiler = webpack(mainCompilerConfig);
 
-      this.entryPathsCompiler.hooks.compile.tap({
-        name: 'dllBundlerBridgePlugin-buildEntryPaths-start',
-        fn: ({ normalModuleFactory }) => {
-          this.buildEntryPaths(normalModuleFactory);
-        }
+      this.entryPathsCompiler.hooks.beforeCompile.tapPromise('DynamicDllPlugin', async ({ normalModuleFactory }) => {
+        normalModuleFactory.hooks.factory.tap(
+          'NormalModuleFactory',
+          (actualFactory) => (params, cb) => {
+            actualFactory(params, (error, module) => {
+              if (error || !module) {
+                cb(error, module);
+              } else {
+                this.mapNormalModule(module).then(
+                  (m = module) => cb(undefined, m),
+                  error => cb(error)
+                );
+              }
+            });
+          }
+        );
       });
 
-      this.entryPathsCompiler.hooks.done.tap({
-        name: 'dllBundlerBridgePlugin-buildEntryPaths-done',
-        fn: () => {
-          this.entryPathsCompiler = null;
+      this.entryPathsCompiler.hooks.emit.tapPromise('DynamicDllPlugin', async (compilation) => {
+        const requests = [];
+
+        for (const module of compilation.modules) {
+          // re-include requires for modules already handled by the dll
+          if (module.delegateData) {
+            const absoluteResource = path.resolve(this.dllConfig.context, module.request);
+            requests.push(`${path.relative(this.dllConfig.outputPath, absoluteResource)}`);
+          }
+
+          // include requires for modules that need to be added to the dll
+          if (module.type === DLL_ENTRY_STUB_MODULE_TYPE) {
+            requests.push(`${path.relative(this.dllConfig.outputPath, module.resource)}`);
+          }
+
+        }
+
+        console.log('done, ', requests.length);
+
+
+        const same = this.isSame(this.entryPaths, requests);
+
+        console.log(same);
+
+        if (!same) {
+          this.entryPaths = requests.slice(0);
+          await this.runDLLsCompiler();
         }
       });
 
@@ -78,73 +150,112 @@ export class Plugin {
     });
   }
 
+  bindToCompiler(compiler) {
+    compiler.hooks.run.tapPromise('DynamicDllPlugin', async () => {
+      console.log('starting compile');
+      await this.ensureManifestExists();
+      await this.ensureEntryExists();
+    });
+
+    compiler.hooks.watchRun.tapAsync('DynamicDllPlugin', async (a, cb) => {
+      // console.log('starting compile');
+      await this.ensureManifestExists();
+      await this.ensureEntryExists();
+      await this.runEntryPathsCompiler(compiler);
+      cb();
+    });
+
+    /*compiler.hooks.beforeCompile.tapPromise('DynamicDllPlugin', async ({ normalModuleFactory }) => {
+
+      if (this.waitForBundlerEntryFile) {
+        console.log('before compile compiling DLL');
+        console.log('waiting for dll bundler');
+        await this.runDLLsCompiler();
+        this.waitForBundlerEntryFile = false;
+      }
+
+      normalModuleFactory.hooks.factory.tap(
+        'NormalModuleFactory',
+        (actualFactory) => (params, cb) => {
+          actualFactory(params, (error, module) => {
+            if (error || !module) {
+              cb(error, module);
+            } else {
+              this.mapNormalModule(module).then(
+                (m = module) => cb(undefined, m),
+                error => cb(error)
+              );
+            }
+          });
+        }
+      );
+    });*/
+
+
+    compiler.hooks.done.tapPromise('DynamicDLLPlugin', async (stats) => {
+      console.log('last compiler step start');
+
+      stats.endTime = Date.now();
+
+      console.log('last compiler step end');
+    });
+
+  }
+
+  isSame(arrayOne, arrayTwo) {
+    let a = arrayOne;
+    let b = arrayTwo;
+
+    if (arrayOne.length <= arrayTwo.length) {
+      a = arrayTwo;
+      b = arrayOne;
+    }
+    return isEmpty(difference(a.sort(), b.sort()));
+  }
+
   async runDLLsCompiler() {
     this.dllCompiler = new DLLBundlerCompiler(this.dllConfig, this.log);
-    this.dllCompiler.upsertDllEntryFile(Object.keys(this.entryPaths));
+    this.dllCompiler.upsertDllEntryFile(this.entryPaths);
     await this.dllCompiler.run();
   }
 
-  referenceDLLs(mainCompiler) {
-    this.dllConfig.dllEntries.forEach((entry) => {
-      new webpack.DllReferencePlugin({
-        context: this.dllConfig.context,
-        manifest: require.resolve(`${this.dllConfig.outputPath}/${entry.name}.json`),
-      }).apply(mainCompiler);
-    });
-  }
+  async mapNormalModule(module) {
+    // ignore anything that doesn't have a resource (ignored) or is already delegating to the DLL
+    if (!module.resource || module.delegateData) {
+      return;
+    }
 
-  buildEntryPaths(normalModuleFactory) {
-    normalModuleFactory.hooks.factory.tap('NormalModuleFactory', () => (result, callback) => {
-      const resolver = normalModuleFactory.hooks.resolver.call(null);
+    // ignore anything that needs special loaders or config
+    if (module.request.includes('!') || module.request.includes('?')) {
+      return;
+    }
 
-      // Ignored
-      if (!resolver) return callback();
+    // ignore files that are not in node_modules
+    if (!inNodeModules(module.resource)) {
+      return;
+    }
 
-      resolver(result, (err, data) => {
-        if (err) return callback(err);
+    // also ignore files that are symlinked into node_modules, but only
+    // do the `realpath` call after checking the plain resource path
+    if (!inNodeModules(await realPathAsync(module.resource))) {
+      return;
+    }
 
-        // Ignored
-        if (!data) return callback();
+    const dirs = module.resource.split(path.sep);
+    const nodeModuleName = dirs[dirs.lastIndexOf('node_modules') + 1];
 
-        // direct module
-        if (typeof data.source === 'function') return callback(null, data);
+    // ignore webpack loader modules
+    if (nodeModuleName.endsWith('-loader')) {
+      return;
+    }
 
-        normalModuleFactory.hooks.afterResolve.callAsync(data, (err, result) => {
-          if (err) return callback(err);
-
-          // Ignored
-          if (!result) return callback();
-
-          // Build NodeModules EntryPaths
-          if (!!this.entryPaths[result.request]) {
-            return callback();
-          }
-
-          const nodeModulesPath = fromRoot('./node_modules');
-
-          if (!result.request.includes('loader')
-            && result.request.includes(nodeModulesPath)) {
-            // TODO: Improve the way we build relative path for result.request
-            const relativeRequestPath = result.request.replace(`${fromRoot('.')}/`, '../../../');
-            const normalizedRequestPath = path.normalize(relativeRequestPath);
-
-            this.entryPaths[normalizedRequestPath] = true;
-          }
-
-          let createdModule = normalModuleFactory.hooks.createModule.call(result);
-          if (!createdModule) {
-            if (!result.request) {
-              return callback(new Error('Empty dependency (no request)'));
-            }
-
-            createdModule = new NormalModule(result);
-          }
-
-          createdModule = normalModuleFactory.hooks.module.call(createdModule, result);
-
-          return callback(null, createdModule);
-        });
-      });
-    });
+    const stubModule = new RawModule(
+      `/* pending dll entry */`,
+      `dll pending:${module.resource}`,
+      module.resource
+    );
+    stubModule.type = DLL_ENTRY_STUB_MODULE_TYPE;
+    stubModule.resource = module.resource;
+    return stubModule;
   }
 }

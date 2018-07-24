@@ -26,7 +26,7 @@ export class Compiler {
     return dllEntries.reduce(
       (accumulator, currentValue) => {
         const dllEntryFile = `${outputPath}/${currentValue.name}.entry.dll.js`;
-        const dllManifestFile = `${outputPath}/${currentValue.name}.json`;
+        const dllManifestFile = `${outputPath}/${currentValue.name}.manifest.dll.json`;
         const dllFile = `${outputPath}/${currentValue.name}.dll.js`;
 
         return fs.existsSync(dllEntryFile) && fs.existsSync(dllManifestFile) && fs.existsSync(dllFile);
@@ -42,8 +42,8 @@ export class Compiler {
     this.log =  log;
 
     if (!this.existsDLLs()) {
-      this.upsertDllEntryFile();
-      this.touchDllManifests();
+      // this.upsertDllEntryFile();
+      // this.touchDllManifests();
     }
   }
 

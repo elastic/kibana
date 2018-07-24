@@ -40,7 +40,7 @@ function generateDLLS({ context, entries, output }) {
       new webpack.DllPlugin({
         context,
         name: output.dllName,
-        path: `${output.path}/${output.manifestName}.json`
+        path: `${output.path}/${output.manifestName}.manifest.dll.json`
       })
     ]
   };
