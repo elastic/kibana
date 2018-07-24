@@ -52,7 +52,7 @@ test('should render home component', async () => {
   expect(component).toMatchSnapshot(); // eslint-disable-line
 });
 
-test('should not contain RecentlyAccessed panel when there is no recentlyAccessed history', async () => {
+test('should not contain RecentlyAccessed panel when there is no recentlyAccessed history', () => {
   const component = shallow(<Home
     addBasePath={addBasePath}
     directories={[]}
@@ -61,16 +61,11 @@ test('should not contain RecentlyAccessed panel when there is no recentlyAccesse
     find={findMock}
   />);
 
-  // Ensure all promises resolve
-  await new Promise(resolve => process.nextTick(resolve));
-  // Ensure the state changes are reflected
-  component.update();
-
   expect(component).toMatchSnapshot(); // eslint-disable-line
 });
 
 describe('directories', () => {
-  test('should render DATA directory entry in "Explore Data" panel', async () => {
+  test('should render DATA directory entry in "Explore Data" panel', () => {
     const directoryEntry = {
       id: 'dashboard',
       title: 'Dashboard',
@@ -89,15 +84,10 @@ describe('directories', () => {
       find={findMock}
     />);
 
-    // Ensure all promises resolve
-    await new Promise(resolve => process.nextTick(resolve));
-    // Ensure the state changes are reflected
-    component.update();
-
     expect(component).toMatchSnapshot(); // eslint-disable-line
   });
 
-  test('should render ADMIN directory entry in "Manage" panel', async () => {
+  test('should render ADMIN directory entry in "Manage" panel', () => {
     const directoryEntry = {
       id: 'index_patterns',
       title: 'Index Patterns',
@@ -116,15 +106,10 @@ describe('directories', () => {
       find={findMock}
     />);
 
-    // Ensure all promises resolve
-    await new Promise(resolve => process.nextTick(resolve));
-    // Ensure the state changes are reflected
-    component.update();
-
     expect(component).toMatchSnapshot(); // eslint-disable-line
   });
 
-  test('should not render directory entry when showOnHomePage is false', async () => {
+  test('should not render directory entry when showOnHomePage is false', () => {
     const directoryEntry = {
       id: 'management',
       title: 'Management',
@@ -142,10 +127,6 @@ describe('directories', () => {
       recentlyAccessed={[]}
       find={findMock}
     />);
-    // Ensure all promises resolve
-    await new Promise(resolve => process.nextTick(resolve));
-    // Ensure the state changes are reflected
-    component.update();
 
     expect(component).toMatchSnapshot(); // eslint-disable-line
   });

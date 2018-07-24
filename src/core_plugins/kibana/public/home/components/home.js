@@ -41,7 +41,6 @@ import { FeatureCatalogueCategory } from 'ui/registry/feature_catalogue';
 export class Home extends Component {
 
   state = {
-    isLoading: false,
     isNewKibanaInstance: false,
   }
 
@@ -55,10 +54,6 @@ export class Home extends Component {
   }
 
   fetchIsNewKibanaInstance = async () => {
-    this.setState({
-      isLoading: true
-    });
-
     let resp;
     try {
       resp = await this.props.find({
@@ -69,15 +64,8 @@ export class Home extends Component {
         perPage: 1
       });
     } catch (error) {
-      if (!this._isMounted) {
-        return;
-      }
-
       // ignore error - find is not critical for page functioning,
       // just used to add some extra styling when there are no index-patterns
-      this.setState({
-        isLoading: false
-      });
       return;
     }
 
@@ -86,7 +74,6 @@ export class Home extends Component {
     }
 
     this.setState({
-      isLoading: false,
       isNewKibanaInstance: resp.total === 0
     });
   }
@@ -113,10 +100,6 @@ export class Home extends Component {
 
 
   render() {
-    if (this.state.isLoading) {
-      return null;
-    }
-
     const { apmUiEnabled, recentlyAccessed } = this.props;
 
     let recentlyAccessedPanel;
