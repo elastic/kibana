@@ -21,7 +21,7 @@ export const shape = () => ({
     shapeContent.setAttribute('stroke-miterlimit', 999);
     shapeContent.setAttribute('vector-effect', 'non-scaling-stroke');
 
-    shapeSvg.setAttribute('preserveAspectRatio', maintainAspect ? 'xMidYmid meet' : 'none');
+    shapeSvg.setAttribute('preserveAspectRatio', maintainAspect ? 'xMidYMid meet' : 'none');
 
     const initialViewBox = shapeSvg
       .getAttribute('viewBox')
