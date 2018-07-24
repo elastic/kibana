@@ -80,7 +80,7 @@ export default new Datasource('es', {
     });
 
     const savedObjectsClient = await tlConfig.request.getSavedObjectsClient();
-    const findResp = savedObjectsClient.find({
+    const findResp = await savedObjectsClient.find({
       type: 'index-pattern',
       fields: ['title', 'fields'],
       search: `"${config.index}"`,
