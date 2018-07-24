@@ -1,0 +1,1268 @@
+@-webkit-keyframes euiAnimFadeIn {
+  0% {
+    opacity: 0; }
+  100% {
+    opacity: 1; } }
+
+@keyframes euiAnimFadeIn {
+  0% {
+    opacity: 0; }
+  100% {
+    opacity: 1; } }
+
+@-webkit-keyframes euiGrow {
+  0% {
+    opacity: 0; }
+  1% {
+    opacity: 0;
+    -webkit-transform: scale(0);
+            transform: scale(0); }
+  100% {
+    opacity: 1;
+    -webkit-transform: scale(1);
+            transform: scale(1); } }
+
+@keyframes euiGrow {
+  0% {
+    opacity: 0; }
+  1% {
+    opacity: 0;
+    -webkit-transform: scale(0);
+            transform: scale(0); }
+  100% {
+    opacity: 1;
+    -webkit-transform: scale(1);
+            transform: scale(1); } }
+
+/**
+ * Text truncation
+ *
+ * Prevent text from wrapping onto multiple lines, and truncate with an
+ * ellipsis.
+ *
+ * 1. Ensure that the node has a maximum width after which truncation can
+ *    occur.
+ * 2. Fix for IE 8/9 if `word-wrap: break-word` is in effect on ancestor
+ *    nodes.
+ */
+/**
+ * Set scroll bar appearance on Chrome.
+ */
+/**
+ * Specifically target IE11, but not Edge.
+ */
+@-webkit-keyframes focusRingAnimate {
+  0% {
+    -webkit-box-shadow: 0 0 0 6px rgba(0, 121, 165, 0);
+            box-shadow: 0 0 0 6px rgba(0, 121, 165, 0); }
+  100% {
+    -webkit-box-shadow: 0 0 0 2px rgba(0, 121, 165, 0.3);
+            box-shadow: 0 0 0 2px rgba(0, 121, 165, 0.3); } }
+@keyframes focusRingAnimate {
+  0% {
+    -webkit-box-shadow: 0 0 0 6px rgba(0, 121, 165, 0);
+            box-shadow: 0 0 0 6px rgba(0, 121, 165, 0); }
+  100% {
+    -webkit-box-shadow: 0 0 0 2px rgba(0, 121, 165, 0.3);
+            box-shadow: 0 0 0 2px rgba(0, 121, 165, 0.3); } }
+
+@-webkit-keyframes focusRingAnimateLarge {
+  0% {
+    -webkit-box-shadow: 0 0 0 10px rgba(0, 121, 165, 0);
+            box-shadow: 0 0 0 10px rgba(0, 121, 165, 0); }
+  100% {
+    -webkit-box-shadow: 0 0 0 4px rgba(0, 121, 165, 0.3);
+            box-shadow: 0 0 0 4px rgba(0, 121, 165, 0.3); } }
+
+@keyframes focusRingAnimateLarge {
+  0% {
+    -webkit-box-shadow: 0 0 0 10px rgba(0, 121, 165, 0);
+            box-shadow: 0 0 0 10px rgba(0, 121, 165, 0); }
+  100% {
+    -webkit-box-shadow: 0 0 0 4px rgba(0, 121, 165, 0.3);
+            box-shadow: 0 0 0 4px rgba(0, 121, 165, 0.3); } }
+
+.discoverFetchError {
+  max-width: 1000px; }
+
+.dscNoResults {
+  max-width: 1000px; }
+
+/**
+ * 1. em used for right padding so documentation link and query string
+ *    won't overlap if the user increases their default browser font size
+ *    This is sized for the 'Uses lucene query syntax' link
+ */
+.kuiLocalSearchInput {
+  padding-right: 6em;
+  /* 1 */ }
+
+.tab-discover {
+  overflow: hidden; }
+
+.dscFieldDetails .progress {
+  background-color: #e9e9e9;
+  margin-bottom: 0;
+  border-radius: 0; }
+
+.dscFieldDetails .progress-bar {
+  padding-left: 10px;
+  text-align: right;
+  line-height: 20px;
+  max-width: 100%; }
+
+.dscSidebar__listHeader {
+  margin-top: 5px; }
+
+.dscFieldList--popular {
+  padding-top: 10px; }
+
+.dscWrapper {
+  padding-right: 0;
+  padding-left: 21px;
+  z-index: 1; }
+
+.dscWrapper__content {
+  padding-right: 16px;
+  clear: both; }
+
+.dscTimechart {
+  display: block;
+  position: relative; }
+  .dscTimechart .series > rect {
+    fill-opacity: 0.5;
+    stroke-width: 1; }
+
+.dscTimechart__header {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-pack: center;
+  -webkit-justify-content: center;
+      -ms-flex-pack: center;
+          justify-content: center;
+  min-height: 40px;
+  padding: 4px 0; }
+
+.dscOverlay {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  z-index: 20;
+  padding-top: 12px;
+  opacity: 0.75;
+  text-align: center;
+  background-color: transparent; }
+
+.dscTable {
+  overflow: auto; }
+  .dscTable .discover-table-row {
+    font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, Courier, monospace; }
+
+.dscTable__footer {
+  background-color: #D9D9D9;
+  padding: 5px 10px;
+  text-align: center; }
+
+/**
+ * 1. When switching between open and closed, the toggle changes size
+ *    slightly which is a problem because it forces the entire table to
+ *    re-render which is SLOW.
+ */
+.dscTable__openButton {
+  -webkit-appearance: none;
+     -moz-appearance: none;
+          appearance: none;
+  background-color: transparent;
+  padding: 0;
+  border: none;
+  width: 14px;
+  /* 1 */
+  height: 14px; }
+
+/**
+ * 1. Override sidebar-item-title styles.
+ */
+.dscSidebarItem {
+  position: relative;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-align: center;
+  -webkit-align-items: center;
+      -ms-flex-align: center;
+          align-items: center;
+  -webkit-box-pack: justify;
+  -webkit-justify-content: space-between;
+      -ms-flex-pack: justify;
+          justify-content: space-between;
+  padding-top: 0 !important;
+  /* 1 */
+  padding-bottom: 0 !important;
+  /* 1 */
+  height: 32px; }
+  .dscSidebarItem:hover .dscSidebarItem__action, .dscSidebarItem:focus .dscSidebarItem__action {
+    opacity: 1; }
+
+.dscSidebarItem--active {
+  background: #e9e9e9;
+  color: #000;
+  font-weight: bold; }
+
+/**
+ * 1. Truncate long text so it doesn't push the actions outside of the container.
+ */
+.dscSidebarItem__label {
+  overflow: hidden;
+  /* 1 */
+  text-overflow: ellipsis;
+  /* 1 */ }
+
+/**
+ * 1. Only visually hide the action, so that it's still accessible to screen readers.
+ * 2. When tabbed to, this element needs to be visible for keyboard accessibility.
+ */
+.dscSidebarItem__action {
+  opacity: 0;
+  /* 1 */ }
+  .dscSidebarItem__action:focus {
+    opacity: 1;
+    /* 2 */ }
+
+.dscFieldDetails {
+  padding: 10px;
+  background-color: #e9e9e9;
+  color: #595959; }
+
+.dscFieldDetails__progress {
+  background-color: rgba(0, 0, 0, 0.8);
+  padding: 3px;
+  border-radius: 4px;
+  margin-left: 3px;
+  margin-right: 3px; }
+
+.dscFieldDetailsItem {
+  margin-top: 5px; }
+
+.dscFieldDetails__filter {
+  cursor: pointer; }
+
+.dscFieldDetailsItem__title {
+  line-height: 1.5;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-align: center;
+  -webkit-align-items: center;
+      -ms-flex-align: center;
+          align-items: center;
+  -webkit-box-pack: justify;
+  -webkit-justify-content: space-between;
+      -ms-flex-pack: justify;
+          justify-content: space-between; }
+
+/**
+ * 1. If the field name is very long, don't let it squash the buttons.
+ */
+.dscFieldDetailsItem__buttonGroup {
+  -webkit-box-flex: 0;
+  -webkit-flex: 0 0 auto;
+      -ms-flex: 0 0 auto;
+          flex: 0 0 auto;
+  /* 1 */ }
+
+.dscFieldDetailsItem__button {
+  -webkit-appearance: none;
+     -moz-appearance: none;
+          appearance: none;
+  border: none;
+  padding: 0;
+  background-color: transparent; }
+
+.dscField--noResults {
+  color: #666; }
+
+.dscField__icon {
+  margin-right: 5px;
+  text-align: center;
+  display: inline-block;
+  width: 12px;
+  color: #666; }
+
+.dscResults h3 {
+  margin: -20px 0 10px 0;
+  text-align: center; }
+
+.dscResults__interval {
+  display: inline-block;
+  width: auto; }
+
+.dscSkipButton {
+  position: absolute;
+  left: -10000px;
+  top: 4px;
+  width: 1px;
+  height: 1px;
+  overflow: hidden; }
+  .dscSkipButton:focus {
+    left: initial;
+    right: 16px;
+    width: auto;
+    height: auto; }
+
+home-app {
+  background-color: #F5F5F5; }
+
+.homPage {
+  min-height: 100vh;
+  max-width: 1200px;
+  margin: auto; }
+
+.homSampleDataSetCard {
+  -webkit-box-flex: 0;
+  -webkit-flex-grow: 0;
+      -ms-flex-positive: 0;
+          flex-grow: 0; }
+
+.homAddData__card {
+  width: 250px;
+  min-width: 200px;
+  border: none;
+  -webkit-box-shadow: none;
+          box-shadow: none; }
+
+.homAddData__icon {
+  width: 64px;
+  height: 64px; }
+
+.homAddData__footerItem--highlight {
+  background-color: #e6f2f6;
+  padding: 16px; }
+
+.homAddData__footerItem {
+  text-align: center; }
+
+@media only screen and (max-width: 574px) {
+  .homRecentlyAccessed__separator {
+    display: none; } }
+
+@media only screen and (min-width: 575px) and (max-width: 767px) {
+  .homRecentlyAccessed__separator {
+    display: none; } }
+
+.homRecentlyAccessed__item {
+  overflow: hidden;
+  max-width: 300px; }
+
+.homRecentlyAccessed__anchor {
+  overflow: hidden;
+  text-overflow: ellipsis; }
+
+.homRecentlyAccessed__longLink {
+  max-width: 100%;
+  /* 1 */
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  white-space: nowrap !important;
+  word-wrap: normal !important;
+  /* 2 */
+  line-height: normal; }
+
+.homRecentlyAccessed__flexItem {
+  max-width: 1000px; }
+
+.homRecentlyAccessed__dropdownLink,
+.homRecentlyAccessed__dropdownLabel {
+  white-space: nowrap; }
+
+.synopsis {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-flex: 1;
+  -webkit-flex-grow: 1;
+      -ms-flex-positive: 1;
+          flex-grow: 1;
+  cursor: pointer; }
+  .synopsis:hover, .synopsis:focus {
+    text-decoration: none; }
+    .synopsis:hover .synopsisTitle, .synopsis:focus .synopsisTitle {
+      text-decoration: underline; }
+
+.synopsisTitle {
+  font-size: 16px;
+  font-weight: normal;
+  color: #0079a5; }
+
+.synopsisIcon {
+  padding-top: 8px; }
+
+.homWelcome {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 10000;
+  background: inherit;
+  background-image: -webkit-gradient(linear, left bottom, left top, from(#F5F5F5), to(#FFF));
+  background-image: linear-gradient(0deg, #F5F5F5 0%, #FFF 100%);
+  opacity: 0;
+  overflow: auto;
+  -webkit-animation: homWelcome_FadeIn 500ms cubic-bezier(0.694, 0.0482, 0.335, 1) 0s forwards;
+          animation: homWelcome_FadeIn 500ms cubic-bezier(0.694, 0.0482, 0.335, 1) 0s forwards; }
+
+.homWelcome::before {
+  position: absolute;
+  top: 0;
+  right: 0;
+  z-index: 1; }
+
+.homWelcome::after {
+  position: fixed;
+  bottom: -2px;
+  left: 0;
+  z-index: 1; }
+
+.homWelcome__header {
+  position: relative;
+  padding: 32px;
+  z-index: 10; }
+
+.homWelcome__logo {
+  margin-bottom: 32px;
+  display: inline-block;
+  width: 80px;
+  height: 80px;
+  line-height: 80px;
+  text-align: center;
+  background-color: #FFF;
+  border-radius: 100%;
+  padding: 16px;
+  -webkit-box-shadow: 0 6px 12px -1px rgba(153, 153, 153, 0.2), 0 4px 4px -1px rgba(153, 153, 153, 0.2), 0 2px 2px 0 rgba(153, 153, 153, 0.2);
+          box-shadow: 0 6px 12px -1px rgba(153, 153, 153, 0.2), 0 4px 4px -1px rgba(153, 153, 153, 0.2), 0 2px 2px 0 rgba(153, 153, 153, 0.2); }
+  .homWelcome__logo .euiIcon {
+    vertical-align: baseline; }
+
+.homWelcome__footerAction {
+  margin-right: 8px; }
+
+.homWelcome__content {
+  position: relative;
+  margin: auto;
+  max-width: 512px;
+  padding-left: 32px;
+  padding-right: 32px;
+  z-index: 10; }
+
+@-webkit-keyframes homWelcome_FadeIn {
+  from {
+    opacity: 0;
+    -webkit-transform: translateY(200px), scale(0.75);
+            transform: translateY(200px), scale(0.75); }
+  to {
+    opacity: 1;
+    -webkit-transform: translateY(0), scale(1);
+            transform: translateY(0), scale(1); } }
+
+@keyframes homWelcome_FadeIn {
+  from {
+    opacity: 0;
+    -webkit-transform: translateY(200px), scale(0.75);
+            transform: translateY(200px), scale(0.75); }
+  to {
+    opacity: 1;
+    -webkit-transform: translateY(0), scale(1);
+            transform: translateY(0), scale(1); } }
+
+.homTutorial__notFoundPanel {
+  background: #FFF;
+  padding: 24px; }
+
+/**
+ * Mimics EuiPageBackground
+ */
+dashboard-listing {
+  background-color: #F5F5F5;
+  min-height: 100vh; }
+
+/**
+ * Needs to correspond with the react root nested inside angular.
+ */
+dashboard-viewport-provider {
+  -webkit-box-flex: 1;
+  -webkit-flex: 1;
+      -ms-flex: 1;
+          flex: 1;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex; }
+  dashboard-viewport-provider [data-reactroot] {
+    -webkit-box-flex: 1;
+    -webkit-flex: 1;
+        -ms-flex: 1;
+            flex: 1; }
+
+.tab-dashboard.theme-dark a {
+  color: #4da1c0; }
+  .tab-dashboard.theme-dark a:hover, .tab-dashboard.theme-dark a:focus {
+    color: #3985a1; }
+
+.tab-dashboard.theme-dark .form-control {
+  color: #DDD;
+  background-color: #a7a7a7;
+  border-color: rgba(255, 255, 255, 0.1); }
+  .tab-dashboard.theme-dark .form-control[disabled], .tab-dashboard.theme-dark .form-control[readonly],
+  fieldset[disabled] .tab-dashboard.theme-dark .form-control {
+    background-color: #1f1f1f; }
+
+.tab-dashboard.theme-dark .table > thead > tr > th,
+.tab-dashboard.theme-dark .table > thead > tr > td,
+.tab-dashboard.theme-dark .table > tbody > tr > th,
+.tab-dashboard.theme-dark .table > tbody > tr > td,
+.tab-dashboard.theme-dark .table > tfoot > tr > th,
+.tab-dashboard.theme-dark .table > tfoot > tr > td {
+  border-top-color: #333; }
+
+.tab-dashboard.theme-dark .table > thead > tr > th {
+  border-bottom-color: #333; }
+
+.tab-dashboard.theme-dark .table > tbody + tbody {
+  border-top-color: #333; }
+
+.tab-dashboard.theme-dark .table .table {
+  background-color: transparent; }
+
+.tab-dashboard.theme-dark table th i.fa-sort {
+  color: #444; }
+
+.tab-dashboard.theme-dark table th button.fa-sort-asc,
+.tab-dashboard.theme-dark table th button.fa-sort-down,
+.tab-dashboard.theme-dark table th i.fa-sort-asc,
+.tab-dashboard.theme-dark table th i.fa-sort-down {
+  color: #DDD; }
+
+.tab-dashboard.theme-dark table th button.fa-sort-desc,
+.tab-dashboard.theme-dark table th button.fa-sort-up,
+.tab-dashboard.theme-dark table th i.fa-sort-desc,
+.tab-dashboard.theme-dark table th i.fa-sort-up {
+  color: #DDD; }
+
+.tab-dashboard.theme-dark .list-group-item {
+  background-color: #333;
+  border-color: #8A8A8A; }
+  .tab-dashboard.theme-dark .list-group-item:nth-child(even) {
+    background-color: #444; }
+
+.tab-dashboard.theme-dark a.list-group-item,
+.tab-dashboard.theme-dark button.list-group-item {
+  color: #444; }
+  .tab-dashboard.theme-dark a.list-group-item .list-group-item-heading,
+  .tab-dashboard.theme-dark button.list-group-item .list-group-item-heading {
+    color: #333; }
+  .tab-dashboard.theme-dark a.list-group-item:hover, .tab-dashboard.theme-dark a.list-group-item:focus,
+  .tab-dashboard.theme-dark button.list-group-item:hover,
+  .tab-dashboard.theme-dark button.list-group-item:focus {
+    color: #444;
+    background-color: #F5F5F5; }
+
+.tab-dashboard.theme-dark .panel > .panel-body + .table,
+.tab-dashboard.theme-dark .panel > .panel-body + .table-responsive,
+.tab-dashboard.theme-dark .panel > .table + .panel-body,
+.tab-dashboard.theme-dark .panel > .table-responsive + .panel-body {
+  border-top-color: #444; }
+
+.tab-dashboard.theme-dark .panel-group .panel-heading + .panel-collapse > .panel-body,
+.tab-dashboard.theme-dark .panel-group .panel-heading + .panel-collapse > .list-group {
+  border-top-color: #222; }
+
+.tab-dashboard.theme-dark .panel-group .panel-footer {
+  border-top: 0; }
+  .tab-dashboard.theme-dark .panel-group .panel-footer + .panel-collapse .panel-body {
+    border-bottom-color: #222; }
+
+.tab-dashboard.theme-dark .panel-default > .panel-heading {
+  color: #4da1c0;
+  background-color: #222;
+  border-color: #333; }
+  .tab-dashboard.theme-dark .panel-default > .panel-heading + .panel-collapse > .panel-body {
+    border-top-color: #333; }
+  .tab-dashboard.theme-dark .panel-default > .panel-heading .badge {
+    color: #222;
+    background-color: #4da1c0; }
+
+.tab-dashboard.theme-dark .panel-default > .panel-footer + .panel-collapse > .panel-body {
+  border-bottom-color: #333; }
+
+.tab-dashboard.theme-dark .nav > li > a:hover, .tab-dashboard.theme-dark .nav > li > a:focus {
+  background-color: #8A8A8A; }
+
+.tab-dashboard.theme-dark .nav-tabs {
+  border-bottom-color: #444; }
+  .tab-dashboard.theme-dark .nav-tabs > li > a:hover {
+    border-color: #8A8A8A; }
+  .tab-dashboard.theme-dark .nav-tabs > li.active > a, .tab-dashboard.theme-dark .nav-tabs > li.active > a:hover, .tab-dashboard.theme-dark .nav-tabs > li.active > a:focus {
+    color: #FFF;
+    background-color: #444;
+    border: 0 none transparent; }
+
+.tab-dashboard.theme-dark .discover-table-row .docTableRowFilterButton {
+  background-color: #222; }
+
+.tab-dashboard.theme-dark .input-range__track {
+  background-color: #8A8A8A; }
+
+.tab-dashboard.theme-dark .input-range__slider {
+  background: #242424;
+  border-color: #8A8A8A; }
+
+.tab-dashboard.theme-dark .input-range__track--active {
+  background: #4da1c0; }
+
+.tab-dashboard.theme-dark .input-range__label {
+  color: #DDD; }
+
+/**
+  * 1. Don't duplicate styles in dark mode
+  */
+.tab-dashboard.theme-light {
+  /* 1 */
+  /**
+ * 1. Due to https://github.com/STRML/react-grid-layout/issues/240 we have to manually hide the resizable
+ * element.
+ */
+  /**
+ * 1. If we don't give the resizable handler a larger z index value the layout will hide it.
+ */
+  /**
+ * 1. Need to override the react grid layout height when a single panel is expanded. Important is required because
+ * otherwise the height is set inline.
+ */
+  /**
+ * .dshLayout-withMargins only affects the panel styles themselves, see ../panel
+ */
+  /**
+ * When a single panel is expanded, all the other panels are hidden in the grid.
+ */
+  /**
+ * 1. We need to mark this as important because react grid layout sets the width and height of the panels inline.
+ */
+  /**
+  * 1. Use opacity to make this element accessible to screen readers and keyboard.
+  * 2. Show on focus to enable keyboard accessibility.
+  */
+  /**
+  * 1. Use opacity to make this element accessible to screen readers and keyboard.
+  * 2. Show on focus to enable keyboard accessibility.
+  */ }
+  .tab-dashboard.theme-light .dshAppContainer {
+    -webkit-box-flex: 1;
+    -webkit-flex: 1;
+        -ms-flex: 1;
+            flex: 1;
+    display: -webkit-box;
+    display: -webkit-flex;
+    display: -ms-flexbox;
+    display: flex;
+    -webkit-box-orient: vertical;
+    -webkit-box-direction: normal;
+    -webkit-flex-direction: column;
+        -ms-flex-direction: column;
+            flex-direction: column;
+    background-color: #FFF; }
+  .tab-dashboard.theme-light .dshAppContainer--withMargins {
+    background-color: #F5F5F5; }
+  .tab-dashboard.theme-light .dshStartScreen {
+    text-align: center;
+    margin: 16px auto;
+    max-width: 800px;
+    width: 100%;
+    background: #FFF;
+    padding: 40px;
+    border-radius: 4px; }
+  .tab-dashboard.theme-light .dshSaveModal,
+  .tab-dashboard.theme-light .dshCloneModal {
+    max-width: 450px; }
+  .tab-dashboard.theme-light .react-grid-layout .gs-w {
+    z-index: auto; }
+  .tab-dashboard.theme-light .dshLayout--viewing .react-resizable-handle {
+    display: none;
+    /* 1 */ }
+  .tab-dashboard.theme-light .dshLayout--editing .react-resizable-handle {
+    z-index: 1000;
+    /* 1 */
+    right: 4px;
+    bottom: 4px; }
+  .tab-dashboard.theme-light .dshLayout-isMaximizedPanel {
+    height: 100% !important;
+    /* 1. */
+    width: 100%;
+    position: absolute; }
+  .tab-dashboard.theme-light .dshDashboardGrid__item--hidden {
+    display: none; }
+  .tab-dashboard.theme-light .dshDashboardGrid__item--expanded {
+    height: 100% !important;
+    /* 1 */
+    width: 100% !important;
+    /* 1 */
+    top: 0 !important;
+    /* 1 */
+    left: 0 !important;
+    /* 1 */ }
+  .tab-dashboard.theme-light .react-grid-layout .dshPanel {
+    overflow: visible; }
+  .tab-dashboard.theme-light .react-grid-item {
+    /**
+   * Disable transitions from the library on each grid element.
+   */
+    -webkit-transition: none;
+    transition: none;
+    /**
+    * Copy over and overwrite the fill color with EUI color mixin (for theming)
+    */
+    /**
+   * Dragged/Resized panels in dashboard should always appear above other panels
+   * and above the placeholder
+   */
+    /**
+   * Overwrites red coloring that comes from this library by default.
+   */ }
+    .tab-dashboard.theme-light .react-grid-item > .react-resizable-handle {
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='6' height='6' viewBox='0 0 6 6'%3E%3Cpolygon fill='rgb%28102, 102, 102%29' points='6 6 0 6 0 4.2 4 4.2 4.2 4.2 4.2 0 6 0' /%3E%3C/svg%3E%0A"); }
+      .tab-dashboard.theme-light .react-grid-item > .react-resizable-handle::after {
+        border: none; }
+    .tab-dashboard.theme-light .react-grid-item.resizing, .tab-dashboard.theme-light .react-grid-item.react-draggable-dragging {
+      z-index: 2000 !important; }
+    .tab-dashboard.theme-light .react-grid-item.react-draggable-dragging {
+      -webkit-box-shadow: 0 40px 64px 0 rgba(59, 79, 93, 0.1), 0 24px 32px 0 rgba(59, 79, 93, 0.1), 0 16px 16px 0 rgba(59, 79, 93, 0.1), 0 8px 8px 0 rgba(59, 79, 93, 0.1), 0 4px 4px 0 rgba(59, 79, 93, 0.1), 0 2px 2px 0 rgba(59, 79, 93, 0.1);
+              box-shadow: 0 40px 64px 0 rgba(59, 79, 93, 0.1), 0 24px 32px 0 rgba(59, 79, 93, 0.1), 0 16px 16px 0 rgba(59, 79, 93, 0.1), 0 8px 8px 0 rgba(59, 79, 93, 0.1), 0 4px 4px 0 rgba(59, 79, 93, 0.1), 0 2px 2px 0 rgba(59, 79, 93, 0.1);
+      border-radius: 4px; }
+    .tab-dashboard.theme-light .react-grid-item.react-grid-placeholder {
+      border-radius: 4px;
+      background: #0079a5; }
+  .tab-dashboard.theme-light .dshPanel {
+    z-index: auto;
+    -webkit-box-flex: 1;
+    -webkit-flex: 1;
+        -ms-flex: 1;
+            flex: 1;
+    display: -webkit-box;
+    display: -webkit-flex;
+    display: -ms-flexbox;
+    display: flex;
+    -webkit-box-orient: vertical;
+    -webkit-box-direction: normal;
+    -webkit-flex-direction: column;
+        -ms-flex-direction: column;
+            flex-direction: column;
+    height: 100%;
+    position: relative;
+    /**
+   * 1. We want the doc-table-container to scroll only when embedded in a dashboard panel
+   * 2. Fix overflow of vis's specifically for inside dashboard panels, lets the panel decide the overflow
+   */ }
+    .tab-dashboard.theme-light .dshPanel .panel-content {
+      display: -webkit-box;
+      display: -webkit-flex;
+      display: -ms-flexbox;
+      display: flex;
+      -webkit-box-flex: 1;
+      -webkit-flex: 1 1 100%;
+          -ms-flex: 1 1 100%;
+              flex: 1 1 100%;
+      height: auto;
+      z-index: 1;
+      background-color: inherit; }
+    .tab-dashboard.theme-light .dshPanel .panel-content--fullWidth {
+      width: 100%; }
+    .tab-dashboard.theme-light .dshPanel .doc-table-container {
+      -webkit-box-flex: 1;
+      -webkit-flex: 1 1 0;
+          -ms-flex: 1 1 0px;
+              flex: 1 1 0;
+      /* 1 */
+      overflow: auto;
+      /* 1 */ }
+    .tab-dashboard.theme-light .dshPanel .visualization .vis-container {
+      overflow: visible;
+      /* 2 */ }
+  .tab-dashboard.theme-light .dshPanel__panel {
+    background-color: #FFF;
+    border: 1px solid #FFF;
+    overflow: hidden;
+    height: 100%;
+    -webkit-box-flex: 1;
+    -webkit-flex: 1;
+        -ms-flex: 1;
+            flex: 1;
+    display: -webkit-box;
+    display: -webkit-flex;
+    display: -ms-flexbox;
+    display: flex;
+    -webkit-box-orient: vertical;
+    -webkit-box-direction: normal;
+    -webkit-flex-direction: column;
+        -ms-flex-direction: column;
+            flex-direction: column;
+    -webkit-box-pack: start;
+    -webkit-justify-content: flex-start;
+        -ms-flex-pack: start;
+            justify-content: flex-start; }
+  .tab-dashboard.theme-light .dshPanel__panel--editing {
+    border-color: #D9D9D9; }
+    .tab-dashboard.theme-light .dshPanel__panel--editing:hover {
+      border-color: #0079a5; }
+  .tab-dashboard.theme-light .dshLayout-withMargins .dshPanel__panel {
+    -webkit-box-shadow: 0 2px 2px -1px rgba(153, 153, 153, 0.3), 0 1px 5px -2px rgba(153, 153, 153, 0.3);
+            box-shadow: 0 2px 2px -1px rgba(153, 153, 153, 0.3), 0 1px 5px -2px rgba(153, 153, 153, 0.3);
+    border-color: #D9D9D9;
+    border-radius: 4px; }
+  .tab-dashboard.theme-light .dshLayout-withMargins .dshPanel__panel--editing {
+    -webkit-transition: all 150ms cubic-bezier(0.694, 0.0482, 0.335, 1);
+    transition: all 150ms cubic-bezier(0.694, 0.0482, 0.335, 1); }
+    .tab-dashboard.theme-light .dshLayout-withMargins .dshPanel__panel--editing:hover, .tab-dashboard.theme-light .dshLayout-withMargins .dshPanel__panel--editing:focus {
+      border-color: #0079a5;
+      -webkit-box-shadow: 0 4px 8px 0px rgba(153, 153, 153, 0.15), 0 2px 2px -1px rgba(153, 153, 153, 0.3);
+              box-shadow: 0 4px 8px 0px rgba(153, 153, 153, 0.15), 0 2px 2px -1px rgba(153, 153, 153, 0.3); }
+  .tab-dashboard.theme-light .dshPanel__header {
+    padding: 8px;
+    -webkit-box-flex: 0;
+    -webkit-flex: 0 0 auto;
+        -ms-flex: 0 0 auto;
+            flex: 0 0 auto;
+    white-space: nowrap;
+    display: -webkit-box;
+    display: -webkit-flex;
+    display: -ms-flexbox;
+    display: flex;
+    border: none;
+    -webkit-transition: background-color 150ms cubic-bezier(0.694, 0.0482, 0.335, 1);
+    transition: background-color 150ms cubic-bezier(0.694, 0.0482, 0.335, 1); }
+    .dshLayout-withMargins .tab-dashboard.theme-light .dshPanel__header {
+      border-top-left-radius: 3px;
+      border-top-right-radius: 3px; }
+  .tab-dashboard.theme-light .dshPanel__title {
+    font-size: inherit;
+    color: #666;
+    -webkit-transition: color 150ms cubic-bezier(0.694, 0.0482, 0.335, 1);
+    transition: color 150ms cubic-bezier(0.694, 0.0482, 0.335, 1);
+    -webkit-box-flex: 1;
+    -webkit-flex: 1 1 auto;
+        -ms-flex: 1 1 auto;
+            flex: 1 1 auto;
+    max-width: 100%;
+    /* 1 */
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    white-space: nowrap !important;
+    word-wrap: normal !important;
+    /* 2 */
+    display: inline-block; }
+  .tab-dashboard.theme-light .dshPanel__panel--editing:hover .dshPanel__header {
+    background-color: rgba(0, 0, 0, 0.05) !important;
+    cursor: move; }
+  .tab-dashboard.theme-light .dshPanel__panel--editing:hover .dshPanel__title:hover {
+    color: #0079a5; }
+  .tab-dashboard.theme-light .dshPanel__header--floater {
+    opacity: 0;
+    /* 1 */
+    position: absolute;
+    right: 1px;
+    top: 1px;
+    background-color: #FFF;
+    z-index: 1000;
+    -webkit-transition: opacity 150ms cubic-bezier(0.694, 0.0482, 0.335, 1);
+    transition: opacity 150ms cubic-bezier(0.694, 0.0482, 0.335, 1); }
+    .tab-dashboard.theme-light .dshPanel__header--floater:focus {
+      /* 2 */
+      opacity: 1; }
+  .tab-dashboard.theme-light .dshPanel:hover .dshPanel__header--floater {
+    opacity: 1; }
+  .tab-dashboard.theme-light .dshPanel_optionsMenuButton {
+    opacity: 0;
+    /* 1 */ }
+    .tab-dashboard.theme-light .dshPanel_optionsMenuButton:focus {
+      /* 2 */
+      opacity: 1; }
+  .tab-dashboard.theme-light .dshPanel:hover .dshPanel_optionsMenuButton {
+    opacity: 1; }
+  .tab-dashboard.theme-light .dshPanel__error {
+    text-align: center;
+    -webkit-box-pack: center;
+    -webkit-justify-content: center;
+        -ms-flex-pack: center;
+            justify-content: center;
+    -webkit-box-orient: vertical;
+    -webkit-box-direction: normal;
+    -webkit-flex-direction: column;
+        -ms-flex-direction: column;
+            flex-direction: column;
+    overflow: auto; }
+    .tab-dashboard.theme-light .dshPanel__error .fa-exclamation-triangle {
+      font-size: 24.0px;
+      color: #A30000; }
+  .tab-dashboard.theme-light .dshDashboardViewport {
+    width: 100%;
+    background-color: #FFF; }
+  .tab-dashboard.theme-light .dshDashboardViewport-withMargins {
+    width: 100%;
+    background-color: #F5F5F5; }
+
+.dshExitFullScreenButton {
+  text-align: center;
+  width: 100%;
+  height: 0;
+  bottom: 0;
+  position: absolute; }
+
+/**
+ * 1. override the z-index: 1 applied to all non-eui elements that are in :focus via kui
+ *      - see packages/kbn-ui-framework/src/global_styling/reset/_reset.scss
+ */
+.dshExitFullScreenButton__mode {
+  height: 40px;
+  left: 0;
+  bottom: 0;
+  position: fixed;
+  display: block;
+  padding: 0;
+  border: none;
+  background: none;
+  z-index: 5; }
+  .dshExitFullScreenButton__mode:hover, .dshExitFullScreenButton__mode:focus {
+    -webkit-transition: all 500ms cubic-bezier(0.694, 0.0482, 0.335, 1);
+    transition: all 500ms cubic-bezier(0.694, 0.0482, 0.335, 1);
+    z-index: 10 !important;
+    /* 1 */ }
+    .dshExitFullScreenButton__mode:hover .dshExitFullScreenButton__text, .dshExitFullScreenButton__mode:focus .dshExitFullScreenButton__text {
+      -webkit-transition: all 250ms cubic-bezier(0.694, 0.0482, 0.335, 1);
+      transition: all 250ms cubic-bezier(0.694, 0.0482, 0.335, 1);
+      -webkit-transform: translateX(-16px);
+              transform: translateX(-16px); }
+
+.dshExitFullScreenButton__logo {
+  display: block;
+  background-color: #005b7c;
+  height: 40px;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 147 51' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%23FFF' fill-rule='evenodd'%3E%3Cpath d='m59.3 36.99v-6.7l2.1-0.2 4 7h4.1l-5-8.8 4.8-7.7h-4l-3.9 6.4-2 0.2v-13.6h-3.6v23.4h3.5zm13 0h3.6v-16.5h-3.6v16.5zm0-19.3h3.6v-3.8h-3.6v3.8zm15.7 2.5c-1.9 0-4.1 1-4.1 1v-7.5h-3.6v23.4s4.3 0.4 6 0.4c5.9 0 8.1-2 8.1-8.9 0-6.2-1.9-8.4-6.4-8.4zm-1.7 14c-0.7 0-2.5-0.1-2.5-0.1v-10s1.9-0.7 3.7-0.7c2.2 0 3.2 1.5 3.2 5.2 0 4-0.7 5.6-4.4 5.6zm23.9-8.6c0-3.8-1.7-5.5-5.7-5.5-3 0-6.6 0.9-6.6 0.9l0.1 2.5s4-0.3 6.2-0.3c1.6 0 2.4 0.6 2.4 2.4v1.2l-4.3 0.4c-3.5 0.3-5.5 1.5-5.5 5 0 3.4 1.7 5.3 4.9 5.3 2.7 0 5.3-1.2 5.3-1.2 1.2 1 2.4 1.2 4.4 1.2l0.1-2.7c-1-0.1-1.4-0.5-1.5-1.5l0.2-7.7zm-3.6 3.7v4.4s-2.2 0.7-4.1 0.7c-1.4 0-2-0.9-2-2.4s0.8-2.2 2.3-2.3l3.8-0.4zm11.7 7.7v-12.8s1.8-0.9 3.7-0.9c2.5 0 2.9 1.6 2.9 4.9v8.8h3.6v-8.9c0-5.4-1.1-8-5.7-8-2.1 0-4.6 1.4-4.6 1.4v-1h-3.6v16.5h3.7zm26.6-11.4c0-3.8-1.7-5.5-5.7-5.5-3 0-6.6 0.9-6.6 0.9l0.1 2.5s4-0.3 6.2-0.3c1.6 0 2.4 0.6 2.4 2.4v1.2l-4.3 0.4c-3.5 0.3-5.5 1.5-5.5 5 0 3.4 1.7 5.3 4.9 5.3 2.7 0 5.3-1.2 5.3-1.2 1.2 1 2.4 1.2 4.4 1.2l0.1-2.7c-1-0.1-1.4-0.5-1.5-1.5l0.2-7.7zm-3.6 3.7v4.4s-2.2 0.7-4.1 0.7c-1.4 0-2-0.9-2-2.4s0.8-2.2 2.3-2.3l3.8-0.4z' fill-rule='nonzero'/%3E%3Cpath d='m0.75002 23.052c6.9088 0 13.402-2.3515 19.066 0.6639l20.184-23.716h-40v47l-1.9774e-14 -25.287c0.25047-0.0054307 0.49816-0.019007 0.75002-0.019007v1.3577z' opacity='.7'/%3E%3Cpath d='m3.9602e-14 44.578l-3.9602e-14 6.4223h40c-2.2378-11.667-9.8136-21.496-20.158-27l-19.842 20.578z' opacity='.7'/%3E%3Cpath d='m3.9035e-14 44.579l-3.9035e-14 6.4209h7.0209l18.979-22.652s-1.2608-1.0527-3.0476-2.2888c-1.3665-0.96307-3.3951-2.0593-3.3951-2.0593l-19.557 20.579z' opacity='.5'/%3E%3Cpath d='m0.75697 19c-0.2542 0-0.50418 0.013566-0.75697 0.018993v27.981l20-23.267c-5.7173-3.0131-12.27-4.7334-19.243-4.7334'/%3E%3C/g%3E%3C/svg%3E%0A");
+  width: 92px;
+  background-position: 8px 5px;
+  background-size: 72px 30px;
+  background-repeat: no-repeat;
+  z-index: 1000; }
+
+/**
+ * 1. Calc made to allow caret in text to peek out / animate.
+ */
+.dshExitFullScreenButton__text {
+  background: #0079a5;
+  color: #FFF;
+  line-height: 40px;
+  display: inline-block;
+  height: 40px;
+  position: absolute;
+  left: calc(100% + 16px);
+  /* 1 */
+  top: 0px;
+  bottom: 0px;
+  white-space: nowrap;
+  padding: 0px 8px 0px 12px;
+  -webkit-transition: all .2s ease;
+  transition: all .2s ease;
+  -webkit-transform: translateX(-100%);
+          transform: translateX(-100%);
+  z-index: -1; }
+
+.dshPanel__optionsMenuForm {
+  padding: 16px; }
+
+.tab-dashboard.theme-dark {
+  background-color: #222;
+  /**
+ * 1. Due to https://github.com/STRML/react-grid-layout/issues/240 we have to manually hide the resizable
+ * element.
+ */
+  /**
+ * 1. If we don't give the resizable handler a larger z index value the layout will hide it.
+ */
+  /**
+ * 1. Need to override the react grid layout height when a single panel is expanded. Important is required because
+ * otherwise the height is set inline.
+ */
+  /**
+ * .dshLayout-withMargins only affects the panel styles themselves, see ../panel
+ */
+  /**
+ * When a single panel is expanded, all the other panels are hidden in the grid.
+ */
+  /**
+ * 1. We need to mark this as important because react grid layout sets the width and height of the panels inline.
+ */
+  /**
+  * 1. Use opacity to make this element accessible to screen readers and keyboard.
+  * 2. Show on focus to enable keyboard accessibility.
+  */
+  /**
+  * 1. Use opacity to make this element accessible to screen readers and keyboard.
+  * 2. Show on focus to enable keyboard accessibility.
+  */ }
+  .tab-dashboard.theme-dark .dshAppContainer {
+    -webkit-box-flex: 1;
+    -webkit-flex: 1;
+        -ms-flex: 1;
+            flex: 1;
+    display: -webkit-box;
+    display: -webkit-flex;
+    display: -ms-flexbox;
+    display: flex;
+    -webkit-box-orient: vertical;
+    -webkit-box-direction: normal;
+    -webkit-flex-direction: column;
+        -ms-flex-direction: column;
+            flex-direction: column;
+    background-color: #222; }
+  .tab-dashboard.theme-dark .dshAppContainer--withMargins {
+    background-color: #242424; }
+  .tab-dashboard.theme-dark .dshStartScreen {
+    text-align: center;
+    margin: 16px auto;
+    max-width: 800px;
+    width: 100%;
+    background: #222;
+    padding: 40px;
+    border-radius: 4px; }
+  .tab-dashboard.theme-dark .dshSaveModal,
+  .tab-dashboard.theme-dark .dshCloneModal {
+    max-width: 450px; }
+  .tab-dashboard.theme-dark .react-grid-layout .gs-w {
+    z-index: auto; }
+  .tab-dashboard.theme-dark .dshLayout--viewing .react-resizable-handle {
+    display: none;
+    /* 1 */ }
+  .tab-dashboard.theme-dark .dshLayout--editing .react-resizable-handle {
+    z-index: 1000;
+    /* 1 */
+    right: 4px;
+    bottom: 4px; }
+  .tab-dashboard.theme-dark .dshLayout-isMaximizedPanel {
+    height: 100% !important;
+    /* 1. */
+    width: 100%;
+    position: absolute; }
+  .tab-dashboard.theme-dark .dshDashboardGrid__item--hidden {
+    display: none; }
+  .tab-dashboard.theme-dark .dshDashboardGrid__item--expanded {
+    height: 100% !important;
+    /* 1 */
+    width: 100% !important;
+    /* 1 */
+    top: 0 !important;
+    /* 1 */
+    left: 0 !important;
+    /* 1 */ }
+  .tab-dashboard.theme-dark .react-grid-layout .dshPanel {
+    overflow: visible; }
+  .tab-dashboard.theme-dark .react-grid-item {
+    /**
+   * Disable transitions from the library on each grid element.
+   */
+    -webkit-transition: none;
+    transition: none;
+    /**
+    * Copy over and overwrite the fill color with EUI color mixin (for theming)
+    */
+    /**
+   * Dragged/Resized panels in dashboard should always appear above other panels
+   * and above the placeholder
+   */
+    /**
+   * Overwrites red coloring that comes from this library by default.
+   */ }
+    .tab-dashboard.theme-dark .react-grid-item > .react-resizable-handle {
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='6' height='6' viewBox='0 0 6 6'%3E%3Cpolygon fill='rgb%28138, 138, 138%29' points='6 6 0 6 0 4.2 4 4.2 4.2 4.2 4.2 0 6 0' /%3E%3C/svg%3E%0A"); }
+      .tab-dashboard.theme-dark .react-grid-item > .react-resizable-handle::after {
+        border: none; }
+    .tab-dashboard.theme-dark .react-grid-item.resizing, .tab-dashboard.theme-dark .react-grid-item.react-draggable-dragging {
+      z-index: 2000 !important; }
+    .tab-dashboard.theme-dark .react-grid-item.react-draggable-dragging {
+      -webkit-box-shadow: 0 40px 64px 0 rgba(0, 0, 0, 0.1), 0 24px 32px 0 rgba(0, 0, 0, 0.1), 0 16px 16px 0 rgba(0, 0, 0, 0.1), 0 8px 8px 0 rgba(0, 0, 0, 0.1), 0 4px 4px 0 rgba(0, 0, 0, 0.1), 0 2px 2px 0 rgba(0, 0, 0, 0.1);
+              box-shadow: 0 40px 64px 0 rgba(0, 0, 0, 0.1), 0 24px 32px 0 rgba(0, 0, 0, 0.1), 0 16px 16px 0 rgba(0, 0, 0, 0.1), 0 8px 8px 0 rgba(0, 0, 0, 0.1), 0 4px 4px 0 rgba(0, 0, 0, 0.1), 0 2px 2px 0 rgba(0, 0, 0, 0.1);
+      border-radius: 4px; }
+    .tab-dashboard.theme-dark .react-grid-item.react-grid-placeholder {
+      border-radius: 4px;
+      background: #4da1c0; }
+  .tab-dashboard.theme-dark .dshPanel {
+    z-index: auto;
+    -webkit-box-flex: 1;
+    -webkit-flex: 1;
+        -ms-flex: 1;
+            flex: 1;
+    display: -webkit-box;
+    display: -webkit-flex;
+    display: -ms-flexbox;
+    display: flex;
+    -webkit-box-orient: vertical;
+    -webkit-box-direction: normal;
+    -webkit-flex-direction: column;
+        -ms-flex-direction: column;
+            flex-direction: column;
+    height: 100%;
+    position: relative;
+    /**
+   * 1. We want the doc-table-container to scroll only when embedded in a dashboard panel
+   * 2. Fix overflow of vis's specifically for inside dashboard panels, lets the panel decide the overflow
+   */ }
+    .tab-dashboard.theme-dark .dshPanel .panel-content {
+      display: -webkit-box;
+      display: -webkit-flex;
+      display: -ms-flexbox;
+      display: flex;
+      -webkit-box-flex: 1;
+      -webkit-flex: 1 1 100%;
+          -ms-flex: 1 1 100%;
+              flex: 1 1 100%;
+      height: auto;
+      z-index: 1;
+      background-color: inherit; }
+    .tab-dashboard.theme-dark .dshPanel .panel-content--fullWidth {
+      width: 100%; }
+    .tab-dashboard.theme-dark .dshPanel .doc-table-container {
+      -webkit-box-flex: 1;
+      -webkit-flex: 1 1 0;
+          -ms-flex: 1 1 0px;
+              flex: 1 1 0;
+      /* 1 */
+      overflow: auto;
+      /* 1 */ }
+    .tab-dashboard.theme-dark .dshPanel .visualization .vis-container {
+      overflow: visible;
+      /* 2 */ }
+  .tab-dashboard.theme-dark .dshPanel__panel {
+    background-color: #222;
+    border: 1px solid #222;
+    overflow: hidden;
+    height: 100%;
+    -webkit-box-flex: 1;
+    -webkit-flex: 1;
+        -ms-flex: 1;
+            flex: 1;
+    display: -webkit-box;
+    display: -webkit-flex;
+    display: -ms-flexbox;
+    display: flex;
+    -webkit-box-orient: vertical;
+    -webkit-box-direction: normal;
+    -webkit-flex-direction: column;
+        -ms-flex-direction: column;
+            flex-direction: column;
+    -webkit-box-pack: start;
+    -webkit-justify-content: flex-start;
+        -ms-flex-pack: start;
+            justify-content: flex-start; }
+  .tab-dashboard.theme-dark .dshPanel__panel--editing {
+    border-color: #333; }
+    .tab-dashboard.theme-dark .dshPanel__panel--editing:hover {
+      border-color: #4da1c0; }
+  .tab-dashboard.theme-dark .dshLayout-withMargins .dshPanel__panel {
+    -webkit-box-shadow: 0 2px 2px -1px rgba(0, 0, 0, 0.3), 0 1px 5px -2px rgba(0, 0, 0, 0.3);
+            box-shadow: 0 2px 2px -1px rgba(0, 0, 0, 0.3), 0 1px 5px -2px rgba(0, 0, 0, 0.3);
+    border-color: #333;
+    border-radius: 4px; }
+  .tab-dashboard.theme-dark .dshLayout-withMargins .dshPanel__panel--editing {
+    -webkit-transition: all 150ms cubic-bezier(0.694, 0.0482, 0.335, 1);
+    transition: all 150ms cubic-bezier(0.694, 0.0482, 0.335, 1); }
+    .tab-dashboard.theme-dark .dshLayout-withMargins .dshPanel__panel--editing:hover, .tab-dashboard.theme-dark .dshLayout-withMargins .dshPanel__panel--editing:focus {
+      border-color: #4da1c0;
+      -webkit-box-shadow: 0 4px 8px 0px rgba(0, 0, 0, 0.15), 0 2px 2px -1px rgba(0, 0, 0, 0.3);
+              box-shadow: 0 4px 8px 0px rgba(0, 0, 0, 0.15), 0 2px 2px -1px rgba(0, 0, 0, 0.3); }
+  .tab-dashboard.theme-dark .dshPanel__header {
+    padding: 8px;
+    -webkit-box-flex: 0;
+    -webkit-flex: 0 0 auto;
+        -ms-flex: 0 0 auto;
+            flex: 0 0 auto;
+    white-space: nowrap;
+    display: -webkit-box;
+    display: -webkit-flex;
+    display: -ms-flexbox;
+    display: flex;
+    border: none;
+    -webkit-transition: background-color 150ms cubic-bezier(0.694, 0.0482, 0.335, 1);
+    transition: background-color 150ms cubic-bezier(0.694, 0.0482, 0.335, 1); }
+    .dshLayout-withMargins .tab-dashboard.theme-dark .dshPanel__header {
+      border-top-left-radius: 3px;
+      border-top-right-radius: 3px; }
+  .tab-dashboard.theme-dark .dshPanel__title {
+    font-size: inherit;
+    color: #8A8A8A;
+    -webkit-transition: color 150ms cubic-bezier(0.694, 0.0482, 0.335, 1);
+    transition: color 150ms cubic-bezier(0.694, 0.0482, 0.335, 1);
+    -webkit-box-flex: 1;
+    -webkit-flex: 1 1 auto;
+        -ms-flex: 1 1 auto;
+            flex: 1 1 auto;
+    max-width: 100%;
+    /* 1 */
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    white-space: nowrap !important;
+    word-wrap: normal !important;
+    /* 2 */
+    display: inline-block; }
+  .tab-dashboard.theme-dark .dshPanel__panel--editing:hover .dshPanel__header {
+    background-color: rgba(255, 255, 255, 0.05) !important;
+    cursor: move; }
+  .tab-dashboard.theme-dark .dshPanel__panel--editing:hover .dshPanel__title:hover {
+    color: #4da1c0; }
+  .tab-dashboard.theme-dark .dshPanel__header--floater {
+    opacity: 0;
+    /* 1 */
+    position: absolute;
+    right: 1px;
+    top: 1px;
+    background-color: #222;
+    z-index: 1000;
+    -webkit-transition: opacity 150ms cubic-bezier(0.694, 0.0482, 0.335, 1);
+    transition: opacity 150ms cubic-bezier(0.694, 0.0482, 0.335, 1); }
+    .tab-dashboard.theme-dark .dshPanel__header--floater:focus {
+      /* 2 */
+      opacity: 1; }
+  .tab-dashboard.theme-dark .dshPanel:hover .dshPanel__header--floater {
+    opacity: 1; }
+  .tab-dashboard.theme-dark .dshPanel_optionsMenuButton {
+    opacity: 0;
+    /* 1 */ }
+    .tab-dashboard.theme-dark .dshPanel_optionsMenuButton:focus {
+      /* 2 */
+      opacity: 1; }
+  .tab-dashboard.theme-dark .dshPanel:hover .dshPanel_optionsMenuButton {
+    opacity: 1; }
+  .tab-dashboard.theme-dark .dshPanel__error {
+    text-align: center;
+    -webkit-box-pack: center;
+    -webkit-justify-content: center;
+        -ms-flex-pack: center;
+            justify-content: center;
+    -webkit-box-orient: vertical;
+    -webkit-box-direction: normal;
+    -webkit-flex-direction: column;
+        -ms-flex-direction: column;
+            flex-direction: column;
+    overflow: auto; }
+    .tab-dashboard.theme-dark .dshPanel__error .fa-exclamation-triangle {
+      font-size: 24.0px;
+      color: #bf4d4d; }
+  .tab-dashboard.theme-dark .dshDashboardViewport {
+    width: 100%;
+    background-color: #222; }
+  .tab-dashboard.theme-dark .dshDashboardViewport-withMargins {
+    width: 100%;
+    background-color: #242424; }
+/*# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbIi4uLy4uLy4uLy4uL25vZGVfbW9kdWxlcy9AZWxhc3RpYy9ldWkvc3JjL2dsb2JhbF9zdHlsaW5nL3ZhcmlhYmxlcy9fYW5pbWF0aW9ucy5zY3NzIiwiLi4vLi4vLi4vLi4vbm9kZV9tb2R1bGVzL0BlbGFzdGljL2V1aS9zcmMvZ2xvYmFsX3N0eWxpbmcvbWl4aW5zL190eXBvZ3JhcGh5LnNjc3MiLCIuLi8uLi8uLi8uLi9ub2RlX21vZHVsZXMvQGVsYXN0aWMvZXVpL3NyYy9nbG9iYWxfc3R5bGluZy9taXhpbnMvX2hlbHBlcnMuc2NzcyIsIi4uLy4uLy4uLy4uL25vZGVfbW9kdWxlcy9AZWxhc3RpYy9ldWkvc3JjL2dsb2JhbF9zdHlsaW5nL21peGlucy9fc3RhdGVzLnNjc3MiLCIuLi8uLi8uLi8uLi9ub2RlX21vZHVsZXMvQGVsYXN0aWMvZXVpL3NyYy9nbG9iYWxfc3R5bGluZy92YXJpYWJsZXMvX2NvbG9ycy5zY3NzIiwiZGlzY292ZXIvY29tcG9uZW50cy9mZXRjaF9lcnJvci9fZmV0Y2hfZXJyb3Iuc2NzcyIsImRpc2NvdmVyL2RpcmVjdGl2ZXMvX25vX3Jlc3VsdHMuc2NzcyIsIi4uLy4uLy4uL3VpL3B1YmxpYy9zdHlsZXMvX2xvY2FsX3NlYXJjaC5zY3NzIiwiZGlzY292ZXIvX2hhY2tzLnNjc3MiLCIuLi8uLi8uLi8uLi9ub2RlX21vZHVsZXMvQGVsYXN0aWMvZXVpL3NyYy9nbG9iYWxfc3R5bGluZy9mdW5jdGlvbnMvX2NvbG9ycy5zY3NzIiwiZGlzY292ZXIvX2Rpc2NvdmVyLnNjc3MiLCIuLi8uLi8uLi8uLi9ub2RlX21vZHVsZXMvQGVsYXN0aWMvZXVpL3NyYy9nbG9iYWxfc3R5bGluZy92YXJpYWJsZXMvX3NpemUuc2NzcyIsIi4uLy4uLy4uLy4uL25vZGVfbW9kdWxlcy9AZWxhc3RpYy9ldWkvc3JjL2dsb2JhbF9zdHlsaW5nL3ZhcmlhYmxlcy9fdHlwb2dyYXBoeS5zY3NzIiwiLi4vLi4vLi4vLi4vbm9kZV9tb2R1bGVzL0BlbGFzdGljL2V1aS9zcmMvZ2xvYmFsX3N0eWxpbmcvdmFyaWFibGVzL19ib3JkZXJzLnNjc3MiLCJob21lL19ob21lLnNjc3MiLCJob21lL2NvbXBvbmVudHMvX2FkZF9kYXRhLnNjc3MiLCIuLi8uLi8uLi8uLi9ub2RlX21vZHVsZXMvQGVsYXN0aWMvZXVpL3NyYy9nbG9iYWxfc3R5bGluZy9taXhpbnMvX3Jlc3BvbnNpdmUuc2NzcyIsImhvbWUvY29tcG9uZW50cy9fcmVjZW50bHlfYWNjZXNzZWQuc2NzcyIsImhvbWUvY29tcG9uZW50cy9fc3lub3BzaXMuc2NzcyIsImhvbWUvY29tcG9uZW50cy9fd2VsY29tZS5zY3NzIiwiLi4vLi4vLi4vLi4vbm9kZV9tb2R1bGVzL0BlbGFzdGljL2V1aS9zcmMvZ2xvYmFsX3N0eWxpbmcvdmFyaWFibGVzL196X2luZGV4LnNjc3MiLCIuLi8uLi8uLi91aS9wdWJsaWMvc3R5bGVzL19zdHlsaW5nX2NvbnN0YW50cy5zY3NzIiwiLi4vLi4vLi4vLi4vbm9kZV9tb2R1bGVzL0BlbGFzdGljL2V1aS9zcmMvZ2xvYmFsX3N0eWxpbmcvbWl4aW5zL19zaXplLnNjc3MiLCIuLi8uLi8uLi8uLi9ub2RlX21vZHVsZXMvQGVsYXN0aWMvZXVpL3NyYy9nbG9iYWxfc3R5bGluZy9taXhpbnMvX3NoYWRvdy5zY3NzIiwiaG9tZS9jb21wb25lbnRzL3R1dG9yaWFsL190dXRvcmlhbC5zY3NzIiwiZGFzaGJvYXJkL19oYWNrcy5zY3NzIiwiLi4vLi4vLi4vLi4vbm9kZV9tb2R1bGVzL0BlbGFzdGljL2V1aS9zcmMvdGhlbWVzL2s2L2s2X2NvbG9yc19kYXJrLnNjc3MiLCJkYXNoYm9hcmQvX2luZGV4LnNjc3MiLCJkYXNoYm9hcmQvZ3JpZC9fZGFzaGJvYXJkX2dyaWQuc2NzcyIsImRhc2hib2FyZC9wYW5lbC9fZGFzaGJvYXJkX3BhbmVsLnNjc3MiLCJkYXNoYm9hcmQvX2Rhc2hib2FyZF9hcHAuc2NzcyIsIi4uLy4uLy4uLy4uL25vZGVfbW9kdWxlcy9AZWxhc3RpYy9ldWkvc3JjL3RoZW1lcy9rNi9rNl9nbG9iYWxzLnNjc3MiLCJkYXNoYm9hcmQvdmlld3BvcnQvX2Rhc2hib2FyZF92aWV3cG9ydC5zY3NzIiwiZGFzaGJvYXJkL2NvbXBvbmVudHMvX2V4aXRfZnVsbF9zY3JlZW5fYnV0dG9uLnNjc3MiLCJkYXNoYm9hcmQvcGFuZWwvcGFuZWxfaGVhZGVyL19wYW5lbF9vcHRpb25zX21lbnVfZm9ybS5zY3NzIl0sIm5hbWVzIjpbXSwibWFwcGluZ3MiOiJBQVdBO0VBQ0U7SUFDRSxXQUFVLEVBQUE7RUFFWjtJQUNFLFdBQVUsRUFBQSxFQUFBOztBQUxkO0VBQ0U7SUFDRSxXQUFVLEVBQUE7RUFFWjtJQUNFLFdBQVUsRUFBQSxFQUFBOztBQUlkO0VBQ0U7SUFDRSxXQUFVLEVBQUE7RUFFWjtJQUNFLFdBQVU7SUFDViw0QkFBbUI7WUFBbkIsb0JBQW1CLEVBQUE7RUFFckI7SUFDRSxXQUFVO0lBQ1YsNEJBQW1CO1lBQW5CLG9CQUFtQixFQUFBLEVBQUE7O0FBVnZCO0VBQ0U7SUFDRSxXQUFVLEVBQUE7RUFFWjtJQUNFLFdBQVU7SUFDViw0QkFBbUI7WUFBbkIsb0JBQW1CLEVBQUE7RUFFckI7SUFDRSxXQUFVO0lBQ1YsNEJBQW1CO1lBQW5CLG9CQUFtQixFQUFBLEVBQUE7O0FDeUR2Qjs7Ozs7Ozs7OztHQVVHO0FDbEVIOztHQUVHO0FBb0JIOztHQUVHO0FDdkNIO0VBQ0U7SUFDRSxtRENoQnFCO1lEZ0JyQiwyQ0NoQnFCLEVBQUE7RURrQnZCO0lBQ0UscURDbkJxQjtZRG1CckIsNkNDbkJxQixFQUFBLEVBQUE7QURjekI7RUFDRTtJQUNFLG1EQ2hCcUI7WURnQnJCLDJDQ2hCcUIsRUFBQTtFRGtCdkI7SUFDRSxxRENuQnFCO1lEbUJyQiw2Q0NuQnFCLEVBQUEsRUFBQTs7QUR1QnpCO0VBQ0U7SUFDRSxvREN6QnFCO1lEeUJyQiw0Q0N6QnFCLEVBQUE7RUQyQnZCO0lBQ0UscURDNUJxQjtZRDRCckIsNkNDNUJxQixFQUFBLEVBQUE7O0FEdUJ6QjtFQUNFO0lBQ0Usb0RDekJxQjtZ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 */

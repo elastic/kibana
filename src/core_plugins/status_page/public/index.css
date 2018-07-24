@@ -1,0 +1,87 @@
+@-webkit-keyframes euiAnimFadeIn {
+  0% {
+    opacity: 0; }
+  100% {
+    opacity: 1; } }
+
+@keyframes euiAnimFadeIn {
+  0% {
+    opacity: 0; }
+  100% {
+    opacity: 1; } }
+
+@-webkit-keyframes euiGrow {
+  0% {
+    opacity: 0; }
+  1% {
+    opacity: 0;
+    -webkit-transform: scale(0);
+            transform: scale(0); }
+  100% {
+    opacity: 1;
+    -webkit-transform: scale(1);
+            transform: scale(1); } }
+
+@keyframes euiGrow {
+  0% {
+    opacity: 0; }
+  1% {
+    opacity: 0;
+    -webkit-transform: scale(0);
+            transform: scale(0); }
+  100% {
+    opacity: 1;
+    -webkit-transform: scale(1);
+            transform: scale(1); } }
+
+/**
+ * Text truncation
+ *
+ * Prevent text from wrapping onto multiple lines, and truncate with an
+ * ellipsis.
+ *
+ * 1. Ensure that the node has a maximum width after which truncation can
+ *    occur.
+ * 2. Fix for IE 8/9 if `word-wrap: break-word` is in effect on ancestor
+ *    nodes.
+ */
+/**
+ * Set scroll bar appearance on Chrome.
+ */
+/**
+ * Specifically target IE11, but not Edge.
+ */
+@-webkit-keyframes focusRingAnimate {
+  0% {
+    -webkit-box-shadow: 0 0 0 6px rgba(0, 121, 165, 0);
+            box-shadow: 0 0 0 6px rgba(0, 121, 165, 0); }
+  100% {
+    -webkit-box-shadow: 0 0 0 2px rgba(0, 121, 165, 0.3);
+            box-shadow: 0 0 0 2px rgba(0, 121, 165, 0.3); } }
+@keyframes focusRingAnimate {
+  0% {
+    -webkit-box-shadow: 0 0 0 6px rgba(0, 121, 165, 0);
+            box-shadow: 0 0 0 6px rgba(0, 121, 165, 0); }
+  100% {
+    -webkit-box-shadow: 0 0 0 2px rgba(0, 121, 165, 0.3);
+            box-shadow: 0 0 0 2px rgba(0, 121, 165, 0.3); } }
+
+@-webkit-keyframes focusRingAnimateLarge {
+  0% {
+    -webkit-box-shadow: 0 0 0 10px rgba(0, 121, 165, 0);
+            box-shadow: 0 0 0 10px rgba(0, 121, 165, 0); }
+  100% {
+    -webkit-box-shadow: 0 0 0 4px rgba(0, 121, 165, 0.3);
+            box-shadow: 0 0 0 4px rgba(0, 121, 165, 0.3); } }
+
+@keyframes focusRingAnimateLarge {
+  0% {
+    -webkit-box-shadow: 0 0 0 10px rgba(0, 121, 165, 0);
+            box-shadow: 0 0 0 10px rgba(0, 121, 165, 0); }
+  100% {
+    -webkit-box-shadow: 0 0 0 4px rgba(0, 121, 165, 0.3);
+            box-shadow: 0 0 0 4px rgba(0, 121, 165, 0.3); } }
+
+.stsPage {
+  min-height: 100vh; }
+/*# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbIi4uLy4uLy4uLy4uL25vZGVfbW9kdWxlcy9AZWxhc3RpYy9ldWkvc3JjL2dsb2JhbF9zdHlsaW5nL3ZhcmlhYmxlcy9fYW5pbWF0aW9ucy5zY3NzIiwiLi4vLi4vLi4vLi4vbm9kZV9tb2R1bGVzL0BlbGFzdGljL2V1aS9zcmMvZ2xvYmFsX3N0eWxpbmcvbWl4aW5zL190eXBvZ3JhcGh5LnNjc3MiLCIuLi8uLi8uLi8uLi9ub2RlX21vZHVsZXMvQGVsYXN0aWMvZXVpL3NyYy9nbG9iYWxfc3R5bGluZy9taXhpbnMvX2hlbHBlcnMuc2NzcyIsIi4uLy4uLy4uLy4uL25vZGVfbW9kdWxlcy9AZWxhc3RpYy9ldWkvc3JjL2dsb2JhbF9zdHlsaW5nL21peGlucy9fc3RhdGVzLnNjc3MiLCIuLi8uLi8uLi8uLi9ub2RlX21vZHVsZXMvQGVsYXN0aWMvZXVpL3NyYy9nbG9iYWxfc3R5bGluZy92YXJpYWJsZXMvX2NvbG9ycy5zY3NzIiwiaW5kZXguc2NzcyJdLCJuYW1lcyI6W10sIm1hcHBpbmdzIjoiQUFXQTtFQUNFO0lBQ0UsV0FBVSxFQUFBO0VBRVo7SUFDRSxXQUFVLEVBQUEsRUFBQTs7QUFMZDtFQUNFO0lBQ0UsV0FBVSxFQUFBO0VBRVo7SUFDRSxXQUFVLEVBQUEsRUFBQTs7QUFJZDtFQUNFO0lBQ0UsV0FBVSxFQUFBO0VBRVo7SUFDRSxXQUFVO0lBQ1YsNEJBQW1CO1lBQW5CLG9CQUFtQixFQUFBO0VBRXJCO0lBQ0UsV0FBVTtJQUNWLDRCQUFtQjtZQUFuQixvQkFBbUIsRUFBQSxFQUFBOztBQVZ2QjtFQUNFO0lBQ0UsV0FBVSxFQUFBO0VBRVo7SUFDRSxXQUFVO0lBQ1YsNEJBQW1CO1lBQW5CLG9CQUFtQixFQUFBO0VBRXJCO0lBQ0UsV0FBVTtJQUNWLDRCQUFtQjtZQUFuQixvQkFBbUIsRUFBQSxFQUFBOztBQ3lEdkI7Ozs7Ozs7Ozs7R0FVRztBQ2xFSDs7R0FFRztBQW9CSDs7R0FFRztBQ3ZDSDtFQUNFO0lBQ0UsbURDaEJxQjtZRGdCckIsMkNDaEJxQixFQUFBO0VEa0J2QjtJQUNFLHFEQ25CcUI7WURtQnJCLDZDQ25CcUIsRUFBQSxFQUFBO0FEY3pCO0VBQ0U7SUFDRSxtRENoQnFCO1lEZ0JyQiwyQ0NoQnFCLEVBQUE7RURrQnZCO0lBQ0UscURDbkJxQjtZRG1CckIsNkNDbkJxQixFQUFBLEVBQUE7O0FEdUJ6QjtFQUNFO0lBQ0Usb0RDekJxQjtZRHlCckIsNENDekJxQixFQUFBO0VEMkJ2QjtJQUNFLHFEQzVCcUI7WUQ0QnJCLDZDQzVCcUIsRUFBQSxFQUFBOztBRHVCekI7RUFDRTtJQUNFLG9EQ3pCcUI7WUR5QnJCLDRDQ3pCcUIsRUFBQTtFRDJCdkI7SUFDRSxxREM1QnFCO1lENEJyQiw2Q0M1QnFCLEVBQUEsRUFBQTs7QUNDekI7RUFDRSxrQkFBaUIsRUFDbEIiLCJmaWxlIjoidG8uY3NzIn0= */
