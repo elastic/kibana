@@ -26,11 +26,10 @@ const NoConnections = require('elasticsearch').errors.NoConnections;
 import mappings from './fixtures/mappings';
 import healthCheck from '../health_check';
 import kibanaVersion from '../kibana_version';
-import { esTestConfig } from '@kbn/test';
 import * as patchKibanaIndexNS from '../patch_kibana_index';
 
-const esPort = esTestConfig.getPort();
-const esUrl = esTestConfig.getUrl();
+const esPort = 9220;
+const esUrl = `http://elastic:changement@localhost:9220`;
 
 describe('plugins/elasticsearch', () => {
   describe('lib/health_check', function () {
@@ -162,7 +161,7 @@ describe('plugins/elasticsearch', () => {
           sinon.assert.calledOnce(plugin.status.red);
           sinon.assert.calledWithExactly(
             plugin.status.red,
-            `Unable to connect to Elasticsearch at ${esUrl}.`
+            `Unable to connect to Elasticsearch at http://localhost:9220/.`
           );
 
           sinon.assert.calledTwice(ping);
