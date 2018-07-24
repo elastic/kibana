@@ -95,6 +95,14 @@ export class XPackInfo {
   }
 
   /**
+   * Checks whether ES was available
+   * @returns {boolean}
+   */
+  isXpackUnavailable() {
+    return this._cache.error instanceof Error && this._cache.error.status === 400;
+  }
+
+  /**
    * If present, describes the reason why XPack info is not available.
    * @returns {Error|string}
    */
@@ -103,7 +111,7 @@ export class XPackInfo {
       return `[${this._clusterSource}] Elasticsearch cluster did not respond with license information.`;
     }
 
-    if (this._cache.error instanceof Error && this._cache.error.status === 400) {
+    if (this.isXpackUnavailable()) {
       return `X-Pack plugin is not installed on the [${this._clusterSource}] Elasticsearch cluster.`;
     }
 
