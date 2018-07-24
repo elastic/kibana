@@ -27,7 +27,7 @@ const findMock = () => {
   return Promise.resolve({ total: 1 });
 };
 
-test('should render home component', async () => {
+test('should render home component', () => {
   const recentlyAccessed = [
     {
       label: 'my vis',
@@ -42,12 +42,6 @@ test('should render home component', async () => {
     recentlyAccessed={recentlyAccessed}
     find={findMock}
   />);
-
-  // Ensure all promises resolve
-  await new Promise(resolve => process.nextTick(resolve));
-  // Ensure the state changes are reflected
-  component.update();
-
 
   expect(component).toMatchSnapshot(); // eslint-disable-line
 });
