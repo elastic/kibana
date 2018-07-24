@@ -30,6 +30,8 @@ It is *not* supported to manage Roles which grant <<kibana-privileges>> using
 doing so will likely cause Kibana's authorization to behave unexpectedly. 
 ============================================================================
 
-For more information, see {xpack-ref}/authorization.html[Configuring Role-based Access Control].
+For more information, see <<xpack-security-authorization>> and 
+{xpack-ref}/authorization.html[Configuring Role-based Access Control].
 
+include::authorization/index.asciidoc[]
 include::authorization/kibana-privileges.asciidoc[]

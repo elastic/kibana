@@ -2,15 +2,7 @@
 [[kibana-privileges]]
 === Kibana privileges
 
-Prior to {kib} 6.4, it was required to give {kib} users access to the underlying `.kibana`
-index in Elasticsearch. This allowed {kib} to defer to the {es} authorization model, and 
-create roles that had either read-only or read-and-write access to all Dashboards, Visualizations, 
-Saved Searches, etc. that are stored in the `.kibana` index. This approach requires you to know
-the details of where and how data is stored by {kib}.
-
-Kibana privileges allow you to   grant access to Kibana features without concerning yourself with
-the way the data is stored in Elasticsearch. To create a role with Kibana privileges, you can either
-use the *Management / Security / Roles* page in {kib} or you can use {kib}'s <<role-management-api>>.
+This section lists the Kibana privileges that you can assign to a role.
 
 [horizontal]
 `all`::

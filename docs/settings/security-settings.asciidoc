@@ -24,6 +24,10 @@ hidden in this {kib} instance. If `xpack.security.enabled` is set to `true` in
 Set to `true` to enable audit logging for security events, this is set to `false` by default.
 For more details see <<xpack-security-audit-logging>>.
 
+`xpack.security.authorization.legacyFallback`::
+Set to `true` (default) to enable the legacy fallback, see <<xpack-security-authorization>>
+for more details.
+
 [float]
 [[security-ui-settings]]
 ==== User Interface Security Settings
