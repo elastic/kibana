@@ -91,9 +91,9 @@ describe('esArchiver createParseArchiveStreams', () => {
           createConcatStream([])
         ]);
 
-        input.write(Buffer.from('{"a": 1}\n\n'));
+        input.write(Buffer.from('{"a": 1}\n\n{"a":'));
         expect(await receivedPromise).to.eql({ a: 1 });
-        input.write(Buffer.from('{"a": 2}'));
+        input.write(Buffer.from('2}'));
         input.end();
         expect(await finalPromise).to.eql([{ a: 1 }, { a: 2 }]);
       });
