@@ -25,6 +25,7 @@ import { PersistedState } from '../../persisted_state';
 import { IPrivate } from '../../private';
 import { RenderCompleteHelper } from '../../render_complete';
 import { AppState } from '../../state_management/app_state';
+import { timefilter } from '../../timefilter';
 import { RequestHandlerParams, Vis } from '../../vis';
 import { visualizationLoader } from './visualization_loader';
 import { VisualizeDataLoader } from './visualize_data_loader';
@@ -108,6 +109,7 @@ export class EmbeddedVisualizeHandler {
     this.vis.on('update', this.handleVisUpdate);
     this.vis.on('reload', this.reload);
     this.uiState.on('change', this.fetchAndRender);
+    timefilter.on('autoRefreshFetch', this.reload);
 
     this.dataLoader = new VisualizeDataLoader(vis, Private);
     this.renderCompleteHelper = new RenderCompleteHelper(element);
@@ -162,6 +164,7 @@ export class EmbeddedVisualizeHandler {
   public destroy(): void {
     this.destroyed = true;
     this.debouncedFetchAndRender.cancel();
+    timefilter.off('autoRefreshFetch', this.reload);
     this.vis.removeListener('reload', this.reload);
     this.vis.removeListener('update', this.handleVisUpdate);
     this.element.removeEventListener('renderComplete', this.onRenderCompleteListener);
