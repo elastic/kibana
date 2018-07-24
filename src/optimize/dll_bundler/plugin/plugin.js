@@ -161,21 +161,19 @@ export class Plugin {
     });
 
     compiler.hooks.watchRun.tapAsync('DynamicDllPlugin', async (a, cb) => {
-      // console.log('starting compile');
+      console.log('starting compile');
       await this.ensureManifestExists();
       await this.ensureEntryExists();
-      await this.runEntryPathsCompiler(compiler);
       cb();
     });
 
-    /*compiler.hooks.beforeCompile.tapPromise('DynamicDllPlugin', async ({ normalModuleFactory }) => {
-
-      if (this.waitForBundlerEntryFile) {
-        console.log('before compile compiling DLL');
-        console.log('waiting for dll bundler');
-        await this.runDLLsCompiler();
-        this.waitForBundlerEntryFile = false;
-      }
+    compiler.hooks.beforeCompile.tapPromise('DynamicDllPlugin', async ({ normalModuleFactory }) => {
+      // if (this.waitForBundlerEntryFile) {
+      //   console.log('before compile compiling DLL');
+      //   console.log('waiting for dll bundler');
+      //   await this.runDLLsCompiler();
+      //   this.waitForBundlerEntryFile = false;
+      // }
 
       normalModuleFactory.hooks.factory.tap(
         'NormalModuleFactory',
@@ -192,14 +190,64 @@ export class Plugin {
           });
         }
       );
-    });*/
+    });
+
+    compiler.hooks.compilation.tap('DynamicDllPlugin', compilation => {
+      // console.log('FDXXXXXXXXXXXXX');
+      if (compilation.compiler !== compiler || this.waitForBundlerEntryFile) {
+        // ignore child compilations from plugins like mini-css-extract-plugin
+        return;
+      }
+
+      console.log('OLAAAAAAAAAAAAA');
+
+      compilation.hooks.needAdditionalPass.tap('DynamicDllPlugin', () => {
+        const stubs = compilation.modules.filter(m => m.type === DLL_ENTRY_STUB_MODULE_TYPE);
+
+        if (!stubs.length) {
+          return false;
+        }
+
+        console.log('... need additional pass, dll missing', stubs.map(m => m.resource).length);
+        return true;
+      });
+    });
 
 
-    compiler.hooks.done.tapPromise('DynamicDLLPlugin', async (stats) => {
+    compiler.hooks.emit.tapPromise('DynamicDLLPlugin', async (compilation) => {
       console.log('last compiler step start');
 
-      stats.endTime = Date.now();
 
+      const requires = [];
+
+      for (const module of compilation.modules) {
+        // re-include requires for modules already handled by the dll
+        if (module.delegateData) {
+          const absoluteResource = path.resolve(this.dllConfig.context, module.request);
+          requires.push(`${path.relative(this.dllConfig.outputPath, absoluteResource)}`);
+        }
+
+        // include requires for modules that need to be added to the dll
+        if (module.type === DLL_ENTRY_STUB_MODULE_TYPE) {
+          requires.push(`${path.relative(this.dllConfig.outputPath, module.resource)}`);
+        }
+      }
+
+      const same = this.isSame(this.entryPaths, requires);
+
+      if (!same) {
+        console.log('writing new bundler entry file');
+        this.entryPaths = requires.slice(0);
+        this.waitForBundlerEntryFile = true;
+        await this.runDLLsCompiler();
+        this.waitForBundlerEntryFile = false;
+
+        for (const [key, module] of Object.entries(compilation.cache)) {
+          if (module.type === DLL_ENTRY_STUB_MODULE_TYPE) {
+            delete compilation.cache[key];
+          }
+        }
+      }
       console.log('last compiler step end');
     });
 
