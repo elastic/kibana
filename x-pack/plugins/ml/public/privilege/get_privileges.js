@@ -20,8 +20,12 @@ export function getPrivileges() {
     canUpdateJob: false,
     canUpdateDatafeed: false,
     canPreviewDatafeed: false,
+    canGetCalendars: false,
     canCreateCalendar: false,
     canDeleteCalendar: false,
+    canGetFilters: false,
+    canCreateFilter: false,
+    canDeleteFilter: false,
   };
 
   return new Promise((resolve, reject) => {
@@ -58,9 +62,8 @@ export function getPrivileges() {
 
     ml.checkPrivilege(priv)
       .then((resp) => {
-
-      // if security has been disabled, securityDisabled is returned from the endpoint
-      // therefore set all privileges to true
+        // if security has been disabled, securityDisabled is returned from the endpoint
+        // therefore set all privileges to true
         if (resp.securityDisabled) {
           Object.keys(privileges).forEach(k => privileges[k] = true);
         } else {
