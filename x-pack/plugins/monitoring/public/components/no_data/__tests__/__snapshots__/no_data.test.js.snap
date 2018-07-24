@@ -5,8 +5,8 @@ exports[`NoData should show a default message if reason is unknown 1`] = `
   class="euiPage euiPage--widthIsNotRestricted"
 >
   <div
-    class="euiPageBody euiPage--restrictWidth-custom"
-    style="max-width:600px"
+    class="euiPageBody"
+    restrictwidth="600"
   >
     <div
       class="euiPanel euiPanel--paddingLarge euiPageContent eui-textCenter euiPageContent--verticalCenter euiPageContent--horizontalCenter"
@@ -86,8 +86,8 @@ exports[`NoData should show text next to the spinner while checking a setting 1`
   class="euiPage euiPage--widthIsNotRestricted"
 >
   <div
-    class="euiPageBody euiPage--restrictWidth-custom"
-    style="max-width:600px"
+    class="euiPageBody"
+    restrictwidth="600"
   >
     <div
       class="euiPanel euiPanel--paddingLarge euiPageContent eui-textCenter euiPageContent--verticalCenter euiPageContent--horizontalCenter"
