@@ -17,6 +17,7 @@
  * under the License.
  */
 
+import { readFileSync } from 'fs';
 import { format as formatUrl } from 'url';
 
 import supertestAsPromised from 'supertest-as-promised';
@@ -24,7 +25,20 @@ import supertestAsPromised from 'supertest-as-promised';
 export function KibanaSupertestProvider({ getService }) {
   const config = getService('config');
   const kibanaServerUrl = formatUrl(config.get('servers.kibana'));
-  return supertestAsPromised(kibanaServerUrl);
+
+  const agent = supertestAsPromised.agent(kibanaServerUrl);
+
+  const kibanaServerCert = config.get('kbnTestServer.serverArgs')
+    .filter(arg => arg.startsWith('--server.ssl.certificate'))
+    .map(arg => arg.split('=').pop())
+    .map(path => readFileSync(path))
+    .shift();
+
+  if (kibanaServerCert) {
+    agent.ca(kibanaServerCert);
+  }
+
+  return agent;
 }
 
 export function KibanaSupertestWithoutAuthProvider({ getService }) {

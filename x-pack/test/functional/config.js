@@ -148,7 +148,6 @@ export default async function ({ readConfigFile }) {
 
     kbnTestServer: {
       ...kibanaCommonConfig.get('kbnTestServer'),
-      uuid: 'jjj', // Kibana UUID for "primary" cluster in monitoring data
       serverArgs: [
         ...kibanaCommonConfig.get('kbnTestServer.serverArgs'),
         '--server.uuid=5b2de169-2785-441b-ae8c-186a1936b17d',
