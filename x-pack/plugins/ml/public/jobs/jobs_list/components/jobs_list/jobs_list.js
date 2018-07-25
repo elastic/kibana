@@ -203,10 +203,12 @@ export class JobsList extends Component {
       },
     };
 
+    const selectedJobsClass = (this.props.selectedJobsCount) ? 'jobs-selected' : '';
+
     return (
       <EuiBasicTable
         itemId="id"
-        className="jobs-list-table"
+        className={`jobs-list-table ${selectedJobsClass}`}
         items={pageOfItems}
         columns={columns}
         pagination={pagination}
@@ -230,4 +232,5 @@ JobsList.propTypes = {
   showDeleteJobModal: PropTypes.func.isRequired,
   showStartDatafeedModal: PropTypes.func.isRequired,
   refreshJobs: PropTypes.func.isRequired,
+  selectedJobsCount: PropTypes.number.isRequired,
 };
