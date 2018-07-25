@@ -17,17 +17,25 @@
  * under the License.
  */
 
-interface IInjector {
-  get<T>(injectable: string): T;
+interface Toast extends ToastDescription {
+  id: number;
 }
 
-declare class Chrome {
-  public addBasePath<T = string>(path: T): T;
-  public dangerouslyGetActiveInjector(): Promise<IInjector>;
-  public getBasePath(): string;
-  public getXsrfToken(): string;
+interface ToastDescription {
+  title: string;
+  color?: string;
+  iconType?: string;
+  text?: string;
+  'data-test-subj'?: string;
 }
 
-declare const chrome: Chrome;
+export interface ToastNotifications {
+  onChange(changeCallback: () => void): void;
+  remove(toast: Toast): void;
+  add(toast: ToastDescription | string): Toast;
+  addSuccess(toast: ToastDescription | string): Toast;
+  addWarning(toast: ToastDescription | string): Toast;
+  addDanger(toast: ToastDescription | string): Toast;
+}
 
-export default chrome;
+export const toastNotifications: ToastNotifications;

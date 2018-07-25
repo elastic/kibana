@@ -17,17 +17,27 @@
  * under the License.
  */
 
-interface IInjector {
-  get<T>(injectable: string): T;
+import { SearchSource } from '../../courier';
+import { QueryFilter } from '../../filter_bar/query_filter';
+import { PersistedState } from '../../persisted_state';
+import { Filters, Query, TimeRange } from '../../visualize';
+import { AggConfigs } from '../agg_configs';
+import { Vis } from '../vis';
+
+export interface RequestHandlerParams {
+  searchSource: SearchSource;
+  aggs: AggConfigs;
+  timeRange?: TimeRange;
+  query?: Query;
+  filters?: Filters;
+  forceFetch: boolean;
+  queryFilter: QueryFilter;
+  uiState: PersistedState;
 }
 
-declare class Chrome {
-  public addBasePath<T = string>(path: T): T;
-  public dangerouslyGetActiveInjector(): Promise<IInjector>;
-  public getBasePath(): string;
-  public getXsrfToken(): string;
+export type RequestHandler = <T>(vis: Vis, params: RequestHandlerParams) => T;
+
+export interface RequestHandlerDescription {
+  name: string;
+  handler: RequestHandler;
 }
-
-declare const chrome: Chrome;
-
-export default chrome;
