@@ -27,7 +27,8 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
   const find = getService('find');
   const flyout = getService('flyout');
   const testSubjects = getService('testSubjects');
-  const PageObjects = getPageObjects(['header', 'common', 'visualize']);
+  const comboBox = getService('comboBox');
+  const PageObjects = getPageObjects(['header', 'common']);
 
   const defaultFindTimeout = config.get('timeouts.find');
 
@@ -547,7 +548,7 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
       await this.setScriptedFieldScript(script);
       await this.openScriptedFieldHelp('testTab');
       if (additionalField) {
-        await PageObjects.visualize.setComboBox('additionalFieldsSelect', additionalField);
+        await comboBox.set('additionalFieldsSelect', additionalField);
         await testSubjects.click('runScriptButton');
       }
       let scriptResults;
