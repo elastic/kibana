@@ -6,12 +6,12 @@
 
 import Boom from 'boom';
 import fs from 'fs';
-import { Full } from 'javascript-typescript-langserver/lib/lsp-extend';
 import { Clone, Commit, Error, Repository, Reset } from 'nodegit';
 import path from 'path';
 import Url from 'url';
 import { ResponseMessage } from 'vscode-jsonrpc/lib/messages';
 import { Location, TextDocumentPositionParams } from 'vscode-languageserver';
+import { Full } from '../../../../lsp/javascript-typescript-langserver/src/lsp-extend';
 import { LspRequest } from '../../model';
 import { GitOperations } from '../git_operations';
 import { Log } from '../log';

@@ -28,7 +28,7 @@ task checkoutKibana(type: com.palominolabs.gradle.task.git.clone.GitCloneTask) {
   forceFetch = true
 }
 
-task bootstrap(type: YarnTask, dependsOn: [yarnSetup, checkoutKibana])  {
+task bootstrap(type: YarnTask, dependsOn: [yarnSetup, checkoutKibana, rootProject.tasks.checkoutSubmodule])  {
   inputs.property("kibanaVersion", kibanaVersion)
   inputs.files(
     file("$rootDir/kibana-extra/castro/package.json"),
