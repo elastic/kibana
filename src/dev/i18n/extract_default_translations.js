@@ -23,7 +23,7 @@ import JSON5 from 'json5';
 
 import { extractHtmlMessages } from './extract_html_messages';
 import { extractCodeMessages } from './extract_code_messages';
-import { extractJadeMessages } from './extract_jade_messages';
+import { extractPugMessages } from './extract_pug_messages';
 import { extractHandlebarsMessages } from './extract_handlebars_messages';
 import { globAsync, makeDirAsync, accessAsync, readFileAsync, writeFileAsync } from './utils';
 
@@ -38,19 +38,19 @@ function addMessageToMap(targetMap, key, value) {
 }
 
 export async function extractDefaultTranslations(inputPath) {
-  const entries = await globAsync('*.{js,jsx,jade,ts,tsx,html,hbs,handlebars}', {
+  const entries = await globAsync('*.{js,jsx,pug,jade,ts,tsx,html,hbs,handlebars}', {
     cwd: inputPath,
     matchBase: true,
   });
 
-  const { htmlEntries, codeEntries, jadeEntries, hbsEntries } = entries.reduce(
+  const { htmlEntries, codeEntries, pugEntries, hbsEntries } = entries.reduce(
     (paths, entry) => {
       const resolvedPath = resolve(inputPath, entry);
 
       if (resolvedPath.endsWith('.html')) {
         paths.htmlEntries.push(resolvedPath);
       } else if (resolvedPath.endsWith('.jade') || resolvedPath.endsWith('.pug')) {
-        paths.jadeEntries.push(resolvedPath);
+        paths.pugEntries.push(resolvedPath);
       } else if (resolvedPath.endsWith('.hbs') || resolvedPath.endsWith('.handlebars')) {
         paths.hbsFiles.push(resolvedPath);
       } else {
@@ -59,7 +59,7 @@ export async function extractDefaultTranslations(inputPath) {
 
       return paths;
     },
-    { htmlEntries: [], codeEntries: [], jadeEntries: [], hbsEntries: [] }
+    { htmlEntries: [], codeEntries: [], pugEntries: [], hbsEntries: [] }
   );
 
   const defaultMessagesMap = new Map();
@@ -68,7 +68,7 @@ export async function extractDefaultTranslations(inputPath) {
     [
       [htmlEntries, extractHtmlMessages],
       [codeEntries, extractCodeMessages],
-      [jadeEntries, extractJadeMessages],
+      [pugEntries, extractPugMessages],
       [hbsEntries, extractHandlebarsMessages],
     ].map(async ([entries, extractFunction]) => {
       const files = await Promise.all(

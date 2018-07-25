@@ -80,7 +80,7 @@ async function verifyTranslations(uiExports) {
   throw new Error(
     '\n' +
     '\n' +
-    'The following keys are used in angular/jade views but are not translated:\n' +
+    'The following keys are used in angular/pug views but are not translated:\n' +
     keysWithoutTranslations.map(([locale, keys]) => (
       `   - ${locale}: ${formatListAsProse(keys)}`
     )).join('\n') +
