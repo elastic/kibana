@@ -17,14 +17,14 @@
  * under the License.
  */
 
-import _ from 'lodash';
-import { AliasAction, CallCluster, IndexMapping, NotFound, RawDoc } from './call_cluster';
-import { MigrationVersion } from './document_migrator';
-
 /*
  * This module contains various functions for querying and manipulating
  * elasticsearch indices.
  */
+
+import _ from 'lodash';
+import { AliasAction, CallCluster, IndexMapping, NotFound, RawDoc } from './call_cluster';
+import { MigrationVersion } from './document_migrator';
 
 // Require rather than import gets us around the lack of TypeScript definitions
 // for "getTypes"
@@ -63,16 +63,10 @@ export class ElasticIndex {
     this.index = opts.index;
   }
 
-  /**
-   * Gets the index name.
-   */
   public get name() {
     return this.index;
   }
 
-  /**
-   * Gets the index name.
-   */
   public toString() {
     return this.index;
   }
@@ -106,7 +100,6 @@ export class ElasticIndex {
    * @param Opts
    * @prop {number} batchSize - The number of documents to read at a time
    * @prop {string} scrollDuration - The scroll duration used for scrolling through the index
-   * @memberof BatchIndexWriter
    */
   public reader({ batchSize, scrollDuration }: { batchSize: number; scrollDuration: string }) {
     const { callCluster, index } = this;
@@ -175,7 +168,8 @@ export class ElasticIndex {
    * the number of documents that have a property which has migrations defined for it,
    * but which has not had those migrations applied. We don't want to cache the
    * results of this function (e.g. in context or somewhere), as it is important that
-   * it performs the check *each* time it is called.
+   * it performs the check *each* time it is called, rather than memoizing itself,
+   * as this is used to determine if migrations are complete.
    *
    * @param {MigrationVersion} migrationVersion - The latest versions of the migrations
    */
@@ -219,19 +213,11 @@ export class ElasticIndex {
     return callCluster('indices.putMapping', { body: mappings.doc, index, type: 'doc' });
   }
 
-  /**
-   * Creates the index. Returns true if the index was created, false if it already existed.
-   *
-   * @param {IndexMapping} mappings
-   */
   public async create(mappings?: IndexMapping) {
     const { callCluster, index } = this;
     await callCluster('indices.create', { body: { mappings }, index });
   }
 
-  /**
-   * Deletes the index.
-   */
   public async deleteIndex() {
     const { callCluster, index } = this;
     await callCluster('indices.delete', { index });
