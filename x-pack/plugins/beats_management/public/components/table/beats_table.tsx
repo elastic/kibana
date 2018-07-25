@@ -17,7 +17,7 @@ import React from 'react';
 import styled from 'styled-components';
 import { TABLE_CONFIG } from '../../../common/constants';
 import { CMPopulatedBeat } from '../../../common/domain_types';
-import { BulkActionControlBar } from './controls';
+import { BulkActionControlBar } from './bulk_action_control_bar';
 
 const columns = [
   {

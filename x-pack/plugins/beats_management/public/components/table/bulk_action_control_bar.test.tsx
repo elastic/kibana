@@ -7,7 +7,7 @@
 import { mount, shallow } from 'enzyme';
 import React from 'react';
 import { TABLE_CONFIG } from '../../../common/constants';
-import { BulkActionControlBar } from './controls';
+import { BulkActionControlBar } from './bulk_action_control_bar';
 
 describe('BulkActionControlBar component', () => {
   let onBulkAction: any;
