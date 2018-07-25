@@ -17,16 +17,16 @@
  * under the License.
  */
 
-import { FatalErrorsService } from '../../../core/public/fatal_errors';
+import { FatalErrorsStartContract } from '../../../core/public/fatal_errors';
 import {
   AngularHttpError,
   formatAngularHttpError,
   isAngularHttpError,
 } from './lib/format_angular_http_error';
 
-let newPlatformFatalErrors: ReturnType<FatalErrorsService['start']>;
+let newPlatformFatalErrors: FatalErrorsStartContract;
 
-export function __newPlatformInit__(instance: typeof newPlatformFatalErrors) {
+export function __newPlatformInit__(instance: FatalErrorsStartContract) {
   if (newPlatformFatalErrors === undefined) {
     newPlatformFatalErrors = instance;
   } else {
