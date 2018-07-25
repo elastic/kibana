@@ -25,7 +25,7 @@ import 'uiExports/navbarExtensions';
 import 'uiExports/docViews';
 import 'uiExports/fieldFormats';
 import 'uiExports/search';
-
+import 'uiExports/autocompleteProviders';
 import _ from 'lodash';
 import 'ui/autoload/all';
 import 'plugins/kibana/dashboard';
