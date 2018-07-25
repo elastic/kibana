@@ -72,7 +72,6 @@ uiModules
         listenForUpdates($scope);
         updateGlobalStateWithTime($scope);
 
-        setTimefilterValues($scope);
         $scope.toggleRefresh = () => {
           timefilter.toggleRefresh();
         };
