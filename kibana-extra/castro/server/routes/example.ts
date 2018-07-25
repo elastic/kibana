@@ -4,9 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import * as Hapi from 'hapi';
-
 import { computeRanges, render, tokenizeLines } from '../highlights';
+import { Server } from '../kibana_types';
 import { Log } from '../log';
 
 import * as fs from 'fs';
@@ -137,11 +136,11 @@ async function getFiles(log: Log) {
   };
 }
 
-export function exampleRoute(server: Hapi.Server) {
+export function exampleRoute(server: Server) {
   server.route({
     path: '/api/castro/example',
     method: 'GET',
-    handler(req: Hapi.Request, reply: any) {
+    handler(req, reply) {
       const log = new Log(server, ['codesearch', 'getFiles']);
       getFiles(log).then(result => reply(result), err => reply(err).code(500));
     },
@@ -149,7 +148,7 @@ export function exampleRoute(server: Hapi.Server) {
   server.route({
     path: '/api/castro/tree',
     method: 'GET',
-    handler(req: Hapi.Request, reply: any) {
+    handler(req, reply) {
       const log = new Log(server, ['codesearch', 'getTree']);
       getTree(log).then(result => reply(result), err => reply(err).code(500));
     },
@@ -157,7 +156,7 @@ export function exampleRoute(server: Hapi.Server) {
   server.route({
     path: '/api/castro/highlight/{path}',
     method: 'POST',
-    handler(req: Hapi.Request, reply: any) {
+    handler(req, reply) {
       const { content } = req.payload;
       const path = req.params.path;
       const lines = tokenizeLines(path, content);

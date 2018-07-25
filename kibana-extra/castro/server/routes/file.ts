@@ -6,15 +6,15 @@
 
 import Boom from 'boom';
 import fileType from 'file-type';
-import * as Hapi from 'hapi';
 import { GitOperations } from '../git_operations';
+import { Server } from '../kibana_types';
 import { ServerOptions } from '../server_options';
 
-export function fileRoute(server: Hapi.Server, options: ServerOptions) {
+export function fileRoute(server: Server, options: ServerOptions) {
   server.route({
     path: '/api/castro/repo/{site}/{org}/{repo}/tree/{rev}/{path*}',
     method: 'GET',
-    async handler(req: Hapi.Request, reply: any) {
+    async handler(req, reply) {
       const fileResolver = new GitOperations(options.repoPath);
       const { site, org, repo, path, rev } = req.params;
       const uri = `${site}/${org}/${repo}`;
@@ -34,7 +34,7 @@ export function fileRoute(server: Hapi.Server, options: ServerOptions) {
   server.route({
     path: '/api/castro/repo/{site}/{org}/{repo}/blob/{rev}/{path*}',
     method: 'GET',
-    async handler(req: Hapi.Request, reply: Hapi.IReply) {
+    async handler(req, reply) {
       const fileResolver = new GitOperations(options.repoPath);
       const { site, org, repo, path, rev } = req.params;
       const uri = `${site}/${org}/${repo}`;
@@ -66,7 +66,7 @@ export function fileRoute(server: Hapi.Server, options: ServerOptions) {
   server.route({
     path: '/api/castro/repo/{site}/{org}/{repo}/raw/{rev}/{path*}',
     method: 'GET',
-    async handler(req: Hapi.Request, reply: Hapi.IReply) {
+    async handler(req, reply) {
       const fileResolver = new GitOperations(options.repoPath);
       const { site, org, repo, path, rev } = req.params;
       const uri = `${site}/${org}/${repo}`;

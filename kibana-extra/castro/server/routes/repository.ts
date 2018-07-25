@@ -5,17 +5,17 @@
  */
 
 import Boom from 'boom';
-import * as Hapi from 'hapi';
 
 import { RepositoryUtils } from '../../common/repository_utils';
 import { REPOSITORY_INDEX_TYPE } from '../../mappings';
 import { Repository } from '../../model';
+import { Server } from '../kibana_types';
 import { Log } from '../log';
 import { CloneWorker, DeleteWorker } from '../queue';
 import { ServerOptions } from '../server_options';
 
 export function repositoryRoute(
-  server: Hapi.Server,
+  server: Server,
   options: ServerOptions,
   cloneWorker: CloneWorker,
   deleteWorker: DeleteWorker
@@ -24,7 +24,7 @@ export function repositoryRoute(
   server.route({
     path: '/api/castro/repo',
     method: 'POST',
-    async handler(req: Hapi.Request, reply: any) {
+    async handler(req, reply) {
       const repoUrl: string = req.payload.url;
       const objectClient = req.getSavedObjectsClient();
       const log = new Log(req.server);
@@ -49,7 +49,7 @@ export function repositoryRoute(
             dataPath: options.repoPath,
           };
           await cloneWorker.enqueueJob(payload, {});
-          reply();
+          reply({});
         } catch (error) {
           const msg = `Issue repository clone request for ${repoUrl} error: ${error}`;
           log.error(msg);
@@ -63,7 +63,7 @@ export function repositoryRoute(
   server.route({
     path: '/api/castro/repo/{uri*3}',
     method: 'DELETE',
-    async handler(req: Hapi.Request, reply: any) {
+    async handler(req, reply) {
       const repoUri: string = req.params.uri as string;
       const log = new Log(req.server);
 
@@ -78,7 +78,7 @@ export function repositoryRoute(
         };
         await deleteWorker.enqueueJob(payload, {});
 
-        reply();
+        reply({});
       } catch (error) {
         const msg = `Issue repository delete request for ${repoUri} error: ${error}`;
         log.error(msg);
@@ -91,7 +91,7 @@ export function repositoryRoute(
   server.route({
     path: '/api/castro/repo/{uri*3}',
     method: 'GET',
-    async handler(req: Hapi.Request, reply: any) {
+    async handler(req, reply) {
       const repoUri = req.params.uri as string;
       const objectClient = req.getSavedObjectsClient();
       const log = new Log(req.server);
@@ -112,7 +112,7 @@ export function repositoryRoute(
   server.route({
     path: '/api/castro/repos',
     method: 'GET',
-    async handler(req: Hapi.Request, reply: any) {
+    async handler(req, reply) {
       const objectClient = req.getSavedObjectsClient();
       const log = new Log(req.server);
 

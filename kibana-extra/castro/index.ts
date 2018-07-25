@@ -5,10 +5,10 @@
  */
 
 import { Esqueue } from '@castro/esqueue';
-import * as Hapi from 'hapi';
 import { resolve } from 'path';
 
 import { mappings } from './mappings';
+import { Server } from './server/kibana_types';
 import { Log } from './server/log';
 import { CloneWorker, DeleteWorker, UpdateWorker } from './server/queue';
 import { exampleRoute } from './server/routes/example';
@@ -47,7 +47,7 @@ export default (kibana: any) =>
       }).default();
     },
 
-    init(server: Hapi.Server, options: any) {
+    init(server: Server, options: any) {
       const queueIndex = server.config().get('castro.queueIndex');
       const adminClient = server.plugins.elasticsearch.getCluster('admin');
       const queue = new Esqueue(queueIndex, {
@@ -58,10 +58,6 @@ export default (kibana: any) =>
       });
       const log = new Log(server);
       const serverOptions = new ServerOptions(options);
-      const client = server.plugins.elasticsearch.getCluster('admin');
-      const callCluster = async (method: string, params: any) => {
-        return await client.callWithInternalUser(method, params);
-      };
 
       const repository = server.savedObjects.getSavedObjectsRepository(
         adminClient.callWithInternalUser
@@ -72,7 +68,11 @@ export default (kibana: any) =>
       const deleteWorker = new DeleteWorker(queue, log, objectsClient).bind();
       const updateWorker = new UpdateWorker(queue, log, objectsClient).bind();
 
-      const scheduler = new UpdateScheduler(updateWorker, serverOptions, callCluster);
+      const scheduler = new UpdateScheduler(
+        updateWorker,
+        serverOptions,
+        adminClient.callWithInternalUser
+      );
       scheduler.start();
 
       // Add server routes and initialize the plugin here

@@ -4,15 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import * as Hapi from 'hapi';
-
 import { ResponseError } from 'vscode-jsonrpc';
+
+import { Server } from '../kibana_types';
 import { Log } from '../log';
 import { LanguageServerController } from '../lsp/controller';
 import { WorkspaceHandler } from '../lsp/workspace_handler';
 import { ServerOptions } from '../server_options';
 
-export async function lspRoute(server: Hapi.Server, options: ServerOptions) {
+export async function lspRoute(server: Server, options: ServerOptions) {
   const workspacePath: string = options.workspacePath;
 
   const repoPath: string = options.repoPath;
@@ -24,7 +24,7 @@ export async function lspRoute(server: Hapi.Server, options: ServerOptions) {
 
   server.route({
     path: '/api/lsp/textDocument/{method}',
-    async handler(req: Hapi.Request, reply: Hapi.IReply) {
+    async handler(req, reply) {
       if (typeof req.payload === 'object' && req.payload != null) {
         const method = req.params.method;
         if (method) {
