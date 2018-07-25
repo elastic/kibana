@@ -16,7 +16,8 @@ describe('Validate config', function () {
   beforeEach(() => {
     config = {
       get: sinon.stub(),
-      set: sinon.stub()
+      getDefault: sinon.stub(),
+      set: sinon.stub(),
     };
     log.resetHistory();
   });

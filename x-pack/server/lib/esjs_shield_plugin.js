@@ -361,5 +361,36 @@
         fmt: '/_xpack/security/oauth2/token'
       }
     });
+
+    shield.getPrivilege = ca({
+      method: 'GET',
+      urls: [{
+        fmt: '/_xpack/security/privilege/<%=privilege%>',
+        req: {
+          privilege: {
+            type: 'string',
+            required: false
+          }
+        }
+      }, {
+        fmt: '/_xpack/security/privilege'
+      }]
+    });
+
+    shield.postPrivileges = ca({
+      method: 'POST',
+      needBody: true,
+      url: {
+        fmt: '/_xpack/security/privilege'
+      }
+    });
+
+    shield.hasPrivileges = ca({
+      method: 'POST',
+      needBody: true,
+      url: {
+        fmt: '/_xpack/security/user/_has_privileges'
+      }
+    });
   };
 }));
