@@ -7,9 +7,8 @@
 import { ResponseError } from 'vscode-jsonrpc';
 import { Server } from '../kibana_types';
 import { LspService } from '../lsp/lsp_service';
-import { ServerOptions } from '../server_options';
 
-export function lspRoute(server: Server, options: ServerOptions, lspService: LspService) {
+export function lspRoute(server: Server, lspService: LspService) {
   server.route({
     path: '/api/lsp/textDocument/{method}',
     async handler(req, reply) {

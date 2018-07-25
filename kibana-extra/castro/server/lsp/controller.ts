@@ -3,6 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+import * as glob from 'glob';
 import * as Hapi from 'hapi';
 import { detectLanguage } from '../detect_language';
 import { Log } from '../log';
@@ -105,7 +106,58 @@ export class LanguageServerController implements ILanguageServerHandler {
     this.registerServer(['typescript', 'javascript', 'html'], handler);
   }
 
-  private closeOnExit(proxy: LanguageServerProxy, child: ChildProcess) {
+  public async launchJava() {
+    let port = 2089;
+
+    if (!this.detach) {
+      port = await getPort();
+    }
+    const log = new Log(this.server, ['LSP', `ts@${this.targetHost}:${port}`]);
+    const proxy = new LanguageServerProxy(port, this.targetHost, log);
+    proxy.awaitServerConnection();
+    const javaLangserverPath = path.resolve(
+      __dirname,
+      '../../../../lsp/eclipse.jdt.ls/org.eclipse.jdt.ls.product/target/repository'
+    );
+    const launchersFound = glob.sync('**/plugins/org.eclipse.equinox.launcher_*.jar', {
+      cwd: javaLangserverPath,
+    });
+    if (!launchersFound.length) {
+      this.log.error('cannot find executable jar for JavaLsp');
+    }
+    if (!this.detach) {
+      this.log.info('Launch Java Language Server at port ' + port);
+      const child = spawn(
+        'java',
+        [
+          '-Declipse.application=org.eclipse.jdt.ls.core.id1',
+          '-Dosgi.bundles.defaultStartLevel=4',
+          '-Declipse.product=org.eclipse.jdt.ls.core.product',
+          '-Dlog.level=ALL',
+          '-noverify',
+          '-Xmx1G',
+          '-jar',
+          path.resolve(javaLangserverPath, launchersFound[0]),
+          '-configuration',
+          path.resolve(javaLangserverPath, './config_mac/'),
+          '-data',
+          '/tmp/data',
+        ],
+        {
+          detached: true,
+          stdio: 'inherit',
+          env: { CLIENT_PORT: port.toString() },
+        }
+      );
+      this.closeOnExit(proxy, child);
+    }
+
+    proxy.listen();
+    const handler = new RequestExpander(proxy);
+    this.registerServer(['java'], handler);
+  }
+
+  private async closeOnExit(proxy: LanguageServerProxy, child: ChildProcess) {
     let childTerminated = false;
     child.on('exit', () => (childTerminated = true));
     const listeners: { [signal: string]: () => void } = {};

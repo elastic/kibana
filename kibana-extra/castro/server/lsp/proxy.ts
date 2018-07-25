@@ -143,6 +143,29 @@ export class LanguageServerProxy implements ILanguageServerHandler {
     this.closed = true; // stop the socket reconnect
   }
 
+  public awaitServerConnection() {
+    return new Promise((res, rej) => {
+      const server = net.createServer(socket => {
+        server.close();
+        if (this.logger) {
+          this.logger.info('JDT LS connection established on port ' + this.targetPort);
+        }
+        const reader = new SocketMessageReader(socket);
+        const writer = new SocketMessageWriter(socket);
+        this.clientConnection = createMessageConnection(reader, writer, this.logger);
+        this.clientConnection.listen();
+        res(this.clientConnection);
+      });
+      server.on('error', rej);
+      server.listen(this.targetPort, () => {
+        server.removeListener('error', rej);
+        if (this.logger) {
+          this.logger.info('Awaiting JDT LS connection on port ' + this.targetPort);
+        }
+      });
+    });
+  }
+
   private connect(): Promise<MessageConnection> {
     if (this.clientConnection) {
       return Promise.resolve(this.clientConnection);
@@ -176,7 +199,6 @@ export class LanguageServerProxy implements ILanguageServerHandler {
       socket.on('error', () => void 0);
       socket.on('timeout', () => void 0);
       socket.on('drain', () => void 0);
-
       socket.connect(this.targetPort, this.targetHost);
     });
   }
