@@ -1,8 +1,8 @@
 [role="xpack"]
 [[job-tips]]
-=== Machine Learning Job Tips
+=== Machine learning job tips
 ++++
-<titleabbrev>Job Tips</titleabbrev>
+<titleabbrev>Job tips</titleabbrev>
 ++++
 
 When you are creating a job in {kib}, the job creation wizards can provide
@@ -10,7 +10,7 @@ advice based on the characteristics of your data. By heeding these suggestions,
 you can create jobs that are more likely to produce insightful {ml} results.
 
 [[bucket-span]]
-==== Bucket Span
+==== Bucket span
 
 The bucket span is the time interval that {ml} analytics use to summarize and
 model data for your job. When you create a job in {kib}, you can choose to
@@ -19,6 +19,9 @@ estimated value is between 5 minutes to 1 hour. If you choose a value that is
 larger than one day or is significantly different than the estimated value, you
 receive an informational message. For more information about choosing an
 appropriate bucket span, see {xpack-ref}/ml-buckets.html[Buckets].
+
+TIP: The bucket span must contain a valid time interval. For more information, 
+see {ref}/ml-job-resource.html#ml-analysisconfig[Analysis configuration objects].
 
 [[cardinality]]
 ==== Cardinality
@@ -30,15 +33,25 @@ detect when users are accessing resources differently than they usually do.
 
 If the field that you use to split your data has many different values, the
 job uses more memory resources. In particular, if the cardinality of the
-`partition_field_name` is greater than 100, you are advised to consider
-alternative options such as population analysis.
+`by_field_name`, `over_field_name`, or `partition_field_name` is greater than 
+1000, you are advised that there might be high memory usage. 
 
 Likewise if you are performing population analysis and the cardinality of the
 `over_field_name` is below 10, you are advised that this might not be a suitable
-field to use.
-
-For more information, see
+field to use. For more information, see
 {xpack-ref}/ml-configuring-pop.html[Performing Population Analysis].
+
+[[detectors]]
+==== Detectors
+
+Each job must have one or more _detectors_. A detector applies an analytical 
+function to specific fields in your data. If your job does not contain a 
+detector or the detector does not contain a 
+{stack-ov}/ml-functions.html[valid function], you receive an error.
+
+If a job contains duplicate detectors, you also receive an error. Detectors are 
+duplicates if they have the same `function`, `field_name`, `by_field_name`, 
+`over_field_name` and `partition_field_name`. 
 
 [[influencers]]
 ==== Influencers
@@ -60,3 +73,21 @@ do not need more than three. If you pick many influencers, the results can be
 overwhelming and there is a small overhead to the analysis.
 
 The job creation wizards in {kib} can suggest which fields to use as influencers.
+
+[[model-memory-limits]]
+==== Model memory limits
+
+For each job, you can optionally specify a `model_memory_limit`, which is the 
+approximate maximum amount of memory resources that are required for analytical 
+processing. Once this limit is approached, data pruning becomes more aggressive. 
+Upon exceeding this limit, new entities are not modeled. For more information 
+about this property, see {ref}/ml-job-resource.html#ml-analysisconfig[Analysis limits].
+
+You can optionally specify the `xpack.ml.max_model_memory_limit` setting, which 
+prevents the creation of jobs with model memory limits greater than this value. 
+For more information, see {ref}/ml-settings.html[Machine learning settings].
+
+If the estimated model memory limit for a job is greater than the model memory 
+limit for the job or the maximum model memory limit for the cluster, the job 
+creation wizards in {kib} generate a warning. 
+//TBD: What is the recommended action?  Increase the limits?
