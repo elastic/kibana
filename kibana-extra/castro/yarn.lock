@@ -2447,29 +2447,9 @@ jaeger-client@^3.5.3:
     uuid "^3.2.1"
     xorshift "^0.2.0"
 
-javascript-typescript-langserver@^2.10.0:
-  version "2.10.0"
-  resolved "https://registry.yarnpkg.com/javascript-typescript-langserver/-/javascript-typescript-langserver-2.10.0.tgz#31615e0c297d2fec23a3540d35445a3319bd067d"
-  dependencies:
-    chai "^4.0.1"
-    chai-as-promised "^7.0.0"
-    chalk "^2.2.0"
-    commander "^2.9.0"
-    fast-json-patch "^2.0.2"
-    glob "^7.1.1"
-    iterare "^0.0.8"
-    jaeger-client "^3.5.3"
-    lodash "^4.17.4"
-    mz "^2.6.0"
-    object-hash "^1.1.8"
-    opentracing "^0.14.0"
-    rxjs "^5.5.0"
-    semaphore-async-await "^1.5.1"
-    string-similarity "^1.1.0"
-    typescript "2.8.3"
-    vscode-jsonrpc "^3.3.1"
-    vscode-languageserver "^4.2.1"
-    vscode-languageserver-types "^3.0.3"
+"javascript-typescript-langserver@link:../../lsp/javascript-typescript-langserver":
+  version "0.0.0"
+  uid ""
 
 jest-get-type@^22.1.0:
   version "22.4.3"

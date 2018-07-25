@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Server } from '../kibana_types';
 import { ResponseError } from 'vscode-jsonrpc';
+import { Server } from '../kibana_types';
 import { LspService } from '../lsp/lsp_service';
 import { ServerOptions } from '../server_options';
 

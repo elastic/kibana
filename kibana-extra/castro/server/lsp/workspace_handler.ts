@@ -6,13 +6,12 @@
 
 import Boom from 'boom';
 import fs from 'fs';
+import { Full } from 'javascript-typescript-langserver/lib/lsp-extend';
 import { Clone, Commit, Error, Repository, Reset } from 'nodegit';
 import path from 'path';
 import Url from 'url';
 import { ResponseMessage } from 'vscode-jsonrpc/lib/messages';
 import { Location, TextDocumentPositionParams } from 'vscode-languageserver';
-// #todo this may have problem in prod distribution
-import { Full } from '../../../../lsp/javascript-typescript-langserver/src/lsp-extend';
 import { LspRequest } from '../../model';
 import { GitOperations } from '../git_operations';
 import { Log } from '../log';
@@ -62,7 +61,7 @@ export class WorkspaceHandler {
     const { method, params } = request;
     switch (method) {
       case 'textDocument/hover':
-      case 'textDocument/full':
+      case 'textDocument/full': {
         const payload: TextDocumentPositionParams = params;
         const { filePath, workspacePath } = await this.resolveUri(params.textDocument.uri);
         if (filePath) {
@@ -70,6 +69,7 @@ export class WorkspaceHandler {
           request.workspacePath = workspacePath;
         }
         break;
+      }
       default:
       // do nothing
     }
@@ -78,7 +78,7 @@ export class WorkspaceHandler {
   public handleResponse(request: LspRequest, response: ResponseMessage): ResponseMessage {
     const { method } = request;
     switch (method) {
-      case 'textDocument/full':
+      case 'textDocument/full': {
         const result = response.result as Full[];
         for (const full of result) {
           if (full.symbols) {
@@ -93,11 +93,13 @@ export class WorkspaceHandler {
           }
         }
         return response;
+      }
       default:
         return response;
     }
   }
 
+  // todo add an unit test
   private convertLocation(location: Location) {
     const uri = location.uri;
     if (uri && uri.startsWith('file://')) {

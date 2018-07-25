@@ -50,7 +50,8 @@
     "mocha": "^5.2.0",
     "tslint": "^5.10.0",
     "tslint-react": "^3.6.0",
-    "typescript": "^2.9.2"
+    "typescript": "^2.9.2",
+    "javascript-typescript-langserver": "link:../../lsp/javascript-typescript-langserver"
   },
   "dependencies": {
     "@castro/esqueue": "link:packages/castro-esqueue",
@@ -61,7 +62,6 @@
     "git-url-parse": "^9.0.1",
     "highlights": "^3.1.1",
     "history": "^4.7.2",
-    "javascript-typescript-langserver": "^2.10.0",
     "language-detect": "^1.1.0",
     "moment": "^2.22.2",
     "monaco-editor": "^0.13.1",
