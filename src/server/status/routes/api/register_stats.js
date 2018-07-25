@@ -52,13 +52,15 @@ export function registerStatsApi(kbnServer, server, config) {
       config: {
         validate: {
           query: {
-            extended: Joi.string().valid('', 'true', 'false')
+            extended: Joi.string().valid('', 'true', 'false'),
+            legacy: Joi.string().valid('', 'true', 'false')
           }
         },
         tags: ['api'],
       },
       async handler(req, reply) {
         const isExtended = req.query.extended !== undefined && req.query.extended !== 'false';
+        const isLegacy = req.query.legacy !== undefined && req.query.legacy !== 'false';
 
         let extended;
         if (isExtended) {
@@ -70,39 +72,43 @@ export function registerStatsApi(kbnServer, server, config) {
               getClusterUuid(callCluster),
             ]);
 
-            // In an effort to make telemetry more easily augmented, we need to ensure
-            // we can passthrough the data without every part of the process needing
-            // to know about the change; however, to support legacy use cases where this
-            // wasn't true, we need to be backwards compatible with how the legacy data
-            // looked and support those use cases here.
-            const usageWithLegacySupport = Object.keys(usage).reduce((accum, usageKey) => {
-              if (usageKey === 'kibana') {
-                accum = {
-                  ...accum,
-                  ...usage[usageKey]
-                };
-              }
-              else if (usageKey === 'reporting') {
-                accum = {
-                  ...accum,
-                  xpack: {
-                    ...accum.xpack,
-                    reporting: usage[usageKey]
-                  },
-                };
-              }
-              else {
-                accum = {
-                  ...accum,
-                  [usageKey]: usage[usageKey]
-                };
-              }
 
-              return accum;
-            }, {});
+            let modifiedUsage = usage;
+            if (isLegacy) {
+              // In an effort to make telemetry more easily augmented, we need to ensure
+              // we can passthrough the data without every part of the process needing
+              // to know about the change; however, to support legacy use cases where this
+              // wasn't true, we need to be backwards compatible with how the legacy data
+              // looked and support those use cases here.
+              modifiedUsage = Object.keys(usage).reduce((accum, usageKey) => {
+                if (usageKey === 'kibana') {
+                  accum = {
+                    ...accum,
+                    ...usage[usageKey]
+                  };
+                }
+                else if (usageKey === 'reporting') {
+                  accum = {
+                    ...accum,
+                    xpack: {
+                      ...accum.xpack,
+                      reporting: usage[usageKey]
+                    },
+                  };
+                }
+                else {
+                  accum = {
+                    ...accum,
+                    [usageKey]: usage[usageKey]
+                  };
+                }
+
+                return accum;
+              }, {});
+            }
 
             extended = collectorSet.toApiFieldNames({
-              usage: usageWithLegacySupport,
+              usage: modifiedUsage,
               clusterUuid
             });
           } catch (e) {
