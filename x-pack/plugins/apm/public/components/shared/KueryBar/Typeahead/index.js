@@ -174,7 +174,7 @@ export class Typeahead extends Component {
               style={{
                 backgroundImage: 'none'
               }}
-              placeholder="Search transactions or errors… (i.e. transaction.duration.us => 100000)"
+              placeholder="Search transactions and errors... (E.g. transaction.duration.us > 300000 AND context.response.status_code >= 400)"
               inputRef={node => {
                 if (node) {
                   this.inputRef = node;
