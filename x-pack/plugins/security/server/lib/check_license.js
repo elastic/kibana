@@ -33,6 +33,7 @@ export function checkLicense(xPackInfo) {
       showLinks: false,
       allowRoleDocumentLevelSecurity: false,
       allowRoleFieldLevelSecurity: false,
+      allowRbac: false,
       layout: xPackInfo.isXpackUnavailable() ? 'error-xpack-unavailable' : 'error-es-unavailable'
     };
   }
@@ -46,6 +47,7 @@ export function checkLicense(xPackInfo) {
       showLinks: false,
       allowRoleDocumentLevelSecurity: false,
       allowRoleFieldLevelSecurity: false,
+      allowRbac: false,
       linksMessage: isLicenseBasic
         ? 'Your Basic license does not support Security. Please upgrade your license.'
         : 'Access is denied because Security is disabled in Elasticsearch.'
@@ -60,6 +62,7 @@ export function checkLicense(xPackInfo) {
     showLinks: true,
     // Only platinum and trial licenses are compliant with field- and document-level security.
     allowRoleDocumentLevelSecurity: isLicensePlatinumOrTrial,
-    allowRoleFieldLevelSecurity: isLicensePlatinumOrTrial
+    allowRoleFieldLevelSecurity: isLicensePlatinumOrTrial,
+    allowRbac: true,
   };
 }
