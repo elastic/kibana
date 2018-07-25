@@ -50,16 +50,21 @@ export function ComboBoxProvider({ getService }) {
       const input = await comboBoxElement.findByTagName('input');
       await input.clearValue();
       await input.type(filterValue);
+      await this._waitForOptionsListLoading(comboBoxElement);
+    }
+
+    async _waitForOptionsListLoading(comboBoxElement) {
       await comboBoxElement.waitForDeletedByClassName('euiLoadingSpinner');
     }
 
     async getOptionsList(comboBoxSelector) {
       log.debug(`comboBox.getOptionsList, comboBoxSelector: ${comboBoxSelector}`);
+      const comboBox = await testSubjects.find(comboBoxSelector);
       await testSubjects.click(comboBoxSelector);
+      await this._waitForOptionsListLoading(comboBox);
       const menu = await retry.try(
         async () => await testSubjects.find('comboBoxOptionsList'));
       const optionsText = await menu.getVisibleText();
-      const comboBox = await testSubjects.find(comboBoxSelector);
       await this.closeOptionsList(comboBox);
       return optionsText;
     }
