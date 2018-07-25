@@ -123,6 +123,7 @@ export class StartDatafeedModal extends Component {
       now,
     } = this.state;
     const startableJobs = (jobs !== undefined) ? jobs.filter(j => j.hasDatafeed) : [];
+    // disable start button if the start and end times are the same
     const startDisabled = (startTime !== undefined && (startTime === endTime));
     let modal;
 
