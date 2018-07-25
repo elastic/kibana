@@ -12,6 +12,7 @@ import { Router } from 'react-router-dom';
 import ReactDOM from 'react-dom';
 import 'ui/autoload/styles';
 import 'ui/autoload/all';
+import 'uiExports/autocompleteProviders';
 import 'react-vis/dist/style.css';
 import './style/global_overrides.css';
 
