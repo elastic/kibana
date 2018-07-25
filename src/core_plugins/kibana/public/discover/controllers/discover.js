@@ -201,6 +201,10 @@ function discoverController(
     .setField('highlightAll', true)
     .setField('version', true);
 
+  // Even when searching rollups, we want to use the default strategy so that we get back a
+  // document-like response.
+  $scope.searchSource.setPreferredSearchStrategyId('default');
+
   // searchSource which applies time range
   const timeRangeSearchSource = savedSearch.searchSource.create();
   timeRangeSearchSource.setField('filter', () => {
