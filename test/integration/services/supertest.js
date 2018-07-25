@@ -26,19 +26,15 @@ export function KibanaSupertestProvider({ getService }) {
   const config = getService('config');
   const kibanaServerUrl = formatUrl(config.get('servers.kibana'));
 
-  const agent = supertestAsPromised.agent(kibanaServerUrl);
-
   const kibanaServerCert = config.get('kbnTestServer.serverArgs')
     .filter(arg => arg.startsWith('--server.ssl.certificate'))
     .map(arg => arg.split('=').pop())
     .map(path => readFileSync(path))
     .shift();
 
-  if (kibanaServerCert) {
-    agent.ca(kibanaServerCert);
-  }
-
-  return agent;
+  return kibanaServerCert
+    ? supertestAsPromised.agent(kibanaServerUrl, { ca: kibanaServerCert })
+    : supertestAsPromised(kibanaServerUrl);
 }
 
 export function KibanaSupertestWithoutAuthProvider({ getService }) {
