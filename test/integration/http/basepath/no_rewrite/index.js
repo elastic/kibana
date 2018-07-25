@@ -21,18 +21,18 @@ export default function ({ getService }) {
 
   const supertest = getService('supertest');
 
-  describe('Kibana server with basePath and with rewriteBasePath', () => {
+  describe('Kibana server with basePath and without rewriteBasePath', () => {
     const basePath = '/abc/xyz';
 
-    it('requires root requests to contain basePath', async () => {
+    it('cannot find requests containing basePath', async () => {
       await supertest.get(`/abc/xyz`)
-        .expect(302)
-        .expect('location', `${basePath}/app/kibana`);
+        .expect(404);
     });
 
-    it('cannot find root requests', async () => {
+    it('redirects root requests to basePath root', async () => {
       await supertest.get(`/`)
-        .expect(404);
+        .expect(302)
+        .expect('location', `${basePath}/app/kibana`);
     });
   });
 }

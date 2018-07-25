@@ -35,7 +35,7 @@ export default async function ({ readConfigFile }) {
       serverArgs: [
         ...httpConfig.get('kbnTestServer.serverArgs'),
         '--server.basePath=/abc/xyz',
-        '--server.rewriteBasePath=true',
+        '--server.rewriteBasePath=false',
       ],
     },
   };
