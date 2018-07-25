@@ -179,10 +179,10 @@ export default class DynamicBaselineFlyout extends Component {
               expected bounds from the Machine Learning job and annotate the
               graph once the anomaly score is &gt;=75.
             </p>
-            <img
+            {/* <img
               src="/plugins/apm/images/apm-ml-anomaly-detection-example.png"
               alt="Anomaly detection on response times in APM"
-            />
+            /> */}
             <p>
               Jobs can be created per transaction type and based on the average
               response time. Once a job is created, you can manage it and see
@@ -192,7 +192,7 @@ export default class DynamicBaselineFlyout extends Component {
               refresh the graph a few minutes after creating the job.
             </p>
             <p>
-              <a href="#">Learn more</a> about the Machine Learning integration.
+              {/* <a href="#">Learn more</a> about the Machine Learning integration. */}
             </p>
           </EuiText>
         </EuiFlyoutBody>

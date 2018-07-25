@@ -156,13 +156,15 @@ export const security = (kibana) => new kibana.Plugin({
     initLogoutView(server);
 
     server.injectUiAppVars('login', () => {
-      const { showLogin, loginMessage, allowLogin } = xpackInfo.feature(plugin.id).getLicenseCheckResults() || {};
+
+      const { showLogin, loginMessage, allowLogin, layout = 'form' } = xpackInfo.feature(plugin.id).getLicenseCheckResults() || {};
 
       return {
         loginState: {
           showLogin,
           allowLogin,
-          loginMessage
+          loginMessage,
+          layout,
         }
       };
     });
