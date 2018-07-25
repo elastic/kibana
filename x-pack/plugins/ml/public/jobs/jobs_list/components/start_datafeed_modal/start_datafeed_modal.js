@@ -100,13 +100,8 @@ export class StartDatafeedModal extends Component {
 
   save = () => {
     const { jobs } = this.state;
-    let start = moment.isMoment(this.state.startTime) ? this.state.startTime.valueOf() : this.state.startTime;
+    const start = moment.isMoment(this.state.startTime) ? this.state.startTime.valueOf() : this.state.startTime;
     const end = moment.isMoment(this.state.endTime) ? this.state.endTime.valueOf() : this.state.endTime;
-    if (start === end) {
-      // if start and end are the same time.
-      // move start back a millisecond to avoid an error from the endpoint
-      start--;
-    }
 
     forceStartDatafeeds(jobs, start, end, () => {
       if (this.state.createWatch && jobs.length === 1) {
@@ -128,6 +123,7 @@ export class StartDatafeedModal extends Component {
       now,
     } = this.state;
     const startableJobs = (jobs !== undefined) ? jobs.filter(j => j.hasDatafeed) : [];
+    const startDisabled = (startTime !== undefined && (startTime === endTime));
     let modal;
 
     if (this.state.isModalVisible) {
@@ -174,6 +170,7 @@ export class StartDatafeedModal extends Component {
 
               <EuiButton
                 onClick={this.save}
+                isDisabled={startDisabled}
                 fill
               >
                 Start
