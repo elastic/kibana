@@ -18,7 +18,7 @@ export default function ({ getService, getPageObjects }) {
 
 
 
-  describe('security', function () {
+  describe('secure roles and permissions', function () {
     before(async () => {
       await remote.setWindowSize(1600, 1000);
       log.debug('users');
