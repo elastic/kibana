@@ -54,12 +54,40 @@ So, let's say we have a document that looks like this:
 ```js
 {
   type: 'dashboard',
-  attributes: { whatever: 'here' },
+  attributes: { title: 'whatever' },
   securityKey: '324234234kjlke2',
 }
 ```
 
 In this document, one plugin might own the `dashboard` type, and another plugin might own the `securityKey` type. If two or more plugins define securityKey migrations `{ migrations: { securityKey: { ... } } }`, Kibana will fail to start.
+
+To write a migration for this document, the dashboard plugin might look something like this:
+
+```js
+uiExports: {
+  migrations: {
+    // This is whatever value your document's "type" field is
+    dashboard: {
+      // Takes a pre 1.9.0 dashboard doc, and converts it to 1.9.0
+      '1.9.0': (doc) => {
+        doc.attributes.title = doc.attributes.title.toUpperCase();
+        return doc;
+      },
+
+      // Takes a 1.9.0 dashboard doc, and converts it to a 2.0.0
+      '2.0.0': (doc) => {
+        doc.attributes.title = doc.attributes.title + '!!!';
+        return doc;
+      },
+    },
+  },
+  // ... normal uiExport stuff
+}
+```
+
+After Kibana migrates the index, our example document would have `{ attributes: { title: 'WHATEVER!!' } }`.
+
+Each migration function only needs to be able to handle documents belonging to the previous version. The initial migration function (in this example, `1.9.0`) needs to be more flexible, as it may be passed documents of any pre `1.9.0` shape.
 
 ## Disabled plugins
 
