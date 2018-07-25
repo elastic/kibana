@@ -27,7 +27,6 @@ import expect from 'expect.js';
  * broke?).  The upside is that this offers very good coverage with a minimal time investment.
  */
 
-
 export default function ({ getService, getPageObjects }) {
   const find = getService('find');
   const remote = getService('remote');
@@ -91,9 +90,10 @@ export default function ({ getService, getPageObjects }) {
     });
 
     after(async () => {
-      // Get rid of the timestamp added in this test.
+      // Get rid of the timestamp added in this test, as well any global or app state.
       const currentUrl = await remote.getCurrentUrl();
-      await remote.get(currentUrl, false);
+      const newUrl = currentUrl.replace(/\?.*$/, '');
+      await remote.get(newUrl, false);
     });
 
     it('adding visualizations', async () => {
