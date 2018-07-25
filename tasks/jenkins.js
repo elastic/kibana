@@ -23,19 +23,19 @@ module.exports = function (grunt) {
   ]);
 
   grunt.registerTask('jenkins:unit', [
-    'run:eslint',
-    'run:tslint',
-    'run:checkFileCasing',
-    'licenses',
-    'verifyDependencyVersions',
-    'run:verifyNotice',
-    'test:server',
-    'test:jest',
-    'test:jest_integration',
-    'test:projects',
-    'test:browser-ci',
-    'run:apiIntegrationTests',
-    'verifyTranslations',
+    // 'run:eslint',
+    // 'run:tslint',
+    // 'run:checkFileCasing',
+    // 'licenses',
+    // 'verifyDependencyVersions',
+    // 'run:verifyNotice',
+    // 'test:server',
+    // 'test:jest',
+    // 'test:jest_integration',
+    // 'test:projects',
+    // 'test:browser-ci',
+    // 'run:apiIntegrationTests',
+    // 'verifyTranslations',
   ]);
 
   grunt.registerTask('jenkins:selenium', [
