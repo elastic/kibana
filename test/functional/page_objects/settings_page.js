@@ -32,7 +32,9 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
     async clickNavigation() {
       find.clickDisplayedByCssSelector('.app-link:nth-child(5) a');
     }
-
+    async clickLinkText(text) {
+      await find.clickByDisplayedLinkText(text);
+    }
     async clickKibanaSettings() {
       await find.clickByDisplayedLinkText('Advanced Settings');
       await PageObjects.header.waitUntilLoadingHasFinished();
