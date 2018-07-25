@@ -10,30 +10,44 @@ import { CMPopulatedBeat } from '../../../common/domain_types';
 import { BeatsTable } from './beats_table';
 
 describe('BeatsTable component', () => {
-  let items: CMPopulatedBeat[];
-  let beat;
+  let beats: CMPopulatedBeat[];
   let onBulkAction: any;
 
   beforeEach(() => {
-    beat = {
-      id: 'beatid',
-      access_token: 'access',
-      type: 'type',
-      host_ip: 'ip',
-      host_name: 'name',
-      full_tags: [
-        {
-          id: 'Production',
-          configuration_blocks: [],
-        },
-      ],
-    };
-    items = [beat];
+    beats = [
+      {
+        id: 'beatid',
+        access_token: 'access',
+        type: 'type',
+        host_ip: 'ip',
+        host_name: 'name',
+        full_tags: [
+          {
+            id: 'Production',
+            configuration_blocks: [],
+          },
+        ],
+      },
+      {
+        id: 'beatid2',
+        access_token: 'access',
+        type: 'Filebeat v6.3.2',
+        host_ip: '192.168.1.0',
+        host_name: 'name',
+        full_tags: [
+          {
+            id: 'Production',
+            configuration_blocks: [],
+          },
+        ],
+      },
+    ];
     onBulkAction = jest.fn();
   });
 
   it('matches snapshot', () => {
-    const wrapper = shallow(<BeatsTable items={items} onBulkAction={onBulkAction} />);
+    const wrapper = shallow(<BeatsTable items={beats} onBulkAction={onBulkAction} />);
+
     expect(wrapper).toMatchSnapshot();
   });
 });
