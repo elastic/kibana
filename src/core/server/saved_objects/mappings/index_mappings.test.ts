@@ -121,12 +121,12 @@ describe('saved objects index mapping', () => {
 
     it('throws if any of the new properties conflict', () => {
       const initialMapping = {
-        root: { properties: { foo: 'bar' } },
+        root: { properties: { foo: { type: 'string' } } },
       };
       const extensions = [
         {
           properties: {
-            foo: 'bar',
+            foo: { type: 'string' },
           },
         },
       ];
@@ -138,13 +138,13 @@ describe('saved objects index mapping', () => {
 
     it('includes the pluginId from the extension in the error message if defined', () => {
       const initialMapping = {
-        root: { properties: { foo: 'bar' } },
+        root: { properties: { foo: { type: 'string' } } },
       };
       const extensions = [
         {
           pluginId: 'abc123',
           properties: {
-            foo: 'bar',
+            foo: { type: 'string' },
           },
         },
       ];
@@ -156,12 +156,12 @@ describe('saved objects index mapping', () => {
 
     it('throws if any of the new properties start with _', () => {
       const initialMapping = {
-        root: { properties: { foo: 'bar' } },
+        root: { properties: { foo: { type: 'string' } } },
       };
       const extensions = [
         {
           properties: {
-            _foo: 'bar',
+            _foo: { type: 'string' },
           },
         },
       ];
@@ -173,13 +173,13 @@ describe('saved objects index mapping', () => {
 
     it('includes the pluginId from the extension in the _ error message if defined', () => {
       const initialMapping = {
-        root: { properties: { foo: 'bar' } },
+        root: { properties: { foo: { type: 'string' } } },
       };
       const extensions = [
         {
           pluginId: 'abc123',
           properties: {
-            _foo: 'bar',
+            _foo: { type: 'string' },
           },
         },
       ];

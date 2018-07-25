@@ -17,10 +17,15 @@
  * under the License.
  */
 
-import { cloneDeep } from 'lodash';
+import { cloneDeep, isPlainObject } from 'lodash';
 
-import { EsMappings, EsPropertyMappings, getRootProperties, getRootType } from './lib';
+import { EsMapping, EsMappings, getRootProperties, getRootType } from './lib';
 import { formatListAsProse } from './utils';
+
+interface MappingExtension {
+  pluginId?: string;
+  properties: { [key: string]: EsMapping };
+}
 
 const DEFAULT_INITIAL_DSL: EsMappings = {
   rootType: {
@@ -30,16 +35,15 @@ const DEFAULT_INITIAL_DSL: EsMappings = {
 };
 
 export class IndexMappings {
-  private dsl: EsMappings;
+  private dsl: EsMappings = this.initialDsl;
 
   constructor(
-    initialDsl: EsMappings = DEFAULT_INITIAL_DSL,
-    mappingExtensions: Array<{
-      properties: EsPropertyMappings;
-      pluginId?: string;
-    }> = []
+    private initialDsl: EsMappings = DEFAULT_INITIAL_DSL,
+    mappingExtensions: MappingExtension[] = []
   ) {
-    this.dsl = cloneDeep(initialDsl);
+    if (!isPlainObject(this.dsl)) {
+      throw new TypeError('initial mapping must be an object');
+    }
 
     // ensure that the dsl can be parsed with getRootProperties() and kin
     this.setProperties(getRootProperties(this.dsl) || {});
@@ -79,7 +83,7 @@ export class IndexMappings {
     return cloneDeep(this.dsl);
   }
 
-  private setProperties(newProperties: EsPropertyMappings) {
+  private setProperties(newProperties: MappingExtension['properties']) {
     const rootType = getRootType(this.dsl);
     this.dsl = {
       ...this.dsl,

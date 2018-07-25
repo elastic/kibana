@@ -31,7 +31,3 @@ export interface EsMapping {
 export interface EsMappings {
   [rootType: string]: EsMapping;
 }
-
-export class EsPropertyMappings {
-  [key: string]: EsMappings;
-}
