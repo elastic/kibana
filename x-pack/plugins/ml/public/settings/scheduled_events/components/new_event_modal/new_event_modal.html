@@ -51,6 +51,7 @@
               <datepicker
                 offset-timezone
                 ng-model="ui.timepicker.start"
+                max-date="ui.timepicker.end"
                 show-weeks="false">
               </datepicker>
               <div class="partition"></div>
@@ -62,6 +63,7 @@
               <datepicker
                 offset-timezone
                 ng-model="ui.timepicker.end"
+                min-date="ui.timepicker.start"
                 show-weeks="false">
               </datepicker>
             </div>
@@ -80,6 +82,7 @@
               <datepicker
                 offset-timezone
                 ng-model="ui.timepicker.start"
+                max-date="ui.timepicker.end"
                 show-weeks="false">
               </datepicker>
               <div class="partition partition-large"></div>
@@ -94,6 +97,7 @@
               <datepicker
                 offset-timezone
                 ng-model="ui.timepicker.end"
+                min-date="ui.timepicker.start"
                 show-weeks="false">
               </datepicker>
             </div>
