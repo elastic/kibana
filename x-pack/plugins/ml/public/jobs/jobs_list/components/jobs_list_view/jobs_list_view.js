@@ -280,6 +280,7 @@ export class JobsListView extends Component {
           showDeleteJobModal={this.showDeleteJobModal}
           showStartDatafeedModal={this.showStartDatafeedModal}
           refreshJobs={() => this.refreshJobSummaryList(true)}
+          selectedJobsCount={this.state.selectedJobs.length}
         />
         <EditJobFlyout
           setShowFunction={this.setShowEditJobFlyoutFunction}
