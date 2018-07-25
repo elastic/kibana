@@ -1,5 +1,6 @@
 <kbn-management-app section="kibana">
   <div class="euiPage">
+    <div class="euiPageBody">
     <h1 class="euiTitle">Generated reports</h1>
 
     <table class="table table-striped job-list" ng-class="{ loading: jobsCtrl.loading }">
@@ -85,6 +86,7 @@
         show-first-last="true"
         paging-action="jobsCtrl.setPage(page)">
       </paging>
+    </div>
     </div>
   </div>
 </kbn-management-app>
