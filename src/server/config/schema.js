@@ -227,7 +227,7 @@ export default async () => Joi.object({
         }))
       }))
     }).default(),
-    manifestServiceUrl: Joi.string().default('https://staging-dot-catalogue-dot-elastic-layer.appspot.com/v2/manifest'),
+    manifestServiceUrl: Joi.string().default(' https://catalogue.maps.elastic.co/v2/manifest'),
     includeElasticMapsService: Joi.boolean().default(true)
   }).default(),
   tilemap: Joi.object({
