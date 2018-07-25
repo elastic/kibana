@@ -44,7 +44,7 @@ import {
   deleteJobRule
 } from './utils';
 
-import { ACTION } from '../../../common/constants/detector_rule';
+import { ACTION, CONDITIONS_NOT_SUPPORTED_FUNCTIONS } from '../../../common/constants/detector_rule';
 import { getPartitioningFieldNames } from 'plugins/ml/../common/util/job_utils';
 import { mlJobService } from 'plugins/ml/services/job_service';
 import { ml } from 'plugins/ml/services/ml_api_service';
@@ -366,8 +366,6 @@ export class RuleEditorFlyout extends Component {
 
     let flyout;
 
-    const hasPartitioningFields = (this.partitioningFieldNames && this.partitioningFieldNames.length > 0);
-
     if (ruleIndex === -1) {
       flyout = (
         <EuiFlyout
@@ -409,9 +407,12 @@ export class RuleEditorFlyout extends Component {
         </EuiFlyout>
       );
     } else {
+      const hasPartitioningFields = (this.partitioningFieldNames && this.partitioningFieldNames.length > 0);
+      const conditionSupported = (CONDITIONS_NOT_SUPPORTED_FUNCTIONS.indexOf(anomaly.source.function) === -1);
       const conditionsText = 'Add numeric conditions to take action according ' +
         'to the actual or typical values of the anomaly. Multiple conditions are ' +
         'combined using AND.';
+
       flyout = (
         <EuiFlyout
           className="ml-rule-editor-flyout"
@@ -452,14 +453,23 @@ export class RuleEditorFlyout extends Component {
               <h2>Conditions</h2>
             </EuiTitle>
             <EuiSpacer size="s" />
-            <EuiCheckbox
-              id="enable_conditions_checkbox"
-              className="scope-enable-checkbox"
-              label={conditionsText}
-              checked={isConditionsEnabled}
-              onChange={this.onConditionsEnabledChange}
-              disabled={!hasPartitioningFields}
-            />
+            {(conditionSupported === true) ?
+              (
+                <EuiCheckbox
+                  id="enable_conditions_checkbox"
+                  className="scope-enable-checkbox"
+                  label={conditionsText}
+                  checked={isConditionsEnabled}
+                  onChange={this.onConditionsEnabledChange}
+                  disabled={!conditionSupported || !hasPartitioningFields}
+                />
+              ) : (
+                <EuiCallOut
+                  title={`Conditions are not supported for detectors using the ${anomaly.source.function} function`}
+                  iconType="iInCircle"
+                />
+              )
+            }
             <EuiSpacer size="s" />
             <ConditionsSection
               isEnabled={isConditionsEnabled}
