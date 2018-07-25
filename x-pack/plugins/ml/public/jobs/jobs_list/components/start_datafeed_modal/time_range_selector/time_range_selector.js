@@ -81,6 +81,7 @@ export class TimeRangeSelector extends Component {
           <EuiDatePicker
             selected={datePickerTimes.start}
             onChange={this.setStartTime}
+            maxDate={datePickerTimes.end}
             inline
             showTimeSelect
           />)
@@ -93,6 +94,7 @@ export class TimeRangeSelector extends Component {
           <EuiDatePicker
             selected={datePickerTimes.end}
             onChange={this.setEndTime}
+            minDate={datePickerTimes.start}
             inline
             showTimeSelect
           />)
