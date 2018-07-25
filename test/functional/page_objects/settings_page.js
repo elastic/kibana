@@ -18,13 +18,14 @@
  */
 
 import { map as mapAsync } from 'bluebird';
-
 export function SettingsPageProvider({ getService, getPageObjects }) {
   const log = getService('log');
   const retry = getService('retry');
   const remote = getService('remote');
   const find = getService('find');
   const flyout = getService('flyout');
+  const config = getService('config');
+  const defaultFindTimeout = config.get('timeouts.find');
   const testSubjects = getService('testSubjects');
   const PageObjects = getPageObjects(['header', 'common', 'visualize']);
 
@@ -154,7 +155,7 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
     }
 
     async sortBy(columnName) {
-      const chartTypes = find.allByCssSelector('table.euiTable thead tr th button');
+      const chartTypes = await find.allByCssSelector('table.euiTable thead tr th button');
       async function getChartType(chart) {
         const chartString = await chart.getVisibleText();
         if (chartString === columnName) {
@@ -166,15 +167,13 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
       return Promise.all(getChartTypesPromises);
     }
 
-    async getTableRow(rowNumber, colNumber) {
-      // passing in zero-based index, but adding 1 for css 1-based indexes
-      return await find.byCssSelector(
-        'table.euiTable tbody tr:nth-child(' +
-            (rowNumber + 1) +
-            ') td.euiTableRowCell:nth-child(' +
-            (colNumber + 1) +
-            ')'
-      );
+    getTableRow(rowNumber, colNumber) {
+      return remote.setFindTimeout(defaultFindTimeout)
+        // passing in zero-based index, but adding 1 for css 1-based indexes
+        .findByCssSelector('table.euiTable tbody tr:nth-child(' +
+          (rowNumber + 1) + ') td.euiTableRowCell:nth-child(' +
+          (colNumber + 1) + ')'
+        );
     }
 
     async getFieldsTabCount() {
