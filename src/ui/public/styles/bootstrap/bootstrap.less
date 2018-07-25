@@ -31,34 +31,39 @@
  * THE SOFTWARE.
  */
 
+// PLANNED FOR REMOVAL
+// We are trying to remove bootstrap. The below are the files we're currently using.
+// There's an audit in the comments to cover what's left to remove.
+
 // Core variables and mixins
 @import "variables.less";
 @import "mixins.less";
 
-// Core CSS
-@import "type.less"; // Need to replace with EUI css
+// Hard to remove, used in many places
 @import "grid.less"; // Used in a lot of places
 @import "tables.less"; // Used in a lot of places
 @import "forms.less"; // Used in a lot of places
 
-// Components
+// Easy to remove
+@import "type.less"; // Can be search / replaced with EUI
 @import "component-animations.less"; // Used in angular bootstrap
+@import "navbar.less"; // Used in Graph
+@import "close.less"; // Only in angular-bootstrap
+@import "modals.less"; // Only in angular-bootstrap
+@import "progress-bars.less"; // Used in ML, angular-bootstrap
+@import "list-group.less"; // Used in Timelion, Graph
+@import "navs.less"; // Used in ML
+@import "alerts.less"; // Only in angular-bootstrap
+
+// Decent usage in multiple areas
 @import "dropdowns.less"; // Used in console, datepicker, watcher
 @import "input-groups.less"; // Used in ML, typeahead, reporting, graph
-@import "navs.less"; // Used in ML
-@import "navbar.less"; // Used in Graph
 @import "pagination.less";
 @import "pager.less";
-@import "labels.less";
-@import "badges.less";
-@import "alerts.less";
-@import "progress-bars.less"; // Used in ML, angular-bootstrap
-@import "list-group.less";
-@import "panels.less";
-@import "close.less";
+@import "labels.less"; // Hard to judge usage because of generic selector names
+@import "panels.less"; // Used in ML, dashboards, notify, angular-bootstrap
 
 // Components w/ JavaScript
-@import "modals.less";
 @import "tooltip.less";
 @import "popovers.less";
 
