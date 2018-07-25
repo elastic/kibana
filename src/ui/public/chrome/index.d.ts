@@ -17,8 +17,15 @@
  * under the License.
  */
 
+interface IInjector {
+  get<T>(injectable: string): T;
+}
+
 declare class Chrome {
   public addBasePath<T = string>(path: T): T;
+  public dangerouslyGetActiveInjector(): Promise<IInjector>;
+  public getBasePath(): string;
+  public getXsrfToken(): string;
 }
 
 declare const chrome: Chrome;
