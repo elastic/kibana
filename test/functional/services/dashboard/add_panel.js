@@ -179,10 +179,7 @@ export function DashboardAddPanelProvider({ getService, getPageObjects }) {
     async filterEmbeddableNames(name) {
       // The search input field may be disabled while the table is loading so wait for it
       await this.waitForEuiTableLoading();
-      // This try loop lets us recover it the field wasn't enabled yet
-      await retry.try(async () => {
-        await testSubjects.setValue('savedObjectFinderSearchInput', name);
-      });
+      await testSubjects.setValue('savedObjectFinderSearchInput', name);
       await PageObjects.header.waitUntilLoadingHasFinished();
     }
 
