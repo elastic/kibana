@@ -21,6 +21,7 @@ import {
 } from '@elastic/eui';
 
 import { ScopeExpression } from './scope_expression';
+import { checkPermission } from 'plugins/ml/privilege/check_privilege';
 import { getScopeFieldDefaults } from './utils';
 
 
@@ -49,6 +50,14 @@ function NoFilterListsCallOut() {
   );
 }
 
+function NoPermissionCallOut() {
+  return (
+    <EuiCallOut
+      title="You do not have permission to view filter lists"
+      iconType="gear"
+    />
+  );
+}
 
 export function ScopeSection({
   isEnabled,
@@ -57,6 +66,8 @@ export function ScopeSection({
   filterListIds,
   scope,
   updateScope }) {
+
+  const canGetFilters = checkPermission('canGetFilters');
 
   if (partitioningFieldNames === null || partitioningFieldNames.length === 0) {
     return null;
@@ -86,6 +97,8 @@ export function ScopeSection({
         />
       );
     });
+  } else if(canGetFilters === false) {
+    content = <NoPermissionCallOut />;
   } else {
     content = <NoFilterListsCallOut />;
   }
