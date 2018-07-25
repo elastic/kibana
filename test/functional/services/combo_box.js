@@ -50,13 +50,7 @@ export function ComboBoxProvider({ getService }) {
       const input = await comboBoxElement.findByTagName('input');
       await input.clearValue();
       await input.type(filterValue);
-      await retry.try(async () => {
-        const isLoading = await find.exists(
-          async () => await comboBoxElement.findByCssSelector('.euiLoadingSpinner'));
-        if (isLoading) {
-          throw new Error('Still waiting for options list to load');
-        }
-      });
+      await comboBoxElement.waitForDeletedByClassName('euiLoadingSpinner');
     }
 
     async getOptionsList(comboBoxSelector) {
