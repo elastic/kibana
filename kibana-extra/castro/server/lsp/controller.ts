@@ -4,15 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import * as Hapi from 'hapi';
-
+import { detectLanguage } from '../detect_language';
 import { Log } from '../log';
 import { ILanguageServerHandler, LanguageServerProxy } from './proxy';
 
 import { ChildProcess, spawn } from 'child_process';
-import fs from 'fs';
 import getPort from 'get-port';
-// @ts-ignore
-import * as detect from 'language-detect';
+
 import path from 'path';
 // @ts-ignore
 import signals from 'signal-exit/signals';
@@ -25,7 +23,7 @@ import { RequestExpander } from './request_expander';
  * we just use forward request to all the LSP servers we are running.
  */
 export class LanguageServerController implements ILanguageServerHandler {
-  /** Map from langauge type to Lsp Server Controller */
+  /** Map from language type to Lsp Server Controller */
   private languageServers: { [name: string]: ILanguageServerHandler } = {};
   private readonly targetHost: string;
   private log: Log;
@@ -38,18 +36,12 @@ export class LanguageServerController implements ILanguageServerHandler {
     this.server = server;
   }
 
-  public handleRequest(request: LspRequest) {
+  public async handleRequest(request: LspRequest) {
     const file = request.resolvedFilePath;
     if (file) {
       // #todo add test for this
       // try  file name first, without read contents
-      let lang = detect.filename(file);
-      if (!lang) {
-        // try again with file contents;
-        lang = detect.contents(file, fs.readFileSync(file, 'utf8'));
-      }
-      // TODO(yulong): discussed with Fuyao offline, the code here create some exceptions.
-      lang = 'typescript';
+      const lang = await detectLanguage(file);
       return this.dispatchRequest(lang, request);
     } else {
       return Promise.reject(
