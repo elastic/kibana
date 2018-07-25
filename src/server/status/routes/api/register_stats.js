@@ -69,7 +69,37 @@ export function registerStatsApi(kbnServer, server, config) {
               getUsage(callCluster),
               getClusterUuid(callCluster),
             ]);
-            extended = collectorSet.toApiFieldNames({ usage, clusterUuid });
+
+            // In an effort to make telemetry more easily augmented, we need to ensure
+            // we can passthrough the data without every part of the process needing
+            // to know about the change; however, to support legacy use cases where this
+            // wasn't true, we need to be backwards compatible with how the legacy data
+            // looked and support those use cases here.
+            const usageWithLegacySupport = Object.keys(usage).reduce((accum, usageKey) => {
+              if (usageKey === 'kibana') {
+                accum = {
+                  ...accum,
+                  ...usage[usageKey]
+                };
+              }
+
+              if (usageKey === 'reporting') {
+                accum = {
+                  ...accum,
+                  xpack: {
+                    ...accum.xpack,
+                    reporting: usage[usageKey]
+                  },
+                };
+              }
+
+              return accum;
+            }, {});
+
+            extended = collectorSet.toApiFieldNames({
+              usage: usageWithLegacySupport,
+              clusterUuid
+            });
           } catch (e) {
             return reply(boomify(e));
           }
