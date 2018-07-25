@@ -40,11 +40,17 @@ const select = (fun, logFun) => (...inputs) => {
   // fun => (...inputs) => state => fun(...inputs.map(input => input(state)))
   let argumentValues = [];
   let value;
+  let actionId;
   return state => {
-    if (shallowEqual(argumentValues, (argumentValues = inputs.map(input => input(state))))) {
+    const lastActionId = state.primaryUpdate.payload.uid;
+    if (
+      actionId === lastActionId ||
+      shallowEqual(argumentValues, (argumentValues = inputs.map(input => input(state))))
+    ) {
       return value;
     }
     value = fun(...argumentValues);
+    actionId = lastActionId;
     if (logFun) logFun(value, argumentValues);
     return value;
   };

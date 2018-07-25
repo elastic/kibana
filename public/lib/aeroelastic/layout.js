@@ -538,6 +538,8 @@ const nextShapes = select((preexistingShapes, enteringShapes, restated) => {
   return preexistingShapes.concat(enteringShapes);
 })(shapes, enteringShapes, restateShapesEvent);
 
+const transformedShapes = select(applyLocalTransforms)(nextShapes, transformIntents);
+
 const alignmentGuides = (shapes, guidedShapes) => {
   const result = {};
   let counter = 0;
@@ -637,7 +639,7 @@ const alignmentGuideAnnotations = select((shapes, guidedShapes) => {
         backgroundColor: 'magenta',
       }))
     : [];
-})(nextShapes, hoveredShapes);
+})(transformedShapes, hoveredShapes);
 
 const rotationAnnotation = (shapes, selectedShapes, shape, i) => {
   const foundShape = shapes.find(s => shape.id === s.id);
@@ -676,7 +678,7 @@ const rotationAnnotations = select((shapes, selectedShapes) => {
       return rotationAnnotation(shapes, selectedShapes, shape, i);
     })
     .filter(identity);
-})(nextShapes, selectedShapes);
+})(transformedShapes, selectedShapes);
 
 const resizePointAnnotations = (parent, a, b) => ([x, y]) => {
   const markerPlace = matrix.translate(x * a, y * b, config.resizeAnnotationOffsetZ);
@@ -782,7 +784,7 @@ function resizeAnnotationsFunction(shapes, selectedShapes) {
   );
 }
 
-const resizeAnnotations = select(resizeAnnotationsFunction)(nextShapes, selectedShapes);
+const resizeAnnotations = select(resizeAnnotationsFunction)(transformedShapes, selectedShapes);
 
 /*
 // not all annotations can interact
@@ -837,12 +839,9 @@ const annotatedShapes = select(
     const result = snappedShapes.concat(annotations); // add current annotations
     return result;
   }
-)(nextShapes, alignmentGuideAnnotations, rotationAnnotations, resizeAnnotations);
+)(transformedShapes, alignmentGuideAnnotations, rotationAnnotations, resizeAnnotations);
 
-const reprojectedShapes = select((shapes, draggedShape, mouseDowned, transformIntents) => {
-  // per-shape model update of projections
-  return cascadeTransforms(applyLocalTransforms(shapes, transformIntents));
-})(annotatedShapes, draggedShape, mouseDowned, transformIntents);
+const globalTransformShapes = select(cascadeTransforms)(annotatedShapes);
 
 // this is the core scenegraph update invocation: upon new cursor position etc. emit the new scenegraph
 // it's _the_ state representation (at a PoC level...) comprising of transient properties eg. draggedShape, and the
@@ -857,7 +856,7 @@ const nextScene = select(
       gestureEnd,
     };
   }
-)(hoveredShape, selectedShapeIds, selectedPrimaryShapeIds, reprojectedShapes, gestureEnd);
+)(hoveredShape, selectedShapeIds, selectedPrimaryShapeIds, globalTransformShapes, gestureEnd);
 
 module.exports = {
   cursorPosition,
