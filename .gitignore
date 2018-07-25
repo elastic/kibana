@@ -1,6 +1,6 @@
 gen/
 bin/
-!/kibana-extra/castro/packages/castro-filename-check/bin/
+!/kibana-extra/codesearch/packages/codesearch-filename-check/bin/
 .DS_Store
 .gradle/
 .idea/

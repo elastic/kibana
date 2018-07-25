@@ -1,5 +1,5 @@
 //include 'util'
 //include 'elasticsearch'
 
-include 'kibana-extra:castro'
+include 'kibana-extra:codesearch'
 include 'lsp:javascript-typescript-langserver'

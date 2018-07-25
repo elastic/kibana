@@ -3,6 +3,6 @@ optimize:
   sourceMaps: false
 #  sourceMaps: '#cheap-source-map'
 
-castro:
+codesearch:
   enabled: true
-  dataPath: 'castro/data'  # the path relative to your HOME folder
+  dataPath: 'codesearch/data'  # the path relative to your HOME folder
