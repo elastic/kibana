@@ -6,8 +6,8 @@
 
 import { uiModules } from 'ui/modules';
 import { labels } from './lib/labels';
-import { indicesByNodes } from './transformers/indicesByNodes';
-import { nodesByIndices } from './transformers/nodesByIndices';
+import { indicesByNodes } from './transformers/indices_by_nodes';
+import { nodesByIndices } from './transformers/nodes_by_indices';
 import template from './index.html';
 
 const uiModule = uiModules.get('monitoring/directives', []);

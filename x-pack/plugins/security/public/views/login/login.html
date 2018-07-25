@@ -3,7 +3,7 @@
     <div class="kibanaWelcomeLogo"></div>
   </div>
 
-  <div class="form-container">
+  <div class="form-container" ng-if="login.layout === 'form'">
     <form class="login-form" ng-submit="login.submit(username, password)">
       <div ng-show="login.error" class="form-group error-message">
         <label class="control-label" data-test-subj="loginErrorMessage" >Oops! Error. Try again.</label>
@@ -42,6 +42,17 @@
         </button>
       </div>
     </form>
+  </div>
+
+  <div class="euiText loginErrorEsUnavailable" ng-if="login.layout === 'error-es-unavailable'">
+    <p class="euiTitle euiTitle--medium euiTextColor euiTextColor--danger">Cannot connect to the Elasticsearch cluster currently configured for Kibana.</p>
+    <p>Refer to the Kibana logs for more details and refresh to try again.</p>
+  </div>
+
+  <div class="euiText loginErrorXpackUnavailable" ng-if="login.layout === 'error-xpack-unavailable'">
+    <p class="euiTitle euiTitle--small">It appears you're running the oss-only distribution of Elasticsearch.</p>
+    <p class="euiTitle euiTitle--small">To use the full set of free features in this distribution of Kibana, please update Elasticsearch to the <a href="https://www.elastic.co/downloads/elasticsearch">default distribution</a>.</p>
+    <p>Refresh to try again.</p>
   </div>
 
 </div>

@@ -22,7 +22,7 @@ import { KibanaMap } from 'ui/vis/map/kibana_map';
 import * as Rx from 'rxjs';
 import { filter, first } from 'rxjs/operators';
 import 'ui/vis/map/service_settings';
-
+import { toastNotifications } from 'ui/notify';
 
 const MINZOOM = 0;
 const MAXZOOM = 22;//increase this to 22. Better for WMS
@@ -142,7 +142,7 @@ export function BaseMapsVisualizationProvider(serviceSettings) {
             this._setTmsLayer(firstRoadMapLayer);
           }
         } catch (e) {
-          this._notify.warning(e.message);
+          toastNotifications.addWarning(e.message);
           return;
         }
         return;
@@ -174,7 +174,7 @@ export function BaseMapsVisualizationProvider(serviceSettings) {
 
         }
       } catch (tmsLoadingError) {
-        this._notify.warning(tmsLoadingError.message);
+        toastNotifications.addWarning(tmsLoadingError.message);
       }
 
 
