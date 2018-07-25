@@ -22,9 +22,9 @@ import { buildActiveMappings } from './build_active_mappings';
 import { CallCluster, IndexMapping, MappingProperties } from './call_cluster';
 import { VersionedTransformer } from './document_migrator';
 import { ElasticIndex, FullIndexInfo } from './elastic_index';
+import { migrateRawDocs } from './migrate_raw_docs';
 import { coordinateMigration } from './migration_coordinator';
 import { LogFn, Logger, MigrationLogger } from './migration_logger';
-import { SavedObjectDoc } from './saved_object';
 
 type MigrationResult =
   | { status: 'skipped' }
@@ -215,16 +215,14 @@ async function runMigration(context: Context) {
 async function migrateDocs(context: Context) {
   const { destIndex, sourceIndex, batchSize, scrollDuration, documentMigrator } = context;
   const read = sourceIndex.reader({ batchSize, scrollDuration });
-  const migrateDoc = (doc: SavedObjectDoc) =>
-    documentMigrator.migrate(doc.migrationVersion ? doc : { ...doc, migrationVersion: {} });
 
   while (true) {
-    const originalDocs = await read();
+    const docs = await read();
 
-    if (!originalDocs || !originalDocs.length) {
+    if (!docs || !docs.length) {
       return;
     }
 
-    await destIndex.write(originalDocs.map(migrateDoc));
+    await destIndex.write(migrateRawDocs(documentMigrator.migrate, docs));
   }
 }

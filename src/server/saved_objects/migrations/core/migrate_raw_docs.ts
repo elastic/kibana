@@ -18,45 +18,45 @@
  */
 
 /*
- * This file provides helper functions for transforming documents to/from
- * the saved object format during index migrations.
+ * This file provides logic for migrating raw documents.
  */
 
 import { RawDoc } from './call_cluster';
+import { SavedObjectDoc, TransformFn } from './document_migrator';
 
-export interface MigrationVersion {
-  [type: string]: string;
+/**
+ * Applies the specified migration function to every saved object document in the list
+ * of raw docs. Any raw docs that are not valid saved objects will simply be passed through.
+ *
+ * @param {TransformFn} migrateDoc
+ * @param {RawDoc[]} rawDocs
+ * @returns {RawDoc[]}
+ */
+export function migrateRawDocs(migrateDoc: TransformFn, rawDocs: RawDoc[]): RawDoc[] {
+  return rawDocs.map(
+    raw => (isRawSavedObject(raw) ? savedObjectToRaw(migrateDoc(rawToSavedObject(raw))) : raw)
+  );
 }
 
 /**
- * A saved object type definition that allows for miscellaneous, unknown
- * properties, as current discussions around security, ACLs, etc indicate
- * that future props are likely to be added. Migrations support this
- * scenario out of the box.
+ * Determines whether or not the raw document can be converted to a saved object.
  */
-export interface SavedObjectDoc {
-  attributes: any;
-  id: string;
-  type: string;
-  migrationVersion?: MigrationVersion;
-
-  [rootProp: string]: any;
+function isRawSavedObject(rawDoc: RawDoc) {
+  const { type } = rawDoc._source;
+  return type && rawDoc._id.startsWith(type) && rawDoc._source.hasOwnProperty(type);
 }
 
 /**
  * Converts a document from the format that is stored in elasticsearch to the saved object client format.
- *
- * @export
- * @param {RawDoc} { _id, _source }
- * @returns {SavedObjectDoc}
  */
-export function rawToSavedObject({ _id, _source }: RawDoc): SavedObjectDoc {
+function rawToSavedObject({ _id, _source }: RawDoc): SavedObjectDoc {
   const { type } = _source;
   const id = _id.slice(type.length + 1);
   const doc = {
     ..._source,
     attributes: _source[type],
     id,
+    migrationVersion: _source.migrationVersion || {},
   };
 
   delete doc[type];
@@ -65,12 +65,8 @@ export function rawToSavedObject({ _id, _source }: RawDoc): SavedObjectDoc {
 
 /**
  * Converts a document from the saved object client format to the format that is stored in elasticsearch.
- *
- * @export
- * @param {SavedObjectDoc} savedObj
- * @returns {RawDoc}
  */
-export function savedObjectToRaw(savedObj: SavedObjectDoc): RawDoc {
+function savedObjectToRaw(savedObj: SavedObjectDoc): RawDoc {
   const { id, type, attributes } = savedObj;
   const source = {
     ...savedObj,

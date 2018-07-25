@@ -17,6 +17,7 @@
  * under the License.
  */
 
+import _ from 'lodash';
 import sinon from 'sinon';
 import { ElasticIndex } from './elastic_index';
 
@@ -27,22 +28,24 @@ describe('ElasticIndex', () => {
       const callCluster = sinon.stub();
       const docs = [
         {
-          attributes: {
-            aka: 'Mr Rogers',
+          _id: 'niceguy:fredrogers',
+          _source: {
+            type: 'niceguy',
+            niceguy: {
+              aka: 'Mr Rogers',
+            },
+            quotes: ['The greatest gift you ever give is your honest self.'],
           },
-          type: 'niceguy',
-          id: 'fredrogers',
-          quotes: ['The greatest gift you ever give is your honest self.'],
         },
         {
-          attributes: {
-            aka: 'Dominic Badguy',
+          _id: 'badguy:rickygervais',
+          _source: {
+            type: 'badguy',
+            badguy: {
+              aka: 'Dominic Badguy',
+            },
+            migrationVersion: { badguy: '2.3.4' },
           },
-          id: 'rickygervais',
-          migrationVersion: {
-            badguy: '2.3.4',
-          },
-          type: 'badguy',
         },
       ];
 
@@ -68,11 +71,13 @@ describe('ElasticIndex', () => {
       const callCluster = sinon.stub();
       const docs = [
         {
-          attributes: {
-            aka: 'Mr Rogers',
+          _id: 'niceguy:fredrogers',
+          _source: {
+            type: 'niceguy',
+            niceguy: {
+              aka: 'Mr Rogers',
+            },
           },
-          type: 'niceguy',
-          id: 'fredrogers',
         },
       ];
 
@@ -121,9 +126,9 @@ describe('ElasticIndex', () => {
 
       callCluster
         .onCall(0)
-        .returns(Promise.resolve({ _scroll_id: 'x', hits: { hits: batch1 } }))
+        .returns(Promise.resolve({ _scroll_id: 'x', hits: { hits: _.cloneDeep(batch1) } }))
         .onCall(1)
-        .returns(Promise.resolve({ _scroll_id: 'y', hits: { hits: batch2 } }))
+        .returns(Promise.resolve({ _scroll_id: 'y', hits: { hits: _.cloneDeep(batch2) } }))
         .onCall(2)
         .returns(Promise.resolve({ _scroll_id: 'z', hits: { hits: [] } }))
         .onCall(3)
@@ -134,28 +139,8 @@ describe('ElasticIndex', () => {
         index,
       }).reader({ batchSize: 100, scrollDuration: '5m' });
 
-      expect(await read()).toEqual([
-        {
-          attributes: { num: 1 },
-          id: '1',
-          type: 'such',
-        },
-      ]);
-
-      expect(await read()).toEqual([
-        {
-          attributes: { num: 2 },
-          id: '2',
-          type: 'aaa',
-        },
-        {
-          attributes: { num: 3 },
-          id: '3',
-          migrationVersion: { bbb: '3.2.5' },
-          type: 'bbb',
-        },
-      ]);
-
+      expect(await read()).toEqual(batch1);
+      expect(await read()).toEqual(batch2);
       expect(await read()).toEqual([]);
 
       // Check order of calls, as well as args
@@ -184,7 +169,7 @@ describe('ElasticIndex', () => {
 
       callCluster
         .onCall(0)
-        .returns(Promise.resolve({ _scroll_id: 'x', hits: { hits: batch } }))
+        .returns(Promise.resolve({ _scroll_id: 'x', hits: { hits: _.cloneDeep(batch) } }))
         .onCall(1)
         .returns(Promise.resolve({ _scroll_id: 'z', hits: { hits: [] } }));
 
@@ -196,15 +181,7 @@ describe('ElasticIndex', () => {
         scrollDuration: '5m',
       });
 
-      expect(await read()).toEqual([
-        {
-          acls: '3230a',
-          attributes: { num: 1 },
-          foos: { is: 'fun' },
-          id: '1',
-          type: 'such',
-        },
-      ]);
+      expect(await read()).toEqual(batch);
     });
   });
 });

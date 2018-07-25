@@ -18,13 +18,8 @@
  */
 
 import _ from 'lodash';
-import { AliasAction, CallCluster, IndexMapping, NotFound } from './call_cluster';
-import {
-  MigrationVersion,
-  rawToSavedObject,
-  SavedObjectDoc,
-  savedObjectToRaw,
-} from './saved_object';
+import { AliasAction, CallCluster, IndexMapping, NotFound, RawDoc } from './call_cluster';
+import { MigrationVersion } from './document_migrator';
 
 /*
  * This module contains various functions for querying and manipulating
@@ -127,7 +122,7 @@ export class ElasticIndex {
 
     return async function read() {
       const result = await nextBatch();
-      const docs = result.hits.hits.map(rawToSavedObject);
+      const docs = result.hits.hits;
 
       scrollId = result._scroll_id;
 
@@ -143,24 +138,21 @@ export class ElasticIndex {
    * Writes the specified documents to the index, throws an exception
    * if any of the documents fail to save.
    *
-   * @param {SavedObjectDoc[]} docs - The saved object docs being written.
-   * @memberof BatchIndexWriter
+   * @param {RawDoc[]} docs
    */
-  public async write(docs: SavedObjectDoc[]) {
+  public async write(docs: RawDoc[]) {
     const { callCluster, index } = this;
     const result = await callCluster('bulk', {
-      body: docs.reduce((acc: object[], doc: SavedObjectDoc) => {
-        const raw = savedObjectToRaw(doc);
-
+      body: docs.reduce((acc: object[], doc: RawDoc) => {
         acc.push({
           index: {
-            _id: raw._id,
+            _id: doc._id,
             _index: index,
             _type: 'doc',
           },
         });
 
-        acc.push(raw._source);
+        acc.push(doc._source);
 
         return acc;
       }, []),
