@@ -72,9 +72,8 @@ export default function (kibana) {
 }
 ```
 
-The engine uses a locale resolution process similar to that of the built-in
-Intl APIs to determine which locale data to use based on the `accept-language`
-http header.
+The engine uses a `config/kibana.yml` file for locale resolution process.
+If `i18n.locale` option is defined this will be used for localization
 
 The following are the abstract steps i18n engine goes through to resolve the locale value:
 
@@ -82,9 +81,8 @@ The following are the abstract steps i18n engine goes through to resolve the loc
   `uiExports.translations`), then that locale will be resolved.
 - If locale data is missing for a leaf locale like `fr-FR`, but there is data
 for one of its ancestors, `fr` in this case, then its ancestor will be used.
-- If `accept-language` header is not presented or previous steps didn't resolve
-the locale, the locale will be resolved to locale defined in `i18n.defaultLocale`
-option at `config/kibana.yml` file.
+- If `i18n.locale` option is not defined in `config/kibana.yml` or previous steps
+didn't resolve the locale, the `en` locale will be used.
 
 One of our technical requirements is to have default message in the templates
 themselves, and that message will always be english, so we don't need interact

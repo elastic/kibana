@@ -27,27 +27,22 @@
 import { i18nLoader } from '@kbn/i18n';
 
 export function uiI18nMixin(kbnServer, server, config) {
-  const defaultLocale = config.get('i18n.defaultLocale');
+  const locale = config.get('i18n.locale');
+
   const { translationPaths = [] } = kbnServer.uiExports;
 
   i18nLoader.registerTranslationFiles(translationPaths);
 
   /**
-   *  Fetch the translations matching the Accept-Language header for a requests.
+   *  Fetch the translations matching the locale from kibana.yml config.
    *  @name request.getUiTranslations
    *  @returns {Promise<Messages>} translations - translation messages
    */
   server.decorate('request', 'getUiTranslations', async function () {
-    const header = this.headers['accept-language'];
-
-    const [defaultTranslations, requestedTranslations] = await Promise.all([
-      i18nLoader.getTranslationsByLocale(defaultLocale),
-      i18nLoader.getTranslationsByLanguageHeader(header),
-    ]);
+    const requestedTranslations = await i18nLoader.getTranslationsByLocale(locale);
 
     return {
-      locale: defaultLocale,
-      ...defaultTranslations,
+      locale,
       ...requestedTranslations,
     };
   });
