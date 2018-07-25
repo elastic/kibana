@@ -6,8 +6,12 @@
 
 import { getSpacesQueryFilters } from './query_filters';
 
-test('returns no parameters when no types are provided', () => {
-  expect(getSpacesQueryFilters('space_1', [])).toEqual([]);
+test('throws when no types are provided', () => {
+  expect(() => getSpacesQueryFilters('space_1', [])).toThrowErrorMatchingSnapshot();
+});
+
+test('throws if types contains an empty entry', () => {
+  expect(() => getSpacesQueryFilters('space_1', ['dashboard', ''])).toThrowErrorMatchingSnapshot();
 });
 
 test('creates a query that filters on type, but not on space, for types that are not space-aware', () => {

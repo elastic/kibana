@@ -102,7 +102,7 @@ export class SavedObjectsClient {
    * @param {object} [options={}]
    * @property {string} [options.id] - force id on creation, not recommended
    * @property {boolean} [options.overwrite=false]
-   * @property {object} [options.extraBodyProperties={}] - extra properties to append to the document body, outside of the object's type property
+   * @property {object} [options.extraDocumentProperties={}] - extra properties to append to the document body, outside of the object's type property
    * @returns {promise} - { id, type, version, attributes }
   */
   async create(type, attributes = {}, options = {}) {
@@ -112,7 +112,7 @@ export class SavedObjectsClient {
   /**
    * Creates multiple documents at once
    *
-   * @param {array} objects - [{ type, id, attributes, extraBodyProperties }]
+   * @param {array} objects - [{ type, id, attributes, extraDocumentProperties }]
    * @param {object} [options={}]
    * @property {boolean} [options.overwrite=false] - overwrites existing documents
    * @returns {promise} - { saved_objects: [{ id, type, version, attributes, error: { message } }]}
@@ -188,7 +188,7 @@ export class SavedObjectsClient {
    * @param {string} id
    * @param {object} [options={}]
    * @property {integer} options.version - ensures version matches that of persisted object
-   * @param {array} [options.extraBodyProperties = {}] - an object of extra properties to write into the underlying document
+   * @param {array} [options.extraDocumentProperties = {}] - an object of extra properties to write into the underlying document
    * @returns {promise}
    */
   async update(type, id, attributes, options = {}) {
