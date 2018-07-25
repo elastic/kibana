@@ -17,25 +17,4 @@
  * under the License.
  */
 
-import _ from 'lodash';
-import React from 'react';
-import { render, unmountComponentAtNode } from 'react-dom';
-import { Visualization } from '../components/visualization';
-
-
-export const visualizationLoader = (element, vis, visData, uiState, params) => {
-  return new Promise(resolve => {
-    const listenOnChange = _.get(params, 'listenOnChange', false);
-    render(<Visualization
-      vis={vis}
-      visData={visData}
-      uiState={uiState}
-      listenOnChange={listenOnChange}
-      onInit={resolve}
-    />, element);
-  });
-};
-
-visualizationLoader.destroy = (element) => {
-  if (element) unmountComponentAtNode(element);
-};
+export type SearchSource = any;
