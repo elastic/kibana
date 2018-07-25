@@ -15,11 +15,7 @@ import {
   EuiSearchBar,
 } from '@elastic/eui';
 import React from 'react';
-
-// TODO: move to constants
-const BULK_ASSIGN_TAG = 'BULK_ASSIGN_TAG';
-const BULK_DELETE = 'BULK_DELETE';
-const BULK_EDIT = 'BULK_EDIT';
+import { TABLE_CONFIG } from '../../../common/constants';
 
 interface BulkActionControlBarState {
   isPopoverVisible: boolean;
@@ -56,7 +52,7 @@ export class BulkActionControlBar extends React.Component<
         Bulk Action
       </EuiButton>
     );
-    const { onBulkAction, onSearchQueryChange, tagOptions, typeOptions } = this.props;
+    const { onSearchQueryChange, tagOptions, typeOptions } = this.props;
     const panels = [
       {
         id: 0,
@@ -65,17 +61,17 @@ export class BulkActionControlBar extends React.Component<
           {
             name: 'Bulk Edit',
             icon: <EuiIcon type="indexEdit" size="m" />,
-            onClick: () => onBulkAction(BULK_EDIT),
+            onClick: this.getActionHandler(TABLE_CONFIG.ACTIONS.BULK_EDIT),
           },
           {
             name: 'Bulk Delete',
             icon: <EuiIcon type="indexClose" size="m" />,
-            onClick: () => onBulkAction(BULK_DELETE),
+            onClick: this.getActionHandler(TABLE_CONFIG.ACTIONS.BULK_DELETE),
           },
           {
             name: 'Bulk Assign Tags',
             icon: <EuiIcon type="gear" size="m" />,
-            onClick: () => onBulkAction(BULK_ASSIGN_TAG),
+            onClick: this.getActionHandler(TABLE_CONFIG.ACTIONS.BULK_ASSIGN_TAG),
           },
         ],
       },
@@ -122,15 +118,17 @@ export class BulkActionControlBar extends React.Component<
     );
   }
 
-  private showPopover = () => {
-    this.setState({
-      isPopoverVisible: true,
-    });
-  };
-
   private hidePopover = () => {
     this.setState({
       isPopoverVisible: false,
+    });
+  };
+
+  private getActionHandler = (action: string) => () => this.props.onBulkAction(action);
+
+  private showPopover = () => {
+    this.setState({
+      isPopoverVisible: true,
     });
   };
 }

@@ -15,6 +15,7 @@ import {
 import { flatten, uniq } from 'lodash';
 import React from 'react';
 import styled from 'styled-components';
+import { TABLE_CONFIG } from '../../../common/constants';
 import { CMPopulatedBeat } from '../../../common/domain_types';
 import { BulkActionControlBar } from './controls';
 
@@ -34,7 +35,7 @@ const columns = [
     field: 'full_tags',
     name: 'Tags',
     render: (value: string, beat: CMPopulatedBeat) => (
-      <EuiFlexGroup wrap responsive={false}>
+      <EuiFlexGroup wrap responsive={true}>
         {beat.full_tags.map(tag => (
           <EuiBadge key={tag.id} color={tag.color ? tag.color : 'primary'}>
             {tag.id}
@@ -65,9 +66,6 @@ interface BeatsTableProps {
 
 interface BeatsTableState {
   itemsToRender: CMPopulatedBeat[];
-  pageIndex: number;
-  pageSize: number;
-  search?: any;
   selection: CMPopulatedBeat[];
 }
 
@@ -81,27 +79,22 @@ export class BeatsTable extends React.Component<BeatsTableProps, BeatsTableState
 
     this.state = {
       itemsToRender: props.items,
-      pageIndex: 0,
-      pageSize: 5,
       selection: [],
     };
   }
 
   public render() {
-    const { onBulkAction } = this.props;
-    const { itemsToRender, pageIndex, pageSize } = this.state;
+    const { itemsToRender } = this.state;
 
     const pagination = {
-      pageIndex,
-      pageSize,
-      totalItemCount: itemsToRender.length,
-      pageSizeOptions: [3, 5, 8],
+      initialPageSize: TABLE_CONFIG.INITIAL_ROW_SIZE,
+      pageSizeOptions: TABLE_CONFIG.PAGE_SIZE_OPTIONS,
     };
 
     const selectionOptions = {
       onSelectionChange: this.setSelection,
       selectable: () => true,
-      selectableMessage: () => null,
+      selectableMessage: () => 'Select this beat',
     };
 
     const tagOptions = this.getTagsOptions();
@@ -110,11 +103,8 @@ export class BeatsTable extends React.Component<BeatsTableProps, BeatsTableState
     return (
       <TableContainer>
         <BulkActionControlBar
-          onBulkAction={(action: string) => {
-            const { selection } = this.state;
-            onBulkAction(action, selection);
-          }}
-          onSearchQueryChange={this.onQueryChange}
+          onBulkAction={this.handleBulkAction}
+          onSearchQueryChange={this.onSearchQueryChange}
           tagOptions={tagOptions}
           typeOptions={typeOptions}
         />
@@ -136,15 +126,21 @@ export class BeatsTable extends React.Component<BeatsTableProps, BeatsTableState
     return clauses ? clauses.map((clause: any) => clause.value) : [];
   };
 
-  private onQueryChange = (search: any) => {
+  private handleBulkAction = (action: string) => {
+    const { onBulkAction } = this.props;
+    const { selection } = this.state;
+    onBulkAction(action, selection);
+  };
+
+  private onSearchQueryChange = (search: any) => {
     const { items } = this.props;
     let itemsToRender = items;
 
     if (search && !search.error) {
-      const { query } = search;
-      const types = this.getClauseValuesForField(query.ast, 'type');
-      const tags = this.getClauseValuesForField(query.ast, 'tag');
-      const terms = query.ast.getTermClauses().map((clause: any) => clause.value);
+      const { ast } = search.query;
+      const types = this.getClauseValuesForField(ast, 'type');
+      const tags = this.getClauseValuesForField(ast, 'tag');
+      const terms = ast.getTermClauses().map((clause: any) => clause.value);
       if (types.length) {
         itemsToRender = itemsToRender.filter(item => types.includes(item.type));
       }
@@ -167,15 +163,13 @@ export class BeatsTable extends React.Component<BeatsTableProps, BeatsTableState
 
   private getTagsOptions = () => {
     const { items } = this.props;
-    const ids = flatten(items.map(({ full_tags }) => full_tags.map(({ id }) => id)));
-    return uniq(ids).map(id => ({
-      value: id,
-    }));
+    const fullTags = flatten(items.map(item => item.full_tags));
+    return uniq(fullTags.map(tag => ({ value: tag.id })), 'value');
   };
 
   private getTypeOptions = () => {
     const { items } = this.props;
-    return uniq(items.map(({ type }) => type)).map(type => ({ value: type }));
+    return uniq(items.map(({ type }) => ({ value: type })), 'value');
   };
 
   private setSelection = (selection: any) => {
