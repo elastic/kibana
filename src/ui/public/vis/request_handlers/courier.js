@@ -104,9 +104,11 @@ const CourierRequestHandlerProvider = function () {
         return aggs.onSearchRequestStart(searchSource, searchRequest);
       });
 
-      timeFilterSearchSource.setField('filter', () => {
-        return getTime(searchSource.getField('index'), timeRange);
-      });
+      if (timeRange) {
+        timeFilterSearchSource.setField('filter', () => {
+          return getTime(searchSource.getField('index'), timeRange);
+        });
+      }
 
       requestSearchSource.setField('filter', filters);
       requestSearchSource.setField('query', query);
