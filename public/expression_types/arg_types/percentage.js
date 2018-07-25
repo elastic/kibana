@@ -3,9 +3,7 @@ import PropTypes from 'prop-types';
 import { EuiRange } from '@elastic/eui';
 import { templateFromReactComponent } from '../../lib/template_from_react_component';
 
-// Same code as Range input, but converts values to percentage between 0 and 1 instead of 0 and 100
-const PercentageArgInput = ({ typeInstance, onValueChange, argValue }) => {
-  const { min, max } = typeInstance;
+const PercentageArgInput = ({ onValueChange, argValue }) => {
   const handleChange = ev => {
     return onValueChange(ev.target.value / 100);
   };
@@ -13,8 +11,8 @@ const PercentageArgInput = ({ typeInstance, onValueChange, argValue }) => {
   return (
     <EuiRange
       compressed
-      min={min}
-      max={max}
+      min={0}
+      max={100}
       showLabels
       showInput
       value={argValue * 100}
@@ -26,12 +24,6 @@ const PercentageArgInput = ({ typeInstance, onValueChange, argValue }) => {
 PercentageArgInput.propTypes = {
   onValueChange: PropTypes.func.isRequired,
   argValue: PropTypes.oneOfType([PropTypes.string, PropTypes.number, PropTypes.bool]).isRequired,
-  typeInstance: PropTypes.shape({
-    name: PropTypes.string.isRequired,
-    min: PropTypes.number.isRequired,
-    max: PropTypes.number.isRequired,
-    step: PropTypes.number.isRequired,
-  }),
   argId: PropTypes.string.isRequired,
 };
 

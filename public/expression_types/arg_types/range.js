@@ -4,9 +4,9 @@ import { EuiRange } from '@elastic/eui';
 import { templateFromReactComponent } from '../../lib/template_from_react_component';
 
 const RangeArgInput = ({ typeInstance, onValueChange, argValue }) => {
-  const { min, max, step } = typeInstance;
+  const { min, max, step } = typeInstance.options;
   const handleChange = ev => {
-    return onValueChange(ev.target.value);
+    return onValueChange(Number(ev.target.value));
   };
 
   return (
@@ -17,7 +17,7 @@ const RangeArgInput = ({ typeInstance, onValueChange, argValue }) => {
       step={step}
       showLabels
       showInput
-      value={argValue}
+      value={`${argValue}`}
       onChange={handleChange}
     />
   );
@@ -25,12 +25,13 @@ const RangeArgInput = ({ typeInstance, onValueChange, argValue }) => {
 
 RangeArgInput.propTypes = {
   onValueChange: PropTypes.func.isRequired,
-  argValue: PropTypes.oneOfType([PropTypes.string, PropTypes.number, PropTypes.bool]).isRequired,
+  argValue: PropTypes.number.isRequired,
   typeInstance: PropTypes.shape({
-    name: PropTypes.string.isRequired,
-    min: PropTypes.number.isRequired,
-    max: PropTypes.number.isRequired,
-    step: PropTypes.number.isRequired,
+    options: PropTypes.shape({
+      min: PropTypes.number.isRequired,
+      max: PropTypes.number.isRequired,
+      step: PropTypes.number,
+    }).isRequired,
   }),
   argId: PropTypes.string.isRequired,
 };
