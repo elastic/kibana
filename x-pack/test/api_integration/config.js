@@ -31,7 +31,6 @@ export default async function ({ readConfigFile }) {
     junit: {
       reportName: 'X-Pack API Integration Tests',
     },
-    env: xPackFunctionalTestsConfig.get('env'),
     kbnTestServer: {
       ...xPackFunctionalTestsConfig.get('kbnTestServer'),
       serverArgs: [
