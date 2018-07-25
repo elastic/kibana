@@ -214,6 +214,21 @@ export function FindProvider({ getService }) {
         await element.click();
       });
     }
+    async clickByDisplayedLinkText(linkText, timeout = defaultFindTimeout) {
+      log.debug(`clickByDisplayedLinkText(${linkText})`);
+      await retry.try(async () => {
+        const element = await this.byDisplayedLinkText(linkText, timeout);
+        await remote.moveMouseTo(element);
+        await element.click();
+      });
+    }
+    async clickDisplayedByCssSelector(selector, timeout = defaultFindTimeout) {
+      await retry.try(async () => {
+        const element = await this.findDisplayedByCssSelector(selector, timeout);
+        await remote.moveMouseTo(element);
+        await element.click();
+      });
+    }
   }
 
   return new Find();

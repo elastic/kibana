@@ -30,21 +30,21 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
 
   class SettingsPage {
     async clickNavigation() {
-      find.clickByCssSelector('.app-link:nth-child(5) a');
+      find.clickDisplayedByCssSelector('.app-link:nth-child(5) a');
     }
 
     async clickKibanaSettings() {
-      await find.clickByCssSelector('Advanced Settings');
+      await find.clickByDisplayedLinkText('Advanced Settings');
       await PageObjects.header.waitUntilLoadingHasFinished();
     }
 
     async clickKibanaSavedObjects() {
-      await find.clickByCssSelector('Saved Objects');
+      await find.clickByDisplayedLinkText('Saved Objects');
     }
 
     async clickKibanaIndices() {
       log.debug('clickKibanaIndices link');
-      await find.clickByCssSelector('Index Patterns');
+      await find.clickByDisplayedLinkText('Index Patterns');
     }
 
     async getAdvancedSettings(propertyName) {
@@ -55,8 +55,7 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
 
     async getAdvancedSettingCheckbox(propertyName) {
       log.debug('in getAdvancedSettingCheckbox');
-      const setting = await testSubjects.find(`advancedSetting-editField-${propertyName}`);
-      return await setting.getProperty('checked');
+      return await testSubjects.getProperty(`advancedSetting-editField-${propertyName}`, 'checked');
     }
 
     async clearAdvancedSettings(propertyName) {
@@ -145,7 +144,7 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
     }
 
     async getConfigureHeader() {
-      return await find.allByCssSelector('h1');
+      return await find.byCssSelector('h1');
     }
 
     async getTableHeader() {
@@ -154,16 +153,13 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
 
     async sortBy(columnName) {
       const chartTypes = find.allByCssSelector('table.euiTable thead tr th button');
-      function getChartType(chart) {
-        return chart.getVisibleText().then(function (chartString) {
-          if (chartString === columnName) {
-            return chart.click().then(function () {
-              return PageObjects.header.waitUntilLoadingHasFinished();
-            });
-          }
-        });
+      async function getChartType(chart) {
+        const chartString = await chart.getVisibleText();
+        if (chartString === columnName) {
+          await chart.click();
+          await PageObjects.header.waitUntilLoadingHasFinished();
+        }
       }
-
       const getChartTypesPromises = chartTypes.map(getChartType);
       return Promise.all(getChartTypesPromises);
     }
