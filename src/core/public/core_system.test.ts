@@ -167,7 +167,14 @@ describe('#start()', () => {
     expect(mockInstance.start).toHaveBeenCalledWith();
   });
 
-  it('calls lifecycleSystem#start()', () => {
+  it('calls fatalErrors#start()', () => {
+    startCore();
+    const [mockInstance] = MockFatalErrorsService.mock.instances;
+    expect(mockInstance.start).toHaveBeenCalledTimes(1);
+    expect(mockInstance.start).toHaveBeenCalledWith();
+  });
+
+  it('calls legacyPlatform#start()', () => {
     startCore();
     const [mockInstance] = MockLegacyPlatformService.mock.instances;
     expect(mockInstance.start).toHaveBeenCalledTimes(1);
