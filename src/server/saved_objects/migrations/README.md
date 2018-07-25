@@ -187,16 +187,11 @@ Generally, the code eschews classes in favor of functions and basic data structu
 
 ### Core
 
-A high-level overview of the core folder follows. Each file in the core folder contains fairly detailed comments, if more info is desired.
+There are three core entry points.
 
-* `build_active_mappings.ts` - Contains logic to build the index mappings object
-* `call_cluster.ts` - This is just a TypeScript definitions file, really, defining the elasticsearch.js subset used by the migration codebase
-* `document_migrator.ts` - Logic for migrating individual documents
-* `elastic_index.ts` - An uuber class that exposes methods for querying and modifying an elastic search index
-* `index_migrator.ts` - Logic for migrating or patching indices
-* `migration_coordinator.ts` - A function which attempts to run a migration, and if it gets an index exists error, falls back to a polling mechanism to wait for another Kibana instance to finish migrating the index
-* `migrate_raw_docs.ts` - Logic that takes raw documents (e.g. fresh out of an index), converts them to saved objects, migrates them, and converts them back to raw docs, used by index migrations.
-* `migration_logger.ts` - The basic logging mechanism used by index migrations
+* index_migrator - Logic for migrating an index
+* document_migrator - Logic for migrating an individual document, used by index_migrator, but also by the saved object client to migrate docs during document creation
+* build_active_mappings - Logic to convert mapping properties into a full index mapping object, including the core properties required by any saved object index
 
 ## Testing
 
