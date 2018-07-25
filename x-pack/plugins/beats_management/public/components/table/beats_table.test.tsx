@@ -46,7 +46,7 @@ describe('BeatsTable component', () => {
   });
 
   it('matches snapshot', () => {
-    const wrapper = shallow(<BeatsTable items={beats} onBulkAction={onBulkAction} />);
+    const wrapper = shallow(<BeatsTable beats={beats} onBulkAction={onBulkAction} />);
 
     expect(wrapper).toMatchSnapshot();
   });

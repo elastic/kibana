@@ -60,12 +60,12 @@ const columns = [
 ];
 
 interface BeatsTableProps {
-  items: CMPopulatedBeat[];
+  beats: CMPopulatedBeat[];
   onBulkAction: any;
 }
 
 interface BeatsTableState {
-  itemsToRender: CMPopulatedBeat[];
+  beatsToRender: CMPopulatedBeat[];
   selection: CMPopulatedBeat[];
 }
 
@@ -78,13 +78,13 @@ export class BeatsTable extends React.Component<BeatsTableProps, BeatsTableState
     super(props);
 
     this.state = {
-      itemsToRender: props.items,
+      beatsToRender: props.beats,
       selection: [],
     };
   }
 
   public render() {
-    const { itemsToRender } = this.state;
+    const { beatsToRender } = this.state;
 
     const pagination = {
       initialPageSize: TABLE_CONFIG.INITIAL_ROW_SIZE,
@@ -110,7 +110,7 @@ export class BeatsTable extends React.Component<BeatsTableProps, BeatsTableState
         />
         <EuiInMemoryTable
           columns={columns}
-          items={itemsToRender}
+          items={beatsToRender}
           itemId="id"
           isSelectable={true}
           pagination={pagination}
@@ -133,8 +133,8 @@ export class BeatsTable extends React.Component<BeatsTableProps, BeatsTableState
   };
 
   private onSearchQueryChange = (search: any) => {
-    const { items } = this.props;
-    let itemsToRender = items;
+    const { beats } = this.props;
+    let beatsToRender = beats;
 
     if (search && !search.error) {
       const { ast } = search.query;
@@ -142,34 +142,34 @@ export class BeatsTable extends React.Component<BeatsTableProps, BeatsTableState
       const tags = this.getClauseValuesForField(ast, 'tag');
       const terms = ast.getTermClauses().map((clause: any) => clause.value);
       if (types.length) {
-        itemsToRender = itemsToRender.filter(item => types.includes(item.type));
+        beatsToRender = beatsToRender.filter(item => types.includes(item.type));
       }
       if (tags.length) {
-        itemsToRender = itemsToRender.filter(item =>
+        beatsToRender = beatsToRender.filter(item =>
           item.full_tags.some(({ id }) => tags.includes(id))
         );
       }
       if (terms.length) {
-        itemsToRender = itemsToRender.filter(item =>
+        beatsToRender = beatsToRender.filter(item =>
           terms.some((term: string) => item.id.includes(term))
         );
       }
     }
 
     this.setState({
-      itemsToRender,
+      beatsToRender,
     });
   };
 
   private getTagsOptions = () => {
-    const { items } = this.props;
-    const fullTags = flatten(items.map(item => item.full_tags));
+    const { beats } = this.props;
+    const fullTags = flatten(beats.map(item => item.full_tags));
     return uniq(fullTags.map(tag => ({ value: tag.id })), 'value');
   };
 
   private getTypeOptions = () => {
-    const { items } = this.props;
-    return uniq(items.map(({ type }) => ({ value: type })), 'value');
+    const { beats } = this.props;
+    return uniq(beats.map(({ type }) => ({ value: type })), 'value');
   };
 
   private setSelection = (selection: any) => {
