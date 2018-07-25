@@ -48,7 +48,7 @@ const MAPPINGS = {
   },
 };
 
-function runTest(path: string | string[], mapping: {}) {
+function runTest(path: string | string[], mapping: { [key: string]: any }) {
   expect(getProperty(MAPPINGS, path)).toBe(mapping);
 }
 

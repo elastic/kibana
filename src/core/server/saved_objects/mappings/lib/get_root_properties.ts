@@ -18,12 +18,10 @@
  */
 
 import { getRootType } from './get_root_type';
-
-import { EsMappingsDsl } from './es_mappings_dsl';
-import { EsPropertyMappings } from './es_property_mappings';
+import { EsMappings, EsPropertyMappings } from './types';
 
 /**
- *  Get the property mappings for the root type in the EsMappingsDsl
+ *  Get the property mappings for the root type in the EsMappings
  *
  *  If the mappings don't have a root type, or the root type is not
  *  an object type (it's a keyword or something) this function will
@@ -37,10 +35,10 @@ import { EsPropertyMappings } from './es_property_mappings';
  *  This data can be found at `{indexName}.mappings.{typeName}.properties`
  *  in the es indices.get() response.
  *
- *  @param  {EsMappingsDsl} mappings
+ *  @param  {EsMappings} mappings
  *  @return {EsPropertyMappings}
  */
-export function getRootProperties(mappings: EsMappingsDsl): EsPropertyMappings {
+export function getRootProperties(mappings: EsMappings): EsPropertyMappings {
   const mapping = mappings[getRootType(mappings)];
 
   if (mapping.type !== 'object' && !mapping.properties) {

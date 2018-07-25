@@ -19,11 +19,10 @@
 
 import { cloneDeep } from 'lodash';
 
-import { getRootProperties, getRootType } from './lib';
-import { EsMappingsDsl, EsPropertyMappings } from './lib/es_mappings_dsl';
+import { EsMappings, EsPropertyMappings, getRootProperties, getRootType } from './lib';
 import { formatListAsProse } from './utils';
 
-const DEFAULT_INITIAL_DSL: EsMappingsDsl = {
+const DEFAULT_INITIAL_DSL: EsMappings = {
   rootType: {
     type: 'object',
     properties: {},
@@ -31,10 +30,10 @@ const DEFAULT_INITIAL_DSL: EsMappingsDsl = {
 };
 
 export class IndexMappings {
-  private dsl: EsMappingsDsl;
+  private dsl: EsMappings;
 
   constructor(
-    initialDsl: EsMappingsDsl = DEFAULT_INITIAL_DSL,
+    initialDsl: EsMappings = DEFAULT_INITIAL_DSL,
     mappingExtensions: Array<{
       properties: EsPropertyMappings;
       pluginId?: string;

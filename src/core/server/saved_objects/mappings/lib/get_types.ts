@@ -17,13 +17,14 @@
  * under the License.
  */
 
-import { EsMappingsDsl } from './es_mappings_dsl';
+import { EsMappings } from './types';
+
 /**
- *  Get the names of the types defined in the EsMappingsDsl
+ *  Get the names of the types defined in the EsMappings
  *
- *  @param  {EsMappingsDsl} mappings
+ *  @param  {EsMappings} mappings
  *  @return {string[]}
  */
-export function getTypes(mappings: EsMappingsDsl): string[] {
+export function getTypes(mappings: EsMappings): string[] {
   return Object.keys(mappings).filter(type => type !== '_default_');
 }

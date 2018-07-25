@@ -17,6 +17,21 @@
  * under the License.
  */
 
+export interface EsMapping {
+  type?: string;
+  dynamic?: true | false | 'strict';
+  properties?: {
+    [key: string]: EsMapping;
+  };
+  fields?: {
+    [key: string]: EsMapping;
+  };
+}
+
+export interface EsMappings {
+  [rootType: string]: EsMapping;
+}
+
 export class EsPropertyMappings {
-  [typeOrField: string]: any;
+  [key: string]: EsMappings;
 }

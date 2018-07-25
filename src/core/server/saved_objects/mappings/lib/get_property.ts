@@ -17,26 +17,23 @@
  * under the License.
  */
 
+// @ts-ignore internal modules are not typed
 import toPath from 'lodash/internal/toPath';
-import { EsMappingsDsl } from './es_mappings_dsl';
-import { EsObjectMapping } from './es_object_mapping';
 import { getRootType } from './get_root_type';
+import { EsMapping, EsMappings } from './types';
 
 /**
  *  Recursively read properties from the mapping object of type "object"
  *  until the `path` is resolved.
- *  @param  {EsObjectMapping} mapping
- *  @param  {string[]} path
- *  @return {Objects|undefined}
  */
 function getPropertyMappingFromObjectMapping(
-  mapping: EsObjectMapping | any, // can be any because of recursion
+  mapping: EsMapping,
   path: string[]
-): {} | undefined {
+): EsMapping | undefined {
   const props = mapping && (mapping.properties || mapping.fields);
 
   if (!props) {
-    return undefined;
+    return;
   }
 
   if (path.length > 1) {
@@ -47,11 +44,11 @@ function getPropertyMappingFromObjectMapping(
 }
 
 /**
- *  Get the mapping for a specific property within the root type of the EsMappingsDsl.
- *  @param  {EsMappingsDsl} mappings
+ *  Get the mapping for a specific property within the root type of the EsMappings.
+ *  @param  {EsMappings} mappings
  *  @param  {string|string[]} path
  *  @return {Object|undefined}
  */
-export function getProperty(mappings: EsMappingsDsl, path: string | string[]): {} | undefined {
+export function getProperty(mappings: EsMappings, path: string | string[]): {} | undefined {
   return getPropertyMappingFromObjectMapping(mappings[getRootType(mappings)], toPath(path));
 }
