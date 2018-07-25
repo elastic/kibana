@@ -6,17 +6,47 @@
 
 import { createSpacesService } from "./create_spaces_service";
 
-const createRequest = (urlContext) => ({
-  getBasePath: () => urlContext ? `/s/${urlContext}` : ''
+const createRequest = (urlContext, serverBasePath = '') => ({
+  getBasePath: () => urlContext ? `${serverBasePath}/s/${urlContext}` : serverBasePath
 });
 
+const createMockServer = (config) => {
+  return {
+    config: jest.fn(() => {
+      return {
+        get: jest.fn((key) => {
+          return config[key];
+        })
+      };
+    })
+  };
+};
+
 test('returns empty string for the default space', () => {
-  const service = createSpacesService();
+  const server = createMockServer({
+    'server.basePath': ''
+  });
+
+  const service = createSpacesService(server);
   expect(service.getUrlContext(createRequest())).toEqual('');
 });
 
 test('returns the urlContext for the current space', () => {
   const request = createRequest('my-space-context');
-  const service = createSpacesService();
+  const server = createMockServer({
+    'server.basePath': ''
+  });
+
+  const service = createSpacesService(server);
+  expect(service.getUrlContext(request)).toEqual('my-space-context');
+});
+
+test(`returns the urlContext for the current space when a server basepath is defined`, () => {
+  const request = createRequest('my-space-context', '/foo');
+  const server = createMockServer({
+    'server.basePath': '/foo'
+  });
+
+  const service = createSpacesService(server);
   expect(service.getUrlContext(request)).toEqual('my-space-context');
 });
