@@ -193,14 +193,8 @@ function extractDetectorDescriptions(job, newJobData) {
 
 function extractCustomSettings(job, newJobData) {
   const settingsData = {};
-  if (job.custom_settings !== undefined) {
-    settingsData.custom_settings = job.custom_settings;
-  }
-
   if (newJobData && newJobData.customUrls) {
-    if (settingsData.custom_settings === undefined) {
-      settingsData.custom_settings = {};
-    }
+    settingsData.custom_settings = job.custom_settings || {};
     settingsData.custom_settings.custom_urls = newJobData.customUrls;
   }
   return settingsData;
