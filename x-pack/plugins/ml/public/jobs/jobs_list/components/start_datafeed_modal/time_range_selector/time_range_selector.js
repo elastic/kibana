@@ -29,6 +29,7 @@ export class TimeRangeSelector extends Component {
       endTab: 1,
     };
     this.latestTimeStamp = this.props.startTime;
+    this.now = this.props.now;
   }
 
   setStartTab = (tab) => {
@@ -38,7 +39,7 @@ export class TimeRangeSelector extends Component {
         this.setStartTime(undefined);
         break;
       case 1:
-        this.setStartTime('now');
+        this.setStartTime(this.now);
         break;
       default:
         break;
@@ -52,7 +53,7 @@ export class TimeRangeSelector extends Component {
         this.setEndTime(undefined);
         break;
       case 1:
-        this.setEndTime(moment());
+        this.setEndTime(this.now);
         break;
       default:
         break;
@@ -70,7 +71,7 @@ export class TimeRangeSelector extends Component {
   getTabItems() {
     const datePickerTimes = {
       start: (moment.isMoment(this.props.startTime)) ? this.props.startTime : this.latestTimeStamp,
-      end: (moment.isMoment(this.props.endTime)) ? this.props.endTime : moment()
+      end: (moment.isMoment(this.props.endTime)) ? this.props.endTime : this.now,
     };
     const formattedStartTime = this.latestTimeStamp.format(TIME_FORMAT);
     const startItems = [
