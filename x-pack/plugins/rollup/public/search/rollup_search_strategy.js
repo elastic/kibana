@@ -19,6 +19,7 @@ export const rollupSearchStrategy = {
       body: {
         size,
         aggs,
+        query: _query,
       },
     } = searchParams;
 
@@ -42,6 +43,7 @@ export const rollupSearchStrategy = {
     const query = {
       'size': size,
       'aggregations': aggs,
+      'query': _query,
     };
 
     const {
