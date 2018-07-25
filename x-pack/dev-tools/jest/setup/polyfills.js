@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-// bluebird < 3.5.0 does not work with MutationObserver polyfill
+// bluebird < v3.3.5 does not work with MutationObserver polyfill
 // when MutationObserver exists, bluebird avoids using node's builtin async schedulers
 // x-pack has a different version of bluebird so it needs its own polyfills.js to ensure
 // the scheduler is set on the right bluebird instance
