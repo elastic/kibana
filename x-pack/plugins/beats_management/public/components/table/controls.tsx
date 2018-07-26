@@ -21,15 +21,10 @@ interface BulkActionControlBarState {
   isPopoverVisible: boolean;
 }
 
-interface FilterOption {
-  value: string;
-}
-
 interface BulkActionControlBarProps {
   onBulkAction: any;
   onSearchQueryChange: any;
-  tagOptions: FilterOption[];
-  typeOptions: FilterOption[];
+  searchBarFilters: any[];
 }
 
 export class BulkActionControlBar extends React.Component<
@@ -45,6 +40,7 @@ export class BulkActionControlBar extends React.Component<
   }
 
   public render() {
+    const { searchBarFilters } = this.props;
     const { isPopoverVisible } = this.state;
 
     const bulkActionButton = (
@@ -52,7 +48,7 @@ export class BulkActionControlBar extends React.Component<
         Bulk Action
       </EuiButton>
     );
-    const { onSearchQueryChange, tagOptions, typeOptions } = this.props;
+    const { onSearchQueryChange } = this.props;
     const panels = [
       {
         id: 0,
@@ -97,20 +93,7 @@ export class BulkActionControlBar extends React.Component<
             box={{
               incremental: true,
             }}
-            filters={[
-              {
-                type: 'field_value_selection',
-                field: 'type',
-                name: 'Type',
-                options: typeOptions,
-              },
-              {
-                type: 'field_value_selection',
-                field: 'tag',
-                name: 'Tags',
-                options: tagOptions,
-              },
-            ]}
+            filters={searchBarFilters}
             onChange={onSearchQueryChange}
           />
         </EuiFlexItem>

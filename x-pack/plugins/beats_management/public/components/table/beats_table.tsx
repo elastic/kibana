@@ -100,13 +100,27 @@ export class BeatsTable extends React.Component<BeatsTableProps, BeatsTableState
     const tagOptions = this.getTagsOptions();
     const typeOptions = this.getTypeOptions();
 
+    const searchBarFilters = [
+      {
+        type: 'field_value_selection',
+        field: 'type',
+        name: 'Type',
+        options: typeOptions,
+      },
+      {
+        type: 'field_value_selection',
+        field: 'tag',
+        name: 'Tags',
+        options: tagOptions,
+      },
+    ];
+
     return (
       <TableContainer>
         <BulkActionControlBar
           onBulkAction={this.handleBulkAction}
           onSearchQueryChange={this.onSearchQueryChange}
-          tagOptions={tagOptions}
-          typeOptions={typeOptions}
+          searchBarFilters={searchBarFilters}
         />
         <EuiInMemoryTable
           columns={columns}
