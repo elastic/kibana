@@ -1,15 +1,16 @@
-== RBAC
+[[development-security-role-based-access-control]]
+=== Role Based Access Control
 
 Prior to Kibana 6.4, Kibana has deferred entirely to Elasticsearch’s security model for authorization. Whenever Kibana’s server called an Elasticsearch API on behalf of an end-user we use `callWithRequest` which forwards the authorization headers from the http request to Kibana to Elasticsearch, essentially impersonating the Kibana end-user and relying upon them having direct access to the `.kibana` index.
 
-Insert first sequence diagram
+[role="diagram"]
+image:development/security/before-sequence-diagram.png["Before RBAC Sequence Diagram"]
 
 This required us to assign roles to Kibana end-users which grant them explicit privileges on the `.kibana` index itself. For example, this is what the `kibana_user` role looked like, which is what we recommend assigning to Kibana end-users:
 
 [source,js]
 ----------------------------------
 "kibana_user": {
-    "cluster": [],
     "indices": [
         {
             "names": [
@@ -23,13 +24,7 @@ This required us to assign roles to Kibana end-users which grant them explicit p
             ]
         }
     ],
-    "run_as": [],
-    "metadata": {
-        "_reserved": true
-    },
-    "transient_metadata": {
-        "enabled": true
-    }
+    ...
 }
 ----------------------------------
 
@@ -37,16 +32,16 @@ Requiring end-users to be able to directly access the `.kibana` index limits the
 
 To address this deficiency, we are no longer always using `callWithRequest` to make requests to Elasticsearch when accessing the `.kibana` index. Instead, if we are able to authorize the user using the Elasticsearch `_has_privileges` API, then we can execute the request against the `.kibana` index using the Kibana internal server user.
 
-Insert second diagram
+[role="diagram"]
+image:development/security/after-sequence-diagram.png["After RBAC Sequence Diagram"]
 
-=== Has Privileges
+==== Has Privileges
 
 A few things have to happen for us to be able to perform the  `_has_privileges` check. First, we have to grant certain Kibana privileges to users, which is done using Elasticsearch roles. This allows us to change the aforementioned `kibana_user` role from it’s previous definition to the following:
 
 [source,js]
 ----------------------------------
 "kibana_user": {
-   "cluster": [],
    "indices": [],
    "applications": [
      {
@@ -59,23 +54,17 @@ A few things have to happen for us to be able to perform the  `_has_privileges` 
        ]
      }
    ],
-   "run_as": [],
-   "metadata": {
-     "_reserved": true
-   },
-   "transient_metadata": {
-     "enabled": true
-   }
+   ...
  }
 ----------------------------------
 
-You’ll notice that we no longer have permission to access the `.kibana` index directly, instead we have an application entry for the application “kibana-.kibana”, privilege “all” on resources “*”. The application is created by concatenating the prefix of “kibana-” with the value of “kibana.index” from the `kibana.yml`, so we have a way to isolate different kibana tenants from each other. The privilege “all” corresponds to the privileges that we synchronize into Elasticsearch when the Kibana server starts up, and is discussed more in depth below. For the time being, we always use a “resources” of `*` but we’ll take advantage of this when we have spaces and wish to grant different privileges in different spaces.
+You’ll notice that we no longer have permission to access the `.kibana` index directly, instead we have an application entry for the application `kibana-.kibana`, privilege `all` on resources `*`. The application is created by concatenating the prefix of `kibana-` with the value of `kibana.index` from the `kibana.yml`, so we have a way to isolate different kibana tenants from each other. The privilege `all` corresponds to the privileges that we synchronize into Elasticsearch when the Kibana server starts up, and is discussed more in depth below. For the time being, we always use a resources of `*` but we’ll take advantage of this when we have spaces and wish to grant different privileges in different spaces.
 
 When the Kibana server starts up, it synchronizes the privilege definition for the application so that we can call the `_has_privileges` API with the actual actions that we wish to check the user’s authorization for. The following is an example of us PUTing the privilege definition for the `kibana-.kibana` application:
 
 [source,js]
 ----------------------------------
-POST _xpack/security/privilege
+POST /_xpack/security/privilege
 Content-Type: application/json
 Authorization: Basic kibana changeme
 
@@ -110,7 +99,7 @@ This allows us to then call the _has_privileges API to determine if the user is 
 
 [source,js]
 ----------------------------------
-POST _xpack/security/user/_has_privileges
+POST /_xpack/security/user/_has_privileges
 Content-Type: application/json
 Authorization: Basic foo_read_only_user password
 
@@ -127,15 +116,13 @@ Authorization: Basic foo_read_only_user password
 }
 ----------------------------------
 
-And Elasticsearch will translate the privilege action’s granted from the user’s role, and respond with something similar to the following:
+And Elasticsearch will translate the privilege's actions granted from the user’s role, and respond with something similar to the following:
 
 [source,js]
 ----------------------------------
 {
-  "username": "elastic",
+  "username": "foo_read_only_user",
   "has_all_requested": true,
-  "cluster": {},
-  "index": {},
   "application": {
     "kibana-.kibana": {
       "*": {
@@ -146,9 +133,7 @@ And Elasticsearch will translate the privilege action’s granted from the user�
 }
 ----------------------------------
 
-=== Role Management APIs
-
-Insert this whole section
+==== Role Management APIs
 
 === Transitioning to application privileges
 
@@ -160,7 +145,7 @@ When we perform the aforementioned _has_privileges check, we’re also checking 
 
 [source,js]
 ----------------------------------
-POST _xpack/security/user/_has_privileges
+POST /_xpack/security/user/_has_privileges
 Content-Type: application/json
 Authorization: Basic foo_legacy_user password
 
