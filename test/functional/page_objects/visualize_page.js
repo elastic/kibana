@@ -248,17 +248,28 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
 
     async setComboBox(comboBoxSelector, value) {
       const comboBox = await testSubjects.find(comboBoxSelector);
-      await this.setComboBoxElement(comboBox, value);
+      await this.setComboBoxValue(comboBox, value);
+      await this.closeComboBoxOptionsList(comboBoxSelector);
       await PageObjects.common.sleep(1000);
     }
 
-    async setComboBoxElement(element, value) {
-      const input = await element.findByTagName('input');
+    async setComboBoxElement(comboBox, value) {
+      await this.setComboBoxValue(comboBox, value);
+
+      // Close list.
+      const isOptionsListOpen = await testSubjects.exists('comboBoxOptionsList');
+      if (isOptionsListOpen) {
+        const closeBtn = await comboBox.findByCssSelector('[data-test-subj="comboBoxToggleListButton"]');
+        await closeBtn.click();
+      }
+    }
+
+    async setComboBoxValue(comboBox, value) {
+      const input = await comboBox.findByTagName('input');
       await input.clearValue();
       await input.type(value);
       await PageObjects.common.sleep(500);
       await find.clickByCssSelector('.euiComboBoxOption');
-      await this.closeComboBoxOptionsList(element);
     }
 
     async filterComboBoxOptions(comboBoxSelector, value) {
@@ -267,7 +278,7 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
       await input.clearValue();
       await input.type(value);
       await PageObjects.common.sleep(500);
-      await this.closeComboBoxOptionsList(comboBox);
+      await this.closeComboBoxOptionsList(comboBoxSelector);
     }
 
     async getComboBoxOptions(comboBoxSelector) {
@@ -275,8 +286,7 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
       const menu = await retry.try(
         async () => await testSubjects.find('comboBoxOptionsList'));
       const optionsText = await menu.getVisibleText();
-      const comboBox = await testSubjects.find(comboBoxSelector);
-      await this.closeComboBoxOptionsList(comboBox);
+      await this.closeComboBoxOptionsList(comboBoxSelector);
       return optionsText;
     }
 
@@ -301,35 +311,32 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
 
     async clearComboBox(comboBoxSelector) {
       log.debug(`clearComboBox for comboBoxSelector:${comboBoxSelector}`);
-      const comboBox = await testSubjects.find(comboBoxSelector);
       await retry.try(async () => {
-        const clearButtonExists = await this.doesComboBoxClearButtonExist(comboBox);
+        const clearButtonExists = await this.doesComboBoxClearButtonExist(comboBoxSelector);
         if (!clearButtonExists) {
           log.debug('Unable to clear comboBox, comboBoxClearButton does not exist');
           return;
         }
 
-        const clearBtn = await comboBox.findByCssSelector('[data-test-subj="comboBoxClearButton"]');
-        await clearBtn.click();
+        await testSubjects.click(`${comboBoxSelector} comboBoxClearButton`);
 
-        const clearButtonStillExists = await this.doesComboBoxClearButtonExist(comboBox);
+        const clearButtonStillExists = await this.doesComboBoxClearButtonExist(comboBoxSelector);
         if (clearButtonStillExists) {
           throw new Error('Failed to clear comboBox');
         }
       });
-      await this.closeComboBoxOptionsList(comboBox);
+      await this.closeComboBoxOptionsList(comboBoxSelector);
     }
 
-    async doesComboBoxClearButtonExist(comboBoxElement) {
-      return await find.exists(
-        async () => await comboBoxElement.findByCssSelector('[data-test-subj="comboBoxClearButton"]'));
+    async doesComboBoxClearButtonExist(comboBoxSelector) {
+      return await testSubjects.exists(`${comboBoxSelector} comboBoxClearButton`);
     }
 
-    async closeComboBoxOptionsList(comboBoxElement) {
+    async closeComboBoxOptionsList(comboBoxSelector) {
+      // List is in a portal, not a child of the combobox, so we don't prepend with the selector.
       const isOptionsListOpen = await testSubjects.exists('comboBoxOptionsList');
       if (isOptionsListOpen) {
-        const closeBtn = await comboBoxElement.findByCssSelector('[data-test-subj="comboBoxToggleListButton"]');
-        await closeBtn.click();
+        await testSubjects.click(`${comboBoxSelector} comboBoxToggleListButton`);
       }
     }
 
