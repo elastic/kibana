@@ -24,7 +24,6 @@ export class SpacesSavedObjectsClient {
     this._types = types;
 
     this._spaceUrlContext = spacesService.getUrlContext(request);
-    console.log('created SSOC with url context', this._spaceUrlContext, 'for ', request.path);
   }
 
   /**
