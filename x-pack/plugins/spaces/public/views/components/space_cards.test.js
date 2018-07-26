@@ -15,5 +15,5 @@ test('it renders without crashing', () => {
     description: 'space description'
   };
 
-  shallow(<SpaceCards spaces={[space]} />);
+  shallow(<SpaceCards spaces={[space]} onSpaceSelect={jest.fn()} />);
 });

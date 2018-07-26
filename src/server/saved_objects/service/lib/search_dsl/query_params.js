@@ -65,24 +65,21 @@ function getFieldsForTypes(searchFields, types) {
  *  @param  {(string|Array<string>)} type
  *  @param  {String} search
  *  @param  {Array<string>} searchFields
+ *  @param {Array<object>} filters additional query filters
  *  @return {Object}
  */
-export function getQueryParams(mappings, type, search, searchFields) {
-  if (!type && !search) {
-    return {};
-  }
+export function getQueryParams(mappings, type, search, searchFields, filters = []) {
 
-  const bool = {};
+  const bool = {
+    filter: [...filters],
+  };
 
   if (type) {
-    bool.filter = [
-      { [Array.isArray(type) ? 'terms' : 'term']: { type } }
-    ];
+    bool.filter.push({ [Array.isArray(type) ? 'terms' : 'term']: { type } });
   }
 
   if (search) {
     bool.must = [
-      ...bool.must || [],
       {
         simple_query_string: {
           query: search,
@@ -95,5 +92,12 @@ export function getQueryParams(mappings, type, search, searchFields) {
     ];
   }
 
+  // Don't construct a query if there is nothing to search on.
+  if (bool.filter.length === 0 && !search) {
+    return {};
+  }
+
   return { query: { bool } };
 }
+
+
