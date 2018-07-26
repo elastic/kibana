@@ -10,11 +10,13 @@ import { checkLicense } from './server/lib/check_license';
 import { initSpacesApi } from './server/routes/api/v1/spaces';
 import { initSpacesRequestInterceptors } from './server/lib/space_request_interceptors';
 import { createDefaultSpace } from './server/lib/create_default_space';
-import { mirrorPluginStatus } from '../../server/lib/mirror_plugin_status';
+import { createSpacesService } from './server/lib/create_spaces_service';
 import { getActiveSpace } from './server/lib/get_active_space';
 import { getSpacesUsageCollector } from './server/lib/get_spaces_usage_collector';
 import { wrapError } from './server/lib/errors';
 import mappings from './mappings.json';
+import { spacesSavedObjectsClientWrapperFactory } from './server/lib/saved_objects_client/saved_objects_client_wrapper_factory';
+import { watchStatusAndLicenseToInitialize } from '../../server/lib/watch_status_and_license_to_initialize';
 
 export const spaces = (kibana) => new kibana.Plugin({
   id: 'spaces',
@@ -47,11 +49,11 @@ export const spaces = (kibana) => new kibana.Plugin({
         activeSpace: null
       };
     },
-    replaceInjectedVars: async function (vars, request) {
+    replaceInjectedVars: async function (vars, request, server) {
       try {
         vars.activeSpace = {
           valid: true,
-          space: await getActiveSpace(request.getSavedObjectsClient(), request.getBasePath())
+          space: await getActiveSpace(request.getSavedObjectsClient(), request.getBasePath(), server.config().get('server.basePath'))
         };
       } catch (e) {
         vars.activeSpace = {
@@ -66,7 +68,10 @@ export const spaces = (kibana) => new kibana.Plugin({
   async init(server) {
     const thisPlugin = this;
     const xpackMainPlugin = server.plugins.xpack_main;
-    mirrorPluginStatus(xpackMainPlugin, thisPlugin);
+
+    watchStatusAndLicenseToInitialize(xpackMainPlugin, thisPlugin, async () => {
+      await createDefaultSpace(server);
+    });
 
     // Register a function that is called whenever the xpack info changes,
     // to re-compute the license check results for this plugin
@@ -74,6 +79,14 @@ export const spaces = (kibana) => new kibana.Plugin({
 
     const config = server.config();
     validateConfig(config, message => server.log(['spaces', 'warning'], message));
+
+    const spacesService = createSpacesService(server);
+    server.decorate('server', 'spaces', spacesService);
+
+    const { addScopedSavedObjectsClientWrapperFactory, types } = server.savedObjects;
+    addScopedSavedObjectsClientWrapperFactory(
+      spacesSavedObjectsClientWrapperFactory(spacesService, types)
+    );
 
     initSpacesApi(server);
 

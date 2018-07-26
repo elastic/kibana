@@ -4,12 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
+import React, { Fragment } from 'react';
 import { render } from 'react-dom';
 import { capitalize, get } from 'lodash';
 import moment from 'moment';
 import numeral from '@elastic/numeral';
 import { uiModules } from 'ui/modules';
+import chrome from 'ui/chrome';
 import {
   KuiTableRowCell,
   KuiTableRow
@@ -18,7 +19,7 @@ import {
   EuiHealth,
   EuiLink,
 } from '@elastic/eui';
-import { Notifier } from 'ui/notify';
+import { toastNotifications } from 'ui/notify';
 import { MonitoringTable } from 'plugins/monitoring/components/table';
 import { Tooltip } from 'plugins/monitoring/components/tooltip';
 import { AlertsIndicator } from 'plugins/monitoring/components/cluster/listing/alerts_indicator';
@@ -35,11 +36,11 @@ const columns = [
   { title: 'Kibana', sortKey: 'kibana.count' },
   { title: 'License', sortKey: 'license.type' }
 ];
+
 const clusterRowFactory = (scope, globalState, kbnUrl, showLicenseExpiration) => {
   return class ClusterRow extends React.Component {
     constructor(props) {
       super(props);
-      this.notify = new Notifier();
     }
 
     changeCluster() {
@@ -51,33 +52,45 @@ const clusterRowFactory = (scope, globalState, kbnUrl, showLicenseExpiration) =>
       });
     }
 
-    licenseWarning(message) {
+    licenseWarning({ title, text }) {
       scope.$evalAsync(() => {
-        this.notify.warning(message, {
-          lifetime: 60000
-        });
+        toastNotifications.addWarning({ title, text, 'data-test-subj': 'monitoringLicenseWarning' });
       });
     }
 
     handleClickIncompatibleLicense() {
-      this.licenseWarning(
-        `You can't view the "${this.props.cluster_name}" cluster because the
-Basic license does not support multi-cluster monitoring.
-
-Need to monitor multiple clusters? [Get a license with full functionality](https://www.elastic.co/subscriptions/xpack)
-to enjoy multi-cluster monitoring.`
-      );
+      this.licenseWarning({
+        title: `You can't view the "${this.props.cluster_name}" cluster`,
+        text: (
+          <Fragment>
+            <p>The Basic license does not support multi-cluster monitoring.</p>
+            <p>
+              Need to monitor multiple clusters?{' '}
+              <a href="https://www.elastic.co/subscriptions/xpack" target="_blank">Get a license with full functionality</a>{' '}
+              to enjoy multi-cluster monitoring.
+            </p>
+          </Fragment>
+        ),
+      });
     }
 
     handleClickInvalidLicense() {
-      this.licenseWarning(
-        `You can't view the "${this.props.cluster_name}" cluster because the
-license information is invalid.
+      const licensingPath = `${chrome.getBasePath()}/app/kibana#/management/elasticsearch/license_management/home`;
 
-Need a license? [Get a free Basic license](https://register.elastic.co/xpack_register)
-or get a license with [full functionality](https://www.elastic.co/subscriptions/xpack)
-to enjoy multi-cluster monitoring.`
-      );
+      this.licenseWarning({
+        title: `You can't view the "${this.props.cluster_name}" cluster`,
+        text: (
+          <Fragment>
+            <p>The license information is invalid.</p>
+            <p>
+              Need a license?{' '}
+              <a href={licensingPath}>Get a free Basic license</a> or{' '}
+              <a href="https://www.elastic.co/subscriptions/xpack" target="_blank">get a license with full functionality</a>{' '}
+              to enjoy multi-cluster monitoring.
+            </p>
+          </Fragment>
+        ),
+      });
     }
 
     getClusterAction() {

@@ -146,6 +146,32 @@ export default function ({ getService }) {
       }
     });
 
+    bulkGetTest(`kibana dual-privileges user`, {
+      auth: {
+        username: AUTHENTICATION.KIBANA_DUAL_PRIVILEGES_USER.USERNAME,
+        password: AUTHENTICATION.KIBANA_DUAL_PRIVILEGES_USER.PASSWORD,
+      },
+      tests: {
+        default: {
+          statusCode: 200,
+          response: expectResults,
+        },
+      }
+    });
+
+    bulkGetTest(`kibana dual-privileges dashboard only user`, {
+      auth: {
+        username: AUTHENTICATION.KIBANA_DUAL_PRIVILEGES_DASHBOARD_ONLY_USER.USERNAME,
+        password: AUTHENTICATION.KIBANA_DUAL_PRIVILEGES_DASHBOARD_ONLY_USER.PASSWORD,
+      },
+      tests: {
+        default: {
+          statusCode: 200,
+          response: expectResults,
+        },
+      }
+    });
+
     bulkGetTest(`kibana rbac user`, {
       auth: {
         username: AUTHENTICATION.KIBANA_RBAC_USER.USERNAME,

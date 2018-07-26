@@ -15,17 +15,19 @@ describe('check_license', function () {
   beforeEach(function () {
     mockXPackInfo = {
       isAvailable: sinon.stub(),
+      isXpackUnavailable: sinon.stub(),
       feature: sinon.stub(),
       license: sinon.stub({
-        isOneOf() {},
+        isOneOf() { },
       })
     };
 
     mockXPackInfo.isAvailable.returns(true);
   });
 
-  it('should show login page but not allow login if license information is not available.', () => {
+  it('should display error when ES is unavailable', () => {
     mockXPackInfo.isAvailable.returns(false);
+    mockXPackInfo.isXpackUnavailable.returns(false);
 
     const licenseCheckResults = checkLicense(mockXPackInfo);
     expect(licenseCheckResults).to.be.eql({
@@ -34,10 +36,27 @@ describe('check_license', function () {
       showLinks: false,
       allowRoleDocumentLevelSecurity: false,
       allowRoleFieldLevelSecurity: false,
+      layout: 'error-es-unavailable',
       allowRbac: false,
-      loginMessage: 'Login is currently disabled. Administrators should consult the Kibana logs for more details.'
     });
   });
+
+  it('should display error when X-Pack is unavailable', () => {
+    mockXPackInfo.isAvailable.returns(false);
+    mockXPackInfo.isXpackUnavailable.returns(true);
+
+    const licenseCheckResults = checkLicense(mockXPackInfo);
+    expect(licenseCheckResults).to.be.eql({
+      showLogin: true,
+      allowLogin: false,
+      showLinks: false,
+      allowRoleDocumentLevelSecurity: false,
+      allowRoleFieldLevelSecurity: false,
+      layout: 'error-xpack-unavailable',
+      allowRbac: false,
+    });
+  });
+
 
   it('should not show login page or other security elements if license is basic.', () => {
     mockXPackInfo.license.isOneOf.withArgs(['basic']).returns(true);

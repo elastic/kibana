@@ -155,7 +155,7 @@ export class NavControlModal extends Component {
         </EuiModalHeader>
         <EuiModalBody>
           {callout}
-          <SpaceCards spaces={this.state.spaces} />
+          <SpaceCards spaces={this.state.spaces} onSpaceSelect={this.onSelectSpace} />
         </EuiModalBody>
       </EuiModal>
     );
@@ -176,6 +176,10 @@ export class NavControlModal extends Component {
     this.setState({
       isOpen: false
     });
+  }
+
+  onSelectSpace = (space) => {
+    this.props.spacesManager.changeSelectedSpace(space);
   }
 }
 

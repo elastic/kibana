@@ -66,25 +66,25 @@ export class SpaceSelector extends Component {
     let filteredSpaces = spaces;
     if (searchTerm) {
       filteredSpaces = spaces
-        .filter(s => s.name.toLowerCase().indexOf(searchTerm) >= 0 || s.description.toLowerCase().indexOf(searchTerm) >= 0);
+        .filter(space => space.name.toLowerCase().indexOf(searchTerm) >= 0 || space.description.toLowerCase().indexOf(searchTerm) >= 0);
     }
 
     return (
       <EuiPage className="spaceSelector__page">
-        <EuiPageHeader className="spaceSelector__heading">
-          <EuiPageHeaderSection className="spaceSelector__logoHeader">
-            <div className="spaceSelector__logoCircle">
-              <EuiIcon size="xxl" type={`logoKibana`} />
-            </div>
-
-            <EuiSpacer />
-
-            <EuiTitle size="l">
-              <EuiTextColor color="ghost"><p>Select your space</p></EuiTextColor>
-            </EuiTitle>
-          </EuiPageHeaderSection>
-        </EuiPageHeader>
         <EuiPageBody>
+          <EuiPageHeader className="spaceSelector__heading">
+            <EuiPageHeaderSection className="spaceSelector__logoHeader">
+              <div className="spaceSelector__logoCircle">
+                <EuiIcon size="xxl" type={`logoKibana`} />
+              </div>
+
+              <EuiSpacer />
+
+              <EuiTitle size="l">
+                <EuiTextColor color="ghost"><p>Select your space</p></EuiTextColor>
+              </EuiTitle>
+            </EuiPageHeaderSection>
+          </EuiPageHeader>
           <EuiPageContent className="spaceSelector__pageContent">
 
             <EuiFlexGroup direction="column" alignItems="center" responsive={false}>
@@ -97,7 +97,7 @@ export class SpaceSelector extends Component {
 
             <EuiSpacer size="xl" />
 
-            <SpaceCards spaces={filteredSpaces} />
+            <SpaceCards spaces={filteredSpaces} onSpaceSelect={this.onSelectSpace} />
 
             {
               filteredSpaces.length === 0 &&
@@ -133,6 +133,10 @@ export class SpaceSelector extends Component {
     this.setState({
       searchTerm: searchTerm.trim().toLowerCase()
     });
+  }
+
+  onSelectSpace = (space) => {
+    this.props.spacesManager.changeSelectedSpace(space);
   }
 }
 

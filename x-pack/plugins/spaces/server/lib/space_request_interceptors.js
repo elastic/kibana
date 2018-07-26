@@ -5,33 +5,33 @@
  */
 
 import { wrapError } from './errors';
+import { addSpaceUrlContext, getSpaceUrlContext } from './spaces_url_parser';
 
 export function initSpacesRequestInterceptors(server) {
-  const contextCache = new WeakMap();
+
+  const serverBasePath = server.config().get('server.basePath');
 
   server.ext('onRequest', async function spacesOnRequestHandler(request, reply) {
     const path = request.path;
 
     // If navigating within the context of a space, then we store the Space's URL Context on the request,
     // and rewrite the request to not include the space identifier in the URL.
+    const spaceUrlContext = getSpaceUrlContext(path, serverBasePath);
 
-    if (path.startsWith('/s/')) {
-      const pathParts = path.split('/');
-
-      const spaceUrlContext = pathParts[2];
-
+    if (spaceUrlContext) {
       const reqBasePath = `/s/${spaceUrlContext}`;
       request.setBasePath(reqBasePath);
 
+      const newLocation = path.substr(reqBasePath.length) || '/';
+
       const newUrl = {
         ...request.url,
-        path: path.substr(reqBasePath.length) || '/',
-        pathname: path.substr(reqBasePath.length) || '/',
-        href: path.substr(reqBasePath.length) || '/'
+        path: newLocation,
+        pathname: newLocation,
+        href: newLocation,
       };
 
       request.setUrl(newUrl);
-      contextCache.set(request, spaceUrlContext);
     }
 
     return reply.continue();
@@ -41,7 +41,8 @@ export function initSpacesRequestInterceptors(server) {
     const path = request.path;
 
     const isRequestingKibanaRoot = path === '/';
-    const urlContext = contextCache.get(request);
+    const { spaces } = server;
+    const urlContext = await spaces.getUrlContext(request);
 
     // if requesting the application root, then show the Space Selector UI to allow the user to choose which space
     // they wish to visit. This is done "onPostAuth" to allow the Saved Objects Client to use the request's auth scope,
@@ -53,6 +54,10 @@ export function initSpacesRequestInterceptors(server) {
           type: 'space'
         });
 
+        const config = server.config();
+        const basePath = config.get('server.basePath');
+        const defaultRoute = config.get('server.defaultRoute');
+
         if (total === 1) {
           // If only one space is available, then send user there directly.
           // No need for an interstitial screen where there is only one possible outcome.
@@ -61,17 +66,7 @@ export function initSpacesRequestInterceptors(server) {
             urlContext
           } = space.attributes;
 
-          const config = server.config();
-          const basePath = config.get('server.basePath');
-          const defaultRoute = config.get('server.defaultRoute');
-
-          let destination;
-          if (urlContext) {
-            destination = `${basePath}/s/${urlContext}${defaultRoute}`;
-          } else {
-            destination = `${basePath}${defaultRoute}`;
-          }
-
+          const destination = addSpaceUrlContext(basePath, urlContext, defaultRoute);
           return reply.redirect(destination);
         }
 
@@ -83,8 +78,8 @@ export function initSpacesRequestInterceptors(server) {
           });
         }
 
-      } catch (e) {
-        return reply(wrapError(e));
+      } catch (error) {
+        return reply(wrapError(error));
       }
     }
 

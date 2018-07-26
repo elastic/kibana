@@ -1,0 +1,13 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`current space (space_1) #create #delete does not allow an object to be deleted via a different space 1`] = `"not found"`;
+
+exports[`current space (space_1) #create #update does not allow an object to be updated via a different space 1`] = `"not found"`;
+
+exports[`current space (space_1) #get returns error when the object belongs to a different space 1`] = `"not found"`;
+
+exports[`default space #delete does not allow an object to be deleted via a different space 1`] = `"not found"`;
+
+exports[`default space #get returns error when the object belongs to a different space 1`] = `"not found"`;
+
+exports[`default space #update does not allow an object to be updated via a different space 1`] = `"not found"`;
