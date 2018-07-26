@@ -58,7 +58,7 @@ describe('saved objects index mapping', () => {
             type: chance.pickone(['string', 'keyword', 'geo_point']),
           },
         });
-      }).toThrowError(/non-object/);
+      }).toThrowError(/not an object/);
     });
 
     it('throws if root type has no type and no properties', () => {
@@ -67,7 +67,7 @@ describe('saved objects index mapping', () => {
         new IndexMappings({
           root: {},
         });
-      }).toThrowError(/non-object/);
+      }).toThrowError(/not an object/);
     });
 
     it('initialized root type with properties object if not set', () => {
