@@ -18,6 +18,10 @@ export class MemoryTagsAdapter implements CMTagsAdapter {
     return this.tagsDB.filter(tag => tagIds.includes(tag.id));
   }
 
+  public async getAll() {
+    return this.tagsDB;
+  }
+
   public async upsertTag(tag: BeatTag) {
     const existingTagIndex = this.tagsDB.findIndex(t => t.id === tag.id);
     if (existingTagIndex !== -1) {
