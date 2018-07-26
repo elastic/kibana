@@ -1,5 +1,5 @@
-import { get } from 'lodash';
 import $ from 'jquery';
+import { get } from 'lodash';
 
 /*
   FreeBSD-License

@@ -1,8 +1,8 @@
 import React, { Fragment } from 'react';
 import PropTypes from 'prop-types';
-import { map, includes, sortBy } from 'lodash';
-import lowerCase from 'lodash.lowercase';
 import { EuiFieldSearch, EuiContextMenuItem, EuiPopoverTitle } from '@elastic/eui';
+import lowerCase from 'lodash.lowercase';
+import { map, includes, sortBy } from 'lodash';
 
 export const ElementTypes = ({ elements, onClick, search, setSearch }) => {
   search = lowerCase(search);

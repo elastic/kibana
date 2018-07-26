@@ -1,5 +1,5 @@
-import { flatten, get, map, filter, includes } from 'lodash';
 import uniqBy from 'lodash.uniqby';
+import { flatten, get, map, filter, includes } from 'lodash';
 import { parse } from '../../common/lib/grammar';
 import { functionsRegistry } from './functions_registry';
 import { typesRegistry } from './types_registry';

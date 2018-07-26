@@ -1,6 +1,6 @@
 import { withHandlers } from 'recompose';
-import { get } from 'lodash';
 import { set } from 'object-path-immutable';
+import { get } from 'lodash';
 import { templateFromReactComponent } from '../../../lib/template_from_react_component';
 import { SimpleTemplate } from './simple_template';
 import { ExtendedTemplate } from './extended_template';

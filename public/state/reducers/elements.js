@@ -1,6 +1,6 @@
 import { handleActions } from 'redux-actions';
-import { get } from 'lodash';
 import { assign, push, del, set } from 'object-path-immutable';
+import { get } from 'lodash';
 import * as actions from '../actions/elements';
 
 function getPageIndexById(workpadState, pageId) {

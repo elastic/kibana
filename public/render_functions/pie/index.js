@@ -1,6 +1,6 @@
+import $ from 'jquery';
 import { debounce, includes } from 'lodash';
 import '../../lib/flot-charts';
-import $ from 'jquery';
 import { pie as piePlugin } from './plugins/pie';
 
 export const pie = () => ({

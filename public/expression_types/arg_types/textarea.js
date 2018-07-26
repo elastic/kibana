@@ -1,8 +1,8 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { compose, withProps } from 'recompose';
-import { get } from 'lodash';
 import { EuiForm, EuiTextArea, EuiSpacer, EuiButton } from '@elastic/eui';
+import { get } from 'lodash';
 import { createStatefulPropHoc } from '../../components/enhance/stateful_prop';
 import { templateFromReactComponent } from '../../lib/template_from_react_component';
 

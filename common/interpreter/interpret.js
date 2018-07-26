@@ -1,5 +1,5 @@
-import { each, keys, last, mapValues, reduce, zipObject } from 'lodash';
 import clone from 'lodash.clone';
+import { each, keys, last, mapValues, reduce, zipObject } from 'lodash';
 import { getType } from '../lib/get_type';
 import { fromExpression } from '../lib/ast';
 import { getByAlias } from '../lib/get_by_alias';

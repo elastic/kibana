@@ -83,7 +83,7 @@
   },
   "devDependencies": {
     "@elastic/eslint-config-kibana": "link:../../kibana/packages/eslint-config-kibana",
-    "@elastic/eslint-import-resolver-kibana": "^2.0.0",
+    "@kbn/eslint-import-resolver-kibana": "link:../../kibana/packages/kbn-eslint-import-resolver-kibana",
     "@kbn/plugin-helpers": "link:../../kibana/packages/kbn-plugin-helpers",
     "ansi-colors": "^1.0.1",
     "aws-sdk": "^2.141.0",

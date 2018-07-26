@@ -1,7 +1,7 @@
 import { createAction } from 'redux-actions';
-import { get, pick, cloneDeep, without } from 'lodash';
-import { set, del } from 'object-path-immutable';
 import { createThunk } from 'redux-thunks';
+import { set, del } from 'object-path-immutable';
+import { get, pick, cloneDeep, without } from 'lodash';
 import { getPages, getElementById, getSelectedPageIndex } from '../selectors/workpad';
 import { getValue } from '../selectors/resolved_args';
 import { getDefaultElement } from '../defaults';

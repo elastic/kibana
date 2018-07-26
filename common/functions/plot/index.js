@@ -1,5 +1,5 @@
-import { groupBy, get, set, map, sortBy } from 'lodash';
 import keyBy from 'lodash.keyby';
+import { groupBy, get, set, map, sortBy } from 'lodash';
 import { getColorsFromPalette } from '../../lib/get_colors_from_palette';
 import { getLegendConfig } from '../../lib/get_legend_config';
 import { getFlotAxisConfig } from './get_flot_axis_config';

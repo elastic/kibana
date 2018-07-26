@@ -1,7 +1,5 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import moment from 'moment';
-import { sortByOrder } from 'lodash';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -10,6 +8,8 @@ import {
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
+import { sortByOrder } from 'lodash';
+import moment from 'moment';
 import { ConfirmModal } from '../confirm_modal';
 import { Link } from '../link';
 import { Tooltip } from '../tooltip';

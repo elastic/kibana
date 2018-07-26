@@ -1,6 +1,6 @@
+import PropTypes from 'prop-types';
 import { compose, withProps } from 'recompose';
 import { get } from 'lodash';
-import PropTypes from 'prop-types';
 import { renderFunctionsRegistry } from '../../lib/render_functions_registry';
 import { ElementContent as Component } from './element_content';
 

@@ -1,5 +1,5 @@
-import moment from 'moment';
 import dateMath from '@elastic/datemath';
+import moment from 'moment';
 import { quickRanges } from './quick_ranges';
 import { timeUnits } from './time_units';
 

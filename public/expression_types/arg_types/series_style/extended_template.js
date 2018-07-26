@@ -1,8 +1,8 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiSelect } from '@elastic/eui';
-import { get } from 'lodash';
 import { set, del } from 'object-path-immutable';
+import { get } from 'lodash';
 
 export const ExtendedTemplate = props => {
   const { typeInstance, onValueChange, labels, argValue } = props;
