@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { FrameworkAuthenticatedUser } from './../framework/adapter_types';
+import { FrameworkAuthenticatedUser } from '../framework/adapter_types';
 import { CMTokensAdapter, TokenEnrollmentData } from './adapter_types';
 
 export class MemoryTokensAdapter implements CMTokensAdapter {
