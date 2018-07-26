@@ -698,9 +698,16 @@ module.controller('MlTimeSeriesExplorerController', function (
         // Default to functionDescription if no description available.
         // TODO - when job_service is moved server_side, move this to server endpoint.
         const jobId = anomaly.jobId;
-        anomaly.detector = _.get(detectorsByJob,
-          [jobId, anomaly.detectorIndex, 'detector_description'],
+        const detector = _.get(detectorsByJob, [jobId, anomaly.detectorIndex]);
+        anomaly.detector = _.get(detector,
+          ['detector_description'],
           anomaly.source.function_description);
+
+        // For detectors with rules, add a property with the rule count.
+        const customRules = detector.custom_rules;
+        if (customRules !== undefined) {
+          anomaly.rulesLength = customRules.length;
+        }
 
         // Add properties used for building the links menu.
         // TODO - when job_service is moved server_side, move this to server endpoint.

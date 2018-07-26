@@ -131,9 +131,6 @@ describe('Metrics', function () {
         },
         'requests': {
           'disconnects': 0,
-          'status_codes': {
-            '200': 22
-          },
           'total': 22
         },
         'response_times': {
@@ -159,7 +156,7 @@ describe('Metrics', function () {
           memory: { free_in_bytes: 12, total_in_bytes: 24 },
         },
         response_times: { max_in_millis: 4 },
-        requests: { total: 22, disconnects: 0, status_codes: { '200': 22 } },
+        requests: { total: 22, disconnects: 0 },
       });
     });
   });

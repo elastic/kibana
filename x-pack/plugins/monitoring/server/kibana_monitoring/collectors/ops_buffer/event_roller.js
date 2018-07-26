@@ -13,7 +13,6 @@ import { mapConcurrentConnections } from './map_concurrent_connections';
 
 // rollup functions are for objects with unpredictable keys (e.g., {'200': 1, '201': 2} + {'200':2} = {'200': 3, '201': 2})
 const maxRollup = partialRight(assign, (latest, prev) => max([latest, prev]));
-const sumRollup = partialRight(assign, (latest, prev) => sum([latest, prev]));
 
 export class EventRoller {
   constructor() {
@@ -68,10 +67,6 @@ export class EventRoller {
           this.getFromRollup('requests.disconnects')
         ]),
         total: sum([requests.total, this.getFromRollup('requests.total')]),
-        status_codes: sumRollup(
-          requests.status_codes,
-          this.getFromRollup('requests.status_codes')
-        )
       },
       response_times: maxRollup(
         mapResponseTimes(event.responseTimes),

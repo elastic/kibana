@@ -22,12 +22,13 @@ import {
   EuiFlexItem,
   EuiHealth,
   EuiInMemoryTable,
-  EuiText
+  EuiText,
 } from '@elastic/eui';
 
 import { formatDate } from '@elastic/eui/lib/services/format';
 
 import { DescriptionCell } from './description_cell';
+import { DetectorCell } from './detector_cell';
 import { EntityCell } from './entity_cell';
 import { InfluencersCell } from './influencers_cell';
 import { AnomalyDetails } from './anomaly_details';
@@ -36,7 +37,7 @@ import { checkPermission } from 'plugins/ml/privilege/check_privilege';
 
 import { mlAnomaliesTableService } from './anomalies_table_service';
 import { mlFieldFormatService } from 'plugins/ml/services/field_format_service';
-import { getSeverityColor } from 'plugins/ml/../common/util/anomaly_utils';
+import { getSeverityColor, isRuleSupported } from 'plugins/ml/../common/util/anomaly_utils';
 import { formatValue } from 'plugins/ml/formatters/format_value';
 import { RuleEditorFlyout } from 'plugins/ml/components/rule_editor';
 
@@ -55,8 +56,8 @@ function renderTime(date, aggregationInterval) {
 }
 
 function showLinksMenuForItem(item) {
-  const canUpdateJob = checkPermission('canUpdateJob');
-  return (canUpdateJob ||
+  const canConfigureRules = (isRuleSupported(item) && checkPermission('canUpdateJob'));
+  return (canConfigureRules ||
     item.isTimeSeriesViewDetector ||
     item.entityName === 'mlcategory' ||
     item.customUrls !== undefined);
@@ -106,6 +107,12 @@ function getColumns(
     {
       field: 'detector',
       name: 'detector',
+      render: (detectorDescription, item) => (
+        <DetectorCell
+          detectorDescription={detectorDescription}
+          numberOfRules={item.rulesLength}
+        />
+      ),
       sortable: true
     }
   ];
