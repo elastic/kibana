@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { Server } from 'hapi';
+import { Server } from 'hapi-latest';
 import { IndexMappings } from './index_mappings';
 import { EsMappings } from './lib/';
 
