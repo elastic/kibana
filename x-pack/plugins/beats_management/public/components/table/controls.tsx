@@ -81,13 +81,13 @@ export class BulkActionControlBar extends React.Component<
       <EuiFlexGroup>
         <EuiFlexItem grow={false}>
           <EuiPopover
-            id="contextMenu"
+            anchorPosition="downLeft"
             button={bulkActionButton}
-            isOpen={isPopoverVisible}
             closePopover={this.hidePopover}
+            id="contextMenu"
+            isOpen={isPopoverVisible}
             panelPaddingSize="none"
             withTitle
-            anchorPosition="downLeft"
           >
             <EuiContextMenu initialPanelId={0} panels={panels} />
           </EuiPopover>

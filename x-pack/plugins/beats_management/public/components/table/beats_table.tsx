@@ -142,16 +142,16 @@ export class BeatsTable extends React.Component<BeatsTableProps, BeatsTableState
       const tags = this.getClauseValuesForField(ast, 'tag');
       const terms = ast.getTermClauses().map((clause: any) => clause.value);
       if (types.length) {
-        beatsToRender = beatsToRender.filter(item => types.includes(item.type));
+        beatsToRender = beatsToRender.filter(beat => types.includes(beat.type));
       }
       if (tags.length) {
-        beatsToRender = beatsToRender.filter(item =>
-          item.full_tags.some(({ id }) => tags.includes(id))
+        beatsToRender = beatsToRender.filter(beat =>
+          beat.full_tags.some(({ id }) => tags.includes(id))
         );
       }
       if (terms.length) {
-        beatsToRender = beatsToRender.filter(item =>
-          terms.some((term: string) => item.id.includes(term))
+        beatsToRender = beatsToRender.filter(beat =>
+          terms.some((term: string) => beat.id.includes(term))
         );
       }
     }
