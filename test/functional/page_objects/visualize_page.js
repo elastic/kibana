@@ -695,7 +695,10 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
         await testSubjects.click('saveAsNewCheckbox');
       }
       await PageObjects.header.waitUntilLoadingHasFinished();
-      return await testSubjects.exists('saveVisualizationSuccess');
+
+      // Confirm save and close toast.
+      await testSubjects.existOrFail('saveVisualizationSuccess');
+      await find.clickByCssSelector('[data-test-subj="saveVisualizationSuccess"] [data-test-subj="toastCloseButton"]');
     }
 
     async clickLoadSavedVisButton() {

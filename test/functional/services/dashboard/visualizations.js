@@ -21,7 +21,6 @@
 export function DashboardVisualizationProvider({ getService, getPageObjects }) {
   const log = getService('log');
   const queryBar = getService('queryBar');
-  const testSubjects = getService('testSubjects');
   const dashboardAddPanel = getService('dashboardAddPanel');
   const PageObjects = getPageObjects(['dashboard', 'visualize', 'header', 'discover']);
 
@@ -56,8 +55,6 @@ export function DashboardVisualizationProvider({ getService, getPageObjects }) {
       }
 
       await PageObjects.discover.saveSearch(name);
-      await PageObjects.header.waitUntilLoadingHasFinished();
-      await testSubjects.exists('saveSearchSuccess');
     }
 
     async createAndAddSavedSearch({ name, query, fields }) {

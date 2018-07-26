@@ -22,6 +22,7 @@ export function DashboardAddPanelProvider({ getService, getPageObjects }) {
   const log = getService('log');
   const retry = getService('retry');
   const testSubjects = getService('testSubjects');
+  const find = getService('find');
   const flyout = getService('flyout');
   const PageObjects = getPageObjects(['header', 'common']);
 
@@ -144,7 +145,11 @@ export function DashboardAddPanelProvider({ getService, getPageObjects }) {
       await this.filterEmbeddableNames(searchName);
 
       await testSubjects.click(`addPanel${searchName.split(' ').join('-')}`);
-      await testSubjects.exists('addSavedSearchToDashboardSuccess');
+
+      // Confirm it was added and close the toast.
+      await testSubjects.existOrFail('addSavedSearchToDashboardSuccess');
+      await find.clickByCssSelector('[data-test-subj="addSavedSearchToDashboardSuccess"] [data-test-subj="toastCloseButton"]');
+
       await this.closeAddPanel();
     }
 

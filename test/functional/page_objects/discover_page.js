@@ -225,8 +225,9 @@ export function DiscoverPageProvider({ getService, getPageObjects }) {
     async clickCopyToClipboard() {
       await testSubjects.click('sharedSnapshotCopyButton');
 
-      // Confirm that the content was copied to the clipboard.
-      return await testSubjects.exists('shareCopyToClipboardSuccess');
+      // Confirm that the content was copied to the clipboard and close the toast.
+      await testSubjects.existOrFail('shareCopyToClipboardSuccess');
+      await find.clickByCssSelector('[data-test-subj="shareCopyToClipboardSuccess"] [data-test-subj="toastCloseButton"]');
     }
 
     async getShareCaption() {
