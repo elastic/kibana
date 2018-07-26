@@ -38,7 +38,7 @@ function addMessageToMap(targetMap, key, value) {
 }
 
 export async function extractDefaultTranslations(inputPath) {
-  const entries = await globAsync('*.{js,jsx,pug,jade,ts,tsx,html,hbs,handlebars}', {
+  const entries = await globAsync('*.{js,jsx,jade,ts,tsx,html,hbs,handlebars}', {
     cwd: inputPath,
     matchBase: true,
   });
@@ -49,7 +49,7 @@ export async function extractDefaultTranslations(inputPath) {
 
       if (resolvedPath.endsWith('.html')) {
         paths.htmlEntries.push(resolvedPath);
-      } else if (resolvedPath.endsWith('.jade') || resolvedPath.endsWith('.pug')) {
+      } else if (resolvedPath.endsWith('.pug')) {
         paths.pugEntries.push(resolvedPath);
       } else if (resolvedPath.endsWith('.hbs') || resolvedPath.endsWith('.handlebars')) {
         paths.hbsFiles.push(resolvedPath);
