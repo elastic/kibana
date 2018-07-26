@@ -27,8 +27,8 @@ import { DeleteSpacesButton } from '../components';
 import { SpaceAvatar } from '../../components';
 
 import { Notifier, toastNotifications } from 'ui/notify';
-import { UrlContext } from './url_context';
-import { toUrlContext, isValidUrlContext } from '../lib/url_context_utils';
+import { SpaceIdentifier } from './space_identifier';
+import { toSpaceIdentifier } from '../lib';
 import { CustomizeSpaceAvatar } from './customize_space_avatar';
 import { isReservedSpace } from '../../../../common';
 import { ReservedSpaceBadge } from './reserved_space_badge';
@@ -124,11 +124,10 @@ export class ManageSpacePage extends Component {
                   ? null
                   : (
                     <Fragment>
-                      <UrlContext
+                      <SpaceIdentifier
                         space={this.state.space}
-                        editingExistingSpace={this.editingExistingSpace()}
-                        editable={true}
-                        onChange={this.onUrlContextChange}
+                        editable={!this.editingExistingSpace()}
+                        onChange={this.onSpaceIdentifierChange}
                         validator={this.validator}
                       />
                     </Fragment>
@@ -211,21 +210,21 @@ export class ManageSpacePage extends Component {
   };
 
   onNameChange = (e) => {
-    const canUpdateContext = !this.editingExistingSpace();
+    const canUpdateId = !this.editingExistingSpace();
 
     let {
-      urlContext
+      id
     } = this.state.space;
 
-    if (canUpdateContext) {
-      urlContext = toUrlContext(e.target.value);
+    if (canUpdateId) {
+      id = toSpaceIdentifier(e.target.value);
     }
 
     this.setState({
       space: {
         ...this.state.space,
         name: e.target.value,
-        urlContext
+        id
       }
     });
   };
@@ -239,11 +238,11 @@ export class ManageSpacePage extends Component {
     });
   };
 
-  onUrlContextChange = (e) => {
+  onSpaceIdentifierChange = (e) => {
     this.setState({
       space: {
         ...this.state.space,
-        urlContext: toUrlContext(e.target.value)
+        id: toSpaceIdentifier(e.target.value)
       }
     });
   };
@@ -272,11 +271,10 @@ export class ManageSpacePage extends Component {
   _performSave = () => {
     const {
       name = '',
-      id = toUrlContext(name),
+      id = toSpaceIdentifier(name),
       description,
       initials,
       color,
-      urlContext
     } = this.state.space;
 
     const params = {
@@ -285,7 +283,6 @@ export class ManageSpacePage extends Component {
       description,
       initials,
       color,
-      urlContext
     };
 
     if (name && description) {
@@ -314,86 +311,6 @@ export class ManageSpacePage extends Component {
 
   backToSpacesList = () => {
     window.location.hash = `#/management/spaces/list`;
-  };
-
-  validateName = () => {
-    if (!this.state.validate) {
-      return {};
-    }
-
-    const {
-      name
-    } = this.state.space;
-
-    if (!name) {
-      return {
-        isInvalid: true,
-        error: 'Name is required'
-      };
-    }
-
-    return {};
-  };
-
-  validateDescription = () => {
-    if (!this.state.validate) {
-      return {};
-    }
-
-    const {
-      description
-    } = this.state.space;
-
-    if (!description) {
-      return {
-        isInvalid: true,
-        error: 'Description is required'
-      };
-    }
-
-    return {};
-  };
-
-  validateUrlContext = () => {
-    if (!this.state.validate) {
-      return {};
-    }
-
-    const {
-      urlContext
-    } = this.state.space;
-
-    if (!urlContext) {
-      return {
-        isInvalid: true,
-        error: 'URL Context is required'
-      };
-    }
-
-    if (!isValidUrlContext(urlContext)) {
-      return {
-        isInvalid: true,
-        error: 'URL Context only allows a-z, 0-9, and the "-" character'
-      };
-    }
-
-    return {};
-
-  };
-
-  validateForm = () => {
-    if (!this.state.validate) {
-      return {};
-    }
-
-    const validations = [this.validateName(), this.validateDescription(), this.validateUrlContext()];
-    if (validations.some(validation => validation.isInvalid)) {
-      return {
-        isInvalid: true
-      };
-    }
-
-    return {};
   };
 
   editingExistingSpace = () => !!this.props.space;

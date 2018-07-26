@@ -4,10 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export function toUrlContext(value = '') {
+export function toSpaceIdentifier(value = '') {
   return value.toLowerCase().replace(/[^a-z0-9]/g, '-');
 }
 
-export function isValidUrlContext(value = '') {
-  return value === toUrlContext(value);
+export function isValidSpaceIdentifier(value = '') {
+  return value === toSpaceIdentifier(value);
 }

@@ -23,7 +23,7 @@ export class SpacesSavedObjectsClient {
     this._client = baseClient;
     this._types = types;
 
-    this._spaceUrlContext = spacesService.getUrlContext(request);
+    this._spaceId = spacesService.getSpaceId(request);
   }
 
   /**
@@ -39,7 +39,7 @@ export class SpacesSavedObjectsClient {
   */
   async create(type, attributes = {}, options = {}) {
 
-    const spaceId = await this._getSpaceId();
+    const spaceId = this._spaceId;
 
     const createOptions = {
       ...options,
@@ -66,7 +66,7 @@ export class SpacesSavedObjectsClient {
    * @returns {promise} - { saved_objects: [{ id, type, version, attributes, error: { message } }]}
    */
   async bulkCreate(objects, options = {}) {
-    const spaceId = await this._getSpaceId();
+    const spaceId = this._spaceId;
     const objectsToCreate = objects.map(object => {
 
       const objectToCreate = {
@@ -127,7 +127,7 @@ export class SpacesSavedObjectsClient {
 
     const filters = options.filters || [];
 
-    const spaceId = await this._getSpaceId();
+    const spaceId = this._spaceId;
 
     spaceOptions.filters = [...filters, ...getSpacesQueryFilters(spaceId, types)];
 
@@ -150,7 +150,7 @@ export class SpacesSavedObjectsClient {
    */
   async bulkGet(objects = [], options = {}) {
     // ES 'mget' does not support queries, so we have to filter results after the fact.
-    const thisSpaceId = await this._getSpaceId();
+    const thisSpaceId = this._spaceId;
 
     const extraDocumentProperties = this._collectExtraDocumentProperties(['spaceId', 'type'], options.extraDocumentProperties);
 
@@ -200,7 +200,7 @@ export class SpacesSavedObjectsClient {
     const { spaceId: objectSpaceId = DEFAULT_SPACE_ID } = response;
 
     if (isTypeSpaceAware(type)) {
-      const thisSpaceId = await this._getSpaceId();
+      const thisSpaceId = this._spaceId;
       if (objectSpaceId !== thisSpaceId) {
         throw this._client.errors.createGenericNotFoundError();
       }
@@ -232,7 +232,7 @@ export class SpacesSavedObjectsClient {
     if (isTypeSpaceAware(type)) {
       await this.get(type, id);
 
-      const spaceId = await this._getSpaceId();
+      const spaceId = this._spaceId;
 
       if (this._shouldAssignSpaceId(type, spaceId)) {
         updateOptions.extraDocumentProperties.spaceId = spaceId;
@@ -242,34 +242,6 @@ export class SpacesSavedObjectsClient {
     }
 
     return await this._client.update(type, id, attributes, updateOptions);
-  }
-
-  async _getSpaceId() {
-    if (!this._spaceUrlContext) {
-      return DEFAULT_SPACE_ID;
-    }
-
-    if (!this._spaceId) {
-      this._spaceId = await this._findSpace(this._spaceUrlContext);
-    }
-
-    return this._spaceId;
-  }
-
-  async _findSpace(urlContext) {
-    const {
-      saved_objects: spaces = []
-    } = await this._client.find({
-      type: 'space',
-      search: `${urlContext}`,
-      search_fields: ['urlContext']
-    });
-
-    if (spaces.length > 0) {
-      return spaces[0].id;
-    }
-
-    return null;
   }
 
   _collectExtraDocumentProperties(thisClientProperties, optionalProperties = []) {

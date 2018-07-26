@@ -6,17 +6,16 @@
 
 import React from 'react';
 import { shallow } from 'enzyme';
-import { UrlContext } from './url_context';
+import { SpaceIdentifier } from './space_identifier';
 import { SpaceValidator } from '../lib';
 
 test('renders without crashing', () => {
   const props = {
     space: {},
     editable: true,
-    editingExistingSpace: false,
     onChange: jest.fn(),
     validator: new SpaceValidator()
   };
-  const wrapper = shallow(<UrlContext {...props} />);
+  const wrapper = shallow(<SpaceIdentifier {...props} />);
   expect(wrapper).toMatchSnapshot();
 });

@@ -127,8 +127,8 @@ export class SpacesGridPage extends Component {
       name: 'Description',
       sortable: true
     }, {
-      field: 'urlContext',
-      name: 'URL Context',
+      field: 'id',
+      name: 'Identifier',
       sortable: true
     }];
   }

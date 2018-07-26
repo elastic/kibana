@@ -24,22 +24,19 @@ jest.mock('../../../../../../server/lib/get_client_shield', () => {
 });
 
 const spaces = [{
-  id: 'space:a-space',
+  id: 'a-space',
   attributes: {
     name: 'a space',
-    urlContext: 'a-space',
   }
 }, {
-  id: 'space:b-space',
+  id: 'b-space',
   attributes: {
     name: 'b space',
-    urlContext: 'b-space',
   }
 }, {
-  id: 'space:default',
+  id: 'default',
   attributes: {
     name: 'Default Space',
-    urlContext: '',
     _reserved: true
   }
 }];
@@ -53,7 +50,13 @@ describe('Spaces API', () => {
   };
 
   beforeEach(() => {
-    request = async (method, path, setupFn = () => { }, testConfig = {}) => {
+    request = async (method, path, options = {}) => {
+
+      const {
+        setupFn = () => { },
+        testConfig = {},
+        payload,
+      } = options;
 
       const server = new Server();
 
@@ -78,27 +81,37 @@ describe('Spaces API', () => {
       server.decorate('request', 'setBasePath', jest.fn());
 
       // Mock server.getSavedObjectsClient()
-      server.decorate('request', 'getSavedObjectsClient', () => {
-        return {
-          get: jest.fn((type, id) => {
-            return spaces.filter(s => s.id === `${type}:${id}`)[0];
-          }),
-          find: jest.fn(() => {
-            return {
-              total: spaces.length,
-              saved_objects: spaces
-            };
-          }),
-          delete: jest.fn()
-        };
-      });
+      const mockSavedObjectsClient = {
+        get: jest.fn((type, id) => {
+          return spaces.filter(s => s.id === id)[0];
+        }),
+        find: jest.fn(() => {
+          return {
+            total: spaces.length,
+            saved_objects: spaces
+          };
+        }),
+        create: jest.fn(() => ({})),
+        update: jest.fn(() => ({})),
+        delete: jest.fn(),
+        errors: {
+          isNotFoundError: jest.fn(() => true)
+        }
+      };
+
+      server.decorate('request', 'getSavedObjectsClient', () => mockSavedObjectsClient);
 
       teardowns.push(() => server.stop());
 
-      return await server.inject({
-        method,
-        url: path,
-      });
+      return {
+        server,
+        mockSavedObjectsClient,
+        response: await server.inject({
+          method,
+          url: path,
+          payload,
+        })
+      };
     };
   });
 
@@ -107,7 +120,7 @@ describe('Spaces API', () => {
   });
 
   test(`'GET spaces' returns all available spaces`, async () => {
-    const response = await request('GET', '/api/spaces/v1/spaces');
+    const { response } = await request('GET', '/api/spaces/v1/spaces');
 
     const {
       statusCode,
@@ -120,7 +133,7 @@ describe('Spaces API', () => {
   });
 
   test(`'GET spaces/{id}' returns the space with that id`, async () => {
-    const response = await request('GET', '/api/spaces/v1/space/default');
+    const { response } = await request('GET', '/api/spaces/v1/space/default');
 
     const {
       statusCode,
@@ -129,11 +142,11 @@ describe('Spaces API', () => {
 
     expect(statusCode).toEqual(200);
     const resultSpace = JSON.parse(payload);
-    expect(resultSpace.id).toEqual('space:default');
+    expect(resultSpace.id).toEqual('default');
   });
 
   test(`'DELETE spaces/{id}' deletes the space`, async () => {
-    const response = await request('DELETE', '/api/spaces/v1/space/a-space');
+    const { response } = await request('DELETE', '/api/spaces/v1/space/a-space');
 
     const {
       statusCode
@@ -143,7 +156,7 @@ describe('Spaces API', () => {
   });
 
   test(`'DELETE spaces/{id}' cannot delete reserved spaces`, async () => {
-    const response = await request('DELETE', '/api/spaces/v1/space/default');
+    const { response } = await request('DELETE', '/api/spaces/v1/space/default');
 
     const {
       statusCode,
@@ -158,8 +171,84 @@ describe('Spaces API', () => {
     });
   });
 
+  test('POST /space should create a new space with the provided ID', async () => {
+    const payload = {
+      id: 'my-space-id',
+      name: 'my new space',
+      description: 'with a description',
+    };
+
+    const { mockSavedObjectsClient, response } = await request('POST', '/api/spaces/v1/space', { payload });
+
+    const {
+      statusCode,
+    } = response;
+
+    expect(statusCode).toEqual(200);
+    expect(mockSavedObjectsClient.create).toHaveBeenCalledTimes(1);
+    expect(mockSavedObjectsClient.create)
+      .toHaveBeenCalledWith('space', { name: 'my new space', description: 'with a description' }, { id: 'my-space-id', overwrite: false });
+  });
+
+  test('POST /space should not allow a space to be updated', async () => {
+    const payload = {
+      id: 'a-space',
+      name: 'my updated space',
+      description: 'with a description',
+    };
+
+    const { response } = await request('POST', '/api/spaces/v1/space', { payload });
+
+    const {
+      statusCode,
+      payload: responsePayload,
+    } = response;
+
+    expect(statusCode).toEqual(409);
+    expect(JSON.parse(responsePayload)).toEqual({
+      error: 'Conflict',
+      message: "A space with the identifier a-space already exists. Please choose a different identifier",
+      statusCode: 409
+    });
+  });
+
+  test('PUT /space should update an exisitng space with the provided ID', async () => {
+    const payload = {
+      id: 'a-space',
+      name: 'my updated space',
+      description: 'with a description',
+    };
+
+    const { mockSavedObjectsClient, response } = await request('PUT', '/api/spaces/v1/space/a-space', { payload });
+
+    const {
+      statusCode,
+    } = response;
+
+    expect(statusCode).toEqual(200);
+    expect(mockSavedObjectsClient.update).toHaveBeenCalledTimes(1);
+    expect(mockSavedObjectsClient.update)
+      .toHaveBeenCalledWith('space', 'a-space', { name: 'my updated space', description: 'with a description' });
+  });
+
+  test('PUT /space should not allow a new space to be created', async () => {
+    const payload = {
+      id: 'a-new-space',
+      name: 'my new space',
+      description: 'with a description',
+    };
+
+    const { response } = await request('PUT', '/api/spaces/v1/space/a-new-space', { payload });
+
+    const {
+      statusCode,
+    } = response;
+
+    expect(statusCode).toEqual(404);
+  });
+
   test('POST space/{id}/select should respond with the new space location', async () => {
-    const response = await request('POST', '/api/spaces/v1/space/a-space/select');
+    const { response } = await request('POST', '/api/spaces/v1/space/a-space/select');
 
     const {
       statusCode,
@@ -173,9 +262,11 @@ describe('Spaces API', () => {
   });
 
   test('POST space/{id}/select should respond with the new space location when a baseUrl is provided', async () => {
-    const response = await request('POST', '/api/spaces/v1/space/a-space/select', () => { }, {
+    const testConfig = {
       'server.basePath': '/my/base/path'
-    });
+    };
+
+    const { response } = await request('POST', '/api/spaces/v1/space/a-space/select', { testConfig });
 
     const {
       statusCode,

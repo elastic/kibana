@@ -5,9 +5,9 @@
  */
 
 export {
-  toUrlContext,
-  isValidUrlContext
-} from './url_context_utils';
+  toSpaceIdentifier,
+  isValidSpaceIdentifier,
+} from './space_identifier_utils';
 
 export {
   SpaceValidator

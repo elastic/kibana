@@ -48,37 +48,37 @@ describe('validateSpaceDescription', () => {
   });
 });
 
-describe('validateUrlContext', () => {
+describe('validateSpaceIdentifier', () => {
   test('it does not validate reserved spaces', () => {
     const space = {
       _reserved: true
     };
 
-    expect(validator.validateUrlContext(space)).toEqual({ isInvalid: false });
+    expect(validator.validateSpaceIdentifier(space)).toEqual({ isInvalid: false });
   });
 
   test('it requires a non-empty value', () => {
     const space = {
-      urlContext: ''
+      id: ''
     };
 
-    expect(validator.validateUrlContext(space)).toEqual({ isInvalid: true, error: `URL Context is required` });
+    expect(validator.validateSpaceIdentifier(space)).toEqual({ isInvalid: true, error: `Space Identifier is required` });
   });
 
-  test('it requires a valid URL Context', () => {
+  test('it requires a valid Space Identifier', () => {
     const space = {
-      urlContext: 'invalid context'
+      id: 'invalid context'
     };
 
-    expect(validator.validateUrlContext(space))
-      .toEqual({ isInvalid: true, error: 'URL Context only allows a-z, 0-9, and the "-" character' });
+    expect(validator.validateSpaceIdentifier(space))
+      .toEqual({ isInvalid: true, error: 'Space Identifier only allows a-z, 0-9, and the "-" character' });
   });
 
-  test('it allows a valid URL Context', () => {
+  test('it allows a valid Space Identifier', () => {
     const space = {
-      urlContext: '01-valid-context-01'
+      id: '01-valid-context-01'
     };
 
-    expect(validator.validateUrlContext(space)).toEqual({ isInvalid: false });
+    expect(validator.validateSpaceIdentifier(space)).toEqual({ isInvalid: false });
   });
 });

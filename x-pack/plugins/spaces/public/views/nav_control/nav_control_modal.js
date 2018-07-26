@@ -61,6 +61,7 @@ export class NavControlModal extends Component {
     } = this.props;
 
     if (activeSpace && !activeSpace.valid) {
+      console.error(activeSpace);
       const { error = {} } = activeSpace;
       if (error.message) {
         this.notifier.error(error.message);

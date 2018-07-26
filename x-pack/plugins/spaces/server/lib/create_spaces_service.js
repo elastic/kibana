@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { getSpaceUrlContext } from './spaces_url_parser';
+import { getSpaceIdFromPath } from './spaces_url_parser';
 
 export function createSpacesService(server) {
 
@@ -12,24 +12,24 @@ export function createSpacesService(server) {
 
   const contextCache = new WeakMap();
 
-  function getUrlContext(request) {
+  function getSpaceId(request) {
     if (!contextCache.has(request)) {
       populateCache(request);
     }
 
-    const { urlContext } = contextCache.get(request);
-    return urlContext;
+    const { spaceId } = contextCache.get(request);
+    return spaceId;
   }
 
   function populateCache(request) {
-    const urlContext = getSpaceUrlContext(request.getBasePath(), serverBasePath);
+    const spaceId = getSpaceIdFromPath(request.getBasePath(), serverBasePath);
 
     contextCache.set(request, {
-      urlContext
+      spaceId
     });
   }
 
   return {
-    getUrlContext,
+    getSpaceId,
   };
 }

@@ -10,11 +10,9 @@ import {
   EuiFormRow,
   EuiLink,
   EuiFieldText,
-  EuiCallOut,
-  EuiSpacer
 } from '@elastic/eui';
 
-export class UrlContext extends Component {
+export class SpaceIdentifier extends Component {
   textFieldRef = null;
 
   state = {
@@ -23,7 +21,7 @@ export class UrlContext extends Component {
 
   render() {
     const {
-      urlContext = ''
+      id = ''
     } = this.props.space;
 
     return (
@@ -31,18 +29,15 @@ export class UrlContext extends Component {
         <EuiFormRow
           label={this.getLabel()}
           helpText={this.getHelpText()}
-          {...this.props.validator.validateUrlContext(this.props.space)}
+          {...this.props.validator.validateSpaceIdentifier(this.props.space)}
         >
-          <div>
-            <EuiFieldText
-              readOnly={!this.state.editing}
-              placeholder={this.state.editing || !this.props.editable ? null : 'give your space a name to see its URL Context'}
-              value={urlContext}
-              onChange={this.onChange}
-              inputRef={(ref) => this.textFieldRef = ref}
-            />
-            {this.getCallOut()}
-          </div>
+          <EuiFieldText
+            readOnly={!this.state.editing}
+            placeholder={this.state.editing || !this.props.editable ? null : 'give your space a name to see its identifier'}
+            value={id}
+            onChange={this.onChange}
+            inputRef={(ref) => this.textFieldRef = ref}
+          />
         </EuiFormRow>
       </Fragment>
     );
@@ -50,32 +45,15 @@ export class UrlContext extends Component {
 
   getLabel = () => {
     if (!this.props.editable) {
-      return (<p>URL Context</p>);
+      return (<p>Space Identifier</p>);
     }
 
     const editLinkText = this.state.editing ? `[stop editing]` : `[edit]`;
-    return (<p>URL Context <EuiLink onClick={this.onEditClick}>{editLinkText}</EuiLink></p>);
+    return (<p>Space Identifier <EuiLink onClick={this.onEditClick}>{editLinkText}</EuiLink></p>);
   };
 
   getHelpText = () => {
     return (<p>Links within Kibana will include this space identifier</p>);
-  };
-
-  getCallOut = () => {
-    if (this.props.editingExistingSpace && this.state.editing) {
-      return (
-        <Fragment>
-          <EuiSpacer />
-          <EuiCallOut
-            color={'warning'}
-            size={'s'}
-            title={'Changing the URL Context will invalidate all existing links and bookmarks to this space'}
-          />
-        </Fragment>
-      );
-    }
-
-    return null;
   };
 
   onEditClick = () => {
@@ -94,10 +72,9 @@ export class UrlContext extends Component {
   };
 }
 
-UrlContext.propTypes = {
+SpaceIdentifier.propTypes = {
   space: PropTypes.object.isRequired,
   editable: PropTypes.bool.isRequired,
-  editingExistingSpace: PropTypes.bool.isRequired,
   onChange: PropTypes.func,
   validator: PropTypes.object.isRequired,
 };
