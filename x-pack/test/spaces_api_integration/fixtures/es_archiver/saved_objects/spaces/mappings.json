@@ -44,9 +44,6 @@
                   }
                 }
               },
-              "urlContext": {
-                "type": "keyword"
-              },
               "description": {
                 "type": "text"
               },

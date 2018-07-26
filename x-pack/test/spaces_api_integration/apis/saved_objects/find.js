@@ -106,14 +106,14 @@ export default function ({ getService }) {
       });
     };
 
-    const findTest = (description, { urlContext, tests }) => {
+    const findTest = (description, { spaceId, tests }) => {
       describe(description, () => {
         before(() => esArchiver.load('saved_objects/spaces'));
         after(() => esArchiver.unload('saved_objects/spaces'));
 
         it(`should return ${tests.normal.statusCode} with ${tests.normal.description}`, async () => (
           await supertest
-            .get(`${getUrlPrefix(urlContext)}/api/saved_objects/_find?type=visualization&fields=title`)
+            .get(`${getUrlPrefix(spaceId)}/api/saved_objects/_find?type=visualization&fields=title`)
             .expect(tests.normal.statusCode)
             .then(tests.normal.response)
         ));
@@ -121,7 +121,7 @@ export default function ({ getService }) {
         describe('page beyond total', () => {
           it(`should return ${tests.pageBeyondTotal.statusCode} with ${tests.pageBeyondTotal.description}`, async () => (
             await supertest
-              .get(`${getUrlPrefix(urlContext)}/api/saved_objects/_find?type=visualization&page=100&per_page=100`)
+              .get(`${getUrlPrefix(spaceId)}/api/saved_objects/_find?type=visualization&page=100&per_page=100`)
               .expect(tests.pageBeyondTotal.statusCode)
               .then(tests.pageBeyondTotal.response)
           ));
@@ -130,7 +130,7 @@ export default function ({ getService }) {
         describe('unknown search field', () => {
           it(`should return ${tests.unknownSearchField.statusCode} with ${tests.unknownSearchField.description}`, async () => (
             await supertest
-              .get(`${getUrlPrefix(urlContext)}/api/saved_objects/_find?type=wigwags&search_fields=a`)
+              .get(`${getUrlPrefix(spaceId)}/api/saved_objects/_find?type=wigwags&search_fields=a`)
               .expect(tests.unknownSearchField.statusCode)
               .then(tests.unknownSearchField.response)
           ));
@@ -139,7 +139,7 @@ export default function ({ getService }) {
         describe('no type', () => {
           it(`should return ${tests.noType.statusCode} with ${tests.noType.description}`, async () => (
             await supertest
-              .get(`${getUrlPrefix(urlContext)}/api/saved_objects/_find`)
+              .get(`${getUrlPrefix(spaceId)}/api/saved_objects/_find`)
               .expect(tests.noType.statusCode)
               .then(tests.noType.response)
           ));
