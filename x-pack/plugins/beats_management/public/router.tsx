@@ -5,18 +5,14 @@
  */
 
 import React from 'react';
-import { HashRouter, Route, Switch } from 'react-router-dom';
+import { HashRouter, Route } from 'react-router-dom';
 
-import { NotFoundPage } from './pages/404';
-import { HomePage } from './pages/home';
+import { MainPages } from './pages/main';
 
-export const PageRouter: React.SFC<{}> = () => {
+export const PageRouter: React.SFC<{ libs: any }> = ({ libs }) => {
   return (
     <HashRouter basename="/management/beats_management">
-      <Switch>
-        <Route path="/" exact={true} component={HomePage} />
-        <Route component={NotFoundPage} />
-      </Switch>
+      <Route render={(props: any) => <MainPages {...props} libs={libs} />} />
     </HashRouter>
   );
 };

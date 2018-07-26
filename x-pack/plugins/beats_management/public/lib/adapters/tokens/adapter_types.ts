@@ -3,11 +3,11 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+export interface TokenEnrollmentData {
+  token: string | null;
+  expires_on: string;
+}
 
-import React from 'react';
-
-export class HomePage extends React.PureComponent {
-  public render() {
-    return <div>Home</div>;
-  }
+export interface CMTokensAdapter {
+  createEnrollmentToken(): Promise<TokenEnrollmentData>;
 }
