@@ -1,13 +1,7 @@
 $dashGrid__depth: 1;
 $dashGrid__depth-dragging: 2;
 
-.exitFullScreenButton {
-  text-align: center;
-  width: 100%;
-  height: 0;
-  bottom: 0;
-  position: absolute;
-}
+
 
 .layout-edit {
   /**
@@ -44,62 +38,7 @@ $dashGrid__depth-dragging: 2;
   position: absolute;
 }
 
-.exitFullScreenMode {
-  height: 40px;
-  left: 0px;
-  bottom: 0px;
-  position: fixed;
-  display: block;
-  padding: 0;
-  border: none;
-  background: none;
-  z-index: 5;
-}
 
-.exitFullScreenMode:hover,
-.exitFullScreenMode:focus {
-  transition: all .5s ease;
-
-  .exitFullScreenModeText {
-    visibility: visible;
-    opacity: 1;
-    transition: all .2s ease;
-    transform: translateX(-14px);
-  }
-}
-
-.exitFullScreenModeLogo {
-  display: block;
-  background-color: #005571;
-  width: 92px;
-  height: 40px;
-  background-image: url("~ui/images/kibana.svg");
-  background-position: 8px 5px;
-  background-size: 72px 30px;
-  background-repeat: no-repeat;
-  z-index: 50;
-}
-
-/**
- * 1. Calc made to allow caret in text to peek out / animate.
- */
-
-.exitFullScreenModeText {
-  background: $euiColorPrimary;
-  color: tint($euiColorPrimary, 70%);
-  line-height: 40px;
-  display: inline-block;
-  height: 40px;
-  position: absolute;
-  left: calc(100% + 14px);  // 1
-  top: 0px;
-  bottom: 0px;
-  white-space: nowrap;
-  padding: 0px 4px 0px 10px;
-  transition: all .2s ease;
-  transform: translateX(-100%);
-  z-index: -1;
-}
 
 .tab-dashboard {
   background-color: $euiColorEmptyShade;
