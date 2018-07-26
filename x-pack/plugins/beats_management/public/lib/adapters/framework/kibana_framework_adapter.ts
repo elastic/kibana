@@ -86,8 +86,9 @@ export class KibanaFrameworkAdapter implements FrameworkAdapter {
 
   private register = (adapterModule: IModule) => {
     const adapter = this;
-    this.routes.when(`/management/beats_management/?`, {
-      template: '<beats-cm><div id="beatsReactRoot" style="flex-grow: 1;"></div></beats-cm>',
+    this.routes.when(`/management/beats_management/:view?/:id?/:other?/:other2?`, {
+      template:
+        '<beats-cm><div id="beatsReactRoot" style="flex-grow: 1; height: 100vh; background: #f5f5f5"></div></beats-cm>',
       controllerAs: 'beatsManagement',
       // tslint:disable-next-line: max-classes-per-file
       controller: class BeatsManagementController {
