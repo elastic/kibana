@@ -56,7 +56,11 @@ task startKibana(type: YarnTask, dependsOn: [bootstrap, ":lsp:javascript-typescr
   args = ['start', '--logging.json=false']
 }
 
-task debugKibana(type: YarnTask, dependsOn: [bootstrap, ":lsp:javascript-typescript-langserver:build"]) {
+task startFullKibana(type: YarnTask, dependsOn: [bootstrap, ":lsp:javascript-typescript-langserver:build", ":lsp:eclipse.jdt.ls:build"]) {
+  args = ['start', '--logging.json=false']
+}
+
+task debugKibana(type: YarnTask, dependsOn: [bootstrap, ":lsp:javascript-typescript-langserver:build", ":lsp:eclipse.jdt.ls:build"]) {
   args = ['debug', '--logging.json=false']
 }
 

@@ -2,3 +2,6 @@
 	path = lsp/javascript-typescript-langserver
 	url = ../javascript-typescript-langserver
 	ignore = untracked
+[submodule "lsp/eclipse.jdt.ls"]
+	path = lsp/eclipse.jdt.ls
+	url = ../eclipse.jdt.ls.git

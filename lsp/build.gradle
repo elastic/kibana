@@ -19,5 +19,12 @@ project("javascript-typescript-langserver") {
     args = ['run', "build"]
   }
 
-  tasks.nodeSetup.dependsOn(rootProject.tasks.checkoutSubmodule);
+  tasks.nodeSetup.dependsOn(rootProject.tasks.checkoutSubmodule)
+}
+
+project("eclipse.jdt.ls") {
+  task build(type: Exec) {
+    commandLine "./mvnw", "clean", "package", "-DskipTest=true"
+  }
+  tasks.build.dependsOn(rootProject.tasks.checkoutSubmodule)
 }

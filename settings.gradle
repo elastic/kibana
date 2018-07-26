@@ -3,3 +3,4 @@
 
 include 'kibana-extra:codesearch'
 include 'lsp:javascript-typescript-langserver'
+include 'lsp:eclipse.jdt.ls'
