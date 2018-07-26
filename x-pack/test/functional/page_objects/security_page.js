@@ -211,6 +211,7 @@ export function SecurityPageProvider({ getService, getPageObjects }) {
     async addUser(userObj) {
       const self = this;
       await this.clickNewUser();
+      log.debug('username = ' + userObj.username);
       await testSubjects.setValue('userFormUserNameInput', userObj.username);
       await testSubjects.setValue('passwordInput', userObj.password);
       await testSubjects.setValue('passwordConfirmationInput', userObj.confirmPassword);

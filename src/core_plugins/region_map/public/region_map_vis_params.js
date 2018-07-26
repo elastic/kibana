@@ -38,7 +38,7 @@ uiModules.get('kibana/region_map')
           serviceSettings.getFileLayers()
             .then(function (layersFromService) {
 
-              layersFromService = layersFromService.map(mapToLayerWithId.bind(null, 'elastic_maps_service'));
+              layersFromService = layersFromService.map(mapToLayerWithId.bind(null, 'elastic_maps_service', true));
               const newVectorLayers = $scope.collections.vectorLayers.slice();
               for (let i = 0; i < layersFromService.length; i += 1) {
                 const layerFromService = layersFromService[i];
@@ -87,8 +87,21 @@ uiModules.get('kibana/region_map')
         }
 
         function onLayerChange() {
+
+          if (!$scope.editorState.params.selectedLayer) {
+            return;
+          }
+
           $scope.editorState.params.selectedJoinField = $scope.editorState.params.selectedLayer.fields[0];
+
+          if ($scope.editorState.params.selectedLayer.isEMS) {
+            $scope.editorState.params.emsHotLink = serviceSettings.getEMSHotLink($scope.editorState.params.selectedLayer);
+          } else {
+            $scope.editorState.params.emsHotLink = null;
+          }
         }
+
+        onLayerChange();
 
       }
     };

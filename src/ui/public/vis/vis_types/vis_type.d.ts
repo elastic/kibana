@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { Vis } from '..';
+import { RequestHandler, ResponseHandler, Vis } from '..';
 import { Status } from '../update_status';
 
 export class VisualizationController {
@@ -31,6 +31,8 @@ export interface VisType {
   title: string;
   visualization: typeof VisualizationController;
   isAccessible?: boolean;
+  requestHandler: string | RequestHandler;
+  responseHandler: string | ResponseHandler;
 
   // Since we haven't typed everything here yet, we basically "any" the rest
   // of that interface. This should be removed as soon as this type definition

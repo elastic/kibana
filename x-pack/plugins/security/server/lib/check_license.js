@@ -34,7 +34,7 @@ export function checkLicense(xPackInfo) {
       allowRoleDocumentLevelSecurity: false,
       allowRoleFieldLevelSecurity: false,
       allowRbac: false,
-      loginMessage: 'Login is currently disabled. Administrators should consult the Kibana logs for more details.'
+      layout: xPackInfo.isXpackUnavailable() ? 'error-xpack-unavailable' : 'error-es-unavailable'
     };
   }
 
