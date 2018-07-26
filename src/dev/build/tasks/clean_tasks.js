@@ -134,19 +134,21 @@ export const CleanExtraFilesFromModulesTask = {
     ];
     const misc = ['.*ignore', '.DS_Store', 'Dockerfile', 'docker-compose.yml'];
 
-    await deleteFromNodeModules(tests);
-    await deleteFromNodeModules(docs);
-    await deleteFromNodeModules(examples);
-    await deleteFromNodeModules(bins);
-    await deleteFromNodeModules(linters);
-    await deleteFromNodeModules(hints);
-    await deleteFromNodeModules(scripts);
-    await deleteFromNodeModules(untranspiledSources);
-    await deleteFromNodeModules(editors);
-    await deleteFromNodeModules(git);
-    await deleteFromNodeModules(ci);
-    await deleteFromNodeModules(meta);
-    await deleteFromNodeModules(misc);
+    await deleteFromNodeModules([].concat(
+      tests,
+      docs,
+      examples,
+      bins,
+      linters,
+      hints,
+      scripts,
+      untranspiledSources,
+      editors,
+      git,
+      ci,
+      meta,
+      misc
+    ));
   },
 };
 
