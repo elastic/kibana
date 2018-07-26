@@ -40,8 +40,7 @@ export function TestSubjectsProvider({ getService }) {
 
     async existOrFail(selector, timeout = 1000) {
       log.debug(`TestSubjects.existOrFail(${selector})`);
-      const doesExist = await find.existsByDisplayedByCssSelector(testSubjSelector(selector), timeout);
-
+      const doesExist = await this.exists(selector, timeout);
       // Verify element exists, or else fail the test consuming this.
       expect(doesExist).to.be(true);
     }
