@@ -20,13 +20,23 @@
 import { difference } from 'lodash';
 import { transformDeprecations } from './transform_deprecations';
 import { unset, formatListAsProse, getFlattenedObject } from '../../utils';
+import { createTransform, Deprecations } from '../../deprecation';
+
 
 const getFlattenedKeys = object => (
   Object.keys(getFlattenedObject(object))
 );
 
-const getUnusedConfigKeys = (disabledPluginSpecs, rawSettings, configValues) => {
-  const settings = transformDeprecations(rawSettings);
+const getUnusedConfigKeys = (plugins, disabledPluginSpecs, rawSettings, configValues) => {
+  // transform deprecated core settings
+  let settings = transformDeprecations(rawSettings);
+
+  // transform deprecated plugin settings
+  plugins.forEach(({ spec }) => {
+    const deprecationsProvider = spec.getDeprecationsProvider();
+    if (!deprecationsProvider) return;
+    settings = createTransform(deprecationsProvider(Deprecations))(settings);
+  });
 
   // remove config values from disabled plugins
   for (const spec of disabledPluginSpecs) {
@@ -52,7 +62,7 @@ export default function (kbnServer, server, config) {
     return kbnServer.config;
   });
 
-  const unusedKeys = getUnusedConfigKeys(kbnServer.disabledPluginSpecs, kbnServer.settings, config.get())
+  const unusedKeys = getUnusedConfigKeys(kbnServer.plugins, kbnServer.disabledPluginSpecs, kbnServer.settings, config.get())
     .map(key => `"${key}"`);
 
   if (!unusedKeys.length) {

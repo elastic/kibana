@@ -34,6 +34,7 @@ describe('server/config completeMixin()', function () {
       settings = {},
       configValues = {},
       disabledPluginSpecs = [],
+      plugins = [],
     } = options;
 
     const server = {
@@ -48,7 +49,8 @@ describe('server/config completeMixin()', function () {
       settings,
       server,
       config,
-      disabledPluginSpecs
+      disabledPluginSpecs,
+      plugins
     };
 
     const callCompleteMixin = () => {
@@ -219,6 +221,28 @@ describe('server/config completeMixin()', function () {
 
       callCompleteMixin();
       sinon.assert.calledOnce(transformDeprecations);
+    });
+
+    it('should transform deprecated plugin settings', () => {
+      const { callCompleteMixin } = setup({
+        settings: {
+          foo1: 'bar'
+        },
+        configValues: {
+          foo2: 'bar'
+        },
+        plugins: [
+          {
+            spec: {
+              getDeprecationsProvider() {
+                return ({ rename }) => [rename('foo1', 'foo2')];
+              }
+            }
+          }
+        ],
+      });
+
+      expect(callCompleteMixin).not.toThrowError();
     });
   });
 
