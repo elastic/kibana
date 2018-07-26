@@ -1,0 +1,306 @@
+// SASSTODO: we don't have a suitable var
+.dscSidebar__ListHeader {
+  margin-top: 5px;
+}
+
+// SASSTODO: we don't have a suitable var
+.dscPopularFields {
+  padding-top: 10px;
+}
+
+// SASSTODO: we don't have a z-index variable with the value of 1
+.dscWrapper {
+  padding-right: 0;
+  padding-left: 21px;
+  z-index: 1
+}
+
+.dscWrapper__content {
+  padding-right: $euiSize;
+  clear: both;
+}
+
+.dscTimechart {
+  display: block;
+  position: relative;
+
+  // SASSTODO: the visualizing component should have an option or a modifier
+  .series > rect {
+    fill-opacity: 0.5;
+    stroke-width: 1;
+  }
+
+  // SASSTODO: Seems that this selector is not used anywhere
+  visualize {
+    height: 200px; /* 1 */
+
+    .loading {
+      opacity: 1 !important;
+    }
+
+    &.only-spy {
+      height: auto;
+
+      .visualize-table {
+        height: auto;
+      }
+    }
+  }
+
+  // SASSTODO: Seems that this class is not used anywhere
+  .chartwrapper {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+  }
+
+  // SASSTODO: Seems that this class is not used anywhere
+  .vis-overlay {
+    display: flex;
+    align-items: center;
+  }
+}
+
+.dscTimechart__header {
+  display: flex;
+  justify-content: center;
+  min-height: $euiSizeXXL;
+  padding: $euiSizeXS 0;
+}
+
+.dscOverlay {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  z-index: 20;
+  padding-top: $euiSizeM;
+
+  opacity: 0.75;
+  text-align: center;
+  background-color: transparent;
+}
+
+// SASSTODO: seems like this class is not used anywhere
+.discover-info {
+  line-height: 30px;
+  padding: 0 10px;
+  border-bottom-left-radius: $euiBorderRadius;
+}
+
+// SASSTODO: seems like this class is not used anywhere
+.discover-info-title {
+  font-weight: bold;
+  margin-right: 10px;
+}
+
+.dscTable {
+  overflow: auto;
+
+  // SASSTODO: add a monospace modifier to the doc-table component
+  tbody {
+    font-family: 'Lucida Console', Monaco, monospace;
+  }
+}
+
+// SASSTODO: replace the padding value with a variable
+.dscTable__footer {
+  background-color: $euiColorLightShade;
+  padding: 5px 10px;
+  text-align: center;
+}
+
+// SASSTODO: seems like this class is not used anywhere
+.discover-table-details-toggle {
+  margin-bottom: 3px;
+}
+
+.dscTable__timefield {
+  white-space: nowrap;
+}
+
+/**
+ * 1. When switching between open and closed, the toggle changes size
+ *    slightly which is a problem because it forces the entire table to
+ *    re-render which is SLOW.
+ */
+.dscTable__openButton {
+  appearance: none;
+  background-color: transparent;
+  padding: 0;
+  border: none;
+  width: 14px; /* 1 */
+  height: 14px;
+}
+
+// SASSTODO: seems like this class is not used anywhere
+.discover-field-filter {
+  background-color: $euiColorLightShade;
+  margin-right: 10px;
+
+  .form-group {
+    margin-bottom: 0;
+  }
+}
+
+/**
+ * 1. Override sidebar-item-title styles.
+ */
+.dscSidebarItem {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-top: 0 !important; /* 1 */
+  padding-bottom: 0 !important; /* 1 */
+  height: $euiSizeXL;
+
+  &--active {
+    background: shade($euiColorLightestShade, 5%);
+    color: $euiColorFullShade;
+    font-weight: bold;
+  }
+
+  &:hover,
+  &:focus {
+    .dscSidebarItem__action {
+      opacity: 1;
+    }
+  }
+}
+
+/**
+ * 1. Truncate long text so it doesn't push the actions outside of the container.
+ */
+.dscSidebarItem__label {
+  overflow: hidden; /* 1 */
+  text-overflow: ellipsis; /* 1 */
+}
+
+/**
+ * 1. Only visually hide the action, so that it's still accessible to screen readers.
+ * 2. When tabbed to, this element needs to be visible for keyboard accessibility.
+ */
+.dscSidebarItem__action {
+  opacity: 0; /* 1 */
+
+  &:focus {
+    opacity: 1; /* 2 */
+  }
+}
+
+// SASSTODO: replace the padding value with a variable
+.dscFieldDetails {
+  padding: 10px;
+  background-color: shade($euiColorLightestShade, 5%);
+  color: shade($euiColorEmptyShade, 65%);
+
+  // SASSTODO: add an option or a modifier to the progressbar component instead
+  .progress {
+    background-color: shade($euiColorLightestShade, 5%);
+    margin-bottom: 0;
+    border-radius: 0;
+
+    // SASSTODO: replace the padding and line-height values with variables
+    .progress-bar {
+      padding-left: 10px;
+      text-align: right;
+      line-height: 20px;
+      max-width: 100%;
+
+      // SASSTODO: replace the padding and margin values with variables
+      span {
+        background-color: rgba(0, 0, 0, 0.8);
+        padding: 3px;
+        border-radius: $euiBorderRadius;
+        margin-left: 3px;
+        margin-right: 3px;
+      }
+    }
+  }
+}
+
+// SASSTODO: seems like this class is not being used anywhere
+.discover-field-details-count {
+  white-space: nowrap;
+}
+
+// SASSTODO: replace the margin-top value with a variable
+.dscFieldDetailsItem {
+  margin-top: 5px;
+}
+
+.dscFieldDetails__filter {
+  cursor: pointer;
+}
+
+.dscFieldDetailsItem__title {
+  line-height: 1.5;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+/**
+ * 1. If the field name is very long, don't let it squash the buttons.
+ */
+.dscFieldDetailsItem__buttonGroup {
+  flex: 0 0 auto; /* 1 */
+}
+
+.dscFieldDetailsItem__button {
+  appearance: none;
+  border: none;
+  padding: 0;
+  background-color: transparent;
+}
+
+// SASSTODO: Seems that .discover-field-details is not used anywhere
+.discover-field-details {
+
+}
+
+.dscField--noResults {
+  color: $euiColorDarkShade;
+}
+
+// SASSTODO: replace the margin-right value with a variables
+.dscField__icon {
+  margin-right: 5px;
+  text-align: center;
+  display: inline-block;
+  width: $euiSizeM;
+  color: $euiColorDarkShade;
+}
+
+.dscResults {
+  // SASSTODO: seems that there are no h3 elements in .dscResults
+  h3 {
+    margin: -20px 0 10px 0;
+    text-align: center;
+  }
+}
+
+.dscResults__interval {
+  display: inline-block;
+  width: auto;
+}
+
+.dscSkipButton {
+  position: absolute;
+  left: -10000px;
+  top: $euiSizeXS;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+
+  &:focus {
+    left: initial;
+    right: $euiSize;
+    width: auto;
+    height: auto;
+  }
+}

@@ -122,7 +122,7 @@ describe('discover field chooser directives', function () {
   const getSections = function (ctx) {
     return {
       selected: $('.discover-selected-fields', ctx),
-      popular: $('.discover-popular-fields', ctx),
+      popular: $('.dscPopularFields', ctx),
       unpopular: $('.discover-unpopular-fields', ctx),
     };
   };
