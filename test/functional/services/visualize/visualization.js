@@ -40,7 +40,7 @@ export function VisualizationProvider({ getService }) {
      *
      * This method will wait an absolute of 10 seconds for the visualization to finish rendering.
      */
-    async waitForRender(count) {
+    async waitForRender(count = 1) {
       log.debug(`Visualization.waitForRender for ${count} elements`);
       await retry.try(async () => {
         const completedElements = await find.allByCssSelector(RENDER_COMPLETE_SELECTOR);
