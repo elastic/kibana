@@ -2,7 +2,7 @@ const noop = () => {};
 
 export const location = () => ({
   name: 'location',
-  type: 'location',
+  type: 'datatable',
   context: {
     types: ['null'],
   },
@@ -13,9 +13,9 @@ export const location = () => ({
       function createLocation(geoposition) {
         const { latitude, longitude } = geoposition.coords;
         return resolve({
-          type: 'location',
-          longitude,
-          latitude,
+          type: 'datatable',
+          columns: [{ name: 'latitude', type: 'number' }, { name: 'longitude', type: 'number' }],
+          rows: [{ latitude, longitude }],
         });
       }
       return navigator.geolocation.getCurrentPosition(createLocation, noop, {
