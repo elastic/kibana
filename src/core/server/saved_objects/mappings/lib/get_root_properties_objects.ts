@@ -18,7 +18,7 @@
  */
 
 import { getRootProperties } from './get_root_properties';
-import { EsMappings, EsPropertyMappings } from './types';
+import { EsMappings } from './types';
 
 /**
  *  Get the property mappings for the root type in the EsMappings
@@ -32,12 +32,12 @@ import { EsMappings, EsPropertyMappings } from './types';
  *  in the es indices.get() response where the properties are objects.
  *
  *  @param  {EsMappings} mappings
- *  @return {EsPropertyMappings}
+ *  @return {EsMappings}
  */
-export function getRootPropertiesObjects(mappings: EsMappings): EsPropertyMappings {
+export function getRootPropertiesObjects(mappings: EsMappings): EsMappings {
   const rootProperties = getRootProperties(mappings);
   return Object.entries(rootProperties).reduce(
-    (acc: EsPropertyMappings, [key, value]) => {
+    (acc: EsMappings, [key, value]) => {
       // if value has properties or a type of object, we assume it is an object datatype
       if (value.properties || value.type === 'object') {
         acc[key] = value;
@@ -46,5 +46,5 @@ export function getRootPropertiesObjects(mappings: EsMappings): EsPropertyMappin
       return acc;
     },
     {} as any
-  ) as EsPropertyMappings;
+  ) as EsMappings;
 }

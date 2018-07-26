@@ -18,7 +18,7 @@
  */
 
 import { getRootType } from './get_root_type';
-import { EsMappings, EsPropertyMappings } from './types';
+import { EsMappings } from './types';
 
 /**
  *  Get the property mappings for the root type in the EsMappings
@@ -27,7 +27,7 @@ import { EsMappings, EsPropertyMappings } from './types';
  *  an object type (it's a keyword or something) this function will
  *  throw an error.
  *
- *  EsPropertyMappings objects have the root property names as their
+ *  EsMappings objects have the root property names as their
  *  first level keys which map to the mappings object for each property.
  *  If the property is of type object it too could have a `properties`
  *  key whose value follows the same format.
@@ -36,9 +36,9 @@ import { EsMappings, EsPropertyMappings } from './types';
  *  in the es indices.get() response.
  *
  *  @param  {EsMappings} mappings
- *  @return {EsPropertyMappings}
+ *  @return {EsMappings}
  */
-export function getRootProperties(mappings: EsMappings): EsPropertyMappings {
+export function getRootProperties(mappings: EsMappings): EsMappings {
   const mapping = mappings[getRootType(mappings)];
 
   if (mapping.type !== 'object' && !mapping.properties) {
