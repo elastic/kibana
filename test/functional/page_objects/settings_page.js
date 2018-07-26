@@ -469,6 +469,7 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
       const datePatternField = await find.byCssSelector(
         'input[data-test-subj="dateEditorPattern"]'
       );
+      await datePatternField.clearValue();
       await datePatternField.type(datePattern);
     }
 
