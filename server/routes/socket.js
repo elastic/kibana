@@ -7,13 +7,7 @@ import { typesRegistry } from '../../common/lib/types_registry';
 import { getAuthHeader } from './get_auth/get_auth_header';
 
 export function socketApi(server) {
-  const config = server.config();
-  const socketPathPrefix =
-    config.has('server.rewriteBasePath') && config.get('server.rewriteBasePath')
-      ? config.get('server.basePath')
-      : '';
-  const socketPath = `${socketPathPrefix}/socket.io`;
-  const io = socket(server.listener, { path: socketPath });
+  const io = socket(server.listener, { path: '/socket.io' });
 
   io.on('connection', socket => {
     console.log('User connected, attaching handlers');
