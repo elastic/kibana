@@ -23,6 +23,7 @@ import { toastNotifications } from 'ui/notify';
 
 import { ES_FIELD_TYPES } from 'plugins/ml/../common/constants/field_types';
 import { checkPermission } from 'plugins/ml/privilege/check_privilege';
+import { isRuleSupported } from 'plugins/ml/../common/util/anomaly_utils';
 import { parseInterval } from 'plugins/ml/../common/util/parse_interval';
 import { getFieldTypeFromMapping } from 'plugins/ml/services/mapping_service';
 import { ml } from 'plugins/ml/services/ml_api_service';
@@ -336,7 +337,7 @@ export class LinksMenu extends Component {
 
   render() {
     const { anomaly, showViewSeriesLink } = this.props;
-    const canUpdateJob = checkPermission('canUpdateJob');
+    const canConfigureRules = (isRuleSupported(anomaly.source) && checkPermission('canUpdateJob'));
 
     const button = (
       <EuiButtonIcon
@@ -387,7 +388,7 @@ export class LinksMenu extends Component {
       );
     }
 
-    if (canUpdateJob) {
+    if (canConfigureRules) {
       items.push(
         <EuiContextMenuItem
           key="create_rule"

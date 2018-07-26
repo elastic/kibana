@@ -61,6 +61,7 @@ export function DashboardExpectProvider({ getService, getPageObjects }) {
     }
 
     async tsvbTimeSeriesLegendCount(expectedCount) {
+      log.debug(`DashboardExpect.tsvbTimeSeriesLegendCount(${expectedCount})`);
       await retry.try(async () => {
         const tsvbLegendItems = await testSubjects.findAll('tsvbLegendItem');
         expect(tsvbLegendItems.length).to.be(expectedCount);
@@ -68,11 +69,13 @@ export function DashboardExpectProvider({ getService, getPageObjects }) {
     }
 
     async fieldSuggestionIndexPatterns(expectedIndexPatterns) {
+      log.debug(`DashboardExpect.fieldSuggestionIndexPatterns(${expectedIndexPatterns})`);
       const indexPatterns = await filterBar.getFilterFieldIndexPatterns();
       expect(indexPatterns).to.eql(expectedIndexPatterns);
     }
 
     async legendValuesToExist(legendValues) {
+      log.debug(`DashboardExpect.legendValuesToExist(${legendValues})`);
       await Promise.all(legendValues.map(async legend => {
         await retry.try(async () => {
           const legendValueExists = await testSubjects.exists(`legend-${legend}`);
@@ -82,6 +85,7 @@ export function DashboardExpectProvider({ getService, getPageObjects }) {
     }
 
     async textWithinElementsExists(texts, getElementsFn) {
+      log.debug(`DashboardExpect.textWithinElementsExists(${texts})`);
       await retry.try(async () => {
         const elements = await getElementsFn();
         const elementTexts = [];
@@ -98,16 +102,19 @@ export function DashboardExpectProvider({ getService, getPageObjects }) {
     }
 
     async textWithinTestSubjectsExists(texts, selector) {
+      log.debug(`DashboardExpect.textWithinTestSubjectsExists(${texts})`);
       log.debug(`textWithinTestSubjectsExists:(${JSON.stringify(texts)},${selector})`);
       await this.textWithinElementsExists(texts, async () => await testSubjects.findAll(selector));
     }
 
     async textWithinCssElementExists(texts, selector) {
+      log.debug(`DashboardExpect.textWithinCssElementExists(${texts})`);
       log.debug(`textWithinCssElementExists:(${JSON.stringify(texts)},${selector})`);
       await this.textWithinElementsExists(texts, async () => await find.allByCssSelector(selector));
     }
 
     async textWithinElementsDoNotExist(texts, getElementsFn) {
+      log.debug(`DashboardExpect.textWithinElementsDoNotExist(${texts})`);
       await retry.try(async () => {
         const elements = await getElementsFn();
         const elementTexts = [];
@@ -128,6 +135,7 @@ export function DashboardExpectProvider({ getService, getPageObjects }) {
     }
 
     async timelionLegendCount(expectedCount) {
+      log.debug(`DashboardExpect.timelionLegendCount(${expectedCount})`);
       await retry.try(async () => {
         const flotLegendLabels = await testSubjects.findAll('flotLegendLabel');
         expect(flotLegendLabels.length).to.be(expectedCount);
@@ -135,6 +143,7 @@ export function DashboardExpectProvider({ getService, getPageObjects }) {
     }
 
     async emptyTagCloudFound() {
+      log.debug(`DashboardExpect.emptyTagCloudFound()`);
       const tagCloudVisualizations = await testSubjects.findAll('tagCloudVisualization');
       const tagCloudsHaveContent = await Promise.all(tagCloudVisualizations.map(async tagCloud => {
         return await find.descendantExistsByCssSelector('text', tagCloud);
@@ -143,6 +152,7 @@ export function DashboardExpectProvider({ getService, getPageObjects }) {
     }
 
     async tagCloudWithValuesFound(values) {
+      log.debug(`DashboardExpect.tagCloudWithValuesFound(${values})`);
       const tagCloudVisualizations = await testSubjects.findAll('tagCloudVisualization');
       const matches = await Promise.all(tagCloudVisualizations.map(async tagCloud => {
         for (let i = 0; i < values.length; i++) {
@@ -157,38 +167,47 @@ export function DashboardExpectProvider({ getService, getPageObjects }) {
     }
 
     async goalAndGuageLabelsExist(labels) {
+      log.debug(`DashboardExpect.goalAndGuageLabelsExist(${labels})`);
       await this.textWithinCssElementExists(labels, '.chart-label');
     }
 
     async metricValuesExist(values) {
+      log.debug(`DashboardExpect.metricValuesExist(${values})`);
       await this.textWithinCssElementExists(values, '.metric-value');
     }
 
     async tsvbMetricValuesExist(values) {
+      log.debug(`DashboardExpect.tsvbMetricValuesExist(${values})`);
       await this.textWithinTestSubjectsExists(values, 'tsvbMetricValue');
     }
 
     async tsvbTopNValuesExist(values) {
+      log.debug(`DashboardExpect.tsvbTopNValuesExist(${values})`);
       await this.textWithinTestSubjectsExists(values, 'tsvbTopNValue');
     }
 
     async vegaTextsExist(values) {
+      log.debug(`DashboardExpect.vegaTextsExist(${values})`);
       await this.textWithinCssElementExists(values, '.vega-view-container text');
     }
 
     async vegaTextsDoNotExist(values) {
+      log.debug(`DashboardExpect.vegaTextsDoNotExist(${values})`);
       await this.textWithinCssElementDoNotExist(values, '.vega-view-container text');
     }
 
     async tsvbMarkdownWithValuesExists(values) {
+      log.debug(`DashboardExpect.tsvbMarkdownWithValuesExists(${values})`);
       await this.textWithinTestSubjectsExists(values, 'tsvbMarkdown');
     }
 
     async markdownWithValuesExists(values) {
+      log.debug(`DashboardExpect.markdownWithValuesExists(${values})`);
       await this.textWithinTestSubjectsExists(values, 'markdownBody');
     }
 
     async savedSearchRowCount(expectedCount) {
+      log.debug(`DashboardExpect.savedSearchRowCount(${expectedCount})`);
       await retry.try(async () => {
         const savedSearchRows = await testSubjects.findAll('docTableExpandToggleColumn');
         expect(savedSearchRows.length).to.be(expectedCount);
@@ -196,6 +215,7 @@ export function DashboardExpectProvider({ getService, getPageObjects }) {
     }
 
     async dataTableRowCount(expectedCount) {
+      log.debug(`DashboardExpect.dataTableRowCount(${expectedCount})`);
       await retry.try(async () => {
         const dataTableRows =
           await find.allByCssSelector('[data-test-subj="paginated-table-body"] [data-cell-content]');
@@ -204,6 +224,7 @@ export function DashboardExpectProvider({ getService, getPageObjects }) {
     }
 
     async seriesElementCount(expectedCount) {
+      log.debug(`DashboardExpect.seriesElementCount(${expectedCount})`);
       await retry.try(async () => {
         const seriesElements = await find.allByCssSelector('.series');
         expect(seriesElements.length).to.be(expectedCount);
@@ -211,6 +232,7 @@ export function DashboardExpectProvider({ getService, getPageObjects }) {
     }
 
     async inputControlItemCount(expectedCount) {
+      log.debug(`DashboardExpect.inputControlItemCount(${expectedCount})`);
       await retry.try(async () => {
         const inputControlItems = await testSubjects.findAll('inputControlItem');
         expect(inputControlItems.length).to.be(expectedCount);
@@ -218,6 +240,7 @@ export function DashboardExpectProvider({ getService, getPageObjects }) {
     }
 
     async lineChartPointsCount(expectedCount) {
+      log.debug(`DashboardExpect.lineChartPointsCount(${expectedCount})`);
       await retry.try(async () => {
         const points = await find.allByCssSelector('.points');
         expect(points.length).to.be(expectedCount);
@@ -225,6 +248,7 @@ export function DashboardExpectProvider({ getService, getPageObjects }) {
     }
 
     async tsvbTableCellCount(expectedCount) {
+      log.debug(`DashboardExpect.tsvbTableCellCount(${expectedCount})`);
       await retry.try(async () => {
         const tableCells = await find.allByCssSelector('.tsvb-table__value');
         expect(tableCells.length).to.be(expectedCount);

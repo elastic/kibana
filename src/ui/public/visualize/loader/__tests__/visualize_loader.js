@@ -32,6 +32,7 @@ import { getVisualizeLoader } from '../visualize_loader';
 import { EmbeddedVisualizeHandler } from '../embedded_visualize_handler';
 import { Inspector } from '../../../inspector/inspector';
 import { dispatchRenderComplete } from '../../../render_complete';
+import { VisualizeDataLoader } from '../visualize_data_loader';
 
 describe('visualize loader', () => {
 
@@ -297,26 +298,30 @@ describe('visualize loader', () => {
             added: 'value',
           }
         });
-        // Sync we are relying on $evalAsync we need to trigger a digest loop during tests
-        $rootScope.$digest();
         expect(container.find('[data-test-subj="visualizationLoader"]')[0].hasAttribute('data-foo')).to.be(false);
         expect(container.find('[data-test-subj="visualizationLoader"]').attr('data-added')).to.be('value');
       });
 
-      it('should allow updating the time range of the visualization', () => {
+      it('should allow updating the time range of the visualization', async () => {
+        const spy = sinon.spy(VisualizeDataLoader.prototype, 'fetch');
+
         const handler = loader.embedVisualizationWithSavedObject(newContainer()[0], createSavedObject(), {
           timeRange: { from: 'now-7d', to: 'now' }
         });
+
+        // Wait for the initial fetch and render to happen
+        await timeout(150);
+        spy.resetHistory();
+
         handler.update({
           timeRange: { from: 'now-10d/d', to: 'now' }
         });
-        // Sync we are relying on $evalAsync we need to trigger a digest loop during tests
-        $rootScope.$digest();
-        // This is not the best test, since it tests internal structure of our scope.
-        // Unfortunately we currently don't expose the timeRange in a better way.
-        // Once we rewrite this to a react component we should spy on the timeRange
-        // property in the component to match the passed in value.
-        expect(handler._params.timeRange).to.eql({ from: 'now-10d/d', to: 'now' });
+
+        // Wait for fetch debounce to happen (as soon as we use lodash 4+ we could use fake timers here for the debounce)
+        await timeout(150);
+
+        sinon.assert.calledOnce(spy);
+        sinon.assert.calledWith(spy, sinon.match({ timeRange: { from: 'now-10d/d', to: 'now' } }));
       });
     });
 
