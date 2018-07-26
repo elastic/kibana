@@ -5,6 +5,7 @@
  */
 
 import {
+  // @ts-ignore
   EuiBadge,
   // @ts-ignore
   EuiInMemoryTable,
@@ -25,7 +26,7 @@ interface TagsTableProps {
 
 interface TagsTableState {
   selection: BeatTag[];
-  tagsToRender: BeatTag[];
+  search: any;
 }
 
 const truncateText = (text: string) =>
@@ -69,13 +70,12 @@ export class TagsTable extends React.Component<TagsTableProps, TagsTableState> {
 
     this.state = {
       selection: [],
-      tagsToRender: props.tags,
+      search: null,
     };
   }
 
   public render() {
     const { onAddTag } = this.props;
-    const { tagsToRender } = this.state;
 
     const pagination = {
       initialPageSize: TABLE_CONFIG.INITIAL_ROW_SIZE,
@@ -99,7 +99,7 @@ export class TagsTable extends React.Component<TagsTableProps, TagsTableState> {
         <EuiInMemoryTable
           columns={columns}
           isSelectable={true}
-          items={tagsToRender}
+          items={this.getTagsToRender()}
           itemId="id"
           pagination={pagination}
           selection={selectionOptions}
@@ -107,6 +107,19 @@ export class TagsTable extends React.Component<TagsTableProps, TagsTableState> {
         />
       </TableContainer>
     );
+  }
+
+  private getTagsToRender() {
+    const { search } = this.state;
+    let tagsToRender = this.props.tags;
+    if (search && !search.error && search.query.ast.getTermClauses().length) {
+      const { ast } = search.query;
+      const terms = ast.getTermClauses().map((clause: any) => clause.value);
+      tagsToRender = tagsToRender.filter(tag =>
+        terms.some((term: string) => tag.id.toLowerCase().includes(term.toLowerCase()))
+      );
+    }
+    return tagsToRender;
   }
 
   private setSelection = (selection: any) => {
@@ -122,17 +135,8 @@ export class TagsTable extends React.Component<TagsTableProps, TagsTableState> {
   };
 
   private onSearchQueryChange = (search: any) => {
-    let tagsToRender = this.props.tags;
-    const { ast } = search.query;
-    if (search && !search.error && ast.getTermClauses().length) {
-      const terms = ast.getTermClauses().map((clause: any) => clause.value);
-      tagsToRender = tagsToRender.filter(tag =>
-        terms.some((term: string) => tag.id.toLowerCase().includes(term.toLowerCase()))
-      );
-    }
-
     this.setState({
-      tagsToRender,
+      search,
     });
   };
 }
