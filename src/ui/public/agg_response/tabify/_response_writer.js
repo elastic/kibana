@@ -17,6 +17,7 @@
  * under the License.
  */
 
+import { toArray } from 'lodash';
 import { tabifyGetColumns } from './_get_columns';
 
 /**
@@ -34,7 +35,7 @@ function TabbedAggResponseWriter(aggs, opts) {
   this.opts.minimalColumns = !(this.opts.minimalColumns === false);
 
   this.aggs = aggs;
-  this.columns = tabifyGetColumns(aggs, this.opts.minimalColumns);
+  this.columns = tabifyGetColumns(aggs.getResponseAggs(), this.opts.minimalColumns);
   this.aggStack = [...this.columns];
 
   this.rows = [];
@@ -47,6 +48,10 @@ TabbedAggResponseWriter.prototype.row = function () {
   this.bucketBuffer.forEach(bucket => {
     this.rowBuffer[bucket.id] = bucket.value;
   });
+
+  if (!toArray(this.rowBuffer).length) {
+    return;
+  }
 
   this.rows.push(this.rowBuffer);
   this.rowBuffer = {};

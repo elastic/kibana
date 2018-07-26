@@ -49,7 +49,11 @@ const getTerms = (table, columnIndex, rowIndex) => {
   }
 
   // get only rows where cell value matches current row for all the fields before columnIndex
-  const rows = table.rows.filter(row => row.every((cell, i) => cell === table.rows[rowIndex][i] || i >= columnIndex));
+  const rows = table.rows.filter(row => {
+    return table.columns.every((column, i) => {
+      return row[column.id] === table.rows[rowIndex][column.id] || i >= columnIndex;
+    });
+  });
   const terms = rows.map(row => row[columnIndex]);
 
   return [...new Set(terms.filter(term => {
@@ -100,8 +104,9 @@ export function VisProvider(Private, indexPatterns, getAppState) {
           },
           addFilter: (data, columnIndex, rowIndex, cellValue) => {
             const agg = data.columns[columnIndex].aggConfig;
+            const columnId = data.columns[columnIndex].id;
             let filter = [];
-            const value = rowIndex > -1 ? data.rows[rowIndex][columnIndex] : cellValue;
+            const value = rowIndex > -1 ? data.rows[rowIndex][columnId] : cellValue;
             if (!value) {
               return;
             }

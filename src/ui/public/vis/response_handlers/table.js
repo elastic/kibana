@@ -51,21 +51,32 @@ const TableResponseHandlerProvider = function () {
               });
             }
 
+            let previousSplitAgg = new AggConfigResult(splitAgg, null, splitValue, splitValue);
             const tableIndex = splitMap[splitValue];
             const newRow = _.map(converted.tables[tableIndex].columns, column => {
               const value = row[column.id];
-              return new AggConfigResult(column.aggConfig, splitAgg, value, value);
+              const aggConfigResult = new AggConfigResult(column.aggConfig, previousSplitAgg, value, value);
+              if (column.aggConfig.type.type === 'buckets') {
+                previousSplitAgg = aggConfigResult;
+              }
+              return aggConfigResult;
             });
 
             converted.tables[tableIndex].rows.push(newRow);
           });
         } else {
+
           converted.tables.push({
             columns: table.columns,
             rows: table.rows.map(row => {
+              let previousSplitAgg;
               return table.columns.map(column => {
                 const value = row[column.id];
-                return new AggConfigResult(column.aggConfig, null, value, value);
+                const aggConfigResult = new AggConfigResult(column.aggConfig, previousSplitAgg, value, value);
+                if (column.aggConfig.type.type === 'buckets') {
+                  previousSplitAgg = aggConfigResult;
+                }
+                return aggConfigResult;
               });
             }),
             aggConfig: (column) => column.aggConfig

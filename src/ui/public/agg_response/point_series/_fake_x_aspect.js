@@ -36,12 +36,9 @@ export function PointSeriesFakeXAxisProvider() {
     });
 
     return {
-      i: -1,
-      agg: fake,
-      col: {
-        aggConfig: fake,
-        label: fake.makeLabel()
-      }
+      aggConfig: fake,
+      title: fake.makeLabel(),
+      id: 'col-0'
     };
   };
 }
