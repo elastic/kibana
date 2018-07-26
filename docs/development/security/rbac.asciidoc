@@ -135,6 +135,8 @@ And Elasticsearch will translate the privilege's actions granted from the userâ€
 
 ==== Role Management APIs
 
+Kibana users shouldn't have to concern themselves with the implementation details of how we're using the application privileges in Elasticsearch to create roles which grant these privileges. The *Management* / *Security* / *Roles* page makes it easy for users to perform this using the UI, and the <<role-management-api>> makes this accessible programatically.
+
 === Transitioning to application privileges
 
 ==== Legacy Fallback
