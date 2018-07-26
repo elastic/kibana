@@ -109,13 +109,12 @@ export class TagCloudVisualization {
 
   }
 
-  _updateData(response) {
-    if (!response || !response.tables.length) {
+  _updateData(data) {
+    if (!data || !data.rows.length) {
       this._tagCloud.setData([]);
       return;
     }
 
-    const data = response.tables[0];
     const segmentAggs = this._vis.aggs.bySchemaName.segment;
     if (segmentAggs && segmentAggs.length > 0) {
       this._bucketAgg = segmentAggs[0];
@@ -123,8 +122,11 @@ export class TagCloudVisualization {
       this._bucketAgg = null;
     }
 
+    const tagColumn = data.columns[0].id;
+    const countColumn = data.columns[1].id;
     const tags = data.rows.map((row, rowIndex) => {
-      const [tag, count] = row;
+      const tag = row[tagColumn];
+      const count = row[countColumn];
       return {
         displayText: this._bucketAgg ? this._bucketAgg.fieldFormatter()(tag) : tag,
         rawText: tag,

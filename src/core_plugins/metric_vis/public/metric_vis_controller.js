@@ -89,7 +89,7 @@ export class MetricVisComponent extends Component {
     return fieldFormatter(value);
   }
 
-  _processTableGroups(tableGroups) {
+  _processTableGroups(table) {
     const config = this.props.vis.params.metric;
     const isPercentageMode = config.percentageMode;
     const min = config.colorsRange[0].from;
@@ -98,56 +98,55 @@ export class MetricVisComponent extends Component {
     const labels = this._getLabels();
     const metrics = [];
 
-    tableGroups.tables.forEach((table, tableIndex) => {
-      let bucketAgg;
-      let rowHeaderIndex;
+    let bucketAgg;
+    let bucketColumnId;
+    let rowHeaderIndex;
 
-      table.columns.forEach((column, columnIndex) => {
-        const aggConfig = column.aggConfig;
+    table.columns.forEach((column, columnIndex) => {
+      const aggConfig = column.aggConfig;
 
-        if (aggConfig && aggConfig.type.type === 'buckets') {
-          bucketAgg = aggConfig;
-          // Store the current index, so we later know in which position in the
-          // row array, the bucket agg key will be, so we can create filters on it.
-          rowHeaderIndex = columnIndex;
-          return;
+      if (aggConfig && aggConfig.type.type === 'buckets') {
+        bucketAgg = aggConfig;
+        // Store the current index, so we later know in which position in the
+        // row array, the bucket agg key will be, so we can create filters on it.
+        rowHeaderIndex = columnIndex;
+        bucketColumnId = column.id;
+        return;
+      }
+
+      table.rows.forEach((row, rowIndex) => {
+
+        let title = column.title;
+        let value = row[column.id];
+        const color = this._getColor(value, labels, colors);
+
+        if (isPercentageMode) {
+          const percentage = Math.round(100 * (value - min) / (max - min));
+          value = `${percentage}%`;
         }
 
-        table.rows.forEach((row, rowIndex) => {
-
-          let title = column.title;
-          let value = row[columnIndex];
-          const color = this._getColor(value, labels, colors);
-
-          if (isPercentageMode) {
-            const percentage = Math.round(100 * (value - min) / (max - min));
-            value = `${percentage}%`;
+        if (aggConfig) {
+          if (!isPercentageMode) value = this._getFormattedValue(aggConfig.fieldFormatter('html'), value);
+          if (bucketAgg) {
+            const bucketValue = bucketAgg.fieldFormatter('text')(row[bucketColumnId]);
+            title = `${bucketValue} - ${aggConfig.makeLabel()}`;
+          } else {
+            title = aggConfig.makeLabel();
           }
+        }
 
-          if (aggConfig) {
-            if (!isPercentageMode) value = this._getFormattedValue(aggConfig.fieldFormatter('html'), value);
-            if (bucketAgg) {
-              const bucketValue = bucketAgg.fieldFormatter('text')(row[0]);
-              title = `${bucketValue} - ${aggConfig.makeLabel()}`;
-            } else {
-              title = aggConfig.makeLabel();
-            }
-          }
+        const shouldColor = config.colorsRange.length > 1;
 
-          const shouldColor = config.colorsRange.length > 1;
-
-          metrics.push({
-            label: title,
-            value: value,
-            color: shouldColor && config.style.labelColor ? color : null,
-            bgColor: shouldColor && config.style.bgColor ? color : null,
-            lightText: shouldColor && config.style.bgColor && this._needsLightText(color),
-            filterKey: rowHeaderIndex !== undefined ? row[rowHeaderIndex] : null,
-            tableIndex: tableIndex,
-            rowIndex: rowIndex,
-            columnIndex: rowHeaderIndex,
-            bucketAgg: bucketAgg,
-          });
+        metrics.push({
+          label: title,
+          value: value,
+          color: shouldColor && config.style.labelColor ? color : null,
+          bgColor: shouldColor && config.style.bgColor ? color : null,
+          lightText: shouldColor && config.style.bgColor && this._needsLightText(color),
+          filterKey: bucketColumnId !== undefined ? row[bucketColumnId] : null,
+          rowIndex: rowIndex,
+          columnIndex: rowHeaderIndex,
+          bucketAgg: bucketAgg,
         });
       });
     });
@@ -159,7 +158,7 @@ export class MetricVisComponent extends Component {
     if (!metric.filterKey || !metric.bucketAgg) {
       return;
     }
-    const table = this.props.visData.tables[metric.tableIndex];
+    const table = this.props.visData;
     this.props.vis.API.events.addFilter(table, metric.columnIndex, metric.rowIndex);
   };
 
