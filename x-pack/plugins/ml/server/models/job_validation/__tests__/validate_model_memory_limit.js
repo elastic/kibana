@@ -206,6 +206,48 @@ describe('ML - validateModelMemoryLimit', () => {
     );
   });
 
+  it('Called with specified invalid mml of "10mbananas"', () => {
+    const dtrs = createDetectors(1);
+    const job = getJobConfig(['instance'], dtrs);
+    const duration = { start: 0, end: 1 };
+    job.analysis_limits.model_memory_limit = '10mbananas';
+
+    return validateModelMemoryLimit(callWithRequest, job, duration).then(
+      (messages) => {
+        const ids = messages.map(m => m.id);
+        expect(ids).to.eql(['mml_value_invalid']);
+      }
+    );
+  });
+
+  it('Called with specified invalid mml of "10"', () => {
+    const dtrs = createDetectors(1);
+    const job = getJobConfig(['instance'], dtrs);
+    const duration = { start: 0, end: 1 };
+    job.analysis_limits.model_memory_limit = '10';
+
+    return validateModelMemoryLimit(callWithRequest, job, duration).then(
+      (messages) => {
+        const ids = messages.map(m => m.id);
+        expect(ids).to.eql(['mml_value_invalid']);
+      }
+    );
+  });
+
+  it('Called with specified invalid mml of "mb"', () => {
+    const dtrs = createDetectors(1);
+    const job = getJobConfig(['instance'], dtrs);
+    const duration = { start: 0, end: 1 };
+    job.analysis_limits.model_memory_limit = 'mb';
+
+    return validateModelMemoryLimit(callWithRequest, job, duration).then(
+      (messages) => {
+        const ids = messages.map(m => m.id);
+        expect(ids).to.eql(['mml_value_invalid']);
+      }
+    );
+  });
+
   it('Called with specified invalid mml of "asdf"', () => {
     const dtrs = createDetectors(1);
     const job = getJobConfig(['instance'], dtrs);
