@@ -50,7 +50,6 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
 
       // Verify navigation is successful, or else fail the test consuming this.
       expect(isSettingsLoaded).to.be(true);
-      return isSettingsLoaded;
     }
 
     async clickKibanaSavedObjects() {
