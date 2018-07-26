@@ -370,17 +370,3 @@ dashboard-viewport-provider {
     display: block;
   }
 }
-
-// Mimics EuiPageBackground
-dashboard-listing {
-  background-color: $euiColorLightestShade;
-  min-height: 100vh;
-}
-
-.dashboardLandingPage {
-  background: $euiColorLightestShade;
-}
-
-.dashboardLandingPageContent {
-  max-width: 1000px !important; // Temp fix till EUI@3.0.2 is merged
-}

@@ -1,0 +1,7 @@
+.dshDashboardListing__page {
+  background: $euiColorLightestShade;
+}
+
+.dshDashboardListing__pageContent {
+  max-width: 1000px !important; // Temp fix till EUI@3.0.2 is merged
+}
