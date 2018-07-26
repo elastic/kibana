@@ -24,7 +24,6 @@ import { traverseNodes } from './utils';
 
 export function verifyJSON(json) {
   const jsonAST = parse(`+${json}`);
-  let namespace = '';
 
   for (const node of traverseNodes(jsonAST.program.body)) {
     if (!isObjectExpression(node)) {
@@ -35,18 +34,15 @@ export function verifyJSON(json) {
       throw 'Locale file should contain formats object.';
     }
 
-    for (const property of node.properties) {
-      if (property.key.name !== 'formats') {
-        const messageNamespace = property.key.value.split('.')[0];
-        if (!namespace) {
-          namespace = messageNamespace;
-        }
+    const nameProperties = node.properties.filter(property => property.key.name !== 'formats');
+    const namespaces = nameProperties.map(property => property.key.value.split('.')[0]);
+    const uniqueNamespaces = new Set(namespaces);
 
-        if (namespace !== messageNamespace) {
-          throw 'All messages ids should start with the same namespace.';
-        }
-      }
+    if (uniqueNamespaces.size !== 1) {
+      throw 'All messages ids should start with the same namespace.';
     }
+
+    const namespace = uniqueNamespaces.values().next().value;
 
     const idsSet = new Set();
     for (const id of node.properties.map(prop => prop.key.value)) {
@@ -56,8 +52,6 @@ export function verifyJSON(json) {
       idsSet.add(id);
     }
 
-    break;
+    return namespace;
   }
-
-  return namespace;
 }

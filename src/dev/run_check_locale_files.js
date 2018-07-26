@@ -20,6 +20,4 @@
 import { run } from './run';
 import { checkLocaleFiles } from './i18n/check_locale_files';
 
-run(async () => {
-  await checkLocaleFiles(process.argv.slice(2));
-});
+run(() => checkLocaleFiles(process.argv.slice(2)));

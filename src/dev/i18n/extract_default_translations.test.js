@@ -34,16 +34,17 @@ const PLUGIN_PATH = path.resolve(
   'test_plugin'
 );
 
+const pluginTranslationsPath = path.resolve(PLUGIN_PATH, 'translations');
+const pluginTranslationsEnPath = path.resolve(pluginTranslationsPath, 'en.json');
+
 describe('dev/i18n/extract_default_translations', () => {
   it('injects default formats into en.json', async () => {
     await extractDefaultTranslations(PLUGIN_PATH);
 
-    const extractedJSONBuffer = await readFileAsync(
-      path.resolve(PLUGIN_PATH, 'translations', 'en.json')
-    );
+    const extractedJSONBuffer = await readFileAsync(pluginTranslationsEnPath);
 
-    await unlinkAsync(path.resolve(PLUGIN_PATH, 'translations', 'en.json'));
-    await removeDirAsync(path.resolve(PLUGIN_PATH, 'translations'));
+    await unlinkAsync(pluginTranslationsEnPath);
+    await removeDirAsync(pluginTranslationsPath);
 
     expect(extractedJSONBuffer.toString()).toMatchSnapshot();
   });

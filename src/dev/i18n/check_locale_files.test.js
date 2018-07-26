@@ -44,18 +44,8 @@ describe('dev/i18n/check_locale_files', () => {
     it('throws an error for unused id and missing id', async () => {
       const localeWithMissingMessage = path.join(pluginsPaths[2], 'translations', 'missing.json');
       const localeWithUnusedMessage = path.join(pluginsPaths[2], 'translations', 'unused.json');
-
-      expect(checkFile(localeWithMissingMessage)).rejects.toEqual(
-        new Error(
-          `\nMissing translations in locale file ${localeWithMissingMessage}:\ntest_plugin_3.id_2`
-        )
-      );
-
-      expect(checkFile(localeWithUnusedMessage)).rejects.toEqual(
-        new Error(
-          `\nUnused translations in locale file ${localeWithUnusedMessage}:\ntest_plugin_3.id_3`
-        )
-      );
+      await expect(checkFile(localeWithMissingMessage)).rejects.toThrowErrorMatchingSnapshot();
+      await expect(checkFile(localeWithUnusedMessage)).rejects.toThrowErrorMatchingSnapshot();
     });
   });
 
@@ -65,12 +55,9 @@ describe('dev/i18n/check_locale_files', () => {
     });
 
     it('throws an error for namespaces collision', async () => {
-      expect(checkLocaleFiles([pluginsPaths[3], pluginsPaths[4]])).rejects.toEqual(
-        new Error(
-          `Error in ${pluginsPaths[4]} plugin valid.json locale file
-Locale file namespace should be unique for each plugin`
-        )
-      );
+      await expect(
+        checkLocaleFiles([pluginsPaths[3], pluginsPaths[4]])
+      ).rejects.toThrowErrorMatchingSnapshot();
     });
   });
 });
