@@ -1,0 +1,224 @@
+== RBAC
+
+Prior to Kibana 6.4, Kibana has deferred entirely to Elasticsearch’s security model for authorization. Whenever Kibana’s server called an Elasticsearch API on behalf of an end-user we use `callWithRequest` which forwards the authorization headers from the http request to Kibana to Elasticsearch, essentially impersonating the Kibana end-user and relying upon them having direct access to the `.kibana` index.
+
+Insert first sequence diagram
+
+This required us to assign roles to Kibana end-users which grant them explicit privileges on the `.kibana` index itself. For example, this is what the `kibana_user` role looked like, which is what we recommend assigning to Kibana end-users:
+
+[source,js]
+----------------------------------
+"kibana_user": {
+    "cluster": [],
+    "indices": [
+        {
+            "names": [
+                ".kibana*"
+            ],
+            "privileges": [
+                "manage",
+                "read",
+                "index",
+                "delete"
+            ]
+        }
+    ],
+    "run_as": [],
+    "metadata": {
+        "_reserved": true
+    },
+    "transient_metadata": {
+        "enabled": true
+    }
+}
+----------------------------------
+
+Requiring end-users to be able to directly access the `.kibana` index limits the granularity to which we are able to authorize users since they have access to the entire index.
+
+To address this deficiency, we are no longer always using `callWithRequest` to make requests to Elasticsearch when accessing the `.kibana` index. Instead, if we are able to authorize the user using the Elasticsearch `_has_privileges` API, then we can execute the request against the `.kibana` index using the Kibana internal server user.
+
+Insert second diagram
+
+=== Has Privileges
+
+A few things have to happen for us to be able to perform the  `_has_privileges` check. First, we have to grant certain Kibana privileges to users, which is done using Elasticsearch roles. This allows us to change the aforementioned `kibana_user` role from it’s previous definition to the following:
+
+[source,js]
+----------------------------------
+"kibana_user": {
+   "cluster": [],
+   "indices": [],
+   "applications": [
+     {
+       "application": "kibana-.kibana",
+       "privileges": [
+         "all"
+       ],
+       "resources": [
+         "*"
+       ]
+     }
+   ],
+   "run_as": [],
+   "metadata": {
+     "_reserved": true
+   },
+   "transient_metadata": {
+     "enabled": true
+   }
+ }
+----------------------------------
+
+You’ll notice that we no longer have permission to access the `.kibana` index directly, instead we have an application entry for the application “kibana-.kibana”, privilege “all” on resources “*”. The application is created by concatenating the prefix of “kibana-” with the value of “kibana.index” from the `kibana.yml`, so we have a way to isolate different kibana tenants from each other. The privilege “all” corresponds to the privileges that we synchronize into Elasticsearch when the Kibana server starts up, and is discussed more in depth below. For the time being, we always use a “resources” of `*` but we’ll take advantage of this when we have spaces and wish to grant different privileges in different spaces.
+
+When the Kibana server starts up, it synchronizes the privilege definition for the application so that we can call the `_has_privileges` API with the actual actions that we wish to check the user’s authorization for. The following is an example of us PUTing the privilege definition for the `kibana-.kibana` application:
+
+[source,js]
+----------------------------------
+POST _xpack/security/privilege
+Content-Type: application/json
+Authorization: Basic kibana changeme
+
+{
+   "kibana-.kibana":{
+       "all":{
+           "application":"kibana-.kibana",
+           "name":"all",
+           "actions":[
+               "version:7.0.0-alpha1-SNAPSHOT",
+               "action:login",
+               "action:*"
+           ],
+           "metadata":{}
+       },
+       "read":{
+           "application":"kibana-.kibana",
+           "name":"read",
+           "actions":[
+               "version:7.0.0-alpha1-SNAPSHOT",
+               "action:login",
+               "action:saved_objects/dashboard/get",
+               "action:saved_objects/dashboard/bulk_get",
+               "action:saved_objects/dashboard/find",
+               ...
+           ],"metadata":{}}
+   }
+}
+----------------------------------
+
+This allows us to then call the _has_privileges API to determine if the user is authorized to save a Dashboard with the following:
+
+[source,js]
+----------------------------------
+POST _xpack/security/user/_has_privileges
+Content-Type: application/json
+Authorization: Basic foo_read_only_user password
+
+{
+   "applications":[
+       {
+           "application":"kibana-.kibana",
+           "resources":["*"],
+           "privileges":[
+             "action:saved_objects/dashboard/save",
+           ]
+       }
+   ]
+}
+----------------------------------
+
+And Elasticsearch will translate the privilege action’s granted from the user’s role, and respond with something similar to the following:
+
+[source,js]
+----------------------------------
+{
+  "username": "elastic",
+  "has_all_requested": true,
+  "cluster": {},
+  "index": {},
+  "application": {
+    "kibana-.kibana": {
+      "*": {
+        "action:saved_objects/dashboard/save": false
+      }
+    }
+  }
+}
+----------------------------------
+
+=== Role Management APIs
+
+Insert this whole section
+
+=== Transitioning to application privileges
+
+==== Legacy Fallback
+
+To facilitate the transition to using application privileges instead of index privileges on the `.kibana` index, we have implemented a legacy fallback which will use the old `callWithRequest` method when the user doesn’t have any application privileges.
+
+When we perform the aforementioned _has_privileges check, we’re also checking to see if the user has any privileges on the index:
+
+[source,js]
+----------------------------------
+POST _xpack/security/user/_has_privileges
+Content-Type: application/json
+Authorization: Basic foo_legacy_user password
+
+{
+   "applications":[
+       {
+           "application":"kibana-.kibana",
+           "resources":["*"],
+           "privileges":[
+             "action:saved_objects/dashboard/save"
+           ]
+       }
+   ],
+   "index": [
+       {
+           "names": ".kibana",
+           "privileges": ["create", "delete", "read", "view_index_metadata"]
+       }
+   ]
+}
+----------------------------------
+
+If the response comes back with the user having no application privileges, but they have privileges on the `kibana` index:
+
+[source,js]
+----------------------------------
+{
+  "username": "foo_legacy_user",
+  "has_all_requested": false,
+  "cluster": {},
+  "index": {
+    ".kibana": {
+      "read": true,
+      "view_index_metadata": true,
+      "create": true,
+      "delete": true
+    }
+  },
+  "application": {
+    "kibana-.kibana": {
+      "*": {
+        "action:saved_objects/dashboard/save": false
+      }
+    }
+  }
+}
+----------------------------------
+
+
+We’ll automatically detect that the request could be executed against `.kibana` using `callWithRequest` and do so.
+
+When the user first logs into Kibana, we detect whether the user will have to rely upon the legacy fallback to be able to access `.kibana`, and we’ll log a deprecation warning similar to the following:
+
+[source,js]
+----------------------------------
+${username} relies on index privileges on the Kibana index. This is deprecated and will be removed in Kibana 7.0
+----------------------------------
+
+==== Reserved Roles
+
+Ideally, we’d like to change the `kibana_user` and `kibana_dashboard_only_user` roles to only use application privileges, and no longer give them index privileges on the `.kibana` index. However, making this switch will force the user to incur some downtime if Elasticsearch is upgraded to >= 6.4, and Kibana is running < 6.4. To mitigate this downtime, for the 6.x releases the `kibana_user` and `kibana_dashbord_only_user` roles will have both application privileges and index privileges. When Kibana is running >= 6.4 it will use the application privileges to authorize the user, but when Kibana is running <= 6.4 it’ll rely on the direct index privileges. 
