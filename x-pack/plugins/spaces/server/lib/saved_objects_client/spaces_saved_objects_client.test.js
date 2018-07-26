@@ -290,7 +290,7 @@ describe('default space', () => {
         types: [],
       });
 
-      const type = 'foo';
+      const type = ['foo', 'space'];
       const options = {
         type
       };
@@ -306,7 +306,7 @@ describe('default space', () => {
               bool: {
                 must: [{
                   term: {
-                    type
+                    type: 'foo'
                   },
                 }],
                 must_not: [{
@@ -314,6 +314,14 @@ describe('default space', () => {
                     field: "spaceId"
                   }
                 }]
+              }
+            }, {
+              bool: {
+                must: [{
+                  term: {
+                    type: 'space'
+                  },
+                }],
               }
             }]
           }
@@ -933,7 +941,7 @@ describe('current space (space_1)', () => {
         types: [],
       });
 
-      const type = 'foo';
+      const type = ['foo', 'space'];
       const options = {
         type
       };
@@ -949,12 +957,20 @@ describe('current space (space_1)', () => {
               bool: {
                 must: [{
                   term: {
-                    type
+                    type: 'foo'
                   },
                 }, {
                   term: {
                     spaceId: 'space_1'
                   }
+                }],
+              }
+            }, {
+              bool: {
+                must: [{
+                  term: {
+                    type: 'space'
+                  },
                 }],
               }
             }]
