@@ -76,6 +76,7 @@ export class TagsTable extends React.Component<TagsTableProps, TagsTableState> {
 
   public render() {
     const { onAddTag } = this.props;
+    const { selection } = this.state;
 
     const pagination = {
       initialPageSize: TABLE_CONFIG.INITIAL_ROW_SIZE,
@@ -91,6 +92,7 @@ export class TagsTable extends React.Component<TagsTableProps, TagsTableState> {
     return (
       <TableContainer>
         <TagActionControlBar
+          isDeleteDisabled={selection.length === 0}
           onAddTag={onAddTag}
           onDeleteSelected={this.onDeleteSelected}
           onSearchQueryChange={this.onSearchQueryChange}

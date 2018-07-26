@@ -14,12 +14,14 @@ import {
 import React from 'react';
 
 interface TagActionControlBarProps {
+  isDeleteDisabled: boolean;
   onAddTag: any;
   onDeleteSelected: any;
   onSearchQueryChange: any;
 }
 
 export const TagActionControlBar: React.SFC<TagActionControlBarProps> = ({
+  isDeleteDisabled,
   onAddTag,
   onDeleteSelected,
   onSearchQueryChange,
@@ -30,7 +32,7 @@ export const TagActionControlBar: React.SFC<TagActionControlBarProps> = ({
         <EuiButton onClick={onAddTag}>Add Tag</EuiButton>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
-        <EuiButton onClick={onDeleteSelected} color="danger">
+        <EuiButton color="danger" isDisabled={isDeleteDisabled} onClick={onDeleteSelected}>
           Delete Tag
         </EuiButton>
       </EuiFlexItem>
