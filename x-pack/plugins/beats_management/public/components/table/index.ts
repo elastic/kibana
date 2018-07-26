@@ -5,3 +5,4 @@
  */
 
 export { BeatsTable } from './beats_table';
+export { TagsTable } from './tags_table';
