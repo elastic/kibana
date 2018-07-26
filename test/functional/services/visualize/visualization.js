@@ -62,7 +62,7 @@ export function VisualizationProvider({ getService }) {
         }
         vis = visualizations[0];
       }
-      await retry.tryForTime(10000, async () => {
+      await retry.try(async () => {
         const renderComplete = await vis.getAttribute('data-render-complete');
         if (renderComplete !== 'disabled' && renderComplete !== 'true') {
           throw new Error(`${tag} visualization has not finished first render`);
