@@ -5,29 +5,30 @@
  */
 
 import { wrapError } from './errors';
-import { addSpaceUrlContext } from '../../common/spaces_url_parser';
+import { addSpaceUrlContext, getSpaceUrlContext } from './spaces_url_parser';
 
 export function initSpacesRequestInterceptors(server) {
+
+  const serverBasePath = server.config().get('server.basePath');
 
   server.ext('onRequest', async function spacesOnRequestHandler(request, reply) {
     const path = request.path;
 
     // If navigating within the context of a space, then we store the Space's URL Context on the request,
     // and rewrite the request to not include the space identifier in the URL.
+    const spaceUrlContext = getSpaceUrlContext(path, serverBasePath);
 
-    if (path.startsWith('/s/')) {
-      const pathParts = path.split('/');
-
-      const spaceUrlContext = pathParts[2];
-
+    if (spaceUrlContext) {
       const reqBasePath = `/s/${spaceUrlContext}`;
       request.setBasePath(reqBasePath);
 
+      const newLocation = path.substr(reqBasePath.length) || '/';
+
       const newUrl = {
         ...request.url,
-        path: path.substr(reqBasePath.length) || '/',
-        pathname: path.substr(reqBasePath.length) || '/',
-        href: path.substr(reqBasePath.length) || '/'
+        path: newLocation,
+        pathname: newLocation,
+        href: newLocation,
       };
 
       request.setUrl(newUrl);

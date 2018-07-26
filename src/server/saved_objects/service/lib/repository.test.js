@@ -193,13 +193,13 @@ describe('SavedObjectsRepository', () => {
       sinon.assert.calledOnce(onBeforeWrite);
     });
 
-    it('appends extraBodyProperties to the document', async () => {
+    it('appends extraDocumentProperties to the document', async () => {
       await savedObjectsRepository.create('index-pattern',
         {
           title: 'Logstash'
         },
         {
-          extraBodyProperties: {
+          extraDocumentProperties: {
             myExtraProp: 'myExtraValue',
             myOtherExtraProp: true,
           }
@@ -220,13 +220,13 @@ describe('SavedObjectsRepository', () => {
       sinon.assert.calledOnce(onBeforeWrite);
     });
 
-    it('does not allow extraBodyProperties to overwrite existing properties', async () => {
+    it('does not allow extraDocumentProperties to overwrite existing properties', async () => {
       await savedObjectsRepository.create('index-pattern',
         {
           title: 'Logstash'
         },
         {
-          extraBodyProperties: {
+          extraDocumentProperties: {
             myExtraProp: 'myExtraValue',
             myOtherExtraProp: true,
             updated_at: 'should_not_be_used',
@@ -389,13 +389,13 @@ describe('SavedObjectsRepository', () => {
       });
     });
 
-    it('appends extraBodyProperties to each created object', async () => {
+    it('appends extraDocumentProperties to each created object', async () => {
       callAdminCluster.returns({ items: [] });
 
       await savedObjectsRepository.bulkCreate(
         [
-          { type: 'config', id: 'one', attributes: { title: 'Test One' }, extraBodyProperties: { extraConfigValue: true } },
-          { type: 'index-pattern', id: 'two', attributes: { title: 'Test Two' }, extraBodyProperties: { extraIndexValue: true } }
+          { type: 'config', id: 'one', attributes: { title: 'Test One' }, extraDocumentProperties: { extraConfigValue: true } },
+          { type: 'index-pattern', id: 'two', attributes: { title: 'Test Two' }, extraDocumentProperties: { extraIndexValue: true } }
         ]);
 
       sinon.assert.calledOnce(callAdminCluster);
@@ -411,28 +411,37 @@ describe('SavedObjectsRepository', () => {
       sinon.assert.calledOnce(onBeforeWrite);
     });
 
-    it('does not allow extraBodyProperties to overwrite existing properties', async () => {
+    it('does not allow extraDocumentProperties to overwrite existing properties', async () => {
 
       callAdminCluster.returns({ items: [] });
 
-      const extraBodyProperties = {
+      const extraDocumentProperties = {
         extraProp: 'extraVal',
         updated_at: 'should_not_be_used',
       };
-      const configExtraBodyProperties = {
-        ...extraBodyProperties,
+      const configExtraDocumentProperties = {
+        ...extraDocumentProperties,
         'config': { newIgnoredProp: 'should_not_be_used' }
       };
-      const indexPatternExtraBodyProperties = {
-        ...extraBodyProperties,
+      const indexPatternExtraDocumentProperties = {
+        ...extraDocumentProperties,
         'index-pattern': { title: 'should_not_be_used', newIgnoredProp: 'should_not_be_used' }
       };
 
       await savedObjectsRepository.bulkCreate(
-        [
-          { type: 'config', id: 'one', attributes: { title: 'Test One' }, extraBodyProperties: configExtraBodyProperties },
-          { type: 'index-pattern', id: 'two', attributes: { title: 'Test Two' }, extraBodyProperties: indexPatternExtraBodyProperties }
-        ]);
+        [{
+          type: 'config',
+          id: 'one',
+          attributes: { title: 'Test One' },
+          extraDocumentProperties: configExtraDocumentProperties
+        },
+        {
+          type: 'index-pattern',
+          id: 'two',
+          attributes: { title: 'Test Two' },
+          extraDocumentProperties: indexPatternExtraDocumentProperties
+        }]
+      );
 
       sinon.assert.calledOnce(callAdminCluster);
       sinon.assert.calledWithExactly(callAdminCluster, 'bulk', sinon.match({
@@ -635,9 +644,9 @@ describe('SavedObjectsRepository', () => {
       }));
     });
 
-    it('includes the requested extraSourceProperties in the response for the requested object', async () => {
+    it('includes the requested extraDocumentProperties in the response for the requested object', async () => {
       const response = await savedObjectsRepository.get('index-pattern', 'logstash-*', {
-        extraSourceProperties: ['specialProperty', 'undefinedProperty']
+        extraDocumentProperties: ['specialProperty', 'undefinedProperty']
       });
 
       expect(response).toEqual({
@@ -723,7 +732,7 @@ describe('SavedObjectsRepository', () => {
       });
     });
 
-    it('includes the requested extraSourceProperties in the response for each requested object', async () => {
+    it('includes the requested extraDocumentProperties in the response for each requested object', async () => {
       callAdminCluster.returns(Promise.resolve({
         docs: [{
           _type: 'doc',
@@ -762,7 +771,7 @@ describe('SavedObjectsRepository', () => {
           { id: 'bad', type: 'config' },
           { id: 'logstash-*', type: 'index-pattern' }
         ], {
-          extraSourceProperties: ['specialProperty', 'undefinedProperty']
+          extraDocumentProperties: ['specialProperty', 'undefinedProperty']
         }
       );
 
@@ -857,12 +866,12 @@ describe('SavedObjectsRepository', () => {
       sinon.assert.calledOnce(onBeforeWrite);
     });
 
-    it('updates the document including all provided extraBodyProperties', async () => {
+    it('updates the document including all provided extraDocumentProperties', async () => {
       await savedObjectsRepository.update(
         'index-pattern',
         'logstash-*',
         { title: 'Testing' },
-        { extraBodyProperties: { extraProp: 'extraVal' } }
+        { extraDocumentProperties: { extraProp: 'extraVal' } }
       );
 
       sinon.assert.calledOnce(callAdminCluster);
@@ -881,13 +890,13 @@ describe('SavedObjectsRepository', () => {
       sinon.assert.calledOnce(onBeforeWrite);
     });
 
-    it('does not allow extraBodyProperties to overwrite existing properties', async () => {
+    it('does not allow extraDocumentProperties to overwrite existing properties', async () => {
       await savedObjectsRepository.update(
         'index-pattern',
         'logstash-*',
         { title: 'Testing' },
         {
-          extraBodyProperties: {
+          extraDocumentProperties: {
             extraProp: 'extraVal',
             updated_at: 'should_not_be_used',
             'index-pattern': { title: 'should_not_be_used', newIgnoredProp: 'should_not_be_used' }

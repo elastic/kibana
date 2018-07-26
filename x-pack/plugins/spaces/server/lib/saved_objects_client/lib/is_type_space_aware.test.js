@@ -14,13 +14,13 @@ const knownSpaceAwareTypes = [
   'index_pattern'
 ];
 
-const unwareTypes = ['space'];
+const unawareTypes = ['space'];
 
 knownSpaceAwareTypes.forEach(type => test(`${type} should be space-aware`, () => {
   expect(isTypeSpaceAware(type)).toBe(true);
 }));
 
-unwareTypes.forEach(type => test(`${type} should not be space-aware`, () => {
+unawareTypes.forEach(type => test(`${type} should not be space-aware`, () => {
   expect(isTypeSpaceAware(type)).toBe(false);
 }));
 

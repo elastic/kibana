@@ -329,6 +329,74 @@ export default function ({ getService }) {
       }
     });
 
+    findTest(`kibana dual-privileges user`, {
+      auth: {
+        username: AUTHENTICATION.KIBANA_DUAL_PRIVILEGES_USER.USERNAME,
+        password: AUTHENTICATION.KIBANA_DUAL_PRIVILEGES_USER.PASSWORD,
+      },
+      tests: {
+        normal: {
+          description: 'only the visualization',
+          statusCode: 200,
+          response: expectVisualizationResults,
+        },
+        unknownType: {
+          description: 'empty result',
+          statusCode: 200,
+          response: createExpectEmpty(1, 20, 0),
+        },
+        pageBeyondTotal: {
+          description: 'empty result',
+          statusCode: 200,
+          response: createExpectEmpty(100, 100, 1),
+        },
+        unknownSearchField: {
+          description: 'empty result',
+          statusCode: 200,
+          response: createExpectEmpty(1, 20, 0),
+        },
+        noType: {
+          description: 'all objects',
+          statusCode: 200,
+          response: expectResultsWithValidTypes,
+        },
+      },
+    });
+
+    findTest(`kibana dual-privileges dashboard only user`, {
+      auth: {
+        username: AUTHENTICATION.KIBANA_DUAL_PRIVILEGES_DASHBOARD_ONLY_USER.USERNAME,
+        password: AUTHENTICATION.KIBANA_DUAL_PRIVILEGES_DASHBOARD_ONLY_USER.PASSWORD,
+      },
+      tests: {
+        normal: {
+          description: 'only the visualization',
+          statusCode: 200,
+          response: expectVisualizationResults,
+        },
+        unknownType: {
+          description: 'forbidden find wigwags message',
+          statusCode: 403,
+          response: createExpectRbacForbidden('wigwags'),
+        },
+        pageBeyondTotal: {
+          description: 'empty result',
+          statusCode: 200,
+          response: createExpectEmpty(100, 100, 1),
+        },
+        unknownSearchField: {
+          description: 'forbidden find wigwags message',
+          statusCode: 403,
+          response: createExpectRbacForbidden('wigwags'),
+        },
+        noType: {
+          description: 'all objects',
+          statusCode: 200,
+          response: expectResultsWithValidTypes,
+        },
+      }
+    });
+
     findTest(`kibana rbac user`, {
       auth: {
         username: AUTHENTICATION.KIBANA_RBAC_USER.USERNAME,

@@ -4,23 +4,25 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { getSpaceUrlContext } from '../../common/spaces_url_parser';
+import { getSpaceUrlContext } from './spaces_url_parser';
 
-export function createSpacesService() {
+export function createSpacesService(server) {
+
+  const serverBasePath = server.config().get('server.basePath');
 
   const contextCache = new WeakMap();
 
   function getUrlContext(request) {
     if (!contextCache.has(request)) {
-      _populateCache(request);
+      populateCache(request);
     }
 
     const { urlContext } = contextCache.get(request);
     return urlContext;
   }
 
-  function _populateCache(request) {
-    const urlContext = getSpaceUrlContext(request.getBasePath());
+  function populateCache(request) {
+    const urlContext = getSpaceUrlContext(request.getBasePath(), serverBasePath);
 
     contextCache.set(request, {
       urlContext
@@ -28,6 +30,6 @@ export function createSpacesService() {
   }
 
   return {
-    getUrlContext
+    getUrlContext,
   };
 }

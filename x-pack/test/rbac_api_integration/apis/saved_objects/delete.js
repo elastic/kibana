@@ -133,6 +133,40 @@ export default function ({ getService }) {
       }
     });
 
+    deleteTest(`kibana dual-privileges user`, {
+      auth: {
+        username: AUTHENTICATION.KIBANA_DUAL_PRIVILEGES_USER.USERNAME,
+        password: AUTHENTICATION.KIBANA_DUAL_PRIVILEGES_USER.PASSWORD,
+      },
+      tests: {
+        actualId: {
+          statusCode: 200,
+          response: expectEmpty,
+        },
+        invalidId: {
+          statusCode: 404,
+          response: expectNotFound,
+        }
+      }
+    });
+
+    deleteTest(`kibana dual-privileges dashboard only user`, {
+      auth: {
+        username: AUTHENTICATION.KIBANA_DUAL_PRIVILEGES_DASHBOARD_ONLY_USER.USERNAME,
+        password: AUTHENTICATION.KIBANA_DUAL_PRIVILEGES_DASHBOARD_ONLY_USER.PASSWORD,
+      },
+      tests: {
+        actualId: {
+          statusCode: 403,
+          response: expectRbacForbidden,
+        },
+        invalidId: {
+          statusCode: 403,
+          response: expectRbacForbidden,
+        }
+      }
+    });
+
     deleteTest(`kibana rbac user`, {
       auth: {
         username: AUTHENTICATION.KIBANA_RBAC_USER.USERNAME,

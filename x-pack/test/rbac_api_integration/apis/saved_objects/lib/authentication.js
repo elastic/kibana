@@ -21,6 +21,14 @@ export const AUTHENTICATION = {
     USERNAME: 'a_kibana_legacy_dashboard_only_user',
     PASSWORD: 'password'
   },
+  KIBANA_DUAL_PRIVILEGES_USER: {
+    USERNAME: 'a_kibana_dual_privileges_user',
+    PASSWORD: 'password'
+  },
+  KIBANA_DUAL_PRIVILEGES_DASHBOARD_ONLY_USER: {
+    USERNAME: 'a_kibana_dual_privileges_dashboard_only_user',
+    PASSWORD: 'password'
+  },
   KIBANA_RBAC_USER: {
     USERNAME: 'a_kibana_rbac_user',
     PASSWORD: 'password'

@@ -20,7 +20,6 @@
 import { INSTRUCTION_VARIANT } from '../../../common/tutorials/instruction_variant';
 import {
   WINDOWS_SERVER_INSTRUCTIONS,
-  IMPORT_DASHBOARD_UNIX,
   EDIT_CONFIG,
   START_SERVER_UNIX,
   DOWNLOAD_SERVER_RPM,
@@ -49,7 +48,6 @@ export function onPremInstructions(apmIndexPattern) {
             id: INSTRUCTION_VARIANT.OSX,
             instructions: [
               DOWNLOAD_SERVER_OSX,
-              IMPORT_DASHBOARD_UNIX,
               EDIT_CONFIG,
               START_SERVER_UNIX,
             ],
@@ -58,7 +56,6 @@ export function onPremInstructions(apmIndexPattern) {
             id: INSTRUCTION_VARIANT.DEB,
             instructions: [
               DOWNLOAD_SERVER_DEB,
-              IMPORT_DASHBOARD_UNIX,
               EDIT_CONFIG,
               START_SERVER_UNIX,
             ],
@@ -67,7 +64,6 @@ export function onPremInstructions(apmIndexPattern) {
             id: INSTRUCTION_VARIANT.RPM,
             instructions: [
               DOWNLOAD_SERVER_RPM,
-              IMPORT_DASHBOARD_UNIX,
               EDIT_CONFIG,
               START_SERVER_UNIX,
             ],

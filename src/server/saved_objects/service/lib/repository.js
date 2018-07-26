@@ -54,13 +54,13 @@ export class SavedObjectsRepository {
    * @param {object} [options={}]
    * @property {string} [options.id] - force id on creation, not recommended
    * @property {boolean} [options.overwrite=false]
-   * @property {object} [options.extraBodyProperties={}] - extra properties to append to the document body, outside of the object's type property
+   * @property {object} [options.extraDocumentProperties={}] - extra properties to append to the document body, outside of the object's type property
    * @returns {promise} - { id, type, version, attributes }
   */
   async create(type, attributes = {}, options = {}) {
     const {
       id,
-      extraBodyProperties = {},
+      extraDocumentProperties = {},
       overwrite = false
     } = options;
 
@@ -74,7 +74,7 @@ export class SavedObjectsRepository {
         index: this._index,
         refresh: 'wait_for',
         body: {
-          ...extraBodyProperties,
+          ...extraDocumentProperties,
           type,
           updated_at: time,
           [type]: attributes,
@@ -101,7 +101,7 @@ export class SavedObjectsRepository {
   /**
    * Creates multiple documents at once
    *
-   * @param {array} objects - [{ type, id, attributes, extraBodyProperties }]
+   * @param {array} objects - [{ type, id, attributes, extraDocumentProperties }]
    * @param {object} [options={}]
    * @property {boolean} [options.overwrite=false] - overwrites existing documents
    * @returns {promise} -  {saved_objects: [[{ id, type, version, attributes, error: { message } }]}
@@ -122,7 +122,7 @@ export class SavedObjectsRepository {
           }
         },
         {
-          ...object.extraBodyProperties,
+          ...object.extraDocumentProperties,
           type: object.type,
           updated_at: time,
           [object.type]: object.attributes,
@@ -307,7 +307,7 @@ export class SavedObjectsRepository {
    *
    * @param {array} objects - an array ids, or an array of objects containing id and optionally type
    * @param {object} [options = {}]
-   * @param {array} [options.extraSourceProperties = []] - an array of extra properties to return from the underlying document
+   * @param {array} [options.extraDocumentProperties = []] - an array of extra properties to return from the underlying document
    * @returns {promise} - { saved_objects: [{ id, type, version, attributes }] }
    * @example
    *
@@ -333,7 +333,7 @@ export class SavedObjectsRepository {
 
     const { docs } = response;
 
-    const { extraSourceProperties = [] } = options;
+    const { extraDocumentProperties = [] } = options;
 
     return {
       saved_objects: docs.map((doc, i) => {
@@ -353,7 +353,7 @@ export class SavedObjectsRepository {
           type,
           ...time && { updated_at: time },
           version: doc._version,
-          ...extraSourceProperties
+          ...extraDocumentProperties
             .map(s => ({ [s]: doc._source[s] }))
             .reduce((acc, prop) => ({ ...acc, ...prop }), {}),
           attributes: {
@@ -372,7 +372,7 @@ export class SavedObjectsRepository {
    * @param {string} type
    * @param {string} id
    * @param {object} [options = {}]
-   * @param {array} [options.extraSourceProperties = []] - an array of extra properties to return from the underlying document
+   * @param {array} [options.extraDocumentProperties = []] - an array of extra properties to return from the underlying document
    * @returns {promise} - { id, type, version, attributes }
    */
   async get(type, id, options = {}) {
@@ -390,7 +390,7 @@ export class SavedObjectsRepository {
       throw errors.createGenericNotFoundError(type, id);
     }
 
-    const { extraSourceProperties = [] } = options;
+    const { extraDocumentProperties = [] } = options;
 
     const { updated_at: updatedAt } = response._source;
 
@@ -399,7 +399,7 @@ export class SavedObjectsRepository {
       type,
       ...updatedAt && { updated_at: updatedAt },
       version: response._version,
-      ...extraSourceProperties
+      ...extraDocumentProperties
         .map(s => ({ [s]: response._source[s] }))
         .reduce((acc, prop) => ({ ...acc, ...prop }), {}),
       attributes: {
@@ -415,7 +415,7 @@ export class SavedObjectsRepository {
    * @param {string} id
    * @param {object} [options={}]
    * @property {integer} options.version - ensures version matches that of persisted object
-   * @param {array} [options.extraBodyProperties = {}] - an object of extra properties to write into the underlying document
+   * @param {array} [options.extraDocumentProperties = {}] - an object of extra properties to write into the underlying document
    * @returns {promise}
    */
   async update(type, id, attributes, options = {}) {
@@ -429,7 +429,7 @@ export class SavedObjectsRepository {
       ignore: [404],
       body: {
         doc: {
-          ...options.extraBodyProperties,
+          ...options.extraDocumentProperties,
           updated_at: time,
           [type]: attributes,
         }

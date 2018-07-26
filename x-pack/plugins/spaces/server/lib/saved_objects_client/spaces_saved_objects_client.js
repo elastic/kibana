@@ -21,50 +21,80 @@ export class SpacesSavedObjectsClient {
     this.errors = baseClient.errors;
 
     this._client = baseClient;
-    this._request = request;
     this._types = types;
 
-    this._spaceUrlContext = spacesService.getUrlContext(this._request);
+    this._spaceUrlContext = spacesService.getUrlContext(request);
   }
 
+  /**
+   * Persists an object
+   *
+   * @param {string} type
+   * @param {object} attributes
+   * @param {object} [options={}]
+   * @property {string} [options.id] - force id on creation, not recommended
+   * @property {boolean} [options.overwrite=false]
+   * @property {object} [options.extraDocumentProperties={}] - extra properties to append to the document body, outside of the object's type property
+   * @returns {promise} - { id, type, version, attributes }
+  */
   async create(type, attributes = {}, options = {}) {
 
     const spaceId = await this._getSpaceId();
-    const shouldAssignSpaceId = spaceId !== DEFAULT_SPACE_ID && isTypeSpaceAware(type);
 
     const createOptions = {
-      ...options
+      ...options,
+      extraDocumentProperties: {
+        ...options.extraDocumentProperties
+      }
     };
 
-    if (shouldAssignSpaceId) {
-      createOptions.extraBodyProperties = {
-        ...options.extraBodyProperties,
-        spaceId
-      };
+    if (this._shouldAssignSpaceId(type, spaceId)) {
+      createOptions.extraDocumentProperties.spaceId = spaceId;
+    } else {
+      delete createOptions.extraDocumentProperties.spaceId;
     }
 
     return await this._client.create(type, attributes, createOptions);
   }
 
+  /**
+   * Creates multiple documents at once
+   *
+   * @param {array} objects - [{ type, id, attributes, extraDocumentProperties }]
+   * @param {object} [options={}]
+   * @property {boolean} [options.overwrite=false] - overwrites existing documents
+   * @returns {promise} - { saved_objects: [{ id, type, version, attributes, error: { message } }]}
+   */
   async bulkCreate(objects, options = {}) {
     const spaceId = await this._getSpaceId();
     const objectsToCreate = objects.map(object => {
-      const shouldAssignSpaceId = spaceId !== DEFAULT_SPACE_ID && isTypeSpaceAware(object.type);
-      if (shouldAssignSpaceId) {
-        return {
-          ...object,
-          extraBodyProperties: {
-            ...object.extraBodyProperties,
-            spaceId
-          }
-        };
+
+      const objectToCreate = {
+        ...object,
+        extraDocumentProperties: {
+          ...object.extraDocumentProperties
+        }
+      };
+
+      if (this._shouldAssignSpaceId(object.type, spaceId)) {
+        objectToCreate.extraDocumentProperties.spaceId = spaceId;
+      } else {
+        delete objectToCreate.extraDocumentProperties.spaceId;
       }
-      return object;
+
+      return objectToCreate;
     });
 
     return await this._client.bulkCreate(objectsToCreate, options);
   }
 
+  /**
+   * Deletes an object
+   *
+   * @param {string} type
+   * @param {string} id
+   * @returns {promise}
+   */
   async delete(type, id) {
     // attempt to retrieve document before deleting.
     // this ensures that the document belongs to the current space.
@@ -73,6 +103,20 @@ export class SpacesSavedObjectsClient {
     return await this._client.delete(type, id);
   }
 
+  /**
+   * @param {object} [options={}]
+   * @property {(string|Array<string>)} [options.type]
+   * @property {string} [options.search]
+   * @property {Array<string>} [options.searchFields] - see Elasticsearch Simple Query String
+   *                                        Query field argument for more information
+   * @property {object} [options.filters] - ES Query filters to append
+   * @property {integer} [options.page=1]
+   * @property {integer} [options.perPage=20]
+   * @property {string} [options.sortField]
+   * @property {string} [options.sortOrder]
+   * @property {Array<string>} [options.fields]
+   * @returns {promise} - { saved_objects: [{ id, type, version, attributes }], total, per_page, page }
+   */
   async find(options = {}) {
     const spaceOptions = {};
 
@@ -81,22 +125,38 @@ export class SpacesSavedObjectsClient {
       types = [types];
     }
 
+    const filters = options.filters || [];
+
     const spaceId = await this._getSpaceId();
 
-    spaceOptions.filters = getSpacesQueryFilters(spaceId, types);
+    spaceOptions.filters = [...filters, ...getSpacesQueryFilters(spaceId, types)];
 
     return await this._client.find({ ...options, ...spaceOptions });
   }
 
+  /**
+   * Returns an array of objects by id
+   *
+   * @param {array} objects - an array ids, or an array of objects containing id and optionally type
+   * @param {object} [options = {}]
+   * @param {array} [options.extraSourceProperties = []] - an array of extra properties to return from the underlying document
+   * @returns {promise} - { saved_objects: [{ id, type, version, attributes }] }
+   * @example
+   *
+   * bulkGet([
+   *   { id: 'one', type: 'config' },
+   *   { id: 'foo', type: 'index-pattern' }
+   * ])
+   */
   async bulkGet(objects = [], options = {}) {
     // ES 'mget' does not support queries, so we have to filter results after the fact.
     const thisSpaceId = await this._getSpaceId();
 
-    const extraSourceProperties = this._collectExtraSourceProperties(['spaceId', 'type'], options.extraSourceProperties);
+    const extraDocumentProperties = this._collectExtraDocumentProperties(['spaceId', 'type'], options.extraDocumentProperties);
 
     const result = await this._client.bulkGet(objects, {
       ...options,
-      extraSourceProperties
+      extraDocumentProperties
     });
 
     result.saved_objects = result.saved_objects.map(savedObject => {
@@ -118,14 +178,23 @@ export class SpacesSavedObjectsClient {
     return result;
   }
 
+  /**
+   * Gets a single object
+   *
+   * @param {string} type
+   * @param {string} id
+   * @param {object} [options = {}]
+   * @param {array} [options.extraSourceProperties = []] - an array of extra properties to return from the underlying document
+   * @returns {promise} - { id, type, version, attributes }
+   */
   async get(type, id, options = {}) {
     // ES 'get' does not support queries, so we have to filter results after the fact.
 
-    const extraSourceProperties = this._collectExtraSourceProperties(['spaceId'], options.extraSourceProperties);
+    const extraDocumentProperties = this._collectExtraDocumentProperties(['spaceId'], options.extraDocumentProperties);
 
     const response = await this._client.get(type, id, {
       ...options,
-      extraSourceProperties
+      extraDocumentProperties
     });
 
     const { spaceId: objectSpaceId = DEFAULT_SPACE_ID } = response;
@@ -140,22 +209,39 @@ export class SpacesSavedObjectsClient {
     return response;
   }
 
+  /**
+   * Updates an object
+   *
+   * @param {string} type
+   * @param {string} id
+   * @param {object} [options={}]
+   * @property {integer} options.version - ensures version matches that of persisted object
+   * @param {array} [options.extraDocumentProperties = {}] - an object of extra properties to write into the underlying document
+   * @returns {promise}
+   */
   async update(type, id, attributes, options = {}) {
+    const updateOptions = {
+      ...options,
+      extraDocumentProperties: {
+        ...options.extraDocumentProperties
+      }
+    };
+
     // attempt to retrieve document before updating.
     // this ensures that the document belongs to the current space.
     if (isTypeSpaceAware(type)) {
       await this.get(type, id);
 
       const spaceId = await this._getSpaceId();
-      if (spaceId !== DEFAULT_SPACE_ID) {
-        options.extraBodyProperties = {
-          ...options.extraBodyProperties,
-          spaceId
-        };
+
+      if (this._shouldAssignSpaceId(type, spaceId)) {
+        updateOptions.extraDocumentProperties.spaceId = spaceId;
+      } else {
+        delete updateOptions.extraDocumentProperties.spaceId;
       }
     }
 
-    return await this._client.update(type, id, attributes, options);
+    return await this._client.update(type, id, attributes, updateOptions);
   }
 
   async _getSpaceId() {
@@ -186,7 +272,11 @@ export class SpacesSavedObjectsClient {
     return null;
   }
 
-  _collectExtraSourceProperties(thisClientProperties, optionalProperties = []) {
+  _collectExtraDocumentProperties(thisClientProperties, optionalProperties = []) {
     return uniq([...thisClientProperties, ...optionalProperties]).value();
+  }
+
+  _shouldAssignSpaceId(type, spaceId) {
+    return spaceId !== DEFAULT_SPACE_ID && isTypeSpaceAware(type);
   }
 }
