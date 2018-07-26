@@ -2,17 +2,17 @@
 
 exports[`dev/i18n/check_locale_files checkFile throws an error for unused id and missing id 1`] = `
 "
-Missing translations in locale file __fixtures__\\\\check_locale_files\\\\test_plugin_3\\\\translations\\\\missing.json:
+Missing translations in locale file __fixtures__/check_locale_files/test_plugin_3/translations/missing.json:
 test_plugin_3.id_2"
 `;
 
 exports[`dev/i18n/check_locale_files checkFile throws an error for unused id and missing id 2`] = `
 "
-Unused translations in locale file __fixtures__\\\\check_locale_files\\\\test_plugin_3\\\\translations\\\\unused.json:
+Unused translations in locale file __fixtures__/check_locale_files/test_plugin_3/translations/unused.json:
 test_plugin_3.id_3"
 `;
 
 exports[`dev/i18n/check_locale_files checkLocaleFiles throws an error for namespaces collision 1`] = `
-"Error in __fixtures__\\\\check_locale_files\\\\test_plugin_5 plugin valid.json locale file
+"Error in __fixtures__/check_locale_files/test_plugin_5 plugin valid.json locale file
 Locale file namespace should be unique for each plugin"
 `;

@@ -19,6 +19,7 @@
 
 import path from 'path';
 import JSON5 from 'json5';
+import normalize from 'normalize-path';
 
 import { difference, globAsync, readFileAsync } from './utils';
 import { verifyJSON } from './verify_locale_json';
@@ -37,7 +38,7 @@ export async function checkFile(localePath) {
   try {
     namespace = verifyJSON(localeBuffer.toString(), localePath);
   } catch (error) {
-    throw new Error(`Error in ${path.relative(__dirname, localePath)}\n${error.message || error}`);
+    throw new Error(`Error in ${normalize(path.relative(__dirname, localePath))}\n${error.message || error}`);
   }
 
   const translations = JSON5.parse(localeBuffer.toString());
@@ -47,12 +48,12 @@ export async function checkFile(localePath) {
   const missingTranslations = difference(defaultMessagesIds, translationsIds);
 
   if (unusedTranslations.length > 0) {
-    errorMessage += `\nUnused translations in locale file ${path.relative(__dirname, localePath)}:
+    errorMessage += `\nUnused translations in locale file ${normalize(path.relative(__dirname, localePath))}:
 ${unusedTranslations.join(', ')}`;
   }
 
   if (missingTranslations.length > 0) {
-    errorMessage += `\nMissing translations in locale file ${path.relative(__dirname, localePath)}:
+    errorMessage += `\nMissing translations in locale file ${normalize(path.relative(__dirname, localePath))}:
 ${missingTranslations.join(', ')}`;
   }
 
@@ -91,7 +92,7 @@ export async function checkLocaleFiles(pluginsPaths) {
       const namespace = await checkFile(path.resolve(pluginPath, 'translations', locale));
       if (namespaces.includes(namespace)) {
         throw new Error(
-          `Error in ${path.relative(__dirname, pluginPath)} plugin ${locale} locale file
+          `Error in ${normalize(path.relative(__dirname, pluginPath))} plugin ${locale} locale file
 Locale file namespace should be unique for each plugin`
         );
       }
