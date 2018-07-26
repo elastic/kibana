@@ -57,8 +57,7 @@ export function isValidRule(rule) {
     } else {
       const scope = rule.scope;
       if (scope !== undefined) {
-        const enabledScope = Object.keys(scope).find(field => (scope[field].enabled === true));
-        isValid = (enabledScope !== undefined);
+        isValid = Object.keys(scope).some(field => (scope[field].enabled === true));
       }
     }
   }
