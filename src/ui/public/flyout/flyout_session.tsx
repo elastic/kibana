@@ -19,15 +19,9 @@
 
 import React from 'react';
 
+import { EuiFlyout } from '@elastic/eui';
 import { EventEmitter } from 'events';
 import ReactDOM from 'react-dom';
-
-// TODO: Remove once EUI has typing for EuiFlyout and EuiFlyoutBody
-declare module '@elastic/eui' {
-  export const EuiFlyout: React.SFC<any>;
-}
-
-import { EuiFlyout } from '@elastic/eui';
 
 let activeSession: FlyoutSession | null = null;
 
