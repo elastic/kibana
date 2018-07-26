@@ -42,3 +42,4 @@ package-lock.json
 .vscode
 npm-debug.log*
 .tern-project
+index.css
