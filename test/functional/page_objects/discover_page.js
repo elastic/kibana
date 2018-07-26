@@ -56,7 +56,7 @@ export function DiscoverPageProvider({ getService, getPageObjects }) {
 
       // Make sure toast exists and then close it.
       await testSubjects.existOrFail('saveSearchSuccess');
-      await find.clickByCssSelector('[data-test-subj="saveSearchSuccess"] [data-test-subj="toastCloseButton"]');
+      await testSubjects.click('saveSearchSuccess toastCloseButton');
     }
 
     async getColumnHeaders() {
@@ -227,7 +227,7 @@ export function DiscoverPageProvider({ getService, getPageObjects }) {
 
       // Confirm that the content was copied to the clipboard and close the toast.
       await testSubjects.existOrFail('shareCopyToClipboardSuccess');
-      await find.clickByCssSelector('[data-test-subj="shareCopyToClipboardSuccess"] [data-test-subj="toastCloseButton"]');
+      await testSubjects.click('shareCopyToClipboardSuccess toastCloseButton');
     }
 
     async getShareCaption() {

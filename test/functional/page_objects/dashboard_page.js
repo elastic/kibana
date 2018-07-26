@@ -301,7 +301,7 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
 
       // Confirm that the Dashboard has been saved and close the toast.
       await testSubjects.existOrFail('saveDashboardSuccess');
-      await find.clickByCssSelector('[data-test-subj="saveDashboardSuccess"] [data-test-subj="toastCloseButton"]');
+      await testSubjects.click('saveDashboardSuccess toastCloseButton');
     }
 
     async cancelSave() {

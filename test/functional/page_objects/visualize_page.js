@@ -698,7 +698,7 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
 
       // Confirm save and close toast.
       await testSubjects.existOrFail('saveVisualizationSuccess');
-      await find.clickByCssSelector('[data-test-subj="saveVisualizationSuccess"] [data-test-subj="toastCloseButton"]');
+      await testSubjects.click('saveVisualizationSuccess toastCloseButton');
     }
 
     async clickLoadSavedVisButton() {
