@@ -49,6 +49,7 @@ export const UI_EXPORT_DEFAULTS = {
       'ui/vis/response_handlers/basic',
       'ui/vis/response_handlers/none',
       'ui/vis/response_handlers/tabify',
+      'ui/vis/response_handlers/table',
     ],
     visEditorTypes: [
       'ui/vis/editors/default/default',

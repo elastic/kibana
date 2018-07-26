@@ -96,6 +96,7 @@ function TableVisTypeProvider(Private) {
         }
       ])
     },
+    responseHandler: 'table',
     responseHandlerConfig: {
       asAggConfigResults: true
     },
