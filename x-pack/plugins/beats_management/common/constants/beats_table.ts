@@ -12,4 +12,5 @@ export const TABLE_CONFIG = {
     BULK_DELETE: 'BULK_DELETE',
     BULK_EDIT: 'BULK_EDIT',
   },
+  TRUNCATE_TAG_LENGTH: 33,
 };
