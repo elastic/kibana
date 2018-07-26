@@ -17,13 +17,12 @@
  * under the License.
  */
 
-const TEST_SUBJECT_VISUALIZE = 'visualizationLoader';
+const RENDER_COMPLETE_SELECTOR = '[data-render-completete="true"]';
 
 export function VisualizationProvider({ getService }) {
   const log = getService('log');
   const retry = getService('retry');
   const find = getService('find');
-  const testSubjects = getService('testSubjects');
 
   return new class Visualization {
 
@@ -41,38 +40,19 @@ export function VisualizationProvider({ getService }) {
      *
      * This method will wait an absolute of 10 seconds for the visualization to finish rendering.
      */
-    async waitForRender(parentElement, title = '', { ignoreNonVisualization } = {}) {
-      log.debug(`Visualization.waitForRender(${title})`);
-      const tag = `waitForRender(${title}):`;
-      if (!parentElement) {
-        parentElement = await find.byCssSelector('body');
-      }
-      const testSubj = await parentElement.getAttribute('data-test-subj');
-      let vis;
-      if (testSubj === TEST_SUBJECT_VISUALIZE) {
-        vis = parentElement;
-      } else {
-        const visualizations = await testSubjects.findAllDescendant(TEST_SUBJECT_VISUALIZE, parentElement);
-        if (visualizations.length === 0 && ignoreNonVisualization) {
-          log.info(`${tag} element does not contain a visualization, ignoring it`);
-          return;
+    async waitForRender(count) {
+      log.debug(`Visualization.waitForRender for ${count} elements`);
+      await retry.try(async () => {
+        const completedElements = await find.allByCssSelector(RENDER_COMPLETE_SELECTOR);
+        if (completedElements.length !== count) {
+          throw new Error(`${completedElements.length} elements completed rendering, waiting on a total of ${count}`);
         }
-        if (visualizations.length !== 1) {
-          throw new Error(`${tag} expects exactly 1 visualization in the specified parent, but found ${visualizations.length}`);
-        }
-        vis = visualizations[0];
-      }
-      await retry.tryForTime(10000, async () => {
-        const renderComplete = await vis.getAttribute('data-render-complete');
-        if (renderComplete !== 'disabled' && renderComplete !== 'true') {
-          throw new Error(`${tag} visualization has not finished first render`);
-        }
-        const isLoading = await vis.getAttribute('data-loading');
-        if (isLoading !== null) {
-          throw new Error(`${tag} visualization is still loading/rendering`);
+
+        const stillLoadingElements = await find.allByCssSelector('[data-loading]');
+        if (stillLoadingElements.length > 0) {
+          throw new Error(`${stillLoadingElements.length} elements still loading contents`);
         }
       });
     }
-
   };
 }

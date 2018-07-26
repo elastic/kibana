@@ -550,12 +550,8 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
     }
 
     async waitForRenderComplete() {
-      await retry.try(async () => {
-        const sharedItems = await this.getPanelSharedItemData();
-        await Promise.all(sharedItems.map(async sharedItem => {
-          return await visualization.waitForRender(sharedItem.element, sharedItem.title, { ignoreNonVisualization: true });
-        }));
-      });
+      const count = await this.getSharedContainerData().count;
+      await visualization.waitForRender(count);
     }
 
     async getSharedContainerData() {
@@ -563,7 +559,8 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
       const sharedContainer = await find.byCssSelector('[data-shared-items-container]');
       return {
         title: await sharedContainer.getAttribute('data-title'),
-        description: await sharedContainer.getAttribute('data-description')
+        description: await sharedContainer.getAttribute('data-description'),
+        count: await sharedContainer.getAttribute('data-shared-items-count'),
       };
     }
 
