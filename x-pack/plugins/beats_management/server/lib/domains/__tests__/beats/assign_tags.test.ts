@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { FrameworkInternalUser } from './../../../adapters/framework/adapter_types';
+import { FrameworkInternalUser } from '../../../adapters/framework/adapter_types';
 
 import { MemoryBeatsAdapter } from '../../../adapters/beats/memory_beats_adapter';
 import { TestingBackendFrameworkAdapter } from '../../../adapters/framework/testing_framework_adapter';
