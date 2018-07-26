@@ -1,0 +1,30 @@
+// External libraries
+// SASSTODO: Change from relative path once node-sass includes node_modules in includePaths
+@import './../../../../../node_modules/react-grid-layout/css/styles';
+@import './../../../../../node_modules/react-resizable/css/styles';
+
+// Temporary hacks
+//@import 'hacks';
+
+// Dashboard plugin styles
+
+@import 'styles/index';
+
+// Prefix all styles with "dash" to avoid conflicts.
+// Examples
+//   dashChart
+//   dashChart__legend
+//   dashChart__legend--small
+//   dashChart__legend-isLoading
+
+// DARK THEME
+// EUI global scope
+// @import './../../../../../node_modules/@elastic/eui/src/themes/k6/k6_colors_dark';
+
+// .tab-dashboard.theme-dark {
+//   .dashboard-panel {
+//     background-color: tintOrShade($euiColorDanger, 0%, 100%) !important;
+//   }
+
+//   @import 'styles/index';
+// }
