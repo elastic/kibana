@@ -153,6 +153,12 @@ export class RuleEditorFlyout extends Component {
     const isConditionsEnabled = (this.partitioningFieldNames.length === 0) ||
       (rule.conditions !== undefined && rule.conditions.length > 0);
     const isScopeEnabled = (rule.scope !== undefined) && (Object.keys(rule.scope).length > 0);
+    if (isScopeEnabled === true) {
+      // Add 'enabled:true' to mark them as selected in the UI.
+      Object.keys(rule.scope).forEach((field) => {
+        rule.scope[field].enabled = true;
+      });
+    }
 
     this.setState({
       ruleIndex,
@@ -275,20 +281,15 @@ export class RuleEditorFlyout extends Component {
   updateScope = (fieldName, filterId, filterType, enabled) => {
     this.setState((prevState) => {
       let scope = { ...prevState.rule.scope };
-      if (enabled === true) {
-        if (scope === undefined) {
-          scope = {};
-        }
-
-        scope[fieldName] = {
-          filter_id: filterId,
-          filter_type: filterType
-        };
-      } else {
-        if (scope !== undefined) {
-          delete scope[fieldName];
-        }
+      if (scope === undefined) {
+        scope = {};
       }
+
+      scope[fieldName] = {
+        filter_id: filterId,
+        filter_type: filterType,
+        enabled,
+      };
 
       return {
         rule: { ...prevState.rule, scope }
