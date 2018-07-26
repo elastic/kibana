@@ -93,6 +93,7 @@ export class EmbeddedVisualizeHandler {
       this.listeners.once(RENDER_COMPLETE_EVENT, resolve);
     });
 
+    element.setAttribute(LOADING_ATTRIBUTE, '');
     element.addEventListener('renderComplete', this.onRenderCompleteListener);
 
     this.appState = appState;
