@@ -42,10 +42,8 @@ export default function ({ getService, getPageObjects, updateBaselines }) {
       await PageObjects.dashboard.clickNewDashboard();
       await PageObjects.dashboard.setTimepickerInLogstashDataRange();
       await dashboardAddPanel.addVisualization('Rendering Test: tsvb-ts');
-      await PageObjects.common.closeToast();
 
       await PageObjects.dashboard.saveDashboard('tsvb');
-      await PageObjects.common.closeToast();
 
       await PageObjects.dashboard.clickFullScreenMode();
       await dashboardPanelActions.toggleExpandPanel();
@@ -65,9 +63,7 @@ export default function ({ getService, getPageObjects, updateBaselines }) {
       await PageObjects.dashboard.clickNewDashboard();
       await PageObjects.dashboard.setTimepickerInLogstashDataRange();
       await dashboardAddPanel.addVisualization('Rendering Test: area with not filter');
-      await PageObjects.common.closeToast();
       await PageObjects.dashboard.saveDashboard('area');
-      await PageObjects.common.closeToast();
 
       await PageObjects.dashboard.clickFullScreenMode();
       await dashboardPanelActions.toggleExpandPanel();

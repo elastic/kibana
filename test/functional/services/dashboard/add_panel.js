@@ -172,6 +172,11 @@ export function DashboardAddPanelProvider({ getService, getPageObjects }) {
       await PageObjects.common.sleep(500);
       await this.filterEmbeddableNames(`"${vizName.replace('-', ' ')}"`);
       await testSubjects.click(`addPanel${vizName.split(' ').join('-')}`);
+
+      // Confirm it was added and close the toast.
+      await testSubjects.existOrFail('addVisualizationToDashboardSuccess');
+      await testSubjects.click('addVisualizationToDashboardSuccess toastCloseButton');
+
       await this.closeAddPanel();
     }
 

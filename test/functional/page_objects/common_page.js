@@ -329,12 +329,6 @@ export function CommonPageProvider({ getService, getPageObjects }) {
       });
     }
 
-    async closeToast() {
-      const toast = await find.byCssSelector('.euiToast');
-      await remote.moveMouseTo(toast);
-      await find.clickByCssSelector('.euiToast__closeButton');
-    }
-
     async clearAllToasts() {
       const toasts = await find.allByCssSelector('.euiToast');
       for (const toastElement of toasts) {
