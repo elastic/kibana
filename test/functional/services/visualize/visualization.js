@@ -17,6 +17,8 @@
  * under the License.
  */
 
+const TEST_SUBJECT_VISUALIZE = 'visualizationLoader';
+
 export function VisualizationProvider({ getService }) {
   const log = getService('log');
   const retry = getService('retry');
@@ -32,26 +34,42 @@ export function VisualizationProvider({ getService }) {
      * If you call this method before a visualization started fetching its data, it might return immediately,
      * i.e. it does not wait for the next fetch and render to start.
      *
-     * You can pass in a parent element, in which the visualization should be located. If you don't specify that
-     * we'll look for a visualization in body. In case you specify a parent (or use the default) and multiple
-     * visualizations are found within that element, this method will throw an error.
+     * You can pass in a parent element, in which the visualization should be located. The parent element can also be
+     * the visualization element itself. If you don't specify a parent element, this method looks for a visualization
+     * in body. In case you specify a parent (or use the default) and multiple visualizations are found within that element,
+     * this method will throw an error.
      *
      * This method will wait an absolute of 10 seconds for the visualization to finish rendering.
      */
-    async waitForRender(parentElement) {
-      log.debug(`Visualization.waitForRender()`);
+    async waitForRender(parentElement, title = '', { ignoreNonVisualization } = {}) {
+      log.debug(`Visualization.waitForRender(${title})`);
+      const tag = `waitForRender(${title}):`;
       if (!parentElement) {
         parentElement = await find.byCssSelector('body');
       }
-      const visualizations = await testSubjects.findAllDescendant('visualizationLoader', parentElement);
-      if (visualizations.length !== 1) {
-        throw new Error(`waitForRender expects exactly 1 visualization within the specified parent, but found ${visualizations.length}`);
+      const testSubj = await parentElement.getAttribute('data-test-subj');
+      let vis;
+      if (testSubj === TEST_SUBJECT_VISUALIZE) {
+        vis = parentElement;
+      } else {
+        const visualizations = await testSubjects.findAllDescendant(TEST_SUBJECT_VISUALIZE, parentElement);
+        if (visualizations.length === 0 && ignoreNonVisualization) {
+          log.info(`${tag} element does not contain a visualization, ignoring it`);
+          return;
+        }
+        if (visualizations.length !== 1) {
+          throw new Error(`${tag} expects exactly 1 visualization in the specified parent, but found ${visualizations.length}`);
+        }
+        vis = visualizations[0];
       }
-      const vis = visualizations[0];
       await retry.tryForTime(10000, async () => {
+        const renderComplete = await vis.getAttribute('data-render-complete');
+        if (renderComplete !== 'disabled' && renderComplete !== 'true') {
+          throw new Error(`${tag} visualization has not finished first render`);
+        }
         const isLoading = await vis.getAttribute('data-loading');
         if (isLoading !== null) {
-          throw new Error('waitForRender: visualization is still loading/rendering');
+          throw new Error(`${tag} visualization is still loading/rendering`);
         }
       });
     }
