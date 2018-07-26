@@ -67,7 +67,7 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.settings.clickKibanaSavedObjects();
 
       // This data has already been loaded by the "visualize" esArchive. We'll load it again
-      // so that we can overriding the existing visualization.
+      // so that we can override the existing visualization.
       await PageObjects.settings.importFile(path.join(__dirname, 'exports', '_import_objects_exists.json'), false);
 
       await PageObjects.header.waitUntilLoadingHasFinished();
