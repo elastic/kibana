@@ -4,9 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { BeatTag } from '../../../../common/domain_types';
-import { FrameworkUser } from '../framework/adapter_types';
 
 export interface CMTagsAdapter {
-  getTagsWithIds(user: FrameworkUser, tagIds: string[]): Promise<BeatTag[]>;
-  upsertTag(user: FrameworkUser, tag: BeatTag): Promise<{}>;
+  getTagsWithIds(tagIds: string[]): Promise<BeatTag[]>;
+  upsertTag(tag: BeatTag): Promise<{}>;
 }
