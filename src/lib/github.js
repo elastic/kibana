@@ -9,32 +9,31 @@ function getCommitMessage(message) {
 }
 
 async function getCommits(owner, repoName, author) {
-  const urlArgs = {
+  const query = {
     per_page: 20,
     access_token: accessToken
   };
 
   if (author) {
-    urlArgs.author = author;
-    urlArgs.per_page = 5;
+    query.author = author;
+    query.per_page = 5;
   }
 
   try {
     const res = await axios(
       `https://api.github.com/repos/${owner}/${repoName}/commits?${querystring.stringify(
-        urlArgs
+        query
       )}`
     );
 
     return res.data.map(commit => {
-      const message = getCommitMessage(commit.commit.message);
       return {
-        message,
+        message: getCommitMessage(commit.commit.message),
         sha: commit.sha
       };
     });
   } catch (e) {
-    return handleError(e);
+    throw getError(e);
   }
 }
 
@@ -44,30 +43,34 @@ async function getCommit(owner, repoName, sha) {
       `https://api.github.com/repos/${owner}/${repoName}/commits/${sha}?access_token=${accessToken}`
     );
     return {
-      message: res.data.commit.message,
+      message: getCommitMessage(res.data.commit.message),
       sha: res.data.sha
     };
   } catch (e) {
-    return handleError(e);
+    throw getError(e);
   }
 }
 
 function createPullRequest(owner, repoName, payload) {
-  return axios
-    .post(
+  try {
+    return axios.post(
       `https://api.github.com/repos/${owner}/${repoName}/pulls?access_token=${accessToken}`,
       payload
-    )
-    .catch(handleError);
+    );
+  } catch (e) {
+    throw getError(e);
+  }
 }
 
 function addLabels(owner, repoName, pullNumber, labels) {
-  return axios
-    .post(
+  try {
+    return axios.post(
       `https://api.github.com/repos/${owner}/${repoName}/issues/${pullNumber}/labels?access_token=${accessToken}`,
       labels
-    )
-    .catch(handleError);
+    );
+  } catch (e) {
+    throw getError(e);
+  }
 }
 
 async function getPullRequestByCommit(owner, repoName, commitSha) {
@@ -77,7 +80,7 @@ async function getPullRequestByCommit(owner, repoName, commitSha) {
     );
     return get(res.data.items[0], 'number');
   } catch (e) {
-    return handleError(e);
+    throw getError(e);
   }
 }
 
@@ -85,12 +88,12 @@ function setAccessToken(_accessToken) {
   accessToken = _accessToken;
 }
 
-function handleError(e) {
+function getError(e) {
   if (get(e.response, 'data')) {
-    throw new GithubApiError(e.response.data);
+    return new GithubApiError(e.response.data);
   }
 
-  throw e;
+  return e;
 }
 
 module.exports = {

@@ -204,21 +204,18 @@ function getBackportBranchName(branch, commits) {
   return `backport/${branch}/${refValues}`;
 }
 
-function getReference(commit, { short }) {
-  if (commit.pullRequest) {
-    return short ? `pr-${commit.pullRequest}` : `#${commit.pullRequest}`;
-  }
-
-  const shortCommit = commit.sha.slice(0, 7);
-  return short ? `commit-${shortCommit}` : `${shortCommit}`;
+function getShortSha(commit) {
+  return commit.sha.slice(0, 7);
 }
 
 function getReferenceLong(commit) {
-  return getReference(commit, { short: false });
+  return commit.pullRequest ? `#${commit.pullRequest}` : getShortSha(commit);
 }
 
 function getReferenceShort(commit) {
-  return getReference(commit, { short: true });
+  return commit.pullRequest
+    ? `pr-${commit.pullRequest}`
+    : `commit-${getShortSha(commit)}`;
 }
 
 function isCherrypickConflict(e) {
@@ -258,6 +255,15 @@ async function confirmResolvedRecursive(owner, repoName) {
   }
 }
 
+function getPullRequestTitle(branch, commits) {
+  const commitMessages = commits
+    .map(commit => commit.message)
+    .join(' | ')
+    .slice(0, 200);
+
+  return `[${branch}] ${commitMessages}`;
+}
+
 function getPullRequestPayload(branch, commits, username) {
   const backportBranchName = getBackportBranchName(branch, commits);
   const commitRefs = commits
@@ -267,13 +273,8 @@ function getPullRequestPayload(branch, commits, username) {
     })
     .join('\n');
 
-  const commitMessages = commits
-    .map(commit => commit.message)
-    .join(' | ')
-    .slice(0, 200);
-
   return {
-    title: `[${branch}] ${commitMessages}`,
+    title: getPullRequestTitle(branch, commits),
     body: `Backports the following commits to ${branch}:\n${commitRefs}`,
     head: `${username}:${backportBranchName}`,
     base: `${branch}`
