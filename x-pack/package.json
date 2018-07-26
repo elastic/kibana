@@ -28,7 +28,7 @@
     "@kbn/plugin-helpers": "link:../packages/kbn-plugin-helpers",
     "@kbn/test": "link:../packages/kbn-test",
     "@types/angular": "^1.6.45",
-    "@types/boom": "4.3.8",
+    "@types/boom": "3.2.2",
     "@types/d3-array": "^1.2.1",
     "@types/d3-scale": "^2.0.0",
     "@types/d3-shape": "^1.2.2",
