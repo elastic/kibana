@@ -661,7 +661,7 @@ app.controller('graphuiPlugin', function ($scope, $route, $interval, $http, kbnU
     }
   }
 
-  $scope.indices = $route.current.locals.indexPatterns.filter(o => !o.get('type'));
+  $scope.indices = $route.current.locals.indexPatterns.filter(indexPattern => !indexPattern.get('type'));
 
 
   $scope.setDetail = function (data) {

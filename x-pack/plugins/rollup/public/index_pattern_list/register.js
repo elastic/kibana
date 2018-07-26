@@ -22,7 +22,7 @@ IndexPatternListRegistry.register(() => {
 
     getFieldInfo = (indexPattern, field) => {
       const allAggs = indexPattern.typeMeta && indexPattern.typeMeta.aggs;
-      const fieldAggs = allAggs && Object.keys(allAggs).filter(agg => allAggs[agg][field]);
+      const fieldAggs = allAggs && Object.keys(allAggs).filter(agg => allAggs[agg][field] && Array.isArray(allAggs[agg][field]));
 
       if(!fieldAggs || !fieldAggs.length) {
         return [];

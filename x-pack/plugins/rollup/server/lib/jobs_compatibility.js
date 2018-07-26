@@ -51,34 +51,35 @@ export function mergeJobConfigurations(jobs = []) {
       // Look through each field's capabilities (aggregations)
       fieldAggs.forEach(agg => {
         const aggName = agg.agg;
+        const aggDoesntExist = !allAggs[aggName];
+        const fieldDoesntExist = allAggs[aggName] && !allAggs[aggName][fieldName];
+        const aggIsntDateHistogram = aggName !== 'date_histogram';
 
         // If we currently don't have this aggregation, add it.
         // Special case for date histogram, since there can only be one
         // date histogram field.
-        if(
-          !allAggs[aggName] ||
-          (!allAggs[aggName][fieldName] && aggName !== 'date_histogram')
-        ) {
+        if(aggDoesntExist || (fieldDoesntExist && aggIsntDateHistogram)) {
           allAggs[aggName] = allAggs[aggName] || {};
           allAggs[aggName][fieldName] = { ...agg };
         }
         // If aggregation already exists, attempt to merge it
         else {
-          switch (aggName) {
+          const fieldAgg = allAggs[aggName][fieldName];
 
+          switch (aggName) {
             // For histograms, calculate the least common multiple between the
             // new interval and existing interval
             case 'histogram':
               // TODO: Fix this with LCD algorithm
-              const intervals = [allAggs[aggName][fieldName].interval, agg.interval].sort((a, b) => a - b);
+              const intervals = [fieldAgg.interval, agg.interval].sort((a, b) => a - b);
               const isMultiple = intervals[1] % intervals[0] === 0;
-              allAggs[aggName][fieldName].interval = isMultiple ? intervals[1] : (intervals[0] * intervals[1]);
+              fieldAgg.interval = isMultiple ? intervals[1] : (intervals[0] * intervals[1]);
               break;
 
             // For date histograms, if it is on the same field, check that the configuration is identical,
             // otherwise reject. If not the same field, reject;
             case 'date_histogram':
-              if(!allAggs[aggName][fieldName] || !isEqual(allAggs[aggName][fieldName], agg)) {
+              if(fieldDoesntExist || !isEqual(fieldAgg, agg)) {
                 throw new Error('Multiple date histograms configured');
               }
               break;

@@ -57,7 +57,11 @@ export function registerFieldsForWildcardRoute(server) {
 
         // Merge rollup capabilities information with field information
         Object.keys(rollupIndexCapabilities).forEach(agg => {
+
+          // Field names of the aggregation
           const fields = Object.keys(rollupIndexCapabilities[agg]);
+
+          // Default field information
           const defaultField = {
             name: null,
             searchable: true,
@@ -65,36 +69,23 @@ export function registerFieldsForWildcardRoute(server) {
             readFromDocValues: true,
           };
 
-          switch(agg) {
-            case 'date_histogram':
-              rollupFields.push(
-                ...fields
-                  .filter(field => !rollupFieldNames.includes(field))
-                  .map(field => {
-                    rollupFieldNames.push(field);
-                    return {
-                      ...fieldsFromFieldCapsApi[`${field}.${agg}.timestamp`],
-                      ...defaultField,
-                      name: field,
-                    };
-                  })
-              );
-              break;
-            default:
-              rollupFields.push(
-                ...fields
-                  .filter(field => !rollupFieldNames.includes(field))
-                  .map(field => {
-                    rollupFieldNames.push(field);
-                    return {
-                      ...fieldsFromFieldCapsApi[`${field}.${agg}.value`],
-                      ...defaultField,
-                      name: field,
-                    };
-                  })
-              );
-              break;
-          }
+          rollupFields.push(
+            ...fields
+              // For each field of the aggregation, filter out ones that have already been added
+              // to the field list bcause the same field can be part of multiple aggregations, but
+              // end consumption doesn't differentiate fields based on their aggregation abilities.
+              .filter(field => !rollupFieldNames.includes(field))
+              // Then expand each field into object format that end consumption expects.
+              .map(field => {
+                const fieldCapsKey = `${field}.${agg}.${agg === 'date_histogram' ? 'timestamp' : 'value'}`;
+                rollupFieldNames.push(field);
+                return {
+                  ...fieldsFromFieldCapsApi[fieldCapsKey],
+                  ...defaultField,
+                  name: field,
+                };
+              })
+          );
         });
         return reply({
           fields: rollupFields

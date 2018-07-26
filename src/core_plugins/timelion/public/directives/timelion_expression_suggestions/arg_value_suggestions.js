@@ -73,7 +73,7 @@ export function ArgValueSuggestionsProvider(Private, indexPatterns) {
           perPage: 25
         });
         return resp.savedObjects
-          .filter(o => !o.get('type'))
+          .filter(savedObject => !savedObject.get('type'))
           .map(savedObject => {
             return { name: savedObject.attributes.title };
           });
