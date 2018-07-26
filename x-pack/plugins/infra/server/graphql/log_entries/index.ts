@@ -4,4 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export * from './log_entries_domain';
+export { createLogEntriesResolvers } from './resolvers';

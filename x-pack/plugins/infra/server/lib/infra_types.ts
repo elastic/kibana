@@ -7,12 +7,14 @@
 import { InfraConfigurationAdapter } from './adapters/configuration';
 import { InfraBackendFrameworkAdapter, InfraFrameworkRequest } from './adapters/framework';
 import { InfraFieldsDomain } from './domains/fields_domain';
+import { InfraLogEntriesDomain } from './domains/log_entries_domain';
 import { InfraNodesDomain } from './domains/nodes_domain';
 import { InfraSourceStatus } from './source_status';
 import { InfraSourceConfigurations, InfraSources } from './sources';
 
 export interface InfraDomainLibs {
   fields: InfraFieldsDomain;
+  logEntries: InfraLogEntriesDomain;
   nodes: InfraNodesDomain;
 }
 

@@ -25,6 +25,9 @@ export interface InfraSource {
   id: string /** The id of the source */;
   configuration: InfraSourceConfiguration /** The raw configuration of the source */;
   status: InfraSourceStatus /** The status of the source */;
+  logEntriesAfter: InfraLogEntryInterval;
+  logEntriesBefore: InfraLogEntryInterval;
+  logEntriesBetween: InfraLogEntryInterval;
   map?: InfraResponse | null /** A hierarchy of hosts, pods, containers, services or arbitrary groups */;
 }
 /** A set of configuration options for an infrastructure data source */
@@ -48,6 +51,36 @@ export interface InfraSourceStatus {
   logAliasExists: boolean /** Whether the configured log alias exists */;
   metricIndices: string[] /** The list of indices in the metric alias */;
   logIndices: string[] /** The list of indices in the log alias */;
+}
+
+export interface InfraLogEntryInterval {
+  start?: InfraTimeKey | null;
+  end?: InfraTimeKey | null;
+  filterQuery?: string | null;
+  highlightQuery?: string | null;
+  entries: InfraLogEntry[];
+}
+
+export interface InfraTimeKey {
+  time: number;
+  tiebreaker: number;
+}
+
+export interface InfraLogEntry {
+  key: InfraTimeKey;
+  gid: string;
+  source: string;
+  message: InfraLogMessageSegment[];
+}
+
+export interface InfraLogMessageFieldSegment {
+  field: string;
+  value: string;
+  highlights: string[];
+}
+
+export interface InfraLogMessageConstantSegment {
+  constant: string;
 }
 
 export interface InfraResponse {
@@ -93,12 +126,39 @@ export namespace InfraSourceResolvers {
     id?: IdResolver /** The id of the source */;
     configuration?: ConfigurationResolver /** The raw configuration of the source */;
     status?: StatusResolver /** The status of the source */;
+    logEntriesAfter?: LogEntriesAfterResolver;
+    logEntriesBefore?: LogEntriesBeforeResolver;
+    logEntriesBetween?: LogEntriesBetweenResolver;
     map?: MapResolver /** A hierarchy of hosts, pods, containers, services or arbitrary groups */;
   }
 
   export type IdResolver = Resolver<string>;
   export type ConfigurationResolver = Resolver<InfraSourceConfiguration>;
   export type StatusResolver = Resolver<InfraSourceStatus>;
+  export type LogEntriesAfterResolver = Resolver<InfraLogEntryInterval, LogEntriesAfterArgs>;
+  export interface LogEntriesAfterArgs {
+    key: InfraTimeKeyInput;
+    count: number;
+    filterQuery?: string | null;
+    highlightQuery?: string | null;
+  }
+
+  export type LogEntriesBeforeResolver = Resolver<InfraLogEntryInterval, LogEntriesBeforeArgs>;
+  export interface LogEntriesBeforeArgs {
+    key: InfraTimeKeyInput;
+    count: number;
+    filterQuery?: string | null;
+    highlightQuery?: string | null;
+  }
+
+  export type LogEntriesBetweenResolver = Resolver<InfraLogEntryInterval, LogEntriesBetweenArgs>;
+  export interface LogEntriesBetweenArgs {
+    startKey: InfraTimeKeyInput;
+    endKey: InfraTimeKeyInput;
+    filterQuery?: string | null;
+    highlightQuery?: string | null;
+  }
+
   export type MapResolver = Resolver<InfraResponse | null, MapArgs>;
   export interface MapArgs {
     timerange: InfraTimerangeInput;
@@ -150,6 +210,66 @@ export namespace InfraSourceStatusResolvers {
   export type LogIndicesResolver = Resolver<string[]>;
 }
 
+export namespace InfraLogEntryIntervalResolvers {
+  export interface Resolvers {
+    start?: StartResolver;
+    end?: EndResolver;
+    filterQuery?: FilterQueryResolver;
+    highlightQuery?: HighlightQueryResolver;
+    entries?: EntriesResolver;
+  }
+
+  export type StartResolver = Resolver<InfraTimeKey | null>;
+  export type EndResolver = Resolver<InfraTimeKey | null>;
+  export type FilterQueryResolver = Resolver<string | null>;
+  export type HighlightQueryResolver = Resolver<string | null>;
+  export type EntriesResolver = Resolver<InfraLogEntry[]>;
+}
+
+export namespace InfraTimeKeyResolvers {
+  export interface Resolvers {
+    time?: TimeResolver;
+    tiebreaker?: TiebreakerResolver;
+  }
+
+  export type TimeResolver = Resolver<number>;
+  export type TiebreakerResolver = Resolver<number>;
+}
+
+export namespace InfraLogEntryResolvers {
+  export interface Resolvers {
+    key?: KeyResolver;
+    gid?: GidResolver;
+    source?: SourceResolver;
+    message?: MessageResolver;
+  }
+
+  export type KeyResolver = Resolver<InfraTimeKey>;
+  export type GidResolver = Resolver<string>;
+  export type SourceResolver = Resolver<string>;
+  export type MessageResolver = Resolver<InfraLogMessageSegment[]>;
+}
+
+export namespace InfraLogMessageFieldSegmentResolvers {
+  export interface Resolvers {
+    field?: FieldResolver;
+    value?: ValueResolver;
+    highlights?: HighlightsResolver;
+  }
+
+  export type FieldResolver = Resolver<string>;
+  export type ValueResolver = Resolver<string>;
+  export type HighlightsResolver = Resolver<string[]>;
+}
+
+export namespace InfraLogMessageConstantSegmentResolvers {
+  export interface Resolvers {
+    constant?: ConstantResolver;
+  }
+
+  export type ConstantResolver = Resolver<string>;
+}
+
 export namespace InfraResponseResolvers {
   export interface Resolvers {
     nodes?: NodesResolver;
@@ -195,6 +315,11 @@ export namespace InfraNodeMetricResolvers {
 export interface InfraIndexPatternInput {
   pattern: string /** The index pattern to use, defaults to '*' */;
   timeFieldName: string /** The timefield to use, defaults to @timestamp */;
+}
+
+export interface InfraTimeKeyInput {
+  time: number;
+  tiebreaker: number;
 }
 
 export interface InfraTimerangeInput {
@@ -250,6 +375,24 @@ export interface FieldsQueryArgs {
 export interface SourceQueryArgs {
   id: string /** The id of the source */;
 }
+export interface LogEntriesAfterInfraSourceArgs {
+  key: InfraTimeKeyInput;
+  count: number;
+  filterQuery?: string | null;
+  highlightQuery?: string | null;
+}
+export interface LogEntriesBeforeInfraSourceArgs {
+  key: InfraTimeKeyInput;
+  count: number;
+  filterQuery?: string | null;
+  highlightQuery?: string | null;
+}
+export interface LogEntriesBetweenInfraSourceArgs {
+  startKey: InfraTimeKeyInput;
+  endKey: InfraTimeKeyInput;
+  filterQuery?: string | null;
+  highlightQuery?: string | null;
+}
 export interface MapInfraSourceArgs {
   timerange: InfraTimerangeInput;
   filters?: InfraFilterInput[] | null;
@@ -303,6 +446,9 @@ export enum InfraOperator {
   lte = 'lte',
   eq = 'eq',
 }
+
+export type InfraLogMessageSegment = InfraLogMessageFieldSegment | InfraLogMessageConstantSegment;
+
 export namespace MapQuery {
   export type Variables = {
     id: string;
