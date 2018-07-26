@@ -64,6 +64,19 @@ export class Editor extends React.Component<Props> {
               return { value: e.value || e.toString() };
             }),
           };
+        } else if (hover.contents) {
+          const { contents } = hover;
+          if (Array.isArray(contents)) {
+            return {
+              contents: (contents as any[]).reverse().map(e => {
+                return { value: e.value || e.toString() };
+              }),
+            };
+          } else {
+            return {
+              contents: [contents],
+            };
+          }
         } else {
           return { contents: [] };
         }
@@ -80,7 +93,7 @@ export class Editor extends React.Component<Props> {
         const contentType = response.headers.get('Content-Type');
 
         if (contentType && contentType.startsWith('text/')) {
-          response.text().then(text => this.loadText(text));
+          response.text().then(text => this.loadText(text, file));
         } else if (contentType && contentType.startsWith('image/')) {
           alert('show image!');
         }
@@ -88,23 +101,29 @@ export class Editor extends React.Component<Props> {
     });
   }
 
-  private loadText(text: string) {
+  private loadText(text: string, file: string) {
     if (this.editor) {
       this.editor.setValue(text);
     } else {
-      this.initEditor(text);
+      this.initEditor(text, file);
     }
   }
 
-  private initEditor(text: string) {
+  private initEditor(text: string, file: string) {
     initMonaco(monaco => {
-      monaco.languages.registerHoverProvider('typescript', {
+      // TODO use a common library for this
+      let detectedLanguage = 'typescript';
+      if (file.endsWith('.java')) {
+        detectedLanguage = 'java';
+      }
+
+      monaco.languages.registerHoverProvider(detectedLanguage, {
         provideHover: (model, position) => this.onHover(monaco, model, position),
       });
 
       this.editor = monaco.editor.create(this.container!, {
         value: text,
-        language: 'typescript',
+        language: detectedLanguage,
         readOnly: true,
       });
     });

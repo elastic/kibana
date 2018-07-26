@@ -139,7 +139,7 @@ export class LanguageServerController implements ILanguageServerHandler {
           '-jar',
           path.resolve(javaLangserverPath, launchersFound[0]),
           '-configuration',
-          path.resolve(javaLangserverPath, './config_mac/'),
+          path.resolve(javaLangserverPath, './config_mac/'), // TODO detect platform
           '-data',
           '/tmp/data',
         ],

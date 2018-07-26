@@ -32,5 +32,6 @@ export class LspService {
   public async launchServers() {
     // TODO read from config which LSP should be used
     await this.controller.launchTypescript();
+    await this.controller.launchJava();
   }
 }
