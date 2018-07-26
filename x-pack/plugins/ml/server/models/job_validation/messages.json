@@ -2,12 +2,12 @@
   "field_not_aggregatable": {
     "status": "ERROR",
     "text": "Detector field \"{{fieldName}}\" is not an aggregatable field.",
-    "url": "https://www.elastic.co/guide/en/x-pack/{{version}}/ml-configuring-aggregation.html"
+    "url": "https://www.elastic.co/guide/en/elastic-stack-overview/{{version}}/ml-configuring-aggregation.html"
   },
   "fields_not_aggregatable": {
     "status": "ERROR",
     "text": "One of the detector fields is not an aggregatable field.",
-    "url": "https://www.elastic.co/guide/en/x-pack/{{version}}/ml-configuring-aggregation.html"
+    "url": "https://www.elastic.co/guide/en/elastic-stack-overview/{{version}}/ml-configuring-aggregation.html"
   },
   "cardinality_by_field": {
     "status": "WARNING",
@@ -36,7 +36,7 @@
   "categorization_filters_valid": {
     "status": "SUCCESS",
     "text": "Categorization filters checks passed.",
-    "url": "https://www.elastic.co/guide/en/x-pack/{{version}}/ml-configuring-categories.html"
+    "url": "https://www.elastic.co/guide/en/elastic-stack-overview/{{version}}/ml-configuring-categories.html"
   },
   "categorization_filters_invalid": {
     "status": "ERROR",
@@ -189,7 +189,7 @@
     "status": "SUCCESS",
     "heading": "Model memory limit",
     "text": "Valid and within the estimated model memory limit.",
-    "url": "https://www.elastic.co/guide/en/x-pack/{{version}}/ml-gs-job1-manage.html"
+    "url": "https://www.elastic.co/guide/en/elastic-stack-overview/{{version}}/ml-gs-job1-manage.html"
   },
   "success_time_range": {
     "status": "SUCCESS",
