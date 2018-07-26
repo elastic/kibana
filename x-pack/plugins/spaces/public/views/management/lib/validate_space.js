@@ -36,8 +36,8 @@ export class SpaceValidator {
   validateSpaceDescription(space) {
     if (!this._shouldValidate) return valid();
 
-    if (!space.description) {
-      return invalid(`Please provide a space description`);
+    if (space.description && space.description.length > 2000) {
+      return invalid(`Description must not exceed 2000 characters`);
     }
 
     return valid();
@@ -62,9 +62,9 @@ export class SpaceValidator {
   validateForSave(space) {
     const { isInvalid: isNameInvalid } = this.validateSpaceName(space);
     const { isInvalid: isDescriptionInvalid } = this.validateSpaceDescription(space);
-    const { isInvalid: isContextInvalid } = this.validateSpaceIdentifier(space);
+    const { isInvalid: isIdentifierInvalid } = this.validateSpaceIdentifier(space);
 
-    if (isNameInvalid || isDescriptionInvalid || isContextInvalid) {
+    if (isNameInvalid || isDescriptionInvalid || isIdentifierInvalid) {
       return invalid();
     }
 

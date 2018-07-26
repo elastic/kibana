@@ -21,6 +21,7 @@ import {
   EuiButton,
   EuiPageContentBody,
   EuiHorizontalRule,
+  EuiLoadingSpinner,
 } from '@elastic/eui';
 
 import { DeleteSpacesButton } from '../components';
@@ -37,6 +38,7 @@ import { SpaceValidator } from '../lib/validate_space';
 export class ManageSpacePage extends Component {
   state = {
     space: {},
+    isLoading: true,
   };
 
   constructor(props) {
@@ -57,7 +59,8 @@ export class ManageSpacePage extends Component {
         .then(result => {
           if (result.data) {
             this.setState({
-              space: result.data
+              space: result.data,
+              isLoading: false
             });
           }
         })
@@ -69,94 +72,109 @@ export class ManageSpacePage extends Component {
           toastNotifications.addDanger(`Error loading space: ${message}`);
           this.backToSpacesList();
         });
+    } else {
+      this.setState({ isLoading: false });
     }
   }
 
   render() {
-    const {
-      name = '',
-      description = '',
-    } = this.state.space;
+
+    const content = this.state.isLoading ? this.getLoadingIndicator() : this.getForm();
 
     return (
       <EuiPage className="manageSpacePage">
         <EuiPageBody>
           <EuiPageContent className="manageSpacePage__content">
             <EuiPageContentBody>
-              <EuiForm>
-                {this.getFormHeading()}
-
-                <EuiSpacer />
-
-                <EuiFlexGroup>
-                  <EuiFlexItem style={{ maxWidth: '400px' }}>
-                    <EuiFormRow
-                      label="Name"
-                      {...this.validator.validateSpaceName(this.state.space)}
-                    >
-                      <EuiFieldText
-                        name="name"
-                        placeholder={'Awesome space'}
-                        value={name}
-                        onChange={this.onNameChange}
-                      />
-                    </EuiFormRow>
-                  </EuiFlexItem>
-                  {
-                    name && (
-                      <EuiFlexItem grow={false}>
-                        <EuiFlexGroup responsive={false}>
-                          <EuiFlexItem grow={false}>
-                            <EuiFormRow hasEmptyLabelSpace={true}>
-                              <SpaceAvatar space={this.state.space} />
-                            </EuiFormRow>
-                          </EuiFlexItem>
-                          <CustomizeSpaceAvatar space={this.state.space} onChange={this.onAvatarChange} />
-                        </EuiFlexGroup>
-                      </EuiFlexItem>
-                    )
-                  }
-                </EuiFlexGroup>
-
-                <EuiSpacer />
-
-                {isReservedSpace(this.state.space)
-                  ? null
-                  : (
-                    <Fragment>
-                      <SpaceIdentifier
-                        space={this.state.space}
-                        editable={!this.editingExistingSpace()}
-                        onChange={this.onSpaceIdentifierChange}
-                        validator={this.validator}
-                      />
-                    </Fragment>
-                  )
-                }
-
-                <EuiFormRow
-                  label="Description"
-                  {...this.validator.validateSpaceDescription(this.state.space)}
-                >
-                  <EuiFieldText
-                    name="description"
-                    placeholder={'This is where the magic happens'}
-                    value={description}
-                    onChange={this.onDescriptionChange}
-                  />
-                </EuiFormRow>
-
-                <EuiSpacer />
-
-                <EuiHorizontalRule />
-
-                {this.getFormButtons()}
-
-              </EuiForm>
+              {content}
             </EuiPageContentBody>
           </EuiPageContent>
         </EuiPageBody>
       </EuiPage>
+    );
+  }
+
+  getLoadingIndicator = () => {
+    return <div><EuiLoadingSpinner size={'xl'} /> <EuiTitle><h1>Loading...</h1></EuiTitle></div>;
+  }
+
+  getForm = () => {
+    const {
+      name = '',
+      description = '',
+    } = this.state.space;
+
+    return (
+      <EuiForm>
+        {this.getFormHeading()}
+
+        <EuiSpacer />
+
+        <EuiFlexGroup>
+          <EuiFlexItem style={{ maxWidth: '400px' }}>
+            <EuiFormRow
+              label="Name"
+              {...this.validator.validateSpaceName(this.state.space)}
+            >
+              <EuiFieldText
+                name="name"
+                placeholder={'Awesome space'}
+                value={name}
+                onChange={this.onNameChange}
+              />
+            </EuiFormRow>
+          </EuiFlexItem>
+          {
+            name && (
+              <EuiFlexItem grow={false}>
+                <EuiFlexGroup responsive={false}>
+                  <EuiFlexItem grow={false}>
+                    <EuiFormRow hasEmptyLabelSpace={true}>
+                      <SpaceAvatar space={this.state.space} />
+                    </EuiFormRow>
+                  </EuiFlexItem>
+                  <CustomizeSpaceAvatar space={this.state.space} onChange={this.onAvatarChange} />
+                </EuiFlexGroup>
+              </EuiFlexItem>
+            )
+          }
+        </EuiFlexGroup>
+
+        <EuiSpacer />
+
+        {isReservedSpace(this.state.space)
+          ? null
+          : (
+            <Fragment>
+              <SpaceIdentifier
+                space={this.state.space}
+                editable={!this.editingExistingSpace()}
+                onChange={this.onSpaceIdentifierChange}
+                validator={this.validator}
+              />
+            </Fragment>
+          )
+        }
+
+        <EuiFormRow
+          label="Description (optional)"
+          {...this.validator.validateSpaceDescription(this.state.space)}
+        >
+          <EuiFieldText
+            name="description"
+            placeholder={'This is where the magic happens'}
+            value={description}
+            onChange={this.onDescriptionChange}
+          />
+        </EuiFormRow>
+
+        <EuiSpacer />
+
+        <EuiHorizontalRule />
+
+        {this.getFormButtons()}
+
+      </EuiForm>
     );
   }
 
@@ -285,28 +303,26 @@ export class ManageSpacePage extends Component {
       color,
     };
 
-    if (name && description) {
-      let action;
-      if (this.editingExistingSpace()) {
-        action = this.props.spacesManager.updateSpace(params);
-      } else {
-        action = this.props.spacesManager.createSpace(params);
-      }
-
-      action
-        .then(result => {
-          this.props.spacesNavState.refreshSpacesList();
-          toastNotifications.addSuccess(`Saved '${result.data.name}'`);
-          window.location.hash = `#/management/spaces/list`;
-        })
-        .catch(error => {
-          const {
-            message = ''
-          } = error.data || {};
-
-          toastNotifications.addDanger(`Error saving space: ${message}`);
-        });
+    let action;
+    if (this.editingExistingSpace()) {
+      action = this.props.spacesManager.updateSpace(params);
+    } else {
+      action = this.props.spacesManager.createSpace(params);
     }
+
+    action
+      .then(result => {
+        this.props.spacesNavState.refreshSpacesList();
+        toastNotifications.addSuccess(`Saved '${result.data.name}'`);
+        window.location.hash = `#/management/spaces/list`;
+      })
+      .catch(error => {
+        const {
+          message = ''
+        } = error.data || {};
+
+        toastNotifications.addDanger(`Error saving space: ${message}`);
+      });
   };
 
   backToSpacesList = () => {

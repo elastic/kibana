@@ -123,12 +123,12 @@ export class SpacesGridPage extends Component {
         );
       }
     }, {
-      field: 'description',
-      name: 'Description',
-      sortable: true
-    }, {
       field: 'id',
       name: 'Identifier',
+      sortable: true
+    }, {
+      field: 'description',
+      name: 'Description',
       sortable: true
     }];
   }

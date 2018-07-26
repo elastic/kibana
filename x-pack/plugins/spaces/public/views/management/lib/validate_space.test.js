@@ -39,12 +39,19 @@ describe('validateSpaceName', () => {
 });
 
 describe('validateSpaceDescription', () => {
-  test('it requires a non-empty value', () => {
+  test('is optional', () => {
     const space = {
-      description: ''
     };
 
-    expect(validator.validateSpaceDescription(space)).toEqual({ isInvalid: true, error: `Please provide a space description` });
+    expect(validator.validateSpaceDescription(space)).toEqual({ isInvalid: false });
+  });
+
+  test('it cannot exceed 2000 characters', () => {
+    const space = {
+      description: new Array(2002).join('A')
+    };
+
+    expect(validator.validateSpaceDescription(space)).toEqual({ isInvalid: true, error: `Description must not exceed 2000 characters` });
   });
 });
 
