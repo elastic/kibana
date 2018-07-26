@@ -27,6 +27,7 @@ export default function ({ getService, getPageObjects }) {
   const dashboardExpect = getService('dashboardExpect');
   const queryBar = getService('queryBar');
   const dashboardAddPanel = getService('dashboardAddPanel');
+  const embeddable = getService('embeddable');
   const testSubjects = getService('testSubjects');
   const filterBar = getService('filterBar');
   const dashboardPanelActions = getService('dashboardPanelActions');
@@ -234,7 +235,10 @@ export default function ({ getService, getPageObjects }) {
         await queryBar.submitQuery();
 
         await PageObjects.header.waitUntilLoadingHasFinished();
-        await PageObjects.dashboard.waitForRenderComplete();
+
+        // We are on the visualize page, not dashboard, so can't use "PageObjects.dashboard.waitForRenderComplete();"
+        // as that expects an item with the `data-shared-items-count` tag.
+        await embeddable.waitForRender(2);
         await dashboardExpect.pieSliceCount(3);
 
         await PageObjects.visualize.saveVisualization('Rendering-Test:-animal-sounds-pie');

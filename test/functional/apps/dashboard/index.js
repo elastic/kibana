@@ -54,6 +54,25 @@ export default function ({ getService, loadTestFile, getPageObjects }) {
       loadTestFile(require.resolve('./_panel_expand_toggle'));
       loadTestFile(require.resolve('./_dashboard_grid'));
       loadTestFile(require.resolve('./_dashboard_snapshots'));
+      loadTestFile(require.resolve('./_dashboard_snapshots'));
+      loadTestFile(require.resolve('./_dashboard_snapshots'));
+      loadTestFile(require.resolve('./_dashboard_snapshots'));
+      loadTestFile(require.resolve('./_dashboard_snapshots'));
+      loadTestFile(require.resolve('./_dashboard_snapshots'));
+      loadTestFile(require.resolve('./_dashboard_snapshots'));
+      loadTestFile(require.resolve('./_dashboard_snapshots'));
+      loadTestFile(require.resolve('./_dashboard_snapshots'));
+      loadTestFile(require.resolve('./_dashboard_snapshots'));
+      loadTestFile(require.resolve('./_dashboard_snapshots'));
+      loadTestFile(require.resolve('./_dashboard_snapshots'));
+      loadTestFile(require.resolve('./_dashboard_snapshots'));
+      loadTestFile(require.resolve('./_dashboard_snapshots'));
+      loadTestFile(require.resolve('./_dashboard_snapshots'));
+      loadTestFile(require.resolve('./_dashboard_snapshots'));
+      loadTestFile(require.resolve('./_dashboard_snapshots'));
+      loadTestFile(require.resolve('./_dashboard_snapshots'));
+      loadTestFile(require.resolve('./_dashboard_snapshots'));
+      loadTestFile(require.resolve('./_dashboard_snapshots'));
       loadTestFile(require.resolve('./_view_edit'));
     });
 
