@@ -17,7 +17,6 @@
  * under the License.
  */
 
-import expect from 'expect.js';
 import { map as mapAsync } from 'bluebird';
 
 export function SettingsPageProvider({ getService, getPageObjects }) {
@@ -46,10 +45,8 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
 
     async clickKibanaSettings() {
       await this.clickLinkText('Advanced Settings');
-      const isSettingsLoaded = await testSubjects.exists('managementSettingsTitle');
-
-      // Verify navigation is successful, or else fail the test consuming this.
-      expect(isSettingsLoaded).to.be(true);
+      // Verify navigation is successful.
+      await testSubjects.existOrFail('managementSettingsTitle');
     }
 
     async clickKibanaSavedObjects() {
