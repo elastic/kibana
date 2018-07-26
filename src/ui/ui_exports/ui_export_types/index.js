@@ -51,7 +51,9 @@ export {
   home,
   visTypeEnhancers,
   aliases,
-  visualize
+  visualize,
+  search,
+  autocompleteProviders,
 } from './ui_app_extensions';
 
 export {

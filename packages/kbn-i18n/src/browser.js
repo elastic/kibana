@@ -17,12 +17,6 @@
  * under the License.
  */
 
-import * as angular from './angular';
-import * as react from './react';
-import * as i18nCore from './core/i18n';
+import * as i18nCore from './core';
 
-export { formats } from './core/formats';
-
-export const AngularI18n = angular;
-export const ReactI18n = react;
 export const i18n = i18nCore;

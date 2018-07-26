@@ -31,6 +31,7 @@ exports[`Header should render normally 1`] = `
         <p>
           <EuiTextColor
             color="subdued"
+            component="span"
           >
             Kibana uses index patterns to retrieve data from Elasticsearch indices for things like visualizations.
           </EuiTextColor>
@@ -43,6 +44,7 @@ exports[`Header should render normally 1`] = `
     >
       <EuiSwitch
         checked={true}
+        id="checkboxShowSystemIndices"
         label="Include system indices"
         onChange={[Function]}
       />
@@ -85,6 +87,7 @@ exports[`Header should render without including system indices 1`] = `
         <p>
           <EuiTextColor
             color="subdued"
+            component="span"
           >
             Kibana uses index patterns to retrieve data from Elasticsearch indices for things like visualizations.
           </EuiTextColor>
@@ -97,6 +100,7 @@ exports[`Header should render without including system indices 1`] = `
     >
       <EuiSwitch
         checked={false}
+        id="checkboxShowSystemIndices"
         label="Include system indices"
         onChange={[Function]}
       />

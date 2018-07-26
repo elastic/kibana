@@ -7,6 +7,7 @@
 import d3 from 'd3';
 import 'ace';
 import rison from 'rison-node';
+import React from 'react';
 
 // import the uiExports that we want to "use"
 import 'uiExports/fieldFormats';
@@ -390,7 +391,7 @@ app.controller('graphuiPlugin', function ($scope, $route, $interval, $http, kbnU
     return $http.post('../api/graph/graphExplore', request)
       .then(function (resp) {
         if (resp.data.resp.timed_out) {
-          notify.warning('Exploration timed out');
+          toastNotifications.addWarning('Exploration timed out');
         }
         responseHandler(resp.data.resp);
       })
@@ -538,7 +539,10 @@ app.controller('graphuiPlugin', function ($scope, $route, $interval, $http, kbnU
   $scope.saveUrlTemplate = function () {
     const found = $scope.newUrlTemplate.url.search(drillDownRegex) > -1;
     if (!found) {
-      notify.warning('Invalid URL - the url must contain a {{gquery}} string');
+      toastNotifications.addWarning({
+        title: 'Invalid URL',
+        text: 'The URL must contain a {{gquery}} string',
+      });
       return;
     }
     if ($scope.newUrlTemplate.templateBeingEdited) {
@@ -715,9 +719,14 @@ app.controller('graphuiPlugin', function ($scope, $route, $interval, $http, kbnU
       .on('zoom', redraw));
 
 
+  const managementUrl = chrome.getNavLinkById('kibana:management').url;
+  const url = `${managementUrl}/kibana/indices`;
 
   if ($scope.indices.length === 0) {
-    notify.warning('Oops, no data sources. First head over to Kibana settings and define a choice of index pattern');
+    toastNotifications.addWarning({
+      title: 'No data source',
+      text: <p>Go to <a href={url}>Management &gt; Index Patterns</a> and create an index pattern</p>,
+    });
   }
 
 
@@ -941,7 +950,7 @@ app.controller('graphuiPlugin', function ($scope, $route, $interval, $http, kbnU
     if ($scope.allSavingDisabled) {
       // It should not be possible to navigate to this function if allSavingDisabled is set
       // but adding check here as a safeguard.
-      notify.warning('Saving is disabled');
+      toastNotifications.addWarning('Saving is disabled');
       return;
     }
     initWorkspaceIfRequired();

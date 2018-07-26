@@ -19,7 +19,6 @@
 
 const { resolve, relative, dirname } = require('path');
 
-const kebabCase = require('lodash.kebabcase');
 const startCase = require('lodash.startcase');
 const camelCase = require('lodash.camelcase');
 const snakeCase = require('lodash.snakecase');
@@ -86,9 +85,9 @@ module.exports = function({ name }) {
       Object.assign(
         {
           templateVersion: pkg.version,
-          kebabCase,
           startCase,
           camelCase,
+          snakeCase,
           name,
         },
         answers

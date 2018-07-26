@@ -40,7 +40,7 @@ export default function ({ getService, getPageObjects }) {
         const toTime = '2015-09-23 18:31:44.000';
 
         log.debug('navigateToApp visualize');
-        await PageObjects.common.navigateToUrl('visualize', 'new');
+        await PageObjects.visualize.navigateToNewVisualization();
         log.debug('clickTileMap');
         await PageObjects.visualize.clickTileMap();
         await PageObjects.visualize.clickNewSearch();
@@ -71,7 +71,7 @@ export default function ({ getService, getPageObjects }) {
         const toTime = '2015-09-23 18:31:44.000';
 
         log.debug('navigateToApp visualize');
-        await PageObjects.common.navigateToUrl('visualize', 'new');
+        await PageObjects.visualize.navigateToNewVisualization();
         log.debug('clickTileMap');
         await PageObjects.visualize.clickTileMap();
         await PageObjects.visualize.clickNewSearch();

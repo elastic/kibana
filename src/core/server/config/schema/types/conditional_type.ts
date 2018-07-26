@@ -22,7 +22,9 @@ import { internals } from '../internals';
 import { Reference } from '../references';
 import { Type, TypeOptions } from './type';
 
-export class ConditionalType<A, B, C> extends Type<B | C> {
+export type ConditionalTypeValue = string | number | boolean | object | null;
+
+export class ConditionalType<A extends ConditionalTypeValue, B, C> extends Type<B | C> {
   constructor(
     leftOperand: Reference<A>,
     rightOperand: Reference<A> | A,
