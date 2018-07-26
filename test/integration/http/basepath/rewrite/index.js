@@ -24,15 +24,38 @@ export default function ({ getService }) {
   describe('Kibana server with basePath and with rewriteBasePath', () => {
     const basePath = '/abc/xyz';
 
-    it('requires root requests to contain basePath', async () => {
+    it('requests to the basePath redirect once', async () => {
+      // When not following redirects, check for 302 Found
+      // and make sure the location header contains basePath
       await supertest.get(`/abc/xyz`)
         .expect(302)
-        .expect('location', `${basePath}/app/kibana`);
+        .expect('Location', `${basePath}/app/kibana`);
+
+      // When following redirects, check for 200 OK
+      await supertest.get(`/abc/xyz`)
+        .redirects(1)
+        .expect(200);
     });
 
-    it('cannot find root requests', async () => {
+    it('requests to root path redirect twice', async () => {
       await supertest.get(`/`)
-        .expect(404);
+        .redirects(1)
+        .expect(302)
+        .expect('Location', `${basePath}/app/kibana`);
+
+      await supertest.get(`/`)
+        .redirects(2)
+        .expect(200);
+    });
+
+    it('requests to old basePath redirect once to new basePath', async () => {
+      await supertest.get(`/def/app/kibana`)
+        .expect(302)
+        .expect('Location', `${basePath}/app/kibana`);
+
+      await supertest.get(`/def/app/kibana`)
+        .redirects(1)
+        .expect(200);
     });
   });
 }

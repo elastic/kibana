@@ -25,7 +25,7 @@ export async function runKibanaServer({ procs, config, options }) {
 
   await procs.run('kibana', {
     cmd: getKibanaCmd(installDir),
-    args: collectCliArgs(config, options),
+    args: filterCliArgs(collectCliArgs(config, options)),
     env: {
       FORCE_COLOR: 1,
       ...process.env,
@@ -59,10 +59,33 @@ function collectCliArgs(config, { installDir, extraKbnOpts }) {
     serverArgs,
     args => (installDir ? args.filter(a => a !== '--oss') : args),
     args => {
-      return installDir ? [...args, ...buildArgs] : [KIBANA_EXEC_PATH, ...args, ...sourceArgs];
+      return installDir ? [...buildArgs, ...args] : [KIBANA_EXEC_PATH, ...sourceArgs, ...args];
     },
     args => args.concat(extraKbnOpts || [])
   );
+}
+
+/*
+ * Filter the cli args to remove duplications and
+ * overridden options
+ */
+function filterCliArgs(args) {
+  const argv = [...args].slice(1);
+
+  const filteredArgv = argv.reduce((acc, val, ind) => {
+    if (isBasePathSettingOverridden(argv, val, ind)) {
+      return acc;
+    }
+
+    // is any other setting overridden?
+    if (findIndexFrom(argv, ind, opt => opt.split('=')[0] === val.split('=')[0]) > 0) {
+      return acc;
+    }
+
+    return [...acc, val];
+  }, []);
+
+  return [args[0], ...filteredArgv];
 }
 
 /*
@@ -74,4 +97,21 @@ function pipe(arr, ...fns) {
   return fns.reduce((acc, fn) => {
     return fn(acc);
   }, arr);
+}
+
+function isBasePathSettingOverridden(args, val, ind) {
+  const key = val.split('=')[0];
+  const basePathKeys = ['--no-base-path', '--server.basePath'];
+
+  if (basePathKeys.includes(key)) {
+    if (findIndexFrom(args, ind, opt => basePathKeys.includes(opt.split('=')[0])) > 0) {
+      return true;
+    }
+  }
+
+  return false;
+}
+
+function findIndexFrom(array, index, ...args) {
+  return [...array].slice(++index).findIndex(...args);
 }
