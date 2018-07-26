@@ -1,107 +1,162 @@
-.canvas__page-manager {
+
+.canvasPageManager {
   white-space: nowrap;
-  overflow-x: auto;
-  overflow-y: hidden;
+  max-width: 100%;
 
-  .canvas__page-manager--pages {
-    max-height: ($euiSizeXXL + $euiSizeS) * 3;
-    padding-top: $euiSizeS;
-    margin-bottom: $euiSizeS;
+  .canvasPageManager__pages {
+    position: relative;
+    height: 160px;
   }
 
-  .canvas__page-manager--pages a {
-    box-shadow: none;
-    padding-left: $euiSizeXS;
+  .canvasPageManager__pageScroll {
+    @include euiScrollBar;
+    overflow-x: auto;
+    overflow-y: hidden;
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 0;
+    bottom: 0;
+
   }
 
-  .canvas__page-manager--page.active {
-    box-shadow: 0 0 1px 2px $euiColorPrimary;
+  .canvasPageManager__pageList > div {
+    animation: trayPop $euiAnimSpeedNormal $euiAnimSlightResistance;
+    opacity: 0;
+    animation-fill-mode: forwards;
   }
 
-  .canvas__page-manager--page {
+  @for $i from 1 through 10 {
+    .canvasPageManager__pageList > div:nth-child(#{$i}n) {
+      animation-delay: #{$i * 0.05}s;
+    }
+  }
+
+  .canvasPageManager__addPage {
+    width: $euiSizeXXL + $euiSize;
+    background: $euiColorSecondary;
+    color: $euiColorGhost;
+    opacity: 0;
+    animation: buttonPop $euiAnimSpeedNormal $euiAnimSlightResistance;
+    animation-fill-mode: forwards;
+    height: 160px;
+  }
+
+  .canvasPageManager__addPageTip {
+    display: block;
+    height: 100%;
+  }
+
+  .canvasPageManager__page {
+    padding: $euiSize $euiSize $euiSize $euiSizeS;
+    color: inherit;
+    min-height: 144px;
+    max-height: 160px;
+
+    &:focus, &-isActive {
+      background-color: darken($euiColorLightestShade, 10%);
+      outline: none;
+      text-decoration: none;
+    }
+
+    &-isActive:focus {
+      .canvasPageManager__pagePreview {
+        outline-color: $euiColorVis0;
+      }
+    }
+
+    &:hover {
+      text-decoration: none;
+
+      .canvasPageManager__pagePreview {
+        @include euiBottomShadowMedium($opacity: .3);
+      }
+
+      .canvasPageManager__controls {
+        visibility: visible;
+        opacity: 1;
+      }
+
+      .canvasPageManager__removeIcon {
+        visibility: visible;
+        opacity: 1;
+      }
+    }
+
+    &-isActive {
+      .canvasPageManager__pagePreview {
+        @include euiBottomShadowMedium;
+        outline: $euiBorderThick;
+        outline-color: $euiColorDarkShade;
+      }
+    }
+
+    // layout overrides
+    .canvasInteractable-actions,
+    .canvasInteractable-resize,
+    .canvasRenderEl--remove-icon {
+      display: none;
+    }
+  }
+
+  .canvasPageManager__pageNumber {
+    color: $euiColorDarkShade !important;
+  }
+
+  .canvasPageManager__pagePreview {
+    @include euiBottomShadowSmall;
+
+    height: ($euiSizeXXL + $euiSizeS) * 2;
+    position: relative;
     white-space: initial;
     position: relative;
-    color: initial;
-    border: $euiBorderThin;
-    display: inline-block;
     vertical-align: top;
-    font-weight: bold;
     width: ($euiSizeXL * 2);
     height: ($euiSizeXXL + $euiSizeS) * 2;
-    margin: 0 $euiSize $euiSizeS 0;
-    cursor: pointer;
+    overflow: hidden;
+    margin: 0 auto;
 
-    &:hover {
-      background-color: $euiColorMediumShade;
-      .canvas__page-manager--page-controls {
-        bottom: 0;
-        color: $euiColorLightShade;
-        display: block;
-        position: absolute;
-        text-align: center;
-        width: 100%;
-        background-color: $euiColorDarkestShade;
-        opacity: 0.75;
-
-        > * {
-          padding: $euiSizeXS;
-        }
-
-        .delete,
-        .duplicate {
-          font-size: $euiFontSize;
-        }
-
-        .delete {
-          color: $euiColorDanger;
-        }
-
-        .duplicate {
-          color: $euiColorPrimary;
-        }
-      }
-
-      .canvas__page-manager--page-remove {
-        display: inline;
-      }
-    }
-
-    .canvas__page-manager--page-remove {
-      display: none;
+    .canvasPositionable {
       position: absolute;
-      top: -$euiSizeS;
-      right: -$euiSizeM;
-    }
-
-    .canvas__page-manager--page-controls {
-      display: none;
-    }
-
-    .canvas__page-manager--page-index {
-      overflow: hidden;
-      height: ($euiSizeXXL + $euiSizeS) * 2;
-    }
-
-    .canvas__interactable-actions,
-    .canvas__interactable-resize,
-    .canvas__element--remove-icon {
-      display: none;
     }
   }
 
-  .canvas__page-manager--page-add {
-    display: inline-block;
-    line-height: $euiSizeXXL * 2;
-    font-size: $euiFontSizeXXL;
-    padding: 0 $euiSizeS;
-    color: $euiColorMediumShade;
-
-    &:hover {
-      color: $euiColorEmptyShade;
-    }
+  .canvasPageManager__controls {
+    margin-top: $euiSizeS;
+    visibility: hidden;
+    opacity: 0;
+    transition: opacity $euiAnimSpeedFast $euiAnimSlightResistance;
+    transition-delay: $euiAnimSpeedNormal;
+    border-radius: $euiBorderRadius;
   }
+}
 
-  .canvas__positionable {
-    position: absolute;
+@keyframes buttonPop {
+  0% {
+    opacity: 0;
+    transform: translateX(100%);
+  }
+  1% {
+    opacity: 0;
+    transform: translateX(100%);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes trayPop {
+  0% {
+    opacity: 0;
+    transform: translateY(100%);
+  }
+  1% {
+    opacity: 0;
+    transform: translateY(100%);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
   }
 }

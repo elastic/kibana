@@ -28,7 +28,7 @@ export const ConfirmModal = props => {
   return (
     <EuiOverlayMask>
       <EuiConfirmModal
-        className={`canvas__confirm_modal ${className || ''}`}
+        className={`canvasConfirmModal ${className || ''}`}
         title={title}
         onCancel={cancel}
         onConfirm={confirm}

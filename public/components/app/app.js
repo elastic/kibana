@@ -42,7 +42,7 @@ export class App extends React.PureComponent {
     const restoreRoute = storage.get(LOCALSTORAGE_LASTPAGE);
 
     return (
-      <div className="canvas canvas__container">
+      <div className="canvas canvasContainer">
         <Router
           routes={routes}
           restoreRoute={restoreRoute}

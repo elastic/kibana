@@ -23,12 +23,12 @@ export const AppearanceForm = ({ padding, opacity, onChange }) => {
   return (
     <EuiFlexGroup gutterSize="s">
       <EuiFlexItem>
-        <EuiFormRow label="Padding">
+        <EuiFormRow label="Padding" compressed>
           <EuiFieldNumber value={Number(paddingVal)} onChange={namedChange('padding')} />
         </EuiFormRow>
       </EuiFlexItem>
       <EuiFlexItem>
-        <EuiFormRow label="Opacity">
+        <EuiFormRow label="Opacity" compressed>
           <EuiSelect defaultValue={opacity} options={opacities} onChange={namedChange('opacity')} />
         </EuiFormRow>
       </EuiFlexItem>

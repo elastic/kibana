@@ -9,10 +9,10 @@ export const DropdownFilter = ({ value, onChange, commit, choices }) => {
         e.preventDefault();
         commit(value);
       }}
-      className="canvas__element__dropdown_filter"
+      className="canvasDropdownFilter"
     >
       <FormControl
-        className="canvas__element__dropdown_filter--input"
+        className="canvasDropdownFilter--input"
         componentClass="select"
         placeholder="select"
         value={value}

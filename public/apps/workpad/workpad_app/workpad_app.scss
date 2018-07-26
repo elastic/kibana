@@ -1,36 +1,71 @@
-.canvas__workpad_app {
+.canvasLayout {
   display: flex;
+  background: $euiColorLightestShade;
   flex-grow: 1;
-  flex-direction: column;
   overflow: hidden;
 }
 
-.canvas__workpad_app--main {
-  background-color: $euiColorLightestShade;
-  display: flex;
-  flex: 1 1 auto;
-  flex-direction: row;
-  height: 0px; // Essentially a hack to make the sidebar and workspace scroll when the tray is open
-}
-
-.canvas__workpad_app--workpad {
-  background-color: $euiColorLightestShade;
-  padding: $euiSize;
-  flex-grow: 1;
+.canvasLayout__rows {
   display: flex;
   flex-direction: column;
-  overflow: auto;
+  flex-grow: 1;
+  max-height: 100vh;
 }
 
-.canvas__workpad_app--workspace {
-  flex: 0 0;
-  width: 0;
+.canvasLayout__cols {
+  display: flex;
+  align-items: stretch;
+  flex-grow: 1;
 }
 
-.canvas__workpad_app--sidebar {
-  background-color: darken($euiColorLightestShade, 2%);
-  width: 350px;
+.canvasLayout__stage {
+  flex-grow: 1;
+  flex-basis: 0%;
+  display: flex;
+  flex-direction: column;
+}
+
+.canvasLayout__stageHeader {
   flex-grow: 0;
+  flex-basis: auto;
+  padding: $euiSizeM $euiSize $euiSizeS $euiSize;
+}
+
+.canvasLayout__stageContent {
+  flex-grow: 1;
+  flex-basis: 0%;
+  position: relative;
+}
+
+.canvasLayout__stageContentOverflow {
+  @include euiScrollBar;
+
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
   overflow: auto;
-  border-left: $euiBorderThin;
+  display: flex;
+  align-items: center;
+}
+
+.canvasLayout__sidebar {
+  flex-grow: 0;
+  flex-basis: auto;
+  width: 350px;
+  background: darken($euiColorLightestShade, 2%);
+  display: flex;
+
+  .euiPanel {
+    margin-bottom: $euiSizeS;
+  }
+}
+
+.canvasLayout__footer {
+  flex-grow: 0;
+  flex-basis: auto;
+  width: 100%;
+  background-color: $euiColorLightestShade;
+  z-index: $euiZNavigation;
 }

@@ -2,9 +2,9 @@ import React from 'react';
 import PropTypes from 'prop-types';
 
 export const Suggestion = ({ item }) => (
-  <div className="suggestion">
-    <div className="name">{item.name}</div>
-    <div className="description">{item.description}</div>
+  <div className="canvasExpressionSuggestion">
+    <div className="canvasExpressionSuggestion__name">{item.name}</div>
+    <div className="canvasExpressionSuggestion__desc">{item.description}</div>
   </div>
 );
 

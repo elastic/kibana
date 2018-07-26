@@ -1,25 +1,31 @@
 import React from 'react';
 import PropTypes from 'prop-types';
+import { EuiTitle, EuiFlexItem, EuiFlexGroup } from '@elastic/eui';
 import { Tooltip } from '../tooltip';
 
 export const SidebarSectionTitle = ({ title, tip, children }) => {
+  const formattedTitle = (
+    <EuiTitle size="xs">
+      <h4>{title}</h4>
+    </EuiTitle>
+  );
   const renderTitle = () => {
     if (tip) {
       return (
-        <Tooltip placement="left" text={tip}>
-          <span>{title}</span>
+        <Tooltip placement="left" content={tip}>
+          {formattedTitle}
         </Tooltip>
       );
     }
 
-    return <span>{title}</span>;
+    return formattedTitle;
   };
 
   return (
-    <div className="canvas__sidebar-section-title">
-      {renderTitle(tip)}
-      {children}
-    </div>
+    <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
+      <EuiFlexItem grow={false}>{renderTitle(tip)}</EuiFlexItem>
+      <EuiFlexItem grow={false}>{children}</EuiFlexItem>
+    </EuiFlexGroup>
   );
 };
 

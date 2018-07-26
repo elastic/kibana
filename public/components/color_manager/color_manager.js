@@ -10,6 +10,7 @@ export const ColorManager = ({ value, addColor, removeColor, onChange }) => (
     </EuiFlexItem>
     <EuiFlexItem grow={5} style={{ display: 'inline-block' }}>
       <EuiFieldText
+        compressed
         value={value || ''}
         placeholder="#hex color"
         onChange={e => onChange(e.target.value)}

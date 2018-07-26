@@ -1,27 +1,27 @@
 export const render = () => ({
   name: 'render',
-  displayName: 'Element Style',
+  displayName: 'Element style',
   help: 'Setting for the container around your element',
   modelArgs: [],
   requiresContext: false,
   args: [
     {
       name: 'containerStyle',
-      displayName: 'Container Style',
+      displayName: 'Container',
       help: 'Tweak the appearance of the element container',
       argType: 'containerStyle',
       default: '{containerStyle}',
     },
     {
       name: 'css',
-      displayName: 'Custom CSS',
+      displayName: 'CSS',
       help: 'A CSS stylesheet scoped to your element',
       argType: 'textarea',
-      default: `".canvas__element {
+      default: `".canvasRenderEl {
 
 }"`,
       options: {
-        confirm: 'Apply Stylesheet',
+        confirm: 'Apply stylesheet',
       },
     },
   ],

@@ -8,7 +8,7 @@ export const FauxSelect = ({ handleClick, children }) => (
     gutterSize="none"
     alignItems="center"
     justifyContent="spaceBetween"
-    className="euiSelect canvas__faux-select"
+    className="euiSelect  euiSelect--compressed euiSelect--fullWidth"
     style={{ padding: 12 }} // match padding with EuiSelect
     onClick={handleClick}
   >

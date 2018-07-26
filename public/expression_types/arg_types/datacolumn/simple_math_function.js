@@ -18,6 +18,7 @@ export const SimpleMathFunction = ({ onChange, value, inputRef, onlymath }) => {
 
   return (
     <EuiSelect
+      compressed
       options={options}
       inputRef={inputRef}
       defaultValue={value || ''}

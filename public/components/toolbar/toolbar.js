@@ -1,133 +1,130 @@
 import React from 'react';
 import PropTypes from 'prop-types';
+import {
+  EuiButtonEmpty,
+  EuiButtonIcon,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiOverlayMask,
+  EuiModal,
+  EuiModalBody,
+  EuiModalFooter,
+  EuiButton,
+} from '@elastic/eui';
 import { Navbar } from '../navbar';
-import { NavbarButton } from '../navbar_button';
-import { FeedbackButton } from '../feedback_button';
-import { NavbarDivider } from '../navbar_divider';
-import { Expression } from '../expression';
-import { Datasource } from '../datasource';
 import { WorkpadLoader } from '../workpad_loader';
 import { PageManager } from '../page_manager';
-import { AssetManager } from '../asset_manager';
-import { ElementTypes } from './element_types';
+import { Expression } from '../expression';
 import { Tray } from './tray';
 
 export const Toolbar = props => {
   const {
     editing,
-    hasAssets,
+    selectedElement,
     tray,
     setTray,
-    addElement,
-    duplicateElement,
-    elementLayer,
     previousPage,
     nextPage,
-    elementIsSelected,
     selectedPageNumber,
+    workpadName,
     totalPages,
   } = props;
+
+  const elementIsSelected = Boolean(selectedElement);
+
   const done = () => setTray(null);
+
   const showHideTray = exp => {
     if (tray && tray === exp) return done();
     setTray(exp);
   };
 
-  const createElement = element => {
-    addElement(element);
-
-    // close the tray
-    done();
-  };
+  const workpadLoader = (
+    <EuiOverlayMask>
+      <EuiModal onClose={done} style={{ width: '1080px' }}>
+        <EuiModalBody>
+          <WorkpadLoader onClose={done} />
+        </EuiModalBody>
+        <EuiModalFooter>
+          <EuiButton size="s" onClick={done}>
+            Dismiss
+          </EuiButton>
+        </EuiModalFooter>
+      </EuiModal>
+    </EuiOverlayMask>
+  );
 
   const trays = {
     pageManager: <PageManager />,
-    assetManager: <AssetManager />,
-    elements: <ElementTypes done={done} onClick={createElement} />,
+    workpadloader: workpadLoader,
     expression: !elementIsSelected ? null : <Expression done={done} />,
-    datasource: !elementIsSelected ? null : <Datasource done={done} />,
-    workpadloader: <WorkpadLoader onClose={done} />,
   };
 
   return !editing ? null : (
-    <div className="canvas__toolbar">
-      {trays[tray] && <Tray>{trays[tray]}</Tray>}
-
+    <div>
+      {trays[tray] && <Tray done={done}>{trays[tray]}</Tray>}
       <Navbar>
-        <NavbarButton onClick={previousPage} disabled={selectedPageNumber <= 1}>
-          <i className="fa fa-chevron-left" />
-        </NavbarButton>
-        {selectedPageNumber}
-        <NavbarButton onClick={nextPage} disabled={selectedPageNumber >= totalPages}>
-          <i className="fa fa-chevron-right" />
-        </NavbarButton>
-
-        <NavbarDivider />
-
-        <NavbarButton onClick={() => showHideTray('workpadloader')}>
-          <i className="fa fa-briefcase" /> Workpads
-        </NavbarButton>
-        <NavbarButton onClick={() => showHideTray('pageManager')}>
-          <i className="fa fa-file" /> Pages
-        </NavbarButton>
-        <NavbarButton onClick={() => showHideTray('elements')}>
-          <i className="fa fa-plus" /> Elements
-        </NavbarButton>
-
-        {hasAssets && (
-          <NavbarButton onClick={() => showHideTray('assetManager')}>
-            <i className="fa fa-image" /> Assets
-          </NavbarButton>
-        )}
-
-        {elementIsSelected && (
-          <span>
-            <NavbarDivider />
-
-            <NavbarButton onClick={() => showHideTray('datasource')}>
-              <i className="fa fa-database" /> Datasource
-            </NavbarButton>
-            <NavbarButton onClick={() => showHideTray('expression')}>
-              <i className="fa fa-terminal" /> Code
-            </NavbarButton>
-
-            <NavbarDivider />
-
-            <NavbarButton onClick={() => elementLayer(Infinity)}>
-              <i className="fa fa-arrow-circle-up" />
-            </NavbarButton>
-            <NavbarButton onClick={() => elementLayer(1)}>
-              <i className="fa fa-arrow-up" />
-            </NavbarButton>
-            <NavbarButton onClick={() => elementLayer(-1)}>
-              <i className="fa fa-arrow-down" />
-            </NavbarButton>
-            <NavbarButton onClick={() => elementLayer(-Infinity)}>
-              <i className="fa fa-arrow-circle-down" />
-            </NavbarButton>
-
-            <NavbarButton onClick={() => duplicateElement()}>
-              <i className="fa fa-clone" /> Clone
-            </NavbarButton>
-          </span>
-        )}
-        <FeedbackButton />
+        <EuiFlexGroup alignItems="center" gutterSize="none" className="canvasNavBar__controls">
+          <EuiFlexItem grow={false}>
+            <EuiButtonEmpty
+              color="text"
+              iconType="grid"
+              onClick={() => showHideTray('workpadloader')}
+            >
+              {workpadName}
+            </EuiButtonEmpty>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false} />
+          <EuiFlexItem grow={false}>
+            <EuiButtonIcon
+              color="text"
+              onClick={previousPage}
+              iconType="arrowLeft"
+              disabled={selectedPageNumber <= 1}
+              aria-label="Previous Page"
+            />
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiButtonEmpty color="text" onClick={() => showHideTray('pageManager')}>
+              Page {selectedPageNumber}
+              {totalPages > 1 ? ` of ${totalPages}` : null}
+            </EuiButtonEmpty>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiButtonIcon
+              color="text"
+              onClick={nextPage}
+              iconType="arrowRight"
+              disabled={selectedPageNumber >= totalPages}
+              aria-label="Next Page"
+            />
+          </EuiFlexItem>
+          <EuiFlexItem />
+          {elementIsSelected && (
+            <EuiFlexItem grow={false}>
+              <EuiButtonEmpty
+                color="text"
+                iconType="editorCodeBlock"
+                onClick={() => showHideTray('expression')}
+              >
+                Expression editor
+              </EuiButtonEmpty>
+            </EuiFlexItem>
+          )}
+        </EuiFlexGroup>
       </Navbar>
     </div>
   );
 };
 
 Toolbar.propTypes = {
+  workpadName: PropTypes.string,
   editing: PropTypes.bool,
-  hasAssets: PropTypes.bool,
   tray: PropTypes.node,
   setTray: PropTypes.func.isRequired,
-  addElement: PropTypes.func.isRequired,
-  duplicateElement: PropTypes.func.isRequired,
-  elementLayer: PropTypes.func,
   nextPage: PropTypes.func.isRequired,
   previousPage: PropTypes.func.isRequired,
   selectedPageNumber: PropTypes.number.isRequired,
   totalPages: PropTypes.number.isRequired,
-  elementIsSelected: PropTypes.bool.isRequired,
+  selectedElement: PropTypes.object,
 };

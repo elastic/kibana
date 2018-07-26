@@ -1,4 +1,4 @@
-export const fullscreenClass = 'canvas-fullscreen';
+export const fullscreenClass = 'canvas-isFullscreen';
 
 export function setFullscreen(fullscreen, doc = document) {
   const enabled = Boolean(fullscreen);

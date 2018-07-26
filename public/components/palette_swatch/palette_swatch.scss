@@ -1,23 +1,26 @@
-.canvas__palette-swatch {
+.canvasPaletteSwatch {
   display: inline-block;
   position: relative;
-  height: $euiSizeL;
+  height: $euiSizeXS;
   width: 100%;
   overflow: hidden;
-  border-radius: $euiSize;
-  border: 2px solid $euiColorDarkShade;
+  text-align: left;
+  transform: scaleY(1);
+  transition: transform $euiAnimSlightResistance $euiAnimSpeedExtraFast;
 
-  .canvas__palette-swatch--background {
+  .canvasPaletteSwatch__background {
     position: absolute;
-    height: $euiSizeL;
+    height: $euiSizeXS;
     top: 0;
     left: 0;
     width: 100%;
+    transform: scaleY(1);
+    transition: transform $euiAnimSlightResistance $euiAnimSpeedExtraFast;
   }
 
-  .canvas__palette-swatch--foreground {
+  .canvasPaletteSwatch__foreground {
     position: absolute;
-    height: $euiSizeL + 2px; // TODO: No idea why this can't be 25, but it leaves a 1px white spot in the palettePicker if its 25
+    height: 100%; // TODO: No idea why this can't be 25, but it leaves a 1px white spot in the palettePicker if its 25
     top: 0;
     left: 0;
     white-space: nowrap;
@@ -25,7 +28,7 @@
     display: flex;
   }
 
-  .canvas__palette-swatch--box {
+  .canvasPaletteSwatch__box {
     display: inline-block;
     width: 100%;
   }

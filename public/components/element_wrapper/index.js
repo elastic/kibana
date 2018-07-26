@@ -1,13 +1,12 @@
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
-import { getFullscreen, getEditing } from '../../state/selectors/app';
+import { getEditing } from '../../state/selectors/app';
 import { getResolvedArgs, getSelectedPage } from '../../state/selectors/workpad';
 import { getState, getValue, getError } from '../../lib/resolved_arg';
 import { ElementWrapper as Component } from './element_wrapper';
 import { createHandlers as createHandlersWithDispatch } from './lib/handlers';
 
 const mapStateToProps = (state, { element }) => ({
-  isFullscreen: getFullscreen(state),
   isEditing: getEditing(state),
   resolvedArg: getResolvedArgs(state, element.id, 'expressionRenderable'),
   selectedPage: getSelectedPage(state),
@@ -19,17 +18,19 @@ const mapDispatchToProps = (dispatch, { element }) => ({
 
 const mergeProps = (stateProps, dispatchProps, ownProps) => {
   const { resolvedArg, selectedPage } = stateProps;
-  const renderable = getValue(resolvedArg);
-  const { element } = ownProps;
+  const { element, restProps } = ownProps;
+  const { id, selected, transformMatrix, a, b } = element;
 
   return {
+    ...restProps, // pass through unused props
+    id, //pass through useful parts of the element object
+    selected,
+    transformMatrix,
+    a,
+    b,
     state: getState(resolvedArg),
     error: getError(resolvedArg),
-    renderable,
-    transformMatrix: element.transformMatrix,
-    id: element.id,
-    a: element.a,
-    b: element.b,
+    renderable: getValue(resolvedArg),
     createHandlers: dispatchProps.createHandlers(selectedPage),
   };
 };
@@ -39,5 +40,9 @@ export const ElementWrapper = connect(mapStateToProps, mapDispatchToProps, merge
 ElementWrapper.propTypes = {
   element: PropTypes.shape({
     id: PropTypes.string.isRequired,
+    selected: PropTypes.bool,
+    transformMatrix: PropTypes.arrayOf(PropTypes.number).isRequired,
+    a: PropTypes.number.isRequired,
+    b: PropTypes.number.isRequired,
   }).isRequired,
 };

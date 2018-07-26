@@ -1,0 +1,26 @@
+// It is up to the element to handle its overflow.
+.canvasElement {
+  height: 100%;
+  width: 100%;
+}
+
+.canvasElement__content {
+  height: 100%;
+  width: 100%;
+}
+
+.canvasWorkpad:not(.fullscreen) {
+  .canvasElement {
+    &--isSelected {
+      cursor: grab;
+
+      &:active {
+        cursor: grabbing;
+      }
+    }
+
+    &:not(.canvasElement--isSelected):hover {
+      outline: solid 1px $euiColorVis0;
+    }
+  }
+}

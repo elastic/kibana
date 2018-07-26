@@ -1,12 +1,12 @@
-.suggestion {
+.canvasExpressionSuggestion {
   display: flex;
 
-  .name {
+  .canvasExpressionSuggestion__name {
     width: 120px;
     font-weight: bold;
   }
 
-  .description {
+  .canvasExpressionSuggestion__desc {
     width: calc(100% - 120px);
   }
 }

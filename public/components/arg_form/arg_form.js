@@ -89,7 +89,7 @@ const ArgFormComponent = props => {
         );
 
         const extendedArg = (
-          <div className="canvas__arg--controls">
+          <div className="canvasArg--controls">
             <ArgTemplateForm
               template={template}
               errorTemplate={AdvancedFailure}
@@ -100,7 +100,7 @@ const ArgFormComponent = props => {
         );
 
         return (
-          <div className="canvas__arg">
+          <div className={`canvasArg ${expandableLabel ? 'canvasArg--expandable' : null}`}>
             <ArgLabel
               className="resolved"
               argId={argId}

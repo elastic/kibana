@@ -2,8 +2,8 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { EuiFilePicker } from '@elastic/eui';
 
-export const FileUpload = ({ id = '', className = 'canvas__file-upload', onUpload }) => (
-  <EuiFilePicker id={id} className={className} onChange={onUpload} />
+export const FileUpload = ({ id = '', className = 'canvasFileUpload', onUpload }) => (
+  <EuiFilePicker compressed id={id} className={className} onChange={onUpload} />
 );
 
 FileUpload.propTypes = {

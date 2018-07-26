@@ -24,7 +24,7 @@ export const TimePicker = ({ range, setRange, dirty, setDirty, onSelect }) => {
   }
 
   return (
-    <div className="canvas__time-picker">
+    <div className="canvasTimePicker">
       <DatetimeRangeAbsolute
         from={dateMath.parse(from)}
         to={dateMath.parse(to)}
@@ -40,7 +40,7 @@ export const TimePicker = ({ range, setRange, dirty, setDirty, onSelect }) => {
         <Button
           bsStyle="success"
           disabled={!dirty}
-          className="canvas__time-picker--apply"
+          className="canvasTimePicker__apply"
           onClick={() => {
             setDirty(false);
             onSelect(range.from, range.to);

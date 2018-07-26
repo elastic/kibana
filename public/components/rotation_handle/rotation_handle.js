@@ -4,10 +4,10 @@ import aero from '../../lib/aeroelastic';
 
 export const RotationHandle = ({ transformMatrix }) => (
   <div
-    className="canvas__rotation-handle-connector"
+    className="canvasRotationHandle canvasRotationHandle--connector"
     style={{ transform: aero.dom.matrixToCSS(transformMatrix) }}
   >
-    <div className="canvas__rotation-handle" />
+    <div className="canvasRotationHandle--handle" />
   </div>
 );
 

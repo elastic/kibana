@@ -1,13 +1,21 @@
 import React from 'react';
 import PropTypes from 'prop-types';
+import {
+  EuiDescriptionList,
+  EuiDescriptionListTitle,
+  EuiDescriptionListDescription,
+} from '@elastic/eui';
 
 export const ArgAdd = ({ onValueAdd, displayName, help }) => {
   return (
-    <div className="canvas__arg--add" onClick={onValueAdd}>
-      <strong>{displayName}</strong>
-      <br />
-      {help}
-    </div>
+    <button className="canvasArg__add" onClick={onValueAdd}>
+      <EuiDescriptionList compressed>
+        <EuiDescriptionListTitle>{displayName}</EuiDescriptionListTitle>
+        <EuiDescriptionListDescription>
+          <small>{help}</small>
+        </EuiDescriptionListDescription>
+      </EuiDescriptionList>
+    </button>
   );
 };
 

@@ -60,16 +60,18 @@ export const FontPicker = ({ onSelect, value, anchorPosition }) => {
   return (
     <Popover
       id="font-picker-popover"
+      className="canvasFontPicker__wrapper"
       button={popoverButton}
-      panelClassName="canvas__font-picker--popover"
+      panelClassName="canvasFontPicker__popover"
       anchorPosition={anchorPosition}
+      panelPaddingSize="none"
     >
       {() => (
-        <div className="canvas__font-picker">
+        <div className="canvasFontPicker">
           {fonts.map(font => (
             <EuiLink
               key={font.label}
-              className="canvas__font-picker--font"
+              className="canvasFontPicker__font"
               style={{ fontFamily: font.value }}
               onClick={() => onSelect(font.value)}
             >

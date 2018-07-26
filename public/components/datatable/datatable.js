@@ -1,9 +1,10 @@
 import React from 'react';
 import { Table } from 'react-bootstrap';
+import { EuiTextColor } from '@elastic/eui';
 import PropTypes from 'prop-types';
 import moment from 'moment';
 import { Paginate } from '../paginate';
-import { PageControls } from '../paginate_controls';
+import { PaginateControls } from '../paginate_controls';
 
 const getIcon = type => {
   if (type === null) return;
@@ -43,7 +44,7 @@ export const Datatable = ({ datatable, perPage, paginate, showHeader }) => (
       pageNumber,
       totalPages,
     }) => (
-      <div className="canvas__datatable">
+      <div className="canvasDataTable">
         <div style={{ flexGrow: 1 }}>
           <Table condensed>
             {!showHeader ? null : (
@@ -52,7 +53,7 @@ export const Datatable = ({ datatable, perPage, paginate, showHeader }) => (
                   {datatable.columns.map(col => (
                     <th key={`header-${getColumnName(col)}`}>
                       {getColumnName(col)}{' '}
-                      <small className="muted">{getIcon(getColumnType(col))}</small>
+                      <EuiTextColor color="subdued">{getIcon(getColumnType(col))}</EuiTextColor>
                     </th>
                   ))}
                 </tr>
@@ -73,7 +74,7 @@ export const Datatable = ({ datatable, perPage, paginate, showHeader }) => (
         </div>
 
         {paginate && (
-          <PageControls
+          <PaginateControls
             prevPage={prevPage}
             prevPageEnabled={prevPageEnabled}
             setPage={setPage}

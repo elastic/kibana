@@ -1,46 +1,97 @@
-.canvas__arg {
-  &:not(:last-child) {
-    border-bottom: $euiBorderThin;
-  }
+.canvasArg--expandable + .canvasArg--expandable {
+  margin-top: 0;
 
-  .form-control {
-    font-size: $euiFontSizeS;
+  .canvasArg__accordion:before {
+    display: none;
   }
+}
 
+.canvasSidebar__panel {
+  .canvasArg--expandable:last-child {
+    .canvasArg__accordion.euiAccordion-isOpen:after {
+      display: none;
+    }
+  }
+}
+
+.canvasArg {
+  margin-top: $euiSize;
+
+
+  .canvasArg--remove {
+    visibility: hidden;
+  }
+}
+
+.canvasArg__content {
+  padding-top: $euiSizeS;
+}
+
+.canvasArg__form {
+  position: relative;
+
+}
+
+.canvasArg__form, .canvasArg__accordion {
   &:hover {
-    .canvas__arg--remove {
+    .canvasArg__remove {
+      opacity: 1;
       visibility: visible;
     }
   }
+}
 
-  .canvas__arg--label {
-    margin: $euiSizeS;
-    flex-shrink: 0;
+.canvasArg__tooltip {
+  margin-left: -$euiSizeXL;
+}
+
+.canvasArg__remove {
+  position: absolute;
+  right: -$euiSizeL;
+  top: $euiSizeS - 2px;
+  border-radius: $euiBorderRadius;
+  border: $euiBorderThin;
+  background: $euiColorEmptyShade;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity $euiAnimSpeedNormal $euiAnimSlightResistance;
+  transition-delay: $euiAnimSpeedSlow;
+}
+
+.canvasArg__accordion {
+  padding: $euiSizeS $euiSize;
+  margin: 0 (-$euiSize);
+  background: $euiColorLightestShade;
+  position: relative;
+
+  // different spacing means leff shift
+  .canvasArg__remove {
+    right: -$euiSizeM;
   }
 
-  .canvas__arg--simple {
-    display: flex;
-    align-items: center;
+  // don't let remove button position here if this is nested in an accordion
+  .canvasArg__form {
+    position: static;
   }
 
-  .canvas__arg--simple-controls {
+  &.euiAccordion-isOpen {
+    background: transparent;
+  }
+
+  &:before, &:after {
+    content: "";
+    height: 1px;
+    position: absolute;
+    left: 0;
     width: 100%;
-    margin: $euiSizeS;
+    background: $euiColorLightShade;
   }
 
-  .canvas__arg--controls {
-    padding: $euiSizeS;
-
-    .canvas__arg--controls--submit {
-      text-align: right;
-
-      button {
-        margin-left: $euiSize;
-      }
-    }
+  &:before {
+    top: 0;
   }
 
-  .canvas__arg--remove {
-    visibility: hidden;
+  &:after {
+    bottom: 0;
   }
 }

@@ -120,7 +120,7 @@ export class RenderWithFn extends React.Component {
     // NOTE: the data-shared-* attributes here are used for reporting
     return (
       <div
-        className="canvas__workpad--element_render canvas__element"
+        className="canvasWorkpad--element_render canvasRenderEl"
         style={{ height: '100%', width: '100%' }}
       >
         <RenderToDom

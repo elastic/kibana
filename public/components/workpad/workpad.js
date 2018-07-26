@@ -21,6 +21,10 @@ export const Workpad = props => {
   } = props;
 
   const { height, width } = workpad;
+  const bufferStyle = {
+    height: isFullscreen ? height : height + 32,
+    width: isFullscreen ? width : width + 32,
+  };
 
   const keyHandler = action => {
     // handle keypress events for editor and presentation events
@@ -38,57 +42,60 @@ export const Workpad = props => {
   };
 
   return (
-    <div className="canvas__checkered" style={{ height, width }}>
-      {!isFullscreen && (
-        <Shortcuts name="EDITOR" handler={keyHandler} targetNodeSelector="body" global />
-      )}
+    <div className="canvasWorkpad__buffer" style={bufferStyle}>
+      <div className="canvasCheckered" style={{ height, width }}>
+        {!isFullscreen && (
+          <Shortcuts name="EDITOR" handler={keyHandler} targetNodeSelector="body" global />
+        )}
 
-      <Fullscreen>
-        {({ isFullscreen, windowSize }) => {
-          const scale = Math.min(windowSize.height / height, windowSize.width / width);
-          const transform = `scale3d(${scale}, ${scale}, 1)`;
-          const fsStyle = !isFullscreen
-            ? {}
-            : {
-                transform,
-                WebkitTransform: transform,
-                msTransform: transform,
-                height,
-                width,
-              };
+        <Fullscreen>
+          {({ isFullscreen, windowSize }) => {
+            const scale = Math.min(windowSize.height / height, windowSize.width / width);
+            const fsStyle = isFullscreen
+              ? {
+                  transform: `scale3d(${scale}, ${scale}, 1)`,
+                  WebkitTransform: `scale3d(${scale}, ${scale}, 1)`,
+                  msTransform: `scale3d(${scale}, ${scale}, 1)`,
+                  // height,
+                  // width,
+                  height: windowSize.height < height ? 'auto' : height,
+                  width: windowSize.width < width ? 'auto' : width,
+                }
+              : {};
 
-          // NOTE: the data-shared-* attributes here are used for reporting
-          return (
-            <div
-              className={`canvas__workpad ${isFullscreen ? 'fullscreen' : ''}`}
-              style={fsStyle}
-              data-shared-items-count={totalElementCount}
-            >
-              {isFullscreen && (
-                <Shortcuts
-                  name="PRESENTATION"
-                  handler={keyHandler}
-                  targetNodeSelector="body"
-                  global
-                />
-              )}
-              {pages.map(page => (
-                <WorkpadPage
-                  key={page.id}
-                  page={page}
-                  isSelected={selectedPageId === page.id}
-                  height={height}
-                  width={width}
-                />
-              ))}
+            // NOTE: the data-shared-* attributes here are used for reporting
+            return (
               <div
-                className="canvas__grid"
-                style={{ height, width, display: grid ? 'block' : 'none' }}
-              />
-            </div>
-          );
-        }}
-      </Fullscreen>
+                className={`canvasWorkpad ${isFullscreen ? 'fullscreen' : ''}`}
+                style={fsStyle}
+                data-shared-items-count={totalElementCount}
+              >
+                {isFullscreen && (
+                  <Shortcuts
+                    name="PRESENTATION"
+                    handler={keyHandler}
+                    targetNodeSelector="body"
+                    global
+                  />
+                )}
+                {pages.map(page => (
+                  <WorkpadPage
+                    key={page.id}
+                    page={page}
+                    isSelected={selectedPageId === page.id}
+                    height={height}
+                    width={width}
+                  />
+                ))}
+                <div
+                  className="canvasGrid"
+                  style={{ height, width, display: grid ? 'block' : 'none' }}
+                />
+              </div>
+            );
+          }}
+        </Fullscreen>
+      </div>
     </div>
   );
 };

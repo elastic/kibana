@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { Fragment } from 'react';
 import PropTypes from 'prop-types';
 import { omit } from 'lodash';
 import { withState, withHandlers, lifecycle, mapProps, compose } from 'recompose';
@@ -22,13 +22,13 @@ export const errorBoundaryHoc = compose(
 );
 
 const ErrorBoundaryComponent = props => (
-  <div className="canvas_error-boundary">
+  <Fragment>
     {props.children({
       error: props.error,
       errorInfo: props.errorInfo,
       resetErrorState: props.resetErrorState,
     })}
-  </div>
+  </Fragment>
 );
 
 ErrorBoundaryComponent.propTypes = {

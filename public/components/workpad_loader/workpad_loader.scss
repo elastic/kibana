@@ -1,7 +1,4 @@
-.canvas__workpad_loader {
+.canvasWorkPadLoader {
+  padding: $euiSize;
   height: fit-content;
-
-  .canvas__workpad_loader--search {
-    color: $euiColorDarkestShade;
-  }
 }

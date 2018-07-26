@@ -1,7 +1,7 @@
 .contextMenu {
   position: relative;
 
-  .contextMenuItems {
+  .contextMenu__items {
     position: absolute;
     z-index: 1;
     width: 100%;
@@ -10,7 +10,7 @@
     background: $euiColorEmptyShade;
     border: $euiBorderThin;
 
-    .contextMenuItem {
+    .contextMenu__item {
       padding: $euiSizeS;
       background-color: $euiColorEmptyShade;
       border: $euiBorderThin;
@@ -18,11 +18,11 @@
       display: flex;
       align-self: flex-start;
       width: 100%;
-    }
 
-    .contextMenuItem.active {
-      background-color: $euiColorDarkShade;
-      color: $euiColorGhost;
+      &-isActive {
+        background-color: $euiColorDarkShade;
+        color: $euiColorGhost;
+      }
     }
   }
 }

@@ -1,20 +1,21 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { withState } from 'recompose';
-import { Button, Well } from 'react-bootstrap';
+import { EuiCode, EuiButtonEmpty } from '@elastic/eui';
 
 const ShowDebuggingComponent = ({ payload, expanded, setExpanded }) =>
   process.env.NODE_ENV === 'production' ? null : (
     <div>
-      <Button bsStyle="link" onClick={() => setExpanded(!expanded)}>
-        {expanded && <span className="fa fa-caret-down" />}
-        {!expanded && <span className="fa fa-caret-right" />}
-        &nbsp;See Details
-      </Button>
+      <EuiButtonEmpty
+        iconType={expanded ? 'arrowDown' : 'arrowRight'}
+        onClick={() => setExpanded(!expanded)}
+      >
+        See Details
+      </EuiButtonEmpty>
       {expanded && (
-        <Well className="canvas_error-render--debug-payload">
+        <EuiCode className="canvasErrorDebug">
           <pre>{JSON.stringify(payload, null, 2)}</pre>
-        </Well>
+        </EuiCode>
       )}
     </div>
   );

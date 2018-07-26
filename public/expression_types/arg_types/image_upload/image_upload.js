@@ -1,10 +1,9 @@
-import React, { Fragment } from 'react';
+import React from 'react';
 import PropTypes from 'prop-types';
 import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiImage,
-  EuiPanel,
   EuiSpacer,
   EuiSelect,
   EuiButton,
@@ -95,7 +94,12 @@ class ImageUpload extends React.Component {
     const urlTypeSrc = urlType === 'src';
 
     const selectUrlType = (
-      <EuiSelect options={this.urlTypeOptions} value={urlType} onChange={this.changeUrlType} />
+      <EuiSelect
+        compressed
+        options={this.urlTypeOptions}
+        value={urlType}
+        onChange={this.changeUrlType}
+      />
     );
 
     let uploadImage = null;
@@ -108,54 +112,45 @@ class ImageUpload extends React.Component {
     }
 
     const pasteImageUrl = urlTypeSrc ? (
-      <Fragment>
-        <EuiFlexGroup>
-          <EuiFlexItem grow={10}>
-            <EuiFieldText
-              defaultValue={this.state.url}
-              inputRef={ref => (this.inputRefs.srcUrlText = ref)}
-              placeholder="Image URL"
-              aria-label="Image URL"
-            />
-          </EuiFlexItem>
-        </EuiFlexGroup>
-        <EuiSpacer size="xs" />
-        <EuiFlexGroup>
-          <EuiFlexItem grow={false}>
-            <EuiButton size="s" onClick={this.setSrcUrl}>
-              Set
-            </EuiButton>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </Fragment>
+      <form onSubmit={this.setSrcUrl} className="eui-textRight">
+        <EuiFieldText
+          compressed
+          defaultValue={this.state.url}
+          inputRef={ref => (this.inputRefs.srcUrlText = ref)}
+          placeholder="Image URL"
+          aria-label="Image URL"
+        />
+        <EuiButton type="submit" size="s" onClick={this.setSrcUrl}>
+          Set
+        </EuiButton>
+      </form>
     ) : null;
 
     const shouldPreview =
       (urlTypeSrc && isValidHttpUrl(url)) || (urlTypeInline && isValidDataUrl(url));
 
     return (
-      <EuiPanel paddingSize="s">
+      <div>
         {selectUrlType}
         <EuiSpacer size="s" />
-        <EuiFlexGroup alignItems="center" gutterSize="s" className="canvas__argtype--image">
+        <EuiFlexGroup alignItems="center" gutterSize="s" className="canvasArgImage">
           <EuiFlexItem grow={8}>
             {uploadImage}
             {pasteImageUrl}
           </EuiFlexItem>
           {shouldPreview ? (
-            <EuiFlexItem grow={3} className="canvas__argtype--image--preview">
+            <EuiFlexItem grow={3} className="canvasArgImage--preview">
               <EuiImage
                 size="s"
                 hasShadow
-                allowFullScreen
                 alt="Image Preview"
                 url={this.state.url}
-                className="canvas__checkered"
+                className="canvasCheckered"
               />
             </EuiFlexItem>
           ) : null}
         </EuiFlexGroup>
-      </EuiPanel>
+      </div>
     );
   }
 }

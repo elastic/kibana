@@ -1,8 +1,16 @@
-.canvas__navbar {
+.canvasNavbar {
   width: 100%;
   height: $euiSizeXL * 2;
-  background-color: $euiColorDarkestShade;
-  color: $euiColorLightShade;
-  padding-left: $euiSizeS;
-  padding-right: $euiSizeS;
+  background-color: darken($euiColorLightestShade, 5%);
+  position: relative;
+  z-index: 200;
+}
+
+.canvasNavBar__controls, .canvasNavBar__element {
+  padding: $euiSizeM;
+}
+
+.canvasNavBar__element {
+  width: 350px;
+  background-color: darken($euiColorDarkestShade, 10%);
 }

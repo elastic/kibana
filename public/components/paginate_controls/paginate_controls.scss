@@ -1,9 +1,9 @@
-.canvas__paginate--page-controls {
+.canvasPaginate__controls {
   overflow: hidden;
   text-align: center;
 
-  .page-navigate,
-  .page-number {
+  .canvasPaginate__nav,
+  .canvasPaginate__number {
     padding: ($euiSizeXS / 2);
     vertical-align: middle;
   }

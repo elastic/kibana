@@ -7,7 +7,7 @@ const ancestorElement = (element, className) => {
 };
 
 const localMousePosition = (target, clientX, clientY) => {
-  const ancestor = ancestorElement(target, 'canvas__page') || target;
+  const ancestor = ancestorElement(target, 'canvasPage') || target;
   const box = ancestor.getBoundingClientRect(); // causes reflow, fixme check performance impact
   return {
     x: clientX - box.left,

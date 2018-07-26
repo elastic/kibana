@@ -1,10 +1,10 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 
+import { EuiPanel } from '@elastic/eui';
+
 export const SidebarSection = ({ children }) => (
-  <div className="canvas__sidebar-section">
-    <div className="canvas__sidebar-section-body">{children}</div>
-  </div>
+  <EuiPanel className="canvasSidebar__panel">{children}</EuiPanel>
 );
 
 SidebarSection.propTypes = {

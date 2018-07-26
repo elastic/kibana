@@ -16,7 +16,7 @@ export const ColorPickerMini = ({ onChange, value, anchorPosition, colors }) => 
   return (
     <Popover
       id="color-picker-mini-popover"
-      panelClassName="canvas canvas__color-picker-mini--popover"
+      panelClassName="canvas canvasColorPickerMini__popover"
       button={button}
       anchorPosition={anchorPosition}
     >

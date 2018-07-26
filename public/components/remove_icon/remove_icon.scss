@@ -1,23 +1,29 @@
-.canvas__remove-icon--background,
-.canvas__remove-icon--foreground {
+.canvasRemove {
+  $clearSize: $euiSize;
   position: absolute;
-}
+  pointer-events: all;
+  @include size($clearSize);
+  background-color: $euiColorSlightHue;
+  border-radius: $clearSize;
+  line-height: $clearSize;
+  top: -$euiSizeL;
+  right: -$euiSizeL;
 
-.canvas__remove-icon--background {
-  height: 14px;
-  width: 14px;
-  background-color: $euiColorEmptyShade;
-  top: 2px;
-  left: 2px;
-  border-radius: 20px;
-}
+  .canvasRemove__icon {
+    @include size($euiSizeS);
+    fill: $euiColorEmptyShade;
+    stroke: $euiColorEmptyShade;
+    stroke-width: 3px; // increase thickness of icon at such a small size
+    // better vertical position fix that works with IE
+    position: relative;
+    top: -1px;
+    left: $euiSizeXS;
 
-.canvas__remove-icon {
-  color: $euiColorDanger;
-  font-size: 20px;
-  cursor: pointer;
+  }
 
   &:hover {
-    color: darken($euiColorDanger, 10%);
+    background-color: $euiColorDanger;
+    cursor: pointer;
   }
+
 }

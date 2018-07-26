@@ -1,12 +1,15 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { EuiSpacer } from '@elastic/eui';
+import { EuiSpacer, EuiTitle } from '@elastic/eui';
 import { BorderForm } from './border_form';
 import { AppearanceForm } from './appearance_form';
 
 export const ExtendedTemplate = ({ getArgValue, setArgValue, workpad }) => (
   <div>
-    <label>Appearance</label>
+    <EuiTitle size="xxxs" textTransform="uppercase">
+      <h6>Appearance</h6>
+    </EuiTitle>
+    <EuiSpacer size="xs" />
     <EuiSpacer size="xs" />
     <AppearanceForm
       padding={getArgValue('padding')}
@@ -17,7 +20,9 @@ export const ExtendedTemplate = ({ getArgValue, setArgValue, workpad }) => (
 
     <EuiSpacer size="m" />
 
-    <label>Border</label>
+    <EuiTitle size="xxxs" textTransform="uppercase">
+      <h6>Border</h6>
+    </EuiTitle>
     <EuiSpacer size="xs" />
     <BorderForm
       value={getArgValue('border', '')}

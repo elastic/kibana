@@ -1,8 +1,7 @@
-
-.canvas__arg--add {
-  cursor: pointer;
-  padding: $euiSizeXS;
-  padding-left: $euiSizeS;
+.canvasArg__add {
+  padding: $euiSizeM;
+  text-align: left;
+  width: 100%;
 
   &:not(:last-child) {
     border-bottom: $euiBorderThin;

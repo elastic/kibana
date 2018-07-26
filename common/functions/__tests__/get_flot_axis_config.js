@@ -15,40 +15,40 @@ describe('getFlotAxisConfig', () => {
 
   describe('show', () => {
     it('hides the axis', () => {
-      expect(getFlotAxisConfig('x', false, columns, ticks))
+      expect(getFlotAxisConfig('x', false, { columns, ticks }))
         .to.only.have.key('show')
         .and.to.have.property('show', false);
-      expect(getFlotAxisConfig('y', false, columns, ticks))
+      expect(getFlotAxisConfig('y', false, { columns, ticks }))
         .to.only.have.key('show')
         .and.to.have.property('show', false);
     });
 
     it('shows the axis', () => {
-      expect(getFlotAxisConfig('x', true, columns, ticks)).to.have.property('show', true);
-      expect(getFlotAxisConfig('y', true, columns, ticks)).to.have.property('show', true);
+      expect(getFlotAxisConfig('x', true, { columns, ticks })).to.have.property('show', true);
+      expect(getFlotAxisConfig('y', true, { columns, ticks })).to.have.property('show', true);
     });
 
     it('sets show using an AxisConfig', () => {
-      let result = getFlotAxisConfig('x', xAxisConfig, columns, ticks);
+      let result = getFlotAxisConfig('x', xAxisConfig, { columns, ticks });
       expect(result).to.have.property('show', xAxisConfig.show);
 
-      result = getFlotAxisConfig('y', yAxisConfig, columns, ticks);
+      result = getFlotAxisConfig('y', yAxisConfig, { columns, ticks });
       expect(result).to.have.property('show', yAxisConfig.show);
 
-      result = getFlotAxisConfig('x', hideAxis, columns, ticks);
+      result = getFlotAxisConfig('x', hideAxis, { columns, ticks });
       expect(result).to.have.property('show', hideAxis.show);
 
-      result = getFlotAxisConfig('y', hideAxis, columns, ticks);
+      result = getFlotAxisConfig('y', hideAxis, { columns, ticks });
       expect(result).to.have.property('show', hideAxis.show);
     });
   });
 
   describe('position', () => {
     it('sets the position of the axis when given an AxisConfig', () => {
-      let result = getFlotAxisConfig('x', xAxisConfig, columns, ticks);
+      let result = getFlotAxisConfig('x', xAxisConfig, { columns, ticks });
       expect(result).to.have.property('position', xAxisConfig.position);
 
-      result = getFlotAxisConfig('y', yAxisConfig, columns, ticks);
+      result = getFlotAxisConfig('y', yAxisConfig, { columns, ticks });
       expect(result).to.have.property('position', yAxisConfig.position);
     });
 
@@ -59,7 +59,7 @@ describe('getFlotAxisConfig', () => {
         position: 'left',
       };
 
-      const result = getFlotAxisConfig('x', invalidXPosition, columns, ticks);
+      const result = getFlotAxisConfig('x', invalidXPosition, { columns, ticks });
       expect(result).to.have.property('position', 'bottom');
     });
 
@@ -70,27 +70,27 @@ describe('getFlotAxisConfig', () => {
         position: 'bottom',
       };
 
-      const result = getFlotAxisConfig('y', invalidYPosition, columns, ticks);
+      const result = getFlotAxisConfig('y', invalidYPosition, { columns, ticks });
       expect(result).to.have.property('position', 'left');
     });
   });
 
   describe('ticks', () => {
     it('adds a tick mark mapping for string columns', () => {
-      let result = getFlotAxisConfig('x', true, columns, ticks);
+      let result = getFlotAxisConfig('x', true, { columns, ticks });
       expect(result.ticks).to.eql([[2, 'product1'], [1, 'product2']]);
 
-      result = getFlotAxisConfig('x', xAxisConfig, columns, ticks);
+      result = getFlotAxisConfig('x', xAxisConfig, { columns, ticks });
       expect(result.ticks).to.eql([[2, 'product1'], [1, 'product2']]);
     });
   });
 
   describe('mode', () => {
     it('sets the mode to time for date columns', () => {
-      let result = getFlotAxisConfig('y', true, columns, ticks);
+      let result = getFlotAxisConfig('y', true, { columns, ticks });
       expect(result).to.have.property('mode', 'time');
 
-      result = getFlotAxisConfig('y', yAxisConfig, columns, ticks);
+      result = getFlotAxisConfig('y', yAxisConfig, { columns, ticks });
       expect(result).to.have.property('mode', 'time');
     });
   });

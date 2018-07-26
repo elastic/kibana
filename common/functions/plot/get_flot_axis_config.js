@@ -1,7 +1,7 @@
 import { get, map } from 'lodash';
 import { getType } from '../../lib/get_type';
 
-export const getFlotAxisConfig = (axis, argValue, columns, ticks) => {
+export const getFlotAxisConfig = (axis, argValue, { columns, ticks, font } = {}) => {
   if (!argValue || argValue.show === false) return { show: false };
 
   const config = { show: true };
@@ -22,6 +22,8 @@ export const getFlotAxisConfig = (axis, argValue, columns, ticks) => {
   }
 
   if (axisType === 'date') config.mode = 'time';
+
+  if (typeof font === 'object') config.font = font;
 
   return config;
 };

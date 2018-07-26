@@ -1,10 +1,8 @@
-import header from './header.png';
-
 export const table = () => ({
   name: 'table',
   displayName: 'Data Table',
   help: 'A scrollable grid for displaying data in a tabular format',
-  image: header,
+  image: 'editorTable',
   expression: `filters
 | demodata
 | table

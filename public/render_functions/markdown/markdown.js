@@ -15,11 +15,7 @@ export const markdown = () => ({
 
     /* eslint-disable react/no-danger */
     ReactDOM.render(
-      <div
-        className="canvas__element__markdown"
-        style={fontStyle}
-        dangerouslySetInnerHTML={html}
-      />,
+      <div className="canvasMarkdown" style={fontStyle} dangerouslySetInnerHTML={html} />,
       domNode,
       () => handlers.done()
     );

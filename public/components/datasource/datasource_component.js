@@ -1,6 +1,13 @@
-import React from 'react';
+import React, { Fragment } from 'react';
 import PropTypes from 'prop-types';
-import { EuiButton, EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
+import {
+  EuiPanel,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiButton,
+  EuiButtonEmpty,
+  EuiSpacer,
+} from '@elastic/eui';
 import { DatasourceSelector } from './datasource_selector';
 import { DatasourcePreview } from './datasource_preview';
 
@@ -19,7 +26,6 @@ export const DatasourceComponent = props => {
     setSelecting,
     previewing,
     setPreviewing,
-    done,
   } = props;
 
   const getDatasourceFunctionNode = (name, args) => ({
@@ -40,10 +46,6 @@ export const DatasourceComponent = props => {
     setSelecting(false);
   };
 
-  const close = () => {
-    if (done) done();
-  };
-
   const save = () => {
     const datasourceAst = getDatasourceFunctionNode(stateDatasource.name, stateArgs);
     setDatasourceAst && setDatasourceAst(datasourceAst);
@@ -53,48 +55,40 @@ export const DatasourceComponent = props => {
     return <DatasourceSelector datasources={datasources} onSelect={setSelectedDatasource} />;
   }
 
-  if (previewing) {
-    return (
+  return (
+    <Fragment>
+      <EuiPanel>
+        <EuiButtonEmpty
+          iconSide="right"
+          flush="left"
+          iconType="sortRight"
+          onClick={() => setSelecting(!selecting)}
+        >
+          Change your data source
+        </EuiButtonEmpty>
+        <EuiSpacer size="s" />
+        {stateDatasource.render({ args: stateArgs, updateArgs, datasourceDef })}
+        <EuiSpacer size="m" />
+        <EuiFlexGroup justifyContent="flexEnd" gutterSize="s">
+          <EuiFlexItem grow={false}>
+            <EuiButton size="s" onClick={() => setPreviewing(true)} icon="check">
+              Preview
+            </EuiButton>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiButton size="s" color="secondary" fill onClick={save} icon="check">
+              Save
+            </EuiButton>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiPanel>
+
       <DatasourcePreview
+        show={previewing}
         done={() => setPreviewing(false)}
         function={getDatasourceFunctionNode(stateDatasource.name, stateArgs)}
       />
-    );
-  }
-
-  return (
-    <div className="canvas__datasource">
-      <div>{stateDatasource.render({ args: stateArgs, updateArgs, datasourceDef })}</div>
-
-      <EuiSpacer size="m" />
-
-      <EuiFlexGroup gutterSize="s">
-        <EuiFlexItem grow={false}>
-          <EuiButton fill color="secondary" onClick={save}>
-            Apply
-          </EuiButton>
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiButton fill color="primary" onClick={() => setPreviewing(true)}>
-            Preview
-          </EuiButton>
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiButton fill color="ghost" onClick={close}>
-            Cancel
-          </EuiButton>
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiButtonEmpty
-            iconType="logstashInput"
-            color="ghost"
-            onClick={() => setSelecting(!selecting)}
-          >
-            Change Datasource
-          </EuiButtonEmpty>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    </div>
+    </Fragment>
   );
 };
 
@@ -102,13 +96,15 @@ DatasourceComponent.propTypes = {
   datasources: PropTypes.array.isRequired,
   datasource: PropTypes.object.isRequired,
   datasourceDef: PropTypes.object.isRequired,
-  stateDatasource: PropTypes.object.isRequired,
+  stateDatasource: PropTypes.shape({
+    name: PropTypes.string.isRequired,
+    render: PropTypes.func.isRequired,
+  }).isRequired,
   selectDatasource: PropTypes.func,
   setDatasourceAst: PropTypes.func,
   stateArgs: PropTypes.object.isRequired,
   updateArgs: PropTypes.func,
   resetArgs: PropTypes.func.isRequired,
-  done: PropTypes.func,
   selecting: PropTypes.bool,
   setSelecting: PropTypes.func,
   previewing: PropTypes.bool,

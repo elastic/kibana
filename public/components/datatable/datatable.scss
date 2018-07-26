@@ -1,4 +1,4 @@
-.canvas__datatable {
+.canvasDataTable {
   height: 100%;
   overflow: auto;
   display: flex;
@@ -13,6 +13,7 @@
     white-space: nowrap;
   }
 
+  // This is a bootstrap overwrite
   .controls--perpage {
     padding: $euiSizeXS $euiSize;
     text-align: right;

@@ -1,12 +1,10 @@
 import React from 'react';
 import PropTypes from 'prop-types';
+import { EuiIcon } from '@elastic/eui';
 
-export const RemoveIcon = ({ onClick, style, className }) => (
-  <div className={className} style={{ height: 20, width: 20, ...style }} onClick={onClick}>
-    <div className="canvas__remove-icon--background" />
-    <div className="canvas__remove-icon--foreground">
-      <i className={`fa fa-times-circle canvas__remove-icon `} />
-    </div>
+export const RemoveIcon = ({ onClick, className }) => (
+  <div className={`canvasRemove ${className}`} onClick={onClick}>
+    <EuiIcon type="cross" className="canvasRemove__icon" />
   </div>
 );
 

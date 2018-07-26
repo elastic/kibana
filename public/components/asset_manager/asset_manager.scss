@@ -1,44 +1,56 @@
-.canvas__asset-manager {
-  .canvas__asset-manager--asset {
-    display: inline-block;
-    position: relative;
-    margin-right: $euiSize;
-    margin-bottom: $euiSize;
-    height: 200px;
-    width: 200px;
+.canvasAssetManager {
+  max-width: 1000px;
+
+  .canvasAssetManager__modalHeader {
+    flex-wrap: wrap;
   }
 
-  .canvas__asset-manager--thumb {
-    overflow: hidden;
-    width: 100%;
-    height: 100%;
-
-    .canvas_asset-manager-image {
+  .canvasAssetManager__modalHeaderTitle {
+    @include euiBreakpoint('xs', 's') {
       width: 100%;
-      height: 100%;
+      padding-bottom: $euiSize;
     }
+  }
+
+  .canvasAssetManager__meterWrapper {
+    flex-grow: 0;
+    min-width: 40%;
+    align-items: center;
+    justify-content: flex-end;
+    padding-right: $euiSize;
+
+    @include euiBreakpoint('xs', 's') {
+      flex-grow: 1;
+    }
+  }
+
+  .canvasAssetManager__meterLabel {
+    margin: 0;
+  }
+
+  // ASSETS LIST
+
+  .canvasAssetManager__asset {
+    text-align: center;
+    overflow: hidden; // hides image from outer panel boundaries
+  }
+
+  .canvasAssetManager__thumb {
+    margin: -$euiSizeS;
+    margin-bottom: 0;
+    font-size: 0; // eliminates any extra space around img
+  }
+
+  .canvasAssetManager__img {
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: contain;
 
     img {
-      object-fit: cover;
-      min-height: 200px;
-    }
-  }
-
-  .canvas__asset-manager--asset-identifier {
-    position: absolute;
-    bottom: 0;
-    background-color: transparentize($euiColorDarkestShade, 0.2);
-    border-radius: 0 0 $euiBorderThin $euiBorderThin;
-    padding: $euiSizeXS;
-    white-space: nowrap;
-    overflow: hidden;
-    width: 100%;
-
-    .asset-id {
-      font-size: $euiFontSizeS;
-      display: block;
-      overflow: hidden;
-      text-overflow: ellipsis;
+      width: auto;
+      max-width: 100%;
+      height: 164px; // nice default proportions for typical 4x3 images
+      opacity: 0; // only show the background image (which will properly keep proportions)
     }
   }
 }

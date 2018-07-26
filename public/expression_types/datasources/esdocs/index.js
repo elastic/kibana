@@ -1,20 +1,11 @@
-import React, { Fragment } from 'react';
+import React from 'react';
 import PropTypes from 'prop-types';
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiFormRow,
-  EuiFieldText,
-  EuiSelect,
-  EuiSpacer,
-} from '@elastic/eui';
+import { EuiFormRow, EuiSelect, EuiFieldText, EuiCallOut, EuiSpacer } from '@elastic/eui';
 import { getSimpleArg, setSimpleArg } from '../../../lib/arg_helpers';
 import { ESFieldsSelect } from '../../../components/es_fields_select';
 import { ESFieldSelect } from '../../../components/es_field_select';
 import { ESIndexSelect } from '../../../components/es_index_select';
-import { TooltipIcon } from '../../../components/tooltip_icon';
 import { templateFromReactComponent } from '../../../lib/template_from_react_component';
-import header from './header.png';
 
 const EsdocsDatasource = ({ args, updateArgs }) => {
   const setArg = (name, value) => {
@@ -35,104 +26,63 @@ const EsdocsDatasource = ({ args, updateArgs }) => {
     return commas.split(',').map(str => str.trim());
   };
 
-  const getSort = () => {
+  const getSortBy = () => {
     const commas = getSimpleArg('sort', args)[0] || '_score,desc';
     return commas.split(',').map(str => str.trim());
   };
 
   const fields = getFields();
-  const sort = getSort();
+  const [sortField, sortOrder] = getSortBy();
   const index = getSimpleArg('index', args)[0];
   const [query] = getQuery();
 
+  const sortOptions = [{ value: 'asc', text: 'Ascending' }, { value: 'desc', text: 'Descending' }];
+
   return (
-    <Fragment>
-      <p>
-        The Elasticsearch Docs datasource is used to pull documents directly from Elasticsearch
-        without the use of aggregations. It is best used with low volume datasets and in situations
-        where you need to view raw documents or plot exact, non-aggregated values on a chart.
-      </p>
+    <div>
+      <EuiCallOut size="s" title="Be careful" color="warning">
+        <p>
+          The Elasticsearch Docs datasource is used to pull documents directly from Elasticsearch
+          without the use of aggregations. It is best used with low volume datasets and in
+          situations where you need to view raw documents or plot exact, non-aggregated values on a
+          chart.
+        </p>
+      </EuiCallOut>
 
-      <EuiFlexGroup gutterSize="s" alignItems="flexEnd" className="canvas__esdocs--row">
-        <EuiFlexItem grow={false}>
-          <EuiFormRow
-            label={
-              <Fragment>
-                Index &nbsp;
-                <TooltipIcon
-                  text="The index pattern to query. Time filters will apply to the timefield from this pattern."
-                  placement="right"
-                />
-              </Fragment>
-            }
-          >
-            <ESIndexSelect value={index} onChange={index => setArg('index', index)} />
-          </EuiFormRow>
-        </EuiFlexItem>
+      <EuiSpacer size="m" />
 
-        <EuiFlexItem>
-          <EuiFormRow
-            label={
-              <Fragment>
-                Query &nbsp;
-                <TooltipIcon text="Lucene Query String syntax" placement="right" />
-              </Fragment>
-            }
-            fullWidth
-          >
-            <EuiFieldText fullWidth value={query} onChange={e => setArg('query', e.target.value)} />
-          </EuiFormRow>
-        </EuiFlexItem>
+      <EuiFormRow label="Index Pattern">
+        <ESIndexSelect value={index} onChange={index => setArg('index', index)} />
+      </EuiFormRow>
 
-        <EuiFlexItem grow={false}>
-          <EuiFormRow
-            label={
-              <Fragment>
-                Sort &nbsp;
-                <TooltipIcon text="Document sort order, field and direction" placement="right" />
-              </Fragment>
-            }
-          >
-            <ESFieldSelect
-              index={index}
-              value={sort[0]}
-              onChange={field => setArg('sort', [field, sort[1]].join(', '))}
-            />
-          </EuiFormRow>
-        </EuiFlexItem>
-
-        <EuiFlexItem grow={false}>
-          <EuiFormRow hasEmptyLabelSpace>
-            <EuiSelect
-              defaultValue={sort[1]}
-              options={['asc', 'desc'].map(value => ({ value, text: value }))}
-              onChange={e => setArg('sort', [sort[0], e.target.value].join(', '))}
-            />
-          </EuiFormRow>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-
-      <EuiSpacer size="s" />
-
+      <EuiFormRow label="Query" helpText="Lucene query string syntax" compressed>
+        <EuiFieldText value={query} onChange={e => setArg('query', e.target.value)} />
+      </EuiFormRow>
+      <EuiFormRow label="Sort Field" helpText="Document sort order, field, and direction">
+        <ESFieldSelect
+          index={index}
+          value={sortField}
+          onChange={field => setArg('sort', [field, sortOrder].join(', '))}
+        />
+      </EuiFormRow>
       <EuiFormRow
-        label={
-          <Fragment>
-            Fields &nbsp;
-            {fields.length <= 10 ? (
-              <TooltipIcon
-                text="The fields to extract. Kibana scripted fields are not currently available"
-                placement="right"
-              />
-            ) : (
-              <TooltipIcon
-                icon="warning"
-                text="This datasource performs best with 10 or fewer fields"
-                placement="right"
-              />
-            )}
-          </Fragment>
+        label="Sort Order"
+        helpText="Document sort order, field, and direction"
+        compressed
+      >
+        <EuiSelect
+          value={sortOrder}
+          onChange={e => setArg('sort', [sortField, e.target.value].join(', '))}
+          options={sortOptions}
+        />
+      </EuiFormRow>
+      <EuiFormRow
+        label="fields"
+        helpText={
+          fields.length <= 10
+            ? 'The fields to extract. Kibana scripted fields are not currently available'
+            : 'This datasource performs best with 10 or fewer fields'
         }
-        fullWidth
       >
         <ESFieldsSelect
           index={index}
@@ -140,7 +90,7 @@ const EsdocsDatasource = ({ args, updateArgs }) => {
           selected={fields}
         />
       </EuiFormRow>
-    </Fragment>
+    </div>
   );
 };
 
@@ -153,6 +103,6 @@ export const esdocs = () => ({
   name: 'esdocs',
   displayName: 'Elasticsearch Raw Documents',
   help: 'Pull back raw documents from elasticsearch',
-  image: header,
+  image: 'logoElasticsearch',
   template: templateFromReactComponent(EsdocsDatasource),
 });

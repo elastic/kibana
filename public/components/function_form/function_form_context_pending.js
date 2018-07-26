@@ -31,7 +31,7 @@ export class FunctionFormContextPending extends React.PureComponent {
 
   render() {
     return (
-      <div className="canvas__function">
+      <div className="canvasFunctionForm canvasFunctionForm--loading">
         <Loading />
       </div>
     );

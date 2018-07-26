@@ -1,24 +1,24 @@
-.canvas__color-dot {
+.canvasColorDot {
   display: inline-block;
   position: relative;
   height: $euiSizeXL;
   width: $euiSizeXL;
 
-  .canvas__color-dot--background {
+  .canvasColorDot__background {
     position: absolute;
     height: $euiSizeXL;
     width: $euiSizeXL;
-    border-radius: 16px;
+    border-radius: $euiBorderRadius;
     top: 0;
     left: 0;
   }
 
-  .canvas__color-dot--foreground {
+  .canvasColorDot__foreground {
     position: absolute;
-    border: $euiBorderThick;
+    border: $euiBorderThin;
     height: $euiSizeXL;
     width: $euiSizeXL;
-    border-radius: $euiSize;
+    border-radius: $euiBorderRadius;
     top: 0;
     left: 0;
     display: flex;

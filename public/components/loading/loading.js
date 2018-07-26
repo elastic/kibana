@@ -5,7 +5,7 @@ import { EuiLoadingSpinner, EuiIcon } from '@elastic/eui';
 export const Loading = ({ animated, text }) => {
   if (animated) {
     return (
-      <div className="canvas__loading">
+      <div className="canvasLoading">
         {text && <span>{text}&nbsp;</span>}
         <EuiLoadingSpinner size="m" />
       </div>
@@ -13,7 +13,7 @@ export const Loading = ({ animated, text }) => {
   }
 
   return (
-    <div className="canvas__loading">
+    <div className="canvasLoading">
       {text && <span>{text}&nbsp;</span>}
       <EuiIcon type="clock" />
     </div>

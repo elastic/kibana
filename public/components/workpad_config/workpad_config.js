@@ -9,7 +9,9 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiSpacer,
+  EuiTitle,
 } from '@elastic/eui';
+import { Tooltip } from '../tooltip';
 
 export const WorkpadConfig = ({ size, name, setSize, setName }) => {
   const rotate = () => setSize({ width: size.height, height: size.width });
@@ -35,17 +37,19 @@ export const WorkpadConfig = ({ size, name, setSize, setName }) => {
 
   return (
     <div>
-      <div>
-        <EuiFormRow label="Workpad Name">
-          <EuiFieldText value={name} onChange={e => setName(e.target.value)} />
-        </EuiFormRow>
-      </div>
+      <EuiTitle size="xs">
+        <h4>Workpad</h4>
+      </EuiTitle>
 
       <EuiSpacer size="m" />
 
+      <EuiFormRow label="Name" compressed>
+        <EuiFieldText value={name} onChange={e => setName(e.target.value)} />
+      </EuiFormRow>
+
       <EuiFlexGroup gutterSize="s" alignItems="center">
         <EuiFlexItem>
-          <EuiFormRow label="Width">
+          <EuiFormRow label="Width" compressed>
             <EuiFieldNumber
               onChange={e => setSize({ width: Number(e.target.value), height: size.height })}
               value={size.width}
@@ -54,17 +58,19 @@ export const WorkpadConfig = ({ size, name, setSize, setName }) => {
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiFormRow hasEmptyLabelSpace>
-            <EuiButtonIcon
-              size="l"
-              className="clickable"
-              iconType="kqlOperand"
-              onClick={rotate}
-              aria-label="Swap Page Dimensions"
-            />
+            <Tooltip position="bottom" content="Flip the width and height">
+              <EuiButtonIcon
+                iconType="merge"
+                color="text"
+                onClick={rotate}
+                aria-label="Swap Page Dimensions"
+                style={{ marginBottom: 12 }}
+              />
+            </Tooltip>
           </EuiFormRow>
         </EuiFlexItem>
         <EuiFlexItem>
-          <EuiFormRow label="Height">
+          <EuiFormRow label="Height" compressed>
             <EuiFieldNumber
               onChange={e => setSize({ height: Number(e.target.value), width: size.width })}
               value={size.height}
@@ -79,9 +85,10 @@ export const WorkpadConfig = ({ size, name, setSize, setName }) => {
         {badges.map((badge, i) => (
           <EuiBadge
             key={`page-size-badge-${i}`}
-            color="default"
+            color="hollow"
             onClick={() => setSize(badge.size)}
             aria-label={`Preset Page Size: ${badge.name}`}
+            onClickAriaLabel={`Set page size to ${badge.name}`}
           >
             {badge.name}
           </EuiBadge>

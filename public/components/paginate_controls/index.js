@@ -1,3 +1,1 @@
-import { PageControls } from './page_controls';
-
-export { PageControls };
+export { PaginateControls } from './paginate_controls';

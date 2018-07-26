@@ -1,20 +1,26 @@
-import React from 'react';
+import React, { Fragment } from 'react';
 import PropTypes from 'prop-types';
-import { EuiFieldText } from '@elastic/eui';
 import { map, includes, sortBy } from 'lodash';
 import lowerCase from 'lodash.lowercase';
-import { MediaCard } from '../../media_card';
+import { EuiFieldSearch, EuiContextMenuItem, EuiPopoverTitle } from '@elastic/eui';
 
 export const ElementTypes = ({ elements, onClick, search, setSearch }) => {
   search = lowerCase(search);
   elements = sortBy(map(elements, (element, name) => ({ name, ...element })), 'displayName');
   const elementList = map(elements, (element, name) => {
-    const { help, image, displayName, expression, filter, width, height } = element;
+    const { help, displayName, expression, filter, width, height } = element;
     const whenClicked = () => onClick({ expression, filter, width, height });
+
+    // Add back in icon={image} to this when Design has a full icon set
     const card = (
-      <MediaCard key={name} image={image} title={displayName} onClick={whenClicked}>
-        {help}
-      </MediaCard>
+      <EuiContextMenuItem
+        key={name}
+        toolTipContent={help}
+        toolTipPosition="right"
+        onClick={whenClicked}
+      >
+        {displayName}
+      </EuiContextMenuItem>
     );
 
     if (!search) return card;
@@ -25,15 +31,17 @@ export const ElementTypes = ({ elements, onClick, search, setSearch }) => {
   });
 
   return (
-    <div>
-      <EuiFieldText
-        fullWidth
-        placeholder="Filter Elements"
-        onChange={e => setSearch(e.target.value)}
-        value={search}
-      />
-      <div>{elementList}</div>
-    </div>
+    <Fragment>
+      <EuiPopoverTitle>
+        <EuiFieldSearch
+          compressed
+          placeholder="Filter Elements"
+          onChange={e => setSearch(e.target.value)}
+          value={search}
+        />
+      </EuiPopoverTitle>
+      {elementList}
+    </Fragment>
   );
 };
 

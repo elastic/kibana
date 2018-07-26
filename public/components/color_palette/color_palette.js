@@ -6,14 +6,14 @@ import { ColorDot } from '../color_dot';
 import { ItemGrid } from '../item_grid';
 
 export const ColorPalette = ({ value, colors, colorsPerRow, onChange }) => (
-  <div className="canvas__color-palette">
+  <div className="canvasColorPalette">
     <ItemGrid items={colors} itemsPerRow={colorsPerRow || 6}>
       {({ item: color }) => (
         <EuiLink
           style={{ fontSize: 0 }}
           key={color}
           onClick={() => onChange(color)}
-          className="canvas__color-palette--dot"
+          className="canvasColorPalette__dot"
         >
           <ColorDot value={color}>
             {color === value && (

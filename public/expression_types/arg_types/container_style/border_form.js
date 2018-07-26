@@ -32,13 +32,13 @@ export const BorderForm = ({ value, radius, onChange, colors }) => {
   return (
     <EuiFlexGroup gutterSize="s">
       <EuiFlexItem grow={2}>
-        <EuiFormRow label="Width">
+        <EuiFormRow label="Width" compressed>
           <EuiFieldNumber value={Number(borderWidthVal)} onChange={namedChange('borderWidth')} />
         </EuiFormRow>
       </EuiFlexItem>
 
       <EuiFlexItem grow={3}>
-        <EuiFormRow label="Style">
+        <EuiFormRow label="Style" compressed>
           <EuiSelect
             defaultValue={borderStyle}
             options={options}
@@ -48,7 +48,7 @@ export const BorderForm = ({ value, radius, onChange, colors }) => {
       </EuiFlexItem>
 
       <EuiFlexItem grow={2}>
-        <EuiFormRow label="Radius">
+        <EuiFormRow label="Radius" compressed>
           <EuiFieldNumber value={Number(radiusVal)} onChange={namedChange('borderRadius')} />
         </EuiFormRow>
       </EuiFlexItem>

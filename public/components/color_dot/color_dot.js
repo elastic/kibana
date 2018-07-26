@@ -3,9 +3,9 @@ import PropTypes from 'prop-types';
 
 export const ColorDot = ({ value, children }) => {
   return (
-    <div className="canvas__color-dot">
-      <div className="canvas__color-dot--background canvas__checkered" />
-      <div className="canvas__color-dot--foreground" style={{ background: value }}>
+    <div className="canvasColorDot">
+      <div className="canvasColorDot__background canvasCheckered" />
+      <div className="canvasColorDot__foreground" style={{ background: value }}>
         {children}
       </div>
     </div>

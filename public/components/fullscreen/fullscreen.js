@@ -47,10 +47,6 @@ export class Fullscreen extends React.Component {
       height: this.state.height,
     };
 
-    return (
-      <div className="canvas__fullscreen" allowFullScreen>
-        {children({ isFullscreen, windowSize })}
-      </div>
-    );
+    return children({ isFullscreen, windowSize });
   }
 }

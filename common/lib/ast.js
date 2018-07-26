@@ -88,7 +88,7 @@ export function fromExpression(expression, type = 'expression') {
   try {
     return parse(String(expression), { startRule: type });
   } catch (e) {
-    throw new Error(`Unable to parse expression: ${expression}\n ${e.message}`);
+    throw new Error(`Unable to parse expression: ${e.message}`);
   }
 }
 

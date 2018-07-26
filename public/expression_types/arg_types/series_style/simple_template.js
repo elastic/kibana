@@ -23,11 +23,7 @@ export const SimpleTemplate = props => {
   const handlePlain = (argName, val) => handleChange(argName, { target: { value: val } });
 
   return (
-    <EuiFlexGroup
-      gutterSize="none"
-      alignItems="center"
-      className="canvas__argtype--seriesStyle--color-picker"
-    >
+    <EuiFlexGroup gutterSize="none" alignItems="center" className="canvasArgSeries__colorPicker">
       {!color || color.length === 0 ? (
         <Fragment>
           <EuiFlexItem grow={false}>
@@ -69,7 +65,7 @@ export const SimpleTemplate = props => {
             <TooltipIcon
               placement="left"
               icon="warning"
-              text="Data has no series to style, add a color dimension"
+              content="Data has no series to style, add a color dimension"
             />
           </EuiFlexItem>
         )}

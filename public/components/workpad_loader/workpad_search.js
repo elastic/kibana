@@ -24,6 +24,7 @@ export class WorkpadSearch extends React.PureComponent {
   render() {
     return (
       <EuiFieldSearch
+        compressed
         placeholder="Find workpad"
         value={this.state.searchText}
         onChange={this.setSearchText}

@@ -1,16 +1,16 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { map } from 'lodash';
-import { EuiLink, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { Popover } from '../popover';
 import { PaletteSwatch } from '../palette_swatch';
 import { palettes } from '../../../common/lib/palettes';
 
 export const PalettePicker = ({ onChange, value, anchorPosition }) => {
   const button = handleClick => (
-    <EuiLink style={{ width: '100%' }} onClick={handleClick}>
+    <button style={{ width: '100%', height: 16 }} onClick={handleClick}>
       <PaletteSwatch colors={value.colors} gradient={value.gradient} />
-    </EuiLink>
+    </button>
   );
 
   return (
@@ -18,26 +18,27 @@ export const PalettePicker = ({ onChange, value, anchorPosition }) => {
       id="palette-picker-popover"
       button={button}
       anchorPosition={anchorPosition}
-      panelClassName="canvas__palette-picker--swatches-popover"
+      panelClassName="canvasPalettePicker__swatchesPanel"
+      className="canvasPalettePicker__swatchesPopover"
     >
       {() => (
-        <div className="canvas canvas__palette-picker--swatches">
+        <div className="canvas canvasPalettePicker__swatches">
           {map(palettes, (palette, name) => (
-            <EuiLink
+            <button
               key={name}
               onClick={() => onChange(palette)}
-              className="canvas__palette-picker--swatch"
+              className="canvasPalettePicker__swatch"
               style={{ width: '100%' }}
             >
-              <EuiFlexGroup gutterSize="none" alignItems="center">
+              <EuiFlexGroup gutterSize="s" alignItems="center">
                 <EuiFlexItem grow={1}>
-                  <span className="canvas__palette-picker--label">{name.replace(/_/g, ' ')}</span>
+                  <span className="canvasPalettePicker__label">{name.replace(/_/g, ' ')}</span>
                 </EuiFlexItem>
                 <EuiFlexItem grow={2}>
                   <PaletteSwatch colors={palette.colors} gradient={palette.gradient} />
                 </EuiFlexItem>
               </EuiFlexGroup>
-            </EuiLink>
+            </button>
           ))}
         </div>
       )}

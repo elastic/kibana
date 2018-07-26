@@ -1,18 +1,19 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { MediaCard } from '../media_card';
+import { EuiCard, EuiIcon } from '@elastic/eui';
 
 export const DatasourceSelector = ({ onSelect, datasources }) => (
   <div>
     {datasources.map(d => (
-      <MediaCard
+      <EuiCard
         key={d.name}
         title={d.displayName}
-        image={d.image}
+        icon={<EuiIcon type={d.image} size="xxl" />}
         onClick={() => onSelect(d.name)}
-      >
-        {d.help}
-      </MediaCard>
+        description={d.help}
+        layout="horizontal"
+        className="canvasDataSource__card"
+      />
     ))}
   </div>
 );

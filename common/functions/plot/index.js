@@ -3,6 +3,7 @@ import keyBy from 'lodash.keyby';
 import { getColorsFromPalette } from '../../lib/get_colors_from_palette';
 import { getLegendConfig } from '../../lib/get_legend_config';
 import { getFlotAxisConfig } from './get_flot_axis_config';
+import { getFontSpec } from './get_font_spec';
 import { seriesStyleToFlot } from './series_style_to_flot';
 import { getTickHash } from './get_tick_hash';
 
@@ -54,10 +55,9 @@ export const plot = () => ({
   },
   fn: (context, args) => {
     const seriesStyles = keyBy(args.seriesStyle || [], 'label') || {};
-
     const sortedRows = sortBy(context.rows, ['x', 'y', 'color', 'size', 'text']);
-
     const ticks = getTickHash(context.columns, sortedRows);
+    const font = args.font ? getFontSpec(args.font) : {};
 
     const data = map(groupBy(sortedRows, 'color'), (series, label) => {
       const seriesStyle = seriesStyles[label] || args.defaultStyle;
@@ -102,15 +102,22 @@ export const plot = () => ({
       type: 'render',
       as: 'plot',
       value: {
-        font: args.font,
         data: sortBy(data, 'label'),
         options: {
           canvas: false,
           colors: getColorsFromPalette(args.palette, data.length),
           legend: getLegendConfig(args.legend, data.length),
           grid: gridConfig,
-          xaxis: getFlotAxisConfig('x', args.xaxis, context.columns, ticks),
-          yaxis: getFlotAxisConfig('y', args.yaxis, context.columns, ticks),
+          xaxis: getFlotAxisConfig('x', args.xaxis, {
+            columns: context.columns,
+            ticks,
+            font,
+          }),
+          yaxis: getFlotAxisConfig('y', args.yaxis, {
+            columns: context.columns,
+            ticks,
+            font,
+          }),
           series: {
             shadowSize: 0,
             ...seriesStyleToFlot(args.defaultStyle),

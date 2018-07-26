@@ -33,14 +33,14 @@ export class PendingArgValue extends React.PureComponent {
     const { label, argTypeInstance } = this.props;
 
     return (
-      <div className="canvas__arg">
+      <div className="canvasArg">
         <ArgLabel
           className="resolve-pending"
           label={label}
           help={argTypeInstance.help}
           expandable={false}
         >
-          <div className="canvas__arg--pending">
+          <div className="canvasArg--pending">
             <Loading animated text="Loading" />
           </div>
         </ArgLabel>

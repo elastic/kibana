@@ -131,8 +131,15 @@ describe('plot', () => {
     describe('font', () => {
       it('sets the font style', () => {
         const result = fn(testPlot, { font: fontStyle }).value;
-        expect(result).to.have.property('font');
-        expect(result.font).to.eql(fontStyle);
+        const style = {
+          size: 12,
+          style: 'normal',
+          weight: 'bolder',
+          family: 'Chalkboard, serif',
+          color: 'pink',
+        };
+        expect(result.options.xaxis.font).to.eql(style);
+        expect(result.options.yaxis.font).to.eql(style);
       });
 
       // TODO: write test when using an instance of the interpreter

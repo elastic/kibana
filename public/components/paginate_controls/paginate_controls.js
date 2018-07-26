@@ -7,7 +7,7 @@ const showPages = ({ setPage, pageNumber, totalPages }) => {
   for (let i = 1; i <= totalPages; i++) {
     if (i === pageNumber)
       pages.push(
-        <span key={`pageNumber${i}`} className="page-number active">
+        <span key={`pageNumber${i}`} className="canvasPaginate__number active">
           {i}
         </span>
       );
@@ -15,7 +15,7 @@ const showPages = ({ setPage, pageNumber, totalPages }) => {
       pages.push(
         <button
           key={`pageNumber${i}`}
-          className="btn btn-link page-number"
+          className="btn btn-link canvasPaginate__number"
           onClick={() => setPage(i)}
         >
           {i}
@@ -27,7 +27,7 @@ const showPages = ({ setPage, pageNumber, totalPages }) => {
   return pages;
 };
 
-export const PageControls = ({
+export const PaginateControls = ({
   prevPage,
   prevPageEnabled,
   setPage,
@@ -36,22 +36,22 @@ export const PageControls = ({
   nextPage,
   nextPageEnabled,
 }) => (
-  <div className="canvas__paginate--page-controls">
+  <div className="canvasPaginate__controls">
     {prevPageEnabled && (
-      <button className="btn btn-link page-navigate" onClick={prevPage}>
+      <button className="btn btn-link canvasPaginate__nav" onClick={prevPage}>
         <i className="fa fa-angle-left" />
       </button>
     )}
     {showPages({ setPage, pageNumber, totalPages })}
     {nextPageEnabled && (
-      <button className="btn btn-link page-navigate" onClick={nextPage}>
+      <button className="btn btn-link canvasPaginate__nav" onClick={nextPage}>
         <i className="fa fa-angle-right" />
       </button>
     )}
   </div>
 );
 
-PageControls.propTypes = {
+PaginateControls.propTypes = {
   pageNumber: PropTypes.number.isRequired,
   totalPages: PropTypes.number.isRequired,
   setPage: PropTypes.func.isRequired,

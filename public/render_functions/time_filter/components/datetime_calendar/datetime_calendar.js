@@ -6,7 +6,7 @@ import dateMath from '@elastic/datemath';
 import { DatetimeInput } from '../datetime_input';
 
 export const DatetimeCalendar = ({ value, onSelect }) => (
-  <div className="canvas__datetime-calendar">
+  <div className="canvasDateTimeCal">
     <DatetimeInput moment={dateMath.parse(value)} setMoment={onSelect} />
     <Datetime value={value} input={false} onChange={onSelect} />
   </div>

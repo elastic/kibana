@@ -1,7 +1,11 @@
-.canvas__datasource_preview {
+.canvasDataSource {
   background-color: $euiColorEmptyShade;
   color: $euiTextColor;
   border-radius: $euiBorderThin;
   margin: $euiSizeS;
   padding: 0 $euiSizeS;
+}
+
+.canvasDataSource__card + .canvasDataSource__card {
+  margin-top: $euiSizeS;
 }

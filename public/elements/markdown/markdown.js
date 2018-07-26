@@ -1,10 +1,8 @@
-import header from './header.png';
-
 export const markdown = () => ({
   name: 'markdown',
   displayName: 'Markdown',
   help: 'Markup from Markdown',
-  image: header,
+  image: 'editorAlignLeft',
   expression: `filters
 | demodata
 | markdown "### Welcome to the Markdown Element.

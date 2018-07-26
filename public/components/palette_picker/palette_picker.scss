@@ -1,25 +1,41 @@
-.canvas__palette-picker {
+.canvasPalettePicker {
   display: inline-block;
   width: 100%;
 }
 
-.canvas__palette-picker--swatches-popover {
-  .popover-content {
-    padding: 0;
-  }
-}
+.canvasPalettePicker__swatches {
+  @include euiScrollBar;
 
-.canvas__palette-picker--swatches {
   width: 280px;
   height: 250px;
   overflow-y: scroll;
 }
 
-.canvas__palette-picker--swatch {
-  padding: $euiSizeS;
+.canvasPalettePicker__swatchesPanel {
+  padding: $euiSizeS 0 !important;
 }
 
-.canvas__palette-picker--label {
-  font-size: $euiFontSizeS;
+.canvasPalettePicker__swatch {
+  padding: $euiSizeS $euiSize;
+
+  &:hover,
+  &:focus {
+    text-decoration: underline;
+    background-color: $euiColorLightestShade;
+
+    .canvasPaletteSwatch,
+    .canvasPaletteSwatch__background {
+      transform: scaleY(2);
+    }
+    .canvasPalettePicker__label {
+      color: $euiTextColor;
+    }
+  }
+}
+
+.canvasPalettePicker__label {
+  font-size: $euiFontSizeXS;
   text-transform: capitalize;
+  text-align: left;
+  color: $euiColorDarkShade;
 }

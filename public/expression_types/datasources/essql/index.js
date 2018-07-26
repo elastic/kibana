@@ -1,10 +1,8 @@
-import React, { Fragment } from 'react';
+import React from 'react';
 import PropTypes from 'prop-types';
 import { EuiFormRow, EuiTextArea } from '@elastic/eui';
 import { getSimpleArg, setSimpleArg } from 'plugins/canvas/lib/arg_helpers';
-import { TooltipIcon } from 'plugins/canvas/components/tooltip_icon';
 import { templateFromReactComponent } from '../../../lib/template_from_react_component';
-import header from './header.png';
 
 const EssqlDatasource = ({ args, updateArgs }) => {
   const setArg = (name, value) => {
@@ -28,17 +26,9 @@ const EssqlDatasource = ({ args, updateArgs }) => {
   };
 
   return (
-    <EuiFormRow
-      fullWidth
-      label={
-        <Fragment>
-          Query &nbsp;
-          <TooltipIcon text="Elasticsearch SQL" placement="right" />
-        </Fragment>
-      }
-    >
+    <EuiFormRow label="Elasticsearch SQL query">
       <EuiTextArea
-        fullWidth
+        className="canvasTextArea--code"
         value={getQuery()}
         onChange={e => setArg(getArgName(), e.target.value)}
       />
@@ -55,6 +45,7 @@ export const essql = () => ({
   name: 'essql',
   displayName: 'Elasticsearch SQL',
   help: 'Use Elasticsearch SQL to get a datatable',
-  image: header,
+  // Replace this with a SQL logo when we have one in EUI
+  image: 'logoElasticsearch',
   template: templateFromReactComponent(EssqlDatasource),
 });

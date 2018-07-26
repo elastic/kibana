@@ -4,8 +4,6 @@ import './angular/config';
 import './angular/services';
 import { CanvasRootController } from './angular/controllers';
 
-// TODO: We needed button style support. Remove this and hackery.less when you can
-import 'bootstrap/dist/css/bootstrap.css';
 import './style/index.css';
 
 // load the application

@@ -18,7 +18,7 @@ export const FunctionFormComponent = props => {
     onValueRemove: props.onValueRemove,
   };
 
-  return <div className="canvas__function">{props.expressionType.render(passedProps)}</div>;
+  return <div className="canvasFunctionForm">{props.expressionType.render(passedProps)}</div>;
 };
 
 FunctionFormComponent.propTypes = {

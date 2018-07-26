@@ -1,24 +1,18 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { EuiButton } from '@elastic/eui';
-export const NoDatasource = ({ done }) => (
-  <div>
-    <h3>No Datasource Detected</h3>
-    <p>
-      Its not that you're not connected to any data. Maybe you are, maybe you're not. But if you
-      are, I don't know about it. I looked for a data source in your expression, because I really
-      wanted to give you a fancy interface to it. Alas, I could not find one that I know about.
-    </p>
+import { EuiPanel, EuiText } from '@elastic/eui';
 
-    <p>
-      I'm just going to trust that you know what you're doing. You look smart. We should hang out
-      more. What are you doing Thursday?
-    </p>
-    <br />
-    <EuiButton fill onClick={done}>
-      Close
-    </EuiButton>
-  </div>
+export const NoDatasource = () => (
+  <EuiPanel>
+    <EuiText>
+      <h4>No data source present</h4>
+      <p>
+        This element does not have an attached data source. This is usually because the element is
+        an image or other static asset. If that's not the case you might want to check your
+        expression to make sure it is not malformed.
+      </p>
+    </EuiText>
+  </EuiPanel>
 );
 
 NoDatasource.propTypes = {

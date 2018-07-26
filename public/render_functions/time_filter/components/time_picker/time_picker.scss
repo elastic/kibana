@@ -1,11 +1,11 @@
-.canvas__time-picker {
+.canvasTimePicker {
   display: flex;
 
   > div:not(:last-child) {
     margin-right: $euiSizeS;
   }
 
-  .canvas__time-picker--apply {
+  .canvasTimePicker__apply {
     margin-top: $euiSizeXS;
     width: 100%;
   }

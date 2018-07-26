@@ -1,17 +1,20 @@
-.canvas__font-picker {
+.canvasFontPicker__wrapper {
+  // hacky fix until we can use EUI super select
+  > .euiPopover__anchor {
+    width: 100%;
+  }
+}
+
+.canvasFontPicker {
+  @include euiScrollBar;
+
   height: 200px;
   overflow-y: scroll;
 
-  .canvas__font-picker--font {
+  .canvasFontPicker__font {
     display: block;
     width: 100%;
     padding: $euiSizeXS $euiSize;
     color: black;
-  }
-}
-
-.canvas__font-picker--popover {
-  .popover-content {
-    padding: 0;
   }
 }

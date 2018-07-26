@@ -1,22 +1,36 @@
-.canvas__sidebar {
-  padding: $euiSizeS;
+.canvasSidebar {
+  @include euiScrollBar;
+
+  width: 100%;
+  padding: $euiSizeM;
+  max-height: 100vh;
+  overflow-y: auto;
+  overflow-x: hidden;
 }
 
-.canvas__sidebar-section-title {
-  font-size: $euiFontSize;
-  font-weight: 200;
-  display: flex;
-  align-items: center;
+.canvasSidebar__pop {
+  animation: sidebarPop $euiAnimSpeedFast $euiAnimSlightResistance;
 }
 
-.canvas__sidebar-section-tip {
-  font-size: $euiFontSizeS;
-  margin-left: $euiSizeS;
+
+.canvasSidebarFlyout {
+  width: 350px;
+  min-width: 350px;
 }
 
-.canvas__sidebar-section-body {
+.canvasSidebar__elementButtons {
+  background: darken($euiColorLightestShade, 5%);
   margin-bottom: $euiSizeS;
-  padding: $euiSizeS;
-  background-color: $euiColorEmptyShade;
-  border: $euiBorderThin;
+}
+
+@keyframes sidebarPop {
+  0% {
+    opacity: 0;
+  }
+  1% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
 }

@@ -15,6 +15,7 @@ const NumberArgInput = ({ updateValue, value, confirm, commit, argId }) => (
   <EuiFlexGroup gutterSize="s">
     <EuiFlexItem>
       <EuiFieldNumber
+        compressed
         id={argId}
         value={Number(value)}
         onChange={confirm ? updateValue : ev => commit(Number(ev.target.value))}
@@ -22,7 +23,9 @@ const NumberArgInput = ({ updateValue, value, confirm, commit, argId }) => (
     </EuiFlexItem>
     {confirm && (
       <EuiFlexItem grow={false}>
-        <EuiButton onClick={() => commit(Number(value))}>{confirm}</EuiButton>
+        <EuiButton size="s" onClick={() => commit(Number(value))}>
+          {confirm}
+        </EuiButton>
       </EuiFlexItem>
     )}
   </EuiFlexGroup>

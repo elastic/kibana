@@ -4,38 +4,17 @@
 */
 
 // Give buttons some room to the right
-.btn-toolbar {
-  .btn {
-    margin-right: $euiSizeXS;
-  }
+.euiAccordion__childWrapper {
+  overflow-x: hidden;
 }
 
-.btn-link,
-.btn-link:focus,
-.btn-link:hover {
-  background-color: transparent;
-  color: $euiColorPrimary;
-}
-
-.btn-link:focus,
-.btn-link:hover {
-  text-decoration: underline;
-}
-
-.text-warning {
-  color: $euiColorWarning;
-}
-
-.text-danger {
-  color: $euiColorDanger;
-}
 
 .clickable {
   cursor: pointer;
 }
 
 .popover-content {
-  overflow: auto;
+  padding: $euiSize;
 }
 
 .form-control[type='checkbox'],
@@ -47,12 +26,13 @@ button:focus {
   border-bottom: 0px;
 }
 
-.muted {
-  color: $euiColorDarkShade;
-}
-
-.popover {
-  max-width: 2000px !important; // React-Bootstrap popovers are hardcoded to 276px;
+// Temp EUI issue.
+.canvasPalettePicker__swatchesPopover {
+  display: block;
+  
+  .euiPopover__anchor {
+    display: block;
+  }
 }
 
 // fix modal focus index, set to bootstrap values
@@ -80,7 +60,7 @@ html {
   font-size: $euiFontSize;
 }
 
-.canvas__argtype--seriesStyle--color-picker {
+.canvasArgSeries__colorPicker {
   label {
     margin: 0;
   }
@@ -90,13 +70,6 @@ html {
 // temp fix for SVGs not appearing in the EuiImage fullscreen view
 .euiImageFullScreen {
   min-width: 100px;
-}
-
-// this makes the eui file picker smaller and fit better next to the image preview in imageUpload
-.euiFilePicker {
-  .euiFilePicker__promptText {
-    font-size: 0.75rem;
-  }
 }
 
 // TODO: remove when bootstrap is removed

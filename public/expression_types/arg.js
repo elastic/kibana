@@ -24,7 +24,7 @@ export class Arg {
     // properties that can be passed in
     const defaultProps = {
       displayName: props.name,
-      help: argType.help || `Argument: ${props.name}`,
+      help: argType.help,
       multi: false,
       required: false,
       types: [],

@@ -2,7 +2,14 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import moment from 'moment';
 import { sortByOrder } from 'lodash';
-import { EuiFlexGroup, EuiFlexItem, EuiBasicTable, EuiButtonIcon, EuiSpacer } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiBasicTable,
+  EuiButtonIcon,
+  EuiText,
+  EuiTitle,
+} from '@elastic/eui';
 import { ConfirmModal } from '../confirm_modal';
 import { Link } from '../link';
 import { Tooltip } from '../tooltip';
@@ -91,7 +98,7 @@ export class WorkpadLoader extends React.PureComponent {
         render: workpad => (
           <EuiFlexGroup gutterSize="xs" alignItems="center">
             <EuiFlexItem grow={false}>
-              <Tooltip text="Download">
+              <Tooltip content="Download">
                 <EuiButtonIcon
                   iconType="exportAction"
                   onClick={() => this.downloadWorkpad(workpad)}
@@ -100,7 +107,7 @@ export class WorkpadLoader extends React.PureComponent {
               </Tooltip>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <Tooltip text="Clone">
+              <Tooltip content="Clone">
                 <EuiButtonIcon
                   iconType="copy"
                   onClick={() => this.cloneWorkpad(workpad)}
@@ -109,7 +116,7 @@ export class WorkpadLoader extends React.PureComponent {
               </Tooltip>
             </EuiFlexItem>
             <EuiFlexItem>
-              <Tooltip text="Delete">
+              <Tooltip content="Delete">
                 <EuiButtonIcon
                   iconType="trash"
                   color="danger"
@@ -177,6 +184,7 @@ export class WorkpadLoader extends React.PureComponent {
 
     return (
       <EuiBasicTable
+        compressed
         items={sortedWorkpads}
         columns={columns}
         sorting={sorting}
@@ -191,23 +199,31 @@ export class WorkpadLoader extends React.PureComponent {
     const isLoading = this.props.workpads == null;
 
     return (
-      <div className="canvas__workpad_loader">
-        <WorkpadUpload onUpload={this.uploadWorkpad}>
-          <EuiFlexGroup gutterSize="s" className="canvas__workpad_loader--controls">
-            <EuiFlexItem grow={false}>
-              <WorkpadCreate createPending={createPending} onCreate={this.createWorkpad} />
-            </EuiFlexItem>
-            <EuiFlexItem className="canvas__workpad_loader--search">
-              <WorkpadSearch onChange={this.props.findWorkpads} />
-            </EuiFlexItem>
-          </EuiFlexGroup>
-
-          <EuiSpacer size="l" />
-
-          {createPending && <div>Creating Workpad...</div>}
-          {!createPending && isLoading && <div>Fetching Workpads...</div>}
-          {!createPending && !isLoading && this.renderWorkpadTable()}
-        </WorkpadUpload>
+      <WorkpadUpload onUpload={this.uploadWorkpad}>
+        <EuiFlexGroup gutterSize="s" alignItems="center" className="canvasWorkPadLoader">
+          <EuiFlexItem>
+            <EuiTitle size="s">
+              <h4>Workpads</h4>
+            </EuiTitle>
+            <EuiText>
+              <p>
+                <i>
+                  Drag and drop a JSON file oto this area to load a previously built workpad as a
+                  new file
+                </i>
+              </p>
+            </EuiText>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <WorkpadSearch onChange={this.props.findWorkpads} />
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <WorkpadCreate createPending={createPending} onCreate={this.createWorkpad} />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+        {createPending && <div>Creating Workpad...</div>}
+        {!createPending && isLoading && <div>Fetching Workpads...</div>}
+        {!createPending && !isLoading && this.renderWorkpadTable()}
 
         <ConfirmModal
           isOpen={deletingWorkpad.id != null}
@@ -217,7 +233,7 @@ export class WorkpadLoader extends React.PureComponent {
           onConfirm={() => this.removeWorkpad(deletingWorkpad.id)}
           onCancel={this.closeRemoveConfirm}
         />
-      </div>
+      </WorkpadUpload>
     );
   }
 }

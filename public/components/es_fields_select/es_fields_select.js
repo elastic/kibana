@@ -16,7 +16,7 @@ export const ESFieldsSelect = ({ selected, fields, onChange, onFocus, onBlur }) 
       selectedOptions={selectedOptions}
       options={options}
       onChange={values => onChange(values.map(({ label }) => label))}
-      className="canvas__esdocs--fields"
+      className="canvasFieldsSelect"
       onFocus={onFocus}
       onBlur={onBlur}
     />

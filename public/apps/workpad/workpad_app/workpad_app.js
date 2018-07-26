@@ -20,22 +20,34 @@ export class WorkpadApp extends React.PureComponent {
     const { editing, deselectElement } = this.props;
 
     return (
-      <div className="canvas__workpad_app">
-        <div className="canvas__workpad_app--main">
-          <div className="canvas__workpad_app--workpad" onMouseDown={deselectElement}>
-            <WorkpadHeader />
-            <div className="canvas__workpad_app--workspace">
-              <Workpad />
-            </div>
-          </div>
-          {editing && (
-            <div className="canvas__workpad_app--sidebar">
-              <Sidebar />
-            </div>
-          )}
-        </div>
+      <div className="canvasLayout">
+        <div className="canvasLayout__rows">
+          <div className="canvasLayout__cols">
+            <div className="canvasLayout__stage">
+              <div className="canvasLayout__stageHeader">
+                <WorkpadHeader />
+              </div>
 
-        {editing ? <Toolbar /> : null}
+              <div className="canvasLayout__stageContent" onMouseDown={deselectElement}>
+                <div className="canvasLayout__stageContentOverflow">
+                  <Workpad />
+                </div>
+              </div>
+            </div>
+
+            {editing && (
+              <div className="canvasLayout__sidebar">
+                <Sidebar />
+              </div>
+            )}
+          </div>
+
+          {editing ? (
+            <div className="canvasLayout__footer">
+              <Toolbar />
+            </div>
+          ) : null}
+        </div>
       </div>
     );
   }

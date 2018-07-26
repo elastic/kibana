@@ -1,7 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import Dropzone from 'react-dropzone';
-import { EuiCode } from '@elastic/eui';
 import { getId } from '../../lib/get_id';
 
 export class WorkpadUpload extends React.PureComponent {
@@ -43,14 +42,6 @@ export class WorkpadUpload extends React.PureComponent {
         disableClick
         style={{ border: this.state.dropping ? '2px dashed' : '2px solid transparent' }}
       >
-        <center>
-          <p>
-            <i>
-              Tip: Drag and drop a <EuiCode>JSON</EuiCode> exported workpad into this dialog to load
-              new workpad from a file
-            </i>
-          </p>
-        </center>
         {this.props.children}
       </Dropzone>
     );

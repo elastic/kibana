@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { Fragment } from 'react';
 import PropTypes from 'prop-types';
 import { get } from 'lodash';
 import { set } from 'object-path-immutable';
@@ -45,10 +45,7 @@ export class ExtendedTemplate extends React.PureComponent {
   render() {
     const isDisabled = typeof this.props.argValue === 'boolean' && this.props.argValue === false;
 
-    if (isDisabled)
-      return (
-        <EuiText className="canvas__argtype--axis_config--disabled">The axis is disabled</EuiText>
-      );
+    if (isDisabled) return <EuiText color="subdued">The axis is disabled</EuiText>;
 
     const positions = {
       xaxis: ['bottom', 'top'],
@@ -60,15 +57,15 @@ export class ExtendedTemplate extends React.PureComponent {
     const options = positions[argName].map(val => ({ value: val, text: val }));
 
     return (
-      <div>
-        <EuiFormRow label="Position">
+      <Fragment>
+        <EuiFormRow label="Position" compressed>
           <EuiSelect
             defaultValue={position}
             options={options}
             onChange={this.setArgValue('position')}
           />
         </EuiFormRow>
-      </div>
+      </Fragment>
     );
   }
 }

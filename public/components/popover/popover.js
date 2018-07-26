@@ -1,41 +1,8 @@
-import React, { PureComponent } from 'react';
+import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import { Popover as BootstrapPopover, Overlay } from 'react-bootstrap';
-import uuid from 'uuid/v4';
+import { EuiPopover } from '@elastic/eui';
 
-// mapping for EUI popover positions to bootstrap placements
-const anchorPositions = {
-  upCenter: 'top',
-  upLeft: 'top',
-  upRight: 'top',
-  downCenter: 'bottom',
-  downLeft: 'bottom',
-  downRight: 'bottom',
-  leftCenter: 'left',
-  leftUp: 'left',
-  leftDown: 'left',
-  rightCenter: 'right',
-  rightUp: 'right',
-  rightDown: 'right',
-};
-
-export class Popover extends PureComponent {
-  static propTypes = {
-    id: PropTypes.string,
-    panelClassName: PropTypes.string,
-    button: PropTypes.func.isRequired,
-    children: PropTypes.func.isRequired,
-    title: PropTypes.string,
-    anchorPosition: PropTypes.string,
-    style: PropTypes.object,
-  };
-
-  static defaultProps = {
-    ownFocus: false,
-    anchorPosition: 'downCenter',
-    panelPaddingSize: 'm',
-  };
-
+export class Popover extends Component {
   state = {
     isPopoverOpen: false,
   };
@@ -53,36 +20,49 @@ export class Popover extends PureComponent {
   };
 
   render() {
-    const { id, button, children, panelClassName, title, anchorPosition, style } = this.props;
-
-    const position = anchorPositions[anchorPosition] ? anchorPosition : 'downCenter';
-
-    // TODO: replace bootstrap popover with EuiPopover https://github.com/elastic/kibana-canvas/issues/612
-    // Pending https://github.com/elastic/eui/issues/873
-    const popover = (
-      <BootstrapPopover id={id || `popover-${uuid()}`} className={panelClassName} title={title}>
-        {children({ closePopover: this.closePopover })}
-      </BootstrapPopover>
-    );
+    // TODO: This should just pass {...rest} otherwise it won't get EUI updates.
+    const {
+      className,
+      button,
+      children,
+      panelClassName,
+      anchorPosition,
+      panelPaddingSize,
+      withTitle,
+      ownFocus,
+      title,
+      ...rest
+    } = this.props;
 
     return (
-      <div
-        ref={button => {
-          this.target = button;
-        }}
-        style={style}
+      <EuiPopover
+        panelClassName={panelClassName}
+        title={title}
+        withTitle={withTitle}
+        anchorPosition={anchorPosition}
+        button={button(this.handleClick)}
+        isOpen={this.state.isPopoverOpen}
+        panelPaddingSize={panelPaddingSize}
+        closePopover={this.closePopover}
+        className={className}
+        ownFocus={ownFocus}
+        {...rest}
       >
-        {button(this.handleClick)}
-        <Overlay
-          show={this.state.isPopoverOpen}
-          onHide={() => this.setState({ isPopoverOpen: false })}
-          rootClose
-          placement={anchorPositions[position]}
-          target={this.target}
-        >
-          {popover}
-        </Overlay>
-      </div>
+        {children({ closePopover: this.closePopover })}
+      </EuiPopover>
     );
   }
 }
+
+Popover.propTypes = {
+  isOpen: PropTypes.bool,
+  ownFocus: PropTypes.bool,
+  withTitle: PropTypes.bool,
+  button: PropTypes.func.isRequired,
+  children: PropTypes.func,
+  className: PropTypes.string,
+  anchorPosition: PropTypes.string,
+  panelClassName: PropTypes.string,
+  title: PropTypes.string,
+  panelPaddingSize: PropTypes.string,
+};

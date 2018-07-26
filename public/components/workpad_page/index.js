@@ -25,12 +25,12 @@ const mapDispatchToProps = dispatch => {
   };
 };
 
-const mergeProps = (stateProps, { removeElement }, props) => {
+const mergeProps = (stateProps, { removeElement }, ownProps) => {
   const { isEditing, isFullscreen } = stateProps;
-  const { page } = props;
+  const { page } = ownProps;
 
   return {
-    ...props,
+    ...ownProps,
     isEditable: !isFullscreen && isEditing,
     key: page.id,
     removeElement,
@@ -60,6 +60,7 @@ export const WorkpadPage = compose(
           : shape
     );
     const selectedElements = selectedShapes.map(id => getRootElementId(shapeLookup, id));
+
     return {
       elements,
       selectedShapes,

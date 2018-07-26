@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 import { DatetimeCalendar } from '../datetime_calendar';
 
 export const DatetimeRangeAbsolute = ({ from, to, onSelect }) => (
-  <div className="canvas__datetime-range-absolute">
+  <div className="canvasDateTimeRangeAbsolute">
     <div>
       <DatetimeCalendar value={from} onSelect={val => onSelect(val, to)} />
     </div>

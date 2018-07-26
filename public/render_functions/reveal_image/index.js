@@ -18,6 +18,8 @@ export const revealImage = () => ({
       setSize();
       finish();
     };
+
+    img.className = 'revealImage__image';
     img.style.clipPath = getClipPath(config.percent, config.origin);
     img.style['-webkit-clip-path'] = getClipPath(config.percent, config.origin);
     img.src = isValid(config.image) ? config.image : elasticOutline;

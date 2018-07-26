@@ -18,7 +18,7 @@ export const Positionable = ({ children, transformMatrix, a, b }) => {
 
     const stepChild = React.cloneElement(child, { size: { width: a * 2, height: b * 2 } });
     return (
-      <div className="canvas__positionable canvas__interactable" style={newStyle}>
+      <div className="canvasPositionable canvasInteractable" style={newStyle}>
         {stepChild}
       </div>
     );

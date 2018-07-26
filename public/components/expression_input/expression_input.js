@@ -1,5 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
+import { EuiTextArea, EuiFormRow } from '@elastic/eui';
 import { getAutocompleteProposals } from '../../lib/autocomplete_proposals';
 import { ContextMenu } from '../context_menu';
 import { matchPairsProvider } from './match_pairs';
@@ -70,21 +71,29 @@ export class ExpressionInput extends React.Component {
   };
 
   render() {
+    const { value, error } = this.props;
+    const { suggestions } = this.state;
+
+    const helpText = error
+      ? null
+      : 'This is the coded expression that backs this element. You better know what you are doing here.';
     return (
       <div className="expressionInput">
         <ContextMenu
-          items={this.state.suggestions}
+          items={suggestions}
           onSelect={this.onSuggestionSelect}
           itemsStyle={this.getContextMenuItemsStyle()}
           itemComponent={Suggestion}
         >
-          <textarea
-            className="textarea form-control"
-            value={this.props.value}
-            onKeyDown={this.matchPairs}
-            onChange={this.onChange}
-            ref={ref => (this.ref = ref)}
-          />
+          <EuiFormRow fullWidth isInvalid={Boolean(error)} error={error} helpText={helpText}>
+            <EuiTextArea
+              className="canvasTextArea--code"
+              value={value}
+              onKeyDown={this.matchPairs}
+              onChange={this.onChange}
+              inputRef={ref => (this.ref = ref)}
+            />
+          </EuiFormRow>
         </ContextMenu>
       </div>
     );
@@ -94,4 +103,5 @@ export class ExpressionInput extends React.Component {
 ExpressionInput.propTypes = {
   value: PropTypes.string,
   onChange: PropTypes.func,
+  error: PropTypes.string,
 };

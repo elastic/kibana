@@ -1,41 +1,49 @@
-body.canvas-fullscreen {
-  nav.global-nav {
-    display: none;
-  }
-
-  .content .app-wrapper {
+body.canvas-isFullscreen {
+  // this is a hack that overwrites Kibana's core chrome
+  .app-wrapper {
     left: 0;
   }
 
-  .canvas__workpad_app {
-    .canvas__workpad_app--main .canvas__workpad_app--sidebar,
-    .canvas__workpad_app--main .canvas__workpad_header,
-    .canvas__toolbar {
-      display: none;
-    }
+  // set the background color
+  .canvasLayout {
+    background: #000; // This hex is OK, we always want it black
+  }
 
-    .canvas__workpad_app--main .canvas__workpad_app--workpad {
+  // hide all the interface parts
+  nav.global-nav,
+  .canvasLayout__stageHeader,
+  .canvasLayout__sidebar,
+  .canvasLayout__footer,
+  .canvasGrid {
+    display: none;
+  }
+
+  .canvasLayout__stageContentOverflow {
+    overflow: visible;
+    position: static;
+    top: auto;
+    left: auto;
+    right: auto;
+    bottom: auto;
+
+    .canvasWorkpad__buffer {
       padding: 0;
-      background-color: black;
-      align-items: center;
-      justify-content: center;
-      overflow: hidden;
-
-      .canvas__workpad_app--workspace {
-        width: auto;
-
-        .canvas__checkered {
-          background: none;
-        }
-
-        .canvas__workpad {
-          overflow: hidden;
-
-          .canvas__page {
-            box-shadow: none;
-          }
-        }
-      }
+      margin: 0;
     }
+  }
+
+  .canvasLayout__rows,
+  .canvasLayout__cols {
+    align-items: center;
+    justify-content: center;
+  }
+
+  .canvasCheckered {
+    display: flex;
+    background: none;
+  }
+
+  .canvasPage {
+    box-shadow: none;
   }
 }

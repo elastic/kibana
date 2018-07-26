@@ -1,30 +1,38 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { FormGroup, Button, ButtonToolbar } from 'react-bootstrap';
+import {
+  EuiPanel,
+  EuiButton,
+  EuiButtonEmpty,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiSpacer,
+} from '@elastic/eui';
 import { ExpressionInput } from '../expression_input';
 
 export const Expression = ({ formState, updateValue, setExpression, done, error }) => {
   return (
-    <div className="canvas__expression">
-      <FormGroup controlId="formControlsTextarea" validationState={error ? 'error' : null}>
-        <ExpressionInput value={formState.expression} onChange={updateValue} />
-        <label>
-          {error
-            ? error
-            : `The Canvas expression backing the element. Better know what you're doing here.`}
-        </label>
-      </FormGroup>
-      <ButtonToolbar>
-        <Button
-          disabled={!!error}
-          bsStyle="success"
-          onClick={() => setExpression(formState.expression)}
-        >
-          Run
-        </Button>
-        {done && <Button onClick={done}> {formState.dirty ? 'Cancel' : 'Done'}</Button>}
-      </ButtonToolbar>
-    </div>
+    <EuiPanel>
+      <ExpressionInput error={error} value={formState.expression} onChange={updateValue} />
+      <EuiSpacer size="m" />
+      <EuiFlexGroup justifyContent="flexEnd" gutterSize="s">
+        <EuiFlexItem grow={false}>
+          <EuiButtonEmpty size="s" color={formState.dirty ? 'danger' : 'primary'} onClick={done}>
+            {formState.dirty ? 'Cancel' : 'Close'}
+          </EuiButtonEmpty>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiButton
+            fill
+            disabled={!!error}
+            onClick={() => setExpression(formState.expression)}
+            size="s"
+          >
+            Run
+          </EuiButton>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </EuiPanel>
   );
 };
 

@@ -12,7 +12,15 @@ const SelectArgInput = ({ typeInstance, onValueChange, argValue, argId }) => {
     return onValueChange(value);
   };
 
-  return <EuiSelect id={argId} defaultValue={argValue} options={choices} onChange={handleChange} />;
+  return (
+    <EuiSelect
+      compressed
+      id={argId}
+      defaultValue={argValue}
+      options={choices}
+      onChange={handleChange}
+    />
+  );
 };
 
 SelectArgInput.propTypes = {

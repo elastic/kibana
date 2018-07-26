@@ -8,7 +8,7 @@ export const PaletteSwatch = ({ colors, gradient }) => {
     colorBoxes = colors.map(color => (
       <div
         key={color}
-        className="canvas__palette-swatch--box"
+        className="canvasPaletteSwatch__box"
         style={{
           backgroundColor: color,
         }}
@@ -18,7 +18,7 @@ export const PaletteSwatch = ({ colors, gradient }) => {
     colorBoxes = [
       <div
         key="gradient"
-        className="canvas__palette-swatch--box"
+        className="canvasPaletteSwatch__box"
         style={{
           background: `linear-gradient(90deg, ${colors.join(', ')})`,
         }}
@@ -27,9 +27,9 @@ export const PaletteSwatch = ({ colors, gradient }) => {
   }
 
   return (
-    <div className="canvas__palette-swatch">
-      <div className="canvas__palette-swatch--background canvas__checkered" />
-      <div className="canvas__palette-swatch--foreground">{colorBoxes}</div>
+    <div className="canvasPaletteSwatch">
+      <div className="canvasPaletteSwatch__background canvasCheckered" />
+      <div className="canvasPaletteSwatch__foreground">{colorBoxes}</div>
     </div>
   );
 };

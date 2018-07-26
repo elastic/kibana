@@ -16,12 +16,10 @@ const render = (domNode, config, handlers) => {
     try {
       if (!plot) {
         plot = $.plot($(domNode), config.data, config.options);
-        $('.legendLabel, .flot-tick-label, .valueLabel', domNode).css(config.font.spec);
       } else {
         plot.resize();
         plot.setupGrid();
         plot.draw();
-        $('.legendLabel, .flot-tick-label, .valueLabel', domNode).css(config.font.spec);
       }
     } catch (e) {
       // Nope

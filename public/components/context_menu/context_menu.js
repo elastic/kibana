@@ -16,11 +16,13 @@ export const ContextMenu = ({
   <div className="contextMenu" onKeyDown={onKeyDown} onKeyPress={onKeyPress}>
     {children}
     {isOpen && items.length ? (
-      <div className="contextMenuItems" style={itemsStyle}>
+      <div className="contextMenu__items" style={itemsStyle}>
         {items.map((item, i) => (
           <div
             key={i}
-            className={'contextMenuItem ' + (selectedIndex === i ? 'active' : '')}
+            className={
+              'contextMenu__item ' + (selectedIndex === i ? 'contextMenu__item-isActive' : '')
+            }
             onClick={() => onSelect(item)}
             onMouseOver={() => setSelectedIndex(i)}
           >

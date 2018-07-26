@@ -5,7 +5,12 @@ import { EuiButton } from '@elastic/eui';
 export const ElementNotSelected = ({ done }) => (
   <div>
     <div>Select an element to show expression input</div>
-    {done && <EuiButton onClick={done}> Close</EuiButton>}
+    {done && (
+      <EuiButton size="s" onClick={done}>
+        {' '}
+        Close
+      </EuiButton>
+    )}
   </div>
 );
 

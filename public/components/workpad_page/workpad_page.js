@@ -6,6 +6,7 @@ import { RotationHandle } from '../rotation_handle';
 import { BorderConnection } from '../border_connection';
 import { BorderResizeHandle } from '../border_resize_handle';
 
+// NOTE: the data-shared-* attributes here are used for reporting
 export const WorkpadPage = ({
   page,
   elements,
@@ -21,13 +22,13 @@ export const WorkpadPage = ({
   onMouseUp,
   selectedShapes,
 }) => {
-  const activeClass = isSelected ? 'canvas__page--active' : 'canvas__page--inactive';
+  const activeClass = isSelected ? 'canvasPage--isActive' : 'canvasPage--isInactive';
 
   return (
     <div
       key={page.id}
       id={page.id}
-      className={`canvas__page ${activeClass}`}
+      className={`canvasPage ${activeClass}`}
       data-shared-items-container
       style={{
         ...page.style,
@@ -45,53 +46,30 @@ export const WorkpadPage = ({
       {elements
         .map(element => {
           const selected = selectedShapes.indexOf(element.id) !== -1;
+
           if (element.type === 'annotation') {
-            if (!isEditable) {
-              return;
-            }
+            if (!isEditable) return;
+
+            const props = {
+              key: element.id,
+              type: element.type,
+              transformMatrix: element.transformMatrix,
+              a: element.a,
+              b: element.b,
+            };
+
             switch (element.subtype) {
               case 'alignmentGuide':
-                return (
-                  <AlignmentGuide
-                    key={element.id}
-                    type={element.type}
-                    transformMatrix={element.transformMatrix}
-                    a={element.a}
-                    b={element.b}
-                  />
-                );
+                return <AlignmentGuide {...props} />;
               case 'rotationHandle':
-                return (
-                  <RotationHandle
-                    key={element.id}
-                    type={element.type}
-                    transformMatrix={element.transformMatrix}
-                    a={element.a}
-                    b={element.b}
-                  />
-                );
+                return <RotationHandle {...props} />;
               case 'resizeHandle':
-                return (
-                  <BorderResizeHandle
-                    key={element.id}
-                    type={element.type}
-                    transformMatrix={element.transformMatrix}
-                    a={element.a}
-                    b={element.b}
-                  />
-                );
+                return <BorderResizeHandle {...props} />;
               case 'resizeConnector':
-                return (
-                  <BorderConnection
-                    key={element.id}
-                    type={element.type}
-                    transformMatrix={element.transformMatrix}
-                    a={element.a}
-                    b={element.b}
-                  />
-                );
+                return <BorderConnection {...props} />;
             }
           }
+
           return <ElementWrapper key={element.id} element={{ ...element, selected }} />;
         })
         .filter(element => !!element)}
@@ -106,8 +84,12 @@ WorkpadPage.propTypes = {
   elements: PropTypes.arrayOf(
     PropTypes.shape({
       id: PropTypes.string.isRequired,
+      transformMatrix: PropTypes.arrayOf(PropTypes.number).isRequired,
+      a: PropTypes.number.isRequired,
+      b: PropTypes.number.isRequired,
+      type: PropTypes.string,
     })
-  ),
+  ).isRequired,
   isSelected: PropTypes.bool.isRequired,
   height: PropTypes.number.isRequired,
   width: PropTypes.number.isRequired,

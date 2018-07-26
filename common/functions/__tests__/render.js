@@ -21,7 +21,7 @@ describe('render', () => {
   it('returns a render', () => {
     const result = fn(renderTable, {
       as: 'debug',
-      css: '".canvas__element { background-color: red; }"',
+      css: '".canvasRenderEl { background-color: red; }"',
       containerStyle: containerStyle,
     });
 
@@ -44,10 +44,10 @@ describe('render', () => {
     describe('css', () => {
       it('sets the custom CSS for the render elemnt', () => {
         const result = fn(renderTable, {
-          css: '".canvas__element { background-color: red; }"',
+          css: '".canvasRenderEl { background-color: red; }"',
         });
 
-        expect(result).to.have.property('css', '".canvas__element { background-color: red; }"');
+        expect(result).to.have.property('css', '".canvasRenderEl { background-color: red; }"');
       });
 
       it("defaults to '* > * {}'", () => {

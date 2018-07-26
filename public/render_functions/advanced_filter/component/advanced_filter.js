@@ -8,10 +8,10 @@ export const AdvancedFilter = ({ value, onChange, commit }) => (
       e.preventDefault();
       commit(value);
     }}
-    className="canvas__element__advanced_filter"
+    className="canvasAdvancedFilter"
   >
     <FormControl
-      className="canvas__element__advanced_filter--input"
+      className="canvasAdvancedFilter__input"
       type="text"
       placeholder="Enter text"
       value={value}

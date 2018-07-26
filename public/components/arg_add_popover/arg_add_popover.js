@@ -10,7 +10,12 @@ export const ArgAddPopover = ({ options }) => {
   );
 
   return (
-    <Popover id="arg-add-popover" panelClassName="canvas__add-arg-popover" button={button}>
+    <Popover
+      id="arg-add-popover"
+      panelClassName="canvasArg__addPopover"
+      panelPaddingSize="none"
+      button={button}
+    >
       {({ closePopover }) =>
         options.map(opt => (
           <ArgAdd

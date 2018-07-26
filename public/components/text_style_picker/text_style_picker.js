@@ -1,7 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { Button, ButtonGroup } from 'react-bootstrap';
-import { EuiFlexGroup, EuiFlexItem, EuiSelect, EuiSpacer } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiSelect, EuiSpacer, EuiButtonGroup } from '@elastic/eui';
 import { FontPicker } from '../font_picker';
 import { ColorPickerMini } from '../color_picker_mini';
 import { fontSizes } from './font_sizes';
@@ -17,7 +16,49 @@ export const TextStylePicker = ({
   onChange,
   colors,
 }) => {
-  function doChange(propName, value) {
+  const alignmentButtons = [
+    {
+      id: 'left',
+      label: 'Align left',
+      iconType: 'editorAlignLeft',
+    },
+    {
+      id: 'center',
+      label: 'Align center',
+      iconType: 'editorAlignCenter',
+    },
+    {
+      id: 'right',
+      label: 'Align right',
+      iconType: 'editorAlignRight',
+    },
+  ];
+
+  const styleButtons = [
+    {
+      id: 'bold',
+      label: 'Bold',
+      iconType: 'editorBold',
+    },
+    {
+      id: 'italic',
+      label: 'Italic',
+      iconType: 'editorItalic',
+    },
+    {
+      id: 'underline',
+      label: 'Underline',
+      iconType: 'editorUnderline',
+    },
+  ];
+
+  const stylesSelectedMap = {
+    ['bold']: weight === 'bold',
+    ['italic']: Boolean(italic),
+    ['underline']: Boolean(underline),
+  };
+
+  const doChange = (propName, value) => {
     onChange({
       family,
       size,
@@ -28,13 +69,31 @@ export const TextStylePicker = ({
       italic: italic || false,
       [propName]: value,
     });
-  }
+  };
+
+  const onAlignmentChange = optionId => doChange('align', optionId);
+
+  const onStyleChange = optionId => {
+    let prop;
+    let value;
+
+    if (optionId === 'bold') {
+      prop = 'weight';
+      value = !stylesSelectedMap[optionId] ? 'bold' : 'normal';
+    } else {
+      prop = optionId;
+      value = !stylesSelectedMap[optionId];
+    }
+
+    doChange(prop, value);
+  };
 
   return (
-    <div className="canvas__text-style-picker">
-      <EuiFlexGroup gutterSize="s">
+    <div className="canvasTextStylePicker">
+      <EuiFlexGroup gutterSize="m">
         <EuiFlexItem grow={false}>
           <EuiSelect
+            compressed
             defaultValue={size}
             onChange={e => doChange('size', Number(e.target.value))}
             options={fontSizes.map(size => ({ text: String(size), value: size }))}
@@ -47,43 +106,30 @@ export const TextStylePicker = ({
 
       <EuiSpacer size="m" />
 
-      <EuiFlexGroup gutterSize="none" justifyContent="spaceAround" alignItems="flexEnd">
+      <EuiFlexGroup gutterSize="m" alignItems="center">
+        <EuiFlexItem grow={false}>
+          <EuiButtonGroup
+            options={styleButtons}
+            idToSelectedMap={stylesSelectedMap}
+            onChange={onStyleChange}
+            type="multi"
+            isIconOnly
+          />
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiButtonGroup
+            options={alignmentButtons}
+            isIconOnly
+            idSelected={align}
+            onChange={onAlignmentChange}
+          />
+        </EuiFlexItem>
         <EuiFlexItem grow={false} style={{ fontSize: 0 }}>
           <ColorPickerMini
             value={color}
             onChange={value => doChange('color', value)}
             colors={colors}
           />
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          {/* The bootstrap button groups will be removed when EUI has button groups. See https://github.com/elastic/eui/issues/841 */}
-          <ButtonGroup bsSize="medium">
-            <Button
-              active={weight === 'bold'}
-              onClick={() => doChange('weight', weight !== 'bold' ? 'bold' : 'normal')}
-            >
-              <span style={{ fontWeight: 'bold' }}>B</span>
-            </Button>
-            <Button active={italic} onClick={() => doChange('italic', !italic)}>
-              <span style={{ fontStyle: 'italic' }}>I</span>
-            </Button>
-            <Button active={underline} onClick={() => doChange('underline', !underline)}>
-              <span style={{ textDecoration: 'underline' }}>U</span>
-            </Button>
-          </ButtonGroup>
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <ButtonGroup bsSize="medium">
-            <Button active={align === 'left'} onClick={() => doChange('align', 'left')}>
-              <i className="fa fa-align-left" />
-            </Button>
-            <Button active={align === 'center'} onClick={() => doChange('align', 'center')}>
-              <i className="fa fa-align-center" />
-            </Button>
-            <Button active={align === 'right'} onClick={() => doChange('align', 'right')}>
-              <i className="fa fa-align-right" />
-            </Button>
-          </ButtonGroup>
         </EuiFlexItem>
       </EuiFlexGroup>
     </div>
@@ -100,4 +146,8 @@ TextStylePicker.propTypes = {
   italic: PropTypes.bool,
   onChange: PropTypes.func.isRequired,
   colors: PropTypes.array,
+};
+
+TextStylePicker.defaultProps = {
+  align: 'left',
 };
