@@ -134,9 +134,9 @@ uiRoutes
         throw new Error(errorMessage);
       }
 
-      const defaultFieldName = i18n.translate('kbn.management.editIndexPattern.scripted.newFieldPlaceholder',
+      const fieldName = this.field.name || i18n.translate('kbn.management.editIndexPattern.scripted.newFieldPlaceholder',
         { defaultMessage: 'New Scripted Field' });
-      docTitle.change([this.field.name || defaultFieldName, this.indexPattern.title]);
+      docTitle.change([fieldName, this.indexPattern.title]);
 
       renderFieldEditor($scope, this.indexPattern, this.field, {
         Field,
