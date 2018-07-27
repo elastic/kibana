@@ -11,12 +11,12 @@ export const columns = () => ({
   args: {
     include: {
       types: ['string'],
-      help: 'A comma seperated list of column names to keep in the table',
+      help: 'A comma separated list of column names to keep in the table',
       default: null,
     },
     exclude: {
       types: ['string'],
-      help: 'A comma seperated list of column names to remove from the table',
+      help: 'A comma separated list of column names to remove from the table',
       default: null,
     },
   },
