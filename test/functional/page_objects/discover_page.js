@@ -52,7 +52,6 @@ export function DiscoverPageProvider({ getService, getPageObjects }) {
       await this.clickSaveSearchButton();
       await getRemote().findDisplayedById('SaveSearch').pressKeys(searchName);
       await testSubjects.click('discoverSaveSearchButton');
-      await PageObjects.header.waitUntilLoadingHasFinished();
 
       // Make sure toast exists and then close it.
       await testSubjects.existOrFail('saveSearchSuccess');

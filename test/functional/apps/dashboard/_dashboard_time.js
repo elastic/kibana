@@ -41,8 +41,8 @@ export default function ({ getPageObjects }) {
       it('is saved', async () => {
         await PageObjects.dashboard.clickNewDashboard();
         await PageObjects.dashboard.addVisualizations([PageObjects.dashboard.getTestVisualizationNames()[0]]);
-        const isDashboardSaved = await PageObjects.dashboard.saveDashboard(dashboardName, { storeTimeWithDashboard: false });
-        expect(isDashboardSaved).to.eql(true);
+        // saveDashboard asserts that it saves successfully.
+        await PageObjects.dashboard.saveDashboard(dashboardName, { storeTimeWithDashboard: false });
       });
 
       it('Does not set the time picker on open', async () => {
@@ -61,8 +61,8 @@ export default function ({ getPageObjects }) {
       it('is saved with quick time', async function () {
         await PageObjects.dashboard.clickEdit();
         await PageObjects.header.setQuickTime('Today');
-        const isDashboardSaved = await PageObjects.dashboard.saveDashboard(dashboardName, { storeTimeWithDashboard: true });
-        expect(isDashboardSaved).to.eql(true);
+        // saveDashboard asserts that it saves successfully.
+        await PageObjects.dashboard.saveDashboard(dashboardName, { storeTimeWithDashboard: true });
       });
 
       it('sets quick time on open', async function () {
@@ -77,8 +77,8 @@ export default function ({ getPageObjects }) {
       it('is saved with absolute time', async function () {
         await PageObjects.dashboard.clickEdit();
         await PageObjects.header.setAbsoluteRange(fromTime, toTime);
-        const isDashboardSaved = await PageObjects.dashboard.saveDashboard(dashboardName, { storeTimeWithDashboard: true });
-        expect(isDashboardSaved).to.eql(true);
+        // saveDashboard asserts that it saves successfully.
+        await PageObjects.dashboard.saveDashboard(dashboardName, { storeTimeWithDashboard: true });
       });
 
       it('sets absolute time on open', async function () {

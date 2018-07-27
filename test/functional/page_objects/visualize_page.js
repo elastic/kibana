@@ -694,7 +694,6 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
       if (saveAsNew) {
         await testSubjects.click('saveAsNewCheckbox');
       }
-      await PageObjects.header.waitUntilLoadingHasFinished();
 
       // Confirm save and close toast.
       await testSubjects.existOrFail('saveVisualizationSuccess');

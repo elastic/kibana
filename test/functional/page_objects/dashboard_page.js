@@ -297,8 +297,6 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
         await this.clickSave();
       }
 
-      await PageObjects.header.waitUntilLoadingHasFinished();
-
       // Confirm that the Dashboard has been saved and close the toast.
       await testSubjects.existOrFail('saveDashboardSuccess');
       await testSubjects.click('saveDashboardSuccess toastCloseButton');
