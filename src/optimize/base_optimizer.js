@@ -176,6 +176,12 @@ export default class BaseOptimizer {
           allChunks: true
         }),
 
+        new webpack.DefinePlugin({
+          'process.env': {
+            'IS_KIBANA_DISTRIBUTABLE': String(IS_KIBANA_DISTRIBUTABLE)
+          }
+        }),
+
         new webpack.optimize.CommonsChunkPlugin({
           name: 'commons',
           filename: 'commons.bundle.js',
