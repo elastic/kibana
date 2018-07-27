@@ -128,17 +128,6 @@ $dashGrid__depth-dragging: 2;
 }
 
 /**
- * Needs to correspond with the react root nested inside angular.
- */
-dashboard-viewport-provider {
-  flex: 1;
-  display: flex;
-  [data-reactroot] {
-    flex: 1;
-  }
-}
-
-/**
  * Disable transitions from the library on each grid element.
  */
 .react-grid-item {
@@ -353,16 +342,6 @@ dashboard-viewport-provider {
     box-shadow: 0 4px 4px -1px rgba(0, 0, 0, 0.1);
   }
 }
-
-.dashboard-viewport {
-  width: 100%;
-  background-color: $euiColorEmptyShade;
-}
-.dashboard-viewport-with-margins {
-  width: 100%;
-  background-color: $euiColorLightestShade;
-}
-
 .dashboardPanelMenuOptionsForm {
   padding: 16px;
   input {

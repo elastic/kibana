@@ -1,4 +1,4 @@
-.dashExitFullScreenButton {
+.dshExitFullScreenButton {
   text-align: center;
   width: 100%;
   height: 0;
@@ -6,7 +6,7 @@
   position: absolute;
 }
 
-.dashExitFullScreenButton__mode {
+.dshExitFullScreenButton__mode {
   height: $euiSizeXXL;
   left: 0;
   bottom: 0;
@@ -21,14 +21,14 @@
   &:focus {
     transition: all $euiAnimSpeedExtraSlow $euiAnimSlightResistance;
 
-    .dashExitFullScreenButton__text {
+    .dshExitFullScreenButton__text {
       transition: all $euiAnimSpeedNormal $euiAnimSlightResistance;
       transform: translateX(-$euiSize);
     }
   }
 }
 
-.dashExitFullScreenButton__logo {
+.dshExitFullScreenButton__logo {
   display: block;
   background-color: shadeOrTint($euiColorPrimary, 25%, 25%);
   height: $euiSizeXXL;
@@ -48,7 +48,7 @@
  * 1. Calc made to allow caret in text to peek out / animate.
  */
 
-.dashExitFullScreenButton__text {
+.dshExitFullScreenButton__text {
   background: $euiColorPrimary;
   color: $euiColorEmptyShade;
   line-height: $euiSizeXXL;
