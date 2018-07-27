@@ -5,7 +5,7 @@
  */
 
 export function toSpaceIdentifier(value = '') {
-  return value.toLowerCase().replace(/[^a-z0-9]/g, '-');
+  return value.toLowerCase().replace(/[^a-z0-9_]/g, '-');
 }
 
 export function isValidSpaceIdentifier(value = '') {

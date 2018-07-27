@@ -74,11 +74,11 @@ describe('validateSpaceIdentifier', () => {
 
   test('it requires a valid Space Identifier', () => {
     const space = {
-      id: 'invalid context'
+      id: 'invalid identifier'
     };
 
     expect(validator.validateSpaceIdentifier(space))
-      .toEqual({ isInvalid: true, error: 'Space Identifier only allows a-z, 0-9, and the "-" character' });
+      .toEqual({ isInvalid: true, error: 'Space Identifier only allows a-z, 0-9, "_", and the "-" character' });
   });
 
   test('it allows a valid Space Identifier', () => {

@@ -212,7 +212,7 @@ describe('Spaces API', () => {
     });
   });
 
-  test('PUT /space should update an exisitng space with the provided ID', async () => {
+  test('PUT /space should update an existing space with the provided ID', async () => {
     const payload = {
       id: 'a-space',
       name: 'my updated space',
@@ -261,7 +261,7 @@ describe('Spaces API', () => {
     expect(result.location).toEqual('/s/a-space');
   });
 
-  test('POST space/{id}/select should respond with the new space location when a baseUrl is provided', async () => {
+  test('POST space/{id}/select should respond with the new space location when a server.basePath is in use', async () => {
     const testConfig = {
       'server.basePath': '/my/base/path'
     };

@@ -15,8 +15,8 @@ test('it converts everything to lowercase', () => {
   expect(toSpaceIdentifier(input)).toEqual('this-is-a-test');
 });
 
-test('it converts non-alphanumeric characters to dashes', () => {
-  const input = `~!@#$%^&*()_+-=[]{}\|';:"/.,<>?` + "`";
+test('it converts non-alphanumeric characters except for "_" to dashes', () => {
+  const input = `~!@#$%^&*()+-=[]{}\|';:"/.,<>?` + "`";
 
   const expectedResult = new Array(input.length + 1).join('-');
 

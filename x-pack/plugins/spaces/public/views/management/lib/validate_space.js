@@ -53,7 +53,7 @@ export class SpaceValidator {
     }
 
     if (!isValidSpaceIdentifier(space.id)) {
-      return invalid('Space Identifier only allows a-z, 0-9, and the "-" character');
+      return invalid('Space Identifier only allows a-z, 0-9, "_", and the "-" character');
     }
 
     return valid();
