@@ -22,7 +22,6 @@ import testSubjSelector from '@kbn/test-subj-selector';
 import {
   filter as filterAsync,
   map as mapAsync,
-  delay,
 } from 'bluebird';
 
 export function TestSubjectsProvider({ getService }) {
@@ -46,6 +45,13 @@ export function TestSubjectsProvider({ getService }) {
       expect(doesExist).to.be(true);
     }
 
+    async noExistOrFail(selector, timeout = 1000) {
+      log.debug(`TestSubjects.noExistOrFail(${selector})`);
+      const doesExist = await this.exists(selector, timeout);
+      // Verify element doesn't exist, or else fail the test consuming this.
+      expect(doesExist).to.be(false);
+    }
+
     async append(selector, text) {
       return await retry.try(async () => {
         const input = await this.find(selector);
@@ -59,9 +65,6 @@ export function TestSubjectsProvider({ getService }) {
       return await retry.try(async () => {
         const element = await this.find(selector, timeout);
         await remote.moveMouseTo(element);
-        // Sometimes we need to wait for the element to become clickable. This can happen if the
-        // element in question fades-in in response to being hovered over.
-        await delay(100);
         await element.click();
       });
     }

@@ -23,6 +23,7 @@ export function DashboardAddPanelProvider({ getService, getPageObjects }) {
   const retry = getService('retry');
   const testSubjects = getService('testSubjects');
   const flyout = getService('flyout');
+  const toasts = getService('toasts');
   const PageObjects = getPageObjects(['header', 'common']);
 
   return new class DashboardAddPanel {
@@ -172,11 +173,7 @@ export function DashboardAddPanelProvider({ getService, getPageObjects }) {
       await PageObjects.common.sleep(500);
       await this.filterEmbeddableNames(`"${vizName.replace('-', ' ')}"`);
       await testSubjects.click(`addPanel${vizName.split(' ').join('-')}`);
-
-      // Confirm it was added and close the toast.
-      await testSubjects.existOrFail('addVisualizationToDashboardSuccess');
-      await testSubjects.click('addVisualizationToDashboardSuccess toastCloseButton');
-
+      await toasts.verifyAndDismiss('addVisualizationToDashboardSuccess');
       await this.closeAddPanel();
     }
 

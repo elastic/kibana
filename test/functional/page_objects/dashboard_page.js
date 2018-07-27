@@ -34,6 +34,7 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
   const kibanaServer = getService('kibanaServer');
   const testSubjects = getService('testSubjects');
   const dashboardAddPanel = getService('dashboardAddPanel');
+  const toasts = getService('toasts');
   const PageObjects = getPageObjects(['common', 'header', 'settings', 'visualize']);
 
   const defaultFindTimeout = config.get('timeouts.find');
@@ -297,9 +298,7 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
         await this.clickSave();
       }
 
-      // Confirm that the Dashboard has been saved and close the toast.
-      await testSubjects.existOrFail('saveDashboardSuccess');
-      await testSubjects.click('saveDashboardSuccess toastCloseButton');
+      await toasts.verifyAndDismiss('saveDashboardSuccess');
     }
 
     async cancelSave() {

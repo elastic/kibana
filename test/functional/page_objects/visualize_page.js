@@ -29,6 +29,7 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
   const find = getService('find');
   const log = getService('log');
   const flyout = getService('flyout');
+  const toasts = getService('toasts');
   const PageObjects = getPageObjects(['common', 'header']);
   const defaultFindTimeout = config.get('timeouts.find');
 
@@ -695,9 +696,7 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
         await testSubjects.click('saveAsNewCheckbox');
       }
 
-      // Confirm save and close toast.
-      await testSubjects.existOrFail('saveVisualizationSuccess');
-      await testSubjects.click('saveVisualizationSuccess toastCloseButton');
+      await toasts.verifyAndDismiss('saveVisualizationSuccess');
     }
 
     async clickLoadSavedVisButton() {

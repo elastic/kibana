@@ -27,5 +27,6 @@ export { ScreenshotsProvider } from './screenshots';
 export { FailureDebuggingProvider } from './failure_debugging';
 export { VisualizeListingTableProvider } from './visualize_listing_table';
 export { FlyoutProvider } from './flyout';
+export { ToastsProvider } from './toasts';
 
 export * from './dashboard';

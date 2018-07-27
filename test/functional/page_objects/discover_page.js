@@ -23,6 +23,7 @@ export function DiscoverPageProvider({ getService, getPageObjects }) {
   const retry = getService('retry');
   const testSubjects = getService('testSubjects');
   const find = getService('find');
+  const toasts = getService('toasts');
   const PageObjects = getPageObjects(['header', 'common']);
 
   const getRemote = () => (
@@ -52,10 +53,7 @@ export function DiscoverPageProvider({ getService, getPageObjects }) {
       await this.clickSaveSearchButton();
       await getRemote().findDisplayedById('SaveSearch').pressKeys(searchName);
       await testSubjects.click('discoverSaveSearchButton');
-
-      // Make sure toast exists and then close it.
-      await testSubjects.existOrFail('saveSearchSuccess');
-      await testSubjects.click('saveSearchSuccess toastCloseButton');
+      await toasts.verifyAndDismiss('saveSearchSuccess');
     }
 
     async getColumnHeaders() {
@@ -223,10 +221,7 @@ export function DiscoverPageProvider({ getService, getPageObjects }) {
 
     async clickCopyToClipboard() {
       await testSubjects.click('sharedSnapshotCopyButton');
-
-      // Confirm that the content was copied to the clipboard and close the toast.
-      await testSubjects.existOrFail('shareCopyToClipboardSuccess');
-      await testSubjects.click('shareCopyToClipboardSuccess toastCloseButton');
+      await toasts.verifyAndDismiss('shareCopyToClipboardSuccess');
     }
 
     async getShareCaption() {
