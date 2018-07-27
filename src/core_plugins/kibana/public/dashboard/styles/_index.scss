@@ -1,33 +1,5 @@
-$dashGrid__depth: 1;
-$dashGrid__depth-dragging: 2;
-
-
-
-
-
-.euiContextMenuItem {
-  display: block;
-}
-
-
-
-
-
-
-.tab-dashboard {
-  background-color: $euiColorEmptyShade;
-}
-
-
 .dashboardModal {
   width: 450px;
-}
-
-.dashboard-grid {
-  display: block;
-  margin: 0;
-  padding: 5px;
-  z-index: $dashGrid__depth;
 }
 
 .start-screen {
@@ -44,31 +16,9 @@ $dashGrid__depth-dragging: 2;
   flex: 1;
   display: flex;
   flex-direction: column;
+  background-color: $euiColorEmptyShade;
 }
 
 .dashboard-container-with-margins {
   background-color: $euiColorLightestShade;
 }
-
-/**
- * Disable transitions from the library on each grid element.
- */
-.react-grid-item {
-  transition: none;
-}
-
-/**
- * Dragged panels in dashboard should always appear above other panels.
- */
-.react-grid-item.react-draggable-dragging {
-  z-index: $dashGrid__depth-dragging !important;
-}
-
-/**
- * Overwrites red coloring that comes from this library by default.
- */
-.react-grid-item.react-grid-placeholder {
-  border-radius: 4px;
-  background: $euiColorPrimary;
-}
-

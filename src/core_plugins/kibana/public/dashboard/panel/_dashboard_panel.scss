@@ -37,6 +37,9 @@
 // CONTENT
 
 .dshPanel__panel {
+  background-color: $euiColorEmptyShade;
+  border: 1px solid $euiColorEmptyShade;
+
   // maintain the 100% height of the panel
   height: 100%;
   flex: 1;
@@ -48,7 +51,7 @@
 }
 
 .dshPanel__panel--editing {
-  border: $euiBorderThin;
+  border-color: $euiBorderColor;
 
   &:hover {
     border-color: $euiColorPrimary;
@@ -59,8 +62,7 @@
 .dshLayout-withMargins {
   .dshPanel__panel {
     @include euiBottomShadowSmall;
-    background-color: $euiColorEmptyShade;
-    border: $euiBorderThin;
+    border-color: $euiBorderColor;
     border-radius: $euiBorderRadius;
   }
 

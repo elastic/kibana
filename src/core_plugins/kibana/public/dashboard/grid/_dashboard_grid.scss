@@ -55,3 +55,35 @@
   left: 0 !important; /* 1 */
 }
 
+// REACT-GRID
+
+
+/**
+ * Disable transitions from the library on each grid element.
+ */
+.react-grid-item {
+  transition: none;
+}
+
+/**
+ * Dragged/Resized panels in dashboard should always appear above other panels
+ * and above teh placeholder
+ */
+.react-grid-item.resizing,
+.react-grid-item.react-draggable-dragging {
+  z-index: $euiZLevel2 !important;
+}
+
+.react-grid-item.react-draggable-dragging {
+  @include euiBottomShadowLarge;
+  border-radius: $euiBorderRadius; // keeps shadow within bounds
+}
+
+/**
+ * Overwrites red coloring that comes from this library by default.
+ */
+.react-grid-item.react-grid-placeholder {
+  border-radius: $euiBorderRadius;
+  background: $euiColorPrimary;
+}
+
