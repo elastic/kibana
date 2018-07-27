@@ -44,19 +44,15 @@ export default (kibana: any) =>
         enabled: Joi.boolean().default(true),
         dataPath: Joi.string().default('/tmp'),
         queueIndex: Joi.string().default('.codesearch-worker-queue'),
+        queueTimeout: Joi.number().default(60 * 60 * 1000), // 1 hour by default
         updateFreqencyMs: Joi.number().default(5 * 60 * 1000), // 5 minutes by default.
       }).default();
     },
 
     init(server: Server, options: any) {
       const queueIndex = server.config().get('codesearch.queueIndex');
+      const queueTimeout = server.config().get('codesearch.queueTimeout');
       const adminClient = server.plugins.elasticsearch.getCluster('admin');
-      const queue = new Esqueue(queueIndex, {
-        // We may consider to provide a different value
-        doctype: 'esqueue',
-        dateSeparator: '.',
-        client: adminClient.getClient(),
-      });
       const log = new Log(server);
       const serverOptions = new ServerOptions(options);
 
@@ -64,7 +60,11 @@ export default (kibana: any) =>
         adminClient.callWithInternalUser
       );
       const objectsClient = new server.savedObjects.SavedObjectsClient(repository);
-
+      const queue = new Esqueue(queueIndex, {
+        client: adminClient.getClient(),
+        timeout: queueTimeout,
+        doctype: 'esqueue',
+      });
       const cloneWorker = new CloneWorker(queue, log, objectsClient).bind();
       const deleteWorker = new DeleteWorker(queue, log, objectsClient).bind();
       const updateWorker = new UpdateWorker(queue, log, objectsClient).bind();
