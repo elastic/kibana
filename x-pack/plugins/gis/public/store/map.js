@@ -7,7 +7,7 @@
 import {
   SET_SELECTED_LAYER, UPDATE_LAYER_ORDER, ADD_SOURCE,
   ADD_LAYER, REMOVE_LAYER, PROMOTE_TEMPORARY_LAYERS,
-  CLEAR_TEMPORARY_LAYERS, LAYER_LOADING
+  CLEAR_TEMPORARY_LAYERS, LAYER_LOADING, TOGGLE_LAYER_VISIBLE
 } from "../actions/map_actions";
 
 const INITIAL_STATE = {
@@ -45,6 +45,13 @@ export function map(state = INITIAL_STATE, action) {
         ({ temporary }) => !temporary) ] } };
     case LAYER_LOADING:
       return { ...state, layerLoading: action.loadingBool };
+    // TODO: Simplify this & promote temp layers
+    case TOGGLE_LAYER_VISIBLE:
+      const visibleLayerIdx = state.layerList.findIndex(({ id }) => action.layerId === id);
+      const visibleLayer = { ...state.layerList[visibleLayerIdx], visible: !state.layerList[visibleLayerIdx].visible };
+      const visibleToggledList = [...state.layerList.slice(0, visibleLayerIdx), visibleLayer,
+        ...state.layerList.slice(visibleLayerIdx + 1) ];
+      return { ...state, ...{ layerList: visibleToggledList } };
     default:
       return state;
   }
