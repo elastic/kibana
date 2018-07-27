@@ -62,7 +62,6 @@ export default function ({ getService }) {
         version: 1,
         attributes: {
           name: 'My favorite space',
-          urlContext: 'my-favorite-space'
         }
       });
 
@@ -80,13 +79,13 @@ export default function ({ getService }) {
       expect(actualSpaceId).to.eql('**not defined**');
     };
 
-    const createTest = (description, { urlContext, tests }) => {
+    const createTest = (description, { spaceId, tests }) => {
       describe(description, () => {
         before(() => esArchiver.load('saved_objects/spaces'));
         after(() => esArchiver.unload('saved_objects/spaces'));
         it(`should return ${tests.spaceAware.statusCode} for a space-aware type`, async () => {
           await supertest
-            .post(`${getUrlPrefix(urlContext)}/api/saved_objects/visualization`)
+            .post(`${getUrlPrefix(spaceId)}/api/saved_objects/visualization`)
             .send({
               attributes: {
                 title: 'My favorite vis'
@@ -98,11 +97,10 @@ export default function ({ getService }) {
 
         it(`should return ${tests.notSpaceAware.statusCode} for a non space-aware type`, async () => {
           await supertest
-            .post(`${getUrlPrefix(urlContext)}/api/saved_objects/space`)
+            .post(`${getUrlPrefix(spaceId)}/api/saved_objects/space`)
             .send({
               attributes: {
                 name: 'My favorite space',
-                urlContext: 'my-favorite-space'
               }
             })
             .expect(tests.notSpaceAware.statusCode)

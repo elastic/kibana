@@ -5,7 +5,8 @@
  */
 
 import { wrapError } from './errors';
-import { addSpaceUrlContext, getSpaceUrlContext } from './spaces_url_parser';
+import { addSpaceIdToPath, getSpaceIdFromPath } from './spaces_url_parser';
+import { DEFAULT_SPACE_ID } from '../../common/constants';
 
 export function initSpacesRequestInterceptors(server) {
 
@@ -16,10 +17,10 @@ export function initSpacesRequestInterceptors(server) {
 
     // If navigating within the context of a space, then we store the Space's URL Context on the request,
     // and rewrite the request to not include the space identifier in the URL.
-    const spaceUrlContext = getSpaceUrlContext(path, serverBasePath);
+    const spaceId = getSpaceIdFromPath(path, serverBasePath);
 
-    if (spaceUrlContext) {
-      const reqBasePath = `/s/${spaceUrlContext}`;
+    if (spaceId !== DEFAULT_SPACE_ID) {
+      const reqBasePath = `/s/${spaceId}`;
       request.setBasePath(reqBasePath);
 
       const newLocation = path.substr(reqBasePath.length) || '/';
@@ -41,13 +42,11 @@ export function initSpacesRequestInterceptors(server) {
     const path = request.path;
 
     const isRequestingKibanaRoot = path === '/';
-    const { spaces } = server;
-    const urlContext = await spaces.getUrlContext(request);
 
     // if requesting the application root, then show the Space Selector UI to allow the user to choose which space
     // they wish to visit. This is done "onPostAuth" to allow the Saved Objects Client to use the request's auth scope,
     // which is not available at the time of "onRequest".
-    if (isRequestingKibanaRoot && !urlContext) {
+    if (isRequestingKibanaRoot) {
       try {
         const client = request.getSavedObjectsClient();
         const { total, saved_objects: spaceObjects } = await client.find({
@@ -62,11 +61,8 @@ export function initSpacesRequestInterceptors(server) {
           // If only one space is available, then send user there directly.
           // No need for an interstitial screen where there is only one possible outcome.
           const space = spaceObjects[0];
-          const {
-            urlContext
-          } = space.attributes;
 
-          const destination = addSpaceUrlContext(basePath, urlContext, defaultRoute);
+          const destination = addSpaceIdToPath(basePath, space.id, defaultRoute);
           return reply.redirect(destination);
         }
 

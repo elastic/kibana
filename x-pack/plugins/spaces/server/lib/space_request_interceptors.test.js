@@ -164,10 +164,9 @@ describe('interceptors', () => {
         });
 
         const spaces = [{
-          id: 'space:a-space',
+          id: 'a-space',
           attributes: {
             name: 'a space',
-            urlContext: 'a-space',
           }
         }];
 
@@ -197,10 +196,9 @@ describe('interceptors', () => {
         });
 
         const spaces = [{
-          id: 'space:default',
+          id: 'default',
           attributes: {
             name: 'Default Space',
-            urlContext: '',
           }
         }];
 
@@ -216,16 +214,14 @@ describe('interceptors', () => {
       test('it redirects to the Space Selector App when navigating to Kibana root', async () => {
 
         const spaces = [{
-          id: 'space:a-space',
+          id: 'a-space',
           attributes: {
             name: 'a space',
-            urlContext: 'a-space',
           }
         }, {
-          id: 'space:b-space',
+          id: 'b-space',
           attributes: {
             name: 'b space',
-            urlContext: 'b-space',
           }
         }];
 
