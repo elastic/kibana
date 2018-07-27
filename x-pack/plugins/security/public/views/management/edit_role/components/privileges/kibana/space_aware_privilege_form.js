@@ -16,6 +16,7 @@ import {
   EuiButton,
   EuiText,
   EuiTitle,
+  EuiHorizontalRule,
 } from '@elastic/eui';
 import { isReservedRole } from '../../../../../../lib/role';
 import { copyRole } from '../../../lib/copy_role';
@@ -131,7 +132,6 @@ export class SpaceAwarePrivilegeForm extends Component {
 
             {this.props.editable && (
               <Fragment>
-                <EuiSpacer />
                 {this.state.privilegeForms.map((form, index) => this.getSpaceForm(form, index, basePrivilege))}
                 {availableSpaces.length > 0 &&
                   <Fragment>
@@ -189,16 +189,23 @@ export class SpaceAwarePrivilegeForm extends Component {
 
     const availableSpaces = this.getAvailableSpaces(index);
 
+    const isFirst = index === 0;
+
+    const startingElement = isFirst ? <EuiSpacer /> : <EuiHorizontalRule />;
+
     return (
-      <PrivilegeSpaceForm
-        key={index}
-        availableSpaces={availableSpaces}
-        selectedSpaceIds={selectedSpaceIds}
-        availablePrivileges={getAvailablePermissions(basePrivilege)}
-        selectedPrivilege={privilege}
-        onChange={this.onPrivilegeSpacePermissionChange(index)}
-        onDelete={this.onPrivilegeSpacePermissionDelete(index)}
-      />
+      <Fragment>
+        {startingElement}
+        <PrivilegeSpaceForm
+          key={index}
+          availableSpaces={availableSpaces}
+          selectedSpaceIds={selectedSpaceIds}
+          availablePrivileges={getAvailablePermissions(basePrivilege)}
+          selectedPrivilege={privilege}
+          onChange={this.onPrivilegeSpacePermissionChange(index)}
+          onDelete={this.onPrivilegeSpacePermissionDelete(index)}
+        />
+      </Fragment>
     );
   }
 
