@@ -12,13 +12,11 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiFlyoutBody,
-  EuiText,
   EuiHorizontalRule,
   EuiFlyoutHeader,
   EuiFlyoutFooter,
   EuiTitle,
   EuiSpacer,
-  EuiTextColor,
   EuiButtonEmpty,
 } from '@elastic/eui';
 
@@ -31,14 +29,9 @@ export function LayerPanel({
     <EuiFlyout onClose={cancelLayerPanel} style={{ maxWidth: 768 }}>
       <EuiFlyoutHeader>
         <EuiTitle size="l">
-          <h2>{selectedLayer.getLayerName()}</h2>
+          <h2>{selectedLayer.name}</h2>
         </EuiTitle>
         <EuiSpacer size="m"/>
-        <EuiTextColor color="subdued">
-          <EuiText size="s">
-            <p className="layerSettings__type">{selectedLayer.renderSmallLegend()} {selectedLayer.getType()}</p>
-          </EuiText>
-        </EuiTextColor>
         <EuiSpacer />
         <EuiHorizontalRule margin="none"/>
       </EuiFlyoutHeader>

@@ -6,8 +6,9 @@
 
 import { connect } from 'react-redux';
 import { LayerPanel } from './view';
-import { updateFlyout, setSelectedLayer, getSelectedLayer, FLYOUT_STATE }
-  from '../../store/ui';
+import { updateFlyout, FLYOUT_STATE } from '../../store/ui';
+import { getSelectedLayer } from '../../selectors/map_selectors';
+import { setSelectedLayer } from '../../actions/map_actions';
 
 const mapDispatchToProps = {
   cancelLayerPanel: () => updateFlyout(FLYOUT_STATE.NONE) && setSelectedLayer(null),
