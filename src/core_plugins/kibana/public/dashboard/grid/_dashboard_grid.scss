@@ -57,33 +57,39 @@
 
 // REACT-GRID
 
-
-/**
- * Disable transitions from the library on each grid element.
- */
 .react-grid-item {
-  transition: none;
+  /**
+   * Disable transitions from the library on each grid element.
+   */
+   transition: none;
+  /**
+    * Copy over and overwrite the fill color with EUI color mixin (for theming)
+    */
+  > .react-resizable-handle {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='6' height='6' viewBox='0 0 6 6'%3E%3Cpolygon fill='#{hexToRGB($euiColorDarkShade)}' points='6 6 0 6 0 4.2 4 4.2 4.2 4.2 4.2 0 6 0' /%3E%3C/svg%3E%0A");
+  }
+
+  /**
+   * Dragged/Resized panels in dashboard should always appear above other panels
+   * and above the placeholder
+   */
+  &.resizing,
+  &.react-draggable-dragging {
+    z-index: $euiZLevel2 !important;
+  }
+
+  &.react-draggable-dragging {
+    @include euiBottomShadowLarge;
+    border-radius: $euiBorderRadius; // keeps shadow within bounds
+  }
+
+  /**
+   * Overwrites red coloring that comes from this library by default.
+   */
+  &.react-grid-placeholder {
+    border-radius: $euiBorderRadius;
+    background: $euiColorPrimary;
+  }
 }
 
-/**
- * Dragged/Resized panels in dashboard should always appear above other panels
- * and above teh placeholder
- */
-.react-grid-item.resizing,
-.react-grid-item.react-draggable-dragging {
-  z-index: $euiZLevel2 !important;
-}
-
-.react-grid-item.react-draggable-dragging {
-  @include euiBottomShadowLarge;
-  border-radius: $euiBorderRadius; // keeps shadow within bounds
-}
-
-/**
- * Overwrites red coloring that comes from this library by default.
- */
-.react-grid-item.react-grid-placeholder {
-  border-radius: $euiBorderRadius;
-  background: $euiColorPrimary;
-}
 

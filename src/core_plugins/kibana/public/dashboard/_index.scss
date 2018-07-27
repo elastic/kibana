@@ -13,21 +13,29 @@
 //   dshChart__legend--small
 //   dshChart__legend-isLoading
 
-@import 'dashboard_app';
+/**
+  * 1. Don't duplicate styles in dark mode
+  */
+.tab-dashboard.theme-light { /* 1 */
+  @import 'dashboard_app';
+  @import 'grid/index';
+  @import 'panel/index';
+  @import 'viewport/index';
+}
+
+// Imports outside of .tab-dashboard selector don't change between light/dark modes
 @import 'components/index';
-@import 'grid/index';
 @import 'listing/index';
-@import 'panel/index';
-@import 'viewport/index';
 
 // DARK THEME
-// EUI global scope
-// @import './../../../../../node_modules/@elastic/eui/src/themes/k6/k6_colors_dark';
+// EUI global scope -- dark
+@import './../../../../../node_modules/@elastic/eui/src/themes/k6/k6_colors_dark';
 
-// .tab-dashboard.theme-dark {
-//   .dshPanel {
-//     background-color: tintOrShade($euiColorDanger, 0%, 100%) !important;
-//   }
+.tab-dashboard.theme-dark {
+  background-color: $euiColorEmptyShade;
 
-//   @import 'styles/index';
-// }
+  @import 'dashboard_app';
+  @import 'grid/index';
+  @import 'panel/index';
+  @import 'viewport/index';
+}

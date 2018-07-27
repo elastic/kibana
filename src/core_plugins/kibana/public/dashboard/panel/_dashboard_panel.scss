@@ -51,7 +51,8 @@
 }
 
 .dshPanel__panel--editing {
-  border-color: $euiBorderColor;
+  // SASSTOD: Change this back $euiBorderColor, when EUI adds !default to borders
+  border-color: $euiColorLightShade;
 
   &:hover {
     border-color: $euiColorPrimary;
@@ -62,7 +63,8 @@
 .dshLayout-withMargins {
   .dshPanel__panel {
     @include euiBottomShadowSmall;
-    border-color: $euiBorderColor;
+    // SASSTOD: Change this back $euiBorderColor, when EUI adds !default to borders
+    border-color: $euiColorLightShade;
     border-radius: $euiBorderRadius;
   }
 
@@ -132,10 +134,13 @@
   z-index: $euiZLevel1;
   transition: opacity $euiAnimSpeedFast $euiAnimSlightResistance;
 
-  &:focus, /* 2 */
-  .dshPanel:hover & {
+  &:focus { /* 2 */
     opacity: 1;
   }
+}
+
+.dshPanel:hover .dshPanel__header--floater {
+  opacity: 1;
 }
 
 // OPTIONS MENU
@@ -147,12 +152,14 @@
 .dshPanel_optionsMenuButton {
   opacity: 0; /* 1 */
 
-  &:focus, /* 2 */
-  .dshPanel:hover & {
+  &:focus { /* 2 */
     opacity: 1;
   }
 }
 
+.dshPanel:hover .dshPanel_optionsMenuButton {
+  opacity: 1;
+}
 
 .dshPanel__optionsMenuForm {
   padding: $euiSize;
