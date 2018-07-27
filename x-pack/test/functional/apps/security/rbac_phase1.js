@@ -14,7 +14,7 @@ export default function ({ getService, getPageObjects }) {
   const remote = getService('remote');
   const kibanaServer = getService('kibanaServer');
 
-  describe.skip('rbac ', async function () {
+  describe('rbac ', async function () {
     before(async () => {
       await remote.setWindowSize(1600, 1000);
       log.debug('users');

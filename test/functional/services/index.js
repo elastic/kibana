@@ -30,3 +30,4 @@ export { FlyoutProvider } from './flyout';
 export { ToastsProvider } from './toasts';
 
 export * from './dashboard';
+export * from './visualize';

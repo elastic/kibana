@@ -30,6 +30,7 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
   const log = getService('log');
   const flyout = getService('flyout');
   const toasts = getService('toasts');
+  const visualization = getService('visualization');
   const PageObjects = getPageObjects(['common', 'header']);
   const defaultFindTimeout = config.get('timeouts.find');
 
@@ -637,6 +638,7 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
     async clickGo() {
       await testSubjects.click('visualizeEditorRenderButton');
       await PageObjects.header.waitUntilLoadingHasFinished();
+      await visualization.waitForRender();
     }
 
     async toggleAutoMode() {

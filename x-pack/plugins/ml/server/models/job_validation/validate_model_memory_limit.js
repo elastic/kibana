@@ -9,6 +9,7 @@
 import numeral from '@elastic/numeral';
 import { validateJobObject } from './validate_job_object';
 import { calculateModelMemoryLimitProvider } from '../../models/calculate_model_memory_limit';
+import { ALLOWED_DATA_UNITS } from '../../../common/constants/validation';
 
 export async function validateModelMemoryLimit(callWithRequest, job, duration) {
   validateJobObject(job);
@@ -28,6 +29,7 @@ export async function validateModelMemoryLimit(callWithRequest, job, duration) {
   let splitFieldName = '';
   const fieldNames = [];
   let runCalcModelMemoryTest = true;
+  let validModelMemoryLimit = true;
 
   // extract the field names and partition field names from the detectors
   // we only want to estimate the mml for multi-metric jobs.
@@ -62,66 +64,85 @@ export async function validateModelMemoryLimit(callWithRequest, job, duration) {
   }
 
   const messages = [];
-  if (runCalcModelMemoryTest) {
-    const mmlEstimate = await calculateModelMemoryLimitProvider(callWithRequest)(
-      job.datafeed_config.indices.join(','),
-      splitFieldName,
-      job.datafeed_config.query,
-      fieldNames,
-      job.analysis_config.influencers,
-      job.data_description.time_field,
-      duration.start,
-      duration.end,
-      true);
-    const mmlEstimateBytes = numeral(mmlEstimate.modelMemoryLimit).value();
 
-    let runEstimateGreaterThenMml = true;
-    // if max_model_memory_limit has been set,
-    // make sure the estimated value is not greater than it.
-    if (typeof maxModelMemoryLimit !== 'undefined') {
-      const maxMmlBytes = numeral(maxModelMemoryLimit.toUpperCase()).value();
-      if (mmlEstimateBytes > maxMmlBytes) {
-        runEstimateGreaterThenMml = false;
-        messages.push({
-          id: 'estimated_mml_greater_than_max_mml',
-          maxModelMemoryLimit,
-          mmlEstimate
-        });
-      }
-    }
+  // check that mml is a valid data format
+  if (mml !== null) {
+    const mmlSplit = mml.match(/\d+(\w+)/);
+    const unit = (mmlSplit && mmlSplit.length === 2) ? mmlSplit[1] : null;
 
-    // check to see if the estimated mml is greater that the user
-    // specified mml
-    // do not run this if we've already found that it's larger than
-    // the max mml
-    if (runEstimateGreaterThenMml && mml !== null) {
-      const mmlBytes = numeral(mml).value();
-      if (mmlBytes === 0) {
-        messages.push({
-          id: 'mml_value_invalid',
-          mml
-        });
-      } else if (mmlEstimateBytes > mmlBytes) {
-        messages.push({
-          id: 'estimated_mml_greater_than_mml',
-          maxModelMemoryLimit,
-          mml
-        });
-      }
+    if (ALLOWED_DATA_UNITS.indexOf(unit) === -1) {
+      messages.push({
+        id: 'mml_value_invalid',
+        mml
+      });
+      // mml is not a valid data format.
+      // abort all other tests
+      validModelMemoryLimit = false;
     }
   }
 
-  // if max_model_memory_limit has been set,
-  // make sure the user defined MML is not greater than it
-  if (maxModelMemoryLimit !== undefined && mml !== null) {
-    const maxMmlBytes = numeral(maxModelMemoryLimit.toUpperCase()).value();
-    const mmlBytes = numeral(mml).value();
-    if (mmlBytes > maxMmlBytes) {
-      messages.push({
-        id: 'mml_greater_than_max_mml',
-        maxModelMemoryLimit,
-        mml
-      });
+  if (validModelMemoryLimit) {
+    if(runCalcModelMemoryTest) {
+      const mmlEstimate = await calculateModelMemoryLimitProvider(callWithRequest)(
+        job.datafeed_config.indices.join(','),
+        splitFieldName,
+        job.datafeed_config.query,
+        fieldNames,
+        job.analysis_config.influencers,
+        job.data_description.time_field,
+        duration.start,
+        duration.end,
+        true);
+      const mmlEstimateBytes = numeral(mmlEstimate.modelMemoryLimit).value();
+
+      let runEstimateGreaterThenMml = true;
+      // if max_model_memory_limit has been set,
+      // make sure the estimated value is not greater than it.
+      if (typeof maxModelMemoryLimit !== 'undefined') {
+        const maxMmlBytes = numeral(maxModelMemoryLimit.toUpperCase()).value();
+        if (mmlEstimateBytes > maxMmlBytes) {
+          runEstimateGreaterThenMml = false;
+          messages.push({
+            id: 'estimated_mml_greater_than_max_mml',
+            maxModelMemoryLimit,
+            mmlEstimate
+          });
+        }
+      }
+
+      // check to see if the estimated mml is greater that the user
+      // specified mml
+      // do not run this if we've already found that it's larger than
+      // the max mml
+      if (runEstimateGreaterThenMml && mml !== null) {
+        const mmlBytes = numeral(mml).value();
+        if (mmlBytes === 0) {
+          messages.push({
+            id: 'mml_value_invalid',
+            mml
+          });
+        } else if (mmlEstimateBytes > mmlBytes) {
+          messages.push({
+            id: 'estimated_mml_greater_than_mml',
+            maxModelMemoryLimit,
+            mml
+          });
+        }
+      }
+    }
+
+    // if max_model_memory_limit has been set,
+    // make sure the user defined MML is not greater than it
+    if (maxModelMemoryLimit !== undefined && mml !== null) {
+      const maxMmlBytes = numeral(maxModelMemoryLimit.toUpperCase()).value();
+      const mmlBytes = numeral(mml).value();
+      if (mmlBytes > maxMmlBytes) {
+        messages.push({
+          id: 'mml_greater_than_max_mml',
+          maxModelMemoryLimit,
+          mml
+        });
+      }
     }
   }
 

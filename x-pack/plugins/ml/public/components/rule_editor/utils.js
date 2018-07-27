@@ -32,6 +32,7 @@ export function getNewRuleDefaults() {
 export function getScopeFieldDefaults(filterListIds) {
   const defaults = {
     filter_type: FILTER_TYPE.INCLUDE,
+    enabled: false,   // UI-only property to show field as enabled in Scope section.
   };
 
   if (filterListIds !== undefined && filterListIds.length > 0) {
@@ -55,8 +56,8 @@ export function isValidRule(rule) {
       isValid = true;
     } else {
       const scope = rule.scope;
-      if (scope !== undefined && Object.keys(scope).length > 0) {
-        isValid = true;
+      if (scope !== undefined) {
+        isValid = Object.keys(scope).some(field => (scope[field].enabled === true));
       }
     }
   }
@@ -67,17 +68,33 @@ export function isValidRule(rule) {
 export function saveJobRule(job, detectorIndex, ruleIndex, editedRule) {
   const detector = job.analysis_config.detectors[detectorIndex];
 
+  // Filter out any scope expression where the UI=specific 'enabled'
+  // property is set to false.
+  const clonedRule = cloneDeep(editedRule);
+  const scope = clonedRule.scope;
+  if (scope !== undefined) {
+    Object.keys(scope).forEach((field) => {
+      if (scope[field].enabled === false) {
+        delete scope[field];
+      } else {
+        // Remove the UI-only property as it is rejected by the endpoint.
+        delete scope[field].enabled;
+      }
+    });
+  }
+
   let rules = [];
   if (detector.custom_rules === undefined) {
-    rules = [editedRule];
+    rules = [clonedRule];
   } else {
     rules = cloneDeep(detector.custom_rules);
+
     if (ruleIndex < rules.length) {
       // Edit to an existing rule.
-      rules[ruleIndex] = editedRule;
+      rules[ruleIndex] = clonedRule;
     } else {
       // Add a new rule.
-      rules.push(editedRule);
+      rules.push(clonedRule);
     }
   }
 
