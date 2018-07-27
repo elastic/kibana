@@ -12,6 +12,17 @@ import _ from 'lodash';
 
 const FEATURE_PROJECTION = 'EPSG:3857';
 
+// Temporary style
+const tempVectorStyle = new ol.style.Style({
+  fill: new ol.style.Fill({
+    color: 'rgba(160, 225, 255, .05)'
+  }),
+  stroke: new ol.style.Stroke({
+    color: 'rgba(160, 225, 255, .8)',
+    width: 1
+  })
+});
+
 // Layer-specific logic
 function convertTmsLayersToOl({ source, visible }) {
   const tileLayer = new ol.layer.Tile({
@@ -27,7 +38,7 @@ const convertVectorLayersToOl = (() => {
   const geojsonFormat = new ol.format.GeoJSON({
     featureProjection: FEATURE_PROJECTION
   });
-  return ({ source, visible }) => {
+  return ({ source, visible, temporary }) => {
     const olFeatures = geojsonFormat.readFeatures(source);
     const vectorLayer = new ol.layer.Vector({
       source: new ol.source.Vector({
@@ -35,6 +46,7 @@ const convertVectorLayersToOl = (() => {
       })
     });
     vectorLayer.setVisible(visible);
+    temporary && vectorLayer.setStyle(tempVectorStyle);
     return vectorLayer;
   };
 })();
