@@ -137,6 +137,7 @@ And Elasticsearch will translate the privilege's actions granted from the userâ€
 
 Kibana users shouldn't have to concern themselves with the implementation details of how we're using the application privileges in Elasticsearch to create roles which grant these privileges. The *Management* / *Security* / *Roles* page makes it easy for users to perform this using the UI, and the <<role-management-api>> makes this accessible programatically.
 
+[[development-security-transitioning-to-application-privileges]]
 === Transitioning to application privileges
 
 To facilitate the transition to using application privileges instead of index privileges on the `.kibana` index, we have implemented a legacy fallback and modified the reserved Kibana roles to have both index privileges and application privileges. These will remain in effect until 7.0, when they both will be removed.
