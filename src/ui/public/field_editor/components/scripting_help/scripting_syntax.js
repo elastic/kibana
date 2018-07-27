@@ -48,8 +48,7 @@ export const ScriptingSyntax = () => (
                 target="_window"
                 href={getDocLink('scriptedFields.painless')}
               >
-                <FormattedMessage id="common.ui.fieldEditor.syntax.defaultLabel.painlessLink" defaultMessage="Painless" />&nbsp;
-                <EuiIcon type="link" />
+                Painless <EuiIcon type="link" />
               </EuiLink>
             )
           }}

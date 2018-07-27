@@ -20,11 +20,7 @@ exports[`CallOuts should render normally 1`] = `
               href="http://www.elastic.co/painlessDocs"
               type="button"
             >
-              <FormattedMessage
-                defaultMessage="Painless"
-                id="kbn.management.editIndexPattern.scripted.deprecationLangLabel.painlessLink"
-                values={Object {}}
-              />
+              Painless
             </EuiLink>,
           }
         }

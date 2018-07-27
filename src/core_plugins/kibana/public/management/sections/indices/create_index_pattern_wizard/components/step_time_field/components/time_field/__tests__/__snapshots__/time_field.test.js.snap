@@ -38,11 +38,13 @@ exports[`TimeField should render a loading state 1`] = `
           component="div"
           grow={false}
         >
-          <FormattedMessage
-            defaultMessage="Time Filter field name"
-            id="kbn.management.createIndexPattern.stepTime.fieldHeader"
-            values={Object {}}
-          />
+          <span>
+            <FormattedMessage
+              defaultMessage="Time Filter field name"
+              id="kbn.management.createIndexPattern.stepTime.fieldHeader"
+              values={Object {}}
+            />
+          </span>
         </EuiFlexItem>
         <EuiFlexItem
           component="div"
@@ -114,11 +116,13 @@ exports[`TimeField should render a selected time field 1`] = `
           component="div"
           grow={false}
         >
-          <FormattedMessage
-            defaultMessage="Time Filter field name"
-            id="kbn.management.createIndexPattern.stepTime.fieldHeader"
-            values={Object {}}
-          />
+          <span>
+            <FormattedMessage
+              defaultMessage="Time Filter field name"
+              id="kbn.management.createIndexPattern.stepTime.fieldHeader"
+              values={Object {}}
+            />
+          </span>
         </EuiFlexItem>
         <EuiFlexItem
           component="div"
@@ -201,11 +205,13 @@ exports[`TimeField should render normally 1`] = `
           component="div"
           grow={false}
         >
-          <FormattedMessage
-            defaultMessage="Time Filter field name"
-            id="kbn.management.createIndexPattern.stepTime.fieldHeader"
-            values={Object {}}
-          />
+          <span>
+            <FormattedMessage
+              defaultMessage="Time Filter field name"
+              id="kbn.management.createIndexPattern.stepTime.fieldHeader"
+              values={Object {}}
+            />
+          </span>
         </EuiFlexItem>
         <EuiFlexItem
           component="div"

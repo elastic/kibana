@@ -54,10 +54,7 @@ export const CallOutsComponent = ({
               deprecatedLangsInUse: deprecatedLangsInUse.join(', '),
               link: (
                 <EuiLink href={painlessDocLink}>
-                  <FormattedMessage
-                    id="kbn.management.editIndexPattern.scripted.deprecationLangLabel.painlessLink"
-                    defaultMessage="Painless"
-                  />
+                  Painless
                 </EuiLink>)
             }}
           />
