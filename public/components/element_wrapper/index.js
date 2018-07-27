@@ -19,12 +19,11 @@ const mapDispatchToProps = (dispatch, { element }) => ({
 const mergeProps = (stateProps, dispatchProps, ownProps) => {
   const { resolvedArg, selectedPage } = stateProps;
   const { element, restProps } = ownProps;
-  const { id, selected, transformMatrix, a, b } = element;
+  const { id, transformMatrix, a, b } = element;
 
   return {
     ...restProps, // pass through unused props
     id, //pass through useful parts of the element object
-    selected,
     transformMatrix,
     a,
     b,
@@ -40,7 +39,6 @@ export const ElementWrapper = connect(mapStateToProps, mapDispatchToProps, merge
 ElementWrapper.propTypes = {
   element: PropTypes.shape({
     id: PropTypes.string.isRequired,
-    selected: PropTypes.bool,
     transformMatrix: PropTypes.arrayOf(PropTypes.number).isRequired,
     a: PropTypes.number.isRequired,
     b: PropTypes.number.isRequired,

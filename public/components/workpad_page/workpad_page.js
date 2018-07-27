@@ -2,6 +2,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { ElementWrapper } from '../element_wrapper';
 import { AlignmentGuide } from '../alignment_guide';
+import { HoverAnnotation } from '../hover_annotation';
 import { RotationHandle } from '../rotation_handle';
 import { BorderConnection } from '../border_connection';
 import { BorderResizeHandle } from '../border_resize_handle';
@@ -20,7 +21,6 @@ export const WorkpadPage = ({
   onMouseDown,
   onMouseMove,
   onMouseUp,
-  selectedShapes,
 }) => {
   const activeClass = isSelected ? 'canvasPage--isActive' : 'canvasPage--isInactive';
 
@@ -45,8 +45,6 @@ export const WorkpadPage = ({
     >
       {elements
         .map(element => {
-          const selected = selectedShapes.indexOf(element.id) !== -1;
-
           if (element.type === 'annotation') {
             if (!isEditable) return;
 
@@ -61,16 +59,20 @@ export const WorkpadPage = ({
             switch (element.subtype) {
               case 'alignmentGuide':
                 return <AlignmentGuide {...props} />;
+              case 'hoverAnnotation':
+                return <HoverAnnotation {...props} />;
               case 'rotationHandle':
                 return <RotationHandle {...props} />;
               case 'resizeHandle':
                 return <BorderResizeHandle {...props} />;
               case 'resizeConnector':
                 return <BorderConnection {...props} />;
+              default:
+                return [];
             }
+          } else {
+            return <ElementWrapper key={element.id} element={element} />;
           }
-
-          return <ElementWrapper key={element.id} element={{ ...element, selected }} />;
         })
         .filter(element => !!element)}
     </div>
@@ -101,6 +103,5 @@ WorkpadPage.propTypes = {
   onMouseDown: PropTypes.func,
   onMouseMove: PropTypes.func,
   onMouseUp: PropTypes.func,
-  selectedShapes: PropTypes.arrayOf(PropTypes.string),
   shapes: PropTypes.arrayOf(PropTypes.object),
 };

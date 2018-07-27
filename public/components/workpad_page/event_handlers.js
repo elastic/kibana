@@ -40,11 +40,12 @@ const handleMouseMove = (commit, { target, clientX, clientY }) => {
 const handleMouseDown = (commit, e, isEditable) => {
   e.stopPropagation();
   const { target, clientX, clientY } = e;
+  const ancestor = ancestorElement(target, 'canvasPage');
   if (!isEditable) {
     return;
   }
-  const { x, y } = localMousePosition(target, clientX, clientY);
-  setupHandler(commit, target);
+  const { x, y } = localMousePosition(ancestor, clientX, clientY);
+  setupHandler(commit, ancestor);
   commit('mouseEvent', { event: 'mouseDown', x, y });
 };
 

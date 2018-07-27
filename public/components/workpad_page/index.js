@@ -63,7 +63,6 @@ export const WorkpadPage = compose(
 
     return {
       elements,
-      selectedShapes,
       commit: (...args) => {
         aeroelastic.commit(page.id, ...args);
         // TODO: remove this, it's a hack to force react to rerender

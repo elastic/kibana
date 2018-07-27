@@ -1,0 +1,8 @@
+.canvasHoverAnnotation {
+  position: absolute;
+  background: none;
+  transform-origin: center center; /* the default, only for clarity */
+  transform-style: preserve-3d;
+  outline: solid 1px $euiColorVis0;
+  pointer-events: none;
+}

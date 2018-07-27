@@ -11,7 +11,6 @@ export class ElementWrapper extends React.PureComponent {
     b: PropTypes.number.isRequired,
     state: PropTypes.string,
     createHandlers: PropTypes.func.isRequired,
-    selected: PropTypes.bool,
   };
 
   state = {
@@ -29,16 +28,11 @@ export class ElementWrapper extends React.PureComponent {
     // wait until the handlers have been created
     if (!this.state.handlers) return null;
 
-    const { selected, renderable, transformMatrix, a, b, state } = this.props;
+    const { renderable, transformMatrix, a, b, state } = this.props;
 
     return (
       <Positionable transformMatrix={transformMatrix} a={a} b={b}>
-        <ElementContent
-          selected={selected}
-          renderable={renderable}
-          state={state}
-          handlers={this.state.handlers}
-        />
+        <ElementContent renderable={renderable} state={state} handlers={this.state.handlers} />
       </Positionable>
     );
   }

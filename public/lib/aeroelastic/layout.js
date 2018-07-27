@@ -47,17 +47,16 @@ const draggingShape = ({ draggedShape, shapes }, hoveredShape, down, mouseDowned
 
 const shapes = select(scene => scene.shapes)(scene);
 
-const hoveredShapes = select((shapes, cursorPosition) => shapesAt(shapes, cursorPosition))(
-  shapes,
-  cursorPosition
-);
+const hoveredShapes = select((shapes, cursorPosition) =>
+  shapesAt(shapes.filter(s => s.type !== 'annotation' || s.interactive), cursorPosition)
+)(shapes, cursorPosition);
 
 const hoveredShape = selectReduce(
   (prev, hoveredShapes) => {
     if (hoveredShapes.length) {
-      const depthIndex = (prev.depthIndex + 1) % hoveredShapes.length;
+      const depthIndex = 0; // (prev.depthIndex + 1) % hoveredShapes.length;
       return {
-        shape: hoveredShapes[prev.depthIndex],
+        shape: hoveredShapes[depthIndex],
         depthIndex,
       };
     } else {
@@ -646,6 +645,26 @@ const alignmentGuideAnnotations = select((shapes, guidedShapes) => {
     : [];
 })(transformedShapes, hoveredShapes);
 
+const hoverAnnotations = select((hoveredShape, selectedPrimaryShapeIds) => {
+  return hoveredShape &&
+    hoveredShape.type !== 'annotation' &&
+    selectedPrimaryShapeIds.indexOf(hoveredShape.id) === -1
+    ? [
+        {
+          ...hoveredShape,
+          id: config.hoverAnnotationName + '_' + hoveredShape.id,
+          type: 'annotation',
+          subtype: config.hoverAnnotationName,
+          interactive: false,
+          localTransformMatrix: matrix.multiply(
+            hoveredShape.localTransformMatrix,
+            matrix.translate(0, 0, 100)
+          ),
+        },
+      ]
+    : [];
+})(hoveredShape, selectedPrimaryShapeIds);
+
 const rotationAnnotation = (shapes, selectedShapes, shape, i) => {
   const foundShape = shapes.find(s => shape.id === s.id);
   if (!foundShape) {
@@ -807,9 +826,10 @@ const interactedAnnotations = select(
 */
 
 const annotatedShapes = select(
-  (shapes, alignmentGuideAnnotations, rotationAnnotations, resizeAnnotations) => {
+  (shapes, alignmentGuideAnnotations, hoverAnnotations, rotationAnnotations, resizeAnnotations) => {
     const annotations = [].concat(
       alignmentGuideAnnotations,
+      hoverAnnotations,
       rotationAnnotations,
       resizeAnnotations
     );
@@ -844,7 +864,13 @@ const annotatedShapes = select(
     const result = snappedShapes.concat(annotations); // add current annotations
     return result;
   }
-)(transformedShapes, alignmentGuideAnnotations, rotationAnnotations, resizeAnnotations);
+)(
+  transformedShapes,
+  alignmentGuideAnnotations,
+  hoverAnnotations,
+  rotationAnnotations,
+  resizeAnnotations
+);
 
 const globalTransformShapes = select(cascadeTransforms)(annotatedShapes);
 

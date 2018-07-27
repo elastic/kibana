@@ -35,14 +35,14 @@ const branches = [
 ];
 
 export const ElementContent = compose(pure, ...branches)(
-  ({ renderable, renderFunction, size, handlers, selected }) => {
+  ({ renderable, renderFunction, size, handlers }) => {
     const { getFilter, setFilter, done, onComplete } = handlers;
 
     return Style.it(
       renderable.css,
       <div
         // TODO: 'canvas__element' was added for BWC, It can be removed after a while
-        className={`canvas__element canvasElement ${selected ? 'canvasElement--isSelected' : ''}`}
+        className={'canvas__element canvasElement'}
         style={{ ...renderable.containerStyle, ...size }}
       >
         <ElementShareContainer
@@ -75,7 +75,6 @@ ElementContent.propTypes = {
     render: PropTypes.func,
     reuseDomNode: PropTypes.bool,
   }),
-  selected: PropTypes.bool,
   size: PropTypes.object,
   handlers: PropTypes.shape({
     setFilter: PropTypes.func.isRequired,
