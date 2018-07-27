@@ -594,6 +594,11 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
       await find.clickByCssSelector(`select[name="orderBy"] > option[value="${fieldValue}"]`);
     }
 
+    async getInputTypeParam(paramName) {
+      const input = await find.byCssSelector(`input[ng-model="agg.params.${paramName}"]`);
+      return await input.getProperty('value');
+    }
+
     async getInterval() {
       const select = await find.byCssSelector('select[ng-model="agg.params.interval"]');
       const selectedIndex = await select.getProperty('selectedIndex');
@@ -607,9 +612,11 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
       await input.type(newValue);
     }
 
-    async setNumericInterval(newValue) {
+    async setNumericInterval(newValue, { append } = {}) {
       const input = await find.byCssSelector('input[name="interval"]');
-      await input.clearValue();
+      if (!append) {
+        await input.clearValue();
+      }
       await input.type(newValue + '');
       await PageObjects.common.sleep(1000);
     }
@@ -633,9 +640,18 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
       return await find.clickByCssSelector('input[name="showMissing"]');
     }
 
+    async isApplyEnabled() {
+      const applyButton = await testSubjects.find('visualizeEditorRenderButton');
+      return await applyButton.isEnabled();
+    }
+
     async clickGo() {
       await testSubjects.click('visualizeEditorRenderButton');
       await PageObjects.header.waitUntilLoadingHasFinished();
+    }
+
+    async clickReset() {
+      await testSubjects.click('visualizeEditorResetButton');
     }
 
     async toggleAutoMode() {
