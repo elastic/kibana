@@ -118,6 +118,14 @@ export function FindProvider({ getService }) {
       return await this._ensureElement(async () => await parentElement.findDisplayedByCssSelector(selector));
     }
 
+    async allDescendantDisplayedByCssSelector(selector, parentElement) {
+      log.debug(`Find.allDescendantDisplayedByCssSelector(${selector})`);
+      const allElements = await parentElement.findAllByCssSelector(selector);
+      return await Promise.all(
+        allElements.map((element) => this._ensureElement(async () => element))
+      );
+    }
+
     async displayedByCssSelector(selector, timeout = defaultFindTimeout, parentElement) {
       log.debug('in displayedByCssSelector: ' + selector);
       return await this._ensureElementWithTimeout(timeout, async remote => {
