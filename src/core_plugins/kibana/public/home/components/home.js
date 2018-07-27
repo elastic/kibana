@@ -45,10 +45,12 @@ export class Home extends Component {
   constructor(props) {
     super(props);
 
+    const isWelcomeEnabled = props.settingsClient.get(KEY_ENABLE_WELCOME, true);
+
     this.state = {
-      isLoading: true,
+      isLoading: isWelcomeEnabled,
       isNewKibanaInstance: false,
-      isWelcomeEnabled: props.settingsClient.get(KEY_ENABLE_WELCOME, true),
+      isWelcomeEnabled,
     };
   }
 
