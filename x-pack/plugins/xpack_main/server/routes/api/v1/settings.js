@@ -5,8 +5,8 @@
  */
 
 import { wrap as wrapError } from 'boom';
-import { getKibanaInfoForStats } from '../../../../../../../src/server/status/lib';
 import { KIBANA_SETTINGS_TYPE } from '../../../../../monitoring/common/constants';
+import { getKibanaInfoForStats } from '../../../../../monitoring/server/kibana_monitoring/lib';
 
 const getClusterUuid = async callCluster => {
   const { cluster_uuid: uuid } = await callCluster('info', { filterPath: 'cluster_uuid', });
@@ -28,8 +28,6 @@ export function settingsRoute(server, kbnServer) {
 
         const settings = await settingsCollector.fetch(callCluster);
         const uuid = await getClusterUuid(callCluster);
-
-        console.log('uuid', uuid);
 
         const kibana = getKibanaInfoForStats(server, kbnServer);
         reply({
