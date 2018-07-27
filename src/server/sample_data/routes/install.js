@@ -21,7 +21,11 @@ import Joi from 'joi';
 
 import { loadData } from './lib/load_data';
 import { createIndexName } from './lib/create_index_name';
-import { adjustTimestamp } from './lib/adjust_timestamp';
+import {
+  dateToIso8601IgnoringTime,
+  translateTimeRelativeToDifference,
+  translateTimeRelativeToWeek
+} from './lib/translate_timestamp';
 
 export const createInstallRoute = () => ({
   path: '/api/sample_data/{id}',
@@ -80,12 +84,13 @@ export const createInstallRoute = () => ({
         return reply(errMsg).code(err.status);
       }
 
-      const now = new Date();
-      const currentTimeMarker = new Date(Date.parse(sampleDataset.currentTimeMarker));
+      const nowReference = dateToIso8601IgnoringTime(new Date());
       function updateTimestamps(doc) {
         sampleDataset.timeFields.forEach(timeFieldName => {
           if (doc[timeFieldName]) {
-            doc[timeFieldName] = adjustTimestamp(doc[timeFieldName], currentTimeMarker, now, sampleDataset.preserveDayOfWeekTimeOfDay);
+            doc[timeFieldName] = sampleDataset.preserveDayOfWeekTimeOfDay
+              ? translateTimeRelativeToWeek(doc[timeFieldName], sampleDataset.currentTimeMarker, nowReference)
+              : translateTimeRelativeToDifference(doc[timeFieldName], sampleDataset.currentTimeMarker, nowReference);
           }
         });
         return doc;
@@ -111,7 +116,7 @@ export const createInstallRoute = () => ({
         }
 
         const createResults = await request.getSavedObjectsClient().bulkCreate(sampleDataset.savedObjects, { overwrite: true });
-        const errors = createResults.filter(savedObjectCreateResult => {
+        const errors = createResults.saved_objects.filter(savedObjectCreateResult => {
           return savedObjectCreateResult.hasOwnProperty('error');
         });
         if (errors.length > 0) {

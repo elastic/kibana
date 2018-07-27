@@ -27,7 +27,9 @@ module.directive('mlMultiMetricJobChart', function () {
 
     let svgWidth = 0;
     const lineChartHeight = scope.chartHeight;
-    const margin = { top: 5, right: 1, bottom: 20, left: scope.chartTicksMargin.width };
+    const marginTop = 5;
+    const progressBarMarginBottom = lineChartHeight + marginTop - 15;
+    const margin = { top: marginTop, right: 1, bottom: 20, left: scope.chartTicksMargin.width };
     const svgHeight = lineChartHeight + margin.top + margin.bottom;
     let vizWidth  = svgWidth  - margin.left - margin.right;
     const chartLimits = { max: 0, min: 0 };
@@ -88,7 +90,7 @@ module.directive('mlMultiMetricJobChart', function () {
 
       if (chartElement.select('.progress-bar')[0][0] === null) {
         const style = `width: ${(+vizWidth + 2)}px;
-          margin-bottom: -${(+lineChartHeight - 15)}px;
+          margin-bottom: -${(+progressBarMarginBottom)}px;
           margin-left: ${(+margin.left - 1)}px;'`;
 
         chartElement.append('div')

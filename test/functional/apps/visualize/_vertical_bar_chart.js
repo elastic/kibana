@@ -31,7 +31,7 @@ export default function ({ getService, getPageObjects }) {
 
     const initBarChart = async () => {
       log.debug('navigateToApp visualize');
-      await PageObjects.common.navigateToUrl('visualize', 'new');
+      await PageObjects.visualize.navigateToNewVisualization();
       log.debug('clickVerticalBarChart');
       await PageObjects.visualize.clickVerticalBarChart();
       await PageObjects.visualize.clickNewSearch();
@@ -97,6 +97,16 @@ export default function ({ getService, getPageObjects }) {
         ['2015-09-20 21:00', '31'],
         ['2015-09-21 00:00', '42'],
         ['2015-09-21 03:00', '202'],
+        [ '2015-09-21 06:00', '683' ],
+        [ '2015-09-21 09:00', '1,361' ],
+        [ '2015-09-21 12:00', '1,415' ],
+        [ '2015-09-21 15:00', '707' ],
+        [ '2015-09-21 18:00', '177' ],
+        [ '2015-09-21 21:00', '27' ],
+        [ '2015-09-22 00:00', '32' ],
+        [ '2015-09-22 03:00', '175' ],
+        [ '2015-09-22 06:00', '707' ],
+        [ '2015-09-22 09:00', '1,408' ],
       ];
 
       await PageObjects.visualize.openInspector();

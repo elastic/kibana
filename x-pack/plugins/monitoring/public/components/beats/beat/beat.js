@@ -5,8 +5,8 @@
  */
 
 import React, { Fragment } from 'react';
-import { MonitoringTimeseriesContainer } from 'plugins/monitoring/components';
-import { formatMetric } from 'plugins/monitoring/lib/format_number';
+import { MonitoringTimeseriesContainer } from '../../chart';
+import { formatMetric } from '../../../lib/format_number';
 
 function renderTransportAddress(summary) {
   let output = null;

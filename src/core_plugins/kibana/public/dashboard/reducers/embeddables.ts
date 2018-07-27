@@ -27,11 +27,7 @@ import {
   PanelActionTypeKeys,
   SetStagedFilterActionPayload,
 } from '../actions';
-import {
-  EmbeddableReduxState,
-  EmbeddablesMap,
-  PanelId,
-} from '../selectors/types';
+import { EmbeddableReduxState, EmbeddablesMap, PanelId } from '../selectors/types';
 
 const embeddableIsInitializing = (
   embeddables: EmbeddablesMap,
@@ -81,16 +77,12 @@ const embeddableError = (
 });
 
 const clearStagedFilters = (embeddables: EmbeddablesMap): EmbeddablesMap => {
-  const omitStagedFilters = (
-    embeddable: EmbeddableReduxState
-  ): EmbeddablesMap => _.omit({ ...embeddable }, ['stagedFilter']);
+  const omitStagedFilters = (embeddable: EmbeddableReduxState): EmbeddablesMap =>
+    _.omit({ ...embeddable }, ['stagedFilter']);
   return _.mapValues<EmbeddablesMap>(embeddables, omitStagedFilters);
 };
 
-const deleteEmbeddable = (
-  embeddables: EmbeddablesMap,
-  panelId: PanelId
-): EmbeddablesMap => {
+const deleteEmbeddable = (embeddables: EmbeddablesMap, panelId: PanelId): EmbeddablesMap => {
   const embeddablesCopy = { ...embeddables };
   delete embeddablesCopy[panelId];
   return embeddablesCopy;
@@ -100,9 +92,7 @@ export const embeddablesReducer: Reducer<EmbeddablesMap> = (
   embeddables = {},
   action
 ): EmbeddablesMap => {
-  switch (
-    action.type as EmbeddableActionTypeKeys | PanelActionTypeKeys.DELETE_PANEL
-  ) {
+  switch (action.type as EmbeddableActionTypeKeys | PanelActionTypeKeys.DELETE_PANEL) {
     case EmbeddableActionTypeKeys.EMBEDDABLE_IS_INITIALIZING:
       return embeddableIsInitializing(embeddables, action.payload);
     case EmbeddableActionTypeKeys.EMBEDDABLE_IS_INITIALIZED:

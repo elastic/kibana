@@ -48,13 +48,9 @@ export interface SetPanelTitleActionPayload {
 }
 
 export interface SetPanelTitleAction
-  extends KibanaAction<
-      PanelActionTypeKeys.SET_PANEl_TITLE,
-      SetPanelTitleActionPayload
-    > {}
+  extends KibanaAction<PanelActionTypeKeys.SET_PANEl_TITLE, SetPanelTitleActionPayload> {}
 
-export interface SetPanelsAction
-  extends KibanaAction<PanelActionTypeKeys.SET_PANELS, PanelsMap> {}
+export interface SetPanelsAction extends KibanaAction<PanelActionTypeKeys.SET_PANELS, PanelsMap> {}
 
 export type PanelActions =
   | DeletePanelAction
@@ -64,21 +60,11 @@ export type PanelActions =
   | SetPanelTitleAction
   | SetPanelsAction;
 
-export const deletePanel = createAction<PanelId>(
-  PanelActionTypeKeys.DELETE_PANEL
-);
-export const updatePanel = createAction<PanelState>(
-  PanelActionTypeKeys.UPDATE_PANEL
-);
-export const resetPanelTitle = createAction<PanelId>(
-  PanelActionTypeKeys.RESET_PANEl_TITLE
-);
+export const deletePanel = createAction<PanelId>(PanelActionTypeKeys.DELETE_PANEL);
+export const updatePanel = createAction<PanelState>(PanelActionTypeKeys.UPDATE_PANEL);
+export const resetPanelTitle = createAction<PanelId>(PanelActionTypeKeys.RESET_PANEl_TITLE);
 export const setPanelTitle = createAction<SetPanelTitleActionPayload>(
   PanelActionTypeKeys.SET_PANEl_TITLE
 );
-export const updatePanels = createAction<PanelsMap>(
-  PanelActionTypeKeys.UPDATE_PANELS
-);
-export const setPanels = createAction<PanelsMap>(
-  PanelActionTypeKeys.SET_PANELS
-);
+export const updatePanels = createAction<PanelsMap>(PanelActionTypeKeys.UPDATE_PANELS);
+export const setPanels = createAction<PanelsMap>(PanelActionTypeKeys.SET_PANELS);

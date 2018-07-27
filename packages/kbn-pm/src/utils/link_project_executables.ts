@@ -59,9 +59,7 @@ export async function linkProjectExecutables(
           .split(sep)
           .join('/');
 
-        log.write(
-          chalk`{dim [${project.name}]} ${name} -> {dim ${projectRelativePath}}`
-        );
+        log.write(chalk`{dim [${project.name}]} ${name} -> {dim ${projectRelativePath}}`);
 
         await mkdirp(dirname(dest));
         await createSymlink(srcPath, dest, 'exec');

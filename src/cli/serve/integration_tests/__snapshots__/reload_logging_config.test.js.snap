@@ -18,8 +18,10 @@ Object {
       "message": "Server running at http://localhost:8274",
       "pid": "## PID ##",
       "tags": Array [
-        "listening",
         "info",
+        "http",
+        "server",
+        "listening",
       ],
       "type": "log",
     },

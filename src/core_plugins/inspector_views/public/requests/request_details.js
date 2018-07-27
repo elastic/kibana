@@ -25,14 +25,12 @@ import {
 } from '@elastic/eui';
 
 import {
-  RequestDetailsDescription,
   RequestDetailsRequest,
   RequestDetailsResponse,
   RequestDetailsStats,
 } from './details';
 
 const DETAILS = [
-  { name: 'Description', component: RequestDetailsDescription },
   { name: 'Statistics', component: RequestDetailsStats },
   { name: 'Request', component: RequestDetailsRequest },
   { name: 'Response', component: RequestDetailsResponse },

@@ -7,19 +7,19 @@
 import { connect } from 'react-redux';
 import TransactionOverview from './view';
 import { getUrlParams } from '../../../store/urlParams';
-import sorting, { changeTransactionSorting } from '../../../store/sorting';
+import { hasDynamicBaseline } from '../../../store/reactReduxRequest/overviewCharts';
+import { getLicense } from '../../../store/reactReduxRequest/license';
 
 function mapStateToProps(state = {}) {
   return {
     urlParams: getUrlParams(state),
-
-    transactionSorting: sorting(state, 'transaction').sorting.transaction
+    hasDynamicBaseline: hasDynamicBaseline(state),
+    location: state.location,
+    license: getLicense(state)
   };
 }
 
-const mapDispatchToProps = {
-  changeTransactionSorting
-};
+const mapDispatchToProps = {};
 
 export default connect(mapStateToProps, mapDispatchToProps)(
   TransactionOverview

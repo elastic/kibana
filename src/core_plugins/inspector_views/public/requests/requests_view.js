@@ -118,6 +118,12 @@ class RequestsViewComponent extends Component {
           selectedRequest={this.state.request}
           onRequestChanged={this.selectRequest}
         />
+        <EuiSpacer size="xs"/>
+        { this.state.request && this.state.request.description  &&
+          <EuiText size="xs">
+            <p>{this.state.request.description}</p>
+          </EuiText>
+        }
         <EuiSpacer size="m" />
         { this.state.request &&
           <RequestDetails

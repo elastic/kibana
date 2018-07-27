@@ -28,10 +28,12 @@ export default function ({ getService, getPageObjects }) {
       await tearDown();
     });
 
-    describe('Shard Allocation Per Node', () => {
+    describe.skip('Shard Allocation Per Node', () => {
       before(async () => {
         // start on cluster overview
         await PageObjects.monitoring.clickBreadcrumb('breadcrumbClusters');
+
+        await PageObjects.header.waitUntilLoadingHasFinished();
 
         // go to nodes listing
         await overview.clickEsNodes();

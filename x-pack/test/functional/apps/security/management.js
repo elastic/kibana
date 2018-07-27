@@ -28,6 +28,16 @@ export default function ({ getService, getPageObjects }) {
         'defaultIndex': 'logstash-*'
       });
       await PageObjects.settings.navigateTo();
+
+      // Create logstash-readonly role
+      await PageObjects.settings.clickLinkText('Roles');
+      await PageObjects.security.clickCreateNewRole();
+      await testSubjects.setValue('roleFormNameInput', 'logstash-readonly');
+      await PageObjects.security.addIndexToRole('logstash-*');
+      await PageObjects.security.addPrivilegeToRole('read');
+      await PageObjects.security.clickSaveEditRole();
+
+      await PageObjects.settings.navigateTo();
     });
 
     describe('Security', async () => {
@@ -53,7 +63,7 @@ export default function ({ getService, getPageObjects }) {
           await testSubjects.setValue('passwordInput', '123456');
           await testSubjects.setValue('passwordConfirmationInput', '123456');
           await testSubjects.setValue('userFormFullNameInput', 'Full User Name');
-          await testSubjects.setValue('userFormEmailInput', 'my@email.com');
+          await testSubjects.setValue('userFormEmailInput', 'example@example.com');
 
           await PageObjects.security.clickSaveEditUser();
 
@@ -66,8 +76,9 @@ export default function ({ getService, getPageObjects }) {
           await PageObjects.settings.clickLinkText('new-user');
           const currentUrl = await remote.getCurrentUrl();
           expect(currentUrl).to.contain(EDIT_USERS_PATH);
-
           const userNameInput = await testSubjects.find('userFormUserNameInput');
+          // allow time for user to load
+          await PageObjects.common.sleep(500);
           const userName = await userNameInput.getProperty('value');
           expect(userName).to.equal('new-user');
         });
@@ -122,9 +133,9 @@ export default function ({ getService, getPageObjects }) {
           await testSubjects.setValue('passwordInput', '123456');
           await testSubjects.setValue('passwordConfirmationInput', '123456');
           await testSubjects.setValue('userFormFullNameInput', 'dashuser');
-          await testSubjects.setValue('userFormEmailInput', 'my@email.com');
+          await testSubjects.setValue('userFormEmailInput', 'example@example.com');
           await PageObjects.security.assignRoleToUser('kibana_dashboard_only_user');
-          await PageObjects.security.assignRoleToUser('logstash-data');
+          await PageObjects.security.assignRoleToUser('logstash-readonly');
 
           await PageObjects.security.clickSaveEditUser();
 

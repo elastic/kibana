@@ -17,6 +17,7 @@
  * under the License.
  */
 
+import expect from 'expect.js';
 import testSubjSelector from '@kbn/test-subj-selector';
 import {
   filter as filterAsync,
@@ -35,6 +36,13 @@ export function TestSubjectsProvider({ getService }) {
     async exists(selector, timeout = 1000) {
       log.debug(`TestSubjects.exists(${selector})`);
       return await find.existsByDisplayedByCssSelector(testSubjSelector(selector), timeout);
+    }
+
+    async existOrFail(selector, timeout = 1000) {
+      log.debug(`TestSubjects.existOrFail(${selector})`);
+      const doesExist = await this.exists(selector, timeout);
+      // Verify element exists, or else fail the test consuming this.
+      expect(doesExist).to.be(true);
     }
 
     async append(selector, text) {
@@ -101,9 +109,7 @@ export function TestSubjectsProvider({ getService }) {
 
     async setValue(selector, text) {
       return await retry.try(async () => {
-        const element = await this.find(selector);
-        await element.click();
-
+        await this.click(selector);
         // in case the input element is actually a child of the testSubject, we
         // call clearValue() and type() on the element that is focused after
         // clicking on the testSubject

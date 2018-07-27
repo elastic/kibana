@@ -6,11 +6,11 @@
 
 import React from 'react';
 import { createSelector } from 'reselect';
+import { get, isEmpty } from 'lodash';
 import { getCharts } from '../selectors/chartSelectors';
 import { getUrlParams } from '../urlParams';
 import { Request } from 'react-redux-request';
-import { loadCharts } from '../../services/rest';
-import { withInitialData } from './helpers';
+import { loadCharts } from '../../services/rest/apm';
 
 const ID = 'overviewCharts';
 const INITIAL_DATA = {
@@ -18,19 +18,28 @@ const INITIAL_DATA = {
   dates: [],
   responseTimes: {},
   tpmBuckets: [],
-  weightedAverage: null
+  overallAvgDuration: null
 };
 
 export const getOverviewCharts = createSelector(
   getUrlParams,
-  state => withInitialData(state.reactReduxRequest[ID], INITIAL_DATA),
-  (urlParams, overviewCharts) => {
+  state => state.reactReduxRequest[ID],
+  (urlParams, overviewCharts = {}) => {
     return {
       ...overviewCharts,
-      data: getCharts(urlParams, overviewCharts.data)
+      data: getCharts(urlParams, overviewCharts.data || INITIAL_DATA)
     };
   }
 );
+
+export function hasDynamicBaseline(state) {
+  return !isEmpty(
+    get(
+      state,
+      `reactReduxRequest[${ID}].data.responseTimes.avgAnomalies.buckets`
+    )
+  );
+}
 
 export function OverviewChartsRequest({ urlParams, render }) {
   const { serviceName, start, end, transactionType, kuery } = urlParams;

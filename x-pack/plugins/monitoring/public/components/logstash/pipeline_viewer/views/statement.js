@@ -6,10 +6,7 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
-import {
-  EuiButtonEmpty,
-  EuiCodeBlock,
-  EuiFlexItem } from '@elastic/eui';
+import { EuiButtonEmpty, EuiCodeBlock, EuiFlexItem } from '@elastic/eui';
 import { PluginStatement as PluginStatementModel } from '../models/pipeline/plugin_statement';
 import { CollapsibleStatement } from './collapsible_statement';
 import { IfElement } from '../models/list/if_element';
@@ -17,10 +14,7 @@ import { PluginStatement } from './plugin_statement';
 
 function renderStatementName(name, onVertexSelected) {
   return (
-    <EuiFlexItem
-      grow={false}
-      key="statementName"
-    >
+    <EuiFlexItem grow={false} key="statementName">
       <EuiButtonEmpty
         color="text"
         size="xs"
@@ -36,30 +30,22 @@ function renderStatementName(name, onVertexSelected) {
 function renderIfStatement({ condition }, onVertexSelected) {
   return [
     renderStatementName('if', onVertexSelected),
-    (
-      <EuiFlexItem
-        key="ifContent"
-        grow={false}
+    <EuiFlexItem key="ifContent" grow={false}>
+      <EuiCodeBlock
+        fontSize="s"
+        paddingSize="none"
+        transparentBackground={true}
       >
-        <EuiCodeBlock
-          fontSize="s"
-          paddingSize="none"
-          transparentBackground={true}
-        >
-          {condition}
-        </EuiCodeBlock>
-      </EuiFlexItem>
-    )
+        {condition}
+      </EuiCodeBlock>
+    </EuiFlexItem>,
   ];
 }
 
-function getStatementBody(
-  isIf,
-  statement,
-  vertex,
-  onShowVertexDetails
-) {
-  const showVertexDetailsClicked = () => { onShowVertexDetails(vertex); };
+function getStatementBody(isIf, statement, vertex, onShowVertexDetails) {
+  const showVertexDetailsClicked = () => {
+    onShowVertexDetails(vertex);
+  };
 
   return isIf
     ? renderIfStatement(statement, showVertexDetailsClicked)
@@ -69,7 +55,9 @@ function getStatementBody(
 function renderNestingSpacers(depth) {
   const spacers = [];
   for (let i = 0; i < depth; i += 1) {
-    spacers.push(<div key={`spacer_${i}`} className="pipelineViewer__spacer" />);
+    spacers.push(
+      <div key={`spacer_${i}`} className="pipelineViewer__spacer" />
+    );
   }
   return spacers;
 }
@@ -80,11 +68,11 @@ function renderStatement({
   element: {
     id,
     statement,
-    statement: { vertex }
+    statement: { vertex },
   },
   expand,
   isCollapsed,
-  onShowVertexDetails
+  onShowVertexDetails,
 }) {
   if (statement instanceof PluginStatementModel) {
     return (
@@ -132,9 +120,9 @@ Statement.propTypes = {
   element: PropTypes.shape({
     depth: PropTypes.number.isRequired,
     id: PropTypes.string.isRequired,
-    statement: PropTypes.object.isRequired
+    statement: PropTypes.object.isRequired,
   }).isRequired,
   expand: PropTypes.func.isRequired,
   isCollapsed: PropTypes.bool.isRequired,
-  onShowVertexDetails: PropTypes.func.isRequired
+  onShowVertexDetails: PropTypes.func.isRequired,
 };

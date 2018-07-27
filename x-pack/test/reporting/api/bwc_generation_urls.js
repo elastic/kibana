@@ -10,8 +10,7 @@ export default function ({ getService }) {
   const reportingAPI = getService('reportingAPI');
   const usageAPI = getService('usageAPI');
 
-  // Disabling because of CI flakiness
-  describe.skip('BWC report generation urls', () => {
+  describe('BWC report generation urls', () => {
     describe('6_2', () => {
       before(async () => {
         await reportingAPI.deleteAllReportingIndexes();

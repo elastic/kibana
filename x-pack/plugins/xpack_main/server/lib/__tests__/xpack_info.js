@@ -67,7 +67,7 @@ describe('XPackInfo', () => {
 
     mockServer = sinon.stub({
       plugins: { elasticsearch: mockElasticsearchPlugin },
-      log() {}
+      log() { }
     });
   });
 
@@ -126,6 +126,22 @@ describe('XPackInfo', () => {
       expect(xPackInfo.license.isActive()).to.be(true);
     });
 
+
+    it('communicates X-Pack being unavailable', async () => {
+      const badRequestError = new Error('Bad request');
+      badRequestError.status = 400;
+
+      mockElasticsearchCluster.callWithInternalUser.returns(Promise.reject(badRequestError));
+      await xPackInfo.refreshNow();
+
+      expect(xPackInfo.isAvailable()).to.be(false);
+      expect(xPackInfo.isXpackUnavailable()).to.be(true);
+      expect(xPackInfo.license.isActive()).to.be(false);
+      expect(xPackInfo.unavailableReason()).to.be(
+        'X-Pack plugin is not installed on the [data] Elasticsearch cluster.'
+      );
+    });
+
     it('correctly updates xpack info if Elasticsearch API fails.', async () => {
       expect(xPackInfo.isAvailable()).to.be(true);
       expect(xPackInfo.license.isActive()).to.be(true);
@@ -151,9 +167,9 @@ describe('XPackInfo', () => {
       expect(xPackInfo.unavailableReason()).to.be(randomError);
       sinon.assert.calledWithExactly(
         mockServer.log,
-        [ 'license', 'warning', 'xpack' ],
+        ['license', 'warning', 'xpack'],
         `License information from the X-Pack plugin could not be obtained from Elasticsearch` +
-          ` for the [data] cluster. ${randomError}`
+        ` for the [data] cluster. ${randomError}`
       );
 
       const badRequestError = new Error('Bad request');
@@ -168,9 +184,9 @@ describe('XPackInfo', () => {
       );
       sinon.assert.calledWithExactly(
         mockServer.log,
-        [ 'license', 'warning', 'xpack' ],
+        ['license', 'warning', 'xpack'],
         `License information from the X-Pack plugin could not be obtained from Elasticsearch` +
-          ` for the [data] cluster. ${badRequestError}`
+        ` for the [data] cluster. ${badRequestError}`
       );
 
       mockElasticsearchCluster.callWithInternalUser.returns(getMockXPackInfoAPIResponse());

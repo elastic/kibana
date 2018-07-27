@@ -6,7 +6,7 @@
 
 import pluralize from 'pluralize';
 import { uiModules } from 'ui/modules';
-import { Notifier, toastNotifications } from 'ui/notify';
+import { toastNotifications } from 'ui/notify';
 import template from './pipeline_list.html';
 import '../pipeline_table';
 import { PAGINATION } from 'plugins/logstash/../common/constants';
@@ -50,7 +50,6 @@ app.directive('pipelineList', function ($injector) {
         this.sortField = 'status.sortOrder';
         this.sortReverse = false;
 
-        this.notifier = new Notifier({ location: 'Logstash' });
         this.pager = pagerFactory.create(this.pipelines.length, PAGINATION.PAGE_SIZE, 1);
 
         // load pipelines
@@ -96,7 +95,7 @@ app.directive('pipelineList', function ($injector) {
                   }
                 } else {
                   this.isForbidden = false;
-                  this.notifier.error(err);
+                  toastNotifications.addDanger(`Couldn't load pipeline. Error: '${err.statusText}'.`);
                 }
               });
           });
@@ -191,7 +190,7 @@ app.directive('pipelineList', function ($injector) {
           })
           .catch(err => {
             return licenseService.checkValidity()
-              .then(() => this.notifier.error(err));
+              .then(() => toastNotifications.addDanger(err));
           });
       }
 

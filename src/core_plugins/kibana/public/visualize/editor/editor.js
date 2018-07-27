@@ -144,7 +144,7 @@ function VisEditor(
     template: require('plugins/kibana/visualize/editor/panels/share.html'),
     testId: 'visualizeShareButton',
   }, {
-    key: 'inspector',
+    key: 'inspect',
     description: 'Open Inspector for visualization',
     testId: 'openInspectorButton',
     disableButton() {

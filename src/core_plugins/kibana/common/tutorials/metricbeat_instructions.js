@@ -17,6 +17,9 @@
  * under the License.
  */
 
+import { INSTRUCTION_VARIANT } from './instruction_variant';
+import { TRYCLOUD_OPTION1, TRYCLOUD_OPTION2 } from './onprem_cloud_instructions';
+
 export const METRICBEAT_INSTRUCTIONS = {
   INSTALL: {
     OSX: {
@@ -164,3 +167,256 @@ export const METRICBEAT_INSTRUCTIONS = {
     }
   }
 };
+
+export const METRICBEAT_CLOUD_INSTRUCTIONS = {
+  CONFIG: {
+    OSX: {
+      title: 'Edit the configuration',
+      textPre: 'Modify `metricbeat.yml` to set the connection information for Elastic Cloud:',
+      commands: [
+        'cloud.id: "{config.cloud.id}"',
+        'cloud.auth: "elastic:<password>"'
+      ],
+      textPost: 'Where `<password>` is the password of the `elastic` user.'
+    },
+    DEB: {
+      title: 'Edit the configuration',
+      textPre: 'Modify `/etc/metricbeat/metricbeat.yml` to set the connection information for Elastic Cloud:',
+      commands: [
+        'cloud.id: "{config.cloud.id}"',
+        'cloud.auth: "elastic:<password>"'
+      ],
+      textPost: 'Where `<password>` is the password of the `elastic` user.'
+    },
+    RPM: {
+      title: 'Edit the configuration',
+      textPre: 'Modify `/etc/metricbeat/metricbeat.yml` to set the connection information for Elastic Cloud:',
+      commands: [
+        'cloud.id: "{config.cloud.id}"',
+        'cloud.auth: "elastic:<password>"'
+      ],
+      textPost: 'Where `<password>` is the password of the `elastic` user.'
+    },
+    WINDOWS: {
+      title: 'Edit the configuration',
+      textPre: 'Modify `C:\\Program Files\\Filebeat\\metricbeat.yml` to set the connection information for Elastic Cloud:',
+      commands: [
+        'cloud.id: "{config.cloud.id}"',
+        'cloud.auth: "elastic:<password>"'
+      ],
+      textPost: 'Where `<password>` is the password of the `elastic` user.'
+    }
+  }
+};
+
+export function metricbeatEnableInstructions(moduleName) {
+  return {
+    OSX: {
+      title: 'Enable and configure the ' + moduleName + ' module',
+      textPre: 'From the installation directory, run:',
+      commands: [
+        './metricbeat modules enable ' + moduleName,
+      ],
+      textPost: 'Modify the settings in the `modules.d/' + moduleName + '.yml` file.'
+    },
+    DEB: {
+      title: 'Enable and configure the ' + moduleName + ' module',
+      commands: [
+        'sudo metricbeat modules enable ' + moduleName,
+      ],
+      textPost: 'Modify the settings in the `/etc/metricbeat/modules.d/' + moduleName + '.yml` file.'
+    },
+    RPM: {
+      title: 'Enable and configure the ' + moduleName + ' module',
+      commands: [
+        'sudo metricbeat modules enable ' + moduleName,
+      ],
+      textPost: 'Modify the settings in the `/etc/metricbeat/modules.d/' + moduleName + '.yml` file.'
+    },
+    WINDOWS: {
+      title: 'Enable and configure the ' + moduleName + ' module',
+      textPre: 'From the `C:\\Program Files\\Metricbeat` folder, run:',
+      commands: [
+        'PS C:\\Program Files\\Metricbeat> metricbeat.exe modules enable ' + moduleName,
+      ],
+      textPost: 'Modify the settings in the `modules.d/' + moduleName + '.yml` file.'
+    }
+  };
+}
+
+export function metricbeatStatusCheck(moduleName) {
+  return {
+    title: 'Module status',
+    text: 'Check that data is received from the Metricbeat `' + moduleName + '` module',
+    btnLabel: 'Check data',
+    success: 'Data successfully received from this module',
+    error: 'No data has been received from this module yet',
+    esHitsCheck: {
+      index: 'metricbeat-*',
+      query: {
+        bool: {
+          filter: {
+            term: {
+              'metricset.module': moduleName
+            }
+          }
+        }
+      }
+    }
+  };
+}
+
+export function onPremInstructions(moduleName) {
+  return {
+    instructionSets: [
+      {
+        title: 'Getting Started',
+        instructionVariants: [
+          {
+            id: INSTRUCTION_VARIANT.OSX,
+            instructions: [
+              METRICBEAT_INSTRUCTIONS.INSTALL.OSX,
+              METRICBEAT_INSTRUCTIONS.CONFIG.OSX,
+              metricbeatEnableInstructions(moduleName).OSX,
+              METRICBEAT_INSTRUCTIONS.START.OSX
+            ]
+          },
+          {
+            id: INSTRUCTION_VARIANT.DEB,
+            instructions: [
+              METRICBEAT_INSTRUCTIONS.INSTALL.DEB,
+              METRICBEAT_INSTRUCTIONS.CONFIG.DEB,
+              metricbeatEnableInstructions(moduleName).DEB,
+              METRICBEAT_INSTRUCTIONS.START.DEB
+            ]
+          },
+          {
+            id: INSTRUCTION_VARIANT.RPM,
+            instructions: [
+              METRICBEAT_INSTRUCTIONS.INSTALL.RPM,
+              METRICBEAT_INSTRUCTIONS.CONFIG.RPM,
+              metricbeatEnableInstructions(moduleName).RPM,
+              METRICBEAT_INSTRUCTIONS.START.RPM
+            ]
+          },
+          {
+            id: INSTRUCTION_VARIANT.WINDOWS,
+            instructions: [
+              METRICBEAT_INSTRUCTIONS.INSTALL.WINDOWS,
+              METRICBEAT_INSTRUCTIONS.CONFIG.WINDOWS,
+              metricbeatEnableInstructions(moduleName).WINDOWS,
+              METRICBEAT_INSTRUCTIONS.START.WINDOWS
+            ]
+          }
+        ],
+        statusCheck: metricbeatStatusCheck(moduleName)
+      }
+    ]
+  };
+}
+
+export function onPremCloudInstructions(moduleName) {
+  return {
+    instructionSets: [
+      {
+        title: 'Getting Started',
+        instructionVariants: [
+          {
+            id: INSTRUCTION_VARIANT.OSX,
+            instructions: [
+              TRYCLOUD_OPTION1,
+              TRYCLOUD_OPTION2,
+              METRICBEAT_INSTRUCTIONS.INSTALL.OSX,
+              METRICBEAT_INSTRUCTIONS.CONFIG.OSX,
+              metricbeatEnableInstructions(moduleName).OSX,
+              METRICBEAT_INSTRUCTIONS.START.OSX
+            ]
+          },
+          {
+            id: INSTRUCTION_VARIANT.DEB,
+            instructions: [
+              TRYCLOUD_OPTION1,
+              TRYCLOUD_OPTION2,
+              METRICBEAT_INSTRUCTIONS.INSTALL.DEB,
+              METRICBEAT_INSTRUCTIONS.CONFIG.DEB,
+              metricbeatEnableInstructions(moduleName).DEB,
+              METRICBEAT_INSTRUCTIONS.START.DEB
+            ]
+          },
+          {
+            id: INSTRUCTION_VARIANT.RPM,
+            instructions: [
+              TRYCLOUD_OPTION1,
+              TRYCLOUD_OPTION2,
+              METRICBEAT_INSTRUCTIONS.INSTALL.RPM,
+              METRICBEAT_INSTRUCTIONS.CONFIG.RPM,
+              metricbeatEnableInstructions(moduleName).RPM,
+              METRICBEAT_INSTRUCTIONS.START.RPM
+            ]
+          },
+          {
+            id: INSTRUCTION_VARIANT.WINDOWS,
+            instructions: [
+              TRYCLOUD_OPTION1,
+              TRYCLOUD_OPTION2,
+              METRICBEAT_INSTRUCTIONS.INSTALL.WINDOWS,
+              METRICBEAT_INSTRUCTIONS.CONFIG.WINDOWS,
+              metricbeatEnableInstructions(moduleName).WINDOWS,
+              METRICBEAT_INSTRUCTIONS.START.WINDOWS
+            ]
+          }
+        ],
+        statusCheck: metricbeatStatusCheck(moduleName)
+      }
+    ]
+  };
+}
+
+export function cloudInstructions(moduleName) {
+  return {
+    instructionSets: [
+      {
+        title: 'Getting Started',
+        instructionVariants: [
+          {
+            id: INSTRUCTION_VARIANT.OSX,
+            instructions: [
+              METRICBEAT_INSTRUCTIONS.INSTALL.OSX,
+              METRICBEAT_CLOUD_INSTRUCTIONS.CONFIG.OSX,
+              metricbeatEnableInstructions(moduleName).OSX,
+              METRICBEAT_INSTRUCTIONS.START.OSX
+            ]
+          },
+          {
+            id: INSTRUCTION_VARIANT.DEB,
+            instructions: [
+              METRICBEAT_INSTRUCTIONS.INSTALL.DEB,
+              METRICBEAT_CLOUD_INSTRUCTIONS.CONFIG.DEB,
+              metricbeatEnableInstructions(moduleName).DEB,
+              METRICBEAT_INSTRUCTIONS.START.DEB
+            ]
+          },
+          {
+            id: INSTRUCTION_VARIANT.RPM,
+            instructions: [
+              METRICBEAT_INSTRUCTIONS.INSTALL.RPM,
+              METRICBEAT_CLOUD_INSTRUCTIONS.CONFIG.RPM,
+              metricbeatEnableInstructions(moduleName).RPM,
+              METRICBEAT_INSTRUCTIONS.START.RPM
+            ]
+          },
+          {
+            id: INSTRUCTION_VARIANT.WINDOWS,
+            instructions: [
+              METRICBEAT_INSTRUCTIONS.INSTALL.WINDOWS,
+              METRICBEAT_CLOUD_INSTRUCTIONS.CONFIG.WINDOWS,
+              metricbeatEnableInstructions(moduleName).WINDOWS,
+              METRICBEAT_INSTRUCTIONS.START.WINDOWS
+            ]
+          }
+        ],
+        statusCheck: metricbeatStatusCheck(moduleName)
+      }
+    ]
+  };
+}

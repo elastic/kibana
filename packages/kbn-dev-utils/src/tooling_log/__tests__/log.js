@@ -58,10 +58,7 @@ describe('utils: createToolingLog(logLevel, output)', () => {
     log.info('Baz');
     log.end();
 
-    const output = await createPromiseFromStreams([
-      log,
-      createConcatStream(''),
-    ]);
+    const output = await createPromiseFromStreams([log, createConcatStream('')]);
 
     expect(output).to.contain('Foo');
     expect(output).to.contain('Bar');

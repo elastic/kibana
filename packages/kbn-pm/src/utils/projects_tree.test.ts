@@ -36,11 +36,7 @@ test('handles projects with root folder', async () => {
 });
 
 test('handles projects outside root folder', async () => {
-  const projects = await getProjects(rootPath, [
-    '.',
-    'packages/*',
-    '../plugins/*',
-  ]);
+  const projects = await getProjects(rootPath, ['.', 'packages/*', '../plugins/*']);
 
   const tree = await renderProjectsTree(rootPath, projects);
   expect(tree).toMatchSnapshot();

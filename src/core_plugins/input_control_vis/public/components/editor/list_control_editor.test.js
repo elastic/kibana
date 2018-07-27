@@ -37,6 +37,7 @@ const controlParams = {
   options: {
     type: 'terms',
     multiselect: true,
+    dynamicOptions: false,
     size: 10
   }
 };
@@ -52,43 +53,173 @@ beforeEach(() => {
   handleNumberOptionChange = sinon.spy();
 });
 
-test('renders ListControlEditor', () => {
-  const component = shallow(<ListControlEditor
-    getIndexPatterns={getIndexPatternsMock}
-    getIndexPattern={getIndexPatternMock}
-    controlIndex={0}
-    controlParams={controlParams}
-    handleFieldNameChange={handleFieldNameChange}
-    handleIndexPatternChange={handleIndexPatternChange}
-    handleCheckboxOptionChange={handleCheckboxOptionChange}
-    handleNumberOptionChange={handleNumberOptionChange}
-    handleParentChange={() => {}}
-    parentCandidates={[]}
-  />);
-  expect(component).toMatchSnapshot(); // eslint-disable-line
+describe('renders', () => {
+  test('should not display any options until field is selected', async () => {
+    const controlParams = {
+      id: '1',
+      indexPattern: 'mockIndexPattern',
+      fieldName: '',
+      type: 'list',
+      options: {
+        type: 'terms',
+        multiselect: true,
+        dynamicOptions: true,
+        size: 5,
+      }
+    };
+    const component = shallow(<ListControlEditor
+      getIndexPatterns={getIndexPatternsMock}
+      getIndexPattern={getIndexPatternMock}
+      controlIndex={0}
+      controlParams={controlParams}
+      handleFieldNameChange={handleFieldNameChange}
+      handleIndexPatternChange={handleIndexPatternChange}
+      handleCheckboxOptionChange={handleCheckboxOptionChange}
+      handleNumberOptionChange={handleNumberOptionChange}
+      handleParentChange={() => {}}
+      parentCandidates={[]}
+    />);
+
+    // Ensure all promises resolve
+    await new Promise(resolve => process.nextTick(resolve));
+    // Ensure the state changes are reflected
+    component.update();
+
+    expect(component).toMatchSnapshot();
+  });
+
+  test('should display chaining input when parents are provided', async () => {
+    const parentCandidates = [
+      { value: '1', text: 'fieldA' },
+      { value: '2', text: 'fieldB' }
+    ];
+    const component = shallow(<ListControlEditor
+      getIndexPatterns={getIndexPatternsMock}
+      getIndexPattern={getIndexPatternMock}
+      controlIndex={0}
+      controlParams={controlParams}
+      handleFieldNameChange={handleFieldNameChange}
+      handleIndexPatternChange={handleIndexPatternChange}
+      handleCheckboxOptionChange={handleCheckboxOptionChange}
+      handleNumberOptionChange={handleNumberOptionChange}
+      handleParentChange={() => {}}
+      parentCandidates={parentCandidates}
+    />);
+
+    // Ensure all promises resolve
+    await new Promise(resolve => process.nextTick(resolve));
+    // Ensure the state changes are reflected
+    component.update();
+
+    expect(component).toMatchSnapshot();
+  });
+
+  describe('dynamic options', () => {
+    test('should display dynamic options for string fields', async () => {
+      const controlParams = {
+        id: '1',
+        indexPattern: 'mockIndexPattern',
+        fieldName: 'keywordField',
+        type: 'list',
+        options: {
+          type: 'terms',
+          multiselect: true,
+          dynamicOptions: true,
+          size: 5,
+        }
+      };
+      const component = shallow(<ListControlEditor
+        getIndexPatterns={getIndexPatternsMock}
+        getIndexPattern={getIndexPatternMock}
+        controlIndex={0}
+        controlParams={controlParams}
+        handleFieldNameChange={handleFieldNameChange}
+        handleIndexPatternChange={handleIndexPatternChange}
+        handleCheckboxOptionChange={handleCheckboxOptionChange}
+        handleNumberOptionChange={handleNumberOptionChange}
+        handleParentChange={() => {}}
+        parentCandidates={[]}
+      />);
+
+      // Ensure all promises resolve
+      await new Promise(resolve => process.nextTick(resolve));
+      // Ensure the state changes are reflected
+      component.update();
+
+      expect(component).toMatchSnapshot();
+    });
+
+    test('should display size field when dynamic options is disabled', async () => {
+      const controlParams = {
+        id: '1',
+        indexPattern: 'mockIndexPattern',
+        fieldName: 'keywordField',
+        type: 'list',
+        options: {
+          type: 'terms',
+          multiselect: true,
+          dynamicOptions: false,
+          size: 5,
+        }
+      };
+      const component = shallow(<ListControlEditor
+        getIndexPatterns={getIndexPatternsMock}
+        getIndexPattern={getIndexPatternMock}
+        controlIndex={0}
+        controlParams={controlParams}
+        handleFieldNameChange={handleFieldNameChange}
+        handleIndexPatternChange={handleIndexPatternChange}
+        handleCheckboxOptionChange={handleCheckboxOptionChange}
+        handleNumberOptionChange={handleNumberOptionChange}
+        handleParentChange={() => {}}
+        parentCandidates={[]}
+      />);
+
+      // Ensure all promises resolve
+      await new Promise(resolve => process.nextTick(resolve));
+      // Ensure the state changes are reflected
+      component.update();
+
+      expect(component).toMatchSnapshot();
+    });
+
+    test('should display disabled dynamic options with tooltip for non-string fields', async () => {
+      const controlParams = {
+        id: '1',
+        indexPattern: 'mockIndexPattern',
+        fieldName: 'numberField',
+        type: 'list',
+        options: {
+          type: 'terms',
+          multiselect: true,
+          dynamicOptions: true,
+          size: 5,
+        }
+      };
+      const component = shallow(<ListControlEditor
+        getIndexPatterns={getIndexPatternsMock}
+        getIndexPattern={getIndexPatternMock}
+        controlIndex={0}
+        controlParams={controlParams}
+        handleFieldNameChange={handleFieldNameChange}
+        handleIndexPatternChange={handleIndexPatternChange}
+        handleCheckboxOptionChange={handleCheckboxOptionChange}
+        handleNumberOptionChange={handleNumberOptionChange}
+        handleParentChange={() => {}}
+        parentCandidates={[]}
+      />);
+
+      // Ensure all promises resolve
+      await new Promise(resolve => process.nextTick(resolve));
+      // Ensure the state changes are reflected
+      component.update();
+
+      expect(component).toMatchSnapshot();
+    });
+  });
 });
 
-test('parentCandidates', () => {
-  const parentCandidates = [
-    { value: '1', text: 'fieldA' },
-    { value: '2', text: 'fieldB' }
-  ];
-  const component = shallow(<ListControlEditor
-    getIndexPatterns={getIndexPatternsMock}
-    getIndexPattern={getIndexPatternMock}
-    controlIndex={0}
-    controlParams={controlParams}
-    handleFieldNameChange={handleFieldNameChange}
-    handleIndexPatternChange={handleIndexPatternChange}
-    handleCheckboxOptionChange={handleCheckboxOptionChange}
-    handleNumberOptionChange={handleNumberOptionChange}
-    handleParentChange={() => {}}
-    parentCandidates={parentCandidates}
-  />);
-  expect(component).toMatchSnapshot(); // eslint-disable-line
-});
-
-test('handleCheckboxOptionChange - multiselect', () => {
+test('handleCheckboxOptionChange - multiselect', async () => {
   const component = mount(<ListControlEditor
     getIndexPatterns={getIndexPatternsMock}
     getIndexPattern={getIndexPatternMock}
@@ -101,6 +232,12 @@ test('handleCheckboxOptionChange - multiselect', () => {
     handleParentChange={() => {}}
     parentCandidates={[]}
   />);
+
+  // Ensure all promises resolve
+  await new Promise(resolve => process.nextTick(resolve));
+  // Ensure the state changes are reflected
+  component.update();
+
   const checkbox = findTestSubject(component, 'listControlMultiselectInput');
   checkbox.simulate('change', { target: { checked: true } });
   sinon.assert.notCalled(handleFieldNameChange);
@@ -120,7 +257,7 @@ test('handleCheckboxOptionChange - multiselect', () => {
     }, 'unexpected checkbox input event'));
 });
 
-test('handleNumberOptionChange - size', () => {
+test('handleNumberOptionChange - size', async () => {
   const component = mount(<ListControlEditor
     getIndexPatterns={getIndexPatternsMock}
     getIndexPattern={getIndexPatternMock}
@@ -133,6 +270,12 @@ test('handleNumberOptionChange - size', () => {
     handleParentChange={() => {}}
     parentCandidates={[]}
   />);
+
+  // Ensure all promises resolve
+  await new Promise(resolve => process.nextTick(resolve));
+  // Ensure the state changes are reflected
+  component.update();
+
   const input = findTestSubject(component, 'listControlSizeInput');
   input.simulate('change', { target: { value: 7 } });
   sinon.assert.notCalled(handleCheckboxOptionChange);

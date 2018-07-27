@@ -45,9 +45,7 @@ export const BootstrapCommand: ICommand = {
       }
     }
 
-    log.write(
-      chalk.bold('\nInstalls completed, linking package executables:\n')
-    );
+    log.write(chalk.bold('\nInstalls completed, linking package executables:\n'));
     await linkProjectExecutables(projects, projectGraph);
 
     /**
@@ -56,11 +54,7 @@ export const BootstrapCommand: ICommand = {
      * transpiled before they can be used. Ideally we shouldn't do this unless we
      * have to, as it will slow down the bootstrapping process.
      */
-    log.write(
-      chalk.bold(
-        '\nLinking executables completed, running `kbn:bootstrap` scripts\n'
-      )
-    );
+    log.write(chalk.bold('\nLinking executables completed, running `kbn:bootstrap` scripts\n'));
     await parallelizeBatches(batchedProjects, async pkg => {
       if (pkg.hasScript('kbn:bootstrap')) {
         await pkg.runScriptStreaming('kbn:bootstrap');

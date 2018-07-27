@@ -93,6 +93,11 @@ export function DashboardAddPanelProvider({ getService, getPageObjects }) {
       }
     }
 
+    async waitForEuiTableLoading() {
+      const addPanel = await testSubjects.find('dashboardAddPanel');
+      await addPanel.waitForDeletedByClassName('euiBasicTable-loading');
+    }
+
     async closeAddPanel() {
       log.debug('DashboardAddPanel.closeAddPanel');
       const isOpen = await this.isAddPanelOpen();
@@ -164,12 +169,16 @@ export function DashboardAddPanelProvider({ getService, getPageObjects }) {
     async addVisualization(vizName) {
       log.debug(`DashboardAddPanel.addVisualization(${vizName})`);
       await this.ensureAddPanelIsShowing();
+      // workaround for timing issue with slideout animation
+      await PageObjects.common.sleep(500);
       await this.filterEmbeddableNames(`"${vizName.replace('-', ' ')}"`);
       await testSubjects.click(`addPanel${vizName.split(' ').join('-')}`);
       await this.closeAddPanel();
     }
 
     async filterEmbeddableNames(name) {
+      // The search input field may be disabled while the table is loading so wait for it
+      await this.waitForEuiTableLoading();
       await testSubjects.setValue('savedObjectFinderSearchInput', name);
       await PageObjects.header.waitUntilLoadingHasFinished();
     }

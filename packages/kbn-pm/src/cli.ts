@@ -55,11 +55,7 @@ export async function run(argv: string[]) {
   // starts forwarding the `--` directly to this script, see
   // https://github.com/yarnpkg/yarn/blob/b2d3e1a8fe45ef376b716d597cc79b38702a9320/src/cli/index.js#L174-L182
   if (argv.includes('--')) {
-    log.write(
-      chalk.red(
-        `Using "--" is not allowed, as it doesn't work with 'yarn kbn'.`
-      )
-    );
+    log.write(chalk.red(`Using "--" is not allowed, as it doesn't work with 'yarn kbn'.`));
     process.exit(1);
   }
 
@@ -89,9 +85,7 @@ export async function run(argv: string[]) {
 
   const command = commands[commandName];
   if (command === undefined) {
-    log.write(
-      chalk.red(`[${commandName}] is not a valid command, see 'kbn --help'`)
-    );
+    log.write(chalk.red(`[${commandName}] is not a valid command, see 'kbn --help'`));
     process.exit(1);
   }
 

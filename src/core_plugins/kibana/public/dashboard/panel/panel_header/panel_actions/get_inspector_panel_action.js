@@ -37,7 +37,7 @@ export function getInspectorPanelAction({ closeContextMenu, panelTitle }) {
   return new DashboardPanelAction(
     {
       id: 'openInspector',
-      displayName: 'Inspector',
+      displayName: 'Inspect',
       parentPanelId: 'mainMenu',
     },
     {

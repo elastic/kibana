@@ -6,7 +6,7 @@
 
 import routes from 'ui/routes';
 import { management } from 'ui/management';
-import { Notifier } from 'ui/notify';
+import { toastNotifications } from 'ui/notify';
 import template from './watch_list_route.html';
 import './components/watch_list';
 import 'plugins/watcher/services/license';
@@ -31,7 +31,6 @@ routes
         const watchesService = $injector.get('xpackWatcherWatchesService');
         const licenseService = $injector.get('xpackWatcherLicenseService');
         const kbnUrl = $injector.get('kbnUrl');
-        const notifier = new Notifier({ location: 'Watcher' });
 
         return watchesService.getWatchList()
           .catch(err => {
@@ -41,7 +40,7 @@ routes
                   return null;
                 }
 
-                notifier.error(err);
+                toastNotifications.addDanger(err.data.message);
                 kbnUrl.redirect('/management');
                 return Promise.reject();
               });

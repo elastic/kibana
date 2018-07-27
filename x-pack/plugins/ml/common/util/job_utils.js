@@ -88,6 +88,24 @@ export function isTimeSeriesViewFunction(functionName) {
   return mlFunctionToESAggregation(functionName) !== null;
 }
 
+// Returns the names of the partition, by, and over fields for the detector with the
+// specified index from the supplied ML job configuration.
+export function getPartitioningFieldNames(job, detectorIndex) {
+  const fieldNames = [];
+  const detector = job.analysis_config.detectors[detectorIndex];
+  if (_.has(detector, 'partition_field_name')) {
+    fieldNames.push(detector.partition_field_name);
+  }
+  if (_.has(detector, 'by_field_name')) {
+    fieldNames.push(detector.by_field_name);
+  }
+  if (_.has(detector, 'over_field_name')) {
+    fieldNames.push(detector.over_field_name);
+  }
+
+  return fieldNames;
+}
+
 // Returns a flag to indicate whether model plot has been enabled for a job.
 // If model plot is enabled for a job with a terms filter (comma separated
 // list of partition or by field names), performs additional checks that
@@ -233,20 +251,14 @@ export function basicJobValidation(job, fields, limits) {
       messages.push({ id: 'job_id_valid' });
     }
 
-    if (job.groups !== undefined) {
-      let groupIdValid = true;
-      job.groups.forEach(group => {
-        if (isJobIdValid(group) === false) {
-          groupIdValid = false;
-          valid = false;
-        }
-      });
-      if (job.groups.length > 0 && groupIdValid) {
-        messages.push({ id: 'job_group_id_valid' });
-      } else if (job.groups.length > 0 && !groupIdValid) {
-        messages.push({ id: 'job_group_id_invalid' });
-      }
-    }
+    // group names
+    const {
+      messages: groupsMessages,
+      valid: groupsValid,
+    } = validateGroupNames(job);
+
+    messages.push(...groupsMessages);
+    valid = (valid && groupsValid);
 
     // Analysis Configuration
     if (job.analysis_config.categorization_filters) {
@@ -338,7 +350,10 @@ export function basicJobValidation(job, fields, limits) {
         messages.push({ id: 'bucket_span_invalid' });
         valid = false;
       } else {
-        messages.push({ id: 'bucket_span_valid' });
+        messages.push({
+          id: 'bucket_span_valid',
+          bucketSpan: job.analysis_config.bucket_span
+        });
       }
     }
 
@@ -354,22 +369,13 @@ export function basicJobValidation(job, fields, limits) {
     }
 
     // model memory limit
-    if (typeof job.analysis_limits !== 'undefined' && typeof job.analysis_limits.model_memory_limit !== 'undefined') {
-      if (typeof limits === 'object' && typeof limits.max_model_memory_limit !== 'undefined') {
-        const max = limits.max_model_memory_limit.toUpperCase();
-        const mml = job.analysis_limits.model_memory_limit.toUpperCase();
+    const {
+      messages: mmlMessages,
+      valid: mmlValid,
+    } = validateModelMemoryLimit(job, limits);
 
-        const mmlBytes = numeral(mml).value();
-        const maxBytes = numeral(max).value();
-
-        if(mmlBytes > maxBytes) {
-          messages.push({ id: 'model_memory_limit_invalid' });
-          valid = false;
-        } else {
-          messages.push({ id: 'model_memory_limit_valid' });
-        }
-      }
-    }
+    messages.push(...mmlMessages);
+    valid = (valid && mmlValid);
 
   } else {
     valid = false;
@@ -378,7 +384,60 @@ export function basicJobValidation(job, fields, limits) {
   return {
     messages,
     valid,
-    contains(id) { return _.some(messages, { id }); },
-    find(id) { return _.find(messages, { id }); }
+    contains: id =>  (messages.some(m => id === m.id)),
+    find: id => (messages.find(m => id === m.id)),
+  };
+}
+
+export function validateModelMemoryLimit(job, limits) {
+  const messages = [];
+  let valid = true;
+  // model memory limit
+  if (typeof job.analysis_limits !== 'undefined' && typeof job.analysis_limits.model_memory_limit !== 'undefined') {
+    if (typeof limits === 'object' && typeof limits.max_model_memory_limit !== 'undefined') {
+      const max = limits.max_model_memory_limit.toUpperCase();
+      const mml = job.analysis_limits.model_memory_limit.toUpperCase();
+
+      const mmlBytes = numeral(mml).value();
+      const maxBytes = numeral(max).value();
+
+      if(mmlBytes > maxBytes) {
+        messages.push({ id: 'model_memory_limit_invalid' });
+        valid = false;
+      } else {
+        messages.push({ id: 'model_memory_limit_valid' });
+      }
+    }
+  }
+  return {
+    valid,
+    messages,
+    contains: id =>  (messages.some(m => id === m.id)),
+    find: id => (messages.find(m => id === m.id)),
+  };
+}
+
+export function validateGroupNames(job) {
+  const messages = [];
+  let valid = true;
+  if (job.groups !== undefined) {
+    let groupIdValid = true;
+    job.groups.forEach(group => {
+      if (isJobIdValid(group) === false) {
+        groupIdValid = false;
+        valid = false;
+      }
+    });
+    if (job.groups.length > 0 && groupIdValid) {
+      messages.push({ id: 'job_group_id_valid' });
+    } else if (job.groups.length > 0 && !groupIdValid) {
+      messages.push({ id: 'job_group_id_invalid' });
+    }
+  }
+  return {
+    valid,
+    messages,
+    contains: id =>  (messages.some(m => id === m.id)),
+    find: id => (messages.find(m => id === m.id)),
   };
 }
