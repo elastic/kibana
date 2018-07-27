@@ -18,6 +18,20 @@ export const getLayerLoading = ({ map }) => map && map.layerLoading;
 export const getTemporaryLayers = ({ map }) => map &&
   map.layerList.filter(({ temporary }) => temporary);
 
+function getLayersById(state) {
+  return createSelector(
+    getLayerList,
+    layerList => layerList.reduce((accu, layer) => ({ ...accu, [layer.id]: layer }), {})
+  )(state);
+}
+
+export function getLayerById(state, id) {
+  return createSelector(
+    getLayersById,
+    layersByIdList => _.get(layersByIdList, id)
+  )(state);
+}
+
 function getLayerOptionsByOrigin(state) {
   return createSelector(
     getLayerOptions,
