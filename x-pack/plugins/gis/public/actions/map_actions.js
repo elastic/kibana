@@ -18,6 +18,14 @@ export const REMOVE_LAYER = 'REMOVE_LAYER';
 export const PROMOTE_TEMPORARY_LAYERS = 'PROMOTE_TEMPORARY_LAYERS';
 export const CLEAR_TEMPORARY_LAYERS = 'CLEAR_TEMPORARY_LAYERS';
 export const ADD_SOURCE = 'ADD_SOURCE';
+export const TOGGLE_LAYER_VISIBLE = 'TOGGLE_LAYER_VISIBLE';
+
+export function toggleLayerVisible(layerId) {
+  return {
+    type: TOGGLE_LAYER_VISIBLE,
+    layerId
+  };
+}
 
 export function setSelectedLayer(layerId) {
   return {

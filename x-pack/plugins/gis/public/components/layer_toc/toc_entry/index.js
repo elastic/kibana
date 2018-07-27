@@ -7,19 +7,23 @@
 import { connect } from 'react-redux';
 import { TOCEntry } from './view';
 import { updateFlyout, FLYOUT_STATE } from '../../../store/ui';
-import { setSelectedLayer } from '../../../actions/map_actions';
+import { setSelectedLayer, toggleLayerVisible } from '../../../actions/map_actions';
+import { getLayerById } from '../../../selectors/map_selectors';
+import _ from 'lodash';
 
 function mapDispatchToProps(dispatch) {
-  return {
+  return ({
     onButtonClick: layerId => {
       dispatch(updateFlyout(FLYOUT_STATE.LAYER_PANEL));
       dispatch(setSelectedLayer(layerId));
-    }
-  };
+    },
+    toggleVisible: layerId => dispatch(toggleLayerVisible(layerId))
+  });
 }
 
-function mapStateToProps() {
+function mapStateToProps(state) {
   return {
+    layerVisible: layerId => _.get(getLayerById(state, layerId), 'visible')
   };
 }
 
