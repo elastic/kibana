@@ -6,6 +6,7 @@
 
 import { SpacesSavedObjectsClient } from './spaces_saved_objects_client';
 import { createSpacesService } from '../create_spaces_service';
+import { DEFAULT_SPACE_ID } from '../../../common/constants';
 
 const createObjectEntry = (type, id, spaceId) => ({
   [id]: {
@@ -35,7 +36,7 @@ const server = {
 };
 
 const createMockRequest = (space) => ({
-  getBasePath: () => space.urlContext ? `/s/${space.urlContext}` : '',
+  getBasePath: () => space.id !== DEFAULT_SPACE_ID ? `/s/${space.id}` : '',
 });
 
 const createMockClient = (space) => {
@@ -74,7 +75,6 @@ const createMockClient = (space) => {
 describe('default space', () => {
   const currentSpace = {
     id: 'default',
-    urlContext: ''
   };
 
   describe('#get', () => {
@@ -723,7 +723,6 @@ describe('default space', () => {
 describe('current space (space_1)', () => {
   const currentSpace = {
     id: 'space_1',
-    urlContext: 'space-1'
   };
 
   describe('#get', () => {

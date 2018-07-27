@@ -14,7 +14,7 @@ exports[`renders without crashing 1`] = `
     isInvalid={false}
     label={
       <p>
-        URL Context 
+        Space Identifier 
         <EuiLink
           color="primary"
           onClick={[Function]}
@@ -25,18 +25,16 @@ exports[`renders without crashing 1`] = `
       </p>
     }
   >
-    <div>
-      <EuiFieldText
-        compressed={false}
-        fullWidth={false}
-        inputRef={[Function]}
-        isLoading={false}
-        onChange={[Function]}
-        placeholder="give your space a name to see its URL Context"
-        readOnly={true}
-        value=""
-      />
-    </div>
+    <EuiFieldText
+      compressed={false}
+      fullWidth={false}
+      inputRef={[Function]}
+      isLoading={false}
+      onChange={[Function]}
+      placeholder="give your space a name to see its identifier"
+      readOnly={true}
+      value=""
+    />
   </EuiFormRow>
 </React.Fragment>
 `;

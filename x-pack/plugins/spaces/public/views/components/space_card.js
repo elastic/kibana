@@ -36,11 +36,11 @@ function renderSpaceAvatar(space) {
 }
 
 function renderSpaceDescription(space) {
-  let description = space.description;
-  const needsTruncation = space.description.length > 120;
+  let description = space.description || '';
+  const needsTruncation = description.length > 120;
   if (needsTruncation) {
     description = (
-      <span title={description}>{space.description.substr(0, 120) + '…'}</span>
+      <span title={description}>{description.substr(0, 120) + '…'}</span>
     );
   }
   return <EuiTextColor className="eui-textBreakWord" color={"subdued"}>{description}</EuiTextColor>;

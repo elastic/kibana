@@ -4,17 +4,19 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export function getUrlPrefix(urlContext) {
-  return urlContext ? `/s/${urlContext}` : ``;
+import { DEFAULT_SPACE_ID } from '../../../../../plugins/spaces/common/constants';
+
+export function getUrlPrefix(spaceId) {
+  return spaceId && spaceId !== DEFAULT_SPACE_ID ? `/s/${spaceId}` : ``;
 }
 
 // Spaces do not actually prefix the ID, but this simplifies testing positive and negative flows.
 export function getIdPrefix(spaceId) {
-  return spaceId === 'default' ? '' : `${spaceId}-`;
+  return spaceId === DEFAULT_SPACE_ID ? '' : `${spaceId}-`;
 }
 
 export function getExpectedSpaceIdProperty(spaceId) {
-  if (spaceId === 'default') {
+  if (spaceId === DEFAULT_SPACE_ID) {
     return {};
   }
   return {
