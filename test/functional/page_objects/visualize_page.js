@@ -250,7 +250,6 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
       const comboBox = await testSubjects.find(comboBoxSelector);
       await this.setComboBoxValue(comboBox, value);
       await this.closeComboBoxOptionsList(comboBoxSelector);
-      await PageObjects.common.sleep(1000);
     }
 
     async setComboBoxElement(comboBox, value) {
