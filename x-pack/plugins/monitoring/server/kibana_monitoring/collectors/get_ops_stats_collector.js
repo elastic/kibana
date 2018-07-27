@@ -52,6 +52,24 @@ export function getOpsStatsCollector(server, kbnServer) {
         kibana: getKibanaInfoForStats(server, kbnServer),
         ...buffer.flush()
       };
+    },
+    format: result => {
+      const { kibana, ...rest } = result;
+      return [
+        {
+          type: 'kibana_stats',
+          payload: {
+            kibana,
+            ...rest,
+          }
+        },
+        {
+          type: 'kibana_settings',
+          payload: {
+            kibana,
+          }
+        }
+      ];
     }
   });
 }

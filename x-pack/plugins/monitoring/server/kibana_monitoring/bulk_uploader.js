@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { get, set, isEmpty, flatten, uniq } from 'lodash';
+import { get, set, flatten, uniq } from 'lodash';
 import { callClusterFactory } from '../../../xpack_main';
 import {
   LOGGING_TAG,
@@ -98,7 +98,7 @@ export class BulkUploader {
    */
   async _fetchAndUpload(collectorSet) {
     const data = await collectorSet.bulkFetch(this._callClusterWithInternalUser);
-    const payload = BulkUploader.toBulkUploadFormat(data);
+    const payload = BulkUploader.toBulkUploadFormat(data, collectorSet);
 
     if (payload) {
       try {
@@ -117,18 +117,39 @@ export class BulkUploader {
     return sendBulkPayload(this._client, this._interval, payload);
   }
 
+  static deepMergeUploadData(uploadData, collectorSet) {
+    const deepMergeAndGroup = collectorSet.bulkFormat(uploadData).reduce((accum, datas) => {
+      for (const data of datas) {
+        accum[data.type] = accum[data.type] || {};
+        for (const key in data.payload) {
+          if (typeof accum[data.type][key] === 'object') {
+            accum[data.type][key] = {
+              ...accum[data.type][key],
+              ...data.payload[key]
+            };
+          } else {
+            accum[data.type][key] = data.payload[key];
+          }
+        }
+      }
+      return accum;
+    }, {});
+
+    return Object.keys(deepMergeAndGroup).reduce((accum, type) => {
+      accum.push([
+        { index: { _type: type } },
+        deepMergeAndGroup[type],
+      ]);
+      return accum;
+    }, []);
+  }
+
   /*
    * Bulk stats are transformed into a bulk upload format
    * Non-legacy transformation is done in CollectorSet.toApiStats
    */
-  static toBulkUploadFormat(uploadData) {
-    const payload = uploadData
-      .filter(d => Boolean(d) && !isEmpty(d.result))
-      .map(({ result, type }) => [{ index: { _type: type } }, result]);
-    if (payload.length > 0) {
-      const combinedData = BulkUploader.combineStatsLegacy(payload); // arrange the usage data into the stats
-      return flatten(combinedData);
-    }
+  static toBulkUploadFormat(uploadData, collectorSet) {
+    return flatten(BulkUploader.deepMergeUploadData(uploadData, collectorSet));
   }
 
   static checkPayloadTypesUnique(payload) {
@@ -140,6 +161,7 @@ export class BulkUploader {
   }
 
   static combineStatsLegacy(payload) {
+    throw 'This is deprecated';
     BulkUploader.checkPayloadTypesUnique(payload);
 
     // default the item to [] to allow destructuring

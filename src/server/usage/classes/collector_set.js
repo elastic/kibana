@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { snakeCase } from 'lodash';
+import { snakeCase, isEmpty } from 'lodash';
 import Promise from 'bluebird';
 import { getCollectorLogger } from '../lib';
 import { Collector } from './collector';
@@ -90,6 +90,46 @@ export class CollectorSet {
           this._log.warn(`Unable to fetch data from ${collectorType} collector`);
         });
     });
+  }
+
+  bulkFormat(data, collectors = this._collectors) {
+    if (!Array.isArray(collectors)) {
+      throw new Error(`bulkFormat method given bad collectors parameter: ` + typeof collectors);
+    }
+
+    return data.reduce((accum, collectedData) => {
+      if (isEmpty(collectedData)) {
+        return accum;
+      }
+      const collector = collectors.find(_c => _c.type === collectedData.type);
+      if (collector.format) {
+        accum.push(collector.format(collectedData.result));
+      } else {
+        this._log.debug(`No formatter found for collector, type=${collectedData.type}`);
+      }
+      return accum;
+    }, []);
+
+    // for (const collector of collectors) {
+    //   const typeData = data.find(_data => _data.type === collector.type);
+    //   if (!isEmpty(typeData)) {
+
+    //   }
+    //   console.log('type', collector.type, typeData);
+    // }
+
+    // return Promise.map(collectors, collector => {
+    //   const collectorType = collector.type;
+    //   this._log.debug(`Fetching data from ${collectorType} collector`);
+    //   return Promise.props({
+    //     type: collectorType,
+    //     result: collector.fetchInternal(callCluster) // use the wrapper for fetch, kicks in error checking
+    //   })
+    //     .catch(err => {
+    //       this._log.warn(err);
+    //       this._log.warn(`Unable to fetch data from ${collectorType} collector`);
+    //     });
+    // });
   }
 
   async bulkFetchUsage(callCluster) {

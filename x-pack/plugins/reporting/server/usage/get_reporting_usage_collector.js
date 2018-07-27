@@ -147,6 +147,18 @@ export function getReportingUsageCollector(server) {
           ...statsOverLast7Days
         }
       };
+    },
+    format: result => {
+      return [{
+        type: 'kibana_stats',
+        payload: {
+          usage: {
+            xpack: {
+              reporting: result
+            }
+          }
+        }
+      }];
     }
   });
 }

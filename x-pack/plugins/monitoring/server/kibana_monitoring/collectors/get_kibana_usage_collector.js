@@ -60,6 +60,14 @@ export function getKibanaUsageCollector(server) {
           }
         }), {})
       };
+    },
+    format: result => {
+      return [{
+        type: 'kibana_stats',
+        payload: {
+          usage: result
+        }
+      }];
     }
   });
 }

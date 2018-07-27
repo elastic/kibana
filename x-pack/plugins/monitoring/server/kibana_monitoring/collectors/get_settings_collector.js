@@ -83,6 +83,6 @@ export function getSettingsCollector(server, kbnServer) {
         kibana: getKibanaInfoForStats(server, kbnServer),
         ...kibanaSettingsData
       };
-    }
+    },
   });
 }
