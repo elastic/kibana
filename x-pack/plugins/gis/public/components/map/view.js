@@ -35,6 +35,7 @@ export class KibanaMap extends React.Component {
   }
 
   _addLayers = (layers) => {
+    this._olMap.setLayerGroup(new ol.layer.Group());
     layers.forEach(layer=> {
       this._olMap.addLayer(layer.olLayer);
     });
