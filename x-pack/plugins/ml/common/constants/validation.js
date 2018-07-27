@@ -15,3 +15,5 @@ export const VALIDATION_STATUS = {
 };
 
 export const SKIP_BUCKET_SPAN_ESTIMATION = true;
+
+export const ALLOWED_DATA_UNITS = ['B', 'KB', 'MB', 'GB', 'TB', 'PB'];

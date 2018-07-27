@@ -40,7 +40,7 @@ describe('ML - BucketSpanEstimator', () => {
           }
         }
       }).catch((catchData) => {
-        expect(catchData).to.be('BucketSpanEstimator: run has stopped because no checks returned a valid interval');
+        expect(catchData).to.be('Unable to retrieve cluster setting search.max_buckets');
         done();
       });
 

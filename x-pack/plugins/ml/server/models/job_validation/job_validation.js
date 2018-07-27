@@ -44,7 +44,7 @@ export async function validateJob(callWithRequest, payload, kbnVersion = 'curren
     // check if basic tests pass the requirements to run the extended tests.
     // if so, run the extended tests and merge the messages.
     // otherwise just return the basic test messages.
-    const basicValidation = basicJobValidation(job, fields, {});
+    const basicValidation = basicJobValidation(job, fields, {}, true);
     let validationMessages;
 
     if (basicValidation.valid === true) {

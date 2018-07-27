@@ -24,6 +24,7 @@ export default function ({ getService, getPageObjects }) {
   const kibanaServer = getService('kibanaServer');
   const esArchiver = getService('esArchiver');
   const PageObjects = getPageObjects(['common', 'settings', 'header']);
+  const testSubjects = getService('testSubjects');
 
   describe('import objects', function describeIndexTests() {
     beforeEach(async function () {
@@ -53,7 +54,7 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.settings.importFile(path.join(__dirname, 'exports', '_import_objects-conflicts.json'));
       await PageObjects.header.waitUntilLoadingHasFinished();
       await PageObjects.settings.setImportIndexFieldOption(2);
-      await PageObjects.settings.clickConfirmConflicts();
+      await PageObjects.settings.clickConfirmChanges();
       await PageObjects.header.waitUntilLoadingHasFinished();
       await PageObjects.settings.clickImportDone();
       await PageObjects.settings.waitUntilSavedObjectsTableIsNotLoading();
@@ -62,56 +63,40 @@ export default function ({ getService, getPageObjects }) {
       expect(isSavedObjectImported).to.be(true);
     });
 
-    // Test should be testing that user is warned when saved object will override another because of an id collision
-    // This is not the case. Instead the test just loads a saved object with an index pattern conflict
-    // Disabling until the issue is resolved since the test does not test the intended behavior
-    it.skip('should allow for overrides', async function () {
+    it('should allow the user to override duplicate saved objects', async function () {
       await PageObjects.settings.clickKibanaSavedObjects();
 
-      // Put in data which already exists
+      // This data has already been loaded by the "visualize" esArchive. We'll load it again
+      // so that we can override the existing visualization.
       await PageObjects.settings.importFile(path.join(__dirname, 'exports', '_import_objects_exists.json'), false);
-      // Wait for all the saves to happen
-      await PageObjects.header.waitUntilLoadingHasFinished();
-      // Interact with the conflict modal
-      await PageObjects.settings.setImportIndexFieldOption(2);
-      await PageObjects.settings.clickConfirmConflicts();
-      // Now confirm we want to override
-      await PageObjects.common.clickConfirmOnModal();
-      // Wait for all the saves to happen
-      await PageObjects.header.waitUntilLoadingHasFinished();
-      // Finish the flyout
-      await PageObjects.settings.clickImportDone();
-      // Wait...
-      await PageObjects.settings.waitUntilSavedObjectsTableIsNotLoading();
 
-      const objects = await PageObjects.settings.getSavedObjectsInTable();
-      expect(objects.length).to.be(2);
+      await PageObjects.header.waitUntilLoadingHasFinished();
+      await PageObjects.settings.setImportIndexFieldOption(2);
+      await PageObjects.settings.clickConfirmChanges();
+
+      // Override the visualization.
+      await PageObjects.common.clickConfirmOnModal();
+
+      const isSuccessful = await testSubjects.exists('importSavedObjectsSuccess');
+      expect(isSuccessful).to.be(true);
     });
 
-    // Test should be testing that user is warned when saved object will overrides another because of an id collision
-    // This is not the case. Instead the test just loads a saved object with an index pattern conflict
-    // Disabling until the issue is resolved since the test does not test the intended behavior
-    it.skip('should allow for cancelling overrides', async function () {
+    it('should allow the user to cancel overriding duplicate saved objects', async function () {
       await PageObjects.settings.clickKibanaSavedObjects();
 
-      // Put in data which already exists
+      // This data has already been loaded by the "visualize" esArchive. We'll load it again
+      // so that we can be prompted to override the existing visualization.
       await PageObjects.settings.importFile(path.join(__dirname, 'exports', '_import_objects_exists.json'), false);
-      // Wait for all the saves to happen
-      await PageObjects.header.waitUntilLoadingHasFinished();
-      // Interact with the conflict modal
-      await PageObjects.settings.setImportIndexFieldOption(2);
-      await PageObjects.settings.clickConfirmConflicts();
-      // Now cancel the override
-      await PageObjects.common.clickCancelOnModal();
-      // Wait for all saves to happen
-      await PageObjects.header.waitUntilLoadingHasFinished();
-      // Finish the flyout
-      await PageObjects.settings.clickImportDone();
-      // Wait for table to refresh
-      await PageObjects.settings.waitUntilSavedObjectsTableIsNotLoading();
 
-      const objects = await PageObjects.settings.getSavedObjectsInTable();
-      expect(objects.length).to.be(2);
+      await PageObjects.header.waitUntilLoadingHasFinished();
+      await PageObjects.settings.setImportIndexFieldOption(2);
+      await PageObjects.settings.clickConfirmChanges();
+
+      // *Don't* override the visualization.
+      await PageObjects.common.clickCancelOnModal();
+
+      const isSuccessful = await testSubjects.exists('importSavedObjectsSuccessNoneImported');
+      expect(isSuccessful).to.be(true);
     });
 
     it('should import saved objects linked to saved searches', async function () {
