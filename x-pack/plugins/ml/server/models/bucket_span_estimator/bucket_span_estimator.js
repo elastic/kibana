@@ -39,7 +39,8 @@ export function estimateBucketSpanFactory(callWithRequest) {
       // exceed search.max_buckets.
       const ONE_MINUTE_MS = 60000;
       const ONE_HOUR_MS = 3600000;
-      const HOUR_MULTIPLIER = Math.floor((maxBuckets * ONE_MINUTE_MS) / ONE_HOUR_MS);
+      // only run the tests over the last 250 hours of data at max
+      const HOUR_MULTIPLIER = Math.min(250, Math.floor((maxBuckets * ONE_MINUTE_MS) / ONE_HOUR_MS));
       const timePickerDurationLength = (this.duration.end - this.duration.start);
       const multiplierDurationLength = (ONE_HOUR_MS * HOUR_MULTIPLIER);
 
