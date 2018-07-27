@@ -178,7 +178,7 @@ export default class BaseOptimizer {
 
         new webpack.DefinePlugin({
           'process.env': {
-            'IS_KIBANA_DISTRIBUTABLE': String(IS_KIBANA_DISTRIBUTABLE)
+            'IS_KIBANA_DISTRIBUTABLE': `"${IS_KIBANA_DISTRIBUTABLE}"`
           }
         }),
 
