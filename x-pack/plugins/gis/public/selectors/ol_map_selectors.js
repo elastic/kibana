@@ -13,25 +13,29 @@ import _ from 'lodash';
 const FEATURE_PROJECTION = 'EPSG:3857';
 
 // Layer-specific logic
-function convertTmsLayersToOl({ source }) {
-  return new ol.layer.Tile({
+function convertTmsLayersToOl({ source, visible }) {
+  const tileLayer = new ol.layer.Tile({
     source: new ol.source.XYZ({
       url: source
     })
   });
+  tileLayer.setVisible(visible);
+  return tileLayer;
 }
 
 const convertVectorLayersToOl = (() => {
   const geojsonFormat = new ol.format.GeoJSON({
     featureProjection: FEATURE_PROJECTION
   });
-  return ({ source }) => {
+  return ({ source, visible }) => {
     const olFeatures = geojsonFormat.readFeatures(source);
-    return new ol.layer.Vector({
+    const vectorLayer = new ol.layer.Vector({
       source: new ol.source.Vector({
         features: olFeatures
       })
     });
+    vectorLayer.setVisible(visible);
+    return vectorLayer;
   };
 })();
 
