@@ -11,14 +11,15 @@ import { REPOSITORY_INDEX_TYPE } from '../../mappings';
 import { Repository } from '../../model';
 import { Server } from '../kibana_types';
 import { Log } from '../log';
-import { CloneWorker, DeleteWorker } from '../queue';
+import { CloneWorker, DeleteWorker, IndexWorker } from '../queue';
 import { ServerOptions } from '../server_options';
 
 export function repositoryRoute(
   server: Server,
   options: ServerOptions,
   cloneWorker: CloneWorker,
-  deleteWorker: DeleteWorker
+  deleteWorker: DeleteWorker,
+  indexWorker: IndexWorker
 ) {
   // Clone a git repository
   server.route({
@@ -129,6 +130,31 @@ export function repositoryRoute(
         reply(repos);
       } catch (error) {
         const msg = `Get all repositories error: ${error}`;
+        log.error(msg);
+        reply(Boom.notFound(msg));
+      }
+    },
+  });
+
+  // Issue a repository index task.
+  // TODO(mengwei): This is just temprorary API stub to trigger the index job. Eventually in the near
+  // future, this route will be removed. The scheduling strategy is still in discussion.
+  server.route({
+    path: '/api/cs/repo/index/{uri*3}',
+    method: 'POST',
+    async handler(req: Hapi.Request, reply: any) {
+      const repoUri = req.params.uri as string;
+      const log = new Log(req.server);
+
+      try {
+        const payload = {
+          uri: repoUri,
+          dataPath: options.repoPath,
+        };
+        await indexWorker.enqueueJob(payload, {});
+        reply({});
+      } catch (error) {
+        const msg = `Index repository ${repoUri} error: ${error}`;
         log.error(msg);
         reply(Boom.notFound(msg));
       }

@@ -9,6 +9,8 @@ import { Esqueue } from '@codesearch/esqueue';
 import {
   REPOSITORY_CLONE_STATUS_INDEX_TYPE,
   REPOSITORY_DELETE_STATUS_INDEX_TYPE,
+  REPOSITORY_INDEX_STATUS_INDEX_TYPE,
+  REPOSITORY_LSP_INDEX_STATUS_INDEX_TYPE,
 } from '../../mappings';
 import { DeleteWorkerResult, WorkerProgress } from '../../model/repository';
 import { Log } from '../log';
@@ -36,7 +38,13 @@ export class DeleteWorker extends AbstractWorker {
     const deleteRes = await repoService.remove(uri);
 
     // 2. Delete repository data in ES.
-    await this.objectsClient.delete(REPOSITORY_CLONE_STATUS_INDEX_TYPE, uri);
+    try {
+      await this.objectsClient.delete(REPOSITORY_CLONE_STATUS_INDEX_TYPE, uri);
+      await this.objectsClient.delete(REPOSITORY_LSP_INDEX_STATUS_INDEX_TYPE, uri);
+      await this.objectsClient.delete(REPOSITORY_INDEX_STATUS_INDEX_TYPE, uri);
+    } catch (error) {
+      this.log.error(`Delete repository status error: ${error}`);
+    }
 
     return deleteRes;
   }

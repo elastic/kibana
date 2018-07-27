@@ -8,7 +8,7 @@ import { Esqueue, events as esqueueEvents } from '@codesearch/esqueue';
 import { Job as JobInternal } from '@codesearch/esqueue/job';
 import { Worker as WorkerInternal } from '@codesearch/esqueue/worker';
 
-import { WorkerResult } from '../../model/repository';
+import { WorkerResult } from 'model/repository';
 import { Log } from '../log';
 import { Job } from './job';
 import { Worker } from './worker';
@@ -39,8 +39,8 @@ export abstract class AbstractWorker implements Worker {
   public async enqueueJob(payload: any, options: any) {
     const job: Job = this.createJob(payload, options);
     return new Promise((resolve, reject) => {
-      const jobInternal: JobInternal = this.queue.addJob(this.id, job, {});
-      jobInternal.on(esqueueEvents.EVENT_JOB_CREATED, async (createdJob: JobInternal) => {
+      const jobInternal: JobInternal<Job> = this.queue.addJob(this.id, job, {});
+      jobInternal.on(esqueueEvents.EVENT_JOB_CREATED, async (createdJob: JobInternal<Job>) => {
         if (createdJob.id === jobInternal.id) {
           await this.onJobEnqueued(job);
           resolve(jobInternal);

@@ -51,6 +51,14 @@ export interface UpdateWorkerResult extends WorkerResult {
   revision: string;
 }
 
+export interface IndexWorkerResult extends WorkerResult {
+  revision: string;
+  // Number of symbols indexed.
+  symbols: number;
+  // Number of files indexed.
+  file: number;
+}
+
 export interface WorkerProgress {
   // Job payload repository uri.
   uri: string;

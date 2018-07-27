@@ -14,3 +14,18 @@ export interface Document {
   language?: string;
   sha1?: string;
 }
+
+// The base interface of indexer requests
+export interface IndexRequest {
+  repoUri: RepositoryUri;
+}
+
+// The request for LspIndexer
+export interface LspIndexRequest extends IndexRequest {
+  filePath: string;
+}
+
+// The request for RepositoryIndexer
+export interface RepositoryIndexRequest extends IndexRequest {
+  repoUri: RepositoryUri;
+}

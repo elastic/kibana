@@ -8,10 +8,11 @@ import { Esqueue } from '@codesearch/esqueue';
 import { resolve } from 'path';
 
 import { mappings } from './mappings';
+import { LspIndexer, RepositoryIndexer } from './server/indexer';
 import { Server } from './server/kibana_types';
 import { Log } from './server/log';
 import { LspService } from './server/lsp/lsp_service';
-import { CloneWorker, DeleteWorker, UpdateWorker } from './server/queue';
+import { CloneWorker, DeleteWorker, IndexWorker, UpdateWorker } from './server/queue';
 import { exampleRoute } from './server/routes/example';
 import { fileRoute } from './server/routes/file';
 import { lspRoute } from './server/routes/lsp';
@@ -56,6 +57,10 @@ export default (kibana: any) =>
       const log = new Log(server);
       const serverOptions = new ServerOptions(options);
 
+      const lspService = new LspService('127.0.0.1', server, serverOptions);
+      const lspIndexer = new LspIndexer(lspService, serverOptions, log);
+      const repositoryIndexer = new RepositoryIndexer(serverOptions, log);
+
       const repository = server.savedObjects.getSavedObjectsRepository(
         adminClient.callWithInternalUser
       );
@@ -68,6 +73,10 @@ export default (kibana: any) =>
       const cloneWorker = new CloneWorker(queue, log, objectsClient).bind();
       const deleteWorker = new DeleteWorker(queue, log, objectsClient).bind();
       const updateWorker = new UpdateWorker(queue, log, objectsClient).bind();
+      const indexWorker = new IndexWorker(queue, log, objectsClient, [
+        lspIndexer,
+        repositoryIndexer,
+      ]).bind();
 
       const scheduler = new UpdateScheduler(
         updateWorker,
@@ -79,11 +88,9 @@ export default (kibana: any) =>
       // Add server routes and initialize the plugin here
       exampleRoute(server);
 
-      repositoryRoute(server, serverOptions, cloneWorker, deleteWorker);
+      repositoryRoute(server, serverOptions, cloneWorker, deleteWorker, indexWorker);
       fileRoute(server, serverOptions);
       monacoRoute(server);
-
-      const lspService = new LspService('127.0.0.1', server, serverOptions);
 
       lspService.launchServers().then(() => {
         // register lsp route after language server launched
