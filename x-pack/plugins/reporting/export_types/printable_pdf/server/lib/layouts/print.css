@@ -42,17 +42,20 @@ discover-app .discover-table-footer {
 }
 
 /**
+ * The global banner (e.g. "Help us improve Elastic...") should not print.
+ */
+
+#globalBannerList {
+  display: none;
+}
+
+/**
  *  Visualize Editor Tweaks
  */
+
 /* hide unusable controls */
-visualize-app
-  visualize
-  > :not(.vis-editor-content):not(.vis_editor)/* all non-content rows in interface */,
-visualize-app
-  visualize
-  .vis-editor-content
-  .default-vis-editor
-  > :not(.vis-editor-canvas):not(.vis_editor) {
+visualize-app visualize > :not(.vis-editor-content):not(.vis_editor), /* all non-content rows in interface */
+visualization-editor .default-vis-editor > :not(.vis-editor-canvas) {
   display: none;
 }
 /** THIS IS FOR TSVB UNTIL REFACTOR **/
