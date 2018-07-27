@@ -40,7 +40,7 @@ export function PanelOptionsMenuForm({ title, onReset, onUpdatePanelTitle, onClo
 
   return (
     <div
-      className="dashboardPanelMenuOptionsForm"
+      className="dshPanel__optionsMenuForm"
       data-test-subj="dashboardPanelTitleInputMenuItem"
     >
       <EuiFormRow

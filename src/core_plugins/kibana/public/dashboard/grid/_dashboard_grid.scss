@@ -37,31 +37,6 @@
 /**
  * .dshLayout-withMargins only affects the panel styles themselves, see ../panel
  */
-.dshLayout-withMargins {
-
-  .panel {
-    @include euiBottomShadowSmall;
-    background-color: $euiColorEmptyShade;
-    border: $euiBorderThin;
-    border-radius: $euiBorderRadius;
-  }
-
-  .panel--edit-mode {
-    transition: all $euiAnimSpeedFast $euiAnimSlightResistance;
-
-    &:hover,
-    &:focus {
-      border-color: $euiColorPrimary;
-      @include euiSlightShadowHover;
-    }
-  }
-
-  .panel-heading {
-    border-top-left-radius: $euiBorderRadius - 1px !important;
-    border-top-right-radius: $euiBorderRadius - 1px !important;
-  }
-
-}
 
 /**
  * When a single panel is expanded, all the other panels are hidden in the grid.

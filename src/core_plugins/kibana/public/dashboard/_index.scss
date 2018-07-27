@@ -20,6 +20,7 @@
 @import 'components/index';
 @import 'grid/index';
 @import 'listing/index';
+@import 'panel/index';
 @import 'viewport/index';
 
 // DARK THEME
@@ -27,7 +28,7 @@
 // @import './../../../../../node_modules/@elastic/eui/src/themes/k6/k6_colors_dark';
 
 // .tab-dashboard.theme-dark {
-//   .dashboard-panel {
+//   .dshPanel {
 //     background-color: tintOrShade($euiColorDanger, 0%, 100%) !important;
 //   }
 

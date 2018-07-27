@@ -138,11 +138,11 @@
     }
   }
 
-  .panel--edit-mode {
-    border-color: #222;
+  .dshPanel__panel--editing {
+    border: 1px solid #222;
   }
 
-  .panel--edit-mode:hover {
+  .dshPanel__panel--editing:hover {
     border-color: @globalColorBlue;
   }
 
@@ -509,33 +509,31 @@
     background-color: @dashboard-bg;
   }
 
-  .dashboard-panel {
+  .dshPanel__panel {
     background: @dashboard-panel-bg;
     color: @dashboard-panel-color;
 
-    .panel {
-
-      .panel-heading {
-        a {
-          color: @dashboard-panel-heading-link-color;
-          &:hover {
-            color: @dashboard-panel-heading-link-hover-color;
-          }
-        }
-        span.panel-title {
-          color: @dashboard-panel-heading-link-color;
-        }
-        i {
-          color: @dashboard-panel-heading-link-color;
-          opacity: 1;
+    .dshPanel__header {
+      a {
+        color: @dashboard-panel-heading-link-color;
+        &:hover {
+          color: @dashboard-panel-heading-link-hover-color;
         }
       }
+      .dshPanel__title {
+        color: @dashboard-panel-heading-link-color;
+      }
+    }
+
+    .dshPanel__header--floater {
+      background: @dashboard-panel-bg;
+      //background-color: $euiColorEmptyShade;
+    }
 
 
-      .load-error {
-        .fa-exclamation-triangle {
-          color: @dashboard-panel-load-error-color;
-        }
+    .dshPanel__error {
+      .fa-exclamation-triangle {
+        color: @dashboard-panel-load-error-color;
       }
     }
   }
@@ -632,15 +630,7 @@
  * need to give a different background color so the panels are distinguishable from the background.
  */
  .dshLayout-withMargins {
-    .panel-default {
-      & > .panel-heading {
-        background-color: @panel-bg-with-margins;
-      }
-    }
-    .panel-content {
-      background-color: @panel-bg-with-margins;
-    }
-    .panel {
+    .dshPanel__panel {
       background-color: @panel-bg-with-margins;
       border: 1px solid #444444;
     }

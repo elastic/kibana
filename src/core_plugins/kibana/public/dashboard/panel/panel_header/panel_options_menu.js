@@ -31,7 +31,7 @@ export function PanelOptionsMenu({ toggleContextMenu, isPopoverOpen, closeContex
     <EuiButtonIcon
       iconType={isViewMode ? 'boxesHorizontal' : 'gear'}
       color="text"
-      className={isViewMode && !isPopoverOpen ? 'viewModeOpenContextMenuIcon' : ''}
+      className={isViewMode && !isPopoverOpen ? 'dshPanel_optionsMenuButton' : ''}
       aria-label="Panel options"
       data-test-subj="dashboardPanelToggleMenuIcon"
       onClick={toggleContextMenu}
@@ -41,7 +41,7 @@ export function PanelOptionsMenu({ toggleContextMenu, isPopoverOpen, closeContex
   return (
     <EuiPopover
       id="dashboardPanelContextMenu"
-      className="dashboardPanelPopOver"
+      className="dshPanel_optionsMenuPopover"
       button={button}
       isOpen={isPopoverOpen}
       closePopover={closeContextMenu}

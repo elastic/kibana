@@ -88,7 +88,7 @@ function ResponsiveGrid({
       rowHeight={DASHBOARD_GRID_HEIGHT}
       // Pass the named classes of what should get the dragging handle
       // (.doesnt-exist literally doesnt exist)
-      draggableHandle={isViewMode ? '.doesnt-exist' : '.panel-title'}
+      draggableHandle={isViewMode ? '.doesnt-exist' : '.dshPanel__title'}
       layout={layout}
       onLayoutChange={onLayoutChange}
       measureBeforeMount={false}
