@@ -132,6 +132,13 @@ export function FindProvider({ getService }) {
       });
     }
 
+    async findDisplayedByLinkText(selector, timeout = defaultFindTimeout) {
+      log.debug('Find.byLinkText: ' + selector);
+      return await this._ensureElementWithTimeout(timeout, async remote => {
+        return await remote.findDisplayedByLinkText(selector);
+      });
+    }
+
     async byPartialLinkText(partialLinkText, timeout = defaultFindTimeout) {
       log.debug(`find.byPartialLinkText(${partialLinkText})`);
       return await this._ensureElementWithTimeout(timeout, async remote => {
@@ -210,6 +217,21 @@ export function FindProvider({ getService }) {
       log.debug(`clickByCssSelector(${selector})`);
       await retry.try(async () => {
         const element = await this.byCssSelector(selector, timeout);
+        await remote.moveMouseTo(element);
+        await element.click();
+      });
+    }
+    async clickByDisplayedLinkText(linkText, timeout = defaultFindTimeout) {
+      log.debug(`clickByDisplayedLinkText(${linkText})`);
+      await retry.try(async () => {
+        const element = await this.findDisplayedByLinkText(linkText, timeout);
+        await remote.moveMouseTo(element);
+        await element.click();
+      });
+    }
+    async clickDisplayedByCssSelector(selector, timeout = defaultFindTimeout) {
+      await retry.try(async () => {
+        const element = await this.findDisplayedByCssSelector(selector, timeout);
         await remote.moveMouseTo(element);
         await element.click();
       });
