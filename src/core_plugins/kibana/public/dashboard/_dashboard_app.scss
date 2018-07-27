@@ -1,15 +1,16 @@
-.dshContainer {
+.dshAppContainer {
   flex: 1;
   display: flex;
   flex-direction: column;
   background-color: $euiColorEmptyShade;
 }
 
-.dshContainer--withMargins {
+.dshAppContainer--withMargins {
   background-color: $euiColorLightestShade;
 }
 
 .dshStartScreen {
+  text-align: center;
   margin: $euiSize auto;
   max-width: 800px;
   width: 100%;
