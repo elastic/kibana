@@ -22,7 +22,6 @@ import PropTypes from 'prop-types';
 import { Synopsis } from './synopsis';
 import { AddData } from './add_data';
 import { RecentlyAccessed, recentlyAccessedShape } from './recently_accessed';
-import chrome from 'ui/chrome';
 
 import {
   EuiButton,
@@ -37,16 +36,21 @@ import {
   EuiPageBody,
 } from '@elastic/eui';
 
-import { Welcome, WelcomePreference } from './welcome';
-
+import { Welcome } from './welcome';
 import { FeatureCatalogueCategory } from 'ui/registry/feature_catalogue';
 
+const KEY_ENABLE_WELCOME = 'home:welcome:show';
+
 export class Home extends Component {
-  state = {
-    isLoading: true,
-    isNewKibanaInstance: false,
-    isWelcomeEnabled: WelcomePreference.isEnabled,
-  };
+  constructor(props) {
+    super(props);
+
+    this.state = {
+      isLoading: true,
+      isNewKibanaInstance: false,
+      isWelcomeEnabled: props.settingsClient.get(KEY_ENABLE_WELCOME, true),
+    };
+  }
 
   componentWillUnmount() {
     this._isMounted = false;
@@ -58,7 +62,7 @@ export class Home extends Component {
   }
 
   fetchIsNewKibanaInstance = async () => {
-    chrome.loadingCount.increment();
+    this.props.loadingCount.increment();
 
     try {
       const resp = await this.props
@@ -76,11 +80,11 @@ export class Home extends Component {
     }
 
     this._isMounted && this.setState({ isLoading: false });
-    chrome.loadingCount.decrement();
+    this.props.loadingCount.decrement();
   };
 
   skipWelcome = () => {
-    WelcomePreference.isEnabled = false;
+    this.props.settingsClient.set(KEY_ENABLE_WELCOME, false);
     this._isMounted && this.setState({ isWelcomeEnabled: false });
   };
 
@@ -179,7 +183,7 @@ export class Home extends Component {
   }
 
   renderWelcome() {
-    return <Welcome skipWelcome={this.skipWelcome} kibanaVersion={chrome.getKibanaVersion()} />;
+    return <Welcome skipWelcome={this.skipWelcome} kibanaVersion={this.props.kibanaVersion} />;
   }
 
   render() {
@@ -214,4 +218,7 @@ Home.propTypes = {
   apmUiEnabled: PropTypes.bool.isRequired,
   recentlyAccessed: PropTypes.arrayOf(recentlyAccessedShape).isRequired,
   find: PropTypes.func.isRequired,
+  loadingCount: PropTypes.object.isRequired,
+  kibanaVersion: PropTypes.string.isRequired,
+  settingsClient: PropTypes.object.isRequired,
 };

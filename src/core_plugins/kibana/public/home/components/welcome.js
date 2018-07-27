@@ -25,7 +25,6 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
-import chrome from 'ui/chrome';
 import {
   EuiCard,
   EuiTitle,
@@ -35,20 +34,6 @@ import {
   EuiText,
   EuiIcon,
 } from '@elastic/eui';
-
-const ENABLE_WELCOME = 'home:welcome:show';
-
-/**
- * A lightweight wrapper around the 'home:welcome:show' setting.
- */
-export const WelcomePreference = {
-  get isEnabled() {
-    return chrome.getUiSettingsClient().get(ENABLE_WELCOME, true);
-  },
-  set isEnabled(val) {
-    return chrome.getUiSettingsClient().set(ENABLE_WELCOME, val);
-  },
-};
 
 /**
  * Shows a full-screen welcome page that gives helpful quick links to beginners.
