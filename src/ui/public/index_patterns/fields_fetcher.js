@@ -25,7 +25,10 @@ export function createFieldsFetcher(apiClient, config) {
         return this.fetchForTimePattern(indexPattern.title, interval);
       }
 
-      return this.fetchForWildcard(indexPattern.title, indexPattern.type);
+      return this.fetchForWildcard(indexPattern.title, {
+        type: indexPattern.type,
+        params: indexPattern.typeMeta && indexPattern.typeMeta.params,
+      });
     }
 
     fetchForTimePattern(indexPatternId) {
@@ -36,11 +39,12 @@ export function createFieldsFetcher(apiClient, config) {
       });
     }
 
-    fetchForWildcard(indexPatternId, indexPatternType) {
+    fetchForWildcard(indexPatternId, options = {}) {
       return apiClient.getFieldsForWildcard({
         pattern: indexPatternId,
         metaFields: config.get('metaFields'),
-        type: indexPatternType,
+        type: options.type,
+        params: options.params || {},
       });
     }
   }
