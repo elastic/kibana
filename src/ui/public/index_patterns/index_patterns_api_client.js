@@ -86,26 +86,16 @@ export function createIndexPatternsApiClient($http, basePath) {
         pattern,
         metaFields,
         type,
+        params,
       } = options;
 
-      const url = getUrl(['_fields_for_wildcard'], {
+      const url = getUrl([type, '_fields_for_wildcard'], {
         pattern,
         meta_fields: metaFields,
+        params: JSON.stringify(params),
       });
 
-      return request('GET', url).then(resp => {
-        if(type) {
-          const typeUrl = type ? getUrl([type, '_fields_for_wildcard'], {
-            pattern,
-            fields: resp.fields,
-            meta_fields: metaFields,
-          }) : null;
-
-          return request('GET', typeUrl).then(typeResp => typeResp.fields);
-        } else {
-          return resp.fields;
-        }
-      });
+      return request('GET', url).then(resp => resp.fields);
     }
   }
 

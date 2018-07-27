@@ -14,10 +14,10 @@ export const RollupPrompt = () => (
   <EuiCallOut
     size="s"
     title={
-      `Rollup index patterns can only match against indices created from rollup jobs.
-      They may have limited metrics, fields, intervals and aggregations available.
-      The index pattern must match a rollup index exactly (no wildcards) and is
-      limited to rollup indices that have one job configuration, or multiple jobs
+      `Rollup index patterns can match against one rollup index and zero or more
+      regular indices. They will have limited metrics, fields, intervals and aggregations
+      available based on the rollup index job configuration. The rollup index is
+      limited to those that have one job configuration, or multiple jobs
       with the same configuration.`
     }
   />

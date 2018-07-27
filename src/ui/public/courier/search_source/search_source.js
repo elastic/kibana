@@ -130,6 +130,7 @@ export function SearchSourceProvider(Promise, Private, config) {
     constructor(initialFields) {
       this._id = _.uniqueId('data_source');
 
+      this._searchStrategyId = undefined;
       this._fields = parseInitialFields(initialFields);
       this._parent = undefined;
 
@@ -163,6 +164,14 @@ export function SearchSourceProvider(Promise, Private, config) {
     /*****
      * PUBLIC API
      *****/
+
+    setPreferredSearchStrategyId(searchStrategyId) {
+      this._searchStrategyId = searchStrategyId;
+    }
+
+    getPreferredSearchStrategyId() {
+      return this._searchStrategyId;
+    }
 
     setFields(newFields) {
       this._fields = newFields;

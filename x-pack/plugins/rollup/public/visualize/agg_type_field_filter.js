@@ -15,14 +15,8 @@ aggTypeFieldFilters.addFilter(
     if(indexPattern.type !== 'rollup') {
       return true;
     }
-
-    const fieldName = field.name;
     const aggName = aggConfig.type.name;
-    const jobs = indexPattern.typeMeta.jobs;
-
-    return !!jobs.find(job => {
-      const fields = indexPattern.typeMeta.capabilities[job].fields;
-      return fields[fieldName] && fields[fieldName].find(agg => agg.agg === aggName);
-    });
+    const aggFields = indexPattern.typeMeta.aggs && indexPattern.typeMeta.aggs[aggName];
+    return aggFields && aggFields[field.name];
   }
 );
