@@ -50,6 +50,17 @@ const KUBERNETES_INSTRUCTIONS = {
     textPost: 'Where `<password>` is the password of the `elastic` user, ' +
               '`<es_url>` is the URL of Elasticsearch, without the port and `<es_port>` is the Elasticsearch port.'
   },
+  CONFIG_CLOUD: {
+    title: 'Edit the configuration',
+    textPre: 'Modify `filebeat-kubernetes.yaml` to set the connection information:',
+    commands: [
+      '- name: ELASTIC_CLOUD_ID',
+      '  value: "{config.cloud.id}"',
+      '- name: ELASTIC_CLOUD_AUTH',
+      '  value: "elastic:<password>"',
+    ],
+    textPost: 'Where `<password>` is the password of the `elastic` user.'
+  },
   DEPLOY: {
     title: 'Deploy to Kuberentes',
     textPre: 'Deploy the configured manifest to Kuberentes:',
@@ -123,7 +134,7 @@ function onPremCloudInstructions(moduleName, platforms) {
         TRYCLOUD_OPTION1,
         TRYCLOUD_OPTION2,
         KUBERNETES_INSTRUCTIONS.INSTALL,
-        KUBERNETES_INSTRUCTIONS.CONFIG,
+        KUBERNETES_INSTRUCTIONS.CONFIG_CLOUD,
         KUBERNETES_INSTRUCTIONS.DEPLOY
       ]
     });
@@ -148,7 +159,7 @@ function cloudInstructions(moduleName, platforms) {
       id: INSTRUCTION_VARIANT[platform],
       instructions: [
         KUBERNETES_INSTRUCTIONS.INSTALL,
-        KUBERNETES_INSTRUCTIONS.CONFIG,
+        KUBERNETES_INSTRUCTIONS.CONFIG_CLOUD,
         KUBERNETES_INSTRUCTIONS.DEPLOY
       ]
     });
