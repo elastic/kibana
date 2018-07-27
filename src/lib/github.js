@@ -1,7 +1,7 @@
 const axios = require('axios');
 const querystring = require('querystring');
 const get = require('lodash.get');
-const { GithubApiError } = require('./errors');
+const { HandledError } = require('./errors');
 
 let accessToken;
 function getCommitMessage(message) {
@@ -51,9 +51,9 @@ async function getCommit(owner, repoName, sha) {
   }
 }
 
-function createPullRequest(owner, repoName, payload) {
+async function createPullRequest(owner, repoName, payload) {
   try {
-    return axios.post(
+    return await axios.post(
       `https://api.github.com/repos/${owner}/${repoName}/pulls?access_token=${accessToken}`,
       payload
     );
@@ -62,9 +62,9 @@ function createPullRequest(owner, repoName, payload) {
   }
 }
 
-function addLabels(owner, repoName, pullNumber, labels) {
+async function addLabels(owner, repoName, pullNumber, labels) {
   try {
-    return axios.post(
+    return await axios.post(
       `https://api.github.com/repos/${owner}/${repoName}/issues/${pullNumber}/labels?access_token=${accessToken}`,
       labels
     );
@@ -90,7 +90,7 @@ function setAccessToken(_accessToken) {
 
 function getError(e) {
   if (get(e.response, 'data')) {
-    return new GithubApiError(e.response.data);
+    return new HandledError(e.response.data);
   }
 
   return e;

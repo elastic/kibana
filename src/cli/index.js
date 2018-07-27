@@ -16,8 +16,7 @@ async function initYargs() {
     config = await getCombinedConfig();
   } catch (e) {
     switch (e.code) {
-      case ERROR_CODES.INVALID_CONFIG_ERROR_CODE:
-      case ERROR_CODES.INVALID_JSON_ERROR_CODE:
+      case ERROR_CODES.HANDLED_ERROR_ERROR_CODE:
         logger.error(e.message);
         break;
       default:

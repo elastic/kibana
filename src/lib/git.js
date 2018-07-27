@@ -3,7 +3,7 @@ const rimraf = require('rimraf');
 
 const env = require('./env');
 const rpc = require('./rpc');
-const { GithubSSHError } = require('./errors');
+const { HandledError } = require('./errors');
 
 async function folderExists(path) {
   try {
@@ -89,13 +89,30 @@ async function isIndexDirty(owner, repoName) {
   }
 }
 
-function createAndCheckoutBranch(owner, repoName, baseBranch, featureBranch) {
-  return rpc.exec(
-    `git fetch origin ${baseBranch} && git branch ${featureBranch} origin/${baseBranch} --force && git checkout ${featureBranch} `,
-    {
-      cwd: env.getRepoPath(owner, repoName)
+async function createAndCheckoutBranch(
+  owner,
+  repoName,
+  baseBranch,
+  featureBranch
+) {
+  try {
+    return await rpc.exec(
+      `git fetch origin ${baseBranch} && git branch ${featureBranch} origin/${baseBranch} --force && git checkout ${featureBranch} `,
+      {
+        cwd: env.getRepoPath(owner, repoName)
+      }
+    );
+  } catch (e) {
+    if (
+      e.stderr.includes(`Couldn't find remote ref`) ||
+      e.stderr.includes(`Invalid refspec`)
+    ) {
+      throw new HandledError(
+        `The branch "${baseBranch}"  is invalid or doesn't exist`
+      );
     }
-  );
+    throw e;
+  }
 }
 
 function push(owner, repoName, username, branchName) {
@@ -123,11 +140,11 @@ async function verifyGithubSshAuth() {
         return true;
       case 255:
         if (e.stderr.includes('Host key verification failed.')) {
-          throw new GithubSSHError(
+          throw new HandledError(
             'Host verification of github.com failed. To automatically add it to .ssh/known_hosts run:\nssh -T git@github.com'
           );
         } else if (e.stderr.includes('Permission denied')) {
-          throw new GithubSSHError(
+          throw new HandledError(
             'Permission denied. Please add your ssh private key to the keychain by following these steps:\nhttps://help.github.com/articles/generating-a-new-ssh-key-and-adding-it-to-the-ssh-agent/#adding-your-ssh-key-to-the-ssh-agent'
           );
         } else {

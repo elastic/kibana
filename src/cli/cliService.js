@@ -4,11 +4,7 @@ const isEmpty = require('lodash.isempty');
 
 const prompts = require('../lib/prompts');
 const github = require('../lib/github');
-const {
-  ERROR_CODES,
-  MissingDataError,
-  AbortApplicationError
-} = require('../lib/errors');
+const { ERROR_CODES, HandledError } = require('../lib/errors');
 const { getRepoPath } = require('../lib/env');
 const logger = require('../lib/logger');
 
@@ -152,7 +148,7 @@ async function getCommitByPrompt({ owner, repoName, author, multipleCommits }) {
         text: `${chalk.bold('Select commit')} `
       });
 
-      throw new MissingDataError(
+      throw new HandledError(
         chalk.red(
           author
             ? 'There are no commits by you in this repository'
@@ -175,10 +171,7 @@ function getBranchesByPrompt(branches, isMultipleChoice = false) {
 function handleErrors(e) {
   switch (e.code) {
     // Handled exceptions
-    case ERROR_CODES.ABORT_APPLICATION_ERROR_CODE:
-    case ERROR_CODES.GITHUB_API_ERROR_CODE:
-    case ERROR_CODES.GITHUB_SSH_ERROR_CODE:
-    case ERROR_CODES.MISSING_DATA_ERROR_CODE:
+    case ERROR_CODES.HANDLED_ERROR_ERROR_CODE:
       logger.error(e.message);
       break;
 
@@ -246,7 +239,7 @@ async function cherrypickAndConfirm(owner, repoName, sha) {
 async function confirmResolvedRecursive(owner, repoName) {
   const res = await prompts.confirmConflictResolved();
   if (!res) {
-    throw new AbortApplicationError('Application was aborted.');
+    throw new HandledError('Application was aborted.');
   }
 
   const isDirty = await isIndexDirty(owner, repoName);

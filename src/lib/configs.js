@@ -2,7 +2,7 @@ const path = require('path');
 const isEmpty = require('lodash.isempty');
 const findUp = require('find-up');
 const stripJsonComments = require('strip-json-comments');
-const { InvalidConfigError, InvalidJsonError } = require('./errors');
+const { HandledError } = require('./errors');
 const env = require('./env');
 const rpc = require('./rpc');
 const schemas = require('./schemas');
@@ -42,7 +42,7 @@ function validateGlobalConfig(config, filename) {
   const { error } = schemas.validate(config, schemas.globalConfig);
 
   if (error) {
-    throw new InvalidConfigError(
+    throw new HandledError(
       `The global config file (${filename}) is not valid:\n${schemas.formatError(
         error
       )}`
@@ -56,7 +56,7 @@ function validateProjectConfig(config, filepath) {
   const { error } = schemas.validate(config, schemas.projectConfig);
 
   if (error) {
-    throw new InvalidConfigError(
+    throw new HandledError(
       `The project config file (${filepath}) is not valid:\n${schemas.formatError(
         error
       )}`
@@ -72,7 +72,9 @@ async function readConfigFile(filepath) {
   try {
     return JSON.parse(configWithoutComments);
   } catch (e) {
-    throw new InvalidJsonError(e.message, filepath, fileContents);
+    throw new HandledError(
+      `"${filepath}" contains invalid JSON:\n\n${fileContents}\n\nTry validating the file on https://jsonlint.com/`
+    );
   }
 }
 
