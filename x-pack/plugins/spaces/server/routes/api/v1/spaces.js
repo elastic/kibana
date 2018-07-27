@@ -65,7 +65,6 @@ export function initSpacesApi(server) {
         });
 
         spaces = result.saved_objects.map(convertSavedObjectToSpace);
-
       } catch (error) {
         return reply(wrapError(error));
       }

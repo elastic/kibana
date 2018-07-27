@@ -52,7 +52,7 @@ export class SavedObjectsClient {
    * @property {boolean} [options.overwrite=false]
    * @returns {promise} - SavedObject({ id, type, version, attributes })
    */
-  create(type, attributes = {}, options = {}) {
+  create = (type, attributes = {}, options = {}) => {
     if (!type || !attributes) {
       return Promise.reject(new Error('requires type and attributes'));
     }
@@ -96,7 +96,7 @@ export class SavedObjectsClient {
    * @param {string} id
    * @returns {promise}
    */
-  delete(type, id) {
+  delete = (type, id) => {
     if (!type || !id) {
       return Promise.reject(new Error('requires type and id'));
     }
@@ -117,7 +117,7 @@ export class SavedObjectsClient {
    * @property {array} options.fields
    * @returns {promise} - { savedObjects: [ SavedObject({ id, type, version, attributes }) ]}
    */
-  find(options = {}) {
+  find = (options = {}) => {
     const path = this._getPath(['_find']);
     const query = keysToSnakeCaseShallow(options);
 
@@ -134,7 +134,7 @@ export class SavedObjectsClient {
    * @param {string} id
    * @returns {promise} - SavedObject({ id, type, version, attributes })
    */
-  get(type, id) {
+  get = (type, id) => {
     if (!type || !id) {
       return Promise.reject(new Error('requires type and id'));
     }
@@ -157,7 +157,7 @@ export class SavedObjectsClient {
    *   { id: 'foo', type: 'index-pattern' }
    * ])
    */
-  bulkGet(objects = []) {
+  bulkGet = (objects = []) => {
     const path = this._getPath(['_bulk_get']);
     const filteredObjects = objects.map(obj => _.pick(obj, ['id', 'type']));
 
@@ -176,7 +176,7 @@ export class SavedObjectsClient {
    * @param {integer} options.version - ensures version matches that of persisted object
    * @returns {promise}
    */
-  update(type, id, attributes, { version } = {}) {
+  update = (type, id, attributes, { version } = {}) => {
     if (!type || !id || !attributes) {
       return Promise.reject(new Error('requires type, id and attributes'));
     }

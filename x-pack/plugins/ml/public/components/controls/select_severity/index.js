@@ -6,4 +6,3 @@
 
 
 import './select_severity_directive';
-import './styles/main.less';

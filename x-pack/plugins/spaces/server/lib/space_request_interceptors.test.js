@@ -21,9 +21,6 @@ describe('interceptors', () => {
 
       server.connection({ port: 0 });
 
-      const spacesService = createSpacesService(server);
-      server.decorate('server', 'spaces', spacesService);
-
       const config = {
         'server.basePath': '/foo',
         ...testConfig,
@@ -36,6 +33,9 @@ describe('interceptors', () => {
           })
         };
       }));
+
+      const spacesService = createSpacesService(server);
+      server.decorate('server', 'spaces', spacesService);
 
       initSpacesRequestInterceptors(server);
 

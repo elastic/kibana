@@ -15,13 +15,15 @@ function getClauseForType(spaceId, type) {
     must: []
   };
 
-  if (type) {
-    bool.must.push({
-      term: {
-        type
-      }
-    });
+  if (!type) {
+    throw new Error(`type is required to build filter clause`);
   }
+
+  bool.must.push({
+    term: {
+      type
+    }
+  });
 
   if (shouldFilterOnSpace) {
     if (isDefaultSpace) {
@@ -47,6 +49,10 @@ function getClauseForType(spaceId, type) {
 }
 
 export function getSpacesQueryFilters(spaceId, types = []) {
+  if (types.length === 0) {
+    throw new Error(`At least one type must be provided to "getSpacesQueryFilters"`);
+  }
+
   const filters = [];
 
   const typeClauses = types.map((type) => getClauseForType(spaceId, type));

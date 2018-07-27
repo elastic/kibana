@@ -6,7 +6,9 @@
 
 import { getSpaceUrlContext } from './spaces_url_parser';
 
-export function createSpacesService() {
+export function createSpacesService(server) {
+
+  const serverBasePath = server.config().get('server.basePath');
 
   const contextCache = new WeakMap();
 
@@ -20,7 +22,7 @@ export function createSpacesService() {
   }
 
   function populateCache(request) {
-    const urlContext = getSpaceUrlContext(request.getBasePath());
+    const urlContext = getSpaceUrlContext(request.getBasePath(), serverBasePath);
 
     contextCache.set(request, {
       urlContext
