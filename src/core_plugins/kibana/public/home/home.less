@@ -22,3 +22,49 @@ home-app {
 .homeDirectoryTab {
   background-color: @globalColorLightestGray;
 }
+
+.home-welcome {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 100000;
+  background: inherit;
+  color: inherit;
+  opacity: 0;
+  animation: homeFadeIn 0.5s ease-in 0s forwards;
+}
+
+.home-welcome-header {
+  background: #0079A5;
+  color: white;
+}
+
+.home-welcome-title {
+  color: inherit;
+}
+
+.home-welcome-logo {
+  display: inline-block;
+  margin-bottom: 24px;
+  background-color: white;
+  border-radius: 100%;
+  padding: 16px;
+}
+
+.home-welcome-content {
+  margin: auto;
+  max-width: 800px;
+  padding-left: 32px;
+  padding-right: 32px;
+}
+
+@keyframes homeFadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}

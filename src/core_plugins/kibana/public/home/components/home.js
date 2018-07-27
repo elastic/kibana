@@ -22,6 +22,7 @@ import PropTypes from 'prop-types';
 import { Synopsis } from './synopsis';
 import { AddData } from './add_data';
 import { RecentlyAccessed, recentlyAccessedShape } from './recently_accessed';
+import chrome from 'ui/chrome';
 
 import {
   EuiButton,
@@ -36,13 +37,16 @@ import {
   EuiPageBody,
 } from '@elastic/eui';
 
+import { Welcome, WelcomePreference } from './welcome';
+
 import { FeatureCatalogueCategory } from 'ui/registry/feature_catalogue';
 
 export class Home extends Component {
-
   state = {
+    isLoading: true,
     isNewKibanaInstance: false,
-  }
+    isWelcomeEnabled: WelcomePreference.isEnabled,
+  };
 
   componentWillUnmount() {
     this._isMounted = false;
@@ -54,37 +58,39 @@ export class Home extends Component {
   }
 
   fetchIsNewKibanaInstance = async () => {
-    let resp;
+    chrome.loadingCount.increment();
+
     try {
-      resp = await this.props.find({
-        type: 'index-pattern',
-        fields: ['title'],
-        search: `*`,
-        search_fields: ['title'],
-        perPage: 1
-      });
-    } catch (error) {
-      // ignore error - find is not critical for page functioning,
-      // just used to add some extra styling when there are no index-patterns
-      return;
+      const resp = await this.props
+        .find({
+          type: 'index-pattern',
+          fields: ['title'],
+          search: `*`,
+          search_fields: ['title'],
+          perPage: 1,
+        });
+      this._isMounted && this.setState({ isNewKibanaInstance: resp.total === 0 });
+    } catch (err) {
+      // An error here is relatively unimportant, as it only means we don't provide
+      // some UI niceties.
     }
 
-    if (!this._isMounted) {
-      return;
-    }
+    this._isMounted && this.setState({ isLoading: false });
+    chrome.loadingCount.decrement();
+  };
 
-    this.setState({
-      isNewKibanaInstance: resp.total === 0
-    });
-  }
+  skipWelcome = () => {
+    WelcomePreference.isEnabled = false;
+    this._isMounted && this.setState({ isWelcomeEnabled: false });
+  };
 
-  renderDirectories = (category) => {
+  renderDirectories = category => {
     const { addBasePath, directories } = this.props;
     return directories
-      .filter((directory) => {
+      .filter(directory => {
         return directory.showOnHomePage && directory.category === category;
       })
-      .map((directory) => {
+      .map(directory => {
         return (
           <EuiFlexItem style={{ minHeight: 64 }} key={directory.id}>
             <Synopsis
@@ -98,17 +104,14 @@ export class Home extends Component {
       });
   };
 
-
-  render() {
+  renderNormal() {
     const { apmUiEnabled, recentlyAccessed } = this.props;
 
     let recentlyAccessedPanel;
     if (recentlyAccessed.length > 0) {
       recentlyAccessedPanel = (
         <Fragment>
-          <RecentlyAccessed
-            recentlyAccessed={recentlyAccessed}
-          />
+          <RecentlyAccessed recentlyAccessed={recentlyAccessed} />
           <EuiSpacer size="l" />
         </Fragment>
       );
@@ -117,7 +120,6 @@ export class Home extends Component {
     return (
       <EuiPage className="home">
         <EuiPageBody>
-
           {recentlyAccessedPanel}
 
           <AddData
@@ -131,26 +133,22 @@ export class Home extends Component {
             <EuiFlexItem>
               <EuiPanel paddingSize="l">
                 <EuiTitle>
-                  <h3>
-                    Visualize and Explore Data
-                  </h3>
+                  <h3>Visualize and Explore Data</h3>
                 </EuiTitle>
-                <EuiSpacer size="m"/>
+                <EuiSpacer size="m" />
                 <EuiFlexGrid columns={2}>
-                  { this.renderDirectories(FeatureCatalogueCategory.DATA) }
+                  {this.renderDirectories(FeatureCatalogueCategory.DATA)}
                 </EuiFlexGrid>
               </EuiPanel>
             </EuiFlexItem>
             <EuiFlexItem>
               <EuiPanel paddingSize="l">
                 <EuiTitle>
-                  <h3>
-                    Manage and Administer the Elastic Stack
-                  </h3>
+                  <h3>Manage and Administer the Elastic Stack</h3>
                 </EuiTitle>
-                <EuiSpacer size="m"/>
+                <EuiSpacer size="m" />
                 <EuiFlexGrid columns={2}>
-                  { this.renderDirectories(FeatureCatalogueCategory.ADMIN) }
+                  {this.renderDirectories(FeatureCatalogueCategory.ADMIN)}
                 </EuiFlexGrid>
               </EuiPanel>
             </EuiFlexItem>
@@ -161,14 +159,10 @@ export class Home extends Component {
           <EuiFlexGroup justifyContent="center">
             <EuiFlexItem grow={false}>
               <EuiText>
-                <p>
-                  Didn’t find what you were looking for?
-                </p>
+                <p>Didn’t find what you were looking for?</p>
               </EuiText>
               <EuiSpacer size="s" />
-              <EuiButton
-                href="#/home/feature_directory"
-              >
+              <EuiButton href="#/home/feature_directory">
                 View full directory of Kibana plugins
               </EuiButton>
             </EuiFlexItem>
@@ -177,19 +171,46 @@ export class Home extends Component {
       </EuiPage>
     );
   }
+
+  // For now, loading is just an empty page w/ the standard
+  // Kibana chrome.loadingCount.increment() indicator.
+  renderLoading() {
+    return '';
+  }
+
+  renderWelcome() {
+    return <Welcome skipWelcome={this.skipWelcome} kibanaVersion={chrome.getKibanaVersion()} />;
+  }
+
+  render() {
+    const { isLoading, isWelcomeEnabled, isNewKibanaInstance } = this.state;
+
+    if (isWelcomeEnabled) {
+      if (isLoading) {
+        return this.renderLoading();
+      }
+      if (isNewKibanaInstance) {
+        return this.renderWelcome();
+      }
+    }
+
+    return this.renderNormal();
+  }
 }
 
 Home.propTypes = {
   addBasePath: PropTypes.func.isRequired,
-  directories: PropTypes.arrayOf(PropTypes.shape({
-    id: PropTypes.string.isRequired,
-    title: PropTypes.string.isRequired,
-    description: PropTypes.string.isRequired,
-    icon: PropTypes.string.isRequired,
-    path: PropTypes.string.isRequired,
-    showOnHomePage: PropTypes.bool.isRequired,
-    category: PropTypes.string.isRequired
-  })),
+  directories: PropTypes.arrayOf(
+    PropTypes.shape({
+      id: PropTypes.string.isRequired,
+      title: PropTypes.string.isRequired,
+      description: PropTypes.string.isRequired,
+      icon: PropTypes.string.isRequired,
+      path: PropTypes.string.isRequired,
+      showOnHomePage: PropTypes.bool.isRequired,
+      category: PropTypes.string.isRequired,
+    })
+  ),
   apmUiEnabled: PropTypes.bool.isRequired,
   recentlyAccessed: PropTypes.arrayOf(recentlyAccessedShape).isRequired,
   find: PropTypes.func.isRequired,
