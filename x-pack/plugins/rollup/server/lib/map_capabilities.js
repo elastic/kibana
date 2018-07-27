@@ -4,48 +4,21 @@
 * you may not use this file except in compliance with the Elastic License.
 */
 
-const mapCapabilities = (capabilities, optionalIndexName) => {
-  if (!capabilities) {
-    return {};
-  }
+import { mergeJobConfigurations } from './jobs_compatibility';
 
-  const indexNameToCapabilitiesMap = {};
+export function getCapabilitiesForRollupIndices(indices) {
+  const indexNames = Object.keys(indices);
+  const capabilities = {};
 
-  Object.keys(capabilities).forEach(pattern => {
-    capabilities[pattern].rollup_jobs.forEach(job => {
-      const {
-        job_id: jobId,
-        rollup_index: rollupIndexName,
-        fields,
-      } = job;
-
-      // If we're looking for a particular index, ignore ones which don't match.
-      if(optionalIndexName && rollupIndexName !== optionalIndexName) {
-        return;
-      }
-
-      if(!indexNameToCapabilitiesMap[rollupIndexName]) {
-        indexNameToCapabilitiesMap[rollupIndexName] = {
-          rollup_index: rollupIndexName,
-          capabilities: {},
-        };
-      }
-
-      // Collect capabilities for each job within the index.
-      indexNameToCapabilitiesMap[rollupIndexName].capabilities[jobId] = {
-        fields,
+  indexNames.forEach(index => {
+    try {
+      capabilities[index] = mergeJobConfigurations(indices[index].rollup_jobs);
+    } catch(e) {
+      capabilities[index] = {
+        error: e.message,
       };
-    });
+    }
   });
 
-  return indexNameToCapabilitiesMap;
-};
-
-export const getIndexNameToCapabilitiesMap = (capabilities) => {
-  return mapCapabilities(capabilities);
-};
-
-
-export const getCapabilitiesForIndexName = (capabilities, indexName) => {
-  return mapCapabilities(capabilities, indexName)[indexName].capabilities;
-};
+  return capabilities;
+}

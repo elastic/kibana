@@ -16,32 +16,28 @@ IndexPatternListRegistry.register(() => {
           key: 'rollup',
           name: 'Rollup',
         });
-
-        if(indexPattern.typeMeta && indexPattern.typeMeta.jobs) {
-          tags.push({
-            key: 'rollup_jobs',
-            name: `Rollup jobs: ${indexPattern.typeMeta.jobs.join(', ')}`,
-          });
-        }
       }
       return tags;
     }
 
     getFieldInfo = (indexPattern, field) => {
-      const jobs = indexPattern.typeMeta && indexPattern.typeMeta.jobs;
-      const capabilities = jobs && indexPattern.typeMeta.capabilities && indexPattern.typeMeta.capabilities[jobs[0]].fields[field];
+      const allAggs = indexPattern.typeMeta && indexPattern.typeMeta.aggs;
+      const fieldAggs = allAggs && Object.keys(allAggs).filter(agg => allAggs[agg][field] && Array.isArray(allAggs[agg][field]));
 
-      if(!capabilities) {
+      if(!fieldAggs || !fieldAggs.length) {
         return [];
       }
 
-      return ['Rollup capabilities:'].concat(capabilities.map(cap => {
-        if(cap.agg === 'date_histogram') {
-          return `${cap.agg} (interval: ${cap.interval}, ${cap.delay ? `delay: ${cap.delay},` : ''} ${cap.time_zone})`;
-        } else if(cap.agg === 'histogram') {
-          return `${cap.agg} (interval: ${cap.interval})`;
-        } else {
-          return cap.agg;
+      return ['Rollup aggregations:'].concat(fieldAggs.map(aggName => {
+        const agg = allAggs[aggName][field];
+        switch(aggName) {
+          case 'date_histogram':
+            return `${aggName} (interval: ${agg.interval}, ${agg.delay ? `delay: ${agg.delay},` : ''} ${agg.time_zone})`;
+            break;
+          case 'histogram':
+            return `${aggName} (interval: ${agg.interval})`;
+          default:
+            return aggName;
         }
       }));
     }

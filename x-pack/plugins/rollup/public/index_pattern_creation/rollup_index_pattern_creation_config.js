@@ -5,7 +5,6 @@
  */
 
 import React from 'react';
-import isEqual from 'lodash/lang/isEqual';
 import { IndexPatternCreationConfig } from 'ui/management/index_pattern_creation';
 
 import { RollupPrompt } from './components/rollup_prompt';
@@ -19,7 +18,6 @@ export class RollupIndexPatternCreationConfig extends IndexPatternCreationConfig
       type: 'rollup',
       name: 'rollup index pattern',
       showSystemIndices: false,
-      allowWildcards: false,
       ...options,
     });
 
@@ -47,69 +45,50 @@ export class RollupIndexPatternCreationConfig extends IndexPatternCreationConfig
     } : null;
   }
 
-  getIndexPatternCreationQuery = () => {
-    return {
-      query: {
-        exists: {
-          field: "_rollup.version"
-        }
-      },
-    };
-  };
-
-  illegalCharacters = (characters = []) => {
-    return ['*'].concat(characters);
+  isRollupIndex = (indexName) => {
+    return this.rollupIndices.includes(indexName);
   }
 
-  getIndexTags() {
-    return [{
-      key: 'rollup',
+  getIndexTags(indexName) {
+    return this.isRollupIndex(indexName) ? [{
+      key: this.type,
       name: 'Rollup',
-    }];
+    }] : [];
   }
 
   checkIndicesForErrors = (indices) => {
     this.rollupIndex = null;
-    this.rollupJobs = [];
 
     if(!indices || !indices.length) {
       return;
     }
 
-    if(indices.length > 1) {
-      return ['Index pattern can only match one rollup index'];
+    const rollupIndices = indices.filter(index => this.isRollupIndex(index.name));
+
+    if(!rollupIndices.length) {
+      return ['Rollup index error: must match one rollup index'];
+    } else if(rollupIndices.length > 1) {
+      return ['Rollup index error: can only match one rollup index'];
     }
 
-    let i = 0;
-    let sameCapabilities = true;
-    const capabilities = this.rollupIndicesCapabilities[indices[0].name].capabilities;
-    const jobs = Object.keys(capabilities);
+    const rollupIndexName = rollupIndices[0].name;
+    const error = this.rollupIndicesCapabilities[rollupIndexName].error;
 
-    if(!jobs.length) {
-      return ['This rollup index has no capabilities'];
+    if(error) {
+      return [`Rollup index error: ${error}`];
     }
 
-    if(jobs.length > 1) {
-      while(i < jobs.length - 1 && sameCapabilities) {
-        sameCapabilities = isEqual(capabilities[jobs[i]].fields, capabilities[jobs[i + 1]].fields);
-        i++;
-      }
-
-      if(!sameCapabilities) {
-        return ['There is more than one configuration for this rollup index'];
-      }
-    }
-
-    this.rollupIndex = indices[0].name;
-    this.rollupJobs = [...jobs];
+    this.rollupIndex = rollupIndexName;
   }
 
   getIndexPatternMappings = () => {
     return this.rollupIndex ? {
-      type: 'rollup',
+      type: this.type,
       typeMeta: {
-        jobs: this.rollupJobs,
-        capabilities: this.rollupIndicesCapabilities[this.rollupIndex].capabilities,
+        params: {
+          rollup_index: this.rollupIndex,
+        },
+        aggs: this.rollupIndicesCapabilities[this.rollupIndex].aggs,
       },
     } : {};
   }
@@ -118,5 +97,14 @@ export class RollupIndexPatternCreationConfig extends IndexPatternCreationConfig
     return (
       <RollupPrompt />
     );
+  }
+
+  getFetchForWildcardOptions = () => {
+    return {
+      type: this.type,
+      params: {
+        rollup_index: this.rollupIndex,
+      },
+    };
   }
 }
