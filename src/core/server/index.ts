@@ -18,17 +18,22 @@
  */
 
 import { ConfigService, Env } from './config';
+import { ElasticsearchConfigs, ElasticsearchModule } from './elasticsearch';
 import { HttpConfig, HttpModule, Router } from './http';
 import { Logger, LoggerFactory } from './logging';
 
 export class Server {
+  private readonly elasticsearch: ElasticsearchModule;
   private readonly http: HttpModule;
   private readonly log: Logger;
 
   constructor(private readonly configService: ConfigService, logger: LoggerFactory, env: Env) {
     this.log = logger.get('server');
 
+    const esConfigs$ = configService.atPath('elasticsearch', ElasticsearchConfigs);
     const httpConfig$ = configService.atPath('server', HttpConfig);
+
+    this.elasticsearch = new ElasticsearchModule(esConfigs$, logger);
     this.http = new HttpModule(httpConfig$, logger, env);
   }
 
@@ -39,6 +44,7 @@ export class Server {
     router.get({ path: '/', validate: false }, async (req, res) => res.ok({ version: '0.0.1' }));
     this.http.service.registerRouter(router);
 
+    await this.elasticsearch.service.start();
     await this.http.service.start();
 
     const unhandledConfigPaths = await this.configService.getUnusedPaths();
@@ -51,5 +57,6 @@ export class Server {
     this.log.debug('stopping server');
 
     await this.http.service.stop();
+    await this.elasticsearch.service.stop();
   }
 }
