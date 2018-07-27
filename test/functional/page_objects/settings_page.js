@@ -578,7 +578,7 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
       await testSubjects.click('importSavedObjectsDoneBtn');
     }
 
-    async clickConfirmConflicts() {
+    async clickConfirmChanges() {
       await testSubjects.click('importSavedObjectsConfirmBtn');
     }
 
