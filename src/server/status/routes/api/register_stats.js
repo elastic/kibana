@@ -105,12 +105,18 @@ export function registerStatsApi(kbnServer, server, config) {
 
                 return accum;
               }, {});
-            }
 
-            extended = collectorSet.toApiFieldNames({
-              usage: modifiedUsage,
-              clusterUuid
-            });
+              extended = {
+                usage: modifiedUsage,
+                clusterUuid,
+              };
+            }
+            else {
+              extended = collectorSet.toApiFieldNames({
+                usage: modifiedUsage,
+                clusterUuid
+              });
+            }
           } catch (e) {
             return reply(boomify(e));
           }
