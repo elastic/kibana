@@ -45,7 +45,8 @@ export class Home extends Component {
   constructor(props) {
     super(props);
 
-    const isWelcomeEnabled = props.settingsClient.get(KEY_ENABLE_WELCOME, true);
+    const isWelcomeEnabled = props.localStorage.getItem(KEY_ENABLE_WELCOME) !== 'false' &&
+      props.settingsClient.get(KEY_ENABLE_WELCOME, true);
 
     this.state = {
       isLoading: isWelcomeEnabled,
@@ -86,7 +87,7 @@ export class Home extends Component {
   };
 
   skipWelcome = () => {
-    this.props.settingsClient.set(KEY_ENABLE_WELCOME, false);
+    this.props.localStorage.setItem(KEY_ENABLE_WELCOME, 'false');
     this._isMounted && this.setState({ isWelcomeEnabled: false });
   };
 
@@ -223,4 +224,5 @@ Home.propTypes = {
   loadingCount: PropTypes.object.isRequired,
   kibanaVersion: PropTypes.string.isRequired,
   settingsClient: PropTypes.object.isRequired,
+  localStorage: PropTypes.object.isRequired,
 };

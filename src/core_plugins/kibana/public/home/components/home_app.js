@@ -106,6 +106,7 @@ export function HomeApp({
             loadingCount={loadingCount}
             kibanaVersion={kibanaVersion}
             settingsClient={settingsClient}
+            localStorage={localStorage}
           />
         </Route>
       </Switch>
