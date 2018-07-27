@@ -10,7 +10,21 @@ export const elasticsearchJsPlugin = (Client, config, components) => {
   Client.prototype.rollup = components.clientAction.namespaceFactory();
   const rollup = Client.prototype.rollup.prototype;
 
-  rollup.capabilities = ca({
+  rollup.capabilitiesByRollupIndex = ca({
+    urls: [
+      {
+        fmt: '<%=indexPattern%>/_xpack/rollup/data',
+        req: {
+          indexPattern: {
+            type: 'string'
+          }
+        }
+      }
+    ],
+    method: 'GET'
+  });
+
+  rollup.capabilitiesByIndex = ca({
     urls: [
       {
         fmt: '/_xpack/rollup/data/<%=indices%>',
