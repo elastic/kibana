@@ -24,9 +24,7 @@ import { schema } from '@kbn/utils';
  */
 export const sslSchema = schema.object({
   certificate: schema.maybe(schema.string()),
-  certificateAuthorities: schema.maybe(
-    schema.arrayOf(schema.string(), { minSize: 1 })
-  ),
+  certificateAuthorities: schema.maybe(schema.arrayOf(schema.string(), { minSize: 1 })),
   key: schema.maybe(schema.string()),
   keyPassphrase: schema.maybe(schema.string()),
   verificationMode: schema.oneOf([
@@ -88,9 +86,7 @@ export const elasticsearchSchema = schema.object({
 /**
  * @internal
  */
-export type ElasticsearchConfigsSchema = schema.TypeOf<
-  typeof elasticsearchSchema
->;
+export type ElasticsearchConfigsSchema = schema.TypeOf<typeof elasticsearchSchema>;
 
 /**
  * @internal

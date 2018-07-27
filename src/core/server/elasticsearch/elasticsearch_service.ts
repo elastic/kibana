@@ -45,10 +45,7 @@ export class ElasticsearchService implements CoreService {
   private clients$: Observable<Clients>;
   private subscription?: Subscription;
 
-  constructor(
-    private readonly configs$: Observable<ElasticsearchConfigs>,
-    logger: LoggerFactory
-  ) {
+  constructor(private readonly configs$: Observable<ElasticsearchConfigs>, logger: LoggerFactory) {
     const log = logger.get('elasticsearch');
 
     this.clients$ = k$(configs$)(
@@ -71,9 +68,7 @@ export class ElasticsearchService implements CoreService {
                   shouldAuth: false,
                 })
               ),
-              data: new Client(
-                configs.forType('data').toElasticsearchClientConfig()
-              ),
+              data: new Client(configs.forType('data').toElasticsearchClientConfig()),
             };
 
             observer.next(clients);
@@ -113,10 +108,7 @@ export class ElasticsearchService implements CoreService {
     return k$($combineLatest(this.clients$, this.configs$))(
       map(
         ([clients, configs]) =>
-          new ScopedDataClient(
-            clients.data,
-            configs.forType('data').filterHeaders(headers)
-          )
+          new ScopedDataClient(clients.data, configs.forType('data').filterHeaders(headers))
       )
     );
   }

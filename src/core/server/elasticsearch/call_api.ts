@@ -40,8 +40,7 @@ export async function callAPI(
     throw new Error(`called with an invalid endpoint: ${endpoint}`);
   }
 
-  const apiContext =
-    clientPath.length === 1 ? client : get(client, clientPath.slice(0, -1));
+  const apiContext = clientPath.length === 1 ? client : get(client, clientPath.slice(0, -1));
 
   try {
     return await api.call(apiContext, clientParams);

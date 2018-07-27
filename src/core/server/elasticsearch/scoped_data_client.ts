@@ -29,10 +29,7 @@ export interface CallAPIClientParams {
 }
 
 export class ScopedDataClient {
-  constructor(
-    private readonly client: Client,
-    private readonly headers: Headers
-  ) {}
+  constructor(private readonly client: Client, private readonly headers: Headers) {}
 
   /**
    * Call the elasticsearch API via the given client
