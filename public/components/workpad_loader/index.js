@@ -52,30 +52,31 @@ export const WorkpadLoader = compose(
       props.router.navigateTo('loadWorkpad', { id: workpad.id, page: 1 });
     },
 
-    // Remove workpad given an id
-    removeWorkpad: props => async workpadId => {
+    // Remove workpad given an array of id
+    removeWorkpads: props => async workpadIds => {
       const { setWorkpads, workpads, workpadId: loadedWorkpad } = props;
 
-      await workpadService.remove(workpadId);
+      let redirectHome = false;
+      const removeWorkpads = workpadIds.map(id => {
+        if (id === loadedWorkpad) redirectHome = true;
+        return workpadService.remove(id);
+      });
 
-      const remainingWorkpads = workpads.workpads.filter(w => w.id !== workpadId);
-      const workpadState = {
-        total: remainingWorkpads.length,
-        workpads: remainingWorkpads,
-      };
+      Promise.all(removeWorkpads).then(() => {
+        const remainingWorkpads = workpads.workpads.filter(({ id }) => !workpadIds.includes(id));
 
-      // load the first available workpad if the active one was removed
-      if (loadedWorkpad === workpadId) {
-        const nextWorkpad = workpadState.workpads[0];
-        if (nextWorkpad != null) {
-          props.router.navigateTo('loadWorkpad', { id: nextWorkpad.id, page: 1 });
+        const workpadState = {
+          total: remainingWorkpads.length,
+          workpads: remainingWorkpads,
+        };
 
-          // update the workpad list, filtering out the removed workpad
-          setWorkpads(workpadState);
-        } else {
+        // update the workpad list, filtering out the removed workpad
+        setWorkpads(workpadState);
+
+        if (redirectHome) {
           props.router.navigateTo('home');
         }
-      }
+      });
     },
   })
 )(Component);

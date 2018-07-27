@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { Fragment } from 'react';
 import PropTypes from 'prop-types';
 import {
   EuiFlexGroup,
@@ -7,6 +7,8 @@ import {
   EuiButtonIcon,
   EuiText,
   EuiTitle,
+  EuiSpacer,
+  EuiButton,
 } from '@elastic/eui';
 import { sortByOrder } from 'lodash';
 import moment from 'moment';
@@ -26,16 +28,17 @@ export class WorkpadLoader extends React.PureComponent {
     findWorkpads: PropTypes.func.isRequired,
     downloadWorkpad: PropTypes.func.isRequired,
     cloneWorkpad: PropTypes.func.isRequired,
-    removeWorkpad: PropTypes.func.isRequired,
+    removeWorkpads: PropTypes.func.isRequired,
     onClose: PropTypes.func.isRequired,
     workpads: PropTypes.object,
   };
 
   state = {
-    deletingWorkpad: {},
+    deletingWorkpad: false,
     createPending: false,
     sortField: '@timestamp',
     sortDirection: 'desc',
+    selectedWorkpads: [],
   };
 
   async componentDidMount() {
@@ -67,18 +70,23 @@ export class WorkpadLoader extends React.PureComponent {
     this.props.cloneWorkpad(workpad.id);
   };
 
-  // Workpad remove methods
-  removeConfirm = deletingWorkpad => this.setState({ deletingWorkpad });
-
-  closeRemoveConfirm = () => this.setState({ deletingWorkpad: {} });
-
-  removeWorkpad = workpadId => {
-    this.props.removeWorkpad(workpadId);
-    this.closeRemoveConfirm();
+  onSelectionChange = selectedWorkpads => {
+    this.setState({ selectedWorkpads });
   };
 
-  downloadWorkpad = workpad => {
-    this.props.downloadWorkpad(workpad.id);
+  // Workpad remove methods
+  openRemoveConfirm = () => this.setState({ deletingWorkpad: true });
+
+  closeRemoveConfirm = () => this.setState({ deletingWorkpad: false });
+
+  removeWorkpads = () => {
+    this.props.removeWorkpads(this.state.selectedWorkpads.map(({ id }) => id));
+    this.setState({ deletingWorkpad: false, selectedWorkpads: [] });
+  };
+
+  // downloads selected workpads as JSON files
+  downloadWorkpads = () => {
+    this.state.selectedWorkpads.forEach(({ id }) => this.props.downloadWorkpad(id));
   };
 
   onTableChange = ({ sort = {} }) => {
@@ -100,8 +108,8 @@ export class WorkpadLoader extends React.PureComponent {
             <EuiFlexItem grow={false}>
               <Tooltip content="Download">
                 <EuiButtonIcon
-                  iconType="exportAction"
-                  onClick={() => this.downloadWorkpad(workpad)}
+                  iconType="sortDown"
+                  onClick={() => this.props.downloadWorkpad(workpad.id)}
                   aria-label="Download Workpad"
                 />
               </Tooltip>
@@ -112,16 +120,6 @@ export class WorkpadLoader extends React.PureComponent {
                   iconType="copy"
                   onClick={() => this.cloneWorkpad(workpad)}
                   aria-label="Clone Workpad"
-                />
-              </Tooltip>
-            </EuiFlexItem>
-            <EuiFlexItem>
-              <Tooltip content="Delete">
-                <EuiButtonIcon
-                  iconType="trash"
-                  color="danger"
-                  onClick={() => this.removeConfirm(workpad)}
-                  aria-label="Delete Workpad"
                 />
               </Tooltip>
             </EuiFlexItem>
@@ -182,57 +180,98 @@ export class WorkpadLoader extends React.PureComponent {
       [sortDirection, 'desc']
     );
 
+    const selection = {
+      itemId: 'id',
+      onSelectionChange: this.onSelectionChange,
+    };
+
     return (
       <EuiBasicTable
         compressed
         items={sortedWorkpads}
+        itemId="id"
         columns={columns}
         sorting={sorting}
-        message="No matching workpads found"
+        message="No workpads found"
         onChange={this.onTableChange}
+        isSelectable
+        selection={selection}
       />
     );
   };
 
   render() {
-    const { deletingWorkpad, createPending } = this.state;
+    const { deletingWorkpad, createPending, selectedWorkpads } = this.state;
     const isLoading = this.props.workpads == null;
+
+    const modalTitle =
+      selectedWorkpads.length === 1
+        ? `Delete workpad '${selectedWorkpads[0].name}'?`
+        : `Delete ${selectedWorkpads.length} workpads?`;
+
+    const confirmModal = (
+      <ConfirmModal
+        isOpen={deletingWorkpad}
+        title={modalTitle}
+        message="You can't recover deleted workpads."
+        confirmButtonText="Delete"
+        onConfirm={this.removeWorkpads}
+        onCancel={this.closeRemoveConfirm}
+      />
+    );
 
     return (
       <WorkpadUpload onUpload={this.uploadWorkpad}>
-        <EuiFlexGroup gutterSize="s" alignItems="center" className="canvasWorkPadLoader">
+        <EuiTitle size="s">
+          <h4>Workpads</h4>
+        </EuiTitle>
+        <EuiText>
+          <p>
+            <i>
+              Drag and drop a JSON file oto this area to load a previously built workpad as a new
+              file
+            </i>
+          </p>
+        </EuiText>
+        <EuiSpacer />
+        <EuiFlexGroup gutterSize="s">
+          {selectedWorkpads.length > 0 && (
+            <Fragment>
+              <EuiFlexItem grow={false}>
+                <EuiButton
+                  size="s"
+                  color="secondary"
+                  onClick={this.downloadWorkpads}
+                  iconType="sortDown"
+                >
+                  {`Download (${selectedWorkpads.length})`}
+                </EuiButton>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiButton
+                  size="s"
+                  color="danger"
+                  iconType="trash"
+                  onClick={this.openRemoveConfirm}
+                >
+                  {`Delete (${selectedWorkpads.length})`}
+                </EuiButton>
+              </EuiFlexItem>
+            </Fragment>
+          )}
           <EuiFlexItem>
-            <EuiTitle size="s">
-              <h4>Workpads</h4>
-            </EuiTitle>
-            <EuiText>
-              <p>
-                <i>
-                  Drag and drop a JSON file oto this area to load a previously built workpad as a
-                  new file
-                </i>
-              </p>
-            </EuiText>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
             <WorkpadSearch onChange={this.props.findWorkpads} />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <WorkpadCreate createPending={createPending} onCreate={this.createWorkpad} />
           </EuiFlexItem>
         </EuiFlexGroup>
+        <EuiSpacer />
         {createPending && <div>Creating Workpad...</div>}
         {!createPending && isLoading && <div>Fetching Workpads...</div>}
         {!createPending && !isLoading && this.renderWorkpadTable()}
 
-        <ConfirmModal
-          isOpen={deletingWorkpad.id != null}
-          title="Remove Workpad"
-          message={`Are you sure you want to remove the workpad '${deletingWorkpad.name}'?`}
-          confirmButtonText="Remove"
-          onConfirm={() => this.removeWorkpad(deletingWorkpad.id)}
-          onCancel={this.closeRemoveConfirm}
-        />
+        {confirmModal}
       </WorkpadUpload>
     );
   }
