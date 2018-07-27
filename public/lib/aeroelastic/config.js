@@ -16,8 +16,7 @@ const rotateAnnotationOffset = 12;
 const rotationHandleName = 'rotationHandle';
 const rotationHandleSize = 14;
 const resizeHandleName = 'resizeHandle';
-const rotateSnapInDeg = 5;
-const rotateSnapInRad = rotateSnapInDeg / 180 * Math.PI;
+const rotateSnapInPixels = 10;
 const shortcuts = false;
 const singleSelect = true;
 const snapConstraint = false;
@@ -35,7 +34,7 @@ module.exports = {
   resizeConnectorName,
   resizeHandleName,
   rotateAnnotationOffset,
-  rotateSnapInRad,
+  rotateSnapInPixels,
   rotationHandleName,
   rotationHandleSize,
   shortcuts,
