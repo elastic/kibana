@@ -58,7 +58,6 @@ export async function getIndices(es, indexPatternCreationType, rawPattern, limit
           }
         }
       },
-      ...indexPatternCreationType.getIndexPatternCreationQuery(),
     }
   };
 
@@ -72,10 +71,10 @@ export async function getIndices(es, indexPatternCreationType, rawPattern, limit
       response.aggregations.indices.buckets.map(bucket => {
         return bucket.key;
       })
-        .map((index) => {
+        .map((indexName) => {
           return {
-            name: index,
-            tags: indexPatternCreationType.getIndexTags(index)
+            name: indexName,
+            tags: indexPatternCreationType.getIndexTags(indexName)
           };
         })
       , 'name'
