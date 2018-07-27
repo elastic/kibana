@@ -92,6 +92,7 @@ export class Welcome extends React.Component {
             </EuiFlexItem>
             <EuiFlexItem>
               <EuiCard
+                data-test-subj="skipWelcomeScreen"
                 icon={<EuiIcon size="xxl" type="cross" color="accent" />}
                 title="I don't need help"
                 description="Skip the tour. I know what I'm doing."
