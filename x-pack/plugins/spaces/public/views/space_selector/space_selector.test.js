@@ -13,7 +13,7 @@ import { SpacesManager } from '../../lib/spaces_manager';
 
 
 function getHttpAgent(spaces = []) {
-  const httpAgent = () => {};
+  const httpAgent = () => { };
   httpAgent.get = jest.fn(() => Promise.resolve({ data: spaces }));
 
   return httpAgent;
@@ -32,7 +32,7 @@ function getSpacesManager(spaces = []) {
 test('it renders without crashing', () => {
   const spacesManager = getSpacesManager();
   const component = renderer.create(
-    <SpaceSelector spaces={[]} spacesManager={spacesManager}/>
+    <SpaceSelector spaces={[]} spacesManager={spacesManager} />
   );
   expect(component).toMatchSnapshot();
 });
@@ -44,7 +44,6 @@ test('it uses the spaces on props, when provided', () => {
     id: 'space-1',
     name: 'Space 1',
     description: 'This is the first space',
-    urlContext: 'space-1-context'
   }];
 
   const component = render(
@@ -64,13 +63,12 @@ test('it queries for spaces when not provided on props', () => {
     id: 'space-1',
     name: 'Space 1',
     description: 'This is the first space',
-    urlContext: 'space-1-context'
   }];
 
   const spacesManager = getSpacesManager(spaces);
 
   shallow(
-    <SpaceSelector spacesManager={spacesManager}/>
+    <SpaceSelector spacesManager={spacesManager} />
   );
 
   return Promise

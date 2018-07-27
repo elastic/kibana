@@ -5,9 +5,10 @@
  */
 
 import { createSpacesService } from "./create_spaces_service";
+import { DEFAULT_SPACE_ID } from '../../common/constants';
 
-const createRequest = (urlContext, serverBasePath = '') => ({
-  getBasePath: () => urlContext ? `${serverBasePath}/s/${urlContext}` : serverBasePath
+const createRequest = (spaceId, serverBasePath = '') => ({
+  getBasePath: () => spaceId && spaceId !== DEFAULT_SPACE_ID ? `${serverBasePath}/s/${spaceId}` : serverBasePath
 });
 
 const createMockServer = (config) => {
@@ -22,31 +23,31 @@ const createMockServer = (config) => {
   };
 };
 
-test('returns empty string for the default space', () => {
+test('returns the default space ID', () => {
   const server = createMockServer({
     'server.basePath': ''
   });
 
   const service = createSpacesService(server);
-  expect(service.getUrlContext(createRequest())).toEqual('');
+  expect(service.getSpaceId(createRequest())).toEqual(DEFAULT_SPACE_ID);
 });
 
-test('returns the urlContext for the current space', () => {
+test('returns the id for the current space', () => {
   const request = createRequest('my-space-context');
   const server = createMockServer({
     'server.basePath': ''
   });
 
   const service = createSpacesService(server);
-  expect(service.getUrlContext(request)).toEqual('my-space-context');
+  expect(service.getSpaceId(request)).toEqual('my-space-context');
 });
 
-test(`returns the urlContext for the current space when a server basepath is defined`, () => {
+test(`returns the id for the current space when a server basepath is defined`, () => {
   const request = createRequest('my-space-context', '/foo');
   const server = createMockServer({
     'server.basePath': '/foo'
   });
 
   const service = createSpacesService(server);
-  expect(service.getUrlContext(request)).toEqual('my-space-context');
+  expect(service.getSpaceId(request)).toEqual('my-space-context');
 });

@@ -51,14 +51,15 @@ export default function ({ getService }) {
       });
     };
 
-    const getTest = (description, { spaceId, urlContext = '', tests }) => {
+    const getTest = (description, { spaceId, tests, otherSpaceId = spaceId }) => {
       describe(description, () => {
         before(async () => esArchiver.load(`saved_objects/spaces`));
         after(async () => esArchiver.unload(`saved_objects/spaces`));
 
         it(`should return ${tests.exists.statusCode}`, async () => {
+          const objectId = `${getIdPrefix(otherSpaceId)}dd7caf20-9efd-11e7-acb3-3dab96693fab`;
           return supertest
-            .get(`${getUrlPrefix(urlContext)}/api/saved_objects/visualization/${getIdPrefix(spaceId)}dd7caf20-9efd-11e7-acb3-3dab96693fab`)
+            .get(`${getUrlPrefix(spaceId)}/api/saved_objects/visualization/${objectId}`)
             .expect(tests.exists.statusCode)
             .then(tests.exists.response);
         });
@@ -77,7 +78,7 @@ export default function ({ getService }) {
 
     getTest(`cannot access objects belonging to a different space (space_1)`, {
       ...SPACES.SPACE_1,
-      urlContext: 'space-2',
+      otherSpaceId: SPACES.SPACE_2.spaceId,
       tests: {
         exists: {
           statusCode: 404,
@@ -98,7 +99,7 @@ export default function ({ getService }) {
 
     getTest(`cannot access objects belonging to a different space (default)`, {
       ...SPACES.DEFAULT,
-      urlContext: 'space-1',
+      otherSpaceId: SPACES.SPACE_1.spaceId,
       tests: {
         exists: {
           statusCode: 404,

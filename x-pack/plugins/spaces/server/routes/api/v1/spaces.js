@@ -6,13 +6,11 @@
 
 import Boom from 'boom';
 import { omit } from 'lodash';
-import { getClient } from '../../../../../../server/lib/get_client_shield';
 import { routePreCheckLicense } from '../../../lib/route_pre_check_license';
 import { spaceSchema } from '../../../lib/space_schema';
 import { wrapError } from '../../../lib/errors';
 import { isReservedSpace } from '../../../../common/is_reserved_space';
-import { createDuplicateContextQuery } from '../../../lib/check_duplicate_context';
-import { addSpaceUrlContext } from '../../../lib/spaces_url_parser';
+import { addSpaceIdToPath } from '../../../lib/spaces_url_parser';
 
 export function initSpacesApi(server) {
   const routePreCheckLicenseFn = routePreCheckLicense(server);
@@ -22,33 +20,6 @@ export function initSpacesApi(server) {
       id: savedObject.id,
       ...savedObject.attributes
     };
-  }
-
-  const callWithInternalUser = getClient(server).callWithInternalUser;
-
-  const config = server.config();
-
-  async function checkForDuplicateContext(space) {
-    return {};
-    const query = createDuplicateContextQuery(config.get('kibana.index'), space);
-
-    // TODO(legrego): Once the SOC is split into a client & repository, this "callWithInternalUser" call should
-    // be replaced to use the repository instead.
-    const { hits } = await callWithInternalUser('search', query);
-
-    const { total, hits: conflicts } = hits;
-
-    let error;
-
-    if (total > 0) {
-      const firstConflictName = conflicts[0]._source.space.name;
-
-      error = Boom.badRequest(
-        `Another Space (${firstConflictName}) already uses this URL Context. Please choose a different URL Context.`
-      );
-    }
-
-    return { error };
   }
 
   server.route({
@@ -105,31 +76,19 @@ export function initSpacesApi(server) {
 
       const space = omit(request.payload, ['id', '_reserved']);
 
-      const { error: contextError } = await checkForDuplicateContext(space);
+      const id = request.payload.id;
 
-      if (contextError) {
-        return reply(wrapError(contextError));
+      const existingSpace = await getSpaceById(client, id);
+      if (existingSpace) {
+        return reply(Boom.conflict(`A space with the identifier ${id} already exists. Please choose a different identifier`));
       }
 
-      const id = request.params.id;
-
-      let result;
       try {
-        const existingSpace = await getSpaceById(client, id);
-
-        // Reserved Spaces cannot have their _reserved or urlContext properties altered.
-        if (isReservedSpace(existingSpace)) {
-          space._reserved = true;
-          space.urlContext = existingSpace.urlContext;
-        }
-
-        result = await client.create('space', { ...space }, { id });
+        return reply(await client.create('space', { ...space }, { id, overwrite: false }));
       } catch (error) {
         return reply(wrapError(error));
       }
 
-      const createdSpace = convertSavedObjectToSpace(result);
-      return reply(createdSpace);
     },
     config: {
       validate: {
@@ -145,22 +104,20 @@ export function initSpacesApi(server) {
     async handler(request, reply) {
       const client = request.getSavedObjectsClient();
 
-      const {
-        overwrite = false
-      } = request.query;
-
       const space = omit(request.payload, ['id']);
       const id = request.params.id;
 
-      const { error } = await checkForDuplicateContext({ ...space, id });
+      const existingSpace = await getSpaceById(client, id);
 
-      if (error) {
-        return reply(wrapError(error));
+      if (existingSpace) {
+        space._reserved = existingSpace._reserved;
+      } else {
+        return reply(Boom.notFound(`Unable to find space with ID ${id}`));
       }
 
       let result;
       try {
-        result = await client.create('space', { ...space }, { id, overwrite });
+        result = await client.update('space', id, { ...space });
       } catch (error) {
         return reply(wrapError(error));
       }
@@ -220,7 +177,7 @@ export function initSpacesApi(server) {
         const config = server.config();
 
         return reply({
-          location: addSpaceUrlContext(config.get('server.basePath'), existingSpace.urlContext, config.get('server.defaultRoute'))
+          location: addSpaceIdToPath(config.get('server.basePath'), existingSpace.id, config.get('server.defaultRoute'))
         });
 
       } catch (error) {
