@@ -137,7 +137,7 @@ export class AdvancedSettings extends Component {
         <EuiFlexGroup gutterSize="none">
           <EuiFlexItem>
             <EuiText>
-              <h1>Settings</h1>
+              <h1 data-test-subj="managementSettingsTitle">Settings</h1>
             </EuiText>
           </EuiFlexItem>
           <EuiFlexItem>

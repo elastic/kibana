@@ -21,7 +21,7 @@ import {
   EuiSpacer,
   EuiBetaBadge
 } from '@elastic/eui';
-import { getMlJobUrl } from '../../../../utils/url';
+import { getMlJobUrl, KibanaLink } from '../../../../utils/url';
 
 export default class DynamicBaselineFlyout extends Component {
   state = {
@@ -159,9 +159,12 @@ export default class DynamicBaselineFlyout extends Component {
                   <span>
                     No APM index pattern available. To create a job, please
                     import the APM index pattern via the{' '}
-                    <a href="/app/kibana#/home/tutorial/apm">
+                    <KibanaLink
+                      pathname={'/app/kibana'}
+                      hash={`/home/tutorial/apm`}
+                    >
                       Setup Instructions
-                    </a>
+                    </KibanaLink>
                   </span>
                 }
                 color="warning"
