@@ -99,7 +99,7 @@ export default function ({ getService, getPageObjects }) {
           indicesCount: 'Indices:\nN/A',
           shardsCount: 'Shards:\nN/A',
           nodeType: 'Type:\nOffline Node',
-          status: 'Status:\nOffline',
+          status: 'Status: Offline',
         });
       });
     });
