@@ -1026,6 +1026,12 @@ module.controller('MlNewJob',
           tabs[0].checks.groupIds.message = msg;
         }
 
+        if (validationResults.contains('model_memory_limit_units_invalid')) {
+          tabs[0].checks.modelMemoryLimit.valid = false;
+          const msg = `Model memory limit data unit unrecognized. It must be B, KB, MB, GB, TB or PB`;
+          tabs[0].checks.modelMemoryLimit.message = msg;
+        }
+
         if (validationResults.contains('model_memory_limit_invalid')) {
           tabs[0].checks.modelMemoryLimit.valid = false;
           const msg = `Model memory limit cannot be higher than the maximum value of ${limits.max_model_memory_limit.toUpperCase()}`;
