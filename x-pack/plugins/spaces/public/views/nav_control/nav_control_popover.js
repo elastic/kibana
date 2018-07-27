@@ -9,9 +9,9 @@ import PropTypes from 'prop-types';
 import {
   EuiAvatar,
   EuiPopover,
+  EuiPopoverTitle,
 } from '@elastic/eui';
 import { SpaceAvatar } from '../components';
-import { Notifier } from 'ui/notify';
 import { SpacesTable } from './components/spaces_table';
 
 export class NavControlPopover extends Component {
@@ -21,8 +21,6 @@ export class NavControlPopover extends Component {
     activeSpaceExists: true,
     spaces: []
   };
-
-  notifier = new Notifier(`Spaces`);
 
   async loadSpaces() {
     const {
@@ -50,17 +48,6 @@ export class NavControlPopover extends Component {
   }
 
   componentDidMount() {
-    const {
-      activeSpace
-    } = this.props;
-
-    if (activeSpace && !activeSpace.valid) {
-      const { error = {} } = activeSpace;
-      if (error.message) {
-        this.notifier.error(error.message);
-      }
-    }
-
     this.loadSpaces();
 
     if (this.props.spacesManager) {
@@ -76,14 +63,11 @@ export class NavControlPopover extends Component {
       return null;
     }
 
-    const popover = (
+    return (
       <EuiPopover button={button} isOpen={this.state.isOpen} closePopover={this.closePortal} anchorPosition={'rightCenter'}>
+        <EuiPopoverTitle>Select a Space</EuiPopoverTitle>
         <SpacesTable spaces={this.state.spaces || []} onSelectSpace={this.onSelectSpace} />
       </EuiPopover>
-    );
-
-    return (
-      <div>{popover}</div>
     );
   }
 
@@ -117,6 +101,7 @@ export class NavControlPopover extends Component {
   };
 
   getButton = (linkIcon, linkTitle) => {
+    // Mimics the current angular-based navigation link
     return (
       <div className="global-nav-link">
         <a className="global-nav-link__anchor" onClick={this.togglePortal}>
