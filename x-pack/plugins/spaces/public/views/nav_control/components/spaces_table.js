@@ -28,24 +28,17 @@ export class SpacesTable extends Component {
   render() {
     return (
       <div className="spaceSelectorMenu">
-        <EuiFlexGroup direction={'column'} responsive={false}>
-          <EuiFlexItem>
-            <EuiInMemoryTable
-              itemId={"id"}
-              items={this.props.spaces}
-              columns={this.getColumnConfig()}
-              pagination={this.props.spaces.length > 10 && {
-                initialPageSize: 10,
-                pageSizeOptions: [10]
-              }}
-              search={this.props.spaces.length >= SPACE_SEARCH_COUNT_THRESHOLD && {
-                box: {
-                  incremental: true
-                }
-              }}
-            />
-          </EuiFlexItem>
-        </EuiFlexGroup>
+        <EuiInMemoryTable
+          itemId={"id"}
+          items={this.props.spaces}
+          columns={this.getColumnConfig()}
+          pagination={false}
+          search={this.props.spaces.length >= SPACE_SEARCH_COUNT_THRESHOLD && {
+            box: {
+              incremental: true
+            }
+          }}
+        />
       </div>
     );
   }
