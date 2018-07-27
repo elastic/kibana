@@ -49,10 +49,12 @@ export const TimeFieldComponent = ({
         label={
           <EuiFlexGroup gutterSize="xs" justifyContent="spaceBetween" alignItems="center">
             <EuiFlexItem grow={false}>
-              <FormattedMessage
-                id="kbn.management.createIndexPattern.stepTime.fieldHeader"
-                defaultMessage="Time Filter field name"
-              />
+              <span>
+                <FormattedMessage
+                  id="kbn.management.createIndexPattern.stepTime.fieldHeader"
+                  defaultMessage="Time Filter field name"
+                />
+              </span>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               { isLoading ? (
