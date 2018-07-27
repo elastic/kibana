@@ -84,6 +84,7 @@ Array [
       "status": "green",
     },
     "license": Object {
+      "expiry_date": "2018-05-16T19:32:08.764Z",
       "expiry_date_in_millis": 1526499128764,
       "status": "active",
       "type": "trial",
@@ -184,6 +185,7 @@ Array [
       "status": null,
     },
     "license": Object {
+      "expiry_date": "2018-05-16T19:31:42.070Z",
       "expiry_date_in_millis": 1526499102070,
       "status": "active",
       "type": "trial",
@@ -289,6 +291,7 @@ Array [
       "status": "green",
     },
     "license": Object {
+      "expiry_date": "2018-05-16T19:32:08.764Z",
       "expiry_date_in_millis": 1526499128764,
       "status": "active",
       "type": "trial",
@@ -389,6 +392,7 @@ Array [
       "status": null,
     },
     "license": Object {
+      "expiry_date": "2018-05-16T19:31:42.070Z",
       "expiry_date_in_millis": 1526499102070,
       "status": "active",
       "type": "trial",
