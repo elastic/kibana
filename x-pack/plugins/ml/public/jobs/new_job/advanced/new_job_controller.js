@@ -1029,7 +1029,7 @@ module.controller('MlNewJob',
 
         if (validationResults.contains('model_memory_limit_units_invalid')) {
           tabs[0].checks.modelMemoryLimit.valid = false;
-          const str = ALLOWED_DATA_UNITS.slice(0, ALLOWED_DATA_UNITS.length - 1).join(', ') + ` or ${([...ALLOWED_DATA_UNITS].pop())}`;
+          const str = `${(ALLOWED_DATA_UNITS.slice(0, ALLOWED_DATA_UNITS.length - 1).join(', '))} or ${([...ALLOWED_DATA_UNITS].pop())}`;
           const msg = `Model memory limit data unit unrecognized. It must be ${str}`;
           tabs[0].checks.modelMemoryLimit.message = msg;
         }
