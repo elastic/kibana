@@ -10,15 +10,17 @@ import {
   EuiFlexItem,
   EuiIcon,
 } from '@elastic/eui';
-import { VisibilityToggle } from '../visiblity_toggle';
+import { VisibilityToggle } from './visiblity_toggle';
 
 export function TOCEntry(props) {
   const {
     layerId,
-    visible,
+    layerVisible,
     layerName,
-    onButtonClick
+    toggleVisible
   } = props;
+
+  const visible = layerVisible(layerId);
 
   return (
     <div
@@ -30,11 +32,11 @@ export function TOCEntry(props) {
         <EuiFlexItem grow={false} className="layerEntry--visibility">
           <VisibilityToggle
             checked={visible}
-            // onChange={this._onVisibilityChange}
+            onChange={() => toggleVisible(layerId)}
           />
         </EuiFlexItem>
         <EuiFlexItem className="layerEntry--name">
-          <button onClick={() => onButtonClick(layerId)}>
+          <button onClick={(layerId)}>
             {layerName}
           </button>
         </EuiFlexItem>
