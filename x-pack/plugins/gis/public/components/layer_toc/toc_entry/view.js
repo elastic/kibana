@@ -17,7 +17,8 @@ export function TOCEntry(props) {
     layerId,
     layerVisible,
     layerName,
-    toggleVisible
+    toggleVisible,
+    onButtonClick
   } = props;
 
   const visible = layerVisible(layerId);
@@ -36,7 +37,7 @@ export function TOCEntry(props) {
           />
         </EuiFlexItem>
         <EuiFlexItem className="layerEntry--name">
-          <button onClick={(layerId)}>
+          <button onClick={() => onButtonClick(layerId)}>
             {layerName}
           </button>
         </EuiFlexItem>

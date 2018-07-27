@@ -12,7 +12,6 @@ import _ from 'lodash';
 
 const FEATURE_PROJECTION = 'EPSG:3857';
 
-// Temporary style
 const tempVectorStyle = new ol.style.Style({
   fill: new ol.style.Fill({
     color: 'rgba(160, 225, 255, .05)'
