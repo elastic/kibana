@@ -17,17 +17,10 @@
  * under the License.
  */
 
-import ngMock from 'ng_mock';
 import expect from 'expect.js';
-import { VisTypeProvider } from '../../vis_types/base_vis_type';
+import { BaseVisType } from '../../vis_types/base_vis_type';
 
 describe('Base Vis Type', function () {
-  let BaseVisType;
-
-  beforeEach(ngMock.module('kibana'));
-  beforeEach(ngMock.inject(function (Private) {
-    BaseVisType = Private(VisTypeProvider);
-  }));
 
   describe('initialization', () => {
     it('should throw if mandatory properties are missing', () => {

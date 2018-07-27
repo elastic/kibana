@@ -108,6 +108,11 @@ class DataTableFormat extends Component {
   render() {
     const { columns, rows } = this.state;
 
+    const pagination = {
+      pageSizeOptions: [10, 20, 50],
+      initialPageSize: 20,
+    };
+
     return (
       <React.Fragment>
         <EuiFlexGroup>
@@ -127,7 +132,7 @@ class DataTableFormat extends Component {
           columns={columns}
           items={rows}
           sorting={true}
-          pagination={true}
+          pagination={pagination}
           compressed={true}
         />
       </React.Fragment>

@@ -30,7 +30,7 @@ export default function ({ getService, getPageObjects }) {
 
     before(async function () {
       log.debug('navigateToApp visualize');
-      await PageObjects.common.navigateToUrl('visualize', 'new');
+      await PageObjects.visualize.navigateToNewVisualization();
       log.debug('clickMetric');
       await PageObjects.visualize.clickMetric();
       await PageObjects.visualize.clickNewSearch();

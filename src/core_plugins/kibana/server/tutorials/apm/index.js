@@ -20,19 +20,22 @@
 import { TUTORIAL_CATEGORY } from '../../../common/tutorials/tutorial_category';
 import { onPremInstructions } from './on_prem';
 import { ELASTIC_CLOUD_INSTRUCTIONS } from './elastic_cloud';
+import { getSavedObjects } from './saved_objects/get_saved_objects';
 
 const apmIntro = 'Collect in-depth performance metrics and errors from inside your applications.';
 
-function isEnabled(config, key) {
-  try {
-    return config.get(key);
-  } catch (err) {
-    return false;
+function isEnabled(config) {
+  const ENABLED_KEY = 'xpack.apm.ui.enabled';
+  if (config.has(ENABLED_KEY)) {
+    return config.get(ENABLED_KEY);
   }
+
+  return false;
 }
 
 export function apmSpecProvider(server) {
   const config = server.config();
+  const apmIndexPattern = config.get('apm_oss.indexPattern');
 
   const artifacts = {
     dashboards: [
@@ -43,7 +46,7 @@ export function apmSpecProvider(server) {
       }
     ]
   };
-  if (isEnabled(config, 'xpack.apm.ui.enabled')) {
+  if (isEnabled(config)) {
     artifacts.application = {
       path: '/app/apm',
       label: 'Launch APM'
@@ -61,8 +64,11 @@ export function apmSpecProvider(server) {
       ' [Learn more]({config.docs.base_url}guide/en/apm/get-started/{config.docs.version}/index.html).',
     euiIconType: 'apmApp',
     artifacts: artifacts,
-    onPrem: onPremInstructions(server),
+    onPrem: onPremInstructions(apmIndexPattern),
     elasticCloud: ELASTIC_CLOUD_INSTRUCTIONS,
     previewImagePath: '/plugins/kibana/home/tutorial_resources/apm/apm.png',
+    savedObjects: getSavedObjects(apmIndexPattern),
+    savedObjectsInstallMsg: 'Load index pattern, visualizations, and pre-defined dashboards.' +
+      ' An index pattern is required for some features in the APM UI.',
   };
 }

@@ -7,9 +7,8 @@
 /*
  * @param {Object} config - Kibana config service
  * @param {Boolean} includeNodes - whether to add the aggs for node shards
- * @param {String} nodeResolver
  */
-export function getShardAggs(config, includeNodes, nodeResolver) {
+export function getShardAggs(config, includeNodes) {
   const maxBucketSize = config.get('xpack.monitoring.max_bucket_size');
   const aggSize = 10;
   const indicesAgg = {
@@ -26,7 +25,7 @@ export function getShardAggs(config, includeNodes, nodeResolver) {
   };
   const nodesAgg = {
     terms: {
-      field: `source_node.${nodeResolver}`,
+      field: 'shard.node',
       size: maxBucketSize
     },
     aggs: {

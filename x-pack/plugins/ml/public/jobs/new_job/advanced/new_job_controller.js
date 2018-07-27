@@ -98,6 +98,8 @@ module.controller('MlNewJob',
       '_type',
       '_uid',
       '_version',
+      '_feature',
+      '_ignored',
     ];
 
     const allowedInfluencerTypes = [
@@ -347,6 +349,16 @@ module.controller('MlNewJob',
                     }
                   });
                 });
+              });
+
+              // Add script fields from the job configuration to $scope.fields
+              // so they're available from within the dropdown in the detector modal.
+              const scriptFields = Object.keys(_.get($scope.job, 'datafeed_config.script_fields', {}));
+              // This type information is retrieved via fieldCaps for regular fields,
+              // here we're creating a similar object so the script field is usable further on.
+              const scriptType = { type: 'script_fields', searchable: false, aggregatable: true };
+              scriptFields.forEach((fieldName) => {
+                $scope.fields[fieldName] = scriptType;
               });
 
               if (Object.keys($scope.fields).length) {

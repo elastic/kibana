@@ -7,23 +7,14 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 
-import {
-  EuiButtonIcon,
-  EuiFlexGroup,
-  EuiFlexItem
-} from '@elastic/eui';
+import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
 function getToggleIconType(isCollapsed) {
   return isCollapsed ? 'arrowRight' : 'arrowDown';
 }
 
 export function CollapsibleStatement(props) {
-  const {
-    collapse,
-    expand,
-    id,
-    isCollapsed
-  } = props;
+  const { collapse, expand, id, isCollapsed } = props;
 
   const toggleClicked = () => {
     if (isCollapsed) {
@@ -40,10 +31,7 @@ export function CollapsibleStatement(props) {
       alignItems="center"
       className="pipelineViewer__statement"
     >
-      <EuiFlexItem
-        key={id}
-        grow={false}
-      >
+      <EuiFlexItem key={id} grow={false}>
         <EuiButtonIcon
           aria-label
           color="text"

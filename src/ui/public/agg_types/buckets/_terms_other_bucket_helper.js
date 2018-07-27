@@ -113,9 +113,6 @@ const buildOtherBucketAgg = (aggConfigs, aggWithOtherBucket, response) => {
   const filterAgg = new AggConfig(aggConfigs[index].vis, {
     type: 'filters',
     id: 'other',
-    schema: {
-      group: 'buckets'
-    }
   });
 
   // nest all the child aggregations of aggWithOtherBucket

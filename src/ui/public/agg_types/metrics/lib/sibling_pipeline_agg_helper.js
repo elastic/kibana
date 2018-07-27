@@ -22,7 +22,7 @@ import { AggConfig } from '../../../vis/agg_config';
 import { Schemas } from '../../../vis/editors/default/schemas';
 
 import { siblingPipelineAggController } from './sibling_pipeline_agg_controller';
-import { siblingPipelineAggWritter } from './sibling_pipeline_agg_writter';
+import { siblingPipelineAggWriter } from './sibling_pipeline_agg_writer';
 import metricAggTemplate from '../../controls/sub_metric.html';
 import { forwardModifyAggConfigOnSearchRequestStart } from './nested_agg_helpers';
 
@@ -97,7 +97,7 @@ const siblingPipelineAggHelper = {
         editor: metricAggTemplate,
         controller: siblingPipelineAggController('customMetric'),
         modifyAggConfigOnSearchRequestStart: forwardModifyAggConfigOnSearchRequestStart('customMetric'),
-        write: siblingPipelineAggWritter
+        write: siblingPipelineAggWriter
       }
     ];
   },

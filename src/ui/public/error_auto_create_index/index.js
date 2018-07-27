@@ -17,4 +17,4 @@
  * under the License.
  */
 
-export { ErrorAutoCreateIndexProvider } from './error_auto_create_index';
+export { isAutoCreateIndexError, showAutoCreateIndexErrorPage } from './error_auto_create_index';

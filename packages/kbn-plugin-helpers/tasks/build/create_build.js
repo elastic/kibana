@@ -65,13 +65,7 @@ function parseTsconfig(pluginSourcePath, configPath) {
   return config;
 }
 
-module.exports = function createBuild(
-  plugin,
-  buildTarget,
-  buildVersion,
-  kibanaVersion,
-  files
-) {
+module.exports = function createBuild(plugin, buildTarget, buildVersion, kibanaVersion, files) {
   const buildSource = plugin.root;
   const buildRoot = path.join(buildTarget, 'kibana', plugin.id);
 
@@ -90,14 +84,8 @@ module.exports = function createBuild(
           // put all files inside the correct directories
           .pipe(
             rename(function nestFileInDir(filePath) {
-              const nonRelativeDirname = filePath.dirname.replace(
-                /^(\.\.\/?)+/g,
-                ''
-              );
-              filePath.dirname = path.join(
-                relative(buildTarget, buildRoot),
-                nonRelativeDirname
-              );
+              const nonRelativeDirname = filePath.dirname.replace(/^(\.\.\/?)+/g, '');
+              filePath.dirname = path.join(relative(buildTarget, buildRoot), nonRelativeDirname);
             })
           )
 
@@ -112,13 +100,9 @@ module.exports = function createBuild(
       }
 
       // install packages in build
-      execa.sync(
-        winCmd('yarn'),
-        ['install', '--production', '--pure-lockfile'],
-        {
-          cwd: buildRoot,
-        }
-      );
+      execa.sync(winCmd('yarn'), ['install', '--production', '--pure-lockfile'], {
+        cwd: buildRoot,
+      });
     })
     .then(function() {
       if (!plugin.styleSheetToCompile) {
@@ -127,17 +111,11 @@ module.exports = function createBuild(
 
       const file = path.resolve(plugin.root, plugin.styleSheetToCompile);
       if (!existsSync(file)) {
-        throw new Error(
-          `Path provided for styleSheetToCompile does not exist: ${file}`
-        );
+        throw new Error(`Path provided for styleSheetToCompile does not exist: ${file}`);
       }
 
       const outputFileName = path.basename(file, path.extname(file)) + '.css';
-      const output = path.join(
-        buildRoot,
-        path.dirname(plugin.styleSheetToCompile),
-        outputFileName
-      );
+      const output = path.join(buildRoot, path.dirname(plugin.styleSheetToCompile), outputFileName);
 
       const rendered = sass.renderSync({ file, output });
       writeFileSync(output, rendered.css);
@@ -161,10 +139,7 @@ module.exports = function createBuild(
       const buildConfig = parseTsconfig(buildSource, buildConfigPath);
 
       if (buildConfig.extends) {
-        buildConfig.extends = path.join(
-          relative(buildRoot, buildSource),
-          buildConfig.extends
-        );
+        buildConfig.extends = path.join(relative(buildRoot, buildSource), buildConfig.extends);
 
         writeFileSync(buildConfigPath, JSON.stringify(buildConfig));
       }

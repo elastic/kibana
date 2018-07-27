@@ -6,131 +6,157 @@
 
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import { toQuery, fromQuery, history } from '../../../../utils/url';
-import { debounce } from 'lodash';
-import APMTable, {
-  AlignmentKuiTableHeaderCell
-} from '../../../shared/APMTable/APMTable';
-import ListItem from './ListItem';
+import { EuiBasicTable, EuiBadge } from '@elastic/eui';
+import numeral from '@elastic/numeral';
+import moment from 'moment';
+import {
+  toQuery,
+  fromQuery,
+  history,
+  RelativeLink
+} from '../../../../utils/url';
+import TooltipOverlay from '../../../shared/TooltipOverlay';
+import styled from 'styled-components';
+import {
+  unit,
+  px,
+  fontFamilyCode,
+  fontSizes,
+  truncate
+} from '../../../../style/variables';
 
-const ITEMS_PER_PAGE = 20;
+function paginateItems({ items, pageIndex, pageSize }) {
+  return items.slice(pageIndex * pageSize, (pageIndex + 1) * pageSize);
+}
+
+const GroupIdLink = styled(RelativeLink)`
+  font-family: ${fontFamilyCode};
+`;
+
+const MessageAndCulpritCell = styled.div`
+  ${truncate(px(unit * 32))};
+`;
+
+const MessageLink = styled(RelativeLink)`
+  font-family: ${fontFamilyCode};
+  font-size: ${fontSizes.large};
+  ${truncate('100%')};
+`;
+
+const Culprit = styled.div`
+  font-family: ${fontFamilyCode};
+`;
+
 class List extends Component {
-  updateQuery = getNextQuery => {
+  state = {
+    page: {
+      index: 0,
+      size: 25
+    }
+  };
+
+  onTableChange = ({ page = {}, sort = {} }) => {
+    this.setState({ page });
+
     const { location } = this.props;
-    const prevQuery = toQuery(location.search);
 
     history.push({
       ...location,
-      search: fromQuery(getNextQuery(prevQuery))
+      search: fromQuery({
+        ...toQuery(location.search),
+        sortField: sort.field,
+        sortDirection: sort.direction
+      })
     });
-  };
-
-  onClickNext = () => {
-    const { page } = this.props.urlParams;
-    this.updateQuery(prevQuery => ({
-      ...prevQuery,
-      page: page + 1
-    }));
-  };
-
-  onClickPrev = () => {
-    const { page } = this.props.urlParams;
-    this.updateQuery(prevQuery => ({
-      ...prevQuery,
-      page: page - 1
-    }));
-  };
-
-  onFilter = debounce(q => {
-    this.updateQuery(prevQuery => ({
-      ...prevQuery,
-      page: 0,
-      q
-    }));
-  }, 300);
-
-  onSort = key => {
-    this.updateQuery(prevQuery => ({
-      ...prevQuery,
-      sortBy: key,
-      sortOrder: this.props.urlParams.sortOrder === 'asc' ? 'desc' : 'asc'
-    }));
   };
 
   render() {
     const { items } = this.props;
-    const {
-      sortBy = 'latestOccurrenceAt',
-      sortOrder = 'desc',
-      page,
-      serviceName
-    } = this.props.urlParams;
+    const { serviceName, sortDirection, sortField } = this.props.urlParams;
 
-    const renderHead = () => {
-      const cells = [
-        { key: 'groupId', sortable: false, label: 'Group ID' },
-        { key: 'message', sortable: false, label: 'Error message and culprit' },
-        { key: 'handled', sortable: false, label: '', alignRight: true },
-        {
-          key: 'occurrenceCount',
-          sortable: true,
-          label: 'Occurrences',
-          alignRight: true
-        },
-        {
-          key: 'latestOccurrenceAt',
-          sortable: true,
-          label: 'Latest occurrence',
-          alignRight: true
+    const paginatedItems = paginateItems({
+      items,
+      pageIndex: this.state.page.index,
+      pageSize: this.state.page.size
+    });
+
+    const columns = [
+      {
+        name: 'Group ID',
+        field: 'groupId',
+        sortable: false,
+        width: px(unit * 6),
+        render: groupId => {
+          return (
+            <GroupIdLink path={`/${serviceName}/errors/${groupId}`}>
+              {groupId.slice(0, 5) || 'N/A'}
+            </GroupIdLink>
+          );
         }
-      ].map(({ key, sortable, label, alignRight }) => (
-        <AlignmentKuiTableHeaderCell
-          key={key}
-          className={alignRight ? 'kuiTableHeaderCell--alignRight' : ''}
-          {...(sortable
-            ? {
-                onSort: () => this.onSort(key),
-                isSorted: sortBy === key,
-                isSortAscending: sortOrder === 'asc'
-              }
-            : {})}
-        >
-          {label}
-        </AlignmentKuiTableHeaderCell>
-      ));
-
-      return cells;
-    };
-
-    const renderBody = errorGroups => {
-      return errorGroups.map(error => {
-        return (
-          <ListItem
-            key={error.groupId}
-            serviceName={serviceName}
-            error={error}
-          />
-        );
-      });
-    };
-
-    const startNumber = page * ITEMS_PER_PAGE;
-    const endNumber = (page + 1) * ITEMS_PER_PAGE;
-    const currentPageItems = items.slice(startNumber, endNumber);
+      },
+      {
+        name: 'Error message and culprit',
+        field: 'message',
+        sortable: false,
+        width: '50%',
+        render: (message, item) => {
+          return (
+            <MessageAndCulpritCell>
+              <TooltipOverlay content={message || 'N/A'}>
+                <MessageLink path={`/${serviceName}/errors/${item.groupId}`}>
+                  {message || 'N/A'}
+                </MessageLink>
+              </TooltipOverlay>
+              <TooltipOverlay content={item.culprit || 'N/A'}>
+                <Culprit>{item.culprit || 'N/A'}</Culprit>
+              </TooltipOverlay>
+            </MessageAndCulpritCell>
+          );
+        }
+      },
+      {
+        name: '',
+        field: 'handled',
+        sortable: false,
+        align: 'right',
+        render: isUnhandled =>
+          isUnhandled === false && (
+            <EuiBadge color="warning">Unhandled</EuiBadge>
+          )
+      },
+      {
+        name: 'Occurrences',
+        field: 'occurrenceCount',
+        sortable: true,
+        dataType: 'number',
+        render: value => (value ? numeral(value).format('0.[0]a') : 'N/A')
+      },
+      {
+        field: 'latestOccurrenceAt',
+        sortable: true,
+        name: 'Latest occurrence',
+        align: 'right',
+        render: value => (value ? moment(value).fromNow() : 'N/A')
+      }
+    ];
 
     return (
-      <APMTable
-        defaultSearchQuery={this.props.urlParams.q}
-        emptyMessageHeading="No errors in the selected time range."
-        items={currentPageItems}
-        itemsPerPage={ITEMS_PER_PAGE}
-        onClickNext={this.onClickNext}
-        onClickPrev={this.onClickPrev}
-        onFilter={this.onFilter}
-        page={page}
-        renderBody={renderBody}
-        renderHead={renderHead}
-        totalItems={items.length}
+      <EuiBasicTable
+        noItemsMessage="No errors were found"
+        items={paginatedItems}
+        columns={columns}
+        pagination={{
+          pageIndex: this.state.page.index,
+          pageSize: this.state.page.size,
+          totalItemCount: this.props.items.length
+        }}
+        sorting={{
+          sort: {
+            field: sortField || 'latestOccurrenceAt',
+            direction: sortDirection || 'desc'
+          }
+        }}
+        onChange={this.onTableChange}
       />
     );
   }

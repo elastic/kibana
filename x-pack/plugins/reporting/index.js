@@ -74,7 +74,7 @@ export const reporting = (kibana) => {
           indexInterval: Joi.string().default('week'),
           pollInterval: Joi.number().integer().default(3000),
           pollIntervalErrorMultiplier: Joi.number().integer().default(10),
-          timeout: Joi.number().integer().default(30000),
+          timeout: Joi.number().integer().default(120000),
         }).default(),
         capture: Joi.object({
           record: Joi.boolean().default(false),
@@ -146,7 +146,7 @@ export const reporting = (kibana) => {
       validateConfig(config, message => server.log(['reporting', 'warning'], message));
       logConfiguration(config, message => server.log(['reporting', 'debug'], message));
 
-      const { xpack_main: xpackMainPlugin, monitoring: monitoringPlugin } = server.plugins;
+      const { xpack_main: xpackMainPlugin } = server.plugins;
 
       mirrorPluginStatus(xpackMainPlugin, this);
       const checkLicense = checkLicenseFactory(exportTypesRegistry);
@@ -156,12 +156,8 @@ export const reporting = (kibana) => {
         xpackMainPlugin.info.feature(this.id).registerLicenseCheckResultsGenerator(checkLicense);
       });
 
-      // Register a function to with Monitoring to manage the collection of usage stats
-      monitoringPlugin && monitoringPlugin.status.once('green', () => {
-        if (monitoringPlugin.collectorSet) {
-          monitoringPlugin.collectorSet.register(getReportingUsageCollector(server));
-        }
-      });
+      // Register a function with server to manage the collection of usage stats
+      server.usage.collectorSet.register(getReportingUsageCollector(server));
 
       server.expose('browserDriverFactory', await createBrowserDriverFactory(server));
       server.expose('queue', createQueueFactory(server));

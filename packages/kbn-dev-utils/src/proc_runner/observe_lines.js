@@ -18,15 +18,7 @@
  */
 
 import * as Rx from 'rxjs';
-import {
-  scan,
-  takeUntil,
-  share,
-  materialize,
-  mergeMap,
-  last,
-  catchError,
-} from 'rxjs/operators';
+import { scan, takeUntil, share, materialize, mergeMap, last, catchError } from 'rxjs/operators';
 
 const SEP = /\r?\n/;
 

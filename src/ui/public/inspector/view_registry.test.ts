@@ -17,10 +17,7 @@
  * under the License.
  */
 
-import {
-  InspectorViewDescription,
-  InspectorViewRegistry,
-} from './view_registry';
+import { InspectorViewDescription, InspectorViewRegistry } from './view_registry';
 
 import { Adapters } from './types';
 

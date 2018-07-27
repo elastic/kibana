@@ -109,10 +109,7 @@ interface InspectorOptions {
  * @param {InspectorOptions} options - Options that configure the inspector. See InspectorOptions type.
  * @return {InspectorSession} The session instance for the opened inspector.
  */
-function open(
-  adapters: Adapters,
-  options: InspectorOptions = {}
-): InspectorSession {
+function open(adapters: Adapters, options: InspectorOptions = {}): InspectorSession {
   // If there is an active inspector session close it before opening a new one.
   if (activeSession) {
     activeSession.close();

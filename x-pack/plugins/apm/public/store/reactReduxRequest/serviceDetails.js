@@ -7,15 +7,16 @@
 import React from 'react';
 import _ from 'lodash';
 import PropTypes from 'prop-types';
-import { withInitialData } from './helpers';
+import { createInitialDataSelector } from './helpers';
 import { Request } from 'react-redux-request';
-import { loadServiceDetails } from '../../services/rest';
+import { loadServiceDetails } from '../../services/rest/apm';
 
 const ID = 'serviceDetails';
 const INITIAL_DATA = { types: [] };
+const withInitialData = createInitialDataSelector(INITIAL_DATA);
 
 export function getServiceDetails(state) {
-  return withInitialData(state.reactReduxRequest[ID], INITIAL_DATA);
+  return withInitialData(state.reactReduxRequest[ID]);
 }
 
 export function getDefaultTransactionType(state) {

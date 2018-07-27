@@ -150,7 +150,7 @@ export default function ({ getService, getPageObjects }) {
         expect(text).to.be('1442901600000');
       });
 
-      it.skip('should allow printing raw value of data', async () => {
+      it('should allow printing raw value of data', async () => {
         await PageObjects.visualBuilder.enterMarkdown('{{ count.data.raw.[0].[1] }}');
         const text = await PageObjects.visualBuilder.getMarkdownText();
         expect(text).to.be('6');
@@ -195,6 +195,7 @@ export default function ({ getService, getPageObjects }) {
       it('should be able to set values for group by field and column name', async () => {
         await PageObjects.visualBuilder.selectGroupByField('machine.os.raw');
         await PageObjects.visualBuilder.setLabelValue('OS');
+        await PageObjects.header.waitUntilLoadingHasFinished();
         log.debug('finished setting field and column name');
       });
 

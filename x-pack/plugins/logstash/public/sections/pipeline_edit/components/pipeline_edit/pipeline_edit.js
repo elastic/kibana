@@ -7,7 +7,7 @@
 import { isEmpty } from 'lodash';
 import { uiModules } from 'ui/modules';
 import { InitAfterBindingsWorkaround } from 'ui/compat';
-import { Notifier, toastNotifications } from 'ui/notify';
+import { toastNotifications } from 'ui/notify';
 import template from './pipeline_edit.html';
 import 'plugins/logstash/services/license';
 import 'plugins/logstash/services/security';
@@ -36,7 +36,6 @@ app.directive('pipelineEdit', function ($injector) {
     controller: class PipelineEditController extends InitAfterBindingsWorkaround {
       initAfterBindings($scope) {
         this.originalPipeline = { ...this.pipeline };
-        this.notifier = new Notifier({ location: 'Logstash' });
         this.isNewPipeline = isEmpty(this.pipeline.id);
         // only if security is enabled and available, we tack on the username.
         if (securityService.isSecurityEnabled) {
@@ -82,7 +81,7 @@ app.directive('pipelineEdit', function ($injector) {
           .catch(err => {
             return licenseService
               .checkValidity()
-              .then(() => this.notifier.error(err));
+              .then(() => toastNotifications.addDanger(err));
           });
       };
 
@@ -112,7 +111,7 @@ app.directive('pipelineEdit', function ($injector) {
           .catch(err => {
             return licenseService
               .checkValidity()
-              .then(() => this.notifier.error(err));
+              .then(() => toastNotifications.addDanger(err));
           });
       };
 

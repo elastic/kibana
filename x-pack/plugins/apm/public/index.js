@@ -12,6 +12,7 @@ import { Router } from 'react-router-dom';
 import ReactDOM from 'react-dom';
 import 'ui/autoload/styles';
 import 'ui/autoload/all';
+import 'uiExports/autocompleteProviders';
 import 'react-vis/dist/style.css';
 import './style/global_overrides.css';
 
@@ -27,10 +28,9 @@ import LicenseChecker from './components/app/Main/LicenseChecker';
 import { history } from './utils/url';
 
 chrome.setRootTemplate(template);
-
 const store = configureStore();
 
-initTimepicker(history, store.dispatch, () => {
+initTimepicker(history, store.dispatch).then(() => {
   ReactDOM.render(
     <Router history={history}>
       <Breadcrumbs />

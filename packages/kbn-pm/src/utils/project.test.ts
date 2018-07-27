@@ -96,9 +96,7 @@ describe('#ensureValidProjectDependency', () => {
       'packages/foo'
     );
 
-    expect(() =>
-      root.ensureValidProjectDependency(foo)
-    ).toThrowErrorMatchingSnapshot();
+    expect(() => root.ensureValidProjectDependency(foo)).toThrowErrorMatchingSnapshot();
   });
 
   test('using version instead of link:', () => {
@@ -118,9 +116,7 @@ describe('#ensureValidProjectDependency', () => {
       'packages/foo'
     );
 
-    expect(() =>
-      root.ensureValidProjectDependency(foo)
-    ).toThrowErrorMatchingSnapshot();
+    expect(() => root.ensureValidProjectDependency(foo)).toThrowErrorMatchingSnapshot();
   });
 });
 
@@ -157,9 +153,7 @@ describe('#getExecutables()', () => {
   });
 
   test('throws CliError when bin is something strange', () => {
-    expect(() =>
-      createProjectWith({ bin: 1 }).getExecutables()
-    ).toThrowErrorMatchingSnapshot();
+    expect(() => createProjectWith({ bin: 1 }).getExecutables()).toThrowErrorMatchingSnapshot();
   });
 });
 
