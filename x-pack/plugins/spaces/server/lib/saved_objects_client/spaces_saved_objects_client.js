@@ -46,7 +46,8 @@ export class SpacesSavedObjectsClient {
       ...options,
       extraDocumentProperties: {
         ...options.extraDocumentProperties
-      }
+      },
+      id: this._generateDocumentId(type, options.id)
     };
 
     if (this._shouldAssignSpaceId(type, spaceId)) {
@@ -55,7 +56,8 @@ export class SpacesSavedObjectsClient {
       delete createOptions.extraDocumentProperties.spaceId;
     }
 
-    return await this._client.create(type, attributes, createOptions);
+    const result = await this._client.create(type, attributes, createOptions);
+    return this._trimSpaceId(result);
   }
 
   /**
@@ -74,7 +76,8 @@ export class SpacesSavedObjectsClient {
         ...object,
         extraDocumentProperties: {
           ...object.extraDocumentProperties
-        }
+        },
+        id: this._generateDocumentId(object.type, object.id)
       };
 
       if (this._shouldAssignSpaceId(object.type, spaceId)) {
@@ -86,7 +89,10 @@ export class SpacesSavedObjectsClient {
       return objectToCreate;
     });
 
-    return await this._client.bulkCreate(objectsToCreate, options);
+    const result = await this._client.bulkCreate(objectsToCreate, options);
+    result.saved_objects.forEach(this._trimSpaceId.bind(this));
+
+    return result;
   }
 
   /**
@@ -97,11 +103,13 @@ export class SpacesSavedObjectsClient {
    * @returns {promise}
    */
   async delete(type, id) {
+    const documentId = this._generateDocumentId(type, id);
+
     // attempt to retrieve document before deleting.
     // this ensures that the document belongs to the current space.
     await this.get(type, id);
 
-    return await this._client.delete(type, id);
+    return await this._client.delete(type, documentId);
   }
 
   /**
@@ -132,7 +140,9 @@ export class SpacesSavedObjectsClient {
 
     spaceOptions.filters = [...filters, ...getSpacesQueryFilters(spaceId, types)];
 
-    return await this._client.find({ ...options, ...spaceOptions });
+    const result = await this._client.find({ ...options, ...spaceOptions });
+    result.saved_objects.forEach(this._trimSpaceId.bind(this));
+    return result;
   }
 
   /**
@@ -155,13 +165,18 @@ export class SpacesSavedObjectsClient {
 
     const extraDocumentProperties = this._collectExtraDocumentProperties(['spaceId', 'type'], options.extraDocumentProperties);
 
-    const result = await this._client.bulkGet(objects, {
+    const objectsToRetrieve = objects.map(object => ({
+      ...object,
+      id: this._generateDocumentId(object.type, object.id)
+    }));
+
+    const result = await this._client.bulkGet(objectsToRetrieve, {
       ...options,
       extraDocumentProperties
     });
 
     result.saved_objects = result.saved_objects.map(savedObject => {
-      const { id, type, spaceId = DEFAULT_SPACE_ID } = savedObject;
+      const { id, type, spaceId = DEFAULT_SPACE_ID } = this._trimSpaceId(savedObject);
 
       if (isTypeSpaceAware(type)) {
         if (spaceId !== thisSpaceId) {
@@ -191,9 +206,11 @@ export class SpacesSavedObjectsClient {
   async get(type, id, options = {}) {
     // ES 'get' does not support queries, so we have to filter results after the fact.
 
+    const documentId = this._generateDocumentId(type, id);
+
     const extraDocumentProperties = this._collectExtraDocumentProperties(['spaceId'], options.extraDocumentProperties);
 
-    const response = await this._client.get(type, id, {
+    const response = await this._client.get(type, documentId, {
       ...options,
       extraDocumentProperties
     });
@@ -207,7 +224,7 @@ export class SpacesSavedObjectsClient {
       }
     }
 
-    return response;
+    return this._trimSpaceId(response);
   }
 
   /**
@@ -228,6 +245,8 @@ export class SpacesSavedObjectsClient {
       }
     };
 
+    const documentId = this._generateDocumentId(type, id);
+
     // attempt to retrieve document before updating.
     // this ensures that the document belongs to the current space.
     if (isTypeSpaceAware(type)) {
@@ -242,7 +261,8 @@ export class SpacesSavedObjectsClient {
       }
     }
 
-    return await this._client.update(type, id, attributes, updateOptions);
+    const result = await this._client.update(type, documentId, attributes, updateOptions);
+    return this._trimSpaceId(result);
   }
 
   _collectExtraDocumentProperties(thisClientProperties, optionalProperties = []) {
@@ -253,15 +273,15 @@ export class SpacesSavedObjectsClient {
     return spaceId !== DEFAULT_SPACE_ID && isTypeSpaceAware(type);
   }
 
-  _generateDocumentId(spaceId, id = uuid.v1()) {
-    if (!spaceId || spaceId === DEFAULT_SPACE_ID) {
+  _generateDocumentId(type, id = uuid.v1()) {
+    if (!this._spaceId || this._spaceId === DEFAULT_SPACE_ID || !isTypeSpaceAware(type)) {
       return id;
     }
-    return `${spaceId}:${id}`;
+    return `${this._spaceId}:${id}`;
   }
 
-  _trimSpaceId(spaceId, savedObject) {
-    const prefix = `${spaceId}:`;
+  _trimSpaceId(savedObject) {
+    const prefix = `${this._spaceId}:`;
 
     if (savedObject.id.startsWith(prefix)) {
       savedObject.id = savedObject.id.slice(prefix.length);
