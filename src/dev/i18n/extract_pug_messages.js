@@ -25,13 +25,13 @@ import { isI18nTranslateFunction, traverseNodes } from './utils';
 /**
  * Matches `i18n(...)` in `#{i18n('id', { defaultMessage: 'Message text' })}`
  */
-const JADE_I18N_REGEX = /(?<=\#\{)i18n\((([^)']|'([^'\\]|\\.)*')*\)(?=\}))/g;
+const PUG_I18N_REGEX = /(?<=\#\{)i18n\((([^)']|'([^'\\]|\\.)*')*\)(?=\}))/g;
 
 /**
  * Example: `#{i18n('message-id', { defaultMessage: 'Message text' })}`
  */
-export function* extractJadeMessages(buffer) {
-  const expressions = buffer.toString().match(JADE_I18N_REGEX) || [];
+export function* extractPugMessages(buffer) {
+  const expressions = buffer.toString().match(PUG_I18N_REGEX) || [];
 
   for (const expression of expressions) {
     for (const node of traverseNodes(parse(expression).program.body)) {

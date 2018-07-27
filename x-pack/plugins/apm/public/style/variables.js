@@ -92,6 +92,4 @@ export function truncate(width) {
 }
 
 // height of specific elements
-export const elements = {
-  topNav: '29px'
-};
+export const topNavHeight = '29px';
