@@ -6,6 +6,7 @@
     "license": {
       "status": "active",
       "type": "gold",
+      "expiry_date": "2030-08-29T23:59:59.999Z",
       "expiry_date_in_millis": 1914278399999
     },
     "elasticsearch": {
