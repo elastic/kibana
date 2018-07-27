@@ -89,8 +89,8 @@ export default function ({ getService, getPageObjects }) {
       });
 
       it('gets copied to clipboard', async function () {
-        const isCopiedToClipboard = await PageObjects.discover.clickCopyToClipboard();
-        expect(isCopiedToClipboard).to.eql(true);
+        // This method is self-confirming, so we don't need an assertion.
+        await PageObjects.discover.clickCopyToClipboard();
       });
 
       // TODO: verify clipboard contents
@@ -105,8 +105,8 @@ export default function ({ getService, getPageObjects }) {
 
       // NOTE: This test has to run immediately after the test above
       it('copies short URL to clipboard', async function () {
-        const isCopiedToClipboard = await PageObjects.discover.clickCopyToClipboard();
-        expect(isCopiedToClipboard).to.eql(true);
+        // This method is self-confirming, so we don't need an assertion.
+        await PageObjects.discover.clickCopyToClipboard();
       });
     });
   });
