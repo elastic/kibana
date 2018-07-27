@@ -24,7 +24,6 @@ import path from 'path';
 import fs from 'fs';
 import { promisify } from 'util';
 import mkdirp from 'mkdirp';
-import { isEmpty, difference, remove } from 'lodash';
 
 const readFileAsync = promisify(fs.readFile);
 const realPathAsync = promisify(fs.realpath);
@@ -44,8 +43,8 @@ export class Plugin {
     this.log = log || (() => {});
     this.entryPath = this.dllConfig.ub.resolvePath('vendor.entry.dll.js');
     this.manifestPath = this.dllConfig.ub.resolvePath('vendor.manifest.dll.json');
-    this.entryPaths = [];
-    this.waitForBundlerEntryFile = false;
+    this.dllBundlePath = this.dllConfig.ub.resolvePath('vendor.bundle.dll.json');
+    this.entryPaths = '';
   }
 
   async ensureManifestExists() {
@@ -63,16 +62,17 @@ export class Plugin {
     }
   }
 
-  async readCurrentManifest() {
-    return JSON.parse(await readFileAsync(this.manifestPath, 'utf8'));
-  }
-
   async ensureEntryExists() {
     const exists = await existsAsync(this.entryPath);
     if (!exists) {
       await mkdirpAsync(path.dirname(this.entryPath));
       await writeFileAsync(this.entryPath, '', 'utf8');
     }
+  }
+
+  async readEnsureEntry() {
+    await this.ensureEntryExists();
+    return await readFileAsync(this.entryPath, 'utf8');
   }
 
   apply(compiler) {
@@ -84,100 +84,27 @@ export class Plugin {
     }).apply(compiler);
   }
 
-  runEntryPathsCompiler(compiler) {
-    return new Promise((resolve) => {
-      const mainCompilerConfig = compiler.options;
-      // Filter out this own plugin from the main compiler
-      // config to avoid exceed max stack size
-      remove(mainCompilerConfig.plugins, (plugin) => {
-        return plugin === this;
-      });
-
-      this.entryPathsCompiler = webpack(mainCompilerConfig);
-
-      this.entryPathsCompiler.hooks.beforeCompile.tapPromise('DynamicDllPlugin', async ({ normalModuleFactory }) => {
-        normalModuleFactory.hooks.factory.tap(
-          'NormalModuleFactory',
-          (actualFactory) => (params, cb) => {
-            actualFactory(params, (error, module) => {
-              if (error || !module) {
-                cb(error, module);
-              } else {
-                this.mapNormalModule(module).then(
-                  (m = module) => cb(undefined, m),
-                  error => cb(error)
-                );
-              }
-            });
-          }
-        );
-      });
-
-      this.entryPathsCompiler.hooks.emit.tapPromise('DynamicDllPlugin', async (compilation) => {
-        const requests = [];
-        const requires  = [];
-
-        for (const module of compilation.modules) {
-          // re-include requires for modules already handled by the dll
-          if (module.delegateData) {
-            const absoluteResource = path.resolve(this.dllConfig.context, module.request);
-            requests.push(`${path.relative(this.dllConfig.outputPath, absoluteResource)}`);
-            requires.push(`require(${path.relative(this.dllConfig.outputPath, absoluteResource)});`);
-          }
-
-          // include requires for modules that need to be added to the dll
-          if (module.type === DLL_ENTRY_STUB_MODULE_TYPE) {
-            requests.push(`${path.relative(this.dllConfig.outputPath, module.resource)}`);
-            requires.push(`require(${path.relative(this.dllConfig.outputPath, module.resource)});`);
-          }
-
-        }
-
-        console.log('done, ', requests.length);
-
-        // const same = this.isSame(this.entryPaths, requests);
-        // const oldContent = await readFileAsync(this.entryPath, 'utf8');
-        // const newContent = '\n' + requires.sort().join('\n');
-
-        this.entryPaths = requests.slice(0);
-
-        //if (oldContent !== newContent) {
-        this.entryPaths = requests.sort().slice(0);
-        // await this.runDLLsCompiler();
-        //}
-      });
-
-      this.entryPathsCompiler.run(() => {
-        resolve();
-      });
-    });
-  }
-
   bindToCompiler(compiler) {
     compiler.hooks.run.tapPromise('DynamicDllPlugin', async () => {
       console.log('starting compile');
       await this.ensureManifestExists();
-      await this.ensureEntryExists();
+      this.entryPaths = await this.readEnsureEntry();
     });
 
-    compiler.hooks.watchRun.tapAsync('DynamicDllPlugin', async (a, cb) => {
+    compiler.hooks.watchRun.tapPromise('DynamicDllPlugin', async () => {
       console.log('starting compile');
       await this.ensureManifestExists();
-      await this.ensureEntryExists();
-      cb();
+      this.entryPaths = await this.readEnsureEntry();
     });
 
     compiler.hooks.beforeCompile.tapPromise('DynamicDllPlugin', async ({ normalModuleFactory }) => {
-      // if (this.waitForBundlerEntryFile) {
-      //   console.log('before compile compiling DLL');
-      //   console.log('waiting for dll bundler');
-      //   await this.runDLLsCompiler();
-      //   this.waitForBundlerEntryFile = false;
-      // }
-
       normalModuleFactory.hooks.factory.tap(
         'NormalModuleFactory',
         (actualFactory) => (params, cb) => {
+          // This is used in order to avoid the cache for DLL modules
+          // resolved from other dependencies
+          normalModuleFactory.cachePredicate = (module) => !(module.stubType === DLL_ENTRY_STUB_MODULE_TYPE);
+
           actualFactory(params, (error, module) => {
             if (error || !module) {
               cb(error, module);
@@ -193,16 +120,8 @@ export class Plugin {
     });
 
     compiler.hooks.compilation.tap('DynamicDllPlugin', compilation => {
-      // console.log('FDXXXXXXXXXXXXX');
-      if (compilation.compiler !== compiler || this.waitForBundlerEntryFile) {
-        // ignore child compilations from plugins like mini-css-extract-plugin
-        return;
-      }
-
-      console.log('OLAAAAAAAAAAAAA');
-
       compilation.hooks.needAdditionalPass.tap('DynamicDllPlugin', () => {
-        const stubs = compilation.modules.filter(m => m.type === DLL_ENTRY_STUB_MODULE_TYPE);
+        const stubs = compilation.modules.filter(m => m.stubType === DLL_ENTRY_STUB_MODULE_TYPE);
 
         if (!stubs.length) {
           return false;
@@ -214,54 +133,63 @@ export class Plugin {
     });
 
 
-    compiler.hooks.emit.tapPromise('DynamicDLLPlugin', async (compilation) => {
-      console.log('last compiler step start');
-
-
+    compiler.hooks.done.tapAsync('DynamicDllPlugin', async (stats, cb) => {
       const requires = [];
 
-      for (const module of compilation.modules) {
+      for (const module of stats.compilation.modules) {
         // re-include requires for modules already handled by the dll
         if (module.delegateData) {
           const absoluteResource = path.resolve(this.dllConfig.context, module.request);
-          requires.push(`${path.relative(this.dllConfig.outputPath, absoluteResource)}`);
+          requires.push(`require('${path.relative(this.dllConfig.outputPath, absoluteResource)}');`);
         }
 
         // include requires for modules that need to be added to the dll
-        if (module.type === DLL_ENTRY_STUB_MODULE_TYPE) {
-          requires.push(`${path.relative(this.dllConfig.outputPath, module.resource)}`);
+        //
+        // INFO: the condition after the || is used to prevent a double dll compilation
+        // when we are under watching mode. After the first done hook, we will go to the
+        // needAdditionalPass that will return no and we will get into a second done.
+        // If we don't use this trick, a second DLL will be compiled
+        // if (module.stubType === DLL_ENTRY_STUB_MODULE_TYPE || module.type === module.stubType) {
+        //   requires.push(`require('${path.relative(this.dllConfig.outputPath, module.resource)}');`);
+        // }
+        if (module.stubType === DLL_ENTRY_STUB_MODULE_TYPE) {
+          requires.push(`require('${path.relative(this.dllConfig.outputPath, module.resource)}');`);
         }
       }
 
-      const same = this.isSame(this.entryPaths, requires);
+      const newEntryPaths = requires.sort().join('\n');
+      this.entryPaths = await this.readEnsureEntry();
 
-      if (!same) {
+      if (newEntryPaths !== this.entryPaths) {
         console.log('writing new bundler entry file');
-        this.entryPaths = requires.slice(0);
-        this.waitForBundlerEntryFile = true;
+        this.entryPaths = newEntryPaths;
         await this.runDLLsCompiler();
-        this.waitForBundlerEntryFile = false;
+        compiler.inputFileSystem.purge(this.manifestPath);
 
-        for (const [key, module] of Object.entries(compilation.cache)) {
-          if (module.type === DLL_ENTRY_STUB_MODULE_TYPE) {
-            delete compilation.cache[key];
-          }
-        }
+        // if (stats.compilation.modules) {
+        //   for(let i = 0; i < stats.compilation.modules.length; i++) {
+        //     const module = stats.compilation.modules[i];
+        //     if (module.stubType === DLL_ENTRY_STUB_MODULE_TYPE) {
+        //       module.stubType = module.type;
+        //     }
+        //   }
+        // }
+
+        console.log('new entry file, new manifest and new dll');
       }
-      console.log('last compiler step end');
+
+      // if (stats.compilation.cache) {
+      //   for (const [key, module] of Object.entries(stats.compilation.cache)) {
+      //     if (module.stubType === DLL_ENTRY_STUB_MODULE_TYPE) {
+      //       console.log('cache');
+      //       delete stats.compilation.cache[key];
+      //     }
+      //   }
+      // }
+
+      console.log('done');
+      return cb();
     });
-
-  }
-
-  isSame(arrayOne, arrayTwo) {
-    let a = arrayOne;
-    let b = arrayTwo;
-
-    if (arrayOne.length <= arrayTwo.length) {
-      a = arrayTwo;
-      b = arrayOne;
-    }
-    return isEmpty(difference(a.sort(), b.sort()));
   }
 
   async runDLLsCompiler() {
@@ -300,13 +228,40 @@ export class Plugin {
       return;
     }
 
+    // #CodeBlock1
+    //
+    // When run in watching mode and we add a new module
+    // on the fly, it will cause an error because
+    // this raw module will be injected in the chunk and so the code
+    // won't be found.
+    //
+    //
     const stubModule = new RawModule(
       `/* pending dll entry */`,
       `dll pending:${module.resource}`,
       module.resource
     );
-    stubModule.type = DLL_ENTRY_STUB_MODULE_TYPE;
+    stubModule.stubType = DLL_ENTRY_STUB_MODULE_TYPE;
     stubModule.resource = module.resource;
     return stubModule;
+    //
+    //
+
+    // #CodeBlock2
+    //
+    // If we use that instead of the above #CodeBlock1
+    // the plugin also works well in the watching mode when
+    // we add a new dependency. However instead of linking it
+    // to the DLL it adds the module to the the chunk.
+    // Maybe a possible solution will be to inject the DelegateModule here
+    // in the same way that DelegatedModuleFactoryPlugin does.
+    // If we weren't able to do it we can try to understand if we are
+    // on watching mode and then only add here a simple DelegateModule
+    //
+    //
+    // module.stubType = DLL_ENTRY_STUB_MODULE_TYPE;
+    // return module;
+    //
+    //
   }
 }

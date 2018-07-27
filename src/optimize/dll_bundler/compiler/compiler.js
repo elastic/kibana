@@ -58,7 +58,7 @@ export class Compiler {
     return configModel.bind(this, dllConfig);
   }
 
-  upsertDllEntryFile(entryPaths = [], entryName = 'vendor') {
+  upsertDllEntryFile(entryPaths = '', entryName = 'vendor') {
     const dllEntry = this.dllEntries.find((entry) => {
       return entry.name === entryName;
     });
@@ -67,15 +67,8 @@ export class Compiler {
       return;
     }
 
-    const data = entryPaths.reduce(
-      (accumulator, currentValue) => {
-        return accumulator + `require('${currentValue}');\n`;
-      },
-      '\n'
-    );
-
     const entryFileName = `${this.outputPath}/${entryName}.entry.dll.js`;
-    fs.writeFileSync(entryFileName, data);
+    fs.writeFileSync(entryFileName, entryPaths);
   }
 
   touchDllManifests() {

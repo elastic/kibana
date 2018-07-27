@@ -86,7 +86,7 @@ export default class BaseOptimizer {
     this.compiler.hooks.done.tap({
       name: 'kibana-writeStatsJson',
       fn: stats => {
-        if (!this.profile) {
+        if (!this.profile || stats.compilation.needAdditionalPass) {
           return;
         }
 

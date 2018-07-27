@@ -109,6 +109,10 @@ export default class WatchOptimizer extends BaseOptimizer {
   compilerDoneTap = {
     name: 'kibana-compilerDoneTap',
     fn: (stats) => {
+      if (stats.compilation.needAdditionalPass) {
+        return;
+      }
+
       this.initialBuildComplete = true;
       const seconds = parseFloat((stats.endTime - stats.startTime) / 1000).toFixed(2);
 
