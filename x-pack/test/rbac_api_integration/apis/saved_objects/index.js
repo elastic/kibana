@@ -32,6 +32,36 @@ export default function ({ loadTestFile, getService }) {
           }
         });
 
+      await supertest.put('/api/security/role/kibana_dual_privileges_user')
+        .send({
+          elasticsearch: {
+            indices: [{
+              names: ['.kibana'],
+              privileges: ['manage', 'read', 'index', 'delete']
+            }]
+          },
+          kibana: [
+            {
+              privileges: ['all']
+            }
+          ]
+        });
+
+      await supertest.put('/api/security/role/kibana_dual_privileges_dashboard_only_user')
+        .send({
+          elasticsearch: {
+            indices: [{
+              names: ['.kibana'],
+              privileges: ['read', 'view_index_metadata']
+            }]
+          },
+          kibana: [
+            {
+              privileges: ['read']
+            }
+          ]
+        });
+
       await supertest.put('/api/security/role/kibana_rbac_user')
         .send({
           kibana: [
@@ -77,6 +107,26 @@ export default function ({ loadTestFile, getService }) {
           roles: ["kibana_legacy_dashboard_only_user"],
           full_name: 'a kibana legacy dashboard only user',
           email: 'a_kibana_legacy_dashboard_only_user@elastic.co',
+        }
+      });
+
+      await es.shield.putUser({
+        username: AUTHENTICATION.KIBANA_DUAL_PRIVILEGES_USER.USERNAME,
+        body: {
+          password: AUTHENTICATION.KIBANA_DUAL_PRIVILEGES_USER.PASSWORD,
+          roles: ['kibana_dual_privileges_user'],
+          full_name: 'a kibana dual_privileges user',
+          email: 'a_kibana_dual_privileges_user@elastic.co',
+        }
+      });
+
+      await es.shield.putUser({
+        username: AUTHENTICATION.KIBANA_DUAL_PRIVILEGES_DASHBOARD_ONLY_USER.USERNAME,
+        body: {
+          password: AUTHENTICATION.KIBANA_DUAL_PRIVILEGES_DASHBOARD_ONLY_USER.PASSWORD,
+          roles: ["kibana_dual_privileges_dashboard_only_user"],
+          full_name: 'a kibana dual_privileges dashboard only user',
+          email: 'a_kibana_dual_privileges_dashboard_only_user@elastic.co',
         }
       });
 

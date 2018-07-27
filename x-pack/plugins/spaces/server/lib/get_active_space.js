@@ -6,20 +6,15 @@
 
 import Boom from 'boom';
 import { wrapError } from './errors';
-import { getSpaceUrlContext } from '../../common/spaces_url_parser';
-import { DEFAULT_SPACE_ID } from '../../common/constants';
+import { getSpaceIdFromPath } from './spaces_url_parser';
 
-export async function getActiveSpace(savedObjectsClient, basePath) {
-  const spaceContext = getSpaceUrlContext(basePath);
+export async function getActiveSpace(savedObjectsClient, requestBasePath, serverBasePath) {
+  const spaceId = getSpaceIdFromPath(requestBasePath, serverBasePath);
 
   let space;
 
   try {
-    if (spaceContext) {
-      space = await getSpaceByUrlContext(savedObjectsClient, spaceContext);
-    } else {
-      space = await getDefaultSpace(savedObjectsClient);
-    }
+    space = await getSpaceById(savedObjectsClient, spaceId);
   }
   catch (e) {
     throw wrapError(e);
@@ -37,30 +32,6 @@ export async function getActiveSpace(savedObjectsClient, basePath) {
   };
 }
 
-async function getDefaultSpace(savedObjectsClient) {
-  return savedObjectsClient.get('space', DEFAULT_SPACE_ID);
-}
-
-async function getSpaceByUrlContext(savedObjectsClient, urlContext) {
-  const {
-    saved_objects: savedObjects
-  } = await savedObjectsClient.find({
-    type: 'space',
-    search: `"${urlContext}"`,
-    search_fields: ['urlContext'],
-  });
-
-  if (savedObjects.length === 0) {
-    return null;
-  }
-
-  if (savedObjects.length > 1) {
-    const spaceNames = savedObjects.map(s => s.attributes.name).join(', ');
-
-    throw Boom.badRequest(
-      `Multiple Spaces share this URL Context: (${spaceNames}). Please correct this in the Management Section.`
-    );
-  }
-
-  return savedObjects[0];
+async function getSpaceById(savedObjectsClient, spaceId) {
+  return savedObjectsClient.get('space', spaceId);
 }

@@ -15,11 +15,24 @@ describe('interceptors', () => {
 
   beforeEach(() => {
     teardowns.push(() => sandbox.restore());
-    request = async (path, setupFn = () => { }) => {
+    request = async (path, setupFn = () => { }, testConfig = {}) => {
 
       const server = new Server();
 
       server.connection({ port: 0 });
+
+      const config = {
+        'server.basePath': '/foo',
+        ...testConfig,
+      };
+
+      server.decorate('server', 'config', jest.fn(() => {
+        return {
+          get: jest.fn(key => {
+            return config[key];
+          })
+        };
+      }));
 
       const spacesService = createSpacesService(server);
       server.decorate('server', 'spaces', spacesService);
@@ -119,15 +132,6 @@ describe('interceptors', () => {
     };
 
     const setupTest = (server, spaces, testHandler) => {
-      // Mock server.config()
-      server.decorate('server', 'config', () => {
-        return {
-          get: (key) => {
-            return config[key];
-          }
-        };
-      });
-
       // Mock server.getSavedObjectsClient()
       server.decorate('request', 'getSavedObjectsClient', () => {
         return {
@@ -160,16 +164,15 @@ describe('interceptors', () => {
         });
 
         const spaces = [{
-          id: 'space:a-space',
+          id: 'a-space',
           attributes: {
             name: 'a space',
-            urlContext: 'a-space',
           }
         }];
 
         await request('/', (server) => {
           setupTest(server, spaces, testHandler);
-        });
+        }, config);
 
         expect(testHandler).toHaveBeenCalledTimes(1);
       });
@@ -193,16 +196,15 @@ describe('interceptors', () => {
         });
 
         const spaces = [{
-          id: 'space:default',
+          id: 'default',
           attributes: {
             name: 'Default Space',
-            urlContext: '',
           }
         }];
 
         await request('/', (server) => {
           setupTest(server, spaces, testHandler);
-        });
+        }, config);
 
         expect(testHandler).toHaveBeenCalledTimes(1);
       });
@@ -212,16 +214,14 @@ describe('interceptors', () => {
       test('it redirects to the Space Selector App when navigating to Kibana root', async () => {
 
         const spaces = [{
-          id: 'space:a-space',
+          id: 'a-space',
           attributes: {
             name: 'a space',
-            urlContext: 'a-space',
           }
         }, {
-          id: 'space:b-space',
+          id: 'b-space',
           attributes: {
             name: 'b space',
-            urlContext: 'b-space',
           }
         }];
 
@@ -247,7 +247,7 @@ describe('interceptors', () => {
           });
 
           setupTest(server, spaces, testHandler);
-        });
+        }, config);
 
         expect(getHiddenUiAppHandler).toHaveBeenCalledTimes(1);
         expect(getHiddenUiAppHandler).toHaveBeenCalledWith('space_selector');

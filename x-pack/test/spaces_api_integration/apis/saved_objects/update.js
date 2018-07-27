@@ -53,13 +53,13 @@ export default function ({ getService }) {
       });
     };
 
-    const updateTest = (description, { urlContext, spaceId, tests }) => {
+    const updateTest = (description, { spaceId, tests }) => {
       describe(description, () => {
         before(() => esArchiver.load('saved_objects/spaces'));
         after(() => esArchiver.unload('saved_objects/spaces'));
         it(`should return ${tests.spaceAware.statusCode} for a space-aware doc`, async () => {
           await supertest
-            .put(`${getUrlPrefix(urlContext)}/api/saved_objects/visualization/${getIdPrefix(spaceId)}dd7caf20-9efd-11e7-acb3-3dab96693fab`)
+            .put(`${getUrlPrefix(spaceId)}/api/saved_objects/visualization/${getIdPrefix(spaceId)}dd7caf20-9efd-11e7-acb3-3dab96693fab`)
             .send({
               attributes: {
                 title: 'My second favorite vis'
@@ -71,7 +71,7 @@ export default function ({ getService }) {
 
         it(`should return ${tests.notSpaceAware.statusCode} for a non space-aware doc`, async () => {
           await supertest
-            .put(`${getUrlPrefix(urlContext)}/api/saved_objects/space/space_1`)
+            .put(`${getUrlPrefix(spaceId)}/api/saved_objects/space/space_1`)
             .send({
               attributes: {
                 name: 'My second favorite space'
@@ -84,7 +84,7 @@ export default function ({ getService }) {
         it(`should return ${tests.inOtherSpace.statusCode} for a doc in another space`, async () => {
           const id = `${getIdPrefix('space_2')}dd7caf20-9efd-11e7-acb3-3dab96693fab`;
           await supertest
-            .put(`${getUrlPrefix(urlContext)}/api/saved_objects/visualization/${id}`)
+            .put(`${getUrlPrefix(spaceId)}/api/saved_objects/visualization/${id}`)
             .send({
               attributes: {
                 title: 'My second favorite vis'
@@ -97,7 +97,7 @@ export default function ({ getService }) {
         describe('unknown id', () => {
           it(`should return ${tests.doesntExist.statusCode}`, async () => {
             await supertest
-              .put(`${getUrlPrefix(urlContext)}/api/saved_objects/visualization/not an id`)
+              .put(`${getUrlPrefix(spaceId)}/api/saved_objects/visualization/not an id`)
               .send({
                 attributes: {
                   title: 'My second favorite vis'

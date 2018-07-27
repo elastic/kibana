@@ -26,28 +26,28 @@ export default function ({ getService }) {
       });
     };
 
-    const deleteTest = (description, { urlContext, spaceId, tests }) => {
+    const deleteTest = (description, { spaceId, tests }) => {
       describe(description, () => {
         before(() => esArchiver.load('saved_objects/spaces'));
         after(() => esArchiver.unload('saved_objects/spaces'));
 
         it(`should return ${tests.spaceAware.statusCode} when deleting a space-aware doc`, async () => (
           await supertest
-            .delete(`${getUrlPrefix(urlContext)}/api/saved_objects/dashboard/${getIdPrefix(spaceId)}be3733a0-9efe-11e7-acb3-3dab96693fab`)
+            .delete(`${getUrlPrefix(spaceId)}/api/saved_objects/dashboard/${getIdPrefix(spaceId)}be3733a0-9efe-11e7-acb3-3dab96693fab`)
             .expect(tests.spaceAware.statusCode)
             .then(tests.spaceAware.response)
         ));
 
         it(`should return ${tests.notSpaceAware.statusCode} when deleting a non-space-aware doc`, async () => (
           await supertest
-            .delete(`${getUrlPrefix(urlContext)}/api/saved_objects/space/space_2`)
+            .delete(`${getUrlPrefix(spaceId)}/api/saved_objects/space/space_2`)
             .expect(tests.notSpaceAware.statusCode)
             .then(tests.notSpaceAware.response)
         ));
 
         it(`should return ${tests.inOtherSpace.statusCode} when deleting a doc belonging to another space`, async () => {
           await supertest
-            .delete(`${getUrlPrefix(urlContext)}/api/saved_objects/dashboard/${getIdPrefix('space_2')}be3733a0-9efe-11e7-acb3-3dab96693fab`)
+            .delete(`${getUrlPrefix(spaceId)}/api/saved_objects/dashboard/${getIdPrefix('space_2')}be3733a0-9efe-11e7-acb3-3dab96693fab`)
             .expect(tests.inOtherSpace.statusCode)
             .then(tests.inOtherSpace.response);
         });

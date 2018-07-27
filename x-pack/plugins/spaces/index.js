@@ -48,11 +48,11 @@ export const spaces = (kibana) => new kibana.Plugin({
         activeSpace: null
       };
     },
-    replaceInjectedVars: async function (vars, request) {
+    replaceInjectedVars: async function (vars, request, server) {
       try {
         vars.activeSpace = {
           valid: true,
-          space: await getActiveSpace(request.getSavedObjectsClient(), request.getBasePath())
+          space: await getActiveSpace(request.getSavedObjectsClient(), request.getBasePath(), server.config().get('server.basePath'))
         };
       } catch (e) {
         vars.activeSpace = {

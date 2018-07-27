@@ -43,7 +43,13 @@ const TIMELINE_MARGINS = {
 
 class Spans extends PureComponent {
   render() {
-    const { agentName, urlParams, location, droppedSpans } = this.props;
+    const {
+      agentName,
+      urlParams,
+      location,
+      droppedSpans,
+      agentMarks
+    } = this.props;
     return (
       <SpansRequest
         urlParams={urlParams}
@@ -81,6 +87,7 @@ class Spans extends PureComponent {
                         transactionName={urlParams.transactionName}
                       />
                     }
+                    agentMarks={agentMarks}
                     duration={totalDuration}
                     height={timelineHeight}
                     margins={TIMELINE_MARGINS}
@@ -176,6 +183,7 @@ function getPrimaryType(type) {
 }
 
 Spans.propTypes = {
+  agentMarks: PropTypes.array,
   agentName: PropTypes.string.isRequired,
   droppedSpans: PropTypes.number.isRequired,
   location: PropTypes.object.isRequired,

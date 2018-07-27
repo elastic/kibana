@@ -10,6 +10,7 @@ import { createSpacesService } from '../create_spaces_service';
 jest.mock('uuid', () => ({
   v1: jest.fn(() => `mock-id`)
 }));
+import { DEFAULT_SPACE_ID } from '../../../common/constants';
 
 const createObjectEntry = (type, id, spaceId) => ({
   [id]: {
@@ -21,33 +22,35 @@ const createObjectEntry = (type, id, spaceId) => ({
 
 const SAVED_OBJECTS = {
   ...createObjectEntry('foo', 'object_0'),
-  ...createObjectEntry('foo', 'space_1:object_1', 'space_1'),
-  ...createObjectEntry('foo', 'space_2:object_2', 'space_2'),
+  ...createObjectEntry('foo', 'object_1', 'space_1'),
+  ...createObjectEntry('foo', 'object_2', 'space_2'),
+  ...createObjectEntry('space', 'space_1'),
+};
+
+const config = {
+  'server.basePath': '/'
+};
+
+const server = {
+  config: () => ({
+    get: (key) => {
+      return config[key];
+    }
+  })
 };
 
 const createMockRequest = (space) => ({
-  getBasePath: () => space.urlContext ? `/s/${space.urlContext}` : '',
+  getBasePath: () => space.id !== DEFAULT_SPACE_ID ? `/s/${space.id}` : '',
 });
 
 const createMockClient = (space) => {
   return {
     get: jest.fn((type, id) => {
-      const object = SAVED_OBJECTS[id];
-      if (!object) {
-        throw new Error(`object not found: ${id}`);
-      }
-      return object;
+      return SAVED_OBJECTS[id];
     }),
     bulkGet: jest.fn((objects) => {
       return {
-        saved_objects: objects.map(o => SAVED_OBJECTS[o.id] || {
-          id: o.id,
-          type: o.type,
-          error: {
-            statusCode: 404,
-            message: 'Not found'
-          }
-        })
+        saved_objects: objects.map(object => SAVED_OBJECTS[object.id])
       };
     }),
     find: jest.fn(({ type }) => {
@@ -61,20 +64,9 @@ const createMockClient = (space) => {
         saved_objects: []
       };
     }),
-    create: jest.fn((type, attributes, options) => ({
-      id: options.id || 'some-new-id',
-      type,
-      attributes
-    })),
-    bulkCreate: jest.fn(((objects) => objects.map((o, i) => ({
-      ...o,
-      id: o.id || `abc-${i}`
-    })))),
-    update: jest.fn((type, id, attributes) => ({
-      id,
-      type,
-      attributes
-    })),
+    create: jest.fn(),
+    bulkCreate: jest.fn(),
+    update: jest.fn(),
     delete: jest.fn(),
     errors: {
       createGenericNotFoundError: jest.fn(() => {
@@ -83,17 +75,18 @@ const createMockClient = (space) => {
     }
   };
 };
-describe('within the default space', () => {
+
+describe('default space', () => {
+  const currentSpace = {
+    id: 'default',
+  };
+
   describe('#get', () => {
-    test(`returns the object when it belongs to the default space`, async () => {
-      const currentSpace = {
-        id: 'default',
-        urlContext: ''
-      };
+    test(`returns the object when it belongs to the current space`, async () => {
 
       const request = createMockRequest(currentSpace);
       const baseClient = createMockClient(currentSpace);
-      const spacesService = createSpacesService();
+      const spacesService = createSpacesService(server);
 
       const client = new SpacesSavedObjectsClient({
         request,
@@ -111,15 +104,58 @@ describe('within the default space', () => {
       expect(result).toBe(SAVED_OBJECTS[id]);
     });
 
-    test(`returns error when the object belongs to a different space`, async () => {
-      const currentSpace = {
-        id: 'default',
-        urlContext: ''
-      };
+    test(`returns global objects that don't belong to a specific space`, async () => {
+      const request = createMockRequest(currentSpace);
+      const baseClient = createMockClient(currentSpace);
+      const spacesService = createSpacesService(server);
+
+      const client = new SpacesSavedObjectsClient({
+        request,
+        baseClient,
+        spacesService,
+        types: [],
+      });
+
+      const type = 'space';
+      const id = 'space_1';
+      const options = {};
+
+      const result = await client.get(type, id, options);
+
+      expect(result).toBe(SAVED_OBJECTS[id]);
+    });
+
+    test(`merges options.extraDocumentProperties`, async () => {
 
       const request = createMockRequest(currentSpace);
       const baseClient = createMockClient(currentSpace);
-      const spacesService = createSpacesService();
+      const spacesService = createSpacesService(server);
+
+      const client = new SpacesSavedObjectsClient({
+        request,
+        baseClient,
+        spacesService,
+        types: [],
+      });
+
+      const type = 'foo';
+      const id = 'object_0';
+      const options = {
+        extraDocumentProperties: ['otherSourceProp']
+      };
+
+      await client.get(type, id, options);
+
+      expect(baseClient.get).toHaveBeenCalledWith(type, id, {
+        extraDocumentProperties: ['spaceId', 'otherSourceProp']
+      });
+    });
+
+    test(`returns error when the object belongs to a different space`, async () => {
+
+      const request = createMockRequest(currentSpace);
+      const baseClient = createMockClient(currentSpace);
+      const spacesService = createSpacesService(server);
 
       const client = new SpacesSavedObjectsClient({
         request,
@@ -137,15 +173,11 @@ describe('within the default space', () => {
   });
 
   describe('#bulk_get', () => {
-    test(`only returns objects belonging to the default space`, async () => {
-      const currentSpace = {
-        id: 'default',
-        urlContext: ''
-      };
+    test(`only returns objects belonging to the current space`, async () => {
 
       const request = createMockRequest(currentSpace);
       const baseClient = createMockClient(currentSpace);
-      const spacesService = createSpacesService();
+      const spacesService = createSpacesService(server);
 
       const client = new SpacesSavedObjectsClient({
         request,
@@ -179,18 +211,11 @@ describe('within the default space', () => {
         }]
       });
     });
-  });
 
-  describe('#find', () => {
-    test(`creates ES query filters restricting objects to the current space`, async () => {
-      const currentSpace = {
-        id: 'default',
-        urlContext: ''
-      };
-
+    test(`returns global objects that don't belong to a specific space`, async () => {
       const request = createMockRequest(currentSpace);
       const baseClient = createMockClient(currentSpace);
-      const spacesService = createSpacesService();
+      const spacesService = createSpacesService(server);
 
       const client = new SpacesSavedObjectsClient({
         request,
@@ -200,6 +225,76 @@ describe('within the default space', () => {
       });
 
       const type = 'foo';
+      const options = {};
+
+      const result = await client.bulkGet([{
+        type,
+        id: 'object_0'
+      }, {
+        type,
+        id: 'space_1'
+      }], options);
+
+      expect(result).toEqual({
+        saved_objects: [{
+          id: 'object_0',
+          type: 'foo',
+        }, {
+          id: 'space_1',
+          type: 'space',
+        }]
+      });
+    });
+
+    test(`merges options.extraDocumentProperties`, async () => {
+      const request = createMockRequest(currentSpace);
+      const baseClient = createMockClient(currentSpace);
+      const spacesService = createSpacesService(server);
+
+      const client = new SpacesSavedObjectsClient({
+        request,
+        baseClient,
+        spacesService,
+        types: [],
+      });
+
+      const type = 'foo';
+
+      const objects = [{
+        type,
+        id: 'object_1'
+      }, {
+        type,
+        id: 'object_2'
+      }];
+
+      const options = {
+        extraDocumentProperties: ['otherSourceProp']
+      };
+
+      await client.bulkGet(objects, options);
+
+      expect(baseClient.bulkGet).toHaveBeenCalledWith(objects, {
+        extraDocumentProperties: ['spaceId', 'type', 'otherSourceProp']
+      });
+    });
+  });
+
+  describe('#find', () => {
+    test(`creates ES query filters restricting objects to the current space`, async () => {
+
+      const request = createMockRequest(currentSpace);
+      const baseClient = createMockClient(currentSpace);
+      const spacesService = createSpacesService(server);
+
+      const client = new SpacesSavedObjectsClient({
+        request,
+        baseClient,
+        spacesService,
+        types: [],
+      });
+
+      const type = ['foo', 'space'];
       const options = {
         type
       };
@@ -215,7 +310,7 @@ describe('within the default space', () => {
               bool: {
                 must: [{
                   term: {
-                    type
+                    type: 'foo'
                   },
                 }],
                 must_not: [{
@@ -224,6 +319,14 @@ describe('within the default space', () => {
                   }
                 }]
               }
+            }, {
+              bool: {
+                must: [{
+                  term: {
+                    type: 'space'
+                  },
+                }],
+              }
             }]
           }
         }]
@@ -231,14 +334,9 @@ describe('within the default space', () => {
     });
 
     test(`merges incoming filters with filters generated by Spaces Saved Objects Client`, async () => {
-      const currentSpace = {
-        id: 'default',
-        urlContext: ''
-      };
-
       const request = createMockRequest(currentSpace);
       const baseClient = createMockClient(currentSpace);
-      const spacesService = createSpacesService();
+      const spacesService = createSpacesService(server);
 
       const client = new SpacesSavedObjectsClient({
         request,
@@ -281,7 +379,7 @@ describe('within the default space', () => {
                   exists: {
                     field: "spaceId"
                   }
-                }],
+                }]
               }
             }]
           }
@@ -291,44 +389,12 @@ describe('within the default space', () => {
   });
 
   describe('#create', () => {
-    test('automatically assigns the object to the default space by not using extraDocumentProperties', async () => {
-      const currentSpace = {
-        id: 'default',
-        urlContext: ''
-      };
+
+    test('does not assign a space-unaware (global) object to a space', async () => {
 
       const request = createMockRequest(currentSpace);
       const baseClient = createMockClient(currentSpace);
-      const spacesService = createSpacesService();
-
-      const client = new SpacesSavedObjectsClient({
-        request,
-        baseClient,
-        spacesService,
-        types: [],
-      });
-
-      const type = 'foo';
-      const attributes = {
-        prop1: 'value 1',
-        prop2: 'value 2'
-      };
-      const options = {};
-
-      await client.create(type, attributes, options);
-
-      expect(baseClient.create).toHaveBeenCalledWith(type, attributes, options);
-    });
-
-    test('does not assign a space-unaware object to a space', async () => {
-      const currentSpace = {
-        id: 'default',
-        urlContext: ''
-      };
-
-      const request = createMockRequest(currentSpace);
-      const baseClient = createMockClient(currentSpace);
-      const spacesService = createSpacesService();
+      const spacesService = createSpacesService(server);
 
       const client = new SpacesSavedObjectsClient({
         request,
@@ -342,24 +408,44 @@ describe('within the default space', () => {
         prop1: 'value 1',
         prop2: 'value 2'
       };
-      const options = {};
 
-      await client.create(type, attributes, options);
+      await client.create(type, attributes);
 
-      expect(baseClient.create).toHaveBeenCalledWith(type, attributes, options);
+      expect(baseClient.create).toHaveBeenCalledWith(type, attributes, { extraDocumentProperties: {} });
+    });
+
+    test('does not assign a spaceId to space-aware objects belonging to the default space', async () => {
+
+      const request = createMockRequest(currentSpace);
+      const baseClient = createMockClient(currentSpace);
+      const spacesService = createSpacesService(server);
+
+      const client = new SpacesSavedObjectsClient({
+        request,
+        baseClient,
+        spacesService,
+        types: [],
+      });
+
+      const type = 'foo';
+      const attributes = {
+        prop1: 'value 1',
+        prop2: 'value 2'
+      };
+
+      await client.create(type, attributes);
+
+      // called without extraDocumentProperties
+      expect(baseClient.create).toHaveBeenCalledWith(type, attributes, { extraDocumentProperties: {} });
     });
   });
 
   describe('#bulk_create', () => {
     test('allows for bulk creation when all types are space-aware', async () => {
-      const currentSpace = {
-        id: 'default',
-        urlContext: ''
-      };
 
       const request = createMockRequest(currentSpace);
       const baseClient = createMockClient(currentSpace);
-      const spacesService = createSpacesService();
+      const spacesService = createSpacesService(server);
 
       const client = new SpacesSavedObjectsClient({
         request,
@@ -380,22 +466,22 @@ describe('within the default space', () => {
         type: 'bar',
         attributes
       }];
-      const options = {};
 
-      await client.bulkCreate(objects, options);
+      await client.bulkCreate(objects, {});
 
-      expect(baseClient.bulkCreate).toHaveBeenCalledWith(objects, options);
+      const expectedCalledWithObjects = objects.map(object => ({
+        ...object,
+        extraDocumentProperties: {}
+      }));
+
+      expect(baseClient.bulkCreate).toHaveBeenCalledWith(expectedCalledWithObjects, {});
     });
 
-    test('allows for bulk creation when all types are not space-aware', async () => {
-      const currentSpace = {
-        id: 'default',
-        urlContext: ''
-      };
+    test('allows for bulk creation when all types are not space-aware (global)', async () => {
 
       const request = createMockRequest(currentSpace);
       const baseClient = createMockClient(currentSpace);
-      const spacesService = createSpacesService();
+      const spacesService = createSpacesService(server);
 
       const client = new SpacesSavedObjectsClient({
         request,
@@ -416,22 +502,19 @@ describe('within the default space', () => {
         type: 'space',
         attributes
       }];
-      const options = {};
 
-      await client.bulkCreate(objects, options);
+      await client.bulkCreate(objects, {});
 
-      expect(baseClient.bulkCreate).toHaveBeenCalledWith(objects, options);
+      expect(baseClient.bulkCreate).toHaveBeenCalledWith(objects.map(o => {
+        return { ...o, extraDocumentProperties: {} };
+      }), {});
     });
 
-    test('allows space-aware and non-space-aware objects to be created at the same time', async () => {
-      const currentSpace = {
-        id: 'default',
-        urlContext: ''
-      };
+    test('allows space-aware and non-space-aware (global) objects to be created at the same time', async () => {
 
       const request = createMockRequest(currentSpace);
       const baseClient = createMockClient(currentSpace);
-      const spacesService = createSpacesService();
+      const spacesService = createSpacesService(server);
 
       const client = new SpacesSavedObjectsClient({
         request,
@@ -452,24 +535,64 @@ describe('within the default space', () => {
         type: 'foo',
         attributes
       }];
-      const options = {};
 
-      await client.bulkCreate(objects, options);
+      await client.bulkCreate(objects, {});
 
-      expect(baseClient.bulkCreate).toHaveBeenCalledWith(objects, options);
+      const expectedCalledWithObjects = [...objects];
+      expectedCalledWithObjects[0] = {
+        ...expectedCalledWithObjects[0],
+        extraDocumentProperties: {}
+      };
+      expectedCalledWithObjects[1] = {
+        ...expectedCalledWithObjects[1],
+        extraDocumentProperties: {}
+      };
+
+      expect(baseClient.bulkCreate).toHaveBeenCalledWith(expectedCalledWithObjects, {});
+    });
+
+    test('does not assign a spaceId to space-aware objects that belong to the default space', async () => {
+
+      const request = createMockRequest(currentSpace);
+      const baseClient = createMockClient(currentSpace);
+      const spacesService = createSpacesService(server);
+
+      const client = new SpacesSavedObjectsClient({
+        request,
+        baseClient,
+        spacesService,
+        types: [],
+      });
+
+
+      const attributes = {
+        prop1: 'value 1',
+        prop2: 'value 2'
+      };
+      const objects = [{
+        type: 'foo',
+        attributes
+      }, {
+        type: 'bar',
+        attributes
+      }];
+
+      await client.bulkCreate(objects, {});
+
+      // called with empty extraDocumentProperties
+      expect(baseClient.bulkCreate).toHaveBeenCalledWith(objects.map(o => ({
+        ...o,
+        extraDocumentProperties: {}
+      })), {});
     });
   });
 
   describe('#update', () => {
     test('allows an object to be updated if it exists in the same space', async () => {
-      const currentSpace = {
-        id: 'default',
-        urlContext: ''
-      };
 
       const request = createMockRequest(currentSpace);
       const baseClient = createMockClient(currentSpace);
-      const spacesService = createSpacesService();
+      const spacesService = createSpacesService(server);
 
       const client = new SpacesSavedObjectsClient({
         request,
@@ -484,22 +607,41 @@ describe('within the default space', () => {
         prop1: 'value 1',
         prop2: 'value 2'
       };
-      const options = {};
 
-      await client.update(type, id, attributes, options);
+      await client.update(type, id, attributes);
 
-      expect(baseClient.update).toHaveBeenCalledWith(type, id, attributes, options);
+      expect(baseClient.update).toHaveBeenCalledWith(type, id, attributes, { extraDocumentProperties: {} });
+    });
+
+    test('allows a global object to be updated', async () => {
+      const request = createMockRequest(currentSpace);
+      const baseClient = createMockClient(currentSpace);
+      const spacesService = createSpacesService(server);
+
+      const client = new SpacesSavedObjectsClient({
+        request,
+        baseClient,
+        spacesService,
+        types: [],
+      });
+
+      const id = 'space_1';
+      const type = 'space';
+      const attributes = {
+        prop1: 'value 1',
+        prop2: 'value 2'
+      };
+
+      await client.update(type, id, attributes);
+
+      expect(baseClient.update).toHaveBeenCalledWith(type, id, attributes, { extraDocumentProperties: {} });
     });
 
     test('does not allow an object to be updated via a different space', async () => {
-      const currentSpace = {
-        id: 'default',
-        urlContext: ''
-      };
 
       const request = createMockRequest(currentSpace);
       const baseClient = createMockClient(currentSpace);
-      const spacesService = createSpacesService();
+      const spacesService = createSpacesService(server);
 
       const client = new SpacesSavedObjectsClient({
         request,
@@ -514,22 +656,17 @@ describe('within the default space', () => {
         prop1: 'value 1',
         prop2: 'value 2'
       };
-      const options = {};
 
-      await expect(client.update(type, id, attributes, options)).rejects.toThrowErrorMatchingSnapshot();
+      await expect(client.update(type, id, attributes)).rejects.toThrowErrorMatchingSnapshot();
     });
   });
 
   describe('#delete', () => {
     test('allows an object to be deleted if it exists in the same space', async () => {
-      const currentSpace = {
-        id: 'default',
-        urlContext: ''
-      };
 
       const request = createMockRequest(currentSpace);
       const baseClient = createMockClient(currentSpace);
-      const spacesService = createSpacesService();
+      const spacesService = createSpacesService(server);
 
       const client = new SpacesSavedObjectsClient({
         request,
@@ -546,15 +683,31 @@ describe('within the default space', () => {
       expect(baseClient.delete).toHaveBeenCalledWith(type, id);
     });
 
+    test(`allows a global object to be deleted`, async () => {
+      const request = createMockRequest(currentSpace);
+      const baseClient = createMockClient(currentSpace);
+      const spacesService = createSpacesService(server);
+
+      const client = new SpacesSavedObjectsClient({
+        request,
+        baseClient,
+        spacesService,
+        types: [],
+      });
+
+      const id = 'space_1';
+      const type = 'space';
+
+      await client.delete(type, id);
+
+      expect(baseClient.delete).toHaveBeenCalledWith(type, id);
+    });
+
     test('does not allow an object to be deleted via a different space', async () => {
-      const currentSpace = {
-        id: 'default',
-        urlContext: ''
-      };
 
       const request = createMockRequest(currentSpace);
       const baseClient = createMockClient(currentSpace);
-      const spacesService = createSpacesService();
+      const spacesService = createSpacesService(server);
 
       const client = new SpacesSavedObjectsClient({
         request,
@@ -571,17 +724,17 @@ describe('within the default space', () => {
   });
 });
 
-describe('within a space', () => {
+describe('current space (space_1)', () => {
+  const currentSpace = {
+    id: 'space_1',
+  };
+
   describe('#get', () => {
     test(`returns the object when it belongs to the current space`, async () => {
-      const currentSpace = {
-        id: 'space_1',
-        urlContext: 'space-1'
-      };
 
       const request = createMockRequest(currentSpace);
       const baseClient = createMockClient(currentSpace);
-      const spacesService = createSpacesService();
+      const spacesService = createSpacesService(server);
 
       const client = new SpacesSavedObjectsClient({
         request,
@@ -596,18 +749,13 @@ describe('within a space', () => {
 
       const result = await client.get(type, id, options);
 
-      expect(result).toEqual({ "id": "object_1", "spaceId": "space_1", "type": "foo" });
+      expect(result).toBe(SAVED_OBJECTS[id]);
     });
 
-    test(`returns error when the object belongs to a different space`, async () => {
-      const currentSpace = {
-        id: 'space_1',
-        urlContext: 'space-1'
-      };
-
+    test(`returns global objects that don't belong to a specific space`, async () => {
       const request = createMockRequest(currentSpace);
       const baseClient = createMockClient(currentSpace);
-      const spacesService = createSpacesService();
+      const spacesService = createSpacesService(server);
 
       const client = new SpacesSavedObjectsClient({
         request,
@@ -616,22 +764,20 @@ describe('within a space', () => {
         types: [],
       });
 
-      const type = 'foo';
-      const id = 'object_2';
+      const type = 'space';
+      const id = 'space_1';
       const options = {};
 
-      await expect(client.get(type, id, options)).rejects.toThrowErrorMatchingSnapshot();
+      const result = await client.get(type, id, options);
+
+      expect(result).toBe(SAVED_OBJECTS[id]);
     });
 
     test(`merges options.extraDocumentProperties`, async () => {
-      const currentSpace = {
-        id: 'space_1',
-        urlContext: 'space-1'
-      };
 
       const request = createMockRequest(currentSpace);
       const baseClient = createMockClient(currentSpace);
-      const spacesService = createSpacesService();
+      const spacesService = createSpacesService(server);
 
       const client = new SpacesSavedObjectsClient({
         request,
@@ -648,22 +794,38 @@ describe('within a space', () => {
 
       await client.get(type, id, options);
 
-      expect(baseClient.get).toHaveBeenCalledWith(type, `space_1:${id}`, {
+      expect(baseClient.get).toHaveBeenCalledWith(type, id, {
         extraDocumentProperties: ['spaceId', 'otherSourceProp']
       });
+    });
+
+    test(`returns error when the object belongs to a different space`, async () => {
+
+      const request = createMockRequest(currentSpace);
+      const baseClient = createMockClient(currentSpace);
+      const spacesService = createSpacesService(server);
+
+      const client = new SpacesSavedObjectsClient({
+        request,
+        baseClient,
+        spacesService,
+        types: [],
+      });
+
+      const type = 'foo';
+      const id = 'object_2';
+      const options = {};
+
+      await expect(client.get(type, id, options)).rejects.toThrowErrorMatchingSnapshot();
     });
   });
 
   describe('#bulk_get', () => {
     test(`only returns objects belonging to the current space`, async () => {
-      const currentSpace = {
-        id: 'space_1',
-        urlContext: 'space-1'
-      };
 
       const request = createMockRequest(currentSpace);
       const baseClient = createMockClient(currentSpace);
-      const spacesService = createSpacesService();
+      const spacesService = createSpacesService(server);
 
       const client = new SpacesSavedObjectsClient({
         request,
@@ -699,15 +861,45 @@ describe('within a space', () => {
       });
     });
 
-    test(`merges options.extraDocumentProperties`, async () => {
-      const currentSpace = {
-        id: 'space_1',
-        urlContext: 'space-1'
-      };
-
+    test(`returns global objects that don't belong to a specific space`, async () => {
       const request = createMockRequest(currentSpace);
       const baseClient = createMockClient(currentSpace);
-      const spacesService = createSpacesService();
+      const spacesService = createSpacesService(server);
+
+      const client = new SpacesSavedObjectsClient({
+        request,
+        baseClient,
+        spacesService,
+        types: [],
+      });
+
+      const type = 'foo';
+      const options = {};
+
+      const result = await client.bulkGet([{
+        type,
+        id: 'object_1'
+      }, {
+        type,
+        id: 'space_1'
+      }], options);
+
+      expect(result).toEqual({
+        saved_objects: [{
+          id: 'object_1',
+          spaceId: 'space_1',
+          type: 'foo',
+        }, {
+          id: 'space_1',
+          type: 'space',
+        }]
+      });
+    });
+
+    test(`merges options.extraDocumentProperties`, async () => {
+      const request = createMockRequest(currentSpace);
+      const baseClient = createMockClient(currentSpace);
+      const spacesService = createSpacesService(server);
 
       const client = new SpacesSavedObjectsClient({
         request,
@@ -732,12 +924,7 @@ describe('within a space', () => {
 
       await client.bulkGet(objects, options);
 
-      const expectedCalledWithObjects = objects.map(obj => ({
-        ...obj,
-        id: `space_1:${obj.id}`
-      }));
-
-      expect(baseClient.bulkGet).toHaveBeenCalledWith(expectedCalledWithObjects, {
+      expect(baseClient.bulkGet).toHaveBeenCalledWith(objects, {
         extraDocumentProperties: ['spaceId', 'type', 'otherSourceProp']
       });
     });
@@ -745,14 +932,10 @@ describe('within a space', () => {
 
   describe('#find', () => {
     test(`creates ES query filters restricting objects to the current space`, async () => {
-      const currentSpace = {
-        id: 'space_1',
-        urlContext: 'space-1'
-      };
 
       const request = createMockRequest(currentSpace);
       const baseClient = createMockClient(currentSpace);
-      const spacesService = createSpacesService();
+      const spacesService = createSpacesService(server);
 
       const client = new SpacesSavedObjectsClient({
         request,
@@ -761,7 +944,7 @@ describe('within a space', () => {
         types: [],
       });
 
-      const type = 'foo';
+      const type = ['foo', 'space'];
       const options = {
         type
       };
@@ -777,13 +960,21 @@ describe('within a space', () => {
               bool: {
                 must: [{
                   term: {
-                    type
+                    type: 'foo'
                   },
                 }, {
                   term: {
                     spaceId: 'space_1'
                   }
-                }]
+                }],
+              }
+            }, {
+              bool: {
+                must: [{
+                  term: {
+                    type: 'space'
+                  },
+                }],
               }
             }]
           }
@@ -792,14 +983,9 @@ describe('within a space', () => {
     });
 
     test(`merges incoming filters with filters generated by Spaces Saved Objects Client`, async () => {
-      const currentSpace = {
-        id: 'space_1',
-        urlContext: 'space-1'
-      };
-
       const request = createMockRequest(currentSpace);
       const baseClient = createMockClient(currentSpace);
-      const spacesService = createSpacesService();
+      const spacesService = createSpacesService(server);
 
       const client = new SpacesSavedObjectsClient({
         request,
@@ -852,14 +1038,10 @@ describe('within a space', () => {
 
   describe('#create', () => {
     test('automatically assigns the object to the current space via extraDocumentProperties', async () => {
-      const currentSpace = {
-        id: 'space_1',
-        urlContext: 'space-1'
-      };
 
       const request = createMockRequest(currentSpace);
       const baseClient = createMockClient(currentSpace);
-      const spacesService = createSpacesService();
+      const spacesService = createSpacesService(server);
 
       const client = new SpacesSavedObjectsClient({
         request,
@@ -873,27 +1055,21 @@ describe('within a space', () => {
         prop1: 'value 1',
         prop2: 'value 2'
       };
-      const options = {};
 
-      await client.create(type, attributes, options);
+      await client.create(type, attributes);
 
       expect(baseClient.create).toHaveBeenCalledWith(type, attributes, {
-        id: 'space_1:mock-id',
         extraDocumentProperties: {
           spaceId: 'space_1'
         }
       });
     });
 
-    test('does not assign a space-unaware object to a space', async () => {
-      const currentSpace = {
-        id: 'space_1',
-        urlContext: 'space-1'
-      };
+    test('does not assign a space-unaware (global) object to a space', async () => {
 
       const request = createMockRequest(currentSpace);
       const baseClient = createMockClient(currentSpace);
-      const spacesService = createSpacesService();
+      const spacesService = createSpacesService(server);
 
       const client = new SpacesSavedObjectsClient({
         request,
@@ -907,250 +1083,261 @@ describe('within a space', () => {
         prop1: 'value 1',
         prop2: 'value 2'
       };
-      const options = {};
 
-      await client.create(type, attributes, options);
+      await client.create(type, attributes);
 
-      expect(baseClient.create).toHaveBeenCalledWith(type, attributes, {});
-    });
-  });
-
-  describe('#bulk_create', () => {
-    test('allows for bulk creation when all types are space-aware', async () => {
-      const currentSpace = {
-        id: 'space_1',
-        urlContext: 'space-1'
-      };
-
-      const request = createMockRequest(currentSpace);
-      const baseClient = createMockClient(currentSpace);
-      const spacesService = createSpacesService();
-
-      const client = new SpacesSavedObjectsClient({
-        request,
-        baseClient,
-        spacesService,
-        types: [],
-      });
-
-
-      const attributes = {
-        prop1: 'value 1',
-        prop2: 'value 2'
-      };
-      const objects = [{
-        type: 'foo',
-        attributes
-      }, {
-        type: 'bar',
-        attributes
-      }];
-      const options = {};
-
-      await client.bulkCreate(objects, options);
-
-      const expectedCalledWithObjects = objects.map(o => ({
-        ...o,
-        id: `space_1:mock-id`,
-        extraDocumentProperties: {
-          spaceId: 'space_1'
-        }
-      }));
-
-      expect(baseClient.bulkCreate).toHaveBeenCalledWith(expectedCalledWithObjects, {});
+      expect(baseClient.create).toHaveBeenCalledWith(type, attributes, { extraDocumentProperties: {} });
     });
 
-    test('allows for bulk creation when all types are not space-aware', async () => {
-      const currentSpace = {
-        id: 'space_1',
-        urlContext: 'space-1'
-      };
+    describe('#bulk_create', () => {
+      test('allows for bulk creation when all types are space-aware', async () => {
 
-      const request = createMockRequest(currentSpace);
-      const baseClient = createMockClient(currentSpace);
-      const spacesService = createSpacesService();
+        const request = createMockRequest(currentSpace);
+        const baseClient = createMockClient(currentSpace);
+        const spacesService = createSpacesService(server);
 
-      const client = new SpacesSavedObjectsClient({
-        request,
-        baseClient,
-        spacesService,
-        types: [],
+        const client = new SpacesSavedObjectsClient({
+          request,
+          baseClient,
+          spacesService,
+          types: [],
+        });
+
+
+        const attributes = {
+          prop1: 'value 1',
+          prop2: 'value 2'
+        };
+        const objects = [{
+          type: 'foo',
+          attributes
+        }, {
+          type: 'bar',
+          attributes
+        }];
+
+        await client.bulkCreate(objects, {});
+
+        const expectedCalledWithObjects = objects.map(object => ({
+          ...object,
+          extraDocumentProperties: {
+            spaceId: 'space_1'
+          }
+        }));
+
+        expect(baseClient.bulkCreate).toHaveBeenCalledWith(expectedCalledWithObjects, {});
       });
 
-      const attributes = {
-        prop1: 'value 1',
-        prop2: 'value 2'
-      };
+      test('allows for bulk creation when all types are not space-aware', async () => {
 
-      const objects = [{
-        type: 'space',
-        attributes
-      }, {
-        type: 'space',
-        attributes
-      }];
+        const request = createMockRequest(currentSpace);
+        const baseClient = createMockClient(currentSpace);
+        const spacesService = createSpacesService(server);
 
-      const options = {};
+        const client = new SpacesSavedObjectsClient({
+          request,
+          baseClient,
+          spacesService,
+          types: [],
+        });
 
-      await client.bulkCreate(objects, options);
+        const attributes = {
+          prop1: 'value 1',
+          prop2: 'value 2'
+        };
 
-      expect(baseClient.bulkCreate).toHaveBeenCalledWith(objects, options);
+        const objects = [{
+          type: 'space',
+          attributes
+        }, {
+          type: 'space',
+          attributes
+        }];
+
+        await client.bulkCreate(objects, {});
+
+        expect(baseClient.bulkCreate).toHaveBeenCalledWith(objects.map(o => {
+          return { ...o, extraDocumentProperties: {} };
+        }), {});
+      });
+
+      test('allows space-aware and non-space-aware (global) objects to be created at the same time', async () => {
+
+        const request = createMockRequest(currentSpace);
+        const baseClient = createMockClient(currentSpace);
+        const spacesService = createSpacesService(server);
+
+        const client = new SpacesSavedObjectsClient({
+          request,
+          baseClient,
+          spacesService,
+          types: [],
+        });
+
+        const attributes = {
+          prop1: 'value 1',
+          prop2: 'value 2'
+        };
+
+        const objects = [{
+          type: 'space',
+          attributes
+        }, {
+          type: 'foo',
+          attributes
+        }];
+
+        await client.bulkCreate(objects, {});
+
+        const expectedCalledWithObjects = [...objects];
+        expectedCalledWithObjects[0] = {
+          ...expectedCalledWithObjects[0],
+          extraDocumentProperties: {}
+        };
+        expectedCalledWithObjects[1] = {
+          ...expectedCalledWithObjects[1],
+          extraDocumentProperties: {
+            spaceId: 'space_1'
+          }
+        };
+
+        expect(baseClient.bulkCreate).toHaveBeenCalledWith(expectedCalledWithObjects, {});
+      });
     });
 
-    test('allows space-aware and non-space-aware objects to be created at the same time', async () => {
-      const currentSpace = {
-        id: 'space_1',
-        urlContext: 'space-1'
-      };
+    describe('#update', () => {
+      test('allows an object to be updated if it exists in the same space', async () => {
 
-      const request = createMockRequest(currentSpace);
-      const baseClient = createMockClient(currentSpace);
-      const spacesService = createSpacesService();
+        const request = createMockRequest(currentSpace);
+        const baseClient = createMockClient(currentSpace);
+        const spacesService = createSpacesService(server);
 
-      const client = new SpacesSavedObjectsClient({
-        request,
-        baseClient,
-        spacesService,
-        types: [],
+        const client = new SpacesSavedObjectsClient({
+          request,
+          baseClient,
+          spacesService,
+          types: [],
+        });
+
+        const id = 'object_1';
+        const type = 'foo';
+        const attributes = {
+          prop1: 'value 1',
+          prop2: 'value 2'
+        };
+
+        await client.update(type, id, attributes);
+
+        expect(baseClient.update).toHaveBeenCalledWith(type, id, attributes, { extraDocumentProperties: { spaceId: 'space_1' } });
       });
 
-      const attributes = {
-        prop1: 'value 1',
-        prop2: 'value 2'
-      };
+      test('allows a global object to be updated', async () => {
+        const request = createMockRequest(currentSpace);
+        const baseClient = createMockClient(currentSpace);
+        const spacesService = createSpacesService(server);
 
-      const objects = [{
-        type: 'space',
-        attributes
-      }, {
-        type: 'foo',
-        attributes
-      }];
-      const options = {};
+        const client = new SpacesSavedObjectsClient({
+          request,
+          baseClient,
+          spacesService,
+          types: [],
+        });
 
-      await client.bulkCreate(objects, options);
+        const id = 'space_1';
+        const type = 'space';
+        const attributes = {
+          prop1: 'value 1',
+          prop2: 'value 2'
+        };
 
-      const expectedCalledWithObjects = [...objects];
-      expectedCalledWithObjects[1] = {
-        ...expectedCalledWithObjects[1],
-        id: `space_1:mock-id`,
-        extraDocumentProperties: {
-          spaceId: 'space_1'
-        }
-      };
+        await client.update(type, id, attributes);
 
-      expect(baseClient.bulkCreate).toHaveBeenCalledWith(expectedCalledWithObjects, options);
-    });
-  });
-
-  describe('#update', () => {
-    test('allows an object to be updated if it exists in the same space', async () => {
-      const currentSpace = {
-        id: 'space_1',
-        urlContext: 'space-1'
-      };
-
-      const request = createMockRequest(currentSpace);
-      const baseClient = createMockClient(currentSpace);
-      const spacesService = createSpacesService();
-
-      const client = new SpacesSavedObjectsClient({
-        request,
-        baseClient,
-        spacesService,
-        types: [],
+        expect(baseClient.update).toHaveBeenCalledWith(type, id, attributes, { extraDocumentProperties: {} });
       });
 
-      const id = 'object_1';
-      const type = 'foo';
-      const attributes = {
-        prop1: 'value 1',
-        prop2: 'value 2'
-      };
-      const options = {};
+      test('does not allow an object to be updated via a different space', async () => {
 
-      await client.update(type, id, attributes, options);
+        const request = createMockRequest(currentSpace);
+        const baseClient = createMockClient(currentSpace);
+        const spacesService = createSpacesService(server);
 
-      expect(baseClient.update)
-        .toHaveBeenCalledWith(type, `space_1:${id}`, attributes, { extraDocumentProperties: { spaceId: 'space_1' } });
+        const client = new SpacesSavedObjectsClient({
+          request,
+          baseClient,
+          spacesService,
+          types: [],
+        });
+
+        const id = 'object_2';
+        const type = 'foo';
+        const attributes = {
+          prop1: 'value 1',
+          prop2: 'value 2'
+        };
+
+        await expect(client.update(type, id, attributes)).rejects.toThrowErrorMatchingSnapshot();
+      });
     });
 
-    test('does not allow an object to be updated via a different space', async () => {
-      const currentSpace = {
-        id: 'space_1',
-        urlContext: 'space-1'
-      };
+    describe('#delete', () => {
+      test('allows an object to be deleted if it exists in the same space', async () => {
+        const request = createMockRequest(currentSpace);
+        const baseClient = createMockClient(currentSpace);
+        const spacesService = createSpacesService(server);
 
-      const request = createMockRequest(currentSpace);
-      const baseClient = createMockClient(currentSpace);
-      const spacesService = createSpacesService();
+        const client = new SpacesSavedObjectsClient({
+          request,
+          baseClient,
+          spacesService,
+          types: [],
+        });
 
-      const client = new SpacesSavedObjectsClient({
-        request,
-        baseClient,
-        spacesService,
-        types: [],
+        const id = 'object_1';
+        const type = 'foo';
+
+        await client.delete(type, id);
+
+        expect(baseClient.delete).toHaveBeenCalledWith(type, id);
       });
 
-      const id = 'object_2';
-      const type = 'foo';
-      const attributes = {
-        prop1: 'value 1',
-        prop2: 'value 2'
-      };
-      const options = {};
+      test('allows a global object to be deleted', async () => {
+        const request = createMockRequest(currentSpace);
+        const baseClient = createMockClient(currentSpace);
+        const spacesService = createSpacesService(server);
 
-      await expect(client.update(type, id, attributes, options)).rejects.toThrowErrorMatchingSnapshot();
-    });
-  });
+        const client = new SpacesSavedObjectsClient({
+          request,
+          baseClient,
+          spacesService,
+          types: [],
+        });
 
-  describe('#delete', () => {
-    test('allows an object to be deleted if it exists in the same space', async () => {
-      const currentSpace = {
-        id: 'space_1',
-        urlContext: 'space-1'
-      };
+        const id = 'space_1';
+        const type = 'space';
 
-      const request = createMockRequest(currentSpace);
-      const baseClient = createMockClient(currentSpace);
-      const spacesService = createSpacesService();
+        await client.delete(type, id);
 
-      const client = new SpacesSavedObjectsClient({
-        request,
-        baseClient,
-        spacesService,
-        types: [],
+        expect(baseClient.delete).toHaveBeenCalledWith(type, id);
       });
 
-      const id = 'object_1';
-      const type = 'foo';
+      test('does not allow an object to be deleted via a different space', async () => {
 
-      await client.delete(type, id);
+        const request = createMockRequest(currentSpace);
+        const baseClient = createMockClient(currentSpace);
+        const spacesService = createSpacesService(server);
 
-      expect(baseClient.delete).toHaveBeenCalledWith(type, `space_1:${id}`);
-    });
+        const client = new SpacesSavedObjectsClient({
+          request,
+          baseClient,
+          spacesService,
+          types: [],
+        });
 
-    test('does not allow an object to be deleted via a different space', async () => {
-      const currentSpace = {
-        id: 'space_1',
-        urlContext: 'space-1'
-      };
+        const id = 'object_2';
+        const type = 'foo';
 
-      const request = createMockRequest(currentSpace);
-      const baseClient = createMockClient(currentSpace);
-      const spacesService = createSpacesService();
-
-      const client = new SpacesSavedObjectsClient({
-        request,
-        baseClient,
-        spacesService,
-        types: [],
+        await expect(client.delete(type, id)).rejects.toThrowErrorMatchingSnapshot();
       });
-
-      const id = 'object_2';
-      const type = 'foo';
-
-      await expect(client.delete(type, id)).rejects.toThrowErrorMatchingSnapshot();
     });
   });
 });
