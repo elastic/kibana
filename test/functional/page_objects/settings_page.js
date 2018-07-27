@@ -45,7 +45,8 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
 
     async clickKibanaSettings() {
       await this.clickLinkText('Advanced Settings');
-      await PageObjects.header.waitUntilLoadingHasFinished();
+      // Verify navigation is successful.
+      await testSubjects.existOrFail('managementSettingsTitle');
     }
 
     async clickKibanaSavedObjects() {
