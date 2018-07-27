@@ -27,7 +27,7 @@ export class Repo extends React.Component<RepoProps, any> {
     return (
       <EuiFlexGroup className="repoContainer">
         <EuiFlexItem>
-          <a href={`#/${uri}`}>{name}</a>
+          <a href={`#/${uri}/HEAD`}>{name}</a>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiButton onClick={this.deleteRepo}>Delete</EuiButton>

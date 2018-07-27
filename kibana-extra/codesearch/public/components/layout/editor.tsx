@@ -15,6 +15,7 @@ import { Hover } from 'vscode-languageserver';
 interface Props {
   file: string;
   repoUri: string;
+  revision: string;
 }
 
 export class Editor extends React.Component<Props> {
@@ -31,12 +32,12 @@ export class Editor extends React.Component<Props> {
 
   public componentDidMount(): void {
     this.container = ReactDOM.findDOMNode(this) as HTMLElement;
-    this.loadFile(this.props.repoUri, this.props.file);
+    this.loadFile(this.props.repoUri, this.props.file, this.props.revision);
   }
 
   public componentWillReceiveProps(nextProps: Props) {
     if (this.editor && nextProps.file !== this.props.file) {
-      this.loadFile(nextProps.repoUri, nextProps.file);
+      this.loadFile(nextProps.repoUri, nextProps.file, nextProps.revision);
     }
   }
   // #todo figure out how specify type for `model` and `position`
@@ -51,45 +52,50 @@ export class Editor extends React.Component<Props> {
           uri: `git://${this.props.repoUri}?HEAD#${this.props.file}`,
         },
       })
-      .then((hover: Hover) => {
-        if (hover.contents && hover.range) {
-          const { range, contents } = hover;
-          return {
-            range: new monaco.Range(
-              range.start.line + 1,
-              range.start.character + 1,
-              range.end.line + 1,
-              range.end.character + 1
-            ),
-            contents: (contents as any[]).reverse().map(e => {
-              return { value: e.value || e.toString() };
-            }),
-          };
-        } else if (hover.contents) {
-          const { contents } = hover;
-          if (Array.isArray(contents)) {
+      .then(
+        (hover: Hover) => {
+          if (hover.contents && hover.range) {
+            const { range, contents } = hover;
             return {
+              range: new monaco.Range(
+                range.start.line + 1,
+                range.start.character + 1,
+                range.end.line + 1,
+                range.end.character + 1
+              ),
               contents: (contents as any[]).reverse().map(e => {
                 return { value: e.value || e.toString() };
               }),
             };
+          } else if (hover.contents) {
+            const { contents } = hover;
+            if (Array.isArray(contents)) {
+              return {
+                contents: (contents as any[]).reverse().map(e => {
+                  return { value: e.value || e.toString() };
+                }),
+              };
+            } else {
+              return {
+                contents: [contents],
+              };
+            }
           } else {
-            return {
-              contents: [contents],
-            };
+            return { contents: [] };
           }
-        } else {
+        },
+        _ => {
           return { contents: [] };
         }
-      });
+      );
   }
 
   public render() {
     return <div style={{ height: 600 }} />;
   }
 
-  private loadFile(repo: string, file: string) {
-    fetch(`../api/cs/repo/${repo}/blob/head/${file}`).then((response: Response) => {
+  private loadFile(repo: string, file: string, revision: string) {
+    fetch(`../api/cs/repo/${repo}/blob/${revision}/${file}`).then((response: Response) => {
       if (response.status === 200) {
         const contentType = response.headers.get('Content-Type');
 

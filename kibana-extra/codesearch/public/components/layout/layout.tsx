@@ -50,7 +50,7 @@ export class Layout extends React.Component<Props, State> {
 
   public componentDidMount() {
     this.fetchTree('').then(() => {
-      const paths = this.props.match.params.path.split('/');
+      const paths = (this.props.match.params.path || '').split('/');
       const pathsLength = paths.length;
       if (pathsLength > 0) {
         this.fetchTree(paths[0], pathsLength);
@@ -59,14 +59,14 @@ export class Layout extends React.Component<Props, State> {
   }
 
   public onClick = (path: string) => {
-    const { resource, org, repo } = this.props.match.params;
-    history.push(`/${resource}/${org}/${repo}/${path}`);
+    const { resource, org, repo, revision } = this.props.match.params;
+    history.push(`/${resource}/${org}/${repo}/${revision}/${path}`);
   };
 
   public fetchTree(path: string, depth: number = 1) {
-    const { resource, org, repo } = this.props.match.params;
+    const { resource, org, repo, revision } = this.props.match.params;
     return kfetch({
-      pathname: `../api/cs/repo/${resource}/${org}/${repo}/tree/head/${path}`,
+      pathname: `../api/cs/repo/${resource}/${org}/${repo}/tree/${revision}/${path}`,
       query: { depth },
     }).then((json: any) => {
       this.updateTree(path, json);
@@ -108,8 +108,10 @@ export class Layout extends React.Component<Props, State> {
   };
 
   public render() {
-    const { resource, org, repo, path } = this.props.match.params;
-    const editor = path && <Editor file={path} repoUri={`${resource}/${org}/${repo}`} />;
+    const { resource, org, repo, revision, path } = this.props.match.params;
+    const editor = path && (
+      <Editor file={path} repoUri={`${resource}/${org}/${repo}`} revision={revision || 'HEAD'} />
+    );
 
     return (
       <EuiPage>
