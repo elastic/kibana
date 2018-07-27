@@ -1,0 +1,82 @@
+// SASSTODO: Can't find this selector, but could break something if removed
+.react-grid-layout .gs-w {
+  z-index: auto;
+}
+
+/**
+ * 1. Due to https://github.com/STRML/react-grid-layout/issues/240 we have to manually hide the resizable
+ * element.
+ */
+.dshLayout--viewing {
+  .react-resizable-handle {
+    display: none; /* 1 */
+  }
+}
+
+/**
+ * 1. If we don't give the resizable handler a larger z index value the layout will hide it.
+ */
+.dshLayout--editing {
+  .react-resizable-handle {
+    z-index: $euiZLevel1; /* 1 */
+    right: $euiSizeXS;
+    bottom: $euiSizeXS;
+  }
+}
+
+/**
+ * 1. Need to override the react grid layout height when a single panel is expanded. Important is required because
+ * otherwise the height is set inline.
+ */
+ .dshLayout-isMaximizedPanel {
+  height: 100% !important; /* 1. */
+  width: 100%;
+  position: absolute;
+}
+
+/**
+ * .dshLayout-withMargins only affects the panel styles themselves, see ../panel
+ */
+.dshLayout-withMargins {
+
+  .panel {
+    @include euiBottomShadowSmall;
+    background-color: $euiColorEmptyShade;
+    border: $euiBorderThin;
+    border-radius: $euiBorderRadius;
+  }
+
+  .panel--edit-mode {
+    transition: all $euiAnimSpeedFast $euiAnimSlightResistance;
+
+    &:hover,
+    &:focus {
+      border-color: $euiColorPrimary;
+      @include euiSlightShadowHover;
+    }
+  }
+
+  .panel-heading {
+    border-top-left-radius: $euiBorderRadius - 1px !important;
+    border-top-right-radius: $euiBorderRadius - 1px !important;
+  }
+
+}
+
+/**
+ * When a single panel is expanded, all the other panels are hidden in the grid.
+ */
+.dshDashboardGrid__item--hidden {
+  display: none;
+}
+
+/**
+ * 1. We need to mark this as important because react grid layout sets the width and height of the panels inline.
+ */
+.dshDashboardGrid__item--expanded {
+  height: 100% !important; /* 1 */
+  width: 100% !important; /* 1 */
+  top: 0 !important; /* 1 */
+  left: 0 !important; /* 1 */
+}
+

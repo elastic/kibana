@@ -65,10 +65,10 @@ function ResponsiveGrid({
   // grid to re-render so it'll show a grid with a width of 0.
   lastValidGridSize = size.width > 0 ? size.width : lastValidGridSize;
   const classes = classNames({
-    'layout-view': isViewMode,
-    'layout-edit': !isViewMode,
-    'layout-maximized-panel': maximizedPanelId !== undefined,
-    'layout-with-margins': useMargins,
+    'dshLayout--viewing': isViewMode,
+    'dshLayout--editing': !isViewMode,
+    'dshLayout-isMaximizedPanel': maximizedPanelId !== undefined,
+    'dshLayout-withMargins': useMargins,
   });
 
   const MARGINS = useMargins ? 8 : 0;
@@ -86,6 +86,8 @@ function ResponsiveGrid({
       margin={[MARGINS, MARGINS]}
       cols={DASHBOARD_GRID_COLUMN_COUNT}
       rowHeight={DASHBOARD_GRID_HEIGHT}
+      // Pass the named classes of what should get the dragging handle
+      // (.doesnt-exist literally doesnt exist)
       draggableHandle={isViewMode ? '.doesnt-exist' : '.panel-title'}
       layout={layout}
       onLayoutChange={onLayoutChange}
@@ -212,8 +214,8 @@ export class DashboardGrid extends React.Component {
       const expandPanel = maximizedPanelId !== undefined && maximizedPanelId === panel.panelIndex;
       const hidePanel = maximizedPanelId !== undefined && maximizedPanelId !== panel.panelIndex;
       const classes = classNames({
-        'grid-item--expanded': expandPanel,
-        'grid-item--hidden': hidePanel,
+        'dshDashboardGrid__item--expanded': expandPanel,
+        'dshDashboardGrid__item--hidden': hidePanel,
       });
       return (
         <div
