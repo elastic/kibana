@@ -61,7 +61,7 @@ const KUBERNETES_INSTRUCTIONS = {
 
 export function kubernetesLogsSpecProvider() {
   const moduleName = 'kubernetes';
-  const platforms = ['OSX', 'DEB', 'RPM'];
+  const platforms = ['GENERIC'];
   return {
     id: 'kubernetesLogs',
     name: 'Kubernetes logs',
