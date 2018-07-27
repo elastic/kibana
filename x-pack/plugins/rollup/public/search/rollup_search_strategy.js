@@ -13,48 +13,28 @@ export const rollupSearchStrategy = {
   search: async ({ searchRequests, Promise }) => {
     // TODO: Batch together requests to hit a bulk rollup search endpoint.
     const searchRequest = searchRequests[0];
+    const searchParams = await searchRequest.getFetchParams();
+    const indexPattern = searchParams.index.title || searchParams.index;
     const {
-      index: { title: indexPattern },
       body: {
         size,
         aggs,
+        query: _query,
       },
-    } = await searchRequest.getFetchParams();
-
-    function findDateHistogram(aggs) {
-      if (Array.isArray(aggs)) {
-        for (let i = 0; i < aggs.length; i++) {
-          const dateHistogram = findDateHistogram(aggs[i]);
-
-          if (dateHistogram) {
-            return dateHistogram;
-          }
-        }
-      } else if (typeof aggs === 'object') {
-        const aggNames = Object.keys(aggs);
-        const aggsList = aggNames.map(aggName => aggs[aggName]);
-
-        if (aggsList.includes('date_histogram')) {
-          return aggs;
-        }
-
-        return findDateHistogram(aggsList);
-      }
-    }
+    } = searchParams;
 
     // TODO: Temporarily automatically assign same timezone and interval as what's defined by
     // the rollup job. This should be done by the visualization itself.
-    const searchableAggs = JSON.parse(searchRequest.source.getField('index').originalBody.typeMeta);
-    const { time_zone: timeZone, interval } = findDateHistogram(searchableAggs);
-
     Object.keys(aggs).forEach(aggName => {
       const subAggs = aggs[aggName];
 
       Object.keys(subAggs).forEach(subAggName => {
         if (subAggName === 'date_histogram') {
+          const dateHistogramAgg = searchRequest.source.getField('index').typeMeta.aggs.date_histogram;
           const subAgg = subAggs[subAggName];
-          subAgg.time_zone = timeZone;
-          subAgg.interval = interval;
+          const field = subAgg.field;
+          subAgg.time_zone = dateHistogramAgg[field].time_zone;
+          subAgg.interval = dateHistogramAgg[field].interval;
         }
       });
     });
@@ -63,6 +43,7 @@ export const rollupSearchStrategy = {
     const query = {
       'size': size,
       'aggregations': aggs,
+      'query': _query,
     };
 
     const {
