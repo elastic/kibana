@@ -149,7 +149,7 @@ const defaultEditor = function ($rootScope, $compile) {
                   const oldStateValue = oldState[prop];
                   const editorStateValue = editorState[prop];
 
-                  if (typeof newStateValue === 'object') {
+                  if (newStateValue && typeof newStateValue === 'object') {
                     if (editorStateValue) {
                       // Keep traversing.
                       return updateEditorStateWithChanges(newStateValue, oldStateValue, editorStateValue);
