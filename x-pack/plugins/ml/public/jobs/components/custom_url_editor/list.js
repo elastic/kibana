@@ -19,6 +19,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
+  EuiToolTip,
 } from '@elastic/eui';
 
 import { toastNotifications } from 'ui/notify';
@@ -136,24 +137,32 @@ export function CustomUrlList({
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiFormRow hasEmptyLabelSpace>
-            <EuiButtonIcon
-              size="s"
-              color="primary"
-              onClick={() => onTestButtonClick(index, customUrls, job)}
-              iconType="popout"
-              aria-label="Test custom URL"
-            />
+            <EuiToolTip
+              content="Test custom URL"
+            >
+              <EuiButtonIcon
+                size="s"
+                color="primary"
+                onClick={() => onTestButtonClick(index, customUrls, job)}
+                iconType="popout"
+                aria-label="Test custom URL"
+              />
+            </EuiToolTip>
           </EuiFormRow>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiFormRow hasEmptyLabelSpace>
-            <EuiButtonIcon
-              size="s"
-              color="danger"
-              onClick={() => onDeleteButtonClick(index, customUrls, setCustomUrls)}
-              iconType="trash"
-              aria-label="Delete custom URL"
-            />
+            <EuiToolTip
+              content="Delete custom URL"
+            >
+              <EuiButtonIcon
+                size="s"
+                color="danger"
+                onClick={() => onDeleteButtonClick(index, customUrls, setCustomUrls)}
+                iconType="trash"
+                aria-label="Delete custom URL"
+              />
+            </EuiToolTip>
           </EuiFormRow>
         </EuiFlexItem>
       </EuiFlexGroup>
