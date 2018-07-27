@@ -60,7 +60,7 @@ task startFullKibana(type: YarnTask, dependsOn: [bootstrap, ":lsp:javascript-typ
   args = ['start', '--logging.json=false']
 }
 
-task debugKibana(type: YarnTask, dependsOn: [bootstrap, ":lsp:javascript-typescript-langserver:build", ":lsp:eclipse.jdt.ls:build"]) {
+task debugKibana(type: YarnTask, dependsOn: [bootstrap, ":lsp:javascript-typescript-langserver:build"]) {
   args = ['debug', '--logging.json=false']
 }
 

@@ -7,3 +7,4 @@ node_modules
 !webpackShims/init-monaco.js
 !server/lib/**/*.js
 /public/styles.css
+yarn-error.log
