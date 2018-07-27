@@ -30,6 +30,7 @@ export function Beat({ summary, metrics, ...props }) {
 
   const summarytStatsTop = [
     { label: 'Name', value: summary.name, dataTestSubj: 'name' },
+    { label: 'Host', value: summary.transportAddress, dataTestSubj: 'host' },
     { label: 'Version', value: summary.version, dataTestSubj: 'version' },
     { label: 'Type', value: summary.type, dataTestSubj: 'type' },
     { label: 'Output', value: summary.output, dataTestSubj: 'output' },
