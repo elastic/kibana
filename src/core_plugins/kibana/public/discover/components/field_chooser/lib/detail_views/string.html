@@ -29,7 +29,7 @@
           <div
             css-truncate
             css-truncate-expandable="true"
-            class="discover-field-details-value"
+            class="dscFieldDetails__value"
             aria-label="Value: {{:: bucket.display === '' ? 'Empty string' : bucket.display }}"
           >
             {{::bucket.display}} <em ng-show="bucket.display === ''">Empty string</em>
@@ -48,7 +48,7 @@
             >
               <span
                 aria-hidden="true"
-                class="kuiIcon fa-search-plus discover-field-details-filter"
+                class="kuiIcon fa-search-plus dscFieldDetails__filter"
               ></span>
             </button>
 
@@ -66,7 +66,13 @@
           </div>
         </div>
         <kbn-tooltip text="{{::bucket.count}}" placement="right" append-to-body="1">
-          <progressbar value="bucket.percent" max="100" animate="false"><span>{{bucket.percent}}%</span></progressbar>
+          <progressbar
+            value="bucket.percent"
+            max="100"
+            animate="false"
+          >
+            <span class="dscFieldDetails__progress">{{bucket.percent}}%</span>
+          </progressbar>
         </kbn-tooltip>
       </div>
     </div>

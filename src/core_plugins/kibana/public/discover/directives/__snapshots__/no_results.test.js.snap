@@ -56,7 +56,7 @@ Array [
           Refine your query
         </h3>
         <p>
-          The search bar at the top uses Elasticsearch’s support for Lucene
+          The search bar at the top uses Elasticsearch’s support for Lucene 
           <a
             class="euiLink euiLink--primary"
             href="documentation-link"
@@ -429,7 +429,7 @@ Array [
           Expand your time range
         </h3>
         <p>
-          One or more of the indices you’re looking at contains a date field. Your query may not match anything in the current time range, or there may not be any data at all in the currently selected time range. You can try
+          One or more of the indices you’re looking at contains a date field. Your query may not match anything in the current time range, or there may not be any data at all in the currently selected time range. You can try 
           <button
             aria-expanded="false"
             class="euiLink euiLink--primary"

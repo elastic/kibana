@@ -1,14 +1,14 @@
-// SASSTODO: we don't have a suitable var
-.dscSidebar__ListHeader {
+// SASSTODO: replace the margin-top value with a variable
+.dscSidebar__listHeader {
   margin-top: 5px;
 }
 
-// SASSTODO: we don't have a suitable var
-.dscPopularFields {
+// SASSTODO: replace the padding-top value with a variable
+.dscFieldList--popular {
   padding-top: 10px;
 }
 
-// SASSTODO: we don't have a z-index variable with the value of 1
+// SASSTODO: replace the z-index value with a variable
 .dscWrapper {
   padding-right: 0;
   padding-left: 21px;
@@ -28,38 +28,6 @@
   .series > rect {
     fill-opacity: 0.5;
     stroke-width: 1;
-  }
-
-  // SASSTODO: Seems that this selector is not used anywhere
-  visualize {
-    height: 200px; /* 1 */
-
-    .loading {
-      opacity: 1 !important;
-    }
-
-    &.only-spy {
-      height: auto;
-
-      .visualize-table {
-        height: auto;
-      }
-    }
-  }
-
-  // SASSTODO: Seems that this class is not used anywhere
-  .chartwrapper {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-  }
-
-  // SASSTODO: Seems that this class is not used anywhere
-  .vis-overlay {
-    display: flex;
-    align-items: center;
   }
 }
 
@@ -84,25 +52,12 @@
   background-color: transparent;
 }
 
-// SASSTODO: seems like this class is not used anywhere
-.discover-info {
-  line-height: 30px;
-  padding: 0 10px;
-  border-bottom-left-radius: $euiBorderRadius;
-}
-
-// SASSTODO: seems like this class is not used anywhere
-.discover-info-title {
-  font-weight: bold;
-  margin-right: 10px;
-}
-
 .dscTable {
   overflow: auto;
 
   // SASSTODO: add a monospace modifier to the doc-table component
-  tbody {
-    font-family: 'Lucida Console', Monaco, monospace;
+  .discover-table-row {
+    font-family: $euiCodeFontFamily;
   }
 }
 
@@ -111,15 +66,6 @@
   background-color: $euiColorLightShade;
   padding: 5px 10px;
   text-align: center;
-}
-
-// SASSTODO: seems like this class is not used anywhere
-.discover-table-details-toggle {
-  margin-bottom: 3px;
-}
-
-.dscTable__timefield {
-  white-space: nowrap;
 }
 
 /**
@@ -136,16 +82,6 @@
   height: 14px;
 }
 
-// SASSTODO: seems like this class is not used anywhere
-.discover-field-filter {
-  background-color: $euiColorLightShade;
-  margin-right: 10px;
-
-  .form-group {
-    margin-bottom: 0;
-  }
-}
-
 /**
  * 1. Override sidebar-item-title styles.
  */
@@ -158,18 +94,18 @@
   padding-bottom: 0 !important; /* 1 */
   height: $euiSizeXL;
 
-  &--active {
-    background: shade($euiColorLightestShade, 5%);
-    color: $euiColorFullShade;
-    font-weight: bold;
-  }
-
   &:hover,
   &:focus {
     .dscSidebarItem__action {
       opacity: 1;
     }
   }
+}
+
+.dscSidebarItem--active {
+  background: shade($euiColorLightestShade, 5%);
+  color: $euiColorFullShade;
+  font-weight: bold;
 }
 
 /**
@@ -197,35 +133,15 @@
   padding: 10px;
   background-color: shade($euiColorLightestShade, 5%);
   color: shade($euiColorEmptyShade, 65%);
-
-  // SASSTODO: add an option or a modifier to the progressbar component instead
-  .progress {
-    background-color: shade($euiColorLightestShade, 5%);
-    margin-bottom: 0;
-    border-radius: 0;
-
-    // SASSTODO: replace the padding and line-height values with variables
-    .progress-bar {
-      padding-left: 10px;
-      text-align: right;
-      line-height: 20px;
-      max-width: 100%;
-
-      // SASSTODO: replace the padding and margin values with variables
-      span {
-        background-color: rgba(0, 0, 0, 0.8);
-        padding: 3px;
-        border-radius: $euiBorderRadius;
-        margin-left: 3px;
-        margin-right: 3px;
-      }
-    }
-  }
 }
 
-// SASSTODO: seems like this class is not being used anywhere
-.discover-field-details-count {
-  white-space: nowrap;
+// SASSTODO: replace the padding and margin values with variables
+.dscFieldDetails__progress {
+  background-color: rgba(0, 0, 0, 0.8);
+  padding: 3px;
+  border-radius: $euiBorderRadius;
+  margin-left: 3px;
+  margin-right: 3px;
 }
 
 // SASSTODO: replace the margin-top value with a variable
@@ -258,11 +174,6 @@
   background-color: transparent;
 }
 
-// SASSTODO: Seems that .discover-field-details is not used anywhere
-.discover-field-details {
-
-}
-
 .dscField--noResults {
   color: $euiColorDarkShade;
 }
@@ -277,7 +188,6 @@
 }
 
 .dscResults {
-  // SASSTODO: seems that there are no h3 elements in .dscResults
   h3 {
     margin: -20px 0 10px 0;
     text-align: center;

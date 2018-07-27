@@ -102,6 +102,7 @@ app.directive('discoverField', function ($compile) {
           detailScope.$destroy();
           detailsElem.remove();
           $elem.removeClass('active');
+          $elem.find('.dscSidebarItem').removeClass('dscSidebarItem--active');
         }
       };
 
