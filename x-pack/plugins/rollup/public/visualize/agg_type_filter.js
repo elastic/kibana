@@ -5,7 +5,6 @@
 */
 
 import { aggTypeFilters } from 'ui/agg_types/filter';
-import { uniq } from 'lodash';
 
 /**
  * If rollup index pattern, check its capabilities
@@ -16,17 +15,8 @@ aggTypeFilters.addFilter(
     if(indexPattern.type !== 'rollup') {
       return true;
     }
-
-    const jobs = indexPattern.typeMeta.jobs;
-    let allAggs = [];
-
-    jobs.forEach(job => {
-      const fields = indexPattern.typeMeta.capabilities[job].fields;
-      Object.keys(fields).forEach(field => {
-        allAggs = [...allAggs, ...fields[field].map(agg => agg.agg)];
-      });
-    });
-
-    return uniq(allAggs).includes(aggType.name);
+    const aggName = aggType.name;
+    const aggs = indexPattern.typeMeta.aggs;
+    return Object.keys(aggs).includes(aggName);
   }
 );
