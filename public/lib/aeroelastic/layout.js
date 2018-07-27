@@ -524,8 +524,13 @@ const getUpstreams = (shapes, shape) =>
 
 const shapeCascadeTransforms = shapes => shape => {
   const upstreams = getUpstreams(shapes, shape);
-  const upstreamTransforms = upstreams.map(shape => shape.localTransformMatrix);
+  const upstreamTransforms = upstreams.map(shape => {
+    return shape.snapDeltaMatrix
+      ? matrix.multiply(shape.localTransformMatrix, shape.snapDeltaMatrix)
+      : shape.localTransformMatrix;
+  });
   const cascadedTransforms = matrix.reduceTransforms(upstreamTransforms);
+
   return {
     ...shape,
     transformMatrix: cascadedTransforms,
@@ -552,12 +557,12 @@ const alignmentGuides = (shapes, guidedShapes) => {
   for (let i = 0; i < guidedShapes.length; i++) {
     const d = guidedShapes[i];
     if (d.type === 'annotation') continue;
-    const dTransformMatrix = d.transformMatrix;
+    const dTransformMatrix = d.localTransformMatrix;
     for (let j = 0; j < shapes.length; j++) {
       const s = shapes[j];
       if (d.id === s.id) continue;
       if (s.type === 'annotation') continue;
-      const sTransformMatrix = s.transformMatrix;
+      const sTransformMatrix = s.localTransformMatrix;
       for (let k = -1; k < 2; k++) {
         for (let l = -1; l < 2; l++) {
           if ((k && !l) || (!k && l)) continue; // don't worry about midpoints of the edges, only the center
@@ -591,7 +596,11 @@ const alignmentGuides = (shapes, guidedShapes) => {
               const radius = midPoint - lowPoint;
               result[key] = {
                 id: counter++,
-                transformMatrix: matrix.translate(dim ? midPoint : ss, dim ? ss : midPoint, 100),
+                localTransformMatrix: matrix.translate(
+                  dim ? midPoint : ss,
+                  dim ? ss : midPoint,
+                  config.atopZ
+                ),
                 a: dim ? radius : 0.5,
                 b: dim ? 0.5 : radius,
                 lowPoint,
@@ -631,7 +640,8 @@ const directionalConstraint = (constraints, filterFun) => {
   return closest && closest.constraint;
 };
 
-const alignmentGuideAnnotations = select((shapes, guidedShapes) => {
+const alignmentGuideAnnotations = select((shapes, draggedShape) => {
+  const guidedShapes = draggedShape ? [shapes.find(s => s.id === draggedShape.id)] : [];
   return guidedShapes.length
     ? alignmentGuides(shapes, guidedShapes).map(shape => ({
         ...shape,
@@ -639,11 +649,10 @@ const alignmentGuideAnnotations = select((shapes, guidedShapes) => {
         type: 'annotation',
         subtype: config.alignmentGuideName,
         interactive: false,
-        localTransformMatrix: shape.transformMatrix,
         backgroundColor: 'magenta',
       }))
     : [];
-})(transformedShapes, hoveredShapes);
+})(transformedShapes, draggedShape);
 
 const hoverAnnotations = select((hoveredShape, selectedPrimaryShapeIds) => {
   return hoveredShape &&
@@ -709,7 +718,7 @@ const resizePointAnnotations = (parent, a, b) => ([x, y]) => {
   const pixelOffset = matrix.translate(
     -x * config.resizeAnnotationOffset,
     -y * config.resizeAnnotationOffset,
-    config.atopZ
+    config.atopZ + 10
   );
   const transform = matrix.multiply(markerPlace, pixelOffset);
   const xName = xNames[x];
@@ -732,7 +741,7 @@ const resizePointAnnotations = (parent, a, b) => ([x, y]) => {
 const resizeEdgeAnnotations = (parent, a, b) => ([[x0, y0], [x1, y1]]) => {
   const x = a * mean(x0, x1);
   const y = b * mean(y0, y1);
-  const markerPlace = matrix.translate(x, y, config.atopZ);
+  const markerPlace = matrix.translate(x, y, config.atopZ - 10);
   const transform = markerPlace; // no offset etc. at the moment
   const horizontal = y0 === y1;
   const length = horizontal ? a * Math.abs(x1 - x0) : b * Math.abs(y1 - y0);
@@ -826,7 +835,14 @@ const interactedAnnotations = select(
 */
 
 const annotatedShapes = select(
-  (shapes, alignmentGuideAnnotations, hoverAnnotations, rotationAnnotations, resizeAnnotations) => {
+  (
+    shapes,
+    draggedShape,
+    alignmentGuideAnnotations,
+    hoverAnnotations,
+    rotationAnnotations,
+    resizeAnnotations
+  ) => {
     const annotations = [].concat(
       alignmentGuideAnnotations,
       hoverAnnotations,
@@ -841,24 +857,34 @@ const annotatedShapes = select(
     const horizontalConstraint = directionalConstraint(constraints, isHorizontal);
     const verticalConstraint = directionalConstraint(constraints, isVertical);
     const snappedShapes = contentShapes.map(shape => {
-      const snapOffsetX =
+      const constrainedShape = draggedShape && shape.id === draggedShape.id;
+      const constrainedX =
         config.snapConstraint &&
         horizontalConstraint &&
-        horizontalConstraint.constrained === shape.id
-          ? -horizontalConstraint.signedDistance
-          : 0;
-      const snapOffsetY =
-        config.snapConstraint && verticalConstraint && verticalConstraint.constrained === shape.id
-          ? -verticalConstraint.signedDistance
-          : 0;
-      if (snapOffsetX || snapOffsetY) {
+        horizontalConstraint.constrained === shape.id;
+      const constrainedY =
+        config.snapConstraint && verticalConstraint && verticalConstraint.constrained === shape.id;
+      const snapOffsetX = constrainedX ? -horizontalConstraint.signedDistance : 0;
+      const snapOffsetY = constrainedY ? -verticalConstraint.signedDistance : 0;
+      if (constrainedX || constrainedY) {
         const snapOffset = matrix.translate(snapOffsetX, snapOffsetY, 0);
         return {
           ...shape,
-          constrainedLocalTransformMatrix: matrix.multiply(shape.localTransformMatrix, snapOffset),
+          snapDeltaMatrix: snapOffset,
+        };
+      } else if (constrainedShape) {
+        return {
+          ...shape,
+          snapDeltaMatrix: null,
         };
       } else {
-        return shape;
+        return {
+          ...shape,
+          snapDeltaMatrix: null,
+          localTransformMatrix: shape.snapDeltaMatrix
+            ? matrix.multiply(shape.localTransformMatrix, shape.snapDeltaMatrix)
+            : shape.localTransformMatrix,
+        };
       }
     });
     const result = snappedShapes.concat(annotations); // add current annotations
@@ -866,6 +892,7 @@ const annotatedShapes = select(
   }
 )(
   transformedShapes,
+  draggedShape,
   alignmentGuideAnnotations,
   hoverAnnotations,
   rotationAnnotations,
@@ -878,16 +905,24 @@ const globalTransformShapes = select(cascadeTransforms)(annotatedShapes);
 // it's _the_ state representation (at a PoC level...) comprising of transient properties eg. draggedShape, and the
 // collection of shapes themselves
 const nextScene = select(
-  (hoveredShape, selectedShapes, selectedPrimaryShapes, shapes, gestureEnd) => {
+  (hoveredShape, selectedShapes, selectedPrimaryShapes, shapes, gestureEnd, draggedShape) => {
     return {
       hoveredShape,
       selectedShapes,
       selectedPrimaryShapes,
       shapes,
       gestureEnd,
+      draggedShape,
     };
   }
-)(hoveredShape, selectedShapeIds, selectedPrimaryShapeIds, globalTransformShapes, gestureEnd);
+)(
+  hoveredShape,
+  selectedShapeIds,
+  selectedPrimaryShapeIds,
+  globalTransformShapes,
+  gestureEnd,
+  draggedShape
+);
 
 module.exports = {
   cursorPosition,
