@@ -195,6 +195,7 @@ export default async () => Joi.object({
   }).default(),
   map: Joi.object({
     manifestServiceUrl: Joi.string().default(' https://catalogue.maps.elastic.co/v2/manifest'),
+    emsLandingPageUrl: Joi.string().default('https://maps.elastic.co/v2'),
     includeElasticMapsService: Joi.boolean().default(true)
   }).default(),
   tilemap: Joi.object({
