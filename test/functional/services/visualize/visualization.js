@@ -17,7 +17,7 @@
  * under the License.
  */
 
-const RENDER_COMPLETE_SELECTOR = '[data-render-completete="true"]';
+const RENDER_COMPLETE_SELECTOR = '[data-render-complete="true"]';
 
 export function VisualizationProvider({ getService }) {
   const log = getService('log');
