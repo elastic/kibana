@@ -30,7 +30,6 @@ const KEY_CODES = {
 };
 
 const BetaLabel = styled.div`
-  font-weight: 600;
   position: absolute;
   top: 0;
   right: 0;
@@ -182,7 +181,7 @@ export class Typeahead extends Component {
           <EuiFlexItem style={{ position: 'relative' }}>
             <BetaLabel>
               <EuiToolTip content="The Query bar feature is still in beta. Help us report any issues or bugs by using the APM feedback link in the top.">
-                <div>Beta - Learn more</div>
+                <div>Beta</div>
               </EuiToolTip>
             </BetaLabel>
 
