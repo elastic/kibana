@@ -61,7 +61,7 @@ exports[`StatusMessage should render with no partial matches 1`] = `
         id="kbn.management.createIndexPattern.step.status.notMatchLabel.notMatchDetail"
         values={
           Object {
-            "allIndicesLength": 2,
+            "indicesLength": 2,
             "strongIndices": <strong>
               <FormattedMessage
                 defaultMessage="{indicesLength, plural, one {# index} other {# indices}}"
@@ -133,6 +133,7 @@ exports[`StatusMessage should render without a query 1`] = `
           Object {
             "strongIndices": <strong>
               2
+               indices
             </strong>,
           }
         }

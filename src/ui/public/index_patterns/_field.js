@@ -49,8 +49,8 @@ export function Field(indexPattern, spec) {
       defaultMessage: 'Field {name} in indexPattern {title} is using an unknown field type.' });
 
     toastNotifications.addDanger({
-      title: title,
-      text: text
+      title,
+      text,
     });
   }
 

@@ -53,7 +53,7 @@ export const StatusMessage = ({
           <FormattedMessage
             id="kbn.management.createIndexPattern.step.status.matchAnyLabel.matchAnyDetail"
             defaultMessage="Your index pattern can match any of your {strongIndices}, below."
-            values={{ strongIndices: (<strong>{allIndicesLength}</strong>) }}
+            values={{ strongIndices: (<strong>{allIndicesLength} indices</strong>) }}
           />
         </span>
       );
@@ -153,7 +153,7 @@ export const StatusMessage = ({
                   values={{ indicesLength: allIndicesLength }}
                 />
               </strong>),
-            allIndicesLength,
+            indicesLength: allIndicesLength,
           }}
         />
       </span>
