@@ -11,20 +11,30 @@ import * as detect from 'language-detect';
 detect.extensions['.ts'] = 'typescript';
 detect.extensions['.tsx'] = 'typescript';
 
-export function detectLanguage(file: string) {
-  const lang = detect.filename(file);
+function readFile(file: string) {
+  return new Promise<string>((resolve, reject) =>
+    fs.readFile(file, 'utf8', (err, content) => {
+      if (err) {
+        reject(err);
+      } else {
+        resolve(content);
+      }
+    })
+  );
+}
+
+export async function detectLanguage(file: string, fileContent?: Buffer) {
+  let lang = detect.filename(file);
   if (!lang) {
-    return new Promise((resolve, reject) =>
-      fs.readFile(file, 'utf8', (err, content) => {
-        if (err) {
-          reject(err);
-        } else {
-          const result = detect.contents(file, content);
-          resolve(result);
-        }
-      })
-    );
+    let content: string;
+    if (fileContent) {
+      content = fileContent.toString('utf8');
+    } else {
+      content = await readFile(file);
+    }
+    lang = detect.contents(file, content);
+    return lang ? lang.toLowerCase() : null;
   } else {
-    return Promise.resolve(lang);
+    return Promise.resolve(lang.toLowerCase());
   }
 }

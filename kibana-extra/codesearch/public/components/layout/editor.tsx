@@ -21,6 +21,7 @@ export class Editor extends React.Component<Props> {
   private lspMethods: TextDocumentMethods;
   private container: HTMLElement | undefined;
   private editor: any | undefined;
+  private monaco: any;
 
   constructor(props: Props, context: any) {
     super(props, context);
@@ -93,7 +94,8 @@ export class Editor extends React.Component<Props> {
         const contentType = response.headers.get('Content-Type');
 
         if (contentType && contentType.startsWith('text/')) {
-          response.text().then(text => this.loadText(text, file));
+          const lang = contentType.split(';')[0].substring('text/'.length);
+          response.text().then(text => this.loadText(text, file, lang));
         } else if (contentType && contentType.startsWith('image/')) {
           alert('show image!');
         }
@@ -101,29 +103,28 @@ export class Editor extends React.Component<Props> {
     });
   }
 
-  private loadText(text: string, file: string) {
+  private loadText(text: string, file: string, lang: string) {
     if (this.editor) {
-      this.editor.setValue(text);
+      const model = this.editor.getModel();
+      model.setValue(text);
+      this.monaco.editor.setModelLanguage(model, lang);
     } else {
-      this.initEditor(text, file);
+      this.initEditor(text, file, lang);
     }
   }
 
-  private initEditor(text: string, file: string) {
+  private initEditor(text: string, file: string, lang: string) {
     initMonaco(monaco => {
-      // TODO use a common library for this
-      let detectedLanguage = 'typescript';
-      if (file.endsWith('.java')) {
-        detectedLanguage = 'java';
+      this.monaco = monaco;
+      if (lang !== 'plain') {
+        monaco.languages.registerHoverProvider(lang, {
+          provideHover: (model, position) => this.onHover(monaco, model, position),
+        });
       }
-
-      monaco.languages.registerHoverProvider(detectedLanguage, {
-        provideHover: (model, position) => this.onHover(monaco, model, position),
-      });
 
       this.editor = monaco.editor.create(this.container!, {
         value: text,
-        language: detectedLanguage,
+        language: lang,
         readOnly: true,
       });
     });

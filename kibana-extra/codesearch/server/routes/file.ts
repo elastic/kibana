@@ -6,6 +6,7 @@
 
 import Boom from 'boom';
 import fileType from 'file-type';
+import { detectLanguage } from '../detect_language';
 import { GitOperations } from '../git_operations';
 import { Server } from '../kibana_types';
 import { ServerOptions } from '../server_options';
@@ -51,7 +52,8 @@ export function fileRoute(server: Server, options: ServerOptions) {
               .code(204);
           }
         } else {
-          reply(blob.content()).type('text/plain');
+          const lang = await detectLanguage(path, blob.content());
+          reply(blob.content()).type(`text/${lang || 'plain'}`);
         }
       } catch (e) {
         if (e.isBoom) {
