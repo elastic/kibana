@@ -17,10 +17,10 @@
  * under the License.
  */
 
-import { Observable } from '@kbn/observable';
+import { Observable } from '../../lib/kbn_observable';
 
-import { LoggerFactory } from '../../logging';
 import { Router } from '../http';
+import { LoggerFactory } from '../logging';
 import { registerElasticsearchRoutes } from './api';
 import { ElasticsearchConfigs } from './elasticsearch_configs';
 import { ElasticsearchService } from './elasticsearch_service';

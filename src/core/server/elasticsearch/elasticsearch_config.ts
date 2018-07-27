@@ -17,12 +17,13 @@
  * under the License.
  */
 
+// @ts-ignore avoid converting elasticsearch lib for now
 import { ConfigOptions } from 'elasticsearch';
 import { readFileSync } from 'fs';
 import { noop } from 'lodash';
 import url from 'url';
 
-import { assertNever, pick } from '../../lib/utils';
+import { assertNever, pick } from '../../utils';
 import { filterHeaders, Headers } from '../http/router/headers';
 import { ClusterSchema } from './schema';
 
@@ -69,14 +70,8 @@ export class ElasticsearchConfig {
    *                   and password. Used to create a client that is not
    *                   authenticated using the config, but from each request.
    */
-  public toElasticsearchClientConfig({
-    shouldAuth = true,
-  } = {}): ConfigOptions {
-    const config: ConfigOptions = pick(this.config, [
-      'apiVersion',
-      'username',
-      'logQueries',
-    ]);
+  public toElasticsearchClientConfig({ shouldAuth = true } = {}): ConfigOptions {
+    const config: ConfigOptions = pick(this.config, ['apiVersion', 'username', 'logQueries']);
 
     config.pingTimeout = this.config.pingTimeout.asMilliseconds();
     config.requestTimeout = this.config.requestTimeout.asMilliseconds();
@@ -94,11 +89,7 @@ export class ElasticsearchConfig {
       query: uri.query,
     };
 
-    if (
-      shouldAuth &&
-      this.config.username !== undefined &&
-      this.config.password !== undefined
-    ) {
+    if (shouldAuth && this.config.username !== undefined && this.config.password !== undefined) {
       config.host.auth = `${this.config.username}:${this.config.password}`;
     }
 

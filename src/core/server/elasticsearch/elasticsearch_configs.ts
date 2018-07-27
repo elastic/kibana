@@ -17,11 +17,8 @@
  * under the License.
  */
 
-import { Env } from '../../config';
-import {
-  ElasticsearchClusterType,
-  ElasticsearchConfig,
-} from './elasticsearch_config';
+import { Env } from '../config';
+import { ElasticsearchClusterType, ElasticsearchConfig } from './elasticsearch_config';
 import { ElasticsearchConfigsSchema, elasticsearchSchema } from './schema';
 
 export class ElasticsearchConfigs {
@@ -30,9 +27,7 @@ export class ElasticsearchConfigs {
    */
   public static schema = elasticsearchSchema;
 
-  private readonly configs: {
-    [type in ElasticsearchClusterType]: ElasticsearchConfig
-  };
+  private readonly configs: { [type in ElasticsearchClusterType]: ElasticsearchConfig };
 
   /**
    * @internal
