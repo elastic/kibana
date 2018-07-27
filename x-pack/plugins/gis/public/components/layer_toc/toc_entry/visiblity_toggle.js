@@ -8,9 +8,7 @@
 import React from 'react';
 
 export function VisibilityToggle(props) {
-  const onChange = (event) => {
-    props.onChange(event.target.checked);
-  };
+  const { onChange } = props;
 
   return (
     <div className="visibilityToggle">
