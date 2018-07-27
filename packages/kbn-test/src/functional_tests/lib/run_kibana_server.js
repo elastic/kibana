@@ -78,7 +78,7 @@ function filterCliArgs(args) {
     }
 
     // is any other setting overridden?
-    if (findIndexFrom(argv, ind, opt => opt.split('=')[0] === val.split('=')[0]) > 0) {
+    if (findIndexFrom(argv, ++ind, opt => opt.split('=')[0] === val.split('=')[0]) > -1) {
       return acc;
     }
 
@@ -104,7 +104,7 @@ function isBasePathSettingOverridden(args, val, ind) {
   const basePathKeys = ['--no-base-path', '--server.basePath'];
 
   if (basePathKeys.includes(key)) {
-    if (findIndexFrom(args, ind, opt => basePathKeys.includes(opt.split('=')[0])) > 0) {
+    if (findIndexFrom(args, ++ind, opt => basePathKeys.includes(opt.split('=')[0])) > -1) {
       return true;
     }
   }
@@ -113,5 +113,5 @@ function isBasePathSettingOverridden(args, val, ind) {
 }
 
 function findIndexFrom(array, index, ...args) {
-  return [...array].slice(++index).findIndex(...args);
+  return [...array].slice(index).findIndex(...args);
 }

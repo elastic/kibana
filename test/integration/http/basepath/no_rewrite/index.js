@@ -21,18 +21,56 @@ export default function ({ getService }) {
 
   const supertest = getService('supertest');
 
+  // All these tests send requests to the base path proxy server
+  // probably configured to be on port 5620
+
   describe('Kibana server with basePath and without rewriteBasePath', () => {
     const basePath = '/abc/xyz';
 
-    it('cannot find requests containing basePath', async () => {
+    it('requests to the basePath redirect once', async () => {
+      // When not following redirects, check for 302 Found
+      // and make sure the location header contains basePath
       await supertest.get(`/abc/xyz`)
-        .expect(404);
+        .expect(302)
+        .expect('Location', `${basePath}/app/kibana`);
+
+      // When following redirects, check for 200 OK
+      await supertest.get(`/abc/xyz`)
+        .redirects(1)
+        .expect(200);
     });
 
-    it('redirects root requests to basePath root', async () => {
+    it('requests to root path redirect twice', async () => {
       await supertest.get(`/`)
         .expect(302)
+        .expect('Location', `${basePath}`);
+
+      await supertest.get(`/`)
+        .redirects(1)
+        .expect(302)
         .expect('location', `${basePath}/app/kibana`);
+
+      await supertest.get(`/`)
+        .redirects(2)
+        .expect(200);
+    });
+
+    it('cannot find app requests without basePath', async () => {
+      await supertest.get(`/app/kibana`)
+        .expect(404);
+
+      await supertest.get(`/abc/xyz/app/kibana`)
+        .expect(200);
+    });
+
+    it('requests to old basePath redirect once to new basePath', async () => {
+      await supertest.get(`/def/app/kibana`)
+        .expect(302)
+        .expect('Location', `${basePath}/app/kibana`);
+
+      await supertest.get(`/def/app/kibana`)
+        .redirects(1)
+        .expect(200);
     });
   });
 }
