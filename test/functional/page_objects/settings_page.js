@@ -45,7 +45,8 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
 
     async clickKibanaSettings() {
       await this.clickLinkText('Advanced Settings');
-      await PageObjects.header.waitUntilLoadingHasFinished();
+      // Verify navigation is successful.
+      await testSubjects.existOrFail('managementSettingsTitle');
     }
 
     async clickKibanaSavedObjects() {
@@ -75,8 +76,13 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
     }
 
     async setAdvancedSettingsSelect(propertyName, propertyValue) {
-      await remote.setFindTimeout(defaultFindTimeout)
-        .findByCssSelector(`[data-test-subj="advancedSetting-editField-${propertyName}"] option[value="${propertyValue}"]`).click();
+      let option;
+      await retry.try(async () => {
+        option = await remote.findByCssSelector(
+          `[data-test-subj="advancedSetting-editField-${propertyName}"] option[value="${propertyValue}"]`
+        );
+      });
+      await option.click();
       await PageObjects.header.waitUntilLoadingHasFinished();
       await testSubjects.click(`advancedSetting-saveEditField-${propertyName}`);
       await PageObjects.header.waitUntilLoadingHasFinished();
@@ -573,7 +579,7 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
       await testSubjects.click('importSavedObjectsDoneBtn');
     }
 
-    async clickConfirmConflicts() {
+    async clickConfirmChanges() {
       await testSubjects.click('importSavedObjectsConfirmBtn');
     }
 
