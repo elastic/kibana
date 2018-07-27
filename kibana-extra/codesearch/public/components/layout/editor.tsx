@@ -100,7 +100,13 @@ export class Editor extends React.Component<Props> {
         const contentType = response.headers.get('Content-Type');
 
         if (contentType && contentType.startsWith('text/')) {
-          const lang = contentType.split(';')[0].substring('text/'.length);
+          let lang = contentType.split(';')[0].substring('text/'.length);
+          if (lang === 'typescript') {
+            lang = 'ts';
+          }
+          if (lang === 'javascript') {
+            lang = 'js';
+          }
           response.text().then(text => this.loadText(text, file, lang));
         } else if (contentType && contentType.startsWith('image/')) {
           alert('show image!');
@@ -122,6 +128,7 @@ export class Editor extends React.Component<Props> {
   private initEditor(text: string, file: string, lang: string) {
     initMonaco(monaco => {
       this.monaco = monaco;
+
       if (lang !== 'plain') {
         monaco.languages.registerHoverProvider(lang, {
           provideHover: (model, position) => this.onHover(monaco, model, position),
