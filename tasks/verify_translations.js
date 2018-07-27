@@ -58,7 +58,7 @@ async function verifyTranslations(uiExports) {
   // Search files for used translation keys
   const translationPatterns = [
     { regexp: 'i18n\\(\'(.*)\'\\)',
-      parsePaths: [fromRoot('src/ui/ui_render/views/*.jade')] }
+      parsePaths: [fromRoot('src/ui/ui_render/views/*.pug')] }
   ];
   for (const { regexp, parsePaths } of translationPatterns) {
     const keys = await i18nVerify.getTranslationKeys(regexp, parsePaths);
@@ -80,7 +80,7 @@ async function verifyTranslations(uiExports) {
   throw new Error(
     '\n' +
     '\n' +
-    'The following keys are used in angular/jade views but are not translated:\n' +
+    'The following keys are used in angular/pug views but are not translated:\n' +
     keysWithoutTranslations.map(([locale, keys]) => (
       `   - ${locale}: ${formatListAsProse(keys)}`
     )).join('\n') +
