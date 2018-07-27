@@ -6608,9 +6608,9 @@ react-reconciler@^0.7.0:
     object-assign "^4.1.1"
     prop-types "^15.6.0"
 
-react-redux-request@^1.5.5:
-  version "1.5.5"
-  resolved "https://registry.yarnpkg.com/react-redux-request/-/react-redux-request-1.5.5.tgz#693562b0d85293d9d16b02e13ea13f118950bb1d"
+react-redux-request@^1.5.6:
+  version "1.5.6"
+  resolved "https://registry.yarnpkg.com/react-redux-request/-/react-redux-request-1.5.6.tgz#8c514dc88264d225e113b4b54a265064e8020651"
   dependencies:
     lodash.get "^4.4.2"
     lodash.isequal "^4.5.0"
@@ -8114,6 +8114,9 @@ to-object-path@^0.3.0:
 to-regex-range@^2.1.0:
   version "2.1.1"
   resolved "https://registry.yarnpkg.com/to-regex-range/-/to-regex-range-2.1.1.tgz#7c80c17b9dfebe599e27367e0d4dd5590141db38"
+  dependencies:
+    is-number "^3.0.0"
+    repeat-string "^1.6.1"
 
 to-regex@^3.0.1:
   version "3.0.1"
