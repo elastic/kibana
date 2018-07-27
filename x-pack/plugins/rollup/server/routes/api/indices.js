@@ -6,30 +6,35 @@
 import { callWithRequestFactory } from '../../lib/call_with_request_factory';
 import { isEsErrorFactory } from '../../lib/is_es_error_factory';
 import { wrapEsError, wrapUnknownError } from '../../lib/error_wrappers';
-import { getIndexNameToCapabilitiesMap } from '../../lib/map_capabilities';
+import { licensePreRoutingFactory } from'../../lib/license_pre_routing_factory';
+import { getCapabilitiesForRollupIndices } from '../../lib/map_capabilities';
 
+/**
+ * Returns a list of all rollup index names
+ */
 export function registerIndicesRoute(server) {
   const isEsError = isEsErrorFactory(server);
+  const licensePreRouting = licensePreRoutingFactory(server);
 
   server.route({
     path: '/api/rollup/indices',
     method: 'GET',
+    config: {
+      pre: [ licensePreRouting ]
+    },
     handler: async (request, reply) => {
       const callWithRequest = callWithRequestFactory(server, request);
       try {
-        const capabilities = await callWithRequest('rollup.capabilities', {
-          indices: '_all'
+        const data = await callWithRequest('rollup.capabilitiesByRollupIndex', {
+          indexPattern: '_all'
         });
-        reply(getIndexNameToCapabilitiesMap(capabilities));
+        reply(getCapabilitiesForRollupIndices(data));
       } catch(err) {
         if (isEsError(err)) {
           return reply(wrapEsError(err));
         }
         reply(wrapUnknownError(err));
       }
-    },
-    // config: {
-    //   pre: [ licensePreRouting ]
-    // }
+    }
   });
 }

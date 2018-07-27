@@ -29,16 +29,14 @@ export class IndexPatternCreationConfig {
   static key = 'default';
 
   constructor({
-    type = '',
+    type = undefined,
     name = indexPatternTypeName,
     showSystemIndices = true,
-    allowWildcards = true,
     httpClient = null,
   }) {
     this.type = type;
     this.name = name;
     this.showSystemIndices = showSystemIndices;
-    this.allowWildcards = allowWildcards;
     this.httpClient = httpClient;
   }
 
@@ -60,20 +58,8 @@ export class IndexPatternCreationConfig {
     return this.name;
   }
 
-  getIndexPatternCreationQuery = () => {
-    return {};
-  };
-
   getShowSystemIndices = () => {
     return this.showSystemIndices;
-  }
-
-  getAllowWildcards = () => {
-    return this.allowWildcards;
-  }
-
-  illegalCharacters = (characters = []) => {
-    return characters;
   }
 
   getIndexTags() {
@@ -90,5 +76,9 @@ export class IndexPatternCreationConfig {
 
   renderPrompt = () => {
     return null;
+  }
+
+  getFetchForWildcardOptions = () => {
+    return {};
   }
 }
