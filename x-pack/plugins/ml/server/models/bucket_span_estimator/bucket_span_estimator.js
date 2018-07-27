@@ -34,7 +34,7 @@ export function estimateBucketSpanFactory(callWithRequest) {
 
       // determine durations for bucket span estimation
       // taking into account the clusters' search.max_buckets settings
-      // the polled_data_checker uses an aggretation interval of 1 minute
+      // the polled_data_checker uses an aggregation interval of 1 minute
       // so that's the smallest interval we have to check for not to
       // exceed search.max_buckets.
       const ONE_MINUTE_MS = 60000;
