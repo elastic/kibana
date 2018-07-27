@@ -17,7 +17,7 @@ import {
   EuiProgress,
   EuiToolTip
 } from '@elastic/eui';
-import { units } from '../../../../style/variables';
+import { units, fontSizes } from '../../../../style/variables';
 
 const KEY_CODES = {
   LEFT: 37,
@@ -33,6 +33,7 @@ const BetaLabel = styled.div`
   position: absolute;
   top: 0;
   right: 0;
+  font-size: ${fontSizes.small};
   transform: translateY(calc(-100% - ${units.quarter}px));
   cursor: pointer;
 `;
