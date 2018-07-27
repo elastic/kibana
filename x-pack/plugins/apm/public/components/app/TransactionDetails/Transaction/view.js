@@ -123,8 +123,8 @@ function Transaction({ transaction, location, urlParams }) {
   if (isEmpty(transaction)) {
     return (
       <EmptyMessage
-        heading="No transaction sample available for this time range."
-        subheading="Please select another time range or another bucket from the distribution histogram."
+        heading="No transaction sample available."
+        subheading="Try another time range, reset the search filter or select another bucket from the distribution histogram."
       />
     );
   }
