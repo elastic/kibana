@@ -33,6 +33,8 @@ export default function ({ getService, getPageObjects }) {
         // start on cluster overview
         await PageObjects.monitoring.clickBreadcrumb('breadcrumbClusters');
 
+        await PageObjects.header.waitUntilLoadingHasFinished();
+
         // go to nodes listing
         await overview.clickEsNodes();
         expect(await nodesList.isOnListing()).to.be(true);
