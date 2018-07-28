@@ -36,7 +36,7 @@ export class FatalErrorsService {
   private errorInfo$ = new Rx.ReplaySubject<ErrorInfo>(Infinity);
 
   constructor(private params: FatalErrorsParams) {
-    this.errorInfo$.pipe(first(), tap(this.onFirstError)).subscribe({
+    this.errorInfo$.pipe(first(), tap(() => this.onFirstError())).subscribe({
       error: error => {
         // tslint:disable-next-line no-console
         console.error('Uncaught error in fatal error screen internals', error);
@@ -67,7 +67,7 @@ export class FatalErrorsService {
     };
   }
 
-  private onFirstError = () => {
+  private onFirstError() {
     // stop the core systems so that things like the legacy platform are stopped
     // and angular/react components are unmounted;
     this.params.stopCoreSystem();
@@ -90,7 +90,7 @@ export class FatalErrorsService {
       />,
       container
     );
-  };
+  }
 }
 
 export type FatalErrorsStartContract = ReturnType<FatalErrorsService['start']>;
