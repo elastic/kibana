@@ -81,7 +81,6 @@ export class FatalErrorsService {
     const container = document.createElement('div');
     this.params.rootDomElement.appendChild(container);
 
-    // render the <FatalErrorScreen>
     render(
       <FatalErrorsScreen
         buildNumber={this.params.injectedMetadata.getKibanaBuildNumber()}
