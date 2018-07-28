@@ -28,7 +28,9 @@ import { metadata } from '../metadata';
 class FetchError extends Error {
   constructor(public readonly res: Response, public readonly body?: any) {
     super(res.statusText);
-    Error.captureStackTrace(this, FetchError);
+    if (Error.captureStackTrace) {
+      Error.captureStackTrace(this, FetchError);
+    }
   }
 }
 
