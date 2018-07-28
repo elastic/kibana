@@ -15,12 +15,6 @@ Array [
 
 exports[`#add() deletes all children of rootDomElement and renders <FatalErrorScreen /> into it: fatal error screen container 1`] = `
 <div>
-  
-      
-  
-      
-  
-    
   <div />
 </div>
 `;

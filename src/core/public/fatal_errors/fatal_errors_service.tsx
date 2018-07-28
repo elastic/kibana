@@ -72,10 +72,8 @@ export class FatalErrorsService {
     // and angular/react components are unmounted;
     this.params.stopCoreSystem();
 
-    // ensure that all children of the rootDomElement are removed
-    while (this.params.rootDomElement.children.length) {
-      this.params.rootDomElement.removeChild(this.params.rootDomElement.children[0]);
-    }
+    // delete all content in the rootDomElement
+    this.params.rootDomElement.textContent = '';
 
     // create and mount a container for the <FatalErrorScreen>
     const container = document.createElement('div');
