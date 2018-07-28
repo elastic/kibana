@@ -42,5 +42,5 @@ export function formatAngularHttpError(error: AngularHttpError) {
     );
   }
 
-  return 'Error ' + error.status + ' ' + error.statusText + ': ' + error.data.message;
+  return `Error ${error.status} ${error.statusText}: ${error.data.message}`;
 }
