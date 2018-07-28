@@ -18,7 +18,7 @@
  */
 
 // @ts-ignore EuiCallOut not available until we upgrade to EUI 3.1.0
-import { EuiButton, EuiCallOut } from '@elastic/eui';
+import { EuiCallOut } from '@elastic/eui';
 import testSubjSelector from '@kbn/test-subj-selector';
 import { mount, shallow } from 'enzyme';
 import React from 'react';
