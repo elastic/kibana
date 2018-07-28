@@ -27,11 +27,11 @@ import {
 let newPlatformFatalErrors: FatalErrorsStartContract;
 
 export function __newPlatformInit__(instance: FatalErrorsStartContract) {
-  if (newPlatformFatalErrors === undefined) {
-    newPlatformFatalErrors = instance;
+  if (newPlatformFatalErrors) {
+    throw new Error('ui/notify/fatal_error already initialized with new platform apis');
   }
 
-  throw new Error('ui/notify/fatal_error already initialized with new platform apis');
+  newPlatformFatalErrors = instance;
 }
 
 export function addFatalErrorCallback(callback: () => void) {
