@@ -84,10 +84,8 @@ describe('#add()', () => {
     expect(() => {
       fatalErrors.add(new Error('foo'));
     }).toThrowError();
-    expect(mockRender).toHaveBeenCalledTimes(1);
-    expect(rootDomElement.children).toHaveLength(1);
-    expect(rootDomElement.children[0]).toMatchSnapshot('fatal error screen container');
-    expect(mockRender.mock.calls[0][0]).toMatchSnapshot('fatal error screen component');
+    expect(rootDomElement).toMatchSnapshot('fatal error screen container');
+    expect(mockRender.mock.calls).toMatchSnapshot('fatal error screen component');
   });
 });
 
