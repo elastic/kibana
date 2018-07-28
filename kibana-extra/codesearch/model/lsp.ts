@@ -10,4 +10,5 @@ export interface LspRequest {
   documentUri?: string; // assert there is only one uri per request for now.
   resolvedFilePath?: string;
   workspacePath?: string;
+  workspaceRevision?: string;
 }

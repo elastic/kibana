@@ -54,7 +54,7 @@ export class WorkspaceHandler {
       }
     }
     this.setWorkspaceRevision(workspaceRepo, headCommit);
-    return workspaceRepo;
+    return { workspaceRepo, workspaceRevision: headCommit.sha().substring(0, 7) };
   }
 
   public async handleRequest(request: LspRequest): Promise<void> {
@@ -63,10 +63,13 @@ export class WorkspaceHandler {
       case 'textDocument/hover':
       case 'textDocument/full': {
         const payload: TextDocumentPositionParams = params;
-        const { filePath, workspacePath } = await this.resolveUri(params.textDocument.uri);
+        const { filePath, workspacePath, workspaceRevision } = await this.resolveUri(
+          params.textDocument.uri
+        );
         if (filePath) {
           payload.textDocument.uri = request.resolvedFilePath = filePath;
           request.workspacePath = workspacePath;
+          request.workspaceRevision = workspaceRevision;
         }
         break;
       }
@@ -131,15 +134,20 @@ export class WorkspaceHandler {
       const revision = url.query ? url.query.toLocaleLowerCase() : 'head';
       const filePath = url.hash ? url.hash.substr(1) : '/';
       const repositoryUri = `${domain}/${repo}`;
-      const workspaceRepo = await this.openWorkspace(repositoryUri, revision);
+      const { workspaceRepo, workspaceRevision } = await this.openWorkspace(
+        repositoryUri,
+        revision
+      );
       return {
         workspacePath: workspaceRepo.workdir(),
         filePath: `file://${path.resolve(workspaceRepo.workdir(), filePath)}`,
         uri,
+        workspaceRevision,
       };
     } else {
       return {
         workspacePath: undefined,
+        workspaceRevision: undefined,
         filePath: undefined,
         uri,
       };

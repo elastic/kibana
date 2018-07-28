@@ -15,8 +15,14 @@ interface Job {
 }
 
 export class RequestExpander implements ILanguageServerHandler {
+  public get initialized() {
+    return this.currentWorkspace !== null;
+  }
+
   private proxy: LanguageServerProxy;
   private jobQueue: Job[] = [];
+  private currentWorkspace: { workspacePath: string; workspaceRevision: string } | null = null;
+
   constructor(proxy: LanguageServerProxy) {
     this.proxy = proxy;
     this.handle = this.handle.bind(this);
@@ -32,6 +38,17 @@ export class RequestExpander implements ILanguageServerHandler {
       this.handleNext();
     });
   }
+
+  public workspaceChanged(request: LspRequest) {
+    if (!this.initialized) {
+      return true;
+    }
+    return (
+      request.workspacePath !== this.currentWorkspace!.workspacePath ||
+      request.workspaceRevision !== this.currentWorkspace!.workspaceRevision
+    );
+  }
+
   private handle() {
     const job = this.jobQueue.shift();
     if (job) {
@@ -54,21 +71,30 @@ export class RequestExpander implements ILanguageServerHandler {
       );
     }
   }
+
   private handleNext() {
     setTimeout(this.handle, 0);
   }
 
   private async expand(request: LspRequest): Promise<ResponseMessage> {
     if (request.workspacePath) {
-      await this.proxy.initialize({}, [
-        {
-          name: request.workspacePath,
-          uri: `file://${request.workspacePath}`,
-        },
-      ]);
+      if (this.workspaceChanged(request)) {
+        if (this.initialized) {
+          await this.proxy.shutdown();
+        }
+        await this.proxy.initialize({}, [
+          {
+            name: request.workspacePath,
+            uri: `file://${request.workspacePath}`,
+          },
+        ]);
+        this.currentWorkspace = {
+          workspacePath: request.workspacePath,
+          workspaceRevision: request.workspaceRevision || 'HEAD',
+        };
+      }
     }
-    const response = await this.proxy.handleRequest(request);
-    await this.proxy.shutdown();
-    return response;
+
+    return await this.proxy.handleRequest(request);
   }
 }
