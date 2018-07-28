@@ -72,7 +72,7 @@ export class LegacyPlatformService {
     injector$.get('$rootScope').$destroy();
 
     // clear the inner html of the root angular element
-    angularRoot.html('');
+    this.params.rootDomElement.textContent = '';
   }
 
   private loadBootstrapModule(): {
