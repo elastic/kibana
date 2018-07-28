@@ -54,14 +54,16 @@ export class FatalErrorsScreen extends React.Component<Props, State> {
   private subscription?: Rx.Subscription;
 
   public componentDidMount() {
-    // reload the page if hash-based navigation is attempted
-    window.addEventListener('hashchange', () => {
-      window.location.reload();
-    });
+    this.subscription = Rx.merge(
+      // reload the page if hash-based navigation is attempted
+      Rx.fromEvent(window, 'hashchange').pipe(
+        tap(() => {
+          window.location.reload();
+        })
+      ),
 
-    // consume error notifications and set them to the component state
-    this.subscription = this.props.errorInfo$
-      .pipe(
+      // consume error notifications and set them to the component state
+      this.props.errorInfo$.pipe(
         tap(error => {
           this.setState(state => ({
             ...state,
@@ -69,12 +71,12 @@ export class FatalErrorsScreen extends React.Component<Props, State> {
           }));
         })
       )
-      .subscribe({
-        error(error) {
-          // tslint:disable-next-line no-console
-          console.error('Uncaught error in fatal error screen internals', error);
-        },
-      });
+    ).subscribe({
+      error(error) {
+        // tslint:disable-next-line no-console
+        console.error('Uncaught error in fatal error screen internals', error);
+      },
+    });
   }
 
   public componentWillUnmount() {

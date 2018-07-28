@@ -57,7 +57,7 @@ describe('reloading', () => {
 
     shallow(<FatalErrorsScreen {...defaultProps} />);
     expect(addEventListenerSpy).toHaveBeenCalledTimes(1);
-    expect(addEventListenerSpy).toHaveBeenCalledWith('hashchange', expect.any(Function));
+    expect(addEventListenerSpy).toHaveBeenCalledWith('hashchange', expect.any(Function), undefined);
 
     expect(locationReloadSpy).not.toHaveBeenCalled();
     const [, handler] = addEventListenerSpy.mock.calls[0];
