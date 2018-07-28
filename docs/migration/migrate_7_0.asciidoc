@@ -4,7 +4,7 @@
 This section discusses the changes that you need to be aware of when migrating
 your application to Kibana 7.0.
 
-See also <<release-highlights>> and <<release-notes>>. 
+See also <<release-highlights>> and <<release-notes>>.
 
 [float]
 === Removed support for tribe nodes
@@ -23,11 +23,11 @@ Kibana 7.0 will only use the Node.js distribution included in the package.
 [float]
 === Advanced setting query:queryString:options no longer applies to filters
 *Details:* In previous versions of Kibana the Advanced Setting `query:queryString:options` was applied to both queries
-and custom filters using the `query_string` query. This could cause errors if a custom filter used options that 
+and custom filters using the `query_string` query. This could cause errors if a custom filter used options that
 conflicted with the Advanced Setting. In 7.0 `query:queryString:options` will no longer be applied to filters so that
 users can have full control over their custom filters.
 
-*Impact:* You must ensure that any saved searches with a `query_string` filter aren't relying implicitly on 
+*Impact:* You must ensure that any saved searches with a `query_string` filter aren't relying implicitly on
 `query:queryString:options`.
 
 [float]
@@ -42,3 +42,11 @@ so we no longer need this workaround.
 will use the index setting instead. The default for the index setting is also `*`, so most users should not be impacted.
 If some of your indices have a non-default `default_field` setting, you may want to update it or re-add the parameter
 to Kibana's advanced setting.
+
+[float]
+=== Deprecated kibana.yml setting `xpack.monitoring.node_resolver` has been removed
+*Details:* This setting has been deprecated since 5.6, when it was explicitly recommended to use `uuid` as its value.
+
+*Impact:* This setting is no longer necessary. If you enable {monitoring} across the Elastic Stack, a monitoring agent runs
+on each Elasticsearch node, Logstash node, Kibana instance, and Beat to collect and index metrics. Each node and instance is
+considered unique based on its persistent UUID, which is written to the path.data directory when the node or instance starts.
