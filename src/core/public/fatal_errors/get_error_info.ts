@@ -64,7 +64,7 @@ function formatStack(err: Error) {
 }
 
 /**
- * Produces a simple ErrorInfo object from some error and optional source, used for
+ * Produce a simple ErrorInfo object from some error and optional source, used for
  * displaying error information on the fatal error screen
  */
 export function getErrorInfo(error: any, source?: string) {
