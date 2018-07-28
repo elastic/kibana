@@ -48,10 +48,10 @@ function setup() {
     injectedMetadata,
     stopCoreSystem,
     fatalErrors: new FatalErrorsService({
-      injectedMetadata,
+      injectedMetadata: injectedMetadata as any,
       rootDomElement,
       stopCoreSystem,
-    } as any),
+    }),
   };
 }
 
