@@ -31,16 +31,9 @@ module.exports = function (grunt) {
     }
   );
 
-  grunt.registerTask('test:server', [
-    'checkPlugins',
-    'run:mocha',
-  ]);
+  grunt.registerTask('test:server', ['checkPlugins', 'run:mocha']);
 
-  grunt.registerTask('test:browser', [
-    'checkPlugins',
-    'run:browserTestServer',
-    'karma:unit',
-  ]);
+  grunt.registerTask('test:browser', ['checkPlugins', 'run:browserTestServer', 'karma:unit']);
 
   grunt.registerTask('test:browser-ci', () => {
     const ciShardTasks = keys(grunt.config.get('karma'))
@@ -49,13 +42,10 @@ module.exports = function (grunt) {
 
     grunt.log.ok(`Running UI tests in ${ciShardTasks.length} shards`);
 
-    grunt.task.run([
-      'run:browserTestServer',
-      ...ciShardTasks
-    ]);
+    grunt.task.run(['run:browserTestServer', ...ciShardTasks]);
   });
 
-  grunt.registerTask('test:coverage', [ 'run:testCoverageServer', 'karma:coverage' ]);
+  grunt.registerTask('test:coverage', ['run:testCoverageServer', 'karma:coverage']);
 
   grunt.registerTask('test:quick', [
     'checkPlugins',
@@ -65,26 +55,24 @@ module.exports = function (grunt) {
     'test:jest_integration',
     'test:projects',
     'test:browser',
-    'run:apiIntegrationTests'
+    'run:apiIntegrationTests',
   ]);
 
-  grunt.registerTask('test:dev', [
-    'checkPlugins',
-    'run:devBrowserTestServer',
-    'karma:dev'
-  ]);
+  grunt.registerTask('test:dev', ['checkPlugins', 'run:devBrowserTestServer', 'karma:dev']);
 
   grunt.registerTask('test', subTask => {
     if (subTask) grunt.fail.fatal(`invalid task "test:${subTask}"`);
 
-    grunt.task.run(_.compact([
-      !grunt.option('quick') && 'run:eslint',
-      !grunt.option('quick') && 'run:tslint',
-      'run:checkFileCasing',
-      'licenses',
-      'test:quick',
-      'verifyTranslations',
-    ]));
+    grunt.task.run(
+      _.compact([
+        !grunt.option('quick') && 'run:eslint',
+        !grunt.option('quick') && 'run:tslint',
+        'run:checkFileCasing',
+        'licenses',
+        'test:quick',
+        'verifyTranslations',
+      ])
+    );
   });
 
   grunt.registerTask('quick-test', ['test:quick']); // historical alias
@@ -98,7 +86,7 @@ module.exports = function (grunt) {
     const serverCmd = {
       cmd: 'yarn',
       args: ['kbn', 'run', 'test', '--exclude', 'kibana', '--oss', '--skip-kibana-extra'],
-      opts: { stdio: 'inherit' }
+      opts: { stdio: 'inherit' },
     };
 
     return new Promise((resolve, reject) => {

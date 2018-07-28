@@ -16,14 +16,18 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { ComponentClass } from 'react';
 
-import { Adapters, InspectorViewDescription } from '../types';
-
-interface InspectorPanelProps {
-  adapters: Adapters;
-  title?: string;
-  views: InspectorViewDescription[];
+function samplePanelAction(kibana) {
+  return new kibana.Plugin({
+    uiExports: {
+      dashboardPanelActions: ['plugins/sample_panel_action/sample_panel_action'],
+    },
+  });
 }
 
-export const InspectorPanel: ComponentClass<InspectorPanelProps>;
+module.exports = function (kibana) {
+  return [
+    samplePanelAction(kibana),
+  ];
+};
+
