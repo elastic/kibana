@@ -16,14 +16,5 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { ComponentClass } from 'react';
 
-import { Adapters, InspectorViewDescription } from '../types';
-
-interface InspectorPanelProps {
-  adapters: Adapters;
-  title?: string;
-  views: InspectorViewDescription[];
-}
-
-export const InspectorPanel: ComponentClass<InspectorPanelProps>;
+export * from './flyout_session';
