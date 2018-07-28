@@ -92,7 +92,7 @@ describe('rendering', () => {
 
 describe('buttons', () => {
   beforeAll(() => {
-    Object.assign(window as any, {
+    Object.assign(window, {
       localStorage: {
         clear: jest.fn(),
       },
