@@ -29,7 +29,7 @@ export function getPainlessError(error: Error) {
     return;
   }
 
-  const { lang, script } = rootCause[0];
+  const [{ lang, script }] = rootCause;
 
   if (lang !== 'painless') {
     return;
