@@ -28,6 +28,7 @@ function formatMessage(error: any) {
   }
 
   if (!error) {
+    // stringify undefined/null/0/whatever this falsy value is
     return inspect(error);
   }
 
