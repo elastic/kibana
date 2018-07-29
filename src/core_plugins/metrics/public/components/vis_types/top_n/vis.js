@@ -55,7 +55,7 @@ function TopNVisualization(props) {
       const id = first(item.id.split(/:/));
       const seriesConfig = model.series.find(s => s.id === id);
       if (seriesConfig) {
-        const formatter = tickFormatter(seriesConfig.formatter, seriesConfig.value_template);
+        const formatter = tickFormatter(seriesConfig.formatter, seriesConfig.value_template, props.getConfig);
         const value = getLastValue(item.data);
         let color = item.color || seriesConfig.color;
         if (model.bar_color_rules) {

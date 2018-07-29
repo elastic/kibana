@@ -35,6 +35,7 @@ class VisEditor extends Component {
     this.onBrush = brushHandler(props.vis.API.timeFilter);
     this.handleUiState = this.handleUiState.bind(this, props.vis);
     this.handleAppStateChange = this.handleAppStateChange.bind(this);
+    this.getConfig = (...args) => props.config.get(...args);
   }
 
   handleUiState(vis, ...args) {
@@ -94,6 +95,7 @@ class VisEditor extends Component {
           fields={this.props.vis.fields}
           model={this.props.vis.params}
           visData={this.props.visData}
+          getConfig={this.getConfig}
         />
       );
     }
@@ -130,6 +132,7 @@ class VisEditor extends Component {
               visData={this.props.visData}
               dateFormat={this.props.config.get('dateFormat')}
               onChange={handleChange}
+              getConfig={this.getConfig}
             />
           </div>
         </div>

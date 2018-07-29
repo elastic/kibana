@@ -42,6 +42,11 @@ describe('tickFormatter(format, template)', () => {
     expect(fn(1500)).to.equal('1.5k');
   });
 
+  it('returns a located string with custom locale setting', () => {
+    const fn = tickFormatter('0,0.0', null, () => 'fr');
+    expect(fn(1500)).to.equal('1 500,0');
+  });
+
   it('returns a custom formatted string with custom formatter and template', () => {
     const fn = tickFormatter('0.0a', '{{value}}/s');
     expect(fn(1500)).to.equal('1.5k/s');

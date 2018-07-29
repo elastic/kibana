@@ -17,15 +17,16 @@
  * under the License.
  */
 
-import numeral from '@elastic/numeral';
 import handlebars from 'handlebars/dist/handlebars';
 import { durationInputOptions } from './durations';
 import { capitalize, isNumber } from 'lodash';
 
 import { createDurationFormat } from '../../../../kibana/common/field_formats/types/duration';
+import { createNumberFormat } from '../../../../kibana/common/field_formats/types/number';
 import { FieldFormat } from '../../../../../ui/field_formats/field_format';
 
 const DurationFormat = createDurationFormat(FieldFormat);
+const NumberFormat = createNumberFormat(FieldFormat);
 
 const formatLookup = {
   'bytes': '0.0b',
@@ -38,32 +39,33 @@ const durationsLookup = durationInputOptions.reduce((acc, row) => {
   return acc;
 }, {});
 
-export default (format = '0,0.[00]', template) => {
+export default (format = '0,0.[00]', template, getConfig = null) => {
   if (!template) template = '{{value}}';
   const render = handlebars.compile(template);
   const durationFormatTest = /[pnumshdwMY]+,[pnumshdwMY]+,\d+/;
-  return (val) => {
+  let formatter;
+  if (durationFormatTest.test(format)) {
+    const [from, to, decimals] = format.split(',');
+    const inputFormat = durationsLookup[from];
+    const outputFormat = `as${capitalize(durationsLookup[to])}`;
+    formatter = new DurationFormat({
+      inputFormat,
+      outputFormat,
+      outputPrecision: decimals
+    });
+  } else {
     const formatString = formatLookup[format] || format;
+    formatter = new NumberFormat({ pattern: formatString }, getConfig);
+  }
+  return (val) => {
     let value;
     if (!isNumber(val)) {
       value = 0;
     } else {
-      if (durationFormatTest.test(format)) {
-        const [from, to, decimals] = format.split(',');
-        const inputFormat = durationsLookup[from];
-        const outputFormat = `as${capitalize(durationsLookup[to])}`;
-        const formatter = new DurationFormat({
-          inputFormat,
-          outputFormat,
-          outputPrecision: decimals
-        });
+      try {
         value = formatter.convert(val, 'text');
-      } else {
-        try {
-          value = numeral(val).format(formatString);
-        } catch (e) {
-          value = val;
-        }
+      } catch (e) {
+        value = val;
       }
     }
     try {

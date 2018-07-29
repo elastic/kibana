@@ -78,7 +78,7 @@ class TimeseriesVisualization extends Component {
     }
     const seriesModel = model.series.map(s => _.cloneDeep(s));
     const firstSeries = seriesModel.find(s => s.formatter && !s.separate_axis);
-    const formatter = tickFormatter(_.get(firstSeries, 'formatter'), _.get(firstSeries, 'value_template'));
+    const formatter = tickFormatter(_.get(firstSeries, 'formatter'), _.get(firstSeries, 'value_template'), this.props.getConfig);
 
     const mainAxis = {
       position: model.axis_position,
@@ -102,7 +102,7 @@ class TimeseriesVisualization extends Component {
     seriesModel.forEach(s => {
       series
         .filter(r => _.startsWith(r.id, s.id))
-        .forEach(r => r.tickFormatter = tickFormatter(s.formatter, s.value_template));
+        .forEach(r => r.tickFormatter = tickFormatter(s.formatter, s.value_template, this.props.getConfig));
 
       if (s.hide_in_legend) {
         series
@@ -148,7 +148,7 @@ class TimeseriesVisualization extends Component {
         if (row.separate_axis) {
           axisCount++;
 
-          const formatter = tickFormatter(row.formatter, row.value_template);
+          const formatter = tickFormatter(row.formatter, row.value_template, this.props.getConfig);
 
           const yaxis = {
             alignTicksWithAxis: 1,
