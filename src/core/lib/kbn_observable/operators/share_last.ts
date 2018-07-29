@@ -17,7 +17,9 @@
  * under the License.
  */
 
-import { Observable as RxObservable } from 'rxjs';
+import { from } from 'rxjs';
+import { Observable } from '../';
+import { MonoTypeOperatorFunction } from '../interfaces';
 import { rxjsToEsObservable } from '../lib';
 
 /**
@@ -80,7 +82,7 @@ import { rxjsToEsObservable } from '../lib';
  * @returns An Observable of the first item received.
  */
 export function shareLast<T>(): MonoTypeOperatorFunction<T> {
-  return function shareLastOperation(source) {
-    return rxjsToEsObservable(RxObservable.from(source).shareReplay(1));
+  return function shareLastOperation(source: Observable<T>) {
+    return rxjsToEsObservable(from(source).shareReplay(1));
   };
 }

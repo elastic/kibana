@@ -53,8 +53,6 @@ describe('creates elasticsearch client config', () => {
     } as ClusterSchema;
     const config = new ElasticsearchConfig('data', clusterSchema);
 
-    expect(
-      config.toElasticsearchClientConfig({ shouldAuth: false })
-    ).toMatchSnapshot();
+    expect(config.toElasticsearchClientConfig({ shouldAuth: false })).toMatchSnapshot();
   });
 });

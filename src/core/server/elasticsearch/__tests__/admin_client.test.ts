@@ -37,12 +37,7 @@ beforeEach(() => {
 describe('call passes correct arguments to callAPI', () => {
   test('when only endpoint is specified', () => {
     client.call('foo');
-    expect(mockCallAPI).toHaveBeenCalledWith(
-      esClient,
-      'foo',
-      {},
-      { wrap401Errors: true }
-    );
+    expect(mockCallAPI).toHaveBeenCalledWith(esClient, 'foo', {}, { wrap401Errors: true });
   });
 
   test('when endpoint and clientParams are specified', () => {
@@ -57,21 +52,11 @@ describe('call passes correct arguments to callAPI', () => {
 
   test('when endpoint, clientParams, and options are specified', () => {
     client.call('foo', {}, { wrap401Errors: true });
-    expect(mockCallAPI).toHaveBeenCalledWith(
-      esClient,
-      'foo',
-      {},
-      { wrap401Errors: true }
-    );
+    expect(mockCallAPI).toHaveBeenCalledWith(esClient, 'foo', {}, { wrap401Errors: true });
   });
 
   test('when endpoint contains periods', () => {
     client.call('foo.bar.baz');
-    expect(mockCallAPI).toHaveBeenCalledWith(
-      esClient,
-      'foo.bar.baz',
-      {},
-      { wrap401Errors: true }
-    );
+    expect(mockCallAPI).toHaveBeenCalledWith(esClient, 'foo.bar.baz', {}, { wrap401Errors: true });
   });
 });

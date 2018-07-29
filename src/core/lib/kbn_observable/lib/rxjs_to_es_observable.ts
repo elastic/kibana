@@ -38,7 +38,7 @@ import { Observable } from '../observable';
 export function rxjsToEsObservable<T>(source: Observable<T>) {
   // TODO: type the observer
   return new Observable(observer =>
-    observable.subscribe({
+    source.subscribe({
       complete: () => {
         observer.complete();
       },

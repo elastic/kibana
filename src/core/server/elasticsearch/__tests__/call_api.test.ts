@@ -41,9 +41,7 @@ describe('things', () => {
     try {
       await callAPI(client, 'foo.bar.baz', {});
     } catch (error) {
-      expect(error.message).toEqual(
-        'called with an invalid endpoint: foo.bar.baz'
-      );
+      expect(error.message).toEqual('called with an invalid endpoint: foo.bar.baz');
     }
   });
 

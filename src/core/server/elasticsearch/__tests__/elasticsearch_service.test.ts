@@ -24,13 +24,13 @@ jest.mock('elasticsearch', () => ({
   Client: mockCreateClient,
 }));
 
-import { BehaviorSubject, first, k$, toPromise } from '@kbn/observable';
-import { logger } from '../../../logging/__mocks__';
+import { BehaviorSubject, first, k$, toPromise } from '../../../lib/kbn_observable';
+import { logger } from '../../logging/__mocks__';
 import { AdminClient } from '../admin_client';
 import { ElasticsearchService } from '../elasticsearch_service';
 import { ScopedDataClient } from '../scoped_data_client';
 
-test('should not create multiple clients while service is running', async () => {
+it.only('should not create multiple clients while service is running', async () => {
   const createElasticsearchConfig = (type: string) => ({
     filterHeaders: () => {},
     requestHeadersWhitelist: [],
