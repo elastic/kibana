@@ -20,7 +20,7 @@
 import _ from 'lodash';
 import { Reducer } from 'redux';
 import { PanelActions, PanelActionTypeKeys, SetPanelTitleActionPayload } from '../actions';
-import { PanelId, PanelsMap, PanelState } from '../selectors';
+import { PanelId, PanelsMap, PanelState } from '../types';
 
 /**
  * @param panel - New panel data (can be partial data) to merge with possibly existing panel data in

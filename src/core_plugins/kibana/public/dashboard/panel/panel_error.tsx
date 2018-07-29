@@ -17,5 +17,19 @@
  * under the License.
  */
 
-export { DashboardPanelContainer as DashboardPanel } from './dashboard_panel_container';
-export { createPanelState } from './panel_state';
+import React from 'react';
+
+import { EmbeddableError } from '../types';
+
+export interface PanelErrorProps {
+  error: EmbeddableError;
+}
+
+export function PanelError(props: PanelErrorProps) {
+  return (
+    <div className="load-error panel-content">
+      <span aria-hidden="true" className="kuiIcon fa-exclamation-triangle" />
+      <span>{props.error}</span>
+    </div>
+  );
+}

@@ -17,22 +17,30 @@
  * under the License.
  */
 
+import { EuiIcon } from '@elastic/eui';
 import React from 'react';
-import PropTypes from 'prop-types';
 
-export function PanelError({ error }) {
-  return (
-    <div className="load-error panel-content">
-      <span aria-hidden="true" className="kuiIcon fa-exclamation-triangle"/>
-      <span>{error}</span>
-    </div>
+import { DashboardPanelAction } from 'ui/dashboard_panel_actions';
+import { DashboardViewMode } from '../../../dashboard_view_mode';
+
+/**
+ *
+ * @param {function} onDeletePanel
+ * @return {DashboardPanelAction}
+ */
+export function getRemovePanelAction(onDeletePanel: () => void) {
+  return new DashboardPanelAction(
+    {
+      displayName: 'Delete from dashboard',
+      id: 'deletePanel',
+      parentPanelId: 'mainMenu',
+    },
+    {
+      icon: <EuiIcon type="trash" />,
+      isVisible: ({ containerState }) =>
+        containerState.viewMode === DashboardViewMode.EDIT &&
+        !containerState.isPanelExpanded,
+      onClick: onDeletePanel,
+    }
   );
 }
-
-PanelError.propTypes = {
-  error: PropTypes.oneOfType([
-    PropTypes.string,
-    PropTypes.node
-  ]),
-};
-

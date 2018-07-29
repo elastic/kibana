@@ -28,7 +28,7 @@ import {
   PanelId,
   PanelsMap,
   PanelState,
-} from './types';
+} from '../types';
 
 export const getPanels = (dashboard: DashboardState): PanelsMap => dashboard.panels;
 

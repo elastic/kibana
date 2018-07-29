@@ -20,7 +20,9 @@
 import { PanelActionAPI } from './types';
 
 interface DashboardContextMenuPanelOptions {
-  getContent?: (panelActionAPI: PanelActionAPI) => HTMLElement | undefined;
+  getContent?: (
+    panelActionAPI: PanelActionAPI
+  ) => JSX.Element | Element | undefined;
 }
 
 interface DashboardContextMenuPanelConfig {
@@ -28,7 +30,7 @@ interface DashboardContextMenuPanelConfig {
   title: string;
 }
 
-export abstract class DashboardContextMenuPanel {
+export class DashboardContextMenuPanel {
   public readonly id: string;
   public readonly title: string;
 
@@ -47,7 +49,9 @@ export abstract class DashboardContextMenuPanel {
   /**
    * Optional, could be composed of actions instead of content.
    */
-  public getContent(panelActionAPI: PanelActionAPI): HTMLElement | undefined {
+  public getContent(
+    panelActionAPI: PanelActionAPI
+  ): JSX.Element | Element | undefined {
     return;
   }
 }

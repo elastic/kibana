@@ -19,7 +19,7 @@
 
 import { createAction } from 'redux-actions';
 import { KibanaAction } from '../../selectors/types';
-import { PanelId, PanelsMap, PanelState } from '../selectors';
+import { PanelId, PanelsMap, PanelState } from '../types';
 
 export enum PanelActionTypeKeys {
   DELETE_PANEL = 'DELETE_PANEL',

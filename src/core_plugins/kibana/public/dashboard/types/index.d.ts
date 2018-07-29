@@ -37,9 +37,10 @@ export interface GridData {
   readonly h: number;
   readonly x: number;
   readonly y: number;
-  readonly id: string;
+  readonly i: string;
 }
 
+export type EmbeddableError = string | object;
 export type PanelId = string;
 export type SavedObjectId = string;
 
@@ -53,9 +54,20 @@ export interface PanelState {
   readonly title?: string;
 }
 
+export interface PanelStatePre61 {
+  readonly size_x?: number;
+  readonly size_y?: number;
+  readonly row: number;
+  readonly col: number;
+  readonly panelIndex: string | number;
+  readonly id: string;
+  readonly type: string;
+  readonly embeddableConfig?: object;
+}
+
 export interface EmbeddableReduxState {
   readonly metadata?: EmbeddableMetadata;
-  readonly error?: string | object;
+  readonly error?: EmbeddableError;
   readonly initialized: boolean;
   readonly stagedFilter?: object;
 }

@@ -17,30 +17,10 @@
  * under the License.
  */
 
-import React from 'react';
+import { EmbeddableFactory } from 'ui/embeddable';
 
-import {
-  EuiIcon,
-} from '@elastic/eui';
-
-import { DashboardPanelAction } from 'ui/dashboard_panel_actions';
-import { DashboardViewMode } from '../../../dashboard_view_mode';
-
-/**
- *
- * @return {DashboardPanelAction}
- */
-export function getEditPanelAction() {
-  return new DashboardPanelAction(
-    {
-      displayName: 'Edit visualization',
-      id: 'editPanel',
-      parentPanelId: 'mainMenu',
-    },
-    {
-      icon: <EuiIcon type="pencil" />,
-      onClick: ({ embeddable }) => { window.location = embeddable.metadata.editUrl; },
-      isVisible: ({ containerState }) => (containerState.viewMode === DashboardViewMode.EDIT),
-      isDisabled: ({ embeddable }) => (!embeddable || !embeddable.metadata || !embeddable.metadata.editUrl),
-    });
+export function getEmbeddableFactoryMock(): EmbeddableFactory {
+  return {
+    create: jest.fn(() => Promise.resolve({})),
+  };
 }

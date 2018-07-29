@@ -17,18 +17,19 @@
  * under the License.
  */
 
-import React from 'react';
 import PropTypes from 'prop-types';
+import React from 'react';
 
-import {
-  KuiButton,
-} from '@kbn/ui-framework/components';
+import { KuiButton } from '@kbn/ui-framework/components';
 
-import {
-  keyCodes,
-} from '@elastic/eui';
+import { keyCodes } from '@elastic/eui';
 
-export function PanelOptionsMenuForm({ title, onReset, onUpdatePanelTitle, onClose }) {
+export function PanelOptionsMenuForm({
+  title,
+  onReset,
+  onUpdatePanelTitle,
+  onClose,
+}) {
   function onInputChange(event) {
     onUpdatePanelTitle(event.target.value);
   }
@@ -44,7 +45,9 @@ export function PanelOptionsMenuForm({ title, onReset, onUpdatePanelTitle, onClo
       className="kuiVerticalRhythm dashboardPanelMenuOptionsForm"
       data-test-subj="dashboardPanelTitleInputMenuItem"
     >
-      <label className="kuiFormLabel" htmlFor="panelTitleInput">Panel title</label>
+      <label className="kuiFormLabel" htmlFor="panelTitleInput">
+        Panel title
+      </label>
       <input
         id="panelTitleInput"
         data-test-subj="customDashboardPanelTitleInput"
@@ -68,8 +71,8 @@ export function PanelOptionsMenuForm({ title, onReset, onUpdatePanelTitle, onClo
 }
 
 PanelOptionsMenuForm.propTypes = {
-  title: PropTypes.string,
-  onUpdatePanelTitle: PropTypes.func.isRequired,
-  onReset: PropTypes.func.isRequired,
   onClose: PropTypes.func.isRequired,
+  onReset: PropTypes.func.isRequired,
+  onUpdatePanelTitle: PropTypes.func.isRequired,
+  title: PropTypes.string,
 };
