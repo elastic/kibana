@@ -31,8 +31,8 @@ import './visualization.less';
 function shouldShowNoResultsMessage(vis: Vis, visData: any): boolean {
   const requiresSearch = get(vis, 'type.requiresSearch');
   const rows = get(visData, 'rows');
-  const isZeroHits = get(visData, 'hits.total') === 0 || (rows && !rows.length);
-  const shouldShowMessage = !get(vis, 'params.handleNoResults');
+  const isZeroHits = get(visData, 'hits') === 0 || (rows && !rows.length);
+  const shouldShowMessage = !get(vis, 'type.handleNoResults');
 
   return Boolean(requiresSearch && isZeroHits && shouldShowMessage);
 }

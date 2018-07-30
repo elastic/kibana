@@ -18,15 +18,18 @@
  */
 
 import React from 'react';
+import { dispatchRenderComplete } from '../../render_complete';
 
 interface VisualizationNoResultsProps {
   onInit?: () => void;
 }
 
 export class VisualizationNoResults extends React.Component<VisualizationNoResultsProps> {
+  private containerDiv = React.createRef<HTMLDivElement>();
+
   public render() {
     return (
-      <div className="text-center visualize-error visualize-chart">
+      <div className="text-center visualize-error visualize-chart" ref={this.containerDiv}>
         <div className="item top" />
         <div className="item">
           <h2 aria-hidden="true">
@@ -40,14 +43,17 @@ export class VisualizationNoResults extends React.Component<VisualizationNoResul
   }
 
   public componentDidMount() {
-    if (this.props.onInit) {
-      this.props.onInit();
-    }
+    this.afterRender();
   }
 
   public componentDidUpdate() {
+    this.afterRender();
+  }
+
+  private afterRender() {
     if (this.props.onInit) {
       this.props.onInit();
     }
+    dispatchRenderComplete(this.containerDiv.current);
   }
 }

@@ -105,6 +105,7 @@ export default function GoalVisType(Private) {
           aggFilter: ['!geohash_grid', '!filter']
         }
       ])
-    }
+    },
+    handleNoResults: true
   });
 }
