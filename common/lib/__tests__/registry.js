@@ -6,6 +6,11 @@ function validateRegistry(registry, elements) {
     expect(registry.get('__test2')).to.eql(elements[1]());
   });
 
+  it('ignores case when getting items', () => {
+    expect(registry.get('__TeSt2')).to.eql(elements[1]());
+    expect(registry.get('__tESt2')).to.eql(elements[1]());
+  });
+
   it('gets a shallow clone', () => {
     expect(registry.get('__test2')).to.not.equal(elements[1]());
   });
@@ -167,6 +172,13 @@ describe('Registry', () => {
     it('toJS contains the full prototype', () => {
       const val = registry.toJS();
       expect(val[name].baseFunc).to.be.a('function');
+    });
+  });
+
+  describe('throws when lookup prop is not a string', () => {
+    const check = () => new Registry(2);
+    expect(check).to.throwException(e => {
+      expect(e.message).to.be('Registry property name must be a string');
     });
   });
 });
