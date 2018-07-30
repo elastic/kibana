@@ -1,27 +1,57 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { Shortcuts } from 'react-shortcuts';
-import { EuiFlexItem, EuiFlexGroup, EuiButtonIcon, EuiButton } from '@elastic/eui';
+import {
+  EuiFlexItem,
+  EuiFlexGroup,
+  EuiButtonIcon,
+  EuiButton,
+  EuiOverlayMask,
+  EuiModal,
+  EuiModalBody,
+  EuiModalFooter,
+} from '@elastic/eui';
 import { Tooltip } from '../tooltip';
 import { AssetManager } from '../asset_manager';
 import { ElementTypes } from '../element_types';
 import { FullscreenControl } from '../fullscreen_control';
 import { RefreshControl } from '../refresh_control';
-import { Popover } from '../popover';
 
-export const WorkpadHeader = ({ editing, toggleEditing, hasAssets, addElement }) => {
+export const WorkpadHeader = ({
+  editing,
+  toggleEditing,
+  hasAssets,
+  addElement,
+  setShowElementModal,
+  showElementModal,
+}) => {
   const keyHandler = action => {
     if (action === 'EDITING') toggleEditing();
   };
 
-  const elementsButton = handleClick => (
-    <EuiButton fill size="s" iconType="vector" onClick={handleClick}>
-      Add element
-    </EuiButton>
+  const elementAdd = (
+    <EuiOverlayMask>
+      <EuiModal onClose={() => setShowElementModal(false)} style={{ width: '1080px' }}>
+        <EuiModalBody>
+          <ElementTypes
+            onClick={element => {
+              addElement(element);
+              setShowElementModal(false);
+            }}
+          />
+        </EuiModalBody>
+        <EuiModalFooter>
+          <EuiButton size="s" onClick={() => setShowElementModal(false)}>
+            Dismiss
+          </EuiButton>
+        </EuiModalFooter>
+      </EuiModal>
+    </EuiOverlayMask>
   );
 
   return (
     <div>
+      {showElementModal ? elementAdd : null}
       <EuiFlexGroup gutterSize="s" alignItems="center" justifyContent="spaceBetween">
         <EuiFlexItem grow={false}>
           <EuiFlexGroup alignItems="center" gutterSize="xs">
@@ -68,21 +98,14 @@ export const WorkpadHeader = ({ editing, toggleEditing, hasAssets, addElement })
                 </EuiFlexItem>
               )}
               <EuiFlexItem grow={false}>
-                <Popover
-                  button={elementsButton}
-                  withTitle
-                  anchorPosition="downRight"
-                  panelClassName="canvasPopover--elements"
+                <EuiButton
+                  fill
+                  size="s"
+                  iconType="vector"
+                  onClick={() => setShowElementModal(true)}
                 >
-                  {({ closePopover }) => (
-                    <ElementTypes
-                      onClick={element => {
-                        addElement(element);
-                        closePopover();
-                      }}
-                    />
-                  )}
-                </Popover>
+                  Add element
+                </EuiButton>
               </EuiFlexItem>
             </EuiFlexGroup>
           </EuiFlexItem>
@@ -97,4 +120,6 @@ WorkpadHeader.propTypes = {
   toggleEditing: PropTypes.func,
   hasAssets: PropTypes.bool,
   addElement: PropTypes.func.isRequired,
+  showElementModal: PropTypes.bool,
+  setShowElementModal: PropTypes.func,
 };

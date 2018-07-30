@@ -1,7 +1,10 @@
+import header from './header.png';
+
 export const areaChart = () => ({
   name: 'areaChart',
   displayName: 'Area Chart',
   help: 'A customizable area chart',
+  image: header,
   expression: `filters
 | demodata
 | pointseries x="time" y="mean(price)"

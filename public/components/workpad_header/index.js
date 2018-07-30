@@ -1,3 +1,4 @@
+import { compose, withState } from 'recompose';
 import { connect } from 'react-redux';
 import { getEditing } from '../../state/selectors/app';
 import { getWorkpadName, getSelectedPage } from '../../state/selectors/workpad';
@@ -26,4 +27,7 @@ const mergeProps = (stateProps, dispatchProps, ownProps) => ({
   toggleEditing: () => dispatchProps.setEditing(!stateProps.editing),
 });
 
-export const WorkpadHeader = connect(mapStateToProps, mapDispatchToProps, mergeProps)(Component);
+export const WorkpadHeader = compose(
+  withState('showElementModal', 'setShowElementModal', false),
+  connect(mapStateToProps, mapDispatchToProps, mergeProps)
+)(Component);

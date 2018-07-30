@@ -1,6 +1,6 @@
 import React, { Fragment } from 'react';
 import PropTypes from 'prop-types';
-import { EuiFieldSearch, EuiContextMenuItem, EuiPopoverTitle } from '@elastic/eui';
+import { EuiFieldSearch, EuiCard, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import lowerCase from 'lodash.lowercase';
 import { map, includes, sortBy } from 'lodash';
 
@@ -8,19 +8,20 @@ export const ElementTypes = ({ elements, onClick, search, setSearch }) => {
   search = lowerCase(search);
   elements = sortBy(map(elements, (element, name) => ({ name, ...element })), 'displayName');
   const elementList = map(elements, (element, name) => {
-    const { help, displayName, expression, filter, width, height } = element;
+    const { help, displayName, expression, filter, width, height, image } = element;
     const whenClicked = () => onClick({ expression, filter, width, height });
 
     // Add back in icon={image} to this when Design has a full icon set
     const card = (
-      <EuiContextMenuItem
-        key={name}
-        toolTipContent={help}
-        toolTipPosition="right"
-        onClick={whenClicked}
-      >
-        {displayName}
-      </EuiContextMenuItem>
+      <EuiFlexItem key={name} style={{ minWidth: 200, maxWidth: 200, maxHeight: 200 }}>
+        <EuiCard
+          textAlign="left"
+          image={image}
+          title={displayName}
+          description={help}
+          onClick={whenClicked}
+        />
+      </EuiFlexItem>
     );
 
     if (!search) return card;
@@ -32,15 +33,17 @@ export const ElementTypes = ({ elements, onClick, search, setSearch }) => {
 
   return (
     <Fragment>
-      <EuiPopoverTitle>
-        <EuiFieldSearch
-          compressed
-          placeholder="Filter Elements"
-          onChange={e => setSearch(e.target.value)}
-          value={search}
-        />
-      </EuiPopoverTitle>
-      {elementList}
+      <EuiFlexGroup>
+        <EuiFlexItem>
+          <EuiFieldSearch
+            placeholder="Filter Elements"
+            onChange={e => setSearch(e.target.value)}
+            value={search}
+          />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+      <EuiSpacer size="m" />
+      <EuiFlexGroup wrap>{elementList}</EuiFlexGroup>
     </Fragment>
   );
 };
