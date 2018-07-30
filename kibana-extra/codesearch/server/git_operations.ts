@@ -5,7 +5,7 @@
  */
 
 import Boom from 'boom';
-import { Commit, Error, Repository, Tree, TreeEntry } from 'nodegit';
+import { Commit, Error, Object, Oid, Repository, Tree, TreeEntry } from 'nodegit';
 import * as Path from 'path';
 import { FileTree, FileTreeItemType, RepositoryUri } from '../model';
 
@@ -74,7 +74,7 @@ export class GitOperations {
     } catch (e) {
       if (e.errno === Error.CODE.ENOTFOUND) {
         return checkExists(
-          () => repo.getCommit(revision),
+          () => this.findCommit(repo, revision),
           `revision or branch ${revision} not found in ${repo.path()}`
         );
       } else {
@@ -133,5 +133,19 @@ export class GitOperations {
       }
     }
     return file;
+  }
+
+  private async findCommit(repo: Repository, revision: string): Promise<Commit> {
+    const obj = await Object.lookupPrefix(
+      repo,
+      Oid.fromString(revision),
+      revision.length,
+      Object.TYPE.COMMIT
+    );
+    if (obj) {
+      return repo.getCommit(obj.id());
+    }
+    // @ts-ignore
+    return null;
   }
 }
