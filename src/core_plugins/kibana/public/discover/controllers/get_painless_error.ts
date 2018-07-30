@@ -17,22 +17,28 @@
  * under the License.
  */
 
-import _ from 'lodash';
+import { get } from 'lodash';
 
-const getRootCause = err => _.get(err, 'resp.error.root_cause');
-
-/**
- * Utilize the extended error information returned from elasticsearch
- * @param  {Error|String} err
- * @returns {string}
- */
-export const formatESMsg = (err) => {
-  const rootCause = getRootCause(err);
+export function getPainlessError(error: Error) {
+  const rootCause: Array<{ lang: string; script: string }> | undefined = get(
+    error,
+    'resp.error.root_cause'
+  );
 
   if (!rootCause) {
     return;
   }
 
-  const result = _.pluck(rootCause, 'reason').join('\n');
-  return result;
-};
+  const [{ lang, script }] = rootCause;
+
+  if (lang !== 'painless') {
+    return;
+  }
+
+  return {
+    lang,
+    script,
+    message: `Error with Painless scripted field '${script}'`,
+    error: error.message,
+  };
+}
