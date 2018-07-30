@@ -16,6 +16,7 @@ function executeJobFn(server) {
   const config = server.config();
   const logger = createTaggedLogger(server, ['reporting', 'csv', 'debug']);
   const generateCsv = createGenerateCsv(logger);
+  const serverBasePath = config.get('server.basePath');
 
   return async function executeJob(job, cancellationToken) {
     const { searchRequest, fields, indexPatternSavedObject, metaFields, conflictedTypesFields, headers: serializedEncryptedHeaders } = job;
@@ -31,6 +32,7 @@ function executeJobFn(server) {
 
     const fakeRequest = {
       headers: decryptedHeaders,
+      getBasePath: () => serverBasePath,
     };
 
     const callEndpoint = (endpoint, clientParams = {}, options = {}) => {

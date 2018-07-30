@@ -31,6 +31,8 @@ function executeJobFn(server) {
   const crypto = cryptoFactory(server);
   const compatibilityShim = compatibilityShimFactory(server);
 
+  const serverBasePath = server.config().get('server.basePath');
+
   const decryptJobHeaders = async (job) => {
     const decryptedHeaders = await crypto.decrypt(job.headers);
     return { job, decryptedHeaders };
@@ -44,6 +46,7 @@ function executeJobFn(server) {
   const getCustomLogo = async ({ job, filteredHeaders }) => {
     const fakeRequest = {
       headers: filteredHeaders,
+      getBasePath: () => serverBasePath
     };
 
     const savedObjects = server.savedObjects;
