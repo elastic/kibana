@@ -1,32 +1,31 @@
 [role="xpack"]
 [[xpack-security-authorization]]
-=== Kibana authorization
+=== Authorization
 
-Prior to {kib} 6.4, it was required to give {kib} users access to the underlying `.kibana`
-index in {es}. This allowed {kib} to defer to the {es} authorization model, and 
-create roles that had either read-only or read-and-write access to all Dashboards, Visualizations, 
-Saved Searches, etc. that are stored in the `.kibana` index. This approach requires you to know
-the details of where and how data is stored by {kib}.
+Authorizing users to use {kib} in most configurations is as simple as assigning the user
+either the `kibana_user` or `kibana_dashboard_only_user` reserved role. If you're running 
+a single tenant of {kib} against your {es} cluster, this is entirely sufficient and no other 
+action is required.
 
-Kibana privileges allow you to grant access to {kib} features without concerning yourself with
-the way the data is stored in {es}. To create a role with <<kibana-privileges>>, you can either
-use the *Management / Security / Roles* page in {kib} or you can use {kib}'s <<role-management-api>>.
+==== Multi-tenant {kib}
 
-The `kibana_user` and `kibana_dashboard_only_user` roles have been automatically updated to use
-Kibana privileges, so no user intervention is required. 
+When running multiple tenants of {kib}, by changing the `kibana.index` in your `kibana.yml`, you 
+must create custom roles which authorize the user for that specific tenant. To do so, you can use
+either the *Management / Security / Roles* page in {kib} or {kib}'s <<role-management-api>>
+to assign a specific <<kibana-privileges, Kibana privilege>> at that tenant. After creating the
+custom role, you should assign this role to the user(s) that you wish to have access.
 
-[[xpack-security-authorization-legacy-fallback]]
-==== Legacy Fallback
+==== Legacy roles
 
-Granting access to {kib} using index privileges on the `.kibana` index is deprecated starting in 
-{kib} 6.4, but will continue functioning until 7.0. This is enabled using an authorization legacy
-fallback, which can be disabled by setting `xpack.security.authorization.legacyFallback` to `false`
-in the kibana.yml. 
-
-When a user logs into {kib} with roles that rely upon index privileges to `.kibana`, {kib} will log 
-the following deprecation warning.
+Prior to {kib} 6.4, it was required to give {kib} users index privileges to the `kibana.index`
+in {es}. This approach is deprecated starting in 6.4, and you will need to switch to using
+<<kibana-privileges>> before 7.0. When a user logs into {kib} and we detect that they're using
+a legacy role, the following will be logged to you {kib} logs:
 
 [source,js]
 ----------------------------------
 <username> relies on index privileges on the Kibana index. This is deprecated and will be removed in Kibana 7.0
 ----------------------------------
+
+To disable legacy roles from being authorized in {kib} set `xpack.security.authorization.legacyFallback` to `false`
+in your `kibana.yml`.
