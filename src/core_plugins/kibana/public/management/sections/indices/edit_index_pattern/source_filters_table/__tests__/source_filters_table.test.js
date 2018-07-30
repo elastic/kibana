@@ -57,6 +57,8 @@ const indexPattern = {
 
 
 describe('SourceFiltersTable', () => {
+  afterEach(() => intl.formatMessage.mockClear());
+
   it('should render normally', async () => {
     const component = shallowWithIntl(
       <SourceFiltersTableComponent

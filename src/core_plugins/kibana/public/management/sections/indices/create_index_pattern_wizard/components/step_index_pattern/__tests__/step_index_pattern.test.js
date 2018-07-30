@@ -67,6 +67,8 @@ const createComponent = props => {
 };
 
 describe('StepIndexPattern', () => {
+  afterEach(() => intl.formatMessage.mockClear());
+
   it('renders the loading state', () => {
     const component = createComponent();
     component.setState({ isLoadingIndices: true });
