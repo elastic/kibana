@@ -17,28 +17,4 @@
  * under the License.
  */
 
-import { parse } from '@babel/parser';
-
-import { extractI18nCallMessages } from './extract_i18n_call_messages';
-import { isI18nTranslateFunction, traverseNodes } from './utils';
-
-/**
- * Matches `i18n(...)` in `#{i18n('id', { defaultMessage: 'Message text' })}`
- */
-const JADE_I18N_REGEX = /(?<=\#\{)i18n\((([^)']|'([^'\\]|\\.)*')*\)(?=\}))/g;
-
-/**
- * Example: `#{i18n('message-id', { defaultMessage: 'Message text' })}`
- */
-export function* extractJadeMessages(buffer) {
-  const expressions = buffer.toString().match(JADE_I18N_REGEX) || [];
-
-  for (const expression of expressions) {
-    for (const node of traverseNodes(parse(expression).program.body)) {
-      if (isI18nTranslateFunction(node)) {
-        yield extractI18nCallMessages(node);
-        break;
-      }
-    }
-  }
-}
+export * from './flyout_session';
