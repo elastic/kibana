@@ -36,7 +36,7 @@ export const bucketAvgMetricAgg = new MetricAggType({
     const scaleMetrics = customMetric.type && customMetric.type.isScalable();
 
     let value = bucket[agg.id] && bucket[agg.id].value;
-    if (scaleMetrics && agg.type.name === 'date_histogram') {
+    if (scaleMetrics && agg.params.customBucket.type.name === 'date_histogram') {
       const aggInfo = agg.params.customBucket.write();
       value *= get(aggInfo, 'bucketInterval.scale', 1);
     }
