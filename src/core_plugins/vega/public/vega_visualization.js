@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { Notifier } from 'ui/notify';
+import { toastNotifications, Notifier } from 'ui/notify';
 import { VegaView } from './vega_view/vega_view';
 import { VegaMapView } from './vega_view/vega_map_view';
 import { SavedObjectsClientProvider, findObjectByTitle } from 'ui/saved_objects';
@@ -59,7 +59,7 @@ export function VegaVisualizationProvider(Private, vegaConfig, serviceSettings, 
      */
     async render(visData, status) {
       if (!visData && !this._vegaView) {
-        notify.warning('Unable to render without data');
+        toastNotifications.addWarning('Unable to render without data');
         return;
       }
 

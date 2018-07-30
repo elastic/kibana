@@ -26,7 +26,7 @@ export async function getTimeseriesData({
   const { intervalString, bucketSize } = getBucketSize(start, end, 'auto');
 
   const params = {
-    index: config.get('xpack.apm.indexPattern'),
+    index: config.get('apm_oss.transactionIndices'),
     body: {
       size: 0,
       query: {

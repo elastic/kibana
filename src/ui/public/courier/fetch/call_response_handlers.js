@@ -17,10 +17,9 @@
  * under the License.
  */
 
-import { RequestFailure, SearchTimeout, ShardFailure } from '../../errors';
-
+import { toastNotifications } from '../../notify';
+import { RequestFailure } from '../../errors';
 import { RequestStatus } from './req_status';
-import { courierNotifier } from './notifier';
 
 export function CallResponseHandlersProvider(Private, Promise) {
   const ABORTED = RequestStatus.ABORTED;
@@ -35,11 +34,15 @@ export function CallResponseHandlersProvider(Private, Promise) {
       const response = responses[index];
 
       if (response.timed_out) {
-        courierNotifier.warning(new SearchTimeout());
+        toastNotifications.addWarning({
+          title: 'Data might be incomplete because your request timed out',
+        });
       }
 
       if (response._shards && response._shards.failed) {
-        courierNotifier.warning(new ShardFailure(response));
+        toastNotifications.addWarning({
+          title: `${response._shards.failed} of ${response._shards.total} shards failed`,
+        });
       }
 
       function progress() {

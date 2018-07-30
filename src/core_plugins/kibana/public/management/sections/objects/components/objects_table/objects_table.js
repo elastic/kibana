@@ -37,6 +37,7 @@ import {
   EuiToolTip,
   EuiPage,
   EuiPageContent,
+  EuiPageBody,
 } from '@elastic/eui';
 import {
   retrieveAndExportDocs,
@@ -467,39 +468,41 @@ export class ObjectsTable extends Component {
 
     return (
       <EuiPage>
-        <EuiPageContent verticalPosition="center" horizontalPosition="center" style={{ maxWidth: 1000, marginTop: 16, marginBottom: 16 }}>
-          {this.renderFlyout()}
-          {this.renderRelationships()}
-          {this.renderDeleteConfirmModal()}
-          {this.renderExportAllOptionsModal()}
-          <Header
-            onExportAll={() =>
-              this.setState({ isShowingExportAllOptionsModal: true })
-            }
-            onImport={this.showImportFlyout}
-            onRefresh={this.refreshData}
-            totalCount={totalItemCount}
-          />
-          <EuiSpacer size="xs" />
-          <Table
-            itemId={'id'}
-            selectionConfig={selectionConfig}
-            selectedSavedObjects={selectedSavedObjects}
-            onQueryChange={this.onQueryChange}
-            onTableChange={this.onTableChange}
-            filterOptions={filterOptions}
-            onExport={this.onExport}
-            onDelete={this.onDelete}
-            getEditUrl={this.props.getEditUrl}
-            goInApp={this.props.goInApp}
-            pageIndex={page}
-            pageSize={perPage}
-            items={savedObjects}
-            totalItemCount={totalItemCount}
-            isSearching={isSearching}
-            onShowRelationships={this.onShowRelationships}
-          />
-        </EuiPageContent>
+        <EuiPageBody>
+          <EuiPageContent verticalPosition="center" horizontalPosition="center" style={{ maxWidth: 1000, marginTop: 16, marginBottom: 16 }}>
+            {this.renderFlyout()}
+            {this.renderRelationships()}
+            {this.renderDeleteConfirmModal()}
+            {this.renderExportAllOptionsModal()}
+            <Header
+              onExportAll={() =>
+                this.setState({ isShowingExportAllOptionsModal: true })
+              }
+              onImport={this.showImportFlyout}
+              onRefresh={this.refreshData}
+              totalCount={totalItemCount}
+            />
+            <EuiSpacer size="xs" />
+            <Table
+              itemId={'id'}
+              selectionConfig={selectionConfig}
+              selectedSavedObjects={selectedSavedObjects}
+              onQueryChange={this.onQueryChange}
+              onTableChange={this.onTableChange}
+              filterOptions={filterOptions}
+              onExport={this.onExport}
+              onDelete={this.onDelete}
+              getEditUrl={this.props.getEditUrl}
+              goInApp={this.props.goInApp}
+              pageIndex={page}
+              pageSize={perPage}
+              items={savedObjects}
+              totalItemCount={totalItemCount}
+              isSearching={isSearching}
+              onShowRelationships={this.onShowRelationships}
+            />
+          </EuiPageContent>
+        </EuiPageBody>
       </EuiPage>
     );
   }

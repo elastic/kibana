@@ -18,9 +18,9 @@
  */
 
 import React from 'react';
-import { shallow } from 'enzyme';
+import { shallowWithIntl } from 'test_utils/enzyme_helpers';
 
-import { ScriptedFieldsTable } from '../scripted_fields_table';
+import { ScriptedFieldsTableComponent } from '../scripted_fields_table';
 
 jest.mock('@elastic/eui', () => ({
   EuiTitle: 'eui-title',
@@ -70,8 +70,8 @@ const indexPattern = {
 
 describe('ScriptedFieldsTable', () => {
   it('should render normally', async () => {
-    const component = shallow(
-      <ScriptedFieldsTable
+    const component = shallowWithIntl(
+      <ScriptedFieldsTableComponent
         indexPattern={indexPattern}
         helpers={helpers}
       />
@@ -86,8 +86,8 @@ describe('ScriptedFieldsTable', () => {
   });
 
   it('should filter based on the query bar', async () => {
-    const component = shallow(
-      <ScriptedFieldsTable
+    const component = shallowWithIntl(
+      <ScriptedFieldsTableComponent
         indexPattern={indexPattern}
         helpers={helpers}
       />
@@ -105,8 +105,8 @@ describe('ScriptedFieldsTable', () => {
   });
 
   it('should filter based on the lang filter', async () => {
-    const component = shallow(
-      <ScriptedFieldsTable
+    const component = shallowWithIntl(
+      <ScriptedFieldsTableComponent
         indexPattern={{
           getScriptedFields: () => ([
             { name: 'ScriptedField', lang: 'painless', script: 'x++' },
@@ -130,8 +130,8 @@ describe('ScriptedFieldsTable', () => {
   });
 
   it('should hide the table if there are no scripted fields', async () => {
-    const component = shallow(
-      <ScriptedFieldsTable
+    const component = shallowWithIntl(
+      <ScriptedFieldsTableComponent
         indexPattern={{
           getScriptedFields: () => ([])
         }}
@@ -148,8 +148,8 @@ describe('ScriptedFieldsTable', () => {
   });
 
   it('should show a delete modal', async () => {
-    const component = shallow(
-      <ScriptedFieldsTable
+    const component = shallowWithIntl(
+      <ScriptedFieldsTableComponent
         indexPattern={indexPattern}
         helpers={helpers}
       />
@@ -165,8 +165,8 @@ describe('ScriptedFieldsTable', () => {
 
   it('should delete a field', async () => {
     const removeScriptedField = jest.fn();
-    const component = shallow(
-      <ScriptedFieldsTable
+    const component = shallowWithIntl(
+      <ScriptedFieldsTableComponent
         indexPattern={{
           ...indexPattern,
           removeScriptedField,

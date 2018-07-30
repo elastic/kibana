@@ -41,6 +41,8 @@ import 'uiExports/devTools';
 import 'uiExports/docViews';
 import 'uiExports/embeddableFactories';
 import 'uiExports/inspectorViews';
+import 'uiExports/search';
+import 'uiExports/autocompleteProviders';
 
 import 'ui/autoload/all';
 import './home';

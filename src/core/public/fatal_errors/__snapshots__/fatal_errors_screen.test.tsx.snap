@@ -1,0 +1,94 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`rendering render matches snapshot 1`] = `
+<EuiPage
+  restrictWidth={false}
+  style={
+    Object {
+      "minHeight": "100vh",
+    }
+  }
+>
+  <EuiPageBody
+    restrictWidth={false}
+  >
+    <EuiPageContent
+      horizontalPosition="center"
+      panelPaddingSize="l"
+      verticalPosition="center"
+    >
+      <EuiEmptyPrompt
+        actions={
+          Array [
+            <EuiButton
+              color="primary"
+              data-test-subj="clearSession"
+              fill={true}
+              iconSide="left"
+              onClick={[Function]}
+              type="button"
+            >
+              Clear your session
+            </EuiButton>,
+            <EuiButtonEmpty
+              color="primary"
+              data-test-subj="goBack"
+              iconSide="left"
+              onClick={[Function]}
+              type="button"
+            >
+              Go back
+            </EuiButtonEmpty>,
+          ]
+        }
+        body={
+          <p>
+            Try refreshing the page. If that doesn't work, go back to the previous page or clear your session data.
+          </p>
+        }
+        iconColor="danger"
+        iconType="alert"
+        title={
+          <h2>
+            Something went wrong
+          </h2>
+        }
+      />
+      <EuiCallOut
+        color="danger"
+        iconType="alert"
+        key="0"
+        size="m"
+        title="foo"
+      >
+        <EuiCodeBlock
+          className="eui-textBreakAll"
+          language="bash"
+        >
+          Version: bar
+Build: 123
+Error: foo
+  stack...foo.js:1:1
+        </EuiCodeBlock>
+      </EuiCallOut>
+      <EuiCallOut
+        color="danger"
+        iconType="alert"
+        key="1"
+        size="m"
+        title="bar"
+      >
+        <EuiCodeBlock
+          className="eui-textBreakAll"
+          language="bash"
+        >
+          Version: bar
+Build: 123
+Error: bar
+  stack...bar.js:1:1
+        </EuiCodeBlock>
+      </EuiCallOut>
+    </EuiPageContent>
+  </EuiPageBody>
+</EuiPage>
+`;

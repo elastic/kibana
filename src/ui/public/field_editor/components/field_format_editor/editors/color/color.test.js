@@ -18,9 +18,9 @@
  */
 
 import React from 'react';
-import { shallow } from 'enzyme';
+import { shallowWithIntl } from 'test_utils/enzyme_helpers';
 
-import { ColorFormatEditor } from './color';
+import { ColorFormatEditorComponent } from './color';
 import { DEFAULT_COLOR } from '../../../../../../../core_plugins/kibana/common/field_formats/types/color_default';
 
 const fieldType = 'string';
@@ -33,11 +33,10 @@ const formatParams = {
 const onChange = jest.fn();
 const onError = jest.fn();
 
-
 describe('ColorFormatEditor', () => {
   it('should render string type normally (regex field)', async () => {
-    const component = shallow(
-      <ColorFormatEditor
+    const component = shallowWithIntl(
+      <ColorFormatEditorComponent
         fieldType={fieldType}
         format={format}
         formatParams={formatParams}
@@ -50,8 +49,8 @@ describe('ColorFormatEditor', () => {
   });
 
   it('should render other type normally (range field)', async () => {
-    const component = shallow(
-      <ColorFormatEditor
+    const component = shallowWithIntl(
+      <ColorFormatEditorComponent
         fieldType={'number'}
         format={format}
         formatParams={formatParams}
@@ -64,8 +63,8 @@ describe('ColorFormatEditor', () => {
   });
 
   it('should render multiple colors', async () => {
-    const component = shallow(
-      <ColorFormatEditor
+    const component = shallowWithIntl(
+      <ColorFormatEditorComponent
         fieldType={fieldType}
         format={format}
         formatParams={{ colors: [...formatParams.colors, ...formatParams.colors] }}

@@ -20,9 +20,9 @@
 
         </div>
         <div class="shard-details">
-          <span class="glyphicon" aria-hidden="true"
+          <span class="fa" aria-hidden="true"
                   ng-click="shardVisibility = !shardVisibility"
-                  ng-class="visible[row.id].visible ? 'glyphicon-menu-down' : 'glyphicon-menu-right'"
+                  ng-class="visible[row.id].visible ? 'fa-chevron-down' : 'fa-chevron-right'"
                   style="font-size:9px">
                 </span>
                 <b>[{{shard.id[0]}}][{{shard.id[2]}}]</b>
@@ -44,10 +44,10 @@
             ng-mouseenter="updateDetail(row, index.name, shard.id[0], shard.id[2])"
             ng-class="row.id == getHighlightedRow() ? 'tv-row-last-hover' : ''">
             <div class="cell description" style="padding-left:{{row.depth * 10}}px;">
-              <div style="display:inline;" ng-class="row.hasChildren ? '' : 'glyphicon-menu-pad'">
-                <span class="glyphicon" aria-hidden="true"
+              <div style="display:inline;" ng-class="row.hasChildren ? '' : 'fa-bars'">
+                <span class="fa" aria-hidden="true"
                   ng-click="toggle(row.id)"
-                  ng-class="visible[row.id].visible ? 'glyphicon-menu-down' : 'glyphicon-menu-right'"
+                  ng-class="visible[row.id].visible ? 'fa-chevron-down' : 'fa-chevron-right'"
                   ng-hide="!row.hasChildren"
                   style="font-size:9px">
                 </span>&nbsp;

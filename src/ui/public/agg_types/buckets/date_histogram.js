@@ -43,7 +43,7 @@ function getInterval(agg) {
 }
 
 function getBounds(vis) {
-  if (vis.API.timeFilter.isTimeRangeSelectorEnabled && vis.filters) {
+  if (vis.API.timeFilter.isTimeRangeSelectorEnabled && vis.filters && vis.filters.timeRange) {
     return vis.API.timeFilter.calculateBounds(vis.filters.timeRange);
   }
 }
