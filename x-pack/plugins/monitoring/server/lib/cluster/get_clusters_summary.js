@@ -26,8 +26,7 @@ export function getClustersSummary(clusters, kibanaUuid) {
     const {
       status: licenseStatus,
       type: licenseType,
-      expiry_date_in_millis: licenseExpiryInMs,
-      expiry_date: licenseExpiry
+      expiry_date_in_millis: licenseExpiry
     } = license;
 
     const indices = pick(clusterStats.indices, ['count', 'docs', 'shards', 'store']);
@@ -54,8 +53,7 @@ export function getClustersSummary(clusters, kibanaUuid) {
       license: {
         status: licenseStatus,
         type: licenseType,
-        expiry_date_in_millis: licenseExpiryInMs,
-        expiry_date: licenseExpiry
+        expiry_date_in_millis: licenseExpiry
       },
       elasticsearch: {
         cluster_stats: {
