@@ -5,7 +5,6 @@
  */
 
 import expect from 'expect.js';
-import multiclusterFixture from './fixtures/multicluster';
 
 export default function ({ getService }) {
   const supertest = getService('supertest');
@@ -28,7 +27,14 @@ export default function ({ getService }) {
           .get('/api/settings')
           .set('kbn-xsrf', 'xxx')
           .expect(200);
-        expect(body).to.eql(multiclusterFixture);
+        expect(body.cluster_uuid.length > 0).to.eql(true);
+        expect(body.settings.kibana.uuid.length > 0).to.eql(true);
+        expect(body.settings.kibana.name.length > 0).to.eql(true);
+        expect(body.settings.kibana.index.length > 0).to.eql(true);
+        expect(body.settings.kibana.host.length > 0).to.eql(true);
+        expect(body.settings.kibana.transport_address.length > 0).to.eql(true);
+        expect(body.settings.kibana.version.length > 0).to.eql(true);
+        expect(body.settings.kibana.status.length > 0).to.eql(true);
       });
     });
   });
