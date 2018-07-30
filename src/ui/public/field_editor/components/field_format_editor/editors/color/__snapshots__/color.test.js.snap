@@ -72,7 +72,11 @@ exports[`ColorFormatEditor should render multiple colors 1`] = `
     size="s"
     type="button"
   >
-    Add color
+    <FormattedMessage
+      defaultMessage="Add color"
+      id="common.ui.fieldEditor.color.addColorButton"
+      values={Object {}}
+    />
   </EuiButton>
   <EuiSpacer
     size="l"
@@ -145,7 +149,11 @@ exports[`ColorFormatEditor should render other type normally (range field) 1`] =
     size="s"
     type="button"
   >
-    Add color
+    <FormattedMessage
+      defaultMessage="Add color"
+      id="common.ui.fieldEditor.color.addColorButton"
+      values={Object {}}
+    />
   </EuiButton>
   <EuiSpacer
     size="l"
@@ -218,7 +226,11 @@ exports[`ColorFormatEditor should render string type normally (regex field) 1`] 
     size="s"
     type="button"
   >
-    Add color
+    <FormattedMessage
+      defaultMessage="Add color"
+      id="common.ui.fieldEditor.color.addColorButton"
+      values={Object {}}
+    />
   </EuiButton>
   <EuiSpacer
     size="l"
