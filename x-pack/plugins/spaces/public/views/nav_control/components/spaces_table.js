@@ -26,14 +26,19 @@ export class SpacesTable extends Component {
   }
 
   render() {
+    const {
+      spaces
+    } = this.props;
+
+    const className = spaces.length >= SPACE_SEARCH_COUNT_THRESHOLD ? `spaceSelectorMenu--full` : `spaceSelectorMenu--compact`;
     return (
-      <div className="spaceSelectorMenu">
+      <div className={`spaceSelectorMenu ${className}`}>
         <EuiInMemoryTable
           itemId={"id"}
-          items={this.props.spaces}
+          items={spaces}
           columns={this.getColumnConfig()}
-          pagination={false}
-          search={this.props.spaces.length >= SPACE_SEARCH_COUNT_THRESHOLD && {
+          pagination={spaces.length > 10}
+          search={spaces.length >= SPACE_SEARCH_COUNT_THRESHOLD && {
             box: {
               incremental: true
             }
