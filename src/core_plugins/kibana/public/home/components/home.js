@@ -45,10 +45,15 @@ export class Home extends Component {
   constructor(props) {
     super(props);
 
-    const isWelcomeEnabled = props.localStorage.getItem(KEY_ENABLE_WELCOME) !== 'false' &&
+    const isWelcomeEnabled =
+      props.localStorage.getItem(KEY_ENABLE_WELCOME) !== 'false' &&
       props.settingsClient.get(KEY_ENABLE_WELCOME, true);
 
     this.state = {
+      // If welcome is enabled, we wait for loading to complete
+      // before rendering. This prevents an annoying flickering
+      // effect where home renders, and then a few ms after, the
+      // welcome screen fades in.
       isLoading: isWelcomeEnabled,
       isNewKibanaInstance: false,
       isWelcomeEnabled,
@@ -68,14 +73,13 @@ export class Home extends Component {
     this.props.loadingCount.increment();
 
     try {
-      const resp = await this.props
-        .find({
-          type: 'index-pattern',
-          fields: ['title'],
-          search: `*`,
-          search_fields: ['title'],
-          perPage: 1,
-        });
+      const resp = await this.props.find({
+        type: 'index-pattern',
+        fields: ['title'],
+        search: `*`,
+        search_fields: ['title'],
+        perPage: 1,
+      });
       this._isMounted && this.setState({ isNewKibanaInstance: resp.total === 0 });
     } catch (err) {
       // An error here is relatively unimportant, as it only means we don't provide
