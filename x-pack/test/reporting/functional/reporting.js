@@ -80,7 +80,7 @@ export default function ({ getService, getPageObjects }) {
       });
 
       describe('Print Layout', () => {
-        it.skip('matches baseline report', async function () {
+        it('matches baseline report', async function () {
           // Generating and then comparing reports can take longer than the default 60s timeout because the comparePngs
           // function is taking about 15 seconds per comparison in jenkins.
           this.timeout(180000);
@@ -117,7 +117,7 @@ export default function ({ getService, getPageObjects }) {
           expect(diffCount).to.be.lessThan(128000);
         });
 
-        it.skip('matches same baseline report with margins turned on', async function () {
+        it('matches same baseline report with margins turned on', async function () {
           // Generating and then comparing reports can take longer than the default 60s timeout because the comparePngs
           // function is taking about 15 seconds per comparison in jenkins.
           this.timeout(180000);
@@ -147,7 +147,7 @@ export default function ({ getService, getPageObjects }) {
       });
 
       describe('Preserve Layout', () => {
-        it.skip('matches baseline report', async function () {
+        it('matches baseline report', async function () {
 
           // Generating and then comparing reports can take longer than the default 60s timeout because the comparePngs
           // function is taking about 15 seconds per comparison in jenkins.
@@ -219,7 +219,30 @@ export default function ({ getService, getPageObjects }) {
           await expectEnabledGenerateReportButton();
         });
 
-        it('generates a report', async () => await expectReportCanBeCreated());
+        it('matches baseline report', async function () {
+          // Generating and then comparing reports can take longer than the default 60s timeout because the comparePngs
+          // function is taking about 15 seconds per comparison in jenkins.
+          this.timeout(180000);
+
+          await PageObjects.reporting.openReportingPanel();
+          await PageObjects.reporting.clickGenerateReportButton();
+          await PageObjects.reporting.clickDownloadReportButton(60000);
+
+          const url = await PageObjects.reporting.getUrlOfTab(1);
+          const reportData = await PageObjects.reporting.getRawPdfReportData(url);
+
+          await PageObjects.reporting.closeTab(1);
+          const reportFileName = 'visualize_print';
+          const sessionReportPath = await writeSessionReport(reportFileName, reportData);
+          const diffCount = await checkIfPdfsMatch(
+            sessionReportPath,
+            getBaselineReportPath(reportFileName),
+            config.get('screenshots.directory'),
+            log
+          );
+          // After expected OS differences, the diff count came to be around 128k
+          expect(diffCount).to.be.lessThan(128000);
+        });
       });
     });
   });
