@@ -9,7 +9,11 @@ exports[`ScriptingDisabledCallOut should render normally 1`] = `
     title="Scripting disabled"
   >
     <p>
-      All inline scripting has been disabled in Elasticsearch. You must enable inline scripting for at least one language in order to use scripted fields in Kibana.
+      <FormattedMessage
+        defaultMessage="All inline scripting has been disabled in Elasticsearch. You must enable inline scripting for at least one language in order to use scripted fields in Kibana."
+        id="common.ui.fieldEditor.disabledCallOutLabel"
+        values={Object {}}
+      />
     </p>
   </EuiCallOut>
   <EuiSpacer
