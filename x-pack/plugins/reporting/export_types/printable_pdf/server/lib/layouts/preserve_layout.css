@@ -42,27 +42,31 @@ discover-app .discover-table-footer {
   display: none;
 }
 
+
+/**
+ * The global banner (e.g. "Help us improve Elastic...") should not print.
+ */
+#globalBannerList {
+  display: none;
+}
+
 /**
  *  Visualize Editor Tweaks
  */
+
 /* hide unusable controls */
-visualize-app
-visualize
-> :not(.vis-editor-content):not(.vis_editor)/* all non-content rows in interface */,
-visualize-app
-visualize
-.vis-editor-content
-.default-vis-editor
-> :not(.vis-editor-canvas):not(.vis_editor) {
-display: none;
+visualization-editor .default-vis-editor > :not(.vis-editor-canvas) {
+  display: none;
 }
+
 /** THIS IS FOR TSVB UNTIL REFACTOR **/
 .vis_editor__visualization {
-position: static !important;
+  position: static !important;
 }
+.visualize .rhythm_chart__legend-control,
 .vis-editor-hide-for-reporting {
-/* all non-content rows in interface */
-display: none;
+  /* all non-content rows in interface */
+  display: none;
 }
 /**  END TSVB BAD BAD HACKS **/
 
@@ -82,15 +86,15 @@ visualize-app .vis-editor-canvas {
  */
 
 /* hide unusable controls */
-visualize .legend-toggle,
-visualize .agg-table-controls/* export raw, export formatted, etc. */ ,
-visualize .leaflet-container .leaflet-top.leaflet-left/* tilemap controls */ ,
-visualize paginate-controls /* page numbers */ {
+.visualize .legend-collapse-button,
+.visualize .agg-table-controls/* export raw, export formatted, etc. */ ,
+.visualize .leaflet-container .leaflet-top.leaflet-left/* tilemap controls */ ,
+.visualize paginate-controls /* page numbers */ {
   display: none;
 }
 
 /* slightly increate legend text size for readability */
-visualize visualize-legend .legend-value-title {
+.visualize visualize-legend .legend-value-title {
   font-size: 1.2em;
 }
 
