@@ -19,7 +19,7 @@
 
 import React from 'react';
 import { StepIndexPatternComponent } from '../step_index_pattern';
-import { shallowWithIntl } from 'test_utils/enzyme_helpers';
+import { shallowWithIntl, intl } from 'test_utils/enzyme_helpers';
 import { Header } from '../components/header';
 
 jest.mock('../../../lib/ensure_minimum_time', () => ({
@@ -93,7 +93,10 @@ describe('StepIndexPattern', () => {
     await new Promise(resolve => process.nextTick(resolve));
     // Ensure the state changes are reflected
     component.update();
-    expect(component.find('[data-test-subj="createIndexPatternStep1Header"]')).toMatchSnapshot();
+    expect({
+      component: component.find('[data-test-subj="createIndexPatternStep1Header"]'),
+      i18n: intl.formatMessage.mock.calls,
+    }).toMatchSnapshot();
   });
 
   it('renders matching indices when input is valid', async () => {

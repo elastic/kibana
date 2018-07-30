@@ -18,7 +18,7 @@
  */
 
 import React from 'react';
-import { shallowWithIntl } from 'test_utils/enzyme_helpers';
+import { shallowWithIntl, intl } from 'test_utils/enzyme_helpers';
 
 import { SourceFiltersTableComponent } from '../source_filters_table';
 
@@ -106,7 +106,10 @@ describe('SourceFiltersTable', () => {
 
     component.instance().startDeleteFilter({ value: 'tim*' });
     component.update(); // We are not calling `.setState` directly so we need to re-render
-    expect(component).toMatchSnapshot();
+    expect({
+      component,
+      i18n: intl.formatMessage.mock.calls,
+    }).toMatchSnapshot();
   });
 
   it('should remove a filter', async () => {

@@ -54,3 +54,5 @@ export function shallowWithIntl(node, { context, childContextTypes, ...props } =
 
   return clonedNode.shallow(options);
 }
+
+export { intl };
