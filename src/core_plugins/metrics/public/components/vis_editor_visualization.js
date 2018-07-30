@@ -87,9 +87,11 @@ class VisEditorVisualization extends Component {
   }
 
   componentDidUpdate() {
-    this._handler.update({
-      timeRange: this.props.timeRange
-    });
+    if (this._handler) {
+      this._handler.update({
+        timeRange: this.props.timeRange
+      });
+    }
   }
 
   componentDidMount() {
