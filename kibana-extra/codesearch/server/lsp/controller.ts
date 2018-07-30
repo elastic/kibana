@@ -5,6 +5,8 @@
  */
 import * as glob from 'glob';
 import * as Hapi from 'hapi';
+
+import { platform as getOsPlatform } from 'os';
 import { detectLanguage } from '../detect_language';
 import { Log } from '../log';
 import { ILanguageServerHandler, LanguageServerProxy } from './proxy';
@@ -125,6 +127,20 @@ export class LanguageServerController implements ILanguageServerHandler {
     if (!launchersFound.length) {
       this.log.error('cannot find executable jar for JavaLsp');
     }
+
+    let config = './config_mac/';
+    // detect platform
+    switch (getOsPlatform()) {
+      case 'darwin':
+        break;
+      case 'win32':
+        config = './config_win/';
+      case 'linux':
+        config = './config_linux/';
+      default:
+        this.log.error('Unable to find platform for this os');
+    }
+
     if (!this.detach) {
       this.log.info('Launch Java Language Server at port ' + port);
       const child = spawn(
@@ -139,7 +155,7 @@ export class LanguageServerController implements ILanguageServerHandler {
           '-jar',
           path.resolve(javaLangserverPath, launchersFound[0]),
           '-configuration',
-          path.resolve(javaLangserverPath, './config_mac/'), // TODO detect platform
+          path.resolve(javaLangserverPath, config),
           '-data',
           '/tmp/data',
         ],
