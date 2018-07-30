@@ -62,6 +62,7 @@ export function createSavedObjectsService(server) {
   const mappings = server.getKibanaIndexMappingsDsl();
   const repositoryProvider = new SavedObjectsRepositoryProvider({
     index: server.config().get('kibana.index'),
+    indexRefresh: server.config().get('kibana.indexRefresh'),
     mappings,
     onBeforeWrite,
   });

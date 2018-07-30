@@ -27,10 +27,12 @@ export class SavedObjectsRepositoryProvider {
   constructor({
     index,
     mappings,
-    onBeforeWrite
+    onBeforeWrite,
+    indexRefresh = 'wait_for',
   }) {
     this._index = index;
     this._mappings = mappings;
+    this._indexRefresh = indexRefresh;
     this._onBeforeWrite = onBeforeWrite;
   }
 
@@ -44,6 +46,7 @@ export class SavedObjectsRepositoryProvider {
       index: this._index,
       mappings: this._mappings,
       onBeforeWrite: this._onBeforeWrite,
+      indexRefresh: this._indexRefresh,
       callCluster
     });
   }

@@ -41,6 +41,7 @@ test('creates a valid Repository', async () => {
         }
       }
     },
+    indexRefresh: false,
     onBeforeWrite: jest.fn()
   };
 
@@ -57,6 +58,7 @@ test('creates a valid Repository', async () => {
   expect(callCluster).toHaveBeenCalledTimes(1);
   expect(properties.onBeforeWrite).toHaveBeenCalledTimes(1);
   expect(callCluster).toHaveBeenCalledWith('index', expect.objectContaining({
-    index: properties.index
+    index: properties.index,
+    refresh: false
   }));
 });

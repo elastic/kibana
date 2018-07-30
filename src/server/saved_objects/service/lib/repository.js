@@ -36,6 +36,7 @@ export class SavedObjectsRepository {
       index,
       mappings,
       callCluster,
+      indexRefresh = 'wait_for',
       onBeforeWrite = () => {},
     } = options;
 
@@ -44,6 +45,8 @@ export class SavedObjectsRepository {
     this._type = getRootType(this._mappings);
     this._onBeforeWrite = onBeforeWrite;
     this._unwrappedCallCluster = callCluster;
+    this._indexRefresh = indexRefresh;
+    console.log(this._indexRefresh);
   }
 
   /**
@@ -70,7 +73,7 @@ export class SavedObjectsRepository {
         id: this._generateEsId(type, id),
         type: this._type,
         index: this._index,
-        refresh: 'wait_for',
+        refresh: this._indexRefresh,
         body: {
           type,
           updated_at: time,
@@ -128,7 +131,7 @@ export class SavedObjectsRepository {
 
     const { items } = await this._writeToCluster('bulk', {
       index: this._index,
-      refresh: 'wait_for',
+      refresh: this._indexRefresh,
       body: objects.reduce((acc, object) => ([
         ...acc,
         ...objectToBulkRequest(object)
@@ -189,7 +192,7 @@ export class SavedObjectsRepository {
       id: this._generateEsId(type, id),
       type: this._type,
       index: this._index,
-      refresh: 'wait_for',
+      refresh: this._indexRefresh,
       ignore: [404],
     });
 
@@ -391,7 +394,7 @@ export class SavedObjectsRepository {
       type: this._type,
       index: this._index,
       version: options.version,
-      refresh: 'wait_for',
+      refresh: this._indexRefresh,
       ignore: [404],
       body: {
         doc: {
