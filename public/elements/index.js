@@ -7,6 +7,7 @@ import { image } from './image';
 import { horizontalBarChart } from './horiz_bar_chart';
 import { lineChart } from './line_chart';
 import { markdown } from './markdown';
+import { metric } from './metric';
 import { pie } from './pie';
 import { plot } from './plot';
 import { repeatImage } from './repeatImage';
@@ -27,6 +28,7 @@ export const elementSpecs = [
   image,
   lineChart,
   markdown,
+  metric,
   pie,
   plot,
   repeatImage,

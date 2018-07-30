@@ -12,7 +12,6 @@ export const math = () => ({
       argType: 'datacolumn',
       options: {
         onlyMath: true,
-        allowedTypes: ['number'],
       },
     },
   ],

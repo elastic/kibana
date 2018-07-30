@@ -12,6 +12,7 @@ export const SimpleMathFunction = ({ onChange, value, inputRef, onlymath }) => {
     { text: 'Median', value: 'median' },
     { text: 'Min', value: 'min' },
     { text: 'Sum', value: 'sum' },
+    { text: 'Unique', value: 'unique' },
   ];
 
   if (!onlymath) options.unshift({ text: 'Value', value: '' });

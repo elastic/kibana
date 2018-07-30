@@ -26,6 +26,7 @@ import { lte } from './lte';
 import { mapColumn } from './mapColumn';
 import { markdown } from './markdown';
 import { math } from './math';
+import { metric } from './metric';
 import { neq } from './neq';
 import { palette } from './palette';
 import { pie } from './pie';
@@ -79,6 +80,7 @@ export const commonFunctions = [
   mapColumn,
   markdown,
   math,
+  metric,
   neq,
   palette,
   pie,

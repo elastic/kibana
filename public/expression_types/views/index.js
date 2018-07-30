@@ -1,6 +1,7 @@
 import { dropdownControl } from './dropdownControl';
 import { image } from './image';
 import { markdown } from './markdown';
+import { metric } from './metric';
 import { pie } from './pie';
 import { plot } from './plot';
 import { getCell } from './getCell';
@@ -15,6 +16,7 @@ export const viewSpecs = [
   dropdownControl,
   image,
   markdown,
+  metric,
   plot,
   getCell,
   pie,

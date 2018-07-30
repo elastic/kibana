@@ -6,6 +6,7 @@ import { image } from './image';
 import { repeatImage } from './repeat_image';
 import { revealImage } from './reveal_image';
 import { markdown } from './markdown';
+import { metric } from './metric';
 import { pie } from './pie';
 import { plot } from './plot';
 import { shape } from './shape';
@@ -22,6 +23,7 @@ export const renderFunctions = [
   repeatImage,
   revealImage,
   markdown,
+  metric,
   pie,
   plot,
   shape,
