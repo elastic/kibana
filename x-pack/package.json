@@ -57,6 +57,7 @@
     "jest-styled-components": "^5.0.1",
     "mocha": "3.3.0",
     "mustache": "^2.3.0",
+    "mutation-observer": "^1.0.3",
     "node-fetch": "^2.1.2",
     "pdf-image": "1.1.0",
     "pixelmatch": "4.0.2",

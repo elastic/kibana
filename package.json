@@ -325,6 +325,7 @@
     "mocha": "3.3.0",
     "mock-fs": "^4.4.2",
     "murmurhash3js": "3.0.1",
+    "mutation-observer": "^1.0.3",
     "ncp": "2.0.0",
     "nock": "8.0.0",
     "node-sass": "^4.9.0",
