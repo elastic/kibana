@@ -9,10 +9,9 @@ import PropTypes from 'prop-types';
 import {
   EuiAvatar,
   EuiPopover,
-  EuiPopoverTitle,
 } from '@elastic/eui';
 import { SpaceAvatar } from '../components';
-import { SpacesTable } from './components/spaces_table';
+import { SpacesMenu } from './components/spaces_menu';
 
 export class NavControlPopover extends Component {
   state = {
@@ -65,8 +64,7 @@ export class NavControlPopover extends Component {
 
     return (
       <EuiPopover button={button} isOpen={this.state.isOpen} closePopover={this.closePortal} anchorPosition={'rightCenter'}>
-        <EuiPopoverTitle>Select a Space</EuiPopoverTitle>
-        <SpacesTable spaces={this.state.spaces || []} onSelectSpace={this.onSelectSpace} />
+        <SpacesMenu spaces={this.state.spaces} onSelectSpace={this.onSelectSpace} />
       </EuiPopover>
     );
   }
