@@ -17,6 +17,7 @@
  * under the License.
  */
 
+import { FatalErrorsService } from './fatal_errors';
 import { InjectedMetadataParams, InjectedMetadataService } from './injected_metadata';
 import { LegacyPlatformParams, LegacyPlatformService } from './legacy_platform';
 
@@ -34,6 +35,7 @@ interface Params {
  * platform the CoreSystem will get many more Services.
  */
 export class CoreSystem {
+  private fatalErrors: FatalErrorsService;
   private injectedMetadata: InjectedMetadataService;
   private legacyPlatform: LegacyPlatformService;
 
@@ -44,6 +46,14 @@ export class CoreSystem {
       injectedMetadata,
     });
 
+    this.fatalErrors = new FatalErrorsService({
+      rootDomElement,
+      injectedMetadata: this.injectedMetadata,
+      stopCoreSystem: () => {
+        this.stop();
+      },
+    });
+
     this.legacyPlatform = new LegacyPlatformService({
       rootDomElement,
       requireLegacyFiles,
@@ -52,8 +62,16 @@ export class CoreSystem {
   }
 
   public start() {
-    this.legacyPlatform.start({
-      injectedMetadata: this.injectedMetadata.start(),
-    });
+    try {
+      const injectedMetadata = this.injectedMetadata.start();
+      const fatalErrors = this.fatalErrors.start();
+      this.legacyPlatform.start({ injectedMetadata, fatalErrors });
+    } catch (error) {
+      this.fatalErrors.add(error);
+    }
+  }
+
+  public stop() {
+    this.legacyPlatform.stop();
   }
 }
