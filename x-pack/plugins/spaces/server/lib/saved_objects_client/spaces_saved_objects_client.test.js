@@ -137,6 +137,27 @@ describe('default space', () => {
       expect(result).toBe(SAVED_OBJECTS[id]);
     });
 
+    test(`does not append the space id to the document id`, async () => {
+      const request = createMockRequest(currentSpace);
+      const baseClient = createMockClient(currentSpace);
+      const spacesService = createSpacesService(server);
+
+      const client = new SpacesSavedObjectsClient({
+        request,
+        baseClient,
+        spacesService,
+        types: [],
+      });
+
+      const type = 'foo';
+      const id = 'object_0';
+      const options = {};
+
+      await client.get(type, id, options);
+
+      expect(baseClient.get).toHaveBeenCalledWith(type, id, { extraDocumentProperties: ['spaceId'] });
+    });
+
     test(`returns global objects that don't belong to a specific space`, async () => {
       const request = createMockRequest(currentSpace);
       const baseClient = createMockClient(currentSpace);
@@ -243,6 +264,34 @@ describe('default space', () => {
           }
         }]
       });
+    });
+
+    test(`does not append the space id to the document id`, async () => {
+      const request = createMockRequest(currentSpace);
+      const baseClient = createMockClient(currentSpace);
+      const spacesService = createSpacesService(server);
+
+      const client = new SpacesSavedObjectsClient({
+        request,
+        baseClient,
+        spacesService,
+        types: [],
+      });
+
+      const type = 'foo';
+      const options = {};
+
+      const objects = [{
+        type,
+        id: 'object_0'
+      }, {
+        type,
+        id: 'object_2'
+      }];
+
+      await client.bulkGet(objects, options);
+
+      expect(baseClient.bulkGet).toHaveBeenCalledWith(objects, { ...options, extraDocumentProperties: ["spaceId", "type"] });
     });
 
     test(`returns global objects that don't belong to a specific space`, async () => {
@@ -789,6 +838,27 @@ describe('current space (space_1)', () => {
       expect(result).toBe(SAVED_OBJECTS[`${currentSpace.id}:${id}`]);
     });
 
+    test('appends the space id to the document id', async () => {
+      const request = createMockRequest(currentSpace);
+      const baseClient = createMockClient(currentSpace);
+      const spacesService = createSpacesService(server);
+
+      const client = new SpacesSavedObjectsClient({
+        request,
+        baseClient,
+        spacesService,
+        types: [],
+      });
+
+      const type = 'foo';
+      const id = 'object_1';
+      const options = {};
+
+      await client.get(type, id, options);
+
+      expect(baseClient.get).toHaveBeenCalledWith(type, `${currentSpace.id}:${id}`, { ...options, extraDocumentProperties: ['spaceId'] });
+    });
+
     test(`returns global objects that don't belong to a specific space`, async () => {
       const request = createMockRequest(currentSpace);
       const baseClient = createMockClient(currentSpace);
@@ -896,6 +966,35 @@ describe('current space (space_1)', () => {
           }
         }]
       });
+    });
+
+    test('appends the space id to the document id', async () => {
+      const request = createMockRequest(currentSpace);
+      const baseClient = createMockClient(currentSpace);
+      const spacesService = createSpacesService(server);
+
+      const client = new SpacesSavedObjectsClient({
+        request,
+        baseClient,
+        spacesService,
+        types: [],
+      });
+
+      const type = 'foo';
+      const options = {};
+      const objects = [{
+        type,
+        id: 'object_1'
+      }, {
+        type,
+        id: 'object_2'
+      }];
+
+      await client.bulkGet(objects, options);
+
+      const expectedObjects = objects.map(o => ({ ...o, id: `${currentSpace.id}:${o.id}` }));
+      expect(baseClient.bulkGet)
+        .toHaveBeenCalledWith(expectedObjects, { ...options, extraDocumentProperties: ["spaceId", "type"] });
     });
 
     test(`returns global objects that don't belong to a specific space`, async () => {
