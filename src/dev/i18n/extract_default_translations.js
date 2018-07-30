@@ -39,7 +39,7 @@ function addMessageToMap(targetMap, key, value) {
 }
 
 export async function extractDefaultTranslations(inputPath) {
-  const entries = await globAsync('*.{js,jsx,jade,ts,tsx,html,hbs,handlebars}', {
+  const entries = await globAsync('*.{js,jsx,pug,ts,tsx,html,hbs,handlebars}', {
     cwd: inputPath,
     matchBase: true,
   });

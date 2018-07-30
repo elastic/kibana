@@ -17,15 +17,15 @@
  * under the License.
  */
 
-import { extractJadeMessages } from './extract_jade_messages';
+import { extractPugMessages } from './extract_pug_messages';
 
-const jadeMessageBuffer = Buffer.from(`
+const pugMessageBuffer = Buffer.from(`
 #{i18n('message-id', { defaultMessage: 'Default message', context: 'Message context' })}
 `);
 
-describe('extractJadeMessages', () => {
-  it('extracts messages from jade template', () => {
-    for (const messageObject of extractJadeMessages(jadeMessageBuffer)) {
+describe('extractPugMessages', () => {
+  it('extracts messages from pug template', () => {
+    for (const messageObject of extractPugMessages(pugMessageBuffer)) {
       const expected = [
         'message-id',
         {
