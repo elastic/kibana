@@ -11,12 +11,10 @@ import { detectLanguage } from '../detect_language';
 import { Log } from '../log';
 import { ILanguageServerHandler, LanguageServerProxy } from './proxy';
 
-import { ChildProcess, spawn } from 'child_process';
+import { spawn } from 'child_process';
 import getPort from 'get-port';
 
 import path from 'path';
-// @ts-ignore
-import signals from 'signal-exit/signals';
 import { ErrorCodes, ResponseError } from 'vscode-jsonrpc';
 import { LspRequest } from '../../model';
 import { RequestExpander } from './request_expander';
@@ -83,7 +81,6 @@ export class LanguageServerController implements ILanguageServerHandler {
     const proxy = new LanguageServerProxy(port, this.targetHost, log);
 
     if (!this.detach) {
-      this.log.info('Launch Typescript Language Server at port ' + port);
       const child = spawn(
         'node',
         [
@@ -97,11 +94,11 @@ export class LanguageServerController implements ILanguageServerHandler {
           '1',
         ],
         {
-          detached: true,
+          detached: false,
           stdio: 'inherit',
         }
       );
-      this.closeOnExit(proxy, child);
+      log.info(`Launch Typescript Language Server at port ${port}, pid:${child.pid}`);
     }
     proxy.listen();
     const handler = new RequestExpander(proxy);
@@ -114,7 +111,7 @@ export class LanguageServerController implements ILanguageServerHandler {
     if (!this.detach) {
       port = await getPort();
     }
-    const log = new Log(this.server, ['LSP', `ts@${this.targetHost}:${port}`]);
+    const log = new Log(this.server, ['LSP', `java@${this.targetHost}:${port}`]);
     const proxy = new LanguageServerProxy(port, this.targetHost, log);
     proxy.awaitServerConnection();
     const javaLangserverPath = path.resolve(
@@ -142,7 +139,6 @@ export class LanguageServerController implements ILanguageServerHandler {
     }
 
     if (!this.detach) {
-      this.log.info('Launch Java Language Server at port ' + port);
       const child = spawn(
         'java',
         [
@@ -160,36 +156,17 @@ export class LanguageServerController implements ILanguageServerHandler {
           '/tmp/data',
         ],
         {
-          detached: true,
+          detached: false,
           stdio: 'inherit',
           env: { CLIENT_PORT: port.toString() },
         }
       );
-      this.closeOnExit(proxy, child);
+      log.info(`Launch Java Language Server at port ${port}, pid:${child.pid}`);
     }
 
     proxy.listen();
     const handler = new RequestExpander(proxy);
     this.registerServer(['java'], handler);
-  }
-
-  private async closeOnExit(proxy: LanguageServerProxy, child: ChildProcess) {
-    let childTerminated = false;
-    child.on('exit', () => (childTerminated = true));
-    const listeners: { [signal: string]: () => void } = {};
-    signals.forEach((signal: NodeJS.Signals) => {
-      const listener = async () => {
-        await proxy.exit();
-        if (!childTerminated) {
-          child.kill(signal);
-          this.log.info(`sent ${signal} to language server, pid:${child.pid}`);
-        }
-        process.removeListener(signal, listeners[signal]);
-        process.kill(process.pid, signal);
-      };
-      listeners[signal] = listener;
-      process.on(signal, listener);
-    });
   }
 
   private registerServer(languages: string[], handler: RequestExpander) {
