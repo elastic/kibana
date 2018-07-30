@@ -61,9 +61,10 @@ const CourierRequestHandlerProvider = function () {
       });
     });
     const rows = table.rows.map(row => {
-      return row.reduce((prev, cur, index) => {
-        const fieldFormatter = table.columns[index].aggConfig.fieldFormatter('text');
-        prev[`col${index}`] = new FormattedData(cur, fieldFormatter(cur));
+      return table.columns.reduce((prev, cur, index) => {
+        const value = row[cur.id];
+        const fieldFormatter = cur.aggConfig.fieldFormatter('text');
+        prev[`col${index}`] = new FormattedData(value, fieldFormatter(value));
         return prev;
       }, {});
     });
