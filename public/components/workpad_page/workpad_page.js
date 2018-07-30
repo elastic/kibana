@@ -11,6 +11,7 @@ import { BorderResizeHandle } from '../border_resize_handle';
 export const WorkpadPage = ({
   page,
   elements,
+  cursor = 'auto',
   height,
   width,
   isEditable,
@@ -34,6 +35,7 @@ export const WorkpadPage = ({
         ...page.style,
         height,
         width,
+        cursor,
       }}
       onMouseMove={onMouseMove}
       onMouseUp={onMouseUp}
@@ -92,6 +94,7 @@ WorkpadPage.propTypes = {
       type: PropTypes.string,
     })
   ).isRequired,
+  cursor: PropTypes.string,
   isSelected: PropTypes.bool.isRequired,
   height: PropTypes.number.isRequired,
   width: PropTypes.number.isRequired,

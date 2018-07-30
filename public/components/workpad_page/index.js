@@ -49,7 +49,7 @@ export const WorkpadPage = compose(
   connect(mapStateToProps, mapDispatchToProps, mergeProps),
   withState('updateCount', 'setUpdateCount', 0), // TODO: remove this, see setUpdateCount below
   withProps(({ updateCount, setUpdateCount, page, removeElement }) => {
-    const { shapes, selectedShapes = [] } = aeroelastic.getStore(page.id).currentScene;
+    const { shapes, selectedShapes = [], cursor } = aeroelastic.getStore(page.id).currentScene;
     const elementLookup = new Map(page.elements.map(element => [element.id, element]));
     const shapeLookup = new Map(shapes.map(shape => [shape.id, shape]));
     const elements = shapes.map(
@@ -63,6 +63,7 @@ export const WorkpadPage = compose(
 
     return {
       elements,
+      cursor,
       commit: (...args) => {
         aeroelastic.commit(page.id, ...args);
         // TODO: remove this, it's a hack to force react to rerender

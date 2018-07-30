@@ -276,10 +276,10 @@ const rotationManipulation = ({ shape, directShape, cursorPosition: { x, y } }) 
   const newAngle = Math.atan2(centerPosition[1] - y, centerPosition[0] - x);
   const closest45deg = Math.round(newAngle / (Math.PI / 4)) * Math.PI / 4;
   const radius = Math.sqrt(Math.pow(centerPosition[0] - x, 2) + Math.pow(centerPosition[1] - y, 2));
-  const closest34degPosition = [Math.cos(closest45deg) * radius, Math.sin(closest45deg) * radius];
+  const closest45degPosition = [Math.cos(closest45deg) * radius, Math.sin(closest45deg) * radius];
   const pixelDifference = Math.sqrt(
-    Math.pow(closest34degPosition[0] - (centerPosition[0] - x), 2) +
-      Math.pow(closest34degPosition[1] - (centerPosition[1] - y), 2)
+    Math.pow(closest45degPosition[0] - (centerPosition[0] - x), 2) +
+      Math.pow(closest45degPosition[1] - (centerPosition[1] - y), 2)
   );
   const newSnappedAngle = pixelDifference < config.rotateSnapInPixels ? closest45deg : newAngle;
   const result = matrix.rotateZ(oldAngle - newSnappedAngle);
@@ -713,7 +713,7 @@ const rotationAnnotations = select((shapes, selectedShapes) => {
     .filter(identity);
 })(transformedShapes, selectedShapes);
 
-const resizePointAnnotations = (parent, a, b) => ([x, y]) => {
+const resizePointAnnotations = (parent, a, b) => ([x, y, cursorAngle]) => {
   const markerPlace = matrix.translate(x * a, y * b, config.resizeAnnotationOffsetZ);
   const pixelOffset = matrix.translate(
     -x * config.resizeAnnotationOffset,
@@ -729,6 +729,7 @@ const resizePointAnnotations = (parent, a, b) => ([x, y]) => {
     subtype: config.resizeHandleName,
     horizontalPosition: xName,
     verticalPosition: yName,
+    cursorAngle,
     interactive: true,
     parent,
     localTransformMatrix: transform,
@@ -784,14 +785,14 @@ function resizeAnnotation(shapes, selectedShapes, shape) {
     return resizeAnnotation(shapes, selectedShapes, shapes.find(s => foundShape.parent === s.id));
   }
   const resizePoints = [
-    [-1, -1],
-    [1, -1],
-    [1, 1],
-    [-1, 1], // corners
-    [0, -1],
-    [1, 0],
-    [0, 1],
-    [-1, 0], // edge midpoints
+    [-1, -1, 315],
+    [1, -1, 45],
+    [1, 1, 135],
+    [-1, 1, 225], // corners
+    [0, -1, 0],
+    [1, 0, 90],
+    [0, 1, 180],
+    [-1, 0, 270], // edge midpoints
   ].map(resizePointAnnotations(shape.id, a, b));
   const connectors = [
     [[-1, -1], [0, -1]],
@@ -901,11 +902,45 @@ const annotatedShapes = select(
 
 const globalTransformShapes = select(cascadeTransforms)(annotatedShapes);
 
+const bidirectionalCursors = {
+  '0': 'ns-resize',
+  '45': 'nesw-resize',
+  '90': 'ew-resize',
+  '135': 'nwse-resize',
+  '180': 'ns-resize',
+  '225': 'nesw-resize',
+  '270': 'ew-resize',
+  '315': 'nwse-resize',
+};
+
+const cursor = select(shape => {
+  if (!shape) return 'auto';
+  switch (shape.subtype) {
+    case config.rotationHandleName:
+      return 'crosshair';
+    case config.resizeHandleName:
+      const angle = (matrix.matrixToAngle(shape.transformMatrix) + 360) % 360;
+      const screenProjectedAngle = angle + shape.cursorAngle;
+      const discretizedAngle = (Math.round(screenProjectedAngle / 45) * 45 + 360) % 360;
+      return bidirectionalCursors[discretizedAngle];
+    default:
+      return 'grab';
+  }
+})(focusedShape);
+
 // this is the core scenegraph update invocation: upon new cursor position etc. emit the new scenegraph
 // it's _the_ state representation (at a PoC level...) comprising of transient properties eg. draggedShape, and the
 // collection of shapes themselves
 const nextScene = select(
-  (hoveredShape, selectedShapes, selectedPrimaryShapes, shapes, gestureEnd, draggedShape) => {
+  (
+    hoveredShape,
+    selectedShapes,
+    selectedPrimaryShapes,
+    shapes,
+    gestureEnd,
+    draggedShape,
+    cursor
+  ) => {
     return {
       hoveredShape,
       selectedShapes,
@@ -913,6 +948,7 @@ const nextScene = select(
       shapes,
       gestureEnd,
       draggedShape,
+      cursor,
     };
   }
 )(
@@ -921,7 +957,8 @@ const nextScene = select(
   selectedPrimaryShapeIds,
   globalTransformShapes,
   gestureEnd,
-  draggedShape
+  draggedShape,
+  cursor
 );
 
 module.exports = {

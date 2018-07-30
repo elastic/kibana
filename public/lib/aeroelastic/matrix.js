@@ -301,6 +301,15 @@ const reduceTransforms = transforms =>
 const applyTransforms = (transforms, previousTransformMatrix) =>
   transforms.reduce((prev, next) => multiply(prev, next), previousTransformMatrix);
 
+const clamp = (low, high, value) => Math.min(high, Math.max(low, value));
+
+const matrixToAngle = transformMatrix => {
+  // clamping is needed, otherwise inevitable floating point inaccuracies can cause NaN
+  const z0 = Math.acos(clamp(-1, 1, transformMatrix[0])) * 180 / Math.PI;
+  const z1 = Math.asin(clamp(-1, 1, transformMatrix[1])) * 180 / Math.PI;
+  return z1 > 0 ? z0 : -z0;
+};
+
 module.exports = {
   ORIGIN,
   NULLVECTOR,
@@ -314,6 +323,7 @@ module.exports = {
   rotateZ,
   scale,
   perspective,
+  matrixToAngle,
   multiply,
   mvMultiply,
   invert,
