@@ -44,7 +44,7 @@ const TableResponseHandlerProvider = function () {
             if (!splitMap[splitValue]) {
               splitMap[splitValue] = splitIndex++;
               converted.tables.push({
-                aggConfig: (column) => column.aggConfig,
+                aggConfig: splitAgg,
                 title: splitValue,
                 columns: table.columns.filter((column, i) => i !== splitColumnIndex),
                 rows: []
