@@ -6,7 +6,7 @@
 
 import { NO_PRIVILEGE_VALUE } from './constants';
 
-export function getAvailablePermissions(minimumPrivilege) {
+export function getAvailablePrivileges(minimumPrivilege) {
   switch (minimumPrivilege) {
     case NO_PRIVILEGE_VALUE:
       return ['read', 'all'];

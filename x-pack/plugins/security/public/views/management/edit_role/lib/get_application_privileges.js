@@ -34,17 +34,3 @@ export function getKibanaPrivilegesViewModel(applicationPrivileges, roleKibanaPr
 
   return viewModel;
 }
-
-export function getKibanaPrivileges(kibanaPrivilegesViewModel) {
-  const kibanaPrivileges = {};
-
-  const resources = Object.keys(kibanaPrivilegesViewModel);
-  resources.forEach(resource => {
-    const selectedPrivileges = Object.keys(kibanaPrivilegesViewModel[resource]).filter(key => kibanaPrivilegesViewModel[resource][key]);
-    if (selectedPrivileges.length > 0) {
-      kibanaPrivileges[resource] = selectedPrivileges;
-    }
-  });
-
-  return kibanaPrivileges;
-}

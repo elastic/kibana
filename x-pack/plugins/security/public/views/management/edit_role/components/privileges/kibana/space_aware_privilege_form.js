@@ -20,7 +20,7 @@ import {
 } from '@elastic/eui';
 import { isReservedRole } from '../../../../../../lib/role';
 import { copyRole } from '../../../lib/copy_role';
-import { getAvailablePermissions } from '../../../lib/get_available_permissions';
+import { getAvailablePrivileges } from '../../../lib/get_available_privileges';
 import { PrivilegeSpaceTable } from './privilege_space_table';
 import { ALL_RESOURCE } from '../../../../../../../common/constants';
 import { getKibanaPrivilegesViewModel } from '../../../lib/get_application_privileges';
@@ -200,7 +200,7 @@ export class SpaceAwarePrivilegeForm extends Component {
           key={index}
           availableSpaces={availableSpaces}
           selectedSpaceIds={selectedSpaceIds}
-          availablePrivileges={getAvailablePermissions(basePrivilege)}
+          availablePrivileges={getAvailablePrivileges(basePrivilege)}
           selectedPrivilege={privilege}
           onChange={this.onPrivilegeSpacePermissionChange(index)}
           onDelete={this.onPrivilegeSpacePermissionDelete(index)}
