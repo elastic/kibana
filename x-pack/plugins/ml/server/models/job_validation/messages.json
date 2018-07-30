@@ -2,12 +2,12 @@
   "field_not_aggregatable": {
     "status": "ERROR",
     "text": "Detector field \"{{fieldName}}\" is not an aggregatable field.",
-    "url": "https://www.elastic.co/guide/en/x-pack/{{version}}/ml-configuring-aggregation.html"
+    "url": "https://www.elastic.co/guide/en/elastic-stack-overview/{{version}}/ml-configuring-aggregation.html"
   },
   "fields_not_aggregatable": {
     "status": "ERROR",
     "text": "One of the detector fields is not an aggregatable field.",
-    "url": "https://www.elastic.co/guide/en/x-pack/{{version}}/ml-configuring-aggregation.html"
+    "url": "https://www.elastic.co/guide/en/elastic-stack-overview/{{version}}/ml-configuring-aggregation.html"
   },
   "cardinality_by_field": {
     "status": "WARNING",
@@ -16,7 +16,7 @@
   },
   "cardinality_over_field_low": {
     "status": "WARNING",
-    "text": "Cardinality of over_field \"{{fieldName}}\" is below 10 and might be less suitable for population analysis.",
+    "text": "Cardinality of over_field \"{{fieldName}}\" is below 10 and might not be suitable for population analysis.",
     "url": "https://www.elastic.co/guide/en/kibana/{{version}}/job-tips.html#cardinality"
   },
   "cardinality_over_field_high": {
@@ -36,11 +36,12 @@
   "categorization_filters_valid": {
     "status": "SUCCESS",
     "text": "Categorization filters checks passed.",
-    "url": "https://www.elastic.co/guide/en/x-pack/{{version}}/ml-configuring-categories.html#ml-configuring-categories"
+    "url": "https://www.elastic.co/guide/en/elastic-stack-overview/{{version}}/ml-configuring-categories.html"
   },
   "categorization_filters_invalid": {
     "status": "ERROR",
-    "text": "The categorization filters are invalid."
+    "text": "The categorization filters configuration is invalid. Make sure filters are valid regular expressions and \"categorization_field_name\" is set.",
+    "url": "https://www.elastic.co/guide/en/elasticsearch/reference/{{version}}/ml-job-resource.html#ml-analysisconfig"
   },
   "bucket_span_empty": {
     "status": "ERROR",
@@ -74,23 +75,23 @@
   "detectors_duplicates": {
     "status": "ERROR",
     "text": "Duplicate detectors were found. Detectors having the same combined configuration for 'function', 'field_name', 'by_field_name', 'over_field_name' and 'partition_field_name' are not allowed within the same job.",
-    "url": "https://www.elastic.co/guide/en/elasticsearch/reference/{{version}}/ml-job-resource.html#ml-detectorconfig"
+    "url": "https://www.elastic.co/guide/en/kibana/{{version}}/job-tips.html#detectors"
   },
   "detectors_empty": {
     "status": "ERROR",
     "text": "No detectors were found. At least one detector must be specified.",
-    "url": "https://www.elastic.co/guide/en/elasticsearch/reference/{{version}}/ml-job-resource.html#ml-detectorconfig"
+    "url": "https://www.elastic.co/guide/en/kibana/{{version}}/job-tips.html#detectors"
   },
   "detectors_function_empty": {
     "status": "ERROR",
     "text": "One of the detector functions is empty.",
-    "url": "https://www.elastic.co/guide/en/elasticsearch/reference/{{version}}/ml-job-resource.html#ml-detectorconfig"
+    "url": "https://www.elastic.co/guide/en/kibana/{{version}}/job-tips.html#detectors"
   },
   "detectors_function_not_empty": {
     "status": "SUCCESS",
     "heading": "Dectector functions",
     "text": "Presence of detector functions validated in all detectors.",
-    "url": "https://www.elastic.co/guide/en/elasticsearch/reference/{{version}}/ml-job-resource.html#ml-detectorconfig"
+    "url": "https://www.elastic.co/guide/en/kibana/{{version}}/job-tips.html#detectors"
   },
   "index_fields_invalid": {
     "status": "ERROR",
@@ -188,7 +189,7 @@
     "status": "SUCCESS",
     "heading": "Model memory limit",
     "text": "Valid and within the estimated model memory limit.",
-    "url": "https://www.elastic.co/guide/en/x-pack/{{version}}/ml-gs-job1-manage.html#ml-gs-job1-manage"
+    "url": "https://www.elastic.co/guide/en/kibana/{{version}}/job-tips.html#model-memory-limits"
   },
   "success_time_range": {
     "status": "SUCCESS",

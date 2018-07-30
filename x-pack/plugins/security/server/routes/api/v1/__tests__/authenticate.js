@@ -64,6 +64,9 @@ describe('Authentication routes', () => {
             username: Joi.string().required(),
             password: Joi.string().required()
           }
+        },
+        response: {
+          emptyStatusCode: 204,
         }
       });
     });

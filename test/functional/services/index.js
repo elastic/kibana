@@ -30,3 +30,4 @@ export { FlyoutProvider } from './flyout';
 export { ComboBoxProvider } from './combo_box';
 
 export * from './dashboard';
+export * from './visualize';

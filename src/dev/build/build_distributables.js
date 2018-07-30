@@ -109,8 +109,8 @@ export async function buildDistributables(options) {
   await run(CreateNoticeFileTask);
   await run(UpdateLicenseFileTask);
   await run(RemovePackageJsonDepsTask);
-  await run(CleanExtraFilesFromModulesTask);
   await run(TranspileScssTask);
+  await run(CleanExtraFilesFromModulesTask);
   await run(OptimizeBuildTask);
 
   /**

@@ -12,7 +12,13 @@ import { initStatusApi } from './server/routes/status_check';
 
 export function apm(kibana) {
   return new kibana.Plugin({
-    require: ['kibana', 'elasticsearch', 'xpack_main', 'apm_oss'],
+    require: [
+      'kibana',
+      'elasticsearch',
+      'xpack_main',
+      'apm_oss',
+      'kuery_autocomplete'
+    ],
     id: 'apm',
     configPrefix: 'xpack.apm',
     publicDir: resolve(__dirname, 'public'),

@@ -93,6 +93,11 @@ export function DashboardAddPanelProvider({ getService, getPageObjects }) {
       }
     }
 
+    async waitForEuiTableLoading() {
+      const addPanel = await testSubjects.find('dashboardAddPanel');
+      await addPanel.waitForDeletedByClassName('euiBasicTable-loading');
+    }
+
     async closeAddPanel() {
       log.debug('DashboardAddPanel.closeAddPanel');
       const isOpen = await this.isAddPanelOpen();
@@ -172,6 +177,8 @@ export function DashboardAddPanelProvider({ getService, getPageObjects }) {
     }
 
     async filterEmbeddableNames(name) {
+      // The search input field may be disabled while the table is loading so wait for it
+      await this.waitForEuiTableLoading();
       await testSubjects.setValue('savedObjectFinderSearchInput', name);
       await PageObjects.header.waitUntilLoadingHasFinished();
     }

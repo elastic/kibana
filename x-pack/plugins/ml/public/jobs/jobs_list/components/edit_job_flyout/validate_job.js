@@ -11,6 +11,7 @@ import { populateValidationMessages } from 'plugins/ml/jobs/new_job/simple/compo
 import {
   validateModelMemoryLimit as validateModelMemoryLimitUtils,
   validateGroupNames as validateGroupNamesUtils,
+  validateModelMemoryLimitUnits as validateModelMemoryLimitUnitsUtils,
 } from 'plugins/ml/../common/util/job_utils';
 
 export function validateModelMemoryLimit(mml) {
@@ -20,8 +21,14 @@ export function validateModelMemoryLimit(mml) {
       model_memory_limit: mml
     }
   };
-  const validationResults = validateModelMemoryLimitUtils(tempJob, limits);
-  const { valid } = validationResults;
+
+  let validationResults = validateModelMemoryLimitUnitsUtils(tempJob);
+  let { valid } = validationResults;
+
+  if(valid) {
+    validationResults = validateModelMemoryLimitUtils(tempJob, limits);
+    valid = validationResults.valid;
+  }
 
   const modelMemoryLimit = {
     valid,
