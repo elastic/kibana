@@ -81,7 +81,7 @@ intl.formatMessage({
 
 describe('dev/i18n/extract_react_messages', () => {
   describe('extractIntlMessages', () => {
-    it('extracts messages from "intl.formatMessage" function call', () => {
+    test('extracts messages from "intl.formatMessage" function call', () => {
       const expected = [
         'message-id-1',
         {
@@ -89,64 +89,53 @@ describe('dev/i18n/extract_react_messages', () => {
           context: 'Message context 1',
         },
       ];
-
       const ast = parse(intlFormatMessageCallSource, { plugins: ['jsx'] });
+      const expressionNode = [...traverseNodes(ast.program.body)].find(node =>
+        isCallExpression(node)
+      );
 
-      let actual;
-
-      for (const node of traverseNodes(ast.program.body)) {
-        if (isCallExpression(node)) {
-          actual = extractIntlMessages(node);
-          break;
-        }
-      }
-
-      expect(actual).toEqual(expected);
+      expect(extractIntlMessages(expressionNode)).toEqual(expected);
     });
 
-    it('throws if message id is not a string literal', () => {
+    test('throws if message id is not a string literal', () => {
       const source = intlFormatMessageCallErrorSources[0];
       const ast = parse(source, { plugins: ['jsx'] });
+      const callExpressionNode = [...traverseNodes(ast.program.body)].find(node =>
+        isCallExpression(node)
+      );
 
-      for (const node of traverseNodes(ast.program.body)) {
-        if (isCallExpression(node)) {
-          expect(() => extractIntlMessages(node)).toThrow('Message id should be a string literal.');
-          break;
-        }
-      }
+      expect(() => extractIntlMessages(callExpressionNode)).toThrow(
+        'Message id should be a string literal.'
+      );
     });
 
-    it('throws if defaultMessage value is not a string literal', () => {
+    test('throws if defaultMessage value is not a string literal', () => {
       const source = intlFormatMessageCallErrorSources[1];
       const ast = parse(source, { plugins: ['jsx'] });
+      const callExpressionNode = [...traverseNodes(ast.program.body)].find(node =>
+        isCallExpression(node)
+      );
 
-      for (const node of traverseNodes(ast.program.body)) {
-        if (isCallExpression(node)) {
-          expect(() => extractIntlMessages(node)).toThrow(
-            'defaultMessage value should be a string literal for id: message-id.'
-          );
-          break;
-        }
-      }
+      expect(() => extractIntlMessages(callExpressionNode)).toThrow(
+        'defaultMessage value should be a string literal for id: message-id.'
+      );
     });
 
-    it('throws if context value is not a string literal', () => {
+    test('throws if context value is not a string literal', () => {
       const source = intlFormatMessageCallErrorSources[2];
       const ast = parse(source, { plugins: ['jsx'] });
+      const callExpressionNode = [...traverseNodes(ast.program.body)].find(node =>
+        isCallExpression(node)
+      );
 
-      for (const node of traverseNodes(ast.program.body)) {
-        if (isCallExpression(node)) {
-          expect(() => extractIntlMessages(node)).toThrow(
-            'context value should be a string literal for id: message-id.'
-          );
-          break;
-        }
-      }
+      expect(() => extractIntlMessages(callExpressionNode)).toThrow(
+        'context value should be a string literal for id: message-id.'
+      );
     });
   });
 
   describe('extractFormattedMessages', () => {
-    it('extracts messages from "<FormattedMessage>" element', () => {
+    test('extracts messages from "<FormattedMessage>" element', () => {
       const expected = [
         'message-id-2',
         {
@@ -154,19 +143,13 @@ describe('dev/i18n/extract_react_messages', () => {
           context: 'Message context 2',
         },
       ];
-
       const ast = parse(formattedMessageElementSource, { plugins: ['jsx'] });
+      const jsxOpeningElementNode = [...traverseNodes(ast.program.body)].find(
+        node =>
+          isJSXOpeningElement(node) && isJSXIdentifier(node.name, { name: 'FormattedMessage' })
+      );
 
-      let actual;
-
-      for (const node of traverseNodes(ast.program.body)) {
-        if (isJSXOpeningElement(node) && isJSXIdentifier(node.name, { name: 'FormattedMessage' })) {
-          actual = extractFormattedMessages(node);
-          break;
-        }
-      }
-
-      expect(actual).toEqual(expected);
+      expect(extractFormattedMessages(jsxOpeningElementNode)).toEqual(expected);
     });
   });
 });

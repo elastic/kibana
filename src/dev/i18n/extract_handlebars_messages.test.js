@@ -20,7 +20,7 @@
 import { extractHandlebarsMessages } from './extract_handlebars_messages';
 
 describe('dev/i18n/extract_handlebars_messages', () => {
-  it('extracts handlebars default messages', () => {
+  test('extracts handlebars default messages', () => {
     const handlebarsSourceBuffer = Buffer.from(`\
 window.onload = function () {
   (function next() {
@@ -44,7 +44,7 @@ window.onload = function () {
     expect(actual).toEqual(expected);
   });
 
-  it('throws on wrong arguments amount', () => {
+  test('throws on wrong number of arguments', () => {
     const handlebarsSourceBuffer = Buffer.from(`\
 window.onload = function () {
   err.innerText = '{{i18n 'ui.id-1'}}';
@@ -52,11 +52,11 @@ window.onload = function () {
 `);
 
     expect(() => extractHandlebarsMessages(handlebarsSourceBuffer).next()).toThrow(
-      'Wrong arguments amount for handlebars i18n call.'
+      'Wrong number of arguments for handlebars i18n call.'
     );
   });
 
-  it('throws on wrong properties argument type', () => {
+  test('throws on wrong properties argument type', () => {
     const handlebarsSourceBuffer = Buffer.from(`\
 window.onload = function () {
   err.innerText = '{{i18n 'ui.id-1' propertiesJSONIdentifier}}';

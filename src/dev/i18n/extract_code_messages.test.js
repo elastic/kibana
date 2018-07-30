@@ -63,7 +63,7 @@ function f() {
 `;
 
 describe('extractCodeMessages', () => {
-  it('extracts React, server-side and angular service default messages', () => {
+  test('extracts React, server-side and angular service default messages', () => {
     const actual = Array.from(extractCodeMessages(extractCodeMessagesSource));
     const expected = [
       ['kbn.mgmt.id-1', { message: 'Message text 1' }],
@@ -75,24 +75,30 @@ describe('extractCodeMessages', () => {
 });
 
 describe('isIntlFormatMessageFunction', () => {
-  it('detects intl.formatMessage call expression', () => {
+  test('detects intl.formatMessage call expression', () => {
+    let callExpressioNode;
     for (const node of traverseNodes(parse(intlFormatMessageSource).program.body)) {
       if (isCallExpression(node)) {
-        expect(isIntlFormatMessageFunction(node)).toBe(true);
+        callExpressioNode = node;
         break;
       }
     }
+
+    expect(isIntlFormatMessageFunction(callExpressioNode)).toBe(true);
   });
 });
 
 describe('isFormattedMessageElement', () => {
-  it('detects FormattedMessage jsx element', () => {
+  test('detects FormattedMessage jsx element', () => {
     const AST = parse(formattedMessageSource, { plugins: ['jsx'] });
+    let jsxOpeningElementNode;
     for (const node of traverseNodes(AST.program.body)) {
       if (isJSXOpeningElement(node)) {
-        expect(isFormattedMessageElement(node)).toBe(true);
+        jsxOpeningElementNode = node;
         break;
       }
     }
+
+    expect(isFormattedMessageElement(jsxOpeningElementNode)).toBe(true);
   });
 });

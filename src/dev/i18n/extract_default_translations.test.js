@@ -20,8 +20,6 @@
 import path from 'path';
 import fs from 'fs';
 import { promisify } from 'util';
-import JSON5 from 'json5';
-import { i18n } from '@kbn/i18n';
 
 import { extractDefaultTranslations } from './extract_default_translations';
 
@@ -37,51 +35,38 @@ const pluginsPaths = [
 ];
 
 describe('dev/i18n/extract_default_translations', () => {
-  it('extracts messages to en.json', async () => {
-    await extractDefaultTranslations(pluginsPaths[0]);
+  test('extracts messages to en.json', async () => {
+    const [pluginPath] = pluginsPaths;
+    await extractDefaultTranslations(pluginPath);
 
     const extractedJSONBuffer = await readFileAsync(
-      path.join(pluginsPaths[0], 'translations', 'en.json')
+      path.join(pluginPath, 'translations', 'en.json')
     );
 
-    await unlinkAsync(path.join(pluginsPaths[0], 'translations', 'en.json'));
-    await removeDirAsync(path.join(pluginsPaths[0], 'translations'));
-
-    const expectedJSONFormats = JSON5.stringify(
-      { formats: i18n.formats },
-      { quote: `'`, space: 2 }
-    );
-
-    const expectedJSON = `${expectedJSONFormats.slice(0, -2)}
-  'plugin_1.id_1': 'Message 1',
-  'plugin_1.id_2': 'Message 2', // Message context
-  'plugin_1.id_3': 'Message 3',
-  'plugin_1.id_4': 'Message 4',
-  'plugin_1.id_5': 'Message 5',
-  'plugin_1.id_6': 'Message 6',
-  'plugin_1.id_7': 'Message 7',
-}
-`;
-
-    expect(extractedJSONBuffer.toString()).toEqual(expectedJSON);
-  });
-
-  it('injects default formats into en.json', async () => {
-    await extractDefaultTranslations(pluginsPaths[1]);
-
-    const extractedJSONBuffer = await readFileAsync(
-      path.join(pluginsPaths[1], 'translations', 'en.json')
-    );
-
-    await unlinkAsync(path.join(pluginsPaths[1], 'translations', 'en.json'));
-    await removeDirAsync(path.join(pluginsPaths[1], 'translations'));
+    await unlinkAsync(path.join(pluginPath, 'translations', 'en.json'));
+    await removeDirAsync(path.join(pluginPath, 'translations'));
 
     expect(extractedJSONBuffer.toString()).toMatchSnapshot();
   });
 
-  it('throws on id collision', async () => {
-    await expect(extractDefaultTranslations(pluginsPaths[2])).rejects.toMatchObject({
-      message: `Error in ${path.join(pluginsPaths[2], 'test_file.jsx')}
+  test('injects default formats into en.json', async () => {
+    const [, pluginPath] = pluginsPaths;
+    await extractDefaultTranslations(pluginPath);
+
+    const extractedJSONBuffer = await readFileAsync(
+      path.join(pluginPath, 'translations', 'en.json')
+    );
+
+    await unlinkAsync(path.join(pluginPath, 'translations', 'en.json'));
+    await removeDirAsync(path.join(pluginPath, 'translations'));
+
+    expect(extractedJSONBuffer.toString()).toMatchSnapshot();
+  });
+
+  test('throws on id collision', async () => {
+    const [, , pluginPath] = pluginsPaths;
+    await expect(extractDefaultTranslations(pluginPath)).rejects.toMatchObject({
+      message: `Error in ${path.join(pluginPath, 'test_file.jsx')}
 There is more than one default message for the same id "plugin_3.duplicate_id": "Message 1" and "Message 2"`,
     });
   });

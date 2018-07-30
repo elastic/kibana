@@ -24,18 +24,16 @@ const pugMessageBuffer = Buffer.from(`
 `);
 
 describe('extractPugMessages', () => {
-  it('extracts messages from pug template', () => {
-    for (const messageObject of extractPugMessages(pugMessageBuffer)) {
-      const expected = [
-        'message-id',
-        {
-          message: 'Default message',
-          context: 'Message context',
-        },
-      ];
+  test('extracts messages from pug template', () => {
+    const expected = [
+      'message-id',
+      {
+        message: 'Default message',
+        context: 'Message context',
+      },
+    ];
+    const [messageObject] = extractPugMessages(pugMessageBuffer);
 
-      expect(messageObject).toEqual(expected);
-      break;
-    }
+    expect(messageObject).toEqual(expected);
   });
 });

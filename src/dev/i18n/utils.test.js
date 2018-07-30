@@ -20,12 +20,7 @@
 import { parse } from '@babel/parser';
 import { isExpressionStatement, isObjectExpression } from '@babel/types';
 
-import {
-  isI18nTranslateFunction,
-  isPropertyWithKey,
-  traverseNodes,
-  formatJSString,
-} from './utils';
+import { isI18nTranslateFunction, isPropertyWithKey, traverseNodes, formatJSString } from './utils';
 
 const i18nTranslateSources = ['i18n', 'i18n.translate'].map(
   callee => `
@@ -51,23 +46,31 @@ describe('i18n utils', () => {
   });
 
   test('should detect i18n translate function call', () => {
+    let expressionStatement;
+
     for (const source of i18nTranslateSources) {
       for (const node of traverseNodes(parse(source).program.body)) {
         if (isExpressionStatement(node)) {
-          expect(isI18nTranslateFunction(node.expression)).toBe(true);
+          expressionStatement = node.expression;
           break;
         }
       }
     }
+
+    expect(isI18nTranslateFunction(expressionStatement)).toBe(true);
   });
 
   test('should detect object property with defined key', () => {
+    let objectExpresssionProperty;
+
     for (const node of traverseNodes(parse(objectPropertySource).program.body)) {
       if (isObjectExpression(node)) {
-        expect(isPropertyWithKey(node.properties[0], 'id')).toBe(true);
-        expect(isPropertyWithKey(node.properties[0], 'not_id')).toBe(false);
+        [objectExpresssionProperty] = node.properties;
         break;
       }
     }
+
+    expect(isPropertyWithKey(objectExpresssionProperty, 'id')).toBe(true);
+    expect(isPropertyWithKey(objectExpresssionProperty, 'not_id')).toBe(false);
   });
 });

@@ -39,7 +39,7 @@ const htmlSourceBuffer = Buffer.from(`
 
 
 describe('dev/i18n/extract_html_messages', () => {
-  it('extracts default messages from HTML', () => {
+  test('extracts default messages from HTML', () => {
     const actual = Array.from(extractHtmlMessages(htmlSourceBuffer));
     const expected = [
       ['kbn.dashboard.id-1', { message: 'Message text 1', context: 'Message context 1' }],

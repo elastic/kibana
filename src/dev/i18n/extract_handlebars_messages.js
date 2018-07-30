@@ -36,7 +36,7 @@ export function* extractHandlebarsMessages(buffer) {
     }
 
     if (tokens.length !== 3) {
-      throw new Error('Wrong arguments amount for handlebars i18n call.');
+      throw new Error('Wrong number of arguments for handlebars i18n call.');
     }
 
     if (!idString.startsWith(`'`) || !idString.endsWith(`'`)) {
