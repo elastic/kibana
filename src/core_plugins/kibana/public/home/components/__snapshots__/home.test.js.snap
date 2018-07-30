@@ -987,7 +987,9 @@ exports[`home welcome should show the normal home page if loading fails 1`] = `
   className="home"
   restrictWidth={false}
 >
-  <EuiPageBody>
+  <EuiPageBody
+    restrictWidth={false}
+  >
     <AddData
       apmUiEnabled={true}
       isNewKibanaInstance={false}
@@ -1101,7 +1103,9 @@ exports[`home welcome should show the normal home page if welcome screen is disa
   className="home"
   restrictWidth={false}
 >
-  <EuiPageBody>
+  <EuiPageBody
+    restrictWidth={false}
+  >
     <AddData
       apmUiEnabled={true}
       isNewKibanaInstance={false}
@@ -1215,7 +1219,9 @@ exports[`home welcome should show the normal home page if welcome screen is disa
   className="home"
   restrictWidth={false}
 >
-  <EuiPageBody>
+  <EuiPageBody
+    restrictWidth={false}
+  >
     <AddData
       apmUiEnabled={true}
       isNewKibanaInstance={false}
@@ -1336,7 +1342,9 @@ exports[`home welcome stores skip welcome setting if skipped 1`] = `
   className="home"
   restrictWidth={false}
 >
-  <EuiPageBody>
+  <EuiPageBody
+    restrictWidth={false}
+  >
     <AddData
       apmUiEnabled={true}
       isNewKibanaInstance={true}
