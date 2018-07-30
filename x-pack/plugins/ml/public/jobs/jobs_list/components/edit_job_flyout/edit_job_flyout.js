@@ -27,6 +27,7 @@ import { JobDetails, Detectors, Datafeed, CustomUrls } from './tabs';
 import { saveJob } from './edit_utils';
 import { loadFullJob } from '../utils';
 import { validateModelMemoryLimit, validateGroupNames } from './validate_job';
+import { mlMessageBarService } from 'plugins/ml/components/messagebar/messagebar_service';
 import { toastNotifications } from 'ui/notify';
 
 export class EditJobFlyout extends Component {
@@ -179,6 +180,7 @@ export class EditJobFlyout extends Component {
       .catch((error) => {
         console.error(error);
         toastNotifications.addDanger(`Could not save changes to ${this.state.job.job_id}`);
+        mlMessageBarService.notify.error(error);
       });
   }
 

@@ -77,10 +77,8 @@ export function ScopeSection({
   if (filterListIds.length > 0) {
     content = partitioningFieldNames.map((fieldName, index) => {
       let filterValues;
-      let enabled = false;
       if (scope !== undefined && scope[fieldName] !== undefined) {
         filterValues = scope[fieldName];
-        enabled = true;
       } else {
         filterValues = getScopeFieldDefaults(filterListIds);
       }
@@ -91,7 +89,7 @@ export function ScopeSection({
           fieldName={fieldName}
           filterId={filterValues.filter_id}
           filterType={filterValues.filter_type}
-          enabled={enabled}
+          enabled={filterValues.enabled}
           filterListIds={filterListIds}
           updateScope={updateScope}
         />

@@ -101,7 +101,10 @@ export class VisualizeDataLoader {
             `the error.`
         );
       }
-      toastNotifications.addDanger(e);
+      toastNotifications.addDanger({
+        title: 'Error in visualization',
+        text: e.message,
+      });
     }
   }
 }
