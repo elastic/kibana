@@ -1,16 +1,7 @@
 .canvasDateTimeRangeAbsolute {
   display: flex;
 
-  > * {
-    border: $euiBorderThin;
-    border-radius: $euiBorderThin;
-  }
-
   > div:not(:last-child) {
     margin-right: $euiSizeS;
-  }
-
-  .rdtPicker {
-    border: none;
   }
 }

@@ -8,7 +8,7 @@ export const Paginate = props => {
     totalPages: props.totalPages,
     nextPageEnabled: props.nextPageEnabled,
     prevPageEnabled: props.prevPageEnabled,
-    setPage: num => props.setPage(num - 1),
+    setPage: num => props.setPage(num),
     nextPage: props.nextPage,
     prevPage: props.prevPage,
   });

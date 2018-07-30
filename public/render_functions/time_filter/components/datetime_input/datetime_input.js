@@ -1,6 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { FormControl } from 'react-bootstrap';
+import { EuiFieldText } from '@elastic/eui';
 import moment from 'moment';
 
 export const DatetimeInput = ({ strValue, setStrValue, setMoment, valid, setValid }) => {
@@ -16,11 +16,11 @@ export const DatetimeInput = ({ strValue, setStrValue, setMoment, valid, setVali
   }
 
   return (
-    <FormControl
-      spellCheck={false}
+    <EuiFieldText
+      compressed
       value={strValue}
       onChange={check}
-      className={valid ? '' : 'has-error'}
+      isInvalid={!valid}
       style={{ textAlign: 'center' }}
     />
   );

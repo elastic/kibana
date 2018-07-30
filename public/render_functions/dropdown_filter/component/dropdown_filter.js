@@ -1,34 +1,30 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { FormControl } from 'react-bootstrap';
+import { EuiIcon } from '@elastic/eui';
 
 export const DropdownFilter = ({ value, onChange, commit, choices }) => {
+  const options = [{ value: '%%CANVAS_MATCH_ALL%%', text: '-- ANY --' }];
+
+  choices.forEach(value => options.push({ value: value, text: value }));
+
   return (
-    <form
-      onSubmit={e => {
-        e.preventDefault();
-        commit(value);
-      }}
-      className="canvasDropdownFilter"
-    >
-      <FormControl
-        className="canvasDropdownFilter--input"
-        componentClass="select"
-        placeholder="select"
+    <div className="canvasDropdownFilter">
+      <select
+        className="canvasDropdownFilter__select"
         value={value}
         onChange={e => {
           onChange(e.target.value);
           commit(e.target.value);
         }}
       >
-        <option value="%%CANVAS_MATCH_ALL%%">-- ANY --</option>
-        {choices.map(value => (
+        {options.map(({ value, text }) => (
           <option key={value} value={value}>
-            {value}
+            {text}
           </option>
         ))}
-      </FormControl>
-    </form>
+      </select>
+      <EuiIcon className="canvasDropdownFilter__icon" type="arrowDown" />
+    </div>
   );
 };
 

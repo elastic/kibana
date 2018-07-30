@@ -1,8 +1,31 @@
 .canvasDropdownFilter {
-  display: flex;
+  width: 100%;
+  font-size: inherit;
 
-  .canvasDropdownFilter--input {
+  .canvasDropdownFilter__select {
+    background-color: $euiColorEmptyShade;
     width: 100%;
-    margin-right: $euiSizeS;
+    padding: $euiSizeXS $euiSize;
+    border: $euiBorderThin;
+    border-radius: $euiBorderRadius;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    font-size: inherit;
+
+    &:after {
+      display: none;
+    }
+
+    &:focus {
+      box-shadow: none;
+    }
+  }
+
+  .canvasDropdownFilter__icon {
+    position: absolute;
+    right: $euiSizeS;
+    top: $euiSizeS;
+    pointer-events: none;
   }
 }

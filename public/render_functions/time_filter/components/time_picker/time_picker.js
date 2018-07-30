@@ -1,7 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import dateMath from '@elastic/datemath';
-import { Button } from 'react-bootstrap';
+import { EuiButton } from '@elastic/eui';
 import moment from 'moment';
 import { DatetimeRangeAbsolute } from '../datetime_range_absolute';
 import { DatetimeQuickList } from '../datetime_quick_list';
@@ -30,15 +30,10 @@ export const TimePicker = ({ range, setRange, dirty, setDirty, onSelect }) => {
         to={dateMath.parse(to)}
         onSelect={absoluteSelect}
       />
-      <div>
-        <DatetimeQuickList
-          from={range.from}
-          to={range.to}
-          ranges={quickRanges}
-          onSelect={onSelect}
-        />
-        <Button
-          bsStyle="success"
+      <DatetimeQuickList from={range.from} to={range.to} ranges={quickRanges} onSelect={onSelect}>
+        <EuiButton
+          fill
+          size="s"
           disabled={!dirty}
           className="canvasTimePicker__apply"
           onClick={() => {
@@ -47,8 +42,8 @@ export const TimePicker = ({ range, setRange, dirty, setDirty, onSelect }) => {
           }}
         >
           Apply
-        </Button>
-      </div>
+        </EuiButton>
+      </DatetimeQuickList>
     </div>
   );
 };

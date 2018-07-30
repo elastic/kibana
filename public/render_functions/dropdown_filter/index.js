@@ -9,6 +9,7 @@ export const dropdownFilter = () => ({
   displayName: 'Dropdown Filter',
   help: 'A dropdown from which you can select values for an "exactly" filter',
   reuseDomNode: true,
+  height: 50,
   render(domNode, config, handlers) {
     let value = '%%CANVAS_MATCH_ALL%%';
     if (handlers.getFilter() !== '') {

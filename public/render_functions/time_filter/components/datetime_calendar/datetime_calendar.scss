@@ -1,5 +1,5 @@
 .canvasDateTimeCal {
-  tfoot {
-    display: none;
-  }
+  display: inline-grid;
+  height: 100%;
+  border: $euiBorderThin;
 }

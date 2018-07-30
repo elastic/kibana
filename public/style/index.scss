@@ -26,6 +26,7 @@
 @import '../components/color_picker_mini/color_picker_mini';
 @import '../components/context_menu/context_menu';
 @import '../components/datasource/datasource';
+@import '../components/datasource/datasource_preview/datasource_preview';
 @import '../components/datatable/datatable';
 @import '../components/element_content/element_content';
 @import '../components/expression_input/suggestion';
@@ -36,7 +37,6 @@
 @import '../components/loading/loading';
 @import '../components/navbar/navbar';
 @import '../components/page_manager/page_manager';
-@import '../components/paginate_controls/paginate_controls';
 @import '../components/palette_picker/palette_picker';
 @import '../components/palette_swatch/palette_swatch';
 @import '../components/positionable/positionable';
@@ -64,3 +64,4 @@
 @import '../render_functions/time_filter/components/datetime_calendar/datetime_calendar';
 @import '../render_functions/time_filter/components/datetime_range_absolute/datetime_range_absolute';
 @import '../render_functions/time_filter/components/time_picker/time_picker';
+@import '../render_functions/time_filter/components/time_picker_mini/time_picker_mini';

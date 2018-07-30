@@ -1,5 +1,5 @@
 import PropTypes from 'prop-types';
-import { compose, withState, withProps, withHandlers } from 'recompose';
+import { compose, withState, withProps, withHandlers, lifecycle } from 'recompose';
 import { Paginate as Component } from './paginate';
 
 export const Paginate = compose(
@@ -9,16 +9,16 @@ export const Paginate = compose(
   })),
   withState('currentPage', 'setPage', ({ startPage, totalPages }) => {
     const maxPage = totalPages - 1;
-    if (startPage && startPage > maxPage) return maxPage;
-    if (startPage) return startPage;
+    if (startPage) return Math.min(startPage, maxPage);
     return 0;
   }),
   withProps(({ rows, totalPages, currentPage, perPage }) => {
+    const maxPage = totalPages - 1;
     const start = currentPage * perPage;
     const end = currentPage === 0 ? perPage : perPage * (currentPage + 1);
     return {
-      pageNumber: currentPage + 1,
-      nextPageEnabled: currentPage < totalPages - 1,
+      pageNumber: currentPage,
+      nextPageEnabled: currentPage < maxPage,
       prevPageEnabled: currentPage > 0,
       partialRows: rows.slice(start, end),
     };
@@ -28,6 +28,13 @@ export const Paginate = compose(
       nextPageEnabled && setPage(currentPage + 1),
     prevPage: ({ currentPage, prevPageEnabled, setPage }) => () =>
       prevPageEnabled && setPage(currentPage - 1),
+  }),
+  lifecycle({
+    componentDidUpdate(prevProps) {
+      if (prevProps.perPage !== this.props.perPage) {
+        this.props.setPage(0);
+      }
+    },
   })
 )(Component);
 

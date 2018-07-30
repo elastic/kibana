@@ -5,10 +5,20 @@ import { DatetimeCalendar } from '../datetime_calendar';
 export const DatetimeRangeAbsolute = ({ from, to, onSelect }) => (
   <div className="canvasDateTimeRangeAbsolute">
     <div>
-      <DatetimeCalendar value={from} onSelect={val => onSelect(val, to)} />
+      <DatetimeCalendar
+        value={from}
+        startDate={from}
+        endDate={to}
+        onSelect={val => onSelect(val, to)}
+      />
     </div>
     <div>
-      <DatetimeCalendar value={to} onSelect={val => onSelect(from, val)} />
+      <DatetimeCalendar
+        value={to}
+        startDate={from}
+        endDate={to}
+        onSelect={val => onSelect(from, val)}
+      />
     </div>
   </div>
 );

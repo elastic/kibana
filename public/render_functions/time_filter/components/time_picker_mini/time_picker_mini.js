@@ -1,24 +1,20 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { Button, Popover, OverlayTrigger } from 'react-bootstrap';
+import { Popover } from '../../../../components/popover';
 import { PrettyDuration } from '../pretty_duration';
 import { TimePicker } from '../time_picker';
 
 export const TimePickerMini = ({ from, to, onSelect }) => {
-  const picker = (
-    <Popover id="timefilter-popover-trigger-click">
-      <div className="canvas">
-        <TimePicker from={from} to={to} onSelect={onSelect} />
-      </div>
-    </Popover>
+  const button = handleClick => (
+    <button className="canvasTimePickerMini__button" onClick={handleClick}>
+      <PrettyDuration from={from} to={to} />
+    </button>
   );
 
   return (
-    <OverlayTrigger rootClose overlay={picker} placement={'bottom'} trigger="click">
-      <Button style={{ width: '100%' }}>
-        <PrettyDuration from={from} to={to} />
-      </Button>
-    </OverlayTrigger>
+    <Popover id="timefilter-popover-trigger-click" className="canvasTimePickerMini" button={button}>
+      {() => <TimePicker from={from} to={to} onSelect={onSelect} />}
+    </Popover>
   );
 };
 

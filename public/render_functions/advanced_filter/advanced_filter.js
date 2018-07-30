@@ -7,6 +7,7 @@ export const advancedFilter = () => ({
   displayName: 'Advanced Filter',
   help: 'Render a Canvas filter expression',
   reuseDomNode: true,
+  height: 50,
   render(domNode, config, handlers) {
     ReactDOM.render(
       <AdvancedFilter commit={handlers.setFilter} filter={handlers.getFilter()} />,
