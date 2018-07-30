@@ -16,32 +16,15 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+/* global jest */
 
-import React from 'react';
-import { shallowWithIntl } from 'test_utils/enzyme_helpers';
-
-import { CallOutsComponent } from '../call_outs';
-
-describe('CallOuts', () => {
-  it('should render normally', async () => {
-    const component = shallowWithIntl(
-      <CallOutsComponent
-        deprecatedLangsInUse={['php']}
-        painlessDocLink="http://www.elastic.co/painlessDocs"
-      />
-    );
-
-    expect(component).toMatchSnapshot();
-  });
-
-  it('should render without any call outs', async () => {
-    const component = shallowWithIntl(
-      <CallOutsComponent
-        deprecatedLangsInUse={[]}
-        painlessDocLink="http://www.elastic.co/painlessDocs"
-      />
-    );
-
-    expect(component).toMatchSnapshot();
-  });
-});
+export const intl = {
+  formatMessage: jest.fn().mockImplementation(({ defaultMessage }) => defaultMessage),
+  formatDate: jest.fn().mockImplementation(value => value),
+  formatTime: jest.fn().mockImplementation(value => value),
+  formatRelative: jest.fn().mockImplementation(value => value),
+  formatNumber: jest.fn().mockImplementation(value => value),
+  formatPlural: jest.fn().mockImplementation(value => value),
+  formatHTMLMessage: jest.fn().mockImplementation(({ defaultMessage }) => defaultMessage),
+  now: jest.fn().mockImplementation(() => new Date(1531834573179)),
+};
