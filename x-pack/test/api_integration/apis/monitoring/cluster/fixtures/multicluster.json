@@ -6,7 +6,6 @@
     "license": {
       "status": "active",
       "type": "basic",
-      "expiry_date": "2030-08-29T23:59:59.999Z",
       "expiry_date_in_millis": 1914278399999
     },
     "elasticsearch": {
@@ -114,7 +113,6 @@
     "license": {
       "status": "active",
       "type": "trial",
-      "expiry_date": "2017-09-14T21:58:28.997Z",
       "expiry_date_in_millis": 1505426308997
     },
     "elasticsearch": {
@@ -222,7 +220,6 @@
     "license": {
       "status": "active",
       "type": "trial",
-      "expiry_date": "2017-09-14T21:58:47.135Z",
       "expiry_date_in_millis": 1505426327135
     },
     "elasticsearch": {
