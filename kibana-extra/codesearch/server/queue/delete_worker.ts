@@ -4,8 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Esqueue } from '@codesearch/esqueue';
+import { EsClient, Esqueue } from '@codesearch/esqueue';
 
+import { RepositoryUtils } from '../../common/repository_utils';
 import {
   REPOSITORY_CLONE_STATUS_INDEX_TYPE,
   REPOSITORY_DELETE_STATUS_INDEX_TYPE,
@@ -24,7 +25,8 @@ export class DeleteWorker extends AbstractWorker {
   constructor(
     protected readonly queue: Esqueue,
     protected readonly log: Log,
-    private readonly objectsClient: any
+    private readonly objectsClient: any,
+    protected readonly client: EsClient
   ) {
     super(queue, log);
   }
@@ -42,6 +44,13 @@ export class DeleteWorker extends AbstractWorker {
       await this.objectsClient.delete(REPOSITORY_CLONE_STATUS_INDEX_TYPE, uri);
       await this.objectsClient.delete(REPOSITORY_LSP_INDEX_STATUS_INDEX_TYPE, uri);
       await this.objectsClient.delete(REPOSITORY_INDEX_STATUS_INDEX_TYPE, uri);
+
+      await this.client.indices.delete({
+        index: `.codesearch-symbol-${RepositoryUtils.normalizeRepoUriToIndexName(uri)}`,
+      });
+      await this.client.indices.delete({
+        index: `.codesearch-document-${RepositoryUtils.normalizeRepoUriToIndexName(uri)}`,
+      });
     } catch (error) {
       this.log.error(`Delete repository status error: ${error}`);
     }

@@ -7,7 +7,7 @@
 import { RepositoryUri } from './repository';
 
 export interface Document {
-  repUri: RepositoryUri;
+  repoUri: RepositoryUri;
   path: string;
   content: string;
   qnames: string[];
@@ -22,7 +22,9 @@ export interface IndexRequest {
 
 // The request for LspIndexer
 export interface LspIndexRequest extends IndexRequest {
-  filePath: string;
+  localRepoPath: string; // The repository local file path
+  filePath: string; // The file path within the repository
+  revision: string; // The revision of the current repository
 }
 
 // The request for RepositoryIndexer

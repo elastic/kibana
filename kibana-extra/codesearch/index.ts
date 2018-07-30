@@ -58,8 +58,8 @@ export default (kibana: any) =>
       const serverOptions = new ServerOptions(options);
 
       const lspService = new LspService('127.0.0.1', server, serverOptions);
-      const lspIndexer = new LspIndexer(lspService, serverOptions, log);
-      const repositoryIndexer = new RepositoryIndexer(serverOptions, log);
+      const lspIndexer = new LspIndexer(lspService, adminClient.getClient(), serverOptions, log);
+      const repositoryIndexer = new RepositoryIndexer(adminClient.getClient(), serverOptions, log);
 
       const repository = server.savedObjects.getSavedObjectsRepository(
         adminClient.callWithInternalUser
@@ -71,7 +71,12 @@ export default (kibana: any) =>
         doctype: 'esqueue',
       });
       const cloneWorker = new CloneWorker(queue, log, objectsClient).bind();
-      const deleteWorker = new DeleteWorker(queue, log, objectsClient).bind();
+      const deleteWorker = new DeleteWorker(
+        queue,
+        log,
+        objectsClient,
+        adminClient.getClient()
+      ).bind();
       const updateWorker = new UpdateWorker(queue, log, objectsClient).bind();
       const indexWorker = new IndexWorker(queue, log, objectsClient, [
         lspIndexer,

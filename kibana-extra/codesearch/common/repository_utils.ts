@@ -5,8 +5,8 @@
  */
 
 import GitUrlParse from 'git-url-parse';
-
 import path from 'path';
+
 import { Repository, RepositoryUri } from '../model';
 
 export class RepositoryUtils {
@@ -26,5 +26,12 @@ export class RepositoryUtils {
   // Return the local data path of a given repository.
   public static repositoryLocalPath(repoPath: string, repoUri: RepositoryUri) {
     return path.join(repoPath, repoUri);
+  }
+
+  public static normalizeRepoUriToIndexName(repoUri: RepositoryUri) {
+    return repoUri
+      .split('/')
+      .join('-')
+      .toLowerCase();
   }
 }

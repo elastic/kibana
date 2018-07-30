@@ -13,6 +13,7 @@ export interface EsClient {
     exists(params: AnyObject): Promise<any>;
     create(params: AnyObject): Promise<any>;
     refresh(params: AnyObject): Promise<any>;
+    delete(params: AnyObject): Promise<any>;
   };
 
   ping(): Promise<void>;
