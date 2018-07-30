@@ -1,5 +1,5 @@
 /*
-  This file contains all the global scope and bootstrap garbage that should be removed
+  This file contains all the global scope garbage that should be removed
   when the UI framework implements everything we need
 */
 
@@ -8,61 +8,16 @@
   overflow-x: hidden;
 }
 
-
 .clickable {
   cursor: pointer;
-}
-
-.popover-content {
-  padding: $euiSize;
-}
-
-.form-control[type='checkbox'],
-button:focus {
-  box-shadow: none !important;
-}
-
-.table > thead > tr > th {
-  border-bottom: 0px;
 }
 
 // Temp EUI issue.
 .canvasPalettePicker__swatchesPopover {
   display: block;
-  
+
   .euiPopover__anchor {
     display: block;
-  }
-}
-
-// fix modal focus index, set to bootstrap values
-// broken upstream by focus mixin: https://github.com/elastic/kibana/blob/d77cc5676bc534c1d1de1f160e213bd66fb8a78c/packages/kbn-ui-framework/src/global_styling/reset/_reset.scss
-[role='dialog'] {
-  .modal-backdrop {
-    z-index: 1040;
-  }
-
-  .modal {
-    z-index: 1050;
-  }
-}
-
-// TODO: remove when kibana v6.3.0 is released
-// fixes EuiToolTip flicker problem
-
-body {
-  min-height: 100%;
-}
-
-// TODO: remove when bootstrap is removed
-// overrides base font-size set by bootstrap
-html {
-  font-size: $euiFontSize;
-}
-
-.canvasArgSeries__colorPicker {
-  label {
-    margin: 0;
   }
 }
 
@@ -70,14 +25,4 @@ html {
 // temp fix for SVGs not appearing in the EuiImage fullscreen view
 .euiImageFullScreen {
   min-width: 100px;
-}
-
-// TODO: remove when bootstrap is removed
-// overrides code styles set by bootstrap
-code {
-  padding: unset;
-  font-size: unset;
-  color: unset;
-  background-color: unset;
-  border-radius: unset;
 }
