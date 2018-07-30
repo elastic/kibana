@@ -6,7 +6,8 @@ exports[`it renders without crashing 1`] = `
   style={undefined}
 >
   <div
-    className="euiPageBody"
+    className="euiPageBody euiPage--widthIsNotRestricted"
+    style={undefined}
   >
     <div
       className="euiPageHeader euiPageHeader--responsive spaceSelector__heading"
