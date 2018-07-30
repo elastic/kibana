@@ -77,7 +77,7 @@ export const logEntriesSchema = gql`
       "The query to highlight the log entries with"
       highlightQuery: String
     ): InfraLogEntryInterval!
-    "A consecutive span of log entries preceeding a point in time"
+    "A consecutive span of log entries preceding a point in time"
     logEntriesBefore(
       "The sort key that corresponds to the point in time"
       key: InfraTimeKeyInput!
