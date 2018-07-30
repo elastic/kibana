@@ -195,6 +195,16 @@ export const registerTimefilterWithGlobalState = _.once((globalState) => {
     timefilter.setTime(newTime);
     timefilter.setRefreshInterval(newRefreshInterval);
   });
+
+  timefilter.on('refreshIntervalUpdate', () => {
+    globalState.refreshInterval = timefilter.getRefreshInterval();
+    globalState.save();
+  });
+
+  timefilter.on('timeUpdate', () => {
+    globalState.time = timefilter.getTime();
+    globalState.save();
+  });
 });
 
 uiRoutes
