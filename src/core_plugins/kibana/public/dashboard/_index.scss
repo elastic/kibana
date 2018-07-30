@@ -27,6 +27,9 @@
 @import 'components/index';
 @import 'listing/index';
 
+// Must be outside of theme selector because it lives in a portal
+@import 'panel/panel_header/panel_options_menu_form';
+
 // DARK THEME
 // EUI global scope -- dark
 @import './../../../../../node_modules/@elastic/eui/src/themes/k6/k6_colors_dark';
