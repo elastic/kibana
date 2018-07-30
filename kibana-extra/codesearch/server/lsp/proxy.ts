@@ -24,6 +24,7 @@ import {
 } from 'vscode-languageserver-protocol/lib/main';
 import { createConnection, IConnection } from 'vscode-languageserver/lib/main';
 
+import { ChildProcess } from 'child_process';
 import { LspRequest } from '../../model';
 import { HttpMessageReader } from './http_message_reader';
 import { HttpMessageWriter } from './http_message_writer';
@@ -43,14 +44,17 @@ export class LanguageServerProxy implements ILanguageServerHandler {
   private sequenceNumber = 0;
   private httpEmitter = new HttpRequestEmitter();
   private replies = createRepliesMap();
+  private serviceProcess?: ChildProcess;
   private readonly targetHost: string;
   private readonly targetPort: number;
   private readonly logger?: Logger;
+  private readonly launchServer?: () => void;
 
-  constructor(targetPort: number, targetHost: string, logger?: Logger) {
+  constructor(targetPort: number, targetHost: string, logger?: Logger, launchServer?: () => void) {
     this.targetHost = targetHost;
     this.targetPort = targetPort;
     this.logger = logger;
+    this.launchServer = launchServer;
     this.conn = createConnection(
       new HttpMessageReader(this.httpEmitter),
       new HttpMessageWriter(this.replies, logger)
@@ -147,6 +151,12 @@ export class LanguageServerProxy implements ILanguageServerHandler {
     return new Promise((res, rej) => {
       const server = net.createServer(socket => {
         server.close();
+        socket.on('end', () => {
+          if (this.clientConnection) {
+            this.clientConnection.dispose();
+          }
+          this.clientConnection = null;
+        });
         if (this.logger) {
           this.logger.info('JDT LS connection established on port ' + this.targetPort);
         }
@@ -166,9 +176,20 @@ export class LanguageServerProxy implements ILanguageServerHandler {
     });
   }
 
+  public registerServiceProcess(child: ChildProcess) {
+    this.serviceProcess = child;
+  }
+
   private connect(): Promise<MessageConnection> {
     if (this.clientConnection) {
       return Promise.resolve(this.clientConnection);
+    }
+    if (this.launchServer && this.serviceProcess) {
+      this.serviceProcess.kill();
+      if (this.logger) {
+        this.logger.info(`kill language server, pid:${this.serviceProcess.pid}`);
+      }
+      this.launchServer();
     }
     this.closed = false;
     return new Promise(resolve => {
