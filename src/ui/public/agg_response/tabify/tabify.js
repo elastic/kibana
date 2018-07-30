@@ -54,12 +54,14 @@ function collectBucket(write, bucket, key, aggScale) {
       if (buckets.length) {
         buckets.forEach(function (subBucket, key) {
           const bucketValue = agg.getKey(subBucket, key);
-          if (typeof bucketValue === 'undefined') {
-            return;
+          const hasBucketValue = typeof bucketValue !== 'undefined';
+          if (hasBucketValue) {
+            write.bucketBuffer.push({ id: column.id, value: bucketValue });
           }
-          write.bucketBuffer.push({ id: column.id, value: bucketValue });
           collectBucket(write, subBucket, agg.getKey(subBucket, key), aggScale);
-          write.bucketBuffer.pop();
+          if (hasBucketValue) {
+            write.bucketBuffer.pop();
+          }
         });
       } else if (write.partialRows && write.metricsForAllBuckets && write.minimalColumns) {
         // we don't have any buckets, but we do have metrics at this
