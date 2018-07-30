@@ -7,6 +7,7 @@ import {
   EuiButtonIcon,
   EuiText,
   EuiTitle,
+  EuiPagination,
   EuiSpacer,
   EuiButton,
 } from '@elastic/eui';
@@ -15,6 +16,7 @@ import moment from 'moment';
 import { ConfirmModal } from '../confirm_modal';
 import { Link } from '../link';
 import { Tooltip } from '../tooltip';
+import { Paginate } from '../paginate';
 import { WorkpadUpload } from './workpad_upload';
 import { WorkpadCreate } from './workpad_create';
 import { WorkpadSearch } from './workpad_search';
@@ -39,6 +41,7 @@ export class WorkpadLoader extends React.PureComponent {
     sortField: '@timestamp',
     sortDirection: 'desc',
     selectedWorkpads: [],
+    pageSize: 10,
   };
 
   async componentDidMount() {
@@ -70,10 +73,6 @@ export class WorkpadLoader extends React.PureComponent {
     this.props.cloneWorkpad(workpad.id);
   };
 
-  onSelectionChange = selectedWorkpads => {
-    this.setState({ selectedWorkpads });
-  };
-
   // Workpad remove methods
   openRemoveConfirm = () => this.setState({ deletingWorkpad: true });
 
@@ -89,6 +88,10 @@ export class WorkpadLoader extends React.PureComponent {
     this.state.selectedWorkpads.forEach(({ id }) => this.props.downloadWorkpad(id));
   };
 
+  onSelectionChange = selectedWorkpads => {
+    this.setState({ selectedWorkpads });
+  };
+
   onTableChange = ({ sort = {} }) => {
     const { field: sortField, direction: sortDirection } = sort;
     this.setState({
@@ -97,9 +100,8 @@ export class WorkpadLoader extends React.PureComponent {
     });
   };
 
-  renderWorkpadTable = () => {
+  renderWorkpadTable = ({ rows, pageNumber, totalPages, setPage }) => {
     const { sortField, sortDirection } = this.state;
-    const { workpads } = this.props.workpads;
 
     const actions = [
       {
@@ -174,36 +176,44 @@ export class WorkpadLoader extends React.PureComponent {
       },
     };
 
-    const sortedWorkpads = sortByOrder(
-      workpads,
-      [sortField, '@timestamp'],
-      [sortDirection, 'desc']
-    );
-
     const selection = {
       itemId: 'id',
       onSelectionChange: this.onSelectionChange,
     };
 
     return (
-      <EuiBasicTable
-        compressed
-        items={sortedWorkpads}
-        itemId="id"
-        columns={columns}
-        sorting={sorting}
-        message="No workpads found"
-        onChange={this.onTableChange}
-        isSelectable
-        selection={selection}
-      />
+      <Fragment>
+        <EuiBasicTable
+          compressed
+          items={rows}
+          itemId="id"
+          columns={columns}
+          sorting={sorting}
+          message="No workpads found"
+          onChange={this.onTableChange}
+          isSelectable
+          selection={selection}
+          style={{ minHeight: '356px' }} // exact height of 10 row page, prevents the modal from shrinking for partial pages
+        />
+        <EuiSpacer />
+        <EuiFlexGroup gutterSize="none" justifyContent="flexEnd">
+          <EuiFlexItem grow={false}>
+            <EuiPagination activePage={pageNumber} onPageClick={setPage} pageCount={totalPages} />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </Fragment>
     );
   };
 
   render() {
-    const { deletingWorkpad, createPending, selectedWorkpads } = this.state;
+    const {
+      deletingWorkpad,
+      createPending,
+      selectedWorkpads,
+      sortField,
+      sortDirection,
+    } = this.state;
     const isLoading = this.props.workpads == null;
-
     const modalTitle =
       selectedWorkpads.length === 1
         ? `Delete workpad '${selectedWorkpads[0].name}'?`
@@ -220,59 +230,79 @@ export class WorkpadLoader extends React.PureComponent {
       />
     );
 
-    return (
-      <WorkpadUpload onUpload={this.uploadWorkpad}>
-        <EuiTitle size="s">
-          <h4>Workpads</h4>
-        </EuiTitle>
-        <EuiText>
-          <p>
-            <i>
-              Drag and drop a JSON file oto this area to load a previously built workpad as a new
-              file
-            </i>
-          </p>
-        </EuiText>
-        <EuiSpacer />
-        <EuiFlexGroup gutterSize="s">
-          {selectedWorkpads.length > 0 && (
-            <Fragment>
-              <EuiFlexItem grow={false}>
-                <EuiButton
-                  size="s"
-                  color="secondary"
-                  onClick={this.downloadWorkpads}
-                  iconType="sortDown"
-                >
-                  {`Download (${selectedWorkpads.length})`}
-                </EuiButton>
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiButton
-                  size="s"
-                  color="danger"
-                  iconType="trash"
-                  onClick={this.openRemoveConfirm}
-                >
-                  {`Delete (${selectedWorkpads.length})`}
-                </EuiButton>
-              </EuiFlexItem>
-            </Fragment>
-          )}
-          <EuiFlexItem>
-            <WorkpadSearch onChange={this.props.findWorkpads} />
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <WorkpadCreate createPending={createPending} onCreate={this.createWorkpad} />
-          </EuiFlexItem>
-        </EuiFlexGroup>
-        <EuiSpacer />
-        {createPending && <div>Creating Workpad...</div>}
-        {!createPending && isLoading && <div>Fetching Workpads...</div>}
-        {!createPending && !isLoading && this.renderWorkpadTable()}
+    let sortedWorkpads = [];
 
-        {confirmModal}
-      </WorkpadUpload>
+    if (!createPending && !isLoading) {
+      const { workpads } = this.props.workpads;
+      sortedWorkpads = sortByOrder(workpads, [sortField, '@timestamp'], [sortDirection, 'desc']);
+    }
+
+    return (
+      <Paginate rows={sortedWorkpads}>
+        {pagination => (
+          <WorkpadUpload onUpload={this.uploadWorkpad}>
+            <EuiTitle size="s">
+              <h4>Workpads</h4>
+            </EuiTitle>
+            <EuiText>
+              <p>
+                <i>
+                  Drag and drop a JSON file oto this area to load a previously built workpad as a
+                  new file
+                </i>
+              </p>
+            </EuiText>
+
+            <EuiSpacer />
+
+            <EuiFlexGroup gutterSize="s">
+              {selectedWorkpads.length > 0 && (
+                <Fragment>
+                  <EuiFlexItem grow={false}>
+                    <EuiButton
+                      size="s"
+                      color="secondary"
+                      onClick={this.downloadWorkpads}
+                      iconType="sortDown"
+                    >
+                      {`Download (${selectedWorkpads.length})`}
+                    </EuiButton>
+                  </EuiFlexItem>
+                  <EuiFlexItem grow={false}>
+                    <EuiButton
+                      size="s"
+                      color="danger"
+                      iconType="trash"
+                      onClick={this.openRemoveConfirm}
+                    >
+                      {`Delete (${selectedWorkpads.length})`}
+                    </EuiButton>
+                  </EuiFlexItem>
+                </Fragment>
+              )}
+              <EuiFlexItem>
+                <WorkpadSearch
+                  onChange={text => {
+                    pagination.setPage(0);
+                    this.props.findWorkpads(text);
+                  }}
+                />
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <WorkpadCreate createPending={createPending} onCreate={this.createWorkpad} />
+              </EuiFlexItem>
+            </EuiFlexGroup>
+
+            <EuiSpacer />
+
+            {createPending && <div>Creating Workpad...</div>}
+            {!createPending && isLoading && <div>Fetching Workpads...</div>}
+            {!createPending && !isLoading && this.renderWorkpadTable(pagination)}
+
+            {confirmModal}
+          </WorkpadUpload>
+        )}
+      </Paginate>
     );
   }
 }

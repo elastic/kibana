@@ -8,8 +8,7 @@ export const Paginate = compose(
     totalPages: Math.ceil(rows.length / (perPage || 10)),
   })),
   withState('currentPage', 'setPage', ({ startPage, totalPages }) => {
-    const maxPage = totalPages - 1;
-    if (startPage) return Math.min(startPage, maxPage);
+    if (totalPages > 0) return Math.min(startPage, totalPages - 1);
     return 0;
   }),
   withProps(({ rows, totalPages, currentPage, perPage }) => {
@@ -42,4 +41,9 @@ Paginate.propTypes = {
   rows: PropTypes.array.isRequired,
   perPage: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
   startPage: PropTypes.number,
+};
+
+Paginate.defaultProps = {
+  perPage: 10,
+  startPage: 0,
 };

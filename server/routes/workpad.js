@@ -74,7 +74,7 @@ export function workpad(server) {
 
   function findWorkpad(req) {
     const savedObjectsClient = req.getSavedObjectsClient();
-    const { name, page } = req.query;
+    const { name, page, perPage } = req.query;
 
     return savedObjectsClient.find({
       type: CANVAS_TYPE,
@@ -84,6 +84,7 @@ export function workpad(server) {
       searchFields: ['name'],
       fields: ['id', 'name', '@created', '@timestamp'],
       page,
+      perPage,
     });
   }
 

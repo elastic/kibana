@@ -41,7 +41,7 @@ export const Toolbar = props => {
 
   const workpadLoader = (
     <EuiOverlayMask>
-      <EuiModal onClose={done} style={{ width: '1080px' }}>
+      <EuiModal onClose={done} style={{ maxWidth: '80vw' }}>
         <EuiModalBody>
           <WorkpadLoader onClose={done} />
         </EuiModalBody>

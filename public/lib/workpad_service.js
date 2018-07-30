@@ -31,7 +31,7 @@ export function find(searchTerm) {
   const validSearchTerm = typeof searchTerm === 'string' && searchTerm.length > 0;
 
   return fetch
-    .get(`${apiPath}/find?name=${validSearchTerm ? searchTerm : ''}`)
+    .get(`${apiPath}/find?name=${validSearchTerm ? searchTerm : ''}&perPage=10000`)
     .then(({ data: workpads }) => workpads)
     .catch(notifyError('Could not find workpads'));
 }
