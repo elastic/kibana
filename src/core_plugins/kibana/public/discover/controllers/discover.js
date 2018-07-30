@@ -571,7 +571,7 @@ function discoverController(
           .then(resp => {
             $scope.visData = resp;
             const visEl = $element.find('#discoverHistogram')[0];
-            visualizationLoader(visEl, $scope.vis, $scope.visData, $scope.uiState, { listenOnChange: true });
+            visualizationLoader.render(visEl, $scope.vis, $scope.visData, $scope.uiState, { listenOnChange: true });
           });
       }
 

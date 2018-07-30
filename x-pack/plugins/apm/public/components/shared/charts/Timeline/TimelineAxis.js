@@ -5,10 +5,12 @@
  */
 
 import React from 'react';
+import PropTypes from 'prop-types';
 import _ from 'lodash';
 import { Sticky } from 'react-sticky';
 import { XYPlot, XAxis } from 'react-vis';
 import LastTickValue from './LastTickValue';
+import AgentMarker from './AgentMarker';
 import { colors, px } from '../../../../style/variables';
 import { getTimeFormatter } from '../../../../utils/formatters';
 
@@ -16,7 +18,7 @@ import { getTimeFormatter } from '../../../../utils/formatters';
 const getXAxisTickValues = (tickValues, xMax) =>
   _.last(tickValues) * 1.05 > xMax ? tickValues.slice(0, -1) : tickValues;
 
-function TimelineAxis({ header, plotValues }) {
+function TimelineAxis({ header, plotValues, agentMarks }) {
   const { margins, tickValues, width, xDomain, xMax, xScale } = plotValues;
   const tickFormat = getTimeFormatter(xMax);
   const xAxisTickValues = getXAxisTickValues(tickValues, xMax);
@@ -60,6 +62,14 @@ function TimelineAxis({ header, plotValues }) {
               />
 
               <LastTickValue x={xScale(xMax)} value={tickFormat(xMax)} />
+
+              {agentMarks.map(agentMark => (
+                <AgentMarker
+                  key={agentMark.timeAxis}
+                  agentMark={agentMark}
+                  x={xScale(agentMark.timeAxis)}
+                />
+              ))}
             </XYPlot>
           </div>
         );
@@ -67,5 +77,15 @@ function TimelineAxis({ header, plotValues }) {
     </Sticky>
   );
 }
+
+TimelineAxis.propTypes = {
+  header: PropTypes.node,
+  plotValues: PropTypes.object.isRequired,
+  agentMarks: PropTypes.array
+};
+
+TimelineAxis.defaultProps = {
+  agentMarks: []
+};
 
 export default TimelineAxis;

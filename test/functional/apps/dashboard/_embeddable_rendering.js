@@ -29,23 +29,82 @@ import expect from 'expect.js';
 
 export default function ({ getService, getPageObjects }) {
   const find = getService('find');
+  const remote = getService('remote');
   const dashboardExpect = getService('dashboardExpect');
   const dashboardAddPanel = getService('dashboardAddPanel');
   const PageObjects = getPageObjects(['common', 'dashboard', 'header', 'visualize', 'discover']);
 
+  const expectAllDataRenders = async () => {
+    await dashboardExpect.pieSliceCount(16);
+    await dashboardExpect.seriesElementCount(19);
+    await dashboardExpect.dataTableRowCount(5);
+    await dashboardExpect.savedSearchRowCount(50);
+    await dashboardExpect.goalAndGuageLabelsExist(['63%', '56%', '11.915 GB']);
+    await dashboardExpect.inputControlItemCount(5);
+    await dashboardExpect.metricValuesExist(['7,544']);
+    await dashboardExpect.markdownWithValuesExists(['I\'m a markdown!']);
+    await dashboardExpect.lineChartPointsCount(5);
+    await dashboardExpect.tagCloudWithValuesFound(['CN', 'IN', 'US', 'BR', 'ID']);
+    await dashboardExpect.timelionLegendCount(0);
+    const tsvbGuageExists = await find.existsByCssSelector('.thorHalfGauge');
+    expect(tsvbGuageExists).to.be(true);
+    await dashboardExpect.tsvbMetricValuesExist(['210,007,889,606']);
+    await dashboardExpect.tsvbMarkdownWithValuesExists(['Hi Avg last bytes: 6286.674715909091']);
+    await dashboardExpect.tsvbTableCellCount(20);
+    await dashboardExpect.tsvbTimeSeriesLegendCount(1);
+    await dashboardExpect.tsvbTopNValuesExist(['5,734.79', '6,286.67']);
+    await dashboardExpect.vegaTextsExist(['5,000']);
+  };
+
+  const expectNoDataRenders = async () => {
+    await dashboardExpect.pieSliceCount(0);
+    await dashboardExpect.seriesElementCount(0);
+    await dashboardExpect.dataTableRowCount(0);
+    await dashboardExpect.savedSearchRowCount(0);
+    await dashboardExpect.inputControlItemCount(5);
+    await dashboardExpect.metricValuesExist(['0']);
+    await dashboardExpect.markdownWithValuesExists(['I\'m a markdown!']);
+
+    // Three instead of 0 because there is a visualization based off a non time based index that
+    // should still show data.
+    await dashboardExpect.lineChartPointsCount(3);
+
+    await dashboardExpect.timelionLegendCount(0);
+    const tsvbGuageExists = await find.existsByCssSelector('.thorHalfGauge');
+    expect(tsvbGuageExists).to.be(true);
+    await dashboardExpect.tsvbMetricValuesExist(['0']);
+    await dashboardExpect.tsvbMarkdownWithValuesExists(['Hi Avg last bytes: 0']);
+    await dashboardExpect.tsvbTableCellCount(0);
+    await dashboardExpect.tsvbTimeSeriesLegendCount(1);
+    await dashboardExpect.tsvbTopNValuesExist(['0']);
+    await dashboardExpect.vegaTextsDoNotExist(['5,000']);
+  };
+
   describe('dashboard embeddable rendering', function describeIndexTests() {
     before(async () => {
       await PageObjects.dashboard.clickNewDashboard();
+
       const fromTime = '2018-01-01 00:00:00.000';
       const toTime = '2018-04-13 00:00:00.000';
       await PageObjects.header.setAbsoluteRange(fromTime, toTime);
     });
 
+    after(async () => {
+      // Get rid of the timestamp added in this test, as well any global or app state.
+      const currentUrl = await remote.getCurrentUrl();
+      const newUrl = currentUrl.replace(/\?.*$/, '');
+      await remote.get(newUrl, false);
+    });
+
     it('adding visualizations', async () => {
       await dashboardAddPanel.addEveryVisualization('"Rendering Test"');
+
+      // This one is rendered via svg which lets us do better testing of what is being rendered.
+      await dashboardAddPanel.addVisualization('Filter Bytes Test: vega');
+
       await PageObjects.header.waitUntilLoadingHasFinished();
       const panelCount = await PageObjects.dashboard.getPanelCount();
-      expect(panelCount).to.be(26);
+      expect(panelCount).to.be(27);
     });
 
     it('adding saved searches', async () => {
@@ -53,84 +112,46 @@ export default function ({ getService, getPageObjects }) {
       await dashboardAddPanel.closeAddPanel();
       await PageObjects.header.waitUntilLoadingHasFinished();
       const panelCount = await PageObjects.dashboard.getPanelCount();
-      expect(panelCount).to.be(27);
+      expect(panelCount).to.be(28);
 
-      // Not necessary but helpful for local debugging.
-      await PageObjects.dashboard.saveDashboard('embeddable rendering test');
+      await PageObjects.dashboard.saveDashboard('embeddable rendering test', { storeTimeWithDashboard: true });
     });
 
-    it('pie charts rendered', async () => {
-      await dashboardExpect.pieSliceCount(16);
+    it('initial render test', async () => {
+      await expectAllDataRenders();
     });
 
-    it('area, bar and heatmap charts rendered', async () => {
-      await dashboardExpect.seriesElementCount(19);
+    it('data rendered correctly when dashboard is opened from listing page', async () => {
+      // Change the time to make sure that it's updated when re-opened from the listing page.
+      const fromTime = '2018-05-10 00:00:00.000';
+      const toTime = '2018-05-11 00:00:00.000';
+      await PageObjects.header.setAbsoluteRange(fromTime, toTime);
+      await PageObjects.dashboard.loadSavedDashboard('embeddable rendering test');
+
+      await expectAllDataRenders();
     });
 
-    it('data tables render', async () => {
-      await dashboardExpect.dataTableRowCount(5);
+    it('data rendered correctly when dashboard is hard refreshed', async () => {
+      const currentUrl = await remote.getCurrentUrl();
+      await remote.get(currentUrl, true);
+
+      await expectAllDataRenders();
     });
 
-    it('saved searches render', async () => {
-      await dashboardExpect.savedSearchRowCount(50);
+    it('panels are updated when time changes outside of data', async () => {
+      const fromTime = '2018-05-11 00:00:00.000';
+      const toTime = '2018-05-12 00:00:00.000';
+      await PageObjects.header.setAbsoluteRange(fromTime, toTime);
+
+      await expectNoDataRenders();
     });
 
-    it('goal and gauge render', async () => {
-      await dashboardExpect.goalAndGuageLabelsExist(['63%', '56%', '11.915 GB']);
-    });
+    it('panels are updated when time changes inside of data', async () => {
+      const fromTime = '2018-01-01 00:00:00.000';
+      const toTime = '2018-04-13 00:00:00.000';
+      await PageObjects.header.setAbsoluteRange(fromTime, toTime);
 
-    it('input controls render', async () => {
-      await dashboardExpect.inputControlItemCount(5);
-    });
-
-    it('metric vis renders', async () => {
-      await dashboardExpect.metricValuesExist(['7,544']);
-    });
-
-    it('markdown renders', async () => {
-      await dashboardExpect.markdownWithValuesExists(['I\'m a markdown!']);
-    });
-
-    it('line charts render', async () => {
-      await dashboardExpect.lineChartPointsCount(5);
-    });
-
-    it('tag cloud renders', async () => {
-      await dashboardExpect.tagCloudWithValuesFound(['CN', 'IN', 'US', 'BR', 'ID']);
-    });
-
-    it('timelion chart renders', async () => {
-      await dashboardExpect.timelionLegendCount(0);
-    });
-
-    it('tsvb gauge renders', async () => {
-      const tsvbGuageExists = await find.existsByCssSelector('.thorHalfGauge');
-      expect(tsvbGuageExists).to.be(true);
-    });
-
-    it('tsvb metric chart renders', async () => {
-      await dashboardExpect.tsvbMetricValuesExist(['210,007,889,606']);
-    });
-
-    it('tsvb markdown renders', async () => {
-      await dashboardExpect.tsvbMarkdownWithValuesExists(['Hi Avg last bytes: 6286.674715909091']);
-    });
-
-    it('tsvb table chart renders', async () => {
-      await dashboardExpect.tsvbTableCellCount(20);
-    });
-
-    it('tsvb time series renders', async () => {
-      await dashboardExpect.tsvbTimeSeriesLegendCount(1);
-    });
-
-    it('tsvb top n chart renders', async () => {
-      await dashboardExpect.tsvbTopNValuesExist(['5,734.79', '6,286.67']);
-    });
-
-    it('vega chart renders', async () => {
-      const tsvb = await find.existsByCssSelector('.vega-view-container');
-      expect(tsvb).to.be(true);
+      await expectAllDataRenders();
     });
   });
 }

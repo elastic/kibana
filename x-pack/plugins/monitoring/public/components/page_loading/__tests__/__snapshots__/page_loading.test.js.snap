@@ -5,7 +5,7 @@ exports[`PageLoading should show a simple page loading component 1`] = `
   class="euiPage euiPage--widthIsNotRestricted"
 >
   <div
-    class="euiPageBody"
+    class="euiPageBody euiPage--widthIsNotRestricted"
   >
     <div
       class="euiPanel euiPanel--paddingLarge euiPageContent noData__content euiPageContent--verticalCenter euiPageContent--horizontalCenter"
