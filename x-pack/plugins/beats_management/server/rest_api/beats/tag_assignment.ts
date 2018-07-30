@@ -12,6 +12,8 @@ import { wrapEsError } from '../../utils/error_wrappers';
 // TODO: add license check pre-hook
 // TODO: write to Kibana audit log file
 export const createTagAssignmentsRoute = (libs: CMServerLibs) => ({
+  method: 'POST',
+  path: '/api/beats/agents_tags/assignments',
   config: {
     validate: {
       payload: Joi.object({
@@ -41,6 +43,4 @@ export const createTagAssignmentsRoute = (libs: CMServerLibs) => ({
       return reply(wrapEsError(err));
     }
   },
-  method: 'POST',
-  path: '/api/beats/agents_tags/assignments',
 });

@@ -10,6 +10,8 @@ import { wrapEsError } from '../../utils/error_wrappers';
 
 // TODO: add license check pre-hook
 export const createListAgentsRoute = (libs: CMServerLibs) => ({
+  method: 'GET',
+  path: '/api/beats/agents',
   handler: async (request: FrameworkRequest, reply: any) => {
     try {
       const beats = await libs.beats.getAllBeats(request.user);
@@ -19,6 +21,4 @@ export const createListAgentsRoute = (libs: CMServerLibs) => ({
       return reply(wrapEsError(err));
     }
   },
-  method: 'GET',
-  path: '/api/beats/agents',
 });
