@@ -36,6 +36,8 @@ import {
   FormatEditorSamples
 } from '../../samples';
 
+import { FormattedMessage } from '@kbn/i18n/react';
+
 export class DateFormatEditor extends DefaultFormatEditor {
   static formatId = 'date';
 
@@ -57,16 +59,21 @@ export class DateFormatEditor extends DefaultFormatEditor {
       <Fragment>
         <EuiFormRow
           label={
-            <span>
-              Moment.js format pattern (Default: <EuiCode>{defaultPattern}</EuiCode>)
-            </span>
+            <FormattedMessage
+              id="common.ui.fieldEditor.date.momentLabel"
+              defaultMessage="Moment.js format pattern (Default: {defaultPattern})"
+              values={{
+                defaultPattern: <EuiCode>{defaultPattern}</EuiCode>
+              }}
+            />
           }
           isInvalid={!!error}
           error={error}
           helpText={
             <span>
               <EuiLink target="_window" href="http://momentjs.com/">
-                Documentation <EuiIcon type="link" />
+                <FormattedMessage id="common.ui.fieldEditor.date.documentationLabel" defaultMessage="Documentation" />&nbsp;
+                <EuiIcon type="link" />
               </EuiLink>
             </span>
           }

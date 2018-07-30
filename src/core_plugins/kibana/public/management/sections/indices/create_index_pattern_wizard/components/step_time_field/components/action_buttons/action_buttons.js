@@ -26,6 +26,8 @@ import {
   EuiButtonEmpty
 } from '@elastic/eui';
 
+import { FormattedMessage } from '@kbn/i18n/react';
+
 export const ActionButtons = ({
   goToPreviousStep,
   submittable,
@@ -37,7 +39,10 @@ export const ActionButtons = ({
         iconType="arrowLeft"
         onClick={goToPreviousStep}
       >
-        Back
+        <FormattedMessage
+          id="kbn.management.createIndexPattern.stepTime.backButton"
+          defaultMessage="Back"
+        />
       </EuiButtonEmpty>
     </EuiFlexItem>
     <EuiFlexItem grow={false}>
@@ -47,7 +52,10 @@ export const ActionButtons = ({
         fill
         onClick={createIndexPattern}
       >
-        Create index pattern
+        <FormattedMessage
+          id="kbn.management.createIndexPattern.stepTime.createPatternButton"
+          defaultMessage="Create index pattern"
+        />
       </EuiButton>
     </EuiFlexItem>
   </EuiFlexGroup>
