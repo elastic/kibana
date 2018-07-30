@@ -51,6 +51,20 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.visualize.clickGo();
     });
 
+    it('should allow applying changed params', async () => {
+      await PageObjects.visualize.setNumericInterval('1', { append: true });
+      const interval = await PageObjects.visualize.getInputTypeParam('interval');
+      expect(interval).to.be('20001');
+      const isApplyButtonEnabled = await PageObjects.visualize.isApplyEnabled();
+      expect(isApplyButtonEnabled).to.be(true);
+    });
+
+    it('should allow resseting changed params', async () => {
+      await PageObjects.visualize.clickReset();
+      const interval = await PageObjects.visualize.getInputTypeParam('interval');
+      expect(interval).to.be('2000');
+    });
+
     it('should be able to save and load', async function () {
       await PageObjects.visualize.saveVisualization(vizName1);
       const pageTitle = await PageObjects.common.getBreadcrumbPageTitle();

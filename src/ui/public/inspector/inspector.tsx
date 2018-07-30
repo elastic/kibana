@@ -16,66 +16,12 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
-import { EventEmitter } from 'events';
 import React from 'react';
-import ReactDOM from 'react-dom';
 
+import { FlyoutSession, openFlyout } from 'ui/flyout';
 import { Adapters } from './types';
 import { InspectorPanel } from './ui/inspector_panel';
 import { viewRegistry } from './view_registry';
-
-let activeSession: InspectorSession | null = null;
-
-const CONTAINER_ID = 'inspector-container';
-
-function getOrCreateContainerElement() {
-  let container = document.getElementById(CONTAINER_ID);
-  if (!container) {
-    container = document.createElement('div');
-    container.id = CONTAINER_ID;
-    document.body.appendChild(container);
-  }
-  return container;
-}
-
-/**
- * An InspectorSession describes the session of one opened inspector. It offers
- * methods to close the inspector again. If you open an inspector you should make
- * sure you call {@link InspectorSession#close} when it should be closed.
- * Since an inspector could also be closed without calling this method (e.g. because
- * the user closes it), you must listen to the "closed" event on this instance.
- * It will be emitted whenever the inspector will be closed and you should throw
- * away your reference to this instance whenever you receive that event.
- * @extends EventEmitter
- */
-class InspectorSession extends EventEmitter {
-  /**
-   * Binds the current inspector session to an Angular scope, meaning this inspector
-   * session will be closed as soon as the Angular scope gets destroyed.
-   * @param {object} scope - And angular scope object to bind to.
-   */
-  public bindToAngularScope(scope: ng.IScope): void {
-    const removeWatch = scope.$on('$destroy', () => this.close());
-    this.on('closed', () => removeWatch());
-  }
-
-  /**
-   * Closes the opened inspector as long as it's stil the open one.
-   * If this is not the active session anymore, this method won't do anything.
-   * If this session was still active and an inspector was closed, the 'closed'
-   * event will be emitted on this InspectorSession instance.
-   */
-  public close(): void {
-    if (activeSession === this) {
-      const container = document.getElementById(CONTAINER_ID);
-      if (container) {
-        ReactDOM.unmountComponentAtNode(container);
-        this.emit('closed');
-      }
-    }
-  }
-}
 
 /**
  * Checks if a inspector panel could be shown based on the passed adapters.
@@ -98,6 +44,8 @@ interface InspectorOptions {
   title?: string;
 }
 
+export type InspectorSession = FlyoutSession;
+
 /**
  * Opens the inspector panel for the given adapters and close any previously opened
  * inspector panel. The previously panel will be closed also if no new panel will be
@@ -110,11 +58,6 @@ interface InspectorOptions {
  * @return {InspectorSession} The session instance for the opened inspector.
  */
 function open(adapters: Adapters, options: InspectorOptions = {}): InspectorSession {
-  // If there is an active inspector session close it before opening a new one.
-  if (activeSession) {
-    activeSession.close();
-  }
-
   const views = viewRegistry.getVisible(adapters);
 
   // Don't open inspector if there are no views available for the passed adapters
@@ -124,20 +67,9 @@ function open(adapters: Adapters, options: InspectorOptions = {}): InspectorSess
       if an inspector can be shown.`);
   }
 
-  const container = getOrCreateContainerElement();
-  const session = (activeSession = new InspectorSession());
-
-  ReactDOM.render(
-    <InspectorPanel
-      views={views}
-      adapters={adapters}
-      onClose={() => session.close()}
-      title={options.title}
-    />,
-    container
-  );
-
-  return session;
+  return openFlyout(<InspectorPanel views={views} adapters={adapters} title={options.title} />, {
+    'data-test-subj': 'inspectorPanel',
+  });
 }
 
 const Inspector = {

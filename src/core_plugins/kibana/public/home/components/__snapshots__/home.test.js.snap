@@ -5,7 +5,9 @@ exports[`home directories should not render directory entry when showOnHomePage 
   className="home"
   restrictWidth={false}
 >
-  <EuiPageBody>
+  <EuiPageBody
+    restrictWidth={false}
+  >
     <AddData
       apmUiEnabled={true}
       isNewKibanaInstance={false}
@@ -119,7 +121,9 @@ exports[`home directories should render ADMIN directory entry in "Manage" panel 
   className="home"
   restrictWidth={false}
 >
-  <EuiPageBody>
+  <EuiPageBody
+    restrictWidth={false}
+  >
     <AddData
       apmUiEnabled={true}
       isNewKibanaInstance={false}
@@ -252,7 +256,9 @@ exports[`home directories should render DATA directory entry in "Explore Data" p
   className="home"
   restrictWidth={false}
 >
-  <EuiPageBody>
+  <EuiPageBody
+    restrictWidth={false}
+  >
     <AddData
       apmUiEnabled={true}
       isNewKibanaInstance={false}
@@ -385,7 +391,9 @@ exports[`home isNewKibanaInstance should safely handle execeptions 1`] = `
   className="home"
   restrictWidth={false}
 >
-  <EuiPageBody>
+  <EuiPageBody
+    restrictWidth={false}
+  >
     <AddData
       apmUiEnabled={true}
       isNewKibanaInstance={false}
@@ -499,7 +507,9 @@ exports[`home isNewKibanaInstance should set isNewKibanaInstance to false when t
   className="home"
   restrictWidth={false}
 >
-  <EuiPageBody>
+  <EuiPageBody
+    restrictWidth={false}
+  >
     <AddData
       apmUiEnabled={true}
       isNewKibanaInstance={false}
@@ -613,7 +623,9 @@ exports[`home isNewKibanaInstance should set isNewKibanaInstance to true when th
   className="home"
   restrictWidth={false}
 >
-  <EuiPageBody>
+  <EuiPageBody
+    restrictWidth={false}
+  >
     <AddData
       apmUiEnabled={true}
       isNewKibanaInstance={true}
@@ -727,7 +739,9 @@ exports[`home should not contain RecentlyAccessed panel when there is no recentl
   className="home"
   restrictWidth={false}
 >
-  <EuiPageBody>
+  <EuiPageBody
+    restrictWidth={false}
+  >
     <AddData
       apmUiEnabled={true}
       isNewKibanaInstance={false}
@@ -841,7 +855,9 @@ exports[`home should render home component 1`] = `
   className="home"
   restrictWidth={false}
 >
-  <EuiPageBody>
+  <EuiPageBody
+    restrictWidth={false}
+  >
     <React.Fragment>
       <RecentlyAccessed
         recentlyAccessed={
