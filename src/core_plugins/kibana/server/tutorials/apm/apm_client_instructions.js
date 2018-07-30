@@ -147,8 +147,7 @@ secret_token: ''
 server_url: ''`.split('\n'),
     textPost:
       'See the [documentation]' +
-      '({config.docs.base_url}guide/en/apm/agent/ruby/1.x/index.html) for configuration options and advanced usage.\n\n' +
-      '**Warning: The Ruby agent is currently in Beta and not meant for production use.**',
+      '({config.docs.base_url}guide/en/apm/agent/ruby/1.x/index.html) for configuration options and advanced usage.'
   },
 ];
 
@@ -196,8 +195,7 @@ secret_token: ''
 server_url: ''`.split('\n'),
     textPost:
       'See the [documentation]' +
-      '({config.docs.base_url}guide/en/apm/agent/ruby/1.x/index.html) for configuration options and advanced usage.\n\n' +
-      '**Warning: The Rack agent is currently in Beta and not meant for production use.**',
+      '({config.docs.base_url}guide/en/apm/agent/ruby/1.x/index.html) for configuration options and advanced usage.'
   },
 ];
 
