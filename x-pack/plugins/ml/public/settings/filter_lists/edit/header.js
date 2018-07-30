@@ -112,7 +112,7 @@ export function EditFilterListHeader({
         <React.Fragment>
           <EuiText>
             <p>
-              This filter list is not being used by any jobs.
+              This filter list is not used by any jobs.
             </p>
           </EuiText>
           <EuiSpacer size="s"/>
