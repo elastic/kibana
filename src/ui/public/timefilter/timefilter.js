@@ -196,18 +196,18 @@ export const registerTimefilterWithGlobalState = _.once((globalState) => {
     timefilter.setRefreshInterval(newRefreshInterval);
   });
 
-  function updateGlobalState() {
+  const updateGlobalStateWithTime = () => {
     globalState.time = timefilter.getTime();
     globalState.refreshInterval = timefilter.getRefreshInterval();
     globalState.save();
-  }
+  };
 
   timefilter.on('refreshIntervalUpdate', () => {
-    updateGlobalState();
+    updateGlobalStateWithTime();
   });
 
   timefilter.on('timeUpdate', () => {
-    updateGlobalState();
+    updateGlobalStateWithTime();
   });
 });
 
