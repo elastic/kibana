@@ -29,3 +29,4 @@ export { VisualizeListingTableProvider } from './visualize_listing_table';
 export { FlyoutProvider } from './flyout';
 
 export * from './dashboard';
+export * from './visualize';

@@ -30,21 +30,10 @@ export const EDIT_CONFIG = {
   ],
 };
 
-const IMPORT_DASHBOARD = {
-  title: 'Import dashboards',
-  textPre: 'APM Server ships with preconfigured dashboards.',
-};
-
 const START_SERVER = {
   title: 'Start APM Server',
   textPre:
     'The server processes and stores application performance metrics in Elasticsearch.',
-};
-
-export const IMPORT_DASHBOARD_UNIX = {
-  title: IMPORT_DASHBOARD.title,
-  textPre: IMPORT_DASHBOARD.textPre,
-  commands: ['./apm-server setup'],
 };
 
 export const START_SERVER_UNIX = {
@@ -101,11 +90,6 @@ export const WINDOWS_SERVER_INSTRUCTIONS = [
     textPost:
       'Note: If script execution is disabled on your system, you need to set the execution policy for the current session' +
       ' to allow the script to run. For example: `PowerShell.exe -ExecutionPolicy UnRestricted -File .\\install-service-apm-server.ps1`.',
-  },
-  {
-    title: IMPORT_DASHBOARD.title,
-    textPre: IMPORT_DASHBOARD.textPre,
-    commands: ['apm-server.exe setup'],
   },
   EDIT_CONFIG,
   {

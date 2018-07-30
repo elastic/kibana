@@ -30,18 +30,19 @@ uiModules
   .directive('kbnGlobalTimepicker', (globalState, config) => {
     const getConfig = (...args) => config.get(...args);
 
+    const updateGlobalStateWithTime = ($scope) => {
+      globalState.refreshInterval = timefilter.getRefreshInterval();
+      globalState.time = timefilter.getTime();
+      globalState.save();
+      setTimefilterValues($scope);
+    };
+
     const listenForUpdates = ($scope) => {
       $scope.$listenAndDigestAsync(timefilter, 'refreshIntervalUpdate', () => {
-        globalState.refreshInterval = timefilter.getRefreshInterval();
-        globalState.time = timefilter.getTime();
-        globalState.save();
-        setTimefilterValues($scope);
+        updateGlobalStateWithTime($scope);
       });
       $scope.$listenAndDigestAsync(timefilter, 'timeUpdate', () => {
-        globalState.refreshInterval = timefilter.getRefreshInterval();
-        globalState.time = timefilter.getTime();
-        globalState.save();
-        setTimefilterValues($scope);
+        updateGlobalStateWithTime($scope);
       });
       $scope.$listenAndDigestAsync(timefilter, 'enabledUpdated', () => {
         setTimefilterValues($scope);
@@ -69,8 +70,8 @@ uiModules
       require: '^kbnTopNav',
       link: ($scope, element, attributes, kbnTopNav) => {
         listenForUpdates($scope);
+        updateGlobalStateWithTime($scope);
 
-        setTimefilterValues($scope);
         $scope.toggleRefresh = () => {
           timefilter.toggleRefresh();
         };
