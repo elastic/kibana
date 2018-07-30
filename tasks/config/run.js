@@ -153,6 +153,17 @@ module.exports = function (grunt) {
       ],
     },
 
+    panelActionTests: {
+      cmd: process.execPath,
+      args: [
+        'scripts/functional_tests',
+        '--config', 'test/panel_actions/config.js',
+        '--esFrom', 'source',
+        '--bail',
+        '--debug',
+      ],
+    },
+
     functionalTests: {
       cmd: process.execPath,
       args: [
