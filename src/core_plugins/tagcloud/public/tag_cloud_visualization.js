@@ -122,10 +122,11 @@ export class TagCloudVisualization {
       this._bucketAgg = null;
     }
 
-    const tagColumn = data.columns[0].id;
-    const countColumn = data.columns[1].id;
+    const hasTags = data.columns.length === 2;
+    const tagColumn = hasTags ? data.columns[0].id : -1;
+    const countColumn = data.columns[hasTags ? 1 : 0].id;
     const tags = data.rows.map((row, rowIndex) => {
-      const tag = row[tagColumn];
+      const tag = row[tagColumn] || 'all';
       const count = row[countColumn];
       return {
         displayText: this._bucketAgg ? this._bucketAgg.fieldFormatter()(tag) : tag,
