@@ -54,6 +54,9 @@ function collectBucket(write, bucket, key, aggScale) {
       if (buckets.length) {
         buckets.forEach(function (subBucket, key) {
           const bucketValue = agg.getKey(subBucket, key);
+          if (typeof bucketValue === 'undefined') {
+            return;
+          }
           write.bucketBuffer.push({ id: column.id, value: bucketValue });
           collectBucket(write, subBucket, agg.getKey(subBucket, key), aggScale);
           write.bucketBuffer.pop();
