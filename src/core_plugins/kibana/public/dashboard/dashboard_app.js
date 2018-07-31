@@ -202,16 +202,8 @@ app.directive('dashboardApp', function ($injector) {
         $scope.refresh();
       };
 
-      $scope.$watch('model.hidePanelTitles', () => {
-        dashboardStateManager.setHidePanelTitles($scope.model.hidePanelTitles);
-      });
-      $scope.$watch('model.useMargins', () => {
-        dashboardStateManager.setUseMargins($scope.model.useMargins);
-      });
-      $scope.$watch('model.darkTheme', () => {
-        dashboardStateManager.setDarkTheme($scope.model.darkTheme);
-        updateTheme();
-      });
+      updateTheme();
+
       $scope.indexPatterns = [];
 
       $scope.onPanelRemoved = (panelIndex) => {
@@ -393,7 +385,24 @@ app.directive('dashboardApp', function ($injector) {
         showAddPanel(chrome.getSavedObjectsClient(), dashboardStateManager.addNewPanel, addNewVis, listingLimit, isLabsEnabled, visTypes);
       };
       navActions[TopNavIds.OPTIONS] = (menuItem, navController, anchorElement) => {
-        showOptionsPopover(anchorElement);
+        /*$scope.$watch('model.hidePanelTitles', () => {
+          dashboardStateManager.setHidePanelTitles($scope.model.hidePanelTitles);
+        });
+        $scope.$watch('model.useMargins', () => {
+          dashboardStateManager.setUseMargins($scope.model.useMargins);
+        });
+        $scope.$watch('model.darkTheme', () => {
+          dashboardStateManager.setDarkTheme($scope.model.darkTheme);
+          updateTheme();
+        });*/
+        showOptionsPopover({
+          anchorElement,
+          darkTheme: dashboardStateManager.getDarkTheme(),
+          onDarkThemeChange: (isChecked) => {
+            dashboardStateManager.setDarkTheme(isChecked);
+            updateTheme();
+          }
+        });
       };
       updateViewMode(dashboardStateManager.getViewMode());
 

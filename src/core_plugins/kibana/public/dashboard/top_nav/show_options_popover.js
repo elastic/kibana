@@ -21,6 +21,8 @@ import './options_popover.less';
 import React from 'react';
 import ReactDOM from 'react-dom';
 
+import { OptionsMenu } from './options';
+
 import {
   EuiWrappingPopover,
 } from '@elastic/eui';
@@ -34,7 +36,7 @@ const onClose = () => {
   isOpen = false;
 };
 
-export function showOptionsPopover(anchorElement) {
+export function showOptionsPopover({ anchorElement, darkTheme, onDarkThemeChange }) {
   if (isOpen) {
     onClose();
     return;
@@ -51,7 +53,10 @@ export function showOptionsPopover(anchorElement) {
       isOpen={true}
       closePopover={onClose}
     >
-      <div>Normal JSX content populates the popover.</div>
+      <OptionsMenu
+        darkTheme={darkTheme}
+        onDarkThemeChange={onDarkThemeChange}
+      />
     </EuiWrappingPopover>
   );
   ReactDOM.render(element, container);
