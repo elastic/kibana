@@ -65,24 +65,25 @@ function f() {
 describe('extractCodeMessages', () => {
   test('extracts React, server-side and angular service default messages', () => {
     const actual = Array.from(extractCodeMessages(extractCodeMessagesSource));
-    const expected = [
-      ['kbn.mgmt.id-1', { message: 'Message text 1' }],
-      ['kbn.mgmt.id-2', { message: 'Message text 2', context: 'Message context' }],
-      ['kbn.mgmt.id-3', { message: 'Message text 3' }],
-    ];
-    expect(actual.sort()).toEqual(expected.sort());
+    expect(actual.sort()).toMatchSnapshot();
+  });
+
+  test('throws on empty id', () => {
+    const source = Buffer.from(`i18n.translate('', { defaultMessage: 'Default message' });`);
+    expect(() => extractCodeMessages(source).next()).toThrowErrorMatchingSnapshot();
+  });
+
+  test('throws on missing defaultMessage', () => {
+    const source = Buffer.from(`intl.formatMessage({ id: 'message-id' });`);
+    expect(() => extractCodeMessages(source).next()).toThrowErrorMatchingSnapshot();
   });
 });
 
 describe('isIntlFormatMessageFunction', () => {
   test('detects intl.formatMessage call expression', () => {
-    let callExpressioNode;
-    for (const node of traverseNodes(parse(intlFormatMessageSource).program.body)) {
-      if (isCallExpression(node)) {
-        callExpressioNode = node;
-        break;
-      }
-    }
+    const callExpressioNode = [...traverseNodes(parse(intlFormatMessageSource).program.body)].find(
+      node => isCallExpression(node)
+    );
 
     expect(isIntlFormatMessageFunction(callExpressioNode)).toBe(true);
   });
@@ -91,13 +92,9 @@ describe('isIntlFormatMessageFunction', () => {
 describe('isFormattedMessageElement', () => {
   test('detects FormattedMessage jsx element', () => {
     const AST = parse(formattedMessageSource, { plugins: ['jsx'] });
-    let jsxOpeningElementNode;
-    for (const node of traverseNodes(AST.program.body)) {
-      if (isJSXOpeningElement(node)) {
-        jsxOpeningElementNode = node;
-        break;
-      }
-    }
+    const jsxOpeningElementNode = [...traverseNodes(AST.program.body)].find(node =>
+      isJSXOpeningElement(node)
+    );
 
     expect(isFormattedMessageElement(jsxOpeningElementNode)).toBe(true);
   });

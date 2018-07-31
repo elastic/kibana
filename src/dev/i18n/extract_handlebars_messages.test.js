@@ -21,7 +21,7 @@ import { extractHandlebarsMessages } from './extract_handlebars_messages';
 
 describe('dev/i18n/extract_handlebars_messages', () => {
   test('extracts handlebars default messages', () => {
-    const handlebarsSourceBuffer = Buffer.from(`\
+    const source = Buffer.from(`\
 window.onload = function () {
   (function next() {
     var failure = function () {
@@ -38,33 +38,47 @@ window.onload = function () {
 };
 `);
 
-    const actual = Array.from(extractHandlebarsMessages(handlebarsSourceBuffer));
-    const expected = [['ui.id-1', { message: 'Message text', context: 'Message context' }]];
-
-    expect(actual).toEqual(expected);
+    const actual = Array.from(extractHandlebarsMessages(source));
+    expect(actual).toMatchSnapshot();
   });
 
   test('throws on wrong number of arguments', () => {
-    const handlebarsSourceBuffer = Buffer.from(`\
+    const source = Buffer.from(`\
 window.onload = function () {
   err.innerText = '{{i18n 'ui.id-1'}}';
 };
 `);
 
-    expect(() => extractHandlebarsMessages(handlebarsSourceBuffer).next()).toThrow(
-      'Wrong number of arguments for handlebars i18n call.'
-    );
+    expect(() => extractHandlebarsMessages(source).next()).toThrowErrorMatchingSnapshot();
   });
 
   test('throws on wrong properties argument type', () => {
-    const handlebarsSourceBuffer = Buffer.from(`\
+    const source = Buffer.from(`\
 window.onload = function () {
   err.innerText = '{{i18n 'ui.id-1' propertiesJSONIdentifier}}';
 };
 `);
 
-    expect(() => extractHandlebarsMessages(handlebarsSourceBuffer).next()).toThrow(
-      `Cannot parse "ui.id-1" message: properties string should be a string literal.`
-    );
+    expect(() => extractHandlebarsMessages(source).next()).toThrowErrorMatchingSnapshot();
+  });
+
+  test('throws on empty id', () => {
+    const source = Buffer.from(`\
+window.onload = function () {
+  err.innerText = '{{i18n '' '{"defaultMessage": "Message text", "context": "Message context"}'}}';
+};
+`);
+
+    expect(() => extractHandlebarsMessages(source).next()).toThrowErrorMatchingSnapshot();
+  });
+
+  test('throws on missing defaultMessage property', () => {
+    const source = Buffer.from(`\
+window.onload = function () {
+  err.innerText = '{{i18n 'message-id' '{"context": "Message context"}'}}';
+};
+`);
+
+    expect(() => extractHandlebarsMessages(source).next()).toThrowErrorMatchingSnapshot();
   });
 });

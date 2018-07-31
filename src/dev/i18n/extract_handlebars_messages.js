@@ -45,6 +45,10 @@ export function* extractHandlebarsMessages(buffer) {
 
     const messageId = formatJSString(idString.slice(1, -1));
 
+    if (!messageId) {
+      throw new Error(`Empty id argument in Handlebars i18n is not allowed.`);
+    }
+
     if (!propertiesString.startsWith(`'`) || !propertiesString.endsWith(`'`)) {
       throw new Error(
         `Cannot parse "${messageId}" message: properties string should be a string literal.`
@@ -57,6 +61,12 @@ export function* extractHandlebarsMessages(buffer) {
     if (typeof message !== 'string') {
       throw new Error(
         `Cannot parse "${messageId}" message: defaultMessage value should be a string.`
+      );
+    }
+
+    if (!message) {
+      throw new Error(
+        `Cannot parse "${messageId}" message: defaultMessage is required.`
       );
     }
 

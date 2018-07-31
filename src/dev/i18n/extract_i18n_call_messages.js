@@ -33,6 +33,11 @@ export function extractI18nCallMessages(node) {
   }
 
   const messageId = idSubTree.value;
+
+  if (!messageId) {
+    throw new Error('Empty "id" value in i18n() or i18n.translate() is not allowed.');
+  }
+
   let message;
   let context;
 

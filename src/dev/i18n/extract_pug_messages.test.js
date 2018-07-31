@@ -19,21 +19,29 @@
 
 import { extractPugMessages } from './extract_pug_messages';
 
-const pugMessageBuffer = Buffer.from(`
-#{i18n('message-id', { defaultMessage: 'Default message', context: 'Message context' })}
-`);
-
 describe('extractPugMessages', () => {
   test('extracts messages from pug template', () => {
-    const expected = [
-      'message-id',
-      {
-        message: 'Default message',
-        context: 'Message context',
-      },
-    ];
-    const [messageObject] = extractPugMessages(pugMessageBuffer);
+    const source = Buffer.from(`\
+#{i18n('message-id', { defaultMessage: 'Default message', context: 'Message context' })}
+`);
+    const [messageObject] = extractPugMessages(source);
 
-    expect(messageObject).toEqual(expected);
+    expect(messageObject).toMatchSnapshot();
+  });
+
+  test('throws on empty id', () => {
+    const source = Buffer.from(`\
+#{i18n('', { defaultMessage: 'Default message', context: 'Message context' })}
+`);
+
+    expect(() => extractPugMessages(source).next()).toThrowErrorMatchingSnapshot();
+  });
+
+  test('throws on missing', () => {
+    const source = Buffer.from(`\
+#{i18n('message-id', { context: 'Message context' })}
+`);
+
+    expect(() => extractPugMessages(source).next()).toThrowErrorMatchingSnapshot();
   });
 });

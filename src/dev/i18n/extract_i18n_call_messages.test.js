@@ -33,71 +33,37 @@ i18n.translate('message-id-2', { defaultMessage: 'Default message 2', context: '
 
 describe('extractI18nCallMessages', () => {
   test('extracts "i18n" and "i18n.translate" functions call message', () => {
-    let actual;
-    let expected = [
-      'message-id-1',
-      {
-        message: 'Default message 1',
-        context: 'Message context 1',
-      },
-    ];
+    let callExpressionNode = [...traverseNodes(parse(i18nCallMessageSource).program.body)].find(
+      node => isCallExpression(node)
+    );
 
-    for (const node of traverseNodes(parse(i18nCallMessageSource).program.body)) {
-      if (isCallExpression(node)) {
-        actual = extractI18nCallMessages(node);
-        break;
-      }
-    }
+    expect(extractI18nCallMessages(callExpressionNode)).toMatchSnapshot();
 
-    expect(actual).toEqual(expected);
+    callExpressionNode = [...traverseNodes(parse(translateCallMessageSource).program.body)].find(
+      node => isCallExpression(node)
+    );
 
-    expected = [
-      'message-id-2',
-      {
-        message: 'Default message 2',
-        context: 'Message context 2',
-      },
-    ];
-
-    for (const node of traverseNodes(parse(translateCallMessageSource).program.body)) {
-      if (isCallExpression(node)) {
-        actual = extractI18nCallMessages(node);
-        break;
-      }
-    }
-
-    expect(actual).toEqual(expected);
+    expect(extractI18nCallMessages(callExpressionNode)).toMatchSnapshot();
   });
 
   test('throws if message id value is not a string literal', () => {
     const source = `
 i18n(messageIdIdentifier, { defaultMessage: 'Default message', context: 'Message context' });
 `;
-    let callExpressionNode;
-    for (const node of traverseNodes(parse(source).program.body)) {
-      if (isCallExpression(node)) {
-        callExpressionNode = node;
-        break;
-      }
-    }
-
-    expect(() => extractI18nCallMessages(callExpressionNode)).toThrow(
-      `Message id should be a string literal.`
+    const callExpressionNode = [...traverseNodes(parse(source).program.body)].find(node =>
+      isCallExpression(node)
     );
+
+    expect(() => extractI18nCallMessages(callExpressionNode)).toThrowErrorMatchingSnapshot();
   });
 
   test('throws if properties object is not provided', () => {
-    let callExpressionNode;
-    for (const node of traverseNodes(parse(`i18n('message-id');`).program.body)) {
-      if (isCallExpression(node)) {
-        callExpressionNode = node;
-        break;
-      }
-    }
-
-    expect(() => extractI18nCallMessages(callExpressionNode)).toThrow(
-      `Cannot parse "message-id" message: object with defaultMessage property is not provided.`
+    const source = `i18n('message-id');`;
+    const callExpressionNode = [...traverseNodes(parse(source).program.body)].find(node =>
+      isCallExpression(node)
     );
+
+    expect(() => extractI18nCallMessages(callExpressionNode)).toThrowErrorMatchingSnapshot();
   });
 
   test('throws if defaultMessage is not a string literal', () => {
@@ -105,30 +71,19 @@ i18n(messageIdIdentifier, { defaultMessage: 'Default message', context: 'Message
 const message = 'Default message';
 i18n('message-id', { defaultMessage: message });
 `;
-    let callExpressionNode;
-    for (const node of traverseNodes(parse(source).program.body)) {
-      if (isCallExpression(node)) {
-        callExpressionNode = node;
-        break;
-      }
-    }
-
-    expect(() => extractI18nCallMessages(callExpressionNode)).toThrow(
-      `Cannot parse "message-id" message: defaultMessage value should be a string literal.`
+    const callExpressionNode = [...traverseNodes(parse(source).program.body)].find(node =>
+      isCallExpression(node)
     );
+
+    expect(() => extractI18nCallMessages(callExpressionNode)).toThrowErrorMatchingSnapshot();
   });
 
   test('throws on empty defaultMessage', () => {
     const source = `i18n('message-id', { defaultMessage: '' });`;
-    let callExpressionNode;
-    for (const node of traverseNodes(parse(source).program.body)) {
-      if (isCallExpression(node)) {
-        callExpressionNode = node;
-        break;
-      }
-    }
-    expect(() => extractI18nCallMessages(callExpressionNode)).toThrow(
-      `Cannot parse "message-id" message: defaultMessage is required`
+    const callExpressionNode = [...traverseNodes(parse(source).program.body)].find(node =>
+      isCallExpression(node)
     );
+
+    expect(() => extractI18nCallMessages(callExpressionNode)).toThrowErrorMatchingSnapshot();
   });
 });

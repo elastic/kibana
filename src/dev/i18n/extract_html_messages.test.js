@@ -37,15 +37,31 @@ const htmlSourceBuffer = Buffer.from(`
 </div>
 `);
 
-
 describe('dev/i18n/extract_html_messages', () => {
   test('extracts default messages from HTML', () => {
     const actual = Array.from(extractHtmlMessages(htmlSourceBuffer));
-    const expected = [
-      ['kbn.dashboard.id-1', { message: 'Message text 1', context: 'Message context 1' }],
-      ['kbn.dashboard.id-2', { message: 'Message text 2' }],
-      ['kbn.dashboard.id-3', { message: 'Message text 3', context: 'Message context 3' }],
-    ];
-    expect(actual.sort()).toEqual(expected.sort());
+    expect(actual.sort()).toMatchSnapshot();
+  });
+
+  test('throws on empty i18n-id', () => {
+    const source = Buffer.from(`\
+<p
+  i18n-id=""
+  i18n-default-message="Message text"
+  i18n-context="Message context"
+></p>
+`);
+
+    expect(() => extractHtmlMessages(source).next()).toThrowErrorMatchingSnapshot();
+  });
+
+  test('throws on missing i18n-default-message attribute', () => {
+    const source = Buffer.from(`\
+<p
+  i18n-id="message-id"
+></p>
+`);
+
+    expect(() => extractHtmlMessages(source).next()).toThrowErrorMatchingSnapshot();
   });
 });

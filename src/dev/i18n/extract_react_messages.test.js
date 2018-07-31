@@ -82,19 +82,12 @@ intl.formatMessage({
 describe('dev/i18n/extract_react_messages', () => {
   describe('extractIntlMessages', () => {
     test('extracts messages from "intl.formatMessage" function call', () => {
-      const expected = [
-        'message-id-1',
-        {
-          message: 'Default message 1',
-          context: 'Message context 1',
-        },
-      ];
       const ast = parse(intlFormatMessageCallSource, { plugins: ['jsx'] });
       const expressionNode = [...traverseNodes(ast.program.body)].find(node =>
         isCallExpression(node)
       );
 
-      expect(extractIntlMessages(expressionNode)).toEqual(expected);
+      expect(extractIntlMessages(expressionNode)).toMatchSnapshot();
     });
 
     test('throws if message id is not a string literal', () => {
@@ -104,9 +97,7 @@ describe('dev/i18n/extract_react_messages', () => {
         isCallExpression(node)
       );
 
-      expect(() => extractIntlMessages(callExpressionNode)).toThrow(
-        'Message id should be a string literal.'
-      );
+      expect(() => extractIntlMessages(callExpressionNode)).toThrowErrorMatchingSnapshot();
     });
 
     test('throws if defaultMessage value is not a string literal', () => {
@@ -116,9 +107,7 @@ describe('dev/i18n/extract_react_messages', () => {
         isCallExpression(node)
       );
 
-      expect(() => extractIntlMessages(callExpressionNode)).toThrow(
-        'defaultMessage value should be a string literal for id: message-id.'
-      );
+      expect(() => extractIntlMessages(callExpressionNode)).toThrowErrorMatchingSnapshot();
     });
 
     test('throws if context value is not a string literal', () => {
@@ -128,28 +117,19 @@ describe('dev/i18n/extract_react_messages', () => {
         isCallExpression(node)
       );
 
-      expect(() => extractIntlMessages(callExpressionNode)).toThrow(
-        'context value should be a string literal for id: message-id.'
-      );
+      expect(() => extractIntlMessages(callExpressionNode)).toThrowErrorMatchingSnapshot();
     });
   });
 
   describe('extractFormattedMessages', () => {
     test('extracts messages from "<FormattedMessage>" element', () => {
-      const expected = [
-        'message-id-2',
-        {
-          message: 'Default message 2',
-          context: 'Message context 2',
-        },
-      ];
       const ast = parse(formattedMessageElementSource, { plugins: ['jsx'] });
       const jsxOpeningElementNode = [...traverseNodes(ast.program.body)].find(
         node =>
           isJSXOpeningElement(node) && isJSXIdentifier(node.name, { name: 'FormattedMessage' })
       );
 
-      expect(extractFormattedMessages(jsxOpeningElementNode)).toEqual(expected);
+      expect(extractFormattedMessages(jsxOpeningElementNode)).toMatchSnapshot();
     });
   });
 });
