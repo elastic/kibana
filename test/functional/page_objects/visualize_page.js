@@ -248,93 +248,6 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
       await input.type(timeString);
     }
 
-    async setComboBox(comboBoxSelector, value) {
-      const comboBox = await testSubjects.find(comboBoxSelector);
-      await this.setComboBoxElement(comboBox, value);
-      await PageObjects.common.sleep(1000);
-    }
-
-    async setComboBoxElement(element, value) {
-      const input = await element.findByTagName('input');
-      await input.clearValue();
-      await input.type(value);
-      await PageObjects.common.sleep(500);
-      await find.clickByCssSelector('.euiComboBoxOption');
-      await this.closeComboBoxOptionsList(element);
-    }
-
-    async filterComboBoxOptions(comboBoxSelector, value) {
-      const comboBox = await testSubjects.find(comboBoxSelector);
-      const input = await comboBox.findByTagName('input');
-      await input.clearValue();
-      await input.type(value);
-      await PageObjects.common.sleep(500);
-      await this.closeComboBoxOptionsList(comboBox);
-    }
-
-    async getComboBoxOptions(comboBoxSelector) {
-      await testSubjects.click(comboBoxSelector);
-      const menu = await retry.try(
-        async () => await testSubjects.find('comboBoxOptionsList'));
-      const optionsText = await menu.getVisibleText();
-      const comboBox = await testSubjects.find(comboBoxSelector);
-      await this.closeComboBoxOptionsList(comboBox);
-      return optionsText;
-    }
-
-    async doesComboBoxHaveSelectedOptions(comboBoxSelector) {
-      const comboBox = await testSubjects.find(comboBoxSelector);
-      const selectedOptions = await comboBox.findAllByClassName('euiComboBoxPill');
-      return selectedOptions > 0;
-    }
-
-    async getComboBoxSelectedOptions(comboBoxSelector) {
-      const comboBox = await testSubjects.find(comboBoxSelector);
-      const selectedOptions = await comboBox.findAllByClassName('euiComboBoxPill');
-      if (selectedOptions.length === 0) {
-        return [];
-      }
-
-      const getOptionValuePromises = selectedOptions.map(async (optionElement) => {
-        return await optionElement.getVisibleText();
-      });
-      return await Promise.all(getOptionValuePromises);
-    }
-
-    async clearComboBox(comboBoxSelector) {
-      log.debug(`clearComboBox for comboBoxSelector:${comboBoxSelector}`);
-      const comboBox = await testSubjects.find(comboBoxSelector);
-      await retry.try(async () => {
-        const clearButtonExists = await this.doesComboBoxClearButtonExist(comboBox);
-        if (!clearButtonExists) {
-          log.debug('Unable to clear comboBox, comboBoxClearButton does not exist');
-          return;
-        }
-
-        const clearBtn = await comboBox.findByCssSelector('[data-test-subj="comboBoxClearButton"]');
-        await clearBtn.click();
-
-        const clearButtonStillExists = await this.doesComboBoxClearButtonExist(comboBox);
-        if (clearButtonStillExists) {
-          throw new Error('Failed to clear comboBox');
-        }
-      });
-      await this.closeComboBoxOptionsList(comboBox);
-    }
-
-    async doesComboBoxClearButtonExist(comboBoxElement) {
-      return await find.exists(
-        async () => await comboBoxElement.findByCssSelector('[data-test-subj="comboBoxClearButton"]'));
-    }
-
-    async closeComboBoxOptionsList(comboBoxElement) {
-      const isOptionsListOpen = await testSubjects.exists('comboBoxOptionsList');
-      if (isOptionsListOpen) {
-        const closeBtn = await comboBoxElement.findByCssSelector('[data-test-subj="comboBoxToggleListButton"]');
-        await closeBtn.click();
-      }
-    }
-
     async addInputControl() {
       await testSubjects.click('inputControlEditorAddBtn');
       await PageObjects.header.waitUntilLoadingHasFinished();
@@ -596,6 +509,11 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
       await find.clickByCssSelector(`select[name="orderBy"] > option[value="${fieldValue}"]`);
     }
 
+    async getInputTypeParam(paramName) {
+      const input = await find.byCssSelector(`input[ng-model="agg.params.${paramName}"]`);
+      return await input.getProperty('value');
+    }
+
     async getInterval() {
       const select = await find.byCssSelector('select[ng-model="agg.params.interval"]');
       const selectedIndex = await select.getProperty('selectedIndex');
@@ -609,9 +527,11 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
       await input.type(newValue);
     }
 
-    async setNumericInterval(newValue) {
+    async setNumericInterval(newValue, { append } = {}) {
       const input = await find.byCssSelector('input[name="interval"]');
-      await input.clearValue();
+      if (!append) {
+        await input.clearValue();
+      }
       await input.type(newValue + '');
       await PageObjects.common.sleep(1000);
     }
@@ -635,10 +555,19 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
       return await find.clickByCssSelector('input[name="showMissing"]');
     }
 
+    async isApplyEnabled() {
+      const applyButton = await testSubjects.find('visualizeEditorRenderButton');
+      return await applyButton.isEnabled();
+    }
+
     async clickGo() {
       await testSubjects.click('visualizeEditorRenderButton');
       await PageObjects.header.waitUntilLoadingHasFinished();
       await visualization.waitForRender();
+    }
+
+    async clickReset() {
+      await testSubjects.click('visualizeEditorResetButton');
     }
 
     async toggleAutoMode() {
