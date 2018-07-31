@@ -69,9 +69,8 @@ export class CoreSystem {
 
   public start() {
     try {
-      while (this.rootDomElement.children.length) {
-        this.rootDomElement.removeChild(this.rootDomElement.children[0]);
-      }
+      // ensure the empty the rootDomElement is empty
+      this.rootDomElement.textContent = '';
 
       const injectedMetadata = this.injectedMetadata.start();
 
@@ -86,11 +85,6 @@ export class CoreSystem {
 
   public stop() {
     this.legacyPlatform.stop();
-
-    if (this.legacyPlatformTargetDomElement.parentElement) {
-      this.legacyPlatformTargetDomElement.parentElement.removeChild(
-        this.legacyPlatformTargetDomElement
-      );
-    }
+    this.rootDomElement.textContent = '';
   }
 }
