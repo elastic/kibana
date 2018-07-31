@@ -116,7 +116,7 @@ export default class BaseOptimizer {
         resolve: {
           extensions: ['.js', '.json'],
           mainFields: ['browser', 'browserify', 'main']
-        }
+        },
       }
     };
   }
