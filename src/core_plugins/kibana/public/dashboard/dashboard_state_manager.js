@@ -200,11 +200,12 @@ export class DashboardStateManager {
       store.dispatch(updateDescription(this.getDescription()));
     }
 
+    const dashboardFilters = this.getDashboardFilterBars();
     if (!_.isEqual(
-      FilterUtils.cleanFiltersForComparison(this.appState.filters),
+      FilterUtils.cleanFiltersForComparison(dashboardFilters),
       FilterUtils.cleanFiltersForComparison(getFilters(state))
     )) {
-      store.dispatch(updateFilters(this.appState.filters));
+      store.dispatch(updateFilters(dashboardFilters));
     }
 
     if (getQuery(state) !== this.getQuery()) {

@@ -279,8 +279,9 @@ function VisEditor(
     // update the searchSource when query updates
     $scope.fetch = function () {
       $state.save();
+      const filters = queryFilter.getFilters();
       savedVis.searchSource.setField('query', $state.query);
-      savedVis.searchSource.setField('filter', $state.filters);
+      savedVis.searchSource.setField('filter', filters);
       $scope.vis.forceReload();
     };
 
