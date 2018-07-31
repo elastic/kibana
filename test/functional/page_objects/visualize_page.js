@@ -618,7 +618,7 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
       });
     }
 
-    async saveVisualization(vizName, { saveAsNew = false } = {}) {
+    async saveVisualization(vizName, { saveAsNew = false, ensureSuccess = true } = {}) {
       await this.ensureSavePanelOpen();
       await testSubjects.setValue('visTitleInput', vizName);
       log.debug('click submit button');
@@ -627,7 +627,9 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
         await testSubjects.click('saveAsNewCheckbox');
       }
 
-      await toasts.verifyAndDismiss('saveVisualizationSuccess');
+      if (ensureSuccess) {
+        await toasts.verifyAndDismiss('saveVisualizationSuccess');
+      }
     }
 
     async clickLoadSavedVisButton() {

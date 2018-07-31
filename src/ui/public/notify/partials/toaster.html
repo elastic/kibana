@@ -1,6 +1,6 @@
 <div class="toaster-container">
   <ul class="toaster">
-    <li ng-repeat="notif in list" kbn-toast notif="notif">
+    <li ng-repeat="notif in list" kbn-toast notif="notif" data-test-subj="bootstrapToast">
       <div ng-class="notif.getAlertClass()">
 
         <span ng-show="notif.count > 1" class="euiBadge euiBadge--default">

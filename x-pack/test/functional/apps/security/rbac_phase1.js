@@ -13,6 +13,8 @@ export default function ({ getService, getPageObjects }) {
   const esArchiver = getService('esArchiver');
   const remote = getService('remote');
   const kibanaServer = getService('kibanaServer');
+  const testSubjects = getService('testSubjects');
+  const retry = getService('retry');
 
   describe('rbac ', async function () {
     before(async () => {
@@ -73,47 +75,32 @@ export default function ({ getService, getPageObjects }) {
 
     //   this is to acertain that all role assigned to the user can perform actions like creating a Visualization
     it('rbac all role can save a visualization', async function () {
-      const fromTime = '2015-09-19 06:31:44.000';
-      const toTime = '2015-09-23 18:31:44.000';
-      const vizName1 = 'Visualization VerticalBarChart';
-
       log.debug('navigateToApp visualize');
       await PageObjects.security.login('kibanauser', 'changeme');
       await PageObjects.common.navigateToUrl('visualize', 'new');
       log.debug('clickVerticalBarChart');
       await PageObjects.visualize.clickVerticalBarChart();
       await PageObjects.visualize.clickNewSearch();
-      log.debug('Set absolute time range from \"' + fromTime + '\" to \"' + toTime + '\"');
-      await PageObjects.header.setAbsoluteRange(fromTime, toTime);
-      await PageObjects.visualize.clickGo();
-      await PageObjects.header.waitUntilLoadingHasFinished();
       await PageObjects.visualize.waitForVisualization();
-      const success = await PageObjects.visualize.saveVisualization(vizName1);
-      expect(success).to.be(true);
+      await PageObjects.visualize.saveVisualization('Visualization VerticalBarChart');
       await PageObjects.security.logout();
-
     });
 
-    it('rbac read only role can not  save a visualization', async function () {
-      const fromTime = '2015-09-19 06:31:44.000';
-      const toTime = '2015-09-23 18:31:44.000';
-      const vizName1 = 'Viz VerticalBarChart';
-
+    it('rbac read only role can not save a visualization', async function () {
       log.debug('navigateToApp visualize');
       await PageObjects.security.login('kibanareadonly', 'changeme');
       await PageObjects.common.navigateToUrl('visualize', 'new');
       log.debug('clickVerticalBarChart');
       await PageObjects.visualize.clickVerticalBarChart();
       await PageObjects.visualize.clickNewSearch();
-      log.debug('Set absolute time range from \"' + fromTime + '\" to \"' + toTime + '\"');
-      await PageObjects.header.setAbsoluteRange(fromTime, toTime);
-      await PageObjects.visualize.clickGo();
-      await PageObjects.header.waitUntilLoadingHasFinished();
       await PageObjects.visualize.waitForVisualization();
-      const success = await PageObjects.visualize.saveVisualization(vizName1);
-      expect(success).to.be(false);
+      await PageObjects.visualize.saveVisualization('Viz VerticalBarChart', { ensureSuccess: false });
+      // Verify the save failed by looking for the failure notification, which uses the old
+      // bootstrap notifications.
+      await retry.try(async () => {
+        await testSubjects.existOrFail('bootstrapToast');
+      });
       await PageObjects.security.logout();
-
     });
 
     after(async function () {
