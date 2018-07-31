@@ -66,7 +66,7 @@ In case when `indicesLength` has value 1, the result string will be "`1 index`".
 ## Best practices
 
 
-### Naming conversation
+### Naming convention
 
 The IDs (names) chosen for message keys should always be descriptive of the string, and its role in the interface (button label, title, etc.). Think of them as long variable names. When you have to change a key ID, adding a progressive number to the existing key should always be used as a last resort.
 
