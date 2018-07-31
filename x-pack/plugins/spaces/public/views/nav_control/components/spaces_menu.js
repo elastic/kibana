@@ -10,7 +10,7 @@ import {
   EuiContextMenuPanel,
   EuiContextMenuItem,
   EuiFieldSearch,
-  EuiHorizontalRule,
+  EuiButton,
 } from '@elastic/eui';
 import { SpaceAvatar } from '../../components/space_avatar';
 import { SPACE_SEARCH_COUNT_THRESHOLD } from '../../../../common/constants';
@@ -31,6 +31,8 @@ export class SpacesMenu extends Component {
     if (this.props.spaces.length >= SPACE_SEARCH_COUNT_THRESHOLD) {
       items = [this.renderSearchField(), this.renderSpacesListPanel(items, searchTerm)];
     }
+
+    items.push(this.renderManageButton());
 
     return (
       <EuiContextMenuPanel
@@ -76,15 +78,23 @@ export class SpacesMenu extends Component {
 
   renderSearchField = () => {
     return (
-      <EuiContextMenuPanel key="spacesMenuSearchField">
+      <EuiContextMenuItem key="spacesMenuSearchField">
         <EuiFieldSearch
           className="spacesMenu__searchField"
           placeholder="Find a space"
           incremental={true}
           onSearch={this.onSearch}
+          compressed
         />
-        <EuiHorizontalRule />
-      </EuiContextMenuPanel>
+      </EuiContextMenuItem>
+    );
+  }
+
+  renderManageButton = () => {
+    return (
+      <EuiContextMenuItem>
+        <EuiButton size="s" style={{ width: `100%` }}>Manage spaces</EuiButton>
+      </EuiContextMenuItem>
     );
   }
 

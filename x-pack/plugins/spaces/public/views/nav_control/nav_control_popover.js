@@ -66,9 +66,10 @@ export class NavControlPopover extends Component {
       <EuiPopover
         button={button}
         isOpen={this.state.isOpen}
-        panelPaddingSize={'none'}
         closePopover={this.closePortal}
         anchorPosition={'rightCenter'}
+        panelPaddingSize="none"
+        ownFocus
       >
         <SpacesMenu spaces={this.state.spaces} onSelectSpace={this.onSelectSpace} />
       </EuiPopover>
