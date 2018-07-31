@@ -30,9 +30,14 @@ export function ToastsProvider({ getService }) {
     }
 
     async dismiss(selector) {
+      // Toasts animate in with opacity and position. Since we can't use position to determine when
+      // the toast is done animating, we'll use opacity. We have to do this, otherwise selenium
+      // might try to click on a moving toast and barely miss. When it misses, it doesn't throw an
+      // error, resulting in a flaky test.
+      await testSubjects.waitForOpacity(selector);
       await testSubjects.click(`${selector} toastCloseButton`);
 
-      // Wait for the toast to fade out and ensure it's gone.
+      // Wait for the toast to be removed.
       await retry.try(async () => {
         await testSubjects.notExistOrFail(`${selector} toastCloseButton`);
       });

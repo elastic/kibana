@@ -52,6 +52,18 @@ export function TestSubjectsProvider({ getService }) {
       expect(doesExist).to.be(false);
     }
 
+    async waitForOpacity(selector) {
+      await retry.try(async () => {
+        const element = await this.find(selector);
+        const opacity = await element.getComputedStyle('opacity');
+        if (opacity === '1') {
+          return true;
+        } else {
+          throw new Error(`Opacity is less than 1: ${selector}`);
+        }
+      });
+    }
+
     async append(selector, text) {
       return await retry.try(async () => {
         const input = await this.find(selector);
