@@ -4,17 +4,20 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { last } from 'lodash';
 import React from 'react';
 import styled from 'styled-components';
-import { InfraHost } from '../../../../common/graphql/types';
+import { InfraResponse } from '../../../../common/graphql/types';
 import { AutoSizer } from '../../auto_sizer';
 
-interface WaffleMapPlaceholderProps {
-  hosts: InfraHost[];
+interface Props {
+  map: InfraResponse;
 }
 
-export class WaffleMap extends React.PureComponent<WaffleMapPlaceholderProps> {
+export class WaffleMap extends React.PureComponent<Props> {
   public render() {
+    const { map } = this.props;
+    const nodes = (map && map.nodes) || [];
     return (
       <AutoSizer bounds>
         {({ measureRef, bounds: { height = 0, width = 0 } }) => (
@@ -22,22 +25,23 @@ export class WaffleMap extends React.PureComponent<WaffleMapPlaceholderProps> {
             <svg height={height} width={width} viewBox={`0 0 ${width} ${height}`}>
               <g
                 transform={`
-            translate(${width / 2} ${height / 2})
-            translate(-100 -100)
-          `}
+                  translate(${width / 2} ${height / 2})
+                  translate(-100 -100)
+                `}
               >
                 <a href="#/details?filter=zone:zone1">
                   <WaffleMapGroupRect x={0} y={0} width={200} height={200} />
                 </a>
-                <a href="#/details?filter=host:host1">
-                  <WaffleMapLeafRect x={10} y={10} />
-                </a>
-                <a href="#/details?filter=host:host2">
-                  <WaffleMapLeafRect x={40} y={10} />
-                </a>
-                <a href="#/details?filter=host:host3">
-                  <WaffleMapLeafRect x={70} y={10} />
-                </a>
+                {nodes.map((node, index) => {
+                  const x = 10 + index * 30;
+                  const nodeName = last(node.path).value;
+                  const id = node.path.map(n => n.value).join('/');
+                  return (
+                    <a href={`#/details?filter=beat.hostname:${nodeName}`} key={id}>
+                      <WaffleMapLeafRect x={x} y={10} />
+                    </a>
+                  );
+                })}
               </g>
             </svg>
           </WaffleMapWrapper>

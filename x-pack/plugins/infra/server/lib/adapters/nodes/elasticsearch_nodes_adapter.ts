@@ -13,7 +13,6 @@ import {
 } from './adapter_types';
 
 import { InfraResponse } from '../../../../common/graphql/types';
-import { DOMAIN_TO_FIELD } from './constants';
 import { calculateCardinalityOfNodeField } from './lib/calculate_cardinality';
 import { createPartitionBodies } from './lib/create_partition_bodies';
 import { processNodes } from './lib/process_nodes';
@@ -35,17 +34,13 @@ export class ElasticsearchNodesAdapter implements InfraNodesAdapter {
 
     const infraResponse: InfraResponse = {};
 
-    const totalNodes = await calculateCardinalityOfNodeField(
-      search,
-      DOMAIN_TO_FIELD[options.nodeType],
-      options
-    );
+    const totalNodes = await calculateCardinalityOfNodeField(search, options.nodeField, options);
 
     if (totalNodes === 0) {
       return infraResponse;
     }
 
-    const body = createPartitionBodies(totalNodes, DOMAIN_TO_FIELD[options.nodeType], options);
+    const body = createPartitionBodies(totalNodes, options.nodeField, options);
 
     const response = await msearch<InfraNodesAggregations>({
       body,

@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { InfraGroupBy } from '../../../../../common/graphql/types';
-import { InfraBucket, InfraNode, InfraNodeRequestOptions } from '../adapter_types';
+import { InfraNode, InfraPath } from '../../../../../common/graphql/types';
+import { InfraBucket, InfraNodeRequestOptions } from '../adapter_types';
 import { createNodeItem } from './create_node_item';
 
 export interface InfraPathItem {
@@ -16,26 +16,30 @@ export interface InfraPathItem {
 export function extractGroupPaths(
   options: InfraNodeRequestOptions,
   node: InfraBucket
-): InfraPathItem[] {
+): InfraNode[] {
   const { groupBy } = options;
-  const firstGroup: InfraGroupBy = groupBy[0];
-  const secondGroup: InfraGroupBy = groupBy[1];
-  const paths: InfraPathItem[] = node[firstGroup!.id].buckets.reduce(
-    (acc: InfraPathItem[], bucket: InfraBucket, index: number): InfraPathItem[] => {
+  const firstGroup: InfraPath = groupBy[0];
+  const secondGroup: InfraPath = groupBy[1];
+  const paths: InfraNode[] = node[firstGroup!.id].buckets.reduce(
+    (acc: InfraNode[], bucket: InfraBucket, index: number): InfraNode[] => {
+      const nodeItem = createNodeItem(options, node, bucket);
+      const key: string = String(bucket.key || index);
       if (secondGroup) {
         return acc.concat(
-          bucket[secondGroup!.id].buckets.map((b: InfraBucket): InfraPathItem => {
+          bucket[secondGroup!.id].buckets.map((b: InfraBucket): InfraNode => {
             return {
-              nodeItem: createNodeItem(options, node, bucket),
-              path: [bucket.key, b.key],
+              ...nodeItem,
+              path: [
+                { id: firstGroup.id, value: bucket.key },
+                { id: secondGroup.id, value: b.key },
+              ].concat(nodeItem.path),
             };
           })
         );
       }
-      const key: string = String(bucket.key || index);
       return acc.concat({
-        nodeItem: createNodeItem(options, node, bucket),
-        path: [key],
+        ...nodeItem,
+        path: [{ id: firstGroup.id, value: key }].concat(nodeItem.path),
       });
     },
     []

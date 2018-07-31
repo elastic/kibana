@@ -5,21 +5,21 @@
  */
 
 import React from 'react';
-import { InfraHost } from '../../common/graphql/types';
+import { InfraResponse } from '../../common/graphql/types';
 import { WaffleMap } from '../components/eui';
 import { MainLayout } from '../components/layouts/main';
-import { withAllHosts } from '../containers/host';
+import { withMap } from '../containers/map';
 
 interface HomePageProps {
-  hosts: InfraHost[];
+  map: InfraResponse;
 }
 
-export const HomePage = withAllHosts(
+export const HomePage = withMap(
   class extends React.PureComponent<HomePageProps> {
     public render() {
       return (
         <MainLayout>
-          <WaffleMap hosts={this.props.hosts} />
+          <WaffleMap map={this.props.map} />
         </MainLayout>
       );
     }
