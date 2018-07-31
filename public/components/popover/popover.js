@@ -1,3 +1,4 @@
+/* eslint-disable react/forbid-elements */
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { EuiPopover } from '@elastic/eui';

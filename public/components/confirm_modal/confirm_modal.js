@@ -1,3 +1,4 @@
+/* eslint-disable react/forbid-elements */
 import React from 'react';
 import PropTypes from 'prop-types';
 import { EuiConfirmModal, EuiOverlayMask } from '@elastic/eui';
