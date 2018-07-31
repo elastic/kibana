@@ -5,7 +5,7 @@
  */
 
 import { createSelector } from 'reselect';
-import { getLayerList } from "./map_selectors";
+import { getLayerList, getMapConstants } from "./map_selectors";
 import { LAYER_TYPE } from "../shared/layers/layer";
 import * as ol from 'openlayers';
 import _ from 'lodash';
