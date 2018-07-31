@@ -31,12 +31,12 @@ describe('getVisualizeLoader', () => {
     updateStub = sinon.stub();
     const handlerMock = {
       update: updateStub
-    }
+    };
     const loaderMock = {
       embedVisualizationWithSavedObject: () => {
         return handlerMock;
       }
-    }
+    };
     require('ui/visualize/loader/visualize_loader').getVisualizeLoader = async () => {
       return loaderMock;
     };
