@@ -17,6 +17,7 @@
  * under the License.
  */
 
+import './core.less';
 import { FatalErrorsService } from './fatal_errors';
 import { InjectedMetadataParams, InjectedMetadataService } from './injected_metadata';
 import { LegacyPlatformParams, LegacyPlatformService } from './legacy_platform';
@@ -71,6 +72,7 @@ export class CoreSystem {
     try {
       // ensure the empty the rootDomElement is empty
       this.rootDomElement.textContent = '';
+      this.rootDomElement.classList.add('coreSystemRootDomElement');
 
       const injectedMetadata = this.injectedMetadata.start();
 
