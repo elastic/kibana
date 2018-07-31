@@ -20,12 +20,10 @@ export const getLayerLoading = ({ map }) => map && map.layerLoading;
 export const getTemporaryLayers = ({ map }) => map &&
   map.layerList.filter(({ temporary }) => temporary);
 
-function getLayersById(state) {
-  return createSelector(
-    getLayerList,
-    layerList => layerList.reduce((accu, layer) => ({ ...accu, [layer.id]: layer }), {})
-  )(state);
-}
+const getLayersById = createSelector(
+  getLayerList,
+  layerList => layerList.reduce((accu, layer) => ({ ...accu, [layer.id]: layer }), {})
+);
 
 export function getLayerById(state, id) {
   return createSelector(
@@ -34,24 +32,20 @@ export function getLayerById(state, id) {
   )(state);
 }
 
-function getLayerOptionsByOrigin(state) {
-  return createSelector(
-    getLayerOptions,
-    layerOptions => {
-      return _.isEmpty(layerOptions) ? {}
-        : _.groupBy(layerOptions, ({ dataOrigin }) => dataOrigin);
-    }
-  )(state);
-}
+const getLayerOptionsByOrigin = createSelector(
+  getLayerOptions,
+  layerOptions => {
+    return _.isEmpty(layerOptions) ? {}
+      : _.groupBy(layerOptions, ({ dataOrigin }) => dataOrigin);
+  }
+);
 
-export function getLayerOptionsByOriginAndType(state) {
-  return createSelector(
-    getLayerOptionsByOrigin,
-    layerOptions => {
-      return _.reduce(layerOptions, (accu, services, origin) => {
-        accu[origin] = _.groupBy(services, ({ type }) => type);
-        return accu;
-      }, {});
-    }
-  )(state);
-}
+export const getLayerOptionsByOriginAndType = createSelector(
+  getLayerOptionsByOrigin,
+  layerOptions => {
+    return _.reduce(layerOptions, (accu, services, origin) => {
+      accu[origin] = _.groupBy(services, ({ type }) => type);
+      return accu;
+    }, {});
+  }
+);

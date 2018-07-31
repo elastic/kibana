@@ -14,8 +14,8 @@ import _ from 'lodash';
 function mapDispatchToProps(dispatch) {
   return ({
     onButtonClick: layerId => {
-      dispatch(updateFlyout(FLYOUT_STATE.LAYER_PANEL));
       dispatch(setSelectedLayer(layerId));
+      dispatch(updateFlyout(FLYOUT_STATE.LAYER_PANEL));
     },
     toggleVisible: layerId => dispatch(toggleLayerVisible(layerId))
   });

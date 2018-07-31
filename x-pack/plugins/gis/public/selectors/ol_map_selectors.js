@@ -81,23 +81,17 @@ export const getOlMap = createSelector(
   }
 );
 
-export function getOlLayers(state) {
-  return createSelector(
-    getLayerList,
-    layerList => convertLayersByType(layerList)
-  )(state);
-}
+export const getOlLayers = createSelector(
+  getLayerList,
+  layerList => convertLayersByType(layerList)
+);
 
-export function getOlLayersBySource(state) {
-  return createSelector(
-    getOlLayers,
-    layers => _.groupBy(layers, ({ appData }) => appData.source)
-  )(state);
-}
+export const getOlLayersBySource = createSelector(
+  getOlLayers,
+  layers => _.groupBy(layers, ({ appData }) => appData.source)
+);
 
-export function getOlLayersByType(state) {
-  return createSelector(
-    getOlLayers,
-    layers => _.groupBy(layers, ({ appData }) => appData.layerType)
-  )(state);
-}
+export const getOlLayersByType = createSelector(
+  getOlLayers,
+  layers => _.groupBy(layers, ({ appData }) => appData.layerType)
+);
