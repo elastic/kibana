@@ -89,7 +89,24 @@ export function addVectorLayer(sourceName, layerId, options = {}) {
   };
 }
 
+
+
+export function addXYZLayer(xyzUrl, layerId, options = {}) {
+  return (dispatch) => {
+    dispatch(layerLoading(true));
+    // const { map } = getState();
+    const layer = TileLayer.create({
+      source: xyzUrl,
+      name: xyzUrl,
+      ...options
+    });
+    dispatch(addLayer(layer));
+  };
+}
+
+
 export function addTileLayer(sourceName, layerId, options = {}) {
+  // console.log('tile layer', arguments);
   return (dispatch, getState) => {
     dispatch(layerLoading(true));
     const { map } = getState();
@@ -141,6 +158,8 @@ export function addVectorSource(dataOrigin, service, sourceName) {
 }
 
 export async function loadMapResources(serviceSettings, dispatch) {
+
+
 
   const tmsSource = await serviceSettings.getTMSServices();
   const emsSource = await serviceSettings.getFileLayers();
