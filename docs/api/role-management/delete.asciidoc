@@ -1,7 +1,7 @@
 [[role-management-api-delete]]
-=== Delete Role
+===== Delete Role
 
-To delete a role in {es}'s `native realm, submit a DELETE request to the `/api/security/role/<rolename>`
+To delete a role in {es}'s `native` realm, submit a DELETE request to the `/api/security/role/<rolename>`
 endpoint:
 
 [source,js]
@@ -11,4 +11,4 @@ DELETE /api/security/role/my_admin_role
 // KIBANA
 
 If the role is successfully deleted, the response code is `204`; otherwise, the response
-code will be 404.
+code is 404.

@@ -1,5 +1,5 @@
 [[role-management-api-get]]
-=== Get Roles
+===== Get Roles
 
 To retrieve all roles from {es}'s `native` realm, issue a GET request to the 
 `/api/security/role` endpoint:

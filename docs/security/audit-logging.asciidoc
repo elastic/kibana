@@ -29,8 +29,8 @@ When you are auditing security events, each request can generate
 multiple audit events. The following is a list of the events that can be generated:
 
 |======
-| `saved_objects_authorization_success`    | | | Logged when a user is authorized to access a saved
-                                                 object(s) when using a role with <<kibana-privileges>>
-| `saved_objects_authorization_failure`    | | | Logged when a user isn't authorized to access a saved
-                                                 object(s) when using a role with <<kibana-privileges>>
+| `saved_objects_authorization_success`    | Logged when a user is authorized to access a saved
+                                             object(s) when using a role with <<kibana-privileges>>
+| `saved_objects_authorization_failure`    | Logged when a user isn't authorized to access a saved
+                                             object(s) when using a role with <<kibana-privileges>>
 |======

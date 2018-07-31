@@ -22,7 +22,7 @@ authentication and built-in users, see
 
 You can manage roles on the *Management* / *Security* / *Roles* page, or use 
 {kib}'s <<role-management-api>>. For more information on configuring roles for
-Kibana see <<xpack-security-authorization, {kib} Authorization>>.
+{kib} see <<xpack-security-authorization, {kib} Authorization>>.
 
 For a more holistic overview of configuring roles for the entire stack,
 see {xpack-ref}/authorization.html[Configuring Role-based Access Control].

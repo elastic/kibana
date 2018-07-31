@@ -1,10 +1,10 @@
 [[role-management-api-put]]
-=== Create or Update Roles
+==== Create or Update Roles
 
 To create or update a role in {es}'s `native` realm, issue a PUT request to the 
 `/api/security/role/<rolename>` endpoint.
 
-==== Request Body
+===== Request Body
 
 The following parameters can be specified in the body of a PUT request to add or update a role:
 
@@ -16,11 +16,7 @@ that begin with `_` are reserved for system usage.
 
 `kibana`:: (list) A list of objects that specify the <<kibana-privileges>>.
 
-==== Authorization
-
-To use this API, you must have at least the `manage_security` cluster privilege.
-
-==== Example
+===== Example
 
 [source,js]
 --------------------------------------------------

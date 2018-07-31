@@ -1,12 +1,12 @@
 [[development-security-rbac]]
 === Role based access control
 
-Role based access control (RBAC) in {kib} relies upon the {ref}/security-api-privileges.html[privilege APIs] that Elasticsearch exposes. This allows us to define the privileges that {kib} wishes to grant to users, assign them to the relevant users using roles, and then authorize the user to perform a specific action. This is handled transparently within a secured instance of the `SavedObjectClient` and available transparently to consumers.
+Role based access control (RBAC) in {kib} relies upon the {ref}/security-api-privileges.html[privilege APIs] that Elasticsearch exposes. This allows us to define the privileges that {kib} wishes to grant to users, assign them to the relevant users using roles, and then authorize the user to perform a specific action. This is handled within a secured instance of the `SavedObjectsClient` and available transparently to consumers when using `request.getSavedObjectsClient()` or `savedObjects.getScopedSavedObjectsClient()`.
 
 [[development-rbac-privileges]]
-==== Kibana Privileges
+==== {kib} Privileges
 
-When Kibana first starts up, it executes the following `POST` request against {es} to synchronize it's definition of privileges which are associated with various `actions` which we later use to authorize a user:
+When {kib} first starts up, it executes the following `POST` request against {es} to synchronize its definition of privileges which are associated with various `actions` which we later use to authorize a user:
 
 [source,js]
 ----------------------------------
@@ -49,9 +49,9 @@ The application is created by concatenating the prefix of `kibana-` with the val
 ==============================================
 
 [[development-rbac-assigning-privileges]]
-==== Assigning Kibana Privileges
+==== Assigning {kib} Privileges
 
-Kibana privileges are assigned to specific roles using the `applications` element. For example, the following role assigns the <<kibana-privileges-all, all>> privilege at `*` `resources` (which will in the future be used to secure spaces) to the default {kib} `application`:
+{kib} privileges are assigned to specific roles using the `applications` element. For example, the following role assigns the <<kibana-privileges-all, all>> privilege at `*` `resources` (which will in the future be used to secure spaces) to the default {kib} `application`:
 
 [source,js]
 ----------------------------------
@@ -96,7 +96,7 @@ Authorization: Basic foo_read_only_user password
 }
 ----------------------------------
 
-We aren't checking to determine whether the user has a specific privilege, instead we're checking to see if they're granted a specific action. When a user is assigned a role which grants them a privilege, {es} uses the <<development-rbac-privileges, Kibana privileges>> definition to associate this with the actions and make authorizing users more intuitive and flexible programatically. 
+We aren't checking to determine whether the user has a specific privilege, instead we're checking to see if they're granted a specific action. When a user is assigned a role which grants them a privilege, {es} uses the <<development-rbac-privileges, {kib} privileges>> definition to associate this with the actions and make authorizing users more intuitive and flexible programatically. 
 
 Once we have authorized the user to perform a specific action, we can execute the request using `callWithInternalUser`.
 
@@ -105,7 +105,7 @@ Once we have authorized the user to perform a specific action, we can execute th
 
 Since users have existing roles which rely upon index privileges to the `.kibana` index, we use a legacy fallback which uses `callWithRequest` (this relies upon the user having index privileges on `.kibana`) method when the user doesn’t have any application privileges. The legacy fallback will be available until 7.0.
 
-Within the secured instance of the `SavedObjectClient` when we peform the `_has_privileges` check, we also check to see if the user has any index privileges on the `.kibana` index:
+Within the secured instance of the `SavedObjectsClient` when we peform the `_has_privileges` check, we also check to see if the user has any index privileges on the `.kibana` index:
 
 [source,js]
 ----------------------------------
@@ -132,7 +132,7 @@ Authorization: Basic foo_legacy_user password
 }
 ----------------------------------
 
-If the response comes back with the user having no application privileges, but they have privileges on the `kibana` index:
+If the response comes back with the user having no application privileges, but they have privileges on the `.kibana` index:
 
 [source,js]
 ----------------------------------
@@ -160,14 +160,14 @@ If the response comes back with the user having no application privileges, but t
 
 We automatically detect that the request could be executed against `.kibana` using `callWithRequest` and do so.
 
-When the user first logs into Kibana, we detect whether the user will have to rely upon the legacy fallback to be able to access `.kibana`, and we log a deprecation warning similar to the following:
+When the user first logs into {kib}, we detect whether the user will have to rely upon the legacy fallback to be able to access `.kibana`, and we log a deprecation warning similar to the following:
 
 [source,js]
 ----------------------------------
-${username} relies on index privileges on the Kibana index. This is deprecated and will be removed in Kibana 7.0
+${username} relies on index privileges on the {kib} index. This is deprecated and will be removed in {kib} 7.0
 ----------------------------------
 
 [[development-rbac-reserved-roles]]
 ==== Reserved roles
 
-Ideally, we’d like to change the `kibana_user` and `kibana_dashboard_only_user` roles to only use application privileges, and no longer give them index privileges on the `.kibana` index. However, making this switch will force the user to incur some downtime if Elasticsearch is upgraded to >= 6.4, and Kibana is running < 6.4. To mitigate this downtime, for the 6.x releases the `kibana_user` and `kibana_dashbord_only_user` roles will have both application privileges and index privileges. When Kibana is running >= 6.4 it will use the application privileges to authorize the user, but when Kibana is running < 6.4 it’ll rely on the direct index privileges. 
+Ideally, we’d like to change the `kibana_user` and `kibana_dashboard_only_user` roles to only use application privileges, and no longer give them index privileges on the `.kibana` index. However, making this switch will force the user to incur some downtime if Elasticsearch is upgraded to >= 6.4, and {kib} is running < 6.4. To mitigate this downtime, for the 6.x releases the `kibana_user` and `kibana_dashbord_only_user` roles will have both application privileges and index privileges. When {kib} is running >= 6.4 it will use the application privileges to authorize the user, but when {kib} is running < 6.4 it’ll rely on the direct index privileges. 
