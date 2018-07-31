@@ -241,7 +241,7 @@ export default function ({ getService, getPageObjects }) {
         await embeddable.waitForRender(2);
         await dashboardExpect.pieSliceCount(3);
 
-        await PageObjects.visualize.saveVisualization('Rendering-Test:-animal-sounds-pie');
+        await PageObjects.visualize.saveVisualization('Rendering Test: animal sounds pie');
         await PageObjects.header.clickDashboard();
         await PageObjects.header.waitUntilLoadingHasFinished();
         await PageObjects.dashboard.waitForRenderComplete();
