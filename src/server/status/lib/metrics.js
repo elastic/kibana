@@ -43,7 +43,6 @@ export class Metrics {
       },
       response_times: {},
       requests: {
-        status_codes: {}
       }
     };
   }
