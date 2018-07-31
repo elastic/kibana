@@ -45,8 +45,8 @@ export function TestSubjectsProvider({ getService }) {
       expect(doesExist).to.be(true);
     }
 
-    async noExistOrFail(selector, timeout = 1000) {
-      log.debug(`TestSubjects.noExistOrFail(${selector})`);
+    async notExistOrFail(selector, timeout = 1000) {
+      log.debug(`TestSubjects.notExistOrFail(${selector})`);
       const doesExist = await this.exists(selector, timeout);
       // Verify element doesn't exist, or else fail the test consuming this.
       expect(doesExist).to.be(false);

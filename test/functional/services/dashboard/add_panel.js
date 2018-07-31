@@ -17,7 +17,6 @@
  * under the License.
  */
 
-
 export function DashboardAddPanelProvider({ getService, getPageObjects }) {
   const log = getService('log');
   const retry = getService('retry');
@@ -40,20 +39,20 @@ export function DashboardAddPanelProvider({ getService, getPageObjects }) {
       await testSubjects.click('addSavedSearchTab');
     }
 
-    async addEveryEmbeddableOnCurrentPage() {
+    async addEveryEmbeddableOnCurrentPage(successToastSelector) {
       log.debug('addEveryEmbeddableOnCurrentPage');
       const addPanel = await testSubjects.find('dashboardAddPanel');
       const embeddableRows = await addPanel.findAllByClassName('euiLink');
       for (let i = 0; i < embeddableRows.length; i++) {
         await embeddableRows[i].click();
       }
+      // All of the toasts up to this point have been automatically removed by the UI. We just
+      // need to remove the last toast.
+      await toasts.verifyAndDismiss(successToastSelector);
       log.debug(`Added ${embeddableRows.length} embeddables`);
     }
 
     async clickPagerNextButton() {
-      // Clear all toasts that could hide pagination controls
-      await PageObjects.common.clearAllToasts();
-
       const addPanel = await testSubjects.find('dashboardAddPanel');
       const pagination = await addPanel.findAllByClassName('euiPagination');
       if (pagination.length === 0) {
@@ -121,7 +120,7 @@ export function DashboardAddPanelProvider({ getService, getPageObjects }) {
       }
       let morePages = true;
       while (morePages) {
-        await this.addEveryEmbeddableOnCurrentPage();
+        await this.addEveryEmbeddableOnCurrentPage('addVisualizationToDashboardSuccess');
         morePages = await this.clickPagerNextButton();
       }
       await this.closeAddPanel();
@@ -136,7 +135,7 @@ export function DashboardAddPanelProvider({ getService, getPageObjects }) {
       }
       let morePages = true;
       while (morePages) {
-        await this.addEveryEmbeddableOnCurrentPage();
+        await this.addEveryEmbeddableOnCurrentPage('addSavedSearchToDashboardSuccess');
         morePages = await this.clickPagerNextButton();
       }
       await this.closeAddPanel();

@@ -30,11 +30,11 @@ export function ToastsProvider({ getService }) {
     }
 
     async dismiss(selector) {
-      // We may need to wait for the close button to fade-in and become clickable when the mouse
-      // hovers over it.
+      await testSubjects.click(`${selector} toastCloseButton`);
+
+      // Wait for the toast to fade out and ensure it's gone.
       await retry.try(async () => {
-        await testSubjects.click(`${selector} closeToastButton`);
-        await testSubjects.notExistOrFail(`${selector} closeToastButton`);
+        await testSubjects.notExistOrFail(`${selector} toastCloseButton`);
       });
     }
 
