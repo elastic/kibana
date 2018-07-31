@@ -148,6 +148,8 @@ export function uiRenderMixin(kbnServer, server, config) {
         i18n: key => get(translations, key, ''),
 
         injectedMetadata: {
+          version: kbnServer.version,
+          buildNumber: config.get('pkg.buildNum'),
           legacyMetadata: await getLegacyKibanaPayload({
             app,
             request,
