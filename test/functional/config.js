@@ -49,6 +49,7 @@ import {
   DashboardAddPanelProvider,
   DashboardPanelActionsProvider,
   FlyoutProvider,
+  ComboBoxProvider,
   VisualizationProvider,
   EmbeddingProvider,
 } from './services';
@@ -105,6 +106,7 @@ export default async function ({ readConfigFile }) {
       dashboardAddPanel: DashboardAddPanelProvider,
       dashboardPanelActions: DashboardPanelActionsProvider,
       flyout: FlyoutProvider,
+      comboBox: ComboBoxProvider,
       visualization: VisualizationProvider,
       embedding: EmbeddingProvider,
     },
