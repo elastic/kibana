@@ -8,7 +8,7 @@ import { Esqueue } from '@codesearch/esqueue';
 import { resolve } from 'path';
 
 import { mappings } from './mappings';
-import { LspIndexer, RepositoryIndexer } from './server/indexer';
+import { LspIndexer, RepositoryIndexInitializer } from './server/indexer';
 import { Server } from './server/kibana_types';
 import { Log } from './server/log';
 import { LspService } from './server/lsp/lsp_service';
@@ -59,7 +59,14 @@ export default (kibana: any) =>
 
       const lspService = new LspService('127.0.0.1', server, serverOptions);
       const lspIndexer = new LspIndexer(lspService, adminClient.getClient(), serverOptions, log);
-      const repositoryIndexer = new RepositoryIndexer(adminClient.getClient(), serverOptions, log);
+
+      // Initialize repository index.
+      const repositoryIndexInit = new RepositoryIndexInitializer(
+        adminClient.getClient(),
+        serverOptions,
+        log
+      );
+      repositoryIndexInit.init();
 
       const repository = server.savedObjects.getSavedObjectsRepository(
         adminClient.callWithInternalUser
@@ -78,10 +85,7 @@ export default (kibana: any) =>
         adminClient.getClient()
       ).bind();
       const updateWorker = new UpdateWorker(queue, log, objectsClient).bind();
-      const indexWorker = new IndexWorker(queue, log, objectsClient, [
-        lspIndexer,
-        repositoryIndexer,
-      ]).bind();
+      const indexWorker = new IndexWorker(queue, log, objectsClient, [lspIndexer]).bind();
 
       const scheduler = new UpdateScheduler(
         updateWorker,

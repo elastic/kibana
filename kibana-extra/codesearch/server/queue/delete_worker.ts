@@ -6,7 +6,6 @@
 
 import { EsClient, Esqueue } from '@codesearch/esqueue';
 
-import { RepositoryUtils } from '../../common/repository_utils';
 import {
   REPOSITORY_CLONE_STATUS_INDEX_TYPE,
   REPOSITORY_DELETE_STATUS_INDEX_TYPE,
@@ -14,6 +13,7 @@ import {
   REPOSITORY_LSP_INDEX_STATUS_INDEX_TYPE,
 } from '../../mappings';
 import { DeleteWorkerResult, WorkerProgress } from '../../model/repository';
+import { documentIndexName, symbolIndexName } from '../indexer/schema';
 import { Log } from '../log';
 import { RepositoryService } from '../repository_service';
 import { AbstractWorker } from './abstract_worker';
@@ -46,10 +46,10 @@ export class DeleteWorker extends AbstractWorker {
       await this.objectsClient.delete(REPOSITORY_INDEX_STATUS_INDEX_TYPE, uri);
 
       await this.client.indices.delete({
-        index: `.codesearch-symbol-${RepositoryUtils.normalizeRepoUriToIndexName(uri)}`,
+        index: symbolIndexName(uri),
       });
       await this.client.indices.delete({
-        index: `.codesearch-document-${RepositoryUtils.normalizeRepoUriToIndexName(uri)}`,
+        index: documentIndexName(uri),
       });
     } catch (error) {
       this.log.error(`Delete repository status error: ${error}`);

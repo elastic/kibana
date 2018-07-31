@@ -7,8 +7,8 @@
 import Boom from 'boom';
 
 import { RepositoryUtils } from '../../common/repository_utils';
-import { REPOSITORY_INDEX_TYPE } from '../../mappings';
 import { Repository } from '../../model';
+import { repositoryIndexName, repositoryTypeName } from '../indexer/schema';
 import { Server } from '../kibana_types';
 import { Log } from '../log';
 import { CloneWorker, DeleteWorker, IndexWorker } from '../queue';
@@ -27,13 +27,17 @@ export function repositoryRoute(
     method: 'POST',
     async handler(req, reply) {
       const repoUrl: string = req.payload.url;
-      const objectClient = req.getSavedObjectsClient();
       const log = new Log(req.server);
+      const repo = RepositoryUtils.buildRepository(repoUrl);
+      const { callWithRequest } = req.server.plugins.elasticsearch.getCluster('data');
 
-      const repo: Repository = RepositoryUtils.buildRepository(repoUrl);
       try {
         // Check if the repository already exists
-        await objectClient.get(REPOSITORY_INDEX_TYPE, repo.uri);
+        await callWithRequest(req, 'get', {
+          index: repositoryIndexName(),
+          type: repositoryTypeName,
+          id: repo.uri,
+        });
         const msg = `Repository ${repoUrl} already exists. Skip clone.`;
         log.info(msg);
         reply(msg).code(304); // Not Modified
@@ -41,10 +45,14 @@ export function repositoryRoute(
         log.info(`Repository ${repoUrl} does not exist. Go ahead with clone.`);
         try {
           // Persist to elasticsearch
-          await objectClient.create(REPOSITORY_INDEX_TYPE, repo, {
+          await callWithRequest(req, 'create', {
+            index: repositoryIndexName(),
+            type: repositoryTypeName,
             id: repo.uri,
+            body: JSON.stringify(repo),
           });
 
+          // Kick off clone job
           const payload = {
             url: repoUrl,
             dataPath: options.repoPath,
@@ -67,11 +75,15 @@ export function repositoryRoute(
     async handler(req, reply) {
       const repoUri: string = req.params.uri as string;
       const log = new Log(req.server);
-
+      const { callWithRequest } = req.server.plugins.elasticsearch.getCluster('data');
       try {
         // Delete the repository from ES.
         // If object does not exist in ES, an error will be thrown.
-        await req.getSavedObjectsClient().delete(REPOSITORY_INDEX_TYPE, repoUri);
+        await callWithRequest(req, 'delete', {
+          index: repositoryIndexName(),
+          type: repositoryTypeName,
+          id: repoUri,
+        });
 
         const payload = {
           uri: repoUri,
@@ -94,11 +106,14 @@ export function repositoryRoute(
     method: 'GET',
     async handler(req, reply) {
       const repoUri = req.params.uri as string;
-      const objectClient = req.getSavedObjectsClient();
       const log = new Log(req.server);
-
+      const { callWithRequest } = req.server.plugins.elasticsearch.getCluster('data');
       try {
-        const response = await objectClient.get(REPOSITORY_INDEX_TYPE, repoUri);
+        const response = await callWithRequest(req, 'get', {
+          index: repositoryIndexName(),
+          type: repositoryTypeName,
+          id: repoUri,
+        });
         const repo: Repository = response.attributes;
         reply(repo);
       } catch (error) {
@@ -114,17 +129,21 @@ export function repositoryRoute(
     path: '/api/cs/repos',
     method: 'GET',
     async handler(req, reply) {
-      const objectClient = req.getSavedObjectsClient();
       const log = new Log(req.server);
-
+      const { callWithRequest } = req.server.plugins.elasticsearch.getCluster('data');
       try {
-        const response = await objectClient.find({
-          perPage: 10000,
-          type: REPOSITORY_INDEX_TYPE,
+        const response = await callWithRequest(req, 'search', {
+          index: repositoryIndexName(),
+          type: repositoryTypeName,
+          body: {
+            query: {
+              match_all: {},
+            },
+          },
         });
-        const objects: any[] = response.saved_objects;
-        const repos: Repository[] = objects.map(obj => {
-          const repo: Repository = obj.attributes;
+        const hits: any[] = response.hits.hits;
+        const repos: Repository[] = hits.map(hit => {
+          const repo: Repository = hit._source;
           return repo;
         });
         reply(repos);

@@ -6,14 +6,15 @@
 
 import { EsClient } from 'packages/codesearch-esqueue';
 
-import { RepositoryIndexRequest, RepositoryUri } from 'model';
+import { RepositoryUri } from 'model';
 import { Log } from '../log';
 import { ServerOptions } from '../server_options';
 import { AbstractIndexer } from './abstract_indexer';
 import { IndexCreationRequest } from './index_creation_request';
-import { RepositorySchema } from './schema';
+import { repositoryIndexName, RepositorySchema, repositoryTypeName } from './schema';
 
-export class RepositoryIndexer extends AbstractIndexer {
+// Inherit AbstractIndexer's index creation logics. This is not an actual indexer.
+export class RepositoryIndexInitializer extends AbstractIndexer {
   protected type: string = 'repository';
 
   constructor(
@@ -24,10 +25,10 @@ export class RepositoryIndexer extends AbstractIndexer {
     super(client, serverOption, log);
   }
 
-  public async prepareIndexCreationRequests(repoUri: RepositoryUri) {
+  public async prepareIndexCreationRequests(_: RepositoryUri) {
     const creationReq: IndexCreationRequest = {
-      index: '.codesearch-repository',
-      type: 'repository',
+      index: repositoryIndexName(),
+      type: repositoryTypeName,
       settings: {
         number_of_shards: 1,
         auto_expand_replicas: '0-1',
@@ -37,19 +38,11 @@ export class RepositoryIndexer extends AbstractIndexer {
     return [creationReq];
   }
 
-  public async prepareRequests(repoUri: RepositoryUri) {
-    return new Promise<RepositoryIndexRequest[]>((resolve, reject) => {
-      const req: RepositoryIndexRequest = {
-        repoUri,
-      };
-      // Always return just one single repository
-      resolve([req]);
-    });
-  }
-
-  public async processRequest(request: RepositoryIndexRequest) {
-    // TODO: add the real repository indexing logic by lsp controller.
-    this.log.info(`index repository for ${JSON.stringify(request)}`);
+  public async init() {
+    const res = await this.prepareIndex('');
+    if (!res) {
+      this.log.error(`Initialize repository index failed.`);
+    }
     return;
   }
 }

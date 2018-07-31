@@ -4,6 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { RepositoryUtils } from '../../../common/repository_utils';
+import { RepositoryUri } from '../../../model';
+
 // Coorespond to model/search/Document
 export const DocumentSchema = {
   repoUri: {
@@ -25,3 +28,9 @@ export const DocumentSchema = {
     type: 'text',
   },
 };
+
+export const documentIndexName = (repoUri: RepositoryUri) => {
+  return `.codesearch-symbol-${RepositoryUtils.normalizeRepoUriToIndexName(repoUri)}`;
+};
+
+export const documentTypeName = 'document';

@@ -6,4 +6,4 @@
 
 export * from './lsp_indexer';
 export * from './indexer';
-export * from './repository_indexer';
+export * from './repository_index_initializer';

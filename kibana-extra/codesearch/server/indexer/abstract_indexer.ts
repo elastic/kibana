@@ -102,7 +102,7 @@ export abstract class AbstractIndexer implements Indexer {
     });
   }
 
-  private async prepareIndex(repoUri: RepositoryUri) {
+  protected async prepareIndex(repoUri: RepositoryUri) {
     const creationReqs = await this.prepareIndexCreationRequests(repoUri);
     for (const req of creationReqs) {
       const res = await this.createIndex(req);

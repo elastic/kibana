@@ -18,3 +18,9 @@ export const RepositorySchema = {
     type: 'text',
   },
 };
+
+export const repositoryIndexName = () => {
+  return `.codesearch-repository`;
+};
+
+export const repositoryTypeName = 'repository';

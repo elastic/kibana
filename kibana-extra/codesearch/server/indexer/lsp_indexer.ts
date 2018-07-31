@@ -10,14 +10,20 @@ import _ from 'lodash';
 import util from 'util';
 import walk from 'walk';
 
-import { RepositoryUtils } from '../../common/repository_utils';
 import { Document, LspIndexRequest, RepositoryUri } from '../../model';
 import { Log } from '../log';
 import { LspService } from '../lsp/lsp_service';
 import { ServerOptions } from '../server_options';
 import { AbstractIndexer } from './abstract_indexer';
 import { IndexCreationRequest } from './index_creation_request';
-import { DocumentSchema, SymbolSchema } from './schema';
+import {
+  documentIndexName,
+  DocumentSchema,
+  documentTypeName,
+  symbolIndexName,
+  SymbolSchema,
+  symbolTypeName,
+} from './schema';
 
 export class LspIndexer extends AbstractIndexer {
   protected type: string = 'lsp';
@@ -33,8 +39,8 @@ export class LspIndexer extends AbstractIndexer {
 
   protected async prepareIndexCreationRequests(repoUri: RepositoryUri) {
     const contentIndexCreationReq: IndexCreationRequest = {
-      index: `.codesearch-document-${RepositoryUtils.normalizeRepoUriToIndexName(repoUri)}`,
-      type: 'document',
+      index: documentIndexName(repoUri),
+      type: documentTypeName,
       settings: {
         number_of_shards: 1,
         auto_expand_replicas: '0-1',
@@ -42,8 +48,8 @@ export class LspIndexer extends AbstractIndexer {
       schema: DocumentSchema,
     };
     const symbolIndexCreationReq: IndexCreationRequest = {
-      index: `.codesearch-symbol-${RepositoryUtils.normalizeRepoUriToIndexName(repoUri)}`,
-      type: 'symbol',
+      index: symbolIndexName(repoUri),
+      type: symbolTypeName,
       settings: {
         number_of_shards: 1,
         auto_expand_replicas: '0-1',
@@ -54,7 +60,6 @@ export class LspIndexer extends AbstractIndexer {
   }
 
   protected async prepareRequests(repoUri: RepositoryUri) {
-    // TODO: get workspaceRevision and apply it to the doc as wel.
     const {
       workspaceRepo,
       workspaceRevision,
@@ -102,8 +107,8 @@ export class LspIndexer extends AbstractIndexer {
     const symbolNames = [];
     for (const symbol of symbols) {
       await this.client.index({
-        index: `.codesearch-symbol-${RepositoryUtils.normalizeRepoUriToIndexName(repoUri)}`,
-        type: 'symbol',
+        index: symbolIndexName(repoUri),
+        type: symbolTypeName,
         body: symbol,
       });
       symbolNames.push(symbol.symbolInformation.name);
@@ -119,8 +124,8 @@ export class LspIndexer extends AbstractIndexer {
       qnames: symbolNames,
     };
     await this.client.index({
-      index: `.codesearch-document-${RepositoryUtils.normalizeRepoUriToIndexName(repoUri)}`,
-      type: 'document',
+      index: documentIndexName(repoUri),
+      type: documentTypeName,
       body,
     });
     return;

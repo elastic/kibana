@@ -4,6 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { RepositoryUtils } from '../../../common/repository_utils';
+import { RepositoryUri } from '../../../model';
+
 export const SymbolSchema = {
   symbolInformation: {
     properties: {
@@ -63,3 +66,9 @@ export const SymbolSchema = {
     },
   },
 };
+
+export const symbolIndexName = (repoUri: RepositoryUri) => {
+  return `.codesearch-symbol-${RepositoryUtils.normalizeRepoUriToIndexName(repoUri)}`;
+};
+
+export const symbolTypeName = 'symbol';
