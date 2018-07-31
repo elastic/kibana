@@ -79,8 +79,8 @@ The following are the abstract steps i18n engine goes through to resolve the loc
 
 - If there's data for the specified locale (localization file is registered in
   `uiExports.translations`), then that locale will be resolved.
-- If `i18n.locale` option is not defined in `config/kibana.yml` or previous steps
-didn't resolve the locale, the `en` locale will be used.
+- If `i18n.locale` option is not defined in `config/kibana.yml` or option has not exact match
+with one of registered locales or previous steps didn't resolve the locale, the `en` locale will be used.
 
 One of our technical requirements is to have default message in the templates
 themselves, and that message will always be english, so we don't need interact
