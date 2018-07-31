@@ -46,6 +46,7 @@ exports[`directories should not render directory entry when showOnHomePage is fa
           <EuiFlexGrid
             columns={2}
             gutterSize="l"
+            responsive={true}
           />
         </EuiPanel>
       </EuiFlexItem>
@@ -71,6 +72,7 @@ exports[`directories should not render directory entry when showOnHomePage is fa
           <EuiFlexGrid
             columns={2}
             gutterSize="l"
+            responsive={true}
           />
         </EuiPanel>
       </EuiFlexItem>
@@ -162,6 +164,7 @@ exports[`directories should render ADMIN directory entry in "Manage" panel 1`] =
           <EuiFlexGrid
             columns={2}
             gutterSize="l"
+            responsive={true}
           />
         </EuiPanel>
       </EuiFlexItem>
@@ -187,6 +190,7 @@ exports[`directories should render ADMIN directory entry in "Manage" panel 1`] =
           <EuiFlexGrid
             columns={2}
             gutterSize="l"
+            responsive={true}
           >
             <EuiFlexItem
               component="div"
@@ -297,6 +301,7 @@ exports[`directories should render DATA directory entry in "Explore Data" panel 
           <EuiFlexGrid
             columns={2}
             gutterSize="l"
+            responsive={true}
           >
             <EuiFlexItem
               component="div"
@@ -341,6 +346,7 @@ exports[`directories should render DATA directory entry in "Explore Data" panel 
           <EuiFlexGrid
             columns={2}
             gutterSize="l"
+            responsive={true}
           />
         </EuiPanel>
       </EuiFlexItem>
@@ -432,6 +438,7 @@ exports[`isNewKibanaInstance should safely handle execeptions 1`] = `
           <EuiFlexGrid
             columns={2}
             gutterSize="l"
+            responsive={true}
           />
         </EuiPanel>
       </EuiFlexItem>
@@ -457,6 +464,7 @@ exports[`isNewKibanaInstance should safely handle execeptions 1`] = `
           <EuiFlexGrid
             columns={2}
             gutterSize="l"
+            responsive={true}
           />
         </EuiPanel>
       </EuiFlexItem>
@@ -548,6 +556,7 @@ exports[`isNewKibanaInstance should set isNewKibanaInstance to false when there 
           <EuiFlexGrid
             columns={2}
             gutterSize="l"
+            responsive={true}
           />
         </EuiPanel>
       </EuiFlexItem>
@@ -573,6 +582,7 @@ exports[`isNewKibanaInstance should set isNewKibanaInstance to false when there 
           <EuiFlexGrid
             columns={2}
             gutterSize="l"
+            responsive={true}
           />
         </EuiPanel>
       </EuiFlexItem>
@@ -664,6 +674,7 @@ exports[`isNewKibanaInstance should set isNewKibanaInstance to true when there a
           <EuiFlexGrid
             columns={2}
             gutterSize="l"
+            responsive={true}
           />
         </EuiPanel>
       </EuiFlexItem>
@@ -689,6 +700,7 @@ exports[`isNewKibanaInstance should set isNewKibanaInstance to true when there a
           <EuiFlexGrid
             columns={2}
             gutterSize="l"
+            responsive={true}
           />
         </EuiPanel>
       </EuiFlexItem>
@@ -780,6 +792,7 @@ exports[`should not contain RecentlyAccessed panel when there is no recentlyAcce
           <EuiFlexGrid
             columns={2}
             gutterSize="l"
+            responsive={true}
           />
         </EuiPanel>
       </EuiFlexItem>
@@ -805,6 +818,7 @@ exports[`should not contain RecentlyAccessed panel when there is no recentlyAcce
           <EuiFlexGrid
             columns={2}
             gutterSize="l"
+            responsive={true}
           />
         </EuiPanel>
       </EuiFlexItem>
@@ -912,6 +926,7 @@ exports[`should render home component 1`] = `
           <EuiFlexGrid
             columns={2}
             gutterSize="l"
+            responsive={true}
           />
         </EuiPanel>
       </EuiFlexItem>
@@ -937,6 +952,7 @@ exports[`should render home component 1`] = `
           <EuiFlexGrid
             columns={2}
             gutterSize="l"
+            responsive={true}
           />
         </EuiPanel>
       </EuiFlexItem>

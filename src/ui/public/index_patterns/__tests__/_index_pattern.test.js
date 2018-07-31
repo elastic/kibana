@@ -125,10 +125,11 @@ const confirmModalPromise = jest.fn();
 const kbnUrl = {
   eval: jest.fn(),
 };
+const i18n = arg => arg;
 
 describe('IndexPattern', () => {
   it('should handle version conflicts', async () => {
-    const IndexPattern = IndexPatternProvider(Private, config, Promise, confirmModalPromise, kbnUrl); // eslint-disable-line new-cap
+    const IndexPattern = IndexPatternProvider(Private, config, Promise, confirmModalPromise, kbnUrl, i18n); // eslint-disable-line new-cap
 
     // Create a normal index pattern
     const pattern = new IndexPattern('foo');
