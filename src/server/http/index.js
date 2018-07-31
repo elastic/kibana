@@ -88,7 +88,7 @@ export default async function (kbnServer, server, config) {
     this.views({
       path: path,
       isCached: config.get('optimize.viewCaching'),
-      engines: _.assign({ jade: require('jade') }, engines || {})
+      engines: _.assign({ pug: require('pug') }, engines || {})
     });
   });
 

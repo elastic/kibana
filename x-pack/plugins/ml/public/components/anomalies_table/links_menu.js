@@ -12,7 +12,7 @@ import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 
 import {
-  EuiButtonEmpty,
+  EuiButtonIcon,
   EuiContextMenuPanel,
   EuiContextMenuItem,
   EuiPopover
@@ -22,6 +22,8 @@ import chrome from 'ui/chrome';
 import { toastNotifications } from 'ui/notify';
 
 import { ES_FIELD_TYPES } from 'plugins/ml/../common/constants/field_types';
+import { checkPermission } from 'plugins/ml/privilege/check_privilege';
+import { isRuleSupported } from 'plugins/ml/../common/util/anomaly_utils';
 import { parseInterval } from 'plugins/ml/../common/util/parse_interval';
 import { getFieldTypeFromMapping } from 'plugins/ml/services/mapping_service';
 import { ml } from 'plugins/ml/services/ml_api_service';
@@ -335,17 +337,16 @@ export class LinksMenu extends Component {
 
   render() {
     const { anomaly, showViewSeriesLink } = this.props;
+    const canConfigureRules = (isRuleSupported(anomaly.source) && checkPermission('canUpdateJob'));
 
     const button = (
-      <EuiButtonEmpty
+      <EuiButtonIcon
         size="s"
-        type="text"
-        iconType="arrowDown"
-        iconSide="right"
+        color="text"
         onClick={this.onButtonClick}
-      >
-        Open link
-      </EuiButtonEmpty>
+        iconType="gear"
+        aria-label="Select action"
+      />
     );
 
     const items = [];
@@ -387,6 +388,18 @@ export class LinksMenu extends Component {
       );
     }
 
+    if (canConfigureRules) {
+      items.push(
+        <EuiContextMenuItem
+          key="create_rule"
+          icon="controlsHorizontal"
+          onClick={() => { this.closePopover(); this.props.showRuleEditorFlyout(anomaly); }}
+        >
+          Configure rules
+        </EuiContextMenuItem>
+      );
+    }
+
     return (
       <EuiPopover
         id="singlePanel"
@@ -409,5 +422,6 @@ LinksMenu.propTypes = {
   showViewSeriesLink: PropTypes.bool,
   isAggregatedData: PropTypes.bool,
   interval: PropTypes.string,
-  timefilter: PropTypes.object.isRequired
+  timefilter: PropTypes.object.isRequired,
+  showRuleEditorFlyout: PropTypes.func
 };

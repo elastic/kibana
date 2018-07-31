@@ -12,6 +12,7 @@
 */
 
 import _ from 'lodash';
+import { CONDITIONS_NOT_SUPPORTED_FUNCTIONS } from '../constants/detector_rule';
 
 // List of function descriptions for which actual values from record level results should be displayed.
 const DISPLAY_ACTUAL_FUNCTIONS = ['count', 'distinct_count', 'lat_long', 'mean', 'max', 'min', 'sum',
@@ -150,6 +151,14 @@ export function showActualForFunction(functionDescription) {
 // whereas the 'function_description' field holds a ML-built display hint for function e.g. 'count'.
 export function showTypicalForFunction(functionDescription) {
   return _.indexOf(DISPLAY_TYPICAL_FUNCTIONS, functionDescription) > -1;
+}
+
+// Returns whether a rule can be configured against the specified anomaly.
+export function isRuleSupported(record) {
+  // A rule can be configured with a numeric condition if the function supports it,
+  // and/or with scope if there is a partitioning fields.
+  return (CONDITIONS_NOT_SUPPORTED_FUNCTIONS.indexOf(record.function) === -1) ||
+    (getEntityFieldName(record) !== undefined);
 }
 
 // Two functions for converting aggregation type names.

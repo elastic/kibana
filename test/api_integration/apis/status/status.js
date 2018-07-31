@@ -59,7 +59,6 @@ export default function ({ getService }) {
 
           expect(body.metrics.requests.total).to.be.a('number');
           expect(body.metrics.requests.disconnects).to.be.a('number');
-          expect(body.metrics.requests.status_codes).to.be.an('object');
           expect(body.metrics.concurrent_connections).to.be.a('number');
         });
     });

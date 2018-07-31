@@ -233,11 +233,6 @@ export default class BaseOptimizer {
             use: getStyleLoaders(),
           },
           {
-            // TODO: this doesn't seem to be used, remove?
-            test: /\.jade$/,
-            loader: 'jade-loader'
-          },
-          {
             test: /\.(html|tmpl)$/,
             loader: 'raw-loader'
           },
