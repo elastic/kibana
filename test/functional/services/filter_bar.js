@@ -50,6 +50,12 @@ export function FilterBarProvider({ getService }) {
       await testSubjects.click(`filter & filter-key-${key} disableFilter-${key}`);
     }
 
+    async toggleFilterPinned(key) {
+      const filterElement = await testSubjects.find(`filter & filter-key-${key}`);
+      await remote.moveMouseTo(filterElement);
+      await testSubjects.click(`filter & filter-key-${key} pinFilter-${key}`);
+    }
+
     async addFilter(field, operator, values) {
       if (!Array.isArray(values)) {
         values = [values];
