@@ -54,6 +54,8 @@ export class VisualizationNoResults extends React.Component<VisualizationNoResul
     if (this.props.onInit) {
       this.props.onInit();
     }
-    dispatchRenderComplete(this.containerDiv.current);
+    if (this.containerDiv.current) {
+      dispatchRenderComplete(this.containerDiv.current);
+    }
   }
 }
