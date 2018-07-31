@@ -7,6 +7,6 @@ Kibana has generally been able to implement security transparently to core and p
 
 `callWithInternalUser` executes requests against Elasticsearch using the internal Kibana server user, and has historically been used for performing actions that aren't initiated by Kibana end-users; for example creating the initial `.kibana` index or performing health-checks against Elasticsearch.
 
-However, with the changes that role based access control (RBAC) introduces, this is no longer so cut-and-dry. We now require all access to the `.kibana` index to go through the `SavedObjectClient`. This used to be best-practice,as the `SavedObjectClient` was responsible for translating the documents stored in Elasticsearch to and from Saved Objects, but RBAC is now taking advantage of this abstraction to implement access control and determine when to use `callWithRequest` versus `callWithInternalUser`.
+However, with the changes that role based access control (RBAC) introduces, this is no longer so cut-and-dry. {kib} now requires all access to the `.kibana` index goes through the `SavedObjectClient`. This used to be best-practice,as the `SavedObjectClient` was responsible for translating the documents stored in Elasticsearch to and from Saved Objects, but RBAC is now taking advantage of this abstraction to implement access control and determine when to use `callWithRequest` versus `callWithInternalUser`.
 
 include::rbac.asciidoc[]
