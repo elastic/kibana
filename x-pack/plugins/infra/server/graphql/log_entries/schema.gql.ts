@@ -66,23 +66,14 @@ export const logEntriesSchema = gql`
   }
 
   extend type InfraSource {
-    "A consecutive span of log entries following a point in time"
-    logEntriesAfter(
+    "A consecutive span of log entries surrounding a point in time"
+    logEntriesAround(
       "The sort key that corresponds to the point in time"
       key: InfraTimeKeyInput!
-      "The maximum number of entries to return"
-      count: Int!
-      "The query to filter the log entries by"
-      filterQuery: String
-      "The query to highlight the log entries with"
-      highlightQuery: String
-    ): InfraLogEntryInterval!
-    "A consecutive span of log entries preceding a point in time"
-    logEntriesBefore(
-      "The sort key that corresponds to the point in time"
-      key: InfraTimeKeyInput!
-      "The maximum number of entries to return"
-      count: Int!
+      "The maximum number of preceding to return"
+      countBefore: Int = 0
+      "The maximum number of following to return"
+      countAfter: Int = 0
       "The query to filter the log entries by"
       filterQuery: String
       "The query to highlight the log entries with"

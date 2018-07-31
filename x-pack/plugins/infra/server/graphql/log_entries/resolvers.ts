@@ -15,14 +15,8 @@ import { InfraLogEntriesDomain } from '../../lib/domains/log_entries_domain';
 import { InfraContext } from '../../lib/infra_types';
 import { QuerySourceResolver } from '../sources/resolvers';
 
-export type InfraSourceLogEntriesAfterResolver = InfraResolverOf<
-  InfraSourceResolvers.LogEntriesAfterResolver,
-  InfraResolvedResult<QuerySourceResolver>,
-  InfraContext
->;
-
-export type InfraSourceLogEntriesBeforeResolver = InfraResolverOf<
-  InfraSourceResolvers.LogEntriesBeforeResolver,
+export type InfraSourceLogEntriesAroundResolver = InfraResolverOf<
+  InfraSourceResolvers.LogEntriesAroundResolver,
   InfraResolvedResult<QuerySourceResolver>,
   InfraContext
 >;
@@ -37,8 +31,7 @@ export const createLogEntriesResolvers = (libs: {
   logEntries: InfraLogEntriesDomain;
 }): {
   InfraSource: {
-    logEntriesAfter: InfraSourceLogEntriesAfterResolver;
-    logEntriesBefore: InfraSourceLogEntriesBeforeResolver;
+    logEntriesAround: InfraSourceLogEntriesAroundResolver;
     logEntriesBetween: InfraSourceLogEntriesBetweenResolver;
   };
   InfraLogMessageSegment: {
@@ -48,30 +41,13 @@ export const createLogEntriesResolvers = (libs: {
   };
 } => ({
   InfraSource: {
-    async logEntriesAfter(source, args, { req }) {
-      const entries = await libs.logEntries.getLogEntriesAfter(
+    async logEntriesAround(source, args, { req }) {
+      const entries = await libs.logEntries.getLogEntriesAround(
         req,
         source.id,
         args.key,
-        args.count,
-        args.filterQuery || undefined,
-        args.highlightQuery || undefined
-      );
-
-      return {
-        start: entries.length > 0 ? entries[0].key : null,
-        end: entries.length > 0 ? entries[entries.length - 1].key : null,
-        filterQuery: args.filterQuery,
-        highlightQuery: args.highlightQuery,
-        entries,
-      };
-    },
-    async logEntriesBefore(source, args, { req }) {
-      const entries = await libs.logEntries.getLogEntriesBefore(
-        req,
-        source.id,
-        args.key,
-        args.count,
+        args.countBefore || 0,
+        args.countAfter || 0,
         args.filterQuery || undefined,
         args.highlightQuery || undefined
       );

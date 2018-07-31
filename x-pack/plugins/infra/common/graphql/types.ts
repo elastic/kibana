@@ -25,8 +25,7 @@ export interface InfraSource {
   id: string /** The id of the source */;
   configuration: InfraSourceConfiguration /** The raw configuration of the source */;
   status: InfraSourceStatus /** The status of the source */;
-  logEntriesAfter: InfraLogEntryInterval /** A consecutive span of log entries following a point in time */;
-  logEntriesBefore: InfraLogEntryInterval /** A consecutive span of log entries preceeding a point in time */;
+  logEntriesAround: InfraLogEntryInterval /** A consecutive span of log entries surrounding a point in time */;
   logEntriesBetween: InfraLogEntryInterval /** A consecutive span of log entries within an interval */;
   map?: InfraResponse | null /** A hierarchy of hosts, pods, containers, services or arbitrary groups */;
 }
@@ -126,8 +125,7 @@ export namespace InfraSourceResolvers {
     id?: IdResolver /** The id of the source */;
     configuration?: ConfigurationResolver /** The raw configuration of the source */;
     status?: StatusResolver /** The status of the source */;
-    logEntriesAfter?: LogEntriesAfterResolver /** A consecutive span of log entries following a point in time */;
-    logEntriesBefore?: LogEntriesBeforeResolver /** A consecutive span of log entries preceeding a point in time */;
+    logEntriesAround?: LogEntriesAroundResolver /** A consecutive span of log entries surrounding a point in time */;
     logEntriesBetween?: LogEntriesBetweenResolver /** A consecutive span of log entries within an interval */;
     map?: MapResolver /** A hierarchy of hosts, pods, containers, services or arbitrary groups */;
   }
@@ -135,18 +133,11 @@ export namespace InfraSourceResolvers {
   export type IdResolver = Resolver<string>;
   export type ConfigurationResolver = Resolver<InfraSourceConfiguration>;
   export type StatusResolver = Resolver<InfraSourceStatus>;
-  export type LogEntriesAfterResolver = Resolver<InfraLogEntryInterval, LogEntriesAfterArgs>;
-  export interface LogEntriesAfterArgs {
+  export type LogEntriesAroundResolver = Resolver<InfraLogEntryInterval, LogEntriesAroundArgs>;
+  export interface LogEntriesAroundArgs {
     key: InfraTimeKeyInput /** The sort key that corresponds to the point in time */;
-    count: number /** The maximum number of entries to return */;
-    filterQuery?: string | null /** The query to filter the log entries by */;
-    highlightQuery?: string | null /** The query to highlight the log entries with */;
-  }
-
-  export type LogEntriesBeforeResolver = Resolver<InfraLogEntryInterval, LogEntriesBeforeArgs>;
-  export interface LogEntriesBeforeArgs {
-    key: InfraTimeKeyInput /** The sort key that corresponds to the point in time */;
-    count: number /** The maximum number of entries to return */;
+    countBefore?: number | null /** The maximum number of preceding to return */;
+    countAfter?: number | null /** The maximum number of following to return */;
     filterQuery?: string | null /** The query to filter the log entries by */;
     highlightQuery?: string | null /** The query to highlight the log entries with */;
   }
@@ -375,15 +366,10 @@ export interface FieldsQueryArgs {
 export interface SourceQueryArgs {
   id: string /** The id of the source */;
 }
-export interface LogEntriesAfterInfraSourceArgs {
+export interface LogEntriesAroundInfraSourceArgs {
   key: InfraTimeKeyInput /** The sort key that corresponds to the point in time */;
-  count: number /** The maximum number of entries to return */;
-  filterQuery?: string | null /** The query to filter the log entries by */;
-  highlightQuery?: string | null /** The query to highlight the log entries with */;
-}
-export interface LogEntriesBeforeInfraSourceArgs {
-  key: InfraTimeKeyInput /** The sort key that corresponds to the point in time */;
-  count: number /** The maximum number of entries to return */;
+  countBefore?: number | null /** The maximum number of preceding to return */;
+  countAfter?: number | null /** The maximum number of following to return */;
   filterQuery?: string | null /** The query to filter the log entries by */;
   highlightQuery?: string | null /** The query to highlight the log entries with */;
 }

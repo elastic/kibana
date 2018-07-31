@@ -17,51 +17,55 @@ export class InfraLogEntriesDomain {
     private readonly libs: { sources: InfraSources }
   ) {}
 
-  public async getLogEntriesAfter(
+  public async getLogEntriesAround(
     request: InfraFrameworkRequest,
     sourceId: string,
     key: TimeKey,
-    maxCount: number,
+    maxCountBefore: number,
+    maxCountAfter: number,
     filterQuery?: string,
     highlightQuery?: string
   ): Promise<InfraLogEntry[]> {
-    const sourceConfiguration = await this.libs.sources.getConfiguration(sourceId);
-    const formattingRules = compileFormattingRules(builtinRules);
-    const documents = await this.adapter.getAdjacentLogEntryDocuments(
-      request,
-      sourceConfiguration,
-      formattingRules.requiredFields,
-      key,
-      'asc',
-      maxCount,
-      filterQuery,
-      highlightQuery
-    );
-    const entries = documents.map(convertLogDocumentToEntry(sourceId, formattingRules.format));
-    return entries;
-  }
+    if (maxCountBefore <= 0 && maxCountAfter <= 0) {
+      return [];
+    }
 
-  public async getLogEntriesBefore(
-    request: InfraFrameworkRequest,
-    sourceId: string,
-    key: TimeKey,
-    maxCount: number,
-    filterQuery?: string,
-    highlightQuery?: string
-  ): Promise<InfraLogEntry[]> {
     const sourceConfiguration = await this.libs.sources.getConfiguration(sourceId);
     const formattingRules = compileFormattingRules(builtinRules);
-    const documents = await this.adapter.getAdjacentLogEntryDocuments(
+
+    const documentsBefore = await this.adapter.getAdjacentLogEntryDocuments(
       request,
       sourceConfiguration,
       formattingRules.requiredFields,
       key,
       'desc',
-      maxCount,
+      Math.max(maxCountBefore, 1),
       filterQuery,
       highlightQuery
     );
-    const entries = documents.map(convertLogDocumentToEntry(sourceId, formattingRules.format));
+    const lastKeyBefore =
+      documentsBefore.length > 0
+        ? documentsBefore[documentsBefore.length - 1].key
+        : {
+            time: key.time - 1,
+            tiebreaker: 0,
+          };
+
+    const documentsAfter = await this.adapter.getAdjacentLogEntryDocuments(
+      request,
+      sourceConfiguration,
+      formattingRules.requiredFields,
+      lastKeyBefore,
+      'asc',
+      maxCountAfter,
+      filterQuery,
+      highlightQuery
+    );
+
+    const entries = [...(maxCountBefore > 0 ? documentsBefore : []), ...documentsAfter].map(
+      convertLogDocumentToEntry(sourceId, formattingRules.format)
+    );
+
     return entries;
   }
 
