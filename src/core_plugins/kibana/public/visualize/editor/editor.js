@@ -42,6 +42,7 @@ import { absoluteToParsedUrl } from 'ui/url/absolute_to_parsed_url';
 import { migrateLegacyQuery } from 'ui/utils/migrateLegacyQuery';
 import { recentlyAccessed } from 'ui/persisted_log';
 import { timefilter } from 'ui/timefilter';
+import { getVisualizeLoader } from '../../../../../ui/public/visualize/loader';
 
 uiRoutes
   .when(VisualizeConstants.CREATE_PATH, {
@@ -100,6 +101,7 @@ uiModules
 
 function VisEditor(
   $scope,
+  $element,
   $route,
   AppState,
   $window,
@@ -123,6 +125,18 @@ function VisEditor(
   // vis is instance of src/ui/public/vis/vis.js.
   // SearchSource is a promise-based stream of search results that can inherit from other search sources.
   const { vis, searchSource } = savedVis;
+
+  // adds top level search source to the stack to which global filters are applied
+  const getTopLevelSearchSource = (searchSource) => {
+    if (searchSource.parent) return getTopLevelSearchSource(searchSource.parent);
+    return searchSource;
+  };
+
+  const topLevelSearchSource =  getTopLevelSearchSource(searchSource);
+  const globalFiltersSearchSource = searchSource.create();
+  topLevelSearchSource.setParent(globalFiltersSearchSource);
+
+
   $scope.vis = vis;
 
   $scope.topNavMenu = [{
@@ -279,16 +293,29 @@ function VisEditor(
     // update the searchSource when query updates
     $scope.fetch = function () {
       $state.save();
-      const filters = queryFilter.getFilters();
+      const globalFilters = queryFilter.getFilters().filter(f => f.$state.store === 'globalState');
       savedVis.searchSource.setField('query', $state.query);
-      savedVis.searchSource.setField('filter', filters);
+      savedVis.searchSource.setField('filter', $state.filters);
+      globalFiltersSearchSource.setField('filter', globalFilters);
       $scope.vis.forceReload();
     };
 
     $scope.$on('$destroy', function () {
+      if ($scope._handler) {
+        $scope._handler.destroy();
+      }
       savedVis.destroy();
       stateMonitor.destroy();
     });
+
+    if (!$scope.chrome.getVisible()) {
+      getVisualizeLoader().then(loader => {
+        $scope._handler = loader.embedVisualizationWithSavedObject($element.find('.visualize')[0], savedVis, {
+          timeRange: $scope.timeRange,
+          uiState: $scope.uiState,
+        });
+      });
+    }
   }
 
   $scope.updateQueryAndFetch = function (query) {
