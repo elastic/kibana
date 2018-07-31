@@ -95,12 +95,10 @@ export function IndexPatternProvider(Private, config, Promise, confirmModalPromi
 
   function updateFromElasticSearch(indexPattern, response, forceFieldRefresh = false) {
     if (!response.found) {
-      const markdownSaveId = indexPattern.id.replace('*', '%2A');
-
       throw new SavedObjectNotFound(
         type,
         indexPattern.id,
-        kbnUrl.eval('#/management/kibana/index?id={{id}}&name=', { id: markdownSaveId })
+        '#/management/kibana/index',
       );
     }
 
