@@ -51,8 +51,6 @@ export default function ({ getService, getPageObjects, updateBaselines }) {
       await dashboardPanelActions.toggleExpandPanel();
 
       await PageObjects.dashboard.waitForRenderComplete();
-      // Render complete flag doesn't handle resizes from expanding.
-      await PageObjects.common.sleep(2000);
       const percentSimilar = await screenshot.compareAgainstBaseline('tsvb_dashboard', updateBaselines);
 
       await PageObjects.dashboard.clickExitFullScreenLogoButton();
@@ -72,7 +70,7 @@ export default function ({ getService, getPageObjects, updateBaselines }) {
       await PageObjects.dashboard.clickFullScreenMode();
       await dashboardPanelActions.toggleExpandPanel();
 
-      //await PageObjects.dashboard.waitForRenderComplete();
+      await PageObjects.dashboard.waitForRenderComplete();
       const percentSimilar = await screenshot.compareAgainstBaseline('area_chart', updateBaselines);
 
       await PageObjects.dashboard.clickExitFullScreenLogoButton();

@@ -49,8 +49,27 @@ export default function ({ getService, loadTestFile, getPageObjects }) {
       loadTestFile(require.resolve('./_data_shared_attributes'));
       loadTestFile(require.resolve('./_embed_mode'));
       loadTestFile(require.resolve('./_full_screen_mode'));
+
       loadTestFile(require.resolve('./_dashboard_filter_bar'));
       loadTestFile(require.resolve('./_dashboard_filtering'));
+      loadTestFile(require.resolve('./_dashboard_filtering'));
+      loadTestFile(require.resolve('./_dashboard_filtering'));
+      loadTestFile(require.resolve('./_dashboard_filtering'));
+      loadTestFile(require.resolve('./_dashboard_filtering'));
+      loadTestFile(require.resolve('./_dashboard_filtering'));
+      loadTestFile(require.resolve('./_dashboard_filtering'));
+      loadTestFile(require.resolve('./_dashboard_filtering'));
+      loadTestFile(require.resolve('./_dashboard_filtering'));
+      loadTestFile(require.resolve('./_dashboard_filtering'));
+      loadTestFile(require.resolve('./_dashboard_filtering'));
+      loadTestFile(require.resolve('./_dashboard_filtering'));
+      loadTestFile(require.resolve('./_dashboard_filtering'));
+      loadTestFile(require.resolve('./_dashboard_filtering'));
+      loadTestFile(require.resolve('./_dashboard_filtering'));
+      loadTestFile(require.resolve('./_dashboard_filtering'));
+      loadTestFile(require.resolve('./_dashboard_filtering'));
+      loadTestFile(require.resolve('./_dashboard_filtering'));
+
       loadTestFile(require.resolve('./_panel_expand_toggle'));
       loadTestFile(require.resolve('./_dashboard_grid'));
       loadTestFile(require.resolve('./_dashboard_snapshots'));
