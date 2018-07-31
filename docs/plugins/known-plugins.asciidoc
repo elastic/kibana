@@ -21,6 +21,7 @@ This list of plugins is not guaranteed to work on your version of Kibana. Instea
 [float]
 === Timelion Extensions
 * https://github.com/fermiumlabs/mathlion[mathlion] (fermiumlabs) - enables equation parsing and advanced math under Timelion
+* https://github.com/lmangani/timelion-influxdb[influxdb] (lmangani) - enables rendering data from the InfluxDB queries in Timelion
 
 [float]
 === Visualizations
@@ -51,6 +52,7 @@ This list of plugins is not guaranteed to work on your version of Kibana. Instea
 * https://github.com/sbeyn/kibana-plugin-traffic-sg[Traffic] (sbeyn)
 * https://github.com/PhaedrusTheGreek/transform_vis[Transform Visualization] (PhaedrusTheGreek)
 * https://github.com/nyurik/kibana-vega-vis[Vega-based visualizations] (nyurik) - Support for user-defined graphs, external data sources, maps, images, and user-defined interactivity.
+* https://github.com/lmangani/kibana_diagram[Flow Diagram] (lmangani)
 
 [float]
 === Other
