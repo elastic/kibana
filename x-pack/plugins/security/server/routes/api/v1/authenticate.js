@@ -23,6 +23,9 @@ export function initAuthenticateApi(server) {
           username: Joi.string().required(),
           password: Joi.string().required()
         }
+      },
+      response: {
+        emptyStatusCode: 204,
       }
     },
     async handler(request, reply) {

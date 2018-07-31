@@ -40,6 +40,8 @@ import {
   Pager
 } from '@elastic/eui/lib/services';
 
+import { FormattedMessage } from '@kbn/i18n/react';
+
 export class IndicesList extends Component {
   static propTypes = {
     indices: PropTypes.array.isRequired,
@@ -98,7 +100,11 @@ export class IndicesList extends Component {
         iconSide="right"
         onClick={this.openPerPageControl}
       >
-        Rows per page: {perPage}
+        <FormattedMessage
+          id="kbn.management.createIndexPattern.step.pagingLabel"
+          defaultMessage="Rows per page: {perPage}"
+          values={{ perPage }}
+        />
       </EuiButtonEmpty>
     );
 
