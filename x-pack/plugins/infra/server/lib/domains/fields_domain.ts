@@ -27,17 +27,19 @@ export class InfraFieldsDomain {
 
     const fields: any = get(fieldCaps, 'fields');
     const results: any = fields
-      ? Object.keys(fields).map((name: keyof typeof fields): InfraField => {
-          const fieldData: any = fields[name];
-          const [type]: any = Object.keys(fieldData);
-          const def: any = fieldData[type];
-          return {
-            aggregatable: def.aggregatable,
-            name: String(name),
-            searchable: def.searchable,
-            type,
-          };
-        })
+      ? Object.keys(fields).map(
+          (name: keyof typeof fields): InfraField => {
+            const fieldData: any = fields[name];
+            const [type]: any = Object.keys(fieldData);
+            const def: any = fieldData[type];
+            return {
+              aggregatable: def.aggregatable,
+              name: String(name),
+              searchable: def.searchable,
+              type,
+            };
+          }
+        )
       : [];
     return sortBy(results, 'name');
   }

@@ -107,7 +107,10 @@ export const createSummaryEpic = <State>(): Epic<
         )
       )
     ),
-    action$.pipe(filter(() => false /* TODO: filter jumpToEnd */), map(() => ({ isJump: true })))
+    action$.pipe(
+      filter(() => false /* TODO: filter jumpToEnd */),
+      map(() => ({ isJump: true }))
+    )
   ).pipe(
     map(({ isJump }) => ({
       isJump,

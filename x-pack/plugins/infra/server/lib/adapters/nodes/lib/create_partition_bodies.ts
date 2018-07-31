@@ -22,17 +22,20 @@ export function createPartitionBodies(
   const { sourceConfiguration }: InfraNodeRequestOptions = nodeOptions;
   const bodies: InfraESMSearchBody[] = [];
   const numberOfPartitions: number = Math.ceil(totalNodes / NODE_REQUEST_PARTITION_SIZE);
-  times(numberOfPartitions, (partitionId: number): void => {
-    const processorOptions: InfraProcesorRequestOptions = {
-      nodeField,
-      nodeOptions,
-      numberOfPartitions,
-      partitionId,
-    };
-    bodies.push({
-      index: [sourceConfiguration.logAlias, sourceConfiguration.metricAlias],
-    });
-    bodies.push(createNodeRequestBody(processorOptions));
-  });
+  times(
+    numberOfPartitions,
+    (partitionId: number): void => {
+      const processorOptions: InfraProcesorRequestOptions = {
+        nodeField,
+        nodeOptions,
+        numberOfPartitions,
+        partitionId,
+      };
+      bodies.push({
+        index: [sourceConfiguration.logAlias, sourceConfiguration.metricAlias],
+      });
+      bodies.push(createNodeRequestBody(processorOptions));
+    }
+  );
   return bodies;
 }

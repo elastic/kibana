@@ -17,9 +17,11 @@ export function processNodes(options: InfraNodeRequestOptions, nodes: any[]): In
   if (options.groupBy.length === 0) {
     // If there are NO group by options then we need to return a
     // nodes only response
-    const nodeResults: InfraNode[] = nodes.map((node: InfraBucket): InfraNode => {
-      return createNodeItem(options, node, node);
-    });
+    const nodeResults: InfraNode[] = nodes.map(
+      (node: InfraBucket): InfraNode => {
+        return createNodeItem(options, node, node);
+      }
+    );
     set(response, 'nodes', nodeResults);
     return response;
   } else {
