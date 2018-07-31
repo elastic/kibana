@@ -6,7 +6,7 @@
 
 import React from 'react';
 import {
-  EuiButton,
+  EuiButtonEmpty,
   EuiConfirmModal,
 } from '@elastic/eui';
 import { DeleteRoleButton } from './delete_role_button';
@@ -18,7 +18,7 @@ import {
 test('it renders without crashing', () => {
   const deleteHandler = jest.fn();
   const wrapper = shallow(<DeleteRoleButton canDelete={true} onDelete={deleteHandler} />);
-  expect(wrapper.find(EuiButton)).toHaveLength(1);
+  expect(wrapper.find(EuiButtonEmpty)).toHaveLength(1);
   expect(deleteHandler).toHaveBeenCalledTimes(0);
 });
 
@@ -26,7 +26,7 @@ test('it shows a confirmation dialog when clicked', () => {
   const deleteHandler = jest.fn();
   const wrapper = mount(<DeleteRoleButton canDelete={true} onDelete={deleteHandler} />);
 
-  wrapper.find(EuiButton).simulate('click');
+  wrapper.find(EuiButtonEmpty).simulate('click');
 
   expect(wrapper.find(EuiConfirmModal)).toHaveLength(1);
 

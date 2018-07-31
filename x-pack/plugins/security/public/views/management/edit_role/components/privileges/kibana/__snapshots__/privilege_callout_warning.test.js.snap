@@ -9,7 +9,7 @@ exports[`PrivilegeCalloutWarning renders without crashing 1`] = `
     color="warning"
     iconType="iInCircle"
     size="m"
-    title="Hey, this is important!"
+    title="Minimum privilege is too high to customize individual spaces"
   >
     <div
       className="euiCallOut euiCallOut--warning"
@@ -61,7 +61,7 @@ exports[`PrivilegeCalloutWarning renders without crashing 1`] = `
         <span
           className="euiCallOutHeader__title"
         >
-          Hey, this is important!
+          Minimum privilege is too high to customize individual spaces
         </span>
       </div>
       <EuiText
@@ -76,9 +76,7 @@ exports[`PrivilegeCalloutWarning renders without crashing 1`] = `
             <strong>
               all
             </strong>
-             grants full access to all spaces.
-            <br />
-            To customize privileges for individual spaces, set the minimum privilege to either 
+             grants full access to all spaces. To customize privileges for individual spaces, the minimum privilege must be either 
             <strong>
               read
             </strong>
@@ -86,6 +84,7 @@ exports[`PrivilegeCalloutWarning renders without crashing 1`] = `
             <strong>
               none
             </strong>
+            .
           </p>
         </div>
       </EuiText>
