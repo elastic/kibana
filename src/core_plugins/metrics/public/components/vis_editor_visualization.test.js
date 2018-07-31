@@ -21,14 +21,13 @@ jest.mock('ui/visualize/loader/visualize_loader', () => ({}));
 
 import React from 'react';
 import { mount } from 'enzyme';
-import sinon from 'sinon';
 import VisEditorVisualization from './vis_editor_visualization';
 
 describe('getVisualizeLoader', () => {
   let updateStub;
 
   beforeEach(() => {
-    updateStub = sinon.stub();
+    updateStub = jest.fn();
     const handlerMock = {
       update: updateStub
     };
@@ -55,6 +54,6 @@ describe('getVisualizeLoader', () => {
     // Ensure the state changes are reflected
     wrapper.update();
 
-    expect(updateStub.calledOnce).toBe(true);
+    expect(updateStub).toHaveBeenCalled();
   });
 });
