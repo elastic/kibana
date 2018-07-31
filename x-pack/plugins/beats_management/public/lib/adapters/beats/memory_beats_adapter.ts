@@ -7,7 +7,12 @@
 import { omit } from 'lodash';
 
 import { CMBeat } from '../../../../common/domain_types';
-import { BeatsTagAssignment, CMBeatsAdapter } from './adapter_types';
+import {
+  BeatsRemovalReturn,
+  BeatsTagAssignment,
+  CMAssignmentReturn,
+  CMBeatsAdapter,
+} from './adapter_types';
 
 export class MemoryBeatsAdapter implements CMBeatsAdapter {
   private beatsDB: CMBeat[];
@@ -20,15 +25,11 @@ export class MemoryBeatsAdapter implements CMBeatsAdapter {
     return this.beatsDB.find(beat => beat.id === id) || null;
   }
 
-  public async getWithIds(beatIds: string[]) {
-    return this.beatsDB.filter(beat => beatIds.includes(beat.id));
-  }
-
   public async getAll() {
     return this.beatsDB.map<CMBeat>((beat: any) => omit(beat, ['access_token']));
   }
 
-  public async removeTagsFromBeats(removals: BeatsTagAssignment[]): Promise<BeatsTagAssignment[]> {
+  public async removeTagsFromBeats(removals: BeatsTagAssignment[]): Promise<BeatsRemovalReturn[]> {
     const beatIds = removals.map(r => r.beatId);
 
     const response = this.beatsDB.filter(beat => beatIds.includes(beat.id)).map(beat => {
@@ -48,7 +49,7 @@ export class MemoryBeatsAdapter implements CMBeatsAdapter {
     }));
   }
 
-  public async assignTagsToBeats(assignments: BeatsTagAssignment[]): Promise<BeatsTagAssignment[]> {
+  public async assignTagsToBeats(assignments: BeatsTagAssignment[]): Promise<CMAssignmentReturn[]> {
     const beatIds = assignments.map(r => r.beatId);
 
     this.beatsDB.filter(beat => beatIds.includes(beat.id)).map(beat => {
