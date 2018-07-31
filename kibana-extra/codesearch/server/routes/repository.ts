@@ -50,7 +50,7 @@ export function repositoryRoute(
             dataPath: options.repoPath,
           };
           await cloneWorker.enqueueJob(payload, {});
-          reply({});
+          reply(repo);
         } catch (error) {
           const msg = `Issue repository clone request for ${repoUrl} error: ${error}`;
           log.error(msg);
