@@ -42,6 +42,10 @@ export function reduce<T, R>(
   initialValue: R
 ): OperatorFunction<T, R> {
   return function reduceOperation(source) {
-    return pipe(scan(accumulator, initialValue), ifEmpty(() => initialValue), last())(source);
+    return pipe(
+      scan(accumulator, initialValue),
+      ifEmpty(() => initialValue),
+      last()
+    )(source);
   };
 }
