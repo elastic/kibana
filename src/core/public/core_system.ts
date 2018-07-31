@@ -22,8 +22,8 @@ import { InjectedMetadataParams, InjectedMetadataService } from './injected_meta
 import { LegacyPlatformParams, LegacyPlatformService } from './legacy_platform';
 
 interface Params {
+  rootDomElement: HTMLElement;
   injectedMetadata: InjectedMetadataParams['injectedMetadata'];
-  rootDomElement: LegacyPlatformParams['rootDomElement'];
   requireLegacyFiles: LegacyPlatformParams['requireLegacyFiles'];
   useLegacyTestHarness?: LegacyPlatformParams['useLegacyTestHarness'];
 }
@@ -35,12 +35,17 @@ interface Params {
  * platform the CoreSystem will get many more Services.
  */
 export class CoreSystem {
+  private rootDomElement: HTMLElement;
   private fatalErrors: FatalErrorsService;
   private injectedMetadata: InjectedMetadataService;
   private legacyPlatform: LegacyPlatformService;
 
+  private legacyPlatformTargetDomElement: HTMLDivElement;
+
   constructor(params: Params) {
     const { rootDomElement, injectedMetadata, requireLegacyFiles, useLegacyTestHarness } = params;
+
+    this.rootDomElement = rootDomElement;
 
     this.injectedMetadata = new InjectedMetadataService({
       injectedMetadata,
@@ -54,8 +59,9 @@ export class CoreSystem {
       },
     });
 
+    this.legacyPlatformTargetDomElement = document.createElement('div');
     this.legacyPlatform = new LegacyPlatformService({
-      rootDomElement,
+      targetDomElement: this.legacyPlatformTargetDomElement,
       requireLegacyFiles,
       useLegacyTestHarness,
     });
@@ -63,8 +69,15 @@ export class CoreSystem {
 
   public start() {
     try {
+      while (this.rootDomElement.children.length) {
+        this.rootDomElement.removeChild(this.rootDomElement.children[0]);
+      }
+
       const injectedMetadata = this.injectedMetadata.start();
+
       const fatalErrors = this.fatalErrors.start();
+
+      this.rootDomElement.appendChild(this.legacyPlatformTargetDomElement);
       this.legacyPlatform.start({ injectedMetadata, fatalErrors });
     } catch (error) {
       this.fatalErrors.add(error);
@@ -73,5 +86,11 @@ export class CoreSystem {
 
   public stop() {
     this.legacyPlatform.stop();
+
+    if (this.legacyPlatformTargetDomElement.parentElement) {
+      this.legacyPlatformTargetDomElement.parentElement.removeChild(
+        this.legacyPlatformTargetDomElement
+      );
+    }
   }
 }
