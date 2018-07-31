@@ -200,16 +200,21 @@ export class DashboardStateManager {
       store.dispatch(updateDescription(this.getDescription()));
     }
 
+    if (getQuery(state) !== this.getQuery()) {
+      store.dispatch(updateQuery(this.getQuery()));
+    }
+
+    this._pushFiltersToStore();
+  }
+
+  _pushFiltersToStore() {
+    const state = store.getState();
     const dashboardFilters = this.getDashboardFilterBars();
     if (!_.isEqual(
       FilterUtils.cleanFiltersForComparison(dashboardFilters),
       FilterUtils.cleanFiltersForComparison(getFilters(state))
     )) {
       store.dispatch(updateFilters(dashboardFilters));
-    }
-
-    if (getQuery(state) !== this.getQuery()) {
-      store.dispatch(updateQuery(this.getQuery()));
     }
   }
 
@@ -583,6 +588,7 @@ export class DashboardStateManager {
     this.savedDashboard.searchSource.setField('query', query);
     this.savedDashboard.searchSource.setField('filter', filters);
     this.saveState();
+    this._pushFiltersToStore();
   }
 
   /**
