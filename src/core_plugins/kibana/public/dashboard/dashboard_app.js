@@ -117,9 +117,6 @@ app.directive('dashboardApp', function ($injector) {
         // https://github.com/angular/angular.js/wiki/Understanding-Scopes
         $scope.model = {
           query: dashboardStateManager.getQuery(),
-          useMargins: dashboardStateManager.getUseMargins(),
-          hidePanelTitles: dashboardStateManager.getHidePanelTitles(),
-          darkTheme: dashboardStateManager.getDarkTheme(),
           timeRestore: dashboardStateManager.getTimeRestore(),
           title: dashboardStateManager.getTitle(),
           description: dashboardStateManager.getDescription(),
@@ -385,23 +382,21 @@ app.directive('dashboardApp', function ($injector) {
         showAddPanel(chrome.getSavedObjectsClient(), dashboardStateManager.addNewPanel, addNewVis, listingLimit, isLabsEnabled, visTypes);
       };
       navActions[TopNavIds.OPTIONS] = (menuItem, navController, anchorElement) => {
-        /*$scope.$watch('model.hidePanelTitles', () => {
-          dashboardStateManager.setHidePanelTitles($scope.model.hidePanelTitles);
-        });
-        $scope.$watch('model.useMargins', () => {
-          dashboardStateManager.setUseMargins($scope.model.useMargins);
-        });
-        $scope.$watch('model.darkTheme', () => {
-          dashboardStateManager.setDarkTheme($scope.model.darkTheme);
-          updateTheme();
-        });*/
         showOptionsPopover({
           anchorElement,
           darkTheme: dashboardStateManager.getDarkTheme(),
           onDarkThemeChange: (isChecked) => {
             dashboardStateManager.setDarkTheme(isChecked);
             updateTheme();
-          }
+          },
+          useMargins: dashboardStateManager.getUseMargins(),
+          onUseMarginsChange: (isChecked) => {
+            dashboardStateManager.setUseMargins(isChecked);
+          },
+          hidePanelTitles: dashboardStateManager.getHidePanelTitles(),
+          onHidePanelTitlesChange: (isChecked) => {
+            dashboardStateManager.setHidePanelTitles(isChecked);
+          },
         });
       };
       updateViewMode(dashboardStateManager.getViewMode());

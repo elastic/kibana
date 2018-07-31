@@ -30,12 +30,26 @@ export class OptionsMenu extends Component {
 
   state = {
     darkTheme: this.props.darkTheme,
+    useMargins: this.props.useMargins,
+    hidePanelTitles: this.props.hidePanelTitles,
   }
 
   handleDarkThemeChange = (evt) => {
     const isChecked = evt.target.checked;
     this.props.onDarkThemeChange(isChecked);
     this.setState({ darkTheme: isChecked });
+  }
+
+  handleUseMarginsChange = (evt) => {
+    const isChecked = evt.target.checked;
+    this.props.onUseMarginsChange(isChecked);
+    this.setState({ useMargins: isChecked });
+  }
+
+  handleHidePanelTitlesChange = (evt) => {
+    const isChecked = evt.target.checked;
+    this.props.onHidePanelTitlesChange(isChecked);
+    this.setState({ hidePanelTitles: isChecked });
   }
 
   render() {
@@ -51,6 +65,24 @@ export class OptionsMenu extends Component {
           />
         </EuiFormRow>
 
+        <EuiFormRow>
+          <EuiSwitch
+            label="Use margins between panels"
+            checked={this.state.useMargins}
+            onChange={this.handleUseMarginsChange}
+            data-test-subj="dashboardMarginsCheckbox"
+          />
+        </EuiFormRow>
+
+        <EuiFormRow>
+          <EuiSwitch
+            label="Hide all panel titles"
+            checked={this.state.hidePanelTitles}
+            onChange={this.handleHidePanelTitlesChange}
+            data-test-subj="dashboardPanelTitlesCheckbox"
+          />
+        </EuiFormRow>
+
       </EuiForm>
     );
   }
@@ -59,4 +91,8 @@ export class OptionsMenu extends Component {
 OptionsMenu.propTypes = {
   darkTheme: PropTypes.bool.isRequired,
   onDarkThemeChange: PropTypes.func.isRequired,
+  useMargins: PropTypes.bool.isRequired,
+  onUseMarginsChange: PropTypes.func.isRequired,
+  hidePanelTitles: PropTypes.bool.isRequired,
+  onHidePanelTitlesChange: PropTypes.func.isRequired,
 };

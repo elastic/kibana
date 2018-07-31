@@ -36,7 +36,15 @@ const onClose = () => {
   isOpen = false;
 };
 
-export function showOptionsPopover({ anchorElement, darkTheme, onDarkThemeChange }) {
+export function showOptionsPopover({
+  anchorElement,
+  darkTheme,
+  onDarkThemeChange,
+  useMargins,
+  onUseMarginsChange,
+  hidePanelTitles,
+  onHidePanelTitlesChange,
+}) {
   if (isOpen) {
     onClose();
     return;
@@ -56,6 +64,10 @@ export function showOptionsPopover({ anchorElement, darkTheme, onDarkThemeChange
       <OptionsMenu
         darkTheme={darkTheme}
         onDarkThemeChange={onDarkThemeChange}
+        useMargins={useMargins}
+        onUseMarginsChange={onUseMarginsChange}
+        hidePanelTitles={hidePanelTitles}
+        onHidePanelTitlesChange={onHidePanelTitlesChange}
       />
     </EuiWrappingPopover>
   );
