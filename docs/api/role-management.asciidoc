@@ -9,6 +9,7 @@ It is *not* supported to do so using the
 {ref}/security-api-roles.html[{es} Role Management APIs], and doing 
 so will likely cause {kib}'s authorization to behave unexpectedly. 
 
+[[role-management-api-endpoints]]
 === Endpoints
 
 experimental[This API is *experimental* and may be changed or removed completely in a future release. The underlying mechanism of enforcing role based access control is stable, but the APIs for managing the roles are currently experimental.]
