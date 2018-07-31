@@ -1,5 +1,5 @@
 import { handleActions } from 'redux-actions';
-import { push, set, del, insert } from 'object-path-immutable';
+import { set, del, insert } from 'object-path-immutable';
 import { getId } from '../../lib/get_id';
 import { routerProvider } from '../../lib/router_provider';
 import { getDefaultPage } from '../defaults';
@@ -14,8 +14,8 @@ function getPageIndexById(workpadState, id) {
   return workpadState.pages.findIndex(page => page.id === id);
 }
 
-function addPage(workpadState, payload) {
-  return push(workpadState, 'pages', payload || getDefaultPage());
+function addPage(workpadState, payload, srcIndex = workpadState.pages.length - 1) {
+  return insert(workpadState, 'pages', payload || getDefaultPage(), srcIndex + 1);
 }
 
 function clonePage(page) {
@@ -32,7 +32,7 @@ export const pagesReducer = handleActions(
   {
     [actions.addPage]: (workpadState, { payload }) => {
       const withNewPage = addPage(workpadState, payload);
-      const newState = setPageIndex(withNewPage, withNewPage.pages.length - 1);
+      const newState = setPageIndex(withNewPage, withNewPage.pages.length - 1); // should be the next page index
 
       // changes to the page require navigation
       const router = routerProvider();
@@ -47,7 +47,12 @@ export const pagesReducer = handleActions(
       // if the page id is invalid, don't change the state
       if (!srcPage) return workpadState;
 
-      return addPage(workpadState, clonePage(srcPage));
+      const srcIndex = workpadState.pages.indexOf(srcPage);
+      const insertedWorkpadState = addPage(workpadState, clonePage(srcPage), srcIndex);
+      const newState = setPageIndex(insertedWorkpadState, srcIndex + 1);
+      const router = routerProvider();
+      router.navigateTo('loadWorkpad', { id: newState.id, page: srcIndex + 1 });
+      return newState;
     },
 
     [actions.gotoPage]: (workpadState, { payload }) => {

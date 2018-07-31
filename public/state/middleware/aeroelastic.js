@@ -7,9 +7,10 @@ import {
   duplicateElement,
   elementLayer,
   setPosition,
+  fetchAllRenderables,
 } from '../actions/elements';
 import { selectElement } from '../actions/transient';
-import { addPage } from '../actions/pages';
+import { addPage, removePage, duplicatePage } from '../actions/pages';
 import { appReady } from '../actions/app';
 import { setWorkpad } from '../actions/workpad';
 import { getElements, getPages, getSelectedPage, getSelectedElement } from '../selectors/workpad';
@@ -161,6 +162,15 @@ export const aeroelastic = ({ dispatch, getState }) => {
       pages.map(p => p.id).forEach(createStore);
     }
 
+    let lastPageRemoved = false;
+    if (action.type === removePage.toString()) {
+      const preRemoveState = getState();
+      if (getPages(preRemoveState).length <= 1) {
+        lastPageRemoved = true;
+      }
+      aero.removeStore(action.payload);
+    }
+
     next(action);
 
     switch (action.type) {
@@ -173,9 +183,21 @@ export const aeroelastic = ({ dispatch, getState }) => {
         break;
 
       case addPage.toString():
+      case duplicatePage.toString():
         const newPage = getSelectedPage(getState());
         createStore(newPage);
+        if (action.type === duplicatePage.toString()) {
+          dispatch(fetchAllRenderables());
+        }
         populateWithElements(newPage);
+        break;
+
+      case removePage.toString():
+        const postRemoveState = getState();
+        if (lastPageRemoved) {
+          const freshPage = getSelectedPage(postRemoveState);
+          createStore(freshPage);
+        }
         break;
 
       case selectElement.toString():

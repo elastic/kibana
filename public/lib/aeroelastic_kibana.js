@@ -25,6 +25,12 @@ export const aeroelastic = {
     stores.get(page).setUpdater(updateScene);
   },
 
+  removeStore(page) {
+    if (stores.has(page)) {
+      stores.delete(page);
+    }
+  },
+
   getStore(page) {
     const store = stores.get(page);
     if (!store) {
