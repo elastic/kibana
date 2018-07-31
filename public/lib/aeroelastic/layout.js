@@ -868,7 +868,12 @@ const annotatedShapes = select(
       const snapOffsetX = constrainedX ? -horizontalConstraint.signedDistance : 0;
       const snapOffsetY = constrainedY ? -verticalConstraint.signedDistance : 0;
       if (constrainedX || constrainedY) {
-        const snapOffset = matrix.translate(snapOffsetX, snapOffsetY, 0);
+        const snapOffset = matrix.translateComponent(
+          matrix.multiply(
+            matrix.rotateZ(matrix.matrixToAngle(draggedShape.localTransformMatrix) / 180 * Math.PI),
+            matrix.translate(snapOffsetX, snapOffsetY, 0)
+          )
+        );
         return {
           ...shape,
           snapDeltaMatrix: snapOffset,
