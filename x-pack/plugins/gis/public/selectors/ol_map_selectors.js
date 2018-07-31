@@ -67,12 +67,27 @@ function convertLayersByType(layerList) {
 }
 
 // Selectors
+export const getOlMap = createSelector(
+  getMapConstants,
+  mapConstants => {
+    const olView = new ol.View({
+      center: ol.proj.fromLonLat(mapConstants.mapCenter),
+      zoom: mapConstants.mapInitZoomLevel
+    });
+    return new ol.Map({
+      layers: [],
+      view: olView
+    });
+  }
+);
+
 export function getOlLayers(state) {
   return createSelector(
     getLayerList,
     layerList => convertLayersByType(layerList)
   )(state);
 }
+
 export function getOlLayersBySource(state) {
   return createSelector(
     getOlLayers,

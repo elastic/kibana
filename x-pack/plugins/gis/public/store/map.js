@@ -11,6 +11,10 @@ import {
 } from "../actions/map_actions";
 
 const INITIAL_STATE = {
+  mapConstants: {
+    mapCenter: [37.41, 8.82],
+    mapInitZoomLevel: 4
+  },
   selectedLayer: null,
   layerList: [],
   sources: [],

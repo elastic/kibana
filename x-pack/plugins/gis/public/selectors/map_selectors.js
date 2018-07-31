@@ -7,6 +7,8 @@
 import { createSelector } from 'reselect';
 import _ from 'lodash';
 
+export const getMapConstants = ({ map }) => map && map.mapConstants;
+
 export const getSelectedLayer = ({ map }) => map && map.selectedLayer;
 
 export const getLayerList = ({ map }) => map && map.layerList;

@@ -10,24 +10,14 @@ import * as ol from 'openlayers';
 
 export class KibanaMap extends React.Component {
 
-  MAP_CENTER = [37.41, 8.82];
-  MAP_INIT_ZOOM_LEVEL = 4;
-
   constructor() {
     super();
   }
 
   componentDidMount() {
-    const olView = new ol.View({
-      center: ol.proj.fromLonLat(this.MAP_CENTER),
-      zoom: this.MAP_INIT_ZOOM_LEVEL
-    });
-    this._olMap = new ol.Map({
-      target: this.refs.mapContainer,
-      layers: [],
-      view: olView
-    });
-    this._addLayers(this.props.olLayers);
+    const { olMap, olLayers } = this.props;
+    olMap.setTarget(this.refs.mapContainer);
+    this._addLayers(olLayers);
   }
 
   componentWillReceiveProps(props) {
@@ -35,9 +25,10 @@ export class KibanaMap extends React.Component {
   }
 
   _addLayers = (layers) => {
-    this._olMap.setLayerGroup(new ol.layer.Group());
+    const { olMap } = this.props;
+    olMap.setLayerGroup(new ol.layer.Group());
     layers.forEach(layer=> {
-      this._olMap.addLayer(layer.olLayer);
+      olMap.addLayer(layer.olLayer);
     });
   };
 
