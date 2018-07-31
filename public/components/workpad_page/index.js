@@ -2,38 +2,22 @@ import { connect } from 'react-redux';
 import PropTypes from 'prop-types';
 import { compose, withState, withProps } from 'recompose';
 import { aeroelastic } from '../../lib/aeroelastic_kibana';
-import { removeElement, setPosition } from '../../state/actions/elements';
-import { selectElement } from '../../state/actions/transient';
+import { removeElement } from '../../state/actions/elements';
 import { getFullscreen, getEditing } from '../../state/selectors/app';
+import { getElements } from '../../state/selectors/workpad';
 import { withEventHandlers } from './event_handlers';
 import { WorkpadPage as Component } from './workpad_page';
 
-const mapStateToProps = state => {
+const mapStateToProps = (state, ownProps) => {
   return {
-    isFullscreen: getFullscreen(state),
-    isEditing: getEditing(state),
+    isEditable: !getFullscreen(state) && getEditing(state),
+    elements: getElements(state, ownProps.page.id),
   };
 };
 
 const mapDispatchToProps = dispatch => {
   return {
     removeElement: pageId => elementId => dispatch(removeElement(elementId, pageId)),
-    selectElement: isInteractable => elementId =>
-      isInteractable && dispatch(selectElement(elementId)),
-    setPosition: pageId => (elementId, position) =>
-      dispatch(setPosition(elementId, pageId, position)),
-  };
-};
-
-const mergeProps = (stateProps, { removeElement }, ownProps) => {
-  const { isEditing, isFullscreen } = stateProps;
-  const { page } = ownProps;
-
-  return {
-    ...ownProps,
-    isEditable: !isFullscreen && isEditing,
-    key: page.id,
-    removeElement,
   };
 };
 
@@ -46,11 +30,11 @@ const getRootElementId = (lookup, id) => {
 };
 
 export const WorkpadPage = compose(
-  connect(mapStateToProps, mapDispatchToProps, mergeProps),
+  connect(mapStateToProps, mapDispatchToProps),
   withState('updateCount', 'setUpdateCount', 0), // TODO: remove this, see setUpdateCount below
-  withProps(({ updateCount, setUpdateCount, page, removeElement }) => {
+  withProps(({ updateCount, setUpdateCount, page, elements: pageElements, removeElement }) => {
     const { shapes, selectedShapes = [], cursor } = aeroelastic.getStore(page.id).currentScene;
-    const elementLookup = new Map(page.elements.map(element => [element.id, element]));
+    const elementLookup = new Map(pageElements.map(element => [element.id, element]));
     const shapeLookup = new Map(shapes.map(shape => [shape.id, shape]));
     const elements = shapes.map(
       shape =>

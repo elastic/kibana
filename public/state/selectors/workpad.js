@@ -37,15 +37,7 @@ export function getSelectedPage(state) {
 }
 
 export function getPages(state) {
-  const pages = get(state, append(workpadRoot, 'pages'), []);
-
-  // explicitely strip the ast, basically a fix for corrupted workpads
-  // due to https://github.com/elastic/kibana-canvas/issues/260
-  // TODO: remove this once it's been in the wild a bit
-  return pages.map(page => ({
-    ...page,
-    elements: page.elements.map(el => omit(el, ['ast'])),
-  }));
+  return get(state, append(workpadRoot, 'pages'), []);
 }
 
 export function getPageById(state, id) {

@@ -84,6 +84,7 @@ export const WorkpadPage = ({
 WorkpadPage.propTypes = {
   page: PropTypes.shape({
     id: PropTypes.string.isRequired,
+    style: PropTypes.object,
   }).isRequired,
   elements: PropTypes.arrayOf(
     PropTypes.shape({
@@ -98,7 +99,6 @@ WorkpadPage.propTypes = {
   isSelected: PropTypes.bool.isRequired,
   height: PropTypes.number.isRequired,
   width: PropTypes.number.isRequired,
-  style: PropTypes.object,
   isEditable: PropTypes.bool.isRequired,
   onDoubleClick: PropTypes.func,
   onKeyDown: PropTypes.func,
@@ -106,5 +106,4 @@ WorkpadPage.propTypes = {
   onMouseDown: PropTypes.func,
   onMouseMove: PropTypes.func,
   onMouseUp: PropTypes.func,
-  shapes: PropTypes.arrayOf(PropTypes.object),
 };
