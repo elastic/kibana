@@ -82,8 +82,9 @@ export default function ({ getService, getPageObjects }) {
       describe('Print Layout', () => {
         it('matches baseline report', async function () {
           // Generating and then comparing reports can take longer than the default 60s timeout because the comparePngs
-          // function is taking about 15 seconds per comparison in jenkins.
-          this.timeout(180000);
+          // function is taking about 15 seconds per comparison in jenkins. Also Chromium takes a lot longer to generate a
+          // report than phantom.
+          this.timeout(360000);
 
           await PageObjects.dashboard.clickEdit();
           await PageObjects.reporting.setTimepickerInDataRange();
@@ -119,8 +120,9 @@ export default function ({ getService, getPageObjects }) {
 
         it('matches same baseline report with margins turned on', async function () {
           // Generating and then comparing reports can take longer than the default 60s timeout because the comparePngs
-          // function is taking about 15 seconds per comparison in jenkins.
-          this.timeout(180000);
+          // function is taking about 15 seconds per comparison in jenkins. Also Chromium takes a lot longer to generate a
+          // report than phantom.
+          this.timeout(360000);
 
           await PageObjects.dashboard.clickEdit();
           await PageObjects.dashboard.useMargins(true);
@@ -150,8 +152,9 @@ export default function ({ getService, getPageObjects }) {
         it('matches baseline report', async function () {
 
           // Generating and then comparing reports can take longer than the default 60s timeout because the comparePngs
-          // function is taking about 15 seconds per comparison in jenkins.
-          this.timeout(180000);
+          // function is taking about 15 seconds per comparison in jenkins. Also Chromium takes a lot longer to generate a
+          // report than phantom.
+          this.timeout(360000);
 
           await PageObjects.reporting.openReportingPanel();
           await PageObjects.reporting.forceSharedItemsContainerSize({ width: 1405 });
