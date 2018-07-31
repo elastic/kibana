@@ -50,6 +50,7 @@ import {
   DashboardPanelActionsProvider,
   FlyoutProvider,
   VisualizationProvider,
+  EmbeddingProvider,
 } from './services';
 
 export default async function ({ readConfigFile }) {
@@ -105,6 +106,7 @@ export default async function ({ readConfigFile }) {
       dashboardPanelActions: DashboardPanelActionsProvider,
       flyout: FlyoutProvider,
       visualization: VisualizationProvider,
+      embedding: EmbeddingProvider,
     },
     servers: commonConfig.get('servers'),
 
