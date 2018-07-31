@@ -63,7 +63,13 @@ export class NavControlPopover extends Component {
     }
 
     return (
-      <EuiPopover button={button} isOpen={this.state.isOpen} closePopover={this.closePortal} anchorPosition={'rightCenter'}>
+      <EuiPopover
+        button={button}
+        isOpen={this.state.isOpen}
+        panelPaddingSize={'none'}
+        closePopover={this.closePortal}
+        anchorPosition={'rightCenter'}
+      >
         <SpacesMenu spaces={this.state.spaces} onSelectSpace={this.onSelectSpace} />
       </EuiPopover>
     );
