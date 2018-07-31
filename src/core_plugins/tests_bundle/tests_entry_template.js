@@ -72,13 +72,16 @@ const legacyMetadata = {
   }
 };
 
+const rootDomElement = document.createElement('div');
+document.body.appendChild(rootDomElement)
+
 new CoreSystem({
   injectedMetadata: {
     version: legacyMetadata.version,
     buildNumber: legacyMetadata.buildNum,
     legacyMetadata
   },
-  rootDomElement: document.body,
+  rootDomElement,
   useLegacyTestHarness: true,
   requireLegacyFiles: () => {
     ${bundle.getRequires().join('\n  ')}
