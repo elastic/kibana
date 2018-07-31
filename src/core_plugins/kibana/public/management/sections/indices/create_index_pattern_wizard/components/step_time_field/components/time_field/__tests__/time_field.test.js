@@ -18,13 +18,13 @@
  */
 
 import React from 'react';
-import { TimeField } from '../time_field';
-import { shallow } from 'enzyme';
+import { TimeFieldComponent } from '../time_field';
+import { shallowWithIntl } from 'test_utils/enzyme_helpers';
 
 describe('TimeField', () => {
   it('should render normally', () => {
-    const component = shallow(
-      <TimeField
+    const component = shallowWithIntl(
+      <TimeFieldComponent
         isVisible={true}
         fetchTimeFields={() => {}}
         timeFieldOptions={[{ text: '@timestamp', value: '@timestamp' }]}
@@ -38,8 +38,8 @@ describe('TimeField', () => {
   });
 
   it('should render something if hiding time field', () => {
-    const component = shallow(
-      <TimeField
+    const component = shallowWithIntl(
+      <TimeFieldComponent
         isVisible={false}
         fetchTimeFields={() => {}}
         timeFieldOptions={[{ text: '@timestamp', value: '@timestamp' }]}
@@ -53,8 +53,8 @@ describe('TimeField', () => {
   });
 
   it('should render a selected time field', () => {
-    const component = shallow(
-      <TimeField
+    const component = shallowWithIntl(
+      <TimeFieldComponent
         isVisible={true}
         fetchTimeFields={() => {}}
         timeFieldOptions={[{ text: '@timestamp', value: '@timestamp' }]}
@@ -68,8 +68,8 @@ describe('TimeField', () => {
   });
 
   it('should render a loading state', () => {
-    const component = shallow(
-      <TimeField
+    const component = shallowWithIntl(
+      <TimeFieldComponent
         isVisible={true}
         fetchTimeFields={() => {}}
         timeFieldOptions={[{ text: '@timestamp', value: '@timestamp' }]}
