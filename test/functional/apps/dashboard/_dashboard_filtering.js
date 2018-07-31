@@ -101,6 +101,63 @@ export default function ({ getService, getPageObjects }) {
       });
     });
 
+    describe('using a pinned filter that excludes all data', async () => {
+      before(async () => {
+        await filterBar.toggleFilterPinned('bytes');
+        await PageObjects.header.waitUntilLoadingHasFinished();
+        await PageObjects.dashboard.waitForRenderComplete();
+      });
+
+      it('filters on pie charts', async () => {
+        await dashboardExpect.pieSliceCount(0);
+      });
+
+      it('area, bar and heatmap charts filtered', async () => {
+        await dashboardExpect.seriesElementCount(0);
+      });
+
+      it('data tables are filtered', async () => {
+        await dashboardExpect.dataTableRowCount(0);
+      });
+
+      it('goal and guages are filtered', async () => {
+        await dashboardExpect.goalAndGuageLabelsExist(['0', '0%']);
+      });
+
+      it('tsvb time series shows no data message', async () => {
+        expect(await testSubjects.exists('noTSVBDataMessage')).to.be(true);
+        await dashboardExpect.tsvbTimeSeriesLegendCount(0);
+      });
+
+      it('metric value shows no data', async () => {
+        await dashboardExpect.metricValuesExist(['-']);
+      });
+
+      it('tag cloud values are filtered', async () => {
+        await dashboardExpect.emptyTagCloudFound();
+      });
+
+      it('tsvb metric is filtered', async () => {
+        await dashboardExpect.tsvbMetricValuesExist(['0 custom template']);
+      });
+
+      it('tsvb top n is filtered', async () => {
+        await dashboardExpect.tsvbTopNValuesExist(['0', '0']);
+      });
+
+      it('saved search is filtered', async () => {
+        await dashboardExpect.savedSearchRowCount(0);
+      });
+
+      it('timelion is filtered', async () => {
+        await dashboardExpect.timelionLegendCount(0);
+      });
+
+      it('vega is filtered', async () => {
+        await dashboardExpect.vegaTextsDoNotExist(['5,000']);
+      });
+    });
+
     describe('disabling a filter unfilters the data on', async () => {
       before(async () => {
         await testSubjects.click('disableFilter-bytes');
