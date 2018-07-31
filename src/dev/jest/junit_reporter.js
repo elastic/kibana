@@ -85,7 +85,7 @@ export default class JestJunitReporter {
       });
     });
 
-    const reportPath = resolve(rootDirectory, `target/junit/${reportName}.xml`);
+    const reportPath = resolve(rootDirectory, `target/junit/TEST-${reportName}.xml`);
     const reportXML = root.end({
       pretty: true,
       indent: '  ',
