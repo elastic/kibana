@@ -139,6 +139,19 @@ const keyTransformGesture = select(
       : []
 )(pressedKeys);
 
+const alterSnapGesture = select(keys =>
+  Object.keys(keys)
+    .map(keypress => {
+      switch (keypress) {
+        case 'MetaLeft':
+          return 'relax';
+        default:
+          return false;
+      }
+    })
+    .filter(identity)
+)(pressedKeys);
+
 const mouseTransformGesture = selectReduce(
   (prev, dragging, { x0, y0, x1, y1 }) => {
     if (dragging) {
@@ -263,7 +276,12 @@ const selectedPrimaryShapeIds = select(shapes => shapes.map(shape => shape.paren
   selectedShapes
 );
 
-const rotationManipulation = ({ shape, directShape, cursorPosition: { x, y } }) => {
+const rotationManipulation = ({
+  shape,
+  directShape,
+  cursorPosition: { x, y },
+  alterSnapGesture,
+}) => {
   // rotate around a Z-parallel line going through the shape center (ie. around the center)
   if (!shape || !directShape) return { transforms: [], shapes: [] };
   const center = shape.transformMatrix;
@@ -281,7 +299,9 @@ const rotationManipulation = ({ shape, directShape, cursorPosition: { x, y } }) 
     Math.pow(closest45degPosition[0] - (centerPosition[0] - x), 2) +
       Math.pow(closest45degPosition[1] - (centerPosition[1] - y), 2)
   );
-  const newSnappedAngle = pixelDifference < config.rotateSnapInPixels ? closest45deg : newAngle;
+  const relaxed = alterSnapGesture.indexOf('relax') !== -1;
+  const newSnappedAngle =
+    pixelDifference < config.rotateSnapInPixels && !relaxed ? closest45deg : newAngle;
   const result = matrix.rotateZ(oldAngle - newSnappedAngle);
   return { transforms: [result], shapes: [shape.id] };
 };
@@ -407,7 +427,8 @@ const rotationAnnotationManipulation = (
   directTransforms,
   directShapes,
   allShapes,
-  cursorPosition
+  cursorPosition,
+  alterSnapGesture
 ) => {
   const shapeIds = directShapes.map(
     shape =>
@@ -421,6 +442,7 @@ const rotationAnnotationManipulation = (
         shape,
         directShape: directShapes[i],
         cursorPosition,
+        alterSnapGesture,
       }))
     )
   );
@@ -441,16 +463,19 @@ const resizeAnnotationManipulation = (transformGestures, directShapes, allShapes
   return tuples.map(asymmetricResizeManipulation);
 };
 
-const transformIntents = select((transformGestures, directShapes, shapes, cursorPosition) => [
-  ...directShapeTranslateManipulation(transformGestures.map(g => g.transform), directShapes),
-  ...rotationAnnotationManipulation(
-    transformGestures.map(g => g.transform),
-    directShapes,
-    shapes,
-    cursorPosition
-  ),
-  ...resizeAnnotationManipulation(transformGestures, directShapes, shapes),
-])(transformGestures, selectedShapes, shapes, cursorPosition);
+const transformIntents = select(
+  (transformGestures, directShapes, shapes, cursorPosition, alterSnapGesture) => [
+    ...directShapeTranslateManipulation(transformGestures.map(g => g.transform), directShapes),
+    ...rotationAnnotationManipulation(
+      transformGestures.map(g => g.transform),
+      directShapes,
+      shapes,
+      cursorPosition,
+      alterSnapGesture
+    ),
+    ...resizeAnnotationManipulation(transformGestures, directShapes, shapes),
+  ]
+)(transformGestures, selectedShapes, shapes, cursorPosition, alterSnapGesture);
 
 const fromScreen = currentTransform => transform => {
   const isTranslate = transform[12] !== 0 || transform[13] !== 0;
@@ -842,7 +867,8 @@ const annotatedShapes = select(
     alignmentGuideAnnotations,
     hoverAnnotations,
     rotationAnnotations,
-    resizeAnnotations
+    resizeAnnotations,
+    alterSnapGesture
   ) => {
     const annotations = [].concat(
       alignmentGuideAnnotations,
@@ -857,14 +883,19 @@ const annotatedShapes = select(
     );
     const horizontalConstraint = directionalConstraint(constraints, isHorizontal);
     const verticalConstraint = directionalConstraint(constraints, isVertical);
+    const relaxed = alterSnapGesture.indexOf('relax') !== -1;
     const snappedShapes = contentShapes.map(shape => {
       const constrainedShape = draggedShape && shape.id === draggedShape.id;
       const constrainedX =
         config.snapConstraint &&
+        !relaxed &&
         horizontalConstraint &&
         horizontalConstraint.constrained === shape.id;
       const constrainedY =
-        config.snapConstraint && verticalConstraint && verticalConstraint.constrained === shape.id;
+        config.snapConstraint &&
+        !relaxed &&
+        verticalConstraint &&
+        verticalConstraint.constrained === shape.id;
       const snapOffsetX = constrainedX ? -horizontalConstraint.signedDistance : 0;
       const snapOffsetY = constrainedY ? -verticalConstraint.signedDistance : 0;
       if (constrainedX || constrainedY) {
@@ -902,7 +933,8 @@ const annotatedShapes = select(
   alignmentGuideAnnotations,
   hoverAnnotations,
   rotationAnnotations,
-  resizeAnnotations
+  resizeAnnotations,
+  alterSnapGesture
 );
 
 const globalTransformShapes = select(cascadeTransforms)(annotatedShapes);
