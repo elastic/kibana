@@ -27,8 +27,7 @@ const tarFs = require('tar-fs');
 
 function decompressTarball(archive, dirPath) {
   return new Promise((resolve, reject) => {
-    fs
-      .createReadStream(archive)
+    fs.createReadStream(archive)
       .on('error', reject)
       .pipe(zlib.createGunzip())
       .on('error', reject)
