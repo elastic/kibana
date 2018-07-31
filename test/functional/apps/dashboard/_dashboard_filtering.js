@@ -251,7 +251,7 @@ export default function ({ getService, getPageObjects }) {
       it('Nested visualization filter pills filters data as expected', async () => {
         await dashboardPanelActions.clickEdit();
         await PageObjects.header.waitUntilLoadingHasFinished();
-        await PageObjects.dashboard.waitForRenderComplete();
+        await embeddable.waitForRender(2);
         await PageObjects.dashboard.filterOnPieSlice('grr');
         await PageObjects.header.waitUntilLoadingHasFinished();
         await dashboardExpect.pieSliceCount(1);
