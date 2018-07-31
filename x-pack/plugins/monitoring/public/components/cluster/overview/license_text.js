@@ -26,7 +26,7 @@ export function LicenseText({ license, showLicenseExpiration }) {
 
   return (
     <EuiLink href="#/license">
-      {capitalize(license.type)} license <WillExpireOn expiryDate={license.expiry_date} />
+      {capitalize(license.type)} license <WillExpireOn expiryDate={license.expiry_date_in_millis} />
     </EuiLink>
   );
 }
