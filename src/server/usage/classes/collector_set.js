@@ -102,34 +102,13 @@ export class CollectorSet {
         return accum;
       }
       const collector = collectors.find(_c => _c.type === collectedData.type);
-      if (collector.format) {
-        accum.push(collector.format(collectedData.result));
-      } else {
-        this._log.debug(`No formatter found for collector, type=${collectedData.type}`);
-      }
+      const defaultFormatterForBulkUpload = result => ([
+        { type: collector.type, payload: result }
+      ]);
+      const formatter = collector.formatForBulkUpload || defaultFormatterForBulkUpload;
+      accum.push(formatter(collectedData.result));
       return accum;
     }, []);
-
-    // for (const collector of collectors) {
-    //   const typeData = data.find(_data => _data.type === collector.type);
-    //   if (!isEmpty(typeData)) {
-
-    //   }
-    //   console.log('type', collector.type, typeData);
-    // }
-
-    // return Promise.map(collectors, collector => {
-    //   const collectorType = collector.type;
-    //   this._log.debug(`Fetching data from ${collectorType} collector`);
-    //   return Promise.props({
-    //     type: collectorType,
-    //     result: collector.fetchInternal(callCluster) // use the wrapper for fetch, kicks in error checking
-    //   })
-    //     .catch(err => {
-    //       this._log.warn(err);
-    //       this._log.warn(`Unable to fetch data from ${collectorType} collector`);
-    //     });
-    // });
   }
 
   async bulkFetchUsage(callCluster) {

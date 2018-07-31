@@ -53,7 +53,7 @@ export function getOpsStatsCollector(server, kbnServer) {
         ...buffer.flush()
       };
     },
-    format: result => {
+    formatForBulkUpload: result => {
       const { kibana, ...rest } = result;
       return [
         {

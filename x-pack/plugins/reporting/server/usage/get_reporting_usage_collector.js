@@ -148,7 +148,7 @@ export function getReportingUsageCollector(server) {
         }
       };
     },
-    format: result => {
+    formatForBulkUpload: result => {
       return [{
         type: 'kibana_stats',
         payload: {
