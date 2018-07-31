@@ -54,7 +54,9 @@ export class OptionsMenu extends Component {
 
   render() {
     return (
-      <EuiForm>
+      <EuiForm
+        data-test-subj="dashboardOptionsMenu"
+      >
 
         <EuiFormRow>
           <EuiSwitch
