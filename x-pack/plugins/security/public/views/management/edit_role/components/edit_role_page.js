@@ -19,6 +19,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiButton,
+  EuiPageBody,
 } from '@elastic/eui';
 import { saveRole, deleteRole } from '../../../../objects';
 import { isReservedRole } from '../../../../lib/role';
@@ -53,22 +54,24 @@ export class EditRolePage extends Component {
 
   render() {
     return (
-      <EuiPage className="editRolePage">
-        <EuiForm {...this.state.formError}>
-          {this.getFormTitle()}
+      <EuiPage className="editRolePage" restrictWidth>
+        <EuiPageBody>
+          <EuiForm {...this.state.formError}>
+            {this.getFormTitle()}
 
-          <EuiSpacer />
+            <EuiSpacer />
 
-          {this.getRoleName()}
+            {this.getRoleName()}
 
-          {this.getElasticsearchPrivileges()}
+            {this.getElasticsearchPrivileges()}
 
-          {this.getKibanaPrivileges()}
+            {this.getKibanaPrivileges()}
 
-          <EuiSpacer />
+            <EuiSpacer />
 
-          {this.getFormButtons()}
-        </EuiForm>
+            {this.getFormButtons()}
+          </EuiForm>
+        </EuiPageBody>
       </EuiPage>
     );
   }

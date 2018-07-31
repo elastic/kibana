@@ -7,7 +7,7 @@
 import React, { Component, Fragment } from 'react';
 import PropTypes from 'prop-types';
 import {
-  EuiButton,
+  EuiButtonEmpty,
   EuiOverlayMask,
   EuiConfirmModal,
 } from '@elastic/eui';
@@ -29,9 +29,9 @@ export class DeleteRoleButton extends Component {
 
     return (
       <Fragment>
-        <EuiButton color={'danger'} iconType={'trash'} onClick={this.showModal}>
-          Delete Role
-        </EuiButton>
+        <EuiButtonEmpty color={'danger'} onClick={this.showModal}>
+          Delete role
+        </EuiButtonEmpty>
         {this.maybeShowModal()}
       </Fragment>
     );

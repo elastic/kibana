@@ -19,6 +19,7 @@ export class PrivilegeSelector extends Component {
     value: PropTypes.string,
     allowNone: PropTypes.bool,
     disabled: PropTypes.bool,
+    compressed: PropTypes.bool,
   };
 
   state = {}
@@ -29,6 +30,7 @@ export class PrivilegeSelector extends Component {
       value,
       disabled,
       allowNone,
+      compressed,
     } = this.props;
 
     const options = [];
@@ -48,6 +50,7 @@ export class PrivilegeSelector extends Component {
         value={value || ''}
         onChange={this.onChange}
         disabled={disabled}
+        compressed={compressed}
       />
     );
   }

@@ -3,30 +3,60 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import React, { Fragment } from 'react';
+import React from 'react';
 import PropTypes from 'prop-types';
 import {
   EuiCallOut
 } from '@elastic/eui';
+import { NO_PRIVILEGE_VALUE } from '../../../lib/constants';
 
 export const PrivilegeCalloutWarning = ({ basePrivilege, isReservedRole }) => {
   if (basePrivilege === 'all') {
-    return (
-      <EuiCallOut color="warning" iconType="iInCircle" title={'Hey, this is important!'}>
-        <p>
-          Setting the minimum privilege to <strong>all</strong> grants full access to all spaces.<br />
-          {getCorrectiveActionText(basePrivilege, isReservedRole)}
-        </p>
-      </EuiCallOut>
-    );
+    if (isReservedRole) {
+      return (
+        <EuiCallOut color="warning" iconType="iInCircle" title={'Cannot customize a reserved role\'s space privileges'}>
+          <p>
+            This role always grants full access to all spaces.
+            To customize privileges for individual spaces, you must create a new role.
+          </p>
+        </EuiCallOut>
+      );
+    } else {
+      return (
+        <EuiCallOut color="warning" iconType="iInCircle" title={'Minimum privilege is too high to customize individual spaces'}>
+          <p>
+            Setting the minimum privilege to <strong>all</strong> grants full access to all spaces.
+            To customize privileges for individual spaces,
+            the minimum privilege must be either <strong>read</strong> or <strong>none</strong>.
+          </p>
+        </EuiCallOut>
+      );
+    }
   }
 
   if (basePrivilege === 'read') {
+    if (isReservedRole) {
+      return (
+        <EuiCallOut color="warning" iconType="iInCircle" title={'Cannot customize a reserved role\'s space privileges'}>
+          <p>
+            This role always grants read access to all spaces.
+            To customize privileges for individual spaces, you must create a new role.
+          </p>
+        </EuiCallOut>
+      );
+    } else {
+      return (
+        <EuiCallOut color="primary" iconType="iInCircle" title={'Lowest possible privilege is \'read\''} />
+      );
+    }
+  }
+
+  if (basePrivilege === NO_PRIVILEGE_VALUE && isReservedRole) {
     return (
-      <EuiCallOut color="primary" iconType="iInCircle" title={'Hey, this is important!'} size={'s'}>
+      <EuiCallOut color="warning" iconType="iInCircle" title={'Cannot customize a reserved role\'s space privileges'}>
         <p>
-          Setting the minimum privilege to <strong>read</strong> grants a minimum of read access to all spaces.<br />
-          {getCorrectiveActionText(basePrivilege, isReservedRole)}
+          This role never grants access to any spaces within Kibana.
+          To customize privileges for individual spaces, you must create a new role.
         </p>
       </EuiCallOut>
     );
@@ -34,37 +64,6 @@ export const PrivilegeCalloutWarning = ({ basePrivilege, isReservedRole }) => {
 
   return null;
 };
-
-function getCorrectiveActionText(basePrivilege, isReservedRole) {
-  if (basePrivilege === 'all') {
-    return isReservedRole
-      ? (
-        <Fragment>
-          To customize privileges for individual spaces, create a new role,
-        and set the minimum privilege to either <strong>read</strong> or <strong>none</strong>
-        </Fragment>
-      )
-      : (
-        <Fragment>
-          To customize privileges for individual spaces, set the minimum privilege to either <strong>read</strong> or <strong>none</strong>
-        </Fragment>
-      );
-  }
-  if (basePrivilege === 'read') {
-    return isReservedRole
-      ? (
-        <Fragment>
-          To restrict access to individual spaces, create a new role,
-          and set the minimum privilege to <strong>none</strong>
-        </Fragment>
-      )
-      : (
-        <Fragment>
-          To restrict access to individual spaces, set the minimum privilege to <strong>none</strong>
-        </Fragment>
-      );
-  }
-}
 
 PrivilegeCalloutWarning.propTypes = {
   basePrivilege: PropTypes.string.isRequired,

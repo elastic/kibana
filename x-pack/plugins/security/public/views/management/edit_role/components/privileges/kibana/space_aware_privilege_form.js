@@ -16,7 +16,6 @@ import {
   EuiButton,
   EuiText,
   EuiTitle,
-  EuiHorizontalRule,
 } from '@elastic/eui';
 import { isReservedRole } from '../../../../../../lib/role';
 import { copyRole } from '../../../lib/copy_role';
@@ -64,13 +63,27 @@ export class SpaceAwarePrivilegeForm extends Component {
 
     const basePrivilege = assignedPrivileges[ALL_RESOURCE].length > 0 ? assignedPrivileges[ALL_RESOURCE][0] : NO_PRIVILEGE_VALUE;
 
+    const description = (<p>Specifies the lowest permission level for all spaces, unless a custom privilege is specified.</p>);
+
+    let helptext;
+    if (basePrivilege === NO_PRIVILEGE_VALUE) {
+      helptext = "No access";
+    } else if (basePrivilege === 'all') {
+      helptext = "View, edit, and share all objects and apps within all spaces";
+    } else if (basePrivilege === 'read') {
+      helptext = "View only mode";
+    }
+
     return (
       <Fragment>
         <EuiDescribedFormGroup
-          title={<p>Minimum privilege</p>}
-          description={<p>Specifies the lowest permission level for all spaces.</p>}
+          title={<h3>Minimum privilege</h3>}
+          description={description}
         >
-          <EuiFormRow hasEmptyLabelSpace>
+          <EuiFormRow
+            hasEmptyLabelSpace
+            helpText={helptext}
+          >
             <PrivilegeSelector
               availablePrivileges={availablePrivileges}
               value={basePrivilege}
@@ -82,16 +95,13 @@ export class SpaceAwarePrivilegeForm extends Component {
         </EuiDescribedFormGroup>
 
         <EuiSpacer />
+
         {this.renderSpacePrivileges(basePrivilege, availablePrivileges)}
       </Fragment>
     );
   }
 
   renderSpacePrivileges = (basePrivilege, availablePrivileges) => {
-    if (basePrivilege === 'all') {
-      return <PrivilegeCalloutWarning basePrivilege={basePrivilege} isReservedRole={isReservedRole(this.props.role)} />;
-    }
-
     const {
       role,
       spaces,
@@ -107,21 +117,24 @@ export class SpaceAwarePrivilegeForm extends Component {
       <Fragment>
         <EuiTitle size={'xs'}><h3>Space privileges</h3></EuiTitle>
         <EuiSpacer size={'s'} />
-        <EuiText size={'s'} color={'subdued'}>
+        <EuiText grow={false} size={'s'} color={'subdued'}>
           <p>
-            Customize permission levels on a per space basis.
-            If a space is not listed, its permissions will default to the minimum privilege specified above.
+            Customize permission levels per space.
+            If a space is not customized, its permissions will default to the minimum privilege specified above.
           </p>
+          {basePrivilege !== 'all' && this.props.editable && (
+            <p>You can bulk-create space privileges though they will be saved individually upon saving the role.</p>
+          )}
         </EuiText>
 
-        {
-          basePrivilege === 'read'
-          && (this.state.privilegeForms.length > 0 || Object.keys(this.state.spacePrivileges).length > 0)
-          && <PrivilegeCalloutWarning basePrivilege={basePrivilege} isReservedRole={isReservedRole(this.props.role)} />
+        {(basePrivilege !== NO_PRIVILEGE_VALUE || isReservedRole(this.props.role)) &&
+          <PrivilegeCalloutWarning basePrivilege={basePrivilege} isReservedRole={isReservedRole(this.props.role)} />
         }
 
-        <EuiFormRow fullWidth>
-          <div>
+        {basePrivilege === 'read' && this.props.editable && <EuiSpacer />}
+
+        {basePrivilege !== 'all' && (
+          <Fragment>
             <PrivilegeSpaceTable
               role={role}
               spaces={spaces}
@@ -130,20 +143,18 @@ export class SpaceAwarePrivilegeForm extends Component {
               onChange={this.onExistingSpacePrivilegesChange}
             />
 
+            {(Object.keys(this.state.spacePrivileges).length > 0) && <EuiSpacer />}
+
             {this.props.editable && (
               <Fragment>
                 {this.state.privilegeForms.map((form, index) => this.getSpaceForm(form, index, basePrivilege))}
                 {availableSpaces.length > 0 &&
-                  <Fragment>
-                    <EuiSpacer />
-                    <EuiButton size={'s'} iconType={'plusInCircle'} onClick={this.addSpacePrivilege}>Add space privilege</EuiButton>
-                  </Fragment>
+                  <EuiButton size={'s'} iconType={'plusInCircle'} onClick={this.addSpacePrivilege}>Add space privilege</EuiButton>
                 }
               </Fragment>
             )}
-          </div>
-
-        </EuiFormRow>
+          </Fragment>
+        )}
       </Fragment>
     );
   }
@@ -189,13 +200,8 @@ export class SpaceAwarePrivilegeForm extends Component {
 
     const availableSpaces = this.getAvailableSpaces(index);
 
-    const isFirst = index === 0;
-
-    const startingElement = isFirst ? <EuiSpacer /> : <EuiHorizontalRule />;
-
     return (
-      <Fragment>
-        {startingElement}
+      <Fragment key={index}>
         <PrivilegeSpaceForm
           key={index}
           availableSpaces={availableSpaces}
@@ -205,6 +211,7 @@ export class SpaceAwarePrivilegeForm extends Component {
           onChange={this.onPrivilegeSpacePermissionChange(index)}
           onDelete={this.onPrivilegeSpacePermissionDelete(index)}
         />
+        <EuiSpacer />
       </Fragment>
     );
   }

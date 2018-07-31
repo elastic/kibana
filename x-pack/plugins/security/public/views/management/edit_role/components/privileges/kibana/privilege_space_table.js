@@ -39,13 +39,14 @@ export class PrivilegeSpaceTable extends Component {
 
     return (
       <EuiInMemoryTable
+        hasActions
         columns={[{
           field: 'space',
           name: 'Space',
-          width: '60%',
+          width: '50%',
           render: (space) => (
-            <EuiFlexGroup responsive={false} alignItems={'center'}>
-              <EuiFlexItem grow={false}><SpaceAvatar space={space} /></EuiFlexItem>
+            <EuiFlexGroup gutterSize="s" responsive={false} alignItems={'center'}>
+              <EuiFlexItem grow={false}><SpaceAvatar space={space} size="s" /></EuiFlexItem>
               <EuiFlexItem><EuiText>{space.name}</EuiText></EuiFlexItem>
             </EuiFlexGroup>
           )
@@ -59,6 +60,7 @@ export class PrivilegeSpaceTable extends Component {
                 value={privilege}
                 disabled={isReservedRole(role)}
                 onChange={this.onSpacePermissionChange(record)}
+                compressed
               />
             );
           }
