@@ -79,8 +79,6 @@ The following are the abstract steps i18n engine goes through to resolve the loc
 
 - If there's data for the specified locale (localization file is registered in
   `uiExports.translations`), then that locale will be resolved.
-- If locale data is missing for a leaf locale like `fr-FR`, but there is data
-for one of its ancestors, `fr` in this case, then its ancestor will be used.
 - If `i18n.locale` option is not defined in `config/kibana.yml` or previous steps
 didn't resolve the locale, the `en` locale will be used.
 
