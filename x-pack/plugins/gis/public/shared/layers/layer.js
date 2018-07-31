@@ -24,7 +24,7 @@ export class ALayer {
 
   static _setName({ nameList, name }, id) {
     const layerName = name || `Layer ${id}`;
-    const duplicateCount = nameList
+    const duplicateCount = (nameList ? nameList : [])
       .filter((listName) => listName === layerName
         || listName.match(new RegExp(`${layerName} \\d`)))
       .length;
