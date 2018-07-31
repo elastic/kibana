@@ -11,6 +11,7 @@ function getAbsoluteUrlFn(server) {
   const config = server.config();
 
   return function getAbsoluteUrl({
+    basePath = config.get('server.basePath'),
     hash,
     path = '/app/kibana',
     search
@@ -19,7 +20,7 @@ function getAbsoluteUrlFn(server) {
       protocol: config.get('xpack.reporting.kibanaServer.protocol') || server.info.protocol,
       hostname: config.get('xpack.reporting.kibanaServer.hostname') || config.get('server.host'),
       port: config.get('xpack.reporting.kibanaServer.port') || config.get('server.port'),
-      pathname: config.get('server.basePath') + path,
+      pathname: basePath + path,
       hash: hash,
       search
     });
