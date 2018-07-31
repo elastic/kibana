@@ -9,7 +9,7 @@ You do not need to configure any settings to use APM. It is enabled by default.
 
 [float]
 [[general-apm-settings-kb]]
-==== APM x-pack Settings
+==== General APM Settings
 
 xpack.apm.enabled:: Set to `false` to disabled the APM plugin {kib}. Defaults to
 `true`.
@@ -17,17 +17,12 @@ xpack.apm.enabled:: Set to `false` to disabled the APM plugin {kib}. Defaults to
 xpack.apm.ui.enabled:: Set to `false` to hide the APM plugin {kib} from the menu. Defaults to
 `true`.
 
-==== APM OSS Settings
+apm.indexPattern:: Index pattern used to query APM data. Defaults to `apm-&#42;`.
 
-apm.enabled:: Set to `false` to disabled the APM OSS plugin {kib}. Defaults to
-`true`.
+apm.errorIndices:: Indicides containing error documents. Defaults to `apm-&#42;-error-&#42;`.
 
-apm.indexPattern:: Defaults to `apm-&#42;`.
+apm.onboardingIndices:: Indicides containing onboarding documents. Defaults to `apm-&#42;-onboarding-&#42;`.
 
-apm.errorIndices:: Defaults to `apm-&#42;-error-&#42;`.
+apm.spanIndices:: Indicides containing span documents. Defaults to `apm-&#42;-span-&#42;`.
 
-apm.onboardingIndices:: Defaults to `apm-&#42;-onboarding-&#42;`.
-
-apm.spanIndices:: Defaults to `apm-&#42;-span-&#42;`.
-
-apm.transactionIndices:: Defaults to `apm-&#42;-transaction-&#42;`.
+apm.transactionIndices:: Indicides containing transaction documents. Defaults to `apm-&#42;-transaction-&#42;`.
