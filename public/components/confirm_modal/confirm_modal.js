@@ -13,6 +13,7 @@ export const ConfirmModal = props => {
     confirmButtonText,
     cancelButtonText,
     className,
+    ...rest
   } = props;
 
   const confirm = ev => {
@@ -29,6 +30,7 @@ export const ConfirmModal = props => {
   return (
     <EuiOverlayMask>
       <EuiConfirmModal
+        {...rest}
         className={`canvasConfirmModal ${className || ''}`}
         title={title}
         onCancel={cancel}
