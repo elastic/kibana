@@ -101,6 +101,8 @@ export class SpacesMenu extends Component {
         key={space.id}
         icon={icon}
         onClick={this.props.onSelectSpace.bind(this, space)}
+        toolTipTitle={space.description && space.name}
+        toolTipContent={space.description}
       >
         {space.name}
       </EuiContextMenuItem>
