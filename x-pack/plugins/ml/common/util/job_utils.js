@@ -183,6 +183,10 @@ export function mlFunctionToESAggregation(functionName) {
     return functionName;
   }
 
+  if (functionName === 'rare') {
+    return 'count';
+  }
+
   // Return null if ML function does not map to an ES aggregation.
   // i.e. median, low_median, high_median, rare, freq_rare,
   // varp, low_varp, high_varp, time_of_day, time_of_week, lat_long,
