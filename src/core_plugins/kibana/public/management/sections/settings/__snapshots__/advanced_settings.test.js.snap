@@ -20,7 +20,9 @@ exports[`AdvancedSettings should render normally 1`] = `
       <EuiText
         grow={true}
       >
-        <h1>
+        <h1
+          data-test-subj="managementSettingsTitle"
+        >
           Settings
         </h1>
       </EuiText>
@@ -253,7 +255,9 @@ exports[`AdvancedSettings should render specific setting if given setting key 1`
       <EuiText
         grow={true}
       >
-        <h1>
+        <h1
+          data-test-subj="managementSettingsTitle"
+        >
           Settings
         </h1>
       </EuiText>

@@ -57,6 +57,7 @@
     "jest-styled-components": "^5.0.1",
     "mocha": "3.3.0",
     "mustache": "^2.3.0",
+    "mutation-observer": "^1.0.3",
     "node-fetch": "^2.1.2",
     "pdf-image": "1.1.0",
     "pixelmatch": "4.0.2",
@@ -78,7 +79,7 @@
     "yargs": "4.7.1"
   },
   "dependencies": {
-    "@elastic/eui": "3.0.0",
+    "@elastic/eui": "3.2.1",
     "@elastic/node-crypto": "0.1.2",
     "@elastic/node-phantom-simple": "2.2.4",
     "@elastic/numeral": "2.3.2",
@@ -141,7 +142,7 @@
     "react-markdown-renderer": "^1.4.0",
     "react-portal": "^3.2.0",
     "react-redux": "^5.0.7",
-    "react-redux-request": "^1.5.5",
+    "react-redux-request": "^1.5.6",
     "react-router-breadcrumbs-hoc": "1.1.2",
     "react-router-dom": "^4.2.2",
     "react-select": "^1.2.1",

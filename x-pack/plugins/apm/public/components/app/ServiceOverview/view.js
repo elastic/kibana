@@ -47,7 +47,7 @@ class ServiceOverview extends Component {
       <EmptyMessage
         heading={
           historicalDataFound
-            ? 'No services with data in the selected time range.'
+            ? 'No services were found'
             : "Looks like you don't have any services with APM installed. Let's add some!"
         }
         subheading={

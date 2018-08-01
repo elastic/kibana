@@ -34,6 +34,7 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
   const kibanaServer = getService('kibanaServer');
   const testSubjects = getService('testSubjects');
   const dashboardAddPanel = getService('dashboardAddPanel');
+  const visualization = getService('visualization');
   const PageObjects = getPageObjects(['common', 'header', 'settings', 'visualize']);
 
   const defaultFindTimeout = config.get('timeouts.find');
@@ -550,20 +551,10 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
 
     async waitForRenderComplete() {
       await retry.try(async () => {
-        const sharedItems = await find.allByCssSelector('[data-shared-item]');
-        const renderComplete = await Promise.all(sharedItems.map(async sharedItem => {
-          return await sharedItem.getAttribute('data-render-complete');
+        const sharedItems = await this.getPanelSharedItemData();
+        await Promise.all(sharedItems.map(async sharedItem => {
+          return await visualization.waitForRender(sharedItem.element, sharedItem.title, { ignoreNonVisualization: true });
         }));
-        if (renderComplete.length !== sharedItems.length) {
-          const expecting = `expecting: ${sharedItems.length}, received: ${renderComplete.length}`;
-          throw new Error(
-            `Some shared items dont have data-render-complete attribute, ${expecting}`);
-        }
-        const totalCount = renderComplete.filter(value => value === 'true' || value === 'disabled').length;
-        if (totalCount < sharedItems.length) {
-          const expecting = `${sharedItems.length}, received: ${totalCount}`;
-          throw new Error(`Still waiting on more visualizations to finish rendering, expecting: ${expecting}`);
-        }
       });
     }
 
@@ -581,6 +572,7 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
       const sharedItems = await find.allByCssSelector('[data-shared-item]');
       return await Promise.all(sharedItems.map(async sharedItem => {
         return {
+          element: sharedItem,
           title: await sharedItem.getAttribute('data-title'),
           description: await sharedItem.getAttribute('data-description')
         };
