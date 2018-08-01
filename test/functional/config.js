@@ -51,6 +51,7 @@ import {
   FlyoutProvider,
   ComboBoxProvider,
   VisualizationProvider,
+  EmbeddingProvider,
 } from './services';
 
 export default async function ({ readConfigFile }) {
@@ -107,6 +108,7 @@ export default async function ({ readConfigFile }) {
       flyout: FlyoutProvider,
       comboBox: ComboBoxProvider,
       visualization: VisualizationProvider,
+      embedding: EmbeddingProvider,
     },
     servers: commonConfig.get('servers'),
 
