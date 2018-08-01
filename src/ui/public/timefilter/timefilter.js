@@ -174,7 +174,7 @@ function convertISO8601(stringTime) {
 // and require it to be executed to properly function.
 // This function is exposed for applications that do not use uiRoutes like APM
 // Kibana issue https://github.com/elastic/kibana/issues/19110 tracks the removal of this dependency on uiRouter
-export const registerTimefilterWithGlobalState = _.once((globalState) => {
+export const registerTimefilterWithGlobalState = _.once((globalState, $rootScope) => {
   const uiSettings = chrome.getUiSettingsClient();
   const timeDefaults = uiSettings.get('timepicker:timeDefaults');
   const refreshIntervalDefaults = uiSettings.get('timepicker:refreshIntervalDefaults');
@@ -202,16 +202,12 @@ export const registerTimefilterWithGlobalState = _.once((globalState) => {
     globalState.save();
   };
 
-  timefilter.on('refreshIntervalUpdate', () => {
-    updateGlobalStateWithTime();
-  });
+  $rootScope.$listenAndDigestAsync(timefilter, 'refreshIntervalUpdate', updateGlobalStateWithTime);
 
-  timefilter.on('timeUpdate', () => {
-    updateGlobalStateWithTime();
-  });
+  $rootScope.$listenAndDigestAsync(timefilter, 'timeUpdate', updateGlobalStateWithTime);
 });
 
 uiRoutes
-  .addSetupWork((globalState) => {
-    return registerTimefilterWithGlobalState(globalState);
+  .addSetupWork((globalState, $rootScope) => {
+    return registerTimefilterWithGlobalState(globalState, $rootScope);
   });
