@@ -85,9 +85,10 @@ function handleIndexExists(error: any, log: Logger) {
   const index = _.get(error, 'body.error.index');
 
   log.warning(
-    `Index ${index} already exists. This may be because another Kibana instance ` +
-      `is running migrations. If no other Kibana instance is running migrations, ` +
-      `you can get past this error by deleting ${index} and restarting Kibnaa.`
+    `Another Kibana instance appears to be migrating the index. Waiting for ` +
+      `that migration to complete. If no other Kibana instance is attempting ` +
+      `migrations, you can get past this message by deleting index ${index} and ` +
+      `restarting Kibana.`
   );
 
   return true;
