@@ -104,6 +104,22 @@ export default function ({ getService, getPageObjects }) {
       });
     });
 
+    it('should show correct data when using average pipeline aggregation', async () => {
+      await PageObjects.visualize.navigateToNewVisualization();
+      await PageObjects.visualize.clickDataTable();
+      await PageObjects.visualize.clickNewSearch();
+      await PageObjects.header.setAbsoluteRange(fromTime, toTime);
+      await PageObjects.visualize.clickAddMetric();
+      await PageObjects.visualize.clickBucket('Metric');
+      await PageObjects.visualize.selectAggregation('Average Bucket', 'metrics');
+      await PageObjects.visualize.selectAggregation('Terms', 'metrics', 'buckets');
+      await PageObjects.visualize.selectField('geo.src', 'metrics', 'buckets');
+      await PageObjects.visualize.clickGo();
+      const data = await PageObjects.visualize.getTableVisData();
+      log.debug(data.split('\n'));
+      expect(data.trim().split('\n')).to.be.eql(['14,004 1,412.6']);
+    });
+
     it('should show correct data for a data table with date histogram', async () => {
       await PageObjects.visualize.navigateToNewVisualization();
       await PageObjects.visualize.clickDataTable();

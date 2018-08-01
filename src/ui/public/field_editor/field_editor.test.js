@@ -20,9 +20,9 @@
 jest.mock('ui/kfetch', () => ({}));
 
 import React from 'react';
-import { shallow } from 'enzyme';
+import { shallowWithIntl } from 'test_utils/enzyme_helpers';
 
-import { FieldEditor } from './field_editor';
+import { FieldEditorComponent } from './field_editor';
 
 jest.mock('@elastic/eui', () => ({
   EuiButton: 'eui-button',
@@ -127,8 +127,8 @@ describe('FieldEditor', () => {
   });
 
   it('should render create new scripted field correctly', async () => {
-    const component = shallow(
-      <FieldEditor
+    const component = shallowWithIntl(
+      <FieldEditorComponent
         indexPattern={indexPattern}
         field={field}
         helpers={helpers}
@@ -149,8 +149,8 @@ describe('FieldEditor', () => {
     indexPattern.fields.push(testField);
     indexPattern.fields.byName[testField.name] = testField;
 
-    const component = shallow(
-      <FieldEditor
+    const component = shallowWithIntl(
+      <FieldEditorComponent
         indexPattern={indexPattern}
         field={testField}
         helpers={helpers}
@@ -172,8 +172,8 @@ describe('FieldEditor', () => {
     indexPattern.fields.push(testField);
     indexPattern.fields.byName[testField.name] = testField;
 
-    const component = shallow(
-      <FieldEditor
+    const component = shallowWithIntl(
+      <FieldEditorComponent
         indexPattern={indexPattern}
         field={testField}
         helpers={helpers}
@@ -187,8 +187,8 @@ describe('FieldEditor', () => {
 
   it('should show conflict field warning', async () => {
     const testField = { ...field };
-    const component = shallow(
-      <FieldEditor
+    const component = shallowWithIntl(
+      <FieldEditorComponent
         indexPattern={indexPattern}
         field={testField}
         helpers={helpers}

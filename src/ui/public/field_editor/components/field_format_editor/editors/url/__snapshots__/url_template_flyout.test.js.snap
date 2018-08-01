@@ -4,6 +4,7 @@ exports[`UrlTemplateFlyout should not render if not visible 1`] = `""`;
 
 exports[`UrlTemplateFlyout should render normally 1`] = `
 <EuiFlyout
+  closeButtonAriaLabel="Closes this dialog"
   hideCloseButton={false}
   onClose={[Function]}
   ownFocus={false}
@@ -14,35 +15,62 @@ exports[`UrlTemplateFlyout should render normally 1`] = `
       grow={true}
     >
       <h3>
-        Url Template
+        <FormattedMessage
+          defaultMessage="Url Template"
+          id="common.ui.fieldEditor.urlTemplateHeader"
+          values={Object {}}
+        />
       </h3>
       <p>
-        If a field only contains part of a URL then a 
-        <strong>
-          Url Template
-        </strong>
-         can be used to format the value as a complete URL. The format is a string which uses double curly brace notation 
-        <EuiCode>
-          {{ }}
-        </EuiCode>
-        to inject values. The following values can be accessed:
+        <FormattedMessage
+          defaultMessage="If a field only contains part of a URL then a {strongUrlTemplate} can be used to format the value as a complete URL. The format is a string which uses double curly brace notation {doubleCurlyBraces} to inject values. The following values can be accessed:"
+          id="common.ui.fieldEditor.urlTemplateLabel.fieldDetail"
+          values={
+            Object {
+              "doubleCurlyBraces": <EuiCode>
+                {{ }}
+              </EuiCode>,
+              "strongUrlTemplate": <strong>
+                <FormattedMessage
+                  defaultMessage="Url Template"
+                  id="common.ui.fieldEditor.urlTemplateLabel.strongUrlTemplateLabel"
+                  values={Object {}}
+                />
+              </strong>,
+            }
+          }
+        />
       </p>
       <ul>
         <li>
           <EuiCode>
             value
           </EuiCode>
-           — The URI-escaped value
+           — 
+          <FormattedMessage
+            defaultMessage="The URI-escaped value"
+            id="common.ui.fieldEditor.urlTemplate.valueLabel"
+            values={Object {}}
+          />
         </li>
         <li>
           <EuiCode>
             rawValue
           </EuiCode>
-           — The unescaped value
+           — 
+          <FormattedMessage
+            defaultMessage="The unescaped value"
+            id="common.ui.fieldEditor.urlTemplate.rawValueLabel"
+            values={Object {}}
+          />
         </li>
       </ul>
       <h4>
-        Examples
+        <FormattedMessage
+          defaultMessage="Examples"
+          id="common.ui.fieldEditor.urlTemplate.examplesHeader"
+          values={Object {}}
+        />
       </h4>
       <EuiBasicTable
         columns={
@@ -72,7 +100,7 @@ exports[`UrlTemplateFlyout should render normally 1`] = `
             Object {
               "input": "users/admin",
               "output": "http://company.net/groups?id=users%2Fadmin",
-              "template": "http://company.net/groups?id={{value}",
+              "template": "http://company.net/groups?id={{value}}",
             },
             Object {
               "input": "/images/favicon.ico",

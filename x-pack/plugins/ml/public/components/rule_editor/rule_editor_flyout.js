@@ -24,6 +24,7 @@ import {
   EuiFlyoutBody,
   EuiFlyoutFooter,
   EuiFlyoutHeader,
+  EuiLink,
   EuiSpacer,
   EuiText,
   EuiTitle,
@@ -31,6 +32,7 @@ import {
 
 import { toastNotifications } from 'ui/notify';
 
+import { DetectorDescriptionList } from './components/detector_description_list';
 import { ActionsSection } from './actions_section';
 import { checkPermission } from 'plugins/ml/privilege/check_privilege';
 import { ConditionsSection } from './conditions_section';
@@ -48,8 +50,12 @@ import { ACTION, CONDITIONS_NOT_SUPPORTED_FUNCTIONS } from '../../../common/cons
 import { getPartitioningFieldNames } from 'plugins/ml/../common/util/job_utils';
 import { mlJobService } from 'plugins/ml/services/job_service';
 import { ml } from 'plugins/ml/services/ml_api_service';
+import { metadata } from 'ui/metadata';
 
 import './styles/main.less';
+
+// metadata.branch corresponds to the version used in documentation links.
+const docsUrl = `https://www.elastic.co/guide/en/elastic-stack-overview/${metadata.branch}/ml-rules.html`;
 
 export class RuleEditorFlyout extends Component {
   constructor(props) {
@@ -408,11 +414,15 @@ export class RuleEditorFlyout extends Component {
         </EuiFlyout>
       );
     } else {
+      const detectorIndex = anomaly.detectorIndex;
+      const detector = job.analysis_config.detectors[detectorIndex];
+      const rules = detector.custom_rules;
+      const isCreate = (rules === undefined || ruleIndex >= rules.length);
+
       const hasPartitioningFields = (this.partitioningFieldNames && this.partitioningFieldNames.length > 0);
       const conditionSupported = (CONDITIONS_NOT_SUPPORTED_FUNCTIONS.indexOf(anomaly.source.function) === -1);
-      const conditionsText = 'Add numeric conditions to take action according ' +
-        'to the actual or typical values of the anomaly. Multiple conditions are ' +
-        'combined using AND.';
+      const conditionsText = 'Add numeric conditions for when the rule applies. ' +
+        'Multiple conditions are combined using AND.';
 
       flyout = (
         <EuiFlyout
@@ -423,17 +433,22 @@ export class RuleEditorFlyout extends Component {
           <EuiFlyoutHeader hasBorder={true}>
             <EuiTitle size="l">
               <h1 id="flyoutTitle">
-                Create Rule
+                {(isCreate === true) ? 'Create Rule' : 'Edit Rule'}
               </h1>
             </EuiTitle>
           </EuiFlyoutHeader>
 
           <EuiFlyoutBody>
+            <DetectorDescriptionList
+              job={job}
+              detector={detector}
+            />
+            <EuiSpacer size="m" />
             <EuiText>
               <p>
-                Rules allow you to provide feedback in order to customize the analytics,
-                skipping results for anomalies which though mathematically significant
-                are not action worthy.
+                Rules instruct anomaly detectors to change their behavior based on domain-specific knowledge that you provide.
+                When you create a rule, you can specify conditions, scope, and actions. When the conditions of a rule are
+                satisfied, its actions are triggered. <EuiLink href={docsUrl} target="_blank">Learn more</EuiLink>
               </p>
             </EuiText>
 

@@ -251,7 +251,8 @@ export default class WatcherFlyout extends Component {
             href={_.get(ELASTIC_DOCS, 'watcher-get-started.url')}
           >
             documentation
-          </EuiLink>.
+          </EuiLink>
+          .
         </p>
 
         <EuiForm>
@@ -368,7 +369,8 @@ export default class WatcherFlyout extends Component {
                     href={_.get(ELASTIC_DOCS, 'x-pack-emails.url')}
                   >
                     documentation
-                  </EuiLink>.
+                  </EuiLink>
+                  .
                 </span>
               }
             >
@@ -399,7 +401,8 @@ export default class WatcherFlyout extends Component {
                     href="https://get.slack.help/hc/en-us/articles/115005265063-Incoming-WebHooks-for-Slack"
                   >
                     documentation
-                  </EuiLink>.
+                  </EuiLink>
+                  .
                 </span>
               }
             >
