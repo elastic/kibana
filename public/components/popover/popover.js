@@ -1,17 +1,33 @@
-/* eslint-disable react/forbid-elements */
+/* eslint react/no-did-mount-set-state: 0, react/forbid-elements: 0 */
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { EuiPopover } from '@elastic/eui';
 
 export class Popover extends Component {
+  static propTypes = {
+    isOpen: PropTypes.bool,
+    ownFocus: PropTypes.bool,
+    button: PropTypes.func.isRequired,
+    children: PropTypes.func.isRequired,
+  };
+
+  static defaultProps = {
+    isOpen: false,
+    ownFocus: true,
+  };
+
   state = {
     isPopoverOpen: false,
   };
 
+  componentDidMount() {
+    if (this.props.isOpen) this.setState({ isPopoverOpen: true });
+  }
+
   handleClick = () => {
-    this.setState({
-      isPopoverOpen: !this.state.isPopoverOpen,
-    });
+    this.setState(state => ({
+      isPopoverOpen: !state.isPopoverOpen,
+    }));
   };
 
   closePopover = () => {
@@ -21,49 +37,17 @@ export class Popover extends Component {
   };
 
   render() {
-    // TODO: This should just pass {...rest} otherwise it won't get EUI updates.
-    const {
-      className,
-      button,
-      children,
-      panelClassName,
-      anchorPosition,
-      panelPaddingSize,
-      withTitle,
-      ownFocus,
-      title,
-      ...rest
-    } = this.props;
+    const { button, children, ...rest } = this.props;
 
     return (
       <EuiPopover
-        panelClassName={panelClassName}
-        title={title}
-        withTitle={withTitle}
-        anchorPosition={anchorPosition}
+        {...rest}
         button={button(this.handleClick)}
         isOpen={this.state.isPopoverOpen}
-        panelPaddingSize={panelPaddingSize}
         closePopover={this.closePopover}
-        className={className}
-        ownFocus={ownFocus}
-        {...rest}
       >
         {children({ closePopover: this.closePopover })}
       </EuiPopover>
     );
   }
 }
-
-Popover.propTypes = {
-  isOpen: PropTypes.bool,
-  ownFocus: PropTypes.bool,
-  withTitle: PropTypes.bool,
-  button: PropTypes.func.isRequired,
-  children: PropTypes.func,
-  className: PropTypes.string,
-  anchorPosition: PropTypes.string,
-  panelClassName: PropTypes.string,
-  title: PropTypes.string,
-  panelPaddingSize: PropTypes.string,
-};
