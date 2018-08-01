@@ -6,7 +6,6 @@
 
 import React, { Fragment, PureComponent } from 'react';
 import PropTypes from 'prop-types';
-
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -19,7 +18,6 @@ import {
   EuiSelect,
   EuiSwitch,
   EuiButtonEmpty,
-  EuiLink,
   EuiDescribedFormGroup,
   EuiBetaBadge,
   EuiButton,
@@ -38,6 +36,7 @@ import {
   PHASE_SHRINK_ENABLED,
 } from '../../../../../../store/constants';
 import { ErrableFormRow } from '../../../../form_errors';
+import { LearnMoreLink } from '../../../../../../components/learn_more_link';
 
 export class WarmPhase extends PureComponent {
   static propTypes = {
@@ -273,9 +272,9 @@ export class WarmPhase extends PureComponent {
               <EuiTitle size="xs">
                 <EuiTextColor color="subdued">
                   Shrink the index into a new index with fewer primary shards.{' '}
-                  <EuiLink href="https://www.elastic.co/guide/en/elasticsearch/reference/master/indices-shrink-index.html#indices-shrink-index">
-                    Learn more
-                  </EuiLink>
+                  <LearnMoreLink
+                    docPath="indices-shrink-index.html#indices-shrink-index"
+                  />
                 </EuiTextColor>
               </EuiTitle>
 
@@ -343,9 +342,7 @@ export class WarmPhase extends PureComponent {
                 <EuiTextColor color="subdued">
                   Reduce the number of segments in your shard by merging smaller
                   files and clearing deleted ones.{' '}
-                  <EuiLink href="https://www.elastic.co/guide/en/elasticsearch/reference/current/indices-forcemerge.html">
-                    Learn more
-                  </EuiLink>
+                  <LearnMoreLink docPath="indices-forcemerge.html" />
                 </EuiTextColor>
               </EuiTitle>
 

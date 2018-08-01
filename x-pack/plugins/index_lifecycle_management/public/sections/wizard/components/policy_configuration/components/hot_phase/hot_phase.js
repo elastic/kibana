@@ -16,11 +16,11 @@ import {
   EuiFieldNumber,
   EuiSelect,
   EuiSwitch,
-  EuiLink,
   EuiFormRow,
   EuiDescribedFormGroup,
   EuiBetaBadge,
 } from '@elastic/eui';
+import { LearnMoreLink } from '../../../../../../components/learn_more_link';
 import {
   PHASE_ROLLOVER_ALIAS,
   PHASE_ROLLOVER_MAX_AGE,
@@ -96,9 +96,9 @@ export class HotPhase extends PureComponent {
           helpText={
             <p>
               If true, rollover the index when it gets too big or too old. The alias switches to the new index.{' '}
-              <EuiLink href="https://www.elastic.co/guide/en/elasticsearch/reference/master/indices-rollover-index.html">
-                Learn more
-              </EuiLink>
+              <LearnMoreLink
+                docPath="ndices-rollover-index.html"
+              />
             </p>
           }
         >

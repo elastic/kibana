@@ -15,9 +15,9 @@ import {
   EuiFieldNumber,
   EuiCallOut,
   EuiButtonEmpty,
-  EuiLink,
   EuiDescribedFormGroup,
 } from '@elastic/eui';
+import { LearnMoreLink } from '../../../../../../components/learn_more_link';
 import {
   STRUCTURE_NODE_ATTRS,
   STRUCTURE_PRIMARY_NODES,
@@ -130,9 +130,9 @@ export class Configuration extends Component {
               <p>
                 The best way to determine how many shards you need is to benchmark
                 using realistic data and queries on your hardware.{' '}
-                <EuiLink href="https://www.elastic.co/webinars/using-rally-to-get-your-elasticsearch-cluster-size-right">
-                  Learn more
-                </EuiLink>
+                <LearnMoreLink
+                  href="https://www.elastic.co/webinars/using-rally-to-get-your-elasticsearch-cluster-size-right"
+                />
               </p>
             }
           />

@@ -13,10 +13,10 @@ import {
   EuiSwitch,
   EuiFieldText,
   EuiDescribedFormGroup,
-  EuiLink,
   EuiSpacer,
 } from '@elastic/eui';
 
+import { LearnMoreLink } from '../../../../../../components/learn_more_link';
 import { ErrableFormRow } from '../../../../form_errors';
 import {
   STRUCTURE_TEMPLATE_NAME,
@@ -86,9 +86,9 @@ export class TemplateSelection extends Component {
           <p>
             An index template defines the settings, mappings, and aliases to apply
             when you create an index.{' '}
-            <EuiLink href="https://www.elastic.co/guide/en/elasticsearch/reference/current/indices-templates.html">
-              Learn more
-            </EuiLink>
+            <LearnMoreLink
+              docPath="indices-templates.html"
+            />
           </p>
         }
       >
