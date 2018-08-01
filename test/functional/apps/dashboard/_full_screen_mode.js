@@ -21,7 +21,6 @@ import expect from 'expect.js';
 
 export default function ({ getService, getPageObjects }) {
   const retry = getService('retry');
-  const remote = getService('remote');
   const dashboardPanelActions = getService('dashboardPanelActions');
   const PageObjects = getPageObjects(['dashboard', 'common']);
 
@@ -55,21 +54,20 @@ export default function ({ getService, getPageObjects }) {
     });
 
     it('displays exit full screen logo button', async () => {
-      const exists = await PageObjects.dashboard.exitFullScreenLogoButtonExists();
+      const exists = await PageObjects.dashboard.exitFullScreenButtonExists();
       expect(exists).to.be(true);
     });
 
     it('displays exit full screen logo button when panel is expanded', async () => {
       await dashboardPanelActions.toggleExpandPanel();
 
-      const exists = await PageObjects.dashboard.exitFullScreenTextButtonExists();
+      const exists = await PageObjects.dashboard.exitFullScreenButtonExists();
       expect(exists).to.be(true);
     });
 
-    it('exits when the text button is clicked on', async () => {
-      const logoButton = await PageObjects.dashboard.getExitFullScreenLogoButton();
-      await remote.moveMouseTo(logoButton);
-      await PageObjects.dashboard.clickExitFullScreenTextButton();
+    it('exits when the full screen logo button is clicked on', async () => {
+      await PageObjects.dashboard.exitFullScreenButtonExists();
+      await PageObjects.dashboard.clickExitFullScreenButton();
 
       await retry.try(async () => {
         const isChromeVisible = await PageObjects.common.isChromeVisible();

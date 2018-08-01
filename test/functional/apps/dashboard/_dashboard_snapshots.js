@@ -53,7 +53,7 @@ export default function ({ getService, getPageObjects, updateBaselines }) {
       await PageObjects.common.sleep(2000);
       const percentSimilar = await screenshot.compareAgainstBaseline('tsvb_dashboard', updateBaselines);
 
-      await PageObjects.dashboard.clickExitFullScreenLogoButton();
+      await PageObjects.dashboard.clickExitFullScreenButton();
 
       expect(percentSimilar).to.be.lessThan(0.05);
     });
@@ -73,7 +73,7 @@ export default function ({ getService, getPageObjects, updateBaselines }) {
       await PageObjects.common.sleep(2000);
       const percentSimilar = await screenshot.compareAgainstBaseline('area_chart', updateBaselines);
 
-      await PageObjects.dashboard.clickExitFullScreenLogoButton();
+      await PageObjects.dashboard.clickExitFullScreenButton();
 
       // Testing some OS/browser differences were shown to cause .009 percent difference.
       expect(percentSimilar).to.be.lessThan(0.05);

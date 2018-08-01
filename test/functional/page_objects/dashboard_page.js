@@ -84,28 +84,16 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
       return await testSubjects.exists('dashboardFullScreenMode');
     }
 
-    async exitFullScreenTextButtonExists() {
-      return await testSubjects.exists('exitFullScreenModeText');
+    async exitFullScreenButtonExists() {
+      return await testSubjects.exists('exitFullScreenModeButton');
     }
 
-    async getExitFullScreenTextButton() {
-      return await testSubjects.find('exitFullScreenModeText');
+    async getExitFullScreenButton() {
+      return await testSubjects.find('exitFullScreenModeButton');
     }
 
-    async exitFullScreenLogoButtonExists() {
-      return await testSubjects.exists('exitFullScreenModeLogo');
-    }
-
-    async getExitFullScreenLogoButton() {
-      return await testSubjects.find('exitFullScreenModeLogo');
-    }
-
-    async clickExitFullScreenLogoButton() {
-      await testSubjects.click('exitFullScreenModeLogo');
-    }
-
-    async clickExitFullScreenTextButton() {
-      await testSubjects.click('exitFullScreenModeText');
+    async clickExitFullScreenButton() {
+      await testSubjects.click('exitFullScreenModeButton');
     }
 
     async getDashboardIdFromCurrentUrl() {
