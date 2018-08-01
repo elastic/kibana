@@ -87,7 +87,7 @@ describe('fetch', () => {
     expect(rangeControl.max).toBe(100);
   });
 
-  test('should disable control there are 0 hits', async () => {
+  test('should disable control when there are 0 hits', async () => {
     // ES response when the query does not match any documents
     esSearchResponse = {
       'aggregations': {
