@@ -107,7 +107,9 @@ function* getFilterMessages(htmlContent) {
     const { message, context } = parseFilterObjectExpression(filterObjectExpression) || {};
 
     if (!message) {
-      throw new Error(`Cannot parse "${messageId}" message: default message is required`);
+      throw new Error(
+        `Empty defaultMessage in angular filter expression is not allowed ("${messageId}").`
+      );
     }
 
     yield [messageId, { message, context }];
@@ -122,15 +124,15 @@ function* getDirectiveMessages(htmlContent) {
   for (const element of document.querySelectorAll('[i18n-id]')) {
     const messageId = formatHTMLString(element.getAttribute('i18n-id'));
     if (!messageId) {
-      throw new Error('Empty "i18n-id" value is not allowed.');
+      throw new Error('Empty "i18n-id" value in angular directive is not allowed.');
     }
 
     const message = formatHTMLString(element.getAttribute('i18n-default-message'));
     if (!message) {
-      throw new Error(`Cannot parse "${messageId}" message: default message is required.`);
+      throw new Error(`Empty defaultMessage in angular directive is not allowed ("${messageId}").`);
     }
 
-    const context = formatHTMLString(element.getAttribute('i18n-context'));
+    const context = formatHTMLString(element.getAttribute('i18n-context')) || undefined;
     yield [messageId, { message, context }];
   }
 }
