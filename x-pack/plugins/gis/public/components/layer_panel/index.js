@@ -11,7 +11,7 @@ import { getSelectedLayer } from '../../selectors/map_selectors';
 import { setSelectedLayer } from '../../actions/map_actions';
 
 const mapDispatchToProps = {
-  cancelLayerPanel: () => updateFlyout(FLYOUT_STATE.NONE) && setSelectedLayer(null),
+  cancelLayerPanel: () => updateFlyout(FLYOUT_STATE.NONE),
   saveLayerEdits: () => updateFlyout(FLYOUT_STATE.NONE) && setSelectedLayer(null)
 };
 
