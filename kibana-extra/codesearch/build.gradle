@@ -52,8 +52,12 @@ task bootstrap(type: YarnTask, dependsOn: [yarnSetup, checkoutKibana, rootProjec
   args = ['kbn', 'bootstrap']
 }
 
-task startKibana(type: YarnTask, dependsOn: [bootstrap, ":lsp:javascript-typescript-langserver:build"]) {
+task startKibana(type: YarnTask, dependsOn: [bootstrap]) {
   args = ['start', '--logging.json=false']
+}
+
+if (!Boolean.valueOf(System.getenv('LSP_DETACH'))) {
+  tasks.startKibana.dependsOn(":lsp:javascript-typescript-langserver:build")
 }
 
 task startFullKibana(type: YarnTask, dependsOn: [bootstrap, ":lsp:javascript-typescript-langserver:build", ":lsp:eclipse.jdt.ls:build"]) {

@@ -28,7 +28,7 @@ export class LanguageServerController implements ILanguageServerHandler {
   private languageServers: { [name: string]: ILanguageServerHandler } = {};
   private readonly targetHost: string;
   private log: Log;
-  private readonly detach: boolean = false;
+  private readonly detach: boolean = !!process.env.LSP_DETACH;
   private readonly server: Hapi.Server;
 
   constructor(targetHost: string, server: Hapi.Server) {
@@ -80,7 +80,9 @@ export class LanguageServerController implements ILanguageServerHandler {
     const log = new Log(this.server, ['LSP', `ts@${this.targetHost}:${port}`]);
     const proxy = new LanguageServerProxy(port, this.targetHost, log);
 
-    if (!this.detach) {
+    if (this.detach) {
+      log.info('Detach mode, expected LSP launch externally');
+    } else {
       const child = spawn(
         'node',
         [
@@ -112,7 +114,7 @@ export class LanguageServerController implements ILanguageServerHandler {
   }
 
   public async launchJava() {
-    let port = 2089;
+    let port = 2090;
 
     if (!this.detach) {
       port = await getPort();
