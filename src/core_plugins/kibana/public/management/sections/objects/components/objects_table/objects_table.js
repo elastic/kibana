@@ -50,7 +50,6 @@ import {
   getSavedObjectLabel,
 } from '../../lib';
 import { ensureMinimumTime } from '../../../indices/create_index_pattern_wizard/lib/ensure_minimum_time';
-import { isSameQuery } from '../../lib/is_same_query';
 
 export const INCLUDED_TYPES = [
   'index-pattern',
@@ -207,11 +206,8 @@ export class ObjectsTable extends Component {
   };
 
   onQueryChange = ({ query }) => {
-    // TODO: investigate why this happens at EUI level
-    if (isSameQuery(query, this.state.activeQuery)) {
-      return;
-    }
-
+    // TODO: Use isSameQuery to compare new query with state.activeQuery to avoid re-fetching the
+    // same data we already have.
     this.setState(
       {
         activeQuery: query,
