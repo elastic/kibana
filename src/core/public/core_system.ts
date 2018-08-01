@@ -36,12 +36,12 @@ interface Params {
  * platform the CoreSystem will get many more Services.
  */
 export class CoreSystem {
-  private rootDomElement: HTMLElement;
-  private fatalErrors: FatalErrorsService;
-  private injectedMetadata: InjectedMetadataService;
-  private legacyPlatform: LegacyPlatformService;
+  private readonly fatalErrors: FatalErrorsService;
+  private readonly injectedMetadata: InjectedMetadataService;
+  private readonly legacyPlatform: LegacyPlatformService;
 
-  private legacyPlatformTargetDomElement: HTMLDivElement;
+  private readonly rootDomElement: HTMLElement;
+  private readonly legacyPlatformTargetDomElement: HTMLDivElement;
 
   constructor(params: Params) {
     const { rootDomElement, injectedMetadata, requireLegacyFiles, useLegacyTestHarness } = params;
@@ -73,12 +73,10 @@ export class CoreSystem {
       // ensure the rootDomElement is empty
       this.rootDomElement.textContent = '';
       this.rootDomElement.classList.add('coreSystemRootDomElement');
+      this.rootDomElement.appendChild(this.legacyPlatformTargetDomElement);
 
       const injectedMetadata = this.injectedMetadata.start();
-
       const fatalErrors = this.fatalErrors.start();
-
-      this.rootDomElement.appendChild(this.legacyPlatformTargetDomElement);
       this.legacyPlatform.start({ injectedMetadata, fatalErrors });
     } catch (error) {
       this.fatalErrors.add(error);
