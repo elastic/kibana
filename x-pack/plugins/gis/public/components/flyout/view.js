@@ -69,7 +69,7 @@ export class FlyOut extends React.Component {
     const { emsVectorOptions, selectAction, closeFlyout } = this.props;
 
     return (
-      <EuiFlyout onClose={this.props.onClose} style={{ maxWidth: 768 }}>
+      <EuiFlyout onClose={() => console.warn('EuiFlyout#onClose not implemented.')} style={{ maxWidth: 768 }}>
         <EuiFlyoutHeader>
           <EuiTitle size="l">
             <h2>Add layer</h2>

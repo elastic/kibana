@@ -26,7 +26,7 @@ export function LayerPanel({
   selectedLayer
 }) {
   return (
-    <EuiFlyout onClose={cancelLayerPanel} style={{ maxWidth: 768 }}>
+    <EuiFlyout onClose={() => console.warn('EuiFlyout#onClose not implemented.')} style={{ maxWidth: 768 }}>
       <EuiFlyoutHeader>
         <EuiTitle size="l">
           <h2>{selectedLayer.name}</h2>
