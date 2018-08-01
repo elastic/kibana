@@ -14,8 +14,8 @@
     "kbn:watch": "yarn build --watch"
   },
   "devDependencies": {
-    "@kbn/babel-preset": "link:../kbn-babel-preset",
-    "@kbn/dev-utils": "link:../kbn-dev-utils",
+    "@kbn/babel-preset": "*",
+    "@kbn/dev-utils": "*",
     "babel-cli": "^6.26.0",
     "cross-env": "^5.2.0"
   },

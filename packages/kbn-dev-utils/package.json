@@ -17,7 +17,7 @@
     "tree-kill": "^1.2.0"
   },
   "devDependencies": {
-    "@kbn/babel-preset": "link:../kbn-babel-preset",
+    "@kbn/babel-preset": "*",
     "babel-cli": "^6.26.0",
     "chance": "1.0.6",
     "expect.js": "0.3.1"

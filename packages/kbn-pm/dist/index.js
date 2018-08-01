@@ -4821,7 +4821,7 @@ function __importDefault(mod) {
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__Observer__ = __webpack_require__(221);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__Subscription__ = __webpack_require__(8);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__internal_symbol_rxSubscriber__ = __webpack_require__(64);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_5__config__ = __webpack_require__(43);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_5__config__ = __webpack_require__(44);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_6__util_hostReportError__ = __webpack_require__(63);
 /** PURE_IMPORTS_START tslib,_util_isFunction,_Observer,_Subscription,_internal_symbol_rxSubscriber,_config,_util_hostReportError PURE_IMPORTS_END */
 
@@ -5078,7 +5078,7 @@ module.exports = require("path");
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__util_toSubscriber__ = __webpack_require__(377);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__internal_symbol_observable__ = __webpack_require__(24);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__util_pipe__ = __webpack_require__(65);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__config__ = __webpack_require__(43);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__config__ = __webpack_require__(44);
 /** PURE_IMPORTS_START _util_toSubscriber,_internal_symbol_observable,_util_pipe,_config PURE_IMPORTS_END */
 
 
@@ -5404,7 +5404,7 @@ function flattenUnsubscriptionErrors(errors) {
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__Observable__ = __webpack_require__(4);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__Subscriber__ = __webpack_require__(2);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__Subscription__ = __webpack_require__(8);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__util_ObjectUnsubscribedError__ = __webpack_require__(45);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__util_ObjectUnsubscribedError__ = __webpack_require__(46);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_5__SubjectSubscription__ = __webpack_require__(225);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_6__internal_symbol_rxSubscriber__ = __webpack_require__(64);
 /** PURE_IMPORTS_START tslib,_Observable,_Subscriber,_Subscription,_util_ObjectUnsubscribedError,_SubjectSubscription,_internal_symbol_rxSubscriber PURE_IMPORTS_END */
@@ -5732,7 +5732,7 @@ function tryCatch(fn) {
 
 "use strict";
 
-const escapeStringRegexp = __webpack_require__(52);
+const escapeStringRegexp = __webpack_require__(53);
 const ansiStyles = __webpack_require__(259);
 const stdoutColor = __webpack_require__(262).stdout;
 
@@ -6775,10 +6775,10 @@ module.exports = glob
 
 var fs = __webpack_require__(7)
 var rp = __webpack_require__(82)
-var minimatch = __webpack_require__(58)
+var minimatch = __webpack_require__(41)
 var Minimatch = minimatch.Minimatch
 var inherits = __webpack_require__(83)
-var EE = __webpack_require__(41).EventEmitter
+var EE = __webpack_require__(42).EventEmitter
 var path = __webpack_require__(3)
 var assert = __webpack_require__(29)
 var isAbsolute = __webpack_require__(59)
@@ -7988,765 +7988,6 @@ var FilterSubscriber = /*@__PURE__*/ (function (_super) {
 
 /***/ }),
 /* 41 */
-/***/ (function(module, exports) {
-
-module.exports = require("events");
-
-/***/ }),
-/* 42 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", {
-    value: true
-});
-exports.isLinkDependency = exports.createProductionPackageJson = undefined;
-
-var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; }; /*
-                                                                                                                                                                                                                                                                   * Licensed to Elasticsearch B.V. under one or more contributor
-                                                                                                                                                                                                                                                                   * license agreements. See the NOTICE file distributed with
-                                                                                                                                                                                                                                                                   * this work for additional information regarding copyright
-                                                                                                                                                                                                                                                                   * ownership. Elasticsearch B.V. licenses this file to you under
-                                                                                                                                                                                                                                                                   * the Apache License, Version 2.0 (the "License"); you may
-                                                                                                                                                                                                                                                                   * not use this file except in compliance with the License.
-                                                                                                                                                                                                                                                                   * You may obtain a copy of the License at
-                                                                                                                                                                                                                                                                   *
-                                                                                                                                                                                                                                                                   *    http://www.apache.org/licenses/LICENSE-2.0
-                                                                                                                                                                                                                                                                   *
-                                                                                                                                                                                                                                                                   * Unless required by applicable law or agreed to in writing,
-                                                                                                                                                                                                                                                                   * software distributed under the License is distributed on an
-                                                                                                                                                                                                                                                                   * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
-                                                                                                                                                                                                                                                                   * KIND, either express or implied.  See the License for the
-                                                                                                                                                                                                                                                                   * specific language governing permissions and limitations
-                                                                                                                                                                                                                                                                   * under the License.
-                                                                                                                                                                                                                                                                   */
-
-
-exports.readPackageJson = readPackageJson;
-exports.writePackageJson = writePackageJson;
-exports.transformDependencies = transformDependencies;
-
-var _readPkg = __webpack_require__(280);
-
-var _readPkg2 = _interopRequireDefault(_readPkg);
-
-var _writePkg = __webpack_require__(303);
-
-var _writePkg2 = _interopRequireDefault(_writePkg);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-function readPackageJson(dir) {
-    return (0, _readPkg2.default)(dir, { normalize: false });
-}
-function writePackageJson(path, json) {
-    return (0, _writePkg2.default)(path, json);
-}
-const createProductionPackageJson = exports.createProductionPackageJson = pkgJson => _extends({}, pkgJson, {
-    dependencies: transformDependencies(pkgJson.dependencies)
-});
-const isLinkDependency = exports.isLinkDependency = depVersion => depVersion.startsWith('link:');
-/**
- * Replaces `link:` dependencies with `file:` dependencies. When installing
- * dependencies, these `file:` dependencies will be copied into `node_modules`
- * instead of being symlinked.
- *
- * This will allow us to copy packages into the build and run `yarn`, which
- * will then _copy_ the `file:` dependencies into `node_modules` instead of
- * symlinking like we do in development.
- */
-function transformDependencies(dependencies = {}) {
-    const newDeps = {};
-    for (const name of Object.keys(dependencies)) {
-        const depVersion = dependencies[name];
-        if (isLinkDependency(depVersion)) {
-            newDeps[name] = depVersion.replace('link:', 'file:');
-        } else {
-            newDeps[name] = depVersion;
-        }
-    }
-    return newDeps;
-}
-
-/***/ }),
-/* 43 */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return config; });
-/** PURE_IMPORTS_START  PURE_IMPORTS_END */
-var _enable_super_gross_mode_that_will_cause_bad_things = false;
-var config = {
-    Promise: undefined,
-    set useDeprecatedSynchronousErrorHandling(value) {
-        if (value) {
-            var error = /*@__PURE__*/ new Error();
-            /*@__PURE__*/ console.warn('DEPRECATED! RxJS was set to use deprecated synchronous error handling behavior by code at: \n' + error.stack);
-        }
-        else if (_enable_super_gross_mode_that_will_cause_bad_things) {
-            /*@__PURE__*/ console.log('RxJS: Back to a better error behavior. Thank you. <3');
-        }
-        _enable_super_gross_mode_that_will_cause_bad_things = value;
-    },
-    get useDeprecatedSynchronousErrorHandling() {
-        return _enable_super_gross_mode_that_will_cause_bad_things;
-    },
-};
-//# sourceMappingURL=config.js.map
-
-
-/***/ }),
-/* 44 */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-/* harmony export (immutable) */ __webpack_exports__["a"] = noop;
-/** PURE_IMPORTS_START  PURE_IMPORTS_END */
-function noop() { }
-//# sourceMappingURL=noop.js.map
-
-
-/***/ }),
-/* 45 */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return ObjectUnsubscribedError; });
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_tslib__ = __webpack_require__(1);
-/** PURE_IMPORTS_START tslib PURE_IMPORTS_END */
-
-var ObjectUnsubscribedError = /*@__PURE__*/ (function (_super) {
-    __WEBPACK_IMPORTED_MODULE_0_tslib__["a" /* __extends */](ObjectUnsubscribedError, _super);
-    function ObjectUnsubscribedError() {
-        var _this = _super.call(this, 'object unsubscribed') || this;
-        _this.name = 'ObjectUnsubscribedError';
-        Object.setPrototypeOf(_this, ObjectUnsubscribedError.prototype);
-        return _this;
-    }
-    return ObjectUnsubscribedError;
-}(Error));
-
-//# sourceMappingURL=ObjectUnsubscribedError.js.map
-
-
-/***/ }),
-/* 46 */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return Notification; });
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__observable_empty__ = __webpack_require__(12);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__observable_of__ = __webpack_require__(68);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__observable_throwError__ = __webpack_require__(70);
-/** PURE_IMPORTS_START _observable_empty,_observable_of,_observable_throwError PURE_IMPORTS_END */
-
-
-
-var Notification = /*@__PURE__*/ (function () {
-    function Notification(kind, value, error) {
-        this.kind = kind;
-        this.value = value;
-        this.error = error;
-        this.hasValue = kind === 'N';
-    }
-    Notification.prototype.observe = function (observer) {
-        switch (this.kind) {
-            case 'N':
-                return observer.next && observer.next(this.value);
-            case 'E':
-                return observer.error && observer.error(this.error);
-            case 'C':
-                return observer.complete && observer.complete();
-        }
-    };
-    Notification.prototype.do = function (next, error, complete) {
-        var kind = this.kind;
-        switch (kind) {
-            case 'N':
-                return next && next(this.value);
-            case 'E':
-                return error && error(this.error);
-            case 'C':
-                return complete && complete();
-        }
-    };
-    Notification.prototype.accept = function (nextOrObserver, error, complete) {
-        if (nextOrObserver && typeof nextOrObserver.next === 'function') {
-            return this.observe(nextOrObserver);
-        }
-        else {
-            return this.do(nextOrObserver, error, complete);
-        }
-    };
-    Notification.prototype.toObservable = function () {
-        var kind = this.kind;
-        switch (kind) {
-            case 'N':
-                return Object(__WEBPACK_IMPORTED_MODULE_1__observable_of__["a" /* of */])(this.value);
-            case 'E':
-                return Object(__WEBPACK_IMPORTED_MODULE_2__observable_throwError__["a" /* throwError */])(this.error);
-            case 'C':
-                return Object(__WEBPACK_IMPORTED_MODULE_0__observable_empty__["b" /* empty */])();
-        }
-        throw new Error('unexpected notification kind value');
-    };
-    Notification.createNext = function (value) {
-        if (typeof value !== 'undefined') {
-            return new Notification('N', value);
-        }
-        return Notification.undefinedValueNotification;
-    };
-    Notification.createError = function (err) {
-        return new Notification('E', undefined, err);
-    };
-    Notification.createComplete = function () {
-        return Notification.completeNotification;
-    };
-    Notification.completeNotification = new Notification('C');
-    Notification.undefinedValueNotification = new Notification('N', undefined);
-    return Notification;
-}());
-
-//# sourceMappingURL=Notification.js.map
-
-
-/***/ }),
-/* 47 */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return AsyncSubject; });
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_tslib__ = __webpack_require__(1);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__Subject__ = __webpack_require__(9);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__Subscription__ = __webpack_require__(8);
-/** PURE_IMPORTS_START tslib,_Subject,_Subscription PURE_IMPORTS_END */
-
-
-
-var AsyncSubject = /*@__PURE__*/ (function (_super) {
-    __WEBPACK_IMPORTED_MODULE_0_tslib__["a" /* __extends */](AsyncSubject, _super);
-    function AsyncSubject() {
-        var _this = _super !== null && _super.apply(this, arguments) || this;
-        _this.value = null;
-        _this.hasNext = false;
-        _this.hasCompleted = false;
-        return _this;
-    }
-    AsyncSubject.prototype._subscribe = function (subscriber) {
-        if (this.hasError) {
-            subscriber.error(this.thrownError);
-            return __WEBPACK_IMPORTED_MODULE_2__Subscription__["a" /* Subscription */].EMPTY;
-        }
-        else if (this.hasCompleted && this.hasNext) {
-            subscriber.next(this.value);
-            subscriber.complete();
-            return __WEBPACK_IMPORTED_MODULE_2__Subscription__["a" /* Subscription */].EMPTY;
-        }
-        return _super.prototype._subscribe.call(this, subscriber);
-    };
-    AsyncSubject.prototype.next = function (value) {
-        if (!this.hasCompleted) {
-            this.value = value;
-            this.hasNext = true;
-        }
-    };
-    AsyncSubject.prototype.error = function (error) {
-        if (!this.hasCompleted) {
-            _super.prototype.error.call(this, error);
-        }
-    };
-    AsyncSubject.prototype.complete = function () {
-        this.hasCompleted = true;
-        if (this.hasNext) {
-            _super.prototype.next.call(this, this.value);
-        }
-        _super.prototype.complete.call(this);
-    };
-    return AsyncSubject;
-}(__WEBPACK_IMPORTED_MODULE_1__Subject__["a" /* Subject */]));
-
-//# sourceMappingURL=AsyncSubject.js.map
-
-
-/***/ }),
-/* 48 */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-/* harmony export (immutable) */ __webpack_exports__["a"] = concat;
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__util_isScheduler__ = __webpack_require__(15);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__of__ = __webpack_require__(68);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__from__ = __webpack_require__(19);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__operators_concatAll__ = __webpack_require__(240);
-/** PURE_IMPORTS_START _util_isScheduler,_of,_from,_operators_concatAll PURE_IMPORTS_END */
-
-
-
-
-function concat() {
-    var observables = [];
-    for (var _i = 0; _i < arguments.length; _i++) {
-        observables[_i] = arguments[_i];
-    }
-    if (observables.length === 1 || (observables.length === 2 && Object(__WEBPACK_IMPORTED_MODULE_0__util_isScheduler__["a" /* isScheduler */])(observables[1]))) {
-        return Object(__WEBPACK_IMPORTED_MODULE_2__from__["a" /* from */])(observables[0]);
-    }
-    return Object(__WEBPACK_IMPORTED_MODULE_3__operators_concatAll__["a" /* concatAll */])()(__WEBPACK_IMPORTED_MODULE_1__of__["a" /* of */].apply(void 0, observables));
-}
-//# sourceMappingURL=concat.js.map
-
-
-/***/ }),
-/* 49 */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-/* harmony export (immutable) */ __webpack_exports__["a"] = isNumeric;
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__isArray__ = __webpack_require__(11);
-/** PURE_IMPORTS_START _isArray PURE_IMPORTS_END */
-
-function isNumeric(val) {
-    return !Object(__WEBPACK_IMPORTED_MODULE_0__isArray__["a" /* isArray */])(val) && (val - parseFloat(val) + 1) >= 0;
-}
-//# sourceMappingURL=isNumeric.js.map
-
-
-/***/ }),
-/* 50 */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return throwIfEmpty; });
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__tap__ = __webpack_require__(249);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__util_EmptyError__ = __webpack_require__(36);
-/** PURE_IMPORTS_START _tap,_util_EmptyError PURE_IMPORTS_END */
-
-
-var throwIfEmpty = function (errorFactory) {
-    if (errorFactory === void 0) {
-        errorFactory = defaultErrorFactory;
-    }
-    return Object(__WEBPACK_IMPORTED_MODULE_0__tap__["a" /* tap */])({
-        hasValue: false,
-        next: function () { this.hasValue = true; },
-        complete: function () {
-            if (!this.hasValue) {
-                throw errorFactory();
-            }
-        }
-    });
-};
-function defaultErrorFactory() {
-    return new __WEBPACK_IMPORTED_MODULE_1__util_EmptyError__["a" /* EmptyError */]();
-}
-//# sourceMappingURL=throwIfEmpty.js.map
-
-
-/***/ }),
-/* 51 */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-/* harmony export (immutable) */ __webpack_exports__["a"] = reduce;
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__scan__ = __webpack_require__(77);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__takeLast__ = __webpack_require__(76);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__defaultIfEmpty__ = __webpack_require__(39);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__util_pipe__ = __webpack_require__(65);
-/** PURE_IMPORTS_START _scan,_takeLast,_defaultIfEmpty,_util_pipe PURE_IMPORTS_END */
-
-
-
-
-function reduce(accumulator, seed) {
-    if (arguments.length >= 2) {
-        return function reduceOperatorFunctionWithSeed(source) {
-            return Object(__WEBPACK_IMPORTED_MODULE_3__util_pipe__["a" /* pipe */])(Object(__WEBPACK_IMPORTED_MODULE_0__scan__["a" /* scan */])(accumulator, seed), Object(__WEBPACK_IMPORTED_MODULE_1__takeLast__["a" /* takeLast */])(1), Object(__WEBPACK_IMPORTED_MODULE_2__defaultIfEmpty__["a" /* defaultIfEmpty */])(seed))(source);
-        };
-    }
-    return function reduceOperatorFunction(source) {
-        return Object(__WEBPACK_IMPORTED_MODULE_3__util_pipe__["a" /* pipe */])(Object(__WEBPACK_IMPORTED_MODULE_0__scan__["a" /* scan */])(function (acc, value, index) {
-            return accumulator(acc, value, index + 1);
-        }), Object(__WEBPACK_IMPORTED_MODULE_1__takeLast__["a" /* takeLast */])(1))(source);
-    };
-}
-//# sourceMappingURL=reduce.js.map
-
-
-/***/ }),
-/* 52 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-var matchOperatorsRe = /[|\\{}()[\]^$+*?.]/g;
-
-module.exports = function (str) {
-	if (typeof str !== 'string') {
-		throw new TypeError('Expected a string');
-	}
-
-	return str.replace(matchOperatorsRe, '\\$&');
-};
-
-
-/***/ }),
-/* 53 */
-/***/ (function(module, exports, __webpack_require__) {
-
-var conversions = __webpack_require__(79);
-var route = __webpack_require__(261);
-
-var convert = {};
-
-var models = Object.keys(conversions);
-
-function wrapRaw(fn) {
-	var wrappedFn = function (args) {
-		if (args === undefined || args === null) {
-			return args;
-		}
-
-		if (arguments.length > 1) {
-			args = Array.prototype.slice.call(arguments);
-		}
-
-		return fn(args);
-	};
-
-	// preserve .conversion property if there is one
-	if ('conversion' in fn) {
-		wrappedFn.conversion = fn.conversion;
-	}
-
-	return wrappedFn;
-}
-
-function wrapRounded(fn) {
-	var wrappedFn = function (args) {
-		if (args === undefined || args === null) {
-			return args;
-		}
-
-		if (arguments.length > 1) {
-			args = Array.prototype.slice.call(arguments);
-		}
-
-		var result = fn(args);
-
-		// we're assuming the result is an array here.
-		// see notice in conversions.js; don't use box types
-		// in conversion functions.
-		if (typeof result === 'object') {
-			for (var len = result.length, i = 0; i < len; i++) {
-				result[i] = Math.round(result[i]);
-			}
-		}
-
-		return result;
-	};
-
-	// preserve .conversion property if there is one
-	if ('conversion' in fn) {
-		wrappedFn.conversion = fn.conversion;
-	}
-
-	return wrappedFn;
-}
-
-models.forEach(function (fromModel) {
-	convert[fromModel] = {};
-
-	Object.defineProperty(convert[fromModel], 'channels', {value: conversions[fromModel].channels});
-	Object.defineProperty(convert[fromModel], 'labels', {value: conversions[fromModel].labels});
-
-	var routes = route(fromModel);
-	var routeModels = Object.keys(routes);
-
-	routeModels.forEach(function (toModel) {
-		var fn = routes[toModel];
-
-		convert[fromModel][toModel] = wrapRounded(fn);
-		convert[fromModel][toModel].raw = wrapRaw(fn);
-	});
-});
-
-module.exports = convert;
-
-
-/***/ }),
-/* 54 */
-/***/ (function(module, exports) {
-
-module.exports = require("os");
-
-/***/ }),
-/* 55 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-module.exports = (flag, argv) => {
-	argv = argv || process.argv;
-	const prefix = flag.startsWith('-') ? '' : (flag.length === 1 ? '-' : '--');
-	const pos = argv.indexOf(prefix + flag);
-	const terminatorPos = argv.indexOf('--');
-	return pos !== -1 && (terminatorPos === -1 ? true : pos < terminatorPos);
-};
-
-
-/***/ }),
-/* 56 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", {
-    value: true
-});
-exports.createSymlink = exports.isFile = exports.isDirectory = exports.mkdirp = exports.readFile = exports.chmod = undefined;
-
-let statTest = (() => {
-    var _ref = _asyncToGenerator(function* (path, block) {
-        try {
-            return block((yield stat(path)));
-        } catch (e) {
-            if (e.code === 'ENOENT') {
-                return false;
-            }
-            throw e;
-        }
-    });
-
-    return function statTest(_x, _x2) {
-        return _ref.apply(this, arguments);
-    };
-})();
-/**
- * Test if a path points to a directory.
- * @param path
- */
-
-
-let isDirectory = exports.isDirectory = (() => {
-    var _ref2 = _asyncToGenerator(function* (path) {
-        return yield statTest(path, function (stats) {
-            return stats.isDirectory();
-        });
-    });
-
-    return function isDirectory(_x3) {
-        return _ref2.apply(this, arguments);
-    };
-})();
-/**
- * Test if a path points to a regular file.
- * @param path
- */
-
-
-let isFile = exports.isFile = (() => {
-    var _ref3 = _asyncToGenerator(function* (path) {
-        return yield statTest(path, function (stats) {
-            return stats.isFile();
-        });
-    });
-
-    return function isFile(_x4) {
-        return _ref3.apply(this, arguments);
-    };
-})();
-/**
- * Create a symlink at dest that points to src. Adapted from
- * https://github.com/lerna/lerna/blob/2f1b87d9e2295f587e4ac74269f714271d8ed428/src/FileSystemUtilities.js#L103.
- *
- * @param src
- * @param dest
- * @param type 'dir', 'file', 'junction', or 'exec'. 'exec' on
- *  windows will use the `cmd-shim` module since symlinks can't be used
- *  for executable files on windows.
- */
-
-
-let createSymlink = exports.createSymlink = (() => {
-    var _ref4 = _asyncToGenerator(function* (src, dest, type) {
-        if (process.platform === 'win32') {
-            if (type === 'exec') {
-                yield cmdShim(src, dest);
-            } else {
-                yield forceCreate(src, dest, type);
-            }
-        } else {
-            const posixType = type === 'exec' ? 'file' : type;
-            const relativeSource = (0, _path.relative)((0, _path.dirname)(dest), src);
-            yield forceCreate(relativeSource, dest, posixType);
-        }
-    });
-
-    return function createSymlink(_x5, _x6, _x7) {
-        return _ref4.apply(this, arguments);
-    };
-})();
-
-let forceCreate = (() => {
-    var _ref5 = _asyncToGenerator(function* (src, dest, type) {
-        try {
-            // If something exists at `dest` we need to remove it first.
-            yield unlink(dest);
-        } catch (error) {
-            if (error.code !== 'ENOENT') {
-                throw error;
-            }
-        }
-        yield symlink(src, dest, type);
-    });
-
-    return function forceCreate(_x8, _x9, _x10) {
-        return _ref5.apply(this, arguments);
-    };
-})();
-
-var _cmdShim = __webpack_require__(269);
-
-var _cmdShim2 = _interopRequireDefault(_cmdShim);
-
-var _fs = __webpack_require__(7);
-
-var _fs2 = _interopRequireDefault(_fs);
-
-var _mkdirp = __webpack_require__(81);
-
-var _mkdirp2 = _interopRequireDefault(_mkdirp);
-
-var _path = __webpack_require__(3);
-
-var _util = __webpack_require__(10);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, arguments); return new Promise(function (resolve, reject) { function step(key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { return Promise.resolve(value).then(function (value) { step("next", value); }, function (err) { step("throw", err); }); } } return step("next"); }); }; } /*
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                            * Licensed to Elasticsearch B.V. under one or more contributor
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                            * license agreements. See the NOTICE file distributed with
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                            * this work for additional information regarding copyright
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                            * ownership. Elasticsearch B.V. licenses this file to you under
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                            * the Apache License, Version 2.0 (the "License"); you may
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                            * not use this file except in compliance with the License.
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                            * You may obtain a copy of the License at
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                            *
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                            *    http://www.apache.org/licenses/LICENSE-2.0
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                            *
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                            * Unless required by applicable law or agreed to in writing,
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                            * software distributed under the License is distributed on an
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                            * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                            * KIND, either express or implied.  See the License for the
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                            * specific language governing permissions and limitations
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                            * under the License.
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                            */
-
-
-const stat = (0, _util.promisify)(_fs2.default.stat);
-const readFile = (0, _util.promisify)(_fs2.default.readFile);
-const unlink = (0, _util.promisify)(_fs2.default.unlink);
-const symlink = (0, _util.promisify)(_fs2.default.symlink);
-const chmod = (0, _util.promisify)(_fs2.default.chmod);
-const cmdShim = (0, _util.promisify)(_cmdShim2.default);
-const mkdirp = (0, _util.promisify)(_mkdirp2.default);
-exports.chmod = chmod;
-exports.readFile = readFile;
-exports.mkdirp = mkdirp;
-
-/***/ }),
-/* 57 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", {
-    value: true
-});
-
-/*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
- */
-let parallelizeBatches = exports.parallelizeBatches = (() => {
-    var _ref = _asyncToGenerator(function* (batches, fn) {
-        for (const batch of batches) {
-            // We need to make sure the entire batch has completed before we can move on
-            // to the next batch
-            yield parallelize(batch, fn);
-        }
-    });
-
-    return function parallelizeBatches(_x, _x2) {
-        return _ref.apply(this, arguments);
-    };
-})();
-
-let parallelize = exports.parallelize = (() => {
-    var _ref2 = _asyncToGenerator(function* (items, fn, concurrency = 4) {
-        if (items.length === 0) {
-            return;
-        }
-        return new Promise(function (resolve, reject) {
-            let scheduleItem = (() => {
-                var _ref3 = _asyncToGenerator(function* (item) {
-                    activePromises++;
-                    try {
-                        yield fn(item);
-                        activePromises--;
-                        if (values.length > 0) {
-                            // We have more work to do, so we schedule the next promise
-                            scheduleItem(values.shift());
-                        } else if (activePromises === 0) {
-                            // We have no more values left, and all items have completed, so we've
-                            // completed all the work.
-                            resolve();
-                        }
-                    } catch (error) {
-                        reject(error);
-                    }
-                });
-
-                return function scheduleItem(_x5) {
-                    return _ref3.apply(this, arguments);
-                };
-            })();
-
-            let activePromises = 0;
-            const values = items.slice(0);
-
-            values.splice(0, concurrency).map(scheduleItem);
-        });
-    });
-
-    return function parallelize(_x3, _x4) {
-        return _ref2.apply(this, arguments);
-    };
-})();
-
-function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, arguments); return new Promise(function (resolve, reject) { function step(key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { return Promise.resolve(value).then(function (value) { step("next", value); }, function (err) { step("throw", err); }); } } return step("next"); }); }; }
-
-/***/ }),
-/* 58 */
 /***/ (function(module, exports, __webpack_require__) {
 
 module.exports = minimatch
@@ -9675,6 +8916,765 @@ function regExpEscape (s) {
 
 
 /***/ }),
+/* 42 */
+/***/ (function(module, exports) {
+
+module.exports = require("events");
+
+/***/ }),
+/* 43 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+exports.isLinkDependency = exports.createProductionPackageJson = undefined;
+
+var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; }; /*
+                                                                                                                                                                                                                                                                   * Licensed to Elasticsearch B.V. under one or more contributor
+                                                                                                                                                                                                                                                                   * license agreements. See the NOTICE file distributed with
+                                                                                                                                                                                                                                                                   * this work for additional information regarding copyright
+                                                                                                                                                                                                                                                                   * ownership. Elasticsearch B.V. licenses this file to you under
+                                                                                                                                                                                                                                                                   * the Apache License, Version 2.0 (the "License"); you may
+                                                                                                                                                                                                                                                                   * not use this file except in compliance with the License.
+                                                                                                                                                                                                                                                                   * You may obtain a copy of the License at
+                                                                                                                                                                                                                                                                   *
+                                                                                                                                                                                                                                                                   *    http://www.apache.org/licenses/LICENSE-2.0
+                                                                                                                                                                                                                                                                   *
+                                                                                                                                                                                                                                                                   * Unless required by applicable law or agreed to in writing,
+                                                                                                                                                                                                                                                                   * software distributed under the License is distributed on an
+                                                                                                                                                                                                                                                                   * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+                                                                                                                                                                                                                                                                   * KIND, either express or implied.  See the License for the
+                                                                                                                                                                                                                                                                   * specific language governing permissions and limitations
+                                                                                                                                                                                                                                                                   * under the License.
+                                                                                                                                                                                                                                                                   */
+
+
+exports.readPackageJson = readPackageJson;
+exports.writePackageJson = writePackageJson;
+exports.transformDependencies = transformDependencies;
+
+var _readPkg = __webpack_require__(280);
+
+var _readPkg2 = _interopRequireDefault(_readPkg);
+
+var _writePkg = __webpack_require__(303);
+
+var _writePkg2 = _interopRequireDefault(_writePkg);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function readPackageJson(dir) {
+    return (0, _readPkg2.default)(dir, { normalize: false });
+}
+function writePackageJson(path, json) {
+    return (0, _writePkg2.default)(path, json);
+}
+const createProductionPackageJson = exports.createProductionPackageJson = pkgJson => _extends({}, pkgJson, {
+    dependencies: transformDependencies(pkgJson.dependencies)
+});
+const isLinkDependency = exports.isLinkDependency = depVersion => depVersion.startsWith('link:');
+/**
+ * Replaces `link:` dependencies with `file:` dependencies. When installing
+ * dependencies, these `file:` dependencies will be copied into `node_modules`
+ * instead of being symlinked.
+ *
+ * This will allow us to copy packages into the build and run `yarn`, which
+ * will then _copy_ the `file:` dependencies into `node_modules` instead of
+ * symlinking like we do in development.
+ */
+function transformDependencies(dependencies = {}) {
+    const newDeps = {};
+    for (const name of Object.keys(dependencies)) {
+        const depVersion = dependencies[name];
+        if (isLinkDependency(depVersion)) {
+            newDeps[name] = depVersion.replace('link:', 'file:');
+        } else {
+            newDeps[name] = depVersion;
+        }
+    }
+    return newDeps;
+}
+
+/***/ }),
+/* 44 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return config; });
+/** PURE_IMPORTS_START  PURE_IMPORTS_END */
+var _enable_super_gross_mode_that_will_cause_bad_things = false;
+var config = {
+    Promise: undefined,
+    set useDeprecatedSynchronousErrorHandling(value) {
+        if (value) {
+            var error = /*@__PURE__*/ new Error();
+            /*@__PURE__*/ console.warn('DEPRECATED! RxJS was set to use deprecated synchronous error handling behavior by code at: \n' + error.stack);
+        }
+        else if (_enable_super_gross_mode_that_will_cause_bad_things) {
+            /*@__PURE__*/ console.log('RxJS: Back to a better error behavior. Thank you. <3');
+        }
+        _enable_super_gross_mode_that_will_cause_bad_things = value;
+    },
+    get useDeprecatedSynchronousErrorHandling() {
+        return _enable_super_gross_mode_that_will_cause_bad_things;
+    },
+};
+//# sourceMappingURL=config.js.map
+
+
+/***/ }),
+/* 45 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+/* harmony export (immutable) */ __webpack_exports__["a"] = noop;
+/** PURE_IMPORTS_START  PURE_IMPORTS_END */
+function noop() { }
+//# sourceMappingURL=noop.js.map
+
+
+/***/ }),
+/* 46 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return ObjectUnsubscribedError; });
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_tslib__ = __webpack_require__(1);
+/** PURE_IMPORTS_START tslib PURE_IMPORTS_END */
+
+var ObjectUnsubscribedError = /*@__PURE__*/ (function (_super) {
+    __WEBPACK_IMPORTED_MODULE_0_tslib__["a" /* __extends */](ObjectUnsubscribedError, _super);
+    function ObjectUnsubscribedError() {
+        var _this = _super.call(this, 'object unsubscribed') || this;
+        _this.name = 'ObjectUnsubscribedError';
+        Object.setPrototypeOf(_this, ObjectUnsubscribedError.prototype);
+        return _this;
+    }
+    return ObjectUnsubscribedError;
+}(Error));
+
+//# sourceMappingURL=ObjectUnsubscribedError.js.map
+
+
+/***/ }),
+/* 47 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return Notification; });
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__observable_empty__ = __webpack_require__(12);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__observable_of__ = __webpack_require__(68);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__observable_throwError__ = __webpack_require__(70);
+/** PURE_IMPORTS_START _observable_empty,_observable_of,_observable_throwError PURE_IMPORTS_END */
+
+
+
+var Notification = /*@__PURE__*/ (function () {
+    function Notification(kind, value, error) {
+        this.kind = kind;
+        this.value = value;
+        this.error = error;
+        this.hasValue = kind === 'N';
+    }
+    Notification.prototype.observe = function (observer) {
+        switch (this.kind) {
+            case 'N':
+                return observer.next && observer.next(this.value);
+            case 'E':
+                return observer.error && observer.error(this.error);
+            case 'C':
+                return observer.complete && observer.complete();
+        }
+    };
+    Notification.prototype.do = function (next, error, complete) {
+        var kind = this.kind;
+        switch (kind) {
+            case 'N':
+                return next && next(this.value);
+            case 'E':
+                return error && error(this.error);
+            case 'C':
+                return complete && complete();
+        }
+    };
+    Notification.prototype.accept = function (nextOrObserver, error, complete) {
+        if (nextOrObserver && typeof nextOrObserver.next === 'function') {
+            return this.observe(nextOrObserver);
+        }
+        else {
+            return this.do(nextOrObserver, error, complete);
+        }
+    };
+    Notification.prototype.toObservable = function () {
+        var kind = this.kind;
+        switch (kind) {
+            case 'N':
+                return Object(__WEBPACK_IMPORTED_MODULE_1__observable_of__["a" /* of */])(this.value);
+            case 'E':
+                return Object(__WEBPACK_IMPORTED_MODULE_2__observable_throwError__["a" /* throwError */])(this.error);
+            case 'C':
+                return Object(__WEBPACK_IMPORTED_MODULE_0__observable_empty__["b" /* empty */])();
+        }
+        throw new Error('unexpected notification kind value');
+    };
+    Notification.createNext = function (value) {
+        if (typeof value !== 'undefined') {
+            return new Notification('N', value);
+        }
+        return Notification.undefinedValueNotification;
+    };
+    Notification.createError = function (err) {
+        return new Notification('E', undefined, err);
+    };
+    Notification.createComplete = function () {
+        return Notification.completeNotification;
+    };
+    Notification.completeNotification = new Notification('C');
+    Notification.undefinedValueNotification = new Notification('N', undefined);
+    return Notification;
+}());
+
+//# sourceMappingURL=Notification.js.map
+
+
+/***/ }),
+/* 48 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return AsyncSubject; });
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_tslib__ = __webpack_require__(1);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__Subject__ = __webpack_require__(9);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__Subscription__ = __webpack_require__(8);
+/** PURE_IMPORTS_START tslib,_Subject,_Subscription PURE_IMPORTS_END */
+
+
+
+var AsyncSubject = /*@__PURE__*/ (function (_super) {
+    __WEBPACK_IMPORTED_MODULE_0_tslib__["a" /* __extends */](AsyncSubject, _super);
+    function AsyncSubject() {
+        var _this = _super !== null && _super.apply(this, arguments) || this;
+        _this.value = null;
+        _this.hasNext = false;
+        _this.hasCompleted = false;
+        return _this;
+    }
+    AsyncSubject.prototype._subscribe = function (subscriber) {
+        if (this.hasError) {
+            subscriber.error(this.thrownError);
+            return __WEBPACK_IMPORTED_MODULE_2__Subscription__["a" /* Subscription */].EMPTY;
+        }
+        else if (this.hasCompleted && this.hasNext) {
+            subscriber.next(this.value);
+            subscriber.complete();
+            return __WEBPACK_IMPORTED_MODULE_2__Subscription__["a" /* Subscription */].EMPTY;
+        }
+        return _super.prototype._subscribe.call(this, subscriber);
+    };
+    AsyncSubject.prototype.next = function (value) {
+        if (!this.hasCompleted) {
+            this.value = value;
+            this.hasNext = true;
+        }
+    };
+    AsyncSubject.prototype.error = function (error) {
+        if (!this.hasCompleted) {
+            _super.prototype.error.call(this, error);
+        }
+    };
+    AsyncSubject.prototype.complete = function () {
+        this.hasCompleted = true;
+        if (this.hasNext) {
+            _super.prototype.next.call(this, this.value);
+        }
+        _super.prototype.complete.call(this);
+    };
+    return AsyncSubject;
+}(__WEBPACK_IMPORTED_MODULE_1__Subject__["a" /* Subject */]));
+
+//# sourceMappingURL=AsyncSubject.js.map
+
+
+/***/ }),
+/* 49 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+/* harmony export (immutable) */ __webpack_exports__["a"] = concat;
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__util_isScheduler__ = __webpack_require__(15);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__of__ = __webpack_require__(68);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__from__ = __webpack_require__(19);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__operators_concatAll__ = __webpack_require__(240);
+/** PURE_IMPORTS_START _util_isScheduler,_of,_from,_operators_concatAll PURE_IMPORTS_END */
+
+
+
+
+function concat() {
+    var observables = [];
+    for (var _i = 0; _i < arguments.length; _i++) {
+        observables[_i] = arguments[_i];
+    }
+    if (observables.length === 1 || (observables.length === 2 && Object(__WEBPACK_IMPORTED_MODULE_0__util_isScheduler__["a" /* isScheduler */])(observables[1]))) {
+        return Object(__WEBPACK_IMPORTED_MODULE_2__from__["a" /* from */])(observables[0]);
+    }
+    return Object(__WEBPACK_IMPORTED_MODULE_3__operators_concatAll__["a" /* concatAll */])()(__WEBPACK_IMPORTED_MODULE_1__of__["a" /* of */].apply(void 0, observables));
+}
+//# sourceMappingURL=concat.js.map
+
+
+/***/ }),
+/* 50 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+/* harmony export (immutable) */ __webpack_exports__["a"] = isNumeric;
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__isArray__ = __webpack_require__(11);
+/** PURE_IMPORTS_START _isArray PURE_IMPORTS_END */
+
+function isNumeric(val) {
+    return !Object(__WEBPACK_IMPORTED_MODULE_0__isArray__["a" /* isArray */])(val) && (val - parseFloat(val) + 1) >= 0;
+}
+//# sourceMappingURL=isNumeric.js.map
+
+
+/***/ }),
+/* 51 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return throwIfEmpty; });
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__tap__ = __webpack_require__(249);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__util_EmptyError__ = __webpack_require__(36);
+/** PURE_IMPORTS_START _tap,_util_EmptyError PURE_IMPORTS_END */
+
+
+var throwIfEmpty = function (errorFactory) {
+    if (errorFactory === void 0) {
+        errorFactory = defaultErrorFactory;
+    }
+    return Object(__WEBPACK_IMPORTED_MODULE_0__tap__["a" /* tap */])({
+        hasValue: false,
+        next: function () { this.hasValue = true; },
+        complete: function () {
+            if (!this.hasValue) {
+                throw errorFactory();
+            }
+        }
+    });
+};
+function defaultErrorFactory() {
+    return new __WEBPACK_IMPORTED_MODULE_1__util_EmptyError__["a" /* EmptyError */]();
+}
+//# sourceMappingURL=throwIfEmpty.js.map
+
+
+/***/ }),
+/* 52 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+/* harmony export (immutable) */ __webpack_exports__["a"] = reduce;
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__scan__ = __webpack_require__(77);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__takeLast__ = __webpack_require__(76);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__defaultIfEmpty__ = __webpack_require__(39);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__util_pipe__ = __webpack_require__(65);
+/** PURE_IMPORTS_START _scan,_takeLast,_defaultIfEmpty,_util_pipe PURE_IMPORTS_END */
+
+
+
+
+function reduce(accumulator, seed) {
+    if (arguments.length >= 2) {
+        return function reduceOperatorFunctionWithSeed(source) {
+            return Object(__WEBPACK_IMPORTED_MODULE_3__util_pipe__["a" /* pipe */])(Object(__WEBPACK_IMPORTED_MODULE_0__scan__["a" /* scan */])(accumulator, seed), Object(__WEBPACK_IMPORTED_MODULE_1__takeLast__["a" /* takeLast */])(1), Object(__WEBPACK_IMPORTED_MODULE_2__defaultIfEmpty__["a" /* defaultIfEmpty */])(seed))(source);
+        };
+    }
+    return function reduceOperatorFunction(source) {
+        return Object(__WEBPACK_IMPORTED_MODULE_3__util_pipe__["a" /* pipe */])(Object(__WEBPACK_IMPORTED_MODULE_0__scan__["a" /* scan */])(function (acc, value, index) {
+            return accumulator(acc, value, index + 1);
+        }), Object(__WEBPACK_IMPORTED_MODULE_1__takeLast__["a" /* takeLast */])(1))(source);
+    };
+}
+//# sourceMappingURL=reduce.js.map
+
+
+/***/ }),
+/* 53 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var matchOperatorsRe = /[|\\{}()[\]^$+*?.]/g;
+
+module.exports = function (str) {
+	if (typeof str !== 'string') {
+		throw new TypeError('Expected a string');
+	}
+
+	return str.replace(matchOperatorsRe, '\\$&');
+};
+
+
+/***/ }),
+/* 54 */
+/***/ (function(module, exports, __webpack_require__) {
+
+var conversions = __webpack_require__(79);
+var route = __webpack_require__(261);
+
+var convert = {};
+
+var models = Object.keys(conversions);
+
+function wrapRaw(fn) {
+	var wrappedFn = function (args) {
+		if (args === undefined || args === null) {
+			return args;
+		}
+
+		if (arguments.length > 1) {
+			args = Array.prototype.slice.call(arguments);
+		}
+
+		return fn(args);
+	};
+
+	// preserve .conversion property if there is one
+	if ('conversion' in fn) {
+		wrappedFn.conversion = fn.conversion;
+	}
+
+	return wrappedFn;
+}
+
+function wrapRounded(fn) {
+	var wrappedFn = function (args) {
+		if (args === undefined || args === null) {
+			return args;
+		}
+
+		if (arguments.length > 1) {
+			args = Array.prototype.slice.call(arguments);
+		}
+
+		var result = fn(args);
+
+		// we're assuming the result is an array here.
+		// see notice in conversions.js; don't use box types
+		// in conversion functions.
+		if (typeof result === 'object') {
+			for (var len = result.length, i = 0; i < len; i++) {
+				result[i] = Math.round(result[i]);
+			}
+		}
+
+		return result;
+	};
+
+	// preserve .conversion property if there is one
+	if ('conversion' in fn) {
+		wrappedFn.conversion = fn.conversion;
+	}
+
+	return wrappedFn;
+}
+
+models.forEach(function (fromModel) {
+	convert[fromModel] = {};
+
+	Object.defineProperty(convert[fromModel], 'channels', {value: conversions[fromModel].channels});
+	Object.defineProperty(convert[fromModel], 'labels', {value: conversions[fromModel].labels});
+
+	var routes = route(fromModel);
+	var routeModels = Object.keys(routes);
+
+	routeModels.forEach(function (toModel) {
+		var fn = routes[toModel];
+
+		convert[fromModel][toModel] = wrapRounded(fn);
+		convert[fromModel][toModel].raw = wrapRaw(fn);
+	});
+});
+
+module.exports = convert;
+
+
+/***/ }),
+/* 55 */
+/***/ (function(module, exports) {
+
+module.exports = require("os");
+
+/***/ }),
+/* 56 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+module.exports = (flag, argv) => {
+	argv = argv || process.argv;
+	const prefix = flag.startsWith('-') ? '' : (flag.length === 1 ? '-' : '--');
+	const pos = argv.indexOf(prefix + flag);
+	const terminatorPos = argv.indexOf('--');
+	return pos !== -1 && (terminatorPos === -1 ? true : pos < terminatorPos);
+};
+
+
+/***/ }),
+/* 57 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+exports.createSymlink = exports.isFile = exports.isDirectory = exports.mkdirp = exports.readFile = exports.chmod = undefined;
+
+let statTest = (() => {
+    var _ref = _asyncToGenerator(function* (path, block) {
+        try {
+            return block((yield stat(path)));
+        } catch (e) {
+            if (e.code === 'ENOENT') {
+                return false;
+            }
+            throw e;
+        }
+    });
+
+    return function statTest(_x, _x2) {
+        return _ref.apply(this, arguments);
+    };
+})();
+/**
+ * Test if a path points to a directory.
+ * @param path
+ */
+
+
+let isDirectory = exports.isDirectory = (() => {
+    var _ref2 = _asyncToGenerator(function* (path) {
+        return yield statTest(path, function (stats) {
+            return stats.isDirectory();
+        });
+    });
+
+    return function isDirectory(_x3) {
+        return _ref2.apply(this, arguments);
+    };
+})();
+/**
+ * Test if a path points to a regular file.
+ * @param path
+ */
+
+
+let isFile = exports.isFile = (() => {
+    var _ref3 = _asyncToGenerator(function* (path) {
+        return yield statTest(path, function (stats) {
+            return stats.isFile();
+        });
+    });
+
+    return function isFile(_x4) {
+        return _ref3.apply(this, arguments);
+    };
+})();
+/**
+ * Create a symlink at dest that points to src. Adapted from
+ * https://github.com/lerna/lerna/blob/2f1b87d9e2295f587e4ac74269f714271d8ed428/src/FileSystemUtilities.js#L103.
+ *
+ * @param src
+ * @param dest
+ * @param type 'dir', 'file', 'junction', or 'exec'. 'exec' on
+ *  windows will use the `cmd-shim` module since symlinks can't be used
+ *  for executable files on windows.
+ */
+
+
+let createSymlink = exports.createSymlink = (() => {
+    var _ref4 = _asyncToGenerator(function* (src, dest, type) {
+        if (process.platform === 'win32') {
+            if (type === 'exec') {
+                yield cmdShim(src, dest);
+            } else {
+                yield forceCreate(src, dest, type);
+            }
+        } else {
+            const posixType = type === 'exec' ? 'file' : type;
+            const relativeSource = (0, _path.relative)((0, _path.dirname)(dest), src);
+            yield forceCreate(relativeSource, dest, posixType);
+        }
+    });
+
+    return function createSymlink(_x5, _x6, _x7) {
+        return _ref4.apply(this, arguments);
+    };
+})();
+
+let forceCreate = (() => {
+    var _ref5 = _asyncToGenerator(function* (src, dest, type) {
+        try {
+            // If something exists at `dest` we need to remove it first.
+            yield unlink(dest);
+        } catch (error) {
+            if (error.code !== 'ENOENT') {
+                throw error;
+            }
+        }
+        yield symlink(src, dest, type);
+    });
+
+    return function forceCreate(_x8, _x9, _x10) {
+        return _ref5.apply(this, arguments);
+    };
+})();
+
+var _cmdShim = __webpack_require__(269);
+
+var _cmdShim2 = _interopRequireDefault(_cmdShim);
+
+var _fs = __webpack_require__(7);
+
+var _fs2 = _interopRequireDefault(_fs);
+
+var _mkdirp = __webpack_require__(81);
+
+var _mkdirp2 = _interopRequireDefault(_mkdirp);
+
+var _path = __webpack_require__(3);
+
+var _util = __webpack_require__(10);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, arguments); return new Promise(function (resolve, reject) { function step(key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { return Promise.resolve(value).then(function (value) { step("next", value); }, function (err) { step("throw", err); }); } } return step("next"); }); }; } /*
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                            * Licensed to Elasticsearch B.V. under one or more contributor
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                            * license agreements. See the NOTICE file distributed with
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                            * this work for additional information regarding copyright
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                            * ownership. Elasticsearch B.V. licenses this file to you under
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                            * the Apache License, Version 2.0 (the "License"); you may
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                            * not use this file except in compliance with the License.
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                            * You may obtain a copy of the License at
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                            *
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                            *    http://www.apache.org/licenses/LICENSE-2.0
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                            *
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                            * Unless required by applicable law or agreed to in writing,
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                            * software distributed under the License is distributed on an
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                            * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                            * KIND, either express or implied.  See the License for the
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                            * specific language governing permissions and limitations
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                            * under the License.
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                            */
+
+
+const stat = (0, _util.promisify)(_fs2.default.stat);
+const readFile = (0, _util.promisify)(_fs2.default.readFile);
+const unlink = (0, _util.promisify)(_fs2.default.unlink);
+const symlink = (0, _util.promisify)(_fs2.default.symlink);
+const chmod = (0, _util.promisify)(_fs2.default.chmod);
+const cmdShim = (0, _util.promisify)(_cmdShim2.default);
+const mkdirp = (0, _util.promisify)(_mkdirp2.default);
+exports.chmod = chmod;
+exports.readFile = readFile;
+exports.mkdirp = mkdirp;
+
+/***/ }),
+/* 58 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+
+/*
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+let parallelizeBatches = exports.parallelizeBatches = (() => {
+    var _ref = _asyncToGenerator(function* (batches, fn) {
+        for (const batch of batches) {
+            // We need to make sure the entire batch has completed before we can move on
+            // to the next batch
+            yield parallelize(batch, fn);
+        }
+    });
+
+    return function parallelizeBatches(_x, _x2) {
+        return _ref.apply(this, arguments);
+    };
+})();
+
+let parallelize = exports.parallelize = (() => {
+    var _ref2 = _asyncToGenerator(function* (items, fn, concurrency = 4) {
+        if (items.length === 0) {
+            return;
+        }
+        return new Promise(function (resolve, reject) {
+            let scheduleItem = (() => {
+                var _ref3 = _asyncToGenerator(function* (item) {
+                    activePromises++;
+                    try {
+                        yield fn(item);
+                        activePromises--;
+                        if (values.length > 0) {
+                            // We have more work to do, so we schedule the next promise
+                            scheduleItem(values.shift());
+                        } else if (activePromises === 0) {
+                            // We have no more values left, and all items have completed, so we've
+                            // completed all the work.
+                            resolve();
+                        }
+                    } catch (error) {
+                        reject(error);
+                    }
+                });
+
+                return function scheduleItem(_x5) {
+                    return _ref3.apply(this, arguments);
+                };
+            })();
+
+            let activePromises = 0;
+            const values = items.slice(0);
+
+            values.splice(0, concurrency).map(scheduleItem);
+        });
+    });
+
+    return function parallelize(_x3, _x4) {
+        return _ref2.apply(this, arguments);
+    };
+})();
+
+function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, arguments); return new Promise(function (resolve, reject) { function step(key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { return Promise.resolve(value).then(function (value) { step("next", value); }, function (err) { step("throw", err); }); } } return step("next"); }); }; }
+
+/***/ }),
 /* 59 */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -9747,7 +9747,7 @@ exports.CliError = CliError;
 var assert = __webpack_require__(29)
 var signals = __webpack_require__(307)
 
-var EE = __webpack_require__(41)
+var EE = __webpack_require__(42)
 /* istanbul ignore if */
 if (typeof EE !== 'function') {
   EE = EE.EventEmitter
@@ -9941,7 +9941,7 @@ var $$rxSubscriber = rxSubscriber;
 "use strict";
 /* harmony export (immutable) */ __webpack_exports__["a"] = pipe;
 /* harmony export (immutable) */ __webpack_exports__["b"] = pipeFromArray;
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__noop__ = __webpack_require__(44);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__noop__ = __webpack_require__(45);
 /** PURE_IMPORTS_START _noop PURE_IMPORTS_END */
 
 function pipe() {
@@ -10044,7 +10044,7 @@ var RefCountSubscriber = /*@__PURE__*/ (function (_super) {
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__scheduler_queue__ = __webpack_require__(228);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__Subscription__ = __webpack_require__(8);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__operators_observeOn__ = __webpack_require__(230);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_5__util_ObjectUnsubscribedError__ = __webpack_require__(45);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_5__util_ObjectUnsubscribedError__ = __webpack_require__(46);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_6__SubjectSubscription__ = __webpack_require__(225);
 /** PURE_IMPORTS_START tslib,_Subject,_scheduler_queue,_Subscription,_operators_observeOn,_util_ObjectUnsubscribedError,_SubjectSubscription PURE_IMPORTS_END */
 
@@ -12053,7 +12053,7 @@ function ownProp (obj, field) {
 }
 
 var path = __webpack_require__(3)
-var minimatch = __webpack_require__(58)
+var minimatch = __webpack_require__(41)
 var isAbsolute = __webpack_require__(59)
 var Minimatch = minimatch.Minimatch
 
@@ -12385,6 +12385,10 @@ var _chalk = __webpack_require__(18);
 
 var _chalk2 = _interopRequireDefault(_chalk);
 
+var _minimatch = __webpack_require__(41);
+
+var _minimatch2 = _interopRequireDefault(_minimatch);
+
 var _path = __webpack_require__(3);
 
 var _util = __webpack_require__(10);
@@ -12393,7 +12397,7 @@ var _errors = __webpack_require__(60);
 
 var _log = __webpack_require__(20);
 
-var _package_json = __webpack_require__(42);
+var _package_json = __webpack_require__(43);
 
 var _scripts = __webpack_require__(310);
 
@@ -12434,6 +12438,7 @@ class Project {
         this.targetLocation = (0, _path.resolve)(this.path, 'target');
         this.productionDependencies = this.json.dependencies || {};
         this.devDependencies = this.json.devDependencies || {};
+        this.yarnWorkspaceSelectors = (this.json.workspaces || []).map(selector => _minimatch2.default.makeRe((0, _path.resolve)(this.path, selector)));
         this.allDependencies = _extends({}, this.devDependencies, this.productionDependencies);
         this.scripts = this.json.scripts || {};
     }
@@ -12441,9 +12446,10 @@ class Project {
         return this.json.name;
     }
     ensureValidProjectDependency(project) {
-        const relativePathToProject = normalizePath((0, _path.relative)(this.path, project.path));
+        // todo: this needs to validate * dependencies correctly
+        return;
         const versionInPackageJson = this.allDependencies[project.name];
-        const expectedVersionInPackageJson = `link:${relativePathToProject}`;
+        const expectedVersionInPackageJson = `*`;
         if (versionInPackageJson === expectedVersionInPackageJson) {
             return;
         }
@@ -12515,6 +12521,9 @@ class Project {
             _log.log.write(_chalk2.default.bold(`\n\nInstalling dependencies in [${_chalk2.default.green(_this2.name)}]:\n`));
             return (0, _scripts.installInDir)(_this2.path, extraArgs);
         })();
+    }
+    isSelectedByWorkspace(project) {
+        return this.yarnWorkspaceSelectors.some(re => re.test(project.path));
     }
 }
 exports.Project = Project; // We normalize all path separators to `/` in generated files
@@ -25420,7 +25429,7 @@ module.exports = shouldUseNative() ? Object.assign : function (target, source) {
 
 "use strict";
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return empty; });
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__config__ = __webpack_require__(43);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__config__ = __webpack_require__(44);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__util_hostReportError__ = __webpack_require__(63);
 /** PURE_IMPORTS_START _config,_util_hostReportError PURE_IMPORTS_END */
 
@@ -25883,7 +25892,7 @@ var InnerRefCountSubscription = /*@__PURE__*/ (function (_super) {
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return BehaviorSubject; });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_tslib__ = __webpack_require__(1);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__Subject__ = __webpack_require__(9);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__util_ObjectUnsubscribedError__ = __webpack_require__(45);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__util_ObjectUnsubscribedError__ = __webpack_require__(46);
 /** PURE_IMPORTS_START tslib,_Subject,_util_ObjectUnsubscribedError PURE_IMPORTS_END */
 
 
@@ -25982,7 +25991,7 @@ var Scheduler = /*@__PURE__*/ (function () {
 /* unused harmony export ObserveOnMessage */
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_tslib__ = __webpack_require__(1);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__Subscriber__ = __webpack_require__(2);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__Notification__ = __webpack_require__(46);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__Notification__ = __webpack_require__(47);
 /** PURE_IMPORTS_START tslib,_Subscriber,_Notification PURE_IMPORTS_END */
 
 
@@ -26341,7 +26350,7 @@ function merge() {
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return NEVER; });
 /* harmony export (immutable) */ __webpack_exports__["b"] = never;
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__Observable__ = __webpack_require__(4);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__util_noop__ = __webpack_require__(44);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__util_noop__ = __webpack_require__(45);
 /** PURE_IMPORTS_START _Observable,_util_noop PURE_IMPORTS_END */
 
 
@@ -26453,7 +26462,7 @@ var RaceSubscriber = /*@__PURE__*/ (function (_super) {
 /* harmony export (immutable) */ __webpack_exports__["a"] = timer;
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__Observable__ = __webpack_require__(4);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__scheduler_async__ = __webpack_require__(13);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__util_isNumeric__ = __webpack_require__(49);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__util_isNumeric__ = __webpack_require__(50);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__util_isScheduler__ = __webpack_require__(15);
 /** PURE_IMPORTS_START _Observable,_scheduler_async,_util_isNumeric,_util_isScheduler PURE_IMPORTS_END */
 
@@ -26687,7 +26696,7 @@ var DistinctUntilChangedSubscriber = /*@__PURE__*/ (function (_super) {
 /* harmony export (immutable) */ __webpack_exports__["a"] = tap;
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_tslib__ = __webpack_require__(1);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__Subscriber__ = __webpack_require__(2);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__util_noop__ = __webpack_require__(44);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__util_noop__ = __webpack_require__(45);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__util_isFunction__ = __webpack_require__(32);
 /** PURE_IMPORTS_START tslib,_Subscriber,_util_noop,_util_isFunction PURE_IMPORTS_END */
 
@@ -27189,7 +27198,7 @@ Object.defineProperty(exports, 'prepareExternalProjectDependencies', {
   }
 });
 
-var _package_json = __webpack_require__(42);
+var _package_json = __webpack_require__(43);
 
 Object.defineProperty(exports, 'transformDependencies', {
   enumerable: true,
@@ -27319,7 +27328,7 @@ function help() {
 
 "use strict";
 /* WEBPACK VAR INJECTION */(function(module) {
-const colorConvert = __webpack_require__(53);
+const colorConvert = __webpack_require__(54);
 
 const wrapAnsi16 = (fn, offset) => function () {
 	const code = fn.apply(colorConvert, arguments);
@@ -27754,8 +27763,8 @@ module.exports = function (fromModel) {
 
 "use strict";
 
-const os = __webpack_require__(54);
-const hasFlag = __webpack_require__(55);
+const os = __webpack_require__(55);
+const hasFlag = __webpack_require__(56);
 
 const env = process.env;
 
@@ -28320,7 +28329,7 @@ var _link_project_executables = __webpack_require__(268);
 
 var _log = __webpack_require__(20);
 
-var _parallelize = __webpack_require__(57);
+var _parallelize = __webpack_require__(58);
 
 var _projects = __webpack_require__(30);
 
@@ -28351,11 +28360,22 @@ const BootstrapCommand = exports.BootstrapCommand = {
     name: 'bootstrap',
     run(projects, projectGraph, { options }) {
         return _asyncToGenerator(function* () {
-            const batchedProjects = (0, _projects.topologicallyBatchProjects)(projects, projectGraph);
+            const kibana = projects.get('kibana');
+            if (!kibana) {
+                throw new Error('bootstrap now requires the kibana project');
+            }
+            const allProjectBatches = (0, _projects.topologicallyBatchProjects)(projects, projectGraph);
+            const nonWorkspaceProjects = new Map();
+            for (const [id, project] of projects) {
+                if (!kibana.isSelectedByWorkspace(project)) {
+                    nonWorkspaceProjects.set(id, project);
+                }
+            }
+            const installProjectBatches = (0, _projects.topologicallyBatchProjects)(nonWorkspaceProjects, projectGraph);
             const frozenLockfile = options['frozen-lockfile'] === true;
             const extraArgs = frozenLockfile ? ['--frozen-lockfile'] : [];
             _log.log.write(_chalk2.default.bold('\nRunning installs in topological order:'));
-            for (const batch of batchedProjects) {
+            for (const batch of installProjectBatches) {
                 for (const project of batch) {
                     if (project.hasDependencies()) {
                         yield project.installDependencies({ extraArgs });
@@ -28371,7 +28391,7 @@ const BootstrapCommand = exports.BootstrapCommand = {
              * have to, as it will slow down the bootstrapping process.
              */
             _log.log.write(_chalk2.default.bold('\nLinking executables completed, running `kbn:bootstrap` scripts\n'));
-            yield (0, _parallelize.parallelizeBatches)(batchedProjects, (() => {
+            yield (0, _parallelize.parallelizeBatches)(allProjectBatches, (() => {
                 var _ref = _asyncToGenerator(function* (pkg) {
                     if (pkg.hasScript('kbn:bootstrap')) {
                         yield pkg.runScriptStreaming('kbn:bootstrap');
@@ -28444,7 +28464,7 @@ var _chalk = __webpack_require__(18);
 
 var _chalk2 = _interopRequireDefault(_chalk);
 
-var _fs = __webpack_require__(56);
+var _fs = __webpack_require__(57);
 
 var _log = __webpack_require__(20);
 
@@ -29760,7 +29780,7 @@ globSync.GlobSync = GlobSync
 
 var fs = __webpack_require__(7)
 var rp = __webpack_require__(82)
-var minimatch = __webpack_require__(58)
+var minimatch = __webpack_require__(41)
 var Minimatch = minimatch.Minimatch
 var Glob = __webpack_require__(31).Glob
 var util = __webpack_require__(10)
@@ -37277,7 +37297,7 @@ module.exports = opts => {
 
 "use strict";
 
-const escapeStringRegexp = __webpack_require__(52);
+const escapeStringRegexp = __webpack_require__(53);
 const ansiStyles = __webpack_require__(339);
 const stdoutColor = __webpack_require__(340).stdout;
 
@@ -37512,7 +37532,7 @@ module.exports.default = module.exports; // For TypeScript
 
 "use strict";
 /* WEBPACK VAR INJECTION */(function(module) {
-const colorConvert = __webpack_require__(53);
+const colorConvert = __webpack_require__(54);
 
 const wrapAnsi16 = (fn, offset) => function () {
 	const code = fn.apply(colorConvert, arguments);
@@ -37672,8 +37692,8 @@ Object.defineProperty(module, 'exports', {
 
 "use strict";
 
-const os = __webpack_require__(54);
-const hasFlag = __webpack_require__(55);
+const os = __webpack_require__(55);
+const hasFlag = __webpack_require__(56);
 
 const env = process.env;
 
@@ -38885,7 +38905,7 @@ var _ora2 = _interopRequireDefault(_ora);
 
 var _path = __webpack_require__(3);
 
-var _fs = __webpack_require__(56);
+var _fs = __webpack_require__(57);
 
 var _log = __webpack_require__(20);
 
@@ -40164,7 +40184,7 @@ module.exports.promise = (action, options) => {
 
 "use strict";
 
-const escapeStringRegexp = __webpack_require__(52);
+const escapeStringRegexp = __webpack_require__(53);
 const ansiStyles = __webpack_require__(364);
 const stdoutColor = __webpack_require__(365).stdout;
 
@@ -40399,7 +40419,7 @@ module.exports.default = module.exports; // For TypeScript
 
 "use strict";
 /* WEBPACK VAR INJECTION */(function(module) {
-const colorConvert = __webpack_require__(53);
+const colorConvert = __webpack_require__(54);
 
 const wrapAnsi16 = (fn, offset) => function () {
 	const code = fn.apply(colorConvert, arguments);
@@ -40559,8 +40579,8 @@ Object.defineProperty(module, 'exports', {
 
 "use strict";
 
-const os = __webpack_require__(54);
-const hasFlag = __webpack_require__(55);
+const os = __webpack_require__(55);
+const hasFlag = __webpack_require__(56);
 
 const env = process.env;
 
@@ -40981,7 +41001,7 @@ var _chalk2 = _interopRequireDefault(_chalk);
 
 var _log = __webpack_require__(20);
 
-var _parallelize = __webpack_require__(57);
+var _parallelize = __webpack_require__(58);
 
 var _projects = __webpack_require__(30);
 
@@ -41053,7 +41073,7 @@ var _chalk2 = _interopRequireDefault(_chalk);
 
 var _log = __webpack_require__(20);
 
-var _parallelize = __webpack_require__(57);
+var _parallelize = __webpack_require__(58);
 
 var _projects = __webpack_require__(30);
 
@@ -41227,7 +41247,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 /* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "BehaviorSubject", function() { return __WEBPACK_IMPORTED_MODULE_5__internal_BehaviorSubject__["a"]; });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_6__internal_ReplaySubject__ = __webpack_require__(67);
 /* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "ReplaySubject", function() { return __WEBPACK_IMPORTED_MODULE_6__internal_ReplaySubject__["a"]; });
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_7__internal_AsyncSubject__ = __webpack_require__(47);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_7__internal_AsyncSubject__ = __webpack_require__(48);
 /* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "AsyncSubject", function() { return __WEBPACK_IMPORTED_MODULE_7__internal_AsyncSubject__["a"]; });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_8__internal_scheduler_asap__ = __webpack_require__(232);
 /* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "asapScheduler", function() { return __WEBPACK_IMPORTED_MODULE_8__internal_scheduler_asap__["a"]; });
@@ -41246,11 +41266,11 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 /* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "Subscription", function() { return __WEBPACK_IMPORTED_MODULE_14__internal_Subscription__["a"]; });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_15__internal_Subscriber__ = __webpack_require__(2);
 /* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "Subscriber", function() { return __WEBPACK_IMPORTED_MODULE_15__internal_Subscriber__["a"]; });
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_16__internal_Notification__ = __webpack_require__(46);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_16__internal_Notification__ = __webpack_require__(47);
 /* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "Notification", function() { return __WEBPACK_IMPORTED_MODULE_16__internal_Notification__["a"]; });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_17__internal_util_pipe__ = __webpack_require__(65);
 /* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "pipe", function() { return __WEBPACK_IMPORTED_MODULE_17__internal_util_pipe__["a"]; });
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_18__internal_util_noop__ = __webpack_require__(44);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_18__internal_util_noop__ = __webpack_require__(45);
 /* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "noop", function() { return __WEBPACK_IMPORTED_MODULE_18__internal_util_noop__["a"]; });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_19__internal_util_identity__ = __webpack_require__(25);
 /* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "identity", function() { return __WEBPACK_IMPORTED_MODULE_19__internal_util_identity__["a"]; });
@@ -41260,7 +41280,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 /* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "ArgumentOutOfRangeError", function() { return __WEBPACK_IMPORTED_MODULE_21__internal_util_ArgumentOutOfRangeError__["a"]; });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_22__internal_util_EmptyError__ = __webpack_require__(36);
 /* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "EmptyError", function() { return __WEBPACK_IMPORTED_MODULE_22__internal_util_EmptyError__["a"]; });
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_23__internal_util_ObjectUnsubscribedError__ = __webpack_require__(45);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_23__internal_util_ObjectUnsubscribedError__ = __webpack_require__(46);
 /* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "ObjectUnsubscribedError", function() { return __WEBPACK_IMPORTED_MODULE_23__internal_util_ObjectUnsubscribedError__["a"]; });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_24__internal_util_UnsubscriptionError__ = __webpack_require__(223);
 /* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "UnsubscriptionError", function() { return __WEBPACK_IMPORTED_MODULE_24__internal_util_UnsubscriptionError__["a"]; });
@@ -41272,7 +41292,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 /* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "bindNodeCallback", function() { return __WEBPACK_IMPORTED_MODULE_27__internal_observable_bindNodeCallback__["a"]; });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_28__internal_observable_combineLatest__ = __webpack_require__(71);
 /* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "combineLatest", function() { return __WEBPACK_IMPORTED_MODULE_28__internal_observable_combineLatest__["b"]; });
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_29__internal_observable_concat__ = __webpack_require__(48);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_29__internal_observable_concat__ = __webpack_require__(49);
 /* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "concat", function() { return __WEBPACK_IMPORTED_MODULE_29__internal_observable_concat__["a"]; });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_30__internal_observable_defer__ = __webpack_require__(73);
 /* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "defer", function() { return __WEBPACK_IMPORTED_MODULE_30__internal_observable_defer__["a"]; });
@@ -41316,7 +41336,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 /* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "zip", function() { return __WEBPACK_IMPORTED_MODULE_49__internal_observable_zip__["b"]; });
 /* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "EMPTY", function() { return __WEBPACK_IMPORTED_MODULE_31__internal_observable_empty__["a"]; });
 /* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "NEVER", function() { return __WEBPACK_IMPORTED_MODULE_40__internal_observable_never__["a"]; });
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_50__internal_config__ = __webpack_require__(43);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_50__internal_config__ = __webpack_require__(44);
 /* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "config", function() { return __WEBPACK_IMPORTED_MODULE_50__internal_config__["a"]; });
 /** PURE_IMPORTS_START  PURE_IMPORTS_END */
 
@@ -41876,7 +41896,7 @@ function isObservable(obj) {
 "use strict";
 /* harmony export (immutable) */ __webpack_exports__["a"] = bindCallback;
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__Observable__ = __webpack_require__(4);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__AsyncSubject__ = __webpack_require__(47);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__AsyncSubject__ = __webpack_require__(48);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__operators_map__ = __webpack_require__(16);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__util_isArray__ = __webpack_require__(11);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__util_isScheduler__ = __webpack_require__(15);
@@ -41988,7 +42008,7 @@ function dispatchError(state) {
 "use strict";
 /* harmony export (immutable) */ __webpack_exports__["a"] = bindNodeCallback;
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__Observable__ = __webpack_require__(4);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__AsyncSubject__ = __webpack_require__(47);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__AsyncSubject__ = __webpack_require__(48);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__operators_map__ = __webpack_require__(16);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__util_isScheduler__ = __webpack_require__(15);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__util_isArray__ = __webpack_require__(11);
@@ -42682,7 +42702,7 @@ function iif(condition, trueResult, falseResult) {
 /* harmony export (immutable) */ __webpack_exports__["a"] = interval;
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__Observable__ = __webpack_require__(4);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__scheduler_async__ = __webpack_require__(13);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__util_isNumeric__ = __webpack_require__(49);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__util_isNumeric__ = __webpack_require__(50);
 /** PURE_IMPORTS_START _Observable,_scheduler_async,_util_isNumeric PURE_IMPORTS_END */
 
 
@@ -43030,7 +43050,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 /* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "publishReplay", function() { return __WEBPACK_IMPORTED_MODULE_58__internal_operators_publishReplay__["a"]; });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_59__internal_operators_race__ = __webpack_require__(455);
 /* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "race", function() { return __WEBPACK_IMPORTED_MODULE_59__internal_operators_race__["a"]; });
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_60__internal_operators_reduce__ = __webpack_require__(51);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_60__internal_operators_reduce__ = __webpack_require__(52);
 /* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "reduce", function() { return __WEBPACK_IMPORTED_MODULE_60__internal_operators_reduce__["a"]; });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_61__internal_operators_repeat__ = __webpack_require__(456);
 /* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "repeat", function() { return __WEBPACK_IMPORTED_MODULE_61__internal_operators_repeat__["a"]; });
@@ -43088,7 +43108,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 /* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "throttle", function() { return __WEBPACK_IMPORTED_MODULE_87__internal_operators_throttle__["b"]; });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_88__internal_operators_throttleTime__ = __webpack_require__(477);
 /* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "throttleTime", function() { return __WEBPACK_IMPORTED_MODULE_88__internal_operators_throttleTime__["a"]; });
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_89__internal_operators_throwIfEmpty__ = __webpack_require__(50);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_89__internal_operators_throwIfEmpty__ = __webpack_require__(51);
 /* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "throwIfEmpty", function() { return __WEBPACK_IMPORTED_MODULE_89__internal_operators_throwIfEmpty__["a"]; });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_90__internal_operators_timeInterval__ = __webpack_require__(478);
 /* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "timeInterval", function() { return __WEBPACK_IMPORTED_MODULE_90__internal_operators_timeInterval__["a"]; });
@@ -43877,7 +43897,7 @@ function combineLatest() {
 
 "use strict";
 /* harmony export (immutable) */ __webpack_exports__["a"] = concat;
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__observable_concat__ = __webpack_require__(48);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__observable_concat__ = __webpack_require__(49);
 /** PURE_IMPORTS_START _observable_concat PURE_IMPORTS_END */
 
 function concat() {
@@ -44141,7 +44161,7 @@ function dispatchNext(subscriber) {
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__scheduler_async__ = __webpack_require__(13);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__util_isDate__ = __webpack_require__(247);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__Subscriber__ = __webpack_require__(2);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__Notification__ = __webpack_require__(46);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__Notification__ = __webpack_require__(47);
 /** PURE_IMPORTS_START tslib,_scheduler_async,_util_isDate,_Subscriber,_Notification PURE_IMPORTS_END */
 
 
@@ -44511,7 +44531,7 @@ function distinctUntilKeyChanged(key, compare) {
 /* harmony export (immutable) */ __webpack_exports__["a"] = elementAt;
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__util_ArgumentOutOfRangeError__ = __webpack_require__(35);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__filter__ = __webpack_require__(40);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__throwIfEmpty__ = __webpack_require__(50);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__throwIfEmpty__ = __webpack_require__(51);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__defaultIfEmpty__ = __webpack_require__(39);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__take__ = __webpack_require__(75);
 /** PURE_IMPORTS_START _util_ArgumentOutOfRangeError,_filter,_throwIfEmpty,_defaultIfEmpty,_take PURE_IMPORTS_END */
@@ -44543,7 +44563,7 @@ function elementAt(index, defaultValue) {
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__observable_fromArray__ = __webpack_require__(21);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__observable_scalar__ = __webpack_require__(69);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__observable_empty__ = __webpack_require__(12);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__observable_concat__ = __webpack_require__(48);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__observable_concat__ = __webpack_require__(49);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__util_isScheduler__ = __webpack_require__(15);
 /** PURE_IMPORTS_START _observable_fromArray,_observable_scalar,_observable_empty,_observable_concat,_util_isScheduler PURE_IMPORTS_END */
 
@@ -44958,7 +44978,7 @@ function findIndex(predicate, thisArg) {
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__filter__ = __webpack_require__(40);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__take__ = __webpack_require__(75);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__defaultIfEmpty__ = __webpack_require__(39);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__throwIfEmpty__ = __webpack_require__(50);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__throwIfEmpty__ = __webpack_require__(51);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_5__util_identity__ = __webpack_require__(25);
 /** PURE_IMPORTS_START _util_EmptyError,_filter,_take,_defaultIfEmpty,_throwIfEmpty,_util_identity PURE_IMPORTS_END */
 
@@ -45062,7 +45082,7 @@ var IsEmptySubscriber = /*@__PURE__*/ (function (_super) {
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__util_EmptyError__ = __webpack_require__(36);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__filter__ = __webpack_require__(40);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__takeLast__ = __webpack_require__(76);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__throwIfEmpty__ = __webpack_require__(50);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__throwIfEmpty__ = __webpack_require__(51);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__defaultIfEmpty__ = __webpack_require__(39);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_5__util_identity__ = __webpack_require__(25);
 /** PURE_IMPORTS_START _util_EmptyError,_filter,_takeLast,_throwIfEmpty,_defaultIfEmpty,_util_identity PURE_IMPORTS_END */
@@ -45125,7 +45145,7 @@ var MapToSubscriber = /*@__PURE__*/ (function (_super) {
 /* harmony export (immutable) */ __webpack_exports__["a"] = materialize;
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_tslib__ = __webpack_require__(1);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__Subscriber__ = __webpack_require__(2);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__Notification__ = __webpack_require__(46);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__Notification__ = __webpack_require__(47);
 /** PURE_IMPORTS_START tslib,_Subscriber,_Notification PURE_IMPORTS_END */
 
 
@@ -45172,7 +45192,7 @@ var MaterializeSubscriber = /*@__PURE__*/ (function (_super) {
 
 "use strict";
 /* harmony export (immutable) */ __webpack_exports__["a"] = max;
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__reduce__ = __webpack_require__(51);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__reduce__ = __webpack_require__(52);
 /** PURE_IMPORTS_START _reduce PURE_IMPORTS_END */
 
 function max(comparer) {
@@ -45339,7 +45359,7 @@ var MergeScanSubscriber = /*@__PURE__*/ (function (_super) {
 
 "use strict";
 /* harmony export (immutable) */ __webpack_exports__["a"] = min;
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__reduce__ = __webpack_require__(51);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__reduce__ = __webpack_require__(52);
 /** PURE_IMPORTS_START _reduce PURE_IMPORTS_END */
 
 function min(comparer) {
@@ -45598,7 +45618,7 @@ function publishBehavior(value) {
 
 "use strict";
 /* harmony export (immutable) */ __webpack_exports__["a"] = publishLast;
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__AsyncSubject__ = __webpack_require__(47);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__AsyncSubject__ = __webpack_require__(48);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__multicast__ = __webpack_require__(26);
 /** PURE_IMPORTS_START _AsyncSubject,_multicast PURE_IMPORTS_END */
 
@@ -46555,7 +46575,7 @@ var SkipWhileSubscriber = /*@__PURE__*/ (function (_super) {
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__observable_fromArray__ = __webpack_require__(21);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__observable_scalar__ = __webpack_require__(69);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__observable_empty__ = __webpack_require__(12);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__observable_concat__ = __webpack_require__(48);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__observable_concat__ = __webpack_require__(49);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__util_isScheduler__ = __webpack_require__(15);
 /** PURE_IMPORTS_START _observable_fromArray,_observable_scalar,_observable_empty,_observable_concat,_util_isScheduler PURE_IMPORTS_END */
 
@@ -46630,7 +46650,7 @@ var SubscribeOnOperator = /*@__PURE__*/ (function () {
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_tslib__ = __webpack_require__(1);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__Observable__ = __webpack_require__(4);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__scheduler_asap__ = __webpack_require__(232);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__util_isNumeric__ = __webpack_require__(49);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__util_isNumeric__ = __webpack_require__(50);
 /** PURE_IMPORTS_START tslib,_Observable,_scheduler_asap,_util_isNumeric PURE_IMPORTS_END */
 
 
@@ -47014,7 +47034,7 @@ var Timestamp = /*@__PURE__*/ (function () {
 
 "use strict";
 /* harmony export (immutable) */ __webpack_exports__["a"] = toArray;
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__reduce__ = __webpack_require__(51);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__reduce__ = __webpack_require__(52);
 /** PURE_IMPORTS_START _reduce PURE_IMPORTS_END */
 
 function toArrayReducer(arr, item, index) {
@@ -47208,7 +47228,7 @@ var WindowCountSubscriber = /*@__PURE__*/ (function (_super) {
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__Subject__ = __webpack_require__(9);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__scheduler_async__ = __webpack_require__(13);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__Subscriber__ = __webpack_require__(2);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__util_isNumeric__ = __webpack_require__(49);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__util_isNumeric__ = __webpack_require__(50);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_5__util_isScheduler__ = __webpack_require__(15);
 /** PURE_IMPORTS_START tslib,_Subject,_scheduler_async,_Subscriber,_util_isNumeric,_util_isScheduler PURE_IMPORTS_END */
 
@@ -48500,11 +48520,11 @@ var _path = __webpack_require__(3);
 
 var _config = __webpack_require__(254);
 
-var _fs = __webpack_require__(56);
+var _fs = __webpack_require__(57);
 
 var _log = __webpack_require__(20);
 
-var _package_json = __webpack_require__(42);
+var _package_json = __webpack_require__(43);
 
 var _projects = __webpack_require__(30);
 
@@ -48535,7 +48555,7 @@ function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, a
 
 "use strict";
 
-const EventEmitter = __webpack_require__(41);
+const EventEmitter = __webpack_require__(42);
 const path = __webpack_require__(3);
 const arrify = __webpack_require__(500);
 const globby = __webpack_require__(501);
@@ -49211,7 +49231,7 @@ if (fs.copyFileSync) {
 
 "use strict";
 
-const EventEmitter = __webpack_require__(41);
+const EventEmitter = __webpack_require__(42);
 
 const written = new WeakMap();
 
@@ -49307,7 +49327,7 @@ let prepareExternalProjectDependencies = exports.prepareExternalProjectDependenc
     };
 })();
 
-var _package_json = __webpack_require__(42);
+var _package_json = __webpack_require__(43);
 
 var _project = __webpack_require__(87);
 

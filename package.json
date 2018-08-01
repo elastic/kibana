@@ -10,7 +10,7 @@
     "dashboards",
     "dashboarding"
   ],
-  "private": false,
+  "private": true,
   "version": "7.0.0-alpha1",
   "branch": "master",
   "build": {
@@ -21,6 +21,10 @@
   "bugs": {
     "url": "http://github.com/elastic/kibana/issues"
   },
+  "workspaces": [
+    "packages/*",
+    "x-pack"
+  ],
   "license": "Apache-2.0",
   "author": "Rashid Khan <rashid.khan@elastic.co>",
   "contributors": [
@@ -81,12 +85,12 @@
     "@elastic/filesaver": "1.1.2",
     "@elastic/numeral": "2.3.2",
     "@elastic/ui-ace": "0.2.3",
-    "@kbn/babel-preset": "link:packages/kbn-babel-preset",
-    "@kbn/datemath": "link:packages/kbn-datemath",
-    "@kbn/i18n": "link:packages/kbn-i18n",
-    "@kbn/pm": "link:packages/kbn-pm",
-    "@kbn/test-subj-selector": "link:packages/kbn-test-subj-selector",
-    "@kbn/ui-framework": "link:packages/kbn-ui-framework",
+    "@kbn/babel-preset": "*",
+    "@kbn/datemath": "*",
+    "@kbn/i18n": "*",
+    "@kbn/pm": "*",
+    "@kbn/test-subj-selector": "*",
+    "@kbn/ui-framework": "*",
     "JSONStream": "1.1.1",
     "abortcontroller-polyfill": "^1.1.9",
     "angular": "1.6.9",
@@ -220,19 +224,19 @@
     "webpack-merge": "4.1.0",
     "whatwg-fetch": "^2.0.3",
     "wreck": "12.4.0",
-    "x-pack": "link:x-pack",
+    "x-pack": "*",
     "yauzl": "2.7.0"
   },
   "devDependencies": {
     "@babel/parser": "7.0.0-beta.52",
     "@babel/types": "7.0.0-beta.31",
-    "@elastic/eslint-config-kibana": "link:packages/eslint-config-kibana",
-    "@elastic/eslint-plugin-kibana-custom": "link:packages/eslint-plugin-kibana-custom",
-    "@kbn/es": "link:packages/kbn-es",
-    "@kbn/eslint-import-resolver-kibana": "link:packages/kbn-eslint-import-resolver-kibana",
-    "@kbn/eslint-plugin-license-header": "link:packages/kbn-eslint-plugin-license-header",
-    "@kbn/plugin-generator": "link:packages/kbn-plugin-generator",
-    "@kbn/test": "link:packages/kbn-test",
+    "@elastic/eslint-config-kibana": "*",
+    "@elastic/eslint-plugin-kibana-custom": "*",
+    "@kbn/es": "*",
+    "@kbn/eslint-import-resolver-kibana": "*",
+    "@kbn/eslint-plugin-license-header": "*",
+    "@kbn/plugin-generator": "*",
+    "@kbn/test": "*",
     "@types/angular": "^1.6.45",
     "@types/babel-core": "^6.25.5",
     "@types/bluebird": "^3.1.1",

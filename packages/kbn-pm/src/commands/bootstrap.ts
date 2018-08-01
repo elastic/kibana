@@ -30,14 +30,27 @@ export const BootstrapCommand: ICommand = {
   name: 'bootstrap',
 
   async run(projects, projectGraph, { options }) {
-    const batchedProjects = topologicallyBatchProjects(projects, projectGraph);
+    const kibana = projects.get('kibana');
+    if (!kibana) {
+      throw new Error('bootstrap now requires the kibana project');
+    }
+
+    const allProjectBatches = topologicallyBatchProjects(projects, projectGraph);
+
+    const nonWorkspaceProjects = new Map();
+    for (const [id, project] of projects) {
+      if (!kibana.isSelectedByWorkspace(project)) {
+        nonWorkspaceProjects.set(id, project);
+      }
+    }
+    const installProjectBatches = topologicallyBatchProjects(nonWorkspaceProjects, projectGraph);
 
     const frozenLockfile = options['frozen-lockfile'] === true;
     const extraArgs = frozenLockfile ? ['--frozen-lockfile'] : [];
 
     log.write(chalk.bold('\nRunning installs in topological order:'));
 
-    for (const batch of batchedProjects) {
+    for (const batch of installProjectBatches) {
       for (const project of batch) {
         if (project.hasDependencies()) {
           await project.installDependencies({ extraArgs });
@@ -55,7 +68,7 @@ export const BootstrapCommand: ICommand = {
      * have to, as it will slow down the bootstrapping process.
      */
     log.write(chalk.bold('\nLinking executables completed, running `kbn:bootstrap` scripts\n'));
-    await parallelizeBatches(batchedProjects, async pkg => {
+    await parallelizeBatches(allProjectBatches, async pkg => {
       if (pkg.hasScript('kbn:bootstrap')) {
         await pkg.runScriptStreaming('kbn:bootstrap');
       }

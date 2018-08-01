@@ -18,7 +18,8 @@
  */
 
 import chalk from 'chalk';
-import { relative, resolve as resolvePath } from 'path';
+import minimatch from 'minimatch';
+import { resolve as resolvePath } from 'path';
 import { inspect } from 'util';
 
 import { CliError } from './errors';
@@ -52,6 +53,7 @@ export class Project {
   public readonly productionDependencies: IPackageDependencies;
   public readonly devDependencies: IPackageDependencies;
   public readonly scripts: IPackageScripts;
+  public readonly yarnWorkspaceSelectors: RegExp[];
 
   constructor(packageJson: IPackageJson, projectPath: string) {
     this.json = Object.freeze(packageJson);
@@ -63,6 +65,10 @@ export class Project {
 
     this.productionDependencies = this.json.dependencies || {};
     this.devDependencies = this.json.devDependencies || {};
+    this.yarnWorkspaceSelectors = (this.json.workspaces || []).map((selector: string) =>
+      minimatch.makeRe(resolvePath(this.path, selector))
+    );
+
     this.allDependencies = {
       ...this.devDependencies,
       ...this.productionDependencies,
@@ -76,10 +82,11 @@ export class Project {
   }
 
   public ensureValidProjectDependency(project: Project) {
-    const relativePathToProject = normalizePath(relative(this.path, project.path));
+    // todo: this needs to validate * dependencies correctly
+    return;
 
     const versionInPackageJson = this.allDependencies[project.name];
-    const expectedVersionInPackageJson = `link:${relativePathToProject}`;
+    const expectedVersionInPackageJson = `*`;
 
     if (versionInPackageJson === expectedVersionInPackageJson) {
       return;
@@ -177,6 +184,10 @@ export class Project {
   public async installDependencies({ extraArgs }: { extraArgs: string[] }) {
     log.write(chalk.bold(`\n\nInstalling dependencies in [${chalk.green(this.name)}]:\n`));
     return installInDir(this.path, extraArgs);
+  }
+
+  public isSelectedByWorkspace(project: Project) {
+    return this.yarnWorkspaceSelectors.some(re => re.test(project.path));
   }
 }
 
