@@ -17,5 +17,21 @@
  * under the License.
  */
 
-export const defaultFeedbackMessage = `Have feedback? Please create an issue in
-<a href="https://github.com/elastic/kibana/issues/new" rel="noopener noreferrer" target="_blank">GitHub</a>.`;
+export function EmbeddingProvider({ getService, getPageObjects }) {
+  const remote = getService('remote');
+  const log = getService('log');
+  const PageObjects = getPageObjects(['header']);
+
+  class Embedding {
+
+    async openInEmbeddedMode() {
+      const currentUrl = await remote.getCurrentUrl();
+      log.debug(`Opening in embedded mode: ${currentUrl}`);
+      await remote.get(`${currentUrl}&embed=true`);
+      await PageObjects.header.waitUntilLoadingHasFinished();
+    }
+
+  }
+
+  return new Embedding();
+}
