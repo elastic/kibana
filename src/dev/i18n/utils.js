@@ -38,6 +38,10 @@ export const globAsync = promisify(glob);
 export const makeDirAsync = promisify(fs.mkdir);
 export const accessAsync = promisify(fs.access);
 
+export function difference(left = [], right = []) {
+  return left.filter(value => !right.includes(value));
+}
+
 export function isPropertyWithKey(property, identifierName) {
   return isObjectProperty(property) && isIdentifier(property.key, { name: identifierName });
 }
