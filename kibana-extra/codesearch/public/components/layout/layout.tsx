@@ -24,6 +24,7 @@ import { kfetch } from 'ui/kfetch';
 
 import { FileTree as Tree } from '../../../model';
 
+import { Breadcrumbs } from '../breadcrumbs/breadcrumbs';
 import { FileTree } from '../file_tree/file_tree';
 import { Editor } from './editor';
 
@@ -50,10 +51,10 @@ export class Layout extends React.Component<Props, State> {
 
   public componentDidMount() {
     this.fetchTree('').then(() => {
-      const paths = (this.props.match.params.path || '').split('/');
-      const pathsLength = paths.length;
+      const pathSegments = (this.props.match.params.path || '').split('/');
+      const pathsLength = pathSegments.length;
       if (pathsLength > 0) {
-        this.fetchTree(paths[0], pathsLength);
+        this.fetchTree(pathSegments[0], pathsLength);
       }
     });
   }
@@ -73,14 +74,14 @@ export class Layout extends React.Component<Props, State> {
     });
   }
 
-  public findNode = (paths: string[], node: Tree) => {
-    if (paths.length === 0) {
+  public findNode = (pathSegments: string[], node: Tree) => {
+    if (pathSegments.length === 0) {
       return node;
-    } else if (paths.length === 1) {
-      return node.children.find(n => n.name === paths[0]);
+    } else if (pathSegments.length === 1) {
+      return node.children.find(n => n.name === pathSegments[0]);
     } else {
-      const currentFolder = paths.shift();
-      return this.findNode(paths, node.children.find(n => n.name === currentFolder));
+      const currentFolder = pathSegments.shift();
+      return this.findNode(pathSegments, node.children.find(n => n.name === currentFolder));
     }
   };
 
@@ -107,8 +108,24 @@ export class Layout extends React.Component<Props, State> {
     }
   };
 
+  public getDirectories = (pathSegments: string[]) => {
+    return pathSegments.map((p, index) => {
+      if (this.state.node) {
+        const node = this.findNode(pathSegments.slice(0, index + 1), this.state.node);
+        if (node && node.children) {
+          return node.children.map(_ => _.name);
+        } else {
+          return [];
+        }
+      } else {
+        return [];
+      }
+    });
+  };
+
   public render() {
     const { resource, org, repo, revision, path } = this.props.match.params;
+    const pathSegments = path ? path.split('/') : [];
     const editor = path && (
       <Editor file={path} repoUri={`${resource}/${org}/${repo}`} revision={revision || 'HEAD'} />
     );
@@ -129,6 +146,11 @@ export class Layout extends React.Component<Props, State> {
               </EuiHeaderSectionItemButton>
             </EuiHeaderSection>
           </EuiHeader>
+          <Breadcrumbs
+            basePath={`/${resource}/${org}/${repo}/${revision}/`}
+            pathSegments={pathSegments}
+            directories={this.getDirectories(pathSegments)}
+          />
           <EuiFlexGroup>
             <EuiFlexItem style={{ maxWidth: 300 }}>
               <FileTree
