@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 /* eslint camelcase: 0 */
+import { get } from 'lodash';
 import React, { Component, Fragment } from 'react';
 import {
   EuiButton,
@@ -37,6 +38,7 @@ export class EditUser extends Component {
   constructor(props) {
     super(props);
     this.state = {
+      isLoaded: false,
       isNewUser: true,
       currentUser: {},
       showDeleteConfirmation: false,
@@ -56,11 +58,31 @@ export class EditUser extends Component {
     const { apiClient, username } = this.props;
     let { user, currentUser } = this.state;
     if (username) {
-      user = await apiClient.getUser(username);
-      currentUser = await apiClient.getCurrentUser();
+      try {
+        user = await apiClient.getUser(username);
+        currentUser = await apiClient.getCurrentUser();
+      } catch (err) {
+        toastNotifications.addDanger({
+          title: `Error loading user`,
+          text: get(err, 'data.message') || err.message,
+        });
+        return;
+      }
     }
-    const roles = await apiClient.getRoles();
+
+    let roles;
+    try {
+      roles = await apiClient.getRoles();
+    } catch (err) {
+      toastNotifications.addDanger({
+        title: `Error loading roles`,
+        text: get(err, 'data.message') || err.message,
+      });
+      return;
+    }
+
     this.setState({
+      isLoaded: true,
       isNewUser: !username,
       currentUser,
       user,
@@ -289,6 +311,11 @@ export class EditUser extends Component {
     if (!user || !roles) {
       return null;
     }
+
+    if (!this.state.isLoaded) {
+      return null;
+    }
+
     return (
       <EuiPage className="mgtUsersEditPage">
         <EuiPageBody>

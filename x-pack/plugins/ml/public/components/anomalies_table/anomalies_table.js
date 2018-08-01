@@ -37,7 +37,7 @@ import { checkPermission } from 'plugins/ml/privilege/check_privilege';
 
 import { mlAnomaliesTableService } from './anomalies_table_service';
 import { mlFieldFormatService } from 'plugins/ml/services/field_format_service';
-import { getSeverityColor } from 'plugins/ml/../common/util/anomaly_utils';
+import { getSeverityColor, isRuleSupported } from 'plugins/ml/../common/util/anomaly_utils';
 import { formatValue } from 'plugins/ml/formatters/format_value';
 import { RuleEditorFlyout } from 'plugins/ml/components/rule_editor';
 
@@ -56,8 +56,8 @@ function renderTime(date, aggregationInterval) {
 }
 
 function showLinksMenuForItem(item) {
-  const canUpdateJob = checkPermission('canUpdateJob');
-  return (canUpdateJob ||
+  const canConfigureRules = (isRuleSupported(item) && checkPermission('canUpdateJob'));
+  return (canConfigureRules ||
     item.isTimeSeriesViewDetector ||
     item.entityName === 'mlcategory' ||
     item.customUrls !== undefined);

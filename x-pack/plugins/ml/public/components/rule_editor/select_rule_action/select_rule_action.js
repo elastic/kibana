@@ -13,12 +13,12 @@ import PropTypes from 'prop-types';
 import React from 'react';
 
 import {
-  EuiDescriptionList,
   EuiLink,
   EuiSpacer,
   EuiText,
 } from '@elastic/eui';
 
+import { DetectorDescriptionList } from '../components/detector_description_list';
 import { RuleActionPanel } from './rule_action_panel';
 
 
@@ -30,17 +30,6 @@ export function SelectRuleAction({
   deleteRuleAtIndex }) {
 
   const detector = job.analysis_config.detectors[detectorIndex];
-  const descriptionListItems = [
-    {
-      title: 'job ID',
-      description: job.job_id,
-    },
-    {
-      title: 'detector',
-      description: detector.detector_description,
-    }
-  ];
-
   const rules = detector.custom_rules || [];
   let ruleActionPanels;
   if (rules.length > 0) {
@@ -62,13 +51,12 @@ export function SelectRuleAction({
   }
 
   return (
-    <React.Fragment>
+    <div className="select-rule-action">
       {rules.length > 0 &&
         <React.Fragment>
-          <EuiDescriptionList
-            className="select-rule-description-list"
-            type="column"
-            listItems={descriptionListItems}
+          <DetectorDescriptionList
+            job={job}
+            detector={detector}
           />
           <EuiSpacer size="m" />
           {ruleActionPanels}
@@ -81,9 +69,9 @@ export function SelectRuleAction({
       <EuiLink
         onClick={() => setEditRuleIndex(rules.length)}
       >
-        create a new rule
+        create a rule
       </EuiLink>
-    </React.Fragment>
+    </div>
   );
 
 }
