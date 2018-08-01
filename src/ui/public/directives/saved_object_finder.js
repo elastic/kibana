@@ -285,16 +285,17 @@ module.directive('savedObjectFinder', function ($location, $injector, kbnUrl, Pr
         const isLabsEnabled = config.get('visualize:enableLabs');
         self.service.find(filter)
           .then(function (hits) {
+            $scope.$apply(() => {
+              hits.hits = hits.hits.filter((hit) => (isLabsEnabled || _.get(hit, 'type.stage') !== 'lab'));
+              hits.total = hits.hits.length;
 
-            hits.hits = hits.hits.filter((hit) => (isLabsEnabled || _.get(hit, 'type.stage') !== 'lab'));
-            hits.total = hits.hits.length;
-
-            // ensure that we don't display old results
-            // as we can't really cancel requests
-            if (currentFilter === filter) {
-              self.hitCount = hits.total;
-              self.hits = _.sortBy(hits.hits, 'title');
-            }
+              // ensure that we don't display old results
+              // as we can't really cancel requests
+              if (currentFilter === filter) {
+                self.hitCount = hits.total;
+                self.hits = _.sortBy(hits.hits, 'title');
+              }
+            });
           });
       }
     }
