@@ -299,7 +299,7 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
         await this.clickSave();
       }
 
-      await toasts.verifyAndDismiss('saveDashboardSuccess');
+      this.ensureSaveSuccess();
     }
 
     async cancelSave() {
@@ -312,6 +312,10 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
         log.debug('clicking final Save button for named dashboard');
         return await testSubjects.click('confirmSaveDashboardButton');
       });
+    }
+
+    async ensureSaveSuccess() {
+      await toasts.verifyAndDismiss('saveDashboardSuccess');
     }
 
     /**
