@@ -31,13 +31,13 @@ If you *never* subscribe to any of the Observables then plugin discovery won't a
 Just get the plugin specs, only fail if there is an uncaught error of some sort:
 ```js
 const { pack$ } = findPluginSpecs(settings);
-const packs = await pack$.toArray().toPromise()
+const packs = await pack$.pipe(toArray()).toPromise()
 ```
 
 Just log the deprecation messages:
 ```js
 const { deprecation$ } = findPluginSpecs(settings);
-for (const warning of await deprecation$.toArray().toPromise()) {
+for (const warning of await deprecation$.pipe(toArray()).toPromise()) {
   console.log('DEPRECATION:', warning)
 }
 ```
@@ -45,15 +45,15 @@ for (const warning of await deprecation$.toArray().toPromise()) {
 Get the packs but fail if any packs are invalid:
 ```js
 const { pack$, invalidDirectoryError$ } = findPluginSpecs(settings);
-const packs = await Observable.merge(
-  pack$.toArray(),
+const packs = await Rx.merge(
+  pack$.pipe(toArray()),
 
   // if we ever get an InvalidDirectoryError, throw it
   // into the stream so that all streams are unsubscribed,
   // the discovery process is aborted, and the promise rejects
-  invalidDirectoryError$.map(error => {
-    throw error
-  }),
+  invalidDirectoryError$.pipe(
+    map(error => { throw error })
+  ),
 ).toPromise()
 ```
 
@@ -70,30 +70,38 @@ const {
   invalidVersionSpec$,
 } = findPluginSpecs(settings);
 
-Observable.merge(
-  pack$
-    .do(pluginPack => console.log('Found plugin pack', pluginPack)),
+Rx.merge(
+  pack$.pipe(
+    tap(pluginPack => console.log('Found plugin pack', pluginPack))
+  ),
 
-  invalidDirectoryError$
-    .do(error => console.log('Invalid directory error', error)),
+  invalidDirectoryError$.pipe(
+    tap(error => console.log('Invalid directory error', error))
+  ),
 
-  invalidPackError$
-    .do(error => console.log('Invalid plugin pack error', error)),
+  invalidPackError$.pipe(
+    tap(error => console.log('Invalid plugin pack error', error))
+  ),
 
-  deprecation$
-    .do(msg => console.log('DEPRECATION:', msg)),
+  deprecation$.pipe(
+    tap(msg => console.log('DEPRECATION:', msg))
+  ),
 
-  extendedConfig$
-    .do(config => console.log('config service extended by plugins', config)),
+  extendedConfig$.pipe(
+    tap(config => console.log('config service extended by plugins', config))
+  ),
 
-  spec$
-    .do(pluginSpec => console.log('enabled plugin spec found', spec)),
+  spec$.pipe(
+    tap(pluginSpec => console.log('enabled plugin spec found', spec))
+  ),
 
-  disabledSpec$
-    .do(pluginSpec => console.log('disabled plugin spec found', spec)),
+  disabledSpec$.pipe(
+    tap(pluginSpec => console.log('disabled plugin spec found', spec))
+  ),
 
-  invalidVersionSpec$
-    .do(pluginSpec => console.log('plugin spec with invalid version found', spec)),
+  invalidVersionSpec$.pipe(
+    tap(pluginSpec => console.log('plugin spec with invalid version found', spec))
+  ),
 )
 .toPromise()
 .then(() => {

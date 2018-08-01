@@ -46,7 +46,7 @@ export function createNoMatchingIndicesError(pattern) {
 }
 
 /**
- *  Determins if an error is produced by `createNoMatchingIndicesError()`
+ *  Determines if an error is produced by `createNoMatchingIndicesError()`
  *
  *  @param  {Any} err
  *  @return {Boolean}

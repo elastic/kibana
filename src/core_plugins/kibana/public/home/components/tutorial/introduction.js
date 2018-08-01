@@ -28,9 +28,10 @@ import {
   EuiImage,
   EuiButton,
   EuiIcon,
+  EuiBetaBadge,
 } from '@elastic/eui';
 
-export function Introduction({ description, previewUrl, title, exportedFieldsUrl, iconType }) {
+export function Introduction({ description, previewUrl, title, exportedFieldsUrl, iconType, isBeta }) {
   let img;
   if (previewUrl) {
     img = (
@@ -69,20 +70,38 @@ export function Introduction({ description, previewUrl, title, exportedFieldsUrl
       />
     );
   }
+  let betaBadge;
+  if (isBeta) {
+    betaBadge = (
+      <EuiFlexItem grow={false}>
+        <EuiBetaBadge className="tutorialIntroBadge" label="BETA" />
+      </EuiFlexItem>
+    );
+  }
   return (
     <EuiFlexGroup>
 
       <EuiFlexItem>
-        <EuiTitle size="l">
-          <h2>
+
+        <EuiFlexGroup gutterSize="s" alignItems="center">
+          <EuiFlexItem grow={false}>
             {icon}
-            {title}
-          </h2>
-        </EuiTitle>
-        <EuiSpacer />
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiTitle size="l">
+              <h2>
+                {title}
+              </h2>
+            </EuiTitle>
+          </EuiFlexItem>
+          {betaBadge}
+        </EuiFlexGroup>
+
         <Content text={description} />
         {exportedFields}
+
       </EuiFlexItem>
+
       <EuiFlexItem grow={false}>
         {img}
       </EuiFlexItem>
@@ -96,4 +115,9 @@ Introduction.propTypes = {
   previewUrl: PropTypes.string,
   exportedFieldsUrl: PropTypes.string,
   iconType: PropTypes.string,
+  isBeta: PropTypes.bool,
+};
+
+Introduction.defaultProps = {
+  isBeta: false
 };

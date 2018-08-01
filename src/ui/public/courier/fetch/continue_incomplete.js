@@ -22,21 +22,26 @@ import { RequestStatus } from './req_status';
 export function ContinueIncompleteProvider() {
   const INCOMPLETE = RequestStatus.INCOMPLETE;
 
-  function continueIncompleteRequests(requests, responses, fetchSearchResults) {
-    const incomplete = [];
+  function continueIncompleteRequests(searchRequests, responses, fetchSearchResults) {
+    const incompleteSearchRequests = [];
 
-    responses.forEach(function (resp, i) {
-      if (resp === INCOMPLETE) {
-        incomplete.push(requests[i]);
+    responses.forEach(function (response, index) {
+      if (response === INCOMPLETE) {
+        incompleteSearchRequests.push(searchRequests[index]);
       }
     });
 
-    if (!incomplete.length) return responses;
+    if (!incompleteSearchRequests.length) {
+      return responses;
+    }
 
-    return fetchSearchResults(incomplete)
+    return fetchSearchResults(incompleteSearchRequests)
       .then(function (completedResponses) {
         return responses.map(function (prevResponse) {
-          if (prevResponse !== INCOMPLETE) return prevResponse;
+          if (prevResponse !== INCOMPLETE) {
+            return prevResponse;
+          }
+
           return completedResponses.shift();
         });
       });

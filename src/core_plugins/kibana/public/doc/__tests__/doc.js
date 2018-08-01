@@ -22,10 +22,10 @@ import ngMock from 'ng_mock';
 import expect from 'expect.js';
 import '..';
 import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
+import { timefilter } from 'ui/timefilter';
 
 let $scope;
 let createController;
-let timefilter;
 
 const init = function (index, type, id) {
 
@@ -85,9 +85,8 @@ const init = function (index, type, id) {
   });
 
   // Create the scope
-  ngMock.inject(function ($rootScope, $controller, _timefilter_) {
+  ngMock.inject(function ($rootScope, $controller) {
     $scope = $rootScope.$new();
-    timefilter = _timefilter_;
 
     createController = function () {
       return $controller('doc', {

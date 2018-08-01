@@ -5,15 +5,16 @@
  */
 
 import React from 'react';
-import { withInitialData } from './helpers';
+import { createInitialDataSelector } from './helpers';
 import { Request } from 'react-redux-request';
-import { loadErrorGroupDetails } from '../../services/rest';
+import { loadErrorGroupDetails } from '../../services/rest/apm';
 
 const ID = 'errorGroupDetails';
 const INITIAL_DATA = {};
+const withInitialData = createInitialDataSelector(INITIAL_DATA);
 
 export function getErrorGroupDetails(state) {
-  return withInitialData(state.reactReduxRequest[ID], INITIAL_DATA);
+  return withInitialData(state.reactReduxRequest[ID]);
 }
 
 export function ErrorGroupDetailsRequest({ urlParams, render }) {

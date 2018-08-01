@@ -209,8 +209,7 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.header.setAbsoluteRange('2014-10-19 06:31:44.000', '2014-12-19 06:31:44.000');
         await PageObjects.dashboard.clickCancelOutOfEditMode();
 
-        const isOpen = await PageObjects.common.isConfirmModalOpen();
-        expect(isOpen).to.be(false);
+        await PageObjects.common.expectConfirmModalOpenState(false);
       });
 
       // See https://github.com/elastic/kibana/issues/10110 - this is intentional.
@@ -222,8 +221,7 @@ export default function ({ getService, getPageObjects }) {
 
         await PageObjects.dashboard.clickCancelOutOfEditMode();
 
-        const isOpen = await PageObjects.common.isConfirmModalOpen();
-        expect(isOpen).to.be(false);
+        await PageObjects.common.expectConfirmModalOpenState(false);
 
         await PageObjects.dashboard.loadSavedDashboard(dashboardName);
         const query = await queryBar.getQueryString();

@@ -18,7 +18,7 @@ const { advanced: metricSetAdvanced, overview: metricSetOverview } = metricSets;
  */
 export function logstashNodeRoute(server) {
   /**
-   * Logtash Node request.
+   * Logstash Node request.
    *
    * This will fetch all data required to display a Logstash Node page.
    *

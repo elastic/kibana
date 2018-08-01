@@ -30,7 +30,7 @@ class ColorPicker extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      displayPlicker: false,
+      displayPicker: false,
       color: {}
     };
 

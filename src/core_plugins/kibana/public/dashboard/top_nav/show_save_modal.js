@@ -29,8 +29,8 @@ export function showSaveModal({ onSave, title, description, timeRestore, showCop
   };
 
   const onSaveConfirmed = (...args) => {
-    onSave(...args).then(id => {
-      if (id) {
+    onSave(...args).then(({ id, error }) => {
+      if (id || error) {
         closeModal();
       }
     });

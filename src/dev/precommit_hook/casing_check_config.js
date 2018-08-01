@@ -19,7 +19,7 @@
 
 
 /**
- * These patterns are used to identifiy files that are not supposed
+ * These patterns are used to identify files that are not supposed
  * to be snake_case because their names are determined by other
  * systems or rules.
  *
@@ -42,7 +42,7 @@ export const IGNORE_FILE_GLOBS = [
   'src/dev/tslint/rules/*',
 
   // filename must match language code which requires capital letters
-  'src/ui/ui_i18n/__tests__/fixtures/translations/test_plugin_1/es-ES.json',
+  '**/translations/*.json',
 ];
 
 

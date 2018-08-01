@@ -36,7 +36,7 @@ describe('toggle filters', function () {
     'kibana/courier',
     'kibana/global_state',
     function ($provide) {
-      $provide.service('courier', require('fixtures/mock_courier'));
+      $provide.service('indexPatterns', require('fixtures/mock_index_patterns'));
 
       appState = new MockState({ filters: [] });
       $provide.service('getAppState', function () {

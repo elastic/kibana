@@ -29,6 +29,7 @@ import { createSourceFormat } from '../../common/field_formats/types/source';
 import { createColorFormat } from '../../common/field_formats/types/color';
 import { createTruncateFormat } from '../../common/field_formats/types/truncate';
 import { createBoolFormat } from '../../common/field_formats/types/boolean';
+import { createStaticLookupFormat } from '../../common/field_formats/types/static_lookup';
 
 export function registerFieldFormats(server) {
   server.registerFieldFormat(createUrlFormat);
@@ -43,4 +44,5 @@ export function registerFieldFormats(server) {
   server.registerFieldFormat(createColorFormat);
   server.registerFieldFormat(createTruncateFormat);
   server.registerFieldFormat(createBoolFormat);
+  server.registerFieldFormat(createStaticLookupFormat);
 }

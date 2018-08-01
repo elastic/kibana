@@ -36,6 +36,7 @@ export default function ({ getService, getPageObjects }) {
   const log = getService('log');
   const remote = getService('remote');
   const retry = getService('retry');
+  const testSubjects = getService('testSubjects');
   const PageObjects = getPageObjects(['common', 'header', 'settings', 'visualize', 'discover']);
 
   describe('scripted fields', () => {
@@ -56,6 +57,20 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.settings.removeIndexPattern();
     });
 
+    it('should not allow saving of invalid scripts', async function () {
+      await PageObjects.settings.navigateTo();
+      await PageObjects.settings.clickKibanaIndices();
+      await PageObjects.settings.clickScriptedFieldsTab();
+      await PageObjects.settings.clickAddScriptedField();
+      await PageObjects.settings.setScriptedFieldName('doomedScriptedField');
+      await PageObjects.settings.setScriptedFieldScript(`doc['iHaveNoClosingTick].value`);
+      await PageObjects.settings.clickSaveScriptedField();
+      await retry.try(async () => {
+        const invalidScriptErrorExists = await testSubjects.exists('invalidScriptError');
+        expect(invalidScriptErrorExists).to.be(true);
+      });
+    });
+
     describe('creating and using Painless numeric scripted fields', function describeIndexTests() {
       const scriptedPainlessFieldName = 'ram_Pain1';
 
@@ -65,7 +80,11 @@ export default function ({ getService, getPageObjects }) {
         const startingCount = parseInt(await PageObjects.settings.getScriptedFieldsTabCount());
         await PageObjects.settings.clickScriptedFieldsTab();
         await log.debug('add scripted field');
-        const script = 'doc[\'machine.ram\'].value / (1024 * 1024 * 1024)';
+        const script = `if (doc['machine.ram'].size() == 0) {
+          return -1;
+        } else {
+          return doc['machine.ram'].value / (1024 * 1024 * 1024);
+        }`;
         await PageObjects.settings.addScriptedField(scriptedPainlessFieldName, 'painless', 'number', null, '1', script);
         await retry.try(async function () {
           expect(parseInt(await PageObjects.settings.getScriptedFieldsTabCount())).to.be(startingCount + 1);
@@ -104,21 +123,21 @@ export default function ({ getService, getPageObjects }) {
       });
 
       it('should visualize scripted field in vertical bar chart', async function () {
-        const expectedChartValues = [ '14', '31', '10', '29', '7', '24', '11', '24', '12', '23',
-          '20', '23', '19', '21', '6', '20', '17', '20', '30', '20', '13', '19', '18', '18', '16', '17', '5', '16',
-          '8', '16', '15', '14', '3', '13', '2', '12', '9', '10', '4', '9'
+        const expectedChartValues = [ ['14', '31'], ['10', '29'], ['7', '24'], ['11', '24'], ['12', '23'],
+          ['20', '23'], ['19', '21'], ['6', '20'], ['17', '20'], ['30', '20'], ['13', '19'], ['18', '18'],
+          ['16', '17'], ['5', '16'], ['8', '16'], ['15', '14'], ['3', '13'], ['2', '12'], ['9', '10'], ['4', '9']
         ];
         await PageObjects.discover.removeAllFilters();
         await PageObjects.discover.clickFieldListItemVisualize(scriptedPainlessFieldName);
         await PageObjects.header.waitUntilLoadingHasFinished();
         await PageObjects.visualize.waitForVisualization();
-        await PageObjects.visualize.toggleSpyPanel();
-        await PageObjects.visualize.setSpyPanelPageSize('All');
-        const data = await PageObjects.visualize.getDataTableData();
-        await log.debug('getDataTableData = ' + data.split('\n'));
+        await PageObjects.visualize.openInspector();
+        await PageObjects.visualize.setInspectorTablePageSize(50);
+        const data = await PageObjects.visualize.getInspectorTableData();
+        await log.debug('getDataTableData = ' + data);
         await log.debug('data=' + data);
         await log.debug('data.length=' + data.length);
-        expect(data.trim().split('\n')).to.eql(expectedChartValues);
+        expect(data).to.eql(expectedChartValues);
       });
     });
 
@@ -176,13 +195,15 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.discover.clickFieldListItemVisualize(scriptedPainlessFieldName2);
         await PageObjects.header.waitUntilLoadingHasFinished();
         await PageObjects.visualize.waitForVisualization();
-        await PageObjects.visualize.toggleSpyPanel();
-        await PageObjects.visualize.setSpyPanelPageSize('All');
-        const data = await PageObjects.visualize.getDataTableData();
-        await log.debug('getDataTableData = ' + data.split('\n'));
+        await PageObjects.visualize.openInspector();
+        const data = await PageObjects.visualize.getInspectorTableData();
+        await log.debug('getDataTableData = ' + data);
         await log.debug('data=' + data);
         await log.debug('data.length=' + data.length);
-        expect(data.trim().split('\n')).to.eql([ 'good', '359', 'bad', '27' ]);
+        expect(data).to.eql([
+          ['good', '359'],
+          ['bad', '27']
+        ]);
       });
     });
 
@@ -240,13 +261,15 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.discover.clickFieldListItemVisualize(scriptedPainlessFieldName2);
         await PageObjects.header.waitUntilLoadingHasFinished();
         await PageObjects.visualize.waitForVisualization();
-        await PageObjects.visualize.toggleSpyPanel();
-        await PageObjects.visualize.setSpyPanelPageSize('All');
-        const data = await PageObjects.visualize.getDataTableData();
-        await log.debug('getDataTableData = ' + data.split('\n'));
+        await PageObjects.visualize.openInspector();
+        const data = await PageObjects.visualize.getInspectorTableData();
+        await log.debug('getDataTableData = ' + data);
         await log.debug('data=' + data);
         await log.debug('data.length=' + data.length);
-        expect(data.trim().split('\n')).to.eql([ 'true', '359', 'false', '27' ]);
+        expect(data).to.eql([
+          ['true', '359'],
+          ['false', '27']
+        ]);
       });
     });
 
@@ -261,7 +284,7 @@ export default function ({ getService, getPageObjects }) {
         await log.debug('add scripted field');
         await PageObjects.settings
           .addScriptedField(scriptedPainlessFieldName2, 'painless', 'date',
-            { format: 'Date', datePattern: 'YYYY-MM-DD HH:00' }, '1',
+            { format: 'date', datePattern: 'YYYY-MM-DD HH:00' }, '1',
             'doc[\'utc_time\'].value.getMillis() + (1000) * 60 * 60');
         await retry.try(async function () {
           expect(parseInt(await PageObjects.settings.getScriptedFieldsTabCount())).to.be(startingCount + 1);
@@ -304,33 +327,33 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.discover.clickFieldListItemVisualize(scriptedPainlessFieldName2);
         await PageObjects.header.waitUntilLoadingHasFinished();
         await PageObjects.visualize.waitForVisualization();
-        await PageObjects.visualize.toggleSpyPanel();
-        await PageObjects.visualize.setSpyPanelPageSize('All');
-        const data = await PageObjects.visualize.getDataTableData();
-        await log.debug('getDataTableData = ' + data.split('\n'));
+        await PageObjects.visualize.openInspector();
+        await PageObjects.visualize.setInspectorTablePageSize(50);
+        const data = await PageObjects.visualize.getInspectorTableData();
+        await log.debug('getDataTableData = ' + data);
         await log.debug('data=' + data);
         await log.debug('data.length=' + data.length);
-        expect(data.trim().split('\n')).to.eql([
-          '2015-09-17 20:00', '1',
-          '2015-09-17 21:00', '1',
-          '2015-09-17 23:00', '1',
-          '2015-09-18 00:00', '1',
-          '2015-09-18 03:00', '1',
-          '2015-09-18 04:00', '1',
-          '2015-09-18 04:00', '1',
-          '2015-09-18 04:00', '1',
-          '2015-09-18 04:00', '1',
-          '2015-09-18 05:00', '1',
-          '2015-09-18 05:00', '1',
-          '2015-09-18 05:00', '1',
-          '2015-09-18 05:00', '1',
-          '2015-09-18 06:00', '1',
-          '2015-09-18 06:00', '1',
-          '2015-09-18 06:00', '1',
-          '2015-09-18 06:00', '1',
-          '2015-09-18 07:00', '1',
-          '2015-09-18 07:00', '1',
-          '2015-09-18 07:00', '1',
+        expect(data).to.eql([
+          ['2015-09-17 20:00', '1'],
+          ['2015-09-17 21:00', '1'],
+          ['2015-09-17 23:00', '1'],
+          ['2015-09-18 00:00', '1'],
+          ['2015-09-18 03:00', '1'],
+          ['2015-09-18 04:00', '1'],
+          ['2015-09-18 04:00', '1'],
+          ['2015-09-18 04:00', '1'],
+          ['2015-09-18 04:00', '1'],
+          ['2015-09-18 05:00', '1'],
+          ['2015-09-18 05:00', '1'],
+          ['2015-09-18 05:00', '1'],
+          ['2015-09-18 05:00', '1'],
+          ['2015-09-18 06:00', '1'],
+          ['2015-09-18 06:00', '1'],
+          ['2015-09-18 06:00', '1'],
+          ['2015-09-18 06:00', '1'],
+          ['2015-09-18 07:00', '1'],
+          ['2015-09-18 07:00', '1'],
+          ['2015-09-18 07:00', '1'],
         ]);
       });
     });

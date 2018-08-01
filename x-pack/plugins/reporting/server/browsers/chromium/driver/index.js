@@ -9,8 +9,8 @@ import path from 'path';
 import moment from 'moment';
 import { promisify, delay } from 'bluebird';
 import { transformFn } from './transform_fn';
-import { IgnoreSSLErrorsBehavior } from './behaviors';
-import { screenshotStitcher } from './screenshot_stitcher';
+import { ignoreSSLErrorsBehavior } from './ignore_ssl_errors';
+import { screenshotStitcher, CapturePngSizeError } from './screenshot_stitcher';
 
 export class HeadlessChromiumDriver {
   constructor(client, { maxScreenshotDimension, logger }) {
@@ -19,14 +19,6 @@ export class HeadlessChromiumDriver {
     this._waitForDelayMs = 100;
     this._zoom = 1;
     this._logger = logger;
-    this._behaviors = [
-      new IgnoreSSLErrorsBehavior(client),
-    ];
-  }
-
-  async destroy() {
-    this.killed = true;
-    await this._client.close();
   }
 
   async evaluate({ fn, args = [], awaitPromise = false, returnByValue = false }) {
@@ -46,7 +38,7 @@ export class HeadlessChromiumDriver {
       Page.enable(),
     ]);
 
-    await Promise.all(this._behaviors.map(behavior => behavior.initialize()));
+    await ignoreSSLErrorsBehavior(this._client.Security);
     await Network.setExtraHTTPHeaders({ headers });
     await Page.navigate({ url });
     await Page.loadEventFired();
@@ -66,9 +58,7 @@ export class HeadlessChromiumDriver {
 
     Page.screencastFrame(async ({ data, sessionId }) => {
       await this._writeData(path.join(recordPath, `${moment().utc().format('HH_mm_ss_SSS')}.png`), data);
-      if (!this.killed) {
-        await Page.screencastFrameAck({ sessionId });
-      }
+      await Page.screencastFrameAck({ sessionId });
     });
   }
 
@@ -94,16 +84,34 @@ export class HeadlessChromiumDriver {
       };
     }
 
-    return await screenshotStitcher(outputClip, this._zoom, this._maxScreenshotDimension, async screenshotClip => {
-      const { data } = await Page.captureScreenshot({
-        clip: {
-          ...screenshotClip,
-          scale: 1
+    // Wrapping screenshotStitcher function call in a retry because of this bug:
+    // https://github.com/elastic/kibana/issues/19563. The reason was never found - it only appeared on ci and
+    // debug logic right after Page.captureScreenshot to ensure the correct size made the bug disappear.
+    let retryCount = 0;
+    const MAX_RETRIES = 3;
+    while (true) {
+      try {
+        return await screenshotStitcher(outputClip, this._zoom, this._maxScreenshotDimension, async screenshotClip => {
+          const { data } = await Page.captureScreenshot({
+            clip: {
+              ...screenshotClip,
+              scale: 1
+            }
+          });
+          this._logger.debug(`Captured screenshot clip ${JSON.stringify(screenshotClip)}`);
+          return data;
+        }, this._logger);
+      } catch (error) {
+        const isCapturePngSizeError = error instanceof CapturePngSizeError;
+        if (!isCapturePngSizeError || retryCount === MAX_RETRIES) {
+          throw error;
+        } else {
+          this._logger.error(error.message);
+          this._logger.error('Trying again...');
+          retryCount++;
         }
-      });
-      this._logger.debug(`captured screenshot clip ${JSON.stringify(screenshotClip)}`);
-      return data;
-    }, this._logger);
+      }
+    }
   }
 
   async _writeData(writePath, base64EncodedData) {
@@ -112,6 +120,7 @@ export class HeadlessChromiumDriver {
   }
 
   async setViewport({ width, height, zoom }) {
+    this._logger.debug(`Setting viewport to width: ${width}, height: ${height}, zoom: ${zoom}`);
     const { Emulation } = this._client;
 
     await Emulation.setDeviceMetricsOverride({
@@ -125,13 +134,13 @@ export class HeadlessChromiumDriver {
   }
 
   async waitFor({ fn, args, toEqual }) {
-    while (!this.killed && (await this.evaluate({ fn, args })) !== toEqual) {
+    while ((await this.evaluate({ fn, args })) !== toEqual) {
       await delay(this._waitForDelayMs);
     }
   }
 
   async waitForSelector(selector) {
-    while (!this.killed) {
+    while (true) {
       const { nodeId } = await this._client.DOM.querySelector({ nodeId: this.documentNode.root.nodeId, selector });
       if (nodeId) {
         break;

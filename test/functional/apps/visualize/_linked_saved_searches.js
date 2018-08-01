@@ -19,8 +19,7 @@
 
 import expect from 'expect.js';
 
-export default function ({ getPageObjects, getService }) {
-  const retry = getService('retry');
+export default function ({ getPageObjects }) {
   const PageObjects = getPageObjects(['common', 'discover', 'visualize', 'header']);
 
   // Blocked by: https://github.com/elastic/kibana/issues/19750
@@ -38,23 +37,19 @@ export default function ({ getPageObjects, getService }) {
       });
 
       it('should create a visualization from a saved search', async () => {
-        retry.try(async () => {
-          // Sometimes navigation to the page fails, so we have this in a retry
-          await PageObjects.common.navigateToUrl('visualize', 'new');
-          await PageObjects.visualize.waitForVisualizationSelectPage();
-        });
+        await PageObjects.visualize.navigateToNewVisualization();
         await PageObjects.visualize.clickDataTable();
         await PageObjects.visualize.clickSavedSearch(savedSearchName);
         await PageObjects.header.setAbsoluteRange(fromTime, toTime);
         await PageObjects.header.waitUntilLoadingHasFinished();
-        const data = await PageObjects.visualize.getDataTableData();
+        const data = await PageObjects.visualize.getTableVisData();
         expect(data.trim()).to.be('14,004');
       });
 
       it('should respect the time filter when linked to a saved search', async () => {
         await PageObjects.header.setAbsoluteRange('2015-09-19 06:31:44.000', '2015-09-21 10:00:00.000');
         await PageObjects.header.waitUntilLoadingHasFinished();
-        const data = await PageObjects.visualize.getDataTableData();
+        const data = await PageObjects.visualize.getTableVisData();
         expect(data.trim()).to.be('6,086');
       });
     });

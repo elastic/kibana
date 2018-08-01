@@ -245,8 +245,7 @@ describe('Terms Agg Other bucket helper', () => {
         vis.aggs[0],
         otherAggConfig);
 
-      expect(mergedResponse.aggregations['1'].buckets[3].key).to.equal('Other');
-      expect(mergedResponse.aggregations['1'].buckets[3].filters.length).to.equal(2);
+      expect(mergedResponse.aggregations['1'].buckets[3].key).to.equal('__other__');
     });
 
     it('correctly merges other bucket with nested terms agg', () => {
@@ -255,8 +254,7 @@ describe('Terms Agg Other bucket helper', () => {
       const mergedResponse = mergeOtherBucketAggResponse(vis.aggs, nestedTermResponse,
         nestedOtherResponse, vis.aggs[1], otherAggConfig);
 
-      expect(mergedResponse.aggregations['1'].buckets[1]['2'].buckets[3].key).to.equal('Other');
-      expect(mergedResponse.aggregations['1'].buckets[1]['2'].buckets[3].filters.length).to.equal(2);
+      expect(mergedResponse.aggregations['1'].buckets[1]['2'].buckets[3].key).to.equal('__other__');
     });
 
   });
@@ -265,17 +263,8 @@ describe('Terms Agg Other bucket helper', () => {
     it('correctly updates missing bucket key', () => {
       init(visConfigNestedTerm);
       const updatedResponse = updateMissingBucket(singleTermResponse, vis.aggs, vis.aggs[0]);
-      expect(updatedResponse.aggregations['1'].buckets.find(bucket => bucket.key === 'Missing')).to.not.be('undefined');
+      expect(updatedResponse.aggregations['1'].buckets.find(bucket => bucket.key === '__missing__')).to.not.be('undefined');
     });
 
-    it('correctly sets the bucket filter', () => {
-      const updatedResponse = updateMissingBucket(singleTermResponse, vis.aggs, vis.aggs[0]);
-      const missingBucket = updatedResponse.aggregations['1'].buckets.find(bucket => bucket.key === 'Missing');
-      expect(missingBucket.filters).to.not.be('undefined');
-      expect(missingBucket.filters[0]).to.eql({
-        meta: { index: 'logstash-*', negate: true },
-        exists: { field: 'geo.src' }
-      });
-    });
   });
 });

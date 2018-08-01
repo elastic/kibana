@@ -91,7 +91,7 @@ describe('Histogram Agg', function () {
         expect(output.params).to.have.property('min_doc_count', 0);
       });
 
-      it('writes 1 for falsey values', function () {
+      it('writes 1 for falsy values', function () {
         let output = paramWriter.write({ min_doc_count: '' });
         expect(output.params).to.have.property('min_doc_count', 1);
 

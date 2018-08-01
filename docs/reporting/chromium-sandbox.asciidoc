@@ -19,6 +19,6 @@ recommended to enable usernamespaces and set `xpack.reporting.capture.browser.ch
 `kibana.yml` to enable the sandbox.
 
 ==== Docker
-When runnning Kibana in a Docker container, all container processes are run within a usernamespace with seccomp-bpf and
+When running Kibana in a Docker container, all container processes are run within a usernamespace with seccomp-bpf and
 AppArmor profiles that prevent the Chromium sandbox from being used. In these situations, disabling the sandbox is recommended,
 as the container implements similar security mechanisms.

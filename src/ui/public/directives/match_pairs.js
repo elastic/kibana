@@ -75,7 +75,7 @@ function shouldMoveCursorForward(key, value, selectionStart, selectionEnd) {
   // Never move selection forward for multi-character selections
   if (selectionStart !== selectionEnd) return false;
 
-  // Move selection foward if the key is the same as the closer in front of the selection
+  // Move selection forward if the key is the same as the closer in front of the selection
   return value.charAt(selectionEnd) === key;
 }
 

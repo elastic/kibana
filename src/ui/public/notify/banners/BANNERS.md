@@ -327,9 +327,9 @@ import { GlobalBannerList } from 'ui/notify';
 
 ## Use in functional tests
 
-Functional tests are commonly used to verify that an action yielded a sucessful outcome. You can place a
+Functional tests are commonly used to verify that an action yielded a successful outcome. You can place a
 `data-test-subj` attribute on the banner and use it to check if the banner exists inside of your functional test.
-This acts as a proxy for verifying the sucessful outcome. Any unrecognized field will be added as a property of the
+This acts as a proxy for verifying the successful outcome. Any unrecognized field will be added as a property of the
 containing element.
 
 ```js

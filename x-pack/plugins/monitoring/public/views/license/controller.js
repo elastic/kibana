@@ -11,12 +11,12 @@ import chrome from 'ui/chrome';
 import { formatDateTimeLocal } from '../../../common/formatting';
 import { MANAGEMENT_BASE_PATH } from 'plugins/xpack_main/components';
 import { License } from 'plugins/monitoring/components';
+import { timefilter } from 'ui/timefilter';
 
 const REACT_NODE_ID = 'licenseReact';
 
 export class LicenseViewController {
   constructor($injector, $scope) {
-    const timefilter = $injector.get('timefilter');
     timefilter.disableTimeRangeSelector();
     timefilter.disableAutoRefreshSelector();
 
@@ -49,9 +49,9 @@ export class LicenseViewController {
   renderReact($scope) {
     $scope.$evalAsync(() => {
       const { isPrimaryCluster, license, isExpired, uploadLicensePath } = this;
-      let expiryDate = license.expiry_date;
-      if (license.expiry_date !== undefined) {
-        expiryDate = formatDateTimeLocal(license.expiry_date);
+      let expiryDate = license.expiry_date_in_millis;
+      if (license.expiry_date_in_millis !== undefined) {
+        expiryDate = formatDateTimeLocal(license.expiry_date_in_millis);
       }
 
       // Mount the React component to the template

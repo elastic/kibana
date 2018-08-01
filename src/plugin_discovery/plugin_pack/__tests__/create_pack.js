@@ -18,7 +18,8 @@
  */
 
 import { resolve } from 'path';
-import { Observable } from 'rxjs';
+import * as Rx from 'rxjs';
+import { toArray } from 'rxjs/operators';
 import expect from 'expect.js';
 
 import { createPack$ } from '../create_pack';
@@ -31,7 +32,7 @@ import {
 
 describe('plugin discovery/create pack', () => {
   it('creates PluginPack', async () => {
-    const packageJson$ = Observable.from([
+    const packageJson$ = Rx.from([
       {
         packageJson: {
           directoryPath: resolve(PLUGINS_DIR, 'prebuilt'),
@@ -41,7 +42,7 @@ describe('plugin discovery/create pack', () => {
         }
       }
     ]);
-    const results = await createPack$(packageJson$).toArray().toPromise();
+    const results = await createPack$(packageJson$).pipe(toArray()).toPromise();
     expect(results).to.have.length(1);
     expect(results[0]).to.only.have.keys(['pack']);
     const { pack } = results[0];
@@ -50,13 +51,13 @@ describe('plugin discovery/create pack', () => {
 
   describe('errors thrown', () => {
     async function checkError(path, check) {
-      const packageJson$ = Observable.from([{
+      const packageJson$ = Rx.from([{
         packageJson: {
           directoryPath: path
         }
       }]);
 
-      const results = await createPack$(packageJson$).toArray().toPromise();
+      const results = await createPack$(packageJson$).pipe(toArray()).toPromise();
       expect(results).to.have.length(1);
       expect(results[0]).to.only.have.keys(['error']);
       const { error } = results[0];

@@ -93,8 +93,7 @@ export function createToolingLog(initialLogLevelName = 'silent') {
           const subLineIndent = i === 0 ? '' : '       ';
           const indent = !indentString
             ? ''
-            : indentString.slice(0, -1) +
-              (i === 0 && line[0] === '-' ? '└' : '│');
+            : indentString.slice(0, -1) + (i === 0 && line[0] === '-' ? '└' : '│');
           super.write(`${indent}${subLineIndent}${line}\n`);
         });
     }

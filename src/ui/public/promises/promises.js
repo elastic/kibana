@@ -22,7 +22,7 @@ import { uiModules } from '../modules';
 
 const module = uiModules.get('kibana');
 
-// Provides a tiny subset of the excelent API from
+// Provides a tiny subset of the excellent API from
 // bluebird, reimplemented using the $q service
 module.service('Promise', function ($q, $timeout) {
   function Promise(fn) {

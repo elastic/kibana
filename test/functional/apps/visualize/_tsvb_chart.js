@@ -38,12 +38,14 @@ export default function ({ getService, getPageObjects }) {
       it('should show the correct count in the legend with 2h offset', async function () {
         await PageObjects.visualBuilder.clickSeriesOption();
         await PageObjects.visualBuilder.enterOffsetSeries('2h');
+        await PageObjects.header.waitUntilLoadingHasFinished();
         const actualCount = await PageObjects.visualBuilder.getRhythmChartLegendValue();
         expect(actualCount).to.be('293');
       });
 
       it('should show the correct count in the legend with -2h offset', async function () {
         await PageObjects.visualBuilder.enterOffsetSeries('-2h');
+        await PageObjects.header.waitUntilLoadingHasFinished();
         const actualCount = await PageObjects.visualBuilder.getRhythmChartLegendValue();
         expect(actualCount).to.be('53');
       });
@@ -65,18 +67,17 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.visualBuilder.fillInExpression('params.test + 1');
       });
 
-      it('should not display spy panel toggle button', async function () {
-        const spyToggleExists = await PageObjects.visualize.getSpyToggleExists();
+      it('should not have inspector enabled', async function () {
+        const spyToggleExists = await PageObjects.visualize.isInspectorButtonEnabled();
         expect(spyToggleExists).to.be(false);
       });
 
       it('should show correct data', async function () {
         const expectedMetricValue =  '157';
-        return PageObjects.visualBuilder.getMetricValue()
-          .then(function (value) {
-            log.debug(`metric value: ${value}`);
-            expect(value).to.eql(expectedMetricValue);
-          });
+        const value = await PageObjects.visualBuilder.getMetricValue();
+        log.debug(`metric value: ${JSON.stringify(value)}`);
+        log.debug(`metric value: ${value}`);
+        expect(value).to.eql(expectedMetricValue);
       });
 
     });
@@ -87,18 +88,16 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.visualBuilder.clickMetric();
       });
 
-      it('should not display spy panel toggle button', async function () {
-        const spyToggleExists = await PageObjects.visualize.getSpyToggleExists();
+      it('should not have inspector enabled', async function () {
+        const spyToggleExists = await PageObjects.visualize.isInspectorButtonEnabled();
         expect(spyToggleExists).to.be(false);
       });
 
       it('should show correct data', async function () {
         const expectedMetricValue =  '156';
-        return PageObjects.visualBuilder.getMetricValue()
-          .then(function (value) {
-            log.debug(`metric value: ${value}`);
-            expect(value).to.eql(expectedMetricValue);
-          });
+        const value = await PageObjects.visualBuilder.getMetricValue();
+        log.debug(`metric value: ${value}`);
+        expect(value).to.eql(expectedMetricValue);
       });
 
     });
@@ -111,7 +110,7 @@ export default function ({ getService, getPageObjects }) {
         log.debug('clicked on Gauge');
       });
 
-      it('should verfiy gauge label and count display', async function () {
+      it('should verify gauge label and count display', async function () {
         const labelString = await PageObjects.visualBuilder.getGaugeLabel();
         expect(labelString).to.be('Count');
         const gaugeCount = await PageObjects.visualBuilder.getGaugeCount();
@@ -127,7 +126,7 @@ export default function ({ getService, getPageObjects }) {
         log.debug('clicked on TopN');
       });
 
-      it('should verfiy topN label and count display', async function () {
+      it('should verify topN label and count display', async function () {
         const labelString = await PageObjects.visualBuilder.getTopNLabel();
         expect(labelString).to.be('Count');
         const gaugeCount = await PageObjects.visualBuilder.getTopNCount();
@@ -151,7 +150,7 @@ export default function ({ getService, getPageObjects }) {
         expect(text).to.be('1442901600000');
       });
 
-      it.skip('should allow printing raw value of data', async () => {
+      it('should allow printing raw value of data', async () => {
         await PageObjects.visualBuilder.enterMarkdown('{{ count.data.raw.[0].[1] }}');
         const text = await PageObjects.visualBuilder.getMarkdownText();
         expect(text).to.be('6');
@@ -166,6 +165,7 @@ export default function ({ getService, getPageObjects }) {
 
         it('allow positive time offsets', async () => {
           await PageObjects.visualBuilder.enterOffsetSeries('2h');
+          await PageObjects.header.waitUntilLoadingHasFinished();
           const text = await PageObjects.visualBuilder.getMarkdownText();
           const [timestamp, value] = text.split('#');
           expect(timestamp).to.be('1442901600000');
@@ -174,6 +174,7 @@ export default function ({ getService, getPageObjects }) {
 
         it('allow negative time offsets', async () => {
           await PageObjects.visualBuilder.enterOffsetSeries('-2h');
+          await PageObjects.header.waitUntilLoadingHasFinished();
           const text = await PageObjects.visualBuilder.getMarkdownText();
           const [timestamp, value] = text.split('#');
           expect(timestamp).to.be('1442901600000');
@@ -194,6 +195,7 @@ export default function ({ getService, getPageObjects }) {
       it('should be able to set values for group by field and column name', async () => {
         await PageObjects.visualBuilder.selectGroupByField('machine.os.raw');
         await PageObjects.visualBuilder.setLabelValue('OS');
+        await PageObjects.header.waitUntilLoadingHasFinished();
         log.debug('finished setting field and column name');
       });
 

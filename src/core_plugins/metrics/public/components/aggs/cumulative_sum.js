@@ -25,7 +25,7 @@ import MetricSelect from './metric_select';
 import createChangeHandler from '../lib/create_change_handler';
 import createSelectHandler from '../lib/create_select_handler';
 
-function CumlativeSumAgg(props) {
+function CumulativeSumAgg(props) {
   const { model, siblings } = props;
   const handleChange = createChangeHandler(props.onChange, model);
   const handleSelectChange = createSelectHandler(handleChange);
@@ -60,7 +60,7 @@ function CumlativeSumAgg(props) {
 
 }
 
-CumlativeSumAgg.propTypes = {
+CumulativeSumAgg.propTypes = {
   disableDelete: PropTypes.bool,
   fields: PropTypes.object,
   model: PropTypes.object,
@@ -72,4 +72,4 @@ CumlativeSumAgg.propTypes = {
   siblings: PropTypes.array,
 };
 
-export default CumlativeSumAgg;
+export default CumulativeSumAgg;

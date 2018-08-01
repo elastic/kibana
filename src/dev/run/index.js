@@ -18,4 +18,4 @@
  */
 
 export { run } from './run';
-export { createFailError } from './fail';
+export { createFailError, combineErrors } from './fail';

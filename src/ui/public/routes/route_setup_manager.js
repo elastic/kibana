@@ -21,7 +21,7 @@ import _ from 'lodash';
 
 // Throw this inside of an Angular route resolver after calling `kbnUrl.change`
 // so that the $router can observe the $location update. Otherwise, the location
-// route setup work will resovle before the route update occurs.
+// route setup work will resolve before the route update occurs.
 export const WAIT_FOR_URL_CHANGE_TOKEN = new Error('WAIT_FOR_URL_CHANGE_TOKEN');
 
 export class RouteSetupManager {

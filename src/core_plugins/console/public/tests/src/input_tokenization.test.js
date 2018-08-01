@@ -379,7 +379,7 @@ describe('Input Tokenization', () => {
     ['start', 'json', ['string_literal', 'json'], ['string_literal', 'json'], 'json', 'start'],
     'POST _search\n' +
   '{\n' +
-  '  "somthing": """\n' +
+  '  "something": """\n' +
   '  test script\n' +
   ' """,\n' +
   '}'
@@ -391,7 +391,7 @@ describe('Input Tokenization', () => {
       'json', 'start'],
     'POST _search\n' +
   '{\n' +
-  '  "somthing": { "f" : """\n' +
+  '  "something": { "f" : """\n' +
   '  test script\n' +
   ' """,\n' +
   ' "g": 1\n' +

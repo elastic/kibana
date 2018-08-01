@@ -48,7 +48,7 @@
           columns="state.columns"
           hits="rows"
           field-counts="fieldCounts"
-          index-pattern="searchSource.get('index')"
+          index-pattern="searchSource.getField('index')"
           index-pattern-list="opts.indexPatternList"
           state="state"
           on-add-field="addColumn"
@@ -60,6 +60,11 @@
 
       <div class="discover-wrapper col-md-10">
         <div class="discover-content">
+          <discover-unsupported-index-pattern
+            ng-if="isUnsupportedIndexPattern"
+            unsupported-type="unsupportedIndexPatternType"
+          ></discover-unsupported-index-pattern>
+
           <discover-no-results
             ng-show="resultState === 'none'"
             top-nav-toggle="kbnTopNav.toggle"
@@ -129,16 +134,11 @@
 
               </header>
 
-              <visualization
-                 ng-if="vis && rows.length != 0"
-                 vis="vis"
-                 ui-state="uiState"
-                 vis-data="visData"
-                 show-spy-panel="true"
-                 search-source="searchSource"
-                 style="height: 200px"
+              <div id="discoverHistogram"
+                 ng-if="vis && rows.length !== 0"
+                 style="display: flex; height: 200px"
                 >
-              </visualization>
+              </div>
             </section>
 
             <section class="discover-table" fixed-scroll aria-label="Documents">

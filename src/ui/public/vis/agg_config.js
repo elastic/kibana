@@ -26,334 +26,334 @@
 
 import _ from 'lodash';
 import { fieldFormats } from '../registry/field_formats';
-import { aggTypes } from '../agg_types/index';
 
-export function AggConfig(vis, opts) {
-  const self = this;
+class AggConfig {
 
-  self.id = String(opts.id || AggConfig.nextId(vis.aggs));
-  self.vis = vis;
-  self._opts = opts = (opts || {});
-  self.enabled = typeof opts.enabled === 'boolean' ? opts.enabled : true;
+  /**
+   * Ensure that all of the objects in the list have ids, the objects
+   * and list are modified by reference.
+   *
+   * @param  {array[object]} list - a list of objects, objects can be anything really
+   * @return {array} - the list that was passed in
+   */
+  static ensureIds(list) {
+    const have = [];
+    const haveNot = [];
+    list.forEach(function (obj) {
+      (obj.id ? have : haveNot).push(obj);
+    });
 
-  // start with empty params so that checks in type/schema setters don't freak
-  // because self.params is undefined
-  self.params = {};
+    let nextId = AggConfig.nextId(have);
+    haveNot.forEach(function (obj) {
+      obj.id = String(nextId++);
+    });
 
-  // setters
-  self.type = opts.type;
-  self.schema = opts.schema;
+    return list;
+  }
 
-  // set the params to the values from opts, or just to the defaults
-  self.setParams(opts.params || {});
-}
+  /**
+   * Calculate the next id based on the ids in this list
+   *
+   * @return {array} list - a list of objects with id properties
+   */
+  static nextId(list) {
+    return 1 + list.reduce(function (max, obj) {
+      return Math.max(max, +obj.id || 0);
+    }, 0);
+  }
 
-AggConfig.aggTypes = aggTypes;
-/**
- * Ensure that all of the objects in the list have ids, the objects
- * and list are modified by reference.
- *
- * @param  {array[object]} list - a list of objects, objects can be anything really
- * @return {array} - the list that was passed in
- */
-AggConfig.ensureIds = function (list) {
-  const have = [];
-  const haveNot = [];
-  list.forEach(function (obj) {
-    (obj.id ? have : haveNot).push(obj);
-  });
+  constructor(vis, opts = {}, aggs) {
+    this.id = String(opts.id || AggConfig.nextId(vis.aggs));
+    this.vis = vis;
+    this._indexPattern = vis.indexPattern;
+    this._aggs = aggs || vis.aggs;
+    this._opts = opts;
+    this.enabled = typeof opts.enabled === 'boolean' ? opts.enabled : true;
 
-  let nextId = AggConfig.nextId(have);
-  haveNot.forEach(function (obj) {
-    obj.id = String(nextId++);
-  });
+    // start with empty params so that checks in type/schema setters don't freak
+    // because this.params is undefined
+    this.params = {};
 
-  return list;
-};
+    // setters
+    this.type = opts.type;
+    this.schema = opts.schema;
 
-/**
- * Calculate the next id based on the ids in this list
- *
- * @return {array} list - a list of objects with id properties
- */
-AggConfig.nextId = function (list) {
-  return 1 + list.reduce(function (max, obj) {
-    return Math.max(max, +obj.id || 0);
-  }, 0);
-};
+    // set the params to the values from opts, or just to the defaults
+    this.setParams(opts.params || {});
+  }
 
-Object.defineProperties(AggConfig.prototype, {
-  type: {
-    get: function () {
-      return this.__type;
-    },
-    set: function (type) {
-      if (this.__typeDecorations) {
-        _.forOwn(this.__typeDecorations, function (prop, name) {
-          delete this[name];
-        }, this);
+  /**
+   * Write the current values to this.params, filling in the defaults as we go
+   *
+   * @param  {object} [from] - optional object to read values from,
+   *                         used when initializing
+   * @return {undefined}
+   */
+  setParams(from) {
+    from = from || this.params || {};
+    const to = this.params = {};
+
+    this.getAggParams().forEach(aggParam => {
+      let val = from[aggParam.name];
+
+      if (val == null) {
+        if (aggParam.default == null) return;
+
+        if (!_.isFunction(aggParam.default)) {
+          val = aggParam.default;
+        } else {
+          val = aggParam.default(this);
+          if (val == null) return;
+        }
       }
 
-      if (_.isString(type)) {
-        type = AggConfig.aggTypes.byName[type];
+      if (aggParam.deserialize) {
+        const isTyped = _.isFunction(aggParam.type);
+
+        const isType = isTyped && (val instanceof aggParam.type);
+        const isObject = !isTyped && _.isObject(val);
+        const isDeserialized = (isType || isObject);
+
+        if (!isDeserialized) {
+          val = aggParam.deserialize(val, this);
+        }
+
+        to[aggParam.name] = val;
+        return;
       }
 
-      if (type && _.isFunction(type.decorateAggConfig)) {
-        this.__typeDecorations = type.decorateAggConfig();
-        Object.defineProperties(this, this.__typeDecorations);
+      to[aggParam.name] = _.cloneDeep(val);
+    });
+  }
+
+  write(aggs) {
+    return this.type.params.write(this, aggs);
+  }
+
+  isFilterable() {
+    return _.isFunction(this.type.createFilter);
+  }
+
+  createFilter(key, params = {}) {
+    if (!this.isFilterable()) {
+      throw new TypeError(`The "${this.type.title}" aggregation does not support filtering.`);
+    }
+
+    const field = this.getField();
+    const label = this.getFieldDisplayName();
+    if (field && !field.filterable) {
+      let message = `The "${label}" field can not be used for filtering.`;
+      if (field.scripted) {
+        message = `The "${label}" field is scripted and can not be used for filtering.`;
       }
+      throw new TypeError(message);
+    }
 
-      this.__type = type;
+    return this.type.createFilter(this, key, params);
+  }
 
-      // clear out the previous params except for a few special ones
-      this.setParams({
-        // split row/columns is "outside" of the agg, so don't reset it
-        row: this.params.row,
+  /**
+   *  Hook for pre-flight logic, see AggType#onSearchRequestStart
+   *  @param {Courier.SearchSource} searchSource
+   *  @param {Courier.SearchRequest} searchRequest
+   *  @return {Promise<undefined>}
+   */
+  onSearchRequestStart(searchSource, searchRequest) {
+    if (!this.type) {
+      return Promise.resolve();
+    }
 
-        // almost every agg has fields, so we try to persist that when type changes
-        field: _.get(this.getFieldOptions(), ['byName', this.getField()])
+    return Promise.all(
+      this.type.params.map(param => param.modifyAggConfigOnSearchRequestStart(this, searchSource, searchRequest))
+    );
+  }
+
+  /**
+   * Convert this aggConfig to its dsl syntax.
+   *
+   * Adds params and adhoc subaggs to a pojo, then returns it
+   *
+   * @param  {AggConfigs} aggConfigs - the config object to convert
+   * @return {void|Object} - if the config has a dsl representation, it is
+   *                         returned, else undefined is returned
+   */
+  toDsl(aggConfigs) {
+    if (this.type.hasNoDsl) return;
+    const output = this.write(aggConfigs);
+
+    const configDsl = {};
+    configDsl[this.type.dslName || this.type.name] = output.params;
+
+    // if the config requires subAggs, write them to the dsl as well
+    if (this.subAggs && !output.subAggs) output.subAggs = this.subAggs;
+    if (output.subAggs) {
+      const subDslLvl = configDsl.aggs || (configDsl.aggs = {});
+      output.subAggs.forEach(function nestAdhocSubAggs(subAggConfig) {
+        subDslLvl[subAggConfig.id] = subAggConfig.toDsl(aggConfigs);
       });
     }
-  },
-  schema: {
-    get: function () {
-      return this.__schema;
-    },
-    set: function (schema) {
-      if (_.isString(schema)) {
-        schema = this.vis.type.schemas.all.byName[schema];
-      }
 
-      this.__schema = schema;
-    }
-  }
-});
-
-/**
- * Write the current values to this.params, filling in the defaults as we go
- *
- * @param  {object} [from] - optional object to read values from,
- *                         used when initializing
- * @return {undefined}
- */
-AggConfig.prototype.setParams = function (from) {
-  const self = this;
-  from = from || self.params || {};
-  const to = self.params = {};
-
-  self.getAggParams().forEach(function (aggParam) {
-    let val = from[aggParam.name];
-
-    if (val == null) {
-      if (aggParam.default == null) return;
-
-      if (!_.isFunction(aggParam.default)) {
-        val = aggParam.default;
-      } else {
-        val = aggParam.default(self);
-        if (val == null) return;
-      }
+    if (output.parentAggs) {
+      const subDslLvl = configDsl.parentAggs || (configDsl.parentAggs = {});
+      output.parentAggs.forEach(function nestAdhocSubAggs(subAggConfig) {
+        subDslLvl[subAggConfig.id] = subAggConfig.toDsl(aggConfigs);
+      });
     }
 
-    if (aggParam.deserialize) {
-      const isTyped = _.isFunction(aggParam.type);
+    return configDsl;
+  }
 
-      const isType = isTyped && (val instanceof aggParam.type);
-      const isObject = !isTyped && _.isObject(val);
-      const isDeserialized = (isType || isObject);
+  toJSON() {
+    const params = this.params;
 
-      if (!isDeserialized) {
-        val = aggParam.deserialize(val, self);
-      }
+    const outParams = _.transform(this.getAggParams(), (out, aggParam) => {
+      let val = params[aggParam.name];
 
-      to[aggParam.name] = val;
-      return;
+      // don't serialize undefined/null values
+      if (val == null) return;
+      if (aggParam.serialize) val = aggParam.serialize(val, this);
+      if (val == null) return;
+
+      // to prevent accidental leaking, we will clone all complex values
+      out[aggParam.name] = _.cloneDeep(val);
+    }, {});
+
+    return {
+      id: this.id,
+      enabled: this.enabled,
+      type: this.type && this.type.name,
+      schema: this.schema && this.schema.name,
+      params: outParams
+    };
+  }
+
+  getAggParams() {
+    return [
+      ...((this.type) ? this.type.params.raw : []),
+      ...((_.has(this, 'schema.params')) ? this.schema.params.raw : []),
+    ];
+  }
+
+  getRequestAggs() {
+    if (!this.type) return;
+    return this.type.getRequestAggs(this) || [this];
+  }
+
+  getResponseAggs() {
+    if (!this.type) return;
+    return this.type.getResponseAggs(this) || [this];
+  }
+
+  getValue(bucket) {
+    return this.type.getValue(this, bucket);
+  }
+
+  getKey(bucket, key) {
+    return this.type.getKey(bucket, key, this);
+  }
+
+  getFieldDisplayName() {
+    const field = this.getField();
+    return field ? (field.displayName || this.fieldName()) : '';
+  }
+
+  getField() {
+    return this.params.field;
+  }
+
+  makeLabel() {
+    if (this.params.customLabel) {
+      return this.params.customLabel;
     }
 
-    to[aggParam.name] = _.cloneDeep(val);
-  });
-};
-
-AggConfig.prototype.write = function () {
-  return this.type.params.write(this);
-};
-
-AggConfig.prototype.isFilterable = function () {
-  return _.isFunction(this.type.createFilter);
-};
-
-AggConfig.prototype.createFilter = function (key) {
-  if (!this.isFilterable()) {
-    throw new TypeError('The "' + this.type.title + '" aggregation does not support filtering.');
+    if (!this.type) return '';
+    let pre = (_.get(this.vis, 'params.mode') === 'percentage') ? 'Percentage of ' : '';
+    return pre += this.type.makeLabel(this);
   }
 
-  const field = this.getField();
-  const label = this.getFieldDisplayName();
-  if (field && !field.filterable) {
-    let message = 'The "' + label + '" field can not be used for filtering.';
-    if (field.scripted) {
-      message = 'The "' + label + '" field is scripted and can not be used for filtering.';
+  getIndexPattern() {
+    return this.vis.indexPattern;
+  }
+
+  getFieldOptions() {
+    const fieldParamType = this.type && this.type.params.byName.field;
+
+    if (!fieldParamType || !fieldParamType.getFieldOptions) {
+      return null;
     }
-    throw new TypeError(message);
+
+    return fieldParamType.getFieldOptions(this);
   }
 
-  return this.type.createFilter(this, key);
-};
-
-/**
- *  Hook for pre-flight logic, see AggType#onSearchRequestStart
- *  @param {Courier.SearchSource} searchSource
- *  @param {Courier.SearchRequest} searchRequest
- *  @return {Promise<undefined>}
- */
-AggConfig.prototype.onSearchRequestStart = function (searchSource, searchRequest) {
-  if (!this.type) {
-    return Promise.resolve();
+  fieldFormatter(contentType, defaultFormat) {
+    const format = this.type && this.type.getFormat(this);
+    if (format) return format.getConverterFor(contentType);
+    return this.fieldOwnFormatter(contentType, defaultFormat);
   }
 
-  return Promise.all(
-    this.type.params.map(param => param.modifyAggConfigOnSearchRequestStart(this, searchSource, searchRequest))
-  );
-};
+  fieldOwnFormatter(contentType, defaultFormat) {
+    const field = this.getField();
+    let format = field && field.format;
+    if (!format) format = defaultFormat;
+    if (!format) format = fieldFormats.getDefaultInstance('string');
+    return format.getConverterFor(contentType);
+  }
 
-/**
- * Convert this aggConfig to its dsl syntax.
- *
- * Adds params and adhoc subaggs to a pojo, then returns it
- *
- * @param  {AggConfig} aggConfig - the config object to convert
- * @return {void|Object} - if the config has a dsl representation, it is
- *                         returned, else undefined is returned
- */
-AggConfig.prototype.toDsl = function () {
-  if (this.type.hasNoDsl) return;
-  const output = this.write();
+  fieldName() {
+    const field = this.getField();
+    return field ? field.name : '';
+  }
 
-  const configDsl = {};
-  configDsl[this.type.dslName || this.type.name] = output.params;
+  fieldIsTimeField() {
+    const timeFieldName = this.vis.indexPattern.timeFieldName;
+    return timeFieldName && this.fieldName() === timeFieldName;
+  }
 
-  // if the config requires subAggs, write them to the dsl as well
-  if (this.subAggs && !output.subAggs) output.subAggs = this.subAggs;
-  if (output.subAggs) {
-    const subDslLvl = configDsl.aggs || (configDsl.aggs = {});
-    output.subAggs.forEach(function nestAdhocSubAggs(subAggConfig) {
-      subDslLvl[subAggConfig.id] = subAggConfig.toDsl();
+  get type() {
+    return this.__type;
+  }
+
+  set type(type) {
+    if (this.__typeDecorations) {
+      _.forOwn(this.__typeDecorations, function (prop, name) {
+        delete this[name];
+      }, this);
+    }
+
+    if (_.isString(type)) {
+      // We need to inline require here, since we're having a cyclic dependency
+      // from somewhere inside agg_types back to AggConfig.
+      type = require('../agg_types').aggTypes.byName[type];
+    }
+
+    if (type && _.isFunction(type.decorateAggConfig)) {
+      this.__typeDecorations = type.decorateAggConfig();
+      Object.defineProperties(this, this.__typeDecorations);
+    }
+
+    this.__type = type;
+
+    // clear out the previous params except for a few special ones
+    this.setParams({
+      // split row/columns is "outside" of the agg, so don't reset it
+      row: this.params.row,
+
+      // almost every agg has fields, so we try to persist that when type changes
+      field: _.get(this.getFieldOptions(), ['byName', this.getField()])
     });
   }
 
-  if (output.parentAggs) {
-    const subDslLvl = configDsl.parentAggs || (configDsl.parentAggs = {});
-    output.parentAggs.forEach(function nestAdhocSubAggs(subAggConfig) {
-      subDslLvl[subAggConfig.id] = subAggConfig.toDsl();
-    });
+  get schema() {
+    return this.__schema;
   }
 
-  return configDsl;
-};
+  set schema(schema) {
+    if (_.isString(schema)) {
+      schema = this.vis.type.schemas.all.byName[schema];
+    }
 
-AggConfig.prototype.toJSON = function () {
-  const self = this;
-  const params = self.params;
-
-  const outParams = _.transform(self.getAggParams(), function (out, aggParam) {
-    let val = params[aggParam.name];
-
-    // don't serialize undefined/null values
-    if (val == null) return;
-    if (aggParam.serialize) val = aggParam.serialize(val, self);
-    if (val == null) return;
-
-    // to prevent accidental leaking, we will clone all complex values
-    out[aggParam.name] = _.cloneDeep(val);
-  }, {});
-
-  return {
-    id: self.id,
-    enabled: self.enabled,
-    type: self.type && self.type.name,
-    schema: self.schema && self.schema.name,
-    params: outParams
-  };
-};
-
-AggConfig.prototype.getAggParams = function () {
-  return [].concat(
-    (this.type) ? this.type.params.raw : [],
-    (_.has(this, 'schema.params')) ? this.schema.params.raw : []
-  );
-};
-
-AggConfig.prototype.getRequestAggs = function () {
-  if (!this.type) return;
-  return this.type.getRequestAggs(this) || [this];
-};
-
-AggConfig.prototype.getResponseAggs = function () {
-  if (!this.type) return;
-  return this.type.getResponseAggs(this) || [this];
-};
-
-AggConfig.prototype.getValue = function (bucket) {
-  return this.type.getValue(this, bucket);
-};
-
-AggConfig.prototype.getKey = function (bucket, key) {
-  return this.type.getKey(bucket, key, this);
-};
-
-AggConfig.prototype.getFieldDisplayName = function () {
-  const field = this.getField();
-  return field ? (field.displayName || this.fieldName()) : '';
-};
-
-AggConfig.prototype.getField = function () {
-  return this.params.field;
-};
-
-AggConfig.prototype.makeLabel = function () {
-  if (this.params.customLabel) {
-    return this.params.customLabel;
+    this.__schema = schema;
   }
+}
 
-  if (!this.type) return '';
-  let pre = (_.get(this.vis, 'params.mode') === 'percentage') ? 'Percentage of ' : '';
-  return pre += this.type.makeLabel(this);
-};
-
-AggConfig.prototype.getIndexPattern = function () {
-  return this.vis.indexPattern;
-};
-
-AggConfig.prototype.getFieldOptions = function () {
-  const fieldParamType = this.type && this.type.params.byName.field;
-
-  if (!fieldParamType || !fieldParamType.getFieldOptions) {
-    return null;
-  }
-
-  return fieldParamType.getFieldOptions(this);
-};
-
-AggConfig.prototype.fieldFormatter = function (contentType, defaultFormat) {
-  const format = this.type && this.type.getFormat(this);
-  if (format) return format.getConverterFor(contentType);
-  return this.fieldOwnFormatter(contentType, defaultFormat);
-};
-
-AggConfig.prototype.fieldOwnFormatter = function (contentType, defaultFormat) {
-  const field = this.getField();
-  let format = field && field.format;
-  if (!format) format = defaultFormat;
-  if (!format) format = fieldFormats.getDefaultInstance('string');
-  return format.getConverterFor(contentType);
-};
-
-AggConfig.prototype.fieldName = function () {
-  const field = this.getField();
-  return field ? field.name : '';
-};
-
-AggConfig.prototype.fieldIsTimeField = function () {
-  const timeFieldName = this.vis.indexPattern.timeFieldName;
-  return timeFieldName && this.fieldName() === timeFieldName;
-};
+export { AggConfig };

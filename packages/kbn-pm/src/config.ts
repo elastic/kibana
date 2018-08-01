@@ -27,10 +27,7 @@ export interface IProjectPathOptions {
 /**
  * Returns all the paths where plugins are located
  */
-export function getProjectPaths(
-  rootPath: string,
-  options: IProjectPathOptions
-) {
+export function getProjectPaths(rootPath: string, options: IProjectPathOptions) {
   const skipKibanaExtra = Boolean(options['skip-kibana-extra']);
   const ossOnly = Boolean(options.oss);
 

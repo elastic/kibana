@@ -1,0 +1,17 @@
+{
+  "xpack.security.put_role": {
+    "data_autocomplete_rules": {
+      "cluster": [],
+      "indices": [
+        {
+          "field_security": {},
+          "names": [],
+          "privileges": [],
+          "query": ""
+        }
+      ],
+      "run_as": [],
+      "metadata": {}
+    }
+  }
+}

@@ -57,4 +57,13 @@ describe('props', () => {
     />);
     expect(component).toMatchSnapshot(); // eslint-disable-line
   });
+
+  test('isBeta', () => {
+    const component = shallow(<Introduction
+      description="this is a great tutorial about..."
+      title="Great tutorial"
+      isBeta={true}
+    />);
+    expect(component).toMatchSnapshot(); // eslint-disable-line
+  });
 });

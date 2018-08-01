@@ -42,6 +42,7 @@ exports[`Header should render normally 1`] = `
         >
           <EuiTextColor
             color="subdued"
+            component="span"
           >
             <p>
               4
@@ -123,6 +124,7 @@ exports[`Header should render normally 1`] = `
     <p>
       <EuiTextColor
         color="subdued"
+        component="span"
       >
         From here you can delete saved objects, such as saved searches. You can also edit the raw data of saved objects. Typically objects are only modified via their associated application, which is probably what you should use instead of this screen.
       </EuiTextColor>

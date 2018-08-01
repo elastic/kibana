@@ -101,7 +101,6 @@ export default function ({ getService, getPageObjects }) {
       });
     });
 
-
     describe('disabling a filter unfilters the data on', async () => {
       before(async () => {
         await testSubjects.click('disableFilter-bytes');

@@ -17,4 +17,4 @@
  * under the License.
  */
 
-import './field_editor';
+export { FieldEditor } from './field_editor';

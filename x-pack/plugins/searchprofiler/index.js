@@ -35,7 +35,7 @@ export const searchprofiler = (kibana) => {
         xpackMainPlugin.info.feature(thisPlugin.id).registerLicenseCheckResultsGenerator(checkLicense);
       });
 
-      // Add server routes and initalize the plugin here
+      // Add server routes and initialize the plugin here
       const commonRouteConfig = {
         pre: [
           function forbidApiAccess(request, reply) {

@@ -36,7 +36,7 @@ uiModules
       scope: true,
       link: function ($scope, $el, attr) {
         $scope.groupName = attr.groupName;
-        $scope.$bind('group', 'vis.aggs.bySchemaGroup["' + $scope.groupName + '"]');
+        $scope.$bind('group', 'state.aggs.bySchemaGroup["' + $scope.groupName + '"]');
         $scope.$bind('schemas', 'vis.type.schemas["' + $scope.groupName + '"]');
 
         $scope.$watchMulti([
@@ -66,9 +66,9 @@ uiModules
         function reorderFinished() {
         //the aggs have been reordered in [group] and we need
         //to apply that ordering to [vis.aggs]
-          const indexOffset = $scope.vis.aggs.indexOf($scope.group[0]);
+          const indexOffset = $scope.state.aggs.indexOf($scope.group[0]);
           _.forEach($scope.group, (agg, index) => {
-            move($scope.vis.aggs, agg, indexOffset + index);
+            move($scope.state.aggs, agg, indexOffset + index);
           });
         }
 

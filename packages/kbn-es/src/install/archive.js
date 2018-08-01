@@ -21,7 +21,7 @@ const fs = require('fs');
 const path = require('path');
 const chalk = require('chalk');
 const execa = require('execa');
-const { log: defaultLog, extractTarball } = require('../utils');
+const { log: defaultLog, decompress } = require('../utils');
 const { BASE_PATH, ES_CONFIG, ES_KEYSTORE_BIN } = require('../paths');
 
 /**
@@ -49,17 +49,17 @@ exports.installArchive = async function installArchive(archive, options = {}) {
   }
 
   log.info('extracting %s', chalk.bold(archive));
-  await extractTarball(archive, installPath);
+  await decompress(archive, installPath);
   log.info('extracted to %s', chalk.bold(installPath));
 
-  if (license !== 'oss') {
-    await appendToConfig(
-      installPath,
-      'xpack.license.self_generated.type',
-      license
-    );
-
+  if (license === 'trial') {
+    // starting in 6.3, security is disabled by default. Since we bootstrap
+    // the keystore, we can enable security ourselves.
     await appendToConfig(installPath, 'xpack.security.enabled', 'true');
+  }
+
+  if (license !== 'oss') {
+    await appendToConfig(installPath, 'xpack.license.self_generated.type', license);
     await configureKeystore(installPath, password, log);
   }
 
@@ -67,7 +67,7 @@ exports.installArchive = async function installArchive(archive, options = {}) {
 };
 
 /**
- * Recurive deletion for a directory
+ * Recursive deletion for a directory
  *
  * @param {String} path
  */
@@ -94,11 +94,7 @@ function rmrfSync(path) {
  * @param {String} value
  */
 async function appendToConfig(installPath, key, value) {
-  fs.appendFileSync(
-    path.resolve(installPath, ES_CONFIG),
-    `${key}: ${value}\n`,
-    'utf8'
-  );
+  fs.appendFileSync(path.resolve(installPath, ES_CONFIG), `${key}: ${value}\n`, 'utf8');
 }
 
 /**

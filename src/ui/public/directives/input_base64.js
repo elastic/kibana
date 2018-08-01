@@ -18,13 +18,14 @@
  */
 
 import { uiModules } from '../modules';
-import { Observable } from 'rxjs/Rx';
 const module = uiModules.get('kibana');
+import * as Rx from 'rxjs';
+import { map, switchMap, share } from 'rxjs/operators';
 
 const multipleUsageErrorMessage = 'Cannot use input-base-sixty-four directive on input with `multiple` attribute';
 
 const createFileContent$ = (file) => {
-  return Observable.create(observer => {
+  return Rx.Observable.create(observer => {
     const reader = new FileReader();
     reader.onerror = (err) => {
       observer.error(err);
@@ -63,10 +64,9 @@ module.directive('inputBaseSixtyFour', function () {
       const validators = [ maxSizeValidator ];
 
       // produce fileContent$ whenever the $element 'change' event is triggered.
-      const fileContent$ = Observable
-        .fromEvent($elem, 'change')
-        .map(e => e.target.files)
-        .switchMap(files => {
+      const fileContent$ = Rx.fromEvent($elem, 'change', e => e).pipe(
+        map(e => e.target.files),
+        switchMap(files => {
           if (files.length === 0) {
             return [];
           }
@@ -76,17 +76,19 @@ module.directive('inputBaseSixtyFour', function () {
           }
 
           return createFileContent$(files[0]);
-        })
-        .share();
+        }),
+        share()
+      );
 
       // validate the content of the files after it is loaded
-      const validations$ = fileContent$
-        .map(fileContent => (
+      const validations$ = fileContent$.pipe(
+        map(fileContent => (
           validators.map(validator => validator(fileContent))
-        ));
+        ))
+      );
 
       // push results from input/validation to the ngModel
-      const unsubscribe = Observable
+      const unsubscribe = Rx
         .combineLatest(fileContent$, validations$)
         .subscribe(([ fileContent, validations ]) => {
           $scope.$evalAsync(() => {

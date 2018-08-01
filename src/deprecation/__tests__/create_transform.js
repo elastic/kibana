@@ -28,7 +28,7 @@ describe('deprecation', function () {
         original: true
       };
       const deprecations = [(settings) => {
-        settings.origial = false;
+        settings.original = false;
       }];
       createTransform(deprecations)(settings);
       expect(settings.original).to.be(true);

@@ -49,7 +49,7 @@ export default function () {
         `--optimize.bundleDir=${OPTIMIZE_BUNDLE_DIR}`,
       ],
       serverArgs: [
-        '--env=development',
+        '--env.name=development',
         '--logging.json=false',
         `--server.port=${kbnTestConfig.getPort()}`,
         `--optimize.watchPort=${kbnTestConfig.getPort() + 10}`,

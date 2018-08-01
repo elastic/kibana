@@ -21,11 +21,10 @@ import React from 'react';
 import PropTypes from 'prop-types';
 
 import {
-  KuiButton,
-} from '@kbn/ui-framework/components';
-
-import {
   keyCodes,
+  EuiButtonEmpty,
+  EuiFormRow,
+  EuiFieldText,
 } from '@elastic/eui';
 
 export function PanelOptionsMenuForm({ title, onReset, onUpdatePanelTitle, onClose }) {
@@ -41,28 +40,30 @@ export function PanelOptionsMenuForm({ title, onReset, onUpdatePanelTitle, onClo
 
   return (
     <div
-      className="kuiVerticalRhythm dashboardPanelMenuOptionsForm"
+      className="dashboardPanelMenuOptionsForm"
       data-test-subj="dashboardPanelTitleInputMenuItem"
     >
-      <label className="kuiFormLabel" htmlFor="panelTitleInput">Panel title</label>
-      <input
-        id="panelTitleInput"
-        data-test-subj="customDashboardPanelTitleInput"
-        name="min"
-        type="text"
-        className="kuiTextInput"
-        value={title}
-        onChange={onInputChange}
-        onKeyDown={onKeyDown}
-        aria-label="Changes to this input are applied immediately. Press enter to exit."
-      />
-      <KuiButton
-        buttonType="hollow"
+      <EuiFormRow
+        label="Panel title"
+      >
+        <EuiFieldText
+          id="panelTitleInput"
+          data-test-subj="customDashboardPanelTitleInput"
+          name="min"
+          type="text"
+          value={title}
+          onChange={onInputChange}
+          onKeyDown={onKeyDown}
+          aria-label="Changes to this input are applied immediately. Press enter to exit."
+        />
+      </EuiFormRow>
+
+      <EuiButtonEmpty
         data-test-subj="resetCustomDashboardPanelTitle"
         onClick={onReset}
       >
         Reset title
-      </KuiButton>
+      </EuiButtonEmpty>
     </div>
   );
 }

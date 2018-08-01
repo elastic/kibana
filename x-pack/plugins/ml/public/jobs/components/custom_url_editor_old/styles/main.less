@@ -1,0 +1,45 @@
+@import (reference) "~ui/styles/variables";
+
+.ml-custom-url-manager {
+  .add-url-input {
+    display: block;
+  }
+
+  select {
+    width: 100%;
+  }
+
+  .link-to-label {
+    padding-right: 20px;
+  }
+
+  label.disabled {
+    color: @globalColorLightGray;
+  }
+
+  .entity-input {
+    display: inline-block;
+    margin-bottom: 5px;
+  }
+
+  .custom-url, .add-url-time-range {
+    display: flex;
+    position: relative;
+    padding-right: 30px;
+    button.remove-button {
+      top: 27px;
+      position: absolute;
+      right: 6px;
+    }
+
+    select {
+      height: 32px;
+    }
+
+    .form-group {
+      margin-right: 10px;
+    }
+  }
+
+}
+

@@ -21,8 +21,10 @@ import _ from 'lodash';
 import moment from 'moment';
 import { IndexedArray } from '../indexed_array';
 import { isNumeric } from '../utils/numeric';
+import { timefilter } from 'ui/timefilter';
+import { i18n } from '@kbn/i18n';
 
-export function IndexPatternsIntervalsProvider(timefilter) {
+export function IndexPatternsIntervalsProvider() {
 
   const intervals = new IndexedArray({
     index: ['name'],
@@ -30,27 +32,27 @@ export function IndexPatternsIntervalsProvider(timefilter) {
       {
         name: 'hours',
         startOf: 'hour',
-        display: 'Hourly'
+        display: i18n.translate('common.ui.indexPattern.intervals.hourlyHeader', { defaultMessage: 'Hourly' })
       },
       {
         name: 'days',
         startOf: 'day',
-        display: 'Daily'
+        display: i18n.translate('common.ui.indexPattern.intervals.dailyHeader', { defaultMessage: 'Daily' })
       },
       {
         name: 'weeks',
         startOf: 'isoWeek',
-        display: 'Weekly'
+        display: i18n.translate('common.ui.indexPattern.intervals.weeklyHeader', { defaultMessage: 'Weekly' })
       },
       {
         name: 'months',
         startOf: 'month',
-        display: 'Monthly'
+        display: i18n.translate('common.ui.indexPattern.intervals.monthlyHeader', { defaultMessage: 'Monthly' })
       },
       {
         name: 'years',
         startOf: 'year',
-        display: 'Yearly'
+        display: i18n.translate('common.ui.indexPattern.intervals.yearlyHeader', { defaultMessage: 'Yearly' })
       }
     ]
   });
@@ -82,7 +84,12 @@ export function IndexPatternsIntervalsProvider(timefilter) {
 
     if (typeof interval === 'string') {
       interval = _.find(intervals, { name: interval });
-      if (!interval) throw new Error('Interval must be one of ' + _.pluck(intervals, 'name'));
+      if (!interval) {
+        const errorMessage = i18n.translate('common.ui.indexPattern.intervalsErrorMessage',
+          { values: { intervals: _.pluck(intervals, 'name') }, defaultMessage: 'Interval must be one of {intervals}' });
+
+        throw new Error(errorMessage);
+      }
     }
 
     const indexList = [];

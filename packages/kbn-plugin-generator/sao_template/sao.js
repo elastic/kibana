@@ -19,7 +19,6 @@
 
 const { resolve, relative, dirname } = require('path');
 
-const kebabCase = require('lodash.kebabcase');
 const startCase = require('lodash.startcase');
 const camelCase = require('lodash.camelcase');
 const snakeCase = require('lodash.snakecase');
@@ -63,12 +62,20 @@ module.exports = function({ name }) {
         message: 'Should a server API be generated?',
         default: true,
       },
+      generateScss: {
+        type: 'confirm',
+        message: 'Should SCSS be used?',
+        when: answers => answers.generateApp,
+        default: true,
+      },
     },
     filters: {
       'public/**/*': 'generateApp',
       'translations/**/*': 'generateTranslations',
       'public/hack.js': 'generateHack',
       'server/**/*': 'generateApi',
+      'public/app.scss': 'generateScss',
+      '.kibana-plugin-helpers.json': 'generateScss',
     },
     move: {
       gitignore: '.gitignore',
@@ -78,9 +85,9 @@ module.exports = function({ name }) {
       Object.assign(
         {
           templateVersion: pkg.version,
-          kebabCase,
           startCase,
           camelCase,
+          snakeCase,
           name,
         },
         answers
@@ -93,10 +100,7 @@ module.exports = function({ name }) {
         cwd: KBN_DIR,
         stdio: 'inherit',
       }).then(() => {
-        const dir = relative(
-          process.cwd(),
-          resolve(KBN_DIR, `../kibana-extra`, snakeCase(name))
-        );
+        const dir = relative(process.cwd(), resolve(KBN_DIR, `../kibana-extra`, snakeCase(name)));
 
         log.success(chalk`🎉
 

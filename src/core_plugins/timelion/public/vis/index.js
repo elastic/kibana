@@ -28,7 +28,7 @@ import { DefaultEditorSize } from 'ui/vis/editor_size';
 import './timelion_vis_controller';
 import '../directives/timelion_expression_input';
 
-// Stylin
+// Styling
 import './timelion_vis.less';
 
 import visConfigTemplate from './timelion_vis.html';
@@ -66,6 +66,6 @@ export default function TimelionVisProvider(Private) {
       showIndexSelection: false,
       showQueryBar: false,
       showFilterBar: false,
-    }
+    },
   });
 }

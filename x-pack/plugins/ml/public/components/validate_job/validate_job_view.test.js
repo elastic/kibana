@@ -62,7 +62,7 @@ describe('ValidateJob', () => {
     ]
   });
 
-  test('renders button and modal with a messsage', () => {
+  test('renders button and modal with a message', () => {
     test2.wrapper.instance().openModal();
     test2.p.then(() => {
       test2.wrapper.update();

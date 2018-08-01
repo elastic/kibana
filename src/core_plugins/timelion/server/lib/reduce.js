@@ -47,10 +47,10 @@ async function pairwiseReduce(left, right, fn) {
   // ensure seriesLists contain same pairwise labels
   left.list.forEach((leftSeries) => {
     if (!indexedList[leftSeries[pairwiseField]]) {
-      const rightSeriesLables = right.list.map((rightSeries) => {
+      const rightSeriesLabels = right.list.map((rightSeries) => {
         return `"${rightSeries[pairwiseField]}"`;
       }).join(',');
-      throw new Error (`Matching series could not be found for "${leftSeries[pairwiseField]}" in [${rightSeriesLables}]`);
+      throw new Error (`Matching series could not be found for "${leftSeries[pairwiseField]}" in [${rightSeriesLabels}]`);
     }
   });
 

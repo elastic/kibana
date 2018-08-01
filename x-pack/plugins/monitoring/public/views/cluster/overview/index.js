@@ -7,6 +7,7 @@
 import uiRoutes from 'ui/routes';
 import { routeInitProvider } from 'plugins/monitoring/lib/route_init';
 import template from './index.html';
+import { timefilter } from 'ui/timefilter';
 
 uiRoutes.when('/overview', {
   template,
@@ -21,7 +22,6 @@ uiRoutes.when('/overview', {
     }
   },
   controller($injector, $scope) {
-    const timefilter = $injector.get('timefilter');
     timefilter.enableTimeRangeSelector();
     timefilter.enableAutoRefreshSelector();
 
@@ -41,7 +41,7 @@ uiRoutes.when('/overview', {
       }
     });
 
-    $executor.start();
+    $executor.start($scope);
 
     $scope.$on('$destroy', $executor.destroy);
   }

@@ -63,7 +63,8 @@ function TabbedAggResponseWriter(aggs, opts) {
   // to their aggConfig and enable the filterbar and tooltip formatters
   this.asAggConfigResults = !!this.opts.asAggConfigResults;
 
-  this.columns = tabifyGetColumns(aggs, this.minimalColumns);
+  this.aggs = aggs;
+  this.columns = tabifyGetColumns(aggs.getResponseAggs(), this.minimalColumns);
   this.aggStack = _.pluck(this.columns, 'aggConfig');
 
   this.root = new TabifyTableGroup();
@@ -156,7 +157,7 @@ TabbedAggResponseWriter.prototype._removeAggFromColumns = function (agg) {
 
   if (this.minimalColumns) return;
 
-  // hierarchical vis creats additional columns for each bucket
+  // hierarchical vis creates additional columns for each bucket
   // we will remove those too
   const mCol = this.columns.splice(i, 1).pop();
   const mI = _.findIndex(this.aggStack, function (agg) {
@@ -233,15 +234,15 @@ TabbedAggResponseWriter.prototype.cell = function (agg, value, block, filters) {
     value = new AggConfigResult(agg, this.acrStack[0], value, value, filters);
   }
 
-  const staskResult = this.asAggConfigResults && value.type === 'bucket';
+  const stackResult = this.asAggConfigResults && value.type === 'bucket';
 
   this.rowBuffer.push(value);
-  if (staskResult) this.acrStack.unshift(value);
+  if (stackResult) this.acrStack.unshift(value);
 
   if (_.isFunction(block)) block.call(this);
 
   this.rowBuffer.pop(value);
-  if (staskResult) this.acrStack.shift();
+  if (stackResult) this.acrStack.shift();
 
   return value;
 };

@@ -19,10 +19,7 @@
 
 import React from 'react';
 import sinon from 'sinon';
-import { mount, shallow } from 'enzyme';
-import {
-  findTestSubject,
-} from '@elastic/eui/lib/test';
+import { shallow } from 'enzyme';
 
 import {
   DashboardAddPanel,
@@ -48,15 +45,4 @@ test('render', () => {
     addNewVis={() => {}}
   />);
   expect(component).toMatchSnapshot();
-});
-
-test('onClose', () => {
-  const component = mount(<DashboardAddPanel
-    onClose={onClose}
-    find={() => {}}
-    addNewPanel={() => {}}
-    addNewVis={() => {}}
-  />);
-  findTestSubject(component, 'closeAddPanelBtn', false).simulate('click');
-  sinon.assert.calledOnce(onClose);
 });

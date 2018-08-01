@@ -12,7 +12,6 @@ import _ from 'lodash';
 
 import {
   EuiButton,
-  EuiButtonEmpty,
   EuiFlyout,
   EuiFlyoutBody,
   EuiFlyoutFooter,
@@ -203,7 +202,6 @@ export default class WatcherFlyout extends Component {
               <KibanaLink
                 pathname={'/app/kibana'}
                 hash={`/management/elasticsearch/watcher/watches/watch/${id}`}
-                query={{}}
               >
                 View watch.
               </KibanaLink>
@@ -242,7 +240,7 @@ export default class WatcherFlyout extends Component {
       return { value: `${hour}:00`, text: `${hour}:00 UTC` };
     });
 
-    const flyoutContent = (
+    const flyoutBody = (
       <EuiText>
         <p>
           This form will assist in creating a Watch that can notify you of error
@@ -253,7 +251,8 @@ export default class WatcherFlyout extends Component {
             href={_.get(ELASTIC_DOCS, 'watcher-get-started.url')}
           >
             documentation
-          </EuiLink>.
+          </EuiLink>
+          .
         </p>
 
         <EuiForm>
@@ -360,7 +359,7 @@ export default class WatcherFlyout extends Component {
           <EuiSpacer size="m" />
           {this.state.actions.email && (
             <EuiFormRow
-              label="Receipients (seperated with comma)"
+              label="Recipients (separated with comma)"
               compressed
               helpText={
                 <span>
@@ -370,7 +369,8 @@ export default class WatcherFlyout extends Component {
                     href={_.get(ELASTIC_DOCS, 'x-pack-emails.url')}
                   >
                     documentation
-                  </EuiLink>.
+                  </EuiLink>
+                  .
                 </span>
               }
             >
@@ -401,7 +401,8 @@ export default class WatcherFlyout extends Component {
                     href="https://get.slack.help/hc/en-us/articles/115005265063-Incoming-WebHooks-for-Slack"
                   >
                     documentation
-                  </EuiLink>.
+                  </EuiLink>
+                  .
                 </span>
               }
             >
@@ -420,33 +421,23 @@ export default class WatcherFlyout extends Component {
       <EuiFlyout onClose={this.props.onClose} size="s">
         <EuiFlyoutHeader>
           <EuiTitle>
-            <h2>Create new watch assistant</h2>
+            <h2>Enable error reports</h2>
           </EuiTitle>
         </EuiFlyoutHeader>
-        <EuiFlyoutBody>{flyoutContent}</EuiFlyoutBody>
-        <EuiFlyoutFooter>
-          <EuiFlexGroup justifyContent="spaceBetween">
-            <EuiFlexItem grow={false}>
-              <EuiButtonEmpty
-                iconType="cross"
-                onClick={this.props.onClose}
-                flush="left"
-              >
-                Cancel
-              </EuiButtonEmpty>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiButton
-                onClick={this.createWatch}
-                fill
-                disabled={
-                  !this.state.actions.email && !this.state.actions.slack
-                }
-              >
-                Create watch
-              </EuiButton>
-            </EuiFlexItem>
-          </EuiFlexGroup>
+        <EuiFlyoutBody>{flyoutBody}</EuiFlyoutBody>
+        <EuiFlyoutFooter
+          style={{
+            flexDirection: 'row-reverse',
+            display: 'flex'
+          }}
+        >
+          <EuiButton
+            onClick={this.createWatch}
+            fill
+            disabled={!this.state.actions.email && !this.state.actions.slack}
+          >
+            Create watch
+          </EuiButton>
         </EuiFlyoutFooter>
       </EuiFlyout>
     );

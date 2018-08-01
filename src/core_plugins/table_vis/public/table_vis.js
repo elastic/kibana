@@ -59,7 +59,7 @@ function TableVisTypeProvider(Private) {
       defaults: {
         perPage: 10,
         showPartialRows: false,
-        showMeticsAtAllLevels: false,
+        showMetricsAtAllLevels: false,
         sort: {
           columnIndex: null,
           direction: null
@@ -100,7 +100,7 @@ function TableVisTypeProvider(Private) {
       asAggConfigResults: true
     },
     hierarchicalData: function (vis) {
-      return Boolean(vis.params.showPartialRows || vis.params.showMeticsAtAllLevels);
+      return Boolean(vis.params.showPartialRows || vis.params.showMetricsAtAllLevels);
     }
   });
 }

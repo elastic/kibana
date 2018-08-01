@@ -22,15 +22,15 @@ export async function collectIndexPatterns(savedObjectsClient, panels) {
     const { kibanaSavedObjectMeta, savedSearchId } = panel.attributes;
 
     if (kibanaSavedObjectMeta && kibanaSavedObjectMeta.searchSourceJSON && !savedSearchId) {
-      let searchSource;
+      let searchSourceData;
       try {
-        searchSource = JSON.parse(kibanaSavedObjectMeta.searchSourceJSON);
+        searchSourceData = JSON.parse(kibanaSavedObjectMeta.searchSourceJSON);
       } catch (err) {
         return acc;
       }
 
-      if (searchSource.index && !acc.find(s => s.id === searchSource.index)) {
-        acc.push({ type: 'index-pattern', id: searchSource.index });
+      if (searchSourceData.index && !acc.find(s => s.id === searchSourceData.index)) {
+        acc.push({ type: 'index-pattern', id: searchSourceData.index });
       }
     }
     return acc;

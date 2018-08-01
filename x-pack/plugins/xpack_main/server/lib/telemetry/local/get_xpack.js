@@ -53,7 +53,7 @@ export function getXPackUsage(callCluster) {
  *
  * @param {Object} license The license returned from /_xpack/license
  * @param {Object} usage The usage details returned from /_xpack/usage
- * @return {Object} An object containig both the license and usage.
+ * @return {Object} An object containing both the license and usage.
  */
 export function handleXPack(license, usage) {
   return {

@@ -27,7 +27,7 @@ import { uiModules } from '../modules';
  * You can find more infos in the official documentation: https://docs.angularjs.org/api/ngAria.
  *
  * Three settings are disabled: it won't automatically attach `tabindex`, `role=button` or
- * handling keyboad events for `ngClick` directives. Kibana uses `kbnAccessibleClick` to handle
+ * handling keyboard events for `ngClick` directives. Kibana uses `kbnAccessibleClick` to handle
  * those cases where you need an `ngClick` non button element to have keyboard access.
  */
 uiModules

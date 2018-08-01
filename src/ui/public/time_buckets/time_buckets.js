@@ -35,7 +35,7 @@ function isValidMoment(m) {
 
 /**
  * Helper class for wrapping the concept of an "Interval",
- * which describes a timespan that will seperate moments.
+ * which describes a timespan that will separate moments.
  *
  * @param {state} object - one of ""
  * @param {[type]} display [description]
@@ -203,9 +203,9 @@ TimeBuckets.prototype.setInterval = function (input) {
  *   expression it will be forced into one.
  *
  * interval.scaled: the interval was adjusted to
- *   accomidate the maxBars setting.
+ *   accommodate the maxBars setting.
  *
- * interval.scale: the numer that y-values should be
+ * interval.scale: the number that y-values should be
  *   multiplied by
  *
  * interval.scaleDescription: a description that reflects

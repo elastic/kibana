@@ -18,7 +18,7 @@
  */
 
 import _ from 'lodash';
-import { requestQueue } from '../_request_queue';
+import { searchRequestQueue } from '../search_request_queue';
 import { FetchNowProvider } from './fetch_now';
 
 /**
@@ -35,8 +35,7 @@ export function FetchSoonProvider(Private, Promise) {
   const fetchNow = Private(FetchNowProvider);
 
   const debouncedFetchNow = _.debounce(() => {
-    const requests = requestQueue.filter(req => req.isFetchRequestedAndPending());
-    fetchNow(requests);
+    fetchNow(searchRequestQueue.getPending());
   }, {
     wait: 10,
     maxWait: 50
@@ -47,13 +46,17 @@ export function FetchSoonProvider(Private, Promise) {
    * @param {array} requests - the requests to fetch
    * @async
    */
-  this.these = (requests) => {
+  this.fetchSearchRequests = (requests) => {
     requests.forEach(req => req._setFetchRequested());
     debouncedFetchNow();
     return Promise.all(requests.map(req => req.getCompletePromise()));
   };
 
+  /**
+   * Return a promise that resembles the success of the fetch completing so we can execute
+   * logic based on this state change. Individual errors are routed to their respective requests.
+   */
   this.fetchQueued = () => {
-    return this.these(requestQueue.getStartable());
+    return this.fetchSearchRequests(searchRequestQueue.getStartable());
   };
 }

@@ -17,6 +17,7 @@
  * under the License.
  */
 
+import { mergeMap, catchError } from 'rxjs/operators';
 import { isInvalidDirectoryError } from '../errors';
 
 import { createChildDirectory$ } from './lib';
@@ -36,9 +37,9 @@ import { createPackageJsonAtPath$ } from './package_json_at_path';
  *  @return {Array<{pack}|{error}>}
  */
 export const createPackageJsonsInDirectory$ = (path) => (
-  createChildDirectory$(path)
-    .mergeMap(createPackageJsonAtPath$)
-    .catch(error => {
+  createChildDirectory$(path).pipe(
+    mergeMap(createPackageJsonAtPath$),
+    catchError(error => {
       // this error is produced by createChildDirectory$() when the path
       // is invalid, we return them as an error result similar to how
       // createPackAtPath$ works when it finds invalid packs in a directory
@@ -48,4 +49,5 @@ export const createPackageJsonsInDirectory$ = (path) => (
 
       throw error;
     })
+  )
 );

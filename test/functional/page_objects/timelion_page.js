@@ -47,6 +47,7 @@ export function TimelionPageProvider({ getService, getPageObjects }) {
     async updateExpression(updates) {
       const input = await testSubjects.find('timelionExpressionTextArea');
       await input.type(updates);
+      await PageObjects.common.sleep(500);
     }
 
     async getExpression() {
@@ -59,12 +60,14 @@ export function TimelionPageProvider({ getService, getPageObjects }) {
       return await Promise.all(elements.map(async element => await element.getVisibleText()));
     }
 
-    async clickSuggestion(suggestionIndex = 0) {
+    async clickSuggestion(suggestionIndex = 0, waitTime = 500) {
       const elements = await find.allByCssSelector('.suggestions .suggestion');
       if (suggestionIndex > elements.length) {
         throw new Error(`Unable to select suggestion ${suggestionIndex}, only ${elements.length} suggestions available.`);
       }
       await elements[suggestionIndex].click();
+      // Wait for timelion expression to be updated after clicking suggestions
+      await PageObjects.common.sleep(waitTime);
     }
   }
 

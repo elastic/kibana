@@ -11,6 +11,7 @@ import { toggle } from 'plugins/security/lib/util';
 import { isRoleEnabled } from 'plugins/security/lib/role';
 import template from 'plugins/security/views/management/edit_role.html';
 import 'angular-ui-select';
+import 'plugins/security/services/application_privilege';
 import 'plugins/security/services/shield_user';
 import 'plugins/security/services/shield_role';
 import 'plugins/security/services/shield_privileges';
@@ -21,10 +22,46 @@ import { XPackInfoProvider } from 'plugins/xpack_main/services/xpack_info';
 import { checkLicenseError } from 'plugins/security/lib/check_license_error';
 import { EDIT_ROLES_PATH, ROLES_PATH } from './management_urls';
 
+const getKibanaPrivilegesViewModel = (applicationPrivileges, roleKibanaPrivileges) => {
+  const viewModel = applicationPrivileges.reduce((acc, applicationPrivilege) => {
+    acc[applicationPrivilege.name] = false;
+    return acc;
+  }, {});
+
+  if (!roleKibanaPrivileges || roleKibanaPrivileges.length === 0) {
+    return viewModel;
+  }
+
+  const assignedPrivileges = _.uniq(_.flatten(_.pluck(roleKibanaPrivileges, 'privileges')));
+  assignedPrivileges.forEach(assignedPrivilege => {
+    // we don't want to display privileges that aren't in our expected list of privileges
+    if (assignedPrivilege in viewModel) {
+      viewModel[assignedPrivilege] = true;
+    }
+  });
+
+  return viewModel;
+};
+
+const getKibanaPrivileges = (kibanaPrivilegesViewModel) => {
+  const selectedPrivileges = Object.keys(kibanaPrivilegesViewModel).filter(key => kibanaPrivilegesViewModel[key]);
+
+  // if we have any selected privileges, add a single application entry
+  if (selectedPrivileges.length > 0) {
+    return [
+      {
+        privileges: selectedPrivileges
+      }
+    ];
+  }
+
+  return [];
+};
+
 routes.when(`${EDIT_ROLES_PATH}/:name?`, {
   template,
   resolve: {
-    role($route, ShieldRole, kbnUrl, Promise, Notifier) {
+    role($route, ShieldRole, kbnUrl, Promise) {
       const name = $route.current.params.name;
       if (name != null) {
         return ShieldRole.get({ name }).$promise
@@ -34,17 +71,24 @@ routes.when(`${EDIT_ROLES_PATH}/:name?`, {
               return fatalError(response);
             }
 
-            const notifier = new Notifier();
-            notifier.error(`No "${name}" role found.`);
+            toastNotifications.addDanger(`No "${name}" role found.`);
             kbnUrl.redirect(ROLES_PATH);
             return Promise.halt();
           });
       }
       return new ShieldRole({
-        cluster: [],
-        indices: [],
-        run_as: []
+        elasticsearch: {
+          cluster: [],
+          indices: [],
+          run_as: [],
+        },
+        kibana: [],
+        _unrecognized_applications: []
       });
+    },
+    applicationPrivileges(ApplicationPrivileges, kbnUrl, Promise, Private) {
+      return ApplicationPrivileges.query().$promise
+        .catch(checkLicenseError(kbnUrl, Promise, Private));
     },
     users(ShieldUser, kbnUrl, Promise, Private) {
       // $promise is used here because the result is an ngResource, not a promise itself
@@ -62,7 +106,6 @@ routes.when(`${EDIT_ROLES_PATH}/:name?`, {
     const $route = $injector.get('$route');
     const kbnUrl = $injector.get('kbnUrl');
     const shieldPrivileges = $injector.get('shieldPrivileges');
-    const Notifier = $injector.get('Notifier');
     const Private = $injector.get('Private');
     const confirmModal = $injector.get('confirmModal');
     const shieldIndices = $injector.get('shieldIndices');
@@ -71,19 +114,23 @@ routes.when(`${EDIT_ROLES_PATH}/:name?`, {
     $scope.users = $route.current.locals.users;
     $scope.indexPatterns = $route.current.locals.indexPatterns;
     $scope.privileges = shieldPrivileges;
+
+    const applicationPrivileges = $route.current.locals.applicationPrivileges;
+    const role = $route.current.locals.role;
+    $scope.kibanaPrivilegesViewModel = getKibanaPrivilegesViewModel(applicationPrivileges, role.kibana);
+    $scope.otherApplications = role._unrecognized_applications;
+
     $scope.rolesHref = `#${ROLES_PATH}`;
 
     this.isNewRole = $route.current.params.name == null;
     this.fieldOptions = {};
-
-    const notifier = new Notifier();
 
     $scope.deleteRole = (role) => {
       const doDelete = () => {
         role.$delete()
           .then(() => toastNotifications.addSuccess('Deleted role'))
           .then($scope.goToRoleList)
-          .catch(error => notifier.error(_.get(error, 'data.message')));
+          .catch(error => toastNotifications.addDanger(_.get(error, 'data.message')));
       };
       const confirmModalOptions = {
         confirmButtonText: 'Delete role',
@@ -93,12 +140,15 @@ routes.when(`${EDIT_ROLES_PATH}/:name?`, {
     };
 
     $scope.saveRole = (role) => {
-      role.indices = role.indices.filter((index) => index.names.length);
-      role.indices.forEach((index) => index.query || delete index.query);
+      role.elasticsearch.indices = role.elasticsearch.indices.filter((index) => index.names.length);
+      role.elasticsearch.indices.forEach((index) => index.query || delete index.query);
+
+      role.kibana = getKibanaPrivileges($scope.kibanaPrivilegesViewModel);
+
       return role.$save()
         .then(() => toastNotifications.addSuccess('Updated role'))
         .then($scope.goToRoleList)
-        .catch(error => notifier.error(_.get(error, 'data.message')));
+        .catch(error => toastNotifications.addDanger(_.get(error, 'data.message')));
     };
 
     $scope.goToRoleList = () => {
@@ -131,13 +181,14 @@ routes.when(`${EDIT_ROLES_PATH}/:name?`, {
     $scope.allowDocumentLevelSecurity = xpackInfo.get('features.security.allowRoleDocumentLevelSecurity');
     $scope.allowFieldLevelSecurity = xpackInfo.get('features.security.allowRoleFieldLevelSecurity');
 
-    $scope.$watch('role.indices', (indices) => {
+    $scope.$watch('role.elasticsearch.indices', (indices) => {
       if (!indices.length) $scope.addIndex(indices);
       else indices.forEach($scope.fetchFieldOptions);
     }, true);
 
     $scope.toggle = toggle;
     $scope.includes = _.includes;
+
     $scope.union = _.flow(_.union, _.compact);
   }
 });

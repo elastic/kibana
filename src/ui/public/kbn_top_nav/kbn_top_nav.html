@@ -20,6 +20,7 @@
           aria-label="{{::menuItem.description}}"
           aria-haspopup="{{!menuItem.hasFunction}}"
           aria-expanded="{{kbnTopNav.isCurrent(menuItem.key)}}"
+          aria-disabled="{{menuItem.disableButton()}}"
           ng-class="{'kuiLocalMenuItem-isSelected': kbnTopNav.isCurrent(menuItem.key), 'kuiLocalMenuItem-isDisabled': menuItem.disableButton()}"
           ng-click="kbnTopNav.handleClick(menuItem)"
           ng-bind="menuItem.label"

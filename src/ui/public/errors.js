@@ -52,17 +52,7 @@ export class KbnError {
 createLegacyClass(KbnError).inherits(Error);
 
 /**
- * SearchTimeout error class
- */
-export class SearchTimeout extends KbnError {
-  constructor() {
-    super('All or part of your request has timed out. The data shown may be incomplete.',
-      SearchTimeout);
-  }
-}
-
-/**
- * Request Failure - When an entire mutli request fails
+ * Request Failure - When an entire multi request fails
  * @param {Error} err - the Error that came back
  * @param {Object} resp - optional HTTP response
  */
@@ -87,20 +77,6 @@ export class FetchFailure extends KbnError {
     super(
       `Failed to get the doc: ${angular.toJson(resp)}`,
       FetchFailure);
-
-    this.resp = resp;
-  }
-}
-
-/**
- * ShardFailure Error - when one or more shards fail
- * @param {Object} resp - The response from es.
- */
-export class ShardFailure extends KbnError {
-  constructor(resp) {
-    super(
-      `${resp._shards.failed} of ${resp._shards.total} shards failed.`,
-      ShardFailure);
 
     this.resp = resp;
   }
@@ -146,7 +122,7 @@ export class RestrictedMapping extends KbnError {
 }
 
 /**
- * a non-critical cache write to elasticseach failed
+ * a non-critical cache write to elasticsearch failed
  */
 export class CacheWriteFailure extends KbnError {
   constructor() {
@@ -251,6 +227,17 @@ export class PersistedStateError extends KbnError {
     super(
       'Error with the persisted state',
       PersistedStateError);
+  }
+}
+
+/**
+ * This error is for scenarios where a saved object is detected that has invalid JSON properties.
+ * There was a scenario where we were importing objects with double-encoded JSON, and the system
+ * was silently failing. This error is now thrown in those scenarios.
+ */
+export class InvalidJSONProperty extends KbnError {
+  constructor(message) {
+    super(message);
   }
 }
 

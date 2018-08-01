@@ -97,7 +97,7 @@ describe('#batchSet', () => {
 
     // if changes were sent to the API now they would be { bar: 'foo' }
     uiSettingsApi.batchSet('bar', 'foo');
-    // these changes override the preivous one, we should now send { bar: null }
+    // these changes override the previous one, we should now send { bar: null }
     uiSettingsApi.batchSet('bar', null);
 
     await resolveMockedSendRequestAndWaitForNext();

@@ -4,28 +4,47 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { LOGGING_TAG, KIBANA_MONITORING_LOGGING_TAG, } from './common/constants';
 import { requireUIRoutes } from './server/routes';
 import { instantiateClient } from './server/es_client/instantiate_client';
 import { initMonitoringXpackInfo } from './server/init_monitoring_xpack_info';
-import { createCollectorSet } from './server/kibana_monitoring';
+import { initBulkUploader } from './server/kibana_monitoring';
+import {
+  getKibanaUsageCollector,
+  getOpsStatsCollector,
+  getSettingsCollector,
+} from './server/kibana_monitoring/collectors';
 
 /**
  * Initialize the Kibana Monitoring plugin by starting up asynchronous server tasks
  * - [1] instantiation of an elasticsearch-js client exposed as a server plugin object
  * - [2] start monitoring cluster x-pack license and features check
  * - [3] webserver route handling
- * - [4] start the internal monitoring collectors
+ * - [4] start the internal monitoring collector/bulk uploader
  * - [5] expose the monitoring collector object for other plugins to register with
- * - [6] set monitoring plugin status to green
  * @param monitoringPlugin {Object} Monitoring UI plugin
  * @param server {Object} HapiJS server instance
  */
 export const init = (monitoringPlugin, server) => {
-  monitoringPlugin.status.yellow('Initializing');
-  const xpackMainPlugin = server.plugins.xpack_main;
+  const kbnServer = monitoringPlugin.kbnServer;
+  const config = server.config();
+  const { collectorSet } = server.usage;
+  /*
+   * Register collector objects for stats to show up in the APIs
+   */
+  collectorSet.register(getOpsStatsCollector(server, kbnServer));
+  collectorSet.register(getKibanaUsageCollector(server));
+  collectorSet.register(getSettingsCollector(server, kbnServer));
 
-  xpackMainPlugin.status.once('green', async () => {
-    const config = server.config();
+  /*
+   * Instantiate and start the internal background task that calls collector
+   * fetch methods and uploads to the ES monitoring bulk endpoint
+   */
+  const xpackMainPlugin = server.plugins.xpack_main;
+  xpackMainPlugin.status.once('green', async () => { // first time xpack_main turns green
+    /*
+     * End-user-facing services
+     */
     const uiEnabled = config.get('xpack.monitoring.ui.enabled');
 
     if (uiEnabled) {
@@ -33,14 +52,32 @@ export const init = (monitoringPlugin, server) => {
       await initMonitoringXpackInfo(server); // Route handlers depend on this for xpackInfo
       await requireUIRoutes(server);
     }
-
-    if (config.get('xpack.monitoring.kibana.collection.enabled')) {
-      const collectorSet = createCollectorSet(monitoringPlugin.kbnServer, server); // instantiate an object for collecting/sending metrics and usage stats
-      server.expose('collectorSet', collectorSet); // expose the collector set object on the server. other plugins will call statsCollectors.register(collector) to define their own collection
-    }
-
-    monitoringPlugin.status.green('Ready');
   });
+
+  const bulkUploader = initBulkUploader(kbnServer, server);
+  const kibanaCollectionEnabled = config.get('xpack.monitoring.kibana.collection.enabled');
+  const { info: xpackMainInfo } = xpackMainPlugin;
+
+  if (kibanaCollectionEnabled) {
+    /*
+     * Bulk uploading of Kibana stats
+     */
+    xpackMainInfo.onLicenseInfoChange(() => {
+      // use updated xpack license info to start/stop bulk upload
+      const mainMonitoring = xpackMainInfo.feature('monitoring');
+      const monitoringBulkEnabled = mainMonitoring && mainMonitoring.isAvailable() && mainMonitoring.isEnabled();
+      if (monitoringBulkEnabled) {
+        bulkUploader.start(collectorSet);
+      } else {
+        bulkUploader.handleNotEnabled();
+      }
+    });
+  } else if (!kibanaCollectionEnabled) {
+    server.log(
+      ['info', LOGGING_TAG, KIBANA_MONITORING_LOGGING_TAG],
+      'Internal collection for Kibana monitoring is disabled per configuration.'
+    );
+  }
 
   server.injectUiAppVars('monitoring', (server) => {
     const config = server.config();

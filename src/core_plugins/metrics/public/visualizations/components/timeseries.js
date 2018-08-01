@@ -36,7 +36,7 @@ class Timeseries extends Component {
       values: values || {},
       show: _.keys(values) || [],
       ignoreLegendUpdates: false,
-      ignoreVisabilityUpdates: false
+      ignoreVisibilityUpdates: false
     };
     this.toggleFilter = this.toggleFilter.bind(this);
     this.handleHideClick = this.handleHideClick.bind(this);
@@ -49,10 +49,10 @@ class Timeseries extends Component {
     const isCurrentlyShown = _.includes(this.state.show, id);
     const show = [];
     if (notAllShown && isCurrentlyShown) {
-      this.setState({ ignoreVisabilityUpdates: false, show: Object.keys(this.state.values) });
+      this.setState({ ignoreVisibilityUpdates: false, show: Object.keys(this.state.values) });
     } else {
       show.push(id);
-      this.setState({ ignoreVisabilityUpdates: true, show: [id] });
+      this.setState({ ignoreVisibilityUpdates: true, show: [id] });
     }
     return show;
   }
@@ -109,7 +109,7 @@ class Timeseries extends Component {
       const keys = _.keys(values);
       const diff = _.difference(keys, currentKeys);
       const nextState = { values: values };
-      if (diff.length && !this.state.ignoreVisabilityUpdates) {
+      if (diff.length && !this.state.ignoreVisibilityUpdates) {
         nextState.show = keys;
       }
       this.setState(nextState);
@@ -177,7 +177,7 @@ class Timeseries extends Component {
 }
 
 Timeseries.defaultProps = {
-  legned: true,
+  legend: true,
   showGrid: true
 };
 

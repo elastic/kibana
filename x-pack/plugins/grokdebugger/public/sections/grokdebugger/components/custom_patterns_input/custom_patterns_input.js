@@ -4,47 +4,59 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { uiModules } from 'ui/modules';
-import { InitAfterBindingsWorkaround } from 'ui/compat';
+import React from 'react';
+import {
+  EuiAccordion,
+  EuiCallOut,
+  EuiCodeBlock,
+  EuiFormRow,
+  EuiPanel,
+  EuiCodeEditor,
+  EuiSpacer
+} from '@elastic/eui';
 import { EDITOR } from '../../../../../common/constants';
-import { applyEditorOptions } from '../../../../lib/ace';
-import template from './custom_patterns_input.html';
-import './custom_patterns_input.less';
-import 'ui/toggle_panel';
-import 'ace';
 
-const app = uiModules.get('xpack/grokdebugger');
+export function CustomPatternsInput({ value, onChange }) {
+  const sampleCustomPatterns = `POSTFIX_QUEUEID [0-9A-F]{10,11}
+MSG message-id=<%{GREEDYDATA}>`;
 
-app.directive('customPatternsInput', function () {
-  return {
-    restrict: 'E',
-    template: template,
-    scope: {
-      onChange: '='
-    },
-    bindToController: true,
-    controllerAs: 'customPatternsInput',
-    controller: class CustomPatternsInputController extends InitAfterBindingsWorkaround {
-      initAfterBindings($scope) {
-        this.isCollapsed = {
-          action: true
-        };
-        $scope.$watch('customPatternsInput.customPatterns', () => {
-          this.onChange(this.customPatterns);
-        });
-        $scope.aceLoaded = (editor) => {
-          this.editor = editor;
-          applyEditorOptions(editor, EDITOR.PATTERN_MIN_LINES, EDITOR.PATTERN_MAX_LINES);
-        };
-      }
+  return (
+    <EuiAccordion
+      id="customPatternsInput"
+      buttonContent="Custom Patterns"
+      data-test-subj="btnToggleCustomPatternsInput"
+    >
 
-      onSectionToggle = (sectionId) => {
-        this.isCollapsed[sectionId] = !this.isCollapsed[sectionId];
-      }
+      <EuiSpacer size="m" />
 
-      isSectionCollapsed = (sectionId) => {
-        return this.isCollapsed[sectionId];
-      }
-    }
-  };
-});
+      <EuiCallOut
+        title="Enter one custom pattern per line. For example:"
+      >
+        <EuiCodeBlock>
+          { sampleCustomPatterns }
+        </EuiCodeBlock>
+      </EuiCallOut>
+
+      <EuiSpacer size="m" />
+
+      <EuiFormRow
+        fullWidth
+        data-test-subj="aceCustomPatternsInput"
+      >
+        <EuiPanel paddingSize="s">
+          <EuiCodeEditor
+            width="100%"
+            value={value}
+            onChange={onChange}
+            setOptions={{
+              highlightActiveLine: false,
+              highlightGutterLine: false,
+              minLines: EDITOR.PATTERN_MIN_LINES,
+              maxLines: EDITOR.PATTERN_MAX_LINES,
+            }}
+          />
+        </EuiPanel>
+      </EuiFormRow>
+    </EuiAccordion>
+  );
+}

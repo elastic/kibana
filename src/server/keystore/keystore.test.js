@@ -26,7 +26,7 @@ import { Keystore } from './keystore';
 describe('Keystore', () => {
   const sandbox = sinon.createSandbox();
 
-  const protoctedKeystoreData = '1:4BnWfydL8NwFIQJg+VQKe0jlIs7uXtty6+++yaWPbSB'
+  const protectedKeystoreData = '1:4BnWfydL8NwFIQJg+VQKe0jlIs7uXtty6+++yaWPbSB'
     + 'KIX3d9nPfQ20K1C6Xh26E/gMJAQ9jh7BxK0+W3lt/iDJBJn44wqX3pQ0189iGkNBL0ibDCc'
     + 'tz4mRy6+hqwiLxiukpH8ELAJsff8LNNHr+gNzX/2k/GvB7nQ==';
 
@@ -37,7 +37,7 @@ describe('Keystore', () => {
   beforeEach(() => {
     mockFs({
       '/data': {
-        'protected.keystore': protoctedKeystoreData,
+        'protected.keystore': protectedKeystoreData,
         'unprotected.keystore': unprotectedKeystoreData,
       },
       '/inaccessible': mockFs.directory({

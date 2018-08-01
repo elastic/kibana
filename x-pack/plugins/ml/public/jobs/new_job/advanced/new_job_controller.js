@@ -11,6 +11,7 @@ import angular from 'angular';
 import 'ace';
 
 import { parseInterval } from 'ui/utils/parse_interval';
+import { timefilter } from 'ui/timefilter';
 
 import uiRoutes from 'ui/routes';
 import { checkLicense } from 'plugins/ml/license/check_license';
@@ -20,6 +21,7 @@ import saveStatusTemplate from 'plugins/ml/jobs/new_job/advanced/save_status_mod
 import { createSearchItems, createJobForSaving } from 'plugins/ml/jobs/new_job/utils/new_job_utils';
 import { loadIndexPatterns, loadCurrentIndexPattern, loadCurrentSavedSearch, timeBasedIndexCheck } from 'plugins/ml/util/index_utils';
 import { ML_JOB_FIELD_TYPES, ES_FIELD_TYPES } from 'plugins/ml/../common/constants/field_types';
+import { ALLOWED_DATA_UNITS } from 'plugins/ml/../common/constants/validation';
 import { checkMlNodesAvailable } from 'plugins/ml/ml_nodes_check/check_ml_nodes';
 import { loadNewJobDefaults, newJobLimits, newJobDefaults } from 'plugins/ml/jobs/new_job/utils/new_job_defaults';
 import {
@@ -69,7 +71,6 @@ module.controller('MlNewJob',
     $route,
     $location,
     $modal,
-    timefilter,
     mlDatafeedService,
     mlConfirmModalService) {
 
@@ -98,6 +99,8 @@ module.controller('MlNewJob',
       '_type',
       '_uid',
       '_version',
+      '_feature',
+      '_ignored',
     ];
 
     const allowedInfluencerTypes = [
@@ -349,6 +352,16 @@ module.controller('MlNewJob',
                 });
               });
 
+              // Add script fields from the job configuration to $scope.fields
+              // so they're available from within the dropdown in the detector modal.
+              const scriptFields = Object.keys(_.get($scope.job, 'datafeed_config.script_fields', {}));
+              // This type information is retrieved via fieldCaps for regular fields,
+              // here we're creating a similar object so the script field is usable further on.
+              const scriptType = { type: 'script_fields', searchable: false, aggregatable: true };
+              scriptFields.forEach((fieldName) => {
+                $scope.fields[fieldName] = scriptType;
+              });
+
               if (Object.keys($scope.fields).length) {
                 $scope.ui.indexTextOk = true;
               }
@@ -472,7 +485,7 @@ module.controller('MlNewJob',
                     // mappings should be fully set up, but the Kibana mappings then
                     // need to be refreshed to reflect the Elasticsearch mappings for
                     // any new analytical fields that have been configured in the job.
-                    //courier.indexPatterns.get('.ml-anomalies-*')
+                    //indexPatterns.get('.ml-anomalies-*')
                     //.then((indexPattern) => {
                     //  indexPattern.refreshFields()
                     //  .then(() => {
@@ -1012,6 +1025,13 @@ module.controller('MlNewJob',
           let msg = 'Job group names can contain lowercase alphanumeric (a-z and 0-9), hyphens or underscores; ';
           msg += 'must start and end with an alphanumeric character';
           tabs[0].checks.groupIds.message = msg;
+        }
+
+        if (validationResults.contains('model_memory_limit_units_invalid')) {
+          tabs[0].checks.modelMemoryLimit.valid = false;
+          const str = `${(ALLOWED_DATA_UNITS.slice(0, ALLOWED_DATA_UNITS.length - 1).join(', '))} or ${([...ALLOWED_DATA_UNITS].pop())}`;
+          const msg = `Model memory limit data unit unrecognized. It must be ${str}`;
+          tabs[0].checks.modelMemoryLimit.message = msg;
         }
 
         if (validationResults.contains('model_memory_limit_invalid')) {

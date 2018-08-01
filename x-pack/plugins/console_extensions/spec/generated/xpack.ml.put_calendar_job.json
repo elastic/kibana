@@ -1,0 +1,10 @@
+{
+  "xpack.ml.put_calendar_job": {
+    "methods": [
+      "PUT"
+    ],
+    "patterns": [
+      "_xpack/ml/calendars/{calendar_id}/jobs/{job_id}"
+    ]
+  }
+}

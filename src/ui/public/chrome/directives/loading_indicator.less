@@ -2,8 +2,8 @@
 
 @loadingIndicatorBackgroundSize: 400px;
 @loadingIndicatorHeight: 2px;
-@loadingIndcatorColor1: @kibanaPink1;
-@loadingIndcatorColor2: @kibanaPink2;
+@loadingIndicatorColor1: @kibanaPink1;
+@loadingIndicatorColor2: @kibanaPink2;
 
 /**
  * 1. Position this loader on top of the content.
@@ -34,20 +34,20 @@
     z-index: 10;
     visibility: visible;
     display: block;
-    animation: animate-loading-indcator 2s linear infinite;
+    animation: animate-loading-indicator 2s linear infinite;
     background-color: @kibanaPink2;
     background-image: linear-gradient(to right,
-      @loadingIndcatorColor1 0%,
-      @loadingIndcatorColor1 50%,
-      @loadingIndcatorColor2 50%,
-      @loadingIndcatorColor2 100%
+      @loadingIndicatorColor1 0%,
+      @loadingIndicatorColor1 50%,
+      @loadingIndicatorColor2 50%,
+      @loadingIndicatorColor2 100%
       );
     background-repeat: repeat-x;
     background-size: @loadingIndicatorBackgroundSize @loadingIndicatorBackgroundSize;
     width: 200%;
   }
 
-  @keyframes animate-loading-indcator {
+  @keyframes animate-loading-indicator {
     from { transform: translateX(0); }
     to { transform: translateX(-@loadingIndicatorBackgroundSize); }
   }

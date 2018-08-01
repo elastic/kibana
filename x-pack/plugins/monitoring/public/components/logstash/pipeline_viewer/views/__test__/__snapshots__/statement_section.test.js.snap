@@ -1,0 +1,28 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`StatementSection component renders heading text, correct icon type, and elements for StatementSection 1`] = `
+<div>
+  <StatementListHeading
+    iconType="logstashInput"
+    title="Inputs"
+  />
+  <EuiSpacer
+    size="s"
+  />
+  <StatementList
+    elements={
+      Array [
+        Object {
+          "id": "standardInput",
+          "parentId": null,
+        },
+        Object {
+          "id": "fileInput",
+          "parentId": null,
+        },
+      ]
+    }
+    onShowVertexDetails={[MockFunction]}
+  />
+</div>
+`;

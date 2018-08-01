@@ -42,7 +42,7 @@ export function errorIfXPackInstall(settings) {
 export function errorIfXPackRemove(settings) {
   if (isXPack(settings.plugin) && !isOSS()) {
     throw new Error(
-      'You are using the standard distrbution of Kibana.  Please install the OSS-only distribution to remove X-Pack features.'
+      'You are using the standard distribution of Kibana.  Please install the OSS-only distribution to remove X-Pack features.'
     );
   }
 }

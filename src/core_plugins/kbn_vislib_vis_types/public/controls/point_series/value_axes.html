@@ -16,7 +16,7 @@
   </div>
 
   <div
-    ng-repeat="axis in vis.params.valueAxes track by axis.id"
+    ng-repeat="axis in editorState.params.valueAxes track by axis.id"
     class="kuiSideBarSection"
   >
     <div class="kuiSideBarCollapsibleTitle">
@@ -41,7 +41,7 @@
       <div tooltip="{{getSeries(axis)}}">{{getSeriesShort(axis)}}</div>
 
       <button
-        ng-hide="vis.params.valueAxes.length === 1"
+        ng-hide="editorState.params.valueAxes.length === 1"
         aria-label="Remove Y axis"
         ng-click="removeValueAxis(axis)"
         tooltip="Remove Y axis"

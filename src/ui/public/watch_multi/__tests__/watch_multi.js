@@ -53,7 +53,7 @@ describe('$scope.$watchMulti', function () {
       $scope.$apply();
       expect(triggers).to.be(1);
 
-      // prove that it triggers on chagne
+      // prove that it triggers on change
       $scope.a++;
       $scope.$apply();
       expect(triggers).to.be(2);

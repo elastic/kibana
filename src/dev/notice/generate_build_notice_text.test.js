@@ -24,6 +24,7 @@ import { generateBuildNoticeText } from './generate_build_notice_text';
 
 const NODE_MODULES = resolve(__dirname, '__fixtures__/node_modules');
 const NODE_DIR = resolve(process.execPath, '../..');
+const NODE_VERSION = '8.11.3';
 const PACKAGES = [
   {
     name: 'bar',
@@ -49,6 +50,7 @@ describe('src/dev/build/tasks/notice_file/generate_notice', () => {
         (notice = await generateBuildNoticeText({
           packages: PACKAGES,
           nodeDir: NODE_DIR,
+          nodeVersion: NODE_VERSION,
           noticeFromSource: 'NOTICE_FROM_SOURCE\n'
         }))
     );
@@ -75,6 +77,12 @@ describe('src/dev/build/tasks/notice_file/generate_notice', () => {
     it('includes the LICENSE file from node', () => {
       expect(notice).toEqual(expect.stringContaining(
         readFileSync(resolve(NODE_DIR, 'LICENSE'), 'utf8')
+      ));
+    });
+
+    it('includes node version', () => {
+      expect(notice).toEqual(expect.stringContaining(
+        'This product bundles Node.js v8.11.3'
       ));
     });
 

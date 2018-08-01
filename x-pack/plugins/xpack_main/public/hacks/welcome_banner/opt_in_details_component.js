@@ -8,13 +8,11 @@ import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 
 import {
-  EuiButton,
   EuiCallOut,
   EuiCodeBlock,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFlyout,
-  EuiFlyoutFooter,
   EuiFlyoutHeader,
   EuiFlyoutBody,
   EuiLoadingSpinner,
@@ -108,14 +106,6 @@ export class OptInExampleFlyout extends Component {
           <EuiFlyoutBody>
             { this.renderBody(this.state) }
           </EuiFlyoutBody>
-          <EuiFlyoutFooter>
-            <EuiButton
-              iconType="cross"
-              onClick={this.props.onClose}
-            >
-              Close
-            </EuiButton>
-          </EuiFlyoutFooter>
         </EuiFlyout>
       </EuiPortal>
     );

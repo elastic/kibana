@@ -32,18 +32,20 @@ export const CleanTask = {
 };
 
 export const CleanPackagesTask = {
-  description: 'Cleaning source for packages that are now installed in node_modules',
+  description:
+    'Cleaning source for packages that are now installed in node_modules',
 
   async run(config, log, build) {
     await deleteAll(log, [
       build.resolvePath('packages'),
-      build.resolvePath('x-pack')
+      build.resolvePath('x-pack'),
     ]);
   },
 };
 
 export const CleanTypescriptTask = {
-  description: 'Cleaning typescript source files that have been transpiled to JS',
+  description:
+    'Cleaning typescript source files that have been transpiled to JS',
 
   async run(config, log, build) {
     await deleteAll(log, [
@@ -57,13 +59,94 @@ export const CleanExtraFilesFromModulesTask = {
   description: 'Cleaning tests, examples, docs, etc. from node_modules',
 
   async run(config, log, build) {
-    await deleteAll(log, [
-      build.resolvePath('node_modules/**/test/**/*'),
-      build.resolvePath('node_modules/**/tests/**/*'),
-      build.resolvePath('node_modules/**/example/**/*'),
-      build.resolvePath('node_modules/**/examples/**/*'),
-      build.resolvePath('node_modules/**/.bin/**/*'),
-    ]);
+    const deleteFromNodeModules = globs => {
+      return deleteAll(
+        log,
+        globs.map(p => build.resolvePath(`node_modules/**/${p}`))
+      );
+    };
+
+    const tests = [
+      'test',
+      'tests',
+      '__tests__',
+      'mocha.opts',
+      '*.test.js',
+      '*.snap',
+      'coverage',
+    ];
+    const docs = [
+      'doc',
+      'docs',
+      'CONTRIBUTING.md',
+      'Contributing.md',
+      'contributing.md',
+      'History.md',
+      'HISTORY.md',
+      'history.md',
+      'CHANGELOG.md',
+      'Changelog.md',
+      'changelog.md',
+    ];
+    const examples = ['example', 'examples', 'demo', 'samples'];
+    const bins = ['.bin'];
+    const linters = [
+      '.eslintrc',
+      '.eslintrc.js',
+      '.eslintrc.yml',
+      '.prettierrc',
+      '.jshintrc',
+      '.babelrc',
+      '.jscs.json',
+      '.lint',
+    ];
+    const hints = ['*.flow', '*.webidl', '*.map'];
+    const scripts = [
+      '*.sh',
+      '*.bat',
+      '*.exe',
+      'Gruntfile.js',
+      'gulpfile.js',
+      'Makefile',
+    ];
+    const untranspiledSources = ['*.coffee', '*.scss', '*.sass', '.ts', '.tsx'];
+    const editors = ['.editorconfig', '.vscode'];
+    const git = [
+      '.gitattributes',
+      '.gitkeep',
+      '.gitempty',
+      '.gitmodules',
+      '.keep',
+      '.empty',
+    ];
+    const ci = [
+      '.travis.yml',
+      '.coveralls.yml',
+      '.instanbul.yml',
+      'appveyor.yml',
+      '.zuul.yml',
+    ];
+    const meta = [
+      'package-lock.json',
+      'component.json',
+      'bower.json',
+      'yarn.lock',
+    ];
+    const misc = ['.*ignore', '.DS_Store', 'Dockerfile', 'docker-compose.yml'];
+
+    await deleteFromNodeModules(tests);
+    await deleteFromNodeModules(docs);
+    await deleteFromNodeModules(examples);
+    await deleteFromNodeModules(bins);
+    await deleteFromNodeModules(linters);
+    await deleteFromNodeModules(hints);
+    await deleteFromNodeModules(scripts);
+    await deleteFromNodeModules(untranspiledSources);
+    await deleteFromNodeModules(editors);
+    await deleteFromNodeModules(git);
+    await deleteFromNodeModules(ci);
+    await deleteFromNodeModules(meta);
+    await deleteFromNodeModules(misc);
   },
 };
 
@@ -75,7 +158,7 @@ export const CleanExtraBinScriptsTask = {
       if (platform.isWindows()) {
         await deleteAll(log, [
           build.resolvePathForPlatform(platform, 'bin', '*'),
-          `!${build.resolvePathForPlatform(platform, 'bin', '*.bat')}`
+          `!${build.resolvePathForPlatform(platform, 'bin', '*.bat')}`,
         ]);
       } else {
         await deleteAll(log, [
@@ -83,19 +166,21 @@ export const CleanExtraBinScriptsTask = {
         ]);
       }
     }
-  }
+  },
 };
 
 export const CleanExtraBrowsersTask = {
   description: 'Cleaning extra browsers from platform-specific builds',
 
   async run(config, log, build) {
-    const getBrowserPathsForPlatform = (platform) => {
+    const getBrowserPathsForPlatform = platform => {
       const reportingDir = 'node_modules/x-pack/plugins/reporting';
       const phantomDir = '.phantom';
       const chromiumDir = '.chromium';
-      const phantomPath = p => build.resolvePathForPlatform(platform, reportingDir, phantomDir, p);
-      const chromiumPath = p => build.resolvePathForPlatform(platform, reportingDir, chromiumDir, p);
+      const phantomPath = p =>
+        build.resolvePathForPlatform(platform, reportingDir, phantomDir, p);
+      const chromiumPath = p =>
+        build.resolvePathForPlatform(platform, reportingDir, chromiumDir, p);
       return platforms => {
         const paths = [];
         if (platforms.windows) {
@@ -119,12 +204,11 @@ export const CleanExtraBrowsersTask = {
       const getBrowserPaths = getBrowserPathsForPlatform(platform);
       if (platform.isWindows()) {
         await deleteAll(log, getBrowserPaths({ linux: true, darwin: true }));
-      }
-      else if (platform.isMac()) {
+      } else if (platform.isMac()) {
         await deleteAll(log, getBrowserPaths({ linux: true, windows: true }));
       } else if (platform.isLinux()) {
         await deleteAll(log, getBrowserPaths({ windows: true, darwin: true }));
       }
     }
-  }
+  },
 };

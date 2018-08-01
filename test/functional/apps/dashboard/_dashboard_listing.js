@@ -65,10 +65,11 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.dashboard.checkDashboardListingSelectAllCheckbox();
         await PageObjects.dashboard.clickDeleteSelectedDashboards();
 
+        await PageObjects.common.expectConfirmModalOpenState(true);
+
         await PageObjects.common.pressEnterKey();
 
-        const isConfirmOpen = await PageObjects.common.isConfirmModalOpen();
-        expect(isConfirmOpen).to.be(false);
+        await PageObjects.common.expectConfirmModalOpenState(false);
 
         const countOfDashboards = await PageObjects.dashboard.getDashboardCountWithName(dashboardName);
         expect(countOfDashboards).to.equal(1);

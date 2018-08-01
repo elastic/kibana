@@ -8,7 +8,6 @@ import { uniq } from 'lodash';
 import { getExportTypesHandler } from './get_export_type_handler';
 import { getReportCountsByParameter } from './get_reporting_type_counts';
 import { KIBANA_REPORTING_TYPE } from '../../common/constants';
-import { UsageCollector } from '../../../monitoring/server/kibana_monitoring';
 
 /**
  * @typedef {Object} ReportingUsageStats  Almost all of these stats are optional.
@@ -115,7 +114,8 @@ async function getReportingUsageWithinRange(callCluster, server, reportingAvaila
  * @return {Object} kibana usage stats type collection object
  */
 export function getReportingUsageCollector(server) {
-  return new UsageCollector(server, {
+  const { collectorSet } = server.usage;
+  return collectorSet.makeUsageCollector({
     type: KIBANA_REPORTING_TYPE,
     fetch: async callCluster => {
       const xpackInfo = server.plugins.xpack_main.info;
@@ -130,7 +130,7 @@ export function getReportingUsageCollector(server) {
 
       let browserType;
       if (enabled) {
-        // Allow this to explictly throw an exception if/when this config is deprecated,
+        // Allow this to explicitly throw an exception if/when this config is deprecated,
         // because we shouldn't collect browserType in that case!
         browserType = config.get('xpack.reporting.capture.browser.type');
       }

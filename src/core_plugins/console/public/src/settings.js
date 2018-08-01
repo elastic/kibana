@@ -43,7 +43,7 @@ function setWrapMode(mode) {
 }
 
 export function getAutocomplete() {
-  return storage.get('autocomplete_settings', { fields: true, indices: true });
+  return storage.get('autocomplete_settings', { fields: true, indices: true, templates: true });
 }
 
 function setAutocomplete(settings) {

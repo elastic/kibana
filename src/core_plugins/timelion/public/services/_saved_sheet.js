@@ -19,17 +19,19 @@
 
 import { uiModules } from 'ui/modules';
 import { createLegacyClass } from 'ui/utils/legacy_class';
+import { SavedObjectProvider } from 'ui/courier';
 const module = uiModules.get('app/timelion');
 
 // Used only by the savedSheets service, usually no reason to change this
-module.factory('SavedSheet', function (courier, config) {
+module.factory('SavedSheet', function (Private, config) {
 
   // SavedSheet constructor. Usually you'd interact with an instance of this.
   // ID is option, without it one will be generated on save.
-  createLegacyClass(SavedSheet).inherits(courier.SavedObject);
+  const SavedObject = Private(SavedObjectProvider);
+  createLegacyClass(SavedSheet).inherits(SavedObject);
   function SavedSheet(id) {
     // Gives our SavedSheet the properties of a SavedObject
-    courier.SavedObject.call(this, {
+    SavedObject.call(this, {
       type: SavedSheet.type,
       mapping: SavedSheet.mapping,
 
@@ -50,7 +52,7 @@ module.factory('SavedSheet', function (courier, config) {
       }
     });
 
-    this.showInRecenltyAccessed = true;
+    this.showInRecentlyAccessed = true;
   }
 
   // save these objects with the 'sheet' type

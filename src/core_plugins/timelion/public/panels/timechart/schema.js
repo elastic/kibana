@@ -24,10 +24,11 @@ import $ from 'jquery';
 import moment from 'moment-timezone';
 import observeResize from '../../lib/observe_resize';
 import { calculateInterval, DEFAULT_TIME_FORMAT } from '../../../common/lib';
+import { timefilter } from 'ui/timefilter';
 
 const DEBOUNCE_DELAY = 50;
 
-export default function timechartFn(Private, config, $rootScope, timefilter, $compile) {
+export default function timechartFn(Private, config, $rootScope, $compile) {
   return function () {
     return {
       help: 'Draw a timeseries chart',
@@ -117,14 +118,14 @@ export default function timechartFn(Private, config, $rootScope, timefilter, $co
           originalColorMap.set(series, series.color);
         });
 
-        let hightlightedSeries;
+        let highlightedSeries;
         let focusedSeries;
         function unhighlightSeries() {
-          if (hightlightedSeries === null) {
+          if (highlightedSeries === null) {
             return;
           }
 
-          hightlightedSeries = null;
+          highlightedSeries = null;
           focusedSeries = null;
           $scope.chart.forEach((series) => {
             series.color = originalColorMap.get(series); // reset the colors
@@ -132,11 +133,11 @@ export default function timechartFn(Private, config, $rootScope, timefilter, $co
           drawPlot($scope.chart);
         }
         $scope.highlightSeries = _.debounce(function (id) {
-          if (hightlightedSeries === id) {
+          if (highlightedSeries === id) {
             return;
           }
 
-          hightlightedSeries = id;
+          highlightedSeries = id;
           $scope.chart.forEach((series, seriesIndex) => {
             if (seriesIndex !== id) {
               series.color = 'rgba(128,128,128,0.1)'; // mark as grey
@@ -173,10 +174,11 @@ export default function timechartFn(Private, config, $rootScope, timefilter, $co
         });
 
         $elem.on('plotselected', function (event, ranges) {
-          timefilter.time.from = moment(ranges.xaxis.from);
-          timefilter.time.to = moment(ranges.xaxis.to);
-          timefilter.time.mode = 'absolute';
-          $scope.$apply();
+          timefilter.setTime({
+            from: moment(ranges.xaxis.from),
+            to: moment(ranges.xaxis.to),
+            mode: 'absolute',
+          });
         });
 
         $elem.on('mouseleave', function () {

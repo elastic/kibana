@@ -16,7 +16,7 @@ import { prefixIndexPattern } from '../../../../lib/ccs_utils';
  */
 export function logstashNodesRoute(server) {
   /**
-   * Logtash Nodes request.
+   * Logstash Nodes request.
    *
    * This will fetch all data required to display the Logstash Nodes page.
    *

@@ -11,7 +11,6 @@ import { Summary } from './summary';
 import { EditSettingsJson } from './edit_settings_json';
 
 import {
-  EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFlyout,
@@ -84,13 +83,7 @@ export class DetailPanel extends Component {
         <EuiFlyoutBody>{component}</EuiFlyoutBody>
 
         <EuiFlyoutFooter>
-          <EuiFlexGroup justifyContent="spaceBetween">
-            <EuiFlexItem grow={false}>
-              <EuiButtonEmpty iconType="cross" onClick={closeDetailPanel}>
-                Close
-              </EuiButtonEmpty>
-            </EuiFlexItem>
-
+          <EuiFlexGroup justifyContent="flexEnd">
             <EuiFlexItem grow={false}>
               <Route
                 key="menu"

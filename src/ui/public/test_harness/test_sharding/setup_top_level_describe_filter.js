@@ -98,7 +98,7 @@ export function setupTopLevelDescribeFilter(test) {
      *  to date even if the call throws an error.
      *
      *  note that try/finally won't actually catch the error, it
-     *  will continue to propogate up the call stack
+     *  will continue to propagate up the call stack
      */
     let result;
     try {

@@ -4,17 +4,15 @@
 Advanced watches are for people who are more familiar with Elasticsearch query syntax and the watcher framework overall. The creation UI is more closely aligned with using the REST apis directly. For 
 more information, see {ref}/query-dsl.html[Query DSL].
 
-To create a new advanced watch:
+To create an advanced watch:
 
-. Select the `Create new watch` button
-image:management/watcher-ui/images/advanced-watch/advanced-watch-select.png["Create a Watch",link="management/watcher-ui/images/advanced-watch/advanced-watch-select.png"]
-
-. Select `Advanced Watch`
+* Click the *Create advanced watch* button.
 
 ==== Advanced Watch UI
 
 This screen lets you define the core properties of an advanced watch.
 
+[role="screenshot"]
 image:management/watcher-ui/images/advanced-watch/advanced-watch-create.png["Create Advanced Watch",link="management/watcher-ui/images/advanced-watch/advanced-watch-create.png"]
 
 The `ID` refers to the identifier used by Elasticsearch, whereas `Name` is the more user-friendly way to identify the watch. Refer to the 
@@ -24,6 +22,7 @@ for the Watch JSON.
 [float]
 === Simulate
 
+[role="screenshot"]
 image:management/watcher-ui/images/advanced-watch/advanced-watch-simulate.png["Simulate Advanced Watch",link="management/watcher-ui/images/advanced-watch/advanced-watch-simulate.png"]
 
 This screen allows you to override parts of the watch and then run a simulation of it.
@@ -40,6 +39,7 @@ Some implementation details on overrides:
 
 After starting the simulation, the UI will show a results screen.
 
+[role="screenshot"]
 image:management/watcher-ui/images/advanced-watch/advanced-watch-simulated.png["Simulated Advanced Watch",link="management/watcher-ui/images/advanced-watch/advanced-watch-simulated.png"]
 
 The possible simulation statuses for watches are:

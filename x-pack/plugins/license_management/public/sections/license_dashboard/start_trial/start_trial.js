@@ -110,7 +110,7 @@ export class StartTrial extends React.PureComponent {
     );
 
     const footer = (
-      <EuiButton onClick={() => this.setState({ showConfirmation: true })}>
+      <EuiButton data-test-subj="startTrialButton" onClick={() => this.setState({ showConfirmation: true })}>
         Start trial
       </EuiButton>
     );

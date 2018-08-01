@@ -45,7 +45,7 @@ function SeriesAgg(props) {
     { label: 'Overall Max', value: 'overall_max' },
     { label: 'Overall Min', value: 'overall_min' },
     { label: 'Overall Avg', value: 'overall_avg' },
-    { label: 'Cumlative Sum', value: 'cumlative_sum' },
+    { label: 'Cumulative Sum', value: 'cumulative_sum' },
   ];
   const selectedFunctionOption = functionOptions.find(option => {
     return model.function === option.value;

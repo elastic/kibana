@@ -1,0 +1,4 @@
+{
+  "browser": "../target/web/angular",
+  "main": "../target/node/angular"
+}

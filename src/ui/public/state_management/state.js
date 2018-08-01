@@ -30,7 +30,7 @@ import angular from 'angular';
 import rison from 'rison-node';
 import { applyDiff } from '../utils/diff_object';
 import { EventsProvider } from '../events';
-import { fatalError, Notifier } from '../notify';
+import { fatalError, toastNotifications } from '../notify';
 import './config_provider';
 import { createLegacyClass } from '../utils/legacy_class';
 import { callEach } from '../utils/function';
@@ -48,14 +48,12 @@ export function StateProvider(Private, $rootScope, $location, stateManagementCon
   function State(
     urlParam,
     defaults,
-    hashedItemStore = HashedItemStoreSingleton,
-    notifier = new Notifier()
+    hashedItemStore = HashedItemStoreSingleton
   ) {
     State.Super.call(this);
 
     this.setDefaults(defaults);
     this._urlParam = urlParam || '_s';
-    this._notifier = notifier;
     this._hashedItemStore = hashedItemStore;
 
     // When the URL updates we need to fetch the values from the URL
@@ -105,7 +103,7 @@ export function StateProvider(Private, $rootScope, $location, stateManagementCon
     }
 
     if (unableToParse) {
-      this._notifier.error('Unable to parse URL');
+      toastNotifications.addDanger('Unable to parse URL');
       search[this._urlParam] = this.toQueryParam(this._defaults);
       $location.search(search).replace();
     }
@@ -244,7 +242,7 @@ export function StateProvider(Private, $rootScope, $location, stateManagementCon
   State.prototype._parseStateHash = function (stateHash) {
     const json = this._hashedItemStore.getItem(stateHash);
     if (json === null) {
-      this._notifier.error('Unable to completely restore the URL, be sure to use the share functionality.');
+      toastNotifications.addDanger('Unable to completely restore the URL, be sure to use the share functionality.');
     }
 
     return JSON.parse(json);

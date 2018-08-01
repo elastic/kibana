@@ -10,8 +10,9 @@ import { HeaderContainer } from '../../shared/UIComponents';
 import TabNavigation from '../../shared/TabNavigation';
 import List from './List';
 import WatcherFlyout from './Watcher/WatcherFlyOut';
-import OpenWatcherDialogButton from './Watcher/OpenWatcherDialogButton';
+import WatcherButton from './Watcher/WatcherButton';
 import { ErrorGroupDetailsRequest } from '../../../store/reactReduxRequest/errorGroupList';
+import { KueryBar } from '../../shared/KueryBar';
 
 class ErrorGroupOverview extends Component {
   state = {
@@ -35,9 +36,11 @@ class ErrorGroupOverview extends Component {
         <HeaderContainer>
           <h1>{serviceName}</h1>
           {license.data.features.watcher.isAvailable && (
-            <OpenWatcherDialogButton onOpenFlyout={this.onOpenFlyout} />
+            <WatcherButton onOpenFlyout={this.onOpenFlyout} />
           )}
         </HeaderContainer>
+
+        <KueryBar />
 
         <TabNavigation />
 
@@ -59,7 +62,9 @@ class ErrorGroupOverview extends Component {
 }
 
 ErrorGroupOverview.propTypes = {
-  location: PropTypes.object.isRequired
+  license: PropTypes.object.isRequired,
+  location: PropTypes.object.isRequired,
+  urlParams: PropTypes.object.isRequired
 };
 
 export default ErrorGroupOverview;

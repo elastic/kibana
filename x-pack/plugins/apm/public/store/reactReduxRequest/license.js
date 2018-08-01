@@ -4,18 +4,23 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import React from 'react';
-import { withInitialData } from './helpers';
+import { createInitialDataSelector } from './helpers';
 import { Request } from 'react-redux-request';
-import { loadLicense } from '../../services/rest';
+import { loadLicense } from '../../services/rest/apm';
 
 const ID = 'license';
 const INITIAL_DATA = {
-  features: { watcher: { isAvailable: false } },
+  features: {
+    watcher: { isAvailable: false },
+    ml: { isAvailable: false }
+  },
   license: { isActive: false }
 };
 
+const withInitialData = createInitialDataSelector(INITIAL_DATA);
+
 export function getLicense(state) {
-  return withInitialData(state.reactReduxRequest[ID], INITIAL_DATA);
+  return withInitialData(state.reactReduxRequest[ID]);
 }
 
 export function LicenceRequest({ render }) {

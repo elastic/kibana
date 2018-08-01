@@ -47,8 +47,8 @@ import * as filterActions from 'ui/doc_table/actions/filter';
 import { FilterManagerProvider } from 'ui/filter_manager';
 import { EmbeddableFactoriesRegistryProvider } from 'ui/embeddable/embeddable_factories_registry';
 import { DashboardPanelActionsRegistryProvider } from 'ui/dashboard_panel_actions/dashboard_panel_actions_registry';
-import { SavedObjectsClientProvider } from 'ui/saved_objects';
 import { VisTypesRegistryProvider } from 'ui/registry/vis_types';
+import { timefilter } from 'ui/timefilter';
 
 import { DashboardViewportProvider } from './viewport/dashboard_viewport_provider';
 
@@ -58,7 +58,6 @@ const app = uiModules.get('app/dashboard', [
   'react',
   'kibana/courier',
   'kibana/config',
-  'kibana/notify',
   'kibana/typeahead',
 ]);
 
@@ -67,10 +66,8 @@ app.directive('dashboardViewportProvider', function (reactDirective) {
 });
 
 app.directive('dashboardApp', function ($injector) {
-  const Notifier = $injector.get('Notifier');
   const courier = $injector.get('courier');
   const AppState = $injector.get('AppState');
-  const timefilter = $injector.get('timefilter');
   const kbnUrl = $injector.get('kbnUrl');
   const confirmModal = $injector.get('confirmModal');
   const config = $injector.get('config');
@@ -83,13 +80,11 @@ app.directive('dashboardApp', function ($injector) {
       const filterManager = Private(FilterManagerProvider);
       const filterBar = Private(FilterBarQueryFilterProvider);
       const docTitle = Private(DocTitleProvider);
-      const notify = new Notifier({ location: 'Dashboard' });
       const embeddableFactories = Private(EmbeddableFactoriesRegistryProvider);
       const panelActionsRegistry = Private(DashboardPanelActionsRegistryProvider);
 
       panelActionsStore.initializeFromRegistry(panelActionsRegistry);
 
-      const savedObjectsClient = Private(SavedObjectsClientProvider);
       const visTypes = Private(VisTypesRegistryProvider);
       $scope.getEmbeddableFactory = panelType => embeddableFactories.byName[panelType];
 
@@ -163,12 +158,11 @@ app.directive('dashboardApp', function ($injector) {
 
       updateState();
 
-      $scope.refresh = (...args) => {
+      $scope.refresh = () => {
         $rootScope.$broadcast('fetch');
-        courier.fetch(...args);
+        courier.fetch();
       };
-      $scope.timefilter = timefilter;
-      dashboardStateManager.handleTimeChange($scope.timefilter.time);
+      dashboardStateManager.handleTimeChange(timefilter.getTime());
 
       $scope.expandedPanel = null;
       $scope.dashboardViewMode = dashboardStateManager.getViewMode();
@@ -226,8 +220,8 @@ app.directive('dashboardApp', function ($injector) {
 
       $scope.$watch('model.query', $scope.updateQueryAndFetch);
 
-      $scope.$listen(timefilter, 'fetch', () => {
-        dashboardStateManager.handleTimeChange($scope.timefilter.time);
+      $scope.$listenAndDigestAsync(timefilter, 'fetch', () => {
+        dashboardStateManager.handleTimeChange(timefilter.getTime());
         // Currently discover relies on this logic to re-fetch. We need to refactor it to rely instead on the
         // directly passed down time filter. Then we can get rid of this reliance on scope broadcasts.
         $scope.refresh();
@@ -288,7 +282,7 @@ app.directive('dashboardApp', function ($injector) {
        * @return {Promise}
        * @resolved {String} - The id of the doc
        */
-      $scope.save = function (saveOptions) {
+      function save(saveOptions) {
         return saveDashboard(angular.toJson, timefilter, dashboardStateManager, saveOptions)
           .then(function (id) {
             $scope.kbnTopNav.close('save');
@@ -305,9 +299,15 @@ app.directive('dashboardApp', function ($injector) {
                 updateViewMode(DashboardViewMode.VIEW);
               }
             }
-            return id;
-          }).catch(notify.error);
-      };
+            return { id };
+          }).catch((error) => {
+            toastNotifications.addDanger({
+              title: `Dashboard '${dash.title}' was not saved. Error: ${error.message}`,
+              'data-test-subj': 'saveDashboardFailure',
+            });
+            return { error };
+          });
+      }
 
       $scope.showFilterBar = () => filterBar.getFilters().length > 0 || !dashboardStateManager.getFullScreenMode();
 
@@ -338,14 +338,14 @@ app.directive('dashboardApp', function ($injector) {
             isTitleDuplicateConfirmed,
             onTitleDuplicate,
           };
-          return $scope.save(saveOptions).then(id => {
+          return save(saveOptions).then(({ id, error }) => {
             // If the save wasn't successful, put the original values back.
-            if (!id) {
+            if (!id || error) {
               dashboardStateManager.setTitle(currentTitle);
               dashboardStateManager.setDescription(currentDescription);
               dashboardStateManager.setTimeRestore(currentTimeRestore);
             }
-            return id;
+            return { id, error };
           });
         };
 
@@ -367,12 +367,12 @@ app.directive('dashboardApp', function ($injector) {
             isTitleDuplicateConfirmed,
             onTitleDuplicate,
           };
-          return $scope.save(saveOptions).then(id => {
+          return save(saveOptions).then(({ id, error }) => {
             // If the save wasn't successful, put the original title back.
-            if (!id) {
+            if (!id || error) {
               dashboardStateManager.setTitle(currentTitle);
             }
-            return id;
+            return { id, error };
           });
         };
 
@@ -389,7 +389,7 @@ app.directive('dashboardApp', function ($injector) {
         const isLabsEnabled = config.get('visualize:enableLabs');
         const listingLimit = config.get('savedObjects:listingLimit');
 
-        showAddPanel(savedObjectsClient, dashboardStateManager.addNewPanel, addNewVis, listingLimit, isLabsEnabled, visTypes);
+        showAddPanel(chrome.getSavedObjectsClient(), dashboardStateManager.addNewPanel, addNewVis, listingLimit, isLabsEnabled, visTypes);
       };
       updateViewMode(dashboardStateManager.getViewMode());
 

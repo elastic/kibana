@@ -18,50 +18,79 @@
  */
 
 import { uiModules } from '../modules';
-import { once, clone } from 'lodash';
 
 import toggleHtml from './kbn_global_timepicker.html';
 import { timeNavigation } from './time_navigation';
+import { timefilter } from 'ui/timefilter';
+import { prettyDuration } from './pretty_duration';
+import { prettyInterval } from './pretty_interval';
 
 uiModules
   .get('kibana')
-  .directive('kbnGlobalTimepicker', (timefilter, globalState, $rootScope) => {
-    const listenForUpdates = once($scope => {
-      $scope.$listen(timefilter, 'update', () => {
-        globalState.time = clone(timefilter.time);
-        globalState.refreshInterval = clone(timefilter.refreshInterval);
-        globalState.save();
+  .directive('kbnGlobalTimepicker', (globalState, config) => {
+    const getConfig = (...args) => config.get(...args);
+
+    const updateGlobalStateWithTime = ($scope) => {
+      globalState.refreshInterval = timefilter.getRefreshInterval();
+      globalState.time = timefilter.getTime();
+      globalState.save();
+      setTimefilterValues($scope);
+    };
+
+    const listenForUpdates = ($scope) => {
+      $scope.$listenAndDigestAsync(timefilter, 'refreshIntervalUpdate', () => {
+        updateGlobalStateWithTime($scope);
       });
-    });
+      $scope.$listenAndDigestAsync(timefilter, 'timeUpdate', () => {
+        updateGlobalStateWithTime($scope);
+      });
+      $scope.$listenAndDigestAsync(timefilter, 'enabledUpdated', () => {
+        setTimefilterValues($scope);
+      });
+    };
+
+    function setTimefilterValues($scope) {
+      const time = timefilter.getTime();
+      const refreshInterval = timefilter.getRefreshInterval();
+      $scope.timefilterValues = {
+        refreshInterval: refreshInterval,
+        time: time,
+        display: {
+          time: prettyDuration(time.from, time.to, getConfig),
+          refreshInterval: prettyInterval(refreshInterval.value),
+        },
+        isAutoRefreshSelectorEnabled: timefilter.isAutoRefreshSelectorEnabled,
+        isTimeRangeSelectorEnabled: timefilter.isTimeRangeSelectorEnabled,
+      };
+    }
 
     return {
       template: toggleHtml,
       replace: true,
       require: '^kbnTopNav',
       link: ($scope, element, attributes, kbnTopNav) => {
-        listenForUpdates($rootScope);
+        listenForUpdates($scope);
+        updateGlobalStateWithTime($scope);
 
-        $rootScope.timefilter = timefilter;
-        $rootScope.toggleRefresh = () => {
-          timefilter.refreshInterval.pause = !timefilter.refreshInterval.pause;
+        $scope.toggleRefresh = () => {
+          timefilter.toggleRefresh();
         };
 
         $scope.forward = function () {
-          timefilter.time = timeNavigation.stepForward(timefilter.getBounds());
+          timefilter.setTime(timeNavigation.stepForward(timefilter.getBounds()));
         };
 
         $scope.back = function () {
-          timefilter.time = timeNavigation.stepBackward(timefilter.getBounds());
+          timefilter.setTime(timeNavigation.stepBackward(timefilter.getBounds()));
         };
 
-        $scope.updateFilter = function (from, to) {
-          timefilter.time.from = from;
-          timefilter.time.to = to;
+        $scope.updateFilter = function (from, to, mode) {
+          timefilter.setTime({ from, to, mode });
           kbnTopNav.close('filter');
         };
 
         $scope.updateInterval = function (interval) {
-          timefilter.refreshInterval = interval;
+          timefilter.setRefreshInterval(interval);
           kbnTopNav.close('interval');
         };
 

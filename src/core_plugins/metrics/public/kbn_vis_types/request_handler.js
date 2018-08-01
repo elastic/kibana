@@ -20,8 +20,9 @@
 import { validateInterval } from '../lib/validate_interval';
 import { dashboardContextProvider } from 'plugins/kibana/dashboard/dashboard_context';
 import { timezoneProvider } from 'ui/vis/lib/timezone';
+import { timefilter } from 'ui/timefilter';
 
-const MetricsRequestHandlerProvider = function (Private, Notifier, config, timefilter, $http) {
+const MetricsRequestHandlerProvider = function (Private, Notifier, config, $http) {
   const dashboardContext = Private(dashboardContextProvider);
   const notify = new Notifier({ location: 'Metrics' });
 

@@ -59,7 +59,7 @@ export const createUninstallRoute = () => ({
       } catch (err) {
         // ignore 404s since users could have deleted some of the saved objects via the UI
         if (_.get(err, 'output.statusCode') !== 404) {
-          return reply(`Unable to delete samle dataset saved objects, error: ${err.message}`).code(403);
+          return reply(`Unable to delete sample dataset saved objects, error: ${err.message}`).code(403);
         }
       }
 

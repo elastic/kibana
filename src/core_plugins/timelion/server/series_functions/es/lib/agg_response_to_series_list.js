@@ -52,7 +52,7 @@ export function flattenBucket(bucket, splitKey, path, result) {
     if (!_.isPlainObject(val)) return;
     if (_.get(val, 'meta.type') === 'split') {
       _.each(val.buckets, function (bucket, bucketKey) {
-        if (bucket.key == null) bucket.key = bucketKey; // For handling "keyed" response formats, eg filters agg
+        if (bucket.key == null) bucket.key = bucketKey; // For handling "keyed" response formats, e.g., filters agg
         flattenBucket(bucket, bucket.key, path.concat([key + ':' + bucket.key]), result);
       });
     } else if (_.get(val, 'meta.type') === 'time_buckets') {

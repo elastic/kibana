@@ -18,9 +18,9 @@ import moment from 'moment';
 import 'plugins/ml/components/anomalies_table';
 import 'plugins/ml/components/controls';
 
-import { notify } from 'ui/notify';
+import { toastNotifications } from 'ui/notify';
 import uiRoutes from 'ui/routes';
-import 'ui/timefilter';
+import { timefilter } from 'ui/timefilter';
 import { parseInterval } from 'ui/utils/parse_interval';
 import { checkLicense } from 'plugins/ml/license/check_license';
 import { checkGetJobsPrivilege, checkPermission } from 'plugins/ml/privilege/check_privilege';
@@ -70,7 +70,6 @@ module.controller('MlTimeSeriesExplorerController', function (
   $route,
   $timeout,
   Private,
-  timefilter,
   AppState,
   mlSelectIntervalService,
   mlSelectSeverityService) {
@@ -130,24 +129,24 @@ module.controller('MlTimeSeriesExplorerController', function (
           selectedJobIds = _.without(selectedJobIds, ...invalidIds);
           if (invalidIds.length > 0) {
             const s = invalidIds.length === 1 ? '' : 's';
-            let warningText = `Requested job${s} ${invalidIds} cannot be viewed in this dashboard`;
+            let warningText = `You can't view requested job${s} ${invalidIds} in this dashboard`;
             if (selectedJobIds.length === 0 && timeSeriesJobIds.length > 0) {
               warningText += ', auto selecting first job';
             }
-            notify.warning(warningText, { lifetime: 30000 });
+            toastNotifications.addWarning(warningText);
           }
 
           if (selectedJobIds.length > 1 || mlJobSelectService.groupIds.length) {
           // if more than one job or a group has been loaded from the URL
             if (selectedJobIds.length > 1) {
             // if more than one job, select the first job from the selection.
-              notify.warning('Only one job may be viewed at a time in this dashboard', { lifetime: 30000 });
+              toastNotifications.addWarning('You can only view one job at a time in this dashboard');
               mlJobSelectService.setJobIds([selectedJobIds[0]]);
             } else {
             // if a group has been loaded
               if (selectedJobIds.length > 0) {
               // if the group contains valid jobs, select the first
-                notify.warning('Only one job may be viewed at a time in this dashboard', { lifetime: 30000 });
+                toastNotifications.addWarning('You can only view one job at a time in this dashboard');
                 mlJobSelectService.setJobIds([selectedJobIds[0]]);
               } else if ($scope.jobs.length > 0) {
               // if there are no valid jobs in the group but there are valid jobs
@@ -505,8 +504,8 @@ module.controller('MlTimeSeriesExplorerController', function (
       forecastId
     ).then((resp) => {
       const bounds = timefilter.getActiveBounds();
-      const earliest = moment(resp.earliest || timefilter.time.from);
-      const latest = moment(resp.latest || timefilter.time.to);
+      const earliest = moment(resp.earliest || timefilter.getTime().from);
+      const latest = moment(resp.latest || timefilter.getTime().to);
 
       // Store forecast ID in the appState.
       $scope.appState.mlTimeSeriesExplorer.forecastId = forecastId;
@@ -529,8 +528,10 @@ module.controller('MlTimeSeriesExplorerController', function (
       if (earliest.isBefore(bounds.min) || latest.isAfter(bounds.max)) {
         const earliestMs = Math.min(earliest.valueOf(), bounds.min.valueOf());
         const latestMs = Math.max(latest.valueOf(), bounds.max.valueOf());
-        timefilter.time.from = moment(earliestMs).toISOString();
-        timefilter.time.to = moment(latestMs).toISOString();
+        timefilter.setTime({
+          from: moment(earliestMs).toISOString(),
+          to: moment(latestMs).toISOString()
+        });
       } else {
         // Refresh to show the requested forecast data.
         $scope.refresh();
@@ -559,7 +560,7 @@ module.controller('MlTimeSeriesExplorerController', function (
   };
 
   // Refresh the data when the time range is altered.
-  $scope.$listen(timefilter, 'fetch', $scope.refresh);
+  $scope.$listenAndDigestAsync(timefilter, 'fetch', $scope.refresh);
 
   // Add a watcher for auto-refresh of the time filter to refresh all the data.
   const refreshWatcher = Private(refreshIntervalWatcher);
@@ -659,7 +660,7 @@ module.controller('MlTimeSeriesExplorerController', function (
     let detectorIndex = appStateDtrIdx !== undefined ? appStateDtrIdx : +(viewableDetectors[0].index);
     if (_.find(viewableDetectors, { 'index': '' + detectorIndex }) === undefined) {
       const warningText = `Requested detector index ${detectorIndex} is not valid for job ${$scope.selectedJob.job_id}`;
-      notify.warning(warningText, { lifetime: 30000 });
+      toastNotifications.addWarning(warningText);
       detectorIndex = +(viewableDetectors[0].index);
       $scope.appState.mlTimeSeriesExplorer.detectorIndex = detectorIndex;
       $scope.appState.save();
@@ -697,9 +698,16 @@ module.controller('MlTimeSeriesExplorerController', function (
         // Default to functionDescription if no description available.
         // TODO - when job_service is moved server_side, move this to server endpoint.
         const jobId = anomaly.jobId;
-        anomaly.detector = _.get(detectorsByJob,
-          [jobId, anomaly.detectorIndex, 'detector_description'],
+        const detector = _.get(detectorsByJob, [jobId, anomaly.detectorIndex]);
+        anomaly.detector = _.get(detector,
+          ['detector_description'],
           anomaly.source.function_description);
+
+        // For detectors with rules, add a property with the rule count.
+        const customRules = detector.custom_rules;
+        if (customRules !== undefined) {
+          anomaly.rulesLength = customRules.length;
+        }
 
         // Add properties used for building the links menu.
         // TODO - when job_service is moved server_side, move this to server endpoint.
@@ -794,20 +802,20 @@ module.controller('MlTimeSeriesExplorerController', function (
       // Calculate the 'auto' zoom duration which shows data at bucket span granularity.
       $scope.autoZoomDuration = getAutoZoomDuration();
 
+      // Check that the zoom times are valid.
+      // zoomFrom must be at or after dashboard earliest,
+      // zoomTo must be at or before dashboard latest plus context chart agg interval.
       const zoomFrom = moment(zoomState.from, 'YYYY-MM-DDTHH:mm:ss.SSSZ', true);
       const zoomTo = moment(zoomState.to, 'YYYY-MM-DDTHH:mm:ss.SSSZ', true);
-
-      // Get the time span of data in the context chart.
-      // Valid zoomTo is the time of the last bucket plus the aggregation interval.
-      const combinedData = $scope.contextForecastData === undefined ?
-        $scope.contextChartData : $scope.contextChartData.concat($scope.contextForecastData);
-      const earliestDataDate = _.first(combinedData).date;
-      const latestDataDate = new Date(_.last(combinedData).date.valueOf() +
-        $scope.contextAggregationInterval.asMilliseconds());
+      const aggIntervalMs = $scope.contextAggregationInterval.asMilliseconds();
+      const bounds = timefilter.getActiveBounds();
+      const earliest = bounds.min;
+      const latest = moment(bounds.max).add(aggIntervalMs, 'ms');
 
       if (zoomFrom.isValid() && zoomTo.isValid &&
-        zoomFrom.isBetween(earliestDataDate, latestDataDate, null, '[]') &&
-        zoomTo.isBetween(earliestDataDate, latestDataDate, null, '[]')) {
+        zoomTo.isAfter(zoomFrom) &&
+        zoomFrom.isBetween(earliest, latest, null, '[]') &&
+        zoomTo.isBetween(earliest, latest, null, '[]')) {
         return [zoomFrom.toDate(), zoomTo.toDate()];
       }
     }

@@ -25,6 +25,7 @@ import { PanelOptionsMenu } from './panel_options_menu';
 import {
   buildEuiContextMenuPanels,
   getEditPanelAction,
+  getInspectorPanelAction,
   getRemovePanelAction,
   getCustomizePanelAction,
   getToggleExpandPanelAction,
@@ -83,7 +84,7 @@ const mapDispatchToProps = (dispatch, { panelId }) => ({
   onMaximizePanel: () => dispatch(maximizePanel(panelId)),
   onMinimizePanel: () => dispatch(minimizePanel()),
   onResetPanelTitle: () => dispatch(resetPanelTitle(panelId)),
-  onUpdatePanelTitle: (newTitle) => dispatch(setPanelTitle(newTitle, panelId)),
+  onUpdatePanelTitle: (newTitle) => dispatch(setPanelTitle({ title: newTitle, panelId: panelId })),
 });
 
 const mergeProps = (stateProps, dispatchProps, ownProps) => {
@@ -124,6 +125,10 @@ const mergeProps = (stateProps, dispatchProps, ownProps) => {
     });
 
     const actions = [
+      getInspectorPanelAction({
+        closeContextMenu: closeMyContextMenuPanel,
+        panelTitle,
+      }),
       getEditPanelAction(),
       getCustomizePanelAction({
         onResetPanelTitle,

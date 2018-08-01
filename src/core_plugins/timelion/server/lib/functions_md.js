@@ -66,7 +66,7 @@ export default (function () {
 
     help += '### Data sources\n';
     help += 'Data sources can start a chain, they don\'t need to be attached to anything, but they still need to start' +
-      ' with a `.` (dot). Data retreived from a data source can be passed into the chainable functions in the next section.\n\n';
+      ' with a `.` (dot). Data retrieved from a data source can be passed into the chainable functions in the next section.\n\n';
 
     help += _.chain(functionArray)
       .filter('datasource')

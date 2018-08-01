@@ -86,10 +86,12 @@
             job-state-wrapper='{jobState:jobState}'
             job-state='JOB_STATE'
             ui='ui'
+            bucket-span-field-change="bucketSpanFieldChange"
             exported-functions='bucketSpanEstimatorExportedFunctions'>
           </ml-bucket-span-estimator>
 
           <button class="euiButton euiButton--primary euiButton--small euiButton--fill navbar-btn-link btn-load-vis"
+            aria-label="Run search"
             ng-click="loadVis()"
             ng-disabled="ui.formValid === false || jobState === JOB_STATE.RUNNING || jobState === JOB_STATE.STOPPING || jobState === JOB_STATE.FINISHED" >
             <i class="fa fa-play" ></i>

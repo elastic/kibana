@@ -31,7 +31,11 @@ class LintFailure {
   constructor(public project: Project, public error: execa.ExecaError) {}
 }
 
-export function runTslintCli() {
+export function runTslintCliOnTsConfigPaths(tsConfigPaths: string[]) {
+  runTslintCli(tsConfigPaths.map(tsConfigPath => new Project(tsConfigPath)));
+}
+
+export function runTslintCli(projects = PROJECTS) {
   const log = createToolingLog('info');
   log.pipe(process.stdout);
 
@@ -42,27 +46,25 @@ export function runTslintCli() {
   }
 
   const list = new Listr(
-    PROJECTS.filter(project => {
-      if (!opts.project) {
-        return true;
-      }
+    projects
+      .filter(project => {
+        if (!opts.project) {
+          return true;
+        }
 
-      return resolve(opts.project) === project.tsConfigPath;
-    }).map(project => ({
-      task: () =>
-        execa(
-          'tslint',
-          [...process.argv.slice(2), '--project', project.tsConfigPath],
-          {
+        return resolve(opts.project) === project.tsConfigPath;
+      })
+      .map(project => ({
+        task: () =>
+          execa('tslint', [...process.argv.slice(2), '--project', project.tsConfigPath], {
             cwd: project.directory,
             env: chalk.enabled ? { FORCE_COLOR: 'true' } : {},
             stdio: ['ignore', 'pipe', 'pipe'],
-          }
-        ).catch(error => {
-          throw new LintFailure(project, error);
-        }),
-      title: project.name,
-    })),
+          }).catch(error => {
+            throw new LintFailure(project, error);
+          }),
+        title: project.name,
+      })),
     {
       concurrent: true,
       exitOnError: false,
@@ -70,10 +72,12 @@ export function runTslintCli() {
   );
 
   list.run().catch((error: any) => {
+    process.exitCode = 1;
+
     if (!error.errors) {
       log.error('Unhandled execption!');
       log.error(error);
-      process.exit(1);
+      process.exit();
     }
 
     for (const e of error.errors) {

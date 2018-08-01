@@ -91,12 +91,8 @@ window.onerror = function (err, url, line) {
 };
 
 if (window.addEventListener) {
-  const notifier = new Notifier({
-    location: 'Promise'
-  });
-
   window.addEventListener('unhandledrejection', function (e) {
-    notifier.log(`Detected an unhandled Promise rejection.\n${e.reason}`);
+    console.log(`Detected an unhandled Promise rejection.\n${e.reason}`); // eslint-disable-line no-console
   });
 }
 

@@ -174,121 +174,125 @@ exports[`UploadLicense should display a modal when license requires acknowledgem
                             </EuiIcon>
                           </button>
                         </EuiButtonIcon>
-                        <EuiModalHeader>
-                          <div
-                            className="euiModalHeader"
-                          >
-                            <EuiModalHeaderTitle
-                              data-test-subj="confirmModalTitleText"
+                        <div
+                          className="euiModal__flex"
+                        >
+                          <EuiModalHeader>
+                            <div
+                              className="euiModalHeader"
                             >
-                              <div
-                                className="euiModalHeader__title"
+                              <EuiModalHeaderTitle
                                 data-test-subj="confirmModalTitleText"
                               >
-                                Confirm License Upload
-                              </div>
-                            </EuiModalHeaderTitle>
-                          </div>
-                        </EuiModalHeader>
-                        <EuiModalBody>
-                          <div
-                            className="euiModalBody"
-                          >
-                            <EuiText
-                              data-test-subj="confirmModalBodyText"
-                              grow={true}
+                                <div
+                                  className="euiModalHeader__title"
+                                  data-test-subj="confirmModalTitleText"
+                                >
+                                  Confirm License Upload
+                                </div>
+                              </EuiModalHeaderTitle>
+                            </div>
+                          </EuiModalHeader>
+                          <EuiModalBody>
+                            <div
+                              className="euiModalBody"
                             >
-                              <div
-                                className="euiText"
+                              <EuiText
                                 data-test-subj="confirmModalBodyText"
+                                grow={true}
                               >
-                                <div>
-                                  <EuiText
-                                    grow={true}
-                                  >
-                                    <div
-                                      className="euiText"
+                                <div
+                                  className="euiText"
+                                  data-test-subj="confirmModalBodyText"
+                                >
+                                  <div>
+                                    <EuiText
+                                      grow={true}
                                     >
-                                      Some functionality will be lost if you replace your 
+                                      <div
+                                        className="euiText"
+                                      >
+                                        Some functionality will be lost if you replace your 
         TRIAL license with a
         BASIC license.  Review the list of features below.
-                                    </div>
-                                  </EuiText>
-                                  <EuiText
-                                    grow={true}
-                                  >
-                                    <div
-                                      className="euiText"
+                                      </div>
+                                    </EuiText>
+                                    <EuiText
+                                      grow={true}
                                     >
-                                      <ul>
-                                        <li
-                                          key="Watcher will be disabled"
-                                        >
-                                          Watcher will be disabled
-                                        </li>
-                                      </ul>
-                                    </div>
-                                  </EuiText>
+                                      <div
+                                        className="euiText"
+                                      >
+                                        <ul>
+                                          <li
+                                            key="Watcher will be disabled"
+                                          >
+                                            Watcher will be disabled
+                                          </li>
+                                        </ul>
+                                      </div>
+                                    </EuiText>
+                                  </div>
                                 </div>
-                              </div>
-                            </EuiText>
-                          </div>
-                        </EuiModalBody>
-                        <EuiModalFooter>
-                          <div
-                            className="euiModalFooter"
-                          >
-                            <EuiButtonEmpty
-                              buttonRef={[Function]}
-                              color="primary"
-                              data-test-subj="confirmModalCancelButton"
-                              iconSide="left"
-                              onClick={[Function]}
-                              type="button"
+                              </EuiText>
+                            </div>
+                          </EuiModalBody>
+                          <EuiModalFooter>
+                            <div
+                              className="euiModalFooter"
                             >
-                              <button
-                                className="euiButtonEmpty euiButtonEmpty--primary"
+                              <EuiButtonEmpty
+                                buttonRef={[Function]}
+                                color="primary"
                                 data-test-subj="confirmModalCancelButton"
+                                iconSide="left"
                                 onClick={[Function]}
                                 type="button"
                               >
-                                <span
-                                  className="euiButtonEmpty__content"
-                                >
-                                  <span>
-                                    Cancel
-                                  </span>
-                                </span>
-                              </button>
-                            </EuiButtonEmpty>
-                            <EuiButton
-                              buttonRef={[Function]}
-                              color="primary"
-                              data-test-subj="confirmModalConfirmButton"
-                              fill={true}
-                              iconSide="left"
-                              onClick={[Function]}
-                              type="button"
-                            >
-                              <button
-                                className="euiButton euiButton--primary euiButton--fill"
-                                data-test-subj="confirmModalConfirmButton"
-                                onClick={[Function]}
-                                type="button"
-                              >
-                                <span
-                                  className="euiButton__content"
+                                <button
+                                  className="euiButtonEmpty euiButtonEmpty--primary"
+                                  data-test-subj="confirmModalCancelButton"
+                                  onClick={[Function]}
+                                  type="button"
                                 >
                                   <span
-                                    className="euiButton__text"
+                                    className="euiButtonEmpty__content"
                                   >
-                                    Confirm
+                                    <span>
+                                      Cancel
+                                    </span>
                                   </span>
-                                </span>
-                              </button>
-                            </EuiButton>
-                          </div>
-                        </EuiModalFooter>
+                                </button>
+                              </EuiButtonEmpty>
+                              <EuiButton
+                                buttonRef={[Function]}
+                                color="primary"
+                                data-test-subj="confirmModalConfirmButton"
+                                fill={true}
+                                iconSide="left"
+                                onClick={[Function]}
+                                type="button"
+                              >
+                                <button
+                                  className="euiButton euiButton--primary euiButton--fill"
+                                  data-test-subj="confirmModalConfirmButton"
+                                  onClick={[Function]}
+                                  type="button"
+                                >
+                                  <span
+                                    className="euiButton__content"
+                                  >
+                                    <span
+                                      className="euiButton__text"
+                                    >
+                                      Confirm
+                                    </span>
+                                  </span>
+                                </button>
+                              </EuiButton>
+                            </div>
+                          </EuiModalFooter>
+                        </div>
                       </div>
                     </div>
                   </Component>
@@ -467,6 +471,7 @@ exports[`UploadLicense should display a modal when license requires acknowledgem
                       >
                         <EuiButton
                           color="primary"
+                          data-test-subj="uploadLicenseButton"
                           fill={true}
                           iconSide="left"
                           isLoading={false}
@@ -475,6 +480,7 @@ exports[`UploadLicense should display a modal when license requires acknowledgem
                         >
                           <button
                             className="euiButton euiButton--primary euiButton--fill"
+                            data-test-subj="uploadLicenseButton"
                             onClick={[Function]}
                             type="button"
                           >
@@ -789,6 +795,7 @@ exports[`UploadLicense should display an error when ES says license is expired 1
                       >
                         <EuiButton
                           color="primary"
+                          data-test-subj="uploadLicenseButton"
                           fill={true}
                           iconSide="left"
                           isLoading={false}
@@ -797,6 +804,7 @@ exports[`UploadLicense should display an error when ES says license is expired 1
                         >
                           <button
                             className="euiButton euiButton--primary euiButton--fill"
+                            data-test-subj="uploadLicenseButton"
                             onClick={[Function]}
                             type="button"
                           >
@@ -1111,6 +1119,7 @@ exports[`UploadLicense should display an error when ES says license is invalid 1
                       >
                         <EuiButton
                           color="primary"
+                          data-test-subj="uploadLicenseButton"
                           fill={true}
                           iconSide="left"
                           isLoading={false}
@@ -1119,6 +1128,7 @@ exports[`UploadLicense should display an error when ES says license is invalid 1
                         >
                           <button
                             className="euiButton euiButton--primary euiButton--fill"
+                            data-test-subj="uploadLicenseButton"
                             onClick={[Function]}
                             type="button"
                           >
@@ -1433,6 +1443,7 @@ exports[`UploadLicense should display an error when submitting invalid JSON 1`] 
                       >
                         <EuiButton
                           color="primary"
+                          data-test-subj="uploadLicenseButton"
                           fill={true}
                           iconSide="left"
                           isLoading={false}
@@ -1441,6 +1452,7 @@ exports[`UploadLicense should display an error when submitting invalid JSON 1`] 
                         >
                           <button
                             className="euiButton euiButton--primary euiButton--fill"
+                            data-test-subj="uploadLicenseButton"
                             onClick={[Function]}
                             type="button"
                           >
@@ -1755,6 +1767,7 @@ exports[`UploadLicense should display error when ES returns error 1`] = `
                       >
                         <EuiButton
                           color="primary"
+                          data-test-subj="uploadLicenseButton"
                           fill={true}
                           iconSide="left"
                           isLoading={false}
@@ -1763,6 +1776,7 @@ exports[`UploadLicense should display error when ES returns error 1`] = `
                         >
                           <button
                             className="euiButton euiButton--primary euiButton--fill"
+                            data-test-subj="uploadLicenseButton"
                             onClick={[Function]}
                             type="button"
                           >

@@ -17,6 +17,8 @@
  * under the License.
  */
 
+import expect from 'expect.js';
+
 export function DiscoverPageProvider({ getService, getPageObjects }) {
   const config = getService('config');
   const log = getService('log');
@@ -41,30 +43,27 @@ export function DiscoverPageProvider({ getService, getPageObjects }) {
         .findByCssSelector('button[aria-label=\'Search\']');
     }
 
-    async getTimespanText() {
-      return await testSubjects.getVisibleText('globalTimepickerRange');
-    }
-
     getChartTimespan() {
       return getRemote()
         .findByCssSelector('center.small > span:nth-child(1)')
         .getVisibleText();
     }
 
-    saveSearch(searchName) {
-      return this.clickSaveSearchButton()
-        .then(() => {
-          log.debug('--saveSearch button clicked');
-          return getRemote().findDisplayedById('SaveSearch')
-            .pressKeys(searchName);
-        })
-        .then(() => {
-          log.debug('--find save button');
-          return testSubjects.click('discoverSaveSearchButton');
-        })
-        .then(async () => {
-          return await testSubjects.exists('saveSearchSuccess', 2000);
-        });
+    async saveSearch(searchName) {
+      log.debug('saveSearch');
+      await this.clickSaveSearchButton();
+      await getRemote().findDisplayedById('SaveSearch').pressKeys(searchName);
+      await testSubjects.click('discoverSaveSearchButton');
+      await PageObjects.header.waitUntilLoadingHasFinished();
+      // LeeDr - this additional checking for the saved search name was an attempt
+      // to cause this method to wait for the reloading of the page to complete so
+      // that the next action wouldn't have to retry.  But it doesn't really solve
+      // that issue.  But it does typically take about 3 retries to
+      // complete with the expected searchName.
+      await retry.try(async () => {
+        const name = await this.getCurrentQueryName();
+        expect(name).to.be(searchName);
+      });
     }
 
     async getColumnHeaders() {
@@ -73,12 +72,13 @@ export function DiscoverPageProvider({ getService, getPageObjects }) {
     }
 
     async openSavedSearch() {
-      await this.clickLoadSavedSearchButton();
+      // We need this try loop here because previous actions in Discover like
+      // saving a search cause reloading of the page and the "Open" menu item goes stale.
       await retry.try(async () => {
-        const isLoadFormVisible = await testSubjects.exists('loadSearchForm');
-        if (!isLoadFormVisible) {
-          throw new Error('Load search form not visible yet.');
-        }
+        await this.clickLoadSavedSearchButton();
+        await PageObjects.header.waitUntilLoadingHasFinished();
+        const loadIsOpen = await testSubjects.exists('loadSearchForm');
+        expect(loadIsOpen).to.be(true);
       });
     }
 

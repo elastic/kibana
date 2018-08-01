@@ -27,7 +27,7 @@ import webpackMerge from 'webpack-merge';
 
 import { defaults } from 'lodash';
 
-import { fromRoot } from '../utils';
+import { IS_KIBANA_DISTRIBUTABLE, fromRoot } from '../utils';
 
 import { PUBLIC_PATH_PLACEHOLDER } from './public_path_placeholder';
 
@@ -122,7 +122,7 @@ export default class BaseOptimizer {
      * of Kibana and just make compressing and extracting it more difficult.
      */
     const maybeAddCacheLoader = (cacheName, loaders) => {
-      if (!this.uiBundles.isDevMode()) {
+      if (IS_KIBANA_DISTRIBUTABLE) {
         return loaders;
       }
 
@@ -233,11 +233,6 @@ export default class BaseOptimizer {
             use: getStyleLoaders(),
           },
           {
-            // TODO: this doesn't seem to be used, remove?
-            test: /\.jade$/,
-            loader: 'jade-loader'
-          },
-          {
             test: /\.(html|tmpl)$/,
             loader: 'raw-loader'
           },
@@ -286,58 +281,72 @@ export default class BaseOptimizer {
       },
     };
 
-    if (this.uiBundles.isDevMode()) {
-      return webpackMerge(commonConfig, {
-        module: {
-          rules: [
-            {
-              resource: createSourceFileResourceSelector(/\.tsx?$/),
-              use: maybeAddCacheLoader('typescript', [
-                {
-                  loader: 'ts-loader',
-                  options: {
-                    transpileOnly: true,
-                    experimentalWatchApi: true,
-                    onlyCompileBundledFiles: true,
-                    compilerOptions: {
-                      sourceMap: Boolean(this.sourceMaps),
-                      target: 'es5',
-                      module: 'esnext',
-                    }
+    // we transpile typescript in the optimizer unless we are running the distributable
+    const transpileTsConfig = {
+      module: {
+        rules: [
+          {
+            resource: createSourceFileResourceSelector(/\.tsx?$/),
+            use: maybeAddCacheLoader('typescript', [
+              {
+                loader: 'ts-loader',
+                options: {
+                  transpileOnly: true,
+                  experimentalWatchApi: true,
+                  onlyCompileBundledFiles: true,
+                  compilerOptions: {
+                    sourceMap: Boolean(this.sourceMaps),
+                    target: 'es5',
+                    module: 'esnext',
                   }
                 }
-              ]),
-            }
-          ]
-        },
+              }
+            ]),
+          }
+        ]
+      },
 
-        stats: {
-          // when typescript doesn't do a full type check, as we have the ts-loader
-          // configured here, it does not have enough information to determine
-          // whether an imported name is a type or not, so when the name is then
-          // exported, typescript has no choice but to emit the export. Fortunately,
-          // the extraneous export should not be harmful, so we just suppress these warnings
-          // https://github.com/TypeStrong/ts-loader#transpileonly-boolean-defaultfalse
-          warningsFilter: /export .* was not found in/
-        },
+      stats: {
+        // when typescript doesn't do a full type check, as we have the ts-loader
+        // configured here, it does not have enough information to determine
+        // whether an imported name is a type or not, so when the name is then
+        // exported, typescript has no choice but to emit the export. Fortunately,
+        // the extraneous export should not be harmful, so we just suppress these warnings
+        // https://github.com/TypeStrong/ts-loader#transpileonly-boolean-defaultfalse
+        warningsFilter: /export .* was not found in/
+      },
 
-        resolve: {
-          extensions: ['.ts', '.tsx'],
-        },
+      resolve: {
+        extensions: ['.ts', '.tsx'],
+      },
+    };
 
-        // In the test env we need to add react-addons (and a few other bits) for the
-        // enzyme tests to work.
-        // https://github.com/airbnb/enzyme/blob/master/docs/guides/webpack.md
-        externals: {
-          'mocha': 'mocha',
-          'react/lib/ExecutionEnvironment': true,
-          'react/addons': true,
-          'react/lib/ReactContext': true,
-        }
-      });
-    }
+    // We need to add react-addons (and a few other bits) for enzyme to work.
+    // https://github.com/airbnb/enzyme/blob/master/docs/guides/webpack.md
+    const supportEnzymeConfig = {
+      externals: {
+        'mocha': 'mocha',
+        'react/lib/ExecutionEnvironment': true,
+        'react/addons': true,
+        'react/lib/ReactContext': true,
+      }
+    };
 
-    return webpackMerge(commonConfig, {
+    const watchingConfig = {
+      plugins: [
+        new webpack.WatchIgnorePlugin([
+          // When our bundle entry files are fresh they cause webpack
+          // to think they might have changed since the watcher was
+          // initialized, which triggers a second compilation on startup.
+          // Since we can't reliably update these files anyway, we can
+          // just ignore them in the watcher and prevent the extra compilation
+          /bundles[\/\\].+\.entry\.js/,
+        ])
+      ]
+    };
+
+    // in production we set the process.env.NODE_ENV and uglify our bundles
+    const productionConfig = {
       plugins: [
         new webpack.DefinePlugin({
           'process.env': {
@@ -352,7 +361,17 @@ export default class BaseOptimizer {
           mangle: false
         }),
       ]
-    });
+    };
+
+    return webpackMerge(
+      commonConfig,
+      IS_KIBANA_DISTRIBUTABLE
+        ? {}
+        : transpileTsConfig,
+      this.uiBundles.isDevMode()
+        ? webpackMerge(watchingConfig, supportEnzymeConfig)
+        : productionConfig
+    );
   }
 
   failedStatsToError(stats) {

@@ -123,6 +123,7 @@
 .start-screen {
   margin: 20px auto;
   max-width: 800px;
+  width: 100%;
   background: #FFF;
   padding: 40px;
   border-radius: 4px;
@@ -173,10 +174,6 @@
     .panel-heading {
       background-color: rgba(0,0,0,.05) !important;
     }
-  }
-
-  .visualize-show-spy {
-    visibility: visible;
   }
 
   .panel-heading {
@@ -316,10 +313,6 @@ dashboard-viewport-provider {
       }
     }
 
-    .visualize-show-spy {
-      visibility: hidden;
-    }
-
     /**
      * 1. Use opacity to make this element accessible to screen readers and keyboard.
      * 2. Show on focus to enable keyboard accessibility.
@@ -350,9 +343,6 @@ dashboard-viewport-provider {
     &:hover {
       .panel-heading-floater {
         opacity: 1;
-      }
-      .visualize-show-spy {
-        visibility: visible;
       }
       .viewModeOpenContextMenuIcon {
         opacity: 1;
@@ -445,12 +435,12 @@ dashboard-viewport-provider {
   }
 }
 
-.dashboardLandingPage {
+// Mimics EuiPageBackground
+dashboard-listing {
+  background-color: @globalColorLightestGray;
   min-height: 100vh;
-  background: @globalColorLightestGray;
 }
 
-.dashboardLandingPage__content {
-  max-width: 1000px;
-  margin: auto;
+.dashboardLandingPage {
+  background: @globalColorLightestGray;
 }

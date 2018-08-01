@@ -71,7 +71,7 @@
                 <ng-pluralize count="metricCards.length" when="{'1':'field exists', 'other':'fields exist'}">fields exist</ng-pluralize> in documents (
                 <span class="field-emphasis">{{ totalMetricFieldCount }}</span> in total)
               </div>
-              
+
               <div ng-if="showAllMetrics === true" class="field-count-label euiFlexItem euiFlexItem--flexGrowZero">
                 <span class="field-emphasis">{{ metricCards.length }}</span>
                 <ng-pluralize count="metricCards.length" when="{'1':'field', 'other':'fields'}">fields</ng-pluralize>
@@ -79,7 +79,7 @@
                 <span class="field-emphasis">{{ populatedMetricFieldCount }}</span>
                 <ng-pluralize count="populatedMetricFieldCount" when="{'1':'exists', 'other':'exist'}">exist</ng-pluralize> in documents)
               </div>
-              
+
               <div ng-hide="populatedMetricFieldCount === totalMetricFieldCount" class="field-group-input euiFlexItem euiFlexItem--flexGrowZero">
                 <input id="toggleAllMetricsCheckbox" type="checkbox" class="kuiCheckBox" ng-click="toggleAllMetrics()" ng-checked="showAllMetrics === true">
                 <label for="toggleAllMetricsCheckbox">show empty fields</label>
@@ -137,7 +137,10 @@
           <div class="field-filter-controls euiFlexItem euiFlexItem--flexGrowZero">
             <div class="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--responsive">
               <div class="euiFlexItem euiFlexItem--flexGrowZero">
-                <select class="kuiSelect type-input" ng-model="filterFieldType" ng-change="filterFieldTypeChanged(filterFieldType)">
+                <select class="kuiSelect type-input"
+                  ng-model="filterFieldType"
+                  ng-change="filterFieldTypeChanged(filterFieldType)"
+                  aria-label="Select field types">
                   <option value="*">All field types</option>
                   <option ng-repeat="type in indexedFieldTypes" value="{{type}}">{{type}} types</option>
                 </select>

@@ -5,15 +5,16 @@
  */
 
 import React from 'react';
-import { withInitialData } from './helpers';
+import { createInitialDataSelector } from './helpers';
 import { Request } from 'react-redux-request';
-import { loadSpans } from '../../services/rest';
+import { loadSpans } from '../../services/rest/apm';
 
 const ID = 'spans';
 const INITIAL_DATA = {};
+const withInitialData = createInitialDataSelector(INITIAL_DATA);
 
 export function getSpans(state) {
-  return withInitialData(state.reactReduxRequest[ID], INITIAL_DATA);
+  return withInitialData(state.reactReduxRequest[ID]);
 }
 
 export function SpansRequest({ urlParams, render }) {

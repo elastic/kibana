@@ -22,21 +22,24 @@ import {
   EuiFlexItem,
   EuiHealth,
   EuiInMemoryTable,
-  EuiText
+  EuiText,
 } from '@elastic/eui';
 
 import { formatDate } from '@elastic/eui/lib/services/format';
 
 import { DescriptionCell } from './description_cell';
+import { DetectorCell } from './detector_cell';
 import { EntityCell } from './entity_cell';
 import { InfluencersCell } from './influencers_cell';
 import { AnomalyDetails } from './anomaly_details';
 import { LinksMenu } from './links_menu';
+import { checkPermission } from 'plugins/ml/privilege/check_privilege';
 
 import { mlAnomaliesTableService } from './anomalies_table_service';
 import { mlFieldFormatService } from 'plugins/ml/services/field_format_service';
-import { getSeverityColor } from 'plugins/ml/../common/util/anomaly_utils';
+import { getSeverityColor, isRuleSupported } from 'plugins/ml/../common/util/anomaly_utils';
 import { formatValue } from 'plugins/ml/formatters/format_value';
+import { RuleEditorFlyout } from 'plugins/ml/components/rule_editor';
 
 
 const INFLUENCERS_LIMIT = 5;    // Maximum number of influencers to display before a 'show more' link is added.
@@ -53,9 +56,11 @@ function renderTime(date, aggregationInterval) {
 }
 
 function showLinksMenuForItem(item) {
-  return item.isTimeSeriesViewDetector ||
+  const canConfigureRules = (isRuleSupported(item) && checkPermission('canUpdateJob'));
+  return (canConfigureRules ||
+    item.isTimeSeriesViewDetector ||
     item.entityName === 'mlcategory' ||
-    item.customUrls !== undefined;
+    item.customUrls !== undefined);
 }
 
 function getColumns(
@@ -65,9 +70,11 @@ function getColumns(
   interval,
   timefilter,
   showViewSeriesLink,
+  showRuleEditorFlyout,
   itemIdToExpandedRowMap,
   toggleRow,
   filter) {
+
   const columns = [
     {
       name: '',
@@ -100,6 +107,12 @@ function getColumns(
     {
       field: 'detector',
       name: 'detector',
+      render: (detectorDescription, item) => (
+        <DetectorCell
+          detectorDescription={detectorDescription}
+          numberOfRules={item.rulesLength}
+        />
+      ),
       sortable: true
     }
   ];
@@ -186,12 +199,11 @@ function getColumns(
     sortable: true
   });
 
-  const showExamples = items.some(item => item.entityName === 'mlcategory');
   const showLinks = (showViewSeriesLink === true) || items.some(item => showLinksMenuForItem(item));
 
   if (showLinks === true) {
     columns.push({
-      name: 'links',
+      name: 'actions',
       render: (item) => {
         if (showLinksMenuForItem(item) === true) {
           return (
@@ -201,6 +213,7 @@ function getColumns(
               isAggregatedData={isAggregatedData}
               interval={interval}
               timefilter={timefilter}
+              showRuleEditorFlyout={showRuleEditorFlyout}
             />
           );
         } else {
@@ -211,6 +224,7 @@ function getColumns(
     });
   }
 
+  const showExamples = items.some(item => item.entityName === 'mlcategory');
   if (showExamples === true) {
     columns.push({
       name: 'category examples',
@@ -238,7 +252,8 @@ class AnomaliesTable extends Component {
     super(props);
 
     this.state = {
-      itemIdToExpandedRowMap: {}
+      itemIdToExpandedRowMap: {},
+      showRuleEditorFlyout: () => {}
     };
   }
 
@@ -313,6 +328,19 @@ class AnomaliesTable extends Component {
     }
   };
 
+  setShowRuleEditorFlyoutFunction = (func) => {
+    this.setState({
+      showRuleEditorFlyout: func
+    });
+  }
+
+  unsetShowRuleEditorFlyoutFunction = () => {
+    const showRuleEditorFlyout = () => {};
+    this.setState({
+      showRuleEditorFlyout
+    });
+  }
+
   render() {
     const { timefilter, tableData, filter } = this.props;
 
@@ -336,6 +364,7 @@ class AnomaliesTable extends Component {
       tableData.interval,
       timefilter,
       tableData.showViewSeriesLink,
+      this.state.showRuleEditorFlyout,
       this.state.itemIdToExpandedRowMap,
       this.toggleRow,
       filter);
@@ -355,20 +384,26 @@ class AnomaliesTable extends Component {
     };
 
     return (
-      <EuiInMemoryTable
-        className="ml-anomalies-table"
-        items={tableData.anomalies}
-        columns={columns}
-        pagination={{
-          pageSizeOptions: [10, 25, 100],
-          initialPageSize: 25
-        }}
-        sorting={sorting}
-        itemId="rowId"
-        itemIdToExpandedRowMap={this.state.itemIdToExpandedRowMap}
-        compressed={true}
-        rowProps={getRowProps}
-      />
+      <React.Fragment>
+        <RuleEditorFlyout
+          setShowFunction={this.setShowRuleEditorFlyoutFunction}
+          unsetShowFunction={this.unsetShowRuleEditorFlyoutFunction}
+        />
+        <EuiInMemoryTable
+          className="ml-anomalies-table eui-textBreakWord"
+          items={tableData.anomalies}
+          columns={columns}
+          pagination={{
+            pageSizeOptions: [10, 25, 100],
+            initialPageSize: 25
+          }}
+          sorting={sorting}
+          itemId="rowId"
+          itemIdToExpandedRowMap={this.state.itemIdToExpandedRowMap}
+          compressed={true}
+          rowProps={getRowProps}
+        />
+      </React.Fragment>
     );
   }
 }

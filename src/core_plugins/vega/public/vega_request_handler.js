@@ -21,8 +21,9 @@ import { VegaParser } from './data_model/vega_parser';
 import { dashboardContextProvider } from 'plugins/kibana/dashboard/dashboard_context';
 import { SearchCache } from './data_model/search_cache';
 import { TimeCache } from './data_model/time_cache';
+import { timefilter } from 'ui/timefilter';
 
-export function VegaRequestHandlerProvider(Private, es, timefilter, serviceSettings) {
+export function VegaRequestHandlerProvider(Private, es, serviceSettings) {
 
   const dashboardContext = Private(dashboardContextProvider);
   const searchCache = new SearchCache(es, { max: 10, maxAge: 4 * 1000 });

@@ -28,7 +28,7 @@ describe('Buckets wrapper', function () {
       expect(buckets).to.have.length(count);
     });
 
-    it('itterates properly, passing in the key', function () {
+    it('iterates properly, passing in the key', function () {
       const buckets = new TabifyBuckets(aggResp);
       const keysSent = [];
       buckets.forEach(function (bucket, key) {

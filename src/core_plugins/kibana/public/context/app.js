@@ -36,6 +36,7 @@ import {
   LOADING_STATUS,
   QueryActionsProvider,
 } from './query';
+import { timefilter } from 'ui/timefilter';
 
 const module = uiModules.get('apps/context', [
   'elasticsearch',
@@ -66,7 +67,7 @@ module.directive('contextApp', function ContextApp() {
   };
 });
 
-function ContextAppController($scope, config, Private, timefilter) {
+function ContextAppController($scope, config, Private) {
   const queryParameterActions = Private(QueryParameterActionsProvider);
   const queryActions = Private(QueryActionsProvider);
 

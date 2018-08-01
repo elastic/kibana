@@ -24,8 +24,9 @@ import ChoroplethLayer from './choropleth_layer';
 import { truncatedColorMaps }  from 'ui/vislib/components/color/truncated_colormaps';
 import AggResponsePointSeriesTooltipFormatterProvider from './tooltip_formatter';
 import 'ui/vis/map/service_settings';
+import { toastNotifications } from 'ui/notify';
 
-export function RegionMapsVisualizationProvider(Private, Notifier, config) {
+export function RegionMapsVisualizationProvider(Private, config) {
 
   const tooltipFormatter = Private(AggResponsePointSeriesTooltipFormatterProvider);
   const BaseMapsVisualization = Private(BaseMapsVisualizationProvider);
@@ -36,17 +37,14 @@ export function RegionMapsVisualizationProvider(Private, Notifier, config) {
       super(container, vis);
       this._vis = this.vis;
       this._choroplethLayer = null;
-      this._notify = new Notifier({ location: 'Region map' });
     }
 
-
-    async render(esReponse, status) {
-      await super.render(esReponse, status);
+    async render(esResponse, status) {
+      await super.render(esResponse, status);
       if (this._choroplethLayer) {
         await this._choroplethLayer.whenDataLoaded();
       }
     }
-
 
     async _updateData(tableGroup) {
       this._chartData = tableGroup;
@@ -81,7 +79,6 @@ export function RegionMapsVisualizationProvider(Private, Notifier, config) {
       this._kibanaMap.useUiStateFromVisualization(this._vis);
     }
 
-
     async  _updateParams() {
 
       await super._updateParams();
@@ -95,7 +92,7 @@ export function RegionMapsVisualizationProvider(Private, Notifier, config) {
         return;
       }
 
-      this._updateChoroplehLayerForNewProperties(
+      this._updateChoroplethLayerForNewProperties(
         visParams.selectedLayer.url,
         visParams.selectedLayer.attribution,
         this._vis.params.showAllShapes
@@ -114,7 +111,7 @@ export function RegionMapsVisualizationProvider(Private, Notifier, config) {
       return this._recreateChoroplethLayer(url, attribution, showAllData);
     }
 
-    _updateChoroplehLayerForNewProperties(url, attribution, showAllData) {
+    _updateChoroplethLayerForNewProperties(url, attribution, showAllData) {
       if (this._choroplethLayer && this._choroplethLayer.canReuseInstance(url, showAllData)) {
         return;
       }
@@ -153,17 +150,17 @@ export function RegionMapsVisualizationProvider(Private, Notifier, config) {
           return;
         }
 
-        const agg = this._vis.aggs.bySchemaName.segment[0];
-        const filter = agg.createFilter(event);
-        this._vis.API.queryFilter.addFilters(filter);
+        const rowIndex = this._chartData.tables[0].rows.findIndex(row => row[0] === event);
+        this._vis.API.events.addFilter(this._chartData.tables[0], 0, rowIndex, event);
       });
+
       this._choroplethLayer.on('styleChanged', (event) => {
         const shouldShowWarning = this._vis.params.isDisplayWarning && config.get('visualization:regionmap:showWarnings');
         if (event.mismatches.length > 0 && shouldShowWarning) {
-          this._notify.warning(`Could not show ${event.mismatches.length} ${event.mismatches.length > 1 ? 'results' : 'result'} on the map.`
-            + ` To avoid this, ensure that each term can be matched to a corresponding shape on that shape's join field.`
-            + ` Could not match following terms: ${event.mismatches.join(',')}`
-          );
+          toastNotifications.addWarning({
+            title: `Unable to show ${event.mismatches.length} ${event.mismatches.length > 1 ? 'results' : 'result'} on map`,
+            text: `Ensure that each of these term matches a shape on that shape's join field: ${event.mismatches.join(', ')}`,
+          });
         }
       });
 

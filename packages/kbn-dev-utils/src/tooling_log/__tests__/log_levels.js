@@ -104,7 +104,7 @@ describe('parseLogLevel(logLevel).flags', () => {
 
   describe('invalid logLevel', () => {
     it('throws error', () => {
-      // avoid the impossiblity that a valid level is generated
+      // avoid the impossibility that a valid level is generated
       // by specifying a long length
       const level = chance.word({ length: 10 });
 

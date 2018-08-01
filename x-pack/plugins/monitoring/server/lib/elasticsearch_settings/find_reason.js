@@ -7,7 +7,7 @@
 import { get } from 'lodash';
 
 /*
- * Return true if the setttings property is enabled or is using its default state of enabled
+ * Return true if the settings property is enabled or is using its default state of enabled
  * Note: this assumes that a 0 corresponds to disabled
  */
 const isEnabledOrDefault = property => {

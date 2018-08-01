@@ -20,7 +20,7 @@ describe('ccs_utils', () => {
       get.withArgs(indexPatternName).returns(indexPattern);
       get.withArgs('xpack.monitoring.ccs.enabled').returns(false);
 
-      // falsey string values should be ignored
+      // falsy string values should be ignored
       const allPattern = prefixIndexPattern(config, indexPatternName, '*');
       const onePattern = prefixIndexPattern(config, indexPatternName, 'do_not_use_me');
 
@@ -37,7 +37,7 @@ describe('ccs_utils', () => {
       get.withArgs(indexPatternName).returns(indexPattern);
       get.withArgs('xpack.monitoring.ccs.enabled').returns(true);
 
-      // falsey string values should be ignored
+      // falsy string values should be ignored
       const undefinedPattern = prefixIndexPattern(config, indexPatternName);
       const nullPattern = prefixIndexPattern(config, indexPatternName, null);
       const blankPattern = prefixIndexPattern(config, indexPatternName, '');

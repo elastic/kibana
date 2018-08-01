@@ -142,7 +142,7 @@ describe('ObjDefine Utility', function () {
       expect(obj).to.have.property('name', 'bar');
     });
 
-    it('ignores default values that are not defined propertyes', function () {
+    it('ignores default values that are not defined properties', function () {
       const def = new ObjDefine({ name: 'foo', name2: 'bar' });
       const obj = def.create();
 

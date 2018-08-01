@@ -8,6 +8,7 @@
 
 import { basicJobValidation } from 'plugins/ml/../common/util/job_utils';
 import { newJobLimits } from 'plugins/ml/jobs/new_job/utils/new_job_defaults';
+import { ALLOWED_DATA_UNITS } from 'plugins/ml/../common/constants/validation';
 import _ from 'lodash';
 
 export function validateJob(job, checks) {
@@ -19,6 +20,20 @@ export function validateJob(job, checks) {
   _.each(checks, (item) => {
     item.valid = true;
   });
+
+  populateValidationMessages(validationResults, checks);
+
+  _.each(checks, (item) => {
+    if (item.valid === false) {
+      valid = false;
+    }
+  });
+
+  return valid;
+}
+
+export function populateValidationMessages(validationResults, checks) {
+  const limits = newJobLimits();
 
   if (validationResults.contains('job_id_empty')) {
     checks.jobId.valid = false;
@@ -36,6 +51,13 @@ export function validateJob(job, checks) {
     checks.groupIds.message = msg;
   }
 
+  if (validationResults.contains('model_memory_limit_units_invalid')) {
+    checks.modelMemoryLimit.valid = false;
+    const str = `${(ALLOWED_DATA_UNITS.slice(0, ALLOWED_DATA_UNITS.length - 1).join(', '))} or ${([...ALLOWED_DATA_UNITS].pop())}`;
+    const msg = `Model memory limit data unit unrecognized. It must be ${str}`;
+    checks.modelMemoryLimit.message = msg;
+  }
+
   if (validationResults.contains('model_memory_limit_invalid')) {
     checks.modelMemoryLimit.valid = false;
     const msg = `Model memory limit cannot be higher than the maximum value of ${limits.max_model_memory_limit.toUpperCase()}`;
@@ -47,12 +69,4 @@ export function validateJob(job, checks) {
     const msg = 'Duplicate detectors were found.';
     checks.duplicateDetectors.message = msg;
   }
-
-  _.each(checks, (item) => {
-    if (item.valid === false) {
-      valid = false;
-    }
-  });
-
-  return valid;
 }

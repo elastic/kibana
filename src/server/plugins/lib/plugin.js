@@ -98,7 +98,7 @@ export class Plugin {
     });
 
     // Only change the plugin status to green if the
-    // intial status has not been changed
+    // initial status has not been changed
     if (this.status && this.status.state === 'uninitialized') {
       this.status.green('Ready');
     }

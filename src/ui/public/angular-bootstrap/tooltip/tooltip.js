@@ -160,7 +160,7 @@ angular.module( 'ui.bootstrap.tooltip', [ 'ui.bootstrap.position', 'ui.bootstrap
                     .catch((error) => {
                       // if the timeout is canceled then the string `canceled` is thrown. To prevent
                       // this from triggering an 'unhandled promise rejection' in angular 1.5+ the
-                      // $timeout service explicitely tells $q that the promise it generated is "handled"
+                      // $timeout service explicitly tells $q that the promise it generated is "handled"
                       // but that does not include down chain promises like the one created by calling
                       // `popupTimeout.then()`. Because of this we need to ignore the "canceled" string
                       // and only propagate real errors

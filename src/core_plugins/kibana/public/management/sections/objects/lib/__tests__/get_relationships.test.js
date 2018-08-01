@@ -28,7 +28,7 @@ describe('getRelationships', () => {
     expect($http.mock.calls.length).toBe(1);
   });
 
-  it('should handle succcesful responses', async () => {
+  it('should handle successful responses', async () => {
     const $http = jest.fn().mockImplementation(() => ({ data: [1, 2] }));
     const basePath = 'test';
 

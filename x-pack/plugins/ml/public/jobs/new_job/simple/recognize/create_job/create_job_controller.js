@@ -10,7 +10,7 @@ import _ from 'lodash';
 import angular from 'angular';
 import dateMath from '@kbn/datemath';
 import { isJobIdValid, prefixDatafeedId } from 'plugins/ml/../common/util/job_utils';
-import { createSearchItems, createResultsUrl, addNewJobToRecentlyAccessed } from 'plugins/ml/jobs/new_job/utils/new_job_utils';
+import { createSearchItems, addNewJobToRecentlyAccessed } from 'plugins/ml/jobs/new_job/utils/new_job_utils';
 
 import 'plugins/kibana/visualize/styles/main.less';
 
@@ -25,6 +25,7 @@ import { mlMessageBarService } from 'plugins/ml/components/messagebar/messagebar
 import { ml } from 'plugins/ml/services/ml_api_service';
 import { initPromise } from 'plugins/ml/util/promise';
 import template from './create_job.html';
+import { timefilter } from 'ui/timefilter';
 
 uiRoutes
   .when('/jobs/new_job/simple/recognize', {
@@ -47,13 +48,11 @@ module
     $scope,
     $window,
     $route,
-    timefilter,
     Private) {
 
     const mlCreateRecognizerJobsService = Private(CreateRecognizerJobsServiceProvider);
     timefilter.disableTimeRangeSelector();
     timefilter.disableAutoRefreshSelector();
-    $scope.tt = timefilter;
     const msgs = mlMessageBarService;
 
     const SAVE_STATE = {
@@ -344,8 +343,8 @@ module
               $scope.formConfig.start = resp.start.epoch;
               $scope.formConfig.end = resp.end.epoch;
             } else {
-              $scope.formConfig.start = dateMath.parse(timefilter.time.from).valueOf();
-              $scope.formConfig.end = dateMath.parse(timefilter.time.to).valueOf();
+              $scope.formConfig.start = dateMath.parse(timefilter.getTime().from).valueOf();
+              $scope.formConfig.end = dateMath.parse(timefilter.getTime().to).valueOf();
             }
             let jobsCounter = 0;
             let datafeedCounter = 0;
@@ -470,7 +469,7 @@ module
         $scope.overallState = SAVE_STATE.SAVED;
       }
 
-      $scope.resultsUrl = createResultsUrl(
+      $scope.resultsUrl = mlJobService.createResultsUrl(
         jobIds,
         $scope.formConfig.start,
         $scope.formConfig.end,

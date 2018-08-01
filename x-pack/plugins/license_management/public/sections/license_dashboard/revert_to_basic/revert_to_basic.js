@@ -82,7 +82,7 @@ export class RevertToBasic extends React.PureComponent {
           title="Revert to Basic license"
           description={description}
           footer={
-            <EuiButton onClick={() => startBasicLicense(licenseType)}>
+            <EuiButton data-test-subj="revertToBasicButton" onClick={() => startBasicLicense(licenseType)}>
               Revert to Basic
             </EuiButton>
           }

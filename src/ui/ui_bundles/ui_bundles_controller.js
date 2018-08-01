@@ -17,14 +17,19 @@
  * under the License.
  */
 
-import { createHash } from 'crypto';
 import { resolve } from 'path';
+import { createHash } from 'crypto';
+import { promisify } from 'util';
+import { existsSync } from 'fs';
 
-import { UiBundle } from './ui_bundle';
-import { fromNode as fcb } from 'bluebird';
+import del from 'del';
 import { makeRe } from 'minimatch';
 import mkdirp from 'mkdirp';
+
+import { UiBundle } from './ui_bundle';
 import { appEntryTemplate } from './app_entry_template';
+
+const mkdirpAsync = promisify(mkdirp);
 
 function getWebpackAliases(pluginSpecs) {
   return pluginSpecs.reduce((aliases, spec) => {
@@ -74,10 +79,11 @@ export class UiBundlesController {
     this._postLoaders = [];
     this._bundles = [];
 
+    // create a bundle for each uiApp
     for (const uiApp of uiApps) {
       this.add({
         id: uiApp.getId(),
-        modules: uiApp.getModules(),
+        modules: [uiApp.getMainModuleId()],
         template: appEntryTemplate,
       });
     }
@@ -98,6 +104,10 @@ export class UiBundlesController {
         controller: this,
       }));
     }
+  }
+
+  isDevMode() {
+    return this._env === 'development';
   }
 
   getWebpackPluginProviders() {
@@ -128,10 +138,6 @@ export class UiBundlesController {
     return this._appExtensions;
   }
 
-  isDevMode() {
-    return this._env === 'development';
-  }
-
   getContext() {
     return JSON.stringify(this._context, null, '  ');
   }
@@ -140,58 +146,48 @@ export class UiBundlesController {
     return resolve(this._workingDir, ...args);
   }
 
+  async resetBundleDir() {
+    if (!existsSync(this._workingDir)) {
+      // create a fresh working directory
+      await mkdirpAsync(this._workingDir);
+    } else {
+      // delete all children of the working directory
+      await del(this.resolvePath('*'));
+    }
+
+    // write the entry/style files for each bundle
+    for (const bundle of this._bundles) {
+      await bundle.writeEntryFile();
+      await bundle.touchStyleFile();
+    }
+  }
+
   getCacheDirectory(...subPath) {
     return this.resolvePath('../.cache', this.hashBundleEntries(), ...subPath);
   }
 
   getDescription() {
-    switch (this._bundles.length) {
+    const ids = this.getIds();
+    switch (ids.length) {
       case 0:
         return '0 bundles';
       case 1:
-        return `bundle for ${this._bundles[0].getId()}`;
+        return `bundle for ${ids[0]}`;
       default:
-        const ids = this.getIds();
         const last = ids.pop();
         const commas = ids.join(', ');
         return `bundles for ${commas} and ${last}`;
     }
   }
 
-  async ensureDir() {
-    await fcb(cb => mkdirp(this._workingDir, cb));
-  }
-
-  async writeEntryFiles() {
-    await this.ensureDir();
-
-    for (const bundle of this._bundles) {
-      const existing = await bundle.readEntryFile();
-      const expected = bundle.renderContent();
-
-      if (existing !== expected) {
-        await bundle.writeEntryFile();
-        await bundle.clearBundleFile();
-      }
-    }
-  }
-
-  async ensureStyleFiles() {
-    await this.ensureDir();
-
-    for (const bundle of this._bundles) {
-      if (!await bundle.hasStyleFile()) {
-        await bundle.touchStyleFile();
-      }
-    }
-  }
-
   hashBundleEntries() {
     const hash = createHash('sha1');
+
     for (const bundle of this._bundles) {
       hash.update(`bundleEntryPath:${bundle.getEntryPath()}`);
       hash.update(`bundleEntryContent:${bundle.renderContent()}`);
     }
+
     return hash.digest('hex');
   }
 
@@ -215,9 +211,5 @@ export class UiBundlesController {
   getIds() {
     return this._bundles
       .map(bundle => bundle.getId());
-  }
-
-  toJSON() {
-    return this._bundles;
   }
 }

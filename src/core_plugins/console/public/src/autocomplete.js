@@ -302,23 +302,6 @@ export function getEndpointFromPosition(editor, pos) {
 }
 export default function (editor) {
 
-  function isSeparatorToken(token) {
-    switch ((token || {}).type) {
-      case 'url.slash':
-      case 'url.comma':
-      case 'url.questionmark':
-      case 'paren.lparen':
-      case 'paren.rparen':
-      case 'punctuation.colon':
-      case 'punctuation.comma':
-      case 'whitespace':
-        return true;
-      default:
-        // standing on white space, quotes or another punctuation - no replacing
-        return false;
-    }
-  }
-
   function isUrlPathToken(token) {
     switch ((token || {}).type) {
       case 'url.slash':
@@ -327,24 +310,6 @@ export default function (editor) {
         return true;
       default:
         return false;
-    }
-  }
-
-
-  function getAutoCompleteValueFromToken(token) {
-    switch ((token || {}).type) {
-      case 'variable':
-      case 'string':
-      case 'text':
-      case 'constant.numeric':
-      case 'constant.language.boolean':
-        return token.value.replace(/"/g, '');
-      case 'method':
-      case 'url.part':
-        return token.value;
-      default:
-        // standing on white space, quotes or another punctuation - no replacing
-        return '';
     }
   }
 
@@ -909,7 +874,7 @@ export default function (editor) {
       case 'paren.rparen':
       case 'punctuation.colon':
       case 'punctuation.comma':
-      case 'UNKOWN':
+      case 'UNKNOWN':
         return;
     }
 
@@ -949,18 +914,21 @@ export default function (editor) {
           } else {
             term = _.clone(term);
           }
-
-          return _.defaults(term, {
+          const defaults = {
             value: term.name,
             meta: 'API',
             score: 0,
             context: context,
-            completer: {
+          };
+          // we only need out custom insertMatch behavior for the body
+          if (context.autoCompleteType === 'body') {
+            defaults.completer = {
               insertMatch: function () {
                 return applyTerm(term);
               }
-            }
-          });
+            };
+          }
+          return _.defaults(term, defaults);
         });
 
         terms.sort(function (t1, t2) {
@@ -1007,10 +975,11 @@ export default function (editor) {
   });
 
   const langTools = ace.acequire('ace/ext/language_tools');
-  const aceUtils = ace.acequire('ace/autocomplete/util');
-  const aceAutoComplete = ace.acequire('ace/autocomplete');
 
   langTools.setCompleters([{
+    identifierRegexps: [
+      /[a-zA-Z_0-9\.\$\-\u00A2-\uFFFF]/ // adds support for dot character
+    ],
     getCompletions: getCompletions
   }]);
 
@@ -1018,49 +987,6 @@ export default function (editor) {
     enableBasicAutocompletion: true
   });
   editor.$blockScrolling = Infinity;
-  // Ace doesn't care about tokenization when calculating prefix. It will thus stop on . in keys names.
-  // we patch this behavior.
-  // CHECK ON ACE UPDATE
-  const aceAutoCompleteInstance = new aceAutoComplete.Autocomplete();
-  aceAutoCompleteInstance.autoInsert = false;
-  aceAutoCompleteInstance.gatherCompletions = function (aceEditor, callback) {
-    const session = aceEditor.getSession();
-    const pos = aceEditor.getCursorPosition();
-    let prefix = '';
-    // change starts here
-    const token = session.getTokenAt(pos.row, pos.column);
-    this.base = _.clone(pos);
-    this.base.detach = () => {};
-    if (!editor.parser.isEmptyToken(token) && !isSeparatorToken(token)) {
-      if (token.value.indexOf('"') === 0) {
-        this.base.column = token.start + 1;
-      }
-      else {
-        this.base.column = token.start;
-      }
-
-      prefix = getAutoCompleteValueFromToken(token);
-    }
-
-    let matches = [];
-    aceUtils.parForEach(aceEditor.completers, function (completer, next) {
-      completer.getCompletions(aceEditor, session, pos, prefix, function (err, results) {
-        if (!err) {
-          matches = matches.concat(results);
-        }
-        next();
-      });
-    }, function () {
-      callback(null, {
-        prefix: prefix,
-        matches: matches
-      });
-    });
-    return true;
-  };
-
-  editor.__ace.completer = aceAutoCompleteInstance;
-
   return {
 
     _test: {

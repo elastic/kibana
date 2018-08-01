@@ -141,7 +141,7 @@ export function mergeXPackStats(cluster, allProductStats, path, product) {
     const mergeStats = {};
     set(mergeStats, path, productStats);
 
-    // merge exising data with new stats
+    // merge existing data with new stats
     cluster.stack_stats.xpack[product] = cluster.stack_stats.xpack[product] || {};
     merge(cluster.stack_stats.xpack[product], mergeStats);
   }

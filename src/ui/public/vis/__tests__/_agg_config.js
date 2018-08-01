@@ -452,7 +452,7 @@ describe('AggConfig', function () {
       type: 'table',
       aggs: [
         {
-          type: 'terms',
+          type: 'histogram',
           schema: 'bucket',
           params: { field: 'bytes' }
         }

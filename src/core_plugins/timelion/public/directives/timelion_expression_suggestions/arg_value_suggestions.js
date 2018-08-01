@@ -160,7 +160,7 @@ export function ArgValueSuggestionsProvider(Private, indexPatterns) {
 
     /**
      * @param {string} partial - user provided argument value
-     * @param {array} staticSuggestions - arugment value suggestions
+     * @param {array} staticSuggestions - argument value suggestions
      * @return {array} array of static suggestions matching partial
      */
     getStaticSuggestionsForInput: (partialInput = '', staticSuggestions = []) => {

@@ -25,7 +25,7 @@ const UrlFormat = createUrlFormat(FieldFormat);
 
 describe('UrlFormat', function () {
 
-  it('ouputs a simple <a> tab by default', function () {
+  it('outputs a simple <a> tab by default', function () {
     const url = new UrlFormat();
 
     expect(url.convert('http://elastic.co', 'html'))

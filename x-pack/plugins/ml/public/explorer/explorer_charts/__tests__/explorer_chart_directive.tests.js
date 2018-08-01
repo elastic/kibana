@@ -199,7 +199,7 @@ describe('ML - <ml-explorer-chart>', () => {
 
         const line = angular.element(paths[2]);
         expect(line.attr('class')).to.be('values-line');
-        // this is not feasable to test because of minimal differences
+        // this is not feasible to test because of minimal differences
         // across various browsers
         // expect(line.attr('d'))
         //   .to.be('M205.56285511363637,152.3732523349513M215.3515625,7.72727272727272L217.79873934659093,162.27272727272728');

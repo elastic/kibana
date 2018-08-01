@@ -23,6 +23,7 @@ exports[`ExplainCollectionEnabled should explain about xpack.monitoring.collecti
     </EuiTitle>
     <EuiTextColor
       color="subdued"
+      component="span"
     >
       <span
         className="euiTextColor euiTextColor--subdued"

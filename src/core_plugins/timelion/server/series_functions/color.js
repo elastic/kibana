@@ -30,8 +30,8 @@ export default new Chainable('color', {
     {
       name: 'color',
       types: ['string'],
-      help: 'Color of series, as hex, eg #c6c6c6 is a lovely light grey. If you specify multiple colors, and have ' +
-       'multiple series, you will get a gradient, eg "#00B1CC:#00FF94:#FF3A39:#CC1A6F"'
+      help: 'Color of series, as hex, e.g., #c6c6c6 is a lovely light grey. If you specify multiple colors, and have ' +
+       'multiple series, you will get a gradient, e.g., "#00B1CC:#00FF94:#FF3A39:#CC1A6F"'
     }
   ],
   help: 'Change the color of the series',

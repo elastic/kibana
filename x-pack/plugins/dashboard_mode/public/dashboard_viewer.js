@@ -18,13 +18,14 @@ import 'uiExports/visTypes';
 import 'uiExports/visResponseHandlers';
 import 'uiExports/visRequestHandlers';
 import 'uiExports/visEditorTypes';
+import 'uiExports/inspectorViews';
 import 'uiExports/savedObjectTypes';
 import 'uiExports/embeddableFactories';
-import 'uiExports/spyModes';
 import 'uiExports/navbarExtensions';
 import 'uiExports/docViews';
 import 'uiExports/fieldFormats';
-
+import 'uiExports/search';
+import 'uiExports/autocompleteProviders';
 import _ from 'lodash';
 import 'ui/autoload/all';
 import 'plugins/kibana/dashboard';

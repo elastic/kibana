@@ -22,6 +22,7 @@ export function DashboardAddPanelProvider({ getService, getPageObjects }) {
   const log = getService('log');
   const retry = getService('retry');
   const testSubjects = getService('testSubjects');
+  const flyout = getService('flyout');
   const PageObjects = getPageObjects(['header', 'common']);
 
   return new class DashboardAddPanel {
@@ -92,12 +93,17 @@ export function DashboardAddPanelProvider({ getService, getPageObjects }) {
       }
     }
 
+    async waitForEuiTableLoading() {
+      const addPanel = await testSubjects.find('dashboardAddPanel');
+      await addPanel.waitForDeletedByClassName('euiBasicTable-loading');
+    }
+
     async closeAddPanel() {
-      log.debug('closeAddPanel');
+      log.debug('DashboardAddPanel.closeAddPanel');
       const isOpen = await this.isAddPanelOpen();
       if (isOpen) {
         await retry.try(async () => {
-          await testSubjects.click('closeAddPanelBtn');
+          await flyout.close('dashboardAddPanel');
           const isOpen = await this.isAddPanelOpen();
           if (isOpen) {
             throw new Error('Add panel still open, trying again.');
@@ -163,12 +169,16 @@ export function DashboardAddPanelProvider({ getService, getPageObjects }) {
     async addVisualization(vizName) {
       log.debug(`DashboardAddPanel.addVisualization(${vizName})`);
       await this.ensureAddPanelIsShowing();
+      // workaround for timing issue with slideout animation
+      await PageObjects.common.sleep(500);
       await this.filterEmbeddableNames(`"${vizName.replace('-', ' ')}"`);
       await testSubjects.click(`addPanel${vizName.split(' ').join('-')}`);
       await this.closeAddPanel();
     }
 
     async filterEmbeddableNames(name) {
+      // The search input field may be disabled while the table is loading so wait for it
+      await this.waitForEuiTableLoading();
       await testSubjects.setValue('savedObjectFinderSearchInput', name);
       await PageObjects.header.waitUntilLoadingHasFinished();
     }

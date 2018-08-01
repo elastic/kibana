@@ -8,12 +8,12 @@
 import 'ngreact';
 
 import { uiModules } from 'ui/modules';
+import { timefilter } from 'ui/timefilter';
 const module = uiModules.get('apps/ml', ['react']);
 
 import { AnomaliesTable } from './anomalies_table';
 
 module.directive('mlAnomaliesTable', function ($injector) {
-  const timefilter = $injector.get('timefilter');
   const reactDirective = $injector.get('reactDirective');
 
   return reactDirective(

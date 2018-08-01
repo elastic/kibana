@@ -58,7 +58,7 @@ export default new Chainable('holt', {
     {
       name: 'season',
       types: ['string'],
-      help: 'How long is the season, eg, 1w if you pattern repeats weekly. (Only useful with gamma)'
+      help: 'How long is the season, e.g., 1w if you pattern repeats weekly. (Only useful with gamma)'
     },
     {
       name: 'sample',
@@ -87,7 +87,7 @@ export default new Chainable('holt', {
 
       // Single exponential smoothing
       // This is basically a weighted moving average in which the older
-      // points exponentially degrade relative to the alpha, eg:
+      // points exponentially degrade relative to the alpha, e.g.:
       // 0.8^1, 0.8^2, 0.8^3, etc
 
       const times = _.map(series.data, 0);
@@ -103,7 +103,7 @@ export default new Chainable('holt', {
 
       if (alpha != null && beta != null && gamma != null) {
         if (!sample || !args.byName.season || sample < 2) {
-          throw new Error('Must specificy a season length and a sample size >= 2');
+          throw new Error('Must specify a season length and a sample size >= 2');
         }
         const season = Math.round(toMilliseconds(args.byName.season) / toMilliseconds(tlConfig.time.interval));
         points = tes(points, alpha, beta, gamma, season, sample);

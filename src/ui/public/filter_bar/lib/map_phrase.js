@@ -20,7 +20,7 @@
 import _ from 'lodash';
 import { SavedObjectNotFound } from '../../errors';
 
-export function FilterBarLibMapPhraseProvider(Promise, courier) {
+export function FilterBarLibMapPhraseProvider(Promise, indexPatterns) {
   return function (filter) {
     const isScriptedPhraseFilter = isScriptedPhrase(filter);
     if (!_.has(filter, ['query', 'match']) && !isScriptedPhraseFilter) {
@@ -33,16 +33,15 @@ export function FilterBarLibMapPhraseProvider(Promise, courier) {
       const params = isScriptedPhraseFilter ? filter.script.script.params : filter.query.match[key];
       const query = isScriptedPhraseFilter ? params.value : params.query;
 
-      // Sometimes a filter will end up with an invalid index param. This could happen for a lot of reasons,
+      // Sometimes a filter will end up with an invalid index or field param. This could happen for a lot of reasons,
       // for example a user might manually edit the url or the index pattern's ID might change due to
       // external factors e.g. a reindex. We only need the index in order to grab the field formatter, so we fallback
-      // on displaying the raw value if the index is invalid.
-      const value = indexPattern ? indexPattern.fields.byName[key].format.convert(query) : query;
+      // on displaying the raw value if the index or field is invalid.
+      const value = (indexPattern && indexPattern.fields.byName[key]) ? indexPattern.fields.byName[key].format.convert(query) : query;
       return { type, key, value, params };
     }
 
-    return courier
-      .indexPatterns
+    return indexPatterns
       .get(filter.meta.index)
       .then(getParams)
       .catch((error) => {

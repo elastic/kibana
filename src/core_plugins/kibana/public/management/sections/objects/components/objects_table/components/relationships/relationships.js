@@ -24,11 +24,7 @@ import {
   EuiTitle,
   EuiFlyout,
   EuiFlyoutBody,
-  EuiFlyoutFooter,
   EuiFlyoutHeader,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiButtonEmpty,
   EuiDescriptionList,
   EuiDescriptionListTitle,
   EuiLink,
@@ -191,7 +187,7 @@ export class Relationships extends Component {
                   name: 'Title',
                   field: 'title',
                   render: (title, item) => (
-                    <EuiLink href={`#${getEditUrl(item.id, type)}`}>
+                    <EuiLink href={`${getEditUrl(item.id, type)}`}>
                       {title}
                     </EuiLink>
                   ),
@@ -240,16 +236,6 @@ export class Relationships extends Component {
         </EuiFlyoutHeader>
 
         <EuiFlyoutBody>{this.renderRelationships()}</EuiFlyoutBody>
-
-        <EuiFlyoutFooter>
-          <EuiFlexGroup justifyContent="spaceBetween">
-            <EuiFlexItem grow={false}>
-              <EuiButtonEmpty onClick={close} size="s">
-                Close
-              </EuiButtonEmpty>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiFlyoutFooter>
       </EuiFlyout>
     );
   }

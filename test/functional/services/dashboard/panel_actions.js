@@ -22,6 +22,7 @@ const EDIT_PANEL_DATA_TEST_SUBJ = 'dashboardPanelAction-editPanel';
 const TOGGLE_EXPAND_PANEL_DATA_TEST_SUBJ = 'dashboardPanelAction-togglePanel';
 const CUSTOMIZE_PANEL_DATA_TEST_SUBJ = 'dashboardPanelAction-customizePanel';
 const OPEN_CONTEXT_MENU_ICON_DATA_TEST_SUBJ = 'dashboardPanelToggleMenuIcon';
+const OPEN_INSPECTOR_TEST_SUBJ = 'dashboardPanelAction-openInspector';
 
 export function DashboardPanelActionsProvider({ getService, getPageObjects }) {
   const log = getService('log');
@@ -107,6 +108,11 @@ export function DashboardPanelActionsProvider({ getService, getPageObjects }) {
     async customizePanel(parent) {
       await this.openContextMenu(parent);
       await testSubjects.click(CUSTOMIZE_PANEL_DATA_TEST_SUBJ);
+    }
+
+    async openInspector(parent) {
+      await this.openContextMenu(parent);
+      await testSubjects.click(OPEN_INSPECTOR_TEST_SUBJ);
     }
 
     async removePanelActionExists() {

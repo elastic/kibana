@@ -16,6 +16,7 @@ export const AddLicense = ({ uploadPath = `#${BASE_PATH}upload_license` }) => {
       description="If you already have a new license, upload it now."
       footer={
         <EuiButton
+          data-test-subj="updateLicenseButton"
           style={{ marginTop: 'auto' }}
           href={uploadPath}
         >

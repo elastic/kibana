@@ -3,36 +3,6 @@
 exports[`DetailView should render empty state 1`] = `""`;
 
 exports[`DetailView should render with data 1`] = `
-.c0 {
-  position: relative;
-  border: 1px solid #d9d9d9;
-  border-radius: 5px;
-  margin-top: 24px;
-}
-
-.c1 {
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-box-pack: justify;
-  -webkit-justify-content: space-between;
-  -ms-flex-pack: justify;
-  justify-content: space-between;
-  -webkit-align-items: flex-start;
-  -webkit-box-align: flex-start;
-  -ms-flex-align: flex-start;
-  align-items: flex-start;
-  padding: 24px 24px 0;
-  margin-bottom: 16px;
-}
-
-.c2 {
-  margin: 24px 0;
-  font-size: 20px;
-  margin: 0;
-}
-
 .c3 {
   display: -webkit-box;
   display: -webkit-flex;
@@ -54,6 +24,12 @@ exports[`DetailView should render with data 1`] = `
   margin-bottom: 16px;
 }
 
+.c8 {
+  width: 33%;
+  margin-bottom: 16px;
+  width: 66%;
+}
+
 .c5 {
   margin-bottom: 8px;
   font-size: 12px;
@@ -73,12 +49,6 @@ exports[`DetailView should render with data 1`] = `
   color: #999999;
 }
 
-.c8 {
-  width: 33%;
-  margin-bottom: 16px;
-  width: 66%;
-}
-
 .c9 {
   display: inline-block;
   max-width: 100%;
@@ -88,9 +58,15 @@ exports[`DetailView should render with data 1`] = `
   line-height: 16px;
 }
 
-.c10 {
-  padding: 0 24px;
-  border-bottom: 1px solid #d9d9d9;
+.c2 {
+  margin: 24px 0;
+  font-size: 20px;
+  margin: 0;
+}
+
+.c14 {
+  margin: 24px 0;
+  font-size: 14px;
 }
 
 .c11 {
@@ -118,40 +94,12 @@ exports[`DetailView should render with data 1`] = `
   user-select: none;
 }
 
-.c13 {
-  padding: 24px 24px 0;
-}
-
-.c14 {
-  margin: 0 0 24px 0;
-  position: relative;
-  font-family: "SFMono-Regular",Consolas,"Liberation Mono",Menlo,Courier,monospace;
-  border: 1px solid #d9d9d9;
-  border-radius: 5px;
-  background: #f5f5f5;
-}
-
-.c14 .c16 {
-  color: #000000;
-}
-
-.c15 {
-  color: #999999;
-  padding: 8px;
-  border-bottom: 1px solid #d9d9d9;
-  border-radius: 5px 5px 0 0;
-}
-
-.c17 {
-  font-weight: bold;
-}
-
-.c18 {
+.c19 {
   position: relative;
   border-radius: 0 0 5px 5px;
 }
 
-.c19 {
+.c20 {
   position: absolute;
   width: 100%;
   height: 18px;
@@ -160,27 +108,12 @@ exports[`DetailView should render with data 1`] = `
   background-color: #FCF2E6;
 }
 
-.c20 {
+.c21 {
   position: absolute;
   top: 0;
   left: 0;
   border-radius: 0 0 0 5px;
   background: #f5f5f5;
-}
-
-.c21 {
-  position: relative;
-  min-width: 42px;
-  padding-left: 8px;
-  padding-right: 4px;
-  color: #999999;
-  line-height: 18px;
-  text-align: right;
-  border-right: 1px solid #d9d9d9;
-}
-
-.c21:last-of-type {
-  border-radius: 0 0 0 5px;
 }
 
 .c22 {
@@ -192,7 +125,6 @@ exports[`DetailView should render with data 1`] = `
   line-height: 18px;
   text-align: right;
   border-right: 1px solid #d9d9d9;
-  background-color: #FCF2E6;
 }
 
 .c22:last-of-type {
@@ -200,17 +132,33 @@ exports[`DetailView should render with data 1`] = `
 }
 
 .c23 {
+  position: relative;
+  min-width: 42px;
+  padding-left: 8px;
+  padding-right: 4px;
+  color: #999999;
+  line-height: 18px;
+  text-align: right;
+  border-right: 1px solid #d9d9d9;
+  background-color: #FCF2E6;
+}
+
+.c23:last-of-type {
+  border-radius: 0 0 0 5px;
+}
+
+.c24 {
   overflow: auto;
   margin: 0 0 0 42px;
   padding: 0;
   background-color: #ffffff;
 }
 
-.c23:last-of-type {
+.c24:last-of-type {
   border-radius: 0 0 5px 0;
 }
 
-.c24 {
+.c25 {
   margin: 0;
   color: inherit;
   background: inherit;
@@ -221,7 +169,7 @@ exports[`DetailView should render with data 1`] = `
   line-height: 18px;
 }
 
-.c25 {
+.c26 {
   position: relative;
   padding: 0;
   margin: 0;
@@ -229,12 +177,69 @@ exports[`DetailView should render with data 1`] = `
   z-index: 2;
 }
 
-.c26 {
+.c16 {
+  color: #999999;
+  padding: 8px;
+  border-bottom: 1px solid #d9d9d9;
+  border-radius: 5px 5px 0 0;
+}
+
+.c18 {
+  font-weight: bold;
+}
+
+.c15 {
+  margin: 0 0 24px 0;
+  position: relative;
+  font-family: "SFMono-Regular",Consolas,"Liberation Mono",Menlo,Courier,monospace;
+  border: 1px solid #d9d9d9;
+  border-radius: 5px;
+  background: #f5f5f5;
+}
+
+.c15 .c17 {
+  color: #000000;
+}
+
+.c27 {
   margin: 0 0 24px 0;
   -webkit-user-select: none;
   -moz-user-select: none;
   -ms-user-select: none;
   user-select: none;
+}
+
+.c0 {
+  position: relative;
+  border: 1px solid #d9d9d9;
+  border-radius: 5px;
+  margin-top: 24px;
+}
+
+.c1 {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-pack: justify;
+  -webkit-justify-content: space-between;
+  -ms-flex-pack: justify;
+  justify-content: space-between;
+  -webkit-align-items: flex-start;
+  -webkit-box-align: flex-start;
+  -ms-flex-align: flex-start;
+  align-items: flex-start;
+  padding: 24px 24px 0;
+  margin-bottom: 16px;
+}
+
+.c10 {
+  padding: 0 24px;
+  border-bottom: 1px solid #d9d9d9;
+}
+
+.c13 {
+  padding: 24px 24px 0;
 }
 
 <div
@@ -500,138 +505,143 @@ exports[`DetailView should render with data 1`] = `
     className="c13"
   >
     <div>
-      <div
+      <h4
         className="c14"
       >
+        Stacktraces
+      </h4>
+      <div
+        className="c15"
+      >
         <div
-          className="c15"
+          className="c16"
         >
           <span
-            className="c16 c17"
+            className="c17 c18"
           >
             server/coffee.js
           </span>
            in
            
           <span
-            className="c16 c17"
+            className="c17 c18"
           >
             &lt;anonymous&gt;
           </span>
            at
            
           <span
-            className="c16 c17"
+            className="c17 c18"
           >
             line 
             9
           </span>
         </div>
         <div
-          className="c18"
+          className="c19"
         >
           <div
-            className="c19"
+            className="c20"
           />
           <div
-            className="c20"
+            className="c21"
           >
             <div
-              className="c21"
+              className="c22"
             >
               2
               .
             </div>
             <div
-              className="c21"
+              className="c22"
             >
               3
               .
             </div>
             <div
-              className="c21"
+              className="c22"
             >
               4
               .
             </div>
             <div
-              className="c21"
+              className="c22"
             >
               5
               .
             </div>
             <div
-              className="c21"
+              className="c22"
             >
               6
               .
             </div>
             <div
-              className="c21"
+              className="c22"
             >
               7
               .
             </div>
             <div
-              className="c21"
+              className="c22"
             >
               8
               .
             </div>
             <div
-              className="c22"
+              className="c23"
             >
               9
               .
             </div>
             <div
-              className="c21"
+              className="c22"
             >
               10
               .
             </div>
             <div
-              className="c21"
+              className="c22"
             >
               11
               .
             </div>
             <div
-              className="c21"
+              className="c22"
             >
               12
               .
             </div>
             <div
-              className="c21"
+              className="c22"
             >
               13
               .
             </div>
             <div
-              className="c21"
+              className="c22"
             >
               14
               .
             </div>
             <div
-              className="c21"
+              className="c22"
             >
               15
               .
             </div>
             <div
-              className="c21"
+              className="c22"
             >
               16
               .
             </div>
           </div>
           <div
-            className="c23"
+            className="c24"
           >
             <pre
-              className="c24"
+              className="c25"
               style={
                 Object {
                   "background": "#fff",
@@ -643,14 +653,14 @@ exports[`DetailView should render with data 1`] = `
               }
             >
               <code
-                className="c25"
+                className="c26"
               >
                 
 
               </code>
             </pre>
             <pre
-              className="c24"
+              className="c25"
               style={
                 Object {
                   "background": "#fff",
@@ -662,7 +672,7 @@ exports[`DetailView should render with data 1`] = `
               }
             >
               <code
-                className="c25"
+                className="c26"
               >
                 <span
                   style={
@@ -697,7 +707,7 @@ exports[`DetailView should render with data 1`] = `
               </code>
             </pre>
             <pre
-              className="c24"
+              className="c25"
               style={
                 Object {
                   "background": "#fff",
@@ -709,7 +719,7 @@ exports[`DetailView should render with data 1`] = `
               }
             >
               <code
-                className="c25"
+                className="c26"
               >
                 <span
                   style={
@@ -744,7 +754,7 @@ exports[`DetailView should render with data 1`] = `
               </code>
             </pre>
             <pre
-              className="c24"
+              className="c25"
               style={
                 Object {
                   "background": "#fff",
@@ -756,14 +766,14 @@ exports[`DetailView should render with data 1`] = `
               }
             >
               <code
-                className="c25"
+                className="c26"
               >
                 
 
               </code>
             </pre>
             <pre
-              className="c24"
+              className="c25"
               style={
                 Object {
                   "background": "#fff",
@@ -775,7 +785,7 @@ exports[`DetailView should render with data 1`] = `
               }
             >
               <code
-                className="c25"
+                className="c26"
               >
                 <span
                   style={
@@ -810,7 +820,7 @@ exports[`DetailView should render with data 1`] = `
               </code>
             </pre>
             <pre
-              className="c24"
+              className="c25"
               style={
                 Object {
                   "background": "#fff",
@@ -822,14 +832,14 @@ exports[`DetailView should render with data 1`] = `
               }
             >
               <code
-                className="c25"
+                className="c26"
               >
                 
 
               </code>
             </pre>
             <pre
-              className="c24"
+              className="c25"
               style={
                 Object {
                   "background": "#fff",
@@ -841,7 +851,7 @@ exports[`DetailView should render with data 1`] = `
               }
             >
               <code
-                className="c25"
+                className="c26"
               >
                 app.get(
                 <span
@@ -882,7 +892,7 @@ exports[`DetailView should render with data 1`] = `
               </code>
             </pre>
             <pre
-              className="c24"
+              className="c25"
               style={
                 Object {
                   "background": "#fff",
@@ -894,7 +904,7 @@ exports[`DetailView should render with data 1`] = `
               }
             >
               <code
-                className="c25"
+                className="c26"
               >
                   
                 <span
@@ -920,7 +930,7 @@ exports[`DetailView should render with data 1`] = `
               </code>
             </pre>
             <pre
-              className="c24"
+              className="c25"
               style={
                 Object {
                   "background": "#fff",
@@ -932,7 +942,7 @@ exports[`DetailView should render with data 1`] = `
               }
             >
               <code
-                className="c25"
+                className="c26"
               >
                     res.send(
                 <span
@@ -948,7 +958,7 @@ exports[`DetailView should render with data 1`] = `
               </code>
             </pre>
             <pre
-              className="c24"
+              className="c25"
               style={
                 Object {
                   "background": "#fff",
@@ -960,7 +970,7 @@ exports[`DetailView should render with data 1`] = `
               }
             >
               <code
-                className="c25"
+                className="c26"
               >
                   } 
                 <span
@@ -976,7 +986,7 @@ exports[`DetailView should render with data 1`] = `
               </code>
             </pre>
             <pre
-              className="c24"
+              className="c25"
               style={
                 Object {
                   "background": "#fff",
@@ -988,7 +998,7 @@ exports[`DetailView should render with data 1`] = `
               }
             >
               <code
-                className="c25"
+                className="c26"
               >
                     res.send(
                 <span
@@ -1004,7 +1014,7 @@ exports[`DetailView should render with data 1`] = `
               </code>
             </pre>
             <pre
-              className="c24"
+              className="c25"
               style={
                 Object {
                   "background": "#fff",
@@ -1016,13 +1026,13 @@ exports[`DetailView should render with data 1`] = `
               }
             >
               <code
-                className="c25"
+                className="c26"
               >
                   }
               </code>
             </pre>
             <pre
-              className="c24"
+              className="c25"
               style={
                 Object {
                   "background": "#fff",
@@ -1034,13 +1044,13 @@ exports[`DetailView should render with data 1`] = `
               }
             >
               <code
-                className="c25"
+                className="c26"
               >
                 })
               </code>
             </pre>
             <pre
-              className="c24"
+              className="c25"
               style={
                 Object {
                   "background": "#fff",
@@ -1052,14 +1062,14 @@ exports[`DetailView should render with data 1`] = `
               }
             >
               <code
-                className="c25"
+                className="c26"
               >
                 
 
               </code>
             </pre>
             <pre
-              className="c24"
+              className="c25"
               style={
                 Object {
                   "background": "#fff",
@@ -1071,7 +1081,7 @@ exports[`DetailView should render with data 1`] = `
               }
             >
               <code
-                className="c25"
+                className="c26"
               >
                 app.get(
                 <span
@@ -1116,7 +1126,7 @@ exports[`DetailView should render with data 1`] = `
       </div>
       <div>
         <div
-          className="c26"
+          className="c27"
         >
           <button
             className="euiLink euiLink--primary"
@@ -1143,137 +1153,137 @@ exports[`DetailView should render with data 1`] = `
         />
       </div>
       <div
-        className="c14"
+        className="c15"
       >
         <div
-          className="c15"
+          className="c16"
         >
           <span
-            className="c16 c17"
+            className="c17 c18"
           >
             server.js
           </span>
            in
            
           <span
-            className="c16 c17"
+            className="c17 c18"
           >
             &lt;anonymous&gt;
           </span>
            at
            
           <span
-            className="c16 c17"
+            className="c17 c18"
           >
             line 
             27
           </span>
         </div>
         <div
-          className="c18"
+          className="c19"
         >
           <div
-            className="c19"
+            className="c20"
           />
           <div
-            className="c20"
+            className="c21"
           >
             <div
-              className="c21"
+              className="c22"
             >
               20
               .
             </div>
             <div
-              className="c21"
+              className="c22"
             >
               21
               .
             </div>
             <div
-              className="c21"
+              className="c22"
             >
               22
               .
             </div>
             <div
-              className="c21"
+              className="c22"
             >
               23
               .
             </div>
             <div
-              className="c21"
+              className="c22"
             >
               24
               .
             </div>
             <div
-              className="c21"
+              className="c22"
             >
               25
               .
             </div>
             <div
-              className="c21"
+              className="c22"
             >
               26
               .
             </div>
             <div
-              className="c22"
+              className="c23"
             >
               27
               .
             </div>
             <div
-              className="c21"
+              className="c22"
             >
               28
               .
             </div>
             <div
-              className="c21"
+              className="c22"
             >
               29
               .
             </div>
             <div
-              className="c21"
+              className="c22"
             >
               30
               .
             </div>
             <div
-              className="c21"
+              className="c22"
             >
               31
               .
             </div>
             <div
-              className="c21"
+              className="c22"
             >
               32
               .
             </div>
             <div
-              className="c21"
+              className="c22"
             >
               33
               .
             </div>
             <div
-              className="c21"
+              className="c22"
             >
               34
               .
             </div>
           </div>
           <div
-            className="c23"
+            className="c24"
           >
             <pre
-              className="c24"
+              className="c25"
               style={
                 Object {
                   "background": "#fff",
@@ -1285,7 +1295,7 @@ exports[`DetailView should render with data 1`] = `
               }
             >
               <code
-                className="c25"
+                className="c26"
               >
                 app.use(
                 <span
@@ -1311,7 +1321,7 @@ exports[`DetailView should render with data 1`] = `
               </code>
             </pre>
             <pre
-              className="c24"
+              className="c25"
               style={
                 Object {
                   "background": "#fff",
@@ -1323,7 +1333,7 @@ exports[`DetailView should render with data 1`] = `
               }
             >
               <code
-                className="c25"
+                className="c26"
               >
                 app.use(express.static(
                 <span
@@ -1339,7 +1349,7 @@ exports[`DetailView should render with data 1`] = `
               </code>
             </pre>
             <pre
-              className="c24"
+              className="c25"
               style={
                 Object {
                   "background": "#fff",
@@ -1351,7 +1361,7 @@ exports[`DetailView should render with data 1`] = `
               }
             >
               <code
-                className="c25"
+                className="c26"
               >
                 app.use(
                 <span
@@ -1382,7 +1392,7 @@ exports[`DetailView should render with data 1`] = `
               </code>
             </pre>
             <pre
-              className="c24"
+              className="c25"
               style={
                 Object {
                   "background": "#fff",
@@ -1394,7 +1404,7 @@ exports[`DetailView should render with data 1`] = `
               }
             >
               <code
-                className="c25"
+                className="c26"
               >
                   apm.setTag(
                 <span
@@ -1420,7 +1430,7 @@ exports[`DetailView should render with data 1`] = `
               </code>
             </pre>
             <pre
-              className="c24"
+              className="c25"
               style={
                 Object {
                   "background": "#fff",
@@ -1432,7 +1442,7 @@ exports[`DetailView should render with data 1`] = `
               }
             >
               <code
-                className="c25"
+                className="c26"
               >
                   apm.setTag(
                 <span
@@ -1458,7 +1468,7 @@ exports[`DetailView should render with data 1`] = `
               </code>
             </pre>
             <pre
-              className="c24"
+              className="c25"
               style={
                 Object {
                   "background": "#fff",
@@ -1470,7 +1480,7 @@ exports[`DetailView should render with data 1`] = `
               }
             >
               <code
-                className="c25"
+                className="c26"
               >
                   apm.setTag(
                 <span
@@ -1496,7 +1506,7 @@ exports[`DetailView should render with data 1`] = `
               </code>
             </pre>
             <pre
-              className="c24"
+              className="c25"
               style={
                 Object {
                   "background": "#fff",
@@ -1508,7 +1518,7 @@ exports[`DetailView should render with data 1`] = `
               }
             >
               <code
-                className="c25"
+                className="c26"
               >
                   apm.setTag(
                 <span
@@ -1534,7 +1544,7 @@ exports[`DetailView should render with data 1`] = `
               </code>
             </pre>
             <pre
-              className="c24"
+              className="c25"
               style={
                 Object {
                   "background": "#fff",
@@ -1546,13 +1556,13 @@ exports[`DetailView should render with data 1`] = `
               }
             >
               <code
-                className="c25"
+                className="c26"
               >
                   next()
               </code>
             </pre>
             <pre
-              className="c24"
+              className="c25"
               style={
                 Object {
                   "background": "#fff",
@@ -1564,13 +1574,13 @@ exports[`DetailView should render with data 1`] = `
               }
             >
               <code
-                className="c25"
+                className="c26"
               >
                 })
               </code>
             </pre>
             <pre
-              className="c24"
+              className="c25"
               style={
                 Object {
                   "background": "#fff",
@@ -1582,14 +1592,14 @@ exports[`DetailView should render with data 1`] = `
               }
             >
               <code
-                className="c25"
+                className="c26"
               >
                 
 
               </code>
             </pre>
             <pre
-              className="c24"
+              className="c25"
               style={
                 Object {
                   "background": "#fff",
@@ -1601,7 +1611,7 @@ exports[`DetailView should render with data 1`] = `
               }
             >
               <code
-                className="c25"
+                className="c26"
               >
                 app.use(
                 <span
@@ -1627,7 +1637,7 @@ exports[`DetailView should render with data 1`] = `
               </code>
             </pre>
             <pre
-              className="c24"
+              className="c25"
               style={
                 Object {
                   "background": "#fff",
@@ -1639,7 +1649,7 @@ exports[`DetailView should render with data 1`] = `
               }
             >
               <code
-                className="c25"
+                className="c26"
               >
                 app.use(
                 <span
@@ -1675,7 +1685,7 @@ exports[`DetailView should render with data 1`] = `
               </code>
             </pre>
             <pre
-              className="c24"
+              className="c25"
               style={
                 Object {
                   "background": "#fff",
@@ -1687,7 +1697,7 @@ exports[`DetailView should render with data 1`] = `
               }
             >
               <code
-                className="c25"
+                className="c26"
               >
                 app.get(
                 <span
@@ -1728,7 +1738,7 @@ exports[`DetailView should render with data 1`] = `
               </code>
             </pre>
             <pre
-              className="c24"
+              className="c25"
               style={
                 Object {
                   "background": "#fff",
@@ -1740,7 +1750,7 @@ exports[`DetailView should render with data 1`] = `
               }
             >
               <code
-                className="c25"
+                className="c26"
               >
                   res.sendFile(path.resolve(__dirname, 
                 <span
@@ -1766,7 +1776,7 @@ exports[`DetailView should render with data 1`] = `
               </code>
             </pre>
             <pre
-              className="c24"
+              className="c25"
               style={
                 Object {
                   "background": "#fff",
@@ -1778,7 +1788,7 @@ exports[`DetailView should render with data 1`] = `
               }
             >
               <code
-                className="c25"
+                className="c26"
               >
                 })
               </code>
@@ -1788,7 +1798,7 @@ exports[`DetailView should render with data 1`] = `
       </div>
       <div>
         <div
-          className="c26"
+          className="c27"
         >
           <button
             className="euiLink euiLink--primary"

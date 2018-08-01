@@ -1,0 +1,10 @@
+{
+  "xpack.ml.info": {
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "_xpack/ml/info"
+    ]
+  }
+}

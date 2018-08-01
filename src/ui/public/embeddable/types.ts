@@ -17,15 +17,38 @@
  * under the License.
  */
 
+export interface TimeRange {
+  to: string;
+  from: string;
+}
+
+// TODO: Filter object representation needs to be fleshed out.
+export interface Filter {
+  meta: object;
+  query: object;
+}
+
+export type Filters = Filter[];
+
+export enum QueryLanguageType {
+  KUERY = 'kuery',
+  LUCENE = 'lucene',
+}
+
+export interface Query {
+  language: QueryLanguageType;
+  query: string;
+}
+
 export interface ContainerState {
   // 'view' or 'edit'. Should probably be an enum but I'm undecided where to define it, here or in dashboard code.
   viewMode: string;
 
-  timeRange: {
-    // To and From should be either an absolute time range in utc format or a relative one (e.g. now-15m)
-    to: string;
-    from: string;
-  };
+  timeRange: TimeRange;
+
+  filters: Filters;
+
+  query: Query;
 
   // The shape will be up to the embeddable type.
   embeddableCustomization?: object;
@@ -42,6 +65,11 @@ export interface ContainerState {
    * Is the current panel in expanded mode
    */
   isPanelExpanded: boolean;
+
+  /**
+   * A way to override the underlying embeddable title and supply a title at the panel level.
+   */
+  customTitle: string | undefined;
 }
 
 export interface EmbeddableState {

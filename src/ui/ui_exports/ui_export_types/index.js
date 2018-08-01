@@ -40,7 +40,7 @@ export {
   embeddableFactories,
   fieldFormats,
   fieldFormatEditors,
-  spyModes,
+  inspectorViews,
   chromeNavControls,
   navbarExtensions,
   dashboardPanelActions,
@@ -51,6 +51,9 @@ export {
   home,
   visTypeEnhancers,
   aliases,
+  visualize,
+  search,
+  autocompleteProviders,
 } from './ui_app_extensions';
 
 export {

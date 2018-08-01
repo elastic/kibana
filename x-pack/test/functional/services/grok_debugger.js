@@ -14,10 +14,10 @@ export function GrokDebuggerProvider({ getService }) {
   // test subject selectors
   const SUBJ_CONTAINER = 'grokDebugger';
 
-  const SUBJ_UI_ACE_EVENT_INPUT = `${SUBJ_CONTAINER} aceEventInput`;
-  const SUBJ_UI_ACE_PATTERN_INPUT = `${SUBJ_CONTAINER} acePatternInput`;
-  const SUBJ_UI_ACE_CUSTOM_PATTERNS_INPUT = `${SUBJ_CONTAINER} aceCustomPatternsInput`;
-  const SUBJ_UI_ACE_EVENT_OUTPUT = `${SUBJ_CONTAINER} aceEventOutput`;
+  const SUBJ_UI_ACE_EVENT_INPUT = `${SUBJ_CONTAINER} aceEventInput codeEditorContainer`;
+  const SUBJ_UI_ACE_PATTERN_INPUT = `${SUBJ_CONTAINER} acePatternInput codeEditorContainer`;
+  const SUBJ_UI_ACE_CUSTOM_PATTERNS_INPUT = `${SUBJ_CONTAINER} aceCustomPatternsInput codeEditorContainer`;
+  const SUBJ_UI_ACE_EVENT_OUTPUT = `${SUBJ_CONTAINER} aceEventOutput codeEditorContainer`;
 
   const SUBJ_BTN_TOGGLE_CUSTOM_PATTERNS_INPUT = `${SUBJ_CONTAINER} btnToggleCustomPatternsInput`;
   const SUBJ_BTN_SIMULATE = `${SUBJ_CONTAINER} btnSimulate`;

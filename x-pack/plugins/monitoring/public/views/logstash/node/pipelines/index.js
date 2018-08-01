@@ -16,12 +16,12 @@ import {
   isPipelineMonitoringSupportedInVersion
 } from 'plugins/monitoring/lib/logstash/pipelines';
 import template from './index.html';
+import { timefilter } from 'ui/timefilter';
 
 const getPageData = ($injector) => {
   const $route = $injector.get('$route');
   const $http = $injector.get('$http');
   const globalState = $injector.get('globalState');
-  const timefilter = $injector.get('timefilter');
   const Private = $injector.get('Private');
 
   const logstashUuid = $route.current.params.uuid;
@@ -63,7 +63,6 @@ uiRoutes
     controller($injector, $scope) {
       const $route = $injector.get('$route');
       const globalState = $injector.get('globalState');
-      const timefilter = $injector.get('timefilter');
       const title = $injector.get('title');
       const $executor = $injector.get('$executor');
 
@@ -81,7 +80,7 @@ uiRoutes
         handleResponse: (response) => $scope.pageData = response
       });
 
-      $executor.start();
+      $executor.start($scope);
 
       $scope.$on('$destroy', $executor.destroy);
     }

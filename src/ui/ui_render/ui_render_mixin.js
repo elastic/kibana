@@ -17,10 +17,11 @@
  * under the License.
  */
 
-import { defaults, get } from 'lodash';
+import { defaults } from 'lodash';
 import { props, reduce as reduceAsync } from 'bluebird';
 import Boom from 'boom';
 import { resolve } from 'path';
+import { i18n } from '@kbn/i18n';
 import { AppBootstrap } from './bootstrap';
 
 export function uiRenderMixin(kbnServer, server, config) {
@@ -62,10 +63,12 @@ export function uiRenderMixin(kbnServer, server, config) {
           throw Boom.notFound(`Unknown app: ${id}`);
         }
 
+        const basePath = config.get('server.basePath');
         const bootstrap = new AppBootstrap({
           templateData: {
             appId: app.getId(),
-            bundlePath: `${config.get('server.basePath')}/bundles`
+            bundlePath: `${basePath}/bundles`,
+            styleSheetPath: app.getStyleSheetUrlPath() ? `${basePath}/${app.getStyleSheetUrlPath()}` : null,
           },
           translations: await request.getUiTranslations()
         });
@@ -103,7 +106,7 @@ export function uiRenderMixin(kbnServer, server, config) {
     }
   });
 
-  async function getKibanaPayload({ app, request, includeUserProvidedConfig, injectedVarsOverrides }) {
+  async function getLegacyKibanaPayload({ app, request, includeUserProvidedConfig, injectedVarsOverrides }) {
     const uiSettings = request.getUiSettingsService();
     const translations = await request.getUiTranslations();
 
@@ -138,17 +141,25 @@ export function uiRenderMixin(kbnServer, server, config) {
     try {
       const request = reply.request;
       const translations = await request.getUiTranslations();
+      const basePath = config.get('server.basePath');
+
+      i18n.init(translations);
 
       return reply.view('ui_app', {
-        app,
-        kibanaPayload: await getKibanaPayload({
-          app,
-          request,
-          includeUserProvidedConfig,
-          injectedVarsOverrides
-        }),
-        bundlePath: `${config.get('server.basePath')}/bundles`,
-        i18n: key => get(translations, key, ''),
+        uiPublicUrl: `${basePath}/ui`,
+        bootstrapScriptUrl: `${basePath}/bundles/app/${app.getId()}/bootstrap.js`,
+        i18n: (id, options) => i18n.translate(id, options),
+
+        injectedMetadata: {
+          version: kbnServer.version,
+          buildNumber: config.get('pkg.buildNum'),
+          legacyMetadata: await getLegacyKibanaPayload({
+            app,
+            request,
+            includeUserProvidedConfig,
+            injectedVarsOverrides
+          }),
+        },
       });
     } catch (err) {
       reply(err);

@@ -205,7 +205,7 @@ function TimeseriesConfig(props) {
     );
   }
 
-  const disableSeperateYaxis = model.seperate_axis ? false : true;
+  const disableSeparateYaxis = model.separate_axis ? false : true;
 
   return (
     <div>
@@ -261,8 +261,8 @@ function TimeseriesConfig(props) {
         <div className="vis_editor__series_config-row">
           <div className="vis_editor__label">Separate Axis</div>
           <YesNo
-            value={model.seperate_axis}
-            name="seperate_axis"
+            value={model.separate_axis}
+            name="separate_axis"
             onChange={props.onChange}
           />
           <label className="vis_editor__label" htmlFor={htmlId('axisMin')}>
@@ -272,7 +272,7 @@ function TimeseriesConfig(props) {
             id={htmlId('axisMin')}
             className="vis_editor__input-grows"
             type="number"
-            disabled={disableSeperateYaxis}
+            disabled={disableSeparateYaxis}
             onChange={handleTextChange('axis_min')}
             value={model.axis_min}
           />
@@ -283,7 +283,7 @@ function TimeseriesConfig(props) {
             id={htmlId('axisMax')}
             className="vis_editor__input-grows"
             type="number"
-            disabled={disableSeperateYaxis}
+            disabled={disableSeparateYaxis}
             onChange={handleTextChange('axis_max')}
             value={model.axis_max}
           />
@@ -293,7 +293,7 @@ function TimeseriesConfig(props) {
           <div className="vis_editor__row_item">
             <EuiComboBox
               isClearable={false}
-              isDisabled={disableSeperateYaxis}
+              isDisabled={disableSeparateYaxis}
               id={htmlId('axisPos')}
               options={positionOptions}
               selectedOptions={selectedAxisPosOption ? [selectedAxisPosOption] : []}

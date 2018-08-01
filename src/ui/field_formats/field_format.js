@@ -24,7 +24,7 @@ export function FieldFormat(params) {
   // give the constructor a more appropriate name
   this.type = this.constructor;
 
-  // keep the params and defaults seperate
+  // keep the params and defaults separate
   this._params = params || {};
 
   // one content type, so assume text

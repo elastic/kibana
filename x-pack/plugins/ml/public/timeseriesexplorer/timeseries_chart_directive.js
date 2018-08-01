@@ -16,7 +16,7 @@ import $ from 'jquery';
 import angular from 'angular';
 import d3 from 'd3';
 import moment from 'moment';
-import 'ui/timefilter';
+import { timefilter } from 'ui/timefilter';
 
 import { ResizeChecker } from 'ui/resize_checker';
 
@@ -40,7 +40,6 @@ const module = uiModules.get('apps/ml');
 module.directive('mlTimeseriesChart', function (
   $compile,
   $timeout,
-  timefilter,
   Private,
   mlChartTooltipService) {
 

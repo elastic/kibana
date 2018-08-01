@@ -17,8 +17,6 @@
  * under the License.
  */
 
-import { resolve } from 'path';
-
 import Promise from 'bluebird';
 import { mkdirp as mkdirpNode } from 'mkdirp';
 
@@ -68,6 +66,7 @@ export default function (kibana) {
         listed: false,
         description: 'the kibana you know and love',
         main: 'plugins/kibana/kibana',
+        styleSheetPath: `${__dirname}/public/index.scss`,
       },
 
       links: [
@@ -123,9 +122,7 @@ export default function (kibana) {
         };
       },
 
-      translations: [
-        resolve(__dirname, './translations/en.json')
-      ],
+      translations: [],
 
       mappings,
       uiSettingDefaults: getUiSettingDefaults(),

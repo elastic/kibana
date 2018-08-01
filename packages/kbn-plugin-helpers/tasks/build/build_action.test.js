@@ -21,10 +21,7 @@ const resolve = require('path').resolve;
 const fs = require('fs');
 const del = require('del');
 
-const PLUGIN_FIXTURE = resolve(
-  __dirname,
-  '__fixtures__/build_action_test_plugin'
-);
+const PLUGIN_FIXTURE = resolve(__dirname, '__fixtures__/build_action_test_plugin');
 const PLUGIN_BUILD_DIR = resolve(PLUGIN_FIXTURE, 'build');
 const PLUGIN = require('../../lib/plugin_config')(PLUGIN_FIXTURE);
 const noop = () => {};
@@ -38,10 +35,7 @@ describe('creating build zip', () => {
   it('creates a zip in the build directory', async () => {
     await buildAction(PLUGIN);
 
-    const buildFile = resolve(
-      PLUGIN_BUILD_DIR,
-      PLUGIN.id + '-' + PLUGIN.version + '.zip'
-    );
+    const buildFile = resolve(PLUGIN_BUILD_DIR, PLUGIN.id + '-' + PLUGIN.version + '.zip');
     if (!fs.existsSync(buildFile)) {
       throw new Error('Build file not found: ' + buildFile);
     }
@@ -50,10 +44,7 @@ describe('creating build zip', () => {
   it('skips zip creation based on flag', async () => {
     await buildAction(PLUGIN, noop, { skipArchive: true });
 
-    const buildFile = resolve(
-      PLUGIN_BUILD_DIR,
-      PLUGIN.id + '-' + PLUGIN.version + '.zip'
-    );
+    const buildFile = resolve(PLUGIN_BUILD_DIR, PLUGIN.id + '-' + PLUGIN.version + '.zip');
     if (fs.existsSync(buildFile)) {
       throw new Error('Build file not found: ' + buildFile);
     }
@@ -109,12 +100,7 @@ describe('calling create_build', () => {
 
   it('uses only files passed in', async () => {
     const options = {
-      files: [
-        'index.js',
-        'LICENSE.txt',
-        'plugins/**/*',
-        '{server,public}/**/*',
-      ],
+      files: ['index.js', 'LICENSE.txt', 'plugins/**/*', '{server,public}/**/*'],
     };
 
     await buildAction(PLUGIN, noop, options);
@@ -136,8 +122,6 @@ describe('calling create_build', () => {
       throw new Error('foo bar');
     });
 
-    await expect(
-      buildAction(PLUGIN, noop)
-    ).rejects.toThrowErrorMatchingSnapshot();
+    await expect(buildAction(PLUGIN, noop)).rejects.toThrowErrorMatchingSnapshot();
   });
 });

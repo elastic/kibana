@@ -55,8 +55,15 @@ exports[`IndicesList should change pages 1`] = `
             size="s"
             type="button"
           >
-            Rows per page: 
-            1
+            <FormattedMessage
+              defaultMessage="Rows per page: {perPage}"
+              id="kbn.management.createIndexPattern.step.pagingLabel"
+              values={
+                Object {
+                  "perPage": 1,
+                }
+              }
+            />
           </EuiButtonEmpty>
         }
         closePopover={[Function]}
@@ -152,8 +159,15 @@ exports[`IndicesList should change per page 1`] = `
             size="s"
             type="button"
           >
-            Rows per page: 
-            1
+            <FormattedMessage
+              defaultMessage="Rows per page: {perPage}"
+              id="kbn.management.createIndexPattern.step.pagingLabel"
+              values={
+                Object {
+                  "perPage": 1,
+                }
+              }
+            />
           </EuiButtonEmpty>
         }
         closePopover={[Function]}
@@ -274,8 +288,15 @@ exports[`IndicesList should highlight the query in the matches 1`] = `
             size="s"
             type="button"
           >
-            Rows per page: 
-            10
+            <FormattedMessage
+              defaultMessage="Rows per page: {perPage}"
+              id="kbn.management.createIndexPattern.step.pagingLabel"
+              values={
+                Object {
+                  "perPage": 10,
+                }
+              }
+            />
           </EuiButtonEmpty>
         }
         closePopover={[Function]}
@@ -381,8 +402,15 @@ exports[`IndicesList should render normally 1`] = `
             size="s"
             type="button"
           >
-            Rows per page: 
-            10
+            <FormattedMessage
+              defaultMessage="Rows per page: {perPage}"
+              id="kbn.management.createIndexPattern.step.pagingLabel"
+              values={
+                Object {
+                  "perPage": 10,
+                }
+              }
+            />
           </EuiButtonEmpty>
         }
         closePopover={[Function]}
@@ -568,8 +596,15 @@ exports[`IndicesList updating props should render all new indices 1`] = `
             size="s"
             type="button"
           >
-            Rows per page: 
-            10
+            <FormattedMessage
+              defaultMessage="Rows per page: {perPage}"
+              id="kbn.management.createIndexPattern.step.pagingLabel"
+              values={
+                Object {
+                  "perPage": 10,
+                }
+              }
+            />
           </EuiButtonEmpty>
         }
         closePopover={[Function]}

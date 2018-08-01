@@ -18,7 +18,8 @@
  */
 
 import TagCloud from './tag_cloud';
-import { Observable } from 'rxjs';
+import * as Rx from 'rxjs';
+import { take } from 'rxjs/operators';
 import { render, unmountComponentAtNode } from 'react-dom';
 import React from 'react';
 
@@ -46,19 +47,22 @@ export class TagCloudVisualization {
       if (!this._bucketAgg) {
         return;
       }
-      const filter = this._bucketAgg.createFilter(event);
-      this._vis.API.queryFilter.addFilters(filter);
+      this._vis.API.events.addFilter(
+        event.meta.data, 0, event.meta.rowIndex
+      );
     });
-    this._renderComplete$ = Observable.fromEvent(this._tagCloud, 'renderComplete');
+    this._renderComplete$ = Rx.fromEvent(this._tagCloud, 'renderComplete');
 
 
     this._feedbackNode = document.createElement('div');
     this._containerNode.appendChild(this._feedbackNode);
-    this._feedbackMessage = render(<FeedbackMessage />, this._feedbackNode);
+    this._feedbackMessage = React.createRef();
+    render(<FeedbackMessage ref={this._feedbackMessage} />, this._feedbackNode);
 
     this._labelNode = document.createElement('div');
     this._containerNode.appendChild(this._labelNode);
-    this._label = render(<Label />, this._labelNode);
+    this._label = React.createRef();
+    render(<Label ref={this._label} />, this._labelNode);
 
   }
 
@@ -77,21 +81,21 @@ export class TagCloudVisualization {
       this._resize();
     }
 
-    await this._renderComplete$.take(1).toPromise();
+    await this._renderComplete$.pipe(take(1)).toPromise();
 
     const hasAggDefined = this._vis.aggs[0] && this._vis.aggs[1];
     if (!hasAggDefined) {
-      this._feedbackMessage.setState({
+      this._feedbackMessage.current.setState({
         shouldShowTruncate: false,
         shouldShowIncomplete: false
       });
       return;
     }
-    this._label.setState({
+    this._label.current.setState({
       label: `${this._vis.aggs[0].makeLabel()} - ${this._vis.aggs[1].makeLabel()}`,
       shouldShowLabel: this._vis.params.showLabel
     });
-    this._feedbackMessage.setState({
+    this._feedbackMessage.current.setState({
       shouldShowTruncate: this._truncated,
       shouldShowIncomplete: this._tagCloud.getStatus() === TagCloud.STATUS.INCOMPLETE
     });
@@ -119,12 +123,16 @@ export class TagCloudVisualization {
       this._bucketAgg = null;
     }
 
-    const tags = data.rows.map(row => {
+    const tags = data.rows.map((row, rowIndex) => {
       const [tag, count] = row;
       return {
         displayText: this._bucketAgg ? this._bucketAgg.fieldFormatter()(tag) : tag,
         rawText: tag,
-        value: count
+        value: count,
+        meta: {
+          data: data,
+          rowIndex: rowIndex,
+        }
       };
     });
 

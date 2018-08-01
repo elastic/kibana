@@ -28,7 +28,7 @@ export default new Datasource ('graphite', {
     {
       name: 'metric', // _test-data.users.*.data
       types: ['string'],
-      help: 'Graphite metric to pull, eg _test-data.users.*.data'
+      help: 'Graphite metric to pull, e.g., _test-data.users.*.data'
     }
   ],
   help: `[experimental] Pull data from graphite. Configure your graphite server in Kibana's Advanced Settings`,

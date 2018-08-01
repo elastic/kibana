@@ -7,7 +7,7 @@
 import { get } from 'lodash';
 import { XPACK_DEFAULT_ADMIN_EMAIL_UI_SETTING } from '../../../../../server/lib/constants';
 import { KIBANA_SETTINGS_TYPE } from '../../../common/constants';
-import { Collector } from '../classes/collector';
+import { getKibanaInfoForStats } from '../lib';
 
 /*
  * Check if Cluster Alert email notifications is enabled in config
@@ -54,10 +54,11 @@ export async function checkForEmailValue(
   }
 }
 
-export function getSettingsCollector(server) {
+export function getSettingsCollector(server, kbnServer) {
   const config = server.config();
 
-  return new Collector(server, {
+  const { collectorSet } = server.usage;
+  return collectorSet.makeStatsCollector({
     type: KIBANA_SETTINGS_TYPE,
     async fetch(callCluster) {
       let kibanaSettingsData;
@@ -78,7 +79,10 @@ export function getSettingsCollector(server) {
       // remember the current email so that we can mark it as successful if the bulk does not error out
       shouldUseNull = !!defaultAdminEmail;
 
-      return kibanaSettingsData;
+      return {
+        kibana: getKibanaInfoForStats(server, kbnServer),
+        ...kibanaSettingsData
+      };
     }
   });
 }

@@ -52,7 +52,7 @@ export default new Chainable('movingaverage', {
     }
   ],
   aliases: ['mvavg'],
-  help: 'Calculate the moving average over a given window. Nice for smoothing noisey series',
+  help: 'Calculate the moving average over a given window. Nice for smoothing noisy series',
   fn: function movingaverageFn(args, tlConfig) {
     return alter(args, function (eachSeries, _window, _position) {
 

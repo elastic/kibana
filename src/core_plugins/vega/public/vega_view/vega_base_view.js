@@ -18,13 +18,38 @@
  */
 
 import $ from 'jquery';
+import moment from 'moment';
+import dateMath from '@kbn/datemath';
 import * as vega from 'vega-lib';
 import * as vegaLite from 'vega-lite';
 import { Utils } from '../data_model/utils';
 import { VISUALIZATION_COLORS } from '@elastic/eui';
 import { TooltipHandler } from './vega_tooltip';
+import { buildQueryFilter } from 'ui/filter_manager/lib';
 
 vega.scheme('elastic', VISUALIZATION_COLORS);
+
+// Vega's extension functions are global. When called,
+// we forward execution to the instance-specific handler
+// This functions must be declared in the VegaBaseView class
+const vegaFunctions = {
+  kibanaAddFilter: 'addFilterHandler',
+  kibanaRemoveFilter: 'removeFilterHandler',
+  kibanaRemoveAllFilters: 'removeAllFiltersHandler',
+  kibanaSetTimeFilter: 'setTimeFilterHandler',
+};
+
+for (const funcName of Object.keys(vegaFunctions)) {
+  if (!vega.expressionFunction(funcName)) {
+    vega.expressionFunction(
+      funcName,
+      function handlerFwd(...args) {
+        const view = this.context.dataflow;
+        view.runAfter(() => view._kibanaView.vegaFunctionsHandler(funcName, ...args));
+      }
+    );
+  }
+}
 
 const bypassToken = Symbol();
 
@@ -34,12 +59,16 @@ export function bypassExternalUrlCheck(url) {
 }
 
 export class VegaBaseView {
-  constructor(vegaConfig, editorMode, parentEl, vegaParser, serviceSettings) {
-    this._vegaConfig = vegaConfig;
-    this._editorMode = editorMode;
-    this._$parentEl = $(parentEl);
-    this._parser = vegaParser;
-    this._serviceSettings = serviceSettings;
+  constructor(opts) {
+    // $rootScope is a temp workaround, see usage below
+    this._$rootScope = opts.$rootScope;
+    this._vegaConfig = opts.vegaConfig;
+    this._$parentEl = $(opts.parentEl);
+    this._parser = opts.vegaParser;
+    this._serviceSettings = opts.serviceSettings;
+    this._queryfilter = opts.queryfilter;
+    this._timefilter = opts.timefilter;
+    this._findIndex = opts.findIndex;
     this._view = null;
     this._vegaViewConfig = null;
     this._$messages = null;
@@ -175,6 +204,10 @@ export class VegaBaseView {
     this._view = view;
 
     if (view) {
+
+      // Global vega expression handler uses it to call custom functions
+      view._kibanaView = this;
+
       if (this._parser.tooltips) {
         // position and padding can be specified with
         // {config:{kibana:{tooltips: {position: 'top', padding: 15 } }}}
@@ -189,14 +222,118 @@ export class VegaBaseView {
   }
 
   /**
+   * Handle
+   * @param funcName
+   * @param args
+   * @returns {Promise<void>}
+   */
+  async vegaFunctionsHandler(funcName, ...args) {
+    try {
+      const handlerFunc = vegaFunctions[funcName];
+      if (!handlerFunc || !this[handlerFunc]) {
+        // in case functions don't match the list above
+        throw new Error(`${funcName}() is not defined for this graph`);
+      }
+      await this[handlerFunc](...args);
+    } catch (err) {
+      this.onError(err);
+    }
+  }
+
+  /**
+   * @param {object} query Elastic Query DSL snippet, as used in the query DSL editor
+   * @param {string} [index] as defined in Kibana, or default if missing
+   */
+  async addFilterHandler(query, index) {
+    const indexId = await this._findIndex(index);
+    const filter = buildQueryFilter(query, indexId);
+    await this._queryfilter.addFilters(filter);
+  }
+
+  /**
+   * @param {object} query Elastic Query DSL snippet, as used in the query DSL editor
+   * @param {string} [index] as defined in Kibana, or default if missing
+   */
+  async removeFilterHandler(query, index) {
+    const indexId = await this._findIndex(index);
+    const filter = buildQueryFilter(query, indexId);
+
+    // This is a workaround for the https://github.com/elastic/kibana/issues/18863
+    // Once fixed, replace with a direct call (no await is needed because its not async)
+    //    this._queryfilter.removeFilter(filter);
+    this._$rootScope.$evalAsync(() => {
+      try {
+        this._queryfilter.removeFilter(filter);
+      } catch (err) {
+        this.onError(err);
+      }
+    });
+  }
+
+  removeAllFiltersHandler() {
+    this._queryfilter.removeAll();
+  }
+
+  /**
+   * Update dashboard time filter to the new values
+   * @param {number|string|Date} start
+   * @param {number|string|Date} end
+   */
+  setTimeFilterHandler(start, end) {
+    this._timefilter.setTime(VegaBaseView._parseTimeRange(start, end));
+  }
+
+  /**
+   * Parse start and end values, determining the mode, and if order should be reversed
+   * @private
+   */
+  static _parseTimeRange(start, end) {
+    const absStart = moment(start);
+    const absEnd = moment(end);
+    const isValidAbsStart = absStart.isValid();
+    const isValidAbsEnd = absEnd.isValid();
+    let mode = 'absolute';
+    let from;
+    let to;
+    let reverse;
+
+    if (isValidAbsStart && isValidAbsEnd) {
+      // Both are valid absolute dates.
+      from = absStart;
+      to = absEnd;
+      reverse = absStart.isAfter(absEnd);
+    } else {
+      // Try to parse as relative dates too (absolute dates will also be accepted)
+      const startDate = dateMath.parse(start);
+      const endDate = dateMath.parse(end);
+      if (!startDate || !endDate || !startDate.isValid() || !endDate.isValid()) {
+        throw new Error(`Error setting time filter: both time values must be either relative or absolute dates. ` +
+          `start=${JSON.stringify(start)}, end=${JSON.stringify(end)}`);
+      }
+      reverse = startDate.isAfter(endDate);
+      if (isValidAbsStart || isValidAbsEnd) {
+        // Mixing relative and absolute - treat them as absolute
+        from = startDate;
+        to = endDate;
+      } else {
+        // Both dates are relative
+        mode = 'relative';
+        from = start;
+        to = end;
+      }
+    }
+
+    if (reverse) {
+      [from, to] = [to, from];
+    }
+
+    return { from, to, mode };
+  }
+
+  /**
    * Set global debug variable to simplify vega debugging in console. Show info message first time
    */
   setDebugValues(view, spec, vlspec) {
-    if (!this._editorMode) {
-      // VEGA_DEBUG should only be enabled in the editor mode
-      return;
-    }
-
     if (window) {
       if (window.VEGA_DEBUG === undefined && console) {
         console.log('%cWelcome to Kibana Vega Plugin!', 'font-size: 16px; font-weight: bold;');

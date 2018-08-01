@@ -30,13 +30,20 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 
+import { FormattedMessage } from '@kbn/i18n/react';
+
 export const LoadingState = () => (
   <EuiPanel paddingSize="l">
     <EuiFlexGroup justifyContent="center" alignItems="center">
       <EuiFlexItem grow={false}>
         <EuiTitle>
           <EuiTextColor color="subdued">
-            <h2 style={{ textAlign: 'center' }}>Checking for Elasticsearch data</h2>
+            <h2 style={{ textAlign: 'center' }}>
+              <FormattedMessage
+                id="kbn.management.createIndexPattern.loadingState.checkingLabel"
+                defaultMessage="Checking for Elasticsearch data"
+              />
+            </h2>
           </EuiTextColor>
         </EuiTitle>
 
@@ -49,7 +56,10 @@ export const LoadingState = () => (
 
           <EuiFlexItem grow={false}>
             <EuiText size="s" color="subdued">
-              Reticulating splines...
+              <FormattedMessage
+                id="kbn.management.createIndexPattern.loadingState.reticulatingLabel"
+                defaultMessage="Reticulating splines..."
+              />
             </EuiText>
           </EuiFlexItem>
         </EuiFlexGroup>

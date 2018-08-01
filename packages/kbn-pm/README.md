@@ -123,7 +123,7 @@ For more details, run:
 yarn kbn
 ```
 
-Bootstrapping also calls the `kbn:boostrap` script for every included project.
+Bootstrapping also calls the `kbn:bootstrap` script for every included project.
 This is intended for packages that need to be built/transpiled to be usable.
 
 ### Running scripts

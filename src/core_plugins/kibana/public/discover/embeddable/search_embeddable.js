@@ -29,7 +29,7 @@ export class SearchEmbeddable extends Embeddable {
       metadata: {
         title: savedSearch.title,
         editUrl,
-        indexPattern: savedSearch.searchSource.get('index')
+        indexPattern: savedSearch.searchSource.getField('index')
       }
     });
     this.onEmbeddableStateChanged = onEmbeddableStateChanged;
@@ -58,8 +58,8 @@ export class SearchEmbeddable extends Embeddable {
     this.searchScope.sort = this.customization.sort || this.savedSearch.sort;
     this.searchScope.sharedItemTitle = this.panelTitle;
 
-    this.filtersSearchSource.set('filter', this.filters);
-    this.filtersSearchSource.set('query', this.query);
+    this.filtersSearchSource.setField('filter', this.filters);
+    this.filtersSearchSource.setField('query', this.query);
   }
 
   onContainerStateChanged(containerState) {
@@ -85,15 +85,15 @@ export class SearchEmbeddable extends Embeddable {
     this.searchScope.description = this.savedSearch.description;
     this.searchScope.searchSource = this.savedSearch.searchSource;
 
-    const timeRangeSearchSource = this.searchScope.searchSource.new();
-    timeRangeSearchSource.filter(() => {
-      return getTime(this.searchScope.searchSource.get('index'), this.timeRange);
+    const timeRangeSearchSource = this.searchScope.searchSource.create();
+    timeRangeSearchSource.setField('filter', () => {
+      return getTime(this.searchScope.searchSource.getField('index'), this.timeRange);
     });
 
-    this.filtersSearchSource = this.searchScope.searchSource.new();
-    this.filtersSearchSource.inherits(timeRangeSearchSource);
+    this.filtersSearchSource = this.searchScope.searchSource.create();
+    this.filtersSearchSource.setParent(timeRangeSearchSource);
 
-    this.searchScope.searchSource.inherits(this.filtersSearchSource);
+    this.searchScope.searchSource.setParent(this.filtersSearchSource);
 
     this.pushContainerStateParamsToScope();
 
@@ -103,14 +103,14 @@ export class SearchEmbeddable extends Embeddable {
     };
 
     this.searchScope.addColumn = (columnName) => {
-      this.savedSearch.searchSource.get('index').popularizeField(columnName, 1);
+      this.savedSearch.searchSource.getField('index').popularizeField(columnName, 1);
       columnActions.addColumn(this.searchScope.columns, columnName);
       this.searchScope.columns = this.customization.columns = this.searchScope.columns;
       this.emitEmbeddableStateChange(this.getEmbeddableState());
     };
 
     this.searchScope.removeColumn = (columnName) => {
-      this.savedSearch.searchSource.get('index').popularizeField(columnName, 1);
+      this.savedSearch.searchSource.getField('index').popularizeField(columnName, 1);
       columnActions.removeColumn(this.searchScope.columns, columnName);
       this.customization.columns = this.searchScope.columns;
       this.emitEmbeddableStateChange(this.getEmbeddableState());
@@ -123,7 +123,7 @@ export class SearchEmbeddable extends Embeddable {
     };
 
     this.searchScope.filter = (field, value, operator) => {
-      const index = this.savedSearch.searchSource.get('index').id;
+      const index = this.savedSearch.searchSource.getField('index').id;
       const stagedFilter = {
         field,
         value,

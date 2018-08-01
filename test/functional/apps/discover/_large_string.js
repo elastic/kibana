@@ -23,7 +23,12 @@ export default function ({ getService, getPageObjects }) {
   const esArchiver = getService('esArchiver');
   const log = getService('log');
   const retry = getService('retry');
-  const PageObjects = getPageObjects(['common', 'home', 'settings', 'discover']);
+  const PageObjects = getPageObjects([
+    'common',
+    'home',
+    'settings',
+    'discover',
+  ]);
 
   describe('test large strings', function () {
     before(async function () {
@@ -34,16 +39,16 @@ export default function ({ getService, getPageObjects }) {
 
     it('verify the large string book present', async function () {
       const ExpectedDoc =
-           'mybook:Project Gutenberg EBook of Hamlet, by William Shakespeare'
-         + ' This eBook is for the use of anyone anywhere in the United States'
-         + ' and most other parts of the world at no cost and with almost no restrictions whatsoever.'
-         + ' You may copy it, give it away or re-use it under the terms of the'
-         + ' Project Gutenberg License included with this eBook or online at www.gutenberg.org.'
-         + ' If you are not located in the United States,'
-         + ' you’ll have to check the laws of the country where you are'
-         + ' located before using this ebook.'
-         + ' Title: Hamlet Author: William Shakespeare Release Date: November 1998 [EBook #1524]'
-         + ' Last Updated: December 30, 2017 Language: English Character set encoding:';
+        'mybook:Project Gutenberg EBook of Hamlet, by William Shakespeare' +
+        ' This eBook is for the use of anyone anywhere in the United States' +
+        ' and most other parts of the world at no cost and with almost no restrictions whatsoever.' +
+        ' You may copy it, give it away or re-use it under the terms of the' +
+        ' Project Gutenberg License included with this eBook or online at www.gutenberg.org.' +
+        ' If you are not located in the United States,' +
+        ' you’ll have to check the laws of the country where you are' +
+        ' located before using this ebook.' +
+        ' Title: Hamlet Author: William Shakespeare Release Date: November 1998 [EBook #1524]' +
+        ' Last Updated: December 30, 2017 Language: English Character set encoding:';
 
       let rowData;
       await PageObjects.common.navigateToApp('discover');
@@ -76,6 +81,5 @@ export default function ({ getService, getPageObjects }) {
     after(async () => {
       await esArchiver.unload('hamlet');
     });
-
   });
 }

@@ -230,22 +230,22 @@ describe(`when job is completed`, () => {
 
   describe(`when non-whitelisted contentType specified in job output`, async () => {
     test(`sets statusCode to 500`, async () => {
-      const { statusCode } = await getCompletedResponse({ outputContentType: 'appplication/html' });
+      const { statusCode } = await getCompletedResponse({ outputContentType: 'application/html' });
       expect(statusCode).toBe(500);
     });
 
     test(`doesn't include job output content in payload`, async () => {
-      const { payload } = await getCompletedResponse({ outputContentType: 'appplication/html' });
+      const { payload } = await getCompletedResponse({ outputContentType: 'application/html' });
       expect(payload).not.toMatch(/job output content/);
     });
 
     test(`logs error message about invalid content type`, async () => {
-      const { request } = await getCompletedResponse({ outputContentType: 'appplication/html' });
+      const { request } = await getCompletedResponse({ outputContentType: 'application/html' });
       const logs = request.getLog();
       const errorLogs = logs.filter(log => difference(['internal', 'implementation', 'error'], log.tags).length === 0);
       expect(errorLogs).toHaveLength(1);
       expect(errorLogs[0].data).toBeInstanceOf(Error);
-      expect(errorLogs[0].data.message).toMatch(/Unsupported content-type of appplication\/html/);
+      expect(errorLogs[0].data.message).toMatch(/Unsupported content-type of application\/html/);
     });
   });
 });
