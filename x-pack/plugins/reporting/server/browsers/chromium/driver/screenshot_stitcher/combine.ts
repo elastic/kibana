@@ -85,7 +85,7 @@ export function $combine(
         ) {
           const error = new CapturePngSizeError(png, screenshot.rectangle);
           logger.error(error.message);
-          throw error;
+          // throw error;
         }
         return { screenshot, png };
       }
@@ -100,8 +100,10 @@ export function $combine(
       logger.debug(`Output dimensions is ${JSON.stringify(outputSize)}`);
       logger.debug(`Input png w: ${png.width} and h: ${png.height}`);
       logger.debug(`Creating output png with ${JSON.stringify(screenshot.rectangle)}`);
-      const { rectangle } = screenshot;
-      png.bitblt(output, 0, 0, rectangle.width, rectangle.height, rectangle.x, rectangle.y);
+      // const { rectangle } = screenshot;
+      if (png.width !== screenshot.rectangle.width || png.height !== screenshot.rectangle.height) {
+        png.bitblt(output, 0, 0, png.width, png.height, 0, 0);
+      }
       return output;
     }, new PNG({ width: outputSize.width, height: outputSize.height }))
   );
