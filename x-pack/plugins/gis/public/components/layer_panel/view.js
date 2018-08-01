@@ -20,60 +20,63 @@ import {
   EuiButtonEmpty,
 } from '@elastic/eui';
 
-export function LayerPanel({
-  cancelLayerPanel,
-  saveLayerEdits,
-  selectedLayer
-}) {
-  return (
-    <EuiFlyout onClose={() => console.warn('EuiFlyout#onClose not implemented.')} style={{ maxWidth: 768 }}>
-      <EuiFlyoutHeader>
-        <EuiTitle size="l">
-          <h2>{selectedLayer.name}</h2>
-        </EuiTitle>
-        <EuiSpacer size="m"/>
-        <EuiSpacer />
-        <EuiHorizontalRule margin="none"/>
-      </EuiFlyoutHeader>
+export class LayerPanel extends React.Component {
 
-      <EuiFlyoutBody style={{ paddingTop: 0 }}>
-        <EuiSpacer size="l"/>
-        styling + analytics
-      </EuiFlyoutBody>
+  render() {
 
-      <EuiFlyoutFooter>
-        <EuiFlexGroup responsive={false}>
-          <EuiFlexItem grow={false}>
-            <EuiButtonEmpty
-              onClick={cancelLayerPanel}
-              flush="left"
-            >
-              Cancel
-            </EuiButtonEmpty>
-          </EuiFlexItem>
-          <EuiFlexItem>
-            <EuiSpacer />
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiButtonEmpty
-              color="danger"
-              onClick={() => this.props.removeLayer(selectedLayer)}
-              flush="right"
-            >
-              Remove layer
-            </EuiButtonEmpty>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiButton
-              iconType="check"
-              onClick={saveLayerEdits}
-              fill
-            >
-              Save &amp; Close
-            </EuiButton>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </EuiFlyoutFooter>
-    </EuiFlyout>
-  );
+    const { cancelLayerPanel, saveLayerEdits, selectedLayer } = this.props;
+
+    return (
+
+      <EuiFlyout onClose={() => console.warn('EuiFlyout#onClose not implemented.')} style={{ maxWidth: 768 }}>
+        <EuiFlyoutHeader>
+          <EuiTitle size="l">
+            <h2>{selectedLayer.name}</h2>
+          </EuiTitle>
+          <EuiSpacer size="m"/>
+          <EuiSpacer/>
+          <EuiHorizontalRule margin="none"/>
+        </EuiFlyoutHeader>
+
+        <EuiFlyoutBody style={{ paddingTop: 0 }}>
+          <EuiSpacer size="l"/>
+          styling + analytics
+        </EuiFlyoutBody>
+
+        <EuiFlyoutFooter>
+          <EuiFlexGroup responsive={false}>
+            <EuiFlexItem grow={false}>
+              <EuiButtonEmpty
+                onClick={cancelLayerPanel}
+                flush="left"
+              >
+                Cancel
+              </EuiButtonEmpty>
+            </EuiFlexItem>
+            <EuiFlexItem>
+              <EuiSpacer/>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiButtonEmpty
+                color="danger"
+                onClick={() => this.props.removeLayer(selectedLayer)}
+                flush="right"
+              >
+                Remove layer
+              </EuiButtonEmpty>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiButton
+                iconType="check"
+                onClick={saveLayerEdits}
+                fill
+              >
+                Save &amp; Close
+              </EuiButton>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiFlyoutFooter>
+      </EuiFlyout>
+    );
+  }
 }
