@@ -184,7 +184,7 @@ describe('#start()', () => {
 });
 
 describe('LegacyPlatform targetDomElement', () => {
-  it('only monts the element when started, before starting the legacyPlatformService', () => {
+  it('only mounts the element when started, before starting the legacyPlatformService', () => {
     const rootDomElement = document.createElement('div');
     const core = new CoreSystem({
       ...defaultCoreSystemParams,

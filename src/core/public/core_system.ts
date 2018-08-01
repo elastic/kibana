@@ -70,7 +70,7 @@ export class CoreSystem {
 
   public start() {
     try {
-      // ensure the empty the rootDomElement is empty
+      // ensure the rootDomElement is empty
       this.rootDomElement.textContent = '';
       this.rootDomElement.classList.add('coreSystemRootDomElement');
 
