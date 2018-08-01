@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { once } from 'lodash';
 import { compatibilityShimFactory } from './compatibility_shim';
 
 const createMockServer = () => {
@@ -15,12 +14,12 @@ const createMockServer = () => {
 };
 
 const createMockRequest = () => {
+  const mockSavedObjectsClient = {
+    get: jest.fn(),
+  };
+
   return {
-    getSavedObjectsClient: once(async function () {
-      return {
-        get: jest.fn()
-      };
-    })
+    async getSavedObjectsClient() { return mockSavedObjectsClient; },
   };
 };
 
@@ -60,7 +59,8 @@ test(`passes the objectType and savedObjectId to the savedObjectsClient`, async 
 
   const createJobMock = jest.fn();
   const mockRequest = createMockRequest();
-  mockRequest.getSavedObjectsClient().get.mockReturnValue({
+  const mockSavedObjectsClient = await mockRequest.getSavedObjectsClient();
+  mockSavedObjectsClient.get.mockReturnValue({
     attributes: {
       title: ''
     }
@@ -70,7 +70,7 @@ test(`passes the objectType and savedObjectId to the savedObjectsClient`, async 
   const savedObjectId = 'abc';
   await compatibilityShim(createJobMock)({ objectType, savedObjectId, }, null, mockRequest);
 
-  const getMock = mockRequest.getSavedObjectsClient().get.mock;
+  const getMock = mockSavedObjectsClient.get.mock;
   expect(getMock.calls.length).toBe(1);
   expect(getMock.calls[0][0]).toBe(objectType);
   expect(getMock.calls[0][1]).toBe(savedObjectId);
@@ -82,7 +82,8 @@ test(`logs deprecations when generating the title/relativeUrl using the savedObj
 
   const createJobMock = jest.fn();
   const mockRequest = createMockRequest();
-  mockRequest.getSavedObjectsClient().get.mockReturnValue({
+  const mockSavedObjectsClient = await mockRequest.getSavedObjectsClient();
+  mockSavedObjectsClient.get.mockReturnValue({
     attributes: {
       title: ''
     }
@@ -112,9 +113,10 @@ test(`passes the relativeUrls through`, async () => {
   const compatibilityShim = compatibilityShimFactory(createMockServer());
 
   const createJobMock = jest.fn();
+  const mockRequest = createMockRequest();
 
   const relativeUrls = ['/app/kibana#something', '/app/kibana#something-else'];
-  await compatibilityShim(createJobMock)({ title: 'test', relativeUrls }, null, null);
+  await compatibilityShim(createJobMock)({ title: 'test', relativeUrls }, null, mockRequest);
   expect(createJobMock.mock.calls.length).toBe(1);
   expect(createJobMock.mock.calls[0][0].relativeUrls).toBe(relativeUrls);
 });
@@ -123,8 +125,9 @@ const testSavedObjectRelativeUrl = (objectType, expectedUrl) => {
   test(`generates the saved object relativeUrl for ${objectType}`, async () => {
     const compatibilityShim = compatibilityShimFactory(createMockServer());
     const createJobMock = jest.fn();
+    const mockRequest = createMockRequest();
 
-    await compatibilityShim(createJobMock)({ title: 'test', objectType, savedObjectId: 'abc', }, null, null);
+    await compatibilityShim(createJobMock)({ title: 'test', objectType, savedObjectId: 'abc', }, null, mockRequest);
     expect(createJobMock.mock.calls.length).toBe(1);
     expect(createJobMock.mock.calls[0][0].relativeUrls).toEqual([expectedUrl]);
   });
@@ -137,8 +140,11 @@ testSavedObjectRelativeUrl('dashboard', '/app/kibana#/dashboard/abc?');
 test(`appends the queryString to the relativeUrl when generating from the savedObject`, async () => {
   const compatibilityShim = compatibilityShimFactory(createMockServer());
   const createJobMock = jest.fn();
+  const mockRequest = createMockRequest();
 
-  await compatibilityShim(createJobMock)({ title: 'test', objectType: 'search', savedObjectId: 'abc', queryString: 'foo=bar' }, null, null);
+  await compatibilityShim(createJobMock)(
+    { title: 'test', objectType: 'search', savedObjectId: 'abc', queryString: 'foo=bar' }, null, mockRequest
+  );
   expect(createJobMock.mock.calls.length).toBe(1);
   expect(createJobMock.mock.calls[0][0].relativeUrls).toEqual(['/app/kibana#/discover/abc?foo=bar']);
 });
@@ -146,13 +152,14 @@ test(`appends the queryString to the relativeUrl when generating from the savedO
 test(`throw an Error if the objectType, savedObjectId and relativeUrls are provided`, async () => {
   const compatibilityShim = compatibilityShimFactory(createMockServer());
   const createJobMock = jest.fn();
+  const mockRequest = createMockRequest();
 
   const promise = compatibilityShim(createJobMock)({
     title: 'test',
     objectType: 'something',
     relativeUrls: ['/something'],
     savedObjectId: 'abc',
-  }, null, null);
+  }, null, mockRequest);
 
   await expect(promise).rejects.toBeDefined();
 });
