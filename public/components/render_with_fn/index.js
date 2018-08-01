@@ -13,7 +13,7 @@ export const RenderWithFn = compose(
   ),
   withProps(({ handlers, elementHandlers }) => ({
     handlers: Object.assign(elementHandlers, handlers),
-    onError: message => notify.error(message),
+    onError: notify.error,
   }))
 )(Component);
 

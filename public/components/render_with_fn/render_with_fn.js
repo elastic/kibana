@@ -75,7 +75,7 @@ export class RenderWithFn extends React.Component {
       this.firstRender = false;
     } catch (err) {
       console.error('renderFn threw', err);
-      this.props.onError(`Rendering ${functionName || 'function'} failed: ${err}`);
+      this.props.onError(err, { title: `Rendering '${functionName || 'function'}' failed` });
     }
   };
 

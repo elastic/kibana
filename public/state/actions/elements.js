@@ -233,8 +233,8 @@ const setAst = createThunk('setAst', ({ dispatch }, ast, element, pageId, doRend
   try {
     const expression = toExpression(ast);
     dispatch(setExpression(expression, element.id, pageId, doRender));
-  } catch (e) {
-    notify.error(e);
+  } catch (err) {
+    notify.error(err);
 
     // TODO: remove this, may have been added just to cause a re-render, but why?
     dispatch(setExpression(element.expression, element.id, pageId, doRender));

@@ -32,13 +32,10 @@ export const esPersistMiddleware = ({ getState }) => next => action => {
     const persistedWorkpad = getWorkpadPersisted(getState());
     return update(persistedWorkpad.id, persistedWorkpad).catch(err => {
       if (err.response.status === 400) {
-        const respErr = err.response;
-        respErr.data.message = `Could not save your changes to Elasticsearch: ${
-          respErr.data.message
-        }`;
-        return notify.error(respErr);
+        return notify.error(err.response, {
+          title: `Couldn't save your changes to Elasticsearch`,
+        });
       }
-
       return notify.error(err.response);
     });
   }
