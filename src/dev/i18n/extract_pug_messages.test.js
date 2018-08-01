@@ -37,7 +37,7 @@ describe('extractPugMessages', () => {
     expect(() => extractPugMessages(source).next()).toThrowErrorMatchingSnapshot();
   });
 
-  test('throws on missing', () => {
+  test('throws on missing default message', () => {
     const source = Buffer.from(`\
 #{i18n('message-id', { context: 'Message context' })}
 `);

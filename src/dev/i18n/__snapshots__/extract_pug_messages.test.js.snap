@@ -12,4 +12,4 @@ Array [
 
 exports[`extractPugMessages throws on empty id 1`] = `"Empty \\"id\\" value in i18n() or i18n.translate() is not allowed."`;
 
-exports[`extractPugMessages throws on missing 1`] = `"Cannot parse \\"message-id\\" message: defaultMessage is required"`;
+exports[`extractPugMessages throws on missing default message 1`] = `"Empty defaultMessage in i18n() or i18n.translate() is not allowed (\\"message-id\\")."`;

@@ -29,7 +29,7 @@ export function extractI18nCallMessages(node) {
   const [idSubTree, optionsSubTree] = node.arguments;
 
   if (!isStringLiteral(idSubTree)) {
-    throw new Error('Message id should be a string literal.');
+    throw new Error('Message id in i18n() or i18n.translate() should be a string literal.');
   }
 
   const messageId = idSubTree.value;
@@ -43,7 +43,7 @@ export function extractI18nCallMessages(node) {
 
   if (!isObjectExpression(optionsSubTree)) {
     throw new Error(
-      `Cannot parse "${messageId}" message: object with defaultMessage property is not provided.`
+      `Empty defaultMessage in i18n() or i18n.translate() is not allowed ("${messageId}").`
     );
   }
 
@@ -51,7 +51,7 @@ export function extractI18nCallMessages(node) {
     if (isPropertyWithKey(prop, DEFAULT_MESSAGE_KEY)) {
       if (!isStringLiteral(prop.value)) {
         throw new Error(
-          `Cannot parse "${messageId}" message: defaultMessage value should be a string literal.`
+          `defaultMessage value in i18n() or i18n.translate() should be a string literal ("${messageId}").`
         );
       }
 
@@ -59,7 +59,7 @@ export function extractI18nCallMessages(node) {
     } else if (isPropertyWithKey(prop, CONTEXT_KEY)) {
       if (!isStringLiteral(prop.value)) {
         throw new Error(
-          `Cannot parse "${messageId}" message: context value should be a string literal.`
+          `context value in i18n() or i18n.translate() should be a string literal ("${messageId}").`
         );
       }
 
@@ -68,7 +68,9 @@ export function extractI18nCallMessages(node) {
   }
 
   if (!message) {
-    throw new Error(`Cannot parse "${messageId}" message: defaultMessage is required`);
+    throw new Error(
+      `Empty defaultMessage in i18n() or i18n.translate() is not allowed ("${messageId}").`
+    );
   }
 
   return [messageId, { message, context }];

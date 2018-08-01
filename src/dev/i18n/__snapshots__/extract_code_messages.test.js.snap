@@ -28,4 +28,4 @@ Array [
 
 exports[`extractCodeMessages throws on empty id 1`] = `"Empty \\"id\\" value in i18n() or i18n.translate() is not allowed."`;
 
-exports[`extractCodeMessages throws on missing defaultMessage 1`] = `"Default message is required for id: message-id."`;
+exports[`extractCodeMessages throws on missing defaultMessage 1`] = `"Empty defaultMessage in intl.formatMessage() is not allowed (\\"message-id\\")."`;

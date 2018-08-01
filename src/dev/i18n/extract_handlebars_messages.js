@@ -51,7 +51,7 @@ export function* extractHandlebarsMessages(buffer) {
 
     if (!propertiesString.startsWith(`'`) || !propertiesString.endsWith(`'`)) {
       throw new Error(
-        `Cannot parse "${messageId}" message: properties string should be a string literal.`
+        `Properties string in Handlebars i18n should be a string literal ("${messageId}").`
       );
     }
 
@@ -60,20 +60,18 @@ export function* extractHandlebarsMessages(buffer) {
 
     if (typeof message !== 'string') {
       throw new Error(
-        `Cannot parse "${messageId}" message: defaultMessage value should be a string.`
+        `defaultMessage value in Handlebars i18n should be a string ("${messageId}").`
       );
     }
 
     if (!message) {
-      throw new Error(
-        `Cannot parse "${messageId}" message: defaultMessage is required.`
-      );
+      throw new Error(`Empty defaultMessage in Handlebars i18n is not allowed ("${messageId}").`);
     }
 
     const context = formatJSString(properties.context);
 
     if (context != null && typeof context !== 'string') {
-      throw new Error(`Cannot parse "${messageId}" message: context value should be a string.`);
+      throw new Error(`Context value in Handlebars i18n should be a string ("${messageId}").`);
     }
 
     yield [messageId, { message, context }];
