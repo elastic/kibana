@@ -72,8 +72,15 @@ export default function (kibana) {
 }
 ```
 
-The engine uses a `config/kibana.yml` file for locale resolution process.
-If `i18n.locale` option is defined this will be used for localization
+The engine uses a `config/kibana.yml` file for locale resolution process. If locale is
+defined via `i18n.locale` option in `config/kibana.yml` then it will be used as a base
+locale, otherwise i18n engine will fall back to `en`. The `en` locale will also be used
+if translation can't be found for the base non-English locale.
+
+__Note:__ locale defined in `i18n.locale` and the one used for translation files should
+match exactly, e.g. `i18n.locale: zn` and `.../translations/zh_CN.json` won't match and
+default English translations will be used, but `i18n.locale: zh_CN` and`.../translations/zh_CN.json`
+or `i18n.locale: zn` and `.../translations/zn.json` will work as expected.
 
 The following are the abstract steps i18n engine goes through to resolve the locale value:
 
