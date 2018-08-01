@@ -27,7 +27,8 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
   const config = getService('config');
   const defaultFindTimeout = config.get('timeouts.find');
   const testSubjects = getService('testSubjects');
-  const PageObjects = getPageObjects(['header', 'common', 'visualize']);
+  const comboBox = getService('comboBox');
+  const PageObjects = getPageObjects(['header', 'common']);
 
   class SettingsPage {
     async clickNavigation() {
@@ -534,7 +535,7 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
       await this.setScriptedFieldScript(script);
       await this.openScriptedFieldHelp('testTab');
       if (additionalField) {
-        await PageObjects.visualize.setComboBox('additionalFieldsSelect', additionalField);
+        await comboBox.set('additionalFieldsSelect', additionalField);
         await testSubjects.click('runScriptButton');
       }
       let scriptResults;

@@ -124,6 +124,7 @@
             ng-hide="autoApplyEnabled"
           >
             <button
+              data-test-subj="visualizeEditorResetButton"
               class="kuiButton kuiButton--basic navbar-btn-link"
               ng-disabled="!vis.dirty"
               ng-click="resetEditableVis()"

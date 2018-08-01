@@ -51,6 +51,20 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.visualize.clickGo();
     });
 
+    it('should allow applying changed params', async () => {
+      await PageObjects.visualize.setNumericInterval('1', { append: true });
+      const interval = await PageObjects.visualize.getInputTypeParam('interval');
+      expect(interval).to.be('20001');
+      const isApplyButtonEnabled = await PageObjects.visualize.isApplyEnabled();
+      expect(isApplyButtonEnabled).to.be(true);
+    });
+
+    it('should allow resseting changed params', async () => {
+      await PageObjects.visualize.clickReset();
+      const interval = await PageObjects.visualize.getInputTypeParam('interval');
+      expect(interval).to.be('2000');
+    });
+
     it('should be able to save and load', async function () {
       await PageObjects.visualize.saveVisualization(vizName1);
       const pageTitle = await PageObjects.common.getBreadcrumbPageTitle();
@@ -87,6 +101,22 @@ export default function ({ getService, getPageObjects }) {
         log.debug(data);
         expect(data).to.eql(expectedChartData);
       });
+    });
+
+    it('should show correct data when using average pipeline aggregation', async () => {
+      await PageObjects.visualize.navigateToNewVisualization();
+      await PageObjects.visualize.clickDataTable();
+      await PageObjects.visualize.clickNewSearch();
+      await PageObjects.header.setAbsoluteRange(fromTime, toTime);
+      await PageObjects.visualize.clickAddMetric();
+      await PageObjects.visualize.clickBucket('Metric');
+      await PageObjects.visualize.selectAggregation('Average Bucket', 'metrics');
+      await PageObjects.visualize.selectAggregation('Terms', 'metrics', 'buckets');
+      await PageObjects.visualize.selectField('geo.src', 'metrics', 'buckets');
+      await PageObjects.visualize.clickGo();
+      const data = await PageObjects.visualize.getTableVisData();
+      log.debug(data.split('\n'));
+      expect(data.trim().split('\n')).to.be.eql(['14,004 1,412.6']);
     });
 
     it('should show correct data for a data table with date histogram', async () => {

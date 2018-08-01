@@ -42,6 +42,7 @@ import { absoluteToParsedUrl } from 'ui/url/absolute_to_parsed_url';
 import { migrateLegacyQuery } from 'ui/utils/migrateLegacyQuery';
 import { recentlyAccessed } from 'ui/persisted_log';
 import { timefilter } from 'ui/timefilter';
+import { getVisualizeLoader } from '../../../../../ui/public/visualize/loader';
 
 uiRoutes
   .when(VisualizeConstants.CREATE_PATH, {
@@ -100,6 +101,7 @@ uiModules
 
 function VisEditor(
   $scope,
+  $element,
   $route,
   AppState,
   $window,
@@ -285,9 +287,23 @@ function VisEditor(
     };
 
     $scope.$on('$destroy', function () {
+      if ($scope._handler) {
+        $scope._handler.destroy();
+      }
       savedVis.destroy();
       stateMonitor.destroy();
     });
+
+    if (!$scope.chrome.getVisible()) {
+      getVisualizeLoader().then(loader => {
+        $scope._handler = loader.embedVisualizationWithSavedObject($element.find('.visualize')[0], savedVis, {
+          timeRange: $scope.timeRange,
+          uiState: $scope.uiState,
+          appState: $state,
+          listenOnChange: false
+        });
+      });
+    }
   }
 
   $scope.updateQueryAndFetch = function (query) {

@@ -130,5 +130,7 @@ export function jobSettingsFromJob(job, aggTypeOptions) {
     jobSettings.influencers = job.analysis_config.influencers;
   }
 
+  jobSettings.resultsIndexName = job.results_index_name;
+
   return jobSettings;
 }

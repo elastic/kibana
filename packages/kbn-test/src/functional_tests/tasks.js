@@ -92,7 +92,11 @@ export async function startServers(options) {
 
 async function silence(milliseconds, { log }) {
   await Rx.fromEvent(log, 'data')
-    .pipe(startWith(null), switchMap(() => Rx.timer(milliseconds)), take(1))
+    .pipe(
+      startWith(null),
+      switchMap(() => Rx.timer(milliseconds)),
+      take(1)
+    )
     .toPromise();
 }
 

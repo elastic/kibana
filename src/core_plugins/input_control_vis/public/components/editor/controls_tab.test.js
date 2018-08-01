@@ -96,18 +96,6 @@ test('renders ControlsTab', () => {
 });
 
 describe('behavior', () => {
-  // Mock MutationObserver used in EuiAccordion
-  beforeAll(() => {
-    global.MutationObserver = class {
-      constructor() {}
-      disconnect() {}
-      observe() {}
-    };
-  });
-
-  afterAll(() => {
-    delete global.MutationObserver;
-  });
 
   test('add control button', () => {
     const component = mount(<ControlsTab

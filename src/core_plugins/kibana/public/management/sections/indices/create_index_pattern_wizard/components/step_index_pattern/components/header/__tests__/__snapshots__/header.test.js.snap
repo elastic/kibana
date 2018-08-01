@@ -6,7 +6,11 @@ exports[`Header should mark the input as invalid 1`] = `
     size="s"
   >
     <h2>
-      Step 1 of 2: Define index pattern
+      <FormattedMessage
+        defaultMessage="Step 1 of 2: Define index pattern"
+        id="kbn.management.createIndexPattern.stepHeader"
+        values={Object {}}
+      />
     </h2>
   </EuiTitle>
   <EuiSpacer
@@ -40,23 +44,41 @@ exports[`Header should mark the input as invalid 1`] = `
           helpText={
             <div>
               <p>
-                You can use a 
-                <strong>
-                  *
-                </strong>
-                 as a wildcard in your index pattern.
+                <FormattedMessage
+                  defaultMessage="You can use a {asterisk} as a wildcard in your index pattern."
+                  id="kbn.management.createIndexPattern.step.indexPattern.allowLabel"
+                  values={
+                    Object {
+                      "asterisk": <strong>
+                        *
+                      </strong>,
+                    }
+                  }
+                />
               </p>
               <p>
-                You can't use spaces or the characters 
-                <strong>
-                  %
-                </strong>
-                .
+                <FormattedMessage
+                  defaultMessage="You can't use spaces or the characters {characterList}."
+                  id="kbn.management.createIndexPattern.step.indexPattern.disallowLabel"
+                  values={
+                    Object {
+                      "characterList": <strong>
+                        %
+                      </strong>,
+                    }
+                  }
+                />
               </p>
             </div>
           }
           isInvalid={true}
-          label="Index pattern"
+          label={
+            <FormattedMessage
+              defaultMessage="Index pattern"
+              id="kbn.management.createIndexPattern.step.indexPatternLabel"
+              values={Object {}}
+            />
+          }
         >
           <EuiFieldText
             compressed={false}
@@ -86,7 +108,11 @@ exports[`Header should mark the input as invalid 1`] = `
         onClick={[Function]}
         type="button"
       >
-        Next step
+        <FormattedMessage
+          defaultMessage="Next step"
+          id="kbn.management.createIndexPattern.step.nextStepButton"
+          values={Object {}}
+        />
       </EuiButton>
     </EuiFlexItem>
   </EuiFlexGroup>
@@ -99,7 +125,11 @@ exports[`Header should render normally 1`] = `
     size="s"
   >
     <h2>
-      Step 1 of 2: Define index pattern
+      <FormattedMessage
+        defaultMessage="Step 1 of 2: Define index pattern"
+        id="kbn.management.createIndexPattern.stepHeader"
+        values={Object {}}
+      />
     </h2>
   </EuiTitle>
   <EuiSpacer
@@ -129,23 +159,41 @@ exports[`Header should render normally 1`] = `
           helpText={
             <div>
               <p>
-                You can use a 
-                <strong>
-                  *
-                </strong>
-                 as a wildcard in your index pattern.
+                <FormattedMessage
+                  defaultMessage="You can use a {asterisk} as a wildcard in your index pattern."
+                  id="kbn.management.createIndexPattern.step.indexPattern.allowLabel"
+                  values={
+                    Object {
+                      "asterisk": <strong>
+                        *
+                      </strong>,
+                    }
+                  }
+                />
               </p>
               <p>
-                You can't use spaces or the characters 
-                <strong>
-                  %
-                </strong>
-                .
+                <FormattedMessage
+                  defaultMessage="You can't use spaces or the characters {characterList}."
+                  id="kbn.management.createIndexPattern.step.indexPattern.disallowLabel"
+                  values={
+                    Object {
+                      "characterList": <strong>
+                        %
+                      </strong>,
+                    }
+                  }
+                />
               </p>
             </div>
           }
           isInvalid={false}
-          label="Index pattern"
+          label={
+            <FormattedMessage
+              defaultMessage="Index pattern"
+              id="kbn.management.createIndexPattern.step.indexPatternLabel"
+              values={Object {}}
+            />
+          }
         >
           <EuiFieldText
             compressed={false}
@@ -175,7 +223,11 @@ exports[`Header should render normally 1`] = `
         onClick={[Function]}
         type="button"
       >
-        Next step
+        <FormattedMessage
+          defaultMessage="Next step"
+          id="kbn.management.createIndexPattern.step.nextStepButton"
+          values={Object {}}
+        />
       </EuiButton>
     </EuiFlexItem>
   </EuiFlexGroup>
