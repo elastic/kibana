@@ -9,7 +9,7 @@ import { FlyOut } from './view';
 import { getFlyoutDisplay, updateFlyout, FLYOUT_STATE } from '../../store/ui';
 import { getLayerOptionsByOriginAndType, getLayerLoading, getTemporaryLayers }
   from "../../selectors/map_selectors";
-import { addVectorLayer, removeLayer, clearTemporaryLayers, promoteTemporaryLayers }
+import { addVectorLayer, removeLayer, clearTemporaryLayers, promoteTemporaryLayers, addXYZLayer }
   from "../../actions/map_actions";
 import _ from 'lodash';
 
@@ -31,11 +31,12 @@ function mapStateToProps(state = {}) {
 
 function mapDispatchToProps(dispatch) {
   return {
-    closeFlyout: () => dispatch(updateFlyout(FLYOUT_STATE.NONE))
-      && dispatch(clearTemporaryLayers()),
-    selectAction: (sourceName, layerId) =>
-      dispatch(addVectorLayer(sourceName, layerId, { temporary: true })),
+    closeFlyout: () => dispatch(updateFlyout(FLYOUT_STATE.NONE)) && dispatch(clearTemporaryLayers()),
+    selectAction: (sourceName, layerId) => dispatch(addVectorLayer(sourceName, layerId, { temporary: true })),
     removeAction: layerName => dispatch(removeLayer(layerName)),
+    previewXYZLayer: (url, layerId) => {
+      dispatch(addXYZLayer(url, layerId, { temporary: true }));
+    },
     addAction: () => dispatch(promoteTemporaryLayers())
   };
 }
