@@ -10,6 +10,7 @@ export const RepositorySchema = {
   },
   url: {
     type: 'text',
+    index: false,
   },
   name: {
     type: 'text',
@@ -19,8 +20,7 @@ export const RepositorySchema = {
   },
 };
 
-export const repositoryIndexName = () => {
-  return `.codesearch-repository`;
+export const RepositoryTypeName = 'repository';
+export const RepositoryIndexName = () => {
+  return `.codesearch-${RepositoryTypeName}`;
 };
-
-export const repositoryTypeName = 'repository';

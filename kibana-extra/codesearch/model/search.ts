@@ -44,6 +44,10 @@ export interface RepositorySearchRequest extends SearchRequest {
   query: string;
 }
 
+export interface DocumentSearchRequest extends SearchRequest {
+  query: string;
+}
+
 // The base interface of any kind of search result.
 export interface SearchResult {
   total: number;
@@ -52,4 +56,9 @@ export interface SearchResult {
 
 export interface RepositorySearchResult extends SearchResult {
   repositories: Repository[];
+}
+
+export interface DocumentSearchResult extends SearchResult {
+  documents: Document[];
+  highlights: any[];
 }

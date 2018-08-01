@@ -8,7 +8,7 @@ import Boom from 'boom';
 
 import { RepositoryUtils } from '../../common/repository_utils';
 import { Repository } from '../../model';
-import { repositoryIndexName, repositoryTypeName } from '../indexer/schema';
+import { RepositoryIndexName, RepositoryTypeName } from '../indexer/schema';
 import { Server } from '../kibana_types';
 import { Log } from '../log';
 import { CloneWorker, DeleteWorker, IndexWorker } from '../queue';
@@ -34,8 +34,8 @@ export function repositoryRoute(
       try {
         // Check if the repository already exists
         await callWithRequest(req, 'get', {
-          index: repositoryIndexName(),
-          type: repositoryTypeName,
+          index: RepositoryIndexName(),
+          type: RepositoryTypeName,
           id: repo.uri,
         });
         const msg = `Repository ${repoUrl} already exists. Skip clone.`;
@@ -46,8 +46,8 @@ export function repositoryRoute(
         try {
           // Persist to elasticsearch
           await callWithRequest(req, 'create', {
-            index: repositoryIndexName(),
-            type: repositoryTypeName,
+            index: RepositoryIndexName(),
+            type: RepositoryTypeName,
             id: repo.uri,
             body: JSON.stringify(repo),
           });
@@ -80,8 +80,8 @@ export function repositoryRoute(
         // Delete the repository from ES.
         // If object does not exist in ES, an error will be thrown.
         await callWithRequest(req, 'delete', {
-          index: repositoryIndexName(),
-          type: repositoryTypeName,
+          index: RepositoryIndexName(),
+          type: RepositoryTypeName,
           id: repoUri,
         });
 
@@ -110,8 +110,8 @@ export function repositoryRoute(
       const { callWithRequest } = req.server.plugins.elasticsearch.getCluster('data');
       try {
         const response = await callWithRequest(req, 'get', {
-          index: repositoryIndexName(),
-          type: repositoryTypeName,
+          index: RepositoryIndexName(),
+          type: RepositoryTypeName,
           id: repoUri,
         });
         const repo: Repository = response.attributes;
@@ -133,8 +133,8 @@ export function repositoryRoute(
       const { callWithRequest } = req.server.plugins.elasticsearch.getCluster('data');
       try {
         const response = await callWithRequest(req, 'search', {
-          index: repositoryIndexName(),
-          type: repositoryTypeName,
+          index: RepositoryIndexName(),
+          type: RepositoryTypeName,
           body: {
             query: {
               match_all: {},

@@ -7,7 +7,7 @@
 import { EsClient } from '@codesearch/esqueue';
 
 import { Repository, RepositorySearchRequest, RepositorySearchResult } from '../../model';
-import { repositoryIndexName } from '../indexer/schema';
+import { RepositoryIndexName } from '../indexer/schema';
 import { Log } from '../log';
 import { AbstractSearchClient } from './abstract_search_client';
 
@@ -20,7 +20,7 @@ export class RepositorySearchClient extends AbstractSearchClient {
     const from = (req.page - 1) * req.resultsPerPage;
     const size = req.resultsPerPage;
     const rawRes = await this.client.search({
-      index: repositoryIndexName(),
+      index: RepositoryIndexName(),
       body: {
         from,
         size,

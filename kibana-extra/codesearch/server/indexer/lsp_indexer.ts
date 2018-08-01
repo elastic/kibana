@@ -16,12 +16,13 @@ import { LspService } from '../lsp/lsp_service';
 import { AbstractIndexer } from './abstract_indexer';
 import { IndexCreationRequest } from './index_creation_request';
 import {
-  documentIndexName,
+  DocumentAnalysisSettings,
+  DocumentIndexName,
   DocumentSchema,
-  documentTypeName,
-  symbolIndexName,
+  DocumentTypeName,
+  SymbolIndexName,
   SymbolSchema,
-  symbolTypeName,
+  SymbolTypeName,
 } from './schema';
 
 export class LspIndexer extends AbstractIndexer {
@@ -37,17 +38,18 @@ export class LspIndexer extends AbstractIndexer {
 
   protected async prepareIndexCreationRequests(repoUri: RepositoryUri) {
     const contentIndexCreationReq: IndexCreationRequest = {
-      index: documentIndexName(repoUri),
-      type: documentTypeName,
+      index: DocumentIndexName(repoUri),
+      type: DocumentTypeName,
       settings: {
+        ...DocumentAnalysisSettings,
         number_of_shards: 1,
         auto_expand_replicas: '0-1',
       },
       schema: DocumentSchema,
     };
     const symbolIndexCreationReq: IndexCreationRequest = {
-      index: symbolIndexName(repoUri),
-      type: symbolTypeName,
+      index: SymbolIndexName(repoUri),
+      type: SymbolTypeName,
       settings: {
         number_of_shards: 1,
         auto_expand_replicas: '0-1',
@@ -105,8 +107,8 @@ export class LspIndexer extends AbstractIndexer {
     const symbolNames = [];
     for (const symbol of symbols) {
       await this.client.index({
-        index: symbolIndexName(repoUri),
-        type: symbolTypeName,
+        index: SymbolIndexName(repoUri),
+        type: SymbolTypeName,
         body: symbol,
       });
       symbolNames.push(symbol.symbolInformation.name);
@@ -122,8 +124,8 @@ export class LspIndexer extends AbstractIndexer {
       qnames: symbolNames,
     };
     await this.client.index({
-      index: documentIndexName(repoUri),
-      type: documentTypeName,
+      index: DocumentIndexName(repoUri),
+      type: DocumentTypeName,
       body,
     });
     return;

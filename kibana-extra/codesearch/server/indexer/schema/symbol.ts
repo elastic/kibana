@@ -67,8 +67,7 @@ export const SymbolSchema = {
   },
 };
 
-export const symbolIndexName = (repoUri: RepositoryUri) => {
-  return `.codesearch-symbol-${RepositoryUtils.normalizeRepoUriToIndexName(repoUri)}`;
+export const SymbolTypeName = 'symbol';
+export const SymbolIndexName = (repoUri: RepositoryUri) => {
+  return `.codesearch-${SymbolTypeName}-${RepositoryUtils.normalizeRepoUriToIndexName(repoUri)}`;
 };
-
-export const symbolTypeName = 'symbol';
