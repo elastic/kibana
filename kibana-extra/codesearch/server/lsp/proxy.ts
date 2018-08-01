@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-
+import EventEmitter from 'events';
 import * as net from 'net';
 import {
   createMessageConnection,
@@ -24,7 +24,6 @@ import {
 } from 'vscode-languageserver-protocol/lib/main';
 import { createConnection, IConnection } from 'vscode-languageserver/lib/main';
 
-import { ChildProcess } from 'child_process';
 import { LspRequest } from '../../model';
 import { HttpMessageReader } from './http_message_reader';
 import { HttpMessageWriter } from './http_message_writer';
@@ -44,17 +43,15 @@ export class LanguageServerProxy implements ILanguageServerHandler {
   private sequenceNumber = 0;
   private httpEmitter = new HttpRequestEmitter();
   private replies = createRepliesMap();
-  private serviceProcess?: ChildProcess;
   private readonly targetHost: string;
   private readonly targetPort: number;
   private readonly logger?: Logger;
-  private readonly launchServer?: () => void;
+  private eventEmitter = new EventEmitter();
 
-  constructor(targetPort: number, targetHost: string, logger?: Logger, launchServer?: () => void) {
+  constructor(targetPort: number, targetHost: string, logger?: Logger) {
     this.targetHost = targetHost;
     this.targetPort = targetPort;
     this.logger = logger;
-    this.launchServer = launchServer;
     this.conn = createConnection(
       new HttpMessageReader(this.httpEmitter),
       new HttpMessageWriter(this.replies, logger)
@@ -79,7 +76,9 @@ export class LanguageServerProxy implements ILanguageServerHandler {
       this.httpEmitter.emit('message', message);
     });
   }
-
+  public get isClosed() {
+    return this.closed;
+  }
   public async initialize(
     clientCapabilities: ClientCapabilities,
     workspaceFolders: [WorkspaceFolder]
@@ -151,15 +150,19 @@ export class LanguageServerProxy implements ILanguageServerHandler {
     return new Promise((res, rej) => {
       const server = net.createServer(socket => {
         server.close();
-        socket.on('end', () => {
+        this.eventEmitter.emit('connect');
+        socket.on('close', () => {
           if (this.clientConnection) {
             this.clientConnection.dispose();
           }
           this.clientConnection = null;
+          this.eventEmitter.emit('close');
         });
+
         if (this.logger) {
           this.logger.info('JDT LS connection established on port ' + this.targetPort);
         }
+
         const reader = new SocketMessageReader(socket);
         const writer = new SocketMessageWriter(socket);
         this.clientConnection = createMessageConnection(reader, writer, this.logger);
@@ -176,20 +179,25 @@ export class LanguageServerProxy implements ILanguageServerHandler {
     });
   }
 
-  public registerServiceProcess(child: ChildProcess) {
-    this.serviceProcess = child;
+  /**
+   * get notification when proxy's socket disconnect
+   * @param listener
+   */
+  public onDisconnected(listener: () => void) {
+    this.eventEmitter.on('close', listener);
   }
 
-  private connect(): Promise<MessageConnection> {
+  /**
+   * get notification when proxy's socket connect
+   * @param listener
+   */
+  public onConnected(listener: () => void) {
+    this.eventEmitter.on('connect', listener);
+  }
+
+  public connect(): Promise<MessageConnection> {
     if (this.clientConnection) {
       return Promise.resolve(this.clientConnection);
-    }
-    if (this.launchServer && this.serviceProcess) {
-      this.serviceProcess.kill();
-      if (this.logger) {
-        this.logger.info(`kill language server, pid:${this.serviceProcess.pid}`);
-      }
-      this.launchServer();
     }
     this.closed = false;
     return new Promise(resolve => {
@@ -201,6 +209,7 @@ export class LanguageServerProxy implements ILanguageServerHandler {
         this.clientConnection = createMessageConnection(reader, writer, this.logger);
         this.clientConnection.listen();
         resolve(this.clientConnection);
+        this.eventEmitter.emit('connect');
       });
 
       socket.on('end', () => {
@@ -211,10 +220,7 @@ export class LanguageServerProxy implements ILanguageServerHandler {
       });
 
       socket.on('close', () => {
-        if (!this.closed) {
-          // Reconnect after 1 second
-          setTimeout(() => socket.connect(this.targetPort, this.targetHost), 1000);
-        }
+        this.eventEmitter.emit('close');
       });
 
       socket.on('error', () => void 0);

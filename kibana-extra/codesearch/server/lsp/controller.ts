@@ -100,6 +100,12 @@ export class LanguageServerController implements ILanguageServerHandler {
       );
       log.info(`Launch Typescript Language Server at port ${port}, pid:${child.pid}`);
     }
+    proxy.onDisconnected(() => {
+      if (!proxy.isClosed) {
+        log.warn('language server disconnected, reconnecting');
+        setTimeout(() => proxy.connect(), 1000);
+      }
+    });
     proxy.listen();
     const handler = new RequestExpander(proxy);
     this.registerServer(['typescript', 'javascript', 'html'], handler);
@@ -139,31 +145,47 @@ export class LanguageServerController implements ILanguageServerHandler {
     }
 
     if (!this.detach) {
-      const child = spawn(
-        'java',
-        [
-          '-Declipse.application=org.eclipse.jdt.ls.core.id1',
-          '-Dosgi.bundles.defaultStartLevel=4',
-          '-Declipse.product=org.eclipse.jdt.ls.core.product',
-          '-Dlog.level=ALL',
-          '-noverify',
-          '-Xmx1G',
-          '-jar',
-          path.resolve(javaLangserverPath, launchersFound[0]),
-          '-configuration',
-          path.resolve(javaLangserverPath, config),
-          '-data',
-          '/tmp/data',
-        ],
-        {
-          detached: false,
-          stdio: 'inherit',
-          env: { CLIENT_PORT: port.toString() },
-        }
-      );
+      const spawnJava = () => {
+        return spawn(
+          'java',
+          [
+            '-Declipse.application=org.eclipse.jdt.ls.core.id1',
+            '-Dosgi.bundles.defaultStartLevel=4',
+            '-Declipse.product=org.eclipse.jdt.ls.core.product',
+            '-Dlog.level=ALL',
+            '-noverify',
+            '-Xmx1G',
+            '-jar',
+            path.resolve(javaLangserverPath, launchersFound[0]),
+            '-configuration',
+            path.resolve(javaLangserverPath, config),
+            '-data',
+            '/tmp/data',
+          ],
+          {
+            detached: false,
+            stdio: 'inherit',
+            env: { CLIENT_PORT: port.toString() },
+          }
+        );
+      };
+      let child = spawnJava();
       log.info(`Launch Java Language Server at port ${port}, pid:${child.pid}`);
+      proxy.onDisconnected(() => {
+        if (!proxy.isClosed) {
+          child.kill();
+          proxy.awaitServerConnection();
+          log.warn('language server disconnected, restarting it');
+          child = spawnJava();
+        }
+      });
+    } else {
+      proxy.onDisconnected(() => {
+        if (!proxy.isClosed) {
+          proxy.awaitServerConnection();
+        }
+      });
     }
-
     proxy.listen();
     const handler = new RequestExpander(proxy);
     this.registerServer(['java'], handler);
