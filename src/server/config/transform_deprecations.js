@@ -17,9 +17,9 @@
  * under the License.
  */
 
-import _, { partial } from 'lodash';
+import _, { partial, set } from 'lodash';
 import { createTransform, Deprecations } from '../../deprecation';
-import { unset, set } from '../utils';
+import { unset } from '../../utils';
 
 const { rename, unused } = Deprecations;
 
