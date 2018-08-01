@@ -7,13 +7,14 @@
 import expect from 'expect.js';
 import { SPACES } from './lib/spaces';
 import { getUrlPrefix, getIdPrefix } from './lib/space_test_utils';
+import { DEFAULT_SPACE_ID } from '../../../../plugins/spaces/common/constants';
 
 export default function ({ getService }) {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
 
   describe('update', () => {
-    const expectSpaceAwareResults = resp => {
+    const expectSpaceAwareResults = () => resp => {
 
       // loose ISO8601 UTC time with milliseconds validation
       expect(resp.body).to.have.property('updated_at').match(/^[\d-]{10}T[\d:\.]{12}Z$/);
@@ -29,7 +30,7 @@ export default function ({ getService }) {
       });
     };
 
-    const expectNonSpaceAwareResults = resp => {
+    const expectNonSpaceAwareResults = () => resp => {
 
       // loose ISO8601 UTC time with milliseconds validation
       expect(resp.body).to.have.property('updated_at').match(/^[\d-]{10}T[\d:\.]{12}Z$/);
@@ -45,11 +46,11 @@ export default function ({ getService }) {
       });
     };
 
-    const expectNotFound = resp => {
+    const expectNotFound = (type, id) => resp => {
       expect(resp.body).eql({
         statusCode: 404,
         error: 'Not Found',
-        message: 'Not Found'
+        message: `Saved object [${type}/${id}] not found`
       });
     };
 
@@ -66,7 +67,7 @@ export default function ({ getService }) {
               }
             })
             .expect(tests.spaceAware.statusCode)
-            .then(tests.spaceAware.response);
+            .then(tests.spaceAware.response());
         });
 
         it(`should return ${tests.notSpaceAware.statusCode} for a non space-aware doc`, async () => {
@@ -78,7 +79,7 @@ export default function ({ getService }) {
               }
             })
             .expect(tests.notSpaceAware.statusCode)
-            .then(tests.notSpaceAware.response);
+            .then(tests.notSpaceAware.response());
         });
 
         it(`should return ${tests.inOtherSpace.statusCode} for a doc in another space`, async () => {
@@ -91,7 +92,7 @@ export default function ({ getService }) {
               }
             })
             .expect(tests.inOtherSpace.statusCode)
-            .then(tests.inOtherSpace.response);
+            .then(tests.inOtherSpace.response(`visualization`, `${spaceId === DEFAULT_SPACE_ID ? '' : (spaceId + ':')}${id}`));
         });
 
         describe('unknown id', () => {
@@ -104,7 +105,7 @@ export default function ({ getService }) {
                 }
               })
               .expect(tests.doesntExist.statusCode)
-              .then(tests.doesntExist.response);
+              .then(tests.doesntExist.response(`visualization`, `${spaceId === DEFAULT_SPACE_ID ? '' : (spaceId + ':')}not an id`));
           });
         });
       });

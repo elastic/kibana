@@ -31,9 +31,11 @@ export default function ({ getService }) {
         }
       });
 
+      const expectedDocumentId = spaceId === DEFAULT_SPACE_ID ? resp.body.id : `${spaceId}:${resp.body.id}`;
+
       // query ES directory to assert on space id
       const { _source } = await es.get({
-        id: `visualization:${resp.body.id}`,
+        id: `visualization:${expectedDocumentId}`,
         type: 'doc',
         index: '.kibana'
       });
