@@ -3,32 +3,41 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+import { combineReducers } from 'redux';
+import { Action, handleActions } from 'redux-actions';
 
-import { handleActions } from 'redux-actions';
 import { decrease, increase } from '../actions';
+import { repository, RepositoryState } from './repository';
 
-export interface RootState {
+interface CounterState {
   count: number;
 }
 
-const defaultState: RootState = {
+const defaultState: CounterState = {
   count: 0,
 };
 
-export const reducer = handleActions(
+export const counter = handleActions(
   {
-    [String(increase)]: (state: RootState, action: any) => {
+    [String(increase)]: (state: CounterState, action: Action<number>) => {
       console.log('Receive increase action with payload: ' + action.payload); // tslint:disable-line no-console
       return {
-        count: state.count + action.payload,
+        count: state.count + (action.payload || 0),
       };
     },
-    [String(decrease)]: (state: RootState, action: any) => {
+    [String(decrease)]: (state: CounterState, action: Action<number>) => {
       console.log('Receive decrease action with payload: ' + action.payload); // tslint:disable-line no-console
       return {
-        count: state.count - action.payload,
+        count: state.count - (action.payload || 0),
       };
     },
   },
   defaultState
 );
+
+export interface RootState {
+  counter: CounterState;
+  repository: RepositoryState;
+}
+
+export const rootReducer = combineReducers({ counter, repository });

@@ -7,6 +7,9 @@
 import { fork, select, takeEvery } from 'redux-saga/effects';
 import * as Selectors from '../selectors';
 
+import { watchDeleteRepo, watchFetchRepos, watchImportRepo } from './repository';
+import { watchLocationChange } from './route';
+
 function* handleIncrease(action: any) {
   const count = yield select(Selectors.getCounter);
   console.log('Side Effect of Increase From Saga: Current count is ' + count); // tslint:disable-line no-console
@@ -28,4 +31,8 @@ function* DecreaseWatcher() {
 export function* rootSaga() {
   yield fork(IncreaseWatcher);
   yield fork(DecreaseWatcher);
+  yield fork(watchFetchRepos);
+  yield fork(watchLocationChange);
+  yield fork(watchDeleteRepo);
+  yield fork(watchImportRepo);
 }

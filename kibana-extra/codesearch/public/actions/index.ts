@@ -6,5 +6,19 @@
 
 import { createAction } from 'redux-actions';
 
+import { Repository } from '../../model';
+
 export const increase = createAction<number>('INCREASE');
 export const decrease = createAction<number>('DECREASE');
+
+export const fetchRepos = createAction('FETCH REPOS');
+export const fetchReposSuccess = createAction<Repository[]>('FETCH REPOS SUCCESS');
+export const fetchReposFailed = createAction<Error>('FETCH REPOS FAILED');
+
+export const deleteRepo = createAction<string>('DELETE REPOS');
+export const deleteRepoSuccess = createAction<string>('DELETE REPOS SUCCESS');
+export const deleteRepoFailed = createAction<Error>('DELETE REPOS FAILED');
+
+export const importRepo = createAction<string>('IMPORT REPOS');
+export const importRepoSuccess = createAction<string>('IMPORT REPOS SUCCESS');
+export const importRepoFailed = createAction<Error>('IMPORT REPOS FAILED');

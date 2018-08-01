@@ -696,6 +696,13 @@ concat-stream@^1.4.7:
     readable-stream "^2.2.2"
     typedarray "^0.0.6"
 
+connected-react-router@^4.3.0:
+  version "4.3.0"
+  resolved "https://registry.yarnpkg.com/connected-react-router/-/connected-react-router-4.3.0.tgz#a3bcba9e82ec5ee9f2018daeeddca827a7ef6235"
+  dependencies:
+    immutable "^3.8.1"
+    react-router "^4.2.0"
+
 console-control-strings@^1.0.0, console-control-strings@~1.1.0:
   version "1.1.0"
   resolved "https://registry.yarnpkg.com/console-control-strings/-/console-control-strings-1.1.0.tgz#3d7cf4464db6446ea644bf4b39507f9851008e8e"
@@ -1808,6 +1815,10 @@ ignore@^3.3.5:
   version "3.3.10"
   resolved "https://registry.yarnpkg.com/ignore/-/ignore-3.3.10.tgz#0a97fb876986e8081c631160f8f9f389157f0043"
 
+immutable@^3.8.1:
+  version "3.8.2"
+  resolved "https://registry.yarnpkg.com/immutable/-/immutable-3.8.2.tgz#c2439951455bb39913daf281376f1530e104adf3"
+
 in-publish@^2.0.0:
   version "2.0.0"
   resolved "https://registry.yarnpkg.com/in-publish/-/in-publish-2.0.0.tgz#e20ff5e3a2afc2690320b6dc552682a9c7fadf51"
@@ -1974,10 +1985,6 @@ is-fullwidth-code-point@^2.0.0:
   version "2.0.0"
   resolved "https://registry.yarnpkg.com/is-fullwidth-code-point/-/is-fullwidth-code-point-2.0.0.tgz#a3b30a5c4f199183167aaab93beefae3ddfb654f"
 
-is-function@^1.0.1:
-  version "1.0.1"
-  resolved "https://registry.yarnpkg.com/is-function/-/is-function-1.0.1.tgz#12cfb98b65b57dd3d193a3121f5f6e2f437602b5"
-
 is-glob@^3.1.0:
   version "3.1.0"
   resolved "https://registry.yarnpkg.com/is-glob/-/is-glob-3.1.0.tgz#7ba5ae24217804ac70707b96922567486cc3e84a"
@@ -2067,10 +2074,6 @@ is-ssh@^1.3.0:
 is-stream@^1.0.1, is-stream@^1.1.0:
   version "1.1.0"
   resolved "https://registry.yarnpkg.com/is-stream/-/is-stream-1.1.0.tgz#12d4a3dd4e68e0b79ceb8dbc84173ae80d91ca44"
-
-is-symbol@^1.0.1:
-  version "1.0.1"
-  resolved "https://registry.yarnpkg.com/is-symbol/-/is-symbol-1.0.1.tgz#3cc59f00025194b6ab2e38dbae6689256b660572"
 
 is-typedarray@~1.0.0:
   version "1.0.0"
@@ -3248,7 +3251,7 @@ react-router-dom@^4.3.1:
     react-router "^4.3.1"
     warning "^4.0.1"
 
-react-router@^4.3.1:
+react-router@^4.2.0, react-router@^4.3.1:
   version "4.3.1"
   resolved "https://registry.yarnpkg.com/react-router/-/react-router-4.3.1.tgz#aada4aef14c809cb2e686b05cee4742234506c4e"
   dependencies:
@@ -3363,13 +3366,10 @@ reduce-reducers@^0.1.0:
   resolved "https://registry.yarnpkg.com/reduce-reducers/-/reduce-reducers-0.1.5.tgz#ff77ca8068ff41007319b8b4b91533c7e0e54576"
 
 redux-actions@^2.4.0:
-  version "2.5.1"
-  resolved "https://registry.yarnpkg.com/redux-actions/-/redux-actions-2.5.1.tgz#25678a34f0558f5edb3eb75b02844188c57f328d"
+  version "2.6.1"
+  resolved "https://registry.yarnpkg.com/redux-actions/-/redux-actions-2.6.1.tgz#42c06e94739fbe6db35db3605abb105bdb3724d8"
   dependencies:
     invariant "^2.2.1"
-    is-function "^1.0.1"
-    is-plain-object "^2.0.4"
-    is-symbol "^1.0.1"
     lodash.camelcase "^4.3.0"
     lodash.curry "^4.1.1"
     reduce-reducers "^0.1.0"
