@@ -28,6 +28,8 @@ const SAVED_OBJECTS = {
   ...createObjectEntry('space', 'space_1'),
 };
 
+const createSavedObjects = () => cloneDeep(SAVED_OBJECTS);
+
 const config = {
   'server.basePath': '/'
 };
@@ -44,25 +46,39 @@ const createMockRequest = (space) => ({
   getBasePath: () => space.id !== DEFAULT_SPACE_ID ? `/s/${space.id}` : '',
 });
 
-const createMockClient = (space) => {
+const createMockClient = (space, { mangleSpaceIdentifier = false } = {}) => {
   const errors = {
     createGenericNotFoundError: jest.fn((type, id) => {
       return new Error(`not found: ${type} ${id}`);
     })
   };
 
+  const maybeTransformSavedObject = (savedObject) => {
+    if (!mangleSpaceIdentifier) {
+      return savedObject;
+    }
+    if (space.id === DEFAULT_SPACE_ID) {
+      savedObject.id = `default:${space.id}`;
+    } else {
+      savedObject.id = savedObject.id.split(':')[1];
+    }
+
+    return savedObject;
+  };
+
   return {
     get: jest.fn((type, id) => {
-      const result = SAVED_OBJECTS[id];
+      const result = createSavedObjects()[id];
       if (!result) {
         throw errors.createGenericNotFoundError(type, id);
       }
-      return result;
+
+      return maybeTransformSavedObject(result);
     }),
     bulkGet: jest.fn((objects) => {
       return {
         saved_objects: objects.map(object => {
-          const result = SAVED_OBJECTS[object.id];
+          const result = createSavedObjects()[object.id];
           if (!result) {
             return {
               id: object.id,
@@ -70,7 +86,7 @@ const createMockClient = (space) => {
               error: { statusCode: 404, message: 'Not found' }
             };
           }
-          return result;
+          return maybeTransformSavedObject(result);
         })
       };
     }),
@@ -81,28 +97,33 @@ const createMockClient = (space) => {
           saved_objects: [space]
         };
       }
+      const objects = createSavedObjects();
+      const result = Object.keys(objects)
+        .filter(key => objects[key].spaceId === space.id || (space.id === DEFAULT_SPACE_ID && !objects[key].spaceId))
+        .map(key => maybeTransformSavedObject(objects[key]));
+
       return {
-        saved_objects: []
+        saved_objects: result
       };
     }),
     create: jest.fn((type, attributes, options) => {
-      return {
+      return maybeTransformSavedObject({
         id: options.id || 'foo-id',
         type,
         attributes
-      };
+      });
     }),
     bulkCreate: jest.fn((objects) => {
       return {
-        saved_objects: cloneDeep(objects)
+        saved_objects: cloneDeep(objects).map(maybeTransformSavedObject)
       };
     }),
     update: jest.fn((type, id, attributes) => {
-      return {
+      return maybeTransformSavedObject({
         id,
         type,
         attributes
-      };
+      });
     }),
     delete: jest.fn(),
     errors,
@@ -134,7 +155,7 @@ describe('default space', () => {
 
       const result = await client.get(type, id, options);
 
-      expect(result).toBe(SAVED_OBJECTS[id]);
+      expect(result).toEqual(SAVED_OBJECTS[id]);
     });
 
     test(`does not append the space id to the document id`, async () => {
@@ -176,7 +197,7 @@ describe('default space', () => {
 
       const result = await client.get(type, id, options);
 
-      expect(result).toBe(SAVED_OBJECTS[id]);
+      expect(result).toEqual(SAVED_OBJECTS[id]);
     });
 
     test(`merges options.extraDocumentProperties`, async () => {
@@ -220,6 +241,25 @@ describe('default space', () => {
 
       const type = 'foo';
       const id = 'object_2';
+      const options = {};
+
+      await expect(client.get(type, id, options)).rejects.toThrowErrorMatchingSnapshot();
+    });
+
+    test(`throws when the base client returns a malformed document id`, async () => {
+      const request = createMockRequest(currentSpace);
+      const baseClient = createMockClient(currentSpace, { mangleSpaceIdentifier: true });
+      const spacesService = createSpacesService(server);
+
+      const client = new SpacesSavedObjectsClient({
+        request,
+        baseClient,
+        spacesService,
+        types: [],
+      });
+
+      const type = 'foo';
+      const id = 'object_0';
       const options = {};
 
       await expect(client.get(type, id, options)).rejects.toThrowErrorMatchingSnapshot();
@@ -360,6 +400,25 @@ describe('default space', () => {
         extraDocumentProperties: ['spaceId', 'type', 'otherSourceProp']
       });
     });
+
+    test(`throws when the base client returns a malformed document id`, async () => {
+      const request = createMockRequest(currentSpace);
+      const baseClient = createMockClient(currentSpace, { mangleSpaceIdentifier: true });
+      const spacesService = createSpacesService(server);
+
+      const client = new SpacesSavedObjectsClient({
+        request,
+        baseClient,
+        spacesService,
+        types: [],
+      });
+
+      const type = 'foo';
+      const id = 'object_0';
+      const options = {};
+
+      await expect(client.bulkGet([{ type, id }], options)).rejects.toThrowErrorMatchingSnapshot();
+    });
   });
 
   describe('#find', () => {
@@ -468,6 +527,24 @@ describe('default space', () => {
         }]
       });
     });
+
+    test(`throws when the base client returns a malformed document id`, async () => {
+      const request = createMockRequest(currentSpace);
+      const baseClient = createMockClient(currentSpace, { mangleSpaceIdentifier: true });
+      const spacesService = createSpacesService(server);
+
+      const client = new SpacesSavedObjectsClient({
+        request,
+        baseClient,
+        spacesService,
+        types: [],
+      });
+
+      const type = 'foo';
+      const options = { type };
+
+      await expect(client.find(options)).rejects.toThrowErrorMatchingSnapshot();
+    });
   });
 
   describe('#create', () => {
@@ -519,6 +596,27 @@ describe('default space', () => {
 
       // called without extraDocumentProperties
       expect(baseClient.create).toHaveBeenCalledWith(type, attributes, { extraDocumentProperties: {}, id: 'mock-id' });
+    });
+
+    test(`throws when the base client returns a malformed document id`, async () => {
+      const request = createMockRequest(currentSpace);
+      const baseClient = createMockClient(currentSpace, { mangleSpaceIdentifier: true });
+      const spacesService = createSpacesService(server);
+
+      const client = new SpacesSavedObjectsClient({
+        request,
+        baseClient,
+        spacesService,
+        types: [],
+      });
+
+      const type = 'foo';
+      const attributes = {
+        prop1: 'value 1',
+        prop2: 'value 2'
+      };
+
+      await expect(client.create(type, attributes)).rejects.toThrowErrorMatchingSnapshot();
     });
   });
 
@@ -671,6 +769,33 @@ describe('default space', () => {
         id: 'mock-id'
       })), {});
     });
+
+    test(`throws when the base client returns a malformed document id`, async () => {
+      const request = createMockRequest(currentSpace);
+      const baseClient = createMockClient(currentSpace, { mangleSpaceIdentifier: true });
+      const spacesService = createSpacesService(server);
+
+      const client = new SpacesSavedObjectsClient({
+        request,
+        baseClient,
+        spacesService,
+        types: [],
+      });
+
+      const attributes = {
+        prop1: 'value 1',
+        prop2: 'value 2'
+      };
+      const objects = [{
+        type: 'foo',
+        attributes
+      }, {
+        type: 'bar',
+        attributes
+      }];
+
+      await expect(client.bulkCreate(objects, {})).rejects.toThrowErrorMatchingSnapshot();
+    });
   });
 
   describe('#update', () => {
@@ -738,6 +863,28 @@ describe('default space', () => {
 
       const id = 'object_2';
       const type = 'foo';
+      const attributes = {
+        prop1: 'value 1',
+        prop2: 'value 2'
+      };
+
+      await expect(client.update(type, id, attributes)).rejects.toThrowErrorMatchingSnapshot();
+    });
+
+    test(`throws when the base client returns a malformed document id`, async () => {
+      const request = createMockRequest(currentSpace);
+      const baseClient = createMockClient(currentSpace, { mangleSpaceIdentifier: true });
+      const spacesService = createSpacesService(server);
+
+      const client = new SpacesSavedObjectsClient({
+        request,
+        baseClient,
+        spacesService,
+        types: [],
+      });
+
+      const id = 'space_1';
+      const type = 'space';
       const attributes = {
         prop1: 'value 1',
         prop2: 'value 2'
@@ -835,7 +982,11 @@ describe('current space (space_1)', () => {
 
       const result = await client.get(type, id, options);
 
-      expect(result).toBe(SAVED_OBJECTS[`${currentSpace.id}:${id}`]);
+      expect(result).toEqual({
+        id,
+        type,
+        spaceId: currentSpace.id
+      });
     });
 
     test('appends the space id to the document id', async () => {
@@ -877,7 +1028,7 @@ describe('current space (space_1)', () => {
 
       const result = await client.get(type, id, options);
 
-      expect(result).toBe(SAVED_OBJECTS[id]);
+      expect(result).toEqual(SAVED_OBJECTS[id]);
     });
 
     test(`merges options.extraDocumentProperties`, async () => {
@@ -921,6 +1072,25 @@ describe('current space (space_1)', () => {
 
       const type = 'foo';
       const id = 'object_2';
+      const options = {};
+
+      await expect(client.get(type, id, options)).rejects.toThrowErrorMatchingSnapshot();
+    });
+
+    test(`returns error when the object has a malformed identifier`, async () => {
+      const request = createMockRequest(currentSpace);
+      const baseClient = createMockClient(currentSpace, { mangleSpaceIdentifier: true });
+      const spacesService = createSpacesService(server);
+
+      const client = new SpacesSavedObjectsClient({
+        request,
+        baseClient,
+        spacesService,
+        types: [],
+      });
+
+      const type = 'foo';
+      const id = 'object_1';
       const options = {};
 
       await expect(client.get(type, id, options)).rejects.toThrowErrorMatchingSnapshot();
@@ -1072,6 +1242,28 @@ describe('current space (space_1)', () => {
         extraDocumentProperties: ['spaceId', 'type', 'otherSourceProp']
       });
     });
+
+    test(`throws when base client returns documents with malformed ids`, async () => {
+      const request = createMockRequest(currentSpace);
+      const baseClient = createMockClient(currentSpace, { mangleSpaceIdentifier: true });
+      const spacesService = createSpacesService(server);
+
+      const client = new SpacesSavedObjectsClient({
+        request,
+        baseClient,
+        spacesService,
+        types: [],
+      });
+
+      const type = 'foo';
+      const objects = [{
+        type,
+        id: 'object_1'
+      }];
+      const options = {};
+
+      await expect(client.bulkGet(objects, options)).rejects.toThrowErrorMatchingSnapshot();
+    });
   });
 
   describe('#find', () => {
@@ -1178,6 +1370,26 @@ describe('current space (space_1)', () => {
         }]
       });
     });
+
+    test(`throws when base client returns documents with malformed ids`, async () => {
+      const request = createMockRequest(currentSpace);
+      const baseClient = createMockClient(currentSpace, { mangleSpaceIdentifier: true });
+      const spacesService = createSpacesService(server);
+
+      const client = new SpacesSavedObjectsClient({
+        request,
+        baseClient,
+        spacesService,
+        types: [],
+      });
+
+      const type = 'foo';
+      const options = {
+        type,
+      };
+
+      await expect(client.find(options)).rejects.toThrowErrorMatchingSnapshot();
+    });
   });
 
   describe('#create', () => {
@@ -1232,6 +1444,27 @@ describe('current space (space_1)', () => {
       await client.create(type, attributes);
 
       expect(baseClient.create).toHaveBeenCalledWith(type, attributes, { extraDocumentProperties: {}, id: 'mock-id' });
+    });
+
+    test('throws when the base client returns a malformed document id', async () => {
+      const request = createMockRequest(currentSpace);
+      const baseClient = createMockClient(currentSpace, { mangleSpaceIdentifier: true });
+      const spacesService = createSpacesService(server);
+
+      const client = new SpacesSavedObjectsClient({
+        request,
+        baseClient,
+        spacesService,
+        types: [],
+      });
+
+      const type = 'foo';
+      const attributes = {
+        prop1: 'value 1',
+        prop2: 'value 2'
+      };
+
+      await expect(client.create(type, attributes)).rejects.toThrowErrorMatchingSnapshot();
     });
   });
 
@@ -1352,6 +1585,27 @@ describe('current space (space_1)', () => {
 
       expect(baseClient.bulkCreate).toHaveBeenCalledWith(expectedCalledWithObjects, {});
     });
+
+    test('throws when the base client returns a malformed document id', async () => {
+      const request = createMockRequest(currentSpace);
+      const baseClient = createMockClient(currentSpace, { mangleSpaceIdentifier: true });
+      const spacesService = createSpacesService(server);
+
+      const client = new SpacesSavedObjectsClient({
+        request,
+        baseClient,
+        spacesService,
+        types: [],
+      });
+
+      const type = 'foo';
+      const attributes = {
+        prop1: 'value 1',
+        prop2: 'value 2'
+      };
+
+      await expect(client.bulkCreate([{ type, attributes }])).rejects.toThrowErrorMatchingSnapshot();
+    });
   });
 
   describe('#update', () => {
@@ -1419,6 +1673,28 @@ describe('current space (space_1)', () => {
       });
 
       const id = 'object_2';
+      const type = 'foo';
+      const attributes = {
+        prop1: 'value 1',
+        prop2: 'value 2'
+      };
+
+      await expect(client.update(type, id, attributes)).rejects.toThrowErrorMatchingSnapshot();
+    });
+
+    test('throws when the base client returns a malformed document id', async () => {
+      const request = createMockRequest(currentSpace);
+      const baseClient = createMockClient(currentSpace, { mangleSpaceIdentifier: true });
+      const spacesService = createSpacesService(server);
+
+      const client = new SpacesSavedObjectsClient({
+        request,
+        baseClient,
+        spacesService,
+        types: [],
+      });
+
+      const id = 'object_1';
       const type = 'foo';
       const attributes = {
         prop1: 'value 1',
