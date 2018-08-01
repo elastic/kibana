@@ -17,5 +17,48 @@
  * under the License.
  */
 
-export { I18n } from './i18n';
-export { uiI18nMixin } from './ui_i18n_mixin';
+/**
+ @typedef Messages - messages tree, where leafs are translated strings
+ @type {object<string, object>}
+ @property {string} [locale] - locale of the messages
+ @property {object} [formats] - set of options to the underlying formatter
+ */
+
+import { i18nLoader } from '@kbn/i18n';
+
+export function uiI18nMixin(kbnServer, server, config) {
+  const defaultLocale = config.get('i18n.defaultLocale');
+  const { translationPaths = [] } = kbnServer.uiExports;
+
+  i18nLoader.registerTranslationFiles(translationPaths);
+
+  /**
+   *  Fetch the translations matching the Accept-Language header for a requests.
+   *  @name request.getUiTranslations
+   *  @returns {Promise<Messages>} translations - translation messages
+   */
+  server.decorate('request', 'getUiTranslations', async function () {
+    const header = this.headers['accept-language'];
+
+    const [defaultTranslations, requestedTranslations] = await Promise.all([
+      i18nLoader.getTranslationsByLocale(defaultLocale),
+      i18nLoader.getTranslationsByLanguageHeader(header),
+    ]);
+
+    return {
+      locale: defaultLocale,
+      ...defaultTranslations,
+      ...requestedTranslations,
+    };
+  });
+
+  /**
+   *  Return all translations for registered locales
+   *  @name server.getAllUiTranslations
+   *  @return {Promise<Map<string, Messages>>} translations - A Promise object
+   *  where keys are the locale and values are objects of translation messages
+   */
+  server.decorate('server', 'getAllUiTranslations', async () => {
+    return await i18nLoader.getAllTranslations();
+  });
+}
