@@ -121,7 +121,6 @@ function applyConfig(config) {
       priority: BANNER_PRIORITY,
     });
 
-    clearTimeout(bannerTimeoutId);
     bannerTimeoutId = setTimeout(() => {
       dismissBanner();
     }, bannerLifetime);
