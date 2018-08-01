@@ -38,8 +38,8 @@ export function uiSettingsMixin(kbnServer, server) {
     });
   });
 
-  server.addMemoizedFactoryToRequest('getUiSettingsService', request => {
-    return getUiSettingsServiceForRequest(server, request, {
+  server.addMemoizedFactoryToRequest('getUiSettingsService', async request => {
+    return await getUiSettingsServiceForRequest(server, request, {
       getDefaults,
     });
   });

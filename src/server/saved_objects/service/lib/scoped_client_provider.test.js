@@ -19,15 +19,15 @@
 
 import { ScopedSavedObjectsClientProvider } from './scoped_client_provider';
 
-test(`uses default client factory when one isn't set`, () => {
+test(`uses default client factory when one isn't set`, async () => {
   const returnValue = Symbol();
-  const defaultClientFactoryMock = jest.fn().mockReturnValue(returnValue);
+  const defaultClientFactoryMock = jest.fn().mockImplementation(async () => returnValue);
   const request = Symbol();
 
   const clientProvider = new ScopedSavedObjectsClientProvider({
     defaultClientFactory: defaultClientFactoryMock
   });
-  const result = clientProvider.getClient(request);
+  const result = await clientProvider.getClient(request);
 
   expect(result).toBe(returnValue);
   expect(defaultClientFactoryMock).toHaveBeenCalledTimes(1);
@@ -36,17 +36,17 @@ test(`uses default client factory when one isn't set`, () => {
   });
 });
 
-test(`uses custom client factory when one is set`, () => {
+test(`uses custom client factory when one is set`, async () => {
   const defaultClientFactoryMock = jest.fn();
   const request = Symbol();
   const returnValue = Symbol();
-  const customClientFactoryMock = jest.fn().mockReturnValue(returnValue);
+  const customClientFactoryMock = jest.fn().mockImplementation(async () => returnValue);
 
   const clientProvider = new ScopedSavedObjectsClientProvider({
     defaultClientFactory: defaultClientFactoryMock
   });
   clientProvider.setClientFactory(customClientFactoryMock);
-  const result = clientProvider.getClient(request);
+  const result = await clientProvider.getClient(request);
 
   expect(result).toBe(returnValue);
   expect(defaultClientFactoryMock).not.toHaveBeenCalled();
@@ -64,9 +64,9 @@ test(`throws error when more than one scoped saved objects client factory is set
   }).toThrowErrorMatchingSnapshot();
 });
 
-test(`invokes and uses instance from single added wrapper factory`, () => {
+test(`invokes and uses instance from single added wrapper factory`, async () => {
   const defaultClient = Symbol();
-  const defaultClientFactoryMock = jest.fn().mockReturnValue(defaultClient);
+  const defaultClientFactoryMock = jest.fn().mockImplementation(async () => defaultClient);
   const clientProvider = new ScopedSavedObjectsClientProvider({
     defaultClientFactory: defaultClientFactoryMock
   });
@@ -75,7 +75,7 @@ test(`invokes and uses instance from single added wrapper factory`, () => {
   const request = Symbol();
 
   clientProvider.addClientWrapperFactory(clientWrapperFactoryMock);
-  const actualClient = clientProvider.getClient(request);
+  const actualClient = await clientProvider.getClient(request);
 
   expect(actualClient).toBe(wrappedClient);
   expect(clientWrapperFactoryMock).toHaveBeenCalledWith({
@@ -84,9 +84,9 @@ test(`invokes and uses instance from single added wrapper factory`, () => {
   });
 });
 
-test(`invokes and uses wrappers in LIFO order`, () => {
+test(`invokes and uses wrappers in LIFO order`, async () => {
   const defaultClient = Symbol();
-  const defaultClientFactoryMock = jest.fn().mockReturnValue(defaultClient);
+  const defaultClientFactoryMock = jest.fn().mockImplementation(async () => defaultClient);
   const clientProvider = new ScopedSavedObjectsClientProvider({
     defaultClientFactory: defaultClientFactoryMock
   });
@@ -98,7 +98,7 @@ test(`invokes and uses wrappers in LIFO order`, () => {
 
   clientProvider.addClientWrapperFactory(firstClientWrapperFactoryMock);
   clientProvider.addClientWrapperFactory(secondClientWrapperFactoryMock);
-  const actualClient = clientProvider.getClient(request);
+  const actualClient = await clientProvider.getClient(request);
 
   expect(actualClient).toBe(firstWrappedClient);
   expect(firstClientWrapperFactoryMock).toHaveBeenCalledWith({

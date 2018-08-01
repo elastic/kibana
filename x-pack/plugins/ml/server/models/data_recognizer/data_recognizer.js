@@ -202,7 +202,7 @@ export class DataRecognizer {
     end,
     request
   ) {
-    this.savedObjectsClient = request.getSavedObjectsClient();
+    this.savedObjectsClient = await request.getSavedObjectsClient();
     this.indexPatterns = await this.loadIndexPatterns();
 
     // load the config from disk

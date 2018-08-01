@@ -37,7 +37,7 @@ function executeJobFn(server) {
       return callWithRequest(fakeRequest, endpoint, clientParams, options);
     };
     const savedObjects = server.savedObjects;
-    const savedObjectsClient = savedObjects.getScopedSavedObjectsClient(fakeRequest);
+    const savedObjectsClient = await savedObjects.getScopedSavedObjectsClient(fakeRequest);
     const uiSettings = server.uiSettingsServiceFactory({
       savedObjectsClient
     });

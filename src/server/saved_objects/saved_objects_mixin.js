@@ -57,14 +57,14 @@ export function savedObjectsMixin(kbnServer, server) {
   server.decorate('server', 'savedObjects', createSavedObjectsService(server));
 
   const savedObjectsClientCache = new WeakMap();
-  server.decorate('request', 'getSavedObjectsClient', function () {
+  server.decorate('request', 'getSavedObjectsClient', async function () {
     const request = this;
 
     if (savedObjectsClientCache.has(request)) {
       return savedObjectsClientCache.get(request);
     }
 
-    const savedObjectsClient = server.savedObjects.getScopedSavedObjectsClient(request);
+    const savedObjectsClient = await server.savedObjects.getScopedSavedObjectsClient(request);
 
     savedObjectsClientCache.set(request, savedObjectsClient);
     return savedObjectsClient;

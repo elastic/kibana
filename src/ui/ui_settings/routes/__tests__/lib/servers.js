@@ -44,7 +44,7 @@ export async function startServers() {
   await kbnServer.server.plugins.elasticsearch.waitUntilReady();
 }
 
-export function getServices() {
+export async function getServices() {
   if (services) {
     return services;
   }
@@ -52,7 +52,7 @@ export function getServices() {
   const callCluster = es.getCallCluster();
 
   const savedObjects = kbnServer.server.savedObjects;
-  const savedObjectsClient = savedObjects.getScopedSavedObjectsClient();
+  const savedObjectsClient = await savedObjects.getScopedSavedObjectsClient();
 
   const uiSettings = kbnServer.server.uiSettingsServiceFactory({
     savedObjectsClient,

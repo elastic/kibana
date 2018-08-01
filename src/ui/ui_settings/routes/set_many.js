@@ -21,7 +21,7 @@ import Joi from 'joi';
 
 async function handleRequest(request) {
   const { changes } = request.payload;
-  const uiSettings = request.getUiSettingsService();
+  const uiSettings = await request.getUiSettingsService();
 
   await uiSettings.setMany(changes);
 

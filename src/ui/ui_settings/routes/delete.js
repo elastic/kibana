@@ -19,7 +19,7 @@
 
 async function handleRequest(request) {
   const { key } = request.params;
-  const uiSettings = request.getUiSettingsService();
+  const uiSettings = await request.getUiSettingsService();
 
   await uiSettings.remove(key);
   return {

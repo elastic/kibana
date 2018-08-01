@@ -115,7 +115,8 @@ export const createInstallRoute = () => ({
           return reply(err.message).code(500);
         }
 
-        const createResults = await request.getSavedObjectsClient().bulkCreate(sampleDataset.savedObjects, { overwrite: true });
+        const savedObjectsClient = await request.getSavedObjectsClient();
+        const createResults = await savedObjectsClient.bulkCreate(sampleDataset.savedObjects, { overwrite: true });
         const errors = createResults.saved_objects.filter(savedObjectCreateResult => {
           return savedObjectCreateResult.hasOwnProperty('error');
         });

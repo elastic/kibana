@@ -32,14 +32,15 @@ import { uiSettingsServiceFactory } from './ui_settings_service_factory';
  *                            the uiSettings.
  *  @return {UiSettingsService}
  */
-export function getUiSettingsServiceForRequest(server, request, options = {}) {
+export async function getUiSettingsServiceForRequest(server, request, options = {}) {
   const {
     getDefaults
   } = options;
 
+  const savedObjectsClient = await request.getSavedObjectsClient();
   const uiSettingsService = uiSettingsServiceFactory(server, {
     getDefaults,
-    savedObjectsClient: request.getSavedObjectsClient()
+    savedObjectsClient,
   });
 
   return uiSettingsService;

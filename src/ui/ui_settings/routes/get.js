@@ -18,7 +18,7 @@
  */
 
 async function handleRequest(request) {
-  const uiSettings = request.getUiSettingsService();
+  const uiSettings = await request.getUiSettingsService();
   return {
     settings: await uiSettings.getUserProvided()
   };

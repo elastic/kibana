@@ -22,7 +22,7 @@ import Joi from 'joi';
 async function handleRequest(request) {
   const { key } = request.params;
   const { value } = request.payload;
-  const uiSettings = request.getUiSettingsService();
+  const uiSettings = await request.getUiSettingsService();
 
   await uiSettings.set(key, value);
 

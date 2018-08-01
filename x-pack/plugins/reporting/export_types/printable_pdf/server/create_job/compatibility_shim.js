@@ -67,9 +67,10 @@ export function compatibilityShimFactory(server) {
         throw new Error('objectType and savedObjectId should not be provided in addition to the relativeUrls');
       }
 
+      const savedObjectsClient = await request.getSavedObjectsClient();
       const transformedJobParams = {
         objectType,
-        title: title || await getSavedObjectTitle(objectType, savedObjectId, request.getSavedObjectsClient()),
+        title: title || await getSavedObjectTitle(objectType, savedObjectId, savedObjectsClient),
         relativeUrls: objectType && savedObjectId ? [ getSavedObjectRelativeUrl(objectType, savedObjectId, queryString) ] : relativeUrls,
         browserTimezone,
         layout

@@ -44,7 +44,8 @@ export function registerRelationships(server) {
       const size = req.query.size || 10;
 
       try {
-        const response = await findRelationships(type, id, size, req.getSavedObjectsClient());
+        const savedObjectsClient = await req.getSavedObjectsClient();
+        const response = await findRelationships(type, id, size, savedObjectsClient);
         reply(response);
       } catch (err) {
         if (isNotFoundError(err)) {

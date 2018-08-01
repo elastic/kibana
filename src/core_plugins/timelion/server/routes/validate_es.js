@@ -24,7 +24,8 @@ export default function (server) {
     method: 'GET',
     path: '/api/timelion/validate/es',
     handler: async function (request, reply) {
-      const uiSettings = await request.getUiSettingsService().getAll();
+      const uiSettingsService = await request.getUiSettingsService();
+      const uiSettings = await uiSettingsService.getAll();
 
       const { callWithRequest } = server.plugins.elasticsearch.getCluster('data');
 

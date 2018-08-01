@@ -79,7 +79,8 @@ export default new Datasource('es', {
       fit: 'nearest'
     });
 
-    const findResp = await tlConfig.request.getSavedObjectsClient().find({
+    const savedObjectsClient = await tlConfig.request.getSavedObjectsClient();
+    const findResp = await savedObjectsClient.find({
       type: 'index-pattern',
       fields: ['title', 'fields'],
       search: `"${config.index}"`,

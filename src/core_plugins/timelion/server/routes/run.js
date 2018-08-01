@@ -36,7 +36,8 @@ export default function (server) {
     path: '/api/timelion/run',
     handler: async (request, reply) => {
       try {
-        const uiSettings = await request.getUiSettingsService().getAll();
+        const uiSettingsService = await request.getUiSettingsService();
+        const uiSettings = await uiSettingsService.getAll();
 
         const tlConfig = require('../handlers/lib/tl_config.js')({
           server,

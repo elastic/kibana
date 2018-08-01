@@ -29,7 +29,7 @@ import {
 export function docMissingSuite() {
   // ensure the kibana index has no documents
   beforeEach(async () => {
-    const { kbnServer, callCluster } = getServices();
+    const { kbnServer, callCluster } = await getServices();
 
     // write a setting to ensure kibana index is created
     await kbnServer.inject({
@@ -49,7 +49,7 @@ export function docMissingSuite() {
 
   describe('get route', () => {
     it('creates doc, returns a 200 with no settings', async () => {
-      const { kbnServer } = getServices();
+      const { kbnServer } = await getServices();
 
       const { statusCode, result } = await kbnServer.inject({
         method: 'GET',
@@ -65,7 +65,7 @@ export function docMissingSuite() {
 
   describe('set route', () => {
     it('creates doc, returns a 200 with value set', async () => {
-      const { kbnServer } = getServices();
+      const { kbnServer } = await getServices();
 
       const defaultIndex = chance.word();
       const { statusCode, result } = await kbnServer.inject({
@@ -90,7 +90,7 @@ export function docMissingSuite() {
 
   describe('setMany route', () => {
     it('creates doc, returns 200 with updated values', async () => {
-      const { kbnServer } = getServices();
+      const { kbnServer } = await getServices();
 
       const defaultIndex = chance.word();
       const { statusCode, result } = await kbnServer.inject({
@@ -117,7 +117,7 @@ export function docMissingSuite() {
 
   describe('delete route', () => {
     it('creates doc, returns a 200 with just buildNum', async () => {
-      const { kbnServer } = getServices();
+      const { kbnServer } = await getServices();
 
       const { statusCode, result } = await kbnServer.inject({
         method: 'DELETE',

@@ -28,7 +28,7 @@ import {
 
 export function indexMissingSuite() {
   async function setup() {
-    const { callCluster, kbnServer } = getServices();
+    const { callCluster, kbnServer } = await getServices();
     const indexName = kbnServer.config.get('kibana.index');
 
     // ensure the kibana index does not exist

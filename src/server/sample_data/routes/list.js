@@ -63,7 +63,8 @@ export const createListRoute = () => ({
         }
 
         try {
-          await request.getSavedObjectsClient().get('dashboard', sampleDataset.overviewDashboard);
+          const savedObjectsClient = await request.getSavedObjectsClient();
+          await savedObjectsClient.get('dashboard', sampleDataset.overviewDashboard);
         } catch (err) {
           // savedObjectClient.get() throws an boom error when object is not found.
           if (_.get(err, 'output.statusCode') === 404) {

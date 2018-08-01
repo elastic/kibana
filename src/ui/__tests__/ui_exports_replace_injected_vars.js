@@ -66,7 +66,7 @@ describe('UiExports', function () {
       // like this in the new platform
       kbnServer.server._requestor._decorations.getUiSettingsService = {
         apply: undefined,
-        method() {
+        async method() {
           return {
             getDefaults: noop,
             getUserProvided: noop
