@@ -22,6 +22,10 @@ import {
 
 export class LayerPanel extends React.Component {
 
+  constructor() {
+    super();
+  }
+
   render() {
 
     const { cancelLayerPanel, saveLayerEdits, selectedLayer } = this.props;
@@ -59,7 +63,7 @@ export class LayerPanel extends React.Component {
             <EuiFlexItem grow={false}>
               <EuiButtonEmpty
                 color="danger"
-                onClick={() => this.props.removeLayer(selectedLayer)}
+                onClick={() => {console.warn("`Remove Layer` not implemented");}}
                 flush="right"
               >
                 Remove layer
