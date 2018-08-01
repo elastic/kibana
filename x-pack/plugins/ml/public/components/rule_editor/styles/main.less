@@ -1,0 +1,68 @@
+.ml-rule-editor-flyout {
+  font-size: 14px;
+
+  .select-rule-action .rule-detector-description-list {
+    padding-left: 16px;
+  }
+
+  .select-rule-action-panel {
+    padding-top:10px;
+
+    .euiDescriptionList {
+      .euiDescriptionList__title {
+        flex-basis: 15%;
+      }
+
+      .euiDescriptionList__description {
+        flex-basis: 85%;
+      }
+
+      .euiDescriptionList__description:nth-child(2) {
+        color: #1a1a1a;
+        font-weight: 600;
+      }
+    }
+
+    .euiDescriptionList.euiDescriptionList--column > * {
+      margin-top: 5px;
+    }
+  }
+
+  .scope-enable-checkbox {
+    .euiCheckbox__input[disabled] ~ .euiCheckbox__label {
+      color: inherit;
+    }
+  }
+
+  .scope-field-checkbox {
+    margin-right: 2px;
+
+    .euiCheckbox {
+      margin-top: 6px;
+    }
+  }
+
+  .scope-field-button {
+    pointer-events: none;
+    border-bottom: none;
+  }
+
+  .scope-edit-filter-link {
+    line-height: 32px;
+    font-size: 12px;
+  }
+
+  .euiExpressionButton.disabled {
+    pointer-events: none;
+
+    .euiExpressionButton__value,
+    .euiExpressionButton__description {
+      color: #c5c5c5;
+    }
+  }
+
+  .text-highlight {
+    font-weight: bold;
+  }
+
+}

@@ -6,36 +6,51 @@
 
 import expect from 'expect.js';
 import multiclusterFixture from './fixtures/multicluster';
+import basicclusterFixture from './fixtures/basiccluster';
 
 export default function ({ getService }) {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
 
   describe('/api/telemetry/v1/clusters/_stats', () => {
-    describe('with trial license clusters', () => {
+    it('should load multiple trial-license clusters', async () => {
       const archive = 'monitoring/multicluster';
       const timeRange = {
         min: '2017-08-15T21:00:00Z',
         max: '2017-08-16T00:00:00Z'
       };
 
-      before('load clusters archive', () => {
-        return esArchiver.load(archive);
-      });
+      await esArchiver.load(archive);
 
-      after('unload clusters archive', () => {
-        return esArchiver.unload(archive);
-      });
+      const { body } = await supertest
+        .post('/api/telemetry/v1/clusters/_stats')
+        .set('kbn-xsrf', 'xxx')
+        .send({ timeRange })
+        .expect(200);
+      expect(body).to.eql(multiclusterFixture);
 
-      it('should load multiple clusters', async () => {
+      await esArchiver.unload(archive);
+    });
+
+    describe('with basic cluster and reporting and canvas usage info', () => {
+      it('should load non-expiring basic cluster', async () => {
+        const archive = 'monitoring/basic_6.3.x';
+        const timeRange = {
+          min: '2018-07-23T22:07:00Z',
+          max: '2018-07-23T22:13:00Z'
+        };
+
+        await  esArchiver.load(archive);
+
         const { body } = await supertest
           .post('/api/telemetry/v1/clusters/_stats')
           .set('kbn-xsrf', 'xxx')
           .send({ timeRange })
           .expect(200);
-        expect(body).to.eql(multiclusterFixture);
+        expect(body).to.eql(basicclusterFixture);
+
+        await esArchiver.unload(archive);
       });
     });
   });
 }
-

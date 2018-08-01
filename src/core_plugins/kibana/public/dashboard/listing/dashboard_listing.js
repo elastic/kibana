@@ -454,7 +454,7 @@ export class DashboardListing extends React.Component {
     }
 
     return (
-      <EuiPageContent verticalPosition="center" horizontalPosition="center" className="dashboardLandingPage__content">
+      <EuiPageContent horizontalPosition="center">
         {this.renderListingOrEmptyState()}
       </EuiPageContent>
     );
@@ -463,7 +463,7 @@ export class DashboardListing extends React.Component {
   render() {
     return (
       <EuiPage data-test-subj="dashboardLandingPage" className="dashboardLandingPage">
-        <EuiPageBody>
+        <EuiPageBody restrictWidth>
           {this.renderPageContent()}
         </EuiPageBody>
       </EuiPage>

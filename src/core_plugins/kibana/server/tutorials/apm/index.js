@@ -24,8 +24,8 @@ import { getSavedObjects } from './saved_objects/get_saved_objects';
 
 const apmIntro = 'Collect in-depth performance metrics and errors from inside your applications.';
 
-const ENABLED_KEY = 'xpack.apm.ui.enabled';
 function isEnabled(config) {
+  const ENABLED_KEY = 'xpack.apm.ui.enabled';
   if (config.has(ENABLED_KEY)) {
     return config.get(ENABLED_KEY);
   }
@@ -33,19 +33,9 @@ function isEnabled(config) {
   return false;
 }
 
-const TITLE_KEY = 'xpack.apm.indexPattern';
-const DEFAULT_TITLE = 'apm*';
-function getIndexPatternTitle(config) {
-  if (config.has(TITLE_KEY)) {
-    return config.get(TITLE_KEY);
-  }
-
-  return DEFAULT_TITLE;
-}
-
 export function apmSpecProvider(server) {
   const config = server.config();
-  const apmIndexPattern = getIndexPatternTitle(config);
+  const apmIndexPattern = config.get('apm_oss.indexPattern');
 
   const artifacts = {
     dashboards: [
