@@ -61,7 +61,7 @@ export default function loggingConfiguration(config) {
         config: {
           json: config.get('logging.json'),
           dest: config.get('logging.dest'),
-          useUTC: config.get('logging.useUTC'),
+          timezone: config.get('logging.timezone'),
 
           // I'm adding the default here because if you add another filter
           // using the commandline it will remove authorization. I want users
