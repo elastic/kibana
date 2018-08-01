@@ -10,6 +10,9 @@ import { wrapEsError, wrapUnknownError } from '../../../lib/error_wrappers';
 import { licensePreRoutingFactory } from'../../../lib/license_pre_routing_factory';
 
 function formatHits(hits) {
+  if (hits.status === 404) {
+    return [];
+  }
   return Object.keys(hits).reduce((accum, lifecycleName) => {
     const hit = hits[lifecycleName];
     accum.push({
@@ -24,7 +27,7 @@ async function fetchPolicies(callWithRequest) {
   const params = {
     method: 'GET',
     path: '/_xpack/index_lifecycle',
-    // we allow 404 incase the user shutdown security in-between the check and now
+    // we allow 404 since they may have no policies
     ignore: [ 404 ]
   };
 
