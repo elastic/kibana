@@ -10,7 +10,7 @@ import moment from 'moment';
 import { promisify, delay } from 'bluebird';
 import { transformFn } from './transform_fn';
 import { ignoreSSLErrorsBehavior } from './ignore_ssl_errors';
-import { screenshotStitcher, CapturePngSizeError } from './screenshot_stitcher';
+import { screenshotStitcher } from './screenshot_stitcher';
 
 export class HeadlessChromiumDriver {
   constructor(client, { maxScreenshotDimension, logger }) {
@@ -88,30 +88,22 @@ export class HeadlessChromiumDriver {
     // https://github.com/elastic/kibana/issues/19563. The reason was never found - it only appeared on ci and
     // debug logic right after Page.captureScreenshot to ensure the correct size made the bug disappear.
     let retryCount = 0;
-    const MAX_RETRIES = 3;
-    while (true) {
-      try {
-        return await screenshotStitcher(outputClip, this._zoom, this._maxScreenshotDimension, async screenshotClip => {
-          const { data } = await Page.captureScreenshot({
-            clip: {
-              ...screenshotClip,
-              scale: 1
-            }
-          });
-          this._logger.debug(`Captured screenshot clip ${JSON.stringify(screenshotClip)}`);
-          return data;
-        }, this._logger);
-      } catch (error) {
-        const isCapturePngSizeError = error instanceof CapturePngSizeError;
-        if (!isCapturePngSizeError || retryCount === MAX_RETRIES) {
-          throw error;
-        } else {
-          this._logger.error(error.message);
-          this._logger.error('Trying again...');
-          retryCount++;
-        }
-      }
+    const MAX_RETRIES = 20;
+    let returnValue;
+    while (retryCount < MAX_RETRIES) {
+      returnValue = await screenshotStitcher(outputClip, this._zoom, this._maxScreenshotDimension, async screenshotClip => {
+        const { data } = await Page.captureScreenshot({
+          clip: {
+            ...screenshotClip,
+            scale: 1
+          }
+        });
+        this._logger.debug(`Captured screenshot clip ${JSON.stringify(screenshotClip)}`);
+        return data;
+      }, this._logger);
+      retryCount++;
     }
+    return returnValue;
   }
 
   async _writeData(writePath, base64EncodedData) {
