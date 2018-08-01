@@ -89,6 +89,7 @@ export class ObjectsTable extends Component {
       isShowingImportFlyout: false,
       isSearching: false,
       totalItemCount: 0,
+      filteredItemCount: 0,
       isShowingRelationships: false,
       relationshipId: undefined,
       relationshipType: undefined,
@@ -113,14 +114,11 @@ export class ObjectsTable extends Component {
   }
 
   fetchCounts = async () => {
-    const { queryText, visibleTypes } = parseQuery(this.state.activeQuery);
-    const type = INCLUDED_TYPES.filter(
-      type => !visibleTypes || visibleTypes.includes(type)
-    );
+    const { queryText } = parseQuery(this.state.activeQuery);
 
     const savedObjectCounts = await getSavedObjectCounts(
       this.props.$http,
-      type,
+      INCLUDED_TYPES,
       queryText
     );
 
@@ -141,7 +139,8 @@ export class ObjectsTable extends Component {
     if (!activeQuery) {
       return {
         pageOfItems: [],
-        totalItemCount: 0,
+        // Deliberately don't reset totalItemCount because 0 wouldn't be accurate.
+        filteredItemCount: 0,
       };
     }
 
@@ -151,6 +150,7 @@ export class ObjectsTable extends Component {
 
     let savedObjects = [];
     let totalItemCount = 0;
+    let filteredItemCount = 0;
 
     const type = INCLUDED_TYPES.filter(
       type => !visibleTypes || visibleTypes.includes(type)
@@ -159,7 +159,13 @@ export class ObjectsTable extends Component {
     // TODO: is there a good way to stop existing calls if the input changes?
     await ensureMinimumTime(
       (async () => {
-        const data = await savedObjectsClient.find({
+        const allSavedObjects = await savedObjectsClient.find({
+          type: INCLUDED_TYPES,
+        });
+
+        totalItemCount = allSavedObjects.total;
+
+        const filteredSavedObjects = await savedObjectsClient.find({
           search: queryText ? `${queryText}*` : undefined,
           perPage,
           page: page + 1,
@@ -169,18 +175,23 @@ export class ObjectsTable extends Component {
           type,
         });
 
-        savedObjects = data.savedObjects.map(savedObject => ({
+        savedObjects = filteredSavedObjects.savedObjects.map(savedObject => ({
           title: savedObject.attributes.title,
           type: savedObject.type,
           id: savedObject.id,
           icon: getSavedObjectIcon(savedObject.type),
         }));
 
-        totalItemCount = data.total;
+        filteredItemCount = filteredSavedObjects.total;
       })()
     );
 
-    this.setState({ savedObjects, totalItemCount, isSearching: false });
+    this.setState({
+      savedObjects,
+      totalItemCount,
+      filteredItemCount,
+      isSearching: false,
+    });
   };
 
   refreshData = async () => {
@@ -452,6 +463,7 @@ export class ObjectsTable extends Component {
       perPage,
       savedObjects,
       totalItemCount,
+      filteredItemCount,
       isSearching,
       savedObjectCounts,
     } = this.state;
@@ -497,7 +509,7 @@ export class ObjectsTable extends Component {
               pageIndex={page}
               pageSize={perPage}
               items={savedObjects}
-              totalItemCount={totalItemCount}
+              totalItemCount={filteredItemCount}
               isSearching={isSearching}
               onShowRelationships={this.onShowRelationships}
             />
