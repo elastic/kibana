@@ -22,4 +22,4 @@ export { Notifier } from './notifier';
 export { fatalError, addFatalErrorCallback } from './fatal_error';
 export { GlobalToastList, toastNotifications } from './toasts';
 export { GlobalBannerList, banners } from './banners';
-export { APP_REDIRECT_MESSAGE_PARAM, showAppRedirectNotification } from './app_redirect';
+export { addAppRedirectMessageToUrl, showAppRedirectNotification } from './app_redirect';

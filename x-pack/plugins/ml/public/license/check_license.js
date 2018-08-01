@@ -7,8 +7,7 @@
 
 import React from 'react';
 import { XPackInfoProvider } from 'plugins/xpack_main/services/xpack_info';
-import { banners, APP_REDIRECT_MESSAGE_PARAM } from 'ui/notify';
-import _ from 'lodash';
+import { banners, addAppRedirectMessageToUrl } from 'ui/notify';
 
 import chrome from 'ui/chrome';
 import { EuiCallOut } from '@elastic/eui';
@@ -23,7 +22,8 @@ export function checkLicense(Private, kbnBaseUrl) {
   const licenseAllowsToShowThisPage = features.isAvailable;
   if (!licenseAllowsToShowThisPage) {
     const { message } = features;
-    window.location.href = `${chrome.addBasePath(kbnBaseUrl)}#?${APP_REDIRECT_MESSAGE_PARAM}=${message}`;
+    const newUrl = addAppRedirectMessageToUrl(`${chrome.addBasePath(kbnBaseUrl)}`, message);
+    window.location.href = newUrl;
     return Promise.halt();
   }
 
