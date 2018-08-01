@@ -72,6 +72,8 @@ const legacyMetadata = {
   }
 };
 
+// render the core system in a child of the body as the default children of the body
+// in the browser tests are needed for mocha and other test components to work
 const rootDomElement = document.createElement('div');
 document.body.appendChild(rootDomElement)
 
