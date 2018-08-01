@@ -132,6 +132,8 @@ export class DocumentMigrator implements VersionedTransformer {
    * @memberof DocumentMigrator
    */
   constructor(opts: Opts) {
+    validateMigrationDefinition(opts.migrations);
+
     this.migrations = buildActiveMigrations(opts.migrations);
     this.transformDoc = buildDocumentTransform({
       kibanaVersion: opts.kibanaVersion,
@@ -161,6 +163,47 @@ export class DocumentMigrator implements VersionedTransformer {
   public migrate = (doc: SavedObjectDoc): SavedObjectDoc => {
     return this.transformDoc(doc);
   };
+}
+
+/**
+ * Basic validation that the migraiton definition matches our expectations. We can't
+ * rely on TypeScript here, as the caller may be JavaScript / ClojureScript / any compile-to-js
+ * language. So, this is just to provide a little developer-friendly error messaging. Joi was
+ * giving weird errors, so we're just doing manual validation.
+ */
+function validateMigrationDefinition(migrations: MigrationDefinition) {
+  function assertObject(obj: any, prefix: string) {
+    if (!obj || typeof obj !== 'object') {
+      throw new Error(`${prefix} Got ${obj}.`);
+    }
+  }
+
+  function assertValidSemver(semver: string, type: string) {
+    if (!/\d+.\d+\.\d+/.test(semver)) {
+      throw new Error(
+        `Invalid migration for type ${type}. Expected all properties to be semvers, but got ${semver}.`
+      );
+    }
+  }
+
+  function assertValidTransform(fn: any, semver: string, type: string) {
+    if (typeof fn !== 'function') {
+      throw new Error(`Invalid migration ${type}.${semver}: expected a function, but got ${fn}.`);
+    }
+  }
+
+  assertObject(migrations, 'Migration definition should be an object.');
+
+  Object.entries(migrations).forEach(([type, semvers]: any) => {
+    assertObject(
+      semvers,
+      `Migration for type ${type} should be an object like { '2.0.0': (doc) => doc }.`
+    );
+    Object.entries(semvers).forEach(([semver, fn]) => {
+      assertValidSemver(semver, type);
+      assertValidTransform(fn, semver, type);
+    });
+  });
 }
 
 /**
@@ -260,7 +303,15 @@ function markAsUpToDate(doc: SavedObjectDoc, migrations: ActiveMigrations) {
 function wrapWithTry(version: string, prop: string, transform: TransformFn) {
   return function tryTransformDoc(doc: SavedObjectDoc) {
     try {
-      return transform(doc);
+      const result = transform(doc);
+
+      // A basic sanity check to help migration authors detect basic errors
+      // (e.g. forgetting to return the transformed doc)
+      if (!result || !result.type) {
+        throw new Error(`Invalid saved object returned from migration ${prop}:${version}.`);
+      }
+
+      return result;
     } catch (error) {
       error.detail = {
         failedDoc: `${doc.type}:${doc.id}`,

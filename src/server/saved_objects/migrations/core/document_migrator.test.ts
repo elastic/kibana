@@ -18,10 +18,22 @@
  */
 
 import _ from 'lodash';
-import { DocumentMigrator } from './document_migrator';
-import { SavedObjectDoc } from './saved_object';
+import { DocumentMigrator, SavedObjectDoc } from './document_migrator';
 
 describe('DocumentMigrator', () => {
+  it('validates the migration definition', () => {
+    const invalidDefinition: any = {
+      kibanaVersion: '3.2.3',
+      migrations: {
+        foo: _.noop,
+      },
+      validateDoc: _.noop,
+    };
+    expect(() => new DocumentMigrator(invalidDefinition)).toThrow(
+      /Migration for type foo should be an object/
+    );
+  });
+
   it('migrates type and attributes', () => {
     const kibanaVersion = '8.9.1';
     const migrator = new DocumentMigrator({

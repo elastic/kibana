@@ -45,7 +45,8 @@ describe('coordinateMigration', () => {
 
     sinon.assert.calledOnce(runMigration);
     sinon.assert.calledTwice(isMigrated);
-    expect(log.warning.args.filter((msg: any) => /deleting \.foo/.test(msg)).length).toEqual(1);
+    const warnings = log.warning.args.filter((msg: any) => /deleting index \.foo/.test(msg));
+    expect(warnings.length).toEqual(1);
   });
 
   test('does not poll if the runMigration succeeds', async () => {
