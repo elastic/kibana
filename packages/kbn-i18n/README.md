@@ -77,22 +77,15 @@ defined via `i18n.locale` option in `config/kibana.yml` then it will be used as 
 locale, otherwise i18n engine will fall back to `en`. The `en` locale will also be used
 if translation can't be found for the base non-English locale.
 
+One of our technical requirements is to have default messages in the templates
+themselves, and those messages will always be in English, so we don't have to keep
+`en.json` file in repository. We can generate that file from `defaultMessage`s
+defined inline.
+
 __Note:__ locale defined in `i18n.locale` and the one used for translation files should
 match exactly, e.g. `i18n.locale: zn` and `.../translations/zh_CN.json` won't match and
 default English translations will be used, but `i18n.locale: zh_CN` and`.../translations/zh_CN.json`
 or `i18n.locale: zn` and `.../translations/zn.json` will work as expected.
-
-The following are the abstract steps i18n engine goes through to resolve the locale value:
-
-- If there's data for the specified locale (localization file is registered in
-  `uiExports.translations`), then that locale will be resolved.
-- If `i18n.locale` option is not defined in `config/kibana.yml` or option has not exact match
-with one of registered locales or previous steps didn't resolve the locale, the `en` locale will be used.
-
-One of our technical requirements is to have default message in the templates
-themselves, and that message will always be english, so we don't need interact
-with `en.json` file directly. We can generate that file from `defaultMessage`s
-defined inline.
 
 ## I18n engine
 
