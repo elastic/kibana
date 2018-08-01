@@ -181,6 +181,11 @@ export class ElasticIndex {
       return false;
     }
 
+    // If no migrations are actually defined, we're up to date!
+    if (Object.keys(migrationVersion).length <= 0) {
+      return true;
+    }
+
     const { count } = await callCluster('count', {
       body: {
         query: {

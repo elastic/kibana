@@ -20,8 +20,8 @@
 import _ from 'lodash';
 import sinon from 'sinon';
 import { CallCluster } from './call_cluster';
+import { SavedObjectDoc } from './document_migrator';
 import { IndexMigrator } from './index_migrator';
-import { SavedObjectDoc } from './saved_object';
 
 describe('IndexMigrator', () => {
   test('patches the index mappings if the index is already migrated', async () => {
@@ -215,6 +215,10 @@ describe('IndexMigrator', () => {
   test('removes previous indices from the alias', async () => {
     const opts = defaultOpts();
     const callCluster = clusterStub(opts);
+
+    opts.documentMigrator.migrationVersion = {
+      dashboard: '2.4.5',
+    };
 
     withIndex(callCluster, { numOutOfDate: 1 });
 

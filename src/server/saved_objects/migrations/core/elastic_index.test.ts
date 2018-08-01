@@ -184,4 +184,173 @@ describe('ElasticIndex', () => {
       expect(await read()).toEqual(batch);
     });
   });
+
+  describe('hasMigrations', () => {
+    // A helper to reduce boilerplate in the hasMigration tests that follow.
+    async function testHasMigrations({ index = '.myindex', mappings, count, migrations }: any) {
+      const callCluster = sinon.spy(async (path: string) => {
+        if (path === 'indices.get') {
+          return {
+            [index]: { mappings },
+          };
+        }
+        if (path === 'count') {
+          return { count };
+        }
+        throw new Error(`Unknown command ${path}.`);
+      });
+      const indexHelper = new ElasticIndex({
+        callCluster,
+        index,
+      });
+      const hasMigrations = await indexHelper.hasMigrations(migrations);
+      return { hasMigrations, callCluster };
+    }
+
+    test('is false if the index mappings do not contain migrationVersion', async () => {
+      const { hasMigrations, callCluster } = await testHasMigrations({
+        index: '.myalias',
+        mappings: {
+          doc: {
+            properties: {
+              dashboard: { type: 'text' },
+            },
+          },
+        },
+        count: 0,
+        migrations: { dashy: '2.3.4' },
+      });
+
+      expect(hasMigrations).toBeFalsy();
+      expect(callCluster.args).toEqual([['indices.get', { ignore: [404], index: '.myalias' }]]);
+    });
+
+    test('is true if there are no migrations defined', async () => {
+      const { hasMigrations, callCluster } = await testHasMigrations({
+        index: '.myalias',
+        mappings: {
+          doc: {
+            properties: {
+              migrationVersion: {
+                dynamic: 'true',
+                type: 'object',
+              },
+              dashboard: { type: 'text' },
+            },
+          },
+        },
+        count: 2,
+        migrations: {},
+      });
+
+      expect(hasMigrations).toBeTruthy();
+      sinon.assert.calledOnce(callCluster);
+      expect(callCluster.args[0][0]).toEqual('indices.get');
+    });
+
+    test('is true if there are no documents out of date', async () => {
+      const { hasMigrations, callCluster } = await testHasMigrations({
+        index: '.myalias',
+        mappings: {
+          doc: {
+            properties: {
+              migrationVersion: {
+                dynamic: 'true',
+                type: 'object',
+              },
+              dashboard: { type: 'text' },
+            },
+          },
+        },
+        count: 0,
+        migrations: { dashy: '23.2.5' },
+      });
+
+      expect(hasMigrations).toBeTruthy();
+      sinon.assert.calledTwice(callCluster);
+      expect(callCluster.args[0][0]).toEqual('indices.get');
+      expect(callCluster.args[1][0]).toEqual('count');
+    });
+
+    test('is false if there are documents out of date', async () => {
+      const { hasMigrations, callCluster } = await testHasMigrations({
+        index: '.myalias',
+        mappings: {
+          doc: {
+            properties: {
+              migrationVersion: {
+                dynamic: 'true',
+                type: 'object',
+              },
+              dashboard: { type: 'text' },
+            },
+          },
+        },
+        count: 3,
+        migrations: { dashy: '23.2.5' },
+      });
+
+      expect(hasMigrations).toBeFalsy();
+      sinon.assert.calledTwice(callCluster);
+      expect(callCluster.args[0][0]).toEqual('indices.get');
+      expect(callCluster.args[1][0]).toEqual('count');
+    });
+
+    test('counts docs that are out of date', async () => {
+      const { callCluster } = await testHasMigrations({
+        index: '.myalias',
+        mappings: {
+          doc: {
+            properties: {
+              migrationVersion: {
+                dynamic: 'true',
+                type: 'object',
+              },
+              dashboard: { type: 'text' },
+            },
+          },
+        },
+        count: 0,
+        migrations: {
+          dashy: '23.2.5',
+          bashy: '99.9.3',
+          flashy: '3.4.5',
+        },
+      });
+
+      function shouldClause(type: string, version: string) {
+        return {
+          bool: {
+            must: [
+              { exists: { field: type } },
+              {
+                bool: {
+                  must_not: { term: { [`migrationVersion.${type}`]: version } },
+                },
+              },
+            ],
+          },
+        };
+      }
+
+      expect(callCluster.args[1]).toEqual([
+        'count',
+        {
+          body: {
+            query: {
+              bool: {
+                should: [
+                  shouldClause('dashy', '23.2.5'),
+                  shouldClause('bashy', '99.9.3'),
+                  shouldClause('flashy', '3.4.5'),
+                ],
+              },
+            },
+          },
+          index: '.myalias',
+          type: 'doc',
+        },
+      ]);
+    });
+  });
 });
