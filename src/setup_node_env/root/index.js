@@ -17,6 +17,10 @@
  * under the License.
  */
 
-require('./root');
-require('./node_version_validator');
-require('./babel_register');
+var force = require('./force')(process.argv);
+var isRoot = require('./is_root')(process.getuid());
+
+if(isRoot && !force) {
+  console.error('Kibana should not be run as root.  Use --force-root to continue.');
+  process.exit(1);
+}
