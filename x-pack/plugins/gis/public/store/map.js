@@ -5,7 +5,7 @@
  */
 
 import {
-  SET_SELECTED_LAYER, UPDATE_LAYER_ORDER, ADD_SOURCE,
+  SET_SELECTED_LAYER, UPDATE_LAYER_ORDER, ADD_EMS_FILE_SOURCE_LIST,
   ADD_LAYER, REMOVE_LAYER, PROMOTE_TEMPORARY_LAYERS,
   CLEAR_TEMPORARY_LAYERS, LAYER_LOADING, TOGGLE_LAYER_VISIBLE
 } from "../actions/map_actions";
@@ -23,8 +23,8 @@ const INITIAL_STATE = {
 
 export function map(state = INITIAL_STATE, action) {
   switch (action.type) {
-    case ADD_SOURCE:
-      return { ...state, sources: [...state.sources, action.source ] };
+    case ADD_EMS_FILE_SOURCE_LIST:
+      return { ...state, sources: [...state.sources, action.emsFileSourceList ] };
     case SET_SELECTED_LAYER:
       return { ...state, selectedLayer: state.layerList.find(
         layer => layer.id === action.selectedLayer) };
@@ -33,7 +33,18 @@ export function map(state = INITIAL_STATE, action) {
         layerNumber => state.layerList[layerNumber]
       ) };
     case ADD_LAYER:
-      return { ...state, ...{ layerList: [ ...state.layerList, action.layer ] } };
+      let newLayerlist;
+      if (
+        action.position === -1 ||
+        action.position > state.layerList.length
+      ) {
+        newLayerlist = [ ...state.layerList, action.layer ];
+      } else {
+        state.layerList.splice(action.position, 0, action.layer);
+        newLayerlist = state.layerList.slice();
+      }
+      return { ...state, ...{ layerList: newLayerlist } };
+
     case REMOVE_LAYER:
       return { ...state, ...{ layerList: [ ...state.layerList.filter(
         ({ name }) => name !== action.layerName) ] } };

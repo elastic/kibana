@@ -5,6 +5,8 @@
  */
 
 import React, { Fragment } from 'react';
+import { XYZTMSSource } from '../../shared/layers/sources/xyz_tms_source';
+import { EMSFileSource } from '../../shared/layers/sources/ems_file_source';
 import {
   EuiAccordion,
   EuiFieldText,
@@ -24,9 +26,6 @@ import {
   EuiTextColor,
 } from '@elastic/eui';
 
-
-let idCounter = 0;
-
 export class FlyOut extends React.Component {
 
   constructor() {
@@ -36,11 +35,11 @@ export class FlyOut extends React.Component {
     };
   }
 
-
-  _renderFlexibleSelect = (options, selectAction) => {
+  _renderEMSFileSelection = (options, previewEmsFileLayer) => {
     const onChange = ({ target }) => {
-      const [source, id] = target.value.split(':');
-      selectAction(source, +id);
+      const selectedId = target.options[target.selectedIndex].text;
+      const emsFileSource = EMSFileSource.createDescriptor(selectedId);
+      previewEmsFileLayer(emsFileSource);
     };
 
     return (
@@ -84,12 +83,13 @@ export class FlyOut extends React.Component {
     if (!this.state.tmsInput) {
       return;
     }
-    this.props.previewXYZLayer(this.state.tmsInput, this.state.tmsInput + (idCounter++).toString(), {});
+
+    const xyzTmsSource = XYZTMSSource.createDescriptor(this.state.tmsInput);
+    this.props.previewXYZLayer(xyzTmsSource);
   }
 
   _renderFlyout() {
 
-    const { emsVectorOptions, selectAction, closeFlyout } = this.props;
     return (
       <EuiFlyout onClose={() => console.warn('EuiFlyout#onClose not implemented.')} style={{ maxWidth: 768 }}>
         <EuiFlyoutHeader>
@@ -115,7 +115,7 @@ export class FlyOut extends React.Component {
               paddingSize="l"
             >
               <EuiText>
-                {this._renderFlexibleSelect(emsVectorOptions, selectAction)}
+                {this._renderEMSFileSelection(this.props.emsVectorOptions, this.props.previewEMSFileLayer)}
               </EuiText>
             </EuiAccordion>
           </div>
@@ -148,7 +148,7 @@ export class FlyOut extends React.Component {
           <EuiFlexGroup justifyContent="spaceBetween" responsive={false}>
             <EuiFlexItem grow={false}>
               <EuiButtonEmpty
-                onClick={closeFlyout}
+                onClick={this.props.closeFlyout}
                 flush="left"
               >
                 Cancel

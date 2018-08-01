@@ -13,7 +13,7 @@ export const getSelectedLayer = ({ map }) => map && map.selectedLayer;
 
 export const getLayerList = ({ map }) => map && map.layerList;
 
-export const getLayerOptions = ({ map }) => map && map.sources;
+export const getSources = ({ map }) => map && map.sources;
 
 export const getLayerLoading = ({ map }) => map && map.layerLoading;
 
@@ -32,20 +32,10 @@ export function getLayerById(state, id) {
   )(state);
 }
 
-const getLayerOptionsByOrigin = createSelector(
-  getLayerOptions,
+export const getLayerOptionsByOrigin = createSelector(
+  getSources,
   layerOptions => {
     return _.isEmpty(layerOptions) ? {}
-      : _.groupBy(layerOptions, ({ dataOrigin }) => dataOrigin);
-  }
-);
-
-export const getLayerOptionsByOriginAndType = createSelector(
-  getLayerOptionsByOrigin,
-  layerOptions => {
-    return _.reduce(layerOptions, (accu, services, origin) => {
-      accu[origin] = _.groupBy(services, ({ type }) => type);
-      return accu;
-    }, {});
+      : _.groupBy(layerOptions, ({ type }) => type);
   }
 );

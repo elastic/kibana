@@ -7,23 +7,23 @@
 import { connect } from 'react-redux';
 import { FlyOut } from './view';
 import { getFlyoutDisplay, updateFlyout, FLYOUT_STATE } from '../../store/ui';
-import { getLayerOptionsByOriginAndType, getLayerLoading, getTemporaryLayers }
+import { getLayerOptionsByOrigin, getLayerLoading, getTemporaryLayers }
   from "../../selectors/map_selectors";
-import { addVectorLayer, removeLayer, clearTemporaryLayers, promoteTemporaryLayers, addXYZLayer }
+import { addVectorLayerFromEMSFileSource, removeLayer, clearTemporaryLayers, promoteTemporaryLayers, addXYZTMSLayerFromSource }
   from "../../actions/map_actions";
 import _ from 'lodash';
+import { EMSFileSource } from '../../shared/layers/sources/ems_file_source';
 
 function mapStateToProps(state = {}) {
 
-  const layerOptions = getLayerOptionsByOriginAndType(state);
-  const emsSourceName = _.get(layerOptions, 'EMS.VECTOR[0].name');
-  const emsVectorOptions = _.get(layerOptions, 'EMS.VECTOR[0].service');
+  const layerOptions = getLayerOptionsByOrigin(state);
+
+  let emsVectorOptions = layerOptions[EMSFileSource.type] && layerOptions[EMSFileSource.type][0].service;
+  emsVectorOptions = emsVectorOptions ? emsVectorOptions.map((file) => ({ value: file.name, text: file.name })) : [];
 
   return {
     flyoutVisible: getFlyoutDisplay(state) !== FLYOUT_STATE.NONE,
-    emsVectorOptions: emsVectorOptions
-      && emsVectorOptions.map(({ name, id }) =>
-        ({ value: `${emsSourceName}:${id}`, text: name })),
+    emsVectorOptions: emsVectorOptions,
     layerLoading: getLayerLoading(state),
     temporaryLayers: !_.isEmpty(getTemporaryLayers(state))
   };
@@ -32,11 +32,13 @@ function mapStateToProps(state = {}) {
 function mapDispatchToProps(dispatch) {
   return {
     closeFlyout: () => dispatch(updateFlyout(FLYOUT_STATE.NONE)) && dispatch(clearTemporaryLayers()),
-    selectAction: (sourceName, layerId) => dispatch(addVectorLayer(sourceName, layerId, { temporary: true })),
-    removeAction: layerName => dispatch(removeLayer(layerName)),
-    previewXYZLayer: (url, layerId) => {
-      dispatch(addXYZLayer(url, layerId, { temporary: true }));
+    previewEMSFileLayer: (emsFileSource) => {
+      dispatch(addVectorLayerFromEMSFileSource(emsFileSource, { temporary: true }));
     },
+    previewXYZLayer: (xyzTmsLayerSource) => {
+      dispatch(addXYZTMSLayerFromSource(xyzTmsLayerSource, { temporary: true }));
+    },
+    removeAction: layerName => dispatch(removeLayer(layerName)),
     addAction: () => dispatch(promoteTemporaryLayers())
   };
 }

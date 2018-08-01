@@ -12,6 +12,7 @@ export const FLYOUT_STATE = {
   LAYER_PANEL: 'LAYER_PANEL',
   ADD_LAYER_WIZARD: 'ADD_LAYER_WIZARD'
 };
+
 const INITIAL_STATE = {
   flyoutDisplay: FLYOUT_STATE.NONE,
   selectedLayer: null

@@ -4,9 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { DATA_ORIGIN } from "../shared/layers/sources/source";
-import { VectorSource } from "../shared/layers/sources/vector_source";
-import { TMSSource } from "../shared/layers/sources/tms_source";
+import { EMSTMSSource } from "../shared/layers/sources/ems_tms_source";
+import { EMSFileSource } from "../shared/layers/sources/ems_file_source";
+import { XYZTMSSource } from "../shared/layers/sources/xyz_tms_source";
+
 import { VectorLayer } from "../shared/layers/vector_layer";
 import { TileLayer } from "../shared/layers/tile_layer";
 
@@ -17,8 +18,13 @@ export const LAYER_LOADING = 'LAYER_LOADING';
 export const REMOVE_LAYER = 'REMOVE_LAYER';
 export const PROMOTE_TEMPORARY_LAYERS = 'PROMOTE_TEMPORARY_LAYERS';
 export const CLEAR_TEMPORARY_LAYERS = 'CLEAR_TEMPORARY_LAYERS';
-export const ADD_SOURCE = 'ADD_SOURCE';
+export const ADD_EMS_FILE_SOURCE_LIST = 'ADD_EMS_FILE_SOURCE_LIST';
 export const TOGGLE_LAYER_VISIBLE = 'TOGGLE_LAYER_VISIBLE';
+
+let kbnModulesResolve;
+const KIBANA_MODULES = new Promise((resolve) => {
+  kbnModulesResolve = resolve;
+});
 
 export function toggleLayerVisible(layerId) {
   return {
@@ -41,15 +47,17 @@ export function updateLayerOrder(newLayerOrder) {
   };
 }
 
-export function addLayer(layer) {
-  return dispatch => {
+export function addLayer(layer, position = -1) {
+  return async dispatch => {
     dispatch({
       type: ADD_LAYER,
-      layer
+      layer,
+      position
     });
     dispatch(layerLoading(false));
   };
 }
+
 
 export function layerLoading(loadingBool) {
   return {
@@ -70,55 +78,42 @@ export function clearTemporaryLayers() {
   };
 }
 
-export function addVectorLayer(sourceName, layerId, options = {}) {
-  return async (dispatch, getState) => {
+export function addVectorLayerFromEMSFileSource(emsFileSource, options = {}, position) {
+  return async (dispatch) => {
     dispatch(layerLoading(true));
-    const { map } = getState();
-    const vectorSource = map.sources.find(({ name }) => name === sourceName);
-    const service = vectorSource.service.find(({ id }) => id === layerId);
-    const vectorFetch = await fetch(service.url);
-    vectorFetch.json().then(resolvedResource => {
-      const layer = VectorLayer.create({
-        source: resolvedResource,
-        name: service.name || service.id,
-        nameList: map.layerList.map(({ name }) => name),
-        ...options
-      });
-      dispatch(addLayer(layer));
-    });
-  };
-}
-
-
-
-export function addXYZLayer(xyzUrl, layerId, options = {}) {
-  return (dispatch) => {
-    dispatch(layerLoading(true));
-    // const { map } = getState();
-    const layer = TileLayer.create({
-      source: xyzUrl,
-      name: xyzUrl,
+    const geojson = await EMSFileSource.getGeoJson(emsFileSource, await KIBANA_MODULES);
+    const layer = VectorLayer.create({
+      source: geojson,
+      name: emsFileSource.name || emsFileSource.id,
       ...options
     });
-    dispatch(addLayer(layer));
+    dispatch(addLayer(layer, position));
   };
 }
 
-
-export function addTileLayer(sourceName, layerId, options = {}) {
-  // console.log('tile layer', arguments);
-  return (dispatch, getState) => {
+export function addXYZTMSLayerFromSource(xyzTMSsource, options = {}, position) {
+  return async (dispatch) => {
     dispatch(layerLoading(true));
-    const { map } = getState();
-    const tmsSource = map.sources.find(({ name }) => name === sourceName);
-    const service = tmsSource.service.find(({ id }) => id === layerId);
+    const service = await XYZTMSSource.getTMSOptions(xyzTMSsource);
     const layer = TileLayer.create({
       source: service.url,
-      name: service.name || service.id,
-      nameList: map.layerList.map(({ name }) => name),
+      name: service.url,
       ...options
     });
-    dispatch(addLayer(layer));
+    dispatch(addLayer(layer, position));
+  };
+}
+
+export function addEMSTMSFromSource(source, options = {}, position) {
+  return async (dispatch) => {
+    dispatch(layerLoading(true));
+    const service = await EMSTMSSource.getTMSOptions(source, await KIBANA_MODULES);
+    const layer = TileLayer.create({
+      source: service.url,
+      name: source.id,
+      ...options
+    });
+    dispatch(addLayer(layer, position));
   };
 }
 
@@ -129,51 +124,34 @@ export function removeLayer(layerName) {
   };
 }
 
-export function addTMSSource(dataOrigin, service, sourceName) {
-  return dispatch => {
-    const source = TMSSource.create({
-      dataOrigin,
-      service,
-      name: sourceName
-    });
+export  function addEMSSourceList() {
+
+  return async  dispatch => {
+    const emsFileSourceList = await EMSFileSource.createEMSFileListDescriptor(await KIBANA_MODULES);
     dispatch({
-      type: ADD_SOURCE,
-      source
+      type: ADD_EMS_FILE_SOURCE_LIST,
+      emsFileSourceList
     });
   };
 }
 
-export function addVectorSource(dataOrigin, service, sourceName) {
-  return dispatch => {
-    const source = VectorSource.create({
-      dataOrigin,
-      service,
-      name: sourceName
-    });
-    dispatch({
-      type: ADD_SOURCE,
-      source
-    });
-  };
-}
 
 export async function loadMapResources(serviceSettings, dispatch) {
 
+  kbnModulesResolve({
+    serviceSettings: serviceSettings
+  });
 
-
-  const tmsSource = await serviceSettings.getTMSServices();
-  const emsSource = await serviceSettings.getFileLayers();
-
-  // Sample TMS Road Map Source
-  dispatch(addTMSSource(DATA_ORIGIN.EMS, tmsSource, 'road_map_source'));
-  // Sample TMS OSM Source
-  dispatch(addTMSSource(DATA_ORIGIN.TMS,
-    [{ id: 'osm', url: 'https://a.tile.openstreetmap.org/{z}/{x}/{y}.png' }], 'osm_source'));
-  // EMS Vector Source
-  dispatch(addVectorSource(DATA_ORIGIN.EMS, emsSource, 'ems_source'));
+  //need to add this to the store otherwise our UI has no access to it
+  //not good, should be lazily loaded. Users not using EMS should not have to load EMS resources up front.
+  const emsFileLayers = await serviceSettings.getFileLayers();
+  dispatch(addEMSSourceList(EMSFileSource.type, emsFileLayers));
 
   // Add initial layers
-  dispatch(addTileLayer('road_map_source', 'road_map', { name: 'Road Map' }));
-  dispatch(addTileLayer('osm_source', 'osm', { name: 'Open Street Maps' }));
-  dispatch(addVectorLayer('ems_source', 5715999101812736, { name: 'World Countries' }));
+  const roadMapEms = EMSTMSSource.createDescriptor('road_map');
+  dispatch(addEMSTMSFromSource(roadMapEms, {}, 0));
+
+  const worldCountries = EMSFileSource.createDescriptor('World Countries');
+  dispatch(addVectorLayerFromEMSFileSource(worldCountries, {}, 1));
+
 }
