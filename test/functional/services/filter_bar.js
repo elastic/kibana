@@ -17,6 +17,8 @@
  * under the License.
  */
 
+import Keys from 'leadfoot/keys';
+
 export function FilterBarProvider({ getService }) {
   const remote = getService('remote');
   const testSubjects = getService('testSubjects');
@@ -59,16 +61,15 @@ export function FilterBarProvider({ getService }) {
       await typeIntoReactSelect('filterOperatorList', operator);
       const params = await testSubjects.find('filterParams');
       const paramFields = await params.findAllByTagName('input');
-      await Promise.all(values.map(async (value, index) => {
-        await paramFields[index].type(value);
-        // Checks if the actual options value has an auto complete (like 'is one of' filter)
-        // In this case we need to click the active autocompletion.
-        const hasAutocompletion = await find.exists(async () => await params.findByClassName('active'));
-        if (hasAutocompletion) {
-          const activeSelection = await params.findByClassName('active');
-          await activeSelection.click();
-        }
-      }));
+      for (let i = 0; i < values.length; i++) {
+        // If we have multiple fields for the value, enter the individual
+        // array elements into each of the inputs, but if we have more array
+        // values than input fields, enter them all in the last (e.g. useful
+        // to do addFilter('extension', 'is one of', ['jpg', 'png']), which is
+        // only one input field)
+        await paramFields[Math.min(paramFields.length - 1, i)].type(values[i]);
+        await remote.pressKeys(Keys.RETURN);
+      }
       await testSubjects.click('saveFilter');
     }
 
