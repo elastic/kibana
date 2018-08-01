@@ -161,7 +161,7 @@ export function repositoryRoute(
   server.route({
     path: '/api/cs/repo/index/{uri*3}',
     method: 'POST',
-    async handler(req: Hapi.Request, reply: any) {
+    async handler(req, reply) {
       const repoUri = req.params.uri as string;
       const log = new Log(req.server);
 

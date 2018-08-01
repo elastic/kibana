@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { Repository } from '../model';
 import { RepositoryUri } from './repository';
 
 export interface Document {
@@ -30,4 +31,25 @@ export interface LspIndexRequest extends IndexRequest {
 // The request for RepositoryIndexer
 export interface RepositoryIndexRequest extends IndexRequest {
   repoUri: RepositoryUri;
+}
+
+// The base interface of any kind of search requests.
+export interface SearchRequest {
+  query: string;
+  page: number;
+  resultsPerPage: number;
+}
+
+export interface RepositorySearchRequest extends SearchRequest {
+  query: string;
+}
+
+// The base interface of any kind of search result.
+export interface SearchResult {
+  total: number;
+  took: number;
+}
+
+export interface RepositorySearchResult extends SearchResult {
+  repositories: Repository[];
 }

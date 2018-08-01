@@ -9,26 +9,12 @@ import { EsClient } from '@codesearch/esqueue';
 import { Indexer, IndexProgress, ProgressReporter } from '.';
 import { IndexRequest, RepositoryUri } from '../../model';
 import { Log } from '../log';
-import { ServerOptions } from '../server_options';
 import { IndexCreationRequest } from './index_creation_request';
 
 export abstract class AbstractIndexer implements Indexer {
-  // A helper function to transfer 'a/b/c' to 'a-b-c' since '/' is not
-  // a valid character in ES index name.
-  public static normalizeUri(repoUri: RepositoryUri): string {
-    return repoUri
-      .split('/')
-      .join('-')
-      .toLowerCase();
-  }
-
   protected type: string = 'abstract';
 
-  constructor(
-    protected readonly client: EsClient,
-    protected readonly serverOption: ServerOptions,
-    protected readonly log: Log
-  ) {}
+  constructor(protected readonly client: EsClient, protected readonly log: Log) {}
 
   public async start(repoUri: RepositoryUri, progressReporter?: ProgressReporter) {
     this.log.info(`Indexer ${this.type} started for repo ${repoUri}`);
@@ -119,6 +105,18 @@ export abstract class AbstractIndexer implements Indexer {
       settings: creationReq.settings,
       mappings: {
         [creationReq.type]: {
+          dynamic_templates: [
+            {
+              fieldDefaultNotAnalyzed: {
+                match: '*',
+                mapping: {
+                  index: 'no',
+                  include_in_all: 'false',
+                  norm: 'false',
+                },
+              },
+            },
+          ],
           properties: creationReq.schema,
         },
       },

@@ -13,7 +13,6 @@ import walk from 'walk';
 import { Document, LspIndexRequest, RepositoryUri } from '../../model';
 import { Log } from '../log';
 import { LspService } from '../lsp/lsp_service';
-import { ServerOptions } from '../server_options';
 import { AbstractIndexer } from './abstract_indexer';
 import { IndexCreationRequest } from './index_creation_request';
 import {
@@ -31,10 +30,9 @@ export class LspIndexer extends AbstractIndexer {
   constructor(
     protected readonly lspService: LspService,
     protected readonly client: EsClient,
-    protected readonly serverOption: ServerOptions,
     protected readonly log: Log
   ) {
-    super(client, serverOption, log);
+    super(client, log);
   }
 
   protected async prepareIndexCreationRequests(repoUri: RepositoryUri) {

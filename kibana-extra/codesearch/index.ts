@@ -18,6 +18,8 @@ import { fileRoute } from './server/routes/file';
 import { lspRoute } from './server/routes/lsp';
 import { monacoRoute } from './server/routes/monaco';
 import { repositoryRoute } from './server/routes/repository';
+import { repositorySearchRoute } from './server/routes/search';
+import { RepositorySearchClient } from './server/search';
 import { ServerOptions } from './server/server_options';
 import { UpdateScheduler } from './server/update_scheduler';
 
@@ -53,27 +55,29 @@ export default (kibana: any) =>
     init(server: Server, options: any) {
       const queueIndex = server.config().get('codesearch.queueIndex');
       const queueTimeout = server.config().get('codesearch.queueTimeout');
-      const adminClient = server.plugins.elasticsearch.getCluster('admin');
+      const adminCluster = server.plugins.elasticsearch.getCluster('admin');
+      const dataCluster = server.plugins.elasticsearch.getCluster('data');
       const log = new Log(server);
       const serverOptions = new ServerOptions(options);
 
+      // Initialize search clients
+      const repoSearchClient = new RepositorySearchClient(dataCluster.getClient(), log);
+
+      // Initialize indexers
       const lspService = new LspService('127.0.0.1', server, serverOptions);
-      const lspIndexer = new LspIndexer(lspService, adminClient.getClient(), serverOptions, log);
+      const lspIndexer = new LspIndexer(lspService, adminCluster.getClient(), log);
 
       // Initialize repository index.
-      const repositoryIndexInit = new RepositoryIndexInitializer(
-        adminClient.getClient(),
-        serverOptions,
-        log
-      );
+      const repositoryIndexInit = new RepositoryIndexInitializer(adminCluster.getClient(), log);
       repositoryIndexInit.init();
 
+      // Initialize queue.
       const repository = server.savedObjects.getSavedObjectsRepository(
-        adminClient.callWithInternalUser
+        adminCluster.callWithInternalUser
       );
       const objectsClient = new server.savedObjects.SavedObjectsClient(repository);
       const queue = new Esqueue(queueIndex, {
-        client: adminClient.getClient(),
+        client: adminCluster.getClient(),
         timeout: queueTimeout,
         doctype: 'esqueue',
       });
@@ -82,22 +86,23 @@ export default (kibana: any) =>
         queue,
         log,
         objectsClient,
-        adminClient.getClient()
+        adminCluster.getClient()
       ).bind();
       const updateWorker = new UpdateWorker(queue, log, objectsClient).bind();
       const indexWorker = new IndexWorker(queue, log, objectsClient, [lspIndexer]).bind();
 
+      // Initialize scheduler.
       const scheduler = new UpdateScheduler(
         updateWorker,
         serverOptions,
-        adminClient.callWithInternalUser
+        adminCluster.callWithInternalUser
       );
       scheduler.start();
 
       // Add server routes and initialize the plugin here
       exampleRoute(server);
-
       repositoryRoute(server, serverOptions, cloneWorker, deleteWorker, indexWorker);
+      repositorySearchRoute(server, repoSearchClient);
       fileRoute(server, serverOptions);
       monacoRoute(server);
 

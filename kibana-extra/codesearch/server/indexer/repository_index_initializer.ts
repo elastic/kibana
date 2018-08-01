@@ -8,7 +8,6 @@ import { EsClient } from 'packages/codesearch-esqueue';
 
 import { RepositoryUri } from 'model';
 import { Log } from '../log';
-import { ServerOptions } from '../server_options';
 import { AbstractIndexer } from './abstract_indexer';
 import { IndexCreationRequest } from './index_creation_request';
 import { repositoryIndexName, RepositorySchema, repositoryTypeName } from './schema';
@@ -17,12 +16,8 @@ import { repositoryIndexName, RepositorySchema, repositoryTypeName } from './sch
 export class RepositoryIndexInitializer extends AbstractIndexer {
   protected type: string = 'repository';
 
-  constructor(
-    protected readonly client: EsClient,
-    protected readonly serverOption: ServerOptions,
-    protected readonly log: Log
-  ) {
-    super(client, serverOption, log);
+  constructor(protected readonly client: EsClient, protected readonly log: Log) {
+    super(client, log);
   }
 
   public async prepareIndexCreationRequests(_: RepositoryUri) {
