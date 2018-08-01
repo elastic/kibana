@@ -94,7 +94,7 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.visualize.clickVerticalBarChart();
       await PageObjects.visualize.clickNewSearch();
       await PageObjects.visualize.waitForVisualization();
-      await PageObjects.visualize.saveVisualization('Viz VerticalBarChart', { ensureSuccess: false });
+      await PageObjects.visualize.saveVisualization('Viz VerticalBarChart', { verifySuccess: false });
       // Verify the save failed by looking for the failure notification, which uses the old
       // bootstrap notifications.
       await retry.try(async () => {

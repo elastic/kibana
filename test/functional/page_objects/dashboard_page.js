@@ -287,19 +287,24 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
       await testSubjects.setValue('dashboardTitle', dashName);
     }
 
-    /**
-     *
-     * @param dashName {String}
-     * @param saveOptions {{storeTimeWithDashboard: boolean, saveAsNew: boolean, needsConfirm: false}}
-     */
-    async saveDashboard(dashName, saveOptions = {}) {
-      await this.enterDashboardTitleAndClickSave(dashName, saveOptions);
+    async saveDashboard(dashName, {
+      storeTimeWithDashboard = undefined,
+      saveAsNew = undefined,
+      needsConfirm = false,
+      verifySuccess = true,
+    } = {}) {
+      await this.enterDashboardTitleAndClickSave(dashName, {
+        storeTimeWithDashboard,
+        saveAsNew,
+      });
 
-      if (saveOptions.needsConfirm) {
+      if (needsConfirm) {
         await this.clickSave();
       }
 
-      this.ensureSaveSuccess();
+      if (verifySuccess) {
+        await this.ensureSaveSuccess();
+      }
     }
 
     async cancelSave() {
@@ -318,12 +323,10 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
       await toasts.verifyAndDismiss('saveDashboardSuccess');
     }
 
-    /**
-     *
-     * @param dashboardTitle {String}
-     * @param saveOptions {{storeTimeWithDashboard: boolean, saveAsNew: boolean}}
-     */
-    async enterDashboardTitleAndClickSave(dashboardTitle, saveOptions = {}) {
+    async enterDashboardTitleAndClickSave(dashboardTitle, {
+      storeTimeWithDashboard = undefined,
+      saveAsNew = undefined,
+    } = {}) {
       await testSubjects.click('dashboardSaveMenuItem');
 
       await PageObjects.header.waitUntilLoadingHasFinished();
@@ -331,12 +334,14 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
       log.debug('entering new title');
       await testSubjects.setValue('dashboardTitle', dashboardTitle);
 
-      if (saveOptions.storeTimeWithDashboard !== undefined) {
-        await this.setStoreTimeWithDashboard(saveOptions.storeTimeWithDashboard);
+      // Passing undefined allows us to bypass interacting with the UI.
+      if (storeTimeWithDashboard !== undefined) {
+        await this.setStoreTimeWithDashboard(storeTimeWithDashboard);
       }
 
-      if (saveOptions.saveAsNew !== undefined) {
-        await this.setSaveAsNewCheckBox(saveOptions.saveAsNew);
+      // Passing undefined allows us to bypass interacting with the UI.
+      if (saveAsNew !== undefined) {
+        await this.setSaveAsNewCheckBox(saveAsNew);
       }
 
       await this.clickSave();

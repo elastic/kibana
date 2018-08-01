@@ -275,19 +275,19 @@ export function CommonPageProvider({ getService, getPageObjects }) {
       }
     }
 
-    async expectConfirmModalOpenState(state) {
-      if (typeof state !== 'boolean') {
+    async expectConfirmModalOpenState(isExpectedToBeOpen) {
+      if (typeof isExpectedToBeOpen !== 'boolean') {
         throw new Error('pass true or false to expectConfirmModalOpenState()');
       }
 
-      log.debug(`expectConfirmModalOpenState(${state})`);
+      log.debug(`expectConfirmModalOpenState(${isExpectedToBeOpen})`);
 
       // we use retry here instead of a simple .exists() check because the modal
       // fades in/out, which takes time, and we really only care that at some point
-      // the modal is either open or closed
+      // the modal is open or closed.
       await retry.try(async () => {
-        const actualState = await testSubjects.exists('confirmModalCancelButton');
-        expect(actualState).to.be(state);
+        const isOpen = await testSubjects.exists('confirmModalCancelButton');
+        expect(isOpen).to.be(isExpectedToBeOpen);
       });
     }
 
