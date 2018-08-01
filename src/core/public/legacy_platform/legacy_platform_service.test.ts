@@ -69,7 +69,6 @@ const defaultParams = {
 };
 
 afterEach(() => {
-  defaultParams.targetDomElement = document.createElement('div');
   jest.clearAllMocks();
   injectedMetadataStartContract.getLegacyMetadata.mockReset();
   jest.resetModules();
