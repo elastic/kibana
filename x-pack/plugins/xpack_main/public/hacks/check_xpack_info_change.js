@@ -40,7 +40,7 @@ module.factory('checkXPackInfoChange', ($q, Private) => {
             color="warning"
             title={`Your ${license.type} license is expired`}
           >
-            Please contact your administrator or <a href={uploadLicensePath}>update your license</a> directly
+            Contact your administrator or <a href={uploadLicensePath}>update your license</a> directly.
           </EuiCallOut>
         ),
       });

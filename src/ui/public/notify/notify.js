@@ -110,7 +110,7 @@ function applyConfig(config) {
         </MarkdownSimple>
 
         <EuiButton type="primary" size="s" onClick={dismissBanner}>
-          Dismiss
+          Close
         </EuiButton>
       </EuiCallOut>
     );
