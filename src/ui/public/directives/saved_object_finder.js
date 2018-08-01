@@ -285,7 +285,7 @@ module.directive('savedObjectFinder', function ($location, $injector, kbnUrl, Pr
         const isLabsEnabled = config.get('visualize:enableLabs');
         self.service.find(filter)
           .then(function (hits) {
-            $scope.$apply(() => {
+            $scope.$evalAsync(() => {
               hits.hits = hits.hits.filter((hit) => (isLabsEnabled || _.get(hit, 'type.stage') !== 'lab'));
               hits.total = hits.hits.length;
 
