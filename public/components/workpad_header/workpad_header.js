@@ -10,8 +10,8 @@ import {
   EuiModal,
   EuiModalBody,
   EuiModalFooter,
+  EuiToolTip,
 } from '@elastic/eui';
-import { Tooltip } from '../tooltip';
 import { AssetManager } from '../asset_manager';
 import { ElementTypes } from '../element_types';
 import { FullscreenControl } from '../fullscreen_control';
@@ -61,19 +61,19 @@ export const WorkpadHeader = ({
             <EuiFlexItem grow={false}>
               <FullscreenControl>
                 {({ toggleFullscreen }) => (
-                  <Tooltip position="bottom" content="Toggle fullscreen mode">
+                  <EuiToolTip position="bottom" content="Toggle fullscreen mode">
                     <EuiButtonIcon
                       iconType="fullScreen"
                       aria-label="View fullscreen"
                       onClick={toggleFullscreen}
                     />
-                  </Tooltip>
+                  </EuiToolTip>
                 )}
               </FullscreenControl>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <Shortcuts name="EDITOR" handler={keyHandler} targetNodeSelector="body" global />
-              <Tooltip
+              <EuiToolTip
                 position="bottom"
                 content={editing ? 'Hide editing controls' : 'Show editing controls'}
               >
@@ -85,7 +85,7 @@ export const WorkpadHeader = ({
                   size="s"
                   aria-label={editing ? 'Hide editing controls' : 'Show editing controls'}
                 />
-              </Tooltip>
+              </EuiToolTip>
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlexItem>

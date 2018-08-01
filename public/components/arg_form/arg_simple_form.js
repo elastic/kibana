@@ -11,7 +11,7 @@ export const ArgSimpleForm = ({ children, required, valueMissing, onRemove }) =>
       {valueMissing && (
         <EuiFlexItem grow={false}>
           <TooltipIcon
-            placement="left"
+            position="left"
             icon="error"
             content="This argument is required, you should specify a value."
           />

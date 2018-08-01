@@ -10,12 +10,12 @@ import {
   EuiPagination,
   EuiSpacer,
   EuiButton,
+  EuiToolTip,
 } from '@elastic/eui';
 import { sortByOrder } from 'lodash';
 import moment from 'moment';
 import { ConfirmModal } from '../confirm_modal';
 import { Link } from '../link';
-import { Tooltip } from '../tooltip';
 import { Paginate } from '../paginate';
 import { WorkpadUpload } from './workpad_upload';
 import { WorkpadCreate } from './workpad_create';
@@ -108,22 +108,22 @@ export class WorkpadLoader extends React.PureComponent {
         render: workpad => (
           <EuiFlexGroup gutterSize="xs" alignItems="center">
             <EuiFlexItem grow={false}>
-              <Tooltip content="Download">
+              <EuiToolTip content="Download">
                 <EuiButtonIcon
                   iconType="sortDown"
                   onClick={() => this.props.downloadWorkpad(workpad.id)}
                   aria-label="Download Workpad"
                 />
-              </Tooltip>
+              </EuiToolTip>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <Tooltip content="Clone">
+              <EuiToolTip content="Clone">
                 <EuiButtonIcon
                   iconType="copy"
                   onClick={() => this.cloneWorkpad(workpad)}
                   aria-label="Clone Workpad"
                 />
-              </Tooltip>
+              </EuiToolTip>
             </EuiFlexItem>
           </EuiFlexGroup>
         ),

@@ -1,7 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { EuiTitle, EuiFlexItem, EuiFlexGroup } from '@elastic/eui';
-import { Tooltip } from '../tooltip';
+import { EuiTitle, EuiFlexItem, EuiFlexGroup, EuiToolTip } from '@elastic/eui';
 
 export const SidebarSectionTitle = ({ title, tip, children }) => {
   const formattedTitle = (
@@ -12,9 +11,9 @@ export const SidebarSectionTitle = ({ title, tip, children }) => {
   const renderTitle = () => {
     if (tip) {
       return (
-        <Tooltip placement="left" content={tip}>
+        <EuiToolTip position="left" content={tip}>
           {formattedTitle}
-        </Tooltip>
+        </EuiToolTip>
       );
     }
 

@@ -10,8 +10,8 @@ import {
   EuiFlexItem,
   EuiSpacer,
   EuiTitle,
+  EuiToolTip,
 } from '@elastic/eui';
-import { Tooltip } from '../tooltip';
 
 export const WorkpadConfig = ({ size, name, setSize, setName }) => {
   const rotate = () => setSize({ width: size.height, height: size.width });
@@ -58,7 +58,7 @@ export const WorkpadConfig = ({ size, name, setSize, setName }) => {
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiFormRow hasEmptyLabelSpace>
-            <Tooltip position="bottom" content="Flip the width and height">
+            <EuiToolTip position="bottom" content="Flip the width and height">
               <EuiButtonIcon
                 iconType="merge"
                 color="text"
@@ -66,7 +66,7 @@ export const WorkpadConfig = ({ size, name, setSize, setName }) => {
                 aria-label="Swap Page Dimensions"
                 style={{ marginBottom: 12 }}
               />
-            </Tooltip>
+            </EuiToolTip>
           </EuiFormRow>
         </EuiFlexItem>
         <EuiFlexItem>

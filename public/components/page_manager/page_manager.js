@@ -1,7 +1,6 @@
 import React, { Fragment } from 'react';
 import PropTypes from 'prop-types';
-import { EuiIcon, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
-import { Tooltip } from '../tooltip';
+import { EuiIcon, EuiFlexGroup, EuiFlexItem, EuiText, EuiToolTip } from '@elastic/eui';
 import { ConfirmModal } from '../confirm_modal';
 import { Link } from '../link';
 import { PagePreview } from '../page_preview';
@@ -90,7 +89,7 @@ export class PageManager extends React.PureComponent {
             </div>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <Tooltip
+            <EuiToolTip
               anchorClassName="canvasPageManager__addPageTip"
               content="Add a new page to this workpad"
               position="left"
@@ -98,7 +97,7 @@ export class PageManager extends React.PureComponent {
               <button onClick={addPage} className="canvasPageManager__addPage">
                 <EuiIcon color="ghost" type="plusInCircle" size="l" />
               </button>
-            </Tooltip>
+            </EuiToolTip>
           </EuiFlexItem>
         </EuiFlexGroup>
         <ConfirmModal

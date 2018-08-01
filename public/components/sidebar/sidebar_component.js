@@ -7,10 +7,10 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiTabbedContent,
+  EuiToolTip,
 } from '@elastic/eui';
 import { Datasource } from '../datasource';
 import { FunctionFormList } from '../function_form_list';
-import { Tooltip } from '../tooltip';
 
 export const SidebarComponent = ({
   selectedElement,
@@ -58,54 +58,57 @@ export const SidebarComponent = ({
                 <EuiFlexItem grow={false}>
                   <EuiFlexGroup alignItems="center" gutterSize="none">
                     <EuiFlexItem grow={false}>
-                      <Tooltip position="bottom" content="Move element to top layer">
+                      <EuiToolTip position="bottom" content="Move element to top layer">
                         <EuiButtonIcon
                           color="text"
                           iconType="sortUp"
                           onClick={() => elementLayer(Infinity)}
                           aria-label="Move element to top layer"
                         />
-                      </Tooltip>
+                      </EuiToolTip>
                     </EuiFlexItem>
                     <EuiFlexItem grow={false}>
-                      <Tooltip position="bottom" content="Move element up one layer">
+                      <EuiToolTip position="bottom" content="Move element up one layer">
                         <EuiButtonIcon
                           color="text"
                           iconType="arrowUp"
                           onClick={() => elementLayer(1)}
                           aria-label="Move element up one layer"
                         />
-                      </Tooltip>
+                      </EuiToolTip>
                     </EuiFlexItem>
                     <EuiFlexItem grow={false}>
-                      <Tooltip position="bottom" content="Move element down one layer">
+                      <EuiToolTip position="bottom" content="Move element down one layer">
                         <EuiButtonIcon
                           color="text"
                           iconType="arrowDown"
                           onClick={() => elementLayer(-1)}
                           aria-label="Move element down one layer"
                         />
-                      </Tooltip>
+                      </EuiToolTip>
                     </EuiFlexItem>
                     <EuiFlexItem grow={false}>
-                      <Tooltip position="bottom" content="Move element to bottom layer">
+                      <EuiToolTip position="bottom" content="Move element to bottom layer">
                         <EuiButtonIcon
                           color="text"
                           iconType="sortDown"
                           onClick={() => elementLayer(-Infinity)}
                           aria-label="Move element to bottom layer"
                         />
-                      </Tooltip>
+                      </EuiToolTip>
                     </EuiFlexItem>
                     <EuiFlexItem grow={false}>
-                      <Tooltip position="bottom" content="Duplicate this element into a new layer">
+                      <EuiToolTip
+                        position="bottom"
+                        content="Duplicate this element into a new layer"
+                      >
                         <EuiButtonIcon
                           color="text"
                           iconType="copy"
                           onClick={() => duplicateElement()}
                           aria-label="Duplicate this element into a new layer"
                         />
-                      </Tooltip>
+                      </EuiToolTip>
                     </EuiFlexItem>
                   </EuiFlexGroup>
                 </EuiFlexItem>

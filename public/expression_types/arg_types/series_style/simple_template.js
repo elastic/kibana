@@ -63,7 +63,7 @@ export const SimpleTemplate = props => {
         (labels || labels.length === 0) && (
           <EuiFlexItem grow={false}>
             <TooltipIcon
-              placement="left"
+              position="left"
               icon="warning"
               content="Data has no series to style, add a color dimension"
             />

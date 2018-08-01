@@ -5,7 +5,7 @@ import { TooltipIcon } from '../tooltip_icon';
 export const SimpleFailure = () => (
   <div className="canvasArg--error canvasArg--error-simple">
     <TooltipIcon
-      placement="left"
+      position="left"
       icon="warning"
       content="The interface for this argument could not parse the value, so a fallback input is being used"
     />
