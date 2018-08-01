@@ -20,7 +20,7 @@
 import { Build } from './build';
 import { collectUiExports } from '../../ui/ui_exports';
 
-export function buildAll(enabledPluginSpecs, { onSuccess, onError }) {
+export function buildAll(enabledPluginSpecs) {
   const { uiAppSpecs = [] } = collectUiExports(enabledPluginSpecs);
 
   return Promise.all(uiAppSpecs.reduce((acc, uiAppSpec) => {
@@ -28,10 +28,7 @@ export function buildAll(enabledPluginSpecs, { onSuccess, onError }) {
       return acc;
     }
 
-    const builder = new Build(uiAppSpec.styleSheetPath, {
-      onSuccess,
-      onError,
-    });
+    const builder = new Build(uiAppSpec.styleSheetPath);
 
     return [...acc, builder.build()];
   }, []));

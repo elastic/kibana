@@ -29,15 +29,10 @@ export const TranspileScssTask = {
     const { spec$ } = findPluginSpecs({ plugins: { scanDirs, paths: [] } });
     const enabledPlugins = await spec$.pipe(toArray()).toPromise();
 
-    function onSuccess(builder) {
+    const builders = await buildAll(enabledPlugins);
+
+    builders.forEach(builder => {
       log.info(`Compiled SCSS: ${builder.source}`);
-    }
-
-    function onError(builder, e) {
-      log.error(`Compiling SCSS failed: ${builder.source}`);
-      throw e;
-    }
-
-    await buildAll(enabledPlugins, { onSuccess, onError });
+    });
   }
 };

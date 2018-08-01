@@ -37,40 +37,76 @@ export async function sassMixin(kbnServer, server, config) {
 
   const { buildAll } = require('./build_all');
 
-  function onSuccess(builder) {
-    server.log(['info', 'scss'], `Compiled CSS: ${builder.source}`);
-  }
+  try {
+    const scssBundles = await buildAll(kbnServer.pluginSpecs);
 
-  function onError(builder, error) {
-    server.log(['warning', 'scss'], `Compiling CSS failed: ${builder.source}`);
-    server.log(['warning', 'scss'], error);
-  }
+    scssBundles.forEach(builder => {
+      server.log(['info', 'scss'], `Compiled CSS: ${builder.source}`);
+    });
 
-  const scssBundles = await buildAll(kbnServer.pluginSpecs, { onSuccess, onError });
+    /**
+     * Setup Watchers
+     *
+     * Similar to the optimizer, we only setup watchers while in development mode
+     */
 
-
-  /**
-   * Setup Watchers
-   *
-   * Similar to the optimizer, we only setup watchers while in development mode
-   */
-
-  if (!config.get('env').dev) {
-    return;
-  }
-
-  const { FSWatcher } = require('chokidar');
-  const watcher = new FSWatcher({ ignoreInitial: true });
-
-  scssBundles.forEach(bundle => {
-    watcher.add(bundle.getGlob());
-  });
-
-  watcher.on('all', async (event, path) => {
-    for (let i = 0; i < scssBundles.length; i++) {
-      if (await scssBundles[i].buildIfInPath(path)) {
-        return;
-      }
+    if (!config.get('env').dev) {
+      return;
     }
-  });
+
+    const { FSWatcher } = require('chokidar');
+    const watcher = new FSWatcher({ ignoreInitial: true });
+
+    function allTrackedFiles() {
+      return scssBundles.reduce((acc, bundle) => {
+        bundle.stats.includedFiles.forEach(file => acc.add(file));
+        return acc;
+      }, new Set());
+    }
+
+    let previousFiles = allTrackedFiles();
+
+    watcher.add([...previousFiles]);
+
+    watcher.on('all', async (event, path) => {
+      server.log(['debug', 'scss'], `${path} triggered ${event}`);
+
+      // build bundles containing the changed file
+      await Promise.all(scssBundles.map(async bundle => {
+        if (await bundle.buildIfIncluded(path)) {
+          server.log(['info', 'scss'], `Compiled ${bundle.source} due to change in ${path}`);
+        }
+      }, []));
+
+      /**
+       * update watchers
+       */
+
+      const currentFiles = allTrackedFiles();
+
+      // un-watch files no longer included in any bundle
+      previousFiles.forEach(file => {
+        if (currentFiles.has(file)) {
+          return;
+        }
+
+        server.log(['debug', 'scss'], `No longer watching ${file}`);
+        watcher.unwatch(file);
+      });
+
+      // watch files not previously included in any bundle
+      currentFiles.forEach(file => {
+        if (previousFiles.has(file)) {
+          return;
+        }
+
+        server.log(['debug', 'scss'], `Now watching ${file}`);
+        watcher.add(file);
+      });
+
+      previousFiles = currentFiles;
+    });
+  } catch(error) {
+    server.log(['warning', 'scss'], `${error.message} on line ${error.line} of ${error.file}`);
+  }
 }
