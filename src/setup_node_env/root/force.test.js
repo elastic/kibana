@@ -17,6 +17,23 @@
  * under the License.
  */
 
-require('./root');
-require('./node_version_validator');
-require('./babel_register');
+var forceRoot = require('./force');
+
+describe('forceRoot', function () {
+
+  it('with flag', function () {
+    expect(forceRoot(['--force-root'])).toBeTruthy();
+  });
+
+  it('without flag', function () {
+    expect(forceRoot(['--foo'])).toBeFalsy();
+
+  });
+
+  test('remove argument', function () {
+    var args = ['--force-root', 'foo'];
+    forceRoot(args);
+    expect(args.includes('--force-root')).toBeFalsy();
+  });
+
+});
