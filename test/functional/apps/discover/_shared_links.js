@@ -76,7 +76,7 @@ export default function ({ getService, getPageObjects }) {
         const expectedUrl =
           baseUrl +
           '/app/kibana?_t=1453775307251#' +
-          '/discover?_g=(refreshInterval:(pause:!f,value:0),time' +
+          '/discover?_g=(refreshInterval:(pause:!t,value:0),time' +
           ':(from:\'2015-09-19T06:31:44.000Z\',mode:absolute,to:\'2015-09' +
           '-23T18:31:44.000Z\'))&_a=(columns:!(_source),index:\'logstash-' +
           '*\',interval:auto,query:(language:lucene,query:\'\')' +
