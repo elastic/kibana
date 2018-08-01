@@ -103,8 +103,10 @@ export default function ({ getService, getPageObjects }) {
           expect(successToastExists).to.be(true);
         });
 
-        const isInstalled = await PageObjects.home.isSampleDataSetInstalled('flights');
-        expect(isInstalled).to.be(false);
+        await retry.try(async () => {
+          const isInstalled = await PageObjects.home.isSampleDataSetInstalled('flights');
+          expect(isInstalled).to.be(false);
+        });
       });
     });
   });
