@@ -26,6 +26,9 @@ export class RequestExpander implements ILanguageServerHandler {
   constructor(proxy: LanguageServerProxy) {
     this.proxy = proxy;
     this.handle = this.handle.bind(this);
+    proxy.onDisconnected(() => {
+      this.currentWorkspace = null;
+    });
   }
 
   public handleRequest(request: LspRequest): Promise<ResponseMessage> {
