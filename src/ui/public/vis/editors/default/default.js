@@ -130,7 +130,7 @@ const defaultEditor = function ($rootScope, $compile) {
 
             $scope.responseValueAggs = null;
             try {
-              $scope.responseValueAggs = $scope.vis.aggs.getResponseAggs().filter(function (agg) {
+              $scope.responseValueAggs = $scope.state.aggs.getResponseAggs().filter(function (agg) {
                 return _.get(agg, 'schema.group') === 'metrics';
               });
             }
