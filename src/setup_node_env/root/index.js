@@ -18,7 +18,9 @@
  */
 
 var force = require('./force')(process.argv);
-var isRoot = require('./is_root')(process.getuid());
+
+var uid = process.getuid && process.getuid();
+var isRoot = require('./is_root')(uid);
 
 if(isRoot && !force) {
   console.error('Kibana should not be run as root.  Use --force-root to continue.');
