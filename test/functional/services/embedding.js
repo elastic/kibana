@@ -17,18 +17,21 @@
  * under the License.
  */
 
-export { QueryBarProvider } from './query_bar';
-export { FilterBarProvider } from './filter_bar';
-export { FindProvider } from './find';
-export { TestSubjectsProvider } from './test_subjects';
-export { RemoteProvider } from './remote';
-export { DocTableProvider } from './doc_table';
-export { ScreenshotsProvider } from './screenshots';
-export { FailureDebuggingProvider } from './failure_debugging';
-export { VisualizeListingTableProvider } from './visualize_listing_table';
-export { FlyoutProvider } from './flyout';
-export { EmbeddingProvider } from './embedding';
-export { ComboBoxProvider } from './combo_box';
+export function EmbeddingProvider({ getService, getPageObjects }) {
+  const remote = getService('remote');
+  const log = getService('log');
+  const PageObjects = getPageObjects(['header']);
 
-export * from './dashboard';
-export * from './visualize';
+  class Embedding {
+
+    async openInEmbeddedMode() {
+      const currentUrl = await remote.getCurrentUrl();
+      log.debug(`Opening in embedded mode: ${currentUrl}`);
+      await remote.get(`${currentUrl}&embed=true`);
+      await PageObjects.header.waitUntilLoadingHasFinished();
+    }
+
+  }
+
+  return new Embedding();
+}
