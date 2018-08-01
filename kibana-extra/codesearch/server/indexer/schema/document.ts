@@ -30,7 +30,7 @@ export const DocumentSchema = {
 };
 
 export const documentIndexName = (repoUri: RepositoryUri) => {
-  return `.codesearch-symbol-${RepositoryUtils.normalizeRepoUriToIndexName(repoUri)}`;
+  return `.codesearch-document-${RepositoryUtils.normalizeRepoUriToIndexName(repoUri)}`;
 };
 
 export const documentTypeName = 'document';

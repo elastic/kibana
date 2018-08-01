@@ -22,6 +22,10 @@ export class Repo extends React.Component<RepoProps, any> {
     });
   };
 
+  public indexRepo = () => {
+    this.props.httpClient.post(`../api/cs/repo/index/${this.props.repo.uri}`);
+  };
+
   public render() {
     const { name, uri } = this.props.repo;
     return (
@@ -30,6 +34,7 @@ export class Repo extends React.Component<RepoProps, any> {
           <a href={`#/${uri}/HEAD`}>{name}</a>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
+          <EuiButton onClick={this.indexRepo}>Index</EuiButton>
           <EuiButton onClick={this.deleteRepo}>Delete</EuiButton>
         </EuiFlexItem>
       </EuiFlexGroup>
