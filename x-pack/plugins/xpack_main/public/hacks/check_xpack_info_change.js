@@ -22,7 +22,7 @@ module.factory('checkXPackInfoChange', ($q, Private) => {
   const xpackInfoSignature = Private(XPackInfoSignatureProvider);
   const debounce = Private(DebounceProvider);
   const isLoginOrLogout = Private(PathProvider).isLoginOrLogout();
-  let licenseExpirationBannerId;
+  let isLicenseExpirationBannerShown = false;
 
   const notifyIfLicenseIsExpired = debounce(() => {
     const license = xpackInfo.get('license');
@@ -32,8 +32,9 @@ module.factory('checkXPackInfoChange', ($q, Private) => {
 
     const uploadLicensePath = `${chrome.getBasePath()}/app/kibana#/management/elasticsearch/license_management/upload_license`;
 
-    if (licenseExpirationBannerId === undefined) {
-      licenseExpirationBannerId = banners.add({
+    if (!isLicenseExpirationBannerShown) {
+      isLicenseExpirationBannerShown = true;
+      banners.add({
         component: (
           <EuiCallOut
             iconType="help"
