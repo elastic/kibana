@@ -127,7 +127,7 @@ function VisEditor(
 
   // adds top level search source to the stack to which global filters are applied
   const getTopLevelSearchSource = (searchSource) => {
-    if (searchSource.parent) return getTopLevelSearchSource(searchSource.parent);
+    if (searchSource.getParent()) return getTopLevelSearchSource(searchSource.getParent());
     return searchSource;
   };
 
