@@ -4,7 +4,11 @@ exports[`FieldEditor should render create new scripted field correctly 1`] = `
 <div>
   <eui-text>
     <h3>
-      Create scripted field
+      <FormattedMessage
+        defaultMessage="Create scripted field"
+        id="common.ui.fieldEditor.createHeader"
+        values={Object {}}
+      />
     </h3>
   </eui-text>
   <eui-spacer
@@ -103,21 +107,24 @@ exports[`FieldEditor should render create new scripted field correctly 1`] = `
     <React.Fragment>
       <eui-form-row
         helpText={
-          <span>
-            Formatting allows you to control the way that specific values are displayed. It can also cause values to be completely changed and prevent highlighting in Discover from working.
-          </span>
+          <FormattedMessage
+            defaultMessage="Formatting allows you to control the way that specific values are displayed. It can also cause values to be completely changed and prevent highlighting in Discover from working."
+            id="common.ui.fieldEditor.formatLabel"
+            values={Object {}}
+          />
         }
         label={
-          <span>
-            Format 
-            <span>
-              (Default: 
-              <eui-code>
-                Test format
-              </eui-code>
-              )
-            </span>
-          </span>
+          <FormattedMessage
+            defaultMessage="Format (Default: {defaultFormat})"
+            id="common.ui.fieldEditor.defaultFormatHeader"
+            values={
+              Object {
+                "defaultFormat": <eui-code>
+                  Test format
+                </eui-code>,
+              }
+            }
+          />
         }
       >
         <eui-select
@@ -161,18 +168,28 @@ exports[`FieldEditor should render create new scripted field correctly 1`] = `
       <eui-form-row>
         <React.Fragment>
           <eui-text>
-            Access fields with 
-            <code>
-              doc['some_field'].value
-            </code>
-            .
+            <FormattedMessage
+              defaultMessage="Access fields with {code}."
+              id="common.ui.fieldEditor.script.accessWithLabel"
+              values={
+                Object {
+                  "code": <code>
+                    doc['some_field'].value
+                  </code>,
+                }
+              }
+            />
           </eui-text>
           <br />
           <eui-link
             data-test-subj="scriptedFieldsHelpLink"
             onClick={[Function]}
           >
-            Get help with the syntax and preview the results of your script.
+            <FormattedMessage
+              defaultMessage="Get help with the syntax and preview the results of your script."
+              id="common.ui.fieldEditor.script.getHelpLabel"
+              values={Object {}}
+            />
           </eui-link>
         </React.Fragment>
       </eui-form-row>
@@ -189,7 +206,11 @@ exports[`FieldEditor should render create new scripted field correctly 1`] = `
             isLoading={false}
             onClick={[Function]}
           >
-            Create field
+            <FormattedMessage
+              defaultMessage="Create field"
+              id="common.ui.fieldEditor.actions.createButton"
+              values={Object {}}
+            />
           </eui-button>
         </eui-flex-item>
         <eui-flex-item
@@ -199,7 +220,11 @@ exports[`FieldEditor should render create new scripted field correctly 1`] = `
             data-test-subj="fieldCancelButton"
             onClick={[Function]}
           >
-            Cancel
+            <FormattedMessage
+              defaultMessage="Cancel"
+              id="common.ui.fieldEditor.actions.cancelButton"
+              values={Object {}}
+            />
           </eui-button-empty>
         </eui-flex-item>
       </eui-flex-group>
@@ -215,7 +240,15 @@ exports[`FieldEditor should render edit scripted field correctly 1`] = `
 <div>
   <eui-text>
     <h3>
-      Edit test
+      <FormattedMessage
+        defaultMessage="Edit {fieldName}"
+        id="common.ui.fieldEditor.editHeader"
+        values={
+          Object {
+            "fieldName": "test",
+          }
+        }
+      />
     </h3>
   </eui-text>
   <eui-spacer
@@ -310,21 +343,24 @@ exports[`FieldEditor should render edit scripted field correctly 1`] = `
     <React.Fragment>
       <eui-form-row
         helpText={
-          <span>
-            Formatting allows you to control the way that specific values are displayed. It can also cause values to be completely changed and prevent highlighting in Discover from working.
-          </span>
+          <FormattedMessage
+            defaultMessage="Formatting allows you to control the way that specific values are displayed. It can also cause values to be completely changed and prevent highlighting in Discover from working."
+            id="common.ui.fieldEditor.formatLabel"
+            values={Object {}}
+          />
         }
         label={
-          <span>
-            Format 
-            <span>
-              (Default: 
-              <eui-code>
-                Test format
-              </eui-code>
-              )
-            </span>
-          </span>
+          <FormattedMessage
+            defaultMessage="Format (Default: {defaultFormat})"
+            id="common.ui.fieldEditor.defaultFormatHeader"
+            values={
+              Object {
+                "defaultFormat": <eui-code>
+                  Test format
+                </eui-code>,
+              }
+            }
+          />
         }
       >
         <eui-select
@@ -369,18 +405,28 @@ exports[`FieldEditor should render edit scripted field correctly 1`] = `
       <eui-form-row>
         <React.Fragment>
           <eui-text>
-            Access fields with 
-            <code>
-              doc['some_field'].value
-            </code>
-            .
+            <FormattedMessage
+              defaultMessage="Access fields with {code}."
+              id="common.ui.fieldEditor.script.accessWithLabel"
+              values={
+                Object {
+                  "code": <code>
+                    doc['some_field'].value
+                  </code>,
+                }
+              }
+            />
           </eui-text>
           <br />
           <eui-link
             data-test-subj="scriptedFieldsHelpLink"
             onClick={[Function]}
           >
-            Get help with the syntax and preview the results of your script.
+            <FormattedMessage
+              defaultMessage="Get help with the syntax and preview the results of your script."
+              id="common.ui.fieldEditor.script.getHelpLabel"
+              values={Object {}}
+            />
           </eui-link>
         </React.Fragment>
       </eui-form-row>
@@ -397,7 +443,11 @@ exports[`FieldEditor should render edit scripted field correctly 1`] = `
             isLoading={false}
             onClick={[Function]}
           >
-            Save field
+            <FormattedMessage
+              defaultMessage="Save field"
+              id="common.ui.fieldEditor.actions.saveButton"
+              values={Object {}}
+            />
           </eui-button>
         </eui-flex-item>
         <eui-flex-item
@@ -407,7 +457,11 @@ exports[`FieldEditor should render edit scripted field correctly 1`] = `
             data-test-subj="fieldCancelButton"
             onClick={[Function]}
           >
-            Cancel
+            <FormattedMessage
+              defaultMessage="Cancel"
+              id="common.ui.fieldEditor.actions.cancelButton"
+              values={Object {}}
+            />
           </eui-button-empty>
         </eui-flex-item>
         <eui-flex-item>
@@ -421,7 +475,11 @@ exports[`FieldEditor should render edit scripted field correctly 1`] = `
                 color="danger"
                 onClick={[Function]}
               >
-                Delete
+                <FormattedMessage
+                  defaultMessage="Delete"
+                  id="common.ui.fieldEditor.actions.deleteButton"
+                  values={Object {}}
+                />
               </eui-button-empty>
             </eui-flex-item>
           </eui-flex-group>
@@ -439,7 +497,11 @@ exports[`FieldEditor should show conflict field warning 1`] = `
 <div>
   <eui-text>
     <h3>
-      Create scripted field
+      <FormattedMessage
+        defaultMessage="Create scripted field"
+        id="common.ui.fieldEditor.createHeader"
+        values={Object {}}
+      />
     </h3>
   </eui-text>
   <eui-spacer
@@ -496,14 +558,24 @@ exports[`FieldEditor should show conflict field warning 1`] = `
             type="alert"
           />
            
-          <strong>
-            Mapping Conflict:
-          </strong>
-            You already have a field with the name 
-          <eui-code>
-            foobar
-          </eui-code>
-          . Naming your scripted field with the same name means you won't be able to query both fields at the same time.
+          <FormattedMessage
+            defaultMessage="{mappingConflict} You already have a field with the name {fieldName}. Naming your scripted field with the same name means you won't be able to query both fields at the same time."
+            id="common.ui.fieldEditor.mappingConflictLabel.mappingConflictDetail"
+            values={
+              Object {
+                "fieldName": <eui-code>
+                  foobar
+                </eui-code>,
+                "mappingConflict": <strong>
+                  <FormattedMessage
+                    defaultMessage="Mapping Conflict:"
+                    id="common.ui.fieldEditor.mappingConflictLabel.mappingConflictLabel"
+                    values={Object {}}
+                  />
+                </strong>,
+              }
+            }
+          />
         </span>
       }
       isInvalid={false}
@@ -572,21 +644,24 @@ exports[`FieldEditor should show conflict field warning 1`] = `
     <React.Fragment>
       <eui-form-row
         helpText={
-          <span>
-            Formatting allows you to control the way that specific values are displayed. It can also cause values to be completely changed and prevent highlighting in Discover from working.
-          </span>
+          <FormattedMessage
+            defaultMessage="Formatting allows you to control the way that specific values are displayed. It can also cause values to be completely changed and prevent highlighting in Discover from working."
+            id="common.ui.fieldEditor.formatLabel"
+            values={Object {}}
+          />
         }
         label={
-          <span>
-            Format 
-            <span>
-              (Default: 
-              <eui-code>
-                Test format
-              </eui-code>
-              )
-            </span>
-          </span>
+          <FormattedMessage
+            defaultMessage="Format (Default: {defaultFormat})"
+            id="common.ui.fieldEditor.defaultFormatHeader"
+            values={
+              Object {
+                "defaultFormat": <eui-code>
+                  Test format
+                </eui-code>,
+              }
+            }
+          />
         }
       >
         <eui-select
@@ -630,18 +705,28 @@ exports[`FieldEditor should show conflict field warning 1`] = `
       <eui-form-row>
         <React.Fragment>
           <eui-text>
-            Access fields with 
-            <code>
-              doc['some_field'].value
-            </code>
-            .
+            <FormattedMessage
+              defaultMessage="Access fields with {code}."
+              id="common.ui.fieldEditor.script.accessWithLabel"
+              values={
+                Object {
+                  "code": <code>
+                    doc['some_field'].value
+                  </code>,
+                }
+              }
+            />
           </eui-text>
           <br />
           <eui-link
             data-test-subj="scriptedFieldsHelpLink"
             onClick={[Function]}
           >
-            Get help with the syntax and preview the results of your script.
+            <FormattedMessage
+              defaultMessage="Get help with the syntax and preview the results of your script."
+              id="common.ui.fieldEditor.script.getHelpLabel"
+              values={Object {}}
+            />
           </eui-link>
         </React.Fragment>
       </eui-form-row>
@@ -658,7 +743,11 @@ exports[`FieldEditor should show conflict field warning 1`] = `
             isLoading={false}
             onClick={[Function]}
           >
-            Create field
+            <FormattedMessage
+              defaultMessage="Create field"
+              id="common.ui.fieldEditor.actions.createButton"
+              values={Object {}}
+            />
           </eui-button>
         </eui-flex-item>
         <eui-flex-item
@@ -668,7 +757,11 @@ exports[`FieldEditor should show conflict field warning 1`] = `
             data-test-subj="fieldCancelButton"
             onClick={[Function]}
           >
-            Cancel
+            <FormattedMessage
+              defaultMessage="Cancel"
+              id="common.ui.fieldEditor.actions.cancelButton"
+              values={Object {}}
+            />
           </eui-button-empty>
         </eui-flex-item>
       </eui-flex-group>
@@ -684,7 +777,15 @@ exports[`FieldEditor should show deprecated lang warning 1`] = `
 <div>
   <eui-text>
     <h3>
-      Edit test
+      <FormattedMessage
+        defaultMessage="Edit {fieldName}"
+        id="common.ui.fieldEditor.editHeader"
+        values={
+          Object {
+            "fieldName": "test",
+          }
+        }
+      />
     </h3>
   </eui-text>
   <eui-spacer
@@ -742,20 +843,30 @@ exports[`FieldEditor should show deprecated lang warning 1`] = `
           />
            
           <strong>
-            Deprecation Warning:
+            <FormattedMessage
+              defaultMessage="Deprecation Warning:"
+              id="common.ui.fieldEditor.warningHeader"
+              values={Object {}}
+            />
           </strong>
            
-          <eui-code>
-            testlang
-          </eui-code>
-           is deprecated and support will be removed in the next major version of Kibana and Elasticsearch. We recommend using 
-          <eui-link
-            href="(docLink for scriptedFields.painless)"
-            target="_window"
-          >
-            Painless
-          </eui-link>
-           for new scripted fields.
+          <FormattedMessage
+            defaultMessage="{language} is deprecated and support will be removed in the next major version of Kibana and Elasticsearch. We recommend using {painlessLink} for new scripted fields."
+            id="common.ui.fieldEditor.warningLabel.warningDetail"
+            values={
+              Object {
+                "language": <eui-code>
+                  testlang
+                </eui-code>,
+                "painlessLink": <eui-link
+                  href="(docLink for scriptedFields.painless)"
+                  target="_window"
+                >
+                  Painless
+                </eui-link>,
+              }
+            }
+          />
         </span>
       }
       label="Language"
@@ -843,21 +954,24 @@ exports[`FieldEditor should show deprecated lang warning 1`] = `
     <React.Fragment>
       <eui-form-row
         helpText={
-          <span>
-            Formatting allows you to control the way that specific values are displayed. It can also cause values to be completely changed and prevent highlighting in Discover from working.
-          </span>
+          <FormattedMessage
+            defaultMessage="Formatting allows you to control the way that specific values are displayed. It can also cause values to be completely changed and prevent highlighting in Discover from working."
+            id="common.ui.fieldEditor.formatLabel"
+            values={Object {}}
+          />
         }
         label={
-          <span>
-            Format 
-            <span>
-              (Default: 
-              <eui-code>
-                Test format
-              </eui-code>
-              )
-            </span>
-          </span>
+          <FormattedMessage
+            defaultMessage="Format (Default: {defaultFormat})"
+            id="common.ui.fieldEditor.defaultFormatHeader"
+            values={
+              Object {
+                "defaultFormat": <eui-code>
+                  Test format
+                </eui-code>,
+              }
+            }
+          />
         }
       >
         <eui-select
@@ -902,18 +1016,28 @@ exports[`FieldEditor should show deprecated lang warning 1`] = `
       <eui-form-row>
         <React.Fragment>
           <eui-text>
-            Access fields with 
-            <code>
-              doc['some_field'].value
-            </code>
-            .
+            <FormattedMessage
+              defaultMessage="Access fields with {code}."
+              id="common.ui.fieldEditor.script.accessWithLabel"
+              values={
+                Object {
+                  "code": <code>
+                    doc['some_field'].value
+                  </code>,
+                }
+              }
+            />
           </eui-text>
           <br />
           <eui-link
             data-test-subj="scriptedFieldsHelpLink"
             onClick={[Function]}
           >
-            Get help with the syntax and preview the results of your script.
+            <FormattedMessage
+              defaultMessage="Get help with the syntax and preview the results of your script."
+              id="common.ui.fieldEditor.script.getHelpLabel"
+              values={Object {}}
+            />
           </eui-link>
         </React.Fragment>
       </eui-form-row>
@@ -930,7 +1054,11 @@ exports[`FieldEditor should show deprecated lang warning 1`] = `
             isLoading={false}
             onClick={[Function]}
           >
-            Save field
+            <FormattedMessage
+              defaultMessage="Save field"
+              id="common.ui.fieldEditor.actions.saveButton"
+              values={Object {}}
+            />
           </eui-button>
         </eui-flex-item>
         <eui-flex-item
@@ -940,7 +1068,11 @@ exports[`FieldEditor should show deprecated lang warning 1`] = `
             data-test-subj="fieldCancelButton"
             onClick={[Function]}
           >
-            Cancel
+            <FormattedMessage
+              defaultMessage="Cancel"
+              id="common.ui.fieldEditor.actions.cancelButton"
+              values={Object {}}
+            />
           </eui-button-empty>
         </eui-flex-item>
         <eui-flex-item>
@@ -954,7 +1086,11 @@ exports[`FieldEditor should show deprecated lang warning 1`] = `
                 color="danger"
                 onClick={[Function]}
               >
-                Delete
+                <FormattedMessage
+                  defaultMessage="Delete"
+                  id="common.ui.fieldEditor.actions.deleteButton"
+                  values={Object {}}
+                />
               </eui-button-empty>
             </eui-flex-item>
           </eui-flex-group>
