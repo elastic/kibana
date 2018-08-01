@@ -80,7 +80,7 @@ export default function ({ getService, getPageObjects }) {
       });
 
       describe('Print Layout', () => {
-        it.skip('matches baseline report', async function () {
+        it('matches baseline report', async function () {
           // Generating and then comparing reports can take longer than the default 60s timeout because the comparePngs
           // function is taking about 15 seconds per comparison in jenkins.
           this.timeout(180000);
@@ -117,7 +117,7 @@ export default function ({ getService, getPageObjects }) {
           expect(diffCount).to.be.lessThan(128000);
         });
 
-        it.skip('matches same baseline report with margins turned on', async function () {
+        it('matches same baseline report with margins turned on', async function () {
           // Generating and then comparing reports can take longer than the default 60s timeout because the comparePngs
           // function is taking about 15 seconds per comparison in jenkins.
           this.timeout(180000);
