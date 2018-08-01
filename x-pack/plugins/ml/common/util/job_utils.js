@@ -188,7 +188,7 @@ export function mlFunctionToESAggregation(functionName) {
   }
 
   // Return null if ML function does not map to an ES aggregation.
-  // i.e. median, low_median, high_median, rare, freq_rare,
+  // i.e. median, low_median, high_median, freq_rare,
   // varp, low_varp, high_varp, time_of_day, time_of_week, lat_long,
   // info_content, low_info_content, high_info_content
   return null;

@@ -286,7 +286,7 @@ module.controller('MlExplorerChartsContainerController', function ($scope, $inje
       const job = mlJobService.getJob(record.job_id);
       if (
         isTimeSeriesViewDetector(job, record.detector_index) === false ||
-        !FUNCTION_DESCRIPTIONS_TO_PLOT.includes(record.function_description)
+        FUNCTION_DESCRIPTIONS_TO_PLOT.includes(record.function_description) === false
       ) {
         return;
       }
