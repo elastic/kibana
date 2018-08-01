@@ -76,8 +76,9 @@ class Timefilter extends SimpleEmitter {
   setRefreshInterval = (refreshInterval) => {
     // Object.assign used for partially composed updates
     const newRefreshInterval = Object.assign(this.getRefreshInterval(), refreshInterval);
-    if (newRefreshInterval.value < 0) {
+    if (newRefreshInterval.value <= 0) {
       newRefreshInterval.value = 0;
+      newRefreshInterval.pause = true;
     }
     if (areTimePickerValsDifferent(this.getRefreshInterval(), newRefreshInterval)) {
       this._refreshInterval = {
