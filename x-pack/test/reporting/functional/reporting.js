@@ -147,7 +147,7 @@ export default function ({ getService, getPageObjects }) {
       });
 
       describe('Preserve Layout', () => {
-        it.skip('matches baseline report', async function () {
+        it('matches baseline report', async function () {
 
           // Generating and then comparing reports can take longer than the default 60s timeout because the comparePngs
           // function is taking about 15 seconds per comparison in jenkins.
