@@ -68,7 +68,7 @@ export class NavControlPopover extends Component {
         isOpen={this.state.isOpen}
         closePopover={this.closePortal}
         anchorPosition={'rightCenter'}
-        panelPaddingSize="none"
+        panelPaddingSize="s"
         ownFocus
       >
         <SpacesMenu spaces={this.state.spaces} onSelectSpace={this.onSelectSpace} />
