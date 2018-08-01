@@ -22,7 +22,6 @@ import expect from 'expect.js';
 export default function ({ getService, getPageObjects }) {
   const filterBar = getService('filterBar');
   const log = getService('log');
-  const visualization = getService('visualization');
   const embedding = getService('embedding');
   const PageObjects = getPageObjects(['common', 'visualize', 'header']);
 
@@ -46,7 +45,7 @@ export default function ({ getService, getPageObjects }) {
 
       it('should allow opening table vis in embedded mode', async () => {
         await embedding.openInEmbeddedMode();
-        await visualization.waitForRender();
+        await PageObjects.common.sleep(500);
 
         const data = await PageObjects.visualize.getTableVisData();
         log.debug(data.split('\n'));
@@ -67,7 +66,7 @@ export default function ({ getService, getPageObjects }) {
       it('should allow to filter in embedded mode', async () => {
         await filterBar.addFilter('@timestamp', 'is between', ['2015-09-19', '2015-09-21']);
         await PageObjects.header.waitUntilLoadingHasFinished();
-        await visualization.waitForRender();
+        await PageObjects.common.sleep(500);
 
         const data = await PageObjects.visualize.getTableVisData();
         log.debug(data.split('\n'));
