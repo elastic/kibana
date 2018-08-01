@@ -29,6 +29,10 @@ const BasicResponseHandlerProvider = function (Private) {
     const tables = tableGroup.tables;
 
     if (!tables.length) return;
+    if (tables.length === 1) {
+      return convertTable(vis, tables[0]);
+    }
+
     const out = {};
     let outList;
 
