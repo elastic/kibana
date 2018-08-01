@@ -56,3 +56,8 @@ considered unique based on its persistent UUID, which is written to the path.dat
 *Details:* The `/shorten` API has been deprecated since 6.5, when it was replaced by the `/api/shorten_url` API.
 
 *Impact:* The '/shorten' API has been removed. Use the '/api/shorten_url' API instead.
+
+=== Deprecated kibana.yml setting logging.useUTC has been replaced with logging.timezone
+*Details:* Any timezone can now be specified by canonical id.
+
+*Impact:* The logging.useUTC flag will have to be replaced with a timezone id.  If set to true the id is `UTC`.
