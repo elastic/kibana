@@ -17,28 +17,20 @@
  * under the License.
  */
 
+// @ts-ignore don't type elasticsearch now
 import { Client } from 'elasticsearch';
-import {
-  $combineLatest,
-  filter,
-  first,
-  k$,
-  map,
-  Observable,
-  shareLast,
-  Subscription,
-  switchMap,
-  toPromise,
-} from '../../lib/kbn_observable';
-import { LoggerFactory } from '../../logging';
+import { combineLatest, Observable, Subscription } from 'rxjs';
+import { filter, first, map, publishLast, switchMap } from 'rxjs/operators';
 import { CoreService } from '../../types/core_service';
 import { Headers } from '../http/router/headers';
+import { LoggerFactory } from '../logging';
 import { AdminClient } from './admin_client';
 import { ElasticsearchConfigs } from './elasticsearch_configs';
 import { ScopedDataClient } from './scoped_data_client';
 
 interface Clients {
-  [type in ElasticsearchClusterType]: Client;
+  admin: Client;
+  data: Client;
 }
 
 export class ElasticsearchService implements CoreService {
@@ -48,7 +40,7 @@ export class ElasticsearchService implements CoreService {
   constructor(private readonly configs$: Observable<ElasticsearchConfigs>, logger: LoggerFactory) {
     const log = logger.get('elasticsearch');
 
-    this.clients$ = k$(configs$)(
+    this.clients$ = configs$.pipe(
       filter(() => {
         if (this.subscription !== undefined) {
           log.error('clusters cannot be changed after they are created');
@@ -81,10 +73,7 @@ export class ElasticsearchService implements CoreService {
             };
           })
       ),
-      // We only want a single subscription of this as we only want to create a
-      // single set of clients at a time. We therefore share these, plus we
-      // always replay the latest set of clusters when subscribing.
-      shareLast()
+      publishLast()
     );
   }
 
@@ -101,11 +90,11 @@ export class ElasticsearchService implements CoreService {
   }
 
   public getAdminClient$() {
-    return k$(this.clients$)(map(clients => new AdminClient(clients.admin)));
+    return this.clients$.pipe(map(clients => new AdminClient(clients.admin)));
   }
 
   public getScopedDataClient$(headers: Headers) {
-    return k$($combineLatest(this.clients$, this.configs$))(
+    return combineLatest(this.clients$, this.configs$).pipe(
       map(
         ([clients, configs]) =>
           new ScopedDataClient(clients.data, configs.forType('data').filterHeaders(headers))
@@ -114,6 +103,8 @@ export class ElasticsearchService implements CoreService {
   }
 
   public getScopedDataClient(headers: Headers) {
-    return k$(this.getScopedDataClient$(headers))(first(), toPromise());
+    return this.getScopedDataClient$(headers)
+      .pipe(first())
+      .toPromise();
   }
 }
