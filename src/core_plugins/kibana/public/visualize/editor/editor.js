@@ -133,6 +133,7 @@ function VisEditor(
 
   const topLevelSearchSource =  getTopLevelSearchSource(searchSource);
   const globalFiltersSearchSource = searchSource.create();
+  globalFiltersSearchSource.setField('index', searchSource.getField('index'));
   topLevelSearchSource.setParent(globalFiltersSearchSource);
 
 
