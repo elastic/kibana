@@ -90,14 +90,9 @@ export const BeatsTableType: TableType = {
   controlDefinitions: (data: any) => ({
     actions: [
       {
-        action: 'edit',
-        name: 'Bulk Edit',
-        icon: <EuiIcon type="indexEdit" size="m" />,
-      },
-      {
+        name: 'Disenroll Selected',
         action: 'delete',
-        name: 'Bulk Delete',
-        icon: <EuiIcon type="indexClose" size="m" />,
+        danger: true,
       },
     ],
     filters: [

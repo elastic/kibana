@@ -50,11 +50,8 @@ export class ControlBar extends React.Component<ControlBarProps, ControlBarState
 
   private renderAssignmentOptions = () => (
     <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
-      <EuiFlexItem grow={false}>{this.renderActionButton()}</EuiFlexItem>
       <EuiFlexItem>{this.props.selectionCount} selected</EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <EuiButton color="danger">Disenroll Selected</EuiButton>
-      </EuiFlexItem>
+      <EuiFlexItem grow={false}>{this.renderActionButton()}</EuiFlexItem>
       <EuiFlexItem grow={false}>
         <EuiPopover
           button={
@@ -92,16 +89,11 @@ export class ControlBar extends React.Component<ControlBarProps, ControlBarState
   );
 
   private renderDefaultControls = () => (
-    <EuiFlexGroup>
-      <EuiFlexItem grow={false}>{this.renderActionButton()}</EuiFlexItem>
-      <EuiFlexItem>
-        <EuiSearchBar
-          box={{ incremental: true }}
-          filters={this.props.controlDefinitions.filters}
-          onChange={(query: any) => this.props.actionHandler('search', query)}
-        />
-      </EuiFlexItem>
-    </EuiFlexGroup>
+    <EuiSearchBar
+      box={{ incremental: true }}
+      filters={this.props.controlDefinitions.filters}
+      onChange={(query: any) => this.props.actionHandler('search', query)}
+    />
   );
 
   private renderActionButton = () => {
