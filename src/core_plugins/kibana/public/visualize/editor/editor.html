@@ -66,12 +66,7 @@
     </div>
   </div>
 
-  <visualize
-    ng-if="!chrome.getVisible()"
-    saved-obj="savedVis"
-    ui-state="uiState"
-    time-range="timeRange"
-  />
+  <div class="visualize" ng-if="!chrome.getVisible()"/>
 
   <visualization-editor
     ng-if="chrome.getVisible()"

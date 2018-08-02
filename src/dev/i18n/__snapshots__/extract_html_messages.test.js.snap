@@ -1,0 +1,31 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`dev/i18n/extract_html_messages extracts default messages from HTML 1`] = `
+Array [
+  Array [
+    "kbn.dashboard.id-1",
+    Object {
+      "context": "Message context 1",
+      "message": "Message text 1",
+    },
+  ],
+  Array [
+    "kbn.dashboard.id-2",
+    Object {
+      "context": undefined,
+      "message": "Message text 2",
+    },
+  ],
+  Array [
+    "kbn.dashboard.id-3",
+    Object {
+      "context": "Message context 3",
+      "message": "Message text 3",
+    },
+  ],
+]
+`;
+
+exports[`dev/i18n/extract_html_messages throws on empty i18n-id 1`] = `"Empty \\"i18n-id\\" value in angular directive is not allowed."`;
+
+exports[`dev/i18n/extract_html_messages throws on missing i18n-default-message attribute 1`] = `"Empty defaultMessage in angular directive is not allowed (\\"message-id\\")."`;
