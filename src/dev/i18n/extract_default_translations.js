@@ -38,15 +38,15 @@ function addMessageToMap(targetMap, key, value) {
   targetMap.set(key, value);
 }
 
-export async function extractDefaultTranslations(inputPath) {
+export async function extractDefaultTranslations({ path, checkOnly }) {
   const entries = await globAsync('*.{js,jsx,pug,ts,tsx,html,hbs,handlebars}', {
-    cwd: inputPath,
+    cwd: path,
     matchBase: true,
   });
 
   const { htmlEntries, codeEntries, pugEntries, hbsEntries } = entries.reduce(
     (paths, entry) => {
-      const resolvedPath = resolve(inputPath, entry);
+      const resolvedPath = resolve(path, entry);
 
       if (resolvedPath.endsWith('.html')) {
         paths.htmlEntries.push(resolvedPath);
@@ -93,6 +93,10 @@ export async function extractDefaultTranslations(inputPath) {
     })
   );
 
+  if (checkOnly) {
+    return;
+  }
+
   // .slice(0, -1): remove closing curly brace from json to append messages
   let jsonBuffer = Buffer.from(
     JSON5.stringify({ formats: i18n.formats }, { quote: `'`, space: 2 }).slice(0, -1)
@@ -114,10 +118,10 @@ export async function extractDefaultTranslations(inputPath) {
   jsonBuffer = Buffer.concat([jsonBuffer, Buffer.from('}\n')]);
 
   try {
-    await accessAsync(resolve(inputPath, 'translations'));
+    await accessAsync(resolve(path, 'translations'));
   } catch (_) {
-    await makeDirAsync(resolve(inputPath, 'translations'));
+    await makeDirAsync(resolve(path, 'translations'));
   }
 
-  await writeFileAsync(resolve(inputPath, 'translations', 'en.json'), jsonBuffer);
+  await writeFileAsync(resolve(path, 'translations', 'en.json'), jsonBuffer);
 }

@@ -21,7 +21,14 @@ import { run } from './run';
 import { extractDefaultTranslations } from './i18n/extract_default_translations';
 
 run(async () => {
-  for (const inputPath of process.argv.slice(2)) {
-    await extractDefaultTranslations(inputPath);
+  let args = process.argv.slice(2);
+  const checkOnly = args.includes('--syntax-check-only');
+
+  if (checkOnly) {
+    args = args.filter(arg => arg !== '--syntax-check-only');
+  }
+
+  for (const path of args) {
+    await extractDefaultTranslations({ path, checkOnly });
   }
 });
