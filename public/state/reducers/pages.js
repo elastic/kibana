@@ -48,10 +48,14 @@ export const pagesReducer = handleActions(
       if (!srcPage) return workpadState;
 
       const srcIndex = workpadState.pages.indexOf(srcPage);
+      const newPageIndex = srcIndex + 1;
       const insertedWorkpadState = addPage(workpadState, clonePage(srcPage), srcIndex);
-      const newState = setPageIndex(insertedWorkpadState, srcIndex + 1);
+      const newState = setPageIndex(insertedWorkpadState, newPageIndex);
+
+      // changes to the page require navigation
       const router = routerProvider();
-      router.navigateTo('loadWorkpad', { id: newState.id, page: srcIndex + 1 });
+      router.navigateTo('loadWorkpad', { id: newState.id, page: newPageIndex + 1 });
+
       return newState;
     },
 
