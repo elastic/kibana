@@ -7,6 +7,7 @@ import { BeatTag } from '../../../../common/domain_types';
 import { FrameworkUser } from '../framework/adapter_types';
 
 export interface CMTagsAdapter {
+  getAll(user: FrameworkUser): Promise<BeatTag[]>;
   getTagsWithIds(user: FrameworkUser, tagIds: string[]): Promise<BeatTag[]>;
   upsertTag(user: FrameworkUser, tag: BeatTag): Promise<{}>;
 }
