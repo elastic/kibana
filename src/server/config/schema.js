@@ -236,7 +236,7 @@ export default async () => Joi.object({
   }).default(),
 
   i18n: Joi.object({
-    defaultLocale: Joi.string().default('en'),
+    locale: Joi.string().default('en'),
   }).default(),
 
   // This is a configuration node that is specifically handled by the config system
