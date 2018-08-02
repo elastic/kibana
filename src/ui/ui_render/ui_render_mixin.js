@@ -25,13 +25,11 @@ import { i18n, i18nLoader } from '@kbn/i18n';
 import { AppBootstrap } from './bootstrap';
 
 export function uiRenderMixin(kbnServer, server, config) {
+  const { translationPaths = [] } = kbnServer.uiExports;
+  i18nLoader.registerTranslationFiles(translationPaths);
 
   async function getUiTranslations() {
     const locale = config.get('i18n.locale');
-
-    const { translationPaths = [] } = kbnServer.uiExports;
-    i18nLoader.registerTranslationFiles(translationPaths);
-
     const translations = await i18nLoader.getTranslationsByLocale(locale);
 
     return {
