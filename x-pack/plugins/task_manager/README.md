@@ -1,192 +1,243 @@
-# Task Manager
+# Kibana task manager
 
-The task manager is a system for running background tasks in Kibana. Background tasks can run on a recurring schedule, or be one-time tasks. Eventually, background tasks will be run in a separate process from the main Kibana server.
+The task manager is a generic system for running background tasks. It supports:
 
-## TODO
+- Single-run and recurring tasks
+- Scheduling tasks to run after a specified datetime
+- Basic retry logic
+- Recovery of stalled tasks / timeouts
+- Tracking task state across multiple runs
+- Configuring the run-parameters for specific tasks
+- Basic coordination to prevent the same task instance from running on more than one Kibana system at a time
 
-- Support storage of user tokens so that tasks are run in the context of the user that created them
-- Test the task_store class and tidy it up
-- Create a Kibana plugin and service to expose the ability to schedule and delete tasks
-- Write integration tests
+## Implementation details
 
+At a high-level, the task manager works like this:
 
-## Task Pool
+- Every `{poll_interval}` milliseconds, check the `{index}` for any tasks that need to be run:
+  - `runAt` is past
+  - `attempts` is less than the configured threshold
+- Attempt to claim the task by using optimistic concurrency to set:
+  - status to `running`
+  - `runAt` to now + the timeout specified by the task
+- Execute the task, if the previous claim succeeded
+- If the task fails, increment the `attempts` count and reschedule it
+- If the task succeeds:
+    - If it is recurring, store the result of the run, and reschedule
+    - If it is not recurring, remove it from the index
 
-The core logic behind running tasks is the task pool. This is a function which polls the task manager index, looking for scheduled tasks which have timed out or whose schedule has arrived. It coordinates the running of these tasks across a cluster of Kibana instances.
+## Pooling
 
-The task pool has logic in place that ensures:
+Each task manager instance runs tasks in a pool which ensures that  at most N tasks are run at a time, where N is configurable. This prevents the system from running too many tasks at once in resource constrained environments. In addition to this, each individual task can also specify `maxConcurrency` to limit how many tasks of a given type can be run at once.
 
-- No more than `maxPoolSize` tasks will run on any given Kibana instance.
-- The task pool index is queried efficiently, batching access and ensuring that no single Kibana instance competes with itself for tasks
+For example, we may have a system with a maxConcurrency of 10, but a super expensive task (such as reporting) which specifies a maxConcurrency of 1.
 
-The pool returns an object which allows:
+If a task specifies a higher maxConcurrency than the system supports, the system's maxConcurrency setting trumps it.
 
-  - Manually forcing the pool to look for more work
-  - Querying the pool for stats on its currently running tasks
+## Config options
 
+The task_manager can be configured via `taskManager` config options (e.g. `taskManager.maxAttempts`):
 
-## Tasks
+- `max_attempts` - How many times a failing task instance will be retried before it is never run again
+- `poll_interval` - How often the background worker should check the task_manager index for more work
+- `index` - The name of the index that the task_manager
+- `max_concurrency` - The maximum number of tasks a Kibana will run concurrently (defaults to 10)
+- `credentials` - Encrypted user credentials. All tasks will run in the security context of this user. See [this issue](https://github.com/elastic/dev/issues/1045) for a discussion on task scheduler security.
 
-Plugins can define tasks by adding a `tasks` property to their plugin spec.
+## Task definitions
+
+Plugins define tasks by adding a `tasks` property to their `uiExports`.
 
 ```js
-
 {
   tasks: {
-    // 'mytask' is the task type, and should be unique across the system
-    mytask: {
-      title: 'A required, human friendly title',
-      description: 'An optional, more detailed description',
-      timeOut: '5m', // Optional, specified in minutes, defaults to 5m
+    // clusterMonitoring is the task type, and must be unique across the entire system
+    clusterMonitoring: {
+      // Human friendly name, used to represent this task in logs, UI, etc
+      title: 'Human friendly name',
+
+      // Optional, human-friendly, more detailed description
+      description: 'Amazing!!',
+
+      // Optional, how long, in minutes, the system should wait before
+      // a running instance of this task is considered to be timed out.
+      // This defaults to 5 minutes.
+      timeOut: '5m',
+
+      // At most, two clusterMonitoring tasks can be run concurrently in a single
+      // Kibana instance.
+      maxConcurrency: 2,
+
+      // The method that actually runs this task. It is passed a task
+      // context: { params, state, callCluster }, documented below.
+      // Its return value should fit the TaskResult interface, documented
+      // below. Invalid return values will result in a logged warning.
       async run(context) {
-        return Promise.resolve('Do something fanci here!');
+        // Do some work
+        // Conditionally send some alerts
+        // Return some result or other...
       },
     },
   },
-},
-
+}
 ```
 
-The task context looks like this:
+When Kibana attempts to claim and run a task instance, it looks its definition up, and executes its run method, passing it a run context which looks like this:
 
 ```js
 {
-  // A function which calls Elasticsearch with the same user-context
-  // as the user who scheduled this task.
+  // A function that provides user-scoped access to Elasticsearch
   callCluster,
 
-  // A task-specific object containing whatever data the task needs
-  // in order to perform its work. It is up to task authors to define
-  // what params their task expects. An example for a notification task
-  // might be something like this: { emails: ['foo@example.com'] }
+  // An object, specific to this task instance, used by the
+  // task to determine exactly what work should be performed.
+  // e.g. a cluster-monitoring task might have a `clusterName`
+  // property in here, but a movie-monitoring task might have
+  // a `directorName` property.
   params,
 
-  // Whatever is returned from the last successful run of the task,
-  // if this is a recurring task. This will be the empty object `{}`
-  // if this is the first run of a task.
-  previousResult,
+  // The state returned from the previous run of this task instance.
+  // If this task instance has never succesfully run, this will
+  // be an empty object: {}
+  state,
 }
 ```
 
+## Task result
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-## General Approach
-
-The initial MVP for task manager will be quite restrictive. It is designed to solve a specific problem (cluster alerts), and no deep thought has gone into extensibility.
-
-- Two kinds of scheduled tasks:
-  - Immediate: one-time tasks
-  - Recurring: tasks which will recurr on a scheduled basis
-- Restrictions in the MVP
-  - Only allows recurring tasks to be scheduled in increments of one minute (e.g. 1m, 2m, 5m, 10m)
-  - Cron-like or more complex scheduling is not supported
-  - Extending the system to provide new kinds of types via plugins is not supported
-  - Adding custom schedule types or overriding the "reschedule" logic is not supported
-  - Tasks do not have a heartbeat, or any kind of sophisticated mechanism for detecting "stuck" states
-- Both immediate and recurring tasks can be given a scheduled time for their first run
-- Background tasks have a "nextRun" property, which is a timestamp indicating the earliest time the task can run
-  - Dependng on how busy the scheudled task system is, tasks with a nextRun may run significantly later than the specified date, but are guaranteed not to run before it
-- Each instance of Kibana has a task pool of configurable size
-  - This is the maximum number of tasks that are permitted to run simultaneously within a single instance
-- Multiple Kibana instances coordinate in order to not do duplicate work
-  - This is done using optimistic concurrency
-  - Tasks are written into and read from
-  - This index is polled periodically (with a bit of intelligence) in order to detect new work
-  - Using optimistic concurrency
-    - Sets status 'running'
-    - Sets nextRun to the next date (e.g. now + 5 mins, in the case of the example above)
-  - Invokes the task function, passing it the configured args and previous state
-  - If the task fails (promise rejection), log the error, but in V1, no reattempts-- it'll run again at the next interval
-  - Regardless of success or failure, reset the status to 'idle'
-- Detailed logging
-- Recurring task previousState
-  - Tasks can return data of any shape
-  - The return value of a task is stored and passed into the next run of that task as `opts.previousState`
-  - This allows tasks to be a bit more powerful in what they can reason about (e.g. did the system go from green to red?)
-- Tasks are registered with the system, and have
-  - An id, title, description, execute, the latter is a function which must return a promise
-  - If a task accepts input params (most probably will), it can define metadata that describes those params
-    - This metadata can be used to build an input form / UI for configuring an instance of a task
-  - If the same id is registered more than once, this is an error
-  - The execute function is passed a context which includes:
-    - params - custom context specified when the task was scheduled, used by the task to modify its behavior (e.g. `{ email: 'me@example.com', monitorIndex: 'bar' }`)
-    - previousState
-    - callCluster - an elasticsearch connection that has the context of the user who scheduled the task
-- REST API
-  - The API allows programmatic CRUD of scheudled tasks
-  - Users cannot modify tasks created by other users (except, maybe admin-like users)
-  - For security reasons, we may restrict excatly what details users can read about other users' scheduled tasks
-- Tasks are considered "stuck" if `status === 'running' && nextRun > (2 * interval)`
-  - In other words, if a task is scheduled to run every 5 minutes, if the task runs for more than 10 minutes, it is "stuck"
-  - If a stuck task is found
-    - Update the task (w/ optimistic concurrency)
-      - Update `nextRun`
-      - Increment `attempts`
-    - Write it out to the logs
-    - If `attempts` is below threshold, reattempt it
-    - If `attempts` is above threshold, log, but no longer reattempt (or maybe we bump out the nextRun to 24 hours or something)
-- Task options
-  - When a task is scheduled, it can be given data as i
-  - Some descriptive metadata about the shape of arguments that can be used to tailor scheduled instances of the task
-- Configuration options:
-  - `pool_size`: defaults to 10
-  - `index`: defaults to "task_manager"
-  - `poll_interval`: defaults to 1m
-  - `max_retries`: defaults to 3
-
-
-### Terms
-
-- task - a definition of work that can be configured and scheduled by the task manager
-- taskInstance - a configured or scheduled instance of a task
-
-
-### Scheduled task document
-
-A scheduled task document might look something like this:
+The task's run method is expected to return an object that conforms to the following interface. Other return values will result in a warning, but the system should continue to work.
 
 ```js
 {
-  interval: '5m', // 5 minutes
-  task: 'someplugin.foo', // The id / type of the registered task
-  params: '{ "json": "blob", "whatever": "stuff" }', // The input params used to tailor what the task does
-  status: 'idle', // The task is not running
-  nextRun: '2018-10-20 T02:30:30', // The date + time after which the task will run
-  previousState: '{ "status": "offline" }', // The value returned by the previous run
-  attempts: 0, // The number of failed attempts to run this task
+  // An indication of success or failure: 'ok' | 'error'
+  status: 'error',
+
+  // Optional, if specified, this is used as the tasks' nextRun, overriding
+  // the default system scheduler.
+  runAt: "2020-07-24T17:34:35.272Z",
+
+  // Optional, an error object, logged out as a warning
+  error: { message: 'Hrumph!' },
+
+  // Optional, this will be passed into the next run of the task, if
+  // there is one...
+  state: {
+    anything: 'goes here',
+  },
 }
 ```
 
+## Task instances
 
+The task_manager module will store scheduled task instances in an index. This allows recover of failed tasks, coordination across Kibana clusters, etc.
 
-## Misc / later work
+The data stored for a task instance looks something like this:
 
-Later versions might:
+```js
+{
+  // The type of task that will run this instance.
+  taskType: 'clusterMonitoring',
 
-- Track task history in e.g. task_history indices
-  - These should use the rollover API or similar to keep from growing too large
-- Allow addition of custom types of tasks (e.g. something other than one-time or recurring)
-- Built-in, scriptable task that allows tasks to be defined via canvas AST w/out the need to write a custom plugin
-- More robust healthcheck for any given task
-- More complex scheduling abilities (e.g. cron or some extensiblity layer or something)
+  // The next time this task instance should run. It is not guaranteed
+  // to run at this time, but it is guaranteed not to run earlier than
+  // this.
+  runAt: "2020-07-24T17:34:35.272Z",
+
+  // Indicates that this is a recurring task. We currently only support
+  // 1 minute granularity.
+  interval: '5m',
+
+  // How many times this task has been unsuccesfully attempted,
+  // this will be reset to 0 if the task ever succesfully completes.
+  // This is incremented if a task fails or times out.
+  attempts: 0,
+
+  // Currently, this is either idle | running. It is used to
+  // coordinate which Kibana instance owns / is running a specific
+  // task instance.
+  status: 'idle',
+
+  // The params specific to this task instance, which will be
+  // passed to the task when it runs, and will be used by the
+  // task to determine exactly what work should be performed.
+  // This is a JSON blob, and will be different per task type.
+  // e.g. a cluster-monitoring task might have a `clusterName`
+  // property in here, but a movie-monitoring task might have
+  // a `directorName` property.
+  params: '{ "task": "specific stuff here" }',
+
+  // The result of the previous run of this task instance. This
+  // will be passed to the next run of the task, along with the
+  // params, and could be used by a task to do special logic If
+  // the task state changes (e.g. from green to red, or foo to bar)
+  // If there was no previous run (e.g. the instance has never succesfully
+  // completed, this will be an empty object.). This is a JSON blob,
+  // and will be different per task type.
+  previousResult: '{ "status": "green" }',
+
+  // The token of the user who scheduled this task, used to ensure
+  // the task runs in the same security context as the user who
+  // scheduled the task.
+  userContext: 'the token of the user who scheduled this task',
+
+  // The id of the user that scheduled this task.
+  user: '23lk3l42',
+
+  // An application-specific designation, allowing different Kibana
+  // plugins / apps to query for only those tasks they care about.
+  scope: 'alerting',
+}
+```
+
+## Programmatic access
+
+The task manager plugin exposes a taskManager object on the Kibana server which plugins can use to manage scheduled tasks. Each method takes an optional `scope` argument and ensures that only tasks with the specified scope(s) will be affected.
+
+```js
+const manager = server.taskManager;
+
+// Schedules a task. All properties are as documented in the previous
+// storage section, except that here, params is an object, not a JSON
+// string.
+const task = manager.schedule({
+  taskType,
+  runAt,
+  interval,
+  params,
+  scope: 'my-fanci-app',
+});
+
+// Removes the specified task
+manager.remove({ id: task.id });
+
+// Fetches tasks, supports pagination, via the search-after API:
+// https://www.elastic.co/guide/en/elasticsearch/reference/current/search-request-search-after.html
+// If scope is not specified, all tasks are returned, otherwise only tasks
+// with the given scope are returned.
+const results = manager.find({ scope: 'my-fanci-app', searchAfter: ['ids'] });
+
+// results look something like this:
+{
+  searchAfter: ['233322'],
+  // Tasks is an array of task instances
+  tasks: [{
+    id: '3242342',
+    type: 'reporting',
+    // etc
+  }]
+}
+
+```
+
+More custom access to the tasks can be done directly via Elasticsearch, though that won't be officially supported, as we can change the document structure at any time.
+
+## Limitations in v1.0
+
+In v1, the system only understands 1 minute increments (e.g. '1m', '7m'). Tasks which need something more robust will need to specify their own "runAt" in their run method's return value.
+
+There is only a rudimentary mechanism for coordinating tasks and handling expired tasks. Tasks are considered expired if their runAt has arrived, and their status is still 'running'.
+
+There is no task history. Each run overwrites the previous run's state. One-time tasks are removed from the index upon completion regardless of success / failure.
+
+The task manager's public API is create / delete / list. Updates aren't directly supported, and listing is scoped so that users only see their own tasks.
+
