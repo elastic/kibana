@@ -6,9 +6,9 @@
 
 import Boom from 'boom';
 
-import { DocumentSearchRequest, RepositorySearchRequest } from '../../model';
+import { DocumentSearchRequest, RepositorySearchRequest, SymbolSearchRequest } from '../../model';
 import { Server } from '../kibana_types';
-import { DocumentSearchClient, RepositorySearchClient } from '../search';
+import { DocumentSearchClient, RepositorySearchClient, SymbolSearchClient } from '../search';
 
 export function repositorySearchRoute(server: Server, repoSearchClient: RepositorySearchClient) {
   server.route({
@@ -42,6 +42,26 @@ export function documentSearchRoute(server: Server, docSearchClient: DocumentSea
       };
       try {
         const res = await docSearchClient.search(searchReq);
+        reply(res);
+      } catch (error) {
+        reply(Boom.internal(`Search Exception ${error}`));
+      }
+    },
+  });
+}
+
+export function symbolSearchRoute(server: Server, symbolSearchClient: SymbolSearchClient) {
+  server.route({
+    path: '/api/cs/search/symbol',
+    method: 'GET',
+    async handler(req, reply) {
+      const searchReq: SymbolSearchRequest = {
+        query: req.query.q,
+        page: 1,
+        resultsPerPage: 50,
+      };
+      try {
+        const res = await symbolSearchClient.search(searchReq);
         reply(res);
       } catch (error) {
         reply(Boom.internal(`Search Exception ${error}`));

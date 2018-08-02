@@ -4,6 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { DetailSymbolInformation } from '@codesearch/javascript-typescript-langserver';
+
 import { Repository } from '../model';
 import { RepositoryUri } from './repository';
 
@@ -47,6 +49,9 @@ export interface RepositorySearchRequest extends SearchRequest {
 export interface DocumentSearchRequest extends SearchRequest {
   query: string;
 }
+export interface SymbolSearchRequest extends SearchRequest {
+  query: string;
+}
 
 // The base interface of any kind of search result.
 export interface SearchResult {
@@ -61,4 +66,9 @@ export interface RepositorySearchResult extends SearchResult {
 export interface DocumentSearchResult extends SearchResult {
   documents: Document[];
   highlights: any[];
+}
+
+export interface SymbolSearchResult extends SearchResult {
+  // TODO: we migit need an additional data structure for symbol search result.
+  symbols: DetailSymbolInformation[];
 }

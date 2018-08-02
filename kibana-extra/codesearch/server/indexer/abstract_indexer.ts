@@ -110,9 +110,8 @@ export abstract class AbstractIndexer implements Indexer {
               fieldDefaultNotAnalyzed: {
                 match: '*',
                 mapping: {
-                  index: 'no',
-                  include_in_all: 'false',
-                  norm: 'false',
+                  index: false,
+                  norms: false,
                 },
               },
             },

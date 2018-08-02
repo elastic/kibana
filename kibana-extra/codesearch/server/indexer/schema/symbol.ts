@@ -12,62 +12,46 @@ export const SymbolSchema = {
     properties: {
       name: {
         type: 'text',
+        analyzer: 'qname_path_hierarchy_analyzer',
       },
       kind: {
         type: 'integer',
+        index: false,
       },
       location: {
         properties: {
           uri: {
             type: 'text',
-          },
-          range: {
-            properties: {
-              start: {
-                properties: {
-                  line: {
-                    type: 'integer',
-                  },
-                  character: {
-                    type: 'integer',
-                  },
-                },
-              },
-              end: {
-                properties: {
-                  line: {
-                    type: 'integer',
-                  },
-                  character: {
-                    type: 'integer',
-                  },
-                },
-              },
-            },
+            index: false,
+            norms: false,
           },
         },
       },
-      containerName: {
-        type: 'text',
-      },
     },
   },
-  contents: {
-    properties: {
-      kind: {
-        type: 'text',
+};
+
+export const SymbolAnalysisSettings = {
+  analysis: {
+    analyzer: {
+      qname_path_hierarchy_analyzer: {
+        type: 'custom',
+        tokenizer: 'qname_path_hierarchy_tokenizer',
+        filter: ['lowercase'],
       },
-      language: {
-        type: 'text',
-      },
-      value: {
-        type: 'text',
+    },
+    tokenizer: {
+      qname_path_hierarchy_tokenizer: {
+        type: 'path_hierarchy',
+        delimiter: '.',
+        reverse: 'true',
       },
     },
   },
 };
 
 export const SymbolTypeName = 'symbol';
+export const SymbolIndexNamePrefix = `.codesearch-${SymbolTypeName}`;
 export const SymbolIndexName = (repoUri: RepositoryUri) => {
-  return `.codesearch-${SymbolTypeName}-${RepositoryUtils.normalizeRepoUriToIndexName(repoUri)}`;
+  return `${SymbolIndexNamePrefix}-${RepositoryUtils.normalizeRepoUriToIndexName(repoUri)}`;
 };

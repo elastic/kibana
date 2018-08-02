@@ -17,8 +17,12 @@ import { fileRoute } from './server/routes/file';
 import { lspRoute } from './server/routes/lsp';
 import { monacoRoute } from './server/routes/monaco';
 import { repositoryRoute } from './server/routes/repository';
-import { documentSearchRoute, repositorySearchRoute } from './server/routes/search';
-import { DocumentSearchClient, RepositorySearchClient } from './server/search';
+import {
+  documentSearchRoute,
+  repositorySearchRoute,
+  symbolSearchRoute
+} from './server/routes/search';
+import { DocumentSearchClient, RepositorySearchClient, SymbolSearchClient } from './server/search';
 import { ServerOptions } from './server/server_options';
 import { UpdateScheduler } from './server/update_scheduler';
 
@@ -62,6 +66,7 @@ export default (kibana: any) =>
       // Initialize search clients
       const repoSearchClient = new RepositorySearchClient(dataCluster.getClient(), log);
       const documentSearchClient = new DocumentSearchClient(dataCluster.getClient(), log);
+      const symbolSearchClient = new SymbolSearchClient(dataCluster.getClient(), log);
 
       // Initialize indexers
       const lspService = new LspService('127.0.0.1', server, serverOptions);
@@ -103,6 +108,7 @@ export default (kibana: any) =>
       repositoryRoute(server, serverOptions, cloneWorker, deleteWorker, indexWorker);
       repositorySearchRoute(server, repoSearchClient);
       documentSearchRoute(server, documentSearchClient);
+      symbolSearchRoute(server, symbolSearchClient);
       fileRoute(server, serverOptions);
       monacoRoute(server);
 

@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EsClient } from 'packages/codesearch-esqueue';
+import { EsClient } from '@codesearch/esqueue';
 
 import { RepositoryUri } from 'model';
 import { Log } from '../log';

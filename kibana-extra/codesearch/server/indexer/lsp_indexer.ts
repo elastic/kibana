@@ -20,6 +20,7 @@ import {
   DocumentIndexName,
   DocumentSchema,
   DocumentTypeName,
+  SymbolAnalysisSettings,
   SymbolIndexName,
   SymbolSchema,
   SymbolTypeName,
@@ -51,6 +52,7 @@ export class LspIndexer extends AbstractIndexer {
       index: SymbolIndexName(repoUri),
       type: SymbolTypeName,
       settings: {
+        ...SymbolAnalysisSettings,
         number_of_shards: 1,
         auto_expand_replicas: '0-1',
       },
