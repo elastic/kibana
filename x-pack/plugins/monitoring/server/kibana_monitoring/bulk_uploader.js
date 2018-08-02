@@ -162,45 +162,7 @@ export class BulkUploader {
     }
   }
 
-  static combineStatsLegacy(payload) {
-    throw 'This is deprecated';
-    BulkUploader.checkPayloadTypesUnique(payload);
-
-    // default the item to [] to allow destructuring
-    const findItem = type => payload.find(item => get(item, '[0].index._type') === type) || [];
-
-    // kibana usage and stats
-    let statsResult;
-    const [ statsHeader, statsPayload ] = findItem(KIBANA_STATS_TYPE_MONITORING);
-    const [ reportingHeader, reportingPayload ] = findItem(KIBANA_REPORTING_TYPE);
-
-    if (statsHeader && statsPayload) {
-      statsHeader.index._type = 'kibana_stats'; // HACK to convert kibana_stats_monitoring to just kibana_stats for bwc
-      const [ usageHeader, usagePayload ] = findItem(KIBANA_USAGE_TYPE);
-      const kibanaUsage = (usageHeader && usagePayload) ? usagePayload : null;
-      const reportingUsage = (reportingHeader && reportingPayload) ? reportingPayload : null;
-      statsResult = [ statsHeader, statsPayload ];
-      if (kibanaUsage) {
-        set(statsResult, '[1].usage', kibanaUsage);
-      }
-      if (reportingUsage) {
-        set(statsResult, '[1].usage.xpack.reporting', reportingUsage);
-      }
-    }
-
-    // kibana settings
-    let settingsResult;
-    const [ settingsHeader, settingsPayload ] = findItem(KIBANA_SETTINGS_TYPE);
-    if (settingsHeader && settingsPayload) {
-      settingsResult = [ settingsHeader, settingsPayload ];
-    }
-
-    // return new payload with the combined data
-    // adds usage data to stats data
-    // strips usage out as a top-level type
-    const result = [ statsResult, settingsResult ];
-
-    // remove result items that are undefined
-    return result.filter(Boolean);
+  static combineStatsLegacy() {
+    throw new Error('This is deprecated');
   }
 }
