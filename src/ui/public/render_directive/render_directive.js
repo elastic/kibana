@@ -22,7 +22,7 @@ import { uiModules } from '../modules';
 import { ApplyScopeBindingsProvider } from './apply_scope_bindings';
 
 /**
- * The <render-directive> directive is useful for programaticaly modifying or
+ * The <render-directive> directive is useful for programmatically modifying or
  * extending a view. It allows defining the majority of the directives behavior
  * using a "definition" object, which the implementer can obtain from plugins (for instance).
  *

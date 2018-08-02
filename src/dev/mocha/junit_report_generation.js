@@ -24,7 +24,7 @@ import { inspect } from 'util';
 import mkdirp from 'mkdirp';
 import xmlBuilder from 'xmlbuilder';
 
-export function setupJunitReportGeneration(runner, options = {}) {
+export function setupJUnitReportGeneration(runner, options = {}) {
   const {
     reportName = 'Unnamed Mocha Tests',
     rootDirectory = dirname(require.resolve('../../../package.json')),
@@ -131,7 +131,7 @@ export function setupJunitReportGeneration(runner, options = {}) {
       }
     });
 
-    const reportPath = resolve(rootDirectory, `target/junit/${reportName}.xml`);
+    const reportPath = resolve(rootDirectory, `target/junit/TEST-${reportName}.xml`);
     const reportXML = builder.end({
       pretty: true,
       indent: '  ',

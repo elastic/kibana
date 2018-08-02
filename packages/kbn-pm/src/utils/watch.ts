@@ -18,16 +18,7 @@
  */
 
 import * as Rx from 'rxjs';
-import {
-  catchError,
-  delay,
-  finalize,
-  first,
-  map,
-  mapTo,
-  mergeMap,
-  timeout,
-} from 'rxjs/operators';
+import { catchError, delay, finalize, first, map, mapTo, mergeMap, timeout } from 'rxjs/operators';
 
 /**
  * Number of milliseconds we wait before we fall back to the default watch handler.
@@ -97,13 +88,9 @@ function getWatchHandlers(
   return [typescriptHandler, webpackHandler, defaultHandler];
 }
 
-export function waitUntilWatchIsReady(
-  stream: NodeJS.EventEmitter,
-  opts: IWatchOptions = {}
-) {
+export function waitUntilWatchIsReady(stream: NodeJS.EventEmitter, opts: IWatchOptions = {}) {
   const buildOutput$ = new Rx.Subject<string>();
-  const onDataListener = (data: Buffer) =>
-    buildOutput$.next(data.toString('utf-8'));
+  const onDataListener = (data: Buffer) => buildOutput$.next(data.toString('utf-8'));
   const onEndListener = () => buildOutput$.complete();
   const onErrorListener = (e: Error) => buildOutput$.error(e);
 

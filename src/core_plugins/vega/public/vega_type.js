@@ -60,8 +60,8 @@ VisTypesRegistryProvider.register((Private) => {
     responseHandler: 'none',
     options: {
       showIndexSelection: false,
-      showQueryBar: false,
-      showFilterBar: false,
+      showQueryBar: true,
+      showFilterBar: true,
     },
     stage: 'lab',
     feedbackMessage: defaultFeedbackMessage,

@@ -37,11 +37,12 @@ uiModules
           self.form = false;
 
           const aggConfig = new AggConfig($scope.vis, {
-            schema: schema
+            schema: schema,
+            id: AggConfig.nextId($scope.state.aggs),
           });
           aggConfig.brandNew = true;
 
-          $scope.vis.aggs.push(aggConfig);
+          $scope.state.aggs.push(aggConfig);
         };
       }
     };

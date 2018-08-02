@@ -21,6 +21,7 @@ import { SavedObjectRegistryProvider } from 'ui/saved_objects/saved_object_regis
 import 'ui/pager_control';
 import 'ui/pager';
 import { uiModules } from 'ui/modules';
+import { timefilter } from 'ui/timefilter';
 
 import { VisualizeListingTable } from './visualize_listing_table';
 
@@ -32,7 +33,6 @@ app.directive('visualizeListingTable', function (reactDirective) {
 export function VisualizeListingController($injector) {
   const Notifier = $injector.get('Notifier');
   const Private = $injector.get('Private');
-  const timefilter = $injector.get('timefilter');
   const config = $injector.get('config');
 
   timefilter.disableAutoRefreshSelector();

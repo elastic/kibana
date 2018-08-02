@@ -39,6 +39,7 @@ import { mlJobService } from 'plugins/ml/services/job_service';
 import { mlFieldFormatService } from 'plugins/ml/services/field_format_service';
 import { JobSelectServiceProvider } from 'plugins/ml/components/job_select_list/job_select_service';
 import { isTimeSeriesViewDetector } from 'plugins/ml/../common/util/job_utils';
+import { timefilter } from 'ui/timefilter';
 
 uiRoutes
   .when('/explorer/?', {
@@ -59,7 +60,6 @@ module.controller('MlExplorerController', function (
   $timeout,
   AppState,
   Private,
-  timefilter,
   mlCheckboxShowChartsService,
   mlExplorerDashboardService,
   mlSelectLimitService,
@@ -246,7 +246,7 @@ module.controller('MlExplorerController', function (
   };
 
   // Refresh all the data when the time range is altered.
-  $scope.$listen(timefilter, 'fetch', () => {
+  $scope.$listenAndDigestAsync(timefilter, 'fetch', () => {
     loadOverallData();
     clearSelectedAnomalies();
   });
@@ -829,9 +829,16 @@ module.controller('MlExplorerController', function (
         // Default to functionDescription if no description available.
         // TODO - when job_service is moved server_side, move this to server endpoint.
         const jobId = anomaly.jobId;
-        anomaly.detector = _.get(detectorsByJob,
-          [jobId, anomaly.detectorIndex, 'detector_description'],
+        const detector = _.get(detectorsByJob, [jobId, anomaly.detectorIndex]);
+        anomaly.detector = _.get(detector,
+          ['detector_description'],
           anomaly.source.function_description);
+
+        // For detectors with rules, add a property with the rule count.
+        const customRules = detector.custom_rules;
+        if (customRules !== undefined) {
+          anomaly.rulesLength = customRules.length;
+        }
 
         // Add properties used for building the links menu.
         // TODO - when job_service is moved server_side, move this to server endpoint.

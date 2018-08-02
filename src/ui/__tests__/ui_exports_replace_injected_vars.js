@@ -29,8 +29,8 @@ import KbnServer from '../../server/kbn_server';
 
 const getInjectedVarsFromResponse = (resp) => {
   const $ = cheerio.load(resp.payload);
-  const data = $('kbn-initial-state').attr('data');
-  return JSON.parse(data).vars;
+  const data = $('kbn-injected-metadata').attr('data');
+  return JSON.parse(data).legacyMetadata.vars;
 };
 
 const injectReplacer = (kbnServer, replacer) => {
@@ -132,7 +132,7 @@ describe('UiExports', function () {
       expect(injectedVars).to.eql({ name: 'sam' });
     });
 
-    it('propogates errors thrown in replacers', async () => {
+    it('propagates errors thrown in replacers', async () => {
       injectReplacer(kbnServer, async () => {
         await delay(100);
         throw new Error('replacer failed');

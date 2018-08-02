@@ -59,7 +59,7 @@ export default function ({ getService, getPageObjects }) {
     */
     it('should create initial vertical bar chart', async function () {
       log.debug('create shakespeare vertical bar chart');
-      await PageObjects.common.navigateToUrl('visualize', 'new');
+      await PageObjects.visualize.navigateToNewVisualization();
       await PageObjects.visualize.clickVerticalBarChart();
       await PageObjects.visualize.clickNewSearch('shakes*');
       await PageObjects.visualize.waitForVisualization();
@@ -107,6 +107,7 @@ export default function ({ getService, getPageObjects }) {
     */
     it('should configure Terms aggregation on play_name', async function () {
       await PageObjects.visualize.clickBucket('X-Axis');
+      await PageObjects.common.sleep(1000);
       log.debug('Aggregation = Terms');
       await PageObjects.visualize.selectAggregation('Terms');
       aggIndex = aggIndex + 1;

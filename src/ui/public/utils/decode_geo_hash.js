@@ -1,6 +1,6 @@
 /*
  * geohash.js
- * Geohash library for Javascript
+ * Geohash library for JavaScript
  * (c) 2008 David Troy
  * Distributed under the MIT License
  */

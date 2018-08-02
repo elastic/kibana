@@ -26,7 +26,7 @@ import del from 'del';
 import Mocha from 'mocha';
 import expect from 'expect.js';
 
-import { setupJunitReportGeneration } from '../junit_report_generation';
+import { setupJUnitReportGeneration } from '../junit_report_generation';
 
 const PROJECT_DIR = resolve(__dirname, 'fixtures/project');
 const DURATION_REGEX = /^\d+\.\d{3}$/;
@@ -40,7 +40,7 @@ describe('dev/mocha/junit report generation', () => {
   it('reports on failed setup hooks', async () => {
     const mocha = new Mocha({
       reporter: function Runner(runner) {
-        setupJunitReportGeneration(runner, {
+        setupJUnitReportGeneration(runner, {
           reportName: 'test',
           rootDirectory: PROJECT_DIR
         });
@@ -49,7 +49,7 @@ describe('dev/mocha/junit report generation', () => {
 
     mocha.addFile(resolve(PROJECT_DIR, 'test.js'));
     await new Promise(resolve => mocha.run(resolve));
-    const report = await fcb(cb => parseString(readFileSync(resolve(PROJECT_DIR, 'target/junit/test.xml')), cb));
+    const report = await fcb(cb => parseString(readFileSync(resolve(PROJECT_DIR, 'target/junit/TEST-test.xml')), cb));
 
     // test case results are wrapped in <testsuites></testsuites>
     expect(report).to.eql({

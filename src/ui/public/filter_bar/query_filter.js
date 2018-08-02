@@ -154,7 +154,7 @@ export function FilterBarQueryFilterProvider(Private, $rootScope, getAppState, g
 
 
   /**
-   * Inverts the nagate value on the filter
+   * Inverts the negate value on the filter
    * @param {object} filter The filter to toggle
    * @returns {object} updated filter
    */

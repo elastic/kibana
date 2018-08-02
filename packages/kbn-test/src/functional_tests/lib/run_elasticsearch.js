@@ -23,18 +23,17 @@ import { createEsTestCluster } from '../../es';
 
 import { setupUsers, DEFAULT_SUPERUSER_PASS } from './auth';
 
-export async function runElasticsearch({ config, log }) {
+export async function runElasticsearch({ config, options }) {
+  const { log, esFrom } = options;
   const isOss = config.get('esTestCluster.license') === 'oss';
 
   const cluster = createEsTestCluster({
     port: config.get('servers.elasticsearch.port'),
-    password: !isOss
-      ? DEFAULT_SUPERUSER_PASS
-      : config.get('servers.elasticsearch.password'),
+    password: !isOss ? DEFAULT_SUPERUSER_PASS : config.get('servers.elasticsearch.password'),
     license: config.get('esTestCluster.license'),
     log,
     basePath: resolve(KIBANA_ROOT, '.es'),
-    from: config.get('esTestCluster.from'),
+    esFrom: esFrom || config.get('esTestCluster.from'),
   });
 
   const esArgs = config.get('esTestCluster.serverArgs');

@@ -12,13 +12,13 @@ import uiRoutes from 'ui/routes';
 import { ajaxErrorHandlersProvider } from 'plugins/monitoring/lib/ajax_error_handler';
 import { routeInitProvider } from 'plugins/monitoring/lib/route_init';
 import template from './index.html';
+import { timefilter } from 'ui/timefilter';
 
 function getPageData($injector) {
   const globalState = $injector.get('globalState');
   const $route = $injector.get('$route');
   const url = `../api/monitoring/v1/clusters/${globalState.cluster_uuid}/elasticsearch/indices/${$route.current.params.index}`;
   const $http = $injector.get('$http');
-  const timefilter = $injector.get('timefilter');
   const timeBounds = timefilter.getBounds();
 
   return $http.post(url, {
@@ -47,7 +47,6 @@ uiRoutes.when('/elasticsearch/indices/:index/advanced', {
     pageData: getPageData
   },
   controller($injector, $scope) {
-    const timefilter = $injector.get('timefilter');
     timefilter.enableTimeRangeSelector();
     timefilter.enableAutoRefreshSelector();
 
@@ -66,7 +65,7 @@ uiRoutes.when('/elasticsearch/indices/:index/advanced', {
       handleResponse: (response) => $scope.pageData = response
     });
 
-    $executor.start();
+    $executor.start($scope);
 
     $scope.$on('$destroy', $executor.destroy);
   }

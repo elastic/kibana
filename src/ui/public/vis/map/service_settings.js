@@ -39,7 +39,7 @@ uiModules.get('kibana')
 
     /**
      *  Unescape a url template that was escaped by encodeURI() so leaflet
-     *  will be able to correctly locate the varables in the template
+     *  will be able to correctly locate the variables in the template
      *  @param  {String} url
      *  @return {String}
      */
@@ -76,7 +76,7 @@ uiModules.get('kibana')
             return response.data;
           } catch (e) {
             if (!e) {
-              e = new Error('Unkown error');
+              e = new Error('Unknown error');
             }
             if (!(e instanceof Error)) {
               e = new Error(e.data || `status ${e.statusText || e.status}`);
@@ -182,6 +182,11 @@ uiModules.get('kibana')
             }
           }
         }
+      }
+
+      getEMSHotLink(fileLayer) {
+        const id = `file/${fileLayer.name}`;
+        return `${mapConfig.emsLandingPageUrl}#${id}`;
       }
     }
 

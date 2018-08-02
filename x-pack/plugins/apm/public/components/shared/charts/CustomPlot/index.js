@@ -8,7 +8,6 @@ import _ from 'lodash';
 import { makeWidthFlexible } from 'react-vis';
 import PropTypes from 'prop-types';
 import React, { PureComponent, Fragment } from 'react';
-import styled from 'styled-components';
 
 import Legends from './Legends';
 import StaticPlot from './StaticPlot';
@@ -16,14 +15,12 @@ import InteractivePlot from './InteractivePlot';
 import VoronoiPlot from './VoronoiPlot';
 import { createSelector } from 'reselect';
 import { getPlotValues } from './plotUtils';
-import { fontSizes, units, px } from '../../../../style/variables';
 
-const Title = styled.div`
-  font-size: ${fontSizes.large};
-  margin-bottom: ${px(units.half)};
-`;
+const VISIBLE_LEGEND_COUNT = 4;
 
-const VISIBLE_SERIES_COUNT = 4;
+function getHiddenLegendCount(series) {
+  return series.filter(serie => serie.hideLegend).length;
+}
 
 export class InnerCustomPlot extends PureComponent {
   state = {
@@ -49,7 +46,12 @@ export class InnerCustomPlot extends PureComponent {
 
   getVisibleSeries = createSelector(
     state => state.series,
-    series => series.slice(0, VISIBLE_SERIES_COUNT)
+    series => {
+      return series.slice(
+        0,
+        VISIBLE_LEGEND_COUNT + getHiddenLegendCount(series)
+      );
+    }
   );
 
   clickLegend = i => {
@@ -91,10 +93,7 @@ export class InnerCustomPlot extends PureComponent {
   };
 
   onHover = node => {
-    const index = this.props.series[0].data.findIndex(
-      item => item.x === node.x
-    );
-    this.props.onHover(index);
+    this.props.onHover(node.x);
 
     if (this.state.isDrawing) {
       this.setState({ selectionEnd: node.x });
@@ -102,13 +101,16 @@ export class InnerCustomPlot extends PureComponent {
   };
 
   render() {
-    const { chartTitle, series, truncateLegends, noHits, width } = this.props;
+    const { series, truncateLegends, noHits, width } = this.props;
 
     if (_.isEmpty(series) || !width) {
       return null;
     }
 
-    const hiddenSeriesCount = Math.max(series.length - VISIBLE_SERIES_COUNT, 0);
+    const hiddenSeriesCount = Math.max(
+      series.length - VISIBLE_LEGEND_COUNT - getHiddenLegendCount(series),
+      0
+    );
     const visibleSeries = this.getVisibleSeries({ series });
     const enabledSeries = this.getEnabledSeries({
       visibleSeries,
@@ -126,11 +128,8 @@ export class InnerCustomPlot extends PureComponent {
 
     return (
       <Fragment>
-        <Title>{chartTitle}</Title>
-
         <Legends
           noHits={noHits}
-          chartTitle={chartTitle}
           truncateLegends={truncateLegends}
           series={visibleSeries}
           hiddenSeriesCount={hiddenSeriesCount}
@@ -149,7 +148,7 @@ export class InnerCustomPlot extends PureComponent {
 
           <InteractivePlot
             plotValues={plotValues}
-            hoverIndex={this.props.hoverIndex}
+            hoverX={this.props.hoverX}
             series={enabledSeries}
             formatTooltipValue={this.props.formatTooltipValue}
             isDrawing={this.state.isDrawing}
@@ -174,7 +173,7 @@ export class InnerCustomPlot extends PureComponent {
 
 InnerCustomPlot.propTypes = {
   formatTooltipValue: PropTypes.func,
-  hoverIndex: PropTypes.number,
+  hoverX: PropTypes.number,
   noHits: PropTypes.bool.isRequired,
   onHover: PropTypes.func.isRequired,
   onMouseLeave: PropTypes.func.isRequired,
@@ -186,7 +185,8 @@ InnerCustomPlot.propTypes = {
 };
 
 InnerCustomPlot.defaultProps = {
-  formatTooltipValue: y => y,
+  formatTooltipValue: p => p.y,
+  tickFormatX: undefined,
   tickFormatY: y => y,
   truncateLegends: false
 };

@@ -23,7 +23,7 @@ import _ from 'lodash';
 export function VislibLibAlertsProvider() {
 
   /**
-   * Adds allerts that float in front of a visualization
+   * Adds alerts that float in front of a visualization
    *
    * @class Alerts
    * @constructor

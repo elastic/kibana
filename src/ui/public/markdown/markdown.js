@@ -36,7 +36,7 @@ import { memoize } from 'lodash';
 export const markdownFactory = memoize((whiteListedRules = [], openLinksInNewTab = false) => {
   let markdownIt;
 
-  // It is imperitive that the html config property be set to false, to mitigate XSS: the output of markdown-it is
+  // It is imperative that the html config property be set to false, to mitigate XSS: the output of markdown-it is
   // fed directly to the DOM via React's dangerouslySetInnerHTML below.
 
   if (whiteListedRules && whiteListedRules.length > 0) {
@@ -92,7 +92,7 @@ export class Markdown extends PureComponent {
         className={classes}
         /*
          * Justification for dangerouslySetInnerHTML:
-         * The Markdown Visulization is, believe it or not, responsible for rendering Markdown.
+         * The Markdown Visualization is, believe it or not, responsible for rendering Markdown.
          * This relies on `markdown-it` to produce safe and correct HTML.
          */
         dangerouslySetInnerHTML={{ __html: renderedMarkdown }} //eslint-disable-line react/no-danger

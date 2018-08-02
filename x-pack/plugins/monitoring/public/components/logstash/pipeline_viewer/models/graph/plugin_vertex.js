@@ -6,9 +6,6 @@
 
 import { last, get, omit } from 'lodash';
 import { Vertex } from './vertex';
-import inputIcon from '@elastic/eui/src/components/icon/assets/logstash_input.svg';
-import filterIcon from '@elastic/eui/src/components/icon/assets/logstash_filter.svg';
-import outputIcon from '@elastic/eui/src/components/icon/assets/logstash_output.svg';
 
 export const TIME_CONSUMING_PROCESSOR_THRESHOLD_COEFFICIENT = 2;
 export const SLOWNESS_STANDARD_DEVIATIONS_ABOVE_THE_MEAN = 2;
@@ -106,14 +103,14 @@ export class PluginVertex extends Vertex {
     return slowness > SLOWNESS_STANDARD_DEVIATIONS_ABOVE_THE_MEAN;
   }
 
-  get icon() {
+  get iconType() {
     switch(this.pluginType) {
       case 'input':
-        return inputIcon;
+        return 'logstashInput';
       case 'filter':
-        return filterIcon;
+        return 'logstashFilter';
       case 'output':
-        return outputIcon;
+        return 'logstashOutput';
       default:
         throw new Error(`Unknown plugin type ${this.pluginType}! This shouldn't happen!`);
     }

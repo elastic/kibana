@@ -39,7 +39,7 @@ const vals = _.transform([
     vals[unit] = val;
   });
 }, {});
-// match any key from the vals object prececed by an optional number
+// match any key from the vals object preceded by an optional number
 const parseRE = new RegExp('^(\\d+(?:\\.\\d*)?)?\\s*(' + _.keys(vals).join('|') + ')$');
 
 export default function (expr) {

@@ -14,7 +14,7 @@ import { prefixIndexPattern } from '../../../../lib/ccs_utils';
  */
 export function logstashPipelineRoute(server) {
   /**
-   * Logtash Pipeline Viewer request.
+   * Logstash Pipeline Viewer request.
    *
    * This will fetch all data required to display a Logstash Pipeline Viewer page.
    *

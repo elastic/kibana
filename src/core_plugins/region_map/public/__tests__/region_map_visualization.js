@@ -93,7 +93,7 @@ const vectorManifest = {
 
 
 const THRESHOLD = 0.45;
-const PIXEL_DIFF = 64;
+const PIXEL_DIFF = 96;
 
 describe('RegionMapsVisualizationTests', function () {
 
@@ -305,11 +305,11 @@ describe('RegionMapsVisualizationTests', function () {
       const mismatchedPixelsAfterDataChange = await compareImage(afterdatachangePng);
 
 
-      const anoterTableGroup = _.cloneDeep(newTableGroup);
-      anoterTableGroup.tables[0].rows.pop();//remove one shape
+      const anotherTableGroup = _.cloneDeep(newTableGroup);
+      anotherTableGroup.tables[0].rows.pop();//remove one shape
       domNode.style.width = '412px';
       domNode.style.height = '112px';
-      await regionMapsVisualization.render(anoterTableGroup, {
+      await regionMapsVisualization.render(anotherTableGroup, {
         resize: true,
         params: false,
         aggs: false,

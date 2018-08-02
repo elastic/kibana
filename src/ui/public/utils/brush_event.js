@@ -20,73 +20,72 @@
 import _ from 'lodash';
 import moment from 'moment';
 import { buildRangeFilter } from '../filter_manager/lib/range';
+import { timefilter } from 'ui/timefilter';
 
-export function UtilsBrushEventProvider(timefilter) {
-  return $state => {
-    return event => {
-      if (!event.data.xAxisField) {
-        return;
-      }
+export function onBrushEvent(event, $state) {
+  if (!event.data.xAxisField) {
+    return;
+  }
 
-      const isDate = event.data.xAxisField.type === 'date';
-      const isNumber = event.data.xAxisField.type === 'number';
+  const isDate = event.data.xAxisField.type === 'date';
+  const isNumber = event.data.xAxisField.type === 'number';
 
-      if (isDate &&
-        event.data.xAxisField.name === event.data.indexPattern.timeFieldName) {
-        setTimefilter();
-      } else if (isDate || isNumber) {
-        setRange();
-      }
+  if (isDate &&
+    event.data.xAxisField.name === event.data.indexPattern.timeFieldName) {
+    setTimefilter();
+  } else if (isDate || isNumber) {
+    setRange();
+  }
 
-      function setTimefilter() {
-        const from = moment(event.range[0]);
-        const to = moment(event.range[1]);
+  function setTimefilter() {
+    const from = moment(event.range[0]);
+    const to = moment(event.range[1]);
 
-        if (to - from === 0) return;
+    if (to - from === 0) return;
 
-        timefilter.time.from = from;
-        timefilter.time.to = to;
-        timefilter.time.mode = 'absolute';
-      }
+    timefilter.setTime({
+      from,
+      to,
+      mode: 'absolute'
+    });
+  }
 
-      function setRange() {
-        if (event.range.length <= 1) return;
+  function setRange() {
+    if (event.range.length <= 1) return;
 
-        const existingFilter = $state.filters.find(filter => (
-          filter.meta && filter.meta.key === event.data.xAxisField.name
-        ));
+    const existingFilter = $state.filters.find(filter => (
+      filter.meta && filter.meta.key === event.data.xAxisField.name
+    ));
 
-        const min = event.range[0];
-        const max = event.range[event.range.length - 1];
-        let range;
-        if (isDate) {
-          range = {
-            gte: moment(min).valueOf(),
-            lt: moment(max).valueOf(),
-            format: 'epoch_millis'
-          };
-        } else {
-          range = {
-            gte: min,
-            lt: max
-          };
-        }
+    const min = event.range[0];
+    const max = event.range[event.range.length - 1];
+    let range;
+    if (isDate) {
+      range = {
+        gte: moment(min).valueOf(),
+        lt: moment(max).valueOf(),
+        format: 'epoch_millis'
+      };
+    } else {
+      range = {
+        gte: min,
+        lt: max
+      };
+    }
 
-        if (_.has(existingFilter, 'range')) {
-          existingFilter.range[event.data.xAxisField.name] = range;
-        } else if (_.has(existingFilter, 'script.script.params.gte')
-          && _.has(existingFilter, 'script.script.params.lt')) {
-          existingFilter.script.script.params.gte = min;
-          existingFilter.script.script.params.lt = max;
-        } else {
-          const newFilter = buildRangeFilter(
-            event.data.xAxisField,
-            range,
-            event.data.indexPattern,
-            event.data.xAxisFormatter);
-          $state.$newFilters = [newFilter];
-        }
-      }
-    };
-  };
+    if (_.has(existingFilter, 'range')) {
+      existingFilter.range[event.data.xAxisField.name] = range;
+    } else if (_.has(existingFilter, 'script.script.params.gte')
+      && _.has(existingFilter, 'script.script.params.lt')) {
+      existingFilter.script.script.params.gte = min;
+      existingFilter.script.script.params.lt = max;
+    } else {
+      const newFilter = buildRangeFilter(
+        event.data.xAxisField,
+        range,
+        event.data.indexPattern,
+        event.data.xAxisFormatter);
+      $state.$newFilters = [newFilter];
+    }
+  }
 }

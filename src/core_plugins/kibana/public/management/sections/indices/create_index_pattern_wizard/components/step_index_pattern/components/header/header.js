@@ -30,7 +30,9 @@ import {
   EuiFieldText,
 } from '@elastic/eui';
 
-export const Header = ({
+import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
+
+export const HeaderComponent = ({
   isInputInvalid,
   errors,
   characterList,
@@ -38,12 +40,16 @@ export const Header = ({
   onQueryChanged,
   goToNextStep,
   isNextStepDisabled,
+  intl,
   ...rest
 }) => (
   <div {...rest}>
     <EuiTitle size="s">
       <h2>
-        Step 1 of 2: Define index pattern
+        <FormattedMessage
+          id="kbn.management.createIndexPattern.stepHeader"
+          defaultMessage="Step 1 of 2: Define index pattern"
+        />
       </h2>
     </EuiTitle>
     <EuiSpacer size="m"/>
@@ -53,19 +59,37 @@ export const Header = ({
           isInvalid={isInputInvalid}
         >
           <EuiFormRow
-            label="Index pattern"
+            label={<FormattedMessage
+              id="kbn.management.createIndexPattern.step.indexPatternLabel"
+              defaultMessage="Index pattern"
+            />}
             isInvalid={isInputInvalid}
             error={errors}
             helpText={
               <div>
-                <p>You can use a <strong>*</strong> as a wildcard in your index pattern.</p>
-                <p>You can&apos;t use spaces or the characters <strong>{characterList}</strong>.</p>
+                <p>
+                  <FormattedMessage
+                    id="kbn.management.createIndexPattern.step.indexPattern.allowLabel"
+                    defaultMessage="You can use a {asterisk} as a wildcard in your index pattern."
+                    values={{ asterisk: <strong>*</strong> }}
+                  />
+                </p>
+                <p>
+                  <FormattedMessage
+                    id="kbn.management.createIndexPattern.step.indexPattern.disallowLabel"
+                    defaultMessage="You can't use spaces or the characters {characterList}."
+                    values={{ characterList: <strong>{characterList}</strong> }}
+                  />
+                </p>
               </div>
             }
           >
             <EuiFieldText
               name="indexPattern"
-              placeholder="index-name-*"
+              placeholder={intl.formatMessage({
+                id: 'kbn.management.createIndexPattern.step.indexPatternPlaceholder',
+                defaultMessage: 'index-name-*'
+              })}
               value={query}
               isInvalid={isInputInvalid}
               onChange={onQueryChanged}
@@ -81,9 +105,14 @@ export const Header = ({
           isDisabled={isNextStepDisabled}
           data-test-subj="createIndexPatternGoToStep2Button"
         >
-          Next step
+          <FormattedMessage
+            id="kbn.management.createIndexPattern.step.nextStepButton"
+            defaultMessage="Next step"
+          />
         </EuiButton>
       </EuiFlexItem>
     </EuiFlexGroup>
   </div>
 );
+
+export const Header = injectI18n(HeaderComponent);

@@ -5,67 +5,74 @@ exports[`isCloudEnabled is false should not render instruction toggle when ON_PR
   className="home"
   restrictWidth={false}
 >
-  <EuiLink
-    color="primary"
-    href="#/home"
-    type="button"
+  <EuiPageBody
+    restrictWidth={false}
   >
-    Home
-  </EuiLink>
-   / 
-  <EuiLink
-    color="primary"
-    href="#/home/tutorial_directory"
-    type="button"
-  >
-    Add Data
-  </EuiLink>
-  <EuiSpacer
-    size="s"
-  />
-  <div>
-    <Introduction
-      description="tutorial used to drive jest tests"
-      title="jest test tutorial"
-    />
+    <div>
+      <EuiLink
+        color="primary"
+        href="#/home"
+        type="button"
+      >
+        Home
+      </EuiLink>
+       / 
+      <EuiLink
+        color="primary"
+        href="#/home/tutorial_directory"
+        type="button"
+      >
+        Add Data
+      </EuiLink>
+    </div>
     <EuiSpacer
-      size="l"
+      size="s"
     />
-    <div
-      className="text-center"
-    />
-    <EuiSpacer
-      size="l"
-    />
-    <EuiPanel
-      grow={true}
-      hasShadow={false}
-      paddingSize="l"
-    >
-      <InstructionSet
-        instructionVariants={
-          Array [
-            Object {
-              "id": "platform id",
-              "instructions": Array [
-                Object {
-                  "title": "onPrem instructions",
-                },
-              ],
-            },
-          ]
-        }
-        key="0"
-        offset={1}
-        onStatusCheck={[Function]}
-        paramValues={Object {}}
-        replaceTemplateStrings={[Function]}
-        setParameter={[Function]}
-        statusCheckState="NOT_CHECKED"
-        title="Instruction title"
+    <div>
+      <Introduction
+        description="tutorial used to drive jest tests"
+        isBeta={false}
+        title="jest test tutorial"
       />
-    </EuiPanel>
-  </div>
+      <EuiSpacer
+        size="l"
+      />
+      <div
+        className="text-center"
+      />
+      <EuiSpacer
+        size="l"
+      />
+      <EuiPanel
+        grow={true}
+        hasShadow={false}
+        paddingSize="l"
+      >
+        <InstructionSet
+          instructionVariants={
+            Array [
+              Object {
+                "id": "platform id",
+                "instructions": Array [
+                  Object {
+                    "title": "onPrem instructions",
+                  },
+                ],
+              },
+            ]
+          }
+          key="0"
+          offset={1}
+          onStatusCheck={[Function]}
+          paramValues={Object {}}
+          replaceTemplateStrings={[Function]}
+          setParameter={[Function]}
+          statusCheckState="NOT_CHECKED"
+          title="Instruction title"
+        />
+      </EuiPanel>
+    </div>
+  </EuiPageBody>
 </EuiPage>
 `;
 
@@ -74,86 +81,93 @@ exports[`isCloudEnabled is false should render ON_PREM instructions with instruc
   className="home"
   restrictWidth={false}
 >
-  <EuiLink
-    color="primary"
-    href="#/home"
-    type="button"
+  <EuiPageBody
+    restrictWidth={false}
   >
-    Home
-  </EuiLink>
-   / 
-  <EuiLink
-    color="primary"
-    href="#/home/tutorial_directory"
-    type="button"
-  >
-    Add Data
-  </EuiLink>
-  <EuiSpacer
-    size="s"
-  />
-  <div>
-    <Introduction
-      description="tutorial used to drive jest tests"
-      iconType="logoApache"
-      title="jest test tutorial"
-    />
-    <EuiSpacer
-      size="l"
-    />
-    <div
-      className="text-center"
-    >
-      <RadioButtonGroup
-        buttons={
-          Array [
-            Object {
-              "dataTestSubj": "onPremBtn",
-              "label": "Self managed",
-              "onClick": [Function],
-            },
-            Object {
-              "dataTestSubj": "onPremElasticCloudBtn",
-              "label": "Elastic Cloud",
-              "onClick": [Function],
-            },
-          ]
-        }
-        selectedBtnLabel="Self managed"
-      />
+    <div>
+      <EuiLink
+        color="primary"
+        href="#/home"
+        type="button"
+      >
+        Home
+      </EuiLink>
+       / 
+      <EuiLink
+        color="primary"
+        href="#/home/tutorial_directory"
+        type="button"
+      >
+        Add Data
+      </EuiLink>
     </div>
     <EuiSpacer
-      size="l"
+      size="s"
     />
-    <EuiPanel
-      grow={true}
-      hasShadow={false}
-      paddingSize="l"
-    >
-      <InstructionSet
-        instructionVariants={
-          Array [
-            Object {
-              "id": "platform id",
-              "instructions": Array [
-                Object {
-                  "title": "onPrem instructions",
-                },
-              ],
-            },
-          ]
-        }
-        key="0"
-        offset={1}
-        onStatusCheck={[Function]}
-        paramValues={Object {}}
-        replaceTemplateStrings={[Function]}
-        setParameter={[Function]}
-        statusCheckState="NOT_CHECKED"
-        title="Instruction title"
+    <div>
+      <Introduction
+        description="tutorial used to drive jest tests"
+        iconType="logoApache"
+        isBeta={false}
+        title="jest test tutorial"
       />
-    </EuiPanel>
-  </div>
+      <EuiSpacer
+        size="l"
+      />
+      <div
+        className="text-center"
+      >
+        <RadioButtonGroup
+          buttons={
+            Array [
+              Object {
+                "dataTestSubj": "onPremBtn",
+                "label": "Self managed",
+                "onClick": [Function],
+              },
+              Object {
+                "dataTestSubj": "onPremElasticCloudBtn",
+                "label": "Elastic Cloud",
+                "onClick": [Function],
+              },
+            ]
+          }
+          selectedBtnLabel="Self managed"
+        />
+      </div>
+      <EuiSpacer
+        size="l"
+      />
+      <EuiPanel
+        grow={true}
+        hasShadow={false}
+        paddingSize="l"
+      >
+        <InstructionSet
+          instructionVariants={
+            Array [
+              Object {
+                "id": "platform id",
+                "instructions": Array [
+                  Object {
+                    "title": "onPrem instructions",
+                  },
+                ],
+              },
+            ]
+          }
+          key="0"
+          offset={1}
+          onStatusCheck={[Function]}
+          paramValues={Object {}}
+          replaceTemplateStrings={[Function]}
+          setParameter={[Function]}
+          statusCheckState="NOT_CHECKED"
+          title="Instruction title"
+        />
+      </EuiPanel>
+    </div>
+  </EuiPageBody>
 </EuiPage>
 `;
 
@@ -162,67 +176,74 @@ exports[`should render ELASTIC_CLOUD instructions when isCloudEnabled is true 1`
   className="home"
   restrictWidth={false}
 >
-  <EuiLink
-    color="primary"
-    href="#/home"
-    type="button"
+  <EuiPageBody
+    restrictWidth={false}
   >
-    Home
-  </EuiLink>
-   / 
-  <EuiLink
-    color="primary"
-    href="#/home/tutorial_directory"
-    type="button"
-  >
-    Add Data
-  </EuiLink>
-  <EuiSpacer
-    size="s"
-  />
-  <div>
-    <Introduction
-      description="tutorial used to drive jest tests"
-      iconType="logoApache"
-      title="jest test tutorial"
-    />
+    <div>
+      <EuiLink
+        color="primary"
+        href="#/home"
+        type="button"
+      >
+        Home
+      </EuiLink>
+       / 
+      <EuiLink
+        color="primary"
+        href="#/home/tutorial_directory"
+        type="button"
+      >
+        Add Data
+      </EuiLink>
+    </div>
     <EuiSpacer
-      size="l"
+      size="s"
     />
-    <div
-      className="text-center"
-    />
-    <EuiSpacer
-      size="l"
-    />
-    <EuiPanel
-      grow={true}
-      hasShadow={false}
-      paddingSize="l"
-    >
-      <InstructionSet
-        instructionVariants={
-          Array [
-            Object {
-              "id": "platform id",
-              "instructions": Array [
-                Object {
-                  "title": "elasticCloud instructions",
-                },
-              ],
-            },
-          ]
-        }
-        key="0"
-        offset={1}
-        onStatusCheck={[Function]}
-        paramValues={Object {}}
-        replaceTemplateStrings={[Function]}
-        setParameter={[Function]}
-        statusCheckState="NOT_CHECKED"
-        title="Instruction title"
+    <div>
+      <Introduction
+        description="tutorial used to drive jest tests"
+        iconType="logoApache"
+        isBeta={false}
+        title="jest test tutorial"
       />
-    </EuiPanel>
-  </div>
+      <EuiSpacer
+        size="l"
+      />
+      <div
+        className="text-center"
+      />
+      <EuiSpacer
+        size="l"
+      />
+      <EuiPanel
+        grow={true}
+        hasShadow={false}
+        paddingSize="l"
+      >
+        <InstructionSet
+          instructionVariants={
+            Array [
+              Object {
+                "id": "platform id",
+                "instructions": Array [
+                  Object {
+                    "title": "elasticCloud instructions",
+                  },
+                ],
+              },
+            ]
+          }
+          key="0"
+          offset={1}
+          onStatusCheck={[Function]}
+          paramValues={Object {}}
+          replaceTemplateStrings={[Function]}
+          setParameter={[Function]}
+          statusCheckState="NOT_CHECKED"
+          title="Instruction title"
+        />
+      </EuiPanel>
+    </div>
+  </EuiPageBody>
 </EuiPage>
 `;

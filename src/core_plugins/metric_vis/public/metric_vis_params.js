@@ -31,19 +31,19 @@ module.directive('metricVisParams', function () {
       $scope.collections = $scope.vis.type.editorConfig.collections;
       $scope.showColorRange = true;
 
-      $scope.$watch('vis.params.metric.metricColorMode', newValue => {
+      $scope.$watch('editorState.params.metric.metricColorMode', newValue => {
         switch (newValue) {
           case 'Labels':
-            $scope.vis.params.metric.style.labelColor = true;
-            $scope.vis.params.metric.style.bgColor = false;
+            $scope.editorState.params.metric.style.labelColor = true;
+            $scope.editorState.params.metric.style.bgColor = false;
             break;
           case 'Background':
-            $scope.vis.params.metric.style.labelColor = false;
-            $scope.vis.params.metric.style.bgColor = true;
+            $scope.editorState.params.metric.style.labelColor = false;
+            $scope.editorState.params.metric.style.bgColor = true;
             break;
           case 'None':
-            $scope.vis.params.metric.style.labelColor = false;
-            $scope.vis.params.metric.style.bgColor = false;
+            $scope.editorState.params.metric.style.labelColor = false;
+            $scope.editorState.params.metric.style.bgColor = false;
             break;
         }
       });
@@ -55,18 +55,18 @@ module.directive('metricVisParams', function () {
 
       $scope.getGreaterThan = function (index) {
         if (index === 0) return 0;
-        return $scope.vis.params.metric.colorsRange[index - 1].to;
+        return $scope.editorState.params.metric.colorsRange[index - 1].to;
       };
 
       $scope.addRange = function () {
-        const previousRange = _.last($scope.vis.params.metric.colorsRange);
+        const previousRange = _.last($scope.editorState.params.metric.colorsRange);
         const from = previousRange ? previousRange.to : 0;
         const to = previousRange ? from + (previousRange.to - previousRange.from) : 100;
-        $scope.vis.params.metric.colorsRange.push({ from: from, to: to });
+        $scope.editorState.params.metric.colorsRange.push({ from: from, to: to });
       };
 
       $scope.removeRange = function (index) {
-        $scope.vis.params.metric.colorsRange.splice(index, 1);
+        $scope.editorState.params.metric.colorsRange.splice(index, 1);
       };
 
       $scope.getColor = function (index) {

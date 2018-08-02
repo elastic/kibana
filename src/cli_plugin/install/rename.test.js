@@ -57,7 +57,7 @@ describe('plugin folder rename', function () {
         expect(renameStub.callCount).toBe(1);
       })
       .catch(function () {
-        throw new Error('We shouln\'t have any errors');
+        throw new Error('We shouldn\'t have any errors');
       });
   });
 

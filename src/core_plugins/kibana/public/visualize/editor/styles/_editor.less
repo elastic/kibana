@@ -4,6 +4,7 @@
 @vis-editor-sidebar-min-width: 350px;
 @vis-editor-nesting-width: 8px;
 @vis-editor-agg-editor-spacing: 10px;
+@vis-editor-resizer-width: 13px;
 
 .vis-editor {
   .flex-parent();
@@ -75,7 +76,8 @@
 
   .default-editor__resizer {
     display: flex;
-    flex: 0 0 13px;
+    flex: 0 0 @vis-editor-resizer-width;
+    width: @vis-editor-resizer-width;
     cursor: ew-resize;
     background-color: @globalColorLightestGray;
     align-items: center;
@@ -153,8 +155,9 @@ a tilemap in an iframe: https://github.com/elastic/kibana/issues/16457 */
 
   .vis-editor-sidebar {
     .flex-parent(1, 0, auto);
+    max-width: ~"calc(100% - @{vis-editor-resizer-width})";
 
-    // overrided for tablet and desktop
+    // overridden for tablet and desktop
     @media (min-width: @screen-md-min) {
       flex-basis: @vis-editor-sidebar-basis;
     }
@@ -228,6 +231,8 @@ a tilemap in an iframe: https://github.com/elastic/kibana/issues/16457 */
 
   .vis-editor-agg {
     .flex-parent();
+    width: 100%;
+    max-width: 100%;
 
     //IE10/11 - prevent flex item from overflowing
     flex-basis: 100%;
@@ -264,14 +269,21 @@ a tilemap in an iframe: https://github.com/elastic/kibana/issues/16457 */
       }
 
       .vis-editor-agg-header-title {
-        flex: 1 1 auto;
+        flex: 0 0 auto;
         .ellipsis();
         font-weight: bold;
+      }
+
+      .vis-editor-agg-header-title--grow {
+        flex-grow: 1;
       }
 
       .vis-editor-agg-header-description {
         font-weight: normal;
         padding-right: @vis-editor-agg-editor-spacing;
+        padding-left: 5px;
+        .ellipsis();
+        flex: 1 1 0;
 
         &.danger {
           .text-danger();
@@ -375,6 +387,15 @@ a tilemap in an iframe: https://github.com/elastic/kibana/issues/16457 */
   * 1. Show invalid state if the user has interacted with the input without selecting an option.
   */
   .vis-editor-field-ui-select {
+
+    .vis-editor-field-ui-select__field-entry {
+      .ellipsis();
+    }
+
+    .ui-select-match-text {
+      .ellipsis();
+    }
+
     &.ng-invalid.ng-dirty,
     &.ng-invalid.ng-touched {
       .ui-select-match {
@@ -423,6 +444,10 @@ vis-editor-vis-options > * {
   .flex-parent();
 }
 
+.vis-editor-config .ems-hotlink {
+  font-size: 12px;
+}
+
 /**
    * 1. TODO: Override bootstrap styles. Remove !important once we're rid of bootstrap.
    */
@@ -464,3 +489,5 @@ vis-editor-vis-options > * {
 .agg-select-help {
   float: right;
 }
+
+

@@ -18,13 +18,7 @@
  */
 
 import _ from 'lodash';
-import {
-  ContainerState,
-  EmbeddableMetadata,
-  Filters,
-  Query,
-  TimeRange,
-} from 'ui/embeddable';
+import { ContainerState, EmbeddableMetadata, Filters, Query, TimeRange } from 'ui/embeddable';
 import { DashboardViewMode } from '../dashboard_view_mode';
 import {
   DashboardMetadata,
@@ -36,33 +30,23 @@ import {
   PanelState,
 } from './types';
 
-export const getPanels = (dashboard: DashboardState): PanelsMap =>
-  dashboard.panels;
+export const getPanels = (dashboard: DashboardState): PanelsMap => dashboard.panels;
 
-export const getPanel = (
-  dashboard: DashboardState,
-  panelId: PanelId
-): PanelState => getPanels(dashboard)[panelId];
+export const getPanel = (dashboard: DashboardState, panelId: PanelId): PanelState =>
+  getPanels(dashboard)[panelId];
 
-export const getPanelType = (
-  dashboard: DashboardState,
-  panelId: PanelId
-): string => getPanel(dashboard, panelId).type;
+export const getPanelType = (dashboard: DashboardState, panelId: PanelId): string =>
+  getPanel(dashboard, panelId).type;
 
-export const getEmbeddables = (dashboard: DashboardState): EmbeddablesMap =>
-  dashboard.embeddables;
+export const getEmbeddables = (dashboard: DashboardState): EmbeddablesMap => dashboard.embeddables;
 
 // TODO: rename panel.embeddableConfig to embeddableCustomization. Because it's on the panel that's stored on a
 // dashboard, renaming this will require a migration step.
-export const getEmbeddableCustomization = (
-  dashboard: DashboardState,
-  panelId: PanelId
-): object => getPanel(dashboard, panelId).embeddableConfig;
+export const getEmbeddableCustomization = (dashboard: DashboardState, panelId: PanelId): object =>
+  getPanel(dashboard, panelId).embeddableConfig;
 
-export const getEmbeddable = (
-  dashboard: DashboardState,
-  panelId: PanelId
-): EmbeddableReduxState => dashboard.embeddables[panelId];
+export const getEmbeddable = (dashboard: DashboardState, panelId: PanelId): EmbeddableReduxState =>
+  dashboard.embeddables[panelId];
 
 export const getEmbeddableError = (
   dashboard: DashboardState,
@@ -79,10 +63,8 @@ export const getEmbeddableTitle = (
     : '';
 };
 
-export const getEmbeddableInitialized = (
-  dashboard: DashboardState,
-  panelId: PanelId
-): boolean => getEmbeddable(dashboard, panelId).initialized;
+export const getEmbeddableInitialized = (dashboard: DashboardState, panelId: PanelId): boolean =>
+  getEmbeddable(dashboard, panelId).initialized;
 
 export const getEmbeddableStagedFilter = (
   dashboard: DashboardState,
@@ -104,12 +86,10 @@ export const getEmbeddableEditUrl = (
     : '';
 };
 
-export const getVisibleContextMenuPanelId = (
-  dashboard: DashboardState
-): PanelId | undefined => dashboard.view.visibleContextMenuPanelId;
+export const getVisibleContextMenuPanelId = (dashboard: DashboardState): PanelId | undefined =>
+  dashboard.view.visibleContextMenuPanelId;
 
-export const getUseMargins = (dashboard: DashboardState): boolean =>
-  dashboard.view.useMargins;
+export const getUseMargins = (dashboard: DashboardState): boolean => dashboard.view.useMargins;
 
 export const getViewMode = (dashboard: DashboardState): DashboardViewMode =>
   dashboard.view.viewMode;
@@ -120,38 +100,27 @@ export const getFullScreenMode = (dashboard: DashboardState): boolean =>
 export const getHidePanelTitles = (dashboard: DashboardState): boolean =>
   dashboard.view.hidePanelTitles;
 
-export const getMaximizedPanelId = (
-  dashboard: DashboardState
-): PanelId | undefined => dashboard.view.maximizedPanelId;
+export const getMaximizedPanelId = (dashboard: DashboardState): PanelId | undefined =>
+  dashboard.view.maximizedPanelId;
 
-export const getTimeRange = (dashboard: DashboardState): TimeRange =>
-  dashboard.view.timeRange;
+export const getTimeRange = (dashboard: DashboardState): TimeRange => dashboard.view.timeRange;
 
-export const getFilters = (dashboard: DashboardState): Filters =>
-  dashboard.view.filters;
+export const getFilters = (dashboard: DashboardState): Filters => dashboard.view.filters;
 
-export const getQuery = (dashboard: DashboardState): Query =>
-  dashboard.view.query;
+export const getQuery = (dashboard: DashboardState): Query => dashboard.view.query;
 
-export const getMetadata = (dashboard: DashboardState): DashboardMetadata =>
-  dashboard.metadata;
+export const getMetadata = (dashboard: DashboardState): DashboardMetadata => dashboard.metadata;
 
-export const getTitle = (dashboard: DashboardState): string =>
-  dashboard.metadata.title;
+export const getTitle = (dashboard: DashboardState): string => dashboard.metadata.title;
 
 export const getDescription = (dashboard: DashboardState): string | undefined =>
   dashboard.metadata.description;
 
-export const getContainerState = (
-  dashboard: DashboardState,
-  panelId: PanelId
-): ContainerState => {
+export const getContainerState = (dashboard: DashboardState, panelId: PanelId): ContainerState => {
   const time = getTimeRange(dashboard);
   return {
     customTitle: getPanel(dashboard, panelId).title,
-    embeddableCustomization: _.cloneDeep(
-      getEmbeddableCustomization(dashboard, panelId) || {}
-    ),
+    embeddableCustomization: _.cloneDeep(getEmbeddableCustomization(dashboard, panelId) || {}),
     filters: getFilters(dashboard),
     hidePanelTitles: getHidePanelTitles(dashboard),
     isPanelExpanded: getMaximizedPanelId(dashboard) === panelId,

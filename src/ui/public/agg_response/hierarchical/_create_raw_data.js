@@ -68,7 +68,7 @@ export function createRawData(vis, resp) {
   /**
    * Walk the buckets and create records for each leaf
    * @param {aggConfig} agg The aggConfig for the current level
-   * @param {object} data The aggergation object
+   * @param {object} data The aggregation object
    * @param {array} [record] The record that will eventually get pushed to the rows
    * @returns {void}
    */

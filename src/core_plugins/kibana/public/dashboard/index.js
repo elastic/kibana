@@ -28,7 +28,7 @@ import dashboardTemplate from './dashboard_app.html';
 import dashboardListingTemplate from './listing/dashboard_listing_ng_wrapper.html';
 
 import { DashboardConstants, createDashboardEditUrl } from './dashboard_constants';
-import { SavedObjectNotFound } from 'ui/errors';
+import { InvalidJSONProperty, SavedObjectNotFound } from 'ui/errors';
 import { FeatureCatalogueRegistryProvider, FeatureCatalogueCategory } from 'ui/registry/feature_catalogue';
 import { SavedObjectsClientProvider } from 'ui/saved_objects';
 import { recentlyAccessed } from 'ui/persisted_log';
@@ -66,7 +66,7 @@ uiRoutes
       $scope.initialFilter = ($location.search()).filter || EMPTY_FILTER;
     },
     resolve: {
-      dash: function ($route, Private, courier, kbnUrl) {
+      dash: function ($route, Private, redirectWhenMissing, kbnUrl) {
         const savedObjectsClient = Private(SavedObjectsClientProvider);
         const title = $route.current.params.title;
         if (title) {
@@ -84,7 +84,7 @@ uiRoutes
               kbnUrl.redirect(`${DashboardConstants.LANDING_PAGE_PATH}?filter="${title}"`);
             }
             throw uiRoutes.WAIT_FOR_URL_CHANGE_TOKEN;
-          }).catch(courier.redirectWhenMissing({
+          }).catch(redirectWhenMissing({
             'dashboard': DashboardConstants.LANDING_PAGE_PATH
           }));
         }
@@ -94,9 +94,9 @@ uiRoutes
   .when(DashboardConstants.CREATE_NEW_DASHBOARD_URL, {
     template: dashboardTemplate,
     resolve: {
-      dash: function (savedDashboards, courier) {
+      dash: function (savedDashboards, redirectWhenMissing) {
         return savedDashboards.get()
-          .catch(courier.redirectWhenMissing({
+          .catch(redirectWhenMissing({
             'dashboard': DashboardConstants.LANDING_PAGE_PATH
           }));
       }
@@ -105,7 +105,7 @@ uiRoutes
   .when(createDashboardEditUrl(':id'), {
     template: dashboardTemplate,
     resolve: {
-      dash: function (savedDashboards, Notifier, $route, $location, courier, kbnUrl, AppState) {
+      dash: function (savedDashboards, Notifier, $route, $location, redirectWhenMissing, kbnUrl, AppState) {
         const id = $route.current.params.id;
 
         return savedDashboards.get(id)
@@ -114,17 +114,24 @@ uiRoutes
             return savedDashboard;
           })
           .catch((error) => {
+            // A corrupt dashboard was detected (e.g. with invalid JSON properties)
+            if (error instanceof InvalidJSONProperty) {
+              toastNotifications.addDanger(error.message);
+              kbnUrl.redirect(DashboardConstants.LANDING_PAGE_PATH);
+              return;
+            }
+
             // Preserve BWC of v5.3.0 links for new, unsaved dashboards.
             // See https://github.com/elastic/kibana/issues/10951 for more context.
             if (error instanceof SavedObjectNotFound && id === 'create') {
-              // Note "new AppState" is neccessary so the state in the url is preserved through the redirect.
+              // Note "new AppState" is necessary so the state in the url is preserved through the redirect.
               kbnUrl.redirect(DashboardConstants.CREATE_NEW_DASHBOARD_URL, {}, new AppState());
               toastNotifications.addWarning('The url "dashboard/create" was removed in 6.0. Please update your bookmarks.');
             } else {
               throw error;
             }
           })
-          .catch(courier.redirectWhenMissing({
+          .catch(redirectWhenMissing({
             'dashboard': DashboardConstants.LANDING_PAGE_PATH
           }));
       }

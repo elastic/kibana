@@ -29,7 +29,7 @@ const globProm = Promise.promisify(glob);
 /**
  * Return all the translation keys found for the file pattern
  * @param {String} translationPattern - regEx pattern for translations
- * @param {Array<String>} filesPatterns - List of file patterns to be checkd for translation keys
+ * @param {Array<String>} filesPatterns - List of file patterns to be checked for translation keys
  * @return {Promise} - A Promise object which will return a String Array of the translation keys
  * not translated then the Object will contain all non translated translation keys with value of file the key is from
  */

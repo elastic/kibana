@@ -37,12 +37,12 @@ describe('tickFormatter(format, template)', () => {
     expect(fn(1500 ^ 10)).to.equal('1.5KB');
   });
 
-  it('returns a custom forrmatted string with custom formatter', () => {
+  it('returns a custom formatted string with custom formatter', () => {
     const fn = tickFormatter('0.0a');
     expect(fn(1500)).to.equal('1.5k');
   });
 
-  it('returns a custom forrmatted string with custom formatter and template', () => {
+  it('returns a custom formatted string with custom formatter and template', () => {
     const fn = tickFormatter('0.0a', '{{value}}/s');
     expect(fn(1500)).to.equal('1.5k/s');
   });

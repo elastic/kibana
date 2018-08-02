@@ -25,7 +25,8 @@ import { Footer } from './footer';
 import { Introduction } from './introduction';
 import { InstructionSet } from './instruction_set';
 import { RadioButtonGroup } from './radio_button_group';
-import { EuiSpacer, EuiPage, EuiPanel, EuiLink, EuiText } from '@elastic/eui';
+import { SavedObjectsInstaller } from './saved_objects_installer';
+import { EuiSpacer, EuiPage, EuiPanel, EuiLink, EuiText, EuiPageBody } from '@elastic/eui';
 import * as StatusCheckStates from './status_check_states';
 
 const INSTRUCTIONS_TYPE = {
@@ -235,6 +236,21 @@ export class Tutorial extends React.Component {
     });
   };
 
+  renderSavedObjectsInstaller = () => {
+    if (!this.state.tutorial.savedObjects) {
+      return;
+    }
+
+    return (
+      <SavedObjectsInstaller
+        bulkCreate={this.props.bulkCreate}
+        savedObjects={this.state.tutorial.savedObjects}
+        installMsg={this.state.tutorial.savedObjectsInstallMsg}
+      />
+    );
+
+  }
+
   renderFooter = () => {
     let label;
     let url;
@@ -295,6 +311,7 @@ export class Tutorial extends React.Component {
             previewUrl={previewUrl}
             exportedFieldsUrl={exportedFieldsUrl}
             iconType={this.state.tutorial.euiIconType}
+            isBeta={this.state.tutorial.isBeta}
           />
 
           <EuiSpacer />
@@ -305,6 +322,7 @@ export class Tutorial extends React.Component {
           <EuiSpacer />
           <EuiPanel paddingSize="l">
             {this.renderInstructionSets(instructions)}
+            {this.renderSavedObjectsInstaller()}
             {this.renderFooter()}
           </EuiPanel>
         </div>
@@ -312,10 +330,15 @@ export class Tutorial extends React.Component {
     }
     return (
       <EuiPage className="home">
+        <EuiPageBody>
 
-        <EuiLink href="#/home">Home</EuiLink> / <EuiLink href="#/home/tutorial_directory">Add Data</EuiLink>
-        <EuiSpacer size="s" />
-        {content}
+          <div>
+            <EuiLink href="#/home">Home</EuiLink> / <EuiLink href="#/home/tutorial_directory">Add Data</EuiLink>
+          </div>
+          <EuiSpacer size="s" />
+          {content}
+
+        </EuiPageBody>
       </EuiPage>
     );
   }
@@ -327,4 +350,5 @@ Tutorial.propTypes = {
   getTutorial: PropTypes.func.isRequired,
   replaceTemplateStrings: PropTypes.func.isRequired,
   tutorialId: PropTypes.string.isRequired,
+  bulkCreate: PropTypes.func.isRequired,
 };

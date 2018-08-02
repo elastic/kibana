@@ -23,7 +23,7 @@ import { loadTestFiles } from './load_test_files';
 import { MochaReporterProvider } from './reporter';
 
 /**
- *  Instansiate mocha and load testfiles into it
+ *  Instantiate mocha and load testfiles into it
  *
  *  @param  {Lifecycle} lifecycle
  *  @param  {ToolingLog} log

@@ -170,7 +170,7 @@ describe('src/dev/build/tasks/nodejs/download', () => {
       });
     });
 
-    it('makes 6 sequests if `retries: 5` and all failed', async () => {
+    it('makes 6 requests if `retries: 5` and all failed', async () => {
       let reqCount = 0;
       nextHandler = function sequenceHandler(req, res) {
         reqCount += 1;

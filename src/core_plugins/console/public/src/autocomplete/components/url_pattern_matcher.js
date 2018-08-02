@@ -44,7 +44,9 @@ export class UrlPatternMatcher {
     ['HEAD', 'GET', 'PUT', 'POST', 'DELETE'].forEach((method) => {
       this[method] = {
         rootComponent: new SharedComponent('ROOT'),
-        parametrizedComponentFactories: parametrizedComponentFactories || {}
+        parametrizedComponentFactories: parametrizedComponentFactories || {
+          getComponent: () => {}
+        }
       };
     });
   }
@@ -87,7 +89,7 @@ export class UrlPatternMatcher {
                 );
                 c = new SharedComponent(part);
               }
-            } else if ((c = this[method].parametrizedComponentFactories[part])) {
+            } else if ((c = this[method].parametrizedComponentFactories.getComponent(part))) {
               // c is a f
               c = c(part, activeComponent);
             } else {

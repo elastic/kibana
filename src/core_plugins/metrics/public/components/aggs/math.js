@@ -93,7 +93,7 @@ class MathAgg extends Component {
                 {model.script}
               </textarea>
               <div className="vis_editor__note" id="mathExpressionDescription">
-                This field uses basic math expresions (see{' '}
+                This field uses basic math expressions (see{' '}
                 <a
                   href="https://github.com/elastic/tinymath/blob/master/docs/functions.md"
                   target="_blank"

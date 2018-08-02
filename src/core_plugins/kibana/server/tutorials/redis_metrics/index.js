@@ -18,11 +18,10 @@
  */
 
 import { TUTORIAL_CATEGORY } from '../../../common/tutorials/tutorial_category';
-import { ON_PREM_INSTRUCTIONS } from './on_prem';
-import { ELASTIC_CLOUD_INSTRUCTIONS } from './elastic_cloud';
-import { ON_PREM_ELASTIC_CLOUD_INSTRUCTIONS } from './on_prem_elastic_cloud';
+import { onPremInstructions, cloudInstructions, onPremCloudInstructions } from '../../../common/tutorials/metricbeat_instructions';
 
 export function redisMetricsSpecProvider() {
+  const moduleName = 'redis';
   return {
     id: 'redisMetrics',
     name: 'Redis metrics',
@@ -45,8 +44,8 @@ export function redisMetricsSpecProvider() {
     },
     completionTimeMinutes: 10,
     previewImagePath: '/plugins/kibana/home/tutorial_resources/redis_metrics/screenshot.png',
-    onPrem: ON_PREM_INSTRUCTIONS,
-    elasticCloud: ELASTIC_CLOUD_INSTRUCTIONS,
-    onPremElasticCloud: ON_PREM_ELASTIC_CLOUD_INSTRUCTIONS
+    onPrem: onPremInstructions(moduleName),
+    elasticCloud: cloudInstructions(moduleName),
+    onPremElasticCloud: onPremCloudInstructions(moduleName)
   };
 }

@@ -53,7 +53,7 @@ describe('esArchiver createParseArchiveStreams', () => {
 
         expect(output).to.eql({ a: 1 });
       });
-      it('consume buffers of valid JSON seperated by two newlines', async () => {
+      it('consume buffers of valid JSON separated by two newlines', async () => {
         const output = await createPromiseFromStreams([
           createListStream([
             Buffer.from('{'),
@@ -91,9 +91,9 @@ describe('esArchiver createParseArchiveStreams', () => {
           createConcatStream([])
         ]);
 
-        input.write(Buffer.from('{"a": 1}\n\n'));
+        input.write(Buffer.from('{"a": 1}\n\n{"a":'));
         expect(await receivedPromise).to.eql({ a: 1 });
-        input.write(Buffer.from('{"a": 2}'));
+        input.write(Buffer.from('2}'));
         input.end();
         expect(await finalPromise).to.eql([{ a: 1 }, { a: 2 }]);
       });
@@ -143,7 +143,7 @@ describe('esArchiver createParseArchiveStreams', () => {
         expect(output).to.eql({ a: 1 });
       });
 
-      it('parses valid gzipped JSON strings seperated by two newlines', async () => {
+      it('parses valid gzipped JSON strings separated by two newlines', async () => {
         const output = await createPromiseFromStreams([
           createListStream([
             '{\n',

@@ -30,7 +30,10 @@ import { first, ignoreElements, map } from 'rxjs/operators';
  */
 export function observeReadable(readable) {
   return Rx.race(
-    Rx.fromEvent(readable, 'end').pipe(first(), ignoreElements()),
+    Rx.fromEvent(readable, 'end').pipe(
+      first(),
+      ignoreElements()
+    ),
 
     Rx.fromEvent(readable, 'error').pipe(
       first(),

@@ -18,11 +18,12 @@
  */
 
 import _ from 'lodash';
-import chrome from '../chrome';
 
-import { resolve as resolveUrl, format as formatUrl } from 'url';
+import { resolve as resolveUrl } from 'url';
 import { keysToSnakeCaseShallow, keysToCamelCaseShallow } from '../../../utils/case_conversion';
 import { SavedObject } from './saved_object';
+import { isAutoCreateIndexError, showAutoCreateIndexErrorPage } from '../error_auto_create_index';
+import { kfetch } from 'ui/kfetch';
 
 const join = (...uriComponents) => (
   uriComponents.filter(Boolean).map(encodeURIComponent).join('/')
@@ -34,42 +35,58 @@ const join = (...uriComponents) => (
  */
 const BATCH_INTERVAL = 100;
 
-export class SavedObjectsClient {
-  constructor(options) {
-    const {
-      $http,
-      basePath = chrome.getBasePath(),
-      PromiseConstructor = Promise,
-      onCreateFailure = () => {},
-    } = options;
+const API_BASE_URL = '/api/saved_objects/';
 
-    this._$http = $http;
-    this._apiBaseUrl = `${basePath}/api/saved_objects/`;
-    this._PromiseCtor = PromiseConstructor;
-    this._onCreateFailure = onCreateFailure;
+export class SavedObjectsClient {
+  constructor() {
     this.batchQueue = [];
   }
 
   /**
-  * Persists an object
-  *
-  * @param {string} type
-  * @param {object} [attributes={}]
-  * @param {object} [options={}]
-  * @property {string} [options.id] - force id on creation, not recommended
-  * @property {boolean} [options.overwrite=false]
-  * @returns {promise} - SavedObject({ id, type, version, attributes })
-  */
-  create(type, attributes = {}, options = {}) {
+   * Persists an object
+   *
+   * @param {string} type
+   * @param {object} [attributes={}]
+   * @param {object} [options={}]
+   * @property {string} [options.id] - force id on creation, not recommended
+   * @property {boolean} [options.overwrite=false]
+   * @returns {promise} - SavedObject({ id, type, version, attributes })
+   */
+  create = (type, attributes = {}, options = {}) => {
     if (!type || !attributes) {
-      return this._PromiseCtor.reject(new Error('requires type and attributes'));
+      return Promise.reject(new Error('requires type and attributes'));
     }
 
-    const url = this._getUrl([type, options.id], _.pick(options, ['overwrite']));
+    const path = this._getPath([type, options.id]);
+    const query = _.pick(options, ['overwrite']);
 
-    return this._request('POST', url, { attributes })
-      .catch(this._onCreateFailure)
-      .then(resp => this.createSavedObject(resp));
+    return this._request({ method: 'POST', path, query, body: { attributes } })
+      .catch(error => {
+        if (isAutoCreateIndexError(error)) {
+          return showAutoCreateIndexErrorPage();
+        }
+
+        throw error;
+      })
+      .then(resp => this._createSavedObject(resp));
+  }
+
+  /**
+   * Creates multiple documents at once
+   *
+   * @param {array} objects - [{ type, id, attributes }]
+   * @param {object} [options={}]
+   * @property {boolean} [options.overwrite=false]
+   * @returns {promise} - { savedObjects: [{ id, type, version, attributes, error: { message } }]}
+   */
+  bulkCreate = (objects = [], options = {}) => {
+    const path = this._getPath(['_bulk_create']);
+    const query = _.pick(options, ['overwrite']);
+
+    return this._request({ method: 'POST', path, query, body: objects }).then(resp => {
+      resp.saved_objects = resp.saved_objects.map(d => this._createSavedObject(d));
+      return keysToCamelCaseShallow(resp);
+    });
   }
 
   /**
@@ -79,12 +96,12 @@ export class SavedObjectsClient {
    * @param {string} id
    * @returns {promise}
    */
-  delete(type, id) {
+  delete = (type, id) => {
     if (!type || !id) {
-      return this._PromiseCtor.reject(new Error('requires type and id'));
+      return Promise.reject(new Error('requires type and id'));
     }
 
-    return this._request('DELETE', this._getUrl([type, id]));
+    return this._request({ method: 'DELETE', path: this._getPath([type, id]) });
   }
 
   /**
@@ -100,11 +117,12 @@ export class SavedObjectsClient {
    * @property {array} options.fields
    * @returns {promise} - { savedObjects: [ SavedObject({ id, type, version, attributes }) ]}
    */
-  find(options = {}) {
-    const url = this._getUrl(['_find'], keysToSnakeCaseShallow(options));
+  find = (options = {}) => {
+    const path = this._getPath(['_find']);
+    const query = keysToSnakeCaseShallow(options);
 
-    return this._request('GET', url).then(resp => {
-      resp.saved_objects = resp.saved_objects.map(d => this.createSavedObject(d));
+    return this._request({ method: 'GET', path, query }).then(resp => {
+      resp.saved_objects = resp.saved_objects.map(d => this._createSavedObject(d));
       return keysToCamelCaseShallow(resp);
     });
   }
@@ -116,14 +134,14 @@ export class SavedObjectsClient {
    * @param {string} id
    * @returns {promise} - SavedObject({ id, type, version, attributes })
    */
-  get(type, id) {
+  get = (type, id) => {
     if (!type || !id) {
-      return this._PromiseCtor.reject(new Error('requires type and id'));
+      return Promise.reject(new Error('requires type and id'));
     }
 
-    return new this._PromiseCtor((resolve, reject) => {
+    return new Promise((resolve, reject) => {
       this.batchQueue.push({ type, id, resolve, reject });
-      this.processBatchQueue();
+      this._processBatchQueue();
     });
   }
 
@@ -139,12 +157,12 @@ export class SavedObjectsClient {
    *   { id: 'foo', type: 'index-pattern' }
    * ])
    */
-  bulkGet(objects = []) {
-    const url = this._getUrl(['_bulk_get']);
+  bulkGet = (objects = []) => {
+    const path = this._getPath(['_bulk_get']);
     const filteredObjects = objects.map(obj => _.pick(obj, ['id', 'type']));
 
-    return this._request('POST', url, filteredObjects).then(resp => {
-      resp.saved_objects = resp.saved_objects.map(d => this.createSavedObject(d));
+    return this._request({ method: 'POST', path, body: filteredObjects }).then(resp => {
+      resp.saved_objects = resp.saved_objects.map(d => this._createSavedObject(d));
       return keysToCamelCaseShallow(resp);
     });
   }
@@ -158,25 +176,26 @@ export class SavedObjectsClient {
    * @param {integer} options.version - ensures version matches that of persisted object
    * @returns {promise}
    */
-  update(type, id, attributes, { version } = {}) {
+  update = (type, id, attributes, { version } = {}) => {
     if (!type || !id || !attributes) {
-      return this._PromiseCtor.reject(new Error('requires type, id and attributes'));
+      return Promise.reject(new Error('requires type, id and attributes'));
     }
 
+    const path = this._getPath([type, id]);
     const body = {
       attributes,
       version
     };
 
-    return this._request('PUT', this._getUrl([type, id]), body).then(resp => {
-      return this.createSavedObject(resp);
+    return this._request({ method: 'PUT', path, body }).then(resp => {
+      return this._createSavedObject(resp);
     });
   }
 
   /**
    * Throttled processing of get requests into bulk requests at 100ms interval
    */
-  processBatchQueue = _.throttle(() => {
+  _processBatchQueue = _.throttle(() => {
     const queue = _.cloneDeep(this.batchQueue);
     this.batchQueue = [];
 
@@ -187,7 +206,7 @@ export class SavedObjectsClient {
         });
 
         if (!foundObject) {
-          return queueItem.resolve(this.createSavedObject(_.pick(queueItem, ['id', 'type'])));
+          return queueItem.resolve(this._createSavedObject(_.pick(queueItem, ['id', 'type'])));
         }
 
         queueItem.resolve(foundObject);
@@ -196,38 +215,23 @@ export class SavedObjectsClient {
 
   }, BATCH_INTERVAL, { leading: false });
 
-  createSavedObject(options) {
+  _createSavedObject(options) {
     return new SavedObject(this, options);
   }
 
-  _getUrl(path, query) {
-    if (!path && !query) {
-      return this._apiBaseUrl;
+  _getPath(path) {
+    if (!path) {
+      return API_BASE_URL;
     }
 
-    return resolveUrl(this._apiBaseUrl, formatUrl({
-      pathname: join(...path),
-      query: _.pick(query, value => value != null)
-    }));
+    return resolveUrl(API_BASE_URL, join(...path));
   }
 
-  _request(method, url, body) {
-    const options = { method, url, data: body };
-
+  _request({ method, path, query, body }) {
     if (method === 'GET' && body) {
-      return this._PromiseCtor.reject(new Error('body not permitted for GET requests'));
+      return Promise.reject(new Error('body not permitted for GET requests'));
     }
 
-    return this._$http(options)
-      .then(resp => _.get(resp, 'data'))
-      .catch(resp => {
-        const respBody = _.get(resp, 'data', {});
-        const err = new Error(respBody.message || respBody.error || `${resp.status} Response`);
-
-        err.statusCode = respBody.statusCode || resp.status;
-        err.body = respBody;
-
-        throw err;
-      });
+    return kfetch({ method, pathname: path, query, body: JSON.stringify(body) });
   }
 }

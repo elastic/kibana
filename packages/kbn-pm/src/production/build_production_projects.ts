@@ -70,11 +70,9 @@ async function getProductionProjects(rootPath: string) {
   const projectPaths = getProjectPaths(rootPath, {});
   const projects = await getProjects(rootPath, projectPaths);
 
-  const productionProjects = includeTransitiveProjects(
-    [projects.get('kibana')!],
-    projects,
-    { onlyProductionDependencies: true }
-  );
+  const productionProjects = includeTransitiveProjects([projects.get('kibana')!], projects, {
+    onlyProductionDependencies: true,
+  });
 
   // We remove Kibana, as we're already building Kibana
   productionProjects.delete('kibana');
@@ -107,11 +105,7 @@ async function buildProject(project: Project) {
  * manage dependencies is that it will "dedupe" them, so we don't include
  * unnecessary copies of dependencies.
  */
-async function copyToBuild(
-  project: Project,
-  kibanaRoot: string,
-  buildRoot: string
-) {
+async function copyToBuild(project: Project, kibanaRoot: string, buildRoot: string) {
   // We want the package to have the same relative location within the build
   const relativeProjectPath = relative(kibanaRoot, project.path);
   const buildProjectPath = resolve(buildRoot, relativeProjectPath);

@@ -12,7 +12,7 @@ import { createQuery } from '../create_query';
  * {@code createQuery} for all Beats instances.
  *
  * This helps to future proof Beats Monitoring by explicitly excluding APM Server from the Beats monitoring metrics
- * so that its stats do not propogate there and the forthcoming APM Server monitoring pages.
+ * so that its stats do not propagate there and the forthcoming APM Server monitoring pages.
  *
  * @param {Object} options The options to pass to {@code createQuery}
  */

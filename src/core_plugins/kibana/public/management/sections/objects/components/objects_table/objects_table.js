@@ -31,12 +31,14 @@ import {
   EuiInMemoryTable,
   EuiIcon,
   EuiConfirmModal,
+  EuiLoadingKibana,
   EuiOverlayMask,
   EUI_MODAL_CONFIRM_BUTTON,
   EuiCheckboxGroup,
   EuiToolTip,
   EuiPage,
   EuiPageContent,
+  EuiPageBody,
 } from '@elastic/eui';
 import {
   retrieveAndExportDocs,
@@ -304,13 +306,17 @@ export class ObjectsTable extends Component {
     // Unset this
     this.setState({
       selectedSavedObjects: [],
-      isShowingDeleteConfirmModal: false,
-      isDeleting: false,
     });
 
     // Fetching all data
     await this.fetchSavedObjects();
     await this.fetchCounts();
+
+    // Allow the user to interact with the table once the saved objects have been re-fetched.
+    this.setState({
+      isShowingDeleteConfirmModal: false,
+      isDeleting: false,
+    });
   };
 
   getRelationships = async (type, id) => {
@@ -358,23 +364,44 @@ export class ObjectsTable extends Component {
   }
 
   renderDeleteConfirmModal() {
-    if (!this.state.isShowingDeleteConfirmModal) {
+    const {
+      isShowingDeleteConfirmModal,
+      isDeleting,
+      selectedSavedObjects,
+    } = this.state;
+
+    if (!isShowingDeleteConfirmModal) {
       return null;
     }
 
-    return (
-      <EuiOverlayMask>
+    let modal;
+
+    if (isDeleting) {
+      // Block the user from interacting with the table while its contents are being deleted.
+      modal = (
+        <EuiLoadingKibana size="xl"/>
+      );
+    } else {
+      const onCancel = () => {
+        this.setState({ isShowingDeleteConfirmModal: false });
+      };
+
+      const onConfirm = () => {
+        this.delete();
+      };
+
+      modal = (
         <EuiConfirmModal
           title="Delete saved objects"
-          onCancel={() => this.setState({ isShowingDeleteConfirmModal: false })}
-          onConfirm={this.delete}
+          onCancel={onCancel}
+          onConfirm={onConfirm}
           cancelButtonText="Cancel"
-          confirmButtonText={this.state.isDeleting ? 'Deleting...' : 'Delete'}
+          confirmButtonText={isDeleting ? 'Deleting...' : 'Delete'}
           defaultFocusedButton={EUI_MODAL_CONFIRM_BUTTON}
         >
           <p>This action will delete the following saved objects:</p>
           <EuiInMemoryTable
-            items={this.state.selectedSavedObjects}
+            items={selectedSavedObjects}
             columns={[
               {
                 field: 'type',
@@ -398,6 +425,12 @@ export class ObjectsTable extends Component {
             sorting={false}
           />
         </EuiConfirmModal>
+      );
+    }
+
+    return (
+      <EuiOverlayMask>
+        {modal}
       </EuiOverlayMask>
     );
   }
@@ -467,39 +500,41 @@ export class ObjectsTable extends Component {
 
     return (
       <EuiPage>
-        <EuiPageContent verticalPosition="center" horizontalPosition="center" style={{ maxWidth: 1000, marginTop: 16, marginBottom: 16 }}>
-          {this.renderFlyout()}
-          {this.renderRelationships()}
-          {this.renderDeleteConfirmModal()}
-          {this.renderExportAllOptionsModal()}
-          <Header
-            onExportAll={() =>
-              this.setState({ isShowingExportAllOptionsModal: true })
-            }
-            onImport={this.showImportFlyout}
-            onRefresh={this.refreshData}
-            totalCount={totalItemCount}
-          />
-          <EuiSpacer size="xs" />
-          <Table
-            itemId={'id'}
-            selectionConfig={selectionConfig}
-            selectedSavedObjects={selectedSavedObjects}
-            onQueryChange={this.onQueryChange}
-            onTableChange={this.onTableChange}
-            filterOptions={filterOptions}
-            onExport={this.onExport}
-            onDelete={this.onDelete}
-            getEditUrl={this.props.getEditUrl}
-            goInApp={this.props.goInApp}
-            pageIndex={page}
-            pageSize={perPage}
-            items={savedObjects}
-            totalItemCount={totalItemCount}
-            isSearching={isSearching}
-            onShowRelationships={this.onShowRelationships}
-          />
-        </EuiPageContent>
+        <EuiPageBody>
+          <EuiPageContent verticalPosition="center" horizontalPosition="center" style={{ maxWidth: 1000, marginTop: 16, marginBottom: 16 }}>
+            {this.renderFlyout()}
+            {this.renderRelationships()}
+            {this.renderDeleteConfirmModal()}
+            {this.renderExportAllOptionsModal()}
+            <Header
+              onExportAll={() =>
+                this.setState({ isShowingExportAllOptionsModal: true })
+              }
+              onImport={this.showImportFlyout}
+              onRefresh={this.refreshData}
+              totalCount={totalItemCount}
+            />
+            <EuiSpacer size="xs" />
+            <Table
+              itemId={'id'}
+              selectionConfig={selectionConfig}
+              selectedSavedObjects={selectedSavedObjects}
+              onQueryChange={this.onQueryChange}
+              onTableChange={this.onTableChange}
+              filterOptions={filterOptions}
+              onExport={this.onExport}
+              onDelete={this.onDelete}
+              getEditUrl={this.props.getEditUrl}
+              goInApp={this.props.goInApp}
+              pageIndex={page}
+              pageSize={perPage}
+              items={savedObjects}
+              totalItemCount={totalItemCount}
+              isSearching={isSearching}
+              onShowRelationships={this.onShowRelationships}
+            />
+          </EuiPageContent>
+        </EuiPageBody>
       </EuiPage>
     );
   }

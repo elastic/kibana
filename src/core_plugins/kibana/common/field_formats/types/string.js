@@ -20,11 +20,21 @@
 import { asPrettyString } from '../../utils/as_pretty_string';
 import { shortenDottedString } from '../../utils/shorten_dotted_string';
 
+const TRANSFORM_OPTIONS = [
+  { kind: false, text: '- None -' },
+  { kind: 'lower', text: 'Lower Case' },
+  { kind: 'upper', text: 'Upper Case' },
+  { kind: 'title', text: 'Title Case' },
+  { kind: 'short', text: 'Short Dots' },
+  { kind: 'base64', text: 'Base64 Decode' }
+];
+const DEFAULT_TRANSFORM_OPTION = false;
+
 export function createStringFormat(FieldFormat) {
   return class StringFormat extends FieldFormat {
     getParamDefaults() {
       return {
-        transform: false
+        transform: DEFAULT_TRANSFORM_OPTION
       };
     }
 
@@ -66,5 +76,6 @@ export function createStringFormat(FieldFormat) {
       'unknown',
       'conflict'
     ];
+    static transformOptions = TRANSFORM_OPTIONS;
   };
 }

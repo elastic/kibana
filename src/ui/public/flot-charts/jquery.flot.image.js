@@ -5,7 +5,7 @@ Licensed under the MIT license.
 
 The data syntax is [ [ image, x1, y1, x2, y2 ], ... ] where (x1, y1) and
 (x2, y2) are where you intend the two opposite corners of the image to end up
-in the plot. Image must be a fully loaded Javascript image (you can make one
+in the plot. Image must be a fully loaded JavaScript image (you can make one
 with new Image()). If the image is not complete, it's skipped when plotting.
 
 There are two helpers included for retrieving images. The easiest work the way

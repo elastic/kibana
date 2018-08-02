@@ -18,6 +18,7 @@
  */
 
 import _ from 'lodash';
+import chrome from 'ui/chrome';
 import { BucketAggType } from './_bucket_agg_type';
 import { AggConfig } from '../../vis/agg_config';
 import { Schemas } from '../../vis/editors/default/schemas';
@@ -85,19 +86,25 @@ export const termsBucketAgg = new BucketAggType({
           if (val === '__missing__') {
             return bucket.params.missingBucketLabel;
           }
+          const parsedUrl = {
+            origin: window.location.origin,
+            pathname: window.location.pathname,
+            basePath: chrome.getBasePath(),
+          };
           const converter = bucket.params.field.format.getConverterFor(type);
-          return converter(val);
+          return converter(val, undefined, undefined, parsedUrl);
         };
       }
     };
   },
   createFilter: createFilterTerms,
-  postFlightRequest: async (resp, aggConfigs, aggConfig, nestedSearchSource) => {
+  postFlightRequest: async (resp, aggConfigs, aggConfig, searchSource, inspectorAdapters) => {
+    const nestedSearchSource = searchSource.createChild();
     if (aggConfig.params.otherBucket) {
       const filterAgg = buildOtherBucketAgg(aggConfigs, aggConfig, resp);
-      nestedSearchSource.set('aggs', filterAgg);
+      nestedSearchSource.setField('aggs', filterAgg);
 
-      const request = aggConfigs.vis.API.inspectorAdapters.requests.start('Other bucket', {
+      const request = inspectorAdapters.requests.start('Other bucket', {
         description: `This request counts the number of documents that fall
           outside the criterion of the data buckets.`
       });
@@ -106,7 +113,7 @@ export const termsBucketAgg = new BucketAggType({
       });
       request.stats(getRequestInspectorStats(nestedSearchSource));
 
-      const response = await nestedSearchSource.fetchAsRejectablePromise();
+      const response = await nestedSearchSource.fetch();
       request
         .stats(getResponseInspectorStats(nestedSearchSource, response))
         .ok({ json: response });
@@ -205,12 +212,11 @@ export const termsBucketAgg = new BucketAggType({
           params.orderAgg = params.orderAgg || paramDef.makeOrderAgg(agg);
         }
       },
-      write: function (agg, output) {
-        const vis = agg.vis;
+      write: function (agg, output, aggs) {
         const dir = agg.params.order.val;
         const order = output.params.order = {};
 
-        let orderAgg = agg.params.orderAgg || vis.aggs.getResponseAggById(agg.params.orderBy);
+        let orderAgg = agg.params.orderAgg || aggs.getResponseAggById(agg.params.orderBy);
 
         // TODO: This works around an Elasticsearch bug the always casts terms agg scripts to strings
         // thus causing issues with filtering. This probably causes other issues since float might not
@@ -238,7 +244,7 @@ export const termsBucketAgg = new BucketAggType({
 
         const orderAggId = orderAgg.id;
         if (orderAgg.parentId) {
-          orderAgg = vis.aggs.byId[orderAgg.parentId];
+          orderAgg = aggs.byId[orderAgg.parentId];
         }
 
         output.subAggs = (output.subAggs || []).concat(orderAgg);

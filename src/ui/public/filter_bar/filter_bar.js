@@ -27,7 +27,7 @@ import { FilterBarLibMapAndFlattenFiltersProvider } from './lib/map_and_flatten_
 import { FilterBarLibMapFlattenAndWrapFiltersProvider } from './lib/map_flatten_and_wrap_filters';
 import { FilterBarLibExtractTimeFilterProvider } from './lib/extract_time_filter';
 import { FilterBarLibFilterOutTimeBasedFilterProvider } from './lib/filter_out_time_based_filter';
-import { FilterBarLibChangeTimeFilterProvider } from './lib/change_time_filter';
+import { changeTimeFilter } from './lib/change_time_filter';
 import { FilterBarQueryFilterProvider } from './query_filter';
 import { compareFilters } from './lib/compare_filters';
 import { uiModules } from '../modules';
@@ -42,7 +42,6 @@ module.directive('filterBar', function (Private, Promise, getAppState) {
   const mapFlattenAndWrapFilters = Private(FilterBarLibMapFlattenAndWrapFiltersProvider);
   const extractTimeFilter = Private(FilterBarLibExtractTimeFilterProvider);
   const filterOutTimeBasedFilter = Private(FilterBarLibFilterOutTimeBasedFilterProvider);
-  const changeTimeFilter = Private(FilterBarLibChangeTimeFilterProvider);
   const queryFilter = Private(FilterBarQueryFilterProvider);
 
   return {

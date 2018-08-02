@@ -22,7 +22,7 @@ import React, { Component } from 'react';
 import _ from 'lodash';
 import getLastValue from '../../../common/get_last_value';
 import reactcss from 'reactcss';
-import calculateCorrdinates from '../lib/calculate_corrdinates';
+import calculateCoordinates from '../lib/calculate_coordinates';
 
 class Metric extends Component {
 
@@ -41,7 +41,7 @@ class Metric extends Component {
   componentWillMount() {
     const check = () => {
       this.timeout = setTimeout(() => {
-        const newState = calculateCorrdinates(this.inner, this.resize, this.state);
+        const newState = calculateCoordinates(this.inner, this.resize, this.state);
         if (newState && this.state && !_.isEqual(newState, this.state)) {
           this.handleResize();
         }
@@ -61,7 +61,7 @@ class Metric extends Component {
 
   handleResize() {
     // Bingo!
-    const newState = calculateCorrdinates(this.inner, this.resize, this.state);
+    const newState = calculateCoordinates(this.inner, this.resize, this.state);
     this.setState(newState);
   }
 

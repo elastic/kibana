@@ -140,7 +140,7 @@ export class IndexedArray {
    * @param  {function} inflect - a function that will be called with a property name, and
    *                            creates the public property at which the index will be exposed
    * @param  {function} op      - the function that will be used to create the indices, it is passed
-   *                            the raw representaion of the registry, and a getter for reading the
+   *                            the raw representation of the registry, and a getter for reading the
    *                            right prop
    *
    * @returns {string[]}        - the public keys of all indices created

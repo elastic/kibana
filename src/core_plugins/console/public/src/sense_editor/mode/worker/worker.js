@@ -1,7 +1,7 @@
 /* eslint-disable */
 /* 
   This file is loaded up as a blob by Brace to hand to Ace to load as Jsonp
-  (hence the redefinining of everything).  It is based on the javascript
+  (hence the redefining of everything).  It is based on the javascript
   mode from the brace distro.
 */
 

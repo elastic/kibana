@@ -25,7 +25,7 @@ export function getParentCandidates(controlParamsList, controlId, lineageMap) {
     if (!controlParams.indexPattern || !controlParams.fieldName) {
       return false;
     }
-    // Ignore controls that would create a circlar graph
+    // Ignore controls that would create a circular graph
     const lineage = lineageMap.get(controlParams.id);
     if (lineage.includes(controlId)) {
       return false;

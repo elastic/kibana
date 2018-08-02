@@ -46,7 +46,7 @@ import { shouldReadFieldFromDocValues } from './should_read_field_from_doc_value
  *          ...
  *
  *  Returned array includes an object for each field in the _field_caps
- *  response. When the field uses the same configuation across all indices
+ *  response. When the field uses the same configuration across all indices
  *  it should look something like this:
  *
  *    {

@@ -20,7 +20,7 @@
 import * as fs from 'fs';
 
 /**
- * Recurive deletion for a directory
+ * Recursive deletion for a directory
  *
  * @param {String} path
  */

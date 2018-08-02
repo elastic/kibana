@@ -43,7 +43,7 @@ describe('Comma-List filter', function () {
     expect(commaList()).to.be('');
   });
 
-  it('handls single values ok', function () {
+  it('handles single values ok', function () {
     expect(commaList(['john'])).to.be('john');
   });
 

@@ -26,7 +26,7 @@ export default (obj = {}) => {
     color: '#68BC00',
     split_mode: 'everything',
     metrics: [ newMetricAggFn() ],
-    seperate_axis: 0,
+    separate_axis: 0,
     axis_position: 'right',
     formatter: 'number',
     chart_type: 'line',

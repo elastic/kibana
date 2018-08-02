@@ -7,13 +7,13 @@
 
 import 'ngreact';
 
+import { timefilter } from 'ui/timefilter';
 import { uiModules } from 'ui/modules';
 const module = uiModules.get('apps/ml', ['react']);
 
 import { ForecastingModal } from './forecasting_modal';
 
 module.directive('mlForecastingModal', function ($injector) {
-  const timefilter = $injector.get('timefilter');
   const reactDirective = $injector.get('reactDirective');
   return reactDirective(
     ForecastingModal,

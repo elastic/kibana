@@ -31,3 +31,4 @@ export { IndexAutocompleteComponent } from './index_autocomplete_component';
 export { FieldAutocompleteComponent } from './field_autocomplete_component';
 export { TypeAutocompleteComponent } from './type_autocomplete_component';
 export { IdAutocompleteComponent } from './id_autocomplete_component';
+export { TemplateAutocompleteComponent } from './template_autocomplete_component';

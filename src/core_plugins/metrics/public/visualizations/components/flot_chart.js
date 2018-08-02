@@ -95,7 +95,7 @@ class FlotChart extends Component {
       const { series } = newProps;
       const options = this.plot.getOptions();
       _.set(options, 'series.bars.barWidth', calculateBarWidth(series));
-      _.set(options, 'xaxes[0].ticks', this.calcualteTicks());
+      _.set(options, 'xaxes[0].ticks', this.calculateTicks());
       this.plot.setData(this.calculateData(series, newProps.show));
       this.plot.setupGrid();
       this.plot.draw();
@@ -168,7 +168,7 @@ class FlotChart extends Component {
         timezone: 'browser',
         mode: 'time',
         font: { color: textColor },
-        ticks: this.calcualteTicks()
+        ticks: this.calculateTicks()
       },
       series: {
         shadowSize: 0
@@ -202,7 +202,7 @@ class FlotChart extends Component {
     return _.assign(opts, props.options);
   }
 
-  calcualteTicks() {
+  calculateTicks() {
     const sample = this.props.xAxisFormatter(new Date());
     const tickLetterWidth = 7;
     const tickPadding = 45;
@@ -220,7 +220,7 @@ class FlotChart extends Component {
     if (resize && resize.clientHeight > 0 && resize.clientHeight > 0) {
       if (!this.plot) return;
       const options = this.plot.getOptions();
-      _.set(options, 'xaxes[0].ticks', this.calcualteTicks());
+      _.set(options, 'xaxes[0].ticks', this.calculateTicks());
       this.plot.resize();
       this.plot.setupGrid();
       this.plot.draw();

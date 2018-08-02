@@ -201,7 +201,7 @@ function compileDescription(description, compilingContext) {
 
 function compileParametrizedValue(value, compilingContext, template) {
   value = value.substr(1, value.length - 2).toLowerCase();
-  let component = compilingContext.parametrizedComponentFactories[value];
+  let component = compilingContext.parametrizedComponentFactories.getComponent(value, true);
   if (!component) {
     throw new Error('no factory found for \'' + value + '\'');
   }

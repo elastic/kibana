@@ -20,7 +20,7 @@
 import { SavedObjectsRepository } from './repository';
 
 /**
- * Provider for the Saved Object Reppository.
+ * Provider for the Saved Object Repository.
  */
 export class SavedObjectsRepositoryProvider {
 

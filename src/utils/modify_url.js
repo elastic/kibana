@@ -31,7 +31,7 @@ import { parse as parseUrl, format as formatUrl } from 'url';
  *    - auth
  *    - hostname (just the name of the host, no port or auth information)
  *    - port
- *    - pathmame (the path after the hostname, no query or hash, starts
+ *    - pathname (the path after the hostname, no query or hash, starts
  *        with a slash if there was a path)
  *    - query (always an object, even when no query on original url)
  *    - hash

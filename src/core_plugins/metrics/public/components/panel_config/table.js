@@ -61,7 +61,7 @@ class TablePanelConfig extends Component {
         <div>
           <div className="vis_editor__table-pivot-fields">
             <div className="vis_editor__container">
-              <div className="vis_ediotr__vis_config-row">
+              <div className="vis_editor__vis_config-row">
                 <p>
                   For the table visualization you need to define a field to
                   group by using a terms aggregation.

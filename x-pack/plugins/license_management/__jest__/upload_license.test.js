@@ -54,22 +54,25 @@ describe('UploadLicense', () => {
     services.kbnUrl.change.mockReset();
   });
   it('should display an error when submitting invalid JSON', async () => {
-    store.dispatch(uploadLicense('INVALID', 'trial'));
     const rendered = mount(component);
+    store.dispatch(uploadLicense('INVALID', 'trial'));
+    rendered.update();
     expect(rendered).toMatchSnapshot();
   });
   it('should display an error when ES says license is invalid', async () => {
+    const rendered = mount(component);
     const invalidLicense = JSON.stringify({ license: { type: 'basic' } });
     server.respond(UPLOAD_LICENSE_INVALID);
     await uploadLicense(invalidLicense)(store.dispatch, null, services);
-    const rendered = mount(component);
+    rendered.update();
     expect(rendered).toMatchSnapshot();
   });
   it('should display an error when ES says license is expired', async () => {
+    const rendered = mount(component);
     const invalidLicense = JSON.stringify({ license: { type: 'basic' } });
     server.respond(UPLOAD_LICENSE_EXPIRED);
     await uploadLicense(invalidLicense)(store.dispatch, null, services);
-    const rendered = mount(component);
+    rendered.update();
     expect(rendered).toMatchSnapshot();
   });
   it('should display a modal when license requires acknowledgement', async () => {
@@ -93,10 +96,11 @@ describe('UploadLicense', () => {
     expect(services.kbnUrl.change).toHaveBeenCalledWith(BASE_PATH);
   });
   it('should display error when ES returns error', async () => {
+    const rendered = mount(component);
     const license = JSON.stringify({ license: { type: 'basic' } });
     server.respond(UPLOAD_LICENSE_TLS_NOT_ENABLED);
     await uploadLicense(license)(store.dispatch, null, services);
-    const rendered = mount(component);
+    rendered.update();
     expect(rendered).toMatchSnapshot();
   });
 });

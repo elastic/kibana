@@ -30,16 +30,16 @@ export function MergeDuplicatesRequestProvider(Private) {
     return requests.map(function (req) {
       if (!isRequest(req)) return req;
 
-      const iid = req.source._instanceid;
-      if (!index[iid]) {
+      const searchSourceId = req.source.getId();
+      if (!index[searchSourceId]) {
         // this request is unique so far
-        index[iid] = req;
+        index[searchSourceId] = req;
         // keep the request
         return req;
       }
 
       // the source was requested at least twice
-      req._uniq = index[iid];
+      req._uniq = index[searchSourceId];
       return DUPLICATE;
     });
   }

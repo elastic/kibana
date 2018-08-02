@@ -18,15 +18,13 @@
  */
 
 import { uiModules } from 'ui/modules';
+import { toastNotifications } from 'ui/notify';
 import regionMapVisParamsTemplate from './region_map_vis_params.html';
 import { mapToLayerWithId } from './util';
 import '../../tile_map/public/editors/wms_options';
 
 uiModules.get('kibana/region_map')
-  .directive('regionMapVisParams', function (serviceSettings, regionmapsConfig, Notifier) {
-
-    const notify = new Notifier({ location: 'Region map' });
-
+  .directive('regionMapVisParams', function (serviceSettings, regionmapsConfig) {
     return {
       restrict: 'E',
       template: regionMapVisParamsTemplate,
@@ -40,7 +38,7 @@ uiModules.get('kibana/region_map')
           serviceSettings.getFileLayers()
             .then(function (layersFromService) {
 
-              layersFromService = layersFromService.map(mapToLayerWithId.bind(null, 'elastic_maps_service'));
+              layersFromService = layersFromService.map(mapToLayerWithId.bind(null, 'elastic_maps_service', true));
               const newVectorLayers = $scope.collections.vectorLayers.slice();
               for (let i = 0; i < layersFromService.length; i += 1) {
                 const layerFromService = layersFromService[i];
@@ -57,8 +55,8 @@ uiModules.get('kibana/region_map')
               }
 
               $scope.collections.vectorLayers = newVectorLayers;
-              if ($scope.collections.vectorLayers[0] && !$scope.vis.params.selectedLayer) {
-                $scope.vis.params.selectedLayer = $scope.collections.vectorLayers[0];
+              if ($scope.collections.vectorLayers[0] && !$scope.editorState.params.selectedLayer) {
+                $scope.editorState.params.selectedLayer = $scope.collections.vectorLayers[0];
                 onLayerChange();
               }
 
@@ -69,8 +67,8 @@ uiModules.get('kibana/region_map')
               }, 0);
               $scope.collections.vectorLayers = newVectorLayers;
 
-              if ($scope.collections.vectorLayers[0] && !$scope.vis.params.selectedLayer) {
-                $scope.vis.params.selectedLayer = $scope.collections.vectorLayers[0];
+              if ($scope.collections.vectorLayers[0] && !$scope.editorState.params.selectedLayer) {
+                $scope.editorState.params.selectedLayer = $scope.collections.vectorLayers[0];
                 onLayerChange();
               }
 
@@ -84,13 +82,26 @@ uiModules.get('kibana/region_map')
 
             })
             .catch(function (error) {
-              notify.warning(error.message);
+              toastNotifications.addWarning(error.message);
             });
         }
 
         function onLayerChange() {
-          $scope.vis.params.selectedJoinField = $scope.vis.params.selectedLayer.fields[0];
+
+          if (!$scope.editorState.params.selectedLayer) {
+            return;
+          }
+
+          $scope.editorState.params.selectedJoinField = $scope.editorState.params.selectedLayer.fields[0];
+
+          if ($scope.editorState.params.selectedLayer.isEMS) {
+            $scope.editorState.params.emsHotLink = serviceSettings.getEMSHotLink($scope.editorState.params.selectedLayer);
+          } else {
+            $scope.editorState.params.emsHotLink = null;
+          }
         }
+
+        onLayerChange();
 
       }
     };

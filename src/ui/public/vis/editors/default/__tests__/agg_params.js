@@ -77,10 +77,11 @@ describe('Vis-Editor-Agg-Params plugin directive', function () {
     });
 
     $parentScope.agg = new AggConfig(vis, state);
+    $parentScope.vis = vis;
 
     // make the element
     $elem = angular.element(
-      `<vis-editor-agg-params agg="agg" group-name="groupName"></vis-editor-agg-params>`
+      `<vis-editor-agg-params index-pattern="vis.indexPattern" agg="agg" group-name="groupName"></vis-editor-agg-params>`
     );
 
     // compile the html

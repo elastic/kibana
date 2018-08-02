@@ -24,6 +24,7 @@
   </div>
   <div ng-show="agg.params.orderAgg" class="vis-editor-agg-order-agg">
     <vis-editor-agg-params
+      index-pattern="agg._indexPattern"
       agg="agg.params.orderAgg"
       ng-if="agg.params.orderAgg"
       group-name="'metrics'">

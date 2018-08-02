@@ -25,7 +25,7 @@ export async function runKibanaServer({ procs, config, options }) {
 
   await procs.run('kibana', {
     cmd: getKibanaCmd(installDir),
-    args: getCliArgs(config, options),
+    args: collectCliArgs(config, options),
     env: {
       FORCE_COLOR: 1,
       ...process.env,
@@ -45,14 +45,33 @@ function getKibanaCmd(installDir) {
   return KIBANA_EXEC;
 }
 
-function getCliArgs(config, { devMode, installDir }) {
+/* When installDir is passed, we run from a built version of Kibana,
+ * which uses different command line arguments. If installDir is not
+ * passed, we run from source code. We also allow passing in extra
+ * Kibana server options, so we tack those on here.
+ */
+function collectCliArgs(config, { installDir, extraKbnOpts }) {
   const buildArgs = config.get('kbnTestServer.buildArgs') || [];
   const sourceArgs = config.get('kbnTestServer.sourceArgs') || [];
   const serverArgs = config.get('kbnTestServer.serverArgs') || [];
 
-  if (devMode) serverArgs.push('--dev');
+  return pipe(
+    serverArgs,
+    args => (installDir ? args.filter(a => a !== '--oss') : args),
+    args => {
+      return installDir ? [...args, ...buildArgs] : [KIBANA_EXEC_PATH, ...args, ...sourceArgs];
+    },
+    args => args.concat(extraKbnOpts || [])
+  );
+}
 
-  return installDir
-    ? [...serverArgs, ...buildArgs]
-    : [KIBANA_EXEC_PATH, ...serverArgs, ...sourceArgs];
+/*
+ * Apply each function in fns to the result of the
+ * previous function. The first function's input
+ * is the arr array.
+ */
+function pipe(arr, ...fns) {
+  return fns.reduce((acc, fn) => {
+    return fn(acc);
+  }, arr);
 }

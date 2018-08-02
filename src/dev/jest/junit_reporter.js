@@ -27,9 +27,9 @@ const ROOT_DIR = dirname(require.resolve('../../../package.json'));
 
 /**
  * Jest reporter that produces JUnit report when running on CI
- * @class JestJunitReporter
+ * @class JestJUnitReporter
  */
-export default class JestJunitReporter {
+export default class JestJUnitReporter {
   constructor(globalConfig, options = {}) {
     const {
       reportName = 'Jest Tests',
@@ -104,7 +104,7 @@ export default class JestJunitReporter {
       });
     });
 
-    const reportPath = resolve(rootDirectory, `target/junit/${reportName}.xml`);
+    const reportPath = resolve(rootDirectory, `target/junit/TEST-${reportName}.xml`);
     const reportXML = root.end({
       pretty: true,
       indent: '  ',

@@ -17,27 +17,20 @@
  * under the License.
  */
 
-import moment from 'moment';
 import expect from 'expect.js';
 import ngMock from 'ng_mock';
 import $ from 'jquery';
-import sinon from 'sinon';
+import { timefilter } from 'ui/timefilter';
 
 describe('kbnGlobalTimepicker', function () {
-  const sandbox = sinon.createSandbox();
-
   let compile;
   let scope;
 
   beforeEach(() => {
     ngMock.module('kibana');
-    ngMock.inject(($compile, $rootScope, timefilter) => {
+    ngMock.inject(($compile, $rootScope) => {
       scope = $rootScope.$new();
-      compile = (timefilterStubProperties = {}) => {
-        Object.keys(timefilterStubProperties).forEach((key) => {
-          sandbox.stub(timefilter, key).value(timefilterStubProperties[key]);
-        });
-
+      compile = () => {
         const $el = $('<kbn-global-timepicker></kbn-global-timepicker>');
         $el.data('$kbnTopNavController', {}); // Mock the kbnTopNav
         $compile($el)(scope);
@@ -45,10 +38,6 @@ describe('kbnGlobalTimepicker', function () {
         return $el;
       };
     });
-  });
-
-  afterEach(() => {
-    sandbox.restore();
   });
 
   it('injects the timepicker into the DOM', () => {
@@ -59,17 +48,16 @@ describe('kbnGlobalTimepicker', function () {
   it('sets data-shared-timefilter-* using the timefilter when auto-refresh selector is enabled', function () {
     const minString = '2000-01-01T00:00:00Z';
     const maxString = '2001-01-01T00:00:00Z';
-    const bounds = {
-      min: moment(minString),
-      max: moment(maxString),
-    };
-    const timefilter = {
-      isAutoRefreshSelectorEnabled: true,
-      isTimeRangeSelectorEnabled: false,
-      getBounds: () => bounds
-    };
 
-    const $el = compile(timefilter);
+    timefilter.enableAutoRefreshSelector();
+    timefilter.disableTimeRangeSelector();
+    timefilter.setTime({
+      from: minString,
+      to: maxString,
+      mode: 'absolute'
+    });
+
+    const $el = compile();
 
     expect($el.attr('data-shared-timefilter-from')).to.eql(minString);
     expect($el.attr('data-shared-timefilter-to')).to.eql(maxString);
@@ -78,17 +66,16 @@ describe('kbnGlobalTimepicker', function () {
   it('sets data-shared-timefilter-* using the timefilter when time range selector is enabled', function () {
     const minString = '2000-01-01T00:00:00Z';
     const maxString = '2001-01-01T00:00:00Z';
-    const bounds = {
-      min: moment(minString),
-      max: moment(maxString),
-    };
-    const timefilter = {
-      isAutoRefreshSelectorEnabled: false,
-      isTimeRangeSelectorEnabled: true,
-      getBounds: () => bounds
-    };
 
-    const $el = compile(timefilter);
+    timefilter.disableAutoRefreshSelector();
+    timefilter.enableTimeRangeSelector();
+    timefilter.setTime({
+      from: minString,
+      to: maxString,
+      mode: 'absolute'
+    });
+
+    const $el = compile();
 
     expect($el.attr('data-shared-timefilter-from')).to.eql(minString);
     expect($el.attr('data-shared-timefilter-to')).to.eql(maxString);
@@ -97,17 +84,16 @@ describe('kbnGlobalTimepicker', function () {
   it(`doesn't set data-shared-timefilter-* when auto-refresh and time range selectors are both disabled`, function () {
     const minString = '2000-01-01T00:00:00Z';
     const maxString = '2001-01-01T00:00:00Z';
-    const bounds = {
-      min: moment(minString),
-      max: moment(maxString),
-    };
-    const timefilter = {
-      isAutoRefreshSelectorEnabled: false,
-      isTimeRangeSelectorEnabled: false,
-      getBounds: () => bounds
-    };
 
-    const $el = compile(timefilter);
+    timefilter.disableAutoRefreshSelector();
+    timefilter.disableTimeRangeSelector();
+    timefilter.setTime({
+      from: minString,
+      to: maxString,
+      mode: 'absolute'
+    });
+
+    const $el = compile();
 
     expect($el.attr('data-shared-timefilter-from')).to.eql('');
     expect($el.attr('data-shared-timefilter-to')).to.eql('');

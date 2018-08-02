@@ -1,0 +1,63 @@
+[role="xpack"]
+[[apm-ui]]
+== Using the APM UI
+
+The APM UI is designed to be as intuitive as possible, but you might come across certain terms or concepts that don’t feel native to you. Not to worry, that’s why we’ve created this guide to help you get the most out of the solution.
+
+* <<services>>
+* <<transactions>>
+* <<spans>>
+* <<errors>>
+* <<errors-alerts-with-watcher>>
+
+[[services]]
+=== Services
+
+You can add services by setting the `service.name` in the APM agent configuration per service you’re instrumenting. The global time range filter in Kibana defines which services are available. The Services overview gives you a quick insight into the health and general performance of each service.
+
+[role="screenshot"]
+image::apm/images/apm-services-overview.png[Example view of services table the APM UI in Kibana]
+
+[[transactions]]
+=== Transactions
+
+The APM agents automatically collect performance metrics on HTTP requests, database queries, and much more. Please refer to the documentation for each agent for more detail. Each `transaction.type` is displayed separately to make it easy for you to navigate to the transaction.
+
+[role="screenshot"]
+image::apm/images/apm-transactions-overview.png[Example view of transactions table in the APM UI in Kibana]
+
+[[spans]]
+=== Spans
+
+A span is defined as the duration of a single event. Spans are automatically captured by the APM agents, but you can also define custom spans. Each span has a type and is defined by a different colour in the Timeline visualization (also known as the waterfall).
+
+[role="screenshot"]
+image::apm/images/apm-transaction-detail.png[Example view of transactions detail page in the APM UI in Kibana]
+
+You can view a span in detail by clicking it in the Timeline. This displays the recorded SQL database query or source code (in-app frames) around the event that was captured.
+
+[role="screenshot"]
+image::apm/images/apm-span-detail.png[Example view of a span detail in the APM UI in Kibana]
+
+[[errors]]
+=== Errors
+
+Errors are defined as groups of exceptions with matching exception or log messages. Each error group features a breakdown of the exception including the stackframes from when the error occurred and additional contextual information to help debug the issue.
+
+[role="screenshot"]
+image::apm/images/apm-errors-overview.png[Example view of the errors overview in the APM UI in Kibana]
+
+[role="screenshot"]
+image::apm/images/apm-error-group.png[Example view of the error group page in the APM UI in Kibana]
+
+[[errors-alerts-with-watcher]]
+=== Errors alerts with Watcher
+
+You can use the power of the alerting features with Watcher to get alerts on error occurrences. The Watcher assistant, which is available on the Errors overview page, can help you set up a watch per service.
+
+Configure the watch with occurrences threshold and time interval and set the desired actions, such as email or Slack notifications. Your team can be set up with alerts in minutes.
+
+Watches are managed separately in the dedicated Watcher UI available in Advanced Settings.
+
+[role="screenshot"]
+image::apm/images/apm-errors-watcher-assistant.png[Example view of the Watcher assistant for errors in APM UI in Kibana]

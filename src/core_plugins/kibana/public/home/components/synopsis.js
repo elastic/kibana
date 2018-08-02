@@ -30,7 +30,7 @@ import {
   EuiIcon,
 } from '@elastic/eui';
 
-export function Synopsis({ description, iconUrl, iconType, title, url, wrapInPanel, onClick }) {
+export function Synopsis({ description, iconUrl, iconType, title, url, wrapInPanel, onClick, isBeta }) {
   let optionalImg;
   if (iconUrl) {
     optionalImg = (
@@ -76,7 +76,7 @@ export function Synopsis({ description, iconUrl, iconType, title, url, wrapInPan
   let synopsisDisplay = content;
   if (wrapInPanel) {
     synopsisDisplay = (
-      <EuiPanel className="synopsisPanel">
+      <EuiPanel className="synopsisPanel" betaBadgeLabel={isBeta ? 'BETA' : null}>
         {content}
       </EuiPanel>
     );
@@ -112,4 +112,9 @@ Synopsis.propTypes = {
   title: PropTypes.string.isRequired,
   url: PropTypes.string,
   onClick: PropTypes.func,
+  isBeta: PropTypes.bool,
+};
+
+Synopsis.defaultProps = {
+  isBeta: false
 };

@@ -163,7 +163,7 @@ describe('Flyout', () => {
         },
         obj: {
           searchSource: {
-            getOwn: () => 'MyIndexPattern*',
+            getOwnField: () => 'MyIndexPattern*',
           },
         },
       },

@@ -65,7 +65,7 @@ describe('splitStream', () => {
     expect(output).to.eql(['f', '&bar']);
   });
 
-  it('handles delimiters that span multple chunks', async () => {
+  it('handles delimiters that span multiple chunks', async () => {
     const output = await split(createSplitStream('ba'), ['foo&b', 'ar']);
     expect(output).to.eql(['foo&', 'r']);
   });

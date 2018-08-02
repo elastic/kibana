@@ -1,0 +1,10 @@
+{
+  "xpack.ml.delete_filter": {
+    "methods": [
+      "DELETE"
+    ],
+    "patterns": [
+      "_xpack/ml/filters/{filter_id}"
+    ]
+  }
+}

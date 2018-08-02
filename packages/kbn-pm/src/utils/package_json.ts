@@ -43,8 +43,7 @@ export const createProductionPackageJson = (pkgJson: IPackageJson) => ({
   dependencies: transformDependencies(pkgJson.dependencies),
 });
 
-export const isLinkDependency = (depVersion: string) =>
-  depVersion.startsWith('link:');
+export const isLinkDependency = (depVersion: string) => depVersion.startsWith('link:');
 
 /**
  * Replaces `link:` dependencies with `file:` dependencies. When installing

@@ -70,9 +70,9 @@ export const histogramBucketAgg = new BucketAggType({
           : { field: field.name };
 
         return searchSource
-          .extend()
-          .size(0)
-          .aggs({
+          .createChild()
+          .setField('size', 0)
+          .setField('aggs', {
             maxAgg: {
               max: aggBody
             },
@@ -80,7 +80,7 @@ export const histogramBucketAgg = new BucketAggType({
               min: aggBody
             }
           })
-          .fetchAsRejectablePromise()
+          .fetch()
           .then((resp) => {
             aggConfig.setAutoBounds({
               min: _.get(resp, 'aggregations.minAgg.value'),
@@ -102,10 +102,10 @@ export const histogramBucketAgg = new BucketAggType({
             const minInterval = range / config.get('histogram:maxBars');
             // Round interval by order of magnitude to provide clean intervals
             // Always round interval up so there will always be less buckets than histogram:maxBars
-            const orderOfMaginute = Math.pow(10, Math.floor(Math.log10(minInterval)));
-            let roundInterval = orderOfMaginute;
+            const orderOfMagnitude = Math.pow(10, Math.floor(Math.log10(minInterval)));
+            let roundInterval = orderOfMagnitude;
             while (roundInterval < minInterval) {
-              roundInterval += orderOfMaginute;
+              roundInterval += orderOfMagnitude;
             }
             interval = roundInterval;
           }

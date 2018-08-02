@@ -47,7 +47,7 @@ export function serverExtensionsMixin(kbnServer, server) {
         Memoization is done based on the request instance and is cached and reused
         regardless of other arguments. If you want to have a per-request cache that
         also does some sort of secondary memoization then return an object or function
-        from the memoized decorator and do secordary memoization there.
+        from the memoized decorator and do secondary memoization there.
       `);
     }
 

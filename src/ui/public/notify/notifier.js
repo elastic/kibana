@@ -39,17 +39,6 @@ const {
   buildNum,
 } = metadata;
 
-const consoleGroups = ('group' in window.console) && ('groupCollapsed' in window.console) && ('groupEnd' in window.console);
-
-const log = _.bindKey(console, 'log');
-
-function now() {
-  if (window.performance && window.performance.now) {
-    return window.performance.now();
-  }
-  return Date.now();
-}
-
 function closeNotif(notif, cb = _.noop, key) {
   return function () {
     // this === notif
@@ -106,7 +95,6 @@ function restartNotifTimer(notif, cb) {
 
 const typeToButtonClassMap = {
   danger: 'kuiButton--danger', // NOTE: `error` type is internally named as `danger`
-  warning: 'kuiButton--warning',
   info: 'kuiButton--primary',
 };
 const buttonHierarchyClass = (index) => {
@@ -119,7 +107,6 @@ const buttonHierarchyClass = (index) => {
 };
 const typeToAlertClassMap = {
   danger: `alert-danger`,
-  warning: `alert-warning`,
   info: `alert-info`,
 };
 
@@ -198,11 +185,7 @@ export function Notifier(opts) {
   self.from = opts.location;
 
   const notificationLevels = [
-    'event',
-    'lifecycle',
-    'timed',
     'error',
-    'warning',
   ];
 
   notificationLevels.forEach(function (m) {
@@ -213,7 +196,6 @@ export function Notifier(opts) {
 Notifier.config = {
   bannerLifetime: 3000000,
   errorLifetime: 300000,
-  warningLifetime: 10000,
   infoLifetime: 5000,
   setInterval: window.setInterval,
   clearInterval: window.clearInterval
@@ -253,50 +235,7 @@ Notifier.pullMessageFromUrl = ($location) => {
 // simply a pointer to the global notif list
 Notifier.prototype._notifs = notifs;
 
-/**
- * Log a sometimes redundant event
- * @param {string} name - The name of the group
- * @param {boolean} success - Simple flag stating whether the event succeeded
- */
-Notifier.prototype.event = createGroupLogger('event', {
-  open: true
-});
-
-/**
- * Log a major, important, event in the lifecycle of the application
- * @param {string} name - The name of the lifecycle event
- * @param {boolean} success - Simple flag stating whether the lifecycle event succeeded
- */
-Notifier.prototype.lifecycle = createGroupLogger('lifecycle', {
-  open: true
-});
-
-/**
- * Wrap a function so that it's execution time gets logged.
- *
- * @param {function} fn - the function to wrap, it's .name property is
- *                      read so make sure to set it
- * @return {function} - the wrapped function
- */
-Notifier.prototype.timed = function (name, fn) {
-  const self = this;
-
-  if (typeof name === 'function') {
-    fn = name;
-    name = fn.name;
-  }
-
-  return function WrappedNotifierFunction() {
-    const cntx = this;
-    const args = arguments;
-
-    return self.event(name, function () {
-      return fn.apply(cntx, args);
-    });
-  };
-};
-
-const overrideableOptions = ['lifetime', 'icon'];
+const overridableOptions = ['lifetime', 'icon'];
 
 /**
  * Alert the user of an error that occured
@@ -317,29 +256,7 @@ Notifier.prototype.error = function (err, opts, cb) {
     lifetime: Notifier.config.errorLifetime,
     actions: ['report', 'accept'],
     stack: formatStack(err)
-  }, _.pick(opts, overrideableOptions));
-  return add(config, cb);
-};
-
-/**
- * Warn the user abort something
- * @param  {String} msg
- * @param  {Function} cb
- */
-Notifier.prototype.warning = function (msg, opts, cb) {
-  if (_.isFunction(opts)) {
-    cb = opts;
-    opts = {};
-  }
-
-  const config = _.assign({
-    type: 'warning',
-    content: formatMsg(msg, this.from),
-    icon: 'warning',
-    title: 'Warning',
-    lifetime: Notifier.config.warningLifetime,
-    actions: ['accept']
-  }, _.pick(opts, overrideableOptions));
+  }, _.pick(opts, overridableOptions));
   return add(config, cb);
 };
 
@@ -414,8 +331,6 @@ function getDecoratedCustomConfig(config) {
 
   const getLifetime = (type) => {
     switch (type) {
-      case 'warning':
-        return Notifier.config.warningLifetime;
       case 'danger':
         return Notifier.config.errorLifetime;
       default: // info
@@ -439,30 +354,6 @@ function getDecoratedCustomConfig(config) {
 
   return customConfig;
 }
-
-/**
- * Display a custom message
- * @param  {String} msg - required
- * @param  {Object} config - required
- * @param  {Function} cb - optional
- *
- * config = {
- *   title: 'Some Title here',
- *   type: 'info',
- *   actions: [{
- *     text: 'next',
- *     callback: function() { next(); }
- *   }, {
- *     text: 'prev',
- *     callback: function() { prev(); }
- *   }]
- * }
- */
-Notifier.prototype.custom = function (msg, config, cb) {
-  const customConfig = getDecoratedCustomConfig(config);
-  customConfig.content = formatMsg(msg, this.from);
-  return add(customConfig, cb);
-};
 
 /**
  * Display a scope-bound directive using template rendering in the message area
@@ -521,96 +412,3 @@ Notifier.prototype.directive = function (directive, config, cb) {
   customConfig.directive = localDirective;
   return add(customConfig, cb);
 };
-
-Notifier.prototype.describeError = formatMsg.describeError;
-
-if (log === _.noop) {
-  Notifier.prototype.log = _.noop;
-} else {
-  Notifier.prototype.log = function () {
-    const args = [].slice.apply(arguments);
-    if (this.from) args.unshift(this.from + ':');
-    log.apply(null, args);
-  };
-}
-
-// general functionality used by .event() and .lifecycle()
-function createGroupLogger(type, opts) {
-  // Track the groups managed by this logger
-  const groups = window[type + 'Groups'] = {};
-
-  return function logger(name, success) {
-    let status; // status of the timer
-    let exec; // function to execute and wrap
-    let ret; // return value
-
-    const complete = function (val) { logger(name, true); return val; };
-    const failure = function (err) { logger(name, false); throw err; };
-
-    if (typeof success === 'function' || success === void 0) {
-      // start
-      groups[name] = now();
-      if (success) {
-        // success === the function to time
-        exec = success;
-      } else {
-        // function that can report on the success or failure of an op, and pass their value along
-        ret = complete;
-        ret.failure = failure;
-      }
-    }
-    else {
-      groups[name] = now() - (groups[name] || 0);
-      const time = ' in ' + groups[name].toFixed(2) + 'ms';
-
-      // end
-      if (success) {
-        status = 'complete' + time;
-      } else {
-        groups[name] = false;
-        status = 'failure' + time;
-      }
-    }
-
-    if (consoleGroups) {
-      if (status) {
-        console.log(status); // eslint-disable-line no-console
-        console.groupEnd(); // eslint-disable-line no-console
-      } else {
-        if (opts.open) {
-          console.group(name); // eslint-disable-line no-console
-        } else {
-          console.groupCollapsed(name); // eslint-disable-line no-console
-        }
-      }
-    } else {
-      log('KBN: ' + name + (status ? ' - ' + status : ''));
-    }
-
-    if (exec) {
-      try {
-        ret = exec();
-      } catch (e) {
-        return failure(e);
-      }
-
-      if (ret && typeof ret.then === 'function') {
-        // return a new promise that proxies the value
-        // and logs about the promise outcome
-        return ret.then(function (val) {
-          complete();
-          return val;
-        }, function (err) {
-          failure(err);
-          throw err;
-        });
-      }
-
-      // the function executed fine, and didn't return a promise, move along
-      complete();
-    }
-
-    return ret;
-  };
-}
-

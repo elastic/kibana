@@ -19,15 +19,10 @@ describe('DetailDrawer component', () => {
 
   test('shows vertex title', () => {
     const vertex = {
-      title: 'grok'
+      title: 'grok',
     };
 
-    const component = (
-      <DetailDrawer
-        vertex={vertex}
-        onHide={onHide}
-      />
-    );
+    const component = <DetailDrawer vertex={vertex} onHide={onHide} />;
     const renderedComponent = shallow(component);
     expect(renderedComponent).toMatchSnapshot();
   });
@@ -43,46 +38,34 @@ describe('DetailDrawer component', () => {
           id: 'parse_apache_logline',
           stats: {
             events_in: {
-              data: [
-                [ 1516131120000, 200 ],
-                [ 1516131180000, 203 ]
-              ],
+              data: [[1516131120000, 200], [1516131180000, 203]],
               timeRange: {
                 min: 1516131138639,
-                max: 1516135440463
-              }
+                max: 1516135440463,
+              },
             },
             events_out: {
-              data: [
-                [ 1516131120000, 199 ],
-                [ 1516131180000, 200 ]
-              ],
+              data: [[1516131120000, 199], [1516131180000, 200]],
               timeRange: {
                 min: 1516131138639,
-                max: 1516135440463
-              }
+                max: 1516135440463,
+              },
             },
             millis_per_event: {
-              data: [
-                [ 1516131120000, 0.21 ],
-                [ 1516131180000, 0.23 ]
-              ],
+              data: [[1516131120000, 0.21], [1516131180000, 0.23]],
               timeRange: {
                 min: 1516131138639,
-                max: 1516135440463
-              }
-            }
+                max: 1516135440463,
+              },
+            },
           },
           eventsPerSecond: {
-            data: [
-              [ 1516131120000, 32 ],
-              [ 1516131180000, 36 ]
-            ],
+            data: [[1516131120000, 32], [1516131180000, 36]],
             timeRange: {
               min: 1516131138639,
-              max: 1516135440463
-            }
-          }
+              max: 1516135440463,
+            },
+          },
         };
 
         const component = (
@@ -107,46 +90,34 @@ describe('DetailDrawer component', () => {
           id: 'foobarbazqux',
           stats: {
             events_in: {
-              data: [
-                [ 1516131120000, 200 ],
-                [ 1516131180000, 203 ]
-              ],
+              data: [[1516131120000, 200], [1516131180000, 203]],
               timeRange: {
                 min: 1516131138639,
-                max: 1516135440463
-              }
+                max: 1516135440463,
+              },
             },
             events_out: {
-              data: [
-                [ 1516131120000, 199 ],
-                [ 1516131180000, 200 ]
-              ],
+              data: [[1516131120000, 199], [1516131180000, 200]],
               timeRange: {
                 min: 1516131138639,
-                max: 1516135440463
-              }
+                max: 1516135440463,
+              },
             },
             millis_per_event: {
-              data: [
-                [ 1516131120000, 0.21 ],
-                [ 1516131180000, 0.23 ]
-              ],
+              data: [[1516131120000, 0.21], [1516131180000, 0.23]],
               timeRange: {
                 min: 1516131138639,
-                max: 1516135440463
-              }
-            }
+                max: 1516135440463,
+              },
+            },
           },
           eventsPerSecond: {
-            data: [
-              [ 1516131120000, 32 ],
-              [ 1516131180000, 36 ]
-            ],
+            data: [[1516131120000, 32], [1516131180000, 36]],
             timeRange: {
               min: 1516131138639,
-              max: 1516135440463
-            }
-          }
+              max: 1516135440463,
+            },
+          },
         };
 
         const component = (
@@ -167,9 +138,7 @@ describe('DetailDrawer component', () => {
       const vertex = {
         title: 'if',
         typeString: 'if',
-        subtitle: {
-          complete: '[type] == "apache_log"'
-        }
+        subtitle: '[type] == "apache_log"',
       };
 
       const component = (
@@ -188,7 +157,7 @@ describe('DetailDrawer component', () => {
     test('shows basic info and no stats for queue', () => {
       const vertex = {
         title: 'queue',
-        typeString: 'queue'
+        typeString: 'queue',
       };
 
       const component = (

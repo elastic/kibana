@@ -37,7 +37,7 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.dashboard.gotoDashboardLandingPage();
     });
 
-    describe('adding a filter that excludes all data', async () => {
+    describe.skip('adding a filter that excludes all data', async () => {
       before(async () => {
         await PageObjects.dashboard.clickNewDashboard();
         await PageObjects.dashboard.setTimepickerInDataRange();
@@ -101,8 +101,7 @@ export default function ({ getService, getPageObjects }) {
       });
     });
 
-
-    describe('disabling a filter unfilters the data on', async () => {
+    describe.skip('disabling a filter unfilters the data on', async () => {
       before(async () => {
         await testSubjects.click('disableFilter-bytes');
         await PageObjects.header.waitUntilLoadingHasFinished();

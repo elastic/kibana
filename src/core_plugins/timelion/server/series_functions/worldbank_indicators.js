@@ -34,7 +34,7 @@ export default new Datasource ('worldbank_indicators', {
       name: 'indicator',
       types: ['string', 'null'],
       help: 'The indicator code to use. You\'ll have to look this up on data.worldbank.org.' +
-        ' Often pretty obtuse. Eg SP.POP.TOTL is population'
+        ' Often pretty obtuse. E.g., SP.POP.TOTL is population'
     }
   ],
   aliases: ['wbi'],

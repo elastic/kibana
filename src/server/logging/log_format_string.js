@@ -47,7 +47,7 @@ const typeColors = {
   debug: 'gray',
   server: 'gray',
   optmzr: 'white',
-  managr: 'green',
+  manager: 'green',
   optimize: 'magentaBright',
   listening: 'magentaBright',
   scss: 'magentaBright',

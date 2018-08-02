@@ -57,7 +57,7 @@ const body = JSON.parse(`
                         }
                     ],
                     "point_size": 1,
-                    "seperate_axis": 0,
+                    "separate_axis": 0,
                     "split_mode": "everything",
                     "stacked": 0
                 }

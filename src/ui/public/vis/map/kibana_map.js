@@ -52,7 +52,7 @@ function makeFitControl(fitContainer, kibanaMap) {
   return new FitControl(fitContainer, kibanaMap);
 }
 
-function makeLegedControl(container, kibanaMap, position) {
+function makeLegendControl(container, kibanaMap, position) {
 
   const LegendControl = L.Control.extend({
 
@@ -498,7 +498,7 @@ export class KibanaMap extends EventEmitter {
       this._leafletMap.removeControl(this._leafletLegendControl);
     }
     const $wrapper = $('<div>').addClass('tilemap-legend-wrapper');
-    this._leafletLegendControl = makeLegedControl($wrapper, this, this._legendPosition);
+    this._leafletLegendControl = makeLegendControl($wrapper, this, this._legendPosition);
     this._leafletMap.addControl(this._leafletLegendControl);
   }
 
@@ -647,7 +647,6 @@ export class KibanaMap extends EventEmitter {
       if (!centerFromUIState || centerFromMap.lon !== centerFromUIState[1] || centerFromMap.lat !== centerFromUIState[0]) {
         visualization.uiStateVal('mapCenter', [centerFromMap.lat, centerFromMap.lon]);
       }
-      visualization.sessionState.mapBounds = this.getBounds();
     }
 
     this._leafletMap.on('resize', () => {

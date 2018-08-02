@@ -48,7 +48,7 @@ describe('utils parseCommaSeparatedList()', () => {
     }
   });
 
-  it('trims whitspace around elements', () => {
+  it('trims whitespace around elements', () => {
     expect(parseCommaSeparatedList('1 ,    2,    3     ,    4')).to.eql(['1', '2', '3', '4']);
   });
 

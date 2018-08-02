@@ -39,7 +39,8 @@ const formatIds = [
   '_source',
   'truncate',
   'boolean',
-  'relative_date'
+  'relative_date',
+  'static_lookup'
 ];
 
 // eslint-disable-next-line @elastic/kibana-custom/no-default-export

@@ -31,45 +31,45 @@ module.directive('gaugeOptions', function () {
       $scope.collections = $scope.vis.type.editorConfig.collections;
       $scope.showColorRange = true;
 
-      $scope.$watch('vis.params.gauge.gaugeType', type => {
+      $scope.$watch('editorState.params.gauge.gaugeType', type => {
         switch (type) {
           case 'Arc':
-            $scope.vis.params.gauge.type = 'meter';
-            $scope.vis.params.gauge.minAngle = undefined;
-            $scope.vis.params.gauge.maxAngle = undefined;
+            $scope.editorState.params.gauge.type = 'meter';
+            $scope.editorState.params.gauge.minAngle = undefined;
+            $scope.editorState.params.gauge.maxAngle = undefined;
             break;
           case 'Circle':
-            $scope.vis.params.gauge.type = 'meter';
-            $scope.vis.params.gauge.minAngle = 0;
-            $scope.vis.params.gauge.maxAngle = 2 * Math.PI;
+            $scope.editorState.params.gauge.type = 'meter';
+            $scope.editorState.params.gauge.minAngle = 0;
+            $scope.editorState.params.gauge.maxAngle = 2 * Math.PI;
             break;
           case 'Metric':
-            $scope.vis.params.gauge.type = 'simple';
+            $scope.editorState.params.gauge.type = 'simple';
         }
       });
 
 
       const updateLegend = () => {
-        if (!$scope.vis.params.gauge.style.bgColor && !$scope.vis.params.gauge.style.labelColor) {
-          $scope.vis.params.addLegend = false;
+        if (!$scope.editorState.params.gauge.style.bgColor && !$scope.editorState.params.gauge.style.labelColor) {
+          $scope.editorState.params.addLegend = false;
         } else {
-          $scope.vis.params.addLegend = true;
+          $scope.editorState.params.addLegend = true;
         }
       };
 
-      $scope.$watch('vis.params.gauge.gaugeColorMode', newValue => {
+      $scope.$watch('editorState.params.gauge.gaugeColorMode', newValue => {
         switch (newValue) {
           case 'Labels':
-            $scope.vis.params.gauge.style.labelColor = true;
-            $scope.vis.params.gauge.style.bgColor = false;
+            $scope.editorState.params.gauge.style.labelColor = true;
+            $scope.editorState.params.gauge.style.bgColor = false;
             break;
           case 'Background':
-            $scope.vis.params.gauge.style.labelColor = false;
-            $scope.vis.params.gauge.style.bgColor = true;
+            $scope.editorState.params.gauge.style.labelColor = false;
+            $scope.editorState.params.gauge.style.bgColor = true;
             break;
           case 'None':
-            $scope.vis.params.gauge.style.labelColor = false;
-            $scope.vis.params.gauge.style.bgColor = false;
+            $scope.editorState.params.gauge.style.labelColor = false;
+            $scope.editorState.params.gauge.style.bgColor = false;
             break;
         }
         updateLegend();
@@ -82,18 +82,18 @@ module.directive('gaugeOptions', function () {
 
       $scope.getGreaterThan = function (index) {
         if (index === 0) return 0;
-        return $scope.vis.params.gauge.colorsRange[index - 1].to;
+        return $scope.editorState.params.gauge.colorsRange[index - 1].to;
       };
 
       $scope.addRange = function () {
-        const previousRange = _.last($scope.vis.params.gauge.colorsRange);
+        const previousRange = _.last($scope.editorState.params.gauge.colorsRange);
         const from = previousRange ? previousRange.to : 0;
         const to = previousRange ? from + (previousRange.to - previousRange.from) : 100;
-        $scope.vis.params.gauge.colorsRange.push({ from: from, to: to });
+        $scope.editorState.params.gauge.colorsRange.push({ from: from, to: to });
       };
 
       $scope.removeRange = function (index) {
-        $scope.vis.params.gauge.colorsRange.splice(index, 1);
+        $scope.editorState.params.gauge.colorsRange.splice(index, 1);
       };
 
       $scope.getColor = function (index) {

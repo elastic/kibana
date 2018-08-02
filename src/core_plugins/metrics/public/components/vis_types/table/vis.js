@@ -30,8 +30,8 @@ function getColor(rules, colorKey, value) {
   let color;
   if (rules) {
     rules.forEach((rule) => {
-      if (rule.opperator && rule.value != null) {
-        if (_[rule.opperator](value, rule.value)) {
+      if (rule.operator && rule.value != null) {
+        if (_[rule.operator](value, rule.value)) {
           color = rule[colorKey];
         }
       }

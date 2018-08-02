@@ -67,7 +67,7 @@ export function isDeleteWhileSnapshotInProgressError(error) {
 }
 
 /**
- * Wait for the any snapshot in any respository that is
+ * Wait for the any snapshot in any repository that is
  * snapshotting this index to complete.
  *
  * @param  {EsClient} client

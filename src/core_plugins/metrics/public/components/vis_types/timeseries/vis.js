@@ -27,8 +27,8 @@ import replaceVars from '../../lib/replace_vars';
 import { getAxisLabelString } from '../../lib/get_axis_label_string';
 import { createXaxisFormatter } from '../../lib/create_xaxis_formatter';
 
-function hasSeperateAxis(row) {
-  return row.seperate_axis;
+function hasSeparateAxis(row) {
+  return row.separate_axis;
 }
 
 class TimeseriesVisualization extends Component {
@@ -77,7 +77,7 @@ class TimeseriesVisualization extends Component {
       });
     }
     const seriesModel = model.series.map(s => _.cloneDeep(s));
-    const firstSeries = seriesModel.find(s => s.formatter && !s.seperate_axis);
+    const firstSeries = seriesModel.find(s => s.formatter && !s.separate_axis);
     const formatter = tickFormatter(_.get(firstSeries, 'formatter'), _.get(firstSeries, 'value_template'));
 
     const mainAxis = {
@@ -120,7 +120,7 @@ class TimeseriesVisualization extends Component {
           });
       }
       if (s.stacked === 'percent') {
-        s.seperate_axis = true;
+        s.separate_axis = true;
         s.axisFormatter = 'percent';
         s.axis_min = 0;
         s.axis_max = 1;
@@ -143,9 +143,9 @@ class TimeseriesVisualization extends Component {
     const interval = this.getInterval();
 
     let axisCount = 1;
-    if (seriesModel.some(hasSeperateAxis)) {
+    if (seriesModel.some(hasSeparateAxis)) {
       seriesModel.forEach((row) => {
-        if (row.seperate_axis) {
+        if (row.separate_axis) {
           axisCount++;
 
           const formatter = tickFormatter(row.formatter, row.value_template);

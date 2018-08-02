@@ -1,8 +1,8 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`parses data containing execption 1`] = `"[o.e.n.Node] [qEfPPg8] starting ..."`;
+exports[`parses data containing exception 1`] = `"[o.e.n.Node] [qEfPPg8] starting ..."`;
 
-exports[`parses data containing execption 2`] = `
+exports[`parses data containing exception 2`] = `
 "[o.e.b.ElasticsearchUncaughtExceptionHandler] [] uncaught exception in thread [main]
 org.elasticsearch.bootstrap.StartupException: BindHttpException; nested: BindException[Address already in use];
   at org.elasticsearch.bootstrap.Elasticsearch.init(Elasticsearch.java:125) ~[elasticsearch-7.0.0.jar:7.0.0-alpha1-SNAPSHOT]
@@ -15,7 +15,7 @@ Caused by: java.net.BindException: Address already in use
   at java.lang.Thread.run(Thread.java:844) [?:?]"
 `;
 
-exports[`parses data containing execption 3`] = `"[o.e.g.GatewayService] [qEfPPg8] recovered [0] indices into cluster_state"`;
+exports[`parses data containing exception 3`] = `"[o.e.g.GatewayService] [qEfPPg8] recovered [0] indices into cluster_state"`;
 
 exports[`parses multiple lines 1`] = `"[o.e.p.PluginsService] [qEfPPg8] loaded plugin [x-pack-security]"`;
 

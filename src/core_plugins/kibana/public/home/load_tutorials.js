@@ -28,7 +28,7 @@ headers.append('Content-Type', 'application/json');
 headers.append('kbn-xsrf', 'kibana');
 
 let tutorials = [];
-let turorialsLoaded = false;
+let tutorialsLoaded = false;
 
 async function loadTutorials() {
   try {
@@ -42,14 +42,14 @@ async function loadTutorials() {
     }
 
     tutorials = await response.json();
-    turorialsLoaded = true;
+    tutorialsLoaded = true;
   } catch(err) {
     notify.error(`Unable to load tutorials, ${err}`);
   }
 }
 
 export async function getTutorials() {
-  if (!turorialsLoaded) {
+  if (!tutorialsLoaded) {
     await loadTutorials();
   }
 
@@ -57,7 +57,7 @@ export async function getTutorials() {
 }
 
 export async function getTutorial(id) {
-  if (!turorialsLoaded) {
+  if (!tutorialsLoaded) {
     await loadTutorials();
   }
 

@@ -219,13 +219,13 @@ describe('Editor', () => {
 
   utilsTest(
     'full url: single line request data',
-    'POST https://somehoset/_search',
+    'POST https://somehost/_search',
     singleLineRequest.data,
     function () {
       input.getRequest(function (request) {
         const expected = {
           method: 'POST',
-          url: 'https://somehoset/_search',
+          url: 'https://somehost/_search',
           data: [singleLineRequest.data],
         };
 

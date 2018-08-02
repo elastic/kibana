@@ -14,7 +14,7 @@ import {
 
 describe('click_banner', () => {
 
-  it('sets setting successfuly and removes banner', async () => {
+  it('sets setting successfully and removes banner', async () => {
     const banners = {
       remove: sinon.spy()
     };
@@ -33,7 +33,7 @@ describe('click_banner', () => {
     expect(banners.remove.calledWith(bannerId)).to.be(true);
   });
 
-  it('sets setting unsuccessfuly, adds toast, and does not touch banner', async () => {
+  it('sets setting unsuccessfully, adds toast, and does not touch banner', async () => {
     const toastNotifications = {
       addDanger: sinon.spy()
     };
@@ -55,7 +55,7 @@ describe('click_banner', () => {
     expect(banners.remove.notCalled).to.be(true);
   });
 
-  it('sets setting unsuccessfuly with error, adds toast, and does not touch banner', async () => {
+  it('sets setting unsuccessfully with error, adds toast, and does not touch banner', async () => {
     const toastNotifications = {
       addDanger: sinon.spy()
     };

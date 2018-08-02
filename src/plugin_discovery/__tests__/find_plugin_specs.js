@@ -135,7 +135,7 @@ describe('plugin discovery', () => {
             await spec$.pipe(toArray()).toPromise();
             throw new Error('expected spec$ to throw an error');
           } catch (error) {
-            expect(error.message).to.contain('Multple plugins found with the id "foo"');
+            expect(error.message).to.contain('Multiple plugins found with the id "foo"');
             expect(error.message).to.contain(CONFLICT_FIXTURES);
           }
         });

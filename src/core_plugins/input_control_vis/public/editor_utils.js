@@ -75,6 +75,7 @@ export const getDefaultOptions = (type) => {
     case CONTROL_TYPES.LIST:
       defaultOptions.type = 'terms';
       defaultOptions.multiselect = true;
+      defaultOptions.dynamicOptions = true;
       defaultOptions.size = 5;
       defaultOptions.order = 'desc';
       break;

@@ -61,7 +61,7 @@ used when {kib} sends monitoring data to the production cluster.
 
 .. Configure {kib} to encrypt communications between the {kib} server and the
 production cluster. This set up involves generating a server certificate and
-setting `server.ssl.*` and `elasticsearch.ssl.certitifcateAuthorities` settings
+setting `server.ssl.*` and `elasticsearch.ssl.certificateAuthorities` settings
 in the `kibana.yml` file on the {kib} server. For example:
 +
 --

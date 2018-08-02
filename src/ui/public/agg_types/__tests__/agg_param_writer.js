@@ -20,14 +20,11 @@
 import _ from 'lodash';
 import { VisProvider } from '../../vis';
 import { aggTypes } from '..';
-import { VisTypesRegistryProvider } from '../../registry/vis_types';
 import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
-import { AggConfig } from '../../vis/agg_config';
 
 // eslint-disable-next-line @elastic/kibana-custom/no-default-export
 export default function AggParamWriterHelper(Private) {
   const Vis = Private(VisProvider);
-  const visTypes = Private(VisTypesRegistryProvider);
   const stubbedLogstashIndexPattern = Private(FixturesStubbedLogstashIndexPatternProvider);
 
   /**
@@ -60,32 +57,16 @@ export default function AggParamWriterHelper(Private) {
     // not configurable right now, but totally required
     self.indexPattern = stubbedLogstashIndexPattern;
 
-    // the vis type we will use to write the aggParams
-    self.visType = null;
-
     // the schema that the aggType satisfies
     self.visAggSchema = null;
 
-    // find a suitable vis type and schema
-    _.find(visTypes, function (visType) {
-      const schema = _.find(visType.schemas.all, function (schema) {
-        // type, type, type, type, type... :(
-        return schema.group === self.aggType.type;
-      });
-
-      if (schema) {
-        self.visType = visType;
-        self.visAggSchema = schema;
-        return true;
-      }
-    });
-
-    if (!self.aggType || !self.visType || !self.visAggSchema) {
-      throw new Error('unable to find a usable visType and schema for the ' + opts.aggType + ' agg type');
-    }
-
     self.vis = new Vis(self.indexPattern, {
-      type: self.visType.name
+      type: 'histogram',
+      aggs: [{
+        id: 1,
+        type: self.aggType.name,
+        params: {}
+      }]
     });
   }
 
@@ -108,23 +89,10 @@ export default function AggParamWriterHelper(Private) {
     }
 
 
-    const agg = new AggConfig(self.vis, {
-      id: 1,
-      schema: self.visAggSchema.name,
-      type: self.aggType.name,
-      params: paramValues
-    });
+    const aggConfig = self.vis.aggs[0];
+    aggConfig.setParams(paramValues);
 
-    self.vis.setState({
-      type: self.vis.type.name,
-      aggs: [agg.toJSON()]
-    });
-
-    const aggConfig = _.find(self.vis.aggs, function (aggConfig) {
-      return aggConfig.type === self.aggType;
-    });
-
-    return aggConfig.type.params.write(aggConfig);
+    return aggConfig.write(self.vis.aggs);
   };
 
   return AggParamWriter;

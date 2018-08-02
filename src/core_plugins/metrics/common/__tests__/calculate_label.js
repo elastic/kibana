@@ -21,7 +21,7 @@ import { expect } from 'chai';
 import calculateLabel from '../calculate_label';
 
 describe('calculateLabel(metric, metrics)', () => {
-  it('returns "Unkonwn" for empty metric', () => {
+  it('returns "Unknown" for empty metric', () => {
     expect(calculateLabel()).to.equal('Unknown');
   });
 
@@ -33,7 +33,7 @@ describe('calculateLabel(metric, metrics)', () => {
     expect(calculateLabel({ type: 'count' })).to.equal('Count');
   });
 
-  it('returns "Calcuation" for a bucket script metric', () => {
+  it('returns "Calculation" for a bucket script metric', () => {
     expect(calculateLabel({ type: 'calculation' })).to.equal('Bucket Script');
   });
 

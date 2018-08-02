@@ -13,7 +13,7 @@ const { findPluginSpecs } = require('../../src/plugin_discovery');
 /*
   Usage:
     Specifying which plugins to run tests can be done with the --plugins flag.
-    One of more plugins can be specified, and each one should be comman separated, like so:
+    One of more plugins can be specified, and each one should be command separated, like so:
       gulp testserver --plugins monitoring,reporting
     If using with yarn:
       yarn test:server --plugins graph

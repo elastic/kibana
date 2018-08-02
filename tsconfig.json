@@ -22,7 +22,7 @@
     // in webpack with loader-level compiler options
     "target": "esnext",
 
-    // Use commonjs for node, overriden in webpack to keep import statements
+    // Use commonjs for node, overridden in webpack to keep import statements
     // to maintain support for things like `await import()`
     "module": "commonjs",
 
@@ -39,9 +39,15 @@
     "moduleResolution": "node",
 
     // Disallow inconsistently-cased references to the same file.
-    "forceConsistentCasingInFileNames": true
+    "forceConsistentCasingInFileNames": true,
+
+    // Disable the breaking keyof behaviour introduced in TS 2.9.2 until EUI is updated to support that too
+    "keyofStringsOnly": true
   },
   "include": [
     "src/**/*"
+  ],
+  "exclude": [
+    "src/**/__fixtures__/**/*"
   ]
 }

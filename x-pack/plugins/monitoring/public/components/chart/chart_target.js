@@ -105,7 +105,7 @@ export class ChartTarget extends React.Component {
       }
       catch (e) { // eslint-disable-line no-empty
         /* It is ok to silently swallow the error here. Resize events fire
-         * continously so the proper resize will happen in a later firing of
+         * continuously so the proper resize will happen in a later firing of
          * the event */
       }
     };

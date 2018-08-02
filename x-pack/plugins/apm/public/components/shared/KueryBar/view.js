@@ -6,20 +6,21 @@
 
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
+import { uniqueId, startsWith } from 'lodash';
+import { EuiCallOut } from '@elastic/eui';
 import {
   history,
   fromQuery,
   toQuery,
-  legacyEncodeURIComponent
+  legacyEncodeURIComponent,
+  KibanaLink
 } from '../../../utils/url';
-import { debounce } from 'lodash';
-
-import { EuiFieldSearch } from '@elastic/eui';
-
-import { getAPMIndexPattern } from '../../../services/rest';
-
+import { Typeahead } from './Typeahead';
+import { getAPMIndexPattern } from '../../../services/rest/savedObjects';
 import { convertKueryToEsQuery, getSuggestions } from '../../../services/kuery';
 import styled from 'styled-components';
+
+import { getBoolFilter } from './get_bool_filter';
 
 const Container = styled.div`
   margin-bottom: 10px;
@@ -28,36 +29,48 @@ const Container = styled.div`
 class KueryBarView extends Component {
   state = {
     indexPattern: null,
-    inputValue: this.props.urlParams.kuery || ''
+    suggestions: [],
+    isLoadingIndexPattern: true,
+    isLoadingSuggestions: false
   };
 
-  componentDidMount() {
-    getAPMIndexPattern().then(indexPattern => {
-      this.setState({ indexPattern });
-    });
+  async componentDidMount() {
+    const indexPattern = await getAPMIndexPattern();
+    this.setState({ indexPattern, isLoadingIndexPattern: false });
   }
 
-  componentWillReceiveProps(nextProps) {
-    const kuery = nextProps.urlParams.kuery;
-    if (kuery && !this.state.inputValue) {
-      this.setState({ inputValue: kuery });
-    }
-  }
-
-  updateUrl = debounce(kuery => {
-    const { location } = this.props;
+  onChange = async (inputValue, selectionStart) => {
     const { indexPattern } = this.state;
+    const { urlParams } = this.props;
+    this.setState({ suggestions: [], isLoadingSuggestions: true });
 
-    if (!indexPattern) {
-      return;
-    }
+    const currentRequest = uniqueId();
+    this.currentRequest = currentRequest;
 
-    getSuggestions(kuery, indexPattern).then(
-      suggestions => console.log(suggestions.map(suggestion => suggestion.text)) // eslint-disable-line no-console
-    );
-
+    const boolFilter = getBoolFilter(urlParams);
     try {
-      const res = convertKueryToEsQuery(kuery, indexPattern);
+      const suggestions = (await getSuggestions(
+        inputValue,
+        selectionStart,
+        indexPattern,
+        boolFilter
+      )).filter(suggestion => !startsWith(suggestion.text, 'span.'));
+
+      if (currentRequest !== this.currentRequest) {
+        return;
+      }
+
+      this.setState({ suggestions, isLoadingSuggestions: false });
+    } catch (e) {
+      console.error('Error while fetching suggestions', e);
+    }
+  };
+
+  onSubmit = inputValue => {
+    const { indexPattern } = this.state;
+    const { location } = this.props;
+    try {
+      const res = convertKueryToEsQuery(inputValue, indexPattern);
       if (!res) {
         return;
       }
@@ -66,29 +79,49 @@ class KueryBarView extends Component {
         ...location,
         search: fromQuery({
           ...toQuery(this.props.location.search),
-          kuery: legacyEncodeURIComponent(kuery)
+          kuery: legacyEncodeURIComponent(inputValue.trim())
         })
       });
     } catch (e) {
       console.log('Invalid kuery syntax'); // eslint-disable-line no-console
     }
-  }, 200);
-
-  onChange = event => {
-    const kuery = event.target.value;
-    this.setState({ inputValue: kuery });
-    this.updateUrl(kuery);
   };
 
   render() {
+    const indexPatternMissing =
+      !this.state.isLoadingIndexPattern && !this.state.indexPattern;
+
     return (
       <Container>
-        <EuiFieldSearch
-          placeholder="Search... (Example: transaction.duration.us > 10000)"
-          fullWidth
+        <Typeahead
+          disabled={indexPatternMissing}
+          isLoading={this.state.isLoadingSuggestions}
+          initialValue={this.props.urlParams.kuery}
           onChange={this.onChange}
-          value={this.state.inputValue}
+          onSubmit={this.onSubmit}
+          suggestions={this.state.suggestions}
         />
+
+        {indexPatternMissing && (
+          <EuiCallOut
+            style={{ display: 'inline-block', marginTop: '10px' }}
+            title={
+              <div>
+                There&#39;s no APM index pattern available. To use the Query
+                bar, please choose to import the APM index pattern in the{' '}
+                <KibanaLink
+                  pathname={'/app/kibana'}
+                  hash={`/home/tutorial/apm`}
+                >
+                  Setup Instructions.
+                </KibanaLink>
+              </div>
+            }
+            color="warning"
+            iconType="alert"
+            size="s"
+          />
+        )}
       </Container>
     );
   }

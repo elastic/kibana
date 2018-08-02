@@ -98,7 +98,7 @@ describe('fieldCalculator', function () {
         expect(groups['foo,bar'].value).to.eql(['foo', 'bar']);
       });
 
-      it('should count the pairs seperately from the values they contain', function () {
+      it('should count the pairs separately from the values they contain', function () {
         expect(groups['foo,bar'].count).to.be(2);
         expect(groups.foo.count).to.be(3);
         expect(groups.bar.count).to.be(1);

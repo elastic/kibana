@@ -27,6 +27,7 @@ import appTemplate from './app.html';
 import landingTemplate from './landing.html';
 import { management } from 'ui/management';
 import { FeatureCatalogueRegistryProvider, FeatureCatalogueCategory } from 'ui/registry/feature_catalogue';
+import { timefilter } from 'ui/timefilter';
 import 'ui/kbn_top_nav';
 
 uiRoutes
@@ -45,7 +46,7 @@ require('ui/index_patterns/route_setup/load_default')({
 
 uiModules
   .get('apps/management')
-  .directive('kbnManagementApp', function (Private, $location, timefilter) {
+  .directive('kbnManagementApp', function (Private, $location) {
     return {
       restrict: 'E',
       template: appTemplate,

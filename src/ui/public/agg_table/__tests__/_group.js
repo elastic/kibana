@@ -51,7 +51,7 @@ describe('AggTableGroup Directive', function () {
 
   it('renders a simple split response properly', function () {
     const vis = new Vis(indexPattern, 'table');
-    $scope.group = tabifyAggResponse(vis.getAggConfig().getResponseAggs(), fixtures.metricOnly);
+    $scope.group = tabifyAggResponse(vis.getAggConfig(), fixtures.metricOnly);
     $scope.sort = {
       columnIndex: null,
       direction: null
@@ -93,7 +93,7 @@ describe('AggTableGroup Directive', function () {
       agg.id = 'agg_' + (i + 1);
     });
 
-    const group = $scope.group = tabifyAggResponse(vis.getAggConfig().getResponseAggs(), fixtures.threeTermBuckets);
+    const group = $scope.group = tabifyAggResponse(vis.getAggConfig(), fixtures.threeTermBuckets);
     const $el = $('<kbn-agg-table-group group="group"></kbn-agg-table-group>');
     $compile($el)($scope);
     $scope.$digest();

@@ -9,7 +9,7 @@
 //
 // tldr: While developing, it is easy to make minor mistakes that results in infinite dispatch loops.
 // Longer Motivation: Infinite dispatch loop occurs, if a component dispatches an action, that in turn re-renders the component, which then again dispatches.
-// Normally this is guarded, but if the condition is missing/errornous an infinite loop happens.
+// Normally this is guarded, but if the condition is missing/erroneous an infinite loop happens.
 // The root cause is mostly very simple to fix (update an if statement) but the infinite loop causes the browser to be unresponsive
 // and only by killing and restarting the process can development continue.
 // Solution: Block actions if more than x dispatches happens within y seconds

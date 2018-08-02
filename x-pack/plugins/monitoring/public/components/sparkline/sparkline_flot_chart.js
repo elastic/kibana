@@ -128,7 +128,7 @@ export class SparklineFlotChart {
   }
 
   /**
-   * Necessary to prevent a memory leak. Shoudl be called any time
+   * Necessary to prevent a memory leak. Should be called any time
    * the chart is being removed from the DOM
    */
   shutdown() {
