@@ -325,6 +325,10 @@ export default class BaseOptimizer {
         ],
         alias: this.uiBundles.getAliases()
       },
+
+      performance: {
+        hints: false // TODO: review this
+      }
     };
 
     // we transpile typescript in the optimizer unless we are running the distributable
@@ -456,7 +460,7 @@ export default class BaseOptimizer {
     );
   }
 
-  async run(...args) {
-    await this.compiler.run(args);
+  async run(args) {
+    return await this.compiler.run(args);
   }
 }

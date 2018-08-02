@@ -19,6 +19,7 @@
 
 import webpack from 'webpack';
 import webpackMerge from 'webpack-merge';
+// import MiniCssExtractPlugin from 'mini-css-extract-plugin';
 
 function generateDLLS({ context, entries, output }) {
   const finalEntries = {};
@@ -36,12 +37,32 @@ function generateDLLS({ context, entries, output }) {
       publicPath: output.publicPath,
       library: output.dllName
     },
+    module: {
+      rules: [
+        {
+          test: /\.css$/,
+          use: [
+            // MiniCssExtractPlugin.loader,
+            'css-loader',
+          ],
+        },
+        {
+          test: /\.png$/,
+          loader: 'url-loader'
+        },
+        {
+          test: /\.(woff|woff2|ttf|eot|svg|ico)(\?|$)/,
+          loader: 'file-loader'
+        },
+      ]
+    },
     plugins: [
       new webpack.DllPlugin({
         context,
         name: output.dllName,
         path: `${output.path}/${output.manifestName}.manifest.dll.json`
-      })
+      }),
+      // new MiniCssExtractPlugin()
     ]
   };
 }

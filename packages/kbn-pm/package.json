@@ -62,6 +62,7 @@
     "ts-loader": "^4.4.2",
     "typescript": "^2.8.1",
     "webpack": "^4.16.0",
+    "webpack-cli": "^3.1.0",
     "wrap-ansi": "^3.0.1",
     "write-pkg": "^3.1.0"
   }

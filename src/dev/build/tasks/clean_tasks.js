@@ -17,7 +17,11 @@
  * under the License.
  */
 
-import { deleteAll } from '../lib';
+import { deleteAll, read, write } from '../lib';
+import { dirname } from 'path';
+import globby from 'globby';
+import deleteEmpty from 'delete-empty';
+import pkgUp from 'pkg-up';
 
 export const CleanTask = {
   global: true,
@@ -211,4 +215,136 @@ export const CleanExtraBrowsersTask = {
       }
     }
   },
+};
+
+export const CleanNodeModulesOnDLLTask = {
+  description:
+    'Cleaning node_modules bundled in the DLL',
+
+  async run(config, log, build) {
+    const blackListModules = [
+      '@elastic/numeral',
+      '@kbn/babel-preset',
+      '@kbn/datemath',
+      '@kbn/i18n',
+      '@kbn/pm',
+      'babel-runtime',
+      'brace',
+      'core-js',
+      'css-loader',
+      'events',
+      'handlebars',
+      'inherits',
+      'invariant',
+      'intl-format-cache',
+      'intl-messageformat',
+      'intl-messageformat-parser',
+      'intl-relativeformat',
+      'isobject',
+      'is-buffer',
+      'less',
+      'lodash',
+      'lru-cache',
+      'moment',
+      'moment-timezone',
+      'node-libs-browser',
+      'object-assign',
+      'pegjs',
+      'pseudomap',
+      'readable-stream',
+      'rxjs',
+      'timers-browserify',
+      'url',
+      'util-deprecate',
+      'uuid',
+      'webpack',
+      'yallist'
+    ];
+    const optimizedBundlesFolder = build.resolvePath('optimize/bundles');
+    const dllManifest = JSON.parse(
+      await read(build.resolvePath(optimizedBundlesFolder, 'vendor.manifest.dll.json'))
+    );
+
+    const getDllModules = (manifest) => {
+      if (!manifest || !manifest.content) {
+        return [];
+      }
+
+      // In our setup the last manifest content entry
+      // should be the dll entry file and so we need
+      // to remove it from the modules entry paths array
+      const modules = Object.keys(manifest.content);
+      const lastModule = modules.slice(-1).pop() || '';
+      const isLastModuleDllEntry = lastModule.includes('.entry.dll.js');
+
+      if (isLastModuleDllEntry) {
+        modules.pop();
+      }
+
+      return modules.filter(entry => !blackListModules.some(nonEntry => entry.includes(nonEntry)));
+    };
+
+    const cleanModule = async (moduleEntryPath) => {
+      const modulePkgPath = await pkgUp(moduleEntryPath);
+      const modulePkg = JSON.parse(await read(modulePkgPath));
+      const moduleDir = dirname(modulePkgPath);
+
+      // Cancel the cleanup for this module as it
+      // was already done.
+      if (modulePkg.cleaned) {
+        return;
+      }
+
+      // Clear dependencies from dll module package.json
+      if (modulePkg.dependencies) {
+        modulePkg.dependencies = [];
+      }
+
+      // Clear devDependencies from dll module package.json
+      if (modulePkg.devDependencies) {
+        modulePkg.devDependencies = [];
+      }
+
+      // Delete module contents. It will delete everything
+      // excepts package.json, images and css
+      const deletePatterns = await globby([
+        `${moduleDir}/**`,
+        `!${moduleDir}/**/*.+(css)`,
+        `!${moduleDir}/**/*.+(gif|ico|jpeg|jpg|tiff|tif|svg|png|webp)`,
+        `!${modulePkgPath}`,
+      ]);
+
+      await deleteAll(
+        log,
+        deletePatterns
+      );
+
+      await deleteEmpty(moduleDir);
+
+      // Mark this module as cleaned
+      modulePkg.cleaned = true;
+
+      // Rewrite modified package.json
+      await write(
+        modulePkgPath,
+        JSON.stringify(modulePkg, null, '  ')
+      );
+    };
+
+    const buildEmptyEntryFile = async (moduleEntryPath) => {
+      await write(
+        moduleEntryPath,
+        ''
+      );
+    };
+
+    const modules = getDllModules(dllManifest);
+
+    for (const relativeModuleEntryPath of modules) {
+      const moduleEntryPath = build.resolvePath(relativeModuleEntryPath);
+
+      await cleanModule(moduleEntryPath);
+      await buildEmptyEntryFile(moduleEntryPath);
+    }
+  }
 };

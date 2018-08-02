@@ -25,6 +25,7 @@ import {
   CleanExtraBinScriptsTask,
   CleanExtraBrowsersTask,
   CleanExtraFilesFromModulesTask,
+  CleanNodeModulesOnDLLTask,
   CleanPackagesTask,
   CleanTypescriptTask,
   CleanTask,
@@ -101,6 +102,8 @@ export async function buildDistributables(options) {
   await run(CreateReadmeTask);
   await run(TranspileBabelTask);
   await run(TranspileTypescriptTask);
+  // TODO: Check if we need to run this before trapnspile babel
+  await run(TranspileScssTask);
   await run(BuildPackagesTask);
   await run(CreatePackageJsonTask);
   await run(InstallDependenciesTask);
@@ -109,9 +112,9 @@ export async function buildDistributables(options) {
   await run(CreateNoticeFileTask);
   await run(UpdateLicenseFileTask);
   await run(RemovePackageJsonDepsTask);
-  await run(CleanExtraFilesFromModulesTask);
-  await run(TranspileScssTask);
   await run(OptimizeBuildTask);
+  await run(CleanNodeModulesOnDLLTask);
+  await run(CleanExtraFilesFromModulesTask);
 
   /**
    * copy generic build outputs into platform-specific build

@@ -24,7 +24,7 @@ import './global_nav_link';
 import globalNavTemplate from './global_nav.html';
 import './global_nav.less';
 import { uiModules } from '../../../modules';
-//import validate from 'vali-date';
+import validate from 'vali-date';
 
 const module = uiModules.get('kibana');
 
