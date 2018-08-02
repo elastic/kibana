@@ -22,11 +22,11 @@ exports[`is rendered 1`] = `
         <span>
           <span
             class="dshExitFullScreenButton__logo"
-            data-test-subj="dshExitFullScreenModeLogo"
+            data-test-subj="exitFullScreenModeLogo"
           />
           <span
             class="dshExitFullScreenButton__text"
-            data-test-subj="dshExitFullScreenModeText"
+            data-test-subj="exitFullScreenModeText"
           >
             Exit full screen 
             <span

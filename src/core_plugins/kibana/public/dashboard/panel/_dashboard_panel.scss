@@ -17,6 +17,7 @@
     display: flex;
     flex: 1 1 100%;
     height: auto;
+    z-index: 1;
   }
 
   // SASSTODO: Pretty sure this doesn't do anything since the flex-basis 100%,
@@ -28,7 +29,7 @@
   /**
    * 1. We want the doc-table-container to scroll only when embedded in a dashboard panel
    */
-   .doc-table-container {
+  .doc-table-container {
     flex: 1 1 0; /* 1 */
     overflow: auto; /* 1 */
   }
@@ -101,13 +102,12 @@
   font-size: inherit;
   color: $euiColorDarkShade;
   transition: color $euiAnimSpeedFast $euiAnimSlightResistance;
+  flex: 1 1 auto;
+  @include truncate;
 
   // flexbox fix for IE10
   // http://stackoverflow.com/questions/22008135/internet-explorer-10-does-not-apply-flexbox-on-inline-elements
   display: inline-block;
-
-  @include truncate;
-  flex: 1 1 auto;
 }
 
 .dshPanel__panel--editing:hover {
