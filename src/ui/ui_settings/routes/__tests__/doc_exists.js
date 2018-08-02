@@ -82,7 +82,10 @@ export function docExistsSuite() {
           },
           defaultIndex: {
             userValue: defaultIndex
-          }
+          },
+          foo: {
+            userValue: 'bar'
+          },
         }
       });
     });
@@ -109,8 +112,30 @@ export function docExistsSuite() {
           },
           defaultIndex: {
             userValue: defaultIndex
-          }
+          },
+          foo: {
+            userValue: 'bar'
+          },
         }
+      });
+    });
+
+    it('returns a 400 if trying to set overridden value', async () => {
+      const { kbnServer } = await setup();
+
+      const { statusCode, result } = await kbnServer.inject({
+        method: 'POST',
+        url: '/api/kibana/settings/foo',
+        payload: {
+          value: 'baz'
+        }
+      });
+
+      expect(statusCode).to.be(400);
+      assertSinonMatch(result, {
+        error: 'Bad Request',
+        message: 'Unable to update "foo" because it is overridden',
+        statusCode: 400
       });
     });
   });
@@ -138,8 +163,32 @@ export function docExistsSuite() {
           },
           defaultIndex: {
             userValue: defaultIndex
+          },
+          foo: {
+            userValue: 'bar'
+          },
+        }
+      });
+    });
+
+    it('returns a 400 if trying to set overridden value', async () => {
+      const { kbnServer } = await setup();
+
+      const { statusCode, result } = await kbnServer.inject({
+        method: 'POST',
+        url: '/api/kibana/settings',
+        payload: {
+          changes: {
+            foo: 'baz'
           }
         }
+      });
+
+      expect(statusCode).to.be(400);
+      assertSinonMatch(result, {
+        error: 'Bad Request',
+        message: 'Unable to update "foo" because it is overridden',
+        statusCode: 400
       });
     });
   });
@@ -164,8 +213,26 @@ export function docExistsSuite() {
         settings: {
           buildNum: {
             userValue: sinon.match.number
-          }
+          },
+          foo: {
+            userValue: 'bar'
+          },
         }
+      });
+    });
+    it('returns a 400 if deleting overridden value', async () => {
+      const { kbnServer } = await setup();
+
+      const { statusCode, result } = await kbnServer.inject({
+        method: 'DELETE',
+        url: '/api/kibana/settings/foo'
+      });
+
+      expect(statusCode).to.be(400);
+      assertSinonMatch(result, {
+        error: 'Bad Request',
+        message: 'Unable to update "foo" because it is overridden',
+        statusCode: 400
       });
     });
   });

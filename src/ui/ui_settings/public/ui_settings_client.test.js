@@ -33,6 +33,7 @@ beforeEach(() => {
 function setup(options = {}) {
   const {
     defaults = { dateFormat: { value: 'Browser' } },
+    overriddenKeys = [],
     initialSettings = {}
   } = options;
 
@@ -43,6 +44,7 @@ function setup(options = {}) {
   const config = new UiSettingsClient({
     defaults,
     initialSettings,
+    overriddenKeys,
     api: {
       batchSet
     },
@@ -123,6 +125,11 @@ describe('#set', () => {
 
     await expect(config.set('foo', 'bar')).resolves.toBe(false);
   });
+
+  it('throws an error if key is overridden', async () => {
+    const { config } = setup({ overriddenKeys: ['foo', 'bar'] });
+    await expect(config.set('foo', true)).rejects.toThrowErrorMatchingSnapshot();
+  });
 });
 
 describe('#remove', () => {
@@ -139,6 +146,11 @@ describe('#remove', () => {
     });
 
     await expect(config.remove('dateFormat')).resolves.toBe(false);
+  });
+
+  it('throws an error if key is overridden', async () => {
+    const { config } = setup({ overriddenKeys: ['foo', 'bar'] });
+    await expect(config.remove('bar')).rejects.toThrowErrorMatchingSnapshot();
   });
 });
 
@@ -291,6 +303,36 @@ describe('#overrideLocalDefault', () => {
 
       expect(config.get('dateFormat')).toMatchSnapshot('get after override');
       expect(config.getAll()).toMatchSnapshot('getAll after override');
+    });
+  });
+
+  describe('#isOverridden()', () => {
+    it('returns false if no overriddenKeys defined', () => {
+      const { config } = setup();
+      expect(config.isOverridden('foo')).toBe(false);
+    });
+    it('returns false if overriddenKeys defined but key is not included', () => {
+      const { config } = setup({ overriddenKeys: ['foo', 'bar'] });
+      expect(config.isOverridden('baz')).toBe(false);
+    });
+    it('returns false for object prototype properties', () => {
+      const { config } = setup({ overriddenKeys: ['foo', 'bar'] });
+      expect(config.isOverridden('hasOwnProperty')).toBe(false);
+    });
+    it('returns true if overriddenKeys defined and key is overridden', () => {
+      const { config } = setup({ overriddenKeys: ['foo', 'bar'] });
+      expect(config.isOverridden('bar')).toBe(true);
+    });
+  });
+
+  describe('#assertUpdateAllowed()', () => {
+    it('returns false if no overriddenKeys defined', () => {
+      const { config } = setup();
+      expect(config.assertUpdateAllowed('foo')).toBe(undefined);
+    });
+    it('throws error when keys is overridden', () => {
+      const { config } = setup({ overriddenKeys: ['foo'] });
+      expect(() => config.assertUpdateAllowed('foo')).toThrowErrorMatchingSnapshot();
     });
   });
 });

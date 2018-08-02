@@ -18,6 +18,8 @@
  */
 
 import { defaultsDeep } from 'lodash';
+import Boom from 'boom';
+
 import { createOrUpgradeSavedConfig } from './create_or_upgrade_saved_config';
 
 function hydrateUserSettings(userSettings) {
@@ -53,6 +55,7 @@ export class UiSettingsService {
       getDefaults = () => ({}),
       // function that accepts log messages in the same format as server.log
       log = () => {},
+      overrides = {},
     } = options;
 
     this._type = type;
@@ -60,6 +63,7 @@ export class UiSettingsService {
     this._buildNum = buildNum;
     this._savedObjectsClient = savedObjectsClient;
     this._getDefaults = getDefaults;
+    this._overrides = overrides;
     this._log = log;
   }
 
@@ -114,7 +118,25 @@ export class UiSettingsService {
     await this.setMany(changes);
   }
 
+  getOverriddenKeys() {
+    return Object.keys(this._overrides);
+  }
+
+  isOverridden(key) {
+    return this._overrides.hasOwnProperty(key);
+  }
+
+  assertUpdateAllowed(key) {
+    if (this.isOverridden(key)) {
+      throw Boom.badRequest(`Unable to update "${key}" because it is overridden`);
+    }
+  }
+
   async _write({ changes, autoCreateOrUpgradeIfMissing = true }) {
+    for (const key of Object.keys(changes)) {
+      this.assertUpdateAllowed(key);
+    }
+
     try {
       await this._savedObjectsClient.update(this._type, this._id, changes);
     } catch (error) {
@@ -158,10 +180,15 @@ export class UiSettingsService {
 
     try {
       const resp = await this._savedObjectsClient.get(this._type, this._id);
-      return resp.attributes;
+      return {
+        ...resp.attributes,
+        ...this._overrides
+      };
     } catch (error) {
       if (isIgnorableError(error)) {
-        return {};
+        return {
+          ...this._overrides
+        };
       }
 
       throw error;

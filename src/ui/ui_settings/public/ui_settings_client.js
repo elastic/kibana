@@ -24,12 +24,14 @@ export class UiSettingsClient {
   constructor(options) {
     const {
       defaults,
+      overriddenKeys,
       initialSettings,
       notify,
       api = createUiSettingsApi(),
     } = options;
 
     this._defaults = cloneDeep(defaults);
+    this._overriddenKeys = overriddenKeys;
     this._cache = defaultsDeep({}, this._defaults, cloneDeep(initialSettings));
     this._api = api;
     this._notify = notify;
@@ -102,6 +104,16 @@ You can use \`config.get("${key}", defaultValue)\`, which will just return
     return this.isDeclared(key) && !('value' in this._cache[key]);
   }
 
+  isOverridden(key) {
+    return this._overriddenKeys.includes(key);
+  }
+
+  assertUpdateAllowed(key) {
+    if (this.isOverridden(key)) {
+      throw new Error(`Unable to update "${key}" because it is overridden by the Kibana server`);
+    }
+  }
+
   overrideLocalDefault(key, newDefault) {
     // capture the previous value
     const prevDefault = this._defaults[key]
@@ -137,6 +149,8 @@ You can use \`config.get("${key}", defaultValue)\`, which will just return
   }
 
   async _update(key, value) {
+    this.assertUpdateAllowed(key);
+
     const declared = this.isDeclared(key);
     const defaults = this._defaults;
 
@@ -151,7 +165,7 @@ You can use \`config.get("${key}", defaultValue)\`, which will just return
     }
 
     const initialVal = declared ? this.get(key) : undefined;
-    this._setLocally(key, newVal, initialVal);
+    this._setLocally(key, newVal);
 
     try {
       const { settings } = await this._api.batchSet(key, newVal);
@@ -165,6 +179,8 @@ You can use \`config.get("${key}", defaultValue)\`, which will just return
   }
 
   _setLocally(key, newValue) {
+    this.assertUpdateAllowed(key);
+
     if (!this.isDeclared(key)) {
       this._cache[key] = {};
     }

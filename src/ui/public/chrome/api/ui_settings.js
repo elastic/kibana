@@ -24,6 +24,7 @@ import { UiSettingsClient } from '../../../ui_settings/public/ui_settings_client
 export function initUiSettingsApi(chrome) {
   const uiSettings = new UiSettingsClient({
     defaults: metadata.uiSettings.defaults,
+    overriddenKeys: metadata.uiSettings.overriddenKeys,
     initialSettings: metadata.uiSettings.user,
     notify: new Notifier({ location: 'Config' })
   });

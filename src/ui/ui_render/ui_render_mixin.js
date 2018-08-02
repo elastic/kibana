@@ -135,6 +135,7 @@ export function uiRenderMixin(kbnServer, server, config) {
       devMode: config.get('env.dev'),
       uiSettings: await props({
         defaults: uiSettings.getDefaults(),
+        overriddenKeys: uiSettings.getOverriddenKeys(),
         user: includeUserProvidedConfig && uiSettings.getUserProvided()
       }),
       vars: await replaceInjectedVars(
