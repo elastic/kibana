@@ -22,8 +22,7 @@ import expect from 'expect.js';
 export default function ({ getPageObjects }) {
   const PageObjects = getPageObjects(['common', 'discover', 'visualize', 'header']);
 
-  // Blocked by: https://github.com/elastic/kibana/issues/19750
-  describe.skip('visualize app', function describeIndexTests() {
+  describe('visualize app', function describeIndexTests() {
     const fromTime = '2015-09-19 06:31:44.000';
     const toTime = '2015-09-23 18:31:44.000';
 
