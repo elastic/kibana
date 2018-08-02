@@ -70,8 +70,7 @@ const getLayersIds = mapLayers => mapLayers
   && mapLayers.getArray().map(layer => layer.get('id') || []);
 
 
-function updateMapLayerOrder(map, oldLayerOrder, newLayerOrder) {
-  const mapLayers = map.getLayers();
+function updateMapLayerOrder(mapLayers, oldLayerOrder, newLayerOrder) {
   let layerToMove;
   let newIdx;
   newLayerOrder.some((newOrderId, idx) => {
@@ -79,17 +78,15 @@ function updateMapLayerOrder(map, oldLayerOrder, newLayerOrder) {
       layerToMove = mapLayers.removeAt(idx);
       newIdx = newLayerOrder.findIndex(id => id === oldLayerOrder[idx]);
       mapLayers.insertAt(newIdx, layerToMove);
-      updateMapLayerOrder(map, getLayersIds(mapLayers), newLayerOrder);
+      updateMapLayerOrder(mapLayers, getLayersIds(mapLayers), newLayerOrder);
       return true;
-    } else {
-      return false;
-    }
+    } else { return false; }
   });
 }
 
 
 // Selectors
-export const getOlMap = createSelector(
+const getOlMap = createSelector(
   getMapConstants,
   mapConstants => {
     const olView = new ol.View({
@@ -112,7 +109,7 @@ const getCurrentLayerIdsInMap = createSelector(
   (layerList, mapLayers) => getLayersIds(mapLayers)
 );
 
-export const getLayersWithOl = createSelector(
+const getLayersWithOl = createSelector(
   getLayerList,
   getCurrentLayerIdsInMap,
   (layerList, currentLayersInMap) => {
@@ -143,7 +140,7 @@ export const getOlMapAndLayers = createSelector(
     // Layer order updates
     const oldLayerIdsOrder = getLayersIds(olMap.getLayers());
     const newLayerIdsOrder = layersWithOl.map(({ id }) => id);
-    updateMapLayerOrder(olMap, oldLayerIdsOrder, newLayerIdsOrder);
+    updateMapLayerOrder(olMap.getLayers(), oldLayerIdsOrder, newLayerIdsOrder);
     return olMap;
   }
 );
