@@ -23,12 +23,12 @@ At a high-level, the task manager works like this:
 - Execute the task, if the previous claim succeeded
 - If the task fails, increment the `attempts` count and reschedule it
 - If the task succeeds:
-    - If it is recurring, store the result of the run, and reschedule
-    - If it is not recurring, remove it from the index
+  - If it is recurring, store the result of the run, and reschedule
+  - If it is not recurring, remove it from the index
 
 ## Pooling
 
-Each task manager instance runs tasks in a pool which ensures that  at most N tasks are run at a time, where N is configurable. This prevents the system from running too many tasks at once in resource constrained environments. In addition to this, each individual task can also specify `maxConcurrency` to limit how many tasks of a given type can be run at once.
+Each task manager instance runs tasks in a pool which ensures that at most N tasks are run at a time, where N is configurable. This prevents the system from running too many tasks at once in resource constrained environments. In addition to this, each individual task can also specify `maxConcurrency` to limit how many tasks of a given type can be run at once.
 
 For example, we may have a system with a maxConcurrency of 10, but a super expensive task (such as reporting) which specifies a maxConcurrency of 1.
 
@@ -105,18 +105,16 @@ When Kibana attempts to claim and run a task instance, it looks its definition u
 
 ## Task result
 
-The task's run method is expected to return an object that conforms to the following interface. Other return values will result in a warning, but the system should continue to work.
+The task's run method is expected to return a promise that resolves to an object that conforms to the following interface. Other return values will result in a warning, but the system should continue to work.
 
 ```js
 {
-  // An indication of success or failure: 'ok' | 'error'
-  status: 'error',
-
   // Optional, if specified, this is used as the tasks' nextRun, overriding
   // the default system scheduler.
   runAt: "2020-07-24T17:34:35.272Z",
 
-  // Optional, an error object, logged out as a warning
+  // Optional, an error object, logged out as a warning. The pressence of this
+  // property indicates that the task did not succeed.
   error: { message: 'Hrumph!' },
 
   // Optional, this will be passed into the next run of the task, if
@@ -124,6 +122,50 @@ The task's run method is expected to return an object that conforms to the follo
   state: {
     anything: 'goes here',
   },
+}
+```
+
+If the promise returned by the run function has a cancel method, the cancel method will be called if Kibana determines that the task has timed out. The cancel method itself can return a promise, and Kibana will wait for the cancelation before attempting a re-run. Tasks that spawn processes or threads (e.g. w/ napajs or similar) can perform cleanup work here.
+
+As a convenience, Kibana provides a `cancelable` helper function in the `@kbn/cancelable` package for tasks that don't spawn truly cancelable processes, and don't want to pull in a big dependency, but which want to allow for cancellation to occur within a sequence of promises. Any task that resolves a sequence of promises can wrap those in a cancelable call to allow Kibana to cancel the task before all promises have resolved. Here's an example:
+
+```js
+import { cancelable } from '@kbn/cancelable';
+
+// Run returns a cancelable promise. If Kibana calls cancel
+// on this promise while "a" is running, "b" and "c" will never be called.
+// If Kibana calls cancel while "b" is running, "c" will never be called, etc.
+// The functions passed to cancelable can themselves return a cancelable promise,
+// but do not have to.
+function run() {
+  return cancelable(
+    async function a() {
+      await aLongRunningPromise(1000);
+      return { hello: 'world' };
+    },
+
+    async function b(context) {
+      // Each function is passed the result of the previous one
+      console.log(context.hello);
+      await aLongRunningPromise(2000);
+      return { ...context, holla: 'Waarld!' };
+    },
+
+    async function c(context) {
+      console.log(context.hello, context.holla);
+      await aLongRunningPromise(1500);
+
+      // This being the last function in the chain, this is the
+      // final result of the run function.
+      return { state: { message: 'All done!!!' } };
+    }
+  );
+}
+
+// Just used for demo purposes, simulates a long-running task
+async function aLongRunningPromise(ms) {
+  console.log(`Waiting ${ms}ms`);
+  await new Promise(r => setTimeout(r, ms));
 }
 ```
 
@@ -173,7 +215,7 @@ The data stored for a task instance looks something like this:
   // If there was no previous run (e.g. the instance has never succesfully
   // completed, this will be an empty object.). This is a JSON blob,
   // and will be different per task type.
-  previousResult: '{ "status": "green" }',
+  state: '{ "status": "green" }',
 
   // The token of the user who scheduled this task, used to ensure
   // the task runs in the same security context as the user who
@@ -226,7 +268,6 @@ const results = manager.find({ scope: 'my-fanci-app', searchAfter: ['ids'] });
     // etc
   }]
 }
-
 ```
 
 More custom access to the tasks can be done directly via Elasticsearch, though that won't be officially supported, as we can change the document structure at any time.
@@ -240,4 +281,3 @@ There is only a rudimentary mechanism for coordinating tasks and handling expire
 There is no task history. Each run overwrites the previous run's state. One-time tasks are removed from the index upon completion regardless of success / failure.
 
 The task manager's public API is create / delete / list. Updates aren't directly supported, and listing is scoped so that users only see their own tasks.
-
