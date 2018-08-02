@@ -31,6 +31,7 @@ import {
   EuiInMemoryTable,
   EuiIcon,
   EuiConfirmModal,
+  EuiLoadingKibana,
   EuiOverlayMask,
   EUI_MODAL_CONFIRM_BUTTON,
   EuiCheckboxGroup,
@@ -305,13 +306,17 @@ export class ObjectsTable extends Component {
     // Unset this
     this.setState({
       selectedSavedObjects: [],
-      isShowingDeleteConfirmModal: false,
-      isDeleting: false,
     });
 
     // Fetching all data
     await this.fetchSavedObjects();
     await this.fetchCounts();
+
+    // Allow the user to interact with the table once the saved objects have been re-fetched.
+    this.setState({
+      isShowingDeleteConfirmModal: false,
+      isDeleting: false,
+    });
   };
 
   getRelationships = async (type, id) => {
@@ -359,23 +364,44 @@ export class ObjectsTable extends Component {
   }
 
   renderDeleteConfirmModal() {
-    if (!this.state.isShowingDeleteConfirmModal) {
+    const {
+      isShowingDeleteConfirmModal,
+      isDeleting,
+      selectedSavedObjects,
+    } = this.state;
+
+    if (!isShowingDeleteConfirmModal) {
       return null;
     }
 
-    return (
-      <EuiOverlayMask>
+    let modal;
+
+    if (isDeleting) {
+      // Block the user from interacting with the table while its contents are being deleted.
+      modal = (
+        <EuiLoadingKibana size="xl"/>
+      );
+    } else {
+      const onCancel = () => {
+        this.setState({ isShowingDeleteConfirmModal: false });
+      };
+
+      const onConfirm = () => {
+        this.delete();
+      };
+
+      modal = (
         <EuiConfirmModal
           title="Delete saved objects"
-          onCancel={() => this.setState({ isShowingDeleteConfirmModal: false })}
-          onConfirm={this.delete}
+          onCancel={onCancel}
+          onConfirm={onConfirm}
           cancelButtonText="Cancel"
-          confirmButtonText={this.state.isDeleting ? 'Deleting...' : 'Delete'}
+          confirmButtonText={isDeleting ? 'Deleting...' : 'Delete'}
           defaultFocusedButton={EUI_MODAL_CONFIRM_BUTTON}
         >
           <p>This action will delete the following saved objects:</p>
           <EuiInMemoryTable
-            items={this.state.selectedSavedObjects}
+            items={selectedSavedObjects}
             columns={[
               {
                 field: 'type',
@@ -399,6 +425,12 @@ export class ObjectsTable extends Component {
             sorting={false}
           />
         </EuiConfirmModal>
+      );
+    }
+
+    return (
+      <EuiOverlayMask>
+        {modal}
       </EuiOverlayMask>
     );
   }
