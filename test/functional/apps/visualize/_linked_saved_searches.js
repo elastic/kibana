@@ -78,6 +78,13 @@ export default function ({ getService, getPageObjects }) {
         const unfilteredData = await PageObjects.visualize.getTableVisData();
         expect(unfilteredData.trim()).to.be('1,293');
       });
+
+      it('should not break when saving after unlinking', async () => {
+        await PageObjects.visualize.saveVisualization('Unlinked before saved');
+        await PageObjects.header.waitUntilLoadingHasFinished();
+        const data = await PageObjects.visualize.getTableVisData();
+        expect(data.trim()).to.be('1,293');
+      });
     });
   });
 }
