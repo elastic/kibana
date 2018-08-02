@@ -134,7 +134,6 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.visualize.clickYAxisAdvancedOptions(axisId);
         await PageObjects.visualize.changeYAxisFilterLabelsCheckbox(axisId, false);
         await PageObjects.visualize.clickGo();
-        await PageObjects.header.waitUntilLoadingHasFinished();
         const labels = await PageObjects.visualize.getYAxisLabels();
         const expectedLabels = [
           '2', '3', '5', '7', '10', '20', '30', '50', '70', '100', '200',
@@ -146,7 +145,6 @@ export default function ({ getService, getPageObjects }) {
       it('should show filtered ticks on selecting log scale', async () => {
         await PageObjects.visualize.changeYAxisFilterLabelsCheckbox(axisId, true);
         await PageObjects.visualize.clickGo();
-        await PageObjects.header.waitUntilLoadingHasFinished();
         const labels = await PageObjects.visualize.getYAxisLabels();
         const expectedLabels = [
           '2', '3', '5', '7', '10', '20', '30', '50', '70', '100', '200',
@@ -159,7 +157,6 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.visualize.selectYAxisScaleType(axisId, 'square root');
         await PageObjects.visualize.changeYAxisFilterLabelsCheckbox(axisId, false);
         await PageObjects.visualize.clickGo();
-        await PageObjects.header.waitUntilLoadingHasFinished();
         const labels = await PageObjects.visualize.getYAxisLabels();
         const expectedLabels = [
           '0', '2,000', '4,000', '6,000', '8,000', '10,000',
@@ -170,7 +167,6 @@ export default function ({ getService, getPageObjects }) {
       it('should show filtered ticks on selecting square root scale', async () => {
         await PageObjects.visualize.changeYAxisFilterLabelsCheckbox(axisId, true);
         await PageObjects.visualize.clickGo();
-        await PageObjects.header.waitUntilLoadingHasFinished();
         const labels = await PageObjects.visualize.getYAxisLabels();
         const expectedLabels = [
           '2,000', '4,000', '6,000', '8,000',
@@ -182,7 +178,6 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.visualize.selectYAxisScaleType(axisId, 'linear');
         await PageObjects.visualize.changeYAxisFilterLabelsCheckbox(axisId, false);
         await PageObjects.visualize.clickGo();
-        await PageObjects.header.waitUntilLoadingHasFinished();
         const labels = await PageObjects.visualize.getYAxisLabels();
         log.debug(labels);
         const expectedLabels = [
@@ -194,7 +189,6 @@ export default function ({ getService, getPageObjects }) {
       it('should show filtered ticks on selecting linear scale', async () => {
         await PageObjects.visualize.changeYAxisFilterLabelsCheckbox(axisId, true);
         await PageObjects.visualize.clickGo();
-        await PageObjects.header.waitUntilLoadingHasFinished();
         const labels = await PageObjects.visualize.getYAxisLabels();
         const expectedLabels = [
           '2,000', '4,000', '6,000', '8,000',
