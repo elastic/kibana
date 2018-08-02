@@ -220,6 +220,10 @@ export default function ({ getService, getPageObjects }) {
         });
 
         it('becomes available when saved', async () => {
+          await PageObjects.reporting.setTimepickerInDataRange();
+          await PageObjects.visualize.clickBucket('X-Axis');
+          await PageObjects.visualize.selectAggregation('Date Histogram');
+          await PageObjects.visualize.clickGo();
           await PageObjects.visualize.saveVisualization('my viz');
           await expectEnabledGenerateReportButton();
         });
@@ -245,8 +249,8 @@ export default function ({ getService, getPageObjects }) {
             config.get('screenshots.directory'),
             log
           );
-          // After expected OS differences, the diff count came to be around 128k
-          expect(diffCount).to.be.lessThan(128000);
+          // After expected OS differences, the diff count came to be around ...
+          expect(diffCount).to.be.lessThan(1);
         });
       });
     });
