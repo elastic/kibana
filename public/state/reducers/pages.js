@@ -31,8 +31,9 @@ function clonePage(page) {
 export const pagesReducer = handleActions(
   {
     [actions.addPage]: (workpadState, { payload }) => {
-      const withNewPage = addPage(workpadState, payload);
-      const newState = setPageIndex(withNewPage, withNewPage.pages.length - 1); // should be the next page index
+      const { page: activePage } = workpadState;
+      const withNewPage = addPage(workpadState, payload, activePage);
+      const newState = setPageIndex(withNewPage, activePage + 1);
 
       // changes to the page require navigation
       const router = routerProvider();
