@@ -78,7 +78,10 @@ exports[`Header should render normally 1`] = `
             size="s"
             type="button"
           >
-            Export Everything
+            Export 
+            2
+             
+            objects
           </EuiButtonEmpty>
         </EuiFlexItem>
         <EuiFlexItem

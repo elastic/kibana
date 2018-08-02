@@ -79,9 +79,9 @@ export class ObjectsTable extends Component {
       page: 0,
       perPage: props.perPageConfig || 50,
       savedObjects: [],
-      savedObjectCounts: INCLUDED_TYPES.reduce((accum, type) => {
-        accum[type] = 0;
-        return accum;
+      savedObjectCounts: INCLUDED_TYPES.reduce((typeToCountMap, type) => {
+        typeToCountMap[type] = 0;
+        return typeToCountMap;
       }, {}),
       activeQuery: Query.parse(''),
       selectedSavedObjects: [],
@@ -96,14 +96,8 @@ export class ObjectsTable extends Component {
       isShowingDeleteConfirmModal: false,
       isShowingExportAllOptionsModal: false,
       isDeleting: false,
-      exportAllOptions: INCLUDED_TYPES.map(type => ({
-        id: type,
-        label: type,
-      })),
-      exportAllSelectedOptions: INCLUDED_TYPES.reduce((accum, type) => {
-        accum[type] = true;
-        return accum;
-      }, {}),
+      exportAllOptions: [],
+      exportAllSelectedOptions: {},
     };
   }
 
@@ -113,8 +107,34 @@ export class ObjectsTable extends Component {
   }
 
   fetchCounts = async () => {
-    const { queryText } = parseQuery(this.state.activeQuery);
+    const { queryText, visibleTypes } = parseQuery(this.state.activeQuery);
 
+    const filteredTypes = INCLUDED_TYPES.filter(
+      type => !visibleTypes || visibleTypes.includes(type)
+    );
+
+    // These are the saved objects visible in the table.
+    const filteredSavedObjectCounts = await getSavedObjectCounts(
+      this.props.$http,
+      filteredTypes,
+      queryText
+    );
+
+    const exportAllOptions = [];
+    const exportAllSelectedOptions = {};
+
+    Object.keys(filteredSavedObjectCounts).forEach(id => {
+      // Add this type as a bulk-export option.
+      exportAllOptions.push({
+        id,
+        label: `${id} (${filteredSavedObjectCounts[id] || 0})`,
+      });
+
+      // Select it by defayult.
+      exportAllSelectedOptions[id] = true;
+    });
+
+    // These are all the saved objects that exist.
     const savedObjectCounts = await getSavedObjectCounts(
       this.props.$http,
       INCLUDED_TYPES,
@@ -124,10 +144,8 @@ export class ObjectsTable extends Component {
     this.setState(state => ({
       ...state,
       savedObjectCounts,
-      exportAllOptions: state.exportAllOptions.map(option => ({
-        ...option,
-        label: `${option.id} (${savedObjectCounts[option.id]})`,
-      })),
+      exportAllOptions,
+      exportAllSelectedOptions,
     }));
   };
 
@@ -411,14 +429,21 @@ export class ObjectsTable extends Component {
   }
 
   renderExportAllOptionsModal() {
-    if (!this.state.isShowingExportAllOptionsModal) {
+    const {
+      isShowingExportAllOptionsModal,
+      filteredItemCount,
+      exportAllOptions,
+      exportAllSelectedOptions,
+    } = this.state;
+
+    if (!isShowingExportAllOptionsModal) {
       return null;
     }
 
     return (
       <EuiOverlayMask>
         <EuiConfirmModal
-          title="Export All"
+          title={`Export ${filteredItemCount} ${filteredItemCount === 1 ? 'object' : 'objects'}`}
           onCancel={() =>
             this.setState({ isShowingExportAllOptionsModal: false })
           }
@@ -432,18 +457,18 @@ export class ObjectsTable extends Component {
             how many of this type are available to export.
           </p>
           <EuiCheckboxGroup
-            options={this.state.exportAllOptions}
-            idToSelectedMap={this.state.exportAllSelectedOptions}
+            options={exportAllOptions}
+            idToSelectedMap={exportAllSelectedOptions}
             onChange={optionId => {
-              const exportAllSelectedOptions = {
-                ...this.state.exportAllSelectedOptions,
+              const newExportAllSelectedOptions = {
+                ...exportAllSelectedOptions,
                 ...{
-                  [optionId]: !this.state.exportAllSelectedOptions[optionId],
+                  [optionId]: !exportAllSelectedOptions[optionId],
                 },
               };
 
               this.setState({
-                exportAllSelectedOptions: exportAllSelectedOptions,
+                exportAllSelectedOptions: newExportAllSelectedOptions,
               });
             }}
           />
@@ -489,6 +514,7 @@ export class ObjectsTable extends Component {
               onImport={this.showImportFlyout}
               onRefresh={this.refreshData}
               totalCount={totalItemCount}
+              filteredCount={filteredItemCount}
             />
             <EuiSpacer size="xs" />
             <Table

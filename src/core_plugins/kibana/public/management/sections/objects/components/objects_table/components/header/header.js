@@ -18,6 +18,7 @@
  */
 
 import React, { Fragment } from 'react';
+import PropTypes from 'prop-types';
 
 import {
   EuiSpacer,
@@ -34,6 +35,7 @@ export const Header = ({
   onImport,
   onRefresh,
   totalCount,
+  filteredCount,
 }) => (
   <Fragment>
     <EuiFlexGroup justifyContent="spaceBetween" alignItems="baseline">
@@ -60,7 +62,7 @@ export const Header = ({
               data-test-subj="exportAllObjects"
               onClick={onExportAll}
             >
-              Export Everything
+              Export {filteredCount} {filteredCount === 1 ? 'object' : 'objects'}
             </EuiButtonEmpty>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
@@ -99,3 +101,11 @@ export const Header = ({
     <EuiSpacer size="m"/>
   </Fragment>
 );
+
+Header.propTypes = {
+  onExportAll: PropTypes.func.isRequired,
+  onImport: PropTypes.func.isRequired,
+  onRefresh: PropTypes.func.isRequired,
+  totalCount: PropTypes.number.isRequired,
+  filteredCount: PropTypes.number.isRequired,
+};
