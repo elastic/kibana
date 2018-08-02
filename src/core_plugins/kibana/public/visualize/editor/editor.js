@@ -385,6 +385,7 @@ function VisEditor(
 
     $state.query = searchSourceParent.getField('query');
     $state.filters = searchSourceParent.getField('filter');
+    searchSource.setField('index', searchSourceParent.getField('index'));
     searchSource.setParent(searchSourceGrandparent);
 
     toastNotifications.addSuccess(`Unlinked from saved search '${savedVis.savedSearch.title}'`);
