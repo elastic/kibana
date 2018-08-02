@@ -16,7 +16,7 @@ describe('Beats Domain Lib', () => {
   let beatsDB: CMBeat[] = [];
   let tagsDB: BeatTag[] = [];
 
-  describe('remove_tags_to_beats', () => {
+  describe('remove_tags_from_beats', () => {
     beforeEach(async () => {
       beatsDB = [
         {
