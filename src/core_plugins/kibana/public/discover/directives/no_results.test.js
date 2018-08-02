@@ -14,11 +14,11 @@ describe('DiscoverNoResults', () => {
         const shardFailures = [{
           index: 'A',
           shard: '1',
-          reason: 'Awful error',
+          reason: { reason: 'Awful error' },
         }, {
           index: 'B',
           shard: '2',
-          reason: 'Bad error',
+          reason: { reason: 'Bad error' },
         }];
 
         const component = render(

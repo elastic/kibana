@@ -280,7 +280,7 @@ Array [
               <code
                 class="euiCodeBlock__code"
               >
-                Awful error
+                {"reason":"Awful error"}
               </code>
             </pre>
           </div>
@@ -309,7 +309,7 @@ Array [
               <code
                 class="euiCodeBlock__code"
               >
-                Bad error
+                {"reason":"Bad error"}
               </code>
             </pre>
           </div>
