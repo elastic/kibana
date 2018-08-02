@@ -19,8 +19,8 @@
 
 // @ts-ignore don't type elasticsearch now
 import { Client } from 'elasticsearch';
-import { combineLatest, Observable, Subscription } from 'rxjs';
-import { filter, first, map, publishLast, switchMap } from 'rxjs/operators';
+import { combineLatest, ConnectableObservable, from, Observable, Subscription } from 'rxjs';
+import { filter, first, map, publishReplay, refCount, switchMap } from 'rxjs/operators';
 import { CoreService } from '../../types/core_service';
 import { Headers } from '../http/router/headers';
 import { LoggerFactory } from '../logging';
@@ -34,13 +34,16 @@ interface Clients {
 }
 
 export class ElasticsearchService implements CoreService {
-  private clients$: Observable<Clients>;
+  private clients$: ConnectableObservable<Clients>;
   private subscription?: Subscription;
 
-  constructor(private readonly configs$: Observable<ElasticsearchConfigs>, logger: LoggerFactory) {
+  constructor(
+    private readonly configs$: ConnectableObservable<ElasticsearchConfigs>,
+    logger: LoggerFactory
+  ) {
     const log = logger.get('elasticsearch');
 
-    this.clients$ = configs$.pipe(
+    this.clients$ = from(configs$).pipe(
       filter(() => {
         if (this.subscription !== undefined) {
           log.error('clusters cannot be changed after they are created');
@@ -49,32 +52,32 @@ export class ElasticsearchService implements CoreService {
 
         return true;
       }),
-      switchMap(
-        configs =>
-          new Observable<Clients>(observer => {
-            log.info('creating Elasticsearch clients');
+      switchMap(configs => {
+        return new Observable<Clients>(observer => {
+          log.info('creating Elasticsearch clients');
 
-            const clients = {
-              admin: new Client(
-                configs.forType('admin').toElasticsearchClientConfig({
-                  shouldAuth: false,
-                })
-              ),
-              data: new Client(configs.forType('data').toElasticsearchClientConfig()),
-            };
+          const clients = {
+            admin: new Client(
+              configs.forType('admin').toElasticsearchClientConfig({
+                shouldAuth: false,
+              })
+            ),
+            data: new Client(configs.forType('data').toElasticsearchClientConfig()),
+          };
 
-            observer.next(clients);
+          observer.next(clients);
 
-            return () => {
-              log.info('closing Elasticsearch clients');
+          return () => {
+            log.info('closing Elasticsearch clients');
 
-              clients.data.close();
-              clients.admin.close();
-            };
-          })
-      ),
-      publishLast()
-    );
+            clients.data.close();
+            clients.admin.close();
+          };
+        });
+      }),
+      publishReplay(1),
+      refCount()
+    ) as ConnectableObservable<Clients>;
   }
 
   public async start() {
@@ -102,7 +105,7 @@ export class ElasticsearchService implements CoreService {
     );
   }
 
-  public getScopedDataClient(headers: Headers) {
+  public async getScopedDataClient(headers: Headers) {
     return this.getScopedDataClient$(headers)
       .pipe(first())
       .toPromise();

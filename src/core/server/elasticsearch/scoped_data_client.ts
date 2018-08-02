@@ -17,6 +17,7 @@
  * under the License.
  */
 
+// @ts-ignore don't type elasticsearch now
 import { Client } from 'elasticsearch';
 import { Headers } from '../http/router/headers';
 import { callAPI } from './call_api';
