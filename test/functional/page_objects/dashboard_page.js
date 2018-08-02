@@ -291,7 +291,7 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
       }
 
       if (verifySuccess) {
-        await this.ensureSaveSuccess();
+        await this.verifySaveSuccess();
       }
     }
 
@@ -307,7 +307,7 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
       });
     }
 
-    async ensureSaveSuccess() {
+    async verifySaveSuccess() {
       await toasts.verifyAndDismiss('saveDashboardSuccess');
     }
 

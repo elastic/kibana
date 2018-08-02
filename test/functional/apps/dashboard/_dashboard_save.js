@@ -63,7 +63,7 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.dashboard.clickSave();
 
       await Promise.all([
-        PageObjects.dashboard.ensureSaveSuccess(),
+        PageObjects.dashboard.verifySaveSuccess(),
         // This is important since saving a new dashboard will cause a refresh of the page. We have to
         // wait till it finishes reloading or it might reload the url after simulating the
         // dashboard landing page click.
