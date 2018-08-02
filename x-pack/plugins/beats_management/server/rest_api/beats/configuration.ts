@@ -27,7 +27,7 @@ export const createGetBeatConfigurationRoute = (libs: CMServerLibs) => ({
     let beat;
     let tags;
     try {
-      beat = await libs.beats.getById(beatId);
+      beat = await libs.beats.getById(libs.framework.internalUser, beatId);
       if (beat === null) {
         return reply({ message: 'Beat not found' }).code(404);
       }

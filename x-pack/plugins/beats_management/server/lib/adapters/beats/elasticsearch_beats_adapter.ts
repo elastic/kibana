@@ -21,7 +21,7 @@ export class ElasticsearchBeatsAdapter implements CMBeatsAdapter {
     this.framework = framework;
   }
 
-  public async get(id: string) {
+  public async get(user: FrameworkUser, id: string) {
     const params = {
       id: `beat:${id}`,
       ignore: [404],
@@ -29,7 +29,7 @@ export class ElasticsearchBeatsAdapter implements CMBeatsAdapter {
       type: '_doc',
     };
 
-    const response = await this.database.get(this.framework.internalUser, params);
+    const response = await this.database.get(user, params);
     if (!response.found) {
       return null;
     }

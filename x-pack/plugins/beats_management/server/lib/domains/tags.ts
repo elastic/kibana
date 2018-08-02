@@ -18,6 +18,10 @@ export class CMTagsDomain {
     this.adapter = adapter;
   }
 
+  public async getAll(user: FrameworkUser) {
+    return await this.adapter.getAll(user);
+  }
+
   public async getTagsWithIds(user: FrameworkUser, tagIds: string[]) {
     return await this.adapter.getTagsWithIds(user, tagIds);
   }
