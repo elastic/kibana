@@ -29,9 +29,9 @@ see {xpack-ref}/authorization.html[Configuring Role-based Access Control].
 
 [NOTE]
 ============================================================================
-It is *not* supported to manage Roles which grant <<kibana-privileges>> using 
-{es}'s {ref}/security-api-roles.html[Role Management APIs], and 
-doing so will likely cause Kibana's authorization to behave unexpectedly. 
+Managing roles that grant <<kibana-privileges>> using {es}'s {ref}
+/security-api-roles.html[Role Management APIs] is not shpported. Doing so will likely
+cause Kibana's authorization to behave unexpectedly.
 ============================================================================
 
 include::authorization/index.asciidoc[]

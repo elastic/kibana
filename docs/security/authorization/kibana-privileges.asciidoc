@@ -8,8 +8,8 @@ This section lists the Kibana privileges that you can assign to a role.
 [[kibana-privileges-all]]
 `all`::
 All Kibana privileges, can read, write and delete saved searches, dashboards, visualizations,
-short urls, timelion sheets, graph workspaces, index patterns and advanced settings.
+short URLs, Timelion sheets, graph workspaces, index patterns and advanced settings.
 
 `read`::
-Can read saved searches, dashboards, visualiations, short urls, timelion sheets, graph workspaces,
-index patterns and advanced settings.
+Can read saved searches, dashboards, visualizations, short URLs, Timelion sheets, graph workspaces,
+index patterns, and advanced settings.
