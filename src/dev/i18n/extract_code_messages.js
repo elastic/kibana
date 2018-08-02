@@ -38,9 +38,17 @@ import { extractIntlMessages, extractFormattedMessages } from './extract_react_m
 export function isIntlFormatMessageFunction(node) {
   return (
     isCallExpression(node) &&
-    isMemberExpression(node.callee) &&
-    isIdentifier(node.callee.object, { name: 'intl' }) &&
-    isIdentifier(node.callee.property, { name: 'formatMessage' })
+    (
+      isIdentifier(node.callee, { name: 'formatMessage' }) ||
+      (
+        isMemberExpression(node.callee) &&
+        (
+          isIdentifier(node.callee.object, { name: 'intl' }) ||
+          isIdentifier(node.callee.object.property, { name: 'intl' })
+        ) &&
+        isIdentifier(node.callee.property, { name: 'formatMessage' })
+      )
+    )
   );
 }
 
