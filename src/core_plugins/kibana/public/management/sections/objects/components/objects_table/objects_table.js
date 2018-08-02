@@ -153,14 +153,6 @@ export class ObjectsTable extends Component {
     const { savedObjectsClient } = this.props;
     const { activeQuery, page, perPage } = this.state;
 
-    if (!activeQuery) {
-      return {
-        pageOfItems: [],
-        // Deliberately don't reset totalItemCount because 0 wouldn't be accurate.
-        filteredItemCount: 0,
-      };
-    }
-
     this.setState({ isSearching: true });
 
     const { queryText, visibleTypes } = parseQuery(activeQuery);
