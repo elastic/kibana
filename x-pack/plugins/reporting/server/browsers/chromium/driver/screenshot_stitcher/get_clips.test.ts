@@ -6,7 +6,7 @@
 
 import { toArray } from 'rxjs/operators';
 import { $getClips } from './get_clips';
-import { Rectangle } from './types';
+import { Rectangle } from '../../../../../types';
 
 function getClipsTest(
   description: string,

@@ -7,7 +7,7 @@
 import { map, mergeMap, switchMap, toArray } from 'rxjs/operators';
 import { $combine } from './combine';
 import { $getClips } from './get_clips';
-import { Logger, Rectangle, Screenshot } from './types';
+import { Logger, Rectangle, Screenshot } from '../../../../../types';
 
 const scaleRect = (rect: Rectangle, scale: number): Rectangle => {
   return {

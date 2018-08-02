@@ -8,7 +8,7 @@ import { promisify } from 'bluebird';
 import fs from 'fs';
 import path from 'path';
 
-import { screenshotStitcher } from './index';
+import { screenshotStitcher } from '.';
 
 const loggerMock = {
   debug: () => {

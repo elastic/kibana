@@ -5,7 +5,7 @@
  */
 
 import * as Rx from 'rxjs';
-import { Rectangle } from './types';
+import { Rectangle } from '../../../../../types';
 
 /**
  * Takes one large rectangle and breaks it down into an array of smaller rectangles,

@@ -26,3 +26,8 @@ export interface Logger {
   error: (message: string) => void;
   warning: (message: string) => void;
 }
+
+export interface ElementPosition {
+  boundingClientRect: ClientRect;
+  scroll?: { x: number; y: number };
+}
