@@ -294,7 +294,7 @@ function VisEditor(
     // update the searchSource when query updates
     $scope.fetch = function () {
       $state.save();
-      const globalFilters = queryFilter.getFilters().filter(f => f.$state.store === 'globalState');
+      const globalFilters = queryFilter.getGlobalFilters();
       savedVis.searchSource.setField('query', $state.query);
       savedVis.searchSource.setField('filter', $state.filters);
       globalFiltersSearchSource.setField('filter', globalFilters);
