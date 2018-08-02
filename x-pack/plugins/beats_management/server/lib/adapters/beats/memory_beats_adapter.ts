@@ -17,7 +17,7 @@ export class MemoryBeatsAdapter implements CMBeatsAdapter {
     this.beatsDB = beatsDB;
   }
 
-  public async get(id: string) {
+  public async get(user: FrameworkUser, id: string) {
     return this.beatsDB.find(beat => beat.id === id) || null;
   }
 

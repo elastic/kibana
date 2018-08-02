@@ -5,10 +5,7 @@
  */
 
 import expect from 'expect.js';
-import {
-  ES_INDEX_NAME,
-  ES_TYPE_NAME
-} from './constants';
+import { ES_INDEX_NAME, ES_TYPE_NAME } from './constants';
 
 export default function ({ getService }) {
   const supertest = getService('supertest');
@@ -24,25 +21,19 @@ export default function ({ getService }) {
 
     it('should add a single tag to a single beat', async () => {
       const { body: apiResponse } = await supertest
-        .post(
-          '/api/beats/agents_tags/assignments'
-        )
+        .post('/api/beats/agents_tags/assignments')
         .set('kbn-xsrf', 'xxx')
         .send({
-          assignments: [
-            { beat_id: 'bar', tag: 'production' }
-          ]
+          assignments: [{ beatId: 'bar', tag: 'production' }],
         })
         .expect(200);
 
-      expect(apiResponse.assignments).to.eql([
-        { status: 200, result: 'updated' }
-      ]);
+      expect(apiResponse.assignments).to.eql([{ status: 200, result: 'updated' }]);
 
       const esResponse = await es.get({
         index: ES_INDEX_NAME,
         type: ES_TYPE_NAME,
-        id: `beat:bar`
+        id: `beat:bar`,
       });
 
       const beat = esResponse._source.beat;
@@ -59,7 +50,7 @@ export default function ({ getService }) {
       esResponse = await es.get({
         index: ES_INDEX_NAME,
         type: ES_TYPE_NAME,
-        id: `beat:foo`
+        id: `beat:foo`,
       });
 
       beat = esResponse._source.beat;
@@ -67,26 +58,20 @@ export default function ({ getService }) {
 
       // Adding the existing tag
       const { body: apiResponse } = await supertest
-        .post(
-          '/api/beats/agents_tags/assignments'
-        )
+        .post('/api/beats/agents_tags/assignments')
         .set('kbn-xsrf', 'xxx')
         .send({
-          assignments: [
-            { beat_id: 'foo', tag: 'production' }
-          ]
+          assignments: [{ beatId: 'foo', tag: 'production' }],
         })
         .expect(200);
 
-      expect(apiResponse.assignments).to.eql([
-        { status: 200, result: 'updated' }
-      ]);
+      expect(apiResponse.assignments).to.eql([{ status: 200, result: 'updated' }]);
 
       // After adding the existing tag
       esResponse = await es.get({
         index: ES_INDEX_NAME,
         type: ES_TYPE_NAME,
-        id: `beat:foo`
+        id: `beat:foo`,
       });
 
       beat = esResponse._source.beat;
@@ -95,21 +80,19 @@ export default function ({ getService }) {
 
     it('should add a single tag to a multiple beats', async () => {
       const { body: apiResponse } = await supertest
-        .post(
-          '/api/beats/agents_tags/assignments'
-        )
+        .post('/api/beats/agents_tags/assignments')
         .set('kbn-xsrf', 'xxx')
         .send({
           assignments: [
-            { beat_id: 'foo', tag: 'development' },
-            { beat_id: 'bar', tag: 'development' }
-          ]
+            { beatId: 'foo', tag: 'development' },
+            { beatId: 'bar', tag: 'development' },
+          ],
         })
         .expect(200);
 
       expect(apiResponse.assignments).to.eql([
         { status: 200, result: 'updated' },
-        { status: 200, result: 'updated' }
+        { status: 200, result: 'updated' },
       ]);
 
       let esResponse;
@@ -119,7 +102,7 @@ export default function ({ getService }) {
       esResponse = await es.get({
         index: ES_INDEX_NAME,
         type: ES_TYPE_NAME,
-        id: `beat:foo`
+        id: `beat:foo`,
       });
 
       beat = esResponse._source.beat;
@@ -129,7 +112,7 @@ export default function ({ getService }) {
       esResponse = await es.get({
         index: ES_INDEX_NAME,
         type: ES_TYPE_NAME,
-        id: `beat:bar`
+        id: `beat:bar`,
       });
 
       beat = esResponse._source.beat;
@@ -138,27 +121,25 @@ export default function ({ getService }) {
 
     it('should add multiple tags to a single beat', async () => {
       const { body: apiResponse } = await supertest
-        .post(
-          '/api/beats/agents_tags/assignments'
-        )
+        .post('/api/beats/agents_tags/assignments')
         .set('kbn-xsrf', 'xxx')
         .send({
           assignments: [
-            { beat_id: 'bar', tag: 'development' },
-            { beat_id: 'bar', tag: 'production' }
-          ]
+            { beatId: 'bar', tag: 'development' },
+            { beatId: 'bar', tag: 'production' },
+          ],
         })
         .expect(200);
 
       expect(apiResponse.assignments).to.eql([
         { status: 200, result: 'updated' },
-        { status: 200, result: 'updated' }
+        { status: 200, result: 'updated' },
       ]);
 
       const esResponse = await es.get({
         index: ES_INDEX_NAME,
         type: ES_TYPE_NAME,
-        id: `beat:bar`
+        id: `beat:bar`,
       });
 
       const beat = esResponse._source.beat;
@@ -167,21 +148,19 @@ export default function ({ getService }) {
 
     it('should add multiple tags to a multiple beats', async () => {
       const { body: apiResponse } = await supertest
-        .post(
-          '/api/beats/agents_tags/assignments'
-        )
+        .post('/api/beats/agents_tags/assignments')
         .set('kbn-xsrf', 'xxx')
         .send({
           assignments: [
-            { beat_id: 'foo', tag: 'development' },
-            { beat_id: 'bar', tag: 'production' }
-          ]
+            { beatId: 'foo', tag: 'development' },
+            { beatId: 'bar', tag: 'production' },
+          ],
         })
         .expect(200);
 
       expect(apiResponse.assignments).to.eql([
         { status: 200, result: 'updated' },
-        { status: 200, result: 'updated' }
+        { status: 200, result: 'updated' },
       ]);
 
       let esResponse;
@@ -191,7 +170,7 @@ export default function ({ getService }) {
       esResponse = await es.get({
         index: ES_INDEX_NAME,
         type: ES_TYPE_NAME,
-        id: `beat:foo`
+        id: `beat:foo`,
       });
 
       beat = esResponse._source.beat;
@@ -201,7 +180,7 @@ export default function ({ getService }) {
       esResponse = await es.get({
         index: ES_INDEX_NAME,
         type: ES_TYPE_NAME,
-        id: `beat:bar`
+        id: `beat:bar`,
       });
 
       beat = esResponse._source.beat;
@@ -212,19 +191,15 @@ export default function ({ getService }) {
       const nonExistentBeatId = chance.word();
 
       const { body: apiResponse } = await supertest
-        .post(
-          '/api/beats/agents_tags/assignments'
-        )
+        .post('/api/beats/agents_tags/assignments')
         .set('kbn-xsrf', 'xxx')
         .send({
-          assignments: [
-            { beat_id: nonExistentBeatId, tag: 'production' }
-          ]
+          assignments: [{ beatId: nonExistentBeatId, tag: 'production' }],
         })
         .expect(200);
 
       expect(apiResponse.assignments).to.eql([
-        { status: 404, result: `Beat ${nonExistentBeatId} not found` }
+        { status: 404, result: `Beat ${nonExistentBeatId} not found` },
       ]);
     });
 
@@ -232,25 +207,21 @@ export default function ({ getService }) {
       const nonExistentTag = chance.word();
 
       const { body: apiResponse } = await supertest
-        .post(
-          '/api/beats/agents_tags/assignments'
-        )
+        .post('/api/beats/agents_tags/assignments')
         .set('kbn-xsrf', 'xxx')
         .send({
-          assignments: [
-            { beat_id: 'bar', tag: nonExistentTag }
-          ]
+          assignments: [{ beatID: 'bar', tag: nonExistentTag }],
         })
         .expect(200);
 
       expect(apiResponse.assignments).to.eql([
-        { status: 404, result: `Tag ${nonExistentTag} not found` }
+        { status: 404, result: `Tag ${nonExistentTag} not found` },
       ]);
 
       const esResponse = await es.get({
         index: ES_INDEX_NAME,
         type: ES_TYPE_NAME,
-        id: `beat:bar`
+        id: `beat:bar`,
       });
 
       const beat = esResponse._source.beat;
@@ -262,25 +233,21 @@ export default function ({ getService }) {
       const nonExistentTag = chance.word();
 
       const { body: apiResponse } = await supertest
-        .post(
-          '/api/beats/agents_tags/assignments'
-        )
+        .post('/api/beats/agents_tags/assignments')
         .set('kbn-xsrf', 'xxx')
         .send({
-          assignments: [
-            { beat_id: nonExistentBeatId, tag: nonExistentTag }
-          ]
+          assignments: [{ beatID: nonExistentBeatId, tag: nonExistentTag }],
         })
         .expect(200);
 
       expect(apiResponse.assignments).to.eql([
-        { status: 404, result: `Beat ${nonExistentBeatId} and tag ${nonExistentTag} not found` }
+        { status: 404, result: `Beat ${nonExistentBeatId} and tag ${nonExistentTag} not found` },
       ]);
 
       const esResponse = await es.get({
         index: ES_INDEX_NAME,
         type: ES_TYPE_NAME,
-        id: `beat:bar`
+        id: `beat:bar`,
       });
 
       const beat = esResponse._source.beat;

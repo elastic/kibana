@@ -11,7 +11,7 @@ import { FrameworkUser } from '../framework/adapter_types';
 export interface CMBeatsAdapter {
   insert(beat: CMBeat): Promise<void>;
   update(beat: CMBeat): Promise<void>;
-  get(id: string): any;
+  get(user: FrameworkUser, id: string): any;
   getAll(user: FrameworkUser): any;
   getWithIds(user: FrameworkUser, beatIds: string[]): any;
   removeTagsFromBeats(
