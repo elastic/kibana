@@ -4,4 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { BeatsTable } from './beats_table';
+export { Table } from './table';
+export { ControlBar } from './controls';
+export { BeatsTableType } from './table_type_configs';
