@@ -222,6 +222,7 @@ export class ObjectsTable extends Component {
       {
         activeQuery: query,
         page: 0, // Reset this on each query change
+        selectedSavedObjects: [],
       },
       () => {
         this.fetchSavedObjects();
@@ -233,7 +234,11 @@ export class ObjectsTable extends Component {
   onTableChange = async table => {
     const { index: page, size: perPage } = table.page || {};
 
-    this.setState({ page, perPage }, this.fetchSavedObjects);
+    this.setState({
+      page,
+      perPage,
+      selectedSavedObjects: [],
+    }, this.fetchSavedObjects);
   };
 
   onShowRelationships = (id, type, title) => {
