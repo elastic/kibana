@@ -5,7 +5,7 @@
  */
 
 import React from 'react';
-import { FlyOut } from '../flyout/index';
+import { FlyOut } from '../layer_addpanel/index';
 
 export class KibanaMap extends React.Component {
 
