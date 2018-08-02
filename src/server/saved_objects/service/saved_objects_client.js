@@ -187,4 +187,11 @@ export class SavedObjectsClient {
   async update(type, id, attributes, options = {}) {
     return this._repository.update(type, id, attributes, options);
   }
+
+  /*
+   * Summarize the objects
+   */
+  async summarize() {
+    return this._repository.summarize();
+  }
 }
