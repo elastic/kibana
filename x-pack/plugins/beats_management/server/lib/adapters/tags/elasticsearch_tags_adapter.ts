@@ -19,6 +19,17 @@ export class ElasticsearchTagsAdapter implements CMTagsAdapter {
     this.database = database;
   }
 
+  public async getAll(user: FrameworkUser) {
+    const params = {
+      index: INDEX_NAMES.BEATS,
+      q: 'type:tag',
+      type: '_doc',
+    };
+    const response = await this.database.search(user, params);
+
+    return get<any>(response, 'hits.hits', []);
+  }
+
   public async getTagsWithIds(user: FrameworkUser, tagIds: string[]) {
     const ids = tagIds.map(tag => `tag:${tag}`);
 

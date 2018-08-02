@@ -9,9 +9,8 @@ import { CMBeat } from '../../../../common/domain_types';
 export interface CMBeatsAdapter {
   get(id: string): Promise<CMBeat | null>;
   getAll(): Promise<CMBeat[]>;
-  getWithIds(beatIds: string[]): Promise<CMBeat[]>;
-  removeTagsFromBeats(removals: BeatsTagAssignment[]): Promise<BeatsTagAssignment[]>;
-  assignTagsToBeats(assignments: BeatsTagAssignment[]): Promise<BeatsTagAssignment[]>;
+  removeTagsFromBeats(removals: BeatsTagAssignment[]): Promise<BeatsRemovalReturn[]>;
+  assignTagsToBeats(assignments: BeatsTagAssignment[]): Promise<CMAssignmentReturn[]>;
 }
 
 export interface BeatsTagAssignment {

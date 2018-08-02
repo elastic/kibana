@@ -13,6 +13,8 @@ import { wrapEsError } from '../../utils/error_wrappers';
 // TODO: add license check pre-hook
 // TODO: write to Kibana audit log file
 export const createBeatEnrollmentRoute = (libs: CMServerLibs) => ({
+  method: 'POST',
+  path: '/api/beats/agent/{beatId}',
   config: {
     auth: false,
     validate: {
@@ -58,6 +60,4 @@ export const createBeatEnrollmentRoute = (libs: CMServerLibs) => ({
       return reply(wrapEsError(err));
     }
   },
-  method: 'POST',
-  path: '/api/beats/agent/{beatId}',
 });

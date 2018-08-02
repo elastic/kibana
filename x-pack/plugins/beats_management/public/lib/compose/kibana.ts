@@ -6,23 +6,28 @@
 
 import 'ui/autoload/all';
 // @ts-ignore: path dynamic for kibana
+import chrome from 'ui/chrome';
+// @ts-ignore: path dynamic for kibana
 import { management } from 'ui/management';
 // @ts-ignore: path dynamic for kibana
 import { uiModules } from 'ui/modules';
 // @ts-ignore: path dynamic for kibana
 import routes from 'ui/routes';
 // @ts-ignore: path dynamic for kibana
-import { MemoryBeatsAdapter } from '../adapters/beats/memory_beats_adapter';
+import { RestBeatsAdapter } from '../adapters/beats/rest_beats_adapter';
 import { KibanaFrameworkAdapter } from '../adapters/framework/kibana_framework_adapter';
-import { MemoryTagsAdapter } from '../adapters/tags/memory_tags_adapter';
-import { MemoryTokensAdapter } from '../adapters/tokens/memory_tokens_adapter';
+import { AxiosRestAPIAdapter } from '../adapters/rest_api/axios_rest_api_adapter';
+import { RestTagsAdapter } from '../adapters/tags/rest_tags_adapter';
+import { RestTokensAdapter } from '../adapters/tokens/rest_tokens_adapter';
 import { FrontendDomainLibs, FrontendLibs } from '../lib';
 
 export function compose(): FrontendLibs {
-  // const kbnVersion = (window as any).__KBN__.version;
-  const tags = new MemoryTagsAdapter([]);
-  const tokens = new MemoryTokensAdapter();
-  const beats = new MemoryBeatsAdapter([]);
+  const kbnVersion = (window as any).__KBN__.version;
+  const api = new AxiosRestAPIAdapter(kbnVersion, chrome.getXsrfToken(), chrome.getBasePath());
+
+  const tags = new RestTagsAdapter(api);
+  const tokens = new RestTokensAdapter(api);
+  const beats = new RestBeatsAdapter(api);
 
   const domainLibs: FrontendDomainLibs = {
     tags,

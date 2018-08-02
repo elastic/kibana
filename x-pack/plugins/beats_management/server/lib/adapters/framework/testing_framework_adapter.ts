@@ -3,13 +3,11 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { Client } from 'elasticsearch';
-import { get } from 'lodash';
+
 import { FrameworkInternalUser } from './adapter_types';
 
 import {
   BackendFrameworkAdapter,
-  FrameworkRequest,
   FrameworkRouteOptions,
   FrameworkWrappableRequest,
 } from './adapter_types';
@@ -24,15 +22,15 @@ export class TestingBackendFrameworkAdapter implements BackendFrameworkAdapter {
     kind: 'internal',
   };
   public version: string;
-  private client: Client | null;
   private settings: TestSettings;
 
-  constructor(client: Client | null, settings: TestSettings) {
-    this.client = client;
-    this.settings = settings || {
+  constructor(
+    settings: TestSettings = {
       encryptionKey: 'something_who_cares',
       enrollmentTokensTtlInSeconds: 10 * 60, // 10 minutes
-    };
+    }
+  ) {
+    this.settings = settings;
     this.version = 'testing';
   }
 
@@ -53,25 +51,5 @@ export class TestingBackendFrameworkAdapter implements BackendFrameworkAdapter {
     route: FrameworkRouteOptions<RouteRequest, RouteResponse>
   ) {
     // not yet testable
-  }
-
-  public installIndexTemplate(name: string, template: {}) {
-    return;
-  }
-
-  public async callWithInternalUser(esMethod: string, options: {}) {
-    const api = get<any>(this.client, esMethod);
-
-    api(options);
-
-    return await api(options);
-  }
-
-  public async callWithRequest(req: FrameworkRequest, esMethod: string, options: {}) {
-    const api = get<any>(this.client, esMethod);
-
-    api(options);
-
-    return await api(options);
   }
 }

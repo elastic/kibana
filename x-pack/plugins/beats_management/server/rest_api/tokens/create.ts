@@ -13,6 +13,8 @@ import { wrapEsError } from '../../utils/error_wrappers';
 // TODO: write to Kibana audit log file
 const DEFAULT_NUM_TOKENS = 1;
 export const createTokensRoute = (libs: CMServerLibs) => ({
+  method: 'POST',
+  path: '/api/beats/enrollment_tokens',
   config: {
     validate: {
       payload: Joi.object({
@@ -34,6 +36,4 @@ export const createTokensRoute = (libs: CMServerLibs) => ({
       return reply(wrapEsError(err));
     }
   },
-  method: 'POST',
-  path: '/api/beats/enrollment_tokens',
 });

@@ -4,21 +4,21 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { FrameworkRequest } from '../../lib/adapters/framework/adapter_types';
+import { BeatTag } from '../../../common/domain_types';
 import { CMServerLibs } from '../../lib/lib';
 import { wrapEsError } from '../../utils/error_wrappers';
 
-// TODO: add license check pre-hook
-export const createListAgentsRoute = (libs: CMServerLibs) => ({
+export const createListTagsRoute = (libs: CMServerLibs) => ({
   method: 'GET',
-  path: '/api/beats/agents',
-  handler: async (request: FrameworkRequest, reply: any) => {
+  path: '/api/beats/tags/',
+  handler: async (request: any, reply: any) => {
+    let tags: BeatTag[];
     try {
-      const beats = await libs.beats.getAllBeats(request.user);
-      reply({ beats });
+      tags = await libs.tags.getAll(request.user);
     } catch (err) {
-      // TODO move this to kibana route thing in adapter
       return reply(wrapEsError(err));
     }
+
+    reply(tags);
   },
 });
