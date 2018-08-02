@@ -101,7 +101,7 @@ export default function ({ getService, getPageObjects }) {
       });
     });
 
-    describe('using a pinned filter that excludes all data', async () => {
+    describe.skip('using a pinned filter that excludes all data', async () => {
       before(async () => {
         await filterBar.toggleFilterPinned('bytes');
         await PageObjects.header.waitUntilLoadingHasFinished();
