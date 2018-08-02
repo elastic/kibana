@@ -56,7 +56,7 @@ describe('CollectorSet', () => {
       const collectors = new CollectorSet(server);
       collectors.register(new Collector(server, {
         type: 'MY_TEST_COLLECTOR',
-        fetch: caller => caller()
+        fetch: ({ callCluster: caller }) => caller()
       }));
 
       const result = await collectors.bulkFetch({
