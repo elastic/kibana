@@ -87,7 +87,6 @@ export class ObjectsTable extends Component {
       selectedSavedObjects: [],
       isShowingImportFlyout: false,
       isSearching: false,
-      totalItemCount: 0,
       filteredItemCount: 0,
       isShowingRelationships: false,
       relationshipId: undefined,
@@ -158,7 +157,6 @@ export class ObjectsTable extends Component {
     const { queryText, visibleTypes } = parseQuery(activeQuery);
 
     let savedObjects = [];
-    let totalItemCount = 0;
     let filteredItemCount = 0;
 
     const type = INCLUDED_TYPES.filter(
@@ -168,12 +166,6 @@ export class ObjectsTable extends Component {
     // TODO: is there a good way to stop existing calls if the input changes?
     await ensureMinimumTime(
       (async () => {
-        const allSavedObjects = await savedObjectsClient.find({
-          type: INCLUDED_TYPES,
-        });
-
-        totalItemCount = allSavedObjects.total;
-
         const filteredSavedObjects = await savedObjectsClient.find({
           search: queryText ? `${queryText}*` : undefined,
           perPage,
@@ -197,7 +189,6 @@ export class ObjectsTable extends Component {
 
     this.setState({
       savedObjects,
-      totalItemCount,
       filteredItemCount,
       isSearching: false,
     });
@@ -480,7 +471,6 @@ export class ObjectsTable extends Component {
       page,
       perPage,
       savedObjects,
-      totalItemCount,
       filteredItemCount,
       isSearching,
       savedObjectCounts,
@@ -510,7 +500,6 @@ export class ObjectsTable extends Component {
               }
               onImport={this.showImportFlyout}
               onRefresh={this.refreshData}
-              totalCount={totalItemCount}
               filteredCount={filteredItemCount}
             />
             <EuiSpacer size="xs" />

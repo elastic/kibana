@@ -34,25 +34,16 @@ export const Header = ({
   onExportAll,
   onImport,
   onRefresh,
-  totalCount,
   filteredCount,
 }) => (
   <Fragment>
     <EuiFlexGroup justifyContent="spaceBetween" alignItems="baseline">
       <EuiFlexItem grow={false}>
-        <EuiFlexGroup alignItems="baseline" gutterSize="m" responsive={false}>
-          <EuiFlexItem grow={false}>
-            <EuiTitle>
-              <h1>Saved Objects</h1>
-            </EuiTitle>
-          </EuiFlexItem>
-          <EuiFlexItem>
-            <EuiTextColor color="subdued">
-              <p>{totalCount} in total</p>
-            </EuiTextColor>
-          </EuiFlexItem>
-        </EuiFlexGroup>
+        <EuiTitle>
+          <h1>Saved Objects</h1>
+        </EuiTitle>
       </EuiFlexItem>
+
       <EuiFlexItem grow={false}>
         <EuiFlexGroup alignItems="baseline" gutterSize="m" responsive={false}>
           <EuiFlexItem grow={false}>
@@ -106,6 +97,5 @@ Header.propTypes = {
   onExportAll: PropTypes.func.isRequired,
   onImport: PropTypes.func.isRequired,
   onRefresh: PropTypes.func.isRequired,
-  totalCount: PropTypes.number.isRequired,
   filteredCount: PropTypes.number.isRequired,
 };

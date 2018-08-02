@@ -146,7 +146,6 @@ exports[`ObjectsTable should render normally 1`] = `
         onExportAll={[Function]}
         onImport={[Function]}
         onRefresh={[Function]}
-        totalCount={4}
       />
       <EuiSpacer
         size="xs"
