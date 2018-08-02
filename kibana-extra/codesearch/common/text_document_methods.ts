@@ -5,6 +5,7 @@
  */
 
 import {
+  Definition,
   DocumentSymbolParams,
   Hover,
   SymbolInformation,
@@ -17,6 +18,7 @@ import { LspMethod } from './lsp_method';
 export class TextDocumentMethods {
   public documentSymbol: LspMethod<DocumentSymbolParams, SymbolInformation[]>;
   public hover: LspMethod<TextDocumentPositionParams, Hover>;
+  public definition: LspMethod<TextDocumentPositionParams, Definition>;
 
   private readonly client: LspClient;
 
@@ -24,5 +26,6 @@ export class TextDocumentMethods {
     this.client = client;
     this.documentSymbol = new LspMethod('textDocument/documentSymbol', this.client);
     this.hover = new LspMethod('textDocument/hover', this.client);
+    this.definition = new LspMethod('textDocument/definition', this.client);
   }
 }

@@ -6,7 +6,7 @@
 
 import { ConnectedRouter } from 'connected-react-router';
 import React from 'react';
-import { HashRouter as Router, Route } from 'react-router-dom';
+import { HashRouter as Router, Route, Switch } from 'react-router-dom';
 
 import { history } from '../utils/url';
 import { Admin } from './admin_page/admin';
@@ -22,10 +22,13 @@ export const App = props => {
     <ConnectedRouter history={history}>
       <Router>
         <div>
-          <Route path="/" exact={true} render={renderMain} />
-          <Route path="/repos" render={renderRepos} />
-          <Route path="/:resource/:org/:repo/:revision/:path*" component={Layout} />
-          <Route path="/admin" component={Admin} />
+          <Switch>
+            <Route path="/" exact={true} render={renderMain} />
+            <Route path="/repos" render={renderRepos} />
+            <Route path="/:resource/:org/:repo/:revision/:path*:goto(!.*)?" component={Layout} />
+            <Route path="/:resource/:org/:repo/:revision" component={Layout} />
+            <Route path="/admin" component={Admin} />
+          </Switch>
         </div>
       </Router>
     </ConnectedRouter>

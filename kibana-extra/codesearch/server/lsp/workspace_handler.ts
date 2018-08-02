@@ -60,6 +60,7 @@ export class WorkspaceHandler {
   public async handleRequest(request: LspRequest): Promise<void> {
     const { method, params } = request;
     switch (method) {
+      case 'textDocument/definition':
       case 'textDocument/hover':
       case 'textDocument/full': {
         const payload: TextDocumentPositionParams = params;
@@ -81,6 +82,17 @@ export class WorkspaceHandler {
   public handleResponse(request: LspRequest, response: ResponseMessage): ResponseMessage {
     const { method } = request;
     switch (method) {
+      case 'textDocument/definition': {
+        const result = response.result;
+        if (result) {
+          if (Array.isArray(result)) {
+            (result as Location[]).forEach(location => this.convertLocation(location));
+          } else {
+            this.convertLocation(result);
+          }
+        }
+        return response;
+      }
       case 'textDocument/full': {
         const result = response.result as Full[];
         for (const full of result) {

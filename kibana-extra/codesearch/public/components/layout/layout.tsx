@@ -78,10 +78,10 @@ export class Layout extends React.Component<Props, State> {
     if (pathSegments.length === 0) {
       return node;
     } else if (pathSegments.length === 1) {
-      return node.children.find(n => n.name === pathSegments[0]);
+      return (node.children || []).find(n => n.name === pathSegments[0]);
     } else {
       const currentFolder = pathSegments.shift();
-      return this.findNode(pathSegments, node.children.find(n => n.name === currentFolder));
+      return this.findNode(pathSegments, (node.children || []).find(n => n.name === currentFolder));
     }
   };
 
@@ -124,10 +124,15 @@ export class Layout extends React.Component<Props, State> {
   };
 
   public render() {
-    const { resource, org, repo, revision, path } = this.props.match.params;
+    const { resource, org, repo, revision, path, goto } = this.props.match.params;
     const pathSegments = path ? path.split('/') : [];
     const editor = path && (
-      <Editor file={path} repoUri={`${resource}/${org}/${repo}`} revision={revision || 'HEAD'} />
+      <Editor
+        file={path}
+        goto={goto}
+        repoUri={`${resource}/${org}/${repo}`}
+        revision={revision || 'HEAD'}
+      />
     );
 
     return (
