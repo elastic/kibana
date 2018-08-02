@@ -22,6 +22,8 @@ import { AuditLogger } from '../../server/lib/audit_logger';
 import { SecureSavedObjectsClient } from './server/lib/saved_objects_client/secure_saved_objects_client';
 import { initAuthorizationService, registerPrivilegesWithCluster } from './server/lib/authorization';
 import { watchStatusAndLicenseToInitialize } from '../../server/lib/watch_status_and_license_to_initialize';
+import { SecurityContextService } from './server/lib/security_context_service';
+import { SecureSavedObjectsClientWrapper } from './server/lib/saved_objects_client/secure_saved_objects_client_wrapper';
 
 export const security = (kibana) => new kibana.Plugin({
   id: 'security',
@@ -113,6 +115,8 @@ export const security = (kibana) => new kibana.Plugin({
       }
     });
 
+    const securityContextService = new SecurityContextService();
+
     const auditLogger = new SecurityAuditLogger(server.config(), new AuditLogger(server, 'security'));
 
     const { savedObjects } = server;
@@ -129,18 +133,33 @@ export const security = (kibana) => new kibana.Plugin({
         return new savedObjects.SavedObjectsClient(callWithRequestRepository);
       }
 
-      const { authorization } = server.plugins.security;
-      const checkPrivileges = authorization.checkPrivilegesWithRequest(request);
       const internalRepository = savedObjects.getSavedObjectsRepository(callWithInternalUser);
 
       return new SecureSavedObjectsClient({
-        internalRepository,
         callWithRequestRepository,
         errors: savedObjects.SavedObjectsClient.errors,
-        checkPrivileges,
-        auditLogger,
-        savedObjectTypes: savedObjects.types,
+        internalRepository,
+        request,
+        securityContextService,
+      });
+    });
+
+    savedObjects.addScopedSavedObjectsClientWrapperFactory(({ client, request }) => {
+      if (!xpackInfoFeature.getLicenseCheckResults().allowRbac) {
+        return client;
+      }
+
+      const { authorization } = server.plugins.security;
+
+      return new SecureSavedObjectsClientWrapper({
         actions: authorization.actions,
+        auditLogger,
+        baseClient: client,
+        checkPrivilegesWithRequest: authorization.checkPrivilegesWithRequest,
+        errors: savedObjects.SavedObjectsClient.errors,
+        request,
+        savedObjectTypes: savedObjects.types,
+        securityContextService,
       });
     });
 
