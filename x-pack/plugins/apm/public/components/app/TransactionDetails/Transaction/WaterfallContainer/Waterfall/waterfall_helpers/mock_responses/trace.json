@@ -1,0 +1,276 @@
+{
+  "hits": [
+    {
+      "@timestamp": "2018-09-12T14:48:56.371Z",
+      "beat": {
+        "name": "361022bff072",
+        "hostname": "361022bff072",
+        "version": "7.0.0-alpha1"
+      },
+      "host": {
+        "name": "361022bff072"
+      },
+      "processor": {
+        "name": "transaction",
+        "event": "span"
+      },
+      "span": {
+        "trace_id": "07d17fa20dcba4b19d5d409912026c98",
+        "name": "SELECT",
+        "type": "db.h2.sql",
+        "start": {
+          "us": 1229
+        },
+        "duration": {
+          "us": 210
+        },
+        "hex_id": "e26e5e65752afe09",
+        "parent_id": "45ff247daab5c13c"
+      },
+      "transaction": {
+        "id": "45ff247daab5c13c"
+      },
+      "context": {
+        "db": {
+          "type": "sql",
+          "user": "SA",
+          "statement": "select product0_.id as col_0_0_, product0_.sku as col_1_0_, product0_.name as col_2_0_, product0_.stock as col_3_0_, producttyp1_.name as col_4_0_ from products product0_ left outer join product_types producttyp1_ on product0_.type_id=producttyp1_.id"
+        },
+        "service": {
+          "agent": {
+            "name": "java",
+            "version": "0.7.0-SNAPSHOT"
+          },
+          "name": "opbeans-java"
+        }
+      }
+    },
+    {
+      "@timestamp": "2018-09-12T14:48:56.368Z",
+      "processor": {
+        "name": "transaction",
+        "event": "span"
+      },
+      "span": {
+        "name": "GET [0:0:0:0:0:0:0:1]",
+        "type": "ext.http.spring-resttemplate",
+        "start": {
+          "us": 2238
+        },
+        "duration": {
+          "us": 4694
+        },
+        "hex_id": "3c68670ae62c6b79",
+        "parent_id": "dd4977bf25bb1f52",
+        "trace_id": "07d17fa20dcba4b19d5d409912026c98"
+      },
+      "transaction": {
+        "id": "dd4977bf25bb1f52"
+      },
+      "context": {
+        "service": {
+          "name": "opbeans-java",
+          "agent": {
+            "name": "java",
+            "version": "0.7.0-SNAPSHOT"
+          }
+        }
+      },
+      "beat": {
+        "name": "361022bff072",
+        "hostname": "361022bff072",
+        "version": "7.0.0-alpha1"
+      },
+      "host": {
+        "name": "361022bff072"
+      }
+    },
+    {
+      "@timestamp": "2018-09-12T14:48:56.369Z",
+      "processor": {
+        "event": "transaction",
+        "name": "transaction"
+      },
+      "transaction": {
+        "sampled": true,
+        "duration": {
+          "us": 3581
+        },
+        "type": "request",
+        "result": "HTTP 2xx",
+        "parent_id": "3c68670ae62c6b79",
+        "id": "45ff247daab5c13c",
+        "name": "APIRestController#productsRemote",
+        "trace_id": "07d17fa20dcba4b19d5d409912026c98",
+        "span_count": {
+          "dropped": {
+            "total": 0
+          },
+          "started": 1
+        }
+      },
+      "context": {
+        "system": {
+          "ip": "172.18.0.1",
+          "hostname": "Mac OS X",
+          "architecture": "x86_64",
+          "platform": "Srens-MacBook-Pro.local"
+        },
+        "process": {
+          "title": "/Library/Java/JavaVirtualMachines/jdk-10.0.2.jdk/Contents/Home/bin/java",
+          "pid": 10069,
+          "ppid": 10060
+        },
+        "service": {
+          "agent": {
+            "version": "0.7.0-SNAPSHOT",
+            "name": "java"
+          },
+          "language": {
+            "name": "Java",
+            "version": "10.0.2"
+          },
+          "runtime": {
+            "name": "Java",
+            "version": "10.0.2"
+          },
+          "name": "opbeans-java"
+        },
+        "request": {
+          "method": "GET",
+          "headers": {
+            "elastic-apm-traceparent": "00-07d17fa20dcba4b19d5d409912026c98-3c68670ae62c6b79-03",
+            "user-agent": "Java/10.0.2",
+            "host": "[0:0:0:0:0:0:0:1]:8080",
+            "connection": "keep-alive",
+            "accept": "text/plain, application/json, application/*+json, */*"
+          },
+          "url": {
+            "port": "8080",
+            "pathname": "/api/products-remote",
+            "protocol": "http",
+            "full": "http://[0:0:0:0:0:0:0:1]:8080/api/products-remote",
+            "hostname": "[0:0:0:0:0:0:0:1]"
+          },
+          "socket": {
+            "remote_address": "0:0:0:0:0:0:0:1",
+            "encrypted": false
+          },
+          "http_version": "1.1"
+        },
+        "response": {
+          "headers": {
+            "Content-Type": "application/json;charset=UTF-8",
+            "Transfer-Encoding": "chunked",
+            "Date": "Wed, 12 Sep 2018 14:48:56 GMT"
+          },
+          "finished": true,
+          "headers_sent": true,
+          "status_code": 200
+        }
+      },
+      "beat": {
+        "hostname": "361022bff072",
+        "version": "7.0.0-alpha1",
+        "name": "361022bff072"
+      },
+      "host": {
+        "name": "361022bff072"
+      }
+    },
+    {
+      "@timestamp": "2018-09-12T14:48:56.366Z",
+      "beat": {
+        "hostname": "361022bff072",
+        "version": "7.0.0-alpha1",
+        "name": "361022bff072"
+      },
+      "processor": {
+        "name": "transaction",
+        "event": "transaction"
+      },
+      "transaction": {
+        "span_count": {
+          "dropped": {
+            "total": 0
+          },
+          "started": 1
+        },
+        "id": "dd4977bf25bb1f52",
+        "name": "APIRestController#products",
+        "duration": {
+          "us": 9480
+        },
+        "type": "request",
+        "result": "HTTP 2xx",
+        "trace_id": "07d17fa20dcba4b19d5d409912026c98",
+        "sampled": true
+      },
+      "context": {
+        "request": {
+          "headers": {
+            "accept": "*/*",
+            "referer": "http://localhost:8080/products",
+            "accept-encoding": "gzip, deflate",
+            "host": "localhost:8080",
+            "connection": "keep-alive",
+            "user-agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_6) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/70.0.3508.0 Safari/537.36"
+          },
+          "url": {
+            "protocol": "http",
+            "full": "http://localhost:8080/api/products",
+            "hostname": "localhost",
+            "port": "8080",
+            "pathname": "/api/products"
+          },
+          "socket": {
+            "remote_address": "0:0:0:0:0:0:0:1",
+            "encrypted": false
+          },
+          "http_version": "1.1",
+          "method": "GET"
+        },
+        "response": {
+          "headers_sent": true,
+          "status_code": 200,
+          "headers": {
+            "Content-Type": "application/json",
+            "Content-Length": "1023",
+            "Date": "Wed, 12 Sep 2018 14:48:56 GMT"
+          },
+          "finished": true
+        },
+        "system": {
+          "architecture": "x86_64",
+          "platform": "Srens-MacBook-Pro.local",
+          "ip": "172.18.0.1",
+          "hostname": "Mac OS X"
+        },
+        "process": {
+          "ppid": 10060,
+          "title": "/Library/Java/JavaVirtualMachines/jdk-10.0.2.jdk/Contents/Home/bin/java",
+          "pid": 10069
+        },
+        "service": {
+          "name": "opbeans-java",
+          "agent": {
+            "name": "java",
+            "version": "0.7.0-SNAPSHOT"
+          },
+          "language": {
+            "version": "10.0.2",
+            "name": "Java"
+          },
+          "runtime": {
+            "name": "Java",
+            "version": "10.0.2"
+          }
+        }
+      },
+      "host": {
+        "name": "361022bff072"
+      }
+    }
+  ],
+  "services": ["opbeans-java"]
+}

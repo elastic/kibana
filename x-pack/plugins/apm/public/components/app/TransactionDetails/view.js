@@ -7,13 +7,13 @@
 import React from 'react';
 import { EuiSpacer } from '@elastic/eui';
 import { HeaderLarge } from '../../shared/UIComponents';
-import Transaction from './Transaction';
 import Distribution from './Distribution';
 import { TransactionDetailsChartsRequest } from '../../../store/reactReduxRequest/transactionDetailsCharts';
-import Charts from '../../shared/charts/TransactionCharts';
 import { TransactionDistributionRequest } from '../../../store/reactReduxRequest/transactionDistribution';
-import { TransactionDetailsRequest } from '../../../store/reactReduxRequest/transactionDetails';
+import TransactionCharts from '../../shared/charts/TransactionCharts';
 import { KueryBar } from '../../shared/KueryBar';
+import Transaction from './Transaction';
+import { TransactionDetailsRequest } from '../../../store/reactReduxRequest/transactionDetails';
 
 function TransactionDetails({ urlParams, location }) {
   return (
@@ -27,7 +27,11 @@ function TransactionDetails({ urlParams, location }) {
       <TransactionDetailsChartsRequest
         urlParams={urlParams}
         render={({ data }) => (
-          <Charts charts={data} urlParams={urlParams} location={location} />
+          <TransactionCharts
+            charts={data}
+            urlParams={urlParams}
+            location={location}
+          />
         )}
       />
 
@@ -40,9 +44,15 @@ function TransactionDetails({ urlParams, location }) {
 
       <TransactionDetailsRequest
         urlParams={urlParams}
-        render={({ data }) => (
-          <Transaction transaction={data} urlParams={urlParams} />
-        )}
+        render={res => {
+          return (
+            <Transaction
+              location={location}
+              transaction={res.data}
+              urlParams={urlParams}
+            />
+          );
+        }}
       />
     </div>
   );
