@@ -6,7 +6,6 @@
 
 import React from 'react';
 import { FlyOut } from '../flyout/index';
-import * as ol from 'openlayers';
 
 export class KibanaMap extends React.Component {
 
@@ -15,22 +14,9 @@ export class KibanaMap extends React.Component {
   }
 
   componentDidMount() {
-    const { olMap, olLayers } = this.props;
-    olMap.setTarget(this.refs.mapContainer);
-    this._addLayers(olLayers);
-  }
-
-  componentWillReceiveProps(props) {
-    this._addLayers(props.olLayers);
-  }
-
-  _addLayers = (layers) => {
     const { olMap } = this.props;
-    olMap.setLayerGroup(new ol.layer.Group());
-    layers.forEach(layer=> {
-      olMap.addLayer(layer.olLayer);
-    });
-  };
+    olMap.setTarget(this.refs.mapContainer);
+  }
 
   render() {
     return (

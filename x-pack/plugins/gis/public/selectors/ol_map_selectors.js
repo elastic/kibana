@@ -50,21 +50,43 @@ const convertVectorLayersToOl = (() => {
   };
 })();
 
-function convertLayersByType(layerList) {
-  return layerList.map(layer => {
-    switch (layer.type) {
-      case LAYER_TYPE.TILE:
-        layer.olLayer = convertTmsLayersToOl(layer);
-        break;
-      case LAYER_TYPE.VECTOR:
-        layer.olLayer = convertVectorLayersToOl(layer);
-        break;
-      default:
-        break;
+function convertLayerByType(layer) {
+  switch (layer.type) {
+    case LAYER_TYPE.TILE:
+      layer.olLayer = convertTmsLayersToOl(layer);
+      break;
+    case LAYER_TYPE.VECTOR:
+      layer.olLayer = convertVectorLayersToOl(layer);
+      break;
+    default:
+      break;
+  }
+  layer.olLayer.set('id', layer.id);
+  return layer;
+}
+
+// OpenLayers helper function
+const getLayersIds = mapLayers => mapLayers
+  && mapLayers.getArray().map(layer => layer.get('id') || []);
+
+
+function updateMapLayerOrder(map, oldLayerOrder, newLayerOrder) {
+  const mapLayers = map.getLayers();
+  let layerToMove;
+  let newIdx;
+  newLayerOrder.some((newOrderId, idx) => {
+    if (oldLayerOrder[idx] !== newOrderId) {
+      layerToMove = mapLayers.removeAt(idx);
+      newIdx = newLayerOrder.findIndex(id => id === oldLayerOrder[idx]);
+      mapLayers.insertAt(newIdx, layerToMove);
+      updateMapLayerOrder(map, getLayersIds(mapLayers), newLayerOrder);
+      return true;
+    } else {
+      return false;
     }
-    return layer;
   });
 }
+
 
 // Selectors
 export const getOlMap = createSelector(
@@ -81,17 +103,57 @@ export const getOlMap = createSelector(
   }
 );
 
-export const getOlLayers = createSelector(
+const getCurrentLayerIdsInMap = createSelector(
+  getLayerList, // Just used to trigger update
+  createSelector(
+    getOlMap,
+    map => map && map.getLayers() || null
+  ),
+  (layerList, mapLayers) => getLayersIds(mapLayers)
+);
+
+export const getLayersWithOl = createSelector(
   getLayerList,
-  layerList => convertLayersByType(layerList)
+  getCurrentLayerIdsInMap,
+  (layerList, currentLayersInMap) => {
+    return layerList.map(layer => {
+      if (currentLayersInMap.find(id => id === layer.id)) {
+        return layer;
+      } else {
+        return convertLayerByType(layer);
+      }
+    });
+  }
+);
+
+export const getOlMapAndLayers = createSelector(
+  getOlMap,
+  getLayersWithOl,
+  getCurrentLayerIdsInMap,
+  (olMap, layersWithOl, currentLayerIdsInMap) => {
+    layersWithOl.forEach((layer) => {
+      const olLayerId = layer.id;
+      if (!currentLayerIdsInMap.find(id => id === olLayerId)) {
+        olMap.addLayer(layer.olLayer);
+      } else {
+        // Individual layer-specific updates
+        layer.olLayer.setVisible(layer.visible);
+      }
+    });
+    // Layer order updates
+    const oldLayerIdsOrder = getLayersIds(olMap.getLayers());
+    const newLayerIdsOrder = layersWithOl.map(({ id }) => id);
+    updateMapLayerOrder(olMap, oldLayerIdsOrder, newLayerIdsOrder);
+    return olMap;
+  }
 );
 
 export const getOlLayersBySource = createSelector(
-  getOlLayers,
+  getLayersWithOl,
   layers => _.groupBy(layers, ({ appData }) => appData.source)
 );
 
 export const getOlLayersByType = createSelector(
-  getOlLayers,
+  getLayersWithOl,
   layers => _.groupBy(layers, ({ appData }) => appData.layerType)
 );
