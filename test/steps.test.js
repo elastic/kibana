@@ -43,7 +43,7 @@ describe('run through steps', () => {
     nock('https://api.github.com')
       .get(`/search/issues`)
       .query({
-        q: 'repo:elastic/kibana mySha',
+        q: 'repo:elastic/kibana mySha base:master',
         access_token: 'myAccessToken'
       })
       .reply(200, {

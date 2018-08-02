@@ -76,7 +76,7 @@ async function addLabels(owner, repoName, pullNumber, labels) {
 async function getPullRequestByCommit(owner, repoName, commitSha) {
   try {
     const res = await axios(
-      `https://api.github.com/search/issues?q=repo:${owner}/${repoName}+${commitSha}&access_token=${accessToken}`
+      `https://api.github.com/search/issues?q=repo:${owner}/${repoName}+${commitSha}+base:master&access_token=${accessToken}`
     );
     return get(res.data.items[0], 'number');
   } catch (e) {
