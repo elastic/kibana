@@ -1,0 +1,553 @@
+{
+  "trace": {
+    "id": "1",
+    "duration": 181126,
+    "time": 1532957033847
+  },
+  "services": [
+    "client",
+    "flask-server",
+    "log-server",
+    "tornado-server",
+    "tchannel-server"
+  ],
+  "waterfallItems": [
+    {
+      "doc": {
+        "@timestamp": "2018-08-20T14:03:34.690Z",
+        "transaction": {
+          "duration": {
+            "us": 96652
+          },
+          "type": "request",
+          "result": "HTTP 2xx",
+          "sampled": true,
+          "id": "165c3eb5-c646-4bd7-970e-b2c5d8b236ec",
+          "name": "GET opbeans.views.orders"
+        },
+        "context": {
+          "process": {
+            "pid": 2733,
+            "ppid": 37,
+            "argv": [
+              "/usr/local/bin/gunicorn",
+              "-b",
+              "0.0.0.0:3000",
+              "opbeans.wsgi"
+            ]
+          },
+          "service": {
+            "name": "opbeans-python",
+            "agent": {
+              "name": "python",
+              "version": "2.2.1"
+            },
+            "language": {
+              "version": "3.6.6",
+              "name": "python"
+            },
+            "runtime": {
+              "name": "CPython",
+              "version": "3.6.6"
+            },
+            "framework": {
+              "version": "1.11.8",
+              "name": "django"
+            }
+          },
+          "request": {
+            "url": {
+              "protocol": "http:",
+              "hostname": "172.18.0.7",
+              "pathname": "/api/orders",
+              "port": "3000",
+              "full": "http://172.18.0.7:3000/api/orders"
+            },
+            "env": {
+              "REMOTE_ADDR": "172.18.0.7",
+              "SERVER_NAME": "0.0.0.0",
+              "SERVER_PORT": "3000"
+            },
+            "headers": {
+              "accept": "*/*",
+              "accept-encoding": "gzip, deflate",
+              "host": "172.18.0.7:3000",
+              "user-agent": "Python/3.6 aiohttp/2.3.6"
+            },
+            "method": "GET",
+            "socket": {
+              "remote_address": "172.18.0.7",
+              "encrypted": false
+            }
+          },
+          "response": {
+            "headers": {
+              "content-type": "application/json",
+              "x-frame-options": "SAMEORIGIN",
+              "content-length": "110822",
+              "vary": "Cookie"
+            },
+            "status_code": 200
+          },
+          "user": {
+            "is_authenticated": true,
+            "id": 13,
+            "username": "michelle74",
+            "email": "michelle74@barnes.net"
+          },
+          "tags": {
+            "request_id": "cd23f23c-8dc0-4e50-b51e-9d53e53628fc",
+            "customer_tier": "$$$"
+          },
+          "system": {
+            "ip": "172.18.0.7",
+            "hostname": "54734e822395",
+            "architecture": "x86_64",
+            "platform": "linux"
+          }
+        },
+        "beat": {
+          "name": "013a2292e047",
+          "hostname": "013a2292e047",
+          "version": "7.0.0-alpha1"
+        },
+        "host": {
+          "name": "013a2292e047"
+        },
+        "processor": {
+          "name": "transaction",
+          "event": "transaction"
+        }
+      },
+      "service": "client",
+      "id": "1",
+      "parent_id": null,
+      "name": "client-calls-server-via-get",
+      "duration": 181126,
+      "offset": 0,
+      "processor.event": "transaction"
+    },
+    {
+      "service": "flask-server",
+      "id": "2",
+      "parent_id": "1",
+      "name": "get",
+      "duration": 180527,
+      "offset": 527,
+      "processor.event": "transaction"
+    },
+    {
+      "doc": {
+        "@timestamp": "2018-08-19T16:54:54.879Z",
+        "processor": {
+          "name": "transaction",
+          "event": "span"
+        },
+        "span": {
+          "type": "custom",
+          "start": {
+            "us": 302
+          },
+          "duration": {
+            "us": 969752
+          },
+          "stacktrace": [
+            {
+              "filename": "worker.js",
+              "abs_path": "/app/worker.js",
+              "function": "performSubTask",
+              "library_frame": false,
+              "exclude_from_grouping": false,
+              "context": {
+                "pre": [
+                  "function performSubTask (name, cb) {",
+                  "  var span = apm.buildSpan()"
+                ],
+                "post": ["", "  setTimeout(function () {"]
+              },
+              "line": {
+                "number": 46,
+                "context": "  if (span) span.start(name)"
+              }
+            },
+            {
+              "function": "performSubTasks",
+              "library_frame": false,
+              "exclude_from_grouping": false,
+              "context": {
+                "pre": ["", "function performSubTasks (tasks, cb) {"],
+                "post": [
+                  "    if (tasks.length === 0) return cb()",
+                  "    setTimeout(function () {"
+                ]
+              },
+              "line": {
+                "context": "  performSubTask(tasks.shift(), function () {",
+                "number": 36
+              },
+              "filename": "worker.js",
+              "abs_path": "/app/worker.js"
+            },
+            {
+              "abs_path": "/app/worker.js",
+              "function": "processCompletedOrder",
+              "library_frame": false,
+              "exclude_from_grouping": false,
+              "context": {
+                "pre": [
+                  "function processCompletedOrder () {",
+                  "  apm.startTransaction('Process completed order', 'Worker')"
+                ],
+                "post": [
+                  "    apm.endTransaction()",
+                  "    queue(processCompletedOrder)"
+                ]
+              },
+              "line": {
+                "number": 21,
+                "context": "  performSubTasks(['Send receipt email', 'Update inventory'], function () {"
+              },
+              "filename": "worker.js"
+            },
+            {
+              "filename": "timers.js",
+              "abs_path": "timers.js",
+              "function": "ontimeout",
+              "library_frame": true,
+              "exclude_from_grouping": false,
+              "line": {
+                "number": 498
+              }
+            },
+            {
+              "function": "tryOnTimeout",
+              "library_frame": true,
+              "exclude_from_grouping": false,
+              "line": {
+                "number": 323
+              },
+              "filename": "timers.js",
+              "abs_path": "timers.js"
+            },
+            {
+              "library_frame": true,
+              "exclude_from_grouping": false,
+              "line": {
+                "number": 290
+              },
+              "filename": "timers.js",
+              "abs_path": "timers.js",
+              "function": "listOnTimeout"
+            }
+          ],
+          "name": "Send receipt email"
+        },
+        "transaction": {
+          "id": "a2a9a543-1f50-4786-b973-b2c5cca7d24d"
+        },
+        "context": {
+          "service": {
+            "name": "opbeans-node",
+            "agent": {
+              "name": "nodejs",
+              "version": "1.10.2"
+            }
+          }
+        },
+        "beat": {
+          "name": "60c9f8d998f4",
+          "hostname": "60c9f8d998f4",
+          "version": "7.0.0-alpha1"
+        },
+        "host": {
+          "name": "60c9f8d998f4"
+        }
+      },
+      "service": "flask-server",
+      "id": "3a",
+      "parent_id": "2",
+      "name": "trigger-log",
+      "duration": 13150,
+      "offset": 25000,
+      "type": "db.postgresql.sql",
+      "processor.event": "span"
+    },
+    {
+      "service": "flask-server",
+      "id": "4",
+      "parent_id": "2",
+      "name": "mysqldb:select",
+      "duration": 54152,
+      "offset": 25000,
+      "type": "db.postgresql.sql",
+      "processor.event": "span"
+    },
+    {
+      "service": "log-server",
+      "id": "3b",
+      "parent_id": "3a",
+      "name": "log",
+      "duration": 12450,
+      "offset": 26500,
+      "processor.event": "transaction"
+    },
+    {
+      "service": "log-server",
+      "id": "20",
+      "parent_id": "3b",
+      "name": "log-to-db",
+      "duration": 10450,
+      "offset": 28500,
+      "type": "db.postgresql.sql",
+      "processor.event": "span"
+    },
+    {
+      "service": "flask-server",
+      "id": "5",
+      "parent_id": "2",
+      "name": "mysqldb:connect",
+      "duration": 394,
+      "offset": 80000,
+      "type": "db.postgresql.sql",
+      "processor.event": "span"
+    },
+    {
+      "service": "flask-server",
+      "id": "6",
+      "parent_id": "2",
+      "name": "mysqldb:begin_transaction",
+      "duration": 46,
+      "offset": 81000,
+      "type": "db.postgresql.sql",
+      "processor.event": "span"
+    },
+    {
+      "service": "flask-server",
+      "id": "7",
+      "parent_id": "2",
+      "name": "mysqldb:select",
+      "duration": 40910,
+      "offset": 82000,
+      "type": "db.postgresql.sql",
+      "processor.event": "span"
+    },
+    {
+      "service": "flask-server",
+      "id": "8",
+      "parent_id": "2",
+      "name": "mysqldb:commit",
+      "duration": 1000,
+      "offset": 124000,
+      "type": "db.postgresql.sql",
+      "processor.event": "span"
+    },
+    {
+      "service": "flask-server",
+      "id": "9a",
+      "parent_id": "2",
+      "name": "get",
+      "duration": 42000,
+      "offset": 134000,
+      "type": "db.postgresql.sql",
+      "processor.event": "span"
+    },
+    {
+      "service": "tornado-server",
+      "id": "9b",
+      "parent_id": "9a",
+      "name": "get",
+      "duration": 41194,
+      "offset": 135000,
+      "processor.event": "transaction"
+    },
+    {
+      "service": "tornado-server",
+      "id": "21a",
+      "parent_id": "9b",
+      "name": "trigger-log",
+      "duration": 13500,
+      "offset": 139500,
+      "type": "db.postgresql.sql",
+      "processor.event": "span"
+    },
+    {
+      "service": "tornado-server",
+      "id": "10",
+      "parent_id": "9b",
+      "name": "get_root",
+      "duration": 32659,
+      "offset": 140000,
+      "type": "db.postgresql.sql",
+      "processor.event": "span"
+    },
+    {
+      "service": "log-server",
+      "id": "21b",
+      "parent_id": "21a",
+      "name": "log",
+      "duration": 12500,
+      "offset": 140500,
+      "processor.event": "transaction"
+    },
+    {
+      "service": "tornado-server",
+      "id": "25a",
+      "parent_id": "10",
+      "name": "get from flask-server",
+      "duration": 3400,
+      "offset": 140500,
+      "type": "db.postgresql.sql",
+      "processor.event": "span"
+    },
+    {
+      "service": "tornado-server",
+      "id": "11",
+      "parent_id": "10",
+      "name": "call-downstream",
+      "duration": 12489,
+      "offset": 140500,
+      "type": "db.postgresql.sql",
+      "processor.event": "span"
+    },
+    {
+      "service": "flask-server",
+      "id": "25b",
+      "parent_id": "25a",
+      "name": "get abc",
+      "duration": 3200,
+      "offset": 140700,
+      "processor.event": "transaction"
+    },
+    {
+      "service": "flask-server",
+      "id": "26",
+      "parent_id": "25b",
+      "name": "get-info",
+      "duration": 3100,
+      "offset": 140800,
+      "type": "db.postgresql.sql",
+      "processor.event": "span"
+    },
+    {
+      "service": "tornado-server",
+      "id": "12",
+      "parent_id": "11",
+      "name": "get",
+      "duration": 11492,
+      "offset": 141000,
+      "type": "db.postgresql.sql",
+      "processor.event": "span"
+    },
+    {
+      "service": "tornado-server",
+      "id": "14",
+      "parent_id": "10",
+      "name": "call-downstream",
+      "duration": 11494,
+      "offset": 142000,
+      "type": "db.postgresql.sql",
+      "processor.event": "span"
+    },
+    {
+      "service": "tornado-server",
+      "id": "15",
+      "parent_id": "14",
+      "name": "get",
+      "duration": 10511,
+      "offset": 142500,
+      "type": "db.postgresql.sql",
+      "processor.event": "span"
+    },
+    {
+      "service": "log-server",
+      "id": "22",
+      "parent_id": "21b",
+      "name": "log-to-db",
+      "duration": 10000,
+      "offset": 143000,
+      "type": "db.postgresql.sql",
+      "processor.event": "span"
+    },
+    {
+      "service": "tornado-server",
+      "id": "17",
+      "parent_id": "10",
+      "name": "call-tchannel",
+      "duration": 29816,
+      "offset": 143000,
+      "processor.event": "span"
+    },
+    {
+      "service": "tornado-server",
+      "id": "13",
+      "parent_id": "12",
+      "name": "tornado-x2",
+      "duration": 105,
+      "offset": 145000,
+      "processor.event": "span"
+    },
+    {
+      "service": "tornado-server",
+      "id": "16",
+      "parent_id": "15",
+      "name": "tornado-x3",
+      "duration": 85,
+      "offset": 148000,
+      "processor.event": "span"
+    },
+    {
+      "service": "tornado-server",
+      "id": "18",
+      "parent_id": "17",
+      "name": "call_in_request_context",
+      "duration": 12153,
+      "offset": 154000,
+      "processor.event": "span"
+    },
+    {
+      "service": "tornado-server",
+      "id": "19a",
+      "parent_id": "18",
+      "name": "endpoint",
+      "duration": 10000,
+      "offset": 154500,
+      "processor.event": "span"
+    },
+    {
+      "service": "tchannel-server",
+      "id": "19b",
+      "parent_id": "19a",
+      "name": "endpoint",
+      "duration": 9712,
+      "offset": 155000,
+      "processor.event": "transaction"
+    },
+    {
+      "service": "tchannel-server",
+      "id": "23a",
+      "parent_id": "19b",
+      "name": "trigger-log",
+      "duration": 13600,
+      "offset": 156500,
+      "processor.event": "span"
+    },
+    {
+      "service": "log-server",
+      "id": "23b",
+      "parent_id": "23a",
+      "name": "log",
+      "duration": 12700,
+      "offset": 157400,
+      "processor.event": "transaction"
+    },
+    {
+      "service": "log-server",
+      "id": "24",
+      "parent_id": "23b",
+      "name": "log-to-db",
+      "duration": 12600,
+      "offset": 157500,
+      "processor.event": "span"
+    }
+  ]
+}

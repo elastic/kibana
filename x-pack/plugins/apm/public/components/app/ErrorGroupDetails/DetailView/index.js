@@ -17,7 +17,7 @@ import {
 import { get, capitalize, isEmpty } from 'lodash';
 import { STATUS } from '../../../../constants';
 
-import { ContextProperties } from '../../../shared/ContextProperties';
+import { StickyProperties } from '../../../shared/StickyProperties';
 import { Tab, HeaderMedium } from '../../../shared/UIComponents';
 import DiscoverButton from '../../../shared/DiscoverButton';
 import {
@@ -91,6 +91,17 @@ function DetailView({ errorGroup, urlParams, location }) {
 
   const stickyProperties = [
     {
+      label: 'Timestamp',
+      fieldName: '@timestamp',
+      val: timestamp
+    },
+    {
+      fieldName: 'context.request.url.full',
+      label: 'URL',
+      val: url,
+      truncated: true
+    },
+    {
       label: 'Request method',
       fieldName: 'context.request.method',
       val: get(errorGroup.data, 'error.context.request.method', 'N/A')
@@ -154,11 +165,7 @@ function DetailView({ errorGroup, urlParams, location }) {
         </DiscoverButton>
       </HeaderContainer>
 
-      <ContextProperties
-        timestamp={timestamp}
-        url={url}
-        stickyProperties={stickyProperties}
-      />
+      <StickyProperties stickyProperties={stickyProperties} />
 
       <TabContainer>
         {tabs.map(key => {

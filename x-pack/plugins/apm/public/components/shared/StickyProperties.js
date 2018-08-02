@@ -32,10 +32,6 @@ const Property = styled.div`
   margin-bottom: ${px(unit)};
 `;
 
-const PropertyWide = Property.extend`
-  width: 66%;
-`;
-
 const PropertyLabel = styled.div`
   margin-bottom: ${px(units.half)};
   font-size: ${fontSizes.small};
@@ -46,22 +42,22 @@ const PropertyLabel = styled.div`
   }
 `;
 
+const PropertyValueDimmed = styled.span`
+  color: ${colors.gray3};
+`;
+
 const PropertyValue = styled.div`
   display: inline-block;
   line-height: ${px(unit)};
 `;
 
-const PropertyValueEmphasis = styled.span`
-  color: ${colors.gray3};
-`;
-
-const PropertyUrl = styled.span`
+const PropertyValueTruncated = styled.span`
   display: inline-block;
-  ${truncate('100%')};
   line-height: ${px(unit)};
+  ${truncate('100%')};
 `;
 
-export function ContextProperties({ timestamp, url, stickyProperties }) {
+function TimestampValue({ timestamp }) {
   const time = moment(timestamp);
   const timeAgo = timestamp ? time.fromNow() : 'N/A';
   const timestampFull = timestamp
@@ -69,41 +65,50 @@ export function ContextProperties({ timestamp, url, stickyProperties }) {
     : 'N/A';
 
   return (
-    <PropertiesContainer>
-      <Property>
-        <PropertyLabel>
-          <TooltipOverlay content={fieldNameHelper('@timestamp')}>
-            <span>Timestamp</span>
-          </TooltipOverlay>
-        </PropertyLabel>
-        <PropertyValue>
-          {timeAgo}{' '}
-          <PropertyValueEmphasis>({timestampFull})</PropertyValueEmphasis>
-        </PropertyValue>
-      </Property>
-      <PropertyWide>
-        <PropertyLabel>
-          <TooltipOverlay content={fieldNameHelper('context.request.url.full')}>
-            <span>URL</span>
-          </TooltipOverlay>
-        </PropertyLabel>
-        <TooltipOverlay content={url}>
-          <PropertyUrl>{url}</PropertyUrl>
+    <PropertyValue>
+      {timeAgo} <PropertyValueDimmed>({timestampFull})</PropertyValueDimmed>
+    </PropertyValue>
+  );
+}
+
+function getPropertyLabel({ fieldName, label }) {
+  if (fieldName) {
+    return (
+      <PropertyLabel>
+        <TooltipOverlay content={fieldNameHelper(fieldName)}>
+          <span>{label}</span>
         </TooltipOverlay>
-      </PropertyWide>
+      </PropertyLabel>
+    );
+  }
+
+  return <PropertyLabel>{label}</PropertyLabel>;
+}
+
+function getPropertyValue({ val, fieldName, truncated = false }) {
+  if (fieldName === '@timestamp') {
+    return <TimestampValue timestamp={val} />;
+  }
+
+  if (truncated) {
+    return (
+      <TooltipOverlay content={String(val)}>
+        <PropertyValueTruncated>{String(val)}</PropertyValueTruncated>
+      </TooltipOverlay>
+    );
+  }
+
+  return <PropertyValue>{String(val)}</PropertyValue>;
+}
+
+export function StickyProperties({ stickyProperties }) {
+  return (
+    <PropertiesContainer>
       {stickyProperties &&
-        stickyProperties.map(({ label, val, fieldName }, i) => (
+        stickyProperties.map((prop, i) => (
           <Property key={i}>
-            {fieldName ? (
-              <PropertyLabel>
-                <TooltipOverlay content={fieldNameHelper(fieldName)}>
-                  <span>{label}</span>
-                </TooltipOverlay>
-              </PropertyLabel>
-            ) : (
-              <PropertyLabel>{label}</PropertyLabel>
-            )}
-            <PropertyValue>{String(val)}</PropertyValue>
+            {getPropertyLabel(prop)}
+            {getPropertyValue(prop)}
           </Property>
         ))}
     </PropertiesContainer>

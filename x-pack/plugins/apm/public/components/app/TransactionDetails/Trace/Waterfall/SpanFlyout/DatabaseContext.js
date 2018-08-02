@@ -1,0 +1,67 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License;
+ * you may not use this file except in compliance with the Elastic License.
+ */
+
+import React from 'react';
+import styled from 'styled-components';
+import {
+  unit,
+  units,
+  px,
+  colors,
+  borderRadius,
+  fontFamilyCode
+} from '../../../../../../style/variables';
+
+import SyntaxHighlighter, {
+  registerLanguage
+} from 'react-syntax-highlighter/dist/light';
+import { xcode } from 'react-syntax-highlighter/dist/styles';
+
+import sql from 'react-syntax-highlighter/dist/languages/sql';
+import { HeaderXSmall } from '../../../../../shared/UIComponents';
+
+registerLanguage('sql', sql);
+
+const DatabaseStatement = styled.div`
+  margin-top: ${px(unit)};
+  padding: ${px(units.half)} ${px(unit)};
+  background: ${colors.yellow};
+  border-radius: ${borderRadius};
+  border: 1px solid ${colors.gray4};
+  font-family: ${fontFamilyCode};
+`;
+
+export default function DatabaseContext({ dbContext }) {
+  if (!dbContext || !dbContext.statement) {
+    return null;
+  }
+
+  if (dbContext.type !== 'sql') {
+    return <DatabaseStatement>{dbContext.statement}</DatabaseStatement>;
+  }
+
+  return (
+    <div>
+      <HeaderXSmall>DB Statement</HeaderXSmall>
+      <DatabaseStatement>
+        <SyntaxHighlighter
+          language={'sql'}
+          style={xcode}
+          customStyle={{
+            color: null,
+            background: null,
+            padding: null,
+            lineHeight: px(unit * 1.5),
+            whiteSpace: 'pre-wrap',
+            overflowX: 'scroll'
+          }}
+        >
+          {dbContext.statement}
+        </SyntaxHighlighter>
+      </DatabaseStatement>
+    </div>
+  );
+}
