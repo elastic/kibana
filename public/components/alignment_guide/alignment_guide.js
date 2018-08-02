@@ -12,7 +12,12 @@ export const AlignmentGuide = ({ transformMatrix, a, b }) => {
     position: 'absolute',
     transform: aero.dom.matrixToCSS(transformMatrix),
   };
-  return <div className="canvasAlignmentGuide canvasInteractable" style={newStyle} />;
+  return (
+    <div
+      className="canvasAlignmentGuide canvasInteractable canvasLayoutAnnotation"
+      style={newStyle}
+    />
+  );
 };
 
 AlignmentGuide.propTypes = {

@@ -11,7 +11,7 @@ export const BorderConnection = ({ transformMatrix, a, b }) => {
     position: 'absolute',
     transform: aero.dom.matrixToCSS(transformMatrix),
   };
-  return <div className="canvasBorder--connection" style={newStyle} />;
+  return <div className="canvasBorder--connection canvasLayoutAnnotation" style={newStyle} />;
 };
 
 BorderConnection.propTypes = {

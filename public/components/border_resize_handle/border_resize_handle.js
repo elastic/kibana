@@ -4,7 +4,7 @@ import aero from '../../lib/aeroelastic';
 
 export const BorderResizeHandle = ({ transformMatrix }) => (
   <div
-    className="canvasBorderResizeHandle"
+    className="canvasBorderResizeHandle canvasLayoutAnnotation"
     style={{ transform: aero.dom.matrixToCSS(transformMatrix) }}
   />
 );
