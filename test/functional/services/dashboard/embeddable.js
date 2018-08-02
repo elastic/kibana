@@ -32,8 +32,9 @@ export function EmbeddableProvider({ getService }) {
      * by a couple tags. The RENDER_COMPLETE_SELECTOR indicates that it's done initially loading up. Some
      * visualizations also add a DATA_LOADING_SELECTOR when the internal data is loading. This test will not
      * return if any of those tags are found.
+     * @param count {Number} Defaults to 2 because for some reason there are two tags on the visualize app.
      */
-    async waitForRender(count) {
+    async waitForRender(count = 2) {
       log.debug(`Visualization.waitForRender for ${count} elements`);
       await retry.try(async () => {
         const completedElements = await find.allByCssSelector(RENDER_COMPLETE_SELECTOR);

@@ -238,7 +238,7 @@ export default function ({ getService, getPageObjects }) {
 
         // We are on the visualize page, not dashboard, so can't use "PageObjects.dashboard.waitForRenderComplete();"
         // as that expects an item with the `data-shared-items-count` tag.
-        await embeddable.waitForRender(2);
+        await embeddable.waitForRender();
         await dashboardExpect.pieSliceCount(3);
 
         await PageObjects.visualize.saveVisualization('Rendering Test: animal sounds pie');
@@ -251,7 +251,7 @@ export default function ({ getService, getPageObjects }) {
       it('Nested visualization filter pills filters data as expected', async () => {
         await dashboardPanelActions.clickEdit();
         await PageObjects.header.waitUntilLoadingHasFinished();
-        await embeddable.waitForRender(2);
+        await embeddable.waitForRender();
         await PageObjects.dashboard.filterOnPieSlice('grr');
         await PageObjects.header.waitUntilLoadingHasFinished();
         await dashboardExpect.pieSliceCount(1);
