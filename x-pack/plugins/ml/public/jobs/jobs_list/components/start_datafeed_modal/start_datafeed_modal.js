@@ -34,17 +34,19 @@ export class StartDatafeedModal extends Component {
   constructor(props) {
     super(props);
 
+    const now = moment();
     this.state = {
       jobs: this.props.jobs,
       isModalVisible: false,
-      startTime: moment(),
-      endTime: moment(),
+      startTime: now,
+      endTime: now,
       createWatch: false,
       allowCreateWatch: false,
-      initialSpecifiedStartTime: moment()
+      initialSpecifiedStartTime: now,
+      now,
     };
 
-    this.initialSpecifiedStartTime = moment();
+    this.initialSpecifiedStartTime = now;
     this.refreshJobs = this.props.refreshJobs;
     this.getShowCreateWatchFlyoutFunction = this.props.getShowCreateWatchFlyoutFunction;
   }
@@ -79,7 +81,8 @@ export class StartDatafeedModal extends Component {
 
   showModal = (jobs, showCreateWatchFlyout) => {
     const startTime = undefined;
-    const endTime = moment();
+    const now = moment();
+    const endTime = now;
     const initialSpecifiedStartTime = getLowestLatestTime(jobs);
     const allowCreateWatch = (jobs.length === 1);
     this.setState({
@@ -91,6 +94,7 @@ export class StartDatafeedModal extends Component {
       showCreateWatchFlyout,
       allowCreateWatch,
       createWatch: false,
+      now,
     });
   }
 
@@ -98,6 +102,7 @@ export class StartDatafeedModal extends Component {
     const { jobs } = this.state;
     const start = moment.isMoment(this.state.startTime) ? this.state.startTime.valueOf() : this.state.startTime;
     const end = moment.isMoment(this.state.endTime) ? this.state.endTime.valueOf() : this.state.endTime;
+
     forceStartDatafeeds(jobs, start, end, () => {
       if (this.state.createWatch && jobs.length === 1) {
         const jobId = jobs[0].id;
@@ -112,10 +117,14 @@ export class StartDatafeedModal extends Component {
     const {
       jobs,
       initialSpecifiedStartTime,
+      startTime,
       endTime,
-      createWatch
+      createWatch,
+      now,
     } = this.state;
     const startableJobs = (jobs !== undefined) ? jobs.filter(j => j.hasDatafeed) : [];
+    // disable start button if the start and end times are the same
+    const startDisabled = (startTime !== undefined && (startTime === endTime));
     let modal;
 
     if (this.state.isModalVisible) {
@@ -133,10 +142,11 @@ export class StartDatafeedModal extends Component {
 
             <EuiModalBody>
               <TimeRangeSelector
-                startTime={initialSpecifiedStartTime}
+                startTime={(startTime === undefined) ? initialSpecifiedStartTime : startTime}
                 endTime={endTime}
                 setStartTime={this.setStartTime}
                 setEndTime={this.setEndTime}
+                now={now}
               />
               {
                 this.state.endTime === undefined &&
@@ -161,6 +171,7 @@ export class StartDatafeedModal extends Component {
 
               <EuiButton
                 onClick={this.save}
+                isDisabled={startDisabled}
                 fill
               >
                 Start

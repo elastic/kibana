@@ -41,7 +41,7 @@ export function CallResponseHandlersProvider(Private, Promise) {
 
       if (response._shards && response._shards.failed) {
         toastNotifications.addWarning({
-          title: '${response._shards.failed} of ${response._shards.total} shards failed',
+          title: `${response._shards.failed} of ${response._shards.total} shards failed`,
         });
       }
 

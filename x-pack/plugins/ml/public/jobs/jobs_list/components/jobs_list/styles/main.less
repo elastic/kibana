@@ -17,7 +17,7 @@
       width: auto;
     }
     th:nth-child(6) {
-      width: 90px;
+      width: 100px;
     }
     th:nth-child(7) {
       width: 85px;
@@ -77,13 +77,7 @@
 
     .results-button {
       margin-right: 10px;
-    }
-
-    .euiTableRow-isSelected {
-      .results-button {
-        color: silver;
-        pointer-events: none;
-      }
+      width: 18px;
     }
 
     .euiContextMenuItem .euiIcon {
@@ -106,5 +100,12 @@
 
   .job-loading-spinner {
     text-align: center;
+  }
+}
+
+.jobs-list-table.jobs-selected {
+  .results-button {
+    color: silver;
+    pointer-events: none;
   }
 }

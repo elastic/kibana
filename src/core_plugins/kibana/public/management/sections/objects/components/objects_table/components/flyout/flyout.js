@@ -410,8 +410,23 @@ export class Flyout extends Component {
     }
 
     if (wasImportSuccessful) {
+      if (importCount === 0) {
+        return (
+          <EuiCallOut
+            data-test-subj="importSavedObjectsSuccessNoneImported"
+            title="No objects imported"
+            color="primary"
+          />
+        );
+      }
+
       return (
-        <EuiCallOut title="Import successful" color="success" iconType="check">
+        <EuiCallOut
+          data-test-subj="importSavedObjectsSuccess"
+          title="Import successful"
+          color="success"
+          iconType="check"
+        >
           <p>Successfully imported {importCount} objects.</p>
         </EuiCallOut>
       );

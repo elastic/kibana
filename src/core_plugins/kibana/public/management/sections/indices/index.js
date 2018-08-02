@@ -25,6 +25,7 @@ import { uiModules } from 'ui/modules';
 import indexTemplate from './index.html';
 import { SavedObjectsClientProvider } from 'ui/saved_objects';
 import { FeatureCatalogueRegistryProvider, FeatureCatalogueCategory } from 'ui/registry/feature_catalogue';
+import { i18n } from '@kbn/i18n';
 
 const indexPatternsResolutions = {
   indexPatterns: function (Private) {
@@ -78,7 +79,7 @@ uiModules.get('apps/management')
   });
 
 management.getSection('kibana').register('indices', {
-  display: 'Index Patterns',
+  display: i18n.translate('kbn.management.indexPattern.sectionsHeader', { defaultMessage: 'Index Patterns' }),
   order: 0,
   url: '#/management/kibana/indices/'
 });
@@ -86,8 +87,9 @@ management.getSection('kibana').register('indices', {
 FeatureCatalogueRegistryProvider.register(() => {
   return {
     id: 'index_patterns',
-    title: 'Index Patterns',
-    description: 'Manage the index patterns that help retrieve your data from Elasticsearch.',
+    title: i18n.translate('kbn.management.indexPatternHeader', { defaultMessage: 'Index Patterns' }),
+    description: i18n.translate('kbn.management.indexPatternLabel',
+      { defaultMessage: 'Manage the index patterns that help retrieve your data from Elasticsearch.' }),
     icon: 'indexPatternApp',
     path: '/app/kibana#/management/kibana/indices',
     showOnHomePage: true,

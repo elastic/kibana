@@ -76,8 +76,8 @@ export class Build {
       this.onSuccess(this);
     } catch(e) {
       this.onError(this, e);
-    } finally {
-      return this;
     }
+
+    return this;
   }
 }
