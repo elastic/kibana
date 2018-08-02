@@ -100,21 +100,13 @@ const getOlMap = createSelector(
   }
 );
 
-const getCurrentLayerIdsInMap = createSelector(
-  getLayerList, // Just used to trigger update
-  createSelector(
-    getOlMap,
-    map => map && map.getLayers() || null
-  ),
-  (layerList, mapLayers) => getLayersIds(mapLayers)
-);
-
 const getLayersWithOl = createSelector(
+  getOlMap,
   getLayerList,
-  getCurrentLayerIdsInMap,
-  (layerList, currentLayersInMap) => {
+  (olMap, layerList) => {
+    const layersIds = getLayersIds(olMap.getLayers());
     return layerList.map(layer => {
-      if (currentLayersInMap.find(id => id === layer.id)) {
+      if (layersIds.find(id => id === layer.id)) {
         return layer;
       } else {
         return convertLayerByType(layer);
@@ -126,11 +118,11 @@ const getLayersWithOl = createSelector(
 export const getOlMapAndLayers = createSelector(
   getOlMap,
   getLayersWithOl,
-  getCurrentLayerIdsInMap,
-  (olMap, layersWithOl, currentLayerIdsInMap) => {
+  (olMap, layersWithOl) => {
+    const layersIds = getLayersIds(olMap.getLayers());
     layersWithOl.forEach((layer) => {
       const olLayerId = layer.id;
-      if (!currentLayerIdsInMap.find(id => id === olLayerId)) {
+      if (!layersIds.find(id => id === olLayerId)) {
         olMap.addLayer(layer.olLayer);
       } else {
         // Individual layer-specific updates
