@@ -11,7 +11,6 @@ import {
   EuiContextMenuItem,
   EuiFieldSearch,
   EuiButton,
-  EuiSpacer,
   EuiText,
 } from '@elastic/eui';
 import { SpaceAvatar } from '../../components/space_avatar';
@@ -41,9 +40,7 @@ export class SpacesMenu extends Component {
       return (
         <EuiContextMenuPanel {...panelProps}>
           {this.renderSearchField()}
-          <EuiSpacer />
           {this.renderSpacesListPanel(items, searchTerm)}
-          <EuiSpacer />
           {this.renderManageButton()}
         </EuiContextMenuPanel>
       );
@@ -99,15 +96,16 @@ export class SpacesMenu extends Component {
 
   renderSearchField = () => {
     return (
-      <EuiFieldSearch
-        className="spacesMenu__searchField"
-        placeholder="Find a space"
-        incremental={true}
-        onSearch={this.onSearch}
-        onKeyDown={this.onSearchKeyDown}
-        onFocus={this.onSearchFocus}
-        compressed
-      />
+      <div className="spacesMenu__searchFieldWrapper">
+        <EuiFieldSearch
+          placeholder="Find a space"
+          incremental={true}
+          onSearch={this.onSearch}
+          onKeyDown={this.onSearchKeyDown}
+          onFocus={this.onSearchFocus}
+          compressed
+        />
+      </div>
     );
   }
 
@@ -135,7 +133,9 @@ export class SpacesMenu extends Component {
 
   renderManageButton = () => {
     return (
-      <EuiButton key="manageSpacesButton" size="s" style={{ width: `100%` }}>Manage spaces</EuiButton>
+      <div className="spacesMenu__manageButtonWrapper">
+        <EuiButton key="manageSpacesButton" size="s" style={{ width: `100%` }}>Manage spaces</EuiButton>
+      </div>
     );
   }
 
