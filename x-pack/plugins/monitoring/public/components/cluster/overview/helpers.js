@@ -53,6 +53,7 @@ export function ClusterItemContainer(props) {
     kibana: 'logoKibana',
     logstash: 'logoLogstash',
     beats: 'logoBeats',
+    apm: 'logoApm'
   };
   const icon = iconMap[props.url];
 

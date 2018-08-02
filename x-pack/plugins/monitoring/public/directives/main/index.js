@@ -22,6 +22,7 @@ export class MonitoringMainController {
     this.inKibana = false;
     this.inLogstash = false;
     this.inBeats = false;
+    this.inApm = false;
   }
 
   // kick things off from the directive link function
@@ -38,6 +39,7 @@ export class MonitoringMainController {
       this.inKibana = this.product === 'kibana';
       this.inLogstash = this.product === 'logstash';
       this.inBeats = this.product === 'beats';
+      this.inApm = this.product === 'apm';
     } else {
       this.inOverview = this.name === 'overview';
       this.inAlerts = this.name === 'alerts';

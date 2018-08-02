@@ -27,3 +27,6 @@ import './kibana/summary';
 import './beats/overview';
 import './beats/listing';
 import './beats/beat';
+import './apm/cluster_status';
+import './apm/listing';
+import './apm/summary';

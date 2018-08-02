@@ -20,6 +20,7 @@ export function getClustersSummary(clusters, kibanaUuid) {
       kibana,
       ml,
       beats,
+      apm,
       alerts
     } = cluster;
 
@@ -66,6 +67,7 @@ export function getClustersSummary(clusters, kibanaUuid) {
       kibana: omit(kibana, 'uuids'),
       ml,
       beats,
+      apm,
       alerts,
       isPrimary: kibana.uuids.includes(kibanaUuid),
       status: calculateOverallStatus([

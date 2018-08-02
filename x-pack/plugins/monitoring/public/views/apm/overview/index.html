@@ -1,0 +1,14 @@
+<monitoring-main
+  product="apm"
+  name="overview"
+  data-test-subj="apmOverviewPage"
+>
+  <monitoring-cluster-status-apm status="pageData.clusterStatus"></monitoring-cluster-status-apm>
+  <div class="page-row">
+    <div class="row" ng-if="pageData.metrics">
+      <div class="col-md-6">
+        <monitoring-chart series="pageData.metrics.apm_requests"></monitoring-chart>
+      </div>
+    </div>
+  </div>
+</monitoring-main>
