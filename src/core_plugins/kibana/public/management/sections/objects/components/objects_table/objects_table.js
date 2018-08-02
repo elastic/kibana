@@ -133,7 +133,8 @@ export class ObjectsTable extends Component {
       exportAllSelectedOptions[id] = true;
     });
 
-    // These are all the saved objects that exist.
+    // Fetch all the saved objects that exist so we can accurately populate the counts within
+    // the table filter dropdown.
     const savedObjectCounts = await getSavedObjectCounts(
       this.props.$http,
       INCLUDED_TYPES,
