@@ -46,7 +46,7 @@ export default function ({ getService, getPageObjects }) {
 
       it('should allow opening table vis in embedded mode', async () => {
         await embedding.openInEmbeddedMode();
-        await embeddable.waitForRender();
+        await embeddable.waitForRender(1);
 
         const data = await PageObjects.visualize.getTableVisData();
         log.debug(data.split('\n'));
