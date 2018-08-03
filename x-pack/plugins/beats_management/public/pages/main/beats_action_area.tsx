@@ -41,6 +41,19 @@ export class BeatsActionArea extends React.Component<any, any> {
       }
     }
   }
+  public async componentDidMount() {
+    if(this.props.match.params.enrollmentToken) {
+      this.waitForToken(this.props.match.params.enrollmentToken)
+    }
+  }
+  public waitForToken = async (token: string) => {
+    this.pinging = true;
+    const enrolledBeat = await this.pingForBeatWithToken(this.props.libs, token) as CMBeat;
+    this.setState({
+      enrolledBeat
+    })
+    this.pinging = false
+  }
   public render() {
     const {
       match,
@@ -63,12 +76,7 @@ export class BeatsActionArea extends React.Component<any, any> {
       onClick={async () => {
         const token = await libs.tokens.createEnrollmentToken();
         history.push(`/beats/enroll/${token}`);
-        this.pinging = true;
-        const enrolledBeat = await this.pingForBeatWithToken(libs, token) as CMBeat;
-        this.setState({
-          enrolledBeat
-        })
-        this.pinging = false
+        this.waitForToken(token);
       }}
     >
       Enroll Beats
@@ -140,13 +148,7 @@ export class BeatsActionArea extends React.Component<any, any> {
                   })
                   const token = await libs.tokens.createEnrollmentToken();
                   history.push(`/beats/enroll/${token}`);
-                  this.pinging = true;
-                  const enrolledBeat = await this.pingForBeatWithToken(libs, token) as CMBeat;
-
-                  this.setState({
-                    enrolledBeat
-                  })
-                  this.pinging = false
+                  this.waitForToken(token);
                 }}
               >
                Enroll Another Beat
