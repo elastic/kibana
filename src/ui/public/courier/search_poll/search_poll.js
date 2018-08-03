@@ -23,6 +23,7 @@ import { fatalError } from '../../notify';
 import '../../promises';
 import { searchRequestQueue } from '../search_request_queue';
 import { FetchSoonProvider } from '../fetch';
+import { timefilter } from 'ui/timefilter';
 
 export function SearchPollProvider(Private, Promise) {
   const fetchSoon = Private(FetchSoonProvider);
@@ -81,6 +82,7 @@ export function SearchPollProvider(Private, Promise) {
       // We use resolve() here instead of try() because the latter won't trigger a $digest
       // when the promise resolves.
       this._searchPromise = Promise.resolve().then(() => {
+        timefilter.emit('autoRefreshFetch');
         const requests = searchRequestQueue.getInactive();
 
         // The promise returned from fetchSearchRequests() only resolves when the requests complete.

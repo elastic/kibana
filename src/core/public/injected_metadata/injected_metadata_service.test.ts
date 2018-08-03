@@ -19,23 +19,27 @@
 
 import { InjectedMetadataService } from './injected_metadata_service';
 
-describe('#start()', () => {
-  it('deeply freezes its injectedMetadata param', () => {
-    const params = {
-      injectedMetadata: { foo: true } as any,
-    };
+describe('#getKibanaVersion', () => {
+  it('returns version from injectedMetadata', () => {
+    const injectedMetadata = new InjectedMetadataService({
+      injectedMetadata: {
+        version: 'foo',
+      },
+    } as any);
 
-    const injectedMetadata = new InjectedMetadataService(params);
+    expect(injectedMetadata.getKibanaVersion()).toBe('foo');
+  });
+});
 
-    expect(() => {
-      params.injectedMetadata.foo = false;
-    }).not.toThrowError();
+describe('#getKibanaBuildNumber', () => {
+  it('returns buildNumber from injectedMetadata', () => {
+    const injectedMetadata = new InjectedMetadataService({
+      injectedMetadata: {
+        buildNumber: 'foo',
+      },
+    } as any);
 
-    injectedMetadata.start();
-
-    expect(() => {
-      params.injectedMetadata.foo = true;
-    }).toThrowError(`read only property 'foo'`);
+    expect(injectedMetadata.getKibanaBuildNumber()).toBe('foo');
   });
 });
 
@@ -44,10 +48,29 @@ describe('start.getLegacyMetadata()', () => {
     const injectedMetadata = new InjectedMetadataService({
       injectedMetadata: {
         legacyMetadata: 'foo',
-      } as any,
-    });
+      },
+    } as any);
 
     const contract = injectedMetadata.start();
     expect(contract.getLegacyMetadata()).toBe('foo');
+  });
+
+  it('exposes frozen version of legacyMetadata', () => {
+    const injectedMetadata = new InjectedMetadataService({
+      injectedMetadata: {
+        legacyMetadata: {
+          foo: true,
+        },
+      },
+    } as any);
+
+    const legacyMetadata = injectedMetadata.start().getLegacyMetadata();
+    expect(legacyMetadata).toEqual({
+      foo: true,
+    });
+    expect(() => {
+      // @ts-ignore TS knows this shouldn't be possible
+      legacyMetadata.foo = false;
+    }).toThrowError();
   });
 });

@@ -64,7 +64,11 @@ exports[`StaticLookupFormatEditor should render multiple lookup entries and unkn
     size="s"
     type="button"
   >
-    Add entry
+    <FormattedMessage
+      defaultMessage="Add entry"
+      id="common.ui.fieldEditor.staticLookup.addEntryButton"
+      values={Object {}}
+    />
   </EuiButton>
   <EuiSpacer
     size="l"
@@ -148,7 +152,11 @@ exports[`StaticLookupFormatEditor should render normally 1`] = `
     size="s"
     type="button"
   >
-    Add entry
+    <FormattedMessage
+      defaultMessage="Add entry"
+      id="common.ui.fieldEditor.staticLookup.addEntryButton"
+      values={Object {}}
+    />
   </EuiButton>
   <EuiSpacer
     size="l"

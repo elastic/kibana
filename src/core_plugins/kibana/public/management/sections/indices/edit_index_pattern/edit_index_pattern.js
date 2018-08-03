@@ -32,6 +32,8 @@ import { render, unmountComponentAtNode } from 'react-dom';
 import { SourceFiltersTable } from './source_filters_table';
 import { IndexedFieldsTable } from './indexed_fields_table';
 import { ScriptedFieldsTable } from './scripted_fields_table';
+import { I18nProvider } from '@kbn/i18n/react';
+import { i18n } from '@kbn/i18n';
 
 const REACT_SOURCE_FILTERS_DOM_ELEMENT_ID = 'reactSourceFiltersTable';
 const REACT_INDEXED_FIELDS_DOM_ELEMENT_ID = 'reactIndexedFieldsTable';
@@ -46,16 +48,18 @@ function updateSourceFiltersTable($scope, $state) {
       }
 
       render(
-        <SourceFiltersTable
-          indexPattern={$scope.indexPattern}
-          filterFilter={$scope.fieldFilter}
-          fieldWildcardMatcher={$scope.fieldWildcardMatcher}
-          onAddOrRemoveFilter={() => {
-            $scope.editSections = $scope.editSectionsProvider($scope.indexPattern);
-            $scope.refreshFilters();
-            $scope.$apply();
-          }}
-        />,
+        <I18nProvider>
+          <SourceFiltersTable
+            indexPattern={$scope.indexPattern}
+            filterFilter={$scope.fieldFilter}
+            fieldWildcardMatcher={$scope.fieldWildcardMatcher}
+            onAddOrRemoveFilter={() => {
+              $scope.editSections = $scope.editSectionsProvider($scope.indexPattern);
+              $scope.refreshFilters();
+              $scope.$apply();
+            }}
+          />
+        </I18nProvider>,
         node,
       );
     });
@@ -79,22 +83,24 @@ function updateScriptedFieldsTable($scope, $state) {
       }
 
       render(
-        <ScriptedFieldsTable
-          indexPattern={$scope.indexPattern}
-          fieldFilter={$scope.fieldFilter}
-          scriptedFieldLanguageFilter={$scope.scriptedFieldLanguageFilter}
-          helpers={{
-            redirectToRoute: (obj, route) => {
-              $scope.kbnUrl.redirectToRoute(obj, route);
-              $scope.$apply();
-            },
-            getRouteHref: (obj, route) => $scope.kbnUrl.getRouteHref(obj, route),
-          }}
-          onRemoveField={() => {
-            $scope.editSections = $scope.editSectionsProvider($scope.indexPattern);
-            $scope.refreshFilters();
-          }}
-        />,
+        <I18nProvider>
+          <ScriptedFieldsTable
+            indexPattern={$scope.indexPattern}
+            fieldFilter={$scope.fieldFilter}
+            scriptedFieldLanguageFilter={$scope.scriptedFieldLanguageFilter}
+            helpers={{
+              redirectToRoute: (obj, route) => {
+                $scope.kbnUrl.redirectToRoute(obj, route);
+                $scope.$apply();
+              },
+              getRouteHref: (obj, route) => $scope.kbnUrl.getRouteHref(obj, route),
+            }}
+            onRemoveField={() => {
+              $scope.editSections = $scope.editSectionsProvider($scope.indexPattern);
+              $scope.refreshFilters();
+            }}
+          />
+        </I18nProvider>,
         node,
       );
     });
@@ -117,19 +123,21 @@ function updateIndexedFieldsTable($scope, $state) {
       }
 
       render(
-        <IndexedFieldsTable
-          fields={$scope.fields}
-          indexPattern={$scope.indexPattern}
-          fieldFilter={$scope.fieldFilter}
-          fieldWildcardMatcher={$scope.fieldWildcardMatcher}
-          indexedFieldTypeFilter={$scope.indexedFieldTypeFilter}
-          helpers={{
-            redirectToRoute: (obj, route) => {
-              $scope.kbnUrl.redirectToRoute(obj, route);
-              $scope.$apply();
-            },
-          }}
-        />,
+        <I18nProvider>
+          <IndexedFieldsTable
+            fields={$scope.fields}
+            indexPattern={$scope.indexPattern}
+            fieldFilter={$scope.fieldFilter}
+            fieldWildcardMatcher={$scope.fieldWildcardMatcher}
+            indexedFieldTypeFilter={$scope.indexedFieldTypeFilter}
+            helpers={{
+              redirectToRoute: (obj, route) => {
+                $scope.kbnUrl.redirectToRoute(obj, route);
+                $scope.$apply();
+              },
+            }}
+          />
+        </I18nProvider>,
         node,
       );
     });
@@ -233,16 +241,19 @@ uiModules.get('apps/management')
     });
 
     $scope.refreshFields = function () {
+      const confirmMessage = i18n.translate('kbn.management.editIndexPattern.refreshLabel', {
+        defaultMessage: 'This action resets the popularity counter of each field.'
+      });
       const confirmModalOptions = {
-        confirmButtonText: 'Refresh',
+        confirmButtonText: i18n.translate('kbn.management.editIndexPattern.refreshButton', { defaultMessage: 'Refresh' }),
         onConfirm: async () => {
           await $scope.indexPattern.init(true);
           $scope.fields = $scope.indexPattern.getNonScriptedFields();
         },
-        title: 'Refresh field list?'
+        title: i18n.translate('kbn.management.editIndexPattern.refreshHeader', { defaultMessage: 'Refresh field list?' })
       };
       confirmModal(
-        'This action resets the popularity counter of each field.',
+        confirmMessage,
         confirmModalOptions
       );
     };
@@ -265,9 +276,9 @@ uiModules.get('apps/management')
       }
 
       const confirmModalOptions = {
-        confirmButtonText: 'Delete',
+        confirmButtonText: i18n.translate('kbn.management.editIndexPattern.deleteButton', { defaultMessage: 'Delete' }),
         onConfirm: doRemove,
-        title: 'Delete index pattern?'
+        title: i18n.translate('kbn.management.editIndexPattern.deleteHeader', { defaultMessage: 'Delete index pattern?' })
       };
       confirmModal('', confirmModalOptions);
     };
@@ -278,7 +289,10 @@ uiModules.get('apps/management')
 
     $scope.setIndexPatternsTimeField = function (field) {
       if (field.type !== 'date') {
-        notify.error('That field is a ' + field.type + ' not a date.');
+        const errorMessage = i18n.translate('kbn.management.editIndexPattern.notDateErrorMessage', {
+          defaultMessage: 'That field is a {fieldType} not a date.', values: { fieldType: field.type }
+        });
+        notify.error(errorMessage);
         return;
       }
       $scope.indexPattern.timeFieldName = field.name;

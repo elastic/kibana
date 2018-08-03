@@ -36,6 +36,7 @@ export class XPackInfo {
    */
   _licenseInfoChangedListeners = new Set();
 
+
   /**
    * Cache that may contain last xpack info API response or error, json representation
    * of xpack info and xpack info signature.
@@ -95,6 +96,14 @@ export class XPackInfo {
   }
 
   /**
+   * Checks whether ES was available
+   * @returns {boolean}
+   */
+  isXpackUnavailable() {
+    return this._cache.error instanceof Error && this._cache.error.status === 400;
+  }
+
+  /**
    * If present, describes the reason why XPack info is not available.
    * @returns {Error|string}
    */
@@ -103,7 +112,7 @@ export class XPackInfo {
       return `[${this._clusterSource}] Elasticsearch cluster did not respond with license information.`;
     }
 
-    if (this._cache.error instanceof Error && this._cache.error.status === 400) {
+    if (this.isXpackUnavailable()) {
       return `X-Pack plugin is not installed on the [${this._clusterSource}] Elasticsearch cluster.`;
     }
 
@@ -150,7 +159,7 @@ export class XPackInfo {
         this._log(
           ['license', 'info', 'xpack'],
           `Imported ${this._cache.response ? 'changed ' : ''}license information` +
-            ` from Elasticsearch for the [${this._clusterSource}] cluster: ${licenseInfo}`
+          ` from Elasticsearch for the [${this._clusterSource}] cluster: ${licenseInfo}`
         );
       }
 
@@ -165,9 +174,9 @@ export class XPackInfo {
 
     } catch(error) {
       this._log(
-        [ 'license', 'warning', 'xpack' ],
+        ['license', 'warning', 'xpack'],
         `License information from the X-Pack plugin could not be obtained from Elasticsearch` +
-          ` for the [${this._clusterSource}] cluster. ${error}`
+        ` for the [${this._clusterSource}] cluster. ${error}`
       );
 
       this._cache = { error };

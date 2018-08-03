@@ -54,9 +54,7 @@ class Distribution extends Component {
     const unit = timeUnit(xMax);
 
     if (isEmpty) {
-      return (
-        <EmptyMessage heading="No transactions in the selected time range." />
-      );
+      return <EmptyMessage heading="No transactions were found." />;
     }
 
     const bucketIndex = buckets.findIndex(
