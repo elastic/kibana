@@ -11,6 +11,7 @@ export interface CMBeatsAdapter {
   getAll(): Promise<CMBeat[]>;
   removeTagsFromBeats(removals: BeatsTagAssignment[]): Promise<BeatsRemovalReturn[]>;
   assignTagsToBeats(assignments: BeatsTagAssignment[]): Promise<CMAssignmentReturn[]>;
+  getBeatWithToken(enrollmentToken: string): Promise<CMBeat | null>;
 }
 
 export interface BeatsTagAssignment {

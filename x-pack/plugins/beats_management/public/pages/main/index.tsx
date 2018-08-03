@@ -38,18 +38,6 @@ export class MainPages extends React.PureComponent<MainPagesProps, MainPagesStat
       selectedTabId: '/',
     };
   }
-  public toggleEnrollBeat = () => {
-    if (this.state.enrollBeat) {
-      return this.setState({
-        enrollBeat: null,
-      });
-    }
-
-    // TODO: create a real enromment token
-    return this.setState({
-      enrollBeat: { enrollmentToken: '5g3i4ug5uy34g' },
-    });
-  };
 
   public onSelectedTabChanged = (id: string) => {
     this.props.history.push(id);
@@ -89,7 +77,10 @@ export class MainPages extends React.PureComponent<MainPagesProps, MainPagesStat
         title="Beats"
         actionSection={
           <Switch>
-            <Route path="/beats/:action?/:enrollmentToken?" render={BeatsPage.ActionArea} />
+            <Route
+              path="/beats/:action?/:enrollmentToken?"
+              render={(props: any) => <BeatsPage.ActionArea libs={this.props.libs} {...props} />}
+            />
           </Switch>
         }
       >

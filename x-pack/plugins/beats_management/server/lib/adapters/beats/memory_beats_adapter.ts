@@ -38,8 +38,15 @@ export class MemoryBeatsAdapter implements CMBeatsAdapter {
     return this.beatsDB.filter(beat => beatIds.includes(beat.id));
   }
 
+  public async getBeatWithToken(
+    user: FrameworkUser,
+    enrollmentToken: string
+  ): Promise<CMBeat | null> {
+    return this.beatsDB.find(beat => enrollmentToken === beat.enrollment_token) || null;
+  }
+
   public async getAll(user: FrameworkUser) {
-    return this.beatsDB.map((beat: any) => omit(beat, ['access_token']));
+    return this.beatsDB.map<CMBeat>((beat: any) => omit(beat, ['access_token']));
   }
 
   public async removeTagsFromBeats(
