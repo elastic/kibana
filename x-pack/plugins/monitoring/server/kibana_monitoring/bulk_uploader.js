@@ -4,16 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { get, set, flatten, uniq, compact } from 'lodash';
+import { flatten, uniq, compact } from 'lodash';
 import { callClusterFactory } from '../../../xpack_main';
 import {
   LOGGING_TAG,
   KIBANA_MONITORING_LOGGING_TAG,
-  KIBANA_STATS_TYPE_MONITORING,
-  KIBANA_SETTINGS_TYPE,
-  KIBANA_USAGE_TYPE,
 } from '../../common/constants';
-import { KIBANA_REPORTING_TYPE } from '../../../reporting/common/constants';
 import {
   sendBulkPayload,
   monitoringBulk,
@@ -100,8 +96,11 @@ export class BulkUploader {
    * @return {Promise} - resolves to undefined
    */
   async _fetchAndUpload(collectorSet) {
-    const data = await collectorSet.bulkFetch(this._callClusterWithInternalUser);
-    const payload = BulkUploader.toBulkUploadFormat(data, collectorSet);
+    const data = await collectorSet.bulkFetch({
+      callCluster: this._callClusterWithInternalUser,
+      savedObjectsClient: this._savedObjectsClient,
+    });
+    const payload = BulkUploader.getCollectedData(data, collectorSet);
 
     if (payload) {
       try {
@@ -151,7 +150,7 @@ export class BulkUploader {
    * Bulk stats are transformed into a bulk upload format
    * Non-legacy transformation is done in CollectorSet.toApiStats
    */
-  static toBulkUploadFormat(uploadData, collectorSet) {
+  static getCollectedData(uploadData, collectorSet) {
     if (compact(uploadData).length > 0) {
       return flatten(BulkUploader.deepMergeUploadData(uploadData, collectorSet));
     }
