@@ -67,7 +67,7 @@ export default function ({ getService, getPageObjects }) {
       it('should allow to filter in embedded mode', async () => {
         await filterBar.addFilter('@timestamp', 'is between', ['2015-09-19', '2015-09-21']);
         await PageObjects.header.waitUntilLoadingHasFinished();
-        await embeddable.waitForRender();
+        await embeddable.waitForRender(1);
 
         const data = await PageObjects.visualize.getTableVisData();
         log.debug(data.split('\n'));
