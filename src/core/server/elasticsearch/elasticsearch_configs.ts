@@ -38,10 +38,10 @@ export class ElasticsearchConfigs {
         ElasticsearchClusterType.admin,
         config
       ),
-      [ElasticsearchClusterType.data]:
-        config.tribe !== undefined
-          ? new ElasticsearchConfig(ElasticsearchClusterType.data, config.tribe)
-          : new ElasticsearchConfig(ElasticsearchClusterType.data, config),
+      [ElasticsearchClusterType.data]: new ElasticsearchConfig(
+        ElasticsearchClusterType.data,
+        config
+      ),
     };
   }
 
