@@ -4,20 +4,20 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import {
-  CallCluster,
-  TaskDoc,
-  TaskQuery,
-  TaskStatus,
-  TaskStore,
-} from './types';
+import { ConcreteTaskInstance, ElasticJs, TaskStatus } from './task';
 
 const DOC_TYPE = 'doc';
 
 export interface StoreOpts {
-  callCluster: CallCluster;
+  callCluster: ElasticJs;
   index: string;
-  maxPoolSize: number;
+  maxAttempts: number;
+}
+
+export interface TaskStore {
+  availableTasks: (query: TaskQuery) => Promise<ConcreteTaskInstance[]>;
+  update: (instance: ConcreteTaskInstance) => Promise<ConcreteTaskInstance>;
+  remove: (id: string) => Promise<void>;
 }
 
 // Internal, the raw document, as stored in the Kibana index.
@@ -27,15 +27,21 @@ interface RawTaskDoc {
   _type: string;
   _version: number;
   _source: {
+    type: string;
+    runAt: Date;
+    interval?: string;
     attempts: number;
     status: TaskStatus;
-    type: string;
     params: string;
-    previousResult: string;
-    nextRun: Date;
-    timeOut: Date | null;
-    interval?: string;
+    state: string;
+    user: string;
+    scope: string | string[];
   };
+}
+
+export interface TaskQuery {
+  types: string[];
+  size: number;
 }
 
 /**
@@ -47,75 +53,51 @@ interface RawTaskDoc {
  * @implements {TaskStore}
  */
 export class ElasticTaskStore implements TaskStore {
-  private callCluster: CallCluster;
+  private callCluster: ElasticJs;
   private index: string;
-  private maxPoolSize: number;
+  private maxAttempts: number;
 
   /**
    * Constructs a new ElasticTaskStore.
    * @param {StoreOpts} opts
    * @prop {CallCluster} callCluster - The elastic search connection
    * @prop {string} index - The name of the task manager index
-   * @prop {number} maxPoolSize - The maximum number of tasks to run at a time
+   * @prop {number} maxAttempts - The maximum number of attempts before a task will be abandoned
    * @memberof ElasticTaskStore
    */
   constructor(opts: StoreOpts) {
     this.callCluster = opts.callCluster;
     this.index = opts.index;
-    this.maxPoolSize = opts.maxPoolSize;
+    this.maxAttempts = opts.maxAttempts;
   }
 
   /**
    * Fetches tasks from the index, which are ready to be run.
-   * - nextRun is now or past
-   * - timeOut is now or past
+   * - runAt is now or past
    * - id is not currently running in this instance of Kibana
    * - has a type that is in our task definitions
    *
    * @param {TaskQuery} query
-   * @prop {string[]} knownTypes - Types that are known by this Kibana instance
-   * @prop {string[]} runningIds - Ids of tasks that are currently running in this Kibana instance
+   * @prop {string[]} types - Task types to be queried
+   * @prop {number} size - The number of task instances to retrieve
    * @returns {Promise<TaskDoc[]>}
    * @memberof ElasticTaskStore
    */
-  public async availableTasks(query: TaskQuery): Promise<TaskDoc[]> {
-    const { knownTypes, runningIds } = query;
+  public async availableTasks(query: TaskQuery): Promise<ConcreteTaskInstance[]> {
+    const { types, size } = query;
 
     const result = await this.callCluster('search', {
       body: {
         query: {
           bool: {
-            must: {
-              terms: {
-                type: knownTypes,
-              },
-            },
-            must_not: {
-              ids: {
-                values: runningIds,
-              },
-            },
-            should: [
-              {
-                bool: {
-                  must: [
-                    { term: { status: { value: 'idle' } } },
-                    { range: { nextRun: { lte: 'now' } } },
-                  ],
-                },
-              },
-              {
-                bool: {
-                  must: [
-                    { term: { status: { value: 'running' } } },
-                    { range: { timeOut: { lte: 'now' } } },
-                  ],
-                },
-              },
+            must: [
+              { terms: { type: types } },
+              { range: { attempts: { lte: this.maxAttempts } } },
+              { range: { nextRun: { lte: 'now' } } },
             ],
           },
         },
-        size: this.maxPoolSize,
+        size,
         sort: { nextRun: { order: 'asc' } },
         version: true,
       },
@@ -133,7 +115,7 @@ export class ElasticTaskStore implements TaskStore {
    * @returns {Promise<TaskDoc>}
    * @memberof ElasticTaskStore
    */
-  public async update(doc: TaskDoc): Promise<TaskDoc> {
+  public async update(doc: ConcreteTaskInstance): Promise<ConcreteTaskInstance> {
     const rawDoc = taskDocToRaw(doc, this.index);
 
     const { _version } = await this.callCluster('update', {
@@ -168,48 +150,32 @@ export class ElasticTaskStore implements TaskStore {
   }
 }
 
-function taskDocToRaw(doc: TaskDoc, index: string): RawTaskDoc {
+function taskDocToRaw(doc: ConcreteTaskInstance, index: string): RawTaskDoc {
+  const source = {
+    ...doc,
+    params: JSON.stringify(doc.params || {}),
+    state: JSON.stringify(doc.state || {}),
+  };
+
+  delete source.id;
+  delete source.version;
+
   return {
     _id: doc.id,
     _index: index,
-    _source: {
-      attempts: doc.attempts,
-      interval: doc.interval,
-      nextRun: doc.nextRun,
-      params: JSON.stringify(doc.params),
-      previousResult: JSON.stringify(doc.previousResult),
-      status: doc.status,
-      timeOut: doc.timeOut,
-      type: doc.type,
-    },
+    _source: source,
     _type: DOC_TYPE,
     _version: doc.version,
   };
 }
 
-function rawToTaskDoc(doc: RawTaskDoc): TaskDoc {
-  const {
-    attempts,
-    interval,
-    nextRun,
-    params,
-    previousResult,
-    status,
-    timeOut,
-    type,
-  } = doc._source;
-
+function rawToTaskDoc(doc: RawTaskDoc): ConcreteTaskInstance {
   return {
-    attempts,
+    ...doc._source,
     id: doc._id,
-    interval,
-    nextRun,
-    params: parseJSONField(params, 'params', doc),
-    previousResult: parseJSONField(previousResult, 'previousResult', doc),
-    status,
-    timeOut,
-    type,
     version: doc._version,
+    params: parseJSONField(doc._source.params, 'params', doc),
+    state: parseJSONField(doc._source.state, 'state', doc),
   };
 }
 
@@ -217,8 +183,6 @@ function parseJSONField(json: string, fieldName: string, doc: RawTaskDoc) {
   try {
     return json ? JSON.parse(json) : {};
   } catch (error) {
-    throw new Error(
-      `Task "${doc._id}"'s ${fieldName} field has invalid JSON: ${json}`
-    );
+    throw new Error(`Task "${doc._id}"'s ${fieldName} field has invalid JSON: ${json}`);
   }
 }

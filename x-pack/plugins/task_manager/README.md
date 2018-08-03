@@ -138,7 +138,7 @@ The data stored for a task instance looks something like this:
 ```js
 {
   // The type of task that will run this instance.
-  taskType: 'clusterMonitoring',
+  type: 'clusterMonitoring',
 
   // The next time this task instance should run. It is not guaranteed
   // to run at this time, but it is guaranteed not to run earlier than
