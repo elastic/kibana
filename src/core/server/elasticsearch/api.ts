@@ -43,7 +43,7 @@ export function registerElasticsearchRoutes(
       }),
     },
     async (req, res) => {
-      // WOHO! Both of these are typed!
+      // WUHU! Both of these are typed!
       log.info(`field param: ${req.params.field}`);
       log.info(`query param: ${req.query.key}`);
 

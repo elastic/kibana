@@ -25,12 +25,13 @@ import { CoreService } from '../../types/core_service';
 import { Headers } from '../http/router/headers';
 import { LoggerFactory } from '../logging';
 import { AdminClient } from './admin_client';
+import { ElasticsearchClusterType } from './elasticsearch_config';
 import { ElasticsearchConfigs } from './elasticsearch_configs';
 import { ScopedDataClient } from './scoped_data_client';
 
 interface Clients {
-  admin: Client;
-  data: Client;
+  [ElasticsearchClusterType.admin]: Client;
+  [ElasticsearchClusterType.data]: Client;
 }
 
 export class ElasticsearchService implements CoreService {
@@ -38,7 +39,8 @@ export class ElasticsearchService implements CoreService {
   private subscription?: Subscription;
 
   constructor(
-    private readonly configs$: ConnectableObservable<ElasticsearchConfigs>,
+    // private readonly configs$: ConnectableObservable<ElasticsearchConfigs>,
+    private readonly configs$: Observable<ElasticsearchConfigs>,
     logger: LoggerFactory
   ) {
     const log = logger.get('elasticsearch');
@@ -58,11 +60,13 @@ export class ElasticsearchService implements CoreService {
 
           const clients = {
             admin: new Client(
-              configs.forType('admin').toElasticsearchClientConfig({
+              configs.forType(ElasticsearchClusterType.admin).toElasticsearchClientConfig({
                 shouldAuth: false,
               })
             ),
-            data: new Client(configs.forType('data').toElasticsearchClientConfig()),
+            data: new Client(
+              configs.forType(ElasticsearchClusterType.data).toElasticsearchClientConfig()
+            ),
           };
 
           observer.next(clients);
@@ -100,7 +104,10 @@ export class ElasticsearchService implements CoreService {
     return combineLatest(this.clients$, this.configs$).pipe(
       map(
         ([clients, configs]) =>
-          new ScopedDataClient(clients.data, configs.forType('data').filterHeaders(headers))
+          new ScopedDataClient(
+            clients.data,
+            configs.forType(ElasticsearchClusterType.data).filterHeaders(headers)
+          )
       )
     );
   }

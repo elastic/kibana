@@ -17,6 +17,7 @@
  * under the License.
  */
 
+// @ts-ignore
 import { Client } from 'elasticsearch';
 import { callAPI } from './call_api';
 

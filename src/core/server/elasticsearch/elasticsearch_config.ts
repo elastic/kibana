@@ -27,8 +27,10 @@ import { assertNever, pick } from '../../utils';
 import { filterHeaders, Headers } from '../http/router/headers';
 import { ClusterSchema } from './schema';
 
-// TODO This can't be specified like this
-export type ElasticsearchClusterType = 'data' | 'admin';
+export enum ElasticsearchClusterType {
+  admin = 'admin',
+  data = 'data',
+}
 
 export class ElasticsearchConfig {
   public requestHeadersWhitelist: string[];
@@ -122,7 +124,7 @@ export class ElasticsearchConfig {
         ssl.rejectUnauthorized = true;
         break;
       default:
-        assertNever(verificationMode);
+        assertNever(verificationMode as never);
     }
 
     const ca = this.config.ssl.certificateAuthorities;

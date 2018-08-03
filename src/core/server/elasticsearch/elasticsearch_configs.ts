@@ -34,11 +34,14 @@ export class ElasticsearchConfigs {
    */
   constructor(config: ElasticsearchConfigsSchema, env: Env) {
     this.configs = {
-      admin: new ElasticsearchConfig('admin', config),
-      data:
+      [ElasticsearchClusterType.admin]: new ElasticsearchConfig(
+        ElasticsearchClusterType.admin,
+        config
+      ),
+      [ElasticsearchClusterType.data]:
         config.tribe !== undefined
-          ? new ElasticsearchConfig('data', config.tribe)
-          : new ElasticsearchConfig('data', config),
+          ? new ElasticsearchConfig(ElasticsearchClusterType.data, config.tribe)
+          : new ElasticsearchConfig(ElasticsearchClusterType.data, config),
     };
   }
 

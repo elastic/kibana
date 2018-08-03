@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { Observable } from '../../lib/kbn_observable';
+import { Observable } from 'rxjs';
 
 import { Router } from '../http';
 import { LoggerFactory } from '../logging';

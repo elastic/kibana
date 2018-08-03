@@ -17,6 +17,7 @@
  * under the License.
  */
 
+import { from } from 'rxjs';
 import { ConfigService, Env } from './config';
 import { ElasticsearchConfigs, ElasticsearchModule } from './elasticsearch';
 import { HttpConfig, HttpModule, Router } from './http';
@@ -33,7 +34,7 @@ export class Server {
     const esConfigs$ = configService.atPath('elasticsearch', ElasticsearchConfigs);
     const httpConfig$ = configService.atPath('server', HttpConfig);
 
-    this.elasticsearch = new ElasticsearchModule(esConfigs$, logger);
+    this.elasticsearch = new ElasticsearchModule(from(esConfigs$), logger);
     this.http = new HttpModule(httpConfig$, logger, env);
   }
 
