@@ -5,10 +5,6 @@
  */
 
 import { get, set, isEmpty, flatten, uniq } from 'lodash';
-import {
-  SavedObjectsClient,
-  SavedObjectsRepositoryProvider,
-} from '../../../../../src/server/saved_objects';
 import { callClusterFactory } from '../../../xpack_main';
 import {
   LOGGING_TAG,
@@ -59,15 +55,8 @@ export class BulkUploader {
       plugins: [monitoringBulk],
     });
 
-    const callClusterInternal = callClusterFactory(server).getCallClusterInternal();
-    this._callClusterInternal = callClusterInternal;
-
-    const repositoryProvider = new SavedObjectsRepositoryProvider({
-      index: server.config().get('kibana.index'),
-      mappings: server.getKibanaIndexMappingsDsl(),
-    });
-    const repository = repositoryProvider.getRepository(callClusterInternal);
-    this._savedObjectsClient = new SavedObjectsClient(repository);
+    this._callClusterWithInternalUser = callClusterFactory(server).getCallClusterInternal();
+    this._savedObjectsClient = server.savedObjects.getUnscopedSavedObjectsClient(this._callClusterWithInternalUser);
   }
 
   /*
@@ -109,7 +98,7 @@ export class BulkUploader {
    */
   async _fetchAndUpload(collectorSet) {
     const data = await collectorSet.bulkFetch({
-      callCluster: this._callClusterInternal,
+      callCluster: this._callClusterWithInternalUser,
       savedObjectsClient: this._savedObjectsClient,
     });
     const payload = BulkUploader.toBulkUploadFormat(data);
