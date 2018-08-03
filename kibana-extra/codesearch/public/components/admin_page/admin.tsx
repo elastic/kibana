@@ -30,7 +30,7 @@ import {
 import { Link } from 'react-router-dom';
 
 import { Repository } from '../../../model';
-import { deleteRepo, importRepo } from '../../actions';
+import { deleteRepo, importRepo, indexRepo } from '../../actions';
 import { RootState } from '../../reducers';
 
 enum Tabs {
@@ -42,6 +42,7 @@ interface Props {
   repositories: Repository[];
   importLoading: boolean;
   deleteRepo: (uri: string) => void;
+  indexRepo: (uri: string) => void;
   importRepo: (uri: string) => void;
 }
 
@@ -56,6 +57,7 @@ interface RepositoryItemProps {
   repoName: string;
   repoURI: string;
   deleteRepo: () => void;
+  indexRepo: () => void;
 }
 
 const RepositoryItem = (props: RepositoryItemProps) => (
@@ -75,6 +77,7 @@ const RepositoryItem = (props: RepositoryItemProps) => (
     <EuiFlexItem grow={false}>
       <div>
         <EuiButtonIcon iconType="indexSettings" aria-label="settings" />
+        <EuiButtonIcon iconType="indexOpen" aria-label="index" onClick={props.indexRepo} />
         <EuiButtonIcon iconType="trash" aria-label="delete" onClick={props.deleteRepo} />
       </div>
     </EuiFlexItem>
@@ -179,6 +182,10 @@ class AdminPage extends React.PureComponent<Props, State> {
     this.props.deleteRepo(uri);
   };
 
+  public getIndexRepoHandler = (uri: string) => () => {
+    this.props.indexRepo(uri);
+  };
+
   public onSearchQueryChange = (q: any) => {
     this.setState({
       searchQuery: q.query,
@@ -222,6 +229,7 @@ class AdminPage extends React.PureComponent<Props, State> {
         repoName={repo.name || ''}
         repoURI={repo.uri}
         deleteRepo={this.getDeleteRepoHandler(repo.uri)}
+        indexRepo={this.getIndexRepoHandler(repo.uri)}
       />
     ));
 
@@ -270,6 +278,7 @@ const mapStateToProps = (state: RootState) => ({
 const mapDispatchToProps = {
   deleteRepo,
   importRepo,
+  indexRepo,
 };
 
 export const Admin = connect(mapStateToProps, mapDispatchToProps)(AdminPage);

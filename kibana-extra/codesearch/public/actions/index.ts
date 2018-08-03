@@ -19,6 +19,10 @@ export const deleteRepo = createAction<string>('DELETE REPOS');
 export const deleteRepoSuccess = createAction<string>('DELETE REPOS SUCCESS');
 export const deleteRepoFailed = createAction<Error>('DELETE REPOS FAILED');
 
+export const indexRepo = createAction<string>('INDEX REPOS');
+export const indexRepoSuccess = createAction<string>('INDEX REPOS SUCCESS');
+export const indexRepoFailed = createAction<Error>('INDEX REPOS FAILED');
+
 export const importRepo = createAction<string>('IMPORT REPOS');
 export const importRepoSuccess = createAction<string>('IMPORT REPOS SUCCESS');
 export const importRepoFailed = createAction<Error>('IMPORT REPOS FAILED');

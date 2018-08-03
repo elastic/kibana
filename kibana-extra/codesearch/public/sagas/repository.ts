@@ -17,6 +17,9 @@ import {
   importRepo,
   importRepoFailed,
   importRepoSuccess,
+  indexRepo,
+  indexRepoFailed,
+  indexRepoSuccess,
 } from '../actions';
 
 function requestRepos(): any {
@@ -36,12 +39,25 @@ function requestDeleteRepo(uri: string) {
   return kfetch({ pathname: `../api/cs/repo/${uri}`, method: 'delete' });
 }
 
+function requestIndexRepo(uri: string) {
+  return kfetch({ pathname: `../api/cs/repo/index/${uri}`, method: 'post' });
+}
+
 function* handleDeleteRepo(action: Action<string>) {
   try {
     yield call(requestDeleteRepo, action.payload || '');
     yield put(deleteRepoSuccess(action.payload || ''));
   } catch (err) {
     yield put(deleteRepoFailed(err));
+  }
+}
+
+function* handleIndexRepo(action: Action<string>) {
+  try {
+    yield call(requestIndexRepo, action.payload || '');
+    yield put(indexRepoSuccess(action.payload || ''));
+  } catch (err) {
+    yield put(indexRepoFailed(err));
   }
 }
 
@@ -64,6 +80,10 @@ export function* watchImportRepo() {
 
 export function* watchDeleteRepo() {
   yield takeEvery(String(deleteRepo), handleDeleteRepo);
+}
+
+export function* watchIndexRepo() {
+  yield takeEvery(String(indexRepo), handleIndexRepo);
 }
 
 export function* watchFetchRepos() {

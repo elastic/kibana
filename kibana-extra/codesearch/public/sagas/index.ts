@@ -7,7 +7,7 @@
 import { fork, select, takeEvery } from 'redux-saga/effects';
 import * as Selectors from '../selectors';
 
-import { watchDeleteRepo, watchFetchRepos, watchImportRepo } from './repository';
+import { watchDeleteRepo, watchFetchRepos, watchImportRepo, watchIndexRepo } from './repository';
 import { watchLocationChange } from './route';
 
 function* handleIncrease(action: any) {
@@ -34,5 +34,6 @@ export function* rootSaga() {
   yield fork(watchFetchRepos);
   yield fork(watchLocationChange);
   yield fork(watchDeleteRepo);
+  yield fork(watchIndexRepo);
   yield fork(watchImportRepo);
 }
