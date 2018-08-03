@@ -31,31 +31,34 @@ export class SecureSavedObjectsClientWrapper {
   }
 
   async create(type, attributes = {}, options = {}) {
-    return await this._execute(
+    await this._ensureAuthorized(
       type,
       'create',
       { type, attributes, options },
-      client => client.create(type, attributes, options),
     );
+
+    return await this._baseClient.create(type, attributes, options);
   }
 
   async bulkCreate(objects, options = {}) {
     const types = uniq(objects.map(o => o.type));
-    return await this._execute(
+    await this._ensureAuthorized(
       types,
       'bulk_create',
       { objects, options },
-      client => client.bulkCreate(objects, options),
     );
+
+    return await this._baseClient.bulkCreate(objects, options);
   }
 
   async delete(type, id) {
-    return await this._execute(
+    await this._ensureAuthorized(
       type,
       'delete',
       { type, id },
-      client => client.delete(type, id),
     );
+
+    return await this._baseClient.delete(type, id);
   }
 
   async find(options = {}) {
@@ -68,30 +71,33 @@ export class SecureSavedObjectsClientWrapper {
 
   async bulkGet(objects = [], options = {}) {
     const types = uniq(objects.map(o => o.type));
-    return await this._execute(
+    await this._ensureAuthorized(
       types,
       'bulk_get',
       { objects, options },
-      client => client.bulkGet(objects, options)
     );
+
+    return await this._baseClient.bulkGet(objects, options);
   }
 
   async get(type, id, options = {}) {
-    return await this._execute(
+    await this._ensureAuthorized(
       type,
       'get',
       { type, id, options },
-      client => client.get(type, id, options)
     );
+
+    return await this._baseClient.get(type, id, options);
   }
 
   async update(type, id, attributes, options = {}) {
-    return await this._execute(
+    await this._ensureAuthorized(
       type,
       'update',
       { type, id, attributes, options },
-      client => client.update(type, id, attributes, options)
     );
+
+    return await this._baseClient.update(type, id, attributes, options);
   }
 
   async _checkSavedObjectPrivileges(actions) {
@@ -103,7 +109,7 @@ export class SecureSavedObjectsClientWrapper {
     }
   }
 
-  async _execute(typeOrTypes, action, args, fn) {
+  async _ensureAuthorized(typeOrTypes, action, args) {
     const types = Array.isArray(typeOrTypes) ? typeOrTypes : [typeOrTypes];
     const actions = types.map(type => this._actions.getSavedObjectAction(type, action));
     const { result, username, missing } = await this._checkSavedObjectPrivileges(actions);
@@ -112,10 +118,10 @@ export class SecureSavedObjectsClientWrapper {
       case CHECK_PRIVILEGES_RESULT.AUTHORIZED:
         this._auditLogger.savedObjectsAuthorizationSuccess(username, action, types, args);
         this._securityContextService.set(this._request, { rbac: true, });
-        return await fn(this._baseClient);
+        return;
       case CHECK_PRIVILEGES_RESULT.LEGACY:
         this._securityContextService.set(this._request, { legacy: true, });
-        return await fn(this._baseClient);
+        return;
       case CHECK_PRIVILEGES_RESULT.UNAUTHORIZED:
         this._auditLogger.savedObjectsAuthorizationFailure(username, action, types, missing, args);
         const msg = `Unable to ${action} ${[...types].sort().join(',')}, missing ${[...missing].sort().join(',')}`;
@@ -163,11 +169,12 @@ export class SecureSavedObjectsClientWrapper {
   }
 
   async _findWithTypes(options) {
-    return await this._execute(
+    await this._ensureAuthorized(
       options.type,
       'find',
       { options },
-      client => client.find(options)
     );
+
+    return await this._baseClient.find(options);
   }
 }
