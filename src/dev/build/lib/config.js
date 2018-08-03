@@ -23,7 +23,7 @@ import { platform as getOsPlatform } from 'os';
 import { getVersionInfo } from './version_info';
 import { createPlatform } from './platform';
 
-export async function getConfig({ isRelease }) {
+export async function getConfig({ isRelease, versionQualifier }) {
   const pkgPath = resolve(__dirname, '../../../../package.json');
   const pkg = require(pkgPath);
   const repoRoot = dirname(pkgPath);
@@ -32,6 +32,7 @@ export async function getConfig({ isRelease }) {
   const platforms = ['darwin', 'linux', 'windows'].map(createPlatform);
   const versionInfo = await getVersionInfo({
     isRelease,
+    versionQualifier,
     pkg,
   });
 

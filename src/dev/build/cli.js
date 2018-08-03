@@ -44,6 +44,9 @@ const flags = getopts(process.argv.slice(0), {
     'verbose',
     'debug',
   ],
+  default: {
+    'version-qualifier': ''
+  },
   alias: {
     v: 'verbose',
     d: 'debug',
@@ -101,6 +104,7 @@ function isOsPackageDesired(name) {
 buildDistributables({
   log,
   isRelease: Boolean(flags.release),
+  versionQualifier: flags['version-qualifier'],
   buildOssDist: flags.oss !== false,
   buildDefaultDist: !flags.oss,
   downloadFreshNode: !Boolean(flags['skip-node-download']),

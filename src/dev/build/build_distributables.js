@@ -61,6 +61,7 @@ export async function buildDistributables(options) {
     createArchives,
     createRpmPackage,
     createDebPackage,
+    versionQualifier,
   } = options;
 
   log.verbose('building distributables with options:', {
@@ -71,10 +72,12 @@ export async function buildDistributables(options) {
     createArchives,
     createRpmPackage,
     createDebPackage,
+    versionQualifier,
   });
 
   const config = await getConfig({
     isRelease,
+    versionQualifier,
   });
 
   const run = createRunner({
