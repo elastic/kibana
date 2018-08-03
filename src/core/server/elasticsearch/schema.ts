@@ -67,20 +67,12 @@ const clusterSchema = schema.object({
 /**
  * @internal
  */
-export const tribeSchema = schema.object({
-  ...sharedElasticsearchFields,
-});
-
-/**
- * @internal
- */
 export const elasticsearchSchema = schema.object({
   enabled: schema.boolean({ defaultValue: true }),
   ...sharedElasticsearchFields,
   healthCheck: schema.object({
     delay: schema.duration({ defaultValue: '2500ms' }),
   }),
-  tribe: schema.maybe(tribeSchema),
 });
 
 /**

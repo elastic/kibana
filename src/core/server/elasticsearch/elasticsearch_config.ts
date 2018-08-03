@@ -51,7 +51,7 @@ export class ElasticsearchConfig {
    * e.g.
    *
    * ```
-   * elasticsearchConfigs.forType('data').filterHeaders(request.headers);
+   * elasticsearchConfigs.forType(ElasticsearchClusterType.data).filterHeaders(request.headers);
    * ```
    *
    * @param headers Full headers (for a request)
