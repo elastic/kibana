@@ -10,9 +10,9 @@ import {
   EuiButton,
   EuiButtonEmpty,
   EuiFlexItem,
+  EuiLoadingSpinner,
   EuiModal,
   EuiModalBody,
-  EuiModalFooter,
   EuiModalHeader,
   EuiModalHeaderTitle,
   EuiOverlayMask,
@@ -35,7 +35,15 @@ interface BeatsPageState {
 }
 
 export class BeatsPage extends React.PureComponent<BeatsPageProps, BeatsPageState> {
-  public static ActionArea = ({ match, history }: { match: any; history: any }) => (
+  public static ActionArea = ({
+    match,
+    history,
+    libs,
+  }: {
+    match: any;
+    history: any;
+    libs: FrontendLibs;
+  }) => (
     <div>
       <EuiButtonEmpty
         onClick={() => {
@@ -48,8 +56,9 @@ export class BeatsPage extends React.PureComponent<BeatsPageProps, BeatsPageStat
       <EuiButton
         size="s"
         color="primary"
-        onClick={() => {
-          history.push('/beats/enroll/foobar');
+        onClick={async () => {
+          const token = await libs.tokens.createEnrollmentToken();
+          history.push(`/beats/enroll/${token}`);
         }}
       >
         Enroll Beats
@@ -57,18 +66,30 @@ export class BeatsPage extends React.PureComponent<BeatsPageProps, BeatsPageStat
 
       {match.params.enrollmentToken != null && (
         <EuiOverlayMask>
-          <EuiModal onClose={() => history.push('/beats')} style={{ width: '800px' }}>
+          <EuiModal onClose={() => history.push('/beats')} style={{ width: '600px' }}>
             <EuiModalHeader>
-              <EuiModalHeaderTitle>Enroll Beats</EuiModalHeaderTitle>
+            <EuiModalHeaderTitle>Enroll a new Beat</EuiModalHeaderTitle>
             </EuiModalHeader>
+            <EuiModalBody style={{ textAlign: 'center' }}>
+              To enroll a Beat with Centeral Management, run this command on the host that has Beats
+              installed.
+              <br />
+              <br />
+              <br />
+              <div className="euiFormControlLayout euiFormControlLayout--fullWidth">
+                <div className="euiFieldText euiFieldText--fullWidth" style={{ textAlign: 'left' }}>
+                  $ beats enroll {window.location.protocol}//{window.location.host} {match.params.enrollmentToken}
+                </div>
+              </div>
+              <br />
+              <br />
+              <EuiLoadingSpinner size="l" />
+              <br />
+              <br />
+              Waiting for enroll command to be run...
 
-            <EuiModalBody>
-              Enrollment UI here for enrollment token of: {match.params.enrollmentToken}
             </EuiModalBody>
 
-            <EuiModalFooter>
-              <EuiButtonEmpty onClick={() => history.push('/beats')}>Cancel</EuiButtonEmpty>
-            </EuiModalFooter>
           </EuiModal>
         </EuiOverlayMask>
       )}
@@ -91,7 +112,7 @@ export class BeatsPage extends React.PureComponent<BeatsPageProps, BeatsPageStat
         actionHandler={this.handleBeatsActions}
         assignmentOptions={this.state.tags}
         assignmentTitle="Set tags"
-        items={this.state.beats}
+        items={this.state.beats || []}
         ref={this.state.tableRef}
         type={BeatsTableType}
       />

@@ -34,7 +34,7 @@ export class ElasticsearchBeatsAdapter implements CMBeatsAdapter {
       return null;
     }
 
-    return _get(response, '_source.beat');
+    return _get<CMBeat>(response, '_source.beat');
   }
 
   public async insert(beat: CMBeat) {

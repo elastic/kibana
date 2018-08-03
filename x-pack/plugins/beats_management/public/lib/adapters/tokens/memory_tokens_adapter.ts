@@ -4,13 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { CMTokensAdapter, TokenEnrollmentData } from './adapter_types';
+import { CMTokensAdapter } from './adapter_types';
 
 export class MemoryTokensAdapter implements CMTokensAdapter {
-  public async createEnrollmentToken(): Promise<TokenEnrollmentData> {
-    return {
-      token: '2jnwkrhkwuehriauhweair',
-      expires_on: new Date().toJSON(),
-    };
+  public async createEnrollmentToken(): Promise<string> {
+    return '2jnwkrhkwuehriauhweair';
   }
 }

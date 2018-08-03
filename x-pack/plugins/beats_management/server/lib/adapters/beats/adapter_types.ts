@@ -10,9 +10,9 @@ import { FrameworkUser } from '../framework/adapter_types';
 export interface CMBeatsAdapter {
   insert(beat: CMBeat): Promise<void>;
   update(beat: CMBeat): Promise<void>;
-  get(user: FrameworkUser, id: string): Promise<CMBeat>;
+  get(user: FrameworkUser, id: string): Promise<CMBeat | null>;
   getAll(user: FrameworkUser): Promise<CMBeat>;
-  getWithIds(user: FrameworkUser, beatIds: string[]): Promise<CMBeat>;
+  getWithIds(user: FrameworkUser, beatIds: string[]): Promise<CMBeat[]>;
   removeTagsFromBeats(
     user: FrameworkUser,
     removals: BeatsTagAssignment[]

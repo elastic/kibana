@@ -87,7 +87,7 @@ export const BeatsTableType: TableType = {
       sortable: true,
     },
   ],
-  controlDefinitions: (data: any) => ({
+  controlDefinitions: (data: any[]) => ({
     actions: [
       {
         name: 'Disenroll Selected',
