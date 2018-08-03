@@ -10,6 +10,7 @@ import { wrapError } from '../../../lib/errors';
 import { BasicCredentials } from '../../../../server/lib/authentication/providers/basic';
 import { canRedirectRequest } from '../../../lib/can_redirect_request';
 import { CHECK_PRIVILEGES_RESULT } from '../../../../server/lib/authorization';
+import { ALL_RESOURCE } from '../../../../common/constants';
 
 export function initAuthenticateApi(server) {
 
@@ -42,7 +43,9 @@ export function initAuthenticateApi(server) {
 
         const { authorization } = server.plugins.security;
         const checkPrivileges = authorization.checkPrivilegesWithRequest(request);
-        const privilegeCheck = await checkPrivileges([authorization.actions.login]);
+
+        //todo: we should be checking this at all spaces
+        const privilegeCheck = await checkPrivileges(ALL_RESOURCE, [authorization.actions.login]);
         if (privilegeCheck.result === CHECK_PRIVILEGES_RESULT.LEGACY) {
           const msg = `${username} relies on index privileges on the Kibana index. This is deprecated and will be removed in Kibana 7.0`;
           server.log(['warning', 'deprecated', 'security'], msg);

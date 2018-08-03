@@ -150,6 +150,7 @@ export const security = (kibana) => new kibana.Plugin({
       }
 
       const { authorization } = server.plugins.security;
+      const { spacesService } = server.plugins.spaces;
 
       return new SecureSavedObjectsClientWrapper({
         actions: authorization.actions,
@@ -160,6 +161,7 @@ export const security = (kibana) => new kibana.Plugin({
         request,
         savedObjectTypes: savedObjects.types,
         securityContextService,
+        spacesService,
       });
     });
 

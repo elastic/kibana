@@ -5,7 +5,6 @@
  */
 
 import { uniq } from 'lodash';
-import { ALL_RESOURCE } from '../../../common/constants';
 import { buildLegacyIndexPrivileges } from './privileges';
 import { validateEsPrivilegeResponse } from './validate_es_response';
 
@@ -58,13 +57,13 @@ export function checkPrivilegesWithRequestFactory(shieldClient, config, actions,
 
   return function checkPrivilegesWithRequest(request) {
 
-    return async function checkPrivileges(privileges) {
+    return async function checkPrivileges(spaceId, privileges) {
       const allApplicationPrivileges = uniq([actions.version, actions.login, ...privileges]);
       const hasPrivilegesResponse = await callWithRequest(request, 'shield.hasPrivileges', {
         body: {
           applications: [{
             application,
-            resources: [ALL_RESOURCE],
+            resources: [spaceId],
             privileges: allApplicationPrivileges
           }],
           index: [{
@@ -74,9 +73,9 @@ export function checkPrivilegesWithRequestFactory(shieldClient, config, actions,
         }
       });
 
-      validateEsPrivilegeResponse(hasPrivilegesResponse, application, allApplicationPrivileges, [ALL_RESOURCE], kibanaIndex);
+      validateEsPrivilegeResponse(hasPrivilegesResponse, application, allApplicationPrivileges, [spaceId], kibanaIndex);
 
-      const applicationPrivilegesResponse = hasPrivilegesResponse.application[application][ALL_RESOURCE];
+      const applicationPrivilegesResponse = hasPrivilegesResponse.application[application][spaceId];
       const indexPrivilegesResponse = hasPrivilegesResponse.index[kibanaIndex];
 
       if (hasIncompatibileVersion(applicationPrivilegesResponse)) {

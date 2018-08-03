@@ -18,6 +18,7 @@ export class SecureSavedObjectsClientWrapper {
       request,
       savedObjectTypes,
       securityContextService,
+      spacesService,
     } = options;
 
     this.errors = errors;
@@ -28,6 +29,7 @@ export class SecureSavedObjectsClientWrapper {
     this._request = request;
     this._savedObjectTypes = savedObjectTypes;
     this._securityContextService = securityContextService;
+    this._spacesService = spacesService;
   }
 
   async create(type, attributes = {}, options = {}) {
@@ -100,9 +102,9 @@ export class SecureSavedObjectsClientWrapper {
     return await this._baseClient.update(type, id, attributes, options);
   }
 
-  async _checkSavedObjectPrivileges(actions) {
+  async _checkSavedObjectPrivileges(spaceId, actions) {
     try {
-      return await this._checkPrivileges(actions);
+      return await this._checkPrivileges(spaceId, actions);
     } catch(error) {
       const { reason } = get(error, 'body.error', {});
       throw this.errors.decorateGeneralError(error, reason);
@@ -112,7 +114,8 @@ export class SecureSavedObjectsClientWrapper {
   async _ensureAuthorized(typeOrTypes, action, args) {
     const types = Array.isArray(typeOrTypes) ? typeOrTypes : [typeOrTypes];
     const actions = types.map(type => this._actions.getSavedObjectAction(type, action));
-    const { result, username, missing } = await this._checkSavedObjectPrivileges(actions);
+    const spaceId = this._spacesService.getSpaceId(this._request);
+    const { result, username, missing } = await this._checkSavedObjectPrivileges(spaceId, actions);
 
     switch (result) {
       case CHECK_PRIVILEGES_RESULT.AUTHORIZED:
@@ -137,7 +140,8 @@ export class SecureSavedObjectsClientWrapper {
     // we have to filter for only their authorized types
     const types = this._savedObjectTypes;
     const typesToPrivilegesMap = new Map(types.map(type => [type, this._actions.getSavedObjectAction(type, action)]));
-    const { result, username, missing } = await this._checkSavedObjectPrivileges(Array.from(typesToPrivilegesMap.values()));
+    const spaceId = this._spacesService.getSpaceId(this._request);
+    const { result, username, missing } = await this._checkSavedObjectPrivileges(spaceId, Array.from(typesToPrivilegesMap.values()));
 
     if (result === CHECK_PRIVILEGES_RESULT.LEGACY) {
       this._securityContextService.set(this._request, { legacy: true, });

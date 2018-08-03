@@ -80,7 +80,7 @@ export const spaces = (kibana) => new kibana.Plugin({
     validateConfig(config, message => server.log(['spaces', 'warning'], message));
 
     const spacesService = createSpacesService(server);
-    server.decorate('server', 'spaces', spacesService);
+    server.expose('spacesService', spacesService);
 
     const { addScopedSavedObjectsClientWrapperFactory, types } = server.savedObjects;
     addScopedSavedObjectsClientWrapperFactory(Number.MAX_VALUE,
