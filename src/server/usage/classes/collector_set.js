@@ -26,7 +26,7 @@ import { UsageCollector } from './usage_collector';
 /*
  * A collector object has types registered into it with the register(type)
  * function. Each type that gets registered defines how to fetch its own data
- * and combine it into a unified payload for bulk upload.
+ * and optionally, how to combine it into a unified payload for bulk upload.
  */
 export class CollectorSet {
 
