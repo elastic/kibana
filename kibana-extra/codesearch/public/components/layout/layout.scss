@@ -1,0 +1,27 @@
+.mainRoot {
+  height: 100vh;
+}
+
+.codeMain {
+  margin: 0;
+}
+
+.editorContainer {
+  height: 100%;
+  overflow: auto;
+}
+
+.topBar {
+  padding: 0 1rem;
+  margin: 0;
+}
+
+.fileTreeContainer {
+  border-right: 4px solid grey;
+  padding: 1rem 0 1rem 1rem;
+  width: 16rem;
+}
+
+.spacer {
+  background-color: grey;
+}

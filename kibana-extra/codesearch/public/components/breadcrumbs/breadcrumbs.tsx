@@ -40,7 +40,7 @@ export class Breadcrumbs extends React.PureComponent<Props> {
 
   public render() {
     return (
-      <div>
+      <div className="breadcrumbsContainer">
         {this.props.pathSegments.slice(0, -1).map((path: string, index: number) => (
           <EuiPopover
             closePopover={this.closePopover}
@@ -49,6 +49,7 @@ export class Breadcrumbs extends React.PureComponent<Props> {
             button={
               <span
                 key={path}
+                className="breadcrumbs"
                 onMouseOver={this.getMouseOverHandler(
                   this.props.pathSegments.slice(0, index).join('/')
                 )}

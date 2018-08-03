@@ -15,8 +15,10 @@ import {
   EuiHeaderSectionItem,
   EuiHeaderSectionItemButton,
   EuiIcon,
+  EuiButtonIcon,
   EuiPage,
   EuiPageBody,
+  EuiSpacer,
 } from '@elastic/eui';
 import { match } from 'react-router-dom';
 
@@ -29,6 +31,10 @@ import { FileTree } from '../file_tree/file_tree';
 import { Editor } from './editor';
 
 import { history } from '../../utils/url';
+
+const noMarginStyle = {
+  margin: 0
+};
 
 interface State {
   children: any[];
@@ -136,41 +142,44 @@ export class Layout extends React.Component<Props, State> {
     );
 
     return (
-      <EuiPage>
-        <EuiPageBody>
-          <EuiHeader>
-            <EuiHeaderSection>
-              <EuiHeaderSectionItem border="right">
-                <EuiHeaderLogo>Code Browsing</EuiHeaderLogo>
-              </EuiHeaderSectionItem>
-            </EuiHeaderSection>
-
-            <EuiHeaderSection side="right">
-              <EuiHeaderSectionItemButton aria-label="Search">
-                <EuiIcon type="search" size="m" />
-              </EuiHeaderSectionItemButton>
-            </EuiHeaderSection>
-          </EuiHeader>
-          <Breadcrumbs
-            basePath={`/${resource}/${org}/${repo}/${revision}/`}
-            pathSegments={pathSegments}
-            directories={this.getDirectories(pathSegments)}
-          />
-          <EuiFlexGroup>
-            <EuiFlexItem style={{ maxWidth: 300 }}>
-              <FileTree
-                node={this.state.node}
-                onClick={this.onClick}
-                forceOpenPaths={this.state.forceOpenPaths}
-                getTreeToggler={this.getTreeToggler}
-                activePath={path || ''}
+      <EuiFlexGroup direction="column" className="mainRoot" style={noMarginStyle}>
+        <div>
+          {/*this section is for search*/}
+        </div>
+        <EuiFlexItem grow={false} style={noMarginStyle}>
+          <EuiFlexGroup justifyContent="spaceBetween" className="topBar" style={noMarginStyle}>
+            <EuiFlexItem grow={false} style={noMarginStyle}>
+              <Breadcrumbs
+                basePath={`/${resource}/${org}/${repo}/${revision}/`}
+                pathSegments={pathSegments}
+                directories={this.getDirectories(pathSegments)}
               />
             </EuiFlexItem>
-
-            <EuiFlexItem>{editor}</EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <div>
+                <EuiButtonIcon iconType="node"/>
+                <EuiButtonIcon iconType="gear"/>
+                <EuiButtonIcon iconType="search"/>
+              </div>
+            </EuiFlexItem>
           </EuiFlexGroup>
-        </EuiPageBody>
-      </EuiPage>
+        </EuiFlexItem>
+        <EuiSpacer size="xs" className="spacer"/>
+        <EuiFlexItem className="codeMainContainer" style={noMarginStyle}>
+            <EuiFlexGroup justifyContent="spaceBetween" className="codeMain">
+              <EuiFlexItem grow={false} style={noMarginStyle} className="fileTreeContainer">
+                <FileTree
+                  node={this.state.node}
+                  onClick={this.onClick}
+                  forceOpenPaths={this.state.forceOpenPaths}
+                  getTreeToggler={this.getTreeToggler}
+                  activePath={path || ''}
+                />
+              </EuiFlexItem>
+              <EuiFlexItem style={noMarginStyle}>{editor}</EuiFlexItem>
+            </EuiFlexGroup>
+        </EuiFlexItem>
+      </EuiFlexGroup>
     );
   }
 }

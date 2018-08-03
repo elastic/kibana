@@ -21,15 +21,13 @@ export const App = props => {
   return (
     <ConnectedRouter history={history}>
       <Router>
-        <div>
-          <Switch>
-            <Route path="/" exact={true} render={renderMain} />
-            <Route path="/repos" render={renderRepos} />
-            <Route path="/:resource/:org/:repo/:revision/:path*:goto(!.*)?" component={Layout} />
-            <Route path="/:resource/:org/:repo/:revision" component={Layout} />
-            <Route path="/admin" component={Admin} />
-          </Switch>
-        </div>
+        <Switch>
+          <Route path="/" exact={true} render={renderMain} />
+          <Route path="/repos" render={renderRepos} />
+          <Route path="/:resource/:org/:repo/:revision/:path*:goto(!.*)?" component={Layout} />
+          <Route path="/:resource/:org/:repo/:revision" component={Layout} />
+          <Route path="/admin" component={Admin} />
+        </Switch>
       </Router>
     </ConnectedRouter>
   );
