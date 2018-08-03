@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { schema } from '../config/schema';
+import { schema, TypeOf } from '../config/schema';
 
 /**
  * @internal
@@ -78,9 +78,9 @@ export const elasticsearchSchema = schema.object({
 /**
  * @internal
  */
-export type ElasticsearchConfigsSchema = schema.TypeOf<typeof elasticsearchSchema>;
+export type ElasticsearchConfigsSchema = TypeOf<typeof elasticsearchSchema>;
 
 /**
  * @internal
  */
-export type ClusterSchema = schema.TypeOf<typeof clusterSchema>;
+export type ClusterSchema = TypeOf<typeof clusterSchema>;

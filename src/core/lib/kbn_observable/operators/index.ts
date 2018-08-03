@@ -29,4 +29,3 @@ export { switchMap } from './switch_map';
 export { mergeMap } from './merge_map';
 export { skipRepeats } from './skip_repeats';
 export { toPromise } from './to_promise';
-export { shareLast } from './share_last';

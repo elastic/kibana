@@ -129,7 +129,7 @@ export class ElasticsearchConfig {
 
     const ca = this.config.ssl.certificateAuthorities;
     if (ca && ca.length > 0) {
-      ssl.ca = ca.map(authority => readFileSync(authority));
+      ssl.ca = ca.map((authority: string) => readFileSync(authority));
     }
 
     config.ssl = ssl;
