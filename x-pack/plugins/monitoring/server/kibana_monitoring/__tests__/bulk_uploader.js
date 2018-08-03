@@ -19,6 +19,18 @@ class MockCollectorSet {
   async bulkFetch() {
     return this.mockCollectors.map(({ fetch }) => fetch());
   }
+  bulkFormat(data) {
+    return data.reduce((accum, collectedData) => {
+      if (collectedData) {
+        const collector = this.mockCollectors[0];
+        const formatter = collector.formatForBulkUpload || (result => ([
+          { type: collector.type, payload: result }
+        ]));
+        accum.push(formatter(collectedData.result));
+      }
+      return accum;
+    }, []);
+  }
 }
 
 describe('BulkUploader', () => {

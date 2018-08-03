@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { get, set, flatten, uniq } from 'lodash';
+import { get, set, flatten, uniq, compact } from 'lodash';
 import { callClusterFactory } from '../../../xpack_main';
 import {
   LOGGING_TAG,
@@ -149,7 +149,9 @@ export class BulkUploader {
    * Non-legacy transformation is done in CollectorSet.toApiStats
    */
   static toBulkUploadFormat(uploadData, collectorSet) {
-    return flatten(BulkUploader.deepMergeUploadData(uploadData, collectorSet));
+    if (compact(uploadData).length > 0) {
+      return flatten(BulkUploader.deepMergeUploadData(uploadData, collectorSet));
+    }
   }
 
   static checkPayloadTypesUnique(payload) {
