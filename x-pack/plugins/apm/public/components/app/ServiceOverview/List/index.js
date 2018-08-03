@@ -58,6 +58,7 @@ class List extends Component {
       {
         field: 'serviceName',
         name: 'Name',
+        width: '50%',
         sortable: true,
         render: serviceName => (
           <TooltipOverlay content={formatString(serviceName)}>

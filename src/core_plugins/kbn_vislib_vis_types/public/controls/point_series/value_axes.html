@@ -21,6 +21,7 @@
   >
     <div class="kuiSideBarCollapsibleTitle">
       <div
+        data-test-subj="toggleYAxisOptions-{{axis.id}}"
         class="kuiSideBarCollapsibleTitle__label"
         ng-click="isValueAxisOpen = !isValueAxisOpen"
         kbn-accessible-click
@@ -112,6 +113,7 @@
           </label>
           <div class="kuiSideBarFormRow__control">
             <select
+              data-test-subj="scaleSelectYAxis-{{axis.id}}"
               id="{{ 'valueAxisScaleType' + $index }}"
               class="kuiSelect kuiSideBarSelect"
               ng-model="axis.scale.type"
@@ -124,6 +126,7 @@
       <!-- Advanced options -->
       <div class="kuiSideBarSection">
         <a
+          data-test-subj="toggleYAxisAdvancedOptions-{{axis.id}}"
           class="kuiSideBarOptionsLink"
           ng-click="isValueAxisAdvancedOptionsOpen = !isValueAxisAdvancedOptionsOpen"
           kbn-accessible-click
@@ -166,7 +169,13 @@
                 Filter Labels
               </label>
               <div class="kuiSideBarFormRow__control">
-                <input class="kuiCheckBox" id="{{ 'valueAxisFilterLabels' + $index }}" type="checkbox" ng-model="axis.labels.filter">
+                <input
+                  data-test-subj="yAxisFilterLabelsCheckbox-{{axis.id}}"
+                  class="kuiCheckBox"
+                  id="{{ 'valueAxisFilterLabels' + $index }}"
+                  type="checkbox"
+                  ng-model="axis.labels.filter"
+                >
               </div>
             </div>
 

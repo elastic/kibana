@@ -81,7 +81,7 @@ export class LegacyPlatformService {
     if (this.params.useLegacyTestHarness) {
       // wrapped in NODE_ENV check so the `ui/test_harness` module
       // is not included in the distributable
-      if (process.env.NODE_ENV !== 'production') {
+      if (process.env.IS_KIBANA_DISTRIBUTABLE !== 'true') {
         return require('ui/test_harness');
       }
 
