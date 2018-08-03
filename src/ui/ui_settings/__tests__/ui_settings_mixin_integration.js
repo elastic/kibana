@@ -35,7 +35,13 @@ describe('uiSettingsMixin()', () => {
   const sandbox = sinon.createSandbox();
 
   async function setup() {
-    const config = await Config.withDefaultSchema();
+    const config = await Config.withDefaultSchema({
+      uiSettings: {
+        overrides: {
+          foo: 'bar'
+        }
+      }
+    });
 
     // maps of decorations passed to `server.decorate()`
     const decorations = {
@@ -105,6 +111,9 @@ describe('uiSettingsMixin()', () => {
       sinon.assert.calledOnce(uiSettingsServiceFactory);
       sinon.assert.calledWithExactly(uiSettingsServiceFactory, server, {
         foo: 'bar',
+        overrides: {
+          foo: 'bar'
+        },
         getDefaults: sinon.match.func,
       });
     });
