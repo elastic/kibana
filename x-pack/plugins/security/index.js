@@ -144,7 +144,7 @@ export const security = (kibana) => new kibana.Plugin({
       });
     });
 
-    savedObjects.addScopedSavedObjectsClientWrapperFactory(({ client, request }) => {
+    savedObjects.addScopedSavedObjectsClientWrapperFactory(Number.MIN_VALUE, ({ client, request }) => {
       if (!xpackInfoFeature.getLicenseCheckResults().allowRbac) {
         return client;
       }

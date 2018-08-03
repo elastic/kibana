@@ -64,40 +64,20 @@ test(`throws error when more than one scoped saved objects client factory is set
   }).toThrowErrorMatchingSnapshot();
 });
 
-test(`invokes and uses instance from single added wrapper factory`, () => {
+test(`invokes and uses wrappers in specified order`, () => {
   const defaultClient = Symbol();
   const defaultClientFactoryMock = jest.fn().mockReturnValue(defaultClient);
   const clientProvider = new ScopedSavedObjectsClientProvider({
     defaultClientFactory: defaultClientFactoryMock
   });
-  const wrappedClient = Symbol();
-  const clientWrapperFactoryMock = jest.fn().mockReturnValue(wrappedClient);
-  const request = Symbol();
-
-  clientProvider.addClientWrapperFactory(clientWrapperFactoryMock);
-  const actualClient = clientProvider.getClient(request);
-
-  expect(actualClient).toBe(wrappedClient);
-  expect(clientWrapperFactoryMock).toHaveBeenCalledWith({
-    request,
-    client: defaultClient
-  });
-});
-
-test(`invokes and uses wrappers in LIFO order`, () => {
-  const defaultClient = Symbol();
-  const defaultClientFactoryMock = jest.fn().mockReturnValue(defaultClient);
-  const clientProvider = new ScopedSavedObjectsClientProvider({
-    defaultClientFactory: defaultClientFactoryMock
-  });
-  const firstWrappedClient = Symbol();
+  const firstWrappedClient = Symbol('first client');
   const firstClientWrapperFactoryMock = jest.fn().mockReturnValue(firstWrappedClient);
-  const secondWrapperClient = Symbol();
+  const secondWrapperClient = Symbol('second client');
   const secondClientWrapperFactoryMock = jest.fn().mockReturnValue(secondWrapperClient);
   const request = Symbol();
 
-  clientProvider.addClientWrapperFactory(firstClientWrapperFactoryMock);
-  clientProvider.addClientWrapperFactory(secondClientWrapperFactoryMock);
+  clientProvider.addClientWrapperFactory(1, secondClientWrapperFactoryMock);
+  clientProvider.addClientWrapperFactory(0, firstClientWrapperFactoryMock);
   const actualClient = clientProvider.getClient(request);
 
   expect(actualClient).toBe(firstWrappedClient);

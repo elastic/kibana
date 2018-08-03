@@ -126,9 +126,12 @@ export default function ({ getService }) {
           statusCode: 403,
           response: createExpectLegacyForbidden(AUTHENTICATION.KIBANA_LEGACY_DASHBOARD_ONLY_USER.USERNAME),
         },
+        // We're executing the get before a delete here to ensure the object is in the right space, and it's
+        // not found. This is somewhat confusing, but the user is authorized to GET objects so it's not disclosing
+        // the existence of an object they shouldn't be able to see.
         invalidId: {
-          statusCode: 403,
-          response: createExpectLegacyForbidden(AUTHENTICATION.KIBANA_LEGACY_DASHBOARD_ONLY_USER.USERNAME),
+          statusCode: 404,
+          response: expectNotFound,
         }
       }
     });

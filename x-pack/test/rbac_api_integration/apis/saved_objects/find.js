@@ -69,50 +69,6 @@ export default function ({ getService }) {
       });
     };
 
-    const expectAllResultsIncludingInvalidTypes = (resp) => {
-      expect(resp.body).to.eql({
-        page: 1,
-        per_page: 20,
-        total: 5,
-        saved_objects: [
-          {
-            id: '91200a00-9efd-11e7-acb3-3dab96693fab',
-            type: 'index-pattern',
-            updated_at: '2017-09-21T18:49:16.270Z',
-            version: 1,
-            attributes: resp.body.saved_objects[0].attributes
-          },
-          {
-            id: '7.0.0-alpha1',
-            type: 'config',
-            updated_at: '2017-09-21T18:49:16.302Z',
-            version: 1,
-            attributes: resp.body.saved_objects[1].attributes
-          },
-          {
-            id: 'dd7caf20-9efd-11e7-acb3-3dab96693fab',
-            type: 'visualization',
-            updated_at: '2017-09-21T18:51:23.794Z',
-            version: 1,
-            attributes: resp.body.saved_objects[2].attributes
-          },
-          {
-            id: 'be3733a0-9efe-11e7-acb3-3dab96693fab',
-            type: 'dashboard',
-            updated_at: '2017-09-21T18:57:40.826Z',
-            version: 1,
-            attributes: resp.body.saved_objects[3].attributes
-          },
-          {
-            id: 'visualization:dd7caf20-9efd-11e7-acb3-3dab96693faa',
-            type: 'not-a-visualization',
-            updated_at: '2017-09-21T18:51:23.794Z',
-            version: 1
-          },
-        ]
-      });
-    };
-
     const createExpectEmpty = (page, perPage, total) => (resp) => {
       expect(resp.body).to.eql({
         page: page,
@@ -290,7 +246,7 @@ export default function ({ getService }) {
         noType: {
           description: 'all objects',
           statusCode: 200,
-          response: expectAllResultsIncludingInvalidTypes,
+          response: expectResultsWithValidTypes,
         },
       },
     });
@@ -324,7 +280,7 @@ export default function ({ getService }) {
         noType: {
           description: 'all objects',
           statusCode: 200,
-          response: expectAllResultsIncludingInvalidTypes,
+          response: expectResultsWithValidTypes,
         },
       }
     });

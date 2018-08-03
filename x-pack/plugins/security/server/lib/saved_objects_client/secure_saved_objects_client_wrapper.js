@@ -20,10 +20,10 @@ export class SecureSavedObjectsClientWrapper {
       securityContextService,
     } = options;
 
+    this.errors = errors;
     this._actions = actions;
     this._auditLogger = auditLogger;
     this._baseClient = baseClient;
-    this.errors = errors;
     this._checkPrivileges = checkPrivilegesWithRequest(request);
     this._request = request;
     this._savedObjectTypes = savedObjectTypes;

@@ -82,10 +82,10 @@ export const spaces = (kibana) => new kibana.Plugin({
     const spacesService = createSpacesService(server);
     server.decorate('server', 'spaces', spacesService);
 
-    // const { addScopedSavedObjectsClientWrapperFactory, types } = server.savedObjects;
-    // addScopedSavedObjectsClientWrapperFactory(
-    //   spacesSavedObjectsClientWrapperFactory(spacesService, types)
-    // );
+    const { addScopedSavedObjectsClientWrapperFactory, types } = server.savedObjects;
+    addScopedSavedObjectsClientWrapperFactory(Number.MAX_VALUE,
+      spacesSavedObjectsClientWrapperFactory(spacesService, types)
+    );
 
     initSpacesApi(server);
 
