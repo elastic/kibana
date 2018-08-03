@@ -215,7 +215,7 @@ export default function ({ getService, getPageObjects }) {
         });
 
         it('becomes available when saved', async () => {
-          await PageObjects.visualize.saveVisualization('my viz');
+          await PageObjects.visualize.saveVisualizationAndVerify('my viz');
           await expectEnabledGenerateReportButton();
         });
 

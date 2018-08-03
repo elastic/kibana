@@ -180,7 +180,7 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.dashboard.waitForRenderComplete();
         await dashboardExpect.pieSliceCount(3);
 
-        await PageObjects.visualize.saveVisualization('Rendering-Test:-animal-sounds-pie');
+        await PageObjects.visualize.saveVisualizationAndVerify('Rendering-Test:-animal-sounds-pie');
         await PageObjects.header.clickDashboard();
         await PageObjects.header.waitUntilLoadingHasFinished();
         await PageObjects.dashboard.waitForRenderComplete();
@@ -195,7 +195,7 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.header.waitUntilLoadingHasFinished();
         await dashboardExpect.pieSliceCount(1);
 
-        await PageObjects.visualize.saveVisualization('animal sounds pie');
+        await PageObjects.visualize.saveVisualizationAndVerify('animal sounds pie');
         await PageObjects.header.clickDashboard();
 
         await dashboardExpect.pieSliceCount(1);

@@ -630,17 +630,18 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
       });
     }
 
-    async saveVisualization(vizName, { saveAsNew = false, verifySuccess = true } = {}) {
+    async saveVisualizationAndVerify(vizName, options = {}) {
+      await this.saveVisualization(vizName, options);
+      await toasts.verifyAndDismiss('saveVisualizationSuccess');
+    }
+
+    async saveVisualization(vizName, { saveAsNew = false } = {}) {
       await this.ensureSavePanelOpen();
       await testSubjects.setValue('visTitleInput', vizName);
       log.debug('click submit button');
       await testSubjects.click('saveVisualizationButton');
       if (saveAsNew) {
         await testSubjects.click('saveAsNewCheckbox');
-      }
-
-      if (verifySuccess) {
-        await toasts.verifyAndDismiss('saveVisualizationSuccess');
       }
     }
 

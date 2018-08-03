@@ -34,7 +34,7 @@ export function DashboardVisualizationProvider({ getService, getPageObjects }) {
       await dashboardAddPanel.ensureAddPanelIsShowing();
       await dashboardAddPanel.clickAddNewEmbeddableLink();
       await PageObjects.visualize.clickVisualBuilder();
-      await PageObjects.visualize.saveVisualization(name);
+      await PageObjects.visualize.saveVisualizationAndVerify(name);
     }
 
     async createSavedSearch({ name, query, fields }) {
@@ -81,7 +81,7 @@ export function DashboardVisualizationProvider({ getService, getPageObjects }) {
       await PageObjects.visualize.clickMarkdownWidget();
       await PageObjects.visualize.setMarkdownTxt(markdown);
       await PageObjects.visualize.clickGo();
-      await PageObjects.visualize.saveVisualization(name);
+      await PageObjects.visualize.saveVisualizationAndVerify(name);
     }
   };
 }
