@@ -34,6 +34,22 @@ interface BeatsPageState {
   tableRef: any;
 }
 
+let pinging = false;
+const pingForBeatWithToken = async(libs: FrontendLibs,token: string): Promise<CMBeat | void> => {
+  try {
+      const beats = await libs.beats.getBeatWithToken(token);
+
+      if(!beats) { throw new Error('no beats') }
+      return beats;
+  } catch(err) {
+    if(pinging) {
+      const timeout = (ms:number) => new Promise(res => setTimeout(res, ms))
+      await timeout(5000)
+      return await pingForBeatWithToken(libs, token);
+    }
+  }
+}
+
 export class BeatsPage extends React.PureComponent<BeatsPageProps, BeatsPageState> {
   public static ActionArea = ({
     match,
@@ -59,6 +75,9 @@ export class BeatsPage extends React.PureComponent<BeatsPageProps, BeatsPageStat
         onClick={async () => {
           const token = await libs.tokens.createEnrollmentToken();
           history.push(`/beats/enroll/${token}`);
+          pinging = true;
+          await pingForBeatWithToken(libs, token);
+          pinging = false
         }}
       >
         Enroll Beats
@@ -66,7 +85,7 @@ export class BeatsPage extends React.PureComponent<BeatsPageProps, BeatsPageStat
 
       {match.params.enrollmentToken != null && (
         <EuiOverlayMask>
-          <EuiModal onClose={() => history.push('/beats')} style={{ width: '600px' }}>
+          <EuiModal onClose={() => { history.push('/beats'); pinging = false}} style={{ width: '640px' }}>
             <EuiModalHeader>
             <EuiModalHeaderTitle>Enroll a new Beat</EuiModalHeaderTitle>
             </EuiModalHeader>

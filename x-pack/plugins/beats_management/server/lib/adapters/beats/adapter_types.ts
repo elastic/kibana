@@ -11,8 +11,9 @@ export interface CMBeatsAdapter {
   insert(beat: CMBeat): Promise<void>;
   update(beat: CMBeat): Promise<void>;
   get(user: FrameworkUser, id: string): Promise<CMBeat | null>;
-  getAll(user: FrameworkUser): Promise<CMBeat>;
+  getAll(user: FrameworkUser): Promise<CMBeat[]>;
   getWithIds(user: FrameworkUser, beatIds: string[]): Promise<CMBeat[]>;
+  getBeatWithToken(user: FrameworkUser, enrollmentToken: string): Promise<CMBeat | null>;
   removeTagsFromBeats(
     user: FrameworkUser,
     removals: BeatsTagAssignment[]

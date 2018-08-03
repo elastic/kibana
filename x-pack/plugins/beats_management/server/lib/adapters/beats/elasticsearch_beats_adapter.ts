@@ -86,6 +86,34 @@ export class ElasticsearchBeatsAdapter implements CMBeatsAdapter {
       .map((b: any) => b._source.beat);
   }
 
+  public async getBeatWithToken(
+    user: FrameworkUser,
+    enrollmentToken: string
+  ): Promise<CMBeat | null> {
+    const params = {
+      ignore: [404],
+      index: INDEX_NAMES.BEATS,
+      type: '_doc',
+      q: 'type:beat',
+      body: {
+        query: {
+          bool: {
+            must: [{ match: { enrollment_token: enrollmentToken } }],
+          },
+        },
+      },
+    };
+
+    const response = await this.database.search(user, params);
+    const beats = _get<CMBeat[]>(response, 'hits.hits', []);
+
+    if (beats.length === 0) {
+      return null;
+    }
+
+    return beats[0];
+  }
+
   public async getAll(user: FrameworkUser) {
     const params = {
       index: INDEX_NAMES.BEATS,
