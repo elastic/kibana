@@ -54,7 +54,6 @@ describe('UiExports', function () {
       kbnServer = new KbnServer({
         server: { port: 0 }, // pick a random open port
         logging: { silent: true }, // no logs
-        optimize: { enabled: false },
         plugins: {
           paths: [resolve(__dirname, './fixtures/test_app')] // inject an app so we can hit /app/{id}
         },

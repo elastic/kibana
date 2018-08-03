@@ -34,14 +34,8 @@ import { uiSettingsMixin } from '../ui_settings_mixin';
 describe('uiSettingsMixin()', () => {
   const sandbox = sinon.createSandbox();
 
-  async function setup(options = {}) {
-    const {
-      enabled = true
-    } = options;
-
-    const config = await Config.withDefaultSchema({
-      uiSettings: { enabled }
-    });
+  async function setup() {
+    const config = await Config.withDefaultSchema();
 
     // maps of decorations passed to `server.decorate()`
     const decorations = {
