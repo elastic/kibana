@@ -33,6 +33,9 @@ import {
   uninstallSampleDataSet
 } from '../sample_data_sets';
 
+const INSTALLED_STATUS = 'installed';
+const UNINSTALLED_STATUS = 'not_installed';
+
 export class SampleDataSetCard extends React.Component {
 
   constructor(props) {
@@ -40,16 +43,22 @@ export class SampleDataSetCard extends React.Component {
 
     this.state = {
       isProcessingRequest: false,
+      status: this.props.status,
     };
   }
 
-  startRequest = async () => {
+  static getDerivedStateFromProps(nextProps) {
+    return {
+      status: nextProps.status,
+    };
+  }
+
+  install = async () => {
     const {
       getConfig,
       setConfig,
       id,
       name,
-      onRequestComplete,
       defaultIndex,
       clearIndexPatternsCache,
     } = this.props;
@@ -58,26 +67,38 @@ export class SampleDataSetCard extends React.Component {
       isProcessingRequest: true,
     });
 
-    if (this.isInstalled()) {
-      await uninstallSampleDataSet(id, name, defaultIndex, getConfig, setConfig, clearIndexPatternsCache);
-    } else {
-      await installSampleDataSet(id, name, defaultIndex, getConfig, setConfig, clearIndexPatternsCache);
-    }
+    const isSuccess = await installSampleDataSet(id, name, defaultIndex, getConfig, setConfig, clearIndexPatternsCache);
 
-    onRequestComplete();
+    this.setState({
+      isProcessingRequest: false,
+      status: isSuccess ? INSTALLED_STATUS : UNINSTALLED_STATUS
+    });
   }
 
-  static getDerivedStateFromProps(nextProps, state) {
-    // Only reset isProcessingRequest once onRequestComplete has completed, allowing for updated props
-    if (state.isProcessingRequest) {
-      return {
-        isProcessingRequest: false,
-      };
-    }
+  uninstall = async () => {
+    const {
+      getConfig,
+      setConfig,
+      id,
+      name,
+      defaultIndex,
+      clearIndexPatternsCache,
+    } = this.props;
+
+    this.setState({
+      isProcessingRequest: true,
+    });
+
+    const isSuccess = await uninstallSampleDataSet(id, name, defaultIndex, getConfig, setConfig, clearIndexPatternsCache);
+
+    this.setState({
+      isProcessingRequest: false,
+      status: isSuccess ? UNINSTALLED_STATUS : INSTALLED_STATUS
+    });
   }
 
   isInstalled = () => {
-    if (this.props.status === 'installed') {
+    if (this.state.status === 'installed') {
       return true;
     }
 
@@ -85,14 +106,14 @@ export class SampleDataSetCard extends React.Component {
   }
 
   renderBtn = () => {
-    switch (this.props.status) {
-      case 'installed':
+    switch (this.state.status) {
+      case INSTALLED_STATUS:
         return (
           <EuiFlexGroup justifyContent="spaceBetween">
             <EuiFlexItem grow={false}>
               <EuiButtonEmpty
                 isLoading={this.state.isProcessingRequest}
-                onClick={this.startRequest}
+                onClick={this.uninstall}
                 color="danger"
                 data-test-subj={`removeSampleDataSet${this.props.id}`}
               >
@@ -110,13 +131,13 @@ export class SampleDataSetCard extends React.Component {
           </EuiFlexGroup>
         );
 
-      case 'not_installed':
+      case UNINSTALLED_STATUS:
         return (
           <EuiFlexGroup justifyContent="flexEnd">
             <EuiFlexItem grow={false}>
               <EuiButton
                 isLoading={this.state.isProcessingRequest}
-                onClick={this.startRequest}
+                onClick={this.install}
                 data-test-subj={`addSampleDataSet${this.props.id}`}
               >
                 {this.state.isProcessingRequest ? 'Adding' : 'Add'}
@@ -167,12 +188,11 @@ SampleDataSetCard.propTypes = {
   name: PropTypes.string.isRequired,
   launchUrl: PropTypes.string.isRequired,
   status: PropTypes.oneOf([
-    'installed',
-    'not_installed',
+    INSTALLED_STATUS,
+    UNINSTALLED_STATUS,
     'unknown',
   ]).isRequired,
   statusMsg: PropTypes.string,
-  onRequestComplete: PropTypes.func.isRequired,
   getConfig: PropTypes.func.isRequired,
   setConfig: PropTypes.func.isRequired,
   clearIndexPatternsCache: PropTypes.func.isRequired,

@@ -66,7 +66,7 @@ export async function installSampleDataSet(id, name, defaultIndex, getConfig, se
       title: `Unable to install sample data set: ${name}`,
       text: `${err.message}`,
     });
-    return;
+    return false;
   }
 
   const existingDefaultIndex = await getConfig('defaultIndex');
@@ -80,6 +80,8 @@ export async function installSampleDataSet(id, name, defaultIndex, getConfig, se
     title: `${name} installed`,
     ['data-test-subj']: 'sampleDataSetInstallToast'
   });
+
+  return true;
 }
 
 export async function uninstallSampleDataSet(id, name, defaultIndex, getConfig, setConfig, clearIndexPatternsCache) {
@@ -98,7 +100,7 @@ export async function uninstallSampleDataSet(id, name, defaultIndex, getConfig, 
       title: `Unable to uninstall sample data set`,
       text: `${err.message}`,
     });
-    return;
+    return false;
   }
 
   const existingDefaultIndex = await getConfig('defaultIndex');
@@ -112,4 +114,6 @@ export async function uninstallSampleDataSet(id, name, defaultIndex, getConfig, 
     title: `${name} uninstalled`,
     ['data-test-subj']: 'sampleDataSetUninstallToast'
   });
+
+  return true;
 }
