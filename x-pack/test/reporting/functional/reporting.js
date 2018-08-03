@@ -16,11 +16,12 @@ const mkdirAsync = promisify(mkdirp);
 const REPORTS_FOLDER = path.resolve(__dirname, 'reports');
 
 export default function ({ getService, getPageObjects }) {
+  const PageObjects = getPageObjects(['reporting', 'common', 'dashboard', 'header', 'discover', 'visualize']);
   const retry = getService('retry');
   const kibanaServer = getService('kibanaServer');
   const config = getService('config');
-  const PageObjects = getPageObjects(['reporting', 'common', 'dashboard', 'header', 'discover', 'visualize']);
   const log = getService('log');
+  const toasts = getService('toasts');
 
   describe('Reporting', () => {
 
@@ -48,8 +49,7 @@ export default function ({ getService, getPageObjects }) {
 
     const expectReportCanBeCreated = async () => {
       await PageObjects.reporting.clickGenerateReportButton();
-      const success = await PageObjects.reporting.checkForReportingToasts();
-      expect(success).to.be(true);
+      await toasts.verifyAndDismiss('completeReportSuccess');
     };
 
     const writeSessionReport = async (name, rawPdf) => {
