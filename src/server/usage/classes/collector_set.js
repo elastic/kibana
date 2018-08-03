@@ -44,7 +44,8 @@ export class CollectorSet {
      */
     this.makeStatsCollector = options => new Collector(server, options);
     this.makeUsageCollector = options => new UsageCollector(server, options);
-    this.makeCollectorSetFromArray = collectorsArray => new CollectorSet(server, collectorsArray);
+
+    this._makeCollectorSetFromArray = collectorsArray => new CollectorSet(server, collectorsArray);
   }
 
   /*
@@ -73,12 +74,12 @@ export class CollectorSet {
    * @param {Object} fetchMechanisms - an object with a callCluster function and a savedObjectsClient object
    * @param {Array} collectors - an array of collectors, default to all registered collectors
    */
-  bulkFetch(fetchMechanisms, collectors = this._collectors) {
-    if (!Array.isArray(collectors)) {
+  bulkFetch(fetchMechanisms, collectors = this) {
+    if (!(collectors instanceof CollectorSet)) {
       throw new Error(`bulkFetch method given bad collectors parameter: ` + typeof collectors);
     }
 
-    return Promise.map(collectors, collector => {
+    const fetchPromises = collectors.map(collector => {
       const collectorType = collector.type;
       this._log.debug(`Fetching data from ${collectorType} collector`);
       return Promise.props({
@@ -90,13 +91,10 @@ export class CollectorSet {
           this._log.warn(`Unable to fetch data from ${collectorType} collector`);
         });
     });
+    return Promise.all(fetchPromises);
   }
 
-  bulkFormat(data, collectors = this._collectors) {
-    if (!Array.isArray(collectors)) {
-      throw new Error(`bulkFormat method given bad collectors parameter: ` + typeof collectors);
-    }
-
+  bulkFormat(data) {
     return data.reduce((accum, { type, result }) => {
       if (isEmpty(result)) {
         return accum;
@@ -115,7 +113,7 @@ export class CollectorSet {
    */
   getFilteredCollectorSet(filter) {
     const filtered = this._collectors.filter(filter);
-    return this.makeCollectorSetFromArray(filtered);
+    return this._makeCollectorSetFromArray(filtered);
   }
 
   async bulkFetchUsage(fetchMechanisms) {
@@ -162,5 +160,9 @@ export class CollectorSet {
         [newName]: getValueOrRecurse(value),
       };
     }, {});
+  }
+
+  map(mapFn) {
+    return this._collectors.map(mapFn);
   }
 }
