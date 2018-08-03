@@ -17,6 +17,7 @@
  * under the License.
  */
 
+// @ts-ignore
 import { Client } from 'elasticsearch';
 import { get } from 'lodash';
 

@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { schema } from '@kbn/utils';
+import { schema } from '../config/schema';
 
 /**
  * @internal

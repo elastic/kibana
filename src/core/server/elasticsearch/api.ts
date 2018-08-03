@@ -17,8 +17,8 @@
  * under the License.
  */
 
-import { LoggerFactory } from '../../logging';
 import { Router } from '../http';
+import { LoggerFactory } from '../logging';
 import { ElasticsearchService } from './elasticsearch_service';
 
 export function registerElasticsearchRoutes(
