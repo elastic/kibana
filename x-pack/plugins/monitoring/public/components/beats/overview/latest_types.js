@@ -17,12 +17,10 @@ export function LatestTypes({ latestTypes }) {
       columns={[
         {
           field: 'type',
-          name: 'Type',
         },
         {
           field: 'count',
           dataType: 'number',
-          name: 'Count'
         }
       ]}
     />

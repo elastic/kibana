@@ -30,12 +30,10 @@ export function LatestActive({ latestActive }) {
       columns={[
         {
           field: 'range',
-          name: 'Range',
         },
         {
           field: 'count',
           dataType: 'number',
-          name: 'Count'
         }
       ]}
     />

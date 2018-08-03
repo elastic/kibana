@@ -17,12 +17,10 @@ export function LatestVersions({ latestVersions }) {
       columns={[
         {
           field: 'version',
-          name: 'Version',
         },
         {
           field: 'count',
           dataType: 'number',
-          name: 'Count'
         }
       ]}
     />

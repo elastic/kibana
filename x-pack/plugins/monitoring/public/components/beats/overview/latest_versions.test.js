@@ -6,7 +6,6 @@
 
 import React from 'react';
 import { shallow } from 'enzyme';
-
 import { LatestVersions } from './latest_versions';
 
 describe('Latest Versions', () => {
