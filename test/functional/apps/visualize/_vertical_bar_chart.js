@@ -115,7 +115,7 @@ export default function ({ getService, getPageObjects }) {
       expect(data).to.eql(expectedChartData);
     });
 
-    describe('switch between Y axis scale types', () => {
+    describe.skip('switch between Y axis scale types', () => {
       before(initBarChart);
       const axisId = 'ValueAxis-1';
 
