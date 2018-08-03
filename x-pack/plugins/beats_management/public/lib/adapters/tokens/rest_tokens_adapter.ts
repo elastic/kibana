@@ -5,13 +5,14 @@
  */
 
 import { RestAPIAdapter } from '../rest_api/adapter_types';
-import { CMTokensAdapter, TokenEnrollmentData } from './adapter_types';
+import { CMTokensAdapter } from './adapter_types';
 
 export class RestTokensAdapter implements CMTokensAdapter {
   constructor(private readonly REST: RestAPIAdapter) {}
 
-  public async createEnrollmentToken(): Promise<TokenEnrollmentData> {
-    const tokens = await this.REST.post<TokenEnrollmentData[]>('/api/beats/enrollment_tokens');
+  public async createEnrollmentToken(): Promise<string> {
+    const tokens = (await this.REST.post<{ tokens: string[] }>('/api/beats/enrollment_tokens'))
+      .tokens;
     return tokens[0];
   }
 }

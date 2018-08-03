@@ -52,7 +52,7 @@ export default function ({ getService }) {
       });
     });
 
-    it('should enroll beat in an unverified state', async () => {
+    it('should enroll beat in a verified state', async () => {
       await supertest
         .post(`/api/beats/agent/${beatId}`)
         .set('kbn-xsrf', 'xxx')

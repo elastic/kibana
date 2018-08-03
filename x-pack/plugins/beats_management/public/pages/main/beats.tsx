@@ -7,15 +7,7 @@
 import {
   // @ts-ignore typings for EuiBadge not present in current version
   EuiBadge,
-  EuiButton,
-  EuiButtonEmpty,
   EuiFlexItem,
-  EuiModal,
-  EuiModalBody,
-  EuiModalFooter,
-  EuiModalHeader,
-  EuiModalHeaderTitle,
-  EuiOverlayMask,
 } from '@elastic/eui';
 
 import React from 'react';
@@ -23,9 +15,11 @@ import { BeatTag, CMBeat, CMPopulatedBeat } from '../../../common/domain_types';
 import { BeatsTagAssignment } from '../../../server/lib/adapters/beats/adapter_types';
 import { BeatsTableType, Table } from '../../components/table';
 import { FrontendLibs } from '../../lib/lib';
+import { BeatsActionArea } from './beats_action_area';
 
 interface BeatsPageProps {
   libs: FrontendLibs;
+  location: any;
 }
 
 interface BeatsPageState {
@@ -35,45 +29,7 @@ interface BeatsPageState {
 }
 
 export class BeatsPage extends React.PureComponent<BeatsPageProps, BeatsPageState> {
-  public static ActionArea = ({ match, history }: { match: any; history: any }) => (
-    <div>
-      <EuiButtonEmpty
-        onClick={() => {
-          window.alert('This will later go to more general beats install instructions.');
-          window.location.href = '#/home/tutorial/dockerMetrics';
-        }}
-      >
-        Learn how to install beats
-      </EuiButtonEmpty>
-      <EuiButton
-        size="s"
-        color="primary"
-        onClick={() => {
-          history.push('/beats/enroll/foobar');
-        }}
-      >
-        Enroll Beats
-      </EuiButton>
-
-      {match.params.enrollmentToken != null && (
-        <EuiOverlayMask>
-          <EuiModal onClose={() => history.push('/beats')} style={{ width: '800px' }}>
-            <EuiModalHeader>
-              <EuiModalHeaderTitle>Enroll Beats</EuiModalHeaderTitle>
-            </EuiModalHeader>
-
-            <EuiModalBody>
-              Enrollment UI here for enrollment token of: {match.params.enrollmentToken}
-            </EuiModalBody>
-
-            <EuiModalFooter>
-              <EuiButtonEmpty onClick={() => history.push('/beats')}>Cancel</EuiButtonEmpty>
-            </EuiModalFooter>
-          </EuiModal>
-        </EuiOverlayMask>
-      )}
-    </div>
-  );
+  public static ActionArea = BeatsActionArea;
   constructor(props: BeatsPageProps) {
     super(props);
 
@@ -85,13 +41,18 @@ export class BeatsPage extends React.PureComponent<BeatsPageProps, BeatsPageStat
 
     this.loadBeats();
   }
+  public componentDidUpdate(prevProps: any) {
+    if (this.props.location !== prevProps.location) {
+      this.loadBeats();
+    }
+  }
   public render() {
     return (
       <Table
         actionHandler={this.handleBeatsActions}
         assignmentOptions={this.state.tags}
         assignmentTitle="Set tags"
-        items={this.state.beats}
+        items={this.state.beats || []}
         ref={this.state.tableRef}
         type={BeatsTableType}
       />
