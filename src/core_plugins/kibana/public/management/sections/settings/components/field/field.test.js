@@ -42,7 +42,7 @@ const settings = {
     value: undefined,
     defVal: ['default_value'],
     isCustom: false,
-    isOverridden: false,
+    isControlledByServer: false,
     options: null,
   },
   boolean: {
@@ -54,7 +54,7 @@ const settings = {
     value: undefined,
     defVal: true,
     isCustom: false,
-    isOverridden: false,
+    isControlledByServer: false,
     options: null,
   },
   image: {
@@ -66,7 +66,7 @@ const settings = {
     value: undefined,
     defVal: null,
     isCustom: false,
-    isOverridden: false,
+    isControlledByServer: false,
     options: {
       maxSize: {
         length: 1000,
@@ -84,7 +84,7 @@ const settings = {
     value: '{"foo": "bar"}',
     defVal: '{}',
     isCustom: false,
-    isOverridden: false,
+    isControlledByServer: false,
     options: null,
   },
   markdown: {
@@ -96,7 +96,7 @@ const settings = {
     value: undefined,
     defVal: '',
     isCustom: false,
-    isOverridden: false,
+    isControlledByServer: false,
     options: null,
   },
   number: {
@@ -108,7 +108,7 @@ const settings = {
     value: undefined,
     defVal: 5,
     isCustom: false,
-    isOverridden: false,
+    isControlledByServer: false,
     options: null,
   },
   select: {
@@ -120,7 +120,7 @@ const settings = {
     value: undefined,
     defVal: 'orange',
     isCustom: false,
-    isOverridden: false,
+    isControlledByServer: false,
     options: ['apple', 'orange', 'banana'],
   },
   string: {
@@ -132,7 +132,7 @@ const settings = {
     value: undefined,
     defVal: null,
     isCustom: false,
-    isOverridden: false,
+    isControlledByServer: false,
     options: null,
   },
 };
@@ -172,7 +172,7 @@ describe('Field', () => {
             setting={{
               ...setting,
               value: userValues[type],
-              isOverridden: true,
+              isControlledByServer: true,
             }}
             save={save}
             clear={clear}

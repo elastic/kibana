@@ -61,7 +61,7 @@ export function docMissingSuite() {
         settings: {
           foo: {
             userValue: 'bar',
-            isOverridden: true
+            isControlledByServer: true
           }
         }
       });
@@ -90,7 +90,7 @@ export function docMissingSuite() {
           },
           foo: {
             userValue: 'bar',
-            isOverridden: true
+            isControlledByServer: true
           }
         }
       });
@@ -121,7 +121,7 @@ export function docMissingSuite() {
           },
           foo: {
             userValue: 'bar',
-            isOverridden: true
+            isControlledByServer: true
           }
         }
       });
@@ -145,7 +145,7 @@ export function docMissingSuite() {
           },
           foo: {
             userValue: 'bar',
-            isOverridden: true
+            isControlledByServer: true
           }
         }
       });

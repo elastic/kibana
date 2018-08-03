@@ -360,7 +360,7 @@ describe('ui settings', () => {
         },
         foo: {
           userValue: 'bar',
-          isOverridden: true,
+          isControlledByServer: true,
         },
       });
     });
@@ -408,7 +408,7 @@ describe('ui settings', () => {
       expect(result).to.eql({
         foo: {
           userValue: true,
-          isOverridden: true,
+          isControlledByServer: true,
         },
         key: {
           value: defaults.key.value,
@@ -530,22 +530,22 @@ describe('ui settings', () => {
     });
   });
 
-  describe('#isOverridden()', () => {
+  describe('#isControlledByServer()', () => {
     it('returns false if no overrides defined', () => {
       const { uiSettings } = setup();
-      expect(uiSettings.isOverridden('foo')).to.be(false);
+      expect(uiSettings.isControlledByServer('foo')).to.be(false);
     });
     it('returns false if overrides defined but key is not included', () => {
       const { uiSettings } = setup({ overrides: { foo: true, bar: true } });
-      expect(uiSettings.isOverridden('baz')).to.be(false);
+      expect(uiSettings.isControlledByServer('baz')).to.be(false);
     });
     it('returns false for object prototype properties', () => {
       const { uiSettings } = setup({ overrides: { foo: true, bar: true } });
-      expect(uiSettings.isOverridden('hasOwnProperty')).to.be(false);
+      expect(uiSettings.isControlledByServer('hasOwnProperty')).to.be(false);
     });
     it('returns true if overrides defined and key is overridden', () => {
       const { uiSettings } = setup({ overrides: { foo: true, bar: true } });
-      expect(uiSettings.isOverridden('bar')).to.be(true);
+      expect(uiSettings.isControlledByServer('bar')).to.be(true);
     });
   });
 

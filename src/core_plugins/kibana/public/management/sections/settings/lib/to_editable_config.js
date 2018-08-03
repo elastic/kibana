@@ -27,7 +27,7 @@ import { DEFAULT_CATEGORY } from './default_category';
  * @param {object} current value of setting
  * @returns {object} the editable config object
  */
-export function toEditableConfig({ def, name, value, isCustom, isOverridden }) {
+export function toEditableConfig({ def, name, value, isCustom, isControlledByServer }) {
   if (!def) {
     def = {};
   }
@@ -38,7 +38,7 @@ export function toEditableConfig({ def, name, value, isCustom, isOverridden }) {
     value,
     category: def.category && def.category.length ? def.category : [DEFAULT_CATEGORY],
     isCustom,
-    isOverridden,
+    isControlledByServer,
     readonly: !!def.readonly,
     defVal: def.value,
     type: getValType(def, value),
