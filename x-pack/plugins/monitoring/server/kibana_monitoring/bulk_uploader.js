@@ -100,7 +100,7 @@ export class BulkUploader {
       callCluster: this._callClusterWithInternalUser,
       savedObjectsClient: this._savedObjectsClient,
     });
-    const payload = BulkUploader.getCollectedData(data, collectorSet);
+    const payload = BulkUploader.toBulkUploadFormat(data, collectorSet);
 
     if (payload) {
       try {
@@ -150,7 +150,7 @@ export class BulkUploader {
    * Bulk stats are transformed into a bulk upload format
    * Non-legacy transformation is done in CollectorSet.toApiStats
    */
-  static getCollectedData(uploadData, collectorSet) {
+  static toBulkUploadFormat(uploadData, collectorSet) {
     if (compact(uploadData).length > 0) {
       return flatten(BulkUploader.deepMergeUploadData(uploadData, collectorSet));
     }
