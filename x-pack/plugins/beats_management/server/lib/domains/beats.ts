@@ -14,28 +14,33 @@ import { FrameworkUser } from '../adapters/framework/adapter_types';
 
 import { CMAssignmentReturn } from '../adapters/beats/adapter_types';
 import { BeatsRemovalReturn } from '../adapters/beats/adapter_types';
-import { BeatEnrollmentStatus, CMDomainLibs } from '../lib';
+import { BeatEnrollmentStatus, CMDomainLibs, CMServerLibs } from '../lib';
 
 export class CMBeatsDomain {
-  private adapter: CMBeatsAdapter;
   private tags: CMDomainLibs['tags'];
   private tokens: CMDomainLibs['tokens'];
+  private framework: CMServerLibs['framework'];
 
   constructor(
-    adapter: CMBeatsAdapter,
-    libs: { tags: CMDomainLibs['tags']; tokens: CMDomainLibs['tokens'] }
+    private readonly adapter: CMBeatsAdapter,
+    libs: {
+      tags: CMDomainLibs['tags'];
+      tokens: CMDomainLibs['tokens'];
+      framework: CMServerLibs['framework'];
+    }
   ) {
     this.adapter = adapter;
     this.tags = libs.tags;
     this.tokens = libs.tokens;
+    this.framework = libs.framework;
   }
 
-  public async getById(beatId: string) {
-    return await this.adapter.get(beatId);
+  public async getById(user: FrameworkUser, beatId: string) {
+    return await this.adapter.get(user, beatId);
   }
 
   public async update(beatId: string, accessToken: string, beatData: Partial<CMBeat>) {
-    const beat = await this.adapter.get(beatId);
+    const beat = await this.adapter.get(this.framework.internalUser, beatId);
 
     const { verified: isAccessTokenValid } = this.tokens.verifyToken(
       beat ? beat.access_token : '',
@@ -190,6 +195,7 @@ function addNonExistentItemToResponse(
 ) {
   assignments.forEach(({ beatId, tag }: BeatsTagAssignment, idx: any) => {
     const isBeatNonExistent = nonExistentBeatIds.includes(beatId);
+
     const isTagNonExistent = nonExistentTags.includes(tag);
 
     if (isBeatNonExistent && isTagNonExistent) {

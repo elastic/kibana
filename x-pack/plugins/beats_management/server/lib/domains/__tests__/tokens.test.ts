@@ -28,7 +28,7 @@ describe('Token Domain Lib', () => {
 
   beforeEach(async () => {
     tokensDB = [];
-    framework = new TestingBackendFrameworkAdapter(null, settings);
+    framework = new TestingBackendFrameworkAdapter(settings);
 
     tokensLib = new CMTokensDomain(new MemoryTokensAdapter(tokensDB), {
       framework,

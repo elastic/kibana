@@ -12,6 +12,8 @@ import { wrapEsError } from '../../utils/error_wrappers';
 // TODO: add license check pre-hook
 // TODO: write to Kibana audit log file (include who did the verification as well)
 export const createBeatUpdateRoute = (libs: CMServerLibs) => ({
+  method: 'PUT',
+  path: '/api/beats/agent/{beatId}',
   config: {
     auth: false,
     validate: {
@@ -56,6 +58,4 @@ export const createBeatUpdateRoute = (libs: CMServerLibs) => ({
       return reply(wrapEsError(err));
     }
   },
-  method: 'PUT',
-  path: '/api/beats/agent/{beatId}',
 });
