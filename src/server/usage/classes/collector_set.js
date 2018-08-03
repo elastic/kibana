@@ -46,6 +46,7 @@ export class CollectorSet {
      */
     this.makeStatsCollector = options => new Collector(server, options);
     this.makeUsageCollector = options => new UsageCollector(server, options);
+    this.makeCollectorSetFromArray = collectorsArray => new CollectorSet(server, collectorsArray);
   }
 
   /*
@@ -111,9 +112,17 @@ export class CollectorSet {
     }, []);
   }
 
-  async bulkFetchUsage(callCluster) {
-    const usageCollectors = this._collectors.filter(c => c instanceof UsageCollector);
-    return this.bulkFetch(callCluster, usageCollectors);
+  /*
+   * @return {new CollectorSet}
+   */
+  getFilteredCollectorSet(filter) {
+    const filtered = this._collectors.filter(filter);
+    return this.makeCollectorSetFromArray(filtered);
+  }
+
+  async bulkFetchUsage(fetchMechanisms) {
+    const usageCollectors = this.getFilteredCollectorSet(c => c instanceof UsageCollector);
+    return this.bulkFetch(fetchMechanisms, usageCollectors);
   }
 
   // convert an array of fetched stats results into key/object

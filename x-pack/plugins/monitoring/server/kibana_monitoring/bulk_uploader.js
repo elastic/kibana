@@ -66,9 +66,12 @@ export class BulkUploader {
    */
   start(collectorSet) {
     this._log.info('Starting monitoring stats collection');
-    this._fetchAndUpload(collectorSet); // initial fetch
+
+    // filter out API-only collectors
+    const filterThem = _collectorSet => _collectorSet.getFilteredCollectorSet(c => c.internalIgnore !== true);
+    this._fetchAndUpload(filterThem(collectorSet)); // initial fetch
     this._timer = setInterval(() => {
-      this._fetchAndUpload(collectorSet);
+      this._fetchAndUpload(filterThem(collectorSet));
     }, this._interval);
   }
 
