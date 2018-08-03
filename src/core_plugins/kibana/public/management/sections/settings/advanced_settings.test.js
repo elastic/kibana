@@ -19,6 +19,7 @@
 
 import React from 'react';
 import { shallow } from 'enzyme';
+import dedent from 'dedent';
 
 import { AdvancedSettings } from './advanced_settings';
 
@@ -44,6 +45,7 @@ const config = {
   set: () => {},
   remove: () => {},
   isCustom: (setting) => setting.isCustom,
+  isOverridden: (key) => key.startsWith('test:overridden'),
   getAll: () => {
     return {
       'test:array:setting': {
@@ -108,6 +110,35 @@ const config = {
         description: 'Description for Test custom string setting',
         type: 'string',
         isCustom: true,
+      },
+      'test:overridden:string': {
+        value: 'foo',
+        name: 'An overridden string',
+        description: 'Description for overridden string',
+        type: 'string',
+      },
+      'test:overridden:number': {
+        value: 1234,
+        name: 'An overridden number',
+        description: 'Description for overridden number',
+        type: 'number',
+      },
+      'test:overridden:json': {
+        value: dedent`
+          {
+            "foo": "bar"
+          }
+        `,
+        name: 'An overridden json',
+        description: 'Description for overridden json',
+        type: 'json',
+      },
+      'test:overridden:select': {
+        value: 'orange',
+        name: 'Test overridden select setting',
+        description: 'Description for overridden select setting',
+        type: 'select',
+        options: ['apple', 'orange', 'banana'],
       },
     };
   }
