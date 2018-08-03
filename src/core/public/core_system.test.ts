@@ -199,7 +199,7 @@ describe('LegacyPlatform targetDomElement', () => {
     });
 
     // targetDomElement should not have a parent element when the LegacyPlatformService is constructed
-    const { targetDomElement } = MockLegacyPlatformService.mock.calls[0][0];
+    const [[{ targetDomElement }]] = MockLegacyPlatformService.mock.calls;
     expect(targetDomElement).toHaveProperty('parentElement', null);
 
     // starting the core system should mount the targetDomElement as a child of the rootDomElement
