@@ -26,7 +26,7 @@ export class Collector {
    * @param {Function} options.init (optional) - initialization function
    * @param {Function} options.fetch - function to query data
    */
-  constructor(server, { type, init, fetch, formatForBulkUpload } = {}) {
+  constructor(server, { type, init, fetch, formatForBulkUpload = null } = {}) {
     if (type === undefined) {
       throw new Error('Collector must be instantiated with a options.type string property');
     }

@@ -23,6 +23,12 @@ import { getCollectorLogger } from '../lib';
 import { Collector } from './collector';
 import { UsageCollector } from './usage_collector';
 
+function defaultFormatterForBulkUpload(collector, result) {
+  return [
+    { type: collector.type, payload: result }
+  ];
+}
+
 /*
  * A collector object has types registered into it with the register(type)
  * function. Each type that gets registered defines how to fetch its own data
@@ -92,6 +98,10 @@ export class CollectorSet {
     });
   }
 
+  getCollectorByType(type, collectors = this._collectors) {
+    return collectors.find(collector => collector.type === type);
+  }
+
   bulkFormat(data, collectors = this._collectors) {
     if (!Array.isArray(collectors)) {
       throw new Error(`bulkFormat method given bad collectors parameter: ` + typeof collectors);
@@ -101,11 +111,9 @@ export class CollectorSet {
       if (isEmpty(collectedData)) {
         return accum;
       }
-      const collector = collectors.find(_c => _c.type === collectedData.type);
-      const defaultFormatterForBulkUpload = result => ([
-        { type: collector.type, payload: result }
-      ]);
-      const formatter = collector.formatForBulkUpload || defaultFormatterForBulkUpload;
+
+      const collector = this.getCollectorByType(collectedData.type);
+      const formatter = collector.formatForBulkUpload || defaultFormatterForBulkUpload.bind(null, collector);
       accum.push(formatter(collectedData.result));
       return accum;
     }, []);
