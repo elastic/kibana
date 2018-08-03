@@ -98,10 +98,6 @@ export class CollectorSet {
     });
   }
 
-  getCollectorByType(type, collectors = this._collectors) {
-    return collectors.find(collector => collector.type === type);
-  }
-
   bulkFormat(data, collectors = this._collectors) {
     if (!Array.isArray(collectors)) {
       throw new Error(`bulkFormat method given bad collectors parameter: ` + typeof collectors);
