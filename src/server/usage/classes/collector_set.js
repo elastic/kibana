@@ -23,12 +23,6 @@ import { getCollectorLogger } from '../lib';
 import { Collector } from './collector';
 import { UsageCollector } from './usage_collector';
 
-function defaultFormatterForBulkUpload(collector, result) {
-  return [
-    { type: collector.type, payload: result }
-  ];
-}
-
 /*
  * A collector object has types registered into it with the register(type)
  * function. Each type that gets registered defines how to fetch its own data
@@ -108,10 +102,12 @@ export class CollectorSet {
         return accum;
       }
 
-      const collector = this.getCollectorByType(collectedData.type);
-      const formatter = collector.formatForBulkUpload || defaultFormatterForBulkUpload.bind(null, collector);
-      accum.push(formatter(collectedData.result));
-      return accum;
+      const payload = this.getCollectorByType(type).formatForBulkUpload(result);
+      console.log(JSON.stringify({ payload }));
+      return [
+        ...accum,
+        payload // TODO flatten it here
+      ];
     }, []);
   }
 
