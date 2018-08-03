@@ -6,7 +6,7 @@
 
 import React from 'react';
 import { BASE_PATH } from '../common/constants';
-import { compose } from './lib/compose/memory';
+import { compose } from './lib/compose/kibana';
 import { FrontendLibs } from './lib/lib';
 
 // import * as euiVars from '@elastic/eui/dist/eui_theme_k6_light.json';

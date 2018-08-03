@@ -39,6 +39,10 @@ export class CMBeatsDomain {
     return await this.adapter.get(user, beatId);
   }
 
+  public async getByEnrollmentToken(user: FrameworkUser, enrollmentToken: string) {
+    return await this.adapter.getBeatWithToken(user, enrollmentToken);
+  }
+
   public async update(beatId: string, accessToken: string, beatData: Partial<CMBeat>) {
     const beat = await this.adapter.get(this.framework.internalUser, beatId);
 
@@ -83,6 +87,7 @@ export class CMBeatsDomain {
 
     await this.adapter.insert({
       ...beat,
+      enrollment_token: enrollmentToken,
       verified_on: verifiedOn,
       access_token: accessToken,
       host_ip: remoteAddress,

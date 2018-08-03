@@ -30,6 +30,9 @@
             "id": {
               "type": "keyword"
             },
+            "color": {
+              "type": "keyword"
+            },
             "configuration_blocks": {
               "type": "nested",
               "properties": {
@@ -46,6 +49,9 @@
         "beat": {
           "properties": {
             "id": {
+              "type": "keyword"
+            },
+            "enrollment_token": {
               "type": "keyword"
             },
             "access_token": {
@@ -75,7 +81,7 @@
             "tags": {
               "type": "keyword"
             },
-            "central_configuration_yml": {
+            "orig_configuration_yml": {
               "type": "text"
             },
             "metadata": {

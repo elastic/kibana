@@ -19,19 +19,30 @@ export class RestBeatsAdapter implements CMBeatsAdapter {
     return await this.REST.get<CMBeat>(`/api/beats/agent/${id}`);
   }
 
+  public async getBeatWithToken(enrollmentToken: string): Promise<CMBeat | null> {
+    const beat = await this.REST.get<CMBeat>(`/api/beats/agent/unknown/${enrollmentToken}`);
+    return beat;
+  }
+
   public async getAll(): Promise<CMBeat[]> {
-    return await this.REST.get<CMBeat[]>('/api/beats/agents');
+    return (await this.REST.get<{ beats: CMBeat[] }>('/api/beats/agents')).beats;
   }
 
   public async removeTagsFromBeats(removals: BeatsTagAssignment[]): Promise<BeatsRemovalReturn[]> {
-    return await this.REST.post<BeatsRemovalReturn[]>(`/api/beats/agents_tags/removals`, {
-      removals,
-    });
+    return (await this.REST.post<{ removals: BeatsRemovalReturn[] }>(
+      `/api/beats/agents_tags/removals`,
+      {
+        removals,
+      }
+    )).removals;
   }
 
   public async assignTagsToBeats(assignments: BeatsTagAssignment[]): Promise<CMAssignmentReturn[]> {
-    return await this.REST.post<CMAssignmentReturn[]>(`/api/beats/agents_tags/assignments`, {
-      assignments,
-    });
+    return (await this.REST.post<{ assignments: CMAssignmentReturn[] }>(
+      `/api/beats/agents_tags/assignments`,
+      {
+        assignments,
+      }
+    )).assignments;
   }
 }

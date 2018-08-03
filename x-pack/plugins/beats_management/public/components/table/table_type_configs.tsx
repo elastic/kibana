@@ -64,7 +64,7 @@ export const BeatsTableType: TableType = {
       name: 'Tags',
       render: (value: string, beat: CMPopulatedBeat) => (
         <EuiFlexGroup wrap responsive={true}>
-          {beat.full_tags.map(tag => (
+          {(beat.full_tags || []).map(tag => (
             <EuiBadge key={tag.id} color={tag.color ? tag.color : 'primary'}>
               {tag.id}
             </EuiBadge>
@@ -87,7 +87,7 @@ export const BeatsTableType: TableType = {
       sortable: true,
     },
   ],
-  controlDefinitions: (data: any) => ({
+  controlDefinitions: (data: any[]) => ({
     actions: [
       {
         name: 'Disenroll Selected',
@@ -107,7 +107,9 @@ export const BeatsTableType: TableType = {
         field: 'full_tags',
         name: 'Tags',
         options: uniq(
-          flatten(data.map((item: any) => item.full_tags)).map((tag: any) => ({ value: tag.id })),
+          flatten(data.map((item: any) => item.full_tags || [])).map((tag: any) => ({
+            value: tag.id,
+          })),
           'value'
         ),
       },
