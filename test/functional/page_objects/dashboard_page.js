@@ -304,6 +304,18 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
       return await testSubjects.exists('saveDashboardSuccess');
     }
 
+    /**
+     *
+     * @param dashName {String}
+     */
+    async deleteDashboard(dashName) {
+      await this.gotoDashboardLandingPage();
+      await this.searchForDashboardWithName(dashName);
+      await this.selectDashboard(dashName);
+      await this.clickDeleteSelectedDashboards();
+      await PageObjects.common.clickConfirmOnModal();
+    }
+
     async cancelSave() {
       log.debug('Canceling save');
       await testSubjects.click('saveCancelButton');
