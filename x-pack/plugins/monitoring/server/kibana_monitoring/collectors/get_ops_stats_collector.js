@@ -52,9 +52,7 @@ export function getOpsStatsCollector(server) {
     formatForBulkUpload: result => {
       return {
         type: 'kibana_stats',
-        payload: {
-          kibana_stats: result
-        }
+        payload: result
       };
     }
   });

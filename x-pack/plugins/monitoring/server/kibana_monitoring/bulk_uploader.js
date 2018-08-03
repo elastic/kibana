@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { isEmpty, uniq } from 'lodash';
+import { defaultsDeep, isEmpty, uniq } from 'lodash';
 import { callClusterFactory } from '../../../xpack_main';
 import {
   LOGGING_TAG,
@@ -124,17 +124,29 @@ export class BulkUploader {
    * Non-legacy transformation is done in CollectorSet.toApiStats
    */
   static toBulkUploadFormat(rawData, collectorSet) {
-    const bulk = rawData.reduce((accum, { type, result }) => {
+    // convert the raw data to a nested object by taking each payload through
+    // its formatter, organizing it per-type
+    const typesNested = rawData.reduce((accum, { type, result }) => {
       if (isEmpty(result)) {
         return accum;
       }
-      const payload = collectorSet.getCollectorByType(type).formatForBulkUpload(result);
+      const { type: uploadType, payload: uploadData } = collectorSet.getCollectorByType(type).formatForBulkUpload(result);
+      return defaultsDeep(accum, { [uploadType]: uploadData });
+    }, {});
+
+    // convert the nested object into a flat array, with each payload prefixed
+    // with an 'index' instruction, for bulk upload
+    const flat = Object.keys(typesNested).reduce((accum, type) => {
       return [
         ...accum,
-        payload // TODO flatten it here
+        { index: { _type: type } },
+        {
+          ...typesNested[type],
+        }
       ];
     }, []);
 
+    return flat;
   }
 
   static checkPayloadTypesUnique(payload) {

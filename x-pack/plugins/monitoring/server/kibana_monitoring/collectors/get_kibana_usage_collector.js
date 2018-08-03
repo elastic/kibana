@@ -20,9 +20,7 @@ export function getKibanaUsageCollector(server) {
       return {
         type: 'kibana_stats',
         payload: {
-          kibana_stats: {
-            usage: result
-          }
+          usage: result
         }
       };
     }

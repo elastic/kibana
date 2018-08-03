@@ -83,9 +83,7 @@ export function getSettingsCollector(server) {
     formatForBulkUpload: result => {
       return {
         type: 'kibana_settings',
-        payload: {
-          kibana_settings: result
-        }
+        payload: result
       };
     }
   });

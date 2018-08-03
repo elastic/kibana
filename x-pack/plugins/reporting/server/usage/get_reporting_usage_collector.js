@@ -152,11 +152,9 @@ export function getReportingUsageCollector(server) {
       return {
         type: 'kibana_stats',
         payload: {
-          kibana_stats: {
-            usage: {
-              xpack: {
-                reporting: result
-              }
+          usage: {
+            xpack: {
+              reporting: result
             }
           }
         }
