@@ -40,7 +40,6 @@ export class SampleDataSetCard extends React.Component {
 
     this.state = {
       isProcessingRequest: false,
-      status: this.props.status,
     };
   }
 
@@ -69,10 +68,10 @@ export class SampleDataSetCard extends React.Component {
   }
 
   static getDerivedStateFromProps(nextProps, state) {
-    if (state.isProcessingRequest && nextProps.status !== state.status) {
+    // Only reset isProcessingRequest once onRequestComplete has completed, allowing for updated props
+    if (state.isProcessingRequest) {
       return {
         isProcessingRequest: false,
-        status: nextProps.status
       };
     }
   }
