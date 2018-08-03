@@ -19,6 +19,7 @@ import { BeatsActionArea } from './beats_action_area';
 
 interface BeatsPageProps {
   libs: FrontendLibs;
+  location: any;
 }
 
 interface BeatsPageState {
@@ -39,6 +40,11 @@ export class BeatsPage extends React.PureComponent<BeatsPageProps, BeatsPageStat
     };
 
     this.loadBeats();
+  }
+  public componentDidUpdate(prevProps: any) {
+    if (this.props.location !== prevProps.location) {
+      this.loadBeats();
+    }
   }
   public render() {
     return (
