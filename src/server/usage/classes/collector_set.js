@@ -103,7 +103,6 @@ export class CollectorSet {
       }
 
       const payload = this.getCollectorByType(type).formatForBulkUpload(result);
-      console.log(JSON.stringify({ payload }));
       return [
         ...accum,
         payload // TODO flatten it here
