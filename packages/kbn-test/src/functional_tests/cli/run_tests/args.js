@@ -93,6 +93,11 @@ export function processOptions(userOptions, defaultConfigPaths) {
     }
   }
 
+  if (userOptions['kibana-install-dir']) {
+    userOptions.installDir = userOptions['kibana-install-dir'];
+    delete userOptions['kibana-install-dir'];
+  }
+
   function createLogger() {
     const log = createToolingLog(pickLevelFromFlags(userOptions));
     log.pipe(process.stdout);
