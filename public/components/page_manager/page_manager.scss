@@ -1,15 +1,16 @@
-
 .canvasPageManager {
   white-space: nowrap;
   max-width: 100%;
 
   .canvasPageManager__pages {
     position: relative;
-    height: 160px;
+    overflow-y: hidden;
+    height: 144px;
   }
 
-  .canvasPageManager__pageScroll {
+  .canvasPageManager__pageList {
     @include euiScrollBar;
+    display: flex;
     overflow-x: auto;
     overflow-y: hidden;
     position: absolute;
@@ -17,17 +18,15 @@
     right: 0;
     top: 0;
     bottom: 0;
-
   }
 
-  .canvasPageManager__pageList > div {
+  .canvasPageManager--trayPop > div {
     animation: trayPop $euiAnimSpeedNormal $euiAnimSlightResistance;
     opacity: 0;
     animation-fill-mode: forwards;
   }
-
-  @for $i from 1 through 10 {
-    .canvasPageManager__pageList > div:nth-child(#{$i}n) {
+  @for $i from 1 through 20 {
+    .canvasPageManager--trayPop > div:nth-child(#{$i}n) {
       animation-delay: #{$i * 0.05}s;
     }
   }
@@ -39,7 +38,7 @@
     opacity: 0;
     animation: buttonPop $euiAnimSpeedNormal $euiAnimSlightResistance;
     animation-fill-mode: forwards;
-    height: 160px;
+    height: 144px;
   }
 
   .canvasPageManager__addPageTip {
@@ -50,11 +49,12 @@
   .canvasPageManager__page {
     padding: $euiSize $euiSize $euiSize $euiSizeS;
     color: inherit;
-    min-height: 144px;
-    max-height: 160px;
+    min-height: 100px;
+    max-height: 144px;
 
-    &:focus, &-isActive {
-      background-color: darken($euiColorLightestShade, 10%);
+    &:focus,
+    &-isActive {
+      background-color: transparentize(darken($euiColorLightestShade, 30%), 0.5);
       outline: none;
       text-decoration: none;
     }
@@ -65,19 +65,15 @@
       }
     }
 
-    &:hover {
+    &:hover,
+    &:focus {
       text-decoration: none;
 
       .canvasPageManager__pagePreview {
-        @include euiBottomShadowMedium($opacity: .3);
+        @include euiBottomShadowMedium($opacity: 0.3);
       }
 
       .canvasPageManager__controls {
-        visibility: visible;
-        opacity: 1;
-      }
-
-      .canvasPageManager__removeIcon {
         visibility: visible;
         opacity: 1;
       }
@@ -122,11 +118,14 @@
   }
 
   .canvasPageManager__controls {
-    margin-top: $euiSizeS;
+    position: absolute;
+    right: $euiSizeS;
+    top: $euiSizeS;
     visibility: hidden;
     opacity: 0;
     transition: opacity $euiAnimSpeedFast $euiAnimSlightResistance;
-    transition-delay: $euiAnimSpeedNormal;
+    transition-delay: $euiAnimSpeedExtraSlow;
+    background: transparentize($euiColorGhost, 0.5);
     border-radius: $euiBorderRadius;
   }
 }

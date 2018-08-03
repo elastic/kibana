@@ -1,10 +1,10 @@
 import React, { Fragment } from 'react';
 import PropTypes from 'prop-types';
 import { EuiIcon, EuiFlexGroup, EuiFlexItem, EuiText, EuiToolTip } from '@elastic/eui';
+import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
 import { ConfirmModal } from '../confirm_modal';
 import { Link } from '../link';
 import { PagePreview } from '../page_preview';
-import { PageControls } from './page_controls';
 
 export class PageManager extends React.PureComponent {
   static propTypes = {
@@ -12,11 +12,57 @@ export class PageManager extends React.PureComponent {
     workpadId: PropTypes.string.isRequired,
     addPage: PropTypes.func.isRequired,
     movePage: PropTypes.func.isRequired,
+    previousPage: PropTypes.func.isRequired,
     duplicatePage: PropTypes.func.isRequired,
     removePage: PropTypes.func.isRequired,
     selectedPage: PropTypes.string,
     deleteId: PropTypes.string,
     setDeleteId: PropTypes.func.isRequired,
+  };
+
+  state = {
+    showTrayPop: true,
+  };
+
+  componentDidMount() {
+    // gives the tray pop animation time to finish
+    setTimeout(() => {
+      this.scrollToActivePage();
+      this.setState({ showTrayPop: false });
+    }, 1000);
+  }
+
+  componentDidUpdate(prevProps) {
+    // scrolls to the active page on the next tick, otherwise new pages don't scroll completely into view
+    if (prevProps.selectedPage !== this.props.selectedPage) setTimeout(this.scrollToActivePage, 0);
+  }
+
+  scrollToActivePage = () => {
+    if (this.activePageRef && this.pageListRef) {
+      const pageOffset = this.activePageRef.offsetLeft;
+      const {
+        left: pageLeft,
+        right: pageRight,
+        width: pageWidth,
+      } = this.activePageRef.getBoundingClientRect();
+      const {
+        left: listLeft,
+        right: listRight,
+        width: listWidth,
+      } = this.pageListRef.getBoundingClientRect();
+
+      if (pageLeft < listLeft)
+        this.pageListRef.scrollTo({
+          left: pageOffset,
+          behavior: 'smooth',
+        });
+      if (pageRight > listRight) {
+        this.pageListRef.scrollTo({
+          left: pageOffset - listWidth + pageWidth,
+          behavior: 'smooth',
+        });
+      }
+    }
   };
 
   confirmDelete = pageId => {
@@ -26,8 +72,21 @@ export class PageManager extends React.PureComponent {
   resetDelete = () => this.props.setDeleteId(null);
 
   doDelete = () => {
+    const { previousPage, removePage, deleteId, selectedPage } = this.props;
     this.resetDelete();
-    this.props.removePage(this.props.deleteId);
+    if (deleteId === selectedPage) previousPage();
+    removePage(deleteId);
+  };
+
+  onDragEnd = ({ draggableId: pageId, source, destination }) => {
+    // dropped outside the list
+    if (!destination) {
+      return;
+    }
+
+    const position = destination.index - source.index;
+
+    this.props.movePage(pageId, position);
   };
 
   renderPage = (page, i) => {
@@ -35,58 +94,77 @@ export class PageManager extends React.PureComponent {
     const pageNumber = i + 1;
 
     return (
-      <EuiFlexItem
-        key={page.id}
-        grow={false}
-        className={`canvasPageManager__page ${
-          page.id === selectedPage ? 'canvasPageManager__page-isActive' : ''
-        }`}
-      >
-        <EuiFlexGroup gutterSize="s">
-          <EuiFlexItem grow={false}>
-            <EuiText size="xs" className="canvasPageManager__pageNumber">
-              {pageNumber}
-            </EuiText>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <Link
-              name="loadWorkpad"
-              params={{ id: workpadId, page: pageNumber }}
-              aria-label={`Load page number ${pageNumber}`}
-            >
-              <PagePreview
-                page={page}
-                height={94}
-                pageNumber={pageNumber}
-                movePage={movePage}
-                selectedPage={selectedPage}
-              />
-            </Link>
-            <PageControls
-              pageId={page.id}
-              pageNumber={pageNumber}
-              movePage={movePage}
-              onDuplicate={duplicatePage}
-              onDelete={this.confirmDelete}
-            />
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </EuiFlexItem>
+      <Draggable key={page.id} draggableId={page.id} index={i}>
+        {provided => (
+          <div
+            key={page.id}
+            className={`canvasPageManager__page ${
+              page.id === selectedPage ? 'canvasPageManager__page-isActive' : ''
+            }`}
+            ref={el => {
+              if (page.id === selectedPage) this.activePageRef = el;
+              provided.innerRef(el);
+            }}
+            {...provided.draggableProps}
+            {...provided.dragHandleProps}
+          >
+            <EuiFlexGroup gutterSize="s">
+              <EuiFlexItem grow={false}>
+                <EuiText size="xs" className="canvasPageManager__pageNumber">
+                  {pageNumber}
+                </EuiText>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <Link
+                  name="loadWorkpad"
+                  params={{ id: workpadId, page: pageNumber }}
+                  aria-label={`Load page number ${pageNumber}`}
+                >
+                  <PagePreview
+                    page={page}
+                    height={100}
+                    pageNumber={pageNumber}
+                    movePage={movePage}
+                    selectedPage={selectedPage}
+                    duplicatePage={duplicatePage}
+                    confirmDelete={this.confirmDelete}
+                  />
+                </Link>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </div>
+        )}
+      </Draggable>
     );
   };
 
   render() {
     const { pages, addPage, deleteId } = this.props;
+    const { showTrayPop } = this.state;
 
     return (
       <Fragment>
         <EuiFlexGroup gutterSize="none" className="canvasPageManager">
           <EuiFlexItem className="canvasPageManager__pages">
-            <div className="canvasPageManager__pageScroll">
-              <EuiFlexGroup gutterSize="none" className="canvasPageManager__pageList">
-                {pages.map(this.renderPage)}
-              </EuiFlexGroup>
-            </div>
+            <DragDropContext onDragEnd={this.onDragEnd}>
+              <Droppable droppableId="droppable-page-manager" direction="horizontal">
+                {provided => (
+                  <div
+                    className={`canvasPageManager__pageList ${
+                      showTrayPop ? 'canvasPageManager--trayPop' : ''
+                    }`}
+                    ref={el => {
+                      this.pageListRef = el;
+                      provided.innerRef(el);
+                    }}
+                    {...provided.droppableProps}
+                  >
+                    {pages.map(this.renderPage)}
+                    {provided.placeholder}
+                  </div>
+                )}
+              </Droppable>
+            </DragDropContext>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiToolTip

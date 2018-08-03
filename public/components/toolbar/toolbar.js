@@ -55,7 +55,7 @@ export const Toolbar = props => {
   );
 
   const trays = {
-    pageManager: <PageManager />,
+    pageManager: <PageManager previousPage={previousPage} />,
     workpadloader: workpadLoader,
     expression: !elementIsSelected ? null : <Expression done={done} />,
   };
