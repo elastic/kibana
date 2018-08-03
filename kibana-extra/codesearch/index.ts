@@ -13,7 +13,6 @@ import { Server } from './server/kibana_types';
 import { Log } from './server/log';
 import { LspService } from './server/lsp/lsp_service';
 import { CloneWorker, DeleteWorker, IndexWorker, UpdateWorker } from './server/queue';
-import { exampleRoute } from './server/routes/example';
 import { fileRoute } from './server/routes/file';
 import { lspRoute } from './server/routes/lsp';
 import { monacoRoute } from './server/routes/monaco';
@@ -100,7 +99,6 @@ export default (kibana: any) =>
       scheduler.start();
 
       // Add server routes and initialize the plugin here
-      exampleRoute(server);
       repositoryRoute(server, serverOptions, cloneWorker, deleteWorker, indexWorker);
       repositorySearchRoute(server, repoSearchClient);
       fileRoute(server, serverOptions);

@@ -6,24 +6,19 @@
 
 import { ConnectedRouter } from 'connected-react-router';
 import React from 'react';
-import { HashRouter as Router, Route, Switch } from 'react-router-dom';
+import { HashRouter as Router, Redirect, Route, Switch } from 'react-router-dom';
 
 import { history } from '../utils/url';
 import { Admin } from './admin_page/admin';
 import { Layout } from './layout/layout';
-import { Main } from './main';
-import { ReposManagement } from './repos_management/repos_management';
 
-export const App = props => {
-  const renderMain = () => <Main {...props} />;
-  const renderRepos = () => <ReposManagement {...props} />;
-
+export const App = () => {
+  const redirectToAdmin = () => <Redirect to="/admin" />;
   return (
     <ConnectedRouter history={history}>
       <Router>
         <Switch>
-          <Route path="/" exact={true} render={renderMain} />
-          <Route path="/repos" render={renderRepos} />
+          <Route exact={true} path="/" render={redirectToAdmin} />
           <Route path="/:resource/:org/:repo/:revision/:path*:goto(!.*)?" component={Layout} />
           <Route path="/:resource/:org/:repo/:revision" component={Layout} />
           <Route path="/admin" component={Admin} />

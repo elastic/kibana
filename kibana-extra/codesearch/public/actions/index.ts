@@ -8,9 +8,6 @@ import { createAction } from 'redux-actions';
 
 import { Repository } from '../../model';
 
-export const increase = createAction<number>('INCREASE');
-export const decrease = createAction<number>('DECREASE');
-
 export const fetchRepos = createAction('FETCH REPOS');
 export const fetchReposSuccess = createAction<Repository[]>('FETCH REPOS SUCCESS');
 export const fetchReposFailed = createAction<Error>('FETCH REPOS FAILED');
