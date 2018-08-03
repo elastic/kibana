@@ -85,11 +85,6 @@ export class NavControlPopover extends Component {
       return null;
     }
 
-    // 0 or 1 spaces are available. Either either way, there is no need to render a space selection button
-    if (this.state.spaces.length < 2) {
-      return null;
-    }
-
     if (activeSpace.valid && activeSpace.space) {
       return this.getButton(
         <SpaceAvatar space={activeSpace.space} size={'s'} className={'spaceNavGraphic'} />,
