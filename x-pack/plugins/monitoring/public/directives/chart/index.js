@@ -33,7 +33,7 @@ uiModule.directive('monitoringChart', () => {
           <Fragment>
             <MonitoringTimeseriesContainer
               series={series}
-              onBursh={onBrush}
+              onBrush={onBrush}
             />
             <EuiSpacer size="m"/>
           </Fragment>,
