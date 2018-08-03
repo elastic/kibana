@@ -114,13 +114,12 @@ export default function ({ getService, getPageObjects }) {
       const panelCount = await PageObjects.dashboard.getPanelCount();
       expect(panelCount).to.be(28);
 
+      // Saving a dashboard causes the panels to refresh, which can be heavy on the browser.
+      // If the re-render takes too long, then the toast might disappear before selenium
+      // gets a chance to interact with it. This can cause flakiness, so we'll just ignore the
+      // success toast this time.
       await PageObjects.dashboard.saveDashboard('embeddable rendering test', {
         storeTimeWithDashboard: true,
-        // Saving a dashboard causes the panels to refresh, which can be heavy on the browser.
-        // If the re-render takes too long, then the toast might disappear before selenium
-        // gets a chance to interact with it. This can cause flakiness, so we'll just ignore the
-        // success toast this time.
-        verifySuccess: false,
       });
     });
 

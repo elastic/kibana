@@ -40,7 +40,7 @@ export default function ({ getService, getPageObjects }) {
     });
 
     it('available in view mode', async () => {
-      await PageObjects.dashboard.saveDashboard('full screen test', { saveAsNew: true });
+      await PageObjects.dashboard.saveDashboardAndVerify('full screen test', { saveAsNew: true });
       const exists = await PageObjects.dashboard.fullScreenModeMenuItemExists();
       expect(exists).to.be(true);
     });

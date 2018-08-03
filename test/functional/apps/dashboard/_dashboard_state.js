@@ -50,14 +50,14 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.dashboard.setTimepickerInHistoricalDataRange();
 
       await dashboardAddPanel.addVisualization(AREA_CHART_VIS_NAME);
-      await PageObjects.dashboard.saveDashboard('Overridden colors');
+      await PageObjects.dashboard.saveDashboardAndVerify('Overridden colors');
 
       await PageObjects.dashboard.clickEdit();
 
       await PageObjects.visualize.openLegendOptionColors('Count');
       await PageObjects.visualize.selectNewLegendColorChoice('#EA6460');
 
-      await PageObjects.dashboard.saveDashboard('Overridden colors');
+      await PageObjects.dashboard.saveDashboardAndVerify('Overridden colors');
 
       await PageObjects.dashboard.gotoDashboardLandingPage();
       await PageObjects.dashboard.loadSavedDashboard('Overridden colors');
@@ -79,7 +79,7 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.dashboard.clickNewDashboard();
 
       await dashboardAddPanel.addSavedSearch('my search');
-      await PageObjects.dashboard.saveDashboard('No local edits');
+      await PageObjects.dashboard.saveDashboardAndVerify('No local edits');
 
       const inViewMode = await testSubjects.exists('dashboardEditMode');
       expect(inViewMode).to.be(true);
@@ -101,7 +101,7 @@ export default function ({ getService, getPageObjects }) {
     it('Saved search with column changes will not update when the saved object changes', async () => {
       await PageObjects.discover.removeHeaderColumn('bytes');
       await PageObjects.dashboard.clickEdit();
-      await PageObjects.dashboard.saveDashboard('Has local edits');
+      await PageObjects.dashboard.saveDashboardAndVerify('Has local edits');
 
       await PageObjects.header.clickDiscover();
       await PageObjects.discover.clickFieldListItemAdd('clientip');
@@ -123,7 +123,7 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.dashboard.setTimepickerInHistoricalDataRange();
 
       await dashboardAddPanel.addVisualization('Visualization TileMap');
-      await PageObjects.dashboard.saveDashboard('No local edits');
+      await PageObjects.dashboard.saveDashboardAndVerify('No local edits');
 
       await dashboardPanelActions.openInspector();
       const tileMapData = await PageObjects.visualize.getInspectorTableData();

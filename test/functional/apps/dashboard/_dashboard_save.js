@@ -36,7 +36,7 @@ export default function ({ getService, getPageObjects }) {
 
     it('warns on duplicate name for new dashboard', async function () {
       await PageObjects.dashboard.clickNewDashboard();
-      await PageObjects.dashboard.saveDashboard(dashboardName);
+      await PageObjects.dashboard.saveDashboardAndVerify(dashboardName);
 
       let isWarningDisplayed = await PageObjects.dashboard.isDuplicateTitleWarningDisplayed();
       expect(isWarningDisplayed).to.equal(false);
@@ -79,7 +79,7 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.dashboard.selectDashboard(dashboardName);
         await PageObjects.header.awaitGlobalLoadingIndicatorHidden();
         await PageObjects.dashboard.clickEdit();
-        await PageObjects.dashboard.saveDashboard(dashboardName);
+        await PageObjects.dashboard.saveDashboardAndVerify(dashboardName);
         const isWarningDisplayed = await PageObjects.dashboard.isDuplicateTitleWarningDisplayed();
         expect(isWarningDisplayed).to.equal(false);
       }
@@ -96,7 +96,7 @@ export default function ({ getService, getPageObjects }) {
     });
 
     it('Does not warn when only the prefix matches', async function () {
-      await PageObjects.dashboard.saveDashboard(dashboardName.split(' ')[0]);
+      await PageObjects.dashboard.saveDashboardAndVerify(dashboardName.split(' ')[0]);
 
       const isWarningDisplayed = await PageObjects.dashboard.isDuplicateTitleWarningDisplayed();
       expect(isWarningDisplayed).to.equal(false);

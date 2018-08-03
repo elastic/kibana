@@ -74,7 +74,7 @@ export default function ({ getService, getPageObjects }) {
         });
 
         it('becomes available when saved', async () => {
-          await PageObjects.dashboard.saveDashboard('mydash');
+          await PageObjects.dashboard.saveDashboardAndVerify('mydash');
           await expectEnabledGenerateReportButton();
         });
       });
@@ -96,7 +96,7 @@ export default function ({ getService, getPageObjects }) {
           visualizations.splice(tileMapIndex, 1);
           await PageObjects.dashboard.addVisualizations(visualizations);
 
-          await PageObjects.dashboard.saveDashboard('report test');
+          await PageObjects.dashboard.saveDashboardAndVerify('report test');
 
           await PageObjects.reporting.openReportingPanel();
           await PageObjects.reporting.clickGenerateReportButton();
@@ -124,7 +124,7 @@ export default function ({ getService, getPageObjects }) {
 
           await PageObjects.dashboard.clickEdit();
           await PageObjects.dashboard.useMargins(true);
-          await PageObjects.dashboard.saveDashboard('report test');
+          await PageObjects.dashboard.saveDashboardAndVerify('report test');
           await PageObjects.reporting.openReportingPanel();
           await PageObjects.reporting.clickGenerateReportButton();
           await PageObjects.reporting.clickDownloadReportButton(60000);

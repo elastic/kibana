@@ -58,7 +58,7 @@ export default function ({ getService, getPageObjects }) {
       });
 
       it('are hidden in view mode', async function () {
-        await PageObjects.dashboard.saveDashboard(dashboardName);
+        await PageObjects.dashboard.saveDashboardAndVerify(dashboardName);
 
         await dashboardPanelActions.openContextMenu();
         const editLinkExists = await dashboardPanelActions.editPanelActionExists();
@@ -103,7 +103,7 @@ export default function ({ getService, getPageObjects }) {
 
       describe('on an expanded panel', function () {
         it('are hidden in view mode', async function () {
-          await PageObjects.dashboard.saveDashboard(dashboardName);
+          await PageObjects.dashboard.saveDashboardAndVerify(dashboardName);
           await dashboardPanelActions.toggleExpandPanel();
 
           await dashboardPanelActions.openContextMenu();

@@ -275,11 +275,15 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
       await testSubjects.setValue('dashboardTitle', dashName);
     }
 
+    async saveDashboardAndVerify(dashName, options = {}) {
+      await this.saveDashboard(dashName, options);
+      await this.verifySaveSuccess();
+    }
+
     async saveDashboard(dashName, {
       storeTimeWithDashboard = undefined,
       saveAsNew = undefined,
       needsConfirm = false,
-      verifySuccess = true,
     } = {}) {
       await this.enterDashboardTitleAndClickSave(dashName, {
         storeTimeWithDashboard,
@@ -288,10 +292,6 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
 
       if (needsConfirm) {
         await this.clickSave();
-      }
-
-      if (verifySuccess) {
-        await this.verifySaveSuccess();
       }
     }
 

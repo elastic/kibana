@@ -47,7 +47,7 @@ export default function ({ getService, getPageObjects }) {
     describe('save', function () {
       it('auto exits out of edit mode', async function () {
         await PageObjects.dashboard.gotoDashboardEditMode(dashboardName);
-        await PageObjects.dashboard.saveDashboard(dashboardName);
+        await PageObjects.dashboard.saveDashboardAndVerify(dashboardName);
         const isViewMode = await PageObjects.dashboard.getIsInViewMode();
         expect(isViewMode).to.equal(true);
       });
@@ -65,7 +65,7 @@ export default function ({ getService, getPageObjects }) {
           const originalFromTime = await PageObjects.header.getFromTime();
           const originalToTime = await PageObjects.header.getToTime();
 
-          await PageObjects.dashboard.saveDashboard(dashboardName, { storeTimeWithDashboard: true });
+          await PageObjects.dashboard.saveDashboardAndVerify(dashboardName, { storeTimeWithDashboard: true });
 
           await PageObjects.dashboard.clickEdit();
           await PageObjects.header.setAbsoluteRange('2013-09-19 06:31:44.000', '2013-09-19 06:31:44.000');
@@ -156,13 +156,13 @@ export default function ({ getService, getPageObjects }) {
           const newFromTime = '2015-09-19 06:31:44.000';
           const newToTime = '2015-09-19 06:31:44.000';
           await PageObjects.header.setAbsoluteRange('2013-09-19 06:31:44.000', '2013-09-19 06:31:44.000');
-          await PageObjects.dashboard.saveDashboard(dashboardName, true);
+          await PageObjects.dashboard.saveDashboardAndVerify(dashboardName);
           await PageObjects.dashboard.clickEdit();
           await PageObjects.header.setAbsoluteRange(newToTime, newToTime);
           await PageObjects.dashboard.clickCancelOutOfEditMode();
 
           await PageObjects.common.clickCancelOnModal();
-          await PageObjects.dashboard.saveDashboard(dashboardName, { storeTimeWithDashboard: true });
+          await PageObjects.dashboard.saveDashboardAndVerify(dashboardName, { storeTimeWithDashboard: true });
 
           await PageObjects.dashboard.loadSavedDashboard(dashboardName);
 
@@ -179,7 +179,7 @@ export default function ({ getService, getPageObjects }) {
       it('when time changed is stored with dashboard', async function () {
         await PageObjects.dashboard.gotoDashboardEditMode(dashboardName);
         await PageObjects.dashboard.setTimepickerInDataRange();
-        await PageObjects.dashboard.saveDashboard(dashboardName, true);
+        await PageObjects.dashboard.saveDashboardAndVerify(dashboardName);
         await PageObjects.dashboard.clickEdit();
         await PageObjects.header.setAbsoluteRange('2013-09-19 06:31:44.000', '2013-09-19 06:31:44.000');
 
@@ -189,7 +189,7 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.dashboard.clickCancelOutOfEditMode();
 
         await PageObjects.common.clickCancelOnModal();
-        await PageObjects.dashboard.saveDashboard(dashboardName, { storeTimeWithDashboard: true });
+        await PageObjects.dashboard.saveDashboardAndVerify(dashboardName, { storeTimeWithDashboard: true });
 
         await PageObjects.dashboard.loadSavedDashboard(dashboardName);
 
@@ -204,7 +204,7 @@ export default function ({ getService, getPageObjects }) {
     describe('Does not show lose changes warning', async function () {
       it('when time changed is not stored with dashboard', async function () {
         await PageObjects.dashboard.gotoDashboardEditMode(dashboardName);
-        await PageObjects.dashboard.saveDashboard(dashboardName, { storeTimeWithDashboard: false });
+        await PageObjects.dashboard.saveDashboardAndVerify(dashboardName, { storeTimeWithDashboard: false });
         await PageObjects.dashboard.clickEdit();
         await PageObjects.header.setAbsoluteRange('2014-10-19 06:31:44.000', '2014-12-19 06:31:44.000');
         await PageObjects.dashboard.clickCancelOutOfEditMode();
