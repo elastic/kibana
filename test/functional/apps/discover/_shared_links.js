@@ -89,8 +89,7 @@ export default function ({ getService, getPageObjects }) {
       });
 
       it('gets copied to clipboard', async function () {
-        // This method is self-confirming, so we don't need an assertion.
-        await PageObjects.discover.clickCopyToClipboard();
+        await PageObjects.discover.clickCopyToClipboardAndVerify();
       });
 
       // TODO: verify clipboard contents
@@ -105,8 +104,7 @@ export default function ({ getService, getPageObjects }) {
 
       // NOTE: This test has to run immediately after the test above
       it('copies short URL to clipboard', async function () {
-        // This method is self-confirming, so we don't need an assertion.
-        await PageObjects.discover.clickCopyToClipboard();
+        await PageObjects.discover.clickCopyToClipboardAndVerify();
       });
     });
   });
