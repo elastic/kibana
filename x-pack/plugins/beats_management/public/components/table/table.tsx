@@ -5,7 +5,7 @@
  */
 
 import {
-  // @ts-ignore
+  // @ts-ignore no typings for EuiInMemoryTable in EUI
   EuiInMemoryTable,
   EuiSpacer,
 } from '@elastic/eui';
