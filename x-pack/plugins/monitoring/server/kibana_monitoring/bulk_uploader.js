@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { flatten, uniq, compact } from 'lodash';
+import { compact, flatten, uniq } from 'lodash';
 import { callClusterFactory } from '../../../xpack_main';
 import {
   LOGGING_TAG,
@@ -52,7 +52,7 @@ export class BulkUploader {
     });
 
     this._callClusterWithInternalUser = callClusterFactory(server).getCallClusterInternal();
-
+    this._savedObjectsClient = server.savedObjects.getUnscopedSavedObjectsClient(this._callClusterWithInternalUser);
   }
 
   /*

@@ -32,13 +32,11 @@ export class CollectorSet {
 
   /*
    * @param {Object} server - server object
-   * @param {Number} options.interval - in milliseconds
-   * @param {Function} options.combineTypes
-   * @param {Function} options.onPayload
+   * @param {Array} collectors to initialize, usually as a result of filtering another CollectorSet instance
    */
-  constructor(server) {
+  constructor(server, collectors = []) {
     this._log = getCollectorLogger(server);
-    this._collectors = [];
+    this._collectors = collectors;
 
     /*
      * Helper Factory methods
@@ -72,9 +70,10 @@ export class CollectorSet {
 
   /*
    * Call a bunch of fetch methods and then do them in bulk
+   * @param {Object} fetchMechanisms - an object with a callCluster function and a savedObjectsClient object
    * @param {Array} collectors - an array of collectors, default to all registered collectors
    */
-  bulkFetch(callCluster, collectors = this._collectors) {
+  bulkFetch(fetchMechanisms, collectors = this._collectors) {
     if (!Array.isArray(collectors)) {
       throw new Error(`bulkFetch method given bad collectors parameter: ` + typeof collectors);
     }
@@ -84,7 +83,7 @@ export class CollectorSet {
       this._log.debug(`Fetching data from ${collectorType} collector`);
       return Promise.props({
         type: collectorType,
-        result: collector.fetchInternal(callCluster) // use the wrapper for fetch, kicks in error checking
+        result: collector.fetchInternal(fetchMechanisms) // use the wrapper for fetch, kicks in error checking
       })
         .catch(err => {
           this._log.warn(err);
@@ -98,8 +97,8 @@ export class CollectorSet {
       throw new Error(`bulkFormat method given bad collectors parameter: ` + typeof collectors);
     }
 
-    return data.reduce((accum, collectedData) => {
-      if (isEmpty(collectedData)) {
+    return data.reduce((accum, { type, result }) => {
+      if (isEmpty(result)) {
         return accum;
       }
 

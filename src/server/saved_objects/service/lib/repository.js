@@ -17,6 +17,7 @@
  * under the License.
  */
 
+import { get, snakeCase } from 'lodash';
 import uuid from 'uuid';
 
 import { getRootType } from '../../../mappings';
@@ -208,6 +209,54 @@ export class SavedObjectsRepository {
     throw new Error(
       `Unexpected Elasticsearch DELETE response: ${JSON.stringify({ type, id, response, })}`
     );
+  }
+
+  /**
+   * Summarize
+   */
+  async summarize() {
+    const TYPES = [
+      'dashboard',
+      'graph-workspace',
+      'index-pattern',
+      'search',
+      'timelion-sheet',
+      'visualization',
+    ];
+
+    const esOptions = {
+      index: this._index,
+      size: 0,
+      ignore: [404],
+      filterPath: 'aggregations.types.buckets',
+      body: {
+        query: {
+          terms: { type: TYPES },
+        },
+        aggs: {
+          types: {
+            terms: { field: 'type', size: TYPES.length }
+          }
+        }
+      }
+    };
+    const response = await this._callCluster('search', esOptions);
+    const buckets = get(response, 'aggregations.types.buckets', []);
+    const bucketCounts = buckets.reduce((acc, bucket) => ({
+      ...acc,
+      [bucket.key]: bucket.doc_count,
+    }), {});
+
+    return {
+      index: this._index,
+      ...TYPES.reduce((acc, type) => ({ // combine the bucketCounts and 0s for types that don't have documents
+        ...acc,
+        [snakeCase(type)]: {
+          total: bucketCounts[type] || 0
+        }
+      }), {})
+    };
+
   }
 
   /**

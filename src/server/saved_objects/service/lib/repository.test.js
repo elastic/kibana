@@ -666,4 +666,37 @@ describe('SavedObjectsRepository', () => {
       }
     });
   });
+
+  describe('summarize', () => {
+    beforeEach(() => {
+      const aggResults = {
+        aggregations: {
+          types: {
+            buckets: [
+              { key: 'dashboard', doc_count: 13 },
+              { key: 'graph-workspace', doc_count: 2 },
+              { key: 'index-pattern', doc_count: 4 },
+              { key: 'search', doc_count: 13 },
+              { key: 'timelion-sheet', doc_count: 4 },
+              { key: 'visualization', doc_count: 65 },
+            ]
+          }
+        }
+      };
+      callAdminCluster.returns(aggResults);
+    });
+
+    it('summarizes saved objects', async () => {
+      const response = await savedObjectsRepository.summarize();
+      expect(response).toEqual({
+        index: '.kibana-test',
+        index_pattern: { total: 4 },
+        dashboard: { total: 13 },
+        graph_workspace: { total: 2 },
+        search: { total: 13 },
+        timelion_sheet: { total: 4 },
+        visualization: { total: 65 }
+      });
+    });
+  });
 });

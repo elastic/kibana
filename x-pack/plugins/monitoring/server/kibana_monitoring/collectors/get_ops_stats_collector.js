@@ -57,14 +57,14 @@ export function getOpsStatsCollector(server, kbnServer) {
       const { kibana, ...rest } = result;
       return [
         {
-          type: 'kibana_stats',
+          type: KIBANA_STATS_TYPE_MONITORING,
           payload: {
             kibana,
             ...rest,
           }
         },
         {
-          type: 'kibana_settings',
+          type: KIBANA_STATS_TYPE_MONITORING + '_settings',
           payload: {
             kibana,
           }
