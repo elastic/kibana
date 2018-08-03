@@ -17,12 +17,14 @@ export function getKibanaUsageCollector(server) {
       return savedObjectsClient.summarize();
     },
     formatForBulkUpload: result => {
-      return [{
+      return {
         type: 'kibana_stats',
         payload: {
-          usage: result
+          kibana_stats: {
+            usage: result
+          }
         }
-      }];
+      };
     }
   });
 }

@@ -45,7 +45,7 @@ export class Collector {
     this.init = init;
     this.fetch = fetch;
 
-    const defaultFormatterForBulkUpload = result => [ { type, payload: result } ];
+    const defaultFormatterForBulkUpload = result => ({ type, payload: result });
     this._formatForBulkUpload = formatForBulkUpload || defaultFormatterForBulkUpload;
 
     this.log = getCollectorLogger(server);

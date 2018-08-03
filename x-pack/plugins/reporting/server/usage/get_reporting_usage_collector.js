@@ -149,16 +149,18 @@ export function getReportingUsageCollector(server) {
       };
     },
     formatForBulkUpload: result => {
-      return [{
+      return {
         type: 'kibana_stats',
         payload: {
-          usage: {
-            xpack: {
-              reporting: result
+          kibana_stats: {
+            usage: {
+              xpack: {
+                reporting: result
+              }
             }
           }
         }
-      }];
+      };
     }
   });
 }

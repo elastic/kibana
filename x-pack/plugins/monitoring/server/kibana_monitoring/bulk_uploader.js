@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { compact, flatten, uniq } from 'lodash';
+import { isEmpty, uniq } from 'lodash';
 import { callClusterFactory } from '../../../xpack_main';
 import {
   LOGGING_TAG,
@@ -119,41 +119,22 @@ export class BulkUploader {
     return sendBulkPayload(this._client, this._interval, payload);
   }
 
-  static deepMergeUploadData(uploadData, collectorSet) {
-    const deepMergeAndGroup = collectorSet.bulkFormat(uploadData).reduce((accum, datas) => {
-      for (const data of datas) {
-        accum[data.type] = accum[data.type] || {};
-        for (const key in data.payload) {
-          if (typeof accum[data.type][key] === 'object') {
-            accum[data.type][key] = {
-              ...accum[data.type][key],
-              ...data.payload[key]
-            };
-          } else {
-            accum[data.type][key] = data.payload[key];
-          }
-        }
-      }
-      return accum;
-    }, {});
-
-    return Object.keys(deepMergeAndGroup).reduce((accum, type) => {
-      accum.push([
-        { index: { _type: type } },
-        deepMergeAndGroup[type],
-      ]);
-      return accum;
-    }, []);
-  }
-
   /*
    * Bulk stats are transformed into a bulk upload format
    * Non-legacy transformation is done in CollectorSet.toApiStats
    */
-  static toBulkUploadFormat(uploadData, collectorSet) {
-    if (compact(uploadData).length > 0) {
-      return flatten(BulkUploader.deepMergeUploadData(uploadData, collectorSet));
-    }
+  static toBulkUploadFormat(rawData, collectorSet) {
+    const bulk = rawData.reduce((accum, { type, result }) => {
+      if (isEmpty(result)) {
+        return accum;
+      }
+      const payload = collectorSet.getCollectorByType(type).formatForBulkUpload(result);
+      return [
+        ...accum,
+        payload // TODO flatten it here
+      ];
+    }, []);
+
   }
 
   static checkPayloadTypesUnique(payload) {

@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { snakeCase, isEmpty } from 'lodash';
+import { snakeCase } from 'lodash';
 import Promise from 'bluebird';
 import { getCollectorLogger } from '../lib';
 import { Collector } from './collector';
@@ -92,20 +92,6 @@ export class CollectorSet {
         });
     });
     return Promise.all(fetchPromises);
-  }
-
-  bulkFormat(data) {
-    return data.reduce((accum, { type, result }) => {
-      if (isEmpty(result)) {
-        return accum;
-      }
-
-      const payload = this.getCollectorByType(type).formatForBulkUpload(result);
-      return [
-        ...accum,
-        payload // TODO flatten it here
-      ];
-    }, []);
   }
 
   /*

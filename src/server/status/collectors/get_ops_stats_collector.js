@@ -41,7 +41,7 @@ export function getOpsStatsCollector(server, kbnServer) {
     type: KIBANA_STATS_TYPE,
     fetch: () => {
       return {
-        kibana: getKibanaInfoForStats(server, kbnServer),
+        kibana: getKibanaInfoForStats(server, kbnServer), // TODO this should probably be injected in one place at a higher level where all collector data is combined
         ...kbnServer.metrics // latest metrics captured from the ops event listener in src/server/status/index
       };
     },
