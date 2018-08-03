@@ -150,7 +150,7 @@ export function getReportingUsageCollector(server) {
     },
     formatForBulkUpload: result => {
       return [{
-        type: KIBANA_REPORTING_TYPE,
+        type: 'kibana_stats',
         payload: {
           usage: {
             xpack: {

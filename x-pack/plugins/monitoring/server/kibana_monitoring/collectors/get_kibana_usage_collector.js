@@ -18,7 +18,7 @@ export function getKibanaUsageCollector(server) {
     },
     formatForBulkUpload: result => {
       return [{
-        type: KIBANA_USAGE_TYPE,
+        type: 'kibana_stats',
         payload: {
           usage: result
         }
