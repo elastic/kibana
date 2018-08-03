@@ -32,10 +32,3 @@ export function getLayerById(state, id) {
   )(state);
 }
 
-export const getLayerOptionsByOrigin = createSelector(
-  getSources,
-  layerOptions => {
-    return _.isEmpty(layerOptions) ? {}
-      : _.groupBy(layerOptions, ({ type }) => type);
-  }
-);

@@ -7,18 +7,15 @@
 import { connect } from 'react-redux';
 import { FlyOut } from './view';
 import { getFlyoutDisplay, updateFlyout, FLYOUT_STATE } from '../../store/ui';
-import { getLayerOptionsByOrigin, getLayerLoading, getTemporaryLayers }
+import { getLayerLoading, getTemporaryLayers }
   from "../../selectors/map_selectors";
 import { addVectorLayerFromEMSFileSource, removeLayer, clearTemporaryLayers, promoteTemporaryLayers, addXYZTMSLayerFromSource }
   from "../../actions/map_actions";
 import _ from 'lodash';
-import { EMSFileSource } from '../../shared/layers/sources/ems_file_source';
 
 function mapStateToProps(state = {}) {
 
-  const layerOptions = getLayerOptionsByOrigin(state);
-
-  let emsVectorOptions = layerOptions[EMSFileSource.type] && layerOptions[EMSFileSource.type][0].service;
+  let emsVectorOptions = (state.map.meta && state.map.meta.data_sources) ? state.map.meta.data_sources.ems.file : [];
   emsVectorOptions = emsVectorOptions ? emsVectorOptions.map((file) => ({ value: file.name, text: file.name })) : [];
 
   return {

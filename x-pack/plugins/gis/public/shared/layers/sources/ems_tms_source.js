@@ -15,8 +15,8 @@ export class EMSTMSSource {
     };
   }
 
-  static async getTMSOptions(descriptor, kbnModules) {
-    const services = await kbnModules.serviceSettings.getTMSServices();
+  static async getTMSOptions(descriptor, services) {
+    // const services = await kbnModules.serviceSettings.getTMSServices();
     return services.find(service => {
       return service.id === descriptor.id;
     });

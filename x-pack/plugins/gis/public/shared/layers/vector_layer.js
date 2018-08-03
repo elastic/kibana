@@ -18,7 +18,4 @@ export class VectorLayer extends ALayer {
     return vectorLayerDescriptor;
   }
 
-  getType() {
-    return "Vector";
-  }
 }

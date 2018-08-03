@@ -11,6 +11,8 @@ import { XYZTMSSource } from "../shared/layers/sources/xyz_tms_source";
 import { VectorLayer } from "../shared/layers/vector_layer";
 import { TileLayer } from "../shared/layers/tile_layer";
 
+import { GIS_API_PATH } from '../../common/constants';
+
 export const SET_SELECTED_LAYER = 'SET_SELECTED_LAYER';
 export const UPDATE_LAYER_ORDER = 'UPDATE_LAYER_ORDER';
 export const ADD_LAYER = 'ADD_LAYER';
@@ -18,13 +20,10 @@ export const LAYER_LOADING = 'LAYER_LOADING';
 export const REMOVE_LAYER = 'REMOVE_LAYER';
 export const PROMOTE_TEMPORARY_LAYERS = 'PROMOTE_TEMPORARY_LAYERS';
 export const CLEAR_TEMPORARY_LAYERS = 'CLEAR_TEMPORARY_LAYERS';
-export const ADD_EMS_FILE_SOURCE_LIST = 'ADD_EMS_FILE_SOURCE_LIST';
+export const SET_META = 'SET_META';
 export const TOGGLE_LAYER_VISIBLE = 'TOGGLE_LAYER_VISIBLE';
 
-let kbnModulesResolve;
-const KIBANA_MODULES = new Promise((resolve) => {
-  kbnModulesResolve = resolve;
-});
+const GIS_API_RELATIVE = `../${GIS_API_PATH}`;
 
 export function toggleLayerVisible(layerId) {
   return {
@@ -79,14 +78,18 @@ export function clearTemporaryLayers() {
 }
 
 export function addVectorLayerFromEMSFileSource(emsFileSource, options = {}, position) {
-  return async (dispatch) => {
+  return async (dispatch, getState) => {
+
     dispatch(layerLoading(true));
-    const geojson = await EMSFileSource.getGeoJson(emsFileSource, await KIBANA_MODULES);
+
+    const allFiles = getState().map.meta.data_sources.ems.file;
+    const geojson = await EMSFileSource.getGeoJson(emsFileSource, allFiles);
     const layer = VectorLayer.create({
       source: geojson,
       name: emsFileSource.name || emsFileSource.id,
       ...options
     });
+
     dispatch(addLayer(layer, position));
   };
 }
@@ -105,9 +108,10 @@ export function addXYZTMSLayerFromSource(xyzTMSsource, options = {}, position) {
 }
 
 export function addEMSTMSFromSource(source, options = {}, position) {
-  return async (dispatch) => {
+  return async (dispatch, getState) => {
     dispatch(layerLoading(true));
-    const service = await EMSTMSSource.getTMSOptions(source, await KIBANA_MODULES);
+    const allServices = getState().map.meta.data_sources.ems.tms;
+    const service = await EMSTMSSource.getTMSOptions(source, allServices);
     const layer = TileLayer.create({
       source: service.url,
       name: source.id,
@@ -124,13 +128,11 @@ export function removeLayer(layerName) {
   };
 }
 
-export  function addEMSSourceList() {
-
-  return async  dispatch => {
-    const emsFileSourceList = await EMSFileSource.createEMSFileListDescriptor(await KIBANA_MODULES);
+export function setMeta(metaJson) {
+  return async dispatch => {
     dispatch({
-      type: ADD_EMS_FILE_SOURCE_LIST,
-      emsFileSourceList
+      type: SET_META,
+      meta: metaJson
     });
   };
 }
@@ -138,20 +140,15 @@ export  function addEMSSourceList() {
 
 export async function loadMapResources(serviceSettings, dispatch) {
 
-  kbnModulesResolve({
-    serviceSettings: serviceSettings
-  });
-
-  //need to add this to the store otherwise our UI has no access to it
-  //not good, should be lazily loaded. Users not using EMS should not have to load EMS resources up front.
-  const emsFileLayers = await serviceSettings.getFileLayers();
-  dispatch(addEMSSourceList(EMSFileSource.type, emsFileLayers));
+  const meta = await fetch(`${GIS_API_RELATIVE}/meta`);
+  const metaJson = await meta.json();
+  await dispatch(setMeta(metaJson));
 
   // Add initial layers
   const roadMapEms = EMSTMSSource.createDescriptor('road_map');
-  dispatch(addEMSTMSFromSource(roadMapEms, {}, 0));
+  await dispatch(addEMSTMSFromSource(roadMapEms, {}, 0));
 
   const worldCountries = EMSFileSource.createDescriptor('World Countries');
-  dispatch(addVectorLayerFromEMSFileSource(worldCountries, {}, 1));
+  await dispatch(addVectorLayerFromEMSFileSource(worldCountries, {}, 1));
 
 }

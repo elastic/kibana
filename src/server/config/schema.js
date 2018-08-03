@@ -227,7 +227,7 @@ export default async () => Joi.object({
         }))
       }))
     }).default(),
-    manifestServiceUrl: Joi.string().default(' https://catalogue.maps.elastic.co/v2/manifest'),
+    manifestServiceUrl: Joi.string().default('https://catalogue.maps.elastic.co/v2/manifest'),
     emsLandingPageUrl: Joi.string().default('https://maps.elastic.co/v2'),
     includeElasticMapsService: Joi.boolean().default(true)
   }).default(),

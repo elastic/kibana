@@ -5,7 +5,7 @@
  */
 
 import {
-  SET_SELECTED_LAYER, UPDATE_LAYER_ORDER, ADD_EMS_FILE_SOURCE_LIST,
+  SET_SELECTED_LAYER, UPDATE_LAYER_ORDER, SET_META,
   ADD_LAYER, REMOVE_LAYER, PROMOTE_TEMPORARY_LAYERS,
   CLEAR_TEMPORARY_LAYERS, LAYER_LOADING, TOGGLE_LAYER_VISIBLE
 } from "../actions/map_actions";
@@ -18,20 +18,18 @@ const INITIAL_STATE = {
   selectedLayer: null,
   layerList: [],
   sources: [],
+  meta: {},
   layerLoading: false
 };
 
 export function map(state = INITIAL_STATE, action) {
   switch (action.type) {
-    case ADD_EMS_FILE_SOURCE_LIST:
-      return { ...state, sources: [...state.sources, action.emsFileSourceList ] };
+    case SET_META:
+      return { ...state, meta: action.meta };
     case SET_SELECTED_LAYER:
-      return { ...state, selectedLayer: state.layerList.find(
-        layer => layer.id === action.selectedLayer) };
+      return { ...state, selectedLayer: state.layerList.find(layer => layer.id === action.selectedLayer) };
     case UPDATE_LAYER_ORDER:
-      return { ...state, layerList: action.newLayerOrder.map(
-        layerNumber => state.layerList[layerNumber]
-      ) };
+      return { ...state, layerList: action.newLayerOrder.map(layerNumber => state.layerList[layerNumber]) };
     case ADD_LAYER:
       let newLayerlist;
       if (
