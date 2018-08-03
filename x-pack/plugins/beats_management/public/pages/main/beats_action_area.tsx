@@ -85,11 +85,10 @@ export class BeatsActionArea extends React.Component<any, any> {
     {match.params.enrollmentToken != null && (
       <EuiOverlayMask>
         <EuiModal onClose={() => { 
-          history.push('/beats'); 
           this.pinging = false; 
           this.setState({
             enrolledBeat: null
-          })
+          }, () => history.push('/beats'))
         }} style={{ width: '640px' }}>
           <EuiModalHeader>
           <EuiModalHeaderTitle>Enroll a new Beat</EuiModalHeaderTitle>
