@@ -17,6 +17,7 @@ export const PHASE_ENABLED = 'phaseEnabled';
 export const MAX_SIZE_TYPE_DOCUMENT = 'd';
 
 export const PHASE_ROLLOVER_ENABLED = 'rolloverEnabled';
+export const WARM_PHASE_ON_ROLLOVER = 'warmPhaseOnRollover';
 export const PHASE_ROLLOVER_ALIAS = 'selectedAlias';
 export const PHASE_ROLLOVER_MAX_AGE = 'selectedMaxAge';
 export const PHASE_ROLLOVER_MAX_AGE_UNITS = 'selectedMaxAgeUnits';

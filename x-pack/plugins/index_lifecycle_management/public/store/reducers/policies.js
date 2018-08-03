@@ -37,12 +37,12 @@ import {
   PHASE_ROLLOVER_MAX_SIZE_STORED_UNITS,
   PHASE_ROLLOVER_ALIAS,
   PHASE_ROLLOVER_MAX_DOC_SIZE,
-  PHASE_SHRINK_ENABLED
+  PHASE_SHRINK_ENABLED,
+  WARM_PHASE_ON_ROLLOVER
 } from '../constants';
 
 export const defaultWarmPhase = {
   [PHASE_ENABLED]: false,
-  [PHASE_ROLLOVER_ENABLED]: false,
   [PHASE_ROLLOVER_ALIAS]: '',
   [PHASE_FORCE_MERGE_SEGMENTS]: '',
   [PHASE_FORCE_MERGE_ENABLED]: false,
@@ -51,7 +51,8 @@ export const defaultWarmPhase = {
   [PHASE_NODE_ATTRS]: '',
   [PHASE_SHRINK_ENABLED]: true,
   [PHASE_PRIMARY_SHARD_COUNT]: '',
-  [PHASE_REPLICA_COUNT]: ''
+  [PHASE_REPLICA_COUNT]: '',
+  [WARM_PHASE_ON_ROLLOVER]: false
 };
 
 export const defaultHotPhase = {
@@ -67,7 +68,6 @@ export const defaultHotPhase = {
 
 export const defaultColdPhase = {
   [PHASE_ENABLED]: false,
-  [PHASE_ROLLOVER_ENABLED]: false,
   [PHASE_ROLLOVER_ALIAS]: '',
   [PHASE_ROLLOVER_AFTER]: '',
   [PHASE_ROLLOVER_AFTER_UNITS]: 's',

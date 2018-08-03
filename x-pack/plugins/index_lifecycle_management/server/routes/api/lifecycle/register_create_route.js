@@ -21,7 +21,7 @@ async function createLifecycle(callWithRequest, lifecycle) {
   };
   const params = {
     method: 'PUT',
-    path: `/_xpack/index_lifecycle/${lifecycle.name}`,
+    path: `/_ilm/${lifecycle.name}`,
     ignore: [ 404 ],
     body,
   };

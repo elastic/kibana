@@ -133,6 +133,7 @@ export class ColdPhase extends PureComponent {
                       setPhaseData(PHASE_ROLLOVER_AFTER, e.target.value);
                       validate();
                     }}
+                    min={1}
                   />
                 </ErrableFormRow>
               </EuiFlexItem>
@@ -170,7 +171,7 @@ export class ColdPhase extends PureComponent {
               ) : null}
             >
               <EuiSelect
-                value={phaseData[PHASE_NODE_ATTRS]}
+                value={phaseData[PHASE_NODE_ATTRS] || ' '}
                 options={nodeOptions}
                 onChange={async e => {
                   await setPhaseData(PHASE_NODE_ATTRS, e.target.value);
@@ -193,6 +194,7 @@ export class ColdPhase extends PureComponent {
                       await setPhaseData(PHASE_REPLICA_COUNT, e.target.value);
                       validate();
                     }}
+                    min={0}
                   />
                 </ErrableFormRow>
               </EuiFlexItem>

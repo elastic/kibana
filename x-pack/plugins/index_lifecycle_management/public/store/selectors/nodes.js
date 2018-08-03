@@ -32,7 +32,7 @@ export const getNodeOptions = createSelector(
 export const getSelectedPrimaryShardCount = state =>
   state.nodes.selectedPrimaryShardCount;
 export const getSelectedReplicaCount = state =>
-  state.nodes.selectedReplicaCount;
+  state.nodes.selectedReplicaCount !== undefined ? state.nodes.selectedReplicaCount : 1;
 export const getSelectedNodeAttrs = state => state.nodes.selectedNodeAttrs;
 export const getNodesFromSelectedNodeAttrs = state => {
   const nodes = getNodes(state)[getSelectedNodeAttrs(state)];

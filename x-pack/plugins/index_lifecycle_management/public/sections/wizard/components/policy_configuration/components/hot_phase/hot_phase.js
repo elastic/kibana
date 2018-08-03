@@ -131,6 +131,7 @@ export class HotPhase extends PureComponent {
                       );
                       validate();
                     }}
+                    min={1}
                   />
                 </ErrableFormRow>
               </EuiFlexItem>
@@ -173,6 +174,7 @@ export class HotPhase extends PureComponent {
                       await setPhaseData(PHASE_ROLLOVER_MAX_AGE, e.target.value);
                       validate();
                     }}
+                    min={1}
                   />
                 </ErrableFormRow>
               </EuiFlexItem>

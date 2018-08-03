@@ -13,7 +13,7 @@ async function fetchTemplates(callWithRequest) {
   const params = {
     method: 'GET',
     path: '/_template',
-    // we allow 404 incase the user shutdown security in-between the check and now
+    // we allow 404 in case there are no templates
     ignore: [404]
   };
 
@@ -27,7 +27,7 @@ async function getAffectedIndices(
 ) {
   const templates = await fetchTemplates(callWithRequest);
 
-  if (!templates || Object.keys(templates).length === 0) {
+  if (!templates || Object.keys(templates).length === 0 | templates.status === 404) {
     return [];
   }
 
@@ -48,12 +48,15 @@ async function getAffectedIndices(
   if (!indexPatterns || indexPatterns.length === 0) {
     return [];
   }
+  const indexParams = {
+    method: 'GET',
+    path: `/${indexPatterns.join(',')}`,
+    // we allow 404 in case there are no indices
+    ignore: [404]
+  };
+  const indices = await callWithRequest('transport.request', indexParams);
 
-  const indices = await callWithRequest('indices.get', {
-    index: indexPatterns
-  });
-
-  if (!indices) {
+  if (!indices || indices.status === 404) {
     return [];
   }
 

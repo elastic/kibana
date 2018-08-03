@@ -58,9 +58,13 @@ export const getSelectedIndexTemplate = createSelector(
 export const getFullSelectedIndexTemplate = state => state.indexTemplate.fullSelectedIndexTemplate;
 
 export const getAlias = state => {
-  const template = getSelectedIndexTemplate(state);
-  if (template && template.settings) {
-    return template.settings.indexlifecycle.rollover_alias;
+  const indexTemplate = getSelectedIndexTemplate(state);
+  if (!indexTemplate) {
+    return undefined;
+  }
+  const { settings = {} } = indexTemplate;
+  if (settings.indexlifecycle) {
+    return settings.indexlifecycle.rollover_alias;
   }
   return undefined;
 };
@@ -126,8 +130,8 @@ export const getTemplateDiff = state => {
   const newFullIndexTemplate = merge(cloneDeep(originalFullIndexTemplate), {
     settings: {
       index: {
-        number_of_shards: '' + getSelectedPrimaryShardCount(state),
-        number_of_replicas: '' + getSelectedReplicaCount(state),
+        number_of_shards: getSelectedPrimaryShardCount(state),
+        number_of_replicas: getSelectedReplicaCount(state),
         lifecycle: {
           name: getSelectedPolicyName(state)
         },

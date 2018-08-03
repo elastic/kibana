@@ -24,7 +24,7 @@ import {
 } from '@elastic/eui';
 import {
   PHASE_ENABLED,
-  PHASE_ROLLOVER_ENABLED,
+  WARM_PHASE_ON_ROLLOVER,
   PHASE_ROLLOVER_ALIAS,
   PHASE_FORCE_MERGE_ENABLED,
   PHASE_FORCE_MERGE_SEGMENTS,
@@ -48,7 +48,7 @@ export class WarmPhase extends PureComponent {
     errors: PropTypes.object.isRequired,
     phaseData: PropTypes.shape({
       [PHASE_ENABLED]: PropTypes.bool.isRequired,
-      [PHASE_ROLLOVER_ENABLED]: PropTypes.bool.isRequired,
+      [WARM_PHASE_ON_ROLLOVER]: PropTypes.bool.isRequired,
       [PHASE_ROLLOVER_ALIAS]: PropTypes.string.isRequired,
       [PHASE_FORCE_MERGE_ENABLED]: PropTypes.bool.isRequired,
       [PHASE_FORCE_MERGE_SEGMENTS]: PropTypes.oneOfType([
@@ -152,15 +152,15 @@ export class WarmPhase extends PureComponent {
                 <EuiFormRow label="Rollover configuration">
                   <EuiSwitch
                     label="Move to warm phase on rollover"
-                    checked={phaseData[PHASE_ROLLOVER_ENABLED]}
+                    checked={phaseData[WARM_PHASE_ON_ROLLOVER]}
                     onChange={async e => {
-                      await setPhaseData(PHASE_ROLLOVER_ENABLED, e.target.checked);
+                      await setPhaseData(WARM_PHASE_ON_ROLLOVER, e.target.checked);
                       validate();
                     }}
                   />
                 </EuiFormRow>
               ) : null}
-              {!phaseData[PHASE_ROLLOVER_ENABLED] ? (
+              {!phaseData[WARM_PHASE_ON_ROLLOVER] ? (
                 <EuiFlexGroup>
                   <EuiFlexItem style={{ maxWidth: 188 }}>
                     <ErrableFormRow
@@ -175,6 +175,7 @@ export class WarmPhase extends PureComponent {
                           setPhaseData(PHASE_ROLLOVER_AFTER, e.target.value);
                           validate();
                         }}
+                        min={1}
                       />
                     </ErrableFormRow>
                   </EuiFlexItem>
@@ -220,7 +221,7 @@ export class WarmPhase extends PureComponent {
                 }
               >
                 <EuiSelect
-                  value={phaseData[PHASE_NODE_ATTRS]}
+                  value={phaseData[PHASE_NODE_ATTRS] || ' '}
                   options={nodeOptions}
                   onChange={async e => {
                     await setPhaseData(PHASE_NODE_ATTRS, e.target.value);
@@ -310,6 +311,7 @@ export class WarmPhase extends PureComponent {
                             );
                             validate();
                           }}
+                          min={1}
                         />
                       </ErrableFormRow>
                     </EuiFlexItem>
@@ -375,6 +377,7 @@ export class WarmPhase extends PureComponent {
                       );
                       validate();
                     }}
+                    min={1}
                   />
                 </ErrableFormRow>
               ) : null}

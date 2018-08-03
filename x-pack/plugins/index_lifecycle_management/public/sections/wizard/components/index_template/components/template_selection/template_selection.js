@@ -105,7 +105,7 @@ export class TemplateSelection extends Component {
           errors={errors}
         >
           <EuiSelect
-            value={selectedIndexTemplateName}
+            value={selectedIndexTemplateName || ' '}
             onChange={async e => {
               await setSelectedIndexTemplate(e.target.value);
               validate();

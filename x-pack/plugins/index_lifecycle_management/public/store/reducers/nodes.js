@@ -58,10 +58,17 @@ export const nodes = handleActions(
       };
     },
     [setSelectedReplicaCount](state, { payload }) {
-      let selectedReplicaCount = parseInt(payload);
-      if (isNaN(selectedReplicaCount)) {
-        selectedReplicaCount = '';
+      let selectedReplicaCount;
+      if (payload != null) {
+        selectedReplicaCount = parseInt(payload);
+        if (isNaN(selectedReplicaCount)) {
+          selectedReplicaCount = '';
+        }
+      } else {
+        // default value for Elasticsearch
+        selectedReplicaCount = 1;
       }
+
 
       return {
         ...state,

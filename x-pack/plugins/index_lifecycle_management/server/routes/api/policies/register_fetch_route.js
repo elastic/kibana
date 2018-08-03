@@ -26,7 +26,7 @@ function formatHits(hits) {
 async function fetchPolicies(callWithRequest) {
   const params = {
     method: 'GET',
-    path: '/_xpack/index_lifecycle',
+    path: '/_ilm',
     // we allow 404 since they may have no policies
     ignore: [ 404 ]
   };

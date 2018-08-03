@@ -22,7 +22,7 @@ export class PolicySelection extends Component {
     setSelectedPolicy: PropTypes.func.isRequired,
 
     selectedPolicyName: PropTypes.string.isRequired,
-    policies: PropTypes.array.isRequired
+    policies: PropTypes.array.isRequired,
   };
 
   componentWillMount() {
@@ -36,42 +36,43 @@ export class PolicySelection extends Component {
 
   render() {
     const { policies, selectedPolicyName } = this.props;
-
-    const options = policies.map(item => ({ value: item.name, text: item.name }));
-    options.unshift({
-      value: '',
-      text: '-- New Policy --'
-    });
+    let existingPoliciesSelect;
+    const policiesExist = policies.length > 0;
+    if (policiesExist) {
+      const options = policies.map(item => ({ value: item.name, text: item.name }));
+      options.unshift({
+        value: '',
+        text: '-- New Policy --',
+      });
+      existingPoliciesSelect = (
+        <EuiFlexItem>
+          <EuiFormRow label="Existing policies">
+            <EuiSelect
+              options={options}
+              value={selectedPolicyName || ' '}
+              onChange={async e => {
+                await this.selectPolicy(e.target.value);
+              }}
+            />
+          </EuiFormRow>
+        </EuiFlexItem>
+      );
+    }
 
     return (
       <EuiDescribedFormGroup
-        title={<h4>Select or create a policy</h4>}
+        title={<h4>{policiesExist ? 'Select or c' : 'C'}reate a policy</h4>}
         titleSize="s"
-        description="An index lifecycle policy is a
+        description={`An index lifecycle policy is a
           blueprint for transitioning your data over time.
-          You can create a new policy or edit an existing
-          policy and save it with a new name."
+          You can create a new policy${policiesExist ? ' or edit an existing policy and save it with a new name.' : '.'}`}
         fullWidth
       >
         <EuiFlexGroup alignItems="center">
-          <EuiFlexItem>
-            <EuiFormRow label="Existing policies">
-              <EuiSelect
-                options={options}
-                value={selectedPolicyName}
-                onChange={async e => {
-                  await this.selectPolicy(e.target.value);
-                }}
-              />
-            </EuiFormRow>
-          </EuiFlexItem>
+          {existingPoliciesSelect}
           <EuiFlexItem grow={false}>
             <EuiFormRow hasEmptyLabelSpace>
-              <EuiButton
-                onClick={() => this.selectPolicy()}
-              >
-                Create new policy
-              </EuiButton>
+              <EuiButton onClick={() => this.selectPolicy()}>Create new policy</EuiButton>
             </EuiFormRow>
           </EuiFlexItem>
         </EuiFlexGroup>

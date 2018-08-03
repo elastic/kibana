@@ -115,7 +115,7 @@ export class Configuration extends Component {
             ) : null}
           >
             <EuiSelect
-              value={selectedNodeAttrs}
+              value={selectedNodeAttrs || ' '}
               onChange={async e => {
                 await setSelectedNodeAttrs(e.target.value);
                 validate();
@@ -151,6 +151,7 @@ export class Configuration extends Component {
                     validate();
                   }}
                   value={selectedPrimaryShardCount}
+                  min={1}
                 />
               </ErrableFormRow>
             </EuiFlexItem>
@@ -167,6 +168,7 @@ export class Configuration extends Component {
                     validate();
                   }}
                   value={selectedReplicaCount}
+                  min={0}
                 />
               </ErrableFormRow>
             </EuiFlexItem>

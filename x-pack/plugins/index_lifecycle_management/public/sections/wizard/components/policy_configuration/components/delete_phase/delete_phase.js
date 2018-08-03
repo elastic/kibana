@@ -119,6 +119,7 @@ export class DeletePhase extends PureComponent {
                       setPhaseData(PHASE_ROLLOVER_AFTER, e.target.value);
                       validate();
                     }}
+                    min={1}
                   />
                 </ErrableFormRow>
               </EuiFlexItem>
