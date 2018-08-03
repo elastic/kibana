@@ -530,18 +530,6 @@ describe('ui settings', () => {
     });
   });
 
-  describe('#getOverriddenKeys()', () => {
-    it('returns an empty array when no overrides defined', () => {
-      const { uiSettings } = setup();
-      expect(uiSettings.getOverriddenKeys()).to.eql([]);
-    });
-
-    it('returns the keys of any overrides defined', () => {
-      const { uiSettings } = setup({ overrides: { foo: true } });
-      expect(uiSettings.getOverriddenKeys()).to.eql(['foo']);
-    });
-  });
-
   describe('#isOverridden()', () => {
     it('returns false if no overrides defined', () => {
       const { uiSettings } = setup();

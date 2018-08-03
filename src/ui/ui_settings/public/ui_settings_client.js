@@ -24,14 +24,12 @@ export class UiSettingsClient {
   constructor(options) {
     const {
       defaults,
-      overriddenKeys,
       initialSettings,
       notify,
       api = createUiSettingsApi(),
     } = options;
 
     this._defaults = cloneDeep(defaults);
-    this._overriddenKeys = overriddenKeys;
     this._cache = defaultsDeep({}, this._defaults, cloneDeep(initialSettings));
     this._api = api;
     this._notify = notify;
@@ -105,7 +103,7 @@ You can use \`config.get("${key}", defaultValue)\`, which will just return
   }
 
   isOverridden(key) {
-    return this._overriddenKeys.includes(key);
+    return this.isDeclared(key) && Boolean(this._cache[key].isOverridden);
   }
 
   assertUpdateAllowed(key) {

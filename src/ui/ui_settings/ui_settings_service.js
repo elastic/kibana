@@ -130,10 +130,6 @@ export class UiSettingsService {
     await this.setMany(changes);
   }
 
-  getOverriddenKeys() {
-    return Object.keys(this._overrides);
-  }
-
   isOverridden(key) {
     return this._overrides.hasOwnProperty(key);
   }
