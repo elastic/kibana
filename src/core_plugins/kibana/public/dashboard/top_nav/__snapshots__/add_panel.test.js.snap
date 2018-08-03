@@ -3,6 +3,7 @@
 exports[`render 1`] = `
 <EuiFlyout
   className="addPanelFlyout"
+  closeButtonAriaLabel="Closes this dialog"
   data-test-subj="dashboardAddPanel"
   hideCloseButton={false}
   onClose={[Function]}
@@ -32,7 +33,10 @@ exports[`render 1`] = `
         </EuiTitle>
       </EuiFlexItem>
     </EuiFlexGroup>
-    <EuiTabs>
+    <EuiTabs
+      expand={false}
+      size="m"
+    >
       <EuiTab
         data-test-subj="addVisualizationTab"
         disabled={false}

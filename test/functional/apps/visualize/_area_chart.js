@@ -28,7 +28,7 @@ export default function ({ getService, getPageObjects }) {
   describe('area charts', function indexPatternCreation() {
     const vizName1 = 'Visualization AreaChart Name Test';
 
-    before(async function () {
+    const initAreaChart = async () => {
       const fromTime = '2015-09-19 06:31:44.000';
       const toTime = '2015-09-23 18:31:44.000';
 
@@ -52,7 +52,9 @@ export default function ({ getService, getPageObjects }) {
       log.debug('intervalValue = ' + intervalValue);
       expect(intervalValue).to.be('Auto');
       return PageObjects.visualize.clickGo();
-    });
+    };
+
+    before(initAreaChart);
 
     it('should save and load with special characters', async function () {
       const vizNamewithSpecialChars = vizName1 + '/?&=%';
@@ -152,6 +154,80 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.header.waitUntilLoadingHasFinished();
       const sideEditorExists = await PageObjects.visualize.getSideEditorExists();
       expect(sideEditorExists).to.be(false);
+    });
+
+    describe('switch between Y axis scale types', () => {
+      before(initAreaChart);
+      const axisId = 'ValueAxis-1';
+
+      it('should show ticks on selecting log scale', async () => {
+        await PageObjects.visualize.clickMetricsAndAxes();
+        await PageObjects.visualize.clickYAxisOptions(axisId);
+        await PageObjects.visualize.selectYAxisScaleType(axisId, 'log');
+        await PageObjects.visualize.clickYAxisAdvancedOptions(axisId);
+        await PageObjects.visualize.changeYAxisFilterLabelsCheckbox(axisId, false);
+        await PageObjects.visualize.clickGo();
+        const labels = await PageObjects.visualize.getYAxisLabels();
+        const expectedLabels = [
+          '2', '3', '5', '7', '10', '20', '30', '50', '70', '100', '200',
+          '300', '500', '700', '1,000', '2,000', '3,000', '5,000', '7,000',
+        ];
+        expect(labels).to.eql(expectedLabels);
+      });
+
+      it('should show filtered ticks on selecting log scale', async () => {
+        await PageObjects.visualize.changeYAxisFilterLabelsCheckbox(axisId, true);
+        await PageObjects.visualize.clickGo();
+        const labels = await PageObjects.visualize.getYAxisLabels();
+        const expectedLabels = [
+          '2', '3', '5', '7', '10', '20', '30', '50', '70', '100', '200',
+          '300', '500', '700', '1,000', '2,000', '3,000', '5,000', '7,000',
+        ];
+        expect(labels).to.eql(expectedLabels);
+      });
+
+      it('should show ticks on selecting square root scale', async () => {
+        await PageObjects.visualize.selectYAxisScaleType(axisId, 'square root');
+        await PageObjects.visualize.changeYAxisFilterLabelsCheckbox(axisId, false);
+        await PageObjects.visualize.clickGo();
+        const labels = await PageObjects.visualize.getYAxisLabels();
+        const expectedLabels = [
+          '0', '200', '400', '600', '800', '1,000', '1,200', '1,400', '1,600',
+        ];
+        expect(labels).to.eql(expectedLabels);
+      });
+
+      it('should show filtered ticks on selecting square root scale', async () => {
+        await PageObjects.visualize.changeYAxisFilterLabelsCheckbox(axisId, true);
+        await PageObjects.visualize.clickGo();
+        const labels = await PageObjects.visualize.getYAxisLabels();
+        const expectedLabels = [
+          '200', '400', '600', '800', '1,000', '1,200', '1,400',
+        ];
+        expect(labels).to.eql(expectedLabels);
+      });
+
+      it('should show ticks on selecting linear scale', async () => {
+        await PageObjects.visualize.selectYAxisScaleType(axisId, 'linear');
+        await PageObjects.visualize.changeYAxisFilterLabelsCheckbox(axisId, false);
+        await PageObjects.visualize.clickGo();
+        const labels = await PageObjects.visualize.getYAxisLabels();
+        log.debug(labels);
+        const expectedLabels = [
+          '0', '200', '400', '600', '800', '1,000', '1,200', '1,400', '1,600',
+        ];
+        expect(labels).to.eql(expectedLabels);
+      });
+
+      it('should show filtered ticks on selecting linear scale', async () => {
+        await PageObjects.visualize.changeYAxisFilterLabelsCheckbox(axisId, true);
+        await PageObjects.visualize.clickGo();
+        const labels = await PageObjects.visualize.getYAxisLabels();
+        const expectedLabels = [
+          '200', '400', '600', '800', '1,000', '1,200', '1,400',
+        ];
+        expect(labels).to.eql(expectedLabels);
+      });
     });
   });
 }

@@ -12,7 +12,8 @@ import {
   history,
   fromQuery,
   toQuery,
-  legacyEncodeURIComponent
+  legacyEncodeURIComponent,
+  KibanaLink
 } from '../../../utils/url';
 import { Typeahead } from './Typeahead';
 import { getAPMIndexPattern } from '../../../services/rest/savedObjects';
@@ -108,7 +109,12 @@ class KueryBarView extends Component {
               <div>
                 There&#39;s no APM index pattern available. To use the Query
                 bar, please choose to import the APM index pattern in the{' '}
-                <a href="/app/kibana#/home/tutorial/apm">Setup Instructions.</a>
+                <KibanaLink
+                  pathname={'/app/kibana'}
+                  hash={`/home/tutorial/apm`}
+                >
+                  Setup Instructions.
+                </KibanaLink>
               </div>
             }
             color="warning"
