@@ -6,12 +6,10 @@ exports[`Latest Versions that latest active component renders normally 1`] = `
     Array [
       Object {
         "field": "version",
-        "name": "Version",
       },
       Object {
         "dataType": "number",
         "field": "count",
-        "name": "Count",
       },
     ]
   }
