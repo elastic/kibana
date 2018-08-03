@@ -588,6 +588,7 @@ export class DashboardStateManager {
     this.savedDashboard.searchSource.setField('query', query);
     this.savedDashboard.searchSource.setField('filter', filters);
     this.saveState();
+    // pinned filters go on global state, therefore are not propagated to store via app state and have to be pushed manually.
     this._pushFiltersToStore();
   }
 

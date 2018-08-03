@@ -364,9 +364,7 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
     }
 
     async clickUnlinkSavedSearch() {
-      const unlinkSavedSearch = await testSubjects.find('unlinkSavedSearch');
-      await remote.moveMouseTo(unlinkSavedSearch);
-      await remote.doubleClick();
+      await testSubjects.doubleClick('unlinkSavedSearch');
       await PageObjects.header.waitUntilLoadingHasFinished();
     }
 
