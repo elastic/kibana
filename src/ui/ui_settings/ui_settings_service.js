@@ -22,13 +22,6 @@ import Boom from 'boom';
 
 import { createOrUpgradeSavedConfig } from './create_or_upgrade_saved_config';
 
-function hydrateUserSettings(userSettings) {
-  return Object.keys(userSettings)
-    .map(key => ({ key, userValue: userSettings[key] }))
-    .filter(({ userValue }) => userValue !== null)
-    .reduce((acc, { key, userValue }) => ({ ...acc, [key]: { userValue } }), {});
-}
-
 /**
  *  Service that provides access to the UiSettings stored in elasticsearch.
  *  @class UiSettingsService
@@ -95,7 +88,26 @@ export class UiSettingsService {
   }
 
   async getUserProvided(options) {
-    return hydrateUserSettings(await this._read(options));
+    const userProvided = {};
+
+    // write the userValue for each key stored in the saved object that is not overridden
+    for (const [key, userValue] of Object.entries(await this._read(options))) {
+      if (userValue !== null && !this.isOverridden(key)) {
+        userProvided[key] = {
+          userValue
+        };
+      }
+    }
+
+    // write all overridden keys, dropping the userValue is override is null and
+    // adding keys for overrides that are not in saved object
+    for (const [key, userValue] of Object.entries(this._overrides)) {
+      userProvided[key] = userValue === null
+        ? { isOverridden: true }
+        : { isOverridden: true, userValue };
+    }
+
+    return userProvided;
   }
 
   async setMany(changes) {
@@ -180,15 +192,10 @@ export class UiSettingsService {
 
     try {
       const resp = await this._savedObjectsClient.get(this._type, this._id);
-      return {
-        ...resp.attributes,
-        ...this._overrides
-      };
+      return resp.attributes;
     } catch (error) {
       if (isIgnorableError(error)) {
-        return {
-          ...this._overrides
-        };
+        return {};
       }
 
       throw error;

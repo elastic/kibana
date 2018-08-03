@@ -71,7 +71,8 @@ export function indexMissingSuite() {
       expect(result).to.eql({
         settings: {
           foo: {
-            userValue: 'bar'
+            userValue: 'bar',
+            isOverridden: true
           }
         }
       });
@@ -101,7 +102,8 @@ export function indexMissingSuite() {
             userValue: defaultIndex
           },
           foo: {
-            userValue: 'bar'
+            userValue: 'bar',
+            isOverridden: true
           }
         }
       });
@@ -133,7 +135,8 @@ export function indexMissingSuite() {
             userValue: defaultIndex
           },
           foo: {
-            userValue: 'bar'
+            userValue: 'bar',
+            isOverridden: true
           }
         }
       });
@@ -158,7 +161,8 @@ export function indexMissingSuite() {
             userValue: sinon.match.number
           },
           foo: {
-            userValue: 'bar'
+            userValue: 'bar',
+            isOverridden: true
           }
         }
       });

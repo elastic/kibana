@@ -17,7 +17,6 @@
  * under the License.
  */
 
-import { isEqual } from 'lodash';
 import expect from 'expect.js';
 import { errors as esErrors } from 'elasticsearch';
 import Chance from 'chance';
@@ -256,18 +255,25 @@ describe('ui settings', () => {
       const esDocSource = { user: 'customized' };
       const { uiSettings } = setup({ esDocSource });
       const result = await uiSettings.getUserProvided();
-      expect(isEqual(result, {
-        user: { userValue: 'customized' }
-      })).to.equal(true);
+      expect(result).to.eql({
+        user: {
+          userValue: 'customized',
+        }
+      });
     });
 
     it('ignores null user configuration (because default values)', async () => {
       const esDocSource = { user: 'customized', usingDefault: null, something: 'else' };
       const { uiSettings } = setup({ esDocSource });
       const result = await uiSettings.getUserProvided();
-      expect(isEqual(result, {
-        user: { userValue: 'customized' }, something: { userValue: 'else' }
-      })).to.equal(true);
+      expect(result).to.eql({
+        user: {
+          userValue: 'customized'
+        },
+        something: {
+          userValue: 'else'
+        }
+      });
     });
 
     it('returns an empty object on 404 responses', async () => {
@@ -350,10 +356,11 @@ describe('ui settings', () => {
       const { uiSettings } = setup({ esDocSource, overrides });
       expect(await uiSettings.getUserProvided()).to.eql({
         user: {
-          userValue: 'customized'
+          userValue: 'customized',
         },
         foo: {
-          userValue: 'bar'
+          userValue: 'bar',
+          isOverridden: true,
         },
       });
     });
@@ -401,6 +408,7 @@ describe('ui settings', () => {
       expect(result).to.eql({
         foo: {
           userValue: true,
+          isOverridden: true,
         },
         key: {
           value: defaults.key.value,

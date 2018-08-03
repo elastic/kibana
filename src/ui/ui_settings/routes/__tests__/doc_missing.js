@@ -60,7 +60,8 @@ export function docMissingSuite() {
       assertSinonMatch(result, {
         settings: {
           foo: {
-            userValue: 'bar'
+            userValue: 'bar',
+            isOverridden: true
           }
         }
       });
@@ -88,7 +89,8 @@ export function docMissingSuite() {
             userValue: defaultIndex
           },
           foo: {
-            userValue: 'bar'
+            userValue: 'bar',
+            isOverridden: true
           }
         }
       });
@@ -118,7 +120,8 @@ export function docMissingSuite() {
             userValue: defaultIndex
           },
           foo: {
-            userValue: 'bar'
+            userValue: 'bar',
+            isOverridden: true
           }
         }
       });
@@ -141,7 +144,8 @@ export function docMissingSuite() {
             userValue: sinon.match.number
           },
           foo: {
-            userValue: 'bar'
+            userValue: 'bar',
+            isOverridden: true
           }
         }
       });

@@ -84,7 +84,8 @@ export function docExistsSuite() {
             userValue: defaultIndex
           },
           foo: {
-            userValue: 'bar'
+            userValue: 'bar',
+            isOverridden: true
           },
         }
       });
@@ -114,7 +115,8 @@ export function docExistsSuite() {
             userValue: defaultIndex
           },
           foo: {
-            userValue: 'bar'
+            userValue: 'bar',
+            isOverridden: true
           },
         }
       });
@@ -165,7 +167,8 @@ export function docExistsSuite() {
             userValue: defaultIndex
           },
           foo: {
-            userValue: 'bar'
+            userValue: 'bar',
+            isOverridden: true
           },
         }
       });
@@ -215,7 +218,8 @@ export function docExistsSuite() {
             userValue: sinon.match.number
           },
           foo: {
-            userValue: 'bar'
+            userValue: 'bar',
+            isOverridden: true
           },
         }
       });
