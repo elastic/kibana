@@ -34,7 +34,8 @@ export default function ({ getService, getPageObjects, updateBaselines }) {
 
     after(async function () {
       await remote.setWindowSize(1300, 900);
-      await PageObjects.dashboard.deleteDashboard('area');
+      const id = await PageObjects.dashboard.getDashboardIdFromCurrentUrl();
+      await PageObjects.dashboard.deleteDashboard('area', id);
     });
 
     // Skip until https://github.com/elastic/kibana/issues/19471 is fixed

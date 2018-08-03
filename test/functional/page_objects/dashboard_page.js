@@ -207,6 +207,10 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
       return await testSubjects.exists('createDashboardPromptButton');
     }
 
+    async checkDashboardListingRow(id) {
+      await testSubjects.click(`checkboxSelectRow-${id}`);
+    }
+
     async checkDashboardListingSelectAllCheckbox() {
       const element = await testSubjects.find('checkboxSelectAll');
       const isSelected = await element.isSelected();
@@ -308,10 +312,10 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
      *
      * @param dashName {String}
      */
-    async deleteDashboard(dashName) {
+    async deleteDashboard(dashboardName, dashboardId) {
       await this.gotoDashboardLandingPage();
-      await this.searchForDashboardWithName(dashName);
-      await this.selectDashboard(dashName);
+      await this.searchForDashboardWithName(dashboardName);
+      await this.checkDashboardListingRow(dashboardId);
       await this.clickDeleteSelectedDashboards();
       await PageObjects.common.clickConfirmOnModal();
     }
