@@ -64,19 +64,16 @@ export class JobsListView extends Component {
     timefilter.enableAutoRefreshSelector();
 
     this.setAutoRefresh();
-    this.initAutoRefreshUpdate();
+
+    // update the interval if it changes
+    timefilter.on('refreshIntervalUpdate', () => {
+      this.setAutoRefresh();
+    });
   }
 
   componentWillUnmount() {
     timefilter.off('refreshIntervalUpdate');
     this.clearRefreshInterval();
-  }
-
-  initAutoRefreshUpdate() {
-    // update the interval if it changes
-    timefilter.on('refreshIntervalUpdate', () => {
-      this.setAutoRefresh();
-    });
   }
 
   setAutoRefresh() {
