@@ -17,15 +17,17 @@
  * under the License.
  */
 
-import { resolve } from 'path';
+import path from 'path';
 import { i18n } from '@kbn/i18n';
 import JSON5 from 'json5';
+import normalize from 'normalize-path';
 
 import { extractHtmlMessages } from './extract_html_messages';
 import { extractCodeMessages } from './extract_code_messages';
 import { extractPugMessages } from './extract_pug_messages';
 import { extractHandlebarsMessages } from './extract_handlebars_messages';
 import { globAsync, makeDirAsync, accessAsync, readFileAsync, writeFileAsync } from './utils';
+import { VALID_EXTRACTION_PATHS, IGNORED_BY_EXTRACTOR_FILES } from './config';
 
 function addMessageToMap(targetMap, key, value) {
   const existingValue = targetMap.get(key);
@@ -38,15 +40,37 @@ function addMessageToMap(targetMap, key, value) {
   targetMap.set(key, value);
 }
 
-export async function extractDefaultTranslations({ path, checkOnly }) {
+async function pathMagic(inputPaths) {
+  const pathsForExtraction = [];
+
+  for (const inputPath of inputPaths) {
+    const normalizedPath = normalize(path.relative('.', inputPath));
+
+    if (normalizedPath) {
+      pathsForExtraction.push(
+        ...VALID_EXTRACTION_PATHS.filter(ePath => ePath.startsWith(`${normalizedPath}/`))
+      );
+    } else {
+      pathsForExtraction.push(...VALID_EXTRACTION_PATHS);
+    }
+
+    if (VALID_EXTRACTION_PATHS.some(ePath => normalizedPath.startsWith(`${ePath}/`))) {
+      pathsForExtraction.push(normalizedPath);
+    }
+  }
+
+  return pathsForExtraction;
+}
+
+export async function extractMesssagesFromPathToMap(inputPath, targetMap) {
   const entries = await globAsync('*.{js,jsx,pug,ts,tsx,html,hbs,handlebars}', {
-    cwd: path,
+    cwd: inputPath,
     matchBase: true,
   });
 
   const { htmlEntries, codeEntries, pugEntries, hbsEntries } = entries.reduce(
     (paths, entry) => {
-      const resolvedPath = resolve(path, entry);
+      const resolvedPath = path.resolve(inputPath, entry);
 
       if (resolvedPath.endsWith('.html')) {
         paths.htmlEntries.push(resolvedPath);
@@ -63,8 +87,6 @@ export async function extractDefaultTranslations({ path, checkOnly }) {
     { htmlEntries: [], codeEntries: [], pugEntries: [], hbsEntries: [] }
   );
 
-  const defaultMessagesMap = new Map();
-
   await Promise.all(
     [
       [htmlEntries, extractHtmlMessages],
@@ -73,18 +95,22 @@ export async function extractDefaultTranslations({ path, checkOnly }) {
       [hbsEntries, extractHandlebarsMessages],
     ].map(async ([entries, extractFunction]) => {
       const files = await Promise.all(
-        entries.map(async entry => {
-          return {
-            name: entry,
-            content: await readFileAsync(entry),
-          };
-        })
+        entries
+          .filter(
+            entry => !IGNORED_BY_EXTRACTOR_FILES.includes(normalize(path.relative('.', entry)))
+          )
+          .map(async entry => {
+            return {
+              name: entry,
+              content: await readFileAsync(entry),
+            };
+          })
       );
 
       for (const { name, content } of files) {
         try {
           for (const [id, value] of extractFunction(content)) {
-            addMessageToMap(defaultMessagesMap, id, value);
+            addMessageToMap(targetMap, id, value);
           }
         } catch (error) {
           throw new Error(`Error in ${name}\n${error.message || error}`);
@@ -92,8 +118,16 @@ export async function extractDefaultTranslations({ path, checkOnly }) {
       }
     })
   );
+}
 
-  if (checkOnly) {
+export async function extractDefaultTranslations({ inputPaths, outputPath }) {
+  const defaultMessagesMap = new Map();
+
+  for (const inputPath of await pathMagic(inputPaths)) {
+    await extractMesssagesFromPathToMap(inputPath, defaultMessagesMap);
+  }
+
+  if (!outputPath) {
     return;
   }
 
@@ -118,10 +152,10 @@ export async function extractDefaultTranslations({ path, checkOnly }) {
   jsonBuffer = Buffer.concat([jsonBuffer, Buffer.from('}\n')]);
 
   try {
-    await accessAsync(resolve(path, 'translations'));
+    await accessAsync(path.resolve(outputPath));
   } catch (_) {
-    await makeDirAsync(resolve(path, 'translations'));
+    await makeDirAsync(path.resolve(outputPath));
   }
 
-  await writeFileAsync(resolve(path, 'translations', 'en.json'), jsonBuffer);
+  await writeFileAsync(path.resolve(outputPath, 'en.json'), jsonBuffer);
 }

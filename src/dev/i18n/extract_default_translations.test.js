@@ -37,7 +37,7 @@ const pluginsPaths = [
 describe('dev/i18n/extract_default_translations', () => {
   test('extracts messages to en.json', async () => {
     const [pluginPath] = pluginsPaths;
-    await extractDefaultTranslations({ path: pluginPath });
+    await extractDefaultTranslations({ inputPath: pluginPath });
 
     const extractedJSONBuffer = await readFileAsync(
       path.join(pluginPath, 'translations', 'en.json')
@@ -51,7 +51,7 @@ describe('dev/i18n/extract_default_translations', () => {
 
   test('injects default formats into en.json', async () => {
     const [, pluginPath] = pluginsPaths;
-    await extractDefaultTranslations({ path: pluginPath });
+    await extractDefaultTranslations({ inputPath: pluginPath });
 
     const extractedJSONBuffer = await readFileAsync(
       path.join(pluginPath, 'translations', 'en.json')
@@ -65,7 +65,7 @@ describe('dev/i18n/extract_default_translations', () => {
 
   test('throws on id collision', async () => {
     const [, , pluginPath] = pluginsPaths;
-    await expect(extractDefaultTranslations({ path: pluginPath })).rejects.toMatchObject({
+    await expect(extractDefaultTranslations({ inputPath: pluginPath })).rejects.toMatchObject({
       message: `Error in ${path.join(pluginPath, 'test_file.jsx')}
 There is more than one default message for the same id "plugin_3.duplicate_id": "Message 1" and "Message 2"`,
     });

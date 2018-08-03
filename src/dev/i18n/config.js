@@ -17,22 +17,15 @@
  * under the License.
  */
 
-import { run } from './run';
-import { extractDefaultTranslations } from './i18n/extract_default_translations';
-import yargs from 'yargs';
+export const VALID_EXTRACTION_PATHS = [
+  'src/core_plugins',
+  'src/server',
+  'src/ui',
+  'x-pack/plugins',
+];
 
-run(async () => {
-  const { argv } = yargs
-    .option('path', {
-      default: './',
-      describe: 'paths to directories for messages searching',
-      type: 'array',
-    })
-    .option('output', {
-      default: null,
-      describe: '[optional] path to a folder for en.json extraction',
-      type: 'string',
-    });
-
-  await extractDefaultTranslations({ inputPaths: argv.path, outputPath: argv.output });
-});
+export const IGNORED_BY_EXTRACTOR_FILES = [
+  'src/ui/ui_render/bootstrap/app_bootstrap.js',
+  'x-pack/plugins/monitoring/public/components/cluster/overview/alerts_panel.js',
+  'x-pack/plugins/monitoring/public/directives/alerts/index.js',
+];
