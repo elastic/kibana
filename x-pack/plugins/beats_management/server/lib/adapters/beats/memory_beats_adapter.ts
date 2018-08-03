@@ -42,7 +42,7 @@ export class MemoryBeatsAdapter implements CMBeatsAdapter {
     user: FrameworkUser,
     enrollmentToken: string
   ): Promise<CMBeat | null> {
-    return this.beatsDB.find(beat => enrollmentToken === beat.enrollement_token) || null;
+    return this.beatsDB.find(beat => enrollmentToken === beat.enrollment_token) || null;
   }
 
   public async getAll(user: FrameworkUser) {

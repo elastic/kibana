@@ -87,6 +87,7 @@ export class CMBeatsDomain {
 
     await this.adapter.insert({
       ...beat,
+      enrollment_token: enrollmentToken,
       verified_on: verifiedOn,
       access_token: accessToken,
       host_ip: remoteAddress,

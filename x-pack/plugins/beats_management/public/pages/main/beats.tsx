@@ -7,15 +7,7 @@
 import {
   // @ts-ignore typings for EuiBadge not present in current version
   EuiBadge,
-  EuiButton,
-  EuiButtonEmpty,
   EuiFlexItem,
-  EuiLoadingSpinner,
-  EuiModal,
-  EuiModalBody,
-  EuiModalHeader,
-  EuiModalHeaderTitle,
-  EuiOverlayMask,
 } from '@elastic/eui';
 
 import React from 'react';
@@ -23,6 +15,7 @@ import { BeatTag, CMBeat, CMPopulatedBeat } from '../../../common/domain_types';
 import { BeatsTagAssignment } from '../../../server/lib/adapters/beats/adapter_types';
 import { BeatsTableType, Table } from '../../components/table';
 import { FrontendLibs } from '../../lib/lib';
+import { BeatsActionArea } from './beats_action_area';
 
 interface BeatsPageProps {
   libs: FrontendLibs;
@@ -34,86 +27,8 @@ interface BeatsPageState {
   tableRef: any;
 }
 
-let pinging = false;
-const pingForBeatWithToken = async(libs: FrontendLibs,token: string): Promise<CMBeat | void> => {
-  try {
-      const beats = await libs.beats.getBeatWithToken(token);
-
-      if(!beats) { throw new Error('no beats') }
-      return beats;
-  } catch(err) {
-    if(pinging) {
-      const timeout = (ms:number) => new Promise(res => setTimeout(res, ms))
-      await timeout(5000)
-      return await pingForBeatWithToken(libs, token);
-    }
-  }
-}
-
 export class BeatsPage extends React.PureComponent<BeatsPageProps, BeatsPageState> {
-  public static ActionArea = ({
-    match,
-    history,
-    libs,
-  }: {
-    match: any;
-    history: any;
-    libs: FrontendLibs;
-  }) => (
-    <div>
-      <EuiButtonEmpty
-        onClick={() => {
-          window.alert('This will later go to more general beats install instructions.');
-          window.location.href = '#/home/tutorial/dockerMetrics';
-        }}
-      >
-        Learn how to install beats
-      </EuiButtonEmpty>
-      <EuiButton
-        size="s"
-        color="primary"
-        onClick={async () => {
-          const token = await libs.tokens.createEnrollmentToken();
-          history.push(`/beats/enroll/${token}`);
-          pinging = true;
-          await pingForBeatWithToken(libs, token);
-          pinging = false
-        }}
-      >
-        Enroll Beats
-      </EuiButton>
-
-      {match.params.enrollmentToken != null && (
-        <EuiOverlayMask>
-          <EuiModal onClose={() => { history.push('/beats'); pinging = false}} style={{ width: '640px' }}>
-            <EuiModalHeader>
-            <EuiModalHeaderTitle>Enroll a new Beat</EuiModalHeaderTitle>
-            </EuiModalHeader>
-            <EuiModalBody style={{ textAlign: 'center' }}>
-              To enroll a Beat with Centeral Management, run this command on the host that has Beats
-              installed.
-              <br />
-              <br />
-              <br />
-              <div className="euiFormControlLayout euiFormControlLayout--fullWidth">
-                <div className="euiFieldText euiFieldText--fullWidth" style={{ textAlign: 'left' }}>
-                  $ beats enroll {window.location.protocol}//{window.location.host} {match.params.enrollmentToken}
-                </div>
-              </div>
-              <br />
-              <br />
-              <EuiLoadingSpinner size="l" />
-              <br />
-              <br />
-              Waiting for enroll command to be run...
-
-            </EuiModalBody>
-
-          </EuiModal>
-        </EuiOverlayMask>
-      )}
-    </div>
-  );
+  public static ActionArea = BeatsActionArea;
   constructor(props: BeatsPageProps) {
     super(props);
 

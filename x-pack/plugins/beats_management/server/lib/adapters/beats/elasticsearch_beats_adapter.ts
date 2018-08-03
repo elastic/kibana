@@ -94,24 +94,21 @@ export class ElasticsearchBeatsAdapter implements CMBeatsAdapter {
       ignore: [404],
       index: INDEX_NAMES.BEATS,
       type: '_doc',
-      q: 'type:beat',
       body: {
         query: {
-          bool: {
-            must: [{ match: { enrollment_token: enrollmentToken } }],
-          },
+          match: { 'beat.enrollment_token': enrollmentToken },
         },
       },
     };
 
     const response = await this.database.search(user, params);
+
     const beats = _get<CMBeat[]>(response, 'hits.hits', []);
 
     if (beats.length === 0) {
       return null;
     }
-
-    return beats[0];
+    return _get<CMBeat>(beats[0], '_source.beat');
   }
 
   public async getAll(user: FrameworkUser) {

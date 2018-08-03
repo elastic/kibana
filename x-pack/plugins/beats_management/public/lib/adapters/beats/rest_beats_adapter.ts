@@ -16,12 +16,12 @@ export class RestBeatsAdapter implements CMBeatsAdapter {
   constructor(private readonly REST: RestAPIAdapter) {}
 
   public async get(id: string): Promise<CMBeat | null> {
-    return (await this.REST.get<{ beat: CMBeat }>(`/api/beats/agent/${id}`)).beat;
+    return await this.REST.get<CMBeat>(`/api/beats/agent/${id}`);
   }
 
   public async getBeatWithToken(enrollmentToken: string): Promise<CMBeat | null> {
-    return (await this.REST.get<{ beat: CMBeat }>(`/api/beats/agent/unknown/${enrollmentToken}`))
-      .beat;
+    const beat = await this.REST.get<CMBeat>(`/api/beats/agent/unknown/${enrollmentToken}`);
+    return beat;
   }
 
   public async getAll(): Promise<CMBeat[]> {

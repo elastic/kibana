@@ -51,7 +51,7 @@
             "id": {
               "type": "keyword"
             },
-            "enrollement_token": {
+            "enrollment_token": {
               "type": "keyword"
             },
             "access_token": {
