@@ -76,7 +76,7 @@ export class LegacyPlatformService {
   }
 
   private loadBootstrapModule(): {
-    bootstrap: (rootDomElement: HTMLElement) => void;
+    bootstrap: (targetDomElement: HTMLElement) => void;
   } {
     if (this.params.useLegacyTestHarness) {
       // wrapped in NODE_ENV check so the `ui/test_harness` module
