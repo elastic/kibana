@@ -5,6 +5,7 @@
  */
 
 
+import chrome from 'ui/chrome';
 import './styles/main.less';
 import { timefilter } from 'ui/timefilter';
 
@@ -27,6 +28,13 @@ import React, {
 const DEFAULT_REFRESH_INTERVAL_MS = 30000;
 const MINIMUM_REFRESH_INTERVAL_MS = 5000;
 let jobsRefreshInterval =  null;
+
+const uiSettings = chrome.getUiSettingsClient();
+// set default refresh interval
+uiSettings.overrideLocalDefault('timepicker:refreshIntervalDefaults', JSON.stringify({
+  pause: false,
+  value: DEFAULT_REFRESH_INTERVAL_MS
+}));
 
 export class JobsListView extends Component {
   constructor(props) {
@@ -55,27 +63,13 @@ export class JobsListView extends Component {
     timefilter.disableTimeRangeSelector();
     timefilter.enableAutoRefreshSelector();
 
-    this.initAutoRefresh();
+    this.setAutoRefresh();
     this.initAutoRefreshUpdate();
   }
 
   componentWillUnmount() {
     timefilter.off('refreshIntervalUpdate');
     this.clearRefreshInterval();
-  }
-
-  initAutoRefresh() {
-    const { value } = timefilter.getRefreshInterval();
-    if (value === 0) {
-      // the auto refresher starts in an off state
-      // so switch it on and set the interval to 30s
-      timefilter.setRefreshInterval({
-        pause: false,
-        value: DEFAULT_REFRESH_INTERVAL_MS
-      });
-    }
-
-    this.setAutoRefresh();
   }
 
   initAutoRefreshUpdate() {
