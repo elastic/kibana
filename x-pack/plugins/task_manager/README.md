@@ -125,49 +125,9 @@ The task's run method is expected to return a promise that resolves to an object
 }
 ```
 
-If the promise returned by the run function has a cancel method, the cancel method will be called if Kibana determines that the task has timed out. The cancel method itself can return a promise, and Kibana will wait for the cancelation before attempting a re-run. Tasks that spawn processes or threads (e.g. w/ napajs or similar) can perform cleanup work here.
+If the promise returned by the run function has a cancel method, the cancel method will be called if Kibana determines that the task has timed out. The cancel method itself can return a promise, and Kibana will wait for the cancellation before attempting a re-run. Tasks that spawn processes or threads (e.g. w/ napajs or similar) can perform cleanup work here.
 
-As a convenience, Kibana provides a `cancelable` helper function in the `@kbn/cancelable` package for tasks that don't spawn truly cancelable processes, and don't want to pull in a big dependency, but which want to allow for cancellation to occur within a sequence of promises. Any task that resolves a sequence of promises can wrap those in a cancelable call to allow Kibana to cancel the task before all promises have resolved. Here's an example:
-
-```js
-import { cancelable } from '@kbn/cancelable';
-
-// Run returns a cancelable promise. If Kibana calls cancel
-// on this promise while "a" is running, "b" and "c" will never be called.
-// If Kibana calls cancel while "b" is running, "c" will never be called, etc.
-// The functions passed to cancelable can themselves return a cancelable promise,
-// but do not have to.
-function run() {
-  return cancelable(
-    async function a() {
-      await aLongRunningPromise(1000);
-      return { hello: 'world' };
-    },
-
-    async function b(context) {
-      // Each function is passed the result of the previous one
-      console.log(context.hello);
-      await aLongRunningPromise(2000);
-      return { ...context, holla: 'Waarld!' };
-    },
-
-    async function c(context) {
-      console.log(context.hello, context.holla);
-      await aLongRunningPromise(1500);
-
-      // This being the last function in the chain, this is the
-      // final result of the run function.
-      return { state: { message: 'All done!!!' } };
-    }
-  );
-}
-
-// Just used for demo purposes, simulates a long-running task
-async function aLongRunningPromise(ms) {
-  console.log(`Waiting ${ms}ms`);
-  await new Promise(r => setTimeout(r, ms));
-}
-```
+As a convenience, Kibana provides a `Cancellable` helper class in the `@kbn/cancellable` package that provides a cancellable promise implementation. Any task that resolves a sequence of promises can wrap those in a cancellable call to allow Kibana to cancel the task before all promises have resolved. See [packages/kbn-cancellable](../../packages/kbn-cancellable) for details.
 
 ## Task instances
 
