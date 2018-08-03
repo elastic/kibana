@@ -5,6 +5,7 @@
  */
 
 import React from 'react';
+import { EuiSpacer } from '@elastic/eui';
 import { HeaderLarge } from '../../shared/UIComponents';
 import Transaction from './Transaction';
 import Distribution from './Distribution';
@@ -20,6 +21,8 @@ function TransactionDetails({ urlParams, location }) {
       <HeaderLarge>{urlParams.transactionName}</HeaderLarge>
 
       <KueryBar />
+
+      <EuiSpacer size="s" />
 
       <DetailsChartsRequest
         urlParams={urlParams}
