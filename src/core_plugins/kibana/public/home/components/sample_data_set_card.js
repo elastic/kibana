@@ -40,6 +40,7 @@ export class SampleDataSetCard extends React.Component {
 
     this.state = {
       isProcessingRequest: false,
+      status: this.props.status,
     };
   }
 
@@ -65,10 +66,15 @@ export class SampleDataSetCard extends React.Component {
     }
 
     onRequestComplete();
+  }
 
-    this.setState({
-      isProcessingRequest: false,
-    });
+  static getDerivedStateFromProps(nextProps, state) {
+    if (state.isProcessingRequest && nextProps.status !== state.status) {
+      return {
+        isProcessingRequest: false,
+        status: nextProps.status
+      };
+    }
   }
 
   isInstalled = () => {
