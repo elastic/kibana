@@ -13,6 +13,7 @@ import {
 import {
   sendBulkPayload,
   monitoringBulk,
+  getKibanaInfoForStats,
 } from './lib';
 
 const LOGGING_TAGS = [LOGGING_TAG, KIBANA_MONITORING_LOGGING_TAG];
@@ -34,7 +35,7 @@ const LOGGING_TAGS = [LOGGING_TAG, KIBANA_MONITORING_LOGGING_TAG];
  * @param {Object} xpackInfo server.plugins.xpack_main.info object
  */
 export class BulkUploader {
-  constructor(server, { interval }) {
+  constructor(server, { kbnServer, interval }) {
     if (typeof interval !== 'number') {
       throw new Error('interval number of milliseconds is required');
     }
@@ -53,6 +54,7 @@ export class BulkUploader {
 
     this._callClusterWithInternalUser = callClusterFactory(server).getCallClusterInternal();
     this._savedObjectsClient = server.savedObjects.getUnscopedSavedObjectsClient(this._callClusterWithInternalUser);
+    this._getKibanaInfoForStats = () => getKibanaInfoForStats(server, kbnServer);
   }
 
   /*
@@ -100,7 +102,7 @@ export class BulkUploader {
       callCluster: this._callClusterWithInternalUser,
       savedObjectsClient: this._savedObjectsClient,
     });
-    const payload = BulkUploader.toBulkUploadFormat(data, collectorSet);
+    const payload = this.toBulkUploadFormat(data, collectorSet);
 
     if (payload) {
       try {
@@ -123,7 +125,7 @@ export class BulkUploader {
    * Bulk stats are transformed into a bulk upload format
    * Non-legacy transformation is done in CollectorSet.toApiStats
    */
-  static toBulkUploadFormat(rawData, collectorSet) {
+  toBulkUploadFormat(rawData, collectorSet) {
     // convert the raw data to a nested object by taking each payload through
     // its formatter, organizing it per-type
     const typesNested = rawData.reduce((accum, { type, result }) => {
@@ -141,6 +143,8 @@ export class BulkUploader {
         ...accum,
         { index: { _type: type } },
         {
+          kibana: this._getKibanaInfoForStats(),
+          interval_ms: this._interval,
           ...typesNested[type],
         }
       ];
