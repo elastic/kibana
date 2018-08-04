@@ -58,6 +58,11 @@ describe('UiExports', function () {
         plugins: {
           paths: [resolve(__dirname, './fixtures/test_app')] // inject an app so we can hit /app/{id}
         },
+        elasticsearch: {
+          ssl: {
+            verificationMode: 'full'
+          }
+        },
       });
 
       await kbnServer.ready();
