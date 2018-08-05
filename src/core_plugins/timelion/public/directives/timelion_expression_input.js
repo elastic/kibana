@@ -150,6 +150,10 @@ app.directive('timelionExpressionInput', function ($document, $http, $interval, 
       }
 
       async function getSuggestions() {
+        scope.isLoadingSuggestions = true;
+        scope.suggestions.reset();
+        scope.suggestions.show();
+
         const suggestions = await suggest(
           scope.sheet,
           functionReference.list,
@@ -158,8 +162,14 @@ app.directive('timelionExpressionInput', function ($document, $http, $interval, 
           argValueSuggestions
         );
 
+        if (_.get(suggestions, 'isPrevRequestResults', false)) {
+          // ignore response from old async request
+          return;
+        }
+
         // We're using ES6 Promises, not $q, so we have to wrap this in $apply.
         scope.$apply(() => {
+          scope.isLoadingSuggestions = false;
           if (suggestions) {
             scope.suggestions.setList(suggestions.list, suggestions.type);
             scope.suggestions.show();

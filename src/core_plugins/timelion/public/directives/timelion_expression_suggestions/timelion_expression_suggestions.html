@@ -4,7 +4,21 @@
   role="listbox"
   ng-class="{ 'suggestions-isPopover': shouldPopover === 'true' }"
   data-suggestions-list
+  data-test-subj="timelionSuggestionList"
 >
+
+  <div
+    class="suggestion"
+    ng-if="isLoadingSuggestions"
+  >
+    <div class="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--justifyContentCenter euiFlexGroup--directionRow euiFlexGroup--responsive">
+      <div class="euiFlexItem euiFlexItem--flexGrowZero">
+        <div class="euiLoadingSpinner euiLoadingSpinner--medium"></div>
+      </div>
+      <div class="euiFlexItem euiFlexItem--flexGrowZero">Loading suggestions</div>
+    </div>
+  </div>
+
   <div
     class="suggestion"
     id="timelionSuggestion{{$index}}"

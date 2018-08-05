@@ -25,6 +25,7 @@ app.directive('timelionExpressionSuggestions', () => {
   return {
     restrict: 'E',
     scope: {
+      isLoadingSuggestions: '=',
       suggestions: '=',
       suggestionsType: '=',
       selectedIndex: '=',

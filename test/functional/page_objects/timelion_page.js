@@ -24,6 +24,8 @@ export function TimelionPageProvider({ getService, getPageObjects }) {
   const PageObjects = getPageObjects(['common', 'header']);
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
+  const retry = getService('retry');
+  const remote = getService('remote');
 
   class TimelionPage {
     async initTests() {
@@ -38,16 +40,11 @@ export function TimelionPageProvider({ getService, getPageObjects }) {
       await PageObjects.common.navigateToApp('timelion');
     }
 
-    async setExpression(expression) {
+    async setExpression(expression, caretPosition) {
       const input = await testSubjects.find('timelionExpressionTextArea');
       await input.clearValue();
       await input.type(expression);
-    }
-
-    async updateExpression(updates) {
-      const input = await testSubjects.find('timelionExpressionTextArea');
-      await input.type(updates);
-      await PageObjects.common.sleep(500);
+      await this._positionCaret(caretPosition);
     }
 
     async getExpression() {
@@ -56,18 +53,36 @@ export function TimelionPageProvider({ getService, getPageObjects }) {
     }
 
     async getSuggestionItemsText() {
+      await this._waitForSuggestionListLoading();
       const elements = await find.allByCssSelector('.suggestions .suggestion');
       return await Promise.all(elements.map(async element => await element.getVisibleText()));
     }
 
-    async clickSuggestion(suggestionIndex = 0, waitTime = 500) {
-      const elements = await find.allByCssSelector('.suggestions .suggestion');
-      if (suggestionIndex > elements.length) {
-        throw new Error(`Unable to select suggestion ${suggestionIndex}, only ${elements.length} suggestions available.`);
+    async _positionCaret(caretPosition) {
+      const input = await testSubjects.find('timelionExpressionTextArea');
+      const inputText = await input.getProperty('value');
+      await input.click(); // places caret at end of input
+      const clickPromises = [];
+      for (let i = inputText.length; i > caretPosition; i--) {
+        // move caret to left
+        clickPromises.push(remote.pressKeys('\uE012'));
       }
-      await elements[suggestionIndex].click();
-      // Wait for timelion expression to be updated after clicking suggestions
-      await PageObjects.common.sleep(waitTime);
+      await Promise.all(clickPromises);
+    }
+
+    async _waitForSuggestionListLoading() {
+      const suggestionList = await testSubjects.find('timelionSuggestionList');
+      const isLoading = await this._isLoading(suggestionList);
+      if (isLoading) {
+        await retry.try(async () => {
+          await suggestionList.waitForDeletedByClassName('euiLoadingSpinner');
+        });
+      }
+    }
+
+    async _isLoading(suggestionListElement) {
+      return await find.exists(
+        async () => await suggestionListElement.findByCssSelector('.euiLoadingSpinner'));
     }
   }
 

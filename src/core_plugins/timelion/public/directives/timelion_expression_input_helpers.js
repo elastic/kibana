@@ -146,7 +146,11 @@ async function extractSuggestionsFromParsedResult(result, cursorPosition, functi
 
     let valueSuggestions;
     if (argValueSuggestions.hasDynamicSuggestionsForArgument(functionName, argName)) {
-      valueSuggestions = await argValueSuggestions.getDynamicSuggestionsForArgument(functionName, argName, functionArgs, partialInput);
+      const results = await argValueSuggestions.getDynamicSuggestionsForArgument(functionName, argName, functionArgs, partialInput);
+      if (results.isPrevRequestResults) {
+        return { isPrevRequestResults: true, list: [] };
+      }
+      valueSuggestions = results.suggestions;
     } else {
       const {
         suggestions: staticSuggestions,
@@ -223,7 +227,11 @@ export async function suggest(expression, functionList, Parser, cursorPosition, 
         } = message;
         let valueSuggestions = [];
         if (argValueSuggestions.hasDynamicSuggestionsForArgument(functionName, argName)) {
-          valueSuggestions = await argValueSuggestions.getDynamicSuggestionsForArgument(functionName, argName, functionArgs);
+          const results = await argValueSuggestions.getDynamicSuggestionsForArgument(functionName, argName, functionArgs);
+          if (results.isPrevRequestResults) {
+            return { isPrevRequestResults: true, list: [] };
+          }
+          valueSuggestions = results.suggestions;
         } else {
           const functionHelp = functionList.find(func => func.name === functionName);
           if (functionHelp) {
