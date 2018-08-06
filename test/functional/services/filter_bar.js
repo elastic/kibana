@@ -52,6 +52,17 @@ export function FilterBarProvider({ getService }) {
       await testSubjects.click(`filter & filter-key-${key} disableFilter-${key}`);
     }
 
+    /**
+     * Adds a filter to the filter bar.
+     *
+     * @param {string} field The name of the field the filter should be applied for.
+     * @param {string} operator A valid operator for that fields, e.g. "is one of", "is", "exists", etc.
+     * @param {string[]|string} values One value or a list of values to set for this filter. This depends
+     *  on the actual filter set, how these values behave. This depends on the operator on how that behave.
+     *  You can use it like `addFilter('bytes', 'is between', ['100', '5000'])` to add values into the two
+     *  separate input fields of the `is between` filter, but you can also use it as
+     *  `addFilter('extension', 'is one of', ['jpg', 'png'])` to add multiple options for a "is one of" filter.
+     */
     async addFilter(field, operator, values) {
       if (!Array.isArray(values)) {
         values = [values];
