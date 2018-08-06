@@ -17,11 +17,30 @@
  * under the License.
  */
 
-interface EditorParamConfig {
-  fixedValue?: any;
-  hidden?: boolean;
-  base?: number;
+/**
+ * A hidden parameter can be hidden from the UI completely.
+ */
+interface HiddenParam {
+  hidden: boolean;
 }
+
+/**
+ * A fixed parameter has a fixed value for a specific field.
+ * It can optionally also be hidden.
+ */
+export type FixedParam = Partial<HiddenParam> & {
+  fixedValue: any;
+};
+
+/**
+ * Numeric interval parameters must always be set in the editor to a multiple of
+ * the specified base. It can optionally also be hidden.
+ */
+export type NumericIntervalParam = Partial<HiddenParam> & {
+  base: number;
+};
+
+export type EditorParamConfig = NumericIntervalParam | FixedParam | HiddenParam;
 
 export interface EditorConfig {
   [paramName: string]: EditorParamConfig;

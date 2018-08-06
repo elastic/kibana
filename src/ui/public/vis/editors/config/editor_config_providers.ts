@@ -20,7 +20,7 @@
 import { AggConfig } from '../..';
 import { AggType } from '../../../agg_types';
 import { IndexPattern } from '../../../index_patterns';
-import { EditorConfig } from './types';
+import { EditorConfig, EditorParamConfig, FixedParam, NumericIntervalParam } from './types';
 
 type EditorConfigProvider = (
   aggType: AggType,
@@ -33,7 +33,7 @@ function greatestCommonDivisor(a: number, b: number): number {
 }
 
 function leastCommonMultiple(a: number, b: number) {
-  return a * b / greatestCommonDivisor(a, b);
+  return (a * b) / greatestCommonDivisor(a, b);
 }
 
 class EditorConfigProviderRegistry {
@@ -54,30 +54,73 @@ class EditorConfigProviderRegistry {
     return this.mergeConfigs(configs);
   }
 
+  private isBaseParam(config: EditorParamConfig): config is NumericIntervalParam {
+    return config.hasOwnProperty('base');
+  }
+
+  private isFixedParam(config: EditorParamConfig): config is FixedParam {
+    return config.hasOwnProperty('fixedValue');
+  }
+
+  private mergeHidden(current: EditorParamConfig, merged: EditorParamConfig): boolean {
+    return Boolean(current.hidden || merged.hidden);
+  }
+
+  private mergeFixedAndBase(
+    current: EditorParamConfig,
+    merged: EditorParamConfig,
+    paramName: string
+  ): { fixedValue?: any; base?: number } {
+    if (
+      this.isFixedParam(current) &&
+      this.isFixedParam(merged) &&
+      current.fixedValue !== merged.fixedValue
+    ) {
+      // In case multiple configurations provided a fixedValue, these must all be the same.
+      // If not we'll throw an error.
+      throw new Error(`Two EditorConfigProviders provided different fixed values for field ${paramName}:
+          ${merged.fixedValue} !== ${current.fixedValue}`);
+    } else if (
+      (this.isFixedParam(current) && this.isBaseParam(merged)) ||
+      (this.isBaseParam(current) && this.isFixedParam(merged))
+    ) {
+      // In case one config tries to set a fixed value and another setting a base value,
+      // we'll throw an error. This could be solved more elegantly, by allowing fixedValues
+      // that are the multiple of the specific base value, but since there is no use-case for that
+      // right now, this isn't implemented.
+      throw new Error(`Tried to provide a fixedValue and a base for param ${paramName}.`);
+    } else if (this.isBaseParam(current) && this.isBaseParam(merged)) {
+      // In case both had where interval values, just use the least common multiple between both interval
+      return {
+        base: leastCommonMultiple(current.base, merged.base),
+      };
+    } else {
+      // In this case we haven't had a fixed value of base for that param yet, we use the one specified
+      // in the current config
+      if (this.isFixedParam(current)) {
+        return {
+          fixedValue: current.fixedValue,
+        };
+      } else if (this.isBaseParam(current)) {
+        return {
+          base: current.base,
+        };
+      }
+
+      return {};
+    }
+  }
+
   private mergeConfigs(configs: EditorConfig[]): EditorConfig {
     return configs.reduce((output, conf) => {
       Object.entries(conf).forEach(([paramName, paramConfig]) => {
         if (!output[paramName]) {
-          // No other config had anything configured for that param, just
-          // use the whole config for that param as it is.
           output[paramName] = paramConfig;
         } else {
-          // Another config already had already configured something, so let's merge that
-          // If one config set it to hidden, we'll hide the param.
-          output[paramName].hidden = output[paramName].hidden || paramConfig.hidden;
-
-          // In case a base is defined either set it (if no previous base)
-          // has been configured for that param or otherwise find the least common multiple
-          if (paramConfig.base) {
-            const previousBase = output[paramName].base;
-            output[paramName].base =
-              previousBase !== undefined
-                ? leastCommonMultiple(previousBase, paramConfig.base)
-                : output[paramName].base;
-          }
-
-          // TODO: What to do for multiple fixedValues
-          output[paramName].fixedValue = paramConfig.fixedValue;
+          output[paramName] = {
+            hidden: this.mergeHidden(paramConfig, output[paramName]),
+            ...this.mergeFixedAndBase(paramConfig, output[paramName], paramName),
+          };
         }
       });
       return output;
@@ -87,4 +130,4 @@ class EditorConfigProviderRegistry {
 
 const editorConfigProviders = new EditorConfigProviderRegistry();
 
-export { editorConfigProviders };
+export { editorConfigProviders, EditorConfigProviderRegistry };
