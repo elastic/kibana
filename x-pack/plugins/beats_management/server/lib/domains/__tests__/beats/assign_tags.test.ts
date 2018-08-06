@@ -93,6 +93,7 @@ describe('Beats Domain Lib', () => {
       beatsLib = new CMBeatsDomain(new MemoryBeatsAdapter(beatsDB), {
         tags: tagsLib,
         tokens: tokensLib,
+        framework,
       });
     });
 

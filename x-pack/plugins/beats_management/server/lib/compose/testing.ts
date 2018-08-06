@@ -36,6 +36,7 @@ export function compose({
   const beats = new CMBeatsDomain(new MemoryBeatsAdapter(beatsDB), {
     tags,
     tokens,
+    framework,
   });
 
   const domainLibs: CMDomainLibs = {
