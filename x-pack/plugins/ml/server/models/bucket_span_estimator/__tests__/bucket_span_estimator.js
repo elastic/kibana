@@ -52,8 +52,12 @@ describe('ML - BucketSpanEstimator', () => {
   // Based on the `search.max_buckets` settings the range queries will have a different
   // `gte` value we can test against. When `search.max_buckets` is `-1`, the duration should
   // fall back to a default value of 10000 buckets.
+
+  // Sunday, February 12, 2017 12:59:54 AM GMT+01:00
   const DURATION_END = 1486857594000;
+  // Sunday, February 5, 2017 2:59:54 AM GMT+01:00
   const TEST1_EXPECTED_GTE = 1486259994000;
+  // Saturday, February 11, 2017 8:59:54 AM GMT+01:00
   const TEST2_EXPECTED_GTE = 1486799994000;
 
   it('call factory with mock max buckets response of -1', (done) => {
