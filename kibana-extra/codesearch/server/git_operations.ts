@@ -5,9 +5,10 @@
  */
 
 import Boom from 'boom';
-import { Commit, Error, Object, Oid, Repository, Tree, TreeEntry } from 'nodegit';
+import { Commit, Error, Object, Oid, Reference, Repository, Tree, TreeEntry } from 'nodegit';
 import * as Path from 'path';
 import { FileTree, FileTreeItemType, RepositoryUri } from '../model';
+import { CommitInfo, ReferenceInfo } from '../model/commit';
 
 /**
  * do a nodegit operation and check the results. If it throws a not found error or returns null,
@@ -148,4 +149,35 @@ export class GitOperations {
     // @ts-ignore
     return null;
   }
+}
+
+export function commitInfo(commit: Commit): CommitInfo {
+  return {
+    updated: commit.date(),
+    message: commit.message(),
+    committer: commit.committer().name(),
+    id: commit.sha().substr(0, 7),
+  };
+}
+
+export async function referenceInfo(ref: Reference): Promise<ReferenceInfo> {
+  const repository = ref.owner();
+  const object = await ref.peel(Object.TYPE.COMMIT);
+  const commit = await repository.getCommit(object.id());
+  let type: string;
+  if (ref.isTag()) {
+    type = 'tag';
+  } else if (ref.isRemote()) {
+    type = 'remote_branch';
+  } else if (ref.isBranch()) {
+    type = 'branch';
+  } else {
+    type = 'other';
+  }
+  return {
+    name: ref.shorthand(),
+    reference: ref.name(),
+    commit: commitInfo(commit),
+    type,
+  };
 }
