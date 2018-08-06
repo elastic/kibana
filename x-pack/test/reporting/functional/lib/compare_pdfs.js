@@ -93,27 +93,29 @@ export async function checkIfPdfsMatch(actualPdfPath, baselinePdfPath, screensho
   let failCount = 0;
   while (true) {
     let expectedPagePng;
+    let actualPagePng;
     try {
+      log.debug(`Converting expected pdf page ${pageNum} to png`);
       expectedPagePng = await expectedPdfImage.convertPage(pageNum);
+      log.debug(`Converting actual pdf page ${pageNum} to png`);
+      actualPagePng = await actualPdfImage.convertPage(pageNum);
     } catch (e) {
+      log.error(`Error caught while converting pdf page ${pageNum} to png: ${e.message}`);
       if (JSON.stringify(e).indexOf('Requested FirstPage is greater than the number of pages in the file') >= 0) {
         break;
       } else {
-        log.error('Failed on: ' + e.message);
         if (failCount < 3) {
-          log.error('Will try conversion again...');
+          log.error(`${failCount}: Will try conversion again...`);
           failCount++;
           continue;
         } else {
+          log.error(`Failed ${failCount} times, throwing error`);
           throw e;
         }
       }
     }
 
-    const actualPagePng = await actualPdfImage.convertPage(pageNum);
-
     const diffPngPath = path.resolve(failureDirectoryPath, `${baselinePdfFileName}-${pageNum}.png`);
-
     diffTotal += await comparePngs(actualPagePng, expectedPagePng, diffPngPath, log);
     pageNum++;
   }
