@@ -5,10 +5,10 @@
  */
 
 import {
-  SET_SELECTED_LAYER, UPDATE_LAYER_ORDER, SET_META,
+  SET_SELECTED_LAYER, UPDATE_LAYER_ORDER,
   ADD_LAYER, REMOVE_LAYER, PROMOTE_TEMPORARY_LAYERS,
   CLEAR_TEMPORARY_LAYERS, LAYER_LOADING, TOGGLE_LAYER_VISIBLE
-} from "../actions/map_actions";
+} from "../actions/store_actions";
 
 const INITIAL_STATE = {
   mapConstants: {
@@ -18,14 +18,13 @@ const INITIAL_STATE = {
   selectedLayer: null,
   layerList: [],
   sources: [],
-  meta: {},
   layerLoading: false
 };
 
 export function map(state = INITIAL_STATE, action) {
   switch (action.type) {
-    case SET_META:
-      return { ...state, meta: action.meta };
+    // case SET_META:
+    //   return { ...state, meta: action.meta };
     case SET_SELECTED_LAYER:
       return { ...state, selectedLayer: state.layerList.find(layer => layer.id === action.selectedLayer) };
     case UPDATE_LAYER_ORDER:

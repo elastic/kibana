@@ -10,7 +10,7 @@ import { combineReducers, applyMiddleware, createStore, compose }
 import thunk from 'redux-thunk';
 import ui from './ui';
 import { map } from './map';
-import { loadMapResources } from "../actions/map_actions";
+import { loadMapResources } from "../actions/store_actions";
 import config from './config';
 
 const rootReducer = combineReducers({

@@ -8,7 +8,7 @@ import { connect } from 'react-redux';
 import { KibanaMap } from './view';
 import { getOlMapAndLayers } from "../../selectors/ol_map_selectors";
 import { updateFlyout, FLYOUT_STATE } from '../../store/ui';
-import { setSelectedLayer } from '../../actions/map_actions';
+import { setSelectedLayer } from '../../actions/store_actions';
 
 const mapDispatchToProps = {
   showLayerDetails: layer =>

@@ -24,10 +24,10 @@ export class LayerTOC extends React.Component {
   }
 
   componentDidMount() {
-    this._attachSortHandler(this.props);
+    this._attachSortHandler();
   }
 
-  _attachSortHandler({ updateLayerOrder }) {
+  _attachSortHandler() {
     const tocEntries = this._domContainer;
     let length;
     $(tocEntries).sortable({
@@ -43,7 +43,7 @@ export class LayerTOC extends React.Component {
           .map((el, idx) => idx);
         newOrder.splice(prevIndex, 1);
         newOrder.splice(newIndex, 0, prevIndex);
-        updateLayerOrder(newOrder);
+        this.props.updateLayerOrder(newOrder);
       }
     });
   }
@@ -58,7 +58,6 @@ export class LayerTOC extends React.Component {
             layerId={layer.id}
             visible={true}
             layerName={layer.name}
-            // onButtonClick={alert('clicked!')}
           />
         );
       });

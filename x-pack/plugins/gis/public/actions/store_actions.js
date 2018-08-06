@@ -82,7 +82,7 @@ export function addVectorLayerFromEMSFileSource(emsFileSource, options = {}, pos
 
     dispatch(layerLoading(true));
 
-    const allFiles = getState().map.meta.data_sources.ems.file;
+    const allFiles = getState().config.meta.data_sources.ems.file;
     const geojson = await EMSFileSource.getGeoJson(emsFileSource, allFiles);
     const layer = VectorLayer.create({
       source: geojson,
@@ -110,7 +110,7 @@ export function addXYZTMSLayerFromSource(xyzTMSsource, options = {}, position) {
 export function addEMSTMSFromSource(source, options = {}, position) {
   return async (dispatch, getState) => {
     dispatch(layerLoading(true));
-    const allServices = getState().map.meta.data_sources.ems.tms;
+    const allServices = getState().config.meta.data_sources.ems.tms;
     const service = await EMSTMSSource.getTMSOptions(source, allServices);
     const layer = TileLayer.create({
       source: service.url,

@@ -7,7 +7,7 @@
 import { connect } from 'react-redux';
 import { TOCEntry } from './view';
 import { updateFlyout, FLYOUT_STATE } from '../../../store/ui';
-import { setSelectedLayer, toggleLayerVisible } from '../../../actions/map_actions';
+import { setSelectedLayer, toggleLayerVisible } from '../../../actions/store_actions';
 import { getLayerById } from '../../../selectors/map_selectors';
 import _ from 'lodash';
 

@@ -6,9 +6,8 @@
 
 import { connect } from 'react-redux';
 import { LayerTOC } from './view';
-import { updateFlyout, setSelectedLayer, FLYOUT_STATE }
-  from '../../store/ui';
-import { updateLayerOrder } from "../../actions/map_actions";
+import { updateFlyout, FLYOUT_STATE } from '../../store/ui';
+import { updateLayerOrder, setSelectedLayer } from "../../actions/store_actions";
 import { getLayerList } from "../../selectors/map_selectors";
 
 const mapDispatchToProps = {

@@ -10,12 +10,12 @@ import { getFlyoutDisplay, updateFlyout, FLYOUT_STATE } from '../../store/ui';
 import { getLayerLoading, getTemporaryLayers }
   from "../../selectors/map_selectors";
 import { addVectorLayerFromEMSFileSource, removeLayer, clearTemporaryLayers, promoteTemporaryLayers, addXYZTMSLayerFromSource }
-  from "../../actions/map_actions";
+  from "../../actions/store_actions";
 import _ from 'lodash';
 
 function mapStateToProps(state = {}) {
 
-  let emsVectorOptions = (state.map.meta && state.map.meta.data_sources) ? state.map.meta.data_sources.ems.file : [];
+  let emsVectorOptions = (state.config.meta && state.config.meta.data_sources) ? state.config.meta.data_sources.ems.file : [];
   emsVectorOptions = emsVectorOptions ? emsVectorOptions.map((file) => ({ value: file.name, text: file.name })) : [];
 
   return {

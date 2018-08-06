@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { SET_SELECTED_LAYER } from "../actions/map_actions";
+import { SET_SELECTED_LAYER } from "../actions/store_actions";
 
 export const UPDATE_FLYOUT = 'UPDATE_FLYOUT';
 
