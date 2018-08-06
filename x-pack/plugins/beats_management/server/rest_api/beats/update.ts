@@ -51,14 +51,7 @@ export const createBeatUpdateRoute = (libs: CMServerLibs) => ({
     }
 
     try {
-      const beat = await libs.beats.getById(libs.framework.internalUser, beatId);
-
-      if (beat === null) {
-        return reply({ message: 'Beat not found' }).code(404);
-      }
-
       const status = await libs.beats.update(userOrToken, beatId, {
-        ...beat,
         ...request.payload,
         host_ip: remoteAddress,
       });
