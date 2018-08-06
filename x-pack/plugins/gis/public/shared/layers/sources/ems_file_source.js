@@ -15,15 +15,7 @@ export class EMSFileSource {
     };
   }
 
-  static async createEMSFileListDescriptor(kbnModules) {
-    return {
-      type: EMSFileSource.type,
-      service: await kbnModules.serviceSettings.getFileLayers()
-    };
-  }
-
   static async getGeoJson(descriptor, fileLayers) {
-    // const fileLayers = await kbnModules.serviceSettings.getFileLayers();
     const file = fileLayers.find((file) => file.name === descriptor.name);
     const vectorFetch = await fetch(file.url);
     return await vectorFetch.json();

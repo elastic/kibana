@@ -24,17 +24,11 @@ window.__REDUX_DEVTOOLS_EXTENSION
   && enhancers.push(window.__REDUX_DEVTOOLS_EXTENSION__());
 
 let initConfig = null;
-let serviceSettings = null;
 uiModules
   .get('kibana')
-  .run((Private, $injector) => {
-    serviceSettings = $injector.get('serviceSettings');
-    const mapConfig = $injector.get('mapConfig');
-    initConfig = {
-      config: {
-        mapConfig
-      }
-    };
+  .run(() => {
+    //leave this for now. we still may want to load Kibana modules.
+    initConfig = {};
   });
 
 export const getStore = async function () {
@@ -44,13 +38,12 @@ export const getStore = async function () {
         clearInterval(handle);
         const store = createStore(
           rootReducer,
-          { ...initConfig },
+          initConfig,
           compose(...enhancers)
         );
         resolve(store);
-        loadMapResources(serviceSettings, store.dispatch);
+        loadMapResources(store.dispatch);
       }
     }, 10);
   });
 };
-
