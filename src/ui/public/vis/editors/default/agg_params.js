@@ -30,28 +30,6 @@ import aggParamsTemplate from './agg_params.html';
 import { aggTypeFilters } from '../../../agg_types/filter';
 import { editorConfigProviders } from '../config/editor_config_providers';
 
-// TODO: This is just an example how to use this, and will be removed later.
-// editorConfigProviders.register((aggType, indexPattern, aggConfig) => {
-//   if (aggConfig.params.field && aggConfig.params.field.name === 'bytes') {
-//     return {
-//       'intervalBase': {
-//         fixedValue: 50
-//       },
-//       'interval': {
-//         base: 50
-//       }
-//     };
-//   }
-//   if (aggConfig.type && aggConfig.type.name === 'date_histogram') {
-//     return {
-//       'time_zone': {
-//         fixedValue: 'UTC'
-//       }
-//     };
-//   }
-//   return {};
-// });
-
 uiModules
   .get('app/visualize')
   .directive('visEditorAggParams', function ($compile) {
