@@ -95,7 +95,7 @@ async function migrationContext(opts: MigrationOpts): Promise<Context> {
   const { callCluster, index } = opts;
   const log = new MigrationLogger(opts.log);
 
-  log.info(`Loading migration status for ${index}`);
+  log.info(`Loading ${index} index information`);
 
   const sourceIndex = new ElasticIndex({ callCluster, index });
   const activeMappings = buildActiveMappings({ properties: opts.mappingProperties });
@@ -161,7 +161,7 @@ async function migrateIndex(context: Context): Promise<MigrationResult> {
   const { sourceIndex, destIndex, log, pollInterval } = context;
   const startTime = Date.now();
 
-  log.info(`Migrating ${sourceIndex} to ${destIndex}`);
+  log.debug(`Coordinating migration from ${sourceIndex} to ${destIndex}`);
   await coordinateMigration({
     log,
     pollInterval,
@@ -176,7 +176,7 @@ async function migrateIndex(context: Context): Promise<MigrationResult> {
     elapsedMs: Date.now() - startTime,
   };
 
-  log.info(`Migrated ${sourceIndex} in ${result.elapsedMs}ms`);
+  log.info(`Finished migrating ${sourceIndex} saved objects in ${result.elapsedMs}ms`);
 
   return result;
 }
@@ -189,7 +189,7 @@ async function runMigration(context: Context) {
 
   // The index may have been migrated since we last checked, due
   // to race conditions between Kibana instances...
-  log.info(`Checking ${sourceIndex} migration status`);
+  log.debug(`Checking if ${sourceIndex} is already migrated`);
   if (await isMigrated(context)) {
     return;
   }
@@ -198,10 +198,10 @@ async function runMigration(context: Context) {
   await destIndex.create(fullMappings);
 
   if (sourceInfo.exists) {
-    log.info(`Ensuring ${sourceIndex} is an alias`);
+    log.debug(`Ensuring ${sourceIndex} is an alias`);
     await sourceIndex.convertToAlias();
 
-    log.info(`Migrating ${sourceIndex} docs to ${destIndex}`);
+    log.info(`Migrating ${sourceIndex} saved objects to ${destIndex}`);
     await migrateDocs(context);
   }
 
