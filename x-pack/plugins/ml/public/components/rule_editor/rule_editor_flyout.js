@@ -34,7 +34,7 @@ import { toastNotifications } from 'ui/notify';
 
 import { DetectorDescriptionList } from './components/detector_description_list';
 import { ActionsSection } from './actions_section';
-import { checkPermission } from 'plugins/ml/privilege/check_privilege';
+import { checkPermission } from '../../privilege/check_privilege';
 import { ConditionsSection } from './conditions_section';
 import { ScopeSection } from './scope_section';
 import { SelectRuleAction } from './select_rule_action';
@@ -47,9 +47,9 @@ import {
 } from './utils';
 
 import { ACTION, CONDITIONS_NOT_SUPPORTED_FUNCTIONS } from '../../../common/constants/detector_rule';
-import { getPartitioningFieldNames } from 'plugins/ml/../common/util/job_utils';
-import { mlJobService } from 'plugins/ml/services/job_service';
-import { ml } from 'plugins/ml/services/ml_api_service';
+import { getPartitioningFieldNames } from '../../../common/util/job_utils';
+import { mlJobService } from '../../services/job_service';
+import { ml } from '../../services/ml_api_service';
 import { metadata } from 'ui/metadata';
 
 import './styles/main.less';
