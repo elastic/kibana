@@ -75,7 +75,15 @@ export class CollectorSet {
    * @param {Object} savedObjectsClient - object with methods for getting info about stored Kibana saved objects
    * @param {Array} collectors - an array of collectors, default to all registered collectors
    */
-  bulkFetch({ callCluster, savedObjectsClient, collectors = this._collectors }) {
+  bulkFetch(options) {
+    // check options
+    const givenOptions = Object.keys(options);
+    givenOptions.forEach(o => {
+      if (!['callCluster', 'savedObjectsClient', 'collectors'].includes(o)) {
+        throw new Error(`Unknown option passed to bulkFetch: ` + o);
+      }
+    });
+    const { callCluster, savedObjectsClient, collectors = this._collectors } = options;
     if (!Array.isArray(collectors)) {
       throw new Error(`bulkFetch method given bad collectors parameter: ` + typeof collectors);
     }
@@ -96,7 +104,7 @@ export class CollectorSet {
 
   async bulkFetchUsage({ callCluster, savedObjectsClient }) {
     const usageCollectors = this._collectors.filter(c => c instanceof UsageCollector);
-    return this.bulkFetch({ callCluster, savedObjectsClient, usageCollectors });
+    return this.bulkFetch({ callCluster, savedObjectsClient, collectors: usageCollectors });
   }
 
   // convert an array of fetched stats results into key/object
