@@ -33,9 +33,9 @@ export class MemoryBeatsAdapter implements CMBeatsAdapter {
     const beatIds = removals.map(r => r.beatId);
 
     const response = this.beatsDB.filter(beat => beatIds.includes(beat.id)).map(beat => {
-      const tags = removals.filter(r => r.beatId === beat.id);
-      if (tags.length) {
-        tags.forEach((assignment: BeatsTagAssignment) => {
+      const removalsForBeat = removals.filter(r => r.beatId === beat.id);
+      if (removalsForBeat.length) {
+        removalsForBeat.forEach((assignment: BeatsTagAssignment) => {
           if (beat.tags) {
             beat.tags = beat.tags.filter(tag => tag !== assignment.tag);
           }
