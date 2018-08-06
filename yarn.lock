@@ -6042,13 +6042,13 @@ hapi-auth-cookie@6.1.1:
     teamwork "3.x.x"
     topo "3.x.x"
 
-hapi@14.2.0:
-  version "14.2.0"
-  resolved "https://registry.yarnpkg.com/hapi/-/hapi-14.2.0.tgz#e4fe2fc182598a0f81e87b41b6be0fbd31c75409"
+hapi@15.2.0:
+  version "15.2.0"
+  resolved "https://registry.yarnpkg.com/hapi/-/hapi-15.2.0.tgz#5704ca2c04b6386c03caf9ee901f1de080316d23"
   dependencies:
     accept "2.x.x"
     ammo "2.x.x"
-    boom "3.x.x"
+    boom "4.x.x"
     call "3.x.x"
     catbox "7.x.x"
     catbox-memory "2.x.x"
@@ -6058,12 +6058,11 @@ hapi@14.2.0:
     iron "4.x.x"
     items "2.x.x"
     joi "9.x.x"
-    kilt "2.x.x"
     mimos "3.x.x"
-    peekaboo "2.x.x"
+    podium "^1.2.x"
     shot "3.x.x"
-    statehood "4.x.x"
-    subtext "4.x.x"
+    statehood "5.x.x"
+    subtext "^4.3.x"
     topo "2.x.x"
 
 har-schema@^1.0.5:
@@ -7964,12 +7963,6 @@ keyv@3.0.0:
   resolved "https://registry.yarnpkg.com/keyv/-/keyv-3.0.0.tgz#44923ba39e68b12a7cec7df6c3268c031f2ef373"
   dependencies:
     json-buffer "3.0.0"
-
-kilt@2.x.x:
-  version "2.0.2"
-  resolved "https://registry.yarnpkg.com/kilt/-/kilt-2.0.2.tgz#04d7183c298a1232efddf7ddca5959a8f6301e20"
-  dependencies:
-    hoek "4.x.x"
 
 kind-of@^3.0.2, kind-of@^3.0.3, kind-of@^3.2.0:
   version "3.2.2"
@@ -9938,10 +9931,6 @@ pdfmake@0.1.33:
     lodash "^4.17.4"
     pdfkit "^0.8.3"
 
-peekaboo@2.x.x:
-  version "2.0.2"
-  resolved "https://registry.yarnpkg.com/peekaboo/-/peekaboo-2.0.2.tgz#fc42e139efd698c6ff2870a6b20c047cd9aa29ff"
-
 pegjs@0.9.0, pegjs@~0.9.0:
   version "0.9.0"
   resolved "https://registry.yarnpkg.com/pegjs/-/pegjs-0.9.0.tgz#f6aefa2e3ce56169208e52179dfe41f89141a369"
@@ -10086,6 +10075,14 @@ podium@3.x.x:
   dependencies:
     hoek "5.x.x"
     joi "13.x.x"
+
+podium@^1.2.x:
+  version "1.3.0"
+  resolved "https://registry.yarnpkg.com/podium/-/podium-1.3.0.tgz#3c490f54d16f10f5260cbe98641f1cb733a8851c"
+  dependencies:
+    hoek "4.x.x"
+    items "2.x.x"
+    joi "10.x.x"
 
 polished@^1.9.2:
   version "1.9.2"
@@ -12393,16 +12390,16 @@ state-toggle@^1.0.0:
   version "1.0.0"
   resolved "https://registry.yarnpkg.com/state-toggle/-/state-toggle-1.0.0.tgz#d20f9a616bb4f0c3b98b91922d25b640aa2bc425"
 
-statehood@4.x.x:
-  version "4.1.0"
-  resolved "https://registry.yarnpkg.com/statehood/-/statehood-4.1.0.tgz#8a2877d13d9850aab6ce877a54b778df0f43acdb"
+statehood@5.x.x:
+  version "5.0.3"
+  resolved "https://registry.yarnpkg.com/statehood/-/statehood-5.0.3.tgz#c07a75620db5379b60d2edd47f538002a8ac7dd6"
   dependencies:
-    boom "3.x.x"
+    boom "5.x.x"
     cryptiles "3.x.x"
     hoek "4.x.x"
     iron "4.x.x"
     items "2.x.x"
-    joi "9.x.x"
+    joi "10.x.x"
 
 statehood@6.x.x:
   version "6.0.6"
@@ -12648,16 +12645,6 @@ subarg@^1.0.0:
   dependencies:
     minimist "^1.1.0"
 
-subtext@4.x.x:
-  version "4.4.1"
-  resolved "https://registry.yarnpkg.com/subtext/-/subtext-4.4.1.tgz#2fcec945de429283c3d18b151ff0fa1f1b87aec9"
-  dependencies:
-    boom "5.x.x"
-    content "3.x.x"
-    hoek "4.x.x"
-    pez "2.x.x"
-    wreck "12.x.x"
-
 subtext@6.x.x:
   version "6.0.7"
   resolved "https://registry.yarnpkg.com/subtext/-/subtext-6.0.7.tgz#8e40a67901a734d598142665c90e398369b885f9"
@@ -12667,6 +12654,16 @@ subtext@6.x.x:
     hoek "5.x.x"
     pez "4.x.x"
     wreck "14.x.x"
+
+subtext@^4.3.x:
+  version "4.4.1"
+  resolved "https://registry.yarnpkg.com/subtext/-/subtext-4.4.1.tgz#2fcec945de429283c3d18b151ff0fa1f1b87aec9"
+  dependencies:
+    boom "5.x.x"
+    content "3.x.x"
+    hoek "4.x.x"
+    pez "2.x.x"
+    wreck "12.x.x"
 
 suffix@^0.1.0:
   version "0.1.1"

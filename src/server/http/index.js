@@ -51,8 +51,15 @@ export default async function (kbnServer, server, config) {
     listener: kbnServer.newPlatform.proxyListener,
     state: {
       strictHeader: false,
+
+      // Remain compat with Hapi v14
+      // TODO: see if we can remove this
+      isHttpOnly: false,
+      isSecure: false,
+      isSameSite: false
     },
     routes: {
+      log: true,
       cors: config.get('server.cors'),
       payload: {
         maxBytes: config.get('server.maxPayloadBytes'),
