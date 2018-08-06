@@ -42,16 +42,16 @@ export class Collector {
   }
 
   /*
-   * @param {Object} fetchMechanisms - an object with a callCluster function and a savedObjectsClient object
+   * @param {Function} callCluster - function for querying ES
+   * @param {Object} savedObjectsClient - object with methods for getting info about stored Kibana saved objects
    */
-  fetchInternal(fetchMechanisms) {
-    const { callCluster, savedObjectsClient } = fetchMechanisms;
+  fetchInternal({ callCluster, savedObjectsClient }) {
     if (typeof callCluster !== 'function' || typeof savedObjectsClient !== 'object') {
       throw new Error(
         'An object must be passed to the fetch methods of collectors having ' +
         'properties of a callCluster function and savedObjectsClient object'
       );
     }
-    return this.fetch(fetchMechanisms);
+    return this.fetch({ callCluster, savedObjectsClient });
   }
 }
