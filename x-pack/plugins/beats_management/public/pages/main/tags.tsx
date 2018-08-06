@@ -82,7 +82,7 @@ export class TagsPage extends React.PureComponent<TagsPageProps, TagsPageState> 
       const tagIcons = tags.map((tagId: string) => {
         const associatedTag = this.state.tags.find(tag => tag.id === tagId);
         return (
-          <EuiToolTip position="bottom" title={tagId}>
+          <EuiToolTip title={tagId}>
             <EuiIcon
               key={tagId}
               type="stopFilled"
