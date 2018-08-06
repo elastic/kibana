@@ -80,6 +80,26 @@ export default function ({ loadTestFile, getService }) {
           ]
         });
 
+      await supertest.put('/api/security/role/kibana_rbac_default_space_user')
+        .send({
+          kibana: [
+            {
+              privileges: ['all'],
+              spaces: ['default']
+            }
+          ]
+        });
+
+      await supertest.put('/api/security/role/kibana_rbac_space_1_read_user')
+        .send({
+          kibana: [
+            {
+              privileges: ['all'],
+              spaces: ['default']
+            }
+          ]
+        });
+
       await es.shield.putUser({
         username: AUTHENTICATION.NOT_A_KIBANA_USER.USERNAME,
         body: {
@@ -149,6 +169,27 @@ export default function ({ loadTestFile, getService }) {
           email: 'a_kibana_rbac_dashboard_only_user@elastic.co',
         }
       });
+
+      await es.shield.putUser({
+        username: AUTHENTICATION.KIBANA_RBAC_DEFAULT_SPACE_USER.USERNAME,
+        body: {
+          password: AUTHENTICATION.KIBANA_RBAC_DEFAULT_SPACE_USER.PASSWORD,
+          roles: ['kibana_rbac_default_space_user'],
+          full_name: 'a kibana default space user',
+          email: 'a_kibana_rbac_default_space_user@elastic.co',
+        }
+      });
+
+      await es.shield.putUser({
+        username: AUTHENTICATION.KIBANA_RBAC_SPACE_1_READONLY_USER.USERNAME,
+        body: {
+          password: AUTHENTICATION.KIBANA_RBAC_SPACE_1_READONLY_USER.PASSWORD,
+          roles: ['kibana_rbac_space_1_read_user'],
+          full_name: 'a kibana rbac space 1 read-only user',
+          email: 'a_kibana_rbac_space_1_readonly_user@elastic.co',
+        }
+      });
+
     });
     loadTestFile(require.resolve('./bulk_get'));
     loadTestFile(require.resolve('./create'));

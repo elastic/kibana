@@ -36,5 +36,13 @@ export const AUTHENTICATION = {
   KIBANA_RBAC_DASHBOARD_ONLY_USER: {
     USERNAME: 'a_kibana_rbac_dashboard_only_user',
     PASSWORD: 'password'
-  }
+  },
+  KIBANA_RBAC_DEFAULT_SPACE_USER: {
+    USERNAME: 'a_kibana_rbac_default_space_user',
+    PASSWORD: 'password'
+  },
+  KIBANA_RBAC_SPACE_1_READONLY_USER: {
+    USERNAME: 'a_kibana_rbac_space_1_readonly_user',
+    PASSWORD: 'password'
+  },
 };

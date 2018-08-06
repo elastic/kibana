@@ -6,6 +6,8 @@
 
 import expect from 'expect.js';
 import { AUTHENTICATION } from './lib/authentication';
+import { getUrlPrefix } from '../lib/space_test_utils';
+import { DEFAULT_SPACE_ID } from '../../../../plugins/spaces/common/constants';
 
 export default function ({ getService }) {
   const supertest = getService('supertestWithoutAuth');
@@ -94,14 +96,14 @@ export default function ({ getService }) {
       });
     };
 
-    const findTest = (description, { auth, tests }) => {
+    const findTest = (description, { auth, spaceId, tests }) => {
       describe(description, () => {
         before(() => esArchiver.load('saved_objects/spaces'));
         after(() => esArchiver.unload('saved_objects/spaces'));
 
         it(`should return ${tests.normal.statusCode} with ${tests.normal.description}`, async () => (
           await supertest
-            .get('/api/saved_objects/_find?type=visualization&fields=title')
+            .get(`${getUrlPrefix(spaceId)}/api/saved_objects/_find?type=visualization&fields=title`)
             .auth(auth.username, auth.password)
             .expect(tests.normal.statusCode)
             .then(tests.normal.response)
@@ -149,276 +151,360 @@ export default function ({ getService }) {
       });
     };
 
-    findTest(`not a kibana user`, {
-      auth: {
-        username: AUTHENTICATION.NOT_A_KIBANA_USER.USERNAME,
-        password: AUTHENTICATION.NOT_A_KIBANA_USER.PASSWORD,
-      },
-      tests: {
-        normal: {
-          description: 'forbidden login and find visualization message',
-          statusCode: 403,
-          response: createExpectRbacForbidden('visualization'),
+    [DEFAULT_SPACE_ID, 'space_1'].forEach(spaceId => {
+      describe(`${spaceId} space`, () => {
+        findTest(`not a kibana user`, {
+          auth: {
+            username: AUTHENTICATION.NOT_A_KIBANA_USER.USERNAME,
+            password: AUTHENTICATION.NOT_A_KIBANA_USER.PASSWORD,
+          },
+          spaceId,
+          tests: {
+            normal: {
+              description: 'forbidden login and find visualization message',
+              statusCode: 403,
+              response: createExpectRbacForbidden('visualization'),
+            },
+            unknownType: {
+              description: 'forbidden login and find wigwags message',
+              statusCode: 403,
+              response: createExpectRbacForbidden('wigwags'),
+            },
+            pageBeyondTotal: {
+              description: 'forbidden login and find visualization message',
+              statusCode: 403,
+              response: createExpectRbacForbidden('visualization'),
+            },
+            unknownSearchField: {
+              description: 'forbidden login and find wigwags message',
+              statusCode: 403,
+              response: createExpectRbacForbidden('wigwags'),
+            },
+            noType: {
+              description: `forbidded can't find any types`,
+              statusCode: 403,
+              response: expectForbiddenCantFindAnyTypes,
+            }
+          }
+        });
+
+        findTest(`superuser`, {
+          auth: {
+            username: AUTHENTICATION.SUPERUSER.USERNAME,
+            password: AUTHENTICATION.SUPERUSER.PASSWORD,
+          },
+          spaceId,
+          tests: {
+            normal: {
+              description: 'only the visualization',
+              statusCode: 200,
+              response: expectVisualizationResults,
+            },
+            unknownType: {
+              description: 'empty result',
+              statusCode: 200,
+              response: createExpectEmpty(1, 20, 0),
+            },
+            pageBeyondTotal: {
+              description: 'empty result',
+              statusCode: 200,
+              response: createExpectEmpty(100, 100, 1),
+            },
+            unknownSearchField: {
+              description: 'empty result',
+              statusCode: 200,
+              response: createExpectEmpty(1, 20, 0),
+            },
+            noType: {
+              description: 'all objects',
+              statusCode: 200,
+              response: expectResultsWithValidTypes,
+            },
+          },
+        });
+
+        findTest(`kibana legacy user`, {
+          auth: {
+            username: AUTHENTICATION.KIBANA_LEGACY_USER.USERNAME,
+            password: AUTHENTICATION.KIBANA_LEGACY_USER.PASSWORD,
+          },
+          spaceId,
+          tests: {
+            normal: {
+              description: 'only the visualization',
+              statusCode: 200,
+              response: expectVisualizationResults,
+            },
+            unknownType: {
+              description: 'empty result',
+              statusCode: 200,
+              response: createExpectEmpty(1, 20, 0),
+            },
+            pageBeyondTotal: {
+              description: 'empty result',
+              statusCode: 200,
+              response: createExpectEmpty(100, 100, 1),
+            },
+            unknownSearchField: {
+              description: 'empty result',
+              statusCode: 200,
+              response: createExpectEmpty(1, 20, 0),
+            },
+            noType: {
+              description: 'all objects',
+              statusCode: 200,
+              response: expectResultsWithValidTypes,
+            },
+          },
+        });
+
+        findTest(`kibana legacy dashboard only user`, {
+          auth: {
+            username: AUTHENTICATION.KIBANA_LEGACY_DASHBOARD_ONLY_USER.USERNAME,
+            password: AUTHENTICATION.KIBANA_LEGACY_DASHBOARD_ONLY_USER.PASSWORD,
+          },
+          spaceId,
+          tests: {
+            normal: {
+              description: 'only the visualization',
+              statusCode: 200,
+              response: expectVisualizationResults,
+            },
+            unknownType: {
+              description: 'empty result',
+              statusCode: 200,
+              response: createExpectEmpty(1, 20, 0),
+            },
+            pageBeyondTotal: {
+              description: 'empty result',
+              statusCode: 200,
+              response: createExpectEmpty(100, 100, 1),
+            },
+            unknownSearchField: {
+              description: 'empty result',
+              statusCode: 200,
+              response: createExpectEmpty(1, 20, 0),
+            },
+            noType: {
+              description: 'all objects',
+              statusCode: 200,
+              response: expectResultsWithValidTypes,
+            },
+          }
+        });
+
+        findTest(`kibana dual-privileges user`, {
+          auth: {
+            username: AUTHENTICATION.KIBANA_DUAL_PRIVILEGES_USER.USERNAME,
+            password: AUTHENTICATION.KIBANA_DUAL_PRIVILEGES_USER.PASSWORD,
+          },
+          spaceId,
+          tests: {
+            normal: {
+              description: 'only the visualization',
+              statusCode: 200,
+              response: expectVisualizationResults,
+            },
+            unknownType: {
+              description: 'empty result',
+              statusCode: 200,
+              response: createExpectEmpty(1, 20, 0),
+            },
+            pageBeyondTotal: {
+              description: 'empty result',
+              statusCode: 200,
+              response: createExpectEmpty(100, 100, 1),
+            },
+            unknownSearchField: {
+              description: 'empty result',
+              statusCode: 200,
+              response: createExpectEmpty(1, 20, 0),
+            },
+            noType: {
+              description: 'all objects',
+              statusCode: 200,
+              response: expectResultsWithValidTypes,
+            },
+          },
+        });
+
+        findTest(`kibana dual-privileges dashboard only user`, {
+          auth: {
+            username: AUTHENTICATION.KIBANA_DUAL_PRIVILEGES_DASHBOARD_ONLY_USER.USERNAME,
+            password: AUTHENTICATION.KIBANA_DUAL_PRIVILEGES_DASHBOARD_ONLY_USER.PASSWORD,
+          },
+          spaceId,
+          tests: {
+            normal: {
+              description: 'only the visualization',
+              statusCode: 200,
+              response: expectVisualizationResults,
+            },
+            unknownType: {
+              description: 'forbidden find wigwags message',
+              statusCode: 403,
+              response: createExpectRbacForbidden('wigwags'),
+            },
+            pageBeyondTotal: {
+              description: 'empty result',
+              statusCode: 200,
+              response: createExpectEmpty(100, 100, 1),
+            },
+            unknownSearchField: {
+              description: 'forbidden find wigwags message',
+              statusCode: 403,
+              response: createExpectRbacForbidden('wigwags'),
+            },
+            noType: {
+              description: 'all objects',
+              statusCode: 200,
+              response: expectResultsWithValidTypes,
+            },
+          }
+        });
+
+        findTest(`kibana rbac user`, {
+          auth: {
+            username: AUTHENTICATION.KIBANA_RBAC_USER.USERNAME,
+            password: AUTHENTICATION.KIBANA_RBAC_USER.PASSWORD,
+          },
+          spaceId,
+          tests: {
+            normal: {
+              description: 'only the visualization',
+              statusCode: 200,
+              response: expectVisualizationResults,
+            },
+            unknownType: {
+              description: 'empty result',
+              statusCode: 200,
+              response: createExpectEmpty(1, 20, 0),
+            },
+            pageBeyondTotal: {
+              description: 'empty result',
+              statusCode: 200,
+              response: createExpectEmpty(100, 100, 1),
+            },
+            unknownSearchField: {
+              description: 'empty result',
+              statusCode: 200,
+              response: createExpectEmpty(1, 20, 0),
+            },
+            noType: {
+              description: 'all objects',
+              statusCode: 200,
+              response: expectResultsWithValidTypes,
+            },
+          },
+        });
+
+        findTest(`kibana rbac dashboard only user`, {
+          auth: {
+            username: AUTHENTICATION.KIBANA_RBAC_DASHBOARD_ONLY_USER.USERNAME,
+            password: AUTHENTICATION.KIBANA_RBAC_DASHBOARD_ONLY_USER.PASSWORD,
+          },
+          spaceId,
+          tests: {
+            normal: {
+              description: 'only the visualization',
+              statusCode: 200,
+              response: expectVisualizationResults,
+            },
+            unknownType: {
+              description: 'forbidden find wigwags message',
+              statusCode: 403,
+              response: createExpectRbacForbidden('wigwags'),
+            },
+            pageBeyondTotal: {
+              description: 'empty result',
+              statusCode: 200,
+              response: createExpectEmpty(100, 100, 1),
+            },
+            unknownSearchField: {
+              description: 'forbidden find wigwags message',
+              statusCode: 403,
+              response: createExpectRbacForbidden('wigwags'),
+            },
+            noType: {
+              description: 'all objects',
+              statusCode: 200,
+              response: expectResultsWithValidTypes,
+            },
+          }
+        });
+      });
+    });
+
+    describe('default space', () => {
+      findTest('kibana rbac default space user', {
+        auth: {
+          username: AUTHENTICATION.KIBANA_RBAC_USER.USERNAME,
+          password: AUTHENTICATION.KIBANA_RBAC_USER.PASSWORD,
         },
-        unknownType: {
-          description: 'forbidden login and find wigwags message',
-          statusCode: 403,
-          response: createExpectRbacForbidden('wigwags'),
+        DEFAULT_SPACE_ID,
+        tests: {
+          normal: {
+            description: 'only the visualization',
+            statusCode: 200,
+            response: expectVisualizationResults,
+          },
+          unknownType: {
+            description: 'empty result',
+            statusCode: 200,
+            response: createExpectEmpty(1, 20, 0),
+          },
+          pageBeyondTotal: {
+            description: 'empty result',
+            statusCode: 200,
+            response: createExpectEmpty(100, 100, 1),
+          },
+          unknownSearchField: {
+            description: 'empty result',
+            statusCode: 200,
+            response: createExpectEmpty(1, 20, 0),
+          },
+          noType: {
+            description: 'all objects',
+            statusCode: 200,
+            response: expectResultsWithValidTypes,
+          },
         },
-        pageBeyondTotal: {
-          description: 'forbidden login and find visualization message',
-          statusCode: 403,
-          response: createExpectRbacForbidden('visualization'),
+      });
+
+      findTest('kibana rbac space 1 readonly user', {
+        auth: {
+          username: AUTHENTICATION.KIBANA_RBAC_SPACE_1_READONLY_USER.USERNAME,
+          password: AUTHENTICATION.KIBANA_RBAC_SPACE_1_READONLY_USER.PASSWORD,
         },
-        unknownSearchField: {
-          description: 'forbidden login and find wigwags message',
-          statusCode: 403,
-          response: createExpectRbacForbidden('wigwags'),
-        },
-        noType: {
-          description: `forbidded can't find any types`,
-          statusCode: 403,
-          response: expectForbiddenCantFindAnyTypes,
+        DEFAULT_SPACE_ID,
+        tests: {
+          normal: {
+            description: 'forbidden login and find visualization message',
+            statusCode: 403,
+            response: createExpectRbacForbidden('visualization'),
+          },
+          unknownType: {
+            description: 'forbidden login and find wigwags message',
+            statusCode: 403,
+            response: createExpectRbacForbidden('wigwags'),
+          },
+          pageBeyondTotal: {
+            description: 'forbidden login and find visualization message',
+            statusCode: 403,
+            response: createExpectRbacForbidden('visualization'),
+          },
+          unknownSearchField: {
+            description: 'forbidden login and find wigwags message',
+            statusCode: 403,
+            response: createExpectRbacForbidden('wigwags'),
+          },
+          noType: {
+            description: `forbidded can't find any types`,
+            statusCode: 403,
+            response: expectForbiddenCantFindAnyTypes,
+          }
         }
-      }
-    });
-
-    findTest(`superuser`, {
-      auth: {
-        username: AUTHENTICATION.SUPERUSER.USERNAME,
-        password: AUTHENTICATION.SUPERUSER.PASSWORD,
-      },
-      tests: {
-        normal: {
-          description: 'only the visualization',
-          statusCode: 200,
-          response: expectVisualizationResults,
-        },
-        unknownType: {
-          description: 'empty result',
-          statusCode: 200,
-          response: createExpectEmpty(1, 20, 0),
-        },
-        pageBeyondTotal: {
-          description: 'empty result',
-          statusCode: 200,
-          response: createExpectEmpty(100, 100, 1),
-        },
-        unknownSearchField: {
-          description: 'empty result',
-          statusCode: 200,
-          response: createExpectEmpty(1, 20, 0),
-        },
-        noType: {
-          description: 'all objects',
-          statusCode: 200,
-          response: expectResultsWithValidTypes,
-        },
-      },
-    });
-
-    findTest(`kibana legacy user`, {
-      auth: {
-        username: AUTHENTICATION.KIBANA_LEGACY_USER.USERNAME,
-        password: AUTHENTICATION.KIBANA_LEGACY_USER.PASSWORD,
-      },
-      tests: {
-        normal: {
-          description: 'only the visualization',
-          statusCode: 200,
-          response: expectVisualizationResults,
-        },
-        unknownType: {
-          description: 'empty result',
-          statusCode: 200,
-          response: createExpectEmpty(1, 20, 0),
-        },
-        pageBeyondTotal: {
-          description: 'empty result',
-          statusCode: 200,
-          response: createExpectEmpty(100, 100, 1),
-        },
-        unknownSearchField: {
-          description: 'empty result',
-          statusCode: 200,
-          response: createExpectEmpty(1, 20, 0),
-        },
-        noType: {
-          description: 'all objects',
-          statusCode: 200,
-          response: expectResultsWithValidTypes,
-        },
-      },
-    });
-
-    findTest(`kibana legacy dashboard only user`, {
-      auth: {
-        username: AUTHENTICATION.KIBANA_LEGACY_DASHBOARD_ONLY_USER.USERNAME,
-        password: AUTHENTICATION.KIBANA_LEGACY_DASHBOARD_ONLY_USER.PASSWORD,
-      },
-      tests: {
-        normal: {
-          description: 'only the visualization',
-          statusCode: 200,
-          response: expectVisualizationResults,
-        },
-        unknownType: {
-          description: 'empty result',
-          statusCode: 200,
-          response: createExpectEmpty(1, 20, 0),
-        },
-        pageBeyondTotal: {
-          description: 'empty result',
-          statusCode: 200,
-          response: createExpectEmpty(100, 100, 1),
-        },
-        unknownSearchField: {
-          description: 'empty result',
-          statusCode: 200,
-          response: createExpectEmpty(1, 20, 0),
-        },
-        noType: {
-          description: 'all objects',
-          statusCode: 200,
-          response: expectResultsWithValidTypes,
-        },
-      }
-    });
-
-    findTest(`kibana dual-privileges user`, {
-      auth: {
-        username: AUTHENTICATION.KIBANA_DUAL_PRIVILEGES_USER.USERNAME,
-        password: AUTHENTICATION.KIBANA_DUAL_PRIVILEGES_USER.PASSWORD,
-      },
-      tests: {
-        normal: {
-          description: 'only the visualization',
-          statusCode: 200,
-          response: expectVisualizationResults,
-        },
-        unknownType: {
-          description: 'empty result',
-          statusCode: 200,
-          response: createExpectEmpty(1, 20, 0),
-        },
-        pageBeyondTotal: {
-          description: 'empty result',
-          statusCode: 200,
-          response: createExpectEmpty(100, 100, 1),
-        },
-        unknownSearchField: {
-          description: 'empty result',
-          statusCode: 200,
-          response: createExpectEmpty(1, 20, 0),
-        },
-        noType: {
-          description: 'all objects',
-          statusCode: 200,
-          response: expectResultsWithValidTypes,
-        },
-      },
-    });
-
-    findTest(`kibana dual-privileges dashboard only user`, {
-      auth: {
-        username: AUTHENTICATION.KIBANA_DUAL_PRIVILEGES_DASHBOARD_ONLY_USER.USERNAME,
-        password: AUTHENTICATION.KIBANA_DUAL_PRIVILEGES_DASHBOARD_ONLY_USER.PASSWORD,
-      },
-      tests: {
-        normal: {
-          description: 'only the visualization',
-          statusCode: 200,
-          response: expectVisualizationResults,
-        },
-        unknownType: {
-          description: 'forbidden find wigwags message',
-          statusCode: 403,
-          response: createExpectRbacForbidden('wigwags'),
-        },
-        pageBeyondTotal: {
-          description: 'empty result',
-          statusCode: 200,
-          response: createExpectEmpty(100, 100, 1),
-        },
-        unknownSearchField: {
-          description: 'forbidden find wigwags message',
-          statusCode: 403,
-          response: createExpectRbacForbidden('wigwags'),
-        },
-        noType: {
-          description: 'all objects',
-          statusCode: 200,
-          response: expectResultsWithValidTypes,
-        },
-      }
-    });
-
-    findTest(`kibana rbac user`, {
-      auth: {
-        username: AUTHENTICATION.KIBANA_RBAC_USER.USERNAME,
-        password: AUTHENTICATION.KIBANA_RBAC_USER.PASSWORD,
-      },
-      tests: {
-        normal: {
-          description: 'only the visualization',
-          statusCode: 200,
-          response: expectVisualizationResults,
-        },
-        unknownType: {
-          description: 'empty result',
-          statusCode: 200,
-          response: createExpectEmpty(1, 20, 0),
-        },
-        pageBeyondTotal: {
-          description: 'empty result',
-          statusCode: 200,
-          response: createExpectEmpty(100, 100, 1),
-        },
-        unknownSearchField: {
-          description: 'empty result',
-          statusCode: 200,
-          response: createExpectEmpty(1, 20, 0),
-        },
-        noType: {
-          description: 'all objects',
-          statusCode: 200,
-          response: expectResultsWithValidTypes,
-        },
-      },
-    });
-
-    findTest(`kibana rbac dashboard only user`, {
-      auth: {
-        username: AUTHENTICATION.KIBANA_RBAC_DASHBOARD_ONLY_USER.USERNAME,
-        password: AUTHENTICATION.KIBANA_RBAC_DASHBOARD_ONLY_USER.PASSWORD,
-      },
-      tests: {
-        normal: {
-          description: 'only the visualization',
-          statusCode: 200,
-          response: expectVisualizationResults,
-        },
-        unknownType: {
-          description: 'forbidden find wigwags message',
-          statusCode: 403,
-          response: createExpectRbacForbidden('wigwags'),
-        },
-        pageBeyondTotal: {
-          description: 'empty result',
-          statusCode: 200,
-          response: createExpectEmpty(100, 100, 1),
-        },
-        unknownSearchField: {
-          description: 'forbidden find wigwags message',
-          statusCode: 403,
-          response: createExpectRbacForbidden('wigwags'),
-        },
-        noType: {
-          description: 'all objects',
-          statusCode: 200,
-          response: expectResultsWithValidTypes,
-        },
-      }
+      });
     });
   });
 }
