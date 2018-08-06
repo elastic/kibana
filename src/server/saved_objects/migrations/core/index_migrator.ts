@@ -213,7 +213,7 @@ async function runMigration(context: Context) {
  * Moves all docs from sourceIndex to destIndex, migrating each as necessary.
  */
 async function migrateDocs(context: Context) {
-  const { destIndex, sourceIndex, batchSize, scrollDuration, documentMigrator } = context;
+  const { destIndex, sourceIndex, batchSize, scrollDuration, documentMigrator, log } = context;
   const read = sourceIndex.reader({ batchSize, scrollDuration });
 
   while (true) {
@@ -223,6 +223,7 @@ async function migrateDocs(context: Context) {
       return;
     }
 
+    log.debug(`Migrating saved objects ${docs.map(d => d._id).join(', ')}`);
     await destIndex.write(migrateRawDocs(documentMigrator.migrate, docs));
   }
 }
