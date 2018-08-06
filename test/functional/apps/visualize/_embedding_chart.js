@@ -65,7 +65,7 @@ export default function ({ getService, getPageObjects }) {
       });
 
       it('should allow to filter in embedded mode', async () => {
-        await filterBar.addFilter('@timestamp', 'is between', ['2015-09-19', '2015-09-21']);
+        await filterBar.addFilter('@timestamp', 'is between', '2015-09-19', '2015-09-21');
         await PageObjects.header.waitUntilLoadingHasFinished();
         await visualization.waitForRender();
 
