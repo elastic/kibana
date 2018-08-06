@@ -12,7 +12,7 @@ import {
 } from '../../../common/constants/detector_rule';
 
 import { cloneDeep } from 'lodash';
-import { mlJobService } from 'plugins/ml/services/job_service';
+import { mlJobService } from '../../services/job_service';
 
 export function getNewConditionDefaults() {
   return {
@@ -212,7 +212,7 @@ export function filterTypeToText(filterType) {
       return 'not in';
 
     default:
-      return filterType;
+      return (filterType !== undefined) ? filterType : '';
   }
 }
 
@@ -228,7 +228,7 @@ export function appliesToText(appliesTo) {
       return 'diff from typical';
 
     default:
-      return appliesTo;
+      return (appliesTo !== undefined) ? appliesTo : '';
   }
 }
 
@@ -247,6 +247,6 @@ export function operatorToText(operator) {
       return 'greater than or equal to';
 
     default:
-      return operator;
+      return (operator !== undefined) ? operator : '';
   }
 }
