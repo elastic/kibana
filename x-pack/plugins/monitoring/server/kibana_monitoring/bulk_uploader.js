@@ -56,7 +56,11 @@ export class BulkUploader {
     });
 
     this._callClusterWithInternalUser = callClusterFactory(server).getCallClusterInternal();
-    this._savedObjectsClient = server.savedObjects.getUnscopedSavedObjectsClient(this._callClusterWithInternalUser);
+
+    const repository = server.savedObjects.getSavedObjectsRepository(
+      this._callClusterWithInternalUser
+    );
+    this._savedObjectsClient = new server.savedObjects.SavedObjectsClient(repository);
   }
 
   /*

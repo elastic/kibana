@@ -41,7 +41,8 @@ describe('BulkUploader', () => {
         },
         usage: {},
         savedObjects: {
-          getUnscopedSavedObjectsClient: sinon.stub()
+          getSavedObjectsRepository: sinon.stub(),
+          SavedObjectsClient: class SavedObjectsClientTest {}
         }
       };
     });
