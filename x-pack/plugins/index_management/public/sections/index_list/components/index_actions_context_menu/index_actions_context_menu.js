@@ -7,7 +7,6 @@
 import React, { Component } from 'react';
 import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
 import { all } from 'lodash';
-import pluralize from 'pluralize';
 import {
   EuiButton,
   EuiCallOut,
@@ -436,15 +435,14 @@ class IndexActionsContextMenuUI extends Component {
   };
   render() {
     const { intl } = this.props;
+    const indexNamesLength = this.props.indexNames.length;
     const {
       iconSide = 'right',
       anchorPosition = 'rightUp',
       label = intl.formatMessage({
         id: 'xpack.idxMgmt.indexActionsContentMenu.manageButtonLabel',
-        defaultMessage: 'Manage {managedValue}',
-        values: {
-          managedValue: this.props.indexNames.length + pluralize(' index', this.props.indexNames.length)
-        }
+        defaultMessage: 'Manage {indexNamesLength, plural, one {index} other {indices}}',
+        values: { indexNamesLength },
       }),
       iconType = 'arrowDown'
     } = this.props;
