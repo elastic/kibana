@@ -40,7 +40,7 @@ export class ElasticsearchBeatsAdapter implements CMBeatsAdapter {
       type: 'beat',
     };
 
-    await this.database.create(user, {
+    await this.database.index(user, {
       body,
       id: `beat:${beat.id}`,
       index: INDEX_NAMES.BEATS,
