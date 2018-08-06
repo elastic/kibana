@@ -32,10 +32,12 @@ export function injectVars(server) {
       `Both legacy "${legacyMap}" and current "map.${legacyMap}" configurations ` +
       `detected. Please use only current map configurations: "map.${legacyMap}".`
     );
-    throw new Error(`Legacy and current map configurations detected`);
+    throw new Error(`Competing legacy and current ${legacyMap} ` +
+      `map configurations detected`);
   })(server);
 
-  let { regionmap, tilemap } = mapConfig;
+  let regionmap = mapConfig.regionmap;
+  let tilemap = mapConfig.tilemap;
   const legacyTilemap = serverConfig.get('tilemap');
   const legacyRegionmap = serverConfig.get('regionmap');
 
@@ -51,11 +53,11 @@ export function injectVars(server) {
       && conflictingConfigsError('tilemap');
   }
   if (!regionmap.layers.length) {
-    regionmap.layers.length
+    legacyRegionmap.layers.length
       && (regionmap = legacyRegionmap)
       && legacyWarning('regionmap');
   } else {
-    regionmap.layers.length
+    legacyRegionmap.layers.length
       && conflictingConfigsError('regionmap');
   }
 
