@@ -95,6 +95,7 @@ export class CMBeatsDomain {
 
     await this.adapter.insert(this.framework.internalUser, {
       ...beat,
+      active: true,
       enrollment_token: enrollmentToken,
       verified_on: verifiedOn,
       access_token: accessToken,
