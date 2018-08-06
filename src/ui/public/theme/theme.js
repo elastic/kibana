@@ -31,12 +31,7 @@ export function applyTheme(newTheme) {
 
   if (styleNode) {
     const css = themes[currentTheme];
-
-    if (styleNode.styleSheet) {
-      styleNode.styleSheet.cssText = css;
-    } else {
-      styleNode.appendChild(document.createTextNode(css));
-    }
+    styleNode.textContent = css;
   }
 }
 
