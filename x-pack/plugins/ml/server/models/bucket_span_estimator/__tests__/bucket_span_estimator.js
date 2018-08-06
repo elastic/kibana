@@ -52,6 +52,10 @@ describe('ML - BucketSpanEstimator', () => {
   // Based on the `search.max_buckets` settings the range queries will have a different
   // `gte` value we can test against. When `search.max_buckets` is `-1`, the duration should
   // fall back to a default value of 10000 buckets.
+  const DURATION_END = 1486857594000;
+  const TEST1_EXPECTED_GTE = 1486259994000;
+  const TEST2_EXPECTED_GTE = 1486799994000;
+
   it('call factory with mock max buckets response of -1', (done) => {
     expect(function () {
       let calledDone = false;
@@ -64,7 +68,7 @@ describe('ML - BucketSpanEstimator', () => {
       const callWithRequestMock = (endpoint, payload) => {
         if (endpoint === 'search' && calledDone === false) {
           const gte = payload.body.query.bool.must[1].range.undefined.gte;
-          expect(gte).to.be(1486259994000);
+          expect(gte).to.be(TEST1_EXPECTED_GTE);
           done();
           calledDone = true;
         }
@@ -78,7 +82,7 @@ describe('ML - BucketSpanEstimator', () => {
 
       estimateBucketSpan({
         aggTypes: ['count'],
-        duration: { start: 0, end: 1486857594000 },
+        duration: { start: 0, end: DURATION_END },
         fields: [null],
         filters: [],
         index: '',
@@ -105,7 +109,7 @@ describe('ML - BucketSpanEstimator', () => {
       const callWithRequestMock = (endpoint, payload) => {
         if (endpoint === 'search' && calledDone === false) {
           const gte = payload.body.query.bool.must[1].range.undefined.gte;
-          expect(gte).to.be(1486799994000);
+          expect(gte).to.be(TEST2_EXPECTED_GTE);
           done();
           calledDone = true;
         }
@@ -119,7 +123,7 @@ describe('ML - BucketSpanEstimator', () => {
 
       estimateBucketSpan({
         aggTypes: ['count'],
-        duration: { start: 0, end: 1486857594000 },
+        duration: { start: 0, end: DURATION_END },
         fields: [null],
         filters: [],
         index: '',
