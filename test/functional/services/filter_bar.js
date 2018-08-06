@@ -63,29 +63,34 @@ export function FilterBarProvider({ getService }) {
      *
      * @param {string} field The name of the field the filter should be applied for.
      * @param {string} operator A valid operator for that fields, e.g. "is one of", "is", "exists", etc.
-     * @param {string[]|string} values One value or a list of values to set for this filter. This depends
-     *  on the actual filter set, how these values behave. This depends on the operator on how that behave.
-     *  You can use it like `addFilter('bytes', 'is between', ['100', '5000'])` to add values into the two
-     *  separate input fields of the `is between` filter, but you can also use it as
-     *  `addFilter('extension', 'is one of', ['jpg', 'png'])` to add multiple options for a "is one of" filter.
+     * @param {string[]|string} values The remaining parameters are the values passed into the individual
+     *   value input fields, i.e. the third parameter into the first input field, the fourth into the second, etc.
+     *   Each value itself can be an array, in case you want to enter multiple values into one field (e.g. for "is one of"):
+     * @example
+     * // Add a plain single value
+     * filterBar.addFilter('country', 'is', 'NL');
+     * // Add an exists filter
+     * filterBar.addFilter('country', 'exists');
+     * // Add a range filter for a numeric field
+     * filterBar.addFilter('bytes', 'is between', '500', '1000');
+     * // Add a filter containing multiple values
+     * filterBar.addFilter('extension', 'is one of', ['jpg', 'png']);
      */
-    async addFilter(field, operator, values) {
-      if (!Array.isArray(values)) {
-        values = [values];
-      }
+    async addFilter(field, operator, ...values) {
       await testSubjects.click('addFilter');
       await typeIntoReactSelect('filterfieldSuggestionList', field);
       await typeIntoReactSelect('filterOperatorList', operator);
       const params = await testSubjects.find('filterParams');
       const paramFields = await params.findAllByTagName('input');
       for (let i = 0; i < values.length; i++) {
-        // If we have multiple fields for the value, enter the individual
-        // array elements into each of the inputs, but if we have more array
-        // values than input fields, enter them all in the last (e.g. useful
-        // to do addFilter('extension', 'is one of', ['jpg', 'png']), which is
-        // only one input field)
-        await paramFields[Math.min(paramFields.length - 1, i)].type(values[i]);
-        await remote.pressKeys(Keys.RETURN);
+        let fieldValues = values[i];
+        if (!Array.isArray(fieldValues)) {
+          fieldValues = [fieldValues];
+        }
+        for (let j = 0; j < fieldValues.length; j++) {
+          await paramFields[i].type(fieldValues[j]);
+          await remote.pressKeys(Keys.RETURN);
+        }
       }
       await testSubjects.click('saveFilter');
     }
