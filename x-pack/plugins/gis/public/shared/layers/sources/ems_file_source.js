@@ -4,6 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { GIS_API_PATH } from '../../../../common/constants';
+
 export class EMSFileSource {
 
   static type = 'EMS_FILE';
@@ -15,10 +17,14 @@ export class EMSFileSource {
     };
   }
 
-  static async getGeoJson(descriptor, fileLayers) {
-    const file = fileLayers.find((file) => file.name === descriptor.name);
-    const vectorFetch = await fetch(file.url);
-    return await vectorFetch.json();
+  static async getGeoJson(descriptor) {
+    try {
+      const vectorFetch = await fetch(`../${GIS_API_PATH}/data/ems?name=${encodeURIComponent(descriptor.name)}`);
+      return await vectorFetch.json();
+    } catch(e) {
+      console.error(e);
+      throw e;
+    }
   }
 
 }

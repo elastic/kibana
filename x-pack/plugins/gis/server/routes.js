@@ -28,6 +28,10 @@ export function initRoutes(server) {
     path: `${ROOT}/data/ems`,
     handler: async (request, reply) => {
 
+      if (!request.query.name) {
+        reply(null);
+      }
+
       const ems = await getEMSResources();//todo: should do this lazily from emsV2 instance
       const layer = ems.fileLayers.find(layer => {
         return layer.name === request.query.name;
@@ -86,15 +90,13 @@ export function initRoutes(server) {
       };
     });
 
-    const geoIndexPatterns = indexPatterns.map(indexPattern => {
+    return indexPatterns.map(indexPattern => {
       const geoPointField = indexPattern.fields.find(field => {
         return field.type === 'geo_point';
       });
       indexPattern.isGeohashable = !!geoPointField;
       return indexPattern;
     });
-
-    return geoIndexPatterns;
   }
 
 

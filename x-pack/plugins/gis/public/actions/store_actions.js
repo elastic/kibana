@@ -78,18 +78,14 @@ export function clearTemporaryLayers() {
 }
 
 export function addVectorLayerFromEMSFileSource(emsFileSource, options = {}, position) {
-  return async (dispatch, getState) => {
-
+  return async (dispatch) => {
     dispatch(layerLoading(true));
-
-    const allFiles = getState().config.meta.data_sources.ems.file;
-    const geojson = await EMSFileSource.getGeoJson(emsFileSource, allFiles);
+    const geojson = await EMSFileSource.getGeoJson(emsFileSource);
     const layer = VectorLayer.create({
       source: geojson,
       name: emsFileSource.name || emsFileSource.id,
       ...options
     });
-
     dispatch(addLayer(layer, position));
   };
 }
