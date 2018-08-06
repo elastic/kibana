@@ -10,5 +10,5 @@
  * Types that are not space-aware will appear in every space, and are not bound by any space-specific access controls.
  */
 export function isTypeSpaceAware(type) {
-  return type !== 'space' && type !== 'config';
+  return type !== 'space';
 }

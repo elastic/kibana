@@ -96,8 +96,8 @@ export default function ({ getService }) {
 
     const findTest = (description, { auth, tests }) => {
       describe(description, () => {
-        before(() => esArchiver.load('saved_objects/basic'));
-        after(() => esArchiver.unload('saved_objects/basic'));
+        before(() => esArchiver.load('saved_objects/spaces'));
+        after(() => esArchiver.unload('saved_objects/spaces'));
 
         it(`should return ${tests.normal.statusCode} with ${tests.normal.description}`, async () => (
           await supertest

@@ -133,6 +133,7 @@ export class SpacesSavedObjectsClient {
     if (!Array.isArray(types)) {
       types = [types];
     }
+    types = types.filter(type => type !== 'space');
 
     const filters = options.filters || [];
 

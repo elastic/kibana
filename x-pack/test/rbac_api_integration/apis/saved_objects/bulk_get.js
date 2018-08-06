@@ -80,8 +80,8 @@ export default function ({ getService }) {
 
     const bulkGetTest = (description, { auth, tests }) => {
       describe(description, () => {
-        before(() => esArchiver.load('saved_objects/basic'));
-        after(() => esArchiver.unload('saved_objects/basic'));
+        before(() => esArchiver.load('saved_objects/spaces'));
+        after(() => esArchiver.unload('saved_objects/spaces'));
 
         it(`should return ${tests.default.statusCode}`, async () => {
           await supertest

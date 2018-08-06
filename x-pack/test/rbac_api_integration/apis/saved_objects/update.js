@@ -57,8 +57,8 @@ export default function ({ getService }) {
 
     const updateTest = (description, { auth, tests }) => {
       describe(description, () => {
-        before(() => esArchiver.load('saved_objects/basic'));
-        after(() => esArchiver.unload('saved_objects/basic'));
+        before(() => esArchiver.load('saved_objects/spaces'));
+        after(() => esArchiver.unload('saved_objects/spaces'));
         it(`should return ${tests.exists.statusCode}`, async () => {
           await supertest
             .put(`/api/saved_objects/visualization/dd7caf20-9efd-11e7-acb3-3dab96693fab`)

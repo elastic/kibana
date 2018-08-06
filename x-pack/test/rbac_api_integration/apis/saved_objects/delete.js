@@ -44,8 +44,8 @@ export default function ({ getService }) {
 
     const deleteTest = (description, { auth, tests }) => {
       describe(description, () => {
-        before(() => esArchiver.load('saved_objects/basic'));
-        after(() => esArchiver.unload('saved_objects/basic'));
+        before(() => esArchiver.load('saved_objects/spaces'));
+        after(() => esArchiver.unload('saved_objects/spaces'));
 
         it(`should return ${tests.actualId.statusCode} when deleting a doc`, async () => (
           await supertest
