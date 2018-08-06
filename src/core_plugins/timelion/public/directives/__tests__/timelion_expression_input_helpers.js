@@ -76,7 +76,8 @@ describe('Timelion expression suggestions', () => {
               'min': 0,
               'max': 1
             },
-            'type': 'functions'
+            'type': 'functions',
+            'expression': expression
           });
         });
         it('should filter function suggestions by function name', async () => {
@@ -89,7 +90,8 @@ describe('Timelion expression suggestions', () => {
               'min': 0,
               'max': 4
             },
-            'type': 'functions'
+            'type': 'functions',
+            'expression': expression
           });
         });
       });
@@ -105,7 +107,8 @@ describe('Timelion expression suggestions', () => {
               'min': 11,
               'max': 12
             },
-            'type': 'arguments'
+            'type': 'arguments',
+            'expression': expression
           });
         });
 
@@ -119,7 +122,8 @@ describe('Timelion expression suggestions', () => {
               'min': 9,
               'max': 10
             },
-            'type': 'arguments'
+            'type': 'arguments',
+            'expression': expression
           });
         });
 
@@ -133,7 +137,8 @@ describe('Timelion expression suggestions', () => {
               'min': 9,
               'max': 25
             },
-            'type': 'arguments'
+            'type': 'arguments',
+            'expression': expression
           });
         });
 
@@ -147,7 +152,8 @@ describe('Timelion expression suggestions', () => {
               'min': 7,
               'max': 8
             },
-            'type': 'arguments'
+            'type': 'arguments',
+            'expression': expression
           });
         });
 
@@ -161,7 +167,8 @@ describe('Timelion expression suggestions', () => {
               'min': 24,
               'max': 25
             },
-            'type': 'arguments'
+            'type': 'arguments',
+            'expression': expression
           });
         });
       });
@@ -177,7 +184,8 @@ describe('Timelion expression suggestions', () => {
               'min': 11,
               'max': 11
             },
-            'type': 'argument_value'
+            'type': 'argument_value',
+            'expression': expression
           });
         });
 
@@ -191,7 +199,8 @@ describe('Timelion expression suggestions', () => {
               'min': 11,
               'max': 11
             },
-            'type': 'argument_value'
+            'type': 'argument_value',
+            'expression': expression
           });
         });
       });
@@ -210,7 +219,8 @@ describe('Timelion expression suggestions', () => {
               'min': 0,
               'max': 8
             },
-            'type': 'functions'
+            'type': 'functions',
+            'expression': expression
           });
         });
       });
@@ -227,7 +237,8 @@ describe('Timelion expression suggestions', () => {
                 'min': 9,
                 'max': 9
               },
-              'type': 'arguments'
+              'type': 'arguments',
+              'expression': expression
             });
           });
           it('should not provide argument suggestions for argument that is all ready set in function def', async () => {
@@ -241,7 +252,8 @@ describe('Timelion expression suggestions', () => {
                 'min': 24,
                 'max': 24
               },
-              'type': 'arguments'
+              'type': 'arguments',
+              'expression': expression
             });
           });
           it('should filter argument suggestions by argument name', async () => {
@@ -254,7 +266,8 @@ describe('Timelion expression suggestions', () => {
                 'min': 9,
                 'max': 14
               },
-              'type': 'arguments'
+              'type': 'arguments',
+              'expression': expression
             });
           });
           it('should not show first argument for chainable functions', async () => {
@@ -267,7 +280,8 @@ describe('Timelion expression suggestions', () => {
                 'min': 7,
                 'max': 7
               },
-              'type': 'arguments'
+              'type': 'arguments',
+              'expression': expression
             });
           });
         });
@@ -282,7 +296,8 @@ describe('Timelion expression suggestions', () => {
                 'min': 14,
                 'max': 16
               },
-              'type': 'argument_value'
+              'type': 'argument_value',
+              'expression': expression
             });
           });
 
@@ -296,7 +311,8 @@ describe('Timelion expression suggestions', () => {
                 'min': 13,
                 'max': 16
               },
-              'type': 'argument_value'
+              'type': 'argument_value',
+              'expression': expression
             });
           });
         });
