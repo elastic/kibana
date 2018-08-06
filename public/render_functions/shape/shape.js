@@ -1,4 +1,3 @@
-import { debounce } from 'lodash';
 import { shapes } from './shapes';
 
 export const shape = () => ({
@@ -58,6 +57,6 @@ export const shape = () => ({
 
     draw();
     handlers.done();
-    handlers.onResize(debounce(draw, 40, { maxWait: 40 })); // 1000 / 40 = 25fps
+    handlers.onResize(draw); // debouncing avoided for fluidity
   },
 });
