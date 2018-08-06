@@ -112,11 +112,12 @@ export class ElasticsearchBeatsAdapter implements CMBeatsAdapter {
     const params = {
       index: INDEX_NAMES.BEATS,
       q: 'type:beat',
+      size: 10000,
       type: '_doc',
     };
     const response = await this.database.search(user, params);
-
     const beats = _get<any>(response, 'hits.hits', []);
+
     return beats.map((beat: any) => omit(beat._source.beat, ['access_token']));
   }
 
