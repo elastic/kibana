@@ -35,12 +35,18 @@ export class CMBeatsDomain {
     this.framework = libs.framework;
   }
 
-  public async getById(user: FrameworkUser, beatId: string) {
-    return await this.adapter.get(user, beatId);
+  public async getById(user: FrameworkUser, beatId: string): Promise<CMBeat | null> {
+    const beat = await this.adapter.get(user, beatId);
+    return beat && beat.active ? beat : null;
+  }
+
+  public async getAll(user: FrameworkUser) {
+    return (await this.adapter.getAll(user)).filter((beat: CMBeat) => beat.active === true);
   }
 
   public async getByEnrollmentToken(user: FrameworkUser, enrollmentToken: string) {
-    return await this.adapter.getBeatWithToken(user, enrollmentToken);
+    const beat = await this.adapter.getBeatWithToken(user, enrollmentToken);
+    return beat && beat.active ? beat : null;
   }
 
   public async update(userOrToken: UserOrToken, beatId: string, beatData: Partial<CMBeat>) {
@@ -141,10 +147,6 @@ export class CMBeatsDomain {
       return addToResultsToResponse('removals', response, removalResults);
     }
     return response;
-  }
-
-  public async getAllBeats(user: FrameworkUser) {
-    return await this.adapter.getAll(user);
   }
 
   public async assignTagsToBeats(
