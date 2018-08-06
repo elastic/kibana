@@ -7,4 +7,5 @@
 export const TABLE_CONFIG = {
   INITIAL_ROW_SIZE: 5,
   PAGE_SIZE_OPTIONS: [3, 5, 10, 20],
+  TRUNCATE_TAG_LENGTH: 33,
 };
