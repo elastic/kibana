@@ -27,6 +27,17 @@ const BasicResponseHandlerProvider = function (Private) {
 
   function convertTableGroup(vis, tableGroup) {
     const tables = tableGroup.tables;
+    const firstChild = tables[0];
+
+    if (firstChild.columns) {
+
+      const chart = convertTable(vis, firstChild);
+      // if chart is within a split, assign group title to its label
+      if (tableGroup.$parent) {
+        chart.label = tableGroup.title;
+      }
+      return chart;
+    }
 
     if (!tables.length) return;
     if (tables.length === 1) {
@@ -44,7 +55,7 @@ const BasicResponseHandlerProvider = function (Private) {
       }
 
       let output;
-      if (output = convertTable(vis, table)) {
+      if (output = convertTableGroup(vis, table)) {
         outList.push(output);
       }
     });

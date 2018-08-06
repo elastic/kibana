@@ -52,7 +52,7 @@ describe('get columns', function () {
       ]
     });
 
-    const columns = tabifyGetColumns(vis.getAggConfig().getResponseAggs(), null, vis.isHierarchical());
+    const columns = tabifyGetColumns(vis.getAggConfig().getResponseAggs(), !vis.isHierarchical());
 
     expect(columns).to.have.length(2);
     expect(columns[1]).to.have.property('aggConfig');
@@ -70,7 +70,7 @@ describe('get columns', function () {
       ]
     });
 
-    const columns = tabifyGetColumns(vis.getAggConfig().getResponseAggs(), null, vis.isHierarchical());
+    const columns = tabifyGetColumns(vis.getAggConfig().getResponseAggs(), !vis.isHierarchical());
 
     expect(columns).to.have.length(8);
     columns.forEach(function (column, i) {
@@ -92,7 +92,7 @@ describe('get columns', function () {
       ]
     });
 
-    const columns = tabifyGetColumns(vis.getAggConfig().getResponseAggs(), null, vis.isHierarchical());
+    const columns = tabifyGetColumns(vis.getAggConfig().getResponseAggs(), !vis.isHierarchical());
 
     function checkColumns(column, i) {
       expect(column).to.have.property('aggConfig');
@@ -128,7 +128,7 @@ describe('get columns', function () {
       ]
     });
 
-    const columns = tabifyGetColumns(vis.getAggConfig().getResponseAggs(), null, vis.isHierarchical());
+    const columns = tabifyGetColumns(vis.getAggConfig().getResponseAggs(), !vis.isHierarchical());
     expect(columns).to.have.length(6);
 
     // sum should be last

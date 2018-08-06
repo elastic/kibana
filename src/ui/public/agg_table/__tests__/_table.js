@@ -17,7 +17,6 @@
  * under the License.
  */
 
-import _ from 'lodash';
 import $ from 'jquery';
 import moment from 'moment';
 import ngMock from 'ng_mock';
@@ -81,12 +80,15 @@ describe('AggTable Directive', function () {
 
   it('renders a complex response properly', async function () {
     const vis = new Vis(indexPattern, {
-      type: 'pie',
+      type: 'table',
+      params: {
+        showMetricsAtAllLevels: true
+      },
       aggs: [
         { type: 'avg', schema: 'metric', params: { field: 'bytes' } },
-        { type: 'terms', schema: 'segment', params: { field: 'extension' } },
-        { type: 'terms', schema: 'segment', params: { field: 'geo.src' } },
-        { type: 'terms', schema: 'segment', params: { field: 'machine.os' } }
+        { type: 'terms', schema: 'bucket', params: { field: 'extension' } },
+        { type: 'terms', schema: 'bucket', params: { field: 'geo.src' } },
+        { type: 'terms', schema: 'bucket', params: { field: 'machine.os' } }
       ]
     });
     vis.aggs.forEach(function (agg, i) {
@@ -104,9 +106,10 @@ describe('AggTable Directive', function () {
     expect($rows.length).to.be.greaterThan(0);
 
     function validBytes(str) {
-      expect(str).to.match(/^\d+$/);
-      const bytesAsNum = _.parseInt(str);
-      expect(bytesAsNum === 0 || bytesAsNum > 1000).to.be.ok();
+      const num = str.replace(/,/g, '');
+      if (num !== '-') {
+        expect(num).to.match(/^\d+$/);
+      }
     }
 
     $rows.each(function () {

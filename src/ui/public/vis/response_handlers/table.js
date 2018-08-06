@@ -45,17 +45,25 @@ const TableResponseHandlerProvider = function () {
 
             if (!splitMap.hasOwnProperty(splitValue)) {
               splitMap[splitValue] = splitIndex++;
-              converted.tables.push({
+              const tableGroup = {
+                $parent: converted,
                 aggConfig: splitAgg,
-                title: splitValue,
+                title: `${splitValue}: ${splitAgg.makeLabel()}`,
+                key: splitValue,
+                tables: []
+              };
+              tableGroup.tables.push({
+                $parent: tableGroup,
                 columns: table.columns.filter((column, i) => i !== splitColumnIndex),
                 rows: []
               });
+
+              converted.tables.push(tableGroup);
             }
 
             let previousSplitAgg = new AggConfigResult(splitAgg, null, splitValue, splitValue);
             const tableIndex = splitMap[splitValue];
-            const newRow = _.map(converted.tables[tableIndex].columns, column => {
+            const newRow = _.map(converted.tables[tableIndex].tables[0].columns, column => {
               const value = row[column.id];
               const aggConfigResult = new AggConfigResult(column.aggConfig, previousSplitAgg, value, value);
               if (column.aggConfig.type.type === 'buckets') {
@@ -64,7 +72,7 @@ const TableResponseHandlerProvider = function () {
               return aggConfigResult;
             });
 
-            converted.tables[tableIndex].rows.push(newRow);
+            converted.tables[tableIndex].tables[0].rows.push(newRow);
           });
         } else {
 
