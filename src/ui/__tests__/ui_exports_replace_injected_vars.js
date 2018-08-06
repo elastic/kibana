@@ -57,7 +57,7 @@ describe('UiExports', function () {
         optimize: { enabled: false },
         plugins: {
           paths: [
-            resolve(__dirname, './fixtures/elasticsearch_plugin'),
+            resolve(__dirname, './__fixtures__/elasticsearch_plugin'),
             resolve(__dirname, './fixtures/test_app'),
           ] // inject an app so we can hit /app/{id}
         },
