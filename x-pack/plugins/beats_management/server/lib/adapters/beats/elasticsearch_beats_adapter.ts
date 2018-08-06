@@ -8,17 +8,14 @@ import { flatten, get as _get, omit } from 'lodash';
 import { INDEX_NAMES } from '../../../../common/constants';
 import { CMBeat } from '../../../../common/domain_types';
 import { DatabaseAdapter } from '../database/adapter_types';
-import { BackendFrameworkAdapter } from '../framework/adapter_types';
 import { FrameworkUser } from '../framework/adapter_types';
 import { BeatsTagAssignment, CMBeatsAdapter } from './adapter_types';
 
 export class ElasticsearchBeatsAdapter implements CMBeatsAdapter {
   private database: DatabaseAdapter;
-  private framework: BackendFrameworkAdapter;
 
-  constructor(database: DatabaseAdapter, framework: BackendFrameworkAdapter) {
+  constructor(database: DatabaseAdapter) {
     this.database = database;
-    this.framework = framework;
   }
 
   public async get(user: FrameworkUser, id: string) {
@@ -37,13 +34,13 @@ export class ElasticsearchBeatsAdapter implements CMBeatsAdapter {
     return _get<CMBeat>(response, '_source.beat');
   }
 
-  public async insert(beat: CMBeat) {
+  public async insert(user: FrameworkUser, beat: CMBeat) {
     const body = {
       beat,
       type: 'beat',
     };
 
-    await this.database.create(this.framework.internalUser, {
+    await this.database.create(user, {
       body,
       id: `beat:${beat.id}`,
       index: INDEX_NAMES.BEATS,
@@ -52,7 +49,7 @@ export class ElasticsearchBeatsAdapter implements CMBeatsAdapter {
     });
   }
 
-  public async update(beat: CMBeat) {
+  public async update(user: FrameworkUser, beat: CMBeat) {
     const body = {
       beat,
       type: 'beat',
@@ -65,7 +62,7 @@ export class ElasticsearchBeatsAdapter implements CMBeatsAdapter {
       refresh: 'wait_for',
       type: '_doc',
     };
-    await this.database.index(this.framework.internalUser, params);
+    await this.database.index(user, params);
   }
 
   public async getWithIds(user: FrameworkUser, beatIds: string[]) {
@@ -129,16 +126,15 @@ export class ElasticsearchBeatsAdapter implements CMBeatsAdapter {
   ): Promise<BeatsTagAssignment[]> {
     const body = flatten(
       removals.map(({ beatId, tag }) => {
-        const script =
-          '' +
-          'def beat = ctx._source.beat; ' +
-          'if (beat.tags != null) { ' +
-          '  beat.tags.removeAll([params.tag]); ' +
-          '}';
+        const script = `
+          def beat = ctx._source.beat;
+          if (beat.tags != null) {
+            beat.tags.removeAll([params.tag]);
+          }`;
 
         return [
           { update: { _id: `beat:${beatId}` } },
-          { script: { source: script, params: { tag } } },
+          { script: { source: script.replace('          ', ''), params: { tag } } },
         ];
       })
     );
@@ -162,19 +158,18 @@ export class ElasticsearchBeatsAdapter implements CMBeatsAdapter {
   ): Promise<BeatsTagAssignment[]> {
     const body = flatten(
       assignments.map(({ beatId, tag }) => {
-        const script =
-          '' +
-          'def beat = ctx._source.beat; ' +
-          'if (beat.tags == null) { ' +
-          '  beat.tags = []; ' +
-          '} ' +
-          'if (!beat.tags.contains(params.tag)) { ' +
-          '  beat.tags.add(params.tag); ' +
-          '}';
+        const script = `
+          def beat = ctx._source.beat;
+          if (beat.tags == null) {
+            beat.tags = [];
+          }
+          if (!beat.tags.contains(params.tag)) {
+            beat.tags.add(params.tag);
+          }`;
 
         return [
           { update: { _id: `beat:${beatId}` } },
-          { script: { source: script, params: { tag } } },
+          { script: { source: script.replace('          ', ''), params: { tag } } },
         ];
       })
     );

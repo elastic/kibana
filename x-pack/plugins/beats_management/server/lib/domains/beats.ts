@@ -14,7 +14,7 @@ import { FrameworkUser } from '../adapters/framework/adapter_types';
 
 import { CMAssignmentReturn } from '../adapters/beats/adapter_types';
 import { BeatsRemovalReturn } from '../adapters/beats/adapter_types';
-import { BeatEnrollmentStatus, CMDomainLibs, CMServerLibs } from '../lib';
+import { BeatEnrollmentStatus, CMDomainLibs, CMServerLibs, UserOrToken } from '../lib';
 
 export class CMBeatsDomain {
   private tags: CMDomainLibs['tags'];
@@ -43,24 +43,26 @@ export class CMBeatsDomain {
     return await this.adapter.getBeatWithToken(user, enrollmentToken);
   }
 
-  public async update(beatId: string, accessToken: string, beatData: Partial<CMBeat>) {
+  public async update(userOrToken: UserOrToken, beatId: string, beatData: Partial<CMBeat>) {
     const beat = await this.adapter.get(this.framework.internalUser, beatId);
-
-    const { verified: isAccessTokenValid } = this.tokens.verifyToken(
-      beat ? beat.access_token : '',
-      accessToken
-    );
-
     // TODO make return type enum
     if (beat === null) {
       return 'beat-not-found';
     }
 
-    if (!isAccessTokenValid) {
-      return 'invalid-access-token';
+    if (typeof userOrToken === 'string') {
+      const { verified: isAccessTokenValid } = this.tokens.verifyToken(
+        beat ? beat.access_token : '',
+        userOrToken
+      );
+      if (!isAccessTokenValid) {
+        return 'invalid-access-token';
+      }
     }
 
-    await this.adapter.update({
+    const user = typeof userOrToken === 'string' ? this.framework.internalUser : userOrToken;
+
+    await this.adapter.update(user, {
       ...beat,
       ...beatData,
     });
@@ -85,7 +87,7 @@ export class CMBeatsDomain {
     const accessToken = this.tokens.generateAccessToken();
     const verifiedOn = moment().toJSON();
 
-    await this.adapter.insert({
+    await this.adapter.insert(this.framework.internalUser, {
       ...beat,
       enrollment_token: enrollmentToken,
       verified_on: verifiedOn,
