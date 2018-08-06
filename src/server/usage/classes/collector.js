@@ -25,27 +25,47 @@ export class Collector {
    * @param {String} options.type - property name as the key for the data
    * @param {Function} options.init (optional) - initialization function
    * @param {Function} options.fetch - function to query data
+   * @param {Function} options.formatForBulkUpload - optional
+   * @param {Function} options.rest - optional other properties
    */
-  constructor(server, { type, init, fetch, formatForBulkUpload = null } = {}) {
+  constructor(server, { type, init, fetch, formatForBulkUpload = null, ...options } = {}) {
     if (type === undefined) {
       throw new Error('Collector must be instantiated with a options.type string property');
+    }
+    if (typeof init !== 'undefined' && typeof init !== 'function') {
+      throw new Error('If init property is passed, Collector must be instantiated with a options.init as a function property');
     }
     if (typeof fetch !== 'function') {
       throw new Error('Collector must be instantiated with a options.fetch function property');
     }
 
+    Object.assign(this, options); // spread in other properties and mutate "this"
+
     this.type = type;
     this.init = init;
     this.fetch = fetch;
-    this.formatForBulkUpload = formatForBulkUpload;
+
+    const defaultFormatterForBulkUpload = result => [ { type, payload: result } ];
+    this._formatForBulkUpload = formatForBulkUpload || defaultFormatterForBulkUpload;
 
     this.log = getCollectorLogger(server);
   }
 
-  fetchInternal(callCluster) {
-    if (typeof callCluster !== 'function') {
-      throw new Error('A `callCluster` function must be passed to the fetch methods of collectors');
+  /*
+   * @param {Object} fetchMechanisms - an object with a callCluster function and a savedObjectsClient object
+   */
+  fetchInternal(fetchMechanisms) {
+    const { callCluster, savedObjectsClient } = fetchMechanisms;
+    if (typeof callCluster !== 'function' || typeof savedObjectsClient !== 'object') {
+      throw new Error(
+        'An object must be passed to the fetch methods of collectors having ' +
+        'properties of a callCluster function and savedObjectsClient object'
+      );
     }
-    return this.fetch(callCluster);
+    return this.fetch(fetchMechanisms);
+  }
+
+  formatForBulkUpload(result) {
+    return this._formatForBulkUpload(result);
   }
 }

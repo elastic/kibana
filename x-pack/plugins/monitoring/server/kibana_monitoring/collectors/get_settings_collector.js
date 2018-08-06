@@ -56,11 +56,11 @@ export async function checkForEmailValue(
 
 export function getSettingsCollector(server, kbnServer) {
   const config = server.config();
-
   const { collectorSet } = server.usage;
+
   return collectorSet.makeStatsCollector({
     type: KIBANA_SETTINGS_TYPE,
-    async fetch(callCluster) {
+    async fetch({ callCluster }) {
       let kibanaSettingsData;
       const defaultAdminEmail = await checkForEmailValue(config, callCluster);
 

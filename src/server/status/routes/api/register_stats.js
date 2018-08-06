@@ -40,8 +40,8 @@ export function registerStatsApi(kbnServer, server, config) {
     return uuid;
   };
 
-  const getUsage = async callCluster => {
-    const usage = await collectorSet.bulkFetchUsage(callCluster);
+  const getUsage = async (callCluster, savedObjectsClient) => {
+    const usage = await collectorSet.bulkFetchUsage({ callCluster, savedObjectsClient });
     return collectorSet.toObject(usage);
   };
 
@@ -66,9 +66,10 @@ export function registerStatsApi(kbnServer, server, config) {
         if (isExtended) {
           const { callWithRequest } = req.server.plugins.elasticsearch.getCluster('admin');
           const callCluster = (...args) => callWithRequest(req, ...args);
+          const savedObjectsClient = req.getSavedObjectsClient();
           try {
             const [ usage, clusterUuid ] = await Promise.all([
-              getUsage(callCluster),
+              getUsage(callCluster, savedObjectsClient),
               getClusterUuid(callCluster),
             ]);
 
