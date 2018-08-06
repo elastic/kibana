@@ -146,11 +146,7 @@ async function extractSuggestionsFromParsedResult(result, cursorPosition, functi
 
     let valueSuggestions;
     if (argValueSuggestions.hasDynamicSuggestionsForArgument(functionName, argName)) {
-      const results = await argValueSuggestions.getDynamicSuggestionsForArgument(functionName, argName, functionArgs, partialInput);
-      if (results.isPrevRequestResults) {
-        return { isPrevRequestResults: true, list: [] };
-      }
-      valueSuggestions = results.suggestions;
+      valueSuggestions = await argValueSuggestions.getDynamicSuggestionsForArgument(functionName, argName, functionArgs, partialInput);
     } else {
       const {
         suggestions: staticSuggestions,
@@ -179,7 +175,9 @@ async function extractSuggestionsFromParsedResult(result, cursorPosition, functi
 export async function suggest(expression, functionList, Parser, cursorPosition, argValueSuggestions) {
   try {
     const result = await Parser.parse(expression);
-    return await extractSuggestionsFromParsedResult(result, cursorPosition, functionList, argValueSuggestions);
+    const suggestions = await extractSuggestionsFromParsedResult(result, cursorPosition, functionList, argValueSuggestions);
+    suggestions.expression = expression;
+    return suggestions;
   } catch (e) {
 
     let message;
@@ -205,7 +203,7 @@ export async function suggest(expression, functionList, Parser, cursorPosition, 
           // The user hasn't typed anything yet, so we'll just return the entire list.
           list = functionList;
         }
-        return { list, location: message.location, type: SUGGESTION_TYPE.FUNCTIONS };
+        return { list, location: message.location, type: SUGGESTION_TYPE.FUNCTIONS, expression };
       }
       case 'incompleteArgument': {
         const {
@@ -216,7 +214,8 @@ export async function suggest(expression, functionList, Parser, cursorPosition, 
         return {
           list: getArgumentsHelp(functionHelp, functionArgs),
           location: message.location,
-          type: SUGGESTION_TYPE.ARGUMENTS
+          type: SUGGESTION_TYPE.ARGUMENTS,
+          expression,
         };
       }
       case 'incompleteArgumentValue': {
@@ -227,11 +226,7 @@ export async function suggest(expression, functionList, Parser, cursorPosition, 
         } = message;
         let valueSuggestions = [];
         if (argValueSuggestions.hasDynamicSuggestionsForArgument(functionName, argName)) {
-          const results = await argValueSuggestions.getDynamicSuggestionsForArgument(functionName, argName, functionArgs);
-          if (results.isPrevRequestResults) {
-            return { isPrevRequestResults: true, list: [] };
-          }
-          valueSuggestions = results.suggestions;
+          valueSuggestions = await argValueSuggestions.getDynamicSuggestionsForArgument(functionName, argName, functionArgs);
         } else {
           const functionHelp = functionList.find(func => func.name === functionName);
           if (functionHelp) {
@@ -244,7 +239,8 @@ export async function suggest(expression, functionList, Parser, cursorPosition, 
         return {
           list: valueSuggestions,
           location: { min: cursorPosition, max: cursorPosition },
-          type: SUGGESTION_TYPE.ARGUMENT_VALUE
+          type: SUGGESTION_TYPE.ARGUMENT_VALUE,
+          expression: expression,
         };
       }
     }

@@ -137,8 +137,6 @@ export function ArgValueSuggestionsProvider(Private, indexPatterns) {
     }
   };
 
-  let lastRequestTimestamp;
-
   return {
     /**
      * @param {string} functionName - user provided function name containing argument
@@ -154,19 +152,10 @@ export function ArgValueSuggestionsProvider(Private, indexPatterns) {
      * @param {string} argName - user provided argument name
      * @param {object} functionArgs - user provided function arguments parsed ahead of current argument
      * @param {string} partial - user provided argument value
-     * @return {object} results
-     * @property {array} [results.suggestions] - array of dynamic suggestions matching partial
-     * @property {boolean} [results.isPrevRequestResults] - boolean indicating results are from an previous request
+     * @return {array} array of dynamic suggestions matching partial
      */
     getDynamicSuggestionsForArgument: async (functionName, argName, functionArgs, partialInput = '') => {
-      const thisRequestTimestamp = Date.now();
-      lastRequestTimestamp = thisRequestTimestamp;
-      const suggestions = await customHandlers[functionName][argName](partialInput, functionArgs);
-      if (lastRequestTimestamp !== thisRequestTimestamp) {
-        return { suggestions: [], isPrevRequestResults: true };
-      }
-
-      return { suggestions, isPrevRequestResults: false };
+      return await customHandlers[functionName][argName](partialInput, functionArgs);
     },
 
     /**

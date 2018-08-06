@@ -155,15 +155,15 @@ app.directive('timelionExpressionInput', function ($document, $http, $interval, 
         scope.suggestions.show();
 
         const suggestions = await suggest(
-          scope.sheet,
+          scope.sheet,  // sheet is the timelion expression
           functionReference.list,
           Parser,
           getCursorPosition(),
           argValueSuggestions
         );
 
-        if (_.get(suggestions, 'isPrevRequestResults', false)) {
-          // ignore response from old async request
+        if (_.get(suggestions, 'expression') !== scope.sheet) {
+          // expression changed since requesting the suggestions, suggestions are no longer valid.
           return;
         }
 
