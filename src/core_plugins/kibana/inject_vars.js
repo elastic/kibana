@@ -26,25 +26,41 @@ export function injectVars(server) {
       `Use of "${legacyMap}" in the kibana configuration is deprecated. ` +
         `Use "map.${legacyMap}" instead`
     ))(server);
+  const conflictingConfigsError = (server => legacyMap => {
+    server.log(
+      ['error', 'init'],
+      `Both legacy "${legacyMap}" and current "map.${legacyMap}" configurations ` +
+      `detected. Please use only current map configurations: "map.${legacyMap}".`
+    );
+    throw new Error(`Legacy and current map configurations detected`);
+  })(server);
 
-  let tilemap = mapConfig.tilemap;
+  let { regionmap, tilemap } = mapConfig;
+  const legacyTilemap = serverConfig.get('tilemap');
+  const legacyRegionmap = serverConfig.get('regionmap');
+
   // DEPRECATED SETTINGS
-  // If neither the url nor settings have been modified, try legacy
-  if (!tilemap.url && tilemap.options.default) {
-    tilemap = serverConfig.get('tilemap');
-    // If any of the legacy settings have been modified, issue warning
-    (tilemap.url || !tilemap.options.default) && legacyWarning('tilemap');
+  // For both tile & region maps:
+  // If no layers have been specified, try legacy. If both modified, throw error
+  if (!tilemap.url || tilemap.options.default) {
+    (legacyTilemap.url || !legacyTilemap.options.default)
+      && (tilemap = legacyTilemap)
+      && legacyWarning('tilemap');
+  } else {
+    (legacyTilemap.url || !legacyTilemap.options.default)
+      && conflictingConfigsError('tilemap');
   }
+  if (!regionmap.layers.length) {
+    regionmap.layers.length
+      && (regionmap = legacyRegionmap)
+      && legacyWarning('regionmap');
+  } else {
+    regionmap.layers.length
+      && conflictingConfigsError('regionmap');
+  }
+
   // If url is set, old settings must be used for backward compatibility
   const isOverridden = typeof tilemap.url === 'string' && tilemap.url !== '';
-
-  let regionmap = mapConfig.regionmap;
-  //DEPRECATED SETTINGS
-  // If no layers have been specified, try legacy
-  if (!regionmap.layers.length) {
-    regionmap = serverConfig.get('regionmap');
-    regionmap.layers.length && legacyWarning('regionmap');
-  }
 
   return {
     kbnDefaultAppId: serverConfig.get('kibana.defaultAppId'),
