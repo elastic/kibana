@@ -32,6 +32,12 @@ export function estimateBucketSpanFactory(callWithRequest) {
         minimumBucketSpanMS: 0
       };
 
+      // In 6.2 upwards `search.max_buckets` is disabled by default (-1) but requests that try to
+      // return more than 10,000 buckets (the default value for future versions) will log a deprecation warning.
+      // If it's disabled we fall back to 10000 to avoid triggering the deprecation warning here.
+      const MAX_BUCKETS_FALLBACK = 10000;
+      maxBuckets = (maxBuckets === -1) ? MAX_BUCKETS_FALLBACK : maxBuckets;
+
       // determine durations for bucket span estimation
       // taking into account the clusters' search.max_buckets settings
       // the polled_data_checker uses an aggregation interval of 1 minute
