@@ -1,5 +1,5 @@
 [[tutorial-define-index]]
-== Defining Your Index Patterns
+=== Defining your index patterns
 
 Index patterns tell Kibana which Elasticsearch indices you want to explore.
 An index pattern can match the name of a single index, or include a wildcard

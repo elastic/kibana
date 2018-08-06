@@ -1,0 +1,25 @@
+[[tutorial-sample-filter]]
+=== Filtering the data
+
+Many visualizations in the *Global Flight* dashboard are interactive. They offer 
+mouse clicks and other controls for you to filter the view of the data. Filters 
+are global&mdash;a change in one visualization simultaneously changes the data 
+in every visualization on the dashboard.
+
+. In the *Controls* visualization, set an *Origin City* and a *Destination City*.
+. Click *Apply changes*.
++
+The `OriginCityName` and the `DestCityName` fields are filtered to match 
+the data you specified. 
++
+For example, this dashboard shows the data for flights from London to Newark
+and Pittsburgh. 
++
+[role="screenshot"]
+image::images/tutorial-sample-filter.png[]
++
+. Remove the filters by hovering your pointer over their labels in the filter bar
+and clicking the trash can icon. 
+
+You can also add filters manually.  In the filter bar, click *Add a Filter*
+and then specify the data you want to view.

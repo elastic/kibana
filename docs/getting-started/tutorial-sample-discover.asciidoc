@@ -1,0 +1,32 @@
+[[tutorial-sample-discover]]
+=== Using Discover
+
+Another way to interactively explore your data is in the Discover application.   
+Here the data is presented as a table of documents.  As in the Dashboard application, 
+you can submit search queries and filter the search results. 
+
+. In the side navigation, select *Discover*.
++
+The current index pattern appears below the filter bar. An
+index patterns tell {kib} which {es} indices you want to explore.
+You’ll learn more about index patterns in the next tutorial, 
+<<tutorial-your-data>>.
+
+. If *kibana_sample_data_flights* isn't the current index pattern, go to the menu
+bar and select *New* to clear the current data. Then click the caret to the right of the current index pattern 
+and select *kibana_sample_data_flights*. 
+
+A time field is configured for the *kibana_sample_data_flights* index pattern. 
+You'll see the distribution of documents over time in a histogram. 
+
+[role="screenshot"]
+image::images/tutorial-sample-discover1.png[]
+
+By default, all fields are shown for each matching document. To choose which fields to display, 
+hover the pointer over the the list of *Available Fields* and then click *add* next 
+to each field you want include.
+
+For example, if you add the `DestAirportID` and `DestWeather` fields, the display changes as follows:
+
+[role="screenshot"]
+image::images/tutorial-sample-discover2.png[]

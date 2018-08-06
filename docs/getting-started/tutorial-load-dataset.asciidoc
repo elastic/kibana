@@ -1,5 +1,5 @@
 [[tutorial-load-dataset]]
-== Loading Sample Data
+=== Loading sample data
 
 This tutorial requires three data sets:
 

@@ -1,0 +1,35 @@
+[[tutorial-sample-query]]
+=== Querying the data
+
+You can also enter an {es} query to narrow the view of the data.  {kib} supports the 
+<<lucene-query>>.
+
+. In the query bar, enter this simple query:
++
+[source,text]
+OriginCityName:Rome   
++
+The dashboard now shows data for flights out of Rome. 
+
+. For a more complex query with AND and OR, try this:
++
+[source,text]
+OriginCityName:Rome AND (Carrier:JetBeats OR "Kibana Airlines")
++
+The dashboard updates to show data for the flights out of Rome on JetBeats and 
+{kib} Airlines.  
++
+[role="screenshot"]
+image::images/tutorial-sample-query.png[]
+
+. When you are finished exploring the dashboard, remove the query by 
+clearing the contents in the query bar and pressing Enter.
+
+In general, filters are faster than queries because filters are cached and don’t 
+influence the score. For more information, see {ref}/query-filter-context.html[Query and filter context].
+
+TIP: {kib} has two experimental features, autocomplete and simple syntax, that can 
+help jumpstart your queries. To turn on these features, click *Options* on the 
+right of the query bar and opt-in. Just start typing in the query bar and you’ll 
+get search suggestions.  For information on the simplified syntax, see 
+<<kuery-query>>.  

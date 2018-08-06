@@ -1,0 +1,17 @@
+
+[[tutorial-your-data]]
+== Getting the full Kibana experience
+
+Ready for the full Kibana experience? This tutorial shows you how to:
+
+* Load a sample data set into Elasticsearch
+* Define an index pattern
+* Discover and explore the sample data
+* Visualize the data
+* Assemble visualizations into a dashboard
+* Inspect the data behind a visualization
+
+If security is enabled, you must have the `all` Kibana privilege to run this tutorial.
+You must also have the `create`, `manage` `read`, `write,` and `delete` 
+index privileges. See {xpack-ref}/security-privileges.html[Security Privileges] 
+for more information.
