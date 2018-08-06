@@ -58,7 +58,7 @@ export default function ({ getService, getPageObjects }) {
       });
 
       it('should allow adding filters while having a linked saved search', async () => {
-        await filterBar.addFilter('bytes', 'is between', ['100', '3000']);
+        await filterBar.addFilter('bytes', 'is between', '100', '3000');
         await PageObjects.header.waitUntilLoadingHasFinished();
         const data = await PageObjects.visualize.getTableVisData();
         expect(data.trim()).to.be('707');
