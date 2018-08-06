@@ -18,14 +18,22 @@ exports[`Header should render normally 1`] = `
       size="s"
     >
       <h3>
-        Scripted fields
+        <FormattedMessage
+          defaultMessage="Scripted fields"
+          id="kbn.management.editIndexPattern.scriptedHeader"
+          values={Object {}}
+        />
       </h3>
     </EuiTitle>
     <EuiText
       grow={true}
     >
       <p>
-        You can use scripted fields in visualizations and display them in your documents. However, you cannot search scripted fields.
+        <FormattedMessage
+          defaultMessage="You can use scripted fields in visualizations and display them in your documents. However, you cannot search scripted fields."
+          id="kbn.management.editIndexPattern.scriptedLabel"
+          values={Object {}}
+        />
       </p>
     </EuiText>
   </EuiFlexItem>
@@ -41,7 +49,11 @@ exports[`Header should render normally 1`] = `
       iconSide="left"
       type="button"
     >
-      Add scripted field
+      <FormattedMessage
+        defaultMessage="Add scripted field"
+        id="kbn.management.editIndexPattern.scripted.addFieldButton"
+        values={Object {}}
+      />
     </EuiButton>
   </EuiFlexItem>
 </EuiFlexGroup>
