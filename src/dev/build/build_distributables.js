@@ -100,10 +100,9 @@ export async function buildDistributables(options) {
   await run(CopySourceTask);
   await run(CreateEmptyDirsAndFilesTask);
   await run(CreateReadmeTask);
+  await run(TranspileScssTask);
   await run(TranspileBabelTask);
   await run(TranspileTypescriptTask);
-  // TODO: Check if we need to run this before trapnspile babel
-  await run(TranspileScssTask);
   await run(BuildPackagesTask);
   await run(CreatePackageJsonTask);
   await run(InstallDependenciesTask);

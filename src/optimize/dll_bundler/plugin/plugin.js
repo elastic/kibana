@@ -38,7 +38,7 @@ function inNodeModules(checkPath) {
 }
 
 function inPluginNodeModules(checkPath) {
-  return checkPath.match(/(\/|\\)plugins.*(\/|\/)node_modules/);
+  return checkPath.match(/(\/|\\)plugins.*(\/|\\)node_modules/);
 }
 
 export class Plugin {
@@ -139,6 +139,7 @@ export class Plugin {
         // Verify if we must check if a dll compilation is needed
         // In case we are in distributable environment and we already
         // have on dll bundle, we don't need to check it
+        // TODO: completely remove the DLL logic on distributable env when we already have the DLL created
         if (!this.mustCheckDllCompilationNeed()) {
           return compilation.needsDLLCompilation = false;
         }

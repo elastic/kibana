@@ -307,6 +307,7 @@ export const CleanNodeModulesOnDLLTask = {
 
       // Delete module contents. It will delete everything
       // excepts package.json, images and css
+      // TODO: use the CWD option instead of append everytime the moduleDir
       const deletePatterns = await globby([
         `${moduleDir}/**`,
         `!${moduleDir}/**/*.+(css)`,
@@ -319,6 +320,7 @@ export const CleanNodeModulesOnDLLTask = {
         deletePatterns
       );
 
+      // TODO: investigate better here and also in the del
       await deleteEmpty(moduleDir);
 
       // Mark this module as cleaned
