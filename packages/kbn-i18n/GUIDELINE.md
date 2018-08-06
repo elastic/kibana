@@ -24,18 +24,18 @@ For example the message before translation looks like:
 
   ```js
   <p>
-      The following deprecated languages are in use: {deprecatedLangsInUse.join(', ')}. Support for these languages will be removed in the next major version of Kibana and Elasticsearch. Convert you scripted fields to <EuiLink href={painlessDocLink}>Painless</EuiLink> to avoid any problems.
+      The following deprecated languages are in use: {deprecatedLangsInUse.join(', ')}. Support for these languages will be removed in the next major version of Kibana and Elasticsearch. Convert your scripted fields to <EuiLink href={painlessDocLink}>Painless</EuiLink> to avoid any problems.
   </p>
   ```
 
 This phrase contains a variable, which represents languages list, and a link (`Painless`). For such cases we divide the message into two parts: the main message, which contains placeholders, and additional message, which represents inner message.
 
 It is used the following message id naming structure:
-1) the main message id has the type on the penultimate position, thereby identifying a divided phrase, and the last segment ends with  `Detail`.
+1) the main message id has the type on the penultimate position, thereby identifying a divided phrase, and the last segment ends with `Detail`.
 
 ```js
 {
-  'kbn.management.editIndexPattern.scripted.deprecationLangLabel.deprecationLangDetail': 'The following deprecated languages are in use: {deprecatedLangsInUse}. Support for these languages will be removed in the next major version of Kibana and Elasticsearch. Convert you scripted fields to {link} to avoid any problems.'
+  'kbn.management.editIndexPattern.scripted.deprecationLangLabel.deprecationLangDetail': 'The following deprecated languages are in use: {deprecatedLangsInUse}. Support for these languages will be removed in the next major version of Kibana and Elasticsearch. Convert your scripted fields to {link} to avoid any problems.'
 }
 ```
 
@@ -109,15 +109,15 @@ The message ids chosen for message keys should always be descriptive of the stri
   'kbn.management.editIndexPattern.scripted.table.nameDescription'
   ```
 
-- For complex messagges, that is divided into several parts, use the folllowing approach:
+- For complex messages, which are divided into several parts, use the following approach:
   - the main message id should have the type on the penultimate position, thereby identifying a divided phrase, and the last segment should end with `Detail`,
   - the inner message id should have the type on the penultimate position and the name of the variable from the placeholder in the main message as the last segment that ends with its own type.
 
-  For example before the translation there was a message:
+  For example, before the translation there was a message:
 
   ```js
   <strong>Success!</strong>
-  Your index pattern matches <strong>{exactMatchedIndices.length} {exactMatchedIndices.length > 1 ? 'indices' : 'index'}</strong>.
+  Your index pattern matches <strong>{exactMatchedIndices.length} {exactMatchedIndices.length === 1 ? 'index' : 'indices'}</strong>.
   ```
 
   After translation we get the following structure:
@@ -277,7 +277,7 @@ Splitting sentences into several keys often inadvertently presumes a grammar, a 
 
   `The following dialogue box indicates progress. You can close it and the process will continue to run in the background.`
 
-  If this sentence is separated it’s possible that the context of the `'it'` in `'close it'` will be lost.
+  If this group of sentences is separated it’s possible that the context of the `'it'` in `'close it'` will be lost.
 
 
 
