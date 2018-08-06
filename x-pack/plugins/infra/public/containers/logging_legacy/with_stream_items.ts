@@ -7,10 +7,7 @@
 import { connect } from 'react-redux';
 import { createSelector } from 'reselect';
 
-import { LogEntry } from '../../../common/log_entry';
 import { SearchResult } from '../../../common/log_search_result';
-import { bindPlainActionCreators } from '../../utils/typed_redux';
-
 import {
   entriesActions,
   entriesSelectors,
@@ -18,17 +15,17 @@ import {
   State,
   targetActions,
   targetSelectors,
-  textviewSelectors,
 } from '../../containers/logging_legacy/state';
+import { LogEntry, LogEntryMessageSegment } from '../../utils/log_entry';
+import { asChildFunctionRenderer } from '../../utils/typed_react';
+import { bindPlainActionCreators } from '../../utils/typed_redux';
 
 export const withStreamItems = connect(
   (state: State) => ({
     endLoadingState: entriesSelectors.selectEntriesEndLoadingState(state),
     items: selectItems(state),
-    scale: textviewSelectors.selectTextviewScale(state),
     startLoadingState: entriesSelectors.selectEntriesStartLoadingState(state),
     target: targetSelectors.selectTarget(state),
-    wrap: textviewSelectors.selectTextviewWrap(state),
   }),
   bindPlainActionCreators({
     jumpToTarget: targetActions.jumpToTarget,
@@ -36,17 +33,41 @@ export const withStreamItems = connect(
   })
 );
 
+export const WithStreamItems = asChildFunctionRenderer(withStreamItems);
+
 const selectItems = createSelector(
   entriesSelectors.selectEntries,
+  entriesSelectors.selectIsReloadingEntries,
   searchResultsSelectors.selectSearchResultsById,
-  (logEntries, searchResults) =>
-    logEntries.map(logEntry =>
-      createLogEntryStreamItem(logEntry, searchResults[logEntry.gid] || null)
-    )
+  (logEntries, isReloading, searchResults) =>
+    isReloading
+      ? []
+      : logEntries.map(logEntry =>
+          createLogEntryStreamItem(logEntry, searchResults[logEntry.gid] || null)
+        )
 );
 
 const createLogEntryStreamItem = (logEntry: LogEntry, searchResult?: SearchResult) => ({
   kind: 'logEntry' as 'logEntry',
-  logEntry,
+  logEntry: {
+    gid: logEntry.gid,
+    origin: {
+      id: logEntry.gid,
+      index: '',
+      type: '',
+    },
+    fields: {
+      time: logEntry.key.time,
+      tiebreaker: logEntry.key.tiebreaker,
+      message: logEntry.message.map(formatMessageSegment).join(' '),
+    },
+  },
   searchResult,
 });
+
+const formatMessageSegment = (messageSegment: LogEntryMessageSegment): string =>
+  messageSegment.__typename === 'InfraLogMessageFieldSegment'
+    ? messageSegment.value
+    : messageSegment.__typename === 'InfraLogMessageConstantSegment'
+      ? messageSegment.constant
+      : 'failed to format message';

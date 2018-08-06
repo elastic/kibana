@@ -16,7 +16,7 @@ interface RunningLoadingProgress<Parameters> {
 
 export type LoadingProgress<Parameters> = IdleLoadingProgress | RunningLoadingProgress<Parameters>;
 
-export const isUninitializedLoadingProgress = <P>(
+export const isIdleLoadingProgress = <P>(
   loadingProgress: LoadingProgress<P>
 ): loadingProgress is IdleLoadingProgress => loadingProgress.progress === 'idle';
 

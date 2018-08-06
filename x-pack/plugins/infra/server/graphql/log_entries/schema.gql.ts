@@ -7,19 +7,6 @@
 import gql from 'graphql-tag';
 
 export const logEntriesSchema = gql`
-  "A representation of the log entry's position in the event stream"
-  type InfraTimeKey {
-    "The timestamp of the event that the log entry corresponds to"
-    time: Float!
-    "The tiebreaker that disambiguates events with the same timestamp"
-    tiebreaker: Float!
-  }
-
-  input InfraTimeKeyInput {
-    time: Float!
-    tiebreaker: Float!
-  }
-
   "A segment of the log entry message that was derived from a field"
   type InfraLogMessageFieldSegment {
     "The field the segment was derived from"
@@ -57,6 +44,10 @@ export const logEntriesSchema = gql`
     start: InfraTimeKey
     "The key corresponding to the end of the interval covered by the entries"
     end: InfraTimeKey
+    "Whether there are more log entries available before the start"
+    hasMoreBefore: Boolean!
+    "Whether there are more log entries available after the end"
+    hasMoreAfter: Boolean!
     "The query the log entries were filtered by"
     filterQuery: String
     "The query the log entries were highlighted with"

@@ -16,17 +16,24 @@ import { InfraAxiosApiAdapter } from '../adapters/api/axios_api_adapter';
 import { InfraKibanaObservableApiAdapter } from '../adapters/observable_api/kibana_observable_api';
 import { InfraFieldsDomain } from '../domains/fields_domain';
 
+import introspectionQueryResultData from '../../../common/graphql/introspection.json';
 import { InfraKibanaFrameworkAdapter } from '../adapters/framework/kibana_framework_adapter';
 import { InfraFrontendLibs } from '../lib';
 
-import { InMemoryCache } from 'apollo-cache-inmemory';
+import { InMemoryCache, IntrospectionFragmentMatcher } from 'apollo-cache-inmemory';
 import ApolloClient from 'apollo-client';
 import { ApolloLink } from 'apollo-link';
 import { HttpLink } from 'apollo-link-http';
 import { withClientState } from 'apollo-link-state';
+import { printSchema } from 'graphql';
+import { buildSchemaFromTypeDefinitions } from 'graphql-tools';
 
 export function compose(): InfraFrontendLibs {
-  const cache = new InMemoryCache();
+  const cache = new InMemoryCache({
+    fragmentMatcher: new IntrospectionFragmentMatcher({
+      introspectionQueryResultData,
+    }),
+  });
 
   const observableApi = new InfraKibanaObservableApiAdapter({
     basePath: chrome.getBasePath(),
@@ -38,10 +45,7 @@ export function compose(): InfraFrontendLibs {
     link: ApolloLink.from([
       withClientState({
         cache,
-        resolvers: {
-          Mutation: {},
-          Query: {},
-        },
+        resolvers: {},
       }),
       new HttpLink({
         credentials: 'same-origin',

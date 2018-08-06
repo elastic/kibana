@@ -7,7 +7,7 @@
 import gql from 'graphql-tag';
 
 export const fieldsSchema = gql`
-  interface InfraField {
+  type InfraField {
     name: String
     type: String
     searchable: Boolean

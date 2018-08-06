@@ -7,10 +7,11 @@
 import { connect } from 'react-redux';
 
 import { isIntervalLoadingPolicy } from '../../utils/loading_state';
+import { asChildFunctionRenderer } from '../../utils/typed_react';
 import { bindPlainActionCreators } from '../../utils/typed_redux';
 import { entriesActions, entriesSelectors, sharedSelectors, State, targetActions } from './state';
 
-export const withTimeControlsProps = connect(
+export const withTimeControls = connect(
   (state: State) => ({
     currentTime: sharedSelectors.selectVisibleMidpointOrTargetTime(state),
     isLiveStreaming: isIntervalLoadingPolicy(
@@ -23,3 +24,5 @@ export const withTimeControlsProps = connect(
     jumpToTime: targetActions.jumpToTime,
   })
 );
+
+export const WithTimeControls = asChildFunctionRenderer(withTimeControls);

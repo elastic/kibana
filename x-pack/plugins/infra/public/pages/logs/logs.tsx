@@ -30,27 +30,20 @@ import { LogTextWrapControls } from '../../components/logging/log_text_wrap_cont
 import { LogTimeControls } from '../../components/logging/log_time_controls';
 
 import { withLibs } from '../../containers/libs';
-import { State } from '../../containers/logging_legacy/state';
+import { State, targetActions } from '../../containers/logging_legacy/state';
 import { withLogSearchControlsProps } from '../../containers/logging_legacy/with_log_search_controls_props';
 import { withMinimapProps } from '../../containers/logging_legacy/with_minimap_props';
 import { withMinimapScaleControlsProps } from '../../containers/logging_legacy/with_minimap_scale_controls_props';
-import { withStreamItems } from '../../containers/logging_legacy/with_stream_items';
-import { withTextScaleControlsProps } from '../../containers/logging_legacy/with_text_scale_controls_props';
-import { withTextStreamScrollState } from '../../containers/logging_legacy/with_text_stream_scroll_state';
-import { withTextWrapControlsProps } from '../../containers/logging_legacy/with_text_wrap_controls_props';
-import { withTimeControlsProps } from '../../containers/logging_legacy/with_time_controls_props';
+import { WithStreamItems } from '../../containers/logging_legacy/with_stream_items';
+import { WithTextScale } from '../../containers/logging_legacy/with_text_scale_controls_props';
+import { WithTextWrap } from '../../containers/logging_legacy/with_text_wrap_controls_props';
+import { WithTimeControls } from '../../containers/logging_legacy/with_time_controls_props';
 import { withVisibleLogEntries } from '../../containers/logging_legacy/with_visible_log_entries';
 
 const ConnectedLogMinimap = withMinimapProps(LogMinimap);
 const ConnectedLogMinimapScaleControls = withMinimapScaleControlsProps(LogMinimapScaleControls);
 const ConnectedLogPositionText = withVisibleLogEntries(LogPositionText);
 const ConnectedLogSearchControls = withLogSearchControlsProps(LogSearchControls);
-const ConnectedLogTextScaleControls = withTextScaleControlsProps(LogTextScaleControls);
-const ConnectedLogTextWrapControls = withTextWrapControlsProps(LogTextWrapControls);
-const ConnectedTimeControls = withTimeControlsProps(LogTimeControls);
-const ConnectedScrollableLogTextStreamView = withStreamItems(
-  withTextStreamScrollState(ScrollableLogTextStreamView)
-);
 
 interface LogsPageProps {
   libs: InfraFrontendLibs;
@@ -70,6 +63,7 @@ export const LogsPage = withLibs(
 
       const libs = new BehaviorSubject(props.libs);
       const store = createStore({
+        apolloClient: libs.pipe(pluck('apolloClient')),
         observableApi: libs.pipe(pluck('observableApi')),
       });
 
@@ -85,6 +79,15 @@ export const LogsPage = withLibs(
       }
     }
 
+    public componentDidMount() {
+      this.state.store.dispatch(
+        targetActions.jumpToTarget({
+          time: Date.now(),
+          tiebreaker: 0,
+        })
+      );
+    }
+
     public render() {
       return (
         <Provider store={this.state.store}>
@@ -98,12 +101,26 @@ export const LogsPage = withLibs(
                 <EuiFlexItem grow={false}>
                   <LogCustomizationMenu>
                     <ConnectedLogMinimapScaleControls />
-                    <ConnectedLogTextWrapControls />
-                    <ConnectedLogTextScaleControls />
+                    <WithTextWrap>
+                      {({ wrap, setTextWrap }) => (
+                        <LogTextWrapControls wrap={wrap} setTextWrap={setTextWrap} />
+                      )}
+                    </WithTextWrap>
+                    <WithTextScale>
+                      {({ availableTextScales, textScale, setTextScale }) => (
+                        <LogTextScaleControls
+                          availableTextScales={availableTextScales}
+                          textScale={textScale}
+                          setTextScale={setTextScale}
+                        />
+                      )}
+                    </WithTextScale>
                   </LogCustomizationMenu>
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
-                  <ConnectedTimeControls />
+                  <WithTimeControls>
+                    {timeProps => <LogTimeControls {...timeProps} />}
+                  </WithTimeControls>
                 </EuiFlexItem>
               </EuiFlexGroup>
             </Toolbar>
@@ -111,7 +128,25 @@ export const LogsPage = withLibs(
               <AutoSizer content>
                 {({ measureRef, content: { width = 0, height = 0 } }) => (
                   <LogPageEventStreamColumn innerRef={measureRef as any}>
-                    <ConnectedScrollableLogTextStreamView height={height} width={width} />
+                    <WithTextScale>
+                      {({ textScale }) => (
+                        <WithTextWrap>
+                          {({ wrap }) => (
+                            <WithStreamItems>
+                              {streamItemsProps => (
+                                <ScrollableLogTextStreamView
+                                  scale={textScale}
+                                  wrap={wrap}
+                                  height={height}
+                                  width={width}
+                                  {...streamItemsProps}
+                                />
+                              )}
+                            </WithStreamItems>
+                          )}
+                        </WithTextWrap>
+                      )}
+                    </WithTextScale>
                   </LogPageEventStreamColumn>
                 )}
               </AutoSizer>
