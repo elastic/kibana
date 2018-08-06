@@ -8,6 +8,7 @@
 
 import { basicJobValidation } from 'plugins/ml/../common/util/job_utils';
 import { newJobLimits } from 'plugins/ml/jobs/new_job/utils/new_job_defaults';
+import { ALLOWED_DATA_UNITS } from 'plugins/ml/../common/constants/validation';
 import _ from 'lodash';
 
 export function validateJob(job, checks) {
@@ -52,7 +53,8 @@ export function populateValidationMessages(validationResults, checks) {
 
   if (validationResults.contains('model_memory_limit_units_invalid')) {
     checks.modelMemoryLimit.valid = false;
-    const msg = `Model memory limit data unit unrecognized. It must be B, KB, MB, GB, TB or PB`;
+    const str = `${(ALLOWED_DATA_UNITS.slice(0, ALLOWED_DATA_UNITS.length - 1).join(', '))} or ${([...ALLOWED_DATA_UNITS].pop())}`;
+    const msg = `Model memory limit data unit unrecognized. It must be ${str}`;
     checks.modelMemoryLimit.message = msg;
   }
 

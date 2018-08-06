@@ -72,6 +72,8 @@ const legacyMetadata = {
 
 new CoreSystem({
   injectedMetadata: {
+    version: legacyMetadata.version,
+    buildNumber: legacyMetadata.buildNum,
     legacyMetadata
   },
   rootDomElement: document.body,

@@ -76,6 +76,7 @@ exports[`apmUiEnabled 1`] = `
         layout="vertical"
         textAlign="center"
         title="APM"
+        titleElement="span"
       />
     </EuiFlexItem>
     <EuiFlexItem
@@ -107,6 +108,7 @@ exports[`apmUiEnabled 1`] = `
         layout="vertical"
         textAlign="center"
         title="Logging"
+        titleElement="span"
       />
     </EuiFlexItem>
     <EuiFlexItem
@@ -138,6 +140,7 @@ exports[`apmUiEnabled 1`] = `
         layout="vertical"
         textAlign="center"
         title="Metrics"
+        titleElement="span"
       />
     </EuiFlexItem>
     <EuiFlexItem
@@ -169,6 +172,7 @@ exports[`apmUiEnabled 1`] = `
         layout="vertical"
         textAlign="center"
         title="Security Analytics"
+        titleElement="span"
       />
     </EuiFlexItem>
   </EuiFlexGroup>
@@ -327,6 +331,7 @@ exports[`isNewKibanaInstance 1`] = `
         layout="vertical"
         textAlign="center"
         title="Logging"
+        titleElement="span"
       />
     </EuiFlexItem>
     <EuiFlexItem
@@ -358,6 +363,7 @@ exports[`isNewKibanaInstance 1`] = `
         layout="vertical"
         textAlign="center"
         title="Metrics"
+        titleElement="span"
       />
     </EuiFlexItem>
     <EuiFlexItem
@@ -389,6 +395,7 @@ exports[`isNewKibanaInstance 1`] = `
         layout="vertical"
         textAlign="center"
         title="Security Analytics"
+        titleElement="span"
       />
     </EuiFlexItem>
   </EuiFlexGroup>
@@ -547,6 +554,7 @@ exports[`render 1`] = `
         layout="vertical"
         textAlign="center"
         title="Logging"
+        titleElement="span"
       />
     </EuiFlexItem>
     <EuiFlexItem
@@ -578,6 +586,7 @@ exports[`render 1`] = `
         layout="vertical"
         textAlign="center"
         title="Metrics"
+        titleElement="span"
       />
     </EuiFlexItem>
     <EuiFlexItem
@@ -609,6 +618,7 @@ exports[`render 1`] = `
         layout="vertical"
         textAlign="center"
         title="Security Analytics"
+        titleElement="span"
       />
     </EuiFlexItem>
   </EuiFlexGroup>

@@ -28,76 +28,179 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 
+import { FormattedMessage } from '@kbn/i18n/react';
+
 export const ScriptingSyntax = () => (
   <Fragment>
     <EuiSpacer />
     <EuiText>
-      <h3>Syntax</h3>
+      <h3>
+        <FormattedMessage id="common.ui.fieldEditor.syntaxHeader" defaultMessage="Syntax"/>
+      </h3>
       <p>
-        By default, Kibana scripted fields use {(
-          <EuiLink
-            target="_window"
-            href={getDocLink('scriptedFields.painless')}
-          >
-            Painless <EuiIcon type="link"/>
-          </EuiLink>
-        )}, a simple and secure scripting language designed specifically for use with Elasticsearch,
-        to access values in the document use the following format:
+        <FormattedMessage
+          id="common.ui.fieldEditor.syntax.defaultLabel.defaultDetail"
+          defaultMessage="By default, Kibana scripted fields use {painless}, a simple and secure scripting language designed
+          specifically for use with Elasticsearch, to access values in the document use the following format:"
+          values={{
+            painless: (
+              <EuiLink
+                target="_window"
+                href={getDocLink('scriptedFields.painless')}
+              >
+                Painless <EuiIcon type="link" />
+              </EuiLink>
+            )
+          }}
+        />
       </p>
       <p>
-        <EuiCode>doc[&apos;some_field&apos;].value</EuiCode>
+        <EuiCode>
+          <FormattedMessage id="common.ui.fieldEditor.syntax.default.formatLabel" defaultMessage="doc['some_field'].value"/>
+        </EuiCode>
       </p>
       <p>
-        Painless is powerful but easy to use. It provides access to many {(
-          <EuiLink
-            target="_window"
-            href={getDocLink('scriptedFields.painlessApi')}
-          >
-            native Java APIs <EuiIcon type="link"/>
-          </EuiLink>
-        )}. Read up on its {(
-          <EuiLink
-            target="_window"
-            href={getDocLink('scriptedFields.painlessSyntax')}
-          >
-          syntax <EuiIcon type="link"/>
-          </EuiLink>
-        )} and you&apos;ll be up to speed in no time!
+        <FormattedMessage
+          id="common.ui.fieldEditor.syntax.painlessLabel.painlessDetail"
+          defaultMessage="Painless is powerful but easy to use. It provides access to many {javaAPIs}. Read up on its {syntax} and
+          you'll be up to speed in no time!"
+          values={{
+            javaAPIs: (
+              <EuiLink
+                target="_window"
+                href={getDocLink('scriptedFields.painlessApi')}
+              >
+                <FormattedMessage id="common.ui.fieldEditor.syntax.painlessLabel.javaAPIsLink" defaultMessage="native Java APIs" />&nbsp;
+                <EuiIcon type="link" />
+              </EuiLink>
+            ),
+            syntax: (
+              <EuiLink
+                target="_window"
+                href={getDocLink('scriptedFields.painlessSyntax')}
+              >
+                <FormattedMessage id="common.ui.fieldEditor.syntax.painlessLabel.syntaxLink" defaultMessage="syntax" />&nbsp;
+                <EuiIcon type="link" />
+              </EuiLink>
+            )
+          }}
+        />
       </p>
       <p>
-        Kibana currently imposes one special limitation on the painless scripts you write. They cannot contain named functions.
+        <FormattedMessage
+          id="common.ui.fieldEditor.syntax.kibanaLabel"
+          defaultMessage="Kibana currently imposes one special limitation on the painless scripts you write. They cannot contain named
+          functions."
+        />
       </p>
       <p>
-        Coming from an older version of Kibana? The {(
-          <EuiLink
-            target="_window"
-            href={getDocLink('scriptedFields.luceneExpressions')}
-          >
-            Lucene Expressions <EuiIcon type="link"/>
-          </EuiLink>
-        )} you know and love are still available. Lucene expressions are a lot like JavaScript,
-          but limited to basic arithmetic, bitwise and comparison operations.
+        <FormattedMessage
+          id="common.ui.fieldEditor.syntax.lucene.commonLabel.commonDetail"
+          defaultMessage="Coming from an older version of Kibana? The {lucene} you know and love are still available. Lucene expressions
+          are a lot like JavaScript, but limited to basic arithmetic, bitwise and comparison operations."
+          values={{
+            lucene: (
+              <EuiLink
+                target="_window"
+                href={getDocLink('scriptedFields.luceneExpressions')}
+              >
+                <FormattedMessage id="common.ui.fieldEditor.syntax.lucene.commonLabel.luceneLink" defaultMessage="Lucene Expressions" />
+                &nbsp;<EuiIcon type="link" />
+              </EuiLink>
+            )
+          }}
+        />
       </p>
       <p>
-        There are a few limitations when using Lucene Expressions:
+        <FormattedMessage
+          id="common.ui.fieldEditor.syntax.lucene.limitsLabel"
+          defaultMessage="There are a few limitations when using Lucene Expressions:"
+        />
       </p>
       <ul>
-        <li> Only numeric, boolean, date, and geo_point fields may be accessed</li>
-        <li> Stored fields are not available</li>
-        <li> If a field is sparse (only some documents contain a value), documents missing the field will have a value of 0</li>
+        <li>
+          <FormattedMessage
+            id="common.ui.fieldEditor.syntax.lucene.limits.typesLabel"
+            defaultMessage="Only numeric, boolean, date, and geo_point fields may be accessed"
+          />
+        </li>
+        <li>
+          <FormattedMessage
+            id="common.ui.fieldEditor.syntax.lucene.limits.fieldsLabel"
+            defaultMessage="Stored fields are not available"
+          />
+        </li>
+        <li>
+          <FormattedMessage
+            id="common.ui.fieldEditor.syntax.lucene.limits.sparseLabel"
+            defaultMessage="If a field is sparse (only some documents contain a value), documents missing the field will have
+            a value of 0"
+          />
+        </li>
       </ul>
       <p>
-        Here are all the operations available to lucene expressions:
+        <FormattedMessage
+          id="common.ui.fieldEditor.syntax.lucene.operationsLabel"
+          defaultMessage="Here are all the operations available to lucene expressions:"
+        />
       </p>
       <ul>
-        <li> Arithmetic operators: <code>+ - * / %</code></li>
-        <li> Bitwise operators: <code>| & ^ ~ &#x3C;&#x3C; &#x3E;&#x3E; &#x3E;&#x3E;&#x3E;</code></li>
-        <li> Boolean operators (including the ternary operator): <code>&& || ! ?:</code></li>
-        <li> Comparison operators: <code>&#x3C; &#x3C;= == &#x3E;= &#x3E;</code></li>
-        <li> Common mathematic functions: <code>abs ceil exp floor ln log10 logn max min sqrt pow</code></li>
-        <li> Trigonometric library functions: <code>acosh acos asinh asin atanh atan atan2 cosh cos sinh sin tanh tan</code></li>
-        <li> Distance functions: <code>haversin</code></li>
-        <li> Miscellaneous functions: <code>min, max</code></li>
+        <li>
+          <FormattedMessage
+            id="common.ui.fieldEditor.syntax.lucene.operations.arithmeticLabel"
+            defaultMessage="Arithmetic operators: {operators}"
+            values={{ operators: <code>+ - * / %</code> }}
+          />
+        </li>
+        <li>
+          <FormattedMessage
+            id="common.ui.fieldEditor.syntax.lucene.operations.bitwiseLabel"
+            defaultMessage="Bitwise operators: {operators}"
+            values={{ operators: <code>| & ^ ~ &#x3C;&#x3C; &#x3E;&#x3E; &#x3E;&#x3E;&#x3E;</code> }}
+          />
+        </li>
+        <li>
+          <FormattedMessage
+            id="common.ui.fieldEditor.syntax.lucene.operations.booleanLabel"
+            defaultMessage="Boolean operators (including the ternary operator): {operators}"
+            values={{ operators: <code>&& || ! ?:</code> }}
+          />
+        </li>
+        <li>
+          <FormattedMessage
+            id="common.ui.fieldEditor.syntax.lucene.operations.comparisonLabel"
+            defaultMessage="Comparison operators: {operators}"
+            values={{ operators: <code>&#x3C; &#x3C;= == &#x3E;= &#x3E;</code> }}
+          />
+        </li>
+        <li>
+          <FormattedMessage
+            id="common.ui.fieldEditor.syntax.lucene.operations.mathLabel"
+            defaultMessage="Common mathematic functions: {operators}"
+            values={{ operators: <code>abs ceil exp floor ln log10 logn max min sqrt pow</code> }}
+          />
+        </li>
+        <li>
+          <FormattedMessage
+            id="common.ui.fieldEditor.syntax.lucene.operations.trigLabel"
+            defaultMessage="Trigonometric library functions: {operators}"
+            values={{ operators: <code>acosh acos asinh asin atanh atan atan2 cosh cos sinh sin tanh tan</code> }}
+          />
+        </li>
+        <li>
+          <FormattedMessage
+            id="common.ui.fieldEditor.syntax.lucene.operations.distanceLabel"
+            defaultMessage="Distance functions: {operators}"
+            values={{ operators: <code>haversin</code> }}
+          />
+        </li>
+        <li>
+          <FormattedMessage
+            id="common.ui.fieldEditor.syntax.lucene.operations.miscellaneousLabel"
+            defaultMessage="Miscellaneous functions: {operators}"
+            values={{ operators: <code>min, max</code> }}
+          />
+        </li>
       </ul>
     </EuiText>
   </Fragment>
