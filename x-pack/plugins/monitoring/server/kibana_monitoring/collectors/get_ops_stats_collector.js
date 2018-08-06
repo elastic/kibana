@@ -12,18 +12,18 @@ import { getKibanaInfoForStats } from '../lib';
  * Initialize a collector for Kibana Ops Stats
  */
 export function getOpsStatsCollector(server, kbnServer) {
-  let monitor;
+  // let monitor;
   const buffer = opsBuffer(server);
-  const onOps = event => buffer.push(event);
+  // const onOps = event => buffer.push(event);
 
   const start = () => {
-    monitor = server.plugins['even-better'].monitor;
-    monitor.on('ops', onOps);
+    // monitor = server.plugins['even-better'].monitor;
+    // monitor.on('ops', onOps);
   };
   const stop = () => {
-    if (monitor) {
-      monitor.removeListener('ops', onOps);
-    }
+    // if (monitor) {
+    //   monitor.removeListener('ops', onOps);
+    // }
   };
 
   /* Handle stopping / restarting the event listener if Elasticsearch stops and restarts
