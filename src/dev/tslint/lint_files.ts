@@ -42,7 +42,7 @@ function groupFilesByProject(files: File[]) {
 }
 
 /**
- * Lints a list of files with eslint. eslint reports are written to the log
+ * Lints a list of files with tslint. tslint reports are written to the log
  * and a FailError is thrown when linting errors occur.
  *
  * @param  {ToolingLog} log

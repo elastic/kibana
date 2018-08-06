@@ -29,7 +29,15 @@ export const createTestEntryTemplate = (defaultUiSettings) => (bundle) => `
  *
  */
 
-window.__KBN__ = {
+// import global polyfills before everything else
+import 'babel-polyfill';
+import 'custom-event-polyfill';
+import 'whatwg-fetch';
+import 'abortcontroller-polyfill';
+
+import { CoreSystem } from '__kibanaCore__'
+
+const legacyMetadata = {
   version: '1.2.3',
   buildNum: 1234,
   vars: {
@@ -64,7 +72,16 @@ window.__KBN__ = {
   }
 };
 
-require('ui/test_harness');
-${bundle.getRequires().join('\n')}
-require('ui/test_harness').bootstrap(/* go! */);
+new CoreSystem({
+  injectedMetadata: {
+    version: legacyMetadata.version,
+    buildNumber: legacyMetadata.buildNum,
+    legacyMetadata
+  },
+  rootDomElement: document.body,
+  useLegacyTestHarness: true,
+  requireLegacyFiles: () => {
+    ${bundle.getRequires().join('\n  ')}
+  }
+}).start()
 `;

@@ -166,6 +166,8 @@ export async function resolveSavedObjects(
   // exist. We will provide a way for the user to manually select a new index pattern for those
   // saved objects.
   const conflictedIndexPatterns = [];
+  // Keep a record of any objects which fail to import for unknown reasons.
+  const failedImports = [];
   // It's possible to have saved objects that link to saved searches which then link to index patterns
   // and those could error out, but the error comes as an index pattern not found error. We can't resolve
   // those the same as way as normal index pattern not found errors, but when those are fixed, it's very
@@ -179,13 +181,15 @@ export async function resolveSavedObjects(
       if (await importDocument(obj, searchDoc, overwriteAll)) {
         importedObjectCount++;
       }
-    } catch (err) {
-      if (err instanceof SavedObjectNotFound) {
-        if (err.savedObjectType === 'index-pattern') {
+    } catch (error) {
+      if (error instanceof SavedObjectNotFound) {
+        if (error.savedObjectType === 'index-pattern') {
           conflictedIndexPatterns.push({ obj, doc: searchDoc });
         } else {
           conflictedSearchDocs.push(searchDoc);
         }
+      } else {
+        failedImports.push({ obj, error });
       }
     }
   });
@@ -197,15 +201,17 @@ export async function resolveSavedObjects(
       if (await importDocument(obj, otherDoc, overwriteAll)) {
         importedObjectCount++;
       }
-    } catch (err) {
-      if (err instanceof SavedObjectNotFound) {
-        if (err.savedObjectType === 'index-pattern') {
+    } catch (error) {
+      if (error instanceof SavedObjectNotFound) {
+        if (error.savedObjectType === 'index-pattern') {
           if (obj.savedSearchId) {
             conflictedSavedObjectsLinkedToSavedSearches.push(obj);
           } else {
             conflictedIndexPatterns.push({ obj, doc: otherDoc });
           }
         }
+      } else {
+        failedImports.push({ obj, error });
       }
     }
   });
@@ -215,5 +221,6 @@ export async function resolveSavedObjects(
     conflictedSavedObjectsLinkedToSavedSearches,
     conflictedSearchDocs,
     importedObjectCount,
+    failedImports,
   };
 }

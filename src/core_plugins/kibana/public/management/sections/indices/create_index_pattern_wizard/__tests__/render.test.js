@@ -22,6 +22,12 @@ const unmountComponentAtNode = jest.fn();
 
 jest.doMock('react-dom', () => ({ render, unmountComponentAtNode }));
 
+jest.mock('ui/chrome', () => ({
+  getUiSettingsClient: () => ({
+    get: () => '',
+  }),
+}));
+
 const { renderCreateIndexPatternWizard, destroyCreateIndexPatternWizard } = require('../render');
 
 describe('CreateIndexPatternWizardRender', () => {

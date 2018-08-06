@@ -12,6 +12,7 @@ import {
   isTimeSeriesViewJob,
   isTimeSeriesViewDetector,
   isTimeSeriesViewFunction,
+  getPartitioningFieldNames,
   isModelPlotEnabled,
   isJobVersionGte,
   mlFunctionToESAggregation,
@@ -70,7 +71,7 @@ describe('ML - job utils', () => {
         analysis_config: {
           detectors: [
             { 'function': 'high_count', 'partition_field_name': 'status', 'detector_description': 'High count status code' },
-            { 'function': 'rare', 'by_field_name': 'status', 'over_field_name': 'clientip', 'detector_description': 'Rare status code' }
+            { 'function': 'freq_rare', 'by_field_name': 'uri', 'over_field_name': 'clientip', 'detector_description': 'Freq rare URI' }
           ]
         }
       };
@@ -82,7 +83,7 @@ describe('ML - job utils', () => {
       const job = {
         analysis_config: {
           detectors: [
-            { 'function': 'rare', 'by_field_name': 'status', 'over_field_name': 'clientip', 'detector_description': 'Rare status code' },
+            { 'function': 'varp', 'by_field_name': 'responsetime', 'detector_description': 'Varp responsetime' },
             { 'function': 'freq_rare', 'by_field_name': 'uri', 'over_field_name': 'clientip', 'detector_description': 'Freq rare URI' }
           ]
         }
@@ -184,10 +185,10 @@ describe('ML - job utils', () => {
       expect(isTimeSeriesViewFunction('non_null_sum')).to.be(true);
       expect(isTimeSeriesViewFunction('low_non_null_sum')).to.be(true);
       expect(isTimeSeriesViewFunction('high_non_null_sum')).to.be(true);
+      expect(isTimeSeriesViewFunction('rare')).to.be(true);
     });
 
     it('returns false for expected functions', () => {
-      expect(isTimeSeriesViewFunction('rare')).to.be(false);
       expect(isTimeSeriesViewFunction('freq_rare')).to.be(false);
       expect(isTimeSeriesViewFunction('info_content')).to.be(false);
       expect(isTimeSeriesViewFunction('low_info_content')).to.be(false);
@@ -198,6 +199,68 @@ describe('ML - job utils', () => {
       expect(isTimeSeriesViewFunction('time_of_day')).to.be(false);
       expect(isTimeSeriesViewFunction('time_of_week')).to.be(false);
       expect(isTimeSeriesViewFunction('lat_long')).to.be(false);
+    });
+  });
+
+  describe('getPartitioningFieldNames', () => {
+    const job = {
+      analysis_config: {
+        detectors: [
+          {
+            function: 'count',
+            detector_description: 'count'
+          },
+          {
+            function: 'count',
+            partition_field_name: 'clientip',
+            detector_description: 'Count by clientip'
+          },
+          {
+            function: 'freq_rare',
+            by_field_name: 'uri',
+            over_field_name: 'clientip',
+            detector_description: 'Freq rare URI'
+          },
+          {
+            function: 'sum',
+            field_name: 'bytes',
+            by_field_name: 'uri',
+            over_field_name: 'clientip',
+            partition_field_name: 'method',
+            detector_description: 'sum bytes'
+          },
+        ]
+      }
+    };
+
+    it('returns empty array for a detector with no partitioning fields', () => {
+      const resp = getPartitioningFieldNames(job, 0);
+      expect(resp).to.be.an('array');
+      expect(resp).to.be.empty();
+    });
+
+    it('returns expected array for a detector with a partition field', () => {
+      const resp = getPartitioningFieldNames(job, 1);
+      expect(resp).to.be.an('array');
+      expect(resp).to.have.length(1);
+      expect(resp).to.contain('clientip');
+    });
+
+    it('returns expected array for a detector with by and over fields', () => {
+      const resp = getPartitioningFieldNames(job, 2);
+      expect(resp).to.be.an('array');
+      expect(resp).to.have.length(2);
+      expect(resp).to.contain('uri');
+      expect(resp).to.contain('clientip');
+    });
+
+    it('returns expected array for a detector with partition, by and over fields', () => {
+      const resp = getPartitioningFieldNames(job, 3);
+      expect(resp).to.be.an('array');
+      expect(resp).to.have.length(3);
+      expect(resp).to.contain('uri');
+      expect(resp).to.contain('clientip');
+      expect(resp).to.contain('method');
     });
   });
 
@@ -310,7 +373,7 @@ describe('ML - job utils', () => {
       expect(mlFunctionToESAggregation('non_null_sum')).to.be('sum');
       expect(mlFunctionToESAggregation('low_non_null_sum')).to.be('sum');
       expect(mlFunctionToESAggregation('high_non_null_sum')).to.be('sum');
-      expect(mlFunctionToESAggregation('rare')).to.be(null);
+      expect(mlFunctionToESAggregation('rare')).to.be('count');
       expect(mlFunctionToESAggregation('freq_rare')).to.be(null);
       expect(mlFunctionToESAggregation('info_content')).to.be(null);
       expect(mlFunctionToESAggregation('low_info_content')).to.be(null);

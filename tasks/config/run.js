@@ -153,6 +153,17 @@ module.exports = function (grunt) {
       ],
     },
 
+    panelActionTests: {
+      cmd: process.execPath,
+      args: [
+        'scripts/functional_tests',
+        '--config', 'test/panel_actions/config.js',
+        '--esFrom', 'source',
+        '--bail',
+        '--debug',
+      ],
+    },
+
     functionalTests: {
       cmd: process.execPath,
       args: [
@@ -175,17 +186,6 @@ module.exports = function (grunt) {
         '--bail',
         '--debug',
         '--kibana-install-dir', `./build/oss/kibana-${PKG_VERSION}-${process.platform}-x86_64`,
-        '--',
-        '--server.maxPayloadBytes=1648576',
-      ],
-    },
-
-    functionalTestsDevServer: {
-      cmd: process.execPath,
-      args: [
-        'scripts/functional_tests_server',
-        '--config', 'test/functional/config.js',
-        '--debug',
         '--',
         '--server.maxPayloadBytes=1648576',
       ],

@@ -3,7 +3,7 @@
 exports[`SourceFiltersTable should add a filter 1`] = `
 <div>
   <header />
-  <AddFilter
+  <InjectIntl(AddFilterComponent)
     onAddFilter={[Function]}
   />
   <eui-spacer
@@ -50,7 +50,7 @@ exports[`SourceFiltersTable should add a filter 1`] = `
 exports[`SourceFiltersTable should filter based on the query bar 1`] = `
 <div>
   <header />
-  <AddFilter
+  <InjectIntl(AddFilterComponent)
     onAddFilter={[Function]}
   />
   <eui-spacer
@@ -91,7 +91,7 @@ exports[`SourceFiltersTable should filter based on the query bar 1`] = `
 exports[`SourceFiltersTable should remove a filter 1`] = `
 <div>
   <header />
-  <AddFilter
+  <InjectIntl(AddFilterComponent)
     onAddFilter={[Function]}
   />
   <eui-spacer
@@ -140,7 +140,7 @@ exports[`SourceFiltersTable should remove a filter 1`] = `
 exports[`SourceFiltersTable should render normally 1`] = `
 <div>
   <header />
-  <AddFilter
+  <InjectIntl(AddFilterComponent)
     onAddFilter={[Function]}
   />
   <eui-spacer
@@ -189,7 +189,7 @@ exports[`SourceFiltersTable should render normally 1`] = `
 exports[`SourceFiltersTable should should a loading indicator when saving 1`] = `
 <div>
   <header />
-  <AddFilter
+  <InjectIntl(AddFilterComponent)
     onAddFilter={[Function]}
   />
   <eui-spacer
@@ -222,53 +222,78 @@ exports[`SourceFiltersTable should should a loading indicator when saving 1`] = 
 `;
 
 exports[`SourceFiltersTable should show a delete modal 1`] = `
-<div>
-  <header />
-  <AddFilter
-    onAddFilter={[Function]}
-  />
-  <eui-spacer
-    size="l"
-  />
-  <Table
-    deleteFilter={[Function]}
-    fieldWildcardMatcher={[Function]}
-    indexPattern={
-      Object {
-        "sourceFilters": Array [
+Object {
+  "component": <div>
+    <header />
+    <InjectIntl(AddFilterComponent)
+      onAddFilter={[Function]}
+    />
+    <eui-spacer
+      size="l"
+    />
+    <Table
+      deleteFilter={[Function]}
+      fieldWildcardMatcher={[Function]}
+      indexPattern={
+        Object {
+          "sourceFilters": Array [
+            Object {
+              "value": "tim*",
+            },
+          ],
+        }
+      }
+      isSaving={false}
+      items={
+        Array [
           Object {
+            "clientId": 1,
             "value": "tim*",
           },
-        ],
+        ]
       }
-    }
-    isSaving={false}
-    items={
-      Array [
-        Object {
-          "clientId": 1,
-          "value": "tim*",
-        },
-      ]
-    }
-    saveFilter={[Function]}
-  />
-  <eui-overlay-mask>
-    <eui-confirm-modal
-      cancelButtonText="Cancel"
-      confirmButtonText="Delete"
-      onCancel={[Function]}
-      onConfirm={[Function]}
-      title="Delete source filter 'tim*'?"
+      saveFilter={[Function]}
     />
-  </eui-overlay-mask>
-</div>
+    <eui-overlay-mask>
+      <eui-confirm-modal
+        cancelButtonText="Cancel"
+        confirmButtonText="Delete"
+        onCancel={[Function]}
+        onConfirm={[Function]}
+        title="Delete source filter '{value}'?"
+      />
+    </eui-overlay-mask>
+  </div>,
+  "i18n": Array [
+    Array [
+      Object {
+        "defaultMessage": "Delete source filter '{value}'?",
+        "id": "kbn.management.editIndexPattern.source.deleteSourceFilterLabel",
+      },
+      Object {
+        "value": "tim*",
+      },
+    ],
+    Array [
+      Object {
+        "defaultMessage": "Cancel",
+        "id": "kbn.management.editIndexPattern.source.deleteFilter.cancelButton",
+      },
+    ],
+    Array [
+      Object {
+        "defaultMessage": "Delete",
+        "id": "kbn.management.editIndexPattern.source.deleteFilter.deleteButton",
+      },
+    ],
+  ],
+}
 `;
 
 exports[`SourceFiltersTable should update a filter 1`] = `
 <div>
   <header />
-  <AddFilter
+  <InjectIntl(AddFilterComponent)
     onAddFilter={[Function]}
   />
   <eui-spacer

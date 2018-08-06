@@ -22,7 +22,7 @@ export { AnyType } from './any_type';
 export { ArrayOptions, ArrayType } from './array_type';
 export { BooleanType } from './boolean_type';
 export { ByteSizeOptions, ByteSizeType } from './byte_size_type';
-export { ConditionalType } from './conditional_type';
+export { ConditionalType, ConditionalTypeValue } from './conditional_type';
 export { DurationOptions, DurationType } from './duration_type';
 export { LiteralType } from './literal_type';
 export { MaybeType } from './maybe_type';

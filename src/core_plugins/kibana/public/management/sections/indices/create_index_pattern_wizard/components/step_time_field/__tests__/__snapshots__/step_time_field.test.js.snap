@@ -44,7 +44,11 @@ exports[`StepTimeField should render a loading state when creating the index pat
       <EuiText
         grow={true}
       >
-        Creating index pattern...
+        <FormattedMessage
+          defaultMessage="Creating index pattern..."
+          id="kbn.management.createIndexPattern.stepTime.creatingLabel"
+          values={Object {}}
+        />
       </EuiText>
     </EuiFlexItem>
   </EuiFlexGroup>

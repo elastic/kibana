@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import React, { Fragment } from 'react';
+import React, { Component, Fragment } from 'react';
 import PropTypes from 'prop-types';
 import { Synopsis } from './synopsis';
 import { AddData } from './add_data';
@@ -33,13 +33,53 @@ import {
   EuiFlexItem,
   EuiFlexGrid,
   EuiText,
+  EuiPageBody,
 } from '@elastic/eui';
 
 import { FeatureCatalogueCategory } from 'ui/registry/feature_catalogue';
 
-export function Home({ addBasePath, directories, apmUiEnabled, recentlyAccessed }) {
+export class Home extends Component {
 
-  const renderDirectories = (category) => {
+  state = {
+    isNewKibanaInstance: false,
+  }
+
+  componentWillUnmount() {
+    this._isMounted = false;
+  }
+
+  componentDidMount() {
+    this._isMounted = true;
+    this.fetchIsNewKibanaInstance();
+  }
+
+  fetchIsNewKibanaInstance = async () => {
+    let resp;
+    try {
+      resp = await this.props.find({
+        type: 'index-pattern',
+        fields: ['title'],
+        search: `*`,
+        search_fields: ['title'],
+        perPage: 1
+      });
+    } catch (error) {
+      // ignore error - find is not critical for page functioning,
+      // just used to add some extra styling when there are no index-patterns
+      return;
+    }
+
+    if (!this._isMounted) {
+      return;
+    }
+
+    this.setState({
+      isNewKibanaInstance: resp.total === 0
+    });
+  }
+
+  renderDirectories = (category) => {
+    const { addBasePath, directories } = this.props;
     return directories
       .filter((directory) => {
         return directory.showOnHomePage && directory.category === category;
@@ -58,78 +98,85 @@ export function Home({ addBasePath, directories, apmUiEnabled, recentlyAccessed 
       });
   };
 
-  let recentlyAccessedPanel;
-  if (recentlyAccessed.length > 0) {
-    recentlyAccessedPanel = (
-      <Fragment>
-        <RecentlyAccessed
-          recentlyAccessed={recentlyAccessed}
-        />
-        <EuiSpacer size="l" />
-      </Fragment>
+
+  render() {
+    const { apmUiEnabled, recentlyAccessed } = this.props;
+
+    let recentlyAccessedPanel;
+    if (recentlyAccessed.length > 0) {
+      recentlyAccessedPanel = (
+        <Fragment>
+          <RecentlyAccessed
+            recentlyAccessed={recentlyAccessed}
+          />
+          <EuiSpacer size="l" />
+        </Fragment>
+      );
+    }
+
+    return (
+      <EuiPage className="home">
+        <EuiPageBody>
+
+          {recentlyAccessedPanel}
+
+          <AddData
+            apmUiEnabled={apmUiEnabled}
+            isNewKibanaInstance={this.state.isNewKibanaInstance}
+          />
+
+          <EuiSpacer size="l" />
+
+          <EuiFlexGroup>
+            <EuiFlexItem>
+              <EuiPanel paddingSize="l">
+                <EuiTitle>
+                  <h3>
+                    Visualize and Explore Data
+                  </h3>
+                </EuiTitle>
+                <EuiSpacer size="m"/>
+                <EuiFlexGrid columns={2}>
+                  { this.renderDirectories(FeatureCatalogueCategory.DATA) }
+                </EuiFlexGrid>
+              </EuiPanel>
+            </EuiFlexItem>
+            <EuiFlexItem>
+              <EuiPanel paddingSize="l">
+                <EuiTitle>
+                  <h3>
+                    Manage and Administer the Elastic Stack
+                  </h3>
+                </EuiTitle>
+                <EuiSpacer size="m"/>
+                <EuiFlexGrid columns={2}>
+                  { this.renderDirectories(FeatureCatalogueCategory.ADMIN) }
+                </EuiFlexGrid>
+              </EuiPanel>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+
+          <EuiSpacer size="l" />
+
+          <EuiFlexGroup justifyContent="center">
+            <EuiFlexItem grow={false}>
+              <EuiText>
+                <p>
+                  Didn’t find what you were looking for?
+                </p>
+              </EuiText>
+              <EuiSpacer size="s" />
+              <EuiButton
+                href="#/home/feature_directory"
+              >
+                View full directory of Kibana plugins
+              </EuiButton>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiPageBody>
+      </EuiPage>
     );
   }
-
-  return (
-    <EuiPage className="home">
-
-      {recentlyAccessedPanel}
-
-      <AddData
-        apmUiEnabled={apmUiEnabled}
-      />
-
-      <EuiSpacer size="l" />
-
-      <EuiFlexGroup>
-        <EuiFlexItem>
-          <EuiPanel paddingSize="l">
-            <EuiTitle>
-              <h3>
-                Visualize and Explore Data
-              </h3>
-            </EuiTitle>
-            <EuiSpacer size="m"/>
-            <EuiFlexGrid columns={2}>
-              { renderDirectories(FeatureCatalogueCategory.DATA) }
-            </EuiFlexGrid>
-          </EuiPanel>
-        </EuiFlexItem>
-        <EuiFlexItem>
-          <EuiPanel paddingSize="l">
-            <EuiTitle>
-              <h3>
-                Manage and Administer the Elastic Stack
-              </h3>
-            </EuiTitle>
-            <EuiSpacer size="m"/>
-            <EuiFlexGrid columns={2}>
-              { renderDirectories(FeatureCatalogueCategory.ADMIN) }
-            </EuiFlexGrid>
-          </EuiPanel>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-
-      <EuiSpacer size="l" />
-
-      <EuiFlexGroup justifyContent="center">
-        <EuiFlexItem grow={false}>
-          <EuiText>
-            <p>
-              Didn’t find what you were looking for?
-            </p>
-          </EuiText>
-          <EuiSpacer size="s" />
-          <EuiButton
-            href="#/home/feature_directory"
-          >
-            View full directory of Kibana plugins
-          </EuiButton>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-
-    </EuiPage>
-  );
 }
 
 Home.propTypes = {
@@ -145,4 +192,5 @@ Home.propTypes = {
   })),
   apmUiEnabled: PropTypes.bool.isRequired,
   recentlyAccessed: PropTypes.arrayOf(recentlyAccessedShape).isRequired,
+  find: PropTypes.func.isRequired,
 };

@@ -17,15 +17,13 @@
  * under the License.
  */
 
-import { AngularI18n } from '@kbn/i18n';
 import { uiModules } from 'ui/modules';
 import { metadata } from 'ui/metadata';
-
-const {
+import {
   i18nProvider,
   i18nFilter,
   i18nDirective,
-} = AngularI18n;
+} from '@kbn/i18n/angular';
 
 uiModules.get('i18n')
   .provider('i18n', i18nProvider)

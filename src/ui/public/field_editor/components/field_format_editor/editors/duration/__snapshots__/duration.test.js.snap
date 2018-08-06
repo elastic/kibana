@@ -8,7 +8,13 @@ exports[`DurationFormatEditor should render human readable output normally 1`] =
     fullWidth={false}
     hasEmptyLabelSpace={false}
     isInvalid={false}
-    label="Input format"
+    label={
+      <FormattedMessage
+        defaultMessage="Input format"
+        id="common.ui.fieldEditor.duration.inputFormatLabel"
+        values={Object {}}
+      />
+    }
   >
     <EuiSelect
       compressed={false}
@@ -32,7 +38,13 @@ exports[`DurationFormatEditor should render human readable output normally 1`] =
     fullWidth={false}
     hasEmptyLabelSpace={false}
     isInvalid={false}
-    label="Output format"
+    label={
+      <FormattedMessage
+        defaultMessage="Output format"
+        id="common.ui.fieldEditor.duration.outputFormatLabel"
+        values={Object {}}
+      />
+    }
   >
     <EuiSelect
       compressed={false}
@@ -55,7 +67,7 @@ exports[`DurationFormatEditor should render human readable output normally 1`] =
       }
     />
   </EuiFormRow>
-  <FormatEditorSamples
+  <InjectIntl(FormatEditorSamplesComponent)
     samples={
       Array [
         Object {
@@ -108,7 +120,13 @@ exports[`DurationFormatEditor should render non-human readable output normally 1
     fullWidth={false}
     hasEmptyLabelSpace={false}
     isInvalid={false}
-    label="Input format"
+    label={
+      <FormattedMessage
+        defaultMessage="Input format"
+        id="common.ui.fieldEditor.duration.inputFormatLabel"
+        values={Object {}}
+      />
+    }
   >
     <EuiSelect
       compressed={false}
@@ -132,7 +150,13 @@ exports[`DurationFormatEditor should render non-human readable output normally 1
     fullWidth={false}
     hasEmptyLabelSpace={false}
     isInvalid={false}
-    label="Output format"
+    label={
+      <FormattedMessage
+        defaultMessage="Output format"
+        id="common.ui.fieldEditor.duration.outputFormatLabel"
+        values={Object {}}
+      />
+    }
   >
     <EuiSelect
       compressed={false}
@@ -161,7 +185,13 @@ exports[`DurationFormatEditor should render non-human readable output normally 1
     fullWidth={false}
     hasEmptyLabelSpace={false}
     isInvalid={false}
-    label="Decimal places"
+    label={
+      <FormattedMessage
+        defaultMessage="Decimal places"
+        id="common.ui.fieldEditor.duration.decimalPlacesLabel"
+        values={Object {}}
+      />
+    }
   >
     <EuiFieldNumber
       compressed={false}
@@ -173,7 +203,7 @@ exports[`DurationFormatEditor should render non-human readable output normally 1
       onChange={[Function]}
     />
   </EuiFormRow>
-  <FormatEditorSamples
+  <InjectIntl(FormatEditorSamplesComponent)
     samples={
       Array [
         Object {
