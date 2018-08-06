@@ -160,7 +160,7 @@ export default function ({ getService, getPageObjects }) {
     });
 
     it('should correctly filter for applied time filter on the main timefield', async () => {
-      await filterBar.addFilter('@timestamp', 'is between', ['2015-09-19', '2015-09-21']);
+      await filterBar.addFilter('@timestamp', 'is between', '2015-09-19', '2015-09-21');
       await PageObjects.header.waitUntilLoadingHasFinished();
       await visualization.waitForRender();
       const data = await PageObjects.visualize.getTableVisData();
