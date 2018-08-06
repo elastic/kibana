@@ -4,6 +4,14 @@
 @import (reference) "~ui/styles/bootstrap/bootstrap";
 @import "./react-input-range";
 
+// NOTE: This is an experiment to see if functional tests are less flaky with animations disabled.
+* {
+  -webkit-animation: none !important;
+  animation: none !important;
+  -webkit-transition: none !important;
+  transition: none !important;
+}
+
 .small {
   font-size: 0.9em !important;
 }
