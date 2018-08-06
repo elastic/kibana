@@ -379,7 +379,7 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
     }
 
     async getCountOfDashboardsInListingTable() {
-      const dashboardTitles = await find.allByCssSelector('.dashboardLink');
+      const dashboardTitles = await find.allByCssSelector('[data-test-subj^="dashboardListingTitleLink"]');
       return dashboardTitles.length;
     }
 
