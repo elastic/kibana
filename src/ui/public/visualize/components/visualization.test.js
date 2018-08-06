@@ -43,7 +43,7 @@ class VisualizationStub {
 describe('<Visualization/>', () => {
 
   const visData = {
-    hits: { total: 1 }
+    hits: 1
   };
 
   const uiState = {
@@ -63,19 +63,18 @@ describe('<Visualization/>', () => {
         return this.uiState;
       },
       params: {
-
       },
       type: {
         title: 'new vis',
         requiresSearch: true,
-        handleNoResults: true,
+        handleNoResults: false,
         visualization: VisualizationStub
       }
     };
   });
 
   it('should display no result message when length of data is 0', () => {
-    const data = { hits: { total: 0 } };
+    const data = { rows: [] };
     const wrapper = render(<Visualization vis={vis} visData={data} listenOnChange={true} uiState={uiState} />);
     expect(wrapper.text()).toBe('No results found');
   });
@@ -87,7 +86,7 @@ describe('<Visualization/>', () => {
 
   it('should call onInit when rendering no data', () => {
     const spy = jest.fn();
-    const noData = { hits: { total: 0 } };
+    const noData = { hits: 0 };
     mount(
       <Visualization
         vis={vis}

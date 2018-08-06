@@ -43,22 +43,18 @@ describe('makeFakeXAspect', function () {
 
     expect(aspect)
       .to.have.property('i', -1)
-      .and.have.property('agg')
-      .and.have.property('col');
+      .and.have.property('aggConfig')
+      .and.have.property('title');
 
-    expect(aspect.agg)
+    expect(aspect.aggConfig)
       .to.be.an(AggConfig)
       .and.to.have.property('type');
 
-    expect(aspect.agg.type)
+    expect(aspect.aggConfig.type)
       .to.be.an(AggType)
       .and.to.have.property('name', 'all')
       .and.to.have.property('title', 'All docs')
       .and.to.have.property('hasNoDsl', true);
 
-    expect(aspect.col)
-      .to.be.an('object')
-      .and.to.have.property('aggConfig', aspect.agg)
-      .and.to.have.property('label', aspect.agg.makeLabel());
   });
 });

@@ -39,23 +39,27 @@ describe('TagCloudVisualizationTest', function () {
   let imageComparator;
 
   const dummyTableGroup = {
-    tables: [
-      {
-        columns: [{
-          'aggConfig': {
-            'id': '2',
-            'enabled': true,
-            'type': 'terms',
-            'schema': 'segment',
-            'params': { 'field': 'geo.dest', 'size': 5, 'order': 'desc', 'orderBy': '1' },
-            fieldFormatter: () => (x => x)
-          }, 'title': 'geo.dest: Descending'
-        }, {
-          'aggConfig': { 'id': '1', 'enabled': true, 'type': 'count', 'schema': 'metric', 'params': {} },
-          'title': 'Count'
-        }],
-        rows: [['CN', 26], ['IN', 17], ['US', 6], ['DE', 4], ['BR', 3]]
-      }
+    columns: [{
+      id: 'col-0',
+      'aggConfig': {
+        'id': '2',
+        'enabled': true,
+        'type': 'terms',
+        'schema': 'segment',
+        'params': { 'field': 'geo.dest', 'size': 5, 'order': 'desc', 'orderBy': '1' },
+        fieldFormatter: () => (x => x)
+      }, 'title': 'geo.dest: Descending'
+    }, {
+      id: 'col-1',
+      'aggConfig': { 'id': '1', 'enabled': true, 'type': 'count', 'schema': 'metric', 'params': {} },
+      'title': 'Count'
+    }],
+    rows: [
+      { 'col-0': 'CN', 'col-1': 26 },
+      { 'col-0': 'IN', 'col-1': 17 },
+      { 'col-0': 'US', 'col-1': 6 },
+      { 'col-0': 'DE', 'col-1': 4 },
+      { 'col-0': 'BR', 'col-1': 3 }
     ]
   };
 

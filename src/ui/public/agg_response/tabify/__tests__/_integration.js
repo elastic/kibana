@@ -25,7 +25,7 @@ import { tabifyAggResponse } from '../tabify';
 import { VisProvider } from '../../../vis';
 import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
 
-describe('tabifyAggResponse Integration', function () {
+describe.skip('tabifyAggResponse Integration', function () {
   let Vis;
   let indexPattern;
 

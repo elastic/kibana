@@ -269,10 +269,11 @@ describe('Vis Class', function () {
 
       data = {
         columns: [{
+          id: 'col-0',
           title: 'test',
           aggConfig
         }],
-        rows: [['US']]
+        rows: [{ 'col-0': 'US' }]
       };
     });
 

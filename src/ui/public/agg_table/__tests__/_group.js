@@ -21,7 +21,7 @@ import $ from 'jquery';
 import ngMock from 'ng_mock';
 import expect from 'expect.js';
 import fixtures from 'fixtures/fake_hierarchical_data';
-import { tabifyAggResponse } from '../../agg_response/tabify/tabify';
+import { TableResponseHandlerProvider } from '../../vis/response_handlers/table';
 import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
 import { VisProvider } from '../../vis';
 describe('AggTableGroup Directive', function () {
@@ -30,9 +30,11 @@ describe('AggTableGroup Directive', function () {
   let $compile;
   let Vis;
   let indexPattern;
+  let tableAggResponse;
 
   beforeEach(ngMock.module('kibana'));
   beforeEach(ngMock.inject(function ($injector, Private) {
+    tableAggResponse = Private(TableResponseHandlerProvider).handler;
     indexPattern = Private(FixturesStubbedLogstashIndexPatternProvider);
     Vis = Private(VisProvider);
 
@@ -49,9 +51,9 @@ describe('AggTableGroup Directive', function () {
   });
 
 
-  it('renders a simple split response properly', function () {
+  it('renders a simple split response properly', async function () {
     const vis = new Vis(indexPattern, 'table');
-    $scope.group = tabifyAggResponse(vis.getAggConfig(), fixtures.metricOnly);
+    $scope.group = await tableAggResponse(vis, fixtures.metricOnly);
     $scope.sort = {
       columnIndex: null,
       direction: null
@@ -79,7 +81,7 @@ describe('AggTableGroup Directive', function () {
     expect($subTables.length).to.be(0);
   });
 
-  it('renders a complex response properly', function () {
+  it('renders a complex response properly', async function () {
     const vis = new Vis(indexPattern, {
       type: 'pie',
       aggs: [
@@ -93,7 +95,7 @@ describe('AggTableGroup Directive', function () {
       agg.id = 'agg_' + (i + 1);
     });
 
-    const group = $scope.group = tabifyAggResponse(vis.getAggConfig(), fixtures.threeTermBuckets);
+    const group = $scope.group = await tableAggResponse(vis, fixtures.threeTermBuckets);
     const $el = $('<kbn-agg-table-group group="group"></kbn-agg-table-group>');
     $compile($el)($scope);
     $scope.$digest();

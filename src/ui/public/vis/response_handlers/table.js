@@ -29,7 +29,9 @@ const TableResponseHandlerProvider = function () {
     handler: function (vis, response) {
       return new Promise((resolve) => {
         const converted = { tables: [] };
-        const table = tabifyAggResponse(vis.getAggConfig(), response);
+        const table = tabifyAggResponse(vis.getAggConfig(), response, {
+          minimalColumns: !vis.isHierarchical()
+        });
 
         const splitColumn = table.columns.find(column => column.aggConfig.schema.name === 'split');
         if (splitColumn) {
@@ -41,7 +43,7 @@ const TableResponseHandlerProvider = function () {
             const splitValue = row[splitColumn.id];
             const splitColumnIndex = table.columns.findIndex(column => column === splitColumn);
 
-            if (!splitMap[splitValue]) {
+            if (!splitMap.hasOwnProperty(splitValue)) {
               splitMap[splitValue] = splitIndex++;
               converted.tables.push({
                 aggConfig: splitAgg,

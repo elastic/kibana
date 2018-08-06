@@ -108,22 +108,26 @@ describe('RegionMapsVisualizationTests', function () {
   const _makeJsonAjaxCallOld = ChoroplethLayer.prototype._makeJsonAjaxCall;
 
   const dummyTableGroup = {
-    tables: [
-      {
-        columns: [{
-          'aggConfig': {
-            'id': '2',
-            'enabled': true,
-            'type': 'terms',
-            'schema': 'segment',
-            'params': { 'field': 'geo.dest', 'size': 5, 'order': 'desc', 'orderBy': '1' }
-          }, 'title': 'geo.dest: Descending'
-        }, {
-          'aggConfig': { 'id': '1', 'enabled': true, 'type': 'count', 'schema': 'metric', 'params': {} },
-          'title': 'Count'
-        }],
-        rows: [['CN', 26], ['IN', 17], ['US', 6], ['DE', 4], ['BR', 3]]
-      }
+    columns: [{
+      'id': 'col-0',
+      'aggConfig': {
+        'id': '2',
+        'enabled': true,
+        'type': 'terms',
+        'schema': 'segment',
+        'params': { 'field': 'geo.dest', 'size': 5, 'order': 'desc', 'orderBy': '1' }
+      }, 'title': 'geo.dest: Descending'
+    }, {
+      'id': 'col-1',
+      'aggConfig': { 'id': '1', 'enabled': true, 'type': 'count', 'schema': 'metric', 'params': {} },
+      'title': 'Count'
+    }],
+    rows: [
+      { 'col-0': 'CN', 'col-1': 26 },
+      { 'col-0': 'IN', 'col-1': 17 },
+      { 'col-0': 'US', 'col-1': 6 },
+      { 'col-0': 'DE', 'col-1': 4 },
+      { 'col-0': 'BR', 'col-1': 3 }
     ]
   };
 
@@ -293,7 +297,7 @@ describe('RegionMapsVisualizationTests', function () {
       });
 
       const newTableGroup = _.cloneDeep(dummyTableGroup);
-      newTableGroup.tables[0].rows.pop();//remove one shape
+      newTableGroup.rows.pop();//remove one shape
 
       await regionMapsVisualization.render(newTableGroup, {
         resize: false,
@@ -306,7 +310,7 @@ describe('RegionMapsVisualizationTests', function () {
 
 
       const anotherTableGroup = _.cloneDeep(newTableGroup);
-      anotherTableGroup.tables[0].rows.pop();//remove one shape
+      anotherTableGroup.rows.pop();//remove one shape
       domNode.style.width = '412px';
       domNode.style.height = '112px';
       await regionMapsVisualization.render(anotherTableGroup, {
@@ -336,7 +340,7 @@ describe('RegionMapsVisualizationTests', function () {
       });
 
       const newTableGroup = _.cloneDeep(dummyTableGroup);
-      newTableGroup.tables[0].rows.pop();//remove one shape
+      newTableGroup.rows.pop();//remove one shape
       vis.params.colorSchema = 'Blues';
       await regionMapsVisualization.render(newTableGroup, {
         resize: false,

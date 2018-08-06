@@ -58,8 +58,7 @@ describe('getAspects', function () {
     expect(aspect)
       .to.be.an('object')
       .and.have.property('i', i)
-      .and.have.property('agg', vis.aggs[i])
-      .and.have.property('col', table.columns[i]);
+      .and.have.property('aggConfig', vis.aggs[i]);
   }
 
   function init(group, x, y) {
@@ -150,13 +149,10 @@ describe('getAspects', function () {
     expect(aspects.x)
       .to.be.an('object')
       .and.have.property('i', -1)
-      .and.have.property('agg')
-      .and.have.property('col');
+      .and.have.property('aggConfig')
+      .and.have.property('title');
 
-    expect(aspects.x.agg).to.be.an(AggConfig);
-    expect(aspects.x.col)
-      .to.be.an('object')
-      .and.to.have.property('aggConfig', aspects.x.agg);
+    expect(aspects.x.aggConfig).to.be.an(AggConfig);
 
   });
 });
