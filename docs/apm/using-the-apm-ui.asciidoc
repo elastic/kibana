@@ -69,7 +69,7 @@ image::apm/images/apm-errors-watcher-assistant.png[Example view of the Watcher a
 
 [NOTE]
 ============
-This feature is in beta, and while we believe it's reasonable stable to use, we kindly ask that you https://discuss.elastic.co/c/apm[provide us feedback] if you encounter any issues to improve the feature before making it generally available.
+Please note this feature is in beta. We kindly ask that you https://discuss.elastic.co/c/apm[provide us feedback] if you experience any issues to improve the feature.
 ============
 
 The Machine Learning integration will initiate a new job predefined to calculate anomaly scores on response times on APM transactions. Once enabled, the response time graph will show the expected bounds from the Machine Learning job and annotate the graph once the anomaly score is >=75.
@@ -84,7 +84,7 @@ Jobs can be created per transaction type and based on the average response time.
 
 [NOTE]
 ============
-This feature is in beta, and while we believe it's reasonable stable to use, we kindly ask that you https://discuss.elastic.co/c/apm[provide us feedback] if you encounter any issues to improve the feature before making it generally available.
+Please note this feature is in beta. We kindly ask that you https://discuss.elastic.co/c/apm[provide us feedback] if you experience any issues to improve the feature.
 ============
 
 The query bar is a powerful data query feature. Similar to the query bar in {kibana-ref}/discover.html[Discover] it enables you to pass advanced queries on your data to filter on particular pieces of information that you're interested in. It comes with a handy autocomplete that helps find the fields and even provides suggestions to the data they include. The query bar is available on Services, Transaction and Errors views, and any input will persist as you move between them.
