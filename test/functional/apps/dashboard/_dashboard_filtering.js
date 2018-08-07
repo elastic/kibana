@@ -27,6 +27,7 @@ export default function ({ getService, getPageObjects }) {
   const dashboardExpect = getService('dashboardExpect');
   const queryBar = getService('queryBar');
   const dashboardAddPanel = getService('dashboardAddPanel');
+  const embeddable = getService('embeddable');
   const testSubjects = getService('testSubjects');
   const filterBar = getService('filterBar');
   const dashboardPanelActions = getService('dashboardPanelActions');
@@ -234,10 +235,13 @@ export default function ({ getService, getPageObjects }) {
         await queryBar.submitQuery();
 
         await PageObjects.header.waitUntilLoadingHasFinished();
-        await PageObjects.dashboard.waitForRenderComplete();
+
+        // We are on the visualize page, not dashboard, so can't use "PageObjects.dashboard.waitForRenderComplete();"
+        // as that expects an item with the `data-shared-items-count` tag.
+        await embeddable.waitForRender();
         await dashboardExpect.pieSliceCount(3);
 
-        await PageObjects.visualize.saveVisualization('Rendering-Test:-animal-sounds-pie');
+        await PageObjects.visualize.saveVisualization('Rendering Test: animal sounds pie');
         await PageObjects.header.clickDashboard();
         await PageObjects.header.waitUntilLoadingHasFinished();
         await PageObjects.dashboard.waitForRenderComplete();
@@ -247,7 +251,7 @@ export default function ({ getService, getPageObjects }) {
       it('Nested visualization filter pills filters data as expected', async () => {
         await dashboardPanelActions.clickEdit();
         await PageObjects.header.waitUntilLoadingHasFinished();
-        await PageObjects.dashboard.waitForRenderComplete();
+        await embeddable.waitForRender();
         await PageObjects.dashboard.filterOnPieSlice('grr');
         await PageObjects.header.waitUntilLoadingHasFinished();
         await dashboardExpect.pieSliceCount(1);

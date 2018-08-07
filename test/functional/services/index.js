@@ -31,4 +31,3 @@ export { EmbeddingProvider } from './embedding';
 export { ComboBoxProvider } from './combo_box';
 
 export * from './dashboard';
-export * from './visualize';
