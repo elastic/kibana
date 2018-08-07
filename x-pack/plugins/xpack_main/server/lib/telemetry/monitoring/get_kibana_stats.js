@@ -16,54 +16,67 @@ export function rollUpTotals(rolledUp, addOn, field) {
  * @param {Object} rawStats
  */
 export function getUsageStats(rawStats) {
-  const clusterIndexCache = [];
+  const clusterIndexCache = new Set();
   const rawStatsHits = get(rawStats, 'hits.hits', []);
-  const usageStatsByCluster = rawStatsHits.reduce((accum, currInstance) => {
+
+  // get usage stats per cluster / .kibana index
+  return rawStatsHits.reduce((accum, currInstance) => {
     const clusterUuid = get(currInstance, '_source.cluster_uuid');
     const currUsage = get(currInstance, '_source.kibana_stats.usage', {});
     const clusterIndexCombination = clusterUuid + currUsage.index;
 
-    // add usage data to the result if this cluster/index has not been processed yet
-    if (isEmpty(currUsage) || clusterIndexCache.includes(clusterIndexCombination)) {
+    // return early if usage data is empty or if this cluster/index has already been processed
+    if (isEmpty(currUsage) || clusterIndexCache.has(clusterIndexCombination)) {
       return accum;
     }
+    clusterIndexCache.add(clusterIndexCombination);
 
+    const {
+      dashboard,
+      visualization,
+      search,
+      index_pattern: indexPattern,
+      graph_workspace: graphWorkspace,
+      timelion_sheet: timelionSheet,
+      index, // eslint-disable-line no-unused-vars
+      ...rest
+    } = currUsage;
+
+    // this cluster/index has not been processed yet
+    let stats;
     const rolledUpStats = get(accum, clusterUuid);
     if (rolledUpStats) {
       // this cluster has been seen, but this index hasn't
-      // process the usage stats for the unique index of this cluster
-      return {
-        ...accum,
-        [clusterUuid]: {
-          dashboard: rollUpTotals(rolledUpStats, currUsage, 'dashboard'),
-          visualization: rollUpTotals(rolledUpStats, currUsage, 'visualization'),
-          search: rollUpTotals(rolledUpStats, currUsage, 'search'),
-          index_pattern: rollUpTotals(rolledUpStats, currUsage, 'index_pattern'),
-          graph_workspace: rollUpTotals(rolledUpStats, currUsage, 'graph_workspace'),
-          timelion_sheet: rollUpTotals(rolledUpStats, currUsage, 'timelion_sheet'),
-          indices: ++rolledUpStats.indices
-        }
+      // roll-up the usage stats for the unique index of this cluster
+      stats = {
+        dashboard: rollUpTotals(rolledUpStats, currUsage, 'dashboard'),
+        visualization: rollUpTotals(rolledUpStats, currUsage, 'visualization'),
+        search: rollUpTotals(rolledUpStats, currUsage, 'search'),
+        index_pattern: rollUpTotals(rolledUpStats, currUsage, 'index_pattern'),
+        graph_workspace: rollUpTotals(rolledUpStats, currUsage, 'graph_workspace'),
+        timelion_sheet: rollUpTotals(rolledUpStats, currUsage, 'timelion_sheet'),
+        indices: ++rolledUpStats.indices
+      };
+    } else {
+      stats = {
+        dashboard: dashboard,
+        visualization: visualization,
+        search: search,
+        index_pattern: indexPattern,
+        graph_workspace: graphWorkspace,
+        timelion_sheet: timelionSheet,
+        indices: 1
       };
     }
 
-    clusterIndexCache.push(clusterIndexCombination);
-
-    // add the usage stats for the unique cluster
     return {
       ...accum,
       [clusterUuid]: {
-        dashboard: currUsage.dashboard,
-        visualization: currUsage.visualization,
-        search: currUsage.search,
-        index_pattern: currUsage.index_pattern,
-        graph_workspace: currUsage.graph_workspace,
-        timelion_sheet: currUsage.timelion_sheet,
-        indices: 1
+        ...stats,
+        plugins: rest
       }
     };
   }, {});
-
-  return usageStatsByCluster;
 }
 
 export function combineStats(highLevelStats, usageStats = {}) {
