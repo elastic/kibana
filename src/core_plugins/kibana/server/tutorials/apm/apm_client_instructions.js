@@ -138,17 +138,16 @@ export const RAILS_CLIENT_INSTRUCTIONS = [
 
 # Set service name - allowed characters: a-z, A-Z, 0-9, -, _ and space
 # Defaults to the name of your Rails app
-service_name: ''
+# service_name: 'my-service'
 
 # Use if APM Server requires a token
-secret_token: ''
+# secret_token: ''
 
 # Set custom APM Server URL (default: http://localhost:8200)
-server_url: ''`.split('\n'),
+# server_url: 'http://localhost:8200'`.split('\n'),
     textPost:
       'See the [documentation]' +
-      '({config.docs.base_url}guide/en/apm/agent/ruby/1.x/index.html) for configuration options and advanced usage.\n\n' +
-      '**Warning: The Ruby agent is currently in Beta and not meant for production use.**',
+      '({config.docs.base_url}guide/en/apm/agent/ruby/1.x/index.html) for configuration options and advanced usage.\n\n',
   },
 ];
 
@@ -161,7 +160,7 @@ export const RACK_CLIENT_INSTRUCTIONS = [
   {
     title: 'Configure the agent',
     textPre:
-      'Rack or compatible framework (like Sinatra). Include the middleware in your app and start the agent.',
+      'For Rack or a compatible framework (e.g. Sinatra), include the middleware in your app and start the agent.',
     commands: `# config.ru
   require 'sinatra/base'
 
@@ -186,26 +185,25 @@ export const RACK_CLIENT_INSTRUCTIONS = [
     commands: `# config/elastic_apm.yml:
 
 # Set service name - allowed characters: a-z, A-Z, 0-9, -, _ and space
-# Defaults to the name of your Rails app
-service_name: ''
+# Defaults to the name of your Rack app's class.
+# service_name: 'my-service'
 
 # Use if APM Server requires a token
-secret_token: ''
+# secret_token: ''
 
 # Set custom APM Server URL (default: http://localhost:8200)
-server_url: ''`.split('\n'),
+# server_url: 'http://localhost:8200'`.split('\n'),
     textPost:
       'See the [documentation]' +
-      '({config.docs.base_url}guide/en/apm/agent/ruby/1.x/index.html) for configuration options and advanced usage.\n\n' +
-      '**Warning: The Rack agent is currently in Beta and not meant for production use.**',
+      '({config.docs.base_url}guide/en/apm/agent/ruby/1.x/index.html) for configuration options and advanced usage.\n\n',
   },
 ];
 
 export const JS_CLIENT_INSTRUCTIONS = [
   {
-    title: 'Enable frontend support in the APM server',
+    title: 'Enable Real User Monitoring support in the APM server',
     textPre:
-      'Please refer to [the documentation]({config.docs.base_url}guide/en/apm/server/{config.docs.version}/frontend.html).',
+      'Please refer to [the documentation]({config.docs.base_url}guide/en/apm/server/{config.docs.version}/rum.html).',
   },
   {
     title: 'Install the APM agent',
@@ -285,5 +283,30 @@ func main() {curlyOpen}
       '({config.docs.base_url}guide/en/apm/agent/go/current/instrumenting-source.html) for a detailed ' +
       'guide to instrumenting Go source code.\n\n' +
       '**Warning: The Go agent is currently in Beta and not meant for production use.**',
+  },
+];
+
+export const JAVA_CLIENT_INSTRUCTIONS = [
+  {
+    title: 'Download the APM agent',
+    textPre: 'Download the agent jar from [Maven Central](http://search.maven.org/#search%7Cga%7C1%7Ca%3Aelastic-apm-agent). ' +
+    'Do **not** add the agent as a dependency to your application.'
+  },
+  {
+    title: 'Start your application with the javaagent flag',
+    textPre: 'Add the `-javaagent` flag and configure the agent with system properties.\n' +
+    '\n' +
+    ' * Set required service name (allowed characters: a-z, A-Z, 0-9, -, _, and space)\n' +
+    ' * Set custom APM Server URL (default: http://localhost:8200)\n' +
+    ' * Set the base package of your application',
+    commands: `java -javaagent:/path/to/elastic-apm-agent-<version>.jar \\
+     -Delastic.apm.service_name=my-application \\
+     -Delastic.apm.server_url=http://localhost:8200 \\ 
+     -Delastic.apm.application_packages=org.example \\ 
+     -jar my-application.jar`.split('\n'),
+    textPost:
+    'See the [documentation]' +
+    '({config.docs.base_url}guide/en/apm/agent/java/current/index.html) for configuration options and advanced usage.\n\n' +
+    '**Warning: The Java agent is currently in Beta and not meant for production use.**',
   },
 ];

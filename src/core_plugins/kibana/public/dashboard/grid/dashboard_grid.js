@@ -146,7 +146,7 @@ export class DashboardGrid extends React.Component {
       }
 
       if (panelVersion.major < 6 || (panelVersion.major === 6 && panelVersion.minor < 3)) {
-        PanelUtils.convertPanelDataPre_6_3(panel);
+        PanelUtils.convertPanelDataPre_6_3(panel, this.props.useMargins);
       }
 
       return panel.gridData;
@@ -170,14 +170,15 @@ export class DashboardGrid extends React.Component {
   }
 
   onLayoutChange = (layout) => {
-    const { onPanelsUpdated } = this.props;
+    const { onPanelsUpdated, panels } = this.props;
     const updatedPanels = layout.reduce((updatedPanelsAcc, panelLayout) => {
       updatedPanelsAcc[panelLayout.i] = {
+        ...panels[panelLayout.i],
         panelIndex: panelLayout.i,
         gridData: _.pick(panelLayout, ['x', 'y', 'w', 'h', 'i'])
       };
       return updatedPanelsAcc;
-    }, {});
+    }, []);
     onPanelsUpdated(updatedPanels);
   };
 

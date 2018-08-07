@@ -95,7 +95,7 @@ uiModules
 
       return self._getLinkedSavedSearch()
         .then(function () {
-          self.searchSource.size(0);
+          self.searchSource.setField('size', 0);
 
           return self.vis ? self._updateVis() : self._createVis();
         });
@@ -111,7 +111,7 @@ uiModules
       }
 
       if (self.savedSearch) {
-        self.searchSource.inherits(self.savedSearch.searchSource.getParent());
+        self.searchSource.setParent(self.savedSearch.searchSource.getParent());
         self.savedSearch.destroy();
         self.savedSearch = null;
       }
@@ -120,7 +120,7 @@ uiModules
         return savedSearches.get(self.savedSearchId)
           .then(function (savedSearch) {
             self.savedSearch = savedSearch;
-            self.searchSource.inherits(self.savedSearch.searchSource);
+            self.searchSource.setParent(self.savedSearch.searchSource);
           });
       }
     });
@@ -137,7 +137,7 @@ uiModules
         self.visState.title = self.title;
       }
       self.vis = new Vis(
-        self.searchSource.get('index'),
+        self.searchSource.getField('index'),
         self.visState
       );
 
@@ -147,7 +147,7 @@ uiModules
     SavedVis.prototype._updateVis = function () {
       const self = this;
 
-      self.vis.indexPattern = self.searchSource.get('index');
+      self.vis.indexPattern = self.searchSource.getField('index');
       self.visState.title = self.title;
       self.vis.setState(self.visState);
     };

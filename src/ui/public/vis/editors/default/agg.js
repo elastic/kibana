@@ -82,7 +82,7 @@ uiModules
         };
 
         $scope.remove = function (agg) {
-          const aggs = $scope.vis.aggs;
+          const aggs = $scope.state.aggs;
           const index = aggs.indexOf(agg);
 
           if (index === -1) {

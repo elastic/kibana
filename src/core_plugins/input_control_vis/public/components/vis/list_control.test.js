@@ -48,3 +48,15 @@ test('renders ListControl', () => {
   />);
   expect(component).toMatchSnapshot(); // eslint-disable-line
 });
+
+test('disableMsg', () => {
+  const component = shallow(<ListControl
+    id="mock-list-control"
+    label="list control"
+    multiselect={true}
+    controlIndex={0}
+    stageFilter={stageFilter}
+    disableMsg={'control is disabled to test rendering when disabled'}
+  />);
+  expect(component).toMatchSnapshot(); // eslint-disable-line
+});

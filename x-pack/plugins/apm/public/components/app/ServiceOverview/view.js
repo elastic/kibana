@@ -7,24 +7,26 @@
 import React, { Component } from 'react';
 import { STATUS } from '../../../constants';
 import { isEmpty } from 'lodash';
-import { loadAgentStatus } from '../../../services/rest';
+import { loadAgentStatus } from '../../../services/rest/apm';
 import { KibanaLink } from '../../../utils/url';
 import { EuiButton } from '@elastic/eui';
 import List from './List';
 import { HeaderContainer } from '../../shared/UIComponents';
+import { KueryBar } from '../../shared/KueryBar';
 
 import { ServiceListRequest } from '../../../store/reactReduxRequest/serviceList';
+import EmptyMessage from '../../shared/EmptyMessage';
 
 class ServiceOverview extends Component {
   state = {
-    noHistoricalDataFound: false
+    historicalDataFound: true
   };
 
   async checkForHistoricalData({ serviceList }) {
     if (serviceList.status === STATUS.SUCCESS && isEmpty(serviceList.data)) {
       const result = await loadAgentStatus();
       if (!result.dataFound) {
-        this.setState({ noHistoricalDataFound: true });
+        this.setState({ historicalDataFound: false });
       }
     }
   }
@@ -38,16 +40,21 @@ class ServiceOverview extends Component {
   }
 
   render() {
-    const { changeServiceSorting, serviceSorting, urlParams } = this.props;
-    const { noHistoricalDataFound } = this.state;
+    const { urlParams } = this.props;
+    const { historicalDataFound } = this.state;
 
-    const emptyMessageHeading = noHistoricalDataFound
-      ? "Looks like you don't have any services with APM installed. Let's add some!"
-      : 'No services with data in the selected time range.';
-
-    const emptyMessageSubHeading = noHistoricalDataFound ? (
-      <SetupInstructionsLink buttonFill />
-    ) : null;
+    const noItemsMessage = (
+      <EmptyMessage
+        heading={
+          historicalDataFound
+            ? 'No services were found'
+            : "Looks like you don't have any services with APM installed. Let's add some!"
+        }
+        subheading={
+          !historicalDataFound ? <SetupInstructionsLink buttonFill /> : null
+        }
+      />
+    );
 
     return (
       <div>
@@ -56,16 +63,12 @@ class ServiceOverview extends Component {
           <SetupInstructionsLink />
         </HeaderContainer>
 
+        <KueryBar />
+
         <ServiceListRequest
           urlParams={urlParams}
           render={({ data }) => (
-            <List
-              items={data}
-              changeServiceSorting={changeServiceSorting}
-              serviceSorting={serviceSorting}
-              emptyMessageHeading={emptyMessageHeading}
-              emptyMessageSubHeading={emptyMessageSubHeading}
-            />
+            <List items={data} noItemsMessage={noItemsMessage} />
           )}
         />
       </div>
@@ -75,7 +78,7 @@ class ServiceOverview extends Component {
 
 function SetupInstructionsLink({ buttonFill = false }) {
   return (
-    <KibanaLink pathname={'/app/kibana'} hash={'/home/tutorial/apm'} query={{}}>
+    <KibanaLink pathname={'/app/kibana'} hash={'/home/tutorial/apm'}>
       <EuiButton size="s" color="primary" fill={buttonFill}>
         Setup Instructions
       </EuiButton>

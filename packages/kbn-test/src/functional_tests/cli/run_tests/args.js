@@ -42,8 +42,7 @@ const options = {
     desc: 'Pattern to select which tests to run.',
   },
   updateBaselines: {
-    desc:
-      'Replace baseline screenshots with whatever is generated from the test.',
+    desc: 'Replace baseline screenshots with whatever is generated from the test.',
   },
   verbose: { desc: 'Log everything.' },
   debug: { desc: 'Run in debug mode.' },
@@ -94,6 +93,11 @@ export function processOptions(userOptions, defaultConfigPaths) {
     }
   }
 
+  if (userOptions['kibana-install-dir']) {
+    userOptions.installDir = userOptions['kibana-install-dir'];
+    delete userOptions['kibana-install-dir'];
+  }
+
   function createLogger() {
     const log = createToolingLog(pickLevelFromFlags(userOptions));
     log.pipe(process.stdout);
@@ -125,9 +129,7 @@ function validateOptions(userOptions) {
       // Validate enum flags
       (options[key].choices && !options[key].choices.includes(val))
     ) {
-      throw new Error(
-        `functional_tests: invalid argument [${val}] to option [${key}]`
-      );
+      throw new Error(`functional_tests: invalid argument [${val}] to option [${key}]`);
     }
   });
 }

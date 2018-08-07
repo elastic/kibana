@@ -64,10 +64,7 @@ getClipsTest(
     rectangle: { x: 0, y: 0, height: 100, width: 150 },
   },
   {
-    clips: [
-      { x: 0, y: 0, height: 100, width: 100 },
-      { x: 100, y: 0, height: 100, width: 50 },
-    ],
+    clips: [{ x: 0, y: 0, height: 100, width: 100 }, { x: 100, y: 0, height: 100, width: 50 }],
   }
 );
 
@@ -78,10 +75,7 @@ getClipsTest(
     rectangle: { x: 0, y: 0, height: 150, width: 100 },
   },
   {
-    clips: [
-      { x: 0, y: 0, height: 100, width: 100 },
-      { x: 0, y: 100, height: 50, width: 100 },
-    ],
+    clips: [{ x: 0, y: 0, height: 100, width: 100 }, { x: 0, y: 100, height: 50, width: 100 }],
   }
 );
 

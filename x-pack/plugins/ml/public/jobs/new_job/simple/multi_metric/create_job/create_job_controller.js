@@ -23,7 +23,6 @@ import { IntervalHelperProvider } from 'plugins/ml/util/ml_time_buckets';
 import { filterAggTypes } from 'plugins/ml/jobs/new_job/simple/components/utils/filter_agg_types';
 import { validateJob } from 'plugins/ml/jobs/new_job/simple/components/utils/validate_job';
 import { adjustIntervalDisplayed } from 'plugins/ml/jobs/new_job/simple/components/utils/adjust_interval';
-import { populateAppStateSettings } from 'plugins/ml/jobs/new_job/simple/components/utils/app_state_settings';
 import { CHART_STATE, JOB_STATE } from 'plugins/ml/jobs/new_job/simple/components/constants/states';
 import { createFields } from 'plugins/ml/jobs/new_job/simple/components/utils/create_fields';
 import { loadCurrentIndexPattern, loadCurrentSavedSearch, timeBasedIndexCheck } from 'plugins/ml/util/index_utils';
@@ -36,6 +35,7 @@ import {
   addNewJobToRecentlyAccessed,
   moveToAdvancedJobCreationProvider } from 'plugins/ml/jobs/new_job/utils/new_job_utils';
 import { mlJobService } from 'plugins/ml/services/job_service';
+import { preLoadJob } from 'plugins/ml/jobs/new_job/simple/components/utils/prepopulate_job_settings';
 import { MultiMetricJobServiceProvider } from './create_job_service';
 import { FullTimeRangeSelectorServiceProvider } from 'plugins/ml/components/full_time_range_selector/full_time_range_selector_service';
 import { mlMessageBarService } from 'plugins/ml/components/messagebar/messagebar_service';
@@ -368,7 +368,6 @@ module
       const $frontCard = angular.element('.multi-metric-job-container .detector-container .card-front');
       $frontCard.addClass('card');
       $frontCard.find('.card-title').text(labels[0]);
-      const w = $frontCard.width();
 
       let marginTop = (labels.length > 1) ? 54 : 0;
       $frontCard.css('margin-top', marginTop);
@@ -384,33 +383,23 @@ module
       angular.element('.card-behind').remove();
 
       for (let i = 0; i < labels.length; i++) {
-        let el = '<div class="card card-behind"><div class="card-title">';
+        let el = `<div class="card card-behind card-behind-${i}"><div class="card-title">`;
         el += mlEscape(labels[i]);
         el += '</div><label class="kuiFormLabel">';
         el += mlEscape(backCardTitle);
         el += '</label></div>';
 
         const $backCard = angular.element(el);
-        $backCard.css('width', w);
-        $backCard.css('height', 100);
-        $backCard.css('display', 'auto');
         $backCard.css('z-index', (9 - i));
 
         $backCard.insertBefore($frontCard);
       }
 
       const cardsBehind = angular.element('.card-behind');
-      let marginLeft = 0;
-      let backWidth = w;
 
       for (let i = 0; i < cardsBehind.length; i++) {
         cardsBehind[i].style.marginTop = marginTop + 'px';
-        cardsBehind[i].style.marginLeft = marginLeft + 'px';
-        cardsBehind[i].style.width = backWidth + 'px';
-
         marginTop -= (10 - (i * (10 / labels.length))) * (10 / labels.length);
-        marginLeft += (5 - (i / 2));
-        backWidth -= (5 - (i / 2)) * 2;
       }
       let i = 0;
       let then = window.performance.now();
@@ -658,23 +647,8 @@ module
         });
     };
 
-    // resize the spilt cards on page resize.
-    // when the job starts the 'Analysis running' label appearing can cause a scroll bar to appear
-    // which will cause the split cards to look odd
-    // TODO - all charts should resize correctly on page resize
-    function resize() {
-      if ($scope.formConfig.splitField !== undefined) {
-        let width = angular.element('.card-front').width();
-        const cardsBehind = angular.element('.card-behind');
-        for (let i = 0; i < cardsBehind.length; i++) {
-          cardsBehind[i].style.width = width + 'px';
-          width -= (5 - (i / 2)) * 2;
-        }
-      }
-    }
-
     $scope.setFullTimeRange = function () {
-      mlFullTimeRangeSelectorService.setFullTimeRange($scope.ui.indexPattern, $scope.formConfig.combinedQuery);
+      return mlFullTimeRangeSelectorService.setFullTimeRange($scope.ui.indexPattern, $scope.formConfig.combinedQuery);
     };
 
     initAgg();
@@ -683,8 +657,7 @@ module
     $scope.loadVis();
 
     $scope.$evalAsync(() => {
-    // populate the fields with any settings from the URL
-      populateAppStateSettings(appState, $scope);
+      preLoadJob($scope, appState);
     });
 
     $scope.$listenAndDigestAsync(timefilter, 'fetch', () => {
@@ -692,10 +665,6 @@ module
       if ($scope.formConfig.splitField !== undefined) {
         $scope.setModelMemoryLimit();
       }
-    });
-
-    angular.element(window).resize(() => {
-      resize();
     });
 
     $scope.$on('$destroy', () => {

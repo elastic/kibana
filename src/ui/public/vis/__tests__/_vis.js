@@ -44,6 +44,14 @@ describe('Vis Class', function () {
     listeners: { click: _.noop }
   };
 
+  // Wrap the given vis type definition in a state, that can be passed to vis
+  const state = (type) => ({
+    type: {
+      visConfig: { defaults: {} },
+      ...type,
+    }
+  });
+
   beforeEach(ngMock.module('kibana'));
   beforeEach(ngMock.inject(function (Private) {
     Vis = Private(VisProvider);
@@ -110,14 +118,6 @@ describe('Vis Class', function () {
   });
 
   describe('inspector', () => {
-
-    // Wrap the given vis type definition in a state, that can be passed to vis
-    const state = (type) => ({
-      type: {
-        visConfig: { defaults: {} },
-        ...type,
-      }
-    });
 
     describe('hasInspector()', () => {
       it('should forward to inspectors hasInspector', () => {
@@ -254,6 +254,42 @@ describe('Vis Class', function () {
       });
     });
 
+  });
+
+  describe('vis addFilter method', () => {
+    let aggConfig;
+    let data;
+
+    beforeEach(() => {
+      aggConfig = {
+        type: { name: 'terms' },
+        params: {},
+        createFilter: sinon.stub()
+      };
+
+      data = {
+        columns: [{
+          title: 'test',
+          aggConfig
+        }],
+        rows: [['US']]
+      };
+    });
+
+
+    it('adds a simple filter', () => {
+      const vis = new Vis(indexPattern, state({ requestHandler: 'none' }));
+      vis.API.events.addFilter(data, 0, 0);
+      expect(aggConfig.createFilter.callCount).to.be(1);
+      expect(aggConfig.createFilter.getCall(0).args[0]).to.be('US');
+    });
+
+    it('adds a filter if value is provided instead of row index', () => {
+      const vis = new Vis(indexPattern, state({ requestHandler: 'none' }));
+      vis.API.events.addFilter(data, 0, -1, 'UK');
+      expect(aggConfig.createFilter.callCount).to.be(1);
+      expect(aggConfig.createFilter.getCall(0).args[0]).to.be('UK');
+    });
   });
 
 });

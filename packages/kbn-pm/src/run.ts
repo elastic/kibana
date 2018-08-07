@@ -32,16 +32,11 @@ export async function runCommand(command: ICommand, config: ICommandConfig) {
   try {
     log.write(
       chalk.bold(
-        `Running [${chalk.green(command.name)}] command from [${chalk.yellow(
-          config.rootPath
-        )}]:\n`
+        `Running [${chalk.green(command.name)}] command from [${chalk.yellow(config.rootPath)}]:\n`
       )
     );
 
-    const projectPaths = getProjectPaths(
-      config.rootPath,
-      config.options as IProjectPathOptions
-    );
+    const projectPaths = getProjectPaths(config.rootPath, config.options as IProjectPathOptions);
 
     const projects = await getProjects(config.rootPath, projectPaths, {
       exclude: toArray(config.options.exclude),
@@ -59,9 +54,7 @@ export async function runCommand(command: ICommand, config: ICommandConfig) {
 
     const projectGraph = buildProjectGraph(projects);
 
-    log.write(
-      chalk.bold(`Found [${chalk.green(projects.size.toString())}] projects:\n`)
-    );
+    log.write(chalk.bold(`Found [${chalk.green(projects.size.toString())}] projects:\n`));
     log.write(renderProjectsTree(config.rootPath, projects));
 
     await command.run(projects, projectGraph, config);

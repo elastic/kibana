@@ -125,7 +125,7 @@ describe('params', function () {
             }));
           });
 
-          const output = histoConfig.write();
+          const output = histoConfig.write(vis.aggs);
           expect(_.has(output, 'metricScale')).to.be(should);
         });
       });

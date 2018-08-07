@@ -78,6 +78,12 @@ describe('setTime', () => {
     expect(timefilter.getTime()).to.eql({ from: 5, to: 10, mode: 'absolute' });
   });
 
+  test('should not add unexpected object keys to time state', () => {
+    const unexpectedKey = 'unexpectedKey';
+    timefilter.setTime({ from: 5, to: 10, [unexpectedKey]: 'I should not be added to time state' });
+    expect(timefilter.getTime()).not.to.have.property(unexpectedKey);
+  });
+
   test('should allow partial updates to time', () => {
     timefilter.setTime({ from: 5, to: 10 });
     expect(timefilter.getTime()).to.eql({ from: 5, to: 10, mode: 'absolute' });
@@ -94,7 +100,6 @@ describe('setTime', () => {
     expect(update.called).to.be(true);
     expect(fetch.called).to.be(true);
   });
-
 });
 
 describe('setRefreshInterval', () => {
@@ -118,9 +123,25 @@ describe('setRefreshInterval', () => {
     expect(timefilter.getRefreshInterval()).to.eql({ pause: true, value: 10 });
   });
 
+  test('should not add unexpected object keys to refreshInterval state', () => {
+    const unexpectedKey = 'unexpectedKey';
+    timefilter.setRefreshInterval({ pause: true, value: 10, [unexpectedKey]: 'I should not be added to refreshInterval state' });
+    expect(timefilter.getRefreshInterval()).not.to.have.property(unexpectedKey);
+  });
+
   test('should allow partial updates to refresh interval', () => {
     timefilter.setRefreshInterval({ value: 10 });
-    expect(timefilter.getRefreshInterval()).to.eql({ pause: false, value: 10 });
+    expect(timefilter.getRefreshInterval()).to.eql({ pause: true, value: 10 });
+  });
+
+  test('should not allow negative intervals', () => {
+    timefilter.setRefreshInterval({ value: -10 });
+    expect(timefilter.getRefreshInterval()).to.eql({ pause: true, value: 0 });
+  });
+
+  test('should set pause to true when interval is zero', () => {
+    timefilter.setRefreshInterval({ value: 0, pause: false });
+    expect(timefilter.getRefreshInterval()).to.eql({ pause: true, value: 0 });
   });
 
   test('not emit anything if nothing has changed', () => {

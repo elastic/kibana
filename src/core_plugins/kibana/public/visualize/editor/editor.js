@@ -42,6 +42,7 @@ import { absoluteToParsedUrl } from 'ui/url/absolute_to_parsed_url';
 import { migrateLegacyQuery } from 'ui/utils/migrateLegacyQuery';
 import { recentlyAccessed } from 'ui/persisted_log';
 import { timefilter } from 'ui/timefilter';
+import { getVisualizeLoader } from '../../../../../ui/public/visualize/loader';
 
 uiRoutes
   .when(VisualizeConstants.CREATE_PATH, {
@@ -100,6 +101,7 @@ uiModules
 
 function VisEditor(
   $scope,
+  $element,
   $route,
   AppState,
   $window,
@@ -123,6 +125,19 @@ function VisEditor(
   // vis is instance of src/ui/public/vis/vis.js.
   // SearchSource is a promise-based stream of search results that can inherit from other search sources.
   const { vis, searchSource } = savedVis;
+
+  // adds top level search source to the stack to which global filters are applied
+  const getTopLevelSearchSource = (searchSource) => {
+    if (searchSource.getParent()) return getTopLevelSearchSource(searchSource.getParent());
+    return searchSource;
+  };
+
+  const topLevelSearchSource =  getTopLevelSearchSource(searchSource);
+  const globalFiltersSearchSource = searchSource.create();
+  globalFiltersSearchSource.setField('index', searchSource.getField('index'));
+  topLevelSearchSource.setParent(globalFiltersSearchSource);
+
+
   $scope.vis = vis;
 
   $scope.topNavMenu = [{
@@ -144,7 +159,7 @@ function VisEditor(
     template: require('plugins/kibana/visualize/editor/panels/share.html'),
     testId: 'visualizeShareButton',
   }, {
-    key: 'inspector',
+    key: 'inspect',
     description: 'Open Inspector for visualization',
     testId: 'openInspectorButton',
     disableButton() {
@@ -191,11 +206,11 @@ function VisEditor(
   const stateDefaults = {
     uiState: savedVis.uiStateJSON ? JSON.parse(savedVis.uiStateJSON) : {},
     linked: !!savedVis.savedSearchId,
-    query: searchSource.getOwn('query') || {
+    query: searchSource.getOwnField('query') || {
       query: '',
       language: localStorage.get('kibana.userQueryLanguage') || config.get('search:queryLanguage')
     },
-    filters: searchSource.getOwn('filter') || [],
+    filters: searchSource.getOwnField('filter') || [],
     vis: savedVisState
   };
 
@@ -252,7 +267,7 @@ function VisEditor(
     };
 
     $scope.$watchMulti([
-      'searchSource.get("index")',
+      'searchSource.getField("index")',
       'vis.type.options.showTimePicker',
     ], function ([index, requiresTimePicker]) {
       const showTimeFilter = Boolean((!index || index.timeFieldName) && requiresTimePicker);
@@ -279,15 +294,31 @@ function VisEditor(
     // update the searchSource when query updates
     $scope.fetch = function () {
       $state.save();
-      savedVis.searchSource.set('query', $state.query);
-      savedVis.searchSource.set('filter', $state.filters);
+      const globalFilters = queryFilter.getGlobalFilters();
+      savedVis.searchSource.setField('query', $state.query);
+      savedVis.searchSource.setField('filter', $state.filters);
+      globalFiltersSearchSource.setField('filter', globalFilters);
       $scope.vis.forceReload();
     };
 
     $scope.$on('$destroy', function () {
+      if ($scope._handler) {
+        $scope._handler.destroy();
+      }
       savedVis.destroy();
       stateMonitor.destroy();
     });
+
+    if (!$scope.chrome.getVisible()) {
+      getVisualizeLoader().then(loader => {
+        $scope._handler = loader.embedVisualizationWithSavedObject($element.find('.visualize')[0], savedVis, {
+          timeRange: $scope.timeRange,
+          uiState: $scope.uiState,
+          appState: $state,
+          listenOnChange: false
+        });
+      });
+    }
   }
 
   $scope.updateQueryAndFetch = function (query) {
@@ -345,26 +376,19 @@ function VisEditor(
   $scope.unlink = function () {
     if (!$state.linked) return;
 
-    toastNotifications.addSuccess(`Unlinked from saved search '${savedVis.savedSearch.title}'`);
-
     $state.linked = false;
-    const parent = searchSource.getParent(true);
-    const parentsParent = parent.getParent(true);
+    const searchSourceParent = searchSource.getParent();
+    const searchSourceGrandparent = searchSourceParent.getParent();
 
     delete savedVis.savedSearchId;
-    parent.set('filter', _.union(searchSource.getOwn('filter'), parent.getOwn('filter')));
+    searchSourceParent.setField('filter', _.union(searchSource.getOwnField('filter'), searchSourceParent.getOwnField('filter')));
 
-    // copy over all state except "aggs", "query" and "filter"
-    _(parent.toJSON())
-      .omit(['aggs', 'filter', 'query'])
-      .forOwn(function (val, key) {
-        searchSource.set(key, val);
-      })
-      .commit();
+    $state.query = searchSourceParent.getField('query');
+    $state.filters = searchSourceParent.getField('filter');
+    searchSource.setField('index', searchSourceParent.getField('index'));
+    searchSource.setParent(searchSourceGrandparent);
 
-    $state.query = searchSource.get('query');
-    $state.filters = searchSource.get('filter');
-    searchSource.inherits(parentsParent);
+    toastNotifications.addSuccess(`Unlinked from saved search '${savedVis.savedSearch.title}'`);
 
     $scope.fetch();
   };

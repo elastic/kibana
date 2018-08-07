@@ -4,14 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { KIBANA_STATS_TYPE } from '../../../common/constants';
+import { KIBANA_STATS_TYPE_MONITORING } from '../../../common/constants';
 import { opsBuffer } from './ops_buffer';
-import { Collector } from '../classes';
+import { getKibanaInfoForStats } from '../lib';
 
 /*
  * Initialize a collector for Kibana Ops Stats
  */
-export function getOpsStatsCollector(server) {
+export function getOpsStatsCollector(server, kbnServer) {
   let monitor;
   const buffer = opsBuffer(server);
   const onOps = event => buffer.push(event);
@@ -43,9 +43,15 @@ export function getOpsStatsCollector(server) {
     }, 5 * 1000); // wait 5 seconds to avoid race condition with reloading logging configuration
   });
 
-  return new Collector(server, {
-    type: KIBANA_STATS_TYPE,
+  const { collectorSet } = server.usage;
+  return collectorSet.makeStatsCollector({
+    type: KIBANA_STATS_TYPE_MONITORING,
     init: start,
-    fetch: buffer.flush
+    fetch: () => {
+      return {
+        kibana: getKibanaInfoForStats(server, kbnServer),
+        ...buffer.flush()
+      };
+    }
   });
 }

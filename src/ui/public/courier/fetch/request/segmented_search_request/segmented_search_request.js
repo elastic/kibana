@@ -195,7 +195,7 @@ export function SegmentedSearchRequestProvider(Private, config) {
 
     _createQueue() {
       const timeBounds = timefilter.getBounds();
-      const indexPattern = this.source.get('index');
+      const indexPattern = this.source.getField('index');
       this._queueCreated = false;
 
       return indexPattern.toDetailedIndexList(timeBounds.min, timeBounds.max, this._direction)
@@ -298,7 +298,7 @@ export function SegmentedSearchRequestProvider(Private, config) {
 
     _detectHitsWindow(hits) {
       hits = hits || [];
-      const indexPattern = this.source.get('index');
+      const indexPattern = this.source.getField('index');
       const desiredSize = this._desiredSize;
 
       const size = _.size(hits);

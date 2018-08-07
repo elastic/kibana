@@ -52,8 +52,12 @@ class Timefilter extends SimpleEmitter {
     // Object.assign used for partially composed updates
     const newTime = Object.assign(this.getTime(), time);
     if (areTimePickerValsDifferent(this.getTime(), newTime)) {
-      this._time = newTime;
-      timeHistory.add(newTime);
+      this._time = {
+        from: newTime.from,
+        to: newTime.to,
+        mode: newTime.mode
+      };
+      timeHistory.add(this._time);
       this.emit('timeUpdate');
       this.emit('fetch');
     }
@@ -66,14 +70,21 @@ class Timefilter extends SimpleEmitter {
   /**
    * Set timefilter refresh interval.
    * @param {Object} refreshInterval
-   * @property {number} time.value
+   * @property {number} time.value Refresh interval in milliseconds. Positive integer
    * @property {boolean} time.pause
    */
   setRefreshInterval = (refreshInterval) => {
     // Object.assign used for partially composed updates
     const newRefreshInterval = Object.assign(this.getRefreshInterval(), refreshInterval);
+    if (newRefreshInterval.value <= 0) {
+      newRefreshInterval.value = 0;
+      newRefreshInterval.pause = true;
+    }
     if (areTimePickerValsDifferent(this.getRefreshInterval(), newRefreshInterval)) {
-      this._refreshInterval = newRefreshInterval;
+      this._refreshInterval = {
+        value: newRefreshInterval.value,
+        pause: newRefreshInterval.pause
+      };
       this.emit('refreshIntervalUpdate');
       if (!newRefreshInterval.pause && newRefreshInterval.value !== 0) {
         this.emit('fetch');
@@ -164,7 +175,7 @@ function convertISO8601(stringTime) {
 // and require it to be executed to properly function.
 // This function is exposed for applications that do not use uiRoutes like APM
 // Kibana issue https://github.com/elastic/kibana/issues/19110 tracks the removal of this dependency on uiRouter
-export const registerTimefilterWithGlobalState = _.once((globalState) => {
+export const registerTimefilterWithGlobalState = _.once((globalState, $rootScope) => {
   const uiSettings = chrome.getUiSettingsClient();
   const timeDefaults = uiSettings.get('timepicker:timeDefaults');
   const refreshIntervalDefaults = uiSettings.get('timepicker:refreshIntervalDefaults');
@@ -185,9 +196,19 @@ export const registerTimefilterWithGlobalState = _.once((globalState) => {
     timefilter.setTime(newTime);
     timefilter.setRefreshInterval(newRefreshInterval);
   });
+
+  const updateGlobalStateWithTime = () => {
+    globalState.time = timefilter.getTime();
+    globalState.refreshInterval = timefilter.getRefreshInterval();
+    globalState.save();
+  };
+
+  $rootScope.$listenAndDigestAsync(timefilter, 'refreshIntervalUpdate', updateGlobalStateWithTime);
+
+  $rootScope.$listenAndDigestAsync(timefilter, 'timeUpdate', updateGlobalStateWithTime);
 });
 
 uiRoutes
-  .addSetupWork((globalState) => {
-    return registerTimefilterWithGlobalState(globalState);
+  .addSetupWork((globalState, $rootScope) => {
+    return registerTimefilterWithGlobalState(globalState, $rootScope);
   });

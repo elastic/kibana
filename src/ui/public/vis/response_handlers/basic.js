@@ -71,7 +71,7 @@ const BasicResponseHandlerProvider = function (Private) {
           resolve(aggResponse.hierarchical(vis, response));
         }
 
-        const tableGroup = aggResponse.tabify(vis.getAggConfig().getResponseAggs(), response, {
+        const tableGroup = aggResponse.tabify(vis.getAggConfig(), response, {
           canSplit: true,
           asAggConfigResults: true,
           isHierarchical: vis.isHierarchical()

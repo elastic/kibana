@@ -48,6 +48,8 @@ the patch version.
 
 include::setup/install.asciidoc[]
 
+include::setup/start-stop.asciidoc[]
+
 include::setup/settings.asciidoc[]
 
 include::setup/secure-settings.asciidoc[]

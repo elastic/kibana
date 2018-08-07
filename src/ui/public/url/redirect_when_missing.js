@@ -18,15 +18,16 @@
  */
 
 
+import React from 'react';
+import { MarkdownSimple } from 'ui/markdown';
+import { toastNotifications } from 'ui/notify';
 import { SavedObjectNotFound } from '../errors';
 import { uiModules } from '../modules';
 
 uiModules.get('kibana/url')
   .service('redirectWhenMissing', function (Private) { return Private(RedirectWhenMissingProvider); });
 
-export function RedirectWhenMissingProvider($location, kbnUrl, Notifier, Promise) {
-  const notify = new Notifier();
-
+export function RedirectWhenMissingProvider($location, kbnUrl, Promise) {
   /**
    * Creates an error handler that will redirect to a url when a SavedObjectNotFound
    * error is thrown
@@ -40,22 +41,26 @@ export function RedirectWhenMissingProvider($location, kbnUrl, Notifier, Promise
       mapping = { '*': mapping };
     }
 
-    return function (err) {
+    return function (error) {
       // if this error is not "404", rethrow
-      const savedObjectNotFound = err instanceof SavedObjectNotFound;
-      const unknownVisType = err.message.indexOf('Invalid type') === 0;
+      const savedObjectNotFound = error instanceof SavedObjectNotFound;
+      const unknownVisType = error.message.indexOf('Invalid type') === 0;
       if (unknownVisType) {
-        err.savedObjectType = 'visualization';
+        error.savedObjectType = 'visualization';
       } else if (!savedObjectNotFound) {
-        throw err;
+        throw error;
       }
 
-      let url = mapping[err.savedObjectType] || mapping['*'];
+      let url = mapping[error.savedObjectType] || mapping['*'];
       if (!url) url = '/';
 
-      url += (url.indexOf('?') >= 0 ? '&' : '?') + `notFound=${err.savedObjectType}`;
+      url += (url.indexOf('?') >= 0 ? '&' : '?') + `notFound=${error.savedObjectType}`;
 
-      notify.warning(err);
+      toastNotifications.addWarning({
+        title: 'Saved object is missing',
+        text: <MarkdownSimple>{error.message}</MarkdownSimple>,
+      });
+
       kbnUrl.redirect(url);
       return Promise.halt();
     };

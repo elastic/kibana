@@ -1,4 +1,3 @@
-==== SysV `init` vs `systemd`
 
 Kibana is not started automatically after installation. How to start
 and stop Kibana depends on whether your system uses SysV `init` or

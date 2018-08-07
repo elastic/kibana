@@ -80,6 +80,11 @@ export function processOptions(userOptions, defaultConfigPath) {
     throw new Error(`functional_tests_server: config is required`);
   }
 
+  if (userOptions['kibana-install-dir']) {
+    userOptions.installDir = userOptions['kibana-install-dir'];
+    delete userOptions['kibana-install-dir'];
+  }
+
   function createLogger() {
     const log = createToolingLog(pickLevelFromFlags(userOptions));
     log.pipe(process.stdout);
@@ -111,9 +116,7 @@ function validateOptions(userOptions) {
       // Validate enum flags
       (options[key].choices && !options[key].choices.includes(val))
     ) {
-      throw new Error(
-        `functional_tests_server: invalid argument [${val}] to option [${key}]`
-      );
+      throw new Error(`functional_tests_server: invalid argument [${val}] to option [${key}]`);
     }
   });
 }

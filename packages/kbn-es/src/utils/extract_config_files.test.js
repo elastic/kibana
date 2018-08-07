@@ -54,10 +54,7 @@ test('ignores non-paths', () => {
 });
 
 test('ignores directories', () => {
-  const config = extractConfigFiles(
-    ['path=/data/foo.yml', 'foo.bar=/data/bar'],
-    '/es'
-  );
+  const config = extractConfigFiles(['path=/data/foo.yml', 'foo.bar=/data/bar'], '/es');
 
   expect(config).toEqual(['path=foo.yml', 'foo.bar=/data/bar']);
 });

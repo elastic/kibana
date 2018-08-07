@@ -19,22 +19,8 @@
 
 import _ from 'lodash';
 import { Reducer } from 'redux';
-import {
-  PanelActions,
-  PanelActionTypeKeys,
-  SetPanelTitleActionPayload,
-} from '../actions';
+import { PanelActions, PanelActionTypeKeys, SetPanelTitleActionPayload } from '../actions';
 import { PanelId, PanelsMap, PanelState } from '../selectors';
-
-/**
- * @param panel - New panel data (can be partial data) to merge with possibly existing panel data in
- * the panels mapping.
- * @param panels
- * @return a new PanelState which has the merged data.
- */
-function mergePanelData(panel: PanelState, panels: PanelsMap): PanelState {
-  return _.defaultsDeep(panel, panels[panel.panelIndex]);
-}
 
 const deletePanel = (panels: PanelsMap, panelId: PanelId): PanelsMap => {
   const panelsCopy = { ...panels };
@@ -44,16 +30,13 @@ const deletePanel = (panels: PanelsMap, panelId: PanelId): PanelsMap => {
 
 const updatePanel = (panels: PanelsMap, panelState: PanelState): PanelsMap => ({
   ...panels,
-  [panelState.panelIndex]: mergePanelData(panelState, panels),
+  [panelState.panelIndex]: panelState,
 });
 
-const updatePanels = (
-  panels: PanelsMap,
-  updatedPanels: PanelsMap
-): PanelsMap => {
+const updatePanels = (panels: PanelsMap, updatedPanels: PanelsMap): PanelsMap => {
   const panelsCopy = { ...panels };
   Object.values(updatedPanels).forEach(panel => {
-    panelsCopy[panel.panelIndex] = mergePanelData(panel, panels);
+    panelsCopy[panel.panelIndex] = panel;
   });
   return panelsCopy;
 };
@@ -66,10 +49,7 @@ const resetPanelTitle = (panels: PanelsMap, panelId: PanelId) => ({
   },
 });
 
-const setPanelTitle = (
-  panels: PanelsMap,
-  payload: SetPanelTitleActionPayload
-) => ({
+const setPanelTitle = (panels: PanelsMap, payload: SetPanelTitleActionPayload) => ({
   ...panels,
   [payload.panelId]: {
     ...panels[payload.panelId],
@@ -77,13 +57,9 @@ const setPanelTitle = (
   },
 });
 
-const setPanels = (panels: PanelsMap, newPanels: PanelsMap) =>
-  _.cloneDeep(newPanels);
+const setPanels = (panels: PanelsMap, newPanels: PanelsMap) => _.cloneDeep(newPanels);
 
-export const panelsReducer: Reducer<PanelsMap> = (
-  panels = {},
-  action
-): PanelsMap => {
+export const panelsReducer: Reducer<PanelsMap> = (panels = {}, action): PanelsMap => {
   switch ((action as PanelActions).type) {
     case PanelActionTypeKeys.DELETE_PANEL:
       return deletePanel(panels, action.payload);

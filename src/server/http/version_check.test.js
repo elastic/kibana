@@ -78,7 +78,6 @@ describe('version_check request filter', function () {
     });
 
     expect(resp.statusCode).toBe(400);
-    expect(resp.headers).toHaveProperty(versionHeader, version);
     expect(resp.payload).toMatch(/"Browser client is out of date/);
   });
 

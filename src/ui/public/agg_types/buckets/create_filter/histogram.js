@@ -25,7 +25,7 @@ export function createFilterHistogram(aggConfig, key) {
   return buildRangeFilter(
     aggConfig.params.field,
     { gte: value, lt: value + aggConfig.params.interval },
-    aggConfig.vis.indexPattern,
+    aggConfig._indexPattern,
     aggConfig.fieldFormatter()(key)
   );
 }

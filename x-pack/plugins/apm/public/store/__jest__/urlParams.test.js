@@ -25,6 +25,7 @@ describe('urlParams', () => {
       page: 0,
       serviceName: 'myServiceName',
       spanId: 10,
+      processorEvent: 'transaction',
       transactionId: 'myTransactionId',
       transactionName: 'myTransactionName',
       detailTab: 'request',

@@ -22,12 +22,7 @@ import * as Rx from 'rxjs';
 import { startWith, switchMap, take } from 'rxjs/operators';
 import { withProcRunner } from '@kbn/dev-utils';
 
-import {
-  runElasticsearch,
-  runKibanaServer,
-  runFtr,
-  KIBANA_FTR_SCRIPT,
-} from './lib';
+import { runElasticsearch, runKibanaServer, runFtr, KIBANA_FTR_SCRIPT } from './lib';
 
 import { readConfigFile } from '../../../../src/functional_test_runner/lib';
 
@@ -81,7 +76,7 @@ export async function startServers(options) {
       config,
       options: {
         ...opts,
-        extraKbnOpts: [...options.extraKbnOpts, '--dev'],
+        extraKbnOpts: [...options.extraKbnOpts, ...(options.installDir ? [] : ['--dev'])],
       },
     });
 
@@ -97,7 +92,11 @@ export async function startServers(options) {
 
 async function silence(milliseconds, { log }) {
   await Rx.fromEvent(log, 'data')
-    .pipe(startWith(null), switchMap(() => Rx.timer(milliseconds)), take(1))
+    .pipe(
+      startWith(null),
+      switchMap(() => Rx.timer(milliseconds)),
+      take(1)
+    )
     .toPromise();
 }
 

@@ -29,16 +29,31 @@ import {
 describe('DiscoverNoResults', () => {
   describe('props', () => {
     describe('shardFailures', () => {
-      test('renders failures list', () => {
+      test('renders failures list when there are failures', () => {
         const shardFailures = [{
           index: 'A',
           shard: '1',
-          reason: 'Awful error',
+          reason: { reason: 'Awful error' },
         }, {
           index: 'B',
           shard: '2',
-          reason: 'Bad error',
+          reason: { reason: 'Bad error' },
         }];
+
+        const component = render(
+          <DiscoverNoResults
+            shardFailures={shardFailures}
+            isTimePickerOpen={false}
+            topNavToggle={() => {}}
+            getDocLink={() => ''}
+          />
+        );
+
+        expect(component).toMatchSnapshot();
+      });
+
+      test(`doesn't render failures list when there are no failures`, () => {
+        const shardFailures = [];
 
         const component = render(
           <DiscoverNoResults

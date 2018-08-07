@@ -136,6 +136,7 @@ export class Flyout extends Component {
       conflictedSavedObjectsLinkedToSavedSearches,
       conflictedSearchDocs,
       importedObjectCount,
+      failedImports,
     } = await resolveSavedObjects(
       contents,
       isOverwriteAllChecked,
@@ -144,7 +145,7 @@ export class Flyout extends Component {
     );
 
     const byId = groupBy(conflictedIndexPatterns, ({ obj }) =>
-      obj.searchSource.getOwn('index')
+      obj.searchSource.getOwnField('index')
     );
     const conflicts = Object.entries(byId).reduce(
       (accum, [existingIndexPatternId, list]) => {
@@ -166,6 +167,7 @@ export class Flyout extends Component {
       conflictedIndexPatterns,
       conflictedSavedObjectsLinkedToSavedSearches,
       conflictedSearchDocs,
+      failedImports,
       conflicts,
       importCount: importedObjectCount,
       isLoading: false,
@@ -373,6 +375,7 @@ export class Flyout extends Component {
       isOverwriteAllChecked,
       wasImportSuccessful,
       importCount,
+      failedImports = [],
     } = this.state;
 
     if (isLoading) {
@@ -389,9 +392,41 @@ export class Flyout extends Component {
       );
     }
 
-    if (wasImportSuccessful) {
+    if (failedImports.length) {
       return (
-        <EuiCallOut title="Import successful" color="success" iconType="check">
+        <EuiCallOut
+          title="Import failed"
+          color="warning"
+          iconType="help"
+        >
+          <p>
+            Failed to import {failedImports.length} of {importCount + failedImports.length} objects.
+          </p>
+          <p>
+            {failedImports.map(({ error }) => error.message || '').join(' ')}
+          </p>
+        </EuiCallOut>
+      );
+    }
+
+    if (wasImportSuccessful) {
+      if (importCount === 0) {
+        return (
+          <EuiCallOut
+            data-test-subj="importSavedObjectsSuccessNoneImported"
+            title="No objects imported"
+            color="primary"
+          />
+        );
+      }
+
+      return (
+        <EuiCallOut
+          data-test-subj="importSavedObjectsSuccess"
+          title="Import successful"
+          color="success"
+          iconType="check"
+        >
           <p>Successfully imported {importCount} objects.</p>
         </EuiCallOut>
       );

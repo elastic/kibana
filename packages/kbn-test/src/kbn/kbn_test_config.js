@@ -39,10 +39,8 @@ export const kbnTestConfig = new class KbnTestConfig {
       };
     }
 
-    const username =
-      process.env.TEST_KIBANA_USERNAME || kibanaTestUser.username;
-    const password =
-      process.env.TEST_KIBANA_PASSWORD || kibanaTestUser.password;
+    const username = process.env.TEST_KIBANA_USERNAME || kibanaTestUser.username;
+    const password = process.env.TEST_KIBANA_PASSWORD || kibanaTestUser.password;
     return {
       protocol: process.env.TEST_KIBANA_PROTOCOL || 'http',
       hostname: process.env.TEST_KIBANA_HOSTNAME || 'localhost',

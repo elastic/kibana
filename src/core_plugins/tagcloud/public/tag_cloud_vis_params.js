@@ -34,7 +34,7 @@ uiModules.get('kibana/table_vis')
         const slider = sliderContainer.querySelector('.tag-cloud-fontsize-slider');
         $scope.config = $scope.vis.type.editorConfig;
         noUiSlider.create(slider, {
-          start: [$scope.vis.params.minFontSize, $scope.vis.params.maxFontSize],
+          start: [$scope.editorState.params.minFontSize, $scope.editorState.params.maxFontSize],
           connect: true,
           step: 1,
           range: { 'min': 1, 'max': 100 },
@@ -43,8 +43,8 @@ uiModules.get('kibana/table_vis')
         slider.noUiSlider.on('slide', function () {
           const fontSize = slider.noUiSlider.get();
           $scope.$apply(() => {
-            $scope.vis.params.minFontSize = fontSize[0];
-            $scope.vis.params.maxFontSize = fontSize[1];
+            $scope.editorState.params.minFontSize = fontSize[0];
+            $scope.editorState.params.maxFontSize = fontSize[1];
           });
         });
 
@@ -52,13 +52,13 @@ uiModules.get('kibana/table_vis')
          * Whenever the params change (e.g. by hitting reset in the editor)
          * set the uislider value to the new value.
          */
-        $scope.$watch('vis.params.minFontSize', (val) => {
+        $scope.$watch('editorState.params.minFontSize', (val) => {
           val = parseInt(val);
           if (slider.noUiSlider.get()[0] !== val) {
             slider.noUiSlider.set([val, null]);
           }
         });
-        $scope.$watch('vis.params.maxFontSize', (val) => {
+        $scope.$watch('editorState.params.maxFontSize', (val) => {
           val = parseInt(val);
           if (slider.noUiSlider.get()[1] !== val) {
             slider.noUiSlider.set([null, val]);

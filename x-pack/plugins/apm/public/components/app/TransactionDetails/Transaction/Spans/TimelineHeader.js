@@ -33,6 +33,13 @@ const Heading = styled.div`
 
 const Legends = styled.div`
   display: flex;
+
+  div {
+    margin-right: ${px(unit)};
+    &:last-child {
+      margin-right: 0;
+    }
+  }
 `;
 
 export default function TimelineHeader({ legends, transactionName }) {
@@ -43,7 +50,7 @@ export default function TimelineHeader({ legends, transactionName }) {
       </TooltipOverlay>
       <Legends>
         {legends.map(({ color, label }) => (
-          <Legend clickable={false} key={color} color={color} text={label} />
+          <Legend key={color} color={color} text={label} />
         ))}
       </Legends>
     </TimelineHeaderContainer>

@@ -31,7 +31,7 @@ export default function ({ getService, getPageObjects }) {
 
     const initBarChart = async () => {
       log.debug('navigateToApp visualize');
-      await PageObjects.common.navigateToUrl('visualize', 'new');
+      await PageObjects.visualize.navigateToNewVisualization();
       log.debug('clickVerticalBarChart');
       await PageObjects.visualize.clickVerticalBarChart();
       await PageObjects.visualize.clickNewSearch();
@@ -97,12 +97,96 @@ export default function ({ getService, getPageObjects }) {
         ['2015-09-20 21:00', '31'],
         ['2015-09-21 00:00', '42'],
         ['2015-09-21 03:00', '202'],
+        [ '2015-09-21 06:00', '683' ],
+        [ '2015-09-21 09:00', '1,361' ],
+        [ '2015-09-21 12:00', '1,415' ],
+        [ '2015-09-21 15:00', '707' ],
+        [ '2015-09-21 18:00', '177' ],
+        [ '2015-09-21 21:00', '27' ],
+        [ '2015-09-22 00:00', '32' ],
+        [ '2015-09-22 03:00', '175' ],
+        [ '2015-09-22 06:00', '707' ],
+        [ '2015-09-22 09:00', '1,408' ],
       ];
 
       await PageObjects.visualize.openInspector();
       const data = await PageObjects.visualize.getInspectorTableData();
       log.debug(data);
       expect(data).to.eql(expectedChartData);
+    });
+
+    describe.skip('switch between Y axis scale types', () => {
+      before(initBarChart);
+      const axisId = 'ValueAxis-1';
+
+      it('should show ticks on selecting log scale', async () => {
+        await PageObjects.visualize.clickMetricsAndAxes();
+        await PageObjects.visualize.clickYAxisOptions(axisId);
+        await PageObjects.visualize.selectYAxisScaleType(axisId, 'log');
+        await PageObjects.visualize.clickYAxisAdvancedOptions(axisId);
+        await PageObjects.visualize.changeYAxisFilterLabelsCheckbox(axisId, false);
+        await PageObjects.visualize.clickGo();
+        const labels = await PageObjects.visualize.getYAxisLabels();
+        const expectedLabels = [
+          '2', '3', '5', '7', '10', '20', '30', '50', '70', '100', '200',
+          '300', '500', '700', '1,000', '2,000', '3,000', '5,000', '7,000',
+        ];
+        expect(labels).to.eql(expectedLabels);
+      });
+
+      it('should show filtered ticks on selecting log scale', async () => {
+        await PageObjects.visualize.changeYAxisFilterLabelsCheckbox(axisId, true);
+        await PageObjects.visualize.clickGo();
+        const labels = await PageObjects.visualize.getYAxisLabels();
+        const expectedLabels = [
+          '2', '3', '5', '7', '10', '20', '30', '50', '70', '100', '200',
+          '300', '500', '700', '1,000', '2,000', '3,000', '5,000', '7,000',
+        ];
+        expect(labels).to.eql(expectedLabels);
+      });
+
+      it('should show ticks on selecting square root scale', async () => {
+        await PageObjects.visualize.selectYAxisScaleType(axisId, 'square root');
+        await PageObjects.visualize.changeYAxisFilterLabelsCheckbox(axisId, false);
+        await PageObjects.visualize.clickGo();
+        const labels = await PageObjects.visualize.getYAxisLabels();
+        const expectedLabels = [
+          '0', '200', '400', '600', '800', '1,000', '1,200', '1,400', '1,600',
+        ];
+        expect(labels).to.eql(expectedLabels);
+      });
+
+      it('should show filtered ticks on selecting square root scale', async () => {
+        await PageObjects.visualize.changeYAxisFilterLabelsCheckbox(axisId, true);
+        await PageObjects.visualize.clickGo();
+        const labels = await PageObjects.visualize.getYAxisLabels();
+        const expectedLabels = [
+          '200', '400', '600', '800', '1,000', '1,200', '1,400',
+        ];
+        expect(labels).to.eql(expectedLabels);
+      });
+
+      it('should show ticks on selecting linear scale', async () => {
+        await PageObjects.visualize.selectYAxisScaleType(axisId, 'linear');
+        await PageObjects.visualize.changeYAxisFilterLabelsCheckbox(axisId, false);
+        await PageObjects.visualize.clickGo();
+        const labels = await PageObjects.visualize.getYAxisLabels();
+        log.debug(labels);
+        const expectedLabels = [
+          '0', '200', '400', '600', '800', '1,000', '1,200', '1,400', '1,600',
+        ];
+        expect(labels).to.eql(expectedLabels);
+      });
+
+      it('should show filtered ticks on selecting linear scale', async () => {
+        await PageObjects.visualize.changeYAxisFilterLabelsCheckbox(axisId, true);
+        await PageObjects.visualize.clickGo();
+        const labels = await PageObjects.visualize.getYAxisLabels();
+        const expectedLabels = [
+          '200', '400', '600', '800', '1,000', '1,200', '1,400',
+        ];
+        expect(labels).to.eql(expectedLabels);
+      });
     });
 
     describe('vertical bar with split series', function () {

@@ -27,7 +27,7 @@
           X-Axis Lines
         </label>
         <div class="kuiSideBarFormRow__control">
-          <input class="kuiCheckBox" id="showCategoryLines" type="checkbox" ng-model="vis.params.grid.categoryLines">
+          <input class="kuiCheckBox" id="showCategoryLines" type="checkbox" ng-model="editorState.params.grid.categoryLines">
         </div>
       </div>
 
@@ -39,8 +39,8 @@
           <select
             id="gridAxis"
             class="kuiSelect kuiSideBarSelect"
-            ng-model="vis.params.grid.valueAxis"
-            ng-options="axis.id as axis.name for axis in vis.params.valueAxes track by axis.id"
+            ng-model="editorState.params.grid.valueAxis"
+            ng-options="axis.id as axis.name for axis in editorState.params.valueAxes track by axis.id"
           >
             <option value="">Don't show</option>
           </select>

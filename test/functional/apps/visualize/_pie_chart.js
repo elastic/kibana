@@ -30,7 +30,7 @@ export default function ({ getService, getPageObjects }) {
     before(async function () {
 
       log.debug('navigateToApp visualize');
-      await PageObjects.common.navigateToUrl('visualize', 'new');
+      await PageObjects.visualize.navigateToNewVisualization();
       log.debug('clickPieChart');
       await PageObjects.visualize.clickPieChart();
       await PageObjects.visualize.clickNewSearch();
@@ -92,7 +92,7 @@ export default function ({ getService, getPageObjects }) {
     it('should show other and missing bucket', async function () {
       const expectedTableData =  [ 'win 8', 'win xp', 'win 7', 'ios', 'Missing', 'Other' ];
 
-      await PageObjects.common.navigateToUrl('visualize', 'new');
+      await PageObjects.visualize.navigateToNewVisualization();
       log.debug('clickPieChart');
       await PageObjects.visualize.clickPieChart();
       await PageObjects.visualize.clickNewSearch();
@@ -112,6 +112,63 @@ export default function ({ getService, getPageObjects }) {
       const pieData = await PageObjects.visualize.getPieChartLabels();
       log.debug('pieData.length = ' + pieData.length);
       expect(pieData).to.eql(expectedTableData);
+    });
+
+    describe('disabled aggs', () => {
+      before(async () => {
+        await PageObjects.visualize.loadSavedVisualization(vizName1);
+        await PageObjects.visualize.waitForVisualization();
+        // sleep a bit before trying to get the pie chart data below
+        await PageObjects.common.sleep(2000);
+      });
+
+      it('should show correct result with one agg disabled', async () => {
+        const expectedTableData =  [ 'win 8', 'win xp', 'win 7', 'ios', 'osx'  ];
+
+        await PageObjects.visualize.clickAddBucket();
+        await PageObjects.visualize.clickBucket('Split Slices');
+        await PageObjects.visualize.selectAggregation('Terms');
+        await PageObjects.visualize.selectField('machine.os.raw');
+        await PageObjects.visualize.toggleDisabledAgg(2);
+        await PageObjects.visualize.clickGo();
+        await PageObjects.header.waitUntilLoadingHasFinished();
+
+        const pieData = await PageObjects.visualize.getPieChartLabels();
+        log.debug('pieData.length = ' + pieData.length);
+        expect(pieData).to.eql(expectedTableData);
+      });
+
+      it('should correctly save disabled agg', async () => {
+        await PageObjects.visualize.saveVisualization(vizName1);
+        const pageTitle = await PageObjects.common.getBreadcrumbPageTitle();
+        log.debug(`Save viz page title is ${pageTitle}`);
+        expect(pageTitle).to.contain(vizName1);
+        await PageObjects.header.waitForToastMessageGone();
+        await PageObjects.visualize.loadSavedVisualization(vizName1);
+        await PageObjects.visualize.waitForVisualization();
+
+        const expectedTableData =  [ 'win 8', 'win xp', 'win 7', 'ios', 'osx'  ];
+        const pieData = await PageObjects.visualize.getPieChartLabels();
+        log.debug('pieData.length = ' + pieData.length);
+        expect(pieData).to.eql(expectedTableData);
+      });
+
+      it('should show correct result when agg is re-enabled', async () => {
+        await PageObjects.visualize.toggleDisabledAgg(2);
+        await PageObjects.visualize.clickGo();
+        await PageObjects.header.waitUntilLoadingHasFinished();
+        await PageObjects.common.sleep(2000);
+
+        const expectedTableData =  [
+          '0', 'win 7', 'win xp', 'win 8', 'ios', 'osx', '40,000', 'win 8', 'ios', 'win 7', 'win xp', 'osx', '80,000',
+          'win 7', 'win 8', 'osx', 'win xp', 'ios', '120,000', 'ios', 'win xp', 'win 7', 'win 8', 'osx', '160,000',
+          'win 8', 'ios', 'win 7', 'win xp', 'osx', '200,000', 'win 8', 'ios', 'win xp', 'win 7', 'osx', '240,000',
+          'ios', 'win 7', 'win xp', 'win 8', 'osx', '280,000', 'win xp', 'win 8', 'win 7', 'ios', 'osx', '320,000',
+          'win xp', 'win 7', 'ios', 'win 8', 'osx', '360,000', 'win 7', 'win xp', 'ios', 'win 8', 'osx' ];
+        const pieData = await PageObjects.visualize.getPieChartLabels();
+        log.debug('pieData.length = ' + pieData.length);
+        expect(pieData).to.eql(expectedTableData);
+      });
     });
   });
 }

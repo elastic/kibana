@@ -23,14 +23,13 @@ import 'plugins/kbn_vislib_vis_types/controls/line_interpolation_option';
 import 'plugins/kbn_vislib_vis_types/controls/heatmap_options';
 import 'plugins/kbn_vislib_vis_types/controls/gauge_options';
 import 'plugins/kbn_vislib_vis_types/controls/point_series';
-import '../../visualize/visualize_legend';
-import { VisTypeProvider } from './base_vis_type';
+import './vislib_vis_legend';
+import { BaseVisType } from './base_vis_type';
 import { AggResponsePointSeriesProvider } from '../../agg_response/point_series/point_series';
 import VislibProvider from '../../vislib';
 import $ from 'jquery';
 
 export function VislibVisTypeProvider(Private, $rootScope, $timeout, $compile) {
-  const VisType = Private(VisTypeProvider);
   const pointSeries = Private(AggResponsePointSeriesProvider);
   const vislib = Private(VislibProvider);
 
@@ -77,12 +76,9 @@ export function VislibVisTypeProvider(Private, $rootScope, $timeout, $compile) {
           $scope.vis = this.vis;
           $scope.visData = esResponse;
           $scope.uiState = $scope.vis.getUiState();
-          const legendHtml = $compile('<visualize-legend></visualize-legend>')($scope);
+          const legendHtml = $compile('<vislib-legend></vislib-legend>')($scope);
           this.container.appendChild(legendHtml[0]);
           $scope.$digest();
-          // We need to wait one digest cycle for the legend to render, before
-          // we want to render the chart, so it know about the legend size.
-          await new Promise(resolve => $timeout(resolve));
         }
 
         this.vis.vislibVis = new vislib.Vis(this.chartEl, this.vis.params);
@@ -105,11 +101,11 @@ export function VislibVisTypeProvider(Private, $rootScope, $timeout, $compile) {
         this.vis.vislibVis.destroy();
         delete this.vis.vislibVis;
       }
-      $(this.container).find('visualize-legend').remove();
+      $(this.container).find('vislib-legend').remove();
     }
   }
 
-  class VislibVisType extends VisType {
+  class VislibVisType extends BaseVisType {
     constructor(opts) {
       if (!opts.responseHandler) {
         opts.responseHandler = 'basic';

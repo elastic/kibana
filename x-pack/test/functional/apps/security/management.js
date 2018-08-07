@@ -16,6 +16,7 @@ export default function ({ getService, getPageObjects }) {
   const kibanaServer = getService('kibanaServer');
   const testSubjects = getService('testSubjects');
   const remote = getService('remote');
+  const retry = getService('retry');
   const find = getService('find');
   const PageObjects = getPageObjects(['security', 'settings', 'common', 'header']);
 
@@ -27,6 +28,16 @@ export default function ({ getService, getPageObjects }) {
         'dateFormat:tz': 'UTC',
         'defaultIndex': 'logstash-*'
       });
+      await PageObjects.settings.navigateTo();
+
+      // Create logstash-readonly role
+      await PageObjects.settings.clickLinkText('Roles');
+      await PageObjects.security.clickCreateNewRole();
+      await testSubjects.setValue('roleFormNameInput', 'logstash-readonly');
+      await PageObjects.security.addIndexToRole('logstash-*');
+      await PageObjects.security.addPrivilegeToRole('read');
+      await PageObjects.security.clickSaveEditRole();
+
       await PageObjects.settings.navigateTo();
     });
 
@@ -53,7 +64,7 @@ export default function ({ getService, getPageObjects }) {
           await testSubjects.setValue('passwordInput', '123456');
           await testSubjects.setValue('passwordConfirmationInput', '123456');
           await testSubjects.setValue('userFormFullNameInput', 'Full User Name');
-          await testSubjects.setValue('userFormEmailInput', 'my@email.com');
+          await testSubjects.setValue('userFormEmailInput', 'example@example.com');
 
           await PageObjects.security.clickSaveEditUser();
 
@@ -66,8 +77,9 @@ export default function ({ getService, getPageObjects }) {
           await PageObjects.settings.clickLinkText('new-user');
           const currentUrl = await remote.getCurrentUrl();
           expect(currentUrl).to.contain(EDIT_USERS_PATH);
-
           const userNameInput = await testSubjects.find('userFormUserNameInput');
+          // allow time for user to load
+          await PageObjects.common.sleep(500);
           const userName = await userNameInput.getProperty('value');
           expect(userName).to.equal('new-user');
         });
@@ -122,9 +134,9 @@ export default function ({ getService, getPageObjects }) {
           await testSubjects.setValue('passwordInput', '123456');
           await testSubjects.setValue('passwordConfirmationInput', '123456');
           await testSubjects.setValue('userFormFullNameInput', 'dashuser');
-          await testSubjects.setValue('userFormEmailInput', 'my@email.com');
+          await testSubjects.setValue('userFormEmailInput', 'example@example.com');
           await PageObjects.security.assignRoleToUser('kibana_dashboard_only_user');
-          await PageObjects.security.assignRoleToUser('logstash-data');
+          await PageObjects.security.assignRoleToUser('logstash-readonly');
 
           await PageObjects.security.clickSaveEditUser();
 
@@ -142,13 +154,13 @@ export default function ({ getService, getPageObjects }) {
           const allInputs = await find.allByCssSelector('input');
           for (let i = 0; i < allInputs.length; i++) {
             const input = allInputs[i];
-            expect(await input.getProperty('disabled')).to.be(true);
-          }
-
-          const allCheckboxes = await find.allByCssSelector('checkbox');
-          for (let i = 0; i < allCheckboxes.length; i++) {
-            const checkbox = allCheckboxes[i];
-            expect(await checkbox.getProperty('disabled')).to.be(true);
+            // Angular can take a little bit to set the input to disabled,
+            // so this accounts for that delay
+            retry.try(async () => {
+              if (!(await input.getProperty('disabled'))) {
+                throw new Error('input is not disabled');
+              }
+            });
           }
         });
       });

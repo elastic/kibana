@@ -26,20 +26,45 @@ import { setupVersionCheck } from './version_check';
 import { handleShortUrlError } from './short_url_error';
 import { shortUrlAssertValid } from './short_url_assert_valid';
 import { shortUrlLookupProvider } from './short_url_lookup';
-import { setupConnection } from './setup_connection';
-import { setupRedirectServer } from './setup_redirect_server';
 import { registerHapiPlugins } from './register_hapi_plugins';
-import { setupBasePathRewrite } from './setup_base_path_rewrite';
 import { setupXsrf } from './xsrf';
 
 export default async function (kbnServer, server, config) {
-  server = kbnServer.server = new Hapi.Server();
+  kbnServer.server = new Hapi.Server();
+  server = kbnServer.server;
 
   const shortUrlLookup = shortUrlLookupProvider(server);
 
-  setupConnection(server, config);
-  setupBasePathRewrite(server, config);
-  await setupRedirectServer(config);
+  // Note that all connection options configured here should be exactly the same
+  // as in `getServerOptions()` in the new platform (see `src/core/server/http/http_tools`).
+  //
+  // The only exception is `tls` property: TLS is entirely handled by the new
+  // platform and we don't have to duplicate all TLS related settings here, we just need
+  // to indicate to Hapi connection that TLS is used so that it can use correct protocol
+  // name in `server.info` and `request.connection.info` that are used throughout Kibana.
+  //
+  // Any change SHOULD BE applied in both places.
+  server.connection({
+    host: config.get('server.host'),
+    port: config.get('server.port'),
+    tls: config.get('server.ssl.enabled'),
+    listener: kbnServer.newPlatform.proxyListener,
+    state: {
+      strictHeader: false,
+    },
+    routes: {
+      cors: config.get('server.cors'),
+      payload: {
+        maxBytes: config.get('server.maxPayloadBytes'),
+      },
+      validate: {
+        options: {
+          abortEarly: false,
+        },
+      },
+    },
+  });
+
   registerHapiPlugins(server);
 
   // provide a simple way to expose static directories
@@ -63,7 +88,7 @@ export default async function (kbnServer, server, config) {
     this.views({
       path: path,
       isCached: config.get('optimize.viewCaching'),
-      engines: _.assign({ jade: require('jade') }, engines || {})
+      engines: _.assign({ pug: require('pug') }, engines || {})
     });
   });
 
@@ -74,7 +99,6 @@ export default async function (kbnServer, server, config) {
     const customHeaders = {
       ...config.get('server.customResponseHeaders'),
       'kbn-name': kbnServer.name,
-      'kbn-version': kbnServer.version,
     };
 
     if (response.isBoom) {

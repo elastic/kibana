@@ -28,22 +28,20 @@ export function initErrorsApi(server) {
       pre,
       validate: {
         query: withDefaultValidators({
-          q: Joi.string().allow(''),
-          sortBy: Joi.string(),
-          sortOrder: Joi.string()
+          sortField: Joi.string(),
+          sortDirection: Joi.string()
         })
       }
     },
     handler: (req, reply) => {
       const { setup } = req.pre;
       const { serviceName } = req.params;
-      const { q, sortBy, sortOrder } = req.query;
+      const { sortField, sortDirection } = req.query;
 
       return getErrorGroups({
         serviceName,
-        q,
-        sortBy,
-        sortOrder,
+        sortField,
+        sortDirection,
         setup
       })
         .then(reply)

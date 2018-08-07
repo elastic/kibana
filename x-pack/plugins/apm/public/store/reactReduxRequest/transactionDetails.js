@@ -5,15 +5,16 @@
  */
 
 import React from 'react';
-import { withInitialData } from './helpers';
+import { createInitialDataSelector } from './helpers';
 import { Request } from 'react-redux-request';
-import { loadTransaction } from '../../services/rest';
+import { loadTransaction } from '../../services/rest/apm';
 
 const ID = 'transactionDetails';
 const INITIAL_DATA = {};
+const withInitialData = createInitialDataSelector(INITIAL_DATA);
 
 export function getTransactionDetails(state) {
-  return withInitialData(state.reactReduxRequest[ID], INITIAL_DATA);
+  return withInitialData(state.reactReduxRequest[ID]);
 }
 
 export function TransactionDetailsRequest({ urlParams, render }) {

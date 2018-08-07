@@ -36,10 +36,7 @@ class DataAdapter extends EventEmitter {
   private tabular?: TabularCallback;
   private tabularOptions?: TabularLoaderOptions;
 
-  public setTabularLoader(
-    callback: TabularCallback,
-    options: TabularLoaderOptions = {}
-  ): void {
+  public setTabularLoader(callback: TabularCallback, options: TabularLoaderOptions = {}): void {
     this.tabular = callback;
     this.tabularOptions = options;
     this.emit('change', 'tabular');

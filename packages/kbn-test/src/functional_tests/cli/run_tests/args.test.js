@@ -57,9 +57,7 @@ describe('process options for run tests CLI', () => {
   it('rejects boolean value for kibana-install-dir', () => {
     expect(() => {
       processOptions({ 'kibana-install-dir': true }, ['foo']);
-    }).toThrow(
-      'functional_tests: invalid argument [true] to option [kibana-install-dir]'
-    );
+    }).toThrow('functional_tests: invalid argument [true] to option [kibana-install-dir]');
   });
 
   it('accepts boolean value for updateBaselines', () => {
@@ -75,9 +73,7 @@ describe('process options for run tests CLI', () => {
   it('rejects non-enum value for esFrom', () => {
     expect(() => {
       processOptions({ esFrom: 'butter' }, ['foo']);
-    }).toThrow(
-      'functional_tests: invalid argument [butter] to option [esFrom]'
-    );
+    }).toThrow('functional_tests: invalid argument [butter] to option [esFrom]');
   });
 
   it('accepts value for grep', () => {

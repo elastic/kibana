@@ -57,7 +57,7 @@ describe('AggTable Directive', function () {
   it('renders a simple response properly', function () {
     const vis = new Vis(indexPattern, 'table');
     $scope.table = tabifyAggResponse(
-      vis.getAggConfig().getResponseAggs(),
+      vis.getAggConfig(),
       fixtures.metricOnly,
       { canSplit: false, hierarchical: vis.isHierarchical() }
     );
@@ -92,7 +92,7 @@ describe('AggTable Directive', function () {
       agg.id = 'agg_' + (i + 1);
     });
 
-    $scope.table = tabifyAggResponse(vis.getAggConfig().getResponseAggs(), fixtures.threeTermBuckets, {
+    $scope.table = tabifyAggResponse(vis.getAggConfig(), fixtures.threeTermBuckets, {
       canSplit: false,
       isHierarchical: vis.isHierarchical()
     });
@@ -158,7 +158,7 @@ describe('AggTable Directive', function () {
       const oldTimezoneSetting = settings.get('dateFormat:tz');
       settings.set('dateFormat:tz', 'UTC');
 
-      $scope.table = tabifyAggResponse(vis.getAggConfig().getResponseAggs(),
+      $scope.table = tabifyAggResponse(vis.getAggConfig(),
         fixtures.oneTermOneHistogramBucketWithTwoMetricsOneTopHitOneDerivative,
         { canSplit: false, minimalColumns: true, asAggConfigResults: true }
       );
