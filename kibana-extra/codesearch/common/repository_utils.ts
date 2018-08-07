@@ -6,6 +6,8 @@
 
 import GitUrlParse from 'git-url-parse';
 import path from 'path';
+import Url from 'url';
+import { Location } from 'vscode-languageserver';
 
 import { Repository, RepositoryUri } from '../model';
 
@@ -33,5 +35,18 @@ export class RepositoryUtils {
       .split('/')
       .join('-')
       .toLowerCase();
+  }
+
+  public static locationToUrl(loc: Location) {
+    const url = Url.parse(loc.uri);
+    const { hostname, pathname, query, hash } = url;
+    if (hostname && pathname && hash && query) {
+      const repoUri = hostname + pathname;
+      const revision = query;
+      const p = hash.slice(1, hash.length);
+      const { line, character } = loc.range.start;
+      return `/${repoUri}/${revision}/${p}!L${line + 1}:${character}`;
+    }
+    return '';
   }
 }

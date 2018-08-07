@@ -8,6 +8,7 @@ import { fork } from 'redux-saga/effects';
 
 import { watchDeleteRepo, watchFetchRepos, watchImportRepo, watchIndexRepo } from './repository';
 import { watchLocationChange } from './route';
+import { watchSearchQueryChanged } from './search';
 
 export function* rootSaga() {
   yield fork(watchFetchRepos);
@@ -15,4 +16,5 @@ export function* rootSaga() {
   yield fork(watchDeleteRepo);
   yield fork(watchIndexRepo);
   yield fork(watchImportRepo);
+  yield fork(watchSearchQueryChanged);
 }

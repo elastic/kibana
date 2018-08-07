@@ -6,9 +6,11 @@
 import { combineReducers } from 'redux';
 
 import { repository, RepositoryState } from './repository';
+import { search, SearchState } from './search';
 
 export interface RootState {
   repository: RepositoryState;
+  search: SearchState;
 }
 
-export const rootReducer = combineReducers({ repository });
+export const rootReducer = combineReducers({ repository, search });

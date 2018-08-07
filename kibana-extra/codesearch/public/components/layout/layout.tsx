@@ -3,28 +3,18 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-
+import { DetailSymbolInformation } from '@codesearch/javascript-typescript-langserver';
+import { EuiButtonIcon, EuiComboBox, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import React from 'react';
-
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiHeader,
-  EuiHeaderLogo,
-  EuiHeaderSection,
-  EuiHeaderSectionItem,
-  EuiHeaderSectionItemButton,
-  EuiIcon,
-  EuiButtonIcon,
-  EuiPage,
-  EuiPageBody,
-  EuiSpacer,
-} from '@elastic/eui';
+import { connect } from 'react-redux';
 import { match } from 'react-router-dom';
+import { Location } from 'vscode-languageserver';
 
 import { kfetch } from 'ui/kfetch';
-
+import { RepositoryUtils } from '../../../common/repository_utils';
 import { FileTree as Tree } from '../../../model';
+import { searchQueryChanged } from '../../actions';
+import { RootState } from '../../reducers';
 
 import { Breadcrumbs } from '../breadcrumbs/breadcrumbs';
 import { FileTree } from '../file_tree/file_tree';
@@ -33,24 +23,29 @@ import { Editor } from './editor';
 import { history } from '../../utils/url';
 
 const noMarginStyle = {
-  margin: 0
+  margin: 0,
 };
 
 interface State {
   children: any[];
   forceOpenPaths: Set<string>;
   node: any;
+  showSearchBox: boolean;
 }
 interface Props {
   match: match<{ [key: string]: string }>;
+  searchQueryChanged: (query: string) => void;
+  symbols: DetailSymbolInformation[];
+  isSymbolsLoading: boolean;
 }
 
-export class Layout extends React.Component<Props, State> {
+export class LayoutPage extends React.Component<Props, State> {
   constructor(props: Props) {
     super(props);
     this.state = {
       children: [],
       node: null,
+      showSearchBox: false,
       forceOpenPaths: new Set([props.match.params.path || '']),
     };
   }
@@ -81,6 +76,9 @@ export class Layout extends React.Component<Props, State> {
   }
 
   public findNode = (pathSegments: string[], node: Tree) => {
+    if (!node) {
+      return null;
+    }
     if (pathSegments.length === 0) {
       return node;
     } else if (pathSegments.length === 1) {
@@ -129,7 +127,31 @@ export class Layout extends React.Component<Props, State> {
     });
   };
 
+  public searchInputOnChangedHandler = (event: React.ChangeEvent<HTMLInputElement>) => {
+    this.props.searchQueryChanged(event.target.value);
+  };
+
+  public getSymbolLinkUrl = (loc: Location) => {
+    return RepositoryUtils.locationToUrl(loc);
+  };
+
+  public toggleSearchBox = () => {
+    this.setState({ showSearchBox: !this.state.showSearchBox });
+  };
+
+  public onChange = (selectedOptions: any[]) => {
+    const { symbol } = selectedOptions[0];
+    const location = symbol.symbolInformation.location;
+    const url = this.getSymbolLinkUrl(location);
+    history.push(url);
+  };
+
+  public onSearchChange = (searchValue: string) => {
+    this.props.searchQueryChanged(searchValue.toLowerCase());
+  };
+
   public render() {
+    const { symbols, isSymbolsLoading } = this.props;
     const { resource, org, repo, revision, path, goto } = this.props.match.params;
     const pathSegments = path ? path.split('/') : [];
     const editor = path && (
@@ -141,11 +163,38 @@ export class Layout extends React.Component<Props, State> {
       />
     );
 
+    const symbolOptions = symbols.map((symbol: DetailSymbolInformation) => {
+      return {
+        label: symbol.symbolInformation.name,
+        symbol,
+      };
+    });
+
+    const searchBox = (
+      <EuiFlexItem grow={false} style={noMarginStyle}>
+        <EuiFlexGroup
+          justifyContent="spaceBetween"
+          className="topBar"
+          direction="column"
+          style={noMarginStyle}
+        >
+          <EuiFlexItem grow={false} style={noMarginStyle}>
+            <EuiComboBox
+              placeholder="Search..."
+              async={true}
+              options={symbolOptions}
+              isLoading={isSymbolsLoading}
+              onChange={this.onChange}
+              onSearchChange={this.onSearchChange}
+            />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiFlexItem>
+    );
+
     return (
       <EuiFlexGroup direction="column" className="mainRoot" style={noMarginStyle}>
-        <div>
-          {/*this section is for search*/}
-        </div>
+        {this.state.showSearchBox && searchBox}
         <EuiFlexItem grow={false} style={noMarginStyle}>
           <EuiFlexGroup justifyContent="spaceBetween" className="topBar" style={noMarginStyle}>
             <EuiFlexItem grow={false} style={noMarginStyle}>
@@ -157,29 +206,44 @@ export class Layout extends React.Component<Props, State> {
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <div>
-                <EuiButtonIcon iconType="node"/>
-                <EuiButtonIcon iconType="gear"/>
-                <EuiButtonIcon iconType="search"/>
+                <EuiButtonIcon iconType="node" aria-label="node" />
+                <EuiButtonIcon iconType="gear" aria-label="config" />
+                <EuiButtonIcon
+                  iconType="search"
+                  aria-label="Toggle Search Box"
+                  onClick={this.toggleSearchBox}
+                />
               </div>
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlexItem>
-        <EuiSpacer size="xs" className="spacer"/>
+        <EuiSpacer size="xs" className="spacer" />
         <EuiFlexItem className="codeMainContainer" style={noMarginStyle}>
-            <EuiFlexGroup justifyContent="spaceBetween" className="codeMain">
-              <EuiFlexItem grow={false} style={noMarginStyle} className="fileTreeContainer">
-                <FileTree
-                  node={this.state.node}
-                  onClick={this.onClick}
-                  forceOpenPaths={this.state.forceOpenPaths}
-                  getTreeToggler={this.getTreeToggler}
-                  activePath={path || ''}
-                />
-              </EuiFlexItem>
-              <EuiFlexItem style={noMarginStyle}>{editor}</EuiFlexItem>
-            </EuiFlexGroup>
+          <EuiFlexGroup justifyContent="spaceBetween" className="codeMain">
+            <EuiFlexItem grow={false} style={noMarginStyle} className="fileTreeContainer">
+              <FileTree
+                node={this.state.node}
+                onClick={this.onClick}
+                forceOpenPaths={this.state.forceOpenPaths}
+                getTreeToggler={this.getTreeToggler}
+                activePath={path || ''}
+              />
+            </EuiFlexItem>
+            <EuiFlexItem style={noMarginStyle}>{editor}</EuiFlexItem>
+          </EuiFlexGroup>
         </EuiFlexItem>
       </EuiFlexGroup>
     );
   }
 }
+
+const mapStateToProps = (state: RootState) => ({
+  symbols: state.search.symbols,
+  isSymbolsLoading: state.search.isLoading,
+});
+
+const mapDispatchToProps = {
+  searchQueryChanged,
+};
+
+export const Layout = connect(mapStateToProps, mapDispatchToProps)(LayoutPage);

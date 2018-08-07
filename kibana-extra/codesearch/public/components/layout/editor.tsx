@@ -40,7 +40,7 @@ export class Editor extends React.Component<Props> {
   }
 
   public render() {
-    return <div className="editorContainer"/>;
+    return <div className="editorContainer" />;
   }
 
   private loadFile(repo: string, file: string, revision: string) {
