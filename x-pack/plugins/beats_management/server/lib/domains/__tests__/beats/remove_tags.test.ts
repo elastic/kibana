@@ -63,14 +63,17 @@ describe('Beats Domain Lib', () => {
         {
           configuration_blocks: [],
           id: 'production',
+          last_updated: new Date(),
         },
         {
           configuration_blocks: [],
           id: 'development',
+          last_updated: new Date(),
         },
         {
           configuration_blocks: [],
           id: 'qa',
+          last_updated: new Date(),
         },
       ];
 
