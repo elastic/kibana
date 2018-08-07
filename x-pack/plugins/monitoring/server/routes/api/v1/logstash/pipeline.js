@@ -44,7 +44,8 @@ export function logstashPipelineRoute(server) {
       const lsIndexPattern = prefixIndexPattern(config, 'xpack.monitoring.logstash.index_pattern', ccs);
 
       const pipelineId = req.params.pipelineId;
-      const pipelineHash = req.params.pipelineHash;
+      // Optional params default to empty string, set to null to be more explicit.
+      const pipelineHash = req.params.pipelineHash || null;
 
       return getPipeline(req, config, lsIndexPattern, clusterUuid, pipelineId, pipelineHash)
         .then(reply)
