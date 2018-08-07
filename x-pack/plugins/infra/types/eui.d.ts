@@ -10,9 +10,8 @@
  */
 
 import { Moment } from 'moment';
-import { MouseEventHandler, ReactType, Ref } from 'react';
+import { MouseEventHandler, ReactNode, ReactType, Ref } from 'react';
 import { ReactDatePickerProps } from 'react-datepicker';
-import { ReactNode } from '../../../node_modules/@types/react';
 
 declare module '@elastic/eui' {
   export interface EuiBreadcrumbDefinition {
