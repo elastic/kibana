@@ -55,25 +55,25 @@
 
     <div class="euiFlexItem euiFlexItem--flexGrowZero">
       <button
-        ng-click="showFields = !showFields"
+        ng-click="$parent.showFields = !$parent.showFields"
         aria-hidden="true"
         class="kuiButton kuiButton--small visible-xs visible-sm pull-right field-collapse-toggle"
       >
         <span
           aria-hidden="true"
           class="kuiIcon"
-          ng-class="{ 'fa-chevron-right': !showFields, 'fa-chevron-down': showFields }"
+          ng-class="{ 'fa-chevron-right': !$parent.showFields, 'fa-chevron-down': $parent.showFields }"
         ></span>
       </button>
     </div>
     <div class="euiFlexItem euiFlexItem--flexGrowZero">
       <button
         type="button"
-        ng-class="{ 'kuiButton--basic': !filter.active, 'kuiButton--primary': filter.active, 'hidden-xs': !showFields, 'hidden-sm': !showFields }"
+        ng-class="{ 'kuiButton--basic': !filter.active, 'kuiButton--primary': filter.active, 'hidden-xs': !$parent.showFields, 'hidden-sm': !$parent.showFields }"
         class="kuiButton kuiButton--small pull-right discover-field-filter-toggle"
-        ng-click="showFilter = !showFilter"
-        aria-label="{{showFilter ? 'Hide' : 'Show'}} field settings"
-        aria-expanded="{{!!showFilter}}"
+        ng-click="$parent.showFilter = !$parent.showFilter"
+        aria-label="{{$parent.showFilter ? 'Hide' : 'Show'}} field settings"
+        aria-expanded="{{!!$parent.showFilter}}"
         aria-controls="discoverFieldFilter"
       >
         <span aria-hidden="true" class="kuiIcon fa-gear"></span>
