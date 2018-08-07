@@ -53,6 +53,7 @@ uiRoutes.when('/apm/instances/:uuid', {
     const globalState = $injector.get('globalState');
     $scope.cluster = find($route.current.locals.clusters, { cluster_uuid: globalState.cluster_uuid });
     $scope.pageData = $route.current.locals.pageData;
+    console.log($scope.pageData);
 
     const title = $injector.get('title');
     title($scope.cluster, `Apm - ${get($scope.pageData, 'apmSummary.name')}`);

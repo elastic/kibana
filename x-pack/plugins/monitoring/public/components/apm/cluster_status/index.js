@@ -40,7 +40,7 @@ export function ClusterStatus({ stats }) {
       metrics={metrics}
       status={status}
       IconComponent={IconComponent}
-      data-test-subj="kibanaClusterStatus"
+      data-test-subj="apmClusterStatus"
     />
   );
 }

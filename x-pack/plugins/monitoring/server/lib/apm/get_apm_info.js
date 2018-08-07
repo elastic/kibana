@@ -4,50 +4,92 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { get, merge } from 'lodash';
+import { get, capitalize } from 'lodash';
 import { checkParam } from '../error_missing_required';
+import { createQuery } from '../create_query';
+import { getDiffCalculation } from '../beats/_beats_stats';
+import { ApmMetric } from '../metrics';
 
-export function handleResponse(resp) {
-  const source = get(resp, 'hits.hits[0]._source.beats_stats');
-  const beat = get(source, 'beat');
-  return merge(
-    beat,
-    {
-      // availability: calculateAvailability(get(source, 'timestamp')),
-      // os_memory_free: get(source, 'os.memory.free_in_bytes'),
-      // uptime: get(source, 'process.uptime_in_millis')
-    }
-  );
+export function handleResponse(response, apmUuid) {
+  const firstStats = get(response, 'hits.hits[0].inner_hits.first_hit.hits.hits[0]._source.beats_stats');
+  const stats = get(response, 'hits.hits[0]._source.beats_stats');
+
+  const eventsTotalFirst = get(firstStats, 'metrics.libbeat.pipeline.events.total', null);
+  const eventsEmittedFirst = get(firstStats, 'metrics.libbeat.pipeline.events.published', null);
+  const eventsDroppedFirst = get(firstStats, 'metrics.libbeat.pipeline.events.dropped', null);
+  const bytesWrittenFirst = get(firstStats, 'metrics.libbeat.output.write.bytes', null);
+
+  const eventsTotalLast = get(stats, 'metrics.libbeat.pipeline.events.total', null);
+  const eventsEmittedLast = get(stats, 'metrics.libbeat.pipeline.events.published', null);
+  const eventsDroppedLast = get(stats, 'metrics.libbeat.pipeline.events.dropped', null);
+  const bytesWrittenLast = get(stats, 'metrics.libbeat.output.write.bytes', null);
+
+  return {
+    uuid: apmUuid,
+    transportAddress: get(stats, 'beat.host', null),
+    version: get(stats, 'beat.version', null),
+    name: get(stats, 'beat.name', null),
+    type: capitalize(get(stats, 'beat.type')) || null,
+    output: capitalize(get(stats, 'metrics.libbeat.output.type')) || null,
+    configReloads: get(stats, 'metrics.libbeat.config.reloads', null),
+    uptime: get(stats, 'metrics.beat.info.uptime.ms', null),
+    eventsTotal: getDiffCalculation(eventsTotalLast, eventsTotalFirst),
+    eventsEmitted: getDiffCalculation(eventsEmittedLast, eventsEmittedFirst),
+    eventsDropped: getDiffCalculation(eventsDroppedLast, eventsDroppedFirst),
+    bytesWritten: getDiffCalculation(bytesWrittenLast, bytesWrittenFirst),
+  };
 }
 
-export function getApmInfo(req, apmIndexPattern, { clusterUuid, apmUuid }) {
-  checkParam(apmIndexPattern, 'apmIndexPattern in getApmInfo');
+export async function getApmInfo(req, beatsIndexPattern, { clusterUuid, apmUuid, start, end }) {
+  checkParam(beatsIndexPattern, 'beatsIndexPattern in beats/getBeatSummary');
 
+  const filters = [
+    { term: { 'beats_stats.beat.uuid': apmUuid } },
+    { term: { 'beats_stats.beat.type': 'apm-server' } }
+  ];
   const params = {
-    index: apmIndexPattern,
+    index: beatsIndexPattern,
     size: 1,
     ignoreUnavailable: true,
     filterPath: [
-      'hits.hits._source.beats_stats.beat',
-      'hits.hits._source.beats_stats.timestamp'
+      'hits.hits._source.beats_stats.beat.host',
+      'hits.hits._source.beats_stats.beat.version',
+      'hits.hits._source.beats_stats.beat.name',
+      'hits.hits._source.beats_stats.beat.type',
+      'hits.hits._source.beats_stats.metrics.libbeat.output.type',
+      'hits.hits._source.beats_stats.metrics.libbeat.pipeline.events.published',
+      'hits.hits._source.beats_stats.metrics.libbeat.pipeline.events.total',
+      'hits.hits._source.beats_stats.metrics.libbeat.pipeline.events.dropped',
+      'hits.hits._source.beats_stats.metrics.libbeat.output.write.bytes',
+      'hits.hits._source.beats_stats.metrics.libbeat.config.reloads',
+      'hits.hits._source.beats_stats.metrics.beat.info.uptime.ms',
+      'hits.hits.inner_hits.first_hit.hits.hits._source.beats_stats.metrics.libbeat.pipeline.events.published',
+      'hits.hits.inner_hits.first_hit.hits.hits._source.beats_stats.metrics.libbeat.pipeline.events.total',
+      'hits.hits.inner_hits.first_hit.hits.hits._source.beats_stats.metrics.libbeat.pipeline.events.dropped',
+      'hits.hits.inner_hits.first_hit.hits.hits._source.beats_stats.metrics.libbeat.output.write.bytes',
     ],
     body: {
-      query: {
-        bool: {
-          filter: [
-            { term: { 'cluster_uuid': clusterUuid } },
-            { term: { 'beats_stats.beat.uuid': apmUuid } }
-          ]
+      sort: { timestamp: { order: 'desc' } },
+      query: createQuery({
+        start,
+        end,
+        clusterUuid,
+        metric: ApmMetric.getMetricFields(),
+        filters
+      }),
+      collapse: {
+        field: 'beats_stats.metrics.beat.info.ephemeral_id', // collapse on ephemeral_id to handle restart
+        inner_hits: {
+          name: 'first_hit',
+          size: 1,
+          sort: { 'beats_stats.timestamp': 'asc' }
         }
-      },
-      collapse: { field: 'beats_stats.beat.uuid' },
-      sort: [
-        { timestamp: { order: 'desc' } }
-      ]
+      }
     }
   };
 
   const { callWithRequest } = req.server.plugins.elasticsearch.getCluster('monitoring');
-  return callWithRequest(req, 'search', params)
-    .then(handleResponse);
+  const response = await callWithRequest(req, 'search', params);
+
+  return handleResponse(response, apmUuid);
 }

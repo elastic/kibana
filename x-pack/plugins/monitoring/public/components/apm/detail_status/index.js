@@ -7,39 +7,44 @@
 import React, { Fragment } from 'react';
 import { SummaryStatus } from '../../summary_status';
 import { ApmStatusIcon } from '../status_icon';
-// import { formatMetric } from '../../../lib/format_number';
+import { formatMetric } from '../../../lib/format_number';
 
 export function DetailStatus({ stats }) {
   const {
-    host,
-    // os_memory_free: osFreeMemory,
-    // version,
-    // uptime,
-    // status
+    name,
+    output,
+    version,
+    uptime,
+    configReloads
   } = stats;
 
-  // console.log('stats', stats);
+  console.log('stats', stats);
 
   const metrics = [
     {
-      value: host,
-      dataTestSubj: 'host'
+      value: name,
+      dataTestSubj: 'name'
     },
-    // {
-    //   label: 'OS Free Memory',
-    //   value: formatMetric(osFreeMemory, 'byte'),
-    //   dataTestSubj: 'osFreeMemory'
-    // },
-    // {
-    //   label: 'Version',
-    //   value: version,
-    //   dataTestSubj: 'version'
-    // },
-    // {
-    //   label: 'Uptime',
-    //   value: formatMetric(uptime, 'time_since'),
-    //   dataTestSubj: 'uptime'
-    // }
+    {
+      label: 'Output',
+      value: output,
+      dataTestSubj: 'output'
+    },
+    {
+      label: 'Config Reloads',
+      value: formatMetric(configReloads, 'int_commas'),
+      dataTestSubj: 'configReloads',
+    },
+    {
+      label: 'Version',
+      value: version,
+      dataTestSubj: 'version'
+    },
+    {
+      label: 'Uptime',
+      value: formatMetric(uptime, 'time_since'),
+      dataTestSubj: 'uptime'
+    }
   ];
 
   const IconComponent = ({ status }) => (
