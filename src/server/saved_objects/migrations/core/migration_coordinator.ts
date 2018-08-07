@@ -41,6 +41,7 @@ const DEFAULT_POLL_INTERVAL = 15000;
 
 export type MigrationResult =
   | { status: 'skipped' }
+  | { status: 'patched' }
   | {
       status: 'migrated';
       destIndex: string;

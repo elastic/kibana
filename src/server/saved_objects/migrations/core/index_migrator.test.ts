@@ -35,7 +35,7 @@ describe('IndexMigrator', () => {
     const result = await new IndexMigrator(opts).migrate();
 
     expect(ranMigration(opts)).toBeFalsy();
-    expect(result.status).toEqual('skipped');
+    expect(result.status).toEqual('patched');
     sinon.assert.calledWith(callCluster, 'indices.putMapping', {
       body: {
         dynamic: 'strict',

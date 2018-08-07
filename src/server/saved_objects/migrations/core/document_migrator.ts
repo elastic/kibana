@@ -32,7 +32,7 @@
  * The basic algorithm, then, is this:
  *
  * While there are any unmigrated properties in the doc, find the next unmigrated property,
- * and run the doc through those transforms.
+ * and run the doc through the transforms that target that property.
  *
  * This way, we keep looping until there are no transforms left to apply, and we properly
  * handle property addition / deletion / renaming.
@@ -46,7 +46,7 @@
  * Migrations *cannot* move a migrationVersion property backwards (e.g. from 2.0.0 to 1.0.0), and they
  * cannot clear a migrationVersion property, as allowing either of these could produce infinite loops.
  * However, we do wish to allow migrations to modify migrationVersion if they wish, so that
- * they could transform a type from "foo" to a specific version of "bar".
+ * they could transform a type from "foo 1.0.0" to  "bar 3.0.0".
  *
  * One last gotcha is that any docs which have no migrationVersion are assumed to be up-to-date.
  * This is because Kibana UI and other clients really can't be expected build the migrationVersion
@@ -241,9 +241,11 @@ function buildDocumentTransform({
 }): TransformFn {
   return function transformAndValidate(doc: SavedObjectDoc) {
     assertCanTransform(doc, kibanaVersion);
+
     const result = doc.migrationVersion
       ? applyMigrations(doc, migrations)
       : markAsUpToDate(doc, migrations);
+
     validateDoc(result);
 
     // In order to keep tests a bit more stable, we won't

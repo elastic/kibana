@@ -109,9 +109,13 @@ async function patchSourceMappings(context: Context): Promise<MigrationResult> {
 
   await Index.putMappings(callCluster, source.indexName, dest.mappings);
 
-  return { status: 'skipped' };
+  return { status: 'patched' };
 }
 
+/**
+ * Performs an index migration if the source index exists, otherwise
+ * this simply creates the dest index with the proper mappings.
+ */
 async function migrateIndex(context: Context): Promise<MigrationResult> {
   const startTime = Date.now();
   const { callCluster, alias, source, dest, log } = context;
@@ -160,6 +164,7 @@ async function migrateSourceToDest(context: Context) {
   const read = Index.reader(callCluster, source.indexName, { batchSize, scrollDuration });
 
   log.info(`Migrating ${source.indexName} saved objects to ${dest.indexName}`);
+
   while (true) {
     const docs = await read();
 
@@ -168,6 +173,7 @@ async function migrateSourceToDest(context: Context) {
     }
 
     log.debug(`Migrating saved objects ${docs.map(d => d._id).join(', ')}`);
+
     await Index.write(callCluster, dest.indexName, migrateRawDocs(documentMigrator.migrate, docs));
   }
 }
