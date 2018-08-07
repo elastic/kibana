@@ -6,10 +6,12 @@ exports[`Latest Active that latest active component renders normally 1`] = `
     Array [
       Object {
         "field": "range",
+        "name": "",
       },
       Object {
         "dataType": "number",
         "field": "count",
+        "name": "",
       },
     ]
   }
