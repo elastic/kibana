@@ -26,6 +26,19 @@ import { includedFields } from './included_fields';
 import { decorateEsError } from './decorate_es_error';
 import * as errors from './errors';
 
+export class DocumentFormat {
+  toDocumentId(type, id) {
+    return `${type}:${id || uuid.v1()}`;
+  }
+
+  fromDocumentId(type, id) {
+    return trimIdPrefix(id, type);
+  }
+
+  getAttributesKey(type) {
+    return type;
+  }
+}
 
 // BEWARE: The SavedObjectClient depends on the implementation details of the SavedObjectsRepository
 // so any breaking changes to this repository are considered breaking changes to the SavedObjectsClient.
@@ -44,6 +57,7 @@ export class SavedObjectsRepository {
     this._type = getRootType(this._mappings);
     this._onBeforeWrite = onBeforeWrite;
     this._unwrappedCallCluster = callCluster;
+    this._documentFormat = new DocumentFormat();
   }
 
   /**
@@ -69,7 +83,7 @@ export class SavedObjectsRepository {
 
     try {
       const response = await this._writeToCluster(method, {
-        id: this._generateEsId(type, id),
+        id: this._documentFormat.toDocumentId(type, id),
         type: this._type,
         index: this._index,
         refresh: 'wait_for',
@@ -77,12 +91,12 @@ export class SavedObjectsRepository {
           ...extraDocumentProperties,
           type,
           updated_at: time,
-          [type]: attributes,
+          [this._documentFormat.getAttributesKey(type)]: attributes,
         },
       });
 
       return {
-        id: trimIdPrefix(response._id, type),
+        id: this._documentFormat.fromDocumentId(type, response._id),
         type,
         updated_at: time,
         version: response._version,
@@ -117,7 +131,7 @@ export class SavedObjectsRepository {
       return [
         {
           [method]: {
-            _id: this._generateEsId(object.type, object.id),
+            _id: this._documentFormat.toDocumentId(object.type, object.id),
             _type: this._type,
           }
         },
@@ -125,7 +139,7 @@ export class SavedObjectsRepository {
           ...object.extraDocumentProperties,
           type: object.type,
           updated_at: time,
-          [object.type]: object.attributes,
+          [this._documentFormat.getAttributesKey(object.type)]: object.attributes,
         }
       ];
     };
@@ -190,7 +204,7 @@ export class SavedObjectsRepository {
    */
   async delete(type, id) {
     const response = await this._writeToCluster('delete', {
-      id: this._generateEsId(type, id),
+      id: this._documentFormat.toDocumentId(type, id),
       type: this._type,
       index: this._index,
       refresh: 'wait_for',
@@ -292,11 +306,11 @@ export class SavedObjectsRepository {
       saved_objects: response.hits.hits.map(hit => {
         const { type, updated_at: updatedAt } = hit._source;
         return {
-          id: trimIdPrefix(hit._id, type),
+          id: this._documentFormat.fromDocumentId(type, hit._id),
           type,
           ...updatedAt && { updated_at: updatedAt },
           version: hit._version,
-          attributes: hit._source[type],
+          attributes: hit._source[this._documentFormat.getAttributesKey(type)],
         };
       }),
     };
@@ -325,7 +339,7 @@ export class SavedObjectsRepository {
       index: this._index,
       body: {
         docs: objects.map(object => ({
-          _id: this._generateEsId(object.type, object.id),
+          _id: this._documentFormat.toDocumentId(object.type, object.id),
           _type: this._type,
         }))
       }
@@ -357,7 +371,7 @@ export class SavedObjectsRepository {
             .map(s => ({ [s]: doc._source[s] }))
             .reduce((acc, prop) => ({ ...acc, ...prop }), {}),
           attributes: {
-            ...doc._source[type],
+            ...doc._source[this._documentFormat.getAttributesKey(type)],
           }
         };
 
@@ -377,7 +391,7 @@ export class SavedObjectsRepository {
    */
   async get(type, id, options = {}) {
     const response = await this._callCluster('get', {
-      id: this._generateEsId(type, id),
+      id: this._documentFormat.toDocumentId(type, id),
       type: this._type,
       index: this._index,
       ignore: [404]
@@ -403,7 +417,7 @@ export class SavedObjectsRepository {
         .map(s => ({ [s]: response._source[s] }))
         .reduce((acc, prop) => ({ ...acc, ...prop }), {}),
       attributes: {
-        ...response._source[type],
+        ...response._source[this._documentFormat.getAttributesKey(type)],
       }
     };
   }
@@ -421,7 +435,7 @@ export class SavedObjectsRepository {
   async update(type, id, attributes, options = {}) {
     const time = this._getCurrentTime();
     const response = await this._writeToCluster('update', {
-      id: this._generateEsId(type, id),
+      id: this._documentFormat.toDocumentId(type, id),
       type: this._type,
       index: this._index,
       version: options.version,
@@ -431,7 +445,7 @@ export class SavedObjectsRepository {
         doc: {
           ...options.extraDocumentProperties,
           updated_at: time,
-          [type]: attributes,
+          [this._documentFormat.getAttributesKey(type)]: attributes,
         }
       },
     });
@@ -465,10 +479,6 @@ export class SavedObjectsRepository {
     } catch (err) {
       throw decorateEsError(err);
     }
-  }
-
-  _generateEsId(type, id) {
-    return `${type}:${id || uuid.v1()}`;
   }
 
   _getCurrentTime() {
