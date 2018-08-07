@@ -25,7 +25,10 @@ There are three ways to run the tests depending on your goals:
 *** can be reused for multiple executions of the tests, thereby saving some time when re-running tests
 *** automatically restarts the Kibana server when relevant changes are detected
 ** `node scripts/functional_test_runner`
-*** runs the tests against Kibana & Elasticsearch servers that were started by `node scripts/functional_tests_server`
+*** runs the UI tests against Kibana & Elasticsearch servers that were started by `node scripts/functional_tests_server`
+*** exit code reports success or failure of the tests
+** `node scripts/functional_test_runner --config test/api_integration/config.js`
+*** runs the API tests against Kibana & Elasticsearch servers that were started by `node scripts/functional_tests_server`
 *** exit code reports success or failure of the tests
 
 3. Custom option:
