@@ -153,16 +153,17 @@ app.directive('timelionExpressionInput', function ($document, $http, $interval, 
         scope.isLoadingSuggestions = true;
         scope.suggestions.reset();
         scope.suggestions.show();
+        const expression = _.clone(scope.sheet);
 
         const suggestions = await suggest(
-          scope.sheet,  // sheet is the timelion expression
+          expression,
           functionReference.list,
           Parser,
           getCursorPosition(),
           argValueSuggestions
         );
 
-        if (_.get(suggestions, 'expression') !== scope.sheet) {
+        if (expression !== scope.sheet) {
           // expression changed since requesting the suggestions, suggestions are no longer valid.
           return;
         }

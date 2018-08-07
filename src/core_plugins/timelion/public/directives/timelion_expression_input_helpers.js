@@ -175,9 +175,7 @@ async function extractSuggestionsFromParsedResult(result, cursorPosition, functi
 export async function suggest(expression, functionList, Parser, cursorPosition, argValueSuggestions) {
   try {
     const result = await Parser.parse(expression);
-    const suggestions = await extractSuggestionsFromParsedResult(result, cursorPosition, functionList, argValueSuggestions);
-    suggestions.expression = expression;
-    return suggestions;
+    return await extractSuggestionsFromParsedResult(result, cursorPosition, functionList, argValueSuggestions);
   } catch (e) {
 
     let message;
@@ -203,7 +201,7 @@ export async function suggest(expression, functionList, Parser, cursorPosition, 
           // The user hasn't typed anything yet, so we'll just return the entire list.
           list = functionList;
         }
-        return { list, location: message.location, type: SUGGESTION_TYPE.FUNCTIONS, expression };
+        return { list, location: message.location, type: SUGGESTION_TYPE.FUNCTIONS };
       }
       case 'incompleteArgument': {
         const {
@@ -214,8 +212,7 @@ export async function suggest(expression, functionList, Parser, cursorPosition, 
         return {
           list: getArgumentsHelp(functionHelp, functionArgs),
           location: message.location,
-          type: SUGGESTION_TYPE.ARGUMENTS,
-          expression,
+          type: SUGGESTION_TYPE.ARGUMENTS
         };
       }
       case 'incompleteArgumentValue': {
@@ -239,8 +236,7 @@ export async function suggest(expression, functionList, Parser, cursorPosition, 
         return {
           list: valueSuggestions,
           location: { min: cursorPosition, max: cursorPosition },
-          type: SUGGESTION_TYPE.ARGUMENT_VALUE,
-          expression: expression,
+          type: SUGGESTION_TYPE.ARGUMENT_VALUE
         };
       }
     }
