@@ -45,7 +45,7 @@ const config = {
   set: () => {},
   remove: () => {},
   isCustom: (setting) => setting.isCustom,
-  isControlledByServer: (key) => key.startsWith('test:overridden'),
+  isControlledByServer: (key) => config.getAll()[key].isControlledByServer,
   getAll: () => {
     return {
       'test:array:setting': {
@@ -111,32 +111,36 @@ const config = {
         type: 'string',
         isCustom: true,
       },
-      'test:overridden:string': {
+      'test:isControlledByServer:string': {
+        isControlledByServer: true,
         value: 'foo',
-        name: 'An overridden string',
-        description: 'Description for overridden string',
+        name: 'An controlled string',
+        description: 'Description for controlled string',
         type: 'string',
       },
-      'test:overridden:number': {
+      'test:isControlledByServer:number': {
+        isControlledByServer: true,
         value: 1234,
-        name: 'An overridden number',
-        description: 'Description for overridden number',
+        name: 'An controlled number',
+        description: 'Description for controlled number',
         type: 'number',
       },
-      'test:overridden:json': {
+      'test:isControlledByServer:json': {
+        isControlledByServer: true,
         value: dedent`
           {
             "foo": "bar"
           }
         `,
-        name: 'An overridden json',
-        description: 'Description for overridden json',
+        name: 'An controlled json',
+        description: 'Description for controlled json',
         type: 'json',
       },
-      'test:overridden:select': {
+      'test:isControlledByServer:select': {
+        isControlledByServer: true,
         value: 'orange',
-        name: 'Test overridden select setting',
-        description: 'Description for overridden select setting',
+        name: 'Test controlled select setting',
+        description: 'Description for controlled select setting',
         type: 'select',
         options: ['apple', 'orange', 'banana'],
       },
