@@ -6,19 +6,22 @@ Migrations are the mechanism by which saved object indices are kept up to date w
 
 When Kibana boots, prior to serving any requests, it performs a check to see if the kibana index needs to be migrated.
 
-If the Kibana index does not exist, it is created. If it is not aliased, or if it contains documents that are out of date, it is migrated. If it exists, is aliased, and its docs are up to date, its mappings are patched.
+* It searches the index for documents that are out of date, and it diffs the persisted index mappings with the mappings defined by the current system.
+* If the Kibana index does not exist, it is created.
+* If there are out of date docs, or breaking mapping changes, or the current index is not aliased, the index is migrated.
+* If there are minor mapping changes, such as adding a new property, the new mappings are applied to the current index.
 
 All of this happens prior to Kibana serving any http requests.
 
 Here is the gist of what happens if an index migration is necessary:
 
 * If `.kibana` (or whatever the Kibana index is named) is not an alias, it will be converted to one:
-  * Reindex `.kibana` into `.kibana_original`
+  * Reindex `.kibana` into `.kibana_1`
   * Delete `.kibana`
-  * Create an alias `.kibana` that points to `.kibana_original`
-* Create a `.kibana_1` index
-* Copy all documents from `.kibana` into `.kibana_1`, running them through any applicable migrations
-* Point the `.kibana` alias to `.kibana_1`
+  * Create an alias `.kibana` that points to `.kibana_1`
+* Create a `.kibana_2` index
+* Copy all documents from `.kibana_1` into `.kibana_2`, running them through any applicable migrations
+* Point the `.kibana` alias to `.kibana_2`
 
 ## Migrating Kibana clusters
 
@@ -202,6 +205,6 @@ Run jest tests:
 Run integration tests:
 
 ```
-node scripts/functional_test_server
+node scripts/functional_tests_server
 node scripts/functional_test_runner --config test/api_integration/config.js --grep migration
 ```

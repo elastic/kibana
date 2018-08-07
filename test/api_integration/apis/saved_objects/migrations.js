@@ -67,13 +67,13 @@ export default ({ getService }) => {
       const result = await migrateIndex({ callCluster, index, migrations, mappingProperties });
 
       assert.deepEqual(_.omit(result, 'elapsedMs'), {
-        destIndex: '.migration-a_1',
-        sourceIndex: '.migration-a',
+        destIndex: '.migration-a_2',
+        sourceIndex: '.migration-a_1',
         status: 'migrated',
       });
 
       // The docs in the original index are unchanged
-      assert.deepEqual(await fetchDocs({ callCluster, index: `${index}_original` }), [
+      assert.deepEqual(await fetchDocs({ callCluster, index: `${index}_1` }), [
         { id: 'foo:a', type: 'foo', foo: { name: 'Foo A' } },
         { id: 'foo:e', type: 'foo', foo: { name: 'Fooey' } },
         { id: 'bar:i', type: 'bar', bar: { nomnom: 33 } },
@@ -128,7 +128,7 @@ export default ({ getService }) => {
       await migrateIndex({ callCluster, index, migrations, mappingProperties });
 
       // The index for the initial migration has not been destroyed...
-      assert.deepEqual(await fetchDocs({ callCluster, index: `${index}_1` }), [
+      assert.deepEqual(await fetchDocs({ callCluster, index: `${index}_2` }), [
         { id: 'foo:a', type: 'foo', migrationVersion: { foo: '1.0.0' }, foo: { name: 'FOO A' } },
         { id: 'foo:e', type: 'foo', migrationVersion: { foo: '1.0.0' }, foo: { name: 'FOOEY' } },
         { id: 'bar:i', type: 'bar', migrationVersion: { bar: '1.9.0' }, bar: { mynum: 68 } },
@@ -183,19 +183,19 @@ export default ({ getService }) => {
       assert.deepEqual(
         result.map(({ status, destIndex }) => ({ status, destIndex })),
         [
-          { status: 'migrated', destIndex: '.migration-c_1' },
-          { status: 'migrated', destIndex: '.migration-c_1' },
+          { status: 'migrated', destIndex: '.migration-c_2' },
+          { status: 'skipped', destIndex: undefined },
         ],
       );
 
       // It only created the original and the dest
       assert.deepEqual(
         _.pluck(await callCluster('cat.indices', { index: '.migration-c*', format: 'json' }), 'index').sort(),
-        ['.migration-c_1', '.migration-c_original'],
+        ['.migration-c_1', '.migration-c_2'],
       );
 
       // The docs in the original index are unchanged
-      assert.deepEqual(await fetchDocs({ callCluster, index: `${index}_original` }), [
+      assert.deepEqual(await fetchDocs({ callCluster, index: `${index}_1` }), [
         { id: 'foo:lotr', type: 'foo', foo: { name: 'Lord of the Rings' } },
       ]);
 

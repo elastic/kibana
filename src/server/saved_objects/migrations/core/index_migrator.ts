@@ -78,7 +78,7 @@ export class IndexMigrator {
  * Determines what action the migration system needs to take (none, patch, migrate).
  */
 async function requiredAction(context: Context): Promise<MigrationAction> {
-  const { callCluster, alias, documentMigrator, source, dest } = context;
+  const { callCluster, alias, documentMigrator, dest } = context;
   const hasMigrations = await Index.hasMigrations(
     callCluster,
     alias,
@@ -89,7 +89,8 @@ async function requiredAction(context: Context): Promise<MigrationAction> {
     return MigrationAction.Migrate;
   }
 
-  return diffMapping(source.mappings, dest.mappings);
+  const refreshedSource = await Index.fetchInfo(callCluster, alias);
+  return diffMapping(refreshedSource.mappings, dest.mappings);
 }
 
 /**
