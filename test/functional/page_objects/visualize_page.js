@@ -29,7 +29,7 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
   const find = getService('find');
   const log = getService('log');
   const flyout = getService('flyout');
-  const visualization = getService('visualization');
+  const renderable = getService('renderable');
   const PageObjects = getPageObjects(['common', 'header']);
   const defaultFindTimeout = config.get('timeouts.find');
 
@@ -363,6 +363,11 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
       await PageObjects.header.waitUntilLoadingHasFinished();
     }
 
+    async clickUnlinkSavedSearch() {
+      await testSubjects.doubleClick('unlinkSavedSearch');
+      await PageObjects.header.waitUntilLoadingHasFinished();
+    }
+
     async setValue(newValue) {
       await find.clickByCssSelector('button[ng-click="numberListCntr.add()"]', defaultFindTimeout * 2);
       const input = await find.byCssSelector('input[ng-model="numberListCntr.getList()[$index]"]');
@@ -574,7 +579,9 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
     async clickGo() {
       await testSubjects.click('visualizeEditorRenderButton');
       await PageObjects.header.waitUntilLoadingHasFinished();
-      await visualization.waitForRender();
+      // For some reason there are two `data-render-complete` tags on each visualization in the visualize page.
+      const countOfDataCompleteFlags = 2;
+      await renderable.waitForRender(countOfDataCompleteFlags);
     }
 
     async clickReset() {
