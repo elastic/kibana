@@ -26,41 +26,87 @@ export function RetryProvider({ getService }) {
   const log = getService('log');
 
   return new class Retry {
-    async tryForTime(timeout, block) {
+    async _baseTry({ timeout, attempt, onFailure }) {
       const start = Date.now();
       const retryDelay = 502;
-      let lastTry = 0;
-      let finalMessage;
-      let prevMessage;
+      let lastTry;
+      let prevError;
 
       while (true) {
         lastTry = Date.now();
 
         if (lastTry - start > timeout) {
-          throw new Error('tryForTime timeout: ' + finalMessage);
+          await onFailure();
         }
 
-        try {
-          return await block();
-        } catch (error) {
-          if (error.message === prevMessage) {
-            log.debug('--- tryForTime errored again with the same message  ...');
-          } else {
-            prevMessage = error.message;
-            log.debug('--- tryForTime error: ' + prevMessage);
-          }
-          finalMessage = error.stack || error.message;
-          await delay(retryDelay);
+        const { success, result } = await attempt(prevError);
+
+        if (success) {
+          return result;
         }
+
+        prevError = result;
+        await delay(retryDelay);
       }
     }
 
+    async tryForTime(timeout, block) {
+      return await this._baseTry({
+        timeout,
+        async attempt(prevError) {
+          try {
+            return {
+              success: true,
+              result: await block()
+            };
+          } catch (error) {
+            if (prevError && error.message === prevError.message) {
+              log.debug('--- tryForTime errored again with the same message  ...');
+            } else {
+              log.debug('--- tryForTime error: ' + error.message);
+            }
+
+            return {
+              success: false,
+              result: error
+            };
+          }
+        },
+
+        onFailure(finalError) {
+          throw new Error(`tryForTime timeout: ${finalError.stack || finalError.message}`);
+        }
+      });
+    }
+
     async try(block) {
-      return await this.tryForTime(config.get('timeouts.try'), block);
+      return await this.tryForTime(
+        config.get('timeouts.try'),
+        block
+      );
     }
 
     async tryMethod(object, method, ...args) {
       return await this.try(() => object[method](...args));
+    }
+
+    async waitForWithTimeout(description, timeout, block) {
+      log.debug('Waiting for', description, '...');
+
+      await this._baseTry({
+        timeout,
+        attempt: async () => ({
+          success: Boolean(await block())
+        }),
+
+        onFailure() {
+          throw new Error(`timed out waiting for ${description}`);
+        }
+      });
+    }
+
+    async waitFor(description, block) {
+      await this.waitForWithTimeout(description, config.get('timeouts.waitFor'), block);
     }
   };
 }
