@@ -16,36 +16,19 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import { trimIdPrefix } from './trim_id_prefix';
+import uuid from 'uuid';
 
-import Boom from 'boom';
-
-import { getQueryParams } from './query_params';
-import { getSortingParams } from './sorting_params';
-
-export function getSearchDsl(mappings, documentFormat, options = {}) {
-  const {
-    type,
-    search,
-    searchFields,
-    sortField,
-    sortOrder,
-    filters,
-  } = options;
-
-  if (!type && sortField) {
-    throw Boom.notAcceptable('Cannot sort without filtering by type');
+export class DefaultDocumentFormat {
+  toDocumentId(type, id) {
+    return `${type}:${id || uuid.v1()}`;
   }
 
-  if (sortOrder && !sortField) {
-    throw Boom.notAcceptable('sortOrder requires a sortField');
+  fromDocumentId(type, id) {
+    return trimIdPrefix(id, type);
   }
 
-  if (filters && !Array.isArray(filters)) {
-    throw Boom.notAcceptable('filters must be an array');
+  getAttributesKey(type) {
+    return type;
   }
-
-  return {
-    ...getQueryParams(mappings, documentFormat, type, search, searchFields, filters),
-    ...getSortingParams(mappings, documentFormat, type, sortField, sortOrder),
-  };
 }

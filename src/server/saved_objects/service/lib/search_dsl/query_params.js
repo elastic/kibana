@@ -43,7 +43,7 @@ function getTypes(mappings, type) {
  *  @param  {string|Array<string>} types
  *  @return {Object}
  */
-function getFieldsForTypes(searchFields, types) {
+function getFieldsForTypes(documentFormat, searchFields, types) {
 
   if (!searchFields || !searchFields.length) {
     return {
@@ -54,7 +54,7 @@ function getFieldsForTypes(searchFields, types) {
   return {
     fields: searchFields.reduce((acc, field) => [
       ...acc,
-      ...types.map(prefix => `${prefix}.${field}`)
+      ...types.map(type => `${documentFormat.getAttributesKey(type)}.${field}`)
     ], []),
   };
 }
@@ -68,7 +68,7 @@ function getFieldsForTypes(searchFields, types) {
  *  @param {Array<object>} filters additional query filters
  *  @return {Object}
  */
-export function getQueryParams(mappings, type, search, searchFields, filters = []) {
+export function getQueryParams(mappings, documentFormat, type, search, searchFields, filters = []) {
 
   const bool = {
     filter: [...filters],
@@ -84,6 +84,7 @@ export function getQueryParams(mappings, type, search, searchFields, filters = [
         simple_query_string: {
           query: search,
           ...getFieldsForTypes(
+            documentFormat,
             searchFields,
             getTypes(mappings, type)
           )

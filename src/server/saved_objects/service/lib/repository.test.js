@@ -24,6 +24,7 @@ import * as getSearchDslNS from './search_dsl/search_dsl';
 import { getSearchDsl } from './search_dsl';
 import * as errors from './errors';
 import elasticsearch from 'elasticsearch';
+import { DefaultDocumentFormat } from './default_document_format';
 
 // BEWARE: The SavedObjectClient depends on the implementation details of the SavedObjectsRepository
 // so any breaking changes to this repository are considered breaking changes to the SavedObjectsClient.
@@ -541,7 +542,7 @@ describe('SavedObjectsRepository', () => {
 
       await savedObjectsRepository.find(relevantOpts);
       sinon.assert.calledOnce(getSearchDsl);
-      sinon.assert.calledWithExactly(getSearchDsl, mappings, relevantOpts);
+      sinon.assert.calledWithExactly(getSearchDsl, mappings, sinon.match.instanceOf(DefaultDocumentFormat), relevantOpts);
     });
 
     it('merges output of getSearchDsl into es request body', async () => {

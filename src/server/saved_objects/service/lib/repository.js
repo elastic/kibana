@@ -16,33 +16,15 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
-import uuid from 'uuid';
-
 import { getRootType } from '../../../mappings';
 import { getSearchDsl } from './search_dsl';
-import { trimIdPrefix } from './trim_id_prefix';
 import { includedFields } from './included_fields';
 import { decorateEsError } from './decorate_es_error';
 import * as errors from './errors';
-
-export class DocumentFormat {
-  toDocumentId(type, id) {
-    return `${type}:${id || uuid.v1()}`;
-  }
-
-  fromDocumentId(type, id) {
-    return trimIdPrefix(id, type);
-  }
-
-  getAttributesKey(type) {
-    return type;
-  }
-}
+import { DefaultDocumentFormat } from './default_document_format';
 
 // BEWARE: The SavedObjectClient depends on the implementation details of the SavedObjectsRepository
 // so any breaking changes to this repository are considered breaking changes to the SavedObjectsClient.
-
 export class SavedObjectsRepository {
   constructor(options) {
     const {
@@ -50,6 +32,7 @@ export class SavedObjectsRepository {
       mappings,
       callCluster,
       onBeforeWrite = () => { },
+      documentFormat = new DefaultDocumentFormat(),
     } = options;
 
     this._index = index;
@@ -57,7 +40,7 @@ export class SavedObjectsRepository {
     this._type = getRootType(this._mappings);
     this._onBeforeWrite = onBeforeWrite;
     this._unwrappedCallCluster = callCluster;
-    this._documentFormat = new DocumentFormat();
+    this._documentFormat = documentFormat;
   }
 
   /**
@@ -275,7 +258,7 @@ export class SavedObjectsRepository {
       ignore: [404],
       body: {
         version: true,
-        ...getSearchDsl(this._mappings, {
+        ...getSearchDsl(this._mappings, this._documentFormat, {
           search,
           searchFields,
           type,
