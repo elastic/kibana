@@ -9,6 +9,8 @@ The APM UI is designed to be as intuitive as possible, but you might come across
 * <<spans>>
 * <<errors>>
 * <<errors-alerts-with-watcher>>
+* <<machine-learning-integration>>
+* <<query-bar>>
 
 [[services]]
 === Services
@@ -61,3 +63,39 @@ Watches are managed separately in the dedicated Watcher UI available in Advanced
 
 [role="screenshot"]
 image::apm/images/apm-errors-watcher-assistant.png[Example view of the Watcher assistant for errors in APM UI in Kibana]
+
+[[machine-learning-integration]]
+=== Machine Learning integration (beta)
+
+[NOTE]
+============
+This feature is in beta and we kindly ask that you provide us feedback so we can fix issues and improve the feature before making it generally available.
+============
+
+The Machine Learning integration will initiate a new job predefined to calculate anomaly scores on response times on APM transactions. Once enabled, the response time graph will show the expected bounds from the Machine Learning job and annotate the graph once the anomaly score is >=75.
+
+[role="screenshot"]
+image::apm/images/apm-ml-integration.png[Example view of anomaly scores on response times in APM UI in Kibana]
+
+Jobs can be created per transaction type and based on the average response time. Once a job is created, you can manage it and see more details in the Machine Learning jobs management page. It might take some time for the job to calculate the results.
+
+[[query-bar]]
+=== Kibana Query bar (beta)
+
+[NOTE]
+============
+This feature is in beta which means some functionality is not included such as saved and recent searches. We also encourage that you provide us feedback so we can fix issues and improve the feature before making it generally available.
+============
+
+The Kibana Query bar functionality known from Discover has now been added to APM. This enables you to pass advanced queries on your data to filter on particular pieces of information that you're interested in. It comes with a handy autocomplete that helps find the fields and even provides suggestions to data they include. The query bar is available on Service, Transaction and Errors views and any input will persist through those views.
+
+Please see the {kibana-ref}/kuery-query.html[Kibana Query Language Enhancements] page to learn more about the capabilities within Kibana Query.
+
+[role="screenshot"]
+image::apm/images/apm-query-bar.png[Example of the Kibana Query bar in APM UI in Kibana]
+
+==== Example queries
+
+* Exclude response times faster than 2000 ms; `transaction.duration.us > 2000000`
+* Filter by response status code; `context.response.status_code >= 400`
+* Filter by single user ID; `context.user.id : 12`
