@@ -20,22 +20,22 @@
 const RENDER_COMPLETE_SELECTOR = '[data-render-complete="true"]';
 const DATA_LOADING_SELECTOR = '[data-loading]';
 
-export function EmbeddableProvider({ getService }) {
+export function RenderableProvider({ getService }) {
   const log = getService('log');
   const retry = getService('retry');
   const find = getService('find');
 
-  return new class Embeddable {
+  return new class Renderable {
 
     /**
-     * This method waits for a certain number of embeddables to finish rendering and loading, which is indicated
+     * This method waits for a certain number of objects to finish rendering and loading, which is indicated
      * by a couple tags. The RENDER_COMPLETE_SELECTOR indicates that it's done initially loading up. Some
      * visualizations also add a DATA_LOADING_SELECTOR when the internal data is loading. This test will not
      * return if any of those tags are found.
      * @param count {Number} Number of RENDER_COMPLETE_SELECTORs to wait for.
      */
     async waitForRender(count = 1) {
-      log.debug(`Embeddable.waitForRender for ${count} elements`);
+      log.debug(`Renderable.waitForRender for ${count} elements`);
       await retry.try(async () => {
         const completedElements = await find.allByCssSelector(RENDER_COMPLETE_SELECTOR);
         if (completedElements.length < count) {

@@ -34,7 +34,7 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
   const kibanaServer = getService('kibanaServer');
   const testSubjects = getService('testSubjects');
   const dashboardAddPanel = getService('dashboardAddPanel');
-  const embeddable = getService('embeddable');
+  const renderable = getService('renderable');
   const PageObjects = getPageObjects(['common', 'header', 'settings', 'visualize']);
 
   const defaultFindTimeout = config.get('timeouts.find');
@@ -564,7 +564,7 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
     async waitForRenderComplete() {
       log.debug('waitForRenderComplete');
       const count = await this.getSharedItemsCount();
-      await embeddable.waitForRender(parseInt(count));
+      await renderable.waitForRender(parseInt(count));
     }
 
     async getSharedContainerData() {
@@ -582,7 +582,6 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
       const sharedItems = await find.allByCssSelector('[data-shared-item]');
       return await Promise.all(sharedItems.map(async sharedItem => {
         return {
-          element: sharedItem,
           title: await sharedItem.getAttribute('data-title'),
           description: await sharedItem.getAttribute('data-description')
         };
