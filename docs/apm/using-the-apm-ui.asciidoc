@@ -80,16 +80,14 @@ image::apm/images/apm-ml-integration.png[Example view of anomaly scores on respo
 Jobs can be created per transaction type and based on the average response time. Once a job is created, you can manage it and see more details in the Machine Learning jobs management page. It might take some time for the job to calculate the results.
 
 [[query-bar]]
-=== Kibana Query bar (beta)
+=== Query bar (beta)
 
 [NOTE]
 ============
 This feature is in beta which means some functionality is not included such as saved and recent searches. We also encourage that you provide us feedback so we can fix issues and improve the feature before making it generally available.
 ============
 
-The Kibana Query bar functionality known from Discover has now been added to APM. This enables you to pass advanced queries on your data to filter on particular pieces of information that you're interested in. It comes with a handy autocomplete that helps find the fields and even provides suggestions to data they include. The query bar is available on Service, Transaction and Errors views and any input will persist through those views.
-
-Please see the {kibana-ref}/kuery-query.html[Kibana Query Language Enhancements] page to learn more about the capabilities within Kibana Query.
+The query bar is a powerful data query feature. Similar to the query bar in {kibana-ref}/discover.html[Discover] it enables you to pass advanced queries on your data to filter on particular pieces of information that you're interested in. It comes with a handy autocomplete that helps find the fields and even provides suggestions to the data they include. The query bar is available on Services, Transaction and Errors views, and any input will persist as you move between them.
 
 [role="screenshot"]
 image::apm/images/apm-query-bar.png[Example of the Kibana Query bar in APM UI in Kibana]
@@ -99,3 +97,5 @@ image::apm/images/apm-query-bar.png[Example of the Kibana Query bar in APM UI in
 * Exclude response times faster than 2000 ms; `transaction.duration.us > 2000000`
 * Filter by response status code; `context.response.status_code >= 400`
 * Filter by single user ID; `context.user.id : 12`
+
+Read the {kibana-ref}/kuery-query.html[Kibana Query Language Enhancements] documentation to learn more about the capabilities in the Kibana query language.
