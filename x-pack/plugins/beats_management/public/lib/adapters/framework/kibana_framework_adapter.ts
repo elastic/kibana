@@ -17,7 +17,6 @@ import {
 
 export class KibanaFrameworkAdapter implements FrameworkAdapter {
   public appState: object;
-  public kbnVersion?: string;
 
   private management: any;
   private adapterService: KibanaAdapterServiceProvider;
