@@ -2,12 +2,12 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import aero from '../../lib/aeroelastic';
 
-export const BorderConnection = ({ transformMatrix, a, b }) => {
+export const BorderConnection = ({ transformMatrix, width, height }) => {
   const newStyle = {
-    width: a * 2,
-    height: b * 2,
-    marginLeft: -a,
-    marginTop: -b,
+    width,
+    height,
+    marginLeft: -width / 2,
+    marginTop: -height / 2,
     position: 'absolute',
     transform: aero.dom.matrixToCSS(transformMatrix),
   };
@@ -15,7 +15,7 @@ export const BorderConnection = ({ transformMatrix, a, b }) => {
 };
 
 BorderConnection.propTypes = {
-  a: PropTypes.number.isRequired,
-  b: PropTypes.number.isRequired,
+  width: PropTypes.number.isRequired,
+  height: PropTypes.number.isRequired,
   transformMatrix: PropTypes.arrayOf(PropTypes.number).isRequired,
 };

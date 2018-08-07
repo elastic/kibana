@@ -566,6 +566,8 @@ const shapeCascadeTransforms = shapes => shape => {
   return {
     ...shape,
     transformMatrix: cascadedTransforms,
+    width: 2 * shape.a,
+    height: 2 * shape.b,
   };
 };
 

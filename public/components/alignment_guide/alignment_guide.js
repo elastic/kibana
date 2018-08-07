@@ -2,12 +2,12 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import aero from '../../lib/aeroelastic';
 
-export const AlignmentGuide = ({ transformMatrix, a, b }) => {
+export const AlignmentGuide = ({ transformMatrix, width, height }) => {
   const newStyle = {
-    width: a * 2,
-    height: b * 2,
-    marginLeft: -a,
-    marginTop: -b,
+    width,
+    height,
+    marginLeft: -width / 2,
+    marginTop: -height / 2,
     background: 'magenta',
     position: 'absolute',
     transform: aero.dom.matrixToCSS(transformMatrix),
@@ -22,6 +22,6 @@ export const AlignmentGuide = ({ transformMatrix, a, b }) => {
 
 AlignmentGuide.propTypes = {
   transformMatrix: PropTypes.arrayOf(PropTypes.number).isRequired,
-  a: PropTypes.number.isRequired,
-  b: PropTypes.number.isRequired,
+  width: PropTypes.number.isRequired,
+  height: PropTypes.number.isRequired,
 };
