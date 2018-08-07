@@ -22,7 +22,7 @@ export function checkLicense(Private, kbnBaseUrl) {
   const licenseAllowsToShowThisPage = features.isAvailable;
   if (!licenseAllowsToShowThisPage) {
     const { message } = features;
-    const newUrl = addAppRedirectMessageToUrl(`${chrome.addBasePath(kbnBaseUrl)}`, message);
+    const newUrl = addAppRedirectMessageToUrl(chrome.addBasePath(kbnBaseUrl), message);
     window.location.href = newUrl;
     return Promise.halt();
   }

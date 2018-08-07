@@ -50,7 +50,7 @@ function checkLicense(Private, Promise, kbnBaseUrl) {
   const licenseAllowsToShowThisPage = xpackInfo.get('features.graph.showAppLink') && xpackInfo.get('features.graph.enableAppLink');
   if (!licenseAllowsToShowThisPage) {
     const message = xpackInfo.get('features.graph.message');
-    const newUrl = addAppRedirectMessageToUrl(`${chrome.addBasePath(kbnBaseUrl)}`, message);
+    const newUrl = addAppRedirectMessageToUrl(chrome.addBasePath(kbnBaseUrl), message);
     window.location.href = newUrl;
     return Promise.halt();
   }
