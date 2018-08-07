@@ -17,52 +17,50 @@
  * under the License.
  */
 
-import bluebird from 'bluebird';
+const delay = ms => new Promise(resolve => (
+  setTimeout(resolve, ms)
+));
 
 export function RetryProvider({ getService }) {
   const config = getService('config');
   const log = getService('log');
 
-  class Retry {
-    tryForTime(timeout, block) {
+  return new class Retry {
+    async tryForTime(timeout, block) {
       const start = Date.now();
       const retryDelay = 502;
       let lastTry = 0;
       let finalMessage;
       let prevMessage;
 
-      function attempt() {
+      while (true) {
         lastTry = Date.now();
 
         if (lastTry - start > timeout) {
           throw new Error('tryForTime timeout: ' + finalMessage);
         }
 
-        return bluebird
-          .try(block)
-          .catch(function tryForTimeCatch(err) {
-            if (err.message === prevMessage) {
-              log.debug('--- tryForTime errored again with the same message  ...');
-            } else {
-              prevMessage = err.message;
-              log.debug('--- tryForTime error: ' + prevMessage);
-            }
-            finalMessage = err.stack || err.message;
-            return bluebird.delay(retryDelay).then(attempt);
-          });
+        try {
+          return await block();
+        } catch (error) {
+          if (error.message === prevMessage) {
+            log.debug('--- tryForTime errored again with the same message  ...');
+          } else {
+            prevMessage = error.message;
+            log.debug('--- tryForTime error: ' + prevMessage);
+          }
+          finalMessage = error.stack || error.message;
+          await delay(retryDelay);
+        }
       }
-
-      return bluebird.try(attempt);
     }
 
-    try(block) {
-      return this.tryForTime(config.get('timeouts.try'), block);
+    async try(block) {
+      return await this.tryForTime(config.get('timeouts.try'), block);
     }
 
-    tryMethod(object, method, ...args) {
-      return this.try(() => object[method](...args));
+    async tryMethod(object, method, ...args) {
+      return await this.try(() => object[method](...args));
     }
-  }
-
-  return new Retry();
+  };
 }
