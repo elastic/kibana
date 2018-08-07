@@ -1,4 +1,4 @@
-import symbolObservable from 'symbol-observable';
+import { observable as Symbol_observable } from 'rxjs/internal/symbol/observable';
 
 // This is a fork of the example implementation of the TC39 Observable spec,
 // see https://github.com/tc39/proposal-observable.
@@ -256,7 +256,7 @@ export class Observable {
     return new Subscription(observer, this._subscriber);
   }
 
-  [symbolObservable]() { return this }
+  [Symbol_observable]() { return this }
 
   // == Derived ==
 
@@ -267,7 +267,7 @@ export class Observable {
     if (x == null)
       throw new TypeError(x + " is not an object");
 
-    let method = getMethod(x, symbolObservable);
+    let method = getMethod(x, Symbol_observable);
 
     if (method) {
 
