@@ -79,6 +79,7 @@ export class IndexMigrator {
  */
 async function requiredAction(context: Context): Promise<MigrationAction> {
   const { callCluster, alias, documentMigrator, dest } = context;
+
   const hasMigrations = await Index.hasMigrations(
     callCluster,
     alias,
@@ -90,6 +91,11 @@ async function requiredAction(context: Context): Promise<MigrationAction> {
   }
 
   const refreshedSource = await Index.fetchInfo(callCluster, alias);
+
+  if (!refreshedSource.aliases[alias]) {
+    return MigrationAction.Migrate;
+  }
+
   return diffMapping(refreshedSource.mappings, dest.mappings);
 }
 
