@@ -45,7 +45,7 @@ const config = {
   set: () => {},
   remove: () => {},
   isCustom: (setting) => setting.isCustom,
-  isControlledByServer: (key) => config.getAll()[key].isControlledByServer,
+  isControlledByServer: (key) => Boolean(config.getAll()[key].isControlledByServer),
   getAll: () => {
     return {
       'test:array:setting': {
