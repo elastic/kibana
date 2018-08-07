@@ -319,7 +319,7 @@ export class Field extends PureComponent {
 
   renderField(setting) {
     const { loading, changeImage, unsavedValue } = this.state;
-    const { name, value, type, options } = setting;
+    const { name, value, type, options, isControlledByServer } = setting;
 
     switch(type) {
       case 'boolean':
@@ -328,7 +328,7 @@ export class Field extends PureComponent {
             label={!!unsavedValue ? 'On' : 'Off'}
             checked={!!unsavedValue}
             onChange={this.onFieldChange}
-            disabled={loading || setting.isControlledByServer}
+            disabled={loading || isControlledByServer}
             onKeyDown={this.onFieldKeyDown}
             data-test-subj={`advancedSetting-editField-${name}`}
           />
@@ -346,7 +346,7 @@ export class Field extends PureComponent {
               height="auto"
               minLines={6}
               maxLines={30}
-              isReadOnly={setting.isControlledByServer}
+              isReadOnly={isControlledByServer}
               setOptions={{
                 showLineNumbers: false,
                 tabSize: 2,
@@ -370,7 +370,7 @@ export class Field extends PureComponent {
         } else {
           return (
             <EuiFilePicker
-              disabled={loading || setting.isControlledByServer}
+              disabled={loading || isControlledByServer}
               onChange={this.onImageChange}
               accept=".jpg,.jpeg,.png"
               ref={(input) => { this.changeImageForm = input; }}
@@ -388,7 +388,7 @@ export class Field extends PureComponent {
             })}
             onChange={this.onFieldChange}
             isLoading={loading}
-            disabled={loading || setting.isControlledByServer}
+            disabled={loading || isControlledByServer}
             onKeyDown={this.onFieldKeyDown}
             data-test-subj={`advancedSetting-editField-${name}`}
           />
@@ -399,7 +399,7 @@ export class Field extends PureComponent {
             value={unsavedValue}
             onChange={this.onFieldChange}
             isLoading={loading}
-            disabled={loading || setting.isControlledByServer}
+            disabled={loading || isControlledByServer}
             onKeyDown={this.onFieldKeyDown}
             data-test-subj={`advancedSetting-editField-${name}`}
           />
@@ -410,7 +410,7 @@ export class Field extends PureComponent {
             value={unsavedValue}
             onChange={this.onFieldChange}
             isLoading={loading}
-            disabled={loading || setting.isControlledByServer}
+            disabled={loading || isControlledByServer}
             onKeyDown={this.onFieldKeyDown}
             data-test-subj={`advancedSetting-editField-${name}`}
           />
