@@ -37,7 +37,7 @@ export function initTimepicker(history, dispatch) {
 
     uiModules
       .get('app/apm', [])
-      .controller('TimePickerController', ($scope, globalState) => {
+      .controller('TimePickerController', ($scope, globalState, $rootScope) => {
         // Add APM feedback menu
         // TODO: move this somewhere else
         $scope.topNavMenu = [];
@@ -50,18 +50,22 @@ export function initTimepicker(history, dispatch) {
 
         history.listen(() => {
           updateRefreshRate(dispatch);
-          globalState.fetch();
+          globalState.fetch(); // ensure global state is updated when url changes
         });
-        timefilter.enableTimeRangeSelector();
-        timefilter.enableAutoRefreshSelector();
 
-        updateRefreshRate(dispatch);
-
+        // ensure that redux is notified after timefilter has updated
         $scope.$listen(timefilter, 'timeUpdate', () =>
           dispatch(updateTimePickerAction())
         );
 
-        registerTimefilterWithGlobalState(globalState);
+        // ensure that timepicker updates when global state changes
+        registerTimefilterWithGlobalState(globalState, $rootScope);
+
+        timefilter.enableTimeRangeSelector();
+        timefilter.enableAutoRefreshSelector();
+
+        dispatch(updateTimePickerAction());
+        updateRefreshRate(dispatch);
 
         Promise.all([waitForAngularReady]).then(resolve);
       });

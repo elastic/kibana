@@ -279,7 +279,7 @@ exports[`ErrorGroupOverview -> List should render with data 1`] = `
 }
 
 .c1 {
-  max-width: 512px;
+  max-width: 100%;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;

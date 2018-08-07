@@ -6,16 +6,14 @@
 
 
 
-import { privilegesProvider } from 'plugins/ml/privilege/get_privileges';
+import { getPrivileges } from 'plugins/ml/privilege/get_privileges';
 import { getLicenseHasExpired } from 'plugins/ml/license/check_license';
 
 let privileges = {};
 
 export function checkGetJobsPrivilege(Private, Promise, kbnUrl) {
-  const mlPrivilegeService = Private(privilegesProvider);
-
   return new Promise((resolve, reject) => {
-    mlPrivilegeService.getPrivileges()
+    getPrivileges()
       .then((priv) => {
         privileges = priv;
         // the minimum privilege for using ML is being able to get the jobs list.
@@ -31,10 +29,8 @@ export function checkGetJobsPrivilege(Private, Promise, kbnUrl) {
 }
 
 export function checkCreateJobsPrivilege(Private, Promise, kbnUrl) {
-  const mlPrivilegeService = Private(privilegesProvider);
-
   return new Promise((resolve, reject) => {
-    mlPrivilegeService.getPrivileges()
+    getPrivileges()
       .then((priv) => {
         privileges = priv;
         if (privileges.canCreateJob) {

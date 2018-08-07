@@ -26,14 +26,12 @@ import _ from 'lodash';
 import $ from 'jquery';
 import rison from 'rison-node';
 import { fieldCalculator } from './lib/field_calculator';
-import { IndexPatternsFieldListProvider } from 'ui/index_patterns/_field_list';
+import { FieldList } from 'ui/index_patterns/_field_list';
 import { uiModules } from 'ui/modules';
 import fieldChooserTemplate from './field_chooser.html';
 const app = uiModules.get('apps/discover');
 
-app.directive('discFieldChooser', function ($location, globalState, config, $route, Private) {
-  const FieldList = Private(IndexPatternsFieldListProvider);
-
+app.directive('discFieldChooser', function ($location, globalState, config, $route) {
   return {
     restrict: 'E',
     scope: {

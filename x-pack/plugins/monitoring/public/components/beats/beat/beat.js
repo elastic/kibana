@@ -5,8 +5,9 @@
  */
 
 import React, { Fragment } from 'react';
-import { MonitoringTimeseriesContainer } from 'plugins/monitoring/components';
-import { formatMetric } from 'plugins/monitoring/lib/format_number';
+import { MonitoringTimeseriesContainer } from '../../chart';
+import { formatMetric } from '../../../lib/format_number';
+import { EuiFlexGrid, EuiFlexItem, EuiSpacer, EuiPage, EuiPageBody } from '@elastic/eui';
 
 function renderTransportAddress(summary) {
   let output = null;
@@ -21,6 +22,16 @@ function renderTransportAddress(summary) {
 }
 
 export function Beat({ summary, metrics, ...props }) {
+  const metricsToShow = [
+    metrics.beat_event_rates,
+    metrics.beat_fail_rates,
+    metrics.beat_throughput_rates,
+    metrics.beat_output_errors,
+    metrics.beat_memory,
+    metrics.beat_cpu_utilization,
+    metrics.beat_os_load,
+  ];
+
   return (
     <div>
       <div role="status">
@@ -91,52 +102,21 @@ export function Beat({ summary, metrics, ...props }) {
         </div>
       </div>
 
-      <div className="page-row">
-        <div className="row">
-          <div className="col-md-6">
-            <MonitoringTimeseriesContainer
-              series={metrics.beat_event_rates}
-              {...props}
-            />
-          </div>
-          <div className="col-md-6">
-            <MonitoringTimeseriesContainer
-              series={metrics.beat_fail_rates}
-              {...props}
-            />
-          </div>
-          <div className="col-md-6">
-            <MonitoringTimeseriesContainer
-              series={metrics.beat_throughput_rates}
-              {...props}
-            />
-          </div>
-          <div className="col-md-6">
-            <MonitoringTimeseriesContainer
-              series={metrics.beat_output_errors}
-              {...props}
-            />
-          </div>
-          <div className="col-md-6">
-            <MonitoringTimeseriesContainer
-              series={metrics.beat_memory}
-              {...props}
-            />
-          </div>
-          <div className="col-md-6">
-            <MonitoringTimeseriesContainer
-              series={metrics.beat_cpu_utilization}
-              {...props}
-            />
-          </div>
-          <div className="col-md-6">
-            <MonitoringTimeseriesContainer
-              series={metrics.beat_os_load}
-              {...props}
-            />
-          </div>
-        </div>
-      </div>
+      <EuiPage style={{ backgroundColor: 'white' }}>
+        <EuiPageBody>
+          <EuiFlexGrid columns={2} gutterSize="none">
+            {metricsToShow.map((metric, index) => (
+              <EuiFlexItem key={index} style={{ width: '50%' }}>
+                <MonitoringTimeseriesContainer
+                  series={metric}
+                  {...props}
+                />
+                <EuiSpacer size="m"/>
+              </EuiFlexItem>
+            ))}
+          </EuiFlexGrid>
+        </EuiPageBody>
+      </EuiPage>
     </div>
   );
 }

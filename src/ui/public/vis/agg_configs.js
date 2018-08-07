@@ -144,7 +144,7 @@ class AggConfigs extends IndexedArray {
 
         parseParentAggs(dslLvlCursor, dsl);
 
-        if (config.schema.group === 'buckets' && i < list.length - 1) {
+        if (config.type.type === 'buckets' && i < list.length - 1) {
         // buckets that are not the last item in the list accept sub-aggs
           subAggs = dsl.aggs || (dsl.aggs = {});
         }
@@ -167,7 +167,7 @@ class AggConfigs extends IndexedArray {
       return aggs ? requestValuesAggs.concat(aggs) : requestValuesAggs;
     }, []);
     //move metrics to the end
-    return _.sortBy(aggregations, agg => agg.schema.group === 'metrics' ? 1 : 0);
+    return _.sortBy(aggregations, agg => agg.type.type === 'metrics' ? 1 : 0);
   }
 
   /**

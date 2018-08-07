@@ -25,8 +25,8 @@ import BluebirdPromise from 'bluebird';
 import { SavedObjectProvider } from '../saved_object';
 import { IndexPatternProvider } from '../../../index_patterns/_index_pattern';
 import { SavedObjectsClientProvider } from '../../../saved_objects';
-
 import { StubIndexPatternsApiClientModule } from '../../../index_patterns/__tests__/stub_index_patterns_api_client';
+import { InvalidJSONProperty } from '../../../errors';
 
 describe('Saved Object', function () {
   require('test_utils/no_digest_promises').activateForSuite();
@@ -81,6 +81,10 @@ describe('Saved Object', function () {
     return savedObject.init();
   }
 
+  const mock409FetchError = {
+    res: { status: 409 }
+  };
+
   beforeEach(ngMock.module(
     'kibana',
     StubIndexPatternsApiClientModule,
@@ -104,7 +108,7 @@ describe('Saved Object', function () {
     describe('with confirmOverwrite', function () {
       function stubConfirmOverwrite() {
         window.confirm = sinon.stub().returns(true);
-        sinon.stub(esDataStub, 'create').returns(BluebirdPromise.reject({ status: 409 }));
+        sinon.stub(esDataStub, 'create').returns(BluebirdPromise.reject(mock409FetchError));
       }
 
       describe('when true', function () {
@@ -112,7 +116,7 @@ describe('Saved Object', function () {
           stubESResponse(getMockedDocResponse('myId'));
           return createInitializedSavedObject({ type: 'dashboard', id: 'myId' }).then(savedObject => {
             const createStub = sinon.stub(savedObjectsClientStub, 'create');
-            createStub.onFirstCall().returns(BluebirdPromise.reject({ statusCode: 409 }));
+            createStub.onFirstCall().returns(BluebirdPromise.reject(mock409FetchError));
             createStub.onSecondCall().returns(BluebirdPromise.resolve({ id: 'myId' }));
 
             stubConfirmOverwrite();
@@ -135,7 +139,7 @@ describe('Saved Object', function () {
           return createInitializedSavedObject({ type: 'dashboard', id: 'HI' }).then(savedObject => {
             window.confirm = sinon.stub().returns(false);
 
-            sinon.stub(savedObjectsClientStub, 'create').returns(BluebirdPromise.reject({ statusCode: 409 }));
+            sinon.stub(savedObjectsClientStub, 'create').returns(BluebirdPromise.reject(mock409FetchError));
 
             savedObject.lastSavedTitle = 'original title';
             savedObject.title = 'new title';
@@ -154,7 +158,7 @@ describe('Saved Object', function () {
           return createInitializedSavedObject({ type: 'dashboard', id: 'myId' }).then(savedObject => {
             stubConfirmOverwrite();
 
-            sinon.stub(savedObjectsClientStub, 'create').returns(BluebirdPromise.reject({ statusCode: 409 }));
+            sinon.stub(savedObjectsClientStub, 'create').returns(BluebirdPromise.reject(mock409FetchError));
 
             return savedObject.save({ confirmOverwrite: true })
               .then(() => {
@@ -294,6 +298,25 @@ describe('Saved Object', function () {
           expect(!!err).to.be(true);
         }
       });
+    });
+
+    it('throws error invalid JSON is detected', async function () {
+      const savedObject = await createInitializedSavedObject({ type: 'dashboard', searchSource: true });
+      const response = {
+        found: true,
+        _source: {
+          kibanaSavedObjectMeta: {
+            searchSourceJSON: '\"{\\n  \\\"filter\\\": []\\n}\"'
+          }
+        }
+      };
+
+      try {
+        await savedObject.applyESResp(response);
+        throw new Error('applyESResp should have failed, but did not.');
+      } catch (err) {
+        expect(err instanceof InvalidJSONProperty).to.be(true);
+      }
     });
 
     it('preserves original defaults if not overridden', function () {

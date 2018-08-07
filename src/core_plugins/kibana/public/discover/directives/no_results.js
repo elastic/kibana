@@ -57,7 +57,7 @@ export class DiscoverNoResults extends Component {
 
     let shardFailuresMessage;
 
-    if (shardFailures) {
+    if (shardFailures && shardFailures.length) {
       const failures = shardFailures.map((failure, index) => (
         <div key={`${failure.index}${failure.shard}${failure.reason}`}>
           <EuiText size="xs">
@@ -67,7 +67,7 @@ export class DiscoverNoResults extends Component {
           <EuiSpacer size="s" />
 
           <EuiCodeBlock paddingSize="s">
-            {failure.reason}
+            {JSON.stringify(failure.reason)}
           </EuiCodeBlock>
 
           {index < shardFailures.length - 1 ? <EuiSpacer size="l" /> : undefined}

@@ -79,9 +79,6 @@ export function VislibVisTypeProvider(Private, $rootScope, $timeout, $compile) {
           const legendHtml = $compile('<vislib-legend></vislib-legend>')($scope);
           this.container.appendChild(legendHtml[0]);
           $scope.$digest();
-          // We need to wait one digest cycle for the legend to render, before
-          // we want to render the chart, so it know about the legend size.
-          await new Promise(resolve => $timeout(resolve));
         }
 
         this.vis.vislibVis = new vislib.Vis(this.chartEl, this.vis.params);
