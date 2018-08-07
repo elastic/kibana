@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import './core.less';
+import './core.css';
 import { FatalErrorsService } from './fatal_errors';
 import { InjectedMetadataParams, InjectedMetadataService } from './injected_metadata';
 import { LegacyPlatformParams, LegacyPlatformService } from './legacy_platform';
