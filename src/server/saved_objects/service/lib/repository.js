@@ -72,9 +72,9 @@ export class SavedObjectsRepository {
         refresh: 'wait_for',
         body: {
           ...extraDocumentProperties,
-          type,
+          type: this._documentFormat.toDocumentSourceType(type),
           updated_at: time,
-          [this._documentFormat.getAttributesKey(type)]: attributes,
+          [type]: attributes,
         },
       });
 
@@ -120,9 +120,9 @@ export class SavedObjectsRepository {
         },
         {
           ...object.extraDocumentProperties,
-          type: object.type,
+          type: this._documentFormat.toDocumentSourceType(object.type),
           updated_at: time,
-          [this._documentFormat.getAttributesKey(object.type)]: object.attributes,
+          [object.type]: object.attributes,
         }
       ];
     };
@@ -287,13 +287,14 @@ export class SavedObjectsRepository {
       per_page: perPage,
       total: response.hits.total,
       saved_objects: response.hits.hits.map(hit => {
-        const { type, updated_at: updatedAt } = hit._source;
+        const { type: sourceType, updated_at: updatedAt } = hit._source;
+        const type = this._documentFormat.fromDocumentSourceType(sourceType);
         return {
           id: this._documentFormat.fromDocumentId(type, hit._id),
           type,
           ...updatedAt && { updated_at: updatedAt },
           version: hit._version,
-          attributes: hit._source[this._documentFormat.getAttributesKey(type)],
+          attributes: hit._source[type],
         };
       }),
     };
@@ -344,6 +345,7 @@ export class SavedObjectsRepository {
           };
         }
 
+        debugger; //eslint-disable-line
         const time = doc._source.updated_at;
         const savedObject = {
           id,
@@ -354,7 +356,7 @@ export class SavedObjectsRepository {
             .map(s => ({ [s]: doc._source[s] }))
             .reduce((acc, prop) => ({ ...acc, ...prop }), {}),
           attributes: {
-            ...doc._source[this._documentFormat.getAttributesKey(type)],
+            ...doc._source[type],
           }
         };
 
@@ -393,14 +395,14 @@ export class SavedObjectsRepository {
 
     return {
       id,
-      type,
+      type: this._documentFormat.fromDocumentSourceType(type),
       ...updatedAt && { updated_at: updatedAt },
       version: response._version,
       ...extraDocumentProperties
         .map(s => ({ [s]: response._source[s] }))
         .reduce((acc, prop) => ({ ...acc, ...prop }), {}),
       attributes: {
-        ...response._source[this._documentFormat.getAttributesKey(type)],
+        ...response._source[type],
       }
     };
   }
@@ -428,7 +430,7 @@ export class SavedObjectsRepository {
         doc: {
           ...options.extraDocumentProperties,
           updated_at: time,
-          [this._documentFormat.getAttributesKey(type)]: attributes,
+          [type]: attributes,
         }
       },
     });

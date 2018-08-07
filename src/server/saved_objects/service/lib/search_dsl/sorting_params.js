@@ -21,7 +21,7 @@ import Boom from 'boom';
 
 import { getProperty } from '../../../../mappings';
 
-export function getSortingParams(mappings, documentFormat, type, sortField, sortOrder) {
+export function getSortingParams(mappings, type, sortField, sortOrder) {
   if (!sortField) {
     return {};
   }
@@ -43,7 +43,7 @@ export function getSortingParams(mappings, documentFormat, type, sortField, sort
   }
 
 
-  const key = `${documentFormat.getAttributesKey(type)}.${sortField}`;
+  const key = `${type}.${sortField}`;
   const field = getProperty(mappings, key);
   if (!field) {
     throw Boom.badRequest(`Unknown sort field ${sortField}`);

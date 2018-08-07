@@ -28,7 +28,11 @@ export class DefaultDocumentFormat {
     return trimIdPrefix(id, type);
   }
 
-  getAttributesKey(type) {
+  fromDocumentSourceType(type) {
+    return type;
+  }
+
+  toDocumentSourceType(type) {
     return type;
   }
 }

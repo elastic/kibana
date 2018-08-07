@@ -17,10 +17,10 @@
  * under the License.
  */
 
-import { SavedObjectsRepositoryProvider } from './repository_provider';
+import { ScopedSavedObjectsRepositoryProvider } from './scoped_repository_provider';
 
 test('requires "callCluster" to be provided', () => {
-  const provider = new SavedObjectsRepositoryProvider({
+  const provider = new ScopedSavedObjectsRepositoryProvider({
     index: 'idx',
     mappings: {
       foo: {}
@@ -44,7 +44,7 @@ test('creates a valid Repository', async () => {
     onBeforeWrite: jest.fn()
   };
 
-  const provider = new SavedObjectsRepositoryProvider(properties);
+  const provider = new ScopedSavedObjectsRepositoryProvider(properties);
 
   const callCluster = jest.fn().mockReturnValue({
     _id: 'new'

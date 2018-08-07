@@ -46,6 +46,6 @@ export function getSearchDsl(mappings, documentFormat, options = {}) {
 
   return {
     ...getQueryParams(mappings, documentFormat, type, search, searchFields, filters),
-    ...getSortingParams(mappings, documentFormat, type, sortField, sortOrder),
+    ...getSortingParams(mappings, type, sortField, sortOrder),
   };
 }

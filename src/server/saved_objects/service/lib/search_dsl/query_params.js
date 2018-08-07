@@ -43,7 +43,7 @@ function getTypes(mappings, type) {
  *  @param  {string|Array<string>} types
  *  @return {Object}
  */
-function getFieldsForTypes(documentFormat, searchFields, types) {
+function getFieldsForTypes(searchFields, types) {
 
   if (!searchFields || !searchFields.length) {
     return {
@@ -54,7 +54,7 @@ function getFieldsForTypes(documentFormat, searchFields, types) {
   return {
     fields: searchFields.reduce((acc, field) => [
       ...acc,
-      ...types.map(type => `${documentFormat.getAttributesKey(type)}.${field}`)
+      ...types.map(prefix => `${prefix}.${field}`)
     ], []),
   };
 }
@@ -75,7 +75,19 @@ export function getQueryParams(mappings, documentFormat, type, search, searchFie
   };
 
   if (type) {
-    bool.filter.push({ [Array.isArray(type) ? 'terms' : 'term']: { type } });
+    if (Array.isArray(type)) {
+      bool.filter.push({
+        terms: {
+          type: type.map(t => documentFormat.toDocumentSourceType(t))
+        }
+      });
+    } else {
+      bool.filter.push({
+        term: {
+          type: documentFormat.toDocumentSourceType(type)
+        }
+      });
+    }
   }
 
   if (search) {
@@ -84,7 +96,6 @@ export function getQueryParams(mappings, documentFormat, type, search, searchFie
         simple_query_string: {
           query: search,
           ...getFieldsForTypes(
-            documentFormat,
             searchFields,
             getTypes(mappings, type)
           )
@@ -97,6 +108,10 @@ export function getQueryParams(mappings, documentFormat, type, search, searchFie
   if (bool.filter.length === 0 && !search) {
     return {};
   }
+
+  console.log(JSON.stringify({
+    query: { bool }
+  }));
 
   return { query: { bool } };
 }

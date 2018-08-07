@@ -16,6 +16,7 @@ import { wrapError } from './server/lib/errors';
 import mappings from './mappings.json';
 import { spacesSavedObjectsClientWrapperFactory } from './server/lib/saved_objects_client/saved_objects_client_wrapper_factory';
 import { watchStatusAndLicenseToInitialize } from '../../server/lib/watch_status_and_license_to_initialize';
+import { SpacesDocumentFormat } from './server/lib/saved_objects_client/spaces_document_format';
 
 export const spaces = (kibana) => new kibana.Plugin({
   id: 'spaces',
@@ -82,9 +83,13 @@ export const spaces = (kibana) => new kibana.Plugin({
     const spacesService = createSpacesService(server);
     server.decorate('server', 'spaces', spacesService);
 
-    const { addScopedSavedObjectsClientWrapperFactory, types } = server.savedObjects;
-    addScopedSavedObjectsClientWrapperFactory(
-      spacesSavedObjectsClientWrapperFactory(spacesService, types)
+    const { savedObjects } = server;
+    savedObjects.setScopedDocumentFormatFactory(request => {
+      const spaceId = spacesService.getSpaceId(request);
+      return new SpacesDocumentFormat(spaceId);
+    });
+    savedObjects.addScopedSavedObjectsClientWrapperFactory(
+      spacesSavedObjectsClientWrapperFactory(spacesService, savedObjects.types)
     );
 
     initSpacesApi(server);
