@@ -108,7 +108,7 @@ You can use \`config.get("${key}", defaultValue)\`, which will just return
 
   assertUpdateAllowed(key) {
     if (this.isControlledByServer(key)) {
-      throw new Error(`Unable to update "${key}" because it is overridden by the Kibana server`);
+      throw new Error(`Unable to update "${key}" because its value is controlled by the Kibana server`);
     }
   }
 
