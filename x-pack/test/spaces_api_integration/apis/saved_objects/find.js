@@ -114,7 +114,7 @@ export default function ({ getService }) {
         it(`should return ${tests.normal.statusCode} with ${tests.normal.description}`, async () => (
           await supertest
             .get(`${getUrlPrefix(spaceId)}/api/saved_objects/_find?type=visualization&fields=title`)
-            .expect(tests.normal.statusCode)
+            .expect(200)
             .then(tests.normal.response)
         ));
 

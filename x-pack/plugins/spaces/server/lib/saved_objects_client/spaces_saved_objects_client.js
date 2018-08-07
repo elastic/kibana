@@ -8,7 +8,6 @@ import { DEFAULT_SPACE_ID } from '../../../common/constants';
 import { isTypeSpaceAware } from './lib/is_type_space_aware';
 import { getSpacesQueryFilters } from './lib/query_filters';
 import uniq from 'lodash';
-import uuid from 'uuid';
 
 export class SpacesSavedObjectsClient {
   constructor(options) {
@@ -47,7 +46,6 @@ export class SpacesSavedObjectsClient {
       extraDocumentProperties: {
         ...options.extraDocumentProperties
       },
-      id: this._prependSpaceId(type, options.id)
     };
 
     if (this._shouldAssignSpaceId(type, spaceId)) {
@@ -56,8 +54,7 @@ export class SpacesSavedObjectsClient {
       delete createOptions.extraDocumentProperties.spaceId;
     }
 
-    const result = await this._client.create(type, attributes, createOptions);
-    return this._trimSpaceId(result);
+    return await this._client.create(type, attributes, createOptions);
   }
 
   /**
@@ -77,7 +74,6 @@ export class SpacesSavedObjectsClient {
         extraDocumentProperties: {
           ...object.extraDocumentProperties
         },
-        id: this._prependSpaceId(object.type, object.id)
       };
 
       if (this._shouldAssignSpaceId(object.type, spaceId)) {
@@ -89,10 +85,7 @@ export class SpacesSavedObjectsClient {
       return objectToCreate;
     });
 
-    const result = await this._client.bulkCreate(objectsToCreate, options);
-    result.saved_objects.forEach(this._trimSpaceId.bind(this));
-
-    return result;
+    return await this._client.bulkCreate(objectsToCreate, options);
   }
 
   /**
@@ -103,13 +96,11 @@ export class SpacesSavedObjectsClient {
    * @returns {promise}
    */
   async delete(type, id) {
-    const objectId = this._prependSpaceId(type, id);
-
     // attempt to retrieve document before deleting.
     // this ensures that the document belongs to the current space.
     await this.get(type, id);
 
-    return await this._client.delete(type, objectId);
+    return await this._client.delete(type, id);
   }
 
   /**
@@ -141,7 +132,6 @@ export class SpacesSavedObjectsClient {
     spaceOptions.filters = [...filters, ...getSpacesQueryFilters(spaceId, types)];
 
     const result = await this._client.find({ ...options, ...spaceOptions });
-    result.saved_objects.forEach(this._trimSpaceId.bind(this));
     return result;
   }
 
@@ -163,20 +153,15 @@ export class SpacesSavedObjectsClient {
     // ES 'mget' does not support queries, so we have to filter results after the fact.
     const thisSpaceId = this._spaceId;
 
-    const extraDocumentProperties = this._collectExtraDocumentProperties(['spaceId', 'type'], options.extraDocumentProperties);
+    const extraDocumentProperties = this._collectExtraDocumentProperties(['spaceId'], options.extraDocumentProperties);
 
-    const objectsToRetrieve = objects.map(object => ({
-      ...object,
-      id: this._prependSpaceId(object.type, object.id)
-    }));
-
-    const result = await this._client.bulkGet(objectsToRetrieve, {
+    const result = await this._client.bulkGet(objects, {
       ...options,
       extraDocumentProperties
     });
 
     result.saved_objects = result.saved_objects.map(savedObject => {
-      const { id, type, spaceId = DEFAULT_SPACE_ID } = this._trimSpaceId(savedObject);
+      const { id, type, spaceId = DEFAULT_SPACE_ID } = savedObject;
 
       if (isTypeSpaceAware(type)) {
         if (spaceId !== thisSpaceId) {
@@ -206,11 +191,9 @@ export class SpacesSavedObjectsClient {
   async get(type, id, options = {}) {
     // ES 'get' does not support queries, so we have to filter results after the fact.
 
-    const objectId = this._prependSpaceId(type, id);
-
     const extraDocumentProperties = this._collectExtraDocumentProperties(['spaceId'], options.extraDocumentProperties);
 
-    const response = await this._client.get(type, objectId, {
+    const response = await this._client.get(type, id, {
       ...options,
       extraDocumentProperties
     });
@@ -224,7 +207,7 @@ export class SpacesSavedObjectsClient {
       }
     }
 
-    return this._trimSpaceId(response);
+    return response;
   }
 
   /**
@@ -245,8 +228,6 @@ export class SpacesSavedObjectsClient {
       }
     };
 
-    const objectId = this._prependSpaceId(type, id);
-
     // attempt to retrieve document before updating.
     // this ensures that the document belongs to the current space.
     if (isTypeSpaceAware(type)) {
@@ -261,8 +242,7 @@ export class SpacesSavedObjectsClient {
       }
     }
 
-    const result = await this._client.update(type, objectId, attributes, updateOptions);
-    return this._trimSpaceId(result);
+    return await this._client.update(type, id, attributes, updateOptions);
   }
 
   _collectExtraDocumentProperties(thisClientProperties, optionalProperties = []) {
@@ -271,30 +251,5 @@ export class SpacesSavedObjectsClient {
 
   _shouldAssignSpaceId(type, spaceId) {
     return spaceId !== DEFAULT_SPACE_ID && isTypeSpaceAware(type);
-  }
-
-  _prependSpaceId(type, id = uuid.v1()) {
-    if (this._spaceId === DEFAULT_SPACE_ID || !isTypeSpaceAware(type)) {
-      return id;
-    }
-    return `${this._spaceId}:${id}`;
-  }
-
-  _trimSpaceId(savedObject) {
-    const prefix = `${this._spaceId}:`;
-
-    const idHasPrefix = savedObject.id.startsWith(prefix);
-
-    if (this._shouldAssignSpaceId(savedObject.type, this._spaceId)) {
-      if (idHasPrefix) {
-        savedObject.id = savedObject.id.slice(prefix.length);
-      } else {
-        throw new Error(`Saved object [${savedObject.type}/${savedObject.id}] is missing its expected space identifier.`);
-      }
-    } else if (idHasPrefix) {
-      throw new Error(`Saved object [${savedObject.type}/${savedObject.id}] has an unexpected space identifier [${this._spaceId}].`);
-    }
-
-    return savedObject;
   }
 }

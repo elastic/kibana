@@ -7,9 +7,9 @@
 import Boom from 'boom';
 import Joi from 'joi';
 import { wrapError } from '../../../lib/errors';
-import { BasicCredentials } from '../../../../server/lib/authentication/providers/basic';
+import { BasicCredentials } from '../../../lib/authentication/providers/basic';
 import { canRedirectRequest } from '../../../lib/can_redirect_request';
-import { CHECK_PRIVILEGES_RESULT } from '../../../../server/lib/authorization';
+import { CHECK_PRIVILEGES_RESULT } from '../../../lib/authorization';
 
 export function initAuthenticateApi(server) {
 

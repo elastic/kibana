@@ -18,7 +18,7 @@
  */
 
 import { getRootPropertiesObjects } from '../../mappings';
-import { SavedObjectsRepository, ScopedSavedObjectsClientProvider, SavedObjectsRepositoryProvider } from './lib';
+import { ScopedSavedObjectsClientProvider, ScopedSavedObjectsRepositoryProvider } from './lib';
 import { SavedObjectsClient } from './saved_objects_client';
 
 export function createSavedObjectsService(server) {
@@ -60,7 +60,7 @@ export function createSavedObjectsService(server) {
   };
 
   const mappings = server.getKibanaIndexMappingsDsl();
-  const repositoryProvider = new SavedObjectsRepositoryProvider({
+  const scopedRepositoryProvider = new ScopedSavedObjectsRepositoryProvider({
     index: server.config().get('kibana.index'),
     mappings,
     onBeforeWrite,
@@ -76,7 +76,7 @@ export function createSavedObjectsService(server) {
       const { callWithRequest } = server.plugins.elasticsearch.getCluster('admin');
       const callCluster = (...args) => callWithRequest(request, ...args);
 
-      const repository = repositoryProvider.getRepository(callCluster);
+      const repository = scopedRepositoryProvider.getRepository(callCluster, request);
 
       return new SavedObjectsClient(repository);
     }
@@ -85,9 +85,10 @@ export function createSavedObjectsService(server) {
   return {
     types: Object.keys(getRootPropertiesObjects(mappings)),
     SavedObjectsClient,
-    SavedObjectsRepository,
-    getSavedObjectsRepository: (...args) =>
-      repositoryProvider.getRepository(...args),
+    setScopedDocumentFormatFactory: (...args) =>
+      scopedRepositoryProvider.setScopedDocumentFormatFactory(...args),
+    getScopedSavedObjectsRepository: (...args) =>
+      scopedRepositoryProvider.getRepository(...args),
     getScopedSavedObjectsClient: (...args) =>
       scopedClientProvider.getClient(...args),
     setScopedSavedObjectsClientFactory: (...args) =>

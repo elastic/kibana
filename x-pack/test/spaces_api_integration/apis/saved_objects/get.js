@@ -7,7 +7,6 @@
 import expect from 'expect.js';
 import { getIdPrefix, getUrlPrefix } from './lib/space_test_utils';
 import { SPACES } from './lib/spaces';
-import { DEFAULT_SPACE_ID } from '../../../../plugins/spaces/common/constants';
 
 export default function ({ getService }) {
   const supertest = getService('supertest');
@@ -60,17 +59,10 @@ export default function ({ getService }) {
         it(`should return ${tests.exists.statusCode}`, async () => {
           const objectId = `${getIdPrefix(otherSpaceId)}dd7caf20-9efd-11e7-acb3-3dab96693fab`;
 
-          let expectedObjectId = objectId;
-          const testingMismatchedSpaces = spaceId !== otherSpaceId;
-
-          if (testingMismatchedSpaces && spaceId !== DEFAULT_SPACE_ID) {
-            expectedObjectId = `${spaceId}:${expectedObjectId}`;
-          }
-
           return supertest
             .get(`${getUrlPrefix(spaceId)}/api/saved_objects/visualization/${objectId}`)
             .expect(tests.exists.statusCode)
-            .then(tests.exists.response('visualization', expectedObjectId));
+            .then(tests.exists.response('visualization', objectId));
         });
       });
     };

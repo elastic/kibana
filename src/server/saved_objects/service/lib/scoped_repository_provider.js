@@ -22,7 +22,7 @@ import { SavedObjectsRepository } from './repository';
 /**
  * Provider for the Saved Object Repository.
  */
-export class SavedObjectsRepositoryProvider {
+export class ScopedSavedObjectsRepositoryProvider {
 
   constructor({
     index,
@@ -34,17 +34,28 @@ export class SavedObjectsRepositoryProvider {
     this._onBeforeWrite = onBeforeWrite;
   }
 
-  getRepository(callCluster) {
+  setScopedDocumentFormatFactory(customFactory) {
+    if (this._customDocumentFormatFactory) {
+      throw new TypeError('Custom document format factory has already been set.');
+    }
+
+    this._customDocumentFormatFactory = customFactory;
+  }
+
+  getRepository(callCluster, request) {
 
     if (typeof callCluster !== 'function') {
       throw new TypeError('Repository requires a "callCluster" function to be provided.');
     }
 
+    const documentFormat = this._customDocumentFormatFactory ? this._customDocumentFormatFactory(request) : null;
+
     return new SavedObjectsRepository({
       index: this._index,
       mappings: this._mappings,
       onBeforeWrite: this._onBeforeWrite,
-      callCluster
+      callCluster,
+      documentFormat,
     });
   }
 }

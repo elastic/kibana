@@ -68,14 +68,26 @@ function getFieldsForTypes(searchFields, types) {
  *  @param {Array<object>} filters additional query filters
  *  @return {Object}
  */
-export function getQueryParams(mappings, type, search, searchFields, filters = []) {
+export function getQueryParams(mappings, documentFormat, type, search, searchFields, filters = []) {
 
   const bool = {
     filter: [...filters],
   };
 
   if (type) {
-    bool.filter.push({ [Array.isArray(type) ? 'terms' : 'term']: { type } });
+    if (Array.isArray(type)) {
+      bool.filter.push({
+        terms: {
+          type: type.map(t => documentFormat.toDocumentSourceType(t))
+        }
+      });
+    } else {
+      bool.filter.push({
+        term: {
+          type: documentFormat.toDocumentSourceType(type)
+        }
+      });
+    }
   }
 
   if (search) {
@@ -96,6 +108,10 @@ export function getQueryParams(mappings, type, search, searchFields, filters = [
   if (bool.filter.length === 0 && !search) {
     return {};
   }
+
+  console.log(JSON.stringify({
+    query: { bool }
+  }));
 
   return { query: { bool } };
 }

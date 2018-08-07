@@ -22,7 +22,7 @@ import Boom from 'boom';
 import { getQueryParams } from './query_params';
 import { getSortingParams } from './sorting_params';
 
-export function getSearchDsl(mappings, options = {}) {
+export function getSearchDsl(mappings, documentFormat, options = {}) {
   const {
     type,
     search,
@@ -45,7 +45,7 @@ export function getSearchDsl(mappings, options = {}) {
   }
 
   return {
-    ...getQueryParams(mappings, type, search, searchFields, filters),
+    ...getQueryParams(mappings, documentFormat, type, search, searchFields, filters),
     ...getSortingParams(mappings, type, sortField, sortOrder),
   };
 }

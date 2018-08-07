@@ -123,7 +123,7 @@ export const security = (kibana) => new kibana.Plugin({
       const { callWithRequest, callWithInternalUser } = adminCluster;
       const callCluster = (...args) => callWithRequest(request, ...args);
 
-      const callWithRequestRepository = savedObjects.getSavedObjectsRepository(callCluster);
+      const callWithRequestRepository = savedObjects.getScopedSavedObjectsRepository(callCluster, request);
 
       if (!xpackInfoFeature.getLicenseCheckResults().allowRbac) {
         return new savedObjects.SavedObjectsClient(callWithRequestRepository);
@@ -131,7 +131,7 @@ export const security = (kibana) => new kibana.Plugin({
 
       const { authorization } = server.plugins.security;
       const checkPrivileges = authorization.checkPrivilegesWithRequest(request);
-      const internalRepository = savedObjects.getSavedObjectsRepository(callWithInternalUser);
+      const internalRepository = savedObjects.getScopedSavedObjectsRepository(callWithInternalUser, request);
 
       return new SecureSavedObjectsClient({
         internalRepository,

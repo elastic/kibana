@@ -24,6 +24,7 @@ import * as getSearchDslNS from './search_dsl/search_dsl';
 import { getSearchDsl } from './search_dsl';
 import * as errors from './errors';
 import elasticsearch from 'elasticsearch';
+import { DefaultDocumentFormat } from './default_document_format';
 
 // BEWARE: The SavedObjectClient depends on the implementation details of the SavedObjectsRepository
 // so any breaking changes to this repository are considered breaking changes to the SavedObjectsClient.
@@ -541,7 +542,7 @@ describe('SavedObjectsRepository', () => {
 
       await savedObjectsRepository.find(relevantOpts);
       sinon.assert.calledOnce(getSearchDsl);
-      sinon.assert.calledWithExactly(getSearchDsl, mappings, relevantOpts);
+      sinon.assert.calledWithExactly(getSearchDsl, mappings, sinon.match.instanceOf(DefaultDocumentFormat), relevantOpts);
     });
 
     it('merges output of getSearchDsl into es request body', async () => {
@@ -702,7 +703,7 @@ describe('SavedObjectsRepository', () => {
           _id: 'config:good',
           found: true,
           _version: 2,
-          _source: { ...mockTimestampFields, config: { title: 'Test' } }
+          _source: { ...mockTimestampFields, type: 'config', config: { title: 'Test' } }
         }, {
           _type: 'doc',
           _id: 'config:bad',
@@ -856,7 +857,7 @@ describe('SavedObjectsRepository', () => {
         id: 'index-pattern:logstash-*',
         version: undefined,
         body: {
-          doc: { updated_at: mockTimestamp, 'index-pattern': { title: 'Testing' } }
+          doc: { type: 'index-pattern', updated_at: mockTimestamp, 'index-pattern': { title: 'Testing' } }
         },
         ignore: [404],
         refresh: 'wait_for',
@@ -880,7 +881,7 @@ describe('SavedObjectsRepository', () => {
         id: 'index-pattern:logstash-*',
         version: undefined,
         body: {
-          doc: { updated_at: mockTimestamp, extraProp: 'extraVal', 'index-pattern': { title: 'Testing' } }
+          doc: { type: 'index-pattern', updated_at: mockTimestamp, extraProp: 'extraVal', 'index-pattern': { title: 'Testing' } }
         },
         ignore: [404],
         refresh: 'wait_for',
@@ -910,7 +911,7 @@ describe('SavedObjectsRepository', () => {
         id: 'index-pattern:logstash-*',
         version: undefined,
         body: {
-          doc: { updated_at: mockTimestamp, extraProp: 'extraVal', 'index-pattern': { title: 'Testing' } }
+          doc: { type: 'index-pattern', updated_at: mockTimestamp, extraProp: 'extraVal', 'index-pattern': { title: 'Testing' } }
         },
         ignore: [404],
         refresh: 'wait_for',

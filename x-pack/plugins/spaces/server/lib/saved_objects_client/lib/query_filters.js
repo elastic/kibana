@@ -19,9 +19,10 @@ function getClauseForType(spaceId, type) {
     throw new Error(`type is required to build filter clause`);
   }
 
+  const prefix = shouldFilterOnSpace && !isDefaultSpace ? `${spaceId}:` : '';
   bool.must.push({
     term: {
-      type
+      type: `${prefix}${type}`
     }
   });
 
