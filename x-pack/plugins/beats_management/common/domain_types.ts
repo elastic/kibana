@@ -36,4 +36,5 @@ export interface BeatTag {
   id: string;
   configuration_blocks: ConfigurationBlock[];
   color?: string;
+  last_updated: Date;
 }
