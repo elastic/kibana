@@ -7,21 +7,52 @@
 import { kfetchAbortable } from 'ui/kfetch';
 import { SearchError } from 'ui/courier';
 
-export const rollupSearchStrategy = {
-  id: 'rollup',
+function getAllFetchParams(searchRequests, Promise) {
+  return Promise.map(searchRequests, (searchRequest) => {
+    return Promise.try(searchRequest.getFetchParams, void 0, searchRequest)
+      .then((fetchParams) => {
+        return (searchRequest.fetchParams = fetchParams);
+      })
+      .then(value => ({ resolved: value }))
+      .catch(error => ({ rejected: error }));
+  });
+}
 
-  search: async ({ searchRequests, Promise }) => {
-    // TODO: Batch together requests to hit a bulk rollup search endpoint.
-    const searchRequest = searchRequests[0];
-    const searchParams = await searchRequest.getFetchParams();
-    const indexPattern = searchParams.index.title || searchParams.index;
+async function serializeAllFetchParams(fetchParams, searchRequests) {
+  const searchRequestsWithFetchParams = [];
+  const failedSearchRequests = [];
+
+  // Gather the fetch param responses from all the successful requests.
+  fetchParams.forEach((result, index) => {
+    if (result.resolved) {
+      searchRequestsWithFetchParams.push(result.resolved);
+    } else {
+      const searchRequest = searchRequests[index];
+
+      searchRequest.handleFailure(result.rejected);
+      failedSearchRequests.push(searchRequest);
+    }
+  });
+
+  const serializedFetchParams = serializeFetchParams(searchRequestsWithFetchParams);
+
+  return {
+    serializedFetchParams,
+    failedSearchRequests,
+  };
+}
+
+function serializeFetchParams(searchRequestsWithFetchParams) {
+  return JSON.stringify(searchRequestsWithFetchParams.map(searchRequestWithFetchParams => {
+    const indexPattern = searchRequestWithFetchParams.index.title || searchRequestWithFetchParams.index;
     const {
       body: {
         size,
         aggs,
         query: _query,
       },
-    } = searchParams;
+      index,
+    } = searchRequestWithFetchParams;
 
     // TODO: Temporarily automatically assign same timezone and interval as what's defined by
     // the rollup job. This should be done by the visualization itself.
@@ -30,7 +61,7 @@ export const rollupSearchStrategy = {
 
       Object.keys(subAggs).forEach(subAggName => {
         if (subAggName === 'date_histogram') {
-          const dateHistogramAgg = searchRequest.source.getField('index').typeMeta.aggs.date_histogram;
+          const dateHistogramAgg = index.typeMeta.aggs.date_histogram;
           const subAgg = subAggs[subAggName];
           const field = subAgg.field;
           subAgg.time_zone = dateHistogramAgg[field].time_zone;
@@ -39,12 +70,29 @@ export const rollupSearchStrategy = {
       });
     });
 
-    const index = indexPattern;
     const query = {
       'size': size,
       'aggregations': aggs,
       'query': _query,
     };
+
+    return { index: indexPattern, query };
+  }));
+}
+
+export const rollupSearchStrategy = {
+  id: 'rollup',
+
+  search: async ({ searchRequests, Promise }) => {
+    // Flatten the searchSource within each searchRequest to get the fetch params,
+    // e.g. body, filters, index pattern, query.
+    const allFetchParams = await getAllFetchParams(searchRequests, Promise);
+
+    // Serialize the fetch params into a format suitable for the body of an ES query.
+    const {
+      serializedFetchParams,
+      failedSearchRequests,
+    } = await serializeAllFetchParams(allFetchParams, searchRequests);
 
     const {
       fetching,
@@ -52,17 +100,13 @@ export const rollupSearchStrategy = {
     } = kfetchAbortable({
       pathname: '../api/rollup/search',
       method: 'POST',
-      body: JSON.stringify({ index, query }),
+      body: serializedFetchParams,
     });
 
-    // TODO: Implement this. Search requests which can't be sent.
-    const failedSearchRequests = [];
-
     return {
-      // Munge data into shape expected by consumer.
       searching: new Promise((resolve, reject) => {
         fetching.then(result => {
-          resolve([ result ]);
+          resolve(result);
         }).catch(error => {
           const {
             body: { statusText, error: title, message },
