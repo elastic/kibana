@@ -363,6 +363,11 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
       await PageObjects.header.waitUntilLoadingHasFinished();
     }
 
+    async clickUnlinkSavedSearch() {
+      await testSubjects.doubleClick('unlinkSavedSearch');
+      await PageObjects.header.waitUntilLoadingHasFinished();
+    }
+
     async setValue(newValue) {
       await find.clickByCssSelector('button[ng-click="numberListCntr.add()"]', defaultFindTimeout * 2);
       const input = await find.byCssSelector('input[ng-model="numberListCntr.getList()[$index]"]');
@@ -396,8 +401,14 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
       await Promise.all(getChartTypesPromises);
     }
 
-    async selectAggregation(myString, groupName = 'buckets') {
-      const selector = `[group-name="${groupName}"] vis-editor-agg-params:not(.ng-hide) .agg-select`;
+    async selectAggregation(myString, groupName = 'buckets', childAggregationType = null) {
+      const selector = `
+        [group-name="${groupName}"]
+        vis-editor-agg-params:not(.ng-hide)
+        ${childAggregationType ? `vis-editor-agg-params[group-name="'${childAggregationType}'"]:not(.ng-hide)` : ''}
+        .agg-select
+      `;
+
       await retry.try(async () => {
         await find.clickByCssSelector(selector);
         const input = await find.byCssSelector(`${selector} input.ui-select-search`);
@@ -483,8 +494,14 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
       return await field.getVisibleText();
     }
 
-    async selectField(fieldValue, groupName = 'buckets') {
-      const selector = `[group-name="${groupName}"] vis-editor-agg-params:not(.ng-hide) .field-select`;
+    async selectField(fieldValue, groupName = 'buckets', childAggregationType = null) {
+      const selector = `
+        [group-name="${groupName}"]
+        vis-editor-agg-params:not(.ng-hide)
+        ${childAggregationType ? `vis-editor-agg-params[group-name="'${childAggregationType}'"]:not(.ng-hide)` : ''}
+        .field-select
+      `;
+
       await retry.try(async () => {
         await find.clickByCssSelector(selector);
         const input = await find.byCssSelector(`${selector} input.ui-select-search`);
@@ -587,8 +604,26 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
       await testSubjects.click('visEditorTabadvanced');
     }
 
+    async clickYAxisOptions(axisId) {
+      await testSubjects.click(`toggleYAxisOptions-${axisId}`);
+    }
+    async clickYAxisAdvancedOptions(axisId) {
+      await testSubjects.click(`toggleYAxisAdvancedOptions-${axisId}`);
+    }
+
+    async changeYAxisFilterLabelsCheckbox(axisId, enabled) {
+      const selector = `yAxisFilterLabelsCheckbox-${axisId}`;
+      enabled ? await this.checkCheckbox(selector) : await this.uncheckCheckbox(selector);
+    }
+
     async selectChartMode(mode) {
       const selector = await find.byCssSelector(`#seriesMode0 > option[label="${mode}"]`);
+      await selector.click();
+    }
+
+    async selectYAxisScaleType(axisId, scaleType) {
+      const selectElement = await testSubjects.find(`scaleSelectYAxis-${axisId}`);
+      const selector = await selectElement.findByCssSelector(`option[label="${scaleType}"]`);
       await selector.click();
     }
 

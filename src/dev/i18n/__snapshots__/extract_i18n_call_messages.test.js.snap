@@ -1,0 +1,29 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`extractI18nCallMessages extracts "i18n" and "i18n.translate" functions call message 1`] = `
+Array [
+  "message-id-1",
+  Object {
+    "context": "Message context 1",
+    "message": "Default message 1",
+  },
+]
+`;
+
+exports[`extractI18nCallMessages extracts "i18n" and "i18n.translate" functions call message 2`] = `
+Array [
+  "message-id-2",
+  Object {
+    "context": "Message context 2",
+    "message": "Default message 2",
+  },
+]
+`;
+
+exports[`extractI18nCallMessages throws if defaultMessage is not a string literal 1`] = `"defaultMessage value in i18n() or i18n.translate() should be a string literal (\\"message-id\\")."`;
+
+exports[`extractI18nCallMessages throws if message id value is not a string literal 1`] = `"Message id in i18n() or i18n.translate() should be a string literal."`;
+
+exports[`extractI18nCallMessages throws if properties object is not provided 1`] = `"Empty defaultMessage in i18n() or i18n.translate() is not allowed (\\"message-id\\")."`;
+
+exports[`extractI18nCallMessages throws on empty defaultMessage 1`] = `"Empty defaultMessage in i18n() or i18n.translate() is not allowed (\\"message-id\\")."`;

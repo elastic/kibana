@@ -35,7 +35,7 @@ import { extractIntlMessages, extractFormattedMessages } from './extract_react_m
  *
  * Example: `intl.formatMessage({ id: 'message-id', defaultMessage: 'Message text' });`
  */
-function isIntlFormatMessageFunction(node) {
+export function isIntlFormatMessageFunction(node) {
   return (
     isCallExpression(node) &&
     isMemberExpression(node.callee) &&
@@ -49,7 +49,7 @@ function isIntlFormatMessageFunction(node) {
  *
  * Example: `<FormattedMessage id="message-id" defaultMessage="Message text"/>`
  */
-function isFormattedMessageElement(node) {
+export function isFormattedMessageElement(node) {
   return isJSXOpeningElement(node) && isJSXIdentifier(node.name, { name: 'FormattedMessage' });
 }
 
