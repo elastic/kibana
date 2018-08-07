@@ -20,16 +20,47 @@ import { trimIdPrefix } from './trim_id_prefix';
 import uuid from 'uuid';
 
 export class DefaultDocumentFormat {
-  toDocumentId(type, id) {
-    return `${type}:${id || uuid.v1()}`;
+
+  fromDocument({
+    extraDocumentProperties,
+    doc
+  }) {
+
+    const { type, updated_at: updatedAt } = doc._source;
+    return {
+      id: this.fromDocumentId(type, doc._id),
+      type,
+      ...updatedAt && { updated_at: updatedAt },
+      version: doc._version,
+      ...extraDocumentProperties
+        .map(s => ({ [s]: doc._source[s] }))
+        .reduce((acc, prop) => ({ ...acc, ...prop }), {}),
+      attributes: {
+        ...doc._source[type],
+      },
+    };
   }
 
   fromDocumentId(type, id) {
     return trimIdPrefix(id, type);
   }
 
-  fromDocumentSourceType(type) {
-    return type;
+  toDocumentId(type, id) {
+    return `${type}:${id || uuid.v1()}`;
+  }
+
+  toDocumentSource({
+    type,
+    extraDocumentProperties,
+    updatedAt,
+    attributes
+  }) {
+    return {
+      ...extraDocumentProperties,
+      type: this.toDocumentSourceType(type),
+      updated_at: updatedAt,
+      [type]: attributes,
+    };
   }
 
   toDocumentSourceType(type) {

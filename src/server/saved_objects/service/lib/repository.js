@@ -70,12 +70,12 @@ export class SavedObjectsRepository {
         type: this._type,
         index: this._index,
         refresh: 'wait_for',
-        body: {
-          ...extraDocumentProperties,
-          type: this._documentFormat.toDocumentSourceType(type),
-          updated_at: time,
-          [type]: attributes,
-        },
+        body: this._documentFormat.toDocumentSource({
+          extraDocumentProperties,
+          type,
+          updatedAt: time,
+          attributes
+        }),
       });
 
       return {
@@ -118,12 +118,12 @@ export class SavedObjectsRepository {
             _type: this._type,
           }
         },
-        {
-          ...object.extraDocumentProperties,
-          type: this._documentFormat.toDocumentSourceType(object.type),
-          updated_at: time,
-          [object.type]: object.attributes,
-        }
+        this._documentFormat.toDocumentSource({
+          extraDocumentProperties: object.extraDocumentProperties,
+          type: object.type,
+          updatedAt: time,
+          attributes: object.attributes,
+        })
       ];
     };
 
@@ -287,15 +287,10 @@ export class SavedObjectsRepository {
       per_page: perPage,
       total: response.hits.total,
       saved_objects: response.hits.hits.map(hit => {
-        const { type: sourceType, updated_at: updatedAt } = hit._source;
-        const type = this._documentFormat.fromDocumentSourceType(sourceType);
-        return {
-          id: this._documentFormat.fromDocumentId(type, hit._id),
-          type,
-          ...updatedAt && { updated_at: updatedAt },
-          version: hit._version,
-          attributes: hit._source[type],
-        };
+        return this._documentFormat.fromDocument({
+          extraDocumentProperties: [],
+          doc: hit
+        });
       }),
     };
   }
@@ -345,22 +340,10 @@ export class SavedObjectsRepository {
           };
         }
 
-        debugger; //eslint-disable-line
-        const time = doc._source.updated_at;
-        const savedObject = {
-          id,
-          type,
-          ...time && { updated_at: time },
-          version: doc._version,
-          ...extraDocumentProperties
-            .map(s => ({ [s]: doc._source[s] }))
-            .reduce((acc, prop) => ({ ...acc, ...prop }), {}),
-          attributes: {
-            ...doc._source[type],
-          }
-        };
-
-        return savedObject;
+        return this._documentFormat.fromDocument({
+          extraDocumentProperties,
+          doc
+        });
       })
     };
   }
@@ -391,20 +374,10 @@ export class SavedObjectsRepository {
 
     const { extraDocumentProperties = [] } = options;
 
-    const { updated_at: updatedAt } = response._source;
-
-    return {
-      id,
-      type: this._documentFormat.fromDocumentSourceType(type),
-      ...updatedAt && { updated_at: updatedAt },
-      version: response._version,
-      ...extraDocumentProperties
-        .map(s => ({ [s]: response._source[s] }))
-        .reduce((acc, prop) => ({ ...acc, ...prop }), {}),
-      attributes: {
-        ...response._source[type],
-      }
-    };
+    return this._documentFormat.fromDocument({
+      extraDocumentProperties,
+      doc: response
+    });
   }
 
   /**
@@ -427,11 +400,12 @@ export class SavedObjectsRepository {
       refresh: 'wait_for',
       ignore: [404],
       body: {
-        doc: {
-          ...options.extraDocumentProperties,
-          updated_at: time,
-          [type]: attributes,
-        }
+        doc: this._documentFormat.toDocumentSource({
+          extraDocumentProperties: options.extraDocumentProperties,
+          type,
+          updatedAt: time,
+          attributes,
+        })
       },
     });
 

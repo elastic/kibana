@@ -703,7 +703,7 @@ describe('SavedObjectsRepository', () => {
           _id: 'config:good',
           found: true,
           _version: 2,
-          _source: { ...mockTimestampFields, config: { title: 'Test' } }
+          _source: { ...mockTimestampFields, type: 'config', config: { title: 'Test' } }
         }, {
           _type: 'doc',
           _id: 'config:bad',
@@ -857,7 +857,7 @@ describe('SavedObjectsRepository', () => {
         id: 'index-pattern:logstash-*',
         version: undefined,
         body: {
-          doc: { updated_at: mockTimestamp, 'index-pattern': { title: 'Testing' } }
+          doc: { type: 'index-pattern', updated_at: mockTimestamp, 'index-pattern': { title: 'Testing' } }
         },
         ignore: [404],
         refresh: 'wait_for',
@@ -881,7 +881,7 @@ describe('SavedObjectsRepository', () => {
         id: 'index-pattern:logstash-*',
         version: undefined,
         body: {
-          doc: { updated_at: mockTimestamp, extraProp: 'extraVal', 'index-pattern': { title: 'Testing' } }
+          doc: { type: 'index-pattern', updated_at: mockTimestamp, extraProp: 'extraVal', 'index-pattern': { title: 'Testing' } }
         },
         ignore: [404],
         refresh: 'wait_for',
@@ -911,7 +911,7 @@ describe('SavedObjectsRepository', () => {
         id: 'index-pattern:logstash-*',
         version: undefined,
         body: {
-          doc: { updated_at: mockTimestamp, extraProp: 'extraVal', 'index-pattern': { title: 'Testing' } }
+          doc: { type: 'index-pattern', updated_at: mockTimestamp, extraProp: 'extraVal', 'index-pattern': { title: 'Testing' } }
         },
         ignore: [404],
         refresh: 'wait_for',

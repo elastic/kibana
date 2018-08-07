@@ -38,22 +38,57 @@ export class SpacesDocumentFormat {
     this._spaceId = spaceId;
   }
 
-  toDocumentId(type, id) {
-    const spacePrefix = this._shouldPrependSpace(type) ? `${this._spaceId}:` : '';
-    return `${type}:${spacePrefix}${id || uuid.v1()}`;
+  fromDocument({
+    extraDocumentProperties,
+    doc
+  }) {
+    const { type: sourceType, updated_at: updatedAt } = doc._source;
+    const type = this.fromDocumentSourceType(sourceType);
+
+    return {
+      id: this.fromDocumentId(type, doc._id),
+      type,
+      ...updatedAt && { updated_at: updatedAt },
+      version: doc._version,
+      ...extraDocumentProperties
+        .map(s => ({ [s]: doc._source[s] }))
+        .reduce((acc, prop) => ({ ...acc, ...prop }), {}),
+      attributes: {
+        ...doc._source[type],
+      },
+    };
+  }
+
+  fromDocumentSourceType(type) {
+    return trimPrefix(type, this._spaceId);
   }
 
   fromDocumentId(type, id) {
     return trimPrefix(trimPrefix(id, type), this._spaceId);
   }
 
+  toDocumentId(type, id) {
+    const spacePrefix = this._shouldPrependSpace(type) ? `${this._spaceId}:` : '';
+    return `${type}:${spacePrefix}${id || uuid.v1()}`;
+  }
+
+  toDocumentSource({
+    type,
+    extraDocumentProperties,
+    updatedAt,
+    attributes
+  }) {
+    return {
+      ...extraDocumentProperties,
+      type: this.toDocumentSourceType(type),
+      updated_at: updatedAt,
+      [type]: attributes,
+    };
+  }
+
   toDocumentSourceType(type) {
     const prefix = this._shouldPrependSpace(type) ? `${this._spaceId}:` : '';
     return `${prefix}${type}`;
-  }
-
-  fromDocumentSourceType(type) {
-    return trimPrefix(type, this._spaceId);
   }
 
   _shouldPrependSpace(type) {

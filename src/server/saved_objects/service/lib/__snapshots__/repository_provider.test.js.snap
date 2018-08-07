@@ -1,3 +1,0 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
-
-exports[`requires "callCluster" to be provided 1`] = `"Repository requires a \\"callCluster\\" function to be provided."`;
