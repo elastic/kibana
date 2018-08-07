@@ -115,7 +115,7 @@ export class BeatsPage extends React.PureComponent<BeatsPageProps, BeatsPageStat
         <EuiFlexItem key={tag.id}>
           <EuiBadge
             color={tag.color}
-            iconType={hasMatches ? 'cross' : null}
+            iconType={hasMatches ? 'cross' : undefined}
             onClick={
               hasMatches
                 ? () => this.removeTagsFromBeats(selectedBeats, tag)
