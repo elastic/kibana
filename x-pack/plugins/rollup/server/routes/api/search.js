@@ -14,15 +14,17 @@ export function registerSearchRoute(server) {
     path: '/api/rollup/search',
     method: 'POST',
     handler: async (request, reply) => {
-      const { index, query } = request.payload;
       const callWithRequest = callWithRequestFactory(server, request);
 
       try {
-        const results = await callWithRequest('rollup.search', {
-          index,
-          body: query,
-        });
+        const requests = request.payload.map(({ index, query }) => (
+          callWithRequest('rollup.search', {
+            index,
+            body: query,
+          })
+        ));
 
+        const results = await Promise.all(requests);
         reply(results);
       } catch(err) {
         if (isEsError(err)) {
