@@ -87,6 +87,7 @@
     "@kbn/pm": "link:packages/kbn-pm",
     "@kbn/test-subj-selector": "link:packages/kbn-test-subj-selector",
     "@kbn/ui-framework": "link:packages/kbn-ui-framework",
+    "@types/color": "^3.0.0",
     "JSONStream": "1.1.1",
     "abortcontroller-polyfill": "^1.1.9",
     "angular": "1.6.9",

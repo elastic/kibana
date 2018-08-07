@@ -9,17 +9,12 @@
  *       package includes them.
  */
 
-declare module '@elastic/eui' {
-  import { Moment } from 'moment';
-  import {
-    ChangeEventHandler,
-    MouseEventHandler,
-    ReactType,
-    Ref,
-    SFC,
-  } from 'react';
-  import { ReactDatePickerProps } from 'react-datepicker';
+import { Moment } from 'moment';
+import { MouseEventHandler, ReactType, Ref } from 'react';
+import { ReactDatePickerProps } from 'react-datepicker';
+import { ReactNode } from '../../../node_modules/@types/react';
 
+declare module '@elastic/eui' {
   export interface EuiBreadcrumbDefinition {
     text: React.ReactNode;
     href?: string;
@@ -89,4 +84,10 @@ declare module '@elastic/eui' {
     type?: string;
   };
   export const EuiFilterButton: React.SFC<EuiFilterButtonProps>;
+
+  type EuiToolTipProps = CommonProps & {
+    position: EuiToolTipPosition;
+    content: string | ReactNode;
+  };
+  export const EuiToolTip: React.SFC<EuiToolTipProps>;
 }
