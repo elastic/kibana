@@ -8,7 +8,13 @@ exports[`TruncateFormatEditor should render normally 1`] = `
     fullWidth={false}
     hasEmptyLabelSpace={false}
     isInvalid={false}
-    label="Field length"
+    label={
+      <FormattedMessage
+        defaultMessage="Field length"
+        id="common.ui.fieldEditor.truncate.lengthLabel"
+        values={Object {}}
+      />
+    }
   >
     <EuiFieldNumber
       compressed={false}
@@ -18,7 +24,7 @@ exports[`TruncateFormatEditor should render normally 1`] = `
       onChange={[Function]}
     />
   </EuiFormRow>
-  <FormatEditorSamples
+  <InjectIntl(FormatEditorSamplesComponent)
     samples={
       Array [
         Object {
