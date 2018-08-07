@@ -22,30 +22,28 @@ export const timelion = () => ({
     from: {
       type: ['string'],
       help: 'Elasticsearch date math string for the start of the time range',
+      default: 'now-1y',
     },
     to: {
       type: ['string'],
       help: 'Elasticsearch date math string for the end of the time range',
+      default: 'now',
+    },
+    timezone: {
+      type: ['string'],
+      help: 'Timezone for the time range',
+      default: 'UTC',
     },
   },
   type: 'datatable',
   help: 'Use timelion to extract one or more timeseries from many sources.',
   fn: (context, args, handlers) => {
-    function findTimeRangeInFilterContext() {
-      const timeFilter = context.and.find(and => and.type === 'time');
-      if (!timeFilter) throw new Error('No time filter found');
-      return { from: timeFilter.from, to: timeFilter.to };
-    }
-
-    const range = (() => {
-      const defaultRange = { from: args.from || 'now-1y', to: args.to || 'now' };
-
-      try {
-        return { ...defaultRange, ...findTimeRangeInFilterContext() };
-      } catch (e) {
-        return defaultRange;
-      }
-    })();
+    // Timelion requires a time range. Use the time range from the timefilter element in the
+    // workpad, if it exists. Otherwise fall back on the function args.
+    const timeFilter = context.and.find(and => and.type === 'time');
+    const range = timeFilter
+      ? { from: timeFilter.from, to: timeFilter.to }
+      : { from: args.from, to: args.to };
 
     const body = {
       extended: {
@@ -62,7 +60,7 @@ export const timelion = () => ({
         from: range.from,
         to: range.to,
         interval: args.interval,
-        timezone: 'America/Phoenix',
+        timezone: args.timezone,
       },
     };
 
@@ -70,7 +68,6 @@ export const timelion = () => ({
       method: 'POST',
       responseType: 'json',
       headers: {
-        'kbn-xsrf': 'lollerpops',
         ...handlers.httpHeaders,
       },
       data: body,
