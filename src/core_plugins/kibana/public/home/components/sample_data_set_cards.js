@@ -17,6 +17,7 @@
  * under the License.
  */
 
+import _ from 'lodash';
 import React from 'react';
 import PropTypes from 'prop-types';
 import {
@@ -39,6 +40,7 @@ export class SampleDataSetCards extends React.Component {
 
     this.state = {
       sampleDataSets: [],
+      processingStatus: {},
     };
   }
 
@@ -61,13 +63,10 @@ export class SampleDataSetCards extends React.Component {
 
     this.setState({
       sampleDataSets: sampleDataSets
-        .map((sampleDataSet) => {
-          sampleDataSet.isProcessing = false;
-          return sampleDataSet;
-        })
         .sort((a, b) => {
           return a.name.toLowerCase().localeCompare(b.name.toLowerCase());
         }),
+      processingStatus: {},
     });
   }
 
@@ -81,15 +80,10 @@ export class SampleDataSetCards extends React.Component {
     const targetSampleDataSet = this.state.sampleDataSets.find((sampleDataSet) => {
       return sampleDataSet.id === id;
     });
-    targetSampleDataSet.isProcessing = true;
+
 
     this.setState({
-      sampleDataSets: this.state.sampleDataSets.map((sampleDataSet) => {
-        if (sampleDataSet.id === id) {
-          return targetSampleDataSet;
-        }
-        return sampleDataSet;
-      }),
+      processingStatus: { ...this.state.processingStatus, [id]: true }
     });
 
     await installSampleDataSet(id, targetSampleDataSet.name, targetSampleDataSet.defaultIndex,
@@ -111,15 +105,9 @@ export class SampleDataSetCards extends React.Component {
     const targetSampleDataSet = this.state.sampleDataSets.find((sampleDataSet) => {
       return sampleDataSet.id === id;
     });
-    targetSampleDataSet.isProcessing = true;
 
     this.setState({
-      sampleDataSets: this.state.sampleDataSets.map((sampleDataSet) => {
-        if (sampleDataSet.id === id) {
-          return targetSampleDataSet;
-        }
-        return sampleDataSet;
-      }),
+      processingStatus: { ...this.state.processingStatus, [id]: true }
     });
 
     await uninstallSampleDataSet(id, targetSampleDataSet.name, targetSampleDataSet.defaultIndex,
@@ -144,7 +132,7 @@ export class SampleDataSetCards extends React.Component {
                   name={sampleDataSet.name}
                   launchUrl={this.props.addBasePath(`/app/kibana#/dashboard/${sampleDataSet.overviewDashboard}`)}
                   status={sampleDataSet.status}
-                  isProcessing={sampleDataSet.isProcessing}
+                  isProcessing={_.get(this.state.processingStatus, sampleDataSet.id, false)}
                   statusMsg={sampleDataSet.statusMsg}
                   previewUrl={this.props.addBasePath(sampleDataSet.previewImagePath)}
                   onInstall={this.install}
