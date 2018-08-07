@@ -224,13 +224,9 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
       await testSubjects.click('deleteSelectedDashboards');
     }
 
-    async clickOptions() {
-      await testSubjects.click('dashboardOptionsButton');
-    }
-
     async isOptionsOpen() {
       log.debug('isOptionsOpen');
-      return await testSubjects.exists('dashboardDarkThemeCheckbox');
+      return await testSubjects.exists('dashboardOptionsMenu');
     }
 
     async openOptions() {
@@ -257,6 +253,7 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
     }
 
     async useDarkTheme(on) {
+      log.debug(`useDarkTheme: on ${on}`);
       await this.openOptions();
       const isDarkThemeOn = await this.isDarkThemeOn();
       if (isDarkThemeOn !== on) {
