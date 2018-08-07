@@ -106,14 +106,15 @@ export class LspIndexer extends AbstractIndexer {
     });
 
     const symbols = response.result[0].symbols;
-    const symbolNames = [];
+    const symbolNames = new Set<string>();
     for (const symbol of symbols) {
       await this.client.index({
         index: SymbolIndexName(repoUri),
         type: SymbolTypeName,
+        id: `${repoUri}:${revision}:${filePath}:${symbol.symbolInformation.name}`,
         body: symbol,
       });
-      symbolNames.push(symbol.symbolInformation.name);
+      symbolNames.add(symbol.symbolInformation.name);
     }
 
     const localFilePath = `${localRepoPath}${filePath}`;
@@ -123,11 +124,12 @@ export class LspIndexer extends AbstractIndexer {
       repoUri,
       path: filePath,
       content,
-      qnames: symbolNames,
+      qnames: Array.from(symbolNames),
     };
     await this.client.index({
       index: DocumentIndexName(repoUri),
       type: DocumentTypeName,
+      id: `${repoUri}:${revision}:${filePath}`,
       body,
     });
     return;

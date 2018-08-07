@@ -13,7 +13,7 @@ import {
   REPOSITORY_LSP_INDEX_STATUS_INDEX_TYPE,
 } from '../../mappings';
 import { DeleteWorkerResult, WorkerProgress } from '../../model/repository';
-import { documentIndexName, symbolIndexName } from '../indexer/schema';
+import { DocumentIndexName, SymbolIndexName } from '../indexer/schema';
 import { Log } from '../log';
 import { RepositoryService } from '../repository_service';
 import { AbstractWorker } from './abstract_worker';
@@ -46,10 +46,10 @@ export class DeleteWorker extends AbstractWorker {
       await this.objectsClient.delete(REPOSITORY_INDEX_STATUS_INDEX_TYPE, uri);
 
       await this.client.indices.delete({
-        index: symbolIndexName(uri),
+        index: SymbolIndexName(uri),
       });
       await this.client.indices.delete({
-        index: documentIndexName(uri),
+        index: DocumentIndexName(uri),
       });
     } catch (error) {
       this.log.error(`Delete repository status error: ${error}`);

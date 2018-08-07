@@ -2190,9 +2190,9 @@ jaeger-client@^3.5.3:
     uuid "^3.2.1"
     xorshift "^0.2.0"
 
-javascript-typescript-langserver@^2.9.2:
-  version "2.9.4"
-  resolved "https://registry.yarnpkg.com/javascript-typescript-langserver/-/javascript-typescript-langserver-2.9.4.tgz#8c31fd6419b2d58e88dbf490a549d8d09fd682fe"
+javascript-typescript-langserver@^2.10.0:
+  version "2.10.0"
+  resolved "https://registry.yarnpkg.com/javascript-typescript-langserver/-/javascript-typescript-langserver-2.10.0.tgz#31615e0c297d2fec23a3540d35445a3319bd067d"
   dependencies:
     chai "^4.0.1"
     chai-as-promised "^7.0.0"
