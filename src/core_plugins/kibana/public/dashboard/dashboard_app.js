@@ -43,6 +43,7 @@ import { showCloneModal } from './top_nav/show_clone_modal';
 import { showSaveModal } from './top_nav/show_save_modal';
 import { showAddPanel } from './top_nav/show_add_panel';
 import { showOptionsPopover } from './top_nav/show_options_popover';
+import { showShareMenu } from 'ui/share/show_share_menu';
 import { migrateLegacyQuery } from 'ui/utils/migrateLegacyQuery';
 import * as filterActions from 'ui/doc_table/actions/filter';
 import { FilterManagerProvider } from 'ui/filter_manager';
@@ -128,14 +129,6 @@ app.directive('dashboardApp', function ($injector) {
       // Part of the exposed plugin API - do not remove without careful consideration.
       this.appStatus = {
         dirty: !dash.id
-      };
-
-      this.getSharingTitle = () => {
-        return dash.title;
-      };
-
-      this.getSharingType = () => {
-        return 'dashboard';
       };
 
       dashboardStateManager.registerChangeListener(status => {
@@ -399,6 +392,14 @@ app.directive('dashboardApp', function ($injector) {
           },
         });
       };
+      navActions[TopNavIds.SHARE] = (menuItem, navController, anchorElement) => {
+        showShareMenu({
+          anchorElement,
+          objectType: 'dashboard',
+          objectId: dash.id,
+        });
+      };
+
       updateViewMode(dashboardStateManager.getViewMode());
 
       // update root source when filters update
@@ -438,11 +439,6 @@ app.directive('dashboardApp', function ($injector) {
         kbnUrl.removeParam(DashboardConstants.ADD_VISUALIZATION_TO_DASHBOARD_MODE_PARAM);
         kbnUrl.removeParam(DashboardConstants.NEW_VISUALIZATION_ID_PARAM);
       }
-
-      // TODO remove opts once share has been converted to react
-      $scope.opts = {
-        dashboard: dash, // used in share.html
-      };
     }
   };
 });
