@@ -1,0 +1,21 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`dev/i18n/extract_handlebars_messages extracts handlebars default messages 1`] = `
+Array [
+  Array [
+    "ui.id-1",
+    Object {
+      "context": "Message context",
+      "message": "Message text",
+    },
+  ],
+]
+`;
+
+exports[`dev/i18n/extract_handlebars_messages throws on empty id 1`] = `"Empty id argument in Handlebars i18n is not allowed."`;
+
+exports[`dev/i18n/extract_handlebars_messages throws on missing defaultMessage property 1`] = `"Empty defaultMessage in Handlebars i18n is not allowed (\\"message-id\\")."`;
+
+exports[`dev/i18n/extract_handlebars_messages throws on wrong number of arguments 1`] = `"Wrong number of arguments for handlebars i18n call."`;
+
+exports[`dev/i18n/extract_handlebars_messages throws on wrong properties argument type 1`] = `"Properties string in Handlebars i18n should be a string literal (\\"ui.id-1\\")."`;
