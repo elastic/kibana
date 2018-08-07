@@ -24,7 +24,7 @@ import { SavedObjectDoc } from './document_migrator';
 import { IndexMigrator } from './index_migrator';
 
 describe('IndexMigrator', () => {
-  test('patches the index mappings if the index is already migrated', async () => {
+  test.only('patches the index mappings if the index is already migrated', async () => {
     const opts = defaultOpts();
     const callCluster = clusterStub(opts);
 
@@ -309,7 +309,12 @@ function withIndex(callCluster: sinon.SinonStub, opts: any = {}) {
     '.kibana_1': {
       aliases: { '.kibana': {} },
       mappings: {
-        doc: { properties: { migrationVersion: { type: 'object' } } },
+        doc: {
+          dynamic: 'strict',
+          properties: {
+            migrationVersion: { dynamic: 'true', type: 'object' },
+          },
+        },
       },
     },
   };

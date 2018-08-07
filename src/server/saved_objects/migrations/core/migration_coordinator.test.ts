@@ -25,7 +25,7 @@ describe('coordinateMigration', () => {
   test('waits for isMigrated, if there is an index conflict', async () => {
     const log = logStub();
     const pollInterval = 1;
-    const migrateIndex = sinon.spy(() => {
+    const runMigration = sinon.spy(() => {
       throw { body: { error: { index: '.foo', type: 'resource_already_exists_exception' } } };
     });
     const isMigrated = sinon.stub();
@@ -38,26 +38,26 @@ describe('coordinateMigration', () => {
 
     await coordinateMigration({
       log,
-      migrateIndex,
+      runMigration,
       pollInterval,
       isMigrated,
     });
 
-    sinon.assert.calledOnce(migrateIndex);
+    sinon.assert.calledOnce(runMigration);
     sinon.assert.calledTwice(isMigrated);
     const warnings = log.warning.args.filter((msg: any) => /deleting index \.foo/.test(msg));
     expect(warnings.length).toEqual(1);
   });
 
-  test('does not poll if the migrateIndex succeeds', async () => {
+  test('does not poll if the runMigration succeeds', async () => {
     const log = logStub();
     const pollInterval = 1;
-    const migrateIndex = sinon.spy(() => Promise.resolve());
+    const runMigration = sinon.spy(() => Promise.resolve());
     const isMigrated = sinon.spy(() => Promise.resolve(true));
 
     await coordinateMigration({
       log,
-      migrateIndex,
+      runMigration,
       pollInterval,
       isMigrated,
     });
@@ -67,7 +67,7 @@ describe('coordinateMigration', () => {
   test('does not swallow exceptions', async () => {
     const log = logStub();
     const pollInterval = 1;
-    const migrateIndex = sinon.spy(() => {
+    const runMigration = sinon.spy(() => {
       throw new Error('Doh');
     });
     const isMigrated = sinon.spy(() => Promise.resolve(true));
@@ -75,7 +75,7 @@ describe('coordinateMigration', () => {
     await expect(
       coordinateMigration({
         log,
-        migrateIndex,
+        runMigration,
         pollInterval,
         isMigrated,
       })

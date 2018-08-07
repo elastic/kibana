@@ -49,7 +49,7 @@ export type MigrationResult =
     };
 
 interface Opts {
-  migrateIndex: () => Promise<MigrationResult>;
+  runMigration: () => Promise<MigrationResult>;
   isMigrated: () => Promise<boolean>;
   log: Logger;
   pollInterval?: number;
@@ -62,7 +62,7 @@ interface Opts {
  *
  * @export
  * @param {Opts} opts
- * @prop {Migration} migrateIndex - A function that runs the index migration
+ * @prop {Migration} runMigration - A function that runs the index migration
  * @prop {IsMigrated} isMigrated - A function which checks if the index is already migrated
  * @prop {Logger} log - The migration logger
  * @prop {number} pollInterval - How often, in ms, to check that the index is migrated
@@ -70,7 +70,7 @@ interface Opts {
  */
 export async function coordinateMigration(opts: Opts): Promise<MigrationResult> {
   try {
-    return await opts.migrateIndex();
+    return await opts.runMigration();
   } catch (error) {
     if (handleIndexExists(error, opts.log)) {
       await waitForMigration(opts.isMigrated, opts.pollInterval);

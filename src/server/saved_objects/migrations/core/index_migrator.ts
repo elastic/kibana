@@ -17,6 +17,7 @@
  * under the License.
  */
 
+import { diffMapping, MigrationAction } from './diff_mapping';
 import * as Index from './elastic_index';
 import { migrateRawDocs } from './migrate_raw_docs';
 import { Context, migrationContext, MigrationOpts } from './migration_context';
@@ -48,30 +49,65 @@ export class IndexMigrator {
 
     return coordinateMigration({
       log: context.log,
+
       pollInterval: context.pollInterval,
-      isMigrated: () => isMigrated(context),
-      migrateIndex: () => migrateIndex(context),
+
+      async isMigrated() {
+        const action = await requiredAction(context);
+        return action === MigrationAction.None;
+      },
+
+      async runMigration() {
+        const action = await requiredAction(context);
+
+        if (action === MigrationAction.None) {
+          return { status: 'skipped' };
+        }
+
+        if (action === MigrationAction.Patch) {
+          return patchSourceMappings(context);
+        }
+
+        return migrateIndex(context);
+      },
     });
   }
 }
 
-async function isMigrated({ callCluster, alias, documentMigrator }: Context) {
-  return Index.hasMigrations(callCluster, alias, documentMigrator.migrationVersion);
+/**
+ * Determines what action the migration system needs to take (none, patch, migrate).
+ */
+async function requiredAction(context: Context): Promise<MigrationAction> {
+  const { callCluster, alias, documentMigrator, source, dest } = context;
+  const hasMigrations = await Index.hasMigrations(
+    callCluster,
+    alias,
+    documentMigrator.migrationVersion
+  );
+
+  if (!hasMigrations) {
+    return MigrationAction.Migrate;
+  }
+
+  return diffMapping(source.mappings, dest.mappings);
+}
+
+/**
+ * Applies the latest mappings to the index.
+ */
+async function patchSourceMappings(context: Context): Promise<MigrationResult> {
+  const { callCluster, log, source, dest } = context;
+
+  log.info(`Patching ${source.indexName} mappings`);
+
+  await Index.putMappings(callCluster, source.indexName, dest.mappings);
+
+  return { status: 'skipped' };
 }
 
 async function migrateIndex(context: Context): Promise<MigrationResult> {
   const startTime = Date.now();
   const { callCluster, alias, source, dest, log } = context;
-
-  log.debug(`Checking if migration of ${alias} is required.`);
-
-  if (await isMigrated(context)) {
-    log.debug(`Alias ${alias} does not require migration.`);
-
-    await patchSourceMappings(context);
-
-    return { status: 'skipped' };
-  }
 
   log.info(`Creating index ${dest.indexName}.`);
 
@@ -93,19 +129,6 @@ async function migrateIndex(context: Context): Promise<MigrationResult> {
   log.info(`Finished in ${result.elapsedMs}ms.`);
 
   return result;
-}
-
-/**
- * Applies the latest mappings to the index.
- */
-async function patchSourceMappings(context: Context): Promise<MigrationResult> {
-  const { callCluster, log, source, dest } = context;
-
-  log.info(`Patching ${source.indexName} mappings`);
-
-  await Index.putMappings(callCluster, source.indexName, dest.mappings);
-
-  return { status: 'skipped' };
 }
 
 /**
