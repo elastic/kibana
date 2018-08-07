@@ -39,8 +39,17 @@ import { Logger } from './migration_logger';
 
 const DEFAULT_POLL_INTERVAL = 15000;
 
+export type MigrationResult =
+  | { status: 'skipped' }
+  | {
+      status: 'migrated';
+      destIndex: string;
+      sourceIndex: string;
+      elapsedMs: number;
+    };
+
 interface Opts {
-  runMigration: () => Promise<any>;
+  migrateIndex: () => Promise<MigrationResult>;
   isMigrated: () => Promise<boolean>;
   log: Logger;
   pollInterval?: number;
@@ -53,18 +62,19 @@ interface Opts {
  *
  * @export
  * @param {Opts} opts
- * @prop {Migration} runMigration - A function that runs the index migration
+ * @prop {Migration} migrateIndex - A function that runs the index migration
  * @prop {IsMigrated} isMigrated - A function which checks if the index is already migrated
  * @prop {Logger} log - The migration logger
  * @prop {number} pollInterval - How often, in ms, to check that the index is migrated
  * @returns
  */
-export async function coordinateMigration(opts: Opts) {
+export async function coordinateMigration(opts: Opts): Promise<MigrationResult> {
   try {
-    await opts.runMigration();
+    return await opts.migrateIndex();
   } catch (error) {
     if (handleIndexExists(error, opts.log)) {
-      return waitForMigration(opts.isMigrated, opts.pollInterval);
+      await waitForMigration(opts.isMigrated, opts.pollInterval);
+      return { status: 'skipped' };
     }
     throw error;
   }

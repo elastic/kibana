@@ -31,11 +31,6 @@ import { MigrationVersion } from './document_migrator';
 // tslint:disable-next-line:no-var-requires
 const { getTypes } = require('../../../mappings');
 
-interface Opts {
-  callCluster: CallCluster;
-  index: string;
-}
-
 export interface FullIndexInfo {
   aliases: { [name: string]: object };
   exists: boolean;
@@ -44,244 +39,227 @@ export interface FullIndexInfo {
 }
 
 /**
- * Helper methods for querying / manipulating indices.
+ * A slight enhancement to indices.get, that adds indexName, and validates that the
+ * index mappings are somewhat what we expect.
  */
-export class ElasticIndex {
-  private callCluster: CallCluster;
-  private index: string;
+export async function fetchInfo(callCluster: CallCluster, index: string): Promise<FullIndexInfo> {
+  const result = await callCluster('indices.get', { ignore: [404], index });
 
-  /**
-   * Creates an instance of ElasticIndex.
-   *
-   * @param {Opts} opts
-   * @prop {CallCluster} callCluster - The elastic search connection
-   * @prop {string} index - The name of the index or alias
-   * @memberof ElasticIndex
-   */
-  constructor(opts: Opts) {
-    this.callCluster = opts.callCluster;
-    this.index = opts.index;
-  }
-
-  public get name() {
-    return this.index;
-  }
-
-  public toString() {
-    return this.index;
-  }
-
-  /**
-   * A slight enhancement to indices.get, that adds indexName, and validates that the
-   * index mappings are somewhat what we expect.
-   */
-  public async fetchInfo(): Promise<FullIndexInfo> {
-    const { callCluster, index } = this;
-    const result = await callCluster('indices.get', { ignore: [404], index });
-
-    if ((result as NotFound).status === 404) {
-      return {
-        aliases: {},
-        exists: false,
-        indexName: index,
-        mappings: { doc: { dynamic: 'strict', properties: {} } },
-      };
-    }
-
-    const [indexName, indexInfo] = Object.entries(result)[0];
-
-    return assertIsSupportedIndex({ ...indexInfo, exists: true, indexName });
-  }
-
-  /**
-   * Creates a reader function that serves up batches of documents from the index. We aren't using
-   * an async generator, as that feature currently breaks Kibana's tooling.
-   *
-   * @param Opts
-   * @prop {number} batchSize - The number of documents to read at a time
-   * @prop {string} scrollDuration - The scroll duration used for scrolling through the index
-   */
-  public reader({ batchSize, scrollDuration }: { batchSize: number; scrollDuration: string }) {
-    const { callCluster, index } = this;
-    const scroll = scrollDuration;
-    let scrollId: string | undefined;
-
-    const nextBatch = () =>
-      scrollId !== undefined
-        ? callCluster('scroll', { scroll, scrollId })
-        : callCluster('search', { body: { size: batchSize }, index, scroll });
-
-    const close = async () => scrollId && (await callCluster('clearScroll', { scrollId }));
-
-    return async function read() {
-      const result = await nextBatch();
-      const docs = result.hits.hits;
-
-      scrollId = result._scroll_id;
-
-      if (!docs.length) {
-        await close();
-      }
-
-      return docs;
+  if ((result as NotFound).status === 404) {
+    return {
+      aliases: {},
+      exists: false,
+      indexName: index,
+      mappings: { doc: { dynamic: 'strict', properties: {} } },
     };
   }
 
-  /**
-   * Writes the specified documents to the index, throws an exception
-   * if any of the documents fail to save.
-   *
-   * @param {RawDoc[]} docs
-   */
-  public async write(docs: RawDoc[]) {
-    const { callCluster, index } = this;
-    const result = await callCluster('bulk', {
-      body: docs.reduce((acc: object[], doc: RawDoc) => {
-        acc.push({
-          index: {
-            _id: doc._id,
-            _index: index,
-            _type: 'doc',
-          },
-        });
+  const [indexName, indexInfo] = Object.entries(result)[0];
 
-        acc.push(doc._source);
+  return assertIsSupportedIndex({ ...indexInfo, exists: true, indexName });
+}
 
-        return acc;
-      }, []),
-    });
+/**
+ * Creates a reader function that serves up batches of documents from the index. We aren't using
+ * an async generator, as that feature currently breaks Kibana's tooling.
+ *
+ * @param {CallCluster} callCluster - The elastic search connection
+ * @param {string} - The index to be read from
+ * @param {opts}
+ * @prop {number} batchSize - The number of documents to read at a time
+ * @prop {string} scrollDuration - The scroll duration used for scrolling through the index
+ */
+export function reader(
+  callCluster: CallCluster,
+  index: string,
+  { batchSize = 10, scrollDuration = '15m' }: { batchSize: number; scrollDuration: string }
+) {
+  const scroll = scrollDuration;
+  let scrollId: string | undefined;
 
-    const err = _.find(result.items, 'index.error.reason');
+  const nextBatch = () =>
+    scrollId !== undefined
+      ? callCluster('scroll', { scroll, scrollId })
+      : callCluster('search', { body: { size: batchSize }, index, scroll });
 
-    if (!err) {
-      return;
+  const close = async () => scrollId && (await callCluster('clearScroll', { scrollId }));
+
+  return async function read() {
+    const result = await nextBatch();
+    const docs = result.hits.hits;
+
+    scrollId = result._scroll_id;
+
+    if (!docs.length) {
+      await close();
     }
 
-    const exception: any = new Error(err.index.error!.reason);
-    exception.detail = err;
-    throw exception;
+    return docs;
+  };
+}
+
+/**
+ * Writes the specified documents to the index, throws an exception
+ * if any of the documents fail to save.
+ *
+ * @param {CallCluster} callCluster
+ * @param {string} index
+ * @param {RawDoc[]} docs
+ */
+export async function write(callCluster: CallCluster, index: string, docs: RawDoc[]) {
+  const result = await callCluster('bulk', {
+    body: docs.reduce((acc: object[], doc: RawDoc) => {
+      acc.push({
+        index: {
+          _id: doc._id,
+          _index: index,
+          _type: 'doc',
+        },
+      });
+
+      acc.push(doc._source);
+
+      return acc;
+    }, []),
+  });
+
+  const err = _.find(result.items, 'index.error.reason');
+
+  if (!err) {
+    return;
   }
 
-  /**
-   * Checks to see if the specified index is up to date. It does this by checking
-   * that the index has the expected mappings and by counting
-   * the number of documents that have a property which has migrations defined for it,
-   * but which has not had those migrations applied. We don't want to cache the
-   * results of this function (e.g. in context or somewhere), as it is important that
-   * it performs the check *each* time it is called, rather than memoizing itself,
-   * as this is used to determine if migrations are complete.
-   *
-   * @param {MigrationVersion} migrationVersion - The latest versions of the migrations
-   */
-  public async hasMigrations(migrationVersion: MigrationVersion): Promise<boolean> {
-    const { callCluster, index } = this;
-    const indexInfo = await this.fetchInfo();
+  const exception: any = new Error(err.index.error!.reason);
+  exception.detail = err;
+  throw exception;
+}
 
-    if (!_.get(indexInfo, 'mappings.doc.properties.migrationVersion')) {
-      return false;
-    }
+/**
+ * Checks to see if the specified index is up to date. It does this by checking
+ * that the index has the expected mappings and by counting
+ * the number of documents that have a property which has migrations defined for it,
+ * but which has not had those migrations applied. We don't want to cache the
+ * results of this function (e.g. in context or somewhere), as it is important that
+ * it performs the check *each* time it is called, rather than memoizing itself,
+ * as this is used to determine if migrations are complete.
+ *
+ * @param {CallCluster} callCluster
+ * @param {string} index
+ * @param {MigrationVersion} migrationVersion - The latest versions of the migrations
+ */
+export async function hasMigrations(
+  callCluster: CallCluster,
+  index: string,
+  migrationVersion: MigrationVersion
+): Promise<boolean> {
+  const indexInfo = await fetchInfo(callCluster, index);
 
-    // If no migrations are actually defined, we're up to date!
-    if (Object.keys(migrationVersion).length <= 0) {
-      return true;
-    }
+  if (!_.get(indexInfo, 'mappings.doc.properties.migrationVersion')) {
+    return false;
+  }
 
-    const { count } = await callCluster('count', {
-      body: {
-        query: {
-          bool: {
-            should: Object.entries(migrationVersion).map(([type, latestVersion]) => ({
-              bool: {
-                must: [
-                  { exists: { field: type } },
-                  { bool: { must_not: { term: { [`migrationVersion.${type}`]: latestVersion } } } },
-                ],
-              },
-            })),
-          },
+  // If no migrations are actually defined, we're up to date!
+  if (Object.keys(migrationVersion).length <= 0) {
+    return true;
+  }
+
+  const { count } = await callCluster('count', {
+    body: {
+      query: {
+        bool: {
+          should: Object.entries(migrationVersion).map(([type, latestVersion]) => ({
+            bool: {
+              must: [
+                { exists: { field: type } },
+                { bool: { must_not: { term: { [`migrationVersion.${type}`]: latestVersion } } } },
+              ],
+            },
+          })),
         },
       },
-      index,
-      type: 'doc',
-    });
+    },
+    index,
+    type: 'doc',
+  });
 
-    return count === 0;
-  }
+  return count === 0;
+}
 
-  /**
-   * Applies the specified mappings to the index.
-   *
-   * @param {IndexMapping} mappings
-   */
-  public putMappings(mappings: IndexMapping) {
-    const { callCluster, index } = this;
-    return callCluster('indices.putMapping', { body: mappings.doc, index, type: 'doc' });
-  }
+/**
+ * Applies the specified mappings to the index.
+ *
+ * @param {CallCluster} callCluster
+ * @param {string} index
+ * @param {IndexMapping} mappings
+ */
+export function putMappings(callCluster: CallCluster, index: string, mappings: IndexMapping) {
+  return callCluster('indices.putMapping', { body: mappings.doc, index, type: 'doc' });
+}
 
-  public async create(mappings?: IndexMapping) {
-    const { callCluster, index } = this;
-    await callCluster('indices.create', { body: { mappings }, index });
-  }
+export async function createIndex(
+  callCluster: CallCluster,
+  index: string,
+  mappings?: IndexMapping
+) {
+  await callCluster('indices.create', { body: { mappings }, index });
+}
 
-  public async deleteIndex() {
-    const { callCluster, index } = this;
-    await callCluster('indices.delete', { index });
-  }
+export async function deleteIndex(callCluster: CallCluster, index: string) {
+  await callCluster('indices.delete', { index });
+}
 
-  /**
-   * Ensures that the index is an alias. If it is not, it will be reindexed, and
-   * converted into an alias that points to the new index.
-   */
-  public async convertToAlias() {
-    const { callCluster, index } = this;
+/**
+ * Converts the specified index to an alias.
+ *
+ * @param {CallCluster} callCluster
+ * @param {FullIndexInfo} info
+ * @param {string} alias
+ */
+export async function convertToAlias(callCluster: CallCluster, info: FullIndexInfo, alias: string) {
+  await callCluster('indices.create', {
+    body: { mappings: info.mappings },
+    index: info.indexName,
+  });
 
-    if (await callCluster('indices.existsAlias', { name: index })) {
-      return;
-    }
+  await callCluster('reindex', {
+    body: {
+      dest: { index: info.indexName },
+      source: { index: alias },
+    },
+    refresh: true,
+    waitForCompletion: true,
+  });
 
-    const originalIndex = `${index}_original`;
-    const info = await this.fetchInfo();
+  await claimAlias(callCluster, info.indexName, alias, [{ remove_index: { index: alias } }]);
+}
 
-    await callCluster('indices.create', {
-      body: { mappings: info.mappings },
-      index: originalIndex,
-    });
+/**
+ * Points the specified alias to the specified index. This is an exclusive
+ * alias, meaning that it will only point to one index at a time, so we
+ * remove any other indices from the alias.
+ *
+ * @param {CallCluster} callCluster
+ * @param {string} index
+ * @param {string} alias
+ * @param {AliasAction[]} aliasActions - Optional actions to be added to the updateAliases call
+ */
+export async function claimAlias(
+  callCluster: CallCluster,
+  index: string,
+  alias: string,
+  aliasActions: AliasAction[] = []
+) {
+  const result = await callCluster('indices.getAlias', { ignore: [404], name: alias });
+  const aliasInfo = (result as NotFound).status === 404 ? {} : result;
+  const removeActions = Object.keys(aliasInfo).map(key => ({ remove: { index: key, alias } }));
 
-    await callCluster('reindex', {
-      body: {
-        dest: { index: originalIndex },
-        source: { index },
-      },
-      refresh: true,
-      waitForCompletion: true,
-    });
+  await callCluster('indices.updateAliases', {
+    body: {
+      actions: aliasActions.concat(removeActions).concat({ add: { index, alias } }),
+    },
+  });
 
-    await this.claimAlias(index, [{ remove_index: { index } }], originalIndex);
-  }
-
-  /**
-   * Points the specified alias to the specified index. This is an exclusive
-   * alias, meaning that it will only point to one index at a time, so we
-   * remove any other indices from the alias.
-   */
-  public async claimAlias(
-    alias: string,
-    aliasActions: AliasAction[] = [],
-    index: string = this.index
-  ) {
-    const { callCluster } = this;
-    const result = await callCluster('indices.getAlias', { ignore: [404], name: alias });
-    const aliasInfo = (result as NotFound).status === 404 ? {} : result;
-    const removeActions = Object.keys(aliasInfo).map(key => ({ remove: { index: key, alias } }));
-
-    await callCluster('indices.updateAliases', {
-      body: {
-        actions: aliasActions.concat(removeActions).concat({ add: { index, alias } }),
-      },
-    });
-
-    await callCluster('indices.refresh', { index });
-  }
+  await callCluster('indices.refresh', { index });
 }
 
 /**
@@ -290,6 +268,8 @@ export class ElasticIndex {
  * and the migration system does not (yet?) handle those indices. They need to be upgraded
  * via v5 -> v6 upgrade tools first. This file contains index-agnostic logic, and this
  * check is itself index-agnostic, though the error hint is a bit Kibana specific.
+ *
+ * @param {FullIndexInfo} indexInfo
  */
 export async function assertIsSupportedIndex(indexInfo: FullIndexInfo) {
   const currentTypes = getTypes(indexInfo.mappings);

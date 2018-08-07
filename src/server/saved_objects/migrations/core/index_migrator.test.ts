@@ -50,7 +50,7 @@ describe('IndexMigrator', () => {
           updated_at: { type: 'date' },
         },
       },
-      index: '.kibana',
+      index: '.kibana_1',
       type: 'doc',
     });
   });

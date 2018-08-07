@@ -17,46 +17,10 @@
  * under the License.
  */
 
-import _ from 'lodash';
-import { buildActiveMappings } from './build_active_mappings';
-import { CallCluster, IndexMapping, MappingProperties } from './call_cluster';
-import { VersionedTransformer } from './document_migrator';
-import { ElasticIndex, FullIndexInfo } from './elastic_index';
+import * as Index from './elastic_index';
 import { migrateRawDocs } from './migrate_raw_docs';
-import { coordinateMigration } from './migration_coordinator';
-import { LogFn, Logger, MigrationLogger } from './migration_logger';
-
-type MigrationResult =
-  | { status: 'skipped' }
-  | {
-      status: 'migrated';
-      destIndex: string;
-      sourceIndex: string;
-      elapsedMs: number;
-    };
-
-interface MigrationOpts {
-  batchSize: number;
-  pollInterval: number;
-  scrollDuration: string;
-  callCluster: CallCluster;
-  index: string;
-  log: LogFn;
-  mappingProperties: MappingProperties;
-  documentMigrator: VersionedTransformer;
-}
-
-interface Context {
-  sourceIndex: ElasticIndex;
-  destIndex: ElasticIndex;
-  documentMigrator: VersionedTransformer;
-  log: Logger;
-  fullMappings: IndexMapping;
-  batchSize: number;
-  pollInterval: number;
-  scrollDuration: string;
-  sourceInfo: FullIndexInfo;
-}
+import { Context, migrationContext, MigrationOpts } from './migration_context';
+import { coordinateMigration, MigrationResult } from './migration_coordinator';
 
 /*
  * Core logic for migrating the mappings and documents in an index.
@@ -74,148 +38,98 @@ export class IndexMigrator {
   }
 
   /**
-   * Performs the index migration. If the index is already up to date,
-   * this still patches the index mappings to ensure they conform to the
-   * system's expectations.
+   * Migrates the index, or, if another Kibana instance appears to be running the migration,
+   * waits for the migration to complete.
    *
    * @returns {Promise<MigrationResult>}
    */
   public async migrate(): Promise<MigrationResult> {
     const context = await migrationContext(this.opts);
 
-    return (await isMigrated(context)) ? patchSourceMappings(context) : migrateIndex(context);
+    return coordinateMigration({
+      log: context.log,
+      pollInterval: context.pollInterval,
+      isMigrated: () => isMigrated(context),
+      migrateIndex: () => migrateIndex(context),
+    });
   }
 }
 
-/**
- * Builds up an uuber object which has all of the config options, settings,
- * and various info needed to migrate the source index.
- */
-async function migrationContext(opts: MigrationOpts): Promise<Context> {
-  const { callCluster, index } = opts;
-  const log = new MigrationLogger(opts.log);
-
-  log.info(`Loading ${index} index information`);
-
-  const sourceIndex = new ElasticIndex({ callCluster, index });
-  const activeMappings = buildActiveMappings({ properties: opts.mappingProperties });
-  const sourceInfo = await sourceIndex.fetchInfo();
-  const destIndex = new ElasticIndex({
-    callCluster,
-    index: nextIndexName(sourceIndex.name, sourceInfo.indexName),
-  });
-  const fullMappings = {
-    doc: {
-      ...activeMappings.doc,
-      properties: {
-        ...sourceInfo.mappings.doc.properties,
-        ...activeMappings.doc.properties,
-      },
-    },
-  };
-
-  return {
-    sourceIndex,
-    destIndex,
-    log,
-    fullMappings,
-    sourceInfo,
-    documentMigrator: opts.documentMigrator,
-    batchSize: opts.batchSize,
-    pollInterval: opts.pollInterval,
-    scrollDuration: opts.scrollDuration,
-  };
+async function isMigrated({ callCluster, alias, documentMigrator }: Context) {
+  return Index.hasMigrations(callCluster, alias, documentMigrator.migrationVersion);
 }
 
-/**
- * Gets the next index name in a sequence, based on specified current index's info.
- * We're using a numeric counter to create new indices. So, `.kibana_1`, `.kibana_2`, etc
- * There are downsides to this, but it seemed like a simple enough approach.
- */
-function nextIndexName(rootName: string, indexName?: string) {
-  const indexNum = parseInt(_.first((indexName || rootName).match(/[0-9]+$/) || []), 10) || 0;
+async function migrateIndex(context: Context): Promise<MigrationResult> {
+  const startTime = Date.now();
+  const { callCluster, alias, source, dest, log } = context;
 
-  return `${rootName}_${indexNum + 1}`;
-}
+  log.debug(`Checking if migration of ${alias} is required.`);
 
-async function isMigrated(context: Context) {
-  return context.sourceIndex.hasMigrations(context.documentMigrator.migrationVersion);
+  if (await isMigrated(context)) {
+    log.debug(`Alias ${alias} does not require migration.`);
+
+    await patchSourceMappings(context);
+
+    return { status: 'skipped' };
+  }
+
+  log.info(`Creating index ${dest.indexName}.`);
+
+  await Index.createIndex(callCluster, dest.indexName, dest.mappings);
+
+  await migrateSourceToDest(context);
+
+  log.info(`Pointing alias ${alias} to ${dest.indexName}.`);
+
+  await Index.claimAlias(callCluster, dest.indexName, alias);
+
+  const result: MigrationResult = {
+    status: 'migrated',
+    destIndex: dest.indexName,
+    sourceIndex: source.indexName,
+    elapsedMs: Date.now() - startTime,
+  };
+
+  log.info(`Finished in ${result.elapsedMs}ms.`);
+
+  return result;
 }
 
 /**
  * Applies the latest mappings to the index.
  */
 async function patchSourceMappings(context: Context): Promise<MigrationResult> {
-  const { log, sourceIndex, fullMappings } = context;
+  const { callCluster, log, source, dest } = context;
 
-  log.info(`Patching ${sourceIndex} mappings`);
-  await sourceIndex.putMappings(fullMappings);
+  log.info(`Patching ${source.indexName} mappings`);
+
+  await Index.putMappings(callCluster, source.indexName, dest.mappings);
+
   return { status: 'skipped' };
 }
 
 /**
- * Migrates the index, or, if another Kibana instance appears to be running the migration,
- * waits for the migration to complete.
+ * Moves all docs from sourceIndex to destIndex, migrating each as necessary.
+ * This moves documents from the concrete index, rather than the alias, to prevent
+ * a situation where the alias moves out from under us as we're migrating docs.
  */
-async function migrateIndex(context: Context): Promise<MigrationResult> {
-  const { sourceIndex, destIndex, log, pollInterval } = context;
-  const startTime = Date.now();
+async function migrateSourceToDest(context: Context) {
+  const { callCluster, alias, dest, source, batchSize } = context;
+  const { scrollDuration, documentMigrator, log } = context;
 
-  log.debug(`Coordinating migration from ${sourceIndex} to ${destIndex}`);
-  await coordinateMigration({
-    log,
-    pollInterval,
-    isMigrated: () => isMigrated(context),
-    runMigration: () => runMigration(context),
-  });
-
-  const result: MigrationResult = {
-    status: 'migrated',
-    sourceIndex: sourceIndex.toString(),
-    destIndex: destIndex.toString(),
-    elapsedMs: Date.now() - startTime,
-  };
-
-  log.info(`Finished migrating ${sourceIndex} saved objects in ${result.elapsedMs}ms`);
-
-  return result;
-}
-
-/**
- * Performs the index migration.
- */
-async function runMigration(context: Context) {
-  const { log, destIndex, sourceIndex, sourceInfo, fullMappings } = context;
-
-  // The index may have been migrated since we last checked, due
-  // to race conditions between Kibana instances...
-  log.debug(`Checking if ${sourceIndex} is already migrated`);
-  if (await isMigrated(context)) {
+  if (!source.exists) {
     return;
   }
 
-  log.info(`Creating index ${destIndex}`);
-  await destIndex.create(fullMappings);
+  if (!source.aliases[alias]) {
+    log.info(`Reindexing ${alias} to ${source.indexName}`);
 
-  if (sourceInfo.exists) {
-    log.debug(`Ensuring ${sourceIndex} is an alias`);
-    await sourceIndex.convertToAlias();
-
-    log.info(`Migrating ${sourceIndex} saved objects to ${destIndex}`);
-    await migrateDocs(context);
+    await Index.convertToAlias(callCluster, source, alias);
   }
 
-  log.info(`Pointing ${sourceIndex} alias to ${destIndex}`);
-  await destIndex.claimAlias(sourceIndex.name);
-}
+  const read = Index.reader(callCluster, source.indexName, { batchSize, scrollDuration });
 
-/**
- * Moves all docs from sourceIndex to destIndex, migrating each as necessary.
- */
-async function migrateDocs(context: Context) {
-  const { destIndex, sourceIndex, batchSize, scrollDuration, documentMigrator, log } = context;
-  const read = sourceIndex.reader({ batchSize, scrollDuration });
-
+  log.info(`Migrating ${source.indexName} saved objects to ${dest.indexName}`);
   while (true) {
     const docs = await read();
 
@@ -224,6 +138,6 @@ async function migrateDocs(context: Context) {
     }
 
     log.debug(`Migrating saved objects ${docs.map(d => d._id).join(', ')}`);
-    await destIndex.write(migrateRawDocs(documentMigrator.migrate, docs));
+    await Index.write(callCluster, dest.indexName, migrateRawDocs(documentMigrator.migrate, docs));
   }
 }

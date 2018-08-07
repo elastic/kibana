@@ -19,7 +19,7 @@
 
 import _ from 'lodash';
 import sinon from 'sinon';
-import { ElasticIndex } from './elastic_index';
+import * as Index from './elastic_index';
 
 describe('ElasticIndex', () => {
   describe('write', () => {
@@ -55,12 +55,7 @@ describe('ElasticIndex', () => {
         })
       );
 
-      const writer = new ElasticIndex({
-        callCluster,
-        index,
-      });
-
-      await writer.write(docs);
+      await Index.write(callCluster, index, docs);
 
       sinon.assert.calledOnce(callCluster);
       expect(callCluster.args[0]).toMatchSnapshot();
@@ -87,12 +82,7 @@ describe('ElasticIndex', () => {
         })
       );
 
-      const writer = new ElasticIndex({
-        callCluster,
-        index,
-      });
-
-      await expect(writer.write(docs)).rejects.toThrow(/dern/);
+      await expect(Index.write(callCluster, index, docs)).rejects.toThrow(/dern/);
       sinon.assert.calledOnce(callCluster);
     });
   });
@@ -134,10 +124,7 @@ describe('ElasticIndex', () => {
         .onCall(3)
         .returns(Promise.resolve());
 
-      const read = new ElasticIndex({
-        callCluster,
-        index,
-      }).reader({ batchSize: 100, scrollDuration: '5m' });
+      const read = Index.reader(callCluster, index, { batchSize: 100, scrollDuration: '5m' });
 
       expect(await read()).toEqual(batch1);
       expect(await read()).toEqual(batch2);
@@ -173,10 +160,7 @@ describe('ElasticIndex', () => {
         .onCall(1)
         .returns(Promise.resolve({ _scroll_id: 'z', hits: { hits: [] } }));
 
-      const read = new ElasticIndex({
-        callCluster,
-        index,
-      }).reader({
+      const read = Index.reader(callCluster, index, {
         batchSize: 100,
         scrollDuration: '5m',
       });
@@ -199,11 +183,7 @@ describe('ElasticIndex', () => {
         }
         throw new Error(`Unknown command ${path}.`);
       });
-      const indexHelper = new ElasticIndex({
-        callCluster,
-        index,
-      });
-      const hasMigrations = await indexHelper.hasMigrations(migrations);
+      const hasMigrations = await Index.hasMigrations(callCluster, index, migrations);
       return { hasMigrations, callCluster };
     }
 
