@@ -17,16 +17,14 @@ export function registerSearchRoute(server) {
       const callWithRequest = callWithRequestFactory(server, request);
 
       try {
-        const results = [];
-
-        for (let i = 0; i < request.payload.length; i++) {
-          const { index, query } = request.payload[i];
-          results.push(await callWithRequest('rollup.search', {
+        const requests = request.payload.map(({ index, query }) => (
+          callWithRequest('rollup.search', {
             index,
             body: query,
-          }));
-        }
+          })
+        ));
 
+        const results = await Promise.all(requests);
         reply(results);
       } catch(err) {
         if (isEsError(err)) {
