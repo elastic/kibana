@@ -91,7 +91,6 @@
     "angular-resource": "1.4.9",
     "angular-sanitize": "1.4.9",
     "angular-ui-ace": "0.2.3",
-    "angular-ui-bootstrap": "1.2.5",
     "babel-core": "^6.26.0",
     "babel-preset-es2015": "^6.24.1",
     "babel-runtime": "^6.26.0",
