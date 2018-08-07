@@ -5,17 +5,14 @@
  */
 
 import React, { Fragment } from 'react';
-import { first, get } from 'lodash';
-import { Tooltip } from 'pivotal-ui/react/tooltip';
-import { OverlayTrigger } from 'pivotal-ui/react/overlay-trigger';
-import { KuiInfoButton } from '@kbn/ui-framework/components';
+import { get, first } from 'lodash';
 import { getTitle } from './get_title';
 import { getUnits } from './get_units';
 import { MonitoringTimeseries } from './monitoring_timeseries';
 import { InfoTooltip } from './info_tooltip';
 
 import {
-  EuiScreenReaderOnly
+  EuiIconTip, EuiFlexGroup, EuiFlexItem, EuiTitle, EuiScreenReaderOnly
 } from '@elastic/eui';
 
 export function MonitoringTimeseriesContainer({ series, onBrush }) {
@@ -32,32 +29,44 @@ export function MonitoringTimeseriesContainer({ series, onBrush }) {
     .concat(series.map(item => `${item.metric.label}: ${item.metric.description}`));
 
   return (
-    <div className="monitoring-chart__container">
-      <h2 className="euiTitle" tabIndex="0">
-        <EuiScreenReaderOnly><span>This chart is not screen reader accessible</span></EuiScreenReaderOnly>
-        { title }{ units ? ` (${units})` : '' }
-        <OverlayTrigger
-          placement="left"
-          trigger="click"
-          overlay={<Tooltip><InfoTooltip series={series} bucketSize={bucketSize}/></Tooltip>}
-        >
-          <span className="monitoring-chart-tooltip__trigger overlay-trigger">
+    <EuiFlexGroup direction="column" gutterSize="s">
+      <EuiFlexItem>
+        <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" style={{ flexGrow: 0 }}>
+          <EuiFlexItem>
+            <EuiTitle tabIndex="0">
+              <Fragment>
+                <EuiScreenReaderOnly><span>This chart is not screen reader accessible</span></EuiScreenReaderOnly>
+                <h2>
+                  { getTitle(series) }{ units ? ` (${units})` : '' }
+                </h2>
+              </Fragment>
+            </EuiTitle>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
             <Fragment>
-              <KuiInfoButton aria-labelledby={`monitoringChart${titleForAriaIds}`} />
+              <EuiIconTip
+                anchorClassName="eui-textRight eui-alignMiddle monitoring-chart-tooltip__trigger"
+                className="monitoring-chart-tooltip__wrapper"
+                type="iInCircle"
+                position="right"
+                content={<InfoTooltip series={series} bucketSize={bucketSize}/>}
+              />
               <EuiScreenReaderOnly>
                 <span id={`monitoringChart${titleForAriaIds}`}>
                   {seriesScreenReaderTextList.join('. ')}
                 </span>
               </EuiScreenReaderOnly>
             </Fragment>
-          </span>
-        </OverlayTrigger>
-      </h2>
-      <MonitoringTimeseries
-        series={series}
-        onBrush={onBrush}
-      />
-    </div>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiFlexItem>
+      <EuiFlexItem style={{ minHeight: '200px' }}>
+        <MonitoringTimeseries
+          series={series}
+          onBrush={onBrush}
+        />
+      </EuiFlexItem>
+    </EuiFlexGroup>
   );
 }
 
