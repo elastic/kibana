@@ -4,9 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { get, omit } from 'lodash';
+import { get, omit, defaultsDeep } from 'lodash';
 import { getClusterInfo } from './get_cluster_info';
 import { getClusterStats } from './get_cluster_stats';
+import { getKibana } from './get_kibana';
 import { getXPack } from './get_xpack';
 
 /**
@@ -18,7 +19,8 @@ import { getXPack } from './get_xpack';
  * @param {Object} xpack License and X-Pack details
  * @return {Object} A combined object containing the different responses.
  */
-export function handleLocalStats(clusterInfo, clusterStats, xpack) {
+export function handleLocalStats(clusterInfo, clusterStats, xpack, kibana) {
+  const stack = defaultsDeep({}, { stack_stats: kibana }, xpack);
   return {
     timestamp: (new Date()).toISOString(),
     cluster_uuid: get(clusterInfo, 'cluster_uuid'),
@@ -26,7 +28,7 @@ export function handleLocalStats(clusterInfo, clusterStats, xpack) {
     version: get(clusterInfo, 'version.number'),
     cluster_stats: omit(clusterStats, '_nodes', 'cluster_name'),
     collection: 'local',
-    ...xpack
+    ...stack
   };
 }
 
@@ -37,13 +39,14 @@ export function handleLocalStats(clusterInfo, clusterStats, xpack) {
  * @param {function} callCluster The callWithInternalUser handler (exposed for testing)
  * @return {Promise} The object containing the current Elasticsearch cluster's telemetry.
  */
-export function getLocalStatsWithCaller(callCluster) {
+export function getLocalStatsWithCaller(server, callCluster) {
   return Promise.all([
     getClusterInfo(callCluster),  // cluster info
     getClusterStats(callCluster), // cluster stats (not to be confused with cluster _state_)
     getXPack(callCluster),        // license, stack_stats
+    getKibana(server, callCluster),
   ])
-    .then(([clusterInfo, clusterStats, xpack]) => handleLocalStats(clusterInfo, clusterStats, xpack));
+    .then(([clusterInfo, clusterStats, xpack, kibana]) => handleLocalStats(clusterInfo, clusterStats, xpack, kibana));
 }
 
 /**
@@ -53,7 +56,8 @@ export function getLocalStatsWithCaller(callCluster) {
  * @return {Promise} The cluster object containing telemetry.
  */
 export function getLocalStats(req) {
-  const { callWithInternalUser } = req.server.plugins.elasticsearch.getCluster('data');
+  const { server } = req;
+  const { callWithInternalUser } = server.plugins.elasticsearch.getCluster('data');
 
-  return getLocalStatsWithCaller(callWithInternalUser);
+  return getLocalStatsWithCaller(server, callWithInternalUser);
 }
