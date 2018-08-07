@@ -16,8 +16,16 @@ const EsdocsDatasource = ({ args, updateArgs }) => {
       });
   };
 
+  // TODO: This is a terrible way of doing defaults. We need to find a way to read the defaults for the function
+  // and set them for the data source UI.
+  const getArgName = () => {
+    if (getSimpleArg('_', args)[0]) return '_';
+    if (getSimpleArg('q', args)[0]) return 'q';
+    return 'query';
+  };
+
   const getQuery = () => {
-    return getSimpleArg('query', args) || '*';
+    return getSimpleArg(getArgName(), args)[0] || '';
   };
 
   const getFields = () => {
@@ -34,7 +42,6 @@ const EsdocsDatasource = ({ args, updateArgs }) => {
   const fields = getFields();
   const [sortField, sortOrder] = getSortBy();
   const index = getSimpleArg('index', args)[0];
-  const [query] = getQuery();
 
   const sortOptions = [{ value: 'asc', text: 'Ascending' }, { value: 'desc', text: 'Descending' }];
 
@@ -56,7 +63,7 @@ const EsdocsDatasource = ({ args, updateArgs }) => {
       </EuiFormRow>
 
       <EuiFormRow label="Query" helpText="Lucene query string syntax" compressed>
-        <EuiFieldText value={query} onChange={e => setArg('query', e.target.value)} />
+        <EuiFieldText value={getQuery()} onChange={e => setArg(getArgName(), e.target.value)} />
       </EuiFormRow>
       <EuiFormRow label="Sort Field" helpText="Document sort order, field, and direction">
         <ESFieldSelect

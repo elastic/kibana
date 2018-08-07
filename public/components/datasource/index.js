@@ -41,7 +41,12 @@ const mergeProps = (stateProps, dispatchProps, ownProps) => {
       if (!datasource) return;
 
       const datasourceDef = getDataTableFunctionsByName(datasource.name);
-      const knownArgs = datasourceDef && Object.keys(datasourceDef.args);
+      const knownArgs =
+        datasourceDef &&
+        Object.keys(datasourceDef.args).reduce((acc, name) => {
+          const { aliases } = datasourceDef.args[name] || [];
+          return [...acc, name, ...aliases];
+        }, []);
       const unknownArgs =
         datasourceDef && Object.keys(args).filter(arg => knownArgs.indexOf(arg) === -1);
 
