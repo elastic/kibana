@@ -66,7 +66,6 @@ uiModules
             if (config.hasOwnProperty('fixedValue')) {
               $scope.agg.params[param] = config.fixedValue;
             }
-            // TODO: process more editor config?
           });
         }
 
@@ -131,6 +130,7 @@ uiModules
 
           // build collection of agg params html
           $scope.agg.type.params
+            // Filter out, i.e. don't render, any parameter that is hidden via the editor config.
             .filter(param => !get($scope, ['editorConfig', param.name, 'hidden'], false))
             .forEach(function (param, i) {
               let aggParam;

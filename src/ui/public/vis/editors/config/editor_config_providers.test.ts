@@ -103,7 +103,7 @@ describe('EditorConfigProvider', () => {
       expect(config.base).toBe(40);
     });
 
-    it('should throw on combinding fixedValue with base', () => {
+    it('should throw on combining fixedValue with base', () => {
       registry.register(singleConfig({ fixedValue: 'foo' }));
       registry.register(singleConfig({ base: 5 }));
       expect(() => {

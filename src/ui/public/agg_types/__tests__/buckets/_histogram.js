@@ -49,6 +49,13 @@ describe('Histogram Agg', function () {
       paramWriter = new AggParamWriter({ aggType: 'histogram' });
     }));
 
+    describe('intervalBase', () => {
+      it('should not be written to the DSL', () => {
+        const output = paramWriter.write({ intervalBase: 100 });
+        expect(output.params).not.to.have.property('intervalBase');
+      });
+    });
+
     describe('interval', function () {
       // reads aggConfig.params.interval, writes to dsl.interval
 

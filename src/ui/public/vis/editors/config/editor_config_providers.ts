@@ -20,6 +20,7 @@
 import { AggConfig } from '../..';
 import { AggType } from '../../../agg_types';
 import { IndexPattern } from '../../../index_patterns';
+import { leastCommonMultiple } from '../../../utils/math';
 import { EditorConfig, EditorParamConfig, FixedParam, NumericIntervalParam } from './types';
 
 type EditorConfigProvider = (
@@ -27,14 +28,6 @@ type EditorConfigProvider = (
   indexPattern: IndexPattern,
   aggConfig: AggConfig
 ) => EditorConfig;
-
-function greatestCommonDivisor(a: number, b: number): number {
-  return a === 0 ? b : greatestCommonDivisor(b % a, a);
-}
-
-function leastCommonMultiple(a: number, b: number) {
-  return (a * b) / greatestCommonDivisor(a, b);
-}
 
 class EditorConfigProviderRegistry {
   private providers: Set<EditorConfigProvider> = new Set();
@@ -80,7 +73,9 @@ class EditorConfigProviderRegistry {
       // If not we'll throw an error.
       throw new Error(`Two EditorConfigProviders provided different fixed values for field ${paramName}:
           ${merged.fixedValue} !== ${current.fixedValue}`);
-    } else if (
+    }
+
+    if (
       (this.isFixedParam(current) && this.isBaseParam(merged)) ||
       (this.isBaseParam(current) && this.isFixedParam(merged))
     ) {
@@ -89,33 +84,37 @@ class EditorConfigProviderRegistry {
       // that are the multiple of the specific base value, but since there is no use-case for that
       // right now, this isn't implemented.
       throw new Error(`Tried to provide a fixedValue and a base for param ${paramName}.`);
-    } else if (this.isBaseParam(current) && this.isBaseParam(merged)) {
+    }
+
+    if (this.isBaseParam(current) && this.isBaseParam(merged)) {
       // In case both had where interval values, just use the least common multiple between both interval
       return {
         base: leastCommonMultiple(current.base, merged.base),
       };
-    } else {
-      // In this case we haven't had a fixed value of base for that param yet, we use the one specified
-      // in the current config
-      if (this.isFixedParam(current)) {
-        return {
-          fixedValue: current.fixedValue,
-        };
-      } else if (this.isBaseParam(current)) {
-        return {
-          base: current.base,
-        };
-      }
-
-      return {};
     }
+
+    // In this case we haven't had a fixed value of base for that param yet, we use the one specified
+    // in the current config
+    if (this.isFixedParam(current)) {
+      return {
+        fixedValue: current.fixedValue,
+      };
+    }
+
+    if (this.isBaseParam(current)) {
+      return {
+        base: current.base,
+      };
+    }
+
+    return {};
   }
 
   private mergeConfigs(configs: EditorConfig[]): EditorConfig {
     return configs.reduce((output, conf) => {
       Object.entries(conf).forEach(([paramName, paramConfig]) => {
         if (!output[paramName]) {
-          output[paramName] = paramConfig;
+          output[paramName] = { ...paramConfig };
         } else {
           output[paramName] = {
             hidden: this.mergeHidden(paramConfig, output[paramName]),
