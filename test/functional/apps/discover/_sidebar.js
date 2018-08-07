@@ -25,7 +25,7 @@ export default function ({ getService, getPageObjects }) {
   const kibanaServer = getService('kibanaServer');
   const PageObjects = getPageObjects(['common', 'discover', 'header']);
 
-  describe('discover tab', function describeIndexTests() {
+  describe('discover sidebar', function describeIndexTests() {
     before(async function () {
       const fromTime = '2015-09-19 06:31:44.000';
       const toTime = '2015-09-23 18:31:44.000';
@@ -47,6 +47,13 @@ export default function ({ getService, getPageObjects }) {
 
       log.debug('setAbsoluteRange');
       await PageObjects.header.setAbsoluteRange(fromTime, toTime);
+    });
+
+    describe('field filtering', function () {
+      it('should reveal and hide the filter form when the toggle is clicked', async function () {
+        await PageObjects.discover.openSidebarFieldFilter();
+        await PageObjects.discover.closeSidebarFieldFilter();
+      });
     });
 
     describe('collapse expand', function () {
