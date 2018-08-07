@@ -51,6 +51,7 @@ export class CMBeatsDomain {
 
   public async update(userOrToken: UserOrToken, beatId: string, beatData: Partial<CMBeat>) {
     const beat = await this.adapter.get(this.framework.internalUser, beatId);
+
     // TODO make return type enum
     if (beat === null) {
       return 'beat-not-found';

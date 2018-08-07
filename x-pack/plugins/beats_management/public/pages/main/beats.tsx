@@ -24,8 +24,8 @@ interface BeatsPageProps {
 
 interface BeatsPageState {
   beats: CMBeat[];
-  tags: any[] | null;
   tableRef: any;
+  tags: any[] | null;
 }
 
 export class BeatsPage extends React.PureComponent<BeatsPageProps, BeatsPageState> {
@@ -54,6 +54,7 @@ export class BeatsPage extends React.PureComponent<BeatsPageProps, BeatsPageStat
         assignmentTitle="Set tags"
         items={this.state.beats || []}
         ref={this.state.tableRef}
+        showAssignmentOptions={true}
         type={BeatsTableType}
       />
     );

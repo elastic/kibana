@@ -30,6 +30,8 @@ export function ControlBar(props: ControlBarProps) {
     selectionCount,
     showAssignmentOptions,
   } = props;
+
+  const filters = controlDefinitions.filters.length === 0 ? null : controlDefinitions.filters;
   return selectionCount !== 0 && showAssignmentOptions ? (
     <AssignmentOptions
       actionHandler={actionHandler}
@@ -41,7 +43,7 @@ export function ControlBar(props: ControlBarProps) {
   ) : (
     <EuiSearchBar
       box={{ incremental: true }}
-      filters={controlDefinitions.filters}
+      filters={filters}
       onChange={(query: any) => actionHandler('search', query)}
     />
   );

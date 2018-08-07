@@ -8,6 +8,8 @@ import { flatten, get as _get, omit } from 'lodash';
 import { INDEX_NAMES } from '../../../../common/constants';
 import { CMBeat } from '../../../../common/domain_types';
 import { DatabaseAdapter } from '../database/adapter_types';
+
+import { BackendFrameworkAdapter } from '../framework/adapter_types';
 import { FrameworkUser } from '../framework/adapter_types';
 import { BeatsTagAssignment, CMBeatsAdapter } from './adapter_types';
 
@@ -16,6 +18,7 @@ export class ElasticsearchBeatsAdapter implements CMBeatsAdapter {
 
   constructor(database: DatabaseAdapter) {
     this.database = database;
+
   }
 
   public async get(user: FrameworkUser, id: string) {
@@ -35,6 +38,7 @@ export class ElasticsearchBeatsAdapter implements CMBeatsAdapter {
   }
 
   public async insert(user: FrameworkUser, beat: CMBeat) {
+
     const body = {
       beat,
       type: 'beat',
@@ -50,6 +54,7 @@ export class ElasticsearchBeatsAdapter implements CMBeatsAdapter {
   }
 
   public async update(user: FrameworkUser, beat: CMBeat) {
+
     const body = {
       beat,
       type: 'beat',
@@ -136,6 +141,7 @@ export class ElasticsearchBeatsAdapter implements CMBeatsAdapter {
         return [
           { update: { _id: `beat:${beatId}` } },
           { script: { source: script.replace('          ', ''), params: { tag } } },
+
         ];
       })
     );

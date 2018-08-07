@@ -15,6 +15,7 @@ export const createListAgentsRoute = (libs: CMServerLibs) => ({
   handler: async (request: FrameworkRequest, reply: any) => {
     try {
       const beats = await libs.beats.getAll(request.user);
+
       reply({ beats });
     } catch (err) {
       // TODO move this to kibana route thing in adapter

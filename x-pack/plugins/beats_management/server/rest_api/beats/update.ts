@@ -64,6 +64,7 @@ export const createBeatUpdateRoute = (libs: CMServerLibs) => ({
       }
 
       reply({ success: true }).code(204);
+
     } catch (err) {
       return reply(wrapEsError(err));
     }

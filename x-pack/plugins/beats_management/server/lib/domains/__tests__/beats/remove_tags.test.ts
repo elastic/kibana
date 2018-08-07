@@ -31,7 +31,6 @@ describe('Beats Domain Lib', () => {
         {
           access_token: '188255eb560a4448b72656c5e99cae6f',
           active: true,
-
           enrollment_token: '12fghjyu34',
           host_ip: '22.33.11.44',
           host_name: 'baz.bar.com',
@@ -41,7 +40,6 @@ describe('Beats Domain Lib', () => {
         {
           access_token: '93c4a4dd08564c189a7ec4e4f046b975',
           active: true,
-
           enrollment_token: '12nfhgj34',
           host_ip: '1.2.3.4',
           host_name: 'foo.bar.com',

@@ -6,6 +6,7 @@
 
 import { DatabaseAdapter } from './adapters/database/adapter_types';
 import { BackendFrameworkAdapter, FrameworkUser } from './adapters/framework/adapter_types';
+
 import { CMBeatsDomain } from './domains/beats';
 import { CMTagsDomain } from './domains/tags';
 import { CMTokensDomain } from './domains/tokens';
