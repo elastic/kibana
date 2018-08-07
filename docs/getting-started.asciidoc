@@ -14,10 +14,12 @@ This tutorial shows you how to:
 
 Before you begin, make sure you've <<install, installed Kibana>> and established
 a {kibana-ref}/connect-to-elasticsearch.html[connection to Elasticsearch].
-
 You might also be interested in the
 https://www.elastic.co/webinars/getting-started-kibana[Getting Started with Kibana]
 video tutorial.
+
+If you are running our https://cloud.elastic.co[hosted Elasticsearch Service] 
+on Elastic Cloud, you can access Kibana with a single click.
 --
 
 include::getting-started/tutorial-load-dataset.asciidoc[]

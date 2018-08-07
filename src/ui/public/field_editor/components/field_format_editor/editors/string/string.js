@@ -32,6 +32,8 @@ import {
   FormatEditorSamples
 } from '../../samples';
 
+import { FormattedMessage } from '@kbn/i18n/react';
+
 export class StringFormatEditor extends DefaultFormatEditor {
   static formatId = 'string';
 
@@ -53,7 +55,7 @@ export class StringFormatEditor extends DefaultFormatEditor {
     return (
       <Fragment>
         <EuiFormRow
-          label="Transform"
+          label={<FormattedMessage id="common.ui.fieldEditor.string.transformLabel" defaultMessage="Transform"/>}
           isInvalid={!!error}
           error={error}
         >

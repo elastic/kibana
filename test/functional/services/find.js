@@ -118,6 +118,14 @@ export function FindProvider({ getService }) {
       return await this._ensureElement(async () => await parentElement.findDisplayedByCssSelector(selector));
     }
 
+    async allDescendantDisplayedByCssSelector(selector, parentElement) {
+      log.debug(`Find.allDescendantDisplayedByCssSelector(${selector})`);
+      const allElements = await parentElement.findAllByCssSelector(selector);
+      return await Promise.all(
+        allElements.map((element) => this._ensureElement(async () => element))
+      );
+    }
+
     async displayedByCssSelector(selector, timeout = defaultFindTimeout, parentElement) {
       log.debug('in displayedByCssSelector: ' + selector);
       return await this._ensureElementWithTimeout(timeout, async remote => {
@@ -129,6 +137,13 @@ export function FindProvider({ getService }) {
       log.debug('Find.byLinkText: ' + selector);
       return await this._ensureElementWithTimeout(timeout, async remote => {
         return await remote.findByLinkText(selector);
+      });
+    }
+
+    async findDisplayedByLinkText(selector, timeout = defaultFindTimeout) {
+      log.debug('Find.byLinkText: ' + selector);
+      return await this._ensureElementWithTimeout(timeout, async remote => {
+        return await remote.findDisplayedByLinkText(selector);
       });
     }
 
@@ -210,6 +225,21 @@ export function FindProvider({ getService }) {
       log.debug(`clickByCssSelector(${selector})`);
       await retry.try(async () => {
         const element = await this.byCssSelector(selector, timeout);
+        await remote.moveMouseTo(element);
+        await element.click();
+      });
+    }
+    async clickByDisplayedLinkText(linkText, timeout = defaultFindTimeout) {
+      log.debug(`clickByDisplayedLinkText(${linkText})`);
+      await retry.try(async () => {
+        const element = await this.findDisplayedByLinkText(linkText, timeout);
+        await remote.moveMouseTo(element);
+        await element.click();
+      });
+    }
+    async clickDisplayedByCssSelector(selector, timeout = defaultFindTimeout) {
+      await retry.try(async () => {
+        const element = await this.findDisplayedByCssSelector(selector, timeout);
         await remote.moveMouseTo(element);
         await element.click();
       });

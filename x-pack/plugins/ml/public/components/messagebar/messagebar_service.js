@@ -63,6 +63,8 @@ function errorNotify(text, resp) {
   let err = null;
   if (typeof text === 'object' && text.response !== undefined) {
     resp = text.response;
+  } else if (typeof text === 'object' && text.message !== undefined) {
+    err = new Error(text.message);
   } else {
     err = new Error(text);
   }

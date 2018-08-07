@@ -35,7 +35,11 @@ exports[`AddFilter should ignore strings with just spaces 1`] = `
       onClick={[Function]}
       type="button"
     >
-      Add
+      <FormattedMessage
+        defaultMessage="Add"
+        id="kbn.management.editIndexPattern.source.addButton"
+        values={Object {}}
+      />
     </EuiButton>
   </EuiFlexItem>
 </EuiFlexGroup>
@@ -76,7 +80,11 @@ exports[`AddFilter should render normally 1`] = `
       onClick={[Function]}
       type="button"
     >
-      Add
+      <FormattedMessage
+        defaultMessage="Add"
+        id="kbn.management.editIndexPattern.source.addButton"
+        values={Object {}}
+      />
     </EuiButton>
   </EuiFlexItem>
 </EuiFlexGroup>

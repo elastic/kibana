@@ -10,7 +10,7 @@ import { SORT_ASCENDING } from '../../../../common/constants';
 import { NodeStatusIcon } from '../node';
 import { extractIp } from '../../../lib/extract_ip'; // TODO this is only used for elasticsearch nodes summary / node detail, so it should be moved to components/elasticsearch/nodes/lib
 import { ClusterStatus } from '../cluster_status';
-import { MonitoringTable } from '../../';
+import { MonitoringTable } from '../../table';
 import { MetricCell, OfflineCell } from './cells';
 import { EuiLink, EuiToolTip } from '@elastic/eui';
 import { KuiTableRowCell, KuiTableRow } from '@kbn/ui-framework/components';

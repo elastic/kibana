@@ -13,3 +13,16 @@ You do not need to configure any settings to use APM. It is enabled by default.
 
 xpack.apm.enabled:: Set to `false` to disabled the APM plugin {kib}. Defaults to
 `true`.
+
+xpack.apm.ui.enabled:: Set to `false` to hide the APM plugin {kib} from the menu. Defaults to
+`true`.
+
+apm_oss.indexPattern:: Index pattern is used for integrations with Machine Learning and Kuery Bar. It must match all apm indices. Defaults to `apm-&#42;`.
+
+apm_oss.errorIndices:: Matcher for indices containing error documents. Defaults to `apm-&#42;-error-&#42;`.
+
+apm_oss.onboardingIndices:: Matcher for indices containing onboarding documents. Defaults to `apm-&#42;-onboarding-&#42;`.
+
+apm_oss.spanIndices:: Matcher for indices containing span documents. Defaults to `apm-&#42;-span-&#42;`.
+
+apm_oss.transactionIndices:: Matcher for indices containing transaction documents. Defaults to `apm-&#42;-transaction-&#42;`.

@@ -8,7 +8,6 @@ import './main';
 import './chart';
 import './sparkline';
 import './alerts';
-import './status_icon';
 import './cluster/overview';
 import './cluster/listing';
 import './elasticsearch/cluster_status';
