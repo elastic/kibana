@@ -8656,10 +8656,6 @@ markdown-it@^8.4.1:
     mdurl "^1.0.1"
     uc.micro "^1.0.5"
 
-marked-text-renderer@0.1.0:
-  version "0.1.0"
-  resolved "https://registry.yarnpkg.com/marked-text-renderer/-/marked-text-renderer-0.1.0.tgz#2342d66e9a84f55c2fb6711a818387e1bb00f847"
-
 material-colors@^1.2.1:
   version "1.2.5"
   resolved "https://registry.yarnpkg.com/material-colors/-/material-colors-1.2.5.tgz#5292593e6754cb1bcc2b98030e4e0d6a3afc9ea1"
