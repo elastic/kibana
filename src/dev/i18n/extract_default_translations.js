@@ -27,7 +27,7 @@ import { extractCodeMessages } from './extract_code_messages';
 import { extractPugMessages } from './extract_pug_messages';
 import { extractHandlebarsMessages } from './extract_handlebars_messages';
 import { globAsync, makeDirAsync, accessAsync, readFileAsync, writeFileAsync } from './utils';
-import { VALID_EXTRACTION_PATHS, IGNORED_BY_EXTRACTOR_FILES } from './config';
+import config from '../../../.localizationrc.json';
 
 function addMessageToMap(targetMap, key, value) {
   const existingValue = targetMap.get(key);
@@ -40,7 +40,8 @@ function addMessageToMap(targetMap, key, value) {
   targetMap.set(key, value);
 }
 
-async function pathMagic(inputPaths) {
+async function getPluginsPaths(inputPaths) {
+  const availablePaths = Object.values(config.paths);
   const pathsForExtraction = [];
 
   for (const inputPath of inputPaths) {
@@ -48,18 +49,29 @@ async function pathMagic(inputPaths) {
 
     if (normalizedPath) {
       pathsForExtraction.push(
-        ...VALID_EXTRACTION_PATHS.filter(ePath => ePath.startsWith(`${normalizedPath}/`))
+        ...availablePaths.filter(ePath => ePath.startsWith(`${normalizedPath}/`))
       );
     } else {
-      pathsForExtraction.push(...VALID_EXTRACTION_PATHS);
+      pathsForExtraction.push(...availablePaths);
     }
 
-    if (VALID_EXTRACTION_PATHS.some(ePath => normalizedPath.startsWith(`${ePath}/`))) {
+    if (availablePaths.some(ePath => normalizedPath.startsWith(`${ePath}/`))) {
       pathsForExtraction.push(normalizedPath);
     }
   }
 
   return pathsForExtraction;
+}
+
+export function validateMessageNamespace(id, filePath) {
+  const normalizedPath = normalize(path.relative('.', filePath));
+  const [expectedNamespace] = Object.entries(config.paths).find(([, pluginPath]) =>
+    normalizedPath.startsWith(`${pluginPath}/`)
+  );
+
+  if (!id.startsWith(`${expectedNamespace}.`)) {
+    throw new Error(`Message id has wrong namespace ("${id}").`);
+  }
 }
 
 export async function extractMesssagesFromPathToMap(inputPath, targetMap) {
@@ -96,9 +108,7 @@ export async function extractMesssagesFromPathToMap(inputPath, targetMap) {
     ].map(async ([entries, extractFunction]) => {
       const files = await Promise.all(
         entries
-          .filter(
-            entry => !IGNORED_BY_EXTRACTOR_FILES.includes(normalize(path.relative('.', entry)))
-          )
+          .filter(entry => !config.exclude.includes(normalize(path.relative('.', entry))))
           .map(async entry => {
             return {
               name: entry,
@@ -110,6 +120,7 @@ export async function extractMesssagesFromPathToMap(inputPath, targetMap) {
       for (const { name, content } of files) {
         try {
           for (const [id, value] of extractFunction(content)) {
+            validateMessageNamespace(id, name);
             addMessageToMap(targetMap, id, value);
           }
         } catch (error) {
@@ -123,11 +134,13 @@ export async function extractMesssagesFromPathToMap(inputPath, targetMap) {
 export async function extractDefaultTranslations({ inputPaths, outputPath }) {
   const defaultMessagesMap = new Map();
 
-  for (const inputPath of await pathMagic(inputPaths)) {
+  for (const inputPath of await getPluginsPaths(inputPaths)) {
     await extractMesssagesFromPathToMap(inputPath, defaultMessagesMap);
   }
 
-  if (!outputPath) {
+  console.log(`Validated ${defaultMessagesMap.size} messages.`); // TODO: normal log
+
+  if (!outputPath || !defaultMessagesMap.size) {
     return;
   }
 
