@@ -36,7 +36,6 @@
         <input
           ng-if="queryBar.localQuery.language === 'kuery'"
           ng-model="queryBar.localQuery.query"
-          ng-model-options="{ debounce: 100 }"
           ng-trim="false"
           ng-keydown="queryBar.handleKeyDown($event)"
           ng-change="queryBar.updateSuggestions()"

@@ -45,7 +45,7 @@ module.directive('queryBar', function () {
     controllerAs: 'queryBar',
     bindToController: true,
 
-    controller: callAfterBindingsWorkaround(function ($scope, $element, $http, $timeout, config, PersistedLog, indexPatterns) {
+    controller: callAfterBindingsWorkaround(function ($scope, $element, $http, $timeout, config, PersistedLog, indexPatterns, debounce) {
       this.appName = this.appName || 'global';
 
       this.getIndexPatterns = () => {
@@ -75,10 +75,10 @@ module.directive('queryBar', function () {
         }
       };
 
-      this.updateSuggestions = async () => {
+      this.updateSuggestions = debounce(async () => {
         const suggestions = await this.getSuggestions();
         $scope.$apply(() => this.suggestions = suggestions);
-      };
+      }, 100);
 
       this.getSuggestions = async () => {
         const { localQuery: { query, language } } = this;
