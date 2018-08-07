@@ -20,6 +20,7 @@ interface BeatsTableProps {
   assignmentOptions: any[] | null;
   assignmentTitle: string | null;
   items: any[];
+  showAssignmentOptions: boolean;
   type: TableType;
   actionHandler(action: string, payload?: any): void;
 }
@@ -42,7 +43,14 @@ export class Table extends React.Component<BeatsTableProps, BeatsTableState> {
   }
 
   public render() {
-    const { actionHandler, assignmentOptions, assignmentTitle, items, type } = this.props;
+    const {
+      actionHandler,
+      assignmentOptions,
+      assignmentTitle,
+      items,
+      showAssignmentOptions,
+      type,
+    } = this.props;
 
     const pagination = {
       initialPageSize: TABLE_CONFIG.INITIAL_ROW_SIZE,
@@ -64,7 +72,7 @@ export class Table extends React.Component<BeatsTableProps, BeatsTableState> {
           assignmentTitle={assignmentTitle}
           controlDefinitions={type.controlDefinitions(items)}
           selectionCount={this.state.selection.length}
-          showAssignmentOptions={true}
+          showAssignmentOptions={showAssignmentOptions}
         />
         <EuiSpacer size="m" />
         <EuiInMemoryTable

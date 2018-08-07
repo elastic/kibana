@@ -9,12 +9,15 @@ import { EuiBadge, EuiFlexGroup, EuiIcon, EuiLink } from '@elastic/eui';
 import { flatten, uniq } from 'lodash';
 import moment from 'moment';
 import React from 'react';
-import { CMPopulatedBeat } from '../../../common/domain_types';
+import { TABLE_CONFIG } from '../../../common/constants';
+import { BeatTag, CMPopulatedBeat, ConfigurationBlock } from '../../../common/domain_types';
 
 export interface ColumnDefinition {
+  align?: string;
   field: string;
   name: string;
   sortable?: boolean;
+  width?: string;
   render?(value: any, object?: any): any;
 }
 
@@ -114,5 +117,43 @@ export const BeatsTableType: TableType = {
         ),
       },
     ],
+  }),
+};
+
+export const TagsTableType: TableType = {
+  columnDefinitions: [
+    {
+      field: 'id',
+      name: 'Tag name',
+      render: (id: string, tag: BeatTag) => (
+        <EuiBadge color={tag.color ? tag.color : 'primary'}>
+          {tag.id.length > TABLE_CONFIG.TRUNCATE_TAG_LENGTH
+            ? `${tag.id.substring(0, TABLE_CONFIG.TRUNCATE_TAG_LENGTH)}...`
+            : tag.id}
+        </EuiBadge>
+      ),
+      sortable: true,
+      width: '45%',
+    },
+    {
+      align: 'right',
+      field: 'configuration_blocks',
+      name: 'Configurations',
+      render: (configurationBlocks: ConfigurationBlock[]) => (
+        <div>{configurationBlocks.length}</div>
+      ),
+      sortable: false,
+    },
+    {
+      align: 'right',
+      field: 'last_updated',
+      name: 'Last update',
+      render: (lastUpdate: Date) => <div>{moment(lastUpdate).fromNow()}</div>,
+      sortable: true,
+    },
+  ],
+  controlDefinitions: (data: any) => ({
+    actions: [],
+    filters: [],
   }),
 };

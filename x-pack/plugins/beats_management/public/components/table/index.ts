@@ -6,4 +6,4 @@
 
 export { Table } from './table';
 export { ControlBar } from './controls';
-export { BeatsTableType } from './table_type_configs';
+export { BeatsTableType, TagsTableType } from './table_type_configs';
