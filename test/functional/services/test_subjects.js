@@ -38,6 +38,13 @@ export function TestSubjectsProvider({ getService }) {
       return await find.existsByDisplayedByCssSelector(testSubjSelector(selector), timeout);
     }
 
+    async existOrFail(selector, timeout = 1000) {
+      log.debug(`TestSubjects.existOrFail(${selector})`);
+      const doesExist = await this.exists(selector, timeout);
+      // Verify element exists, or else fail the test consuming this.
+      expect(doesExist).to.be(true);
+    }
+
     async missingOrFail(selector, timeout = 1000) {
       log.debug(`TestSubjects.missingOrFail(${selector})`);
       const doesExist = await this.exists(selector, timeout);
