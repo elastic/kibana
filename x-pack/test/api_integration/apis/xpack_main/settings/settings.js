@@ -27,7 +27,7 @@ export default function ({ getService }) {
           .get('/api/settings')
           .set('kbn-xsrf', 'xxx')
           .expect(200);
-        expect(body.cluster_uuid.length > 0).to.eql(true);
+        expect(body.cluster_uuid.length > 1).to.eql(true);
         expect(body.settings.kibana.uuid.length > 0).to.eql(true);
         expect(body.settings.kibana.name.length > 0).to.eql(true);
         expect(body.settings.kibana.index.length > 0).to.eql(true);
