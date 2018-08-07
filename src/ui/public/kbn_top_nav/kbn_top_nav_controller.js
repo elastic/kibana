@@ -79,11 +79,11 @@ export function KbnTopNavControllerProvider($compile) {
     toggle = (key) => { this.setCurrent(this.isCurrent(key) ? null : key); };
     click = (key) => { this.handleClick(this.getItem(key)); };
     getItem = (key) => { return this.menuItems.find(i => i.key === key); };
-    handleClick = (menuItem) => {
+    handleClick = (menuItem, event) => {
       if (menuItem.disableButton()) {
         return false;
       }
-      menuItem.run(menuItem, this);
+      menuItem.run(menuItem, this, event.target);
     };
     // apply the defaults to individual options
     _applyOptDefault(opt = {}) {
