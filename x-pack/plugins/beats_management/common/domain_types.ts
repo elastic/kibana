@@ -13,6 +13,7 @@ export interface ConfigurationBlock {
 export interface CMBeat {
   id: string;
   enrollment_token: string;
+  active: boolean;
   access_token: string;
   verified_on?: string;
   type: string;

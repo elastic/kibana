@@ -28,6 +28,11 @@ export class RestBeatsAdapter implements CMBeatsAdapter {
     return (await this.REST.get<{ beats: CMBeat[] }>('/api/beats/agents')).beats;
   }
 
+  public async update(id: string, beatData: Partial<CMBeat>): Promise<boolean> {
+    await this.REST.put<{ success: true }>(`/api/beats/agent/${id}`, beatData);
+    return true;
+  }
+
   public async removeTagsFromBeats(removals: BeatsTagAssignment[]): Promise<BeatsRemovalReturn[]> {
     return (await this.REST.post<{ removals: BeatsRemovalReturn[] }>(
       `/api/beats/agents_tags/removals`,

@@ -14,7 +14,7 @@ import { FrameworkUser } from '../adapters/framework/adapter_types';
 
 import { CMAssignmentReturn } from '../adapters/beats/adapter_types';
 import { BeatsRemovalReturn } from '../adapters/beats/adapter_types';
-import { BeatEnrollmentStatus, CMDomainLibs, CMServerLibs } from '../lib';
+import { BeatEnrollmentStatus, CMDomainLibs, CMServerLibs, UserOrToken } from '../lib';
 
 export class CMBeatsDomain {
   private tags: CMDomainLibs['tags'];
@@ -35,32 +35,41 @@ export class CMBeatsDomain {
     this.framework = libs.framework;
   }
 
-  public async getById(user: FrameworkUser, beatId: string) {
-    return await this.adapter.get(user, beatId);
+  public async getById(user: FrameworkUser, beatId: string): Promise<CMBeat | null> {
+    const beat = await this.adapter.get(user, beatId);
+    return beat && beat.active ? beat : null;
+  }
+
+  public async getAll(user: FrameworkUser) {
+    return (await this.adapter.getAll(user)).filter((beat: CMBeat) => beat.active === true);
   }
 
   public async getByEnrollmentToken(user: FrameworkUser, enrollmentToken: string) {
-    return await this.adapter.getBeatWithToken(user, enrollmentToken);
+    const beat = await this.adapter.getBeatWithToken(user, enrollmentToken);
+    return beat && beat.active ? beat : null;
   }
 
-  public async update(beatId: string, accessToken: string, beatData: Partial<CMBeat>) {
+  public async update(userOrToken: UserOrToken, beatId: string, beatData: Partial<CMBeat>) {
     const beat = await this.adapter.get(this.framework.internalUser, beatId);
-
-    const { verified: isAccessTokenValid } = this.tokens.verifyToken(
-      beat ? beat.access_token : '',
-      accessToken
-    );
 
     // TODO make return type enum
     if (beat === null) {
       return 'beat-not-found';
     }
 
-    if (!isAccessTokenValid) {
-      return 'invalid-access-token';
+    if (typeof userOrToken === 'string') {
+      const { verified: isAccessTokenValid } = this.tokens.verifyToken(
+        beat ? beat.access_token : '',
+        userOrToken
+      );
+      if (!isAccessTokenValid) {
+        return 'invalid-access-token';
+      }
     }
 
-    await this.adapter.update({
+    const user = typeof userOrToken === 'string' ? this.framework.internalUser : userOrToken;
+
+    await this.adapter.update(user, {
       ...beat,
       ...beatData,
     });
@@ -85,8 +94,9 @@ export class CMBeatsDomain {
     const accessToken = this.tokens.generateAccessToken();
     const verifiedOn = moment().toJSON();
 
-    await this.adapter.insert({
+    await this.adapter.insert(this.framework.internalUser, {
       ...beat,
+      active: true,
       enrollment_token: enrollmentToken,
       verified_on: verifiedOn,
       access_token: accessToken,
@@ -139,10 +149,6 @@ export class CMBeatsDomain {
       return addToResultsToResponse('removals', response, removalResults);
     }
     return response;
-  }
-
-  public async getAllBeats(user: FrameworkUser) {
-    return await this.adapter.getAll(user);
   }
 
   public async assignTagsToBeats(

@@ -25,9 +25,10 @@ export function compose(server: any): CMServerLibs {
   const tokens = new CMTokensDomain(new ElasticsearchTokensAdapter(database, framework), {
     framework,
   });
-  const beats = new CMBeatsDomain(new ElasticsearchBeatsAdapter(database, framework), {
+  const beats = new CMBeatsDomain(new ElasticsearchBeatsAdapter(database), {
     tags,
     tokens,
+    framework,
   });
 
   const domainLibs: CMDomainLibs = {

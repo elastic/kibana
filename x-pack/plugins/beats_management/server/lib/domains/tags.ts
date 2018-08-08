@@ -35,6 +35,7 @@ export class CMTagsDomain {
     const tag = {
       configuration_blocks: configs,
       id: tagId,
+      last_updated: new Date(),
     };
     return {
       isValid: true,
