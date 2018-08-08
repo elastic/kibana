@@ -2331,10 +2331,6 @@ builtin-status-codes@^3.0.0:
   version "3.0.0"
   resolved "https://registry.yarnpkg.com/builtin-status-codes/-/builtin-status-codes-3.0.0.tgz#85982878e21b98e1c66425e03d0174788f569ee8"
 
-builtins@0.0.7:
-  version "0.0.7"
-  resolved "https://registry.yarnpkg.com/builtins/-/builtins-0.0.7.tgz#355219cd6cf18dbe7c01cc7fd2dce765cfdc549a"
-
 bunyan@1.7.1:
   version "1.7.1"
   resolved "https://registry.yarnpkg.com/bunyan/-/bunyan-1.7.1.tgz#5ff717e9d1a9a8b81e7b084bf6afc1fbaf9bafc4"
@@ -13644,12 +13640,6 @@ validate-npm-package-license@^3.0.1:
   dependencies:
     spdx-correct "^3.0.0"
     spdx-expression-parse "^3.0.0"
-
-validate-npm-package-name@2.2.2:
-  version "2.2.2"
-  resolved "https://registry.yarnpkg.com/validate-npm-package-name/-/validate-npm-package-name-2.2.2.tgz#f65695b22f7324442019a3c7fa39a6e7fd299085"
-  dependencies:
-    builtins "0.0.7"
 
 value-equal@^0.4.0:
   version "0.4.0"

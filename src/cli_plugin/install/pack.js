@@ -18,7 +18,6 @@
  */
 
 import { analyzeArchive, extractArchive } from './zip';
-import validate from 'validate-npm-package-name';
 
 /**
  * Checks the plugin name. Will throw an exception if it does not meet
@@ -26,10 +25,10 @@ import validate from 'validate-npm-package-name';
  *
  * @param {object} plugin - a package object from listPackages()
  */
-function assertValidPackageName(plugin) {
-  const validation = validate(plugin.name);
-  if (!validation.validForNewPackages) {
-    throw new Error(`Invalid plugin name [${plugin.name}] in package.json`);
+function assertValidPackageName({ name }) {
+  const valid = Boolean(name) && /^(\w|-)+$/.test(name);
+  if (!valid) {
+    throw new Error(`Invalid plugin name [${name}] in package.json`);
   }
 }
 
