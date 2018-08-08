@@ -44,7 +44,6 @@ function createSelectedGroups(jobs, groups) {
     if (c.jobIds.some(j => jobIds.includes(j))) {
       p[c.id] = {
         partial: (groupCounts[c.id] !== jobIds.length),
-        // jobsIds: c.jobIds,
       };
     }
     return p;
@@ -184,6 +183,7 @@ export class GroupSelector extends Component {
         onClick={() => this.togglePopover()}
       />
     );
+    const s = (this.props.jobs.length > 1 ? 's' : '');
 
     return (
       <EuiPopover
@@ -194,7 +194,7 @@ export class GroupSelector extends Component {
         closePopover={() => this.closePopover()}
       >
         <div className="group-selector">
-          <EuiPopoverTitle>Apply groups to jobs</EuiPopoverTitle>
+          <EuiPopoverTitle>Apply groups to job{s}</EuiPopoverTitle>
 
           <GroupList
             groups={groups}

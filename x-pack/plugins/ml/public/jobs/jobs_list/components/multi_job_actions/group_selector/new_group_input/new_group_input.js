@@ -16,11 +16,11 @@ import {
   EuiFlexItem,
   EuiFieldText,
   EuiFormRow,
+  keyCodes,
 } from '@elastic/eui';
 
 import './styles/main.less';
 import { validateGroupNames } from '../../../validate_job';
-import { KEY_CODES } from 'plugins/ml/../common/constants/key_codes';
 
 export class NewGroupInput extends Component {
   constructor(props) {
@@ -43,7 +43,7 @@ export class NewGroupInput extends Component {
 
   newGroupKeyPress = (e) => {
     if (
-      e.keyCode === KEY_CODES.ENTER &&
+      e.keyCode === keyCodes.ENTER &&
       this.state.groupsValidationError === '' &&
       this.state.tempNewGroupName !== ''
     ) {
