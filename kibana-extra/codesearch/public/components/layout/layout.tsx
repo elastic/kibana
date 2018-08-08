@@ -78,8 +78,7 @@ export class LayoutPage extends React.Component<Props, State> {
   public findNode = (pathSegments: string[], node: Tree) => {
     if (!node) {
       return null;
-    }
-    if (pathSegments.length === 0) {
+    } else if (pathSegments.length === 0) {
       return node;
     } else if (pathSegments.length === 1) {
       return (node.children || []).find(n => n.name === pathSegments[0]);
