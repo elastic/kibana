@@ -27,7 +27,7 @@ interface Deps {
 }
 
 export interface LegacyPlatformParams {
-  rootDomElement: HTMLElement;
+  targetDomElement: HTMLElement;
   requireLegacyFiles: () => void;
   useLegacyTestHarness?: boolean;
 }
@@ -55,11 +55,11 @@ export class LegacyPlatformService {
     // require the files that will tie into the legacy platform
     this.params.requireLegacyFiles();
 
-    bootstrapModule.bootstrap(this.params.rootDomElement);
+    bootstrapModule.bootstrap(this.params.targetDomElement);
   }
 
   public stop() {
-    const angularRoot = angular.element(this.params.rootDomElement);
+    const angularRoot = angular.element(this.params.targetDomElement);
     const injector$ = angularRoot.injector();
 
     // if we haven't gotten to the point of bootstraping
@@ -72,11 +72,11 @@ export class LegacyPlatformService {
     injector$.get('$rootScope').$destroy();
 
     // clear the inner html of the root angular element
-    this.params.rootDomElement.textContent = '';
+    this.params.targetDomElement.textContent = '';
   }
 
   private loadBootstrapModule(): {
-    bootstrap: (rootDomElement: HTMLElement) => void;
+    bootstrap: (targetDomElement: HTMLElement) => void;
   } {
     if (this.params.useLegacyTestHarness) {
       // wrapped in NODE_ENV check so the `ui/test_harness` module
