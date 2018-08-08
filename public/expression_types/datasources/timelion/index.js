@@ -21,10 +21,18 @@ const TimelionDatasource = ({ args, updateArgs }) => {
       });
   };
 
+  const getArgName = () => {
+    if (getSimpleArg('_', args)[0]) return '_';
+    if (getSimpleArg('q', args)[0]) return 'q';
+    return 'query';
+  };
+
+  const argName = getArgName();
+
   // TODO: This is a terrible way of doing defaults. We need to find a way to read the defaults for the function
   // and set them for the data source UI.
   const getQuery = () => {
-    return getSimpleArg('query', args)[0] || '.es(*)';
+    return getSimpleArg(argName, args)[0] || '.es(*)';
   };
 
   const getInterval = () => {
@@ -47,7 +55,7 @@ const TimelionDatasource = ({ args, updateArgs }) => {
         <EuiTextArea
           className="canvasTextArea--code"
           value={getQuery()}
-          onChange={e => setArg('query', e.target.value)}
+          onChange={e => setArg(argName, e.target.value)}
         />
       </EuiFormRow>
       {

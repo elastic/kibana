@@ -22,7 +22,14 @@ const EssqlDatasource = ({ args, updateArgs }) => {
   };
 
   const getQuery = () => {
-    return getSimpleArg(getArgName(), args)[0] || '';
+    let query = getSimpleArg(getArgName(), args)[0];
+
+    if (!query) {
+      query = 'SELECT * FROM logstash*';
+      setArg(getArgName(), query);
+    }
+
+    return query;
   };
 
   return (
