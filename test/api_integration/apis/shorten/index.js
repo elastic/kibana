@@ -46,8 +46,9 @@ export default function ({ getService }) {
         .send({ url: '/app/kibana#/visualize/create' })
         .expect(200);
 
-      expect(typeof resp.text).to.be('string');
-      expect(resp.text.length > 0).to.be(true);
+      expect(resp.body).to.have.property('urlId');
+      expect(typeof resp.body.urlId).to.be('string');
+      expect(resp.body.urlId.length > 0).to.be(true);
     });
 
     it('redirects shortened urls', async () => {

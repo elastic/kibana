@@ -32,7 +32,7 @@ export function shortenUrl(absoluteUrl) {
 
   const body = JSON.stringify({ url: relativeUrl });
 
-  return kfetch({ method: 'POST', 'pathname': '/api/shorten_url', body: body }).then((resp) => {
+  return kfetch({ method: 'POST', 'pathname': '/api/shorten_url', body }).then((resp) => {
     return url.format({
       protocol: parsedUrl.protocol,
       host: parsedUrl.host,
