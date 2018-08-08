@@ -31,3 +31,11 @@ export const PROJECTS = [
   // both took closer to 1000ms.
   ...glob.sync('packages/*/tsconfig.json', { cwd: REPO_ROOT }),
 ].map(path => new Project(resolve(REPO_ROOT, path)));
+
+export function findProjectsByFlag(flag: string | undefined) {
+  const resolved = flag ? resolve(flag) : null;
+
+  return PROJECTS.filter(project => {
+    return resolved === null || resolved === project.tsConfigPath;
+  });
+}
