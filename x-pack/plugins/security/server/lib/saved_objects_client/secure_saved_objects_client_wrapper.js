@@ -126,8 +126,7 @@ export class SecureSavedObjectsClientWrapper {
         this._securityContextService.set(this._request, { legacy: true, });
         return;
       case CHECK_PRIVILEGES_RESULT.UNAUTHORIZED:
-        const missing = Object.keys(response[spaceId])
-          .filter(privilege => !response[privilege]);
+        const missing = this._getMissingPrivileges(response, spaceId);
         this._auditLogger.savedObjectsAuthorizationFailure(username, action, types, missing, args);
         const msg = `Unable to ${action} ${[...types].sort().join(',')}, missing ${[...missing].sort().join(',')}`;
         throw this.errors.decorateForbiddenError(new Error(msg));
@@ -143,13 +142,14 @@ export class SecureSavedObjectsClientWrapper {
     const types = this._savedObjectTypes;
     const typesToPrivilegesMap = new Map(types.map(type => [type, this._actions.getSavedObjectAction(type, action)]));
     const spaceId = this._spacesService.getSpaceId(this._request);
-    const { result, username, missing } = await this._checkSavedObjectPrivileges(spaceId, Array.from(typesToPrivilegesMap.values()));
+    const { result, username, response } = await this._checkSavedObjectPrivileges([spaceId], Array.from(typesToPrivilegesMap.values()));
 
     if (result === CHECK_PRIVILEGES_RESULT.LEGACY) {
       this._securityContextService.set(this._request, { legacy: true, });
       return await this._baseClient.find(options);
     }
 
+    const missing = this._getMissingPrivileges(response, spaceId);
     const authorizedTypes = Array.from(typesToPrivilegesMap.entries())
       .filter(([, privilege]) => !missing.includes(privilege))
       .map(([type]) => type);
@@ -182,5 +182,10 @@ export class SecureSavedObjectsClientWrapper {
     );
 
     return await this._baseClient.find(options);
+  }
+
+  _getMissingPrivileges(response, spaceId) {
+    return Object.keys(response[spaceId])
+      .filter(privilege => !response[spaceId][privilege]);
   }
 }

@@ -4,9 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { uniq } from 'lodash';
+import { transform, uniq } from 'lodash';
 import { buildLegacyIndexPrivileges } from './privileges';
 import { validateEsPrivilegeResponse } from './validate_es_response';
+import { pick } from '../../../../../../node_modules/vega-lite/build/src/util';
 
 export const CHECK_PRIVILEGES_RESULT = {
   UNAUTHORIZED: Symbol('Unauthorized'),
@@ -57,13 +58,13 @@ export function checkPrivilegesWithRequestFactory(shieldClient, config, actions,
 
   return function checkPrivilegesWithRequest(request) {
 
-    return async function checkPrivileges(spaceIds, privileges) {
+    return async function checkPrivileges(resources, privileges) {
       const allApplicationPrivileges = uniq([actions.version, actions.login, ...privileges]);
       const hasPrivilegesResponse = await callWithRequest(request, 'shield.hasPrivileges', {
         body: {
           applications: [{
             application,
-            resources: spaceIds,
+            resources,
             privileges: allApplicationPrivileges
           }],
           index: [{
@@ -73,7 +74,7 @@ export function checkPrivilegesWithRequestFactory(shieldClient, config, actions,
         }
       });
 
-      validateEsPrivilegeResponse(hasPrivilegesResponse, application, allApplicationPrivileges, spaceIds, kibanaIndex);
+      validateEsPrivilegeResponse(hasPrivilegesResponse, application, allApplicationPrivileges, resources, kibanaIndex);
 
       const applicationPrivilegesResponse = hasPrivilegesResponse.application[application];
       const indexPrivilegesResponse = hasPrivilegesResponse.index[kibanaIndex];
@@ -85,11 +86,10 @@ export function checkPrivilegesWithRequestFactory(shieldClient, config, actions,
       return {
         result: determineResult(applicationPrivilegesResponse, indexPrivilegesResponse),
         username: hasPrivilegesResponse.username,
-        response: applicationPrivilegesResponse,
-        // we only return missing privileges that they're specifically checking for
-        // missing: Object.keys(applicationPrivilegesResponse)
-        //   .filter(privilege => privileges.includes(privilege))
-        //   .filter(privilege => !applicationPrivilegesResponse[privilege])
+        // we need filter out the non requested privileges from the response
+        response: transform(applicationPrivilegesResponse, (response, resourcePrivilegesResponse, resourceResponse) => {
+          response[resourceResponse] = pick(resourcePrivilegesResponse, privileges);
+        }),
       };
     };
   };

@@ -112,7 +112,7 @@ export default function ({ getService }) {
         describe('unknown type', () => {
           it(`should return ${tests.unknownType.statusCode} with ${tests.unknownType.description}`, async () => (
             await supertest
-              .get('/api/saved_objects/_find?type=wigwags')
+              .get(`${getUrlPrefix(spaceId)}/api/saved_objects/_find?type=wigwags`)
               .auth(auth.username, auth.password)
               .expect(tests.unknownType.statusCode)
               .then(tests.unknownType.response)
@@ -122,7 +122,7 @@ export default function ({ getService }) {
         describe('page beyond total', () => {
           it(`should return ${tests.pageBeyondTotal.statusCode} with ${tests.pageBeyondTotal.description}`, async () => (
             await supertest
-              .get('/api/saved_objects/_find?type=visualization&page=100&per_page=100')
+              .get(`${getUrlPrefix(spaceId)}/api/saved_objects/_find?type=visualization&page=100&per_page=100`)
               .auth(auth.username, auth.password)
               .expect(tests.pageBeyondTotal.statusCode)
               .then(tests.pageBeyondTotal.response)
@@ -132,7 +132,7 @@ export default function ({ getService }) {
         describe('unknown search field', () => {
           it(`should return ${tests.unknownSearchField.statusCode} with ${tests.unknownSearchField.description}`, async () => (
             await supertest
-              .get('/api/saved_objects/_find?type=wigwags&search_fields=a')
+              .get(`${getUrlPrefix(spaceId)}/api/saved_objects/_find?type=wigwags&search_fields=a`)
               .auth(auth.username, auth.password)
               .expect(tests.unknownSearchField.statusCode)
               .then(tests.unknownSearchField.response)
@@ -142,7 +142,7 @@ export default function ({ getService }) {
         describe('no type', () => {
           it(`should return ${tests.noType.statusCode} with ${tests.noType.description}`, async () => (
             await supertest
-              .get('/api/saved_objects/_find')
+              .get(`${getUrlPrefix(spaceId)}/api/saved_objects/_find`)
               .auth(auth.username, auth.password)
               .expect(tests.noType.statusCode)
               .then(tests.noType.response)
