@@ -80,6 +80,11 @@ export function processOptions(userOptions, defaultConfigPath) {
     throw new Error(`functional_tests_server: config is required`);
   }
 
+  if (userOptions['kibana-install-dir']) {
+    userOptions.installDir = userOptions['kibana-install-dir'];
+    delete userOptions['kibana-install-dir'];
+  }
+
   function createLogger() {
     const log = createToolingLog(pickLevelFromFlags(userOptions));
     log.pipe(process.stdout);

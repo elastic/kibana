@@ -40,6 +40,10 @@ export const CleanCommand: ICommand = {
       if (await isDirectory(project.targetLocation)) {
         directoriesToDelete.push(project.targetLocation);
       }
+
+      if (await isDirectory(project.optimizeLocation)) {
+        directoriesToDelete.push(project.optimizeLocation);
+      }
     }
 
     if (directoriesToDelete.length === 0) {

@@ -1,0 +1,27 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`dev/i18n/extract_react_messages extractFormattedMessages extracts messages from "<FormattedMessage>" element 1`] = `
+Array [
+  "message-id-2",
+  Object {
+    "context": "Message context 2",
+    "message": "Default message 2",
+  },
+]
+`;
+
+exports[`dev/i18n/extract_react_messages extractIntlMessages extracts messages from "intl.formatMessage" function call 1`] = `
+Array [
+  "message-id-1",
+  Object {
+    "context": "Message context 1",
+    "message": "Default message 1",
+  },
+]
+`;
+
+exports[`dev/i18n/extract_react_messages extractIntlMessages throws if context value is not a string literal 1`] = `"context value should be a string literal (\\"message-id\\")."`;
+
+exports[`dev/i18n/extract_react_messages extractIntlMessages throws if defaultMessage value is not a string literal 1`] = `"defaultMessage value should be a string literal (\\"message-id\\")."`;
+
+exports[`dev/i18n/extract_react_messages extractIntlMessages throws if message id is not a string literal 1`] = `"Message id should be a string literal."`;
