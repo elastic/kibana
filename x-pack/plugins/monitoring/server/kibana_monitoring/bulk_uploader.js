@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { compact, flatten, uniq } from 'lodash';
+import { defaultsDeep, isEmpty, uniq } from 'lodash';
 import { callClusterFactory } from '../../../xpack_main';
 import {
   LOGGING_TAG,
@@ -13,6 +13,7 @@ import {
 import {
   sendBulkPayload,
   monitoringBulk,
+  getKibanaInfoForStats,
 } from './lib';
 
 const LOGGING_TAGS = [LOGGING_TAG, KIBANA_MONITORING_LOGGING_TAG];
@@ -34,7 +35,7 @@ const LOGGING_TAGS = [LOGGING_TAG, KIBANA_MONITORING_LOGGING_TAG];
  * @param {Object} xpackInfo server.plugins.xpack_main.info object
  */
 export class BulkUploader {
-  constructor(server, { interval }) {
+  constructor(server, { kbnServer, interval }) {
     if (typeof interval !== 'number') {
       throw new Error('interval number of milliseconds is required');
     }
@@ -53,6 +54,7 @@ export class BulkUploader {
 
     this._callClusterWithInternalUser = callClusterFactory(server).getCallClusterInternal();
     this._savedObjectsClient = server.savedObjects.getUnscopedSavedObjectsClient(this._callClusterWithInternalUser);
+    this._getKibanaInfoForStats = () => getKibanaInfoForStats(server, kbnServer);
   }
 
   /*
@@ -100,7 +102,7 @@ export class BulkUploader {
       callCluster: this._callClusterWithInternalUser,
       savedObjectsClient: this._savedObjectsClient,
     });
-    const payload = BulkUploader.toBulkUploadFormat(data, collectorSet);
+    const payload = this.toBulkUploadFormat(data, collectorSet);
 
     if (payload) {
       try {
@@ -119,41 +121,36 @@ export class BulkUploader {
     return sendBulkPayload(this._client, this._interval, payload);
   }
 
-  static deepMergeUploadData(uploadData, collectorSet) {
-    const deepMergeAndGroup = collectorSet.bulkFormat(uploadData).reduce((accum, datas) => {
-      for (const data of datas) {
-        accum[data.type] = accum[data.type] || {};
-        for (const key in data.payload) {
-          if (typeof accum[data.type][key] === 'object') {
-            accum[data.type][key] = {
-              ...accum[data.type][key],
-              ...data.payload[key]
-            };
-          } else {
-            accum[data.type][key] = data.payload[key];
-          }
-        }
-      }
-      return accum;
-    }, {});
-
-    return Object.keys(deepMergeAndGroup).reduce((accum, type) => {
-      accum.push([
-        { index: { _type: type } },
-        deepMergeAndGroup[type],
-      ]);
-      return accum;
-    }, []);
-  }
-
   /*
    * Bulk stats are transformed into a bulk upload format
    * Non-legacy transformation is done in CollectorSet.toApiStats
    */
-  static toBulkUploadFormat(uploadData, collectorSet) {
-    if (compact(uploadData).length > 0) {
-      return flatten(BulkUploader.deepMergeUploadData(uploadData, collectorSet));
-    }
+  toBulkUploadFormat(rawData, collectorSet) {
+    // convert the raw data to a nested object by taking each payload through
+    // its formatter, organizing it per-type
+    const typesNested = rawData.reduce((accum, { type, result }) => {
+      if (isEmpty(result)) {
+        return accum;
+      }
+      const { type: uploadType, payload: uploadData } = collectorSet.getCollectorByType(type).formatForBulkUpload(result);
+      return defaultsDeep(accum, { [uploadType]: uploadData });
+    }, {});
+
+    // convert the nested object into a flat array, with each payload prefixed
+    // with an 'index' instruction, for bulk upload
+    const flat = Object.keys(typesNested).reduce((accum, type) => {
+      return [
+        ...accum,
+        { index: { _type: type } },
+        {
+          kibana: this._getKibanaInfoForStats(),
+          interval_ms: this._interval,
+          ...typesNested[type],
+        }
+      ];
+    }, []);
+
+    return flat;
   }
 
   static checkPayloadTypesUnique(payload) {

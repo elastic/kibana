@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { snakeCase, isEmpty } from 'lodash';
+import { snakeCase } from 'lodash';
 import Promise from 'bluebird';
 import { getCollectorLogger } from '../lib';
 import { Collector } from './collector';
@@ -26,7 +26,7 @@ import { UsageCollector } from './usage_collector';
 /*
  * A collector object has types registered into it with the register(type)
  * function. Each type that gets registered defines how to fetch its own data
- * and combine it into a unified payload for bulk upload.
+ * and optionally, how to combine it into a unified payload for bulk upload.
  */
 export class CollectorSet {
 
@@ -92,20 +92,6 @@ export class CollectorSet {
         });
     });
     return Promise.all(fetchPromises);
-  }
-
-  bulkFormat(data) {
-    return data.reduce((accum, { type, result }) => {
-      if (isEmpty(result)) {
-        return accum;
-      }
-
-      const payload = this.getCollectorByType(type).formatForBulkUpload(result);
-      return [
-        ...accum,
-        payload // TODO flatten it here
-      ];
-    }, []);
   }
 
   /*

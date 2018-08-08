@@ -39,16 +39,16 @@ export class Collector {
       throw new Error('Collector must be instantiated with a options.fetch function property');
     }
 
+    this.log = getCollectorLogger(server);
+
     Object.assign(this, options); // spread in other properties and mutate "this"
 
     this.type = type;
     this.init = init;
     this.fetch = fetch;
 
-    const defaultFormatterForBulkUpload = result => [ { type, payload: result } ];
+    const defaultFormatterForBulkUpload = result => ({ type, payload: result });
     this._formatForBulkUpload = formatForBulkUpload || defaultFormatterForBulkUpload;
-
-    this.log = getCollectorLogger(server);
   }
 
   /*
@@ -65,6 +65,11 @@ export class Collector {
     return this.fetch(fetchMechanisms);
   }
 
+  /*
+   * A hook for allowing the fetched data payload to be organized into a typed
+   * data model for internal bulk upload. See defaultFormatterForBulkUpload for
+   * a generic example.
+   */
   formatForBulkUpload(result) {
     return this._formatForBulkUpload(result);
   }
