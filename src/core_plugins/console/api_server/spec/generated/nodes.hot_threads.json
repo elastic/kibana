@@ -1,0 +1,30 @@
+{
+  "nodes.hot_threads": {
+    "url_params": {
+      "interval": "",
+      "snapshots": "10",
+      "threads": "3",
+      "ignore_idle_threads": "__flag__",
+      "type": [
+        "cpu",
+        "wait",
+        "block"
+      ],
+      "timeout": ""
+    },
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "_cluster/nodes/hotthreads",
+      "_cluster/nodes/hot_threads",
+      "_cluster/nodes/{nodes}/hotthreads",
+      "_cluster/nodes/{nodes}/hot_threads",
+      "_nodes/hotthreads",
+      "_nodes/hot_threads",
+      "_nodes/{nodes}/hotthreads",
+      "_nodes/{nodes}/hot_threads"
+    ],
+    "documentation": "http://www.elastic.co/guide/en/elasticsearch/reference/master/cluster-nodes-hot-threads.html"
+  }
+}

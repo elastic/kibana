@@ -1,0 +1,13 @@
+{
+  "name": "@kbn/eslint-plugin-license-header",
+  "version": "1.0.0",
+  "private": true,
+  "license": "Apache-2.0",
+  "peerDependencies": {
+    "eslint": ">=4.0.0",
+    "babel-eslint": "^8.2.1"
+  },
+  "dependencies": {
+    "dedent": "^0.7.0"
+  }
+}

@@ -1,0 +1,19 @@
+@esDarkerGray: #222;
+
+// NOTE: Temporary fix to allow page items to vertically align to the
+// breadcrumbs and tabs. Overrides a UI Framework class
+.page-row {
+  padding: 0 10px;
+  margin: 10px 0;
+}
+
+.monitoring-tooltip__trigger,
+.monitoring-tooltip__trigger:hover {
+  // override code in pivotal-ui/react/tooltip that forces the color to be blue
+  color: @esDarkerGray;
+}
+
+// match style of kbn-tooltip
+.pui-tooltip-inner {
+  font-size: 12px;
+}

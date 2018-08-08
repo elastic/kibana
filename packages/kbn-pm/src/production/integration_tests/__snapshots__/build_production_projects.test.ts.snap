@@ -1,0 +1,86 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`kbn-pm production builds and copies projects for production 1`] = `
+Array [
+  "packages/bar/package.json",
+  "packages/bar/src/index.js",
+  "packages/bar/target/index.js",
+  "packages/bar/yarn.lock",
+  "packages/baz/index.js",
+  "packages/baz/package.json",
+  "packages/foo/package.json",
+  "packages/foo/src/index.js",
+  "packages/foo/target/index.js",
+  "packages/foo/yarn.lock",
+  "packages/quux/index.js",
+  "packages/quux/package.json",
+]
+`;
+
+exports[`kbn-pm production builds and copies projects for production: packages/bar/package.json 1`] = `
+Object {
+  "dependencies": Object {
+    "lodash": "4.17.4",
+  },
+  "devDependencies": Object {
+    "babel-cli": "^6.26.0",
+    "babel-preset-env": "^1.6.1",
+  },
+  "main": "./target/index.js",
+  "name": "@elastic/bar",
+  "private": true,
+  "scripts": Object {
+    "build": "babel --presets env --out-dir target src",
+  },
+  "version": "1.0.0",
+}
+`;
+
+exports[`kbn-pm production builds and copies projects for production: packages/baz/package.json 1`] = `
+Object {
+  "main": "./index.js",
+  "name": "@elastic/baz",
+  "version": "1.0.0",
+}
+`;
+
+exports[`kbn-pm production builds and copies projects for production: packages/foo/package.json 1`] = `
+Object {
+  "dependencies": Object {
+    "@elastic/bar": "file:../bar",
+    "lodash": "4.17.4",
+  },
+  "devDependencies": Object {
+    "babel-cli": "^6.26.0",
+    "babel-preset-env": "^1.6.1",
+    "moment": "2.20.1",
+  },
+  "main": "./target/index.js",
+  "name": "@elastic/foo",
+  "private": true,
+  "scripts": Object {
+    "build": "babel --presets env --out-dir target src",
+  },
+  "version": "1.0.0",
+}
+`;
+
+exports[`kbn-pm production builds and copies projects for production: packages/quux/package.json 1`] = `
+Object {
+  "devDependencies": Object {
+    "shx": "^0.2.2",
+  },
+  "kibana": Object {
+    "build": Object {
+      "intermediateBuildDirectory": "build",
+    },
+  },
+  "main": "./quux.js",
+  "name": "@elastic/quux",
+  "private": true,
+  "scripts": Object {
+    "build": "shx mkdir build; shx cp quux.js build/index.js",
+  },
+  "version": "1.0.0",
+}
+`;

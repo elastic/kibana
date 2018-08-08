@@ -1,18 +1,37 @@
+/*
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
 import expect from 'expect.js';
-import pixelmatch from 'pixelmatch';
-import { KibanaMap } from '../kibana_map';
+import { KibanaMap } from 'ui/vis/map/kibana_map';
 import { GeohashLayer } from '../geohash_layer';
-import { GeoHashSampleData } from './geohash_sample_data';
 import heatmapPng from './heatmap.png';
 import scaledCircleMarkersPng from './scaledCircleMarkers.png';
 import shadedCircleMarkersPng from './shadedCircleMarkers.png';
-import shadedGeohashGridPng from './shadedGeohashGrid.png';
+import { ImageComparator } from 'test_utils/image_comparator';
+import GeoHashSampleData from './dummy_es_response.json';
 
-describe('kibana_map tests', function () {
+describe('geohash_layer', function () {
 
   let domNode;
   let expectCanvas;
   let kibanaMap;
+  let imageComparator;
 
   function setupDOM() {
     domNode = document.createElement('div');
@@ -38,6 +57,7 @@ describe('kibana_map tests', function () {
 
     beforeEach(async function () {
       setupDOM();
+      imageComparator = new ImageComparator();
       kibanaMap = new KibanaMap(domNode, {
         minZoom: 1,
         maxZoom: 10
@@ -50,22 +70,20 @@ describe('kibana_map tests', function () {
     });
 
     afterEach(function () {
+      // return;
       kibanaMap.destroy();
       teardownDOM();
+      imageComparator.destroy();
     });
 
     [
       {
-        options: { mapType: 'Scaled Circle Markers' },
+        options: { mapType: 'Scaled Circle Markers', colorRamp: 'Yellow to Red' },
         expected: scaledCircleMarkersPng
       },
       {
-        options: { mapType: 'Shaded Circle Markers' },
+        options: { mapType: 'Shaded Circle Markers', colorRamp: 'Yellow to Red' },
         expected: shadedCircleMarkersPng
-      },
-      {
-        options: { mapType: 'Shaded Geohash Grid' },
-        expected: shadedGeohashGridPng
       },
       {
         options: {
@@ -78,71 +96,57 @@ describe('kibana_map tests', function () {
       }
     ].forEach(function (test) {
 
-      it(test.options.mapType, function (done) {
+      it(test.options.mapType, async function () {
 
         const geohashGridOptions = test.options;
-        const geohashLayer = new GeohashLayer(GeoHashSampleData, geohashGridOptions, kibanaMap.getZoomLevel(), kibanaMap);
+        const geohashLayer = new GeohashLayer(
+          GeoHashSampleData.featureCollection,
+          GeoHashSampleData.meta, geohashGridOptions, kibanaMap.getZoomLevel(), kibanaMap);
         kibanaMap.addLayer(geohashLayer);
 
-        // Give time for canvas to render before checking output
-        window.setTimeout(() => {
-          // Extract image data from live map
-          const elementList = domNode.querySelectorAll('canvas');
-          expect(elementList.length).to.equal(1);
-          const canvas = elementList[0];
-          const ctx = canvas.getContext('2d');
-          const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+        const elementList = domNode.querySelectorAll('canvas');
+        expect(elementList.length).to.equal(1);
+        const canvas = elementList[0];
 
-          // convert expect PNG into pixel data by drawing in new canvas element
-          expectCanvas.id = 'expectCursor';
-          expectCanvas.width = canvas.width;
-          expectCanvas.height = canvas.height;
-          const imageEl = new Image();
-          imageEl.onload = () => {
-            const expectCtx = expectCanvas.getContext('2d');
-            expectCtx.drawImage(imageEl, 0, 0, canvas.width, canvas.height);  // draw reference image to size of generated image
-            const expectImageData = expectCtx.getImageData(0, 0, canvas.width, canvas.height);
-
-            // compare live map vs expected pixel data
-            const diffImage = expectCtx.createImageData(canvas.width, canvas.height);
-            const mismatchedPixels = pixelmatch(
-              imageData.data,
-              expectImageData.data,
-              diffImage.data,
-              canvas.width,
-              canvas.height,
-              { threshold: 0.1 });
-            expect(mismatchedPixels < 16).to.equal(true);
-            // Display difference image for refernce
-            expectCtx.putImageData(diffImage, 0, 0);
-
-            done();
-          };
-          imageEl.src = test.expected;
-
-          // Instructions for creating expected image PNGs
-          // Comment out imageEl creation and image loading
-          // Comment out teardown line that removes expectCanvas from DOM
-          // Uncomment out below lines. Run test, right click canvas and select "Save Image As"
-          // const expectCtx = expectCanvas.getContext('2d');
-          // expectCtx.putImageData(imageData, 0, 0);
-          // done();
-
-        }, 200);
+        const mismatchedPixels = await imageComparator.compareImage(canvas, test.expected, 0.1);
+        expect(mismatchedPixels).to.be.lessThan(16);
 
       });
     });
 
     it('should not throw when fitting on empty-data layer', function () {
-      const geohashLayer = new GeohashLayer({
-        type: 'FeatureCollection',
-        features: []
-      }, { 'mapType': 'Scaled Circle Markers' }, kibanaMap.getZoomLevel(), kibanaMap);
+      const geohashLayer = new GeohashLayer(
+        {
+          type: 'FeatureCollection',
+          features: []
+        }, {}, { 'mapType': 'Scaled Circle Markers', colorRamp: 'Yellow to Red' }, kibanaMap.getZoomLevel(), kibanaMap);
       kibanaMap.addLayer(geohashLayer);
 
       expect(() => {
         kibanaMap.fitToData();
       }).to.not.throwException();
     });
+
+    it('should not throw when resizing to 0 on heatmap', function () {
+
+      const geohashGridOptions = {
+        mapType: 'Heatmap',
+        heatmap: {
+          heatClusterSize: '2'
+        }
+      };
+
+      const geohashLayer = new GeohashLayer(GeoHashSampleData.featureCollection,
+        GeoHashSampleData.meta, geohashGridOptions, kibanaMap.getZoomLevel(), kibanaMap);
+      kibanaMap.addLayer(geohashLayer);
+      domNode.style.width = 0;
+      domNode.style.height = 0;
+      expect(() => {
+        kibanaMap.resize();
+      }).to.not.throwException();
+
+    });
+
+
   });
 });

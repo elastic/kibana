@@ -1,0 +1,16 @@
+{
+  "cluster.allocation_explain": {
+    "url_params": {
+      "include_yes_decisions": "__flag__",
+      "include_disk_info": "__flag__"
+    },
+    "methods": [
+      "GET",
+      "POST"
+    ],
+    "patterns": [
+      "_cluster/allocation/explain"
+    ],
+    "documentation": "http://www.elastic.co/guide/en/elasticsearch/reference/master/cluster-allocation-explain.html"
+  }
+}

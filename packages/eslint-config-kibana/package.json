@@ -1,11 +1,8 @@
 {
   "name": "@elastic/eslint-config-kibana",
-  "version": "0.13.0",
+  "version": "0.15.0",
   "description": "The eslint config used by the kibana team",
   "main": ".eslintrc.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/elastic/eslint-config-kibana.git"
@@ -18,12 +15,13 @@
   },
   "homepage": "https://github.com/elastic/eslint-config-kibana#readme",
   "peerDependencies": {
-    "babel-eslint": "^7.2.3",
+    "babel-eslint": "^8.0.0",
     "eslint": "^4.1.0",
     "eslint-plugin-babel": "^4.1.1",
     "eslint-plugin-import": "^2.6.0",
     "eslint-plugin-jest": "^21.0.0",
     "eslint-plugin-mocha": "^4.9.0",
+    "eslint-plugin-no-unsanitized": "^3.0.2",
     "eslint-plugin-prefer-object-spread": "^1.2.1",
     "eslint-plugin-react": "^7.1.0"
   }

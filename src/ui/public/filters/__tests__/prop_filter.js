@@ -1,5 +1,24 @@
+/*
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
 import expect from 'expect.js';
-import { propFilter } from 'ui/filters/_prop_filter';
+import { propFilter } from '../_prop_filter';
 
 describe('prop filter', function () {
   let nameFilter;
@@ -24,6 +43,16 @@ describe('prop filter', function () {
     }
     return objects;
   }
+
+  it('returns list when no filters are provided', function () {
+    const objects = getObjects('table', 'table', 'pie');
+    expect(nameFilter(objects)).to.eql(objects);
+  });
+
+  it('returns list when empty list of filters is provided', function () {
+    const objects = getObjects('table', 'table', 'pie');
+    expect(nameFilter(objects, [])).to.eql(objects);
+  });
 
   it('should keep only the tables', function () {
     const objects = getObjects('table', 'table', 'pie');
@@ -54,5 +83,11 @@ describe('prop filter', function () {
     const objects = getObjects('table', 'line', 'pie');
     const line = (value) => value === 'line';
     expect(nameFilter(objects, line)).to.eql(getObjects('line'));
+  });
+
+  it('gracefully handles a filter function with zero arity', function () {
+    const objects = getObjects('table', 'line', 'pie');
+    const rejectEverything = () => false;
+    expect(nameFilter(objects, rejectEverything)).to.eql([]);
   });
 });

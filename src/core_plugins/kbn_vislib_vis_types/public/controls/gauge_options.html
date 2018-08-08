@@ -7,7 +7,7 @@
       <select
         id="gaugeType"
         class="kuiSelect kuiSideBarSelect"
-        ng-model="vis.params.gauge.gaugeType"
+        ng-model="editorState.params.gauge.gaugeType"
         ng-options="mode for mode in collections.gaugeTypes"
       ></select>
     </div>
@@ -18,20 +18,35 @@
       Percentage Mode
     </label>
     <div class="kuiSideBarFormRow__control">
-      <input class="kuiCheckBox" id="percentageMode" type="checkbox" ng-model="vis.params.gauge.percentageMode">
+      <input class="kuiCheckBox" id="percentageMode" type="checkbox" ng-model="editorState.params.gauge.percentageMode">
     </div>
   </div>
 
-  <div class="kuiSideBarFormRow" ng-hide="vis.params.gauge.type === 'simple'">
+  <div class="kuiSideBarFormRow" ng-hide="editorState.params.gauge.type === 'simple'">
     <label class="kuiSideBarFormRow__label" for="verticalSplit">
-      Vertical Split &nbsp;
-      <kbn-info
-        placement="right"
-        info="Shows gauges one under another">
-      </kbn-info>
+      Vertical Split
     </label>
     <div class="kuiSideBarFormRow__control">
-      <input class="kuiCheckBox" id="verticalSplit" type="checkbox" ng-model="vis.params.gauge.verticalSplit">
+      <input class="kuiCheckBox" id="verticalSplit" type="checkbox" ng-model="editorState.params.gauge.verticalSplit">&nbsp;
+      <icon-tip
+        content="'Shows gauges one under another'"
+        position="'right'"
+      ></icon-tip>
+    </div>
+  </div>
+
+  <div class="kuiSideBarFormRow">
+    <label class="kuiSideBarFormRow__label" for="displayWarnings">
+      Display warnings
+    </label>
+
+    <div class="kuiSideBarFormRow__control">
+      <input class="kuiCheckBox" id="displayWarnings" type="checkbox" ng-model="editorState.params.isDisplayWarning">
+      &nbsp;
+      <icon-tip
+        content="'Turns on/off warnings. When turned on, a warning will be shown if not all labels could be displayed.'"
+        position="'right'"
+      ></icon-tip>
     </div>
   </div>
 
@@ -40,7 +55,7 @@
       Show Legend
     </label>
     <div class="kuiSideBarFormRow__control">
-      <input class="kuiCheckBox" id="addLegend" type="checkbox" ng-model="vis.params.addLegend">
+      <input class="kuiCheckBox" id="addLegend" type="checkbox" ng-model="editorState.params.addLegend">
     </div>
   </div>
 
@@ -49,11 +64,11 @@
       Show Labels
     </label>
     <div class="kuiSideBarFormRow__control">
-      <input class="kuiCheckBox" id="showLabels" type="checkbox" ng-model="vis.params.gauge.labels.show">
+      <input class="kuiCheckBox" id="showLabels" type="checkbox" ng-model="editorState.params.gauge.labels.show">
     </div>
   </div>
 
-  <div class="kuiSideBarFormRow" ng-show="vis.params.gauge.labels.show">
+  <div class="kuiSideBarFormRow" ng-show="editorState.params.gauge.labels.show">
     <label class="kuiSideBarFormRow__label" for="subText">
       Sub Text
     </label>
@@ -61,7 +76,7 @@
       <input
         id="subText"
         class="kuiInput kuiSideBarInput"
-        ng-model="vis.params.gauge.style.subText"
+        ng-model="editorState.params.gauge.style.subText"
         type="text"
       >
     </div>
@@ -69,18 +84,19 @@
 
   <div
     class="kuiSideBarFormRow"
-    ng-hide="vis.params.gauge.type === 'simple'"
-    ng-show="vis.params.gauge.colorsRange.length > 1"
+    ng-hide="editorState.params.gauge.type === 'simple'"
+    ng-show="editorState.params.gauge.colorsRange.length > 1"
   >
     <label class="kuiSideBarFormRow__label" for="extendRange">
-      Auto Extend Range &nbsp;
-      <kbn-info
-        placement="right"
-        info="Extends range to the maximum value in your data">
-      </kbn-info>
+      Auto Extend Range
     </label>
     <div class="kuiSideBarFormRow__control">
-      <input class="kuiCheckBox" id="extendRange" type="checkbox" ng-model="vis.params.gauge.extendRange">
+      <input class="kuiCheckBox" id="extendRange" type="checkbox" ng-model="editorState.params.gauge.extendRange">
+      &nbsp;
+      <icon-tip
+        content="'Extends range to the maximum value in your data'"
+        position="'right'"
+      ></icon-tip>
     </div>
   </div>
 
@@ -107,17 +123,17 @@
 
     <div id="gaugeOptionsRanges" ng-show="showColorRange" class="kuiSideBarCollapsibleSection">
       <div class="kuiSideBarSection">
-        <table class="vis-editor-agg-editor-ranges form-group" ng-show="vis.params.gauge.colorsRange.length">
+        <table class="vis-editor-agg-editor-ranges form-group" ng-show="editorState.params.gauge.colorsRange.length">
           <tr>
-            <th>
+            <th scope="col">
               <label id="gaugeOptionsCustomRangeFrom">From</label>
             </th>
-            <th colspan="2">
+            <th scope="col" colspan="2">
               <label id="gaugeOptionsCustomRangeTo">To</label>
             </th>
           </tr>
 
-          <tr ng-repeat="range in vis.params.gauge.colorsRange track by $index">
+          <tr ng-repeat="range in editorState.params.gauge.colorsRange track by $index">
             <td>
               <input
                 aria-labelledby="gaugeOptionsCustomRangeFrom"
@@ -144,7 +160,7 @@
               <button
                 type="button"
                 ng-click="removeRange($index)"
-                ng-show="vis.params.gauge.colorsRange.length > 1"
+                ng-show="editorState.params.gauge.colorsRange.length > 1"
                 class="kuiButton kuiButton--danger kuiButton--small">
                 <i class="fa fa-times"></i>
               </button>
@@ -152,7 +168,7 @@
           </tr>
         </table>
 
-        <div class="hintbox" ng-show="!vis.params.gauge.colorsRange.length">
+        <div class="hintbox" ng-show="!editorState.params.gauge.colorsRange.length">
           <p>
             <i class="fa fa-danger text-danger"></i>
             <strong>Required:</strong> You must specify at least one range.
@@ -164,11 +180,12 @@
           class="kuiButton kuiButton--primary kuiButton--fullWidth">
           Add Range
         </div>
+        <div class="euiSpacer euiSpacer--s"></div>
         <div class="text text-center text-info">Note: colors can be changed in the legend</div>
       </div>
     </div>
   </div>
-  <div ng-show="vis.params.gauge.colorsRange.length > 1">
+  <div ng-show="editorState.params.gauge.colorsRange.length > 1">
     <div class="kuiSideBarCollapsibleTitle">
       <div
         kbn-accessible-click
@@ -201,7 +218,7 @@
             <select
               id="colorSchema"
               class="kuiSelect kuiSideBarSelect"
-              ng-model="vis.params.gauge.colorSchema"
+              ng-model="editorState.params.gauge.colorSchema"
               ng-options="mode for mode in collections.colorSchemas"
             ></select>
           </div>
@@ -213,7 +230,7 @@
             Reverse Color Schema
           </label>
           <div class="kuiSideBarFormRow__control">
-            <input class="kuiCheckBox" id="invertColors" type="checkbox" ng-model="vis.params.gauge.invertColors">
+            <input class="kuiCheckBox" id="invertColors" type="checkbox" ng-model="editorState.params.gauge.invertColors">
           </div>
         </div>
       </div>
@@ -246,13 +263,13 @@
     <div id="gaugeOptionsStyle" ng-if="showStyle" class="kuiSideBarCollapsibleSection">
 
       <div class="kuiSideBarSection">
-        <div ng-hide="vis.params.gauge.type === 'simple'">
-          <div class="kuiSideBarFormRow" ng-show="vis.params.gauge.colorsRange.length > 1">
+        <div ng-hide="editorState.params.gauge.type === 'simple'">
+          <div class="kuiSideBarFormRow" ng-show="editorState.params.gauge.colorsRange.length > 1">
             <label class="kuiSideBarFormRow__label" for="labelColor">
               Color Labels
             </label>
             <div class="kuiSideBarFormRow__control">
-              <input class="kuiCheckBox" id="labelColor" type="checkbox" ng-model="vis.params.gauge.style.labelColor">
+              <input class="kuiCheckBox" id="labelColor" type="checkbox" ng-model="editorState.params.gauge.style.labelColor">
             </div>
           </div>
           <div class="kuiSideBarFormRow">
@@ -260,11 +277,11 @@
               Show Scale
             </label>
             <div class="kuiSideBarFormRow__control">
-              <input class="kuiCheckBox" id="showScale" type="checkbox" ng-model="vis.params.gauge.scale.show">
+              <input class="kuiCheckBox" id="showScale" type="checkbox" ng-model="editorState.params.gauge.scale.show">
             </div>
           </div>
         </div>
-        <div ng-show="vis.params.gauge.type === 'simple'">
+        <div ng-show="editorState.params.gauge.type === 'simple'">
           <div class="kuiSideBarFormRow">
             <label class="kuiSideBarFormRow__label" for="gaugeColorMode">
               Color
@@ -273,7 +290,7 @@
               <select
                 id="gaugeColorMode"
                 class="kuiSelect kuiSideBarSelect"
-                ng-model="vis.params.gauge.gaugeColorMode"
+                ng-model="editorState.params.gauge.gaugeColorMode"
                 ng-options="mode for mode in collections.gaugeColorMode"
               ></select>
             </div>
@@ -286,16 +303,16 @@
               <input
                 id="backTextColor"
                 class="kuiInput kuiSideBarInput"
-                ng-model="vis.params.gauge.style.bgFill"
+                ng-model="editorState.params.gauge.style.bgFill"
               >
             </div>
           </div>
           <div class="kuiSideBarFormRow">
             <label class="kuiSideBarFormRow__label" for="showScale">
-              Font Size (<span ng-bind="vis.params.gauge.style.fontSize"></span>pt)
+              Font Size (<span ng-bind="editorState.params.gauge.style.fontSize"></span>pt)
             </label>
             <div class="kuiSideBarFormRow__control">
-              <input type="range" ng-model="vis.params.gauge.style.fontSize" class="form-control" min="12" max="120" />
+              <input type="range" ng-model="editorState.params.gauge.style.fontSize" class="form-control" min="12" max="120" />
             </div>
           </div>
         </div>

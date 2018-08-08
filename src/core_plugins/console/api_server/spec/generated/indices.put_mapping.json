@@ -1,0 +1,32 @@
+{
+  "put_mapping": {
+    "url_params": {
+      "include_type_name": "",
+      "timeout": "",
+      "master_timeout": "",
+      "ignore_unavailable": "__flag__",
+      "allow_no_indices": "__flag__",
+      "expand_wildcards": [
+        "open",
+        "closed",
+        "none",
+        "all"
+      ]
+    },
+    "methods": [
+      "PUT",
+      "POST"
+    ],
+    "patterns": [
+      "{indices}/{type}/_mapping",
+      "{indices}/_mapping/{type}",
+      "_mapping/{type}",
+      "{indices}/{type}/_mappings",
+      "{indices}/_mappings/{type}",
+      "_mappings/{type}",
+      "{indices}/_mappings",
+      "{indices}/_mapping"
+    ],
+    "documentation": "http://www.elastic.co/guide/en/elasticsearch/reference/master/indices-put-mapping.html"
+  }
+}

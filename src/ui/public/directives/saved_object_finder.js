@@ -1,9 +1,28 @@
+/*
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
 import _ from 'lodash';
 import rison from 'rison-node';
-import { keyMap } from 'ui/utils/key_map';
-import { SavedObjectRegistryProvider } from 'ui/saved_objects/saved_object_registry';
-import { uiModules } from 'ui/modules';
-import savedObjectFinderTemplate from 'ui/partials/saved_object_finder.html';
+import { keyMap } from '../utils/key_map';
+import { SavedObjectRegistryProvider } from '../saved_objects/saved_object_registry';
+import { uiModules } from '../modules';
+import savedObjectFinderTemplate from '../partials/saved_object_finder.html';
 
 const module = uiModules.get('kibana');
 
@@ -262,15 +281,21 @@ module.directive('savedObjectFinder', function ($location, $injector, kbnUrl, Pr
         if (prevSearch === filter) return;
 
         prevSearch = filter;
+
+        const isLabsEnabled = config.get('visualize:enableLabs');
         self.service.find(filter)
-        .then(function (hits) {
-          // ensure that we don't display old results
-          // as we can't really cancel requests
-          if (currentFilter === filter) {
-            self.hitCount = hits.total;
-            self.hits = _.sortBy(hits.hits, 'title');
-          }
-        });
+          .then(function (hits) {
+
+            hits.hits = hits.hits.filter((hit) => (isLabsEnabled || _.get(hit, 'type.stage') !== 'lab'));
+            hits.total = hits.hits.length;
+
+            // ensure that we don't display old results
+            // as we can't really cancel requests
+            if (currentFilter === filter) {
+              self.hitCount = hits.total;
+              self.hits = _.sortBy(hits.hits, 'title');
+            }
+          });
       }
     }
   };

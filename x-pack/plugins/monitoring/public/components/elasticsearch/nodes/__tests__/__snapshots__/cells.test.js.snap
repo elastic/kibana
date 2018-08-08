@@ -1,0 +1,75 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Node Listing Metric Cell should format N/A as the metric for an offline node 1`] = `
+<td
+  class="kuiTableRowCell"
+>
+  <div
+    class="kuiTableRowCell__liner"
+  >
+    <div
+      class="monitoringTableCell__number monitoringTableCell__offline"
+    >
+      N/A
+    </div>
+  </div>
+</td>
+`;
+
+exports[`Node Listing Metric Cell should format a non-percentage metric 1`] = `
+<td
+  class="kuiTableRowCell"
+>
+  <div
+    class="kuiTableRowCell__liner"
+  >
+    <div
+      class="monitoringTableCell__MetricCell__metric"
+    >
+      206.3 GB
+    </div>
+    <span
+      class="monitoringTableCell__MetricCell__slopeArrow fa fa-long-arrow-down"
+    />
+    <div
+      class="monitoringTableCell__MetricCell__minMax"
+    >
+      <div>
+        206.5 GB max
+      </div>
+      <div>
+        206.3 GB min
+      </div>
+    </div>
+  </div>
+</td>
+`;
+
+exports[`Node Listing Metric Cell should format a percentage metric 1`] = `
+<td
+  class="kuiTableRowCell"
+>
+  <div
+    class="kuiTableRowCell__liner"
+  >
+    <div
+      class="monitoringTableCell__MetricCell__metric"
+    >
+      0%
+    </div>
+    <span
+      class="monitoringTableCell__MetricCell__slopeArrow fa fa-long-arrow-down"
+    />
+    <div
+      class="monitoringTableCell__MetricCell__minMax"
+    >
+      <div>
+        2% max
+      </div>
+      <div>
+        0% min
+      </div>
+    </div>
+  </div>
+</td>
+`;

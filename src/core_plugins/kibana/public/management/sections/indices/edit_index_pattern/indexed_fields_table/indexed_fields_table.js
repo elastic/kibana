@@ -1,92 +1,114 @@
-import _ from 'lodash';
-import 'ui/paginated_table';
-import fieldNameHtml from './field_name.html';
-import fieldTypeHtml from './field_type.html';
-import fieldControlsHtml from '../field_controls.html';
-import { uiModules } from 'ui/modules';
-import { FieldWildcardProvider } from 'ui/field_wildcard';
-import template from './indexed_fields_table.html';
+/*
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
 
-uiModules.get('apps/management')
-.directive('indexedFieldsTable', function (Private, $filter) {
-  const yesTemplate = '<i class="fa fa-check" aria-label="yes"></i>';
-  const noTemplate = '';
-  const filter = $filter('filter');
-  const { fieldWildcardMatcher } = Private(FieldWildcardProvider);
+import React, { Component } from 'react';
+import PropTypes from 'prop-types';
+import { createSelector } from 'reselect';
 
-  return {
-    restrict: 'E',
-    template,
-    scope: true,
-    link: function ($scope) {
-      const rowScopes = []; // track row scopes, so they can be destroyed as needed
-      $scope.perPage = 25;
-      $scope.columns = [
-        { title: 'name' },
-        { title: 'type' },
-        { title: 'format' },
-        { title: 'searchable', info: 'These fields can be used in the filter bar' },
-        { title: 'aggregatable', info: 'These fields can be used in visualization aggregations' },
-        { title: 'excluded', info: 'Fields that are excluded from _source when it is fetched' },
-        { title: 'controls', sortable: false }
-      ];
+import { Table } from './components/table';
+import {
+  getFieldFormat
+} from './lib';
 
-      $scope.$watchMulti(['[]indexPattern.fields', 'fieldFilter', 'indexedFieldTypeFilter'], refreshRows);
+import { I18nProvider } from '@kbn/i18n/react';
 
-      function refreshRows() {
-        // clear and destroy row scopes
-        _.invoke(rowScopes.splice(0), '$destroy');
-        const fields = filter($scope.indexPattern.getNonScriptedFields(), {
-          name: $scope.fieldFilter,
-          type: $scope.indexedFieldTypeFilter
-        });
-        const sourceFilters = $scope.indexPattern.sourceFilters && $scope.indexPattern.sourceFilters.map(f => f.value) || [];
-        const fieldWildcardMatch = fieldWildcardMatcher(sourceFilters);
-        _.find($scope.editSections, { index: 'indexedFields' }).count = fields.length; // Update the tab count
+export class IndexedFieldsTable extends Component {
+  static propTypes = {
+    fields: PropTypes.array.isRequired,
+    indexPattern: PropTypes.object.isRequired,
+    fieldFilter: PropTypes.string,
+    indexedFieldTypeFilter: PropTypes.string,
+    helpers: PropTypes.shape({
+      redirectToRoute: PropTypes.func.isRequired,
+    }),
+    fieldWildcardMatcher: PropTypes.func.isRequired,
+  }
 
-        $scope.rows = fields.map(function (field) {
-          const childScope = _.assign($scope.$new(), { field: field });
-          rowScopes.push(childScope);
+  constructor(props) {
+    super(props);
 
-          const excluded = fieldWildcardMatch(field.name);
+    this.state = {
+      fields: this.mapFields(this.props.fields)
+    };
+  }
 
-          return [
-            {
-              markup: fieldNameHtml,
-              scope: childScope,
-              value: field.displayName,
-              attr: {
-                'data-test-subj': 'indexedFieldName'
-              }
-            },
-            {
-              markup: fieldTypeHtml,
-              scope: childScope,
-              value: field.type,
-              attr: {
-                'data-test-subj': 'indexedFieldType'
-              }
-            },
-            _.get($scope.indexPattern, ['fieldFormatMap', field.name, 'type', 'title']),
-            {
-              markup: field.searchable ? yesTemplate : noTemplate,
-              value: field.searchable
-            },
-            {
-              markup: field.aggregatable ? yesTemplate : noTemplate,
-              value: field.aggregatable
-            },
-            {
-              markup: excluded ? yesTemplate : noTemplate,
-              value: excluded
-            },
-            {
-              markup: fieldControlsHtml,
-              scope: childScope
-            }
-          ];
-        });
-      }
+  componentWillReceiveProps(nextProps) {
+    if (nextProps.fields !== this.props.fields) {
+      this.setState({
+        fields: this.mapFields(nextProps.fields)
+      });
     }
-  };
-});
+  }
+
+  mapFields(fields) {
+    const { indexPattern, fieldWildcardMatcher } = this.props;
+    const sourceFilters = indexPattern.sourceFilters && indexPattern.sourceFilters.map(f => f.value);
+    const fieldWildcardMatch = fieldWildcardMatcher(sourceFilters || []);
+
+    return fields && fields
+      .map((field) => {
+        return {
+          ...field,
+          displayName: field.displayName,
+          routes: field.routes,
+          indexPattern: field.indexPattern,
+          format: getFieldFormat(indexPattern, field.name),
+          excluded: fieldWildcardMatch ? fieldWildcardMatch(field.name) : false,
+        };
+      }) || [];
+  }
+
+  getFilteredFields = createSelector(
+    (state) => state.fields,
+    (state, props) => props.fieldFilter,
+    (state, props) => props.indexedFieldTypeFilter,
+    (fields, fieldFilter, indexedFieldTypeFilter) => {
+      if (fieldFilter) {
+        const normalizedFieldFilter = fieldFilter.toLowerCase();
+        fields = fields.filter(field => field.name.toLowerCase().includes(normalizedFieldFilter));
+      }
+
+      if (indexedFieldTypeFilter) {
+        fields = fields.filter(field => field.type === indexedFieldTypeFilter);
+      }
+
+      return fields;
+    }
+  );
+
+  render() {
+    const {
+      indexPattern,
+    } = this.props;
+
+    const fields = this.getFilteredFields(this.state, this.props);
+
+    return (
+      <I18nProvider>
+        <div>
+          <Table
+            indexPattern={indexPattern}
+            items={fields}
+            editField={field => this.props.helpers.redirectToRoute(field, 'edit')}
+          />
+        </div>
+      </I18nProvider>
+    );
+  }
+}

@@ -10,14 +10,14 @@ Before you can use an external library with Kibana you have to install it. You
 do that using...
 
 [float]
-==== npm (preferred method)
+==== yarn (preferred method)
 
 Once you've http://npmsearch.com[found] a dependency you want to add, you can
 install it like so:
 
 ["source","shell"]
 -----------
-npm install --save some-neat-library
+yarn add some-neat-library
 -----------
 
 At the top of a javascript file, just import the library using it's name:
@@ -28,13 +28,13 @@ import someNeatLibrary from 'some-neat-library';
 -----------
 
 Just like working in node.js, front-end code can require node modules installed
-by npm without any additional configuration.
+by yarn without any additional configuration.
 
 [float]
 ==== webpackShims
 
 When a library you want to use does use es6 or common.js modules but is not
-available on npm, you can copy the source of the library into a webpackShim.
+available with yarn, you can copy the source of the library into a webpackShim.
 
 ["source","shell"]
 -----------
@@ -97,7 +97,7 @@ module.exports = window.angular;
 What this shim does is fairly simple if you go line by line:
 
 . makes sure that jQuery is loaded before angular (which actually runs the shim above)
-. load the angular.js file from the npm installation
+. load the angular.js file from the node_modules directory
 . load the angular-elastic plugin, a plugin we want to always be included whenever we import angular
 . use the `ui/modules` module to add the module exported by angular-elastic as a dependency to the `kibana` angular module
 . finally, export the window.angular variable. This means that writing `import angular from 'angular';` will properly set the angular variable to the angular library, rather than undefined which is the default behavior.

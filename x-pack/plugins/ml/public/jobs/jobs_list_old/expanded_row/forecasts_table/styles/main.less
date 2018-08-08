@@ -1,0 +1,44 @@
+ml-forecasts-table {
+ .euiTable {
+   // Remove this whole block when Jobs List is all EUI.
+   font-size: 12px;
+
+    th {
+      span {
+        font-size: 12px;
+        font-family: "Open Sans", "Lato", "Helvetica Neue", Helvetica, Arial;
+        font-weight: bold;
+      }
+
+    }
+
+    tr {
+      td {
+        .euiTableCellContent {
+          padding-top: 4px;
+          padding-bottom: 4px;
+        }
+      }
+    }
+  }
+
+  table tr th:last-child,
+  table tr td:last-child {
+    width: 60px;
+  }
+
+
+  .view-forecast-btn {
+    width: 35px;
+    min-width: 35px;
+    height: 24px;
+
+    .euiButton__content {
+      padding: 0px 8px;
+    }
+  }
+
+  .euiLink {
+    font-family: inherit;
+  }
+}

@@ -1,16 +1,37 @@
+/*
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
 import { uiModules } from 'ui/modules';
-import _ from 'lodash';
+import { createLegacyClass } from 'ui/utils/legacy_class';
+import { SavedObjectProvider } from 'ui/courier';
 const module = uiModules.get('app/timelion');
 
 // Used only by the savedSheets service, usually no reason to change this
-module.factory('SavedSheet', function (courier, config) {
+module.factory('SavedSheet', function (Private, config) {
 
   // SavedSheet constructor. Usually you'd interact with an instance of this.
   // ID is option, without it one will be generated on save.
-  _.class(SavedSheet).inherits(courier.SavedObject);
+  const SavedObject = Private(SavedObjectProvider);
+  createLegacyClass(SavedSheet).inherits(SavedObject);
   function SavedSheet(id) {
     // Gives our SavedSheet the properties of a SavedObject
-    courier.SavedObject.call(this, {
+    SavedObject.call(this, {
       type: SavedSheet.type,
       mapping: SavedSheet.mapping,
 
@@ -30,6 +51,8 @@ module.factory('SavedSheet', function (courier, config) {
         version: 1,
       }
     });
+
+    this.showInRecentlyAccessed = true;
   }
 
   // save these objects with the 'sheet' type
@@ -51,6 +74,10 @@ module.factory('SavedSheet', function (courier, config) {
 
   // Order these fields to the top, the rest are alphabetical
   SavedSheet.fieldOrder = ['title', 'description'];
+
+  SavedSheet.prototype.getFullPath = function () {
+    return `/app/timelion#/${this.id}`;
+  };
 
   return SavedSheet;
 });

@@ -1,0 +1,117 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`get metric aggs should create aggregations for "basic" metrics 1`] = `
+Object {
+  "node_cpu_utilization": Object {
+    "aggs": Object {
+      "metric": Object {
+        "max": Object {
+          "field": "node_stats.process.cpu.percent",
+        },
+      },
+      "metric_deriv": Object {
+        "derivative": Object {
+          "buckets_path": "metric",
+          "unit": "1s",
+        },
+      },
+    },
+    "date_histogram": Object {
+      "field": "timestamp",
+      "interval": "30s",
+      "min_doc_count": 1,
+    },
+  },
+  "node_jvm_mem_percent": Object {
+    "aggs": Object {
+      "metric": Object {
+        "max": Object {
+          "field": "node_stats.jvm.mem.heap_used_percent",
+        },
+      },
+      "metric_deriv": Object {
+        "derivative": Object {
+          "buckets_path": "metric",
+          "unit": "1s",
+        },
+      },
+    },
+    "date_histogram": Object {
+      "field": "timestamp",
+      "interval": "30s",
+      "min_doc_count": 1,
+    },
+  },
+}
+`;
+
+exports[`get metric aggs should incorporate a metric custom aggs 1`] = `
+Object {
+  "node_index_latency": Object {
+    "aggs": Object {
+      "event_time_in_millis": Object {
+        "max": Object {
+          "field": "node_stats.indices.indexing.index_time_in_millis",
+        },
+      },
+      "event_time_in_millis_deriv": Object {
+        "derivative": Object {
+          "buckets_path": "event_time_in_millis",
+          "gap_policy": "skip",
+          "unit": "1s",
+        },
+      },
+      "event_total": Object {
+        "max": Object {
+          "field": "node_stats.indices.indexing.index_total",
+        },
+      },
+      "event_total_deriv": Object {
+        "derivative": Object {
+          "buckets_path": "event_total",
+          "gap_policy": "skip",
+          "unit": "1s",
+        },
+      },
+    },
+    "date_histogram": Object {
+      "field": "timestamp",
+      "interval": "30s",
+      "min_doc_count": 1,
+    },
+  },
+  "node_query_latency": Object {
+    "aggs": Object {
+      "event_time_in_millis": Object {
+        "max": Object {
+          "field": "node_stats.indices.search.query_time_in_millis",
+        },
+      },
+      "event_time_in_millis_deriv": Object {
+        "derivative": Object {
+          "buckets_path": "event_time_in_millis",
+          "gap_policy": "skip",
+          "unit": "1s",
+        },
+      },
+      "event_total": Object {
+        "max": Object {
+          "field": "node_stats.indices.search.query_total",
+        },
+      },
+      "event_total_deriv": Object {
+        "derivative": Object {
+          "buckets_path": "event_total",
+          "gap_policy": "skip",
+          "unit": "1s",
+        },
+      },
+    },
+    "date_histogram": Object {
+      "field": "timestamp",
+      "interval": "30s",
+      "min_doc_count": 1,
+    },
+  },
+}
+`;

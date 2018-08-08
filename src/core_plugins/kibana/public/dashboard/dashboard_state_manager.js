@@ -1,3 +1,22 @@
+/*
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
 import _ from 'lodash';
 import moment from 'moment';
 
@@ -5,56 +24,68 @@ import { DashboardViewMode } from './dashboard_view_mode';
 import { FilterUtils } from './lib/filter_utils';
 import { PanelUtils } from './panel/panel_utils';
 import { store } from '../store';
-import { updateViewMode, updatePanels, updateIsFullScreenMode, minimizePanel } from './actions';
+import {
+  updateViewMode,
+  setPanels,
+  updateUseMargins,
+  updateIsFullScreenMode,
+  minimizePanel,
+  updateTitle,
+  updateDescription,
+  updateHidePanelTitles,
+  updateTimeRange,
+  clearStagedFilters,
+  updateFilters,
+  updateQuery,
+} from './actions';
 import { stateMonitorFactory } from 'ui/state_management/state_monitor_factory';
-import { createPanelState, getPersistedStateId } from './panel';
-import { getAppStateDefaults } from './lib';
+import { createPanelState } from './panel';
+import { getAppStateDefaults, migrateAppState } from './lib';
 import {
   getViewMode,
   getFullScreenMode,
   getPanels,
   getPanel,
+  getTitle,
+  getDescription,
+  getUseMargins,
+  getHidePanelTitles,
+  getStagedFilters,
+  getEmbeddables,
+  getEmbeddableMetadata,
+  getQuery,
+  getFilters,
 } from '../selectors';
 
 /**
  * Dashboard state manager handles connecting angular and redux state between the angular and react portions of the
- * app. There are two "sources of truth" that need to stay in sync - AppState and the Store. They aren't complete
- * duplicates of each other as AppState has state that the Store doesn't, and vice versa.
- *
- * State that is only stored in AppState:
- *  - title
- *  - description
- *  - timeRestore
- *  - query
- *  - uiState
- *  - filters
- *
- * State that is only stored in the Store:
- *  - embeddables
- *  - maximizedPanelId
- *
- * State that is shared and needs to be synced:
- * - fullScreenMode - changes only propagate from AppState -> Store
- * - viewMode - changes only propagate from AppState -> Store
- * - panels - changes propagate from AppState -> Store and from Store -> AppState.
- *
- *
+ * app. There are two "sources of truth" that need to stay in sync - AppState (aka the `_a` portion of the url) and
+ * the Store. They aren't complete duplicates of each other as AppState has state that the Store doesn't, and vice
+ * versa. They should be as decoupled as possible so updating the store won't affect bwc of urls.
  */
 export class DashboardStateManager {
   /**
    *
-   * @param savedDashboard {SavedDashboard}
-   * @param AppState {AppState} The AppState class to use when instantiating a new AppState instance.
-   * @param hideWriteControls {boolean} true if write controls should be hidden.
+   * @param {SavedDashboard} savedDashboard
+   * @param {AppState} AppState The AppState class to use when instantiating a new AppState instance.
+   * @param {boolean} hideWriteControls true if write controls should be hidden.
+   * @param {function} addFilter a function that can be used to add a filter bar filter
    */
-  constructor(savedDashboard, AppState, hideWriteControls) {
+  constructor({ savedDashboard, AppState, hideWriteControls, addFilter }) {
     this.savedDashboard = savedDashboard;
     this.hideWriteControls = hideWriteControls;
+    this.addFilter = addFilter;
 
     this.stateDefaults = getAppStateDefaults(this.savedDashboard, this.hideWriteControls);
 
     this.appState = new AppState(this.stateDefaults);
-    this.uiState = this.appState.makeStateful('uiState');
+
+    // Initializing appState does two things - first it translates the defaults into AppState, second it updates
+    // appState based on the URL (the url trumps the defaults). This means if we update the state format at all and
+    // want to handle BWC, we must not only migrate the data stored with saved Dashboard, but also any old state in the
+    // url.
+    migrateAppState(this.appState);
+
     this.isDirty = false;
 
     // We can't compare the filters stored on this.appState to this.savedDashboard because in order to apply
@@ -67,13 +98,12 @@ export class DashboardStateManager {
     this.panelIndexPatternMapping = {};
 
     PanelUtils.initPanelIndexes(this.getPanels());
+
     this.createStateMonitor();
 
     // Always start out with all panels minimized when a dashboard is first loaded.
     store.dispatch(minimizePanel());
-    store.dispatch(updatePanels(this.getPanels()));
-    store.dispatch(updateViewMode(this.getViewMode()));
-    store.dispatch(updateIsFullScreenMode(this.getFullScreenMode()));
+    this._pushAppStateChangesToStore();
 
     this.changeListeners = [];
 
@@ -90,18 +120,33 @@ export class DashboardStateManager {
 
   _areStoreAndAppStatePanelsEqual() {
     const state = store.getState();
-    // We need to run this comparison check or we can enter an infinite loop.
-    let differencesFound = false;
-    for (let i = 0; i < this.appState.panels.length; i++) {
-      const appStatePanel = this.appState.panels[i];
-      const storePanel = getPanel(state, appStatePanel.panelIndex);
-      if (!_.isEqual(appStatePanel, storePanel)) {
-        differencesFound = true;
-        break;
-      }
+    const storePanels = getPanels(store.getState());
+    const appStatePanels = this.getPanels();
+
+    if (Object.values(storePanels).length !== appStatePanels.length) {
+      return false;
     }
 
-    return !differencesFound;
+    return appStatePanels.every((appStatePanel) => {
+      const storePanel = getPanel(state, appStatePanel.panelIndex);
+      return _.isEqual(appStatePanel, storePanel);
+    });
+  }
+
+  /**
+   * Time is part of global state so we need to deal with it outside of _pushAppStateChangesToStore.
+   * @param {String|Object} newTimeFilter.to -- either a string representing an absolute time in utc format,
+   * or a relative time (now-15m), or a moment object
+   * @param {String|Object} newTimeFilter.from - either a string representing an absolute or a relative time, or a
+   * moment object
+   * @param {String} newTimeFilter.mode
+   */
+  handleTimeChange(newTimeFilter) {
+    store.dispatch(updateTimeRange({
+      from: FilterUtils.convertTimeToUTCString(newTimeFilter.from),
+      to: FilterUtils.convertTimeToUTCString(newTimeFilter.to),
+      mode: newTimeFilter.mode,
+    }));
   }
 
   /**
@@ -112,35 +157,104 @@ export class DashboardStateManager {
     // We need these checks, or you can get into a loop where a change is triggered by the store, which updates
     // AppState, which then dispatches the change here, which will end up triggering setState warnings.
     if (!this._areStoreAndAppStatePanelsEqual()) {
-      store.dispatch(updatePanels(this.getPanels()));
+      // Translate appState panels data into the data expected by redux, copying the panel objects as we do so
+      // because the panels inside appState can be mutated, while redux state should never be mutated directly.
+      const panelsMap = this.getPanels().reduce((acc, panel) => {
+        acc[panel.panelIndex] = _.cloneDeep(panel);
+        return acc;
+      }, {});
+      store.dispatch(setPanels(panelsMap));
     }
 
     const state = store.getState();
+
+    if (getTitle(state) !== this.getTitle()) {
+      store.dispatch(updateTitle(this.getTitle()));
+    }
+
+    if (getDescription(state) !== this.getDescription()) {
+      store.dispatch(updateDescription(this.getDescription()));
+    }
+
     if (getViewMode(state) !== this.getViewMode()) {
       store.dispatch(updateViewMode(this.getViewMode()));
+    }
+
+    if (getUseMargins(state) !== this.getUseMargins()) {
+      store.dispatch(updateUseMargins(this.getUseMargins()));
+    }
+
+    if (getHidePanelTitles(state) !== this.getHidePanelTitles()) {
+      store.dispatch(updateHidePanelTitles(this.getHidePanelTitles()));
     }
 
     if (getFullScreenMode(state) !== this.getFullScreenMode()) {
       store.dispatch(updateIsFullScreenMode(this.getFullScreenMode()));
     }
+
+    if (getTitle(state) !== this.getTitle()) {
+      store.dispatch(updateTitle(this.getTitle()));
+    }
+
+    if (getDescription(state) !== this.getDescription()) {
+      store.dispatch(updateDescription(this.getDescription()));
+    }
+
+    if (getQuery(state) !== this.getQuery()) {
+      store.dispatch(updateQuery(this.getQuery()));
+    }
+
+    this._pushFiltersToStore();
+  }
+
+  _pushFiltersToStore() {
+    const state = store.getState();
+    const dashboardFilters = this.getDashboardFilterBars();
+    if (!_.isEqual(
+      FilterUtils.cleanFiltersForComparison(dashboardFilters),
+      FilterUtils.cleanFiltersForComparison(getFilters(state))
+    )) {
+      store.dispatch(updateFilters(dashboardFilters));
+    }
   }
 
   _handleStoreChanges() {
-    if (this._areStoreAndAppStatePanelsEqual()) {
-      return;
+    let dirty = false;
+    if (!this._areStoreAndAppStatePanelsEqual()) {
+      const panels = getPanels(store.getState());
+      this.appState.panels = [];
+      this.panelIndexPatternMapping = {};
+      Object.values(panels).map(panel => {
+        this.appState.panels.push(_.cloneDeep(panel));
+      });
+      dirty = true;
     }
 
-    const state = store.getState();
-    // The only state that the store deals with that appState cares about is the panels array. Every other state change
-    // (that appState cares about) is initiated from appState (e.g. view mode).
-    this.appState.panels = [];
-    _.map(getPanels(state), panel => {
-      this.appState.panels.push(panel);
+    _.forEach(getEmbeddables(store.getState()), (embeddable, panelId) => {
+      if (embeddable.initialized && !this.panelIndexPatternMapping.hasOwnProperty(panelId)) {
+        const indexPattern = getEmbeddableMetadata(store.getState(), panelId).indexPattern;
+        if (indexPattern) {
+          this.panelIndexPatternMapping[panelId] = indexPattern;
+          this.dirty = true;
+        }
+      }
     });
 
-    this.changeListeners.forEach(function (listener) {
-      return listener({ dirty: true, clean: false });
+    const stagedFilters = getStagedFilters(store.getState());
+    stagedFilters.forEach(filter => {
+      this.addFilter(filter);
     });
+    if (stagedFilters.length > 0) {
+      this.saveState();
+      store.dispatch(clearStagedFilters());
+    }
+
+    const fullScreen = getFullScreenMode(store.getState());
+    if (fullScreen !== this.getFullScreenMode()) {
+      this.setFullScreenMode(fullScreen);
+    }
+
+    this.changeListeners.forEach(listener => listener({ dirty }));
     this.saveState();
   }
 
@@ -151,12 +265,6 @@ export class DashboardStateManager {
   setFullScreenMode(fullScreenMode) {
     this.appState.fullScreenMode = fullScreenMode;
     this.saveState();
-  }
-
-  registerPanelIndexPatternMap(panelIndex, indexPattern) {
-    if (indexPattern) {
-      this.panelIndexPatternMapping[panelIndex] = indexPattern;
-    }
   }
 
   getPanelIndexPatterns() {
@@ -231,6 +339,25 @@ export class DashboardStateManager {
 
   getQuery() {
     return this.appState.query;
+  }
+
+  getUseMargins() {
+    // Existing dashboards that don't define this should default to false.
+    return this.appState.options.useMargins === undefined ? false : this.appState.options.useMargins;
+  }
+
+  setUseMargins(useMargins) {
+    this.appState.options.useMargins = useMargins;
+    this.saveState();
+  }
+
+  getHidePanelTitles() {
+    return this.appState.options.hidePanelTitles;
+  }
+
+  setHidePanelTitles(hidePanelTitles) {
+    this.appState.options.hidePanelTitles = hidePanelTitles;
+    this.saveState();
   }
 
   getDarkTheme() {
@@ -311,8 +438,8 @@ export class DashboardStateManager {
    */
   getTimeChanged(timeFilter) {
     return (
-      !FilterUtils.areTimesEqual(this.lastSavedDashboardFilters.timeFrom, timeFilter.time.from) ||
-      !FilterUtils.areTimesEqual(this.lastSavedDashboardFilters.timeTo, timeFilter.time.to)
+      !FilterUtils.areTimesEqual(this.lastSavedDashboardFilters.timeFrom, timeFilter.getTime().from) ||
+      !FilterUtils.areTimesEqual(this.lastSavedDashboardFilters.timeTo, timeFilter.getTime().to)
     );
   }
 
@@ -365,7 +492,7 @@ export class DashboardStateManager {
    * @param {number} id
    * @param {string} type
    */
-  addNewPanel(id, type) {
+  addNewPanel = (id, type) => {
     const maxPanelIndex = PanelUtils.getMaxPanelIndex(this.getPanels());
     const newPanel = createPanelState(id, type, maxPanelIndex, this.getPanels());
     this.getPanels().push(newPanel);
@@ -375,7 +502,6 @@ export class DashboardStateManager {
   removePanel(panelIndex) {
     _.remove(this.getPanels(), (panel) => {
       if (panel.panelIndex === panelIndex) {
-        this.uiState.removeChild(getPersistedStateId(panel));
         delete this.panelIndexPatternMapping[panelIndex];
         return true;
       } else {
@@ -414,7 +540,9 @@ export class DashboardStateManager {
 
   /**
    * Updates timeFilter to match the time saved with the dashboard.
-   * @param timeFilter
+   * @param {Object} timeFilter
+   * @param {func} timeFilter.setTime
+   * @param {func} timeFilter.setRefreshInterval
    * @param quickTimeRanges
    */
   syncTimefilterWithDashboard(timeFilter, quickTimeRanges) {
@@ -422,20 +550,25 @@ export class DashboardStateManager {
       throw new Error('The time is not saved with this dashboard so should not be synced.');
     }
 
-    timeFilter.time.to = this.savedDashboard.timeTo;
-    timeFilter.time.from = this.savedDashboard.timeFrom;
+    let mode;
     const isMoment = moment(this.savedDashboard.timeTo).isValid();
     if (isMoment) {
-      timeFilter.time.mode = 'absolute';
+      mode = 'absolute';
     } else {
       const quickTime = _.find(
         quickTimeRanges,
         (timeRange) => timeRange.from === this.savedDashboard.timeFrom && timeRange.to === this.savedDashboard.timeTo);
 
-      timeFilter.time.mode = quickTime ? 'quick' : 'relative';
+      mode = quickTime ? 'quick' : 'relative';
     }
+    timeFilter.setTime({
+      from: this.savedDashboard.timeFrom,
+      to: this.savedDashboard.timeTo,
+      mode
+    });
+
     if (this.savedDashboard.refreshInterval) {
-      timeFilter.refreshInterval = this.savedDashboard.refreshInterval;
+      timeFilter.setRefreshInterval(this.savedDashboard.refreshInterval);
     }
   }
 
@@ -452,9 +585,11 @@ export class DashboardStateManager {
    */
   applyFilters(query, filters) {
     this.appState.query = query;
-    this.savedDashboard.searchSource.set('query', query);
-    this.savedDashboard.searchSource.set('filter', filters);
+    this.savedDashboard.searchSource.setField('query', query);
+    this.savedDashboard.searchSource.setField('filter', filters);
     this.saveState();
+    // pinned filters go on global state, therefore are not propagated to store via app state and have to be pushed manually.
+    this._pushFiltersToStore();
   }
 
   /**

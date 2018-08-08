@@ -1,0 +1,152 @@
+@primary: #0d5a77;
+@replica: #5698ab;
+@relocating: #663db8;
+@initializing: #5c71ce;
+@unassigned: @esGray;
+@unassignedPrimary: @esRed;
+
+@esBlack: #232123;
+@esDarkGray: #666977;
+@esGray: #A3A5AD;
+@esLightGray: #D1D2D6;
+@esRed: #E74C3C;
+@esVeryLightGray: #EFF0F1;
+@esYellow: #F3BC18;
+
+monitoring-shard-allocation {
+  display: block;
+  border-top: 8px solid @esVeryLightGray;
+}
+
+.monitoring-cluster-view-title {
+  font-size: 20px;
+  margin: 0;
+}
+
+.monitoring-cluster-view {
+  cluster-view {
+    display: block;
+  }
+  .parent {
+    padding-top: 14px;
+    border-left: 3px solid @esGreen !important;
+    &.red {
+      border-left: 3px solid @esRed !important;
+    }
+    &.yellow {
+      border-left: 3px solid @esYellow !important;
+    }
+  }
+  td.unassigned {
+    vertical-align: middle;
+    width: 150px;
+  }
+  .children {
+    display: flex;
+    flex-flow: row wrap;
+  }
+  .child {
+    display: flex;
+    align-self: center;
+    &.index {
+      border-left: 4px solid @esGreen;
+      &.red {
+        border-left: 4px solid @esRed;
+      }
+      &.yellow {
+        border-left: 4px solid @esYellow;
+      }
+    }
+    background-color: @esDarkGray;
+    margin: 5px;
+    .title {
+      padding: 5px 7px;
+      float: left;
+      text-align: center;
+      font-size: 12px;
+      font: 10px sans-serif;
+      color: @white;
+      a {
+        color: @white;
+        text-decoration: none;
+      }
+      i {
+        margin-left: 5px;
+      }
+    }
+    &.unassigned {
+      .title {
+        color: #999;
+        display: none;
+      }
+    }
+  }
+
+  th {
+    text-align: left;
+  }
+
+  td:first-child {
+    width: 200px;
+  }
+
+  .shard {
+    align-self: center;
+    padding: 5px 7px;
+    background-color: @primary;
+    font: 10px sans-serif;
+    border-left: 1px solid @white;
+    position: relative;
+    color: @white;
+
+    .shard-tooltip {
+      padding: 5px;
+      bottom: 25px;
+      left: 0;
+      background-color: @esLightGray;
+      position: absolute;
+      color: @esDarkGray;
+      border: 1px solid @esLightGray;
+      white-space: nowrap;
+    }
+
+    &.replica {
+      background-color: @replica;
+    }
+
+    &.unassigned {
+      background-color: @unassigned !important;
+      color: @black;
+    }
+
+    &.emergency {
+      background-color: @unassignedPrimary !important;
+      color: @black;
+    }
+
+    &.relocating {
+      background-color: @relocating;
+    }
+
+    &.initializing {
+      background-color: @initializing;
+    }
+  }
+
+  .legend {
+    font-size: 12px;
+    background-color: @white;
+    .title {
+      margin-left: 5px;
+      font-weight: bold;
+    }
+    color: @esBlack;
+    padding: 5px;
+    span.shard {
+      float: none;
+      display: inline-block;
+      margin: 0 5px 0 10px;
+      padding: 0 4px;
+    }
+  }
+}

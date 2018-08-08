@@ -1,0 +1,34 @@
+/**
+ * 1. Set icon size.
+ * 2. Hack the panel title to move to the left a bit.
+ */
+.cluster-overview-icon {
+  width: 20px; /* 1 */
+  height: 20px; /* 1 */
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: contain; /* 1 */
+  margin-right: -3px; /* 2 */
+}
+
+.cluster-overview-icon__elasticsearch {
+  background-image: url("~ui/icons/elasticsearch-gray.svg");
+}
+
+.cluster-overview-icon__logstash {
+  background-image: url("~ui/icons/logstash-gray.svg");
+}
+
+.cluster-overview-icon__kibana {
+  background-image: url("~ui/icons/kibana-gray.svg");
+}
+
+.cluster-overview-icon__beats {
+  background-image: url("~ui/icons/beats-gray.svg");
+}
+
+// <dt> tags
+.cluster-panel__inner-title {
+  font-weight: normal;
+  font-size: 18px;
+}

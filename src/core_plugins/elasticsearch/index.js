@@ -1,3 +1,22 @@
+/*
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
 import { compact, get, has, set } from 'lodash';
 import { unset } from '../../utils';
 
@@ -32,7 +51,7 @@ export default function (kibana) {
         preserveHost: boolean().default(true),
         username: string(),
         password: string(),
-        shardTimeout: number().default(0),
+        shardTimeout: number().default(30000),
         requestTimeout: number().default(30000),
         requestHeadersWhitelist: array().items().single().default(DEFAULT_REQUEST_HEADERS),
         customHeaders: object().default({}),
@@ -44,21 +63,6 @@ export default function (kibana) {
         healthCheck: object({
           delay: number().default(2500)
         }).default(),
-        tribe: object({
-          url: string().uri({ scheme: ['http', 'https'] }),
-          preserveHost: boolean().default(true),
-          username: string(),
-          password: string(),
-          shardTimeout: number().default(0),
-          requestTimeout: number().default(30000),
-          requestHeadersWhitelist: array().items().single().default(DEFAULT_REQUEST_HEADERS),
-          customHeaders: object().default({}),
-          pingTimeout: number().default(ref('requestTimeout')),
-          startupTimeout: number().default(5000),
-          logQueries: boolean().default(false),
-          ssl: sslSchema,
-          apiVersion: Joi.string().default('master'),
-        }).default()
       }).default();
     },
 
@@ -87,9 +91,6 @@ export default function (kibana) {
         rename('ssl.ca', 'ssl.certificateAuthorities'),
         rename('ssl.cert', 'ssl.certificate'),
         sslVerify(),
-        rename('tribe.ssl.ca', 'tribe.ssl.certificateAuthorities'),
-        rename('tribe.ssl.cert', 'tribe.ssl.certificate'),
-        sslVerify('tribe')
       ];
     },
 
@@ -99,7 +100,6 @@ export default function (kibana) {
           esRequestTimeout: options.requestTimeout,
           esShardTimeout: options.shardTimeout,
           esApiVersion: options.apiVersion,
-          esDataIsTribe: get(options, 'tribe.url') ? true : false,
         };
       }
     },

@@ -1,0 +1,18 @@
+<monitoring-main
+  product="kibana"
+  name="kibanas"
+  data-test-subj="kibanaInstancesPage"
+>
+  <monitoring-cluster-status-kibana status="kibanas.data.clusterStatus"></monitoring-cluster-status-kibana>
+  <div class="page-row">
+    <h3 class="kuiScreenReaderOnly">Kibana Instances</h3>
+    <monitoring-kibana-listing
+      page-index="kibanas.pageIndex"
+      filter-text="kibanas.filterText"
+      sort-key="kibanas.sortKey"
+      sort-order="kibanas.sortOrder"
+      on-new-state="kibanas.onNewState"
+      instances="kibanas.data.kibanas"
+    ></monitoring-kibana-listing>
+  </div>
+</monitoring-main>

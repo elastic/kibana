@@ -1,21 +1,39 @@
+/*
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
+import 'plugins/kbn_vislib_vis_types/controls/vislib_basic_options';
+import './editors/tile_map_vis_params';
 import { supports } from 'ui/utils/supports';
 import { CATEGORY } from 'ui/vis/vis_category';
 import { VisFactoryProvider } from 'ui/vis/vis_factory';
-import { MapsVisualizationProvider } from './maps_visualization';
-import { VisSchemasProvider } from 'ui/vis/editors/default/schemas';
-import { AggResponseGeoJsonProvider } from 'ui/agg_response/geo_json/geo_json';
-import tileMapTemplate from './editors/tile_map.html';
+import { CoordinateMapsVisualizationProvider } from './coordinate_maps_visualization';
+import { Schemas } from 'ui/vis/editors/default/schemas';
 import image from './images/icon-tilemap.svg';
 import { VisTypesRegistryProvider } from 'ui/registry/vis_types';
-
+import { Status } from 'ui/vis/update_status';
+import { makeGeoJsonResponseHandler } from './coordinatemap_response_handler';
+import { truncatedColorMaps } from 'ui/vislib/components/color/truncated_colormaps';
 
 VisTypesRegistryProvider.register(function TileMapVisType(Private, getAppState, courier, config) {
 
-  const Schemas = Private(VisSchemasProvider);
-  const geoJsonConverter = Private(AggResponseGeoJsonProvider);
   const VisFactory = Private(VisFactoryProvider);
-  const MapsVisualization = Private(MapsVisualizationProvider);
-
+  const CoordinateMapsVisualization = Private(CoordinateMapsVisualizationProvider);
 
   return VisFactory.createBaseVisualization({
     name: 'tile_map',
@@ -24,8 +42,9 @@ VisTypesRegistryProvider.register(function TileMapVisType(Private, getAppState, 
     description: 'Plot latitude and longitude coordinates on a map',
     category: CATEGORY.MAP,
     visConfig: {
-      canDesaturate: true,
+      canDesaturate: !!supports.cssFilters,
       defaults: {
+        colorSchema: 'Yellow to Red',
         mapType: 'Scaled Circle Markers',
         isDesaturated: true,
         addTooltip: true,
@@ -36,12 +55,12 @@ VisTypesRegistryProvider.register(function TileMapVisType(Private, getAppState, 
         wms: config.get('visualization:tileMap:WMSdefaults')
       }
     },
-    responseConverter: geoJsonConverter,
-    responseHandler: 'basic',
-    implementsRenderComplete: true,
-    visualization: MapsVisualization,
+    requiresUpdateStatus: [Status.AGGS, Status.PARAMS, Status.RESIZE, Status.UI_STATE],
+    responseHandler: makeGeoJsonResponseHandler(),
+    visualization: CoordinateMapsVisualization,
     editorConfig: {
       collections: {
+        colorSchemas: Object.keys(truncatedColorMaps),
         legendPositions: [{
           value: 'bottomleft',
           text: 'bottom left',
@@ -61,9 +80,9 @@ VisTypesRegistryProvider.register(function TileMapVisType(Private, getAppState, 
           'Shaded Geohash Grid',
           'Heatmap'
         ],
-        canDesaturate: !!supports.cssFilters
+        tmsLayers: [],
       },
-      optionsTemplate: tileMapTemplate,
+      optionsTemplate: '<tile-map-vis-params></tile-map-vis-params>',
       schemas: new Schemas([
         {
           group: 'metrics',

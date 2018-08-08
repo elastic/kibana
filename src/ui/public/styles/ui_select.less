@@ -1,6 +1,7 @@
 // Overwrites ui-select classes that are loaded through NPM dependencies.
 // Must use important tags here because those files are loaded later.
 
+@import (reference) "./mixins";
 @import (reference) "./variables";
 
 /**
@@ -63,4 +64,8 @@
       border-color: @globalColorBlue;
     }
   }
+}
+
+.uiSelectMatch--ellipsis {
+  .ellipsis();
 }

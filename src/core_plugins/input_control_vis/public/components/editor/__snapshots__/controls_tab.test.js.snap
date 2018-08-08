@@ -26,8 +26,18 @@ exports[`renders ControlsTab 1`] = `
     handleIndexPatternChange={[Function]}
     handleLabelChange={[Function]}
     handleNumberOptionChange={[Function]}
+    handleParentChange={[Function]}
     handleRemoveControl={[Function]}
+    key="1"
     moveControl={[Function]}
+    parentCandidates={
+      Array [
+        Object {
+          "text": "numberField",
+          "value": "2",
+        },
+      ]
+    }
   />
   <ControlEditor
     controlIndex={1}
@@ -50,46 +60,91 @@ exports[`renders ControlsTab 1`] = `
     handleIndexPatternChange={[Function]}
     handleLabelChange={[Function]}
     handleNumberOptionChange={[Function]}
+    handleParentChange={[Function]}
     handleRemoveControl={[Function]}
+    key="2"
     moveControl={[Function]}
+    parentCandidates={
+      Array [
+        Object {
+          "text": "custom label",
+          "value": "1",
+        },
+      ]
+    }
   />
-  <div
-    className="kuiSideBarFormRow"
+  <EuiPanel
+    grow={false}
+    hasShadow={false}
+    paddingSize="m"
   >
-    <div
-      className="kuiSideBarFormRow__control kuiFieldGroupSection--wide"
+    <EuiFlexGroup
+      alignItems="stretch"
+      component="div"
+      direction="row"
+      gutterSize="l"
+      justifyContent="flexStart"
+      responsive={true}
+      wrap={false}
     >
-      <select
-        aria-label="Select control type"
-        className="kuiSelect"
-        onChange={[Function]}
-        value="list"
+      <EuiFlexItem
+        component="div"
+        grow={true}
       >
-        <option
-          value="range"
+        <EuiFormRow
+          describedByIds={Array []}
+          fullWidth={false}
+          hasEmptyLabelSpace={false}
+          id="selectControlType"
         >
-          Range slider
-        </option>
-        <option
-          value="list"
+          <EuiSelect
+            aria-label="Select control type"
+            compressed={false}
+            fullWidth={false}
+            hasNoInitialSelection={false}
+            isLoading={false}
+            onChange={[Function]}
+            options={
+              Array [
+                Object {
+                  "text": "Range slider",
+                  "value": "range",
+                },
+                Object {
+                  "text": "Options list",
+                  "value": "list",
+                },
+              ]
+            }
+            value="list"
+          />
+        </EuiFormRow>
+      </EuiFlexItem>
+      <EuiFlexItem
+        component="div"
+        grow={false}
+      >
+        <EuiFormRow
+          describedByIds={Array []}
+          fullWidth={false}
+          hasEmptyLabelSpace={false}
+          id="addControl"
         >
-          Options list
-        </option>
-      </select>
-    </div>
-    <KuiButton
-      buttonType="primary"
-      data-test-subj="inputControlEditorAddBtn"
-      icon={
-        <KuiButtonIcon
-          type="create"
-        />
-      }
-      onClick={[Function]}
-      type="button"
-    >
-      Add
-    </KuiButton>
-  </div>
+          <EuiButton
+            aria-label="Add control"
+            color="primary"
+            data-test-subj="inputControlEditorAddBtn"
+            fill={true}
+            iconSide="left"
+            iconType="plusInCircle"
+            onClick={[Function]}
+            type="button"
+          >
+            Add
+          </EuiButton>
+        </EuiFormRow>
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  </EuiPanel>
 </div>
 `;

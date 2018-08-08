@@ -1,11 +1,30 @@
+/*
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
 
 import _ from 'lodash';
 import expect from 'expect.js';
-import { IndexedArray } from 'ui/indexed_array';
+import { IndexedArray } from '..';
 
 // this is generally a data-structure that IndexedArray is good for managing
 const users = [
-  { name: 'John', id: 69, username: 'beast', group: 'admins' },
+  { name: 'John', id: 6, username: 'beast', group: 'admins' },
   { name: 'Anon', id: 0, username: 'shhhh', group: 'secret' },
   { name: 'Fern', id: 42, username: 'kitty', group: 'editor' },
   { name: 'Mary', id: 55, username: 'sheep', group: 'editor' }
@@ -145,6 +164,34 @@ describe('IndexedArray', function () {
 
       expect(reg.byUsername).to.eql(index);
       expect(reg.byUsername).to.not.be(index);
+    });
+  });
+
+  describe('Ordering', function () {
+    it('ordering is case insensitive', function () {
+      const reg = new IndexedArray({
+        index: ['title'],
+        order: ['title'],
+        initialSet: [{ title: 'APM' }, { title: 'Advanced Settings' }]
+      });
+
+      const ordered = reg.inTitleOrder;
+      expect(ordered[0].title).to.be('Advanced Settings');
+      expect(ordered[1].title).to.be('APM');
+    });
+
+    it('ordering handles numbers', function () {
+      const reg = new IndexedArray({
+        index: ['id'],
+        order: ['id'],
+        initialSet: users
+      });
+
+      const ordered = reg.inIdOrder;
+      expect(ordered[0].id).to.be(0);
+      expect(ordered[1].id).to.be(6);
+      expect(ordered[2].id).to.be(42);
+      expect(ordered[3].id).to.be(55);
     });
   });
 });

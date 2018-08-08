@@ -1,0 +1,14 @@
+{
+  "indices.analyze": {
+    "data_autocomplete_rules": {
+      "text": [],
+      "field": "{field}",
+      "analyzer": "",
+      "tokenizer": "",
+      "char_filter": [],
+      "filter": [],
+      "explain": { "__one_of": [false, true] },
+      "attributes": []
+    }
+  }
+}

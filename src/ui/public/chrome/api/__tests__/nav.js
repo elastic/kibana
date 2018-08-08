@@ -1,8 +1,27 @@
+/*
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
 import expect from 'expect.js';
 
-import { initChromeNavApi } from 'ui/chrome/api/nav';
+import { initChromeNavApi } from '../nav';
 import StubBrowserStorage from 'test_utils/stub_browser_storage';
-import { KibanaParsedUrl } from 'ui/url/kibana_parsed_url';
+import { KibanaParsedUrl } from '../../../url/kibana_parsed_url';
 
 const basePath = '/someBasePath';
 
@@ -89,6 +108,51 @@ describe('chrome nav apis', function () {
         errorThrown = true;
       }
       expect(errorThrown).to.be(true);
+    });
+  });
+
+  describe('#untrackNavLinksForDeletedSavedObjects', function () {
+    const appId = 'appId';
+    const appUrl = 'https://localhost:9200/app/kibana#test';
+    const deletedId = 'IAMDELETED';
+
+    it('should clear last url when last url contains link to deleted saved object', function () {
+      const appUrlStore = new StubBrowserStorage();
+      const nav = [
+        {
+          id: appId,
+          title: 'Discover',
+          linkToLastSubUrl: true,
+          lastSubUrl: `${appUrl}?id=${deletedId}`,
+          url: appUrl
+        }
+      ];
+      const {
+        chrome
+      } = init({ appUrlStore, nav });
+
+      chrome.untrackNavLinksForDeletedSavedObjects([deletedId]);
+      expect(chrome.getNavLinkById('appId').lastSubUrl).to.be(appUrl);
+    });
+
+    it('should not clear last url when last url does not contains link to deleted saved object', function () {
+      const lastUrl = `${appUrl}?id=anotherSavedObjectId`;
+      const appUrlStore = new StubBrowserStorage();
+      const nav = [
+        {
+          id: appId,
+          title: 'Discover',
+          linkToLastSubUrl: true,
+          lastSubUrl: lastUrl,
+          url: appUrl
+        }
+      ];
+      const {
+        chrome
+      } = init({ appUrlStore, nav });
+
+      chrome.untrackNavLinksForDeletedSavedObjects([deletedId]);
+      expect(chrome.getNavLinkById(appId).lastSubUrl).to.be(lastUrl);
     });
   });
 

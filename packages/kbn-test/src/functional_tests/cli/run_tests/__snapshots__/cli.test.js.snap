@@ -1,0 +1,75 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`run tests CLI options accepts help option even if invalid options passed 1`] = `
+Array [
+  Array [
+    "Run Functional Tests
+
+Usage:
+  node scripts/functional_tests --help
+  node scripts/functional_tests [--config <file1> [--config <file2> ...]]
+  node scripts/functional_tests [options] [-- --<other args>]
+
+Options:
+  --help                         Display this menu and exit. 
+  --config <file>                Pass in a config. Can pass in multiple configs. 
+  --esFrom <snapshot|source>     Build Elasticsearch from source or run from snapshot. Default: snapshot
+  --kibana-install-dir <dir>     Run Kibana from existing install directory instead of from source. 
+  --bail                         Stop the test run at the first failure. 
+  --grep <pattern>               Pattern to select which tests to run. 
+  --updateBaselines              Replace baseline screenshots with whatever is generated from the test. 
+  --verbose                      Log everything. 
+  --debug                        Run in debug mode. 
+  --quiet                        Only log errors. 
+  --silent                       Log nothing.",
+  ],
+]
+`;
+
+exports[`run tests CLI options rejects boolean config value 1`] = `
+Array [
+  Array [
+    "[31mError: functional_tests: invalid argument [true] to option [config][39m",
+  ],
+]
+`;
+
+exports[`run tests CLI options rejects boolean value for kibana-install-dir 1`] = `
+Array [
+  Array [
+    "[31mError: functional_tests: invalid argument [true] to option [kibana-install-dir][39m",
+  ],
+]
+`;
+
+exports[`run tests CLI options rejects empty config value if no default passed 1`] = `
+Array [
+  Array [
+    "[31mError: functional_tests: config is required[39m",
+  ],
+]
+`;
+
+exports[`run tests CLI options rejects invalid options even if valid options exist 1`] = `
+Array [
+  Array [
+    "[31mError: functional_tests: invalid option [aintnothang][39m",
+  ],
+]
+`;
+
+exports[`run tests CLI options rejects non-boolean value for bail 1`] = `
+Array [
+  Array [
+    "[31mError: functional_tests: invalid argument [peanut] to option [bail][39m",
+  ],
+]
+`;
+
+exports[`run tests CLI options rejects non-enum value for esFrom 1`] = `
+Array [
+  Array [
+    "[31mError: functional_tests: invalid argument [butter] to option [esFrom][39m",
+  ],
+]
+`;

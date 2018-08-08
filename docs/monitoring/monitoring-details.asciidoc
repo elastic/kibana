@@ -1,0 +1,4 @@
+[[monitoring-details]]
+== Viewing Monitoring Metrics
+
+See {kibana-ref}/monitoring-data.html[Viewing Monitoring Data in {kib}].

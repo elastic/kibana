@@ -1,0 +1,39 @@
+<table class="kuiTable kuiTable--fluid kuiVerticalRhythm">
+  <thead>
+    <tr>
+      <th scope="col" class="kuiTableHeaderCell">Action</th>
+      <th scope="col" class="kuiTableHeaderCell">Type</th>
+      <th scope="col" class="kuiTableHeaderCell">Mode</th>
+      <th scope="col" class="kuiTableHeaderCell">State</th>
+      <th scope="col" class="kuiTableHeaderCell">Reason</th>
+    </tr>
+  </thead>
+  <tr ng-repeat="actionDetail in watchEditActionsExecuteSummary.actionDetails">
+    <td class="kuiTableRowCell">
+      <div class="kuiTableRowCell__liner ">
+        {{actionDetail.action.id}}
+      </div>
+    </td>
+    <td class="kuiTableRowCell">
+      <div class="kuiTableRowCell__liner ">
+        {{actionDetail.action.type}}
+      </div>
+    </td>
+    <td class="kuiTableRowCell">
+      <div class="kuiTableRowCell__liner ">
+        {{actionDetail.actionMode}}
+      </div>
+    </td>
+    <td class="kuiTableRowCell">
+      <div class="kuiTableRowCell__liner">
+        <action-state-icon action-status="actionDetail.actionStatus"></action-state-icon>
+        {{actionDetail.actionStatus.state}}
+      </div>
+    </td>
+    <td class="kuiTableRowCell">
+      <div class="kuiTableRowCell__liner">
+        {{actionDetail.actionStatus.lastExecutionReason}}
+      </div>
+    </td>
+  </tr>
+</table>

@@ -15,7 +15,7 @@ done
 
 DIR="$(dirname "${SCRIPT}")/.."
 NODE="${DIR}/node/bin/node"
-test -x "$NODE" || NODE=$(which node)
+test -x "$NODE"
 if [ ! -x "$NODE" ]; then
   echo "unable to find usable node.js executable."
   exit 1

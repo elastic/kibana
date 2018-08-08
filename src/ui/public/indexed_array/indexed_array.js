@@ -1,5 +1,25 @@
+/*
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
 import _ from 'lodash';
 import { inflector } from './inflector';
+import { organizeBy } from '../utils/collection';
 
 const pathGetter = _(_.get).rearg(1, 0).ary(2);
 const inflectIndex = inflector('by');
@@ -31,9 +51,18 @@ export class IndexedArray {
     Object.defineProperty(this, 'raw', { value: [] });
 
     this._indexNames = _.union(
-      this._setupIndex(config.group, inflectIndex, _.organizeBy),
+      this._setupIndex(config.group, inflectIndex, organizeBy),
       this._setupIndex(config.index, inflectIndex, _.indexBy),
-      this._setupIndex(config.order, inflectOrder, _.sortBy)
+      this._setupIndex(config.order, inflectOrder, (raw, pluckValue) => {
+        return [...raw].sort((itemA, itemB) => {
+          const a = pluckValue(itemA);
+          const b = pluckValue(itemB);
+          if (typeof a === 'number' && typeof b === 'number') {
+            return a - b;
+          }
+          return String(a).toLowerCase().localeCompare(String(b).toLowerCase());
+        });
+      })
     );
 
     if (config.initialSet) {
@@ -111,7 +140,7 @@ export class IndexedArray {
    * @param  {function} inflect - a function that will be called with a property name, and
    *                            creates the public property at which the index will be exposed
    * @param  {function} op      - the function that will be used to create the indices, it is passed
-   *                            the raw representaion of the registry, and a getter for reading the
+   *                            the raw representation of the registry, and a getter for reading the
    *                            right prop
    *
    * @returns {string[]}        - the public keys of all indices created

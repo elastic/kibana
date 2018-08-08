@@ -1,3 +1,22 @@
+/*
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
 import expect from 'expect.js';
 import sinon from 'sinon';
 import { times, cloneDeep, pick, partition } from 'lodash';
@@ -45,11 +64,17 @@ function createIndex(name, mappings = {}) {
 function createCallCluster(index) {
   return sinon.spy(async (method, params) => {
     switch (method) {
-      case 'indices.get':
-        expect(params).to.have.property('index', Object.keys(index)[0]);
-        return cloneDeep(index);
+      case 'indices.getMapping':
+        if (!index) {
+          return { status: 404 };
+        } else {
+          expect(params).to.have.property('index', Object.keys(index)[0]);
+          return cloneDeep(index);
+        }
+
       case 'indices.putMapping':
         return { ok: true };
+
       default:
         throw new Error(`stub not expecting callCluster('${method}')`);
     }
@@ -58,7 +83,7 @@ function createCallCluster(index) {
 
 describe('es/healthCheck/patchKibanaIndex()', () => {
   describe('general', () => {
-    it('reads the _mappings feature of the indexName', async () => {
+    it('reads the mapping for the indexName', async () => {
       const indexName = chance.word();
       const mappings = createRandomMappings();
       const callCluster = createCallCluster(createIndex(indexName, mappings));
@@ -70,9 +95,28 @@ describe('es/healthCheck/patchKibanaIndex()', () => {
       });
 
       sinon.assert.calledOnce(callCluster);
-      sinon.assert.calledWithExactly(callCluster, 'indices.get', sinon.match({
-        feature: '_mappings'
+      sinon.assert.calledWithExactly(callCluster, 'indices.getMapping', sinon.match({
+        ignore: [404],
+        index: indexName,
       }));
+    });
+  });
+
+  describe('missing index', () => {
+    it('returns without doing anything', async () => {
+      const indexName = chance.word();
+      const mappings = createRandomMappings();
+      const callCluster = createCallCluster(null);
+      const log = sinon.stub();
+      await patchKibanaIndex({
+        callCluster,
+        indexName,
+        kibanaIndexMappingsDsl: mappings,
+        log
+      });
+
+      sinon.assert.calledOnce(callCluster);
+      sinon.assert.notCalled(log);
     });
   });
 
@@ -99,7 +143,7 @@ describe('es/healthCheck/patchKibanaIndex()', () => {
       } catch (error) {
         expect(error)
           .to.have.property('message')
-            .contain('Your Kibana index is out of date');
+          .contain('Your Kibana index is out of date');
       }
     });
   });
@@ -117,7 +161,7 @@ describe('es/healthCheck/patchKibanaIndex()', () => {
       });
 
       sinon.assert.calledOnce(callCluster);
-      sinon.assert.calledWithExactly(callCluster, 'indices.get', sinon.match({ index: indexName }));
+      sinon.assert.calledWithExactly(callCluster, 'indices.getMapping', sinon.match({ index: indexName }));
     });
 
     it('adds properties that are not in index', async () => {
@@ -137,7 +181,7 @@ describe('es/healthCheck/patchKibanaIndex()', () => {
       });
 
       sinon.assert.calledTwice(callCluster);
-      sinon.assert.calledWithExactly(callCluster, 'indices.get', sinon.match({ index: indexName }));
+      sinon.assert.calledWithExactly(callCluster, 'indices.getMapping', sinon.match({ index: indexName }));
       sinon.assert.calledWithExactly(callCluster, 'indices.putMapping', sinon.match({
         index: indexName,
         type: getRootType(mappings),
@@ -159,7 +203,7 @@ describe('es/healthCheck/patchKibanaIndex()', () => {
       });
 
       sinon.assert.calledTwice(callCluster);
-      sinon.assert.calledWithExactly(callCluster, 'indices.get', sinon.match({
+      sinon.assert.calledWithExactly(callCluster, 'indices.getMapping', sinon.match({
         index: indexName
       }));
       sinon.assert.calledWithExactly(callCluster, 'indices.putMapping', sinon.match({

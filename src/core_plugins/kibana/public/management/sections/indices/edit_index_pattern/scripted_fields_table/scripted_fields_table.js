@@ -1,115 +1,200 @@
-import _ from 'lodash';
-import 'ui/paginated_table';
-import fieldControlsHtml from '../field_controls.html';
-import { dateScripts } from './date_scripts';
-import { uiModules } from 'ui/modules';
-import template from './scripted_fields_table.html';
+/*
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
 
-uiModules.get('apps/management')
-.directive('scriptedFieldsTable', function (kbnUrl, Notifier, $filter, confirmModal) {
-  const rowScopes = []; // track row scopes, so they can be destroyed as needed
-  const filter = $filter('filter');
+import React, { Component } from 'react';
+import PropTypes from 'prop-types';
+import { getSupportedScriptingLanguages, getDeprecatedScriptingLanguages } from 'ui/scripting_languages';
+import { documentationLinks } from 'ui/documentation_links';
 
-  const notify = new Notifier();
+import {
+  EuiSpacer,
+  EuiOverlayMask,
+  EuiConfirmModal,
+  EUI_MODAL_CONFIRM_BUTTON,
+} from '@elastic/eui';
 
-  return {
-    restrict: 'E',
-    template,
-    scope: true,
-    link: function ($scope) {
+import {
+  Table,
+  Header,
+  CallOuts,
+} from './components';
 
-      const fieldCreatorPath = '/management/kibana/indices/{{ indexPattern }}/scriptedField';
-      const fieldEditorPath = fieldCreatorPath + '/{{ fieldName }}';
+import { I18nProvider, injectI18n } from '@kbn/i18n/react';
 
-      $scope.perPage = 25;
-      $scope.columns = [
-        { title: 'name' },
-        { title: 'lang' },
-        { title: 'script' },
-        { title: 'format' },
-        { title: 'controls', sortable: false }
-      ];
+export class ScriptedFieldsTableComponent extends Component {
+  static propTypes = {
+    indexPattern: PropTypes.object.isRequired,
+    fieldFilter: PropTypes.string,
+    scriptedFieldLanguageFilter: PropTypes.string,
+    helpers: PropTypes.shape({
+      redirectToRoute: PropTypes.func.isRequired,
+      getRouteHref: PropTypes.func.isRequired,
+    }),
+    onRemoveField: PropTypes.func,
+  }
 
-      $scope.$watchMulti(['[]indexPattern.fields', 'fieldFilter', 'scriptedFieldLanguageFilter'], refreshRows);
+  constructor(props) {
+    super(props);
 
-      function refreshRows() {
-        _.invoke(rowScopes, '$destroy');
-        rowScopes.length = 0;
+    this.state = {
+      deprecatedLangsInUse: [],
+      fieldToDelete: undefined,
+      isDeleteConfirmationModalVisible: false,
+      fields: [],
+    };
+  }
 
-        const fields = filter($scope.indexPattern.getScriptedFields(), {
-          name: $scope.fieldFilter,
-          lang: $scope.scriptedFieldLanguageFilter
-        });
-        _.find($scope.editSections, { index: 'scriptedFields' }).count = fields.length; // Update the tab count
+  componentWillMount() {
+    this.fetchFields();
+  }
 
-        $scope.rows = fields.map(function (field) {
-          const rowScope = $scope.$new();
-          rowScope.field = field;
-          rowScopes.push(rowScope);
+  fetchFields = async () => {
+    const fields = await this.props.indexPattern.getScriptedFields();
 
-          return [
-            _.escape(field.name),
-            {
-              markup: field.lang,
-              attr: {
-                'data-test-subj': 'scriptedFieldLang'
-              }
-            },
-            _.escape(field.script),
-            _.get($scope.indexPattern, ['fieldFormatMap', field.name, 'type', 'title']),
-            {
-              markup: fieldControlsHtml,
-              scope: rowScope
-            }
-          ];
-        });
+    const deprecatedLangsInUse = [];
+    const deprecatedLangs = getDeprecatedScriptingLanguages();
+    const supportedLangs = getSupportedScriptingLanguages();
+
+    for (const { lang } of fields) {
+      if (deprecatedLangs.includes(lang) || !supportedLangs.includes(lang)) {
+        deprecatedLangsInUse.push(lang);
       }
-
-      $scope.addDateScripts = function () {
-        const conflictFields = [];
-        let fieldsAdded = 0;
-        _.each(dateScripts($scope.indexPattern), function (script, field) {
-          try {
-            $scope.indexPattern.addScriptedField(field, script, 'number');
-            fieldsAdded++;
-          } catch (e) {
-            conflictFields.push(field);
-          }
-        });
-
-        if (fieldsAdded > 0) {
-          notify.info(fieldsAdded + ' script fields created');
-        }
-
-        if (conflictFields.length > 0) {
-          notify.info('Not adding ' + conflictFields.length + ' duplicate fields: ' + conflictFields.join(', '));
-        }
-      };
-
-      $scope.create = function () {
-        const params = {
-          indexPattern: $scope.indexPattern.id
-        };
-
-        kbnUrl.change(fieldCreatorPath, params);
-      };
-
-      $scope.edit = function (field) {
-        const params = {
-          indexPattern: $scope.indexPattern.id,
-          fieldName: field.name
-        };
-
-        kbnUrl.change(fieldEditorPath, params);
-      };
-
-      $scope.remove = function (field) {
-        const confirmModalOptions = {
-          confirmButtonText: 'Delete field',
-          onConfirm: () => { $scope.indexPattern.removeScriptedField(field.name); }
-        };
-        confirmModal(`Are you sure want to delete ${field.name}? This action is irreversible!`, confirmModalOptions);
-      };
     }
-  };
-});
+
+    this.setState({
+      fields,
+      deprecatedLangsInUse,
+    });
+  }
+
+  getFilteredItems = () => {
+    const { fields } = this.state;
+    const { fieldFilter, scriptedFieldLanguageFilter } = this.props;
+
+    let languageFilteredFields = fields;
+
+    if (scriptedFieldLanguageFilter) {
+      languageFilteredFields = fields.filter(
+        field => field.lang === this.props.scriptedFieldLanguageFilter
+      );
+    }
+
+    let filteredFields = languageFilteredFields;
+
+    if (fieldFilter) {
+      const normalizedFieldFilter = this.props.fieldFilter.toLowerCase();
+      filteredFields = languageFilteredFields.filter(
+        field => field.name.toLowerCase().includes(normalizedFieldFilter)
+      );
+    }
+
+    return filteredFields;
+  }
+
+  renderCallOuts() {
+    const { deprecatedLangsInUse } = this.state;
+
+    return (
+      <CallOuts
+        deprecatedLangsInUse={deprecatedLangsInUse}
+        painlessDocLink={documentationLinks.scriptedFields.painless}
+      />
+    );
+  }
+
+  startDeleteField = field => {
+    this.setState({ fieldToDelete: field, isDeleteConfirmationModalVisible: true });
+  }
+
+  hideDeleteConfirmationModal = () => {
+    this.setState({ fieldToDelete: undefined, isDeleteConfirmationModalVisible: false });
+  }
+
+  deleteField = () =>  {
+    const { indexPattern, onRemoveField } = this.props;
+    const { fieldToDelete } = this.state;
+
+    indexPattern.removeScriptedField(fieldToDelete.name);
+    onRemoveField && onRemoveField();
+    this.fetchFields();
+    this.hideDeleteConfirmationModal();
+  }
+
+  renderDeleteConfirmationModal() {
+    const { fieldToDelete } = this.state;
+
+    if (!fieldToDelete) {
+      return null;
+    }
+
+    const { intl } = this.props;
+    const title = intl.formatMessage(
+      { id: 'kbn.management.editIndexPattern.scripted.deleteFieldLabel', defaultMessage: 'Delete scripted field \'{fieldName}\'?' },
+      { fieldName: fieldToDelete.name });
+    const cancelButtonText = intl.formatMessage(
+      { id: 'kbn.management.editIndexPattern.scripted.deleteField.cancelButton', defaultMessage: 'Cancel' });
+    const confirmButtonText = intl.formatMessage(
+      { id: 'kbn.management.editIndexPattern.scripted.deleteField.deleteButton', defaultMessage: 'Delete' });
+
+    return (
+      <EuiOverlayMask>
+        <EuiConfirmModal
+          title={title}
+          onCancel={this.hideDeleteConfirmationModal}
+          onConfirm={this.deleteField}
+          cancelButtonText={cancelButtonText}
+          confirmButtonText={confirmButtonText}
+          defaultFocusedButton={EUI_MODAL_CONFIRM_BUTTON}
+        />
+      </EuiOverlayMask>
+    );
+  }
+
+  render() {
+    const {
+      helpers,
+      indexPattern,
+    } = this.props;
+
+    const items = this.getFilteredItems();
+
+    return (
+      <I18nProvider>
+        <div>
+          <Header addScriptedFieldUrl={helpers.getRouteHref(indexPattern, 'addField')} />
+
+          {this.renderCallOuts()}
+
+          <EuiSpacer size="l" />
+
+          <Table
+            indexPattern={indexPattern}
+            items={items}
+            editField={field => this.props.helpers.redirectToRoute(field, 'edit')}
+            deleteField={this.startDeleteField}
+          />
+
+          {this.renderDeleteConfirmationModal()}
+        </div>
+      </I18nProvider>
+    );
+  }
+}
+
+export const ScriptedFieldsTable = injectI18n(ScriptedFieldsTableComponent);

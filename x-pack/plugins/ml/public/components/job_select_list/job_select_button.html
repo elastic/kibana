@@ -1,0 +1,18 @@
+<div style='display: flex;' class="ml-job-select-btn-container">
+  <div class="ml-job-select-btn-label">Job</div>
+  <div style="flex:0 0 auto;">
+    <div  popover-placement="bottom"
+          popover-placement="bottom"
+          popover-html-unsafe="{{unsafeHtml}}"
+          popover-append-to-body="false"
+          popover-trigger="click"
+          class="ml-job-select-btn"
+          tooltip="{{description.txt}} selected"
+          aria-label="Job selection menu"
+          ng-click='createMenu()'
+          kbn-accessible-click>
+    <span class="ml-job-select-btn-text">{{description.txt}}</span>
+    <span class="caret"></span>
+  </div>
+  </div>
+</div>

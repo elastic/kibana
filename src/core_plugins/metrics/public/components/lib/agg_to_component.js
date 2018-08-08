@@ -1,3 +1,22 @@
+/*
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
 import { MovingAverageAgg } from '../aggs/moving_average';
 import { DerivativeAgg } from '../aggs/derivative';
 import Calculation from '../aggs/calculation';
@@ -13,6 +32,7 @@ import { FilterRatioAgg } from '../aggs/filter_ratio';
 import { PercentileRankAgg } from '../aggs/percentile_rank';
 import { Static } from '../aggs/static';
 import MathAgg from '../aggs/math';
+import { TopHitAgg } from '../aggs/top_hit';
 export default {
   count: StdAgg,
   avg: StdAgg,
@@ -42,7 +62,6 @@ export default {
   filter_ratio: FilterRatioAgg,
   positive_only: PositiveOnlyAgg,
   static: Static,
-  math: MathAgg
+  math: MathAgg,
+  top_hit: TopHitAgg,
 };
-
-

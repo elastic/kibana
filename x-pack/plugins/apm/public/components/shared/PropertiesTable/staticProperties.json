@@ -1,0 +1,30 @@
+[
+  {
+    "key": "request",
+    "required": false,
+    "children": ["http_version", "method", "url", "socket", "headers", "body"]
+  },
+  {
+    "key": "response",
+    "required": false,
+    "children": ["status_code", "headers", "headers_sent", "finished"]
+  },
+  {
+    "key": "system",
+    "required": false,
+    "children": ["hostname", "architecture", "platform"]
+  },
+  {
+    "key": "service",
+    "required": false,
+    "children": ["runtime", "framework", "agent", "version"]
+  },
+  {
+    "key": "process",
+    "required": false,
+    "children": ["pid", "title", "argv"]
+  },
+  { "key": "user", "required": true, "children": ["id", "username", "email"] },
+  { "key": "tags", "required": true, "children": [] },
+  { "key": "custom", "required": true, "children": [] }
+]

@@ -1,12 +1,33 @@
+/*
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
 import PropTypes from 'prop-types';
 import React from 'react';
-import Select from 'react-select';
 import DataFormatPicker from '../../data_format_picker';
 import createSelectHandler from '../../lib/create_select_handler';
 import YesNo from '../../yes_no';
 import createTextHandler from '../../lib/create_text_handler';
 import { IndexPattern } from '../../index_pattern';
-import { htmlIdGenerator } from 'ui_framework/services';
+import {
+  htmlIdGenerator,
+  EuiComboBox,
+} from '@elastic/eui';
 
 function TimeseriesConfig(props) {
   const handleSelectChange = createSelectHandler(props.onChange);
@@ -32,21 +53,33 @@ function TimeseriesConfig(props) {
     { label: 'Stacked', value: 'stacked' },
     { label: 'Percent', value: 'percent' }
   ];
+  const selectedStackedOption = stackedOptions.find(option => {
+    return model.stacked === option.value;
+  });
 
   const positionOptions = [
     { label: 'Right', value: 'right' },
     { label: 'Left', value: 'left' }
   ];
+  const selectedAxisPosOption = positionOptions.find(option => {
+    return model.axis_position === option.value;
+  });
 
   const chartTypeOptions = [
     { label: 'Bar', value: 'bar' },
     { label: 'Line', value: 'line' }
   ];
+  const selectedChartTypeOption = chartTypeOptions.find(option => {
+    return model.chart_type === option.value;
+  });
 
   const splitColorOptions = [
     { label: 'Gradient', value: 'gradient' },
     { label: 'Rainbow', value: 'rainbow' }
   ];
+  const selectedSplitColorOption = splitColorOptions.find(option => {
+    return model.split_color_mode === option.value;
+  });
 
   let type;
   if (model.chart_type === 'line') {
@@ -56,24 +89,26 @@ function TimeseriesConfig(props) {
           Chart Type
         </label>
         <div className="vis_editor__item">
-          <Select
-            inputProps={{ id: htmlId('chartType') }}
-            clearable={false}
+          <EuiComboBox
+            isClearable={false}
+            id={htmlId('chartType')}
             options={chartTypeOptions}
-            value={model.chart_type}
+            selectedOptions={selectedChartTypeOption ? [selectedChartTypeOption] : []}
             onChange={handleSelectChange('chart_type')}
+            singleSelection={true}
           />
         </div>
         <label className="vis_editor__label" htmlFor={htmlId('stacked')}>
           Stacked
         </label>
         <div className="vis_editor__item">
-          <Select
-            inputProps={{ id: htmlId('stacked') }}
-            clearable={false}
+          <EuiComboBox
+            isClearable={false}
+            id={htmlId('stacked')}
             options={stackedOptions}
-            value={model.stacked}
+            selectedOptions={selectedStackedOption ? [selectedStackedOption] : []}
             onChange={handleSelectChange('stacked')}
+            singleSelection={true}
           />
         </div>
         <label className="vis_editor__label" htmlFor={htmlId('fill')}>
@@ -123,24 +158,26 @@ function TimeseriesConfig(props) {
           Chart Type
         </label>
         <div className="vis_editor__item">
-          <Select
-            inputProps={{ id: htmlId('chartType') }}
-            clearable={false}
+          <EuiComboBox
+            isClearable={false}
+            id={htmlId('chartType')}
             options={chartTypeOptions}
-            value={model.chart_type}
+            selectedOptions={selectedChartTypeOption ? [selectedChartTypeOption] : []}
             onChange={handleSelectChange('chart_type')}
+            singleSelection={true}
           />
         </div>
         <label className="vis_editor__label" htmlFor={htmlId('stacked')}>
           Stacked
         </label>
         <div className="vis_editor__item">
-          <Select
-            inputProps={{ id: htmlId('stacked') }}
-            clearable={false}
+          <EuiComboBox
+            isClearable={false}
+            id={htmlId('stacked')}
             options={stackedOptions}
-            value={model.stacked}
+            selectedOptions={selectedStackedOption ? [selectedStackedOption] : []}
             onChange={handleSelectChange('stacked')}
+            singleSelection={true}
           />
         </div>
         <label className="vis_editor__label" htmlFor={htmlId('fill')}>
@@ -168,7 +205,7 @@ function TimeseriesConfig(props) {
     );
   }
 
-  const disableSeperateYaxis = model.seperate_axis ? false : true;
+  const disableSeparateYaxis = model.separate_axis ? false : true;
 
   return (
     <div>
@@ -195,6 +232,7 @@ function TimeseriesConfig(props) {
           </label>
           <input
             id={htmlId('offset')}
+            data-test-subj="offsetTimeSeries"
             className="vis_editor__input-grows"
             type="text"
             onChange={handleTextChange('offset_time')}
@@ -210,20 +248,21 @@ function TimeseriesConfig(props) {
             Split Color Theme
           </label>
           <div className="vis_editor__row_item">
-            <Select
-              inputProps={{ id: htmlId('splitColor') }}
-              clearable={false}
+            <EuiComboBox
+              isClearable={false}
+              id={htmlId('splitColor')}
               options={splitColorOptions}
-              value={model.split_color_mode}
+              selectedOptions={selectedSplitColorOption ? [selectedSplitColorOption] : []}
               onChange={handleSelectChange('split_color_mode')}
+              singleSelection={true}
             />
           </div>
         </div>
         <div className="vis_editor__series_config-row">
           <div className="vis_editor__label">Separate Axis</div>
           <YesNo
-            value={model.seperate_axis}
-            name="seperate_axis"
+            value={model.separate_axis}
+            name="separate_axis"
             onChange={props.onChange}
           />
           <label className="vis_editor__label" htmlFor={htmlId('axisMin')}>
@@ -233,7 +272,7 @@ function TimeseriesConfig(props) {
             id={htmlId('axisMin')}
             className="vis_editor__input-grows"
             type="number"
-            disabled={disableSeperateYaxis}
+            disabled={disableSeparateYaxis}
             onChange={handleTextChange('axis_min')}
             value={model.axis_min}
           />
@@ -244,7 +283,7 @@ function TimeseriesConfig(props) {
             id={htmlId('axisMax')}
             className="vis_editor__input-grows"
             type="number"
-            disabled={disableSeperateYaxis}
+            disabled={disableSeparateYaxis}
             onChange={handleTextChange('axis_max')}
             value={model.axis_max}
           />
@@ -252,13 +291,14 @@ function TimeseriesConfig(props) {
             Axis Position
           </label>
           <div className="vis_editor__row_item">
-            <Select
-              inputProps={{ id: htmlId('axisPos') }}
-              clearable={false}
-              disabled={disableSeperateYaxis}
+            <EuiComboBox
+              isClearable={false}
+              isDisabled={disableSeparateYaxis}
+              id={htmlId('axisPos')}
               options={positionOptions}
-              value={model.axis_position}
+              selectedOptions={selectedAxisPosOption ? [selectedAxisPosOption] : []}
               onChange={handleSelectChange('axis_position')}
+              singleSelection={true}
             />
           </div>
         </div>
@@ -275,6 +315,18 @@ function TimeseriesConfig(props) {
             className="vis_editor__row_item vis_editor__row"
             disabled={!model.override_index_pattern}
             with-interval={true}
+          />
+        </div>
+        <div className="vis_editor__series_config-row">
+          <label className="vis_editor__label" htmlFor={htmlId('series_filter')}>
+            Filter
+          </label>
+          <input
+            id={htmlId('series_filter')}
+            className="vis_editor__input-grows"
+            type="text"
+            onChange={handleTextChange('filter')}
+            value={model.filter}
           />
         </div>
       </div>

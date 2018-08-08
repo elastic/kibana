@@ -1,0 +1,40 @@
+{
+    "job_id": "JOB_ID",
+    "indexes": [
+      "INDEX_PATTERN_NAME"
+    ],
+    "query": {
+      "bool": {
+        "filter": [
+          { "term":  { "fileset.module": "nginx" } },
+          { "term":  { "fileset.name": "access" } }
+        ]
+      }
+    },
+    "aggregations": {
+      "buckets": {
+        "date_histogram": {
+          "field": "@timestamp",
+          "interval": 900000,
+          "offset": 0,
+          "order": {
+            "_key": "asc"
+          },
+          "keyed": false,
+          "min_doc_count": 0
+        },
+        "aggregations": {
+          "@timestamp": {
+            "max": {
+              "field": "@timestamp"
+            }
+          },
+          "dc_remote_ips": {
+            "cardinality": {
+              "field": "nginx.access.remote_ip"
+            }
+          }
+        }
+      }
+    }
+}

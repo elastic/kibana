@@ -1,0 +1,7 @@
+{
+  "name": "kibana",
+  "version": "1.0.0",
+  "dependencies": {
+    "foo": "link:packages/foo"
+  }
+}

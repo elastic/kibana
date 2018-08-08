@@ -1,3 +1,22 @@
+/*
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
 /**
  * @name SavedObject
  *
@@ -12,12 +31,13 @@
 import angular from 'angular';
 import _ from 'lodash';
 
-import { SavedObjectNotFound } from 'ui/errors';
-import MappingSetupProvider from 'ui/utils/mapping_setup';
+import { InvalidJSONProperty, SavedObjectNotFound } from '../../errors';
+import MappingSetupProvider from '../../utils/mapping_setup';
 
-import { SearchSourceProvider } from '../data_source/search_source';
-import { SavedObjectsClientProvider, findObjectByTitle } from 'ui/saved_objects';
+import { SearchSourceProvider } from '../search_source';
+import { SavedObjectsClientProvider, findObjectByTitle } from '../../saved_objects';
 import { migrateLegacyQuery } from '../../utils/migrateLegacyQuery.js';
+import { recentlyAccessed } from '../../persisted_log';
 
 /**
  * An error message to be used when the user rejects a confirm overwrite.
@@ -92,23 +112,31 @@ export function SavedObjectProvider(Promise, Private, Notifier, confirmModalProm
     const parseSearchSource = (searchSourceJson) => {
       if (!this.searchSource) return;
 
-      // if we have a searchSource, set its state based on the searchSourceJSON field
-      let state;
+      // if we have a searchSource, set its values based on the searchSourceJson field
+      let searchSourceValues;
       try {
-        state = JSON.parse(searchSourceJson);
+        searchSourceValues = JSON.parse(searchSourceJson);
       } catch (e) {
-        state = {};
+        throw new InvalidJSONProperty(
+          `Invalid JSON in ${esType} "${this.id}". ${e.message} JSON: ${searchSourceJson}`
+        );
       }
 
-      const oldState = this.searchSource.toJSON();
-      const fnProps = _.transform(oldState, function (dynamic, val, name) {
+      // This detects a scenario where documents with invalid JSON properties have been imported into the saved object index.
+      // (This happened in issue #20308)
+      if (!searchSourceValues || typeof searchSourceValues !== 'object') {
+        throw new InvalidJSONProperty(`Invalid searchSourceJSON in ${esType} "${this.id}".`);
+      }
+
+      const searchSourceFields = this.searchSource.getFields();
+      const fnProps = _.transform(searchSourceFields, function (dynamic, val, name) {
         if (_.isFunction(val)) dynamic[name] = val;
       }, {});
 
-      this.searchSource.set(_.defaults(state, fnProps));
+      this.searchSource.setFields(_.defaults(searchSourceValues, fnProps));
 
-      if (!_.isUndefined(this.searchSource.getOwn('query'))) {
-        this.searchSource.set('query', migrateLegacyQuery(this.searchSource.getOwn('query')));
+      if (!_.isUndefined(this.searchSource.getOwnField('query'))) {
+        this.searchSource.setField('query', migrateLegacyQuery(this.searchSource.getOwnField('query')));
       }
     };
 
@@ -124,11 +152,11 @@ export function SavedObjectProvider(Promise, Private, Notifier, confirmModalProm
       }
 
       if (config.clearSavedIndexPattern) {
-        this.searchSource.set('index', undefined);
+        this.searchSource.setField('index', null);
         return Promise.resolve(null);
       }
 
-      let index = id || config.indexPattern || this.searchSource.getOwn('index');
+      let index = id || config.indexPattern || this.searchSource.getOwnField('index');
 
       if (!index) {
         return Promise.resolve(null);
@@ -142,7 +170,7 @@ export function SavedObjectProvider(Promise, Private, Notifier, confirmModalProm
       // At this point index will either be an IndexPattern, if cached, or a promise that
       // will return an IndexPattern, if not cached.
       return Promise.resolve(index).then(indexPattern => {
-        this.searchSource.set('index', indexPattern);
+        this.searchSource.setField('index', indexPattern);
       });
     };
 
@@ -191,7 +219,9 @@ export function SavedObjectProvider(Promise, Private, Notifier, confirmModalProm
     this.applyESResp = (resp) => {
       this._source = _.cloneDeep(resp._source);
 
-      if (resp.found != null && !resp.found) throw new SavedObjectNotFound(esType, this.id);
+      if (resp.found != null && !resp.found) {
+        throw new SavedObjectNotFound(esType, this.id);
+      }
 
       const meta = resp._source.kibanaSavedObjectMeta || {};
       delete resp._source.kibanaSavedObjectMeta;
@@ -240,8 +270,9 @@ export function SavedObjectProvider(Promise, Private, Notifier, confirmModalProm
       });
 
       if (this.searchSource) {
+        const searchSourceFields = _.omit(this.searchSource.getFields(), ['sort', 'size']);
         body.kibanaSavedObjectMeta = {
-          searchSourceJSON: angular.toJson(_.omit(this.searchSource.toJSON(), ['sort', 'size']))
+          searchSourceJSON: angular.toJson(searchSourceFields)
         };
       }
 
@@ -271,7 +302,7 @@ export function SavedObjectProvider(Promise, Private, Notifier, confirmModalProm
       return savedObjectsClient.create(esType, source, { id: this.id })
         .catch(err => {
           // record exists, confirm overwriting
-          if (_.get(err, 'statusCode') === 409) {
+          if (_.get(err, 'res.status') === 409) {
             const confirmMessage = `Are you sure you want to overwrite ${this.title}?`;
 
             return confirmModalPromise(confirmMessage, { confirmButtonText: `Overwrite ${this.getDisplayName()}` })
@@ -282,12 +313,21 @@ export function SavedObjectProvider(Promise, Private, Notifier, confirmModalProm
         });
     };
 
-    /**
-     * Returns a promise that resolves to true if either the title is unique, or if the user confirmed they
-     * wished to save the duplicate title.  Promise is rejected if the user rejects the confirmation.
-     */
-    const warnIfDuplicateTitle = () => {
-      // Don't warn if the user isn't updating the title, otherwise that would become very annoying to have
+    const displayDuplicateTitleConfirmModal = () => {
+      const confirmMessage =
+        `A ${this.getDisplayName()} with the title '${this.title}' already exists. Would you like to save anyway?`;
+
+      return confirmModalPromise(confirmMessage, { confirmButtonText: `Save ${this.getDisplayName()}` })
+        .catch(() => Promise.reject(new Error(SAVE_DUPLICATE_REJECTED)));
+    };
+
+    const checkForDuplicateTitle = (isTitleDuplicateConfirmed, onTitleDuplicate) => {
+      // Don't check for duplicates if user has already confirmed save with duplicate title
+      if (isTitleDuplicateConfirmed) {
+        return Promise.resolve();
+      }
+
+      // Don't check if the user isn't updating the title, otherwise that would become very annoying to have
       // to confirm the save every time, except when copyOnSave is true, then we do want to check.
       if (this.title === this.lastSavedTitle && !this.copyOnSave) {
         return Promise.resolve();
@@ -298,11 +338,14 @@ export function SavedObjectProvider(Promise, Private, Notifier, confirmModalProm
           if (!duplicate) return true;
           if (duplicate.id === this.id) return true;
 
-          const confirmMessage =
-            `A ${this.getDisplayName()} with the title '${this.title}' already exists. Would you like to save anyway?`;
+          if (onTitleDuplicate) {
+            onTitleDuplicate();
+            return Promise.reject(new Error(SAVE_DUPLICATE_REJECTED));
+          }
 
-          return confirmModalPromise(confirmMessage, { confirmButtonText: `Save ${this.getDisplayName()}` })
-            .catch(() => Promise.reject(new Error(SAVE_DUPLICATE_REJECTED)));
+          // TODO: make onTitleDuplicate a required prop and remove UI components from this class
+          // Need to leave here until all users pass onTitleDuplicate.
+          return displayDuplicateTitleConfirmModal();
         });
     };
 
@@ -312,10 +355,13 @@ export function SavedObjectProvider(Promise, Private, Notifier, confirmModalProm
      * @param {object} [options={}]
      * @property {boolean} [options.confirmOverwrite=false] - If true, attempts to create the source so it
      * can confirm an overwrite if a document with the id already exists.
+     * @property {boolean} [options.isTitleDuplicateConfirmed=false] - If true, save allowed with duplicate title
+     * @property {func} [options.onTitleDuplicate] - function called if duplicate title exists.
+     * When not provided, confirm modal will be displayed asking user to confirm or cancel save.
      * @return {Promise}
      * @resolved {String} - The id of the doc
      */
-    this.save = ({ confirmOverwrite } = {}) => {
+    this.save = ({ confirmOverwrite = false, isTitleDuplicateConfirmed = false, onTitleDuplicate } = {}) => {
       // Save the original id in case the save fails.
       const originalId = this.id;
       // Read https://github.com/elastic/kibana/issues/9056 and
@@ -332,7 +378,7 @@ export function SavedObjectProvider(Promise, Private, Notifier, confirmModalProm
 
       this.isSaving = true;
 
-      return warnIfDuplicateTitle()
+      return checkForDuplicateTitle(isTitleDuplicateConfirmed, onTitleDuplicate)
         .then(() => {
           if (confirmOverwrite) {
             return createSource(source);
@@ -344,6 +390,9 @@ export function SavedObjectProvider(Promise, Private, Notifier, confirmModalProm
           this.id = resp.id;
         })
         .then(() => {
+          if (this.showInRecentlyAccessed && this.getFullPath) {
+            recentlyAccessed.add(this.getFullPath(), this.title, this.id);
+          }
           this.isSaving = false;
           this.lastSavedTitle = this.title;
           return this.id;

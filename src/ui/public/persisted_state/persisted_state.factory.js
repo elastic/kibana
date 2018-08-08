@@ -1,3 +1,22 @@
+/*
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
 /**
  * @name AngularPersistedState
  *
@@ -12,9 +31,9 @@
  * would call the callback, and finish with a $rootScope.$apply().
  */
 
-import { EventsProvider } from 'ui/events';
+import { EventsProvider } from '../events';
 import { PersistedState } from './persisted_state';
-import { uiModules } from 'ui/modules';
+import { uiModules } from '../modules';
 
 const module = uiModules.get('kibana');
 
@@ -25,8 +44,8 @@ module.factory('PersistedState', ($injector) => {
   // Extend PersistedState to override the EmitterClass class with
   // our Angular friendly version.
   return class AngularPersistedState extends PersistedState {
-    constructor(value, path, parent, silent) {
-      super(value, path, parent, silent, Events);
+    constructor(value, path) {
+      super(value, path, Events);
     }
   };
 });

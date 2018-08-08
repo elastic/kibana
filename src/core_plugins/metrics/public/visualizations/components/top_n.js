@@ -1,6 +1,25 @@
+/*
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
-import getLastValue from '../lib/get_last_value';
+import getLastValue from '../../../common/get_last_value';
 import reactcss from 'reactcss';
 
 class TopN extends Component {
@@ -16,7 +35,7 @@ class TopN extends Component {
   renderRow(maxValue) {
     return item => {
       const key = `${item.id || item.label}`;
-      const lastValue = getLastValue(item.data, item.data.length);
+      const lastValue = getLastValue(item.data);
       const formatter = item.tickFormatter || this.props.tickFormatter;
       const value = formatter(lastValue);
       const width = `${100 * (lastValue / maxValue)}%`;
@@ -47,7 +66,7 @@ class TopN extends Component {
               style={styles.innerBar}
             />
           </td>
-          <td width="1*" className="rhythm_top_n__value">{ value }</td>
+          <td width="1*" className="rhythm_top_n__value" data-test-subj="tsvbTopNValue">{ value }</td>
         </tr>
       );
     };
@@ -56,7 +75,7 @@ class TopN extends Component {
   render() {
     if (!this.props.series) return null;
     const maxValue = this.props.series.reduce((max, series) => {
-      const lastValue = getLastValue(series.data, series.data.length);
+      const lastValue = getLastValue(series.data);
       return lastValue > max ? lastValue : max;
     }, 0);
 

@@ -4,7 +4,7 @@
 @import "~react-grid-layout/css/styles.css";
 @import "~react-resizable/css/styles.css";
 
-.fullScreenModePlaceholder {
+.exitFullScreenButton {
   text-align: center;
   width: 100%;
   height: 0;
@@ -18,7 +18,13 @@
    */
   .react-resizable-handle {
     z-index: 10; /* 1 */
+    right: 4px;
+    bottom: 4px;
   }
+}
+
+.euiContextMenuItem {
+  display: block;
 }
 
 .layout-view {
@@ -33,10 +39,12 @@
 
 /**
  * 1. Need to override the react grid layout height when a single panel is expanded. Important is required because
- * otherwise the heigh is set inline.
+ * otherwise the height is set inline.
  */
 .layout-maximized-panel {
   height: 100% !important; /* 1. */
+  width: 100%;
+  position: absolute;
 }
 
 .exitFullScreenMode {
@@ -51,9 +59,14 @@
   z-index: 5;
 }
 
+/**
+ * 1. override the z-index: 1 applied to all non-eui elements that are in :focus via kui
+ *      - see packages/kbn-ui-framework/src/global_styling/reset/_reset.scss
+ */
 .exitFullScreenMode:hover,
 .exitFullScreenMode:focus {
   transition: all .5s ease;
+  z-index: 10 !important; /* 1. */
 
   .exitFullScreenModeText {
     visibility: visible;
@@ -100,7 +113,8 @@
   background-color: @dashboard-bg;
 }
 
-.dashboardCloneModal {
+
+.dashboardModal {
   width: 450px;
 }
 
@@ -113,9 +127,9 @@
 
 .start-screen {
   margin: 20px auto;
-  background-color: @dashboard-bg;
   max-width: 800px;
-  background: tint(@globalColorBlue, 90%);
+  width: 100%;
+  background: #FFF;
   padding: 40px;
   border-radius: 4px;
 }
@@ -136,7 +150,7 @@
 }
 
 .panel {
-  border: 2px dashed transparent;
+  border: solid 1px transparent;
 }
 
 /**
@@ -153,13 +167,22 @@
 }
 
 .panel--edit-mode {
-  border-color: @kibanaGray4;
-  .visualize-show-spy {
-    visibility: visible;
+  border-color: @globalColorLightGray;
+
+  &:hover {
+    border-color: @globalColorBlue;
+
+    .panel-title:hover {
+      color: @globalColorBlue;
+    }
+
+    .panel-heading {
+      background-color: rgba(0,0,0,.05) !important;
+    }
   }
 
   .panel-heading {
-    cursor: pointer;
+    cursor: move;
   }
 }
 
@@ -167,6 +190,10 @@
   flex: 1;
   display: flex;
   flex-direction: column;
+}
+
+.dashboard-container-with-margins {
+  background-color: @dashboard-bg-with-margins;
 }
 
 /**
@@ -178,6 +205,28 @@ dashboard-viewport-provider {
   [data-reactroot] {
     flex: 1;
   }
+}
+
+/**
+ * Disable transitions from the library on each grid element.
+ */
+.react-grid-item {
+  transition: none;
+}
+
+/**
+ * Dragged panels in dashboard should always appear above other panels.
+ */
+.react-grid-item.react-draggable-dragging {
+  z-index: @dashboardDraggingGridDepth !important;
+}
+
+/**
+ * Overwrites red coloring that comes from this library by default.
+ */
+.react-grid-item.react-grid-placeholder {
+  border-radius: 4px;
+  background: @globalColorBlue;
 }
 
 /**
@@ -193,13 +242,13 @@ dashboard-viewport-provider {
 .grid-item--expanded {
   height: 100% !important; /* 1. */
   width: 100% !important; /* 1. */
-  transform: none !important; /* 1. */
+  top: 0 !important; /* 1. */
+  left: 0 !important; /* 1. */
 }
 
 /**
  * 1. Fix Firefox bug where a value of overflow: hidden will prevent scrolling in a panel where the spy panel does
  * not have enough room.
- * 2. react-select used in input control vis needs `visible` overflow to avoid clipping selection list
  */
 .dashboard-panel {
   z-index: auto;
@@ -211,7 +260,7 @@ dashboard-viewport-provider {
   background: @dashboard-panel-bg;
   color: @dashboard-panel-color;
   padding: 0;
-  overflow: visible; /* 1, 2 */
+  overflow: visible; /* 1 */
 
   position: relative;
 
@@ -227,7 +276,7 @@ dashboard-viewport-provider {
     justify-content: flex-start;
 
     .panel-heading {
-      padding: 2px 10px 2px 5px;
+      padding: 8px;
       flex: 0 0 auto;
       white-space: nowrap;
       display: flex;
@@ -237,18 +286,10 @@ dashboard-viewport-provider {
       border: none;
 
       /**
-       * 1. The popover aligns with the right side of this icon, so we want the right edge as far so the right as
-       * possible to make the arrows line up.
-       */
-      .dashboardPanelPopOver {
-        margin-right: -10px; /* 1. */
-      }
-
-      /**
        * 1. Required to get the pop up component arrow to line up with the menu icon.
        */
-      .panel-dropdown {
-        padding: 0 20px; /* 1. */
+      .panel-dropdown:hover {
+        color: @globalColorBlue;
       }
 
       .kuiPopover__body {
@@ -277,13 +318,39 @@ dashboard-viewport-provider {
       }
     }
 
-    .visualize-show-spy {
-      visibility: hidden;
+    /**
+     * 1. Use opacity to make this element accessible to screen readers and keyboard.
+     * 2. Show on focus to enable keyboard accessibility.
+     */
+    .panel-heading-floater {
+      opacity: 0; /* 1 */
+      position: absolute;
+      right: 1px;
+      top: 1px;
+      background-color: @dashboard-panel-bg;
+      z-index: 5;
+      &:focus {
+        opacity: 1; /* 2 */
+      }
+    }
+
+    /**
+     * 1. Use opacity to make this element accessible to screen readers and keyboard.
+     * 2. Show on focus to enable keyboard accessibility.
+     */
+    .viewModeOpenContextMenuIcon {
+      opacity: 0; /* 1 */
+      &:focus {
+        opacity: 1; /* 2 */
+      }
     }
 
     &:hover {
-      .visualize-show-spy {
-        visibility: visible;
+      .panel-heading-floater {
+        opacity: 1;
+      }
+      .viewModeOpenContextMenuIcon {
+        opacity: 1;
       }
     }
 
@@ -294,6 +361,7 @@ dashboard-viewport-provider {
       flex: 1 0 auto;
       justify-content: center;
       flex-direction: column;
+      overflow: auto;
 
       .fa-exclamation-triangle {
         font-size: 2em;
@@ -311,6 +379,10 @@ dashboard-viewport-provider {
       height: auto;
       z-index: 1; /* 1. */
     }
+
+    .panel-content--fullWidth {
+      width: 100%;
+    }
   }
 
   /**
@@ -320,4 +392,60 @@ dashboard-viewport-provider {
     flex: 1 1 0; /* 1 */
     overflow: auto; /* 1 */
   }
+}
+
+/**
+ * The dashboard background color is the same as the panel color by default. When the user wants to use margins, we
+ * need to give a different background color so the panels are distinguishable from the background.
+ */
+.layout-with-margins {
+  background-color: @dashboard-bg-with-margins;
+  .panel-heading {
+    border-top-left-radius: 4px !important;
+    border-top-right-radius: 4px !important;
+  }
+
+  .panel-content {
+    background-color: @panel-bg-with-margins;
+    border-bottom-left-radius: 4px;
+    border-bottom-right-radius: 4px;
+  }
+
+  .panel {
+    border: 1px solid #D9D9D9;
+    border-radius: 4px;
+    box-shadow: 0 2px 2px -1px rgba(0, 0, 0, 0.1);
+  }
+
+  .panel--edit-mode:hover {
+    border-color: @globalColorBlue;
+    box-shadow: 0 4px 4px -1px rgba(0, 0, 0, 0.1);
+  }
+}
+
+.dashboard-viewport {
+  width: 100%;
+  background-color: @dashboard-bg;
+}
+.dashboard-viewport-with-margins {
+  width: 100%;
+  background-color: @dashboard-bg-with-margins;
+}
+
+.dashboardPanelMenuOptionsForm {
+  padding: 16px;
+  input {
+    width: 100%;
+    display: block;
+  }
+}
+
+// Mimics EuiPageBackground
+dashboard-listing {
+  background-color: @globalColorLightestGray;
+  min-height: 100vh;
+}
+
+.dashboardLandingPage {
+  background: @globalColorLightestGray;
 }

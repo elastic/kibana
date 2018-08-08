@@ -1,3 +1,22 @@
+/*
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
 /**
  * @name State
  *
@@ -9,9 +28,12 @@
 import _ from 'lodash';
 import angular from 'angular';
 import rison from 'rison-node';
-import { applyDiff } from 'ui/utils/diff_object';
-import { EventsProvider } from 'ui/events';
-import { Notifier } from 'ui/notify/notifier';
+import { applyDiff } from '../utils/diff_object';
+import { EventsProvider } from '../events';
+import { fatalError, toastNotifications } from '../notify';
+import './config_provider';
+import { createLegacyClass } from '../utils/legacy_class';
+import { callEach } from '../utils/function';
 
 import {
   createStateHash,
@@ -19,25 +41,23 @@ import {
   isStateHash,
 } from './state_storage';
 
-export function StateProvider(Private, $rootScope, $location, config, kbnUrl) {
+export function StateProvider(Private, $rootScope, $location, stateManagementConfig, config, kbnUrl) {
   const Events = Private(EventsProvider);
 
-  _.class(State).inherits(Events);
+  createLegacyClass(State).inherits(Events);
   function State(
     urlParam,
     defaults,
-    hashedItemStore = HashedItemStoreSingleton,
-    notifier = new Notifier()
+    hashedItemStore = HashedItemStoreSingleton
   ) {
     State.Super.call(this);
 
     this.setDefaults(defaults);
     this._urlParam = urlParam || '_s';
-    this._notifier = notifier;
     this._hashedItemStore = hashedItemStore;
 
     // When the URL updates we need to fetch the values from the URL
-    this._cleanUpListeners = _.partial(_.callEach, [
+    this._cleanUpListeners = _.partial(callEach, [
       // partial route update, no app reload
       $rootScope.$on('$routeUpdate', () => {
         this.fetch();
@@ -83,7 +103,7 @@ export function StateProvider(Private, $rootScope, $location, config, kbnUrl) {
     }
 
     if (unableToParse) {
-      this._notifier.error('Unable to parse URL');
+      toastNotifications.addDanger('Unable to parse URL');
       search[this._urlParam] = this.toQueryParam(this._defaults);
       $location.search(search).replace();
     }
@@ -108,6 +128,10 @@ export function StateProvider(Private, $rootScope, $location, config, kbnUrl) {
    * @returns {void}
    */
   State.prototype.fetch = function () {
+    if (!stateManagementConfig.enabled) {
+      return;
+    }
+
     let stash = this._readFromURL();
 
     // nothing to read from the url? save if ordered to persist
@@ -133,6 +157,10 @@ export function StateProvider(Private, $rootScope, $location, config, kbnUrl) {
    * @returns {void}
    */
   State.prototype.save = function (replace) {
+    if (!stateManagementConfig.enabled) {
+      return;
+    }
+
     let stash = this._readFromURL();
     const state = this.toObject();
     replace = replace || false;
@@ -164,6 +192,10 @@ export function StateProvider(Private, $rootScope, $location, config, kbnUrl) {
    * @returns {void}
    */
   State.prototype.replace = function () {
+    if (!stateManagementConfig.enabled) {
+      return;
+    }
+
     this.save(true);
   };
 
@@ -173,6 +205,10 @@ export function StateProvider(Private, $rootScope, $location, config, kbnUrl) {
    * @returns {void}
    */
   State.prototype.reset = function () {
+    if (!stateManagementConfig.enabled) {
+      return;
+    }
+
     kbnUrl.removeParam(this.getQueryParamName());
     // apply diff to attributes from defaults, this is side effecting so
     // it will change the state in place.
@@ -206,7 +242,7 @@ export function StateProvider(Private, $rootScope, $location, config, kbnUrl) {
   State.prototype._parseStateHash = function (stateHash) {
     const json = this._hashedItemStore.getItem(stateHash);
     if (json === null) {
-      this._notifier.error('Unable to completely restore the URL, be sure to use the share functionality.');
+      toastNotifications.addDanger('Unable to completely restore the URL, be sure to use the share functionality.');
     }
 
     return JSON.parse(json);
@@ -253,7 +289,7 @@ export function StateProvider(Private, $rootScope, $location, config, kbnUrl) {
     }
 
     // If we ran out of space trying to persist the state, notify the user.
-    this._notifier.fatal(
+    fatalError(
       new Error(
         'Kibana is unable to store history items in your session ' +
         'because it is full and there don\'t seem to be items any items safe ' +

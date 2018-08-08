@@ -1,0 +1,195 @@
+{
+  "clusterStatus": {
+    "dataSize": 49427982936,
+    "documentCount": 33017,
+    "indicesCount": 22,
+    "memMax": 2075918336,
+    "memUsed": 619947992,
+    "nodesCount": 2,
+    "status": "green",
+    "totalShards": 108,
+    "unassignedShards": 0,
+    "upTime": 1787957,
+    "version": [
+      "7.0.0-alpha1"
+    ]
+  },
+  "nodes": [
+    {
+      "isOnline": true,
+      "name": "node01",
+      "nodeTypeClass": "fa-star",
+      "nodeTypeLabel": "Master Node",
+      "node_cpu_utilization": {
+        "metric": {
+          "app": "elasticsearch",
+          "description": "Percentage of CPU usage for the Elasticsearch process.",
+          "field": "node_stats.process.cpu.percent",
+          "format": "0,0.[00]",
+          "hasCalculation": false,
+          "isDerivative": false,
+          "label": "CPU Utilization",
+          "metricAgg": "max",
+          "units": "%"
+        },
+        "summary": {
+          "lastVal": 1,
+          "maxVal": 4,
+          "minVal": 0,
+          "slope": 1
+        }
+      },
+      "node_free_space": {
+        "metric": {
+          "app": "elasticsearch",
+          "description": "Free disk space available on the node.",
+          "field": "node_stats.fs.total.available_in_bytes",
+          "format": "0.0 b",
+          "hasCalculation": false,
+          "isDerivative": false,
+          "label": "Disk Free Space",
+          "metricAgg": "max",
+          "units": ""
+        },
+        "summary": {
+          "lastVal": 132828119040,
+          "maxVal": 133150511104,
+          "minVal": 132828119040,
+          "slope": -1
+        }
+      },
+      "node_jvm_mem_percent": {
+        "metric": {
+          "app": "elasticsearch",
+          "description": "Total heap used by Elasticsearch running in the JVM.",
+          "field": "node_stats.jvm.mem.heap_used_percent",
+          "format": "0,0.[00]",
+          "hasCalculation": false,
+          "isDerivative": false,
+          "label": "Used Heap",
+          "metricAgg": "max",
+          "title": "JVM Heap",
+          "units": "%"
+        },
+        "summary": {
+          "lastVal": 33,
+          "maxVal": 44,
+          "minVal": 24,
+          "slope": 1
+        }
+      },
+      "node_load_average": {
+        "metric": {
+          "app": "elasticsearch",
+          "description": "Load average over the last minute.",
+          "field": "node_stats.os.cpu.load_average.1m",
+          "format": "0,0.[00]",
+          "hasCalculation": false,
+          "isDerivative": false,
+          "label": "1m",
+          "metricAgg": "max",
+          "title": "System Load",
+          "units": ""
+        },
+        "summary": {
+          "lastVal": 1.912109375,
+          "maxVal": 2.568359375,
+          "minVal": 1.591796875,
+          "slope": -1
+        }
+      },
+      "resolver": "ENVgDIKRSdCVJo-YqY4kUQ",
+      "shardCount": 54,
+      "transport_address": "127.0.0.1:9300",
+      "type": "master"
+    },
+    {
+      "isOnline": true,
+      "name": "node02",
+      "nodeTypeClass": "fa-server",
+      "nodeTypeLabel": "Node",
+      "node_cpu_utilization": {
+        "metric": {
+          "app": "elasticsearch",
+          "description": "Percentage of CPU usage for the Elasticsearch process.",
+          "field": "node_stats.process.cpu.percent",
+          "format": "0,0.[00]",
+          "hasCalculation": false,
+          "isDerivative": false,
+          "label": "CPU Utilization",
+          "metricAgg": "max",
+          "units": "%"
+        },
+        "summary": {
+          "lastVal": 2,
+          "maxVal": 26,
+          "minVal": 1,
+          "slope": -1
+        }
+      },
+      "node_free_space": {
+        "metric": {
+          "app": "elasticsearch",
+          "description": "Free disk space available on the node.",
+          "field": "node_stats.fs.total.available_in_bytes",
+          "format": "0.0 b",
+          "hasCalculation": false,
+          "isDerivative": false,
+          "label": "Disk Free Space",
+          "metricAgg": "max",
+          "units": ""
+        },
+        "summary": {
+          "lastVal": 132833038336,
+          "maxVal": 133153460224,
+          "minVal": 132833038336,
+          "slope": -1
+        }
+      },
+      "node_jvm_mem_percent": {
+        "metric": {
+          "app": "elasticsearch",
+          "description": "Total heap used by Elasticsearch running in the JVM.",
+          "field": "node_stats.jvm.mem.heap_used_percent",
+          "format": "0,0.[00]",
+          "hasCalculation": false,
+          "isDerivative": false,
+          "label": "Used Heap",
+          "metricAgg": "max",
+          "title": "JVM Heap",
+          "units": "%"
+        },
+        "summary": {
+          "lastVal": 40,
+          "maxVal": 40,
+          "minVal": 20,
+          "slope": -1
+        }
+      },
+      "node_load_average": {
+        "metric": {
+          "app": "elasticsearch",
+          "description": "Load average over the last minute.",
+          "field": "node_stats.os.cpu.load_average.1m",
+          "format": "0,0.[00]",
+          "hasCalculation": false,
+          "isDerivative": false,
+          "label": "1m",
+          "metricAgg": "max",
+          "title": "System Load",
+          "units": ""
+        },
+        "summary": {
+          "lastVal": 1.912109375,
+          "maxVal": 2.6015625,
+          "minVal": 1.591796875,
+          "slope": -1
+        }
+      },
+      "resolver": "t9J9jvHpQ2yDw9c1LJ0tHA",
+      "shardCount": 54,
+      "transport_address": "127.0.0.1:9301",
+      "type": "node"
+    }
+  ]
+}

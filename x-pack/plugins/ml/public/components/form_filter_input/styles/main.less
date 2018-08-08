@@ -1,0 +1,65 @@
+ml-form-filter-input {
+  max-width: 400px;
+  width: 100%;
+  display: inline-block;
+  position: relative;
+  line-height: 0;
+
+  input[type="text"] {
+    background-color: transparent;
+
+    max-width: 400px;
+    width: 100%;
+    padding-right: 30px;
+  }
+
+  input[type="text"]::-ms-clear {
+      display: none;
+  }
+
+  .ml-filter-input-left-icon {
+    padding-left: 30px;
+  }
+
+  .fa.fa-search {
+    position: absolute;
+    top: 6px;
+    left: 8px;
+    color: #CCCCCC;
+    width: 18px;
+    height: 18px;
+    margin-top: 10px;
+    margin-left: 0px;
+    font-size: 1.2em;
+    line-height: 0;
+  }
+
+  .ml-filter-progress-icon {
+    position: absolute;
+    top: 6px;
+    right: 6px;
+    color: #999DA0;
+    width: 18px;
+    height: 18px;
+    margin-top: 10px;
+    margin-right: 0px;
+
+    a {
+      color: #CCCCCC;
+
+      .fa.fa-times-circle {
+        font-size: 1.4em;
+        line-height: 0;
+      }
+    }
+
+    a:hover {
+      color: #999DA0;
+    }
+
+    .fa.fa-spinner {
+      font-size: 1.2em;
+      line-height: 0;
+    }
+  }
+}

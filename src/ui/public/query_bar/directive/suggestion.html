@@ -1,0 +1,23 @@
+<div class="suggestionItem suggestionItem--{{item.type}}">
+  <div class="suggestionItem__type">
+    <div ng-switch="item.type">
+      <div ng-switch-when="field">
+        <icon type="'kqlField'"></icon>
+      </div>
+      <div ng-switch-when="value">
+        <icon type="'kqlValue'"></icon>
+      </div>
+      <div ng-switch-when="recentSearch">
+        <icon type="'search'"></icon>
+      </div>
+      <div ng-switch-when="conjunction">
+        <icon type="'kqlSelector'"></icon>
+      </div>
+      <div ng-switch-when="operator">
+        <icon type="'kqlOperand'"></icon>
+      </div>
+    </div>
+  </div>
+  <div class="suggestionItem__text">{{item.text}}</div>
+  <div class="suggestionItem__description" ng-bind-html="item.description"></div>
+</div>

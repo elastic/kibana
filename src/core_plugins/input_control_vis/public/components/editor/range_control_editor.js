@@ -1,7 +1,31 @@
+/*
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
 import PropTypes from 'prop-types';
 import React from 'react';
 import { IndexPatternSelect } from './index_pattern_select';
 import { FieldSelect } from './field_select';
+
+import {
+  EuiFormRow,
+  EuiFieldNumber,
+} from '@elastic/eui';
 
 function filterField(field) {
   return field.type === 'number';
@@ -20,49 +44,44 @@ export function RangeControlEditor(props) {
     <div>
 
       <IndexPatternSelect
-        value={props.controlParams.indexPattern}
+        indexPatternId={props.controlParams.indexPattern}
         onChange={props.handleIndexPatternChange}
         getIndexPatterns={props.getIndexPatterns}
+        getIndexPattern={props.getIndexPattern}
+        controlIndex={props.controlIndex}
       />
 
       <FieldSelect
-        value={props.controlParams.fieldName}
+        fieldName={props.controlParams.fieldName}
         indexPatternId={props.controlParams.indexPattern}
         filterField={filterField}
         onChange={props.handleFieldNameChange}
         getIndexPattern={props.getIndexPattern}
+        controlIndex={props.controlIndex}
       />
 
-      <div className="kuiSideBarFormRow">
-        <label className="kuiSideBarFormRow__label" htmlFor={stepSizeId}>
-          Step Size
-        </label>
-        <div className="kuiSideBarFormRow__control kuiFieldGroupSection--wide">
-          <input
-            id={stepSizeId}
-            className="kuiTextInput"
-            type="number"
-            value={props.controlParams.options.step}
-            onChange={handleStepChange}
-          />
-        </div>
-      </div>
+      <EuiFormRow
+        id={stepSizeId}
+        label="Step Size"
+      >
+        <EuiFieldNumber
+          value={props.controlParams.options.step}
+          onChange={handleStepChange}
+          data-test-subj={`rangeControlSizeInput${props.controlIndex}`}
+        />
+      </EuiFormRow>
 
-      <div className="kuiSideBarFormRow">
-        <label className="kuiSideBarFormRow__label" htmlFor={decimalPlacesId}>
-          Decimal Places
-        </label>
-        <div className="kuiSideBarFormRow__control kuiFieldGroupSection--wide">
-          <input
-            id={decimalPlacesId}
-            className="kuiTextInput"
-            type="number"
-            min="0"
-            value={props.controlParams.options.decimalPlaces}
-            onChange={handleDecimalPlacesChange}
-          />
-        </div>
-      </div>
+      <EuiFormRow
+        id={decimalPlacesId}
+        label="Decimal Places"
+      >
+        <EuiFieldNumber
+          min={0}
+          value={props.controlParams.options.decimalPlaces}
+          onChange={handleDecimalPlacesChange}
+          data-test-subj={`rangeControlDecimalPlacesInput${props.controlIndex}`}
+        />
+      </EuiFormRow>
 
     </div>
   );

@@ -1,3 +1,22 @@
+/*
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
 import _ from 'lodash';
 import $ from 'jquery';
 
@@ -19,7 +38,7 @@ export function positionTooltip(opts, html) {
   const prev = $chart.data('previousPlacement') || {};
   const event = opts.event;
 
-  if (!$chart.size() || !$el.size()) return;
+  if (!$chart.length || !$el.length) return;
 
   const size = getTtSize(html || $el.html(), $sizer);
   const pos = getBasePosition(size, event);
@@ -55,7 +74,9 @@ function getBasePosition(size, event) {
 function getBounds($el) {
   // in testing, $window is not actually a window, so we need to add
   // the offsets to make it work right.
-  const bounds = $el.offset() || { top: 0, left: 0 };
+  // Sometimes $el is a $(window), which doesn't have getBoundingClientRect()
+  // which breaks in jQuery 3
+  const bounds = $.isWindow($el[0]) ? { top: 0, left: 0 } : $el.offset();
   bounds.top += $el.scrollTop();
   bounds.left += $el.scrollLeft();
   bounds.bottom = bounds.top + $el.outerHeight();
@@ -68,20 +89,20 @@ function getOverflow(size, pos, containers) {
   const overflow = {};
 
   containers.map(getBounds)
-  .sort(function (a, b) {
+    .sort(function (a, b) {
     // ensure smallest containers are merged first
-    return a.area - b.area;
-  })
-  .forEach(function (bounds) {
-    // number of pixels that the toolip would overflow it's far
+      return a.area - b.area;
+    })
+    .forEach(function (bounds) {
+    // number of pixels that the tooltip would overflow it's far
     // side, if we placed it that way. (negative === no overflow)
-    mergeOverflows(overflow, {
-      north: bounds.top - pos.north,
-      east: (pos.east + size.width) - bounds.right,
-      south: (pos.south + size.height) - bounds.bottom,
-      west: bounds.left - pos.west
+      mergeOverflows(overflow, {
+        north: bounds.top - pos.north,
+        east: (pos.east + size.width) - bounds.right,
+        south: (pos.south + size.height) - bounds.bottom,
+        west: bounds.left - pos.west
+      });
     });
-  });
 
   (window.overflows || (window.overflows = [])).push(overflow);
   return overflow;
@@ -123,7 +144,7 @@ function pickPlacement(prop, pos, overflow, prev, pref, fallback, placement) {
   }
 
   // if we don't find one that doesn't overflow, use
-  // the first choice and offset based on overflo
+  // the first choice and offset based on overflow
   if (value == null) {
     dir = dirs[0];
 

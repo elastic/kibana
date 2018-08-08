@@ -1,40 +1,49 @@
+/*
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
 import expect from 'expect.js';
 import * as not from '../not';
 import { nodeTypes } from '../../node_types';
 import * as ast from '../../ast';
-import StubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
-import ngMock from 'ng_mock';
-import { expectDeepEqual } from '../../../../../test_utils/expect_deep_equal';
+import indexPatternResponse from '../../__tests__/index_pattern_response.json';
+
 
 let indexPattern;
 
-const childNode = nodeTypes.function.buildNode('is', 'response', 200);
+const childNode = nodeTypes.function.buildNode('is', 'extension', 'jpg');
 
 describe('kuery functions', function () {
 
   describe('not', function () {
 
-    beforeEach(ngMock.module('kibana'));
-    beforeEach(ngMock.inject(function (Private) {
-      indexPattern = Private(StubbedLogstashIndexPatternProvider);
-    }));
+
+    beforeEach(() => {
+      indexPattern = indexPatternResponse;
+    });
 
     describe('buildNodeParams', function () {
-
-      it('should return "arguments" and "serializeStyle" params', function () {
-        const result = not.buildNodeParams(childNode);
-        expect(result).to.only.have.keys('arguments', 'serializeStyle');
-      });
 
       it('arguments should contain the unmodified child node', function () {
         const { arguments: [ actualChild ] } = not.buildNodeParams(childNode);
         expect(actualChild).to.be(childNode);
       });
 
-      it('serializeStyle should default to "operator"', function () {
-        const { serializeStyle } = not.buildNodeParams(childNode);
-        expect(serializeStyle).to.be('operator');
-      });
 
     });
 
@@ -47,52 +56,6 @@ describe('kuery functions', function () {
         expect(result.bool).to.only.have.keys('must_not');
         expect(result.bool.must_not).to.eql(ast.toElasticsearchQuery(childNode, indexPattern));
       });
-
-      it('should wrap a literal argument with an "is" function targeting all fields', function () {
-        const literalFoo = nodeTypes.literal.buildNode('foo');
-        const expectedChild = ast.toElasticsearchQuery(nodeTypes.function.buildNode('is', '*', 'foo'), indexPattern);
-        const node = nodeTypes.function.buildNode('not', literalFoo);
-        const result = not.toElasticsearchQuery(node, indexPattern);
-        const resultChild = result.bool.must_not;
-        expectDeepEqual(resultChild, expectedChild);
-      });
-
-    });
-
-    describe('toKueryExpression', function () {
-
-      it('should serialize "not" nodes with an operator syntax', function () {
-        const node = nodeTypes.function.buildNode('not', childNode, 'operator');
-        const result = not.toKueryExpression(node);
-        expect(result).to.be('!"response":200');
-      });
-
-      it('should wrap "and" and "or" sub-queries in parenthesis', function () {
-        const andNode = nodeTypes.function.buildNode('and', [childNode, childNode], 'operator');
-        const notAndNode = nodeTypes.function.buildNode('not', andNode, 'operator');
-        expect(not.toKueryExpression(notAndNode)).to.be('!("response":200 and "response":200)');
-
-        const orNode = nodeTypes.function.buildNode('or', [childNode, childNode], 'operator');
-        const notOrNode = nodeTypes.function.buildNode('not', orNode, 'operator');
-        expect(not.toKueryExpression(notOrNode)).to.be('!("response":200 or "response":200)');
-      });
-
-      it('should not wrap "and" and "or" sub-queries that use the function syntax', function () {
-        const andNode = nodeTypes.function.buildNode('and', [childNode, childNode], 'function');
-        const notAndNode = nodeTypes.function.buildNode('not', andNode, 'operator');
-        expect(not.toKueryExpression(notAndNode)).to.be('!and("response":200, "response":200)');
-
-        const orNode = nodeTypes.function.buildNode('or', [childNode, childNode], 'function');
-        const notOrNode = nodeTypes.function.buildNode('not', orNode, 'operator');
-        expect(not.toKueryExpression(notOrNode)).to.be('!or("response":200, "response":200)');
-      });
-
-      it('should throw an error for nodes with unknown or undefined serialize styles', function () {
-        const node = nodeTypes.function.buildNode('not', childNode, 'notValid');
-        expect(not.toKueryExpression)
-        .withArgs(node).to.throwException(/Cannot serialize "not" function as "notValid"/);
-      });
-
     });
   });
 });

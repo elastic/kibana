@@ -1,4 +1,23 @@
-import { Scanner } from 'ui/utils/scanner';
+/*
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
+import { Scanner } from '../scanner';
 import expect from 'expect.js';
 import 'elasticsearch-browser';
 import ngMock from 'ng_mock';
@@ -52,7 +71,7 @@ describe('Scanner', function () {
 
       search = sinon.stub().returns(Promise.resolve({ data: mockSearch }));
       scroll = sinon.stub().returns(Promise.resolve({ data: mockScroll }));
-      httpPost = sinon.stub(scanner.$http, 'post', (path, ...args) => {
+      httpPost = sinon.stub(scanner.$http, 'post').callsFake((path, ...args) => {
         if (path.includes('legacy_scroll_start')) {
           return search(...args);
         }
@@ -66,52 +85,52 @@ describe('Scanner', function () {
     it('should reject when an error occurs', function () {
       search = search.returns(Promise.reject(new Error('fail.')));
       return scanner.scanAndMap('')
-      .then(function () {
-        throw new Error('should reject');
-      })
-      .catch(function (error) {
-        expect(error.message).to.be('fail.');
-      });
+        .then(function () {
+          throw new Error('should reject');
+        })
+        .catch(function (error) {
+          expect(error.message).to.be('fail.');
+        });
     });
 
     it('should search and then scroll for results', function () {
       return scanner.scanAndMap('')
-      .then(function () {
-        expect(search.called).to.be(true);
-        expect(scroll.called).to.be(true);
-      });
+        .then(function () {
+          expect(search.called).to.be(true);
+          expect(scroll.called).to.be(true);
+        });
     });
 
     it('should map results if a function is provided', function () {
       return scanner.scanAndMap(null, null, function (hit) {
         return hit._id.toUpperCase();
       })
-      .then(function (response) {
-        expect(response.hits[0]).to.be('ONE');
-        expect(response.hits[1]).to.be('TWO');
-      });
+        .then(function (response) {
+          expect(response.hits[0]).to.be('ONE');
+          expect(response.hits[1]).to.be('TWO');
+        });
     });
 
     it('should only return the requested number of documents', function () {
       return scanner.scanAndMap(null, { docCount: 1 }, function (hit) {
         return hit._id.toUpperCase();
       })
-      .then(function (response) {
-        expect(response.hits[0]).to.be('ONE');
-        expect(response.hits[1]).to.be(undefined);
-      });
+        .then(function (response) {
+          expect(response.hits[0]).to.be('ONE');
+          expect(response.hits[1]).to.be(undefined);
+        });
     });
 
     it('should scroll across multiple pages', function () {
       const oneResult = { 'took': 1, 'timed_out': false, '_shards': { 'total': 1, 'successful': 1, 'failed': 0 }, 'hits': { 'total': 2, 'max_score': 0.0, 'hits': ['one'] } }; // eslint-disable-line max-len
       scroll = sinon.stub().returns(Promise.resolve({ data: oneResult }));
       return scanner.scanAndMap(null, { pageSize: 1 })
-      .then(function (response) {
-        expect(scroll.calledTwice);
-        expect(response.hits.length).to.be(2);
-        expect(scroll.getCall(1).args[0].scrollId).to.be('abc');
-        expect(scroll.getCall(0).args[0].scrollId).to.be('abc');
-      });
+        .then(function (response) {
+          expect(scroll.calledTwice);
+          expect(response.hits.length).to.be(2);
+          expect(scroll.getCall(1).args[0].scrollId).to.be('abc');
+          expect(scroll.getCall(0).args[0].scrollId).to.be('abc');
+        });
     });
 
     afterEach(function () {

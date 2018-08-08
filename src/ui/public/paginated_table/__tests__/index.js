@@ -1,8 +1,27 @@
+/*
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
 
 import _ from 'lodash';
 import expect from 'expect.js';
 import ngMock from 'ng_mock';
-import 'ui/paginated_table';
+import '..';
 import $ from 'jquery';
 
 describe('paginated table', function () {
@@ -80,7 +99,7 @@ describe('paginated table', function () {
       const rows = [];
 
       renderTable(cols, rows);
-      expect($el.children().size()).to.be(0);
+      expect($el.children().length).to.be(0);
     });
 
     it('should render columns and rows', function () {
@@ -89,10 +108,10 @@ describe('paginated table', function () {
       const rows = data.rows;
 
       renderTable(cols, rows);
-      expect($el.children().size()).to.be(1);
+      expect($el.children().length).to.be(1);
       const tableRows = $el.find('tbody tr');
       // should pad rows
-      expect(tableRows.size()).to.be(defaultPerPage);
+      expect(tableRows.length).to.be(defaultPerPage);
       // should contain the row data
       expect(tableRows.eq(0).find('td').eq(0).text()).to.be(rows[0][0]);
       expect(tableRows.eq(0).find('td').eq(1).text()).to.be(rows[0][1]);
@@ -109,9 +128,9 @@ describe('paginated table', function () {
 
       renderTable(data.columns, data.rows, perPageCount);
       const tableRows = $el.find('tbody tr');
-      expect(tableRows.size()).to.be(perPageCount);
+      expect(tableRows.length).to.be(perPageCount);
       // add 2 for the first and last page links
-      expect($el.find('paginate-controls button').size()).to.be(pageCount + 2);
+      expect($el.find('paginate-controls button').length).to.be(pageCount + 2);
     });
 
     it('should not show blank rows on last page when so specified', function () {
@@ -121,7 +140,7 @@ describe('paginated table', function () {
 
       renderTable(data.columns, data.rows, perPageCount, null, false);
       const tableRows = $el.find('tbody tr');
-      expect(tableRows.size()).to.be(rowCount);
+      expect(tableRows.length).to.be(rowCount);
     });
 
     it('should not show link to top when not set', function () {
@@ -129,7 +148,7 @@ describe('paginated table', function () {
       renderTable(data.columns, data.rows, 10, null, false);
 
       const linkToTop = $el.find('[data-test-subj="paginateControlsLinkToTop"]');
-      expect(linkToTop.size()).to.be(0);
+      expect(linkToTop.length).to.be(0);
     });
 
     it('should show link to top when set', function () {
@@ -137,7 +156,7 @@ describe('paginated table', function () {
       renderTable(data.columns, data.rows, 10, null, false, true);
 
       const linkToTop = $el.find('[data-test-subj="paginateControlsLinkToTop"]');
-      expect(linkToTop.size()).to.be(1);
+      expect(linkToTop.length).to.be(1);
     });
 
   });
@@ -194,7 +213,7 @@ describe('paginated table', function () {
       expect(tableRows.eq(0).find('td').eq(2).text()).to.be('zzzz');
     });
 
-    it('should set the sort direction to asc when it\'s not explicity set', function () {
+    it('should set the sort direction to asc when it\'s not explicitly set', function () {
       paginatedTable.sortColumn(1);
       $scope.$digest();
 
@@ -367,27 +386,27 @@ describe('paginated table', function () {
 
     it('should append object markup', function () {
       const tableRows = $el.find('tbody tr');
-      expect(tableRows.eq(0).find('h1').size()).to.be(0);
-      expect(tableRows.eq(1).find('h1').size()).to.be(1);
-      expect(tableRows.eq(2).find('h1').size()).to.be(0);
+      expect(tableRows.eq(0).find('h1').length).to.be(0);
+      expect(tableRows.eq(1).find('h1').length).to.be(1);
+      expect(tableRows.eq(2).find('h1').length).to.be(0);
     });
 
     it('should sort using object value', function () {
       paginatedTable.sortColumn(0);
       $scope.$digest();
       let tableRows = $el.find('tbody tr');
-      expect(tableRows.eq(0).find('h1').size()).to.be(0);
-      expect(tableRows.eq(1).find('h1').size()).to.be(0);
+      expect(tableRows.eq(0).find('h1').length).to.be(0);
+      expect(tableRows.eq(1).find('h1').length).to.be(0);
       // html row should be the last row
-      expect(tableRows.eq(2).find('h1').size()).to.be(1);
+      expect(tableRows.eq(2).find('h1').length).to.be(1);
 
       paginatedTable.sortColumn(0);
       $scope.$digest();
       tableRows = $el.find('tbody tr');
       // html row should be the first row
-      expect(tableRows.eq(0).find('h1').size()).to.be(1);
-      expect(tableRows.eq(1).find('h1').size()).to.be(0);
-      expect(tableRows.eq(2).find('h1').size()).to.be(0);
+      expect(tableRows.eq(0).find('h1').length).to.be(1);
+      expect(tableRows.eq(1).find('h1').length).to.be(0);
+      expect(tableRows.eq(2).find('h1').length).to.be(0);
     });
   });
 });

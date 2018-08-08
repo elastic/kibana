@@ -1,4 +1,23 @@
-import { courierNotifier } from './notifier';
+/*
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
+import { fatalError } from '../../notify';
 import { CallClientProvider } from './call_client';
 import { CallResponseHandlersProvider } from './call_response_handlers';
 import { ContinueIncompleteProvider } from './continue_incomplete';
@@ -25,60 +44,69 @@ export function FetchNowProvider(Private, Promise) {
   const DUPLICATE = RequestStatus.DUPLICATE;
   const INCOMPLETE = RequestStatus.INCOMPLETE;
 
-  function fetchNow(requests) {
-    return fetchSearchResults(requests.map(function (req) {
-      if (!req.started) return req;
-      return req.retry();
+  function fetchNow(searchRequests) {
+    return fetchSearchResults(searchRequests.map(function (searchRequest) {
+      if (!searchRequest.started) {
+        return searchRequest;
+      }
+
+      return searchRequest.retry();
     }))
-    .catch(courierNotifier.fatal);
+      .catch(error => fatalError(error, 'Courier fetch'));
   }
 
-  function fetchSearchResults(requests) {
+  function fetchSearchResults(searchRequests) {
     function replaceAbortedRequests() {
-      requests = requests.map(r => r.aborted ? ABORTED : r);
+      searchRequests = searchRequests.map(searchRequest => {
+        if (searchRequest.aborted) {
+          return ABORTED;
+        }
+
+        return searchRequest;
+      });
     }
 
     replaceAbortedRequests();
-    return startRequests(requests)
-    .then(function () {
-      replaceAbortedRequests();
-      return callClient(requests);
-    })
-    .then(function (responses) {
-      replaceAbortedRequests();
-      return callResponseHandlers(requests, responses);
-    })
-    .then(function (responses) {
-      replaceAbortedRequests();
-      return continueIncomplete(requests, responses, fetchSearchResults);
-    })
-    .then(function (responses) {
-      replaceAbortedRequests();
-      return responses.map(function (resp) {
-        switch (resp) {
-          case ABORTED:
-            return null;
-          case DUPLICATE:
-          case INCOMPLETE:
-            throw new Error('Failed to clear incomplete or duplicate request from responses.');
-          default:
-            return resp;
-        }
+    return startRequests(searchRequests)
+      .then(function () {
+        replaceAbortedRequests();
+        return callClient(searchRequests);
+      })
+      .then(function (responses) {
+        replaceAbortedRequests();
+        return callResponseHandlers(searchRequests, responses);
+      })
+      .then(function (responses) {
+        replaceAbortedRequests();
+        return continueIncomplete(searchRequests, responses, fetchSearchResults);
+      })
+      .then(function (responses) {
+        replaceAbortedRequests();
+        return responses.map(function (resp) {
+          switch (resp) {
+            case ABORTED:
+              return null;
+            case DUPLICATE:
+            case INCOMPLETE:
+              throw new Error('Failed to clear incomplete or duplicate request from responses.');
+            default:
+              return resp;
+          }
+        });
       });
-    });
   }
 
-  function startRequests(requests) {
-    return Promise.map(requests, function (req) {
-      if (req === ABORTED) {
-        return req;
+  function startRequests(searchRequests) {
+    return Promise.map(searchRequests, function (searchRequest) {
+      if (searchRequest === ABORTED) {
+        return searchRequest;
       }
 
       return new Promise(function (resolve) {
-        const action = req.started ? req.continue : req.start;
-        resolve(action.call(req));
+        const action = searchRequest.started ? searchRequest.continue : searchRequest.start;
+        resolve(action.call(searchRequest));
       })
-      .catch(err => req.handleFailure(err));
+        .catch(err => searchRequest.handleFailure(err));
     });
   }
 

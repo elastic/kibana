@@ -1,0 +1,347 @@
+@import (reference) "~ui/styles/variables";
+@import '~plugins/xpack_main/style/main.less';
+
+.container {
+  margin-top: 30px;
+}
+
+.selectedFieldLine{
+  background: #D0D3D8;
+}
+
+.nodeCircle {
+  fill: #aaaaaa;
+  opacity: 0.95;
+}
+
+.nodeCircle.selectedNode {
+  stroke-width: 4;
+  stroke: yellowgreen;
+}
+.disabledField{
+    opacity:0.3;
+}
+
+/* @notice
+ * This product uses "radioactive button" styles that were published on
+ * https://zurb.com/playground/radioactive-buttons under an "MIT" License.
+ *
+ * Copyright (c) ZURB
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of
+ * this software and associated documentation files (the "Software"), to deal in the
+ * Software without restriction, including without limitation the rights to use, copy,
+ * modify, merge, publish, distribute, sublicense, and/or sell copies of the Software,
+ * and to permit persons to whom the Software is furnished to do so, subject to the
+ * following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,
+ * INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A
+ * PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
+ * HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
+ * OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
+ * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+ */
+@-webkit-keyframes greenPulse {
+  from { border-color: #749a02; -webkit-box-shadow: 0 0 9px #333; }
+  50% { border-color: #91bd09; -webkit-box-shadow: 0 0 18px #91bd09; }
+  to { border-color: #749a02; -webkit-box-shadow: 0 0 9px #333; }
+}
+
+.pulseControl {
+  border: solid 1px @globalColorTeal;
+}
+
+
+.edge {
+  fill: #aaaaaa;
+  stroke-width: 2;
+  stroke: #aaaaaa;
+  stroke-opacity: 0.5;
+}
+.edge.selectedEdge {
+  stroke: yellowgreen;
+  stroke-opacity: 0.95;
+}
+.edge.inferredEdge {
+  stroke-dasharray: 5,5;
+}
+
+.edge:hover {
+  stroke-opacity: 0.95;
+}
+
+.nodeSvgText {
+  font-size: 7px;
+  font-family: "Arial";
+  fill: #555555;
+}
+.nodeHtmlLabel {
+  font-size: 7px;
+  font-family: "Arial";
+  color: #555555;
+  cursor:pointer;
+  text-overflow: ellipsis;
+  overflow: hidden;
+  text-align: center;
+  max-width: 100px;
+  max-height: 20px;
+}
+
+.dialogFooterText {
+  position: absolute;
+  bottom: 0;
+}
+
+
+.nodeMarkerText {
+  font-size: 3px;
+  font-family: "Arial";
+  fill: #555555;
+}
+.nodeMarkerCircle{
+  fill: #E1E897;
+  stroke: white;
+}
+
+.help-block {
+  font-size: smaller;
+}
+
+.indexDropDown{
+  max-width: 200px;
+  margin-right: 5px;
+}
+
+#qDisplayField{
+  max-width: 280px;
+}
+
+#addVertexFieldButton {
+  border-radius: 50%;
+  font-size: smaller;
+  margin-right: 5px;
+  height: 28px;
+  width: 28px;
+}
+
+.selButton{
+  margin-right: 5px;
+  margin-bottom: 2px;
+  margin-top: 2px;
+  // width:66px;
+}
+
+.selectionActionButton i{
+  margin-right: 5px;
+  margin-bottom: 2px;
+  margin-top: 2px;
+}
+
+.selectionActionButton i{
+  font-size:18px;
+}
+
+.vertexSelectionActionBar {
+    padding-top: 2px;
+}
+
+#sidebar{
+  position: absolute;
+  right: 5px;
+  top: 5px;
+  width: 300px;
+  z-index: 5;
+  background-color: #FFFFFF;
+  opacity: 0.96;
+}
+.sidebarPanel{
+  border: 1px solid #cccccc;
+  padding-left: 5px;
+  padding-right: 5px;
+  padding-bottom: 5px;
+  padding-top: 0px;
+  border-radius: 5px;
+  margin-bottom: 2px;
+}
+
+#qDiversityField{
+  max-width: 220px;
+}
+.small-graph-form {
+  margin-bottom: 5px;
+}
+
+#fieldList {
+      height: 100%;
+      min-width: 300px;
+}
+
+.legend-value-color-picker .dot {
+    line-height: 14px;
+    margin: 2px;
+    font-size: 14px;
+}
+.legend-value-color-picker .dot:hover {
+  margin: 0px;
+  font-size: 18px;
+}
+
+.legend-value-icon-picker .icon {
+    line-height: 14px;
+    margin: 2px;
+    font-size: 14px;
+    color: grey;
+}
+.legend-value-icon-picker .icon:hover {
+  margin: 0px;
+  font-size: 18px;
+  color: black;
+}
+.legend-value-icon-picker .selectedNode{
+  margin: 0px;
+  font-size: 18px;
+  color: black;
+}
+
+.venn1 {
+      fill: #FF0000;
+      fill-opacity:0.5;
+}
+.venn2 {
+      fill: #0000FF;
+      fill-opacity:0.5;
+}
+
+.vennTerm1{
+  color:#FF0000;
+}
+.vennTerm2{
+  color:#0000FF;
+}
+.vennTerm12{
+  color:#BC4A84;
+}
+
+.detailPanel{
+  max-height: 300px;
+  overflow: scroll;
+}
+.detailHeader{
+  margin-top: 5px;
+  color: white;
+  background-color: #656A76;
+  padding: 5px;
+  border-radius: 3px;
+  margin-bottom: 3px;
+}
+
+.selectionList{
+  height: 200px;
+  max-height: 200px;
+  background-color: #ECF0F1;
+  overflow: scroll;
+  margin-bottom: 0px;
+}
+
+.no-margin-bottom{
+  margin-bottom:0px;
+  padding-bottom: 0px;
+}
+
+.noUserSelect{
+  user-select: none;
+  -webkit-touch-callout: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+#GraphSvgContainer {
+  position: fixed;
+  height: 100%;
+  width: ~"calc(100% - 53px)";
+}
+
+.global-nav.is-global-nav-open + .app-wrapper #GraphSvgContainer {
+  width: ~"calc(100% - 160px)";
+}
+
+.requestJsonView{
+  height:200px;
+}
+
+
+.SvgIconFont{
+  font-family: FontAwesome;
+  font-size: 1em;
+  fill: white;
+}
+
+.lowOpacitySvgText{
+  fill-opacity: 0.5;
+}
+
+.SvgZoomedIconButton{
+  fill: #95a5a6;
+  stroke:#FFFFFF
+}
+.SvgZoomedIconButton:hover{
+  fill: #636E6F;
+}
+
+
+.SvgZoomedIconButtonText{
+  font-family: FontAwesome;
+  font-size: 0.15em;
+  fill: white;
+}
+.SvgZoomedButtonText{
+  font-size: 0.1em;
+  fill: white;
+}
+
+navbar .input-group{
+    top: 2px;
+    padding-bottom: 2px;
+}
+
+#fieldFinderIcon{
+  background-color: #ffffff;
+  border: none;
+}
+#fieldFinderInput{
+  border: none;
+}
+#fieldIconPlaceholder{
+  min-height: 35px;
+}
+.scrollable-list{
+  max-height: 180px;
+  overflow: scroll;
+}
+
+.scrollable-list ul.li-striped {
+  li {
+    border: none;
+  }
+
+  li:nth-child(even) {
+    background-color: @kibanaGray6;
+  }
+
+  li:nth-child(odd) {
+    background-color: @white;
+  }
+
+}
+
+.graphPlusButton {
+  background: @globalColorBlue;
+  border: none;
+  color: white;
+  &:hover {
+    background: darken(@globalColorBlue, 10%);
+    cursor: pointer;
+  }
+}

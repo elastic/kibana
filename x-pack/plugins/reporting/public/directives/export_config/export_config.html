@@ -1,0 +1,55 @@
+<div ng-show="!exportConfig.isDirty()">
+  <div class="kuiLocalDropdownSection">
+    <h2 class="kuiLocalDropdownTitle">
+      Reporting
+    </h2>
+
+    <div class="input-group generate-controls">
+      <div class="options"></div>
+      <button
+        class="kuiButton kuiButton--primary"
+        data-test-subj="generateReportButton"
+        ng-click="exportConfig.export()"
+      >
+        Generate {{ exportConfig.exportType.name }}
+      </button>
+    </div>
+  </div>
+
+  <div class="kuiLocalDropdownSection">
+
+    <!-- Header -->
+    <div class="kuiLocalDropdownHeader">
+      <label
+        class="kuiLocalDropdownHeader__label"
+        for="reportGenerationUrl"
+      >
+        Generation URL
+      </label>
+      <div class="kuiLocalDropdownHeader__actions">
+        <a
+          class="kuiLocalDropdownHeader__action"
+          ng-click="exportConfig.copyToClipboard('#reportGenerationUrl')"
+          kbn-accessible-click
+        >
+          Copy
+        </a>
+      </div>
+    </div>
+
+    <!-- Input -->
+    <input
+      id="reportGenerationUrl"
+      class="kuiLocalDropdownInput"
+      type="text"
+      readonly
+      data-test-subj="reportGenerationUrl"
+      value="{{ exportConfig.absoluteUrl || 'Loading...' }}"
+      ng-click="updateUrl()"
+    />
+  </div>
+</div>
+
+<div ng-show="exportConfig.isDirty()" data-test-subj="unsavedChangesReportingWarning">
+  Please save your work before generating a report.
+</div>

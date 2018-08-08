@@ -1,0 +1,408 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`ExplainCollectionInterval collection interval setting updates should show a success message while updated = true 1`] = `
+<ExplainCollectionInterval
+  context="cluster"
+  data="-1"
+  enabler={
+    Object {
+      "enableCollectionInterval": [Function],
+    }
+  }
+  isCollectionIntervalUpdated={true}
+  isCollectionIntervalUpdating={false}
+  property="xpack.monitoring.collection.interval"
+>
+  <EuiTitle
+    size="l"
+  >
+    <h2
+      className="euiTitle euiTitle--large"
+    >
+      Success! Wait a moment please.
+    </h2>
+  </EuiTitle>
+  <EuiHorizontalRule
+    margin="l"
+    size="half"
+  >
+    <hr
+      className="euiHorizontalRule euiHorizontalRule--half euiHorizontalRule--marginLarge"
+    />
+  </EuiHorizontalRule>
+  <EuiText
+    grow={true}
+  >
+    <div
+      className="euiText"
+    >
+      <p>
+        As soon as monitoring data appears in your cluster the page will automatically refresh with your monitoring dashboard. This only takes only a few seconds.
+      </p>
+    </div>
+  </EuiText>
+  <EuiSpacer
+    size="l"
+  >
+    <div
+      className="euiSpacer euiSpacer--l"
+    />
+  </EuiSpacer>
+  <EuiLoadingSpinner
+    size="l"
+  >
+    <div
+      className="euiLoadingSpinner euiLoadingSpinner--large"
+    />
+  </EuiLoadingSpinner>
+</ExplainCollectionInterval>
+`;
+
+exports[`ExplainCollectionInterval collection interval setting updates should show a waiting indicator while updating = true 1`] = `
+<ExplainCollectionInterval
+  context="cluster"
+  data="-1"
+  enabler={
+    Object {
+      "enableCollectionInterval": [Function],
+    }
+  }
+  isCollectionIntervalUpdated={false}
+  isCollectionIntervalUpdating={true}
+  property="xpack.monitoring.collection.interval"
+>
+  <Component>
+    <EuiTitle
+      size="l"
+    >
+      <h2
+        className="euiTitle euiTitle--large"
+      >
+        Monitoring is currently off
+      </h2>
+    </EuiTitle>
+    <EuiTextColor
+      color="subdued"
+      component="span"
+    >
+      <span
+        className="euiTextColor euiTextColor--subdued"
+      >
+        <EuiText
+          grow={true}
+        >
+          <div
+            className="euiText"
+          >
+            <p>
+              Monitoring provides insight to your hardware performance and load.
+            </p>
+          </div>
+        </EuiText>
+      </span>
+    </EuiTextColor>
+  </Component>
+  <EuiHorizontalRule
+    margin="l"
+    size="half"
+  >
+    <hr
+      className="euiHorizontalRule euiHorizontalRule--half euiHorizontalRule--marginLarge"
+    />
+  </EuiHorizontalRule>
+  <EuiText
+    grow={true}
+  >
+    <div
+      className="euiText"
+    >
+      <p>
+        We checked the 
+        cluster
+         settings and found that 
+        <EuiCode>
+          <EuiCodeBlockImpl
+            fontSize="s"
+            inline={true}
+            paddingSize="l"
+            transparentBackground={false}
+          >
+            <span
+              className="euiCodeBlock euiCodeBlock--fontSmall euiCodeBlock--paddingLarge euiCodeBlock--inline"
+              style={Object {}}
+            >
+              <code
+                className="euiCodeBlock__code"
+              >
+                xpack.monitoring.collection.interval
+              </code>
+            </span>
+          </EuiCodeBlockImpl>
+        </EuiCode>
+        is set to 
+        <EuiCode>
+          <EuiCodeBlockImpl
+            fontSize="s"
+            inline={true}
+            paddingSize="l"
+            transparentBackground={false}
+          >
+            <span
+              className="euiCodeBlock euiCodeBlock--fontSmall euiCodeBlock--paddingLarge euiCodeBlock--inline"
+              style={Object {}}
+            >
+              <code
+                className="euiCodeBlock__code"
+              >
+                -1
+              </code>
+            </span>
+          </EuiCodeBlockImpl>
+        </EuiCode>
+        .
+      </p>
+      <p>
+        The collection interval setting needs to be a positive integer (10s is recommended) in order for the collection agents to be active.
+      </p>
+      <p>
+        Would you like us to change it and enable monitoring?
+      </p>
+    </div>
+  </EuiText>
+  <EuiSpacer
+    size="l"
+  >
+    <div
+      className="euiSpacer euiSpacer--l"
+    />
+  </EuiSpacer>
+  <EuiFlexGroup
+    alignItems="center"
+    component="div"
+    direction="row"
+    gutterSize="s"
+    justifyContent="spaceAround"
+    responsive={true}
+    wrap={false}
+  >
+    <div
+      className="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--alignItemsCenter euiFlexGroup--justifyContentSpaceAround euiFlexGroup--directionRow euiFlexGroup--responsive"
+    >
+      <EuiFlexItem
+        component="div"
+        grow={false}
+      >
+        <div
+          className="euiFlexItem euiFlexItem--flexGrowZero"
+        >
+          <EuiButton
+            color="primary"
+            data-test-subj="enableCollectionInterval"
+            fill={true}
+            iconSide="left"
+            isLoading={true}
+            onClick={[Function]}
+            type="button"
+          >
+            <button
+              className="euiButton euiButton--primary euiButton--fill"
+              data-test-subj="enableCollectionInterval"
+              disabled={true}
+              onClick={[Function]}
+              type="button"
+            >
+              <span
+                className="euiButton__content"
+              >
+                <EuiLoadingSpinner
+                  className="euiButton__spinner"
+                  size="m"
+                >
+                  <div
+                    className="euiLoadingSpinner euiLoadingSpinner--medium euiButton__spinner"
+                  />
+                </EuiLoadingSpinner>
+                <span
+                  className="euiButton__text"
+                >
+                  Turn on monitoring
+                </span>
+              </span>
+            </button>
+          </EuiButton>
+        </div>
+      </EuiFlexItem>
+    </div>
+  </EuiFlexGroup>
+</ExplainCollectionInterval>
+`;
+
+exports[`ExplainCollectionInterval should explain about xpack.monitoring.collection.interval setting 1`] = `
+<ExplainCollectionInterval
+  context="cluster"
+  data="-1"
+  enabler={
+    Object {
+      "enableCollectionInterval": [Function],
+    }
+  }
+  isCollectionIntervalUpdated={false}
+  isCollectionIntervalUpdating={false}
+  property="xpack.monitoring.collection.interval"
+>
+  <Component>
+    <EuiTitle
+      size="l"
+    >
+      <h2
+        className="euiTitle euiTitle--large"
+      >
+        Monitoring is currently off
+      </h2>
+    </EuiTitle>
+    <EuiTextColor
+      color="subdued"
+      component="span"
+    >
+      <span
+        className="euiTextColor euiTextColor--subdued"
+      >
+        <EuiText
+          grow={true}
+        >
+          <div
+            className="euiText"
+          >
+            <p>
+              Monitoring provides insight to your hardware performance and load.
+            </p>
+          </div>
+        </EuiText>
+      </span>
+    </EuiTextColor>
+  </Component>
+  <EuiHorizontalRule
+    margin="l"
+    size="half"
+  >
+    <hr
+      className="euiHorizontalRule euiHorizontalRule--half euiHorizontalRule--marginLarge"
+    />
+  </EuiHorizontalRule>
+  <EuiText
+    grow={true}
+  >
+    <div
+      className="euiText"
+    >
+      <p>
+        We checked the 
+        cluster
+         settings and found that 
+        <EuiCode>
+          <EuiCodeBlockImpl
+            fontSize="s"
+            inline={true}
+            paddingSize="l"
+            transparentBackground={false}
+          >
+            <span
+              className="euiCodeBlock euiCodeBlock--fontSmall euiCodeBlock--paddingLarge euiCodeBlock--inline"
+              style={Object {}}
+            >
+              <code
+                className="euiCodeBlock__code"
+              >
+                xpack.monitoring.collection.interval
+              </code>
+            </span>
+          </EuiCodeBlockImpl>
+        </EuiCode>
+        is set to 
+        <EuiCode>
+          <EuiCodeBlockImpl
+            fontSize="s"
+            inline={true}
+            paddingSize="l"
+            transparentBackground={false}
+          >
+            <span
+              className="euiCodeBlock euiCodeBlock--fontSmall euiCodeBlock--paddingLarge euiCodeBlock--inline"
+              style={Object {}}
+            >
+              <code
+                className="euiCodeBlock__code"
+              >
+                -1
+              </code>
+            </span>
+          </EuiCodeBlockImpl>
+        </EuiCode>
+        .
+      </p>
+      <p>
+        The collection interval setting needs to be a positive integer (10s is recommended) in order for the collection agents to be active.
+      </p>
+      <p>
+        Would you like us to change it and enable monitoring?
+      </p>
+    </div>
+  </EuiText>
+  <EuiSpacer
+    size="l"
+  >
+    <div
+      className="euiSpacer euiSpacer--l"
+    />
+  </EuiSpacer>
+  <EuiFlexGroup
+    alignItems="center"
+    component="div"
+    direction="row"
+    gutterSize="s"
+    justifyContent="spaceAround"
+    responsive={true}
+    wrap={false}
+  >
+    <div
+      className="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--alignItemsCenter euiFlexGroup--justifyContentSpaceAround euiFlexGroup--directionRow euiFlexGroup--responsive"
+    >
+      <EuiFlexItem
+        component="div"
+        grow={false}
+      >
+        <div
+          className="euiFlexItem euiFlexItem--flexGrowZero"
+        >
+          <EuiButton
+            color="primary"
+            data-test-subj="enableCollectionInterval"
+            fill={true}
+            iconSide="left"
+            isLoading={false}
+            onClick={[Function]}
+            type="button"
+          >
+            <button
+              className="euiButton euiButton--primary euiButton--fill"
+              data-test-subj="enableCollectionInterval"
+              onClick={[Function]}
+              type="button"
+            >
+              <span
+                className="euiButton__content"
+              >
+                <span
+                  className="euiButton__text"
+                >
+                  Turn on monitoring
+                </span>
+              </span>
+            </button>
+          </EuiButton>
+        </div>
+      </EuiFlexItem>
+    </div>
+  </EuiFlexGroup>
+</ExplainCollectionInterval>
+`;

@@ -1,12 +1,31 @@
-import 'plugins/table_vis/table_vis.less';
-import 'plugins/table_vis/table_vis_controller';
-import 'plugins/table_vis/table_vis_params';
+/*
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
+import './table_vis.less';
+import './table_vis_controller';
+import './table_vis_params';
 import 'ui/agg_table';
 import 'ui/agg_table/agg_table_group';
 import { VisFactoryProvider } from 'ui/vis/vis_factory';
 import { CATEGORY } from 'ui/vis/vis_category';
-import { VisSchemasProvider } from 'ui/vis/editors/default/schemas';
-import tableVisTemplate from 'plugins/table_vis/table_vis.html';
+import { Schemas } from 'ui/vis/editors/default/schemas';
+import tableVisTemplate from './table_vis.html';
 import { VisTypesRegistryProvider } from 'ui/registry/vis_types';
 import image from './images/icon-table.svg';
 // we need to load the css ourselves
@@ -23,7 +42,6 @@ VisTypesRegistryProvider.register(TableVisTypeProvider);
 // define the TableVisType
 function TableVisTypeProvider(Private) {
   const VisFactory = Private(VisFactoryProvider);
-  const Schemas = Private(VisSchemasProvider);
 
   // define the TableVisController which is used in the template
   // by angular's ng-controller directive
@@ -41,7 +59,7 @@ function TableVisTypeProvider(Private) {
       defaults: {
         perPage: 10,
         showPartialRows: false,
-        showMeticsAtAllLevels: false,
+        showMetricsAtAllLevels: false,
         sort: {
           columnIndex: null,
           direction: null
@@ -82,7 +100,7 @@ function TableVisTypeProvider(Private) {
       asAggConfigResults: true
     },
     hierarchicalData: function (vis) {
-      return Boolean(vis.params.showPartialRows || vis.params.showMeticsAtAllLevels);
+      return Boolean(vis.params.showPartialRows || vis.params.showMetricsAtAllLevels);
     }
   });
 }

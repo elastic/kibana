@@ -1,127 +1,208 @@
-import { find, each, escape, invoke, size, without } from 'lodash';
+/*
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
 
-import { uiModules } from 'ui/modules';
-import { Notifier } from 'ui/notify/notifier';
-import { FieldWildcardProvider } from 'ui/field_wildcard';
+import React, { Component } from 'react';
+import PropTypes from 'prop-types';
+import { createSelector } from 'reselect';
 
-import controlsHtml from './controls.html';
-import filterHtml from './filter.html';
-import template from './source_filters_table.html';
-import './source_filters_table.less';
+import {
+  EuiSpacer,
+  EuiOverlayMask,
+  EuiConfirmModal,
+  EUI_MODAL_CONFIRM_BUTTON,
+} from '@elastic/eui';
 
-const notify = new Notifier();
+import { Table } from './components/table';
+import { Header } from './components/header';
+import { AddFilter } from './components/add_filter';
+import { injectI18n } from '@kbn/i18n/react';
 
-uiModules.get('kibana')
-.directive('sourceFiltersTable', function (Private, $filter, confirmModal) {
-  const angularFilter = $filter('filter');
-  const { fieldWildcardMatcher } = Private(FieldWildcardProvider);
-  const rowScopes = []; // track row scopes, so they can be destroyed as needed
-
-  return {
-    restrict: 'E',
-    scope: {
-      indexPattern: '='
-    },
-    template,
-    controllerAs: 'sourceFilters',
-    controller: class FieldFiltersController {
-      constructor($scope) {
-        if (!$scope.indexPattern) {
-          throw new Error('index pattern is required');
-        }
-
-        $scope.perPage = 25;
-        $scope.columns = [
-          {
-            title: 'filter'
-          },
-          {
-            title: 'matches',
-            sortable: false,
-            info: 'The source fields that match the filter.'
-          },
-          {
-            title: 'controls',
-            sortable: false
-          }
-        ];
-
-        this.$scope = $scope;
-        this.saving = false;
-        this.editing = null;
-        this.newValue = null;
-        this.placeHolder = 'source filter, accepts wildcards (e.g., `user*` to filter fields starting with \'user\')';
-
-        $scope.$watchMulti([ '[]indexPattern.sourceFilters', '$parent.fieldFilter' ], () => {
-          invoke(rowScopes, '$destroy');
-          rowScopes.length = 0;
-
-          if ($scope.indexPattern.sourceFilters) {
-            $scope.rows = [];
-            each($scope.indexPattern.sourceFilters, (filter) => {
-              const matcher = fieldWildcardMatcher([ filter.value ]);
-              // compute which fields match a filter
-              const matches = $scope.indexPattern.getNonScriptedFields().map(f => f.name).filter(matcher).sort();
-              if ($scope.$parent.fieldFilter && !angularFilter(matches, $scope.$parent.fieldFilter).length) {
-                return;
-              }
-              // compute the rows
-              const rowScope = $scope.$new();
-              rowScope.filter = filter;
-              rowScopes.push(rowScope);
-              $scope.rows.push([
-                {
-                  markup: filterHtml,
-                  scope: rowScope
-                },
-                size(matches) ? escape(matches.join(', ')) : '<em>The source filter doesn\'t match any known fields.</em>',
-                {
-                  markup: controlsHtml,
-                  scope: rowScope
-                }
-              ]);
-            });
-            // Update the tab count
-            find($scope.$parent.editSections, { index: 'sourceFilters' }).count = $scope.rows.length;
-          }
-        });
-      }
-
-      all() {
-        return this.$scope.indexPattern.sourceFilters || [];
-      }
-
-      delete(filter) {
-        const doDelete = () => {
-          if (this.editing === filter) {
-            this.editing = null;
-          }
-
-          this.$scope.indexPattern.sourceFilters = without(this.all(), filter);
-          return this.save();
-        };
-
-        const confirmModalOptions = {
-          confirmButtonText: 'Delete filter',
-          onConfirm: doDelete
-        };
-        confirmModal(`Are you sure want to delete this filter?`, confirmModalOptions);
-      }
-
-      create() {
-        const value = this.newValue;
-        this.newValue = null;
-        this.$scope.indexPattern.sourceFilters = [...this.all(), { value }];
-        return this.save();
-      }
-
-      save() {
-        this.saving = true;
-        this.$scope.indexPattern.save()
-        .then(() => this.editing = null)
-        .catch(notify.error)
-        .finally(() => this.saving = false);
-      }
-    }
+export class SourceFiltersTableComponent extends Component {
+  static propTypes = {
+    indexPattern: PropTypes.object.isRequired,
+    filterFilter: PropTypes.string,
+    fieldWildcardMatcher: PropTypes.func.isRequired,
+    onAddOrRemoveFilter: PropTypes.func,
   };
-});
+
+  constructor(props) {
+    super(props);
+
+    // Source filters do not have any unique ids, only the value is stored.
+    // To ensure we can create a consistent and expected UX when managing
+    // source filters, we are assigning a unique id to each filter on the
+    // client side only
+    this.clientSideId = 0;
+
+    this.state = {
+      filterToDelete: undefined,
+      isDeleteConfirmationModalVisible: false,
+      isSaving: false,
+      filters: [],
+    };
+  }
+
+  componentWillMount() {
+    this.updateFilters();
+  }
+
+  updateFilters = () => {
+    const sourceFilters = this.props.indexPattern.sourceFilters || [];
+    const filters = sourceFilters.map(filter => ({
+      ...filter,
+      clientId: ++this.clientSideId,
+    }));
+
+    this.setState({ filters });
+  };
+
+  getFilteredFilters = createSelector(
+    state => state.filters,
+    (state, props) => props.filterFilter,
+    (filters, filterFilter) => {
+      if (filterFilter) {
+        const filterFilterToLowercase = filterFilter.toLowerCase();
+        return filters.filter(filter =>
+          filter.value.toLowerCase().includes(filterFilterToLowercase)
+        );
+      }
+
+      return filters;
+    }
+  );
+
+  startDeleteFilter = filter => {
+    this.setState({
+      filterToDelete: filter,
+      isDeleteConfirmationModalVisible: true,
+    });
+  };
+
+  hideDeleteConfirmationModal = () => {
+    this.setState({
+      filterToDelete: undefined,
+      isDeleteConfirmationModalVisible: false,
+    });
+  };
+
+  deleteFilter = async () => {
+    const { indexPattern, onAddOrRemoveFilter } = this.props;
+    const { filterToDelete, filters } = this.state;
+
+    indexPattern.sourceFilters = filters.filter(filter => {
+      return filter.clientId !== filterToDelete.clientId;
+    });
+
+    this.setState({ isSaving: true });
+    await indexPattern.save();
+    onAddOrRemoveFilter && onAddOrRemoveFilter();
+    this.updateFilters();
+    this.setState({ isSaving: false });
+    this.hideDeleteConfirmationModal();
+  };
+
+  onAddFilter = async value => {
+    const { indexPattern, onAddOrRemoveFilter } = this.props;
+
+    indexPattern.sourceFilters = [
+      ...(indexPattern.sourceFilters || []),
+      { value },
+    ];
+
+    this.setState({ isSaving: true });
+    await indexPattern.save();
+    onAddOrRemoveFilter && onAddOrRemoveFilter();
+    this.updateFilters();
+    this.setState({ isSaving: false });
+  };
+
+  saveFilter = async ({ filterId, newFilterValue }) => {
+    const { indexPattern } = this.props;
+    const { filters } = this.state;
+
+    indexPattern.sourceFilters = filters.map(filter => {
+      if (filter.clientId === filterId) {
+        return {
+          value: newFilterValue,
+          clientId: filter.clientId,
+        };
+      }
+      return filter;
+    });
+
+    this.setState({ isSaving: true });
+    await indexPattern.save();
+    this.updateFilters();
+    this.setState({ isSaving: false });
+  };
+
+  renderDeleteConfirmationModal() {
+    const { filterToDelete } = this.state;
+    const { intl } = this.props;
+
+    if (!filterToDelete) {
+      return null;
+    }
+
+    return (
+      <EuiOverlayMask>
+        <EuiConfirmModal
+          title={intl.formatMessage(
+            { id: 'kbn.management.editIndexPattern.source.deleteSourceFilterLabel', defaultMessage: 'Delete source filter \'{value}\'?' },
+            { value: filterToDelete.value })}
+          onCancel={this.hideDeleteConfirmationModal}
+          onConfirm={this.deleteFilter}
+          cancelButtonText={intl.formatMessage({
+            id: 'kbn.management.editIndexPattern.source.deleteFilter.cancelButton', defaultMessage: 'Cancel' })}
+          confirmButtonText={intl.formatMessage({
+            id: 'kbn.management.editIndexPattern.source.deleteFilter.deleteButton', defaultMessage: 'Delete' })}
+          defaultFocusedButton={EUI_MODAL_CONFIRM_BUTTON}
+        />
+      </EuiOverlayMask>
+    );
+  }
+
+  render() {
+    const { indexPattern, fieldWildcardMatcher } = this.props;
+
+    const { isSaving } = this.state;
+
+    const filteredFilters = this.getFilteredFilters(this.state, this.props);
+
+    return (
+      <div>
+        <Header />
+        <AddFilter onAddFilter={this.onAddFilter} />
+        <EuiSpacer size="l" />
+        <Table
+          isSaving={isSaving}
+          indexPattern={indexPattern}
+          items={filteredFilters}
+          fieldWildcardMatcher={fieldWildcardMatcher}
+          deleteFilter={this.startDeleteFilter}
+          saveFilter={this.saveFilter}
+        />
+
+        {this.renderDeleteConfirmationModal()}
+      </div>
+    );
+  }
+}
+
+export const SourceFiltersTable = injectI18n(SourceFiltersTableComponent);

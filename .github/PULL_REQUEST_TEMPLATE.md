@@ -8,6 +8,6 @@ attention.
 - Have you signed the [contributor license agreement](https://www.elastic.co/contributor-agreement)?
 - Have you followed the [contributor guidelines](https://github.com/elastic/kibana/blob/master/CONTRIBUTING.md)?
 - If submitting code, have you included unit tests that cover the changes?
-- If submitting code, have you tested and built your code locally prior to submission with `npm test && npm run build`?
+- If submitting code, have you tested and built your code locally prior to submission with `yarn test && yarn build`?
 - If submitting code, is your pull request against master? Unless there is a good reason otherwise, we prefer pull requests against master and will backport as needed.
 -->

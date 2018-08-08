@@ -1,0 +1,34 @@
+{
+  "cat.shards": {
+    "url_params": {
+      "format": "",
+      "bytes": [
+        "b",
+        "k",
+        "kb",
+        "m",
+        "mb",
+        "g",
+        "gb",
+        "t",
+        "tb",
+        "p",
+        "pb"
+      ],
+      "local": "__flag__",
+      "master_timeout": "",
+      "h": [],
+      "help": "__flag__",
+      "s": [],
+      "v": "__flag__"
+    },
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "_cat/shards",
+      "_cat/shards/{indices}"
+    ],
+    "documentation": "http://www.elastic.co/guide/en/elasticsearch/reference/master/cat-shards.html"
+  }
+}

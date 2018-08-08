@@ -1,0 +1,62 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`renders KuiTable 1`] = `
+<table
+  aria-label="aria-label"
+  class="kuiTable testClass1 testClass2"
+  data-test-subj="test subject string"
+>
+  <thead>
+    <tr>
+      <th
+        class="kuiTableHeaderCell"
+        scope="col"
+      >
+        <div
+          class="kuiTableHeaderCell__liner"
+        >
+          Hi Title
+        </div>
+      </th>
+      <th
+        class="kuiTableHeaderCell"
+        scope="col"
+      >
+        <div
+          class="kuiTableHeaderCell__liner"
+        >
+          Bye Title
+        </div>
+      </th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr
+      class="kuiTableRow"
+    >
+      <td
+        class="kuiTableRowCell"
+      >
+        <div
+          class="kuiTableRowCell__liner"
+        >
+          Hi
+        </div>
+      </td>
+    </tr>
+    <tr
+      class="kuiTableRow"
+    >
+      <td
+        class="kuiTableRowCell"
+      >
+        <div
+          class="kuiTableRowCell__liner"
+        >
+          Bye
+        </div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+`;

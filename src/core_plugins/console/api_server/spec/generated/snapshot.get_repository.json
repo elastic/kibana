@@ -1,0 +1,16 @@
+{
+  "snapshot.get_repository": {
+    "url_params": {
+      "master_timeout": "",
+      "local": "__flag__"
+    },
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "_snapshot",
+      "_snapshot/{repository}"
+    ],
+    "documentation": "http://www.elastic.co/guide/en/elasticsearch/reference/master/modules-snapshots.html"
+  }
+}

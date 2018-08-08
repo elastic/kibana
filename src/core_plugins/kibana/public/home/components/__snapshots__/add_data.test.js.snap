@@ -1,0 +1,702 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`apmUiEnabled 1`] = `
+<EuiPanel
+  grow={true}
+  hasShadow={false}
+  paddingSize="l"
+>
+  <EuiFlexGroup
+    alignItems="stretch"
+    component="div"
+    direction="row"
+    gutterSize="l"
+    justifyContent="flexStart"
+    responsive={true}
+    wrap={false}
+  >
+    <EuiFlexItem
+      component="div"
+      grow={true}
+    >
+      <EuiTitle
+        size="m"
+      >
+        <h3>
+          Add Data to Kibana
+        </h3>
+      </EuiTitle>
+      <EuiText
+        grow={true}
+      >
+        <p>
+          Use these solutions to quickly turn your data into pre-built dashboards and monitoring systems.
+        </p>
+      </EuiText>
+    </EuiFlexItem>
+  </EuiFlexGroup>
+  <EuiSpacer
+    size="l"
+  />
+  <EuiFlexGroup
+    alignItems="stretch"
+    component="div"
+    direction="row"
+    gutterSize="none"
+    justifyContent="flexStart"
+    responsive={true}
+    wrap={true}
+  >
+    <EuiFlexItem
+      component="div"
+      grow={true}
+    >
+      <EuiCard
+        className="addDataCard"
+        description="APM automatically collects in-depth performance metrics and errors from inside your applications."
+        footer={
+          <EuiButton
+            className="addDataButton"
+            color="primary"
+            fill={false}
+            href="#/home/tutorial/apm"
+            iconSide="left"
+            type="button"
+          >
+            Add APM
+          </EuiButton>
+        }
+        icon={
+          <EuiIcon
+            className="addDataIcon"
+            size="m"
+            type="apmApp"
+          />
+        }
+        layout="vertical"
+        textAlign="center"
+        title="APM"
+        titleElement="span"
+      />
+    </EuiFlexItem>
+    <EuiFlexItem
+      component="div"
+      grow={true}
+    >
+      <EuiCard
+        className="addDataCard"
+        description="Ingest logs from popular data sources and easily visualize in preconfigured dashboards."
+        footer={
+          <EuiButton
+            className="addDataButton"
+            color="primary"
+            fill={false}
+            href="#/home/tutorial_directory/logging"
+            iconSide="left"
+            type="button"
+          >
+            Add log data
+          </EuiButton>
+        }
+        icon={
+          <EuiIcon
+            className="addDataIcon"
+            size="m"
+            type="loggingApp"
+          />
+        }
+        layout="vertical"
+        textAlign="center"
+        title="Logging"
+        titleElement="span"
+      />
+    </EuiFlexItem>
+    <EuiFlexItem
+      component="div"
+      grow={true}
+    >
+      <EuiCard
+        className="addDataCard"
+        description="Collect metrics from the operating system and services running on your servers."
+        footer={
+          <EuiButton
+            className="addDataButton"
+            color="primary"
+            fill={false}
+            href="#/home/tutorial_directory/metrics"
+            iconSide="left"
+            type="button"
+          >
+            Add metric data
+          </EuiButton>
+        }
+        icon={
+          <EuiIcon
+            className="addDataIcon"
+            size="m"
+            type="monitoringApp"
+          />
+        }
+        layout="vertical"
+        textAlign="center"
+        title="Metrics"
+        titleElement="span"
+      />
+    </EuiFlexItem>
+    <EuiFlexItem
+      component="div"
+      grow={true}
+    >
+      <EuiCard
+        className="addDataCard"
+        description="Centralize security events for interactive investigation in ready-to-go visualizations."
+        footer={
+          <EuiButton
+            className="addDataButton"
+            color="primary"
+            fill={false}
+            href="#/home/tutorial_directory/security"
+            iconSide="left"
+            type="button"
+          >
+            Add security events
+          </EuiButton>
+        }
+        icon={
+          <EuiIcon
+            className="addDataIcon"
+            size="m"
+            type="securityApp"
+          />
+        }
+        layout="vertical"
+        textAlign="center"
+        title="Security Analytics"
+        titleElement="span"
+      />
+    </EuiFlexItem>
+  </EuiFlexGroup>
+  <EuiHorizontalRule
+    margin="l"
+    size="full"
+  />
+  <EuiFlexGroup
+    alignItems="stretch"
+    component="div"
+    direction="row"
+    gutterSize="l"
+    justifyContent="spaceAround"
+    responsive={true}
+    wrap={false}
+  >
+    <EuiFlexItem
+      className="addDataFooterItem"
+      component="div"
+      grow={true}
+    >
+      <EuiText
+        grow={true}
+      >
+        <strong
+          style={
+            Object {
+              "height": 38,
+            }
+          }
+        >
+          Sample Data
+        </strong>
+        <EuiLink
+          color="primary"
+          href="#/home/tutorial_directory/sampleData"
+          style={
+            Object {
+              "marginLeft": 8,
+            }
+          }
+          type="button"
+        >
+          Load a data set and a Kibana dashboard
+        </EuiLink>
+      </EuiText>
+    </EuiFlexItem>
+    <EuiFlexItem
+      className="addDataFooterItem"
+      component="div"
+      grow={true}
+    >
+      <EuiText
+        grow={true}
+      >
+        <strong
+          style={
+            Object {
+              "height": 38,
+            }
+          }
+        >
+          Your Data
+        </strong>
+        <EuiLink
+          color="primary"
+          href="#/management/kibana/index"
+          style={
+            Object {
+              "marginLeft": 8,
+            }
+          }
+          type="button"
+        >
+          Connect to your Elasticsearch index
+        </EuiLink>
+      </EuiText>
+    </EuiFlexItem>
+  </EuiFlexGroup>
+</EuiPanel>
+`;
+
+exports[`isNewKibanaInstance 1`] = `
+<EuiPanel
+  grow={true}
+  hasShadow={false}
+  paddingSize="l"
+>
+  <EuiFlexGroup
+    alignItems="stretch"
+    component="div"
+    direction="row"
+    gutterSize="l"
+    justifyContent="flexStart"
+    responsive={true}
+    wrap={false}
+  >
+    <EuiFlexItem
+      component="div"
+      grow={true}
+    >
+      <EuiTitle
+        size="m"
+      >
+        <h3>
+          Add Data to Kibana
+        </h3>
+      </EuiTitle>
+      <EuiText
+        grow={true}
+      >
+        <p>
+          Use these solutions to quickly turn your data into pre-built dashboards and monitoring systems.
+        </p>
+      </EuiText>
+    </EuiFlexItem>
+  </EuiFlexGroup>
+  <EuiSpacer
+    size="l"
+  />
+  <EuiFlexGroup
+    alignItems="stretch"
+    component="div"
+    direction="row"
+    gutterSize="none"
+    justifyContent="flexStart"
+    responsive={true}
+    wrap={true}
+  >
+    <EuiFlexItem
+      component="div"
+      grow={true}
+    >
+      <EuiCard
+        className="addDataCard"
+        description="Ingest logs from popular data sources and easily visualize in preconfigured dashboards."
+        footer={
+          <EuiButton
+            className="addDataButton"
+            color="primary"
+            fill={false}
+            href="#/home/tutorial_directory/logging"
+            iconSide="left"
+            type="button"
+          >
+            Add log data
+          </EuiButton>
+        }
+        icon={
+          <EuiIcon
+            className="addDataIcon"
+            size="m"
+            type="loggingApp"
+          />
+        }
+        layout="vertical"
+        textAlign="center"
+        title="Logging"
+        titleElement="span"
+      />
+    </EuiFlexItem>
+    <EuiFlexItem
+      component="div"
+      grow={true}
+    >
+      <EuiCard
+        className="addDataCard"
+        description="Collect metrics from the operating system and services running on your servers."
+        footer={
+          <EuiButton
+            className="addDataButton"
+            color="primary"
+            fill={false}
+            href="#/home/tutorial_directory/metrics"
+            iconSide="left"
+            type="button"
+          >
+            Add metric data
+          </EuiButton>
+        }
+        icon={
+          <EuiIcon
+            className="addDataIcon"
+            size="m"
+            type="monitoringApp"
+          />
+        }
+        layout="vertical"
+        textAlign="center"
+        title="Metrics"
+        titleElement="span"
+      />
+    </EuiFlexItem>
+    <EuiFlexItem
+      component="div"
+      grow={true}
+    >
+      <EuiCard
+        className="addDataCard"
+        description="Centralize security events for interactive investigation in ready-to-go visualizations."
+        footer={
+          <EuiButton
+            className="addDataButton"
+            color="primary"
+            fill={false}
+            href="#/home/tutorial_directory/security"
+            iconSide="left"
+            type="button"
+          >
+            Add security events
+          </EuiButton>
+        }
+        icon={
+          <EuiIcon
+            className="addDataIcon"
+            size="m"
+            type="securityApp"
+          />
+        }
+        layout="vertical"
+        textAlign="center"
+        title="Security Analytics"
+        titleElement="span"
+      />
+    </EuiFlexItem>
+  </EuiFlexGroup>
+  <EuiHorizontalRule
+    margin="l"
+    size="full"
+  />
+  <EuiFlexGroup
+    alignItems="stretch"
+    component="div"
+    direction="row"
+    gutterSize="l"
+    justifyContent="spaceAround"
+    responsive={true}
+    wrap={false}
+  >
+    <EuiFlexItem
+      className="addDataFooterItem addDataFooterItem_highlight"
+      component="div"
+      grow={true}
+    >
+      <EuiText
+        grow={true}
+      >
+        <strong
+          style={
+            Object {
+              "height": 38,
+            }
+          }
+        >
+          Sample Data
+        </strong>
+        <EuiLink
+          color="primary"
+          href="#/home/tutorial_directory/sampleData"
+          style={
+            Object {
+              "marginLeft": 8,
+            }
+          }
+          type="button"
+        >
+          Load a data set and a Kibana dashboard
+        </EuiLink>
+      </EuiText>
+    </EuiFlexItem>
+    <EuiFlexItem
+      className="addDataFooterItem addDataFooterItem_highlight"
+      component="div"
+      grow={true}
+    >
+      <EuiText
+        grow={true}
+      >
+        <strong
+          style={
+            Object {
+              "height": 38,
+            }
+          }
+        >
+          Your Data
+        </strong>
+        <EuiLink
+          color="primary"
+          href="#/management/kibana/index"
+          style={
+            Object {
+              "marginLeft": 8,
+            }
+          }
+          type="button"
+        >
+          Connect to your Elasticsearch index
+        </EuiLink>
+      </EuiText>
+    </EuiFlexItem>
+  </EuiFlexGroup>
+</EuiPanel>
+`;
+
+exports[`render 1`] = `
+<EuiPanel
+  grow={true}
+  hasShadow={false}
+  paddingSize="l"
+>
+  <EuiFlexGroup
+    alignItems="stretch"
+    component="div"
+    direction="row"
+    gutterSize="l"
+    justifyContent="flexStart"
+    responsive={true}
+    wrap={false}
+  >
+    <EuiFlexItem
+      component="div"
+      grow={true}
+    >
+      <EuiTitle
+        size="m"
+      >
+        <h3>
+          Add Data to Kibana
+        </h3>
+      </EuiTitle>
+      <EuiText
+        grow={true}
+      >
+        <p>
+          Use these solutions to quickly turn your data into pre-built dashboards and monitoring systems.
+        </p>
+      </EuiText>
+    </EuiFlexItem>
+  </EuiFlexGroup>
+  <EuiSpacer
+    size="l"
+  />
+  <EuiFlexGroup
+    alignItems="stretch"
+    component="div"
+    direction="row"
+    gutterSize="none"
+    justifyContent="flexStart"
+    responsive={true}
+    wrap={true}
+  >
+    <EuiFlexItem
+      component="div"
+      grow={true}
+    >
+      <EuiCard
+        className="addDataCard"
+        description="Ingest logs from popular data sources and easily visualize in preconfigured dashboards."
+        footer={
+          <EuiButton
+            className="addDataButton"
+            color="primary"
+            fill={false}
+            href="#/home/tutorial_directory/logging"
+            iconSide="left"
+            type="button"
+          >
+            Add log data
+          </EuiButton>
+        }
+        icon={
+          <EuiIcon
+            className="addDataIcon"
+            size="m"
+            type="loggingApp"
+          />
+        }
+        layout="vertical"
+        textAlign="center"
+        title="Logging"
+        titleElement="span"
+      />
+    </EuiFlexItem>
+    <EuiFlexItem
+      component="div"
+      grow={true}
+    >
+      <EuiCard
+        className="addDataCard"
+        description="Collect metrics from the operating system and services running on your servers."
+        footer={
+          <EuiButton
+            className="addDataButton"
+            color="primary"
+            fill={false}
+            href="#/home/tutorial_directory/metrics"
+            iconSide="left"
+            type="button"
+          >
+            Add metric data
+          </EuiButton>
+        }
+        icon={
+          <EuiIcon
+            className="addDataIcon"
+            size="m"
+            type="monitoringApp"
+          />
+        }
+        layout="vertical"
+        textAlign="center"
+        title="Metrics"
+        titleElement="span"
+      />
+    </EuiFlexItem>
+    <EuiFlexItem
+      component="div"
+      grow={true}
+    >
+      <EuiCard
+        className="addDataCard"
+        description="Centralize security events for interactive investigation in ready-to-go visualizations."
+        footer={
+          <EuiButton
+            className="addDataButton"
+            color="primary"
+            fill={false}
+            href="#/home/tutorial_directory/security"
+            iconSide="left"
+            type="button"
+          >
+            Add security events
+          </EuiButton>
+        }
+        icon={
+          <EuiIcon
+            className="addDataIcon"
+            size="m"
+            type="securityApp"
+          />
+        }
+        layout="vertical"
+        textAlign="center"
+        title="Security Analytics"
+        titleElement="span"
+      />
+    </EuiFlexItem>
+  </EuiFlexGroup>
+  <EuiHorizontalRule
+    margin="l"
+    size="full"
+  />
+  <EuiFlexGroup
+    alignItems="stretch"
+    component="div"
+    direction="row"
+    gutterSize="l"
+    justifyContent="spaceAround"
+    responsive={true}
+    wrap={false}
+  >
+    <EuiFlexItem
+      className="addDataFooterItem"
+      component="div"
+      grow={true}
+    >
+      <EuiText
+        grow={true}
+      >
+        <strong
+          style={
+            Object {
+              "height": 38,
+            }
+          }
+        >
+          Sample Data
+        </strong>
+        <EuiLink
+          color="primary"
+          href="#/home/tutorial_directory/sampleData"
+          style={
+            Object {
+              "marginLeft": 8,
+            }
+          }
+          type="button"
+        >
+          Load a data set and a Kibana dashboard
+        </EuiLink>
+      </EuiText>
+    </EuiFlexItem>
+    <EuiFlexItem
+      className="addDataFooterItem"
+      component="div"
+      grow={true}
+    >
+      <EuiText
+        grow={true}
+      >
+        <strong
+          style={
+            Object {
+              "height": 38,
+            }
+          }
+        >
+          Your Data
+        </strong>
+        <EuiLink
+          color="primary"
+          href="#/management/kibana/index"
+          style={
+            Object {
+              "marginLeft": 8,
+            }
+          }
+          type="button"
+        >
+          Connect to your Elasticsearch index
+        </EuiLink>
+      </EuiText>
+    </EuiFlexItem>
+  </EuiFlexGroup>
+</EuiPanel>
+`;

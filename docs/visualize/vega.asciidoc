@@ -1,0 +1,342 @@
+[[vega-graph]]
+== Vega Graphs
+experimental[]
+
+You can build https://vega.github.io/vega/examples/[Vega] and
+https://vega.github.io/vega-lite/examples/[VegaLite] data visualizations
+into Kibana, either standalone, or on top of a map.  To see Vega in action,
+watch this
+https://www.youtube.com/watch?v=lQGCipY3th8[short introduction video].
+
+
+[[vega-quick-demo]]
+=== Getting Started with Vega
+
+Follow these steps to create your first Vega visualization.
+
+. In Kibana, choose Visualize, and add Vega visualization. You should see a default graph.
+. Try changing `mark` from `line` to `point`, `area`, `bar`, `circle`,
+`square`, ... (see
+https://vega.github.io/vega-lite/docs/mark.html#mark-def[docs])
+. Try other https://vega.github.io/vega/examples/[Vega] or
+https://vega.github.io/vega-lite/examples/[VegaLite] visualizations. You
+may need to make URLs absolute, e.g. replace
+`"url": "data/world-110m.json"` with
+`"url": "https://vega.github.io/editor/data/world-110m.json"`. (see
+link:#Using%20Vega%20and%20VegaLite%20examples[notes below])
+. Using https://www.npmjs.com/package/makelogs[makelogs util], generate
+some logstash data and try link:public/examples/logstash[logstash
+examples].  *(Do not use makelogs on a production cluster.)*
+
+[[vega-vs-vegalite]]
+=== Vega vs VegaLite
+
+VegaLite is a simplified version of Vega, useful to quickly get started,
+but has a number of limitations. VegaLite is automatically converted
+into Vega before rendering. Compare
+https://github.com/nyurik/kibana-vega-vis/blob/master/examples/logstash/logstash-simple_line-vega.json[logstash-simple_line-vega]
+and
+https://github.com/nyurik/kibana-vega-vis/blob/master/examples/logstash/logstash-simple_line-vegalite.json[logstash-simple_line-vegalite]
+(both use the same Elasticsearch logstash data). You may use
+https://vega.github.io/editor/[this editor] to convert VegaLite into
+Vega.
+
+
+[[vega-querying-elasticsearch]]
+=== Querying Elasticsearch
+
+By default, Vega's https://vega.github.io/vega/docs/data/[data] element
+can use embedded and external data with a `"url"` parameter. Kibana adds support for the direct Elasticsearch queries by overloading
+the `"url"` value.
+
+Here is an example of an Elasticsearch query that counts the number of documents in all indexes. The query uses *@timestamp* field to filter the time range, and break it into histogram buckets.
+
+[source,yaml]
+----
+// An object instead of a string for the url value
+// is treated as a context-aware Elasticsearch query.
+url: {
+  // Filter the time picker (upper right corner) with this field
+  %timefield%: @timestamp
+  // Apply dashboard context filters when set
+  %context%: true
+
+  // Which indexes to search
+  index: _all
+  // The body element may contain "aggs" and "query" subfields
+  body: {
+    aggs: {
+      time_buckets: {
+        date_histogram: {
+          // Use date histogram aggregation on @timestamp field
+          field: @timestamp
+          // interval value will depend on the daterange picker
+          // Use an integer to set approximate bucket count
+          interval: { %autointerval%: true }
+          // Make sure we get an entire range, even if it has no data
+          extended_bounds: {
+            min: { %timefilter%: "min" }
+            max: { %timefilter%: "max" }
+          }
+          // Use this for linear (e.g. line, area) graphs
+          // Without it, empty buckets will not show up
+          min_doc_count: 0
+        }
+      }
+    }
+    // Speed up the response by only including aggregation results
+    size: 0
+  }
+}
+----
+
+The full result has this kind of structure:
+
+[source,yaml]
+----
+{
+  "aggregations": {
+    "time_buckets": {
+      "buckets": [{
+          "key_as_string": "2015-11-30T22:00:00.000Z",
+          "key": 1448920800000,
+          "doc_count": 28
+        }, {
+          "key_as_string": "2015-11-30T23:00:00.000Z",
+          "key": 1448924400000,
+          "doc_count": 330
+        }, ...
+----
+
+Note that `"key"` is a unix timestamp, and can be used without conversions by the
+Vega date expressions.
+
+For most graphs we only need the list of the bucket values, so we use `format: {property: "aggregations.time_buckets.buckets"}` expression to focus on just the data we need.
+
+Query may be specified with individual range and dashboard context as
+well. This query is equivalent to `"%context%": true, "%timefield%": "@timestamp"`,
+except that the timerange is shifted back by 10 minutes:
+
+[source,yaml]
+----
+{
+  body: {
+    query: {
+      bool: {
+        must: [
+          // This string will be replaced
+          // with the auto-generated "MUST" clause
+          "%dashboard_context-must_clause%"
+          {
+            range: {
+              // apply timefilter (upper right corner)
+              // to the @timestamp variable
+              @timestamp: {
+                // "%timefilter%" will be replaced with
+                // the current values of the time filter
+                // (from the upper right corner)
+                "%timefilter%": true
+                // Only work with %timefilter%
+                // Shift current timefilter by 10 units back
+                shift: 10
+                // week, day (default), hour, minute, second
+                unit: minute
+              }
+            }
+          }
+        ]
+        must_not: [
+          // This string will be replaced with
+          // the auto-generated "MUST-NOT" clause
+          "%dashboard_context-must_not_clause%"
+        ]
+      }
+    }
+  }
+}
+----
+
+The `"%timefilter%"` can also be used to specify a single min or max
+value. As shown above, the date_histogram's `extended_bounds` can be set
+with two values - min and max. Instead of hardcoding a value, you may
+use `"min": {"%timefilter%": "min"}`, which will be replaced with the
+beginning of the current time range. The `shift` and `unit` values are
+also supported. The `"interval"` can also be set dynamically, depending
+on the currently picked range: `"interval": {"%autointerval%": 10}` will
+try to get about 10-15 data points (buckets).
+
+[[vega-esmfiles]]
+=== Elastic Map Files
+
+It is possible to access Elastic Map Service's files via the same mechanism
+
+[source,yaml]
+----
+url: {
+  // "type" defaults to "elasticsearch" otherwise
+  type: emsfile
+  // Name of the file, exactly as in the Region map visualization
+  name: World Countries
+}
+// The result is a geojson file, get its features to use
+// this data source with the "shape" marks
+// https://vega.github.io/vega/docs/marks/shape/
+format: {property: "features"}
+----
+
+[[vega-with-a-map]]
+=== Vega with a Map
+
+Kibana's default map can be used as a base of the Vega graph. To enable,
+the graph must specify `type=map` in the host configuration:
+
+[source,yaml]
+----
+{
+  "config": {
+    "kibana": {
+      "type": "map",
+
+      // Initial map position
+      "latitude": 40.7,   // default 0
+      "longitude": -74,   // default 0
+      "zoom": 7,          // default 2
+
+      // defaults to "default". Use false to disable base layer.
+      "mapStyle": false,
+
+      // default 0
+      "minZoom": 5,
+
+      // defaults to the maximum for the given style,
+      // or 25 when base is disabled
+      "maxZoom": 13,
+
+      // defaults to true, shows +/- buttons to zoom in/out
+      "zoomControl": false,
+
+      // defaults to true, disables mouse wheel zoom
+      "scrollWheelZoom": false,
+
+      // When false, repaints on each move frame.
+      // Makes the graph slower when moving the map
+      "delayRepaint": true, // default true
+    }
+  },
+  /* the rest of Vega JSON */
+}
+----
+
+This visualization will automatically inject a projection called
+`"projection"`. Use it to calculate positioning of all geo-aware marks.
+Additionally, you may use `latitude`, `longitude`, and `zoom` signals.
+These signals can be used in the graph, or can be updated to modify the
+positioning of the map.
+
+[[vega-debugging]]
+=== Debugging
+
+[[vega-browser-debugging-console]]
+==== Browser Debugging console
+
+Use browser debugging tools (e.g. F12 or Ctrl+Shift+J in Chrome) to
+inspect the `VEGA_DEBUG` variable:
+* `view` - access to the Vega View object. See https://vega.github.io/vega/docs/api/debugging/[Vega Debugging Guide]
+ on how to inspect data and signals at runtime. For VegaLite, `VEGA_DEBUG.view.data('source_0')` gets the main data set.
+ For Vega, it uses the data name as defined in your Vega spec.
+* `vega_spec` - Vega JSON graph specification after some modifications by Kibana. In case
+of VegaLite, this is the output of the VegaLite compiler.
+* `vegalite_spec` - If this is a VegaLite graph, JSON specification of the graph before
+VegaLite compilation.
+
+[[vega-data]]
+==== Data
+
+If you are using Elasticsearch query, make sure your resulting data is
+what you expected. The easiest way to view it is by using "networking"
+tab in the browser debugging tools (e.g. F12). Modify the graph slightly
+so that it makes a search request, and view the response from the
+server. Another approach is to use
+https://www.elastic.co/guide/en/kibana/current/console-kibana.html[Kibana
+Dev Tools] tab - place the index name into the first line:
+`GET <INDEX_NAME>/_search`, and add your query as the following lines
+(just the value of the `"query"` field)
+
+If you need to share your graph with someone, you may want to copy the
+raw data response to https://gist.github.com/[gist.github.com], possibly
+with a `.json` extension, use the `[raw]` button, and use that url
+directly in your graph.
+
+To restrict Vega from using non-ES data sources, add `vega.enableExternalUrls: false`
+to your kibana.yml file.
+
+[[vega-notes]]
+[[vega-useful-links]]
+=== Useful Links
+
+* https://vega.github.io/editor/[Editor] - includes examples for Vega &
+VegaLite, but does not support any Kibana-specific features like
+Elasticsearch requests and interactive base maps.
+* VegaLite
+https://vega.github.io/vega-lite/tutorials/getting_started.html[Tutorials],
+https://vega.github.io/vega-lite/docs/[docs], and
+https://vega.github.io/vega-lite/examples/[examples]
+* Vega https://vega.github.io/vega/tutorials/[Tutorial],
+https://vega.github.io/vega/docs/[docs],
+https://vega.github.io/vega/examples/[examples]
+
+[[vega-using-vega-and-vegalite-examples]]
+==== Using Vega and VegaLite examples
+
+When using https://vega.github.io/vega/examples/[Vega] and
+https://vega.github.io/vega-lite/examples/[VegaLite] examples, you may
+need to modify the "data" section to use absolute URL. For example,
+replace `"url": "data/world-110m.json"` with
+`"url": "https://vega.github.io/editor/data/world-110m.json"`. Also,
+regular Vega examples use `"autosize": "pad"` layout model, whereas
+Kibana uses `fit`. Remove all `autosize`, `width`, and `height`
+values. See link:#sizing-and-positioning[sizing and positioning] below.
+
+[[vega-additional-configuration-options]]
+==== Additional configuration options
+
+These options are specific to the Kibana. link:#vega-with-a-map[Map support] has
+additional configuration options.
+
+[source,yaml]
+----
+{
+  config: {
+    kibana: {
+      // Placement of the Vega-defined signal bindings.
+      // Can be `left`, `right`, `top`, or `bottom` (default).
+      controlsLocation: top
+      // Can be `vertical` or `horizontal` (default).
+      controlsDirection: vertical
+      // If true, hides most of Vega and VegaLite warnings
+      hideWarnings: true
+      // Vega renderer to use: `svg` or `canvas` (default)
+      renderer: canvas
+    }
+  }
+  /* the rest of Vega code */
+}
+----
+
+[[vega-sizing-and-positioning]]
+==== Sizing and positioning
+
+[[vega-and-vegalite]]
+Vega and VegaLite
+
+By default, Kibana Vega graphs will use
+`autosize = { type: 'fit', contains: 'padding' }` layout model for Vega
+and VegaLite graphs. The `fit` model uses all available space, ignores
+`width` and `height` values, but respects the padding values. You may
+override this behaviour by specifying a different `autosize` value.
+
+[[vega-on-a-map]]
+Vega on a map
+
+All Vega graphs will ignore `autosize`, `width`, `height`, and `padding`
+values, using `fit` model with zero padding.

@@ -1,3 +1,22 @@
+/*
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
 import expect from 'expect.js';
 import $ from 'jquery';
 
@@ -22,8 +41,8 @@ describe('jQuery.findTestSubject', function () {
     const $otherMatch = $make('subject').appendTo($container);
 
     const $found = $container.findTestSubject('subject');
-    expect($found.filter($match).size()).to.be(1);
-    expect($found.filter($otherMatch).size()).to.be(1);
+    expect($found.filter($match).length).to.be(1);
+    expect($found.filter($otherMatch).length).to.be(1);
   });
 
   it('finds all of the elements with either subject', function () {
@@ -33,12 +52,12 @@ describe('jQuery.findTestSubject', function () {
     const $noMatch = $make('notSubject').appendTo($container);
 
     const $found = $container.findTestSubject('subject', 'alsoSubject');
-    expect($found.filter($match1).size()).to.be(1);
-    expect($found.filter($match2).size()).to.be(1);
-    expect($found.filter($noMatch).size()).to.be(0);
+    expect($found.filter($match1).length).to.be(1);
+    expect($found.filter($match2).length).to.be(1);
+    expect($found.filter($noMatch).length).to.be(0);
   });
 
-  it('finds all of the elements with a decendant selector', function () {
+  it('finds all of the elements with a descendant selector', function () {
     const $container = $('<div>');
     const $parent = $make('foo name').appendTo($container);
     const $bar = $make('bar othername').appendTo($parent);

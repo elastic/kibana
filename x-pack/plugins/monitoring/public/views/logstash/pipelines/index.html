@@ -1,0 +1,13 @@
+<monitoring-main
+  product="logstash"
+  name="pipelines"
+  data-test-subj="logstashPipelinesListing"
+>
+  <monitoring-cluster-status-logstash status="pageData.clusterStatus"></monitoring-cluster-status-logstash>
+  <div class="page-row">
+    <monitoring-logstash-pipeline-listing
+      pipelines="pageData.pipelines"
+      upgrade-message="{{ upgradeMessage }}"
+    ></monitoring-logstash-pipeline-listing>
+  </div>
+</monitoring-main>

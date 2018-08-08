@@ -1,0 +1,11 @@
+<div ng-if="card.existsInDocs === true" class="card-contents">
+  <div class="stats euiText">
+    <div class="stat"><i class="fa fa-files-o" aria-hidden="true"></i>
+      {{ card.stats.count }} <ng-pluralize count="card.stats.count" when="{'1':'document', 'other':'documents'}">documents</ng-pluralize>
+      ({{ 100 * card.stats.count / card.stats.sampleCount | number:1 }}%)
+    </div>
+    <div class="stat">earliest {{ card.stats.earliest | moment }}</div>
+    <div class="stat">latest {{ card.stats.latest | moment }}</div>
+
+  </div>
+</div>

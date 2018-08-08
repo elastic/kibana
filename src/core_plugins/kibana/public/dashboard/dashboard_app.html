@@ -1,19 +1,7 @@
-<dashboard-app class="app-container dashboard-container">
-  <div class="fullScreenModePlaceholder">
-    <div
-      aria-label="Exit full screen mode"
-      kbn-accessible-click
-      ng-if="fullScreenMode"
-      class="exitFullScreenMode"
-      ng-click="exitFullScreenMode()"
-    >
-      <span class="exitFullScreenModeLogo" data-test-subj="exitFullScreenModeLogo"></span>
-      <span class="exitFullScreenModeText" data-test-subj="exitFullScreenModeText">
-        Exit full screen
-        <span class="kuiIcon fa fa-angle-left"></span>
-      </span>
-    </div>
-  </div>
+<dashboard-app
+  class="app-container dashboard-container"
+  ng-class="{'dashboard-container-with-margins': model.useMargins}"
+>
   <!-- Local nav. -->
   <kbn-top-nav name="dashboard" config="topNavMenu">
     <!-- Transcluded elements. -->
@@ -40,6 +28,7 @@
           query="model.query"
           app-name="'dashboard'"
           on-submit="updateQueryAndFetch($query)"
+          index-patterns="indexPatterns"
         >
         </query-bar>
       </div>
@@ -51,7 +40,6 @@
     ng-show="showFilterBar()"
     state="state"
     index-patterns="indexPatterns"
-    ng-if="model.query.language === 'lucene'"
   ></filter-bar>
 
   <div
@@ -78,8 +66,7 @@
   </div>
 
   <dashboard-viewport-provider
-    get-container-api="getContainerApi"
-    get-embeddable-handler="getEmbeddableHandler"
+    get-embeddable-factory="getEmbeddableFactory"
   >
   </dashboard-viewport-provider>
 

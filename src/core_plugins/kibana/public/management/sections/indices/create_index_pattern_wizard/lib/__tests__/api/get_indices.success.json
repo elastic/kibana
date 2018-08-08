@@ -1,0 +1,20 @@
+{
+  "hits": {
+    "total": 1,
+    "max_score": 0.0,
+    "hits": []
+  },
+  "aggregations": {
+    "indices": {
+      "doc_count_error_upper_bound": 0,
+      "sum_other_doc_count": 0,
+      "buckets": [{
+        "key": "1",
+        "doc_count": 1
+      },{
+        "key": "2",
+        "doc_count": 1
+      }]
+    }
+  }
+}

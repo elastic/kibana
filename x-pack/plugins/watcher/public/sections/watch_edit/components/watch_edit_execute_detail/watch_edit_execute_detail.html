@@ -1,0 +1,122 @@
+<form name="watchEditExecuteDetail.triggerForm" novalidate>
+  <toggle-panel
+    toggle-panel-id="trigger"
+    button-text="Trigger Overrides"
+    is-collapsed="watchEditExecuteDetail.isSectionCollapsed('trigger')"
+    on-toggle="watchEditExecuteDetail.onSectionToggle"
+  >
+    <div class="kuiFormSection">
+      <label
+        for="triggeredTime"
+        class="kuiFormLabel"
+      >
+        Triggered Time
+      </label>
+      <input
+        type="text"
+        id="triggeredTime"
+        name="triggeredTime"
+        ng-model="watchEditExecuteDetail.executeDetails.triggeredTime"
+        class="kuiTextInput"
+        placeholder="now"
+      >
+    </div>
+    <div class="kuiFormSection">
+      <label
+        for="scheduledTime"
+        class="kuiFormLabel"
+      >
+        Scheduled Time
+      </label>
+      <input
+        type="text"
+        id="scheduledTime"
+        name="scheduledTime"
+        ng-model="watchEditExecuteDetail.executeDetails.scheduledTime"
+        class="kuiTextInput"
+        placeholder="now"
+      >
+    </div>
+  </toggle-panel>
+</form>
+
+<toggle-panel
+  toggle-panel-id="input"
+  button-text="Input Overrides"
+  is-collapsed="watchEditExecuteDetail.isSectionCollapsed('input')"
+  on-toggle="watchEditExecuteDetail.onSectionToggle"
+>
+  <div class="kuiFormSection">
+    <label
+      for="recordExecution"
+      class="kuiFormLabel"
+    >
+      Alternative Input
+      <a
+        class="copyFromPrevious"
+        ng-click="watchEditExecuteDetail.copyFromPreviousExecution()"
+        ng-show="watchEditExecuteDetail.previousWatchHistoryItem"
+        data-test-subj="lnkCopyFromPreviousExecution"
+      >
+        Copy from previous execution
+      </a>
+    </label>
+
+    <json-editor
+      json="watchEditExecuteDetail.executeDetails.alternativeInput"
+      on-change="watchEditExecuteDetail.onAlternativeInputChange"
+      on-valid="watchEditExecuteDetail.onAlternativeInputValid"
+      on-invalid="watchEditExecuteDetail.onAlternativeInputInvalid"
+    ></json-editor>
+    <div
+      class="kuiInputNote kuiInputNote--danger"
+      ng-show="!watchEditExecuteDetail.isAlternativeInputValid && !watchEditExecuteDetail.isAlternativeInputEmpty"
+    >
+      Invalid JSON
+    </div>
+  </div>
+</toggle-panel>
+
+<form name="watchEditExecuteDetail.conditionForm" novalidate>
+  <toggle-panel
+    toggle-panel-id="condition"
+    button-text="Condition Overrides"
+    is-collapsed="watchEditExecuteDetail.isSectionCollapsed('condition')"
+    on-toggle="watchEditExecuteDetail.onSectionToggle"
+  >
+    <div class="kuiFormSection">
+      <label
+        for="ignoreCondition"
+        class="kuiFormLabel"
+      >
+        <input
+          id="ignoreCondition"
+          name="ignoreCondition"
+          type="checkbox"
+          ng-model="watchEditExecuteDetail.executeDetails.ignoreCondition"
+          class="kuiCheckBox"
+        >
+        Ignore Condition (Condition is always true)
+      </label>
+    </div>
+  </toggle-panel>
+</form>
+
+<form name="watchEditExecuteDetail.actionForm" novalidate>
+  <toggle-panel
+    toggle-panel-id="action"
+    button-text="Action Overrides"
+    is-collapsed="watchEditExecuteDetail.isSectionCollapsed('action')"
+    on-toggle="watchEditExecuteDetail.onSectionToggle"
+  >
+    <div class="kuiFormSection">
+      <label class="kuiFormLabel">
+        Action Modes
+      </label>
+      <watch-action-mode-table
+        xpack-watch="watchEditExecuteDetail.watch"
+        on-change="watchEditExecuteDetail.onActionModesChanged"
+      ></watch-action-mode-table>
+    </div>
+  </toggle-panel>
+</form>

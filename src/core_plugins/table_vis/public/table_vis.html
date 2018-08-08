@@ -7,11 +7,11 @@
   <div ng-if="tableGroups" class="table-vis-container">
     <kbn-agg-table-group
       group="tableGroups"
-      export-title="vis.title"
-      per-page="vis.params.perPage"
+      export-title="visState.title"
+      per-page="visState.params.perPage"
       sort="sort"
-      show-total="vis.params.showTotal"
-      total-func="vis.params.totalFunc">
+      show-total="visState.params.showTotal"
+      total-func="visState.params.totalFunc">
     </kbn-agg-table-group>
   </div>
 </div>

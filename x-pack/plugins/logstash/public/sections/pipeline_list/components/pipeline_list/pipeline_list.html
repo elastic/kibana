@@ -1,0 +1,125 @@
+<kbn-management-app section="logstash">
+  <div class="kuiNotice" ng-show="pipelineList.isForbidden && !pipelineList.isLoading">
+    <div class="kuiNotice__header">
+      <h1 class="kuiNoticeTitle">
+        <span class="fa fa-times kuiIcon--error"></span>
+          You do not have permission to manage Logstash pipelines.
+      </h1>
+      <div class="kuiNoticeText">
+        Please contact your administrator.
+      </div>
+    </div>
+  </div>
+
+  <div
+    class="kuiViewContent kuiViewContent--constrainedWidth"
+    ng-show="!pipelineList.isForbidden"
+    data-test-subj="pipelineList"
+  >
+    <div class="kuiViewContentItem kuiControlledTable kuiVerticalRhythm">
+      <div class="kuiToolBar">
+        <div class="kuiToolBarSearch">
+          <tool-bar-search-box
+            filter="pipelineList.query"
+            on-filter="pipelineList.onQueryChange"
+            data-test-subj="filter"
+          ></tool-bar-search-box>
+        </div>
+
+        <div class="kuiToolBarSection">
+          <button
+            class="kuiButton kuiButton--primary"
+            ng-click="pipelineList.onNewPipeline()"
+            ng-disabled="pipelineList.isReadOnly"
+            data-test-subj="btnAdd"
+          >
+            Create pipeline
+          </button>
+          <button
+            class="kuiButton kuiButton--danger"
+            ng-click="pipelineList.onSelectedPipelinesDelete()"
+            ng-disabled="pipelineList.isReadOnly || !pipelineList.hasSelectedPipelines"
+            data-test-subj="btnDelete"
+          >
+            Delete
+          </button>
+        </div>
+
+        <div class="kuiToolBarSection">
+          <tool-bar-pager-text
+            start-item="pipelineList.pager.startItem"
+            end-item="pipelineList.pager.endItem"
+            total-items="pipelineList.pager.totalItems"
+          ></tool-bar-pager-text>
+          <tool-bar-pager-buttons
+            has-previous-page="pipelineList.pager.hasPreviousPage"
+            has-next-page="pipelineList.pager.hasNextPage"
+            on-page-next="pipelineList.onPageNext"
+            on-page-previous="pipelineList.onPagePrevious"
+          ></tool-bar-pager-buttons>
+        </div>
+      </div>
+
+      <table-info
+        ng-show="pipelineList.isLoading">
+          Loading pipelines
+      </table-info>
+      <table-info
+        ng-show="!pipelineList.isLoading && !pipelineList.hasPageOfPipelines">
+          No pipelines found
+      </table-info>
+
+      <pipeline-table
+        pipelines="pipelineList.pageOfPipelines"
+        sort-field="pipelineList.sortField"
+        sort-reverse="pipelineList.sortReverse"
+        on-sort-change="pipelineList.onSortChange"
+        on-select-change="pipelineList.onSelectedChange"
+        ng-show="!pipelineList.isLoading && pipelineList.hasPageOfPipelines"
+        class="kuiVerticalRhythm"
+      ></pipeline-table>
+
+      <div
+        ng-if="pipelineList.showAddRoleAlert || pipelineList.showEnableMonitoringAlert"
+        data-test-subj="alertCallout"
+        class="kuiPanel kuiVerticalRhythm"
+      >
+        <div class="kuiPanelHeader">
+          <div class="kuiPanelHeaderSection">
+            <div class="kuiPanelHeader__title">
+              <div class="kuiIcon kuiIcon--error fa-warning"></div>
+              <span class="kuiSubTitle">Only pipelines created in Kibana Management appear here</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="kuiPanelBody">
+          <p class="kuiVerticalRhythm">How can I see additional pipelines?</p>
+
+          <ul
+            ng-if="pipelineList.showAddRoleAlert && pipelineList.showEnableMonitoringAlert"
+            class="kuiVerticalRhythm"
+          >
+            <li class="kuiText kuiVerticalRhythmSmall"><strong>Grant additional privileges.</strong> In Kibana Management, assign the <code class="euiCodeBlock euiCodeBlock--inline">monitoring_user</code> role to your Kibana user.</li>
+            <li class="kuiText kuiVerticalRhythmSmall"><strong>Enable monitoring.</strong> In the <code class="euiCodeBlock euiCodeBlock--inline">kibana.yml</code> file, set <code class="euiCodeBlock euiCodeBlock--inline">xpack.monitoring.enabled</code> and <code class="euiCodeBlock euiCodeBlock--inline">xpack.monitoring.ui.enabled</code> to <code class="euiCodeBlock euiCodeBlock--inline">true</code>.</li>
+          </ul>
+
+          <p
+            ng-if="pipelineList.showAddRoleAlert && !pipelineList.showEnableMonitoringAlert"
+            class="kuiVerticalRhythm kuiText"
+          >
+            <strong>Grant additional privileges.</strong> In Kibana Management, assign the <code class="euiCodeBlock euiCodeBlock--inline">monitoring_user</code> role to your Kibana user.
+          </p>
+
+          <p
+            ng-if="pipelineList.showEnableMonitoringAlert && !pipelineList.showAddRoleAlert"
+            class="kuiVerticalRhythm kuiText"
+          >
+            <strong>Enable monitoring.</strong> In the <code class="euiCodeBlock euiCodeBlock--inline">kibana.yml</code> file, set <code class="euiCodeBlock euiCodeBlock--inline">xpack.monitoring.enabled</code> and <code class="euiCodeBlock euiCodeBlock--inline">xpack.monitoring.ui.enabled</code> to <code class="euiCodeBlock euiCodeBlock--inline">true</code>.
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</kbn-management-app>

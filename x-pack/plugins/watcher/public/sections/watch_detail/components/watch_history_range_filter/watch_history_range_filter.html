@@ -1,0 +1,13 @@
+<select
+  ng-model="watchHistoryRangeFilter.range"
+  ng-change="watchHistoryRangeFilter.onRangeChange(watchHistoryRangeFilter.range)"
+  class="kuiSelect"
+>
+  <option value="now-1h">Last 1 hour</option>
+  <option value="now-24h">Last 24 hours</option>
+  <option value="now-7d">Last 7 days</option>
+  <option value="now-30d">Last 30 days</option>
+  <option value="now-6M">Last 6 months</option>
+  <option value="now-1y">Last 1 year</option>
+  <option value="all">All</option>
+</select>

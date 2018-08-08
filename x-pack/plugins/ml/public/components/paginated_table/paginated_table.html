@@ -1,0 +1,55 @@
+<paginate
+  ng-if="sortedRows.length"
+  list="sortedRows"
+  per-page-prop="perPage"
+  class="agg-table">
+  <div class="agg-table-paginated">
+    <table class="table table-condensed">
+      <thead>
+        <tr>
+          <th
+            ng-repeat-start="col in columns"
+            ng-if="col.title"
+            ng-click="mlPaginatedTable.sortColumn($index)"
+            scope="col"
+            class="{{ col.class }}">
+            <span ng-bind="col.title"></span>
+
+            <icon-tip
+              ng-if="col.info"
+              content="'{{ col.info }}'"
+            ></icon-tip>
+
+            <button
+              ng-if="col.sortable !== false"
+              id="docTableHeaderFieldSort{{col.title}}"
+              tabindex="0"
+              aria-label="Sort {{col.title}} ascending"
+              class="table-header-button fa fa-sort"
+              ng-class="{
+                'fa-sort-asc': mlPaginatedTable.sort.columnIndex === $index && mlPaginatedTable.sort.direction === 'asc',
+                'fa-sort-desc': mlPaginatedTable.sort.columnIndex === $index && mlPaginatedTable.sort.direction === 'desc',
+                'fa-sort': mlPaginatedTable.sort.columnIndex !== $index || mlPaginatedTable.sort.direction === null
+              }"
+              tooltip="Sort by {{col.title}}"
+              tooltip-append-to-body="1">
+            </button>
+
+            <i aria-label="Click on a cell to filter" ng-if="col.filterable" class="fa fa-search" ng-click="$event.stopPropagation()" tooltip="Click on a cell to filter"></i>
+          </th>
+          <td
+            ng-repeat-end
+            ng-if="!col.title"
+            class="{{ col.class }}">
+          </td>
+        </tr>
+      </thead>
+      <tbody ml-rows="page" ml-rows-min="perPage"></tbody>
+    </table>
+  </div>
+
+  <!-- auto-inserted by the paginate directive... -->
+  <!-- <paginate-controls></paginate-controls> -->
+  <div class="pagination-container" ng-transclude></div>
+
+</paginate>

@@ -38,6 +38,8 @@ A high level overview of our contributing guidelines.
 
 Don't fret, it's not as daunting as the table of contents makes it out to be!
 
+## Effective issue reporting in Kibana
+
 ### Voicing the importance of an issue
 
 We seriously appreciate thoughtful comments. If an issue is important to you, add a comment with a solid write up of your use case and explain why it's so important. Please avoid posting comments comprised solely of a thumbs up emoji 👍.
@@ -109,7 +111,7 @@ You want to make sure there are no merge conflicts. If there are merge conflicts
 
 You can use `git status` to see which files contain conflicts. They'll be the ones that aren't staged for commit. Open those files, and look for where git has marked the conflicts. Resolve the conflicts so that the changes you want to make to the code have been incorporated in a way that doesn't destroy work that's been done in master. Refer to master's commit history on GitHub if you need to gain a better understanding of how code is conflicting and how best to resolve it.
 
-Once you've resolved all of the merge conflicts, use `git add -A` to stage them to be commiteed, and then use `git rebase --continue` to tell git to continue the rebase.
+Once you've resolved all of the merge conflicts, use `git add -A` to stage them to be committed, and then use `git rebase --continue` to tell git to continue the rebase.
 
 When the rebase has completed, you will need to force push your branch because the history is now completely different than what's on the remote. **This is potentially dangerous** because it will completely overwrite what you have on the remote, so you need to be sure that you haven't lost any work when resolving merge conflicts. (If there weren't any merge conflicts, then you can force push without having to worry about this.)
 
@@ -152,23 +154,29 @@ git clone https://github.com/[YOUR_USERNAME]/kibana.git kibana
 cd kibana
 ```
 
-Install the version of node.js listed in the `.node-version` file _(this can be easily automated with tools such as [nvm](https://github.com/creationix/nvm) and [avn](https://github.com/wbyoung/avn))_
+Install the version of Node.js listed in the `.node-version` file. This can be automated with tools such as [nvm](https://github.com/creationix/nvm), [nvm-windows](https://github.com/coreybutler/nvm-windows) or [avn](https://github.com/wbyoung/avn). As we also include a `.nvmrc` file you can switch to the correct version when using nvm by running:
 
 ```bash
-nvm install "$(cat .node-version)"
+nvm use
 ```
 
-Install `npm` dependencies
+Install the latest version of [yarn](https://yarnpkg.com).
+
+Bootstrap Kibana and install all the dependencies
 
 ```bash
-npm install
+yarn kbn bootstrap
 ```
 
-Start elasticsearch.
+(You can also run `yarn kbn` to see the other available commands. For more info about this tool, see https://github.com/elastic/kibana/tree/master/packages/kbn-pm.)
+
+Start elasticsearch from a nightly snapshot.
 
 ```bash
-npm run elasticsearch
+yarn es snapshot
 ```
+
+This will run Elasticsearch with a `basic` license. Additional options are available, pass `--help` for more information.
 
 > You'll need to have a `java` binary in `PATH` or set `JAVA_HOME`.
 
@@ -182,12 +190,36 @@ node scripts/makelogs
 
 Start the development server.
   ```bash
-  npm start
+  yarn start
   ```
 
 > On Windows, you'll need you use Git Bash, Cygwin, or a similar shell that exposes the `sh` command.  And to successfully build you'll need Cygwin optional packages zip, tar, and shasum.
 
-Now you can point your web browser to https://localhost:5601 and start using Kibana! When running `npm start`, Kibana will also log that it is listening on port 5603 due to the base path proxy, but you should still access Kibana on port 5601.
+Now you can point your web browser to http://localhost:5601 and start using Kibana! When running `yarn start`, Kibana will also log that it is listening on port 5603 due to the base path proxy, but you should still access Kibana on port 5601.
+
+#### Running Kibana in Open-Source mode
+
+If you're looking to only work with the open-source software, supply the license type to `yarn es`:
+
+```bash
+yarn es snapshot --license oss
+```
+
+And start Kibana with only open-source code:
+
+```bash
+yarn start --oss
+```
+
+#### Unsupported URL Type
+
+If you're installing dependencies and seeing an error that looks something like
+
+```
+Unsupported URL Type: link:packages/eslint-config-kibana
+```
+
+you're likely running `npm`. To install dependencies in Kibana you need to run `yarn kbn bootstrap`. For more info, see [Setting Up Your Development Environment](#setting-up-your-development-environment) above.
 
 #### Customizing `config/kibana.dev.yml`
 
@@ -203,7 +235,7 @@ In development mode, Kibana runs a customized version of [Webpack](http://webpac
 
 #### Setting Up SSL
 
-Kibana includes a self-signed certificate that can be used for development purposes: `npm start -- --ssl`.
+Kibana includes a self-signed certificate that can be used for development purposes: `yarn start --ssl`.
 
 ### Linting
 
@@ -230,23 +262,47 @@ Before running the tests you will need to install the projects dependencies as d
 Once that's done, just run:
 
 ```bash
-npm run test && npm run build -- --skip-os-packages
+yarn test && yarn build --skip-os-packages
+```
+
+You can get all build options using the following command:
+
+```bash
+yarn build --help
+```
+
+### Debugging Server Code
+`yarn debug` will start the server with Node's inspect flag.  Kibana's development mode will start three processes.  Chrome's developer tools can be configured to connect to all three under the connection tab.
+
+### Unit testing frameworks
+Kibana is migrating unit testing from Mocha to Jest. Legacy unit tests still exist in Mocha but all new unit tests should be written in Jest.
+
+#### Mocha (legacy)
+Mocha tests are contained in `__tests__` directories.
+
+#### Jest
+Jest tests are stored in the same directory as source code files with the `.test.js` suffix.
+
+### Running Jest Unit Tests
+
+```bash
+node scripts/jest
 ```
 
 ### Debugging Unit Tests
 
-The standard `npm run test` task runs several sub tasks and can take several minutes to complete, making debugging failures pretty painful. In order to ease the pain specialized tasks provide alternate methods for running the tests.
+The standard `yarn test` task runs several sub tasks and can take several minutes to complete, making debugging failures pretty painful. In order to ease the pain specialized tasks provide alternate methods for running the tests.
 
-To execute both server and browser tests, but skip linting, use `npm run test:quick`.
+To execute both server and browser tests, but skip linting, use `yarn test:quick`.
 
 ```bash
-npm run test:quick
+yarn test:quick
 ```
 
-Use `npm run test:server` when you want to run only the server tests.
+Use `yarn test:server` when you want to run only the server tests.
 
 ```bash
-npm run test:server
+yarn test:server
 ```
 
 When you'd like to execute individual server-side test files, you can use the command below. Note that this command takes care of configuring Mocha with Babel compilation for you, and you'll be better off avoiding a globally installed `mocha` package. This command is great for development and for quickly identifying bugs.
@@ -261,16 +317,16 @@ You could also add the `--debug` option so that `node` is run using the `--debug
 node scripts/mocha --debug <file>
 ```
 
-With `npm run test:browser`, you can run only the browser tests. Coverage reports are available for browser tests by running `npm run test:coverage`. You can find the results under the `coverage/` directory that will be created upon completion.
+With `yarn test:browser`, you can run only the browser tests. Coverage reports are available for browser tests by running `yarn test:coverage`. You can find the results under the `coverage/` directory that will be created upon completion.
 
 ```bash
-npm run test:browser
+yarn test:browser
 ```
 
-Using `npm run test:dev` initializes an environment for debugging the browser tests. Includes an dedicated instance of the kibana server for building the test bundle, and a karma server. When running this task the build is optimized for the first time and then a karma-owned instance of the browser is opened. Click the "debug" button to open a new tab that executes the unit tests.
+Using `yarn test:dev` initializes an environment for debugging the browser tests. Includes an dedicated instance of the kibana server for building the test bundle, and a karma server. When running this task the build is optimized for the first time and then a karma-owned instance of the browser is opened. Click the "debug" button to open a new tab that executes the unit tests.
 
 ```bash
-npm run test:dev
+yarn test:dev
 ```
 
 In the screenshot below, you'll notice the URL is `localhost:9876/debug.html`. You can append a `grep` query parameter to this URL and set it to a string value which will be used to exclude tests which don't match. For example, if you changed the URL to `localhost:9876/debug.html?query=my test` and then refreshed the browser, you'd only see tests run which contain "my test" in the test description.
@@ -285,8 +341,8 @@ This should work super if you're using the [Kibana plugin generator](https://git
 To run the tests for just your particular plugin run the following command from your plugin:
 
 ```bash
-npm run test:server
-npm run test:browser -- --dev # remove the --dev flag to run them once and close
+yarn test:server
+yarn test:browser --dev # remove the --dev flag to run them once and close
 ```
 
 ### Cross-browser Compatibility
@@ -300,13 +356,14 @@ npm run test:browser -- --dev # remove the --dev flag to run them once and close
 * Open VMWare and go to Window > Virtual Machine Library. Unzip the virtual machine and drag the .vmx file into your Virtual Machine Library.
 * Right-click on the virtual machine you just added to your library and select "Snapshots...", and then click the "Take" button in the modal that opens. You can roll back to this snapshot when the VM expires in 90 days.
 * In System Preferences > Sharing, change your computer name to be something simple, e.g. "computer".
-* Run Kibana with `npm start -- --host=computer.local` (substituting your computer name).
+* Run Kibana with `yarn start --host=computer.local` (substituting your computer name).
 * Now you can run your VM, open the browser, and navigate to `http://computer.local:5601` to test Kibana.
 
 #### Running Browser Automation Tests
 
 [Read about the `FunctionalTestRunner`](https://www.elastic.co/guide/en/kibana/current/development-functional-tests.html) to learn more about how you can run and develop functional tests for Kibana core and plugins.
 
+You can also look into the [Scripts README.md](./scripts/README.md) to learn more about using the node scripts we provide for building Kibana, running integration tests, and starting up Kibana and Elasticsearch while you develop.
 
 ### Building OS packages
 
@@ -315,13 +372,13 @@ Packages are built using fpm, dpkg, and rpm.  Package building has only been tes
 ```bash
 apt-get install ruby-dev rpm
 gem install fpm -v 1.5.0
-npm run build -- --skip-archives
+yarn build --skip-archives
 ```
 
 To specify a package to build you can add `rpm` or `deb` as an argument.
 
 ```bash
-npm run build -- --rpm
+yarn build --rpm
 ```
 
 Distributable packages can be found in `target/` after the build completes.
@@ -347,9 +404,9 @@ Please make sure you have signed the [Contributor License Agreement](http://www.
 
 ## Submitting a Pull Request
 
-Push your local changes to your forked copy of the repository and submit a Pull Request. In the Pull Request, describe what your changes do and mention the number of the issue where discussion has taken place, eg “Closes #123″.
+Push your local changes to your forked copy of the repository and submit a Pull Request. In the Pull Request, describe what your changes do and mention the number of the issue where discussion has taken place, e.g., “Closes #123″.
 
-Always submit your pull against `master` unless the bug is only present in an older version. If the bug effects both `master` and another branch say so in your pull.
+Always submit your pull against `master` unless the bug is only present in an older version. If the bug affects both `master` and another branch say so in your pull.
 
 Then sit back and wait. There will probably be discussion about the Pull Request and, if any changes are needed, we'll work with you to get your Pull Request merged into Kibana.
 
@@ -365,20 +422,6 @@ After a pull is submitted, it needs to get to review. If you have commit permiss
 
 ### Reviewing Pull Requests
 
-So, you've been assigned a pull to review. What's that look like?
-
-Remember, someone is blocked by a pull awaiting review, make it count. Be thorough, the more action items you catch in the first review, the less back and forth will be required, and the better chance the pull has of being successful.
-
-1. **Understand the issue** that is being fixed, or the feature being added. Check the description on the pull, and check out the related issue. If you don't understand something, ask the submitter for clarification.
-1. **Reproduce the bug** (or the lack of feature I guess?) in the destination branch, usually `master`. The referenced issue will help you here. If you're unable to reproduce the issue, contact the issue submitter for clarification
-1. **Check out the pull** and test it. Is the issue fixed? Does it have nasty side effects? Try to create suspect inputs. If it operates on the value of a field try things like: strings (including an empty string), null, numbers, dates. Try to think of edge cases that might break the code.
-1. **Merge the target branch**. It is possible that tests or the linter have been updated in the target branch since the pull was submitted. Merging the pull could cause core to start failing.
-1. **Read the code**. Understanding the changes will help you find additional things to test. Contact the submitter if you don't understand something.
-1. **Go line-by-line**. Are there [style guide](https://github.com/elastic/kibana/blob/master/STYLEGUIDE.md) violations? Strangely named variables? Magic numbers? Do the abstractions make sense to you? Are things arranged in a testable way?
-1. **Speaking of tests** Are they there? If a new function was added does it have tests? Do the tests, well, TEST anything? Do they just run the function or do they properly check the output?
-1. **Suggest improvements** If there are changes needed, be explicit, comment on the lines in the code that you'd like changed. You might consider suggesting fixes. If you can't identify the problem, animated screenshots can help the review understand what's going on.
-1. **Hand it back** If you found issues, re-assign the submitter to the pull to address them. Repeat until mergable.
-1. **Hand it off** If you're the first reviewer and everything looks good but the changes are more than a few lines, hand the pull to someone else to take a second look. Again, try to find the right person to assign it to.
-1. **Merge the code** When everything looks good, put in a `LGTM` (looks good to me) comment. Merge into the target branch. Check the labels on the pull to see if backporting is required, and perform the backport if so.
+So, you've been assigned a pull to review. Check out our [pull request review guidelines](https://www.elastic.co/guide/en/kibana/master/pr-review.html) for our general philosophy for pull request reviewers.
 
 Thank you so much for reading our guidelines! :tada:

@@ -8,13 +8,19 @@
       <thead data-test-subj="paginated-table-header">
         <tr>
           <th
+            scope="col"
             ng-repeat="col in columns"
             ng-click="paginatedTable.sortColumn($index)"
             kbn-accessible-click
             tabindex="0"
             class="{{ col.class }}">
             <span ng-bind="::col.title"></span>
-            <kbn-info ng-if="col.info" info="{{ col.info }}" placement="top"></kbn-info>
+
+            <icon-tip
+              ng-if="col.info"
+              content="'{{ col.info }}'"
+            ></icon-tip>
+
             <i
               ng-if="col.sortable !== false"
               class="fa"
@@ -35,7 +41,7 @@
       </tbody>
       <tfoot ng-if="showTotal">
         <tr>
-          <th ng-repeat="col in columns" class="numeric-value">{{col.total}}</th>
+          <th scope="col" ng-repeat="col in columns" class="numeric-value">{{col.total}}</th>
         </tr>
       </tfoot>
     </table>

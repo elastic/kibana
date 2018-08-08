@@ -1,0 +1,33 @@
+{
+  "cat.indices": {
+    "url_params": {
+      "format": "",
+      "bytes": [
+        "b",
+        "k",
+        "m",
+        "g"
+      ],
+      "local": "__flag__",
+      "master_timeout": "",
+      "h": [],
+      "health": [
+        "green",
+        "yellow",
+        "red"
+      ],
+      "help": "__flag__",
+      "pri": "__flag__",
+      "s": [],
+      "v": "__flag__"
+    },
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "_cat/indices",
+      "_cat/indices/{indices}"
+    ],
+    "documentation": "http://www.elastic.co/guide/en/elasticsearch/reference/master/cat-indices.html"
+  }
+}

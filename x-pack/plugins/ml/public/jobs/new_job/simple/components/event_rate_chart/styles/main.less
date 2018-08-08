@@ -1,0 +1,101 @@
+ml-event-rate-chart {
+  svg {
+    font-size: 12px;
+    font-family: "Open Sans", "Lato", "Helvetica Neue", Helvetica, Arial;
+    margin-top: -20px;
+  }
+
+  .bar {
+    transition: opacity 0.5s ;
+    stroke: #FFFFFF;
+  }
+  .bar:hover {
+    opacity: 1;
+  }
+
+  .axis path, .axis line {
+    fill: none;
+    stroke: #cccccc;
+    shape-rendering: crispEdges;
+  }
+
+  .axis text {
+    fill: #000;
+  }
+
+  .axis .tick line {
+    stroke: rgba(0, 0, 0, 0.1);
+    stroke-width: 0px;
+  }
+
+  .area {
+    stroke-width: 1;
+  }
+
+  .area.bounds {
+    fill: rgba(50, 167, 194, 0.25);
+  }
+
+  .values-line {
+    fill: none;
+    stroke: #32a7c2;
+    stroke-width: 2;
+  }
+
+  .metric-value {
+    opacity: 1;
+    fill: #32a7c2;
+  }
+
+  .context-chart .axis text {
+    font-size: 10px;
+    fill: #333333;
+  }
+
+  .area.context {
+    fill: #e4e4e4;
+  }
+
+  .swimlane .axis text {
+    display: none;
+  }
+
+  .swimlane rect.swimlane-cell-hidden {
+    display: none;
+  }
+
+  .bottom-swimlane .axis .tick line {
+    stroke-width: 1px;
+  }
+
+  .swimlane-cells {
+    transition: opacity 0.5s;
+  }
+
+  .swimlane-cell:hover {
+    opacity: 1;
+  }
+
+  .brush .extent {
+    stroke: #fff;
+    fill-opacity: .125;
+    shape-rendering: crispEdges;
+  }
+
+  .progress {
+    display: inline-block;
+    min-width: 70px;
+    margin-bottom: -5px;
+    margin-left: 49px;
+    background-color: #FFFFFF;
+    height: 2px;
+    border-radius: 0px;
+  }
+
+  .progress-bar {
+    text-align: right;
+    line-height: 18px;
+    transition: none;
+    background-color: #32a7c2;
+  }
+}

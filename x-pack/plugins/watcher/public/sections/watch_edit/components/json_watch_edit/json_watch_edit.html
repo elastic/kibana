@@ -1,0 +1,114 @@
+<kbn-management-app
+  section="elasticsearch/watcher/watch"
+  omit-breadcrumb-pages="{{ jsonWatchEdit.omitBreadcrumbPages }}"
+  page-title="jsonWatchEdit.breadcrumb"
+>
+  <div class="kuiViewContent kuiViewContent--constrainedWidth">
+    <div class="kuiViewContentItem kuiVerticalRhythm">
+      <watch-edit-title-bar
+        xpack-watch="jsonWatchEdit.watch"
+        is-watch-valid="jsonWatchEdit.isValid"
+        on-watch-delete="jsonWatchEdit.onWatchDelete"
+        on-watch-save="jsonWatchEdit.onWatchSave"
+        on-close="jsonWatchEdit.onClose"
+      ></watch-edit-title-bar>
+    </div>
+
+    <div class="kuiViewContentItem kuiVerticalRhythm">
+      <kbn-tabs
+        selected-tab-id="jsonWatchEdit.selectedTabId"
+        on-tab-select="jsonWatchEdit.onTabSelect"
+      >
+        <kbn-tab
+          tab-id="edit-watch"
+          title="Edit Watch"
+        >
+          Edit
+        </kbn-tab>
+        <kbn-tab
+          tab-id="watch-simulate"
+          title="Simulate Watch"
+        >
+          Simulate
+        </kbn-tab>
+        <kbn-tab
+          tab-id="simulate-results"
+          title="Simulate Results"
+          ng-if="jsonWatchEdit.simulateResults"
+        >
+          Simulation Results
+        </kbn-tab>
+      </kbn-tabs>
+    </div>
+
+    <div
+      class="kuiViewContentItem kuiVerticalRhythm"
+      ng-show="jsonWatchEdit.selectedTabId === 'edit-watch'"
+    >
+      <watch-edit-detail
+        xpack-watch="jsonWatchEdit.watch"
+        on-watch-change="jsonWatchEdit.onWatchChange"
+        on-valid="jsonWatchEdit.onValid"
+        on-invalid="jsonWatchEdit.onInvalid"
+      ></watch-edit-detail>
+    </div>
+
+    <div
+      class="kuiViewContentItem kuiVerticalRhythm"
+      ng-show="jsonWatchEdit.selectedTabId === 'watch-simulate'"
+    >
+      <div class="kuiVerticalRhythm">
+        <watch-edit-execute-info-panel></watch-edit-execute-info-panel>
+      </div>
+
+      <div class="kuiVerticalRhythm">
+        <watch-edit-execute-detail
+          xpack-watch="jsonWatchEdit.watch"
+          previous-watch-history-item="jsonWatchEdit.simulateResults"
+          on-change="jsonWatchEdit.executeDetailsChange"
+          on-valid="jsonWatchEdit.onExecuteDetailsValid"
+          on-invalid="jsonWatchEdit.onExecuteDetailsInvalid"
+        ></watch-edit-execute-detail>
+      </div>
+
+      <div class="kuiVerticalRhythm">
+        <button
+          class="kuiButton kuiButton--primary kuiButton--iconText"
+          ng-disabled="!jsonWatchEdit.isExecuteValid"
+          ng-click="jsonWatchEdit.onWatchExecute()"
+          data-test-subj="btnSimulateWatch"
+        >
+          <span class="kuiButton__icon kuiIcon fa-play"></span>
+          Simulate Watch
+        </button>
+      </div>
+    </div>
+
+    <div
+      class="kuiViewContentItem kuiVerticalRhythm"
+      ng-show="jsonWatchEdit.selectedTabId === 'simulate-results'"
+    >
+      <div class="kuiVerticalRhythm">
+        <watch-edit-watch-execute-summary
+          watch-history-item="jsonWatchEdit.simulateResults"
+        ></watch-edit-watch-execute-summary>
+      </div>
+
+      <div class="kuiVerticalRhythm">
+        <watch-edit-actions-execute-summary
+          xpack-watch="jsonWatchEdit.watch"
+          execute-details="jsonWatchEdit.executeDetails"
+          watch-history-item="jsonWatchEdit.simulateResults"
+        ></watch-edit-actions-execute-summary>
+      </div>
+
+      <div class="kuiVerticalRhythm">
+        <label>Simulation Output:</label>
+        <watch-history-item-detail
+          watch-history-item="jsonWatchEdit.simulateResults"
+        ></watch-history-item-detail>
+      </div>
+    </div>
+
+  </div>
+</kbn-management-app>

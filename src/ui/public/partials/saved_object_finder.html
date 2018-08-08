@@ -78,6 +78,7 @@
           ng-blur="finder.hitBlur($event)"
           ng-click="finder.preventClick($event)">
           <span aria-hidden="true" class="finder-type fa" ng-if="hit.icon" ng-class="hit.icon"></span>
+          <div class="kuiIcon fa-flask ng-scope" ng-if="hit.type.shouldMarkAsExperimentalInUI()"></div>
           <span>{{hit.title}}</span>
           <p ng-if="hit.description" ng-bind="hit.description"></p>
       </a>

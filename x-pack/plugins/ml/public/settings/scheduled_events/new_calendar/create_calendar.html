@@ -1,0 +1,102 @@
+<ml-nav-menu name="calendars_list"></ml-nav-menu>
+<ml-new-calendar ng-controller="MlCreateCalendar">
+  <ml-message-bar></ml-message-bar>
+  <div class="new-calendar-container">
+    <div class="kuiViewContent kuiViewContent--constrainedWidth">
+      <h3 class="euiTitle">{{pageTitle}}</h3>
+      <div class="kuiViewContentItem kuiVerticalRhythm">
+        <div class="kuiBar">
+          <div class="kuiBarSection">
+            <div class="kuiButtonGroup">
+              <button
+                class="kuiButton kuiButton--primary"
+                ng-disabled="saveEnabled() === false"
+                ng-click="save()" >
+                Save
+              </button>
+              <button
+                class="kuiButton kuiButton--basic"
+                ng-click="cancel()"
+                ng-disabled="saveLock === true"
+                data-test-subj="btnCancel">
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="kuiViewContentItem kuiVerticalRhythm">
+        <div class="kuiFormSection" aria-hidden="false">
+          <label for="id" class="kuiFormLabel">
+            Calendar ID
+          </label>
+          <input
+            type="text"
+            ng-disabled="isNewCalendar===false"
+            id="id"
+            name="id"
+            ng-model="calendarId"
+            ng-trim="true"
+            class="kuiTextInput fullWidth"
+            autofocus />
+            <div ng-hide="validation.checks.calendarId.valid" class="validation-error">
+              <div class="euiSpacer euiSpacer--s"></div>
+              {{ ( validation.checks.calendarId.message || "Enter a name for the calendar" ) }}
+            </div>
+          </div>
+          <div class="kuiFormSection" aria-hidden="false">
+            <label for="description" class="kuiFormLabel">
+              Description
+            </label>
+            <input
+            type="text"
+            ng-disabled="isNewCalendar===false"
+            id="description"
+            name="description"
+            ng-model="description"
+            class="kuiTextInput fullWidth" />
+        </div>
+        <div class="kuiFormSection">
+          <label class="kuiFormLabel">
+            Jobs
+          </label>
+          <ml-item-select
+            item-ids='jobIds'
+            all-items='allJobs'
+            placeholder='"Jobs"'
+            external-update-function='updateJobsList'
+            >
+          </ml-item-select>
+        </div>
+        <div class="kuiFormSection">
+          <label class="kuiFormLabel">
+            Groups
+          </label>
+          <ml-item-select
+            item-ids='groupIds'
+            all-items='allGroups'
+            placeholder='"Groups"'
+            allow-tagging='true'
+            tagging-text='"(new group)"'
+            external-update-function='updateGroupsList'
+            >
+          </ml-item-select>
+        </div>
+
+      </div>
+      <div class="kuiViewContentItem kuiVerticalRhythm">
+        <label class="kuiFormLabel">
+          Events
+        </label>
+        <ml-events-list
+          events='events'
+          show-controls='true'
+          lock-controls='saveLock'
+        />
+      </div>
+
+    </div>
+
+  </div>
+</ml-calendars-list>

@@ -1,0 +1,124 @@
+<div ng-controller='TabController'>
+  <div class="row">
+    <div class="col-md-6">
+      <div ng-repeat="(key, value) in job" ng-if="key==='analysis_config'">
+        <div class="ml_sub_heading">Detectors</div>
+        <div class='ml_job_section_container'>
+          <table class="euiTable euiTable--compressed">
+            <tbody>
+              <tr ng-repeat="(key2, value2) in value.detectors" class="euiTableRow">
+                <th class="euiTableRowCell">
+                  <div class="euiTableCellContent">
+                    <span class="euiTableCellContent__text">{{detectorToString(value2)}}</span>
+                  </div>
+                </th>
+                <td class="euiTableRowCell">
+                  <div class="euiTableCellContent">
+                    <span class="euiTableCellContent__text" ng-show="(detectorToString(value2) !== value2.detector_description)">{{ value2.detector_description }}</span>
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div ng-show="(value.influencers && value.influencers.length)">
+        <div class="ml_sub_heading">Influencers</div>
+          <div class='ml_job_section_container'>
+            <div>
+              <ml-job-item >
+                <div class="ml_job_row row">
+                  <div class="col-md-12">
+                    {{value.influencers.join(", ")}}
+                  </div>
+                </div>
+              </ml-job-item>
+            </div>
+          </div>
+        </div>
+
+        <div class="ml_sub_heading">Analysis Config</div>
+        <div class='ml_job_section_container'>
+          <table class="euiTable euiTable--compressed">
+            <tbody>
+              <tr ng-repeat="(key1, value1) in value | filterObjects" class="euiTableRow">
+                <th class="euiTableRowCell">
+                  <div class="euiTableCellContent">
+                    <span class="euiTableCellContent__text">{{key1}}</span>
+                  </div>
+                </th>
+                <td class="euiTableRowCell">
+                  <div class="euiTableCellContent">
+                    <span class="euiTableCellContent__text">{{value1}}</span>
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div ng-repeat="(key, value) in job" ng-if="key==='analysis_limits'">
+        <div class="ml_sub_heading">Analysis Limits</div>
+        <div class='ml_job_section_container'>
+          <table class="euiTable euiTable--compressed">
+            <tbody>
+              <tr ng-repeat="(key1, value1) in value | filterObjects" class="euiTableRow">
+                <th class="euiTableRowCell">
+                  <div class="euiTableCellContent">
+                    <span class="euiTableCellContent__text">{{key1}}</span>
+                  </div>
+                </th>
+                <td class="euiTableRowCell">
+                  <div class="euiTableCellContent">
+                    <span class="euiTableCellContent__text">{{value1}}</span>
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div ng-show="(job.analysis_config.categorization_filters && job.analysis_config.categorization_filters.length)"
+        ng-repeat="(key, value) in job" ng-if="key===analysis_config">
+        <div class="ml_sub_heading">Categorization Filters</div>
+        <div class='ml_job_section_container'>
+          <div>
+            <ml-job-item ng-repeat="value2 in value.categorization_filters">
+              <div class="ml_job_row row">
+                <div class="col-md-6" > {{ value2 }} </div>
+              </div>
+            </ml-job-item>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="col-md-6">
+      <div ng-repeat="(key, value) in job" ng-if="key==='data_description'">
+        <div class="ml_sub_heading">Data Description</div>
+        <div class='ml_job_section_container'>
+          <table class="euiTable euiTable--compressed">
+            <tbody>
+              <tr ng-repeat="(key1, value1) in value" class="euiTableRow">
+                <th class="euiTableRowCell">
+                  <div class="euiTableCellContent">
+                    <span class="euiTableCellContent__text">{{key1}}</span>
+                  </div>
+                </th>
+                <td class="euiTableRowCell">
+                  <div class="euiTableCellContent">
+                    <span class="euiTableCellContent__text">{{value1}}</span>
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>

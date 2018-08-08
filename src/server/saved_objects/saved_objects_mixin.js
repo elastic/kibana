@@ -1,24 +1,52 @@
-import { SavedObjectsClient } from './client';
+/*
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
+import { createSavedObjectsService } from './service';
 
 import {
+  createBulkCreateRoute,
   createBulkGetRoute,
   createCreateRoute,
   createDeleteRoute,
   createFindRoute,
   createGetRoute,
-  createUpdateRoute
+  createUpdateRoute,
 } from './routes';
 
 export function savedObjectsMixin(kbnServer, server) {
+  // we use kibana.index which is technically defined in the kibana plugin, so if
+  // we don't have the plugin (mainly tests) we can't initialize the saved objects
+  if (!kbnServer.pluginSpecs.some(p => p.getId() === 'kibana')) {
+    server.log(['warning', 'saved-objects'], `Saved Objects uninitialized because the Kibana plugin is disabled.`);
+    return;
+  }
+
   const prereqs = {
     getSavedObjectsClient: {
       assign: 'savedObjectsClient',
       method(req, reply) {
         reply(req.getSavedObjectsClient());
-      }
+      },
     },
   };
 
+  server.route(createBulkCreateRoute(prereqs));
   server.route(createBulkGetRoute(prereqs));
   server.route(createCreateRoute(prereqs));
   server.route(createDeleteRoute(prereqs));
@@ -26,45 +54,7 @@ export function savedObjectsMixin(kbnServer, server) {
   server.route(createGetRoute(prereqs));
   server.route(createUpdateRoute(prereqs));
 
-  async function onBeforeWrite() {
-    const adminCluster = server.plugins.elasticsearch.getCluster('admin');
-
-    try {
-      await adminCluster.callWithInternalUser('cluster.health', {
-        timeout: `${server.config().get('savedObjects.indexCheckTimeout')}ms`,
-        index: server.config().get('kibana.index'),
-        waitForStatus: 'yellow',
-      });
-    } catch (error) {
-      // This check is designed to emulate our planned index template move until
-      // we get there, and once we do the plan is to just post the index template
-      // and attempt the request.
-      //
-      // Because of this we only throw NotFound() when the status is red AND
-      // there are no shards. All other red statuses indicate real problems that
-      // will be described in better detail when the write fails.
-      if (
-        error &&
-        error.body &&
-        error.body.status === 'red' &&
-        !error.body.unassigned_shards &&
-        !error.body.initializing_shards &&
-        !error.body.delayed_unassigned_shards
-      ) {
-        server.log(['debug', 'savedObjects'], `Attempted to write to the Kibana index when it didn't exist.`);
-        throw new adminCluster.errors.NotFound();
-      }
-    }
-  }
-
-  server.decorate('server', 'savedObjectsClientFactory', ({ callCluster }) => {
-    return new SavedObjectsClient({
-      index: server.config().get('kibana.index'),
-      mappings: server.getKibanaIndexMappingsDsl(),
-      callCluster,
-      onBeforeWrite,
-    });
-  });
+  server.decorate('server', 'savedObjects', createSavedObjectsService(server));
 
   const savedObjectsClientCache = new WeakMap();
   server.decorate('request', 'getSavedObjectsClient', function () {
@@ -74,9 +64,7 @@ export function savedObjectsMixin(kbnServer, server) {
       return savedObjectsClientCache.get(request);
     }
 
-    const { callWithRequest } = server.plugins.elasticsearch.getCluster('admin');
-    const callCluster = (...args) => callWithRequest(request, ...args);
-    const savedObjectsClient = server.savedObjectsClientFactory({ callCluster });
+    const savedObjectsClient = server.savedObjects.getScopedSavedObjectsClient(request);
 
     savedObjectsClientCache.set(request, savedObjectsClient);
     return savedObjectsClient;

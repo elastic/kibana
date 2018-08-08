@@ -1,0 +1,13 @@
+<monitoring-main
+  product="kibana"
+  name="overview"
+  data-test-subj="kibanaOverviewPage"
+>
+  <monitoring-cluster-status-kibana status="pageData.clusterStatus"></monitoring-cluster-status-kibana>
+  <div class="page-row">
+    <div class="row" ng-if="pageData.metrics">
+      <div class="col-md-6"><monitoring-chart series="pageData.metrics.kibana_cluster_requests"></monitoring-chart></div>
+      <div class="col-md-6"><monitoring-chart series="pageData.metrics.kibana_cluster_response_times"></monitoring-chart></div>
+    </div>
+  </div>
+</monitoring-main>

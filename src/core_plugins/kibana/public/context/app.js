@@ -1,3 +1,22 @@
+/*
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
 import _ from 'lodash';
 
 import { callAfterBindingsWorkaround } from 'ui/compat';
@@ -17,6 +36,7 @@ import {
   LOADING_STATUS,
   QueryActionsProvider,
 } from './query';
+import { timefilter } from 'ui/timefilter';
 
 const module = uiModules.get('apps/context', [
   'elasticsearch',
@@ -33,7 +53,8 @@ module.directive('contextApp', function ContextApp() {
     controllerAs: 'contextApp',
     restrict: 'E',
     scope: {
-      anchorUid: '=',
+      anchorType: '=',
+      anchorId: '=',
       columns: '=',
       indexPattern: '=',
       filters: '=',
@@ -46,12 +67,12 @@ module.directive('contextApp', function ContextApp() {
   };
 });
 
-function ContextAppController($scope, config, Private, timefilter) {
+function ContextAppController($scope, config, Private) {
   const queryParameterActions = Private(QueryParameterActionsProvider);
   const queryActions = Private(QueryActionsProvider);
 
-  // this is apparently the "canonical" way to disable the time picker
-  timefilter.enabled = false;
+  timefilter.disableAutoRefreshSelector();
+  timefilter.disableTimeRangeSelector();
 
   this.state = createInitialState(
     parseInt(config.get('context:step'), 10),
@@ -87,7 +108,8 @@ function ContextAppController($scope, config, Private, timefilter) {
       const { queryParameters } = this.state;
       if (
         (newQueryParameters.indexPatternId !== queryParameters.indexPatternId)
-        || (newQueryParameters.anchorUid !== queryParameters.anchorUid)
+        || (newQueryParameters.anchorType !== queryParameters.anchorType)
+        || (newQueryParameters.anchorId !== queryParameters.anchorId)
         || (!_.isEqual(newQueryParameters.sort, queryParameters.sort))
       ) {
         this.actions.fetchAllRowsWithNewQueryParameters(_.cloneDeep(newQueryParameters));

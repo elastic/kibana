@@ -1,6 +1,25 @@
+/*
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
 import _ from 'lodash';
 import { uiModules } from 'ui/modules';
-import vislibSeriesTemplate from 'plugins/kbn_vislib_vis_types/controls/point_series/series.html';
+import vislibSeriesTemplate from './series.html';
 const module = uiModules.get('kibana');
 
 module.directive('vislibSeries', function () {
@@ -23,26 +42,26 @@ module.directive('vislibSeries', function () {
             id: id,
             label: label
           },
-          valueAxis: last ? last.valueAxis : $scope.vis.params.valueAxes[0].id
+          valueAxis: last ? last.valueAxis : $scope.editorState.params.valueAxes[0].id
         };
       }
 
-      $scope.series = $scope.vis.params.seriesParams;
+      $scope.series = $scope.editorState.params.seriesParams;
       $scope.$watch(() => {
-        return $scope.vis.aggs.map(agg => {
+        return $scope.editorState.aggs.map(agg => {
           return agg.makeLabel();
         }).join();
       }, () => {
         const schemaTitle = $scope.vis.type.schemas.metrics[0].title;
 
-        const metrics = $scope.vis.aggs.filter(agg => {
+        const metrics = $scope.editorState.aggs.filter(agg => {
           const isMetric = agg.type && agg.type.type === 'metrics';
           return isMetric && agg.schema.title === schemaTitle;
         });
 
         // update labels for existing params or create new one
-        $scope.vis.params.seriesParams = metrics.map(agg => {
-          const params = $scope.vis.params.seriesParams.find(param => param.data.id === agg.id);
+        $scope.editorState.params.seriesParams = metrics.map(agg => {
+          const params = $scope.editorState.params.seriesParams.find(param => param.data.id === agg.id);
           if (params) {
             params.data.label = agg.makeLabel();
             return params;
@@ -54,22 +73,22 @@ module.directive('vislibSeries', function () {
       });
 
       $scope.$watch(() => {
-        return $scope.vis.params.seriesParams.map(series => series.type).join();
+        return $scope.editorState.params.seriesParams.map(series => series.type).join();
       }, () => {
-        const types = _.uniq(_.map($scope.vis.params.seriesParams, 'type'));
+        const types = _.uniq(_.map($scope.editorState.params.seriesParams, 'type'));
         $scope.vis.type.type = types.length === 1 ? types[0] : 'histogram';
       });
 
-      $scope.$watch('vis.params.valueAxes.length', () => {
-        $scope.vis.params.seriesParams.forEach(series => {
-          if (!$scope.vis.params.valueAxes.find(axis => axis.id === series.valueAxis)) {
-            series.valueAxis = $scope.vis.params.valueAxes[0].id;
+      $scope.$watch('editorState.params.valueAxes.length', () => {
+        $scope.editorState.params.seriesParams.forEach(series => {
+          if (!$scope.editorState.params.valueAxes.find(axis => axis.id === series.valueAxis)) {
+            series.valueAxis = $scope.editorState.params.valueAxes[0].id;
           }
         });
       });
 
       $scope.changeValueAxis = (index) => {
-        const series = $scope.vis.params.seriesParams[index];
+        const series = $scope.editorState.params.seriesParams[index];
         if (series.valueAxis === 'new') {
           const axis = $scope.addValueAxis();
           series.valueAxis = axis.id;

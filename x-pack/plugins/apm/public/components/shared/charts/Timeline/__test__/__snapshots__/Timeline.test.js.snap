@@ -1,0 +1,849 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Timeline should render with data 1`] = `
+.c0 {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+  font-size: 12px;
+  color: #666666;
+  cursor: pointer;
+  opacity: 1;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+
+.c1 {
+  width: 11px;
+  height: 11px;
+  margin-right: 5.5px;
+  background: #999999;
+  border-radius: 100%;
+}
+
+<div
+  onScroll={[Function]}
+  onTouchEnd={[Function]}
+  onTouchMove={[Function]}
+  onTouchStart={[Function]}
+>
+  <div
+    style={
+      Object {
+        "height": "100%",
+        "width": "100%",
+      }
+    }
+  >
+    <div>
+      <div>
+        <div />
+        <div
+          style={
+            Object {
+              "backgroundColor": "#ffffff",
+              "borderBottom": "1px solid #999999",
+              "height": "100px",
+              "position": "absolute",
+              "width": "100%",
+              "zIndex": 2,
+            }
+          }
+        >
+          <div>
+            Hello - i am a header
+          </div>
+          <div
+            className="rv-xy-plot "
+            style={
+              Object {
+                "height": "40px",
+                "width": "1000px",
+              }
+            }
+          >
+            <svg
+              className="rv-xy-plot__inner"
+              height={40}
+              onClick={[Function]}
+              onDoubleClick={[Function]}
+              onMouseDown={[Function]}
+              onMouseEnter={[Function]}
+              onMouseLeave={[Function]}
+              onMouseMove={[Function]}
+              onWheel={[Function]}
+              width={1000}
+            >
+              <g
+                className="rv-xy-plot__axis rv-xy-plot__axis--horizontal "
+                style={
+                  Object {
+                    "text": Object {
+                      "fill": "#999999",
+                    },
+                  }
+                }
+                transform="translate(50,0)"
+              >
+                <g
+                  className="rv-xy-plot__axis__ticks"
+                  transform="translate(0, 40)"
+                >
+                  <g
+                    className="rv-xy-plot__axis__tick"
+                    style={
+                      Object {
+                        "text": Object {
+                          "fill": "#999999",
+                        },
+                      }
+                    }
+                    transform="translate(0, 0)"
+                  >
+                    <line
+                      className="rv-xy-plot__axis__tick__line"
+                      style={
+                        Object {
+                          "text": Object {
+                            "fill": "#999999",
+                          },
+                        }
+                      }
+                      x1={0}
+                      x2={0}
+                      y1={0}
+                      y2={-0}
+                    />
+                    <text
+                      className="rv-xy-plot__axis__tick__text"
+                      dy="0"
+                      style={
+                        Object {
+                          "fill": "#999999",
+                          "text": Object {
+                            "fill": "#999999",
+                          },
+                        }
+                      }
+                      textAnchor="middle"
+                      transform="translate(0, -8)"
+                    >
+                      0
+                    </text>
+                  </g>
+                  <g
+                    className="rv-xy-plot__axis__tick"
+                    style={
+                      Object {
+                        "text": Object {
+                          "fill": "#999999",
+                        },
+                      }
+                    }
+                    transform="translate(87.9408646541237, 0)"
+                  >
+                    <line
+                      className="rv-xy-plot__axis__tick__line"
+                      style={
+                        Object {
+                          "text": Object {
+                            "fill": "#999999",
+                          },
+                        }
+                      }
+                      x1={0}
+                      x2={0}
+                      y1={0}
+                      y2={-0}
+                    />
+                    <text
+                      className="rv-xy-plot__axis__tick__text"
+                      dy="0"
+                      style={
+                        Object {
+                          "fill": "#999999",
+                          "text": Object {
+                            "fill": "#999999",
+                          },
+                        }
+                      }
+                      textAnchor="middle"
+                      transform="translate(0, -8)"
+                    >
+                      20 ms
+                    </text>
+                  </g>
+                  <g
+                    className="rv-xy-plot__axis__tick"
+                    style={
+                      Object {
+                        "text": Object {
+                          "fill": "#999999",
+                        },
+                      }
+                    }
+                    transform="translate(175.8817293082474, 0)"
+                  >
+                    <line
+                      className="rv-xy-plot__axis__tick__line"
+                      style={
+                        Object {
+                          "text": Object {
+                            "fill": "#999999",
+                          },
+                        }
+                      }
+                      x1={0}
+                      x2={0}
+                      y1={0}
+                      y2={-0}
+                    />
+                    <text
+                      className="rv-xy-plot__axis__tick__text"
+                      dy="0"
+                      style={
+                        Object {
+                          "fill": "#999999",
+                          "text": Object {
+                            "fill": "#999999",
+                          },
+                        }
+                      }
+                      textAnchor="middle"
+                      transform="translate(0, -8)"
+                    >
+                      40 ms
+                    </text>
+                  </g>
+                  <g
+                    className="rv-xy-plot__axis__tick"
+                    style={
+                      Object {
+                        "text": Object {
+                          "fill": "#999999",
+                        },
+                      }
+                    }
+                    transform="translate(263.82259396237106, 0)"
+                  >
+                    <line
+                      className="rv-xy-plot__axis__tick__line"
+                      style={
+                        Object {
+                          "text": Object {
+                            "fill": "#999999",
+                          },
+                        }
+                      }
+                      x1={0}
+                      x2={0}
+                      y1={0}
+                      y2={-0}
+                    />
+                    <text
+                      className="rv-xy-plot__axis__tick__text"
+                      dy="0"
+                      style={
+                        Object {
+                          "fill": "#999999",
+                          "text": Object {
+                            "fill": "#999999",
+                          },
+                        }
+                      }
+                      textAnchor="middle"
+                      transform="translate(0, -8)"
+                    >
+                      60 ms
+                    </text>
+                  </g>
+                  <g
+                    className="rv-xy-plot__axis__tick"
+                    style={
+                      Object {
+                        "text": Object {
+                          "fill": "#999999",
+                        },
+                      }
+                    }
+                    transform="translate(351.7634586164948, 0)"
+                  >
+                    <line
+                      className="rv-xy-plot__axis__tick__line"
+                      style={
+                        Object {
+                          "text": Object {
+                            "fill": "#999999",
+                          },
+                        }
+                      }
+                      x1={0}
+                      x2={0}
+                      y1={0}
+                      y2={-0}
+                    />
+                    <text
+                      className="rv-xy-plot__axis__tick__text"
+                      dy="0"
+                      style={
+                        Object {
+                          "fill": "#999999",
+                          "text": Object {
+                            "fill": "#999999",
+                          },
+                        }
+                      }
+                      textAnchor="middle"
+                      transform="translate(0, -8)"
+                    >
+                      80 ms
+                    </text>
+                  </g>
+                  <g
+                    className="rv-xy-plot__axis__tick"
+                    style={
+                      Object {
+                        "text": Object {
+                          "fill": "#999999",
+                        },
+                      }
+                    }
+                    transform="translate(439.7043232706185, 0)"
+                  >
+                    <line
+                      className="rv-xy-plot__axis__tick__line"
+                      style={
+                        Object {
+                          "text": Object {
+                            "fill": "#999999",
+                          },
+                        }
+                      }
+                      x1={0}
+                      x2={0}
+                      y1={0}
+                      y2={-0}
+                    />
+                    <text
+                      className="rv-xy-plot__axis__tick__text"
+                      dy="0"
+                      style={
+                        Object {
+                          "fill": "#999999",
+                          "text": Object {
+                            "fill": "#999999",
+                          },
+                        }
+                      }
+                      textAnchor="middle"
+                      transform="translate(0, -8)"
+                    >
+                      100 ms
+                    </text>
+                  </g>
+                  <g
+                    className="rv-xy-plot__axis__tick"
+                    style={
+                      Object {
+                        "text": Object {
+                          "fill": "#999999",
+                        },
+                      }
+                    }
+                    transform="translate(527.6451879247421, 0)"
+                  >
+                    <line
+                      className="rv-xy-plot__axis__tick__line"
+                      style={
+                        Object {
+                          "text": Object {
+                            "fill": "#999999",
+                          },
+                        }
+                      }
+                      x1={0}
+                      x2={0}
+                      y1={0}
+                      y2={-0}
+                    />
+                    <text
+                      className="rv-xy-plot__axis__tick__text"
+                      dy="0"
+                      style={
+                        Object {
+                          "fill": "#999999",
+                          "text": Object {
+                            "fill": "#999999",
+                          },
+                        }
+                      }
+                      textAnchor="middle"
+                      transform="translate(0, -8)"
+                    >
+                      120 ms
+                    </text>
+                  </g>
+                  <g
+                    className="rv-xy-plot__axis__tick"
+                    style={
+                      Object {
+                        "text": Object {
+                          "fill": "#999999",
+                        },
+                      }
+                    }
+                    transform="translate(615.5860525788659, 0)"
+                  >
+                    <line
+                      className="rv-xy-plot__axis__tick__line"
+                      style={
+                        Object {
+                          "text": Object {
+                            "fill": "#999999",
+                          },
+                        }
+                      }
+                      x1={0}
+                      x2={0}
+                      y1={0}
+                      y2={-0}
+                    />
+                    <text
+                      className="rv-xy-plot__axis__tick__text"
+                      dy="0"
+                      style={
+                        Object {
+                          "fill": "#999999",
+                          "text": Object {
+                            "fill": "#999999",
+                          },
+                        }
+                      }
+                      textAnchor="middle"
+                      transform="translate(0, -8)"
+                    >
+                      140 ms
+                    </text>
+                  </g>
+                  <g
+                    className="rv-xy-plot__axis__tick"
+                    style={
+                      Object {
+                        "text": Object {
+                          "fill": "#999999",
+                        },
+                      }
+                    }
+                    transform="translate(703.5269172329896, 0)"
+                  >
+                    <line
+                      className="rv-xy-plot__axis__tick__line"
+                      style={
+                        Object {
+                          "text": Object {
+                            "fill": "#999999",
+                          },
+                        }
+                      }
+                      x1={0}
+                      x2={0}
+                      y1={0}
+                      y2={-0}
+                    />
+                    <text
+                      className="rv-xy-plot__axis__tick__text"
+                      dy="0"
+                      style={
+                        Object {
+                          "fill": "#999999",
+                          "text": Object {
+                            "fill": "#999999",
+                          },
+                        }
+                      }
+                      textAnchor="middle"
+                      transform="translate(0, -8)"
+                    >
+                      160 ms
+                    </text>
+                  </g>
+                  <g
+                    className="rv-xy-plot__axis__tick"
+                    style={
+                      Object {
+                        "text": Object {
+                          "fill": "#999999",
+                        },
+                      }
+                    }
+                    transform="translate(791.4677818871132, 0)"
+                  >
+                    <line
+                      className="rv-xy-plot__axis__tick__line"
+                      style={
+                        Object {
+                          "text": Object {
+                            "fill": "#999999",
+                          },
+                        }
+                      }
+                      x1={0}
+                      x2={0}
+                      y1={0}
+                      y2={-0}
+                    />
+                    <text
+                      className="rv-xy-plot__axis__tick__text"
+                      dy="0"
+                      style={
+                        Object {
+                          "fill": "#999999",
+                          "text": Object {
+                            "fill": "#999999",
+                          },
+                        }
+                      }
+                      textAnchor="middle"
+                      transform="translate(0, -8)"
+                    >
+                      180 ms
+                    </text>
+                  </g>
+                </g>
+              </g>
+              <g
+                transform="translate(950, 40)"
+              >
+                <text
+                  dy="0"
+                  textAnchor="middle"
+                  transform="translate(0, -8)"
+                >
+                  205 ms
+                </text>
+              </g>
+            </svg>
+            <div
+              style={
+                Object {
+                  "left": "484.2043232706185px",
+                  "position": "absolute",
+                }
+              }
+            >
+              <span
+                className="euiToolTipAnchor"
+              >
+                <div
+                  aria-describedby="timeToFirstByte"
+                  className="c0"
+                  disabled={false}
+                  fontSize="12px"
+                  onBlur={[Function]}
+                  onFocus={[Function]}
+                  onMouseOut={[Function]}
+                  onMouseOver={[Function]}
+                >
+                  <span
+                    className="c1"
+                    color="#999999"
+                    radius={11}
+                  />
+                </div>
+              </span>
+            </div>
+            <div
+              style={
+                Object {
+                  "left": "528.1747555976804px",
+                  "position": "absolute",
+                }
+              }
+            >
+              <span
+                className="euiToolTipAnchor"
+              >
+                <div
+                  aria-describedby="domInteractive"
+                  className="c0"
+                  disabled={false}
+                  fontSize="12px"
+                  onBlur={[Function]}
+                  onFocus={[Function]}
+                  onMouseOut={[Function]}
+                  onMouseOver={[Function]}
+                >
+                  <span
+                    className="c1"
+                    color="#999999"
+                    radius={11}
+                  />
+                </div>
+              </span>
+            </div>
+            <div
+              style={
+                Object {
+                  "left": "879.9382142141751px",
+                  "position": "absolute",
+                }
+              }
+            >
+              <span
+                className="euiToolTipAnchor"
+              >
+                <div
+                  aria-describedby="domComplete"
+                  className="c0"
+                  disabled={false}
+                  fontSize="12px"
+                  onBlur={[Function]}
+                  onFocus={[Function]}
+                  onMouseOut={[Function]}
+                  onMouseOver={[Function]}
+                >
+                  <span
+                    className="c1"
+                    color="#999999"
+                    radius={11}
+                  />
+                </div>
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div
+        style={
+          Object {
+            "left": 0,
+            "position": "absolute",
+            "top": 0,
+          }
+        }
+      >
+        <div
+          className="rv-xy-plot "
+          style={
+            Object {
+              "height": "216px",
+              "width": "1000px",
+            }
+          }
+        >
+          <svg
+            className="rv-xy-plot__inner"
+            height={216}
+            onClick={[Function]}
+            onDoubleClick={[Function]}
+            onMouseDown={[Function]}
+            onMouseEnter={[Function]}
+            onMouseLeave={[Function]}
+            onMouseMove={[Function]}
+            onWheel={[Function]}
+            width={1000}
+          >
+            <g
+              className="rv-xy-plot__grid-lines"
+              transform="translate(50,100)"
+            >
+              <line
+                className="rv-xy-plot__grid-lines__line"
+                style={
+                  Object {
+                    "stroke": "#f5f5f5",
+                  }
+                }
+                x1={0}
+                x2={0}
+                y1={0}
+                y2={116}
+              />
+              <line
+                className="rv-xy-plot__grid-lines__line"
+                style={
+                  Object {
+                    "stroke": "#f5f5f5",
+                  }
+                }
+                x1={87.9408646541237}
+                x2={87.9408646541237}
+                y1={0}
+                y2={116}
+              />
+              <line
+                className="rv-xy-plot__grid-lines__line"
+                style={
+                  Object {
+                    "stroke": "#f5f5f5",
+                  }
+                }
+                x1={175.8817293082474}
+                x2={175.8817293082474}
+                y1={0}
+                y2={116}
+              />
+              <line
+                className="rv-xy-plot__grid-lines__line"
+                style={
+                  Object {
+                    "stroke": "#f5f5f5",
+                  }
+                }
+                x1={263.82259396237106}
+                x2={263.82259396237106}
+                y1={0}
+                y2={116}
+              />
+              <line
+                className="rv-xy-plot__grid-lines__line"
+                style={
+                  Object {
+                    "stroke": "#f5f5f5",
+                  }
+                }
+                x1={351.7634586164948}
+                x2={351.7634586164948}
+                y1={0}
+                y2={116}
+              />
+              <line
+                className="rv-xy-plot__grid-lines__line"
+                style={
+                  Object {
+                    "stroke": "#f5f5f5",
+                  }
+                }
+                x1={439.7043232706185}
+                x2={439.7043232706185}
+                y1={0}
+                y2={116}
+              />
+              <line
+                className="rv-xy-plot__grid-lines__line"
+                style={
+                  Object {
+                    "stroke": "#f5f5f5",
+                  }
+                }
+                x1={527.6451879247421}
+                x2={527.6451879247421}
+                y1={0}
+                y2={116}
+              />
+              <line
+                className="rv-xy-plot__grid-lines__line"
+                style={
+                  Object {
+                    "stroke": "#f5f5f5",
+                  }
+                }
+                x1={615.5860525788659}
+                x2={615.5860525788659}
+                y1={0}
+                y2={116}
+              />
+              <line
+                className="rv-xy-plot__grid-lines__line"
+                style={
+                  Object {
+                    "stroke": "#f5f5f5",
+                  }
+                }
+                x1={703.5269172329896}
+                x2={703.5269172329896}
+                y1={0}
+                y2={116}
+              />
+              <line
+                className="rv-xy-plot__grid-lines__line"
+                style={
+                  Object {
+                    "stroke": "#f5f5f5",
+                  }
+                }
+                x1={791.4677818871132}
+                x2={791.4677818871132}
+                y1={0}
+                y2={116}
+              />
+              <line
+                className="rv-xy-plot__grid-lines__line"
+                style={
+                  Object {
+                    "stroke": "#f5f5f5",
+                  }
+                }
+                x1={879.408646541237}
+                x2={879.408646541237}
+                y1={0}
+                y2={116}
+              />
+            </g>
+            <g
+              className="rv-xy-plot__grid-lines"
+              transform="translate(50,100)"
+            >
+              <line
+                className="rv-xy-plot__grid-lines__line"
+                style={
+                  Object {
+                    "stroke": "#999999",
+                  }
+                }
+                x1={439.7043232706185}
+                x2={439.7043232706185}
+                y1={0}
+                y2={116}
+              />
+              <line
+                className="rv-xy-plot__grid-lines__line"
+                style={
+                  Object {
+                    "stroke": "#999999",
+                  }
+                }
+                x1={483.6747555976803}
+                x2={483.6747555976803}
+                y1={0}
+                y2={116}
+              />
+              <line
+                className="rv-xy-plot__grid-lines__line"
+                style={
+                  Object {
+                    "stroke": "#999999",
+                  }
+                }
+                x1={835.4382142141751}
+                x2={835.4382142141751}
+                y1={0}
+                y2={116}
+              />
+              <line
+                className="rv-xy-plot__grid-lines__line"
+                style={
+                  Object {
+                    "stroke": "#999999",
+                  }
+                }
+                x1={900}
+                x2={900}
+                y1={0}
+                y2={116}
+              />
+            </g>
+          </svg>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+`;

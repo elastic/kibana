@@ -1,3 +1,22 @@
+/*
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
 import d3 from 'd3';
 import _ from 'lodash';
 import $ from 'jquery';
@@ -6,7 +25,7 @@ import { VislibLibAxisTitleProvider } from './axis_title';
 import { VislibAxisLabelsProvider } from './axis_labels';
 import { VislibAxisScaleProvider } from './axis_scale';
 import { VislibLibAxisConfigProvider } from './axis_config';
-import { VislibError } from 'ui/errors';
+import { VislibError } from '../../../errors';
 
 export function VislibLibAxisProvider(Private) {
   const ErrorHandler = Private(VislibLibErrorHandlerProvider);
@@ -30,16 +49,16 @@ export function VislibLibAxisProvider(Private) {
       this.axisLabels = new AxisLabels(this.axisConfig, this.axisScale);
 
       this.stack = d3.layout.stack()
-      .x(d => {
-        return d.x;
-      })
-      .y(d => {
-        if (this.axisConfig.get('scale.offset') === 'expand') {
-          return Math.abs(d.y);
-        }
-        return d.y;
-      })
-      .offset(this.axisConfig.get('scale.offset', 'zero'));
+        .x(d => {
+          return d.x;
+        })
+        .y(d => {
+          if (typeof this.axisConfig.get('scale.offset') === 'function' && this.axisConfig.get('scale.offset').name === 'expand') {
+            return Math.abs(d.y);
+          }
+          return d.y;
+        })
+        .offset(this.axisConfig.get('scale.offset', 'zero'));
 
       const stackedMode = ['normal', 'grouped'].includes(this.axisConfig.get('scale.mode'));
       if (stackedMode) {
@@ -78,10 +97,10 @@ export function VislibLibAxisProvider(Private) {
       const axisFormatter = this.axisConfig.get('labels.axisFormatter');
 
       return d3.svg.axis()
-      .scale(scale)
-      .tickFormat(axisFormatter)
-      .ticks(this.tickScale(length))
-      .orient(position);
+        .scale(scale)
+        .tickFormat(axisFormatter)
+        .ticks(this.tickScale(length))
+        .orient(position);
     }
 
     getScale() {
@@ -98,9 +117,9 @@ export function VislibLibAxisProvider(Private) {
 
     tickScale(length) {
       const yTickScale = d3.scale.linear()
-      .clamp(true)
-      .domain([20, 40, 1000])
-      .range([0, 3, 11]);
+        .clamp(true)
+        .domain([20, 40, 1000])
+        .range([0, 3, 11]);
 
       return Math.ceil(yTickScale(length));
     }
@@ -140,9 +159,9 @@ export function VislibLibAxisProvider(Private) {
           selection.attr('height', Math.ceil(length));
           if (position === 'top') {
             selection.select('g')
-            .attr('transform', `translate(0, ${length - parseInt(style.lineWidth)})`);
+              .attr('transform', `translate(0, ${length - parseInt(style.lineWidth)})`);
             selection.select('path')
-            .attr('transform', 'translate(1,0)');
+              .attr('transform', 'translate(1,0)');
           }
           if (config.get('type') === 'value') {
             const spacerNodes = $(chartEl).find(`.y-axis-spacer-block-${position}`);
@@ -154,7 +173,7 @@ export function VislibLibAxisProvider(Private) {
           selection.attr('width', axisWidth);
           if (position === 'left') {
             selection.select('g')
-            .attr('transform', `translate(${axisWidth},0)`);
+              .attr('transform', `translate(${axisWidth},0)`);
           }
         }
       };
@@ -190,26 +209,26 @@ export function VislibLibAxisProvider(Private) {
 
           if (config.get('show')) {
             const svg = div.append('svg')
-            .attr('width', width)
-            .attr('height', height);
+              .attr('width', width)
+              .attr('height', height);
 
             svgs.push(svg);
 
             const axisClass = self.axisConfig.isHorizontal() ? 'x' : 'y';
             svg.append('g')
-            .attr('class', `${axisClass} axis ${config.get('id')}`)
-            .call(axis);
+              .attr('class', `${axisClass} axis ${config.get('id')}`)
+              .call(axis);
 
             const container = svg.select('g.axis').node();
             if (container) {
               svg.select('path')
-              .style('stroke', style.color)
-              .style('stroke-width', style.lineWidth)
-              .style('stroke-opacity', style.opacity);
+                .style('stroke', style.color)
+                .style('stroke-width', style.lineWidth)
+                .style('stroke-opacity', style.opacity);
               svg.selectAll('line')
-              .style('stroke', style.tickColor)
-              .style('stroke-width', style.tickWidth)
-              .style('stroke-opacity', style.opacity);
+                .style('stroke', style.tickColor)
+                .style('stroke-width', style.tickWidth)
+                .style('stroke-opacity', style.opacity);
             }
             if (self.axisLabels) self.axisLabels.render(svg);
           }

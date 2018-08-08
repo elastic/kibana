@@ -1,0 +1,104 @@
+.ml-influencers-list {
+  line-height: 1.45;
+
+  .field-label {
+    font-size: 12px;
+    text-align: left;
+
+    .field-value {
+      max-width: calc(~"100% - 34px");
+      overflow: hidden;
+      white-space: nowrap;
+      text-overflow: ellipsis;
+      display: inline-block;
+      vertical-align: bottom;
+    }
+  }
+
+  .progress {
+    display:inline-block;
+    width: calc(~"100% - 34px");
+    height: 22px;
+    min-width: 70px;
+    margin-bottom: 0px;
+    color: #555;
+    background-color : transparent;
+
+    .progress-bar-holder {
+      width: calc(~"100% - 28px");
+    }
+
+    .progress-bar {
+      height: 2px;
+      margin-top: 8px;
+      text-align: right;
+      line-height: 18px;
+      display: inline-block;
+      transition: none;
+    }
+  }
+
+  .progress.critical {
+    .progress-bar {
+      background-color: #fe5050;
+    }
+    .score-label {
+      border-color: #fe5050;
+    }
+  }
+
+  .progress.major {
+    .progress-bar {
+      background-color: #fba740;
+    }
+    .score-label {
+      border-color: #fba740;
+    }
+  }
+
+  .progress.minor {
+    .progress-bar {
+      background-color: #ffdd00;
+    }
+    .score-label {
+      border-color: #ffdd00;
+    }
+  }
+
+  .progress.warning {
+    .progress-bar {
+      background-color: #8bc8fb;
+    }
+    .score-label {
+      border-color: #8bc8fb;
+    }
+  }
+
+  .score-label {
+    text-align: center;
+    line-height: 14px;
+    white-space: nowrap;
+    font-size: 12px;
+    display: inline;
+    margin-left: 4px;
+  }
+
+  .total-score-label {
+    width: 32px;
+    vertical-align: top;
+    text-align: center;
+    color: #555;
+    font-size: 11px;
+    line-height: 14px;
+    border-radius: 4px;
+    padding: 2px;
+    margin-top: 1px;
+    display: inline-block;
+    border: 1px solid #bbbbbb;
+  }
+}
+
+.ml-influencers-list-tooltip {
+  word-break: break-all;
+}
+

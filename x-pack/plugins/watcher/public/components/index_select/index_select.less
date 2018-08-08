@@ -1,0 +1,57 @@
+@import (reference) "~ui/styles/variables";
+
+.indexSelectSubText() {
+  color: #b4bcc2;
+  font-size: 12px;
+  padding: 3px 20px;
+  line-height: 1.42;
+}
+
+.indexSelectNoChoice {
+  .indexSelectSubText();
+}
+
+/**
+ * 1. To ensure a smooth UX, prevent the dropdown from hiding while we async search for more results
+ * 2. ui-select likes to clear the result set out of the UI when you enter
+ *    a new search query which can cause a jarring UX. This helps mitigate
+ *    that by at least providing something in the box so it's not empty
+ */
+.indexSelect--activeSearch {
+  .ui-select-dropdown.ng-hide {
+    display: block !important; /* 1 */
+
+    &:after {
+      content: 'Choose...'; /* 2 */
+      .indexSelectSubText(); /* 2 */
+    }
+  }
+}
+
+/**
+ * 1. By default, hide this until the user searches or there are results
+ */
+.indexSelect--noSearch {
+  .ui-select-no-choice {
+    display: none !important; /* 1 */
+  }
+}
+
+/**
+ * 1. Provide a loading indicator to the user
+ */
+.indexSelect--fetchingWithNoIndices {
+  .ui-select-choices:before {
+    content: 'Loading...'; /* 1 */
+    margin-left: 15px; /* 1 */
+    font-style: italic; /* 1 */
+    color: @kibanaGray2; /* 1 */
+  }
+}
+
+/**
+ * 1. Ensure that an invalid ui-select shows a red border
+ */
+.ui-select-multiple.ui-select-bootstrap.ng-invalid {
+  border-color: #D86051 !important; /* 1 */
+}

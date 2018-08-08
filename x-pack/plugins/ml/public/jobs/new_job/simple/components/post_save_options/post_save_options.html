@@ -1,0 +1,51 @@
+<div class='post-save-options'>
+
+  <div class='form-group'>
+    <label class='kuiCheckBoxLabel kuiVerticalRhythm'>
+      <input ng-model='runInRealtime' ng-disabled="status.realtimeJob!==null" type="checkbox" class='kuiCheckBox' ng-click="clickRunInRealtime()"/>
+      <span class="kuiCheckBoxLabel__text">
+        Continue job in real-time
+        <span ng-hide="status.realtimeJob===null">
+          <i ng-show="status.realtimeJob === STATUS.SAVE_FAILED" aria-hidden="true" style="color:red;" class="fa fa-remove"></i>
+          <i ng-show="status.realtimeJob === STATUS.SAVING" aria-hidden="true" class="fa fa-spinner fa-spin"></i>
+          <i ng-show="status.realtimeJob === STATUS.SAVED" aria-hidden="true" style="color:green;" class="fa fa-check"></i>
+         </span>
+      </span>
+    </label>
+  </div>
+  <div ng-show='watcherEnabled' class='form-group'>
+    <label
+      class='kuiCheckBoxLabel kuiVerticalRhythm'
+      ng-class="{'disabled': !runInRealtime}">
+      <input ng-model='createWatch' ng-disabled="!runInRealtime || status.realtimeJob!==null" type="checkbox" class='kuiCheckBox' />
+      <span class="kuiCheckBoxLabel__text">
+        Create watch for real-time job
+        <span ng-hide="status.watch===null">
+          <i ng-show="status.watch === STATUS.SAVE_FAILED" aria-hidden="true" style="color:red;" class="fa fa-remove"></i>
+          <i ng-show="status.watch === STATUS.SAVING" aria-hidden="true" class="fa fa-spinner fa-spin"></i>
+          <i ng-show="status.watch === STATUS.SAVED" aria-hidden="true" style="color:green;" class="fa fa-check"></i>
+        </span>
+      </span>
+    </label>
+
+    <div ng-if='runInRealtime && createWatch'>
+      <ml-create-watch
+        job-id='jobId'
+        bucket-span='bucketSpan'
+        include-influencers='includeInfluencers'
+        embedded='embedded'
+      ></ml-create-watch>
+    </div>
+  </div>
+
+  <button
+    aria-label="Create watch"
+    ng-click="apply()"
+    ng-hide='(status.realtimeJob===STATUS.SAVED && createWatch===false) || (status.realtimeJob===STATUS.SAVED && status.watch===STATUS.SAVED && createWatch===true)'
+    ng-disabled='runInRealtime===false'
+    type="button"
+    class="kuiButton kuiButton--primary">
+      Apply
+  </button>
+
+</div>

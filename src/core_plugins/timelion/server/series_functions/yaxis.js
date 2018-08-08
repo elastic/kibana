@@ -1,3 +1,22 @@
+/*
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
 import _ from 'lodash';
 import alter from '../lib/alter.js';
 import Chainable from '../lib/classes/chainable';
@@ -20,7 +39,7 @@ export default new Chainable('yaxis', {
     {
       name: 'yaxis',
       types: ['number', 'null'],
-      help: 'The numbered y-axis to plot this series on, eg .yaxis(2) for a 2nd y-axis.'
+      help: 'The numbered y-axis to plot this series on, e.g., .yaxis(2) for a 2nd y-axis.'
     },
     {
       name: 'min',
@@ -50,7 +69,10 @@ export default new Chainable('yaxis', {
     {
       name: 'units',
       types: ['string', 'null'],
-      help: 'The function to use for formatting y-axis labels. One of: ' + _.values(tickFormatters).join(', ')
+      help: `The function to use for formatting y-axis labels. One of: ${_.values(tickFormatters).join(', ')}`,
+      suggestions: _.keys(tickFormatters).map(key => {
+        return { name: key, help: tickFormatters[key] };
+      })
     },
     {
       name: 'tickDecimals',
@@ -104,7 +126,7 @@ export default new Chainable('yaxis', {
 
         if (unitType === 'percent') {
           // jquery.flot uses axis.tickDecimals to generate tick values
-          // need 2 extra decimal places to perserve percision when percent shifts value to left
+          // need 2 extra decimal places to preserve precision when percent shifts value to left
           myAxis.units.tickDecimalsShift = 2;
           if (tickDecimals) {
             myAxis.tickDecimals += myAxis.units.tickDecimalsShift;

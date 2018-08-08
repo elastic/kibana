@@ -1,0 +1,14 @@
+<div
+  class="json-editor"
+  ng-model="watchHistoryItemDetail.watchHistoryItem.details"
+  json-input
+  readonly
+  ui-ace="{
+    useWrapMode: true,
+    mode: 'json',
+    onLoad: aceLoaded,
+    advanced: {
+      highlightActiveLine: false
+    }
+  }"
+></div>

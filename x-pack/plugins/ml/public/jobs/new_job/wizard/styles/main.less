@@ -1,0 +1,70 @@
+@import (reference) '~ui/styles/variables/colors';
+@import (reference) "~ui/styles/variables";
+
+.job-type-gallery {
+  width: 100%;
+  padding-right: 10px;
+  padding-left: 10px;
+  background-color: @globalColorLightestGray;
+  -webkit-box-flex: 1;
+  -webkit-flex: 1 0 auto;
+  -ms-flex: 1 0 auto;
+  flex: 1 0 auto;
+
+  .job-types-content {
+    max-width: 1200px;
+    margin-right: auto;
+    margin-left: auto;
+  }
+
+  .synopsis {
+    display: -webkit-box;
+    display: -webkit-flex;
+    display: -ms-flexbox;
+    display: flex;
+    -webkit-box-flex: 1;
+    -webkit-flex-grow: 1;
+    -ms-flex-positive: 1;
+    flex-grow: 1;
+
+    .synopsisTitle {
+      font-size: 16px;
+      font-weight: normal;
+      color: #0079a5;
+    }
+
+    .synopsisIcon {
+      padding-top: 8px;
+    }
+  }
+
+  .synopsis:hover {
+    text-decoration: none;
+
+    .synopsisTitle {
+      text-decoration: underline;
+    }
+  }
+
+  .euiFlexItem.disabled {
+    cursor: not-allowed;
+  }
+
+  .synopsis.disabled {
+    pointer-events: none;
+
+    .synopsisTitle {
+      color: grey;
+    }
+  }
+
+  .index-warning {
+    border: 1px solid #d9d9d9;
+  }
+}
+
+.index-or-saved-search-selection {
+  .kuiBarSection .kuiButtonGroup {
+    display: none;
+  }
+}

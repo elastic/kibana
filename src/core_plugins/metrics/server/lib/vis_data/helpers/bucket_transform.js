@@ -1,5 +1,27 @@
+/*
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
 import parseSettings from './parse_settings';
 import getBucketsPath from './get_buckets_path';
+import { parseInterval } from './parse_interval';
+import { set } from 'lodash';
+
 function checkMetric(metric, fields) {
   fields.forEach(field => {
     if (!metric[field]) {
@@ -12,7 +34,7 @@ function stdMetric(bucket) {
   checkMetric(bucket, ['type', 'field']);
   const body = {};
   body[bucket.type] = {
-    field: bucket.field
+    field: bucket.field,
   };
   return body;
 }
@@ -20,16 +42,18 @@ function stdMetric(bucket) {
 function extendStats(bucket) {
   checkMetric(bucket, ['type', 'field']);
   const body = {
-    extended_stats: { field: bucket.field }
+    extended_stats: { field: bucket.field },
   };
   if (bucket.sigma) body.extended_stats.sigma = parseInt(bucket.sigma, 10);
   return body;
 }
 
 function extendStatsBucket(bucket, metrics) {
-  const bucketsPath = 'timeseries > ' + getBucketsPath(bucket.field, metrics);
+  const bucketsPath = 'timeseries>' + getBucketsPath(bucket.field, metrics);
   const body = { extended_stats_bucket: { buckets_path: bucketsPath } };
-  if (bucket.sigma) body.extended_stats_bucket.sigma = parseInt(bucket.sigma, 10);
+  if (bucket.sigma) {
+    body.extended_stats_bucket.sigma = parseInt(bucket.sigma, 10);
+  }
   return body;
 }
 
@@ -39,24 +63,24 @@ export default {
       bucket_script: {
         buckets_path: { count: '_count' },
         script: {
-          inline: 'count * 1',
-          lang: 'expression'
+          source: 'count * 1',
+          lang: 'expression',
         },
-        gap_policy: 'skip'
-      }
+        gap_policy: 'skip',
+      },
     };
   },
-  static: (bucket) => {
+  static: bucket => {
     checkMetric(bucket, ['value']);
     return {
       bucket_script: {
         buckets_path: { count: '_count' },
         script: {
-          inline: bucket.value,
-          lang: 'painless'
+          source: bucket.value,
+          lang: 'painless',
         },
-        gap_policy: 'skip'
-      }
+        gap_policy: 'skip',
+      },
     };
   },
   avg: stdMetric,
@@ -69,13 +93,36 @@ export default {
   variance: extendStats,
   std_deviation: extendStats,
 
+  top_hit: bucket => {
+    checkMetric(bucket, ['type', 'field', 'size']);
+    const body = {
+      filter: {
+        exists: { field: bucket.field },
+      },
+      aggs: {
+        docs: {
+          top_hits: {
+            size: bucket.size,
+            _source: { includes: [bucket.field] },
+          },
+        },
+      },
+    };
+    if (bucket.order_by) {
+      set(body, 'aggs.docs.top_hits.sort', [
+        { [bucket.order_by]: { order: bucket.order } },
+      ]);
+    }
+    return body;
+  },
+
   percentile_rank: bucket => {
     checkMetric(bucket, ['type', 'field', 'value']);
     const body = {
       percentile_ranks: {
         field: bucket.field,
-        values: [bucket.value]
-      }
+        values: [bucket.value],
+      },
     };
     return body;
   },
@@ -88,19 +135,21 @@ export default {
   std_deviation_bucket: extendStatsBucket,
   variance_bucket: extendStatsBucket,
 
-  percentile: (bucket) => {
+  percentile: bucket => {
     checkMetric(bucket, ['type', 'field', 'percentiles']);
-    let percents = bucket.percentiles.filter(p => p.value != null).map(p => p.value);
+    let percents = bucket.percentiles
+      .filter(p => p.value != null)
+      .map(p => p.value);
     if (bucket.percentiles.some(p => p.mode === 'band')) {
-      percents = percents.concat(bucket.percentiles
-        .filter(p => p.percentile)
-        .map(p => p.percentile));
+      percents = percents.concat(
+        bucket.percentiles.filter(p => p.percentile).map(p => p.percentile)
+      );
     }
     const agg = {
       percentiles: {
         field: bucket.field,
-        percents
-      }
+        percents,
+      },
     };
     return agg;
   },
@@ -111,11 +160,15 @@ export default {
       derivative: {
         buckets_path: getBucketsPath(bucket.field, metrics),
         gap_policy: 'skip', // seems sane
-        unit: bucketSize
-      }
+        unit: bucketSize,
+      },
     };
     if (bucket.gap_policy) body.derivative.gap_policy = bucket.gap_policy;
-    if (bucket.unit) body.derivative.unit = /^([\d]+)([shmdwMy]|ms)$/.test(bucket.unit) ? bucket.unit : bucketSize;
+    if (bucket.unit) {
+      body.derivative.unit = /^([\d]+)([shmdwMy]|ms)$/.test(bucket.unit)
+        ? bucket.unit
+        : bucketSize;
+    }
     return body;
   },
 
@@ -125,11 +178,13 @@ export default {
       serial_diff: {
         buckets_path: getBucketsPath(bucket.field, metrics),
         gap_policy: 'skip', // seems sane
-        lag: 1
-      }
+        lag: 1,
+      },
     };
     if (bucket.gap_policy) body.serial_diff.gap_policy = bucket.gap_policy;
-    if (bucket.lag) body.serial_diff.lag = /^([\d]+)$/.test(bucket.lag) ? bucket.lag : 0;
+    if (bucket.lag) {
+      body.serial_diff.lag = /^([\d]+)$/.test(bucket.lag) ? bucket.lag : 0;
+    }
     return body;
   },
 
@@ -137,8 +192,8 @@ export default {
     checkMetric(bucket, ['type', 'field']);
     return {
       cumulative_sum: {
-        buckets_path: getBucketsPath(bucket.field, metrics)
-      }
+        buckets_path: getBucketsPath(bucket.field, metrics),
+      },
     };
   },
 
@@ -148,18 +203,20 @@ export default {
       moving_avg: {
         buckets_path: getBucketsPath(bucket.field, metrics),
         model: bucket.model || 'simple',
-        gap_policy: 'skip' // seems sane
-      }
+        gap_policy: 'skip', // seems sane
+      },
     };
     if (bucket.gap_policy) body.moving_avg.gap_policy = bucket.gap_policy;
     if (bucket.window) body.moving_avg.window = Number(bucket.window);
     if (bucket.minimize) body.moving_avg.minimize = Boolean(bucket.minimize);
     if (bucket.predict) body.moving_avg.predict = Number(bucket.predict);
-    if (bucket.settings) body.moving_avg.settings = parseSettings(bucket.settings);
+    if (bucket.settings) {
+      body.moving_avg.settings = parseSettings(bucket.settings);
+    }
     return body;
   },
 
-  calculation: (bucket, metrics) => {
+  calculation: (bucket, metrics, bucketSize) => {
     checkMetric(bucket, ['variables', 'script']);
     const body = {
       bucket_script: {
@@ -168,11 +225,14 @@ export default {
           return acc;
         }, {}),
         script: {
-          inline: bucket.script,
-          lang: 'painless'
+          source: bucket.script,
+          lang: 'painless',
+          params: {
+            _interval: parseInterval(bucketSize).asMilliseconds(),
+          },
         },
-        gap_policy: 'skip' // seems sane
-      }
+        gap_policy: 'skip', // seems sane
+      },
     };
     if (bucket.gap_policy) body.bucket_script.gap_policy = bucket.gap_policy;
     return body;
@@ -183,18 +243,15 @@ export default {
     const body = {
       bucket_script: {
         buckets_path: {
-          value: getBucketsPath(bucket.field, metrics)
+          value: getBucketsPath(bucket.field, metrics),
         },
         script: {
-          inline: 'params.value > 0 ? params.value : 0',
-          lang: 'painless'
+          source: 'params.value > 0 ? params.value : 0',
+          lang: 'painless',
         },
-        gap_policy: 'skip' // seems sane
-      }
+        gap_policy: 'skip', // seems sane
+      },
     };
     return body;
-  }
-
-
+  },
 };
-

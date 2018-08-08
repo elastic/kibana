@@ -1,25 +1,79 @@
+/*
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
 import React from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
+import _ from 'lodash';
 
 import { PanelHeader } from './panel_header';
 import { PanelError } from './panel_error';
 
 export class DashboardPanel extends React.Component {
-  async componentDidMount() {
-    this.props.renderEmbeddable(this.panelElement, this.props.panel);
+  constructor(props) {
+    super(props);
+    this.state = {
+      error: props.embeddableFactory ? null : `No factory found for embeddable`,
+    };
+
+    this.mounted = false;
   }
 
-  toggleExpandedPanel = () => {
-    const { isExpanded, onMaximizePanel, onMinimizePanel } = this.props;
-    if (isExpanded) {
-      onMinimizePanel();
-    } else {
-      onMaximizePanel();
+  async componentDidMount() {
+    this.mounted = true;
+    const {
+      initialized,
+      embeddableFactory,
+      embeddableIsInitializing,
+      panel,
+      embeddableStateChanged,
+      embeddableIsInitialized,
+      embeddableError,
+    } = this.props;
+
+    if (!initialized) {
+      embeddableIsInitializing();
+      embeddableFactory.create(panel, embeddableStateChanged)
+        .then((embeddable) => {
+          if (this.mounted) {
+            this.embeddable = embeddable;
+            embeddableIsInitialized(embeddable.metadata);
+            this.embeddable.render(this.panelElement, this.props.containerState);
+          } else {
+            embeddable.destroy();
+          }
+        })
+        .catch((error) => {
+          if (this.mounted) {
+            embeddableError(error.message);
+          }
+        });
     }
-  };
-  deletePanel = () => this.props.onDeletePanel();
-  onEditPanel = () => window.location = this.props.editUrl;
+  }
+
+  componentWillUnmount() {
+    this.props.destroy();
+    this.mounted = false;
+    if (this.embeddable) {
+      this.embeddable.destroy();
+    }
+  }
 
   onFocus = () => {
     const { onPanelFocused, panel } = this.props;
@@ -35,42 +89,42 @@ export class DashboardPanel extends React.Component {
     }
   };
 
-  componentWillUnmount() {
-    this.props.onDestroy();
-  }
-
-  renderEmbeddedContent() {
+  renderEmbeddableViewport() {
     return (
       <div
         id="embeddedPanel"
         className="panel-content"
         ref={panelElement => this.panelElement = panelElement}
-      />
+      >
+        {!this.props.initialized && 'loading...'}
+      </div>
     );
   }
 
-  renderEmbeddedError() {
-    const { error } = this.props;
-    const errorMessage = error.message || JSON.stringify(error);
-    return <PanelError error={errorMessage} />;
-  }
+  shouldComponentUpdate(nextProps) {
+    if (this.embeddable && !_.isEqual(nextProps.containerState, this.props.containerState)) {
+      this.embeddable.onContainerStateChanged(nextProps.containerState);
+    }
 
-  renderEmbeddedContent() {
-    return (
-      <div
-        id="embeddedPanel"
-        className="panel-content"
-        ref={panelElement => this.panelElement = panelElement}
-      />
-    );
+    return nextProps.error !== this.props.error ||
+      nextProps.initialized !== this.props.initialized;
   }
 
   renderEmbeddedError() {
     return <PanelError error={this.props.error} />;
   }
 
+  renderContent() {
+    const { error } = this.props;
+    if (error) {
+      return this.renderEmbeddedError(error);
+    } else {
+      return this.renderEmbeddableViewport();
+    }
+  }
+
   render() {
-    const { viewOnlyMode, isExpanded, title, error } = this.props;
+    const { viewOnlyMode, panel } = this.props;
     const classes = classNames('panel panel-default', this.props.className, {
       'panel--edit-mode': !viewOnlyMode
     });
@@ -85,15 +139,11 @@ export class DashboardPanel extends React.Component {
           data-test-subj="dashboardPanel"
         >
           <PanelHeader
-            title={title}
-            onDeletePanel={this.deletePanel}
-            onEditPanel={this.onEditPanel}
-            onToggleExpand={this.toggleExpandedPanel}
-            isExpanded={isExpanded}
-            isViewOnlyMode={viewOnlyMode}
+            panelId={panel.panelIndex}
+            embeddable={this.embeddable}
           />
 
-          {error ? this.renderEmbeddedError() : this.renderEmbeddedContent()}
+          {this.renderContent()}
 
         </div>
       </div>
@@ -102,22 +152,30 @@ export class DashboardPanel extends React.Component {
 }
 
 DashboardPanel.propTypes = {
-  panel: PropTypes.shape({
-    panelIndex: PropTypes.string,
-  }),
-  renderEmbeddable: PropTypes.func.isRequired,
-  isExpanded: PropTypes.bool.isRequired,
-  onMaximizePanel: PropTypes.func.isRequired,
-  onMinimizePanel: PropTypes.func.isRequired,
   viewOnlyMode: PropTypes.bool.isRequired,
-  onDestroy: PropTypes.func.isRequired,
-  onDeletePanel: PropTypes.func,
-  editUrl: PropTypes.string,
-  title: PropTypes.string,
   onPanelFocused: PropTypes.func,
   onPanelBlurred: PropTypes.func,
   error: PropTypes.oneOfType([
     PropTypes.string,
     PropTypes.object
   ]),
+  destroy: PropTypes.func.isRequired,
+  containerState: PropTypes.shape({
+    timeRange: PropTypes.object,
+    filters: PropTypes.array,
+    query: PropTypes.object,
+    embeddableCustomization: PropTypes.object,
+    hidePanelTitles: PropTypes.bool.isRequired,
+  }),
+  embeddableFactory: PropTypes.shape({
+    create: PropTypes.func,
+  }).isRequired,
+  embeddableStateChanged: PropTypes.func.isRequired,
+  embeddableIsInitialized: PropTypes.func.isRequired,
+  embeddableError: PropTypes.func.isRequired,
+  embeddableIsInitializing: PropTypes.func.isRequired,
+  initialized: PropTypes.bool.isRequired,
+  panel: PropTypes.shape({
+    panelIndex: PropTypes.string,
+  }).isRequired,
 };

@@ -1,42 +1,50 @@
+/*
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
 import expect from 'expect.js';
 import * as or from '../or';
 import { nodeTypes } from '../../node_types';
 import * as ast from '../../ast';
-import StubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
-import ngMock from 'ng_mock';
-import { expectDeepEqual } from '../../../../../test_utils/expect_deep_equal';
+import indexPatternResponse from '../../__tests__/index_pattern_response.json';
+
 
 let indexPattern;
 
-const childNode1 = nodeTypes.function.buildNode('is', 'response', 200);
+const childNode1 = nodeTypes.function.buildNode('is', 'machine.os', 'osx');
 const childNode2 = nodeTypes.function.buildNode('is', 'extension', 'jpg');
 
 describe('kuery functions', function () {
 
   describe('or', function () {
 
-    beforeEach(ngMock.module('kibana'));
-    beforeEach(ngMock.inject(function (Private) {
-      indexPattern = Private(StubbedLogstashIndexPatternProvider);
-    }));
+
+    beforeEach(() => {
+      indexPattern = indexPatternResponse;
+    });
 
     describe('buildNodeParams', function () {
-
-      it('should return "arguments" and "serializeStyle" params', function () {
-        const result = or.buildNodeParams([childNode1, childNode2]);
-        expect(result).to.only.have.keys('arguments', 'serializeStyle');
-      });
 
       it('arguments should contain the unmodified child nodes', function () {
         const result = or.buildNodeParams([childNode1, childNode2]);
         const { arguments: [ actualChildNode1, actualChildNode2 ] } = result;
         expect(actualChildNode1).to.be(childNode1);
         expect(actualChildNode2).to.be(childNode2);
-      });
-
-      it('serializeStyle should default to "operator"', function () {
-        const { serializeStyle } = or.buildNodeParams([childNode1, childNode2]);
-        expect(serializeStyle).to.be('operator');
       });
 
     });
@@ -53,15 +61,6 @@ describe('kuery functions', function () {
         );
       });
 
-      it('should wrap a literal argument with an "is" function targeting all fields', function () {
-        const literalFoo = nodeTypes.literal.buildNode('foo');
-        const expectedChild = ast.toElasticsearchQuery(nodeTypes.function.buildNode('is', '*', 'foo'), indexPattern);
-        const node = nodeTypes.function.buildNode('or', [literalFoo]);
-        const result = or.toElasticsearchQuery(node, indexPattern);
-        const resultChild = result.bool.should[0];
-        expectDeepEqual(resultChild, expectedChild);
-      });
-
       it('should require one of the clauses to match', function () {
         const node = nodeTypes.function.buildNode('or', [childNode1, childNode2]);
         const result = or.toElasticsearchQuery(node, indexPattern);
@@ -70,20 +69,5 @@ describe('kuery functions', function () {
 
     });
 
-    describe('toKueryExpression', function () {
-
-      it('should serialize "or" nodes with an operator syntax', function () {
-        const node = nodeTypes.function.buildNode('or', [childNode1, childNode2]);
-        const result = or.toKueryExpression(node);
-        expect(result).to.be('"response":200 or "extension":"jpg"');
-      });
-
-      it('should throw an error for nodes with unknown or undefined serialize styles', function () {
-        const node = nodeTypes.function.buildNode('or', [childNode1, childNode2], 'notValid');
-        expect(or.toKueryExpression)
-        .withArgs(node).to.throwException(/Cannot serialize "or" function as "notValid"/);
-      });
-
-    });
   });
 });

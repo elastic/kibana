@@ -65,11 +65,6 @@
             round to the {{units[relative.from.unit.substring(0,1)]}}
           </span>
         </label>
-        <div
-          ng-class="{ 'kbn-timepicker-error': checkRelative() }"
-          ng-show="checkRelative()">
-          <strong>From</strong> must occur before <strong>To</strong>
-        </div>
       </div>
     </div>
 
@@ -143,11 +138,17 @@
   </div>
 
   <div class="kbn-timepicker-actions kuiVerticalRhythm">
+    <span
+      class="kbn-timepicker-action-item kbn-timepicker-error"
+      ng-show="checkRelative()"
+    >
+      <strong>From</strong> must occur before <strong>To</strong>
+    </span>
     <button
-      data-test-subj="timepickerGoButton"
       type="submit"
       class="kuiButton kuiButton--primary kbn-timepicker-submit-button"
       ng-disabled="!(relative.from.preview && relative.to.preview) || checkRelative()"
+      data-test-subj="timepickerGoButton"
     >
       Go
     </button>

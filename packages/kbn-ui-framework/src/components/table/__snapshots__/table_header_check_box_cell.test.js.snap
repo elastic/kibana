@@ -1,0 +1,20 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`renders KuiTableHeaderCheckBoxCell 1`] = `
+<th
+  aria-label="aria-label"
+  class="kuiTableHeaderCell kuiTableHeaderCell--checkBox testClass1 testClass2"
+  data-test-subj="test subject string"
+  scope="col"
+>
+  <div
+    class="kuiTableHeaderCell__liner"
+  >
+    <input
+      aria-label="Select all rows"
+      class="kuiCheckBox"
+      type="checkbox"
+    />
+  </div>
+</th>
+`;

@@ -1,30 +1,41 @@
+/*
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
 import _ from 'lodash';
 import expect from 'expect.js';
 import ngMock from 'ng_mock';
-import sinon from 'sinon';
-import 'ui/private';
-import { AggTypesAggParamsProvider } from 'ui/agg_types/agg_params';
-import { VisProvider } from 'ui/vis';
-import { RegistryFieldFormatsProvider } from 'ui/registry/field_formats';
-import { AggTypesAggTypeProvider } from 'ui/agg_types/agg_type';
+import '../../private';
+import { AggParams } from '../agg_params';
+import { VisProvider } from '../../vis';
+import { fieldFormats } from '../../registry/field_formats';
+import { AggType } from '../agg_type';
 import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
 
 describe('AggType Class', function () {
-  let AggType;
-  let AggParams;
   let indexPattern;
-  let fieldFormat;
   let Vis;
 
 
   beforeEach(ngMock.module('kibana'));
   beforeEach(ngMock.inject(function (Private) {
-    AggParams = sinon.spy(Private(AggTypesAggParamsProvider));
-    Private.stub(AggTypesAggParamsProvider, AggParams);
 
     Vis = Private(VisProvider);
-    fieldFormat = Private(RegistryFieldFormatsProvider);
-    AggType = Private(AggTypesAggTypeProvider);
     indexPattern = Private(FixturesStubbedLogstashIndexPatternProvider);
   }));
 
@@ -93,7 +104,7 @@ describe('AggType Class', function () {
 
           let aggConfig = vis.aggs.byTypeName.date_histogram[0];
 
-          expect(aggType.getFormat(aggConfig)).to.be(fieldFormat.getDefaultInstance('date'));
+          expect(aggType.getFormat(aggConfig)).to.be(fieldFormats.getDefaultInstance('date'));
 
           vis = new Vis(indexPattern, {
             type: 'metric',
@@ -106,7 +117,7 @@ describe('AggType Class', function () {
           });
           aggConfig = vis.aggs.byTypeName.count[0];
 
-          expect(aggType.getFormat(aggConfig)).to.be(fieldFormat.getDefaultInstance('string'));
+          expect(aggType.getFormat(aggConfig)).to.be(fieldFormats.getDefaultInstance('string'));
         });
 
         it('can be overridden via config', function () {
@@ -121,9 +132,6 @@ describe('AggType Class', function () {
       });
 
       describe('params', function () {
-        beforeEach(function () {
-          AggParams.reset();
-        });
 
         it('defaults to AggParams object with JSON param', function () {
           const aggType = new AggType({
@@ -160,8 +168,6 @@ describe('AggType Class', function () {
 
           expect(aggType.params).to.be.an(AggParams);
           expect(aggType.params.length).to.be(paramLength);
-          expect(AggParams.callCount).to.be(1);
-          expect(AggParams.firstCall.args[0]).to.be(params);
         });
       });
 

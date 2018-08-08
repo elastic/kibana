@@ -1,3 +1,22 @@
+/*
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
 import d3 from 'd3';
 import _ from 'lodash';
 import $ from 'jquery';
@@ -72,19 +91,19 @@ export function VislibVisualizationsAreaChartProvider(Private) {
 
       // Data layers
       const layer = svg.append('g')
-      .attr('class', function (d, i) {
-        return 'series series-' + i;
-      });
+        .attr('class', function (d, i) {
+          return 'series series-' + i;
+        });
 
       // Append path
       const path = layer.append('path')
-      .attr('data-label', data.label)
-      .style('fill', () => color(data.label))
-      .style('stroke', () => color(data.label))
-      .classed('overlap_area', function () {
-        return isOverlapping;
-      })
-      .attr('clip-path', 'url(#' + this.baseChart.clipPathId + ')');
+        .attr('data-label', data.label)
+        .style('fill', () => color(data.label))
+        .style('stroke', () => color(data.label))
+        .classed('overlap_area', function () {
+          return isOverlapping;
+        })
+        .attr('clip-path', 'url(#' + this.baseChart.clipPathId + ')');
 
       function x(d) {
         if (isTimeSeries) {
@@ -122,10 +141,10 @@ export function VislibVisualizationsAreaChartProvider(Private) {
       path
         .attr('d', function () {
           const area = getArea()
-          .defined(function (d) {
-            return !_.isNull(d.y);
-          })
-          .interpolate(interpolate);
+            .defined(function (d) {
+              return !_.isNull(d.y);
+            })
+            .interpolate(interpolate);
           return area(data.values.filter(function (d) {
             return !_.isNull(d.y);
           }));
@@ -161,25 +180,25 @@ export function VislibVisualizationsAreaChartProvider(Private) {
 
       // append the circles
       const circles = layer.selectAll('circles')
-      .data(function appendData() {
-        return data.values.filter(function isZeroOrNull(d) {
-          return d.y !== 0 && !_.isNull(d.y);
+        .data(function appendData() {
+          return data.values.filter(function isZeroOrNull(d) {
+            return d.y !== 0 && !_.isNull(d.y);
+          });
         });
-      });
 
       // exit
       circles.exit().remove();
 
       // enter
       circles
-      .enter()
-      .append('circle')
-      .attr('data-label', data.label)
-      .attr('stroke', () => {
-        return color(data.label);
-      })
-      .attr('fill', 'transparent')
-      .attr('stroke-width', circleStrokeWidth);
+        .enter()
+        .append('circle')
+        .attr('data-label', data.label)
+        .attr('stroke', () => {
+          return color(data.label);
+        })
+        .attr('fill', 'transparent')
+        .attr('stroke-width', circleStrokeWidth);
 
       function cx(d) {
         if (ordered && ordered.date) {
@@ -198,9 +217,9 @@ export function VislibVisualizationsAreaChartProvider(Private) {
 
       // update
       circles
-      .attr('cx', isHorizontal ? cx : cy)
-      .attr('cy', isHorizontal ? cy : cx)
-      .attr('r', circleRadius);
+        .attr('cx', isHorizontal ? cx : cy)
+        .attr('cy', isHorizontal ? cy : cx)
+        .attr('r', circleRadius);
 
       // Add tooltip
       if (isTooltip) {

@@ -1,0 +1,33 @@
+{
+  "groups": ["nginx"],
+  "description": "Nginx Access Logs: Detect unusual remote_ips - high request rates",
+  "analysis_config" : {
+    "bucket_span": "1h",
+    "detectors": [
+        {
+        "detector_description": "nginx_access_remote_ip_high_count",
+        "function": "high_count",
+        "over_field_name": "nginx.access.remote_ip"
+      }
+    ],
+    "influencers": [
+      "nginx.access.remote_ip"
+    ]
+  },
+  "data_description": {
+    "time_field": "@timestamp",
+    "time_format": "epoch_ms"
+  },
+  "custom_settings": {
+    "custom_urls": [
+      {
+        "url_name": "Count Explorer",
+        "url_value": "kibana#/dashboard/ML-Nginx-Access-Remote-IP-Count-Explorer?_g=(time:(from:\u0027$earliest$\u0027,mode:absolute,to:\u0027$latest$\u0027))&_a=(description:\u0027\u0027,filters:!((\u0027$state\u0027:(store:appState),meta:(alias:!n,disabled:!f,index:\u0027INDEX_PATTERN_ID\u0027,key:nginx.access.remote_ip,negate:!f,type:phrase,value:\u0027$nginx.access.remote_ip$\u0027),query:(match:(nginx.access.remote_ip:(query:\u0027$nginx.access.remote_ip$\u0027,type:phrase))))),query:(query_string:(analyze_wildcard:!t,query:\u0027*\u0027)))"
+      },
+      {
+        "url_name": "Raw Data",
+        "url_value": "kibana#/discover/ML-Filebeat-Nginx-Access?_g=(time:(from:\u0027$earliest$\u0027,mode:absolute,to:\u0027$latest$\u0027))&_a=(columns:!(_source),filters:!((\u0027$state\u0027:(store:appState),meta:(alias:!n,disabled:!f,index:\u0027INDEX_PATTERN_ID\u0027,key:nginx.access.remote_ip,negate:!f,type:phrase,value:\u0027$nginx.access.remote_ip$\u0027),query:(match:(nginx.access.remote_ip:(query:\u0027$nginx.access.remote_ip$\u0027,type:phrase))))),index:\u0027INDEX_PATTERN_ID\u0027,interval:auto,query:(query_string:(analyze_wildcard:!t,query:\u0027*\u0027)),sort:!(\u0027@timestamp\u0027,desc))"
+      }
+    ]
+  }
+}

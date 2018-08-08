@@ -1,1 +1,0 @@
-export { durationEditor } from './duration';

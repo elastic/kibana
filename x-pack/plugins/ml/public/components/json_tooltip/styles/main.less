@@ -1,0 +1,20 @@
+.ml-info-icon {
+  color: #888;
+  margin: 0 4px;
+  transition: color 0.15s;
+
+  /* hard-coded euiIcon size because EuiIconTip doesn't pass on the size attribute to EuiIcon */
+  .euiIcon {
+    width: 12px;
+    height: 12px;
+  }
+
+  .ml-info-tooltip-text {
+    display: none;
+  }
+}
+
+.ml-info-icon:hover {
+  color: #444;
+  transition: color 0.15s 0.15s;
+}

@@ -1,24 +1,41 @@
+/*
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
 import _ from 'lodash';
 import sinon from 'sinon';
 import ngMock from 'ng_mock';
 import expect from 'expect.js';
 import Promise from 'bluebird';
-import { DuplicateField } from 'ui/errors';
-import { IndexedArray } from 'ui/indexed_array';
+import { DuplicateField } from '../../errors';
+import { IndexedArray } from '../../indexed_array';
 import FixturesLogstashFieldsProvider from 'fixtures/logstash_fields';
 import { FixturesStubbedSavedObjectIndexPatternProvider } from 'fixtures/stubbed_saved_object_index_pattern';
-import { IndexPatternsIntervalsProvider } from 'ui/index_patterns/_intervals';
-import { IndexPatternProvider } from 'ui/index_patterns/_index_pattern';
+import { IndexPatternsIntervalsProvider } from '../_intervals';
+import { IndexPatternProvider } from '../_index_pattern';
 import NoDigestPromises from 'test_utils/no_digest_promises';
-import { Notifier } from 'ui/notify';
+import { toastNotifications } from '../../notify';
 
 import { FieldsFetcherProvider } from '../fields_fetcher_provider';
 import { StubIndexPatternsApiClientModule } from './stub_index_patterns_api_client';
 import { IndexPatternsApiClientProvider } from '../index_patterns_api_client_provider';
 import { IsUserAwareOfUnsupportedTimePatternProvider } from '../unsupported_time_patterns';
-import { SavedObjectsClientProvider } from 'ui/saved_objects';
-
-const MARKDOWN_LINK_RE = /\[(.+?)\]\((.+?)\)/;
+import { SavedObjectsClientProvider } from '../../saved_objects';
 
 describe('index pattern', function () {
   NoDigestPromises.activateForSuite();
@@ -219,7 +236,7 @@ describe('index pattern', function () {
   });
 
   describe('popularizeField', function () {
-    it('should increment the poplarity count by default', function () {
+    it('should increment the popularity count by default', function () {
       const saveSpy = sinon.stub(indexPattern, 'save');
       indexPattern.fields.forEach(function (field, i) {
         const oldCount = field.count;
@@ -231,7 +248,7 @@ describe('index pattern', function () {
       });
     });
 
-    it('should increment the poplarity count', function () {
+    it('should increment the popularity count', function () {
       const saveSpy = sinon.stub(indexPattern, 'save');
       indexPattern.fields.forEach(function (field, i) {
         const oldCount = field.count;
@@ -244,7 +261,7 @@ describe('index pattern', function () {
       });
     });
 
-    it('should decrement the poplarity count', function () {
+    it('should decrement the popularity count', function () {
       indexPattern.fields.forEach(function (field) {
         const oldCount = field.count;
         const incrementAmount = 4;
@@ -346,17 +363,16 @@ describe('index pattern', function () {
 
       it('is fulfilled by the result of interval toIndexList', async function () {
         const indexList = await indexPattern.toIndexList();
-        expect(indexList[0]).to.equal('foo');
-        expect(indexList[1]).to.equal('bar');
+        expect(indexList).to.equal('foo,bar');
       });
 
       describe('with sort order', function () {
         it('passes the sort order to the intervals module', function () {
           return indexPattern.toIndexList(1, 2, 'SORT_DIRECTION')
-          .then(function () {
-            expect(intervals.toIndexList.callCount).to.be(1);
-            expect(intervals.toIndexList.getCall(0).args[4]).to.be('SORT_DIRECTION');
-          });
+            .then(function () {
+              expect(intervals.toIndexList.callCount).to.be(1);
+              expect(intervals.toIndexList.getCall(0).args[4]).to.be('SORT_DIRECTION');
+            });
         });
       });
     });
@@ -372,7 +388,7 @@ describe('index pattern', function () {
 
       it('is fulfilled using the id', async function () {
         const indexList = await indexPattern.toIndexList();
-        expect(indexList).to.eql([indexPattern.title]);
+        expect(indexList).to.eql(indexPattern.title);
       });
     });
 
@@ -387,7 +403,7 @@ describe('index pattern', function () {
 
       it('is fulfilled by id', async function () {
         const indexList = await indexPattern.toIndexList();
-        expect(indexList).to.eql([indexPattern.title]);
+        expect(indexList).to.eql(indexPattern.title);
       });
     });
   });
@@ -450,23 +466,22 @@ describe('index pattern', function () {
     }
 
     it('logs a warning when the index pattern source includes `intervalName`', async () => {
-      const indexPattern = await createUnsupportedTimePattern();
-      expect(Notifier.prototype._notifs).to.have.length(1);
-
-      const notif = Notifier.prototype._notifs.shift();
-      expect(notif).to.have.property('type', 'warning');
-      expect(notif.content).to.match(MARKDOWN_LINK_RE);
-
-      const [, text, url] = notif.content.match(MARKDOWN_LINK_RE);
-      expect(text).to.contain(indexPattern.title);
-      expect(url).to.contain(indexPattern.id);
-      expect(url).to.contain('management/kibana/indices');
+      await createUnsupportedTimePattern();
+      expect(toastNotifications.list).to.have.length(1);
     });
 
     it('does not notify if isUserAwareOfUnsupportedTimePattern() returns true', async () => {
+      // Ideally, _index_pattern.js shouldn't be tightly coupled to toastNotifications. Instead, it
+      // should notify its consumer of this state and the consumer should be responsible for
+      // notifying the user. This test verifies the side effect of the state until we can remove
+      // this coupling.
+
+      // Clear existing toasts.
+      toastNotifications.list.splice(0);
+
       isUserAwareOfUnsupportedTimePattern.returns(true);
       await createUnsupportedTimePattern();
-      expect(Notifier.prototype._notifs).to.have.length(0);
+      expect(toastNotifications.list).to.have.length(0);
     });
   });
 });

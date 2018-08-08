@@ -1,0 +1,31 @@
+{
+  "name": "@kbn/i18n",
+  "browser": "./target/web/browser.js",
+  "main": "./target/node/index.js",
+  "module": "./src/index.js",
+  "version": "1.0.0",
+  "license": "Apache-2.0",
+  "private": true,
+  "scripts": {
+    "build": "yarn build:web && yarn build:node",
+    "build:web": "cross-env BABEL_ENV=web babel src --out-dir target/web",
+    "build:node": "cross-env BABEL_ENV=node babel src --out-dir target/node",
+    "kbn:bootstrap": "yarn build",
+    "kbn:watch": "yarn build --watch"
+  },
+  "devDependencies": {
+    "@kbn/babel-preset": "link:../kbn-babel-preset",
+    "@kbn/dev-utils": "link:../kbn-dev-utils",
+    "babel-cli": "^6.26.0",
+    "cross-env": "^5.2.0"
+  },
+  "dependencies": {
+    "intl-format-cache": "^2.1.0",
+    "intl-messageformat": "^2.2.0",
+    "intl-relativeformat": "^2.1.0",
+    "json5": "^1.0.1",
+    "prop-types": "^15.5.8",
+    "react": "^16.3.0",
+    "react-intl": "^2.4.0"
+  }
+}

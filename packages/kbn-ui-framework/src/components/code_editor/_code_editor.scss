@@ -1,0 +1,38 @@
+.kuiCodeEditorWrapper {
+  position: relative;
+
+  .ace_hidden-cursors {
+    opacity: 0;
+  }
+
+  &.kuiCodeEditorWrapper-isEditing {
+    .ace_hidden-cursors {
+      opacity: 1;
+    }
+  }
+}
+
+.kuiCodeEditorKeyboardHint {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  right: 0;
+  left: 0;
+  background: rgba(255, 255, 255, 0.7);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  opacity: 0;
+
+  &:focus {
+    opacity: 1;
+    border: 2px solid $kuiColorBlue;
+    z-index: 1000;
+  }
+
+  &.kuiCodeEditorKeyboardHint-isInactive {
+    display: none;
+  }
+}

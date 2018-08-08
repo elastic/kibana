@@ -1,0 +1,55 @@
+<div
+  class="watchAction"
+  ng-class="{ watchAction__error: watchAction.isCollapsed && !watchAction.isValid}">
+  <button
+    class="watchActionSummaryButton"
+    ng-click="watchAction.onToggle(watchAction.action)">
+    <span class="watchActionSummaryButton__liner">
+      <span class="watchActionHeader">
+        <span
+          class="kuiIcon watchActionSummaryToggleIcon"
+          ng-class="{'fa-chevron-down': !watchAction.isCollapsed, 'fa-chevron-right': watchAction.isCollapsed}"
+        ></span>
+        <span
+          class="kuiIcon watchActionSummaryTypeIcon"
+          ng-class="watchAction.action.iconClass"
+        ></span>
+        <span class="watchActionSummaryType">{{watchAction.action.typeName}}</span>
+      </span>
+      <span
+        class="watchActionDescription"
+        ng-if="watchAction.isCollapsed && watchAction.isValid">
+        {{watchAction.action.description}}
+      </span>
+      <span
+        class="watchActionErrorMessage"
+        ng-if="watchAction.isCollapsed && !watchAction.isValid">
+        There are errors in this action that need to be addressed before you can save.
+      </span>
+    </span>
+  </button>
+  <div
+    class="watchActionDetails"
+    ng-hide="watchAction.isCollapsed">
+      <div>
+        <form name="watchAction.form" novalidate>
+          <div class="watchActionDetailsContent"></div>
+        </form>
+      </div>
+      <div class="watchActionDetailsButtons">
+        <button
+          class="kuiButton kuiButton--primary kuiButton--iconText watchActionSimulateButton"
+          ng-click="watchAction.onSimulate(watchAction.action)"
+          ng-disabled="!watchAction.isValid"
+        >
+          {{watchAction.action.simulatePrompt}}
+        </button>
+        <button
+          class="kuiButton kuiButton--danger kuiButton--iconText watchActionDeleteButton"
+          ng-click="watchAction.onDelete(watchAction.action)"
+        >
+          Remove {{watchAction.action.typeName}} Action
+        </button>
+      </div>
+  </div>
+</div>

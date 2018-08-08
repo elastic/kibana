@@ -1,8 +1,30 @@
+/*
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
 import _ from 'lodash';
 import moment from 'moment';
-import { IndexedArray } from 'ui/indexed_array';
+import { IndexedArray } from '../indexed_array';
+import { isNumeric } from '../utils/numeric';
+import { timefilter } from 'ui/timefilter';
+import { i18n } from '@kbn/i18n';
 
-export function IndexPatternsIntervalsProvider(timefilter) {
+export function IndexPatternsIntervalsProvider() {
 
   const intervals = new IndexedArray({
     index: ['name'],
@@ -10,27 +32,27 @@ export function IndexPatternsIntervalsProvider(timefilter) {
       {
         name: 'hours',
         startOf: 'hour',
-        display: 'Hourly'
+        display: i18n.translate('common.ui.indexPattern.intervals.hourlyHeader', { defaultMessage: 'Hourly' })
       },
       {
         name: 'days',
         startOf: 'day',
-        display: 'Daily'
+        display: i18n.translate('common.ui.indexPattern.intervals.dailyHeader', { defaultMessage: 'Daily' })
       },
       {
         name: 'weeks',
         startOf: 'isoWeek',
-        display: 'Weekly'
+        display: i18n.translate('common.ui.indexPattern.intervals.weeklyHeader', { defaultMessage: 'Weekly' })
       },
       {
         name: 'months',
         startOf: 'month',
-        display: 'Monthly'
+        display: i18n.translate('common.ui.indexPattern.intervals.monthlyHeader', { defaultMessage: 'Monthly' })
       },
       {
         name: 'years',
         startOf: 'year',
-        display: 'Yearly'
+        display: i18n.translate('common.ui.indexPattern.intervals.yearlyHeader', { defaultMessage: 'Yearly' })
       }
     ]
   });
@@ -52,7 +74,7 @@ export function IndexPatternsIntervalsProvider(timefilter) {
         val = bounds[bound];
       }
 
-      if (_.isNumeric(val)) val = moment().add(val, interval.name);
+      if (isNumeric(val)) val = moment().add(val, interval.name);
       else if (!moment.isMoment(val)) val = moment(val);
 
       return val.clone().utc()[extend](interval.startOf);
@@ -62,7 +84,12 @@ export function IndexPatternsIntervalsProvider(timefilter) {
 
     if (typeof interval === 'string') {
       interval = _.find(intervals, { name: interval });
-      if (!interval) throw new Error('Interval must be one of ' + _.pluck(intervals, 'name'));
+      if (!interval) {
+        const errorMessage = i18n.translate('common.ui.indexPattern.intervalsErrorMessage',
+          { values: { intervals: _.pluck(intervals, 'name') }, defaultMessage: 'Interval must be one of {intervals}' });
+
+        throw new Error(errorMessage);
+      }
     }
 
     const indexList = [];

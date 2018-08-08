@@ -1,4 +1,23 @@
-import { SimpleEmitter } from 'ui/utils/simple_emitter';
+/*
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
+import { SimpleEmitter } from '../simple_emitter';
 import expect from 'expect.js';
 import sinon from 'sinon';
 
@@ -102,11 +121,11 @@ describe('SimpleEmitter class', function () {
       const four = sinon.spy(incr);
 
       emitter
-      .on('a', one)
-      .on('a', two)
-      .on('a', three)
-      .on('a', four)
-      .emit('a');
+        .on('a', one)
+        .on('a', two)
+        .on('a', three)
+        .on('a', four)
+        .emit('a');
 
       expect(one).to.have.property('callCount', 1);
       expect(one.returned(1)).to.be.ok();
@@ -137,20 +156,20 @@ describe('SimpleEmitter class', function () {
 
     it('applies all arguments except the first', function () {
       emitter
-      .on('a', function (a, b, c) {
-        expect(a).to.be('foo');
-        expect(b).to.be('bar');
-        expect(c).to.be('baz');
-      })
-      .emit('a', 'foo', 'bar', 'baz');
+        .on('a', function (a, b, c) {
+          expect(a).to.be('foo');
+          expect(b).to.be('bar');
+          expect(c).to.be('baz');
+        })
+        .emit('a', 'foo', 'bar', 'baz');
     });
 
     it('uses the SimpleEmitter as the this context', function () {
       emitter
-      .on('a', function () {
-        expect(this).to.be(emitter);
-      })
-      .emit('a');
+        .on('a', function () {
+          expect(this).to.be(emitter);
+        })
+        .emit('a');
     });
   });
 });

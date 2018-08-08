@@ -1,0 +1,187 @@
+<section>
+  <header>
+    <h1 class="kuiTitle">
+      {{watchEditTitlePanel.title}}
+    </h1>
+    <h2 class="kuiSubText kuiSubduedText">
+      {{watchEditTitlePanel.description}}
+    </h2>
+  </header>
+  <form name="watchEditTitlePanel.form" novalidate>
+    <div class="kuiFieldGroup kuiFieldGroup--alignTop watchEditTitlePanelContent">
+      <div class="kuiFieldGroupSection kuiFieldGroupSection--wide">
+        <label
+          for="{{watchEditTitlePanel.makeId('watchName')}}"
+          class="kuiLabel kuiVerticalRhythmSmall">
+          Name
+        </label>
+        <div class="kuiVerticalRhythmSmall">
+          <input
+            class="kuiTextInput fullWidth"
+            type="text"
+            name="watchName"
+            id="{{watchEditTitlePanel.makeId('watchName')}}"
+            input-focus
+            required
+            ng-model="watchEditTitlePanel.watch.name"
+            placeholder="My Threshold Watch"
+          >
+        </div>
+        <div class="kuiSubText kuiSubduedText kuiVerticalRhythmSmall">
+          <div
+            id="{{watchEditTitlePanel.makeId(['watchName', 'required'])}}"
+            xpack-aria-describes="{{watchEditTitlePanel.makeId('watchName')}}"
+            class="kuiInputNote kuiInputNote--danger"
+            ng-if="watchEditTitlePanel.isValidationMessageVisible('watchName', 'required')"
+          >
+            Name is required
+          </div>
+          &nbsp;
+        </div>
+      </div>
+    </div>
+    <div class="kuiFieldGroup kuiFieldGroup--alignTop">
+      <div class="kuiFieldGroupSection kuiFieldGroupSection--wide">
+        <label
+          for="indexSelectSearchBox"
+          class="kuiLabel kuiVerticalRhythmSmall">
+          Indices to query
+        </label>
+        <div
+          class="kuiVerticalRhythmSmall watchEditTitleIndexSelectContainer"
+          ng-class="{
+            'ng-invalid': watchEditTitlePanel.showIndexSelectionValidationState()
+          }"
+        >
+          <index-select
+            index="watchEditTitlePanel.watch.index"
+            on-change="watchEditTitlePanel.onIndexSelection"
+            on-touched="watchEditTitlePanel.onIndexSelectTouched"
+          >
+          </index-select>
+        </div>
+        <div class="kuiSubText kuiSubduedText kuiVerticalRhythmSmall">
+           <div
+            id="{{watchEditTitlePanel.makeId(['indexSelectSearchBox', 'required'])}}"
+            xpack-aria-describes="{{watchEditTitlePanel.makeId('indexSelectSearchBox')}}"
+            class="kuiInputNote kuiInputNote--danger"
+            ng-if="watchEditTitlePanel.showRequiredIndexSelectionValidationMessage()"
+          >
+            Enter one or more indices
+          </div>
+          <div
+            id="{{watchEditTitlePanel.makeId(['indexSelectSearchBox', 'invalid'])}}"
+            xpack-aria-describes="{{watchEditTitlePanel.makeId('indexSelectSearchBox')}}"
+            class="kuiInputNote kuiInputNote--danger"
+            ng-if="watchEditTitlePanel.showInvalidIndexValidationMessage()"
+          >
+            Your index query does not match any valid indices
+          </div>
+          <div
+            id="{{watchEditTitlePanel.makeId(['indexSelectSearchBox', 'notimefield'])}}"
+            xpack-aria-describes="{{watchEditTitlePanel.makeId('indexSelectSearchBox')}}"
+            class="kuiInputNote kuiInputNote--danger"
+            ng-if="watchEditTitlePanel.showNoTimeFieldsValidationMessage()"
+          >
+            Your index query does not have an associated time field
+          </div>
+          <span>Use * to broaden your search query</span>
+        </div>
+      </div>
+
+      <div class="kuiFieldGroupSection">
+        <label
+          for="{{watchEditTitlePanel.makeId('timeField')}}"
+          class="kuiLabel kuiVerticalRhythmSmall">
+          Time field
+        </label>
+        <div class="kuiVerticalRhythmSmall">
+          <select
+            class="kuiSelect"
+            name="timeField"
+            id="{{watchEditTitlePanel.makeId('timeField')}}"
+            required
+            ng-model="watchEditTitlePanel.watch.timeField"
+            ng-options="timeField.name as timeField.name group by timeField.normalizedType for timeField in watchEditTitlePanel.timeFields"
+          >
+            <option value="">Select a field</option>
+          </select>
+        </div>
+        <div class="kuiSubText kuiSubduedText kuiVerticalRhythmSmall">
+          <div
+            id="{{watchEditTitlePanel.makeId(['timeField', 'required'])}}"
+            xpack-aria-describes="{{watchEditTitlePanel.makeId('timeField')}}"
+            class="kuiInputNote kuiInputNote--danger"
+            ng-if="watchEditTitlePanel.isValidationMessageVisible('timeField', 'required')"
+          >
+            A time field is required
+          </div>
+          &nbsp;
+        </div>
+      </div>
+
+      <div class="kuiFieldGroupSection">
+        <label
+          id="durationSelectTriggerIntervalSizeLabel"
+          for="durationSelectTriggerIntervalSize"
+          class="kuiLabel kuiVerticalRhythmSmall"
+        >
+          Run watch every
+        </label>
+
+        <div class="kuiVerticalRhythmSmall" id="durationSelectTriggerIntervalSize" role="group">
+          <duration-select
+            duration-id="triggerInterval"
+            minimum-unit="watchEditTitlePanel.triggerIntervalMinimumUnit"
+            minimum-size="watchEditTitlePanel.triggerIntervalMinimumSize"
+            unit="watchEditTitlePanel.triggerIntervalUnit"
+            size="watchEditTitlePanel.triggerIntervalSize"
+            described-by="durationSelectTriggerIntervalSizeLabel"
+          ></duration-select>
+        </div>
+        <div class="kuiSubText kuiSubduedText kuiVerticalRhythmSmall watchEditTitlePanelIntervalValidation">
+          <div
+            id="{{watchEditTitlePanel.makeId(['durationSelectTriggerIntervalSize', 'required'])}}"
+            xpack-aria-describes="durationSelectTriggerIntervalSize"
+            class="kuiInputNote kuiInputNote--danger"
+            ng-if="watchEditTitlePanel.isValidationMessageVisible('durationSelectTriggerIntervalSize', 'required')"
+          >
+            Interval size is required
+          </div>
+          <div
+            id="{{watchEditTitlePanel.makeId(['durationSelectTriggerIntervalSize', 'min'])}}"
+            xpack-aria-describes="durationSelectTriggerIntervalSize"
+            class="kuiInputNote kuiInputNote--danger"
+            ng-if="watchEditTitlePanel.isValidationMessageVisible('durationSelectTriggerIntervalSize', 'min')"
+          >
+            Interval size cannot be a negative number
+          </div>
+          <div
+            id="{{watchEditTitlePanel.makeId(['durationSelectTriggerIntervalSize', 'number'])}}"
+            xpack-aria-describes="durationSelectTriggerIntervalSize"
+            class="kuiInputNote kuiInputNote--danger"
+            ng-if="watchEditTitlePanel.isValidationMessageVisible('durationSelectTriggerIntervalSize', 'number')"
+          >
+            Interval size must be a valid number
+          </div>
+          <div
+            id="{{watchEditTitlePanel.makeId(['durationSelectTriggerIntervalUnit', 'required'])}}"
+            xpack-aria-describes="durationSelectTriggerIntervalUnit"
+            class="kuiInputNote kuiInputNote--danger"
+            ng-if="watchEditTitlePanel.isValidationMessageVisible('durationSelectTriggerIntervalUnit', 'required')"
+          >
+            An interval size is required
+          </div>
+          <div
+            id="{{watchEditTitlePanel.makeId(['durationSelectTriggerIntervalSize', 'minimumDuration'])}}"
+            xpack-aria-describes="durationSelectTriggerIntervalSize durationSelectTriggerIntervalUnit"
+            class="kuiInputNote kuiInputNote--danger"
+            ng-if="watchEditTitlePanel.isValidationMessageVisible('durationSelectTriggerIntervalSize', 'minimumDuration', false)"
+          >
+            The minimum duration is {{watchEditTitlePanel.triggerIntervalMinimumSize}}{{watchEditTitlePanel.triggerIntervalMinimumUnit}}
+          </div>
+        </div>
+      </div>
+    </div>
+  </form>
+</section>

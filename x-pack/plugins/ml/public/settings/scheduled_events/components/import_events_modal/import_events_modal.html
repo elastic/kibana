@@ -1,0 +1,91 @@
+<div class="import-events-modal">
+  <ml-message-bar ></ml-message-bar>
+  <h3 class="euiTitle">Import events</h3>
+  <div class="euiSpacer euiSpacer--s"></div>
+
+  <div>
+    Import events from an ICS file
+  </div>
+  <div class="euiSpacer euiSpacer--m"></div>
+
+  <div class="import-events-container">
+
+    <div class="kuiFormSection no-shadow euiPanel euiPanel--paddingMedium">
+      <input
+        type='file'
+        ng-disabled="(loadingLock === true)"
+        ml-file-input-on-change="fileNameChanged"
+        />
+    </div>
+
+    <div
+      ng-if="fileLoaded===true && newEvents.length >= 0"
+      class="kuiFormSection">
+      <span class="kuiFormLabel">Events to import: {{newEvents.length}}</span>
+    </div>
+
+    <div
+      ng-if="error===true"
+      class="kuiFormSection euiCallOut euiCallOut--danger">
+      <div class="euiCallOutHeader">
+        <span class="euiCallOutHeader__title">{{errorMessage}}</span>
+      </div>
+    </div>
+
+    <div
+      ng-if="loadingLock === true"
+      class="kuiFormSection">
+      <ml-loading-indicator
+        label="Importing events"
+        is-loading="true"
+        height="50"
+      />
+    </div>
+
+    <div ng-show="fileLoaded===true && newEvents.length >= 0">
+      <ml-events-list
+        events='newEvents'
+        show-controls='false'
+        asterisk-text='RECURRING_WARNING'
+        >
+      </ml-events-list>
+
+      <div class="euiSpacer euiSpacer--m"></div>
+
+      <div ng-if="showRecurringWarning" class="recurring-warning">
+        *{{RECURRING_WARNING}}
+        <div class="euiSpacer euiSpacer--m"></div>
+      </div>
+
+      <div>
+        <label class='kuiCheckBoxLabel kuiVerticalRhythm'>
+          <input
+            ng-model='includePastEvents'
+            type="checkbox"
+            class='kuiCheckBox'
+            ng-click="createEventsList()"/>
+          <span class='kuiCheckBoxLabel__text'>Include past events</span>
+        </label>
+      </div>
+    </div>
+  </div>
+
+  <div class="clearfix"></div>
+
+  <hr class="euiHorizontalRule euiHorizontalRule--full euiHorizontalRule--marginMedium" />
+
+  <button
+    ng-click="save()"
+    ng-disabled="loadingLock === true"
+    class="kuiButton kuiButton--primary" >
+    Import
+  </button>
+  <button
+    ng-click="cancel()"
+    ng-disabled="loadingLock === true"
+    class="kuiButton kuiButton--primary"
+    aria-label="Cancel">
+    Cancel
+  </button>
+
+</div>

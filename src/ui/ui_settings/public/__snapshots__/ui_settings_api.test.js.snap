@@ -1,0 +1,126 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`#batchSet Buffers are always clear of previously buffered changes: buffered bar=foo 1`] = `
+Array [
+  Object {
+    "body": Object {
+      "changes": Object {
+        "bar": "foo",
+      },
+    },
+    "method": "POST",
+    "path": "/api/kibana/settings",
+  },
+]
+`;
+
+exports[`#batchSet Buffers are always clear of previously buffered changes: buffered baz=box 1`] = `
+Array [
+  Object {
+    "body": Object {
+      "changes": Object {
+        "baz": "box",
+      },
+    },
+    "method": "POST",
+    "path": "/api/kibana/settings",
+  },
+]
+`;
+
+exports[`#batchSet Buffers are always clear of previously buffered changes: unbuffered foo=bar 1`] = `
+Array [
+  Array [
+    Object {
+      "body": Object {
+        "changes": Object {
+          "foo": "bar",
+        },
+      },
+      "method": "POST",
+      "path": "/api/kibana/settings",
+    },
+  ],
+]
+`;
+
+exports[`#batchSet Overwrites previously buffered values with new values for the same key: buffered bar=null 1`] = `
+Array [
+  Array [
+    Object {
+      "body": Object {
+        "changes": Object {
+          "bar": null,
+        },
+      },
+      "method": "POST",
+      "path": "/api/kibana/settings",
+    },
+  ],
+]
+`;
+
+exports[`#batchSet Overwrites previously buffered values with new values for the same key: unbuffered foo=bar 1`] = `
+Array [
+  Array [
+    Object {
+      "body": Object {
+        "changes": Object {
+          "foo": "bar",
+        },
+      },
+      "method": "POST",
+      "path": "/api/kibana/settings",
+    },
+  ],
+]
+`;
+
+exports[`#batchSet buffers changes while first request is in progress, sends buffered changes after first request completes: buffered foo=baz bar=bug 1`] = `
+Array [
+  Array [
+    Object {
+      "body": Object {
+        "changes": Object {
+          "bar": "bug",
+          "foo": "baz",
+        },
+      },
+      "method": "POST",
+      "path": "/api/kibana/settings",
+    },
+  ],
+]
+`;
+
+exports[`#batchSet buffers changes while first request is in progress, sends buffered changes after first request completes: unbuffered foo=bar 1`] = `
+Array [
+  Array [
+    Object {
+      "body": Object {
+        "changes": Object {
+          "foo": "bar",
+        },
+      },
+      "method": "POST",
+      "path": "/api/kibana/settings",
+    },
+  ],
+]
+`;
+
+exports[`#batchSet sends a single change immediately: unbuffered foo=bar 1`] = `
+Array [
+  Array [
+    Object {
+      "body": Object {
+        "changes": Object {
+          "foo": "bar",
+        },
+      },
+      "method": "POST",
+      "path": "/api/kibana/settings",
+    },
+  ],
+]
+`;

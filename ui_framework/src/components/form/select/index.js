@@ -1,1 +1,0 @@
-export { KuiSelect } from './select';

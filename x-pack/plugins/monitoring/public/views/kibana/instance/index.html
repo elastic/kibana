@@ -1,0 +1,18 @@
+<monitoring-main
+  product="kibana"
+  name="kibana"
+  instance="{{ pageData.kibanaSummary.name }}"
+  data-test-subj="kibanaInstancePage"
+>
+  <monitoring-kibana-summary kibana="pageData.kibanaSummary"></monitoring-kibana-summary>
+  <div class="page-row">
+    <div class="row" ng-if="pageData.metrics">
+      <div class="col-md-6"><monitoring-chart series="pageData.metrics.kibana_requests"></monitoring-chart></div>
+      <div class="col-md-6"><monitoring-chart series="pageData.metrics.kibana_response_times"></monitoring-chart></div>
+      <div class="col-md-6"><monitoring-chart series="pageData.metrics.kibana_memory"></monitoring-chart></div>
+      <div class="col-md-6"><monitoring-chart series="pageData.metrics.kibana_average_concurrent_connections"></monitoring-chart></div>
+      <div class="col-md-6"><monitoring-chart series="pageData.metrics.kibana_os_load"></monitoring-chart></div>
+      <div class="col-md-6"><monitoring-chart series="pageData.metrics.kibana_process_delay"></monitoring-chart></div>
+    </div>
+  </div>
+</monitoring-main>

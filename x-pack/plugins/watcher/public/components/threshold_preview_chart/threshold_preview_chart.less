@@ -1,0 +1,17 @@
+@import (reference) "~ui/styles/variables";
+
+.thresholdPreviewChart {
+  height: 100%;
+  position: relative;
+
+  .flot-tick-label {
+    color: @vis-axis-title-color;
+  }
+}
+
+.thresholdPreviewChartNoData {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}

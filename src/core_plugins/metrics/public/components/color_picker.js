@@ -1,9 +1,28 @@
+/*
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
 /* eslint-disable jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions */
 // The color picker is not yet accessible.
 
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
-import Tooltip from './tooltip';
+import { EuiToolTip, } from '@elastic/eui';
 import Picker from './custom_color_picker';
 
 class ColorPicker extends Component {
@@ -11,7 +30,7 @@ class ColorPicker extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      displayPlicker: false,
+      displayPicker: false,
       color: {}
     };
 
@@ -69,9 +88,9 @@ class ColorPicker extends Component {
     if (!this.props.disableTrash) {
       clear = (
         <div className="vis_editor__color_picker-clear" onClick={this.handleClear}>
-          <Tooltip text="Clear">
+          <EuiToolTip content="Clear">
             <i className="fa fa-ban"/>
-          </Tooltip>
+          </EuiToolTip>
         </div>
       );
     }
@@ -81,18 +100,18 @@ class ColorPicker extends Component {
         { clear }
         {
           this.state.displayPicker
-          ? (
-            <div className="vis_editor__color_picker-popover">
-              <div
-                className="vis_editor__color_picker-cover"
-                onClick={this.handleClose}
-              />
-              <Picker
-                color={value}
-                onChangeComplete={this.handleChange}
-              />
-            </div>
-          ) : null
+            ? (
+              <div className="vis_editor__color_picker-popover">
+                <div
+                  className="vis_editor__color_picker-cover"
+                  onClick={this.handleClose}
+                />
+                <Picker
+                  color={value}
+                  onChangeComplete={this.handleChange}
+                />
+              </div>
+            ) : null
         }
       </div>
     );

@@ -1,0 +1,42 @@
+<div
+  class="indexSelect"
+  ng-class="{
+    'indexSelect--activeSearch': indexSelect.hasIndexPattern,
+    'indexSelect--noSearch': !indexSelect.hasIndexPattern,
+    'indexSelect--fetchingWithNoIndices': indexSelect.fetchingWithNoIndices
+  }"
+>
+  <ui-select
+    ng-model="indexSelect.selectedIndices"
+    on-select="indexSelect.onIndicesChanged()"
+    on-remove="indexSelect.onIndicesChanged()"
+    uis-open-close="indexSelect.onDropdownToggled(isOpen)"
+    multiple
+  >
+    <ui-select-match placeholder="Start typing...">
+      {{$item.indexName}}
+    </ui-select-match>
+    <ui-select-choices
+      repeat="index in indexSelect.fetchedIndices | filter: {indexName: $select.search}"
+      refresh="indexSelect.fetchIndices($select.search)"
+      refresh-delay="300"
+      group-by="indexSelect.groupIndices"
+      group-filter="indexSelect.sortGroupedIndices"
+    >
+      <div class="actionTypeChoice">
+        <div class="actionTypeDescription">
+          <div
+            class="indexSelectionName"
+            ng-bind-html="index.indexName | highlight: $select.search"
+          >
+          </div>
+        </div>
+      </div>
+    </ui-select-choices>
+    <ui-select-no-choice>
+      <p class="indexSelectNoChoice">
+        Building list... please wait
+      </p>
+    </ui-select-no-choice>
+  </ui-select>
+</div>

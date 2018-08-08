@@ -1,0 +1,20 @@
+{
+  "cat.plugins": {
+    "url_params": {
+      "format": "",
+      "local": "__flag__",
+      "master_timeout": "",
+      "h": [],
+      "help": "__flag__",
+      "s": [],
+      "v": "__flag__"
+    },
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "_cat/plugins"
+    ],
+    "documentation": "http://www.elastic.co/guide/en/elasticsearch/reference/master/cat-plugins.html"
+  }
+}

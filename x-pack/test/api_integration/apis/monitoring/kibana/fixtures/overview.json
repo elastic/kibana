@@ -1,0 +1,190 @@
+{
+  "clusterStatus": {
+    "concurrent_connections": 174,
+    "count": 1,
+    "memory_limit": 1501560832,
+    "memory_size": 230227968,
+    "requests_total": 174,
+    "response_time_max": 2203,
+    "status": "green",
+    "uuids": [
+      "de3b8f2a-7bb9-4931-9bf3-997ba7824cf9"
+    ]
+  },
+  "metrics": {
+    "kibana_cluster_requests": [
+      {
+        "bucket_size": "10 seconds",
+        "data": [
+          [
+            1504027460000,
+            113
+          ],
+          [
+            1504027470000,
+            146
+          ],
+          [
+            1504027480000,
+            162
+          ],
+          [
+            1504027490000,
+            164
+          ],
+          [
+            1504027500000,
+            166
+          ],
+          [
+            1504027510000,
+            168
+          ],
+          [
+            1504027520000,
+            170
+          ],
+          [
+            1504027530000,
+            172
+          ],
+          [
+            1504027540000,
+            174
+          ]
+        ],
+        "metric": {
+          "app": "kibana",
+          "description": "Total number of client requests received by the Kibana instance.",
+          "field": "kibana_stats.requests.total",
+          "format": "0.[00]",
+          "hasCalculation": false,
+          "isDerivative": false,
+          "label": "Client Requests",
+          "metricAgg": "max",
+          "units": ""
+        },
+        "timeRange": {
+          "max": 1504027568000,
+          "min": 1504027457000
+        }
+      }
+    ],
+    "kibana_cluster_response_times": [
+      {
+        "bucket_size": "10 seconds",
+        "data": [
+          [
+            1504027460000,
+            2203
+          ],
+          [
+            1504027470000,
+            2203
+          ],
+          [
+            1504027480000,
+            2203
+          ],
+          [
+            1504027490000,
+            2203
+          ],
+          [
+            1504027500000,
+            2203
+          ],
+          [
+            1504027510000,
+            2203
+          ],
+          [
+            1504027520000,
+            2203
+          ],
+          [
+            1504027530000,
+            2203
+          ],
+          [
+            1504027540000,
+            2203
+          ]
+        ],
+        "metric": {
+          "app": "kibana",
+          "description": "Maximum response time for client requests to the Kibana instance.",
+          "field": "kibana_stats.response_times.max",
+          "format": "0.[00]",
+          "hasCalculation": false,
+          "isDerivative": false,
+          "label": "Max",
+          "metricAgg": "max",
+          "title": "Client Response Time",
+          "units": "ms"
+        },
+        "timeRange": {
+          "max": 1504027568000,
+          "min": 1504027457000
+        }
+      },
+      {
+        "bucket_size": "10 seconds",
+        "data": [
+          [
+            1504027460000,
+            171.05714416503906
+          ],
+          [
+            1504027470000,
+            171.05714416503906
+          ],
+          [
+            1504027480000,
+            171.05714416503906
+          ],
+          [
+            1504027490000,
+            171.05714416503906
+          ],
+          [
+            1504027500000,
+            171.05714416503906
+          ],
+          [
+            1504027510000,
+            171.05714416503906
+          ],
+          [
+            1504027520000,
+            171.05714416503906
+          ],
+          [
+            1504027530000,
+            171.05714416503906
+          ],
+          [
+            1504027540000,
+            171.05714416503906
+          ]
+        ],
+        "metric": {
+          "app": "kibana",
+          "description": "Average response time for client requests to the Kibana instance.",
+          "field": "kibana_stats.response_times.average",
+          "format": "0.[00]",
+          "hasCalculation": false,
+          "isDerivative": false,
+          "label": "Average",
+          "metricAgg": "max",
+          "title": "Client Response Time",
+          "units": "ms"
+        },
+        "timeRange": {
+          "max": 1504027568000,
+          "min": 1504027457000
+        }
+      }
+    ]
+  }
+}

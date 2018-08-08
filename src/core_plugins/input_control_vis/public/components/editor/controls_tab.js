@@ -1,9 +1,37 @@
+/*
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
 import _ from 'lodash';
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 import { ControlEditor } from './control_editor';
-import { KuiButton, KuiButtonIcon } from 'ui_framework/components';
 import { addControl, moveControl, newControl, removeControl, setControl } from '../../editor_utils';
+import { getLineageMap, getParentCandidates } from '../../lineage';
+
+import {
+  EuiButton,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiFormRow,
+  EuiPanel,
+  EuiSelect,
+} from '@elastic/eui';
 
 export class ControlsTab extends Component {
 
@@ -27,57 +55,67 @@ export class ControlsTab extends Component {
   }
 
   setVisParam(paramName, paramValue) {
-    const params = _.cloneDeep(this.props.scope.vis.params);
+    const params = _.cloneDeep(this.props.editorState.params);
     params[paramName] = paramValue;
     this.props.stageEditorParams(params);
   }
 
   handleLabelChange = (controlIndex, evt) => {
-    const updatedControl = this.props.scope.vis.params.controls[controlIndex];
+    const updatedControl = this.props.editorState.params.controls[controlIndex];
     updatedControl.label = evt.target.value;
-    this.setVisParam('controls', setControl(this.props.scope.vis.params.controls, controlIndex, updatedControl));
+    this.setVisParam('controls', setControl(this.props.editorState.params.controls, controlIndex, updatedControl));
   }
 
-  handleIndexPatternChange = (controlIndex, evt) => {
-    const updatedControl = this.props.scope.vis.params.controls[controlIndex];
-    updatedControl.indexPattern = evt.value;
+  handleIndexPatternChange = (controlIndex, indexPatternId) => {
+    const updatedControl = this.props.editorState.params.controls[controlIndex];
+    updatedControl.indexPattern = indexPatternId;
     updatedControl.fieldName = '';
-    this.setVisParam('controls', setControl(this.props.scope.vis.params.controls, controlIndex, updatedControl));
+    this.setVisParam('controls', setControl(this.props.editorState.params.controls, controlIndex, updatedControl));
   }
 
-  handleFieldNameChange = (controlIndex, evt) => {
-    const updatedControl = this.props.scope.vis.params.controls[controlIndex];
-    updatedControl.fieldName = evt.value;
-    this.setVisParam('controls', setControl(this.props.scope.vis.params.controls, controlIndex, updatedControl));
+  handleFieldNameChange = (controlIndex, fieldName) => {
+    const updatedControl = this.props.editorState.params.controls[controlIndex];
+    updatedControl.fieldName = fieldName;
+    this.setVisParam('controls', setControl(this.props.editorState.params.controls, controlIndex, updatedControl));
   }
 
   handleCheckboxOptionChange = (controlIndex, optionName, evt) => {
-    const updatedControl = this.props.scope.vis.params.controls[controlIndex];
+    const updatedControl = this.props.editorState.params.controls[controlIndex];
     updatedControl.options[optionName] = evt.target.checked;
-    this.setVisParam('controls', setControl(this.props.scope.vis.params.controls, controlIndex, updatedControl));
+    this.setVisParam('controls', setControl(this.props.editorState.params.controls, controlIndex, updatedControl));
   }
 
   handleNumberOptionChange = (controlIndex, optionName, evt) => {
-    const updatedControl = this.props.scope.vis.params.controls[controlIndex];
+    const updatedControl = this.props.editorState.params.controls[controlIndex];
     updatedControl.options[optionName] = parseFloat(evt.target.value);
-    this.setVisParam('controls', setControl(this.props.scope.vis.params.controls, controlIndex, updatedControl));
+    this.setVisParam('controls', setControl(this.props.editorState.params.controls, controlIndex, updatedControl));
   }
 
   handleRemoveControl = (controlIndex) => {
-    this.setVisParam('controls', removeControl(this.props.scope.vis.params.controls, controlIndex));
+    this.setVisParam('controls', removeControl(this.props.editorState.params.controls, controlIndex));
   }
 
   moveControl = (controlIndex, direction) => {
-    this.setVisParam('controls', moveControl(this.props.scope.vis.params.controls, controlIndex, direction));
+    this.setVisParam('controls', moveControl(this.props.editorState.params.controls, controlIndex, direction));
   }
 
   handleAddControl = () => {
-    this.setVisParam('controls', addControl(this.props.scope.vis.params.controls, newControl(this.state.type)));
+    this.setVisParam('controls', addControl(this.props.editorState.params.controls, newControl(this.state.type)));
+  }
+
+  handleParentChange = (controlIndex, evt) => {
+    const updatedControl = this.props.editorState.params.controls[controlIndex];
+    updatedControl.parent = evt.target.value;
+    this.setVisParam('controls', setControl(this.props.editorState.params.controls, controlIndex, updatedControl));
   }
 
   renderControls() {
-    return this.props.scope.vis.params.controls.map((controlParams, controlIndex) => {
-
+    const lineageMap = getLineageMap(this.props.editorState.params.controls);
+    return this.props.editorState.params.controls.map((controlParams, controlIndex) => {
+      const parentCandidates = getParentCandidates(
+        this.props.editorState.params.controls,
+        controlParams.id,
+        lineageMap);
       return (
         <ControlEditor
           key={controlParams.id}
@@ -92,6 +130,8 @@ export class ControlsTab extends Component {
           getIndexPattern={this.getIndexPattern}
           handleCheckboxOptionChange={this.handleCheckboxOptionChange}
           handleNumberOptionChange={this.handleNumberOptionChange}
+          parentCandidates={parentCandidates}
+          handleParentChange={this.handleParentChange}
         />
       );
     });
@@ -103,28 +143,41 @@ export class ControlsTab extends Component {
 
         {this.renderControls()}
 
-        <div className="kuiSideBarFormRow">
-          <div className="kuiSideBarFormRow__control kuiFieldGroupSection--wide">
-            <select
-              aria-label="Select control type"
-              className="kuiSelect"
-              value={this.state.type}
-              onChange={evt => this.setState({ type: evt.target.value })}
-            >
-              <option value="range">Range slider</option>
-              <option value="list">Options list</option>
-            </select>
-          </div>
-          <KuiButton
-            buttonType="primary"
-            type="button"
-            icon={<KuiButtonIcon type="create" />}
-            onClick={this.handleAddControl}
-            data-test-subj="inputControlEditorAddBtn"
-          >
-            Add
-          </KuiButton>
-        </div>
+        <EuiPanel grow={false}>
+          <EuiFlexGroup>
+            <EuiFlexItem>
+              <EuiFormRow
+                id="selectControlType"
+              >
+                <EuiSelect
+                  options={[
+                    { value: 'range', text: 'Range slider' },
+                    { value: 'list', text: 'Options list' },
+                  ]}
+                  value={this.state.type}
+                  onChange={evt => this.setState({ type: evt.target.value })}
+                  aria-label="Select control type"
+                />
+              </EuiFormRow>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiFormRow
+                id="addControl"
+              >
+                <EuiButton
+                  fill
+                  onClick={this.handleAddControl}
+                  iconType="plusInCircle"
+                  data-test-subj="inputControlEditorAddBtn"
+                  aria-label="Add control"
+                >
+                  Add
+                </EuiButton>
+              </EuiFormRow>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiPanel>
+
       </div>
     );
   }

@@ -1,0 +1,25 @@
+<div class="kuiFormSection">
+  <label
+    for="{{watchLoggingAction.makeId('text')}}"
+    class="kuiFormLabel"
+  >
+    Log text
+  </label>
+  <input
+    type="text"
+    id="{{watchLoggingAction.makeId('text')}}"
+    name="text"
+    class="kuiTextInput fullWidth"
+    ng-model="watchLoggingAction.action.text"
+    required
+    input-focus
+  >
+  <div
+    id="{{watchLoggingAction.makeId(['text', 'required'])}}"
+    xpack-aria-describes="{{watchLoggingAction.makeId('text')}}"
+    class="kuiInputNote kuiInputNote--danger"
+    ng-if="watchLoggingAction.isValidationMessageVisible('text', 'required')"
+  >
+    Log text is required.
+  </div>
+</div>

@@ -1,0 +1,23 @@
+{
+  "indices.shard_stores": {
+    "url_params": {
+      "status": [],
+      "ignore_unavailable": "__flag__",
+      "allow_no_indices": "__flag__",
+      "expand_wildcards": [
+        "open",
+        "closed",
+        "none",
+        "all"
+      ]
+    },
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "_shard_stores",
+      "{indices}/_shard_stores"
+    ],
+    "documentation": "http://www.elastic.co/guide/en/elasticsearch/reference/master/indices-shards-stores.html"
+  }
+}

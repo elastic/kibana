@@ -1,0 +1,21 @@
+{
+  "stackframe": {
+    "function": "<anonymous>",
+    "libraryFrame": false,
+    "excludeFromGrouping": false,
+    "context": {
+      "pre": ["", "app.get('/log-error', function (req, res) {"],
+      "post": [
+        "    if (err) {",
+        "      res.status(500).send('could not capture error: ' + err.message)"
+      ]
+    },
+    "line": {
+      "number": 17,
+      "context": "  apm.captureError(new Error('foo'), function (err) {"
+    },
+    "filename": "server/coffee.js",
+    "absPath": "/app/server/coffee.js"
+  },
+  "codeLanguage": "javascript"
+}

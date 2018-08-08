@@ -1,0 +1,227 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Form should render no settings message when there are no settings 1`] = `
+<React.Fragment>
+  <EuiPanel
+    grow={true}
+    hasShadow={false}
+    paddingSize="l"
+  >
+    No settings found 
+    <EuiLink
+      color="primary"
+      onClick={[Function]}
+      type="button"
+    >
+      (Clear search)
+    </EuiLink>
+  </EuiPanel>
+</React.Fragment>
+`;
+
+exports[`Form should render normally 1`] = `
+<React.Fragment>
+  <React.Fragment
+    key="general"
+  >
+    <EuiPanel
+      grow={true}
+      hasShadow={false}
+      paddingSize="l"
+    >
+      <EuiForm>
+        <EuiText
+          grow={true}
+        >
+          <EuiFlexGroup
+            alignItems="baseline"
+            component="div"
+            direction="row"
+            gutterSize="l"
+            justifyContent="flexStart"
+            responsive={true}
+            wrap={false}
+          >
+            <EuiFlexItem
+              component="div"
+              grow={false}
+            >
+              <h2>
+                General
+              </h2>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiText>
+        <EuiSpacer
+          size="m"
+        />
+        <Field
+          clear={[Function]}
+          key="general:test:date"
+          save={[Function]}
+          setting={
+            Object {
+              "ariaName": "general test date",
+              "category": Array [
+                "general",
+              ],
+              "description": "bar",
+              "displayName": "Test date",
+              "name": "general:test:date",
+            }
+          }
+        />
+        <Field
+          clear={[Function]}
+          key="setting:test"
+          save={[Function]}
+          setting={
+            Object {
+              "ariaName": "setting test",
+              "category": Array [
+                "general",
+              ],
+              "description": "foo",
+              "displayName": "Test setting",
+              "name": "setting:test",
+            }
+          }
+        />
+      </EuiForm>
+    </EuiPanel>
+    <EuiSpacer
+      size="l"
+    />
+  </React.Fragment>
+  <React.Fragment
+    key="dashboard"
+  >
+    <EuiPanel
+      grow={true}
+      hasShadow={false}
+      paddingSize="l"
+    >
+      <EuiForm>
+        <EuiText
+          grow={true}
+        >
+          <EuiFlexGroup
+            alignItems="baseline"
+            component="div"
+            direction="row"
+            gutterSize="l"
+            justifyContent="flexStart"
+            responsive={true}
+            wrap={false}
+          >
+            <EuiFlexItem
+              component="div"
+              grow={false}
+            >
+              <h2>
+                Dashboard
+              </h2>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiText>
+        <EuiSpacer
+          size="m"
+        />
+        <Field
+          clear={[Function]}
+          key="dashboard:test:setting"
+          save={[Function]}
+          setting={
+            Object {
+              "ariaName": "dashboard test setting",
+              "category": Array [
+                "dashboard",
+              ],
+              "displayName": "Dashboard test setting",
+              "name": "dashboard:test:setting",
+            }
+          }
+        />
+      </EuiForm>
+    </EuiPanel>
+    <EuiSpacer
+      size="l"
+    />
+  </React.Fragment>
+  <React.Fragment
+    key="x-pack"
+  >
+    <EuiPanel
+      grow={true}
+      hasShadow={false}
+      paddingSize="l"
+    >
+      <EuiForm>
+        <EuiText
+          grow={true}
+        >
+          <EuiFlexGroup
+            alignItems="baseline"
+            component="div"
+            direction="row"
+            gutterSize="l"
+            justifyContent="flexStart"
+            responsive={true}
+            wrap={false}
+          >
+            <EuiFlexItem
+              component="div"
+              grow={false}
+            >
+              <h2>
+                X-pack
+              </h2>
+            </EuiFlexItem>
+            <EuiFlexItem
+              component="div"
+              grow={false}
+            >
+              <em>
+                Search terms are hiding 
+                9
+                 settings 
+                <EuiLink
+                  color="primary"
+                  onClick={[Function]}
+                  type="button"
+                >
+                  <em>
+                    (clear search)
+                  </em>
+                </EuiLink>
+              </em>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiText>
+        <EuiSpacer
+          size="m"
+        />
+        <Field
+          clear={[Function]}
+          key="xpack:test:setting"
+          save={[Function]}
+          setting={
+            Object {
+              "ariaName": "xpack test setting",
+              "category": Array [
+                "x-pack",
+              ],
+              "description": "bar",
+              "displayName": "X-Pack test setting",
+              "name": "xpack:test:setting",
+            }
+          }
+        />
+      </EuiForm>
+    </EuiPanel>
+    <EuiSpacer
+      size="l"
+    />
+  </React.Fragment>
+</React.Fragment>
+`;

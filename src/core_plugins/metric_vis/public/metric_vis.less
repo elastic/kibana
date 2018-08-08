@@ -1,0 +1,34 @@
+@import (reference) "~ui/styles/mixins.less";
+
+.metric-vis {
+  width: 100%;
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+
+  .metric-value {
+    font-weight: bold;
+    .ellipsis();
+  }
+
+  .metric-container {
+    text-align: center;
+    margin: auto;
+    padding: 16px;
+  }
+
+  .metric-container--light {
+    color: white;
+  }
+
+  .metric-container--filterable {
+    cursor: pointer;
+    transition: transform 0.2s ease;
+    transform: translate(0, 0);
+
+    &:hover, &:focus {
+      box-shadow: none;
+      transform: translate(0, -2px);
+    }
+  }
+}

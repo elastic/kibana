@@ -1,0 +1,15 @@
+{
+  "cluster.pending_tasks": {
+    "url_params": {
+      "local": "__flag__",
+      "master_timeout": ""
+    },
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "_cluster/pending_tasks"
+    ],
+    "documentation": "http://www.elastic.co/guide/en/elasticsearch/reference/master/cluster-pending.html"
+  }
+}

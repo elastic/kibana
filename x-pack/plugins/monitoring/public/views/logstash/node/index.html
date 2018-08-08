@@ -1,0 +1,19 @@
+<monitoring-main
+  product="logstash"
+  name="nodes"
+  instance="{{ pageData.nodeSummary.name }}"
+  resolver="{{ pageData.nodeSummary.uuid }}"
+  page="overview"
+>
+  <monitoring-logstash-node-summary logstash="pageData.nodeSummary"></monitoring-logstash-node-summary>
+  <div class="page-row">
+    <div class="row" ng-if="pageData.metrics">
+      <div class="col-md-6"><monitoring-chart series="pageData.metrics.logstash_events_input_rate"></monitoring-chart></div>
+      <div class="col-md-6"><monitoring-chart series="pageData.metrics.logstash_jvm_usage"></monitoring-chart></div>
+      <div class="col-md-6"><monitoring-chart series="pageData.metrics.logstash_events_output_rate"></monitoring-chart></div>
+      <div class="col-md-6"><monitoring-chart series="pageData.metrics.logstash_node_cpu_metric"></monitoring-chart></div>
+      <div class="col-md-6"><monitoring-chart series="pageData.metrics.logstash_events_latency"></monitoring-chart></div>
+      <div class="col-md-6"><monitoring-chart series="pageData.metrics.logstash_os_load"></monitoring-chart></div>
+    </div>
+  </div>
+</monitoring-main>

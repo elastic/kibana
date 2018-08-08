@@ -1,0 +1,49 @@
+@import "~ui/styles/variables";
+
+ml-paginated-table {
+
+  .col-expand-arrow {
+    width: 10px;
+  }
+
+  .table-header-button {
+    border: none;
+    background: none;
+    padding: 0;
+  }
+
+  table th {
+    font-weight: bold;
+    text-align: left;
+  }
+
+  table th button.fa-sort {
+    color: @table-sort-color;
+  }
+
+  tr.row-expand td:hover,
+  tr.row-expand td:hover td {
+    background-color: #FFFFFF;
+  }
+
+  .discover-table-open-button {
+    background-color: #FFFFFF;
+    border: none;
+    min-width: 20px;
+  }
+  .discover-table-open-button:focus {
+  	outline: none;
+  }
+
+  paginate-controls {
+    button.euiPaginationButton {
+      padding: 1px 7px 2px;
+    }
+
+    label {
+      line-height: 1.5;
+      font-size: 12px;
+      font-weight: bold;
+    }
+  }
+}

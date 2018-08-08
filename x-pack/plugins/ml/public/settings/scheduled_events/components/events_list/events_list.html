@@ -1,0 +1,131 @@
+<div class="events-list">
+  <div
+    class="kuiVerticalRhythm"
+    ng-class="{'kuiControlledTable': showControls}">
+    <div ng-if="showControls" class="kuiToolBar">
+
+      <div class="kuiToolBarSection">
+        <button
+          class="kuiButton kuiButton--primary"
+          href=""
+          aria-label="Create new event"
+          tooltip="Create new event"
+          tooltip-append-to-body="true"
+          ng-disabled="lockControls === true"
+          ng-click="clickNewEvent()">
+          <span aria-hidden="true" class="kuiButton__icon kuiIcon fa-plus"></span>
+          New event
+        </button>
+
+        <button
+          class="kuiButton kuiButton--primary"
+          href=""
+          aria-label="Import events"
+          tooltip="Import events"
+          tooltip-append-to-body="true"
+          ng-disabled="lockControls === true"
+          ng-click="clickImportEvents()">
+          <span aria-hidden="true" class="kuiButton__icon kuiIcon fa-upload"></span>
+          Import events
+        </button>
+      </div>
+
+      <div class="kuiToolBarSection">
+        <tool-bar-pager-text
+          start-item="pager.startItem"
+          end-item="pager.endItem"
+          total-items="pager.totalItems">
+        </tool-bar-pager-text>
+        <tool-bar-pager-buttons
+          has-previous-page="pager.hasPreviousPage"
+          has-next-page="pager.hasNextPage"
+          on-page-next="onPageNext"
+          on-page-previous="onPagePrevious">
+        </tool-bar-pager-buttons>
+      </div>
+    </div>
+
+    <table class="kuiTable" ng-show="pageOfEvents.length">
+      <thead>
+        <tr>
+          <th scope="col" class="kuiTableHeaderCell">
+            <sortable-column field="description" on-sort-change="onSortChange" sort-field="sortField" sort-reverse="sortReverse">
+              Description
+            </sortable-column>
+          </th>
+          <th scope="col" class="kuiTableHeaderCell">
+            <sortable-column field="start_time" on-sort-change="onSortChange" sort-field="sortField" sort-reverse="sortReverse">
+              Start
+            </sortable-column>
+          </th>
+          <th scope="col" class="kuiTableHeaderCell">
+            <sortable-column field="end_time" on-sort-change="onSortChange" sort-field="sortField" sort-reverse="sortReverse">
+              End
+            </sortable-column>
+          </th>
+          <th scope="col" class="kuiTableHeaderCell actions-col"></th>
+        </tr>
+      </thead>
+
+      <tbody>
+        <tr ng-repeat="event in pageOfEvents track by $index" class="kuiTableRow" ng-class="{ 'kuiTableRow-isBeingDeleted': event.isBeingDeleted }">
+
+          <td class="kuiTableRowCell">
+            <div class="kuiTableRowCell__liner">
+              <span>
+                {{event.description}}
+              </span>
+              <span
+                ng-if="event.asterisk"
+                class="asterisk"
+                tooltip='{{asteriskText}}'>*</span>
+            </div>
+          </td>
+
+          <td class="kuiTableRowCell">
+            <div class="kuiTableRowCell__liner">
+              <span>
+                {{formatTime(event.start_time)}}
+              </span>
+            </div>
+          </td>
+
+          <td class="kuiTableRowCell">
+            <div class="kuiTableRowCell__liner">
+              <span>
+                {{formatTime(event.end_time)}}
+              </span>
+            </div>
+          </td>
+          <td class="kuiTableRowCell">
+            <div class="kuiTableRowCell__liner">
+              <div class="kuiMenuButtonGroup kuiMenuButtonGroup--alignRight">
+                <button
+                  class="kuiMenuButton kuiMenuButton--danger kuiMenuButton--iconText"
+                  title="Edit"
+                  ng-disabled="lockControls === true"
+                  ng-click="deleteEvent(event)"
+                  href="">
+                  <span class="kuiMenuButton__icon kuiIcon fa-trash"></span>
+                  <span>Delete</span>
+                </button>
+              </div>
+            </div>
+          </td>
+
+        </tr>
+      </tbody>
+
+      <tfoot>
+        <tr>
+          <td colspan="4" class="kuiTableHeaderCell footer-cell">
+          Times are displayed in {{dateFormatTz === 'Browser' ? 'the browser' : dateFormatTz}} timezone
+        </td>
+        </tr>
+      </tfoot>
+
+    </table>
+
+
+  </div>
+</div>

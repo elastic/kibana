@@ -63,7 +63,7 @@ from the redux architecture that forms a ciruclar unidirectional data flow:
 **State**: The state is the single source of truth at
 `ContextAppController::state` and may only be modified by actions.
 
-**Action**: Actions are functions that are called inreponse user or system
+**Action**: Actions are functions that are called in response to user or system
 actions and may modified the state the are bound to via their closure.
 
 

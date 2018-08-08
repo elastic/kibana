@@ -1,0 +1,22 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`GlobalBannerList is rendered 1`] = `null`;
+
+exports[`GlobalBannerList props banners is rendered 1`] = `
+<div
+  class="globalBanner__list"
+>
+  <div
+    class="globalBanner__item"
+    data-test-priority="1"
+  >
+    a component
+  </div>
+  <div
+    class="globalBanner__item"
+    data-test-subj="b"
+  >
+    b good
+  </div>
+</div>
+`;

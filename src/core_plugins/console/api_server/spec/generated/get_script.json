@@ -1,0 +1,11 @@
+{
+  "get_script": {
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "_scripts/{id}"
+    ],
+    "documentation": "http://www.elastic.co/guide/en/elasticsearch/reference/master/modules-scripting.html"
+  }
+}

@@ -1,0 +1,18 @@
+{
+  "indices.rollover": {
+    "url_params": {
+      "timeout": "",
+      "dry_run": "__flag__",
+      "master_timeout": "",
+      "wait_for_active_shards": ""
+    },
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "{alias}/_rollover",
+      "{alias}/_rollover/{new_index}"
+    ],
+    "documentation": "http://www.elastic.co/guide/en/elasticsearch/reference/master/indices-rollover-index.html"
+  }
+}

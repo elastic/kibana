@@ -1,0 +1,54 @@
+<kbn-top-nav class="navbar navbar-default navbar-static-top" name="account-nav">
+  <!-- Transcluded elements. -->
+  <div data-transclude-slots>
+    <!-- Title. -->
+    <div
+      data-transclude-slot="topLeftCorner"
+      class="kuiLocalTitle"
+    >
+      {{user.full_name || user.username}}
+    </div>
+  </div>
+</kbn-top-nav>
+
+<div class="kuiViewContent kuiViewContent--constrainedWidth kuiViewContentItem">
+  <!-- Subheader -->
+  <div class="kuiBar kuiVerticalRhythm">
+    <!-- Title -->
+    <div class="kuiBarSection">
+      <h1 class="kuiTitle">
+        Account Settings
+      </h1>
+    </div>
+
+    <!-- Empty section to push content left -->
+    <div class="kuiBarSection"></div>
+  </div>
+
+  <!-- Username -->
+  <div class="kuiFormSection kuiVerticalRhythm">
+    <label class="kuiFormLabel">
+      Username
+    </label>
+    <div class="euiText">
+      <p ng-bind="::user.username"></p>
+    </div>
+  </div>
+
+  <!-- Email -->
+  <div class="kuiFormSection">
+    <label class="kuiFormLabel">
+      Email
+    </label>
+    <div class="euiText">
+      <p ng-bind="::accountController.getEmail()"></p>
+    </div>
+  </div>
+
+  <!-- Change password -->
+  <kbn-change-password-form
+    require-current-password="true"
+    show-kibana-warning="user.metadata._reserved && user.username === 'kibana'"
+    on-change-password="saveNewPassword(newPassword, currentPassword, onSuccess, onIncorrectPassword)"
+  ></kbn-change-password-form>
+</div>

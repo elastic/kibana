@@ -1,3 +1,22 @@
+/*
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
 const body = JSON.parse(`
 {
     "filters": [
@@ -38,7 +57,7 @@ const body = JSON.parse(`
                         }
                     ],
                     "point_size": 1,
-                    "seperate_axis": 0,
+                    "separate_axis": 0,
                     "split_mode": "everything",
                     "stacked": 0
                 }
@@ -65,63 +84,68 @@ describe('buildRequestBody(req)', () => {
     const series = panel.series[0];
     const doc = buildRequestBody({ payload: body }, panel, series);
     expect(doc).to.eql({
-      'size': 0,
-      'query': {
-        'bool': {
-          'must': [
+      size: 0,
+      query: {
+        bool: {
+          must: [
             {
-              'range': {
+              range: {
                 '@timestamp': {
-                  'gte': 1485463055881,
-                  'lte': 1485463955881,
-                  'format': 'epoch_millis'
+                  gte: 1485463055881,
+                  lte: 1485463955881,
+                  format: 'epoch_millis'
                 }
               }
             },
             {
-              'bool': {
-                'must': [
+              bool: {
+                must: [
                   {
-                    'query_string': {
-                      'analyze_wildcard': true,
-                      'query': '*'
+                    query_string: {
+                      analyze_wildcard: true,
+                      query: '*'
                     }
                   }
                 ],
-                'must_not': []
+                must_not: []
               }
             }
           ]
         }
       },
-      'aggs': {
+      aggs: {
         'c9b5f9c0-e403-11e6-be91-6f7688e9fac7': {
-          'filter': {
-            'match_all': {}
+          filter: {
+            match_all: {}
           },
-          'aggs': {
-            'timeseries': {
-              'date_histogram': {
-                'field': '@timestamp',
-                'interval': '10s',
-                'min_doc_count': 0,
-                'time_zone': 'UTC',
-                'extended_bounds': {
-                  'min': 1485463055881,
-                  'max': 1485463955881
+          meta: {
+            timeField: '@timestamp',
+            bucketSize: 10,
+            intervalString: '10s'
+          },
+          aggs: {
+            timeseries: {
+              date_histogram: {
+                field: '@timestamp',
+                interval: '10s',
+                min_doc_count: 0,
+                time_zone: 'UTC',
+                extended_bounds: {
+                  min: 1485463055881,
+                  max: 1485463955881
                 }
               },
-              'aggs': {
+              aggs: {
                 'c9b5f9c1-e403-11e6-be91-6f7688e9fac7': {
-                  'bucket_script': {
-                    'buckets_path': {
-                      'count': '_count'
+                  bucket_script: {
+                    buckets_path: {
+                      count: '_count'
                     },
-                    'script': {
-                      'inline': 'count * 1',
-                      'lang': 'expression'
+                    script: {
+                      source: 'count * 1',
+                      lang: 'expression'
                     },
-                    'gap_policy': 'skip'
+                    gap_policy: 'skip'
                   }
                 }
               }
@@ -132,4 +156,3 @@ describe('buildRequestBody(req)', () => {
     });
   });
 });
-

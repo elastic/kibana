@@ -1,3 +1,22 @@
+/*
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 import VisEditorVisualization from './vis_editor_visualization';
@@ -15,11 +34,11 @@ class VisEditor extends Component {
     this.state = { model: props.vis.params, dirty: false, autoApply: true, reversed };
     this.onBrush = brushHandler(props.vis.API.timeFilter);
     this.handleUiState = this.handleUiState.bind(this, props.vis);
+    this.handleAppStateChange = this.handleAppStateChange.bind(this);
   }
 
   handleUiState(vis, ...args) {
     vis.uiStateVal(...args);
-    this.handleAppStateChange = this.handleAppStateChange.bind(this);
   }
 
   componentWillMount() {
@@ -62,7 +81,7 @@ class VisEditor extends Component {
       this.setState({ dirty: false });
     };
 
-    if (!this.props.vis.isEditorMode()) {
+    if (!this.props.isEditorMode) {
       if (!this.props.vis.params || !this.props.visData) return null;
       const reversed = this.state.reversed;
       return (
@@ -91,13 +110,17 @@ class VisEditor extends Component {
             dirty={this.state.dirty}
             autoApply={this.state.autoApply}
             model={model}
-            visData={this.props.visData}
+            appState={this.props.appState}
+            savedObj={this.props.savedObj}
+            timeRange={this.props.timeRange}
             onUiState={this.handleUiState}
             uiState={this.props.vis.getUiState()}
             onBrush={this.onBrush}
             onCommit={handleCommit}
             onToggleAutoApply={handleAutoApplyToggle}
             onChange={handleChange}
+            title={this.props.vis.title}
+            description={this.props.vis.description}
             dateFormat={this.props.config.get('dateFormat')}
           />
           <div className="vis-editor-hide-for-reporting">
@@ -119,6 +142,10 @@ class VisEditor extends Component {
   componentDidMount() {
     this.props.renderComplete();
   }
+
+  componentDidUpdate() {
+    this.props.renderComplete();
+  }
 }
 
 VisEditor.defaultProps = {
@@ -130,7 +157,10 @@ VisEditor.propTypes = {
   visData: PropTypes.object,
   appState: PropTypes.object,
   renderComplete: PropTypes.func,
-  config: PropTypes.object
+  config: PropTypes.object,
+  isEditorMode: PropTypes.bool,
+  savedObj: PropTypes.object,
+  timeRange: PropTypes.object,
 };
 
 export default VisEditor;

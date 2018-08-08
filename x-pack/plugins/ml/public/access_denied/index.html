@@ -1,0 +1,26 @@
+<ml-nav-menu name="access-denied"></ml-nav-menu>
+<div class="col-md-12">
+  <div class="euiSpacer euiSpacer--m"></div>
+  <div class="euiCallOut euiCallOut--danger">
+    <div class="euiCallOutHeader">
+      <svg class="euiIcon euiIcon--medium euiCallOutHeader__icon" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
+        width="16" height="16" viewBox="0 0 16 16">
+        <defs>
+          <path id="cross-a" d="M7.293 8l-4.147 4.146a.5.5 0 0 0 .708.708L8 8.707l4.146 4.147a.5.5 0 0 0 .708-.708L8.707 8l4.147-4.146a.5.5 0 0 0-.708-.708L8 7.293 3.854 3.146a.5.5 0 1 0-.708.708L7.293 8z"></path>
+        </defs>
+        <use fill-rule="nonzero" xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#cross-a"></use>
+      </svg>
+      <span class="euiCallOutHeader__title">You need permission to access Machine Learning</span>
+    </div>
+    <div class="euiText euiText--small">
+      <p>You must have the privileges granted in the <span class="text-monospace">kibana_user</span> and <span class="text-monospace">machine_learning_user</span> roles.<br/>
+      Your system admin can set these roles on the Management User page.
+      </p>
+    </div>
+  </div>
+
+  <div style='margin-top:20px;'>
+    <button ng-click="accessDenied.goToKibana();" class="kuiButton kuiButton--primary">Back to Kibana home</button>
+    <button ng-click="accessDenied.retry();" class="kuiButton kuiButton--basic">Retry</button>
+  </div>
+</div>

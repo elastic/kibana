@@ -67,6 +67,7 @@
   padding: 8px 10px;
   border-radius: @borderRadius;
   border: 1px solid @grayLight;
+  font-size: 1.1em;
 }
 .vis_editor__input-grows {
   .vis_editor__input;
@@ -298,8 +299,17 @@
   text-align: center;
   color: @grayLight;
   cursor: row-resize;
+  width: 100%;
+  display: block;
+  appearance: none;
+  background: none;
+  border: none;
   &:hover {
     color: @gray;
+  }
+  &:focus {
+    color: @esBlue;
+    box-shadow: none;
   }
 }
 

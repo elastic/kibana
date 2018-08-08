@@ -1,20 +1,37 @@
+/*
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
 import 'ui/directives/css_truncate';
 import 'ui/directives/field_name';
 import 'ui/filters/unique';
-import 'plugins/kibana/discover/components/field_chooser/discover_field';
+import './discover_field';
 import 'angular-ui-select';
 import _ from 'lodash';
 import $ from 'jquery';
 import rison from 'rison-node';
-import { fieldCalculator } from 'plugins/kibana/discover/components/field_chooser/lib/field_calculator';
-import { IndexPatternsFieldListProvider } from 'ui/index_patterns/_field_list';
+import { fieldCalculator } from './lib/field_calculator';
+import { FieldList } from 'ui/index_patterns/_field_list';
 import { uiModules } from 'ui/modules';
-import fieldChooserTemplate from 'plugins/kibana/discover/components/field_chooser/field_chooser.html';
+import fieldChooserTemplate from './field_chooser.html';
 const app = uiModules.get('apps/discover');
 
-app.directive('discFieldChooser', function ($location, globalState, config, $route, Private) {
-  const FieldList = Private(IndexPatternsFieldListProvider);
-
+app.directive('discFieldChooser', function ($location, globalState, config, $route) {
   return {
     restrict: 'E',
     scope: {
@@ -121,32 +138,32 @@ app.directive('discFieldChooser', function ($location, globalState, config, $rou
 
         // group the fields into popular and up-popular lists
         _.chain(fields)
-        .each(function (field) {
-          field.displayOrder = _.indexOf(columns, field.name) + 1;
-          field.display = !!field.displayOrder;
-          field.rowCount = fieldCounts[field.name];
-        })
-        .sortBy(function (field) {
-          return (field.count || 0) * -1;
-        })
-        .groupBy(function (field) {
-          if (field.display) return 'selected';
-          return field.count > 0 ? 'popular' : 'unpopular';
-        })
-        .tap(function (groups) {
-          groups.selected = _.sortBy(groups.selected || [], 'displayOrder');
+          .each(function (field) {
+            field.displayOrder = _.indexOf(columns, field.name) + 1;
+            field.display = !!field.displayOrder;
+            field.rowCount = fieldCounts[field.name];
+          })
+          .sortBy(function (field) {
+            return (field.count || 0) * -1;
+          })
+          .groupBy(function (field) {
+            if (field.display) return 'selected';
+            return field.count > 0 ? 'popular' : 'unpopular';
+          })
+          .tap(function (groups) {
+            groups.selected = _.sortBy(groups.selected || [], 'displayOrder');
 
-          groups.popular = groups.popular || [];
-          groups.unpopular = groups.unpopular || [];
+            groups.popular = groups.popular || [];
+            groups.unpopular = groups.unpopular || [];
 
-          // move excess popular fields to un-popular list
-          const extras = groups.popular.splice(config.get('fields:popularLimit'));
-          groups.unpopular = extras.concat(groups.unpopular);
-        })
-        .each(function (group, name) {
-          $scope[name + 'Fields'] = _.sortBy(group, name === 'selected' ? 'display' : 'name');
-        })
-        .commit();
+            // move excess popular fields to un-popular list
+            const extras = groups.popular.splice(config.get('fields:popularLimit'));
+            groups.unpopular = extras.concat(groups.unpopular);
+          })
+          .each(function (group, name) {
+            $scope[name + 'Fields'] = _.sortBy(group, name === 'selected' ? 'display' : 'name');
+          })
+          .commit();
 
         // include undefined so the user can clear the filter
         $scope.fieldTypes = _.union(['any'], _.pluck(fields, 'type'));
@@ -245,12 +262,12 @@ app.directive('discFieldChooser', function ($location, globalState, config, $rou
         const fieldNamesInIndexPattern = _.keys(indexPattern.fields.byName);
 
         _.difference(fieldNamesInDocs, fieldNamesInIndexPattern)
-        .forEach(function (unknownFieldName) {
-          fieldSpecs.push({
-            name: unknownFieldName,
-            type: 'unknown'
+          .forEach(function (unknownFieldName) {
+            fieldSpecs.push({
+              name: unknownFieldName,
+              type: 'unknown'
+            });
           });
-        });
 
         const fields = new FieldList(indexPattern, fieldSpecs);
 

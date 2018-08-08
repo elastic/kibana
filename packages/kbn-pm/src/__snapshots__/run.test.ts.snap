@@ -1,0 +1,113 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`excludes project if single \`exclude\` filter is specified 1`] = `
+Object {
+  "graph": Object {
+    "bar": Array [],
+    "baz": Array [
+      "bar",
+    ],
+    "kibana": Array [],
+    "quux": Array [
+      "bar",
+      "baz",
+    ],
+    "with-additional-projects": Array [],
+  },
+  "projects": Array [
+    "bar",
+    "baz",
+    "kibana",
+    "quux",
+    "with-additional-projects",
+  ],
+}
+`;
+
+exports[`excludes projects if multiple \`exclude\` filter are specified 1`] = `
+Object {
+  "graph": Object {
+    "kibana": Array [],
+    "quux": Array [],
+    "with-additional-projects": Array [],
+  },
+  "projects": Array [
+    "kibana",
+    "quux",
+    "with-additional-projects",
+  ],
+}
+`;
+
+exports[`includes only projects specified in multiple \`include\` filters 1`] = `
+Object {
+  "graph": Object {
+    "bar": Array [
+      "foo",
+    ],
+    "baz": Array [
+      "bar",
+    ],
+    "foo": Array [],
+  },
+  "projects": Array [
+    "bar",
+    "baz",
+    "foo",
+  ],
+}
+`;
+
+exports[`includes single project if single \`include\` filter is specified 1`] = `
+Object {
+  "graph": Object {
+    "foo": Array [],
+  },
+  "projects": Array [
+    "foo",
+  ],
+}
+`;
+
+exports[`passes all found projects to the command if no filter is specified 1`] = `
+Object {
+  "graph": Object {
+    "bar": Array [
+      "foo",
+    ],
+    "baz": Array [
+      "bar",
+    ],
+    "foo": Array [],
+    "kibana": Array [
+      "foo",
+    ],
+    "quux": Array [
+      "bar",
+      "baz",
+    ],
+    "with-additional-projects": Array [],
+  },
+  "projects": Array [
+    "bar",
+    "baz",
+    "foo",
+    "kibana",
+    "quux",
+    "with-additional-projects",
+  ],
+}
+`;
+
+exports[`respects both \`include\` and \`exclude\` filters if specified at the same time 1`] = `
+Object {
+  "graph": Object {
+    "baz": Array [],
+    "foo": Array [],
+  },
+  "projects": Array [
+    "baz",
+    "foo",
+  ],
+}
+`;

@@ -1,13 +1,32 @@
+/*
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
 
 import _ from 'lodash';
 import expect from 'expect.js';
 import ngMock from 'ng_mock';
-import { VislibComponentsZeroInjectionInjectZerosProvider } from 'ui/vislib/components/zero_injection/inject_zeros';
-import { VislibComponentsZeroInjectionOrderedXKeysProvider } from 'ui/vislib/components/zero_injection/ordered_x_keys';
-import { VislibComponentsZeroInjectionUniqKeysProvider } from 'ui/vislib/components/zero_injection/uniq_keys';
-import { VislibComponentsZeroInjectionFlattenDataProvider } from 'ui/vislib/components/zero_injection/flatten_data';
-import { VislibComponentsZeroInjectionZeroFilledArrayProvider } from 'ui/vislib/components/zero_injection/zero_filled_array';
-import { VislibComponentsZeroInjectionZeroFillDataArrayProvider } from 'ui/vislib/components/zero_injection/zero_fill_data_array';
+import { VislibComponentsZeroInjectionInjectZerosProvider } from '../../components/zero_injection/inject_zeros';
+import { VislibComponentsZeroInjectionOrderedXKeysProvider } from '../../components/zero_injection/ordered_x_keys';
+import { VislibComponentsZeroInjectionUniqKeysProvider } from '../../components/zero_injection/uniq_keys';
+import { VislibComponentsZeroInjectionFlattenDataProvider } from '../../components/zero_injection/flatten_data';
+import { VislibComponentsZeroInjectionZeroFilledArrayProvider } from '../../components/zero_injection/zero_filled_array';
+import { VislibComponentsZeroInjectionZeroFillDataArrayProvider } from '../../components/zero_injection/zero_fill_data_array';
 
 describe('Vislib Zero Injection Module Test Suite', function () {
   const dateHistogramRows = [

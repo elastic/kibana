@@ -1,0 +1,8 @@
+[[monitoring-troubleshooting]]
+== {monitoring} Troubleshooting
+++++
+<titleabbrev>{monitoring}</titleabbrev>
+++++
+
+See
+{logstash-ref}/monitoring-troubleshooting.html[Troubleshooting {monitoring} in Logstash].

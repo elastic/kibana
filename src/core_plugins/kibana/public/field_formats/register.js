@@ -1,28 +1,49 @@
-import { RegistryFieldFormatsProvider } from 'ui/registry/field_formats';
-import { UrlFormat } from '../../common/field_formats/types/url';
-import { BytesFormat } from '../../common/field_formats/types/bytes';
-import { DateFormat } from '../../common/field_formats/types/date';
-import { RelativeDateFormat } from '../../common/field_formats/types/relative_date';
-import { DurationFormat } from '../../common/field_formats/types/duration';
-import { IpFormat } from '../../common/field_formats/types/ip';
-import { NumberFormat } from '../../common/field_formats/types/number';
-import { PercentFormat } from '../../common/field_formats/types/percent';
-import { StringFormat } from '../../common/field_formats/types/string';
-import { SourceFormat } from '../../common/field_formats/types/source';
-import { ColorFormat } from '../../common/field_formats/types/color';
-import { TruncateFormat } from '../../common/field_formats/types/truncate';
-import { BoolFormat } from '../../common/field_formats/types/boolean';
+/*
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
 
-RegistryFieldFormatsProvider.register(() => UrlFormat);
-RegistryFieldFormatsProvider.register(() => BytesFormat);
-RegistryFieldFormatsProvider.register(() => DateFormat);
-RegistryFieldFormatsProvider.register(() => RelativeDateFormat);
-RegistryFieldFormatsProvider.register(() => DurationFormat);
-RegistryFieldFormatsProvider.register(() => IpFormat);
-RegistryFieldFormatsProvider.register(() => NumberFormat);
-RegistryFieldFormatsProvider.register(() => PercentFormat);
-RegistryFieldFormatsProvider.register(() => StringFormat);
-RegistryFieldFormatsProvider.register(() => SourceFormat);
-RegistryFieldFormatsProvider.register(() => ColorFormat);
-RegistryFieldFormatsProvider.register(() => TruncateFormat);
-RegistryFieldFormatsProvider.register(() => BoolFormat);
+import { fieldFormats } from 'ui/registry/field_formats';
+import { createUrlFormat } from '../../common/field_formats/types/url';
+import { createBytesFormat } from '../../common/field_formats/types/bytes';
+import { createDateFormat } from '../../common/field_formats/types/date';
+import { createRelativeDateFormat } from '../../common/field_formats/types/relative_date';
+import { createDurationFormat } from '../../common/field_formats/types/duration';
+import { createIpFormat } from '../../common/field_formats/types/ip';
+import { createNumberFormat } from '../../common/field_formats/types/number';
+import { createPercentFormat } from '../../common/field_formats/types/percent';
+import { createStringFormat } from '../../common/field_formats/types/string';
+import { createSourceFormat } from '../../common/field_formats/types/source';
+import { createColorFormat } from '../../common/field_formats/types/color';
+import { createTruncateFormat } from '../../common/field_formats/types/truncate';
+import { createBoolFormat } from '../../common/field_formats/types/boolean';
+import { createStaticLookupFormat } from '../../common/field_formats/types/static_lookup';
+
+fieldFormats.register(createUrlFormat);
+fieldFormats.register(createBytesFormat);
+fieldFormats.register(createDateFormat);
+fieldFormats.register(createRelativeDateFormat);
+fieldFormats.register(createDurationFormat);
+fieldFormats.register(createIpFormat);
+fieldFormats.register(createNumberFormat);
+fieldFormats.register(createPercentFormat);
+fieldFormats.register(createStringFormat);
+fieldFormats.register(createSourceFormat);
+fieldFormats.register(createColorFormat);
+fieldFormats.register(createTruncateFormat);
+fieldFormats.register(createBoolFormat);
+fieldFormats.register(createStaticLookupFormat);

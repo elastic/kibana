@@ -1,21 +1,40 @@
-import classNames from 'classnames';
+/*
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
+import './control_editor.less';
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 import { RangeControlEditor } from './range_control_editor';
 import { ListControlEditor } from './list_control_editor';
 import { getTitle } from '../../editor_utils';
 
+import {
+  EuiAccordion,
+  EuiButtonIcon,
+  EuiFieldText,
+  EuiForm,
+  EuiFormRow,
+  EuiPanel,
+  EuiSpacer,
+} from '@elastic/eui';
+
 export class ControlEditor extends Component {
-
-  state = {
-    isEditorCollapsed: true
-  }
-
-  handleToggleControlVisibility = () => {
-    this.setState(prevState => (
-      {  isEditorCollapsed: !prevState.isEditorCollapsed }
-    ));
-  }
 
   changeLabel = (evt) => {
     this.props.handleLabelChange(this.props.controlIndex, evt);
@@ -55,6 +74,8 @@ export class ControlEditor extends Component {
             getIndexPattern={this.props.getIndexPattern}
             handleNumberOptionChange={this.props.handleNumberOptionChange}
             handleCheckboxOptionChange={this.props.handleCheckboxOptionChange}
+            parentCandidates={this.props.parentCandidates}
+            handleParentChange={this.props.handleParentChange}
           />
         );
         break;
@@ -77,80 +98,65 @@ export class ControlEditor extends Component {
 
     const labelId = `controlLabel${this.props.controlIndex}`;
     return (
-      <div>
-        <div className="kuiSideBarFormRow">
-          <label className="kuiSideBarFormRow__label" htmlFor={labelId}>
-            Label
-          </label>
-          <div className="kuiSideBarFormRow__control kuiFieldGroupSection--wide">
-            <input
-              className="kuiTextInput"
-              id={labelId}
-              type="text"
-              value={this.props.controlParams.label}
-              onChange={this.changeLabel}
-            />
-          </div>
-        </div>
+      <EuiForm>
+        <EuiFormRow
+          id={labelId}
+          label="Control Label"
+        >
+          <EuiFieldText
+            value={this.props.controlParams.label}
+            onChange={this.changeLabel}
+          />
+        </EuiFormRow>
 
         {controlEditor}
+      </EuiForm>
+    );
+  }
+
+  renderEditorButtons() {
+    return (
+      <div>
+        <EuiButtonIcon
+          aria-label="Move control up"
+          color="primary"
+          onClick={this.moveUpControl}
+          iconType="sortUp"
+          data-test-subj={`inputControlEditorMoveUpControl${this.props.controlIndex}`}
+        />
+        <EuiButtonIcon
+          aria-label="Move control down"
+          color="primary"
+          onClick={this.moveDownControl}
+          iconType="sortDown"
+          data-test-subj={`inputControlEditorMoveDownControl${this.props.controlIndex}`}
+        />
+        <EuiButtonIcon
+          aria-label="Remove control"
+          color="danger"
+          onClick={this.removeControl}
+          iconType="cross"
+          data-test-subj={`inputControlEditorRemoveControl${this.props.controlIndex}`}
+        />
       </div>
     );
   }
 
   render() {
-    const visibilityToggleClasses = classNames('fa', {
-      'fa-caret-right': !this.state.isEditorCollapsed,
-      'fa-caret-down': this.state.isEditorCollapsed
-    });
-
     return (
-      <div className="sidebar-item">
-        <div className="vis-editor-agg-header">
-          <button
-            aria-label={this.state.isEditorCollapsed ? 'Close Editor' : 'Open Editor'}
-            onClick={this.handleToggleControlVisibility}
-            type="button"
-            className="kuiButton kuiButton--primary kuiButton--small vis-editor-agg-header-toggle"
-          >
-            <i aria-hidden="true" className={visibilityToggleClasses} />
-          </button>
-          <span className="vis-editor-agg-header-title ng-binding">
-            {getTitle(this.props.controlParams, this.props.controlIndex)}
-          </span>
-          <div className="vis-editor-agg-header-controls kuiButtonGroup kuiButtonGroup--united">
-            <button
-              aria-label="Move control down"
-              type="button"
-              className="kuiButton kuiButton--small"
-              onClick={this.moveDownControl}
-              data-test-subj={`inputControlEditorMoveDownControl${this.props.controlIndex}`}
-            >
-              <i aria-hidden="true" className="fa fa-chevron-down" />
-            </button>
-            <button
-              aria-label="Move control up"
-              type="button"
-              className="kuiButton kuiButton--small"
-              onClick={this.moveUpControl}
-              data-test-subj={`inputControlEditorMoveUpControl${this.props.controlIndex}`}
-            >
-              <i aria-hidden="true" className="fa fa-chevron-up" />
-            </button>
-            <button
-              aria-label="Remove control"
-              className="kuiButton kuiButton--danger kuiButton--small"
-              type="button"
-              onClick={this.removeControl}
-              data-test-subj={`inputControlEditorRemoveControl${this.props.controlIndex}`}
-            >
-              <i aria-hidden="true" className="fa fa-times" />
-            </button>
-          </div>
-        </div>
+      <EuiPanel grow={false} className="controlEditorPanel">
 
-        {this.state.isEditorCollapsed && this.renderEditor()}
-      </div>
+        <EuiAccordion
+          id="controlEditorAccordion"
+          buttonContent={getTitle(this.props.controlParams, this.props.controlIndex)}
+          extraAction={this.renderEditorButtons()}
+          initialIsOpen={true}
+        >
+          <EuiSpacer size="s" />
+          {this.renderEditor()}
+        </EuiAccordion>
+
+      </EuiPanel>
     );
   }
 }
@@ -166,5 +172,10 @@ ControlEditor.propTypes = {
   getIndexPatterns: PropTypes.func.isRequired,
   getIndexPattern: PropTypes.func.isRequired,
   handleCheckboxOptionChange: PropTypes.func.isRequired,
-  handleNumberOptionChange: PropTypes.func.isRequired
+  handleNumberOptionChange: PropTypes.func.isRequired,
+  parentCandidates: PropTypes.arrayOf(PropTypes.shape({
+    value: PropTypes.string.isRequired,
+    text: PropTypes.string.isRequired,
+  })).isRequired,
+  handleParentChange: PropTypes.func.isRequired,
 };

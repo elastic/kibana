@@ -1,9 +1,30 @@
+/*
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
 import $ from 'jquery';
 import _ from 'lodash';
-import AggConfigResult from 'ui/vis/agg_config_result';
-import { FilterBarClickHandlerProvider } from 'ui/filter_bar/filter_bar_click_handler';
-import { uiModules } from 'ui/modules';
+import AggConfigResult from '../vis/agg_config_result';
+import { FilterBarClickHandlerProvider } from '../filter_bar/filter_bar_click_handler';
+import { uiModules } from '../modules';
 import tableCellFilterHtml from './partials/table_cell_filter.html';
+import { isNumeric } from '../utils/numeric';
+
 const module = uiModules.get('kibana');
 
 module.directive('kbnRows', function ($compile, $rootScope, getAppState, Private) {
@@ -60,7 +81,7 @@ module.directive('kbnRows', function ($compile, $rootScope, getAppState, Private
 
           // TODO: It would be better to actually check the type of the field, but we don't have
           // access to it here. This may become a problem with the switch to BigNumber
-          if (_.isNumeric(contents)) {
+          if (isNumeric(contents)) {
             $cell.addClass('numeric-value');
           }
         }

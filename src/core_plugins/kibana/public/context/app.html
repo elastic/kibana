@@ -8,7 +8,9 @@
   </div>
   <div class="kuiLocalNavRow kuiLocalNavRow--secondary">
     <div class="kuiLocalTabs">
-      <div class="kuiLocalTab kuiLocalTab-isSelected" ng-bind="contextApp.state.queryParameters.anchorUid"></div>
+      <div class="kuiLocalTab kuiLocalTab-isSelected" >
+        {{ contextApp.state.queryParameters.anchorType }}#{{ contextApp.state.queryParameters.anchorId }}
+      </div>
     </div>
   </div>
 </div>

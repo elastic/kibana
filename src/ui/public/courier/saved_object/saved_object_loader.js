@@ -1,14 +1,33 @@
-import { Scanner } from 'ui/utils/scanner';
-import { StringUtils } from 'ui/utils/string_utils';
-import { SavedObjectsClient } from 'ui/saved_objects';
+/*
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
+import { Scanner } from '../../utils/scanner';
+import { StringUtils } from '../../utils/string_utils';
 
 export class SavedObjectLoader {
-  constructor(SavedObjectClass, kbnIndex, kbnUrl, $http) {
+  constructor(SavedObjectClass, kbnIndex, kbnUrl, $http, chrome, savedObjectClient) {
     this.type = SavedObjectClass.type;
     this.Class = SavedObjectClass;
     this.lowercaseType = this.type.toLowerCase();
     this.kbnIndex = kbnIndex;
     this.kbnUrl = kbnUrl;
+    this.chrome = chrome;
 
     this.scanner = new Scanner($http, {
       index: kbnIndex,
@@ -21,7 +40,7 @@ export class SavedObjectLoader {
       nouns: `${ this.lowercaseType }s`,
     };
 
-    this.savedObjectsClient = new SavedObjectsClient($http);
+    this.savedObjectsClient = savedObjectClient;
   }
 
   /**
@@ -46,7 +65,11 @@ export class SavedObjectLoader {
       return savedObject.delete();
     });
 
-    return Promise.all(deletions);
+    return Promise.all(deletions).then(() => {
+      if (this.chrome) {
+        this.chrome.untrackNavLinksForDeletedSavedObjects(ids);
+      }
+    });
   }
 
   /**
@@ -87,21 +110,22 @@ export class SavedObjectLoader {
    * @param size
    * @returns {Promise}
    */
-  findAll(search = '', size = 100) {
+  findAll(search = '', size = 100, fields) {
     return this.savedObjectsClient.find(
       {
         type: this.lowercaseType,
         search: search ? `${search}*` : undefined,
         perPage: size,
         page: 1,
-        searchFields: ['title^3', 'description']
+        searchFields: ['title^3', 'description'],
+        fields,
       }).then((resp) => {
-        return {
-          total: resp.total,
-          hits: resp.savedObjects
-            .map((savedObject) => this.mapSavedObjectApiHits(savedObject))
-        };
-      });
+      return {
+        total: resp.total,
+        hits: resp.savedObjects
+          .map((savedObject) => this.mapSavedObjectApiHits(savedObject))
+      };
+    });
   }
 
   find(search = '', size = 100) {

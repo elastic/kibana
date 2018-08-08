@@ -1,3 +1,22 @@
+/*
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
 import _ from 'lodash';
 import d3 from 'd3';
 import { SCALE_MODES } from './scale_modes';
@@ -129,7 +148,7 @@ export function VislibLibAxisConfigProvider() {
       }
 
       // horizontal axis with ordinal scale should have labels rotated (so we can fit more)
-      // unless explicitly overriden by user
+      // unless explicitly overridden by user
       if (this.isHorizontal() && this.isOrdinal()) {
         this._values.labels.filter = _.get(axisConfigArgs, 'labels.filter', false);
         this._values.labels.rotate = _.get(axisConfigArgs, 'labels.rotate', 90);
@@ -152,7 +171,29 @@ export function VislibLibAxisConfigProvider() {
           stacked = false;
           break;
         case SCALE_MODES.PERCENTAGE:
-          offset = 'expand';
+          offset = function expand(data) {
+            // taken from https://github.com/d3/d3/blob/v3.5.6/src/layout/stack.js#L193
+            // fixed to support zeros
+            const n = data.length;
+            const m = data[0].length;
+            const y0 = [];
+
+            for (let j = 0; j < m; ++j) {
+              let o = 0;
+              for (let i = 0; i < n; i++) {
+                o += data[i][j][1];
+              }
+              if (o) {
+                for (let i = 0; i < n; i++) {
+                  data[i][j][1] /= o;
+                }
+              }
+            }
+            for (let j = 0; j < m; ++j) {
+              y0[j] = 0;
+            }
+            return y0;
+          };
           break;
         default:
           offset = this.get('scale.mode');

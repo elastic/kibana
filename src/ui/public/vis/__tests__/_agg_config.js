@@ -1,27 +1,40 @@
+/*
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
 import sinon from 'sinon';
 import expect from 'expect.js';
 import ngMock from 'ng_mock';
-import { VisProvider } from 'ui/vis';
-import { AggTypesAggTypeProvider } from 'ui/agg_types/agg_type';
-import { VisAggConfigProvider } from 'ui/vis/agg_config';
+import { VisProvider } from '..';
+import { AggType } from '../../agg_types/agg_type';
+import { AggConfig } from '../agg_config';
 import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
-import { RegistryFieldFormatsProvider } from 'ui/registry/field_formats';
+import { fieldFormats } from '../../registry/field_formats';
 
 describe('AggConfig', function () {
 
   let Vis;
-  let AggType;
-  let AggConfig;
   let indexPattern;
-  let fieldFormat;
 
   beforeEach(ngMock.module('kibana'));
   beforeEach(ngMock.inject(function (Private) {
     Vis = Private(VisProvider);
-    AggType = Private(AggTypesAggTypeProvider);
-    AggConfig = Private(VisAggConfigProvider);
     indexPattern = Private(FixturesStubbedLogstashIndexPatternProvider);
-    fieldFormat = Private(RegistryFieldFormatsProvider);
   }));
 
   describe('#toDsl', function () {
@@ -157,6 +170,7 @@ describe('AggConfig', function () {
     it('uses ::nextId to get the starting value', function () {
       sinon.stub(AggConfig, 'nextId').returns(534);
       const objs = AggConfig.ensureIds([{}]);
+      AggConfig.nextId.restore();
       expect(objs[0]).to.have.property('id', '534');
     });
 
@@ -166,6 +180,8 @@ describe('AggConfig', function () {
       const objs = AggConfig.ensureIds([{}, {}, {}, {}, {}, {}, {}]);
 
       expect(AggConfig.nextId).to.have.property('callCount', 1);
+
+      AggConfig.nextId.restore();
       objs.forEach(function (obj, i) {
         expect(obj).to.have.property('id', String(start + i));
       });
@@ -426,7 +442,7 @@ describe('AggConfig', function () {
           }
         ]
       });
-      expect(vis.aggs[0].fieldFormatter()).to.be(fieldFormat.getDefaultInstance('number').getConverterFor());
+      expect(vis.aggs[0].fieldFormatter()).to.be(fieldFormats.getDefaultInstance('number').getConverterFor());
     });
   });
 
@@ -436,7 +452,7 @@ describe('AggConfig', function () {
       type: 'table',
       aggs: [
         {
-          type: 'terms',
+          type: 'histogram',
           schema: 'bucket',
           params: { field: 'bytes' }
         }
@@ -455,13 +471,13 @@ describe('AggConfig', function () {
     it('returns the string format if the field does not have a format', function () {
       const agg = vis.aggs[0];
       agg.params.field = { type: 'number', format: null };
-      expect(agg.fieldFormatter()).to.be(fieldFormat.getDefaultInstance('string').getConverterFor());
+      expect(agg.fieldFormatter()).to.be(fieldFormats.getDefaultInstance('string').getConverterFor());
     });
 
     it('returns the string format if their is no field', function () {
       const agg = vis.aggs[0];
       delete agg.params.field;
-      expect(agg.fieldFormatter()).to.be(fieldFormat.getDefaultInstance('string').getConverterFor());
+      expect(agg.fieldFormatter()).to.be(fieldFormats.getDefaultInstance('string').getConverterFor());
     });
 
     it('returns the html converter if "html" is passed in', function () {

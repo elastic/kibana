@@ -1,0 +1,16 @@
+{
+  "snapshot.create": {
+    "url_params": {
+      "master_timeout": "",
+      "wait_for_completion": "__flag__"
+    },
+    "methods": [
+      "PUT",
+      "POST"
+    ],
+    "patterns": [
+      "_snapshot/{repository}/{snapshot}"
+    ],
+    "documentation": "http://www.elastic.co/guide/en/elasticsearch/reference/master/modules-snapshots.html"
+  }
+}

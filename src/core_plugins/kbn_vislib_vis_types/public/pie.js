@@ -1,12 +1,30 @@
+/*
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
 import { VisFactoryProvider } from 'ui/vis/vis_factory';
-import { VisSchemasProvider } from 'ui/vis/editors/default/schemas';
+import { Schemas } from 'ui/vis/editors/default/schemas';
 import { CATEGORY } from 'ui/vis/vis_category';
-import pieTemplate from 'plugins/kbn_vislib_vis_types/editors/pie.html';
+import pieTemplate from './editors/pie.html';
 import image from './images/icon-donut.svg';
 
 export default function HistogramVisType(Private) {
   const VisFactory = Private(VisFactoryProvider);
-  const Schemas = Private(VisSchemasProvider);
 
   return VisFactory.createVislibVisualization({
     name: 'pie',
@@ -20,7 +38,13 @@ export default function HistogramVisType(Private) {
         addTooltip: true,
         addLegend: true,
         legendPosition: 'right',
-        isDonut: true
+        isDonut: true,
+        labels: {
+          show: false,
+          values: true,
+          last_level: true,
+          truncate: 100
+        }
       },
     },
     editorConfig: {
@@ -74,6 +98,5 @@ export default function HistogramVisType(Private) {
       ])
     },
     hierarchicalData: true,
-    implementsRenderComplete: true
   });
 }

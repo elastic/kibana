@@ -1,9 +1,28 @@
+/*
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
 import angular from 'angular';
 import expect from 'expect.js';
 import _ from 'lodash';
 import ngMock from 'ng_mock';
-import 'ui/private';
-import 'ui/doc_table';
+import '../../private';
+import '..';
 import FixturesStubbedSearchSourceProvider from 'fixtures/stubbed_search_source';
 
 // Load the kibana app dependencies.
@@ -53,7 +72,7 @@ describe('docTable', function () {
       searchSource = Private(FixturesStubbedSearchSourceProvider);
     });
     init($elem, {
-      searchSource: searchSource,
+      searchSource,
       columns: [],
       sorting: ['@timestamp', 'desc']
     });
@@ -70,12 +89,12 @@ describe('docTable', function () {
   });
 
   it('should set the indexPattern to that of the searchSource', function () {
-    expect($scope.indexPattern).to.be(searchSource.get('index'));
+    expect($scope.indexPattern).to.be(searchSource.getField('index'));
   });
 
   it('should set size and sort on the searchSource', function () {
-    expect($scope.searchSource.sort.called).to.be(true);
-    expect($scope.searchSource.size.called).to.be(true);
+    expect($scope.searchSource.setField.getCall(0).args[0]).to.be('size');
+    expect($scope.searchSource.setField.getCall(1).args[0]).to.be('sort');
   });
 
   it('should have an addRows function that increases the row count', function () {

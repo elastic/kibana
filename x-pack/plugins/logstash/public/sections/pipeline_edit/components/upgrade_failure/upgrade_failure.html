@@ -1,0 +1,59 @@
+<kbn-management-app
+  section="logstash/pipelines/pipeline"
+  omit-breadcrumb-pages="['pipeline']"
+>
+  <div
+    class="kuiViewContent kuiViewContent--constrainedWidth"
+    data-test-subj="pipelineEdit upgradeFailure"
+  >
+    <div class="kuiNotice">
+      <div class="kuiPanel">
+        <div class="kuiPanelHeader">
+          <div class="kuiPanelHeader__title">
+            <span ng-if="!upgradeFailure.isManualUpgrade">Time for an upgrade!</span>
+            <span ng-if="upgradeFailure.isManualUpgrade">Upgrade failed</span>
+          </div>
+        </div>
+        <div class="kuiPanelBody">
+          <p
+            class="kuiVerticalRhythm"
+            ng-if="!upgradeFailure.isManualUpgrade"
+          >
+            Before you can
+            <span ng-if="upgradeFailure.isNewPipeline">add a</span>
+            <span ng-if="!upgradeFailure.isNewPipeline">edit this</span>
+            pipeline, we need to upgrade your configuration.
+          </p>
+          <p
+            class="kuiVerticalRhythm"
+            ng-if="upgradeFailure.isManualUpgrade"
+          >
+            This upgrade is required before you can
+            <span ng-if="upgradeFailure.isNewPipeline">add a</span>
+            <span ng-if="!upgradeFailure.isNewPipeline">edit this</span>
+            pipeline.
+          </p>
+          <div class="kuiVerticalRhythm">
+            <button
+              class="kuiButton kuiButton--primary"
+              ng-click="upgradeFailure.onRetry()"
+            >
+              <span class="kuiButton__inner">
+                <span ng-if="!upgradeFailure.isManualUpgrade">Upgrade now</span>
+                <span ng-if="upgradeFailure.isManualUpgrade">Try again</span>
+              </span>
+            </button>
+            <button
+              class="kuiButton"
+              ng-click="upgradeFailure.onClose()"
+            >
+              <span class="kuiButton__inner">
+                <span>Go back</span>
+              </span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</kbn-management-app>

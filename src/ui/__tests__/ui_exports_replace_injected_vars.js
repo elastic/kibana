@@ -1,3 +1,22 @@
+/*
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
 import { resolve } from 'path';
 
 import { delay } from 'bluebird';
@@ -10,15 +29,19 @@ import KbnServer from '../../server/kbn_server';
 
 const getInjectedVarsFromResponse = (resp) => {
   const $ = cheerio.load(resp.payload);
-  const data = $('kbn-initial-state').attr('data');
-  return JSON.parse(data).vars;
+  const data = $('kbn-injected-metadata').attr('data');
+  return JSON.parse(data).legacyMetadata.vars;
 };
 
 const injectReplacer = (kbnServer, replacer) => {
   // normally the replacer would be defined in a plugin's uiExports,
   // but that requires stubbing out an entire plugin directory for
   // each test, so we fake it and jam the replacer into uiExports
-  kbnServer.uiExports.injectedVarsReplacers.push(replacer);
+  const { injectedVarsReplacers = [] } = kbnServer.uiExports;
+  kbnServer.uiExports.injectedVarsReplacers = [
+    ...injectedVarsReplacers,
+    replacer
+  ];
 };
 
 describe('UiExports', function () {
@@ -109,7 +132,7 @@ describe('UiExports', function () {
       expect(injectedVars).to.eql({ name: 'sam' });
     });
 
-    it('propogates errors thrown in replacers', async () => {
+    it('propagates errors thrown in replacers', async () => {
       injectReplacer(kbnServer, async () => {
         await delay(100);
         throw new Error('replacer failed');
@@ -122,7 +145,6 @@ describe('UiExports', function () {
     it('starts off with the injected vars for the app merged with the default injected vars', async () => {
       const stub = sinon.stub();
       injectReplacer(kbnServer, stub);
-      kbnServer.uiExports.defaultInjectedVars.from_defaults = true;
 
       await kbnServer.inject('/app/test_app');
       sinon.assert.calledOnce(stub);

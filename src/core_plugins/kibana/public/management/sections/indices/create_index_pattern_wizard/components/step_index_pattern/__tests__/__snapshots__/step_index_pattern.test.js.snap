@@ -1,0 +1,92 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`StepIndexPattern renders errors when input is invalid 1`] = `
+Object {
+  "component": <InjectIntl(HeaderComponent)
+    characterList="\\\\, /, ?, \\", <, >, |"
+    data-test-subj="createIndexPatternStep1Header"
+    errors={
+      Array [
+        "An index pattern cannot contain spaces or the characters: {characterList}",
+      ]
+    }
+    goToNextStep={[Function]}
+    isInputInvalid={true}
+    isNextStepDisabled={true}
+    onQueryChanged={[Function]}
+    query="?"
+  />,
+  "i18n": Array [
+    Array [
+      Object {
+        "defaultMessage": "An index pattern cannot contain spaces or the characters: {characterList}",
+        "id": "kbn.management.createIndexPattern.step.invalidCharactersErrorMessage",
+      },
+      Object {
+        "characterList": "\\\\, /, ?, \\", <, >, |",
+      },
+    ],
+    Array [
+      Object {
+        "defaultMessage": "An index pattern cannot contain spaces or the characters: {characterList}",
+        "id": "kbn.management.createIndexPattern.step.invalidCharactersErrorMessage",
+      },
+      Object {
+        "characterList": "\\\\, /, ?, \\", <, >, |",
+      },
+    ],
+    Array [
+      Object {
+        "defaultMessage": "An index pattern cannot contain spaces or the characters: {characterList}",
+        "id": "kbn.management.createIndexPattern.step.invalidCharactersErrorMessage",
+      },
+      Object {
+        "characterList": "\\\\, /, ?, \\", <, >, |",
+      },
+    ],
+    Array [
+      Object {
+        "defaultMessage": "An index pattern cannot contain spaces or the characters: {characterList}",
+        "id": "kbn.management.createIndexPattern.step.invalidCharactersErrorMessage",
+      },
+      Object {
+        "characterList": "\\\\, /, ?, \\", <, >, |",
+      },
+    ],
+  ],
+}
+`;
+
+exports[`StepIndexPattern renders indices which match the initial query 1`] = `
+<IndicesList
+  data-test-subj="createIndexPatternStep1IndicesList"
+  indices={
+    Array [
+      Object {
+        "name": "kibana",
+      },
+    ]
+  }
+  query="kibana"
+/>
+`;
+
+exports[`StepIndexPattern renders matching indices when input is valid 1`] = `
+<IndicesList
+  data-test-subj="createIndexPatternStep1IndicesList"
+  indices={
+    Array [
+      Object {
+        "name": "kibana",
+      },
+    ]
+  }
+  query="k*"
+/>
+`;
+
+exports[`StepIndexPattern renders the loading state 1`] = `
+<LoadingIndices
+  data-test-subj="createIndexPatternStep1Loading"
+/>
+`;

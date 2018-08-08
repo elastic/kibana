@@ -1,3 +1,5 @@
+const RESTRICTED_GLOBALS = require('./restricted_globals')
+
 module.exports = {
   parser: 'babel-eslint',
 
@@ -6,6 +8,7 @@ module.exports = {
     'babel',
     'react',
     'import',
+    'no-unsanitized',
     'prefer-object-spread',
   ],
 
@@ -59,7 +62,7 @@ module.exports = {
     'no-path-concat': 'off',
     'no-proto': 'error',
     'no-redeclare': 'error',
-    'no-restricted-globals': [ 'error', 'context' ],
+    'no-restricted-globals': ['error', ...RESTRICTED_GLOBALS],
     'no-return-assign': 'off',
     'no-script-url': 'error',
     'no-sequences': 'error',
@@ -67,6 +70,8 @@ module.exports = {
     'no-trailing-spaces': 'error',
     'no-undef': 'error',
     'no-underscore-dangle': 'off',
+    'no-unsanitized/method': 'error',
+    'no-unsanitized/property': 'error',
     'no-unused-expressions': 'off',
     'no-unused-vars': [ 'error' ],
     'no-use-before-define': [ 'error', 'nofunc' ],
@@ -87,7 +92,7 @@ module.exports = {
     'wrap-iife': [ 'error', 'outside' ],
     yoda: 'off',
 
-    'object-curly-spacing': 'off', // overriden with babel/object-curly-spacing
+    'object-curly-spacing': 'off', // overridden with babel/object-curly-spacing
     'babel/object-curly-spacing': [ 'error', 'always' ],
 
     'jsx-quotes': ['error', 'prefer-double'],
@@ -102,6 +107,7 @@ module.exports = {
     'react/jsx-indent-props': ['error', 2],
     'react/jsx-max-props-per-line': ['error', { maximum: 1, when: 'multiline' }],
     'react/jsx-no-duplicate-props': ['error', { ignoreCase: true }],
+    'react/no-danger': 'error',
     'react/self-closing-comp': 'error',
     'react/jsx-wrap-multilines': ['error', {
       declaration: true,
@@ -112,8 +118,6 @@ module.exports = {
     'react/jsx-first-prop-new-line': ['error', 'multiline-multiprop'],
     'react/jsx-equals-spacing': ['error', 'never'],
     'react/jsx-indent': ['error', 2],
-    'react/no-did-mount-set-state': 'error',
-    'react/no-did-update-set-state': 'error',
     'react/no-will-update-set-state': 'error',
     'react/no-is-mounted': 'error',
     'react/no-multi-comp': ['error', { ignoreStateless: true }],

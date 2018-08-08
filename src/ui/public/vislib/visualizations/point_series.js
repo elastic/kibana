@@ -1,7 +1,26 @@
+/*
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
 import d3 from 'd3';
 import _ from 'lodash';
 import $ from 'jquery';
-import { TooltipProvider } from 'ui/vis/components/tooltip';
+import { TooltipProvider } from '../../vis/components/tooltip';
 import { VislibVisualizationsChartProvider } from './_chart';
 import { VislibVisualizationsTimeMarkerProvider } from './time_marker';
 import { VislibVisualizationsSeriesTypesProvider } from './point_series/series_types';
@@ -49,13 +68,13 @@ export function VislibVisualizationsPointSeriesProvider(Private) {
       const startY = 0;
 
       return svg
-      .append('rect')
-      .attr('x', startX)
-      .attr('y', startY)
-      .attr('width', width)
-      .attr('height', height)
-      .attr('fill', 'transparent')
-      .attr('class', 'background');
+        .append('rect')
+        .attr('x', startX)
+        .attr('y', startY)
+        .attr('width', width)
+        .attr('height', height)
+        .attr('fill', 'transparent')
+        .attr('class', 'background');
     }
 
     addGrid(svg) {
@@ -74,13 +93,13 @@ export function VislibVisualizationsPointSeriesProvider(Private) {
 
       // Creating clipPath
       return svg
-      .append('clipPath')
-      .attr('id', this.clipPathId)
-      .append('rect')
-      .attr('x', startX)
-      .attr('y', startY)
-      .attr('width', width)
-      .attr('height', height);
+        .append('clipPath')
+        .attr('id', this.clipPathId)
+        .append('rect')
+        .attr('x', startX)
+        .attr('y', startY)
+        .attr('width', width)
+        .attr('height', height);
     }
 
     addEvents(svg) {
@@ -216,8 +235,8 @@ export function VislibVisualizationsPointSeriesProvider(Private) {
           div = d3.select(el);
 
           svg = div.append('svg')
-          .attr('width', width)
-          .attr('height', height);
+            .attr('width', width)
+            .attr('height', height);
 
           self.addBackground(svg, width, height);
           self.addGrid(svg);

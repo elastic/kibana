@@ -1,13 +1,32 @@
+/*
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
 import $ from 'jquery';
 import { delay } from 'bluebird';
 import expect from 'expect.js';
 import sinon from 'sinon';
 
 import ngMock from 'ng_mock';
-import { EventsProvider } from 'ui/events';
 import NoDigestPromises from 'test_utils/no_digest_promises';
 
-import { ResizeCheckerProvider } from '../resize_checker';
+import { ResizeChecker } from '../resize_checker';
+import EventEmitter from 'events';
 
 describe('Resize Checker', () => {
   NoDigestPromises.activateForSuite();
@@ -16,11 +35,8 @@ describe('Resize Checker', () => {
   let setup;
 
   beforeEach(ngMock.module('kibana'));
-  beforeEach(ngMock.inject(($injector) => {
+  beforeEach(() => {
     setup = () => {
-      const Private = $injector.get('Private');
-      const ResizeChecker = Private(ResizeCheckerProvider);
-      const EventEmitter = Private(EventsProvider);
 
       const createEl = () => {
         const el = $('<div>').appendTo('body').get(0);
@@ -41,9 +57,9 @@ describe('Resize Checker', () => {
         return listener;
       };
 
-      return { EventEmitter, createEl, createChecker, createListener };
+      return { createEl, createChecker, createListener };
     };
-  }));
+  });
 
   afterEach(() => {
     teardown.splice(0).forEach(fn => {
@@ -51,7 +67,7 @@ describe('Resize Checker', () => {
     });
   });
 
-  describe('contruction', () => {
+  describe('construction', () => {
     it('accepts a jQuery wrapped element', () => {
       const { createChecker } = setup();
 
@@ -61,7 +77,7 @@ describe('Resize Checker', () => {
 
   describe('events', () => {
     it('is an event emitter', () => {
-      const { createEl, createChecker, EventEmitter } = setup();
+      const { createEl, createChecker } = setup();
 
       const checker = createChecker(createEl());
       expect(checker).to.be.a(EventEmitter);
@@ -79,6 +95,53 @@ describe('Resize Checker', () => {
       sinon.assert.notCalled(listener);
       await listener.firstCallPromise;
       sinon.assert.calledOnce(listener);
+    });
+  });
+
+  describe('enable/disabled state', () => {
+    it('should not trigger events while disabled', async () => {
+      const { createEl, createListener } = setup();
+
+      const el = createEl();
+      const checker = new ResizeChecker(el, { disabled: true });
+      const listener = createListener();
+      checker.on('resize', listener);
+
+      expect(listener.notCalled).to.be(true);
+      $(el).height(100);
+      await delay(1000);
+      expect(listener.notCalled).to.be(true);
+    });
+
+    it('should trigger resize events after calling enable', async () => {
+      const { createEl, createListener } = setup();
+
+      const el = createEl();
+      const checker = new ResizeChecker(el, { disabled: true });
+      const listener = createListener();
+      checker.on('resize', listener);
+
+      expect(listener.notCalled).to.be(true);
+      checker.enable();
+      $(el).height(100);
+      await listener.firstCallPromise;
+      expect(listener.calledOnce).to.be(true);
+    });
+
+    it('should not trigger the first time after enable when the size does not change', async () => {
+      const { createEl, createListener } = setup();
+
+      const el = createEl();
+      const checker = new ResizeChecker(el, { disabled: true });
+      const listener = createListener();
+      checker.on('resize', listener);
+
+      expect(listener.notCalled).to.be(true);
+      $(el).height(250);
+      checker.enable();
+      $(el).height(250);
+      await delay(1000);
+      expect(listener.notCalled).to.be(true);
     });
   });
 

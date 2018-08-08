@@ -1,6 +1,25 @@
+/*
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
 import _ from 'lodash';
-import { uiModules } from 'ui/modules';
-import { callAfterBindingsWorkaround } from 'ui/compat';
+import { uiModules } from '../modules';
+import { callAfterBindingsWorkaround } from '../compat';
 import { FILTER_OPERATOR_TYPES } from './lib/filter_operators';
 import template from './filter_editor.html';
 import '../directives/documentation_href';
@@ -15,7 +34,9 @@ import {
   getOperatorFromFilter,
   getParamsFromFilter,
   isFilterValid,
-  buildFilter
+  buildFilter,
+  areIndexPatternsProvided,
+  isFilterPinned
 } from './lib/filter_editor_utils';
 import * as filterBuilder from '../filter_manager/lib';
 import { keyMap } from '../utils/key_map';
@@ -34,8 +55,16 @@ module.directive('filterEditor', function ($timeout, indexPatterns) {
     },
     controllerAs: 'filterEditor',
     bindToController: true,
-    controller: callAfterBindingsWorkaround(function ($scope, $element) {
-      this.init = () => {
+    controller: callAfterBindingsWorkaround(function ($scope, $element, config) {
+      const pinnedByDefault = config.get('filters:pinnedByDefault');
+
+      this.init = async () => {
+        if (!areIndexPatternsProvided(this.indexPatterns)) {
+          const defaultIndexPattern = await indexPatterns.getDefault();
+          if (defaultIndexPattern) {
+            this.indexPatterns = [defaultIndexPattern];
+          }
+        }
         const { filter } = this;
         this.alias = filter.meta.alias;
         this.isEditingQueryDsl = false;
@@ -87,13 +116,17 @@ module.directive('filterEditor', function ($timeout, indexPatterns) {
         $timeout(() => $scope.$broadcast(`focus-${name}`));
       };
 
-      this.showQueryDslEditor = () => {
+      this.toggleEditingQueryDsl = () => {
+        this.isEditingQueryDsl = !this.isEditingQueryDsl;
+      };
+
+      this.isQueryDslEditorVisible = () => {
         const { type, isNew } = this.filter.meta;
         return this.isEditingQueryDsl || (!isNew && !FILTER_OPERATOR_TYPES.includes(type));
       };
 
       this.isValid = () => {
-        if (this.showQueryDslEditor()) {
+        if (this.isQueryDslEditorVisible()) {
           return _.isObject(this.queryDsl);
         }
         const { field, operator, params } = this;
@@ -104,7 +137,7 @@ module.directive('filterEditor', function ($timeout, indexPatterns) {
         const { filter, field, operator, params, alias } = this;
 
         let newFilter;
-        if (this.showQueryDslEditor()) {
+        if (this.isQueryDslEditorVisible()) {
           const meta = _.pick(filter.meta, ['negate', 'index']);
           meta.index = meta.index || this.indexPatterns[0].id;
           newFilter = Object.assign(this.queryDsl, { meta });
@@ -114,8 +147,7 @@ module.directive('filterEditor', function ($timeout, indexPatterns) {
         }
         newFilter.meta.disabled = filter.meta.disabled;
         newFilter.meta.alias = alias;
-
-        const isPinned = _.get(filter, ['$state', 'store']) === 'globalState';
+        const isPinned = isFilterPinned(filter, pinnedByDefault);
         return this.onSave({ filter, newFilter, isPinned });
       };
 

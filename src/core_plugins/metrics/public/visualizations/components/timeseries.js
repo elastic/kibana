@@ -1,7 +1,26 @@
+/*
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 import _ from 'lodash';
-import getLastValue from '../lib/get_last_value';
+import getLastValue from '../../../common/get_last_value';
 import TimeseriesChart from './timeseries_chart';
 import Legend from './legend';
 import eventBus from '../lib/events';
@@ -17,7 +36,7 @@ class Timeseries extends Component {
       values: values || {},
       show: _.keys(values) || [],
       ignoreLegendUpdates: false,
-      ignoreVisabilityUpdates: false
+      ignoreVisibilityUpdates: false
     };
     this.toggleFilter = this.toggleFilter.bind(this);
     this.handleHideClick = this.handleHideClick.bind(this);
@@ -30,10 +49,10 @@ class Timeseries extends Component {
     const isCurrentlyShown = _.includes(this.state.show, id);
     const show = [];
     if (notAllShown && isCurrentlyShown) {
-      this.setState({ ignoreVisabilityUpdates: false, show: Object.keys(this.state.values) });
+      this.setState({ ignoreVisibilityUpdates: false, show: Object.keys(this.state.values) });
     } else {
       show.push(id);
-      this.setState({ ignoreVisabilityUpdates: true, show: [id] });
+      this.setState({ ignoreVisibilityUpdates: true, show: [id] });
     }
     return show;
   }
@@ -90,7 +109,7 @@ class Timeseries extends Component {
       const keys = _.keys(values);
       const diff = _.difference(keys, currentKeys);
       const nextState = { values: values };
-      if (diff.length && !this.state.ignoreVisabilityUpdates) {
+      if (diff.length && !this.state.ignoreVisibilityUpdates) {
         nextState.show = keys;
       }
       this.setState(nextState);
@@ -135,6 +154,7 @@ class Timeseries extends Component {
               options={this.props.options}
               xaxisLabel={this.props.xaxisLabel}
               yaxes={this.props.yaxes}
+              xAxisFormatter={this.props.xAxisFormatter}
             />
           </div>
           <Legend
@@ -157,7 +177,7 @@ class Timeseries extends Component {
 }
 
 Timeseries.defaultProps = {
-  legned: true,
+  legend: true,
   showGrid: true
 };
 

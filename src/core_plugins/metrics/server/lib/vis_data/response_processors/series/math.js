@@ -1,20 +1,29 @@
+/*
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
 const percentileValueMatch = /\[([0-9\.]+)\]$/;
 import { startsWith, flatten, values, first, last } from 'lodash';
 import getDefaultDecoration from '../../helpers/get_default_decoration';
 import getSiblingAggValue from '../../helpers/get_sibling_agg_value';
 import getSplits from '../../helpers/get_splits';
 import mapBucket from '../../helpers/map_bucket';
-import mathjs from 'mathjs';
-
-const limitedEval = mathjs.eval;
-mathjs.import({
-  'import': function () { throw new Error('Function import is not allowed in your expression.'); },
-  'createUnit': function () { throw new Error('Function createUnit is not allowed in your expression.'); },
-  'eval': function () { throw new Error('Function eval is not allowed in your expression.'); },
-  'parse': function () { throw new Error('Function parse is not allowed in your expression.'); },
-  'simplify': function () { throw new Error('Function simplify is not allowed in your expression.'); },
-  'derivative': function () { throw new Error('Function derivative is not allowed in your expression.'); }
-}, { override: true });
+import { evaluate } from 'tinymath';
 
 export function mathAgg(resp, panel, series) {
   return next => results => {
@@ -30,7 +39,7 @@ export function mathAgg(resp, panel, series) {
     });
     const decoration = getDefaultDecoration(series);
     const splits = getSplits(resp, panel, series);
-    const mathSeries = splits.map((split) => {
+    const mathSeries = splits.map(split => {
       if (mathMetric.variables.length) {
         // Gather the data for the splits. The data will either be a sibling agg or
         // a standard metric/pipeline agg
@@ -43,7 +52,9 @@ export function mathAgg(resp, panel, series) {
             });
           } else {
             const percentileMatch = v.field.match(percentileValueMatch);
-            const m = percentileMatch ? { ...metric, percent: percentileMatch[1] } : { ...metric };
+            const m = percentileMatch
+              ? { ...metric, percent: percentileMatch[1] }
+              : { ...metric };
             acc[v.name] = split.timeseries.buckets.map(mapBucket(m));
           }
           return acc;
@@ -53,13 +64,13 @@ export function mathAgg(resp, panel, series) {
         const all = Object.keys(splitData).reduce((acc, key) => {
           acc[key] = {
             values: splitData[key].map(x => x[1]),
-            timestamps: splitData[key].map(x => x[0])
+            timestamps: splitData[key].map(x => x[0]),
           };
           return acc;
         }, {});
         // Get the first var and check that it shows up in the split data otherwise
-        // we need to return an empty array for the data since we can't opperate
-        // without the first varaible
+        // we need to return an empty array for the data since we can't operate
+        // without the first variable
         const firstVar = first(mathMetric.variables);
         if (!splitData[firstVar.name]) {
           return {
@@ -67,7 +78,7 @@ export function mathAgg(resp, panel, series) {
             label: split.label,
             color: split.color,
             data: [],
-            ...decoration
+            ...decoration,
           };
         }
         // Use the first var to collect all the timestamps
@@ -83,9 +94,19 @@ export function mathAgg(resp, panel, series) {
           const someNull = values(params).some(v => v == null);
           if (someNull) return [ts, null];
           // calculate the result based on the user's script and return the value
-          const result = limitedEval(mathMetric.script, { params: { ...params, _index: index, _timestamp: ts, _all: all } });
+          const result = evaluate(mathMetric.script, {
+            params: {
+              ...params,
+              _index: index,
+              _timestamp: ts,
+              _all: all,
+              _interval: split.meta.bucketSize * 1000,
+            },
+          });
           // if the result is an object (usually when the user is working with maps and functions) flatten the results and return the last value.
-          if (typeof result === 'object') return [ts, last(flatten(result.valueOf()))];
+          if (typeof result === 'object') {
+            return [ts, last(flatten(result.valueOf()))];
+          }
           return [ts, result];
         });
         return {
@@ -93,7 +114,7 @@ export function mathAgg(resp, panel, series) {
           label: split.label,
           color: split.color,
           data,
-          ...decoration
+          ...decoration,
         };
       }
     });

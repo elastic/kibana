@@ -1,0 +1,89 @@
+<expression-builder class="thresholdWatchExpression">
+  <div
+    class="kuiInputNote kuiInputNote--danger"
+    ng-show="thresholdWatchExpression.showExpressionValidation()"
+  >
+    Please fix the errors in the expression below.
+  </div>
+
+  <threshold-watch-agg-type
+    item-id="agg-type"
+    agg-types="thresholdWatchExpression.aggTypes"
+    agg-type="thresholdWatchExpression.aggType"
+    is-open="thresholdWatchExpression.isItemOpen('agg-type');"
+    is-visible="thresholdWatchExpression.isItemVisible('agg-type');"
+    on-open="thresholdWatchExpression.onItemOpen"
+    on-close="thresholdWatchExpression.onItemClose"
+    on-change="thresholdWatchExpression.onAggTypeChange"
+    on-valid="thresholdWatchExpression.onItemValid"
+    on-invalid="thresholdWatchExpression.onItemInvalid"
+    on-dirty="thresholdWatchExpression.onItemDirty"
+    on-pristine="thresholdWatchExpression.onItemPristine"
+  ></threshold-watch-agg-type>
+
+  <threshold-watch-agg-field
+    item-id="agg-field"
+    agg-fields="thresholdWatchExpression.aggFields"
+    agg-field="thresholdWatchExpression.aggField"
+    is-open="thresholdWatchExpression.isItemOpen('agg-field');"
+    is-visible="thresholdWatchExpression.isItemVisible('agg-field');"
+    on-open="thresholdWatchExpression.onItemOpen"
+    on-close="thresholdWatchExpression.onItemClose"
+    on-change="thresholdWatchExpression.onAggFieldChange"
+    on-valid="thresholdWatchExpression.onItemValid"
+    on-invalid="thresholdWatchExpression.onItemInvalid"
+    on-dirty="thresholdWatchExpression.onItemDirty"
+    on-pristine="thresholdWatchExpression.onItemPristine"
+  ></threshold-watch-agg-field>
+
+  <threshold-watch-group-by
+    item-id="group-by"
+    group-by-types="thresholdWatchExpression.groupByTypes"
+    group-by-type="thresholdWatchExpression.groupByType"
+    term-size="thresholdWatchExpression.termSize"
+    term-fields="thresholdWatchExpression.termFields"
+    term-field="thresholdWatchExpression.termField"
+    is-open="thresholdWatchExpression.isItemOpen('group-by');"
+    is-visible="thresholdWatchExpression.isItemVisible('group-by');"
+    on-open="thresholdWatchExpression.onItemOpen"
+    on-close="thresholdWatchExpression.onItemClose"
+    on-change="thresholdWatchExpression.onGroupByChange"
+    on-valid="thresholdWatchExpression.onItemValid"
+    on-invalid="thresholdWatchExpression.onItemInvalid"
+    on-dirty="thresholdWatchExpression.onItemDirty"
+    on-pristine="thresholdWatchExpression.onItemPristine"
+  ></threshold-watch-group-by>
+
+  <threshold-watch-threshold-level
+    item-id="threshold-level"
+    comparators="thresholdWatchExpression.comparators"
+    threshold-comparator="thresholdWatchExpression.thresholdComparator"
+    threshold="thresholdWatchExpression.threshold"
+    is-open="thresholdWatchExpression.isItemOpen('threshold-level');"
+    is-visible="thresholdWatchExpression.isItemVisible('threshold-level');"
+    on-open="thresholdWatchExpression.onItemOpen"
+    on-close="thresholdWatchExpression.onItemClose"
+    on-change="thresholdWatchExpression.onThresholdLevelChange"
+    on-valid="thresholdWatchExpression.onItemValid"
+    on-invalid="thresholdWatchExpression.onItemInvalid"
+    on-dirty="thresholdWatchExpression.onItemDirty"
+    on-pristine="thresholdWatchExpression.onItemPristine"
+  ></threshold-watch-threshold-level>
+
+  <threshold-watch-time-window
+    item-id="time-window"
+    time-window-units="thresholdWatchExpression.timeUnits"
+    time-window-size="thresholdWatchExpression.timeWindowSize"
+    time-window-unit="thresholdWatchExpression.timeWindowUnit"
+    is-open="thresholdWatchExpression.isItemOpen('time-window');"
+    is-visible="thresholdWatchExpression.isItemVisible('time-window');"
+    on-open="thresholdWatchExpression.onItemOpen"
+    on-close="thresholdWatchExpression.onItemClose"
+    on-change="thresholdWatchExpression.onTimeWindowChange"
+    on-valid="thresholdWatchExpression.onItemValid"
+    on-invalid="thresholdWatchExpression.onItemInvalid"
+    on-dirty="thresholdWatchExpression.onItemDirty"
+    on-pristine="thresholdWatchExpression.onItemPristine"
+  ></threshold-watch-time-window>
+
+</expression-builder>

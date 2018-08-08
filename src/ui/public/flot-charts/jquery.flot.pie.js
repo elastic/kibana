@@ -27,7 +27,7 @@ The plugin supports these options:
 				left: integer value to move the pie left or right, or 'auto'
 			},
 			stroke: {
-				color: any hexidecimal color value (other formats may or may not work, so best to stick with something like '#FFF')
+				color: any hexadecimal color value (other formats may or may not work, so best to stick with something like '#FFF')
 				width: integer pixel width of the stroke
 			},
 			label: {
@@ -35,14 +35,14 @@ The plugin supports these options:
 				formatter:  a user-defined function that modifies the text/style of the label text
 				radius: 0-1 for percentage of fullsize, or a specified pixel length
 				background: {
-					color: any hexidecimal color value (other formats may or may not work, so best to stick with something like '#000')
+					color: any hexadecimal color value (other formats may or may not work, so best to stick with something like '#000')
 					opacity: 0-1
 				},
 				threshold: 0-1 for the percentage value at which to hide labels (if they're too small)
 			},
 			combine: {
 				threshold: 0-1 for the percentage value at which to combine slices (if they're too small)
-				color: any hexidecimal color value (other formats may or may not work, so best to stick with something like '#CCC'), if null, the plugin will automatically use the color of the first slice to be combined
+				color: any hexadecimal color value (other formats may or may not work, so best to stick with something like '#CCC'), if null, the plugin will automatically use the color of the first slice to be combined
 				label: any text value of what the combined slice should be labeled
 			}
 			highlight: {
@@ -621,7 +621,7 @@ More detail and specific examples can be found in the included HTML file.
 							arrPoly = [[0, 0], [p1X, p1Y], [p2X, p2Y], [p3X, p3Y], [p4X, p4Y], [p5X, p5Y]],
 							arrPoint = [x, y];
 
-						// TODO: perhaps do some mathmatical trickery here with the Y-coordinate to compensate for pie tilt?
+						// TODO: perhaps do some mathematical trickery here with the Y-coordinate to compensate for pie tilt?
 
 						if (isPointInPoly(arrPoly, arrPoint)) {
 							ctx.restore();

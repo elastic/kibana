@@ -1,3 +1,22 @@
+/*
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
 import {
   getTypes,
   getRootType,
@@ -25,6 +44,12 @@ export async function patchKibanaIndex(options) {
 
   const rootEsType = getRootType(kibanaIndexMappingsDsl);
   const currentMappingsDsl = await getCurrentMappings(callCluster, indexName, rootEsType);
+
+  // patchKibanaIndex() should do nothing if there are no current mappings
+  if (!currentMappingsDsl) {
+    return;
+  }
+
   const missingProperties = await getMissingRootProperties(currentMappingsDsl, kibanaIndexMappingsDsl);
 
   const missingPropertyNames = Object.keys(missingProperties);
@@ -45,27 +70,30 @@ export async function patchKibanaIndex(options) {
     type: rootEsType,
     body: {
       properties: missingProperties
-    },
-    update_all_types: true
+    }
   });
 }
 
 /**
- *  Get the mappings dsl for the current Kibana index
+ *  Get the mappings dsl for the current Kibana index if it exists
  *  @param  {Function} callCluster
  *  @param  {string} indexName
  *  @param  {string} rootEsType
- *  @return {EsMappingsDsl}
+ *  @return {EsMappingsDsl|undefined}
  */
 async function getCurrentMappings(callCluster, indexName, rootEsType) {
-  const index = await callCluster('indices.get', {
+  const response = await callCluster('indices.getMapping', {
     index: indexName,
-    feature: '_mappings'
+    ignore: [404],
   });
 
+  if (response.status === 404) {
+    return undefined;
+  }
+
   // could be different if aliases were resolved by `indices.get`
-  const resolvedName = Object.keys(index)[0];
-  const currentMappingsDsl = index[resolvedName].mappings;
+  const resolvedName = Object.keys(response)[0];
+  const currentMappingsDsl = response[resolvedName].mappings;
   const currentTypes = getTypes(currentMappingsDsl);
 
   const isV5Index = currentTypes.length > 1 || currentTypes[0] !== rootEsType;

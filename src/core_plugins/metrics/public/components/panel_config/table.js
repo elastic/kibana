@@ -1,4 +1,24 @@
-import React, { Component, PropTypes } from 'react';
+/*
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
+import React, { Component } from 'react';
+import PropTypes from 'prop-types';
 import FieldSelect from '../aggs/field_select';
 import SeriesEditor from '../series_editor';
 import { IndexPattern } from '../index_pattern';
@@ -6,7 +26,7 @@ import createTextHandler from '../lib/create_text_handler';
 import createSelectHandler from '../lib/create_select_handler';
 import uuid from 'uuid';
 import YesNo from '../yes_no';
-import { htmlIdGenerator } from 'ui_framework/services';
+import { htmlIdGenerator } from '@elastic/eui';
 
 class TablePanelConfig extends Component {
 
@@ -41,7 +61,7 @@ class TablePanelConfig extends Component {
         <div>
           <div className="vis_editor__table-pivot-fields">
             <div className="vis_editor__container">
-              <div className="vis_ediotr__vis_config-row">
+              <div className="vis_editor__vis_config-row">
                 <p>
                   For the table visualization you need to define a field to
                   group by using a terms aggregation.
@@ -49,7 +69,7 @@ class TablePanelConfig extends Component {
               </div>
               <div className="vis_editor__vis_config-row">
                 <label className="vis_editor__label" htmlFor={htmlId('field')}>Group By Field</label>
-                <div className="vis_editor__row_item">
+                <div className="vis_editor__row_item" data-test-subj="groupByField">
                   <FieldSelect
                     id={htmlId('field')}
                     fields={this.props.fields}
@@ -62,6 +82,7 @@ class TablePanelConfig extends Component {
                 <input
                   id={htmlId('pivotLabelInput')}
                   className="vis_editor__input-grows"
+                  data-test-subj="columnLabelName"
                   type="text"
                   onChange={handleTextChange('pivot_label')}
                   value={model.pivot_label}
@@ -155,4 +176,3 @@ TablePanelConfig.propTypes = {
 };
 
 export default TablePanelConfig;
-

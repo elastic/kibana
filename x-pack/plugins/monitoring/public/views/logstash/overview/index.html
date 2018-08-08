@@ -1,0 +1,10 @@
+<monitoring-main product="logstash" name="overview">
+  <monitoring-cluster-status-logstash status="pageData.clusterStatus"></monitoring-cluster-status-logstash>
+  <div class="page-row">
+    <div class="row" ng-if="pageData.metrics">
+      <div class="col-md-6"><monitoring-chart series="pageData.metrics.logstash_cluster_events_input_rate"></monitoring-chart></div>
+      <div class="col-md-6"><monitoring-chart series="pageData.metrics.logstash_cluster_events_output_rate"></monitoring-chart></div>
+      <div class="col-md-6"><monitoring-chart series="pageData.metrics.logstash_cluster_events_latency"></monitoring-chart></div>
+    </div>
+  </div>
+</monitoring-main>

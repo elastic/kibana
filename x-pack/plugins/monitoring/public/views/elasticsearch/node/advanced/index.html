@@ -1,0 +1,30 @@
+<monitoring-main
+  product="elasticsearch"
+  name="nodes"
+  instance="{{ pageData.nodeSummary.name }}"
+  resolver="{{ pageData.nodeSummary.resolver }}"
+  page="advanced"
+  tab-icon-class="{{ pageData.nodeSummary.nodeTypeClass }}"
+  tab-icon-class="{{ pageData.nodeSummary.nodeTypeLabel }}"
+>
+  <monitoring-node-summary node="pageData.nodeSummary"></monitoring-node-summary>
+
+  <div class="page-row">
+    <div class="row" ng-if="pageData.metrics">
+      <div class="col-md-6"><monitoring-chart series="pageData.metrics.node_gc"/></div>
+      <div class="col-md-6"><monitoring-chart series="pageData.metrics.node_gc_time"/></div>
+      <div class="col-md-6"><monitoring-chart series="pageData.metrics.node_jvm_mem"/></div>
+      <div class="col-md-6"><monitoring-chart series="pageData.metrics.node_cpu_utilization"/></div>
+      <div class="col-md-6"><monitoring-chart series="pageData.metrics.node_index_1"/></div>
+      <div class="col-md-6"><monitoring-chart series="pageData.metrics.node_index_2"/></div>
+      <div class="col-md-6"><monitoring-chart series="pageData.metrics.node_index_3"/></div>
+      <div class="col-md-6"><monitoring-chart series="pageData.metrics.node_index_4"/></div>
+      <div class="col-md-6"><monitoring-chart series="pageData.metrics.node_index_time"/></div>
+      <div class="col-md-6"><monitoring-chart series="pageData.metrics.node_request_total"/></div>
+      <div class="col-md-6"><monitoring-chart series="pageData.metrics.node_index_threads"/></div>
+      <div class="col-md-6"><monitoring-chart series="pageData.metrics.node_read_threads"/></div>
+      <div class="col-md-6"><monitoring-chart series="pageData.metrics.node_cgroup_cpu"/></div>
+      <div class="col-md-6"><monitoring-chart series="pageData.metrics.node_cgroup_stats"/></div>
+    </div>
+  </div>
+</monitoring-main>

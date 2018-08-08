@@ -1,20 +1,39 @@
+/*
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
 import _ from 'lodash';
 import { asPrettyString } from '../../core_plugins/kibana/common/utils/as_pretty_string';
 import { getHighlightHtml } from '../../core_plugins/kibana/common/highlight/highlight_html';
 
 const types = {
   html: function (format, convert) {
-    function recurse(value, field, hit) {
+    function recurse(value, field, hit, meta) {
       if (value == null) {
         return asPrettyString(value);
       }
 
       if (!value || typeof value.map !== 'function') {
-        return convert.call(format, value, field, hit);
+        return convert.call(format, value, field, hit, meta);
       }
 
       const subVals = value.map(v => {
-        return recurse(v, field, hit);
+        return recurse(v, field, hit, meta);
       });
       const useMultiLine = subVals.some(sub => {
         return sub.indexOf('\n') > -1;

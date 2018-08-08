@@ -1,13 +1,33 @@
+/*
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
 import PropTypes from 'prop-types';
 import React from 'react';
 import ColorPicker from '../../color_picker';
 import AddDeleteButtons from '../../add_delete_buttons';
 import SeriesConfig from './config';
 import Sortable from 'react-anything-sortable';
-import Tooltip from '../../tooltip';
+import { EuiToolTip } from '@elastic/eui';
 import Split from '../../split';
 import createAggRowRender from '../../lib/create_agg_row_render';
 import createTextHandler from '../../lib/create_text_handler';
+import { createUpDownHandler } from '../../lib/sort_keyhandler';
 
 function TimeseriesSeries(props) {
   const {
@@ -87,6 +107,7 @@ function TimeseriesSeries(props) {
           </button>
           <button
             role="tab"
+            data-test-subj="seriesOptions"
             aria-selected={selectedTab === 'options'}
             className={optionsClassname}
             onClick={() => props.switchTab('options')}
@@ -110,11 +131,15 @@ function TimeseriesSeries(props) {
   let dragHandle;
   if (!props.disableDelete) {
     dragHandle = (
-      <Tooltip text="Sort">
-        <div className="vis_editor__sort thor__button-outlined-default sm">
+      <EuiToolTip content="Sort">
+        <button
+          className="vis_editor__sort thor__button-outlined-default sm"
+          aria-label="Sort series by pressing up/down"
+          onKeyDown={createUpDownHandler(props.onShouldSortItem)}
+        >
           <i className="fa fa-sort" />
-        </div>
-      </Tooltip>
+        </button>
+      </EuiToolTip>
     );
   }
 
@@ -175,6 +200,7 @@ TimeseriesSeries.propTypes = {
   onClone: PropTypes.func,
   onDelete: PropTypes.func,
   onMouseDown: PropTypes.func,
+  onShouldSortItem: PropTypes.func.isRequired,
   onSortableItemMount: PropTypes.func,
   onSortableItemReadyToMove: PropTypes.func,
   onTouchStart: PropTypes.func,

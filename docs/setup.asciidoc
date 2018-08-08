@@ -34,7 +34,7 @@ version of Kibana that is newer than the version of Elasticsearch (e.g. Kibana
 5.1 and Elasticsearch 5.0).
 
 Running a minor version of Elasticsearch that is higher than Kibana will
-generally work in order to faciliate an upgrade process where Elasticsearch
+generally work in order to facilitate an upgrade process where Elasticsearch
 is upgraded first (e.g. Kibana 5.0 and Elasticsearch 5.1). In this
 configuration, a warning will be logged on Kibana server startup, so it's only
 meant to be temporary until Kibana is upgraded to the same version as
@@ -48,15 +48,17 @@ the patch version.
 
 include::setup/install.asciidoc[]
 
+include::setup/start-stop.asciidoc[]
+
 include::setup/settings.asciidoc[]
+
+include::setup/secure-settings.asciidoc[]
 
 include::setup/docker.asciidoc[]
 
 include::setup/access.asciidoc[]
 
 include::setup/connect-to-elasticsearch.asciidoc[]
-
-include::setup/tribe.asciidoc[]
 
 include::setup/production.asciidoc[]
 

@@ -1,20 +1,43 @@
+/*
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
+import _ from 'lodash';
 
-import { SortableProperties } from 'ui_framework/services';
 import { Pager } from 'ui/pager';
 import { NoVisualizationsPrompt } from './no_visualizations_prompt';
 
 import {
   KuiPager,
-  KuiModalOverlay,
-  KuiConfirmModal,
   KuiListingTableDeleteButton,
   KuiListingTableCreateButton,
   KuiListingTable,
   KuiListingTableNoMatchesPrompt,
   KuiListingTableLoadingPrompt
-} from 'ui_framework/components';
+} from '@kbn/ui-framework/components';
+
+import {
+  EuiOverlayMask,
+  EuiConfirmModal,
+  SortableProperties,
+} from '@elastic/eui';
 
 export class VisualizeListingTable extends Component {
 
@@ -25,8 +48,7 @@ export class VisualizeListingTable extends Component {
       pageOfItems: [],
       showDeleteModal: false,
       filter: '',
-      sortedColumn: '',
-      sortedColumnDirection: '',
+      sortedColumn: 'title',
       pageStartNumber: 1,
       isFetchingItems: false,
     };
@@ -44,10 +66,30 @@ export class VisualizeListingTable extends Component {
           isAscending: true,
         }
       ],
-      'title'
+      this.state.sortedColumn
     );
     this.items = [];
     this.pager = new Pager(this.items.length, 20, 1);
+
+    this.debouncedFetch = _.debounce(filter => {
+      this.props.fetchItems(filter)
+        .then(items => {
+          // We need this check to handle the case where search results come back in a different
+          // order than they were sent out. Only load results for the most recent search.
+          if (filter === this.state.filter) {
+            this.setState({
+              isFetchingItems: false,
+              selectedRowIds: [],
+            });
+            this.items = items;
+            this.calculateItemsOnPage();
+          }
+        });
+    }, 300);
+  }
+
+  componentWillUnmount() {
+    this.debouncedFetch.cancel();
   }
 
   calculateItemsOnPage = () => {
@@ -68,25 +110,14 @@ export class VisualizeListingTable extends Component {
     this.sortableProperties.sortOn(propertyName);
     this.setState({
       selectedRowIds: [],
-      sortedColumn: this.sortableProperties.getSortedProperty(),
-      sortedColumnDirection: this.sortableProperties.isCurrentSortAscending() ? 'ASC' : 'DESC',
+      sortedColumn: this.sortableProperties.getSortedProperty().name,
     });
     this.calculateItemsOnPage();
   };
 
   fetchItems = (filter) => {
-    this.setState({ isFetchingItems: true });
-
-    this.props.fetchItems(filter)
-      .then(items => {
-        this.setState({
-          isFetchingItems: false,
-          selectedRowIds: [],
-          filter,
-        });
-        this.items = items;
-        this.calculateItemsOnPage();
-      });
+    this.setState({ isFetchingItems: true, filter });
+    this.debouncedFetch(filter);
   };
 
   componentDidMount() {
@@ -142,10 +173,21 @@ export class VisualizeListingTable extends Component {
   }
 
   renderRowCells(item) {
+
+    let flaskHolder;
+    if (item.type.shouldMarkAsExperimentalInUI()) {
+      flaskHolder = <span className="kuiIcon fa-flask ng-scope">&nbsp;</span>;
+    }else{
+      flaskHolder = <span />;
+    }
+
     return [
-      <a className="kuiLink" href={this.getUrlForItem(item)}>
-        {item.title}
-      </a>,
+      <span>
+        {flaskHolder}
+        <a className="kuiLink" href={this.getUrlForItem(item)}>
+          {item.title}
+        </a>
+      </span>,
       <span className="kuiStatusText">
         {this.renderItemTypeIcon(item)}
         {item.type.title}
@@ -166,16 +208,17 @@ export class VisualizeListingTable extends Component {
 
   renderConfirmDeleteModal() {
     return (
-      <KuiModalOverlay>
-        <KuiConfirmModal
-          message="Are you sure you want to delete the selected visualizations? This action is irreversible!"
-          title="Warning"
+      <EuiOverlayMask>
+        <EuiConfirmModal
+          title="Delete selected visualizations?"
           onCancel={this.closeModal}
           onConfirm={this.deleteSelectedItems}
           cancelButtonText="Cancel"
           confirmButtonText="Delete"
-        />
-      </KuiModalOverlay>
+        >
+          <p>{`You can't recover deleted visualizations.`}</p>
+        </EuiConfirmModal>
+      </EuiOverlayMask>
     );
   }
 

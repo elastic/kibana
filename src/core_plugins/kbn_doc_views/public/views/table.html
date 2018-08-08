@@ -10,22 +10,24 @@
         <span ng-if="mapping[field].filterable">
           <button
             class="doc-viewer-button"
+            aria-label="Filter for value"
             ng-click="filter(mapping[field], flattened[field], '+')"
             data-test-subj="addInclusiveFilterButton"
+            tooltip="Filter for value"
+            tooltip-append-to-body="1"
           >
             <i
-              tooltip="Filter for value"
-              tooltip-append-to-body="1"
               class="fa fa-search-plus"></i>
           </button>
 
           <button
             class="doc-viewer-button"
+            aria-label="Filter out value"
             ng-click="filter(mapping[field], flattened[field],'-')"
+            tooltip="Filter out value"
+            tooltip-append-to-body="1"
           >
             <i
-              tooltip="Filter out value"
-              tooltip-append-to-body="1"
               class="fa fa-search-minus"></i>
           </button>
         </span>
@@ -36,23 +38,26 @@
         <span ng-if="canToggleColumns()">
           <button
             class="doc-viewer-button"
+            aria-label="Toggle column in table"
+            aria-pressed="{{isColumnActive(field)}}"
             ng-click="toggleColumn(field)"
+            tooltip-append-to-body="1"
+            tooltip="Toggle column in table"
           >
             <i
               class="fa fa-columns"
-              tooltip-append-to-body="1"
-              tooltip="Toggle column in table"
             ></i>
           </button>
         </span>
         <span ng-if="!indexPattern.metaFields.includes(field) && !mapping[field].scripted">
           <button
             class="doc-viewer-button"
+            aria-label="Filter for field present"
             ng-click="filter('_exists_', field, '+')"
+            tooltip="Filter for field present"
+            tooltip-append-to-body="1"
           >
             <i
-              tooltip="Filter for field present"
-              tooltip-append-to-body="1"
               class="fa fa-asterisk"></i>
           </button>
         </span>

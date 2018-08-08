@@ -1,10 +1,29 @@
+/*
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
 import _ from 'lodash';
-import { extractBuckets } from 'ui/agg_response/hierarchical/_extract_buckets';
-import { createRawData } from 'ui/agg_response/hierarchical/_create_raw_data';
-import { arrayToLinkedList } from 'ui/agg_response/hierarchical/_array_to_linked_list';
-import AggConfigResult from 'ui/vis/agg_config_result';
-import { AggResponseHierarchicalBuildSplitProvider } from 'ui/agg_response/hierarchical/_build_split';
-import { HierarchicalTooltipFormatterProvider } from 'ui/agg_response/hierarchical/_hierarchical_tooltip_formatter';
+import { extractBuckets } from './_extract_buckets';
+import { createRawData } from './_create_raw_data';
+import { arrayToLinkedList } from './_array_to_linked_list';
+import AggConfigResult from '../../vis/agg_config_result';
+import { AggResponseHierarchicalBuildSplitProvider } from './_build_split';
+import { HierarchicalTooltipFormatterProvider } from './_hierarchical_tooltip_formatter';
 
 export function BuildHierarchicalDataProvider(Private, Notifier) {
   const buildSplit = Private(AggResponseHierarchicalBuildSplitProvider);
@@ -16,7 +35,7 @@ export function BuildHierarchicalDataProvider(Private, Notifier) {
   });
 
   return function (vis, resp) {
-    // Create a refrenece to the buckets
+    // Create a reference to the buckets
     let buckets = vis.getAggConfig().bySchemaGroup.buckets;
 
     // Find the metric so it's easier to reference.
@@ -32,7 +51,7 @@ export function BuildHierarchicalDataProvider(Private, Notifier) {
 
     // If buckets is falsy then we should just return the aggs
     if (!buckets) {
-      const label = 'Count';
+      const label = raw.columns[0].label;
       const value = resp.aggregations
         && resp.aggregations[metric.id]
         && resp.aggregations[metric.id].value
@@ -77,7 +96,7 @@ export function BuildHierarchicalDataProvider(Private, Notifier) {
       if (!_.isEmpty(displayName)) split.label += ': ' + displayName;
 
       split.tooltipFormatter = tooltipFormatter(raw.columns);
-      const aggConfigResult = new AggConfigResult(firstAgg, null, null, firstAgg.getKey(bucket));
+      const aggConfigResult = new AggConfigResult(firstAgg, null, null, firstAgg.getKey(bucket), bucket.filters);
       split.split = { aggConfig: firstAgg, aggConfigResult: aggConfigResult, key: bucket.key };
       _.each(split.slices.children, function (child) {
         child.aggConfigResult.$parent = aggConfigResult;

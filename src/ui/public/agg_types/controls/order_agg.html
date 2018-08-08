@@ -17,13 +17,14 @@
       <option value="custom" ng-selected="agg.params.orderBy === 'custom'">
         Custom Metric
       </option>
-       <option value="_term" ng-selected="agg.params.orderBy === '_term'">
-        Term
+       <option value="_key" ng-selected="agg.params.orderBy === '_key'">
+        Alphabetical
       </option>
     </select>
   </div>
   <div ng-show="agg.params.orderAgg" class="vis-editor-agg-order-agg">
     <vis-editor-agg-params
+      index-pattern="agg._indexPattern"
       agg="agg.params.orderAgg"
       ng-if="agg.params.orderAgg"
       group-name="'metrics'">

@@ -24,21 +24,24 @@ kbn-management-objects-view {
   text-transform: capitalize;
 }
 
+kbn-management-objects {
+  background: @globalColorLightestGray;
+  min-height: 100vh;
+}
+
 kbn-management-app {
   li.current-page {
     font-size: 1.5em;
     margin: 0 10px;
   }
+
+  min-height: 100vh;
 }
 
 kbn-management-landing {
   .management-panel {
     margin-bottom: 10px;
 
-  }
-
-  .management-panel__body {
-    padding-bottom: 30px;
   }
 
   .management-panel__link {
@@ -127,6 +130,8 @@ kbn-management-objects {
 
 .managementChangeIndexModal {
   width: 800px;
+  overflow: auto;
+  max-height: 89vh;
 }
 
 kbn-management-advanced {
@@ -138,6 +143,11 @@ kbn-management-advanced {
     tbody > tr > td {
       vertical-align: middle;
     }
+  }
+
+  .advancedSettingsTableRowImage {
+    height: 3em;
+    width: auto;
   }
 
   .advancedSettingsTableRowActionsCell {

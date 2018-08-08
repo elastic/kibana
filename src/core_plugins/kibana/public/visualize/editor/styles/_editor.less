@@ -3,7 +3,8 @@
 @vis-editor-sidebar-basis: (100/12) * 2%; // two of twelve columns
 @vis-editor-sidebar-min-width: 350px;
 @vis-editor-nesting-width: 8px;
-@vis-editor-agg-editor-spacing: 5px;
+@vis-editor-agg-editor-spacing: 10px;
+@vis-editor-resizer-width: 13px;
 
 .vis-editor {
   .flex-parent();
@@ -14,9 +15,83 @@
     height: 100%;
   }
 
+  @media (max-width: @screen-sm-max) {
+    visualization {
+      // While we are on a small screen the visualization is below the
+      // editor. In this cases it needs a minimum height, since it would otherwise
+      // maybe end up with 0 height since it just gets the flexbox rest of the screen.
+      min-height: 400px;
+    }
+  }
+
+  .default-vis-editor {
+    // Prevent the default editor from overflowing. Without that you can cause
+    // a weird issue where the complete page can be scrolled out of view if
+    // the editor within the sidebar is too height.
+    overflow-y: hidden;
+    flex: 1 1 auto;
+    display: flex;
+  }
+
   .collapsible-sidebar {
     .flex-parent(0, 0, auto);
     margin-right: 10px;
+    flex-direction: row;
+    min-width: @vis-editor-sidebar-min-width;
+    max-width: 100%;
+    width: @vis-editor-sidebar-min-width;
+
+    @media (max-width: @screen-sm-max) {
+      // If we are on a small screen we force the editor to take 100% width.
+      // We cannot use a min-width: @screen-md-min query here, since we
+      // would otherwise break the manual resizing on large screens.
+      width: 100% !important;
+
+      vis-editor-resizer {
+        display: none;
+      }
+    }
+
+    @media (min-width: @screen-md-min) {
+      max-width: 75%;
+    }
+  }
+
+  .collapsible-sidebar.closed {
+    min-width: 0;
+  }
+
+  .collapsible-sidebar--small {
+    width: 15%;
+  }
+
+  .collapsible-sidebar--medium {
+    width: 30%;
+  }
+
+  .collapsible-sidebar--large {
+    width: 50%;
+  }
+
+
+  .default-editor__resizer {
+    display: flex;
+    flex: 0 0 @vis-editor-resizer-width;
+    width: @vis-editor-resizer-width;
+    cursor: ew-resize;
+    background-color: @globalColorLightestGray;
+    align-items: center;
+    margin: 0;
+    user-select: none;
+
+    &:hover {
+      background-color: lighten(@globalColorBlue, 50%);
+    }
+
+    &.active {
+      background-color: @globalColorBlue;
+      color: white;
+    }
   }
 
   .visualization-options {
@@ -47,10 +122,13 @@
     .flex-parent(0, 1, auto);
   }
 
+  /* Without setting this to 0 you will run into a bug where the filter bar modal is hidden under
+a tilemap in an iframe: https://github.com/elastic/kibana/issues/16457 */
   > visualize {
     height: 100%;
     flex: 1 1 auto;
     display: flex;
+    z-index: 0; /* 1. */
   }
 }
 
@@ -77,12 +155,11 @@
 
   .vis-editor-sidebar {
     .flex-parent(1, 0, auto);
+    max-width: ~"calc(100% - @{vis-editor-resizer-width})";
 
-    // overrided for tablet and desktop
+    // overridden for tablet and desktop
     @media (min-width: @screen-md-min) {
       flex-basis: @vis-editor-sidebar-basis;
-      min-width: @vis-editor-sidebar-min-width;
-      max-width: @vis-editor-sidebar-min-width;
     }
 
     .index-pattern,
@@ -122,10 +199,6 @@
         > .vis-edit-sidebar-buttons {
           flex: 0 0 auto;
         }
-
-        label {
-          margin-bottom: 0px;
-        }
       }
     }
 
@@ -142,7 +215,7 @@
       margin-bottom: @vis-editor-agg-editor-spacing;
     }
 
-    label {
+    .kuiSideBarFormRow__label {
       flex: 2 0 0;
       margin-bottom: 0;
       font-size: 12px;
@@ -158,6 +231,8 @@
 
   .vis-editor-agg {
     .flex-parent();
+    width: 100%;
+    max-width: 100%;
 
     //IE10/11 - prevent flex item from overflowing
     flex-basis: 100%;
@@ -194,14 +269,21 @@
       }
 
       .vis-editor-agg-header-title {
-        flex: 1 1 auto;
+        flex: 0 0 auto;
         .ellipsis();
         font-weight: bold;
+      }
+
+      .vis-editor-agg-header-title--grow {
+        flex-grow: 1;
       }
 
       .vis-editor-agg-header-description {
         font-weight: normal;
         padding-right: @vis-editor-agg-editor-spacing;
+        padding-left: 5px;
+        .ellipsis();
+        flex: 1 1 0;
 
         &.danger {
           .text-danger();
@@ -219,6 +301,7 @@
       text-align: center;
       background: @vis-editor-agg-error-bg;
       color: @vis-editor-agg-error-color;
+      line-height: 1.5;
     }
 
     .vis-editor-agg-editor-ranges {
@@ -246,6 +329,13 @@
         }
       }
     }
+
+      /**
+       * 1. Hack to split child elements evenly.
+       */
+      .vis-editor-agg-form-row__even-split {
+        flex: 1 1 0 !important; /* 1 */
+      }
 
     .vis-editor-agg-form-value {
       align-self: center;
@@ -297,6 +387,15 @@
   * 1. Show invalid state if the user has interacted with the input without selecting an option.
   */
   .vis-editor-field-ui-select {
+
+    .vis-editor-field-ui-select__field-entry {
+      .ellipsis();
+    }
+
+    .ui-select-match-text {
+      .ellipsis();
+    }
+
     &.ng-invalid.ng-dirty,
     &.ng-invalid.ng-touched {
       .ui-select-match {
@@ -312,14 +411,10 @@
     flex-direction: row;
     overflow: auto;
     padding-left: @collapser-width;
+    flex-shrink: 1;
+    flex-basis: 100%;
 
     &.embedded {
-      flex-shrink: 1;
-      flex-basis: 100%;
-    }
-
-    // overrided for tablet and desktop
-    @media (min-width: @screen-md-min) {
       flex-shrink: 1;
       flex-basis: 100%;
     }
@@ -347,6 +442,10 @@ vis-editor-agg-param,
 vis-editor-vis-options,
 vis-editor-vis-options > * {
   .flex-parent();
+}
+
+.vis-editor-config .ems-hotlink {
+  font-size: 12px;
 }
 
 /**
@@ -382,3 +481,13 @@ vis-editor-vis-options > * {
     background-color: darken(@vis-editor-navbar-error-state-bg, 12%) !important; /* 1 */
   }
 }
+
+.agg-select-label {
+  display: inline !important;
+}
+
+.agg-select-help {
+  float: right;
+}
+
+

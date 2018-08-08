@@ -1,0 +1,28 @@
+<monitoring-main
+  product="elasticsearch"
+  name="indices"
+  instance="{{ indexName }}"
+  resolver="{{ indexName }}"
+  page="overview"
+>
+  <monitoring-index-summary summary="pageData.indexSummary"></monitoring-index-summary>
+
+  <div class="page-row">
+    <div class="row" ng-if="pageData.metrics">
+      <div class="col-md-6"><monitoring-chart series="pageData.metrics.index_mem"></monitoring-chart></div>
+      <div class="col-md-6"><monitoring-chart series="pageData.metrics.index_size"></monitoring-chart></div>
+      <div class="col-md-6"><monitoring-chart series="pageData.metrics.index_search_request_rate"></monitoring-chart></div>
+      <div class="col-md-6"><monitoring-chart series="pageData.metrics.index_request_rate"></monitoring-chart></div>
+      <div class="col-md-6"><monitoring-chart series="pageData.metrics.index_segment_count"></monitoring-chart></div>
+      <div class="col-md-6"><monitoring-chart series="pageData.metrics.index_document_count"></monitoring-chart></div>
+    </div>
+  </div>
+
+  <monitoring-shard-allocation
+    id="indexName"
+    view="index"
+    nodes="pageData.nodes"
+    shards="pageData.shards"
+    shard-stats="pageData.shardStats"
+  ></monitoring-shard-allocation>
+</monitoring-main>

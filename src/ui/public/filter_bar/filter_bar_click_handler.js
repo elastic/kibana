@@ -1,19 +1,34 @@
+/*
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
 import _ from 'lodash';
 import { dedupFilters } from './lib/dedup_filters';
 import { uniqFilters } from './lib/uniq_filters';
-import { findByParam } from 'ui/utils/find_by_param';
-import { AddFiltersToKueryProvider } from './lib/add_filters_to_kuery';
+import { findByParam } from '../utils/find_by_param';
+import { toastNotifications } from '../notify';
 
-export function FilterBarClickHandlerProvider(Notifier, Private) {
-  const addFiltersToKuery = Private(AddFiltersToKueryProvider);
+export function FilterBarClickHandlerProvider() {
 
   return function ($state) {
     return function (event, simulate) {
       if (!$state) return;
 
-      const notify = new Notifier({
-        location: 'Filter bar'
-      });
       let aggConfigResult;
 
       // Hierarchical and tabular data set their aggConfigResult parameter
@@ -40,17 +55,18 @@ export function FilterBarClickHandlerProvider(Notifier, Private) {
         }
 
         let filters = _(aggBuckets)
-        .map(function (result) {
-          try {
-            return result.createFilter();
-          } catch (e) {
-            if (!simulate) {
-              notify.warning(e.message);
+          .map(function (result) {
+            try {
+              return result.createFilter();
+            } catch (e) {
+              if (!simulate) {
+                toastNotifications.addSuccess(e.message);
+              }
             }
-          }
-        })
-        .filter(Boolean)
-        .value();
+          })
+          .flatten()
+          .filter(Boolean)
+          .value();
 
         if (!filters.length) return;
 
@@ -64,21 +80,10 @@ export function FilterBarClickHandlerProvider(Notifier, Private) {
         filters = dedupFilters($state.filters, uniqFilters(filters), { negate: true });
 
         if (!simulate) {
-          if ($state.query.language === 'lucene') {
-            $state.$newFilters = filters;
-          }
-          else if ($state.query.language === 'kuery') {
-            addFiltersToKuery($state, filters)
-            .then(() => {
-              if (_.isFunction($state.save)) {
-                $state.save();
-              }
-            });
-          }
+          $state.$newFilters = filters;
         }
         return filters;
       }
     };
   };
 }
-

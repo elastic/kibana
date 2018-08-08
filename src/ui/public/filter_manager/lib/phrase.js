@@ -1,5 +1,25 @@
+/*
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
 export function buildPhraseFilter(field, value, indexPattern) {
   const filter = { meta: { index: indexPattern.id } };
+  const convertedValue = getConvertedValueForField(field, value);
 
   if (field.scripted) {
     filter.script = getPhraseScript(field, value);
@@ -7,7 +27,7 @@ export function buildPhraseFilter(field, value, indexPattern) {
   } else {
     filter.query = { match: {} };
     filter.query.match[field.name] = {
-      query: value,
+      query: convertedValue,
       type: 'phrase'
     };
   }
@@ -32,12 +52,17 @@ export function getPhraseScript(field, value) {
 // See https://github.com/elastic/elasticsearch/issues/20941 and https://github.com/elastic/kibana/issues/8677
 // and https://github.com/elastic/elasticsearch/pull/22201
 // for the reason behind this change. Aggs now return boolean buckets with a key of 1 or 0.
-function getConvertedValueForField(field, value) {
+export function getConvertedValueForField(field, value) {
   if (typeof value !== 'boolean' && field.type === 'boolean') {
-    if (value !== 1 && value !== 0) {
-      throw new Error('Boolean scripted fields must return true or false');
+    if ([1, 'true'].includes(value)) {
+      return true;
     }
-    return value === 1 ? true : false;
+    else if ([0, 'false'].includes(value)) {
+      return false;
+    }
+    else {
+      throw new Error(`${value} is not a valid boolean value for boolean field ${field.name}`);
+    }
   }
   return value;
 }

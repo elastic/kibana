@@ -1,0 +1,28 @@
+@import (reference) "~ui/styles/variables";
+
+.chartTooltip {
+  // The following rules adapted from ui/vislib/styles/_tooltip.less
+  line-height: 1.1;
+  font-size: @font-size-base;
+  font-weight: normal;
+  background: @tooltip-bg;
+  color: @tooltip-color;
+  border-radius: 4px;
+  position: fixed;
+  z-index: 120;
+  word-wrap: break-word;
+  max-width: 40%;
+  overflow: hidden;
+  pointer-events: none;
+  margin: @tooltip-space;
+  padding: @tooltip-space-tight;
+}
+
+.chartTooltip__label {
+  font-family: @font-family-sans-serif;
+  font-weight: @tooltip-bold;
+}
+
+.chartTooltip__value {
+  font-family: @font-family-sans-serif;
+}

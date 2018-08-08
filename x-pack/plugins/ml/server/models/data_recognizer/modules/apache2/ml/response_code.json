@@ -1,0 +1,40 @@
+{
+  "groups": ["apache2"],
+  "description": "Apache2 Access Logs: Detect unusual response_code rates",
+  "analysis_config" : {
+    "bucket_span": "15m",
+    "detectors": [
+        {
+        "detector_description": "apache2_access_response_code_rate",
+        "function": "count",
+        "partition_field_name": "apache2.access.response_code"
+      }
+    ],
+    "influencers": [
+      "apache2.access.response_code",
+      "apache2.access.remote_ip"
+    ]
+  },
+  "analysis_limits": {
+    "model_memory_limit": "100mb"
+  },
+  "data_description": {
+    "time_field": "@timestamp",
+    "time_format": "epoch_ms"
+  },
+  "model_plot_config": {
+    "enabled": true
+  },
+  "custom_settings": {
+    "custom_urls": [
+      {
+        "url_name": "Count Explorer",
+        "url_value": "kibana#/dashboard/ML-Apache2-Access-Remote-IP-Count-Explorer?_g=(time:(from:\u0027$earliest$\u0027,mode:absolute,to:\u0027$latest$\u0027))&_a=(description:\u0027\u0027,filters:!((\u0027$state\u0027:(store:appState),meta:(alias:!n,disabled:!f,index:\u0027INDEX_PATTERN_ID\u0027,key:apache2.access.response_code,negate:!f,type:phrase,value:\u0027$apache2.access.response_code$\u0027),query:(match:(apache2.access.response_code:(query:\u0027$apache2.access.response_code$\u0027,type:phrase))))),query:(query_string:(analyze_wildcard:!t,query:\u0027*\u0027)))"
+      },
+      {
+        "url_name": "Raw Data",
+        "url_value": "kibana#/discover/ML-Filebeat-Apache2-Access?_g=(time:(from:\u0027$earliest$\u0027,mode:absolute,to:\u0027$latest$\u0027))&_a=(columns:!(_source),filters:!((\u0027$state\u0027:(store:appState),meta:(alias:!n,disabled:!f,index:\u0027INDEX_PATTERN_ID\u0027,key:apache2.access.response_code,negate:!f,type:phrase,value:\u0027$apache2.access.response_code$\u0027),query:(match:(apache2.access.response_code:(query:\u0027$apache2.access.response_code$\u0027,type:phrase))))),index:\u0027INDEX_PATTERN_ID\u0027,interval:auto,query:(query_string:(analyze_wildcard:!t,query:\u0027_exists_:apache2.access\u0027)),sort:!(\u0027@timestamp\u0027,desc))"
+      }
+    ]
+  }
+}

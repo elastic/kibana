@@ -1,0 +1,9 @@
+<td ng-click="toggleRow()" data-test-subj="docTableExpandToggleColumn">
+  <button class="discover-table-open-button kuiButton--hollow"
+  	aria-label="{{open ? 'Collapse row' : 'Expand row'}}" aria-expanded="{{open}}">
+    <span
+      class="kuiIcon"
+      ng-class="{ 'fa-caret-down': open, 'fa-caret-right': !open }"
+    ></span>
+  </button>
+</td>

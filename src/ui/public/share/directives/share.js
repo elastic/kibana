@@ -1,3 +1,22 @@
+/*
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
 import {
   parse as parseUrl,
   format as formatUrl,
@@ -6,13 +25,13 @@ import {
 import {
   getUnhashableStatesProvider,
   unhashUrl,
-} from 'ui/state_management/state_hashing';
-import { Notifier } from 'ui/notify/notifier';
+} from '../../state_management/state_hashing';
+import { toastNotifications } from '../../notify';
 
 import { UrlShortenerProvider } from '../lib/url_shortener';
 
-import { uiModules } from 'ui/modules';
-import shareTemplate from 'ui/share/views/share.html';
+import { uiModules } from '../../modules';
+import shareTemplate from '../views/share.html';
 const app = uiModules.get('kibana');
 
 app.directive('share', function (Private) {
@@ -126,9 +145,9 @@ app.directive('share', function (Private) {
 
         if (this.urlFlags.shortSnapshot) {
           urlShortener.shortenUrl(this.urls.snapshot)
-          .then(shortUrl => {
-            this.urls.shortSnapshot = shortUrl;
-          });
+            .then(shortUrl => {
+              this.urls.shortSnapshot = shortUrl;
+            });
         }
       };
 
@@ -138,17 +157,13 @@ app.directive('share', function (Private) {
         if (this.urlFlags.shortSnapshotIframe) {
           const snapshotIframe = this.makeUrlEmbeddable(this.urls.snapshot);
           urlShortener.shortenUrl(snapshotIframe)
-          .then(shortUrl => {
-            this.urls.shortSnapshotIframe = shortUrl;
-          });
+            .then(shortUrl => {
+              this.urls.shortSnapshotIframe = shortUrl;
+            });
         }
       };
 
       this.copyToClipboard = selector => {
-        const notify = new Notifier({
-          location: `Share ${$scope.objectType}`,
-        });
-
         // Select the text to be copied. If the copy fails, the user can easily copy it manually.
         const copyTextarea = $document.find(selector)[0];
         copyTextarea.select();
@@ -156,12 +171,21 @@ app.directive('share', function (Private) {
         try {
           const isCopied = document.execCommand('copy');
           if (isCopied) {
-            notify.info('URL copied to clipboard.');
+            toastNotifications.add({
+              title: 'URL was copied to the clipboard',
+              'data-test-subj': 'shareCopyToClipboardSuccess',
+            });
           } else {
-            notify.info('URL selected. Press Ctrl+C to copy.');
+            toastNotifications.add({
+              title: 'URL selected. Press Ctrl+C to copy.',
+              'data-test-subj': 'shareCopyToClipboardSuccess',
+            });
           }
         } catch (err) {
-          notify.info('URL selected. Press Ctrl+C to copy.');
+          toastNotifications.add({
+            title: 'URL selected. Press Ctrl+C to copy.',
+            'data-test-subj': 'shareCopyToClipboardSuccess',
+          });
         }
       };
     }

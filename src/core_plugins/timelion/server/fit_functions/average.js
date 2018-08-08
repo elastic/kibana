@@ -1,13 +1,32 @@
+/*
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
 import _ from 'lodash';
 
-// Upsampling and down sampling of non-cummulative sets
+// Upsampling and down sampling of non-cumulative sets
 // Good: min, max, average
 // Bad: sum, count
 
 export default function average(dataTuples, targetTuples) {
 
   // Phase 1: Downsample
-  // We nessecarily won't well match the dataSource here as we don't know how much data
+  // We necessarily won't well match the dataSource here as we don't know how much data
   // they had when creating their own average
   const resultTimes = _.pluck(targetTuples, 0);
   const dataTuplesQueue = _.clone(dataTuples);
@@ -48,7 +67,7 @@ export default function average(dataTuples, targetTuples) {
     while (i < resultValues.length) {
       if (isNaN(resultValues[i])) {
         if (i === 0) {
-          // If our first number is NaN, intialize from dataTuples;
+          // If our first number is NaN, initialize from dataTuples;
           previousRealNumber = dataTuples[0][1];
         }
         naNCount++;

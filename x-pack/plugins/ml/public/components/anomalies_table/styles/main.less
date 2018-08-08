@@ -1,0 +1,119 @@
+.ml-anomalies-table {
+  .ml-icon-severity-critical,
+  .ml-icon-severity-major,
+  .ml-icon-severity-minor,
+  .ml-icon-severity-warning,
+  .ml-icon-severity-unknown {
+    color: inherit;
+    text-shadow: none;
+  }
+
+
+  .ml-icon-severity-critical {
+    .euiIcon {
+      fill: #fe5050;
+    }
+  }
+
+  .ml-icon-severity-major {
+    .euiIcon {
+      fill: #fba740;
+    }
+  }
+
+  .ml-icon-severity-minor {
+    .euiIcon {
+      fill: #fdec25;
+    }
+  }
+
+  .ml-icon-severity-warning {
+    .euiIcon {
+      fill: #8bc8fb;
+    }
+  }
+
+  .ml-icon-severity-unknown {
+    .euiIcon {
+      fill: #c0c0c0;
+    }
+  }
+
+  tr th:first-child,
+  tr td:first-child {
+    width: 32px;
+  }
+
+  .euiTableCellContent {
+    .euiHealth {
+      font-size: inherit;
+    }
+
+    .filter-button {
+      opacity: 0.3;
+      width: 20px;
+      padding-top: 2px;
+
+      .euiIcon {
+        width: 14px;
+        height: 14px;
+      }
+    }
+
+    .filter-button:hover {
+      opacity: 1;
+    }
+
+    .detector-rules-icon {
+      margin-left: 3px;
+      opacity: 0.5;
+    }
+  }
+
+  .euiContextMenuItem {
+    min-width: 150px
+  }
+
+  .category-example {
+    display: block;
+    white-space: nowrap;
+  }
+
+  .interim-result {
+    font-style: italic;
+  }
+
+  .ml-anomalies-table-details {
+    padding: 4px 32px;
+    max-height: 1000px;
+    overflow-y: auto;
+
+    .anomaly-description-list {
+
+      .euiDescriptionList__title {
+        margin-top: 0px;
+        flex-basis: 15%;
+        font-size: inherit;
+      }
+
+      .euiDescriptionList__description {
+        margin-top: 0px;
+        flex-basis: 85%;
+        font-size: inherit;
+      }
+
+      .filter-button {
+        height: 20px;
+        padding-top: 2px;
+
+        .euiButtonIcon__icon {
+          -webkit-transform: translateY(-7px);
+          transform: translateY(-7px);
+        }
+      }
+
+    }
+  }
+
+}
+

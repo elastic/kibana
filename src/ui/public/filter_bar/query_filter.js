@@ -1,10 +1,29 @@
+/*
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
 import _ from 'lodash';
-import { onlyDisabled } from 'ui/filter_bar/lib/only_disabled';
-import { onlyStateChanged } from 'ui/filter_bar/lib/only_state_changed';
-import { uniqFilters } from 'ui/filter_bar/lib/uniq_filters';
-import { compareFilters } from 'ui/filter_bar/lib/compare_filters';
-import { EventsProvider } from 'ui/events';
-import { FilterBarLibMapAndFlattenFiltersProvider } from 'ui/filter_bar/lib/map_and_flatten_filters';
+import { onlyDisabled } from './lib/only_disabled';
+import { onlyStateChanged } from './lib/only_state_changed';
+import { uniqFilters } from './lib/uniq_filters';
+import { compareFilters } from './lib/compare_filters';
+import { EventsProvider } from '../events';
+import { FilterBarLibMapAndFlattenFiltersProvider } from './lib/map_and_flatten_filters';
 
 export function FilterBarQueryFilterProvider(Private, $rootScope, getAppState, globalState, config) {
   const EventEmitter = Private(EventsProvider);
@@ -64,13 +83,13 @@ export function FilterBarQueryFilterProvider(Private, $rootScope, getAppState, g
     }
 
     return mapAndFlattenFilters(filters)
-    .then(function (filters) {
-      if (!filterState.filters) {
-        filterState.filters = [];
-      }
+      .then(function (filters) {
+        if (!filterState.filters) {
+          filterState.filters = [];
+        }
 
-      filterState.filters = filterState.filters.concat(filters);
-    });
+        filterState.filters = filterState.filters.concat(filters);
+      });
   };
 
   /**
@@ -135,7 +154,7 @@ export function FilterBarQueryFilterProvider(Private, $rootScope, getAppState, g
 
 
   /**
-   * Inverts the nagate value on the filter
+   * Inverts the negate value on the filter
    * @param {object} filter The filter to toggle
    * @returns {object} updated filter
    */
@@ -265,9 +284,17 @@ export function FilterBarQueryFilterProvider(Private, $rootScope, getAppState, g
       appFilters.splice(i, 1);
     });
 
+    // Reverse the order of globalFilters and appFilters, since uniqFilters
+    // will throw out duplicates from the back of the array, but we want
+    // newer filters to overwrite previously created filters.
+    globalFilters.reverse();
+    appFilters.reverse();
+
     return [
-      uniqFilters(globalFilters, { disabled: true }),
-      uniqFilters(appFilters, { disabled: true })
+      // Reverse filters after uniq again, so they are still in the order, they
+      // were before updating them
+      uniqFilters(globalFilters, { disabled: true }).reverse(),
+      uniqFilters(appFilters, { disabled: true }).reverse()
     ];
   }
 
@@ -327,10 +354,10 @@ export function FilterBarQueryFilterProvider(Private, $rootScope, getAppState, g
         // save states and emit the required events
         saveState();
         queryFilter.emit('update')
-        .then(function () {
-          if (!doFetch) return;
-          queryFilter.emit('fetch');
-        });
+          .then(function () {
+            if (!doFetch) return;
+            queryFilter.emit('fetch');
+          });
 
         // iterate over each state type, checking for changes
         function getActions() {

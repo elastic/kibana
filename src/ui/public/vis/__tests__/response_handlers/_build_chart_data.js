@@ -1,19 +1,36 @@
+/*
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
 import _ from 'lodash';
 import ngMock from 'ng_mock';
 import expect from 'expect.js';
 import sinon from 'sinon';
-import { AggResponseTabifyTableProvider } from 'ui/agg_response/tabify/_table';
-import { AggResponseIndexProvider } from 'ui/agg_response/index';
-import { BasicResponseHandlerProvider } from 'ui/vis/response_handlers/basic';
+import { TabifyTable } from '../../../agg_response/tabify/_table';
+import { AggResponseIndexProvider } from '../../../agg_response';
+import { BasicResponseHandlerProvider } from '../../response_handlers/basic';
 
 describe('renderbot#buildChartData', function () {
   let buildChartData;
   let aggResponse;
-  let Table;
 
   beforeEach(ngMock.module('kibana'));
   beforeEach(ngMock.inject(function (Private) {
-    Table = Private(AggResponseTabifyTableProvider);
     aggResponse = Private(AggResponseIndexProvider);
     buildChartData = Private(BasicResponseHandlerProvider).handler;
   }));
@@ -62,7 +79,7 @@ describe('renderbot#buildChartData', function () {
         }
       };
       const esResp = { hits: { total: 1 } };
-      const tabbed = { tables: [ new Table() ] };
+      const tabbed = { tables: [ new TabifyTable() ] };
 
       sinon.stub(aggResponse, 'tabify').returns(tabbed);
       expect(buildChartData.call(renderbot, esResp)).to.eql(chart);
@@ -71,7 +88,7 @@ describe('renderbot#buildChartData', function () {
     it('converts table groups into rows/columns wrappers for charts', function () {
       const converter = sinon.stub().returns('chart');
       const esResp = { hits: { total: 1 } };
-      const tables = [new Table(), new Table(), new Table(), new Table()];
+      const tables = [new TabifyTable(), new TabifyTable(), new TabifyTable(), new TabifyTable()];
 
       const renderbot = {
         vis: {

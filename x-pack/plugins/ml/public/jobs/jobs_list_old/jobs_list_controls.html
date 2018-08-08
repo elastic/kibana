@@ -1,0 +1,101 @@
+<div class="actions">
+
+  <!-- start -->
+  <div ng-class="checks.startButtonWrapperClass()" data-placement="right" data-toggle="tooltip"
+    ng-attr-tooltip="{{checks.startButtonWrapperTooltip()}}">
+    <button
+      ng-show="checks.startButtonVisible()"
+      ng-click="((job.datafeed_config && job.datafeed_config.state==='started')?stopDatafeed(job):startDatafeed(job))"
+      class="kuiButton kuiButton--basic kuiButton--small"
+      data-toggle="tooltip"
+      aria-label="{{check.startButtonAriaLabel()}}}"
+      ng-disabled="checks.startButtonDisabled()"
+      tooltip="{{checks.startButtonTooltip()}}">
+        <i aria-hidden="true" ng-class="checks.buttonIcon()"></i>
+    </button>
+  </div>
+
+  <!-- loading -->
+  <button
+    disabled
+    ng-show="checks.loadingButtonVisible()"
+    class="kuiButton kuiButton--basic kuiButton--small"
+    data-toggle="tooltip"
+    tooltip="No datafeed settings for {{job.job_id}}">
+      <i aria-hidden="true" class="fa fa-clock-o"></i>
+  </button>
+
+  <!-- anomaly explorer -->
+  <a
+    href='ml#/explorer/{{jobUrl.url}}'
+    ng-click="addItemToRecentlyAccessed('explorer',job.job_id,  jobUrl.url)"
+    class="kuiButton kuiButton--basic kuiButton--small"
+    data-toggle="tooltip"
+    aria-label="Open Anomaly Explorer"
+    tooltip="Open {{job.job_id}} in Anomaly Explorer">
+      <i aria-hidden="true" class="fa fa-table"></i>
+  </a>
+
+  <!-- time series explorer -->
+  <!-- if time series job, show the link. otherwise show a disabled button -->
+  <a
+    ng-if='enableTimeSeries'
+    href='ml#/timeseriesexplorer/{{jobUrl.url}}'
+    ng-click="addItemToRecentlyAccessed('timeseriesexplorer', job.job_id, jobUrl.url)"
+    class="kuiButton kuiButton--basic kuiButton--small"
+    data-toggle="tooltip"
+    aria-label="Open Single Metric Viewer"
+    tooltip="Open {{job.job_id}} in Single Metric Viewer">
+      <i aria-hidden="true" class="fa fa-line-chart"></i>
+  </a>
+  <button
+    ng-if='!enableTimeSeries'
+    disabled
+    class="kuiButton kuiButton--basic kuiButton--small"
+    aria-label="Open single metric viewer"
+    data-toggle="tooltip">
+      <i aria-hidden="true" class="fa fa-line-chart"></i>
+  </button>
+
+  <!-- edit job -->
+  <div ng-class="checks.editButtonWrapperClass()" data-placement="right" data-toggle="tooltip"
+    ng-attr-tooltip="{{checks.editButtonWrapperTooltip()}}">
+    <button
+      ng-click="editJob(job)"
+      ng-disabled="checks.editButtonDisabled()"
+      class="kuiButton kuiButton--basic kuiButton--small"
+      aria-label="Edit job"
+      data-toggle="tooltip"
+      tooltip="Edit job" >
+        <i aria-hidden="true" class="fa fa-pencil-square-o"></i>
+    </button>
+  </div>
+
+  <!-- clone job -->
+  <div ng-class="checks.cloneButtonWrapperClass()" data-placement="right" data-toggle="tooltip"
+    ng-attr-tooltip="{{checks.cloneButtonWrapperTooltip()}}">
+    <button
+      ng-click="cloneJob(job)"
+      class="kuiButton kuiButton--basic kuiButton--small"
+      data-toggle="tooltip"
+      ng-disabled='checks.cloneButtonDisabled()'
+      aria-label="Clone job"
+      tooltip="Clone job" >
+        <i aria-hidden="true" class="fa fa-clone"></i>
+    </button>
+  </div>
+
+  <!-- delete job -->
+  <div ng-class="checks.deleteButtonWrapperClass()" data-placement="right" data-toggle="tooltip"
+    ng-attr-tooltip="{{checks.deleteButtonWrapperTooltip()}}">
+    <button
+      ng-click="deleteJob(job)"
+      class="kuiButton kuiButton--danger kuiButton--small"
+      data-toggle="tooltip"
+      ng-disabled='checks.deleteButtonDisabled()'
+      aria-label="Delete job"
+      tooltip="Delete job">
+        <i aria-hidden="true" class="fa fa-trash"></i>
+    </button>
+  </div>
+</div>

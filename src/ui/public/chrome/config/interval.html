@@ -1,9 +1,9 @@
 <kbn-timepicker
-  from="timefilter.time.from"
-  to="timefilter.time.to"
-  mode="timefilter.time.mode"
+  from="timefilterValues.time.from"
+  to="timefilterValues.time.to"
+  mode="timefilterValues.time.mode"
   active-tab="'interval'"
-  interval="timefilter.refreshInterval"
-  on-filter-select="updateFilter(from, to)"
+  interval="timefilterValues.refreshInterval"
+  on-filter-select="updateFilter(from, to, mode)"
   on-interval-select="updateInterval(interval)">
 </kbn-timepicker>

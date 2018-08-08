@@ -19,9 +19,15 @@
         class="fullWidth"
       >
         <div ng-if="vis.type.requiresSearch && state.linked">
-          Linked to Saved Search &ldquo;{{ savedVis.savedSearch.title }}&rdquo;
+          Linked to Saved Search
+          <a
+            href="#/discover/{{savedVis.savedSearch.id}}"
+          >
+            {{ savedVis.savedSearch.title }}
+          </a>
           &nbsp;
           <a
+            data-test-subj="unlinkSavedSearch"
             href=""
             ng-dblclick="unlink()"
             tooltip="Double click to unlink from Saved Search"
@@ -36,6 +42,7 @@
             app-name="'visualize'"
             on-submit="updateQueryAndFetch($query)"
             disable-auto-focus="true"
+            index-patterns="[indexPattern]"
           >
           </query-bar>
         </div>
@@ -45,21 +52,29 @@
 
   <!-- Filters. -->
   <filter-bar
-    ng-if="vis.type.options.showFilterBar && state.query.language === 'lucene'"
+    ng-if="vis.type.options.showFilterBar"
     state="state"
     index-patterns="[indexPattern]"
   ></filter-bar>
 
-  <visualize
+  <div
+    class="euiCallOut euiCallOut--primary euiCallOut--small hide-for-sharing"
+    ng-if="vis.type.shouldMarkAsExperimentalInUI()"
+    data-test-subj="experimentalVisInfo"
+  >
+    <div class="euiText">
+      <p ng-bind-html="getAdditionalMessage()"></p>
+    </div>
+  </div>
+
+  <div class="visualize" ng-if="!chrome.getVisible()"/>
+
+  <visualization-editor
+    ng-if="chrome.getVisible()"
     saved-obj="savedVis"
     ui-state="uiState"
-    app-state="state"
-    editor-mode="true"
-    data-shared-item
-    render-counter
-    data-title="{{savedVis.lastSavedTitle}}"
-    data-description="{{savedVis.description}}"
-    show-spy-panel="chrome.getVisible()">
-  </visualize>
+    time-range="timeRange"
+    class="vis-editor-content"
+  />
 
 </visualize-app>

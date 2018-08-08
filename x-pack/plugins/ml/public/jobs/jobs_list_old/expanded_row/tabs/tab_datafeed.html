@@ -1,0 +1,52 @@
+<div ng-controller='TabController'>
+  <div class="row">
+    <div class="col-md-6">
+      <div ng-repeat="(key, value) in job" ng-if="key==='datafeed_config'">
+        <div class="ml_sub_heading">Datafeed</div>
+        <div class='ml_job_section_container'>
+          <table class="euiTable euiTable--compressed">
+            <tbody>
+              <tr ng-repeat="(key1, value1) in value" ng-switch="key1" class="euiTableRow">
+                <!-- types //-->
+                <th ng-switch-when="types" class="euiTableRowCell">
+                  <div class="euiTableCellContent">
+                    <span class="euiTableCellContent__text">types:</span>
+                  </div>
+                </th>
+                <td ng-switch-when="types" class="euiTableRowCell">
+                  <div class="euiTableCellContent">
+                    <span class="euiTableCellContent__text">{{value1.join(",")}}</span>
+                  </div>
+                </td>
+
+                <!-- indices //-->
+                <th ng-switch-when="indices" class="euiTableRowCell">
+                  <div class="euiTableCellContent">
+                    <span class="euiTableCellContent__text">indices:</span>
+                  </div>
+                </th>
+                <td ng-switch-when="indices" class="euiTableRowCell">
+                  <div class="euiTableCellContent">
+                    <span class="euiTableCellContent__text">{{value1.join(",")}}</span>
+                  </div>
+                </td>
+
+                <!-- default //-->
+                <th ng-switch-default class="euiTableRowCell">
+                  <div class="euiTableCellContent">
+                    <span class="euiTableCellContent__text">{{key1}}</span>
+                  </div>
+                </th>
+                <td ng-switch-default class="euiTableRowCell">
+                  <div class="euiTableCellContent">
+                    <span class="euiTableCellContent__text">{{value1}}</span>
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

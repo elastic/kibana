@@ -1,0 +1,15 @@
+{
+  "indices.delete_template": {
+    "url_params": {
+      "timeout": "",
+      "master_timeout": ""
+    },
+    "methods": [
+      "DELETE"
+    ],
+    "patterns": [
+      "_template/{name}"
+    ],
+    "documentation": "http://www.elastic.co/guide/en/elasticsearch/reference/master/indices-templates.html"
+  }
+}

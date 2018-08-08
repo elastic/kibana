@@ -1,3 +1,22 @@
+/*
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
 import _ from 'lodash';
 import { VislibVisualizationsPointSeriesProvider } from './_point_series';
 
@@ -51,24 +70,24 @@ export function VislibVisualizationsColumnChartProvider(Private) {
       const isTooltip = this.handler.visConfig.get('tooltip.show');
 
       const layer = svg.append('g')
-      .attr('class', 'series histogram')
-      .attr('clip-path', 'url(#' + this.baseChart.clipPathId + ')');
+        .attr('class', 'series histogram')
+        .attr('clip-path', 'url(#' + this.baseChart.clipPathId + ')');
 
       const bars = layer.selectAll('rect')
-      .data(data.values.filter(function (d) {
-        return !_.isNull(d.y);
-      }));
+        .data(data.values.filter(function (d) {
+          return !_.isNull(d.y);
+        }));
 
       bars
-      .exit()
-      .remove();
+        .exit()
+        .remove();
 
       bars
-      .enter()
-      .append('rect')
-      .attr('data-label', data.label)
-      .attr('fill', () => color(data.label))
-      .attr('stroke', () => color(data.label));
+        .enter()
+        .append('rect')
+        .attr('data-label', data.label)
+        .attr('fill', () => color(data.label))
+        .attr('stroke', () => color(data.label));
 
       self.updateBars(bars);
 
@@ -157,10 +176,10 @@ export function VislibVisualizationsColumnChartProvider(Private) {
 
       // update
       bars
-      .attr('x', isHorizontal ? x : y)
-      .attr('width', isHorizontal ? widthFunc : heightFunc)
-      .attr('y', isHorizontal ? y : x)
-      .attr('height', isHorizontal ? heightFunc : widthFunc);
+        .attr('x', isHorizontal ? x : y)
+        .attr('width', isHorizontal ? widthFunc : heightFunc)
+        .attr('y', isHorizontal ? y : x)
+        .attr('height', isHorizontal ? heightFunc : widthFunc);
 
       return bars;
     }
@@ -222,10 +241,10 @@ export function VislibVisualizationsColumnChartProvider(Private) {
 
       // update
       bars
-      .attr('x', isHorizontal ? x : y)
-      .attr('width', isHorizontal ? widthFunc : heightFunc)
-      .attr('y', isHorizontal ? y : x)
-      .attr('height', isHorizontal ? heightFunc : widthFunc);
+        .attr('x', isHorizontal ? x : y)
+        .attr('width', isHorizontal ? widthFunc : heightFunc)
+        .attr('y', isHorizontal ? y : x)
+        .attr('height', isHorizontal ? heightFunc : widthFunc);
 
       return bars;
     }

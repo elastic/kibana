@@ -1,0 +1,27 @@
+<div ng-if="card.existsInDocs === true" class="card-contents">
+  <div ng-if="card.stats.examples.length > 0" class="stats euiText">
+    <div class="stat"><ng-pluralize count="card.stats.examples.length" when="{'1':'value', 'other':'examples'}">examples</ng-pluralize></div>
+    <div ng-repeat="example in card.stats.examples">
+      {{ example }}
+    </div>
+  </div>
+<div ng-if="card.stats.examples.length === 0" class="not-exist-message">
+  <div>
+    <p>
+      <i class="fa fa-exclamation-triangle" aria-hidden="true"></i> No examples were obtained for this field.
+    </p>
+    <p>
+      This field was not present in the <span class="text-code">_source</span>
+      field of documents queried.
+    </p>
+    <p>
+      It may be populated, for example, using a
+      <span class="text-code">copy_to</span> parameter in the document mapping,
+      or be pruned from the <span class="text-code">_source</span> field afer
+      indexing through the use of <span class="text-code">includes</span> and
+      <span class="text-code">excludes</span> parameters.
+    </p>
+  </div>
+</div>
+
+</div>

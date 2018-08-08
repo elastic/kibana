@@ -1,0 +1,27 @@
+{
+  "body": {
+    "error": {
+      "root_cause": [
+        {
+          "type": "index_not_found_exception",
+          "reason": "no such index",
+          "index_uuid": "_na_",
+          "resource.type": "index_or_alias",
+          "resource.id": "t",
+          "index": "t"
+        }
+      ],
+      "type": "transport_exception",
+      "reason": "unable to communicate with remote cluster [cluster_one]",
+      "caused_by": {
+        "type": "index_not_found_exception",
+        "reason": "no such index",
+        "index_uuid": "_na_",
+        "resource.type": "index_or_alias",
+        "resource.id": "t",
+        "index": "t"
+      }
+    }
+  },
+  "status": 500
+}

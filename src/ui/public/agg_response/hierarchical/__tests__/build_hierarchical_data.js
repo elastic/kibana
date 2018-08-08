@@ -1,12 +1,31 @@
+/*
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
 
 import _ from 'lodash';
 import fixtures from 'fixtures/fake_hierarchical_data';
 import sinon from 'sinon';
 import expect from 'expect.js';
 import ngMock from 'ng_mock';
-import { VisProvider } from 'ui/vis';
+import { VisProvider } from '../../../vis';
 import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
-import { BuildHierarchicalDataProvider } from 'ui/agg_response/hierarchical/build_hierarchical_data';
+import { BuildHierarchicalDataProvider } from '../build_hierarchical_data';
 
 let Vis;
 let Notifier;
@@ -14,7 +33,7 @@ let indexPattern;
 let buildHierarchicalData;
 
 describe('buildHierarchicalData', function () {
-  const sandbox = sinon.sandbox.create();
+  const sandbox = sinon.createSandbox();
 
   beforeEach(ngMock.module('kibana'));
   beforeEach(ngMock.inject(function (Private, $injector) {
@@ -47,7 +66,7 @@ describe('buildHierarchicalData', function () {
     });
 
     it('should set the slices with one child to a consistent label', function () {
-      const checkLabel = 'Count';
+      const checkLabel = 'Average bytes';
       expect(results).to.have.property('slices');
       expect(results.slices).to.have.property('children');
       expect(results.slices.children).to.have.length(1);

@@ -1,0 +1,53 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License;
+ * you may not use this file except in compliance with the Elastic License.
+ */
+
+import { get, pick } from 'lodash';
+import { mapNodesInfo } from './map_nodes_info';
+import { mapNodesMetrics } from './map_nodes_metrics';
+import { LISTING_METRICS_NAMES } from './nodes_listing_metrics';
+
+/*
+ * Process the response from the get_nodes query
+ * @param {Object} response: response data from get_nodes
+ * @param {Object} clusterStats: cluster stats from cluster state document
+ * @param {Object} shardStats: per-node information about shards
+ * @param {Object} timeOptions: min, max, and bucketSize needed for date histogram creation
+ * @return {Array} node info combined with metrics for each node
+ */
+export function handleResponse(response, clusterStats, shardStats, timeOptions = {}) {
+  if (!get(response, 'hits.total')) {
+    return [];
+  }
+
+  const nodeHits = get(response, 'hits.hits', []);
+  const nodesInfo = mapNodesInfo(nodeHits, clusterStats, shardStats);
+
+  /*
+   * Every node bucket is an object with a field for nodeId and fields for
+   * metric buckets. This builds an object that has every nodeId as a property,
+   * with a sub-object for all the metrics buckets
+   */
+  const nodeBuckets = get(response, 'aggregations.nodes.buckets', []);
+  const metricsForNodes = nodeBuckets.reduce((accum, { key: nodeId, ...allAggBuckets }) => {
+    return {
+      ...accum,
+      [nodeId]: pick(allAggBuckets, LISTING_METRICS_NAMES) // "metrics" are just the date histogram aggs
+    };
+  }, {});
+  const nodesMetrics = mapNodesMetrics(metricsForNodes, nodesInfo, timeOptions); // summarize the metrics of online nodes
+
+  const nodes = [];
+  // nodesInfo is the source of truth for the nodeIds, where nodesMetrics will lack metrics for offline nodes
+  Object.keys(nodesInfo).forEach(nodeId => {
+    nodes.push({
+      ...nodesInfo[nodeId],
+      ...nodesMetrics[nodeId],
+      resolver: nodeId,
+    });
+  });
+
+  return nodes;
+}

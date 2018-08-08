@@ -1,0 +1,21 @@
+{
+  "name": "@kbn/datemath",
+  "version": "5.0.0",
+  "description": "elasticsearch datemath parser, used in kibana",
+  "license": "Apache-2.0",
+  "private": true,
+  "main": "target/index.js",
+  "scripts": {
+    "build": "babel src --out-dir target",
+    "kbn:bootstrap": "yarn build",
+    "kbn:watch": "yarn build --watch"
+  },
+  "devDependencies": {
+    "babel-cli": "^6.26.0",
+    "babel-plugin-add-module-exports": "^0.2.1",
+    "babel-preset-env": "^1.6.1"
+  },
+  "dependencies": {
+    "moment": "^2.13.0"
+  }
+}

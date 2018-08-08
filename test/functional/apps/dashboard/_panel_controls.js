@@ -1,3 +1,22 @@
+/*
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
 import expect from 'expect.js';
 
 import { PIE_CHART_VIS_NAME } from '../../page_objects/dashboard_page';
@@ -6,9 +25,10 @@ import {
 } from '../../../../src/core_plugins/kibana/public/visualize/visualize_constants';
 
 export default function ({ getService, getPageObjects }) {
-  const testSubjects = getService('testSubjects');
   const kibanaServer = getService('kibanaServer');
   const remote = getService('remote');
+  const dashboardPanelActions = getService('dashboardPanelActions');
+  const dashboardAddPanel = getService('dashboardAddPanel');
   const PageObjects = getPageObjects(['dashboard', 'header', 'visualize', 'discover']);
   const dashboardName = 'Dashboard Panel Controls Test';
 
@@ -31,27 +51,32 @@ export default function ({ getService, getPageObjects }) {
     });
 
     describe('panel edit controls', function () {
-      before(async() => {
+      before(async () => {
         await PageObjects.dashboard.clickNewDashboard();
-        await PageObjects.dashboard.setTimepickerInDataRange();
-        await PageObjects.dashboard.addVisualization(PIE_CHART_VIS_NAME);
+        await PageObjects.dashboard.setTimepickerInHistoricalDataRange();
+        await dashboardAddPanel.addVisualization(PIE_CHART_VIS_NAME);
       });
 
       it('are hidden in view mode', async function () {
         await PageObjects.dashboard.saveDashboard(dashboardName);
-        await PageObjects.header.clickToastOK();
-        const panelToggleMenu = await testSubjects.exists('dashboardPanelToggleMenuIcon');
-        expect(panelToggleMenu).to.equal(false);
+
+        await dashboardPanelActions.openContextMenu();
+        const editLinkExists = await dashboardPanelActions.editPanelActionExists();
+        const removeExists = await dashboardPanelActions.removePanelActionExists();
+
+        expect(editLinkExists).to.equal(false);
+        expect(removeExists).to.equal(false);
       });
 
       it('are shown in edit mode', async function () {
         await PageObjects.dashboard.clickEdit();
 
-        const panelToggleMenu = await testSubjects.exists('dashboardPanelToggleMenuIcon');
-        expect(panelToggleMenu).to.equal(true);
-        await testSubjects.click('dashboardPanelToggleMenuIcon');
-        const editLinkExists = await testSubjects.exists('dashboardPanelEditLink');
-        const removeExists = await testSubjects.exists('dashboardPanelRemoveIcon');
+        const isContextMenuIconVisible = await dashboardPanelActions.isContextMenuIconVisible();
+        expect(isContextMenuIconVisible).to.equal(true);
+        await dashboardPanelActions.openContextMenu();
+
+        const editLinkExists = await dashboardPanelActions.editPanelActionExists();
+        const removeExists = await dashboardPanelActions.removePanelActionExists();
 
         expect(editLinkExists).to.equal(true);
         expect(removeExists).to.equal(true);
@@ -59,53 +84,53 @@ export default function ({ getService, getPageObjects }) {
 
       // Based off an actual bug encountered in a PR where a hard refresh in edit mode did not show the edit mode
       // controls.
-      it ('are shown in edit mode after a hard refresh', async () => {
+      it('are shown in edit mode after a hard refresh', async () => {
         const currentUrl = await remote.getCurrentUrl();
         // the second parameter of true will include the timestamp in the url and trigger a hard refresh.
         await remote.get(currentUrl.toString(), true);
+        await PageObjects.header.waitUntilLoadingHasFinished();
 
-        await PageObjects.dashboard.showPanelEditControlsDropdownMenu();
-        const editLinkExists = await testSubjects.exists('dashboardPanelEditLink');
-        const removeExists = await testSubjects.exists('dashboardPanelRemoveIcon');
-
+        await dashboardPanelActions.openContextMenu();
+        const editLinkExists = await dashboardPanelActions.editPanelActionExists();
         expect(editLinkExists).to.equal(true);
+
+        const removeExists = await dashboardPanelActions.removePanelActionExists();
         expect(removeExists).to.equal(true);
 
         // Get rid of the timestamp in the url.
         await remote.get(currentUrl.toString(), false);
       });
 
-
       describe('on an expanded panel', function () {
         it('are hidden in view mode', async function () {
           await PageObjects.dashboard.saveDashboard(dashboardName);
-          await PageObjects.header.clickToastOK();
-          await PageObjects.dashboard.toggleExpandPanel();
+          await dashboardPanelActions.toggleExpandPanel();
 
-          const panelToggleMenu = await testSubjects.exists('dashboardPanelToggleMenuIcon');
-          expect(panelToggleMenu).to.equal(false);
+          await dashboardPanelActions.openContextMenu();
+          const editLinkExists = await dashboardPanelActions.editPanelActionExists();
+          const removeExists = await dashboardPanelActions.removePanelActionExists();
+
+          expect(editLinkExists).to.equal(false);
+          expect(removeExists).to.equal(false);
         });
 
         it('in edit mode hides remove icons ', async function () {
           await PageObjects.dashboard.clickEdit();
-
-          const panelToggleMenu = await testSubjects.exists('dashboardPanelToggleMenuIcon');
-          expect(panelToggleMenu).to.equal(true);
-          await testSubjects.click('dashboardPanelToggleMenuIcon');
-          const editLinkExists = await testSubjects.exists('dashboardPanelEditLink');
-          const removeExists = await testSubjects.exists('dashboardPanelRemoveIcon');
+          await dashboardPanelActions.openContextMenu();
+          const editLinkExists = await dashboardPanelActions.editPanelActionExists();
+          const removeExists = await dashboardPanelActions.removePanelActionExists();
 
           expect(editLinkExists).to.equal(true);
           expect(removeExists).to.equal(false);
 
-          await PageObjects.dashboard.toggleExpandPanel();
+          await dashboardPanelActions.toggleExpandPanel();
         });
       });
 
       describe('visualization object edit menu', () => {
         it('opens a visualization when edit link is clicked', async () => {
-          await testSubjects.click('dashboardPanelToggleMenuIcon');
-          await PageObjects.dashboard.clickDashboardPanelEditLink();
+          await dashboardPanelActions.openContextMenu();
+          await dashboardPanelActions.clickEdit();
           await PageObjects.header.waitUntilLoadingHasFinished();
           const currentUrl = await remote.getCurrentUrl();
           expect(currentUrl).to.contain(VisualizeConstants.EDIT_PATH);
@@ -114,7 +139,7 @@ export default function ({ getService, getPageObjects }) {
         it('deletes the visualization when delete link is clicked', async () => {
           await PageObjects.header.clickDashboard();
           await PageObjects.header.waitUntilLoadingHasFinished();
-          await PageObjects.dashboard.clickDashboardPanelRemoveIcon();
+          await dashboardPanelActions.removePanel();
 
           const panelCount = await PageObjects.dashboard.getPanelCount();
           expect(panelCount).to.be(0);
@@ -127,16 +152,15 @@ export default function ({ getService, getPageObjects }) {
           await PageObjects.discover.clickFieldListItemAdd('bytes');
           await PageObjects.discover.saveSearch('my search');
           await PageObjects.header.waitUntilLoadingHasFinished();
-          await PageObjects.header.clickToastOK();
           await PageObjects.header.clickDashboard();
-          await PageObjects.dashboard.addSavedSearch('my search');
+          await dashboardAddPanel.addSavedSearch('my search');
 
           const panelCount = await PageObjects.dashboard.getPanelCount();
           expect(panelCount).to.be(1);
         });
 
         it('opens a saved search when edit link is clicked', async () => {
-          await PageObjects.dashboard.clickDashboardPanelEditLink();
+          await dashboardPanelActions.clickEdit();
           await PageObjects.header.waitUntilLoadingHasFinished();
           const queryName = await PageObjects.discover.getCurrentQueryName();
           expect(queryName).to.be('my search');
@@ -145,7 +169,7 @@ export default function ({ getService, getPageObjects }) {
         it('deletes the saved search when delete link is clicked', async () => {
           await PageObjects.header.clickDashboard();
           await PageObjects.header.waitUntilLoadingHasFinished();
-          await PageObjects.dashboard.clickDashboardPanelRemoveIcon();
+          await dashboardPanelActions.removePanel();
 
           const panelCount = await PageObjects.dashboard.getPanelCount();
           expect(panelCount).to.be(0);
@@ -157,8 +181,8 @@ export default function ({ getService, getPageObjects }) {
     describe('panel expand control', function () {
       it('shown in edit mode', async function () {
         await PageObjects.dashboard.gotoDashboardEditMode(dashboardName);
-        await testSubjects.click('dashboardPanelToggleMenuIcon');
-        const expandExists = await testSubjects.exists('dashboardPanelExpandIcon');
+        await dashboardPanelActions.openContextMenu();
+        const expandExists = await dashboardPanelActions.toggleExpandActionExists();
         expect(expandExists).to.equal(true);
       });
     });

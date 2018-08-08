@@ -1,0 +1,1 @@
+{"took":0,"timed_out":false,"_shards":{"total":5,"successful":5,"skipped":0,"failed":0},"hits":{"total":32017,"max_score":0,"hits":[]},"aggregations":{"earliest":{"value":-252464400000,"value_as_string":"1961-12-31T23:00:00.000Z"},"latest":{"value":1419894000000,"value_as_string":"2014-12-29T23:00:00.000Z"}}}

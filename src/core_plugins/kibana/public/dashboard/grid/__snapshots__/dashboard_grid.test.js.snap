@@ -22,19 +22,23 @@ exports[`renders DashboardGrid 1`] = `
     ]
   }
   onLayoutChange={[Function]}
+  useMargins={true}
 >
   <div
     className=""
+    key="1"
+    style={
+      Object {
+        "zIndex": "auto",
+      }
+    }
   >
     <Connect(DashboardPanel)
-      embeddableHandler={
+      embeddableFactory={
         Object {
-          "getEditPath": [Function],
-          "getTitleFor": [Function],
-          "render": [Function],
+          "create": [MockFunction],
         }
       }
-      getContainerApi={[Function]}
       onPanelBlurred={[Function]}
       onPanelFocused={[Function]}
       panelId="1"
@@ -42,16 +46,19 @@ exports[`renders DashboardGrid 1`] = `
   </div>
   <div
     className=""
+    key="2"
+    style={
+      Object {
+        "zIndex": "auto",
+      }
+    }
   >
     <Connect(DashboardPanel)
-      embeddableHandler={
+      embeddableFactory={
         Object {
-          "getEditPath": [Function],
-          "getTitleFor": [Function],
-          "render": [Function],
+          "create": [MockFunction],
         }
       }
-      getContainerApi={[Function]}
       onPanelBlurred={[Function]}
       onPanelFocused={[Function]}
       panelId="2"
@@ -65,5 +72,6 @@ exports[`renders DashboardGrid with no visualizations 1`] = `
   isViewMode={false}
   layout={Array []}
   onLayoutChange={[Function]}
+  useMargins={true}
 />
 `;

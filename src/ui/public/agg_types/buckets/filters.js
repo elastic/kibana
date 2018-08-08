@@ -1,52 +1,70 @@
+/*
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
 import _ from 'lodash';
 import angular from 'angular';
-import { luceneStringToDsl } from '../../courier/data_source/build_query/lucene_string_to_dsl.js';
 
-import { AggTypesBucketsBucketAggTypeProvider } from 'ui/agg_types/buckets/_bucket_agg_type';
-import { AggTypesBucketsCreateFilterFiltersProvider } from 'ui/agg_types/buckets/create_filter/filters';
-import { DecorateQueryProvider } from 'ui/courier/data_source/_decorate_query';
-import filtersTemplate from 'ui/agg_types/controls/filters.html';
+import { BucketAggType } from './_bucket_agg_type';
+import { createFilterFilters } from './create_filter/filters';
+import { decorateQuery, luceneStringToDsl } from '../../courier';
+import filtersTemplate from '../controls/filters.html';
 
-export function AggTypesBucketsFiltersProvider(Private, Notifier) {
-  const BucketAggType = Private(AggTypesBucketsBucketAggTypeProvider);
-  const createFilter = Private(AggTypesBucketsCreateFilterFiltersProvider);
-  const decorateQuery = Private(DecorateQueryProvider);
-  const notif = new Notifier({ location: 'Filters Agg' });
+export const filtersBucketAgg = new BucketAggType({
+  name: 'filters',
+  title: 'Filters',
+  createFilter: createFilterFilters,
+  customLabels: false,
+  params: [
+    {
+      name: 'filters',
+      editor: filtersTemplate,
+      default: [ { input: {}, label: '' } ],
+      write: function (aggConfig, output) {
+        const inFilters = aggConfig.params.filters;
+        if (!_.size(inFilters)) return;
 
-  return new BucketAggType({
-    name: 'filters',
-    title: 'Filters',
-    createFilter: createFilter,
-    customLabels: false,
-    params: [
-      {
-        name: 'filters',
-        editor: filtersTemplate,
-        default: [ { input: {}, label: '' } ],
-        write: function (aggConfig, output) {
-          const inFilters = aggConfig.params.filters;
-          if (!_.size(inFilters)) return;
+        const outFilters = _.transform(inFilters, function (filters, filter) {
+          const input = _.cloneDeep(filter.input);
 
-          const outFilters = _.transform(inFilters, function (filters, filter) {
-            const input = _.cloneDeep(filter.input);
-            if (!input) return notif.log('malformed filter agg params, missing "input" query');
+          if (!input) {
+            console.log('malformed filter agg params, missing "input" query'); // eslint-disable-line no-console
+            return;
+          }
 
-            const query = input.query = luceneStringToDsl(input.query);
-            if (!query) return notif.log('malformed filter agg params, missing "query" on input');
+          const query = input.query = luceneStringToDsl(input.query);
+          if (!query) {
+            console.log('malformed filter agg params, missing "query" on input'); // eslint-disable-line no-console
+            return;
+          }
 
-            decorateQuery(query);
+          decorateQuery(query);
 
-            const matchAllLabel = (filter.input.query === '' && _.has(query, 'match_all')) ? '*' : '';
-            const label = filter.label || matchAllLabel || _.get(query, 'query_string.query') || angular.toJson(query);
-            filters[label] = input;
-          }, {});
+          const matchAllLabel = (filter.input.query === '' && _.has(query, 'match_all')) ? '*' : '';
+          const label = filter.label || matchAllLabel || _.get(query, 'query_string.query') || angular.toJson(query);
+          filters[label] = input;
+        }, {});
 
-          if (!_.size(outFilters)) return;
+        if (!_.size(outFilters)) return;
 
-          const params = output.params || (output.params = {});
-          params.filters = outFilters;
-        }
+        const params = output.params || (output.params = {});
+        params.filters = outFilters;
       }
-    ]
-  });
-}
+    }
+  ]
+});

@@ -1,3 +1,22 @@
+/*
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
 import _ from 'lodash';
 
 function baseTickFormatter(value, axis) {
@@ -18,44 +37,26 @@ function baseTickFormatter(value, axis) {
   return formatted;
 }
 
+function unitFormatter(divisor, units) {
+  return (val) => {
+    let index = 0;
+    const isNegative = val < 0;
+    val = Math.abs(val);
+    while (val >= divisor && index < units.length) {
+      val /= divisor;
+      index++;
+    }
+    const value = Math.round(val * 100) / 100 * (isNegative ? -1 : 1);
+    return `${value}${units[index]}`;
+  };
+}
+
 export default function tickFormatters() {
   const formatters =  {
-    'bits': function (val) {
-      const labels = ['b', 'kb', 'mb', 'gb', 'tb', 'pb'];
-      let index = 0;
-      while (val >= 1000 && index < labels.length) {
-        val /= 1000;
-        index++;
-      }
-      return (Math.round(val * 100) / 100) + labels[index];
-    },
-    'bits/s': function (val) {
-      const labels = ['b/s', 'kb/s', 'mb/s', 'gb/s', 'tb/s', 'pb/s'];
-      let index = 0;
-      while (val >= 1000 && index < labels.length) {
-        val /= 1000;
-        index++;
-      }
-      return (Math.round(val * 100) / 100) + labels[index];
-    },
-    'bytes': function (val) {
-      const labels = ['B', 'KB', 'MB', 'GB', 'TB', 'PB'];
-      let index = 0;
-      while (val >= 1024 && index < labels.length) {
-        val /= 1024;
-        index++;
-      }
-      return (Math.round(val * 100) / 100) + labels[index];
-    },
-    'bytes/s': function (val) {
-      const labels = ['B/s', 'KB/s', 'MB/s', 'GB/s', 'TB/s', 'PB/s'];
-      let index = 0;
-      while (val >= 1024 && index < labels.length) {
-        val /= 1024;
-        index++;
-      }
-      return (Math.round(val * 100) / 100) + labels[index];
-    },
+    'bits': unitFormatter(1000, ['b', 'kb', 'mb', 'gb', 'tb', 'pb']),
+    'bits/s': unitFormatter(1000, ['b/s', 'kb/s', 'mb/s', 'gb/s', 'tb/s', 'pb/s']),
+    'bytes': unitFormatter(1024, ['B', 'KB', 'MB', 'GB', 'TB', 'PB']),
+    'bytes/s': unitFormatter(1024, ['B/s', 'KB/s', 'MB/s', 'GB/s', 'TB/s', 'PB/s']),
     'currency': function (val, axis) {
       return val.toLocaleString('en', { style: 'currency', currency: axis.options.units.prefix || 'USD' });
     },

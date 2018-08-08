@@ -1,3 +1,22 @@
+/*
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
 import _ from 'lodash';
 import { FilterManager } from './filter_manager.js';
 import { buildRangeFilter } from 'ui/filter_manager/lib/range';
@@ -6,7 +25,7 @@ import { buildRangeFilter } from 'ui/filter_manager/lib/range';
 function toRange(sliderValue) {
   return {
     gte: sliderValue.min,
-    lt: sliderValue.max
+    lte: sliderValue.max
   };
 }
 
@@ -36,41 +55,28 @@ export class RangeFilterManager extends FilterManager {
    * @return {object} range filter
    */
   createFilter(value) {
-    return buildRangeFilter(
+    const newFilter = buildRangeFilter(
       this.indexPattern.fields.byName[this.fieldName],
       toRange(value),
       this.indexPattern);
-  }
-
-  findFilters() {
-    const kbnFilters = _.flatten([this.queryFilter.getAppFilters(), this.queryFilter.getGlobalFilters()]);
-    return kbnFilters.filter((kbnFilter) => {
-      if (_.has(kbnFilter, 'script')
-        && _.get(kbnFilter, 'meta.index') === this.indexPattern.id
-        && _.get(kbnFilter, 'meta.field') === this.fieldName) {
-        //filter is a scripted filter for this index/field
-        return true;
-      } else if (_.has(kbnFilter, ['range', this.fieldName]) && _.get(kbnFilter, 'meta.index') === this.indexPattern.id) {
-        //filter is a match filter for this index/field
-        return true;
-      }
-      return false;
-    });
+    newFilter.meta.controlledBy = this.controlId;
+    return newFilter;
   }
 
   getValueFromFilterBar() {
     const kbnFilters = this.findFilters();
     if (kbnFilters.length === 0) {
-      return this.getUnsetValue();
-    } else {
-      let range = null;
-      if (_.has(kbnFilters[0], 'script')) {
-        range = _.get(kbnFilters[0], 'script.script.params');
-      } else {
-        range = _.get(kbnFilters[0], ['range', this.fieldName]);
-      }
-
-      return fromRange(range);
+      return;
     }
+
+    let range = null;
+    if (_.has(kbnFilters[0], 'script')) {
+      range = _.get(kbnFilters[0], 'script.script.params');
+    } else {
+      range = _.get(kbnFilters[0], ['range', this.fieldName]);
+    }
+
+    return fromRange(range);
+
   }
 }

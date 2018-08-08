@@ -1,0 +1,31 @@
+[[xpack-monitoring]]
+= Monitoring the Elastic Stack
+
+[partintro]
+--
+The {monitoring} components enable you to easily monitor the Elastic Stack
+from {kibana-ref}/introduction.html[Kibana].
+You can view health and performance data for {es}, Logstash, and {kib} in real
+time, as well as analyze past performance.
+
+A monitoring agent runs on each {es}, {kib}, and Logstash instance to collect
+and index metrics.
+
+By default, metrics are indexed within the cluster you are monitoring.
+Setting up a dedicated monitoring cluster ensures you can access historical
+monitoring data even if the cluster you're
+monitoring goes down. It also enables you to monitor multiple clusters
+from a central location.
+
+When you use a dedicated monitoring cluster, the metrics collected by the
+Logstash and Kibana monitoring agents are shipped to the Elasticsearch
+cluster you're monitoring, which then forwards all of the metrics to
+the monitoring cluster.
+
+// &nbsp;
+
+// image:monitoring-architecture.png["Monitoring Architecture",link="images/monitoring-architecture.png"]
+
+--
+
+include::getting-started.asciidoc[]

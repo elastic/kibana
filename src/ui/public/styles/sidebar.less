@@ -38,6 +38,17 @@
       font-size: @sidebar-item-font-size;
       border-top: solid 1px transparent;
       border-bottom: solid 1px transparent;
+      line-height: normal;
+
+      label {
+        margin-bottom: 5px;
+        font-weight: 700;
+        display: block;
+      }
+
+      label[for] {
+        cursor: pointer;
+      }
 
       &.active {
         background-color: darken(@globalColorLightestGray, 10%) !important;
@@ -86,6 +97,7 @@
 
       .sidebar-list-header-label {
         font-size: 14px;
+        line-height: 1.5;
       }
     }
 

@@ -1,0 +1,22 @@
+{
+  "indices.exists_type": {
+    "url_params": {
+      "ignore_unavailable": "__flag__",
+      "allow_no_indices": "__flag__",
+      "expand_wildcards": [
+        "open",
+        "closed",
+        "none",
+        "all"
+      ],
+      "local": "__flag__"
+    },
+    "methods": [
+      "HEAD"
+    ],
+    "patterns": [
+      "{indices}/_mapping/{type}"
+    ],
+    "documentation": "http://www.elastic.co/guide/en/elasticsearch/reference/master/indices-types-exists.html"
+  }
+}

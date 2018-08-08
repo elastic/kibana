@@ -1,3 +1,22 @@
+/*
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
 import { expect } from 'chai';
 import getSplits from '../../helpers/get_splits';
 
@@ -8,7 +27,8 @@ describe('getSplits(resp, panel, series)', () => {
       aggregations: {
         SERIES: {
           timeseries: { buckets: [] },
-          SIBAGG: { value: 1 }
+          SIBAGG: { value: 1 },
+          meta: { bucketSize: 10 }
         }
       }
     };
@@ -26,6 +46,7 @@ describe('getSplits(resp, panel, series)', () => {
       {
         id: 'SERIES',
         label: 'Overall Average of Average of cpu',
+        meta: { bucketSize: 10 },
         color: '#FF0000',
         timeseries: { buckets: [] },
         SIBAGG: { value: 1 }
@@ -48,7 +69,8 @@ describe('getSplits(resp, panel, series)', () => {
               timeseries: { buckets: [] },
               SIBAGG: { value: 2 }
             }
-          ]
+          ],
+          meta: { bucketSize: 10 }
         }
       }
     };
@@ -69,6 +91,7 @@ describe('getSplits(resp, panel, series)', () => {
         id: 'SERIES:example-01',
         key: 'example-01',
         label: 'example-01',
+        meta: { bucketSize: 10 },
         color: '#FF0000',
         timeseries: { buckets: [] },
         SIBAGG: { value: 1 }
@@ -77,6 +100,7 @@ describe('getSplits(resp, panel, series)', () => {
         id: 'SERIES:example-02',
         key: 'example-02',
         label: 'example-02',
+        meta: { bucketSize: 10 },
         color: '#FF0000',
         timeseries: { buckets: [] },
         SIBAGG: { value: 2 }
@@ -99,7 +123,8 @@ describe('getSplits(resp, panel, series)', () => {
               timeseries: { buckets: [] },
               SIBAGG: { value: 2 }
             }
-          ]
+          ],
+          meta: { bucketSize: 10 }
         }
       }
     };
@@ -120,6 +145,7 @@ describe('getSplits(resp, panel, series)', () => {
         id: 'SERIES:example-01',
         key: 'example-01',
         label: 'example-01',
+        meta: { bucketSize: 10 },
         color: '#FF0000',
         timeseries: { buckets: [] },
         SIBAGG: { value: 1 }
@@ -128,6 +154,7 @@ describe('getSplits(resp, panel, series)', () => {
         id: 'SERIES:example-02',
         key: 'example-02',
         label: 'example-02',
+        meta: { bucketSize: 10 },
         color: '#930000',
         timeseries: { buckets: [] },
         SIBAGG: { value: 2 }
@@ -146,7 +173,8 @@ describe('getSplits(resp, panel, series)', () => {
             'filter-2': {
               timeseries: { buckets: [] },
             }
-          }
+          },
+          meta: { bucketSize: 10 }
         }
       }
     };
@@ -168,6 +196,7 @@ describe('getSplits(resp, panel, series)', () => {
         id: 'SERIES:filter-1',
         key: 'filter-1',
         label: '200s',
+        meta: { bucketSize: 10 },
         color: '#F00',
         timeseries: { buckets: [] },
       },
@@ -175,6 +204,7 @@ describe('getSplits(resp, panel, series)', () => {
         id: 'SERIES:filter-2',
         key: 'filter-2',
         label: '300s',
+        meta: { bucketSize: 10 },
         color: '#0F0',
         timeseries: { buckets: [] },
       }

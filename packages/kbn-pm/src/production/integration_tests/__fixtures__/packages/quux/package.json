@@ -1,0 +1,17 @@
+{
+  "name": "@elastic/quux",
+  "version": "1.0.0",
+  "private": true,
+  "main": "./quux.js",
+  "devDependencies": {
+    "shx": "^0.2.2"
+  },
+  "scripts": {
+    "build": "shx mkdir build; shx cp quux.js build/index.js"
+  },
+  "kibana": {
+    "build": {
+      "intermediateBuildDirectory": "build"
+    }
+  }
+}

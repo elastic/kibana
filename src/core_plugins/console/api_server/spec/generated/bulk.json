@@ -1,0 +1,30 @@
+{
+  "bulk": {
+    "url_params": {
+      "include_type_name": "",
+      "wait_for_active_shards": "",
+      "refresh": [
+        "true",
+        "false",
+        "wait_for"
+      ],
+      "routing": "",
+      "timeout": "",
+      "type": "",
+      "_source": [],
+      "_source_exclude": [],
+      "_source_include": [],
+      "pipeline": ""
+    },
+    "methods": [
+      "POST",
+      "PUT"
+    ],
+    "patterns": [
+      "_bulk",
+      "{indices}/_bulk",
+      "{indices}/{type}/_bulk"
+    ],
+    "documentation": "http://www.elastic.co/guide/en/elasticsearch/reference/master/docs-bulk.html"
+  }
+}

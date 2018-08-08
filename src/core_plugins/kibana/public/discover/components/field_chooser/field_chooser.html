@@ -6,7 +6,13 @@
       on-select="setIndexPattern($item)"
     >
       <ui-select-match>
-        {{$select.selected.get('title')}}
+        <span
+          class="uiSelectMatch--ellipsis"
+          tooltip="{{$select.selected.get('title')}}"
+          tooltip-append-to-body="true"
+        >
+          {{$select.selected.get('title')}}
+        </span>
       </ui-select-match>
       <ui-select-choices repeat="pattern in indexPatternList | filter:$select.search">
         <div ng-bind-html="pattern.get('title') | highlight: $select.search"></div>
@@ -25,8 +31,10 @@
     </div>
   </div>
 
-  <div class="sidebar-list-header">
-    <h3 class="sidebar-list-header-label" id="selected_fields" tabindex="0">Selected Fields</h3>
+  <div class="discover-sidebar-list-header sidebar-list-header" ng-if="fields.length">
+    <h3 class="sidebar-list-header-label" id="selected_fields" tabindex="0">
+      Selected fields
+    </h3>
   </div>
   <ul class="list-unstyled discover-selected-fields" >
     <discover-field
@@ -40,30 +48,41 @@
     </discover-field>
   </ul>
 
-  <div class="sidebar-list-header sidebar-item">
-    <h3 class="sidebar-list-header-label" id="available_fields" tabindex="0">Available Fields
-      <span
-        ng-class="{ 'fa-chevron-right': !showFields, 'fa-chevron-down': showFields }"
-        ng-click="showFields = !showFields"
-        aria-hidden="true"
-        class="fa visible-xs visible-sm pull-right field-collapse-toggle"
-      ></span>
+  <div class="sidebar-list-header sidebar-item euiFlexGroup euiFlexGroup--gutterMedium" ng-if="fields.length">
+    <h3 class="euiFlexItem sidebar-list-header-label" id="available_fields" tabindex="0">
+      Available fields
+    </h3>
 
+    <div class="euiFlexItem euiFlexItem--flexGrowZero">
+      <button
+        ng-click="$parent.showFields = !$parent.showFields"
+        aria-hidden="true"
+        class="kuiButton kuiButton--small visible-xs visible-sm pull-right field-collapse-toggle"
+      >
+        <span
+          aria-hidden="true"
+          class="kuiIcon"
+          ng-class="{ 'fa-chevron-right': !$parent.showFields, 'fa-chevron-down': $parent.showFields }"
+        ></span>
+      </button>
+    </div>
+    <div class="euiFlexItem euiFlexItem--flexGrowZero">
       <button
         type="button"
-        ng-class="{ 'kuiButton--basic': !filter.active, 'kuiButton--primary': filter.active, 'hidden-xs': !showFields, 'hidden-sm': !showFields }"
+        ng-class="{ 'kuiButton--basic': !filter.active, 'kuiButton--primary': filter.active, 'hidden-xs': !$parent.showFields, 'hidden-sm': !$parent.showFields }"
         class="kuiButton kuiButton--small pull-right discover-field-filter-toggle"
-        ng-click="showFilter = !showFilter"
-        aria-label="{{showFilter ? 'Hide' : 'Show'}} field settings"
-        aria-expanded="{{!!showFilter}}"
+        ng-click="$parent.showFilter = !$parent.showFilter"
+        aria-label="{{$parent.showFilter ? 'Hide' : 'Show'}} field settings"
+        aria-expanded="{{!!$parent.showFilter}}"
         aria-controls="discoverFieldFilter"
+        data-test-subj="toggleFieldFilterButton"
       >
         <span aria-hidden="true" class="kuiIcon fa-gear"></span>
       </button>
-    </h3>
+    </div>
   </div>
 
-  <div class="sidebar-item discover-field-details" ng-show="showFilter" id="discoverFieldFilter">
+  <div class="sidebar-item discover-field-details" ng-show="showFilter" id="discoverFieldFilter" data-test-subj="discoverFieldFilter">
     <form role="form">
       <div class="form-group">
         <label for="discoverFieldChooserFilterAggregatable">
@@ -112,7 +131,7 @@
       <div class="form-group">
         <label for="discoverFieldChooserHideMissingFields">
           <input id="discoverFieldChooserHideMissingFields" type="checkbox" ng-model="filter.vals.missing">
-          Hide Missing Fields
+          Hide missing fields
         </label>
       </div>
       <button
@@ -120,7 +139,7 @@
         ng-disabled="!filter.active"
         class="kuiButton kuiButton--danger kuiButton--fullWidth"
       >
-        Reset Filters
+        Reset filters
       </button>
     </form>
   </div>

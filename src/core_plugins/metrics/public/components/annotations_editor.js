@@ -1,3 +1,22 @@
+/*
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 import _ from 'lodash';
@@ -8,7 +27,11 @@ import FieldSelect from './aggs/field_select';
 import uuid from 'uuid';
 import IconSelect from './icon_select';
 import YesNo from './yes_no';
-import { htmlIdGenerator } from 'ui_framework/services';
+
+import {
+  htmlIdGenerator,
+  EuiText,
+} from '@elastic/eui';
 
 function newAnnotation() {
   return {
@@ -33,7 +56,7 @@ class AnnotationsEditor extends Component {
     return (e) => {
       const handleChange = collectionActions.handleChange.bind(null, this.props);
       const part = {};
-      part[name] = _.get(e, 'value', _.get(e, 'target.value'));
+      part[name] = _.get(e, '[0].value', _.get(e, 'target.value'));
       handleChange(_.assign({}, item, part));
     };
   }
@@ -175,12 +198,14 @@ class AnnotationsEditor extends Component {
         .bind(null, this.props, newAnnotation);
       content = (
         <div className="vis_editor__annotations-missing">
-          <p>Click the button below to create an annotation data source.</p>
-          <button
-            className="thor__button-outlined-default large"
-            onClick={handleAdd}
-          >Add Data Source
-          </button>
+          <EuiText>
+            <p>Click the button below to create an annotation data source.</p>
+            <button
+              className="thor__button-outlined-default large"
+              onClick={handleAdd}
+            >Add Data Source
+            </button>
+          </EuiText>
         </div>
       );
     } else {

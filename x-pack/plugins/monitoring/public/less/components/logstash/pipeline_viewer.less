@@ -1,0 +1,114 @@
+@import (reference) '~ui/styles/variables/colors';
+
+monitoring-main[page="pipeline"] {
+  background: @globalColorLightestGray;
+  min-height: 100vh;
+}
+
+.pipelineViewer {
+  max-width: 1000px;
+}
+
+.pipelineViewer__statement {
+  padding-left: 12px;
+}
+
+.pipelineViewer__plugin {
+  margin-left: 4px;
+}
+
+.pipelineViewer__spaceContainer {
+  background-color: white;
+  align-self: stretch;
+  display: flex;
+  // Separates the left border spaces properly
+  border-bottom: solid 2px white;
+}
+
+.pipelineViewer__spacer {
+  width: 12px;
+  align-self: stretch;
+  margin-left: 12px;
+  border-left: 1px @globalColorMediumGray dashed;
+
+  // This allows the border to be flush
+  &:last-child {
+    width: 0px;
+  }
+
+  &:first-child {
+    // Odd number is because of the single pixel border.
+    margin-left: 23px;
+  }
+}
+
+.pipelineViewer__metric {
+  text-align: right;
+
+  &--cpuTime {
+    width: 40px;
+  }
+
+  &--events, &--eventsEmitted {
+    width: 160px;
+  }
+
+  &--eventMillis {
+    width: 80px;
+  }
+}
+
+.pipelineViewer__queueMessage {
+  margin-left: 24px;
+  color: @globalColorDarkGray;
+}
+
+.pipelineViewer__list {
+  .pipelineViewer__listItem {
+    display: flex;
+    min-height: 32px;
+    align-items: center;
+    padding-right: 12px;
+
+    &:nth-child(2n+1) {
+      background: #fafafa;
+    }
+  }
+}
+
+.pipelineViewer__conditional {
+  font-weight: bold;
+}
+
+@media (max-width: 768px) {
+  .pipelineViewer {
+    .pipelineViewer__spacer {
+      border: none;
+    }
+
+    .pipelineViewer__metricFlexItem {
+      margin-bottom: 4px !important;
+    }
+
+    .pipelineViewer__metric {
+      text-align: left;
+      padding-left: 32px;
+    }
+  }
+}
+
+
+.monitoring-summary-status {
+  border-bottom: 1px solid #d4d4d4;
+}
+
+img.lspvDetailDrawerIcon {
+  display: inline;
+  margin: 0 5px 0 0;
+  width: auto;
+  vertical-align: middle;
+}
+
+.lspvDetailDrawerSparklineContainer {
+  width: 7vw;
+}

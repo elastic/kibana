@@ -2,6 +2,7 @@ The `Url` field formatter can take on the following types:
 
 * The *Link* type turn the contents of the field into an URL.
 * The *Image* type can be used to specify an image directory where a specified image is located.
+* The *Audio* type can be used to specify an audio directory where a specified audio file is located.
 
 You can customize either type of URL field formats with templates. A _URL template_ enables you to add specific values
 to a partial URL. Use the string `{{value}}` to add the contents of the field to a fixed URL.
@@ -20,6 +21,8 @@ example, field contents `users/admin` result in the URL template adding `users%2
 
 When the formatter type is set to *Image*, the `{{value}}` template string specifies the name of an image at the
 specified URI.
+
+When the formatter type is set to *Audio*, the `{{value}}` template string specifies the name of an audio file at the specified URI.
 
 In order to pass unescaped values directly to the URL, use the `{{rawValue}}` string.
 

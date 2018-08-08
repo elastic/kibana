@@ -1,10 +1,11 @@
 [[search]]
 == Searching Your Data
 You can search the indices that match the current index pattern by entering
-your search criteria in the Query bar. You can use the Lucene
-https://lucene.apache.org/core/2_9_4/queryparsersyntax.html[
-query syntax], the full JSON-based {ref}/query-dsl.html[Elasticsearch
-Query DSL] or Kuery, an experimental new query language built specifically for Kibana.
+your search criteria in the Query bar. You can use Kibana's standard query language
+(based on Lucene https://lucene.apache.org/core/2_9_4/queryparsersyntax.html[query syntax]) 
+or the full JSON-based {ref}/query-dsl.html[Elasticsearch Query DSL]. Autocomplete 
+and a simplified query syntax are available for the Kibana query language as experimental
+features which you can opt-in to under the options menu in the Query Bar. 
 
 When you submit a search request, the histogram, Documents table, and Fields
 list are updated to reflect the search results. The total number of hits
@@ -21,15 +22,15 @@ the request to Elasticsearch.
 
 [NOTE]
 ===========
-By default, Kibana will accept either the Lucene query syntax or the
-Elasticsearch Query DSL in the Query bar. In order to use the new Kuery
-language you must enable language switching in *Management > Advanced Settings*
-via the `search:queryLanguage:switcher:enable` option. You can also change the 
-default language with the `search:queryLanguage` setting.
+You can opt-in to our experimental query features by default by changing `search:queryLanguage`
+to `kuery` under Advanced Settings.
 ===========
 
 [[lucene-query]]
 === Lucene Query Syntax
+Kibana's query language has historically been based on the Lucene query syntax. The following
+are some tips that can help get you started.
+
 * To perform a free text search, simply enter a text string. For example, if
 you're searching web server logs, you could enter `safari` to search all
 fields for the term `safari`.

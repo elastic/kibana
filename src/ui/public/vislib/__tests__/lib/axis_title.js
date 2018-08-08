@@ -1,13 +1,32 @@
+/*
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
 import d3 from 'd3';
 import _ from 'lodash';
 import $ from 'jquery';
 import ngMock from 'ng_mock';
 import expect from 'expect.js';
-import { VislibLibAxisTitleProvider } from 'ui/vislib/lib/axis/axis_title';
-import { VislibLibAxisConfigProvider } from 'ui/vislib/lib/axis/axis_config';
-import { VislibVisConfigProvider } from 'ui/vislib/lib/vis_config';
-import { VislibLibDataProvider } from 'ui/vislib/lib/data';
-import 'ui/persisted_state';
+import { VislibLibAxisTitleProvider } from '../../lib/axis/axis_title';
+import { VislibLibAxisConfigProvider } from '../../lib/axis/axis_config';
+import { VislibVisConfigProvider } from '../../lib/vis_config';
+import { VislibLibDataProvider } from '../../lib/data';
+import '../../../persisted_state';
 
 describe('Vislib AxisTitle Class Test Suite', function () {
   let AxisTitle;
@@ -93,16 +112,16 @@ describe('Vislib AxisTitle Class Test Suite', function () {
     el.append('div')
       .attr('class', 'axis-wrapper-bottom')
       .append('div')
-        .attr('class', 'axis-title y-axis-title')
-        .style('height', '20px')
-        .style('width', '20px');
+      .attr('class', 'axis-title y-axis-title')
+      .style('height', '20px')
+      .style('width', '20px');
 
     el.append('div')
       .attr('class', 'axis-wrapper-left')
       .append('div')
-        .attr('class', 'axis-title x-axis-title')
-        .style('height', '20px')
-        .style('width', '20px');
+      .attr('class', 'axis-title x-axis-title')
+      .style('height', '20px')
+      .style('width', '20px');
 
 
     dataObj = new Data(data, new PersistedState());

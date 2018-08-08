@@ -1,8 +1,27 @@
+/*
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
 import $ from 'jquery';
 import expect from 'expect.js';
 import simulateKeys from 'test_utils/simulate_keys';
 import ngMock from 'ng_mock';
-import 'ui/number_list';
+import '../../../number_list';
 describe('NumberList directive', function () {
 
 
@@ -66,9 +85,9 @@ describe('NumberList directive', function () {
         function () { return $el.find('input').first(); },
         ['up', 'up', 'up']
       )
-      .then(function () {
-        expect(onlyValidValues()).to.eql([4]);
-      });
+        .then(function () {
+          expect(onlyValidValues()).to.eql([4]);
+        });
     });
 
     it('shift-up increases by 0.1', function () {
@@ -90,9 +109,9 @@ describe('NumberList directive', function () {
         function () { return $el.find('input').first(); },
         seq
       )
-      .then(function () {
-        expect(onlyValidValues()).to.eql([5.1]);
-      });
+        .then(function () {
+          expect(onlyValidValues()).to.eql([5.1]);
+        });
     });
 
     it('down arrow decreases by 1', function () {
@@ -102,9 +121,9 @@ describe('NumberList directive', function () {
         function () { return $el.find('input').first(); },
         ['down', 'down', 'down']
       )
-      .then(function () {
-        expect(onlyValidValues()).to.eql([2]);
-      });
+        .then(function () {
+          expect(onlyValidValues()).to.eql([2]);
+        });
     });
 
     it('shift-down decreases by 0.1', function () {
@@ -126,9 +145,9 @@ describe('NumberList directive', function () {
         function () { return $el.find('input').first(); },
         seq
       )
-      .then(function () {
-        expect(onlyValidValues()).to.eql([4.8]);
-      });
+        .then(function () {
+          expect(onlyValidValues()).to.eql([4.8]);
+        });
     });
 
     it('maintains valid number', function () {
@@ -142,9 +161,9 @@ describe('NumberList directive', function () {
       const getEl = function () { return $el.find('input').eq(1); };
 
       return simulateKeys(getEl, seq)
-      .then(function () {
-        expect(onlyValidValues()).to.eql([9, 10, 13]);
-      });
+        .then(function () {
+          expect(onlyValidValues()).to.eql([9, 10, 13]);
+        });
     });
   });
 });

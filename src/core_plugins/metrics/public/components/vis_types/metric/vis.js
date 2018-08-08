@@ -1,10 +1,29 @@
+/*
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
 import PropTypes from 'prop-types';
 import React from 'react';
 import { visWithSplits } from '../../vis_with_splits';
 import tickFormatter from '../../lib/tick_formatter';
 import _ from 'lodash';
-import Metric from 'plugins/metrics/visualizations/components/metric';
-import getLastValue from 'plugins/metrics/visualizations/lib/get_last_value';
+import Metric from '../../../visualizations/components/metric';
+import getLastValue from '../../../../common/get_last_value';
 import color from 'color';
 
 function getColors(props) {
@@ -14,9 +33,9 @@ function getColors(props) {
   let background;
   if (model.background_color_rules) {
     model.background_color_rules.forEach((rule) => {
-      if (rule.opperator && rule.value != null) {
+      if (rule.operator && rule.value != null) {
         const value = series[0] && getLastValue(series[0].data) || 0;
-        if (_[rule.opperator](value, rule.value)) {
+        if (_[rule.operator](value, rule.value)) {
           background = rule.background_color;
           color = rule.color;
         }

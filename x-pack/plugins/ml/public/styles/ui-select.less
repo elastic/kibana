@@ -1,0 +1,30 @@
+@import (reference) "~ui/styles/variables";
+
+// overriding the style of the ui-select element when disabled. To make it look the same all other standard selects
+
+.ui-select-match {
+  .btn-default[disabled],
+  .btn-default[disabled]:hover,
+  .btn-default[disabled]:focus {
+    background-color: @input-bg-disabled;
+    border-color: @input-bg-disabled;
+    opacity: 1;
+
+    .ui-select-placeholder {
+      color: @kibanaGray1;
+    }
+  }
+ }
+
+ .ui-select-container input[type="search"] {
+   padding-left: 15px;
+   padding-top: 4px;
+  }
+
+.ui-select-container input[type="search"]::placeholder {
+  color: @input-color-placeholder;
+}
+
+.ui-select-container input[type="search"]:focus {
+  box-shadow: none;
+}

@@ -1,0 +1,9 @@
+<button
+  class="kuiTab"
+  ng-class="{ 'kuiTab-isSelected': kbnTabs.isTabSelected(kbnTab.tabId) }"
+  title="{{ kbnTab.title }}"
+  ng-click="kbnTabs.onTabSelect(kbnTab.tabId)"
+  data-test-subj="btnSelectTab-{{ kbnTab.id }}"
+>
+  <div class="kbn-tab-liner" ng-transclude></div>
+</button>

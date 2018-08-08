@@ -1,0 +1,17 @@
+{
+  "name": "@kbn/plugin-generator",
+  "license": "Apache-2.0",
+  "private": true,
+  "version": "1.0.0",
+  "dependencies": {
+    "chalk": "^2.4.1",
+    "dedent": "^0.7.0",
+    "execa": "^0.9.0",
+    "getopts": "^2.0.0",
+    "lodash.camelcase": "^4.3.0",
+    "lodash.kebabcase": "^4.1.1",
+    "lodash.snakecase": "^4.1.1",
+    "lodash.startcase": "^4.4.0",
+    "sao": "^0.22.12"
+  }
+}

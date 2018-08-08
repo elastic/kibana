@@ -1,6 +1,25 @@
+/*
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
 import expect from 'expect.js';
 import ngMock from 'ng_mock';
-import { AggTypesIndexProvider } from 'ui/agg_types/index';
+import { aggTypes } from '../..';
 
 describe('Terms Agg', function () {
   describe('order agg editor UI', function () {
@@ -10,7 +29,7 @@ describe('Terms Agg', function () {
     function init({ responseValueAggs = [], aggParams = {} }) {
       ngMock.module('kibana');
       ngMock.inject(function (Private, $controller, _$rootScope_) {
-        const terms = Private(AggTypesIndexProvider).byName.terms;
+        const terms = aggTypes.byName.terms;
         const orderAggController = terms.params.byName.orderAgg.controller;
 
         $rootScope = _$rootScope_;
@@ -86,7 +105,7 @@ describe('Terms Agg', function () {
       expect($rootScope.agg.params.orderBy).to.be('agg5');
     });
 
-    it('defaults to the _term metric if no agg is compatible', function () {
+    it('defaults to the _key metric if no agg is compatible', function () {
       init({
         responseValueAggs: [
           {
@@ -97,15 +116,15 @@ describe('Terms Agg', function () {
           }
         ]
       });
-      expect($rootScope.agg.params.orderBy).to.be('_term');
+      expect($rootScope.agg.params.orderBy).to.be('_key');
     });
 
-    it('selects _term if there are no metric aggs', function () {
+    it('selects _key if there are no metric aggs', function () {
       init({});
-      expect($rootScope.agg.params.orderBy).to.be('_term');
+      expect($rootScope.agg.params.orderBy).to.be('_key');
     });
 
-    it('selects _term if the selected metric becomes incompatible', function () {
+    it('selects _key if the selected metric becomes incompatible', function () {
       init({
         responseValueAggs: [
           {
@@ -126,7 +145,7 @@ describe('Terms Agg', function () {
         }
       ];
       $rootScope.$digest();
-      expect($rootScope.agg.params.orderBy).to.be('_term');
+      expect($rootScope.agg.params.orderBy).to.be('_key');
     });
 
     it('selects first metric if it is avg', function () {
@@ -144,7 +163,7 @@ describe('Terms Agg', function () {
       expect($rootScope.agg.params.orderBy).to.be('agg1');
     });
 
-    it('selects _term if the first metric is avg_bucket', function () {
+    it('selects _key if the first metric is avg_bucket', function () {
       $rootScope.responseValueAggs = [
         {
           id: 'agg1',
@@ -155,10 +174,10 @@ describe('Terms Agg', function () {
         }
       ];
       $rootScope.$digest();
-      expect($rootScope.agg.params.orderBy).to.be('_term');
+      expect($rootScope.agg.params.orderBy).to.be('_key');
     });
 
-    it('selects _term if the selected metric is removed', function () {
+    it('selects _key if the selected metric is removed', function () {
       init({
         responseValueAggs: [
           {
@@ -172,7 +191,37 @@ describe('Terms Agg', function () {
       expect($rootScope.agg.params.orderBy).to.be('agg1');
       $rootScope.responseValueAggs = [];
       $rootScope.$digest();
-      expect($rootScope.agg.params.orderBy).to.be('_term');
+      expect($rootScope.agg.params.orderBy).to.be('_key');
+    });
+
+    describe('custom field formatter', () => {
+      beforeEach(() => {
+        init({
+          responseValueAggs: [
+            {
+              id: 'agg1',
+              type: {
+                name: 'count'
+              }
+            }
+          ],
+          aggParams: {
+            otherBucketLabel: 'Other',
+            missingBucketLabel: 'Missing'
+          }
+        });
+        $rootScope.$digest();
+      });
+
+      it ('converts __other__ key', () => {
+        const formatter = $rootScope.agg.type.getFormat($rootScope.agg).getConverterFor('text');
+        expect(formatter('__other__')).to.be('Other');
+      });
+
+      it ('converts __missing__ key', () => {
+        const formatter = $rootScope.agg.type.getFormat($rootScope.agg).getConverterFor('text');
+        expect(formatter('__missing__')).to.be('Missing');
+      });
     });
 
     it('adds "custom metric" option');

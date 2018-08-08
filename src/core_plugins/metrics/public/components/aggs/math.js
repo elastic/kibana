@@ -1,4 +1,24 @@
-import React, { Component, PropTypes } from 'react';
+/*
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
+import React, { Component } from 'react';
+import PropTypes from 'prop-types';
 import _ from 'lodash';
 import uuid from 'uuid';
 import AggRow from './agg_row';
@@ -10,12 +30,13 @@ import createTextHandler from '../lib/create_text_handler';
 import Vars from './vars';
 
 class MathAgg extends Component {
-
   componentWillMount() {
     if (!this.props.model.variables) {
-      this.props.onChange(_.assign({}, this.props.model, {
-        variables: [{ id: uuid.v1() }]
-      }));
+      this.props.onChange(
+        _.assign({}, this.props.model, {
+          variables: [{ id: uuid.v1() }],
+        })
+      );
     }
   }
 
@@ -56,8 +77,14 @@ class MathAgg extends Component {
               />
             </div>
             <div className="vis_editor__row_item">
-              <label className="vis_editor__label" htmlFor="mathExpressionInput">Expression</label>
+              <label
+                className="vis_editor__label"
+                htmlFor="mathExpressionInput"
+              >
+                Expression
+              </label>
               <textarea
+                data-test-subj="mathExpression"
                 id="mathExpressionInput"
                 aria-describedby="mathExpressionDescription"
                 className="vis_editor__input-grows-100"
@@ -66,11 +93,21 @@ class MathAgg extends Component {
                 {model.script}
               </textarea>
               <div className="vis_editor__note" id="mathExpressionDescription">
-                This field uses basic math expresions (see <a href="http://mathjs.org/docs/expressions/syntax.html" target="_blank">MathJS</a>) - Variables
-                are keys on the <code>params</code> object, i.e. <code>params.&lt;name&gt;</code> To access all the data use
-                <code>params._all.&lt;name&gt;.values</code> for an array of the values and <code>params._all.&lt;name&gt;.timestamps</code>
-                for an array of the timestamps.  <code>params._timestamp</code> is available for the current bucket&apos;s timestamp
-                and <code>params._index</code> is available for the current bucket&apos;s index.
+                This field uses basic math expressions (see{' '}
+                <a
+                  href="https://github.com/elastic/tinymath/blob/master/docs/functions.md"
+                  target="_blank"
+                >
+                  TinyMath
+                </a>) - Variables are keys on the <code>params</code> object,
+                i.e. <code>params.&lt;name&gt;</code> To access all the data use
+                <code>params._all.&lt;name&gt;.values</code> for an array of the
+                values and <code>params._all.&lt;name&gt;.timestamps</code>
+                for an array of the timestamps. <code>params._timestamp</code>
+                is available for the current bucket&apos;s timestamp,
+                <code>params._index</code> is available for the current
+                bucket&apos;s index, and <code>params._interval</code>s
+                available for the interval in milliseconds.
               </div>
             </div>
           </div>
@@ -78,7 +115,6 @@ class MathAgg extends Component {
       </AggRow>
     );
   }
-
 }
 
 MathAgg.propTypes = {

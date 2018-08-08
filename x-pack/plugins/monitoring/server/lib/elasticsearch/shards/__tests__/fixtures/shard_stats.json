@@ -1,0 +1,439 @@
+{
+  "_shards": {
+    "failed": 0,
+    "skipped": 0,
+    "successful": 1,
+    "total": 1
+  },
+  "aggregations": {
+    "indices": {
+      "buckets": [
+        {
+          "doc_count": 10,
+          "key": ".ml-anomalies-shared",
+          "states": {
+            "buckets": [
+              {
+                "doc_count": 10,
+                "key": "STARTED",
+                "primary": {
+                  "buckets": [
+                    {
+                      "doc_count": 5,
+                      "key": 0,
+                      "key_as_string": "false"
+                    },
+                    {
+                      "doc_count": 5,
+                      "key": 1,
+                      "key_as_string": "true"
+                    }
+                  ],
+                  "doc_count_error_upper_bound": 0,
+                  "sum_other_doc_count": 0
+                }
+              }
+            ],
+            "doc_count_error_upper_bound": 0,
+            "sum_other_doc_count": 0
+          }
+        },
+        {
+          "doc_count": 10,
+          "key": "avocado-tweets-2017.09.14",
+          "states": {
+            "buckets": [
+              {
+                "doc_count": 10,
+                "key": "STARTED",
+                "primary": {
+                  "buckets": [
+                    {
+                      "doc_count": 5,
+                      "key": 0,
+                      "key_as_string": "false"
+                    },
+                    {
+                      "doc_count": 5,
+                      "key": 1,
+                      "key_as_string": "true"
+                    }
+                  ],
+                  "doc_count_error_upper_bound": 0,
+                  "sum_other_doc_count": 0
+                }
+              }
+            ],
+            "doc_count_error_upper_bound": 0,
+            "sum_other_doc_count": 0
+          }
+        },
+        {
+          "doc_count": 10,
+          "key": "climate",
+          "states": {
+            "buckets": [
+              {
+                "doc_count": 10,
+                "key": "STARTED",
+                "primary": {
+                  "buckets": [
+                    {
+                      "doc_count": 5,
+                      "key": 0,
+                      "key_as_string": "false"
+                    },
+                    {
+                      "doc_count": 5,
+                      "key": 1,
+                      "key_as_string": "true"
+                    }
+                  ],
+                  "doc_count_error_upper_bound": 0,
+                  "sum_other_doc_count": 0
+                }
+              }
+            ],
+            "doc_count_error_upper_bound": 0,
+            "sum_other_doc_count": 0
+          }
+        },
+        {
+          "doc_count": 10,
+          "key": "watermelon-tweets-2017.09.14",
+          "states": {
+            "buckets": [
+              {
+                "doc_count": 10,
+                "key": "STARTED",
+                "primary": {
+                  "buckets": [
+                    {
+                      "doc_count": 5,
+                      "key": 0,
+                      "key_as_string": "false"
+                    },
+                    {
+                      "doc_count": 5,
+                      "key": 1,
+                      "key_as_string": "true"
+                    }
+                  ],
+                  "doc_count_error_upper_bound": 0,
+                  "sum_other_doc_count": 0
+                }
+              }
+            ],
+            "doc_count_error_upper_bound": 0,
+            "sum_other_doc_count": 0
+          }
+        },
+        {
+          "doc_count": 2,
+          "key": ".kibana",
+          "states": {
+            "buckets": [
+              {
+                "doc_count": 2,
+                "key": "STARTED",
+                "primary": {
+                  "buckets": [
+                    {
+                      "doc_count": 1,
+                      "key": 0,
+                      "key_as_string": "false"
+                    },
+                    {
+                      "doc_count": 1,
+                      "key": 1,
+                      "key_as_string": "true"
+                    }
+                  ],
+                  "doc_count_error_upper_bound": 0,
+                  "sum_other_doc_count": 0
+                }
+              }
+            ],
+            "doc_count_error_upper_bound": 0,
+            "sum_other_doc_count": 0
+          }
+        },
+        {
+          "doc_count": 2,
+          "key": ".ml-notifications",
+          "states": {
+            "buckets": [
+              {
+                "doc_count": 2,
+                "key": "STARTED",
+                "primary": {
+                  "buckets": [
+                    {
+                      "doc_count": 1,
+                      "key": 0,
+                      "key_as_string": "false"
+                    },
+                    {
+                      "doc_count": 1,
+                      "key": 1,
+                      "key_as_string": "true"
+                    }
+                  ],
+                  "doc_count_error_upper_bound": 0,
+                  "sum_other_doc_count": 0
+                }
+              }
+            ],
+            "doc_count_error_upper_bound": 0,
+            "sum_other_doc_count": 0
+          }
+        },
+        {
+          "doc_count": 2,
+          "key": ".security-v6",
+          "states": {
+            "buckets": [
+              {
+                "doc_count": 2,
+                "key": "STARTED",
+                "primary": {
+                  "buckets": [
+                    {
+                      "doc_count": 1,
+                      "key": 0,
+                      "key_as_string": "false"
+                    },
+                    {
+                      "doc_count": 1,
+                      "key": 1,
+                      "key_as_string": "true"
+                    }
+                  ],
+                  "doc_count_error_upper_bound": 0,
+                  "sum_other_doc_count": 0
+                }
+              }
+            ],
+            "doc_count_error_upper_bound": 0,
+            "sum_other_doc_count": 0
+          }
+        },
+        {
+          "doc_count": 2,
+          "key": ".triggered_watches",
+          "states": {
+            "buckets": [
+              {
+                "doc_count": 2,
+                "key": "STARTED",
+                "primary": {
+                  "buckets": [
+                    {
+                      "doc_count": 1,
+                      "key": 0,
+                      "key_as_string": "false"
+                    },
+                    {
+                      "doc_count": 1,
+                      "key": 1,
+                      "key_as_string": "true"
+                    }
+                  ],
+                  "doc_count_error_upper_bound": 0,
+                  "sum_other_doc_count": 0
+                }
+              }
+            ],
+            "doc_count_error_upper_bound": 0,
+            "sum_other_doc_count": 0
+          }
+        },
+        {
+          "doc_count": 2,
+          "key": ".watcher-history-6-2017.09.18",
+          "states": {
+            "buckets": [
+              {
+                "doc_count": 2,
+                "key": "STARTED",
+                "primary": {
+                  "buckets": [
+                    {
+                      "doc_count": 1,
+                      "key": 0,
+                      "key_as_string": "false"
+                    },
+                    {
+                      "doc_count": 1,
+                      "key": 1,
+                      "key_as_string": "true"
+                    }
+                  ],
+                  "doc_count_error_upper_bound": 0,
+                  "sum_other_doc_count": 0
+                }
+              }
+            ],
+            "doc_count_error_upper_bound": 0,
+            "sum_other_doc_count": 0
+          }
+        },
+        {
+          "doc_count": 2,
+          "key": ".watches",
+          "states": {
+            "buckets": [
+              {
+                "doc_count": 2,
+                "key": "STARTED",
+                "primary": {
+                  "buckets": [
+                    {
+                      "doc_count": 1,
+                      "key": 0,
+                      "key_as_string": "false"
+                    },
+                    {
+                      "doc_count": 1,
+                      "key": 1,
+                      "key_as_string": "true"
+                    }
+                  ],
+                  "doc_count_error_upper_bound": 0,
+                  "sum_other_doc_count": 0
+                }
+              }
+            ],
+            "doc_count_error_upper_bound": 0,
+            "sum_other_doc_count": 0
+          }
+        }
+      ],
+      "doc_count_error_upper_bound": 0,
+      "sum_other_doc_count": 0
+    },
+    "nodes": {
+      "buckets": [
+        {
+          "doc_count": 26,
+          "index_count": {
+            "value": 10
+          },
+          "key": "B1wJG9MRQoG2ltcvZG2cRw",
+          "node_data_attributes": {
+            "buckets": [],
+            "doc_count_error_upper_bound": 0,
+            "sum_other_doc_count": 0
+          },
+          "node_ids": {
+            "buckets": [
+              {
+                "doc_count": 26,
+                "key": "B1wJG9MRQoG2ltcvZG2cRw"
+              }
+            ],
+            "doc_count_error_upper_bound": 0,
+            "sum_other_doc_count": 0
+          },
+          "node_master_attributes": {
+            "buckets": [],
+            "doc_count_error_upper_bound": 0,
+            "sum_other_doc_count": 0
+          },
+          "node_names": {
+            "buckets": [
+              {
+                "doc_count": 26,
+                "key": "whatever-01",
+                "max_timestamp": {
+                  "value": 1505767134169,
+                  "value_as_string": "2017-09-18T20:38:54.169Z"
+                }
+              }
+            ],
+            "doc_count_error_upper_bound": 0,
+            "sum_other_doc_count": 0
+          },
+          "node_transport_address": {
+            "buckets": [
+              {
+                "doc_count": 26,
+                "key": "127.0.0.1:9301",
+                "max_timestamp": {
+                  "value": 1505767134169,
+                  "value_as_string": "2017-09-18T20:38:54.169Z"
+                }
+              }
+            ],
+            "doc_count_error_upper_bound": 0,
+            "sum_other_doc_count": 0
+          }
+        },
+        {
+          "doc_count": 26,
+          "index_count": {
+            "value": 10
+          },
+          "key": "GtwLXgbbTEC-sM5ltEqbjg",
+          "node_data_attributes": {
+            "buckets": [],
+            "doc_count_error_upper_bound": 0,
+            "sum_other_doc_count": 0
+          },
+          "node_ids": {
+            "buckets": [
+              {
+                "doc_count": 26,
+                "key": "GtwLXgbbTEC-sM5ltEqbjg"
+              }
+            ],
+            "doc_count_error_upper_bound": 0,
+            "sum_other_doc_count": 0
+          },
+          "node_master_attributes": {
+            "buckets": [],
+            "doc_count_error_upper_bound": 0,
+            "sum_other_doc_count": 0
+          },
+          "node_names": {
+            "buckets": [
+              {
+                "doc_count": 26,
+                "key": "whatever-02",
+                "max_timestamp": {
+                  "value": 1505767134169,
+                  "value_as_string": "2017-09-18T20:38:54.169Z"
+                }
+              }
+            ],
+            "doc_count_error_upper_bound": 0,
+            "sum_other_doc_count": 0
+          },
+          "node_transport_address": {
+            "buckets": [
+              {
+                "doc_count": 26,
+                "key": "127.0.0.1:9302",
+                "max_timestamp": {
+                  "value": 1505767134169,
+                  "value_as_string": "2017-09-18T20:38:54.169Z"
+                }
+              }
+            ],
+            "doc_count_error_upper_bound": 0,
+            "sum_other_doc_count": 0
+          }
+        }
+      ],
+      "doc_count_error_upper_bound": 0,
+      "sum_other_doc_count": 0
+    }
+  },
+  "hits": {
+    "hits": [],
+    "max_score": 0,
+    "total": 52
+  },
+  "timed_out": false,
+  "took": 8
+}

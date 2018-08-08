@@ -1,3 +1,22 @@
+/*
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
 import _ from 'lodash';
 import Datasource from '../../lib/classes/datasource';
 import buildRequest from './lib/build_request';
@@ -15,19 +34,20 @@ export default new Datasource('es', {
       name: 'metric',
       types: ['string', 'null'],
       multi: true,
-      help: 'An elasticsearch single value metric agg, eg avg, sum, min, max or cardinality, followed by a field.' +
-        ' Eg "sum:bytes", or just "count"'
+      help: 'An elasticsearch metric agg: avg, sum, min, max, percentiles or cardinality, followed by a field.' +
+        ' E.g., "sum:bytes", "percentiles:bytes:95,99,99.9" or just "count"'
     },
     {
       name: 'split',
       types: ['string', 'null'],
       multi: true,
-      help: 'An elasticsearch field to split the series on and a limit. Eg, "hostname:10" to get the top 10 hostnames'
+      help: 'An elasticsearch field to split the series on and a limit. E.g., "hostname:10" to get the top 10 hostnames'
     },
     {
       name: 'index',
       types: ['string', 'null'],
-      help: 'Index to query, wildcards accepted'
+      help: 'Index to query, wildcards accepted. Provide Index Pattern name for scripted fields and ' +
+        'field name type ahead suggestions for metrics, split, and timefield arguments.'
     },
     {
       name: 'timefield',
@@ -47,7 +67,7 @@ export default new Datasource('es', {
   ],
   help: 'Pull data from an elasticsearch instance',
   aliases: ['elasticsearch'],
-  fn: function esFn(args, tlConfig) {
+  fn: async function esFn(args, tlConfig) {
 
     const config = _.defaults(_.clone(args.byName), {
       q: '*',
@@ -59,16 +79,31 @@ export default new Datasource('es', {
       fit: 'nearest'
     });
 
-    const { callWithRequest } = tlConfig.server.plugins.elasticsearch.getCluster('data');
-
-    const body = buildRequest(config, tlConfig);
-
-    return callWithRequest(tlConfig.request, 'search', body).then(function (resp) {
-      if (!resp._shards.total) throw new Error('Elasticsearch index not found: ' + config.index);
-      return {
-        type: 'seriesList',
-        list: toSeriesList(resp.aggregations, config)
-      };
+    const findResp = await tlConfig.request.getSavedObjectsClient().find({
+      type: 'index-pattern',
+      fields: ['title', 'fields'],
+      search: `"${config.index}"`,
+      search_fields: ['title']
     });
+    const indexPatternSavedObject = findResp.saved_objects.find(savedObject => {
+      return savedObject.attributes.title === config.index;
+    });
+    let scriptedFields = [];
+    if (indexPatternSavedObject) {
+      const fields = JSON.parse(indexPatternSavedObject.attributes.fields);
+      scriptedFields = fields.filter(field => {
+        return field.scripted;
+      });
+    }
+
+    const body = buildRequest(config, tlConfig, scriptedFields);
+
+    const { callWithRequest } = tlConfig.server.plugins.elasticsearch.getCluster('data');
+    const resp = await callWithRequest(tlConfig.request, 'search', body);
+    if (!resp._shards.total) throw new Error('Elasticsearch index not found: ' + config.index);
+    return {
+      type: 'seriesList',
+      list: toSeriesList(resp.aggregations, config)
+    };
   }
 });

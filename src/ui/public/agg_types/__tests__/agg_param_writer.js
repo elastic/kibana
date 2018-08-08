@@ -1,17 +1,31 @@
-import _ from 'lodash';
-import { VisProvider } from 'ui/vis';
-import { AggTypesIndexProvider } from 'ui/agg_types/index';
-import { VisTypesRegistryProvider } from 'ui/registry/vis_types';
-import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
-import { VisAggConfigProvider } from 'ui/vis/agg_config';
+/*
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
 
-// eslint-disable-next-line kibana-custom/no-default-export
+import _ from 'lodash';
+import { VisProvider } from '../../vis';
+import { aggTypes } from '..';
+import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
+
+// eslint-disable-next-line @elastic/kibana-custom/no-default-export
 export default function AggParamWriterHelper(Private) {
   const Vis = Private(VisProvider);
-  const aggTypes = Private(AggTypesIndexProvider);
-  const visTypes = Private(VisTypesRegistryProvider);
   const stubbedLogstashIndexPattern = Private(FixturesStubbedLogstashIndexPatternProvider);
-  const AggConfig = Private(VisAggConfigProvider);
 
   /**
    * Helper object for writing aggParams. Specify an aggType and it will find a vis & schema, and
@@ -43,32 +57,16 @@ export default function AggParamWriterHelper(Private) {
     // not configurable right now, but totally required
     self.indexPattern = stubbedLogstashIndexPattern;
 
-    // the vis type we will use to write the aggParams
-    self.visType = null;
-
     // the schema that the aggType satisfies
     self.visAggSchema = null;
 
-    // find a suitable vis type and schema
-    _.find(visTypes, function (visType) {
-      const schema = _.find(visType.schemas.all, function (schema) {
-        // type, type, type, type, type... :(
-        return schema.group === self.aggType.type;
-      });
-
-      if (schema) {
-        self.visType = visType;
-        self.visAggSchema = schema;
-        return true;
-      }
-    });
-
-    if (!self.aggType || !self.visType || !self.visAggSchema) {
-      throw new Error('unable to find a usable visType and schema for the ' + opts.aggType + ' agg type');
-    }
-
     self.vis = new Vis(self.indexPattern, {
-      type: self.visType.name
+      type: 'histogram',
+      aggs: [{
+        id: 1,
+        type: self.aggType.name,
+        params: {}
+      }]
     });
   }
 
@@ -91,23 +89,10 @@ export default function AggParamWriterHelper(Private) {
     }
 
 
-    const agg = new AggConfig(self.vis, {
-      id: 1,
-      schema: self.visAggSchema.name,
-      type: self.aggType.name,
-      params: paramValues
-    });
+    const aggConfig = self.vis.aggs[0];
+    aggConfig.setParams(paramValues);
 
-    self.vis.setState({
-      type: self.vis.type.name,
-      aggs: [agg.toJSON()]
-    });
-
-    const aggConfig = _.find(self.vis.aggs, function (aggConfig) {
-      return aggConfig.type === self.aggType;
-    });
-
-    return aggConfig.type.params.write(aggConfig);
+    return aggConfig.write(self.vis.aggs);
   };
 
   return AggParamWriter;

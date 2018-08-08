@@ -1,3 +1,22 @@
+/*
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
 /**
  * @name PersistedState
  *
@@ -6,8 +25,8 @@
 
 import _ from 'lodash';
 import toPath from 'lodash/internal/toPath';
-import { PersistedStateError } from 'ui/errors';
-import { SimpleEmitter } from 'ui/utils/simple_emitter';
+import { PersistedStateError } from '../errors';
+import { SimpleEmitter } from '../utils/simple_emitter';
 
 function prepSetParams(key, value, path) {
   // key must be the value, set the entire state using it
@@ -30,43 +49,32 @@ export class PersistedState {
    *
    * @param value
    * @param path
-   * @param parent
-   * @param silent
    * @param EmitterClass {SimpleEmitter} - a SimpleEmitter class that this class will extend. Can be used to
    * inherit a custom event emitter. For example, the EventEmitter is an "angular-ized" version
    * for angular components which automatically triggers a digest loop for every registered
-   * handler.  TODO: Get rid of the need for EventEmitter by wrapping handlers that require it
-   * in a special function that will handler triggering the digest loop.
+   * handler. TODO: replace angularized SimpleEmitter and force angular callers to handle digest loops manually ala
+   * https://github.com/elastic/kibana/issues/13855
    */
-  constructor(value, path, parent, silent, EmitterClass = SimpleEmitter) {
+  constructor(value, path, EmitterClass = SimpleEmitter) {
     EmitterClass.call(this);
 
-    this._EmitterClass = EmitterClass;
     this._path = this._setPath(path);
-    this._parent = parent || false;
 
     _.forOwn(EmitterClass.prototype, (method, methodName) => {
       this[methodName] = function () {
-        return EmitterClass.prototype[methodName].apply(this._parent || this, arguments);
+        return EmitterClass.prototype[methodName].apply(this, arguments);
       };
     });
 
     // Some validations
-    if (this._parent) {
-      if (this._path.length <= 0) {
-        throw new PersistedStateError('PersistedState child objects must contain a path');
-      }
-      if (!(this._parent instanceof PersistedState)) {
-        throw new PersistedStateError('Parent object must be an instance of PersistedState');
-      }
-    } else if (!this._path.length && value && !_.isPlainObject(value)) {
+    if (!this._path.length && value && !_.isPlainObject(value)) {
       throw new PersistedStateError('State value must be a plain object');
     }
 
     value = value || this._getDefault();
 
     // copy passed state values and create internal trackers
-    (silent) ? this.setSilent(value) : this.set(value);
+    this.set(value);
     this._initialized = true; // used to track state changes
   }
 
@@ -86,6 +94,12 @@ export class PersistedState {
     return this._set(params.key, params.value, true);
   }
 
+  clearAllKeys() {
+    Object.getOwnPropertyNames(this._changedState).forEach(key => {
+      this.set(key, null);
+    });
+  }
+
   reset(path) {
     const keyPath = this._getIndex(path);
     const origValue = _.get(this._defaultState, keyPath);
@@ -97,33 +111,10 @@ export class PersistedState {
       _.set(this._mergedState, keyPath, origValue);
     }
 
-    // clean up the changedState and defaultChildState trees
+    // clean up the changedState tree
     this._cleanPath(path, this._changedState);
-    this._cleanPath(path, this._defaultChildState);
 
     if (!_.isEqual(currentValue, origValue)) this.emit('change');
-  }
-
-  /**
-   *
-   * @param path {String}
-   * @param value {Object} The uiState to store.
-   * @param silent {Boolean}
-   * @returns {PersistedState}
-   */
-  createChild(path, value, silent) {
-    this._setChild(this._getIndex(path), value, this._parent || this);
-    return new PersistedState(value, this._getIndex(path), this._parent || this, silent, this._EmitterClass);
-  }
-
-  removeChild(path) {
-    const origValue = _.get(this._defaultState, this._getIndex(path));
-
-    if (_.isUndefined(origValue)) {
-      this.reset(path);
-    } else {
-      this.set(path, origValue);
-    }
   }
 
   getChanges() {
@@ -171,8 +162,7 @@ export class PersistedState {
   }
 
   _getDefault() {
-    const def = (this._hasPath()) ? undefined : {};
-    return (this._parent ? this.get() : def);
+    return this._hasPath() ? undefined : {};
   }
 
   _setPath(path) {
@@ -183,19 +173,11 @@ export class PersistedState {
     return (isString) ? [this._getIndex(path)] : path;
   }
 
-  _setChild(path, value, parent) {
-    parent._defaultChildState = parent._defaultChildState || {};
-    _.set(parent._defaultChildState, path, value);
-  }
-
   _hasPath() {
     return this._path.length > 0;
   }
 
   _get(key, def) {
-    // delegate to parent instance
-    if (this._parent) return this._parent._get(this._getIndex(key), def);
-
     // no path and no key, get the whole state
     if (!this._hasPath() && _.isUndefined(key)) {
       return this._mergedState;
@@ -204,7 +186,7 @@ export class PersistedState {
     return _.get(this._mergedState, this._getIndex(key), def);
   }
 
-  _set(key, value, silent, initialChildState) {
+  _set(key, value, silent) {
     const self = this;
     let stateChanged = false;
     const initialState = !this._initialized;
@@ -218,47 +200,40 @@ export class PersistedState {
       else this._defaultState = _.set({}, keyPath, value);
     }
 
-    // delegate to parent instance, passing child's default value
-    if (this._parent) {
-      return this._parent._set(keyPath, value, silent, initialState);
-    }
-
-    // everything in here affects only the parent state
     if (!initialState) {
       // no path and no key, set the whole state
       if (!this._hasPath() && _.isUndefined(key)) {
         // compare changedState and new state, emit an event when different
         stateChanged = !_.isEqual(this._changedState, value);
-        if (!initialChildState) {
-          this._changedState = value;
-          this._mergedState = _.cloneDeep(value);
-        }
+        this._changedState = value;
+        this._mergedState = _.cloneDeep(value);
       } else {
         // check for changes at path, emit an event when different
         const curVal = hasKeyPath ? this.get(keyPath) : this._mergedState;
         stateChanged = !_.isEqual(curVal, value);
 
-        if (!initialChildState) {
-          // arrays are merge by index, not desired - ensure they are replaced
-          if (Array.isArray(_.get(this._mergedState, keyPath))) {
-            if (hasKeyPath) _.set(this._mergedState, keyPath, undefined);
-            else this._mergedState = undefined;
-          }
+        // arrays are merge by index, not desired - ensure they are replaced
+        if (Array.isArray(_.get(this._mergedState, keyPath))) {
+          if (hasKeyPath) _.set(this._mergedState, keyPath, undefined);
+          else this._mergedState = undefined;
+        }
 
-          if (hasKeyPath) _.set(this._changedState, keyPath, value);
-          else this._changedState = _.isPlainObject(value) ? value : {};
+        if (hasKeyPath) {
+          _.set(this._changedState, keyPath, value);
+        } else {
+          this._changedState = _.isPlainObject(value) ? value : {};
         }
       }
     }
 
     // update the merged state value
     const targetObj = this._mergedState || _.cloneDeep(this._defaultState);
-    const sourceObj = _.merge({}, this._defaultChildState, this._changedState);
+    const sourceObj = _.merge({}, this._changedState);
 
     // handler arguments are (targetValue, sourceValue, key, target, source)
     const mergeMethod = function (targetValue, sourceValue, mergeKey) {
       // if not initial state, skip default merge method (ie. return value, see note below)
-      if (!initialState && !initialChildState && _.isEqual(keyPath, self._getIndex(mergeKey))) {
+      if (!initialState && _.isEqual(keyPath, self._getIndex(mergeKey))) {
         // use the sourceValue or fall back to targetValue
         return !_.isUndefined(sourceValue) ? sourceValue : targetValue;
       }
@@ -272,7 +247,7 @@ export class PersistedState {
     // sanity check; verify that there are actually changes
     if (_.isEqual(this._mergedState, this._defaultState)) this._changedState = {};
 
-    if (!silent && stateChanged) this.emit('change');
+    if (!silent && stateChanged) this.emit('change', key);
 
     return this;
   }

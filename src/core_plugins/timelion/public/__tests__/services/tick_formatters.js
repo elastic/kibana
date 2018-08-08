@@ -1,3 +1,22 @@
+/*
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
 import expect from 'expect.js';
 import ngMock from 'ng_mock';
 describe('Tick Formatters', function () {
@@ -25,6 +44,13 @@ describe('Tick Formatters', function () {
       expect(bitFormatter(4.1 * 1000 * 1000)).to.equal('4.1mb');
       expect(bitFormatter(3 * 1000 * 1000 * 1000)).to.equal('3gb');
     });
+
+    it('formats negative values with b/kb/mb/gb', () => {
+      expect(bitFormatter(-7)).to.equal('-7b');
+      expect(bitFormatter(-4 * 1000)).to.equal('-4kb');
+      expect(bitFormatter(-4.1 * 1000 * 1000)).to.equal('-4.1mb');
+      expect(bitFormatter(-3 * 1000 * 1000 * 1000)).to.equal('-3gb');
+    });
   });
 
   describe('Bits/s mode', function () {
@@ -42,6 +68,13 @@ describe('Tick Formatters', function () {
       expect(bitsFormatter(4 * 1000)).to.equal('4kb/s');
       expect(bitsFormatter(4.1 * 1000 * 1000)).to.equal('4.1mb/s');
       expect(bitsFormatter(3 * 1000 * 1000 * 1000)).to.equal('3gb/s');
+    });
+
+    it('formats negative values with b/kb/mb/gb', function () {
+      expect(bitsFormatter(-7)).to.equal('-7b/s');
+      expect(bitsFormatter(-4 * 1000)).to.equal('-4kb/s');
+      expect(bitsFormatter(-4.1 * 1000 * 1000)).to.equal('-4.1mb/s');
+      expect(bitsFormatter(-3 * 1000 * 1000 * 1000)).to.equal('-3gb/s');
     });
   });
 
@@ -61,6 +94,13 @@ describe('Tick Formatters', function () {
       expect(byteFormatter(10.2 * 1024 * 1024)).to.equal('10.2MB');
       expect(byteFormatter(3 * 1024 * 1024 * 1024)).to.equal('3GB');
     });
+
+    it('formats negative values with B/KB/MB/GB', function () {
+      expect(byteFormatter(-10)).to.equal('-10B');
+      expect(byteFormatter(-10 * 1024)).to.equal('-10KB');
+      expect(byteFormatter(-10.2 * 1024 * 1024)).to.equal('-10.2MB');
+      expect(byteFormatter(-3 * 1024 * 1024 * 1024)).to.equal('-3GB');
+    });
   });
 
   describe('Bytes/s mode', function () {
@@ -78,6 +118,13 @@ describe('Tick Formatters', function () {
       expect(bytesFormatter(10 * 1024)).to.equal('10KB/s');
       expect(bytesFormatter(10.2 * 1024 * 1024)).to.equal('10.2MB/s');
       expect(bytesFormatter(3 * 1024 * 1024 * 1024)).to.equal('3GB/s');
+    });
+
+    it('formats negative values with B/KB/MB/GB', function () {
+      expect(bytesFormatter(-10)).to.equal('-10B/s');
+      expect(bytesFormatter(-10 * 1024)).to.equal('-10KB/s');
+      expect(bytesFormatter(-10.2 * 1024 * 1024)).to.equal('-10.2MB/s');
+      expect(bytesFormatter(-3 * 1024 * 1024 * 1024)).to.equal('-3GB/s');
     });
   });
 

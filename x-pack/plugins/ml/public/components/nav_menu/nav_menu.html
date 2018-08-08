@@ -1,0 +1,28 @@
+<kbn-top-nav name="dashboard" config="topNavMenu">
+<div data-transclude-slots>
+    <!-- Breadcrumbs. -->
+    <div data-transclude-slot="topLeftCorner" class="kuiLocalBreadcrumbs">
+      <div ng-repeat="crumb in breadcrumbs" class="kuiLocalBreadcrumb">
+        <a ng-if="crumb.url" kbn-href="{{ crumb.url }}" class="kuiLocalBreadcrumb__link">{{ crumb.label }}</a>
+        <span ng-if="!crumb.url" class="kuiLocalBreadcrumb__link">{{ crumb.label }}</span>
+      </div>
+    </div>
+    <!-- Tabs -->
+    <div data-transclude-slot="bottomRow">
+      <div ng-if="showTabs" class="kuiLocalTabs" role="tablist">
+        <a kbn-href="#/jobs" class="kuiLocalTab" role="tab"
+        ng-class="{'kuiLocalTab-isSelected': isActiveTab('jobs')}">
+        Job Management</a>
+        <a kbn-href="#/explorer" class="kuiLocalTab" role="tab"
+        ng-class="{'kuiLocalTab-isSelected': isActiveTab('explorer')}">
+        Anomaly Explorer</a>
+        <a kbn-href="#/timeseriesexplorer" class="kuiLocalTab" role="tab"
+        ng-class="{'kuiLocalTab-isSelected': isActiveTab('timeseriesexplorer')}">
+        Single Metric Viewer</a>
+        <a kbn-href="#/settings" class="kuiLocalTab" role="tab"
+        ng-class="{'kuiLocalTab-isSelected': isActiveTab('settings')}">
+        Settings</a>
+      </div>
+    </div>
+  </div>
+</kbn-top-nav>

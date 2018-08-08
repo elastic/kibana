@@ -1,0 +1,28 @@
+<div class="save-status-modal">
+  <!-- <ml-message-bar ></ml-message-bar> -->
+  <h3 class="euiTitle euiTitle--small">Saving new job</h3>
+  <div class="status-item">Saving job...
+  	<i ng-show="pscope.ui.saveStatus.job === -1" aria-hidden="true" style="color:red;" class="fa fa-remove"></i>
+  	<i ng-show="pscope.ui.saveStatus.job === 1" aria-hidden="true" class="fa fa-spinner fa-spin"></i>
+  	<i ng-show="pscope.ui.saveStatus.job === 2" aria-hidden="true" style="color:green;" class="fa fa-check"></i>
+  </div>
+
+  <hr class="euiHorizontalRule euiHorizontalRule--full euiHorizontalRule--marginMedium">
+
+  <button
+    ng-show="(pscope.ui.saveStatus.job === 2 && pscope.ui.isDatafeed)"
+    ng-disabled="pscope.saveLock"
+    ng-click="openDatafeed();"
+    class="kuiButton kuiButton--primary"
+    aria-label="Back">
+      Start datafeed
+  </button>
+
+  <button
+  	ng-disabled="pscope.saveLock"
+    ng-click="close();"
+    class="kuiButton kuiButton--primary"
+    aria-label="Back">
+    	Close
+  </button>
+</div>

@@ -1,0 +1,15 @@
+
+[[devtools-kibana]]
+= Dev Tools
+
+[partintro]
+--
+The *Dev Tools* page contains development tools that you can use to interact
+with your data in Kibana.
+--
+
+include::dev-tools/console/console.asciidoc[]
+
+include::dev-tools/searchprofiler/index.asciidoc[]
+
+include::dev-tools/grokdebugger/index.asciidoc[]

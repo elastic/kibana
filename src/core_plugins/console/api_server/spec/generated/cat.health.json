@@ -1,0 +1,21 @@
+{
+  "cat.health": {
+    "url_params": {
+      "format": "",
+      "local": "__flag__",
+      "master_timeout": "",
+      "h": [],
+      "help": "__flag__",
+      "s": [],
+      "ts": "__flag__",
+      "v": "__flag__"
+    },
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "_cat/health"
+    ],
+    "documentation": "http://www.elastic.co/guide/en/elasticsearch/reference/master/cat-health.html"
+  }
+}

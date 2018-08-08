@@ -1,287 +1,174 @@
-import _ from 'lodash';
-import { IndexPatternMissingIndices } from 'ui/errors';
-import 'ui/directives/validate_index_pattern';
-import 'ui/directives/auto_select_if_only_one';
-import 'ui/directives/documentation_href';
-import uiRoutes from 'ui/routes';
-import { uiModules } from 'ui/modules';
-import template from './create_index_pattern_wizard.html';
-import { sendCreateIndexPatternRequest } from './send_create_index_pattern_request';
-import './step_index_pattern';
-import './step_time_field';
-import './matching_indices_list';
+/*
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
 
-uiRoutes
-.when('/management/kibana/index', {
-  template,
-});
+import React, { Component } from 'react';
+import PropTypes from 'prop-types';
 
-uiModules.get('apps/management')
-.controller('managementIndicesCreate', function (
-  $routeParams,
-  $scope,
-  $timeout,
-  config,
-  es,
-  indexPatterns,
-  kbnUrl,
-  Notifier,
-  Promise
-) {
-  // This isn't ideal. We want to avoid searching for 20 indices
-  // then filtering out the majority of them because they are sysetm indices.
-  // We'd like to filter system indices out in the query
-  // so if we can accomplish that in the future, this logic can go away
-  const ESTIMATED_NUMBER_OF_SYSTEM_INDICES = 20;
-  const MAX_NUMBER_OF_MATCHING_INDICES = 20;
-  const MAX_SEARCH_SIZE = MAX_NUMBER_OF_MATCHING_INDICES + ESTIMATED_NUMBER_OF_SYSTEM_INDICES;
-  const notify = new Notifier();
-  const disabledDividerOption = {
-    isDisabled: true,
-    display: '───',
-  };
-  const noTimeFieldOption = {
-    display: `I don't want to use the Time Filter`,
-  };
+import { ensureMinimumTime } from './lib';
+import { StepIndexPattern } from './components/step_index_pattern';
+import { StepTimeField } from './components/step_time_field';
+import { Header } from './components/header';
+import { LoadingState } from './components/loading_state';
+import { EmptyState } from './components/empty_state';
 
-  // Configure the new index pattern we're going to create.
-  this.formValues = {
-    id: $routeParams.id ? decodeURIComponent($routeParams.id) : undefined,
-    name: '',
-    expandWildcard: false,
-    timeFieldOption: undefined,
-  };
+import { MAX_SEARCH_SIZE } from './constants';
+import { getIndices } from './lib/get_indices';
 
-  // UI state.
-  this.timeFieldOptions = [];
-  this.wizardStep = 'indexPattern';
-  this.isFetchingExistingIndices = true;
-  this.isFetchingMatchingIndices = false;
-  this.isFetchingTimeFieldOptions = false;
-  this.isCreatingIndexPattern = false;
-  this.doesIncludeSystemIndices = false;
-  let allIndices = [];
-  let matchingIndices = [];
-  let partialMatchingIndices = [];
-  this.allIndices = [];
-  this.matchingIndices = [];
-  this.partialMatchingIndices = [];
-
-  function createReasonableWait() {
-    return new Promise(resolve => {
-      // Make every fetch take a set amount of time so the user gets some feedback that something
-      // is happening.
-      $timeout(() => {
-        resolve();
-      }, 500);
-    });
+export class CreateIndexPatternWizard extends Component {
+  static propTypes = {
+    initialQuery: PropTypes.string,
+    services: PropTypes.shape({
+      es: PropTypes.object.isRequired,
+      indexPatterns: PropTypes.object.isRequired,
+      savedObjectsClient: PropTypes.object.isRequired,
+      config: PropTypes.object.isRequired,
+      changeUrl: PropTypes.func.isRequired,
+    }).isRequired,
   }
 
-  function getIndices(pattern, limit = MAX_SEARCH_SIZE) {
-    const params = {
-      index: pattern,
-      ignore: [404],
-      body: {
-        size: 0, // no hits
-        aggs: {
-          indices: {
-            terms: {
-              field: '_index',
-              size: limit,
-            }
-          }
-        }
-      }
+  constructor(props) {
+    super(props);
+    this.state = {
+      step: 1,
+      indexPattern: '',
+      allIndices: [],
+      isInitiallyLoadingIndices: true,
+      isIncludingSystemIndices: false,
     };
-
-    return es.search(params)
-      .then(response => {
-        if (!response || response.error || !response.aggregations) {
-          return [];
-        }
-
-        return _.sortBy(response.aggregations.indices.buckets.map(bucket => {
-          return {
-            name: bucket.key
-          };
-        }), 'name');
-      });
   }
 
-  const whiteListIndices = indices => {
-    if (!indices) {
-      return indices;
-    }
+  async componentWillMount() {
+    this.fetchIndices();
+  }
 
-    const acceptableIndices = this.doesIncludeSystemIndices
-      ? indices
-      // All system indices begin with a period.
-      : indices.filter(index => !index.name.startsWith('.'));
+  fetchIndices = async () => {
+    this.setState({ allIndices: [], isInitiallyLoadingIndices: true });
+    const { services } = this.props;
+    const allIndices = await ensureMinimumTime(getIndices(services.es, `*`, MAX_SEARCH_SIZE));
+    this.setState({ allIndices, isInitiallyLoadingIndices: false });
+  }
 
-    return acceptableIndices.slice(0, MAX_NUMBER_OF_MATCHING_INDICES);
-  };
+  createIndexPattern = async (timeFieldName, indexPatternId) => {
+    const { services } = this.props;
+    const { indexPattern } = this.state;
 
-  const updateWhiteListedIndices = () => {
-    this.allIndices = whiteListIndices(allIndices);
-    this.matchingIndices = whiteListIndices(matchingIndices);
-    this.partialMatchingIndices = whiteListIndices(partialMatchingIndices);
-  };
+    const emptyPattern = await services.indexPatterns.get();
 
-  this.onIncludeSystemIndicesChange = () => {
-    updateWhiteListedIndices();
-  };
-
-  let mostRecentFetchMatchingIndicesRequest;
-
-  this.fetchMatchingIndices = () => {
-    this.isFetchingMatchingIndices = true;
-
-    // Default to searching for all indices.
-    const exactSearchQuery = this.formValues.name;
-    let partialSearchQuery = this.formValues.name;
-
-    if (!_.endsWith(partialSearchQuery, '*')) {
-      partialSearchQuery = `${partialSearchQuery}*`;
-    }
-    if (!_.startsWith(partialSearchQuery, '*')) {
-      partialSearchQuery = `*${partialSearchQuery}`;
-    }
-
-    const thisFetchMatchingIndicesRequest = mostRecentFetchMatchingIndicesRequest = Promise.all([
-      getIndices(exactSearchQuery),
-      getIndices(partialSearchQuery),
-      createReasonableWait()
-    ])
-    .then(([
-      matchingIndicesResponse,
-      partialMatchingIndicesResponse
-    ]) => {
-      if (thisFetchMatchingIndicesRequest === mostRecentFetchMatchingIndicesRequest) {
-        matchingIndices = matchingIndicesResponse;
-        partialMatchingIndices = partialMatchingIndicesResponse;
-        updateWhiteListedIndices();
-        this.isFetchingMatchingIndices = false;
-      }
-    }).catch(error => {
-      notify.error(error);
-    });
-  };
-
-  this.fetchExistingIndices = () => {
-    this.isFetchingExistingIndices = true;
-    const allExistingLocalIndicesPattern = '*';
-
-    Promise.all([
-      getIndices(allExistingLocalIndicesPattern),
-      createReasonableWait()
-    ])
-    .then(([allIndicesResponse]) => {
-      // Cache all indices.
-      allIndices = allIndicesResponse;
-      updateWhiteListedIndices();
-      this.isFetchingExistingIndices = false;
-    }).catch(error => {
-      notify.error(error);
-      this.isFetchingExistingIndices = false;
-    });
-  };
-
-  this.isSystemIndicesCheckBoxVisible = () => (
-    this.wizardStep === 'indexPattern'
-  );
-
-  this.goToIndexPatternStep = () => {
-    this.wizardStep = 'indexPattern';
-  };
-
-  this.goToTimeFieldStep = () => {
-    // Re-initialize this step.
-    this.formValues.timeFieldOption = undefined;
-    this.fetchTimeFieldOptions();
-    this.wizardStep = 'timeField';
-  };
-
-  this.hasIndices = () => (
-    this.allIndices.length
-  );
-
-  const extractTimeFieldsFromFields = fields => {
-    const dateFields = fields.filter(field => field.type === 'date');
-
-    if (dateFields.length === 0) {
-      return [{
-        display: `The indices which match this index pattern don't contain any time fields.`,
-      }];
-    }
-
-    return [
-      ...dateFields.map(field => ({
-        display: field.name,
-        fieldName: field.name
-      })),
-      disabledDividerOption,
-      noTimeFieldOption,
-    ];
-  };
-
-  this.fetchTimeFieldOptions = () => {
-    this.isFetchingTimeFieldOptions = true;
-    this.formValues.timeFieldOption = undefined;
-    this.timeFieldOptions = [];
-
-    Promise.all([
-      indexPatterns.fieldsFetcher.fetchForWildcard(this.formValues.name),
-      createReasonableWait(),
-    ])
-    .then(([fields]) => {
-      this.timeFieldOptions = extractTimeFieldsFromFields(fields);
-    })
-    .catch(error => {
-      notify.error(error);
-    })
-    .finally(() => {
-      this.isFetchingTimeFieldOptions = false;
-    });
-  };
-
-  this.createIndexPattern = () => {
-    this.isCreatingIndexPattern = true;
-
-    const {
-      id,
-      name,
-      timeFieldOption,
-    } = this.formValues;
-
-    const timeFieldName = timeFieldOption
-      ? timeFieldOption.fieldName
-      : undefined;
-
-    sendCreateIndexPatternRequest(indexPatterns, {
-      id,
-      name,
+    Object.assign(emptyPattern, {
+      id: indexPatternId,
+      title: indexPattern,
       timeFieldName,
-    }).then(createdId => {
-      if (!createdId) {
-        return;
-      }
-
-      if (!config.get('defaultIndex')) {
-        config.set('defaultIndex', createdId);
-      }
-
-      indexPatterns.cache.clear(createdId);
-      kbnUrl.change(`/management/kibana/indices/${createdId}`);
-    }).catch(err => {
-      if (err instanceof IndexPatternMissingIndices) {
-        return notify.error(`Couldn't locate any indices matching that pattern. Please add the index to Elasticsearch`);
-      }
-
-      notify.fatal(err);
-    }).finally(() => {
-      this.isCreatingIndexPattern = false;
     });
-  };
 
-  this.fetchExistingIndices();
-});
+    const createdId = await emptyPattern.create();
+
+    if (!services.config.get('defaultIndex')) {
+      await services.config.set('defaultIndex', createdId);
+    }
+
+    services.indexPatterns.cache.clear(createdId);
+    services.changeUrl(`/management/kibana/indices/${createdId}`);
+  }
+
+  goToTimeFieldStep = (indexPattern) => {
+    this.setState({ step: 2, indexPattern });
+  }
+
+  goToIndexPatternStep = () => {
+    this.setState({ step: 1 });
+  }
+
+  onChangeIncludingSystemIndices = () => {
+    this.setState(state => ({
+      isIncludingSystemIndices: !state.isIncludingSystemIndices,
+    }));
+  }
+
+  renderHeader() {
+    const { isIncludingSystemIndices } = this.state;
+
+    return (
+      <Header
+        isIncludingSystemIndices={isIncludingSystemIndices}
+        onChangeIncludingSystemIndices={this.onChangeIncludingSystemIndices}
+      />
+    );
+  }
+
+  renderContent() {
+    const {
+      allIndices,
+      isInitiallyLoadingIndices,
+      isIncludingSystemIndices,
+      step,
+      indexPattern,
+    } = this.state;
+
+    if (isInitiallyLoadingIndices) {
+      return <LoadingState />;
+    }
+
+    const hasDataIndices = allIndices.some(({ name }) => !name.startsWith('.'));
+    if (!hasDataIndices && !isIncludingSystemIndices) {
+      return <EmptyState onRefresh={this.fetchIndices} />;
+    }
+
+    if (step === 1) {
+      const { services, initialQuery } = this.props;
+      return (
+        <StepIndexPattern
+          allIndices={allIndices}
+          initialQuery={indexPattern || initialQuery}
+          isIncludingSystemIndices={isIncludingSystemIndices}
+          esService={services.es}
+          savedObjectsClient={services.savedObjectsClient}
+          goToNextStep={this.goToTimeFieldStep}
+        />
+      );
+    }
+
+    if (step === 2) {
+      const { services } = this.props;
+      return (
+        <StepTimeField
+          indexPattern={indexPattern}
+          indexPatternsService={services.indexPatterns}
+          goToPreviousStep={this.goToIndexPatternStep}
+          createIndexPattern={this.createIndexPattern}
+        />
+      );
+    }
+
+    return null;
+  }
+
+  render() {
+    const header = this.renderHeader();
+    const content = this.renderContent();
+
+    return (
+      <div>
+        {header}
+        {content}
+      </div>
+    );
+  }
+}
+
+

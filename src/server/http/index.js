@@ -1,25 +1,71 @@
+/*
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
 import { format } from 'url';
 import { resolve } from 'path';
 import _ from 'lodash';
 import Boom from 'boom';
 import Hapi from 'hapi';
-import getDefaultRoute from './get_default_route';
-import versionCheckMixin from './version_check';
+import { setupVersionCheck } from './version_check';
 import { handleShortUrlError } from './short_url_error';
 import { shortUrlAssertValid } from './short_url_assert_valid';
-import shortUrlLookupProvider from './short_url_lookup';
-import setupConnectionMixin from './setup_connection';
-import setupRedirectMixin from './setup_redirect_server';
-import registerHapiPluginsMixin from './register_hapi_plugins';
-import xsrfMixin from './xsrf';
+import { shortUrlLookupProvider } from './short_url_lookup';
+import { registerHapiPlugins } from './register_hapi_plugins';
+import { setupXsrf } from './xsrf';
 
 export default async function (kbnServer, server, config) {
-  server = kbnServer.server = new Hapi.Server();
+  kbnServer.server = new Hapi.Server();
+  server = kbnServer.server;
 
   const shortUrlLookup = shortUrlLookupProvider(server);
-  await kbnServer.mixin(setupConnectionMixin);
-  await kbnServer.mixin(setupRedirectMixin);
-  await kbnServer.mixin(registerHapiPluginsMixin);
+
+  // Note that all connection options configured here should be exactly the same
+  // as in `getServerOptions()` in the new platform (see `src/core/server/http/http_tools`).
+  //
+  // The only exception is `tls` property: TLS is entirely handled by the new
+  // platform and we don't have to duplicate all TLS related settings here, we just need
+  // to indicate to Hapi connection that TLS is used so that it can use correct protocol
+  // name in `server.info` and `request.connection.info` that are used throughout Kibana.
+  //
+  // Any change SHOULD BE applied in both places.
+  server.connection({
+    host: config.get('server.host'),
+    port: config.get('server.port'),
+    tls: config.get('server.ssl.enabled'),
+    listener: kbnServer.newPlatform.proxyListener,
+    state: {
+      strictHeader: false,
+    },
+    routes: {
+      cors: config.get('server.cors'),
+      payload: {
+        maxBytes: config.get('server.maxPayloadBytes'),
+      },
+      validate: {
+        options: {
+          abortEarly: false,
+        },
+      },
+    },
+  });
+
+  registerHapiPlugins(server);
 
   // provide a simple way to expose static directories
   server.decorate('server', 'exposeStaticDir', function (routePath, dirPath) {
@@ -37,37 +83,12 @@ export default async function (kbnServer, server, config) {
     });
   });
 
-  // provide a simple way to expose static files
-  server.decorate('server', 'exposeStaticFile', function (routePath, filePath) {
-    this.route({
-      path: routePath,
-      method: 'GET',
-      handler: {
-        file: filePath
-      },
-      config: { auth: false }
-    });
-  });
-
   // helper for creating view managers for servers
   server.decorate('server', 'setupViews', function (path, engines) {
     this.views({
       path: path,
       isCached: config.get('optimize.viewCaching'),
-      engines: _.assign({ jade: require('jade') }, engines || {})
-    });
-  });
-
-  server.decorate('server', 'redirectToSlash', function (route) {
-    this.route({
-      path: route,
-      method: 'GET',
-      handler: function (req, reply) {
-        return reply.redirect(format({
-          search: req.url.search,
-          pathname: req.url.pathname + '/',
-        }));
-      }
+      engines: _.assign({ pug: require('pug') }, engines || {})
     });
   });
 
@@ -78,7 +99,6 @@ export default async function (kbnServer, server, config) {
     const customHeaders = {
       ...config.get('server.customResponseHeaders'),
       'kbn-name': kbnServer.name,
-      'kbn-version': kbnServer.version,
     };
 
     if (response.isBoom) {
@@ -98,11 +118,10 @@ export default async function (kbnServer, server, config) {
   server.route({
     path: '/',
     method: 'GET',
-    handler: function (req, reply) {
-      return reply.view('root_redirect', {
-        hashRoute: `${config.get('server.basePath')}/app/kibana`,
-        defaultRoute: getDefaultRoute(kbnServer),
-      });
+    handler(req, reply) {
+      const basePath = config.get('server.basePath');
+      const defaultRoute = config.get('server.defaultRoute');
+      reply.redirect(`${basePath}${defaultRoute}`);
     }
   });
 
@@ -119,7 +138,7 @@ export default async function (kbnServer, server, config) {
         search: req.url.search,
         pathname: pathPrefix + path.slice(0, -1),
       }))
-      .permanent(true);
+        .permanent(true);
     }
   });
 
@@ -138,7 +157,7 @@ export default async function (kbnServer, server, config) {
           return;
         }
 
-        const app = kbnServer.uiExports.apps.byId.stateSessionStorageRedirect;
+        const app = server.getHiddenUiAppById('stateSessionStorageRedirect');
         reply.renderApp(app, {
           redirectUrl: url,
         });
@@ -166,7 +185,6 @@ export default async function (kbnServer, server, config) {
   server.exposeStaticDir('/ui/fonts/{path*}', resolve(__dirname, '../../ui/public/assets/fonts'));
   server.exposeStaticDir('/ui/favicons/{path*}', resolve(__dirname, '../../ui/public/assets/favicons'));
 
-  kbnServer.mixin(versionCheckMixin);
-
-  return kbnServer.mixin(xsrfMixin);
-};
+  setupVersionCheck(server, config);
+  setupXsrf(server, config);
+}

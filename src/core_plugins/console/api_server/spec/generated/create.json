@@ -1,0 +1,31 @@
+{
+  "create": {
+    "url_params": {
+      "wait_for_active_shards": "",
+      "parent": "",
+      "refresh": [
+        "true",
+        "false",
+        "wait_for"
+      ],
+      "routing": "",
+      "timeout": "",
+      "version": "",
+      "version_type": [
+        "internal",
+        "external",
+        "external_gte",
+        "force"
+      ],
+      "pipeline": ""
+    },
+    "methods": [
+      "PUT",
+      "POST"
+    ],
+    "patterns": [
+      "{indices}/{type}/{id}/_create"
+    ],
+    "documentation": "http://www.elastic.co/guide/en/elasticsearch/reference/master/docs-index_.html"
+  }
+}

@@ -1,0 +1,105 @@
+<div ng-controller='TabController'>
+  <div class="row">
+
+    <div class="col-md-6">
+      <div ng-repeat="(key, value) in job" ng-if="key==='data_counts'">
+        <div class="ml_sub_heading">Counts</div>
+        <div class='ml_job_section_container'>
+          <table class="euiTable euiTable--compressed">
+            <tbody>
+              <tr ng-repeat="(key1, value1) in value" ng-switch="key1" class="euiTableRow">
+                <!-- input_bytes //-->
+                <th ng-switch-when="input_bytes" class="euiTableRowCell">
+                  <div class="euiTableCellContent">
+                    <span class="euiTableCellContent__text">{{key1}}</span>
+                  </div>
+                </th>
+                <td ng-switch-when="input_bytes" class="euiTableRowCell">
+                  <div class="euiTableCellContent">
+                    <span class="euiTableCellContent__text">{{formatData(value1)}}</span>
+                  </div>
+                </td>
+          
+                <!-- date based fields //-->
+                <th ng-switch-when="earliest_record_timestamp|latest_record_timestamp|last_data_time|latest_empty_bucket_timestamp|latest_sparse_bucket_timestamp"
+                  ng-switch-when-separator="|" class="euiTableRowCell">
+                  <div class="euiTableCellContent">
+                    <span class="euiTableCellContent__text">{{key1}}</span>
+                  </div>
+                </th>
+                <td ng-switch-when="earliest_record_timestamp|latest_record_timestamp|last_data_time|latest_empty_bucket_timestamp|latest_sparse_bucket_timestamp"
+                  ng-switch-when-separator="|"class="euiTableRowCell">
+                  <div class="euiTableCellContent">
+                    <span class="euiTableCellContent__text">{{formatDate(value1)}}</span>
+                  </div>
+                </td>
+          
+                <!-- default with additional ng-if to skip "missing_field_count" //-->
+                <th ng-switch-default ng-if="key1!=='missing_field_count'" class="euiTableRowCell">
+                  <div class="euiTableCellContent">
+                    <span class="euiTableCellContent__text">{{key1}}</span>
+                  </div>
+                </th>
+                <td ng-switch-default ng-if="key1!=='missing_field_count'" class="euiTableRowCell">
+                  <div class="euiTableCellContent">
+                    <span class="euiTableCellContent__text">{{toLocaleString(value1)}}</span>
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-6">
+      <div ng-repeat="(key, value) in job" ng-if="key==='model_size_stats'">
+        <div class="ml_sub_heading">Model size stats</div>
+        <div class='ml_job_section_container'>
+          <table class="euiTable euiTable--compressed">
+            <tbody>
+              <tr ng-repeat="(key1, value1) in value" ng-switch="key1" class="euiTableRow">
+                <!-- model_bytes //-->
+                <th ng-switch-when="model_bytes" class="euiTableRowCell">
+                  <div class="euiTableCellContent">
+                    <span class="euiTableCellContent__text">{{key1}}</span>
+                  </div>
+                </th>
+                <td ng-switch-when="model_bytes" class="euiTableRowCell">
+                  <div class="euiTableCellContent">
+                    <span class="euiTableCellContent__text">{{formatData(value1)}}</span>
+                  </div>
+                </td>
+          
+                <!-- date based fields //-->
+                <th ng-switch-when="log_time|timestamp" ng-switch-when-separator="|" class="euiTableRowCell">
+                  <div class="euiTableCellContent">
+                    <span class="euiTableCellContent__text">{{key1}}</span>
+                  </div>
+                </th>
+                <td ng-switch-when="log_time|timestamp" ng-switch-when-separator="|" class="euiTableRowCell">
+                  <div class="euiTableCellContent">
+                    <span class="euiTableCellContent__text">{{formatDate(value1)}}</span>
+                  </div>
+                </td>
+          
+                <!-- default with additional ng-if to skip "missing_field_count" //-->
+                <th ng-switch-default ng-if="key1!=='missing_field_count'" class="euiTableRowCell">
+                  <div class="euiTableCellContent">
+                    <span class="euiTableCellContent__text">{{key1}}</span>
+                  </div>
+                </th>
+                <td ng-switch-default class="euiTableRowCell">
+                  <div class="euiTableCellContent">
+                    <span class="euiTableCellContent__text">{{toLocaleString(value1)}}</span>
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>

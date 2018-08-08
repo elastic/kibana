@@ -1,6 +1,26 @@
-import { union } from 'lodash';
-import findSourceFiles from './find_source_files';
+/*
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
 import { fromRoot } from '../../utils';
+
+import findSourceFiles from './find_source_files';
+import { createTestEntryTemplate } from './tests_entry_template';
 
 export default (kibana) => {
   return new kibana.Plugin({
@@ -13,9 +33,18 @@ export default (kibana) => {
     },
 
     uiExports: {
-      bundle: async (UiBundle, env, apps, plugins) => {
-        let modules = [];
-        const config = kibana.config;
+      async __bundleProvider__(kbnServer) {
+        const modules = new Set();
+
+        const {
+          config,
+          uiApps,
+          uiBundles,
+          plugins,
+          uiExports: {
+            uiSettingDefaults = {}
+          }
+        } = kbnServer;
 
         const testGlobs = [
           'src/ui/public/**/*.js',
@@ -26,21 +55,26 @@ export default (kibana) => {
         if (testingPluginIds) {
           testGlobs.push('!src/ui/public/**/__tests__/**/*');
           testingPluginIds.split(',').forEach((pluginId) => {
-            const plugin = plugins.byId[pluginId];
-            if (!plugin) throw new Error('Invalid testingPluginId :: unknown plugin ' + pluginId);
+            const plugin = plugins
+              .find(plugin => plugin.id === pluginId);
+
+            if (!plugin) {
+              throw new Error('Invalid testingPluginId :: unknown plugin ' + pluginId);
+            }
 
             // add the modules from all of this plugins apps
-            for (const app of plugin.apps) {
-              modules = union(modules, app.getModules());
+            for (const app of uiApps) {
+              if (app.getPluginId() === pluginId) {
+                modules.add(app.getMainModuleId());
+              }
             }
 
             testGlobs.push(`${plugin.publicDir}/**/__tests__/**/*.js`);
           });
         } else {
-
           // add the modules from all of the apps
-          for (const app of apps) {
-            modules = union(modules, app.getModules());
+          for (const app of uiApps) {
+            modules.add(app.getMainModuleId());
           }
 
           for (const plugin of plugins) {
@@ -49,32 +83,25 @@ export default (kibana) => {
         }
 
         const testFiles = await findSourceFiles(testGlobs);
-        for (const f of testFiles) modules.push(f);
+        for (const f of testFiles) modules.add(f);
 
         if (config.get('tests_bundle.instrument')) {
-          env.addPostLoader({
+          uiBundles.addPostLoader({
             test: /\.js$/,
             exclude: /[\/\\](__tests__|node_modules|bower_components|webpackShims)[\/\\]/,
-            loader: 'istanbul-instrumenter'
+            loader: 'istanbul-instrumenter-loader'
           });
         }
 
-        env.defaultUiSettings = plugins.kbnServer.uiExports.consumers
-          // find the first uiExportsConsumer that has a getUiSettingDefaults method
-          // See src/ui/ui_settings/ui_exports_consumer.js
-          .find(consumer => typeof consumer.getUiSettingDefaults === 'function')
-          .getUiSettingDefaults();
-
-        return new UiBundle({
+        uiBundles.add({
           id: 'tests',
-          modules: modules,
-          template: require('./tests_entry_template'),
-          env: env
+          modules: [...modules],
+          template: createTestEntryTemplate(uiSettingDefaults),
         });
       },
 
       __globalImportAliases__: {
-        ng_mock$: fromRoot('src/core_plugins/dev_mode/public/ng_mock'),
+        ng_mock$: fromRoot('src/test_utils/public/ng_mock'),
         'angular-mocks$': require.resolve('./webpackShims/angular-mocks'),
         fixtures: fromRoot('src/fixtures'),
         test_utils: fromRoot('src/test_utils/public'),

@@ -1,17 +1,37 @@
+/*
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
 import _ from 'lodash';
-import React, { Component, PropTypes } from 'react';
+import React, { Component } from 'react';
+import PropTypes from 'prop-types';
 import ticFormatter from '../../lib/tick_formatter';
 import calculateLabel from '../../../../common/calculate_label';
 import { isSortable } from './is_sortable';
-import Tooltip from '../../tooltip';
+import { EuiToolTip } from '@elastic/eui';
 import replaceVars from '../../lib/replace_vars';
 
 function getColor(rules, colorKey, value) {
   let color;
   if (rules) {
     rules.forEach((rule) => {
-      if (rule.opperator && rule.value != null) {
-        if (_[rule.opperator](value, rule.value)) {
+      if (rule.operator && rule.value != null) {
+        if (_[rule.operator](value, rule.value)) {
           color = rule[colorKey];
         }
       }
@@ -102,7 +122,7 @@ class TableVis extends Component {
       );
       if (!isSortable(metric)) {
         headerContent = (
-          <Tooltip text="This Column is Not Sortable">{headerContent}</Tooltip>
+          <EuiToolTip content="This Column is Not Sortable">{headerContent}</EuiToolTip>
         );
       }
 
@@ -111,6 +131,7 @@ class TableVis extends Component {
           className="tsvb-table__columnName"
           onClick={handleClick}
           key={item.id}
+          scope="col"
         >
           {headerContent}
         </th>
@@ -137,7 +158,7 @@ class TableVis extends Component {
     };
     return (
       <tr>
-        <th onClick={handleSortClick}>{label} {sortComponent}</th>
+        <th scope="col" onClick={handleSortClick}>{label} {sortComponent}</th>
         { columns }
       </tr>
     );
@@ -172,7 +193,7 @@ class TableVis extends Component {
       );
     }
     return(
-      <div className={`dashboard__visualization ${reversedClass}`}>
+      <div className={`dashboard__visualization ${reversedClass}`} data-test-subj="tableView">
         <table className="table">
           <thead>
             {header}

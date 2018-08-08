@@ -1,0 +1,6 @@
+/**
+ * 1. Bring the line-height down or else this link expands its container when it becomes visible.
+ */
+ .timeFieldRefreshButton {
+  line-height: 1 !important; /* 1 */
+}

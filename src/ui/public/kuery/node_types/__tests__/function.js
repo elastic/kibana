@@ -1,10 +1,29 @@
+/*
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
 import * as functionType from '../function';
 import _ from 'lodash';
 import expect from 'expect.js';
 import { expectDeepEqual } from '../../../../../test_utils/expect_deep_equal.js';
 import * as isFunction from '../../functions/is';
-import StubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
-import ngMock from 'ng_mock';
+import indexPatternResponse from '../../__tests__/index_pattern_response.json';
+
 import { nodeTypes } from '../../node_types';
 
 describe('kuery node types', function () {
@@ -13,15 +32,15 @@ describe('kuery node types', function () {
 
     let indexPattern;
 
-    beforeEach(ngMock.module('kibana'));
-    beforeEach(ngMock.inject(function (Private) {
-      indexPattern = Private(StubbedLogstashIndexPatternProvider);
-    }));
+
+    beforeEach(() => {
+      indexPattern = indexPatternResponse;
+    });
 
     describe('buildNode', function () {
 
       it('should return a node representing the given kuery function', function () {
-        const result = functionType.buildNode('is', 'response', 200);
+        const result = functionType.buildNode('is', 'extension', 'jpg');
         expect(result).to.have.property('type', 'function');
         expect(result).to.have.property('function', 'is');
         expect(result).to.have.property('arguments');
@@ -32,8 +51,8 @@ describe('kuery node types', function () {
     describe('buildNodeWithArgumentNodes', function () {
 
       it('should return a function node with the given argument list untouched', function () {
-        const fieldNameLiteral = nodeTypes.literal.buildNode('response');
-        const valueLiteral = nodeTypes.literal.buildNode(200);
+        const fieldNameLiteral = nodeTypes.literal.buildNode('extension');
+        const valueLiteral = nodeTypes.literal.buildNode('jpg');
         const argumentNodes = [fieldNameLiteral, valueLiteral];
         const result = functionType.buildNodeWithArgumentNodes('is', argumentNodes);
 
@@ -49,7 +68,7 @@ describe('kuery node types', function () {
     describe('toElasticsearchQuery', function () {
 
       it('should return the given function type\'s ES query representation', function () {
-        const node = functionType.buildNode('is', 'response', 200);
+        const node = functionType.buildNode('is', 'extension', 'jpg');
         const expected = isFunction.toElasticsearchQuery(node, indexPattern);
         const result = functionType.toElasticsearchQuery(node, indexPattern);
         expect(_.isEqual(expected, result)).to.be(true);
@@ -57,32 +76,6 @@ describe('kuery node types', function () {
 
     });
 
-    describe('toKueryExpression', function () {
-
-      it('should return the function syntax representation of the given node by default', function () {
-        const node = functionType.buildNode('exists', 'foo');
-        expect(functionType.toKueryExpression(node)).to.be('exists("foo")');
-      });
-
-      it('should return the function syntax representation of the given node if serializeStyle is "function"', function () {
-        const node = functionType.buildNode('exists', 'foo');
-        node.serializeStyle = 'function';
-        expect(functionType.toKueryExpression(node)).to.be('exists("foo")');
-      });
-
-      it('should defer to the function\'s serializer if another serializeStyle is specified', function () {
-        const node = functionType.buildNode('is', 'response', 200);
-        expect(node.serializeStyle).to.be('operator');
-        expect(functionType.toKueryExpression(node)).to.be('"response":200');
-      });
-
-      it('should simply return the node\'s "text" property if one exists', function () {
-        const node = functionType.buildNode('exists', 'foo');
-        node.text = 'bar';
-        expect(functionType.toKueryExpression(node)).to.be('bar');
-      });
-
-    });
 
   });
 

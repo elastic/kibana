@@ -1,0 +1,26 @@
+{
+  "name": "@kbn/plugin-helpers",
+  "private": true,
+  "version": "9.0.2",
+  "description": "Just some helpers for kibana plugin devs.",
+  "main": "lib/index.js",
+  "bin": {
+    "plugin-helpers": "bin/plugin-helpers.js"
+  },
+  "author": "Spencer Alger <email@spalger.com>",
+  "license": "Apache-2.0",
+  "dependencies": {
+    "argv-split": "^2.0.1",
+    "commander": "^2.9.0",
+    "del": "^2.2.2",
+    "execa": "^0.10.0",
+    "gulp-rename": "1.2.2",
+    "gulp-zip": "^4.1.0",
+    "inquirer": "^1.2.2",
+    "minimatch": "^3.0.4",
+    "node-sass": "^4.9.0",
+    "through2": "^2.0.3",
+    "through2-map": "^3.0.0",
+    "vinyl-fs": "^3.0.0"
+  }
+}

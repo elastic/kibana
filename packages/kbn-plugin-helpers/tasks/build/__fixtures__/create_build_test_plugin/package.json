@@ -1,0 +1,16 @@
+{
+  "name": "create_build_test_plugin",
+  "version": "0.0.1",
+  "kibana": {
+    "version": "6.0.0"
+  },
+  "dependencies": {
+    "noop3": "999.999.999"
+  },
+  "devDependencies": {
+
+  },
+  "scripts": {
+    "start": "node index.js"
+  }
+}

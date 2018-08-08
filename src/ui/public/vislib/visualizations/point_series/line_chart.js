@@ -1,3 +1,22 @@
+/*
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
 import d3 from 'd3';
 import _ from 'lodash';
 import { VislibVisualizationsPointSeriesProvider } from './_point_series';
@@ -53,16 +72,16 @@ export function VislibVisualizationsLineChartProvider(Private) {
         .attr('clip-path', 'url(#' + this.baseChart.clipPathId + ')');
 
       const circles = layer
-      .selectAll('circle')
-      .data(function appendData() {
-        return data.values.filter(function (d) {
-          return !_.isNull(d.y);
+        .selectAll('circle')
+        .data(function appendData() {
+          return data.values.filter(function (d) {
+            return !_.isNull(d.y);
+          });
         });
-      });
 
       circles
-      .exit()
-      .remove();
+        .exit()
+        .remove();
 
       function cx(d) {
         if (ordered && ordered.date) {
@@ -104,27 +123,27 @@ export function VislibVisualizationsLineChartProvider(Private) {
       }
 
       circles
-      .enter()
-      .append('circle')
-      .attr('r', getCircleRadiusFn())
-      .attr('fill-opacity', (this.seriesConfig.drawLinesBetweenPoints ? 1 : 0.7))
-      .attr('cx', isHorizontal ? cx : cy)
-      .attr('cy', isHorizontal ? cy : cx)
-      .attr('class', 'circle-decoration')
-      .attr('data-label', data.label)
-      .attr('fill', colorCircle);
+        .enter()
+        .append('circle')
+        .attr('r', getCircleRadiusFn())
+        .attr('fill-opacity', (this.seriesConfig.drawLinesBetweenPoints ? 1 : 0.7))
+        .attr('cx', isHorizontal ? cx : cy)
+        .attr('cy', isHorizontal ? cy : cx)
+        .attr('class', 'circle-decoration')
+        .attr('data-label', data.label)
+        .attr('fill', colorCircle);
 
       circles
-      .enter()
-      .append('circle')
-      .attr('r', getCircleRadiusFn(10))
-      .attr('cx', isHorizontal ? cx : cy)
-      .attr('cy', isHorizontal ? cy : cx)
-      .attr('fill', 'transparent')
-      .attr('class', 'circle')
-      .attr('data-label', data.label)
-      .attr('stroke', cColor)
-      .attr('stroke-width', 0);
+        .enter()
+        .append('circle')
+        .attr('r', getCircleRadiusFn(10))
+        .attr('cx', isHorizontal ? cx : cy)
+        .attr('cy', isHorizontal ? cy : cx)
+        .attr('fill', 'transparent')
+        .attr('class', 'circle')
+        .attr('data-label', data.label)
+        .attr('stroke', cColor)
+        .attr('stroke-width', 0);
 
       if (isTooltip) {
         circles.call(tooltip.render());
@@ -151,8 +170,8 @@ export function VislibVisualizationsLineChartProvider(Private) {
       const isHorizontal = this.getCategoryAxis().axisConfig.isHorizontal();
 
       const line = svg.append('g')
-      .attr('class', 'pathgroup lines')
-      .attr('clip-path', 'url(#' + this.baseChart.clipPathId + ')');
+        .attr('class', 'pathgroup lines')
+        .attr('clip-path', 'url(#' + this.baseChart.clipPathId + ')');
 
       function cx(d) {
         if (ordered && ordered.date) {
@@ -168,24 +187,24 @@ export function VislibVisualizationsLineChartProvider(Private) {
       }
 
       line.append('path')
-      .attr('data-label', data.label)
-      .attr('d', () => {
-        const d3Line = d3.svg.line()
-          .defined(function (d) {
+        .attr('data-label', data.label)
+        .attr('d', () => {
+          const d3Line = d3.svg.line()
+            .defined(function (d) {
+              return !_.isNull(d.y);
+            })
+            .interpolate(interpolate)
+            .x(isHorizontal ? cx : cy)
+            .y(isHorizontal ? cy : cx);
+          return d3Line(data.values.filter(function (d) {
             return !_.isNull(d.y);
-          })
-          .interpolate(interpolate)
-          .x(isHorizontal ? cx : cy)
-          .y(isHorizontal ? cy : cx);
-        return d3Line(data.values.filter(function (d) {
-          return !_.isNull(d.y);
-        }));
-      })
-      .attr('fill', 'none')
-      .attr('stroke', () => {
-        return color(data.label);
-      })
-      .attr('stroke-width', lineWidth);
+          }));
+        })
+        .attr('fill', 'none')
+        .attr('stroke', () => {
+          return color(data.label);
+        })
+        .attr('stroke-width', lineWidth);
 
       return line;
     }

@@ -1,0 +1,29 @@
+{
+  "cat.thread_pool": {
+    "url_params": {
+      "format": "",
+      "size": [
+        "",
+        "k",
+        "m",
+        "g",
+        "t",
+        "p"
+      ],
+      "local": "__flag__",
+      "master_timeout": "",
+      "h": [],
+      "help": "__flag__",
+      "s": [],
+      "v": "__flag__"
+    },
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "_cat/thread_pool",
+      "_cat/thread_pool/{thread_pool_patterns}"
+    ],
+    "documentation": "http://www.elastic.co/guide/en/elasticsearch/reference/master/cat-thread-pool.html"
+  }
+}

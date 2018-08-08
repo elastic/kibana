@@ -1,0 +1,36 @@
+{
+  "search_template": {
+    "url_params": {
+      "ignore_unavailable": "__flag__",
+      "allow_no_indices": "__flag__",
+      "expand_wildcards": [
+        "open",
+        "closed",
+        "none",
+        "all"
+      ],
+      "preference": "random",
+      "routing": [],
+      "scroll": "",
+      "search_type": [
+        "query_then_fetch",
+        "query_and_fetch",
+        "dfs_query_then_fetch",
+        "dfs_query_and_fetch"
+      ],
+      "explain": "__flag__",
+      "profile": "__flag__",
+      "typed_keys": "__flag__"
+    },
+    "methods": [
+      "GET",
+      "POST"
+    ],
+    "patterns": [
+      "_search/template",
+      "{indices}/_search/template",
+      "{indices}/{type}/_search/template"
+    ],
+    "documentation": "http://www.elastic.co/guide/en/elasticsearch/reference/current/search-template.html"
+  }
+}

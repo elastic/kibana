@@ -1,0 +1,22 @@
+{
+  "type": "index",
+  "value": {
+    "index": "shakespeare",
+    "settings": {
+      "index": {
+        "number_of_shards": "5",
+        "number_of_replicas": "1"
+      }
+    },
+    "mappings": {
+      "doc": {
+        "properties": {
+          "speaker": {"type": "keyword"},
+          "play_name": {"type": "keyword"},
+          "line_id": {"type": "integer"},
+          "speech_number": {"type": "integer"}
+        }
+      }
+    }
+  }
+}

@@ -1,7 +1,26 @@
-import { uiModules } from 'ui/modules';
+/*
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
+import { uiModules } from '../../modules';
 import _ from 'lodash';
 import MarkdownIt from 'markdown-it';
-import { modifyUrl } from 'ui/url';
+import { modifyUrl } from '../../url';
 
 const markdownIt = new MarkdownIt({
   html: false,
@@ -10,7 +29,6 @@ const markdownIt = new MarkdownIt({
 
 uiModules.get('kibana')
   .service('serviceSettings', function ($http, $sanitize, mapConfig, tilemapsConfig, kbnVersion) {
-
 
     const attributionFromConfig = $sanitize(markdownIt.render(tilemapsConfig.deprecated.config.options.attribution || ''));
     const tmsOptionsFromConfig = _.assign({}, tilemapsConfig.deprecated.config.options, { attribution: attributionFromConfig });
@@ -21,7 +39,7 @@ uiModules.get('kibana')
 
     /**
      *  Unescape a url template that was escaped by encodeURI() so leaflet
-     *  will be able to correctly locate the varables in the template
+     *  will be able to correctly locate the variables in the template
      *  @param  {String} url
      *  @return {String}
      */
@@ -47,13 +65,18 @@ uiModules.get('kibana')
       }
       _invalidateSettings() {
 
-        this._loadCatalogue = _.once(async() => {
+        this._loadCatalogue = _.once(async () => {
+
+          if (!mapConfig.includeElasticMapsService) {
+            return { services: [] };
+          }
+
           try {
             const response = await this._getManifest(mapConfig.manifestServiceUrl, this._queryParams);
             return response.data;
           } catch (e) {
             if (!e) {
-              e = new Error('Unkown error');
+              e = new Error('Unknown error');
             }
             if (!(e instanceof Error)) {
               e = new Error(e.data || `status ${e.statusText || e.status}`);
@@ -63,11 +86,16 @@ uiModules.get('kibana')
         });
 
 
-        this._loadFileLayers = _.once(async() => {
+        this._loadFileLayers = _.once(async () => {
           const catalogue = await this._loadCatalogue();
-          const fileService = catalogue.services.filter((service) => service.type === 'file')[0];
+
+          const fileService = catalogue.services.find(service => service.type === 'file');
+          if (!fileService) {
+            return [];
+          }
+
           const manifest = await this._getManifest(fileService.manifest, this._queryParams);
-          const layers = manifest.data.layers.filter(layer => layer.format === 'geojson');
+          const layers = manifest.data.layers.filter(layer => layer.format === 'geojson' || layer.format === 'topojson');
           layers.forEach((layer) => {
             layer.url = this._extendUrlWithParams(layer.url);
             layer.attribution = $sanitize(markdownIt.render(layer.attribution));
@@ -75,29 +103,24 @@ uiModules.get('kibana')
           return layers;
         });
 
-        this._loadTMSServices = _.once(async() => {
-
-          if (tilemapsConfig.deprecated.isOverridden) {//use settings from yml (which are overridden)
-            const tmsService = _.cloneDeep(tmsOptionsFromConfig);
-            tmsService.url = tilemapsConfig.deprecated.config.url;
-            return tmsService;
-          }
+        this._loadTMSServices = _.once(async () => {
 
           const catalogue = await this._loadCatalogue();
-          const tmsService = catalogue.services.filter((service) => service.type === 'tms')[0];
-          const manifest = await this._getManifest(tmsService.manifest, this._queryParams);
-          const services = manifest.data.services;
-
-          const firstService = _.cloneDeep(services[0]);
-          if (!firstService) {
-            throw new Error('Manifest response does not include sufficient service data.');
+          const tmsService = catalogue.services.find((service) => service.type === 'tms');
+          if (!tmsService) {
+            return [];
           }
+          const tmsManifest = await this._getManifest(tmsService.manifest, this._queryParams);
+          const preppedTMSServices = tmsManifest.data.services.map((tmsService) => {
+            const preppedService = _.cloneDeep(tmsService);
+            preppedService.attribution = $sanitize(markdownIt.render(preppedService.attribution));
+            preppedService.subdomains = preppedService.subdomains || [];
+            preppedService.url = this._extendUrlWithParams(preppedService.url);
+            return preppedService;
+          });
 
+          return preppedTMSServices;
 
-          firstService.attribution = $sanitize(markdownIt.render(firstService.attribution));
-          firstService.subdomains = firstService.subdomains || [];
-          firstService.url = this._extendUrlWithParams(firstService.url);
-          return firstService;
         });
 
       }
@@ -108,6 +131,9 @@ uiModules.get('kibana')
         }));
       }
 
+      /**
+       * this internal method is overridden by the tests to simulate custom manifest.
+       */
       async _getManifest(manifestUrl) {
         return $http({
           url: extendUrl(manifestUrl, { query: this._queryParams }),
@@ -120,38 +146,24 @@ uiModules.get('kibana')
         return await this._loadFileLayers();
       }
 
-      async getTMSService() {
 
-        const tmsService = await this._loadTMSServices();
+      /**
+       * Returns all the services published by EMS (if configures)
+       * It also includes the service configured in tilemap (override)
+       */
+      async getTMSServices() {
 
-        return {
-          getUrl: function () {
-            return tmsService.url;
-          },
-          getMinMaxZoom: (isWMSEnabled) => {
-            if (isWMSEnabled) {
-              return {
-                minZoom: 0,
-                maxZoom: 18
-              };
-            }
-            //Otherwise, we use the settings from the yml.
-            //note that it is no longer possible to only override the zoom-settings, since all options are read from the manifest
-            //by default.
-            //For a custom configuration, users will need to override tilemap.url as well.
-            return {
-              minZoom: tmsService.minZoom,
-              maxZoom: tmsService.maxZoom
-            };
-          },
-          getTMSOptions: function () {
-            return tmsService;
-          }
-        };
-      }
+        const allServices = [];
+        if (tilemapsConfig.deprecated.isOverridden) {//use tilemap.* settings from yml
+          const tmsService = _.cloneDeep(tmsOptionsFromConfig);
+          tmsService.url = tilemapsConfig.deprecated.config.url;
+          tmsService.id = 'TMS in config/kibana.yml';
+          allServices.push(tmsService);
+        }
 
-      getFallbackZoomSettings(isWMSEnabled) {
-        return (isWMSEnabled) ? { minZoom: 0, maxZoom: 18 } : { minZoom: 0, maxZoom: 10 };
+        const servicesFromManifest = await this._loadTMSServices();
+        return allServices.concat(servicesFromManifest);
+
       }
 
       /**
@@ -170,6 +182,11 @@ uiModules.get('kibana')
             }
           }
         }
+      }
+
+      getEMSHotLink(fileLayer) {
+        const id = `file/${fileLayer.name}`;
+        return `${mapConfig.emsLandingPageUrl}#${id}`;
       }
     }
 

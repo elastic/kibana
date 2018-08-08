@@ -1,3 +1,22 @@
+/*
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
 /* eslint max-len:0 */
 /* eslint-disable jsx-a11y/anchor-is-valid, jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions */
 // Markdown builder is not yet properly accessible
@@ -7,10 +26,15 @@ import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 import tickFormatter from './lib/tick_formatter';
 import convertSeriesToVars from './lib/convert_series_to_vars';
-import { KuiCodeEditor } from 'ui_framework/components';
+import { KuiCodeEditor } from '@kbn/ui-framework/components';
 import _ from 'lodash';
 import 'brace/mode/markdown';
 import 'brace/theme/github';
+
+import {
+  EuiText,
+  EuiCodeBlock,
+} from '@elastic/eui';
 
 class MarkdownEditor extends Component {
   constructor(props) {
@@ -40,7 +64,7 @@ class MarkdownEditor extends Component {
     const rows = [];
     const rawFormatter = tickFormatter('0.[0000]');
 
-    const createPrimativeRow = key => {
+    const createPrimitiveRow = key => {
       const snippet = `{{ ${key} }}`;
       let value = _.get(variables, key);
       if (/raw$/.test(key)) value = rawFormatter(value);
@@ -82,7 +106,7 @@ class MarkdownEditor extends Component {
         } else if (_.isObject(obj[name])) {
           walk(obj[name], path.concat(name));
         } else {
-          createPrimativeRow(path.concat(name).join('.'));
+          createPrimitiveRow(path.concat(name).join('.'));
         }
       }
     }
@@ -105,39 +129,42 @@ class MarkdownEditor extends Component {
           />
         </div>
         <div className="vis_editor__markdown-variables">
-          <div>
+          <EuiText>
             The following variables can be used in the Markdown by using the Handlebar (mustache) syntax.{' '}
             <a href="http://handlebarsjs.com/expressions.html" target="_BLANK">
               Click here for documentation
             </a>{' '}
             on the available expressions.
-          </div>
+          </EuiText>
           <table className="table">
             <thead>
               <tr>
-                <th>Name</th>
-                <th>Value</th>
+                <th scope="col">Name</th>
+                <th scope="col">Value</th>
               </tr>
             </thead>
             <tbody>{rows}</tbody>
           </table>
           {rows.length === 0 && (
-            <div className="vis_editor__no-markdown-variables">No variables avaliable for the selected data metrics.</div>
+            <div className="vis_editor__no-markdown-variables">No variables available for the selected data metrics.</div>
           )}
 
           <div className="vis_editor__markdown-code-desc">
-            There is also a special variable named <code>_all</code> which you can use to access the entire tree. This is useful for
-            creating lists with data from a group by...
+            <EuiText>
+              <p>
+                There is also a special variable named <code>_all</code> which you can use to access the entire tree. This is useful for
+                creating lists with data from a group by...
+              </p>
+            </EuiText>
           </div>
-          <pre>
-            <code>
-              {`# All servers:
 
-{{#each _all}}
-- {{ label }} {{ last.formatted }}
-{{/each}}`}
-            </code>
-          </pre>
+          <EuiCodeBlock>
+            {`# All servers:
+
+            {{#each _all}}
+            - {{ label }} {{ last.formatted }}
+            {{/each}}`}
+          </EuiCodeBlock>
         </div>
       </div>
     );

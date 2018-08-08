@@ -1,3 +1,30 @@
+.vislib-container {
+  flex: 1 1 0; /* 1 */
+  display: flex;
+  flex-direction: row;
+  overflow: auto;
+
+  &.vislib-container--legend-left {
+    flex-direction: row-reverse;
+  }
+  &.vislib-container--legend-right {
+    flex-direction: row;
+  }
+  &.vislib-container--legend-top {
+    flex-direction: column-reverse;
+  }
+  &.vislib-container--legend-bottom {
+    flex-direction: column;
+  }
+}
+
+.vislib-chart {
+  display: flex;
+  flex: 1 1 auto;
+  min-height: 0;
+  min-width: 0;
+}
+
 .visualize-chart {
   display: flex;
   flex: 1 1 auto;
@@ -17,6 +44,27 @@
 
 .vis-wrapper svg {
   overflow: visible;
+}
+
+/* SVG Element Default Styling */
+.vis-wrapper {
+  rect {
+    opacity: 1;
+
+    &:hover {
+      opacity: @vis-hover-opacity;
+    }
+  }
+
+  circle {
+    opacity: 0;
+
+    &:hover {
+      opacity: 1;
+      stroke-width: 10px;
+      stroke-opacity: @vis-hover-opacity;
+    }
+  }
 }
 
 /* YAxis logic */
@@ -198,4 +246,16 @@
 .chart-last {
   margin-bottom: 0px;
   margin-right: 0px;
+}
+
+.label-line {
+  opacity: .3;
+  stroke: black;
+  stroke-width: 2px;
+  fill: none;
+}
+
+.label-text {
+  font-size: 130%;
+  font-weight: normal;
 }

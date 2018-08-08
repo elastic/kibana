@@ -1,3 +1,22 @@
+/*
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
 /**
  * @name AppState
  *
@@ -8,10 +27,11 @@
  * ability to destroy those mappings.
  */
 
-import _ from 'lodash';
-import { uiModules } from 'ui/modules';
-import { StateProvider } from 'ui/state_management/state';
-import 'ui/persisted_state';
+import { uiModules } from '../modules';
+import { StateProvider } from './state';
+import '../persisted_state';
+import { createLegacyClass } from '../utils/legacy_class';
+import { callEach } from '../utils/function';
 
 const urlParam = '_a';
 
@@ -21,7 +41,7 @@ export function AppStateProvider(Private, $rootScope, $location, $injector) {
   let persistedStates;
   let eventUnsubscribers;
 
-  _.class(AppState).inherits(State);
+  createLegacyClass(AppState).inherits(State);
   function AppState(defaults) {
     // Initialize persistedStates. This object maps "prop" names to
     // PersistedState instances. These are used to make properties "stateful".
@@ -42,7 +62,7 @@ export function AppStateProvider(Private, $rootScope, $location, $injector) {
   AppState.prototype.destroy = function () {
     AppState.Super.prototype.destroy.call(this);
     AppState.getAppState._set(null);
-    _.callEach(eventUnsubscribers);
+    callEach(eventUnsubscribers);
   };
 
   /**
@@ -108,10 +128,10 @@ export function AppStateProvider(Private, $rootScope, $location, $injector) {
 }
 
 uiModules.get('kibana/global_state')
-.factory('AppState', function (Private) {
-  return Private(AppStateProvider);
-})
-.service('getAppState', function (Private) {
-  return Private(AppStateProvider).getAppState;
-});
+  .factory('AppState', function (Private) {
+    return Private(AppStateProvider);
+  })
+  .service('getAppState', function (Private) {
+    return Private(AppStateProvider).getAppState;
+  });
 

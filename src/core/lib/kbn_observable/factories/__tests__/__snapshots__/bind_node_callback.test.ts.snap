@@ -1,0 +1,7 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`errors if callback is called with more than two args 1`] = `
+Array [
+  [Error: Node callback called with too many args],
+]
+`;

@@ -1,3 +1,22 @@
+/*
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
 import fs from 'fs';
 import glob from 'glob';
 import path from 'path';
@@ -10,15 +29,15 @@ const globProm = Promise.promisify(glob);
 /**
  * Return all the translation keys found for the file pattern
  * @param {String} translationPattern - regEx pattern for translations
- * @param {Array<String>} filesPatterns - List of file patterns to be checkd for translation keys
+ * @param {Array<String>} filesPatterns - List of file patterns to be checked for translation keys
  * @return {Promise} - A Promise object which will return a String Array of the translation keys
  * not translated then the Object will contain all non translated translation keys with value of file the key is from
  */
 export function getTranslationKeys(translationPattern, filesPatterns) {
   return getFilesToVerify(filesPatterns)
-  .then(function (filesToVerify) {
-    return getKeys(translationPattern, filesToVerify);
-  });
+    .then(function (filesToVerify) {
+      return getKeys(translationPattern, filesToVerify);
+    });
 }
 
 /**
@@ -46,15 +65,15 @@ function getFilesToVerify(verifyFilesPatterns) {
     const baseSearchDir = path.dirname(verifyFilesPattern);
     const pattern = path.join('**', path.basename(verifyFilesPattern));
     return globProm(pattern, { cwd: baseSearchDir, matchBase: true })
-    .then(function (files) {
-      for (const file of files) {
-        filesToVerify.push(path.join(baseSearchDir, file));
-      }
-    });
+      .then(function (files) {
+        for (const file of files) {
+          filesToVerify.push(path.join(baseSearchDir, file));
+        }
+      });
   })
-  .then(function () {
-    return filesToVerify;
-  });
+    .then(function () {
+      return filesToVerify;
+    });
 }
 
 function getKeys(translationPattern, filesToVerify) {
@@ -63,18 +82,18 @@ function getKeys(translationPattern, filesToVerify) {
 
   const filePromises = _.map(filesToVerify, (file) => {
     return readFile(file, 'utf8')
-    .then(function (fileContents) {
-      let regexMatch;
-      while ((regexMatch = translationRegEx.exec(fileContents)) !== null) {
-        if (regexMatch.length >= 2) {
-          const translationKey = regexMatch[1];
-          translationKeys.push(translationKey);
+      .then(function (fileContents) {
+        let regexMatch;
+        while ((regexMatch = translationRegEx.exec(fileContents)) !== null) {
+          if (regexMatch.length >= 2) {
+            const translationKey = regexMatch[1];
+            translationKeys.push(translationKey);
+          }
         }
-      }
-    });
+      });
   });
   return Promise.all(filePromises)
-  .then(function () {
-    return _.uniq(translationKeys);
-  });
+    .then(function () {
+      return _.uniq(translationKeys);
+    });
 }

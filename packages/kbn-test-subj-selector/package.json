@@ -1,0 +1,16 @@
+{
+  "name": "@kbn/test-subj-selector",
+  "version": "0.2.1",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "mocha test"
+  },
+  "keywords": [],
+  "author": "Spencer Alger <email@spalger.com>",
+  "license": "Apache-2.0",
+  "devDependencies": {
+    "expect.js": "^0.3.1",
+    "mocha": "^2.3.4"
+  }
+}

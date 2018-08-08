@@ -1,0 +1,21 @@
+{
+  "indices.analyze": {
+    "url_params": {
+      "index": "",
+      "prefer_local": "__flag__",
+      "format": [
+        "detailed",
+        "text"
+      ]
+    },
+    "methods": [
+      "GET",
+      "POST"
+    ],
+    "patterns": [
+      "_analyze",
+      "{indices}/_analyze"
+    ],
+    "documentation": "http://www.elastic.co/guide/en/elasticsearch/reference/master/indices-analyze.html"
+  }
+}

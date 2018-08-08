@@ -1,0 +1,93 @@
+<div class="legend-col-wrapper" ng-if="labels.length">
+  <button
+    type="button"
+    ng-click="toggleLegend()"
+    class="kuiCollapseButton legend-collapse-button"
+    aria-label="Toggle legend"
+    aria-expanded="{{!!open}}"
+    aria-controls="{{::legendId}}"
+  >
+    <span class="kuiIcon {{getToggleLegendClasses()}}"></span>
+  </button>
+  <ul class="legend-ul" ng-show="open" id="{{::legendId}}">
+
+    <li
+      ng-repeat="legendData in labels track by legendData.label"
+      ng-mouseenter="highlight($event)"
+      ng-mouseleave="unhighlight($event)"
+      data-label="{{legendData.label}}"
+      class="legend-value color"
+    >
+
+      <div class="legend-value-container" ng-keydown="onLegendEntryKeydown($event, this)">
+        <div
+          kbn-accessible-click
+          data-label="{{legendData.label}}"
+          ng-focus="highlight($event)"
+          ng-blur="unhighlight($event)"
+          ng-click="showDetails = !showDetails"
+          ng-class="showDetails ? 'legend-value-full' : 'legend-value-truncate'"
+          class="legend-value-title"
+          tooltip="{{legendData.label}}"
+          tooltip-animation="false"
+          aria-label="{{legendData.label}}, toggle options"
+          data-test-subj="legend-{{legendData.label}}"
+        >
+          <i
+            class="fa fa-circle"
+            ng-style="{color: getColor(legendData.label)}"
+            data-test-subj="legendSelectedColor-{{getColor(legendData.label)}}"
+          ></i>
+          {{legendData.label}}
+        </div>
+
+        <div ng-if="showDetails" class="legend-value-details">
+          <div
+            class="kuiButtonGroup kuiButtonGroup--united kuiButtonGroup--fullWidth"
+            ng-show="canFilter(legendData)"
+          >
+            <button
+              class="kuiButton kuiButton--basic kuiButton--small"
+              ng-click="filter(legendData, false)"
+              aria-label="Filter for value {{legendData.label}}"
+            >
+              <span class="kuiIcon fa-search-plus"></span>
+            </button>
+
+            <button
+              class="kuiButton kuiButton--basic kuiButton--small"
+              ng-click="filter(legendData, true)"
+              aria-label="Filter out value {{legendData.label}}"
+            >
+              <span class="kuiIcon fa-search-minus"></span>
+            </button>
+          </div>
+
+          <div class="legend-value-color-picker" role="listbox">
+            <span
+              id="{{legendId}}ColorPickerDesc"
+              class="kuiScreenReaderOnly"
+            >
+              Set color for value {{legendData.label}}
+            </span>
+            <i
+              ng-repeat="choice in colors"
+              kbn-accessible-click
+              role="option"
+              aria-label="{{choice}}"
+              aria-describedby="{{legendId}}ColorPickerDesc"
+              aria-selected="{{choice === getColor(legendData.label)}}"
+              ng-click="setColor(legendData.label, choice)"
+              ng-class="choice == getColor(legendData.label) ? 'fa-circle-o' : 'fa-circle'"
+              ng-style="{color: choice}" class="fa dot"
+              data-test-subj="legendSelectColor-{{choice}}"
+            >
+            </i>
+          </div>
+
+        </div>
+      </div>
+
+    </li>
+  </ul>
+</div>

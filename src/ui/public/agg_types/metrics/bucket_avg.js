@@ -1,31 +1,45 @@
+/*
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
 import { get } from 'lodash';
-import { AggTypesMetricsMetricAggTypeProvider } from 'ui/agg_types/metrics/metric_agg_type';
+import { MetricAggType } from './metric_agg_type';
 import { makeNestedLabel } from './lib/make_nested_label';
-import { SiblingPipelineAggHelperProvider } from './lib/sibling_pipeline_agg_helper';
+import { siblingPipelineAggHelper } from './lib/sibling_pipeline_agg_helper';
 
-export function AggTypesMetricsBucketAvgProvider(Private) {
-  const MetricAggType = Private(AggTypesMetricsMetricAggTypeProvider);
-  const siblingPipelineHelper = Private(SiblingPipelineAggHelperProvider);
+export const bucketAvgMetricAgg = new MetricAggType({
+  name: 'avg_bucket',
+  title: 'Average Bucket',
+  makeLabel: agg => makeNestedLabel(agg, 'overall average'),
+  subtype: siblingPipelineAggHelper.subtype,
+  params: [
+    ...siblingPipelineAggHelper.params()
+  ],
+  getFormat: siblingPipelineAggHelper.getFormat,
+  getValue: function (agg, bucket) {
+    const customMetric = agg.params.customMetric;
+    const scaleMetrics = customMetric.type && customMetric.type.isScalable();
 
-  return new MetricAggType({
-    name: 'avg_bucket',
-    title: 'Average Bucket',
-    makeLabel: agg => makeNestedLabel(agg, 'overall average'),
-    subtype: siblingPipelineHelper.subtype,
-    params: [
-      ...siblingPipelineHelper.params()
-    ],
-    getFormat: siblingPipelineHelper.getFormat,
-    getValue: function (agg, bucket) {
-      const customMetric = agg.params.customMetric;
-      const scaleMetrics = customMetric.type && customMetric.type.isScalable();
-
-      let value = bucket[agg.id] && bucket[agg.id].value;
-      if (scaleMetrics) {
-        const aggInfo = agg.params.customBucket.write();
-        value *= get(aggInfo, 'bucketInterval.scale', 1);
-      }
-      return value;
+    let value = bucket[agg.id] && bucket[agg.id].value;
+    if (scaleMetrics && agg.params.customBucket.type.name === 'date_histogram') {
+      const aggInfo = agg.params.customBucket.write();
+      value *= get(aggInfo, 'bucketInterval.scale', 1);
     }
-  });
-}
+    return value;
+  }
+});

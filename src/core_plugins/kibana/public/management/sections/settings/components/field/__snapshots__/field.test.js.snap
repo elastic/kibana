@@ -1,0 +1,2341 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Field for array setting should render custom setting icon if it is custom 1`] = `
+<EuiFlexGroup
+  alignItems="stretch"
+  className="advancedSettings__field"
+  component="div"
+  direction="row"
+  gutterSize="l"
+  justifyContent="flexStart"
+  responsive={true}
+  wrap={false}
+>
+  <EuiFlexItem
+    component="div"
+    grow={false}
+  >
+    <EuiDescribedFormGroup
+      className="advancedSettings__field__wrapper"
+      description={
+        <UNDEFINED>
+          <div
+            dangerouslySetInnerHTML={
+              Object {
+                "__html": "Description for Array test setting",
+              }
+            }
+          />
+        </UNDEFINED>
+      }
+      fullWidth={false}
+      gutterSize="l"
+      idAria="array:test:setting-aria"
+      title={
+        <h3>
+          Array test setting
+          <EuiIconTip
+            aria-label="Custom setting"
+            color="primary"
+            content="Custom setting"
+            type="asterisk"
+          />
+        </h3>
+      }
+      titleSize="xs"
+    >
+      <EuiFormRow
+        describedByIds={
+          Array [
+            "array:test:setting-aria",
+          ]
+        }
+        error={null}
+        fullWidth={false}
+        hasEmptyLabelSpace={false}
+        helpText={null}
+        isInvalid={false}
+        label={
+          <span
+            aria-label="array test setting"
+          >
+            array:test:setting
+          </span>
+        }
+      >
+        <EuiFieldText
+          compressed={false}
+          data-test-subj="advancedSetting-editField-array:test:setting"
+          disabled={false}
+          fullWidth={false}
+          isLoading={false}
+          onChange={[Function]}
+          onKeyDown={[Function]}
+          value="default_value"
+        />
+      </EuiFormRow>
+    </EuiDescribedFormGroup>
+  </EuiFlexItem>
+  <EuiFlexItem
+    component="div"
+    grow={false}
+  />
+</EuiFlexGroup>
+`;
+
+exports[`Field for array setting should render default value if there is no user value set 1`] = `
+<EuiFlexGroup
+  alignItems="stretch"
+  className="advancedSettings__field"
+  component="div"
+  direction="row"
+  gutterSize="l"
+  justifyContent="flexStart"
+  responsive={true}
+  wrap={false}
+>
+  <EuiFlexItem
+    component="div"
+    grow={false}
+  >
+    <EuiDescribedFormGroup
+      className="advancedSettings__field__wrapper"
+      description={
+        <UNDEFINED>
+          <div
+            dangerouslySetInnerHTML={
+              Object {
+                "__html": "Description for Array test setting",
+              }
+            }
+          />
+        </UNDEFINED>
+      }
+      fullWidth={false}
+      gutterSize="l"
+      idAria="array:test:setting-aria"
+      title={
+        <h3>
+          Array test setting
+          
+        </h3>
+      }
+      titleSize="xs"
+    >
+      <EuiFormRow
+        describedByIds={
+          Array [
+            "array:test:setting-aria",
+          ]
+        }
+        error={null}
+        fullWidth={false}
+        hasEmptyLabelSpace={false}
+        helpText={null}
+        isInvalid={false}
+        label={
+          <span
+            aria-label="array test setting"
+          >
+            array:test:setting
+          </span>
+        }
+      >
+        <EuiFieldText
+          compressed={false}
+          data-test-subj="advancedSetting-editField-array:test:setting"
+          disabled={false}
+          fullWidth={false}
+          isLoading={false}
+          onChange={[Function]}
+          onKeyDown={[Function]}
+          value="default_value"
+        />
+      </EuiFormRow>
+    </EuiDescribedFormGroup>
+  </EuiFlexItem>
+  <EuiFlexItem
+    component="div"
+    grow={false}
+  />
+</EuiFlexGroup>
+`;
+
+exports[`Field for array setting should render user value if there is user value is set 1`] = `
+<EuiFlexGroup
+  alignItems="stretch"
+  className="advancedSettings__field"
+  component="div"
+  direction="row"
+  gutterSize="l"
+  justifyContent="flexStart"
+  responsive={true}
+  wrap={false}
+>
+  <EuiFlexItem
+    component="div"
+    grow={false}
+  >
+    <EuiDescribedFormGroup
+      className="advancedSettings__field__wrapper"
+      description={
+        <UNDEFINED>
+          <div
+            dangerouslySetInnerHTML={
+              Object {
+                "__html": "Description for Array test setting",
+              }
+            }
+          />
+          <UNDEFINED>
+            <EuiSpacer
+              size="s"
+            />
+            <EuiText
+              grow={true}
+              size="xs"
+            >
+              <UNDEFINED>
+                Default: 
+                <EuiCode>
+                  default_value
+                </EuiCode>
+              </UNDEFINED>
+            </EuiText>
+          </UNDEFINED>
+        </UNDEFINED>
+      }
+      fullWidth={false}
+      gutterSize="l"
+      idAria="array:test:setting-aria"
+      title={
+        <h3>
+          Array test setting
+          
+        </h3>
+      }
+      titleSize="xs"
+    >
+      <EuiFormRow
+        describedByIds={
+          Array [
+            "array:test:setting-aria",
+          ]
+        }
+        error={null}
+        fullWidth={false}
+        hasEmptyLabelSpace={false}
+        helpText={
+          <span>
+            <span>
+              <EuiLink
+                aria-label="Reset array test setting to default"
+                color="primary"
+                data-test-subj="advancedSetting-resetField-array:test:setting"
+                onClick={[Function]}
+                type="button"
+              >
+                Reset to default
+              </EuiLink>
+                 
+            </span>
+          </span>
+        }
+        isInvalid={false}
+        label={
+          <span
+            aria-label="array test setting"
+          >
+            array:test:setting
+          </span>
+        }
+      >
+        <EuiFieldText
+          compressed={false}
+          data-test-subj="advancedSetting-editField-array:test:setting"
+          disabled={false}
+          fullWidth={false}
+          isLoading={false}
+          onChange={[Function]}
+          onKeyDown={[Function]}
+          value="user, value"
+        />
+      </EuiFormRow>
+    </EuiDescribedFormGroup>
+  </EuiFlexItem>
+  <EuiFlexItem
+    component="div"
+    grow={false}
+  />
+</EuiFlexGroup>
+`;
+
+exports[`Field for boolean setting should render custom setting icon if it is custom 1`] = `
+<EuiFlexGroup
+  alignItems="stretch"
+  className="advancedSettings__field"
+  component="div"
+  direction="row"
+  gutterSize="l"
+  justifyContent="flexStart"
+  responsive={true}
+  wrap={false}
+>
+  <EuiFlexItem
+    component="div"
+    grow={false}
+  >
+    <EuiDescribedFormGroup
+      className="advancedSettings__field__wrapper"
+      description={
+        <UNDEFINED>
+          <div
+            dangerouslySetInnerHTML={
+              Object {
+                "__html": "Description for Boolean test setting",
+              }
+            }
+          />
+        </UNDEFINED>
+      }
+      fullWidth={false}
+      gutterSize="l"
+      idAria="boolean:test:setting-aria"
+      title={
+        <h3>
+          Boolean test setting
+          <EuiIconTip
+            aria-label="Custom setting"
+            color="primary"
+            content="Custom setting"
+            type="asterisk"
+          />
+        </h3>
+      }
+      titleSize="xs"
+    >
+      <EuiFormRow
+        describedByIds={
+          Array [
+            "boolean:test:setting-aria",
+          ]
+        }
+        error={null}
+        fullWidth={false}
+        hasEmptyLabelSpace={false}
+        helpText={null}
+        isInvalid={false}
+        label={
+          <span
+            aria-label="boolean test setting"
+          >
+            boolean:test:setting
+          </span>
+        }
+      >
+        <EuiSwitch
+          checked={true}
+          data-test-subj="advancedSetting-editField-boolean:test:setting"
+          disabled={false}
+          label="On"
+          onChange={[Function]}
+          onKeyDown={[Function]}
+        />
+      </EuiFormRow>
+    </EuiDescribedFormGroup>
+  </EuiFlexItem>
+  <EuiFlexItem
+    component="div"
+    grow={false}
+  />
+</EuiFlexGroup>
+`;
+
+exports[`Field for boolean setting should render default value if there is no user value set 1`] = `
+<EuiFlexGroup
+  alignItems="stretch"
+  className="advancedSettings__field"
+  component="div"
+  direction="row"
+  gutterSize="l"
+  justifyContent="flexStart"
+  responsive={true}
+  wrap={false}
+>
+  <EuiFlexItem
+    component="div"
+    grow={false}
+  >
+    <EuiDescribedFormGroup
+      className="advancedSettings__field__wrapper"
+      description={
+        <UNDEFINED>
+          <div
+            dangerouslySetInnerHTML={
+              Object {
+                "__html": "Description for Boolean test setting",
+              }
+            }
+          />
+        </UNDEFINED>
+      }
+      fullWidth={false}
+      gutterSize="l"
+      idAria="boolean:test:setting-aria"
+      title={
+        <h3>
+          Boolean test setting
+          
+        </h3>
+      }
+      titleSize="xs"
+    >
+      <EuiFormRow
+        describedByIds={
+          Array [
+            "boolean:test:setting-aria",
+          ]
+        }
+        error={null}
+        fullWidth={false}
+        hasEmptyLabelSpace={false}
+        helpText={null}
+        isInvalid={false}
+        label={
+          <span
+            aria-label="boolean test setting"
+          >
+            boolean:test:setting
+          </span>
+        }
+      >
+        <EuiSwitch
+          checked={true}
+          data-test-subj="advancedSetting-editField-boolean:test:setting"
+          disabled={false}
+          label="On"
+          onChange={[Function]}
+          onKeyDown={[Function]}
+        />
+      </EuiFormRow>
+    </EuiDescribedFormGroup>
+  </EuiFlexItem>
+  <EuiFlexItem
+    component="div"
+    grow={false}
+  />
+</EuiFlexGroup>
+`;
+
+exports[`Field for boolean setting should render user value if there is user value is set 1`] = `
+<EuiFlexGroup
+  alignItems="stretch"
+  className="advancedSettings__field"
+  component="div"
+  direction="row"
+  gutterSize="l"
+  justifyContent="flexStart"
+  responsive={true}
+  wrap={false}
+>
+  <EuiFlexItem
+    component="div"
+    grow={false}
+  >
+    <EuiDescribedFormGroup
+      className="advancedSettings__field__wrapper"
+      description={
+        <UNDEFINED>
+          <div
+            dangerouslySetInnerHTML={
+              Object {
+                "__html": "Description for Boolean test setting",
+              }
+            }
+          />
+          <UNDEFINED>
+            <EuiSpacer
+              size="s"
+            />
+            <EuiText
+              grow={true}
+              size="xs"
+            >
+              <UNDEFINED>
+                Default: 
+                <EuiCode>
+                  true
+                </EuiCode>
+              </UNDEFINED>
+            </EuiText>
+          </UNDEFINED>
+        </UNDEFINED>
+      }
+      fullWidth={false}
+      gutterSize="l"
+      idAria="boolean:test:setting-aria"
+      title={
+        <h3>
+          Boolean test setting
+          
+        </h3>
+      }
+      titleSize="xs"
+    >
+      <EuiFormRow
+        describedByIds={
+          Array [
+            "boolean:test:setting-aria",
+          ]
+        }
+        error={null}
+        fullWidth={false}
+        hasEmptyLabelSpace={false}
+        helpText={
+          <span>
+            <span>
+              <EuiLink
+                aria-label="Reset boolean test setting to default"
+                color="primary"
+                data-test-subj="advancedSetting-resetField-boolean:test:setting"
+                onClick={[Function]}
+                type="button"
+              >
+                Reset to default
+              </EuiLink>
+                 
+            </span>
+          </span>
+        }
+        isInvalid={false}
+        label={
+          <span
+            aria-label="boolean test setting"
+          >
+            boolean:test:setting
+          </span>
+        }
+      >
+        <EuiSwitch
+          checked={false}
+          data-test-subj="advancedSetting-editField-boolean:test:setting"
+          disabled={false}
+          label="Off"
+          onChange={[Function]}
+          onKeyDown={[Function]}
+        />
+      </EuiFormRow>
+    </EuiDescribedFormGroup>
+  </EuiFlexItem>
+  <EuiFlexItem
+    component="div"
+    grow={false}
+  />
+</EuiFlexGroup>
+`;
+
+exports[`Field for image setting should render custom setting icon if it is custom 1`] = `
+<EuiFlexGroup
+  alignItems="stretch"
+  className="advancedSettings__field"
+  component="div"
+  direction="row"
+  gutterSize="l"
+  justifyContent="flexStart"
+  responsive={true}
+  wrap={false}
+>
+  <EuiFlexItem
+    component="div"
+    grow={false}
+  >
+    <EuiDescribedFormGroup
+      className="advancedSettings__field__wrapper"
+      description={
+        <UNDEFINED>
+          <div
+            dangerouslySetInnerHTML={
+              Object {
+                "__html": "Description for Image test setting",
+              }
+            }
+          />
+        </UNDEFINED>
+      }
+      fullWidth={false}
+      gutterSize="l"
+      idAria="image:test:setting-aria"
+      title={
+        <h3>
+          Image test setting
+          <EuiIconTip
+            aria-label="Custom setting"
+            color="primary"
+            content="Custom setting"
+            type="asterisk"
+          />
+        </h3>
+      }
+      titleSize="xs"
+    >
+      <EuiFormRow
+        describedByIds={
+          Array [
+            "image:test:setting-aria",
+          ]
+        }
+        error={null}
+        fullWidth={false}
+        hasEmptyLabelSpace={false}
+        helpText={null}
+        isInvalid={false}
+        label={
+          <span
+            aria-label="image test setting"
+          >
+            image:test:setting
+          </span>
+        }
+      >
+        <EuiFilePicker
+          accept=".jpg,.jpeg,.png"
+          compressed={false}
+          data-test-subj="advancedSetting-editField-image:test:setting"
+          disabled={false}
+          initialPromptText="Select or drag and drop a file"
+          onChange={[Function]}
+          onKeyDown={[Function]}
+        />
+      </EuiFormRow>
+    </EuiDescribedFormGroup>
+  </EuiFlexItem>
+  <EuiFlexItem
+    component="div"
+    grow={false}
+  />
+</EuiFlexGroup>
+`;
+
+exports[`Field for image setting should render default value if there is no user value set 1`] = `
+<EuiFlexGroup
+  alignItems="stretch"
+  className="advancedSettings__field"
+  component="div"
+  direction="row"
+  gutterSize="l"
+  justifyContent="flexStart"
+  responsive={true}
+  wrap={false}
+>
+  <EuiFlexItem
+    component="div"
+    grow={false}
+  >
+    <EuiDescribedFormGroup
+      className="advancedSettings__field__wrapper"
+      description={
+        <UNDEFINED>
+          <div
+            dangerouslySetInnerHTML={
+              Object {
+                "__html": "Description for Image test setting",
+              }
+            }
+          />
+        </UNDEFINED>
+      }
+      fullWidth={false}
+      gutterSize="l"
+      idAria="image:test:setting-aria"
+      title={
+        <h3>
+          Image test setting
+          
+        </h3>
+      }
+      titleSize="xs"
+    >
+      <EuiFormRow
+        describedByIds={
+          Array [
+            "image:test:setting-aria",
+          ]
+        }
+        error={null}
+        fullWidth={false}
+        hasEmptyLabelSpace={false}
+        helpText={null}
+        isInvalid={false}
+        label={
+          <span
+            aria-label="image test setting"
+          >
+            image:test:setting
+          </span>
+        }
+      >
+        <EuiFilePicker
+          accept=".jpg,.jpeg,.png"
+          compressed={false}
+          data-test-subj="advancedSetting-editField-image:test:setting"
+          disabled={false}
+          initialPromptText="Select or drag and drop a file"
+          onChange={[Function]}
+          onKeyDown={[Function]}
+        />
+      </EuiFormRow>
+    </EuiDescribedFormGroup>
+  </EuiFlexItem>
+  <EuiFlexItem
+    component="div"
+    grow={false}
+  />
+</EuiFlexGroup>
+`;
+
+exports[`Field for image setting should render user value if there is user value is set 1`] = `
+<EuiFlexGroup
+  alignItems="stretch"
+  className="advancedSettings__field"
+  component="div"
+  direction="row"
+  gutterSize="l"
+  justifyContent="flexStart"
+  responsive={true}
+  wrap={false}
+>
+  <EuiFlexItem
+    component="div"
+    grow={false}
+  >
+    <EuiDescribedFormGroup
+      className="advancedSettings__field__wrapper"
+      description={
+        <UNDEFINED>
+          <div
+            dangerouslySetInnerHTML={
+              Object {
+                "__html": "Description for Image test setting",
+              }
+            }
+          />
+          <UNDEFINED>
+            <EuiSpacer
+              size="s"
+            />
+            <EuiText
+              grow={true}
+              size="xs"
+            >
+              <UNDEFINED>
+                Default: 
+                <EuiCode>
+                  null
+                </EuiCode>
+              </UNDEFINED>
+            </EuiText>
+          </UNDEFINED>
+        </UNDEFINED>
+      }
+      fullWidth={false}
+      gutterSize="l"
+      idAria="image:test:setting-aria"
+      title={
+        <h3>
+          Image test setting
+          
+        </h3>
+      }
+      titleSize="xs"
+    >
+      <EuiFormRow
+        describedByIds={
+          Array [
+            "image:test:setting-aria",
+          ]
+        }
+        error={null}
+        fullWidth={false}
+        hasEmptyLabelSpace={false}
+        helpText={
+          <span>
+            <span>
+              <EuiLink
+                aria-label="Reset image test setting to default"
+                color="primary"
+                data-test-subj="advancedSetting-resetField-image:test:setting"
+                onClick={[Function]}
+                type="button"
+              >
+                Reset to default
+              </EuiLink>
+                 
+            </span>
+            <span>
+              <EuiLink
+                aria-label="Change image test setting"
+                color="primary"
+                data-test-subj="advancedSetting-changeImage-image:test:setting"
+                onClick={[Function]}
+                type="button"
+              >
+                Change image
+              </EuiLink>
+            </span>
+          </span>
+        }
+        isInvalid={false}
+        label={
+          <span
+            aria-label="image test setting"
+          >
+            image:test:setting
+          </span>
+        }
+      >
+        <EuiImage
+          allowFullScreen={true}
+          alt="image:test:setting"
+          fullScreenIconColor="light"
+          size="original"
+          url="data:image/gif;base64,R0lGODlhAQABAIAAAP///wAAACH5BAEAAAAALAAAAAABAAEAAAICRAEAOw=="
+        />
+      </EuiFormRow>
+    </EuiDescribedFormGroup>
+  </EuiFlexItem>
+  <EuiFlexItem
+    component="div"
+    grow={false}
+  />
+</EuiFlexGroup>
+`;
+
+exports[`Field for json setting should render custom setting icon if it is custom 1`] = `
+<EuiFlexGroup
+  alignItems="stretch"
+  className="advancedSettings__field"
+  component="div"
+  direction="row"
+  gutterSize="l"
+  justifyContent="flexStart"
+  responsive={true}
+  wrap={false}
+>
+  <EuiFlexItem
+    component="div"
+    grow={false}
+  >
+    <EuiDescribedFormGroup
+      className="advancedSettings__field__wrapper"
+      description={
+        <UNDEFINED>
+          <div
+            dangerouslySetInnerHTML={
+              Object {
+                "__html": "Description for Json test setting",
+              }
+            }
+          />
+        </UNDEFINED>
+      }
+      fullWidth={false}
+      gutterSize="l"
+      idAria="json:test:setting-aria"
+      title={
+        <h3>
+          Json test setting
+          <EuiIconTip
+            aria-label="Custom setting"
+            color="primary"
+            content="Custom setting"
+            type="asterisk"
+          />
+        </h3>
+      }
+      titleSize="xs"
+    >
+      <EuiFormRow
+        describedByIds={
+          Array [
+            "json:test:setting-aria",
+          ]
+        }
+        error={null}
+        fullWidth={false}
+        hasEmptyLabelSpace={false}
+        helpText={null}
+        isInvalid={false}
+        label={
+          <span
+            aria-label="json test setting"
+          >
+            json:test:setting
+          </span>
+        }
+      >
+        <div
+          data-test-subj="advancedSetting-editField-json:test:setting"
+        >
+          <EuiCodeEditor
+            editorProps={
+              Object {
+                "$blockScrolling": Infinity,
+              }
+            }
+            height="auto"
+            maxLines={30}
+            minLines={6}
+            mode="json"
+            onChange={[Function]}
+            setOptions={
+              Object {
+                "showLineNumbers": false,
+                "tabSize": 2,
+              }
+            }
+            theme="textmate"
+            value="{\\"foo\\": \\"bar\\"}"
+            width="100%"
+          />
+        </div>
+      </EuiFormRow>
+    </EuiDescribedFormGroup>
+  </EuiFlexItem>
+  <EuiFlexItem
+    component="div"
+    grow={false}
+  />
+</EuiFlexGroup>
+`;
+
+exports[`Field for json setting should render default value if there is no user value set 1`] = `
+<EuiFlexGroup
+  alignItems="stretch"
+  className="advancedSettings__field"
+  component="div"
+  direction="row"
+  gutterSize="l"
+  justifyContent="flexStart"
+  responsive={true}
+  wrap={false}
+>
+  <EuiFlexItem
+    component="div"
+    grow={false}
+  >
+    <EuiDescribedFormGroup
+      className="advancedSettings__field__wrapper"
+      description={
+        <UNDEFINED>
+          <div
+            dangerouslySetInnerHTML={
+              Object {
+                "__html": "Description for Json test setting",
+              }
+            }
+          />
+          <UNDEFINED>
+            <EuiSpacer
+              size="s"
+            />
+            <EuiText
+              grow={true}
+              size="xs"
+            >
+              <UNDEFINED>
+                Default:
+                <EuiCodeBlock
+                  language="json"
+                  overflowHeight={null}
+                  paddingSize="s"
+                >
+                  {}
+                </EuiCodeBlock>
+              </UNDEFINED>
+            </EuiText>
+          </UNDEFINED>
+        </UNDEFINED>
+      }
+      fullWidth={false}
+      gutterSize="l"
+      idAria="json:test:setting-aria"
+      title={
+        <h3>
+          Json test setting
+          
+        </h3>
+      }
+      titleSize="xs"
+    >
+      <EuiFormRow
+        describedByIds={
+          Array [
+            "json:test:setting-aria",
+          ]
+        }
+        error={null}
+        fullWidth={false}
+        hasEmptyLabelSpace={false}
+        helpText={
+          <span>
+            <span>
+              <EuiLink
+                aria-label="Reset json test setting to default"
+                color="primary"
+                data-test-subj="advancedSetting-resetField-json:test:setting"
+                onClick={[Function]}
+                type="button"
+              >
+                Reset to default
+              </EuiLink>
+                 
+            </span>
+          </span>
+        }
+        isInvalid={false}
+        label={
+          <span
+            aria-label="json test setting"
+          >
+            json:test:setting
+          </span>
+        }
+      >
+        <div
+          data-test-subj="advancedSetting-editField-json:test:setting"
+        >
+          <EuiCodeEditor
+            editorProps={
+              Object {
+                "$blockScrolling": Infinity,
+              }
+            }
+            height="auto"
+            maxLines={30}
+            minLines={6}
+            mode="json"
+            onChange={[Function]}
+            setOptions={
+              Object {
+                "showLineNumbers": false,
+                "tabSize": 2,
+              }
+            }
+            theme="textmate"
+            value="{\\"foo\\": \\"bar\\"}"
+            width="100%"
+          />
+        </div>
+      </EuiFormRow>
+    </EuiDescribedFormGroup>
+  </EuiFlexItem>
+  <EuiFlexItem
+    component="div"
+    grow={false}
+  />
+</EuiFlexGroup>
+`;
+
+exports[`Field for json setting should render user value if there is user value is set 1`] = `
+<EuiFlexGroup
+  alignItems="stretch"
+  className="advancedSettings__field"
+  component="div"
+  direction="row"
+  gutterSize="l"
+  justifyContent="flexStart"
+  responsive={true}
+  wrap={false}
+>
+  <EuiFlexItem
+    component="div"
+    grow={false}
+  >
+    <EuiDescribedFormGroup
+      className="advancedSettings__field__wrapper"
+      description={
+        <UNDEFINED>
+          <div
+            dangerouslySetInnerHTML={
+              Object {
+                "__html": "Description for Json test setting",
+              }
+            }
+          />
+          <UNDEFINED>
+            <EuiSpacer
+              size="s"
+            />
+            <EuiText
+              grow={true}
+              size="xs"
+            >
+              <UNDEFINED>
+                Default:
+                <EuiCodeBlock
+                  language="json"
+                  overflowHeight={null}
+                  paddingSize="s"
+                >
+                  {}
+                </EuiCodeBlock>
+              </UNDEFINED>
+            </EuiText>
+          </UNDEFINED>
+        </UNDEFINED>
+      }
+      fullWidth={false}
+      gutterSize="l"
+      idAria="json:test:setting-aria"
+      title={
+        <h3>
+          Json test setting
+          
+        </h3>
+      }
+      titleSize="xs"
+    >
+      <EuiFormRow
+        describedByIds={
+          Array [
+            "json:test:setting-aria",
+          ]
+        }
+        error={null}
+        fullWidth={false}
+        hasEmptyLabelSpace={false}
+        helpText={
+          <span>
+            <span>
+              <EuiLink
+                aria-label="Reset json test setting to default"
+                color="primary"
+                data-test-subj="advancedSetting-resetField-json:test:setting"
+                onClick={[Function]}
+                type="button"
+              >
+                Reset to default
+              </EuiLink>
+                 
+            </span>
+          </span>
+        }
+        isInvalid={false}
+        label={
+          <span
+            aria-label="json test setting"
+          >
+            json:test:setting
+          </span>
+        }
+      >
+        <div
+          data-test-subj="advancedSetting-editField-json:test:setting"
+        >
+          <EuiCodeEditor
+            editorProps={
+              Object {
+                "$blockScrolling": Infinity,
+              }
+            }
+            height="auto"
+            maxLines={30}
+            minLines={6}
+            mode="json"
+            onChange={[Function]}
+            setOptions={
+              Object {
+                "showLineNumbers": false,
+                "tabSize": 2,
+              }
+            }
+            theme="textmate"
+            value="{\\"hello\\": \\"world\\"}"
+            width="100%"
+          />
+        </div>
+      </EuiFormRow>
+    </EuiDescribedFormGroup>
+  </EuiFlexItem>
+  <EuiFlexItem
+    component="div"
+    grow={false}
+  />
+</EuiFlexGroup>
+`;
+
+exports[`Field for markdown setting should render custom setting icon if it is custom 1`] = `
+<EuiFlexGroup
+  alignItems="stretch"
+  className="advancedSettings__field"
+  component="div"
+  direction="row"
+  gutterSize="l"
+  justifyContent="flexStart"
+  responsive={true}
+  wrap={false}
+>
+  <EuiFlexItem
+    component="div"
+    grow={false}
+  >
+    <EuiDescribedFormGroup
+      className="advancedSettings__field__wrapper"
+      description={
+        <UNDEFINED>
+          <div
+            dangerouslySetInnerHTML={
+              Object {
+                "__html": "Description for Markdown test setting",
+              }
+            }
+          />
+        </UNDEFINED>
+      }
+      fullWidth={false}
+      gutterSize="l"
+      idAria="markdown:test:setting-aria"
+      title={
+        <h3>
+          Markdown test setting
+          <EuiIconTip
+            aria-label="Custom setting"
+            color="primary"
+            content="Custom setting"
+            type="asterisk"
+          />
+        </h3>
+      }
+      titleSize="xs"
+    >
+      <EuiFormRow
+        describedByIds={
+          Array [
+            "markdown:test:setting-aria",
+          ]
+        }
+        error={null}
+        fullWidth={false}
+        hasEmptyLabelSpace={false}
+        helpText={null}
+        isInvalid={false}
+        label={
+          <span
+            aria-label="markdown test setting"
+          >
+            markdown:test:setting
+          </span>
+        }
+      >
+        <div
+          data-test-subj="advancedSetting-editField-markdown:test:setting"
+        >
+          <EuiCodeEditor
+            editorProps={
+              Object {
+                "$blockScrolling": Infinity,
+              }
+            }
+            height="auto"
+            maxLines={30}
+            minLines={6}
+            mode="markdown"
+            onChange={[Function]}
+            setOptions={
+              Object {
+                "showLineNumbers": false,
+                "tabSize": 2,
+              }
+            }
+            theme="textmate"
+            value=""
+            width="100%"
+          />
+        </div>
+      </EuiFormRow>
+    </EuiDescribedFormGroup>
+  </EuiFlexItem>
+  <EuiFlexItem
+    component="div"
+    grow={false}
+  />
+</EuiFlexGroup>
+`;
+
+exports[`Field for markdown setting should render default value if there is no user value set 1`] = `
+<EuiFlexGroup
+  alignItems="stretch"
+  className="advancedSettings__field"
+  component="div"
+  direction="row"
+  gutterSize="l"
+  justifyContent="flexStart"
+  responsive={true}
+  wrap={false}
+>
+  <EuiFlexItem
+    component="div"
+    grow={false}
+  >
+    <EuiDescribedFormGroup
+      className="advancedSettings__field__wrapper"
+      description={
+        <UNDEFINED>
+          <div
+            dangerouslySetInnerHTML={
+              Object {
+                "__html": "Description for Markdown test setting",
+              }
+            }
+          />
+        </UNDEFINED>
+      }
+      fullWidth={false}
+      gutterSize="l"
+      idAria="markdown:test:setting-aria"
+      title={
+        <h3>
+          Markdown test setting
+          
+        </h3>
+      }
+      titleSize="xs"
+    >
+      <EuiFormRow
+        describedByIds={
+          Array [
+            "markdown:test:setting-aria",
+          ]
+        }
+        error={null}
+        fullWidth={false}
+        hasEmptyLabelSpace={false}
+        helpText={null}
+        isInvalid={false}
+        label={
+          <span
+            aria-label="markdown test setting"
+          >
+            markdown:test:setting
+          </span>
+        }
+      >
+        <div
+          data-test-subj="advancedSetting-editField-markdown:test:setting"
+        >
+          <EuiCodeEditor
+            editorProps={
+              Object {
+                "$blockScrolling": Infinity,
+              }
+            }
+            height="auto"
+            maxLines={30}
+            minLines={6}
+            mode="markdown"
+            onChange={[Function]}
+            setOptions={
+              Object {
+                "showLineNumbers": false,
+                "tabSize": 2,
+              }
+            }
+            theme="textmate"
+            value=""
+            width="100%"
+          />
+        </div>
+      </EuiFormRow>
+    </EuiDescribedFormGroup>
+  </EuiFlexItem>
+  <EuiFlexItem
+    component="div"
+    grow={false}
+  />
+</EuiFlexGroup>
+`;
+
+exports[`Field for markdown setting should render user value if there is user value is set 1`] = `
+<EuiFlexGroup
+  alignItems="stretch"
+  className="advancedSettings__field"
+  component="div"
+  direction="row"
+  gutterSize="l"
+  justifyContent="flexStart"
+  responsive={true}
+  wrap={false}
+>
+  <EuiFlexItem
+    component="div"
+    grow={false}
+  >
+    <EuiDescribedFormGroup
+      className="advancedSettings__field__wrapper"
+      description={
+        <UNDEFINED>
+          <div
+            dangerouslySetInnerHTML={
+              Object {
+                "__html": "Description for Markdown test setting",
+              }
+            }
+          />
+          <UNDEFINED>
+            <EuiSpacer
+              size="s"
+            />
+            <EuiText
+              grow={true}
+              size="xs"
+            >
+              <UNDEFINED>
+                Default: 
+                <EuiCode>
+                  null
+                </EuiCode>
+              </UNDEFINED>
+            </EuiText>
+          </UNDEFINED>
+        </UNDEFINED>
+      }
+      fullWidth={false}
+      gutterSize="l"
+      idAria="markdown:test:setting-aria"
+      title={
+        <h3>
+          Markdown test setting
+          
+        </h3>
+      }
+      titleSize="xs"
+    >
+      <EuiFormRow
+        describedByIds={
+          Array [
+            "markdown:test:setting-aria",
+          ]
+        }
+        error={null}
+        fullWidth={false}
+        hasEmptyLabelSpace={false}
+        helpText={
+          <span>
+            <span>
+              <EuiLink
+                aria-label="Reset markdown test setting to default"
+                color="primary"
+                data-test-subj="advancedSetting-resetField-markdown:test:setting"
+                onClick={[Function]}
+                type="button"
+              >
+                Reset to default
+              </EuiLink>
+                 
+            </span>
+          </span>
+        }
+        isInvalid={false}
+        label={
+          <span
+            aria-label="markdown test setting"
+          >
+            markdown:test:setting
+          </span>
+        }
+      >
+        <div
+          data-test-subj="advancedSetting-editField-markdown:test:setting"
+        >
+          <EuiCodeEditor
+            editorProps={
+              Object {
+                "$blockScrolling": Infinity,
+              }
+            }
+            height="auto"
+            maxLines={30}
+            minLines={6}
+            mode="markdown"
+            onChange={[Function]}
+            setOptions={
+              Object {
+                "showLineNumbers": false,
+                "tabSize": 2,
+              }
+            }
+            theme="textmate"
+            value="**bold**"
+            width="100%"
+          />
+        </div>
+      </EuiFormRow>
+    </EuiDescribedFormGroup>
+  </EuiFlexItem>
+  <EuiFlexItem
+    component="div"
+    grow={false}
+  />
+</EuiFlexGroup>
+`;
+
+exports[`Field for number setting should render custom setting icon if it is custom 1`] = `
+<EuiFlexGroup
+  alignItems="stretch"
+  className="advancedSettings__field"
+  component="div"
+  direction="row"
+  gutterSize="l"
+  justifyContent="flexStart"
+  responsive={true}
+  wrap={false}
+>
+  <EuiFlexItem
+    component="div"
+    grow={false}
+  >
+    <EuiDescribedFormGroup
+      className="advancedSettings__field__wrapper"
+      description={
+        <UNDEFINED>
+          <div
+            dangerouslySetInnerHTML={
+              Object {
+                "__html": "Description for Number test setting",
+              }
+            }
+          />
+        </UNDEFINED>
+      }
+      fullWidth={false}
+      gutterSize="l"
+      idAria="number:test:setting-aria"
+      title={
+        <h3>
+          Number test setting
+          <EuiIconTip
+            aria-label="Custom setting"
+            color="primary"
+            content="Custom setting"
+            type="asterisk"
+          />
+        </h3>
+      }
+      titleSize="xs"
+    >
+      <EuiFormRow
+        describedByIds={
+          Array [
+            "number:test:setting-aria",
+          ]
+        }
+        error={null}
+        fullWidth={false}
+        hasEmptyLabelSpace={false}
+        helpText={null}
+        isInvalid={false}
+        label={
+          <span
+            aria-label="number test setting"
+          >
+            number:test:setting
+          </span>
+        }
+      >
+        <EuiFieldNumber
+          compressed={false}
+          data-test-subj="advancedSetting-editField-number:test:setting"
+          disabled={false}
+          fullWidth={false}
+          isLoading={false}
+          onChange={[Function]}
+          onKeyDown={[Function]}
+          value={5}
+        />
+      </EuiFormRow>
+    </EuiDescribedFormGroup>
+  </EuiFlexItem>
+  <EuiFlexItem
+    component="div"
+    grow={false}
+  />
+</EuiFlexGroup>
+`;
+
+exports[`Field for number setting should render default value if there is no user value set 1`] = `
+<EuiFlexGroup
+  alignItems="stretch"
+  className="advancedSettings__field"
+  component="div"
+  direction="row"
+  gutterSize="l"
+  justifyContent="flexStart"
+  responsive={true}
+  wrap={false}
+>
+  <EuiFlexItem
+    component="div"
+    grow={false}
+  >
+    <EuiDescribedFormGroup
+      className="advancedSettings__field__wrapper"
+      description={
+        <UNDEFINED>
+          <div
+            dangerouslySetInnerHTML={
+              Object {
+                "__html": "Description for Number test setting",
+              }
+            }
+          />
+        </UNDEFINED>
+      }
+      fullWidth={false}
+      gutterSize="l"
+      idAria="number:test:setting-aria"
+      title={
+        <h3>
+          Number test setting
+          
+        </h3>
+      }
+      titleSize="xs"
+    >
+      <EuiFormRow
+        describedByIds={
+          Array [
+            "number:test:setting-aria",
+          ]
+        }
+        error={null}
+        fullWidth={false}
+        hasEmptyLabelSpace={false}
+        helpText={null}
+        isInvalid={false}
+        label={
+          <span
+            aria-label="number test setting"
+          >
+            number:test:setting
+          </span>
+        }
+      >
+        <EuiFieldNumber
+          compressed={false}
+          data-test-subj="advancedSetting-editField-number:test:setting"
+          disabled={false}
+          fullWidth={false}
+          isLoading={false}
+          onChange={[Function]}
+          onKeyDown={[Function]}
+          value={5}
+        />
+      </EuiFormRow>
+    </EuiDescribedFormGroup>
+  </EuiFlexItem>
+  <EuiFlexItem
+    component="div"
+    grow={false}
+  />
+</EuiFlexGroup>
+`;
+
+exports[`Field for number setting should render user value if there is user value is set 1`] = `
+<EuiFlexGroup
+  alignItems="stretch"
+  className="advancedSettings__field"
+  component="div"
+  direction="row"
+  gutterSize="l"
+  justifyContent="flexStart"
+  responsive={true}
+  wrap={false}
+>
+  <EuiFlexItem
+    component="div"
+    grow={false}
+  >
+    <EuiDescribedFormGroup
+      className="advancedSettings__field__wrapper"
+      description={
+        <UNDEFINED>
+          <div
+            dangerouslySetInnerHTML={
+              Object {
+                "__html": "Description for Number test setting",
+              }
+            }
+          />
+          <UNDEFINED>
+            <EuiSpacer
+              size="s"
+            />
+            <EuiText
+              grow={true}
+              size="xs"
+            >
+              <UNDEFINED>
+                Default: 
+                <EuiCode>
+                  5
+                </EuiCode>
+              </UNDEFINED>
+            </EuiText>
+          </UNDEFINED>
+        </UNDEFINED>
+      }
+      fullWidth={false}
+      gutterSize="l"
+      idAria="number:test:setting-aria"
+      title={
+        <h3>
+          Number test setting
+          
+        </h3>
+      }
+      titleSize="xs"
+    >
+      <EuiFormRow
+        describedByIds={
+          Array [
+            "number:test:setting-aria",
+          ]
+        }
+        error={null}
+        fullWidth={false}
+        hasEmptyLabelSpace={false}
+        helpText={
+          <span>
+            <span>
+              <EuiLink
+                aria-label="Reset number test setting to default"
+                color="primary"
+                data-test-subj="advancedSetting-resetField-number:test:setting"
+                onClick={[Function]}
+                type="button"
+              >
+                Reset to default
+              </EuiLink>
+                 
+            </span>
+          </span>
+        }
+        isInvalid={false}
+        label={
+          <span
+            aria-label="number test setting"
+          >
+            number:test:setting
+          </span>
+        }
+      >
+        <EuiFieldNumber
+          compressed={false}
+          data-test-subj="advancedSetting-editField-number:test:setting"
+          disabled={false}
+          fullWidth={false}
+          isLoading={false}
+          onChange={[Function]}
+          onKeyDown={[Function]}
+          value={10}
+        />
+      </EuiFormRow>
+    </EuiDescribedFormGroup>
+  </EuiFlexItem>
+  <EuiFlexItem
+    component="div"
+    grow={false}
+  />
+</EuiFlexGroup>
+`;
+
+exports[`Field for select setting should render custom setting icon if it is custom 1`] = `
+<EuiFlexGroup
+  alignItems="stretch"
+  className="advancedSettings__field"
+  component="div"
+  direction="row"
+  gutterSize="l"
+  justifyContent="flexStart"
+  responsive={true}
+  wrap={false}
+>
+  <EuiFlexItem
+    component="div"
+    grow={false}
+  >
+    <EuiDescribedFormGroup
+      className="advancedSettings__field__wrapper"
+      description={
+        <UNDEFINED>
+          <div
+            dangerouslySetInnerHTML={
+              Object {
+                "__html": "Description for Select test setting",
+              }
+            }
+          />
+        </UNDEFINED>
+      }
+      fullWidth={false}
+      gutterSize="l"
+      idAria="select:test:setting-aria"
+      title={
+        <h3>
+          Select test setting
+          <EuiIconTip
+            aria-label="Custom setting"
+            color="primary"
+            content="Custom setting"
+            type="asterisk"
+          />
+        </h3>
+      }
+      titleSize="xs"
+    >
+      <EuiFormRow
+        describedByIds={
+          Array [
+            "select:test:setting-aria",
+          ]
+        }
+        error={null}
+        fullWidth={false}
+        hasEmptyLabelSpace={false}
+        helpText={null}
+        isInvalid={false}
+        label={
+          <span
+            aria-label="select test setting"
+          >
+            select:test:setting
+          </span>
+        }
+      >
+        <EuiSelect
+          compressed={false}
+          data-test-subj="advancedSetting-editField-select:test:setting"
+          disabled={false}
+          fullWidth={false}
+          hasNoInitialSelection={false}
+          isLoading={false}
+          onChange={[Function]}
+          onKeyDown={[Function]}
+          options={
+            Array [
+              Object {
+                "text": "apple",
+                "value": "apple",
+              },
+              Object {
+                "text": "orange",
+                "value": "orange",
+              },
+              Object {
+                "text": "banana",
+                "value": "banana",
+              },
+            ]
+          }
+          value="orange"
+        />
+      </EuiFormRow>
+    </EuiDescribedFormGroup>
+  </EuiFlexItem>
+  <EuiFlexItem
+    component="div"
+    grow={false}
+  />
+</EuiFlexGroup>
+`;
+
+exports[`Field for select setting should render default value if there is no user value set 1`] = `
+<EuiFlexGroup
+  alignItems="stretch"
+  className="advancedSettings__field"
+  component="div"
+  direction="row"
+  gutterSize="l"
+  justifyContent="flexStart"
+  responsive={true}
+  wrap={false}
+>
+  <EuiFlexItem
+    component="div"
+    grow={false}
+  >
+    <EuiDescribedFormGroup
+      className="advancedSettings__field__wrapper"
+      description={
+        <UNDEFINED>
+          <div
+            dangerouslySetInnerHTML={
+              Object {
+                "__html": "Description for Select test setting",
+              }
+            }
+          />
+        </UNDEFINED>
+      }
+      fullWidth={false}
+      gutterSize="l"
+      idAria="select:test:setting-aria"
+      title={
+        <h3>
+          Select test setting
+          
+        </h3>
+      }
+      titleSize="xs"
+    >
+      <EuiFormRow
+        describedByIds={
+          Array [
+            "select:test:setting-aria",
+          ]
+        }
+        error={null}
+        fullWidth={false}
+        hasEmptyLabelSpace={false}
+        helpText={null}
+        isInvalid={false}
+        label={
+          <span
+            aria-label="select test setting"
+          >
+            select:test:setting
+          </span>
+        }
+      >
+        <EuiSelect
+          compressed={false}
+          data-test-subj="advancedSetting-editField-select:test:setting"
+          disabled={false}
+          fullWidth={false}
+          hasNoInitialSelection={false}
+          isLoading={false}
+          onChange={[Function]}
+          onKeyDown={[Function]}
+          options={
+            Array [
+              Object {
+                "text": "apple",
+                "value": "apple",
+              },
+              Object {
+                "text": "orange",
+                "value": "orange",
+              },
+              Object {
+                "text": "banana",
+                "value": "banana",
+              },
+            ]
+          }
+          value="orange"
+        />
+      </EuiFormRow>
+    </EuiDescribedFormGroup>
+  </EuiFlexItem>
+  <EuiFlexItem
+    component="div"
+    grow={false}
+  />
+</EuiFlexGroup>
+`;
+
+exports[`Field for select setting should render user value if there is user value is set 1`] = `
+<EuiFlexGroup
+  alignItems="stretch"
+  className="advancedSettings__field"
+  component="div"
+  direction="row"
+  gutterSize="l"
+  justifyContent="flexStart"
+  responsive={true}
+  wrap={false}
+>
+  <EuiFlexItem
+    component="div"
+    grow={false}
+  >
+    <EuiDescribedFormGroup
+      className="advancedSettings__field__wrapper"
+      description={
+        <UNDEFINED>
+          <div
+            dangerouslySetInnerHTML={
+              Object {
+                "__html": "Description for Select test setting",
+              }
+            }
+          />
+          <UNDEFINED>
+            <EuiSpacer
+              size="s"
+            />
+            <EuiText
+              grow={true}
+              size="xs"
+            >
+              <UNDEFINED>
+                Default: 
+                <EuiCode>
+                  orange
+                </EuiCode>
+              </UNDEFINED>
+            </EuiText>
+          </UNDEFINED>
+        </UNDEFINED>
+      }
+      fullWidth={false}
+      gutterSize="l"
+      idAria="select:test:setting-aria"
+      title={
+        <h3>
+          Select test setting
+          
+        </h3>
+      }
+      titleSize="xs"
+    >
+      <EuiFormRow
+        describedByIds={
+          Array [
+            "select:test:setting-aria",
+          ]
+        }
+        error={null}
+        fullWidth={false}
+        hasEmptyLabelSpace={false}
+        helpText={
+          <span>
+            <span>
+              <EuiLink
+                aria-label="Reset select test setting to default"
+                color="primary"
+                data-test-subj="advancedSetting-resetField-select:test:setting"
+                onClick={[Function]}
+                type="button"
+              >
+                Reset to default
+              </EuiLink>
+                 
+            </span>
+          </span>
+        }
+        isInvalid={false}
+        label={
+          <span
+            aria-label="select test setting"
+          >
+            select:test:setting
+          </span>
+        }
+      >
+        <EuiSelect
+          compressed={false}
+          data-test-subj="advancedSetting-editField-select:test:setting"
+          disabled={false}
+          fullWidth={false}
+          hasNoInitialSelection={false}
+          isLoading={false}
+          onChange={[Function]}
+          onKeyDown={[Function]}
+          options={
+            Array [
+              Object {
+                "text": "apple",
+                "value": "apple",
+              },
+              Object {
+                "text": "orange",
+                "value": "orange",
+              },
+              Object {
+                "text": "banana",
+                "value": "banana",
+              },
+            ]
+          }
+          value="banana"
+        />
+      </EuiFormRow>
+    </EuiDescribedFormGroup>
+  </EuiFlexItem>
+  <EuiFlexItem
+    component="div"
+    grow={false}
+  />
+</EuiFlexGroup>
+`;
+
+exports[`Field for string setting should render custom setting icon if it is custom 1`] = `
+<EuiFlexGroup
+  alignItems="stretch"
+  className="advancedSettings__field"
+  component="div"
+  direction="row"
+  gutterSize="l"
+  justifyContent="flexStart"
+  responsive={true}
+  wrap={false}
+>
+  <EuiFlexItem
+    component="div"
+    grow={false}
+  >
+    <EuiDescribedFormGroup
+      className="advancedSettings__field__wrapper"
+      description={
+        <UNDEFINED>
+          <div
+            dangerouslySetInnerHTML={
+              Object {
+                "__html": "Description for String test setting",
+              }
+            }
+          />
+        </UNDEFINED>
+      }
+      fullWidth={false}
+      gutterSize="l"
+      idAria="string:test:setting-aria"
+      title={
+        <h3>
+          String test setting
+          <EuiIconTip
+            aria-label="Custom setting"
+            color="primary"
+            content="Custom setting"
+            type="asterisk"
+          />
+        </h3>
+      }
+      titleSize="xs"
+    >
+      <EuiFormRow
+        describedByIds={
+          Array [
+            "string:test:setting-aria",
+          ]
+        }
+        error={null}
+        fullWidth={false}
+        hasEmptyLabelSpace={false}
+        helpText={null}
+        isInvalid={false}
+        label={
+          <span
+            aria-label="string test setting"
+          >
+            string:test:setting
+          </span>
+        }
+      >
+        <EuiFieldText
+          compressed={false}
+          data-test-subj="advancedSetting-editField-string:test:setting"
+          disabled={false}
+          fullWidth={false}
+          isLoading={false}
+          onChange={[Function]}
+          onKeyDown={[Function]}
+          value=""
+        />
+      </EuiFormRow>
+    </EuiDescribedFormGroup>
+  </EuiFlexItem>
+  <EuiFlexItem
+    component="div"
+    grow={false}
+  />
+</EuiFlexGroup>
+`;
+
+exports[`Field for string setting should render default value if there is no user value set 1`] = `
+<EuiFlexGroup
+  alignItems="stretch"
+  className="advancedSettings__field"
+  component="div"
+  direction="row"
+  gutterSize="l"
+  justifyContent="flexStart"
+  responsive={true}
+  wrap={false}
+>
+  <EuiFlexItem
+    component="div"
+    grow={false}
+  >
+    <EuiDescribedFormGroup
+      className="advancedSettings__field__wrapper"
+      description={
+        <UNDEFINED>
+          <div
+            dangerouslySetInnerHTML={
+              Object {
+                "__html": "Description for String test setting",
+              }
+            }
+          />
+        </UNDEFINED>
+      }
+      fullWidth={false}
+      gutterSize="l"
+      idAria="string:test:setting-aria"
+      title={
+        <h3>
+          String test setting
+          
+        </h3>
+      }
+      titleSize="xs"
+    >
+      <EuiFormRow
+        describedByIds={
+          Array [
+            "string:test:setting-aria",
+          ]
+        }
+        error={null}
+        fullWidth={false}
+        hasEmptyLabelSpace={false}
+        helpText={null}
+        isInvalid={false}
+        label={
+          <span
+            aria-label="string test setting"
+          >
+            string:test:setting
+          </span>
+        }
+      >
+        <EuiFieldText
+          compressed={false}
+          data-test-subj="advancedSetting-editField-string:test:setting"
+          disabled={false}
+          fullWidth={false}
+          isLoading={false}
+          onChange={[Function]}
+          onKeyDown={[Function]}
+          value=""
+        />
+      </EuiFormRow>
+    </EuiDescribedFormGroup>
+  </EuiFlexItem>
+  <EuiFlexItem
+    component="div"
+    grow={false}
+  />
+</EuiFlexGroup>
+`;
+
+exports[`Field for string setting should render user value if there is user value is set 1`] = `
+<EuiFlexGroup
+  alignItems="stretch"
+  className="advancedSettings__field"
+  component="div"
+  direction="row"
+  gutterSize="l"
+  justifyContent="flexStart"
+  responsive={true}
+  wrap={false}
+>
+  <EuiFlexItem
+    component="div"
+    grow={false}
+  >
+    <EuiDescribedFormGroup
+      className="advancedSettings__field__wrapper"
+      description={
+        <UNDEFINED>
+          <div
+            dangerouslySetInnerHTML={
+              Object {
+                "__html": "Description for String test setting",
+              }
+            }
+          />
+          <UNDEFINED>
+            <EuiSpacer
+              size="s"
+            />
+            <EuiText
+              grow={true}
+              size="xs"
+            >
+              <UNDEFINED>
+                Default: 
+                <EuiCode>
+                  null
+                </EuiCode>
+              </UNDEFINED>
+            </EuiText>
+          </UNDEFINED>
+        </UNDEFINED>
+      }
+      fullWidth={false}
+      gutterSize="l"
+      idAria="string:test:setting-aria"
+      title={
+        <h3>
+          String test setting
+          
+        </h3>
+      }
+      titleSize="xs"
+    >
+      <EuiFormRow
+        describedByIds={
+          Array [
+            "string:test:setting-aria",
+          ]
+        }
+        error={null}
+        fullWidth={false}
+        hasEmptyLabelSpace={false}
+        helpText={
+          <span>
+            <span>
+              <EuiLink
+                aria-label="Reset string test setting to default"
+                color="primary"
+                data-test-subj="advancedSetting-resetField-string:test:setting"
+                onClick={[Function]}
+                type="button"
+              >
+                Reset to default
+              </EuiLink>
+                 
+            </span>
+          </span>
+        }
+        isInvalid={false}
+        label={
+          <span
+            aria-label="string test setting"
+          >
+            string:test:setting
+          </span>
+        }
+      >
+        <EuiFieldText
+          compressed={false}
+          data-test-subj="advancedSetting-editField-string:test:setting"
+          disabled={false}
+          fullWidth={false}
+          isLoading={false}
+          onChange={[Function]}
+          onKeyDown={[Function]}
+          value="foo"
+        />
+      </EuiFormRow>
+    </EuiDescribedFormGroup>
+  </EuiFlexItem>
+  <EuiFlexItem
+    component="div"
+    grow={false}
+  />
+</EuiFlexGroup>
+`;

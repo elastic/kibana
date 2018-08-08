@@ -1,3 +1,22 @@
+/*
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
 /**
  * @name Vis
  *
@@ -10,31 +29,45 @@
 
 import { EventEmitter } from 'events';
 import _ from 'lodash';
-import { VisTypesRegistryProvider } from 'ui/registry/vis_types';
-import { VisAggConfigsProvider } from 'ui/vis/agg_configs';
-import { PersistedState } from 'ui/persisted_state';
-import { UtilsBrushEventProvider } from 'ui/utils/brush_event';
-import { FilterBarQueryFilterProvider } from 'ui/filter_bar/query_filter';
-import { FilterBarClickHandlerProvider } from 'ui/filter_bar/filter_bar_click_handler';
+import { VisTypesRegistryProvider } from '../registry/vis_types';
+import { AggConfigs } from './agg_configs';
+import { PersistedState } from '../persisted_state';
+import { onBrushEvent } from '../utils/brush_event';
+import { FilterBarQueryFilterProvider } from '../filter_bar/query_filter';
+import { FilterBarClickHandlerProvider } from '../filter_bar/filter_bar_click_handler';
 import { updateVisualizationConfig } from './vis_update';
-import { queryManagerFactory } from '../query_manager';
-import * as kueryAPI from 'ui/kuery';
-import { SearchSourceProvider } from 'ui/courier/data_source/search_source';
-import { SavedObjectsClientProvider } from 'ui/saved_objects';
-import { FilterManagerProvider } from 'ui/filter_manager';
+import { SearchSourceProvider } from '../courier/search_source';
+import { SavedObjectsClientProvider } from '../saved_objects';
+import { timefilter } from 'ui/timefilter';
 
-export function VisProvider(Private, Promise, indexPatterns, timefilter, getAppState) {
+import { Inspector } from '../inspector';
+import { RequestAdapter, DataAdapter } from '../inspector/adapters';
+
+const getTerms = (table, columnIndex, rowIndex) => {
+  if (rowIndex === -1) {
+    return [];
+  }
+
+  // get only rows where cell value matches current row for all the fields before columnIndex
+  const rows = table.rows.filter(row => row.every((cell, i) => cell === table.rows[rowIndex][i] || i >= columnIndex));
+  const terms = rows.map(row => row[columnIndex]);
+
+  return [...new Set(terms.filter(term => {
+    const notOther = term !== '__other__';
+    const notMissing = term !== '__missing__';
+    return notOther && notMissing;
+  }))];
+};
+
+export function VisProvider(Private, indexPatterns, getAppState) {
   const visTypes = Private(VisTypesRegistryProvider);
-  const AggConfigs = Private(VisAggConfigsProvider);
-  const brushEvent = Private(UtilsBrushEventProvider);
   const queryFilter = Private(FilterBarQueryFilterProvider);
   const filterBarClickHandler = Private(FilterBarClickHandlerProvider);
   const SearchSource = Private(SearchSourceProvider);
   const savedObjectsClient = Private(SavedObjectsClientProvider);
-  const filterManager = Private(FilterManagerProvider);
 
   class Vis extends EventEmitter {
-    constructor(indexPattern, visState, uiState) {
+    constructor(indexPattern, visState) {
       super();
       visState = visState || {};
 
@@ -44,14 +77,9 @@ export function VisProvider(Private, Promise, indexPatterns, timefilter, getAppS
         };
       }
       this.indexPattern = indexPattern;
-
-      if (!uiState) {
-        uiState = new PersistedState();
-      }
-
+      this._setUiState(new PersistedState());
       this.setCurrentState(visState);
       this.setState(this.getCurrentState(), false);
-      this.setUiState(uiState);
 
       // Session state is for storing information that is transitory, and will not be saved with the visualization.
       // For instance, map bounds, which depends on the view port, browser window size, etc.
@@ -62,24 +90,82 @@ export function VisProvider(Private, Promise, indexPatterns, timefilter, getAppS
         SearchSource: SearchSource,
         indexPatterns: indexPatterns,
         timeFilter: timefilter,
-        filterManager: filterManager,
         queryFilter: queryFilter,
-        queryManager: queryManagerFactory(getAppState),
-        kuery: kueryAPI,
         events: {
+          // the filter method will be removed in the near feature
+          // you should rather use addFilter method below
           filter: (event) => {
             const appState = getAppState();
             filterBarClickHandler(appState)(event);
+          },
+          addFilter: (data, columnIndex, rowIndex, cellValue) => {
+            const agg = data.columns[columnIndex].aggConfig;
+            let filter = [];
+            const value = rowIndex > -1 ? data.rows[rowIndex][columnIndex] : cellValue;
+            if (!value) {
+              return;
+            }
+            if (agg.type.name === 'terms' && agg.params.otherBucket) {
+              const terms = getTerms(data, columnIndex, rowIndex);
+              filter = agg.createFilter(value, { terms });
+            } else {
+              filter = agg.createFilter(value);
+            }
+            queryFilter.addFilters(filter);
           }, brush: (event) => {
-            const appState = getAppState();
-            brushEvent(appState)(event);
+            onBrushEvent(event, getAppState());
           }
-        }
+        },
+        inspectorAdapters: this._getActiveInspectorAdapters(),
       };
     }
 
-    isEditorMode() {
-      return this.editorMode || false;
+    /**
+     * Open the inspector for this visualization.
+     * @return {InspectorSession} the handler for the session of this inspector.
+     */
+    openInspector() {
+      return Inspector.open(this.API.inspectorAdapters, {
+        title: this.title
+      });
+    }
+
+    hasInspector() {
+      return Inspector.isAvailable(this.API.inspectorAdapters);
+    }
+
+    /**
+     * Returns an object of all inspectors for this vis object.
+     * This must only be called after this.type has properly be initialized,
+     * since we need to read out data from the the vis type to check which
+     * inspectors are available.
+     */
+    _getActiveInspectorAdapters() {
+      const adapters = {};
+      const { inspectorAdapters: typeAdapters } = this.type;
+
+      // Add the requests inspector adapters if the vis type explicitly requested it via
+      // inspectorAdapters.requests: true in its definition or if it's using the courier
+      // request handler, since that will automatically log its requests.
+      if (typeAdapters && typeAdapters.requests || this.type.requestHandler === 'courier') {
+        adapters.requests = new RequestAdapter();
+      }
+
+      // Add the data inspector adapter if the vis type requested it or if the
+      // vis is using courier, since we know that courier supports logging
+      // its data.
+      if (typeAdapters && typeAdapters.data || this.type.requestHandler === 'courier') {
+        adapters.data = new DataAdapter();
+      }
+
+      // Add all inspectors, that are explicitly registered with this vis type
+      if (typeAdapters && typeAdapters.custom) {
+        Object.entries(typeAdapters.custom).forEach(([key, Adapter]) => {
+          adapters[key] = new Adapter();
+        });
+      }
+
+      return adapters;
     }
 
     setCurrentState(state) {
@@ -106,16 +192,14 @@ export function VisProvider(Private, Promise, indexPatterns, timefilter, getAppS
 
     setState(state, updateCurrentState = true) {
       this._state = _.cloneDeep(state);
-      if (updateCurrentState) this.resetState();
+      if (updateCurrentState) {
+        this.setCurrentState(this._state);
+      }
     }
 
     updateState() {
       this.setState(this.getCurrentState(true));
       this.emit('update');
-    }
-
-    resetState() {
-      this.setCurrentState(this._state);
     }
 
     forceReload() {
@@ -126,12 +210,30 @@ export function VisProvider(Private, Promise, indexPatterns, timefilter, getAppS
       return {
         title: this.title,
         type: this.type.name,
-        params: this.params,
+        params: _.cloneDeep(this.params),
         aggs: this.aggs
           .map(agg => agg.toJSON())
           .filter(agg => includeDisabled || agg.enabled)
           .filter(Boolean)
       };
+    }
+
+    getSerializableState(state) {
+      return {
+        title: state.title,
+        type: state.type,
+        params: _.cloneDeep(state.params),
+        aggs: state.aggs
+          .map(agg => agg.toJSON())
+          .filter(agg => agg.enabled)
+          .filter(Boolean)
+      };
+    }
+
+    copyCurrentState(includeDisabled = false) {
+      const state = this.getCurrentState(includeDisabled);
+      state.aggs = new AggConfigs(this, state.aggs);
+      return state;
     }
 
     getStateInternal(includeDisabled) {
@@ -156,27 +258,6 @@ export function VisProvider(Private, Promise, indexPatterns, timefilter, getAppS
       return this.getStateInternal(true);
     }
 
-    clone() {
-      const uiJson = this.hasUiState() ? this.getUiState().toJSON() : {};
-      const uiState = new PersistedState(uiJson);
-      const clonedVis = new Vis(this.indexPattern, this.getState(), uiState);
-      clonedVis.editorMode = this.editorMode;
-      return clonedVis;
-    }
-
-    /**
-     *  Hook for pre-flight logic, see AggType#onSearchRequestStart()
-     *  @param {Courier.SearchSource} searchSource
-     *  @param {Courier.SearchRequest} searchRequest
-     *  @return {Promise<undefined>}
-     */
-    onSearchRequestStart(searchSource, searchRequest) {
-      return Promise.map(
-        this.aggs.getRequestAggs(),
-        agg => agg.onSearchRequestStart(searchSource, searchRequest)
-      );
-    }
-
     isHierarchical() {
       if (_.isFunction(this.type.hierarchicalData)) {
         return !!this.type.hierarchicalData(this);
@@ -197,7 +278,12 @@ export function VisProvider(Private, Promise, indexPatterns, timefilter, getAppS
       return !!this.__uiState;
     }
 
-    setUiState(uiState) {
+    /***
+     * this should not be used outside of visualize
+     * @param uiState
+     * @private
+     */
+    _setUiState(uiState) {
       if (uiState instanceof PersistedState) {
         this.__uiState = uiState;
       }

@@ -1,0 +1,20 @@
+[role="xpack"]
+[[kibana-page]]
+=== {kib} Monitoring Metrics
+++++
+<titleabbrev>{kib} Metrics</titleabbrev>
+++++
+
+To view the key metrics that indicate the overall health of {kib} itself,
+click **Overview** in the {kib} section of the *Monitoring* page.
+
+image::monitoring/images/monitoring-kibana-overview.jpg["Kibana Overview",link="images/monitoring-kibana-overview.jpg"]
+
+To view {kib} instance metrics, click **Instances**. The Instances section
+shows the status of each {kib} instance.
+
+image::monitoring/images/monitoring-kibana-instances.jpg["Kibana Instances",link="images/monitoring-kibana-instances.jpg"]
+
+Click the name of an instance to view its instance statistics over time.
+
+image::monitoring/images/monitoring-kibana-instance.jpg["Kibana Instance View",link="images/monitoring-kibana-instance.jpg"]

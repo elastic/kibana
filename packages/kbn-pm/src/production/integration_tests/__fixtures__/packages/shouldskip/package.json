@@ -1,0 +1,12 @@
+{
+  "name": "@elastic/shouldskip",
+  "version": "1.0.0",
+  "private": true,
+  "main": "./target/index.js",
+  "dependencies": {
+    "@elastic/bar": "link:../bar"
+  },
+  "scripts": {
+    "build": "echo 'should not be called'; false"
+  }
+}

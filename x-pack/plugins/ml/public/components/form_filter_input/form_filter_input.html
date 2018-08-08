@@ -1,0 +1,18 @@
+<div class="fa fa-search"></div>
+<input
+  class="form-control ml-filter-input-left-icon"
+  type="text"
+  aria-label="{{placeholder}}"
+  placeholder="{{placeholder}}"
+  ng-model="filter"
+  ng-change="filterChanged()" />
+<div class="ml-filter-progress-icon">
+  <div ng-show="filterIcon===1">
+    <i class='fa fa-spinner fa-spin'></i>
+  </div>
+  <div ng-show="filterIcon===0">
+    <a aria-label="Clear filter" ng-click="clearFilter()">
+      <i class="fa fa-times-circle"></i>
+    </a>
+  </div>
+</div>

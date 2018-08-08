@@ -1,0 +1,72 @@
+.kuiFlexGroup {
+  display: flex;
+  align-items: stretch;
+
+  .kuiFlexItem {
+    flex-grow: 1;
+  }
+}
+
+$gutterTypes: (
+  gutterSmall: $kuiSizeS,
+  gutterMedium: $kuiSize,
+  gutterLarge: $kuiSizeL,
+  gutterExtraLarge: $kuiSizeXXL,
+);
+
+// Gutter Sizes
+@each $gutterName, $gutterSize in $gutterTypes {
+  $halfGutterSize: $gutterSize * 0.5;
+
+  &.kuiFlexGroup--#{$gutterName} {
+    margin: -$halfGutterSize;
+
+    & > .kuiFlexItem {
+      margin: $halfGutterSize;
+    }
+  }
+}
+
+// Justify the grid
+.kuiFlexGroup--justifyContentSpaceEvenly {
+  justify-content: space-evenly;
+}
+
+.kuiFlexGroup--justifyContentSpaceBetween {
+  justify-content: space-between;
+}
+
+.kuiFlexGroup--justifyContentSpaceAround {
+  justify-content: space-around;
+}
+
+.kuiFlexGroup--justifyContentCenter {
+  justify-content: center;
+}
+
+.kuiFlexGroup--justifyContentFlexEnd {
+  justify-content: flex-end;
+}
+
+// Align Items
+.kuiFlexGroup--alignItemsStart {
+  align-items: flex-start;
+}
+
+.kuiFlexGroup--alignItemsCenter {
+  align-items: center;
+}
+
+.kuiFlexGroup--alignItemsEnd {
+  align-items: flex-end;
+}
+
+.kuiFlexGroup--wrap {
+  flex-wrap: wrap;
+}
+
+@include screenXSmall {
+  .kuiFlexGroup {
+    flex-wrap: wrap;
+  }
+}

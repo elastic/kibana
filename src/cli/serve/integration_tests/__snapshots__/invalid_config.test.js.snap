@@ -1,0 +1,15 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`cli invalid config support exits with statusCode 64 and logs a single line when config is invalid 1`] = `
+Array [
+  Object {
+    "@timestamp": "## @timestamp ##",
+    "message": "\\"unknown.key\\", \\"other.unknown.key\\", \\"other.third\\", \\"some.flat.key\\", and \\"some.array\\" settings were not applied. Check for spelling errors and ensure that expected plugins are installed.",
+    "pid": "## PID ##",
+    "tags": Array [
+      "fatal",
+    ],
+    "type": "log",
+  },
+]
+`;

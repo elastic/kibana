@@ -1,0 +1,21 @@
+{
+  "cat.nodes": {
+    "url_params": {
+      "format": "",
+      "full_id": "__flag__",
+      "local": "__flag__",
+      "master_timeout": "",
+      "h": [],
+      "help": "__flag__",
+      "s": [],
+      "v": "__flag__"
+    },
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "_cat/nodes"
+    ],
+    "documentation": "http://www.elastic.co/guide/en/elasticsearch/reference/master/cat-nodes.html"
+  }
+}

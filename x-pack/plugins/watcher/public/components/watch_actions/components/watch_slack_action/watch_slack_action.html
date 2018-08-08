@@ -1,0 +1,48 @@
+<div class="kuiFormSection">
+  <label
+    for="{{watchSlackAction.makeId('to')}}"
+    class="kuiFormLabel"
+  >
+    Recipient
+  </label>
+  <input
+    type="text"
+    id="{{watchSlackAction.makeId('to')}}"
+    name="to"
+    class="kuiTextInput fullWidth"
+    ng-model="watchSlackAction.to"
+    required
+    input-focus
+  >
+  <div
+    id="{{watchSlackAction.makeId(['to', 'required'])}}"
+    xpack-aria-describes="{{watchSlackAction.makeId('to')}}"
+    class="kuiInputNote kuiInputNote--danger"
+    ng-if="watchSlackAction.isValidationMessageVisible('to', 'required')"
+  >
+    Recipient is required.
+  </div>
+</div>
+<div class="kuiFormSection">
+  <label
+    for="{{watchSlackAction.makeId('text')}}"
+    class="kuiFormLabel"
+  >
+    Message
+  </label>
+  <textarea
+    id="{{watchSlackAction.makeId('text')}}"
+    name="text"
+    class="kuiTextArea fullWidth"
+    ng-model="watchSlackAction.action.text"
+    required
+  ></textarea>
+  <div
+    id="{{watchSlackAction.makeId(['text', 'required'])}}"
+    xpack-aria-describes="{{watchSlackAction.makeId('text')}}"
+    class="kuiInputNote kuiInputNote--danger"
+    ng-if="watchSlackAction.isValidationMessageVisible('text', 'required')"
+  >
+    Message is required.
+  </div>
+</div>

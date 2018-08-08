@@ -1,10 +1,29 @@
+/*
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
 import _ from 'lodash';
 import sinon from 'sinon';
 import MockState from 'fixtures/mock_state';
 import expect from 'expect.js';
 import ngMock from 'ng_mock';
-import { FilterManagerProvider } from 'ui/filter_manager';
-import { FilterBarQueryFilterProvider } from 'ui/filter_bar/query_filter';
+import { FilterManagerProvider } from '..';
+import { FilterBarQueryFilterProvider } from '../../filter_bar/query_filter';
 import { getPhraseScript } from '../lib/phrase';
 let queryFilter;
 let filterManager;
@@ -27,7 +46,7 @@ describe('Filter Manager', function () {
     'kibana/courier',
     'kibana/global_state',
     function ($provide) {
-      $provide.service('courier', require('fixtures/mock_courier'));
+      $provide.service('indexPatterns', require('fixtures/mock_index_patterns'));
 
       appState = new MockState({ filters: [] });
       $provide.service('getAppState', function () {
@@ -41,14 +60,12 @@ describe('Filter Manager', function () {
 
     // mock required queryFilter methods, used in the manager
     queryFilter = Private(FilterBarQueryFilterProvider);
-    sinon.stub(queryFilter, 'getAppFilters', function () {
-      return appState.filters;
-    });
-    sinon.stub(queryFilter, 'addFilters', function (filters) {
+    sinon.stub(queryFilter, 'getAppFilters').callsFake(() => appState.filters);
+    sinon.stub(queryFilter, 'addFilters').callsFake((filters) => {
       if (!Array.isArray(filters)) filters = [filters];
       appState.filters = appState.filters.concat(filters);
     });
-    sinon.stub(queryFilter, 'invertFilter', function (filter) {
+    sinon.stub(queryFilter, 'invertFilter').callsFake((filter) => {
       filter.meta.negate = !filter.meta.negate;
     });
   }));

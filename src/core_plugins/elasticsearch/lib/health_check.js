@@ -1,84 +1,51 @@
+/*
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
+import url from 'url';
 import Promise from 'bluebird';
 import elasticsearch from 'elasticsearch';
-import createKibanaIndex from './create_kibana_index';
 import kibanaVersion from './kibana_version';
 import { ensureEsVersion } from './ensure_es_version';
-import { ensureNotTribe } from './ensure_not_tribe';
 import { patchKibanaIndex } from './patch_kibana_index';
 
 const NoConnections = elasticsearch.errors.NoConnections;
-import util from 'util';
-const format = util.format;
-
-const NO_INDEX = 'no_index';
-const INITIALIZING = 'initializing';
-const READY = 'ready';
 
 export default function (plugin, server) {
   const config = server.config();
   const callAdminAsKibanaUser = server.plugins.elasticsearch.getCluster('admin').callWithInternalUser;
-  const callDataAsKibanaUser = server.plugins.elasticsearch.getCluster('data').callWithInternalUser;
   const REQUEST_DELAY = config.get('elasticsearch.healthCheck.delay');
 
   plugin.status.yellow('Waiting for Elasticsearch');
-  function waitForPong(callWithInternalUser, url) {
+  function waitForPong(callWithInternalUser, elasticsearchUrl) {
     return callWithInternalUser('ping').catch(function (err) {
       if (!(err instanceof NoConnections)) throw err;
-      plugin.status.red(format('Unable to connect to Elasticsearch at %s.', url));
 
-      return Promise.delay(REQUEST_DELAY).then(waitForPong.bind(null, callWithInternalUser, url));
-    });
-  }
+      const displayUrl = url.format({ ...url.parse(elasticsearchUrl), auth: undefined });
+      plugin.status.red(`Unable to connect to Elasticsearch at ${displayUrl}.`);
 
-  // just figure out the current "health" of the es setup
-  function getHealth() {
-    return callAdminAsKibanaUser('cluster.health', {
-      timeout: '5s', // tells es to not sit around and wait forever
-      index: config.get('kibana.index'),
-      ignore: [408]
-    })
-    .then(function (resp) {
-      // if "timed_out" === true then elasticsearch could not
-      // find any idices matching our filter within 5 seconds
-      if (!resp || resp.timed_out) {
-        return NO_INDEX;
-      }
-
-      // If status === "red" that means that index(es) were found
-      // but the shards are not ready for queries
-      if (resp.status === 'red') {
-        return INITIALIZING;
-      }
-
-      return READY;
+      return Promise.delay(REQUEST_DELAY).then(waitForPong.bind(null, callWithInternalUser, elasticsearchUrl));
     });
   }
 
   function waitUntilReady() {
-    return getHealth()
-    .then(function (health) {
-      if (health !== READY) {
-        return Promise.delay(REQUEST_DELAY).then(waitUntilReady);
-      }
-
-      return new Promise((resolve) => {
-        plugin.status.once('green', resolve);
-      });
-    });
-  }
-
-  function waitForShards() {
-    return getHealth()
-    .then(function (health) {
-      if (health === NO_INDEX) {
-        plugin.status.yellow('No existing Kibana index found');
-        return createKibanaIndex(server);
-      }
-
-      if (health === INITIALIZING) {
-        plugin.status.red('Elasticsearch is still initializing the kibana index.');
-        return Promise.delay(REQUEST_DELAY).then(waitForShards);
-      }
+    return new Promise((resolve) => {
+      plugin.status.once('green', resolve);
     });
   }
 
@@ -90,32 +57,23 @@ export default function (plugin, server) {
   }
 
   function setGreenStatus() {
-    return plugin.status.green('Kibana index ready');
+    return plugin.status.green('Ready');
   }
 
   function check() {
     const healthCheck =
       waitForPong(callAdminAsKibanaUser, config.get('elasticsearch.url'))
-      .then(waitForEsVersion)
-      .then(() => ensureNotTribe(callAdminAsKibanaUser))
-      .then(waitForShards)
-      .then(() => patchKibanaIndex({
-        callCluster: callAdminAsKibanaUser,
-        log: (...args) => server.log(...args),
-        indexName: config.get('kibana.index'),
-        kibanaIndexMappingsDsl: server.getKibanaIndexMappingsDsl()
-      }))
-      .then(() => {
-        const tribeUrl = config.get('elasticsearch.tribe.url');
-        if (tribeUrl) {
-          return waitForPong(callDataAsKibanaUser, tribeUrl)
-          .then(() => ensureEsVersion(server, kibanaVersion.get(), callDataAsKibanaUser));
-        }
-      });
+        .then(waitForEsVersion)
+        .then(() => patchKibanaIndex({
+          callCluster: callAdminAsKibanaUser,
+          log: (...args) => server.log(...args),
+          indexName: config.get('kibana.index'),
+          kibanaIndexMappingsDsl: server.getKibanaIndexMappingsDsl()
+        }));
 
     return healthCheck
-    .then(setGreenStatus)
-    .catch(err => plugin.status.red(err));
+      .then(setGreenStatus)
+      .catch(err => plugin.status.red(err));
   }
 
 

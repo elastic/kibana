@@ -1,3 +1,22 @@
+/*
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
 import { IndexMappings } from './index_mappings';
 
 /**
@@ -6,7 +25,7 @@ import { IndexMappings } from './index_mappings';
  *  and timelion plugins for examples.
  *  @type {EsMappingDsl}
  */
-const BASE_KIBANA_INDEX_MAPPINGS_DSL = {
+const BASE_SAVED_OBJECT_MAPPINGS = {
   doc: {
     dynamic: 'strict',
     properties: {
@@ -29,19 +48,10 @@ const BASE_KIBANA_INDEX_MAPPINGS_DSL = {
 };
 
 export function kibanaIndexMappingsMixin(kbnServer, server) {
-  /**
-   *  Stores the current mappings that we expect to find in the Kibana
-   *  index. Using `kbnServer.mappings.addRootProperties()` the UiExports
-   *  class extends these mappings based on `mappings` ui export specs.
-   *
-   *  Application code should not access this object, and instead should
-   *  use `server.getKibanaIndexMappingsDsl()` from below, mixed with the
-   *  helpers exposed by this module, to interact with the mappings via
-   *  their DSL.
-   *
-   *  @type {IndexMappings}
-   */
-  kbnServer.mappings = new IndexMappings(BASE_KIBANA_INDEX_MAPPINGS_DSL);
+  const mappings = new IndexMappings(
+    BASE_SAVED_OBJECT_MAPPINGS,
+    kbnServer.uiExports.savedObjectMappings
+  );
 
   /**
    *  Get the mappings dsl that we expect to see in the
@@ -57,6 +67,6 @@ export function kibanaIndexMappingsMixin(kbnServer, server) {
    *  @returns {EsMappingDsl}
    */
   server.decorate('server', 'getKibanaIndexMappingsDsl', () => {
-    return kbnServer.mappings.getDsl();
+    return mappings.getDsl();
   });
 }
