@@ -370,9 +370,7 @@ export default class BaseOptimizer {
           parallel: true,
           sourceMap: false,
           uglifyOptions: {
-            compress: {
-              warnings: false
-            },
+            compress: false,
             mangle: false
           }
         }),
