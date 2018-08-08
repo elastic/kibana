@@ -29,6 +29,7 @@ import './styles/main.less';
 import { ml } from '../../../../../services/ml_api_service';
 import { GroupList } from './group_list';
 import { validateGroupNames } from '../../validate_job';
+import { KEY_CODES } from 'plugins/ml/../common/constants/key_codes';
 
 function createSelectedGroups(jobs, groups) {
   const jobIds = jobs.map(j => j.id);
@@ -158,10 +159,6 @@ export class GroupSelector extends Component {
       });
   }
 
-  validateNewGroupName = () => {
-
-  }
-
   changeTempNewGroup = (e) => {
     const name = e.target.value;
     const groupsValidationError = (name === '') ? '' : validateGroupNames([name]).message;
@@ -171,6 +168,16 @@ export class GroupSelector extends Component {
     });
   }
 
+  newGroupKeyPress = (e) => {
+    if (
+      e.keyCode === KEY_CODES.ENTER &&
+      this.state.groupsValidationError === '' &&
+      this.state.tempNewGroupName !== ''
+    ) {
+      this.addNewGroup();
+    }
+  };
+
   addNewGroup = () => {
     const newGroup = {
       id: this.state.tempNewGroupName,
@@ -179,7 +186,9 @@ export class GroupSelector extends Component {
     };
 
     const groups = this.state.groups;
-    groups.push(newGroup);
+    if (groups.some(g => g.id === newGroup.id) === false) {
+      groups.push(newGroup);
+    }
 
     this.setState({
       groups,
@@ -235,6 +244,7 @@ export class GroupSelector extends Component {
                     placeholder="Add new group"
                     value={tempNewGroupName}
                     onChange={this.changeTempNewGroup}
+                    onKeyDown={this.newGroupKeyPress}
                     isInvalid={(groupsValidationError !== '')}
                     error={groupsValidationError}
                   />
