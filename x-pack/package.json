@@ -118,7 +118,6 @@
     "isomorphic-fetch": "2.2.1",
     "joi": "6.10.1",
     "jquery": "^3.3.1",
-    "jstimezonedetect": "1.0.5",
     "lodash": "3.10.1",
     "lodash.mean": "^4.1.0",
     "lodash.orderby": "4.6.0",
