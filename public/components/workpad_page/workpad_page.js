@@ -10,29 +10,30 @@ import { BorderResizeHandle } from '../border_resize_handle';
 // NOTE: the data-shared-* attributes here are used for reporting
 export const WorkpadPage = ({
   page,
+  className,
+  animationStyle,
   elements,
   cursor = 'auto',
   height,
   width,
   isEditable,
-  isSelected,
   onDoubleClick,
   onKeyDown,
   onKeyUp,
   onMouseDown,
   onMouseMove,
   onMouseUp,
+  onAnimationEnd,
 }) => {
-  const activeClass = isSelected ? 'canvasPage--isActive' : 'canvasPage--isInactive';
-
   return (
     <div
       key={page.id}
       id={page.id}
-      className={`canvasPage ${activeClass}`}
+      className={`canvasPage ${className}`}
       data-shared-items-container
       style={{
         ...page.style,
+        ...animationStyle,
         height,
         width,
         cursor,
@@ -43,6 +44,7 @@ export const WorkpadPage = ({
       onKeyDown={onKeyDown}
       onKeyUp={onKeyUp}
       onDoubleClick={onDoubleClick}
+      onAnimationEnd={onAnimationEnd}
       tabIndex={0} // needed to capture keyboard events; focusing is also needed but React apparently does so implicitly
     >
       {elements
@@ -85,6 +87,8 @@ WorkpadPage.propTypes = {
     id: PropTypes.string.isRequired,
     style: PropTypes.object,
   }).isRequired,
+  className: PropTypes.string.isRequired,
+  animationStyle: PropTypes.object.isRequired,
   elements: PropTypes.arrayOf(
     PropTypes.shape({
       id: PropTypes.string.isRequired,
@@ -95,7 +99,6 @@ WorkpadPage.propTypes = {
     })
   ).isRequired,
   cursor: PropTypes.string,
-  isSelected: PropTypes.bool.isRequired,
   height: PropTypes.number.isRequired,
   width: PropTypes.number.isRequired,
   isEditable: PropTypes.bool.isRequired,
@@ -105,4 +108,5 @@ WorkpadPage.propTypes = {
   onMouseDown: PropTypes.func,
   onMouseMove: PropTypes.func,
   onMouseUp: PropTypes.func,
+  onAnimationEnd: PropTypes.func,
 };

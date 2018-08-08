@@ -22,6 +22,7 @@ export default function(kibana) {
         'plugins/canvas/lib/load_types.js',
         'plugins/canvas/lib/load_render_functions.js',
         'plugins/canvas/lib/load_elements.js',
+        'plugins/canvas/lib/load_transitions.js',
       ],
       mappings,
     },

@@ -25,6 +25,7 @@ export const getDefaultPage = () => {
     style: {
       background: '#fff',
     },
+    transition: {},
     elements: [],
   };
 };

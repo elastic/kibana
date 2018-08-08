@@ -31,6 +31,26 @@ const getRootElementId = (lookup, id) => {
 
 export const WorkpadPage = compose(
   connect(mapStateToProps, mapDispatchToProps),
+  withProps(({ isSelected, animation }) => {
+    function getClassName() {
+      if (animation) return animation.name;
+      return isSelected ? 'canvasPage--isActive' : 'canvasPage--isInactive';
+    }
+
+    function getAnimationStyle() {
+      if (!animation) return {};
+      return {
+        animationDirection: animation.direction,
+        // TODO: Make this configurable
+        animationDuration: '1s',
+      };
+    }
+
+    return {
+      className: getClassName(),
+      animationStyle: getAnimationStyle(),
+    };
+  }),
   withState('updateCount', 'setUpdateCount', 0), // TODO: remove this, see setUpdateCount below
   withProps(({ updateCount, setUpdateCount, page, elements: pageElements, removeElement }) => {
     const { shapes, selectedShapes = [], cursor } = aeroelastic.getStore(page.id).currentScene;

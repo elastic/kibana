@@ -6,7 +6,9 @@ import { Fullscreen } from '../fullscreen';
 
 export const Workpad = props => {
   const {
-    selectedPageId,
+    selectedPageNumber,
+    getAnimation,
+    onTransitionEnd,
     pages,
     totalElementCount,
     workpad,
@@ -78,13 +80,15 @@ export const Workpad = props => {
                     global
                   />
                 )}
-                {pages.map(page => (
+                {pages.map((page, i) => (
                   <WorkpadPage
                     key={page.id}
                     page={page}
-                    isSelected={selectedPageId === page.id}
                     height={height}
                     width={width}
+                    isSelected={i + 1 === selectedPageNumber}
+                    animation={getAnimation(i + 1)}
+                    onAnimationEnd={onTransitionEnd}
                   />
                 ))}
                 <div
@@ -101,11 +105,13 @@ export const Workpad = props => {
 };
 
 Workpad.propTypes = {
+  selectedPageNumber: PropTypes.number.isRequired,
+  getAnimation: PropTypes.func.isRequired,
+  onTransitionEnd: PropTypes.func.isRequired,
   grid: PropTypes.bool.isRequired,
   setGrid: PropTypes.func.isRequired,
   pages: PropTypes.array.isRequired,
   totalElementCount: PropTypes.number.isRequired,
-  selectedPageId: PropTypes.string.isRequired,
   isFullscreen: PropTypes.bool.isRequired,
   workpad: PropTypes.object.isRequired,
   undoHistory: PropTypes.func.isRequired,

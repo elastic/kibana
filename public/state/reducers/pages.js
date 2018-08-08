@@ -129,6 +129,11 @@ export const pagesReducer = handleActions(
       const pageIndex = workpadState.pages.findIndex(page => page.id === payload.pageId);
       return set(workpadState, ['pages', pageIndex, 'style'], payload.style);
     },
+
+    [actions.setPageTransition]: (workpadState, { payload }) => {
+      const pageIndex = workpadState.pages.findIndex(page => page.id === payload.pageId);
+      return set(workpadState, ['pages', pageIndex, 'transition'], payload.transition);
+    },
   },
   {}
 );
