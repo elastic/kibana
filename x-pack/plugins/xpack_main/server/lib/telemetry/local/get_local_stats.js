@@ -7,7 +7,7 @@
 import { get, omit, defaultsDeep } from 'lodash';
 import { getClusterInfo } from './get_cluster_info';
 import { getClusterStats } from './get_cluster_stats';
-import { getKibana } from './get_kibana';
+import { getKibanaStats } from './get_kibana_stats';
 import { getXPack } from './get_xpack';
 
 /**
@@ -21,6 +21,7 @@ import { getXPack } from './get_xpack';
  */
 export function handleLocalStats(clusterInfo, clusterStats, xpack, kibana) {
   const stack = defaultsDeep({}, { stack_stats: kibana }, xpack);
+
   return {
     timestamp: (new Date()).toISOString(),
     cluster_uuid: get(clusterInfo, 'cluster_uuid'),
@@ -44,7 +45,7 @@ export function getLocalStatsWithCaller(server, callCluster) {
     getClusterInfo(callCluster),  // cluster info
     getClusterStats(callCluster), // cluster stats (not to be confused with cluster _state_)
     getXPack(callCluster),        // license, stack_stats
-    getKibana(server, callCluster),
+    getKibanaStats(server, callCluster),
   ])
     .then(([clusterInfo, clusterStats, xpack, kibana]) => handleLocalStats(clusterInfo, clusterStats, xpack, kibana));
 }
