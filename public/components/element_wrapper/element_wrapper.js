@@ -7,8 +7,8 @@ export class ElementWrapper extends React.PureComponent {
   static propTypes = {
     renderable: PropTypes.object,
     transformMatrix: PropTypes.arrayOf(PropTypes.number).isRequired,
-    a: PropTypes.number.isRequired,
-    b: PropTypes.number.isRequired,
+    width: PropTypes.number.isRequired,
+    height: PropTypes.number.isRequired,
     state: PropTypes.string,
     createHandlers: PropTypes.func.isRequired,
   };
@@ -28,10 +28,10 @@ export class ElementWrapper extends React.PureComponent {
     // wait until the handlers have been created
     if (!this.state.handlers) return null;
 
-    const { renderable, transformMatrix, a, b, state } = this.props;
+    const { renderable, transformMatrix, width, height, state } = this.props;
 
     return (
-      <Positionable transformMatrix={transformMatrix} a={a} b={b}>
+      <Positionable transformMatrix={transformMatrix} width={width} height={height}>
         <ElementContent renderable={renderable} state={state} handlers={this.state.handlers} />
       </Positionable>
     );

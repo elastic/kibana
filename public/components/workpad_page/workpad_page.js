@@ -49,13 +49,12 @@ export const WorkpadPage = ({
         .map(element => {
           if (element.type === 'annotation') {
             if (!isEditable) return;
-
             const props = {
               key: element.id,
               type: element.type,
               transformMatrix: element.transformMatrix,
-              a: element.a,
-              b: element.b,
+              width: element.width,
+              height: element.height,
             };
 
             switch (element.subtype) {
@@ -90,8 +89,8 @@ WorkpadPage.propTypes = {
     PropTypes.shape({
       id: PropTypes.string.isRequired,
       transformMatrix: PropTypes.arrayOf(PropTypes.number).isRequired,
-      a: PropTypes.number.isRequired,
-      b: PropTypes.number.isRequired,
+      width: PropTypes.number.isRequired,
+      height: PropTypes.number.isRequired,
       type: PropTypes.string,
     })
   ).isRequired,

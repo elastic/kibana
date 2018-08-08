@@ -61,6 +61,21 @@ const metaHeld = selectReduce((prev, next) => {
   }
 }, false)(keyboardEvent);
 
+// DRY these up
+const optionHeld = selectReduce((prev, next) => {
+  // first is for web standard, other is for React key code detection
+  if (!next || !next.code || (next.code.slice(0, 3) !== 'Alt' && next.code !== 'KeyALT'))
+    return prev;
+  switch (next && next.event) {
+    case 'keyDown':
+      return true;
+    case 'keyUp':
+      return false;
+    default:
+      return prev;
+  }
+}, false)(keyboardEvent);
+
 const cursorPosition = selectReduce((previous, position) => position || previous, { x: 0, y: 0 })(
   rawCursorPosition
 );
@@ -165,5 +180,6 @@ module.exports = {
   mouseButton,
   mouseDowned,
   mouseIsDown,
+  optionHeld,
   pressedKeys,
 };

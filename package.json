@@ -1,6 +1,6 @@
 {
   "name": "canvas",
-  "version": "0.1.2053",
+  "version": "0.1.2085",
   "description": "Data driven workpads for kibana",
   "main": "index.js",
   "kibana": {
@@ -62,7 +62,7 @@
     "object-path-immutable": "^0.5.3",
     "prop-types": "^15.6.1",
     "raw-loader": "0.5.1",
-    "react": "^16.2.0",
+    "react": "^16.3.0",
     "react-beautiful-dnd": "^8.0.7",
     "react-datetime": "^2.14.0",
     "react-dom": "^16.2.0",
@@ -82,7 +82,8 @@
   },
   "devDependencies": {
     "@elastic/eslint-config-kibana": "link:../../kibana/packages/eslint-config-kibana",
-    "@kbn/eslint-import-resolver-kibana": "link:../../kibana/packages/kbn-eslint-import-resolver-kibana",
+    "@kbn/eslint-import-resolver-kibana":
+      "link:../../kibana/packages/kbn-eslint-import-resolver-kibana",
     "@kbn/plugin-helpers": "link:../../kibana/packages/kbn-plugin-helpers",
     "ansi-colors": "^1.0.1",
     "aws-sdk": "^2.141.0",

@@ -9,6 +9,7 @@ const {
   mouseButton,
   mouseDowned,
   mouseIsDown,
+  optionHeld,
   pressedKeys,
 } = require('./gestures');
 
@@ -334,8 +335,7 @@ const resizeMultiplierVertical = { top: -1, center: 0, bottom: 1 };
 const xNames = { '-1': 'left', '0': 'center', '1': 'right' };
 const yNames = { '-1': 'top', '0': 'center', '1': 'bottom' };
 
-/* upcoming functionality
-const centeredResizeManipulation = ({ gesture, shape, directShape, cursorPosition: { x, y } }) => {
+const centeredResizeManipulation = ({ gesture, shape, directShape }) => {
   const transform = gesture.transform;
   // scaling such that the center remains in place (ie. the other side of the shape can grow/shrink)
   if (!shape || !directShape) return { transforms: [], shapes: [] };
@@ -352,15 +352,18 @@ const centeredResizeManipulation = ({ gesture, shape, directShape, cursorPositio
     resizeMultiplierVertical[directShape.verticalPosition],
     0,
   ];
+  const orientedVector = matrix2d.componentProduct(vector, orientationMask);
+
+  // correct for possible negative size
+  // const newAB = matrix2d.mvMultiply(sizeMatrix, [shape.a, shape.b, 1])
+  orientedVector[0] += -Math.min(shape.a, 0); // correct for negative size
+  orientedVector[1] += -Math.min(shape.b, 0); // correct for negative size
   return {
     transforms: [],
-    sizes: [
-      gesture.sizes || matrix2d.translate(...matrix2d.componentProduct(vector, orientationMask)),
-    ],
+    sizes: [gesture.sizes || matrix2d.translate(...orientedVector)],
     shapes: [shape.id],
   };
 };
-*/
 
 const asymmetricResizeManipulation = ({ gesture, shape, directShape }) => {
   const transform = gesture.transform;
@@ -449,7 +452,7 @@ const rotationAnnotationManipulation = (
   return tuples.map(rotationManipulation);
 };
 
-const resizeAnnotationManipulation = (transformGestures, directShapes, allShapes) => {
+const resizeAnnotationManipulation = (transformGestures, directShapes, allShapes, manipulator) => {
   const shapeIds = directShapes.map(
     shape =>
       shape.type === 'annotation' && shape.subtype === config.resizeHandleName && shape.parent
@@ -460,11 +463,15 @@ const resizeAnnotationManipulation = (transformGestures, directShapes, allShapes
       transformGestures.map(gesture => ({ gesture, shape, directShape: directShapes[i] }))
     )
   );
-  return tuples.map(asymmetricResizeManipulation);
+  return tuples.map(manipulator);
 };
 
+const resizeManipulator = select(
+  toggle => (toggle ? centeredResizeManipulation : asymmetricResizeManipulation)
+)(optionHeld);
+
 const transformIntents = select(
-  (transformGestures, directShapes, shapes, cursorPosition, alterSnapGesture) => [
+  (transformGestures, directShapes, shapes, cursorPosition, alterSnapGesture, manipulator) => [
     ...directShapeTranslateManipulation(transformGestures.map(g => g.transform), directShapes),
     ...rotationAnnotationManipulation(
       transformGestures.map(g => g.transform),
@@ -473,9 +480,9 @@ const transformIntents = select(
       cursorPosition,
       alterSnapGesture
     ),
-    ...resizeAnnotationManipulation(transformGestures, directShapes, shapes),
+    ...resizeAnnotationManipulation(transformGestures, directShapes, shapes, manipulator),
   ]
-)(transformGestures, selectedShapes, shapes, cursorPosition, alterSnapGesture);
+)(transformGestures, selectedShapes, shapes, cursorPosition, alterSnapGesture, resizeManipulator);
 
 const fromScreen = currentTransform => transform => {
   const isTranslate = transform[12] !== 0 || transform[13] !== 0;
@@ -559,6 +566,8 @@ const shapeCascadeTransforms = shapes => shape => {
   return {
     ...shape,
     transformMatrix: cascadedTransforms,
+    width: 2 * shape.a,
+    height: 2 * shape.b,
   };
 };
 

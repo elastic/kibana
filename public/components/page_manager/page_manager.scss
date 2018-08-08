@@ -124,7 +124,7 @@
     visibility: hidden;
     opacity: 0;
     transition: opacity $euiAnimSpeedFast $euiAnimSlightResistance;
-    transition-delay: $euiAnimSpeedExtraSlow;
+    transition-delay: $euiAnimSpeedNormal;
     background: transparentize($euiColorGhost, 0.5);
     border-radius: $euiBorderRadius;
   }
