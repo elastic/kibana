@@ -109,6 +109,7 @@
     "cache-loader": "1.0.3",
     "chalk": "^2.4.1",
     "check-hash": "1.0.1",
+    "childnode-remove": "^1.0.1",
     "color": "1.0.3",
     "commander": "2.8.1",
     "compare-versions": "3.1.0",

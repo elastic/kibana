@@ -2665,6 +2665,10 @@ cheerio@^1.0.0-rc.2:
     lodash "^4.15.0"
     parse5 "^3.0.1"
 
+childnode-remove@^1.0.1:
+  version "1.0.1"
+  resolved "https://registry.yarnpkg.com/childnode-remove/-/childnode-remove-1.0.1.tgz#a3b3aa81a824eb45f4d66bb88f58a330f76068b5"
+
 chokidar@1.6.0:
   version "1.6.0"
   resolved "https://registry.yarnpkg.com/chokidar/-/chokidar-1.6.0.tgz#90c32ad4802901d7713de532dc284e96a63ad058"
