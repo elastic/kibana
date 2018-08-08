@@ -17,7 +17,6 @@ import {
 } from '../../containers/libs/type_guards';
 import { InfraWaffleData, InfraWaffleMapGroup, InfraWaffleOptions } from '../../lib/lib';
 import { applyWaffleMapLayout } from './lib/apply_wafflemap_layout';
-import { Scroll } from './scroll';
 
 interface WafleMapProps {
   options: InfraWaffleOptions;
@@ -38,18 +37,16 @@ export class Waffle extends React.Component<WafleMapProps, WaffleMapState> {
 
   public render() {
     return (
-      <AutoSizer bounds>
-        {({ measureRef, bounds: { width = 0, height = 0 } }) => {
+      <AutoSizer content>
+        {({ measureRef, content: { width = 0, height = 0 } }) => {
           const { hasScroll } = this.state;
           const { map } = this.props;
           const groupsWithLayout = applyWaffleMapLayout(map, width, height);
           return (
             <Container innerRef={(el: any) => measureRef(el)}>
-              <Scroll hasScroll={hasScroll} innerRef={(el: any) => (this.outer = el)}>
-                <MapContainer innerRef={(el: any) => (this.inner = el)}>
-                  {groupsWithLayout.map(this.renderGroup)}
-                </MapContainer>
-              </Scroll>
+              <MapContainer>
+                {groupsWithLayout.map(this.renderGroup)}
+              </MapContainer>
             </Container>
           );
         }}
@@ -111,19 +108,19 @@ export class Waffle extends React.Component<WafleMapProps, WaffleMapState> {
 }
 
 const Container = styled.div`
-  position: absolute;
-  top: 67px;
-  left: 0;
-  bottom: 0;
-  right: 0;
+  flex: 1 0 0;
+  display: flex;
+  justify-content: center;
+  flex-direction: column;
+  overflow-x: hidden;
+  overflow-y: auto;
 `;
 
 const MapContainer = styled.div`
-  position: relative;
   display: flex;
-  flex-flow: row wrap;
+  flex-direction: row;
+  flex-wrap: wrap;
   justify-content: center;
   align-content: flex-start;
   padding: 10px;
-  min-height: min-content;
 `;
