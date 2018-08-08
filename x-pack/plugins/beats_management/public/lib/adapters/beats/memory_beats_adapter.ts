@@ -25,6 +25,17 @@ export class MemoryBeatsAdapter implements CMBeatsAdapter {
     return this.beatsDB.find(beat => beat.id === id) || null;
   }
 
+  public async update(id: string, beatData: Partial<CMBeat>): Promise<boolean> {
+    const index = this.beatsDB.findIndex(beat => beat.id === id);
+
+    if (index === -1) {
+      return false;
+    }
+
+    this.beatsDB[index] = { ...this.beatsDB[index], ...beatData };
+    return true;
+  }
+
   public async getAll() {
     return this.beatsDB.map<CMBeat>((beat: any) => omit(beat, ['access_token']));
   }
@@ -35,6 +46,12 @@ export class MemoryBeatsAdapter implements CMBeatsAdapter {
     const beatIds = removals.map(r => r.beatId);
 
     const response = this.beatsDB.filter(beat => beatIds.includes(beat.id)).map(beat => {
+      const tagData = removals.find(r => r.beatId === beat.id);
+      if (tagData) {
+        if (beat.tags) {
+          beat.tags = beat.tags.filter(tag => tag !== tagData.tag);
+        }
+      }
       const removalsForBeat = removals.filter(r => r.beatId === beat.id);
       if (removalsForBeat.length) {
         removalsForBeat.forEach((assignment: BeatsTagAssignment) => {

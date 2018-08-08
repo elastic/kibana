@@ -51,6 +51,9 @@
             "id": {
               "type": "keyword"
             },
+            "active": {
+              "type": "boolean"
+            },
             "enrollment_token": {
               "type": "keyword"
             },
