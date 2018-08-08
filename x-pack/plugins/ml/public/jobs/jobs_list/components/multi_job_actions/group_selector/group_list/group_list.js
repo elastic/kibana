@@ -66,7 +66,6 @@ export class GroupList extends Component {
             >
               <Check group={g} selectedGroups={selectedGroups} />
               <JobGroup name={g.id} />
-              {/* <span>({g.jobIds.length} job{(g.jobIds.length === 1) ? '' : 's'})</span> */}
             </div>
           ))
         }
