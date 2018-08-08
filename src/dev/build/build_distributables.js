@@ -112,7 +112,6 @@ export async function buildDistributables(options) {
   await run(RemovePackageJsonDepsTask);
   await run(TranspileScssTask);
   await run(CleanExtraFilesFromModulesTask);
-  await run(CleanNodeTask);
   await run(OptimizeBuildTask);
 
   /**
@@ -122,6 +121,7 @@ export async function buildDistributables(options) {
   await run(CreateArchivesSourcesTask);
   await run(CleanExtraBinScriptsTask);
   await run(CleanExtraBrowsersTask);
+  await run(CleanNodeTask);
 
   /**
    * package platform-specific builds into archives
