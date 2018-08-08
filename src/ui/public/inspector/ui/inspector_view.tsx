@@ -18,7 +18,6 @@
  */
 
 import classNames from 'classnames';
-import PropTypes from 'prop-types';
 import React from 'react';
 
 import { EuiFlyoutBody } from '@elastic/eui';
@@ -34,12 +33,4 @@ const InspectorView: React.SFC<{ useFlex?: boolean }> = ({ useFlex, children }) 
   });
   return <EuiFlyoutBody className={classes}>{children}</EuiFlyoutBody>;
 };
-
-InspectorView.propTypes = {
-  /**
-   * Set to true if the element should have display: flex set.
-   */
-  useFlex: PropTypes.bool,
-};
-
 export { InspectorView };
