@@ -17,23 +17,29 @@
  * under the License.
  */
 
-import PropTypes from 'prop-types';
-import React from 'react';
+import React, { ReactNode } from 'react';
 
-import {
-  EuiFormRow,
-  EuiToolTip,
-} from '@elastic/eui';
+declare module '@elastic/eui' {
+  export const EuiToolTip: React.SFC<{ placement?: string; content?: string }>;
+}
 
-export function FormRow(props) {
-  let control = props.children;
-  if (props.disableMsg) {
-    control = (
-      <EuiToolTip placement="top" content={props.disableMsg}>
-        {control}
-      </EuiToolTip>
-    );
-  }
+import { EuiFormRow, EuiToolTip } from '@elastic/eui';
+
+interface FormRowProps {
+  disableMsg?: string;
+  children: ReactNode;
+  controlIndex: number;
+  label: string;
+  id: string;
+}
+
+export function FormRow(props: FormRowProps) {
+  const control = props.children;
+  const disabledControl = (
+    <EuiToolTip placement="top" content={props.disableMsg}>
+      {control}
+    </EuiToolTip>
+  );
 
   return (
     <EuiFormRow
@@ -41,15 +47,7 @@ export function FormRow(props) {
       id={props.id}
       data-test-subj={'inputControl' + props.controlIndex}
     >
-      {control}
+      {props.disableMsg ? { disabledControl } : { control }}
     </EuiFormRow>
   );
 }
-
-FormRow.propTypes = {
-  label: PropTypes.string.isRequired,
-  id: PropTypes.string.isRequired,
-  children: PropTypes.node.isRequired,
-  controlIndex: PropTypes.number.isRequired,
-  disableMsg: PropTypes.string,
-};
