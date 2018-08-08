@@ -5,10 +5,10 @@
  */
 
 import { EuiToolTip } from '@elastic/eui';
+import { darken } from 'polished';
 import React from 'react';
 import styled from 'styled-components';
 import { InfraWaffleMapNode, InfraWaffleOptions } from '../../lib/lib';
-import { darken } from './lib/darken';
 
 interface Props {
   onDrilldown: () => void;
@@ -50,7 +50,7 @@ export const SquareOuter = styled.div`
   left: 4px;
   bottom: 4px;
   right: 4px;
-  background-color: ${props => darken(props.theme.eui.euiColorVis0, 0.35)};
+  background-color: ${props => darken(0.1, props.theme.eui.euiColorVis0)};
   border-radius: 3px;
   box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.2);
 `;
