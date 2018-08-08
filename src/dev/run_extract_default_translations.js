@@ -17,9 +17,11 @@
  * under the License.
  */
 
+import yargs from 'yargs';
+
 import { run } from './run';
 import { extractDefaultTranslations } from './i18n/extract_default_translations';
-import yargs from 'yargs';
+import config from '../../.localizationrc.json';
 
 run(async () => {
   const { argv } = yargs
@@ -34,5 +36,5 @@ run(async () => {
       type: 'string',
     });
 
-  await extractDefaultTranslations({ inputPaths: argv.path, outputPath: argv.output });
+  await extractDefaultTranslations({ inputPaths: argv.path, outputPath: argv.output, config });
 });

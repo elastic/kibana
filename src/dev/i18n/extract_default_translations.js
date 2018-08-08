@@ -27,7 +27,6 @@ import { extractCodeMessages } from './extract_code_messages';
 import { extractPugMessages } from './extract_pug_messages';
 import { extractHandlebarsMessages } from './extract_handlebars_messages';
 import { globAsync, makeDirAsync, accessAsync, readFileAsync, writeFileAsync } from './utils';
-import config from '../../../.localizationrc.json';
 
 function addMessageToMap(targetMap, key, value) {
   const existingValue = targetMap.get(key);
@@ -40,8 +39,8 @@ function addMessageToMap(targetMap, key, value) {
   targetMap.set(key, value);
 }
 
-async function getPluginsPaths(inputPaths) {
-  const availablePaths = Object.values(config.paths);
+async function getPluginsPaths(inputPaths, availablePathsObject) {
+  const availablePaths = Object.values(availablePathsObject);
   const pathsForExtraction = [];
 
   for (const inputPath of inputPaths) {
@@ -49,13 +48,19 @@ async function getPluginsPaths(inputPaths) {
 
     if (normalizedPath) {
       pathsForExtraction.push(
-        ...availablePaths.filter(ePath => ePath.startsWith(`${normalizedPath}/`))
+        ...availablePaths.filter(
+          ePath => ePath.startsWith(`${normalizedPath}/`) || ePath === normalizedPath
+        )
       );
     } else {
       pathsForExtraction.push(...availablePaths);
     }
 
-    if (availablePaths.some(ePath => normalizedPath.startsWith(`${ePath}/`))) {
+    if (
+      availablePaths.some(
+        ePath => normalizedPath.startsWith(`${ePath}/`) || ePath === normalizedPath
+      )
+    ) {
       pathsForExtraction.push(normalizedPath);
     }
   }
@@ -63,18 +68,19 @@ async function getPluginsPaths(inputPaths) {
   return pathsForExtraction;
 }
 
-export function validateMessageNamespace(id, filePath) {
+export function validateMessageNamespace(id, filePath, availablePathsObject) {
   const normalizedPath = normalize(path.relative('.', filePath));
-  const [expectedNamespace] = Object.entries(config.paths).find(([, pluginPath]) =>
+
+  const [expectedNamespace] = Object.entries(availablePathsObject).find(([, pluginPath]) =>
     normalizedPath.startsWith(`${pluginPath}/`)
   );
 
   if (!id.startsWith(`${expectedNamespace}.`)) {
-    throw new Error(`Message id has wrong namespace ("${id}").`);
+    throw new Error(`Message id has a wrong namespace ("${id}").`);
   }
 }
 
-export async function extractMesssagesFromPathToMap(inputPath, targetMap) {
+export async function extractMesssagesFromPathToMap(inputPath, targetMap, config) {
   const entries = await globAsync('*.{js,jsx,pug,ts,tsx,html,hbs,handlebars}', {
     cwd: inputPath,
     matchBase: true,
@@ -120,7 +126,7 @@ export async function extractMesssagesFromPathToMap(inputPath, targetMap) {
       for (const { name, content } of files) {
         try {
           for (const [id, value] of extractFunction(content)) {
-            validateMessageNamespace(id, name);
+            validateMessageNamespace(id, name, config.paths);
             addMessageToMap(targetMap, id, value);
           }
         } catch (error) {
@@ -131,14 +137,12 @@ export async function extractMesssagesFromPathToMap(inputPath, targetMap) {
   );
 }
 
-export async function extractDefaultTranslations({ inputPaths, outputPath }) {
+export async function extractDefaultTranslations({ inputPaths, outputPath, config }) {
   const defaultMessagesMap = new Map();
 
-  for (const inputPath of await getPluginsPaths(inputPaths)) {
-    await extractMesssagesFromPathToMap(inputPath, defaultMessagesMap);
+  for (const inputPath of await getPluginsPaths(inputPaths, config.paths)) {
+    await extractMesssagesFromPathToMap(inputPath, defaultMessagesMap, config);
   }
-
-  console.log(`Validated ${defaultMessagesMap.size} messages.`); // TODO: normal log
 
   if (!outputPath || !defaultMessagesMap.size) {
     return;
