@@ -20,15 +20,16 @@
 /**
  * A hidden parameter can be hidden from the UI completely.
  */
-interface HiddenParam {
-  hidden: boolean;
+interface Param {
+  hidden?: boolean;
+  warning?: string;
 }
 
 /**
  * A fixed parameter has a fixed value for a specific field.
  * It can optionally also be hidden.
  */
-export type FixedParam = Partial<HiddenParam> & {
+export type FixedParam = Partial<Param> & {
   fixedValue: any;
 };
 
@@ -36,11 +37,11 @@ export type FixedParam = Partial<HiddenParam> & {
  * Numeric interval parameters must always be set in the editor to a multiple of
  * the specified base. It can optionally also be hidden.
  */
-export type NumericIntervalParam = Partial<HiddenParam> & {
+export type NumericIntervalParam = Partial<Param> & {
   base: number;
 };
 
-export type EditorParamConfig = NumericIntervalParam | FixedParam | HiddenParam;
+export type EditorParamConfig = NumericIntervalParam | FixedParam | Param;
 
 export interface EditorConfig {
   [paramName: string]: EditorParamConfig;

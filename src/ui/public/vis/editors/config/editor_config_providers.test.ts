@@ -130,5 +130,13 @@ describe('EditorConfigProvider', () => {
       expect(config.base).toBe(26);
       expect(config.hidden).toBe(false);
     });
+
+    it('should merge warnings together into one string', () => {
+      registry.register(singleConfig({ warning: 'Warning' }));
+      registry.register(singleConfig({ warning: 'Another warning' }));
+      const config = getOutputConfig(registry);
+      expect(config).toHaveProperty('warning');
+      expect(config.warning).toBe('Warning\n\nAnother warning');
+    });
   });
 });

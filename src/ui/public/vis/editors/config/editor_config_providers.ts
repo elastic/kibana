@@ -59,6 +59,14 @@ class EditorConfigProviderRegistry {
     return Boolean(current.hidden || merged.hidden);
   }
 
+  private mergeWarning(current: EditorParamConfig, merged: EditorParamConfig): string | undefined {
+    if (!current.warning) {
+      return merged.warning;
+    }
+
+    return merged.warning ? `${merged.warning}\n\n${current.warning}` : current.warning;
+  }
+
   private mergeFixedAndBase(
     current: EditorParamConfig,
     merged: EditorParamConfig,
@@ -118,6 +126,7 @@ class EditorConfigProviderRegistry {
         } else {
           output[paramName] = {
             hidden: this.mergeHidden(paramConfig, output[paramName]),
+            warning: this.mergeWarning(paramConfig, output[paramName]),
             ...this.mergeFixedAndBase(paramConfig, output[paramName], paramName),
           };
         }
