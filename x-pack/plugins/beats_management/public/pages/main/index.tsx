@@ -128,7 +128,6 @@ export class MainPages extends React.PureComponent<MainPagesProps, MainPagesStat
             exact={true}
             render={(props: any) => <EditTagPage libs={this.props.libs} {...props} />}
           />
-          hi hi hi
         </Switch>
       </PrimaryLayout>
     );
