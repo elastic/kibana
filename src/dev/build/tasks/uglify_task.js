@@ -35,6 +35,7 @@ export const UglifyTask = {
           '**/*.js',
           '!**/public/**',
           '!**/node_modules/**',
+          '!**/webpackShims/**',
         ],
         {
           cwd: build.resolvePath(),

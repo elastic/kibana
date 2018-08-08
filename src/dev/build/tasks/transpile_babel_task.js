@@ -34,6 +34,7 @@ export const TranspileBabelTask = {
           '!**/public/**',
           '!**/node_modules/**',
           '!**/bower_components/**',
+          '!**/webpackShims/**',
           '!**/__tests__/**',
         ],
         {
