@@ -121,7 +121,7 @@ This is no longer the case. Now, only commas are a valid query separator: e.g. `
 `['reporting_user']`. Users will no longer have access to the underlying {reporting}
 indices in {es} when assigned to the built-in `reporting_user` role. If using
 custom reporting roles, the privileges to the indices will need to be removed, and the
-role will need to be added to the `xpack-reporting.roles.allow` setting.
+role will need to be added to the `xpack.reporting.roles.allow` setting.
 
 [float]
 === {watcher}
