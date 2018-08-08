@@ -19,8 +19,4 @@
 
 const childNodeRemove = require('childnode-remove');
 
-if (typeof window === 'object' && window.Element) {
-  if (!Element.prototype.remove) {
-    childNodeRemove.polyfill();
-  }
-}
+childNodeRemove.polyfill();
