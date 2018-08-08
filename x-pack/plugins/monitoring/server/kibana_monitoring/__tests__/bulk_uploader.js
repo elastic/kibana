@@ -14,22 +14,17 @@ const CHECK_DELAY = 500;
 
 class MockCollectorSet {
   constructor(_mockServer, mockCollectors) {
+    this.mockServer = _mockServer;
     this.mockCollectors = mockCollectors;
+  }
+  getCollectorByType(type) {
+    return this.mockCollectors.find(collector => collector.type === type) || this.mockCollectors[0];
+  }
+  getFilteredCollectorSet(filter) {
+    return new MockCollectorSet(this.mockServer, this.mockCollectors.filter(filter));
   }
   async bulkFetch() {
     return this.mockCollectors.map(({ fetch }) => fetch());
-  }
-  bulkFormat(data) {
-    return data.reduce((accum, collectedData) => {
-      if (collectedData) {
-        const collector = this.mockCollectors[0];
-        const formatter = collector.formatForBulkUpload || (result => ([
-          { type: collector.type, payload: result }
-        ]));
-        accum.push(formatter(collectedData.result));
-      }
-      return accum;
-    }, []);
   }
 }
 
@@ -62,7 +57,8 @@ describe('BulkUploader', () => {
       const collectors = new MockCollectorSet(server, [
         {
           type: 'type_collector_test',
-          fetch: noop, // empty payloads
+          fetch: noop, // empty payloads,
+          formatForBulkUpload: result => result,
         }
       ]);
 
@@ -97,7 +93,10 @@ describe('BulkUploader', () => {
 
     it('should run the bulk upload handler', done => {
       const collectors = new MockCollectorSet(server, [
-        { fetch: () => ({ type: 'type_collector_test', result: { testData: 12345 } }) }
+        {
+          fetch: () => ({ type: 'type_collector_test', result: { testData: 12345 } }),
+          formatForBulkUpload: result => result
+        }
       ]);
       const uploader = new BulkUploader(server, {
         interval: FETCH_INTERVAL

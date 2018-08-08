@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { defaultsDeep, isEmpty, uniq } from 'lodash';
+import { defaultsDeep, isEmpty, uniq, compact } from 'lodash';
 import { callClusterFactory } from '../../../xpack_main';
 import {
   LOGGING_TAG,
@@ -102,7 +102,7 @@ export class BulkUploader {
       callCluster: this._callClusterWithInternalUser,
       savedObjectsClient: this._savedObjectsClient,
     });
-    const payload = this.toBulkUploadFormat(data, collectorSet);
+    const payload = this.toBulkUploadFormat(compact(data), collectorSet);
 
     if (payload) {
       try {
@@ -126,6 +126,10 @@ export class BulkUploader {
    * Non-legacy transformation is done in CollectorSet.toApiStats
    */
   toBulkUploadFormat(rawData, collectorSet) {
+    if (rawData.length === 0) {
+      return;
+    }
+
     // convert the raw data to a nested object by taking each payload through
     // its formatter, organizing it per-type
     const typesNested = rawData.reduce((accum, { type, result }) => {
