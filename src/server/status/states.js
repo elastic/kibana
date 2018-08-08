@@ -62,7 +62,7 @@ export const all = [
     id: 'disabled',
     title: 'Disabled',
     severity: -1,
-    uiColor: 'subdued',
+    uiColor: 'default',
     nicknames: [
       'Am I even a thing?'
     ]
