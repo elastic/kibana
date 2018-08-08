@@ -53,6 +53,36 @@ export class SpacesClient {
     }
   }
 
+  public async get(spaceId: number) {
+    if (!this.authorization || !this.authorization.isRbacEnabled()) {
+      return await this.getWithRepository(this.callWithRequestRepository, spaceId);
+    }
+
+    const checkPrivileges = this.authorization.checkPrivilegesWithRequest(this.request);
+    const { result } = await checkPrivileges([spaceId], [this.authorization.actions.login]);
+
+    switch (result) {
+      case this.authorization.CHECK_PRIVILEGES_RESULT.LEGACY: {
+        return await this.getWithRepository(this.callWithRequestRepository, spaceId);
+      }
+      case this.authorization.CHECK_PRIVILEGES_RESULT.AUTHORIZED: {
+        return await this.getWithRepository(this.internalSavedObjectRepository, spaceId);
+      }
+      case this.authorization.CHECK_PRIVILEGES_RESULT.UNAUTHORIZED: {
+        return Boom.forbidden(`Unauthorized to get space ${spaceId}`);
+      }
+      default: {
+        throw new Error('Unexpected result from checkPrivileges');
+      }
+    }
+  }
+
+  private async getWithRepository(repository: any, spaceId: number) {
+    const savedObject = await repository.get('space', spaceId);
+
+    return this.transformSavedObjectToSpace(savedObject);
+  }
+
   private async getAllWithRepository(repository: any) {
     const { saved_objects } = await repository.find({
       type: 'space',
@@ -60,9 +90,13 @@ export class SpacesClient {
       perPage: 1000,
     });
 
-    return saved_objects.map((savedObject: any) => ({
+    return saved_objects.map(this.transformSavedObjectToSpace);
+  }
+
+  private transformSavedObjectToSpace(savedObject: any) {
+    return {
       id: savedObject.id,
       ...savedObject.attributes,
-    }));
+    };
   }
 }

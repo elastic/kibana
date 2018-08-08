@@ -4,10 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { transform, uniq } from 'lodash';
+import { pick, transform, uniq } from 'lodash';
 import { buildLegacyIndexPrivileges } from './privileges';
 import { validateEsPrivilegeResponse } from './validate_es_response';
-import { pick } from '../../../../../../node_modules/vega-lite/build/src/util';
 
 export const CHECK_PRIVILEGES_RESULT = {
   UNAUTHORIZED: Symbol('Unauthorized'),
@@ -86,7 +85,7 @@ export function checkPrivilegesWithRequestFactory(shieldClient, config, actions,
       return {
         result: determineResult(applicationPrivilegesResponse, indexPrivilegesResponse),
         username: hasPrivilegesResponse.username,
-        // we need filter out the non requested privileges from the response
+        // we needfilter out the non requested privileges from the response
         response: transform(applicationPrivilegesResponse, (response, resourcePrivilegesResponse, resourceResponse) => {
           response[resourceResponse] = pick(resourcePrivilegesResponse, privileges);
         }),

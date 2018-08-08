@@ -41,15 +41,12 @@ export function initSpacesApi(server) {
 
       const spacesClient = getSpacesClient(request, server);
 
-      let spaces;
-
       try {
-        spaces = await spacesClient.getAll();
+        const spaces = await spacesClient.getAll();
+        return reply(spaces);
       } catch (error) {
         return reply(wrapError(error));
       }
-
-      return reply(spaces);
     },
     config: {
       pre: [routePreCheckLicenseFn]
@@ -62,12 +59,12 @@ export function initSpacesApi(server) {
     async handler(request, reply) {
       const spaceId = request.params.id;
 
-      const client = request.getSavedObjectsClient();
+      const spacesClient = getSpacesClient(request, server);
 
       try {
-        const response = await client.get('space', spaceId);
+        const space = await spacesClient.get(spaceId);
 
-        return reply(convertSavedObjectToSpace(response));
+        return reply(space);
       } catch (error) {
         return reply(wrapError(error));
       }

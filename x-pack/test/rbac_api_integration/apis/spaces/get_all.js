@@ -5,7 +5,6 @@
  */
 
 import expect from 'expect.js';
-import { SPACES } from '../lib/spaces';
 import { getUrlPrefix } from '../lib/space_test_utils';
 import { AUTHENTICATION } from '../lib/authentication';
 
@@ -13,9 +12,9 @@ export default function ({ getService }) {
   const supertest = getService('supertestWithoutAuth');
   const esArchiver = getService('esArchiver');
 
-  describe('get', () => {
+  describe('get all', () => {
 
-    const allSpaces = [
+    const allResults = [
       { id: 'default',
         name: 'Default Space',
         description: 'This is the default space',
@@ -28,42 +27,33 @@ export default function ({ getService }) {
         description: 'This is the second test space' }
     ];
 
-    const createExpectResultSpace = (spaceId) => (resp) => {
-      const result = allSpaces.find(space => space.id === spaceId);
-      expect(resp.body).to.eql(result);
+    const expectAllResults = (resp) => {
+      expect(resp.body).to.eql(allResults);
     };
 
-    const createExpectRbacForbidden = (spaceId) => (resp) => {
+    const createExpectResults = (spaceIds) => (resp) => {
+      const results = allResults.filter(item => spaceIds.includes(item.id));
+      expect(resp.body).to.eql(results);
+    };
+
+    const expectRbacForbidden = resp => {
       expect(resp.body).to.eql({
         statusCode: 403,
-        error: 'Forbidden',
-        message: `Unauthorized to get space ${spaceId}`
+        error: 'Forbidden'
       });
     };
 
-    const getTest = (description, { auth, tests }) => {
+    const getTest = (description, { auth, spaceId, tests }) => {
       describe(description, () => {
         before(async () => esArchiver.load(`saved_objects/spaces`));
         after(async () => esArchiver.unload(`saved_objects/spaces`));
 
-        describe('default space', () => {
-          it(`should return ${tests.default.statusCode}`, async () => {
-            return supertest
-              .get(`${getUrlPrefix(SPACES.DEFAULT.spaceId)}/api/spaces/v1/space/${SPACES.DEFAULT.spaceId}`)
-              .auth(auth.username, auth.password)
-              .expect(tests.default.statusCode)
-              .then(tests.default.response);
-          });
-        });
-
-        describe('space_2 from space_1', () => {
-          it(`should return ${tests.space2FromSpace1.statusCode}`, async () => {
-            return supertest
-              .get(`${getUrlPrefix(SPACES.SPACE_1.spaceId)}/api/spaces/v1/space/${SPACES.SPACE_2.spaceId}`)
-              .auth(auth.username, auth.password)
-              .expect(tests.space2FromSpace1.statusCode)
-              .then(tests.space2FromSpace1.response);
-          });
+        it(`should return ${tests.exists.statusCode}`, async () => {
+          return supertest
+            .get(`${getUrlPrefix(spaceId)}/api/spaces/v1/spaces`)
+            .auth(auth.username, auth.password)
+            .expect(tests.exists.statusCode)
+            .then(tests.exists.response);
         });
       });
     };
@@ -74,13 +64,9 @@ export default function ({ getService }) {
         password: AUTHENTICATION.NOT_A_KIBANA_USER.PASSWORD,
       },
       tests: {
-        default: {
+        exists: {
           statusCode: 403,
-          response: createExpectRbacForbidden(SPACES.DEFAULT.spaceId),
-        },
-        space2FromSpace1: {
-          statusCode: 403,
-          response: createExpectRbacForbidden(SPACES.SPACE_2.spaceId),
+          response: expectRbacForbidden,
         },
       }
     });
@@ -91,13 +77,9 @@ export default function ({ getService }) {
         password: AUTHENTICATION.SUPERUSER.PASSWORD,
       },
       tests: {
-        default: {
+        exists: {
           statusCode: 200,
-          response: createExpectResultSpace(SPACES.DEFAULT.spaceId),
-        },
-        space2FromSpace1: {
-          statusCode: 200,
-          response: createExpectResultSpace(SPACES.SPACE_2.spaceId),
+          response: expectAllResults,
         },
       }
     });
@@ -108,13 +90,9 @@ export default function ({ getService }) {
         password: AUTHENTICATION.KIBANA_LEGACY_USER.PASSWORD,
       },
       tests: {
-        default: {
+        exists: {
           statusCode: 200,
-          response: createExpectResultSpace(SPACES.DEFAULT.spaceId),
-        },
-        space2FromSpace1: {
-          statusCode: 200,
-          response: createExpectResultSpace(SPACES.SPACE_2.spaceId),
+          response: expectAllResults,
         },
       }
     });
@@ -125,13 +103,9 @@ export default function ({ getService }) {
         password: AUTHENTICATION.KIBANA_LEGACY_DASHBOARD_ONLY_USER.PASSWORD,
       },
       tests: {
-        default: {
+        exists: {
           statusCode: 200,
-          response: createExpectResultSpace(SPACES.DEFAULT.spaceId),
-        },
-        space2FromSpace1: {
-          statusCode: 200,
-          response: createExpectResultSpace(SPACES.SPACE_2.spaceId),
+          response: expectAllResults,
         },
       }
     });
@@ -142,13 +116,9 @@ export default function ({ getService }) {
         password: AUTHENTICATION.KIBANA_DUAL_PRIVILEGES_USER.PASSWORD,
       },
       tests: {
-        default: {
+        exists: {
           statusCode: 200,
-          response: createExpectResultSpace(SPACES.DEFAULT.spaceId),
-        },
-        space2FromSpace1: {
-          statusCode: 200,
-          response: createExpectResultSpace(SPACES.SPACE_2.spaceId),
+          response: expectAllResults,
         },
       }
     });
@@ -159,13 +129,9 @@ export default function ({ getService }) {
         password: AUTHENTICATION.KIBANA_DUAL_PRIVILEGES_DASHBOARD_ONLY_USER.PASSWORD,
       },
       tests: {
-        default: {
+        exists: {
           statusCode: 200,
-          response: createExpectResultSpace(SPACES.DEFAULT.spaceId),
-        },
-        space2FromSpace1: {
-          statusCode: 200,
-          response: createExpectResultSpace(SPACES.SPACE_2.spaceId),
+          response: expectAllResults,
         },
       }
     });
@@ -176,13 +142,9 @@ export default function ({ getService }) {
         password: AUTHENTICATION.KIBANA_RBAC_USER.PASSWORD,
       },
       tests: {
-        default: {
+        exists: {
           statusCode: 200,
-          response: createExpectResultSpace(SPACES.DEFAULT.spaceId),
-        },
-        space2FromSpace1: {
-          statusCode: 200,
-          response: createExpectResultSpace(SPACES.SPACE_2.spaceId),
+          response: expectAllResults,
         },
       }
     });
@@ -193,13 +155,9 @@ export default function ({ getService }) {
         password: AUTHENTICATION.KIBANA_RBAC_DASHBOARD_ONLY_USER.PASSWORD,
       },
       tests: {
-        default: {
+        exists: {
           statusCode: 200,
-          response: createExpectResultSpace(SPACES.DEFAULT.spaceId),
-        },
-        space2FromSpace1: {
-          statusCode: 200,
-          response: createExpectResultSpace(SPACES.SPACE_2.spaceId),
+          response: expectAllResults,
         },
       }
     });
@@ -210,15 +168,11 @@ export default function ({ getService }) {
         password: AUTHENTICATION.KIBANA_RBAC_DEFAULT_SPACE_USER.PASSWORD,
       },
       tests: {
-        default: {
+        exists: {
           statusCode: 200,
-          response: createExpectResultSpace(SPACES.DEFAULT.spaceId),
+          response: createExpectResults('default'),
         },
-        space2FromSpace1: {
-          statusCode: 403,
-          response: createExpectRbacForbidden(SPACES.SPACE_2.spaceId),
-        },
-      }
+      },
     });
 
     getTest('kibana rbac space 1 readonly user', {
@@ -227,13 +181,9 @@ export default function ({ getService }) {
         password: AUTHENTICATION.KIBANA_RBAC_SPACE_1_READONLY_USER.PASSWORD,
       },
       tests: {
-        default: {
-          statusCode: 403,
-          response: createExpectRbacForbidden(SPACES.DEFAULT.spaceId),
-        },
-        space2FromSpace1: {
-          statusCode: 403,
-          response: createExpectRbacForbidden(SPACES.SPACE_2.spaceId),
+        exists: {
+          statusCode: 200,
+          response: createExpectResults('space_1'),
         },
       }
     });

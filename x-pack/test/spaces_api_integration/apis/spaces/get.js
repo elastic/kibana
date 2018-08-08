@@ -14,52 +14,67 @@ export default function ({ getService }) {
 
   describe('get', () => {
 
-    const expectResults = (resp) => {
-      const expectedBody = [
-        { id: 'default',
-          name: 'Default Space',
-          description: 'This is the default space',
-          _reserved: true },
-        { id: 'space_1',
-          name: 'Space 1',
-          description: 'This is the first test space' },
-        { id: 'space_2',
-          name: 'Space 2',
-          description: 'This is the second test space' }
-      ];
-      expect(resp.body).to.eql(expectedBody);
+    const allSpaces = [
+      { id: 'default',
+        name: 'Default Space',
+        description: 'This is the default space',
+        _reserved: true },
+      { id: 'space_1',
+        name: 'Space 1',
+        description: 'This is the first test space' },
+      { id: 'space_2',
+        name: 'Space 2',
+        description: 'This is the second test space' }
+    ];
+
+    const createExpectResultSpace = (spaceId) => (resp) => {
+      const result = allSpaces.find(space => space.id === spaceId);
+      expect(resp.body).to.eql(result);
     };
 
-    const getTest = (description, { spaceId, tests }) => {
+    const getTest = (description, { currentSpace, spaceId, tests }) => {
       describe(description, () => {
         before(async () => esArchiver.load(`saved_objects/spaces`));
         after(async () => esArchiver.unload(`saved_objects/spaces`));
 
         it(`should return ${tests.exists.statusCode}`, async () => {
           return supertest
-            .get(`${getUrlPrefix(spaceId)}/api/spaces/v1/spaces`)
+            .get(`${getUrlPrefix(currentSpace.id)}/api/spaces/v1/space/${spaceId}`)
             .expect(tests.exists.statusCode)
             .then(tests.exists.response);
         });
       });
     };
 
-    getTest(`can access all spaces from space_1`, {
-      ...SPACES.SPACE_1,
+    getTest(`can access default space from default space`, {
+      currentSpace: SPACES.DEFAULT,
+      spaceId: SPACES.DEFAULT.spaceId,
       tests: {
         exists: {
           statusCode: 200,
-          response: expectResults,
+          response: createExpectResultSpace(SPACES.DEFAULT.spaceId),
         },
       }
     });
 
-    getTest(`can access all spaces from the default space`, {
-      ...SPACES.DEFAULT,
+    getTest(`can access space_1 from the default space`, {
+      currentSpace: SPACES.DEFAULT,
+      spaceId: SPACES.SPACE_1.spaceId,
       tests: {
         exists: {
           statusCode: 200,
-          response: expectResults,
+          response: createExpectResultSpace(SPACES.SPACE_1.spaceId),
+        },
+      }
+    });
+
+    getTest(`can access space_2 from space_1`, {
+      currentSpace: SPACES.SPACE_1,
+      spaceId: SPACES.SPACE_2.spaceId,
+      tests: {
+        exists: {
+          statusCode: 200,
+          response: createExpectResultSpace(SPACES.SPACE_2.spaceId),
         },
       }
     });
