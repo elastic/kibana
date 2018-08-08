@@ -8,22 +8,22 @@ import 'brace/mode/yaml';
 import 'brace/theme/github';
 import React from 'react';
 import { ConfigurationBlock } from '../../../common/domain_types';
-import { TagCreateConfig, TagEdit } from '../../components/tag';
+import { TagEdit, TagEditConfig } from '../../components/tag';
 import { FrontendLibs } from '../../lib/lib';
 
-interface CreateTagPageProps {
+interface EditTagPageProps {
   libs: FrontendLibs;
 }
 
-interface CreateTagPageState {
+interface EditTagPageState {
   color: string | null;
   configurationBlocks: ConfigurationBlock[];
   showFlyout: boolean;
   tagName: string | null;
 }
 
-export class CreateTagPage extends React.PureComponent<CreateTagPageProps, CreateTagPageState> {
-  constructor(props: CreateTagPageProps) {
+export class EditTagPage extends React.PureComponent<EditTagPageProps, EditTagPageState> {
+  constructor(props: EditTagPageProps) {
     super(props);
 
     this.state = {
@@ -35,6 +35,6 @@ export class CreateTagPage extends React.PureComponent<CreateTagPageProps, Creat
   }
 
   public render() {
-    return <TagEdit config={TagCreateConfig} items={[]} />;
+    return <TagEdit config={TagEditConfig} items={[]} />;
   }
 }

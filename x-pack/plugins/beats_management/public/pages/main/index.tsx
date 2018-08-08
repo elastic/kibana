@@ -17,6 +17,7 @@ import { FrontendLibs } from '../../lib/lib';
 import { ActivityPage } from './activity';
 import { BeatsPage } from './beats';
 import { CreateTagPage } from './create_tag';
+import { EditTagPage } from './edit_tag';
 import { TagsPage } from './tags';
 
 interface MainPagesProps {
@@ -64,6 +65,11 @@ export class MainPages extends React.PureComponent<MainPagesProps, MainPagesStat
       {
         id: '/createtag',
         name: 'Create Tag',
+        disabled: false,
+      },
+      {
+        id: '/edittag',
+        name: 'Edit Tag',
         disabled: false,
       },
     ];
@@ -117,6 +123,12 @@ export class MainPages extends React.PureComponent<MainPagesProps, MainPagesStat
             exact={true}
             render={(props: any) => <CreateTagPage libs={this.props.libs} {...props} />}
           />
+          <Route
+            path="/edittag"
+            exact={true}
+            render={(props: any) => <EditTagPage libs={this.props.libs} {...props} />}
+          />
+          hi hi hi
         </Switch>
       </PrimaryLayout>
     );
