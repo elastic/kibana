@@ -47,6 +47,7 @@ export class Table extends React.Component<BeatsTableProps, BeatsTableState> {
   };
 
   public render() {
+
     const {
       actionHandler,
       assignmentOptions,
