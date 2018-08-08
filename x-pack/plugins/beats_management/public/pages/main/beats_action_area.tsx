@@ -75,7 +75,7 @@ export class BeatsActionArea extends React.Component<any, any> {
       color="primary"
       onClick={async () => {
         const token = await libs.tokens.createEnrollmentToken();
-        history.push(`/beats/enroll/${token}`);
+        history.push(`/overview/beats/enroll/${token}`);
         this.waitForToken(token);
       }}
     >
@@ -88,7 +88,7 @@ export class BeatsActionArea extends React.Component<any, any> {
           this.pinging = false; 
           this.setState({
             enrolledBeat: null
-          }, () => history.push('/beats'))
+          }, () => history.push('/overview/beats'))
         }} style={{ width: '640px' }}>
           <EuiModalHeader>
           <EuiModalHeaderTitle>Enroll a new Beat</EuiModalHeaderTitle>
@@ -146,7 +146,7 @@ export class BeatsActionArea extends React.Component<any, any> {
                     enrolledBeat: null
                   })
                   const token = await libs.tokens.createEnrollmentToken();
-                  history.push(`/beats/enroll/${token}`);
+                  history.push(`/overview/beats/enroll/${token}`);
                   this.waitForToken(token);
                 }}
               >

@@ -5,14 +5,26 @@
  */
 
 import React from 'react';
-import { HashRouter, Route } from 'react-router-dom';
+import { HashRouter, Redirect, Route, Switch } from 'react-router-dom';
 
+import { BeatDetailsPage } from './pages/beat';
 import { MainPages } from './pages/main';
 
 export const PageRouter: React.SFC<{ libs: any }> = ({ libs }) => {
   return (
     <HashRouter basename="/management/beats_management">
-      <Route render={(props: any) => <MainPages {...props} libs={libs} />} />
+      <Switch>
+        <Route
+          path="/"
+          exact={true}
+          render={() => <Redirect from="/" exact={true} to="/overview/beats" />}
+        />
+        <Route path="/overview" render={(props: any) => <MainPages {...props} libs={libs} />} />
+        <Route
+          path="/beat/:beatId"
+          render={(props: any) => <BeatDetailsPage {...props} libs={libs} />}
+        />
+      </Switch>
     </HashRouter>
   );
 };
