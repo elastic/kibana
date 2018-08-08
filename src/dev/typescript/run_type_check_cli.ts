@@ -23,7 +23,7 @@ import dedent from 'dedent';
 import getopts from 'getopts';
 
 import { execInProjects } from './exec_in_projects';
-import { findProjectsByFlag } from './projects';
+import { filterProjectsByFlag } from './projects';
 
 export function runTypeCheckCli() {
   const extraFlags: string[] = [];
@@ -78,7 +78,7 @@ export function runTypeCheckCli() {
   }
 
   const tscArgs = ['--noEmit', '--pretty', ...(opts['skip-lib-check'] ? ['--skipLibCheck'] : [])];
-  const projects = findProjectsByFlag(opts.project);
+  const projects = filterProjectsByFlag(opts.project);
 
   if (!projects.length) {
     log.error(`Unable to find project at ${opts.project}`);

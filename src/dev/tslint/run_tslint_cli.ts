@@ -20,7 +20,7 @@
 import { createToolingLog } from '@kbn/dev-utils';
 import getopts from 'getopts';
 
-import { execInProjects, findProjectsByFlag, Project } from '../typescript';
+import { execInProjects, filterProjectsByFlag, Project } from '../typescript';
 
 export function runTslintCliOnTsConfigPaths(tsConfigPaths: string[]) {
   runTslintCli(tsConfigPaths.map(tsConfigPath => new Project(tsConfigPath)));
@@ -31,7 +31,7 @@ export function runTslintCli(projects?: Project[]) {
   log.pipe(process.stdout);
 
   const opts = getopts(process.argv.slice(2));
-  projects = projects || findProjectsByFlag(opts.project);
+  projects = projects || filterProjectsByFlag(opts.project);
 
   if (!opts.format) {
     process.argv.push('--format', 'stylish');
