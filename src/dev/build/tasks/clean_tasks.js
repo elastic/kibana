@@ -61,11 +61,13 @@ export const CleanNodeTask = {
     'Cleaning npm from node',
 
   async run(config, log, build) {
-    await deleteAll(log, [
-      build.resolvePathForPlatform('node/lib/node_modules/npm'),
-      build.resolvePathForPlatform('node/bin/npm'),
-      build.resolvePathForPlatform('node/bin/npx'),
-    ]);
+    for (const platform of config.getPlatforms()) {
+      await deleteAll(log, [
+        build.resolvePathForPlatform(platform, 'node/lib/node_modules/npm'),
+        build.resolvePathForPlatform(platform, 'node/bin/npm'),
+        build.resolvePathForPlatform(platform, 'node/bin/npx'),
+      ]);
+    }
   },
 };
 
