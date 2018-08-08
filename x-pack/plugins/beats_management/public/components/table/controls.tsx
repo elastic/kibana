@@ -30,6 +30,7 @@ export function ControlBar(props: ControlBarProps) {
     selectionCount,
     showAssignmentOptions,
   } = props;
+
   const filters = controlDefinitions.filters.length === 0 ? null : controlDefinitions.filters;
   return selectionCount !== 0 && showAssignmentOptions ? (
     <AssignmentOptions

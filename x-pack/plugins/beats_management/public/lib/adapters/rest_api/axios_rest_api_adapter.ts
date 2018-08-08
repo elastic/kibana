@@ -9,11 +9,7 @@ import { RestAPIAdapter } from './adapter_types';
 let globalAPI: AxiosInstance;
 
 export class AxiosRestAPIAdapter implements RestAPIAdapter {
-  constructor(
-    private readonly kbnVersion: string,
-    private readonly xsrfToken: string,
-    private readonly basePath: string
-  ) {}
+  constructor(private readonly xsrfToken: string, private readonly basePath: string) {}
 
   public async get<ResponseData>(url: string): Promise<ResponseData> {
     return await this.REST.get(url).then(resp => resp.data);
@@ -48,7 +44,7 @@ export class AxiosRestAPIAdapter implements RestAPIAdapter {
         Accept: 'application/json',
         credentials: 'same-origin',
         'Content-Type': 'application/json',
-        'kbn-version': this.kbnVersion,
+        'kbn-version': this.xsrfToken,
         'kbn-xsrf': this.xsrfToken,
       },
     });
