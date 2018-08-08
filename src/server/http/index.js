@@ -30,11 +30,6 @@ import { registerHapiPlugins } from './register_hapi_plugins';
 import { setupXsrf } from './xsrf';
 
 export default async function (kbnServer, server, config) {
-  kbnServer.server = new Hapi.Server();
-  server = kbnServer.server;
-
-  const shortUrlLookup = shortUrlLookupProvider(server);
-
   // Note that all connection options configured here should be exactly the same
   // as in `getServerOptions()` in the new platform (see `src/core/server/http/http_tools`).
   //
@@ -44,7 +39,7 @@ export default async function (kbnServer, server, config) {
   // name in `server.info` and `request.connection.info` that are used throughout Kibana.
   //
   // Any change SHOULD BE applied in both places.
-  server.connection({
+  kbnServer.server = new Hapi.Server({
     host: config.get('server.host'),
     port: config.get('server.port'),
     tls: config.get('server.ssl.enabled'),
@@ -59,7 +54,9 @@ export default async function (kbnServer, server, config) {
       isSameSite: false
     },
     routes: {
-      log: true,
+      log: {
+        collect: true
+      },
       cors: config.get('server.cors'),
       payload: {
         maxBytes: config.get('server.maxPayloadBytes'),
@@ -71,6 +68,17 @@ export default async function (kbnServer, server, config) {
       },
     },
   });
+
+  server = kbnServer.server;
+
+  server.register({
+    plugin: require('hapi-compat'),
+    options: {
+      server
+    }
+  });
+
+  const shortUrlLookup = shortUrlLookupProvider(server);
 
   registerHapiPlugins(server);
 
@@ -100,7 +108,7 @@ export default async function (kbnServer, server, config) {
   });
 
   // attach the app name to the server, so we can be sure we are actually talking to kibana
-  server.ext('onPreResponse', function (req, reply) {
+  server.ext('onPreResponse', function onPreResponse(req, h) {
     const response = req.response;
 
     const customHeaders = {
@@ -119,32 +127,33 @@ export default async function (kbnServer, server, config) {
       });
     }
 
-    return reply.continue();
+    return h.continue;
   });
 
   server.route({
     path: '/',
     method: 'GET',
-    handler(req, reply) {
+    handler(req, h) {
       const basePath = config.get('server.basePath');
       const defaultRoute = config.get('server.defaultRoute');
-      reply.redirect(`${basePath}${defaultRoute}`);
+      return h.redirect(`${basePath}${defaultRoute}`);
     }
   });
 
   server.route({
     method: 'GET',
     path: '/{p*}',
-    handler: function (req, reply) {
+    handler: function (req, h) {
       const path = req.path;
       if (path === '/' || path.charAt(path.length - 1) !== '/') {
-        return reply(Boom.notFound());
+        throw Boom.notFound();
       }
       const pathPrefix = config.get('server.basePath') ? `${config.get('server.basePath')}/` : '';
-      return reply.redirect(format({
-        search: req.url.search,
-        pathname: pathPrefix + path.slice(0, -1),
-      }))
+      return h
+        .redirect(format({
+          search: req.url.search,
+          pathname: pathPrefix + path.slice(0, -1),
+        }))
         .permanent(true);
     }
   });
@@ -152,7 +161,7 @@ export default async function (kbnServer, server, config) {
   server.route({
     method: 'GET',
     path: '/goto/{urlId}',
-    handler: async function (request, reply) {
+    handler: async function (request, h) {
       try {
         const url = await shortUrlLookup.getUrl(request.params.urlId, request);
         shortUrlAssertValid(url);
@@ -160,16 +169,15 @@ export default async function (kbnServer, server, config) {
         const uiSettings = request.getUiSettingsService();
         const stateStoreInSessionStorage = await uiSettings.get('state:storeInSessionStorage');
         if (!stateStoreInSessionStorage) {
-          reply().redirect(config.get('server.basePath') + url);
-          return;
+          return h.redirect(config.get('server.basePath') + url);
         }
 
         const app = server.getHiddenUiAppById('stateSessionStorageRedirect');
-        reply.renderApp(app, {
+        return h.renderApp(app, {
           redirectUrl: url,
         });
       } catch (err) {
-        reply(handleShortUrlError(err));
+        return handleShortUrlError(err);
       }
     }
   });
@@ -177,13 +185,13 @@ export default async function (kbnServer, server, config) {
   server.route({
     method: 'POST',
     path: '/shorten',
-    handler: async function (request, reply) {
+    handler: async function (request) {
       try {
         shortUrlAssertValid(request.payload.url);
         const urlId = await shortUrlLookup.generateUrlId(request.payload.url, request);
-        reply(urlId);
+        return urlId;
       } catch (err) {
-        reply(handleShortUrlError(err));
+        return handleShortUrlError(err);
       }
     }
   });

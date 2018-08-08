@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { fromNode } from 'bluebird';
+import expect from 'expect.js';
 import { resolve } from 'path';
 import * as kbnTestServer from '../../test_utils/kbn_server';
 
@@ -27,12 +27,8 @@ const versionHeader = 'kbn-version';
 const version = require(src('../package.json')).version;
 
 describe('version_check request filter', function () {
-  function makeRequest(kbnServer, opts) {
-    return fromNode(cb => {
-      kbnTestServer.makeRequest(kbnServer, opts, (resp) => {
-        cb(null, resp);
-      });
-    });
+  async function makeRequest(kbnServer, opts) {
+    return kbnTestServer.makeRequest(kbnServer, opts);
   }
 
   async function makeServer() {
@@ -43,8 +39,8 @@ describe('version_check request filter', function () {
     kbnServer.server.route({
       path: '/version_check/test/route',
       method: 'GET',
-      handler: function (req, reply) {
-        reply(null, 'ok');
+      handler: function () {
+        return 'ok';
       }
     });
 
@@ -64,8 +60,8 @@ describe('version_check request filter', function () {
       },
     });
 
-    expect(resp.statusCode).toBe(200);
-    expect(resp.payload).toBe('ok');
+    expect(resp.statusCode).to.be(200);
+    expect(resp.payload).to.be('ok');
   });
 
   it('rejects requests with an incorrect version passed in the version header', async function () {
@@ -77,8 +73,8 @@ describe('version_check request filter', function () {
       },
     });
 
-    expect(resp.statusCode).toBe(400);
-    expect(resp.payload).toMatch(/"Browser client is out of date/);
+    expect(resp.statusCode).to.be(400);
+    expect(resp.payload).to.match(/"Browser client is out of date/);
   });
 
   it('accepts requests that do not include a version header', async function () {
@@ -87,7 +83,7 @@ describe('version_check request filter', function () {
       method: 'GET'
     });
 
-    expect(resp.statusCode).toBe(200);
-    expect(resp.payload).toBe('ok');
+    expect(resp.statusCode).to.be(200);
+    expect(resp.payload).to.be('ok');
   });
 });

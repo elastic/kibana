@@ -18,7 +18,6 @@
  */
 
 import { constant, once, compact, flatten } from 'lodash';
-import { fromNode } from 'bluebird';
 import { isWorker } from 'cluster';
 import { fromRoot, pkg } from '../utils';
 // import loggingConfiguration from './logging/configuration';
@@ -143,7 +142,7 @@ export default class KbnServer {
     const { server } = this;
 
     await this.ready();
-    await fromNode(cb => server.start(cb));
+    await server.start();
 
     if (isWorker) {
       // help parent process know when we are ready
@@ -154,7 +153,7 @@ export default class KbnServer {
   }
 
   async close() {
-    await fromNode(cb => this.server.stop(cb));
+    await this.server.stop();
   }
 
   async inject(opts) {

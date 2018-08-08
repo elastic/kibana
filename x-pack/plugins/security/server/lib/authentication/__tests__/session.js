@@ -70,9 +70,7 @@ describe('Session', () => {
     it('logs the reason of validation function failure.', async () => {
       const request = {};
       const failureReason = new Error('Invalid cookie.');
-      server.auth.test.withArgs('security-cookie', request, sinon.match.func).yields(
-        failureReason
-      );
+      server.auth.test.withArgs('security-cookie', request).rejects(failureReason);
 
       expect(await session.get(request)).to.be(null);
       sinon.assert.calledOnce(server.log);
@@ -82,7 +80,7 @@ describe('Session', () => {
     it('returns null if multiple session cookies are detected.', async () => {
       const request = {};
       const sessions = [{ value: { token: 'token' } }, { value: { token: 'token' } }];
-      server.auth.test.withArgs('security-cookie', request, sinon.match.func).yields(null, sessions);
+      server.auth.test.withArgs('security-cookie', request).resolves(sessions);
 
       expect(await session.get(request)).to.be(null);
     });
@@ -90,9 +88,7 @@ describe('Session', () => {
     it('returns what validation function returns', async () => {
       const request = {};
       const rawSessionValue = { value: { token: 'token' } };
-      server.auth.test.withArgs('security-cookie', request, sinon.match.func).yields(
-        null, rawSessionValue
-      );
+      server.auth.test.withArgs('security-cookie', request).resolves(rawSessionValue);
 
       expect(await session.get(request)).to.be.eql(rawSessionValue.value);
     });

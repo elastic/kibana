@@ -94,7 +94,7 @@ export function authOptions() {
  * @param {object}    options Any additional options or overrides for inject()
  * @param {Function}  fn The callback to pass as the second arg to inject()
  */
-export function makeRequest(kbnServer, options, fn) {
+export async function makeRequest(kbnServer, options) {
   options = defaultsDeep({}, authOptions(), options);
-  return kbnServer.server.inject(options, fn);
+  return await kbnServer.server.inject(options);
 }
