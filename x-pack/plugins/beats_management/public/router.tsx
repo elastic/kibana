@@ -9,7 +9,6 @@ import { HashRouter, Redirect, Route, Switch } from 'react-router-dom';
 
 import { BeatDetailsPage } from './pages/beat';
 import { MainPages } from './pages/main';
-import { TagPage } from './pages/tag';
 
 export const PageRouter: React.SFC<{ libs: any }> = ({ libs }) => {
   return (
@@ -25,7 +24,6 @@ export const PageRouter: React.SFC<{ libs: any }> = ({ libs }) => {
           path="/beat/:beatId"
           render={(props: any) => <BeatDetailsPage {...props} libs={libs} />}
         />
-        <Route path="/tag" render={(props: any) => <TagPage {...props} libs={libs} />} />
       </Switch>
     </HashRouter>
   );
