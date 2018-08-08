@@ -22,8 +22,8 @@ import _ from 'lodash';
 import chainRunnerFn from '../handlers/chain_runner.js';
 const timelionDefaults = require('../lib/get_namespaced_settings')();
 
-function replyWithError(e, reply) {
-  reply({
+function formatErrorResponse(e, h) {
+  return h.response({
     title: e.toString(),
     message: e.toString()
   }).code(500);
@@ -34,7 +34,7 @@ export default function (server) {
   server.route({
     method: ['POST', 'GET'],
     path: '/api/timelion/run',
-    handler: async (request, reply) => {
+    handler: async (request, h) => {
       try {
         const uiSettings = await request.getUiSettingsService().getAll();
 
@@ -55,18 +55,18 @@ export default function (server) {
           }
         }));
 
-        reply({
+        return {
           sheet,
           stats: chainRunner.getStats()
-        });
+        };
 
       } catch (err) {
         server.log(['timelion', 'error'], `${err.toString()}: ${err.stack}`);
         // TODO Maybe we should just replace everywhere we throw with Boom? Probably.
         if (err.isBoom) {
-          reply(err);
+          return err;
         } else {
-          replyWithError(err, reply);
+          return formatErrorResponse(err, h);
         }
       }
     }

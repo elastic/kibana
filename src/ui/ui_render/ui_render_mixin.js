@@ -67,53 +67,49 @@ export function uiRenderMixin(kbnServer, server, config) {
     path: '/bundles/app/{id}/bootstrap.js',
     method: 'GET',
     config: { auth: false },
-    async handler(request, reply) {
-      try {
-        const { id } = request.params;
-        const app = server.getUiAppById(id) || server.getHiddenUiAppById(id);
-        if (!app) {
-          throw Boom.notFound(`Unknown app: ${id}`);
-        }
-
-        const basePath = config.get('server.basePath');
-        const bootstrap = new AppBootstrap({
-          templateData: {
-            appId: app.getId(),
-            bundlePath: `${basePath}/bundles`,
-            styleSheetPath: app.getStyleSheetUrlPath() ? `${basePath}/${app.getStyleSheetUrlPath()}` : null,
-          },
-          translations: await getUiTranslations()
-        });
-
-        const body = await bootstrap.getJsFile();
-        const etag = await bootstrap.getJsFileHash();
-
-        reply(body)
-          .header('cache-control', 'must-revalidate')
-          .header('content-type', 'application/javascript')
-          .etag(etag);
-      } catch (err) {
-        reply(err);
+    async handler(request, h) {
+      const { id } = request.params;
+      const app = server.getUiAppById(id) || server.getHiddenUiAppById(id);
+      if (!app) {
+        throw Boom.notFound(`Unknown app: ${id}`);
       }
+
+      const basePath = config.get('server.basePath');
+      const bootstrap = new AppBootstrap({
+        templateData: {
+          appId: app.getId(),
+          bundlePath: `${basePath}/bundles`,
+          styleSheetPath: app.getStyleSheetUrlPath() ? `${basePath}/${app.getStyleSheetUrlPath()}` : null,
+        },
+        translations: await getUiTranslations()
+      });
+
+      const body = await bootstrap.getJsFile();
+      const etag = await bootstrap.getJsFileHash();
+
+      return h.response(body)
+        .header('cache-control', 'must-revalidate')
+        .header('content-type', 'application/javascript')
+        .etag(etag);
     }
   });
 
   server.route({
     path: '/app/{id}',
     method: 'GET',
-    async handler(req, reply) {
+    async handler(req, h) {
       const id = req.params.id;
       const app = server.getUiAppById(id);
-      if (!app) return reply(Boom.notFound('Unknown app ' + id));
+      if (!app) throw Boom.notFound('Unknown app ' + id);
 
       try {
         if (kbnServer.status.isGreen()) {
-          await reply.renderApp(app);
+          return h.renderApp(app);
         } else {
-          await reply.renderStatusPage();
+          return h.renderStatusPage();
         }
       } catch (err) {
-        reply(Boom.wrap(err));
+        throw Boom.wrap(err);
       }
     }
   });
@@ -148,15 +144,15 @@ export function uiRenderMixin(kbnServer, server, config) {
     };
   }
 
-  async function renderApp({ app, reply, includeUserProvidedConfig = true, injectedVarsOverrides = {} }) {
+  async function renderApp({ app, h, includeUserProvidedConfig = true, injectedVarsOverrides = {} }) {
+    const request = h.request;
+    const translations = await getUiTranslations();
+    const basePath = config.get('server.basePath');
+
+    i18n.init(translations);
+
     try {
-      const request = reply.request;
-      const translations = await getUiTranslations();
-      const basePath = config.get('server.basePath');
-
-      i18n.init(translations);
-
-      return reply.view('ui_app', {
+      return h.view('ui_app', {
         uiPublicUrl: `${basePath}/ui`,
         bootstrapScriptUrl: `${basePath}/bundles/app/${app.getId()}/bootstrap.js`,
         i18n: (id, options) => i18n.translate(id, options),
@@ -174,23 +170,23 @@ export function uiRenderMixin(kbnServer, server, config) {
         },
       });
     } catch (err) {
-      reply(err);
+      return Boom.boomify(err);
     }
   }
 
-  server.decorate('reply', 'renderApp', function (app, injectedVarsOverrides) {
+  server.decorate('toolkit', 'renderApp', function (app, injectedVarsOverrides) {
     return renderApp({
       app,
-      reply: this,
+      h: this,
       includeUserProvidedConfig: true,
       injectedVarsOverrides,
     });
   });
 
-  server.decorate('reply', 'renderAppWithDefaultConfig', function (app) {
+  server.decorate('toolkit', 'renderAppWithDefaultConfig', function (app) {
     return renderApp({
       app,
-      reply: this,
+      h: this,
       includeUserProvidedConfig: false,
     });
   });

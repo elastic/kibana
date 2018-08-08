@@ -19,7 +19,7 @@
 
 import _ from 'lodash';
 
-export function resolveApi(senseVersion, apis, reply) {
+export function resolveApi(senseVersion, apis, h) {
   const result = {};
   _.each(apis, function (name) {
     {
@@ -29,5 +29,5 @@ export function resolveApi(senseVersion, apis, reply) {
     }
   });
 
-  return reply(result).type('application/json');
+  return h.response(result).type('application/json');
 }

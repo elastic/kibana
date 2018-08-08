@@ -23,7 +23,7 @@ export default function (server) {
   server.route({
     method: 'GET',
     path: '/api/timelion/validate/es',
-    handler: async function (request, reply) {
+    handler: async function (request) {
       const uiSettings = await request.getUiSettingsService().getAll();
 
       const { callWithRequest } = server.plugins.elasticsearch.getCluster('data');
@@ -57,19 +57,18 @@ export default function (server) {
       }
 
       if (_.has(resp, 'aggregations.maxAgg.value') && _.has(resp, 'aggregations.minAgg.value')) {
-        reply({
+        return {
           ok: true,
           field: timefield,
           min: _.get(resp, 'aggregations.minAgg.value'),
           max: _.get(resp, 'aggregations.maxAgg.value')
-        });
-        return;
+        };
       }
 
-      reply({
+      return {
         ok: false,
         resp: resp
-      });
+      };
     }
   });
 }

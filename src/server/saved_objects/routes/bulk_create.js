@@ -35,11 +35,11 @@ export const createBulkCreateRoute = (prereqs) => ({
         version: Joi.number(),
       }).required())
     },
-    handler(request, reply) {
+    handler(request) {
       const { overwrite } = request.query;
       const { savedObjectsClient } = request.pre;
 
-      reply(savedObjectsClient.bulkCreate(request.payload, { overwrite }));
+      return savedObjectsClient.bulkCreate(request.payload, { overwrite });
     }
   }
 });

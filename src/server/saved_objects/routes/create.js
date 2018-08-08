@@ -37,14 +37,14 @@ export const createCreateRoute = (prereqs) => {
           attributes: Joi.object().required()
         }).required()
       },
-      handler(request, reply) {
+      handler(request) {
         const { savedObjectsClient } = request.pre;
         const { type, id } = request.params;
         const { overwrite } = request.query;
         // Optional params default to empty string, set to null to be more explicit.
         const options = { id: id || null, overwrite };
 
-        reply(savedObjectsClient.create(type, request.payload.attributes, options));
+        return savedObjectsClient.create(type, request.payload.attributes, options);
       }
     }
   };

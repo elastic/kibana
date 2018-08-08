@@ -36,18 +36,20 @@ export function exportApi(server) {
       tags: ['api'],
     },
     method: ['GET'],
-    handler: (req, reply) => {
+    handler: async (req, h) => {
       const currentDate = moment.utc();
-      return exportDashboards(req)
-        .then(resp => {
-          const json = JSON.stringify(resp, null, '  ');
-          const filename = `kibana-dashboards.${currentDate.format('YYYY-MM-DD-HH-mm-ss')}.json`;
-          reply(json)
-            .header('Content-Disposition', `attachment; filename="${filename}"`)
-            .header('Content-Type', 'application/json')
-            .header('Content-Length', json.length);
-        })
-        .catch(err => reply(Boom.boomify(err, { statusCode: 400 })));
+
+      try {
+        const resp = await exportDashboards(req);
+        const json = JSON.stringify(resp, null, '  ');
+        const filename = `kibana-dashboards.${currentDate.format('YYYY-MM-DD-HH-mm-ss')}.json`;
+        return h.response(json)
+          .header('Content-Disposition', `attachment; filename="${filename}"`)
+          .header('Content-Type', 'application/json')
+          .header('Content-Length', json.length);
+      } catch (err) {
+        throw Boom.boomify(err, { statusCode: 400 });
+      }
     }
   });
 }

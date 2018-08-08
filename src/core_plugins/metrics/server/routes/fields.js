@@ -27,15 +27,17 @@ export default (server) => {
     },
     path: '/api/metrics/fields',
     method: 'GET',
-    handler: (req, reply) => {
-      getFields(req)
-        .then(reply)
-        .catch((err) => {
-          if (err.isBoom && err.status === 401) return reply(err);
-          reply([]);
-        });
+    handler: async (req) => {
+      try {
+        return await getFields(req);
+      } catch (err) {
+        if (err.isBoom && err.status === 401) {
+          return err;
+        }
+
+        return [];
+      }
     }
   });
 
 };
-

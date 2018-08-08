@@ -38,20 +38,19 @@ export function registerRelationships(server) {
       },
     },
 
-    handler: async (req, reply) => {
+    handler: async (req) => {
       const type = req.params.type;
       const id = req.params.id;
       const size = req.query.size || 10;
 
       try {
-        const response = await findRelationships(type, id, size, req.getSavedObjectsClient());
-        reply(response);
+        return await findRelationships(type, id, size, req.getSavedObjectsClient());
       } catch (err) {
         if (isNotFoundError(err)) {
-          reply(Boom.boomify(new Error('Resource not found'), { statusCode: 404 }));
-          return;
+          throw Boom.boomify(new Error('Resource not found'), { statusCode: 404 });
         }
-        reply(Boom.boomify(err, { statusCode: 500 }));
+
+        throw Boom.boomify(err, { statusCode: 500 });
       }
     },
   });

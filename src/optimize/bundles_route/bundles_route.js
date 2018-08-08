@@ -58,18 +58,19 @@ export function createBundlesRoute({ bundlesPath, basePublicPath }) {
       auth: false,
       ext: {
         onPreHandler: {
-          method(request, reply) {
+          method(request, h) {
             const ext = extname(request.params.path);
             if (ext !== '.js' && ext !== '.css') {
-              return reply.continue();
+              return h.continue;
             }
 
-            reply(createDynamicAssetResponse({
+            return createDynamicAssetResponse({
               request,
+              h,
               bundlesPath,
               fileHashCache,
               publicPath: `${basePublicPath}/bundles/`
-            }));
+            });
           }
         }
       },

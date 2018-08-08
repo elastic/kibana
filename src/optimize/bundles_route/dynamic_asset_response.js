@@ -57,6 +57,7 @@ export async function createDynamicAssetResponse(options) {
     bundlesPath,
     publicPath,
     fileHashCache,
+    h
   } = options;
 
   let fd;
@@ -83,13 +84,12 @@ export async function createDynamicAssetResponse(options) {
     });
     fd = null; // read stream is now responsible for fd
 
-    const response = request.generateResponse(replacePlaceholder(read, publicPath));
-    response.code(200);
-    response.etag(`${hash}-${publicPath}`);
-    response.header('cache-control', 'must-revalidate');
-    response.type(request.server.mime.path(path).type);
-    return response;
-
+    return h.response(replacePlaceholder(read, publicPath))
+      .takeover()
+      .code(200)
+      .etag(`${hash}-${publicPath}`)
+      .header('cache-control', 'must-revalidate')
+      .type(request.server.mime.path(path).type);
   } catch (error) {
     if (fd) {
       try {

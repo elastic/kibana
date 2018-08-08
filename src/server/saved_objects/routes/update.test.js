@@ -31,8 +31,8 @@ describe('PUT /api/saved_objects/{type}/{id?}', () => {
     const prereqs = {
       getSavedObjectsClient: {
         assign: 'savedObjectsClient',
-        method(request, reply) {
-          reply(savedObjectsClient);
+        method() {
+          return savedObjectsClient;
         }
       },
     };

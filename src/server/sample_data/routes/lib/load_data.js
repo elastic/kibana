@@ -23,6 +23,7 @@ import zlib from 'zlib';
 
 const BULK_INSERT_SIZE = 500;
 
+// TODO: make this async
 export function loadData(path, bulkInsert, callback) {
   let count = 0;
   let docs = [];

@@ -20,7 +20,7 @@
 import Joi from 'joi';
 
 async function handleRequest(request) {
-  const { changes } = request.payload;
+  const { changes } = request.payload.value;
   const uiSettings = request.getUiSettingsService();
 
   await uiSettings.setMany(changes);
@@ -39,8 +39,8 @@ export const setManyRoute = {
         changes: Joi.object().unknown(true).required()
       }).required()
     },
-    handler(request, reply) {
-      reply(handleRequest(request));
+    handler(request) {
+      return handleRequest(request);
     }
   }
 };

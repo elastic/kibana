@@ -39,10 +39,12 @@ export function importApi(server) {
       tags: ['api'],
     },
 
-    handler: (req, reply) => {
-      return importDashboards(req)
-        .then((resp) => reply(resp))
-        .catch(err => reply(Boom.boomify(err, { statusCode: 400 })));
+    handler: async (req) => {
+      try {
+        return await importDashboards(req);
+      } catch (err) {
+        throw Boom.boomify(err, { statusCode: 400 });
+      }
     }
   });
 }

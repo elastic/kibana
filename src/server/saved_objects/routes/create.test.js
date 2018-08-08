@@ -31,8 +31,8 @@ describe('POST /api/saved_objects/{type}', () => {
     const prereqs = {
       getSavedObjectsClient: {
         assign: 'savedObjectsClient',
-        method(request, reply) {
-          reply(savedObjectsClient);
+        method() {
+          return savedObjectsClient;
         }
       },
     };

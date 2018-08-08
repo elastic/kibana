@@ -33,10 +33,9 @@ export function createProxy(server, method, path, config) {
     ['/elasticsearch', server.plugins.elasticsearch.getCluster('data')],
   ]);
 
-  const responseHandler = function (err, upstreamResponse, request, reply) {
+  const responseHandler = function (err, upstreamResponse) {
     if (err) {
-      reply(err);
-      return;
+      throw err;
     }
 
     if (upstreamResponse.headers.location) {
@@ -44,7 +43,7 @@ export function createProxy(server, method, path, config) {
       upstreamResponse.headers.location = encodeURI(upstreamResponse.headers.location);
     }
 
-    reply(null, upstreamResponse);
+    return upstreamResponse;
   };
 
   for (const [proxyPrefix, cluster] of proxies) {

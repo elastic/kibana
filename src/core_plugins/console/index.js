@@ -113,14 +113,13 @@ export default function (kibana) {
       server.route({
         path: '/api/console/api_server',
         method: ['GET', 'POST'],
-        handler: function (req, reply) {
+        handler: function (req, h) {
           const { sense_version: version, apis } = req.query;
           if (!apis) {
-            reply(Boom.badRequest('"apis" is a required param.'));
-            return;
+            throw Boom.badRequest('"apis" is a required param.');
           }
 
-          return resolveApi(version, apis.split(','), reply);
+          return resolveApi(version, apis.split(','), h);
         }
       });
     },

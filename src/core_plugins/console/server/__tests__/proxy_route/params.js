@@ -37,8 +37,7 @@ describe('Console Proxy Route', () => {
     sandbox.stub(Wreck, 'request').callsFake(createWreckResponseStub());
 
     setup = () => {
-      const server = new Server();
-      server.connection({ port: 0 });
+      const server = new Server({ port: 0 });
       teardowns.push(() => server.stop());
       return { server };
     };
@@ -125,7 +124,7 @@ describe('Console Proxy Route', () => {
         const args = getConfigForReq.getCall(0).args;
         expect(args[0]).to.have.property('path', '/api/console/proxy');
         expect(args[0]).to.have.property('method', 'post');
-        expect(args[0]).to.have.property('query').eql({ method: 'HEAD', path: '/index/type/id' });
+        expect(args[0].query).to.have.property('value').eql({ method: 'HEAD', path: '/index/type/id' });
         expect(args[1]).to.be('/index/type/id');
       });
 

@@ -35,13 +35,13 @@ export const createUpdateRoute = (prereqs) => {
           version: Joi.number().min(1)
         }).required()
       },
-      handler(request, reply) {
+      handler(request) {
         const { savedObjectsClient } = request.pre;
         const { type, id } = request.params;
         const { attributes, version } = request.payload;
         const options = { version };
 
-        reply(savedObjectsClient.update(type, id, attributes, options));
+        return savedObjectsClient.update(type, id, attributes, options);
       }
     }
   };

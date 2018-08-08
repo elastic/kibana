@@ -36,9 +36,9 @@ export const createFindRoute = (prereqs) => ({
         fields: Joi.array().items(Joi.string()).single()
       }).default()
     },
-    handler(request, reply) {
+    handler(request) {
       const options = keysToCamelCaseShallow(request.query);
-      reply(request.pre.savedObjectsClient.find(options));
+      return request.pre.savedObjectsClient.find(options);
     }
   }
 });

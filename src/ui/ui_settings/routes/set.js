@@ -20,8 +20,8 @@
 import Joi from 'joi';
 
 async function handleRequest(request) {
-  const { key } = request.params;
-  const { value } = request.payload;
+  const { key } = request.params.value;
+  const { value } = request.payload.value;
   const uiSettings = request.getUiSettingsService();
 
   await uiSettings.set(key, value);
@@ -44,8 +44,8 @@ export const setRoute = {
         value: Joi.any().required()
       }).required()
     },
-    handler(request, reply) {
-      reply(handleRequest(request));
+    handler(request) {
+      return handleRequest(request);
     }
   }
 };

@@ -40,8 +40,8 @@ export function savedObjectsMixin(kbnServer, server) {
   const prereqs = {
     getSavedObjectsClient: {
       assign: 'savedObjectsClient',
-      method(req, reply) {
-        reply(req.getSavedObjectsClient());
+      method(req) {
+        return req.getSavedObjectsClient();
       },
     },
   };

@@ -23,8 +23,7 @@ const defaultConfig = {
 };
 
 export function MockServer(config = defaultConfig) {
-  const server = new Hapi.Server();
-  server.connection({ port: 8080 });
+  const server = new Hapi.Server({ port: 0 });
   server.config = function () {
     return {
       get: (key) => {

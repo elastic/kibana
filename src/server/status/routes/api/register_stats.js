@@ -58,7 +58,7 @@ export function registerStatsApi(kbnServer, server, config) {
         },
         tags: ['api'],
       },
-      async handler(req, reply) {
+      async handler(req) {
         const isExtended = req.query.extended !== undefined && req.query.extended !== 'false';
         const isLegacy = req.query.legacy !== undefined && req.query.legacy !== 'false';
 
@@ -118,7 +118,7 @@ export function registerStatsApi(kbnServer, server, config) {
               });
             }
           } catch (e) {
-            return reply(boomify(e));
+            throw boomify(e);
           }
         }
 
@@ -129,10 +129,10 @@ export function registerStatsApi(kbnServer, server, config) {
         let kibanaStats = await kibanaStatsCollector.fetch();
         kibanaStats = collectorSet.toApiFieldNames(kibanaStats);
 
-        reply({
+        return {
           ...kibanaStats,
           ...extended,
-        });
+        };
       },
     })
   );

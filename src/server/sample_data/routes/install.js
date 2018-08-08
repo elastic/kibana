@@ -36,13 +36,13 @@ export const createInstallRoute = () => ({
         id: Joi.string().required(),
       }).required()
     },
-    handler: async (request, reply) => {
+    handler: async (request, h) => {
       const server = request.server;
       const sampleDataset = server.getSampleDatasets().find(sampleDataset => {
         return sampleDataset.id === request.params.id;
       });
       if (!sampleDataset) {
-        return reply().code(404);
+        return h.response().code(404);
       }
 
       const { callWithRequest } = server.plugins.elasticsearch.getCluster('data');
@@ -81,7 +81,7 @@ export const createInstallRoute = () => ({
       } catch (err) {
         const errMsg = `Unable to create sample data index "${index}", error: ${err.message}`;
         server.log(['warning'], errMsg);
-        return reply(errMsg).code(err.status);
+        return h.response(errMsg).code(err.status);
       }
 
       const nowReference = dateToIso8601IgnoringTime(new Date());
@@ -112,7 +112,7 @@ export const createInstallRoute = () => ({
       loadData(sampleDataset.dataPath, bulkInsert, async (err, count) => {
         if (err) {
           server.log(['warning'], `sample_data install errors while loading data. Error: ${err}`);
-          return reply(err.message).code(500);
+          return h.response(err.message).code(500);
         }
 
         const createResults = await request.getSavedObjectsClient().bulkCreate(sampleDataset.savedObjects, { overwrite: true });
@@ -121,10 +121,10 @@ export const createInstallRoute = () => ({
         });
         if (errors.length > 0) {
           server.log(['warning'], `sample_data install errors while loading saved objects. Errors: ${errors.join(',')}`);
-          return reply(`Unable to load kibana saved objects, see kibana logs for details`).code(403);
+          return h.response(`Unable to load kibana saved objects, see kibana logs for details`).code(403);
         }
 
-        return reply({ docsLoaded: count, kibanaSavedObjectsLoaded: sampleDataset.savedObjects.length });
+        return h.response({ docsLoaded: count, kibanaSavedObjectsLoaded: sampleDataset.savedObjects.length });
       });
     }
   }

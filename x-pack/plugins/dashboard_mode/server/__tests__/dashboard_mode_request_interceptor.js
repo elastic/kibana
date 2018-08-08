@@ -25,8 +25,7 @@ function setup() {
     name: 'dashboardViewerApp'
   };
 
-  const server = new Hapi.Server();
-  server.connection({ port: 0 });
+  const server = new Hapi.Server({ port: 0 });
 
   // attach the extension
   server.ext(createDashboardModeRequestInterceptor(dashboardViewerApp));
