@@ -72,12 +72,12 @@ image::apm/images/apm-errors-watcher-assistant.png[Example view of the Watcher a
 Please note this feature is in beta. We kindly ask that you https://discuss.elastic.co/c/apm[provide us feedback] if you experience any issues to improve the feature.
 ============
 
-The Machine Learning integration will initiate a new job predefined to calculate anomaly scores on response times on APM transactions. Once enabled, the response time graph will show the expected bounds from the Machine Learning job and annotate the graph once the anomaly score is >=75.
+The Machine Learning integration will initiate a new job predefined to calculate anomaly scores on transaction response times. The response time graph will show the expected bounds and annotate the graph when the anomaly score is 75 or above.
 
 [role="screenshot"]
 image::apm/images/apm-ml-integration.png[Example view of anomaly scores on response times in APM UI in Kibana]
 
-Jobs can be created per transaction type and based on the average response time. Once a job is created, you can manage it and see more details in the Machine Learning jobs management page. It might take some time for the job to calculate the results.
+Jobs can be created per transaction type and based on the average response time. You can manage jobs in the Machine Learning jobs management page. It might take some time for results to appear on the graph.
 
 [[query-bar]]
 === Query bar (beta)
