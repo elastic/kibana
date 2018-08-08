@@ -37,9 +37,32 @@ export class HeadlessChromiumDriver {
       };
     }
 
-    return await this._page.screenshot({
+    const screenshot = await this._page.screenshot({
+      encoding: 'base64',
       clip,
     });
+
+    return screenshot;
+  }
+
+  async evaluate({ fn, args = [] }) {
+    const result = await this._page.evaluate(fn, ...args);
+    return result;
+  }
+
+  waitForSelector(selector) {
+    return this._page.waitFor(selector);
+  }
+
+  async waitFor({ fn, args, toEqual }) {
+    while (true) {
+      const result = await this.evaluate({ fn, args });
+      if (result === toEqual) {
+        return;
+      }
+
+      await new Promise(r => setTimeout(r, this._waitForDelayMs));
+    }
   }
 
   async setViewport({ width, height, zoom }) {

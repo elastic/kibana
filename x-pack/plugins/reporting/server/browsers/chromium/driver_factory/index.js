@@ -9,10 +9,10 @@ import path from 'path';
 import puppeteer from 'puppeteer';
 import rimraf from 'rimraf';
 import * as Rx from 'rxjs';
-import { map, share, tap, mergeMap, filter, partition } from 'rxjs/operators';
+import { map, share, mergeMap, filter, partition } from 'rxjs/operators';
 import { HeadlessChromiumDriver } from '../driver';
 import { args } from './args';
-import { safeChildProcess, exitCodeSuggestion } from '../../safe_child_process';
+import { safeChildProcess } from '../../safe_child_process';
 
 const compactWhitespace = (str) => {
   return str.replace(/\s+/, ' ');
@@ -38,23 +38,28 @@ export class HeadlessChromiumDriverFactory {
         disableSandbox: this.browserConfig.disableSandbox,
         proxyConfig: this.browserConfig.proxy,
       });
-
-      this.logger.debug(`spawning chromium process at ${this.binaryPath} with arguments ${chromiumArgs}`);
       let chromium;
+      let page;
       try {
         chromium = await puppeteer.launch({
           ignoreHTTPSErrors: true,
           args: chromiumArgs,
         });
+        page = await chromium.newPage();
       } catch (err) {
         observer.error(new Error(`Caught error spawning Chromium`));
         return;
       }
 
-      safeChildProcess({ async kill() { await chromium.close(); } }, observer);
+      safeChildProcess({
+        async kill() {
+          await chromium.close();
+        }
+      }, observer);
 
-      const stderr$ = Rx.fromEvent(chromium.stderr, 'data').pipe(
-        map(line => line.toString()),
+      const stderr$ = Rx.fromEvent(page, 'console').pipe(
+        filter(line => line._type === 'error'),
+        map(line => line._text),
         share()
       );
 
@@ -62,21 +67,18 @@ export class HeadlessChromiumDriverFactory {
         partition(msg => msg.match(/\[\d+\/\d+.\d+:\w+:CONSOLE\(\d+\)\]/))
       );
 
-      const driver$ = message$.pipe(
-        map(() => chromium.newPage()),
-        tap(() => this.logger.debug('Initializing chromium driver')),
-        map((page) => new HeadlessChromiumDriver(chromium, page, {
-          maxScreenshotDimension: this.browserConfig.maxScreenshotDimension,
-          logger: this.logger
-        }))
-      );
+      const driver$ = Rx.of(new HeadlessChromiumDriver(chromium, page, {
+        maxScreenshotDimension: this.browserConfig.maxScreenshotDimension,
+        logger: this.logger
+      }));
 
-      const processError$ = Rx.fromEvent(chromium, 'error').pipe(
+      const processError$ = Rx.fromEvent(page, 'error').pipe(
+        map((err) => this.logger.error(err)),
         mergeMap(() => Rx.throwError(new Error(`Unable to spawn Chromium`))),
       );
 
-      const processExit$ = Rx.fromEvent(chromium, 'exit').pipe(
-        mergeMap(([code]) => Rx.throwError(new Error(`Chromium exited with code: ${code}. ${exitCodeSuggestion(code)}`)))
+      const processExit$ = Rx.fromEvent(chromium, 'disconnected').pipe(
+        mergeMap((err) => Rx.throwError(new Error(`Chromium exited with code: ${err}. ${JSON.stringify(err)}`)))
       );
 
       const nssError$ = message$.pipe(
