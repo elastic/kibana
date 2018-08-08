@@ -34,6 +34,7 @@ import 'babel-polyfill';
 import 'custom-event-polyfill';
 import 'whatwg-fetch';
 import 'abortcontroller-polyfill';
+import 'childnode-remove';
 
 import { CoreSystem } from '__kibanaCore__'
 

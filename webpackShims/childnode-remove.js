@@ -17,29 +17,10 @@
  * under the License.
  */
 
-export const appEntryTemplate = (bundle) => `
-/**
- * Kibana entry file
- *
- * This is programmatically created and updated, do not modify
- *
- * context: ${bundle.getContext()}
- */
+const childNodeRemove = require('childnode-remove');
 
-// import global polyfills before everything else
-import 'babel-polyfill';
-import 'custom-event-polyfill';
-import 'whatwg-fetch';
-import 'abortcontroller-polyfill';
-import 'childnode-remove';
-
-import { CoreSystem } from '__kibanaCore__'
-
-new CoreSystem({
-  injectedMetadata: JSON.parse(document.querySelector('kbn-injected-metadata').getAttribute('data')),
-  rootDomElement: document.body,
-  requireLegacyFiles: () => {
-    ${bundle.getRequires().join('\n  ')}
+if (typeof window === 'object' && window.Element) {
+  if (!Element.prototype.remove) {
+    childNodeRemove.polyfill();
   }
-}).start()
-`;
+}
