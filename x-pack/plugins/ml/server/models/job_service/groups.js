@@ -69,7 +69,6 @@ export function groupsProvider(callWithRequest) {
         results[jobId] = { success: true };
       } catch (error) {
         results[jobId] = { success: false, error };
-        console.error(error);
       }
     }
     return results;

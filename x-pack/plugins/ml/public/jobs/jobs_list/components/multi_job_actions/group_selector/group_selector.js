@@ -28,6 +28,7 @@ import './styles/main.less';
 import { ml } from '../../../../../services/ml_api_service';
 import { GroupList } from './group_list';
 import { NewGroupInput } from './new_group_input';
+import { mlMessageBarService } from '../../../../../components/messagebar/messagebar_service';
 
 function createSelectedGroups(jobs, groups) {
   const jobIds = jobs.map(j => j.id);
@@ -145,11 +146,28 @@ export class GroupSelector extends Component {
 
     const tempJobs = newJobs.map(j => ({ job_id: j.id, groups: j.newGroups }));
     ml.jobs.updateGroups(tempJobs)
-    	.then(() => {
-        this.refreshJobs();
-        this.closePopover();
+    	.then((resp) => {
+        let success = true;
+        for (const jobId in resp) {
+          // check success of each job update
+          if (resp.hasOwnProperty(jobId)) {
+            if (resp[jobId].success === false) {
+              mlMessageBarService.notify.error(resp[jobId].error);
+              success = false;
+            }
+          }
+        }
+
+        if (success) {
+          // if all are successful refresh the job list
+          this.refreshJobs();
+          this.closePopover();
+        } else {
+          console.error(resp);
+        }
       })
       .catch((error) => {
+        mlMessageBarService.notify.error(error);
         console.error(error);
       });
   }
