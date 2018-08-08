@@ -8,6 +8,7 @@ import { containerStyle } from './containerStyle';
 import { context } from './context';
 import { columns } from './columns';
 import { date } from './date';
+import { doFn } from './do';
 import { dropdownControl } from './dropdownControl';
 import { eq } from './eq';
 import { exactly } from './exactly';
@@ -62,6 +63,7 @@ export const commonFunctions = [
   containerStyle,
   context,
   date,
+  doFn,
   dropdownControl,
   eq,
   exactly,
