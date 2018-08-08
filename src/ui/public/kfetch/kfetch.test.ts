@@ -27,7 +27,7 @@ jest.mock('../metadata', () => ({
   },
 }));
 
-import fetchMock from 'fetch-mock';
+import fetchMock from 'fetch-mock/es5/client';
 import { kfetch } from './kfetch';
 
 describe('kfetch', () => {

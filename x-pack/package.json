@@ -165,6 +165,7 @@
     "uuid": "3.0.1",
     "venn.js": "0.2.9",
     "webcola": "3.3.6",
+    "whatwg-fetch": "^2.0.4",
     "xregexp": "3.2.0"
   },
   "engines": {

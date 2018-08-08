@@ -27,9 +27,13 @@ jest.mock('../metadata', () => ({
   },
 }));
 
+import fetchMock from 'fetch-mock/es5/client';
 import { kfetchAbortable } from './kfetch_abortable';
 
 describe('kfetchAbortable', () => {
+  beforeEach(() => fetchMock.get('*', {}));
+  afterEach(() => fetchMock.restore());
+
   it('should return an object with a fetching promise and an abort callback', () => {
     const { fetching, abort } = kfetchAbortable({ pathname: 'my/path' });
     expect(typeof fetching.then).toBe('function');
