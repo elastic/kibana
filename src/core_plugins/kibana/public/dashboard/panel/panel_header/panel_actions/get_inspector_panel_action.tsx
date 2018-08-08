@@ -19,12 +19,10 @@
 
 import React from 'react';
 
-import {
-  EuiIcon,
-} from '@elastic/eui';
+import { EuiIcon } from '@elastic/eui';
 
-import { Inspector } from 'ui/inspector';
 import { DashboardPanelAction } from 'ui/dashboard_panel_actions';
+import { Inspector } from 'ui/inspector';
 
 /**
  * Returns the dashboard panel action for opening an inspector for a specific panel.
@@ -33,7 +31,13 @@ import { DashboardPanelAction } from 'ui/dashboard_panel_actions';
  * could be shown for those adapters - the inspector icon will be visible.
  * @return {DashboardPanelAction}
  */
-export function getInspectorPanelAction({ closeContextMenu, panelTitle }) {
+export function getInspectorPanelAction({
+  closeContextMenu,
+  panelTitle,
+}: {
+  closeContextMenu: () => void;
+  panelTitle?: string;
+}) {
   return new DashboardPanelAction(
     {
       id: 'openInspector',
@@ -42,9 +46,16 @@ export function getInspectorPanelAction({ closeContextMenu, panelTitle }) {
     },
     {
       icon: <EuiIcon type="inspect" />,
+      isVisible: ({ embeddable }) =>
+        embeddable && Inspector.isAvailable(embeddable.getInspectorAdapters()),
       onClick: ({ embeddable }) => {
         closeContextMenu();
-        const session = Inspector.open(embeddable.getInspectorAdapters(), {
+        const adapters = embeddable.getInspectorAdapters();
+        if (!adapters) {
+          return;
+        }
+
+        const session = Inspector.open(adapters, {
           title: panelTitle,
         });
         // Overwrite the embeddables.destroy() function to close the inspector
@@ -61,8 +72,6 @@ export function getInspectorPanelAction({ closeContextMenu, panelTitle }) {
           embeddable.destroy = originalDestroy;
         });
       },
-      isVisible: ({ embeddable }) => (
-        embeddable && Inspector.isAvailable(embeddable.getInspectorAdapters())
-      ),
-    });
+    }
+  );
 }
