@@ -17,4 +17,4 @@
  * under the License.
  */
 
-export { VisualizationProvider } from './visualization';
+export { addAppRedirectMessageToUrl, showAppRedirectNotification } from './app_redirect';
