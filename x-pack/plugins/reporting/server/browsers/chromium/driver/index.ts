@@ -68,9 +68,7 @@ export class HeadlessChromiumDriver {
     await Network.setExtraHTTPHeaders({ headers });
     await Page.navigate({ url });
 
-    // See https://github.com/ChromeDevTools/devtools-protocol/issues/104 - this should be valid
-    // usage but is not accepted by the type library.
-    await (Page as any).loadEventFired();
+    await new Promise(resolve => Page.on('loadEventFired', resolve));
 
     const { frameTree } = await Page.getResourceTree();
     if (frameTree.frame.unreachableUrl) {
