@@ -80,6 +80,7 @@ export function RuleActionPanel({
   );
 }
 RuleActionPanel.propTypes = {
+  job: PropTypes.object.isRequired,
   detectorIndex: PropTypes.number.isRequired,
   ruleIndex: PropTypes.number.isRequired,
   setEditRuleIndex: PropTypes.func.isRequired,
