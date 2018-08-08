@@ -12,6 +12,7 @@ import React, {
 
 import {
   EuiButton,
+  EuiToolTip,
   EuiPopover,
   EuiPopoverTitle,
   EuiButtonIcon,
@@ -177,11 +178,16 @@ export class GroupSelector extends Component {
       edited,
     } = this.state;
     const button = (
-      <EuiButtonIcon
-        iconType="indexEdit"
-        aria-label="Manage job groups"
-        onClick={() => this.togglePopover()}
-      />
+      <EuiToolTip
+        position="bottom"
+        content={`Edit job groups`}
+      >
+        <EuiButtonIcon
+          iconType="indexEdit"
+          aria-label="Edit job groups"
+          onClick={() => this.togglePopover()}
+        />
+      </EuiToolTip>
     );
     const s = (this.props.jobs.length > 1 ? 's' : '');
 
