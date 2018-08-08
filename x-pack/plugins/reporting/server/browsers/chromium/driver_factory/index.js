@@ -6,15 +6,13 @@
 import fs from 'fs';
 import os from 'os';
 import path from 'path';
-import { spawn } from 'child_process';
+import puppeteer from 'puppeteer';
 import rimraf from 'rimraf';
 import * as Rx from 'rxjs';
-import { map, share, first, tap, mergeMap, filter, partition } from 'rxjs/operators';
-import cdp from 'chrome-remote-interface';
+import { map, share, tap, mergeMap, filter, partition } from 'rxjs/operators';
 import { HeadlessChromiumDriver } from '../driver';
 import { args } from './args';
 import { safeChildProcess, exitCodeSuggestion } from '../../safe_child_process';
-import { ensureChromiumIsListening } from './ensure_chromium_is_listening';
 
 const compactWhitespace = (str) => {
   return str.replace(/\s+/, ' ');
@@ -44,31 +42,30 @@ export class HeadlessChromiumDriverFactory {
       this.logger.debug(`spawning chromium process at ${this.binaryPath} with arguments ${chromiumArgs}`);
       let chromium;
       try {
-        chromium = spawn(this.binaryPath, chromiumArgs);
+        chromium = await puppeteer.launch({
+          ignoreHTTPSErrors: true,
+          args: chromiumArgs,
+        });
       } catch (err) {
         observer.error(new Error(`Caught error spawning Chromium`));
         return;
       }
 
-      safeChildProcess(chromium, observer);
+      safeChildProcess({ async kill() { await chromium.close(); } }, observer);
 
       const stderr$ = Rx.fromEvent(chromium.stderr, 'data').pipe(
         map(line => line.toString()),
         share()
       );
 
-      const [ consoleMessage$, message$ ] = stderr$.pipe(
+      const [consoleMessage$, message$] = stderr$.pipe(
         partition(msg => msg.match(/\[\d+\/\d+.\d+:\w+:CONSOLE\(\d+\)\]/))
       );
 
       const driver$ = message$.pipe(
-        first(line => line.indexOf(`DevTools listening on ws://127.0.0.1:${bridgePort}`) >= 0),
-        tap(() => this.logger.debug('Ensure chromium is running and listening')),
-        mergeMap(() => ensureChromiumIsListening(bridgePort, this.logger)),
-        tap(() => this.logger.debug('Connecting chrome remote interface')),
-        mergeMap(() => cdp({ port: bridgePort, local: true })),
+        map(() => chromium.newPage()),
         tap(() => this.logger.debug('Initializing chromium driver')),
-        map(client => new HeadlessChromiumDriver(client, {
+        map((page) => new HeadlessChromiumDriver(chromium, page, {
           maxScreenshotDimension: this.browserConfig.maxScreenshotDimension,
           logger: this.logger
         }))
