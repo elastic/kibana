@@ -135,14 +135,18 @@
       <td class="kuiTableRowCell">
         <div class="kuiTableRowCell__liner">
           <kbn-tooltip text="{{item.watch.watchStatus.lastFired | moment}}">
-            {{item.watch.watchStatus.lastFiredHumanized}}
+            <span title="{{item.watch.watchStatus.lastFired | moment}}">
+              {{item.watch.watchStatus.lastFiredHumanized}}
+            </span>
           </kbn-tooltip>
         </div>
       </td>
       <td class="kuiTableRowCell">
         <div class="kuiTableRowCell__liner">
           <kbn-tooltip text="{{item.watch.watchStatus.lastChecked | moment}}">
-            {{item.watch.watchStatus.lastCheckedHumanized}}
+            <span title="{{item.watch.watchStatus.lastChecked | moment}}">
+              {{item.watch.watchStatus.lastCheckedHumanized}}
+            </span>
           </kbn-tooltip>
         </div>
       </td>
