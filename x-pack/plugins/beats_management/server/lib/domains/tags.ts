@@ -13,7 +13,10 @@ import { entries } from '../../utils/polyfills';
 import { CMTagsAdapter } from '../adapters/tags/adapter_types';
 
 export class CMTagsDomain {
-  constructor(private readonly adapter: CMTagsAdapter) {}
+  private adapter: CMTagsAdapter;
+  constructor(adapter: CMTagsAdapter) {
+    this.adapter = adapter;
+  }
 
   public async getAll(user: FrameworkUser) {
     return await this.adapter.getAll(user);
@@ -21,10 +24,6 @@ export class CMTagsDomain {
 
   public async getTagsWithIds(user: FrameworkUser, tagIds: string[]) {
     return await this.adapter.getTagsWithIds(user, tagIds);
-  }
-
-  public async delete(user: FrameworkUser, tagIds: string[]) {
-    return await this.adapter.delete(user, tagIds);
   }
 
   public async saveTag(
