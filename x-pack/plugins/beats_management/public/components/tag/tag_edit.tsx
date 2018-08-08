@@ -35,22 +35,19 @@ import {
 import 'brace/mode/yaml';
 import 'brace/theme/github';
 import React from 'react';
-import { ConfigurationBlock } from '../../../common/domain_types';
+import { BeatTag, CMBeat } from '../../../common/domain_types';
 import { Table } from '../table';
 import { BeatsTableType } from '../table';
-import { TagViewConfig } from '../tag';
 
 interface TagEditProps {
-  items: any[];
-  config: TagViewConfig;
+  tag: Partial<BeatTag>;
+  onTagChange: (field: keyof BeatTag, value: string) => any;
+  attachedBeats: CMBeat[] | null;
 }
 
 interface TagEditState {
-  color: string | null;
-  configurationBlocks: ConfigurationBlock[];
   showFlyout: boolean;
   tableRef: any;
-  tagName: string | null;
 }
 
 export class TagEdit extends React.PureComponent<TagEditProps, TagEditState> {
@@ -58,20 +55,13 @@ export class TagEdit extends React.PureComponent<TagEditProps, TagEditState> {
     super(props);
 
     this.state = {
-      color: '#DD0A73',
-      configurationBlocks: [],
       showFlyout: false,
       tableRef: React.createRef(),
-      tagName: null,
     };
   }
 
   public render() {
-    const {
-      config: { showAttachedBeats },
-      items,
-    } = this.props;
-    const { color, configurationBlocks, tagName } = this.state;
+    const { tag, attachedBeats } = this.props;
     return (
       <div>
         <EuiTitle size="m">
@@ -92,20 +82,23 @@ export class TagEdit extends React.PureComponent<TagEditProps, TagEditState> {
                 </p>
               </EuiText>
               <div>
-                <EuiBadge color={color ? color : '#FF0'}>{tagName ? tagName : 'Tag name'}</EuiBadge>
+                <EuiBadge color={tag.color ? tag.color : '#FF0'}>
+                  {tag.id ? tag.id : 'Tag name'}
+                </EuiBadge>
               </div>
             </EuiFlexItem>
             <EuiFlexItem>
               <EuiForm>
                 <EuiFormRow label="Name">
                   <EuiFieldText
-                    name="tagName"
-                    onChange={this.updateBadgeName}
+                    name="name"
+                    onChange={this.updateTag('id')}
+                    value={tag.id}
                     placeholder="Tag name"
                   />
                 </EuiFormRow>
                 <EuiFormRow label="Color">
-                  <EuiColorPicker color={color} onChange={this.updateBadgeColor} />
+                  <EuiColorPicker color={tag.color} onChange={this.updateTag('color')} />
                 </EuiFormRow>
               </EuiForm>
             </EuiFlexItem>
@@ -113,7 +106,11 @@ export class TagEdit extends React.PureComponent<TagEditProps, TagEditState> {
         </EuiPanel>
         <EuiSpacer />
         <EuiPanel>
-          <EuiFlexGroup alignItems={configurationBlocks.length ? 'stretch' : 'center'}>
+          <EuiFlexGroup
+            alignItems={
+              tag.configuration_blocks && tag.configuration_blocks.length ? 'stretch' : 'center'
+            }
+          >
             <EuiFlexItem>
               <EuiTitle size="xs">
                 <h3>Configurations</h3>
@@ -134,7 +131,7 @@ export class TagEdit extends React.PureComponent<TagEditProps, TagEditState> {
           </EuiFlexGroup>
         </EuiPanel>
         <EuiSpacer />
-        {showAttachedBeats && (
+        {attachedBeats && (
           <EuiPanel paddingSize="m">
             <EuiTitle size="xs">
               <h3>Attached Beats</h3>
@@ -145,7 +142,7 @@ export class TagEdit extends React.PureComponent<TagEditProps, TagEditState> {
               }}
               assignmentOptions={[]}
               assignmentTitle={null}
-              items={items}
+              items={attachedBeats}
               ref={this.state.tableRef}
               showAssignmentOptions={false}
               type={BeatsTableType}
@@ -227,6 +224,6 @@ export class TagEdit extends React.PureComponent<TagEditProps, TagEditState> {
       showFlyout: true,
     });
   };
-  private updateBadgeColor = (e: any) => this.setState({ color: e });
-  private updateBadgeName = (e: any) => this.setState({ tagName: e.target.value });
+  private updateTag = (key: keyof BeatTag) => (e: any) =>
+    this.props.onTagChange(key, e.target ? e.target.value : e);
 }

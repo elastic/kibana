@@ -7,8 +7,8 @@
 import 'brace/mode/yaml';
 import 'brace/theme/github';
 import React from 'react';
-import { ConfigurationBlock } from '../../../common/domain_types';
-import { TagEdit, TagEditConfig } from '../../components/tag';
+import { BeatTag } from '../../../common/domain_types';
+import { TagEdit } from '../../components/tag';
 import { FrontendLibs } from '../../lib/lib';
 
 interface EditTagPageProps {
@@ -16,10 +16,8 @@ interface EditTagPageProps {
 }
 
 interface EditTagPageState {
-  color: string | null;
-  configurationBlocks: ConfigurationBlock[];
   showFlyout: boolean;
-  tagName: string | null;
+  tag: Partial<BeatTag>;
 }
 
 export class EditTagPage extends React.PureComponent<EditTagPageProps, EditTagPageState> {
@@ -27,14 +25,26 @@ export class EditTagPage extends React.PureComponent<EditTagPageProps, EditTagPa
     super(props);
 
     this.state = {
-      color: '#DD0A73',
-      configurationBlocks: [],
       showFlyout: false,
-      tagName: null,
+      tag: {
+        id: '',
+        color: '#DD0A73',
+        configuration_blocks: [],
+      },
     };
   }
 
   public render() {
-    return <TagEdit config={TagEditConfig} items={[]} />;
+    return (
+      <TagEdit
+        tag={this.state.tag}
+        onTagChange={(field: string, value: string) =>
+          this.setState(oldState => ({
+            tag: { ...oldState.tag, [field]: value },
+          }))
+        }
+        attachedBeats={[]}
+      />
+    );
   }
 }
