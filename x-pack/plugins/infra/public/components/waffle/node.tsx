@@ -43,8 +43,6 @@ export const Node: React.SFC<Props> = ({ node, formatter, squareSize }) => {
 
 export const Container = styled.div`
   position: relative;
-  display: flex;
-  flex-flow: row wrap;
 `;
 export const SquareOuter = styled.div`
   position: absolute;
