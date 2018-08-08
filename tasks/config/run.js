@@ -90,6 +90,16 @@ module.exports = function (grunt) {
       ]
     },
 
+    // used by the test and jenkins:unit tasks
+    //    runs type checks
+    tsc: {
+      cmd: process.execPath,
+      args: [
+        require.resolve('../../scripts/tsc'),
+        '--noEmit'
+      ]
+    },
+
     // used by the test:server task
     //    runs all node.js/server mocha tests
     mocha: {
