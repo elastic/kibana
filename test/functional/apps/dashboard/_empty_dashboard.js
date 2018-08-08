@@ -31,6 +31,7 @@ export default function ({ getService, getPageObjects }) {
 
     after(async () => {
       await dashboardAddPanel.closeAddPanel();
+      await PageObjects.dashboard.gotoDashboardLandingPage();
     });
 
     it('should display add button', async () => {
