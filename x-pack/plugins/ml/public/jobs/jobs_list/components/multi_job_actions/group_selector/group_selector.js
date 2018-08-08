@@ -13,17 +13,22 @@ import React, {
 import {
   EuiButton,
   EuiPopover,
+  EuiPopoverTitle,
   EuiButtonIcon,
   EuiHorizontalRule,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFieldText,
+  EuiFormRow,
+  EuiSpacer,
 } from '@elastic/eui';
 
 import { cloneDeep } from 'lodash';
 
+import './styles/main.less';
 import { ml } from '../../../../../services/ml_api_service';
 import { GroupList } from './group_list';
+import { validateGroupNames } from '../../validate_job';
 
 function createSelectedGroups(jobs, groups) {
   const jobIds = jobs.map(j => j.id);
@@ -60,6 +65,7 @@ export class GroupSelector extends Component {
       selectedGroups: {},
       edited: false,
       tempNewGroupName: '',
+      groupsValidationError: '',
     };
 
     this.refreshJobs = this.props.refreshJobs;
@@ -157,8 +163,11 @@ export class GroupSelector extends Component {
   }
 
   changeTempNewGroup = (e) => {
+    const name = e.target.value;
+    const groupsValidationError = (name === '') ? '' : validateGroupNames([name]).message;
     this.setState({
       tempNewGroupName: e.target.value,
+      groupsValidationError,
     });
   }
 
@@ -184,6 +193,7 @@ export class GroupSelector extends Component {
       selectedGroups,
       edited,
       tempNewGroupName,
+      groupsValidationError,
     } = this.state;
     const button = (
       <EuiButtonIcon
@@ -201,43 +211,61 @@ export class GroupSelector extends Component {
         isOpen={this.state.isPopoverOpen}
         closePopover={() => this.closePopover()}
       >
+        <div className="group-selector">
+          <EuiPopoverTitle>Apply groups to jobs</EuiPopoverTitle>
+          <GroupList
+            groups={groups}
+            selectedGroups={selectedGroups}
+            selectGroup={this.selectGroup}
+          />
 
-        <GroupList
-          groups={groups}
-          selectedGroups={selectedGroups}
-          selectGroup={this.selectGroup}
-        />
-
-        <div>
+          <EuiHorizontalRule margin="xs" />
+          <EuiSpacer size="s"/>
+          <div>
+            <EuiFlexGroup gutterSize="s" alignItems="center">
+              <EuiFlexItem>
+                <EuiFormRow
+                  compressed
+                  isInvalid={(groupsValidationError !== '')}
+                  error={groupsValidationError}
+                  className="new-group-input"
+                >
+                  <EuiFieldText
+                    compressed
+                    placeholder="Add new group"
+                    value={tempNewGroupName}
+                    onChange={this.changeTempNewGroup}
+                    isInvalid={(groupsValidationError !== '')}
+                    error={groupsValidationError}
+                  />
+                </EuiFormRow>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiFormRow className="new-group-input">
+                  <EuiButtonIcon
+                    onClick={this.addNewGroup}
+                    iconType="plusInCircle"
+                    aria-label="Add"
+                    disabled={(tempNewGroupName === '' || groupsValidationError !== '')}
+                  />
+                </EuiFormRow>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </div>
           <EuiHorizontalRule margin="m" />
-          <EuiFlexGroup gutterSize="s" alignItems="center">
-            <EuiFlexItem>
-              <EuiFieldText
-                compressed
-                placeholder="Add new group"
-                value={tempNewGroupName}
-                onChange={this.changeTempNewGroup}
-              />
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiButtonIcon
-                onClick={this.addNewGroup}
-                iconType="plusInCircle"
-                aria-label="Add"
-                disabled={(tempNewGroupName === '')}
-              />
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </div>
-        <div>
-          <EuiHorizontalRule margin="m" />
-          <EuiButton
-            size="s"
-            onClick={this.applyChanges}
-            isDisabled={(edited === false)}
-          >
-            Apply
-          </EuiButton>
+          <div>
+            <EuiFlexGroup>
+              <EuiFlexItem grow={false}>
+                <EuiButton
+                  size="s"
+                  onClick={this.applyChanges}
+                  isDisabled={(edited === false || groupsValidationError !== '')}
+                >
+                  Apply
+                </EuiButton>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </div>
         </div>
       </EuiPopover>
     );
