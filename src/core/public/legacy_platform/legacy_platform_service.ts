@@ -20,10 +20,12 @@
 import angular from 'angular';
 import { FatalErrorsStartContract } from '../fatal_errors';
 import { InjectedMetadataStartContract } from '../injected_metadata';
+import { NotificationsStartContract } from '../notifications';
 
 interface Deps {
   injectedMetadata: InjectedMetadataStartContract;
   fatalErrors: FatalErrorsStartContract;
+  notifications: NotificationsStartContract;
 }
 
 export interface LegacyPlatformParams {
@@ -42,11 +44,12 @@ export interface LegacyPlatformParams {
 export class LegacyPlatformService {
   constructor(private readonly params: LegacyPlatformParams) {}
 
-  public start({ injectedMetadata, fatalErrors }: Deps) {
+  public start({ injectedMetadata, fatalErrors, notifications }: Deps) {
     // Inject parts of the new platform into parts of the legacy platform
     // so that legacy APIs/modules can mimic their new platform counterparts
     require('ui/metadata').__newPlatformInit__(injectedMetadata.getLegacyMetadata());
     require('ui/notify/fatal_error').__newPlatformInit__(fatalErrors);
+    require('ui/notify/toasts').__newPlatformInit__(notifications.toasts);
 
     // Load the bootstrap module before loading the legacy platform files so that
     // the bootstrap module can modify the environment a bit first

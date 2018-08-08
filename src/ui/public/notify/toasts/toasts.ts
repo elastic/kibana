@@ -17,4 +17,11 @@
  * under the License.
  */
 
-export { toastNotifications, ToastNotifications } from './toast_notifications';
+import { ToastsStartContract } from '../../../../core/public/notifications';
+import { ToastNotifications } from './toast_notifications';
+
+export let toastNotifications: ToastNotifications;
+
+export function __newPlatformInit__(toasts: ToastsStartContract) {
+  toastNotifications = new ToastNotifications(toasts);
+}

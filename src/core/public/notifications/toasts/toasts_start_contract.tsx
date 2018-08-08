@@ -17,7 +17,12 @@
  * under the License.
  */
 
-const normalizeToast = toastOrTitle => {
+import { Toast } from '@elastic/eui';
+import * as Rx from 'rxjs';
+
+export type ToastInput = string | Pick<Toast, Exclude<keyof Toast, 'id'>>;
+
+const normalizeToast = (toastOrTitle: ToastInput) => {
   if (typeof toastOrTitle === 'string') {
     return {
       title: toastOrTitle,
@@ -27,67 +32,54 @@ const normalizeToast = toastOrTitle => {
   return toastOrTitle;
 };
 
-export class ToastNotifications {
-  constructor() {
-    this.list = [];
-    this.idCounter = 0;
-    this.onChangeCallback = null;
+export class ToastsStartContract {
+  private toasts$ = new Rx.BehaviorSubject<Toast[]>([]);
+  private idCounter = 0;
+
+  public get$() {
+    return this.toasts$.asObservable();
   }
 
-  _changed = () => {
-    if (this.onChangeCallback) {
-      this.onChangeCallback();
-    }
-  }
-
-  onChange = callback => {
-    this.onChangeCallback = callback;
-  };
-
-  add = toastOrTitle => {
-    const toast = {
-      id: this.idCounter++,
+  public add(toastOrTitle: ToastInput) {
+    const toast: Toast = {
+      id: String(this.idCounter++),
       ...normalizeToast(toastOrTitle),
     };
 
-    this.list.push(toast);
-    this._changed();
+    this.toasts$.next([...this.toasts$.getValue(), toast]);
 
     return toast;
-  };
+  }
 
-  remove = toast => {
-    const index = this.list.indexOf(toast);
-
-    if (index !== -1) {
-      this.list.splice(index, 1);
-      this._changed();
+  public remove(toast: Toast) {
+    const list = this.toasts$.getValue();
+    const listWithoutToast = list.filter(t => t !== toast);
+    if (listWithoutToast.length !== list.length) {
+      this.toasts$.next(listWithoutToast);
     }
-  };
+  }
 
-  addSuccess = toastOrTitle => {
+  public addSuccess(toastOrTitle: ToastInput) {
     return this.add({
       color: 'success',
       iconType: 'check',
       ...normalizeToast(toastOrTitle),
     });
-  };
+  }
 
-  addWarning = toastOrTitle => {
+  public addWarning(toastOrTitle: ToastInput) {
     return this.add({
       color: 'warning',
       iconType: 'help',
       ...normalizeToast(toastOrTitle),
     });
-  };
+  }
 
-  addDanger = toastOrTitle => {
+  public addDanger(toastOrTitle: ToastInput) {
     return this.add({
       color: 'danger',
       iconType: 'alert',
       ...normalizeToast(toastOrTitle),
     });
-  };
+  }
 }
-
-export const toastNotifications = new ToastNotifications();

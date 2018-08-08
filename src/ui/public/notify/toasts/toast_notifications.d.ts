@@ -18,7 +18,7 @@
  */
 
 interface Toast extends ToastDescription {
-  id: number;
+  id: string;
 }
 
 interface ToastDescription {
