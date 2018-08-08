@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
+import React, { Fragment } from 'react';
 import { ClusterStatus } from '../cluster_status';
 import { ShardActivity } from '../shard_activity';
 import { MonitoringTimeseriesContainer } from '../../chart';
@@ -24,24 +24,24 @@ export function ElasticsearchOverview({
   ];
 
   return (
-    <EuiPage style={{ backgroundColor: 'white' }}>
-      <EuiPageBody>
-        <ClusterStatus stats={clusterStatus} />
-
-        <EuiFlexGrid columns={2} gutterSize="none">
-          {metricsToShow.map((metric, index) => (
-            <EuiFlexItem key={index} style={{ width: '50%' }}>
-              <MonitoringTimeseriesContainer
-                series={metric}
-                {...props}
-              />
-              <EuiSpacer size="m"/>
-            </EuiFlexItem>
-          ))}
-        </EuiFlexGrid>
-
-        <ShardActivity data={shardActivity} {...props} />
-      </EuiPageBody>
-    </EuiPage>
+    <Fragment>
+      <ClusterStatus stats={clusterStatus} />
+      <EuiPage style={{ backgroundColor: 'white' }}>
+        <EuiPageBody>
+          <EuiFlexGrid columns={2} gutterSize="none">
+            {metricsToShow.map((metric, index) => (
+              <EuiFlexItem key={index} style={{ width: '50%' }}>
+                <MonitoringTimeseriesContainer
+                  series={metric}
+                  {...props}
+                />
+                <EuiSpacer size="m"/>
+              </EuiFlexItem>
+            ))}
+          </EuiFlexGrid>
+          <ShardActivity data={shardActivity} {...props} />
+        </EuiPageBody>
+      </EuiPage>
+    </Fragment>
   );
 }
