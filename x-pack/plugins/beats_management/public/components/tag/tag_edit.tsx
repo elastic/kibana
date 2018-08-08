@@ -64,10 +64,6 @@ export class TagEdit extends React.PureComponent<TagEditProps, TagEditState> {
     const { tag, attachedBeats } = this.props;
     return (
       <div>
-        <EuiTitle size="m">
-          <h1>Add a new tag</h1>
-        </EuiTitle>
-        <EuiSpacer size="m" />
         <EuiPanel>
           <EuiFlexGroup>
             <EuiFlexItem>
@@ -94,7 +90,7 @@ export class TagEdit extends React.PureComponent<TagEditProps, TagEditState> {
                     name="name"
                     onChange={this.updateTag('id')}
                     value={tag.id}
-                    placeholder="Tag name"
+                    placeholder="Tag name (required)"
                   />
                 </EuiFormRow>
                 <EuiFormRow label="Color">
@@ -149,17 +145,7 @@ export class TagEdit extends React.PureComponent<TagEditProps, TagEditState> {
             />
           </EuiPanel>
         )}
-        <EuiSpacer size="m" />
-        <EuiFlexGroup>
-          <EuiFlexItem grow={false}>
-            <EuiButton fill isDisabled={true}>
-              Save
-            </EuiButton>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiButtonEmpty>Cancel</EuiButtonEmpty>
-          </EuiFlexItem>
-        </EuiFlexGroup>
+
         {this.state.showFlyout && (
           <EuiFlyout onClose={() => this.setState({ showFlyout: false })}>
             <EuiFlyoutHeader>

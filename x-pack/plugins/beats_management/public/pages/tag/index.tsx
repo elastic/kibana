@@ -39,7 +39,7 @@ export class TagPage extends React.PureComponent<EditTagPageProps, EditTagPageSt
 
   public render() {
     return (
-      <PrimaryLayout title="Beats: Tag">
+      <PrimaryLayout title="Add a new tag">
         <Switch>
           <Route
             path="/tag/create"
@@ -47,7 +47,7 @@ export class TagPage extends React.PureComponent<EditTagPageProps, EditTagPageSt
             render={(props: any) => <CreateTagPage libs={this.props.libs} {...props} />}
           />
           <Route
-            path="/edittag"
+            path="/tag/edit/:tagid"
             exact={true}
             render={(props: any) => <EditTagPage libs={this.props.libs} {...props} />}
           />
