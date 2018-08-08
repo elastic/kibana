@@ -18,7 +18,7 @@ See the [contributing guide](./CONTRIBUTING.md) for instructions setting up your
 
   - `./gradlew startKibana`
 
-    Start kibana and have it include the codesearch plugin.
+    Start kibana and have it include the codesearch plugin. After this is started you should be able to visit kibana interface at http://localhost:5601
 
   - `./gradlew lint`
 
