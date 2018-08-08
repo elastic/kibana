@@ -75,4 +75,5 @@ export class ShareMenu extends Component {
 
 ShareMenu.propTypes = {
   objectType: PropTypes.string.isRequired,
+  getUnhashableStates: PropTypes.func.isRequired,
 };

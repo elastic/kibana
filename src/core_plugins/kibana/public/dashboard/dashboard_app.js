@@ -51,6 +51,7 @@ import { EmbeddableFactoriesRegistryProvider } from 'ui/embeddable/embeddable_fa
 import { DashboardPanelActionsRegistryProvider } from 'ui/dashboard_panel_actions/dashboard_panel_actions_registry';
 import { VisTypesRegistryProvider } from 'ui/registry/vis_types';
 import { timefilter } from 'ui/timefilter';
+import { getUnhashableStatesProvider } from 'ui/state_management/state_hashing';
 
 import { DashboardViewportProvider } from './viewport/dashboard_viewport_provider';
 
@@ -84,6 +85,7 @@ app.directive('dashboardApp', function ($injector) {
       const docTitle = Private(DocTitleProvider);
       const embeddableFactories = Private(EmbeddableFactoriesRegistryProvider);
       const panelActionsRegistry = Private(DashboardPanelActionsRegistryProvider);
+      const getUnhashableStates = Private(getUnhashableStatesProvider);
 
       panelActionsStore.initializeFromRegistry(panelActionsRegistry);
 
@@ -397,6 +399,7 @@ app.directive('dashboardApp', function ($injector) {
           anchorElement,
           objectType: 'dashboard',
           objectId: dash.id,
+          getUnhashableStates,
         });
       };
 
