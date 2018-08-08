@@ -10,7 +10,7 @@ import { wrapEsError } from '../../utils/error_wrappers';
 
 export const createListTagsRoute = (libs: CMServerLibs) => ({
   method: 'GET',
-  path: '/api/beats/tags/',
+  path: '/api/beats/tags',
   handler: async (request: any, reply: any) => {
     let tags: BeatTag[];
     try {

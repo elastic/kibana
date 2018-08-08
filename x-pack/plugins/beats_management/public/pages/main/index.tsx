@@ -16,8 +16,6 @@ import { PrimaryLayout } from '../../components/layouts/primary';
 import { FrontendLibs } from '../../lib/lib';
 import { ActivityPage } from './activity';
 import { BeatsPage } from './beats';
-import { CreateTagPage } from './create_tag';
-import { EditTagPage } from './edit_tag';
 import { TagsPage } from './tags';
 
 interface MainPagesProps {
@@ -57,16 +55,6 @@ export class MainPages extends React.PureComponent<MainPagesProps, MainPagesStat
         name: 'Tags',
         disabled: false,
       },
-      {
-        id: '/createtag',
-        name: 'Create Tag',
-        disabled: false,
-      },
-      {
-        id: '/edittag',
-        name: 'Edit Tag',
-        disabled: false,
-      },
     ];
 
     const renderedTabs = tabs.map((tab, index) => (
@@ -88,6 +76,10 @@ export class MainPages extends React.PureComponent<MainPagesProps, MainPagesStat
               path="/overview/beats/:action?/:enrollmentToken?"
               render={(props: any) => <BeatsPage.ActionArea libs={this.props.libs} {...props} />}
             />
+            <Route
+              path="/overview/tags"
+              render={(props: any) => <TagsPage.ActionArea libs={this.props.libs} {...props} />}
+            />
           </Switch>
         }
       >
@@ -107,16 +99,6 @@ export class MainPages extends React.PureComponent<MainPagesProps, MainPagesStat
             path="/overview/tags"
             exact={true}
             render={(props: any) => <TagsPage libs={this.props.libs} {...props} />}
-          />
-          <Route
-            path="/createtag"
-            exact={true}
-            render={(props: any) => <CreateTagPage libs={this.props.libs} {...props} />}
-          />
-          <Route
-            path="/edittag"
-            exact={true}
-            render={(props: any) => <EditTagPage libs={this.props.libs} {...props} />}
           />
         </Switch>
       </PrimaryLayout>
