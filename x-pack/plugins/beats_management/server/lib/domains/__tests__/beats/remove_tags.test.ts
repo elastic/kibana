@@ -5,9 +5,9 @@
  */
 
 import { BeatTag, CMBeat } from '../../../../../common/domain_types';
+import { FrameworkInternalUser } from '../../../adapters/framework/adapter_types';
 import { compose } from '../../../compose/testing';
 import { CMServerLibs } from '../../../lib';
-import { FrameworkInternalUser } from './../../../adapters/framework/adapter_types';
 
 const internalUser: FrameworkInternalUser = { kind: 'internal' };
 
@@ -21,6 +21,8 @@ describe('Beats Domain Lib', () => {
       beatsDB = [
         {
           access_token: '9a6c99ae0fd84b068819701169cd8a4b',
+          active: true,
+          enrollment_token: '123kuil;4',
           host_ip: '1.2.3.4',
           host_name: 'foo.bar.com',
           id: 'qux',
@@ -28,6 +30,8 @@ describe('Beats Domain Lib', () => {
         },
         {
           access_token: '188255eb560a4448b72656c5e99cae6f',
+          active: true,
+          enrollment_token: '12fghjyu34',
           host_ip: '22.33.11.44',
           host_name: 'baz.bar.com',
           id: 'baz',
@@ -35,6 +39,8 @@ describe('Beats Domain Lib', () => {
         },
         {
           access_token: '93c4a4dd08564c189a7ec4e4f046b975',
+          active: true,
+          enrollment_token: '12nfhgj34',
           host_ip: '1.2.3.4',
           host_name: 'foo.bar.com',
           id: 'foo',
@@ -44,6 +50,9 @@ describe('Beats Domain Lib', () => {
         },
         {
           access_token: '3c4a4dd08564c189a7ec4e4f046b9759',
+          active: true,
+
+          enrollment_token: '123sfd4',
           host_ip: '11.22.33.44',
           host_name: 'foo.com',
           id: 'bar',
@@ -54,14 +63,17 @@ describe('Beats Domain Lib', () => {
         {
           configuration_blocks: [],
           id: 'production',
+          last_updated: new Date(),
         },
         {
           configuration_blocks: [],
           id: 'development',
+          last_updated: new Date(),
         },
         {
           configuration_blocks: [],
           id: 'qa',
+          last_updated: new Date(),
         },
       ];
 

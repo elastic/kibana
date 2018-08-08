@@ -79,10 +79,16 @@ export class BeatsPage extends React.PureComponent<BeatsPageProps, BeatsPageStat
     this.loadBeats();
   };
 
-  // TODO: call delete endpoint
   private deleteSelected = async () => {
-    // const selected = this.getSelectedBeats();
-    // await this.props.libs.beats.delete(selected);
+    const selected = this.getSelectedBeats();
+    for (const beat of selected) {
+      await this.props.libs.beats.update(beat.id, { active: false });
+    }
+    // because the compile code above has a very minor race condition, we wait,
+    // the max race condition time is really 10ms but doing 100 to be safe
+    setTimeout(async () => {
+      await this.loadBeats();
+    }, 100);
   };
 
   private async loadBeats() {
@@ -110,7 +116,7 @@ export class BeatsPage extends React.PureComponent<BeatsPageProps, BeatsPageStat
         <EuiFlexItem key={tag.id}>
           <EuiBadge
             color={tag.color}
-            iconType={hasMatches ? 'cross' : null}
+            iconType={hasMatches ? 'cross' : undefined}
             onClick={
               hasMatches
                 ? () => this.removeTagsFromBeats(selectedBeats, tag)
@@ -143,7 +149,7 @@ export class BeatsPage extends React.PureComponent<BeatsPageProps, BeatsPageStat
     this.loadBeats();
   };
 
-  private getSelectedBeats = () => {
+  private getSelectedBeats = (): CMPopulatedBeat[] => {
     return this.state.tableRef.current.state.selection;
   };
 }

@@ -9,6 +9,7 @@ import { EuiBadge, EuiFlexGroup, EuiIcon, EuiLink } from '@elastic/eui';
 import { flatten, uniq } from 'lodash';
 import moment from 'moment';
 import React from 'react';
+
 import { TABLE_CONFIG } from '../../../common/constants';
 import { BeatTag, CMPopulatedBeat, ConfigurationBlock } from '../../../common/domain_types';
 

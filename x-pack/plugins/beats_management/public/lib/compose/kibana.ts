@@ -22,8 +22,7 @@ import { RestTokensAdapter } from '../adapters/tokens/rest_tokens_adapter';
 import { FrontendDomainLibs, FrontendLibs } from '../lib';
 
 export function compose(): FrontendLibs {
-  const kbnVersion = (window as any).__KBN__.version;
-  const api = new AxiosRestAPIAdapter(kbnVersion, chrome.getXsrfToken(), chrome.getBasePath());
+  const api = new AxiosRestAPIAdapter(chrome.getXsrfToken(), chrome.getBasePath());
 
   const tags = new RestTagsAdapter(api);
   const tokens = new RestTokensAdapter(api);
