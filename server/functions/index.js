@@ -6,4 +6,4 @@ import { server } from './server';
 import { timelion } from './timelion';
 import { essql } from './essql';
 
-export const serverFunctions = [esdocs, escount, demodata, pointseries, server, timelion, essql];
+export const serverFunctions = [demodata, esdocs, escount, essql, pointseries, server, timelion];
