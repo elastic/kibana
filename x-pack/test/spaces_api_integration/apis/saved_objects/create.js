@@ -5,8 +5,8 @@
  */
 
 import expect from 'expect.js';
-import { getUrlPrefix } from './lib/space_test_utils';
-import { SPACES } from './lib/spaces';
+import { getUrlPrefix } from '../lib/space_test_utils';
+import { SPACES } from '../lib/spaces';
 import { DEFAULT_SPACE_ID } from '../../../../plugins/spaces/common/constants';
 
 export default function ({ getService }) {

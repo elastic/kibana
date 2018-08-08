@@ -5,7 +5,7 @@
  */
 
 import expect from 'expect.js';
-import { AUTHENTICATION } from './lib/authentication';
+import { AUTHENTICATION } from '../lib/authentication';
 import { getUrlPrefix } from '../lib/space_test_utils';
 import { DEFAULT_SPACE_ID } from '../../../../plugins/spaces/common/constants';
 

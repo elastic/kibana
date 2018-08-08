@@ -5,11 +5,11 @@
  */
 
 import { actionsFactory } from './actions';
-import { checkPrivilegesWithRequestFactory } from './check_privileges';
+import { CHECK_PRIVILEGES_RESULT, checkPrivilegesWithRequestFactory } from './check_privileges';
 import { deepFreeze } from './deep_freeze';
 import { getClient } from '../../../../../server/lib/get_client_shield';
 
-export function initAuthorizationService(server) {
+export function initAuthorizationService(server, xpackInfoFeature) {
   const shieldClient = getClient(server);
   const config = server.config();
 
@@ -20,5 +20,9 @@ export function initAuthorizationService(server) {
     actions,
     application,
     checkPrivilegesWithRequest: checkPrivilegesWithRequestFactory(shieldClient, config, actions, application),
+    CHECK_PRIVILEGES_RESULT,
+    isRbacEnabled() {
+      return xpackInfoFeature.getLicenseCheckResults().allowRbac;
+    }
   }));
 }

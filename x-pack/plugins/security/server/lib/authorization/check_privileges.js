@@ -20,15 +20,15 @@ export function checkPrivilegesWithRequestFactory(shieldClient, config, actions,
   const kibanaIndex = config.get('kibana.index');
 
   const hasIncompatibileVersion = (applicationPrivilegesResponse) => {
-    return !applicationPrivilegesResponse[actions.version] && applicationPrivilegesResponse[actions.login];
+    return Object.values(applicationPrivilegesResponse).some(resource => !resource[actions.version] && resource[actions.login]);
   };
 
   const hasAllApplicationPrivileges = (applicationPrivilegesResponse) => {
-    return Object.values(applicationPrivilegesResponse).every(val => val === true);
+    return Object.values(applicationPrivilegesResponse).every(resource => Object.values(resource).every(action => action === true));
   };
 
   const hasNoApplicationPrivileges = (applicationPrivilegesResponse) => {
-    return Object.values(applicationPrivilegesResponse).every(val => val === false);
+    return Object.values(applicationPrivilegesResponse).every(resource => Object.values(resource).every(action => action === false));
   };
 
   const isLegacyFallbackEnabled = () => {
@@ -57,13 +57,13 @@ export function checkPrivilegesWithRequestFactory(shieldClient, config, actions,
 
   return function checkPrivilegesWithRequest(request) {
 
-    return async function checkPrivileges(spaceId, privileges) {
+    return async function checkPrivileges(spaceIds, privileges) {
       const allApplicationPrivileges = uniq([actions.version, actions.login, ...privileges]);
       const hasPrivilegesResponse = await callWithRequest(request, 'shield.hasPrivileges', {
         body: {
           applications: [{
             application,
-            resources: [spaceId],
+            resources: spaceIds,
             privileges: allApplicationPrivileges
           }],
           index: [{
@@ -73,9 +73,9 @@ export function checkPrivilegesWithRequestFactory(shieldClient, config, actions,
         }
       });
 
-      validateEsPrivilegeResponse(hasPrivilegesResponse, application, allApplicationPrivileges, [spaceId], kibanaIndex);
+      validateEsPrivilegeResponse(hasPrivilegesResponse, application, allApplicationPrivileges, spaceIds, kibanaIndex);
 
-      const applicationPrivilegesResponse = hasPrivilegesResponse.application[application][spaceId];
+      const applicationPrivilegesResponse = hasPrivilegesResponse.application[application];
       const indexPrivilegesResponse = hasPrivilegesResponse.index[kibanaIndex];
 
       if (hasIncompatibileVersion(applicationPrivilegesResponse)) {
@@ -85,11 +85,11 @@ export function checkPrivilegesWithRequestFactory(shieldClient, config, actions,
       return {
         result: determineResult(applicationPrivilegesResponse, indexPrivilegesResponse),
         username: hasPrivilegesResponse.username,
-
+        response: applicationPrivilegesResponse,
         // we only return missing privileges that they're specifically checking for
-        missing: Object.keys(applicationPrivilegesResponse)
-          .filter(privilege => privileges.includes(privilege))
-          .filter(privilege => !applicationPrivilegesResponse[privilege])
+        // missing: Object.keys(applicationPrivilegesResponse)
+        //   .filter(privilege => privileges.includes(privilege))
+        //   .filter(privilege => !applicationPrivilegesResponse[privilege])
       };
     };
   };

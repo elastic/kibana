@@ -5,8 +5,8 @@
  */
 
 import expect from 'expect.js';
-import { SPACES } from './lib/spaces';
-import { getIdPrefix, getUrlPrefix, getExpectedSpaceIdProperty } from './lib/space_test_utils';
+import { SPACES } from '../lib/spaces';
+import { getIdPrefix, getUrlPrefix, getExpectedSpaceIdProperty } from '../lib/space_test_utils';
 
 export default function ({ getService }) {
   const supertest = getService('supertest');

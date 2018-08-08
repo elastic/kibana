@@ -4,9 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+
 export default function ({ loadTestFile }) {
-  describe('apis spaces', () => {
-    loadTestFile(require.resolve('./saved_objects'));
-    loadTestFile(require.resolve('./spaces'));
+
+  describe('spaces', () => {
+    loadTestFile(require.resolve('./get'));
   });
 }

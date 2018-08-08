@@ -13,7 +13,7 @@ const transformKibanaPrivilegeToEs = (application, kibanaPrivilege) => {
   return {
     privileges: kibanaPrivilege.privileges,
     application,
-    resources: [ALL_RESOURCE],
+    resources: kibanaPrivilege.spaces || [ALL_RESOURCE],
   };
 };
 
@@ -66,6 +66,7 @@ export function initPutRolesApi(
     }),
     kibana: Joi.array().items({
       privileges: Joi.array().items(Joi.string().valid(Object.keys(privilegeMap))),
+      spaces: Joi.array().items(Joi.string())
     }),
   });
 

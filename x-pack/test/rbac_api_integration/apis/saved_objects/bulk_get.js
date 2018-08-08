@@ -5,7 +5,7 @@
  */
 
 import expect from 'expect.js';
-import { AUTHENTICATION } from './lib/authentication';
+import { AUTHENTICATION } from '../lib/authentication';
 
 export default function ({ getService }) {
   const supertest = getService('supertestWithoutAuth');

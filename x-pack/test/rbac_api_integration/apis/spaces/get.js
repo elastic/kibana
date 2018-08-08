@@ -5,6 +5,7 @@
  */
 
 import expect from 'expect.js';
+import { getUrlPrefix } from '../lib/space_test_utils';
 import { AUTHENTICATION } from '../lib/authentication';
 
 export default function ({ getService }) {
@@ -13,61 +14,46 @@ export default function ({ getService }) {
 
   describe('get', () => {
 
-    const expectResults = (resp) => {
-      expect(resp.body).to.eql({
-        id: 'dd7caf20-9efd-11e7-acb3-3dab96693fab',
-        type: 'visualization',
-        updated_at: '2017-09-21T18:51:23.794Z',
-        version: resp.body.version,
-        attributes: {
-          title: 'Count of requests',
-          description: '',
-          version: 1,
-          // cheat for some of the more complex attributes
-          visState: resp.body.attributes.visState,
-          uiStateJSON: resp.body.attributes.uiStateJSON,
-          kibanaSavedObjectMeta: resp.body.attributes.kibanaSavedObjectMeta
-        }
-      });
+    const allResults = [
+      { id: 'default',
+        name: 'Default Space',
+        description: 'This is the default space',
+        _reserved: true },
+      { id: 'space_1',
+        name: 'Space 1',
+        description: 'This is the first test space' },
+      { id: 'space_2',
+        name: 'Space 2',
+        description: 'This is the second test space' }
+    ];
+
+    const expectAllResults = (resp) => {
+      expect(resp.body).to.eql(allResults);
     };
 
-    const expectNotFound = (resp) => {
-      expect(resp.body).to.eql({
-        error: 'Not Found',
-        message: 'Saved object [visualization/foobar] not found',
-        statusCode: 404,
-      });
+    const createExpectResults = (spaceIds) => (resp) => {
+      const results = allResults.filter(item => spaceIds.includes(item.id));
+      expect(resp.body).to.eql(results);
     };
 
     const expectRbacForbidden = resp => {
       expect(resp.body).to.eql({
         statusCode: 403,
-        error: 'Forbidden',
-        message: `Unable to get visualization, missing action:saved_objects/visualization/get`
+        error: 'Forbidden'
       });
     };
 
-    const getTest = (description, { auth, tests }) => {
+    const getTest = (description, { auth, spaceId, tests }) => {
       describe(description, () => {
-        before(() => esArchiver.load('saved_objects/spaces'));
-        after(() => esArchiver.unload('saved_objects/spaces'));
+        before(async () => esArchiver.load(`saved_objects/spaces`));
+        after(async () => esArchiver.unload(`saved_objects/spaces`));
 
-        it(`should return ${tests.exists.statusCode}`, async () => (
-          await supertest
-            .get(`/api/saved_objects/visualization/dd7caf20-9efd-11e7-acb3-3dab96693fab`)
+        it(`should return ${tests.exists.statusCode}`, async () => {
+          return supertest
+            .get(`${getUrlPrefix(spaceId)}/api/spaces/v1/spaces`)
             .auth(auth.username, auth.password)
             .expect(tests.exists.statusCode)
-            .then(tests.exists.response)
-        ));
-
-        describe('document does not exist', () => {
-          it(`should return ${tests.doesntExist.statusCode}`, async () => (
-            await supertest
-              .get(`/api/saved_objects/visualization/foobar`)
-              .auth(auth.username, auth.password)
-              .expect(tests.doesntExist.statusCode)
-              .then(tests.doesntExist.response)
-          ));
+            .then(tests.exists.response);
         });
       });
     };
@@ -82,10 +68,6 @@ export default function ({ getService }) {
           statusCode: 403,
           response: expectRbacForbidden,
         },
-        doesntExist: {
-          statusCode: 403,
-          response: expectRbacForbidden,
-        },
       }
     });
 
@@ -97,11 +79,7 @@ export default function ({ getService }) {
       tests: {
         exists: {
           statusCode: 200,
-          response: expectResults,
-        },
-        doesntExist: {
-          statusCode: 404,
-          response: expectNotFound,
+          response: expectAllResults,
         },
       }
     });
@@ -114,11 +92,7 @@ export default function ({ getService }) {
       tests: {
         exists: {
           statusCode: 200,
-          response: expectResults,
-        },
-        doesntExist: {
-          statusCode: 404,
-          response: expectNotFound,
+          response: expectAllResults,
         },
       }
     });
@@ -131,11 +105,7 @@ export default function ({ getService }) {
       tests: {
         exists: {
           statusCode: 200,
-          response: expectResults,
-        },
-        doesntExist: {
-          statusCode: 404,
-          response: expectNotFound,
+          response: expectAllResults,
         },
       }
     });
@@ -148,11 +118,7 @@ export default function ({ getService }) {
       tests: {
         exists: {
           statusCode: 200,
-          response: expectResults,
-        },
-        doesntExist: {
-          statusCode: 404,
-          response: expectNotFound,
+          response: expectAllResults,
         },
       }
     });
@@ -165,11 +131,7 @@ export default function ({ getService }) {
       tests: {
         exists: {
           statusCode: 200,
-          response: expectResults,
-        },
-        doesntExist: {
-          statusCode: 404,
-          response: expectNotFound,
+          response: expectAllResults,
         },
       }
     });
@@ -182,11 +144,7 @@ export default function ({ getService }) {
       tests: {
         exists: {
           statusCode: 200,
-          response: expectResults,
-        },
-        doesntExist: {
-          statusCode: 404,
-          response: expectNotFound,
+          response: expectAllResults,
         },
       }
     });
@@ -199,11 +157,33 @@ export default function ({ getService }) {
       tests: {
         exists: {
           statusCode: 200,
-          response: expectResults,
+          response: expectAllResults,
         },
-        doesntExist: {
-          statusCode: 404,
-          response: expectNotFound,
+      }
+    });
+
+    getTest('kibana rbac default space user', {
+      auth: {
+        username: AUTHENTICATION.KIBANA_RBAC_DEFAULT_SPACE_USER.USERNAME,
+        password: AUTHENTICATION.KIBANA_RBAC_DEFAULT_SPACE_USER.PASSWORD,
+      },
+      tests: {
+        exists: {
+          statusCode: 200,
+          response: createExpectResults('default'),
+        },
+      },
+    });
+
+    getTest('kibana rbac space 1 readonly user', {
+      auth: {
+        username: AUTHENTICATION.KIBANA_RBAC_SPACE_1_READONLY_USER.USERNAME,
+        password: AUTHENTICATION.KIBANA_RBAC_SPACE_1_READONLY_USER.PASSWORD,
+      },
+      tests: {
+        exists: {
+          statusCode: 200,
+          response: createExpectResults('space_1'),
         },
       }
     });

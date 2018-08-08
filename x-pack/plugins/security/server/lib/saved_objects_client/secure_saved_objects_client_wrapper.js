@@ -115,7 +115,7 @@ export class SecureSavedObjectsClientWrapper {
     const types = Array.isArray(typeOrTypes) ? typeOrTypes : [typeOrTypes];
     const actions = types.map(type => this._actions.getSavedObjectAction(type, action));
     const spaceId = this._spacesService.getSpaceId(this._request);
-    const { result, username, missing } = await this._checkSavedObjectPrivileges(spaceId, actions);
+    const { result, username, response } = await this._checkSavedObjectPrivileges([spaceId], actions);
 
     switch (result) {
       case CHECK_PRIVILEGES_RESULT.AUTHORIZED:
@@ -126,6 +126,8 @@ export class SecureSavedObjectsClientWrapper {
         this._securityContextService.set(this._request, { legacy: true, });
         return;
       case CHECK_PRIVILEGES_RESULT.UNAUTHORIZED:
+        const missing = Object.keys(response[spaceId])
+          .filter(privilege => !response[privilege]);
         this._auditLogger.savedObjectsAuthorizationFailure(username, action, types, missing, args);
         const msg = `Unable to ${action} ${[...types].sort().join(',')}, missing ${[...missing].sort().join(',')}`;
         throw this.errors.decorateForbiddenError(new Error(msg));

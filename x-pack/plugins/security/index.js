@@ -107,7 +107,7 @@ export const security = (kibana) => new kibana.Plugin({
     server.auth.strategy('session', 'login', 'required');
 
     // exposes server.plugins.security.authorization
-    initAuthorizationService(server);
+    initAuthorizationService(server, xpackInfoFeature);
 
     watchStatusAndLicenseToInitialize(xpackMainPlugin, plugin, async (license) => {
       if (license.allowRbac) {
