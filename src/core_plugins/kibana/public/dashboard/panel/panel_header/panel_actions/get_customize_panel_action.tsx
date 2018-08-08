@@ -30,7 +30,7 @@ export function getCustomizePanelAction({
   title,
 }: {
   onResetPanelTitle: () => void;
-  onUpdatePanelTitle: (title: string | undefined) => void;
+  onUpdatePanelTitle: (title: string) => void;
   closeContextMenu: () => void;
   title?: string;
 }): DashboardPanelAction {

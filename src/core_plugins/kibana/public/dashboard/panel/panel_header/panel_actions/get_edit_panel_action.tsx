@@ -41,7 +41,7 @@ export function getEditPanelAction() {
         !embeddable || !embeddable.metadata || !embeddable.metadata.editUrl,
       isVisible: ({ containerState }) => containerState.viewMode === DashboardViewMode.EDIT,
       onClick: ({ embeddable }) => {
-        if (embeddable.metadata.editUrl) {
+        if (embeddable && embeddable.metadata.editUrl) {
           window.location.href = embeddable.metadata.editUrl;
         }
       },
