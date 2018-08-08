@@ -30,6 +30,7 @@ const writeFile = promisify(fs.writeFile);
 export class Build {
   constructor(source) {
     this.source = source;
+    this.includedFiles = [source];
   }
 
   outputPath() {
@@ -46,7 +47,7 @@ export class Build {
   }
 
   async buildIfIncluded(path) {
-    if (this.stats.includedFiles && this.stats.includedFiles.includes(path)) {
+    if (this.includedFiles && this.includedFiles.includes(path)) {
       await this.build();
       return true;
     }
@@ -60,7 +61,6 @@ export class Build {
 
   async build() {
     const outFile = this.outputPath();
-
     const rendered = await renderSass({
       file: this.source,
       outFile,
@@ -68,9 +68,10 @@ export class Build {
       sourceMapEmbed: true,
     });
 
+
     const prefixed = postcss([ autoprefixer ]).process(rendered.css);
 
-    this.stats = rendered.stats;
+    this.includedFiles = rendered.stats.includedFiles;
 
     await writeFile(outFile, prefixed.css);
 

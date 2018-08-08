@@ -20,16 +20,18 @@
 import { Build } from './build';
 import { collectUiExports } from '../../ui/ui_exports';
 
-export function buildAll(enabledPluginSpecs) {
+export async function buildAll(enabledPluginSpecs) {
   const { uiAppSpecs = [] } = collectUiExports(enabledPluginSpecs);
-
-  return Promise.all(uiAppSpecs.reduce((acc, uiAppSpec) => {
+  const bundles = await Promise.all(uiAppSpecs.map(async uiAppSpec => {
     if (!uiAppSpec.styleSheetPath) {
-      return acc;
+      return;
     }
 
-    const builder = new Build(uiAppSpec.styleSheetPath);
+    const bundle = new Build(uiAppSpec.styleSheetPath);
+    await bundle.build();
 
-    return [...acc, builder.build()];
-  }, []));
+    return bundle;
+  }));
+
+  return bundles.filter(v => v);
 }
