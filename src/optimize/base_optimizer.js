@@ -369,10 +369,12 @@ export default class BaseOptimizer {
         new UglifyJsPlugin({
           parallel: true,
           sourceMap: false,
-          compress: {
-            warnings: false
-          },
-          mangle: false
+          uglifyOptions: {
+            compress: {
+              warnings: false
+            },
+            mangle: false
+          }
         }),
       ]
     };
