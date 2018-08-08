@@ -5,10 +5,10 @@
  */
 
 import {
-  InfraFilter,
+  InfraFilterInput,
   InfraFilterType,
-  InfraPath,
-  InfraPathFilter,
+  InfraPathFilterInput,
+  InfraPathInput,
 } from '../../../../../common/graphql/types';
 
 import {
@@ -40,18 +40,18 @@ export function createQuery(options: InfraNodeRequestOptions): InfraESQuery {
   filterClause.push(rangeFilter);
 
   if (groupBy) {
-    groupBy.forEach((group: InfraPath): void => {
+    groupBy.forEach((group: InfraPathInput): void => {
       if (isGroupByTerms(group) && group.field) {
-        const inputFilter: InfraFilter = {
+        const inputFilter: InfraFilterInput = {
           type: InfraFilterType.exists,
           value: group.field,
         };
         mustClause.push(convertInputFilterToESQuery(inputFilter));
       }
       if (isGroupByFilters(group) && group.filters) {
-        group.filters!.forEach((groupFilter: InfraPathFilter | null): void => {
+        group.filters!.forEach((groupFilter: InfraPathFilterInput | null): void => {
           if (groupFilter != null && groupFilter.query) {
-            const inputFilter: InfraFilter = {
+            const inputFilter: InfraFilterInput = {
               type: InfraFilterType.query_string,
               value: groupFilter.query,
             };
@@ -63,7 +63,7 @@ export function createQuery(options: InfraNodeRequestOptions): InfraESQuery {
   }
 
   if (filters) {
-    filters.forEach((filter: InfraFilter): void => {
+    filters.forEach((filter: InfraFilterInput): void => {
       mustClause.push(convertInputFilterToESQuery(filter));
     });
   }

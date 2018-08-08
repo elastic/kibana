@@ -7,10 +7,10 @@ import gql from 'graphql-tag';
 export const query = gql`
   query Query(
     $id: ID!
-    $timerange: InfraTimerange!
-    $filters: [InfraFilter!]
-    $metrics: [InfraMetric!]
-    $path: [InfraPath!]
+    $timerange: InfraTimerangeInput!
+    $filters: [InfraFilterInput!]
+    $metrics: [InfraMetricInput!]
+    $path: [InfraPathInput!]
   ) {
     source(id: $id) {
       id

@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { InfraMetric, InfraPath } from '../../../../common/graphql/types';
+import { InfraMetricInput, InfraPathInput } from '../../../../common/graphql/types';
 
 import {
   ArgumentNode,
@@ -17,15 +17,15 @@ import {
 } from 'graphql';
 
 interface InfraPathsAndMetricOptions {
-  path: InfraPath[];
-  metrics: InfraMetric[];
+  path: InfraPathInput[];
+  metrics: InfraMetricInput[];
 }
 
 export function extractPathsAndMetrics(info: GraphQLResolveInfo): InfraPathsAndMetricOptions {
   if (info.variableValues.metrics && info.variableValues.path) {
     return {
-      metrics: info.variableValues.metrics as InfraMetric[],
-      path: info.variableValues.path as InfraPath[],
+      metrics: info.variableValues.metrics as InfraMetricInput[],
+      path: info.variableValues.path as InfraPathInput[],
     };
   }
 
@@ -74,11 +74,11 @@ function extractArgument<ReturnType>(selection: FieldNode, name: string): Return
   return result;
 }
 
-function extractPathArgument(selection: FieldNode): InfraPath[] {
-  return extractArgument<InfraPath>(selection, 'path') as InfraPath[];
+function extractPathArgument(selection: FieldNode): InfraPathInput[] {
+  return extractArgument<InfraPathInput>(selection, 'path') as InfraPathInput[];
 }
-function extractMetricsArgument(selection: FieldNode): InfraMetric[] {
-  return extractArgument<InfraMetric>(selection, 'metrics') as InfraMetric[];
+function extractMetricsArgument(selection: FieldNode): InfraMetricInput[] {
+  return extractArgument<InfraMetricInput>(selection, 'metrics') as InfraMetricInput[];
 }
 
 function parseFieldNodes(

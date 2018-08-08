@@ -16,7 +16,7 @@ export const fieldsSchema = gql`
 
   extend type Query {
     fields(
-      indexPattern: InfraIndexPattern = {
+      indexPattern: InfraIndexPatternInput = {
         pattern: "metricbeat_read_only"
         timeFieldName: "@timestamp"
       }

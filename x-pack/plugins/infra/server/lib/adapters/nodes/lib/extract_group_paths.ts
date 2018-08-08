@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { InfraNode, InfraPath } from '../../../../../common/graphql/types';
+import { InfraNode, InfraPathInput } from '../../../../../common/graphql/types';
 import { InfraBucket, InfraNodeRequestOptions } from '../adapter_types';
 import { createNodeItem } from './create_node_item';
 
@@ -18,8 +18,8 @@ export function extractGroupPaths(
   node: InfraBucket
 ): InfraNode[] {
   const { groupBy } = options;
-  const firstGroup: InfraPath = groupBy[0];
-  const secondGroup: InfraPath = groupBy[1];
+  const firstGroup: InfraPathInput = groupBy[0];
+  const secondGroup: InfraPathInput = groupBy[1];
   const paths: InfraNode[] = node[firstGroup!.id].buckets.reduce(
     (acc: InfraNode[], bucket: InfraBucket, index: number): InfraNode[] => {
       const nodeItem = createNodeItem(options, node, bucket);

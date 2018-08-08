@@ -79,7 +79,7 @@ export namespace QueryResolvers {
 
   export type FieldsResolver = Resolver<(InfraField | null)[] | null, FieldsArgs>;
   export interface FieldsArgs {
-    indexPattern?: InfraIndexPattern | null;
+    indexPattern?: InfraIndexPatternInput | null;
   }
 
   export type SourceResolver = Resolver<InfraSource, SourceArgs>;
@@ -103,8 +103,8 @@ export namespace InfraSourceResolvers {
   export type StatusResolver = Resolver<InfraSourceStatus>;
   export type MapResolver = Resolver<InfraResponse | null, MapArgs>;
   export interface MapArgs {
-    timerange: InfraTimerange;
-    filters?: InfraFilter[] | null;
+    timerange: InfraTimerangeInput;
+    filters?: InfraFilterInput[] | null;
   }
 }
 /** A set of configuration options for an infrastructure data source */
@@ -159,7 +159,7 @@ export namespace InfraResponseResolvers {
 
   export type NodesResolver = Resolver<InfraNode[] | null, NodesArgs>;
   export interface NodesArgs {
-    path?: InfraPath[] | null;
+    path?: InfraPathInput[] | null;
   }
 }
 
@@ -172,7 +172,7 @@ export namespace InfraNodeResolvers {
   export type PathResolver = Resolver<InfraNodePath[]>;
   export type MetricsResolver = Resolver<InfraNodeMetric[], MetricsArgs>;
   export interface MetricsArgs {
-    metrics?: InfraMetric[] | null;
+    metrics?: InfraMetricInput[] | null;
   }
 }
 
@@ -198,47 +198,47 @@ export namespace InfraNodeMetricResolvers {
   export type ValueResolver = Resolver<number>;
 }
 
-export interface InfraIndexPattern {
+export interface InfraIndexPatternInput {
   pattern: string /** The index pattern to use, defaults to '*' */;
   timeFieldName: string /** The timefield to use, defaults to @timestamp */;
 }
 
-export interface InfraTimerange {
+export interface InfraTimerangeInput {
   interval: string /** The interval string to use for last bucket. The format is '{value}{unit}'. For example '5m' would return the metrics for the last 5 minutes of the timespan. */;
   to: number /** The end of the timerange */;
   from: number /** The beginning of the timerange */;
 }
 
-export interface InfraFilter {
+export interface InfraFilterInput {
   type: InfraFilterType /** The type of filter to use */;
   value: string /** The filter value */;
   field?: string | null /** The field name for a match query */;
 }
 
-export interface InfraPath {
+export interface InfraPathInput {
   id: string /** The UUID for the path by object */;
   type: InfraPathType /** The type of path */;
   label?:
     | string
     | null /** The label to use in the results for the group by for the terms group by */;
-  field?: string | null /** The field to use for the terms aggregation */;
-  filters?:
-    | InfraPathFilter[]
+  field?:
+    | string
     | null /** The field to group by from a terms aggregation, this is ignored by the filter type */;
+  filters?: InfraPathFilterInput[] | null /** The fitlers for the filter group by */;
 }
 /** A group by filter */
-export interface InfraPathFilter {
+export interface InfraPathFilterInput {
   id: string /** The UUID for the path filter */;
   label: string /** The label for the filter, this will be used as the group name in the final results */;
   query: string /** The query string query */;
 }
 
-export interface InfraMetric {
+export interface InfraMetricInput {
   type?: InfraMetricType | null /** The type of metric */;
-  aggs?: InfraMetricAgg[] | null /** The aggregations for custom metrics */;
+  aggs?: InfraMetricAggInput[] | null /** The aggregations for custom metrics */;
 }
 
-export interface InfraMetricAgg {
+export interface InfraMetricAggInput {
   id: string /** The UUID from the metric aggregation */;
   type?: InfraMetricAggregationType | null /** The type of aggregation */;
   field?:
@@ -253,20 +253,20 @@ export interface InfraMetricAgg {
   script?: string | null /** Script field for bucket_script aggregations */;
 }
 export interface FieldsQueryArgs {
-  indexPattern?: InfraIndexPattern | null;
+  indexPattern?: InfraIndexPatternInput | null;
 }
 export interface SourceQueryArgs {
   id: string /** The id of the source */;
 }
 export interface MapInfraSourceArgs {
-  timerange: InfraTimerange;
-  filters?: InfraFilter[] | null;
+  timerange: InfraTimerangeInput;
+  filters?: InfraFilterInput[] | null;
 }
 export interface NodesInfraResponseArgs {
-  path?: InfraPath[] | null;
+  path?: InfraPathInput[] | null;
 }
 export interface MetricsInfraNodeArgs {
-  metrics?: InfraMetric[] | null;
+  metrics?: InfraMetricInput[] | null;
 }
 
 export enum InfraFilterType {
@@ -314,10 +314,10 @@ export enum InfraOperator {
 export namespace Query {
   export type Variables = {
     id: string;
-    timerange: InfraTimerange;
-    filters?: InfraFilter[] | null;
-    metrics?: InfraMetric[] | null;
-    path?: InfraPath[] | null;
+    timerange: InfraTimerangeInput;
+    filters?: InfraFilterInput[] | null;
+    metrics?: InfraMetricInput[] | null;
+    path?: InfraPathInput[] | null;
   };
 
   export type Query = {
@@ -344,7 +344,6 @@ export namespace Query {
 
   export type Path = {
     __typename?: 'InfraNodePath';
-    id: string;
     value: string;
   };
 

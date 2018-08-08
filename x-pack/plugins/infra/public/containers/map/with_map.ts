@@ -6,14 +6,14 @@
 import moment from 'moment';
 import { graphql } from 'react-apollo';
 import {
-  InfraFilter,
-  InfraMetric,
+  InfraFilterInput,
+  InfraMetricInput,
   InfraMetricType,
-  InfraPath,
+  InfraPathInput,
   InfraPathType,
   InfraResponse,
   InfraSource,
-  InfraTimerange,
+  InfraTimerangeInput,
 } from '../../../common/graphql/types';
 import { query } from './query';
 
@@ -27,10 +27,10 @@ interface Response {
 
 interface Variables {
   id: string;
-  timerange: InfraTimerange;
-  filters: InfraFilter[];
-  path: InfraPath[];
-  metrics: InfraMetric[];
+  timerange: InfraTimerangeInput;
+  filters: InfraFilterInput[];
+  path: InfraPathInput[];
+  metrics: InfraMetricInput[];
 }
 
 export const withMap = graphql<

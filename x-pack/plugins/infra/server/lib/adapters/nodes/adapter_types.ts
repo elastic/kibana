@@ -5,14 +5,14 @@
  */
 
 import {
-  InfraFilter,
-  InfraMetric,
+  InfraFilterInput,
+  InfraMetricInput,
   InfraNode,
-  InfraPath,
-  InfraPathFilter,
+  InfraPathFilterInput,
+  InfraPathInput,
   InfraPathType,
   InfraResponse,
-  InfraTimerange,
+  InfraTimerangeInput,
 } from '../../../../common/graphql/types';
 import { InfraSourceConfiguration } from '../../sources';
 import { InfraFrameworkRequest } from '../framework';
@@ -87,10 +87,10 @@ export type InfraESMSearchBody = InfraESSearchBody | InfraESMSearchHeader;
 export interface InfraNodeRequestOptions {
   nodeField: string;
   sourceConfiguration: InfraSourceConfiguration;
-  timerange: InfraTimerange;
-  groupBy: InfraPath[];
-  metrics: InfraMetric[];
-  filters: InfraFilter[];
+  timerange: InfraTimerangeInput;
+  groupBy: InfraPathInput[];
+  metrics: InfraMetricInput[];
+  filters: InfraFilterInput[];
 }
 
 export enum InfraNodesKey {
@@ -136,7 +136,7 @@ export interface InfraGroupByFilters {
   label?:
     | string
     | null /** The label to use in the results for the group by for the terms group by */;
-  filters: InfraPathFilter[] /** The filters to use for the group by aggregation, this is ignored by the terms group by */;
+  filters: InfraPathFilterInput[] /** The filters to use for the group by aggregation, this is ignored by the terms group by */;
 }
 
 export interface InfraGroupByTerms {

@@ -20,17 +20,17 @@ export const nodesSchema: any = gql`
 
   type InfraNode {
     path: [InfraNodePath!]!
-    metrics(metrics: [InfraMetric!]): [InfraNodeMetric!]!
+    metrics(metrics: [InfraMetricInput!]): [InfraNodeMetric!]!
   }
 
-  input InfraIndexPattern {
+  input InfraIndexPatternInput {
     "The index pattern to use, defaults to '*'"
     pattern: String!
     "The timefield to use, defaults to @timestamp"
     timeFieldName: String!
   }
 
-  input InfraTimerange {
+  input InfraTimerangeInput {
     "The interval string to use for last bucket. The format is '{value}{unit}'. For example '5m' would return the metrics for the last 5 minutes of the timespan."
     interval: String!
     "The end of the timerange"
@@ -68,7 +68,7 @@ export const nodesSchema: any = gql`
     positive_only
   }
 
-  input InfraMetricAgg {
+  input InfraMetricAggInput {
     "The UUID from the metric aggregation"
     id: ID!
     "The type of aggregation"
@@ -83,11 +83,11 @@ export const nodesSchema: any = gql`
     script: String
   }
 
-  input InfraMetric {
+  input InfraMetricInput {
     "The type of metric"
     type: InfraMetricType
     "The aggregations for custom metrics"
-    aggs: [InfraMetricAgg!]
+    aggs: [InfraMetricAggInput!]
   }
 
   enum InfraPathType {
@@ -98,7 +98,7 @@ export const nodesSchema: any = gql`
     containers
   }
 
-  input InfraPath {
+  input InfraPathInput {
     "The UUID for the path by object"
     id: ID!
     "The type of path"
@@ -108,11 +108,11 @@ export const nodesSchema: any = gql`
     "The field to group by from a terms aggregation, this is ignored by the filter type"
     field: String
     "The fitlers for the filter group by"
-    filters: [InfraPathFilter!]
+    filters: [InfraPathFilterInput!]
   }
 
   "A group by filter"
-  input InfraPathFilter {
+  input InfraPathFilterInput {
     "The UUID for the path filter"
     id: ID!
     "The label for the filter, this will be used as the group name in the final results"
@@ -127,7 +127,7 @@ export const nodesSchema: any = gql`
     exists
   }
 
-  input InfraFilter {
+  input InfraFilterInput {
     "The type of filter to use"
     type: InfraFilterType!
     "The filter value"
@@ -137,11 +137,11 @@ export const nodesSchema: any = gql`
   }
 
   type InfraResponse {
-    nodes(path: [InfraPath!]): [InfraNode!]
+    nodes(path: [InfraPathInput!]): [InfraNode!]
   }
 
   extend type InfraSource {
     "A hierarchy of hosts, pods, containers, services or arbitrary groups"
-    map(timerange: InfraTimerange!, filters: [InfraFilter!]): InfraResponse
+    map(timerange: InfraTimerangeInput!, filters: [InfraFilterInput!]): InfraResponse
   }
 `;
