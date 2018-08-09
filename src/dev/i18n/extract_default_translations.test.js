@@ -36,19 +36,19 @@ const pluginsPaths = [
   path.join(fixturesPath, 'test_plugin_3'),
 ];
 
-const config = {
+jest.mock('../../../.localizationrc.json', () => ({
   paths: {
     plugin_1: 'src/dev/i18n/__fixtures__/extract_default_translations/test_plugin_1',
     plugin_2: 'src/dev/i18n/__fixtures__/extract_default_translations/test_plugin_2',
     plugin_3: 'src/dev/i18n/__fixtures__/extract_default_translations/test_plugin_3',
   },
   exclude: [],
-};
+}));
 
 describe('dev/i18n/extract_default_translations', () => {
   test('extracts messages to en.json', async () => {
     const [pluginPath] = pluginsPaths;
-    await extractDefaultTranslations({ inputPaths: [pluginPath], outputPath: pluginPath, config });
+    await extractDefaultTranslations({ paths: [pluginPath], output: pluginPath });
     const extractedJSONBuffer = await readFileAsync(path.join(pluginPath, 'en.json'));
 
     await unlinkAsync(path.join(pluginPath, 'en.json'));
@@ -58,7 +58,7 @@ describe('dev/i18n/extract_default_translations', () => {
 
   test('injects default formats into en.json', async () => {
     const [, pluginPath] = pluginsPaths;
-    await extractDefaultTranslations({ inputPaths: [pluginPath], outputPath: pluginPath, config });
+    await extractDefaultTranslations({ paths: [pluginPath], output: pluginPath });
     const extractedJSONBuffer = await readFileAsync(path.join(pluginPath, 'en.json'));
 
     await unlinkAsync(path.join(pluginPath, 'en.json'));
@@ -69,7 +69,7 @@ describe('dev/i18n/extract_default_translations', () => {
   test('throws on id collision', async () => {
     const [, , pluginPath] = pluginsPaths;
     await expect(
-      extractDefaultTranslations({ inputPaths: [pluginPath], outputPath: pluginPath, config })
+      extractDefaultTranslations({ paths: [pluginPath], output: pluginPath })
     ).rejects.toMatchObject({
       message: `Error in ${path.join(pluginPath, 'test_file.jsx')}
 There is more than one default message for the same id "plugin_3.duplicate_id": "Message 1" and "Message 2"`,
@@ -82,7 +82,7 @@ There is more than one default message for the same id "plugin_3.duplicate_id": 
       __dirname,
       '__fixtures__/extract_default_translations/test_plugin_2/test_file.html'
     );
-    expect(() => validateMessageNamespace(id, filePath, config.paths)).not.toThrow();
+    expect(() => validateMessageNamespace(id, filePath)).not.toThrow();
   });
 
   test('throws on wrong message namespace', () => {
@@ -91,8 +91,6 @@ There is more than one default message for the same id "plugin_3.duplicate_id": 
       __dirname,
       '__fixtures__/extract_default_translations/test_plugin_2/test_file.html'
     );
-    expect(() =>
-      validateMessageNamespace(id, filePath, config.paths)
-    ).toThrowErrorMatchingSnapshot();
+    expect(() => validateMessageNamespace(id, filePath)).toThrowErrorMatchingSnapshot();
   });
 });

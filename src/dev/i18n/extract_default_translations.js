@@ -27,6 +27,7 @@ import { extractCodeMessages } from './extract_code_messages';
 import { extractPugMessages } from './extract_pug_messages';
 import { extractHandlebarsMessages } from './extract_handlebars_messages';
 import { globAsync, makeDirAsync, accessAsync, readFileAsync, writeFileAsync } from './utils';
+import config from '../../../.localizationrc.json';
 
 function addMessageToMap(targetMap, key, value) {
   const existingValue = targetMap.get(key);
@@ -39,8 +40,8 @@ function addMessageToMap(targetMap, key, value) {
   targetMap.set(key, value);
 }
 
-async function getPluginsPaths(inputPaths, availablePathsObject) {
-  const availablePaths = Object.values(availablePathsObject);
+async function getPluginsPaths(inputPaths) {
+  const availablePaths = Object.values(config.paths);
   const pathsForExtraction = [];
 
   for (const inputPath of inputPaths) {
@@ -68,10 +69,10 @@ async function getPluginsPaths(inputPaths, availablePathsObject) {
   return pathsForExtraction;
 }
 
-export function validateMessageNamespace(id, filePath, availablePathsObject) {
+export function validateMessageNamespace(id, filePath) {
   const normalizedPath = normalize(path.relative('.', filePath));
 
-  const [expectedNamespace] = Object.entries(availablePathsObject).find(([, pluginPath]) =>
+  const [expectedNamespace] = Object.entries(config.paths).find(([, pluginPath]) =>
     normalizedPath.startsWith(`${pluginPath}/`)
   );
 
@@ -80,7 +81,7 @@ export function validateMessageNamespace(id, filePath, availablePathsObject) {
   }
 }
 
-export async function extractMesssagesFromPathToMap(inputPath, targetMap, config) {
+export async function extractMesssagesFromPathToMap(inputPath, targetMap) {
   const entries = await globAsync('*.{js,jsx,pug,ts,tsx,html,hbs,handlebars}', {
     cwd: inputPath,
     matchBase: true,
@@ -126,7 +127,7 @@ export async function extractMesssagesFromPathToMap(inputPath, targetMap, config
       for (const { name, content } of files) {
         try {
           for (const [id, value] of extractFunction(content)) {
-            validateMessageNamespace(id, name, config.paths);
+            validateMessageNamespace(id, name);
             addMessageToMap(targetMap, id, value);
           }
         } catch (error) {
@@ -137,14 +138,14 @@ export async function extractMesssagesFromPathToMap(inputPath, targetMap, config
   );
 }
 
-export async function extractDefaultTranslations({ inputPaths, outputPath, config }) {
+export async function extractDefaultTranslations({ paths, output }) {
   const defaultMessagesMap = new Map();
 
-  for (const inputPath of await getPluginsPaths(inputPaths, config.paths)) {
-    await extractMesssagesFromPathToMap(inputPath, defaultMessagesMap, config);
+  for (const inputPath of await getPluginsPaths(paths)) {
+    await extractMesssagesFromPathToMap(inputPath, defaultMessagesMap);
   }
 
-  if (!outputPath || !defaultMessagesMap.size) {
+  if (!output || !defaultMessagesMap.size) {
     return;
   }
 
@@ -169,10 +170,10 @@ export async function extractDefaultTranslations({ inputPaths, outputPath, confi
   jsonBuffer = Buffer.concat([jsonBuffer, Buffer.from('}\n')]);
 
   try {
-    await accessAsync(path.resolve(outputPath));
+    await accessAsync(path.resolve(output));
   } catch (_) {
-    await makeDirAsync(path.resolve(outputPath));
+    await makeDirAsync(path.resolve(output));
   }
 
-  await writeFileAsync(path.resolve(outputPath, 'en.json'), jsonBuffer);
+  await writeFileAsync(path.resolve(output, 'en.json'), jsonBuffer);
 }

@@ -2,7 +2,7 @@
   "paths": {
     "kbn": "src/core_plugins/kibana",
     "commonServer": "src/server",
-    "commonUI": "src/ui",
+    "commonUi": "src/ui",
     "x_pack": "xpack/plugins"
   },
   "exclude": [
