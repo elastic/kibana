@@ -36,7 +36,7 @@ async function main() {
       config: CONFIG_PATH,
       out: OUTPUT_TYPES_PATH,
       overwrite: true,
-      schema: OUTPUT_INTROSPECTION_PATH,
+      schema: SCHEMA_PATH,
       template: 'graphql-codegen-typescript-template',
     },
     true
