@@ -27,6 +27,7 @@ export interface InfraSource {
   status: InfraSourceStatus /** The status of the source */;
   logEntriesAround: InfraLogEntryInterval /** A consecutive span of log entries surrounding a point in time */;
   logEntriesBetween: InfraLogEntryInterval /** A consecutive span of log entries within an interval */;
+  logSummaryBetween: InfraLogSummaryInterval /** A consecutive span of summary buckets within an interval */;
   map?: InfraResponse | null /** A hierarchy of hosts, pods, containers, services or arbitrary groups */;
 }
 /** A set of configuration options for an infrastructure data source */
@@ -82,6 +83,23 @@ export interface InfraLogMessageFieldSegment {
 /** A segment of the log entry message that was derived from a field */
 export interface InfraLogMessageConstantSegment {
   constant: string /** The segment's message */;
+}
+/** A consecutive sequence of log summary buckets */
+export interface InfraLogSummaryInterval {
+  start?:
+    | number
+    | null /** The millisecond timestamp corresponding to the start of the interval covered by the summary */;
+  end?:
+    | number
+    | null /** The millisecond timestamp corresponding to the end of the interval covered by the summary */;
+  filterQuery?: string | null /** The query the log entries were filtered by */;
+  buckets: InfraLogSummaryBucket[] /** A list of the log entries */;
+}
+/** A log summary bucket */
+export interface InfraLogSummaryBucket {
+  start: number /** The start timestamp of the bucket */;
+  end: number /** The end timestamp of the bucket */;
+  entriesCount: number /** The number of entries inside the bucket */;
 }
 
 export interface InfraResponse {
@@ -143,6 +161,7 @@ export namespace InfraSourceResolvers {
     status?: StatusResolver /** The status of the source */;
     logEntriesAround?: LogEntriesAroundResolver /** A consecutive span of log entries surrounding a point in time */;
     logEntriesBetween?: LogEntriesBetweenResolver /** A consecutive span of log entries within an interval */;
+    logSummaryBetween?: LogSummaryBetweenResolver /** A consecutive span of summary buckets within an interval */;
     map?: MapResolver /** A hierarchy of hosts, pods, containers, services or arbitrary groups */;
   }
 
@@ -164,6 +183,14 @@ export namespace InfraSourceResolvers {
     endKey: InfraTimeKeyInput /** The sort key that corresponds to the end of the interval */;
     filterQuery?: string | null /** The query to filter the log entries by */;
     highlightQuery?: string | null /** The query to highlight the log entries with */;
+  }
+
+  export type LogSummaryBetweenResolver = Resolver<InfraLogSummaryInterval, LogSummaryBetweenArgs>;
+  export interface LogSummaryBetweenArgs {
+    start: number /** The millisecond timestamp that corresponds to the start of the interval */;
+    end: number /** The millisecond timestamp that corresponds to the end of the interval */;
+    bucketSize: number /** The size of each bucket in milliseconds */;
+    filterQuery?: string | null /** The query to filter the log entries by */;
   }
 
   export type MapResolver = Resolver<InfraResponse | null, MapArgs>;
@@ -279,6 +306,32 @@ export namespace InfraLogMessageConstantSegmentResolvers {
   }
 
   export type ConstantResolver = Resolver<string>;
+}
+/** A consecutive sequence of log summary buckets */
+export namespace InfraLogSummaryIntervalResolvers {
+  export interface Resolvers {
+    start?: StartResolver /** The millisecond timestamp corresponding to the start of the interval covered by the summary */;
+    end?: EndResolver /** The millisecond timestamp corresponding to the end of the interval covered by the summary */;
+    filterQuery?: FilterQueryResolver /** The query the log entries were filtered by */;
+    buckets?: BucketsResolver /** A list of the log entries */;
+  }
+
+  export type StartResolver = Resolver<number | null>;
+  export type EndResolver = Resolver<number | null>;
+  export type FilterQueryResolver = Resolver<string | null>;
+  export type BucketsResolver = Resolver<InfraLogSummaryBucket[]>;
+}
+/** A log summary bucket */
+export namespace InfraLogSummaryBucketResolvers {
+  export interface Resolvers {
+    start?: StartResolver /** The start timestamp of the bucket */;
+    end?: EndResolver /** The end timestamp of the bucket */;
+    entriesCount?: EntriesCountResolver /** The number of entries inside the bucket */;
+  }
+
+  export type StartResolver = Resolver<number>;
+  export type EndResolver = Resolver<number>;
+  export type EntriesCountResolver = Resolver<number>;
 }
 
 export namespace InfraResponseResolvers {
@@ -398,6 +451,12 @@ export interface LogEntriesBetweenInfraSourceArgs {
   endKey: InfraTimeKeyInput /** The sort key that corresponds to the end of the interval */;
   filterQuery?: string | null /** The query to filter the log entries by */;
   highlightQuery?: string | null /** The query to highlight the log entries with */;
+}
+export interface LogSummaryBetweenInfraSourceArgs {
+  start: number /** The millisecond timestamp that corresponds to the start of the interval */;
+  end: number /** The millisecond timestamp that corresponds to the end of the interval */;
+  bucketSize: number /** The size of each bucket in milliseconds */;
+  filterQuery?: string | null /** The query to filter the log entries by */;
 }
 export interface MapInfraSourceArgs {
   timerange: InfraTimerangeInput;

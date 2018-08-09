@@ -27,12 +27,19 @@ export type InfraSourceLogEntriesBetweenResolver = InfraResolverOf<
   InfraContext
 >;
 
+export type InfraSourceLogSummaryBetweenResolver = InfraResolverOf<
+  InfraSourceResolvers.LogSummaryBetweenResolver,
+  InfraResolvedResult<QuerySourceResolver>,
+  InfraContext
+>;
+
 export const createLogEntriesResolvers = (libs: {
   logEntries: InfraLogEntriesDomain;
 }): {
   InfraSource: {
     logEntriesAround: InfraSourceLogEntriesAroundResolver;
     logEntriesBetween: InfraSourceLogEntriesBetweenResolver;
+    logSummaryBetween: InfraSourceLogSummaryBetweenResolver;
   };
   InfraLogMessageSegment: {
     __resolveType(
@@ -91,6 +98,22 @@ export const createLogEntriesResolvers = (libs: {
         filterQuery: args.filterQuery,
         highlightQuery: args.highlightQuery,
         entries,
+      };
+    },
+    async logSummaryBetween(source, args, { req }) {
+      const buckets = await libs.logEntries.getLogSummaryBucketsBetween(
+        req,
+        source.id,
+        args.start,
+        args.end,
+        args.bucketSize,
+        args.filterQuery || undefined
+      );
+
+      return {
+        start: buckets.length > 0 ? buckets[0].start : null,
+        end: buckets.length > 0 ? buckets[buckets.length - 1].end : null,
+        buckets,
       };
     },
   },

@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { SearchResponse } from 'elasticsearch';
 import { GraphQLSchema } from 'graphql';
 import { IRouteAdditionalConfigurationOptions, IStrictReply } from 'hapi';
 
@@ -117,6 +118,26 @@ export interface InfraDatabaseGetAliasResponse {
       [aliasName: string]: any;
     };
   };
+}
+
+export type SearchHit = SearchResponse<object>['hits']['hits'][0];
+
+export interface SortedSearchHit extends SearchHit {
+  sort: any[];
+  _source: {
+    [field: string]: any;
+  };
+}
+
+export interface InfraDateRangeAggregationBucket {
+  from?: number;
+  to?: number;
+  doc_count: number;
+  key: string;
+}
+
+export interface InfraDateRangeAggregationResponse {
+  buckets: InfraDateRangeAggregationBucket[];
 }
 
 export interface InfraFieldsResponse {

@@ -4,9 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { InfraLogEntry, InfraLogMessageSegment } from '../../../../common/graphql/types';
+import {
+  InfraLogEntry,
+  InfraLogMessageSegment,
+  InfraLogSummaryBucket,
+} from '../../../../common/graphql/types';
 import { TimeKey } from '../../../../common/time';
-import { InfraFrameworkRequest } from '../../adapters/framework';
+import { InfraDateRangeAggregationBucket, InfraFrameworkRequest } from '../../adapters/framework';
 import { InfraSourceConfiguration, InfraSources } from '../../sources';
 import { builtinRules } from './builtin_rules';
 import { compileFormattingRules } from './message';
@@ -95,6 +99,27 @@ export class InfraLogEntriesDomain {
     const entries = documents.map(convertLogDocumentToEntry(sourceId, formattingRules.format));
     return entries;
   }
+
+  public async getLogSummaryBucketsBetween(
+    request: InfraFrameworkRequest,
+    sourceId: string,
+    start: number,
+    end: number,
+    bucketSize: number,
+    filterQuery?: string
+  ): Promise<InfraLogSummaryBucket[]> {
+    const sourceConfiguration = await this.libs.sources.getConfiguration(sourceId);
+    const dateRangeBuckets = await this.adapter.getContainedLogSummaryBuckets(
+      request,
+      sourceConfiguration,
+      start,
+      end,
+      bucketSize,
+      filterQuery
+    );
+    const buckets = dateRangeBuckets.map(convertDateRangeBucketToSummaryBucket);
+    return buckets;
+  }
 }
 
 export interface LogEntriesAdapter {
@@ -118,6 +143,15 @@ export interface LogEntriesAdapter {
     filterQuery?: string,
     highlightQuery?: string
   ): Promise<LogEntryDocument[]>;
+
+  getContainedLogSummaryBuckets(
+    request: InfraFrameworkRequest,
+    sourceConfiguration: InfraSourceConfiguration,
+    start: number,
+    end: number,
+    bucketSize: number,
+    filterQuery?: string
+  ): Promise<InfraDateRangeAggregationBucket[]>;
 }
 
 export interface LogEntryDocument {
@@ -138,4 +172,12 @@ const convertLogDocumentToEntry = (
   gid: document.gid,
   source: sourceId,
   message: formatMessage(document.fields),
+});
+
+const convertDateRangeBucketToSummaryBucket = (
+  bucket: InfraDateRangeAggregationBucket
+): InfraLogSummaryBucket => ({
+  entriesCount: bucket.doc_count,
+  start: bucket.from || 0,
+  end: bucket.to || 0,
 });
