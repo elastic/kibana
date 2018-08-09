@@ -39,6 +39,6 @@ export class KibanaServerStatus {
 
   async getOverallState() {
     const status = await this.get();
-    return status.status.overall.state;
+    return status.status.overall.id;
   }
 }

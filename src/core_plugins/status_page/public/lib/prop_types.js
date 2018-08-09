@@ -17,16 +17,20 @@
  * under the License.
  */
 
-export default function (kibana) {
-  return new kibana.Plugin({
-    uiExports: {
-      app: {
-        title: 'Server Status',
-        main: 'plugins/status_page/status_page',
-        hidden: true,
-        url: '/status',
-        styleSheetPath: `${__dirname}/public/index.scss`
-      }
-    }
-  });
-}
+import PropTypes from 'prop-types';
+
+export const State = PropTypes.shape({
+  id: PropTypes.string.isRequired,
+  message: PropTypes.string,  // optional
+  title: PropTypes.string,   // optional
+  uiColor: PropTypes.string.isRequired,
+});
+
+export const Metric = PropTypes.shape({
+  name: PropTypes.string.isRequired,
+  value: PropTypes.oneOfType([
+    PropTypes.arrayOf(PropTypes.number),
+    PropTypes.number
+  ]).isRequired,
+  type: PropTypes.string  // optional
+});
