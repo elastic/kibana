@@ -6,6 +6,7 @@
 
 
 
+import sinon from 'sinon';
 import expect from 'expect.js';
 import { estimateBucketSpanFactory } from '../bucket_span_estimator';
 
@@ -14,6 +15,28 @@ const callWithRequest = () => {
   return new Promise((resolve) => {
     resolve({});
   });
+};
+
+// mock callWithInternalUserFactory
+// we replace the return value of the factory with the above mocked callWithRequest
+import * as mockModule from '../../../client/call_with_internal_user_factory';
+sinon.mock(mockModule)
+  .expects('callWithInternalUserFactory')
+  .once()
+  .returns(callWithRequest);
+
+// mock server
+const mockServer = {
+  plugins: {
+    xpack_main: {
+      info: {
+        isAvailable: () => true,
+        feature: () => ({
+          isEnabled: () => false
+        })
+      }
+    }
+  }
 };
 
 describe('ML - BucketSpanEstimator', () => {
@@ -25,7 +48,7 @@ describe('ML - BucketSpanEstimator', () => {
 
   it('call factory and estimator', (done) => {
     expect(function () {
-      const estimateBucketSpan = estimateBucketSpanFactory(callWithRequest);
+      const estimateBucketSpan = estimateBucketSpanFactory(callWithRequest, mockServer);
 
       estimateBucketSpan({
         aggTypes: ['count'],
