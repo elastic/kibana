@@ -4,12 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-
-
-
 import React from 'react';
-import { Landing } from './sections/landing';
+import { Wizard } from './sections/wizard';
 
 export const App = () => (
-  <Landing/>
+  <Wizard/>
 );

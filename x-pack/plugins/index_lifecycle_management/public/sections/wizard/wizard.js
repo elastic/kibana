@@ -25,6 +25,9 @@ import {
   STRUCTURE_REVIEW,
 } from '../../store/constants';
 
+const STEP_INDEX_TEMPLATE = 1;
+const STEP_POLICY_CONFIGURATION = 2;
+const STEP_REVIEW = 3;
 export class Wizard extends Component {
   static propTypes = {
     saveLifecycle: PropTypes.func.isRequired,
@@ -34,17 +37,21 @@ export class Wizard extends Component {
     bootstrapEnabled: PropTypes.bool.isRequired,
     indexName: PropTypes.string.isRequired,
     aliasName: PropTypes.string.isRequired,
+    fetchIndexTemplates: PropTypes.func.isRequired,
+    indexTemplates: PropTypes.array,
   };
 
   constructor(props) {
     super(props);
 
     this.state = {
-      selectedStep: 1,
+      selectedStep: STEP_INDEX_TEMPLATE,
       errors: this.getErrors(),
     };
   }
-
+  componentDidMount() {
+    this.props.fetchIndexTemplates();
+  }
   onSelectedStepChanged = selectedStep => {
     this.setState({
       selectedStep,
@@ -89,57 +96,58 @@ export class Wizard extends Component {
     const { selectedStep, errors } = this.state;
 
     switch (selectedStep) {
-      case 1:
+      case STEP_INDEX_TEMPLATE:
         return (
           <IndexTemplate
             validate={this.validate}
             errors={errors[STRUCTURE_INDEX_TEMPLATE]}
-            done={() => this.onSelectedStepChanged(2)}
+            done={() => this.onSelectedStepChanged(selectedStep + 1)}
           />
         );
-      case 2:
+      case STEP_POLICY_CONFIGURATION:
         return (
           <PolicyConfiguration
             validate={this.validate}
             errors={errors[STRUCTURE_POLICY_CONFIGURATION]}
-            done={() => this.onSelectedStepChanged(3)}
-            back={() => this.onSelectedStepChanged(1)}
+            done={() => this.onSelectedStepChanged(selectedStep + 1)}
+            back={() => this.onSelectedStepChanged(selectedStep - 1)}
           />
         );
-      case 3:
+      case STEP_REVIEW:
         return (
           <Review
             validate={this.validate}
             done={this.addLifecycle}
             errors={errors[STRUCTURE_REVIEW]}
-            back={() => this.onSelectedStepChanged(2)}
+            back={() => this.onSelectedStepChanged(selectedStep - 1)}
           />
         );
     }
   }
-
+  createStep(title, stepIndex) {
+    return {
+      title,
+      isSelected: this.state.selectedStep === stepIndex,
+      isComplete: this.state.selectedStep > stepIndex,
+      onClick: () => this.onSelectedStepChanged(stepIndex),
+    };
+  }
   render() {
+    const { indexTemplates } = this.props;
+    if (indexTemplates === null) {
+      // Loading...
+      return null;
+    }
+
+    if (indexTemplates.length === 0) {
+      return (
+        <h1>No index templates found.</h1>
+      );
+    }
     const steps = [
-      {
-        title: 'Select a template',
-        isSelected: this.state.selectedStep === 1,
-        isComplete: this.state.selectedStep > 1,
-        onClick: () => this.onSelectedStepChanged(1),
-      },
-      {
-        title: 'Configure a policy',
-        isSelected: this.state.selectedStep === 2,
-        isComplete: this.state.selectedStep > 2,
-        disabled: this.state.selectedStep < 2,
-        onClick: () => this.onSelectedStepChanged(2),
-      },
-      {
-        title: 'Review and save',
-        isSelected: this.state.selectedStep === 3,
-        isComplete: this.state.selectedStep > 3,
-        disabled: this.state.selectedStep < 3,
-        onClick: () => this.onSelectedStepChanged(3),
-      },
+      this.createStep('Select a template', STEP_INDEX_TEMPLATE),
+      this.createStep('Configure a policy', STEP_POLICY_CONFIGURATION),
+      this.createStep('Review and save', STEP_REVIEW),
     ];
 
     return (
