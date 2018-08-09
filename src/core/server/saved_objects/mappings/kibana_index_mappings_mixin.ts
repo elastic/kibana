@@ -25,7 +25,6 @@ import { EsMappings } from './lib/';
  *  The default mappings used for the Kibana index. This is
  *  extended via uiExports type "mappings". See the Kibana
  *  and Timelion plugins for examples.
- *  @type {EsMappings}
  */
 const BASE_SAVED_OBJECT_MAPPINGS: EsMappings = {
   doc: {
@@ -64,9 +63,6 @@ export function kibanaIndexMappingsMixin(kbnServer: any, server: Server) {
    *
    *  See `src/core/server/saved_objects/mappings/lib/index.js` for
    *  helpers useful for reading the EsMappings object.
-   *
-   *  @method server.getKibanaIndexMappingsDsl
-   *  @returns {EsMappingDsl}
    */
   server.decorate('server', 'getKibanaIndexMappingsDsl', () => {
     return mappings.getDsl();

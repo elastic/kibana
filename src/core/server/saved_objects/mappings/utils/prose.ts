@@ -19,12 +19,6 @@
 
 /**
  *  Converts an array of items into a sentence-ready string.
- *
- *  @param {string[]} list
- *  @param {Object} [options={}]
- *  @property {Boolean} [options.inclusive=true] Creates an inclusive list using "and"
- *                                               when `true` (default), otherwise uses "or"
- *  @return {String}
  */
 export function formatListAsProse(list: string[], options = { inclusive: true }) {
   const { inclusive } = options;

@@ -21,10 +21,7 @@ import { EsMappings } from './types';
 
 /**
  *  Get the names of the types defined in the EsMappings
- *
- *  @param  {EsMappings} mappings
- *  @return {string[]}
  */
-export function getTypes(mappings: EsMappings): string[] {
+export function getTypes(mappings: EsMappings) {
   return Object.keys(mappings).filter(type => type !== '_default_');
 }

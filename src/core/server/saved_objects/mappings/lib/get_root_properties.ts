@@ -34,11 +34,8 @@ import { EsMappings } from './types';
  *
  *  This data can be found at `{indexName}.mappings.{typeName}.properties`
  *  in the es indices.get() response.
- *
- *  @param  {EsMappings} mappings
- *  @return {EsMappings}
  */
-export function getRootProperties(mappings: EsMappings): EsMappings {
+export function getRootProperties(mappings: EsMappings) {
   const mapping = mappings[getRootType(mappings)];
 
   if (mapping.type !== 'object' && !mapping.properties) {

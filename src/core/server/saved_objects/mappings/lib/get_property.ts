@@ -45,10 +45,7 @@ function getPropertyMappingFromObjectMapping(
 
 /**
  *  Get the mapping for a specific property within the root type of the EsMappings.
- *  @param  {EsMappings} mappings
- *  @param  {string|string[]} path
- *  @return {Object|undefined}
  */
-export function getProperty(mappings: EsMappings, path: string | string[]): {} | undefined {
+export function getProperty(mappings: EsMappings, path: string | string[]) {
   return getPropertyMappingFromObjectMapping(mappings[getRootType(mappings)], toPath(path));
 }
