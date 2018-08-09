@@ -4,8 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-/**
- * @param
- * @return {number}
- */
-export const getCounter = (state: any) => state.count;
+import { RootState } from '../reducers';
+
+export const getTree = (state: RootState) => state.file.tree;

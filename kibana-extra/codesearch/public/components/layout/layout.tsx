@@ -7,10 +7,10 @@ import { DetailSymbolInformation } from '@codesearch/javascript-typescript-langs
 import { EuiButtonIcon, EuiComboBox, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import React from 'react';
 import { connect } from 'react-redux';
+
 import { match } from 'react-router-dom';
 import { Location } from 'vscode-languageserver';
 
-import { kfetch } from 'ui/kfetch';
 import { RepositoryUtils } from '../../../common/repository_utils';
 import { FileTree as Tree } from '../../../model';
 import { searchQueryChanged } from '../../actions';
@@ -20,6 +20,7 @@ import { Breadcrumbs } from '../breadcrumbs/breadcrumbs';
 import { FileTree } from '../file_tree/file_tree';
 import { Editor } from './editor';
 
+import { closeTreePath, fetchRepoTree, FetchRepoTreePayload } from '../../actions';
 import { history } from '../../utils/url';
 
 const noMarginStyle = {
@@ -27,15 +28,16 @@ const noMarginStyle = {
 };
 
 interface State {
-  children: any[];
-  forceOpenPaths: Set<string>;
-  node: any;
   showSearchBox: boolean;
 }
 interface Props {
   match: match<{ [key: string]: string }>;
-  searchQueryChanged: (query: string) => void;
+  tree: FileTree;
+  openedPaths: string[];
+  fetchRepoTree: (payload: FetchRepoTreePayload) => void;
+  closeTreePath: (path: string) => void;
   symbols: DetailSymbolInformation[];
+  searchQueryChanged: (query: string) => void;
   isSymbolsLoading: boolean;
 }
 
@@ -43,37 +45,18 @@ export class LayoutPage extends React.Component<Props, State> {
   constructor(props: Props) {
     super(props);
     this.state = {
-      children: [],
-      node: null,
       showSearchBox: false,
-      forceOpenPaths: new Set([props.match.params.path || '']),
     };
   }
 
   public componentDidMount() {
-    this.fetchTree('').then(() => {
-      const pathSegments = (this.props.match.params.path || '').split('/');
-      const pathsLength = pathSegments.length;
-      if (pathsLength > 0) {
-        this.fetchTree(pathSegments[0], pathsLength);
-      }
-    });
+    this.fetchTree(this.props.match.params.path);
   }
 
   public onClick = (path: string) => {
     const { resource, org, repo, revision } = this.props.match.params;
     history.push(`/${resource}/${org}/${repo}/${revision}/${path}`);
   };
-
-  public fetchTree(path: string, depth: number = 1) {
-    const { resource, org, repo, revision } = this.props.match.params;
-    return kfetch({
-      pathname: `../api/cs/repo/${resource}/${org}/${repo}/tree/${revision}/${path}`,
-      query: { depth },
-    }).then((json: any) => {
-      this.updateTree(path, json);
-    });
-  }
 
   public findNode = (pathSegments: string[], node: Tree) => {
     if (!node) {
@@ -88,33 +71,20 @@ export class LayoutPage extends React.Component<Props, State> {
     }
   };
 
-  public updateTree = (path: string, tree: Tree) => {
-    if (!path) {
-      this.setState({ node: tree });
-    } else {
-      const node = this.findNode(path.split('/'), this.state.node);
-      node.children = tree.children;
-      this.forceUpdate();
-    }
-  };
-
   public getTreeToggler = (path: string) => e => {
     e.preventDefault();
     e.stopPropagation();
-    if (this.state.forceOpenPaths.has(path)) {
-      this.state.forceOpenPaths.delete(path);
-      this.forceUpdate();
+    if (this.props.openedPaths.includes(path)) {
+      this.props.closeTreePath(path);
     } else {
       this.fetchTree(path);
-      this.state.forceOpenPaths.add(path);
-      this.forceUpdate();
     }
   };
 
   public getDirectories = (pathSegments: string[]) => {
     return pathSegments.map((p, index) => {
-      if (this.state.node) {
-        const node = this.findNode(pathSegments.slice(0, index + 1), this.state.node);
+      if (this.props.tree) {
+        const node = this.findNode(pathSegments.slice(0, index + 1), this.props.tree);
         if (node && node.children) {
           return node.children.map(_ => _.name);
         } else {
@@ -221,9 +191,9 @@ export class LayoutPage extends React.Component<Props, State> {
           <EuiFlexGroup justifyContent="spaceBetween" className="codeMain">
             <EuiFlexItem grow={false} style={noMarginStyle} className="fileTreeContainer">
               <FileTree
-                node={this.state.node}
+                node={this.props.tree}
                 onClick={this.onClick}
-                forceOpenPaths={this.state.forceOpenPaths}
+                openedPaths={this.props.openedPaths}
                 getTreeToggler={this.getTreeToggler}
                 activePath={path || ''}
               />
@@ -234,14 +204,28 @@ export class LayoutPage extends React.Component<Props, State> {
       </EuiFlexGroup>
     );
   }
+
+  private fetchTree(path = '') {
+    const { resource, org, repo, revision } = this.props.match.params;
+    this.props.fetchRepoTree({
+      uri: `${resource}/${org}/${repo}`,
+      revision,
+      path,
+    });
+  }
 }
 
 const mapStateToProps = (state: RootState) => ({
+  tree: state.file.tree,
+  openedPaths: state.file.openedPaths,
+  loading: state.file.loading,
   symbols: state.search.symbols,
   isSymbolsLoading: state.search.isLoading,
 });
 
 const mapDispatchToProps = {
+  fetchRepoTree,
+  closeTreePath,
   searchQueryChanged,
 };
 

@@ -11,11 +11,11 @@ import { FileTree as Tree, FileTreeItemType } from '../../../model';
 
 type Path = string;
 
-interface Props<T = Tree> {
-  node?: T;
+interface Props {
+  node?: Tree;
   onClick: (p: Path) => void;
   getTreeToggler: (path: Path) => (p: any) => void;
-  forceOpenPaths: Set<string>;
+  openedPaths: string[];
   activePath: string;
 }
 
@@ -53,9 +53,7 @@ export class FileTree extends React.Component<Props, any> {
   };
 
   public treeToItems = (node: Tree): any => {
-    const forceOpen = Array.from(this.props.forceOpenPaths).some(
-      (p: string) => p.indexOf(node.path || '') === 0
-    );
+    const forceOpen = this.props.openedPaths.includes(node.path!);
     const data = {
       id: node.name,
       name: node.name,
@@ -63,7 +61,7 @@ export class FileTree extends React.Component<Props, any> {
       renderItem: this.getItemRenderer(node, forceOpen),
       forceOpen,
     };
-    if (node.type === 1 && node.children && node.children.length > 0) {
+    if (forceOpen && node.type === 1 && node.children && node.children.length > 0) {
       data.items = node.children.map(this.treeToItems);
     }
     return data;
@@ -73,7 +71,7 @@ export class FileTree extends React.Component<Props, any> {
     return (
       this.props.node && (
         <EuiSideNav
-          items={this.props.node.children.map(this.treeToItems)}
+          items={(this.props.node.children || []).map(this.treeToItems)}
           className="fileTree"
           style={{ overflow: 'auto' }}
         />

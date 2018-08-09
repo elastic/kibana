@@ -9,7 +9,10 @@ import { put, takeLatest } from 'redux-saga/effects';
 import { fetchRepos } from '../actions';
 
 function* handleLocationChange(action: any) {
-  yield put(fetchRepos());
+  const { pathname } = action.payload;
+  if (pathname && pathname.startsWith('/admin')) {
+    yield put(fetchRepos());
+  }
 }
 
 export function* watchLocationChange() {

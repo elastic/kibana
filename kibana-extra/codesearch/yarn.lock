@@ -1854,6 +1854,10 @@ ignore@^3.3.5:
   version "3.3.10"
   resolved "https://registry.yarnpkg.com/ignore/-/ignore-3.3.10.tgz#0a97fb876986e8081c631160f8f9f389157f0043"
 
+immer@^1.5.0:
+  version "1.5.0"
+  resolved "http://registry.npm.taobao.org/immer/download/immer-1.5.0.tgz#1ed9b1b653643fe9276bbc36377613523ea32a39"
+
 immutable@^3.8.1:
   version "3.8.2"
   resolved "https://registry.yarnpkg.com/immutable/-/immutable-3.8.2.tgz#c2439951455bb39913daf281376f1530e104adf3"

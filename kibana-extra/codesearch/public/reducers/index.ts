@@ -5,12 +5,14 @@
  */
 import { combineReducers } from 'redux';
 
+import { file, FileState } from './file';
 import { repository, RepositoryState } from './repository';
 import { search, SearchState } from './search';
 
 export interface RootState {
   repository: RepositoryState;
   search: SearchState;
+  file: FileState;
 }
 
-export const rootReducer = combineReducers({ repository, search });
+export const rootReducer = combineReducers({ repository, search, file });
