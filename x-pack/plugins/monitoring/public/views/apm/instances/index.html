@@ -3,16 +3,5 @@
   name="apms"
   data-test-subj="apmInstancesPage"
 >
-  <monitoring-cluster-status-apm status="apms.data.clusterStatus"></monitoring-cluster-status-apm>
-  <div class="page-row">
-    <h3 class="kuiScreenReaderOnly">Apm Instances</h3>
-    <monitoring-apm-listing
-      page-index="apms.pageIndex"
-      filter-text="apms.filterText"
-      sort-key="apms.sortKey"
-      sort-order="apms.sortOrder"
-      on-new-state="apms.onNewState"
-      instances="apms.data.apms"
-    ></monitoring-apm-listing>
-  </div>
+  <monitoring-apm-instances apms="apms"></monitoring-apm-instances>
 </monitoring-main>

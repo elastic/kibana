@@ -7,26 +7,37 @@
 import React, { Fragment } from 'react';
 import { SummaryStatus } from '../../summary_status';
 import { ApmStatusIcon } from '../status_icon';
+import { formatMetric } from '../../../lib/format_number';
 
-export function ClusterStatus({ stats }) {
+export function Status({ stats }) {
   const {
-    count: instances,
-    requests_total: requests,
+    name,
+    output,
+    version,
+    uptime,
   } = stats;
-
-  const status = instances === 0 ? 'red' : 'green';
 
   const metrics = [
     {
-      label: 'Instances',
-      value: instances,
-      dataTestSubj: 'instances'
+      label: 'Name',
+      value: name,
+      dataTestSubj: 'name'
     },
     {
-      label: 'Requests',
-      value: requests,
-      dataTestSubj: 'requests'
+      label: 'Output',
+      value: output,
+      dataTestSubj: 'output'
     },
+    {
+      label: 'Version',
+      value: version,
+      dataTestSubj: 'version'
+    },
+    {
+      label: 'Uptime',
+      value: formatMetric(uptime, 'time_since'),
+      dataTestSubj: 'uptime'
+    }
   ];
 
   const IconComponent = ({ status }) => (
@@ -38,9 +49,8 @@ export function ClusterStatus({ stats }) {
   return (
     <SummaryStatus
       metrics={metrics}
-      status={status}
       IconComponent={IconComponent}
-      data-test-subj="apmClusterStatus"
+      data-test-subj="apmDetailStatus"
     />
   );
 }

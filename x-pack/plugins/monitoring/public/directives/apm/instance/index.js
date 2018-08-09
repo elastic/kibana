@@ -8,11 +8,11 @@ import React from 'react';
 import moment from 'moment';
 import { render } from 'react-dom';
 import { uiModules } from 'ui/modules';
-import { ApmServer } from 'plugins/monitoring/components/apm/server';
+import { ApmServerInstance } from 'plugins/monitoring/components/apm/instance';
 import { timefilter } from 'ui/timefilter';
 
 const uiModule = uiModules.get('monitoring/directives', []);
-uiModule.directive('monitoringApmServer', () => {
+uiModule.directive('monitoringApmServerInstance', () => {
   return {
     restrict: 'E',
     scope: {
@@ -30,8 +30,8 @@ uiModule.directive('monitoringApmServer', () => {
 
       scope.$watch('data', (data = {}) => {
         render((
-          <ApmServer
-            summary={data.summary}
+          <ApmServerInstance
+            summary={data.apmSummary}
             metrics={data.metrics}
             onBrush={onBrush}
           />

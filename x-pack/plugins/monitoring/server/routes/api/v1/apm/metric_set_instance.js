@@ -6,40 +6,54 @@
 
 export const metricSet = [
   {
+    name: 'apm_cpu',
     keys: [
-      'beat_pipeline_events_total_rate',
-      'beat_output_events_total',
-    ],
-    name: 'beat_event_rates'
+      'apm_cpu_total'
+    ]
   },
-  {
-    keys: [
-      'beat_pipeline_events_failed_rate',
-      'beat_pipeline_events_dropped_rate',
-      'beat_output_events_dropped_rate',
-      'beat_pipeline_events_retry_rate'
-    ],
-    name: 'beat_fail_rates'
-  },
-  {
-    keys: ['beat_bytes_written', 'beat_output_write_bytes_rate'],
-    name: 'beat_throughput_rates'
-  },
-  {
-    keys: ['beat_output_sending_errors', 'beat_output_receiving_errors'],
-    name: 'beat_output_errors'
-  },
-  {
-    keys: ['beat_mem_alloc', 'beat_mem_rss', 'beat_mem_gc_next'],
-    name: 'beat_memory'
-  },
-  'beat_cpu_utilization',
   {
     keys: [
-      'beat_system_os_load_1',
-      'beat_system_os_load_5',
-      'beat_system_os_load_15'
+      'apm_system_os_load_1',
+      'apm_system_os_load_5',
+      'apm_system_os_load_15'
     ],
-    name: 'beat_os_load'
+    name: 'apm_os_load'
   }
+  // {
+  //   keys: [
+  //     'beat_pipeline_events_total_rate',
+  //     'beat_output_events_total',
+  //   ],
+  //   name: 'beat_event_rates'
+  // },
+  // {
+  //   keys: [
+  //     'beat_pipeline_events_failed_rate',
+  //     'beat_pipeline_events_dropped_rate',
+  //     'beat_output_events_dropped_rate',
+  //     'beat_pipeline_events_retry_rate'
+  //   ],
+  //   name: 'beat_fail_rates'
+  // },
+  // {
+  //   keys: ['beat_bytes_written', 'beat_output_write_bytes_rate'],
+  //   name: 'beat_throughput_rates'
+  // },
+  // {
+  //   keys: ['beat_output_sending_errors', 'beat_output_receiving_errors'],
+  //   name: 'beat_output_errors'
+  // },
+  // {
+  //   keys: ['beat_mem_alloc', 'beat_mem_rss', 'beat_mem_gc_next'],
+  //   name: 'beat_memory'
+  // },
+  // 'beat_cpu_utilization',
+  // {
+  //   keys: [
+  //     'beat_system_os_load_1',
+  //     'beat_system_os_load_5',
+  //     'beat_system_os_load_15'
+  //   ],
+  //   name: 'beat_os_load'
+  // }
 ];

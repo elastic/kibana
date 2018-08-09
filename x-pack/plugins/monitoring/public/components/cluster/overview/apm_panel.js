@@ -5,7 +5,8 @@
  */
 
 import React from 'react';
-// import { formatNumber } from 'plugins/monitoring/lib/format_number';
+import { get } from 'lodash';
+import { formatMetric } from 'plugins/monitoring/lib/format_number';
 import { ClusterItemContainer, HealthStatusIndicator } from './helpers';
 
 import {
@@ -21,7 +22,7 @@ import {
 } from '@elastic/eui';
 
 export function ApmPanel(props) {
-  if (!props.count) {
+  if (!get(props, 'beats.total', 0) > 0) {
     return null;
   }
 
@@ -51,10 +52,14 @@ export function ApmPanel(props) {
               </h3>
             </EuiTitle>
             <EuiHorizontalRule margin="m" />
-            <EuiDescriptionList type="column" data-test-subj="apm_overview" data-overview-status={props.status}>
-              <EuiDescriptionListTitle>Requests</EuiDescriptionListTitle>
-              <EuiDescriptionListDescription data-test-subj="kbnRequests">
-                { props.requests_total }
+            <EuiDescriptionList type="column">
+              <EuiDescriptionListTitle>Total Events</EuiDescriptionListTitle>
+              <EuiDescriptionListDescription data-test-subj="beatsTotalEvents">
+                {formatMetric(props.totalEvents, '0.[0]a')}
+              </EuiDescriptionListDescription>
+              <EuiDescriptionListTitle>Bytes Sent</EuiDescriptionListTitle>
+              <EuiDescriptionListDescription data-test-subj="beatsBytesSent">
+                {formatMetric(props.bytesSent, 'byte')}
               </EuiDescriptionListDescription>
             </EuiDescriptionList>
           </EuiPanel>
@@ -65,20 +70,13 @@ export function ApmPanel(props) {
               <h3>
                 <EuiLink
                   onClick={goToInstances}
-                  data-test-subj="kbnInstances"
-                  aria-label={`Kibana Instances: ${ props.count }`}
+                  aria-label={`Apm Instances: ${props.beats.total}`}
+                  data-test-subj="apmListing"
                 >
-                  Instances: <span data-test-subj="number_of_kibana_instances">{ props.count }</span>
+                  APM Servers: <span data-test-subj="beatsTotal">{props.beats.total}</span>
                 </EuiLink>
               </h3>
             </EuiTitle>
-            <EuiHorizontalRule margin="m" />
-            {/* <EuiDescriptionList type="column">
-              <EuiDescriptionListTitle>Connections</EuiDescriptionListTitle>
-              <EuiDescriptionListDescription data-test-subj="kbnConnections">
-                { formatNumber(props.concurrent_connections, 'int_commas') }
-              </EuiDescriptionListDescription>
-            </EuiDescriptionList> */}
           </EuiPanel>
         </EuiFlexItem>
       </EuiFlexGrid>

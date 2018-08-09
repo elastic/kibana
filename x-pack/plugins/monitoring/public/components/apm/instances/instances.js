@@ -4,41 +4,29 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { get } from 'lodash';
 import React from 'react';
-import { render } from 'react-dom';
-import { uiModules } from 'ui/modules';
+import { get } from 'lodash';
+import { MonitoringTable } from '../../table';
 import {
   KuiTableRowCell,
   KuiTableRow
 } from '@kbn/ui-framework/components';
-// import { KibanaStatusIcon } from 'plugins/monitoring/components/kibana/status_icon';
-import { MonitoringTable } from 'plugins/monitoring/components/table';
 import { SORT_ASCENDING } from '../../../../common/constants';
-// import {
-//   formatNumber,
-//   formatMetric,
-// } from '../../../lib/format_number';
-import {
-  EuiLink,
-} from '@elastic/eui';
+import { EuiLink } from '@elastic/eui';
+import { Status } from './status';
 
-const filterFields = [ 'kibana.name', 'kibana.host', 'kibana.status', 'kibana.transport_address' ];
+
+const filterFields = [ 'beat.name', 'beat.version' ];
 const columns = [
-  { title: 'Name', sortKey: 'kibana.name', sortOrder: SORT_ASCENDING },
+  { title: 'Name', sortKey: 'beat.name', sortOrder: SORT_ASCENDING },
+  { title: 'Version', sortKey: 'beat.version', sortOrder: SORT_ASCENDING },
   // { title: 'Status', sortKey: 'kibana.status' },
   // { title: 'Load Average', sortKey: 'os.load.1m' },
   // { title: 'Memory Size', sortKey: 'process.memory.resident_set_size_in_bytes' },
   // { title: 'Requests', sortKey: 'requests.total' },
   // { title: 'Response Times', sortKey: 'response_times.average' }
 ];
-const instanceRowFactory = (scope, kbnUrl) => {
-  const goToInstance = uuid => {
-    scope.$evalAsync(() => {
-      kbnUrl.changePath(`/apm/instances/${uuid}`);
-    });
-  };
-
+const instanceRowFactory = (goToInstance) => {
   return function KibanaRow(props) {
     return (
       <KuiTableRow>
@@ -51,7 +39,16 @@ const instanceRowFactory = (scope, kbnUrl) => {
               { props.beat.name }
             </EuiLink>
           </div>
-          <div className="monitoringTableCell__transportAddress">{ get(props, 'beat.transport_address') }</div>
+        </KuiTableRowCell>
+        <KuiTableRowCell>
+          <div className="monitoringTableCell__version">
+            <EuiLink
+              onClick={goToInstance.bind(null, get(props, 'beat.uuid'))}
+              data-test-subj={`apmLink-${props.beat.version}`}
+            >
+              { props.beat.version }
+            </EuiLink>
+          </div>
         </KuiTableRowCell>
         {/* <KuiTableRowCell>
           <div title={`Instance status: ${props.kibana.status}`} className="monitoringTableCell__status">
@@ -87,39 +84,31 @@ const instanceRowFactory = (scope, kbnUrl) => {
   };
 };
 
-const uiModule = uiModules.get('monitoring/directives', []);
-uiModule.directive('monitoringApmListing', kbnUrl => {
-  return {
-    restrict: 'E',
-    scope: {
-      instances: '=',
-      pageIndex: '=',
-      filterText: '=',
-      sortKey: '=',
-      sortOrder: '=',
-      onNewState: '=',
-    },
-    link(scope, $el) {
+export function ApmServerInstances({ apms, goToInstance }) {
+  const {
+    pageIndex,
+    filterText,
+    sortKey,
+    sortOrder,
+    onNewState,
+  } = apms;
 
-      scope.$watch('instances', (instances = []) => {
-        const apmsTable = (
-          <MonitoringTable
-            className="apmInstancesTable"
-            rows={instances}
-            pageIndex={scope.pageIndex}
-            filterText={scope.filterText}
-            sortKey={scope.sortKey}
-            sortOrder={scope.sortOrder}
-            onNewState={scope.onNewState}
-            placeholder="Filter Instances..."
-            filterFields={filterFields}
-            columns={columns}
-            rowComponent={instanceRowFactory(scope, kbnUrl)}
-          />
-        );
-        render(apmsTable, $el[0]);
-      });
-
-    }
-  };
-});
+  return (
+    <div>
+      <Status stats={apms.data.clusterStatus}/>
+      <MonitoringTable
+        className="apmInstancesTable"
+        rows={apms.data.apms}
+        pageIndex={pageIndex}
+        filterText={filterText}
+        sortKey={sortKey}
+        sortOrder={sortOrder}
+        onNewState={onNewState}
+        placeholder="Filter Instances..."
+        filterFields={filterFields}
+        columns={columns}
+        rowComponent={instanceRowFactory(goToInstance)}
+      />
+    </div>
+  );
+}

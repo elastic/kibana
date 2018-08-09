@@ -9,42 +9,31 @@ import { SummaryStatus } from '../../summary_status';
 import { ApmStatusIcon } from '../status_icon';
 import { formatMetric } from '../../../lib/format_number';
 
-export function DetailStatus({ stats }) {
+export function Status({ stats }) {
   const {
-    name,
-    output,
-    version,
-    uptime,
-    configReloads
+    beats: {
+      total
+    },
+    bytesSent,
+    totalEvents,
   } = stats;
-
-  console.log('stats', stats);
 
   const metrics = [
     {
-      value: name,
-      dataTestSubj: 'name'
+      label: 'Servers',
+      value: total,
+      dataTestSubj: 'total'
     },
     {
-      label: 'Output',
-      value: output,
-      dataTestSubj: 'output'
+      label: 'Bytes Sent',
+      value: formatMetric(bytesSent, 'bytes'),
+      dataTestSubj: 'bytesSent'
     },
     {
-      label: 'Config Reloads',
-      value: formatMetric(configReloads, 'int_commas'),
-      dataTestSubj: 'configReloads',
+      label: 'Total Events',
+      value: formatMetric(totalEvents),
+      dataTestSubj: 'totalEvents'
     },
-    {
-      label: 'Version',
-      value: version,
-      dataTestSubj: 'version'
-    },
-    {
-      label: 'Uptime',
-      value: formatMetric(uptime, 'time_since'),
-      dataTestSubj: 'uptime'
-    }
   ];
 
   const IconComponent = ({ status }) => (
@@ -56,7 +45,6 @@ export function DetailStatus({ stats }) {
   return (
     <SummaryStatus
       metrics={metrics}
-      // status={status}
       IconComponent={IconComponent}
       data-test-subj="apmDetailStatus"
     />

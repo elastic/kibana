@@ -13,8 +13,46 @@ import {
   BeatsMetric
 } from '../beats/classes';
 import { LARGE_BYTES, LARGE_FLOAT } from '../../../../common/formatting';
+import { ApmMetric, ApmCpuUtilizationMetric } from './classes';
 
 export const metrics = {
+  apm_cpu_total: new ApmCpuUtilizationMetric({
+    title: 'CPU Utilization',
+    label: 'Total',
+    description:
+      'Percentage of CPU time spent executing (user+kernel mode) for the APM process',
+    field: 'beats_stats.metrics.beat.cpu.total.value'
+  }),
+  apm_system_os_load_1: new ApmMetric({
+    field: 'beats_stats.metrics.system.load.1',
+    label: '1m',
+    title: 'System Load',
+    description: 'Load average over the last 1 minute',
+    format: LARGE_FLOAT,
+    metricAgg: 'max',
+    units: ''
+  }),
+  apm_system_os_load_5: new ApmMetric({
+    field: 'beats_stats.metrics.system.load.5',
+    label: '5m',
+    title: 'System Load',
+    description: 'Load average over the last 5 minutes',
+    format: LARGE_FLOAT,
+    metricAgg: 'max',
+    units: ''
+  }),
+  apm_system_os_load_15: new ApmMetric({
+    field: 'beats_stats.metrics.system.load.15',
+    label: '15m',
+    title: 'System Load',
+    description: 'Load average over the last 15 minutes',
+    format: LARGE_FLOAT,
+    metricAgg: 'max',
+    units: ''
+  })
+};
+
+export const metrics2 = {
   beat_cluster_pipeline_events_total_rate: new BeatsEventsRateClusterMetric({
     field: 'beats_stats.metrics.libbeat.pipeline.events.total',
     title: 'Events Rate',
