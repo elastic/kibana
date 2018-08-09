@@ -39,6 +39,10 @@ export class Editor extends React.Component<Props> {
     }
   }
 
+  public componentWillUnmount() {
+    this.monaco!.destroy();
+  }
+
   public render() {
     return <div className="editorContainer" />;
   }

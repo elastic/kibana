@@ -193,7 +193,9 @@ export class LayoutPage extends React.Component<Props, State> {
                 activePath={path || ''}
               />
             </EuiFlexItem>
-            <EuiFlexItem style={noMarginStyle}>{editor}</EuiFlexItem>
+            <EuiFlexItem style={noMarginStyle} className="autoOverflow">
+              {editor}
+            </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlexItem>
       </EuiFlexGroup>

@@ -6,6 +6,7 @@
 
 import { initMonaco, Monaco } from 'init-monaco';
 import { editor, IDisposable, languages } from 'monaco-editor';
+import { ResizeChecker } from 'ui/resize_checker';
 import { Definition, Hover, Location } from 'vscode-languageserver';
 import { LspRestClient, TextDocumentMethods } from '../../common/lsp_client';
 import { EditorService } from './editor_service';
@@ -17,12 +18,13 @@ export class MonacoHelper {
   private definitionProvider: IDisposable | null = null;
   private lspMethods: TextDocumentMethods;
   private editor: editor.IStandaloneCodeEditor | null = null;
+  private resizeChecker: ResizeChecker | null = null;
 
   constructor(private readonly container: HTMLElement) {
     const lspClient = new LspRestClient('../api/lsp');
     this.lspMethods = new TextDocumentMethods(lspClient);
   }
-  public get intialized() {
+  public get initialized() {
     return this.monaco !== null;
   }
   public init() {
@@ -39,10 +41,20 @@ export class MonacoHelper {
             editorService: new EditorService(),
           }
         );
+        this.resizeChecker = new ResizeChecker(this.container);
+        this.resizeChecker.on('resize', () => {
+          this.editor!.layout();
+        });
         resolve(this.editor);
       });
     });
   }
+
+  public destroy = () => {
+    this.monaco = null;
+    this.resizeChecker!.destroy();
+  };
+
   public async loadFile(
     repoUri: string,
     file: string,
@@ -50,7 +62,7 @@ export class MonacoHelper {
     lang: string,
     revision: string = 'HEAD'
   ) {
-    if (!this.intialized) {
+    if (!this.initialized) {
       await this.init();
     }
     if (lang !== 'plain') {
