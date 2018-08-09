@@ -12,9 +12,9 @@ import { withDefaultValidators } from '../lib/helpers/input_validation';
 
 const ROOT = '/api/apm/services';
 const pre = [{ method: setupRequest, assign: 'setup' }];
-const defaultErrorHandler = reply => err => {
+const defaultErrorHandler = err => {
   console.error(err.stack);
-  reply(Boom.wrap(err, 400));
+  return Boom.wrap(err, 400);
 };
 
 export function initServicesApi(server) {
@@ -27,11 +27,9 @@ export function initServicesApi(server) {
         query: withDefaultValidators()
       }
     },
-    handler: (req, reply) => {
+    handler: req => {
       const { setup } = req.pre;
-      return getServices({ setup })
-        .then(reply)
-        .catch(defaultErrorHandler(reply));
+      return getServices({ setup }).catch(defaultErrorHandler);
     }
   });
 
@@ -44,12 +42,10 @@ export function initServicesApi(server) {
         query: withDefaultValidators()
       }
     },
-    handler: (req, reply) => {
+    handler: req => {
       const { setup } = req.pre;
       const { serviceName } = req.params;
-      return getService({ serviceName, setup })
-        .then(reply)
-        .catch(defaultErrorHandler(reply));
+      return getService({ serviceName, setup }).catch(defaultErrorHandler);
     }
   });
 }

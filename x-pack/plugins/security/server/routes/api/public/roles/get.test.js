@@ -10,8 +10,7 @@ import { initGetRolesApi } from './get';
 const application = 'kibana-.kibana';
 
 const createMockServer = () => {
-  const mockServer = new Hapi.Server({ debug: false });
-  mockServer.connection({ port: 8080 });
+  const mockServer = new Hapi.Server({ debug: false, port: 8080 });
   return mockServer;
 };
 
@@ -19,7 +18,7 @@ describe('GET roles', () => {
   const getRolesTest = (
     description,
     {
-      preCheckLicenseImpl = (request, reply) => reply(),
+      preCheckLicenseImpl = (request, h) => h.response(),
       callWithRequestImpl,
       asserts,
     }
@@ -63,8 +62,7 @@ describe('GET roles', () => {
 
   describe('failure', () => {
     getRolesTest(`returns result of routePreCheckLicense`, {
-      preCheckLicenseImpl: (request, reply) =>
-        reply(Boom.forbidden('test forbidden message')),
+      preCheckLicenseImpl: () => Boom.forbidden('test forbidden message'),
       asserts: {
         statusCode: 403,
         result: {
@@ -301,7 +299,7 @@ describe('GET role', () => {
     description,
     {
       name,
-      preCheckLicenseImpl = (request, reply) => reply(),
+      preCheckLicenseImpl = (request, h) => h.response(),
       callWithRequestImpl,
       asserts,
     }
@@ -346,8 +344,7 @@ describe('GET role', () => {
 
   describe('failure', () => {
     getRoleTest(`returns result of routePreCheckLicense`, {
-      preCheckLicenseImpl: (request, reply) =>
-        reply(Boom.forbidden('test forbidden message')),
+      preCheckLicenseImpl: () => Boom.forbidden('test forbidden message'),
       asserts: {
         statusCode: 403,
         result: {

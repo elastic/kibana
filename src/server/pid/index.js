@@ -40,7 +40,7 @@ export default Promise.method(function (kbnServer, server, config) {
       };
 
       if (config.get('pid.exclusive')) {
-        throw Boom.create(500, _.template(log.tmpl)(log), log);
+        return Boom.create(500, _.template(log.tmpl)(log), log);
       } else {
         server.log(['pid', 'warning'], log);
       }

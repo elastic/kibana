@@ -46,20 +46,20 @@ export function registerShardsRoute(server) {
   server.route({
     path: '/api/index_management/indices/shards',
     method: 'POST',
-    handler: async (request, reply) => {
+    handler: async (request) => {
       const callWithRequest = callWithRequestFactory(server, request);
       const indexNames = getIndexNamesFromPayload(request.payload);
 
       try {
         const hits = await fetchShards(callWithRequest, indexNames);
         const response = formatHits(hits);
-        reply(response);
+        return response;
       } catch (err) {
         if (isEsError(err)) {
-          return reply(wrapEsError(err));
+          return wrapEsError(err);
         }
 
-        reply(wrapUnknownError(err));
+        return wrapUnknownError(err);
       }
     },
     config: {

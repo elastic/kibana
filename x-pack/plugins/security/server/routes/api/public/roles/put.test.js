@@ -12,12 +12,11 @@ import { ALL_RESOURCE } from '../../../../../common/constants';
 const application = 'kibana-.kibana';
 
 const createMockServer = () => {
-  const mockServer = new Hapi.Server({ debug: false });
-  mockServer.connection({ port: 8080 });
+  const mockServer = new Hapi.Server({ debug: false, port: 8080 });
   return mockServer;
 };
 
-const defaultPreCheckLicenseImpl = (request, reply) => reply();
+const defaultPreCheckLicenseImpl = (request, h) => h.response();
 
 const privilegeMap = {
   'test-kibana-privilege-1': {},
@@ -33,7 +32,7 @@ const putRoleTest = (
     const mockServer = createMockServer();
     const mockPreCheckLicense = jest
       .fn()
-      .mockImplementation(preCheckLicenseImpl);
+      .mockImplementation(preCheckLicenseImpl || defaultPreCheckLicenseImpl);
     const mockCallWithRequest = jest.fn();
     for (const impl of callWithRequestImpls) {
       mockCallWithRequest.mockImplementationOnce(impl);
@@ -55,14 +54,13 @@ const putRoleTest = (
       headers,
       payload,
     };
-    const { result, statusCode } = await mockServer.inject(request);
+    const response = await mockServer.inject(request);
+    const { result, statusCode } = response;
 
     expect(result).toEqual(asserts.result);
     expect(statusCode).toBe(asserts.statusCode);
     if (preCheckLicenseImpl) {
       expect(mockPreCheckLicense).toHaveBeenCalled();
-    } else {
-      expect(mockPreCheckLicense).not.toHaveBeenCalled();
     }
     if (asserts.callWithRequests) {
       for (const args of asserts.callWithRequests) {
@@ -90,6 +88,7 @@ describe('PUT role', () => {
         statusCode: 404,
         result: {
           error: 'Not Found',
+          message: 'Not Found',
           statusCode: 404,
         },
       },
@@ -102,12 +101,8 @@ describe('PUT role', () => {
         statusCode: 400,
         result: {
           error: 'Bad Request',
-          message: `child "name" fails because ["name" length must be less than or equal to 1024 characters long]`,
-          statusCode: 400,
-          validation: {
-            keys: ['name'],
-            source: 'params',
-          },
+          message: `ValidationError: child "name" fails because ["name" length must be less than or equal to 1024 characters long]`,
+          statusCode: 400
         },
       },
     });
@@ -126,12 +121,8 @@ describe('PUT role', () => {
         result: {
           error: 'Bad Request',
           //eslint-disable-next-line max-len
-          message: `child "kibana" fails because ["kibana" at position 0 fails because [child "privileges" fails because ["privileges" at position 0 fails because ["0" must be one of [test-kibana-privilege-1, test-kibana-privilege-2, test-kibana-privilege-3]]]]]`,
+          message: `ValidationError: child "kibana" fails because ["kibana" at position 0 fails because [child "privileges" fails because ["privileges" at position 0 fails because ["0" must be one of [test-kibana-privilege-1, test-kibana-privilege-2, test-kibana-privilege-3]]]]]`,
           statusCode: 400,
-          validation: {
-            keys: ['kibana.0.privileges.0'],
-            source: 'payload',
-          },
         },
       },
     });
@@ -139,8 +130,7 @@ describe('PUT role', () => {
     putRoleTest(`returns result of routePreCheckLicense`, {
       name: 'foo-role',
       payload: {},
-      preCheckLicenseImpl: (request, reply) =>
-        reply(Boom.forbidden('test forbidden message')),
+      preCheckLicenseImpl: () => Boom.forbidden('test forbidden message'),
       asserts: {
         statusCode: 403,
         result: {

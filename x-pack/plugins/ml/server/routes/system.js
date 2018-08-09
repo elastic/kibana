@@ -44,17 +44,16 @@ export function systemRoutes(server, commonRouteConfig) {
   server.route({
     method: 'POST',
     path: '/api/ml/_has_privileges',
-    handler(request, reply) {
+    handler(request) {
       const callWithRequest = callWithRequestFactory(server, request);
       if (isSecurityDisabled()) {
         // if xpack.security.enabled has been explicitly set to false
         // return that security is disabled and don't call the privilegeCheck endpoint
-        reply({ securityDisabled: true });
+        return { securityDisabled: true };
       } else {
         const body = request.payload;
         return callWithRequest('ml.privilegeCheck', { body })
-          .then(resp => reply(resp))
-          .catch(resp => reply(wrapError(resp)));
+          .catch(resp => wrapError(resp));
       }
     },
     config: {
@@ -65,7 +64,7 @@ export function systemRoutes(server, commonRouteConfig) {
   server.route({
     method: 'GET',
     path: '/api/ml/ml_node_count',
-    handler(request, reply) {
+    handler(request) {
       const callWithRequest = callWithRequestFactory(server, request);
       return new Promise((resolve, reject) => {
         if (isSecurityDisabled()) {
@@ -104,8 +103,7 @@ export function systemRoutes(server, commonRouteConfig) {
             .catch(reject);
         }
       })
-        .then(resp => reply(resp))
-        .catch(error => reply(wrapError(error)));
+        .catch(error => wrapError(error));
     },
     config: {
       ...commonRouteConfig
@@ -115,11 +113,10 @@ export function systemRoutes(server, commonRouteConfig) {
   server.route({
     method: 'GET',
     path: '/api/ml/info',
-    handler(request, reply) {
+    handler(request) {
       const callWithRequest = callWithRequestFactory(server, request);
       return callWithRequest('ml.info')
-        .then(resp => reply(resp))
-        .catch(resp => reply(wrapError(resp)));
+        .catch(resp => wrapError(resp));
     },
     config: {
       ...commonRouteConfig
@@ -129,11 +126,10 @@ export function systemRoutes(server, commonRouteConfig) {
   server.route({
     method: 'POST',
     path: '/api/ml/es_search',
-    handler(request, reply) {
+    handler(request) {
       const callWithRequest = callWithRequestFactory(server, request);
       return callWithRequest('search', request.payload)
-        .then(resp => reply(resp))
-        .catch(resp => reply(wrapError(resp)));
+        .catch(resp => wrapError(resp));
     },
     config: {
       ...commonRouteConfig

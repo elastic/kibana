@@ -23,7 +23,7 @@ export const createCreateRoute = (prereqs) => {
   return {
     path: '/api/saved_objects/{type}/{id?}',
     method: 'POST',
-    config: {
+    options: {
       pre: [prereqs.getSavedObjectsClient],
       validate: {
         query: Joi.object().keys({

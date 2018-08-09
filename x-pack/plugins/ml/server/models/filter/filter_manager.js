@@ -34,7 +34,7 @@ export class FilterManager {
         return Boom.notFound(`Filter with the id "${filterId}" not found`);
       }
     } catch (error) {
-      throw Boom.badRequest(error);
+      return Boom.badRequest(error);
     }
   }
 
@@ -43,7 +43,7 @@ export class FilterManager {
       const filtersResp = await this.callWithRequest('ml.filters');
       return filtersResp.filters;
     } catch (error) {
-      throw Boom.badRequest(error);
+      return Boom.badRequest(error);
     }
   }
 
@@ -81,7 +81,7 @@ export class FilterManager {
 
       return filterStats;
     } catch (error) {
-      throw Boom.badRequest(error);
+      return Boom.badRequest(error);
     }
   }
 

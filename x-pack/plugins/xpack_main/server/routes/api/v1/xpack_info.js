@@ -14,14 +14,12 @@ export function xpackInfoRoute(server) {
   server.route({
     method: 'GET',
     path: '/api/xpack/v1/info',
-    handler(req, reply) {
+    handler() {
       const xPackInfo = server.plugins.xpack_main.info;
 
-      return reply(
-        xPackInfo.isAvailable()
-          ? convertKeysToSnakeCaseDeep(xPackInfo.toJSON())
-          : Boom.notFound()
-      );
+      return xPackInfo.isAvailable()
+        ? convertKeysToSnakeCaseDeep(xPackInfo.toJSON())
+        : Boom.notFound();
     }
   });
 }

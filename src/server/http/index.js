@@ -27,6 +27,7 @@ import { handleShortUrlError } from './short_url_error';
 import { shortUrlAssertValid } from './short_url_assert_valid';
 import { shortUrlLookupProvider } from './short_url_lookup';
 import { registerHapiPlugins } from './register_hapi_plugins';
+import { defaultValidationErrorHandler } from './validation_error_handler';
 import { setupXsrf } from './xsrf';
 
 export default async function (kbnServer, server, config) {
@@ -63,6 +64,7 @@ export default async function (kbnServer, server, config) {
       },
       validate: {
         options: {
+          failAction: defaultValidationErrorHandler,
           abortEarly: false,
         },
       },
@@ -146,7 +148,7 @@ export default async function (kbnServer, server, config) {
     handler: function (req, h) {
       const path = req.path;
       if (path === '/' || path.charAt(path.length - 1) !== '/') {
-        throw Boom.notFound();
+        return Boom.notFound();
       }
       const pathPrefix = config.get('server.basePath') ? `${config.get('server.basePath')}/` : '';
       return h

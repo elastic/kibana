@@ -34,7 +34,7 @@ export const createDeleteRoute = (prereqs) => ({
       const { savedObjectsClient } = request.pre;
       const { type, id } = request.params;
 
-      savedObjectsClient.delete(type, id);
+      return savedObjectsClient.delete(type, id);
     }
   }
 });

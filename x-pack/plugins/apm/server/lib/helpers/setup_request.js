@@ -11,10 +11,10 @@ function decodeEsQuery(esQuery) {
   return esQuery ? JSON.parse(decodeURIComponent(esQuery)) : null;
 }
 
-export function setupRequest(req, reply) {
+export function setupRequest(req) {
   const cluster = req.server.plugins.elasticsearch.getCluster('data');
 
-  const setup = {
+  return {
     start: moment.utc(req.query.start).valueOf(),
     end: moment.utc(req.query.end).valueOf(),
     esFilterQuery: decodeEsQuery(req.query.esFilterQuery),
@@ -33,6 +33,4 @@ export function setupRequest(req, reply) {
     },
     config: req.server.config()
   };
-
-  reply(setup);
 }

@@ -34,7 +34,7 @@ export function registerStatsRoute(server) {
   server.route({
     path: '/api/index_management/stats/{indexName}',
     method: 'GET',
-    handler: async (request, reply) => {
+    handler: async (request) => {
       const callWithRequest = callWithRequestFactory(server, request);
       const { indexName } = request.params;
 
@@ -42,13 +42,13 @@ export function registerStatsRoute(server) {
         const hit = await fetchStats(callWithRequest, indexName);
         const response = formatHit(hit, indexName);
 
-        reply(response);
+        return response;
       } catch (err) {
         if (isEsError(err)) {
-          return reply(wrapEsError(err));
+          return wrapEsError(err);
         }
 
-        reply(wrapUnknownError(err));
+        return wrapUnknownError(err);
       }
     },
     config: {

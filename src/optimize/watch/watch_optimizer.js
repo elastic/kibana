@@ -63,10 +63,9 @@ export default class WatchOptimizer extends BaseOptimizer {
     // pause all requests received while the compiler is running
     // and continue once an outcome is reached (aborting the request
     // with an error if it was a failure).
-    server.ext('onRequest', (request, reply) => {
+    server.ext('onRequest', (request, h) => {
       this.onceBuildOutcome()
-        .then(() => reply.continue())
-        .catch(reply);
+        .then(() => h.continue);
     });
 
     server.route(createBundlesRoute({

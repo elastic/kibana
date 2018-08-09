@@ -29,15 +29,15 @@ export function initLoginView(server, xpackMainPlugin) {
   server.route({
     method: 'GET',
     path: '/login',
-    handler(request, reply) {
+    handler(request, h) {
       const isUserAlreadyLoggedIn = !!request.state[cookieName];
       if (isUserAlreadyLoggedIn || !shouldShowLogin()) {
         const basePath = config.get('server.basePath');
         const url = get(request, 'raw.req.url');
         const next = parseNext(url, basePath);
-        return reply.redirect(next);
+        return h.redirect(next);
       }
-      return reply.renderAppWithDefaultConfig(login);
+      return h.renderAppWithDefaultConfig(login);
     },
     config: {
       auth: false

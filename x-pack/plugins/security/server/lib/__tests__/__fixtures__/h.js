@@ -6,10 +6,11 @@
 
 import { spy } from 'sinon';
 
-export function replyFixture() {
-  const reply = spy();
-  reply.redirect = spy();
-  reply.continue = spy();
-  reply.unstate = spy();
-  return reply;
+export function hFixture() {
+  return {
+    authenticated: spy(),
+    continue: 'continue value',
+    redirect: spy(),
+    unstate: spy(),
+  };
 }

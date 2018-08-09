@@ -29,7 +29,7 @@ export class CalendarManager {
         return Boom.notFound(`Calendar with the id "${calendarId}" not found`);
       }
     } catch (error) {
-      throw Boom.badRequest(error);
+      return Boom.badRequest(error);
     }
   }
 
@@ -49,7 +49,7 @@ export class CalendarManager {
       });
       return calendars;
     } catch (error) {
-      throw Boom.badRequest(error);
+      return Boom.badRequest(error);
     }
   }
 

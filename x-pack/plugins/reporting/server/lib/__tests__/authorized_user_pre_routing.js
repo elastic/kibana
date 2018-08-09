@@ -64,94 +64,74 @@ describe('authorized_user_pre_routing', function () {
   }());
 
 
-  it('should reply with boom notFound when xpackInfo is undefined', async function () {
+  it('should return with boom notFound when xpackInfo is undefined', async function () {
     const mockServer = createMockServer({ xpackInfoUndefined: true });
 
     const authorizedUserPreRouting = authorizedUserPreRoutingFactory(mockServer);
-    const reply = sinon.spy();
-    await authorizedUserPreRouting({}, reply);
-    expect(reply.calledOnce).to.be(true);
-    const replyValue = reply.firstCall.args[0];
-    expect(replyValue.isBoom).to.be(true);
-    expect(replyValue.output.statusCode).to.be(404);
+    const response = await authorizedUserPreRouting();
+    expect(response.isBoom).to.be(true);
+    expect(response.output.statusCode).to.be(404);
   });
 
-  it(`should reply with boom notFound when xpackInfo isn't available`, async function () {
+  it(`should return with boom notFound when xpackInfo isn't available`, async function () {
     const mockServer = createMockServer({ xpackInfoAvailable: false });
 
-    const reply = sinon.spy();
     const authorizedUserPreRouting = authorizedUserPreRoutingFactory(mockServer);
-    await authorizedUserPreRouting({}, reply);
-    expect(reply.calledOnce).to.be(true);
-    const replyValue = reply.firstCall.args[0];
-    expect(replyValue.isBoom).to.be(true);
-    expect(replyValue.output.statusCode).to.be(404);
+    const response = await authorizedUserPreRouting();
+    expect(response.isBoom).to.be(true);
+    expect(response.output.statusCode).to.be(404);
   });
 
-  it('should reply with null user when security is disabled in Elasticsearch', async function () {
+  it('should return with null user when security is disabled in Elasticsearch', async function () {
     const mockServer = createMockServer({ securityEnabled: false });
 
-    const reply = sinon.spy();
     const authorizedUserPreRouting = authorizedUserPreRoutingFactory(mockServer);
-    await authorizedUserPreRouting({}, reply);
-    expect(reply.calledOnce).to.be(true);
-    expect(reply.firstCall.args[0]).to.be(null);
+    const response = await authorizedUserPreRouting();
+    expect(response).to.be(null);
   });
 
-  it('should reply with boom unauthenticated when security is enabled but no authenticated user', async function () {
+  it('should return with boom unauthenticated when security is enabled but no authenticated user', async function () {
     const mockServer = createMockServer({ user: null });
 
-    const reply = sinon.spy();
     const authorizedUserPreRouting = authorizedUserPreRoutingFactory(mockServer);
-    await authorizedUserPreRouting({}, reply);
-    expect(reply.calledOnce).to.be(true);
-    const replyValue = reply.firstCall.args[0];
-    expect(replyValue.isBoom).to.be(true);
-    expect(replyValue.output.statusCode).to.be(401);
+    const response = await authorizedUserPreRouting();
+    expect(response.isBoom).to.be(true);
+    expect(response.output.statusCode).to.be(401);
   });
 
-  it(`should reply with boom forbidden when security is enabled but user doesn't have allowed role`, async function () {
+  it(`should return with boom forbidden when security is enabled but user doesn't have allowed role`, async function () {
     const mockServer = createMockServer({
       user: { roles: [] },
       config: { 'xpack.reporting.roles.allow': ['.reporting_user'] }
     });
 
-    const reply = sinon.spy();
     const authorizedUserPreRouting = authorizedUserPreRoutingFactory(mockServer);
-    await authorizedUserPreRouting({}, reply);
-    expect(reply.calledOnce).to.be(true);
-    const replyValue = reply.firstCall.args[0];
-    expect(replyValue.isBoom).to.be(true);
-    expect(replyValue.output.statusCode).to.be(403);
+    const response = await authorizedUserPreRouting();
+    expect(response.isBoom).to.be(true);
+    expect(response.output.statusCode).to.be(403);
   });
 
-  it('should reply with user when security is enabled and user has explicitly allowed role', async function () {
+  it('should return with user when security is enabled and user has explicitly allowed role', async function () {
     const user = { roles: ['.reporting_user', 'something_else'] };
     const mockServer = createMockServer({
       user,
       config: { 'xpack.reporting.roles.allow': ['.reporting_user'] }
     });
 
-    const reply = sinon.spy();
     const authorizedUserPreRouting = authorizedUserPreRoutingFactory(mockServer);
-    await authorizedUserPreRouting({}, reply);
-    expect(reply.calledOnce).to.be(true);
-    const replyValue = reply.firstCall.args[0];
-    expect(replyValue).to.be(user);
+    const response = await authorizedUserPreRouting();
+    expect(response).to.be(user);
   });
 
-  it('should reply with user when security is enabled and user has superuser role', async function () {
+  it('should return with user when security is enabled and user has superuser role', async function () {
     const user = { roles: ['superuser', 'something_else'] };
     const mockServer = createMockServer({
       user,
       config: { 'xpack.reporting.roles.allow': [] }
     });
 
-    const reply = sinon.spy();
     const authorizedUserPreRouting = authorizedUserPreRoutingFactory(mockServer);
-    await authorizedUserPreRouting({}, reply);
-    expect(reply.calledOnce).to.be(true);
-    const replyValue = reply.firstCall.args[0];
-    expect(replyValue).to.be(user);
+    const response = await authorizedUserPreRouting();
+    expect(response).to.be(user);
   });
 });

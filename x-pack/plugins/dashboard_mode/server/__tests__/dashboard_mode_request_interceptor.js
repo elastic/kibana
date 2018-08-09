@@ -31,15 +31,15 @@ function setup() {
   server.ext(createDashboardModeRequestInterceptor(dashboardViewerApp));
 
   // allow the extension to fake "render an app"
-  server.decorate('reply', 'renderApp', function (app) {
-    this({ renderApp: true, app });
+  server.decorate('toolkit', 'renderApp', function (app) {
+    return { renderApp: true, app };
   });
 
   server.route({
     path: '/app/{appId}',
     method: 'GET',
-    handler(req, reply) {
-      reply.renderApp({ name: req.params.appId });
+    handler(req, h) {
+      return h.renderApp({ name: req.params.appId });
     }
   });
 
@@ -47,8 +47,8 @@ function setup() {
   server.route({
     path: '/{path*}',
     method: 'GET',
-    handler(req, reply) {
-      reply({ catchAll: true, path: `/${req.params.path}` });
+    handler(req) {
+      return { catchAll: true, path: `/${req.params.path}` };
     }
   });
 

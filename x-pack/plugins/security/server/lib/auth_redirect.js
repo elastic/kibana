@@ -29,7 +29,7 @@ export function authenticateFactory(server) {
       authenticationResult = await server.plugins.security.authenticate(request);
     } catch(err) {
       server.log(['error', 'authentication'], err);
-      throw wrapError(err);
+      return wrapError(err);
     }
 
     if (authenticationResult.succeeded()) {
@@ -43,9 +43,9 @@ export function authenticateFactory(server) {
       return h.redirect(authenticationResult.redirectURL);
     } else if (authenticationResult.failed()) {
       server.log(['info', 'authentication'], `Authentication attempt failed: ${authenticationResult.error.message}`);
-      throw wrapError(authenticationResult.error);
+      return wrapError(authenticationResult.error);
     } else {
-      throw Boom.unauthorized();
+      return Boom.unauthorized();
     }
   };
 }

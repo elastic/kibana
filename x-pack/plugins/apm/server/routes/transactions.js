@@ -18,9 +18,9 @@ import { withDefaultValidators } from '../lib/helpers/input_validation';
 
 const pre = [{ method: setupRequest, assign: 'setup' }];
 const ROOT = '/api/apm/services/{serviceName}/transactions';
-const defaultErrorHandler = reply => err => {
+const defaultErrorHandler = err => {
   console.error(err.stack);
-  reply(Boom.wrap(err, 400));
+  return Boom.wrap(err, 400);
 };
 
 export function initTransactionsApi(server) {
@@ -36,7 +36,7 @@ export function initTransactionsApi(server) {
         })
       }
     },
-    handler: (req, reply) => {
+    handler: req => {
       const { serviceName } = req.params;
       const { transaction_type: transactionType } = req.query;
       const { setup } = req.pre;
@@ -45,9 +45,7 @@ export function initTransactionsApi(server) {
         serviceName,
         transactionType,
         setup
-      })
-        .then(reply)
-        .catch(defaultErrorHandler(reply));
+      }).catch(defaultErrorHandler);
     }
   });
 
@@ -60,12 +58,12 @@ export function initTransactionsApi(server) {
         query: withDefaultValidators()
       }
     },
-    handler: (req, reply) => {
+    handler: req => {
       const { transactionId } = req.params;
       const { setup } = req.pre;
-      return getTransaction({ transactionId, setup })
-        .then(res => reply(res))
-        .catch(defaultErrorHandler(reply));
+      return getTransaction({ transactionId, setup }).catch(
+        defaultErrorHandler
+      );
     }
   });
 
@@ -78,15 +76,18 @@ export function initTransactionsApi(server) {
         query: withDefaultValidators()
       }
     },
-    handler: (req, reply) => {
+    handler: req => {
       const { transactionId } = req.params;
       const { setup } = req.pre;
       return Promise.all([
         getSpans({ transactionId, setup }),
         getTransactionDuration({ transactionId, setup })
       ])
-        .then(([spans, duration]) => reply({ ...spans, duration }))
-        .catch(defaultErrorHandler(reply));
+        .then(([spans, duration]) => ({
+          ...spans,
+          duration
+        }))
+        .catch(defaultErrorHandler);
     }
   });
 
@@ -103,7 +104,7 @@ export function initTransactionsApi(server) {
         })
       }
     },
-    handler: (req, reply) => {
+    handler: req => {
       const { setup } = req.pre;
       const { serviceName } = req.params;
       const transactionType = req.query.transaction_type;
@@ -114,9 +115,7 @@ export function initTransactionsApi(server) {
         transactionType,
         transactionName,
         setup
-      })
-        .then(reply)
-        .catch(defaultErrorHandler(reply));
+      }).catch(defaultErrorHandler);
     }
   });
 
@@ -131,7 +130,7 @@ export function initTransactionsApi(server) {
         })
       }
     },
-    handler: (req, reply) => {
+    handler: req => {
       const { setup } = req.pre;
       const { serviceName } = req.params;
       const { transaction_name: transactionName } = req.query;
@@ -139,9 +138,7 @@ export function initTransactionsApi(server) {
         serviceName,
         transactionName,
         setup
-      })
-        .then(reply)
-        .catch(defaultErrorHandler(reply));
+      }).catch(defaultErrorHandler);
     }
   });
 }

@@ -123,7 +123,7 @@ function callAPI(client, endpoint, clientParams = {}, options = {}) {
     const wwwAuthHeader = get(err, 'body.error.header[WWW-Authenticate]');
     boomError.output.headers['WWW-Authenticate'] = wwwAuthHeader || 'Basic realm="Authorization Required"';
 
-    throw boomError;
+    return boomError;
   });
 }
 

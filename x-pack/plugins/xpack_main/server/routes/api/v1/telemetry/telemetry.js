@@ -52,20 +52,20 @@ export function telemetryRoute(server) {
         })
       }
     },
-    handler: async (req, reply) => {
+    handler: async (req, h) => {
       const config = req.server.config();
       const start = req.payload.timeRange.min;
       const end = req.payload.timeRange.max;
 
       try {
-        reply(await getTelemetry(req, config, start, end));
+        return await getTelemetry(req, config, start, end);
       } catch (err) {
         if (config.get('env.dev')) {
         // don't ignore errors when running in dev mode
-          reply(wrap(err));
+          return wrap(err);
         } else {
         // ignore errors, return empty set and a 200
-          reply([]).code(200);
+          return h.response([]).code(200);
         }
       }
     }

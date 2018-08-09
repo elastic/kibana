@@ -85,9 +85,6 @@ test('correctly binds to the server and redirects its events.', () => {
   for (const [eventName, listener] of eventsAndListeners) {
     expect(listener).not.toHaveBeenCalled();
 
-    // Register the event with hapi server
-    server.event(eventName);
-
     // Emit several events, to make sure that server is not being listened with `once`.
     server.emit(eventName, 1, 2, 3, 4);
     server.emit(eventName, 5, 6, 7, 8);
@@ -116,9 +113,6 @@ test('correctly unbinds from the previous server.', () => {
 
   // Any events from the previous server should not be forwarded.
   for (const [eventName, listener] of eventsAndListeners) {
-    // Register the event with hapi server
-    previousServer.event(eventName);
-
     // `error` event is a special case in node, if `error` is emitted, but
     // there is no listener for it error will be thrown.
     if (eventName === 'error') {
@@ -134,9 +128,6 @@ test('correctly unbinds from the previous server.', () => {
 
   // Only events from the last server should be forwarded.
   for (const [eventName, listener] of eventsAndListeners) {
-    // Register the event with hapi server
-    currentServer.event(eventName);
-
     expect(listener).not.toHaveBeenCalled();
 
     currentServer.emit(eventName, 1, 2, 3, 4);

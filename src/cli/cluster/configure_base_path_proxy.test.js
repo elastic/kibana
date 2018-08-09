@@ -48,6 +48,7 @@ describe('configureBasePathProxy()', () => {
     await configureBasePathProxy(configMock);
 
     // Check that logging is configured with the right parameters.
+    // TODO: add back logging
     expect(setupLoggingMock).toHaveBeenCalledWith(
       expect.any(Server),
       configMock

@@ -28,7 +28,7 @@ export function registerForcemergeRoute(server) {
   server.route({
     path: '/api/index_management/indices/forcemerge',
     method: 'POST',
-    handler: async (request, reply) => {
+    handler: async (request, h) => {
       const callWithRequest = callWithRequestFactory(server, request);
       const { payload } = request;
       const { indices = [], maxNumSegments } = payload;
@@ -36,13 +36,13 @@ export function registerForcemergeRoute(server) {
         await forcemergeIndices(callWithRequest, indices, maxNumSegments);
 
         //TODO: Should we check acknowledged = true?
-        reply();
+        return h.response();
       } catch (err) {
         if (isEsError(err)) {
-          return reply(wrapEsError(err));
+          return wrapEsError(err);
         }
 
-        reply(wrapUnknownError(err));
+        return wrapUnknownError(err);
       }
     },
     config: {

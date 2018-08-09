@@ -37,7 +37,7 @@ export function logstashPipelineRoute(server) {
         })
       }
     },
-    handler: (req, reply) => {
+    handler: (req) => {
       const config = server.config();
       const ccs = req.payload.ccs;
       const clusterUuid = req.params.clusterUuid;
@@ -48,8 +48,7 @@ export function logstashPipelineRoute(server) {
       const pipelineHash = req.params.pipelineHash || null;
 
       return getPipeline(req, config, lsIndexPattern, clusterUuid, pipelineId, pipelineHash)
-        .then(reply)
-        .catch(err => reply(handleError(err, req)));
+        .catch(err => handleError(err, req));
     }
   });
 }

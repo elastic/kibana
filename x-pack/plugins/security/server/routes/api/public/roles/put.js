@@ -72,8 +72,8 @@ export function initPutRolesApi(
   server.route({
     method: 'PUT',
     path: '/api/security/role/{name}',
-    async handler(request, reply) {
-      const name = request.params.name;
+    async handler(request, h) {
+      const { name } = request.params;
       try {
         const existingRoleResponse = await callWithRequest(request, 'shield.getRole', {
           name,
@@ -87,9 +87,9 @@ export function initPutRolesApi(
         );
 
         await callWithRequest(request, 'shield.putRole', { name, body });
-        reply().code(204);
+        return h.response().code(204);
       } catch (err) {
-        reply(wrapError(err));
+        return wrapError(err);
       }
     },
     config: {

@@ -31,20 +31,20 @@ export function registerLoadRoute(server) {
   server.route({
     path: '/api/logstash/pipeline/{id}',
     method: 'GET',
-    handler: (request, reply) => {
+    handler: (request) => {
       const callWithRequest = callWithRequestFactory(server, request);
       const pipelineId = request.params.id;
 
       return fetchPipeline(callWithRequest, pipelineId)
         .then((pipelineResponseFromES) => {
           if (!pipelineResponseFromES.found) {
-            return reply(Boom.notFound());
+            return Boom.notFound();
           }
 
           const pipeline = Pipeline.fromUpstreamJSON(pipelineResponseFromES);
-          reply(pipeline.downstreamJSON);
+          pipeline.downstreamJSON;
         })
-        .catch((e) => reply(Boom.internal(e)));
+        .catch((e) => Boom.internal(e));
     },
     config: {
       pre: [ licensePreRouting ]

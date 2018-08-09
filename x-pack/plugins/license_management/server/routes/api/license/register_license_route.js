@@ -12,9 +12,9 @@ export function registerLicenseRoute(server) {
   server.route({
     path: '/api/license',
     method: 'PUT',
-    handler: (request, reply) => {
+    handler: (request) => {
       return putLicense(request, xpackInfo)
-        .then(reply, e => reply(wrapEsError(e)));
+        .catch(e => wrapEsError(e));
     }
   });
 }

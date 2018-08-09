@@ -13,13 +13,13 @@ export function initPrivilegesApi(server) {
   server.route({
     method: 'GET',
     path: '/api/security/v1/privileges',
-    handler(request, reply) {
+    handler() {
       // we're returning our representation of the privileges, as opposed to the ones that are stored
       // in Elasticsearch because our current thinking is that we'll associate additional structure/metadata
       // with our view of them to allow users to more efficiently edit privileges for roles, and serialize it
       // into a different structure for enforcement within Elasticsearch
       const privileges = buildPrivilegeMap(savedObjectTypes, authorization.application, authorization.actions);
-      reply(Object.values(privileges));
+      return Object.values(privileges);
     }
   });
 }

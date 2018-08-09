@@ -27,7 +27,7 @@ export function registerSaveRoute(server) {
   server.route({
     path: '/api/logstash/pipeline/{id}',
     method: 'PUT',
-    handler: async (request, reply) => {
+    handler: async (request, h) => {
       let username;
       if (server.plugins.security) {
         const user = await server.plugins.security.getUser(request);
@@ -39,8 +39,8 @@ export function registerSaveRoute(server) {
 
       const pipeline = Pipeline.fromDownstreamJSON(request.payload, pipelineId, username);
       return savePipeline(callWithRequest, pipeline.id, pipeline.upstreamJSON)
-        .then(() => reply().code(204))
-        .catch(e => reply(wrapEsError(e)));
+        .then(() => h.response().code(204))
+        .catch(e => wrapEsError(e));
     },
     config: {
       pre: [ licensePreRouting ]

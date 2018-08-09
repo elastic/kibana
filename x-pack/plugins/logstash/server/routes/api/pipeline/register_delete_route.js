@@ -24,13 +24,13 @@ export function registerDeleteRoute(server) {
   server.route({
     path: '/api/logstash/pipeline/{id}',
     method: 'DELETE',
-    handler: (request, reply) => {
+    handler: (request, h) => {
       const callWithRequest = callWithRequestFactory(server, request);
       const pipelineId = request.params.id;
 
       return deletePipeline(callWithRequest, pipelineId)
-        .then(() => reply().code(204))
-        .catch(e => reply(wrapEsError(e)));
+        .then(() => h.response().code(204))
+        .catch(e => wrapEsError(e));
     },
     config: {
       pre: [ licensePreRouting ]

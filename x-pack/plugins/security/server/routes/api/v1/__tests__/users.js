@@ -81,21 +81,15 @@ describe('User routes', () => {
       it('returns 401 if old password is wrong.', async () => {
         getUserStub.returns(Promise.reject(new Error('Something went wrong.')));
 
-        const replyStub = sinon.stub();
-        await changePasswordRoute.handler(request, replyStub);
+        const response = await changePasswordRoute.handler(request);
 
         sinon.assert.notCalled(clusterStub.callWithRequest);
-        sinon.assert.calledOnce(replyStub);
-        sinon.assert.calledWithExactly(replyStub, sinon.match({
-          isBoom: true,
-          output: {
-            payload: {
-              statusCode: 401,
-              error: 'Unauthorized',
-              message: 'Error: Something went wrong.'
-            }
-          }
-        }));
+        expect(response.isBoom).to.be(true);
+        expect(response.output.payload).to.eql({
+          statusCode: 401,
+          error: 'Unauthorized',
+          message: 'Error: Something went wrong.'
+        });
       });
 
       it('returns 401 if user can authenticate with new password.', async () => {
@@ -109,8 +103,7 @@ describe('User routes', () => {
             Promise.resolve(AuthenticationResult.failed(new Error('Something went wrong.')))
           );
 
-        const replyStub = sinon.stub();
-        await changePasswordRoute.handler(request, replyStub);
+        const response = await changePasswordRoute.handler(request);
 
         sinon.assert.calledOnce(clusterStub.callWithRequest);
         sinon.assert.calledWithExactly(
@@ -120,17 +113,12 @@ describe('User routes', () => {
           { username: 'user', body: { password: 'new-password' } }
         );
 
-        sinon.assert.calledOnce(replyStub);
-        sinon.assert.calledWithExactly(replyStub, sinon.match({
-          isBoom: true,
-          output: {
-            payload: {
-              statusCode: 401,
-              error: 'Unauthorized',
-              message: 'Error: Something went wrong.'
-            }
-          }
-        }));
+        expect(response.isBoom).to.be(true);
+        expect(response.output.payload).to.eql({
+          statusCode: 401,
+          error: 'Unauthorized',
+          message: 'Error: Something went wrong.'
+        });
       });
 
       it('returns 500 if password update request fails.', async () => {
@@ -142,20 +130,14 @@ describe('User routes', () => {
           )
           .returns(Promise.reject(new Error('Request failed.')));
 
-        const replyStub = sinon.stub();
-        await changePasswordRoute.handler(request, replyStub);
+        const response = await changePasswordRoute.handler(request);
 
-        sinon.assert.calledOnce(replyStub);
-        sinon.assert.calledWithExactly(replyStub, sinon.match({
-          isBoom: true,
-          output: {
-            payload: {
-              statusCode: 500,
-              error: 'Internal Server Error',
-              message: 'An internal server error occurred'
-            }
-          }
-        }));
+        expect(response.isBoom).to.be(true);
+        expect(response.output.payload).to.eql({
+          statusCode: 500,
+          error: 'Internal Server Error',
+          message: 'An internal server error occurred'
+        });
       });
 
       it('successfully changes own password if provided old password is correct.', async () => {
@@ -169,10 +151,10 @@ describe('User routes', () => {
             Promise.resolve(AuthenticationResult.succeeded({}))
           );
 
-        const replyResultStub = { code: sinon.stub() };
-        const replyStub = sinon.stub().returns(replyResultStub);
+        const hResponseStub = { code: sinon.stub() };
+        const hStub = { response: sinon.stub().returns(hResponseStub) };
 
-        await changePasswordRoute.handler(request, replyStub);
+        await changePasswordRoute.handler(request, hStub);
 
         sinon.assert.calledOnce(clusterStub.callWithRequest);
         sinon.assert.calledWithExactly(
@@ -182,9 +164,8 @@ describe('User routes', () => {
           { username: 'user', body: { password: 'new-password' } }
         );
 
-        sinon.assert.calledOnce(replyStub);
-        sinon.assert.calledWithExactly(replyStub);
-        sinon.assert.calledWithExactly(replyResultStub.code, 204);
+        sinon.assert.calledWithExactly(hStub.response);
+        sinon.assert.calledWithExactly(hResponseStub.code, 204);
       });
     });
 
@@ -198,30 +179,24 @@ describe('User routes', () => {
           )
           .returns(Promise.reject(new Error('Request failed.')));
 
-        const replyStub = sinon.stub();
-        await changePasswordRoute.handler(request, replyStub);
+        const response = await changePasswordRoute.handler(request);
 
         sinon.assert.notCalled(serverStub.plugins.security.getUser);
         sinon.assert.notCalled(serverStub.plugins.security.authenticate);
 
-        sinon.assert.calledOnce(replyStub);
-        sinon.assert.calledWithExactly(replyStub, sinon.match({
-          isBoom: true,
-          output: {
-            payload: {
-              statusCode: 500,
-              error: 'Internal Server Error',
-              message: 'An internal server error occurred'
-            }
-          }
-        }));
+        expect(response.isBoom).to.be(true);
+        expect(response.output.payload).to.eql({
+          statusCode: 500,
+          error: 'Internal Server Error',
+          message: 'An internal server error occurred'
+        });
       });
 
       it('successfully changes user password.', async () => {
-        const replyResultStub = { code: sinon.stub() };
-        const replyStub = sinon.stub().returns(replyResultStub);
+        const hResponseStub = { code: sinon.stub() };
+        const hStub = { response: sinon.stub().returns(hResponseStub) };
 
-        await changePasswordRoute.handler(request, replyStub);
+        await changePasswordRoute.handler(request, hStub);
 
         sinon.assert.notCalled(serverStub.plugins.security.getUser);
         sinon.assert.notCalled(serverStub.plugins.security.authenticate);
@@ -234,9 +209,8 @@ describe('User routes', () => {
           { username: 'target-user', body: { password: 'new-password' } }
         );
 
-        sinon.assert.calledOnce(replyStub);
-        sinon.assert.calledWithExactly(replyStub);
-        sinon.assert.calledWithExactly(replyResultStub.code, 204);
+        sinon.assert.calledWithExactly(hStub.response);
+        sinon.assert.calledWithExactly(hResponseStub.code, 204);
       });
     });
   });

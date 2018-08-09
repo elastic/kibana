@@ -21,7 +21,7 @@ export function profileRoute(server, commonRouteConfig) {
         }).required()    //Joi validation
       }
     },
-    handler: (request, reply) => {
+    handler: (request) => {
 
       const { callWithRequest } = server.plugins.elasticsearch.getCluster('data');
       let parsed = request.payload.query;
@@ -35,15 +35,15 @@ export function profileRoute(server, commonRouteConfig) {
       };
 
       callWithRequest(request, 'search', body).then((resp) => {
-        reply({
+        return {
           ok: true,
           resp: resp
-        });
+        };
       }).catch((err) => {
-        reply({
+        return {
           ok: false,
           err: err
-        });
+        };
       });
     }
   });

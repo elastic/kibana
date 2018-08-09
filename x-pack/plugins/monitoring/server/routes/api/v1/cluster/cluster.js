@@ -30,7 +30,7 @@ export function clusterRoute(server) {
         })
       }
     },
-    handler: (req, reply) => {
+    handler: (req) => {
       const config = server.config();
       const ccs = req.payload.ccs;
       const esIndexPattern = prefixIndexPattern(config, 'xpack.monitoring.elasticsearch.index_pattern', ccs);
@@ -46,8 +46,7 @@ export function clusterRoute(server) {
       };
 
       return getClustersFromRequest(req, indexPatterns, options)
-        .then(reply)
-        .catch(err => reply(handleError(err, req)));
+        .catch(err => handleError(err, req));
     }
   });
 }

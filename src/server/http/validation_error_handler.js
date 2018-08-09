@@ -17,34 +17,7 @@
  * under the License.
  */
 
-import Boom from 'boom';
-import Joi from 'joi';
-import { importDashboards } from '../../../lib/import/import_dashboards';
-
-export function importApi(server) {
-  server.route({
-    path: '/api/kibana/dashboards/import',
-    method: ['POST'],
-    config: {
-      validate: {
-        payload: Joi.object().keys({
-          objects: Joi.array(),
-          version: Joi.string()
-        }),
-        query: Joi.object().keys({
-          force: Joi.boolean().default(false),
-          exclude: [Joi.string(), Joi.array().items(Joi.string())]
-        })
-      },
-      tags: ['api'],
-    },
-
-    handler: async (req) => {
-      try {
-        return await importDashboards(req);
-      } catch (err) {
-        return Boom.boomify(err, { statusCode: 400 });
-      }
-    }
-  });
+// Used to replicate Hapi v16 and below's validation responses
+export function defaultValidationErrorHandler(request, h, err) {
+  throw err;
 }

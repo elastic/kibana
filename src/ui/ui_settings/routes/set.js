@@ -20,8 +20,8 @@
 import Joi from 'joi';
 
 async function handleRequest(request) {
-  const { key } = request.params.value;
-  const { value } = request.payload.value;
+  const { key } = request.params;
+  const { value } = request.payload;
   const uiSettings = request.getUiSettingsService();
 
   await uiSettings.set(key, value);

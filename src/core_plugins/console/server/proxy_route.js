@@ -77,7 +77,7 @@ export const createProxyRoute = ({
         const { error, value: { path } } = req.query;
 
         if (error) {
-          throw Boom.badRequest(error);
+          return Boom.badRequest(error);
         }
 
         if (!pathFilters.some(re => re.test(path))) {
