@@ -16,12 +16,12 @@ import { FileTree as Tree } from '../../../model';
 import { searchQueryChanged } from '../../actions';
 import { RootState } from '../../reducers';
 
-import { Breadcrumbs } from '../breadcrumbs/breadcrumbs';
 import { FileTree } from '../file_tree/file_tree';
 import { Editor } from './editor';
 
 import { closeTreePath, fetchRepoTree, FetchRepoTreePayload } from '../../actions';
 import { history } from '../../utils/url';
+import { LayoutBreadcrumbs } from './layout_breadcrumbs';
 
 const noMarginStyle = {
   margin: 0,
@@ -122,7 +122,6 @@ export class LayoutPage extends React.Component<Props, State> {
   public render() {
     const { symbols, isSymbolsLoading } = this.props;
     const { resource, org, repo, revision, path, goto } = this.props.match.params;
-    const pathSegments = path ? path.split('/') : [];
     const editor = path && (
       <Editor
         file={path}
@@ -167,11 +166,7 @@ export class LayoutPage extends React.Component<Props, State> {
         <EuiFlexItem grow={false} style={noMarginStyle}>
           <EuiFlexGroup justifyContent="spaceBetween" className="topBar" style={noMarginStyle}>
             <EuiFlexItem grow={false} style={noMarginStyle}>
-              <Breadcrumbs
-                basePath={`/${resource}/${org}/${repo}/${revision}/`}
-                pathSegments={pathSegments}
-                directories={this.getDirectories(pathSegments)}
-              />
+              <LayoutBreadcrumbs routeParams={this.props.match.params} />
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <div>

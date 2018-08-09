@@ -5,10 +5,18 @@
  */
 
 import { Action } from 'redux-actions';
-import { call, put, select, takeLatest } from 'redux-saga/effects';
+import { call, put, select, takeEvery } from 'redux-saga/effects';
 import { kfetch } from 'ui/kfetch';
 import { FileTree } from '../../model';
 import {
+  fetchRepoBranches,
+  fetchRepoBranchesFailed,
+  fetchRepoBranchesSuccess,
+  fetchRepoCommits,
+  fetchRepoCommitsFailed,
+  fetchRepoCommitsSuccess,
+  FetchRepoPayload,
+  FetchRepoPayloadWithRevision,
   fetchRepoTree,
   fetchRepoTreeFailed,
   FetchRepoTreePayload,
@@ -60,5 +68,40 @@ function requestRepoTree({ uri, revision, path, depth = 1 }: FetchRepoTreePayloa
 }
 
 export function* watchFetchRepoTree() {
-  yield takeLatest(String(fetchRepoTree), handleFetchRepoTree);
+  yield takeEvery(String(fetchRepoTree), handleFetchRepoTree);
+}
+
+function* handleFetchBranches(action: Action<FetchRepoPayload>) {
+  try {
+    const results = yield call(requestBranches, action.payload!);
+    yield put(fetchRepoBranchesSuccess(results));
+  } catch (err) {
+    yield put(fetchRepoBranchesFailed(err));
+  }
+}
+
+function requestBranches({ uri }: FetchRepoPayload) {
+  return kfetch({
+    pathname: `../api/cs/repo/${uri}/references`,
+  });
+}
+
+function* handleFetchCommits(action: Action<FetchRepoPayloadWithRevision>) {
+  try {
+    const results = yield call(requestCommits, action.payload!);
+    yield put(fetchRepoCommitsSuccess(results));
+  } catch (err) {
+    yield put(fetchRepoCommitsFailed(err));
+  }
+}
+
+function requestCommits({ uri, revision }: FetchRepoPayloadWithRevision) {
+  return kfetch({
+    pathname: `../api/cs/repo/${uri}/history/${revision}`,
+  });
+}
+
+export function* watchFetchBranchesAndCommits() {
+  yield takeEvery(String(fetchRepoBranches), handleFetchBranches);
+  yield takeEvery(String(fetchRepoCommits), handleFetchCommits);
 }

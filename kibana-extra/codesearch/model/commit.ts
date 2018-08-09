@@ -15,5 +15,9 @@ export interface ReferenceInfo {
   name: string;
   reference: string;
   commit: CommitInfo;
-  type: string;
+  type: ReferenceType;
+}
+
+export enum ReferenceType {
+  BRANCH, TAG, REMOTE_BRANCH, OTHER
 }

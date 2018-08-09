@@ -1,0 +1,81 @@
+.euiBreadcrumbs {
+  @include euiFontSizeS;
+}
+
+.euiBreadcrumb {
+  display: inline-block;
+
+  &:not(.euiBreadcrumb--last) {
+    margin-right: $euiBreadcrumbSpacing;
+  }
+}
+
+.euiBreadcrumb--last {
+  font-weight: $euiFontWeightMedium;
+}
+
+.euiBreadcrumb--collapsed {
+  color: $euiColorLightShade;
+}
+
+.euiBreadcrumbSeparator {
+  pointer-events: none;
+  display: inline-block;
+  margin-right: $euiBreadcrumbSpacing;
+  width: 1px;
+  height: $euiSize;
+  transform: translateY(0.2em) rotate(15deg);
+  background: $euiColorLightShade;
+}
+
+/**
+ * 1. Can't target separator vs breadcrumb with -of-type because it takes
+ *    the dom element into consideration too and there could be divs, or spans, or a's
+ *    as breadcrumbs.
+ */
+
+.euiBreadcrumbs--responsive {
+  // Laptop
+  @include euiBreakpoint('l') {
+    .euiBreadcrumbSeparator,
+    .euiBreadcrumb {
+      display: none;
+
+      // Only show last 4 breadcrumbs
+      &:nth-last-child(-n+7) { /* 1 */
+        display: inline-block;
+      }
+    }
+  }
+
+  // Tablets
+  @include euiBreakpoint('m') {
+    .euiBreadcrumbSeparator,
+    .euiBreadcrumb {
+      display: none;
+
+      // Only show last 2 breadcrumbs
+      &:nth-last-child(-n+3) { /* 1 */
+        display: inline-block;
+      }
+    }
+  }
+
+  // Mobile
+  @include euiBreakpoint('xs','s') {
+    .euiBreadcrumbSeparator,
+    .euiBreadcrumb {
+      display: none;
+    }
+  }
+}
+
+.euiBreadcrumbs--truncate {
+  .euiBreadcrumb {
+    white-space: nowrap;
+    max-width: 150px;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    vertical-align: top; // overflow hidden causes misalignment of links and slashes, this fixes that
+  }
+}

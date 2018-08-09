@@ -7,8 +7,11 @@
 import produce from 'immer';
 import { Action, handleActions } from 'redux-actions';
 import { FileTree, FileTreeItemType } from '../../model';
+import { CommitInfo, ReferenceInfo, ReferenceType } from '../../model/commit';
 import {
   closeTreePath,
+  fetchRepoBranchesSuccess,
+  fetchRepoCommitsSuccess,
   fetchRepoTree,
   fetchRepoTreeFailed,
   fetchRepoTreeSuccess,
@@ -19,6 +22,9 @@ export interface FileState {
   tree: FileTree;
   loading: boolean;
   openedPaths: string[];
+  branches: ReferenceInfo[];
+  tags: ReferenceInfo[];
+  commits: CommitInfo[];
 }
 
 const initialState: FileState = {
@@ -30,6 +36,9 @@ const initialState: FileState = {
   },
   openedPaths: [],
   loading: false,
+  branches: [],
+  tags: [],
+  commits: [],
 };
 
 function mergeTree(draft: FileState, update: FileTree) {
@@ -88,6 +97,16 @@ export const file = handleActions(
         if (idx >= 0) {
           draft.openedPaths.splice(idx, 1);
         }
+      }),
+    [String(fetchRepoCommitsSuccess)]: (state: FileState, action: any) =>
+      produce<FileState>(state, draft => {
+        draft.commits = action.payload;
+      }),
+    [String(fetchRepoBranchesSuccess)]: (state: FileState, action: any) =>
+      produce<FileState>(state, draft => {
+        const references = action.payload as ReferenceInfo[];
+        draft.tags = references.filter(r => r.type === ReferenceType.TAG);
+        draft.branches = references.filter(r => r.type !== ReferenceType.TAG);
       }),
   },
   initialState

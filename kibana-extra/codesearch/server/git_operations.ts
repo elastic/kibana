@@ -8,7 +8,7 @@ import Boom from 'boom';
 import { Commit, Error, Object, Oid, Reference, Repository, Tree, TreeEntry } from 'nodegit';
 import * as Path from 'path';
 import { FileTree, FileTreeItemType, RepositoryUri } from '../model';
-import { CommitInfo, ReferenceInfo } from '../model/commit';
+import { CommitInfo, ReferenceInfo, ReferenceType } from '../model/commit';
 
 /**
  * do a nodegit operation and check the results. If it throws a not found error or returns null,
@@ -164,15 +164,15 @@ export async function referenceInfo(ref: Reference): Promise<ReferenceInfo> {
   const repository = ref.owner();
   const object = await ref.peel(Object.TYPE.COMMIT);
   const commit = await repository.getCommit(object.id());
-  let type: string;
+  let type: ReferenceType;
   if (ref.isTag()) {
-    type = 'tag';
+    type = ReferenceType.TAG;
   } else if (ref.isRemote()) {
-    type = 'remote_branch';
+    type = ReferenceType.REMOTE_BRANCH;
   } else if (ref.isBranch()) {
-    type = 'branch';
+    type = ReferenceType.BRANCH;
   } else {
-    type = 'other';
+    type = ReferenceType.OTHER;
   }
   return {
     name: ref.shorthand(),
