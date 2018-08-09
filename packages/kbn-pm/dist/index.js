@@ -26150,6 +26150,9 @@ var subscribeTo = function (result) {
             }
         };
     }
+    else if (result && typeof result[__WEBPACK_IMPORTED_MODULE_9__symbol_observable__["a" /* observable */]] === 'function') {
+        return Object(__WEBPACK_IMPORTED_MODULE_4__subscribeToObservable__["a" /* subscribeToObservable */])(result);
+    }
     else if (Object(__WEBPACK_IMPORTED_MODULE_5__isArrayLike__["a" /* isArrayLike */])(result)) {
         return Object(__WEBPACK_IMPORTED_MODULE_1__subscribeToArray__["a" /* subscribeToArray */])(result);
     }
@@ -26158,9 +26161,6 @@ var subscribeTo = function (result) {
     }
     else if (result && typeof result[__WEBPACK_IMPORTED_MODULE_8__symbol_iterator__["a" /* iterator */]] === 'function') {
         return Object(__WEBPACK_IMPORTED_MODULE_3__subscribeToIterable__["a" /* subscribeToIterable */])(result);
-    }
-    else if (result && typeof result[__WEBPACK_IMPORTED_MODULE_9__symbol_observable__["a" /* observable */]] === 'function') {
-        return Object(__WEBPACK_IMPORTED_MODULE_4__subscribeToObservable__["a" /* subscribeToObservable */])(result);
     }
     else {
         var value = Object(__WEBPACK_IMPORTED_MODULE_7__isObject__["a" /* isObject */])(result) ? 'an invalid object' : "'" + result + "'";
@@ -28354,7 +28354,8 @@ const BootstrapCommand = exports.BootstrapCommand = {
         return _asyncToGenerator(function* () {
             const batchedProjects = (0, _projects.topologicallyBatchProjects)(projects, projectGraph);
             const frozenLockfile = options['frozen-lockfile'] === true;
-            const extraArgs = frozenLockfile ? ['--frozen-lockfile'] : [];
+            const offline = options.offline === true;
+            const extraArgs = [frozenLockfile ? '--frozen-lockfile' : '', offline ? '--offline' : ''].filter(Boolean);
             _log.log.write(_chalk2.default.bold('\nRunning installs in topological order:'));
             for (const batch of batchedProjects) {
                 for (const project of batch) {

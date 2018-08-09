@@ -23,6 +23,7 @@ export KIBANA_DIR="$(cd "$(dirname "$SCRIPT")/../../.."; pwd)"
 
 # PARENT_DIR is the directory where we will checkout es and x-pack-es
 export PARENT_DIR="$(cd "$KIBANA_DIR"/..; pwd)"
+export KIBANA_EXTRA_DIR="$PARENT_DIR"/"kibana-extra"
 
 function checkout_sibling {
   project=$1
@@ -31,7 +32,7 @@ function checkout_sibling {
   useExisting="$(eval "echo "\$$useExistingParamName"")"
 
   if [ -z ${useExisting:+x} ]; then
-    if [ -d "$targetDir" ]; then
+    if [ -d "$targetDir" ] && [ -n "$(ls "$targetDir")" ]; then
       echo "I expected a clean workspace but an '${project}' sibling directory already exists in [$PARENT_DIR]!"
       echo
       echo "Either define '${useExistingParamName}' or remove the existing '${project}' sibling."
@@ -99,3 +100,4 @@ function checkout_sibling {
 }
 
 checkout_sibling "elasticsearch" "${PARENT_DIR}/elasticsearch" "USE_EXISTING_ES"
+checkout_sibling "kibana-offline-mirror" "${KIBANA_EXTRA_DIR}/kibana-offline-mirror" "USE_EXISTING_KIBANA_OFFLINE_MIRROR"
