@@ -39,7 +39,7 @@ const callWithRequest = (method) => {
 import * as mockModule from '../../../client/call_with_internal_user_factory';
 
 // mock server
-function getMockServer(isEnabled = false) {
+function mockServerFactory(isEnabled = false) {
   return {
     plugins: {
       xpack_main: {
@@ -89,7 +89,7 @@ describe('ML - BucketSpanEstimator', () => {
 
   it('call factory and estimator with security disabled', (done) => {
     expect(function () {
-      const estimateBucketSpan = estimateBucketSpanFactory(callWithRequest, getMockServer());
+      const estimateBucketSpan = estimateBucketSpanFactory(callWithRequest, mockServerFactory());
 
       estimateBucketSpan(formConfig).catch((catchData) => {
         expect(catchData).to.be('Unable to retrieve cluster setting search.max_buckets');
@@ -102,7 +102,7 @@ describe('ML - BucketSpanEstimator', () => {
 
   it('call factory and estimator with security enabled and sufficient permissions.', (done) => {
     expect(function () {
-      const estimateBucketSpan = estimateBucketSpanFactory(callWithRequest, getMockServer(true));
+      const estimateBucketSpan = estimateBucketSpanFactory(callWithRequest, mockServerFactory(true));
 
       estimateBucketSpan(formConfig).catch((catchData) => {
         expect(catchData).to.be('Unable to retrieve cluster setting search.max_buckets');
@@ -115,7 +115,7 @@ describe('ML - BucketSpanEstimator', () => {
 
   it('call factory and estimator with security enabled and insufficient permissions.', (done) => {
     expect(function () {
-      const estimateBucketSpan = estimateBucketSpanFactory(callWithRequest, getMockServer(true));
+      const estimateBucketSpan = estimateBucketSpanFactory(callWithRequest, mockServerFactory(true));
 
       estimateBucketSpan(formConfig).catch((catchData) => {
         expect(catchData.message).to.be('Forbidden');
