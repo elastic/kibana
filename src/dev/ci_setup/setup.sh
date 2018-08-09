@@ -88,3 +88,6 @@ export PATH="$yarnDir/bin:$PATH"
 yarnGlobalDir="$(yarn global bin)"
 export PATH="$PATH:$yarnGlobalDir"
 hash -r
+
+### configure
+yarn config set cache-folder "$cacheDir/yarn"
