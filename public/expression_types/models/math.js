@@ -11,7 +11,7 @@ export const math = () => ({
       help: 'Function and column to use in extracting a value from the datasource',
       argType: 'datacolumn',
       options: {
-        onlyMath: true,
+        onlyMath: false,
       },
     },
   ],
