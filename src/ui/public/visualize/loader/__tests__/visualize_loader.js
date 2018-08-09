@@ -33,6 +33,7 @@ import { EmbeddedVisualizeHandler } from '../embedded_visualize_handler';
 import { Inspector } from '../../../inspector/inspector';
 import { dispatchRenderComplete } from '../../../render_complete';
 import { VisualizeDataLoader } from '../visualize_data_loader';
+import { PersistedState } from '../../../persisted_state';
 
 describe('visualize loader', () => {
 
@@ -322,6 +323,28 @@ describe('visualize loader', () => {
 
         sinon.assert.calledOnce(spy);
         sinon.assert.calledWith(spy, sinon.match({ timeRange: { from: 'now-10d/d', to: 'now' } }));
+      });
+
+      it('should not set forceFetch on uiState change', async () => {
+        const spy = sinon.spy(VisualizeDataLoader.prototype, 'fetch');
+
+        const uiState = new PersistedState();
+        loader.embedVisualizationWithSavedObject(newContainer()[0], createSavedObject(), {
+          timeRange: { from: 'now-7d', to: 'now' },
+          uiState: uiState,
+        });
+
+        // Wait for the initial fetch and render to happen
+        await timeout(150);
+        spy.resetHistory();
+
+        uiState.set('property', 'value');
+
+        // Wait for fetch debounce to happen (as soon as we use lodash 4+ we could use fake timers here for the debounce)
+        await timeout(150);
+
+        sinon.assert.calledOnce(spy);
+        sinon.assert.calledWith(spy, sinon.match({ forceFetch: false }));
       });
     });
 
