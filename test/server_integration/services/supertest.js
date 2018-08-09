@@ -22,7 +22,7 @@ import { format as formatUrl } from 'url';
 
 import supertestAsPromised from 'supertest-as-promised';
 
-export function KibanaSupertestProvider(options, { getService }) {
+export function KibanaSupertestProvider({ getService }, options) {
   const config = getService('config');
   const kibanaServerUrl = options ? formatUrl(options) : formatUrl(config.get('servers.kibana'));
 

@@ -36,7 +36,8 @@ export default async function ({ readConfigFile }) {
     ],
     services: {
       ...httpConfig.get('services'),
-      supertest: KibanaSupertestProvider.bind(null, supertestOptions),
+      //eslint-disable-next-line new-cap
+      supertest: (arg) => KibanaSupertestProvider(arg, supertestOptions),
     },
     servers: {
       ...httpConfig.get('servers'),
