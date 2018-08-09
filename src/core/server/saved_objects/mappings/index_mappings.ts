@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { cloneDeep, isPlainObject } from 'lodash';
+import { cloneDeep } from 'lodash';
 
 import { EsMapping, EsMappings, getRootProperties, getRootType } from './lib';
 import { formatListAsProse } from './utils';
@@ -41,10 +41,6 @@ export class IndexMappings {
     private initialDsl: EsMappings = DEFAULT_INITIAL_DSL,
     mappingExtensions: MappingExtension[] = []
   ) {
-    if (!isPlainObject(this.dsl)) {
-      throw new TypeError('initial mapping must be an object');
-    }
-
     // ensure that the dsl can be parsed with getRootProperties() and kin
     this.setProperties(getRootProperties(this.dsl) || {});
 
