@@ -39,6 +39,7 @@ function decompressTarball(archive, dirPath) {
 }
 
 function decompressZip(input, output) {
+  mkdirp.sync(output);
   return new Promise((resolve, reject) => {
     yauzl.open(input, { lazyEntries: true }, (err, zipfile) => {
       if (err) {
@@ -63,6 +64,7 @@ function decompressZip(input, output) {
         const fileName = path.resolve(output, zipPath);
 
         if (/\/$/.test(entry.fileName)) {
+          mkdirp.sync(fileName);
           zipfile.readEntry();
         } else {
           // file entry
@@ -75,9 +77,7 @@ function decompressZip(input, output) {
               zipfile.readEntry();
             });
 
-            mkdirp(path.dirname(fileName), () => {
-              readStream.pipe(fs.createWriteStream(fileName));
-            });
+            readStream.pipe(fs.createWriteStream(fileName));
           });
         }
       });
