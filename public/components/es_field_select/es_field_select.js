@@ -9,7 +9,7 @@ export const ESFieldSelect = ({ value = '_score', fields = [], onChange, onFocus
   return (
     <EuiSelect
       compressed
-      value={value}
+      defaultValue={value}
       options={options}
       onChange={e => onChange(e.target.value)}
       onFocus={onFocus}
