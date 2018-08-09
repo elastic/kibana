@@ -381,8 +381,8 @@ export function estimateBucketSpanFactory(callWithRequest, server) {
         getBucketSpanEstimation();
       } else {
         // if security is enabled, check that the user has permission to
-        // view jobs before calling getNodeCount.
-        // getNodeCount calls the _nodes endpoint as the internal user
+        // view jobs before calling getBucketSpanEstimation.
+        // getBucketSpanEstimation calls the 'cluster.getSettings' endpoint as the internal user
         // and so could give the user access to more information than
         // they are entitled to.
         const body = {
