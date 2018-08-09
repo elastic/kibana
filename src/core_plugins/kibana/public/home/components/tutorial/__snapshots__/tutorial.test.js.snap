@@ -5,9 +5,7 @@ exports[`isCloudEnabled is false should not render instruction toggle when ON_PR
   className="home"
   restrictWidth={false}
 >
-  <EuiPageBody
-    restrictWidth={false}
-  >
+  <EuiPageBody>
     <div>
       <EuiLink
         color="primary"
@@ -81,9 +79,7 @@ exports[`isCloudEnabled is false should render ON_PREM instructions with instruc
   className="home"
   restrictWidth={false}
 >
-  <EuiPageBody
-    restrictWidth={false}
-  >
+  <EuiPageBody>
     <div>
       <EuiLink
         color="primary"
@@ -176,9 +172,7 @@ exports[`should render ELASTIC_CLOUD instructions when isCloudEnabled is true 1`
   className="home"
   restrictWidth={false}
 >
-  <EuiPageBody
-    restrictWidth={false}
-  >
+  <EuiPageBody>
     <div>
       <EuiLink
         color="primary"

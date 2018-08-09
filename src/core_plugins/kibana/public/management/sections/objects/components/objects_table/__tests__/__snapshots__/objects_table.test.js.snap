@@ -126,9 +126,7 @@ exports[`ObjectsTable should render normally 1`] = `
 <EuiPage
   restrictWidth={false}
 >
-  <EuiPageBody
-    restrictWidth={false}
-  >
+  <EuiPageBody>
     <EuiPageContent
       horizontalPosition="center"
       panelPaddingSize="l"
