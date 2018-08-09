@@ -1,11 +1,13 @@
 var arrayEach = require('./arrayEach'),
+    baseAssignValue = require('./baseAssignValue'),
     baseMergeDeep = require('./baseMergeDeep'),
     isArray = require('../lang/isArray'),
     isArrayLike = require('./isArrayLike'),
     isObject = require('../lang/isObject'),
     isObjectLike = require('./isObjectLike'),
     isTypedArray = require('../lang/isTypedArray'),
-    keys = require('../object/keys');
+    keys = require('../object/keys'),
+    safeGet = require('./safeGet');
 
 /**
  * The base implementation of `_.merge` without support for argument juggling,
@@ -29,7 +31,7 @@ function baseMerge(object, source, customizer, stackA, stackB) {
   arrayEach(props || source, function(srcValue, key) {
     if (props) {
       key = srcValue;
-      srcValue = source[key];
+      srcValue = safeGet(source, key);
     }
     if (isObjectLike(srcValue)) {
       stackA || (stackA = []);
@@ -37,7 +39,7 @@ function baseMerge(object, source, customizer, stackA, stackB) {
       baseMergeDeep(object, source, key, baseMerge, customizer, stackA, stackB);
     }
     else {
-      var value = object[key],
+      var value = safeGet(object, key),
           result = customizer ? customizer(value, srcValue, key, object, source) : undefined,
           isCommon = result === undefined;
 
@@ -46,7 +48,7 @@ function baseMerge(object, source, customizer, stackA, stackB) {
       }
       if ((result !== undefined || (isSrcArr && !(key in object))) &&
           (isCommon || (result === result ? (result !== value) : (value === value)))) {
-        object[key] = result;
+        baseAssignValue(object, key, result);
       }
     }
   });

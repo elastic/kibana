@@ -1,9 +1,11 @@
 var arrayCopy = require('./arrayCopy'),
+    baseAssignValue = require('./baseAssignValue'),
     isArguments = require('../lang/isArguments'),
     isArray = require('../lang/isArray'),
     isArrayLike = require('./isArrayLike'),
     isPlainObject = require('../lang/isPlainObject'),
     isTypedArray = require('../lang/isTypedArray'),
+    safeGet = require('./safeGet'),
     toPlainObject = require('../lang/toPlainObject');
 
 /**
@@ -23,15 +25,15 @@ var arrayCopy = require('./arrayCopy'),
  */
 function baseMergeDeep(object, source, key, mergeFunc, customizer, stackA, stackB) {
   var length = stackA.length,
-      srcValue = source[key];
+      srcValue = safeGet(source, key);
 
   while (length--) {
     if (stackA[length] == srcValue) {
-      object[key] = stackB[length];
+      baseAssignValue(object, key, stackB[length]);
       return;
     }
   }
-  var value = object[key],
+  var value = safeGet(object, key),
       result = customizer ? customizer(value, srcValue, key, object, source) : undefined,
       isCommon = result === undefined;
 
@@ -58,9 +60,9 @@ function baseMergeDeep(object, source, key, mergeFunc, customizer, stackA, stack
 
   if (isCommon) {
     // Recursively merge objects and arrays (susceptible to call stack limits).
-    object[key] = mergeFunc(result, srcValue, customizer, stackA, stackB);
+    baseAssignValue(object, key, mergeFunc(result, srcValue, customizer, stackA, stackB));
   } else if (result === result ? (result !== value) : (value === value)) {
-    object[key] = result;
+    baseAssignValue(object, key, result);
   }
 }
 
