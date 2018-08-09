@@ -65,7 +65,7 @@ const RepositoryItem = (props: RepositoryItemProps) => (
     <EuiFlexItem>
       <EuiFlexGroup direction="column" justifyContent="spaceBetween">
         <div>
-          <Link to={`/${props.repoURI}/HEAD`}>{props.repoName}</Link>
+          <Link to={`/${props.repoURI}/tree/HEAD`}>{props.repoName}</Link>
         </div>
         <div>
           <a href={`//${props.repoURI}`} target="__blank">

@@ -13,7 +13,7 @@ type Path = string;
 
 interface Props {
   node?: Tree;
-  onClick: (p: Path) => void;
+  onClick: (node: Tree) => void;
   getTreeToggler: (path: Path) => (p: any) => void;
   openedPaths: string[];
   activePath: string;
@@ -22,7 +22,7 @@ interface Props {
 export class FileTree extends React.Component<Props, any> {
   public getItemRenderer = (node: Tree, forceOpen: boolean) => () => {
     const className = this.props.activePath === node.path ? 'activeFileNode' : 'fileNode';
-    const onClick = () => this.props.onClick(node.path || '');
+    const onClick = () => this.props.onClick(node);
     switch (node.type) {
       case FileTreeItemType.Directory: {
         return (

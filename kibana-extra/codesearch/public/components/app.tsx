@@ -19,8 +19,11 @@ export const App = () => {
       <Router>
         <Switch>
           <Route exact={true} path="/" render={redirectToAdmin} />
-          <Route path="/:resource/:org/:repo/:revision/:path*:goto(!.*)?" component={Layout} />
-          <Route path="/:resource/:org/:repo/:revision" component={Layout} />
+          <Route
+            path="/:resource/:org/:repo/:pathType(blob|tree)/:revision/:path*:goto(!.*)?"
+            component={Layout}
+          />
+          <Route path="/:resource/:org/:repo/:pathType(blob|tree)/:revision" component={Layout} />
           <Route path="/admin" component={Admin} />
         </Switch>
       </Router>

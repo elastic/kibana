@@ -45,7 +45,7 @@ export class RepositoryUtils {
       const revision = query;
       const p = hash.slice(1, hash.length);
       const { line, character } = loc.range.start;
-      return `/${repoUri}/${revision}/${p}!L${line + 1}:${character}`;
+      return `/${repoUri}/blob/${revision}/${p}!L${line + 1}:${character}`;
     }
     return '';
   }

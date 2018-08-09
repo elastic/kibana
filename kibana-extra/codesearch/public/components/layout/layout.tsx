@@ -12,15 +12,18 @@ import { match } from 'react-router-dom';
 import { Location } from 'vscode-languageserver';
 
 import { RepositoryUtils } from '../../../common/repository_utils';
-import { FileTree as Tree } from '../../../model';
-import { searchQueryChanged } from '../../actions';
+import { FileTree as Tree, FileTreeItemType } from '../../../model';
+import {
+  closeTreePath,
+  fetchRepoTree,
+  FetchRepoTreePayload,
+  searchQueryChanged,
+} from '../../actions';
 import { RootState } from '../../reducers';
 
+import { history } from '../../utils/url';
 import { FileTree } from '../file_tree/file_tree';
 import { Editor } from './editor';
-
-import { closeTreePath, fetchRepoTree, FetchRepoTreePayload } from '../../actions';
-import { history } from '../../utils/url';
 import { LayoutBreadcrumbs } from './layout_breadcrumbs';
 
 const noMarginStyle = {
@@ -53,9 +56,10 @@ export class LayoutPage extends React.Component<Props, State> {
     this.fetchTree(this.props.match.params.path);
   }
 
-  public onClick = (path: string) => {
+  public onClick = (node: Tree) => {
     const { resource, org, repo, revision } = this.props.match.params;
-    history.push(`/${resource}/${org}/${repo}/${revision}/${path}`);
+    const pathType = node.type === FileTreeItemType.File ? 'blob' : 'tree';
+    history.push(`/${resource}/${org}/${repo}/${pathType}/${revision}/${node.path}`);
   };
 
   public findNode = (pathSegments: string[], node: Tree) => {
@@ -121,8 +125,8 @@ export class LayoutPage extends React.Component<Props, State> {
 
   public render() {
     const { symbols, isSymbolsLoading } = this.props;
-    const { resource, org, repo, revision, path, goto } = this.props.match.params;
-    const editor = path && (
+    const { resource, org, repo, revision, path, goto, pathType } = this.props.match.params;
+    const editor = pathType === 'blob' && (
       <Editor
         file={path}
         goto={goto}
