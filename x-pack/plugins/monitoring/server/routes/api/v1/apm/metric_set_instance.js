@@ -18,7 +18,16 @@ export const metricSet = [
       'apm_system_os_load_15'
     ],
     name: 'apm_os_load'
-  }
+  },
+  {
+    name: 'apm_memory',
+    keys: [
+      'apm_mem_gc_next',
+      'apm_mem_total',
+      'apm_mem_alloc',
+      'apm_mem_rss'
+    ]
+  },
   // {
   //   keys: [
   //     'beat_pipeline_events_total_rate',

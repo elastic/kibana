@@ -15,11 +15,6 @@ uiModule.directive('monitoringApmInstances', kbnUrl => {
     restrict: 'E',
     scope: {
       apms: '=',
-      // pageIndex: '=',
-      // filterText: '=',
-      // sortKey: '=',
-      // sortOrder: '=',
-      // onNewState: '=',
     },
     link(scope, $el) {
       const goToInstance = uuid => {
@@ -27,13 +22,6 @@ uiModule.directive('monitoringApmInstances', kbnUrl => {
           kbnUrl.changePath(`/apm/instances/${uuid}`);
         });
       };
-      /*
-      page-index="apms.pageIndex"
-    filter-text="apms.filterText"
-    sort-key="apms.sortKey"
-    sort-order="apms.sortOrder"
-    on-new-state="apms.onNewState"
-    instances="apms.data.apms"*/
 
       scope.$watch('apms.data.apms', () => {
         const apmsTable = (

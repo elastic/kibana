@@ -49,7 +49,47 @@ export const metrics = {
     format: LARGE_FLOAT,
     metricAgg: 'max',
     units: ''
-  })
+  }),
+
+  apm_mem_gc_next: new BeatsMetric({
+    field: 'beats_stats.metrics.beat.memstats.gc_next',
+    label: 'GC Next',
+    title: 'Memory',
+    description:
+      'Limit of allocated memory at which garbage collection will occur',
+    format: LARGE_BYTES,
+    metricAgg: 'max',
+    units: 'B'
+  }),
+  apm_mem_total: new BeatsMetric({
+    field: 'beats_stats.metrics.beat.memstats.memory_total',
+    label: 'Total Memory',
+    title: 'Memory',
+    description:
+      'Total memory',
+    format: LARGE_BYTES,
+    metricAgg: 'max',
+    units: 'B'
+  }),
+  apm_mem_alloc: new BeatsMetric({
+    field: 'beats_stats.metrics.beat.memstats.memory_alloc',
+    label: 'Allocated Memory',
+    title: 'Memory',
+    description:
+      'Allocated memory',
+    format: LARGE_BYTES,
+    metricAgg: 'max',
+    units: 'B'
+  }),
+  apm_mem_rss: new BeatsMetric({
+    field: 'beats_stats.metrics.beat.memstats.rss',
+    label: 'Process Total',
+    title: 'Memory',
+    description: 'Resident set size of memory reserved by the APM service from the OS',
+    format: LARGE_BYTES,
+    metricAgg: 'max',
+    units: 'B'
+  }),
 };
 
 export const metrics2 = {
