@@ -51,7 +51,7 @@
     "log-symbols": "^2.2.0",
     "mkdirp": "^0.5.1",
     "ora": "^1.4.0",
-    "prettier": "^1.12.1",
+    "prettier": "^1.14.0",
     "read-pkg": "^3.0.0",
     "rxjs": "^6.2.1",
     "spawn-sync": "^1.0.15",

@@ -15,7 +15,10 @@ const INITIAL_DATA = [];
 const withInitialData = createInitialDataSelector(INITIAL_DATA);
 
 const getRelativeImpact = (impact, impactMin, impactMax) =>
-  Math.max((impact - impactMin) / Math.max(impactMax - impactMin, 1) * 100, 1);
+  Math.max(
+    ((impact - impactMin) / Math.max(impactMax - impactMin, 1)) * 100,
+    1
+  );
 
 function getWithRelativeImpact(items) {
   const impacts = items.map(({ impact }) => impact);

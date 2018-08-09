@@ -55,7 +55,7 @@ exports[`ObjectsTable export should allow the user to choose when exporting all 
   defaultFocusedButton="confirm"
   onCancel={[Function]}
   onConfirm={[Function]}
-  title="Export All"
+  title="Export 4 objects"
 >
   <p>
     Select which types to export. The number in parentheses indicates how many of this type are available to export.
@@ -126,7 +126,9 @@ exports[`ObjectsTable should render normally 1`] = `
 <EuiPage
   restrictWidth={false}
 >
-  <EuiPageBody>
+  <EuiPageBody
+    restrictWidth={false}
+  >
     <EuiPageContent
       horizontalPosition="center"
       panelPaddingSize="l"
@@ -140,10 +142,10 @@ exports[`ObjectsTable should render normally 1`] = `
       verticalPosition="center"
     >
       <Header
+        filteredCount={4}
         onExportAll={[Function]}
         onImport={[Function]}
         onRefresh={[Function]}
-        totalCount={4}
       />
       <EuiSpacer
         size="xs"

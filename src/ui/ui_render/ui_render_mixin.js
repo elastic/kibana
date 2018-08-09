@@ -21,10 +21,22 @@ import { defaults } from 'lodash';
 import { props, reduce as reduceAsync } from 'bluebird';
 import Boom from 'boom';
 import { resolve } from 'path';
-import { i18n } from '@kbn/i18n';
+import { i18n, i18nLoader } from '@kbn/i18n';
 import { AppBootstrap } from './bootstrap';
 
 export function uiRenderMixin(kbnServer, server, config) {
+  const { translationPaths = [] } = kbnServer.uiExports;
+  i18nLoader.registerTranslationFiles(translationPaths);
+
+  async function getUiTranslations() {
+    const locale = config.get('i18n.locale');
+    const translations = await i18nLoader.getTranslationsByLocale(locale);
+
+    return {
+      locale,
+      ...translations,
+    };
+  }
 
   function replaceInjectedVars(request, injectedVars) {
     const { injectedVarsReplacers = [] } = kbnServer.uiExports;
@@ -70,7 +82,7 @@ export function uiRenderMixin(kbnServer, server, config) {
             bundlePath: `${basePath}/bundles`,
             styleSheetPath: app.getStyleSheetUrlPath() ? `${basePath}/${app.getStyleSheetUrlPath()}` : null,
           },
-          translations: await request.getUiTranslations()
+          translations: await getUiTranslations()
         });
 
         const body = await bootstrap.getJsFile();
@@ -106,12 +118,12 @@ export function uiRenderMixin(kbnServer, server, config) {
     }
   });
 
-  async function getLegacyKibanaPayload({ app, request, includeUserProvidedConfig, injectedVarsOverrides }) {
+  async function getLegacyKibanaPayload({ app, translations, request, includeUserProvidedConfig, injectedVarsOverrides }) {
     const uiSettings = request.getUiSettingsService();
-    const translations = await request.getUiTranslations();
 
     return {
-      app: app,
+      app,
+      translations,
       bundleId: `app:${app.getId()}`,
       nav: server.getUiNavLinks(),
       version: kbnServer.version,
@@ -121,7 +133,6 @@ export function uiRenderMixin(kbnServer, server, config) {
       basePath: config.get('server.basePath'),
       serverName: config.get('server.name'),
       devMode: config.get('env.dev'),
-      translations: translations,
       uiSettings: await props({
         defaults: uiSettings.getDefaults(),
         user: includeUserProvidedConfig && uiSettings.getUserProvided()
@@ -140,7 +151,7 @@ export function uiRenderMixin(kbnServer, server, config) {
   async function renderApp({ app, reply, includeUserProvidedConfig = true, injectedVarsOverrides = {} }) {
     try {
       const request = reply.request;
-      const translations = await request.getUiTranslations();
+      const translations = await getUiTranslations();
       const basePath = config.get('server.basePath');
 
       i18n.init(translations);
@@ -151,8 +162,11 @@ export function uiRenderMixin(kbnServer, server, config) {
         i18n: (id, options) => i18n.translate(id, options),
 
         injectedMetadata: {
+          version: kbnServer.version,
+          buildNumber: config.get('pkg.buildNum'),
           legacyMetadata: await getLegacyKibanaPayload({
             app,
+            translations,
             request,
             includeUserProvidedConfig,
             injectedVarsOverrides
