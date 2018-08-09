@@ -20,7 +20,7 @@
 import * as kbnTestServer from '../../test_utils/kbn_server';
 
 let kbnServer;
-async function startServer({ maxPayloadBytesDefault, maxPayloadBytesRoute }) {
+async function makeServer({ maxPayloadBytesDefault, maxPayloadBytesRoute }) {
   kbnServer = kbnTestServer.createServer({
     server: { maxPayloadBytes: maxPayloadBytesDefault }
   });
@@ -35,25 +35,16 @@ async function startServer({ maxPayloadBytesDefault, maxPayloadBytesRoute }) {
       reply(null, req.payload.data.slice(0, 5));
     }
   });
-
-  await kbnServer.newPlatform.proxyListener.root.start();
-}
-
-async function stopServer() {
-  await kbnServer.newPlatform.proxyListener.root.shutdown();
-  await kbnServer.close();
 }
 
 function makeRequest(opts) {
-  // Inject request through new platform http server that we can access through `proxyListener`
-  // provided by the new platform.
-  return kbnServer.newPlatform.proxyListener.root.server.http.service.httpServer.server.inject(opts);
+  return kbnTestServer.makeRequest(kbnServer, opts);
 }
 
-afterEach(async () => await stopServer());
+afterEach(async () => await kbnServer.close());
 
 test('accepts payload with a size larger than default but smaller than route config allows', async () => {
-  await startServer({ maxPayloadBytesDefault: 100, maxPayloadBytesRoute: 200 });
+  await makeServer({ maxPayloadBytesDefault: 100, maxPayloadBytesRoute: 200 });
 
   const resp = await makeRequest({
     url: '/payload_size_check/test/route',
@@ -66,7 +57,7 @@ test('accepts payload with a size larger than default but smaller than route con
 });
 
 test('fails with 400 if payload size is larger than default and route config allows', async () => {
-  await startServer({ maxPayloadBytesDefault: 100, maxPayloadBytesRoute: 200 });
+  await makeServer({ maxPayloadBytesDefault: 100, maxPayloadBytesRoute: 200 });
 
   const resp = await makeRequest({
     url: '/payload_size_check/test/route',
