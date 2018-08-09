@@ -96,7 +96,9 @@ export class WorkspaceHandler {
         return response;
       }
       case 'textDocument/full': {
-        const result = response.result as Full[];
+        const result = Array.isArray(response.result)
+          ? (response.result as Full[])
+          : [response.result as Full];
         for (const full of result) {
           if (full.symbols) {
             for (const symbol of full.symbols) {
