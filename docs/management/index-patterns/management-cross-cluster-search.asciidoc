@@ -9,8 +9,8 @@ clusters accordingly. Review the corresponding Elasticsearch
 {ref}/modules-cross-cluster-search.html[documentation] before attempting to use cross cluster
 search in Kibana.
 
-NOTE: From Kibana 6.3 and onward, you can specify multiple clusters to search as 
-a comma-separated list using the cluster_one:index_name,cluster_two:index_name notation. 
+NOTE: Starting in Kibana 6.3, you can specify multiple clusters to search as 
+a comma-separated list using the `cluster_one:index_name,cluster_two:index_name` notation. 
 If you are running Kibana 6.2 or earlier, you cannot use a comma-separated 
 list that points to separate clusters.
 
