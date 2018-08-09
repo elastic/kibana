@@ -11,14 +11,15 @@ clusters accordingly. Review the corresponding Elasticsearch
 {ref}/modules-cross-cluster-search.html[documentation] before attempting to use cross cluster
 search in Kibana.
 
+NOTE: Starting in {kib} 6.3, you can specify multiple clusters to search as 
+a comma-separated list using the `cluster_one:index_name,cluster_two:index_name` 
+notation. If you are running {kib} 6.2 or earlier, you cannot use a 
+comma-separated list that points to separate clusters.
+
 Once your Elasticsearch clusters are configured for cross cluster search, you can create
 specific index patterns in Kibana to search across the clusters of your choosing. Using the
 same syntax that you'd use in a raw cross cluster search request in Elasticsearch, create your
 index pattern in Kibana with the convention `<cluster-names>:<pattern>`.
-
-For example, if you want to query logstash indices across two of the Elasticsearch clusters
-that you set up for cross cluster search, which were named `cluster_one` and `cluster_two`,
-you would use `cluster_one:logstash-*,cluster_two:logstash-*` as your index pattern in Kibana.
 
 Just like in raw search requests in Elasticsearch, you can use wildcards in your cluster names
 to match any number of clusters, so if you wanted to search logstash indices across any
