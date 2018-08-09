@@ -24,6 +24,7 @@ import * as states from './states';
 import Status from './status';
 import ServerStatus from './server_status';
 
+
 describe('ServerStatus class', function () {
   const plugin = { id: 'name', version: '1.2.3' };
 
@@ -93,13 +94,13 @@ describe('ServerStatus class', function () {
     it('considers each status to produce a summary', function () {
       const status = serverStatus.createForPlugin(plugin);
 
-      expect(serverStatus.overall().state).toBe('uninitialized');
+      expect(serverStatus.overall().id).toBe('uninitialized');
 
       const match = function (overall, state) {
-        expect(overall).toHaveProperty('state', state.id);
-        expect(overall).toHaveProperty('title', state.title);
-        expect(overall).toHaveProperty('icon', state.icon);
-        expect(state.nicknames).toContain(overall.nickname);
+        expect(overall).toHaveProperty('id', state.id);
+        expect(overall).toHaveProperty('state.title', state.title);
+        expect(overall).toHaveProperty('state.uiColor', state.uiColor);
+        expect(state.nicknames).toContain(overall.state.nickname);
       };
 
       status.green();
@@ -133,9 +134,12 @@ describe('ServerStatus class', function () {
       expect(json.statuses).toHaveLength(3);
 
       const out = status => find(json.statuses, { id: status.id });
-      expect(out(service)).toHaveProperty('state', 'green');
-      expect(out(p1)).toHaveProperty('state', 'yellow');
-      expect(out(p2)).toHaveProperty('state', 'red');
+      expect(out(service)).toHaveProperty('state.message', 'Green');
+      expect(out(service)).toHaveProperty('state.uiColor', 'secondary');
+      expect(out(p1)).toHaveProperty('state.message', 'Yellow');
+      expect(out(p1)).toHaveProperty('state.uiColor', 'warning');
+      expect(out(p2)).toHaveProperty('state.message', 'Red');
+      expect(out(p2)).toHaveProperty('state.uiColor', 'danger');
     });
   });
 

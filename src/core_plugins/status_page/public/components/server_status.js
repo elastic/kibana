@@ -18,29 +18,48 @@
  */
 
 import React from 'react';
-
+import PropTypes from 'prop-types';
+import { State as StatePropType } from '../lib/prop_types';
 import {
-  EuiIcon,
+  EuiText,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiTitle,
+  EuiBadge,
 } from '@elastic/eui';
 
-import { DashboardPanelAction } from 'ui/dashboard_panel_actions';
-import { DashboardViewMode } from '../../../dashboard_view_mode';
+const ServerState = ({
+  name,
+  serverState
+}) => (
+  <EuiFlexGroup
+    alignItems="center"
+    justifyContent="spaceBetween"
+    style={{ flexGrow: 0 }}
+  >
+    <EuiFlexItem grow={false}>
+      <EuiTitle>
+        <h2>
+          {'Kibana status is '}
+          <EuiBadge color={serverState.uiColor}>
+            {serverState.title }
+          </EuiBadge>
+        </h2>
+      </EuiTitle>
+    </EuiFlexItem>
+    <EuiFlexItem grow={false}>
+      <EuiText>
+        <p>
+          {name}
+        </p>
+      </EuiText>
+    </EuiFlexItem>
+  </EuiFlexGroup>
+);
 
-/**
- *
- * @return {DashboardPanelAction}
- */
-export function getEditPanelAction() {
-  return new DashboardPanelAction(
-    {
-      displayName: 'Edit visualization',
-      id: 'editPanel',
-      parentPanelId: 'mainMenu',
-    },
-    {
-      icon: <EuiIcon type="pencil" />,
-      onClick: ({ embeddable }) => { window.location = embeddable.metadata.editUrl; },
-      isVisible: ({ containerState }) => (containerState.viewMode === DashboardViewMode.EDIT),
-      isDisabled: ({ embeddable }) => (!embeddable || !embeddable.metadata || !embeddable.metadata.editUrl),
-    });
-}
+ServerState.propTypes = {
+  name: PropTypes.string.isRequired,
+  serverState: StatePropType.isRequired
+};
+
+export default ServerState;

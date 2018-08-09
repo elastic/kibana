@@ -17,27 +17,20 @@
  * under the License.
  */
 
-import formatNumber from './lib/format_number';
-import { uiModules } from 'ui/modules';
-import statusPageMetricTemplate from './status_page_metric.html';
+import PropTypes from 'prop-types';
 
-uiModules
-  .get('kibana', [])
-  .filter('statusMetric', function () {
-    return function (input, type) {
-      const metrics = [].concat(input);
-      return metrics.map(function (metric) {
-        return formatNumber(metric, type);
-      }).join(', ');
-    };
-  })
-  .directive('statusPageMetric', function () {
-    return {
-      restrict: 'E',
-      template: statusPageMetricTemplate,
-      scope: {
-        metric: '=',
-      },
-      controllerAs: 'metric'
-    };
-  });
+export const State = PropTypes.shape({
+  id: PropTypes.string.isRequired,
+  message: PropTypes.string,  // optional
+  title: PropTypes.string,   // optional
+  uiColor: PropTypes.string.isRequired,
+});
+
+export const Metric = PropTypes.shape({
+  name: PropTypes.string.isRequired,
+  value: PropTypes.oneOfType([
+    PropTypes.arrayOf(PropTypes.number),
+    PropTypes.number
+  ]).isRequired,
+  type: PropTypes.string  // optional
+});
