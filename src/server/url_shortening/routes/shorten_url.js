@@ -17,7 +17,10 @@
  * under the License.
  */
 
-export const createShortenUrlRoute = ({ handleShortUrlError, shortUrlAssertValid, shortUrlLookup }) => ({
+import { handleShortUrlError } from './lib/short_url_error';
+import { shortUrlAssertValid } from './lib/short_url_assert_valid';
+
+export const createShortenUrlRoute = ({ shortUrlLookup }) => ({
   method: 'POST',
   path: '/api/shorten_url',
   handler: async function (request, reply) {

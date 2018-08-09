@@ -27,8 +27,8 @@ import { createShortenUrlRoute } from './shorten_url';
 export function createRoutes(server, config) {
   const shortUrlLookup = shortUrlLookupProvider(server);
 
-  server.route(createGotoRoute({ server, config, handleShortUrlError, shortUrlAssertValid, shortUrlLookup }));
-  server.route(createShortenUrlRoute({ handleShortUrlError, shortUrlAssertValid, shortUrlLookup }));
+  server.route(createGotoRoute({ server, config, shortUrlLookup }));
+  server.route(createShortenUrlRoute({ shortUrlLookup }));
 
   // TODO remove deprecated '/shorten' API in master (7.0)
   server.route({

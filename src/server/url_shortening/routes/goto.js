@@ -17,7 +17,10 @@
  * under the License.
  */
 
-export const createGotoRoute = ({ server, config, handleShortUrlError, shortUrlAssertValid, shortUrlLookup }) => ({
+import { handleShortUrlError } from './lib/short_url_error';
+import { shortUrlAssertValid } from './lib/short_url_assert_valid';
+
+export const createGotoRoute = ({ server, config, shortUrlLookup }) => ({
   method: 'GET',
   path: '/goto/{urlId}',
   handler: async function (request, reply) {
