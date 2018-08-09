@@ -234,13 +234,13 @@ export interface InfraPathFilterInput {
 }
 
 export interface InfraMetricInput {
-  type?: InfraMetricType | null /** The type of metric */;
+  type: InfraMetricType /** The type of metric */;
   aggs?: InfraMetricAggInput[] | null /** The aggregations for custom metrics */;
 }
 
 export interface InfraMetricAggInput {
   id: string /** The UUID from the metric aggregation */;
-  type?: InfraMetricAggregationType | null /** The type of aggregation */;
+  type: InfraMetricAggregationType /** The type of aggregation */;
   field?:
     | string
     | null /** The field to use for the aggregation, this is only used for metric aggregations */;

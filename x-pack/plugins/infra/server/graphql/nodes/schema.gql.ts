@@ -72,7 +72,7 @@ export const nodesSchema: any = gql`
     "The UUID from the metric aggregation"
     id: ID!
     "The type of aggregation"
-    type: InfraMetricAggregationType
+    type: InfraMetricAggregationType!
     "The field to use for the aggregation, this is only used for metric aggregations"
     field: String
     "The metric to referece for the aggregation, this is only used for pipeline aggreations"
@@ -85,7 +85,7 @@ export const nodesSchema: any = gql`
 
   input InfraMetricInput {
     "The type of metric"
-    type: InfraMetricType
+    type: InfraMetricType!
     "The aggregations for custom metrics"
     aggs: [InfraMetricAggInput!]
   }
