@@ -44,10 +44,6 @@
     // Disable the breaking keyof behaviour introduced in TS 2.9.2 until EUI is updated to support that too
     "keyofStringsOnly": true
   },
-  "include": [
-    "src/**/*"
-  ],
-  "exclude": [
-    "src/**/__fixtures__/**/*"
-  ]
+  "include": ["src/**/*"],
+  "exclude": ["src/**/__fixtures__/**/*"]
 }

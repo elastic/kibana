@@ -4,13 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { InfraGroupBy, InfraGroupByType } from '../../../../../common/graphql/types';
+import { InfraPath, InfraPathType } from '../../../../../common/graphql/types';
 import { InfraGroupByFilters, InfraGroupByTerms } from '../adapter_types';
 
-export function isGroupByFilters(value: InfraGroupBy): value is InfraGroupByFilters {
-  return value.type === InfraGroupByType.filters;
+export function isGroupByFilters(value: InfraPath): value is InfraGroupByFilters {
+  return value.type === InfraPathType.filters;
 }
 
-export function isGroupByTerms(value: InfraGroupBy): value is InfraGroupByTerms {
-  return value.type === InfraGroupByType.terms;
+export function isGroupByTerms(value: InfraPath): value is InfraGroupByTerms {
+  return value.type === InfraPathType.terms;
 }

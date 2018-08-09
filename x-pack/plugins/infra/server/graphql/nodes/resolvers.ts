@@ -4,11 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { InfraResponse, InfraSourceResolvers } from '../../../common/graphql/types';
+import { InfraSourceResolvers } from '../../../common/graphql/types';
 import { InfraResolvedResult, InfraResolverOf } from '../../lib/adapters/framework';
 import { InfraNodeRequestOptions } from '../../lib/adapters/nodes';
-import { extractGroupByAndMetrics } from '../../lib/adapters/nodes/extract_group_by_and_metrics';
-import { formatResponse } from '../../lib/adapters/nodes/format_response';
+import { extractGroupByAndNodeFromPath } from '../../lib/adapters/nodes/extract_group_by_and_node_from_path';
+import { extractPathsAndMetrics } from '../../lib/adapters/nodes/extract_paths_and_metrics';
 import { InfraNodesDomain } from '../../lib/domains/nodes_domain';
 import { InfraContext } from '../../lib/infra_types';
 import { QuerySourceResolver } from '../sources/resolvers';
@@ -32,20 +32,19 @@ export const createNodeResolvers = (
 } => ({
   InfraSource: {
     async map(source, args, { req }, info) {
-      const { groupBy, metrics, nodeType, nodesKey } = extractGroupByAndMetrics(info);
+      const { metrics, path } = extractPathsAndMetrics(info);
+      const { groupBy, nodeField } = extractGroupByAndNodeFromPath(path);
 
       const options: InfraNodeRequestOptions = {
         filters: args.filters || [],
         groupBy,
+        nodeField,
         sourceConfiguration: source.configuration,
         metrics,
-        nodeType,
-        nodesKey,
         timerange: args.timerange,
       };
 
-      const response: InfraResponse = await libs.nodes.getNodes(req, options);
-      return formatResponse(options, response);
+      return await libs.nodes.getNodes(req, options);
     },
   },
 });

@@ -7,8 +7,8 @@
 import {
   InfraFilter,
   InfraFilterType,
-  InfraGroupBy,
-  InfraGroupByFilter,
+  InfraPath,
+  InfraPathFilter,
 } from '../../../../../common/graphql/types';
 
 import {
@@ -18,7 +18,7 @@ import {
   InfraNodeRequestOptions,
 } from '../adapter_types';
 
-import { convertInputFilterToESQuery } from '../lib/convert_input_filter_to_es_query';
+import { convertInputFilterToESQuery } from './convert_input_filter_to_es_query';
 import { isGroupByFilters, isGroupByTerms } from './type_guards';
 
 export function createQuery(options: InfraNodeRequestOptions): InfraESQuery {
@@ -40,7 +40,7 @@ export function createQuery(options: InfraNodeRequestOptions): InfraESQuery {
   filterClause.push(rangeFilter);
 
   if (groupBy) {
-    groupBy.forEach((group: InfraGroupBy): void => {
+    groupBy.forEach((group: InfraPath): void => {
       if (isGroupByTerms(group) && group.field) {
         const inputFilter: InfraFilter = {
           type: InfraFilterType.exists,
@@ -49,7 +49,7 @@ export function createQuery(options: InfraNodeRequestOptions): InfraESQuery {
         mustClause.push(convertInputFilterToESQuery(inputFilter));
       }
       if (isGroupByFilters(group) && group.filters) {
-        group.filters!.forEach((groupFilter: InfraGroupByFilter | null): void => {
+        group.filters!.forEach((groupFilter: InfraPathFilter | null): void => {
           if (groupFilter != null && groupFilter.query) {
             const inputFilter: InfraFilter = {
               type: InfraFilterType.query_string,
