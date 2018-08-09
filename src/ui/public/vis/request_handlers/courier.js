@@ -84,6 +84,13 @@ const CourierRequestHandlerProvider = function () {
       const timeFilterSearchSource = searchSource.createChild({ callParentStartHandlers: true });
       const requestSearchSource = timeFilterSearchSource.createChild({ callParentStartHandlers: true });
 
+      // if date_histogram agg exists we need to set the timeRange parameter on it
+      aggs.forEach(agg => {
+        if (agg.type.name === 'date_histogram') {
+          agg.params.timeRange = timeRange;
+        }
+      });
+
       // For now we need to mirror the history of the passed search source, since
       // the spy panel wouldn't work otherwise.
       Object.defineProperty(requestSearchSource, 'history', {

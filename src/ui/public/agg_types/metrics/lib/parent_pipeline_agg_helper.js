@@ -54,7 +54,7 @@ const parentPipelineAggHelper = {
         makeAgg: function (termsAgg, state) {
           state = state || { type: 'count' };
           state.schema = metricAggSchema;
-          const metricAgg = new AggConfig(termsAgg.vis, state);
+          const metricAgg = this.parent.createAggregation(termsAgg.vis, state);
           metricAgg.id = termsAgg.id + '-metric';
           return metricAgg;
         },

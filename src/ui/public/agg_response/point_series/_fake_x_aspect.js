@@ -17,7 +17,6 @@
  * under the License.
  */
 
-import { AggConfig } from '../../vis/agg_config';
 import { AggType } from '../../agg_types/agg_type';
 
 export function PointSeriesFakeXAxisProvider() {
@@ -29,11 +28,12 @@ export function PointSeriesFakeXAxisProvider() {
     hasNoDsl: true
   });
 
-  return function makeFakeXAxis(vis) {
-    const fake = new AggConfig(vis, {
-      type: allAgg,
-      schema: vis.type.schemas.all.byName.segment
-    });
+  return function makeFakeXAxis() {
+    const fake = {
+      makeLabel: () => 'all',
+      fieldFormatter: () => '',
+      type: allAgg
+    };
 
     return {
       i: -1,

@@ -28,6 +28,7 @@ import { TimeBuckets } from '../../time_buckets';
 import { createFilterDateHistogram } from './create_filter/date_histogram';
 import { intervalOptions } from './_interval_options';
 import intervalTemplate from '../controls/time_interval.html';
+import { timefilter } from '../../timefilter';
 import dropPartialTemplate from '../controls/drop_partials.html';
 
 const config = chrome.getUiSettingsClient();
@@ -42,16 +43,10 @@ function getInterval(agg) {
   return interval;
 }
 
-function getBounds(vis) {
-  if (vis.filters && vis.filters.timeRange) {
-    return vis.API.timeFilter.calculateBounds(vis.filters.timeRange);
-  }
-}
-
 function setBounds(agg, force) {
   if (agg.buckets._alreadySet && !force) return;
   agg.buckets._alreadySet = true;
-  const bounds = getBounds(agg.vis);
+  const bounds = agg.params.timeRange ? timefilter.calculateBounds(agg.params.timeRange) : null;
   agg.buckets.setBounds(agg.fieldIsTimeField() && bounds);
 }
 
@@ -103,7 +98,11 @@ export const dateHistogramBucketAgg = new BucketAggType({
         setBounds(agg, true);
       }
     },
-
+    {
+      name: 'timeRange',
+      default: null,
+      write: _.noop,
+    },
     {
       name: 'interval',
       type: 'optioned',

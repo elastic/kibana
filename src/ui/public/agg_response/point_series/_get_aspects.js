@@ -55,7 +55,7 @@ export function PointSeriesGetAspectsProvider(Private) {
    * @return {object} - an object with a key for each aspect (see map). The values
    *                    may be undefined, a single aspect, or an array of aspects.
    */
-  return function getAspects(vis, table) {
+  return function getAspects(table) {
     const aspects = _(table.columns)
     // write each column into the aspects under it's group
       .transform(columnToAspect, {})
@@ -70,7 +70,7 @@ export function PointSeriesGetAspectsProvider(Private) {
       .value();
 
     if (!aspects.x) {
-      aspects.x = fakeXAspect(vis);
+      aspects.x = fakeXAspect();
     }
 
     return aspects;

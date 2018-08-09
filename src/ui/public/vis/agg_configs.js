@@ -47,7 +47,7 @@ function parseParentAggs(dslLvlCursor, dsl) {
 }
 
 class AggConfigs extends IndexedArray {
-  constructor(vis, configStates = []) {
+  constructor(indexPattern, configStates = [], schemas) {
     configStates = AggConfig.ensureIds(configStates);
 
     super({
@@ -55,36 +55,42 @@ class AggConfigs extends IndexedArray {
       group: ['schema.group', 'type.name', 'schema.name'],
     });
 
-    this.push(...configStates.map(aggConfigState => {
-      if (aggConfigState instanceof AggConfig) {
-        return aggConfigState;
-      }
-      return new AggConfig(vis, aggConfigState, this);
-    }));
+    this.indexPattern = indexPattern;
+    this.schemas = schemas;
 
-    this.vis = vis;
+    configStates.forEach(params => this.createAggregation(params));
 
+    if (this.schemas) {
+      this.initializeDefaultsFromSchemas(schemas);
+    }
+  }
+
+  initializeDefaultsFromSchemas(schemas) {
     // Set the defaults for any schema which has them. If the defaults
     // for some reason has more then the max only set the max number
     // of defaults (not sure why a someone define more...
     // but whatever). Also if a schema.name is already set then don't
     // set anything.
-    if (vis && vis.type && vis.type.schemas && vis.type.schemas.all) {
-      _(vis.type.schemas.all)
-        .filter(schema => {
-          return Array.isArray(schema.defaults) && schema.defaults.length > 0;
-        })
-        .each(schema => {
-          if (!this.bySchemaName[schema.name]) {
-            const defaults = schema.defaults.slice(0, schema.max);
-            _.each(defaults, defaultState => {
-              const state = _.defaults({ id: AggConfig.nextId(this) }, defaultState);
-              this.push(new AggConfig(vis, state, this));
-            });
-          }
-        })
-        .commit();
-    }
+    _(schemas)
+      .filter(schema => {
+        return Array.isArray(schema.defaults) && schema.defaults.length > 0;
+      })
+      .each(schema => {
+        if (!this.bySchemaName[schema.name]) {
+          const defaults = schema.defaults.slice(0, schema.max);
+          _.each(defaults, defaultState => {
+            const state = _.defaults({ id: AggConfig.nextId(this) }, defaultState);
+            this.push(new AggConfig(this, state));
+          });
+        }
+      })
+      .commit();
+  }
+
+  createAggregation(params) {
+    const aggConfig = params instanceof AggConfig ? params : new AggConfig(this, params);
+    this.push(aggConfig);
+    return aggConfig;
   }
 
   /**
@@ -104,14 +110,14 @@ class AggConfigs extends IndexedArray {
     return true;
   }
 
-  toDsl() {
+  toDsl(hierarchical = false) {
     const dslTopLvl = {};
     let dslLvlCursor;
     let nestedMetrics;
 
-    if (this.vis.isHierarchical()) {
+    if (hierarchical) {
       // collect all metrics, and filter out the ones that we won't be copying
-      nestedMetrics = _(this.vis.aggs.bySchemaGroup.metrics)
+      nestedMetrics = _(this.bySchemaGroup.metrics)
         .filter(function (agg) {
           return agg.type.name !== 'count';
         })

@@ -33,9 +33,9 @@ export function AggResponsePointSeriesProvider(Private) {
   const setupOrderedDateXAxis = Private(PointSeriesOrderedDateAxisProvider);
   const tooltipFormatter = Private(PointSeriesTooltipFormatter);
 
-  return function pointSeriesChartDataFromTable(vis, table) {
+  return function pointSeriesChartDataFromTable(table) {
     const chart = {};
-    const aspects = chart.aspects = getAspects(vis, table);
+    const aspects = chart.aspects = getAspects(table);
 
     chart.tooltipFormatter = tooltipFormatter;
 
@@ -44,7 +44,7 @@ export function AggResponsePointSeriesProvider(Private) {
 
     const datedX = aspects.x.aggConfig.type.ordered && aspects.x.aggConfig.type.ordered.date;
     if (datedX) {
-      setupOrderedDateXAxis(vis, chart);
+      setupOrderedDateXAxis(chart);
     }
 
     chart.series = getSeries(table.rows, chart);

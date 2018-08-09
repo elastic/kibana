@@ -68,8 +68,6 @@ export class VisualizeDataLoader {
   }
 
   public async fetch(params: RequestHandlerParams): Promise<any> {
-    this.vis.filters = { timeRange: params.timeRange };
-
     try {
       // searchSource is only there for courier request handler
       const requestHandlerResponse = await this.requestHandler(this.vis, params);

@@ -26,7 +26,7 @@ export function PointSeriesInitXAxisProvider() {
 
     if (!x.aggConfig || !x.aggConfig.type.ordered) return;
 
-    chart.indexPattern = x.aggConfig.vis.indexPattern;
+    chart.indexPattern = x.aggConfig._indexPattern;
     chart.xAxisField = x.aggConfig.params.field;
 
     chart.ordered = {};
