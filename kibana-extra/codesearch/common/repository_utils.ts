@@ -9,7 +9,7 @@ import path from 'path';
 import Url from 'url';
 import { Location } from 'vscode-languageserver';
 
-import { Repository, RepositoryUri } from '../model';
+import { FileTree, FileTreeItemType, Repository, RepositoryUri } from '../model';
 
 export class RepositoryUtils {
   // Generate a Repository instance by parsing repository remote url
@@ -48,5 +48,25 @@ export class RepositoryUtils {
       return `/${repoUri}/${revision}/${p}!L${line + 1}:${character}`;
     }
     return '';
+  }
+
+  public static getAllFiles(fileTree: FileTree): string[] {
+    if (!fileTree) {
+      return [];
+    }
+    let result: string[] = [];
+    switch (fileTree.type) {
+      case FileTreeItemType.File:
+        result.push(fileTree.path!);
+        break;
+      case FileTreeItemType.Directory:
+        for (const node of fileTree.children!) {
+          result = result.concat(RepositoryUtils.getAllFiles(node));
+        }
+        break;
+      default:
+        break;
+    }
+    return result;
   }
 }

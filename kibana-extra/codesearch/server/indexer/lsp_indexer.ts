@@ -6,13 +6,14 @@
 
 import { EsClient } from '@codesearch/esqueue';
 import fs from 'fs';
-import _ from 'lodash';
 import util from 'util';
-import walk from 'walk';
 
+import { RepositoryUtils } from '../../common/repository_utils';
 import { Document, LspIndexRequest, RepositoryUri } from '../../model';
+import { GitOperations } from '../git_operations';
 import { Log } from '../log';
 import { LspService } from '../lsp/lsp_service';
+import { ServerOptions } from '../server_options';
 import { AbstractIndexer } from './abstract_indexer';
 import { IndexCreationRequest } from './index_creation_request';
 import {
@@ -31,6 +32,7 @@ export class LspIndexer extends AbstractIndexer {
 
   constructor(
     protected readonly lspService: LspService,
+    protected readonly options: ServerOptions,
     protected readonly client: EsClient,
     protected readonly log: Log
   ) {
@@ -66,34 +68,23 @@ export class LspIndexer extends AbstractIndexer {
       workspaceRepo,
       workspaceRevision,
     } = await this.lspService.workspaceHandler.openWorkspace(repoUri, 'head');
-    const path = workspaceRepo.workdir();
-    const walker = walk.walk(path, { followLinks: false });
-
-    return new Promise<LspIndexRequest[]>((resolve: any, reject) => {
-      try {
-        const reqs: LspIndexRequest[] = [];
-        walker.on('file', (root: string, stat: any, next: () => void) => {
-          const filePath = _.replace(root, path + '/', '') + '/' + stat.name;
-          if (this.fileFilter(filePath)) {
-            // Add this file to the list of files
-            const req: LspIndexRequest = {
-              repoUri,
-              localRepoPath: path,
-              filePath,
-              revision: workspaceRevision,
-            };
-            reqs.push(req);
-          }
-          next();
-        });
-
-        walker.on('end', () => {
-          resolve(reqs);
-        });
-      } catch (error) {
-        reject();
-      }
-    });
+    const workspaceDir = workspaceRepo.workdir();
+    const gitOperator = new GitOperations(this.options.repoPath);
+    try {
+      const fileTree = await gitOperator.fileTree(repoUri, '');
+      return RepositoryUtils.getAllFiles(fileTree).map((filePath: string) => {
+        const req: LspIndexRequest = {
+          repoUri,
+          localRepoPath: workspaceDir + filePath,
+          filePath,
+          revision: workspaceRevision,
+        };
+        return req;
+      });
+    } catch (e) {
+      this.log.error(`Prepare lsp indexing requests error: ${e}`);
+      throw e;
+    }
   }
 
   protected async processRequest(request: LspIndexRequest) {
@@ -133,9 +124,5 @@ export class LspIndexer extends AbstractIndexer {
       body,
     });
     return;
-  }
-
-  private fileFilter(filePath: string): boolean {
-    return !filePath.startsWith('.git');
   }
 }

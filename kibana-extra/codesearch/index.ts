@@ -20,7 +20,7 @@ import { repositoryRoute } from './server/routes/repository';
 import {
   documentSearchRoute,
   repositorySearchRoute,
-  symbolSearchRoute
+  symbolSearchRoute,
 } from './server/routes/search';
 import { DocumentSearchClient, RepositorySearchClient, SymbolSearchClient } from './server/search';
 import { ServerOptions } from './server/server_options';
@@ -70,7 +70,7 @@ export default (kibana: any) =>
 
       // Initialize indexers
       const lspService = new LspService('127.0.0.1', server, serverOptions);
-      const lspIndexer = new LspIndexer(lspService, adminCluster.getClient(), log);
+      const lspIndexer = new LspIndexer(lspService, serverOptions, adminCluster.getClient(), log);
 
       // Initialize repository index.
       const repositoryIndexInit = new RepositoryIndexInitializer(adminCluster.getClient(), log);
