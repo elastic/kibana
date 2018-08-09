@@ -5,6 +5,7 @@
  */
 
 import { IRange, Uri } from 'monaco-editor';
+import { history } from '../utils/url';
 
 interface IResourceInput {
   resource: Uri;
@@ -14,11 +15,11 @@ interface IResourceInput {
 export class EditorService {
   public async openEditor(input: IResourceInput, sideBySide?: boolean) {
     const uri = input.resource;
-    let newHash = `${uri.authority}${uri.path}/blob/${uri.query}/${uri.fragment}`;
+    let newHash = `/${uri.authority}${uri.path}/blob/${uri.query}/${uri.fragment}`;
     if (input.options && input.options.selection) {
       const { startColumn, startLineNumber } = input.options.selection;
       newHash = newHash + `!L${startLineNumber}:${startColumn}`;
-      window.location.hash = newHash;
+      history.push(newHash);
     }
     return null;
   }
