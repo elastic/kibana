@@ -23,6 +23,7 @@ test('works for any value', () => {
   expect(schema.any().validate(true)).toBe(true);
   expect(schema.any().validate(100)).toBe(100);
   expect(schema.any().validate('foo')).toBe('foo');
+  expect(schema.any().validate(null)).toBe(null);
   expect(schema.any().validate({ foo: 'bar', baz: 2 })).toEqual({ foo: 'bar', baz: 2 });
 });
 
@@ -50,6 +51,7 @@ describe('#defaultValue', () => {
     expect(schema.any({ defaultValue: true }).validate(false)).toBe(false);
     expect(schema.any({ defaultValue: 200 }).validate(100)).toBe(100);
     expect(schema.any({ defaultValue: 'bar' }).validate('foo')).toBe('foo');
+    expect(schema.any({ defaultValue: 'not-null' }).validate(null)).toBe(null);
     expect(schema.any({ defaultValue: { baz: 'foo' } }).validate({ foo: 'bar', baz: 2 })).toEqual({
       foo: 'bar',
       baz: 2,
