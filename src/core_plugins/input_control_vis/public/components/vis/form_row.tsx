@@ -20,7 +20,7 @@
 import React, { ReactNode } from 'react';
 
 declare module '@elastic/eui' {
-  export const EuiToolTip: React.SFC<{ placement?: string; content?: string }>;
+  export const EuiToolTip: React.SFC<{ placement?: string; content: string }>;
 }
 
 import { EuiFormRow, EuiToolTip } from '@elastic/eui';
@@ -35,10 +35,12 @@ interface FormRowProps {
 
 export function FormRow(props: FormRowProps) {
   const control = props.children;
-  const disabledControl = (
+  const disabledControl = props.disableMsg ? (
     <EuiToolTip placement="top" content={props.disableMsg}>
       {control}
     </EuiToolTip>
+  ) : (
+    undefined
   );
 
   return (
@@ -47,7 +49,7 @@ export function FormRow(props: FormRowProps) {
       id={props.id}
       data-test-subj={'inputControl' + props.controlIndex}
     >
-      {props.disableMsg ? { disabledControl } : { control }}
+      {disabledControl || control}
     </EuiFormRow>
   );
 }
