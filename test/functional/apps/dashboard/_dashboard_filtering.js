@@ -109,6 +109,10 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.dashboard.waitForRenderComplete();
       });
 
+      after(async () => {
+        await filterBar.toggleFilterPinned('bytes');
+      });
+
       it('filters on pie charts', async () => {
         await dashboardExpect.pieSliceCount(0);
       });
