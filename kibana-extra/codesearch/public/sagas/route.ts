@@ -3,21 +3,24 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-
 import { LOCATION_CHANGE } from 'connected-react-router';
-import { put, takeLatest } from 'redux-saga/effects';
-import { fetchRepos } from '../actions';
+import { put, select, takeLatest } from 'redux-saga/effects';
+import { fetchRepos, loadStructure } from '../actions';
+import * as ROUTES from '../components/routes';
+import { lastRequestPathSelector } from '../selectors';
 
 function* handleLocationChange(action: any) {
-  if (action.payload) {
-    let pathname: string;
-    if (action.payload.location) {
-      pathname = action.payload.location.pathname;
-    } else {
-      pathname = action.payload.pathname;
-    }
-    if (pathname && pathname.startsWith('/admin')) {
-      yield put(fetchRepos());
+  const { pathname } = action.payload.location;
+  if (ROUTES.adminRegex.test(pathname)) {
+    yield put(fetchRepos());
+  } else if (ROUTES.mainRegex.test(pathname)) {
+    const lastRequestPath = yield select(lastRequestPathSelector);
+    const [resource, org, repo, , revision, path] = ROUTES.mainRegex.exec(pathname)!.slice(1);
+    if (path) {
+      const uri = `${resource}/${org}/${repo}?${revision}#${path}`;
+      if (lastRequestPath !== uri) {
+        yield put(loadStructure(uri));
+      }
     }
   }
 }

@@ -10,6 +10,7 @@ import { watchFetchBranchesAndCommits, watchFetchRepoTree } from './file';
 import { watchDeleteRepo, watchFetchRepos, watchImportRepo, watchIndexRepo } from './repository';
 import { watchLocationChange } from './route';
 import { watchSearchQueryChanged } from './search';
+import { watchLoadStructure } from './structure';
 
 export function* rootSaga() {
   yield fork(watchFetchRepos);
@@ -20,4 +21,5 @@ export function* rootSaga() {
   yield fork(watchFetchRepoTree);
   yield fork(watchFetchBranchesAndCommits);
   yield fork(watchSearchQueryChanged);
+  yield fork(watchLoadStructure);
 }

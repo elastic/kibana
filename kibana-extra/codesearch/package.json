@@ -69,6 +69,7 @@
     "moment": "^2.22.2",
     "monaco-editor": "^0.13.1",
     "nodegit": "^0.22.1",
+    "path-to-regexp": "^2.2.1",
     "popper.js": "^1.14.3",
     "prop-types": "15.5.8",
     "react": "^16.3.0",
@@ -79,8 +80,11 @@
     "redux": "^4.0.0",
     "redux-actions": "^2.4.0",
     "redux-saga": "^0.16.0",
+    "reselect": "^3.0.1",
     "rimraf": "^2.6.2",
     "vscode-jsonrpc": "^3.6.2",
-    "vscode-languageserver": "^4.2.1"
+    "vscode-languageserver": "^4.2.1",
+    "vscode-languageserver-types": "^3.10.0",
+    "walk": "^2.3.14"
   }
 }

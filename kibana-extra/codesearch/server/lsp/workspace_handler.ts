@@ -63,6 +63,7 @@ export class WorkspaceHandler {
       case 'textDocument/definition':
       case 'textDocument/hover':
       case 'textDocument/references':
+      case 'textDocument/documentSymbol':
       case 'textDocument/full': {
         const payload: TextDocumentPositionParams = params;
         const { filePath, workspacePath, workspaceRevision } = await this.resolveUri(
@@ -114,6 +115,14 @@ export class WorkspaceHandler {
         if (response.result) {
           for (const location of response.result as Location[]) {
             this.convertLocation(location);
+          }
+        }
+        return response;
+      }
+      case 'textDocument/documentSymbol': {
+        if (response.result) {
+          for (const symbol of response.result) {
+            this.convertLocation(symbol.location);
           }
         }
         return response;

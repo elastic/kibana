@@ -72,7 +72,7 @@ export class FileTree extends React.Component<Props, any> {
       this.props.node && (
         <EuiSideNav
           items={(this.props.node.children || []).map(this.treeToItems)}
-          className="fileTree"
+          className="sideNavTree"
           style={{ overflow: 'auto' }}
         />
       )

@@ -11,6 +11,7 @@ import { HashRouter as Router, Redirect, Route, Switch } from 'react-router-dom'
 import { history } from '../utils/url';
 import { Admin } from './admin_page/admin';
 import { Layout } from './layout/layout';
+import * as ROUTES from './routes';
 
 export const App = () => {
   const redirectToAdmin = () => <Redirect to="/admin" />;
@@ -18,13 +19,10 @@ export const App = () => {
     <ConnectedRouter history={history}>
       <Router>
         <Switch>
-          <Route exact={true} path="/" render={redirectToAdmin} />
-          <Route
-            path="/:resource/:org/:repo/:pathType(blob|tree)/:revision/:path*:goto(!.*)?"
-            component={Layout}
-          />
+          <Route path={ROUTES.ROOT} exact={true} render={redirectToAdmin} />
+          <Route path={ROUTES.MAIN} component={Layout} />
+          <Route path={ROUTES.ADMIN} component={Admin} />
           <Route path="/:resource/:org/:repo/:pathType(blob|tree)/:revision" component={Layout} />
-          <Route path="/admin" component={Admin} />
         </Switch>
       </Router>
     </ConnectedRouter>

@@ -32,6 +32,7 @@ export class LayoutBreadcrumbs extends React.PureComponent<Props> {
         href: `#${resource}/${org}/${repo}/HEAD`,
       },
       {
+        text: '',
         component: <VersionDropDown head={revision} repoUri={repoUri} path={path} />,
       },
     ];
@@ -42,11 +43,12 @@ export class LayoutBreadcrumbs extends React.PureComponent<Props> {
       const isLast = index === pathSegments.length - 1;
       if (isLast) {
         breadcrumbs.push({
-          text: p,
+          text: p || '',
           href: baseUri + pathSegments.join('/') + '!' + goto,
         });
       } else {
         breadcrumbs.push({
+          text: '',
           component: (
             <FileListDropdown baseUri={baseUri} paths={pathSegments.slice(0, index + 1)} />
           ),

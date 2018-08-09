@@ -63,7 +63,7 @@ export class VersionDropDownComponent extends React.Component<Props, State> {
 
   public renderReference(ref: ReferenceInfo) {
     return (
-      <div>
+      <div key={ref.commit.id}>
         <EuiLink href={`#/${this.props.repoUri}/${encodeURIComponent(ref.commit.id)}/`}>
           <EuiBadge color={'primary'}>{ref.name}</EuiBadge>
           <span>{`${ref.commit.committer} update ${ref.commit.updated}`}</span>
@@ -75,7 +75,7 @@ export class VersionDropDownComponent extends React.Component<Props, State> {
 
   public renderCommit(commit: CommitInfo) {
     return (
-      <div>
+      <div key={commit.id}>
         <EuiLink href={`#/${this.props.repoUri}/${commit.id}/`}>
           <EuiBadge color={'primary'}>{commit.id}</EuiBadge>
           <span>{`${commit.message}`}</span>

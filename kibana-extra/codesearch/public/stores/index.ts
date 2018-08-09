@@ -22,4 +22,4 @@ export const store = createStore(
 );
 
 sagaMW.run(rootSaga);
-store.dispatch({ type: LOCATION_CHANGE, payload: history.location });
+store.dispatch({ type: LOCATION_CHANGE, payload: { action: 'PUSH', location: history.location } });

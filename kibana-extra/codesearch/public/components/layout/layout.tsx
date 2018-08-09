@@ -4,7 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { DetailSymbolInformation } from '@codesearch/javascript-typescript-langserver';
-import { EuiButtonIcon, EuiComboBox, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
+import {
+  EuiButtonIcon,
+  EuiComboBox,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiSpacer,
+  EuiTab,
+  EuiTabs,
+} from '@elastic/eui';
 import React from 'react';
 import { connect } from 'react-redux';
 
@@ -24,7 +32,16 @@ import { RootState } from '../../reducers';
 import { history } from '../../utils/url';
 import { FileTree } from '../file_tree/file_tree';
 import { Editor } from './editor';
+
+import { closeTreePath, fetchRepoTree, FetchRepoTreePayload } from '../../actions';
+import { history } from '../../utils/url';
+import { SymbolTree } from '../symbol_tree/symbol_tree';
 import { LayoutBreadcrumbs } from './layout_breadcrumbs';
+
+enum Tabs {
+  FILE_TREE,
+  STRUCTURE_TREE,
+}
 
 const noMarginStyle = {
   margin: 0,
@@ -32,6 +49,7 @@ const noMarginStyle = {
 
 interface State {
   showSearchBox: boolean;
+  tab: Tabs;
 }
 interface Props {
   match: match<{ [key: string]: string }>;
@@ -49,6 +67,7 @@ export class LayoutPage extends React.Component<Props, State> {
     super(props);
     this.state = {
       showSearchBox: false,
+      tab: Tabs.FILE_TREE,
     };
   }
 
@@ -123,6 +142,41 @@ export class LayoutPage extends React.Component<Props, State> {
     this.props.searchQueryChanged(searchValue.toLowerCase());
   };
 
+  public onSelectedTabChanged = (tab: Tabs) => {
+    this.setState({ tab });
+  };
+
+  public renderTabs = () => {
+    const clickFileTreeHandler = () => this.onSelectedTabChanged(Tabs.FILE_TREE);
+    const clickStructureTreeHandler = () => this.onSelectedTabChanged(Tabs.STRUCTURE_TREE);
+    return (
+      <React.Fragment>
+        <EuiTab onClick={clickFileTreeHandler} isSelected={Tabs.FILE_TREE === this.state.tab}>
+          File Tree
+        </EuiTab>
+        <EuiTab
+          onClick={clickStructureTreeHandler}
+          isSelected={Tabs.STRUCTURE_TREE === this.state.tab}
+        >
+          Structure Tree
+        </EuiTab>
+      </React.Fragment>
+    );
+  };
+
+  public renderTabContent = () =>
+    this.state.tab === Tabs.STRUCTURE_TREE ? (
+      <SymbolTree />
+    ) : (
+      <FileTree
+        node={this.props.tree}
+        onClick={this.onClick}
+        openedPaths={this.props.openedPaths}
+        getTreeToggler={this.getTreeToggler}
+        activePath={this.props.match.params.path || ''}
+      />
+    );
+
   public render() {
     const { symbols, isSymbolsLoading } = this.props;
     const { resource, org, repo, revision, path, goto, pathType } = this.props.match.params;
@@ -189,13 +243,10 @@ export class LayoutPage extends React.Component<Props, State> {
         <EuiFlexItem className="codeMainContainer" style={noMarginStyle}>
           <EuiFlexGroup justifyContent="spaceBetween" className="codeMain">
             <EuiFlexItem grow={false} style={noMarginStyle} className="fileTreeContainer">
-              <FileTree
-                node={this.props.tree}
-                onClick={this.onClick}
-                openedPaths={this.props.openedPaths}
-                getTreeToggler={this.getTreeToggler}
-                activePath={path || ''}
-              />
+              <div>
+                <EuiTabs>{this.renderTabs()}</EuiTabs>
+              </div>
+              {this.renderTabContent()}
             </EuiFlexItem>
             <EuiFlexItem style={noMarginStyle} className="autoOverflow">
               {editor}
