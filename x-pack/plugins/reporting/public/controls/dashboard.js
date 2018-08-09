@@ -15,7 +15,8 @@ function dashboardReportProvider(Private, $location, dashboardConfig) {
     appName: 'dashboard',
     key: 'reporting-dashboard',
     label: 'Reporting',
-    template: `<export-config object-type="Dashboard" enabled-export-type="printablePdf"></export-config>`,
+    //template: `<export-config object-type="Dashboard" enabled-export-type="printablePdf"></export-config>`,
+    template: `<export-config object-type="Dashboard" enabled-export-type="png"></export-config>`,
     description: 'Dashboard Report',
     hideButton: () => (
       dashboardConfig.getHideWriteControls()
