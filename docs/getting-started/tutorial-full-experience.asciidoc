@@ -1,17 +1,12 @@
+[[tutorial-build-dashboard]]
+== Building your own dashboard
 
-[[tutorial-your-data]]
-== Getting the full Kibana experience
+Ready to load some data and build a dashboard? This tutorial shows you how to:
 
-Ready for the full Kibana experience? This tutorial shows you how to:
-
-* Load a sample data set into Elasticsearch
+* Load a data set into Elasticsearch
 * Define an index pattern
-* Discover and explore the sample data
+* Discover and explore the data
 * Visualize the data
-* Assemble visualizations into a dashboard
+* Add visualizations to a dashboard
 * Inspect the data behind a visualization
 
-If security is enabled, you must have the `all` Kibana privilege to run this tutorial.
-You must also have the `create`, `manage` `read`, `write,` and `delete` 
-index privileges. See {xpack-ref}/security-privileges.html[Security Privileges] 
-for more information.

@@ -1,10 +1,8 @@
 [[tutorial-sample-filter]]
 === Filtering the data
 
-Many visualizations in the *Global Flight* dashboard are interactive. They offer 
-mouse clicks and other controls for you to filter the view of the data. Filters 
-are global&mdash;a change in one visualization simultaneously changes the data 
-in every visualization on the dashboard.
+Many visualizations in the *Global Flight* dashboard are interactive. You can 
+apply filters to modify the view of the data across all visualizations.
 
 . In the *Controls* visualization, set an *Origin City* and a *Destination City*.
 . Click *Apply changes*.
@@ -18,8 +16,8 @@ and Pittsburgh.
 [role="screenshot"]
 image::images/tutorial-sample-filter.png[]
 +
-. Remove the filters by hovering your pointer over their labels in the filter bar
-and clicking the trash can icon. 
+. To remove the filters, in the *Controls* visualization, click *Clear form*, and then
+*Apply changes*.
 
 You can also add filters manually.  In the filter bar, click *Add a Filter*
-and then specify the data you want to view.
+and specify the data you want to view.

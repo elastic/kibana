@@ -8,7 +8,7 @@ When you’re done experimenting with the sample data set, you can remove it.
 
 Now that you have a handle on the {kib} basics, you might be interested in:
 
-* <<tutorial-your-data, Getting the Full {kib} Experience>>.  You’ll learn how to load your own 
+* <<tutorial-build-dashboard, Building your own dashboard>>.  You’ll learn how to load your own 
 data, define an index pattern, and create visualizations and dashboards. 
 * <<visualize>>. Here you’ll find information about all the visualization types 
 {kib} has to offer.

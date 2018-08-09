@@ -1,10 +1,10 @@
 [[tutorial-inspect]]
 === Inspecting the data
 
-The visualizations form a picture of the data, but sometimes you need to 
-view the raw data. Perhaps something in the visualization doesn’t seem right 
-or maybe you want to know what’s going on behind the scenes. In {kib}, 
-you can inspect the data that is being used to create a visualization.
+Seeing visualizations of your data is great, 
+but sometimes you need to look at the actual data to
+understand what's really going on. You can inspect the data behind any visualization
+and view the {es} query used to retrieve it.
 
 . In the dashboard, hover the pointer over the pie chart.
 . Click the icon in the upper right. 
@@ -16,7 +16,7 @@ image::images/tutorial-full-inspect1.png[]
 You can also look at the query used to fetch the data for the visualization. 
 
 . Open the *View:Data* menu and select *Requests*. 
-. Click the tabs to look at the request statistics, the raw Elasticsearch request, 
+. Click the tabs to look at the request statistics, the Elasticsearch request, 
 and the response in JSON. 
 . To close the Inspector, click X in the upper right.
 +

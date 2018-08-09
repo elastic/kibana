@@ -1,15 +1,12 @@
 [[tutorial-sample-data]]
-== Exploring {kib} using sample data
+== Explore {kib} using the Flight dashboard
 
-You’re new to {kib} and want to try it out, but don’t have any data. No worries. 
-The Flights sample data set can help you get comfortable visualizing {es} data.
+You’re new to {kib} and want to try it out. With one click, you can install
+the Flights sample data and start interacting with Kibana in
+seconds. 
 
-If security is enabled, you must have the `all` Kibana privilege.
-You must also have access to the `.kibana_sample_data_flights` index with 
-the `read`, `write,` and `manage` privileges. See {xpack-ref}/security-privileges.html[Security Privileges] 
-for more information.
-
-The Flights data set analyzes data for five airlines.  It’s available from the {kib} home page. 
+The Flights data set contains data for four airlines.  
+You can load the data and preconfigured dashboard from the {kib} home page. 
 
 . On the home page, click the link next to  *Sample data*. 
 . On the *Sample flight data* card, click *Add*.
@@ -28,3 +25,9 @@ In this tutorial, you’ll learn to:
 * Discover the data
 * Edit a visualization
 * Inspect the data behind the scenes
+
+NOTE: If security is enabled, you must have the `all` Kibana privilege.
+You must also have access to the `kibana_sample_data_flights` index with 
+the `read`, `write,` and `manage` privileges. See {xpack-ref}/security-privileges.html[Security Privileges] 
+for more information.
+

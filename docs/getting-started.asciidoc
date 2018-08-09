@@ -6,16 +6,14 @@
 
 Ready to get some hands-on experience with {kib}? There are two ways to start:
 
-* <<tutorial-sample-data, Explore {kib} using a sample data set>>
+* <<tutorial-sample-data, Explore {kib} using the Flights dashboard>>
 +
-The data set includes a pre-packaged dashboard. You can experiment with {kib} 
-without having to go through the process of loading the data.
+Load the Flights sample data and dashboard with one click and start 
+interacting with {kib} visualizations in seconds.
 
-* <<tutorial-your-data, Get the full experience using Kibana>> 
+* <<tutorial-build-dashboard, Build your own dashboard>> 
 +
-You’ll walk through the process of loading data, creating an index pattern, 
-visualizing data, and assembling visualizations into a dashboard.
-
+Manually load a data set and build your own visualizations and dashboard.
 
 Before you begin, make sure you've <<install, installed Kibana>> and established
 a {kibana-ref}/connect-to-elasticsearch.html[connection to Elasticsearch].

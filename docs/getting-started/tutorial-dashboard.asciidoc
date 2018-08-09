@@ -1,5 +1,5 @@
 [[tutorial-dashboard]]
-=== Putting it together in a dashboard
+=== Displaying your visualizations in a dashboard
 
 A dashboard is a collection of visualizations that you can arrange and share.
 Here you'll build a dashboard that contains the visualizations you saved during
