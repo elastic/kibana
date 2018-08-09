@@ -22,9 +22,9 @@ import { format as formatUrl } from 'url';
 
 import supertestAsPromised from 'supertest-as-promised';
 
-export function KibanaSupertestProvider({ getService }) {
+export function KibanaSupertestProvider(options, { getService }) {
   const config = getService('config');
-  const kibanaServerUrl = formatUrl(config.get('servers.kibana'));
+  const kibanaServerUrl = options ? formatUrl(options) : formatUrl(config.get('servers.kibana'));
 
   const kibanaServerCert = config.get('kbnTestServer.serverArgs')
     .filter(arg => arg.startsWith('--server.ssl.certificate'))

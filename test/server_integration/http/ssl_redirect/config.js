@@ -17,23 +17,37 @@
  * under the License.
  */
 
+import { KibanaSupertestProvider } from '../../services';
+
 export default async function ({ readConfigFile }) {
   const httpConfig = await readConfigFile(require.resolve('../../config'));
+
+  const redirectPort = httpConfig.get('servers.kibana.port') + 1;
+  const supertestOptions = {
+    ...httpConfig.get('servers.kibana'),
+    port: redirectPort,
+    // test with non ssl protocol
+    protocol: 'http',
+  };
 
   return {
     testFiles: [
       require.resolve('./'),
     ],
-    services: httpConfig.get('services'),
+    services: {
+      ...httpConfig.get('services'),
+      supertest: KibanaSupertestProvider.bind(null, supertestOptions),
+    },
     servers: {
       ...httpConfig.get('servers'),
       kibana: {
         ...httpConfig.get('servers.kibana'),
+        // start the server with https
         protocol: 'https',
       },
     },
     junit: {
-      reportName: 'Http Integration Tests',
+      reportName: 'Http SSL Integration Tests',
     },
     esTestCluster: httpConfig.get('esTestCluster'),
     kbnTestServer: {
@@ -43,6 +57,7 @@ export default async function ({ readConfigFile }) {
         '--server.ssl.enabled=true',
         `--server.ssl.key=${require.resolve('../../../dev_certs/server.key')}`,
         `--server.ssl.certificate=${require.resolve('../../../dev_certs/server.crt')}`,
+        `--server.ssl.redirectHttpFromPort=${redirectPort}`,
       ],
     },
   };
