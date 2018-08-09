@@ -96,7 +96,7 @@
     "angular-route": "1.4.7",
     "angular-sanitize": "1.5.7",
     "angular-sortable-view": "0.0.15",
-    "autoprefixer": "6.5.4",
+    "autoprefixer": "^9.1.0",
     "babel-core": "6.21.0",
     "babel-loader": "7.1.2",
     "babel-polyfill": "6.20.0",
