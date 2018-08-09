@@ -6,8 +6,8 @@
 
 import { set } from 'lodash';
 
-import { InfraResponse } from '../../../../../common/graphql/types';
-import { InfraBucket, InfraNode, InfraNodeRequestOptions } from '../adapter_types';
+import { InfraNode, InfraResponse } from '../../../../../common/graphql/types';
+import { InfraBucket, InfraNodeRequestOptions } from '../adapter_types';
 import { convertNodesResponseToGroups } from './convert_nodes_response_to_groups';
 import { createNodeItem } from './create_node_item';
 
@@ -20,11 +20,11 @@ export function processNodes(options: InfraNodeRequestOptions, nodes: any[]): In
     const nodeResults: InfraNode[] = nodes.map((node: InfraBucket): InfraNode => {
       return createNodeItem(options, node, node);
     });
-    set(response, options.nodesKey, nodeResults);
+    set(response, 'nodes', nodeResults);
     return response;
   } else {
     // Return a grouped response
-    response.groups = convertNodesResponseToGroups(options, nodes);
+    response.nodes = convertNodesResponseToGroups(options, nodes);
   }
 
   return response;

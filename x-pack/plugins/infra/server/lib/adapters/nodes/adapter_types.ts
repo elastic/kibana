@@ -5,16 +5,14 @@
  */
 
 import {
-  InfraContainer,
-  InfraFilter,
-  InfraGroupBy,
-  InfraGroupByFilter,
-  InfraGroupByType,
-  InfraHost,
-  InfraPod,
+  InfraFilterInput,
+  InfraMetricInput,
+  InfraNode,
+  InfraPathFilterInput,
+  InfraPathInput,
+  InfraPathType,
   InfraResponse,
-  InfraService,
-  InfraTimerange,
+  InfraTimerangeInput,
 } from '../../../../common/graphql/types';
 import { InfraSourceConfiguration } from '../../sources';
 import { InfraFrameworkRequest } from '../framework';
@@ -87,13 +85,12 @@ export interface InfraESSearchBody {
 export type InfraESMSearchBody = InfraESSearchBody | InfraESMSearchHeader;
 
 export interface InfraNodeRequestOptions {
-  nodeType: InfraNodeType;
-  nodesKey: InfraNodesKey;
+  nodeField: string;
   sourceConfiguration: InfraSourceConfiguration;
-  timerange: InfraTimerange;
-  groupBy: InfraGroupBy[];
-  metrics: string[];
-  filters: InfraFilter[];
+  timerange: InfraTimerangeInput;
+  groupBy: InfraPathInput[];
+  metrics: InfraMetricInput[];
+  filters: InfraFilterInput[];
 }
 
 export enum InfraNodesKey {
@@ -135,16 +132,16 @@ export interface InfraProcesorRequestOptions {
 
 export interface InfraGroupByFilters {
   id: string /** The UUID for the group by object */;
-  type: InfraGroupByType /** The type of aggregation to use to bucket the groups */;
+  type: InfraPathType /** The type of aggregation to use to bucket the groups */;
   label?:
     | string
     | null /** The label to use in the results for the group by for the terms group by */;
-  filters: InfraGroupByFilter[] /** The filters to use for the group by aggregation, this is ignored by the terms group by */;
+  filters: InfraPathFilterInput[] /** The filters to use for the group by aggregation, this is ignored by the terms group by */;
 }
 
 export interface InfraGroupByTerms {
   id: string /** The UUID for the group by object */;
-  type: InfraGroupByType /** The type of aggregation to use to bucket the groups */;
+  type: InfraPathType /** The type of aggregation to use to bucket the groups */;
   label?:
     | string
     | null /** The label to use in the results for the group by for the terms group by */;
@@ -175,8 +172,6 @@ export interface InfraGroupWithSubGroups {
 }
 
 export type InfraNodeGroup = InfraGroupWithNodes | InfraGroupWithSubGroups;
-
-export type InfraNode = InfraHost | InfraPod | InfraContainer | InfraService;
 
 export interface InfraNodesResponse {
   total?: number;

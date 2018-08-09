@@ -6,7 +6,7 @@
 
 import { cloneDeep, set } from 'lodash';
 
-import { InfraGroupBy, InfraGroupByFilter } from '../../../../../../common/graphql/types';
+import { InfraPathFilterInput, InfraPathInput } from '../../../../../../common/graphql/types';
 import {
   InfraESQueryStringQuery,
   InfraESSearchBody,
@@ -25,7 +25,7 @@ export const groupByProcessor: InfraProcessor<InfraProcesorRequestOptions, Infra
     const { groupBy } = options.nodeOptions;
     let aggs = {};
     set(result, 'aggs.waffle.aggs.nodes.aggs', aggs);
-    groupBy.forEach((grouping: InfraGroupBy) => {
+    groupBy.forEach((grouping: InfraPathInput) => {
       if (isGroupByTerms(grouping)) {
         const termsAgg = {
           aggs: {},
@@ -43,7 +43,7 @@ export const groupByProcessor: InfraProcessor<InfraProcesorRequestOptions, Infra
           aggs: {},
           filters: {
             filters: grouping.filters!.map(
-              (filter: InfraGroupByFilter): InfraESQueryStringQuery => {
+              (filter: InfraPathFilterInput): InfraESQueryStringQuery => {
                 return {
                   query_string: {
                     analyze_wildcard: true,

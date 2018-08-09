@@ -51,60 +51,23 @@ export interface InfraSourceStatus {
 }
 
 export interface InfraResponse {
-  groups?: InfraGroup[] | null;
-  hosts?: InfraHost[] | null;
-  pods?: InfraPod[] | null;
-  containers?: InfraContainer[] | null;
-  services?: InfraService[] | null;
+  nodes?: InfraNode[] | null;
 }
 
-export interface InfraGroup {
+export interface InfraNode {
+  path: InfraNodePath[];
+  metrics: InfraNodeMetric[];
+}
+
+export interface InfraNodePath {
+  id: string;
+  value: string;
+}
+
+export interface InfraNodeMetric {
+  id: string;
   name: string;
-  groups?: InfraGroup[] | null;
-  hosts?: InfraHost[] | null;
-  pods?: InfraPod[] | null;
-  containers?: InfraContainer[] | null;
-  services?: InfraService[] | null;
-}
-
-export interface InfraHost {
-  name?: string | null;
-  type?: string | null;
-  metrics?: InfraHostMetrics | null;
-}
-
-export interface InfraHostMetrics {
-  count?: number | null;
-}
-
-export interface InfraPod {
-  name?: string | null;
-  type?: string | null;
-  metrics?: InfraPodMetrics | null;
-}
-
-export interface InfraPodMetrics {
-  count?: number | null;
-}
-
-export interface InfraContainer {
-  name?: string | null;
-  type?: string | null;
-  metrics?: InfraContainerMetrics | null;
-}
-
-export interface InfraContainerMetrics {
-  count?: number | null;
-}
-
-export interface InfraService {
-  name?: string | null;
-  type?: string | null;
-  metrics?: InfraServiceMetrics | null;
-}
-
-export interface InfraServiceMetrics {
-  count?: number | null;
+  value: number;
 }
 
 export namespace QueryResolvers {
@@ -116,7 +79,7 @@ export namespace QueryResolvers {
 
   export type FieldsResolver = Resolver<(InfraField | null)[] | null, FieldsArgs>;
   export interface FieldsArgs {
-    indexPattern?: InfraIndexPattern | null;
+    indexPattern?: InfraIndexPatternInput | null;
   }
 
   export type SourceResolver = Resolver<InfraSource, SourceArgs>;
@@ -140,8 +103,8 @@ export namespace InfraSourceResolvers {
   export type StatusResolver = Resolver<InfraSourceStatus>;
   export type MapResolver = Resolver<InfraResponse | null, MapArgs>;
   export interface MapArgs {
-    timerange: InfraTimerange;
-    filters?: InfraFilter[] | null;
+    timerange: InfraTimerangeInput;
+    filters?: InfraFilterInput[] | null;
   }
 }
 /** A set of configuration options for an infrastructure data source */
@@ -191,185 +154,119 @@ export namespace InfraSourceStatusResolvers {
 
 export namespace InfraResponseResolvers {
   export interface Resolvers {
-    groups?: GroupsResolver;
-    hosts?: HostsResolver;
-    pods?: PodsResolver;
-    containers?: ContainersResolver;
-    services?: ServicesResolver;
+    nodes?: NodesResolver;
   }
 
-  export type GroupsResolver = Resolver<InfraGroup[] | null, GroupsArgs>;
-  export interface GroupsArgs {
-    type: InfraGroupByType;
-    field?: string | null;
-    filters?: (InfraGroupByFilter | null)[] | null;
+  export type NodesResolver = Resolver<InfraNode[] | null, NodesArgs>;
+  export interface NodesArgs {
+    path?: InfraPathInput[] | null;
   }
-
-  export type HostsResolver = Resolver<InfraHost[] | null>;
-  export type PodsResolver = Resolver<InfraPod[] | null>;
-  export type ContainersResolver = Resolver<InfraContainer[] | null>;
-  export type ServicesResolver = Resolver<InfraService[] | null>;
 }
 
-export namespace InfraGroupResolvers {
+export namespace InfraNodeResolvers {
   export interface Resolvers {
-    name?: NameResolver;
-    groups?: GroupsResolver;
-    hosts?: HostsResolver;
-    pods?: PodsResolver;
-    containers?: ContainersResolver;
-    services?: ServicesResolver;
+    path?: PathResolver;
+    metrics?: MetricsResolver;
   }
 
+  export type PathResolver = Resolver<InfraNodePath[]>;
+  export type MetricsResolver = Resolver<InfraNodeMetric[], MetricsArgs>;
+  export interface MetricsArgs {
+    metrics?: InfraMetricInput[] | null;
+  }
+}
+
+export namespace InfraNodePathResolvers {
+  export interface Resolvers {
+    id?: IdResolver;
+    value?: ValueResolver;
+  }
+
+  export type IdResolver = Resolver<string>;
+  export type ValueResolver = Resolver<string>;
+}
+
+export namespace InfraNodeMetricResolvers {
+  export interface Resolvers {
+    id?: IdResolver;
+    name?: NameResolver;
+    value?: ValueResolver;
+  }
+
+  export type IdResolver = Resolver<string>;
   export type NameResolver = Resolver<string>;
-  export type GroupsResolver = Resolver<InfraGroup[] | null, GroupsArgs>;
-  export interface GroupsArgs {
-    type: InfraGroupByType;
-    field?: string | null;
-    filters?: (InfraGroupByFilter | null)[] | null;
-  }
-
-  export type HostsResolver = Resolver<InfraHost[] | null>;
-  export type PodsResolver = Resolver<InfraPod[] | null>;
-  export type ContainersResolver = Resolver<InfraContainer[] | null>;
-  export type ServicesResolver = Resolver<InfraService[] | null>;
+  export type ValueResolver = Resolver<number>;
 }
 
-export namespace InfraHostResolvers {
-  export interface Resolvers {
-    name?: NameResolver;
-    type?: TypeResolver;
-    metrics?: MetricsResolver;
-  }
-
-  export type NameResolver = Resolver<string | null>;
-  export type TypeResolver = Resolver<string | null>;
-  export type MetricsResolver = Resolver<InfraHostMetrics | null>;
-}
-
-export namespace InfraHostMetricsResolvers {
-  export interface Resolvers {
-    count?: CountResolver;
-  }
-
-  export type CountResolver = Resolver<number | null>;
-}
-
-export namespace InfraPodResolvers {
-  export interface Resolvers {
-    name?: NameResolver;
-    type?: TypeResolver;
-    metrics?: MetricsResolver;
-  }
-
-  export type NameResolver = Resolver<string | null>;
-  export type TypeResolver = Resolver<string | null>;
-  export type MetricsResolver = Resolver<InfraPodMetrics | null>;
-}
-
-export namespace InfraPodMetricsResolvers {
-  export interface Resolvers {
-    count?: CountResolver;
-  }
-
-  export type CountResolver = Resolver<number | null>;
-}
-
-export namespace InfraContainerResolvers {
-  export interface Resolvers {
-    name?: NameResolver;
-    type?: TypeResolver;
-    metrics?: MetricsResolver;
-  }
-
-  export type NameResolver = Resolver<string | null>;
-  export type TypeResolver = Resolver<string | null>;
-  export type MetricsResolver = Resolver<InfraContainerMetrics | null>;
-}
-
-export namespace InfraContainerMetricsResolvers {
-  export interface Resolvers {
-    count?: CountResolver;
-  }
-
-  export type CountResolver = Resolver<number | null>;
-}
-
-export namespace InfraServiceResolvers {
-  export interface Resolvers {
-    name?: NameResolver;
-    type?: TypeResolver;
-    metrics?: MetricsResolver;
-  }
-
-  export type NameResolver = Resolver<string | null>;
-  export type TypeResolver = Resolver<string | null>;
-  export type MetricsResolver = Resolver<InfraServiceMetrics | null>;
-}
-
-export namespace InfraServiceMetricsResolvers {
-  export interface Resolvers {
-    count?: CountResolver;
-  }
-
-  export type CountResolver = Resolver<number | null>;
-}
-
-export interface InfraIndexPattern {
+export interface InfraIndexPatternInput {
   pattern: string /** The index pattern to use, defaults to '*' */;
   timeFieldName: string /** The timefield to use, defaults to @timestamp */;
 }
 
-export interface InfraTimerange {
+export interface InfraTimerangeInput {
   interval: string /** The interval string to use for last bucket. The format is '{value}{unit}'. For example '5m' would return the metrics for the last 5 minutes of the timespan. */;
   to: number /** The end of the timerange */;
   from: number /** The beginning of the timerange */;
 }
 
-export interface InfraFilter {
+export interface InfraFilterInput {
   type: InfraFilterType /** The type of filter to use */;
   value: string /** The filter value */;
   field?: string | null /** The field name for a match query */;
 }
-/** A group by filter */
-export interface InfraGroupByFilter {
-  id: string /** The UUID for the group by filter */;
-  label: string /** The label for the filter, this will be used as the group name in the final results */;
-  query: string /** The query string query */;
-}
 
-export interface InfraGroupBy {
-  id: string /** The UUID for the group by object */;
-  type: InfraGroupByType /** The type of aggregation to use to bucket the groups */;
+export interface InfraPathInput {
+  id: string /** The UUID for the path by object */;
+  type: InfraPathType /** The type of path */;
   label?:
     | string
     | null /** The label to use in the results for the group by for the terms group by */;
   field?:
     | string
-    | null /** The field to group by from a terms aggregation, this is ignored by the filter group by */;
-  filters?:
-    | InfraGroupByFilter[]
-    | null /** The filters to use for the group by aggregation, this is ignored by the terms group by */;
+    | null /** The field to group by from a terms aggregation, this is ignored by the filter type */;
+  filters?: InfraPathFilterInput[] | null /** The fitlers for the filter group by */;
+}
+/** A group by filter */
+export interface InfraPathFilterInput {
+  id: string /** The UUID for the path filter */;
+  label: string /** The label for the filter, this will be used as the group name in the final results */;
+  query: string /** The query string query */;
+}
+
+export interface InfraMetricInput {
+  type: InfraMetricType /** The type of metric */;
+  aggs?: InfraMetricAggInput[] | null /** The aggregations for custom metrics */;
+}
+
+export interface InfraMetricAggInput {
+  id: string /** The UUID from the metric aggregation */;
+  type: InfraMetricAggregationType /** The type of aggregation */;
+  field?:
+    | string
+    | null /** The field to use for the aggregation, this is only used for metric aggregations */;
+  metric?:
+    | string
+    | null /** The metric to referece for the aggregation, this is only used for pipeline aggreations */;
+  settings?:
+    | string
+    | null /** Additional settings for pipeline aggregations in a key:value comma delimited format */;
+  script?: string | null /** Script field for bucket_script aggregations */;
 }
 export interface FieldsQueryArgs {
-  indexPattern?: InfraIndexPattern | null;
+  indexPattern?: InfraIndexPatternInput | null;
 }
 export interface SourceQueryArgs {
   id: string /** The id of the source */;
 }
 export interface MapInfraSourceArgs {
-  timerange: InfraTimerange;
-  filters?: InfraFilter[] | null;
+  timerange: InfraTimerangeInput;
+  filters?: InfraFilterInput[] | null;
 }
-export interface GroupsInfraResponseArgs {
-  type: InfraGroupByType;
-  field?: string | null;
-  filters?: (InfraGroupByFilter | null)[] | null;
+export interface NodesInfraResponseArgs {
+  path?: InfraPathInput[] | null;
 }
-export interface GroupsInfraGroupArgs {
-  type: InfraGroupByType;
-  field?: string | null;
-  filters?: (InfraGroupByFilter | null)[] | null;
+export interface MetricsInfraNodeArgs {
+  metrics?: InfraMetricInput[] | null;
 }
 
 export enum InfraFilterType {
@@ -378,9 +275,33 @@ export enum InfraFilterType {
   exists = 'exists',
 }
 
-export enum InfraGroupByType {
+export enum InfraPathType {
   terms = 'terms',
   filters = 'filters',
+  hosts = 'hosts',
+  pods = 'pods',
+  containers = 'containers',
+}
+
+export enum InfraMetricType {
+  count = 'count',
+  cpu = 'cpu',
+  memory = 'memory',
+  tx = 'tx',
+  rx = 'rx',
+  disk = 'disk',
+  custom = 'custom',
+}
+
+export enum InfraMetricAggregationType {
+  avg = 'avg',
+  min = 'min',
+  max = 'max',
+  sum = 'sum',
+  bucket_script = 'bucket_script',
+  derivative = 'derivative',
+  moving_average = 'moving_average',
+  positive_only = 'positive_only',
 }
 
 export enum InfraOperator {
@@ -390,14 +311,45 @@ export enum InfraOperator {
   lte = 'lte',
   eq = 'eq',
 }
+export namespace Query {
+  export type Variables = {
+    id: string;
+    timerange: InfraTimerangeInput;
+    filters?: InfraFilterInput[] | null;
+    metrics?: InfraMetricInput[] | null;
+    path?: InfraPathInput[] | null;
+  };
 
-export enum InfraMetricTypes {
-  avg = 'avg',
-  min = 'min',
-  max = 'max',
-  sum = 'sum',
-  bucket_script = 'bucket_script',
-  derivative = 'derivative',
-  moving_average = 'moving_average',
-  positive_only = 'positive_only',
+  export type Query = {
+    __typename?: 'Query';
+    source: Source;
+  };
+
+  export type Source = {
+    __typename?: 'InfraSource';
+    id: string;
+    map?: Map | null;
+  };
+
+  export type Map = {
+    __typename?: 'InfraResponse';
+    nodes?: Nodes[] | null;
+  };
+
+  export type Nodes = {
+    __typename?: 'InfraNode';
+    path: Path[];
+    metrics: Metrics[];
+  };
+
+  export type Path = {
+    __typename?: 'InfraNodePath';
+    value: string;
+  };
+
+  export type Metrics = {
+    __typename?: 'InfraNodeMetric';
+    name: string;
+    value: number;
+  };
 }

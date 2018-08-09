@@ -7,54 +7,30 @@
 import gql from 'graphql-tag';
 
 export const nodesSchema: any = gql`
-  type InfraHostMetrics {
-    count: Int
+  type InfraNodeMetric {
+    id: ID!
+    name: String!
+    value: Float!
   }
 
-  type InfraHost {
-    name: String
-    type: String
-    metrics: InfraHostMetrics
+  type InfraNodePath {
+    id: ID!
+    value: String!
   }
 
-  type InfraPodMetrics {
-    count: Int
+  type InfraNode {
+    path: [InfraNodePath!]!
+    metrics(metrics: [InfraMetricInput!]): [InfraNodeMetric!]!
   }
 
-  type InfraPod {
-    name: String
-    type: String
-    metrics: InfraPodMetrics
-  }
-
-  type InfraContainerMetrics {
-    count: Int
-  }
-
-  type InfraContainer {
-    name: String
-    type: String
-    metrics: InfraContainerMetrics
-  }
-
-  type InfraServiceMetrics {
-    count: Int
-  }
-
-  type InfraService {
-    name: String
-    type: String
-    metrics: InfraServiceMetrics
-  }
-
-  input InfraIndexPattern {
+  input InfraIndexPatternInput {
     "The index pattern to use, defaults to '*'"
     pattern: String!
     "The timefield to use, defaults to @timestamp"
     timeFieldName: String!
   }
 
-  input InfraTimerange {
+  input InfraTimerangeInput {
     "The interval string to use for last bucket. The format is '{value}{unit}'. For example '5m' would return the metrics for the last 5 minutes of the timespan."
     interval: String!
     "The end of the timerange"
@@ -71,7 +47,17 @@ export const nodesSchema: any = gql`
     eq
   }
 
-  enum InfraMetricTypes {
+  enum InfraMetricType {
+    count
+    cpu
+    memory
+    tx
+    rx
+    disk
+    custom
+  }
+
+  enum InfraMetricAggregationType {
     avg
     min
     max
@@ -82,27 +68,52 @@ export const nodesSchema: any = gql`
     positive_only
   }
 
-  enum InfraGroupByType {
-    terms
-    filters
+  input InfraMetricAggInput {
+    "The UUID from the metric aggregation"
+    id: ID!
+    "The type of aggregation"
+    type: InfraMetricAggregationType!
+    "The field to use for the aggregation, this is only used for metric aggregations"
+    field: String
+    "The metric to referece for the aggregation, this is only used for pipeline aggreations"
+    metric: ID
+    "Additional settings for pipeline aggregations in a key:value comma delimited format"
+    settings: String
+    "Script field for bucket_script aggregations"
+    script: String
   }
 
-  input InfraGroupBy {
-    "The UUID for the group by object"
+  input InfraMetricInput {
+    "The type of metric"
+    type: InfraMetricType!
+    "The aggregations for custom metrics"
+    aggs: [InfraMetricAggInput!]
+  }
+
+  enum InfraPathType {
+    terms
+    filters
+    hosts
+    pods
+    containers
+  }
+
+  input InfraPathInput {
+    "The UUID for the path by object"
     id: ID!
-    "The type of aggregation to use to bucket the groups"
-    type: InfraGroupByType!
+    "The type of path"
+    type: InfraPathType!
     "The label to use in the results for the group by for the terms group by"
     label: String
-    "The field to group by from a terms aggregation, this is ignored by the filter group by"
+    "The field to group by from a terms aggregation, this is ignored by the filter type"
     field: String
-    "The filters to use for the group by aggregation, this is ignored by the terms group by"
-    filters: [InfraGroupByFilter!]
+    "The fitlers for the filter group by"
+    filters: [InfraPathFilterInput!]
   }
 
   "A group by filter"
-  input InfraGroupByFilter {
-    "The UUID for the group by filter"
+  input InfraPathFilterInput {
+    "The UUID for the path filter"
     id: ID!
     "The label for the filter, this will be used as the group name in the final results"
     label: String!
@@ -116,7 +127,7 @@ export const nodesSchema: any = gql`
     exists
   }
 
-  input InfraFilter {
+  input InfraFilterInput {
     "The type of filter to use"
     type: InfraFilterType!
     "The filter value"
@@ -125,25 +136,12 @@ export const nodesSchema: any = gql`
     field: String
   }
 
-  type InfraGroup {
-    name: String!
-    groups(type: InfraGroupByType!, field: String, filters: [InfraGroupByFilter]): [InfraGroup!]
-    hosts: [InfraHost!]
-    pods: [InfraPod!]
-    containers: [InfraContainer!]
-    services: [InfraService!]
-  }
-
   type InfraResponse {
-    groups(type: InfraGroupByType!, field: String, filters: [InfraGroupByFilter]): [InfraGroup!]
-    hosts: [InfraHost!]
-    pods: [InfraPod!]
-    containers: [InfraContainer!]
-    services: [InfraService!]
+    nodes(path: [InfraPathInput!]): [InfraNode!]
   }
 
   extend type InfraSource {
     "A hierarchy of hosts, pods, containers, services or arbitrary groups"
-    map(timerange: InfraTimerange!, filters: [InfraFilter!]): InfraResponse
+    map(timerange: InfraTimerangeInput!, filters: [InfraFilterInput!]): InfraResponse
   }
 `;

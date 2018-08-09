@@ -6,7 +6,7 @@
 
 import { get, sortBy } from 'lodash';
 
-import { InfraField, InfraIndexPattern } from '../../../common/graphql/types';
+import { InfraField, InfraIndexPatternInput } from '../../../common/graphql/types';
 import { FieldsAdapter } from '../adapters/fields';
 import { InfraFrameworkRequest } from '../adapters/framework';
 
@@ -18,7 +18,7 @@ export class InfraFieldsDomain {
 
   public async getFields(
     req: InfraFrameworkRequest,
-    indexPattern: InfraIndexPattern = {
+    indexPattern: InfraIndexPatternInput = {
       pattern: '*',
       timeFieldName: '@timestamp',
     }

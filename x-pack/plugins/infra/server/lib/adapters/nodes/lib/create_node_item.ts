@@ -4,39 +4,18 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import {
-  InfraContainer,
-  InfraHost,
-  InfraHostMetrics,
-  InfraPod,
-} from '../../../../../common/graphql/types';
-import { InfraBucket, InfraNode, InfraNodeRequestOptions, InfraNodeType } from '../adapter_types';
+import { InfraNode, InfraNodeMetric } from '../../../../../common/graphql/types';
+import { InfraBucket, InfraNodeRequestOptions } from '../adapter_types';
 
 // TODO: Break these function into seperate files and expand beyond just documnet count
 // In the code below it looks like overkill to split these three functions out
 // but in reality the create metrics functions will be different per node type.
-function createHostMetrics(
+function createNodeMetrics(
   options: InfraNodeRequestOptions,
   node: InfraBucket,
   bucket: InfraBucket
-): InfraHostMetrics {
-  return { count: bucket.doc_count };
-}
-
-function createPodMetrics(
-  options: InfraNodeRequestOptions,
-  node: InfraBucket,
-  bucket: InfraBucket
-): InfraHostMetrics {
-  return { count: bucket.doc_count };
-}
-
-function createContainerMetrics(
-  options: InfraNodeRequestOptions,
-  node: InfraBucket,
-  bucket: InfraBucket
-): InfraHostMetrics {
-  return { count: bucket.doc_count };
+): InfraNodeMetric[] {
+  return [{ id: '1', name: 'count', value: bucket.doc_count }];
 }
 
 export function createNodeItem(
@@ -44,30 +23,8 @@ export function createNodeItem(
   node: InfraBucket,
   bucket: InfraBucket
 ): InfraNode {
-  const { nodeType } = options;
-  if (nodeType === InfraNodeType.host) {
-    return {
-      metrics: createHostMetrics(options, node, bucket),
-      name: node.key,
-      type: InfraNodeType.host,
-    } as InfraHost;
-  }
-
-  if (nodeType === InfraNodeType.pod) {
-    return {
-      metrics: createPodMetrics(options, node, bucket),
-      name: node.key,
-      type: InfraNodeType.pod,
-    } as InfraPod;
-  }
-
-  if (nodeType === InfraNodeType.container) {
-    return {
-      metrics: createContainerMetrics(options, node, bucket),
-      name: node.key,
-      type: InfraNodeType.container,
-    } as InfraContainer;
-  }
-
-  throw new Error(`Unsupported node type: ${nodeType}.`);
+  return {
+    metrics: createNodeMetrics(options, node, bucket),
+    path: [{ id: options.nodeField, value: node.key }],
+  } as InfraNode;
 }
