@@ -5,7 +5,6 @@
  */
 
 import React from 'react';
-import { findDOMNode } from 'react-dom';
 import styled from 'styled-components';
 import { AutoSizer } from '../auto_sizer';
 import { GroupOfGroups } from './group_of_groups';
@@ -23,52 +22,21 @@ interface WafleMapProps {
   map: InfraWaffleData;
 }
 
-const initialState = {
-  hasScroll: false,
-};
-
-type WaffleMapState = Readonly<typeof initialState>;
-
-export class Waffle extends React.Component<WafleMapProps, WaffleMapState> {
-  public readonly state: WaffleMapState = initialState;
-  private outer: any;
-  private inner: any;
-  private scrollBarTimer: any;
-
+export class Waffle extends React.Component<WafleMapProps, {}> {
   public render() {
     return (
       <AutoSizer content>
         {({ measureRef, content: { width = 0, height = 0 } }) => {
-          const { hasScroll } = this.state;
           const { map } = this.props;
           const groupsWithLayout = applyWaffleMapLayout(map, width, height);
           return (
             <Container innerRef={(el: any) => measureRef(el)}>
-              <MapContainer>
-                {groupsWithLayout.map(this.renderGroup)}
-              </MapContainer>
+              <MapContainer>{groupsWithLayout.map(this.renderGroup)}</MapContainer>
             </Container>
           );
         }}
       </AutoSizer>
     );
-  }
-
-  public componentWillMount() {
-    const check = () => {
-      this.scrollBarTimer = setTimeout(() => {
-        const el = findDOMNode(this.outer);
-        if (el instanceof Element) {
-          const hasScroll = el.scrollWidth > el.clientWidth || el.scrollHeight > el.clientHeight;
-          this.setState({ hasScroll }, check);
-        }
-      }, 500);
-    };
-    check();
-  }
-
-  public componentWillUnmount() {
-    clearTimeout(this.scrollBarTimer);
   }
 
   // TODO: Change this to a real implimentation using the tickFormatter from the prototype as an example.
