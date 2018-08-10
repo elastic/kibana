@@ -2,8 +2,7 @@
 == Explore {kib} using the Flight dashboard
 
 You’re new to {kib} and want to try it out. With one click, you can install
-the Flights sample data and start interacting with Kibana in
-seconds. 
+the Flights sample data and start interacting with Kibana. 
 
 The Flights data set contains data for four airlines.  
 You can load the data and preconfigured dashboard from the {kib} home page. 
@@ -13,7 +12,7 @@ You can load the data and preconfigured dashboard from the {kib} home page.
 . Click *View data*.
 
 You’re taken to the *Global Flight* dashboard, a collection of charts, graphs, 
-maps, and other visualizations of the data in the Flights data set.
+maps, and other visualizations of the the data in the `kibana_sample_data_flights` index.
 
 [role="screenshot"]
 image::images/tutorial-sample-dashboard.png[]

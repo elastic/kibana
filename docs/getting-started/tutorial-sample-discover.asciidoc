@@ -1,7 +1,7 @@
 [[tutorial-sample-discover]]
 === Using Discover
 
-In Discover, the data is presented in a table. You can 
+In the Discover application, the Flight data is presented in a table. You can 
 interactively explore the data, including searching and filtering.
 
 * In the side navigation, select *Discover*.

@@ -73,15 +73,17 @@ in a ring around the balance ranges.
 [role="screenshot"]
 image::images/tutorial-visualize-pie-3.png[]
 
-To save this chart so you can use it later, click *Save* in the top menu bar
-and enter `Pie Example`.
+To save this chart so you can use it later:
+
+* Click *Save* in the top menu bar and enter `Pie Example`.
 
 === Bar chart
 
 You'll use a bar chart to look at the Shakespeare data set and compare
 the number of speaking parts in the plays.
 
-Create a *Vertical Bar* chart and set the search source to `shakes*`.
+* Create a *Vertical Bar* chart and set the search source to `shakes*`.
+
 Initially, the chart is a single bar that shows the total count
 of documents that match the default wildcard query.
 
