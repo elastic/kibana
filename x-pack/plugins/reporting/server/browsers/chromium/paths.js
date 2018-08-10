@@ -14,5 +14,8 @@ export const paths = {
     archiveFilename: 'stable-headless-chromium-amazonlinux-2017-03.zip',
     archiveChecksum: 'd752c95520d42c666574c271dda8fd65',
     binaryRelativePath: ''
+  }, {
+    platforms: ['mac', 'darwin', 'windows'],
+    skip: true,
   }]
 };
