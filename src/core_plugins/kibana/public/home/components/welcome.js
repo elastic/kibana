@@ -69,7 +69,7 @@ export class Welcome extends React.Component {
             <EuiTitle size="l" className="home-welcome-title">
               <h1>Welcome to Kibana</h1>
             </EuiTitle>
-            <EuiText size="s" className="welcome-subtitle">Your Window into the Elastic Stack</EuiText>
+            <EuiText size="s" className="welcome-subtitle">Your window into the Elastic Stack</EuiText>
             <EuiSpacer size="xl" />
           </div>
         </header>

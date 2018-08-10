@@ -1044,6 +1044,7 @@ exports[`home welcome should show the normal home page if loading fails 1`] = `
           <EuiFlexGrid
             columns={2}
             gutterSize="l"
+            responsive={true}
           />
         </EuiPanel>
       </EuiFlexItem>
@@ -1069,6 +1070,7 @@ exports[`home welcome should show the normal home page if loading fails 1`] = `
           <EuiFlexGrid
             columns={2}
             gutterSize="l"
+            responsive={true}
           />
         </EuiPanel>
       </EuiFlexItem>
@@ -1160,6 +1162,7 @@ exports[`home welcome should show the normal home page if welcome screen is disa
           <EuiFlexGrid
             columns={2}
             gutterSize="l"
+            responsive={true}
           />
         </EuiPanel>
       </EuiFlexItem>
@@ -1185,6 +1188,7 @@ exports[`home welcome should show the normal home page if welcome screen is disa
           <EuiFlexGrid
             columns={2}
             gutterSize="l"
+            responsive={true}
           />
         </EuiPanel>
       </EuiFlexItem>
@@ -1276,6 +1280,7 @@ exports[`home welcome should show the normal home page if welcome screen is disa
           <EuiFlexGrid
             columns={2}
             gutterSize="l"
+            responsive={true}
           />
         </EuiPanel>
       </EuiFlexItem>
@@ -1301,6 +1306,7 @@ exports[`home welcome should show the normal home page if welcome screen is disa
           <EuiFlexGrid
             columns={2}
             gutterSize="l"
+            responsive={true}
           />
         </EuiPanel>
       </EuiFlexItem>
@@ -1399,6 +1405,7 @@ exports[`home welcome stores skip welcome setting if skipped 1`] = `
           <EuiFlexGrid
             columns={2}
             gutterSize="l"
+            responsive={true}
           />
         </EuiPanel>
       </EuiFlexItem>
@@ -1424,6 +1431,7 @@ exports[`home welcome stores skip welcome setting if skipped 1`] = `
           <EuiFlexGrid
             columns={2}
             gutterSize="l"
+            responsive={true}
           />
         </EuiPanel>
       </EuiFlexItem>
