@@ -17,8 +17,20 @@
  * under the License.
  */
 
+import './share_url_content.less';
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
+
+import {
+  EuiForm,
+  EuiFormRow,
+  EuiSwitch,
+  EuiButton,
+  EuiIconTip,
+  EuiFlexGroup,
+  EuiFlexItem,
+} from '@elastic/eui';
+
 
 import {
   parse as parseUrl,
@@ -29,7 +41,9 @@ import { unhashUrl } from '../../state_management/state_hashing';
 
 export class ShareUrlContent extends Component {
 
-  state = {};
+  state = {
+    shareSnapshot: true,
+  };
 
   componentWillUnmount() {
     window.removeEventListener('hashchange', this.resetShortUrls);
@@ -46,27 +60,22 @@ export class ShareUrlContent extends Component {
 
   resetShortUrls = () => {
     if (this._isMounted) {
-      this.setState({
-        shortSnanshotUrl: undefined,
-        shortOriginalUrl: undefined,
-      });
+      this.setState({ shortSnanshotUrl: undefined });
     }
   }
 
-  getOriginalUrl = () => {
-    const {
-      objectId,
-      getUnhashableStates,
-    } = this.props;
+  hasSavedObjectUrl = () => {
+    return this.props.objectId === undefined || this.props.objectId === '';
+  }
 
-    // If there is no objectId, then it isn't saved, so it has no original URL.
-    if (objectId === undefined || objectId === '') {
+  getSavedObjectUrl = () => {
+    if (!this.hasSavedObjectUrl()) {
       return;
     }
 
     const url = window.location.href;
     // Replace hashes with original RISON values.
-    const unhashedUrl = unhashUrl(url, getUnhashableStates());
+    const unhashedUrl = unhashUrl(url, this.props.getUnhashableStates());
 
     const parsedUrl = parseUrl(unhashedUrl);
     // Get the application route, after the hash, and remove the #.
@@ -89,24 +98,59 @@ export class ShareUrlContent extends Component {
   }
 
   getSnapshotUrl = () => {
-    const { getUnhashableStates } = this.props;
-
     const url = window.location.href;
     // Replace hashes with original RISON values.
-    return unhashUrl(url, getUnhashableStates());
+    return unhashUrl(url, this.props.getUnhashableStates());
+  }
+
+  handleShareSnapshotChange = (evt) => {
+    this.setState({ shareSnapshot: evt.target.checked });
+  }
+
+  renderShareSnapshot = () => {
+    return (
+      <EuiFormRow>
+        <EuiFlexGroup>
+          <EuiFlexItem grow={false}>
+            <EuiSwitch
+              label="Share snapshot"
+              checked={this.state.shareSnapshot}
+              onChange={this.handleShareSnapshotChange}
+            />
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiIconTip
+              content={`Snapshot URLs encode the current state of the ${this.props.objectType} in the URL itself.
+              Edits to the saved ${this.props.objectType} won't be visible via this URL.`}
+              position="bottom"
+            />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiFormRow>
+    );
   }
 
   render() {
     return (
-      <div>
-        <p>{this.getOriginalUrl()}</p>
-        <p>{this.getSnapshotUrl()}</p>
-      </div>
+      <EuiForm className="shareUrlContentForm">
+
+        {this.renderShareSnapshot()}
+
+        <EuiButton
+          fill
+          onClick={() => window.alert('Button clicked')}
+        >
+          Copy { this.props.isEmbedded ? 'iFrame code' : 'link' }
+        </EuiButton>
+
+      </EuiForm>
     );
   }
 }
 
 ShareUrlContent.propTypes = {
+  isEmbedded: PropTypes.bool,
   objectId: PropTypes.string,
+  objectType: PropTypes.string.isRequired,
   getUnhashableStates: PropTypes.func.isRequired,
 };

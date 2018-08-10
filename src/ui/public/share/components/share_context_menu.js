@@ -50,7 +50,9 @@ export class ShareContextMenu extends Component {
           title: 'Embed Code',
           content: (
             <ShareUrlContent
+              isEmbedded
               objectId={this.props.objectId}
+              objectType={this.props.objectType}
               getUnhashableStates={this.props.getUnhashableStates}
             />
           )
@@ -61,6 +63,7 @@ export class ShareContextMenu extends Component {
           content: (
             <ShareUrlContent
               objectId={this.props.objectId}
+              objectType={this.props.objectType}
               getUnhashableStates={this.props.getUnhashableStates}
             />
           )
