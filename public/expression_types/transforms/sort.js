@@ -10,6 +10,11 @@ export const sort = () => ({
       displayName: 'Sort Field',
       argType: 'datacolumn',
     },
+    {
+      name: 'reverse',
+      displayName: 'Descending',
+      argType: 'toggle',
+    },
   ],
   resolve({ context }) {
     if (getState(context) === 'ready') {
