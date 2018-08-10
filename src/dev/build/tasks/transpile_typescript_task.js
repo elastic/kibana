@@ -23,15 +23,24 @@ export const TranspileTypescriptTask = {
   description: 'Transpiling sources with typescript compiler',
 
   async run(config, log, build) {
-    await exec(
-      log,
-      require.resolve('typescript/bin/tsc'),
-      [
-        '--pretty', 'true'
-      ],
-      {
-        cwd: build.resolvePath(),
-      }
-    );
+    const tsConfigPaths = [
+      build.resolvePath('tsconfig.json'),
+      build.resolvePath('tsconfig.browser.json')
+    ];
+
+    for (const tsConfigPath of tsConfigPaths) {
+      log.info(`Compiling`, tsConfigPath, 'project');
+      await exec(
+        log,
+        require.resolve('typescript/bin/tsc'),
+        [
+          '--pretty', 'true',
+          '--project', tsConfigPath,
+        ],
+        {
+          cwd: build.resolvePath(),
+        }
+      );
+    }
   },
 };
