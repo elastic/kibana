@@ -56,7 +56,7 @@ export const CleanTypescriptTask = {
   },
 };
 
-export const CleanNodeTask = {
+export const CleanNodeBuildsTask = {
   description:
     'Cleaning npm from node',
 

@@ -27,7 +27,7 @@ import {
   CleanExtraFilesFromModulesTask,
   CleanPackagesTask,
   CleanTypescriptTask,
-  CleanNodeTask,
+  CleanNodeBuildsTask,
   CleanTask,
   CopySourceTask,
   CreateArchivesSourcesTask,
@@ -121,7 +121,7 @@ export async function buildDistributables(options) {
   await run(CreateArchivesSourcesTask);
   await run(CleanExtraBinScriptsTask);
   await run(CleanExtraBrowsersTask);
-  await run(CleanNodeTask);
+  await run(CleanNodeBuildsTask);
 
   /**
    * package platform-specific builds into archives
