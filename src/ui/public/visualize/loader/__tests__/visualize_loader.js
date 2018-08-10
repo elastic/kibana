@@ -42,6 +42,7 @@ describe('visualize loader', () => {
   let $rootScope;
   let loader;
   let mockedSavedObject;
+  let sandbox;
 
   function createSavedObject() {
     return {
@@ -100,14 +101,22 @@ describe('visualize loader', () => {
 
     // Setup savedObject
     mockedSavedObject = createSavedObject();
+
+    sandbox = sinon.sandbox.create();
     // Mock savedVisualizations.get to return 'mockedSavedObject' when id is 'exists'
-    sinon.stub(savedVisualizations, 'get').callsFake((id) =>
+    sandbox.stub(savedVisualizations, 'get').callsFake((id) =>
       id === 'exists' ? Promise.resolve(mockedSavedObject) : Promise.reject()
     );
   }));
   setupAndTeardownInjectorStub();
   beforeEach(async () => {
     loader = await getVisualizeLoader();
+  });
+
+  afterEach(() => {
+    if (sandbox) {
+      sandbox.restore();
+    }
   });
 
   describe('getVisualizeLoader', () => {
@@ -229,7 +238,7 @@ describe('visualize loader', () => {
 
       it('should allow opening the inspector of the visualization and return its session', () => {
         const handler = loader.embedVisualizationWithSavedObject(newContainer()[0], createSavedObject(), {});
-        sinon.spy(Inspector, 'open');
+        sandbox.spy(Inspector, 'open');
         const inspectorSession = handler.openInspector();
         expect(Inspector.open.calledOnce).to.be(true);
         expect(inspectorSession.close).to.be.a('function');
@@ -303,8 +312,8 @@ describe('visualize loader', () => {
         expect(container.find('[data-test-subj="visualizationLoader"]').attr('data-added')).to.be('value');
       });
 
-      it('should allow updating the time range of the visualization', async () => {
-        const spy = sinon.spy(VisualizeDataLoader.prototype, 'fetch');
+      describe('should allow updating the time range of the visualization', async () => {
+        const spy = sandbox.spy(VisualizeDataLoader.prototype, 'fetch');
 
         const handler = loader.embedVisualizationWithSavedObject(newContainer()[0], createSavedObject(), {
           timeRange: { from: 'now-7d', to: 'now' }
@@ -323,10 +332,12 @@ describe('visualize loader', () => {
 
         sinon.assert.calledOnce(spy);
         sinon.assert.calledWith(spy, sinon.match({ timeRange: { from: 'now-10d/d', to: 'now' } }));
+
+        //VisualizeDataLoader.prototype.fetch.restore()
       });
 
       it('should not set forceFetch on uiState change', async () => {
-        const spy = sinon.spy(VisualizeDataLoader.prototype, 'fetch');
+        const spy = sandbox.spy(VisualizeDataLoader.prototype, 'fetch');
 
         const uiState = new PersistedState();
         loader.embedVisualizationWithSavedObject(newContainer()[0], createSavedObject(), {
@@ -345,6 +356,8 @@ describe('visualize loader', () => {
 
         sinon.assert.calledOnce(spy);
         sinon.assert.calledWith(spy, sinon.match({ forceFetch: false }));
+
+        //VisualizeDataLoader.prototype.fetch.restore()
       });
     });
 
