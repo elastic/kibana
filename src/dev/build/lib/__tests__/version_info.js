@@ -55,7 +55,7 @@ describe('dev/build/lib/version_info', () => {
         versionQualifier: 'beta55',
         pkg
       });
-      expect(versionInfo).to.have.property('buildVersion').to.be(pkg.version + '-beta55');
+      expect(versionInfo).to.have.property('buildVersion').be(pkg.version + '-beta55');
     });
   });
 });
