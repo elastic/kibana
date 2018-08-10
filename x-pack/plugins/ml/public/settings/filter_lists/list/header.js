@@ -17,10 +17,16 @@ import {
   EuiTitle,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiLink,
   EuiText,
   EuiTextColor,
   EuiButtonEmpty,
 } from '@elastic/eui';
+
+import { metadata } from 'ui/metadata';
+
+// metadata.branch corresponds to the version used in documentation links.
+const docsUrl = `https://www.elastic.co/guide/en/elastic-stack-overview/${metadata.branch}/ml-rules.html`;
 
 export function FilterListsHeader({ totalCount, refreshFilterLists }) {
   return (
@@ -58,8 +64,10 @@ export function FilterListsHeader({ totalCount, refreshFilterLists }) {
       <EuiText>
         <p>
           <EuiTextColor color="subdued">
-            From here you can create and edit filter lists for use in detector rules for scoping whether the rule should
-            apply to a known set of values.
+            Filter lists contain values that you can use to include or exclude events from the machine learning analysis.
+            You can use the same filter list in multiple jobs.
+            <br/>
+            <EuiLink href={docsUrl} target="_blank">Learn more</EuiLink>
           </EuiTextColor>
         </p>
       </EuiText>

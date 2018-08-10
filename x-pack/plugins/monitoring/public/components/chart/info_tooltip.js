@@ -5,11 +5,8 @@
  */
 
 import React from 'react';
-import { first, get } from 'lodash';
 
-export function InfoTooltip({ series }) {
-
-  const bucketSize = get(first(series), 'bucket_size'); // bucket size will be the same for all metrics in all series
+export function InfoTooltip({ series, bucketSize }) {
   const tableRows = series.map((item, index) => {
     return (
       <tr

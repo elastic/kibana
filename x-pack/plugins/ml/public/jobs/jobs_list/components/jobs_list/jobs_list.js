@@ -12,6 +12,7 @@ import React, {
 
 import { sortBy } from 'lodash';
 
+import { toLocaleString } from '../../../../util/string_utils';
 import { ResultLinks, actionsMenuContent } from '../job_actions';
 import { JobDescription } from './job_description';
 import { JobIcon } from '../job_message_icon';
@@ -136,6 +137,8 @@ export class JobsList extends Component {
         name: 'Processed records',
         sortable: true,
         truncateText: false,
+        dataType: 'number',
+        render: count => toLocaleString(count)
       }, {
         field: 'memory_status',
         name: 'Memory status',

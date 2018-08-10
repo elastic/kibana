@@ -67,7 +67,7 @@ const DEFAULT_TAB = 'timeline';
 
 export function getAgentMarks(transaction) {
   const duration = get(transaction, TRANSACTION_DURATION);
-  const threshold = duration / 100 * 2;
+  const threshold = (duration / 100) * 2;
 
   return sortBy(
     Object.entries(get(transaction, 'transaction.marks.agent', [])),

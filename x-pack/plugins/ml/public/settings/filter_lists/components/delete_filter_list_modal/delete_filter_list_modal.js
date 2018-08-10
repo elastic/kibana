@@ -16,7 +16,7 @@ import {
   EUI_MODAL_CONFIRM_BUTTON,
 } from '@elastic/eui';
 
-import { checkPermission } from 'plugins/ml/privilege/check_privilege';
+import { checkPermission } from '../../../../privilege/check_privilege';
 import { deleteFilterLists } from './delete_filter_lists';
 
 /*
@@ -87,7 +87,7 @@ export class DeleteFilterListModal extends Component {
           iconType="trash"
           color="danger"
           onClick={this.showModal}
-          isDisabled={(selectedFilterLists.length === 0 || this.canDeleteFilter === false)}
+          isDisabled={(selectedFilterLists === undefined || selectedFilterLists.length === 0 || this.canDeleteFilter === false)}
         >
           Delete
         </EuiButton>
@@ -98,7 +98,7 @@ export class DeleteFilterListModal extends Component {
   }
 }
 DeleteFilterListModal.propTypes = {
-  selectedFilterLists: PropTypes.array.isRequired,
+  selectedFilterLists: PropTypes.array,
 };
 
 

@@ -29,7 +29,7 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
   const find = getService('find');
   const log = getService('log');
   const flyout = getService('flyout');
-  const visualization = getService('visualization');
+  const renderable = getService('renderable');
   const PageObjects = getPageObjects(['common', 'header']);
   const defaultFindTimeout = config.get('timeouts.find');
 
@@ -247,93 +247,6 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
       await input.type(timeString);
     }
 
-    async setComboBox(comboBoxSelector, value) {
-      const comboBox = await testSubjects.find(comboBoxSelector);
-      await this.setComboBoxElement(comboBox, value);
-      await PageObjects.common.sleep(1000);
-    }
-
-    async setComboBoxElement(element, value) {
-      const input = await element.findByTagName('input');
-      await input.clearValue();
-      await input.type(value);
-      await PageObjects.common.sleep(500);
-      await find.clickByCssSelector('.euiComboBoxOption');
-      await this.closeComboBoxOptionsList(element);
-    }
-
-    async filterComboBoxOptions(comboBoxSelector, value) {
-      const comboBox = await testSubjects.find(comboBoxSelector);
-      const input = await comboBox.findByTagName('input');
-      await input.clearValue();
-      await input.type(value);
-      await PageObjects.common.sleep(500);
-      await this.closeComboBoxOptionsList(comboBox);
-    }
-
-    async getComboBoxOptions(comboBoxSelector) {
-      await testSubjects.click(comboBoxSelector);
-      const menu = await retry.try(
-        async () => await testSubjects.find('comboBoxOptionsList'));
-      const optionsText = await menu.getVisibleText();
-      const comboBox = await testSubjects.find(comboBoxSelector);
-      await this.closeComboBoxOptionsList(comboBox);
-      return optionsText;
-    }
-
-    async doesComboBoxHaveSelectedOptions(comboBoxSelector) {
-      const comboBox = await testSubjects.find(comboBoxSelector);
-      const selectedOptions = await comboBox.findAllByClassName('euiComboBoxPill');
-      return selectedOptions > 0;
-    }
-
-    async getComboBoxSelectedOptions(comboBoxSelector) {
-      const comboBox = await testSubjects.find(comboBoxSelector);
-      const selectedOptions = await comboBox.findAllByClassName('euiComboBoxPill');
-      if (selectedOptions.length === 0) {
-        return [];
-      }
-
-      const getOptionValuePromises = selectedOptions.map(async (optionElement) => {
-        return await optionElement.getVisibleText();
-      });
-      return await Promise.all(getOptionValuePromises);
-    }
-
-    async clearComboBox(comboBoxSelector) {
-      log.debug(`clearComboBox for comboBoxSelector:${comboBoxSelector}`);
-      const comboBox = await testSubjects.find(comboBoxSelector);
-      await retry.try(async () => {
-        const clearButtonExists = await this.doesComboBoxClearButtonExist(comboBox);
-        if (!clearButtonExists) {
-          log.debug('Unable to clear comboBox, comboBoxClearButton does not exist');
-          return;
-        }
-
-        const clearBtn = await comboBox.findByCssSelector('[data-test-subj="comboBoxClearButton"]');
-        await clearBtn.click();
-
-        const clearButtonStillExists = await this.doesComboBoxClearButtonExist(comboBox);
-        if (clearButtonStillExists) {
-          throw new Error('Failed to clear comboBox');
-        }
-      });
-      await this.closeComboBoxOptionsList(comboBox);
-    }
-
-    async doesComboBoxClearButtonExist(comboBoxElement) {
-      return await find.exists(
-        async () => await comboBoxElement.findByCssSelector('[data-test-subj="comboBoxClearButton"]'));
-    }
-
-    async closeComboBoxOptionsList(comboBoxElement) {
-      const isOptionsListOpen = await testSubjects.exists('comboBoxOptionsList');
-      if (isOptionsListOpen) {
-        const closeBtn = await comboBoxElement.findByCssSelector('[data-test-subj="comboBoxToggleListButton"]');
-        await closeBtn.click();
-      }
-    }
-
     async addInputControl() {
       await testSubjects.click('inputControlEditorAddBtn');
       await PageObjects.header.waitUntilLoadingHasFinished();
@@ -450,6 +363,11 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
       await PageObjects.header.waitUntilLoadingHasFinished();
     }
 
+    async clickUnlinkSavedSearch() {
+      await testSubjects.doubleClick('unlinkSavedSearch');
+      await PageObjects.header.waitUntilLoadingHasFinished();
+    }
+
     async setValue(newValue) {
       await find.clickByCssSelector('button[ng-click="numberListCntr.add()"]', defaultFindTimeout * 2);
       const input = await find.byCssSelector('input[ng-model="numberListCntr.getList()[$index]"]');
@@ -483,8 +401,14 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
       await Promise.all(getChartTypesPromises);
     }
 
-    async selectAggregation(myString, groupName = 'buckets') {
-      const selector = `[group-name="${groupName}"] vis-editor-agg-params:not(.ng-hide) .agg-select`;
+    async selectAggregation(myString, groupName = 'buckets', childAggregationType = null) {
+      const selector = `
+        [group-name="${groupName}"]
+        vis-editor-agg-params:not(.ng-hide)
+        ${childAggregationType ? `vis-editor-agg-params[group-name="'${childAggregationType}'"]:not(.ng-hide)` : ''}
+        .agg-select
+      `;
+
       await retry.try(async () => {
         await find.clickByCssSelector(selector);
         const input = await find.byCssSelector(`${selector} input.ui-select-search`);
@@ -570,8 +494,14 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
       return await field.getVisibleText();
     }
 
-    async selectField(fieldValue, groupName = 'buckets') {
-      const selector = `[group-name="${groupName}"] vis-editor-agg-params:not(.ng-hide) .field-select`;
+    async selectField(fieldValue, groupName = 'buckets', childAggregationType = null) {
+      const selector = `
+        [group-name="${groupName}"]
+        vis-editor-agg-params:not(.ng-hide)
+        ${childAggregationType ? `vis-editor-agg-params[group-name="'${childAggregationType}'"]:not(.ng-hide)` : ''}
+        .field-select
+      `;
+
       await retry.try(async () => {
         await find.clickByCssSelector(selector);
         const input = await find.byCssSelector(`${selector} input.ui-select-search`);
@@ -649,7 +579,9 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
     async clickGo() {
       await testSubjects.click('visualizeEditorRenderButton');
       await PageObjects.header.waitUntilLoadingHasFinished();
-      await visualization.waitForRender();
+      // For some reason there are two `data-render-complete` tags on each visualization in the visualize page.
+      const countOfDataCompleteFlags = 2;
+      await renderable.waitForRender(countOfDataCompleteFlags);
     }
 
     async clickReset() {
@@ -674,8 +606,26 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
       await testSubjects.click('visEditorTabadvanced');
     }
 
+    async clickYAxisOptions(axisId) {
+      await testSubjects.click(`toggleYAxisOptions-${axisId}`);
+    }
+    async clickYAxisAdvancedOptions(axisId) {
+      await testSubjects.click(`toggleYAxisAdvancedOptions-${axisId}`);
+    }
+
+    async changeYAxisFilterLabelsCheckbox(axisId, enabled) {
+      const selector = `yAxisFilterLabelsCheckbox-${axisId}`;
+      enabled ? await this.checkCheckbox(selector) : await this.uncheckCheckbox(selector);
+    }
+
     async selectChartMode(mode) {
       const selector = await find.byCssSelector(`#seriesMode0 > option[label="${mode}"]`);
+      await selector.click();
+    }
+
+    async selectYAxisScaleType(axisId, scaleType) {
+      const selectElement = await testSubjects.find(`scaleSelectYAxis-${axisId}`);
+      const selector = await selectElement.findByCssSelector(`option[label="${scaleType}"]`);
       await selector.click();
     }
 
