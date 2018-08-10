@@ -24,7 +24,7 @@ import { Logger, LoggerFactory } from '../logging';
 import { ConfigWithSchema } from './config_with_schema';
 import { Env } from './env';
 import { RawConfig } from './raw_config';
-import { AnyType } from './schema';
+import { Type } from './schema';
 
 export type ConfigPath = string | string[];
 
@@ -61,7 +61,7 @@ export class ConfigService {
    * @param ConfigClass A class (not an instance of a class) that contains a
    * static `schema` that we validate the config at the given `path` against.
    */
-  public atPath<Schema extends AnyType, Config>(
+  public atPath<Schema extends Type<any>, Config>(
     path: ConfigPath,
     ConfigClass: ConfigWithSchema<Schema, Config>
   ) {
@@ -76,7 +76,7 @@ export class ConfigService {
    *
    * @see atPath
    */
-  public optionalAtPath<Schema extends AnyType, Config>(
+  public optionalAtPath<Schema extends Type<any>, Config>(
     path: ConfigPath,
     ConfigClass: ConfigWithSchema<Schema, Config>
   ) {
@@ -120,7 +120,7 @@ export class ConfigService {
     return config.getFlattenedPaths().filter(path => !isPathHandled(path, handledPaths));
   }
 
-  private createConfig<Schema extends AnyType, Config>(
+  private createConfig<Schema extends Type<any>, Config>(
     path: ConfigPath,
     rawConfig: {},
     ConfigClass: ConfigWithSchema<Schema, Config>
