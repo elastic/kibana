@@ -106,7 +106,7 @@ export class SavedObjectsClient {
    * @returns {promise} - { id, type, version, attributes }
   */
   async create(type, attributes = {}, options = {}) {
-    return this._repository.create(type, attributes, options);
+    return this._repository.create(null, type, attributes, options);
   }
 
   /**
@@ -118,7 +118,7 @@ export class SavedObjectsClient {
    * @returns {promise} - { saved_objects: [{ id, type, version, attributes, error: { message } }]}
    */
   async bulkCreate(objects, options = {}) {
-    return this._repository.bulkCreate(objects, options);
+    return this._repository.bulkCreate(null, objects, options);
   }
 
   /**
@@ -129,7 +129,7 @@ export class SavedObjectsClient {
    * @returns {promise}
    */
   async delete(type, id) {
-    return this._repository.delete(type, id);
+    return this._repository.delete(null, type, id);
   }
 
   /**
@@ -147,7 +147,7 @@ export class SavedObjectsClient {
    * @returns {promise} - { saved_objects: [{ id, type, version, attributes }], total, per_page, page }
    */
   async find(options = {}) {
-    return this._repository.find(options);
+    return this._repository.find(null, options);
   }
 
   /**
@@ -165,7 +165,7 @@ export class SavedObjectsClient {
    * ])
    */
   async bulkGet(objects = [], options = {}) {
-    return this._repository.bulkGet(objects, options);
+    return this._repository.bulkGet(null, objects, options);
   }
 
   /**
@@ -178,7 +178,7 @@ export class SavedObjectsClient {
    * @returns {promise} - { id, type, version, attributes }
    */
   async get(type, id, options = {}) {
-    return this._repository.get(type, id, options);
+    return this._repository.get(null, type, id, options);
   }
 
   /**
@@ -192,6 +192,6 @@ export class SavedObjectsClient {
    * @returns {promise}
    */
   async update(type, id, attributes, options = {}) {
-    return this._repository.update(type, id, attributes, options);
+    return this._repository.update(null, type, id, attributes, options);
   }
 }

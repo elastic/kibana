@@ -29,6 +29,9 @@ const BASE_SAVED_OBJECT_MAPPINGS = {
   doc: {
     dynamic: 'strict',
     properties: {
+      namespace: {
+        type: 'keyword'
+      },
       type: {
         type: 'keyword'
       },

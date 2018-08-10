@@ -24,6 +24,7 @@ import { getSortingParams } from './sorting_params';
 
 export function getSearchDsl(mappings, options = {}) {
   const {
+    namespace,
     type,
     search,
     searchFields,
@@ -45,7 +46,7 @@ export function getSearchDsl(mappings, options = {}) {
   }
 
   return {
-    ...getQueryParams(mappings, type, search, searchFields, filters),
+    ...getQueryParams(mappings, namespace, type, search, searchFields, filters),
     ...getSortingParams(mappings, type, sortField, sortOrder),
   };
 }

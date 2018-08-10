@@ -68,11 +68,21 @@ function getFieldsForTypes(searchFields, types) {
  *  @param {Array<object>} filters additional query filters
  *  @return {Object}
  */
-export function getQueryParams(mappings, type, search, searchFields, filters = []) {
+export function getQueryParams(mappings, namespace, type, search, searchFields, filters = []) {
 
   const bool = {
     filter: [...filters],
   };
+
+  if (namespace) {
+    bool.filter.push({ 'term': { namespace } });
+  } else {
+    bool.must_not = [{
+      exists: {
+        field: 'namespace',
+      }
+    }];
+  }
 
   if (type) {
     bool.filter.push({ [Array.isArray(type) ? 'terms' : 'term']: { type } });

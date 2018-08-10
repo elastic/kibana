@@ -30,14 +30,15 @@ function assertNonEmptyString(value, name) {
  *  @param  {string} type
  *  @return {string}
  */
-export function trimIdPrefix(id, type) {
+export function trimId(id, namespace, type) {
   assertNonEmptyString(id, 'document id');
   assertNonEmptyString(type, 'saved object type');
 
-  const prefix = `${type}:`;
+  const namespacePrefix = namespace ? `${namespace}:` : '';
+  const prefix = `${namespacePrefix}${type}:`;
 
   if (!id.startsWith(prefix)) {
-    return id;
+    throw new Error('Unable to trim id');
   }
 
   return id.slice(prefix.length);
