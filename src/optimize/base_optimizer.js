@@ -21,6 +21,7 @@ import { writeFile } from 'fs';
 
 import Boom from 'boom';
 import ExtractTextPlugin from 'extract-text-webpack-plugin';
+import UglifyJsPlugin from 'uglifyjs-webpack-plugin';
 import webpack from 'webpack';
 import Stats from 'webpack/lib/Stats';
 import webpackMerge from 'webpack-merge';
@@ -281,8 +282,20 @@ export default class BaseOptimizer {
       },
     };
 
-    // we transpile typescript in the optimizer unless we are running the distributable
-    const transpileTsConfig = {
+    // when running from the distributable define an environment variable we can use
+    // to exclude chunks of code, modules, etc.
+    const isDistributableConfig = {
+      plugins: [
+        new webpack.DefinePlugin({
+          'process.env': {
+            'IS_KIBANA_DISTRIBUTABLE': `"true"`
+          }
+        }),
+      ]
+    };
+
+    // when running from source transpile TypeScript automatically
+    const isSourceConfig = {
       module: {
         rules: [
           {
@@ -294,10 +307,9 @@ export default class BaseOptimizer {
                   transpileOnly: true,
                   experimentalWatchApi: true,
                   onlyCompileBundledFiles: true,
+                  configFile: fromRoot('tsconfig.browser.json'),
                   compilerOptions: {
                     sourceMap: Boolean(this.sourceMaps),
-                    target: 'es5',
-                    module: 'esnext',
                   }
                 }
               }
@@ -353,12 +365,13 @@ export default class BaseOptimizer {
             'NODE_ENV': '"production"'
           }
         }),
-        new webpack.optimize.UglifyJsPlugin({
-          compress: {
-            warnings: false
-          },
+        new UglifyJsPlugin({
+          parallel: true,
           sourceMap: false,
-          mangle: false
+          uglifyOptions: {
+            compress: false,
+            mangle: false
+          }
         }),
       ]
     };
@@ -366,8 +379,8 @@ export default class BaseOptimizer {
     return webpackMerge(
       commonConfig,
       IS_KIBANA_DISTRIBUTABLE
-        ? {}
-        : transpileTsConfig,
+        ? isDistributableConfig
+        : isSourceConfig,
       this.uiBundles.isDevMode()
         ? webpackMerge(watchingConfig, supportEnzymeConfig)
         : productionConfig

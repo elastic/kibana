@@ -9,9 +9,11 @@ exports[`AdvancedOptions should hide if not showing 1`] = `
     onClick={[Function]}
     type="button"
   >
-    <span>
-      Show advanced options
-    </span>
+    <FormattedMessage
+      defaultMessage="Show advanced options"
+      id="kbn.management.createIndexPattern.stepTime.options.showButton"
+      values={Object {}}
+    />
   </EuiButtonEmpty>
   <EuiSpacer
     size="xs"
@@ -28,9 +30,11 @@ exports[`AdvancedOptions should render normally 1`] = `
     onClick={[Function]}
     type="button"
   >
-    <span>
-      Show advanced options
-    </span>
+    <FormattedMessage
+      defaultMessage="Show advanced options"
+      id="kbn.management.createIndexPattern.stepTime.options.showButton"
+      values={Object {}}
+    />
   </EuiButtonEmpty>
   <EuiSpacer
     size="xs"

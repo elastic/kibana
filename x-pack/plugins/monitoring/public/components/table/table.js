@@ -256,6 +256,7 @@ export class MonitoringTable extends React.Component {
         pageIndexFirstRow={numVisibleRows ? firstRow + 1 : 0}
         pageIndexLastRow={numVisibleRows ? numVisibleRows + firstRow : 0}
         rowsFiltered={numAvailableRows}
+        totalRows={this.state.rows.length}
         filterText={this.state.filterText}
         paginationControls={this.getPaginationControls(numAvailableRows, this.props.alwaysShowPageControls)}
         onFilterChange={this.onFilterChange}

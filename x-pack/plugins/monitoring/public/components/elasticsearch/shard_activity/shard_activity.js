@@ -56,6 +56,7 @@ const ToggleCompletedSwitch = ({ toggleHistory, showHistory }) => (
   <KuiToolBarSection>
     <KuiToolBarText>
       <EuiSwitch
+        id="monitoring_completed_recoveries"
         label="Completed recoveries"
         onChange={toggleHistory}
         checked={showHistory}

@@ -58,18 +58,31 @@ function getWatchHandlers(
   const typescriptHandler = buildOutput$.pipe(
     first(data => data.includes('$ tsc')),
     map(() =>
-      buildOutput$.pipe(first(data => data.includes('Compilation complete.')), mapTo('tsc'))
+      buildOutput$.pipe(
+        first(data => data.includes('Compilation complete.')),
+        mapTo('tsc')
+      )
     )
   );
 
   const webpackHandler = buildOutput$.pipe(
     first(data => data.includes('$ webpack')),
-    map(() => buildOutput$.pipe(first(data => data.includes('Chunk Names')), mapTo('webpack')))
+    map(() =>
+      buildOutput$.pipe(
+        first(data => data.includes('Chunk Names')),
+        mapTo('webpack')
+      )
+    )
   );
 
   const defaultHandler = Rx.of(undefined).pipe(
     delay(handlerReadinessTimeout),
-    map(() => buildOutput$.pipe(timeout(handlerDelay), catchError(() => Rx.of('timeout'))))
+    map(() =>
+      buildOutput$.pipe(
+        timeout(handlerDelay),
+        catchError(() => Rx.of('timeout'))
+      )
+    )
   );
 
   return [typescriptHandler, webpackHandler, defaultHandler];

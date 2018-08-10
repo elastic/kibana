@@ -67,7 +67,7 @@ export class DiscoverNoResults extends Component {
           <EuiSpacer size="s" />
 
           <EuiCodeBlock paddingSize="s">
-            {failure.reason}
+            {JSON.stringify(failure.reason)}
           </EuiCodeBlock>
 
           {index < shardFailures.length - 1 ? <EuiSpacer size="l" /> : undefined}

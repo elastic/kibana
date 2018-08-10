@@ -27,7 +27,9 @@ import {
   EuiButton,
 } from '@elastic/eui';
 
-export class AddFilter extends Component {
+import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
+
+export class AddFilterComponent extends Component {
   static propTypes = {
     onAddFilter: PropTypes.func.isRequired,
   }
@@ -46,6 +48,11 @@ export class AddFilter extends Component {
 
   render() {
     const { filter } = this.state;
+    const { intl } = this.props;
+    const placeholder = intl.formatMessage({
+      id: 'kbn.management.editIndexPattern.sourcePlaceholder',
+      defaultMessage: 'source filter, accepts wildcards (e.g., `user*` to filter fields starting with \'user\')'
+    });
 
     return (
       <EuiFlexGroup>
@@ -54,7 +61,7 @@ export class AddFilter extends Component {
             fullWidth
             value={filter}
             onChange={e => this.setState({ filter: e.target.value.trim() })}
-            placeholder="source filter, accepts wildcards (e.g., `user*` to filter fields starting with 'user')"
+            placeholder={placeholder}
           />
         </EuiFlexItem>
         <EuiFlexItem>
@@ -62,10 +69,12 @@ export class AddFilter extends Component {
             isDisabled={filter.length === 0}
             onClick={this.onAddFilter}
           >
-            Add
+            <FormattedMessage id="kbn.management.editIndexPattern.source.addButton" defaultMessage="Add" />
           </EuiButton>
         </EuiFlexItem>
       </EuiFlexGroup>
     );
   }
 }
+
+export const AddFilter = injectI18n(AddFilterComponent);

@@ -32,7 +32,7 @@ function extractMessageId(value) {
 
 function extractMessageValue(value, id) {
   if (!isStringLiteral(value)) {
-    throw new Error(`defaultMessage value should be a string literal for id: ${id}.`);
+    throw new Error(`defaultMessage value should be a string literal ("${id}").`);
   }
 
   return value.value;
@@ -40,7 +40,7 @@ function extractMessageValue(value, id) {
 
 function extractContextValue(value, id) {
   if (!isStringLiteral(value)) {
-    throw new Error(`context value should be a string literal for id: ${id}.`);
+    throw new Error(`context value should be a string literal ("${id}").`);
   }
 
   return value.value;
@@ -77,7 +77,7 @@ export function extractIntlMessages(node) {
     : undefined;
 
   if (!message) {
-    throw new Error(`Default message is required for id: ${messageId}.`);
+    throw new Error(`Empty defaultMessage in intl.formatMessage() is not allowed ("${messageId}").`);
   }
 
   const context = contextProperty
@@ -112,7 +112,7 @@ export function extractFormattedMessages(node) {
     : undefined;
 
   if (!message) {
-    throw new Error(`Default message is required for id: ${messageId}.`);
+    throw new Error(`Default message in <FormattedMessage> is not allowed ("${messageId}").`);
   }
 
   const context = contextProperty
