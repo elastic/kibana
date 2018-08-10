@@ -29,6 +29,7 @@ describe('Header', () => {
       onImport: () => {},
       onRefresh: () => {},
       totalCount: 4,
+      filteredCount: 2,
     };
 
     const component = shallow(

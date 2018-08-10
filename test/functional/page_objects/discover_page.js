@@ -328,6 +328,23 @@ export function DiscoverPageProvider({ getService, getPageObjects }) {
       await testSubjects.moveMouseTo(`docTableHeader-${name}`);
       await testSubjects.click(`docTableRemoveHeader-${name}`);
     }
+
+    async openSidebarFieldFilter() {
+      const fieldFilterFormExists = await testSubjects.exists('discoverFieldFilter');
+      if (!fieldFilterFormExists) {
+        await testSubjects.click('toggleFieldFilterButton');
+        await testSubjects.existOrFail('discoverFieldFilter');
+      }
+    }
+
+    async closeSidebarFieldFilter() {
+      const fieldFilterFormExists = await testSubjects.exists('discoverFieldFilter');
+      if (fieldFilterFormExists) {
+        await testSubjects.click('toggleFieldFilterButton');
+        await testSubjects.notExistOrFail('discoverFieldFilter');
+      }
+    }
+
   }
 
   return new DiscoverPage();

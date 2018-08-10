@@ -81,6 +81,15 @@ export function TestSubjectsProvider({ getService }) {
       });
     }
 
+    async doubleClick(selector, timeout = defaultFindTimeout) {
+      log.debug(`TestSubjects.doubleClick(${selector})`);
+      return await retry.try(async () => {
+        const element = await this.find(selector, timeout);
+        await remote.moveMouseTo(element);
+        await remote.doubleClick();
+      });
+    }
+
     async descendantExists(selector, parentElement) {
       return await find.descendantExistsByCssSelector(testSubjSelector(selector), parentElement);
     }
