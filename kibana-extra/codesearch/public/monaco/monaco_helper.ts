@@ -43,7 +43,9 @@ export class MonacoHelper {
         );
         this.resizeChecker = new ResizeChecker(this.container);
         this.resizeChecker.on('resize', () => {
-          this.editor!.layout();
+          setTimeout(() => {
+            this.editor!.layout();
+          });
         });
         resolve(this.editor);
       });
