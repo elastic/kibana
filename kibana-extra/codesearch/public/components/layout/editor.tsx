@@ -31,7 +31,7 @@ export class Editor extends React.Component<Props> {
   }
 
   public componentWillReceiveProps(nextProps: Props) {
-    if (nextProps.file !== this.props.file) {
+    if (nextProps.file !== this.props.file || nextProps.revision !== this.props.revision) {
       this.loadFile(nextProps.repoUri, nextProps.file, nextProps.revision);
     }
     if (nextProps.goto && nextProps.goto !== this.props.goto) {

@@ -19,6 +19,7 @@ interface Props {
   repoUri: string;
   head: string;
   path: string;
+  pathType: string;
   branches: ReferenceInfo[];
   tags: ReferenceInfo[];
   commits: CommitInfo[];
@@ -62,9 +63,11 @@ export class VersionDropDownComponent extends React.Component<Props, State> {
   }
 
   public renderReference(ref: ReferenceInfo) {
+    const { repoUri, path, pathType } = this.props;
+    const url = `#/${repoUri}/${pathType}/${ref.commit.id}/${path}`;
     return (
       <div key={ref.commit.id}>
-        <EuiLink href={`#/${this.props.repoUri}/${encodeURIComponent(ref.commit.id)}/`}>
+        <EuiLink href={url}>
           <EuiBadge color={'primary'}>{ref.name}</EuiBadge>
           <span>{`${ref.commit.committer} update ${ref.commit.updated}`}</span>
         </EuiLink>
@@ -74,9 +77,11 @@ export class VersionDropDownComponent extends React.Component<Props, State> {
   }
 
   public renderCommit(commit: CommitInfo) {
+    const { repoUri, path, pathType } = this.props;
+    const url = `#/${repoUri}/${pathType}/${commit.id}/${path}`;
     return (
       <div key={commit.id}>
-        <EuiLink href={`#/${this.props.repoUri}/${commit.id}/`}>
+        <EuiLink href={url}>
           <EuiBadge color={'primary'}>{commit.id}</EuiBadge>
           <span>{`${commit.message}`}</span>
         </EuiLink>

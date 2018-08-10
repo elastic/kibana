@@ -15,7 +15,7 @@ interface Props {
 }
 export class LayoutBreadcrumbs extends React.PureComponent<Props> {
   public render() {
-    const { resource, org, repo, revision, path, goto } = this.props.routeParams;
+    const { resource, org, repo, revision, path, goto, pathType } = this.props.routeParams;
     const repoUri = `${resource}/${org}/${repo}`;
 
     const breadcrumbs = [
@@ -33,7 +33,9 @@ export class LayoutBreadcrumbs extends React.PureComponent<Props> {
       },
       {
         text: '',
-        component: <VersionDropDown head={revision} repoUri={repoUri} path={path} />,
+        component: (
+          <VersionDropDown head={revision} repoUri={repoUri} path={path} pathType={pathType} />
+        ),
       },
     ];
     const pathSegments = path ? path.split('/') : [];
