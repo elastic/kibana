@@ -17,29 +17,27 @@
  * under the License.
  */
 
-import React from 'react';
-import { shallow } from 'enzyme';
-import StatusTable from './status_table';
+import formatNumber from './lib/format_number';
+import { uiModules } from 'ui/modules';
+import statusPageMetricTemplate from './status_page_metric.html';
 
-
-const STATE = {
-  id: 'green',
-  uiColor: 'secondary',
-  message: 'Ready'
-};
-
-
-test('render', () => {
-  const component = shallow(<StatusTable
-    statuses={[
-      { id: 'plugin:1', state: STATE }
-    ]}
-  />);
-  expect(component).toMatchSnapshot(); // eslint-disable-line
-});
-
-
-test('render empty', () => {
-  const component = shallow(<StatusTable />);
-  expect(component.isEmptyRender()).toBe(true); // eslint-disable-line
-});
+uiModules
+  .get('kibana', [])
+  .filter('statusMetric', function () {
+    return function (input, type) {
+      const metrics = [].concat(input);
+      return metrics.map(function (metric) {
+        return formatNumber(metric, type);
+      }).join(', ');
+    };
+  })
+  .directive('statusPageMetric', function () {
+    return {
+      restrict: 'E',
+      template: statusPageMetricTemplate,
+      scope: {
+        metric: '=',
+      },
+      controllerAs: 'metric'
+    };
+  });

@@ -24,8 +24,7 @@ export default function (kibana) {
         title: 'Server Status',
         main: 'plugins/status_page/status_page',
         hidden: true,
-        url: '/status',
-        styleSheetPath: `${__dirname}/public/index.scss`
+        url: '/status'
       }
     }
   });
