@@ -72,7 +72,7 @@ interface PanelOptionsMenuContainerOwnProps {
 }
 
 interface PanelOptionsMenuContainerStateProps {
-  panelTitle: string | undefined;
+  panelTitle?: string;
   editUrl: string | null | undefined;
   isExpanded: boolean;
   containerState: ContainerState;
