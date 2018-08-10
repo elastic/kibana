@@ -32,7 +32,7 @@ export const PROJECTS = [
   ...glob.sync('packages/*/tsconfig.json', { cwd: REPO_ROOT }),
 ].map(path => new Project(resolve(REPO_ROOT, path)));
 
-export function filterProjectsByFlag(projectFlag: string | undefined) {
+export function filterProjectsByFlag(projectFlag?: string) {
   if (!projectFlag) {
     return PROJECTS;
   }
