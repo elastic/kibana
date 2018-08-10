@@ -1,0 +1,13 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "target": "es5",
+    "module": "esnext",
+  },
+  "include": [
+    "src/**/public/**/*"
+  ],
+  "exclude": [
+    "src/**/__fixtures__/**/*"
+  ]
+}
