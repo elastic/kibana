@@ -37,8 +37,9 @@ const onClose = () => {
 
 export function showShareMenu({
   anchorElement,
-  objectType,
+  getUnhashableStates,
   objectId,
+  objectType,
 }) {
   if (isOpen) {
     onClose();
@@ -58,6 +59,8 @@ export function showShareMenu({
       withTitle
     >
       <ShareMenu
+        getUnhashableStates={getUnhashableStates}
+        objectId={objectId}
         objectType={objectType}
       />
     </EuiWrappingPopover>

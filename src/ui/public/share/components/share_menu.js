@@ -24,56 +24,113 @@ import {
   EuiContextMenu,
 } from '@elastic/eui';
 
-export class ShareMenu extends Component {
+import {
+  parse as parseUrl,
+  format as formatUrl,
+} from 'url';
 
-  state = {
+import { unhashUrl } from '../../state_management/state_hashing';
+
+import { ShareUrlContent } from './share_url_content';
+
+export class ShareMenu extends Component {
+  constructor(props) {
+    super(props);
+
+    this.state = {
+      panels: [
+        {
+          id: 0,
+          title: `Share this ${this.props.objectType}`,
+          items: [{
+            name: 'Embed code',
+            icon: 'console',
+            panel: 1
+          }, {
+            name: 'Permalinks',
+            icon: 'link',
+            panel: 2
+          }],
+        },
+        {
+          id: 1,
+          title: 'Embed Code',
+          content: (
+            <ShareUrlContent
+              getOriginalUrl={this.getOriginalUrl}
+              getSnapshotUrl={this.getSnapshotUrl}
+            />
+          )
+        },
+        {
+          id: 2,
+          title: 'Permalink',
+          content: (
+            <ShareUrlContent
+              getOriginalUrl={this.getOriginalUrl}
+              getSnapshotUrl={this.getSnapshotUrl}
+            />
+          )
+        }
+      ]
+    };
   }
 
-  panels = [
-    {
-      id: 0,
-      title: `Share this ${this.props.objectType}`,
-      items: [{
-        name: 'Embed code',
-        icon: 'console',
-        panel: 1
-      }, {
-        name: 'Permalinks',
-        icon: 'link',
-        panel: 2
-      }],
-    },
-    {
-      id: 1,
-      title: 'Embed Code',
-      content: (
-        <div>
-          embed code content goes here
-        </div>
-      )
-    },
-    {
-      id: 2,
-      title: 'Permalink',
-      content: (
-        <div>
-          Permalink content goes here
-        </div>
-      )
+  getOriginalUrl = () => {
+    const {
+      objectId,
+      getUnhashableStates,
+    } = this.props;
+
+    // If there is no objectId, then it isn't saved, so it has no original URL.
+    if (objectId === undefined || objectId === '') {
+      return;
     }
-  ];
+
+    const url = window.location.href;
+    // Replace hashes with original RISON values.
+    const unhashedUrl = unhashUrl(url, getUnhashableStates());
+
+    const parsedUrl = parseUrl(unhashedUrl);
+    // Get the application route, after the hash, and remove the #.
+    const parsedAppUrl = parseUrl(parsedUrl.hash.slice(1), true);
+
+    return formatUrl({
+      protocol: parsedUrl.protocol,
+      auth: parsedUrl.auth,
+      host: parsedUrl.host,
+      pathname: parsedUrl.pathname,
+      hash: formatUrl({
+        pathname: parsedAppUrl.pathname,
+        query: {
+          // Add global state to the URL so that the iframe doesn't just show the time range
+          // default.
+          _g: parsedAppUrl.query._g,
+        },
+      }),
+    });
+  }
+
+  getSnapshotUrl = () => {
+    const { getUnhashableStates } = this.props;
+
+    const url = window.location.href;
+    // Replace hashes with original RISON values.
+    return unhashUrl(url, getUnhashableStates());
+  }
 
   render() {
     return (
       <EuiContextMenu
         initialPanelId={0}
-        panels={this.panels}
+        panels={this.state.panels}
       />
     );
   }
 }
 
 ShareMenu.propTypes = {
+  objectId: PropTypes.string,
   objectType: PropTypes.string.isRequired,
   getUnhashableStates: PropTypes.func.isRequired,
 };
