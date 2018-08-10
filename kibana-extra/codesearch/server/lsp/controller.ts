@@ -83,24 +83,30 @@ export class LanguageServerController implements ILanguageServerHandler {
     if (this.detach) {
       log.info('Detach mode, expected LSP launch externally');
     } else {
-      const child = spawn(
-        'node',
-        [
-          path.resolve(
-            __dirname,
-            '../../../../lsp/javascript-typescript-langserver/lib/language-server'
-          ),
-          '-p',
-          port.toString(),
-          '-c',
-          '1',
-        ],
-        {
-          detached: false,
-          stdio: 'inherit',
-        }
-      );
+      const spawnTs = () =>
+        spawn(
+          'node',
+          [
+            path.resolve(
+              __dirname,
+              '../../../../lsp/javascript-typescript-langserver/lib/language-server'
+            ),
+            '-p',
+            port.toString(),
+            '-c',
+            '1',
+          ],
+          {
+            detached: false,
+            stdio: 'inherit',
+          }
+        );
+      let child = spawnTs();
       log.info(`Launch Typescript Language Server at port ${port}, pid:${child.pid}`);
+      proxy.onDisconnected(() => {
+        child.kill();
+        child = spawnTs();
+      });
     }
     proxy.onDisconnected(() => {
       if (!proxy.isClosed) {

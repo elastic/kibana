@@ -52,6 +52,7 @@ export default (kibana: any) =>
         queueIndex: Joi.string().default('.codesearch-worker-queue'),
         queueTimeout: Joi.number().default(60 * 60 * 1000), // 1 hour by default
         updateFreqencyMs: Joi.number().default(5 * 60 * 1000), // 5 minutes by default.
+        lspRequestTimeout: Joi.number().default(30), // timeout a request over 30s
       }).default();
     },
 
@@ -114,7 +115,7 @@ export default (kibana: any) =>
 
       lspService.launchServers().then(() => {
         // register lsp route after language server launched
-        lspRoute(server, lspService);
+        lspRoute(server, lspService, serverOptions);
       });
     },
   });

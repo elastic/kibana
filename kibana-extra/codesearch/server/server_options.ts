@@ -32,4 +32,8 @@ export class ServerOptions {
   public get updateFrequencyMs(): number {
     return this.options.updateFreqencyMs;
   }
+
+  public get lspRequestTimeout(): number {
+    return this.options.lspRequestTimeout;
+  }
 }

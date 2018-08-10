@@ -6,9 +6,12 @@
 
 import { ResponseError } from 'vscode-jsonrpc';
 import { Server } from '../kibana_types';
+import { Log } from '../log';
 import { LspService } from '../lsp/lsp_service';
+import { ServerOptions } from '../server_options';
+import { promiseTimeout } from '../utils/timeout';
 
-export function lspRoute(server: Server, lspService: LspService) {
+export function lspRoute(server: Server, lspService: LspService, serverOptions: ServerOptions) {
   server.route({
     path: '/api/lsp/textDocument/{method}',
     async handler(req, reply) {
@@ -16,14 +19,21 @@ export function lspRoute(server: Server, lspService: LspService) {
         const method = req.params.method;
         if (method) {
           try {
-            const result = await lspService.sendRequest(`textDocument/${method}`, req.payload);
+            const result = await promiseTimeout(
+              serverOptions.lspRequestTimeout * 1000,
+              lspService.sendRequest(`textDocument/${method}`, req.payload)
+            );
             reply.response(result);
           } catch (error) {
+            const log = new Log(server);
+            log.error(error);
             if (error instanceof ResponseError) {
               reply
                 .response(error.toJson())
                 .type('json')
                 .code(503); // different code for LS errors and other internal errors.
+            } else if (error.isBoom) {
+              reply(error);
             } else {
               reply
                 .response(JSON.stringify(error))

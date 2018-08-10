@@ -151,13 +151,7 @@ export class LanguageServerProxy implements ILanguageServerHandler {
       const server = net.createServer(socket => {
         server.close();
         this.eventEmitter.emit('connect');
-        socket.on('close', () => {
-          if (this.clientConnection) {
-            this.clientConnection.dispose();
-          }
-          this.clientConnection = null;
-          this.eventEmitter.emit('close');
-        });
+        socket.on('close', () => this.onSocketClosed());
 
         if (this.logger) {
           this.logger.info('JDT LS connection established on port ' + this.targetPort);
@@ -212,21 +206,20 @@ export class LanguageServerProxy implements ILanguageServerHandler {
         this.eventEmitter.emit('connect');
       });
 
-      socket.on('end', () => {
-        if (this.clientConnection) {
-          this.clientConnection.dispose();
-        }
-        this.clientConnection = null;
-      });
-
-      socket.on('close', () => {
-        this.eventEmitter.emit('close');
-      });
+      socket.on('close', () => this.onSocketClosed());
 
       socket.on('error', () => void 0);
       socket.on('timeout', () => void 0);
       socket.on('drain', () => void 0);
       socket.connect(this.targetPort, this.targetHost);
     });
+  }
+
+  private onSocketClosed() {
+    if (this.clientConnection) {
+      this.clientConnection.dispose();
+    }
+    this.clientConnection = null;
+    this.eventEmitter.emit('close');
   }
 }
