@@ -17,7 +17,7 @@ import {
   InfraTimerangeInput,
 } from '../../../common/graphql/types';
 import { InfraWaffleMapGroup } from '../../lib/lib';
-import { nodesToWaffleMap } from '../libs/nodes_to_wafflemap';
+import { nodesToWaffleMap } from './nodes_to_wafflemap';
 import { query } from './query';
 
 interface ChildProps {

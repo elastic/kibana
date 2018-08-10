@@ -4,16 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import {
-  EuiContextMenu,
-  EuiContextMenuPanelDescriptor,
-  EuiPopover,
-  EuiToolTip,
-} from '@elastic/eui';
+import { EuiToolTip } from '@elastic/eui';
 import { darken } from 'polished';
 import React from 'react';
 import styled from 'styled-components';
 import { InfraWaffleMapNode, InfraWaffleOptions } from '../../lib/lib';
+import { NodeContextMenu } from './node_context_menu';
 
 const initialState = {
   isPopoverOpen: false,
@@ -32,57 +28,35 @@ interface Props {
 export class Node extends React.PureComponent<Props, State> {
   public readonly state: State = initialState;
   public render() {
-    const { node, formatter, squareSize } = this.props;
+    const { node, formatter, options, squareSize } = this.props;
     const { isPopoverOpen } = this.state;
     const metric = node.metrics.find(m => m.name === 'count');
     const valueMode = squareSize > 75;
     const label = 'Count';
     const value = metric != null ? formatter(metric.value) : 'n/a';
-    const nodeType = 'host';
-
-    const panels: EuiContextMenuPanelDescriptor[] = [
-      {
-        id: 0,
-        title: '',
-        items: [
-          {
-            name: `View logs for this ${nodeType}`,
-            href: `#/details?filter=${node.name}`,
-          },
-          {
-            name: `View APM Traces for this ${nodeType}`,
-            href: `/app/apm`,
-          },
-        ],
-      },
-    ];
-
-    const nodeContent = (
-      <EuiToolTip position="top" content={`${node.name} | ${value}`}>
-        <Container style={{ width: squareSize, height: squareSize }} onClick={this.togglePopover}>
-          <SquareOuter>
-            <SquareInner>
-              {valueMode && (
-                <ValueInner>
-                  <Label>{label}</Label>
-                  <Value>{value}</Value>
-                </ValueInner>
-              )}
-            </SquareInner>
-          </SquareOuter>
-        </Container>
-      </EuiToolTip>
-    );
 
     return (
-      <EuiPopover
+      <NodeContextMenu
+        node={node}
+        isPopoverOpen={isPopoverOpen}
         closePopover={this.closePopover}
-        id={`${node.id}-popover`}
-        isOpen={isPopoverOpen}
-        button={nodeContent}
+        options={options}
       >
-        <EuiContextMenu initialPanelId={0} panels={panels} />
-      </EuiPopover>
+        <EuiToolTip position="top" content={`${node.name} | ${value}`}>
+          <Container style={{ width: squareSize, height: squareSize }} onClick={this.togglePopover}>
+            <SquareOuter>
+              <SquareInner>
+                {valueMode && (
+                  <ValueInner>
+                    <Label>{label}</Label>
+                    <Value>{value}</Value>
+                  </ValueInner>
+                )}
+              </SquareInner>
+            </SquareOuter>
+          </Container>
+        </EuiToolTip>
+      </NodeContextMenu>
     );
   }
 
@@ -94,37 +68,6 @@ export class Node extends React.PureComponent<Props, State> {
     this.setState({ isPopoverOpen: false });
   };
 }
-
-/*
-export const Node: React.SFC<Props> = ({ node, formatter, squareSize }) => {
-  const metric = node.metrics.find(m => m.name === 'count');
-  const valueMode = squareSize > 75;
-  const label = 'Count';
-  const value = metric != null ? formatter(metric.value) : 'n/a';
-  const node = (
-    <EuiToolTip position="top" content={`${node.name} | ${value}`}>
-      <Container style={{ width: squareSize, height: squareSize }}>
-        <SquareOuter>
-          <SquareInner>
-            {valueMode && (
-              <ValueInner>
-                <Label>{label}</Label>
-                <Value>{value}</Value>
-              </ValueInner>
-            )}
-          </SquareInner>
-        </SquareOuter>
-      </Container>
-    </EuiToolTip>
-  );
-
-  return (
-    <EuiPopover id={`${node.id}-popover`} isOpen={isPopoverOpen}>
-      something
-    </EuiPopover>
-  );
-};
-*/
 
 export const Container = styled.div`
   position: relative;

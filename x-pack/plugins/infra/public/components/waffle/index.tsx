@@ -13,7 +13,7 @@ import { GroupOfNodes } from './group_of_nodes';
 import {
   isWaffleMapGroupWithGroups,
   isWaffleMapGroupWithNodes,
-} from '../../containers/libs/type_guards';
+} from '../../containers/map/type_guards';
 import { InfraWaffleData, InfraWaffleMapGroup, InfraWaffleOptions } from '../../lib/lib';
 import { applyWaffleMapLayout } from './lib/apply_wafflemap_layout';
 
