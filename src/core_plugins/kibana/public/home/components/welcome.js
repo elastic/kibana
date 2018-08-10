@@ -94,6 +94,7 @@ export class Welcome extends React.Component {
                     <EuiButtonEmpty
                       className="home-welcome-footer-action"
                       onClick={onSkip}
+                      data-test-subj="skipWelcomeScreen"
                     >
                       Explore on my own
                     </EuiButtonEmpty>
