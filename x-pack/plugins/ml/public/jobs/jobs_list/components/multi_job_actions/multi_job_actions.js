@@ -12,6 +12,7 @@ import React, {
 
 import { ResultLinks } from '../job_actions';
 import { MultiJobActionsMenu } from './actions_menu';
+import { GroupSelector } from './group_selector';
 import './styles/main.less';
 
 export class MultiJobActions extends Component {
@@ -30,6 +31,12 @@ export class MultiJobActions extends Component {
             <span className="jobs-selected-title">{this.props.selectedJobs.length} job{s} selected</span>
             <div className="actions-border-large" />
             <ResultLinks jobs={this.props.selectedJobs} />
+
+            <GroupSelector
+              jobs={this.props.selectedJobs}
+              refreshJobs={this.props.refreshJobs}
+            />
+
             <MultiJobActionsMenu
               jobs={this.props.selectedJobs}
               showStartDatafeedModal={this.props.showStartDatafeedModal}
