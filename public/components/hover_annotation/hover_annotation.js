@@ -10,7 +10,7 @@ export const HoverAnnotation = ({ transformMatrix, width, height }) => {
     marginTop: -height / 2,
     transform: aero.dom.matrixToCSS(transformMatrix),
   };
-  return <div className="canvasHoverAnnotation" style={newStyle} />;
+  return <div className="canvasHoverAnnotation canvasLayoutAnnotation" style={newStyle} />;
 };
 
 HoverAnnotation.propTypes = {

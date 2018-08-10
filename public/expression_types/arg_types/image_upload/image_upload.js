@@ -97,7 +97,7 @@ class ImageUpload extends React.Component {
       <EuiSelect
         compressed
         options={this.urlTypeOptions}
-        value={urlType}
+        defaultValue={urlType}
         onChange={this.changeUrlType}
       />
     );

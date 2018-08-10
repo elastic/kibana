@@ -1,6 +1,7 @@
 import { map, zipObject } from 'lodash';
 import { buildBoolArray } from './build_bool_array';
 import { normalizeType } from './normalize_type';
+import { sanitizeName } from './sanitize_name';
 
 export const essql = () => ({
   name: 'essql',
@@ -36,7 +37,9 @@ export const essql = () => ({
         },
       })
       .then(res => {
-        const columns = res.columns.map(col => ({ ...col, type: normalizeType(col.type) }));
+        const columns = res.columns.map(({ name, type }) => {
+          return { name: sanitizeName(name), type: normalizeType(type) };
+        });
         const columnNames = map(columns, 'name');
         const rows = res.rows.map(row => zipObject(columnNames, row));
         return {
