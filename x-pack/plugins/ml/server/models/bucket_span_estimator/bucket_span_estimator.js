@@ -14,7 +14,6 @@ import { polledDataCheckerFactory } from './polled_data_checker';
 
 import { callWithInternalUserFactory } from '../../client/call_with_internal_user_factory';
 import { isSecurityDisabled } from '../../lib/security_utils';
-import Boom from 'boom';
 
 export function estimateBucketSpanFactory(callWithRequest, server) {
   const callWithInternalUser = callWithInternalUserFactory(server);
@@ -401,9 +400,7 @@ export function estimateBucketSpanFactory(callWithRequest, server) {
               resp.cluster['cluster:monitor/xpack/ml/datafeeds/stats/get']) {
               getBucketSpanEstimation();
             } else {
-              // if the user doesn't have permission to create jobs
-              // return a 403
-              reject(Boom.forbidden());
+              reject('Insufficient permissions to call bucket span estimation.');
             }
           })
           .catch(reject);
