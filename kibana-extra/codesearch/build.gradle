@@ -72,6 +72,10 @@ task startDeps(type: YarnTask, dependsOn: [bootstrap]) {
   args = ['start-deps']
 }
 
+task startCacheDeps(type: YarnTask, dependsOn: [bootstrap]) {
+  args = ['start-cache-deps']
+}
+
 task checkAllFilenames(type: YarnTask, dependsOn: [bootstrap]) {
   args = ['check_all_filenames']
 }

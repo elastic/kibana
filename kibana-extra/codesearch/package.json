@@ -19,6 +19,7 @@
     "precommit": "lint-staged",
     "build": "plugin-helpers build",
     "start-deps": "node ../../kibana/scripts/es.js snapshot -E path.data=../../data",
+    "start-cache-deps": "node ../../kibana/scripts/es.js archive ../../kibana/.es/cache/elasticsearch-7.0.0-alpha1-SNAPSHOT.tar.gz -E path.data=../../data",
     "debug": "node --inspect ../../kibana/scripts/kibana.js --config ../../config/kibana/kibana.yml --env.name=development --optimize.enabled=false --plugin-path=.",
     "type-check": "tsc --project tsconfig.json --noEmit --pretty"
   },
