@@ -83,6 +83,7 @@ export function KbnTopNavControllerProvider($compile) {
       if (menuItem.disableButton()) {
         return false;
       }
+      // event will be undefined when method is called from click
       menuItem.run(menuItem, this, get(event, 'target'));
     };
     // apply the defaults to individual options
