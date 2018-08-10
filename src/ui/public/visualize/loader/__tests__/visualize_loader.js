@@ -332,8 +332,6 @@ describe('visualize loader', () => {
 
         sinon.assert.calledOnce(spy);
         sinon.assert.calledWith(spy, sinon.match({ timeRange: { from: 'now-10d/d', to: 'now' } }));
-
-        //VisualizeDataLoader.prototype.fetch.restore()
       });
 
       it('should not set forceFetch on uiState change', async () => {
@@ -356,8 +354,6 @@ describe('visualize loader', () => {
 
         sinon.assert.calledOnce(spy);
         sinon.assert.calledWith(spy, sinon.match({ forceFetch: false }));
-
-        //VisualizeDataLoader.prototype.fetch.restore()
       });
     });
 
