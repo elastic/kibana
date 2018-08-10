@@ -132,41 +132,4 @@ describe('params', function () {
     });
   });
 
-  describe('extended_bounds', function () {
-    it('should write a long value if a moment passed in', function () {
-      const then = moment(0);
-      const now = moment(500);
-      const output = paramWriter.write({
-        extended_bounds: {
-          min: then,
-          max: now
-        }
-      });
-
-      expect(typeof output.params.extended_bounds.min).to.be('number');
-      expect(typeof output.params.extended_bounds.max).to.be('number');
-      expect(output.params.extended_bounds.min).to.be(then.valueOf());
-      expect(output.params.extended_bounds.max).to.be(now.valueOf());
-
-
-    });
-
-    it('should write a long if a long is passed', function () {
-      const then = 0;
-      const now = 500;
-      const output = paramWriter.write({
-        extended_bounds: {
-          min: then,
-          max: now
-        }
-      });
-
-      expect(typeof output.params.extended_bounds.min).to.be('number');
-      expect(typeof output.params.extended_bounds.max).to.be('number');
-      expect(output.params.extended_bounds.min).to.be(then.valueOf());
-      expect(output.params.extended_bounds.max).to.be(now.valueOf());
-
-
-    });
-  });
 });
