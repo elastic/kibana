@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { capitalize, isArray, isFunction } from 'lodash';
+import { capitalize, isArray, isFunction, get } from 'lodash';
 
 import chrome from '../chrome';
 import filterTemplate from '../chrome/config/filter.html';
@@ -83,7 +83,8 @@ export function KbnTopNavControllerProvider($compile) {
       if (menuItem.disableButton()) {
         return false;
       }
-      menuItem.run(menuItem, this, event.target);
+      // event will be undefined when method is called from click
+      menuItem.run(menuItem, this, get(event, 'target'));
     };
     // apply the defaults to individual options
     _applyOptDefault(opt = {}) {
