@@ -98,7 +98,7 @@ export class BeatsPage extends React.PureComponent<BeatsPageProps, BeatsPageStat
     });
   }
 
-  // todo: add reference to ES filter endpoint
+  // TODO: add reference to ES filter endpoint
   private handleSearchQuery = (query: any) => {
     // await this.props.libs.beats.searach(query);
   };
@@ -109,7 +109,7 @@ export class BeatsPage extends React.PureComponent<BeatsPageProps, BeatsPageStat
 
     const renderedTags = tags.map((tag: BeatTag) => {
       const hasMatches = selectedBeats.some((beat: any) =>
-        beat.full_tags.some((t: any) => t.id === tag.id)
+        (beat.tags || []).some((t: string) => t === tag.id)
       );
 
       return (
@@ -146,7 +146,8 @@ export class BeatsPage extends React.PureComponent<BeatsPageProps, BeatsPageStat
 
   private assignTagsToBeats = async (beats: CMPopulatedBeat[], tag: BeatTag) => {
     await this.props.libs.beats.assignTagsToBeats(this.createBeatTagAssignments(beats, tag));
-    this.loadBeats();
+    await this.loadBeats();
+    await this.loadTags();
   };
 
   private getSelectedBeats = (): CMPopulatedBeat[] => {

@@ -5,10 +5,7 @@
  */
 
 import expect from 'expect.js';
-import {
-  ES_INDEX_NAME,
-  ES_TYPE_NAME
-} from './constants';
+import { ES_INDEX_NAME, ES_TYPE_NAME } from './constants';
 
 export default function ({ getService }) {
   const supertest = getService('supertest');
@@ -24,25 +21,19 @@ export default function ({ getService }) {
 
     it('should remove a single tag from a single beat', async () => {
       const { body: apiResponse } = await supertest
-        .post(
-          '/api/beats/agents_tags/removals'
-        )
+        .post('/api/beats/agents_tags/removals')
         .set('kbn-xsrf', 'xxx')
         .send({
-          removals: [
-            { beat_id: 'foo', tag: 'production' }
-          ]
+          removals: [{ beatId: 'foo', tag: 'production' }],
         })
         .expect(200);
 
-      expect(apiResponse.removals).to.eql([
-        { status: 200, result: 'updated' }
-      ]);
+      expect(apiResponse.removals).to.eql([{ status: 200, result: 'updated' }]);
 
       const esResponse = await es.get({
         index: ES_INDEX_NAME,
         type: ES_TYPE_NAME,
-        id: `beat:foo`
+        id: `beat:foo`,
       });
 
       const beat = esResponse._source.beat;
@@ -51,21 +42,16 @@ export default function ({ getService }) {
 
     it('should remove a single tag from a multiple beats', async () => {
       const { body: apiResponse } = await supertest
-        .post(
-          '/api/beats/agents_tags/removals'
-        )
+        .post('/api/beats/agents_tags/removals')
         .set('kbn-xsrf', 'xxx')
         .send({
-          removals: [
-            { beat_id: 'foo', tag: 'development' },
-            { beat_id: 'bar', tag: 'development' }
-          ]
+          removals: [{ beatId: 'foo', tag: 'development' }, { beatId: 'bar', tag: 'development' }],
         })
         .expect(200);
 
       expect(apiResponse.removals).to.eql([
         { status: 200, result: 'updated' },
-        { status: 200, result: 'updated' }
+        { status: 200, result: 'updated' },
       ]);
 
       let esResponse;
@@ -75,17 +61,17 @@ export default function ({ getService }) {
       esResponse = await es.get({
         index: ES_INDEX_NAME,
         type: ES_TYPE_NAME,
-        id: `beat:foo`
+        id: `beat:foo`,
       });
 
       beat = esResponse._source.beat;
-      expect(beat.tags).to.eql(['production', 'qa' ]); // as beat 'foo' already had 'production' and 'qa' tags attached to it
+      expect(beat.tags).to.eql(['production', 'qa']); // as beat 'foo' already had 'production' and 'qa' tags attached to it
 
       // Beat bar
       esResponse = await es.get({
         index: ES_INDEX_NAME,
         type: ES_TYPE_NAME,
-        id: `beat:bar`
+        id: `beat:bar`,
       });
 
       beat = esResponse._source.beat;
@@ -94,27 +80,22 @@ export default function ({ getService }) {
 
     it('should remove multiple tags from a single beat', async () => {
       const { body: apiResponse } = await supertest
-        .post(
-          '/api/beats/agents_tags/removals'
-        )
+        .post('/api/beats/agents_tags/removals')
         .set('kbn-xsrf', 'xxx')
         .send({
-          removals: [
-            { beat_id: 'foo', tag: 'development' },
-            { beat_id: 'foo', tag: 'production' }
-          ]
+          removals: [{ beatId: 'foo', tag: 'development' }, { beatId: 'foo', tag: 'production' }],
         })
         .expect(200);
 
       expect(apiResponse.removals).to.eql([
         { status: 200, result: 'updated' },
-        { status: 200, result: 'updated' }
+        { status: 200, result: 'updated' },
       ]);
 
       const esResponse = await es.get({
         index: ES_INDEX_NAME,
         type: ES_TYPE_NAME,
-        id: `beat:foo`
+        id: `beat:foo`,
       });
 
       const beat = esResponse._source.beat;
@@ -123,21 +104,16 @@ export default function ({ getService }) {
 
     it('should remove multiple tags from a multiple beats', async () => {
       const { body: apiResponse } = await supertest
-        .post(
-          '/api/beats/agents_tags/removals'
-        )
+        .post('/api/beats/agents_tags/removals')
         .set('kbn-xsrf', 'xxx')
         .send({
-          removals: [
-            { beat_id: 'foo', tag: 'production' },
-            { beat_id: 'bar', tag: 'development' }
-          ]
+          removals: [{ beatId: 'foo', tag: 'production' }, { beatId: 'bar', tag: 'development' }],
         })
         .expect(200);
 
       expect(apiResponse.removals).to.eql([
         { status: 200, result: 'updated' },
-        { status: 200, result: 'updated' }
+        { status: 200, result: 'updated' },
       ]);
 
       let esResponse;
@@ -147,7 +123,7 @@ export default function ({ getService }) {
       esResponse = await es.get({
         index: ES_INDEX_NAME,
         type: ES_TYPE_NAME,
-        id: `beat:foo`
+        id: `beat:foo`,
       });
 
       beat = esResponse._source.beat;
@@ -157,7 +133,7 @@ export default function ({ getService }) {
       esResponse = await es.get({
         index: ES_INDEX_NAME,
         type: ES_TYPE_NAME,
-        id: `beat:bar`
+        id: `beat:bar`,
       });
 
       beat = esResponse._source.beat;
@@ -168,19 +144,15 @@ export default function ({ getService }) {
       const nonExistentBeatId = chance.word();
 
       const { body: apiResponse } = await supertest
-        .post(
-          '/api/beats/agents_tags/removals'
-        )
+        .post('/api/beats/agents_tags/removals')
         .set('kbn-xsrf', 'xxx')
         .send({
-          removals: [
-            { beat_id: nonExistentBeatId, tag: 'production' }
-          ]
+          removals: [{ beat_id: nonExistentBeatId, tag: 'production' }],
         })
         .expect(200);
 
       expect(apiResponse.removals).to.eql([
-        { status: 404, result: `Beat ${nonExistentBeatId} not found` }
+        { status: 404, result: `Beat ${nonExistentBeatId} not found` },
       ]);
     });
 
@@ -188,25 +160,21 @@ export default function ({ getService }) {
       const nonExistentTag = chance.word();
 
       const { body: apiResponse } = await supertest
-        .post(
-          '/api/beats/agents_tags/removals'
-        )
+        .post('/api/beats/agents_tags/removals')
         .set('kbn-xsrf', 'xxx')
         .send({
-          removals: [
-            { beat_id: 'bar', tag: nonExistentTag }
-          ]
+          removals: [{ beatId: 'bar', tag: nonExistentTag }],
         })
         .expect(200);
 
       expect(apiResponse.removals).to.eql([
-        { status: 404, result: `Tag ${nonExistentTag} not found` }
+        { status: 404, result: `Tag ${nonExistentTag} not found` },
       ]);
 
       const esResponse = await es.get({
         index: ES_INDEX_NAME,
         type: ES_TYPE_NAME,
-        id: `beat:bar`
+        id: `beat:bar`,
       });
 
       const beat = esResponse._source.beat;
@@ -218,25 +186,21 @@ export default function ({ getService }) {
       const nonExistentTag = chance.word();
 
       const { body: apiResponse } = await supertest
-        .post(
-          '/api/beats/agents_tags/removals'
-        )
+        .post('/api/beats/agents_tags/removals')
         .set('kbn-xsrf', 'xxx')
         .send({
-          removals: [
-            { beat_id: nonExistentBeatId, tag: nonExistentTag }
-          ]
+          removals: [{ beatId: nonExistentBeatId, tag: nonExistentTag }],
         })
         .expect(200);
 
       expect(apiResponse.removals).to.eql([
-        { status: 404, result: `Beat ${nonExistentBeatId} and tag ${nonExistentTag} not found` }
+        { status: 404, result: `Beat ${nonExistentBeatId} and tag ${nonExistentTag} not found` },
       ]);
 
       const esResponse = await es.get({
         index: ES_INDEX_NAME,
         type: ES_TYPE_NAME,
-        id: `beat:bar`
+        id: `beat:bar`,
       });
 
       const beat = esResponse._source.beat;

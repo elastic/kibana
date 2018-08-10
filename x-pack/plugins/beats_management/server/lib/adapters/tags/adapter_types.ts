@@ -8,6 +8,7 @@ import { FrameworkUser } from '../framework/adapter_types';
 
 export interface CMTagsAdapter {
   getAll(user: FrameworkUser): Promise<BeatTag[]>;
+  delete(user: FrameworkUser, tagIds: string[]): Promise<boolean>;
   getTagsWithIds(user: FrameworkUser, tagIds: string[]): Promise<BeatTag[]>;
   upsertTag(user: FrameworkUser, tag: BeatTag): Promise<{}>;
 }

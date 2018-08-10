@@ -39,7 +39,7 @@ export class TagPage extends React.PureComponent<EditTagPageProps, EditTagPageSt
 
   public render() {
     return (
-      <PrimaryLayout title="Add a new tag">
+      <PrimaryLayout title="Create Tag">
         <Switch>
           <Route
             path="/tag/create"

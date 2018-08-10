@@ -7,6 +7,7 @@ import { BeatTag } from '../../../../common/domain_types';
 
 export interface CMTagsAdapter {
   getTagsWithIds(tagIds: string[]): Promise<BeatTag[]>;
+  delete(tagIds: string[]): Promise<boolean>;
   getAll(): Promise<BeatTag[]>;
   upsertTag(tag: BeatTag): Promise<BeatTag | null>;
 }

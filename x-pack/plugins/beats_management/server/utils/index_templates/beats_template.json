@@ -33,6 +33,9 @@
             "color": {
               "type": "keyword"
             },
+            "last_updated": {
+              "type": "date"
+            },
             "configuration_blocks": {
               "type": "nested",
               "properties": {

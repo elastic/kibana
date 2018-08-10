@@ -49,6 +49,11 @@ export class CMBeatsDomain {
     return beat && beat.active ? beat : null;
   }
 
+  public async getAllWithTags(user: FrameworkUser, tagIds: string[], justActive = true) {
+    const beats = await this.adapter.getAllWithTags(user, tagIds);
+    return justActive ? beats.filter((beat: CMBeat) => beat.active === true) : beats;
+  }
+
   public async update(userOrToken: UserOrToken, beatId: string, beatData: Partial<CMBeat>) {
     const beat = await this.adapter.get(this.framework.internalUser, beatId);
 

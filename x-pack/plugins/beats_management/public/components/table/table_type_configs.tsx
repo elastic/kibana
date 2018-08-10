@@ -155,7 +155,13 @@ export const TagsTableType: TableType = {
     },
   ],
   controlDefinitions: (data: any) => ({
-    actions: [],
+    actions: [
+      {
+        name: 'Remove Selected',
+        action: 'delete',
+        danger: true,
+      },
+    ],
     filters: [],
   }),
 };

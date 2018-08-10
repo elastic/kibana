@@ -63,7 +63,9 @@ export class CreateTagPage extends React.PureComponent<CreateTagPageProps, Creat
             </EuiButton>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiButtonEmpty>Cancel</EuiButtonEmpty>
+            <EuiButtonEmpty onClick={() => this.props.history.push('/overview/tags')}>
+              Cancel
+            </EuiButtonEmpty>
           </EuiFlexItem>
         </EuiFlexGroup>
       </div>

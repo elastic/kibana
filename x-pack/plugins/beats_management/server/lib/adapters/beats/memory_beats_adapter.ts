@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { omit } from 'lodash';
+import { intersection, omit } from 'lodash';
 
 import { CMBeat } from '../../../../common/domain_types';
 import { FrameworkUser } from '../framework/adapter_types';
@@ -36,6 +36,10 @@ export class MemoryBeatsAdapter implements CMBeatsAdapter {
 
   public async getWithIds(user: FrameworkUser, beatIds: string[]) {
     return this.beatsDB.filter(beat => beatIds.includes(beat.id));
+  }
+
+  public async getAllWithTags(user: FrameworkUser, tagIds: string[]): Promise<CMBeat[]> {
+    return this.beatsDB.filter(beat => intersection(tagIds, beat.tags || []).length !== 0);
   }
 
   public async getBeatWithToken(
