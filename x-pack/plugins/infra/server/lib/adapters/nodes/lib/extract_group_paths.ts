@@ -27,19 +27,25 @@ export function extractGroupPaths(
       if (secondGroup) {
         return acc.concat(
           bucket[secondGroup!.id].buckets.map((b: InfraBucket): InfraNode => {
+            const nodePath = [
+              { id: `${firstGroup.id}:${bucket.key}`, value: bucket.key },
+              { id: `${secondGroup.id}:${b.key}`, value: b.key },
+            ].concat(nodeItem.path);
+            const nodeId = nodePath.map(p => p.value).join('/');
             return {
               ...nodeItem,
-              path: [
-                { id: firstGroup.id, value: bucket.key },
-                { id: secondGroup.id, value: b.key },
-              ].concat(nodeItem.path),
+              path: nodePath,
+              id: nodeId,
             };
           })
         );
       }
+      const path = [{ id: `${firstGroup.id}:${key}`, value: key }].concat(nodeItem.path);
+      const id = path.map(p => p.value).join('/');
       return acc.concat({
         ...nodeItem,
-        path: [{ id: firstGroup.id, value: key }].concat(nodeItem.path),
+        path,
+        id,
       });
     },
     []

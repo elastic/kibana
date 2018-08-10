@@ -32,7 +32,7 @@ export class ElasticsearchNodesAdapter implements InfraNodesAdapter {
     const msearch = <Aggregation>(msearchOptions: object) =>
       this.framework.callWithRequest<{}, Aggregation>(req, 'msearch', msearchOptions);
 
-    const infraResponse: InfraResponse = {};
+    const infraResponse: InfraResponse = { nodes: [] };
 
     const totalNodes = await calculateCardinalityOfNodeField(search, options.nodeField, options);
 

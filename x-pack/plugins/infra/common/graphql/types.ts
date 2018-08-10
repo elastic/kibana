@@ -51,10 +51,11 @@ export interface InfraSourceStatus {
 }
 
 export interface InfraResponse {
-  nodes?: InfraNode[] | null;
+  nodes: InfraNode[];
 }
 
 export interface InfraNode {
+  id: string;
   path: InfraNodePath[];
   metrics: InfraNodeMetric[];
 }
@@ -157,7 +158,7 @@ export namespace InfraResponseResolvers {
     nodes?: NodesResolver;
   }
 
-  export type NodesResolver = Resolver<InfraNode[] | null, NodesArgs>;
+  export type NodesResolver = Resolver<InfraNode[], NodesArgs>;
   export interface NodesArgs {
     path?: InfraPathInput[] | null;
   }
@@ -165,10 +166,12 @@ export namespace InfraResponseResolvers {
 
 export namespace InfraNodeResolvers {
   export interface Resolvers {
+    id?: IdResolver;
     path?: PathResolver;
     metrics?: MetricsResolver;
   }
 
+  export type IdResolver = Resolver<string>;
   export type PathResolver = Resolver<InfraNodePath[]>;
   export type MetricsResolver = Resolver<InfraNodeMetric[], MetricsArgs>;
   export interface MetricsArgs {
@@ -311,7 +314,7 @@ export enum InfraOperator {
   lte = 'lte',
   eq = 'eq',
 }
-export namespace Query {
+export namespace MapQuery {
   export type Variables = {
     id: string;
     timerange: InfraTimerangeInput;
@@ -333,22 +336,25 @@ export namespace Query {
 
   export type Map = {
     __typename?: 'InfraResponse';
-    nodes?: Nodes[] | null;
+    nodes: Nodes[];
   };
 
   export type Nodes = {
     __typename?: 'InfraNode';
+    id: string;
     path: Path[];
     metrics: Metrics[];
   };
 
   export type Path = {
     __typename?: 'InfraNodePath';
+    id: string;
     value: string;
   };
 
   export type Metrics = {
     __typename?: 'InfraNodeMetric';
+    id: string;
     name: string;
     value: number;
   };

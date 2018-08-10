@@ -3,7 +3,6 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { get } from 'lodash';
 import moment from 'moment';
 import { graphql } from 'react-apollo';
 import uuid from 'uuid';
@@ -13,19 +12,15 @@ import {
   InfraMetricType,
   InfraPathInput,
   InfraPathType,
-  InfraSource,
   InfraTimerangeInput,
+  MapQuery,
 } from '../../../common/graphql/types';
 import { InfraWaffleMapGroup } from '../../lib/lib';
 import { nodesToWaffleMap } from './nodes_to_wafflemap';
-import { query } from './query';
+import { mapQuery } from './query';
 
 interface ChildProps {
   map: InfraWaffleMapGroup[];
-}
-
-interface Response {
-  source: InfraSource;
 }
 
 interface Variables {
@@ -38,10 +33,10 @@ interface Variables {
 
 export const withMap = graphql<
   {}, // OptionProps, this will end up being the options that contain index pattern, filters, etc
-  Response,
+  MapQuery.Query,
   Variables,
   ChildProps
->(query, {
+>(mapQuery, {
   options: () => ({
     variables: {
       id: 'default',
@@ -63,7 +58,20 @@ export const withMap = graphql<
     },
   }),
   props: ({ data }) => {
-    const nodes = get(data, 'source.map.nodes', []);
+    const emptyResponse = { map: [] };
+    if (!data) {
+      return emptyResponse;
+    }
+    if (!data.source) {
+      return emptyResponse;
+    }
+    if (!data.source.map) {
+      return emptyResponse;
+    }
+    const { nodes } = data.source.map;
+    if (!nodes) {
+      return emptyResponse;
+    }
     return { map: nodesToWaffleMap(nodes) };
   },
 });

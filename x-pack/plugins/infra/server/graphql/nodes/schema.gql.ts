@@ -19,6 +19,7 @@ export const nodesSchema: any = gql`
   }
 
   type InfraNode {
+    id: ID!
     path: [InfraNodePath!]!
     metrics(metrics: [InfraMetricInput!]): [InfraNodeMetric!]!
   }
@@ -137,7 +138,7 @@ export const nodesSchema: any = gql`
   }
 
   type InfraResponse {
-    nodes(path: [InfraPathInput!]): [InfraNode!]
+    nodes(path: [InfraPathInput!]): [InfraNode!]!
   }
 
   extend type InfraSource {
