@@ -10,7 +10,7 @@ import ApolloClient from 'apollo-client';
 import { AxiosRequestConfig } from 'axios';
 import React from 'react';
 import { Observable } from 'rxjs';
-import { AjaxResponse } from 'rxjs/ajax';
+import { InfraNodeMetric, InfraNodePath } from '../../common/graphql/types';
 import { InfraFieldsDomain } from './domains/fields_domain';
 
 export interface InfraFrontendLibs {
@@ -93,4 +93,35 @@ export interface InfraField {
   type: string;
   searchable: boolean;
   aggregatable: boolean;
+}
+
+export type InfraWaffleData = InfraWaffleMapGroup[];
+
+export interface InfraWaffleMapNode {
+  id: string;
+  name: string;
+  path: InfraNodePath[];
+  metrics: InfraNodeMetric[];
+}
+
+export type InfraWaffleMapGroup = InfraWaffleMapGroupOfNodes | InfraWaffleMapGroupOfGroups;
+
+export interface InfraWaffleMapGroupBase {
+  id: string;
+  name: string;
+  count: number;
+  width: number;
+  squareSize: number;
+}
+
+export interface InfraWaffleMapGroupOfGroups extends InfraWaffleMapGroupBase {
+  groups: InfraWaffleMapGroupOfNodes[];
+}
+
+export interface InfraWaffleMapGroupOfNodes extends InfraWaffleMapGroupBase {
+  nodes: InfraWaffleMapNode[];
+}
+
+export interface InfraWaffleOptions {
+  [name: string]: any;
 }

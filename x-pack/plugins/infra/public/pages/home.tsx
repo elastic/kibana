@@ -5,13 +5,13 @@
  */
 
 import React from 'react';
-import { InfraResponse } from '../../common/graphql/types';
-import { WaffleMap } from '../components/eui';
 import { MainLayout } from '../components/layouts/main';
+import { Waffle } from '../components/waffle';
 import { withMap } from '../containers/map';
+import { InfraWaffleMapGroup } from '../lib/lib';
 
 interface HomePageProps {
-  map: InfraResponse;
+  map: InfraWaffleMapGroup[];
 }
 
 export const HomePage = withMap(
@@ -19,7 +19,7 @@ export const HomePage = withMap(
     public render() {
       return (
         <MainLayout>
-          <WaffleMap map={this.props.map} />
+          <Waffle map={this.props.map} options={{}} />
         </MainLayout>
       );
     }
