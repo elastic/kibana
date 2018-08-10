@@ -56,7 +56,7 @@ export function execInProjects(
     process.exitCode = 1;
 
     if (!error.errors) {
-      log.error('Unhandled execption!');
+      log.error('Unhandled exception!');
       log.error(error);
       process.exit();
     }
