@@ -23,23 +23,6 @@
   },
   "license": "Apache-2.0",
   "author": "Rashid Khan <rashid.khan@elastic.co>",
-  "contributors": [
-    "Chris Cowan <chris.cowan@elastic.co>",
-    "Court Ewing <court@elastic.co>",
-    "Jim Unger <jim.unger@elastic.co>",
-    "Joe Fleming <joe.fleming@elastic.co>",
-    "Jon Budzenski <jonathan.budzenski@elastic.co>",
-    "Juan Thomassie <juan.thomassie@elastic.co>",
-    "Khalah Jones-Golden <khalah.jones@elastic.co>",
-    "Lee Drengenberg <lee.drengenberg@elastic.co>",
-    "Lukas Olson <lukas.olson@elastic.co>",
-    "Matt Bargar <matt.bargar@elastic.co>",
-    "Nicolás Bevacqua <nico@elastic.co>",
-    "Shelby Sturgis <shelby@elastic.co>",
-    "Spencer Alger <spencer.alger@elastic.co>",
-    "Tim Sullivan <tim@elastic.co>",
-    "Yuri Astrakhan <yuri@elastic.co>"
-  ],
   "scripts": {
     "preinstall": "node ./preinstall_check",
     "kbn": "node scripts/kbn",
