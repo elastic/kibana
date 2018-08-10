@@ -49,55 +49,52 @@ export default function AggParamWriterHelper(Private) {
   class AggParamWriter {
 
     constructor(opts) {
-      const self = this;
-
-      self.aggType = opts.aggType;
-      if (_.isString(self.aggType)) {
-        self.aggType = aggTypes.byName[self.aggType];
+      this.aggType = opts.aggType;
+      if (_.isString(this.aggType)) {
+        this.aggType = aggTypes.byName[this.aggType];
       }
 
       // not configurable right now, but totally required
-      self.indexPattern = stubbedLogstashIndexPattern;
+      this.indexPattern = stubbedLogstashIndexPattern;
 
       // the schema that the aggType satisfies
-      self.visAggSchema = null;
+      this.visAggSchema = null;
 
-      self.vis = new Vis(self.indexPattern, {
+      this.vis = new Vis(this.indexPattern, {
         type: 'histogram',
         aggs: [{
           id: 1,
-          type: self.aggType.name,
+          type: this.aggType.name,
           params: {}
         }]
       });
     }
 
     write(paramValues, modifyAggConfig = null) {
-      const self = this;
       paramValues = _.clone(paramValues);
 
-      if (self.aggType.params.byName.field && !paramValues.field) {
+      if (this.aggType.params.byName.field && !paramValues.field) {
         // pick a field rather than force a field to be specified everywhere
-        if (self.aggType.type === 'metrics') {
-          paramValues.field = _.sample(self.indexPattern.fields.byType.number);
+        if (this.aggType.type === 'metrics') {
+          paramValues.field = _.sample(this.indexPattern.fields.byType.number);
         } else {
-          const type = self.aggType.params.byName.field.filterFieldTypes || 'string';
+          const type = this.aggType.params.byName.field.filterFieldTypes || 'string';
           let field;
           do {
-            field = _.sample(self.indexPattern.fields.byType[type]);
+            field = _.sample(this.indexPattern.fields.byType[type]);
           } while (!field.aggregatable);
           paramValues.field = field.name;
         }
       }
 
-      const aggConfig = self.vis.aggs[0];
+      const aggConfig = this.vis.aggs[0];
       aggConfig.setParams(paramValues);
 
       if (modifyAggConfig) {
         modifyAggConfig(aggConfig);
       }
 
-      return aggConfig.write(self.vis.aggs);
+      return aggConfig.write(this.vis.aggs);
     }
   }
 
