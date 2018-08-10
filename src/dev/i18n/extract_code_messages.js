@@ -32,8 +32,13 @@ import { extractIntlMessages, extractFormattedMessages } from './extract_react_m
 
 /**
  * Detect Intl.formatMessage() function call (React).
- *
- * Example: `intl.formatMessage({ id: 'message-id', defaultMessage: 'Message text' });`
+ * @param {Object} node
+ * @returns {boolean}
+ * @example
+ * formatMessage({ id: 'message-id', defaultMessage: 'Message text' });
+ * intl.formatMessage({ id: 'message-id', defaultMessage: 'Message text' });
+ * props.intl.formatMessage({ id: 'message-id', defaultMessage: 'Message text' });
+ * this.props.intl.formatMessage({ id: 'message-id', defaultMessage: 'Message text' });
  */
 export function isIntlFormatMessageFunction(node) {
   return (

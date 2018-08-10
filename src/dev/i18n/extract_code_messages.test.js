@@ -84,13 +84,12 @@ describe('extractCodeMessages', () => {
 
 describe('isIntlFormatMessageFunction', () => {
   test('detects intl.formatMessage call expression', () => {
-    const callExpressioNodes = [...traverseNodes(parse(intlFormatMessageSource).program.body)].filter(
+    const callExpressionNodes = [...traverseNodes(parse(intlFormatMessageSource).program.body)].filter(
       node => isCallExpression(node)
     );
 
-    callExpressioNodes.forEach((callExpressioNode) => {
-      expect(isIntlFormatMessageFunction(callExpressioNode)).toBe(true);
-    });
+    expect(callExpressionNodes).toHaveLength(4);
+    expect(callExpressionNodes.every(callExpressionNode => isIntlFormatMessageFunction(callExpressionNode))).toBe(true);
   });
 });
 
