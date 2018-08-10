@@ -23,7 +23,8 @@
  *
  * The MIT License (MIT)
  *
- * Copyright (c) 2011-2015 Twitter, Inc
+ * Copyright (c) 2016-present, jszhou
+ * https://github.com/jserz/js_piece
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
