@@ -20,7 +20,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 
-import { ShareMenu } from './components/share_menu';
+import { ShareContextMenu } from './components/share_context_menu';
 
 import {
   EuiWrappingPopover,
@@ -35,7 +35,7 @@ const onClose = () => {
   isOpen = false;
 };
 
-export function showShareMenu({
+export function showShareContextMenu({
   anchorElement,
   getUnhashableStates,
   objectId,
@@ -58,7 +58,7 @@ export function showShareMenu({
       panelPaddingSize="none"
       withTitle
     >
-      <ShareMenu
+      <ShareContextMenu
         getUnhashableStates={getUnhashableStates}
         objectId={objectId}
         objectType={objectType}

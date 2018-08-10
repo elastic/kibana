@@ -18,23 +18,95 @@
  */
 
 import PropTypes from 'prop-types';
-import React from 'react';
+import React, { Component } from 'react';
 
-export function ShareUrlContent(props) {
-  const {
-    getOriginalUrl,
-    getSnapshotUrl,
-  } = props;
+import {
+  parse as parseUrl,
+  format as formatUrl,
+} from 'url';
 
-  return (
-    <div>
-      <p>{getOriginalUrl()}</p>
-      <p>{getSnapshotUrl()}</p>
-    </div>
-  );
+import { unhashUrl } from '../../state_management/state_hashing';
+
+export class ShareUrlContent extends Component {
+
+  state = {};
+
+  componentWillUnmount() {
+    window.removeEventListener('hashchange', this.resetShortUrls);
+
+    this._isMounted = false;
+  }
+
+  componentDidMount() {
+    this._isMounted = true;
+    this.resetShortUrls();
+
+    window.addEventListener('hashchange', this.resetShortUrls, false);
+  }
+
+  resetShortUrls = () => {
+    if (this._isMounted) {
+      this.setState({
+        shortSnanshotUrl: undefined,
+        shortOriginalUrl: undefined,
+      });
+    }
+  }
+
+  getOriginalUrl = () => {
+    const {
+      objectId,
+      getUnhashableStates,
+    } = this.props;
+
+    // If there is no objectId, then it isn't saved, so it has no original URL.
+    if (objectId === undefined || objectId === '') {
+      return;
+    }
+
+    const url = window.location.href;
+    // Replace hashes with original RISON values.
+    const unhashedUrl = unhashUrl(url, getUnhashableStates());
+
+    const parsedUrl = parseUrl(unhashedUrl);
+    // Get the application route, after the hash, and remove the #.
+    const parsedAppUrl = parseUrl(parsedUrl.hash.slice(1), true);
+
+    return formatUrl({
+      protocol: parsedUrl.protocol,
+      auth: parsedUrl.auth,
+      host: parsedUrl.host,
+      pathname: parsedUrl.pathname,
+      hash: formatUrl({
+        pathname: parsedAppUrl.pathname,
+        query: {
+          // Add global state to the URL so that the iframe doesn't just show the time range
+          // default.
+          _g: parsedAppUrl.query._g,
+        },
+      }),
+    });
+  }
+
+  getSnapshotUrl = () => {
+    const { getUnhashableStates } = this.props;
+
+    const url = window.location.href;
+    // Replace hashes with original RISON values.
+    return unhashUrl(url, getUnhashableStates());
+  }
+
+  render() {
+    return (
+      <div>
+        <p>{this.getOriginalUrl()}</p>
+        <p>{this.getSnapshotUrl()}</p>
+      </div>
+    );
+  }
 }
 
 ShareUrlContent.propTypes = {
-  getOriginalUrl: PropTypes.func.isRequired,
-  getSnapshotUrl: PropTypes.func.isRequired,
+  objectId: PropTypes.string,
+  getUnhashableStates: PropTypes.func.isRequired,
 };

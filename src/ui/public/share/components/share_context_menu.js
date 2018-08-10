@@ -24,16 +24,9 @@ import {
   EuiContextMenu,
 } from '@elastic/eui';
 
-import {
-  parse as parseUrl,
-  format as formatUrl,
-} from 'url';
-
-import { unhashUrl } from '../../state_management/state_hashing';
-
 import { ShareUrlContent } from './share_url_content';
 
-export class ShareMenu extends Component {
+export class ShareContextMenu extends Component {
   constructor(props) {
     super(props);
 
@@ -57,8 +50,8 @@ export class ShareMenu extends Component {
           title: 'Embed Code',
           content: (
             <ShareUrlContent
-              getOriginalUrl={this.getOriginalUrl}
-              getSnapshotUrl={this.getSnapshotUrl}
+              objectId={this.props.objectId}
+              getUnhashableStates={this.props.getUnhashableStates}
             />
           )
         },
@@ -67,56 +60,13 @@ export class ShareMenu extends Component {
           title: 'Permalink',
           content: (
             <ShareUrlContent
-              getOriginalUrl={this.getOriginalUrl}
-              getSnapshotUrl={this.getSnapshotUrl}
+              objectId={this.props.objectId}
+              getUnhashableStates={this.props.getUnhashableStates}
             />
           )
         }
       ]
     };
-  }
-
-  getOriginalUrl = () => {
-    const {
-      objectId,
-      getUnhashableStates,
-    } = this.props;
-
-    // If there is no objectId, then it isn't saved, so it has no original URL.
-    if (objectId === undefined || objectId === '') {
-      return;
-    }
-
-    const url = window.location.href;
-    // Replace hashes with original RISON values.
-    const unhashedUrl = unhashUrl(url, getUnhashableStates());
-
-    const parsedUrl = parseUrl(unhashedUrl);
-    // Get the application route, after the hash, and remove the #.
-    const parsedAppUrl = parseUrl(parsedUrl.hash.slice(1), true);
-
-    return formatUrl({
-      protocol: parsedUrl.protocol,
-      auth: parsedUrl.auth,
-      host: parsedUrl.host,
-      pathname: parsedUrl.pathname,
-      hash: formatUrl({
-        pathname: parsedAppUrl.pathname,
-        query: {
-          // Add global state to the URL so that the iframe doesn't just show the time range
-          // default.
-          _g: parsedAppUrl.query._g,
-        },
-      }),
-    });
-  }
-
-  getSnapshotUrl = () => {
-    const { getUnhashableStates } = this.props;
-
-    const url = window.location.href;
-    // Replace hashes with original RISON values.
-    return unhashUrl(url, getUnhashableStates());
   }
 
   render() {
@@ -129,7 +79,7 @@ export class ShareMenu extends Component {
   }
 }
 
-ShareMenu.propTypes = {
+ShareContextMenu.propTypes = {
   objectId: PropTypes.string,
   objectType: PropTypes.string.isRequired,
   getUnhashableStates: PropTypes.func.isRequired,
