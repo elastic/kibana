@@ -56,21 +56,6 @@ export const CleanTypescriptTask = {
   },
 };
 
-export const CleanNodeBuildsTask = {
-  description:
-    'Cleaning npm from node',
-
-  async run(config, log, build) {
-    for (const platform of config.getPlatforms()) {
-      await deleteAll(log, [
-        build.resolvePathForPlatform(platform, 'node/lib/node_modules'),
-        build.resolvePathForPlatform(platform, 'node/bin/npm'),
-        build.resolvePathForPlatform(platform, 'node/bin/npx'),
-      ]);
-    }
-  },
-};
-
 export const CleanExtraFilesFromModulesTask = {
   description: 'Cleaning tests, examples, docs, etc. from node_modules',
 
