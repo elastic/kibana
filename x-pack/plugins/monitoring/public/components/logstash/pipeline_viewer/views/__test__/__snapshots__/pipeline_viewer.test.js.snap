@@ -4,7 +4,9 @@ exports[`PipelineViewer component passes expected props 1`] = `
 <EuiPage
   restrictWidth={false}
 >
-  <EuiPageBody>
+  <EuiPageBody
+    restrictWidth={false}
+  >
     <EuiPageContent
       className="pipelineViewer"
       horizontalPosition="center"
@@ -84,7 +86,9 @@ exports[`PipelineViewer component renders DetailDrawer when selected vertex is n
 <EuiPage
   restrictWidth={false}
 >
-  <EuiPageBody>
+  <EuiPageBody
+    restrictWidth={false}
+  >
     <EuiPageContent
       className="pipelineViewer"
       horizontalPosition="center"

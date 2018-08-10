@@ -17,14 +17,22 @@
  * under the License.
  */
 
+import React from 'react';
+import { MarkdownSimple } from 'ui/markdown';
 import { uiModules } from '../modules';
-import { fatalError } from './fatal_error';
-import { Notifier } from './notifier';
 import { metadata } from '../metadata';
+import { fatalError } from './fatal_error';
+import { banners } from './banners';
+import { Notifier } from './notifier';
 import template from './partials/toaster.html';
 import './notify.less';
 import '../filters/markdown';
 import '../directives/truncated';
+
+import {
+  EuiCallOut,
+  EuiButton,
+} from '@elastic/eui';
 
 const module = uiModules.get('kibana/notify');
 
@@ -70,18 +78,52 @@ if (!!metadata.kbnIndex) {
   });
 }
 
+let bannerId;
+let bannerTimeoutId;
+
 function applyConfig(config) {
   Notifier.applyConfig({
-    bannerLifetime: config.get('notifications:lifetime:banner'),
     errorLifetime: config.get('notifications:lifetime:error'),
     warningLifetime: config.get('notifications:lifetime:warning'),
     infoLifetime: config.get('notifications:lifetime:info')
   });
 
-  const banner = config.get('notifications:banner');
+  // Show user-defined banner.
+  const bannerContent = config.get('notifications:banner');
+  const bannerLifetime = config.get('notifications:lifetime:banner');
 
-  if (typeof banner === 'string' && banner.trim()) {
-    notify.banner(banner, 'notifications:banner');
+  if (typeof bannerContent === 'string' && bannerContent.trim()) {
+    const BANNER_PRIORITY = 100;
+
+    const dismissBanner = () => {
+      banners.remove(bannerId);
+      clearTimeout(bannerTimeoutId);
+    };
+
+    const banner = (
+      <EuiCallOut
+        title="Attention"
+        iconType="help"
+      >
+        <MarkdownSimple data-test-subj="userDefinedBanner">
+          {bannerContent}
+        </MarkdownSimple>
+
+        <EuiButton type="primary" size="s" onClick={dismissBanner}>
+          Close
+        </EuiButton>
+      </EuiCallOut>
+    );
+
+    bannerId = banners.set({
+      component: banner,
+      id: bannerId,
+      priority: BANNER_PRIORITY,
+    });
+
+    bannerTimeoutId = setTimeout(() => {
+      dismissBanner();
+    }, bannerLifetime);
   }
 }
 

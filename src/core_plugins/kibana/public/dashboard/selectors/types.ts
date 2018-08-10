@@ -48,7 +48,7 @@ export interface PanelState {
   readonly version: string;
   readonly type: string;
   readonly panelIndex: PanelId;
-  readonly embeddableConfig: object;
+  readonly embeddableConfig: any;
   readonly gridData: GridData;
   readonly title?: string;
 }

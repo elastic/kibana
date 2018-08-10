@@ -16,6 +16,7 @@ export default function ({ getService, getPageObjects }) {
   const kibanaServer = getService('kibanaServer');
   const testSubjects = getService('testSubjects');
   const remote = getService('remote');
+  const retry = getService('retry');
   const find = getService('find');
   const PageObjects = getPageObjects(['security', 'settings', 'common', 'header']);
 
@@ -153,13 +154,13 @@ export default function ({ getService, getPageObjects }) {
           const allInputs = await find.allByCssSelector('input');
           for (let i = 0; i < allInputs.length; i++) {
             const input = allInputs[i];
-            expect(await input.getProperty('disabled')).to.be(true);
-          }
-
-          const allCheckboxes = await find.allByCssSelector('checkbox');
-          for (let i = 0; i < allCheckboxes.length; i++) {
-            const checkbox = allCheckboxes[i];
-            expect(await checkbox.getProperty('disabled')).to.be(true);
+            // Angular can take a little bit to set the input to disabled,
+            // so this accounts for that delay
+            retry.try(async () => {
+              if (!(await input.getProperty('disabled'))) {
+                throw new Error('input is not disabled');
+              }
+            });
           }
         });
       });

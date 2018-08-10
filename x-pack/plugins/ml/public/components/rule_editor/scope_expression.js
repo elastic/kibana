@@ -157,7 +157,7 @@ export class ScopeExpression extends Component {
               button={(
                 <EuiExpressionButton
                   description={`is ${filterTypeToText(filterType)}`}
-                  buttonValue={filterId}
+                  buttonValue={filterId || ''}
                   isActive={this.state.isFilterListOpen}
                   onClick={this.openFilterList}
                 />

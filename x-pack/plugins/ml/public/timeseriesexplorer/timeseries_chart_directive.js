@@ -963,7 +963,10 @@ module.directive('mlTimeseriesChart', function (
         contents += `anomaly score: ${displayScore}<br/>`;
 
         if (scope.modelPlotEnabled === false) {
-          if (_.has(marker, 'actual')) {
+          // Show actual/typical when available except for rare detectors.
+          // Rare detectors always have 1 as actual and the probability as typical.
+          // Exposing those values in the tooltip with actual/typical labels might irritate users.
+          if (_.has(marker, 'actual') && marker.function !== 'rare') {
             // Display the record actual in preference to the chart value, which may be
             // different depending on the aggregation interval of the chart.
             contents += `actual: ${formatValue(marker.actual, marker.function, fieldFormat)}`;

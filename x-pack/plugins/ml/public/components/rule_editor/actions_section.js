@@ -48,7 +48,7 @@ export function ActionsSection({
 
         <EuiFlexItem grow={false}>
           <EuiIconTip
-            content="Result will not be created but the model will be updated by the series value"
+            content="The result will not be created."
             size="s"
             position="right"
           />
@@ -69,7 +69,7 @@ export function ActionsSection({
 
         <EuiFlexItem grow={false}>
           <EuiIconTip
-            content="The series value will not be used to update the model but anomalous records will be created"
+            content="The value for that series will not be used to update the model."
             size="s"
             position="right"
           />
