@@ -97,7 +97,7 @@ class StatusApp extends Component {
 
           <EuiSpacer />
 
-          <EuiPageContent grow={0}>
+          <EuiPageContent grow={false}>
             <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
               <EuiFlexItem grow={false}>
                 <EuiTitle size="s">
