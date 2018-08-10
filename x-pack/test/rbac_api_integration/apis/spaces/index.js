@@ -8,6 +8,7 @@
 export default function ({ loadTestFile }) {
 
   describe('spaces', () => {
+    loadTestFile(require.resolve('./get_all'));
     loadTestFile(require.resolve('./get'));
   });
 }

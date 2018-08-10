@@ -33,11 +33,11 @@ export default function ({ getService }) {
       expect(resp.body).to.eql(result);
     };
 
-    const createExpectRbacForbidden = (spaceId) => (resp) => {
+    const createExpectRbacForbidden = (action, spaceId) => (resp) => {
       expect(resp.body).to.eql({
         statusCode: 403,
         error: 'Forbidden',
-        message: `Unauthorized to get space ${spaceId}`
+        message: `Unauthorized to ${action} ${spaceId} space`
       });
     };
 
@@ -76,11 +76,11 @@ export default function ({ getService }) {
       tests: {
         default: {
           statusCode: 403,
-          response: createExpectRbacForbidden(SPACES.DEFAULT.spaceId),
+          response: createExpectRbacForbidden('get', SPACES.DEFAULT.spaceId),
         },
         space2FromSpace1: {
           statusCode: 403,
-          response: createExpectRbacForbidden(SPACES.SPACE_2.spaceId),
+          response: createExpectRbacForbidden('get', SPACES.SPACE_2.spaceId),
         },
       }
     });
@@ -216,7 +216,7 @@ export default function ({ getService }) {
         },
         space2FromSpace1: {
           statusCode: 403,
-          response: createExpectRbacForbidden(SPACES.SPACE_2.spaceId),
+          response: createExpectRbacForbidden('get', SPACES.SPACE_2.spaceId),
         },
       }
     });
@@ -229,11 +229,11 @@ export default function ({ getService }) {
       tests: {
         default: {
           statusCode: 403,
-          response: createExpectRbacForbidden(SPACES.DEFAULT.spaceId),
+          response: createExpectRbacForbidden('get', SPACES.DEFAULT.spaceId),
         },
         space2FromSpace1: {
           statusCode: 403,
-          response: createExpectRbacForbidden(SPACES.SPACE_2.spaceId),
+          response: createExpectRbacForbidden('get', SPACES.SPACE_2.spaceId),
         },
       }
     });

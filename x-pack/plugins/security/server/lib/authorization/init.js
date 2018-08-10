@@ -8,6 +8,7 @@ import { actionsFactory } from './actions';
 import { CHECK_PRIVILEGES_RESULT, checkPrivilegesWithRequestFactory } from './check_privileges';
 import { deepFreeze } from './deep_freeze';
 import { getClient } from '../../../../../server/lib/get_client_shield';
+import { RBAC_AUTH_SCOPE } from '../../../common/constants';
 
 export function initAuthorizationService(server, xpackInfoFeature) {
   const shieldClient = getClient(server);
@@ -15,14 +16,18 @@ export function initAuthorizationService(server, xpackInfoFeature) {
 
   const actions = actionsFactory(config);
   const application = `kibana-${config.get('kibana.index')}`;
+  const checkPrivilegesWithRequest = checkPrivilegesWithRequestFactory(shieldClient, config, actions, application);
 
   server.expose('authorization', deepFreeze({
     actions,
     application,
-    checkPrivilegesWithRequest: checkPrivilegesWithRequestFactory(shieldClient, config, actions, application),
+    checkPrivilegesWithRequest,
     CHECK_PRIVILEGES_RESULT,
     isRbacEnabled() {
       return xpackInfoFeature.getLicenseCheckResults().allowRbac;
+    },
+    useRbacForRequest(request) {
+      return request.auth.credentials.scope && request.auth.credentials.scope.includes(RBAC_AUTH_SCOPE);
     }
   }));
 }

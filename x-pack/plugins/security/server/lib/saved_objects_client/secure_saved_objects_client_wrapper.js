@@ -17,7 +17,6 @@ export class SecureSavedObjectsClientWrapper {
       errors,
       request,
       savedObjectTypes,
-      securityContextService,
       spacesService,
     } = options;
 
@@ -28,7 +27,6 @@ export class SecureSavedObjectsClientWrapper {
     this._checkPrivileges = checkPrivilegesWithRequest(request);
     this._request = request;
     this._savedObjectTypes = savedObjectTypes;
-    this._securityContextService = securityContextService;
     this._spacesService = spacesService;
   }
 
@@ -120,18 +118,16 @@ export class SecureSavedObjectsClientWrapper {
     switch (result) {
       case CHECK_PRIVILEGES_RESULT.AUTHORIZED:
         this._auditLogger.savedObjectsAuthorizationSuccess(username, action, types, args);
-        this._securityContextService.set(this._request, { rbac: true, });
         return;
+      // we shouldn't get a legacy response, unless their roles changes since we first determined this, if they do we aren't authorizing them
       case CHECK_PRIVILEGES_RESULT.LEGACY:
-        this._securityContextService.set(this._request, { legacy: true, });
-        return;
       case CHECK_PRIVILEGES_RESULT.UNAUTHORIZED:
         const missing = this._getMissingPrivileges(response, spaceId);
         this._auditLogger.savedObjectsAuthorizationFailure(username, action, types, missing, args);
         const msg = `Unable to ${action} ${[...types].sort().join(',')}, missing ${[...missing].sort().join(',')}`;
         throw this.errors.decorateForbiddenError(new Error(msg));
       default:
-        throw new Error('Unexpected result from hasPrivileges');
+        throw new Error('Unexpected result from checkPrivileges');
     }
   }
 
@@ -142,12 +138,7 @@ export class SecureSavedObjectsClientWrapper {
     const types = this._savedObjectTypes;
     const typesToPrivilegesMap = new Map(types.map(type => [type, this._actions.getSavedObjectAction(type, action)]));
     const spaceId = this._spacesService.getSpaceId(this._request);
-    const { result, username, response } = await this._checkSavedObjectPrivileges([spaceId], Array.from(typesToPrivilegesMap.values()));
-
-    if (result === CHECK_PRIVILEGES_RESULT.LEGACY) {
-      this._securityContextService.set(this._request, { legacy: true, });
-      return await this._baseClient.find(options);
-    }
+    const { username, response } = await this._checkSavedObjectPrivileges([spaceId], Array.from(typesToPrivilegesMap.values()));
 
     const missing = this._getMissingPrivileges(response, spaceId);
     const authorizedTypes = Array.from(typesToPrivilegesMap.entries())
@@ -167,7 +158,6 @@ export class SecureSavedObjectsClientWrapper {
 
     this._auditLogger.savedObjectsAuthorizationSuccess(username, action, authorizedTypes, { options });
 
-    this._securityContextService.set(this._request, { rbac: true, });
     return await this._baseClient.find({
       ...options,
       type: authorizedTypes
