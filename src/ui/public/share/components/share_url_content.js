@@ -29,6 +29,7 @@ import {
   EuiIconTip,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiRadioGroup,
 } from '@elastic/eui';
 
 
@@ -39,11 +40,14 @@ import {
 
 import { unhashUrl } from '../../state_management/state_hashing';
 
+const RADIO_SAVED_OBJECT_ID = 'savedObject';
+const RADIO_SNAPSHOT_ID = 'snapshot';
+
 export class ShareUrlContent extends Component {
 
   state = {
-    shareSnapshot: true,
-  };
+    radioIdSelected: RADIO_SNAPSHOT_ID,
+  }
 
   componentWillUnmount() {
     window.removeEventListener('hashchange', this.resetShortUrls);
@@ -64,12 +68,12 @@ export class ShareUrlContent extends Component {
     }
   }
 
-  hasSavedObjectUrl = () => {
+  isNotSaved = () => {
     return this.props.objectId === undefined || this.props.objectId === '';
   }
 
   getSavedObjectUrl = () => {
-    if (!this.hasSavedObjectUrl()) {
+    if (this.isNotSaved()) {
       return;
     }
 
@@ -103,38 +107,67 @@ export class ShareUrlContent extends Component {
     return unhashUrl(url, this.props.getUnhashableStates());
   }
 
-  handleShareSnapshotChange = (evt) => {
-    this.setState({ shareSnapshot: evt.target.checked });
+  handleRadioChange = optionId => {
+    this.setState({
+      radioIdSelected: optionId,
+    });
+  };
+
+  renderRadioOptions = () => {
+    return [
+      {
+        id: RADIO_SAVED_OBJECT_ID,
+        disabled: this.isNotSaved(),
+        label: this.renderRadio(
+          'Saved object',
+          `You can share this URL with people to let them load the most recent saved version of this ${this.props.objectType}.`
+        ),
+      },
+      {
+        id: RADIO_SNAPSHOT_ID,
+        label: this.renderRadio(
+          'Snapshot',
+          `Snapshot URLs encode the current state of the ${this.props.objectType} in the URL itself.
+            Edits to the saved ${this.props.objectType} won't be visible via this URL.`
+        ),
+      }
+    ];
   }
 
-  renderShareSnapshot = () => {
+  renderRadio = (label, tipContent) => {
     return (
-      <EuiFormRow>
-        <EuiFlexGroup>
-          <EuiFlexItem grow={false}>
-            <EuiSwitch
-              label="Share snapshot"
-              checked={this.state.shareSnapshot}
-              onChange={this.handleShareSnapshotChange}
-            />
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiIconTip
-              content={`Snapshot URLs encode the current state of the ${this.props.objectType} in the URL itself.
-              Edits to the saved ${this.props.objectType} won't be visible via this URL.`}
-              position="bottom"
-            />
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </EuiFormRow>
+      <EuiFlexGroup>
+        <EuiFlexItem grow={false}>
+          {label}
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiIconTip
+            content={tipContent}
+            position="bottom"
+          />
+        </EuiFlexItem>
+      </EuiFlexGroup>
     );
   }
 
   render() {
+    const generateLinkAsHelp = this.isNotSaved()
+      ? `Can't share as saved object until the ${this.props.objectType} has been saved.`
+      : undefined;
+
     return (
       <EuiForm className="shareUrlContentForm">
 
-        {this.renderShareSnapshot()}
+        <EuiFormRow
+          label="Generate the link as"
+          helpText={generateLinkAsHelp}
+        >
+          <EuiRadioGroup
+            options={this.renderRadioOptions()}
+            idSelected={this.state.radioIdSelected}
+            onChange={this.handleRadioChange}
+          />
+        </EuiFormRow>
 
         <EuiButton
           fill
