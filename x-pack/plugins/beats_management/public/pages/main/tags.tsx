@@ -38,7 +38,7 @@ export class TagsPage extends React.PureComponent<TagsPageProps, TagsPageState> 
         history.push(`/tag/create`);
       }}
     >
-      Add Token
+      Create Tag
     </EuiButton>
   );
   constructor(props: TagsPageProps) {
@@ -67,10 +67,21 @@ export class TagsPage extends React.PureComponent<TagsPageProps, TagsPageState> 
     );
   }
 
-  private handleTagsAction = (action: string, payload: any) => {
+  private handleTagsAction = async (action: string, payload: any) => {
     switch (action) {
       case 'loadAssignmentOptions':
         this.loadBeats();
+        break;
+      case 'delete':
+        const tags = this.getSelectedTags().map(tag => tag.id);
+        const success = await this.props.libs.tags.delete(tags);
+        if (!success) {
+          alert(
+            'Some of these tags might be assigned to beats. Please ensure tags being removed are not activly assigned'
+          );
+        } else {
+          this.loadTags();
+        }
         break;
     }
 
@@ -153,7 +164,7 @@ export class TagsPage extends React.PureComponent<TagsPageProps, TagsPageState> 
     await this.props.libs.beats.assignTagsToBeats(assignments);
   };
 
-  private getSelectedTags = () => {
+  private getSelectedTags = (): BeatTag[] => {
     return this.state.tableRef.current.state.selection;
   };
 }

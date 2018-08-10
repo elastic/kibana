@@ -30,7 +30,7 @@ export class BeatsLib {
     return beat;
   }
 
-  public async getAll(): Promise<CMPopulatedBeat[]> {
+  public async getAll(): Promise<CMBeat[]> {
     const beats = await this.adapter.getAll();
     return await this.mergeInTags(beats);
   }
