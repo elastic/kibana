@@ -17,31 +17,19 @@
  * under the License.
  */
 
-import { createToolingLog } from '@kbn/dev-utils';
-import getopts from 'getopts';
+import { handleShortUrlError } from './lib/short_url_error';
+import { shortUrlAssertValid } from './lib/short_url_assert_valid';
 
-import { execInProjects, filterProjectsByFlag, Project } from '../typescript';
-
-export function runTslintCliOnTsConfigPaths(tsConfigPaths: string[]) {
-  runTslintCli(tsConfigPaths.map(tsConfigPath => new Project(tsConfigPath)));
-}
-
-export function runTslintCli(projects?: Project[]) {
-  const log = createToolingLog('info');
-  log.pipe(process.stdout);
-
-  const opts = getopts(process.argv.slice(2));
-  projects = projects || filterProjectsByFlag(opts.project);
-
-  if (!opts.format) {
-    process.argv.push('--format', 'stylish');
+export const createShortenUrlRoute = ({ shortUrlLookup }) => ({
+  method: 'POST',
+  path: '/api/shorten_url',
+  handler: async function (request, reply) {
+    try {
+      shortUrlAssertValid(request.payload.url);
+      const urlId = await shortUrlLookup.generateUrlId(request.payload.url, request);
+      reply({ urlId });
+    } catch (err) {
+      reply(handleShortUrlError(err));
+    }
   }
-
-  const getProjectArgs = (project: Project) => [
-    ...process.argv.slice(2),
-    '--project',
-    project.tsConfigPath,
-  ];
-
-  execInProjects(log, projects, 'tslint', getProjectArgs);
-}
+});
