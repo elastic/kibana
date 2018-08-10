@@ -51,7 +51,7 @@ describe('dev/build/lib/version_info', () => {
   describe('versionQualifier', () => {
     it('appends a version qualifier', async () => {
       const versionInfo = await getVersionInfo({
-        isRelease: false,
+        isRelease: true,
         versionQualifier: 'beta55',
         pkg
       });
