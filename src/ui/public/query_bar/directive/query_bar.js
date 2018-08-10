@@ -47,6 +47,7 @@ module.directive('queryBar', function () {
 
     controller: callAfterBindingsWorkaround(function ($scope, $element, $http, $timeout, config, PersistedLog, indexPatterns) {
       this.appName = this.appName || 'global';
+      this.focusedTypeaheadItemID = '';
 
       this.getIndexPatterns = () => {
         if (compact(this.indexPatterns).length) return Promise.resolve(this.indexPatterns);
