@@ -21,12 +21,12 @@ The Kibana plugin interfaces are in a state of constant development.  We cannot 
 Use the following command to install a plugin:
 
 [source,shell]
-bin/kibana-plugin install <package name or URL>
+bin/kibana-plugin install --no-optimize <package name or URL>
 
 When you specify a plugin name without a URL, the plugin tool attempts to download an official Elastic plugin, such as:
 
 ["source","shell",subs="attributes"]
-$ bin/kibana-plugin install x-pack
+$ bin/kibana-plugin install --no-optimize x-pack
 
 
 [float]
@@ -37,7 +37,7 @@ can alternatively specify a URL to a specific plugin, as in the following
 example:
 
 ["source","shell",subs="attributes"]
-$ bin/kibana-plugin install https://artifacts.elastic.co/downloads/packs/x-pack/x-pack-{version}.zip
+$ bin/kibana-plugin install --no-optimize https://artifacts.elastic.co/downloads/packs/x-pack/x-pack-{version}.zip
 
 You can specify URLs that use the HTTP, HTTPS, or `file` protocols.
 
@@ -48,7 +48,7 @@ Use the `-d` or `--plugin-dir` option after the `install` command to specify a d
 example:
 
 [source,shell]
-$ bin/kibana-plugin install file:///some/local/path/my-plugin.zip -d path/to/directory
+$ bin/kibana-plugin install --no-optimize file:///some/local/path/my-plugin.zip -d path/to/directory
 
 NOTE: This command creates the specified directory if it does not already exist.
 
@@ -61,7 +61,7 @@ The Kibana server needs to be able to write to files in the `optimize` directory
 want to make sure these commands are ran as the user `kibana`.  This user is already added for you as part of the package installation.
 
 [source,shell]
-$ sudo -u kibana bin/kibana-plugin install x-pack
+$ sudo -u kibana bin/kibana-plugin install --no-optimize x-pack
 
 If plugins were installed as a different user and the server is not starting, then you will need to change the owner of these files:
 
@@ -79,7 +79,7 @@ It also respects the `no_proxy` environment variable to exclude specific URLs fr
 You can specify the environment variable directly when installing plugins:
 
 [source,shell]
-$ http_proxy="http://proxy.local:4242" bin/kibana-plugin install <package name or URL>
+$ http_proxy="http://proxy.local:4242" bin/kibana-plugin install --no-optimize <package name or URL>
 
 
 [[update-remove-plugin]]
@@ -123,11 +123,11 @@ change this behavior, as in the following examples:
 
 [source,shell]
 .Waits for 30 seconds before failing
-bin/kibana-plugin install --timeout 30s sample-plugin
+bin/kibana-plugin install --no-optimize --timeout 30s sample-plugin
 
 [source,shell]
 .Waits for 1 minute before failing
-bin/kibana-plugin install --timeout 1m sample-plugin
+bin/kibana-plugin install --no-optimize --timeout 1m sample-plugin
 
 [float]
 === Plugins and Custom Kibana Configurations
