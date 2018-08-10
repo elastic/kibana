@@ -28,7 +28,7 @@ import {
 } from '../../state_management/state_hashing';
 import { toastNotifications } from '../../notify';
 
-import { shortenUrl } from '../lib/url_shortener';
+import { UrlShortenerProvider } from '../lib/url_shortener';
 
 import { uiModules } from '../../modules';
 import shareTemplate from '../views/share.html';
@@ -36,6 +36,7 @@ const app = uiModules.get('kibana');
 
 app.directive('share', function (Private) {
   const getUnhashableStates = Private(getUnhashableStatesProvider);
+  const urlShortener = Private(UrlShortenerProvider);
 
   return {
     restrict: 'E',
@@ -143,12 +144,9 @@ app.directive('share', function (Private) {
         this.urlFlags.shortSnapshot = !this.urlFlags.shortSnapshot;
 
         if (this.urlFlags.shortSnapshot) {
-          shortenUrl(this.urls.snapshot)
+          urlShortener.shortenUrl(this.urls.snapshot)
             .then(shortUrl => {
-              // We're using ES6 Promises, not $q, so we have to wrap this in $apply.
-              $scope.$apply(() => {
-                this.urls.shortSnapshot = shortUrl;
-              });
+              this.urls.shortSnapshot = shortUrl;
             });
         }
       };
@@ -158,12 +156,9 @@ app.directive('share', function (Private) {
 
         if (this.urlFlags.shortSnapshotIframe) {
           const snapshotIframe = this.makeUrlEmbeddable(this.urls.snapshot);
-          shortenUrl(snapshotIframe)
+          urlShortener.shortenUrl(snapshotIframe)
             .then(shortUrl => {
-              // We're using ES6 Promises, not $q, so we have to wrap this in $apply.
-              $scope.$apply(() => {
-                this.urls.shortSnapshotIframe = shortUrl;
-              });
+              this.urls.shortSnapshotIframe = shortUrl;
             });
         }
       };

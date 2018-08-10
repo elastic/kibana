@@ -17,31 +17,76 @@
  * under the License.
  */
 
-import { createToolingLog } from '@kbn/dev-utils';
-import getopts from 'getopts';
+import { resolve } from 'path';
 
-import { execInProjects, filterProjectsByFlag, Project } from '../typescript';
+import { createToolingLog } from '@kbn/dev-utils';
+import chalk from 'chalk';
+import execa from 'execa';
+import getopts from 'getopts';
+import Listr from 'listr';
+
+import { Project, PROJECTS } from '../typescript';
+
+class LintFailure {
+  constructor(public project: Project, public error: execa.ExecaError) {}
+}
 
 export function runTslintCliOnTsConfigPaths(tsConfigPaths: string[]) {
   runTslintCli(tsConfigPaths.map(tsConfigPath => new Project(tsConfigPath)));
 }
 
-export function runTslintCli(projects?: Project[]) {
+export function runTslintCli(projects = PROJECTS) {
   const log = createToolingLog('info');
   log.pipe(process.stdout);
 
   const opts = getopts(process.argv.slice(2));
-  projects = projects || filterProjectsByFlag(opts.project);
 
   if (!opts.format) {
     process.argv.push('--format', 'stylish');
   }
 
-  const getProjectArgs = (project: Project) => [
-    ...process.argv.slice(2),
-    '--project',
-    project.tsConfigPath,
-  ];
+  const list = new Listr(
+    projects
+      .filter(project => {
+        if (!opts.project) {
+          return true;
+        }
 
-  execInProjects(log, projects, 'tslint', getProjectArgs);
+        return resolve(opts.project) === project.tsConfigPath;
+      })
+      .map(project => ({
+        task: () =>
+          execa('tslint', [...process.argv.slice(2), '--project', project.tsConfigPath], {
+            cwd: project.directory,
+            env: chalk.enabled ? { FORCE_COLOR: 'true' } : {},
+            stdio: ['ignore', 'pipe', 'pipe'],
+          }).catch(error => {
+            throw new LintFailure(project, error);
+          }),
+        title: project.name,
+      })),
+    {
+      concurrent: true,
+      exitOnError: false,
+    }
+  );
+
+  list.run().catch((error: any) => {
+    process.exitCode = 1;
+
+    if (!error.errors) {
+      log.error('Unhandled execption!');
+      log.error(error);
+      process.exit();
+    }
+
+    for (const e of error.errors) {
+      if (e instanceof LintFailure) {
+        log.write('');
+        log.error(`${e.project.name} failed\n${e.error.stdout}`);
+      } else {
+        log.error(e);
+      }
+    }
+  });
 }

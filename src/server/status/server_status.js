@@ -86,18 +86,16 @@ export default class ServerStatus {
     const since = _.get(_.sortBy(statuses, 'since'), [0, 'since']);
 
     return {
-      id: state.id,
-      state: {
-        title: state.title,
-        uiColor: states.get(state.id).uiColor,
-        nickname: _.sample(state.nicknames),
-      },
+      state: state.id,
+      title: state.title,
+      nickname: _.sample(state.nicknames),
+      icon: state.icon,
       since: since,
     };
   }
 
   isGreen() {
-    return (this.overall().id === 'green');
+    return (this.overall().state === 'green');
   }
 
   notGreen() {

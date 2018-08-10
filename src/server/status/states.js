@@ -23,7 +23,7 @@ export const all = [
   {
     id: 'red',
     title: 'Red',
-    uiColor: 'danger',
+    icon: 'danger',
     severity: 1000,
     nicknames: [
       'Danger Will Robinson! Danger!'
@@ -32,7 +32,7 @@ export const all = [
   {
     id: 'uninitialized',
     title: 'Uninitialized',
-    uiColor: 'default',
+    icon: 'spinner',
     severity: 900,
     nicknames: [
       'Initializing'
@@ -41,7 +41,7 @@ export const all = [
   {
     id: 'yellow',
     title: 'Yellow',
-    uiColor: 'warning',
+    icon: 'warning',
     severity: 800,
     nicknames: [
       'S.N.A.F.U',
@@ -52,7 +52,7 @@ export const all = [
   {
     id: 'green',
     title: 'Green',
-    uiColor: 'secondary',
+    icon: 'success',
     severity: 0,
     nicknames: [
       'Looking good'
@@ -62,7 +62,7 @@ export const all = [
     id: 'disabled',
     title: 'Disabled',
     severity: -1,
-    uiColor: 'default',
+    icon: 'toggle-off',
     nicknames: [
       'Am I even a thing?'
     ]

@@ -36,7 +36,6 @@ import * as Plugins from './plugins';
 import { indexPatternsMixin } from './index_patterns';
 import { savedObjectsMixin } from './saved_objects';
 import { sampleDataMixin } from './sample_data';
-import { urlShorteningMixin } from './url_shortening';
 import { kibanaIndexMappingsMixin } from './mappings';
 import { serverExtensionsMixin } from './server_extensions';
 import { uiMixin } from '../ui';
@@ -93,9 +92,6 @@ export default class KbnServer {
 
       // setup routes for installing/uninstalling sample data sets
       sampleDataMixin,
-
-      // setup routes for short urls
-      urlShorteningMixin,
 
       // ensure that all bundles are built, or that the
       // watch bundle server is running

@@ -18,7 +18,5 @@
  */
 
 export { Project } from './project';
-export { filterProjectsByFlag } from './projects';
+export { PROJECTS } from './projects';
 export { getTsProjectForAbsolutePath } from './get_ts_project_for_absolute_path';
-export { execInProjects } from './exec_in_projects';
-export { runTypeCheckCli } from './run_type_check_cli';
