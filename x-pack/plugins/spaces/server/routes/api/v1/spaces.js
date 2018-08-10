@@ -11,7 +11,6 @@ import { spaceSchema } from '../../../lib/space_schema';
 import { wrapError } from '../../../lib/errors';
 import { isReservedSpace } from '../../../../common/is_reserved_space';
 import { addSpaceIdToPath } from '../../../lib/spaces_url_parser';
-import { SpacesClient } from '../../../lib/spaces_client';
 
 export function initSpacesApi(server) {
   const routePreCheckLicenseFn = routePreCheckLicense(server);
@@ -23,23 +22,12 @@ export function initSpacesApi(server) {
     };
   }
 
-  const getSpacesClient = (request, server) => {
-    const adminCluster = server.plugins.elasticsearch.getCluster('admin');
-    const { callWithRequest, callWithInternalUser } = adminCluster;
-    const callCluster = (...args) => callWithRequest(request, ...args);
-    const { savedObjects } = server;
-    const internalRepository = savedObjects.getSavedObjectsRepository(callWithInternalUser);
-    const callWithRequestRepository = savedObjects.getSavedObjectsRepository(callCluster);
-    const authorization = server.plugins.security ? server.plugins.security.authorization : null;
-    return new SpacesClient(authorization, callWithRequestRepository, internalRepository, request);
-  };
-
   server.route({
     method: 'GET',
     path: '/api/spaces/v1/spaces',
     async handler(request, reply) {
 
-      const spacesClient = getSpacesClient(request, server);
+      const spacesClient = server.plugins.spaces.spacesClient.getScopedClient(request);
 
       try {
         const spaces = await spacesClient.getAll();
@@ -59,7 +47,7 @@ export function initSpacesApi(server) {
     async handler(request, reply) {
       const spaceId = request.params.id;
 
-      const spacesClient = getSpacesClient(request, server);
+      const spacesClient = server.plugins.spaces.spacesClient.getScopedClient(request);
 
       try {
         const space = await spacesClient.get(spaceId);

@@ -27,7 +27,7 @@ export function initAuthorizationService(server, xpackInfoFeature) {
       return xpackInfoFeature.getLicenseCheckResults().allowRbac;
     },
     useRbacForRequest(request) {
-      return request.auth.credentials.scope && request.auth.credentials.scope.includes(RBAC_AUTH_SCOPE);
+      return request.auth.credentials && request.auth.credentials.scope && request.auth.credentials.scope.includes(RBAC_AUTH_SCOPE);
     }
   }));
 }
