@@ -57,6 +57,7 @@ describe('home', () => {
         }),
         set: sinon.mock(),
       },
+      urlBasePath: 'goober',
     };
   });
 
@@ -70,6 +71,8 @@ describe('home', () => {
     await new Promise(resolve => process.nextTick(resolve));
     // Ensure the state changes are reflected
     component.update();
+    // Ensure all promises resolve
+    await new Promise(resolve => process.nextTick(resolve));
 
     return component;
   }
@@ -149,36 +152,6 @@ describe('home', () => {
       });
 
       expect(component).toMatchSnapshot();
-    });
-  });
-
-  describe('loading', () => {
-    test('should increment and decrement the loading count', async () => {
-      let found = false;
-
-      await renderHome({
-        find: async () => {
-          sinon.assert.calledOnce(defaultProps.loadingCount.increment);
-          sinon.assert.notCalled(defaultProps.loadingCount.decrement);
-          found = true;
-          return { total: 0 };
-        },
-      });
-
-      expect(found).toBeTruthy();
-      sinon.assert.calledOnce(defaultProps.loadingCount.increment);
-      sinon.assert.calledOnce(defaultProps.loadingCount.decrement);
-    });
-
-    test('should decrement the loading count even if loading fails', async () => {
-      await renderHome({
-        find: async () => {
-          throw new Error('Shazm!');
-        },
-      });
-
-      sinon.assert.calledOnce(defaultProps.loadingCount.increment);
-      sinon.assert.calledOnce(defaultProps.loadingCount.decrement);
     });
   });
 

@@ -1332,8 +1332,8 @@ exports[`home welcome should show the normal home page if welcome screen is disa
 
 exports[`home welcome should show the welcome screen if enabled, and there are no index patterns defined 1`] = `
 <Welcome
-  kibanaVersion="99.2.1"
-  skipWelcome={[Function]}
+  onSkip={[Function]}
+  urlBasePath="goober"
 />
 `;
 

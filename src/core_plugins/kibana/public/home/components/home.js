@@ -70,9 +70,15 @@ export class Home extends Component {
   }
 
   fetchIsNewKibanaInstance = async () => {
-    this.props.loadingCount.increment();
-
     try {
+      // Set a max-time on this query so we don't hang the page too long...
+      // Worst case, we don't show the welcome screen when we should.
+      setTimeout(() => {
+        if (this.state.isLoading) {
+          this.setState({ isWelcomeEnabled: false });
+        }
+      }, 250);
+
       const resp = await this.props.find({
         type: 'index-pattern',
         fields: ['title'],
@@ -80,14 +86,22 @@ export class Home extends Component {
         search_fields: ['title'],
         perPage: 1,
       });
-      this._isMounted && this.setState({ isNewKibanaInstance: resp.total === 0 });
+
+      this.endLoading({ isNewKibanaInstance: resp.total === 0 });
     } catch (err) {
       // An error here is relatively unimportant, as it only means we don't provide
       // some UI niceties.
+      this.endLoading();
     }
+  };
 
-    this._isMounted && this.setState({ isLoading: false });
-    this.props.loadingCount.decrement();
+  endLoading = (state = {}) => {
+    if (this._isMounted) {
+      this.setState({
+        ...state,
+        isLoading: false,
+      });
+    }
   };
 
   skipWelcome = () => {
@@ -183,14 +197,19 @@ export class Home extends Component {
     );
   }
 
-  // For now, loading is just an empty page w/ the standard
-  // Kibana chrome.loadingCount.increment() indicator.
+  // For now, loading is just an empty page, as we'll show something
+  // in 250ms, no matter what, and a blank page prevents an odd flicker effect.
   renderLoading() {
     return '';
   }
 
   renderWelcome() {
-    return <Welcome skipWelcome={this.skipWelcome} kibanaVersion={this.props.kibanaVersion} />;
+    return (
+      <Welcome
+        onSkip={this.skipWelcome}
+        urlBasePath={this.props.urlBasePath}
+      />
+    );
   }
 
   render() {
@@ -225,8 +244,7 @@ Home.propTypes = {
   apmUiEnabled: PropTypes.bool.isRequired,
   recentlyAccessed: PropTypes.arrayOf(recentlyAccessedShape).isRequired,
   find: PropTypes.func.isRequired,
-  loadingCount: PropTypes.object.isRequired,
-  kibanaVersion: PropTypes.string.isRequired,
-  settingsClient: PropTypes.object.isRequired,
   localStorage: PropTypes.object.isRequired,
+  settingsClient: PropTypes.object.isRequired,
+  urlBasePath: PropTypes.string.isRequired,
 };

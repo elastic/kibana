@@ -45,8 +45,6 @@ export function HomeApp({
   const isCloudEnabled = chrome.getInjected('isCloudEnabled', false);
   const apmUiEnabled = chrome.getInjected('apmUiEnabled', true);
   const savedObjectsClient = chrome.getSavedObjectsClient();
-  const loadingCount = chrome.loadingCount;
-  const kibanaVersion = chrome.getKibanaVersion();
   const settingsClient = chrome.getUiSettingsClient();
 
   const renderTutorialDirectory = (props) => {
@@ -103,10 +101,9 @@ export function HomeApp({
             apmUiEnabled={apmUiEnabled}
             recentlyAccessed={recentlyAccessed}
             find={savedObjectsClient.find}
-            loadingCount={loadingCount}
-            kibanaVersion={kibanaVersion}
-            settingsClient={settingsClient}
             localStorage={localStorage}
+            settingsClient={settingsClient}
+            urlBasePath={chrome.getBasePath()}
           />
         </Route>
       </Switch>

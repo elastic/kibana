@@ -33,6 +33,8 @@ import {
   EuiFlexItem,
   EuiText,
   EuiIcon,
+  EuiButton,
+  EuiButtonEmpty,
 } from '@elastic/eui';
 
 /**
@@ -41,9 +43,9 @@ import {
 export class Welcome extends React.Component {
   hideOnEsc = (e) => {
     if (e.key === 'Escape') {
-      this.props.skipWelcome();
+      this.props.onSkip();
     }
-  }
+  };
 
   componentDidMount() {
     document.addEventListener('keydown', this.hideOnEsc);
@@ -54,8 +56,7 @@ export class Welcome extends React.Component {
   }
 
   render() {
-    const { skipWelcome, kibanaVersion } = this.props;
-    const majorVersion = kibanaVersion.split('.')[0];
+    const { urlBasePath, onSkip } = this.props;
 
     return (
       <div className="home-welcome">
@@ -66,37 +67,38 @@ export class Welcome extends React.Component {
               <EuiIcon type="logoKibana" size="xxl" />
             </span>
             <EuiTitle size="l" className="home-welcome-title">
-              <h1>Welcome to Kibana {majorVersion}</h1>
+              <h1>Welcome to Kibana</h1>
             </EuiTitle>
-            <EuiText size="s">Your window into the Elastic stack</EuiText>
+            <EuiText size="s" className="welcome-subtitle">Your Window into the Elastic Stack</EuiText>
             <EuiSpacer size="xl" />
           </div>
         </header>
         <div className="home-welcome-content home-welcome-body">
-          <header className="eui-textCenter">
-            <EuiSpacer size="xxl" />
-            <EuiText className="home-welcome-subheading">
-              Choose a way to start your journey
-            </EuiText>
-            <EuiSpacer size="xl" />
-          </header>
-
           <EuiFlexGroup gutterSize="l">
             <EuiFlexItem>
               <EuiCard
-                icon={<EuiIcon size="xxl" type="addDataApp" />}
-                title="Play around with sample data"
-                description="See what Kibana is capable of without all the setup."
-                href="#/home/tutorial_directory/sampleData"
-              />
-            </EuiFlexItem>
-            <EuiFlexItem>
-              <EuiCard
-                data-test-subj="skipWelcomeScreen"
-                icon={<EuiIcon size="xxl" type="cross" color="accent" />}
-                title="I don't need help"
-                description="Skip the tour. I know what I'm doing."
-                onClick={skipWelcome}
+                image={`${urlBasePath}/plugins/kibana/assets/illo_dashboard.png`}
+                textAlign="left"
+                title="Let's get started"
+                description="We noticed that you don't have any data in your cluster.
+                  You can try our sample data and dashboards or jump in with your own data."
+                footer={(
+                  <footer>
+                    <EuiButton
+                      fill
+                      className="home-welcome-footer-action"
+                      href="#/home/tutorial_directory/sampleData"
+                    >
+                      Try our sample data
+                    </EuiButton>
+                    <EuiButtonEmpty
+                      className="home-welcome-footer-action"
+                      onClick={onSkip}
+                    >
+                      Explore on my own
+                    </EuiButtonEmpty>
+                  </footer>
+                )}
               />
             </EuiFlexItem>
           </EuiFlexGroup>
@@ -107,6 +109,6 @@ export class Welcome extends React.Component {
 }
 
 Welcome.propTypes = {
-  kibanaVersion: PropTypes.string.isRequired,
-  skipWelcome: PropTypes.func.isRequired,
+  urlBasePath: PropTypes.string.isRequired,
+  onSkip: PropTypes.func.isRequired,
 };
