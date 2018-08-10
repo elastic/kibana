@@ -77,7 +77,9 @@ module.directive('queryBar', function () {
 
       this.updateSuggestions = debounce(async () => {
         const suggestions = await this.getSuggestions();
-        $scope.$apply(() => this.suggestions = suggestions);
+        if (!this._isScopeDestroyed) {
+          $scope.$apply(() => this.suggestions = suggestions);
+        }
       }, 100);
 
       this.getSuggestions = async () => {
@@ -142,6 +144,11 @@ module.directive('queryBar', function () {
 
       $scope.$watch('queryBar.indexPatterns', () => {
         this.updateSuggestions();
+      });
+
+      $scope.$on('$destroy', () => {
+        this.updateSuggestions.cancel();
+        this._isScopeDestroyed = true;
       });
     })
   };
