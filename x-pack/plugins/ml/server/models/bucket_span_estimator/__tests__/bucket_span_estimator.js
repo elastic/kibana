@@ -118,7 +118,7 @@ describe('ML - BucketSpanEstimator', () => {
       const estimateBucketSpan = estimateBucketSpanFactory(callWithRequest, mockServerFactory(true));
 
       estimateBucketSpan(formConfig).catch((catchData) => {
-        expect(catchData.message).to.be('Forbidden');
+        expect(catchData).to.be('Insufficient permissions to call bucket span estimation.');
         mockCallWithInternalUserFactory.verify();
         done();
       });
