@@ -17,12 +17,4 @@
  * under the License.
  */
 
-export { IndexMappings } from './index_mappings';
-
-export {
-  getTypes,
-  getRootType,
-  getProperty,
-  getRootProperties,
-  getRootPropertiesObjects,
-} from './lib';
+export { kibanaIndexMappingsMixin } from './kibana_index_mappings_mixin';

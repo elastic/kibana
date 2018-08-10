@@ -17,18 +17,16 @@
  * under the License.
  */
 
-import { Server } from 'hapi-latest';
-import { IndexMappings } from './index_mappings';
-import { EsMappings } from './lib/';
+import { IndexMappings } from '../../../core/server/saved_objects/mappings';
 
 /**
  *  The default mappings used for the Kibana index. This is
  *  extended via uiExports type "mappings". See the Kibana
  *  and Timelion plugins for examples.
  */
-const BASE_SAVED_OBJECT_MAPPINGS: EsMappings = {
+const BASE_SAVED_OBJECT_MAPPINGS = {
   doc: {
-    dynamic: 'strict' as 'strict',
+    dynamic: 'strict',
     properties: {
       type: {
         type: 'keyword',
@@ -48,7 +46,7 @@ const BASE_SAVED_OBJECT_MAPPINGS: EsMappings = {
   },
 };
 
-export function kibanaIndexMappingsMixin(kbnServer: any, server: Server) {
+export function kibanaIndexMappingsMixin(kbnServer, server) {
   const mappings = new IndexMappings(
     BASE_SAVED_OBJECT_MAPPINGS,
     kbnServer.uiExports.savedObjectMappings
