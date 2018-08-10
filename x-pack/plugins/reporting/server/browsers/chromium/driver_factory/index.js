@@ -42,6 +42,11 @@ export class HeadlessChromiumDriverFactory {
       let page;
       try {
         chromium = await puppeteer.launch({
+          userDataDir,
+
+          // In Mac / Windows, we let Phantom use its own binaries
+          executablePath: process.platform !== 'linux' ? undefined : this.binaryPath,
+
           ignoreHTTPSErrors: true,
           args: chromiumArgs,
         });

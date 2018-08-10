@@ -10,18 +10,6 @@ require('@kbn/test').runTestsCli([
   // turned back on. A 3x retry loop did not prevent it from becoming flaky.
   // HACK: TODO: Remove this. Running this several times to try to reproduce a bug.
   require.resolve('../test/reporting/configs/chromium_api.js'),
-  require.resolve('../test/reporting/configs/chromium_api.js'),
-  require.resolve('../test/reporting/configs/chromium_api.js'),
-  require.resolve('../test/reporting/configs/chromium_api.js'),
-  require.resolve('../test/reporting/configs/chromium_api.js'),
-  require.resolve('../test/reporting/configs/chromium_api.js'),
-  require.resolve('../test/reporting/configs/chromium_api.js'),
-  require.resolve('../test/reporting/configs/chromium_functional.js'),
-  require.resolve('../test/reporting/configs/chromium_functional.js'),
-  require.resolve('../test/reporting/configs/chromium_functional.js'),
-  require.resolve('../test/reporting/configs/chromium_functional.js'),
-  require.resolve('../test/reporting/configs/chromium_functional.js'),
-  require.resolve('../test/reporting/configs/chromium_functional.js'),
   require.resolve('../test/reporting/configs/chromium_functional.js'),
   require.resolve('../test/reporting/configs/phantom_api.js'),
   require.resolve('../test/reporting/configs/phantom_functional.js'),

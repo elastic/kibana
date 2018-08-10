@@ -8,7 +8,7 @@ import path from 'path';
 
 export const paths = {
   archivesPath: path.resolve(__dirname, '../../../.chromium'),
-  baseUrl: 'https://s3.amazonaws.com/headless-shell/',
+  baseUrl: 'https://github.com/adieuadieu/serverless-chrome/releases/download/v1.0.0-53/',
   packages: [{
     platforms: ['darwin', 'freebsd', 'openbsd'],
     archiveFilename: 'chromium-503a3e4-darwin.zip',
@@ -16,9 +16,9 @@ export const paths = {
     binaryRelativePath: 'headless_shell-darwin/headless_shell',
   }, {
     platforms: ['linux'],
-    archiveFilename: 'chromium-503a3e4-linux.zip',
-    archiveChecksum: '9486d8eff9fc4f94c899aa72f5e59520',
-    binaryRelativePath: 'headless_shell-linux/headless_shell'
+    archiveFilename: 'stable-headless-chromium-amazonlinux-2017-03.zip',
+    archiveChecksum: 'd752c95520d42c666574c271dda8fd65',
+    binaryRelativePath: ''
   }, {
     platforms: ['win32'],
     archiveFilename: 'chromium-503a3e4-win32.zip',
