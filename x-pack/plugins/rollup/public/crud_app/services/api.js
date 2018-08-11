@@ -4,5 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { PLUGIN } from './plugin';
-export { CRUD_APP_BASE_PATH } from './crud_app';
+import { kfetch } from 'ui/kfetch';
+
+export async function loadJobs() {
+  const { jobs } = await kfetch({
+    pathname: `/api/rollup/jobs`,
+    method: 'GET',
+  });
+
+  return jobs;
+}
