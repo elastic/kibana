@@ -21,7 +21,7 @@ export default async function ({ readConfigFile }) {
   const functionalConfig = await readConfigFile(require.resolve('../functional/config'));
 
   return {
-    ...functionalConfig.get(),
+    ...functionalConfig.getAll(),
 
     testFiles: [
       require.resolve('../functional/apps/home'),
