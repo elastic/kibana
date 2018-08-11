@@ -224,7 +224,7 @@ export class VegaParser {
     const validate = (name, isZoom) => {
       const val = this._config[name];
       if (val !== undefined) {
-        const parsed = Number.parseFloat(val);
+        const parsed = parseFloat(val);
         if (Number.isFinite(parsed) && (!isZoom || (parsed >= 0 && parsed <= 30))) {
           res[name] = parsed;
           return;
