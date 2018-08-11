@@ -115,7 +115,7 @@ export class Home extends Component {
     }
 
     return (
-      <EuiPage className="home" data-test-subj="kibanaHomePage">
+      <EuiPage className="home">
         <EuiPageBody>
 
           {recentlyAccessedPanel}
