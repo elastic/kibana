@@ -6,35 +6,16 @@
 
 import { createSelector } from 'reselect';
 
-import { getMillisOfScale } from '../../../../../common/time';
-import { SummaryState } from './reducer';
+import { createGraphqlStateSelectors } from '../../../../utils/remote_state/remote_graphql_state';
+import { SummaryGraphqlState, SummaryState } from './state';
 
-export const selectSummaryBuckets = (state: SummaryState) => state.buckets;
-
-export const selectFirstSummaryBucket = createSelector(
-  selectSummaryBuckets,
-  summaryBuckets => (summaryBuckets.length > 0 ? summaryBuckets[0] : null)
+const summaryGraphlStateSelectors = createGraphqlStateSelectors<SummaryGraphqlState['data']>(
+  (state: SummaryState) => state.summary
 );
 
-export const selectLastSummaryBucket = createSelector(
-  selectSummaryBuckets,
-  summaryBuckets => (summaryBuckets.length > 0 ? summaryBuckets[summaryBuckets.length - 1] : null)
+export const selectSummaryBuckets = createSelector(
+  summaryGraphlStateSelectors.selectData,
+  data => (data ? data.buckets : [])
 );
 
-export const selectSummaryStartLoadingCount = (state: SummaryState) => state.start.loading;
-
-export const selectSummaryEndLoadingCount = (state: SummaryState) => state.end.loading;
-
-export const selectSummaryBucketSize = (state: SummaryState) => state.bucketSize;
-
-export const selectSummaryBufferSize = (state: SummaryState) => state.bufferSize;
-
-export const selectSummaryBucketsPerBuffer = createSelector(
-  selectSummaryBufferSize,
-  selectSummaryBucketSize,
-  (bufferSize, bucketSize) => {
-    const bucketSizeMillis = getMillisOfScale(bucketSize);
-    const bufferSizeMillis = getMillisOfScale(bufferSize);
-    return Math.ceil(bufferSizeMillis / bucketSizeMillis);
-  }
-);
+export const selectSummaryIntervalSize = (state: SummaryState) => state.intervalSize;

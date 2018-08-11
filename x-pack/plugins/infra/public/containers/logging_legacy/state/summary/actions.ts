@@ -6,63 +6,15 @@
 
 import actionCreatorFactory from 'typescript-fsa';
 
-import { LogSummaryBucket } from '../../../../../common/log_summary';
-import { TimeScale } from '../../../../../common/time';
+import { loadSummaryActionCreators } from './load_operation';
 
 const actionCreator = actionCreatorFactory('kibana/logging/summary');
 
 /**
- * REPLACE_SUMMARY
+ * load operation
  */
 
-export interface ReplaceSummaryPayload {
-  bucketSize: TimeScale;
-  after: number;
-  before: number;
-  target: number;
-}
-
-export interface ReplaceSummaryResult {
-  buckets: LogSummaryBucket[];
-}
-
-export const replaceSummary = actionCreator.async<ReplaceSummaryPayload, ReplaceSummaryResult>(
-  'REPLACE_SUMMARY'
-);
-
-/**
- * EXTEND_SUMMARY
- */
-
-export interface ExtendSummaryPayload {
-  bucketSize: TimeScale;
-  count: number;
-  target: number;
-}
-
-export interface ExtendSummaryResult {
-  buckets: LogSummaryBucket[];
-}
-
-export const extendSummaryStart = actionCreator.async<ExtendSummaryPayload, ExtendSummaryResult>(
-  'EXTEND_SUMMARY_START'
-);
-
-export const extendSummaryEnd = actionCreator.async<ExtendSummaryPayload, ExtendSummaryResult>(
-  'EXTEND_SUMMARY_END'
-);
-
-/**
- * CONSOLIDATE_SUMMARY
- */
-
-export interface ConsolidateSummaryPayload {
-  after: number;
-  before: number;
-  target: number;
-}
-
-export const consolidateSummary = actionCreator<ConsolidateSummaryPayload>('CONSOLIDATE_SUMMARY');
+export const loadSummary = loadSummaryActionCreators.resolve;
 
 /**
  * REPORT_VISIBLE_SUMMARY
@@ -71,6 +23,9 @@ export const consolidateSummary = actionCreator<ConsolidateSummaryPayload>('CONS
 export interface ReportVisibleSummaryPayload {
   start: number;
   end: number;
+  bucketsOnPage: number;
+  pagesBeforeStart: number;
+  pagesAfterEnd: number;
 }
 
 export const reportVisibleSummary = actionCreator<ReportVisibleSummaryPayload>(
@@ -82,8 +37,7 @@ export const reportVisibleSummary = actionCreator<ReportVisibleSummaryPayload>(
  */
 
 export interface ConfigureSummaryPayload {
-  bucketSize: TimeScale;
-  bufferSize: TimeScale;
+  intervalSize: number;
 }
 
 export const configureSummary = actionCreator<ConfigureSummaryPayload>('CONFIGURE_SUMMARY');

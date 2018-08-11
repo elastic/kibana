@@ -11,7 +11,7 @@ import { concatMap, filter, switchMap, takeUntil, withLatestFrom } from 'rxjs/op
 import { LogSummaryBucket } from '../../../../../common/log_summary';
 import { TimeScale } from '../../../../../common/time';
 import { searchActions } from '../search';
-import { summaryActions } from '../summary';
+// import { summaryActions } from '../summary';
 import { CommonFetchSearchSummaryDependencies } from './api/fetch_search_summary';
 import { replaceSearchSummary$ } from './api/replace_search_summary';
 
@@ -43,11 +43,10 @@ export const createSearchSummaryEpic = <State>(): Epic<
 ) => {
   const newQuery$ = action$.pipe(
     filter(
-      action =>
-        searchActions.search.match(action) ||
-        summaryActions.replaceSummary.done.match(action) ||
-        summaryActions.extendSummaryStart.done.match(action) ||
-        summaryActions.extendSummaryEnd.done.match(action)
+      action => searchActions.search.match(action) // ||
+      // summaryActions.replaceSummary.done.match(action) ||
+      // summaryActions.extendSummaryStart.done.match(action) ||
+      // summaryActions.extendSummaryEnd.done.match(action)
     ),
     concatMap(() => {
       const state = state$.value;

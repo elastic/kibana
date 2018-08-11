@@ -32,16 +32,14 @@ import { LogTimeControls } from '../../components/logging/log_time_controls';
 import { withLibs } from '../../containers/libs';
 import { State, targetActions } from '../../containers/logging_legacy/state';
 import { withLogSearchControlsProps } from '../../containers/logging_legacy/with_log_search_controls_props';
-import { withMinimapProps } from '../../containers/logging_legacy/with_minimap_props';
-import { withMinimapScaleControlsProps } from '../../containers/logging_legacy/with_minimap_scale_controls_props';
 import { WithStreamItems } from '../../containers/logging_legacy/with_stream_items';
+import { WithSummary } from '../../containers/logging_legacy/with_summary';
 import { WithTextScale } from '../../containers/logging_legacy/with_text_scale_controls_props';
+import { WithTextStreamPosition } from '../../containers/logging_legacy/with_text_stream_position';
 import { WithTextWrap } from '../../containers/logging_legacy/with_text_wrap_controls_props';
 import { WithTimeControls } from '../../containers/logging_legacy/with_time_controls_props';
 import { withVisibleLogEntries } from '../../containers/logging_legacy/with_visible_log_entries';
 
-const ConnectedLogMinimap = withMinimapProps(LogMinimap);
-const ConnectedLogMinimapScaleControls = withMinimapScaleControlsProps(LogMinimapScaleControls);
 const ConnectedLogPositionText = withVisibleLogEntries(LogPositionText);
 const ConnectedLogSearchControls = withLogSearchControlsProps(LogSearchControls);
 
@@ -100,7 +98,15 @@ export const LogsPage = withLibs(
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
                   <LogCustomizationMenu>
-                    <ConnectedLogMinimapScaleControls />
+                    <WithSummary>
+                      {({ availableIntervalSizes, configureSummary, intervalSize }) => (
+                        <LogMinimapScaleControls
+                          availableIntervalSizes={availableIntervalSizes}
+                          configureSummary={configureSummary}
+                          intervalSize={intervalSize}
+                        />
+                      )}
+                    </WithSummary>
                     <WithTextWrap>
                       {({ wrap, setTextWrap }) => (
                         <LogTextWrapControls wrap={wrap} setTextWrap={setTextWrap} />
@@ -154,7 +160,24 @@ export const LogsPage = withLibs(
                 {({ measureRef, content: { width = 0, height = 0 } }) => {
                   return (
                     <LogPageMinimapColumn innerRef={measureRef as any}>
-                      <ConnectedLogMinimap height={height} width={width} />
+                      <WithSummary>
+                        {({ buckets, intervalSize, reportVisibleInterval }) => (
+                          <WithTextStreamPosition>
+                            {({ jumpToPosition, visibleMidpoint, visibleTimeInterval }) => (
+                              <LogMinimap
+                                height={height}
+                                width={width}
+                                highlightedInterval={visibleTimeInterval}
+                                intervalSize={intervalSize}
+                                jumpToTarget={jumpToPosition}
+                                reportVisibleInterval={reportVisibleInterval}
+                                summaryBuckets={buckets}
+                                target={visibleMidpoint}
+                              />
+                            )}
+                          </WithTextStreamPosition>
+                        )}
+                      </WithSummary>
                     </LogPageMinimapColumn>
                   );
                 }}

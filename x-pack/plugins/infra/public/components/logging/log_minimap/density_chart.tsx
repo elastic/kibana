@@ -10,10 +10,10 @@ import max from 'lodash/fp/max';
 import * as React from 'react';
 import styled from 'styled-components';
 
-import { LogSummaryBucket } from '../../../../common/log_summary';
+import { SummaryBucket } from './types';
 
 interface DensityChartProps {
-  buckets: LogSummaryBucket[];
+  buckets: SummaryBucket[];
   end: number;
   start: number;
   width: number;
@@ -35,14 +35,14 @@ export const DensityChart: React.SFC<DensityChartProps> = ({
     .domain([start, end])
     .range([0, height]);
 
-  const xMax = max(buckets.map(bucket => bucket.count)) || 0;
+  const xMax = max(buckets.map(bucket => bucket.entriesCount)) || 0;
   const xScale = scaleLinear()
     .domain([0, xMax])
     .range([0, width / 2]);
 
-  const path = area<LogSummaryBucket>()
+  const path = area<SummaryBucket>()
     .x0(xScale(0))
-    .x1(bucket => xScale(bucket.count))
+    .x1(bucket => xScale(bucket.entriesCount))
     .y(bucket => yScale((bucket.start + bucket.end) / 2))
     .curve(curveMonotoneY);
   const pathData = path(buckets);

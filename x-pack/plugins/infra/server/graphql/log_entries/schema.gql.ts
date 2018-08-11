@@ -110,7 +110,7 @@ export const logEntriesSchema = gql`
       "The millisecond timestamp that corresponds to the end of the interval"
       end: Float!
       "The size of each bucket in milliseconds"
-      bucketSize: Int!
+      bucketSize: Float!
       "The query to filter the log entries by"
       filterQuery: String
     ): InfraLogSummaryInterval!

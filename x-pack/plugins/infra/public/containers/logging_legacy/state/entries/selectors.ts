@@ -105,15 +105,6 @@ export const selectLastVisibleEntry = createSelector(
     lastVisibleEntryKey ? getEntry(entries, lastVisibleEntryKey) : null
 );
 
-export const selectVisibleEntriesTimeInterval = createSelector(
-  selectFirstVisibleEntry,
-  selectLastVisibleEntry,
-  (firstVisibleEntry, lastVisibleEntry) => ({
-    end: lastVisibleEntry ? lastVisibleEntry.key.time : null,
-    start: firstVisibleEntry ? firstVisibleEntry.key.time : null,
-  })
-);
-
 export const selectIsFirstEntryVisible = createSelector(
   selectFirstEntry,
   selectFirstVisibleEntry,

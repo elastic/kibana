@@ -15,10 +15,10 @@ import {
   initialState,
   reducer,
   // searchSelectors,
-  sourceSelectors,
+  // sourceSelectors,
   State,
-  summarySelectors,
-  targetSelectors,
+  // summarySelectors,
+  // targetSelectors,
 } from '../../containers/logging_legacy/state';
 import { InfraApolloClient, InfraObservableApi } from '../../lib/lib';
 
@@ -47,15 +47,11 @@ export function createStore({ apolloClient, observableApi }: StoreDependencies) 
     // selectEntriesEndLoadingState: entriesSelectors.selectEntriesEndLoadingState,
     // selectEntriesStartLoadingState: entriesSelectors.selectEntriesStartLoadingState,
     // selectFirstEntry: entriesSelectors.selectFirstEntry,
-    selectFirstSummaryBucket: summarySelectors.selectFirstSummaryBucket,
     // selectLastEntry: entriesSelectors.selectLastEntry,
-    selectLastSummaryBucket: summarySelectors.selectLastSummaryBucket,
     // selectQuery: searchSelectors.selectQuery,
-    selectSourceCoreFields: sourceSelectors.selectSourceCoreFields,
-    selectSourceIndices: sourceSelectors.selectSourceIndices,
-    selectSummaryBucketSize: summarySelectors.selectSummaryBucketSize,
-    selectSummaryBucketsPerBuffer: summarySelectors.selectSummaryBucketsPerBuffer,
-    selectTarget: targetSelectors.selectTarget,
+    // selectSourceCoreFields: sourceSelectors.selectSourceCoreFields,
+    // selectSourceIndices: sourceSelectors.selectSourceIndices,
+    // selectTarget: targetSelectors.selectTarget,
   };
 
   const epicMiddleware = createEpicMiddleware<Action, Action, State, typeof middlewareDependencies>(
