@@ -29,5 +29,7 @@ export interface EsMapping {
 }
 
 export interface EsMappings {
+  // When _doc change enforced, hardcode this to be
+  // '_doc': EsMapping;
   [rootType: string]: EsMapping;
 }
