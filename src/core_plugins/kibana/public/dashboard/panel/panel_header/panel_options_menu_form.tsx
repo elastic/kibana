@@ -24,7 +24,7 @@ import { EuiButtonEmpty, EuiFieldText, EuiFormRow, keyCodes } from '@elastic/eui
 export interface PanelOptionsMenuFormProps {
   title?: string;
   onReset: () => void;
-  onUpdatePanelTitle: (newPanelTitle?: string) => void;
+  onUpdatePanelTitle: (newPanelTitle: string) => void;
   onClose: () => void;
 }
 

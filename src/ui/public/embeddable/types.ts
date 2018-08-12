@@ -69,7 +69,7 @@ export interface ContainerState {
   /**
    * A way to override the underlying embeddable title and supply a title at the panel level.
    */
-  customTitle: string | undefined;
+  customTitle?: string;
 }
 
 export interface EmbeddableState {
