@@ -17,38 +17,53 @@
  * under the License.
  */
 
-import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 
-import { embeddableShape } from 'ui/embeddable';
-import { PanelHeader } from './panel_header';
+import { Embeddable } from 'ui/embeddable';
 import { DashboardViewMode } from '../../dashboard_view_mode';
+import { PanelHeader } from './panel_header';
 
+import { CoreKibanaState } from '../../../selectors';
 import {
-  getPanel,
-  getMaximizedPanelId,
+  getEmbeddableTitle,
   getFullScreenMode,
-  getViewMode,
   getHidePanelTitles,
-  getEmbeddableTitle
+  getMaximizedPanelId,
+  getPanel,
+  getViewMode,
+  PanelId,
 } from '../../selectors';
 
-const mapStateToProps = ({ dashboard }, { panelId }) => {
+export interface PanelHeaderContainerOwnProps {
+  panelId: PanelId;
+  embeddable?: Embeddable;
+}
+
+interface PanelHeaderContainerStateProps {
+  title?: string;
+  isExpanded: boolean;
+  isViewOnlyMode: boolean;
+  hidePanelTitles: boolean;
+}
+
+const mapStateToProps = (
+  { dashboard }: CoreKibanaState,
+  { panelId }: PanelHeaderContainerOwnProps
+) => {
   const panel = getPanel(dashboard, panelId);
   const embeddableTitle = getEmbeddableTitle(dashboard, panelId);
   return {
     title: panel.title === undefined ? embeddableTitle : panel.title,
     isExpanded: getMaximizedPanelId(dashboard) === panelId,
-    isViewOnlyMode: getFullScreenMode(dashboard) || getViewMode(dashboard) === DashboardViewMode.VIEW,
+    isViewOnlyMode:
+      getFullScreenMode(dashboard) || getViewMode(dashboard) === DashboardViewMode.VIEW,
     hidePanelTitles: getHidePanelTitles(dashboard),
   };
 };
 
-export const PanelHeaderContainer = connect(
-  mapStateToProps,
-)(PanelHeader);
-
-PanelHeaderContainer.propTypes = {
-  panelId: PropTypes.string.isRequired,
-  embeddable: embeddableShape,
-};
+export const PanelHeaderContainer = connect<
+  PanelHeaderContainerStateProps,
+  {},
+  PanelHeaderContainerOwnProps,
+  CoreKibanaState
+>(mapStateToProps)(PanelHeader);

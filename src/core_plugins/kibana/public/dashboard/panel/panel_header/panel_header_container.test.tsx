@@ -17,37 +17,57 @@
  * under the License.
  */
 
+import { mount, ReactWrapper } from 'enzyme';
+import _ from 'lodash';
 import React from 'react';
 import { Provider } from 'react-redux';
-import _ from 'lodash';
-import { mount } from 'enzyme';
 
-import { PanelHeaderContainer } from './panel_header_container';
-import { DashboardViewMode } from '../../dashboard_view_mode';
-import { store } from '../../../store';
-import {
-  updateViewMode,
-  setPanels,
-  setPanelTitle,
-  resetPanelTitle,
-  embeddableIsInitialized,
-  updateTimeRange,
-} from '../../actions';
+// TODO: remove this when EUI supports types for this.
+// @ts-ignore: implicit any for JS file
 import { findTestSubject } from '@elastic/eui/lib/test';
 
-function getProps(props = {}) {
+import { store } from '../../../store';
+import {
+  embeddableIsInitialized,
+  resetPanelTitle,
+  setPanels,
+  setPanelTitle,
+  updateTimeRange,
+  updateViewMode,
+} from '../../actions';
+import { DashboardViewMode } from '../../dashboard_view_mode';
+import { PanelHeaderContainer, PanelHeaderContainerOwnProps } from './panel_header_container';
+
+function getProps(props = {}): PanelHeaderContainerOwnProps {
   const defaultTestProps = {
     panelId: 'foo1',
   };
   return _.defaultsDeep(props, defaultTestProps);
 }
 
-let component;
+let component: ReactWrapper;
 
 beforeAll(() => {
   store.dispatch(updateTimeRange({ to: 'now', from: 'now-15m' }));
   store.dispatch(updateViewMode(DashboardViewMode.EDIT));
-  store.dispatch(setPanels({ 'foo1': { panelIndex: 'foo1' } }));
+  store.dispatch(
+    setPanels({
+      foo1: {
+        panelIndex: 'foo1',
+        id: 'hi',
+        version: '123',
+        type: 'viz',
+        embeddableConfig: {},
+        gridData: {
+          x: 1,
+          y: 1,
+          w: 1,
+          h: 1,
+          id: 'hi',
+        },
+      },
+    })
+  );
   const metadata = { title: 'my embeddable title', editUrl: 'editme' };
   store.dispatch(embeddableIsInitialized({ metadata, panelId: 'foo1' }));
 });
@@ -57,7 +77,11 @@ afterAll(() => {
 });
 
 test('Panel header shows embeddable title when nothing is set on the panel', () => {
-  component = mount(<Provider store={store}><PanelHeaderContainer {...getProps()} /></Provider>);
+  component = mount(
+    <Provider store={store}>
+      <PanelHeaderContainer {...getProps()} />
+    </Provider>
+  );
   expect(findTestSubject(component, 'dashboardPanelTitle').text()).toBe('my embeddable title');
 });
 
