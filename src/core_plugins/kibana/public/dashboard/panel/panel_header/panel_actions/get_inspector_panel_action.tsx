@@ -46,9 +46,16 @@ export function getInspectorPanelAction({
     },
     {
       icon: <EuiIcon type="inspect" />,
-      isVisible: ({ embeddable }) =>
-        embeddable && Inspector.isAvailable(embeddable.getInspectorAdapters()),
+      isVisible: ({ embeddable }) => {
+        if (!embeddable) {
+          return false;
+        }
+        return Inspector.isAvailable(embeddable.getInspectorAdapters());
+      },
       onClick: ({ embeddable }) => {
+        if (!embeddable) {
+          return;
+        }
         closeContextMenu();
         const adapters = embeddable.getInspectorAdapters();
         if (!adapters) {

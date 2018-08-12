@@ -17,21 +17,22 @@
  * under the License.
  */
 
-import { connect } from 'react-redux';
-import PropTypes from 'prop-types';
+import { EuiContextMenuPanelDescriptor } from '@elastic/eui';
+import * as Redux from 'react-redux';
+import { ContainerState, Embeddable } from 'ui/embeddable';
 import { panelActionsStore } from '../../store/panel_actions_store';
-import { embeddableShape } from 'ui/embeddable';
-import { PanelOptionsMenu } from './panel_options_menu';
 import {
   buildEuiContextMenuPanels,
+  getCustomizePanelAction,
   getEditPanelAction,
   getInspectorPanelAction,
   getRemovePanelAction,
-  getCustomizePanelAction,
   getToggleExpandPanelAction,
 } from './panel_actions';
+import { PanelOptionsMenu, PanelOptionsMenuProps } from './panel_options_menu';
 
 import {
+  closeContextMenu,
   deletePanel,
   maximizePanel,
   minimizePanel,
@@ -40,20 +41,49 @@ import {
   setVisibleContextMenuPanelId,
 } from '../../actions';
 
+import { DashboardContextMenuPanel } from 'ui/dashboard_panel_actions';
+import { CoreKibanaState } from '../../../selectors';
+import { DashboardViewMode } from '../../dashboard_view_mode';
 import {
+  getContainerState,
   getEmbeddable,
   getEmbeddableEditUrl,
+  getEmbeddableTitle,
   getMaximizedPanelId,
   getPanel,
-  getEmbeddableTitle,
-  getContainerState,
-  getVisibleContextMenuPanelId,
   getViewMode,
+  getVisibleContextMenuPanelId,
+  PanelId,
 } from '../../selectors';
-import { DashboardContextMenuPanel } from 'ui/dashboard_panel_actions';
-import { DashboardViewMode } from '../../dashboard_view_mode';
 
-const mapStateToProps = ({ dashboard }, { panelId }) => {
+interface PanelOptionsMenuContainerDispatchProps {
+  onDeletePanel: () => void;
+  onCloseContextMenu: () => void;
+  openContextMenu: () => void;
+  onMaximizePanel: () => void;
+  onMinimizePanel: () => void;
+  onResetPanelTitle: () => void;
+  onUpdatePanelTitle: (title: string) => void;
+}
+
+interface PanelOptionsMenuContainerOwnProps {
+  panelId: PanelId;
+  embeddable?: Embeddable;
+}
+
+interface PanelOptionsMenuContainerStateProps {
+  panelTitle?: string;
+  editUrl: string | null | undefined;
+  isExpanded: boolean;
+  containerState: ContainerState;
+  visibleContextMenuPanelId: PanelId | undefined;
+  isViewMode: boolean;
+}
+
+const mapStateToProps = (
+  { dashboard }: CoreKibanaState,
+  { panelId }: PanelOptionsMenuContainerOwnProps
+) => {
   const embeddable = getEmbeddable(dashboard, panelId);
   const panel = getPanel(dashboard, panelId);
   const embeddableTitle = getEmbeddableTitle(dashboard, panelId);
@@ -75,20 +105,33 @@ const mapStateToProps = ({ dashboard }, { panelId }) => {
  * @param embeddableFactory {EmbeddableFactory}
  * @param panelId {string}
  */
-const mapDispatchToProps = (dispatch, { panelId }) => ({
+const mapDispatchToProps = (
+  dispatch: Redux.Dispatch<CoreKibanaState>,
+  { panelId }: PanelOptionsMenuContainerOwnProps
+) => ({
   onDeletePanel: () => {
     dispatch(deletePanel(panelId));
   },
-  closeContextMenu: () => dispatch(setVisibleContextMenuPanelId()),
+  onCloseContextMenu: () => dispatch(closeContextMenu()),
   openContextMenu: () => dispatch(setVisibleContextMenuPanelId(panelId)),
   onMaximizePanel: () => dispatch(maximizePanel(panelId)),
   onMinimizePanel: () => dispatch(minimizePanel()),
   onResetPanelTitle: () => dispatch(resetPanelTitle(panelId)),
-  onUpdatePanelTitle: (newTitle) => dispatch(setPanelTitle({ title: newTitle, panelId: panelId })),
+  onUpdatePanelTitle: (newTitle: string) => dispatch(setPanelTitle({ title: newTitle, panelId })),
 });
 
-const mergeProps = (stateProps, dispatchProps, ownProps) => {
-  const { isExpanded, panelTitle, containerState, visibleContextMenuPanelId, isViewMode } = stateProps;
+const mergeProps = (
+  stateProps: PanelOptionsMenuContainerStateProps,
+  dispatchProps: PanelOptionsMenuContainerDispatchProps,
+  ownProps: PanelOptionsMenuContainerOwnProps
+) => {
+  const {
+    isExpanded,
+    panelTitle,
+    containerState,
+    visibleContextMenuPanelId,
+    isViewMode,
+  } = stateProps;
   const isPopoverOpen = visibleContextMenuPanelId === ownProps.panelId;
   const {
     onMaximizePanel,
@@ -96,16 +139,16 @@ const mergeProps = (stateProps, dispatchProps, ownProps) => {
     onDeletePanel,
     onResetPanelTitle,
     onUpdatePanelTitle,
-    closeContextMenu,
+    onCloseContextMenu,
     openContextMenu,
   } = dispatchProps;
-  const toggleContextMenu = () => isPopoverOpen ? closeContextMenu() : openContextMenu();
+  const toggleContextMenu = () => (isPopoverOpen ? onCloseContextMenu() : openContextMenu());
 
   // Outside click handlers will trigger for every closed context menu, we only want to react to clicks external to
   // the currently opened menu.
   const closeMyContextMenuPanel = () => {
     if (isPopoverOpen) {
-      closeContextMenu();
+      onCloseContextMenu();
     }
   };
 
@@ -114,14 +157,14 @@ const mergeProps = (stateProps, dispatchProps, ownProps) => {
     closeMyContextMenuPanel();
   };
 
-  let panels = [];
+  let panels: EuiContextMenuPanelDescriptor[] = [];
 
   // Don't build the panels if the pop over is not open, or this gets expensive - this function is called once for
   // every panel, every time any state changes.
   if (isPopoverOpen) {
     const contextMenuPanel = new DashboardContextMenuPanel({
       title: 'Options',
-      id: 'mainMenu'
+      id: 'mainMenu',
     });
 
     const actions = [
@@ -134,13 +177,18 @@ const mergeProps = (stateProps, dispatchProps, ownProps) => {
         onResetPanelTitle,
         onUpdatePanelTitle,
         title: panelTitle,
-        closeContextMenu: closeMyContextMenuPanel
+        closeContextMenu: closeMyContextMenuPanel,
       }),
       getToggleExpandPanelAction({ isExpanded, toggleExpandedPanel }),
       getRemovePanelAction(onDeletePanel),
     ].concat(panelActionsStore.actions);
 
-    panels = buildEuiContextMenuPanels({ contextMenuPanel, actions, embeddable: ownProps.embeddable, containerState });
+    panels = buildEuiContextMenuPanels({
+      contextMenuPanel,
+      actions,
+      embeddable: ownProps.embeddable,
+      containerState,
+    });
   }
 
   return {
@@ -152,13 +200,14 @@ const mergeProps = (stateProps, dispatchProps, ownProps) => {
   };
 };
 
-export const PanelOptionsMenuContainer = connect(
+export const PanelOptionsMenuContainer = Redux.connect<
+  PanelOptionsMenuContainerStateProps,
+  PanelOptionsMenuContainerDispatchProps,
+  PanelOptionsMenuContainerOwnProps,
+  PanelOptionsMenuProps,
+  CoreKibanaState
+>(
   mapStateToProps,
   mapDispatchToProps,
-  mergeProps,
+  mergeProps
 )(PanelOptionsMenu);
-
-PanelOptionsMenuContainer.propTypes = {
-  panelId: PropTypes.string.isRequired,
-  embeddable: embeddableShape,
-};
