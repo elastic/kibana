@@ -307,10 +307,9 @@ export default class BaseOptimizer {
                   transpileOnly: true,
                   experimentalWatchApi: true,
                   onlyCompileBundledFiles: true,
+                  configFile: fromRoot('tsconfig.browser.json'),
                   compilerOptions: {
                     sourceMap: Boolean(this.sourceMaps),
-                    target: 'es5',
-                    module: 'esnext',
                   }
                 }
               }

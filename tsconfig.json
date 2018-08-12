@@ -48,6 +48,7 @@
     "src/**/*"
   ],
   "exclude": [
-    "src/**/__fixtures__/**/*"
+    "src/**/__fixtures__/**/*",
+    "src/**/public/**/*"
   ]
 }

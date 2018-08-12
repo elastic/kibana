@@ -17,30 +17,32 @@
  * under the License.
  */
 
-import { exec } from '../lib';
+/**
+ * A hidden parameter can be hidden from the UI completely.
+ */
+interface Param {
+  hidden?: boolean;
+  warning?: string;
+}
 
-export const TranspileTypescriptTask = {
-  description: 'Transpiling sources with typescript compiler',
-
-  async run(config, log, build) {
-    const tsConfigPaths = [
-      build.resolvePath('tsconfig.json'),
-      build.resolvePath('tsconfig.browser.json')
-    ];
-
-    for (const tsConfigPath of tsConfigPaths) {
-      log.info(`Compiling`, tsConfigPath, 'project');
-      await exec(
-        log,
-        require.resolve('typescript/bin/tsc'),
-        [
-          '--pretty', 'true',
-          '--project', tsConfigPath,
-        ],
-        {
-          cwd: build.resolvePath(),
-        }
-      );
-    }
-  },
+/**
+ * A fixed parameter has a fixed value for a specific field.
+ * It can optionally also be hidden.
+ */
+export type FixedParam = Partial<Param> & {
+  fixedValue: any;
 };
+
+/**
+ * Numeric interval parameters must always be set in the editor to a multiple of
+ * the specified base. It can optionally also be hidden.
+ */
+export type NumericIntervalParam = Partial<Param> & {
+  base: number;
+};
+
+export type EditorParamConfig = NumericIntervalParam | FixedParam | Param;
+
+export interface EditorConfig {
+  [paramName: string]: EditorParamConfig;
+}
