@@ -17,20 +17,16 @@
  * under the License.
  */
 
+import { DashboardPanelAction } from 'ui/dashboard_panel_actions';
+
 class PanelActionsStore {
-  constructor() {
-    /**
-     *
-     * @type {Array.<DashboardPanelAction>}
-     */
-    this.actions = [];
-  }
+  public actions: DashboardPanelAction[] = [];
 
   /**
    *
    * @type {IndexedArray} panelActionsRegistry
    */
-  initializeFromRegistry(panelActionsRegistry) {
+  public initializeFromRegistry(panelActionsRegistry: DashboardPanelAction[]) {
     panelActionsRegistry.forEach(panelAction => {
       this.actions.push(panelAction);
     });
