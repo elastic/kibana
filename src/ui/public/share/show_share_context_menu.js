@@ -37,6 +37,7 @@ const onClose = () => {
 
 export function showShareContextMenu({
   anchorElement,
+  allowEmbed,
   getUnhashableStates,
   objectId,
   objectType,
@@ -59,6 +60,7 @@ export function showShareContextMenu({
       withTitle
     >
       <ShareContextMenu
+        allowEmbed={allowEmbed}
         getUnhashableStates={getUnhashableStates}
         objectId={objectId}
         objectType={objectType}

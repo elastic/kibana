@@ -27,62 +27,81 @@ import {
 import { ShareUrlContent } from './share_url_content';
 
 export class ShareContextMenu extends Component {
-  constructor(props) {
-    super(props);
 
-    this.state = {
-      panels: [
-        {
-          id: 0,
-          title: `Share this ${this.props.objectType}`,
-          items: [{
-            name: 'Embed code',
-            icon: 'console',
-            panel: 1
-          }, {
-            name: 'Permalinks',
-            icon: 'link',
-            panel: 2
-          }],
-        },
-        {
-          id: 1,
-          title: 'Embed Code',
-          content: (
-            <ShareUrlContent
-              isEmbedded
-              objectId={this.props.objectId}
-              objectType={this.props.objectType}
-              getUnhashableStates={this.props.getUnhashableStates}
-            />
-          )
-        },
-        {
-          id: 2,
-          title: 'Permalink',
-          content: (
-            <ShareUrlContent
-              objectId={this.props.objectId}
-              objectType={this.props.objectType}
-              getUnhashableStates={this.props.getUnhashableStates}
-            />
-          )
-        }
-      ]
+  getPanels = () => {
+    const panels = [];
+    const menuItems = [];
+
+    const permalinkPanel = {
+      id: panels.length + 1,
+      title: 'Permalink',
+      content: (
+        <ShareUrlContent
+          objectId={this.props.objectId}
+          objectType={this.props.objectType}
+          getUnhashableStates={this.props.getUnhashableStates}
+        />
+      )
     };
+    menuItems.push({
+      name: 'Permalinks',
+      icon: 'link',
+      panel: permalinkPanel.id
+    });
+    panels.push(permalinkPanel);
+
+    if (this.props.allowEmbed) {
+      const embedPanel = {
+        id: panels.length + 1,
+        title: 'Embed Code',
+        content: (
+          <ShareUrlContent
+            isEmbedded
+            objectId={this.props.objectId}
+            objectType={this.props.objectType}
+            getUnhashableStates={this.props.getUnhashableStates}
+          />
+        )
+      };
+      panels.push(embedPanel);
+      menuItems.push({
+        name: 'Embed code',
+        icon: 'console',
+        panel: embedPanel.id
+      });
+    }
+
+    // TODO add plugable panels here
+
+    if (menuItems.length > 1) {
+      const topLevelMenuPanel = {
+        id: panels.length + 1,
+        title: `Share this ${this.props.objectType}`,
+        items: menuItems.sort((a, b) => {
+          return a.name.toLowerCase().localeCompare(b.name.toLowerCase());
+        }),
+      };
+      panels.push(topLevelMenuPanel);
+    }
+
+    const lastPanelIndex = panels.length - 1;
+    const initialPanelId = panels[lastPanelIndex].id;
+    return { panels, initialPanelId };
   }
 
   render() {
+    const { panels, initialPanelId } = this.getPanels();
     return (
       <EuiContextMenu
-        initialPanelId={0}
-        panels={this.state.panels}
+        initialPanelId={initialPanelId}
+        panels={panels}
       />
     );
   }
 }
 
 ShareContextMenu.propTypes = {
+  allowEmbed: PropTypes.bool.isRequired,
   objectId: PropTypes.string,
   objectType: PropTypes.string.isRequired,
   getUnhashableStates: PropTypes.func.isRequired,

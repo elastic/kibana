@@ -397,6 +397,7 @@ app.directive('dashboardApp', function ($injector) {
       navActions[TopNavIds.SHARE] = (menuItem, navController, anchorElement) => {
         showShareContextMenu({
           anchorElement,
+          allowEmbed: true,
           getUnhashableStates,
           objectId: dash.id,
           objectType: 'dashboard',
