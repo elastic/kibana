@@ -23,5 +23,9 @@ import { ToastNotifications } from './toast_notifications';
 export let toastNotifications: ToastNotifications;
 
 export function __newPlatformInit__(toasts: ToastsStartContract) {
+  if (toastNotifications) {
+    throw new Error('ui/notify/toasts already initialized with new platform apis');
+  }
+
   toastNotifications = new ToastNotifications(toasts);
 }

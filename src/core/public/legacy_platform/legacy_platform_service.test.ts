@@ -121,7 +121,7 @@ describe('#start()', () => {
       expect(mockFatalErrorInit).toHaveBeenCalledWith(fatalErrorsStartContract);
     });
 
-    it('passes toasts service to ui/notify/fatal_errors', () => {
+    it('passes toasts service to ui/notify/toasts', () => {
       const legacyPlatform = new LegacyPlatformService({
         ...defaultParams,
       });

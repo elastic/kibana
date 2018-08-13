@@ -26,7 +26,7 @@ export class ToastNotifications {
 
   private onChangeCallback?: () => void;
 
-  constructor(private toasts: ToastsStartContract) {
+  constructor(private readonly toasts: ToastsStartContract) {
     toasts.get$().subscribe(list => {
       this.list = list;
 

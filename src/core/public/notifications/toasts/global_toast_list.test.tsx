@@ -25,14 +25,14 @@ import * as Rx from 'rxjs';
 import { GlobalToastList } from './global_toast_list';
 
 function render(props: Partial<GlobalToastList['props']> = {}) {
-  return <GlobalToastList dismissToast={jest.fn()} toasts$={Rx.empty()} {...props} />;
+  return <GlobalToastList dismissToast={jest.fn()} toasts$={Rx.EMPTY} {...props} />;
 }
 
 it('renders matching snapshot', () => {
   expect(shallow(render())).toMatchSnapshot();
 });
 
-it('subscribes to toasts$ on mount and unsubs on unmount', () => {
+it('subscribes to toasts$ on mount and unsubscribes on unmount', () => {
   const unsubscribeSpy = jest.fn();
   const subscribeSpy = jest.fn(observer => {
     observer.next([]);

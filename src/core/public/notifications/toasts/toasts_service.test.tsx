@@ -69,7 +69,7 @@ describe('#stop()', () => {
     }).not.toThrowError();
   });
 
-  it('emptys the content of the targetDomElement', () => {
+  it('empties the content of the targetDomElement', () => {
     const targetDomElement = document.createElement('div');
     const toasts = new ToastsService({ targetDomElement });
 
