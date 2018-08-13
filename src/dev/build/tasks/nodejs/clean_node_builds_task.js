@@ -17,9 +17,19 @@
  * under the License.
  */
 
-export { getNodeDownloadInfo } from './node_download_info';
+import { deleteAll } from '../../lib';
 
-export { DownloadNodeBuildsTask } from './download_node_builds_task';
-export { ExtractNodeBuildsTask } from './extract_node_builds_task';
-export { VerifyExistingNodeBuildsTask } from './verify_existing_node_builds_task';
-export { CleanNodeBuildsTask } from './clean_node_builds_task';
+export const CleanNodeBuildsTask = {
+  description:
+    'Cleaning npm from node',
+
+  async run(config, log, build) {
+    for (const platform of config.getPlatforms()) {
+      await deleteAll(log, [
+        build.resolvePathForPlatform(platform, 'node/lib/node_modules'),
+        build.resolvePathForPlatform(platform, 'node/bin/npm'),
+        build.resolvePathForPlatform(platform, 'node/bin/npx'),
+      ]);
+    }
+  },
+};
