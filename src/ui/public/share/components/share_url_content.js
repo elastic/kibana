@@ -30,6 +30,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiRadioGroup,
+  EuiLoadingSpinner,
 } from '@elastic/eui';
 
 
@@ -39,45 +40,62 @@ import {
 } from 'url';
 
 import { unhashUrl } from '../../state_management/state_hashing';
+import { shortenUrl } from '../lib/url_shortener';
 
 const EXPORT_URL_AS_SAVED_OBJECT = 'savedObject';
 const EXPORT_URL_AS_SNAPSHOT = 'snapshot';
 
 export class ShareUrlContent extends Component {
 
-  state = {
-    exportUrlAs: EXPORT_URL_AS_SNAPSHOT,
-    useShortUrl: false,
-    isCreatingShortUrl: false,
+  constructor(props) {
+    super(props);
+
+    this.state = {
+      exportUrlAs: EXPORT_URL_AS_SNAPSHOT,
+      useShortUrl: false,
+      isCreatingShortUrl: false,
+      url: this.getUrl(EXPORT_URL_AS_SNAPSHOT, false),
+    };
   }
 
   componentWillUnmount() {
-    window.removeEventListener('hashchange', this.resetShortUrls);
+    window.removeEventListener('hashchange', this.resetUrl);
 
     this._isMounted = false;
   }
 
   componentDidMount() {
     this._isMounted = true;
-    this.resetShortUrls();
 
-    window.addEventListener('hashchange', this.resetShortUrls, false);
-  }
-
-  resetShortUrls = () => {
-    if (this._isMounted) {
-      this.setState({ shortUrl: undefined });
-    }
-  }
-
-  createShortUrl = async () => {
-    this.setState({ isCreatingShortUrl: true });
-
-    // TODO create short URL
+    window.addEventListener('hashchange', this.resetUrl, false);
   }
 
   isNotSaved = () => {
     return this.props.objectId === undefined || this.props.objectId === '';
+  }
+
+  resetUrl = () => {
+    if (this._isMounted) {
+      this.setState({
+        useShortUrl: false,
+        shortUrl: undefined,
+        url: undefined,
+      }, this.setUrl);
+    }
+  }
+
+  getShortUrl = async () => {
+    this.setState({ isCreatingShortUrl: true });
+
+    const shortUrl = await shortenUrl(this.getSnapshotUrl());
+    if (!this._isMounted) {
+      return;
+    }
+
+    this.setState({
+      shortUrl,
+      isCreatingShortUrl: false,
+    });
   }
 
   getSavedObjectUrl = () => {
@@ -115,13 +133,63 @@ export class ShareUrlContent extends Component {
     return unhashUrl(url, this.props.getUnhashableStates());
   }
 
-  handleRadioChange = optionId => {
+  makeUrlEmbeddable = url => {
+    const embedQueryParam = '?embed=true';
+    const urlHasQueryString = url.indexOf('?') !== -1;
+    if (urlHasQueryString) {
+      return url.replace('?', `${embedQueryParam}&`);
+    }
+    return `${url}${embedQueryParam}`;
+  }
+
+  makeIframeTag = url => {
+    if (!url) return;
+
+    const embeddableUrl = this.makeUrlEmbeddable(url);
+    return `<iframe src="${embeddableUrl}" height="600" width="800"></iframe>`;
+  }
+
+  getUrl = (exportUrlAs, useShortUrl) => {
+    let url;
+    if (exportUrlAs === EXPORT_URL_AS_SAVED_OBJECT) {
+      url = this.getSavedObjectUrl();
+    } else if (useShortUrl) {
+      url = this.state.shortUrl;
+    } else {
+      url = this.getSnapshotUrl();
+    }
+
+    if (this.props.isEmbedded) {
+      return this.makeIframeTag(url);
+    }
+
+    return url;
+  }
+
+  setUrl = () => {
+    this.setState({
+      url: this.getUrl(this.state.exportUrlAs, this.state.useShortUrl)
+    });
+  }
+
+  handleExportUrlAs = optionId => {
     this.setState({
       exportUrlAs: optionId,
-    });
-  };
+    }, this.setUrl);
+  }
 
-  renderRadioOptions = () => {
+  handleShortUrlChange = async evt => {
+    const isChecked = evt.target.checked;
+    if (this.state.shortUrl === undefined && isChecked) {
+      await this.getShortUrl();
+    }
+
+    this.setState({
+      useShortUrl: isChecked,
+    }, this.setUrl);
+  }
+
+  renderExportUrlAsOptions = () => {
     return [
       {
         id: EXPORT_URL_AS_SAVED_OBJECT,
@@ -168,9 +236,9 @@ export class ShareUrlContent extends Component {
         helpText={generateLinkAsHelp}
       >
         <EuiRadioGroup
-          options={this.renderRadioOptions()}
+          options={this.renderExportUrlAsOptions()}
           idSelected={this.state.exportUrlAs}
-          onChange={this.handleRadioChange}
+          onChange={this.handleExportUrlAs}
         />
       </EuiFormRow>
     );
@@ -190,21 +258,17 @@ export class ShareUrlContent extends Component {
       Internet Explorer has URL length restrictions,
       and some wiki and markup parsers don't do well with the full-length version of the snapshot URL,
       but the short URL should work great.`;
+    let loadingShortUrl;
+    if (this.state.isCreatingShortUrl) {
+      loadingShortUrl = (
+        <EuiLoadingSpinner size="s"/>
+      );
+    }
     return (
-      <EuiFormRow>
+      <EuiFormRow helpText={loadingShortUrl}>
         {this.renderWithIconTip(switchComponent, tipContent)}
       </EuiFormRow>
     );
-  }
-
-  handleShortUrlChange = evt => {
-    if (this.state.shortUrl === undefined) {
-      this.createShortUrl();
-    }
-
-    this.setState({
-      useShortUrl: evt.target.checked,
-    });
   }
 
   render() {
@@ -217,7 +281,8 @@ export class ShareUrlContent extends Component {
 
         <EuiButton
           fill
-          onClick={() => window.alert('Button clicked')}
+          onClick={() => window.alert(this.state.url)}
+          disabled={this.state.isCreatingShortUrl}
         >
           Copy { this.props.isEmbedded ? 'iFrame code' : 'link' }
         </EuiButton>
