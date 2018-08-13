@@ -36,16 +36,13 @@ export default function ({ getService }) {
           expect(body.version.build_number).to.be.a('number');
 
           expect(body.status.overall).to.be.an('object');
-          expect(body.status.overall.id).to.be('green');
-          expect(body.status.overall.state).to.be.an('object');
-          expect(body.status.overall.state.title).to.be('Green');
+          expect(body.status.overall.state).to.be('green');
 
           expect(body.status.statuses).to.be.an('array');
           const kibanaPlugin = body.status.statuses.find(s => {
             return s.id.indexOf('plugin:kibana') === 0;
           });
-          expect(kibanaPlugin.state).to.be.an('object');
-          expect(kibanaPlugin.state.id).to.be('green');
+          expect(kibanaPlugin.state).to.be('green');
 
           expect(body.metrics.collection_interval_in_millis).to.be.a('number');
 
