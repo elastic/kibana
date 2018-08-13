@@ -6,9 +6,10 @@ exports[`NoData should show a default message if reason is unknown 1`] = `
 >
   <div
     class="euiPageBody"
+    style="max-width:600px"
   >
     <div
-      class="euiPanel euiPanel--paddingLarge euiPageContent noData__content euiPageContent--verticalCenter euiPageContent--horizontalCenter"
+      class="euiPanel euiPanel--paddingLarge euiPageContent eui-textCenter euiPageContent--verticalCenter euiPageContent--horizontalCenter"
     >
       <svg
         class="euiIcon euiIcon--xxLarge"
@@ -42,7 +43,7 @@ exports[`NoData should show a default message if reason is unknown 1`] = `
         class="euiText"
       >
         <p>
-          There is a 
+          There is a
           <span
             class="euiCodeBlock euiCodeBlock--fontSmall euiCodeBlock--paddingLarge euiCodeBlock--inline"
           >
@@ -52,7 +53,7 @@ exports[`NoData should show a default message if reason is unknown 1`] = `
               food
             </code>
           </span>
-           setting that has 
+           setting that has
           <span
             class="euiCodeBlock euiCodeBlock--fontSmall euiCodeBlock--paddingLarge euiCodeBlock--inline"
           >
@@ -62,7 +63,7 @@ exports[`NoData should show a default message if reason is unknown 1`] = `
               xpack.monitoring.foo.bar
             </code>
           </span>
-           set to 
+           set to
           <span
             class="euiCodeBlock euiCodeBlock--fontSmall euiCodeBlock--paddingLarge euiCodeBlock--inline"
           >
@@ -86,9 +87,10 @@ exports[`NoData should show text next to the spinner while checking a setting 1`
 >
   <div
     class="euiPageBody"
+    style="max-width:600px"
   >
     <div
-      class="euiPanel euiPanel--paddingLarge euiPageContent noData__content euiPageContent--verticalCenter euiPageContent--horizontalCenter"
+      class="euiPanel euiPanel--paddingLarge euiPageContent eui-textCenter euiPageContent--verticalCenter euiPageContent--horizontalCenter"
     >
       <svg
         class="euiIcon euiIcon--xxLarge"

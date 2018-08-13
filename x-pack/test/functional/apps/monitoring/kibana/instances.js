@@ -32,11 +32,11 @@ export default function ({ getService, getPageObjects }) {
 
     it('should have Kibana Cluster Summary Status showing correct info', async () => {
       expect(await kibanaClusterSummaryStatus.getContent()).to.eql({
-        instances: 'Instances: 1',
-        memory: 'Memory: 219.6 MB / 1.4 GB',
-        requests: 'Requests: 174',
-        connections: 'Connections: 174',
-        maxResponseTime: 'Max. Response Time: 2203 ms',
+        instances: 'Instances:\n1',
+        memory: 'Memory:\n219.6 MB / 1.4 GB',
+        requests: 'Requests:\n174',
+        connections: 'Connections:\n174',
+        maxResponseTime: 'Max. Response Time:\n2203 ms',
         health: 'Health: green',
       });
     });

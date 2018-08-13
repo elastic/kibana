@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
+import { EuiContextMenuItemIcon } from '@elastic/eui';
 import { DashboardContextMenuPanel } from './dashboard_context_menu_panel';
 import { PanelActionAPI } from './types';
 
@@ -54,7 +54,7 @@ interface DashboardPanelActionOptions {
   /**
    * Optional icon to display to the left of the action.
    */
-  icon?: Element | JSX.Element;
+  icon?: EuiContextMenuItemIcon;
 }
 
 interface DashboardPanelActionsConfig {
@@ -77,7 +77,7 @@ export class DashboardPanelAction {
   /**
    * Optional icon to display to the left of the action.
    */
-  public readonly icon?: Element | JSX.Element;
+  public readonly icon?: EuiContextMenuItemIcon;
 
   /**
    * Display name of the action in the menu
