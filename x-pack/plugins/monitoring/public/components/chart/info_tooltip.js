@@ -16,8 +16,8 @@ export function InfoTooltip({ series, bucketSize }) {
         data-debug-metric-is-derivative={item.metric.isDerivative}
         data-debug-metric-has-calculation={item.metric.hasCalculation}
       >
-        <td className="monitoring-chart-tooltip__label">{ item.metric.label }</td>
-        <td className="monitoring-chart-tooltip__value">
+        <td className="monChart__tooltipLabel">{ item.metric.label }</td>
+        <td className="monChart__tooltipValue">
           { item.metric.description }
         </td>
       </tr>
@@ -25,11 +25,11 @@ export function InfoTooltip({ series, bucketSize }) {
   });
 
   return (
-    <table className="monitoring-chart-tooltip">
+    <table>
       <tbody>
         <tr>
-          <td className="monitoring-chart-tooltip__label">Interval</td>
-          <td className="monitoring-chart-tooltip__value">{bucketSize}</td>
+          <td className="monChart__tooltipLabel">Interval</td>
+          <td className="monChart__tooltipValue">{bucketSize}</td>
         </tr>
         { tableRows }
       </tbody>
