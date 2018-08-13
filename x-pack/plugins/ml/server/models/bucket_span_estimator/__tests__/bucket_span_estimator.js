@@ -6,41 +6,124 @@
 
 
 
+import sinon from 'sinon';
 import expect from 'expect.js';
 import { estimateBucketSpanFactory } from '../bucket_span_estimator';
 
-// mock callWithRequest
-const callWithRequest = () => {
+// Mock callWithRequest with the ability to simulate returning different
+// permission settings. On each call using `ml.privilegeCheck` we retrieve
+// the last value from `permissions` and pass that to one of the permission
+// settings. The tests call `ml.privilegeCheck` two times, the first time
+// sufficient permissions should be returned, the second time insufficient
+// permissions.
+const permissions = [false, true];
+const callWithRequest = (method) => {
   return new Promise((resolve) => {
+    if (method === 'ml.privilegeCheck') {
+      resolve({
+        cluster: {
+          'cluster:monitor/xpack/ml/job/get': true,
+          'cluster:monitor/xpack/ml/job/stats/get': true,
+          'cluster:monitor/xpack/ml/datafeeds/get': true,
+          'cluster:monitor/xpack/ml/datafeeds/stats/get': permissions.pop()
+        }
+      });
+      return;
+    }
     resolve({});
   });
 };
 
+// mock callWithInternalUserFactory
+// we replace the return value of the factory with the above mocked callWithRequest
+import * as mockModule from '../../../client/call_with_internal_user_factory';
+
+// mock server
+function mockServerFactory(isEnabled = false) {
+  return {
+    plugins: {
+      xpack_main: {
+        info: {
+          isAvailable: () => true,
+          feature: () => ({
+            isEnabled: () => isEnabled
+          })
+        }
+      }
+    }
+  };
+}
+
+// mock configuration to be passed to the estimator
+const formConfig = {
+  aggTypes: ['count'],
+  duration: {},
+  fields: [null],
+  filters: [],
+  index: '',
+  query: {
+    bool: {
+      must: [{ query_string: { analyze_wildcard: true, query: '*' } }],
+      must_not: []
+    }
+  }
+};
+
 describe('ML - BucketSpanEstimator', () => {
+  let mockCallWithInternalUserFactory;
+
+  function prepareMock() {
+    mockCallWithInternalUserFactory = sinon.mock(mockModule);
+    mockCallWithInternalUserFactory
+      .expects('callWithInternalUserFactory')
+      .once()
+      .returns(callWithRequest);
+  }
+
   it('call factory', () => {
+    prepareMock();
     expect(function () {
       estimateBucketSpanFactory(callWithRequest);
+      mockCallWithInternalUserFactory.verify();
     }).to.not.throwError('Not initialized.');
   });
 
-  it('call factory and estimator', (done) => {
+  it('call factory and estimator with security disabled', (done) => {
+    prepareMock();
     expect(function () {
-      const estimateBucketSpan = estimateBucketSpanFactory(callWithRequest);
+      const estimateBucketSpan = estimateBucketSpanFactory(callWithRequest, mockServerFactory());
 
-      estimateBucketSpan({
-        aggTypes: ['count'],
-        duration: {},
-        fields: [null],
-        filters: [],
-        index: '',
-        query: {
-          bool: {
-            must: [{ query_string: { analyze_wildcard: true, query: '*' } }],
-            must_not: []
-          }
-        }
-      }).catch((catchData) => {
+      estimateBucketSpan(formConfig).catch((catchData) => {
         expect(catchData).to.be('Unable to retrieve cluster setting search.max_buckets');
+        mockCallWithInternalUserFactory.verify();
+        done();
+      });
+
+    }).to.not.throwError('Not initialized.');
+  });
+
+  it('call factory and estimator with security enabled and sufficient permissions.', (done) => {
+    prepareMock();
+    expect(function () {
+      const estimateBucketSpan = estimateBucketSpanFactory(callWithRequest, mockServerFactory(true));
+
+      estimateBucketSpan(formConfig).catch((catchData) => {
+        expect(catchData).to.be('Unable to retrieve cluster setting search.max_buckets');
+        mockCallWithInternalUserFactory.verify();
+        done();
+      });
+
+    }).to.not.throwError('Not initialized.');
+  });
+
+  it('call factory and estimator with security enabled and insufficient permissions.', (done) => {
+    prepareMock();
+    expect(function () {
+      const estimateBucketSpan = estimateBucketSpanFactory(callWithRequest, mockServerFactory(true));
+
+      estimateBucketSpan(formConfig).catch((catchData) => {
+        expect(catchData).to.be('Insufficient permissions to call bucket span estimation.');
+        mockCallWithInternalUserFactory.verify();
         done();
       });
 
@@ -82,7 +165,13 @@ describe('ML - BucketSpanEstimator', () => {
         });
       };
 
-      const estimateBucketSpan = estimateBucketSpanFactory(callWithRequestMock);
+      mockCallWithInternalUserFactory = sinon.mock(mockModule);
+      mockCallWithInternalUserFactory
+        .expects('callWithInternalUserFactory')
+        .once()
+        .returns(callWithRequestMock);
+
+      const estimateBucketSpan = estimateBucketSpanFactory(callWithRequestMock, mockServerFactory());
 
       estimateBucketSpan({
         aggTypes: ['count'],
@@ -123,7 +212,13 @@ describe('ML - BucketSpanEstimator', () => {
         });
       };
 
-      const estimateBucketSpan = estimateBucketSpanFactory(callWithRequestMock);
+      mockCallWithInternalUserFactory = sinon.mock(mockModule);
+      mockCallWithInternalUserFactory
+        .expects('callWithInternalUserFactory')
+        .once()
+        .returns(callWithRequestMock);
+
+      const estimateBucketSpan = estimateBucketSpanFactory(callWithRequestMock, mockServerFactory());
 
       estimateBucketSpan({
         aggTypes: ['count'],
@@ -141,4 +236,9 @@ describe('ML - BucketSpanEstimator', () => {
 
     }).to.not.throwError('Not initialized.');
   });
+
+  afterEach(() => {
+    mockCallWithInternalUserFactory.restore();
+  });
+
 });
