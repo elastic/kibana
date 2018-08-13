@@ -17,9 +17,21 @@
  * under the License.
  */
 
-import { observable as SymbolObservable } from 'rxjs/internal/symbol/observable';
+import { from, of } from 'rxjs';
+import { isObservable } from '../lib/is_observable';
 import { Observable } from '../observable';
 
-export function isObservable<T>(x: any): x is Observable<T> {
-  return x !== null && typeof x === 'object' && x[SymbolObservable] !== undefined;
-}
+// Test that rxjs observable and kbn-observable are interoperable.
+describe('interoperability', () => {
+  it('understood by rxjs of kbn-observables', () => {
+    const obs = Observable.of([1, 2, 3]);
+    expect(() => {
+      from(obs);
+    }).not.toThrowError(TypeError);
+  });
+
+  it('understood by kbn-observable of rxjs observables', () => {
+    const rxobs = of([1, 2, 3]);
+    expect(isObservable(rxobs)).toBeTruthy();
+  });
+});

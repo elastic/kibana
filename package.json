@@ -175,7 +175,6 @@
     "script-loader": "0.7.2",
     "semver": "^5.5.0",
     "style-loader": "0.19.0",
-    "symbol-observable": "^1.2.0",
     "tar": "2.2.0",
     "tinygradient": "0.3.0",
     "tinymath": "0.2.1",
