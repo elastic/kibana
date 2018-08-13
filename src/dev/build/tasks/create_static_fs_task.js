@@ -28,7 +28,7 @@ export const CreateStaticFilesystem = {
 
   async run(config, log, build) {
     const createLoaderFile = async (filePath) => {
-      const sourceFile = require.resolve(`static-link/dist/lib/static-loader`);
+      const sourceFile = require.resolve(`static-fs/dist/lib/static-loader`);
       await copyFile(sourceFile, filePath);
     };
 
