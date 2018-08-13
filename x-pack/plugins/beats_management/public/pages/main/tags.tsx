@@ -25,7 +25,6 @@ interface TagsPageProps {
 
 interface TagsPageState {
   beats: any;
-  tableRef: any;
   tags: BeatTag[];
 }
 
@@ -41,12 +40,12 @@ export class TagsPage extends React.PureComponent<TagsPageProps, TagsPageState> 
       Create Tag
     </EuiButton>
   );
+  public tableRef = React.createRef<Table>();
   constructor(props: TagsPageProps) {
     super(props);
 
     this.state = {
       beats: [],
-      tableRef: React.createRef(),
       tags: [],
     };
 
@@ -60,14 +59,14 @@ export class TagsPage extends React.PureComponent<TagsPageProps, TagsPageState> 
         assignmentOptions={this.state.beats}
         assignmentTitle={'Assign Beats'}
         items={this.state.tags}
-        ref={this.state.tableRef}
+        ref={this.tableRef}
         showAssignmentOptions={true}
         type={TagsTableType}
       />
     );
   }
 
-  private handleTagsAction = async (action: string, payload: any) => {
+  private handleTagsAction = async (action: string) => {
     switch (action) {
       case 'loadAssignmentOptions':
         this.loadBeats();
@@ -81,6 +80,9 @@ export class TagsPage extends React.PureComponent<TagsPageProps, TagsPageState> 
           );
         } else {
           this.loadTags();
+          if (this.tableRef && this.tableRef.current) {
+            this.tableRef.current.resetSelection();
+          }
         }
         break;
     }
@@ -165,6 +167,9 @@ export class TagsPage extends React.PureComponent<TagsPageProps, TagsPageState> 
   };
 
   private getSelectedTags = (): BeatTag[] => {
-    return this.state.tableRef.current.state.selection;
+    if (this.tableRef && this.tableRef.current) {
+      return this.tableRef.current.state.selection;
+    }
+    return [];
   };
 }

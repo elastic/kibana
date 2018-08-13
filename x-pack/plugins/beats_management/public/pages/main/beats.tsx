@@ -24,18 +24,18 @@ interface BeatsPageProps {
 
 interface BeatsPageState {
   beats: CMBeat[];
-  tableRef: any;
   tags: any[] | null;
 }
 
 export class BeatsPage extends React.PureComponent<BeatsPageProps, BeatsPageState> {
   public static ActionArea = BeatsActionArea;
+  private tableRef = React.createRef<Table>();
+
   constructor(props: BeatsPageProps) {
     super(props);
 
     this.state = {
       beats: [],
-      tableRef: React.createRef(),
       tags: null,
     };
 
@@ -53,7 +53,7 @@ export class BeatsPage extends React.PureComponent<BeatsPageProps, BeatsPageStat
         assignmentOptions={this.state.tags}
         assignmentTitle="Set tags"
         items={this.state.beats || []}
-        ref={this.state.tableRef}
+        ref={this.tableRef}
         showAssignmentOptions={true}
         type={BeatsTableType}
       />
@@ -88,6 +88,9 @@ export class BeatsPage extends React.PureComponent<BeatsPageProps, BeatsPageStat
     // the max race condition time is really 10ms but doing 100 to be safe
     setTimeout(async () => {
       await this.loadBeats();
+      if (this.tableRef && this.tableRef.current) {
+        this.tableRef.current.resetSelection();
+      }
     }, 100);
   };
 
@@ -151,6 +154,9 @@ export class BeatsPage extends React.PureComponent<BeatsPageProps, BeatsPageStat
   };
 
   private getSelectedBeats = (): CMPopulatedBeat[] => {
-    return this.state.tableRef.current.state.selection;
+    if (this.tableRef && this.tableRef.current) {
+      return this.tableRef.current.state.selection;
+    }
+    return [];
   };
 }
