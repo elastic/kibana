@@ -233,13 +233,13 @@ export class SavedObjectsClient {
     }
 
     return kfetch({ method, pathname: path, query, body: JSON.stringify(body) })
-      .catch(resp => {
-        const respBody = resp.body;
-        const respRes = resp.res;
-        const err = new Error(respBody.message || respBody.error || `${respRes} Response`);
+      .catch(fetchError => {
+        const errorBody = fetchError.body;
+        const errorRes = fetchError.res;
+        const err = new Error(errorBody.message || errorBody.error || `${errorRes} Response`);
 
-        err.statusCode = respBody.statusCode || respRes.status;
-        err.body = respBody;
+        err.statusCode = errorBody.statusCode || errorRes.status;
+        err.errorBody = errorBody;
 
         throw err;
       });
