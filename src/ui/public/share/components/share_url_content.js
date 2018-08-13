@@ -40,13 +40,15 @@ import {
 
 import { unhashUrl } from '../../state_management/state_hashing';
 
-const RADIO_SAVED_OBJECT_ID = 'savedObject';
-const RADIO_SNAPSHOT_ID = 'snapshot';
+const EXPORT_URL_AS_SAVED_OBJECT = 'savedObject';
+const EXPORT_URL_AS_SNAPSHOT = 'snapshot';
 
 export class ShareUrlContent extends Component {
 
   state = {
-    radioIdSelected: RADIO_SNAPSHOT_ID,
+    exportUrlAs: EXPORT_URL_AS_SNAPSHOT,
+    useShortUrl: false,
+    isCreatingShortUrl: false,
   }
 
   componentWillUnmount() {
@@ -64,8 +66,14 @@ export class ShareUrlContent extends Component {
 
   resetShortUrls = () => {
     if (this._isMounted) {
-      this.setState({ shortSnanshotUrl: undefined });
+      this.setState({ shortUrl: undefined });
     }
+  }
+
+  createShortUrl = async () => {
+    this.setState({ isCreatingShortUrl: true });
+
+    // TODO create short URL
   }
 
   isNotSaved = () => {
@@ -109,23 +117,23 @@ export class ShareUrlContent extends Component {
 
   handleRadioChange = optionId => {
     this.setState({
-      radioIdSelected: optionId,
+      exportUrlAs: optionId,
     });
   };
 
   renderRadioOptions = () => {
     return [
       {
-        id: RADIO_SAVED_OBJECT_ID,
+        id: EXPORT_URL_AS_SAVED_OBJECT,
         disabled: this.isNotSaved(),
-        label: this.renderRadio(
+        label: this.renderWithIconTip(
           'Saved object',
           `You can share this URL with people to let them load the most recent saved version of this ${this.props.objectType}.`
         ),
       },
       {
-        id: RADIO_SNAPSHOT_ID,
-        label: this.renderRadio(
+        id: EXPORT_URL_AS_SNAPSHOT,
+        label: this.renderWithIconTip(
           'Snapshot',
           `Snapshot URLs encode the current state of the ${this.props.objectType} in the URL itself.
             Edits to the saved ${this.props.objectType} won't be visible via this URL.`
@@ -134,11 +142,11 @@ export class ShareUrlContent extends Component {
     ];
   }
 
-  renderRadio = (label, tipContent) => {
+  renderWithIconTip = (child, tipContent) => {
     return (
-      <EuiFlexGroup>
-        <EuiFlexItem grow={false}>
-          {label}
+      <EuiFlexGroup gutterSize="none">
+        <EuiFlexItem>
+          {child}
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiIconTip
@@ -150,24 +158,62 @@ export class ShareUrlContent extends Component {
     );
   }
 
-  render() {
+  renderExportAsRadioGroup = () => {
     const generateLinkAsHelp = this.isNotSaved()
       ? `Can't share as saved object until the ${this.props.objectType} has been saved.`
       : undefined;
+    return (
+      <EuiFormRow
+        label="Generate the link as"
+        helpText={generateLinkAsHelp}
+      >
+        <EuiRadioGroup
+          options={this.renderRadioOptions()}
+          idSelected={this.state.exportUrlAs}
+          onChange={this.handleRadioChange}
+        />
+      </EuiFormRow>
+    );
+  }
 
+  renderShortUrlSwitch = () => {
+    if (this.state.exportUrlAs === EXPORT_URL_AS_SAVED_OBJECT) {
+      return;
+    }
+
+    const switchComponent = (<EuiSwitch
+      label="Short URL"
+      checked={this.state.useShortUrl}
+      onChange={this.handleShortUrlChange}
+    />);
+    const tipContent = `We recommend sharing shortened snapshot URLs for maximum compatibility.
+      Internet Explorer has URL length restrictions,
+      and some wiki and markup parsers don't do well with the full-length version of the snapshot URL,
+      but the short URL should work great.`;
+    return (
+      <EuiFormRow>
+        {this.renderWithIconTip(switchComponent, tipContent)}
+      </EuiFormRow>
+    );
+  }
+
+  handleShortUrlChange = evt => {
+    if (this.state.shortUrl === undefined) {
+      this.createShortUrl();
+    }
+
+    this.setState({
+      useShortUrl: evt.target.checked,
+    });
+  }
+
+  render() {
     return (
       <EuiForm className="shareUrlContentForm">
 
-        <EuiFormRow
-          label="Generate the link as"
-          helpText={generateLinkAsHelp}
-        >
-          <EuiRadioGroup
-            options={this.renderRadioOptions()}
-            idSelected={this.state.radioIdSelected}
-            onChange={this.handleRadioChange}
-          />
-        </EuiFormRow>
+        {this.renderExportAsRadioGroup()}
+
+        {this.renderShortUrlSwitch()}
 
         <EuiButton
           fill
