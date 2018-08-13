@@ -49,7 +49,7 @@ const beatRowFactory = (scope, kbnUrl) => {
     return (
       <KuiTableRow>
         <KuiTableRowCell>
-          <div className="monitoringTableCell__name">
+          <div className="monTableCell__name">
             <EuiLink
               onClick={goToBeat(props.uuid)}
               data-test-subj={`beatLink-${props.name}`}

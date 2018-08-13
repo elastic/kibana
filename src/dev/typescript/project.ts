@@ -57,7 +57,7 @@ export class Project {
   private include: IMinimatch[];
   private exclude: IMinimatch[];
 
-  constructor(public tsConfigPath: string) {
+  constructor(public tsConfigPath: string, name?: string) {
     const { files, include, exclude = [] } = parseTsConfig(tsConfigPath);
 
     if (files || !include) {
@@ -67,7 +67,7 @@ export class Project {
     }
 
     this.directory = dirname(this.tsConfigPath);
-    this.name = relative(REPO_ROOT, this.directory) || basename(this.directory);
+    this.name = name || relative(REPO_ROOT, this.directory) || basename(this.directory);
     this.include = makeMatchers(this.directory, include);
     this.exclude = makeMatchers(this.directory, exclude);
   }

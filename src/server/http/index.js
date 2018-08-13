@@ -23,9 +23,6 @@ import _ from 'lodash';
 import Boom from 'boom';
 import Hapi from 'hapi';
 import { setupVersionCheck } from './version_check';
-import { handleShortUrlError } from './short_url_error';
-import { shortUrlAssertValid } from './short_url_assert_valid';
-import { shortUrlLookupProvider } from './short_url_lookup';
 import { registerHapiPlugins } from './register_hapi_plugins';
 import { defaultValidationErrorHandler } from './validation_error_handler';
 import { setupXsrf } from './xsrf';
@@ -74,8 +71,6 @@ export default async function (kbnServer, server, config) {
   });
 
   server = kbnServer.server;
-
-  const shortUrlLookup = shortUrlLookupProvider(server);
 
   await registerHapiPlugins(server);
 
@@ -152,44 +147,6 @@ export default async function (kbnServer, server, config) {
           pathname: pathPrefix + path.slice(0, -1),
         }))
         .permanent(true);
-    }
-  });
-
-  server.route({
-    method: 'GET',
-    path: '/goto/{urlId}',
-    handler: async function (request, h) {
-      try {
-        const url = await shortUrlLookup.getUrl(request.params.urlId, request);
-        shortUrlAssertValid(url);
-
-        const uiSettings = request.getUiSettingsService();
-        const stateStoreInSessionStorage = await uiSettings.get('state:storeInSessionStorage');
-        if (!stateStoreInSessionStorage) {
-          return h.redirect(config.get('server.basePath') + url);
-        }
-
-        const app = server.getHiddenUiAppById('stateSessionStorageRedirect');
-        return h.renderApp(app, {
-          redirectUrl: url,
-        });
-      } catch (err) {
-        return handleShortUrlError(err);
-      }
-    }
-  });
-
-  server.route({
-    method: 'POST',
-    path: '/shorten',
-    handler: async function (request) {
-      try {
-        shortUrlAssertValid(request.payload.url);
-        const urlId = await shortUrlLookup.generateUrlId(request.payload.url, request);
-        return urlId;
-      } catch (err) {
-        return handleShortUrlError(err);
-      }
     }
   });
 
