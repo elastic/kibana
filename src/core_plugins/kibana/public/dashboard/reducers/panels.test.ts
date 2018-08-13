@@ -72,10 +72,10 @@ describe('UpdatePanel', () => {
     };
     store.dispatch(updatePanels({ '1': panelData }));
     const newPanelData = {
+      ...originalPanelData,
       embeddableConfig: {
         columns: ['field2', 'field3'],
       },
-      panelIndex: '1',
     };
     store.dispatch(updatePanel(newPanelData));
 
