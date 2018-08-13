@@ -11,7 +11,7 @@ import { BASE_PATH } from '../common/constants';
 const esSection = management.getSection('elasticsearch');
 esSection.register('index_management', {
   visible: true,
-  display: i18n.translate('xpack.idxMgmt.sectionTitle', { defaultMessage: 'Index Management' }),
+  display: i18n.translate('xpack.idxMgmt.appTitle', { defaultMessage: 'Index Management' }),
   order: 1,
   url: `#${BASE_PATH}home`
 });

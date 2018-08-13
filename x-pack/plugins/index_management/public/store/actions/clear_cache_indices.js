@@ -23,7 +23,7 @@ export const clearCacheIndices = ({ indexNames }) => async (dispatch) => {
   }
   dispatch(reloadIndices(indexNames));
   toastNotifications.addSuccess(
-    i18n.translate('xpack.idxMgmt.clearCacheIndicesAction.successfullyClearedCacheIndicesMessage', {
+    i18n.translate('xpack.idxMgmt.clearCacheIndicesAction.successMessage', {
       defaultMessage: 'Successfully cleared cache: [{indexNames}]',
       values: { indexNames: indexNames.join(', ') }
     })

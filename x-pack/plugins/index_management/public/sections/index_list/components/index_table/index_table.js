@@ -67,7 +67,7 @@ const HEADERS = {
   })
 };
 
-export class IndexTableUI extends Component {
+export class IndexTableUi extends Component {
   constructor(props) {
     super(props);
 
@@ -336,4 +336,4 @@ export class IndexTableUI extends Component {
   }
 }
 
-export const IndexTable = injectI18n(IndexTableUI);
+export const IndexTable = injectI18n(IndexTableUi);

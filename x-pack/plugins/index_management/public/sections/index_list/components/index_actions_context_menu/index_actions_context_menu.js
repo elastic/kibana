@@ -23,7 +23,7 @@ import {
 import { flattenPanelTree } from '../../../../lib/flatten_panel_tree';
 import { INDEX_OPEN } from '../../../../../common/constants';
 
-class IndexActionsContextMenuUI extends Component {
+class IndexActionsContextMenuUi extends Component {
   constructor(props) {
     super(props);
 
@@ -58,10 +58,9 @@ class IndexActionsContextMenuUI extends Component {
     if (!detailPanel && oneIndexSelected) {
       items.push({
         name: intl.formatMessage({
-          id: 'xpack.idxMgmt.indexActionsContentMenu.showEntitySettingsLabel',
+          id: 'xpack.idxMgmt.indexActionsMenu.showEntitySettingsLabel',
           defaultMessage: 'Show {entity} settings',
-          values: { entity }
-        }),
+        }, { entity }),
         icon: <EuiIcon type="indexSettings" />,
         onClick: () => {
           this.closePopoverAndExecute(showSettings);
@@ -69,10 +68,9 @@ class IndexActionsContextMenuUI extends Component {
       });
       items.push({
         name: intl.formatMessage({
-          id: 'xpack.idxMgmt.indexActionsContentMenu.showEntityMappingLabel',
+          id: 'xpack.idxMgmt.indexActionsMenu.showEntityMappingLabel',
           defaultMessage: 'Show {entity} mapping',
-          values: { entity }
-        }),
+        }, { entity }),
         icon: <EuiIcon type="indexMapping" />,
         onClick: () => {
           this.closePopoverAndExecute(showMapping);
@@ -81,10 +79,9 @@ class IndexActionsContextMenuUI extends Component {
       if (allOpen) {
         items.push({
           name: intl.formatMessage({
-            id: 'xpack.idxMgmt.indexActionsContentMenu.showEntityStatsLabel',
+            id: 'xpack.idxMgmt.indexActionsMenu.showEntityStatsLabel',
             defaultMessage: 'Show {entity} stats',
-            values: { entity }
-          }),
+          }, { entity }),
           icon: <EuiIcon type="stats" />,
           onClick: () => {
             this.closePopoverAndExecute(showStats);
@@ -93,10 +90,9 @@ class IndexActionsContextMenuUI extends Component {
       }
       items.push({
         name: intl.formatMessage({
-          id: 'xpack.idxMgmt.indexActionsContentMenu.editEntitySettingsLabel',
+          id: 'xpack.idxMgmt.indexActionsMenu.editEntitySettingsLabel',
           defaultMessage: 'Edit {entity} settings',
-          values: { entity }
-        }),
+        }, { entity }),
         icon: <EuiIcon type="indexEdit" />,
         onClick: () => {
           this.closePopoverAndExecute(editIndex);
@@ -106,10 +102,9 @@ class IndexActionsContextMenuUI extends Component {
     if (allOpen) {
       items.push({
         name: intl.formatMessage({
-          id: 'xpack.idxMgmt.indexActionsContentMenu.closeEntityLabel',
+          id: 'xpack.idxMgmt.indexActionsMenu.closeEntityLabel',
           defaultMessage: 'Close {entity}',
-          values: { entity }
-        }),
+        }, { entity }),
         icon: <EuiIcon type="indexClose" />,
         onClick: () => {
           this.closePopoverAndExecute(closeIndices);
@@ -117,10 +112,9 @@ class IndexActionsContextMenuUI extends Component {
       });
       items.push({
         name: intl.formatMessage({
-          id: 'xpack.idxMgmt.indexActionsContentMenu.forceMergeEntityLabel',
+          id: 'xpack.idxMgmt.indexActionsMenu.forceMergeEntityLabel',
           defaultMessage: 'Force merge {entity}',
-          values: { entity }
-        }),
+        }, { entity }),
         icon: <EuiIcon type="merge" />,
         onClick: () => {
           this.closePopover();
@@ -129,10 +123,9 @@ class IndexActionsContextMenuUI extends Component {
       });
       items.push({
         name: intl.formatMessage({
-          id: 'xpack.idxMgmt.indexActionsContentMenu.refreshEntityLabel',
+          id: 'xpack.idxMgmt.indexActionsMenu.refreshEntityLabel',
           defaultMessage: 'Refresh {entity}',
-          values: { entity }
-        }),
+        }, { entity }),
         icon: <EuiIcon type="refresh" />,
         onClick: () => {
           this.closePopoverAndExecute(refreshIndices);
@@ -140,10 +133,9 @@ class IndexActionsContextMenuUI extends Component {
       });
       items.push({
         name: intl.formatMessage({
-          id: 'xpack.idxMgmt.indexActionsContentMenu.clearEntityCacheLabel',
+          id: 'xpack.idxMgmt.indexActionsMenu.clearEntityCacheLabel',
           defaultMessage: 'Clear {entity} cache',
-          values: { entity }
-        }),
+        }, { entity }),
         icon: <EuiIcon type="broom" />,
         onClick: () => {
           this.closePopoverAndExecute(clearCacheIndices);
@@ -151,10 +143,9 @@ class IndexActionsContextMenuUI extends Component {
       });
       items.push({
         name: intl.formatMessage({
-          id: 'xpack.idxMgmt.indexActionsContentMenu.flushEntityLabel',
+          id: 'xpack.idxMgmt.indexActionsMenu.flushEntityLabel',
           defaultMessage: 'Flush {entity}',
-          values: { entity }
-        }),
+        }, { entity }),
         icon: <EuiIcon type="indexFlush" />,
         onClick: () => {
           this.closePopoverAndExecute(flushIndices);
@@ -163,10 +154,9 @@ class IndexActionsContextMenuUI extends Component {
     } else {
       items.push({
         name: intl.formatMessage({
-          id: 'xpack.idxMgmt.indexActionsContentMenu.openEntityLabel',
+          id: 'xpack.idxMgmt.indexActionsMenu.openEntityLabel',
           defaultMessage: 'Open {entity}',
-          values: { entity }
-        }),
+        }, { entity }),
         icon: <EuiIcon type="indexOpen" />,
         onClick: () => {
           this.closePopoverAndExecute(openIndices);
@@ -175,10 +165,9 @@ class IndexActionsContextMenuUI extends Component {
     }
     items.push({
       name: intl.formatMessage({
-        id: 'xpack.idxMgmt.indexActionsContentMenu.deleteEntityLabel',
+        id: 'xpack.idxMgmt.indexActionsMenu.deleteEntityLabel',
         defaultMessage: 'Delete {entity}',
-        values: { entity }
-      }),
+      }, { entity }),
       icon: <EuiIcon type="trash" />,
       onClick: () => {
         this.closePopover();
@@ -191,10 +180,9 @@ class IndexActionsContextMenuUI extends Component {
     const panelTree = {
       id: 0,
       title: intl.formatMessage({
-        id: 'xpack.idxMgmt.indexActionsContentMenu.panelTitle',
+        id: 'xpack.idxMgmt.indexActionsMenu.panelTitle',
         defaultMessage: '{entityUpper} options',
-        values: { entityUpper }
-      }),
+      }, { entityUpper }),
       items
     };
     return flattenPanelTree(panelTree);
@@ -244,7 +232,7 @@ class IndexActionsContextMenuUI extends Component {
       return;
     } else {
       return intl.formatMessage({
-        id: 'xpack.idxMgmt.indexActionsContentMenu.segmentsNumberErrorMessage',
+        id: 'xpack.idxMgmt.indexActionsMenu.segmentsNumberErrorMessage',
         defaultMessage: 'The number of segments must be greater than zero.',
       });
     }
@@ -252,7 +240,7 @@ class IndexActionsContextMenuUI extends Component {
   forcemergeSegmentsModal = () => {
     const { forcemergeIndices, indexNames, intl } = this.props;
     const helpText = intl.formatMessage({
-      id: 'xpack.idxMgmt.indexActionsContentMenu.forceMerge.forceMergeSegmentsHelpText',
+      id: 'xpack.idxMgmt.indexActionsMenu.forceMerge.forceMergeSegmentsHelpText',
       defaultMessage: `Merge the segments in an index until the number 
         is reduced to this or fewer segments. The default is 1.`,
     });
@@ -266,7 +254,7 @@ class IndexActionsContextMenuUI extends Component {
       <EuiOverlayMask>
         <EuiConfirmModal
           title={intl.formatMessage({
-            id: 'xpack.idxMgmt.indexActionsContentMenu.forceMerge.confirmModal.modalTitle',
+            id: 'xpack.idxMgmt.indexActionsMenu.forceMerge.confirmModal.modalTitle',
             defaultMessage: 'Force merge',
           })}
           onCancel={this.closeForcemergeSegmentsModal}
@@ -283,13 +271,13 @@ class IndexActionsContextMenuUI extends Component {
           }}
           cancelButtonText={
             intl.formatMessage({
-              id: 'xpack.idxMgmt.indexActionsContentMenu.forceMerge.confirmModal.cancelButtonText',
+              id: 'xpack.idxMgmt.indexActionsMenu.forceMerge.confirmModal.cancelButtonText',
               defaultMessage: 'Cancel',
             })
           }
           confirmButtonText={
             intl.formatMessage({
-              id: 'xpack.idxMgmt.indexActionsContentMenu.forceMerge.confirmModal.confirmButtonText',
+              id: 'xpack.idxMgmt.indexActionsMenu.forceMerge.confirmModal.confirmButtonText',
               defaultMessage: 'Force merge',
             })
           }
@@ -297,7 +285,7 @@ class IndexActionsContextMenuUI extends Component {
           <div>
             <p>
               <FormattedMessage
-                id="xpack.idxMgmt.indexActionsContentMenu.forceMerge.forceMergeDescription"
+                id="xpack.idxMgmt.indexActionsMenu.forceMerge.forceMergeDescription"
                 defaultMessage="You are about to force merge {mergedKeyword}"
                 values={{ mergedKeyword: oneIndexSelected ? 'this' : 'these' }}
               />
@@ -311,7 +299,7 @@ class IndexActionsContextMenuUI extends Component {
             </ul>
             <EuiCallOut
               title={intl.formatMessage({
-                id: 'xpack.idxMgmt.indexActionsContentMenu.forceMerge.proceedWithCautionCallOutTitle',
+                id: 'xpack.idxMgmt.indexActionsMenu.forceMerge.proceedWithCautionCallOutTitle',
                 defaultMessage: 'Proceed with caution!',
               })}
               color="warning"
@@ -319,7 +307,7 @@ class IndexActionsContextMenuUI extends Component {
             >
               <p>
                 <FormattedMessage
-                  id="xpack.idxMgmt.indexActionsContentMenu.forceMerge.forceMergeWarningDescription"
+                  id="xpack.idxMgmt.indexActionsMenu.forceMerge.forceMergeWarningDescription"
                   defaultMessage="
                     Force merging a large index or an index that is not read-only can
                     potentially cause performance and stability issues in the cluster
@@ -335,7 +323,7 @@ class IndexActionsContextMenuUI extends Component {
             >
               <EuiFormRow
                 label={intl.formatMessage({
-                  id: 'xpack.idxMgmt.indexActionsContentMenu.forceMerge.maximumNumberOfSegmentsFormRowLabel',
+                  id: 'xpack.idxMgmt.indexActionsMenu.forceMerge.maximumNumberOfSegmentsFormRowLabel',
                   defaultMessage: 'Maximum number of segments per shard',
                 })}
                 helpText={helpText}
@@ -367,22 +355,21 @@ class IndexActionsContextMenuUI extends Component {
         <EuiConfirmModal
           title={
             intl.formatMessage({
-              id: 'xpack.idxMgmt.indexActionsContentMenu.deleteEntity.confirmModal.modalTitle',
+              id: 'xpack.idxMgmt.indexActionsMenu.deleteEntity.confirmModal.modalTitle',
               defaultMessage: 'Confirm Delete {entity}',
-              values: { entity }
-            })
+            }, { entity })
           }
           onCancel={this.closeDeleteConfirmationModal}
           onConfirm={() => this.closePopoverAndExecute(deleteIndices)}
           cancelButtonText={
             intl.formatMessage({
-              id: 'xpack.idxMgmt.indexActionsContentMenu.deleteEntity.confirmModal.cancelButtonText',
+              id: 'xpack.idxMgmt.indexActionsMenu.deleteEntity.confirmModal.cancelButtonText',
               defaultMessage: 'Cancel',
             })
           }
           confirmButtonText={
             intl.formatMessage({
-              id: 'xpack.idxMgmt.indexActionsContentMenu.deleteEntity.confirmModal.confirmButtonText',
+              id: 'xpack.idxMgmt.indexActionsMenu.deleteEntity.confirmModal.confirmButtonText',
               defaultMessage: 'Confirm',
             })
           }
@@ -390,7 +377,7 @@ class IndexActionsContextMenuUI extends Component {
           <div>
             <p>
               <FormattedMessage
-                id="xpack.idxMgmt.indexActionsContentMenu.deleteEntity.forceMergeDescription"
+                id="xpack.idxMgmt.indexActionsMenu.deleteEntity.forceMergeDescription"
                 defaultMessage="You are about to delete {mergedKeyword}"
                 values={{ mergedKeyword: oneIndexSelected ? 'this' : 'these' }}
               />
@@ -405,7 +392,7 @@ class IndexActionsContextMenuUI extends Component {
             <EuiCallOut
               title={
                 intl.formatMessage({
-                  id: 'xpack.idxMgmt.indexActionsContentMenu.deleteEntity.proceedWithCautionCallOutTitle',
+                  id: 'xpack.idxMgmt.indexActionsMenu.deleteEntity.proceedWithCautionCallOutTitle',
                   defaultMessage: 'Proceed with caution!',
                 })
               }
@@ -414,7 +401,7 @@ class IndexActionsContextMenuUI extends Component {
             >
               <p>
                 <FormattedMessage
-                  id="xpack.idxMgmt.indexActionsContentMenu.deleteEntity.deleteEntityWarningDescription"
+                  id="xpack.idxMgmt.indexActionsMenu.deleteEntity.deleteEntityWarningDescription"
                   defaultMessage="
                     This operation cannot be undone. Make sure you have appropriate
                     backups.
@@ -440,10 +427,9 @@ class IndexActionsContextMenuUI extends Component {
       iconSide = 'right',
       anchorPosition = 'rightUp',
       label = intl.formatMessage({
-        id: 'xpack.idxMgmt.indexActionsContentMenu.manageButtonLabel',
+        id: 'xpack.idxMgmt.indexActionsMenu.manageButtonLabel',
         defaultMessage: 'Manage {indexNamesLength, plural, one {index} other {indices}}',
-        values: { indexNamesLength },
-      }),
+      }, { indexNamesLength }),
       iconType = 'arrowDown'
     } = this.props;
     const panels = this.panels();
@@ -482,4 +468,4 @@ class IndexActionsContextMenuUI extends Component {
   }
 }
 
-export const IndexActionsContextMenu = injectI18n(IndexActionsContextMenuUI);
+export const IndexActionsContextMenu = injectI18n(IndexActionsContextMenuUi);

@@ -30,7 +30,7 @@ function capitalizeFirstLetter(string) {
 }
 
 const tabs = ['Summary', 'Settings', 'Mapping', 'Stats', 'Edit settings'];
-export class DetailPanelUI extends Component {
+export class DetailPanelUi extends Component {
   renderTabs() {
     const { panelType, indexName, indexStatus, openDetailPanel } = this.props;
 
@@ -110,4 +110,4 @@ export class DetailPanelUI extends Component {
   }
 }
 
-export const DetailPanel = injectI18n(DetailPanelUI);
+export const DetailPanel = injectI18n(DetailPanelUi);
