@@ -14,22 +14,22 @@ import { connect } from 'react-redux';
 import { bindPlainActionCreators } from '../../utils/typed_redux';
 
 import {
-  searchActions,
-  searchResultsSelectors,
-  sharedSelectors,
+  // searchActions,
+  // searchResultsSelectors,
+  // sharedSelectors,
   State,
   targetActions,
 } from './state';
 
 export const withLogSearchControlsProps = connect(
   (state: State) => ({
-    isLoadingSearchResults: searchResultsSelectors.selectIsLoadingSearchResults(state),
-    nextSearchResult: sharedSelectors.selectNextSearchResultKey(state),
-    previousSearchResult: sharedSelectors.selectPreviousSearchResultKey(state),
+    // isLoadingSearchResults: searchResultsSelectors.selectIsLoadingSearchResults(state),
+    // nextSearchResult: sharedSelectors.selectNextSearchResultKey(state),
+    // previousSearchResult: sharedSelectors.selectPreviousSearchResultKey(state),
   }),
   bindPlainActionCreators({
-    clearSearch: searchActions.clearSearch,
+    // clearSearch: searchActions.clearSearch,
     jumpToTarget: targetActions.jumpToTarget,
-    search: searchActions.search,
+    // search: searchActions.search,
   })
 );

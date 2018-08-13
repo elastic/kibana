@@ -11,5 +11,5 @@ export { summaryActions } from './summary';
 export { minimapActions } from './minimap';
 // export { configurationActions } from './configuration';
 // export { sourceActions } from './source';
-export { searchActions } from './search';
-export { searchResultsActions } from './search_results';
+// export { searchActions } from './search';
+// export { searchResultsActions } from './search_results';
