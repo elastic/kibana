@@ -38,7 +38,7 @@ export function registerStatusPage(kbnServer, server, config) {
     method: 'GET',
     path: '/status',
     handler(request, h) {
-      h.renderStatusPage();
+      return h.renderStatusPage();
     }
   }));
 }

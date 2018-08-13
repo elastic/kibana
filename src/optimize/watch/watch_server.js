@@ -19,7 +19,6 @@
 
 
 import { Server } from 'hapi';
-import { fromNode } from 'bluebird';
 import { registerHapiPlugins } from '../../server/http/register_hapi_plugins';
 
 export default class WatchServer {
@@ -37,6 +36,6 @@ export default class WatchServer {
   async init() {
     await this.optimizer.init();
     this.optimizer.bindToServer(this.server, this.basePath);
-    await fromNode(cb => this.server.start(cb));
+    return await this.server.start();
   }
 }
