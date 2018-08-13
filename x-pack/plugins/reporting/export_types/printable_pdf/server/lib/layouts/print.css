@@ -33,7 +33,7 @@ filter-bar,
  */
 
 /* hide unusable controls */
-discover-app .discover-timechart,
+discover-app .dscTimechart,
 discover-app .sidebar-container,
 discover-app .sidebar-collapser,
 discover-app navbar[name="discover-search"],
