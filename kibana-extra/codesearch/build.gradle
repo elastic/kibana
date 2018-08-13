@@ -68,6 +68,10 @@ task debugKibana(type: YarnTask, dependsOn: [bootstrap, ":lsp:javascript-typescr
   args = ['debug', '--logging.json=false']
 }
 
+task test(type: YarnTask) {
+  args = ['test']
+}
+
 task startDeps(type: YarnTask, dependsOn: [bootstrap]) {
   args = ['start-deps']
 }

@@ -13,15 +13,17 @@ import { FileTree, FileTreeItemType, Repository, RepositoryUri } from '../model'
 
 export class RepositoryUtils {
   // Generate a Repository instance by parsing repository remote url
-  // TODO(mengwei): This is a very naive implementation, need improvements.
   public static buildRepository(remoteUrl: string): Repository {
     const repo = GitUrlParse(remoteUrl);
-    const uri: RepositoryUri = repo.source + '/' + repo.full_name;
+    const host = repo.source ? repo.source : '';
+    const name = repo.name ? repo.name : '_';
+    const org = repo.owner ? repo.owner.split('/').join('_') : '_';
+    const uri: RepositoryUri = host ? `${host}/${org}/${name}` : repo.full_name;
     return {
       uri,
       url: repo.href as string,
-      name: repo.name as string,
-      org: repo.owner as string,
+      name,
+      org,
     };
   }
 
