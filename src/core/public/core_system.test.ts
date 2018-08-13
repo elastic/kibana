@@ -56,7 +56,7 @@ import { CoreSystem } from './core_system';
 jest.spyOn(CoreSystem.prototype, 'stop');
 
 const defaultCoreSystemParams = {
-  rootDomElement: null!,
+  rootDomElement: document.createElement('div'),
   injectedMetadata: {} as any,
   requireLegacyFiles: jest.fn(),
 };
@@ -91,8 +91,8 @@ describe('constructor', () => {
     });
   });
 
-  it('passes rootDomElement, requireLegacyFiles, and useLegacyTestHarness to LegacyPlatformService', () => {
-    const rootDomElement = { rootDomElement: true } as any;
+  it('passes requireLegacyFiles, useLegacyTestHarness, and a dom element to LegacyPlatformService', () => {
+    const rootDomElement = document.createElement('div');
     const requireLegacyFiles = { requireLegacyFiles: true } as any;
     const useLegacyTestHarness = { useLegacyTestHarness: true } as any;
 
@@ -106,14 +106,14 @@ describe('constructor', () => {
 
     expect(MockLegacyPlatformService).toHaveBeenCalledTimes(1);
     expect(MockLegacyPlatformService).toHaveBeenCalledWith({
-      rootDomElement,
+      targetDomElement: expect.any(HTMLElement),
       requireLegacyFiles,
       useLegacyTestHarness,
     });
   });
 
   it('passes injectedMetadata, rootDomElement, and a stopCoreSystem function to FatalErrorsService', () => {
-    const rootDomElement = { rootDomElement: true } as any;
+    const rootDomElement = document.createElement('div');
     const injectedMetadata = { injectedMetadata: true } as any;
 
     const coreSystem = new CoreSystem({
@@ -152,13 +152,21 @@ describe('#stop', () => {
 });
 
 describe('#start()', () => {
-  function startCore() {
+  function startCore(rootDomElement = defaultCoreSystemParams.rootDomElement) {
     const core = new CoreSystem({
       ...defaultCoreSystemParams,
+      rootDomElement,
     });
 
     core.start();
   }
+
+  it('clears the children of the rootDomElement and appends container for legacyPlatform', () => {
+    const root = document.createElement('div');
+    root.innerHTML = '<p>foo bar</p>';
+    startCore(root);
+    expect(root.innerHTML).toBe('<div></div>');
+  });
 
   it('calls injectedMetadata#start()', () => {
     startCore();
@@ -173,14 +181,29 @@ describe('#start()', () => {
     expect(mockInstance.start).toHaveBeenCalledTimes(1);
     expect(mockInstance.start).toHaveBeenCalledWith();
   });
+});
 
-  it('calls legacyPlatform#start()', () => {
-    startCore();
-    const [mockInstance] = MockLegacyPlatformService.mock.instances;
-    expect(mockInstance.start).toHaveBeenCalledTimes(1);
-    expect(mockInstance.start).toHaveBeenCalledWith({
-      injectedMetadata: mockInjectedMetadataStartContract,
-      fatalErrors: mockFatalErrorsStartContract,
+describe('LegacyPlatform targetDomElement', () => {
+  it('only mounts the element when started, before starting the legacyPlatformService', () => {
+    const rootDomElement = document.createElement('div');
+    const core = new CoreSystem({
+      ...defaultCoreSystemParams,
+      rootDomElement,
     });
+
+    const [legacyPlatform] = MockLegacyPlatformService.mock.instances;
+
+    let targetDomElementParentInStart: HTMLElement;
+    (legacyPlatform as any).start.mockImplementation(() => {
+      targetDomElementParentInStart = targetDomElement.parentElement;
+    });
+
+    // targetDomElement should not have a parent element when the LegacyPlatformService is constructed
+    const [[{ targetDomElement }]] = MockLegacyPlatformService.mock.calls;
+    expect(targetDomElement).toHaveProperty('parentElement', null);
+
+    // starting the core system should mount the targetDomElement as a child of the rootDomElement
+    core.start();
+    expect(targetDomElementParentInStart!).toBe(rootDomElement);
   });
 });

@@ -5,12 +5,10 @@
  */
 
 import React from 'react';
+import PropTypes from 'prop-types';
 import {
-  KuiTable,
-  KuiTableRow,
-  KuiTableRowCell,
-  KuiTableBody,
-} from '@kbn/ui-framework/components';
+  EuiBasicTable
+} from '@elastic/eui';
 
 export function LatestActive({ latestActive }) {
   const rangeMap = {
@@ -21,20 +19,32 @@ export function LatestActive({ latestActive }) {
     'last1d': 'Last 1 day',
   };
 
-  const activity = latestActive.map(({ range, count }, index) => {
-    return (
-      <KuiTableRow key={`latest-active-${index}`}>
-        <KuiTableRowCell>{rangeMap[range]}</KuiTableRowCell>
-        <KuiTableRowCell align="right">{count}</KuiTableRowCell>
-      </KuiTableRow>
-    );
-  });
+  const activity = latestActive.map(({ range, count }) => ({
+    range: rangeMap[range],
+    count,
+  }));
 
   return (
-    <KuiTable>
-      <KuiTableBody>
-        {activity}
-      </KuiTableBody>
-    </KuiTable>
+    <EuiBasicTable
+      items={activity}
+      columns={[
+        {
+          field: 'range',
+          name: '',
+        },
+        {
+          field: 'count',
+          dataType: 'number',
+          name: '',
+        }
+      ]}
+    />
   );
 }
+
+LatestActive.propTypes = {
+  latestActive: PropTypes.arrayOf(PropTypes.shape({
+    range: PropTypes.string.isRequired,
+    count: PropTypes.number.isRequired,
+  })).isRequired
+};

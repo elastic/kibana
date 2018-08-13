@@ -23,6 +23,7 @@ export default function ({ getService, getPageObjects }) {
   const log = getService('log');
   const retry = getService('retry');
   const filterBar = getService('filterBar');
+  const renderable = getService('renderable');
   const PageObjects = getPageObjects(['common', 'visualize', 'header']);
 
   const fromTime = '2015-09-19 06:31:44.000';
@@ -159,9 +160,19 @@ export default function ({ getService, getPageObjects }) {
     });
 
     it('should correctly filter for applied time filter on the main timefield', async () => {
-      await filterBar.addFilter('@timestamp', 'is between', ['2015-09-19', '2015-09-21']);
+      await filterBar.addFilter('@timestamp', 'is between', '2015-09-19', '2015-09-21');
       await PageObjects.header.waitUntilLoadingHasFinished();
-      await PageObjects.common.sleep(1000);
+      await renderable.waitForRender();
+      const data = await PageObjects.visualize.getTableVisData();
+      expect(data.trim().split('\n')).to.be.eql([
+        '2015-09-20', '4,757',
+      ]);
+    });
+
+    it('should correctly filter for pinned filters', async () => {
+      await filterBar.toggleFilterPinned('@timestamp');
+      await PageObjects.header.waitUntilLoadingHasFinished();
+      await renderable.waitForRender();
       const data = await PageObjects.visualize.getTableVisData();
       expect(data.trim().split('\n')).to.be.eql([
         '2015-09-20', '4,757',

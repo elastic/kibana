@@ -425,7 +425,6 @@ describe('ObjectsTable', () => {
       expect(mockSavedObjectsClient.delete).toHaveBeenCalledWith(mockSavedObjects[0].type, mockSavedObjects[0].id);
       expect(mockSavedObjectsClient.delete).toHaveBeenCalledWith(mockSavedObjects[1].type, mockSavedObjects[1].id);
       expect(component.state('selectedSavedObjects').length).toBe(0);
-      expect(defaultProps.savedObjectsClient.find.mock.calls.length).toBe(2);
     });
   });
 });
