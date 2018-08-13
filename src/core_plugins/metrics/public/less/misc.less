@@ -84,11 +84,16 @@
   flex-direction: column;
   flex: 1 0 auto;
   padding: 10px;
-  position: absolute;
-  top: 0;
-  right: 0;
-  bottom: 0;
-  left: 0;
+
+  // The following is commented out for posterity to ensure no ill-effects
+  // But the absolute positioning broke reports and was fighting with display: flex,
+  // Setting the max-width to 100% fixed the issue abs positioning was trying to
+  // position: absolute;
+  // top: 0;
+  // right: 0;
+  // bottom: 0;
+  // left: 0;
+    max-width: 100%;
 }
 
 .dashboard__visualization-title {
