@@ -3,6 +3,15 @@
   flex-grow: 1;
 }
 
+.canvasContainer--loading {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translateY(-50%);
+  transform: translateX(-50%);
+  text-align: center;
+}
+
 .canvasCheckered {
   background-image: linear-gradient(45deg, #ddd 25%, transparent 25%),
     linear-gradient(-45deg, #ddd 25%, transparent 25%),
@@ -17,15 +26,6 @@
   font-family: monospace;
   width: 100%;
   max-width: 100%;
-}
-
-.canvasLoading {
-  position: fixed;
-  top: 50%;
-  left: 50%;
-  transform: translateY(-50%);
-  transform: translateX(-50%);
-  text-align: center;
 }
 
 // Todo: replace this with EuiToast

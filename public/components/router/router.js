@@ -1,23 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { EuiPanel, EuiLoadingChart, EuiSpacer, EuiText } from '@elastic/eui';
 import { routerProvider } from '../../lib/router_provider';
-
-const getLoadingComponent = msg => (
-  <div className="canvasLoading">
-    <EuiPanel>
-      <EuiLoadingChart size="m" />
-      <EuiSpacer size="s" />
-      <EuiText>
-        {/*
-            For some reason a styled color is required,
-            likely something with the chrome css from Kibana
-          */}
-        <p style={{ color: '#000' }}>{msg || 'Loading...'}</p>
-      </EuiText>
-    </EuiPanel>
-  </div>
-);
+import { CanvasLoading } from './canvas_loading';
 
 export class Router extends React.PureComponent {
   static childContextTypes = {
@@ -36,7 +20,7 @@ export class Router extends React.PureComponent {
 
   static state = {
     router: {},
-    activeComponent: getLoadingComponent(),
+    activeComponent: CanvasLoading,
   };
 
   getChildContext() {
@@ -92,7 +76,10 @@ export class Router extends React.PureComponent {
   }
 
   render() {
-    if (this.props.showLoading) return getLoadingComponent(this.props.loadingMessage);
+    if (this.props.showLoading) {
+      return React.createElement(CanvasLoading, { msg: this.props.loadingMessage });
+    }
+
     return React.createElement(this.state.activeComponent, {});
   }
 }
