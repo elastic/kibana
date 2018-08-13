@@ -17,27 +17,19 @@
  * under the License.
  */
 
-import formatNumber from './lib/format_number';
-import { uiModules } from 'ui/modules';
-import statusPageMetricTemplate from './status_page_metric.html';
+import { handleShortUrlError } from './lib/short_url_error';
+import { shortUrlAssertValid } from './lib/short_url_assert_valid';
 
-uiModules
-  .get('kibana', [])
-  .filter('statusMetric', function () {
-    return function (input, type) {
-      const metrics = [].concat(input);
-      return metrics.map(function (metric) {
-        return formatNumber(metric, type);
-      }).join(', ');
-    };
-  })
-  .directive('statusPageMetric', function () {
-    return {
-      restrict: 'E',
-      template: statusPageMetricTemplate,
-      scope: {
-        metric: '=',
-      },
-      controllerAs: 'metric'
-    };
-  });
+export const createShortenUrlRoute = ({ shortUrlLookup }) => ({
+  method: 'POST',
+  path: '/api/shorten_url',
+  handler: async function (request, reply) {
+    try {
+      shortUrlAssertValid(request.payload.url);
+      const urlId = await shortUrlLookup.generateUrlId(request.payload.url, request);
+      reply({ urlId });
+    } catch (err) {
+      reply(handleShortUrlError(err));
+    }
+  }
+});

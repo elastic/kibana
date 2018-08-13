@@ -18,15 +18,29 @@
  */
 
 import React from 'react';
-import PropTypes from 'prop-types';
 
 import {
-  EuiContextMenu,
-  EuiPopover,
   EuiButtonIcon,
+  EuiContextMenu,
+  EuiContextMenuPanelDescriptor,
+  EuiPopover,
 } from '@elastic/eui';
 
-export function PanelOptionsMenu({ toggleContextMenu, isPopoverOpen, closeContextMenu, panels, isViewMode }) {
+export interface PanelOptionsMenuProps {
+  toggleContextMenu: () => void;
+  isPopoverOpen: boolean;
+  closeContextMenu: () => void;
+  panels: EuiContextMenuPanelDescriptor[];
+  isViewMode: boolean;
+}
+
+export function PanelOptionsMenu({
+  toggleContextMenu,
+  isPopoverOpen,
+  closeContextMenu,
+  panels,
+  isViewMode,
+}: PanelOptionsMenuProps) {
   const button = (
     <EuiButtonIcon
       iconType={isViewMode ? 'boxesHorizontal' : 'gear'}
@@ -49,18 +63,7 @@ export function PanelOptionsMenu({ toggleContextMenu, isPopoverOpen, closeContex
       anchorPosition="downRight"
       withTitle
     >
-      <EuiContextMenu
-        initialPanelId="mainMenu"
-        panels={panels}
-      />
+      <EuiContextMenu initialPanelId="mainMenu" panels={panels} />
     </EuiPopover>
   );
 }
-
-PanelOptionsMenu.propTypes = {
-  panels: PropTypes.array,
-  toggleContextMenu: PropTypes.func,
-  closeContextMenu: PropTypes.func,
-  isPopoverOpen: PropTypes.bool,
-  isViewMode: PropTypes.bool.isRequired,
-};

@@ -16,25 +16,8 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import { createRoutes } from './routes/create_routes';
 
-class PanelActionsStore {
-  constructor() {
-    /**
-     *
-     * @type {Array.<DashboardPanelAction>}
-     */
-    this.actions = [];
-  }
-
-  /**
-   *
-   * @type {IndexedArray} panelActionsRegistry
-   */
-  initializeFromRegistry(panelActionsRegistry) {
-    panelActionsRegistry.forEach(panelAction => {
-      this.actions.push(panelAction);
-    });
-  }
+export function urlShorteningMixin(kbnServer, server, config) {
+  createRoutes(server, config);
 }
-
-export const panelActionsStore = new PanelActionsStore();
