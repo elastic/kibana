@@ -101,18 +101,12 @@ export class Session {
    */
   static async create(server) {
     // Register HAPI plugin that manages session cookie and delegate parsing of the session cookie to it.
-    await new Promise((resolve, reject) => {
-      server.register(hapiAuthCookie, (error) => {
-        if (error) {
-          reject(error);
-        } else {
-          resolve();
-        }
-      });
+    await server.register({
+      plugin: hapiAuthCookie
     });
 
     const config =  server.config();
-    server.auth.strategy(HAPI_STRATEGY_NAME, 'cookie', HAPI_STRATEGY_MODE, {
+    server.auth.strategy(HAPI_STRATEGY_NAME, 'cookie', {
       cookie: config.get('xpack.security.cookieName'),
       password: config.get('xpack.security.encryptionKey'),
       clearInvalid: true,
@@ -120,6 +114,13 @@ export class Session {
       isSecure: config.get('xpack.security.secureCookies'),
       path: `${config.get('server.basePath')}/`
     });
+
+    if (HAPI_STRATEGY_MODE) {
+      server.auth.default({
+        strategy: HAPI_STRATEGY_NAME,
+        mode: 'required'
+      });
+    }
 
     return new Session(server);
   }

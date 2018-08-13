@@ -7519,7 +7519,7 @@ joi@13.x.x, joi@^13.4.0:
     isemail "3.x.x"
     topo "3.x.x"
 
-joi@6.10.1, joi@6.x.x:
+joi@6.x.x:
   version "6.10.1"
   resolved "https://registry.yarnpkg.com/joi/-/joi-6.10.1.tgz#4d50c318079122000fe5f16af1ff8e1917b77e06"
   dependencies:

@@ -39,7 +39,7 @@ export function createDashboardModeRequestInterceptor(dashboardViewerApp) {
         return Boom.notFound();
       }
 
-      h.continue;
+      return h.continue;
     }
   };
 }
