@@ -25,7 +25,7 @@ import 'uiExports/navbarExtensions';
 import 'uiExports/docViews';
 import 'uiExports/fieldFormats';
 import 'uiExports/search';
-
+import 'uiExports/autocompleteProviders';
 import _ from 'lodash';
 import 'ui/autoload/all';
 import 'plugins/kibana/dashboard';
@@ -35,7 +35,7 @@ import 'ui/agg_types';
 import 'ui/timepicker';
 import 'leaflet';
 
-import { Notifier } from 'ui/notify';
+import { showAppRedirectNotification } from 'ui/notify';
 import { DashboardConstants, createDashboardEditUrl } from 'plugins/kibana/dashboard/dashboard_constants';
 import { KibanaRootController } from 'plugins/kibana/kibana_root_controller';
 
@@ -51,7 +51,7 @@ chrome
     $controller(KibanaRootController, { $scope, courier, config });
   });
 
-uiModules.get('kibana').run(Notifier.pullMessageFromUrl);
+uiModules.get('kibana').run(showAppRedirectNotification);
 
 // If there is a configured kbnDefaultAppId, and it is a dashboard ID, we'll
 // show that dashboard, otherwise, we'll show the default dasbhoard landing page.

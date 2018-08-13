@@ -5,7 +5,5 @@
  */
 
 
-
-
-import './custom_url_editor_directive';
-import './styles/main.less';
+export { CustomUrlList } from './list';
+export { CustomUrlEditor } from './editor';

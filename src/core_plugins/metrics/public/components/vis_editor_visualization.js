@@ -69,6 +69,12 @@ class VisEditorVisualization extends Component {
     }
   }
 
+  onUpdate = () => {
+    this._handler.update({
+      timeRange: this.props.timeRange
+    });
+  }
+
   _loadVisualization() {
     getVisualizeLoader().then(loader => {
       if (!this._visEl.current) {
@@ -83,13 +89,20 @@ class VisEditorVisualization extends Component {
         timeRange: this.props.timeRange,
         appState: this.props.appState,
       });
+
+      if (this._handlerUpdateHasAlreadyBeenTriggered) {
+        this.onUpdate();
+      }
     });
   }
 
   componentDidUpdate() {
-    this._handler.update({
-      timeRange: this.props.timeRange
-    });
+    if (!this._handler) {
+      this._handlerUpdateHasAlreadyBeenTriggered = true;
+      return;
+    }
+
+    this.onUpdate();
   }
 
   componentDidMount() {

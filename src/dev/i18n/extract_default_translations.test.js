@@ -27,25 +27,47 @@ const readFileAsync = promisify(fs.readFile);
 const removeDirAsync = promisify(fs.rmdir);
 const unlinkAsync = promisify(fs.unlink);
 
-const PLUGIN_PATH = path.resolve(
-  __dirname,
-  '__fixtures__',
-  'extract_default_translations',
-  'test_plugin'
-);
-
-const pluginTranslationsPath = path.resolve(PLUGIN_PATH, 'translations');
-const pluginTranslationsEnPath = path.resolve(pluginTranslationsPath, 'en.json');
+const fixturesPath = path.resolve(__dirname, '__fixtures__', 'extract_default_translations');
+const pluginsPaths = [
+  path.join(fixturesPath, 'test_plugin_1'),
+  path.join(fixturesPath, 'test_plugin_2'),
+  path.join(fixturesPath, 'test_plugin_3'),
+];
 
 describe('dev/i18n/extract_default_translations', () => {
-  it('injects default formats into en.json', async () => {
-    await extractDefaultTranslations(PLUGIN_PATH);
+  test('extracts messages to en.json', async () => {
+    const [pluginPath] = pluginsPaths;
+    await extractDefaultTranslations(pluginPath);
 
-    const extractedJSONBuffer = await readFileAsync(pluginTranslationsEnPath);
+    const extractedJSONBuffer = await readFileAsync(
+      path.join(pluginPath, 'translations', 'en.json')
+    );
 
-    await unlinkAsync(pluginTranslationsEnPath);
-    await removeDirAsync(pluginTranslationsPath);
+    await unlinkAsync(path.join(pluginPath, 'translations', 'en.json'));
+    await removeDirAsync(path.join(pluginPath, 'translations'));
 
     expect(extractedJSONBuffer.toString()).toMatchSnapshot();
+  });
+
+  test('injects default formats into en.json', async () => {
+    const [, pluginPath] = pluginsPaths;
+    await extractDefaultTranslations(pluginPath);
+
+    const extractedJSONBuffer = await readFileAsync(
+      path.join(pluginPath, 'translations', 'en.json')
+    );
+
+    await unlinkAsync(path.join(pluginPath, 'translations', 'en.json'));
+    await removeDirAsync(path.join(pluginPath, 'translations'));
+
+    expect(extractedJSONBuffer.toString()).toMatchSnapshot();
+  });
+
+  test('throws on id collision', async () => {
+    const [, , pluginPath] = pluginsPaths;
+    await expect(extractDefaultTranslations(pluginPath)).rejects.toMatchObject({
+      message: `Error in ${path.join(pluginPath, 'test_file.jsx')}
+There is more than one default message for the same id "plugin_3.duplicate_id": "Message 1" and "Message 2"`,
+    });
   });
 });

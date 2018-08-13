@@ -34,7 +34,7 @@ import { timefilter } from 'ui/timefilter';
 import 'ui/share';
 import 'ui/query_bar';
 import { hasSearchStategyForIndexPattern, isDefaultTypeIndexPattern } from 'ui/courier';
-import { toastNotifications, getPainlessError } from 'ui/notify';
+import { toastNotifications } from 'ui/notify';
 import { VisProvider } from 'ui/vis';
 import { BasicResponseHandlerProvider } from 'ui/vis/response_handlers/basic';
 import { DocTitleProvider } from 'ui/doc_title';
@@ -53,6 +53,7 @@ import { visualizationLoader } from 'ui/visualize/loader/visualization_loader';
 import { recentlyAccessed } from 'ui/persisted_log';
 import { getDocLink } from 'ui/documentation_links';
 import '../components/fetch_error';
+import { getPainlessError } from './get_painless_error';
 
 const app = uiModules.get('apps/discover', [
   'kibana/notify',
@@ -571,7 +572,7 @@ function discoverController(
           .then(resp => {
             $scope.visData = resp;
             const visEl = $element.find('#discoverHistogram')[0];
-            visualizationLoader(visEl, $scope.vis, $scope.visData, $scope.uiState, { listenOnChange: true });
+            visualizationLoader.render(visEl, $scope.vis, $scope.visData, $scope.uiState, { listenOnChange: true });
           });
       }
 

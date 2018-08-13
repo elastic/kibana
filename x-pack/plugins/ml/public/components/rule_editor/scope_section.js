@@ -21,18 +21,9 @@ import {
 } from '@elastic/eui';
 
 import { ScopeExpression } from './scope_expression';
+import { checkPermission } from '../../privilege/check_privilege';
 import { getScopeFieldDefaults } from './utils';
 
-
-function getScopeText(partitioningFieldNames) {
-  if (partitioningFieldNames.length === 1) {
-    return `Specify whether the rule should only apply if the ${partitioningFieldNames[0]} is ` +
-      `in a chosen list of values.`;
-  } else {
-    return `Specify whether the rule should only apply if the ${partitioningFieldNames.join(' or ')} are ` +
-    `in a chosen list of values.`;
-  }
-}
 
 function NoFilterListsCallOut() {
   return (
@@ -49,6 +40,14 @@ function NoFilterListsCallOut() {
   );
 }
 
+function NoPermissionCallOut() {
+  return (
+    <EuiCallOut
+      title="You do not have permission to view filter lists"
+      iconType="gear"
+    />
+  );
+}
 
 export function ScopeSection({
   isEnabled,
@@ -58,6 +57,8 @@ export function ScopeSection({
   scope,
   updateScope }) {
 
+  const canGetFilters = checkPermission('canGetFilters');
+
   if (partitioningFieldNames === null || partitioningFieldNames.length === 0) {
     return null;
   }
@@ -66,10 +67,8 @@ export function ScopeSection({
   if (filterListIds.length > 0) {
     content = partitioningFieldNames.map((fieldName, index) => {
       let filterValues;
-      let enabled = false;
       if (scope !== undefined && scope[fieldName] !== undefined) {
         filterValues = scope[fieldName];
-        enabled = true;
       } else {
         filterValues = getScopeFieldDefaults(filterListIds);
       }
@@ -80,12 +79,14 @@ export function ScopeSection({
           fieldName={fieldName}
           filterId={filterValues.filter_id}
           filterType={filterValues.filter_type}
-          enabled={enabled}
+          enabled={filterValues.enabled}
           filterListIds={filterListIds}
           updateScope={updateScope}
         />
       );
     });
+  } else if(canGetFilters === false) {
+    content = <NoPermissionCallOut />;
   } else {
     content = <NoFilterListsCallOut />;
   }
@@ -98,7 +99,7 @@ export function ScopeSection({
       <EuiSpacer size="s" />
       <EuiCheckbox
         id="enable_scope_checkbox"
-        label={getScopeText(partitioningFieldNames)}
+        label="Add a filter list to limit where the rule applies."
         checked={isEnabled}
         onChange={onEnabledChange}
       />

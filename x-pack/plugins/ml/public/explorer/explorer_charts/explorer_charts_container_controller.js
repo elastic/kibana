@@ -32,7 +32,7 @@ module.controller('MlExplorerChartsContainerController', function ($scope, $inje
   $scope.seriesToPlot = [];
 
   const $chartContainer = $('.explorer-charts');
-  const FUNCTION_DESCRIPTIONS_TO_PLOT = ['mean', 'min', 'max', 'sum', 'count', 'distinct_count', 'median'];
+  const FUNCTION_DESCRIPTIONS_TO_PLOT = ['mean', 'min', 'max', 'sum', 'count', 'distinct_count', 'median', 'rare'];
   const CHART_MAX_POINTS = 500;
   const ANOMALIES_MAX_RESULTS = 500;
   const MAX_SCHEDULED_EVENTS = 10;          // Max number of scheduled events displayed per bucket.
@@ -284,8 +284,10 @@ module.controller('MlExplorerChartsContainerController', function ($scope, $inje
       // Only plot charts for metric functions, and for detectors which don't use categorization
       // or scripted fields which can be very difficult or impossible to invert to a reverse search.
       const job = mlJobService.getJob(record.job_id);
-      if (isTimeSeriesViewDetector(job, record.detector_index) === false ||
-        _.indexOf(FUNCTION_DESCRIPTIONS_TO_PLOT, record.function_description) === -1) {
+      if (
+        isTimeSeriesViewDetector(job, record.detector_index) === false ||
+        FUNCTION_DESCRIPTIONS_TO_PLOT.includes(record.function_description) === false
+      ) {
         return;
       }
       const jobId = record.job_id;

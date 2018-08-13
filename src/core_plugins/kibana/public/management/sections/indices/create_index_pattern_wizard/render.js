@@ -21,6 +21,8 @@ import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { CreateIndexPatternWizard } from './create_index_pattern_wizard';
 
+import { I18nProvider } from '@kbn/i18n/react';
+
 const CREATE_INDEX_PATTERN_DOM_ELEMENT_ID = 'createIndexPatternReact';
 
 export function renderCreateIndexPatternWizard(
@@ -33,10 +35,12 @@ export function renderCreateIndexPatternWizard(
   }
 
   render(
-    <CreateIndexPatternWizard
-      initialQuery={initialQuery}
-      services={services}
-    />,
+    <I18nProvider>
+      <CreateIndexPatternWizard
+        initialQuery={initialQuery}
+        services={services}
+      />
+    </I18nProvider>,
     node,
   );
 }
