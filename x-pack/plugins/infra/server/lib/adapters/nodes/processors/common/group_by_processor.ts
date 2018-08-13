@@ -25,7 +25,7 @@ export const groupByProcessor: InfraProcessor<InfraProcesorRequestOptions, Infra
     const { groupBy } = options.nodeOptions;
     let aggs = {};
     set(result, 'aggs.waffle.aggs.nodes.aggs', aggs);
-    groupBy.forEach((grouping: InfraPathInput) => {
+    groupBy.forEach((grouping: InfraPathInput, index: number) => {
       if (isGroupByTerms(grouping)) {
         const termsAgg = {
           aggs: {},
@@ -34,7 +34,7 @@ export const groupByProcessor: InfraProcessor<InfraProcesorRequestOptions, Infra
             size: 10,
           },
         };
-        set(aggs, `${grouping.id}`, termsAgg);
+        set(aggs, `path_${index}`, termsAgg);
         aggs = termsAgg.aggs;
       }
 

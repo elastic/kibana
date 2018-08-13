@@ -55,18 +55,15 @@ export interface InfraResponse {
 }
 
 export interface InfraNode {
-  id: string;
   path: InfraNodePath[];
   metrics: InfraNodeMetric[];
 }
 
 export interface InfraNodePath {
-  id: string;
   value: string;
 }
 
 export interface InfraNodeMetric {
-  id: string;
   name: string;
   value: number;
 }
@@ -166,12 +163,10 @@ export namespace InfraResponseResolvers {
 
 export namespace InfraNodeResolvers {
   export interface Resolvers {
-    id?: IdResolver;
     path?: PathResolver;
     metrics?: MetricsResolver;
   }
 
-  export type IdResolver = Resolver<string>;
   export type PathResolver = Resolver<InfraNodePath[]>;
   export type MetricsResolver = Resolver<InfraNodeMetric[], MetricsArgs>;
   export interface MetricsArgs {
@@ -181,22 +176,18 @@ export namespace InfraNodeResolvers {
 
 export namespace InfraNodePathResolvers {
   export interface Resolvers {
-    id?: IdResolver;
     value?: ValueResolver;
   }
 
-  export type IdResolver = Resolver<string>;
   export type ValueResolver = Resolver<string>;
 }
 
 export namespace InfraNodeMetricResolvers {
   export interface Resolvers {
-    id?: IdResolver;
     name?: NameResolver;
     value?: ValueResolver;
   }
 
-  export type IdResolver = Resolver<string>;
   export type NameResolver = Resolver<string>;
   export type ValueResolver = Resolver<number>;
 }
@@ -219,7 +210,6 @@ export interface InfraFilterInput {
 }
 
 export interface InfraPathInput {
-  id: string /** The UUID for the path by object */;
   type: InfraPathType /** The type of path */;
   label?:
     | string
@@ -231,7 +221,6 @@ export interface InfraPathInput {
 }
 /** A group by filter */
 export interface InfraPathFilterInput {
-  id: string /** The UUID for the path filter */;
   label: string /** The label for the filter, this will be used as the group name in the final results */;
   query: string /** The query string query */;
 }
@@ -242,7 +231,7 @@ export interface InfraMetricInput {
 }
 
 export interface InfraMetricAggInput {
-  id: string /** The UUID from the metric aggregation */;
+  id: string /** The UUID of the metric, this is used by pipeline aggregations to back reference an InfraMetricAggInput */;
   type: InfraMetricAggregationType /** The type of aggregation */;
   field?:
     | string
@@ -341,20 +330,17 @@ export namespace MapQuery {
 
   export type Nodes = {
     __typename?: 'InfraNode';
-    id: string;
     path: Path[];
     metrics: Metrics[];
   };
 
   export type Path = {
     __typename?: 'InfraNodePath';
-    id: string;
     value: string;
   };
 
   export type Metrics = {
     __typename?: 'InfraNodeMetric';
-    id: string;
     name: string;
     value: number;
   };

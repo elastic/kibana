@@ -5,16 +5,7 @@
  */
 import moment from 'moment';
 import { graphql } from 'react-apollo';
-import uuid from 'uuid';
-import {
-  InfraFilterInput,
-  InfraMetricInput,
-  InfraMetricType,
-  InfraPathInput,
-  InfraPathType,
-  InfraTimerangeInput,
-  MapQuery,
-} from '../../../common/graphql/types';
+import { InfraMetricType, InfraPathType, MapQuery } from '../../../common/graphql/types';
 import { InfraWaffleMapGroup } from '../../lib/lib';
 import { nodesToWaffleMap } from './nodes_to_wafflemap';
 import { mapQuery } from './query';
@@ -23,21 +14,14 @@ interface ChildProps {
   map: InfraWaffleMapGroup[];
 }
 
-interface Variables {
-  id: string;
-  timerange: InfraTimerangeInput;
-  filters: InfraFilterInput[];
-  path: InfraPathInput[];
-  metrics: InfraMetricInput[];
-}
-
 export const withMap = graphql<
   {}, // OptionProps, this will end up being the options that contain index pattern, filters, etc
   MapQuery.Query,
-  Variables,
+  MapQuery.Variables,
   ChildProps
 >(mapQuery, {
   options: () => ({
+    // fetchPolicy: 'no-cache',
     variables: {
       id: 'default',
       timerange: {
@@ -51,27 +35,18 @@ export const withMap = graphql<
       filters: [],
       metrics: [{ type: InfraMetricType.count }],
       path: [
-        { id: uuid.v1(), type: InfraPathType.terms, field: 'metricset.module' },
-        { id: uuid.v1(), type: InfraPathType.terms, field: 'metricset.name' },
-        { id: uuid.v1(), type: InfraPathType.hosts },
+        { type: InfraPathType.terms, field: 'metricset.module' },
+        { type: InfraPathType.terms, field: 'metricset.name' },
+        { type: InfraPathType.hosts },
       ],
     },
   }),
   props: ({ data }) => {
-    const emptyResponse = { map: [] };
-    if (!data) {
-      return emptyResponse;
-    }
-    if (!data.source) {
-      return emptyResponse;
-    }
-    if (!data.source.map) {
-      return emptyResponse;
-    }
-    const { nodes } = data.source.map;
-    if (!nodes) {
-      return emptyResponse;
-    }
-    return { map: nodesToWaffleMap(nodes) };
+    return {
+      map:
+        data && data.source && data.source.map && data.source.map.nodes
+          ? nodesToWaffleMap(data.source.map.nodes)
+          : [],
+    };
   },
 });

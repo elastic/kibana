@@ -8,18 +8,15 @@ import gql from 'graphql-tag';
 
 export const nodesSchema: any = gql`
   type InfraNodeMetric {
-    id: ID!
     name: String!
     value: Float!
   }
 
   type InfraNodePath {
-    id: ID!
     value: String!
   }
 
   type InfraNode {
-    id: ID!
     path: [InfraNodePath!]!
     metrics(metrics: [InfraMetricInput!]): [InfraNodeMetric!]!
   }
@@ -70,7 +67,7 @@ export const nodesSchema: any = gql`
   }
 
   input InfraMetricAggInput {
-    "The UUID from the metric aggregation"
+    "The UUID of the metric, this is used by pipeline aggregations to back reference an InfraMetricAggInput"
     id: ID!
     "The type of aggregation"
     type: InfraMetricAggregationType!
@@ -100,8 +97,6 @@ export const nodesSchema: any = gql`
   }
 
   input InfraPathInput {
-    "The UUID for the path by object"
-    id: ID!
     "The type of path"
     type: InfraPathType!
     "The label to use in the results for the group by for the terms group by"
@@ -114,8 +109,6 @@ export const nodesSchema: any = gql`
 
   "A group by filter"
   input InfraPathFilterInput {
-    "The UUID for the path filter"
-    id: ID!
     "The label for the filter, this will be used as the group name in the final results"
     label: String!
     "The query string query"

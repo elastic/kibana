@@ -15,7 +15,7 @@ function createNodeMetrics(
   node: InfraBucket,
   bucket: InfraBucket
 ): InfraNodeMetric[] {
-  return [{ id: '1', name: 'count', value: bucket.doc_count }];
+  return [{ name: 'count', value: bucket.doc_count }];
 }
 
 export function createNodeItem(
@@ -25,6 +25,6 @@ export function createNodeItem(
 ): InfraNode {
   return {
     metrics: createNodeMetrics(options, node, bucket),
-    path: [{ id: options.nodeField, value: node.key }],
+    path: [{ value: node.key }],
   } as InfraNode;
 }

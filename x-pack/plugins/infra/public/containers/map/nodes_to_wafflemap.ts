@@ -74,7 +74,7 @@ function findOrCreateGroupWithGroups(
 
 function createWaffleMapNode(node: InfraNode): InfraWaffleMapNode {
   return {
-    id: node.id,
+    id: node.path.map(p => p.value).join('/'),
     path: node.path,
     name: last(node.path).value,
     metrics: node.metrics,

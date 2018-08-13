@@ -16,13 +16,10 @@ export const mapQuery = gql`
       id
       map(timerange: $timerange, filters: $filters) {
         nodes(path: $path) {
-          id
           path {
-            id
             value
           }
           metrics(metrics: $metrics) {
-            id
             name
             value
           }
