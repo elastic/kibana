@@ -14,11 +14,19 @@ It is enabled by default.
 `xpack.security.enabled`::
 Set to `true` (default) to enable {security}. +
 +
-If set to `false` in `kibana.yml`, the user and role management options are
-hidden in this {kib} instance. If `xpack.security.enabled` is set to `true` in
-`elasticsearch.yml`, however, you can still use the {security} APIs. To disable
-{security} entirely, see the
-{ref}/security-settings.html[{es} Security Settings].
+Do not set this to `false`. To disable {security} entirely, see
+{ref}/security-settings.html[{es} Security Settings]. +
++
+If set to `false` in `kibana.yml`, the login form, user and role management screens, and 
+authorization using <<kibana-privileges>> are disabled. +
++
+`xpack.security.audit.enabled`::
+Set to `true` to enable audit logging for security events. This is set to `false` by default.
+For more details see <<xpack-security-audit-logging>>.
+
+`xpack.security.authorization.legacyFallback`::
+Set to `true` (default) to enable the legacy fallback. See <<xpack-security-authorization>>
+for more details.
 
 [float]
 [[security-ui-settings]]
