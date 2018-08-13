@@ -1,8 +1,0 @@
-{
-  "name": "@kbn/cancelable",
-  "version": "1.0.0",
-  "description": "Simple, cancelable promises",
-  "license": "Apache-2.0",
-  "private": true,
-  "main": "src/cancelable.js"
-}

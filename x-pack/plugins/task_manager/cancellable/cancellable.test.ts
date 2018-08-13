@@ -1,20 +1,7 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License;
+ * you may not use this file except in compliance with the Elastic License.
  */
 
 import { Cancellable } from './cancellable';
@@ -32,7 +19,9 @@ describe('Cancellable', () => {
     let called = false;
     try {
       await new Cancellable()
-        .then(() => { throw new Error('DOH!'); })
+        .then(() => {
+          throw new Error('DOH!');
+        })
         .then(() => (called = true));
       called = true;
     } catch (err) {
@@ -44,18 +33,22 @@ describe('Cancellable', () => {
 
   test('allows normal catch semantics', async () => {
     const result = await new Cancellable()
-      .then(() => { throw new Error('DOH!'); })
+      .then(() => {
+        throw new Error('DOH!');
+      })
       .catch(() => 'Hello')
-      .then((s) => s + ' World!');
+      .then(s => s + ' World!');
     expect(result).toEqual('Hello World!');
   });
 
   test('bypasses catch and thens if cancelled', async () => {
     let cancelPromise;
-    const calls = [];
+    const calls: string[] = [];
 
     const result = new Cancellable()
-      .then(() => { cancelPromise = result.cancel(); })
+      .then(() => {
+        cancelPromise = result.cancel();
+      })
       .then(() => calls.push('a'))
       .catch(() => calls.push('b'))
       .then(() => calls.push('c'));
@@ -134,7 +127,9 @@ describe('Cancellable', () => {
       const promise = new Cancellable()
         .then(() => {
           return new Cancellable()
-            .then(() => { promise.cancel(); })
+            .then(() => {
+              promise.cancel();
+            })
             .cancelled(() => ++cancelled)
             .then(() => ++count);
         })
@@ -150,8 +145,7 @@ describe('Cancellable', () => {
     let cancelled = 0;
 
     try {
-      const promise = new Cancellable()
-        .cancelled(() => ++cancelled);
+      const promise = new Cancellable().cancelled(() => ++cancelled);
       promise.cancel();
       promise.cancel();
       promise.cancel();

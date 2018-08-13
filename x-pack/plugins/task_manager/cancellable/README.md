@@ -9,7 +9,7 @@ Cancellable works like an ordinary promise, except it exposes a `cancel` method 
 A simple example:
 
 ```js
-import { Cancellable } from '@kbn/cancellable';
+import { Cancellable } from './cancellable';
 
 function example() {
   return new Cancellable()
@@ -46,7 +46,7 @@ If `cancel` is called on the promise, the remaining function calls will not be m
 Cancellables can be nested, and all nested cancellables will be cancelled if the parent is cancelled.
 
 ```js
-import { Cancellable } from '@kbn/cancellable';
+import { Cancellable } from './cancellable';
 
 const parent = new Cancellable()
   .cancelled(() => console.log('Parent cancelled'))
