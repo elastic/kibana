@@ -58,7 +58,7 @@ describe('historyProvider', () => {
       });
     });
 
-    describe('undo', () => {
+    describe.skip('undo', () => {
       it('should move history back', () => {
         // pushed location has state value
         expect(history.getLocation().state).to.eql(state);
@@ -69,7 +69,7 @@ describe('historyProvider', () => {
       });
     });
 
-    describe('redo', () => {
+    describe.skip('redo', () => {
       it('should move history forward', () => {
         // back to initial location, with null state
         history.undo();
@@ -82,7 +82,7 @@ describe('historyProvider', () => {
     });
   });
 
-  describe('replace updates', () => {
+  describe.skip('replace updates', () => {
     beforeEach(() => {
       history.replace(state);
     });
