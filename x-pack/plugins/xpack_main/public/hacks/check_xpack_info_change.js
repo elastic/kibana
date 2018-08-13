@@ -4,10 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import React from 'react';
 import { identity } from 'lodash';
+import { EuiCallOut } from '@elastic/eui';
 import { uiModules } from 'ui/modules';
 import chrome from 'ui/chrome';
-import { Notifier } from 'ui/notify';
+import { banners } from 'ui/notify';
 import { DebounceProvider } from 'ui/debounce';
 import { PathProvider } from 'plugins/xpack_main/services/path';
 import { XPackInfoProvider } from 'plugins/xpack_main/services/xpack_info';
@@ -20,8 +22,8 @@ module.factory('checkXPackInfoChange', ($q, Private) => {
   const xpackInfoSignature = Private(XPackInfoSignatureProvider);
   const debounce = Private(DebounceProvider);
   const isLoginOrLogout = Private(PathProvider).isLoginOrLogout();
+  let isLicenseExpirationBannerShown = false;
 
-  const notify = new Notifier();
   const notifyIfLicenseIsExpired = debounce(() => {
     const license = xpackInfo.get('license');
     if (license.isActive) {
@@ -29,21 +31,26 @@ module.factory('checkXPackInfoChange', ($q, Private) => {
     }
 
     const uploadLicensePath = `${chrome.getBasePath()}/app/kibana#/management/elasticsearch/license_management/upload_license`;
-    notify.directive({
-      template: `
-        <p>
-          Your ${license.type} license is currently expired. Please contact your administrator or
-          <a href="${uploadLicensePath}">update your license</a> directly.
-        </p>
-      `
-    }, {
-      type: 'error'
-    });
+
+    if (!isLicenseExpirationBannerShown) {
+      isLicenseExpirationBannerShown = true;
+      banners.add({
+        component: (
+          <EuiCallOut
+            iconType="help"
+            color="warning"
+            title={`Your ${license.type} license is expired`}
+          >
+            Contact your administrator or <a href={uploadLicensePath}>update your license</a> directly.
+          </EuiCallOut>
+        ),
+      });
+    }
   });
 
   /**
    *  Intercept each network response to look for the kbn-xpack-sig header.
-   *  When that header is detected, compare it's value with the value cached
+   *  When that header is detected, compare its value with the value cached
    *  in the browser storage. When the value is new, call `xpackInfo.refresh()`
    *  so that it will pull down the latest x-pack info
    *

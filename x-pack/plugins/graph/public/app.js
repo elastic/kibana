@@ -18,7 +18,7 @@ import 'ui/directives/saved_object_finder';
 import chrome from 'ui/chrome';
 import { uiModules } from 'ui/modules';
 import uiRoutes from 'ui/routes';
-import { notify, Notifier, fatalError, toastNotifications } from 'ui/notify';
+import { notify, addAppRedirectMessageToUrl, fatalError, toastNotifications } from 'ui/notify';
 import { IndexPatternsProvider } from 'ui/index_patterns/index_patterns';
 import { SavedObjectsClientProvider } from 'ui/saved_objects';
 import { KibanaParsedUrl } from 'ui/url/kibana_parsed_url';
@@ -50,10 +50,8 @@ function checkLicense(Private, Promise, kbnBaseUrl) {
   const licenseAllowsToShowThisPage = xpackInfo.get('features.graph.showAppLink') && xpackInfo.get('features.graph.enableAppLink');
   if (!licenseAllowsToShowThisPage) {
     const message = xpackInfo.get('features.graph.message');
-    const queryString = `?${Notifier.QS_PARAM_LOCATION}=Graph&${Notifier.QS_PARAM_LEVEL}=error&${Notifier.QS_PARAM_MESSAGE}=${message}`;
-    const url = `${chrome.addBasePath(kbnBaseUrl)}#${queryString}`;
-
-    window.location.href = url;
+    const newUrl = addAppRedirectMessageToUrl(chrome.addBasePath(kbnBaseUrl), message);
+    window.location.href = newUrl;
     return Promise.halt();
   }
 
@@ -67,7 +65,6 @@ app.directive('focusOn', function () {
     });
   };
 });
-
 
 if (uiRoutes.enable) {
   uiRoutes.enable();

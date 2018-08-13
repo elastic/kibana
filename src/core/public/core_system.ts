@@ -17,13 +17,14 @@
  * under the License.
  */
 
+import './core.css';
 import { FatalErrorsService } from './fatal_errors';
 import { InjectedMetadataParams, InjectedMetadataService } from './injected_metadata';
 import { LegacyPlatformParams, LegacyPlatformService } from './legacy_platform';
 
 interface Params {
+  rootDomElement: HTMLElement;
   injectedMetadata: InjectedMetadataParams['injectedMetadata'];
-  rootDomElement: LegacyPlatformParams['rootDomElement'];
   requireLegacyFiles: LegacyPlatformParams['requireLegacyFiles'];
   useLegacyTestHarness?: LegacyPlatformParams['useLegacyTestHarness'];
 }
@@ -35,12 +36,17 @@ interface Params {
  * platform the CoreSystem will get many more Services.
  */
 export class CoreSystem {
-  private fatalErrors: FatalErrorsService;
-  private injectedMetadata: InjectedMetadataService;
-  private legacyPlatform: LegacyPlatformService;
+  private readonly fatalErrors: FatalErrorsService;
+  private readonly injectedMetadata: InjectedMetadataService;
+  private readonly legacyPlatform: LegacyPlatformService;
+
+  private readonly rootDomElement: HTMLElement;
+  private readonly legacyPlatformTargetDomElement: HTMLDivElement;
 
   constructor(params: Params) {
     const { rootDomElement, injectedMetadata, requireLegacyFiles, useLegacyTestHarness } = params;
+
+    this.rootDomElement = rootDomElement;
 
     this.injectedMetadata = new InjectedMetadataService({
       injectedMetadata,
@@ -54,8 +60,9 @@ export class CoreSystem {
       },
     });
 
+    this.legacyPlatformTargetDomElement = document.createElement('div');
     this.legacyPlatform = new LegacyPlatformService({
-      rootDomElement,
+      targetDomElement: this.legacyPlatformTargetDomElement,
       requireLegacyFiles,
       useLegacyTestHarness,
     });
@@ -63,6 +70,11 @@ export class CoreSystem {
 
   public start() {
     try {
+      // ensure the rootDomElement is empty
+      this.rootDomElement.textContent = '';
+      this.rootDomElement.classList.add('coreSystemRootDomElement');
+      this.rootDomElement.appendChild(this.legacyPlatformTargetDomElement);
+
       const injectedMetadata = this.injectedMetadata.start();
       const fatalErrors = this.fatalErrors.start();
       this.legacyPlatform.start({ injectedMetadata, fatalErrors });
@@ -73,5 +85,6 @@ export class CoreSystem {
 
   public stop() {
     this.legacyPlatform.stop();
+    this.rootDomElement.textContent = '';
   }
 }
