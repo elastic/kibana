@@ -130,6 +130,7 @@
     "font-awesome": "4.4.0",
     "glob": "^7.1.2",
     "glob-all": "^3.1.0",
+    "good": "^8.1.1",
     "good-squeeze": "2.1.0",
     "h2o2": "8.1.2",
     "h2o2-latest": "npm:h2o2@8.1.2",

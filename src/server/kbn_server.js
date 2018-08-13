@@ -23,7 +23,7 @@ import { fromRoot, pkg } from '../utils';
 // import loggingConfiguration from './logging/configuration';
 import configSetupMixin from './config/setup';
 import httpMixin from './http';
-// import { loggingMixin } from './logging';
+import { loggingMixin } from './logging';
 import warningsMixin from './warnings';
 import { usageMixin } from './usage';
 import { statusMixin } from './status';
@@ -64,7 +64,7 @@ export default class KbnServer {
 
       // adds methods for extending this.server
       serverExtensionsMixin,
-      // loggingMixin,
+      loggingMixin,
       configDeprecationWarningsMixin,
       warningsMixin,
       usageMixin,

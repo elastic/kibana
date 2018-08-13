@@ -24,38 +24,63 @@ import LogFormatJson from './log_format_json';
 import LogFormatString from './log_format_string';
 import { LogInterceptor } from './log_interceptor';
 
-export default class KbnLogger {
-  constructor(events, config) {
-    this.squeeze = new Squeeze(events);
-    this.format = config.json ? new LogFormatJson(config) : new LogFormatString(config);
-    this.logInterceptor = new LogInterceptor();
+// Combine n streams into a single stream object.
+function compose(s1, s2, ...moreStreams) {
+  s1.pipe(s2);
 
-    if (config.dest === 'stdout') {
-      this.dest = process.stdout;
-    } else {
-      this.dest = writeStr(config.dest, {
-        flags: 'a',
-        encoding: 'utf8'
-      });
-    }
+  // Redirect s1's pipe and unpipe to s2
+  s1.pipe = function (dest) {
+    return s2.pipe(dest);
+  };
+  s1.unpipe = function (dest) {
+    return s2.unpipe(dest);
+  };
+
+  if (moreStreams.length > 0) {
+    const [nextS, ...evenMoreStreams] = moreStreams;
+
+    return compose(s1, nextS, ...evenMoreStreams);
   }
 
-  init(readstream, emitter, callback) {
+  return s1;
+}
 
-    this.output = readstream
-      .pipe(this.logInterceptor)
-      .pipe(this.squeeze)
-      .pipe(this.format);
 
-    this.output.pipe(this.dest);
+export function GetLoggerStream({ events, config }) {
+  const squeeze = new Squeeze(events);
+  const format = config.json ? new LogFormatJson(config) : new LogFormatString(config);
+  const logInterceptor = new LogInterceptor();
 
-    emitter.on('stop', () => {
-      this.output.unpipe(this.dest);
-      if (this.dest !== process.stdout) {
-        this.dest.end();
-      }
+  let dest;
+  if (config.dest === 'stdout') {
+    dest = process.stdout;
+  } else {
+    dest = writeStr(config.dest, {
+      flags: 'a',
+      encoding: 'utf8'
     });
-
-    callback();
   }
+
+  const output = compose(
+    logInterceptor,
+    squeeze,
+    format,
+    dest
+  );
+
+  // TODO: get this working
+  // console.log('output going')
+
+  // logInterceptor.on('close', () => {
+  //   console.log('closing');
+  // });
+
+  // emitter.on('stop', () => {
+  //   this.output.unpipe(this.dest);
+  //   if (this.dest !== process.stdout) {
+  //     this.dest.end();
+  //   }
+  // });
+
+  return output;
 }

@@ -2057,12 +2057,6 @@ boom@3.1.1:
   dependencies:
     hoek "3.x.x"
 
-boom@3.x.x:
-  version "3.2.2"
-  resolved "https://registry.yarnpkg.com/boom/-/boom-3.2.2.tgz#0f0cc5d04adc5003b8c7d71f42cca7271fef0e78"
-  dependencies:
-    hoek "4.x.x"
-
 boom@4.x.x:
   version "4.3.1"
   resolved "https://registry.yarnpkg.com/boom/-/boom-4.3.1.tgz#4f8a3005cb4a7e3889f749030fd25b96e01d2e31"
@@ -5717,6 +5711,15 @@ good-squeeze@2.1.0:
     hoek "2.x.x"
     json-stringify-safe "5.0.x"
 
+good@^8.1.1:
+  version "8.1.1"
+  resolved "https://registry.yarnpkg.com/good/-/good-8.1.1.tgz#02b38a9bdab4862d9a4e7897b13a88f6663cd81f"
+  dependencies:
+    hoek "5.x.x"
+    joi "13.x.x"
+    oppsy "2.x.x"
+    pumpify "1.3.x"
+
 got@5.6.0:
   version "5.6.0"
   resolved "https://registry.yarnpkg.com/got/-/got-5.6.0.tgz#bb1d7ee163b78082bbc8eb836f3f395004ea6fbf"
@@ -5964,13 +5967,14 @@ handlebars@^4.0.1, handlebars@^4.0.3:
   optionalDependencies:
     uglify-js "^2.6"
 
-hapi-auth-cookie@6.1.1:
-  version "6.1.1"
-  resolved "https://registry.yarnpkg.com/hapi-auth-cookie/-/hapi-auth-cookie-6.1.1.tgz#927db39e434916d81ab870d4181d70d53e745572"
+hapi-auth-cookie@9.0.0:
+  version "9.0.0"
+  resolved "https://registry.yarnpkg.com/hapi-auth-cookie/-/hapi-auth-cookie-9.0.0.tgz#3b0af443334e2bd92490ddb17bed16e3e9edfd01"
   dependencies:
-    boom "3.x.x"
-    hoek "3.x.x"
-    joi "7.x.x"
+    boom "7.x.x"
+    bounce "1.x.x"
+    hoek "5.x.x"
+    joi "13.x.x"
 
 hapi-compat@^1.1.0:
   version "1.1.0"
@@ -7055,10 +7059,6 @@ isemail@1.x.x:
   version "1.2.0"
   resolved "https://registry.yarnpkg.com/isemail/-/isemail-1.2.0.tgz#be03df8cc3e29de4d2c5df6501263f1fa4595e9a"
 
-isemail@2.x.x:
-  version "2.2.1"
-  resolved "https://registry.yarnpkg.com/isemail/-/isemail-2.2.1.tgz#0353d3d9a62951080c262c2aa0a42b8ea8e9e2a6"
-
 isemail@3.x.x:
   version "3.1.1"
   resolved "https://registry.yarnpkg.com/isemail/-/isemail-3.1.1.tgz#e8450fe78ff1b48347db599122adcd0668bd92b5"
@@ -7527,15 +7527,6 @@ joi@6.x.x:
     isemail "1.x.x"
     moment "2.x.x"
     topo "1.x.x"
-
-joi@7.x.x:
-  version "7.3.0"
-  resolved "https://registry.yarnpkg.com/joi/-/joi-7.3.0.tgz#4d9c9f181830444083665b5b6cd5b8ca6779a5e9"
-  dependencies:
-    hoek "3.x.x"
-    isemail "2.x.x"
-    moment "2.x.x"
-    topo "2.x.x"
 
 jpeg-js@^0.2.0:
   version "0.2.0"
@@ -9428,6 +9419,12 @@ onetime@^2.0.0:
   dependencies:
     mimic-fn "^1.0.0"
 
+oppsy@2.x.x:
+  version "2.0.0"
+  resolved "https://registry.yarnpkg.com/oppsy/-/oppsy-2.0.0.tgz#3a194517adc24c3c61cdc56f35f4537e93a35e34"
+  dependencies:
+    hoek "5.x.x"
+
 optimist@^0.6.1, optimist@~0.6.1:
   version "0.6.1"
   resolved "https://registry.yarnpkg.com/optimist/-/optimist-0.6.1.tgz#da3ea74686fa21a19a111c326e90eb15a0196686"
@@ -10497,6 +10494,14 @@ pump@^2.0.0:
   dependencies:
     end-of-stream "^1.1.0"
     once "^1.3.1"
+
+pumpify@1.3.x:
+  version "1.3.6"
+  resolved "https://registry.yarnpkg.com/pumpify/-/pumpify-1.3.6.tgz#00d40e5ded0a3bf1e0788b1c0cf426a42882ab64"
+  dependencies:
+    duplexify "^3.5.3"
+    inherits "^2.0.3"
+    pump "^2.0.0"
 
 pumpify@^1.3.5:
   version "1.4.0"
@@ -12910,12 +12915,6 @@ topo@1.x.x:
   resolved "https://registry.yarnpkg.com/topo/-/topo-1.1.0.tgz#e9d751615d1bb87dc865db182fa1ca0a5ef536d5"
   dependencies:
     hoek "2.x.x"
-
-topo@2.x.x:
-  version "2.0.2"
-  resolved "https://registry.yarnpkg.com/topo/-/topo-2.0.2.tgz#cd5615752539057c0dc0491a621c3bc6fbe1d182"
-  dependencies:
-    hoek "4.x.x"
 
 topo@3.x.x:
   version "3.0.0"

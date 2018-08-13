@@ -17,17 +17,14 @@
  * under the License.
  */
 
-import { fromNode } from 'bluebird';
 // import evenBetter from 'even-better';
-// import loggingConfiguration from './configuration';
+import good from 'good';
+import loggingConfiguration from './configuration';
 
-export function setupLogging(/*server, config*/) {
-  return fromNode((cb) => {
-    // server.register({
-    //   register: evenBetter,
-    //   options: loggingConfiguration(config)
-    // }, cb);
-    cb();
+export function setupLogging(server, config) {
+  return server.register({
+    plugin: good,
+    options: loggingConfiguration(config)
   });
 }
 
