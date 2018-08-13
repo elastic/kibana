@@ -8,7 +8,7 @@ import { ApolloError, ApolloQueryResult } from 'apollo-client';
 import { DocumentNode } from 'graphql';
 import { Action as ReduxAction } from 'redux';
 import { Epic } from 'redux-observable';
-import { from, merge, Observable, pipe } from 'rxjs';
+import { from, Observable } from 'rxjs';
 import { catchError, filter, map, startWith, switchMap, withLatestFrom } from 'rxjs/operators';
 import { Action, ActionCreator, actionCreatorFactory, Failure, Success } from 'typescript-fsa';
 import { reducerWithInitialState } from 'typescript-fsa-reducers';
@@ -201,6 +201,7 @@ export const createGraphqlStateSelectors = <State>(
     selectLoadingProgress,
     selectLoadingProgressOperationInfo,
     selectLoadingResult,
+    selectLoadingResultOperationInfo,
     selectLoadingState,
   };
 };

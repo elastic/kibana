@@ -87,13 +87,15 @@ function parseFieldNodes(
 ): InfraPathsAndMetricOptions {
   if (isFieldNode(node) && node.selectionSet) {
     const { selections }: SelectionSetNode = node.selectionSet;
-    selections.forEach((selection: SelectionNode): void => {
-      if (isMetricSelection(selection) && selection.arguments) {
-        const metrics = extractMetricsArgument(selection);
-        ctx.metrics = metrics || [];
+    selections.forEach(
+      (selection: SelectionNode): void => {
+        if (isMetricSelection(selection) && selection.arguments) {
+          const metrics = extractMetricsArgument(selection);
+          ctx.metrics = metrics || [];
+        }
+        parseFieldNodes(ctx, selection);
       }
-      parseFieldNodes(ctx, selection);
-    });
+    );
     if (hasPathArguments(node)) {
       const paths = extractPathArgument(node);
       ctx.path = paths || [];

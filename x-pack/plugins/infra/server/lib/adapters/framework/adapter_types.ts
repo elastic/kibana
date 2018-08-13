@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { GraphQLResolveInfo, GraphQLSchema } from 'graphql';
+import { GraphQLSchema } from 'graphql';
 import { IRouteAdditionalConfigurationOptions, IStrictReply } from 'hapi';
 
 export * from '../../../../common/graphql/typed_resolvers';

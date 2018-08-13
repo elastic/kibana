@@ -6,12 +6,12 @@
 
 import { createSelector } from 'reselect';
 
-import { getLogEntryKey } from '../../../utils/log_entry';
 import {
   getSearchResultIndexAfterTime,
   getSearchResultIndexBeforeTime,
   getSearchResultKey,
 } from '../../../../common/log_search_result';
+import { getLogEntryKey } from '../../../utils/log_entry';
 import { globalizeSelectors } from '../../../utils/typed_redux';
 import { configurationSelectors as localConfigurationSelectors } from './configuration';
 import { entriesSelectors as localEntriesSelectors } from './entries';

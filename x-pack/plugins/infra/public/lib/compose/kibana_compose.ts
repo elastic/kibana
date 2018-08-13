@@ -25,8 +25,6 @@ import ApolloClient from 'apollo-client';
 import { ApolloLink } from 'apollo-link';
 import { HttpLink } from 'apollo-link-http';
 import { withClientState } from 'apollo-link-state';
-import { printSchema } from 'graphql';
-import { buildSchemaFromTypeDefinitions } from 'graphql-tools';
 
 export function compose(): InfraFrontendLibs {
   const cache = new InMemoryCache({

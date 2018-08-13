@@ -18,18 +18,18 @@ export function sizeOfSquares(
   const scale = SCALE_FACTOR / levelFactor;
   const x = width * scale;
   const y = height * scale;
-  const possibleX = Math.ceil(Math.sqrt(totalItems * x / y));
+  const possibleX = Math.ceil(Math.sqrt((totalItems * x) / y));
   let newX;
   let newY;
-  if (Math.floor(possibleX * y / x) * possibleX < totalItems) {
-    newX = y / Math.ceil(possibleX * y / x);
+  if (Math.floor((possibleX * y) / x) * possibleX < totalItems) {
+    newX = y / Math.ceil((possibleX * y) / x);
   } else {
     newX = x / possibleX;
   }
-  const possibleY = Math.ceil(Math.sqrt(totalItems * y / x));
-  if (Math.floor(possibleY * x / y) * possibleY < totalItems) {
+  const possibleY = Math.ceil(Math.sqrt((totalItems * y) / x));
+  if (Math.floor((possibleY * x) / y) * possibleY < totalItems) {
     // does not fit
-    newY = x / Math.ceil(x * possibleY / y);
+    newY = x / Math.ceil((x * possibleY) / y);
   } else {
     newY = y / possibleY;
   }

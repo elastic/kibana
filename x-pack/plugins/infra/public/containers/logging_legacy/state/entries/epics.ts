@@ -4,14 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import pick from 'lodash/fp/pick';
 import { Action } from 'redux';
 import { combineEpics, Epic, EpicWithState } from 'redux-observable';
-import { /*interval,*/ merge, Observable } from 'rxjs';
+import { /*interval,*/ merge } from 'rxjs';
 import { exhaustMap, filter, map, withLatestFrom } from 'rxjs/operators';
 
 import { pickTimeKey, TimeKey, timeKeyIsBetween } from '../../../../../common/time';
-import { InfraApolloClient } from '../../../../lib/lib';
 import { targetActions } from '../target';
 import {
   loadEntries,
