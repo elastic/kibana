@@ -37,6 +37,7 @@ import {
   CreatePackageJsonTask,
   CreateReadmeTask,
   CreateRpmPackageTask,
+  CreateStaticFilesystem,
   DownloadNodeBuildsTask,
   ExtractNodeBuildsTask,
   InstallDependenciesTask,
@@ -112,6 +113,7 @@ export async function buildDistributables(options) {
   await run(TranspileScssTask);
   await run(CleanExtraFilesFromModulesTask);
   await run(OptimizeBuildTask);
+  await run(CreateStaticFilesystem);
 
   /**
    * copy generic build outputs into platform-specific build
