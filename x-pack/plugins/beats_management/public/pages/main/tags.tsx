@@ -57,7 +57,7 @@ export class TagsPage extends React.PureComponent<TagsPageProps, TagsPageState> 
       <Table
         actionHandler={this.handleTagsAction}
         assignmentOptions={this.state.beats}
-        assignmentTitle={'Assign Beats'}
+        assignmentTitle={null}
         items={this.state.tags}
         ref={this.tableRef}
         showAssignmentOptions={true}
