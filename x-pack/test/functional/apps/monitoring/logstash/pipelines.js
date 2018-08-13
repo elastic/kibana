@@ -32,10 +32,10 @@ export default function ({ getService, getPageObjects }) {
 
     it('Logstash Cluster Summary Status shows correct info', async () => {
       expect(await lsClusterSummaryStatus.getContent()).to.eql({
-        nodeCount: '2',
-        memoryUsed: '528.4 MB / 1.9 GB',
-        eventsInTotal: '117.9k',
-        eventsOutTotal: '111.9k'
+        nodeCount: 'Nodes:\n2',
+        memoryUsed: 'Memory:\n528.4 MB / 1.9 GB',
+        eventsInTotal: 'Events Received:\n117.9k',
+        eventsOutTotal: 'Events Emitted:\n111.9k'
       });
     });
 
