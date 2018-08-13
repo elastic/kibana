@@ -108,7 +108,7 @@ export class EmbeddedVisualizeHandler {
 
     this.vis.on('update', this.handleVisUpdate);
     this.vis.on('reload', this.reload);
-    this.uiState.on('change', this.fetchAndRender);
+    this.uiState.on('change', this.onUiStateChange);
     timefilter.on('autoRefreshFetch', this.reload);
 
     this.dataLoader = new VisualizeDataLoader(vis, Private);
@@ -168,7 +168,7 @@ export class EmbeddedVisualizeHandler {
     this.vis.removeListener('reload', this.reload);
     this.vis.removeListener('update', this.handleVisUpdate);
     this.element.removeEventListener('renderComplete', this.onRenderCompleteListener);
-    this.uiState.off('change', this.fetchAndRender);
+    this.uiState.off('change', this.onUiStateChange);
     visualizationLoader.destroy(this.element);
     this.renderCompleteHelper.destroy();
   }
@@ -223,6 +223,10 @@ export class EmbeddedVisualizeHandler {
   public removeRenderCompleteListener(listener: () => void) {
     this.listeners.removeListener(RENDER_COMPLETE_EVENT, listener);
   }
+
+  private onUiStateChange = () => {
+    this.fetchAndRender();
+  };
 
   /**
    * Fetches new data and renders the chart. This will happen debounced for a couple
