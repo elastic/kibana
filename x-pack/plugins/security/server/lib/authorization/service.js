@@ -5,10 +5,10 @@
  */
 
 import { actionsFactory } from './actions';
+import { AuthorizationMode } from './mode';
 import { CHECK_PRIVILEGES_RESULT, checkPrivilegesWithRequestFactory } from './check_privileges';
 import { checkPrivilegesAtAllResourcesWithRequestFactory } from './check_privileges_at_all_resources';
 import { getClient } from '../../../../../server/lib/get_client_shield';
-import { RBAC_AUTH_SCOPE } from '../../../common/constants';
 
 export function createAuthorizationService(server, xpackInfoFeature) {
   const shieldClient = getClient(server);
@@ -23,6 +23,7 @@ export function createAuthorizationService(server, xpackInfoFeature) {
     server.savedObjects,
     server.plugins.spaces,
   );
+  const mode = new AuthorizationMode(actions, checkPrivilegesAtAllResourcesWithRequest, xpackInfoFeature);
 
   return {
     actions,
@@ -30,11 +31,6 @@ export function createAuthorizationService(server, xpackInfoFeature) {
     checkPrivilegesWithRequest,
     checkPrivilegesAtAllResourcesWithRequest,
     CHECK_PRIVILEGES_RESULT,
-    isRbacEnabled() {
-      return xpackInfoFeature.getLicenseCheckResults().allowRbac;
-    },
-    useRbacForRequest(request) {
-      return request.auth.credentials && request.auth.credentials.scope && request.auth.credentials.scope.includes(RBAC_AUTH_SCOPE);
-    }
+    mode,
   };
 }

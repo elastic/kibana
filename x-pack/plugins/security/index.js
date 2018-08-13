@@ -23,7 +23,6 @@ import { SecureSavedObjectsClient } from './server/lib/saved_objects_client/secu
 import { createAuthorizationService, registerPrivilegesWithCluster } from './server/lib/authorization';
 import { watchStatusAndLicenseToInitialize } from '../../server/lib/watch_status_and_license_to_initialize';
 import { SecureSavedObjectsClientWrapper } from './server/lib/saved_objects_client/secure_saved_objects_client_wrapper';
-import { initRbacAuthScope } from './server/lib/rbac_auth_scope';
 import { deepFreeze } from './server/lib/deep_freeze';
 
 export const security = (kibana) => new kibana.Plugin({
@@ -129,7 +128,7 @@ export const security = (kibana) => new kibana.Plugin({
 
       const callWithRequestRepository = savedObjects.getSavedObjectsRepository(callCluster);
 
-      if (authorization.useRbacForRequest(request)) {
+      if (authorization.mode.useRbacForRequest(request)) {
         const internalRepository = savedObjects.getSavedObjectsRepository(callWithInternalUser);
 
         return new SecureSavedObjectsClient({
@@ -143,7 +142,7 @@ export const security = (kibana) => new kibana.Plugin({
     });
 
     savedObjects.addScopedSavedObjectsClientWrapperFactory(Number.MIN_VALUE, ({ client, request }) => {
-      if (authorization.useRbacForRequest(request)) {
+      if (authorization.mode.useRbacForRequest(request)) {
         const { spacesService } = server.plugins.spaces;
 
         return new SecureSavedObjectsClientWrapper({
@@ -163,8 +162,7 @@ export const security = (kibana) => new kibana.Plugin({
 
     getUserProvider(server);
 
-    await initAuthenticator(server);
-    initRbacAuthScope(server, authorization);
+    await initAuthenticator(server, authorization);
     initAuthenticateApi(server);
     initUsersApi(server);
     initPublicRolesApi(server);

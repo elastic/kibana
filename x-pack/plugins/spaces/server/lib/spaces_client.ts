@@ -24,7 +24,7 @@ export class SpacesClient {
   }
 
   public async getAll() {
-    if (!this.authorization || !this.authorization.useRbacForRequest(this.request)) {
+    if (!this.authorization || !this.authorization.mode.useRbacForRequest(this.request)) {
       const { saved_objects } = await this.callWithRequestSavedObjectRepository.find({
         type: 'space',
         page: 1,
@@ -58,7 +58,7 @@ export class SpacesClient {
   }
 
   public async get(spaceId: number) {
-    if (!this.authorization || !this.authorization.useRbacForRequest(this.request)) {
+    if (!this.authorization || !this.authorization.mode.useRbacForRequest(this.request)) {
       const savedObject = await this.callWithRequestSavedObjectRepository.get('space', spaceId);
       return this.transformSavedObjectToSpace(savedObject);
     } else {

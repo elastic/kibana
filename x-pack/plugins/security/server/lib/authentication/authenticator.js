@@ -103,10 +103,11 @@ class Authenticator {
    * @param {AuthScopeService} authScope AuthScopeService instance.
    * @param {Session} session Session instance.
    */
-  constructor(server, authScope, session) {
+  constructor(server, authScope, session, authorization) {
     this._server = server;
     this._authScope = authScope;
     this._session = session;
+    this._authorization = authorization;
 
     const config = this._server.config();
     const authProviders = config.get('xpack.security.authProviders');
@@ -168,6 +169,8 @@ class Authenticator {
       }
 
       if (authenticationResult.succeeded()) {
+        // we have to do this here, as the auth scope's could be dependent on this
+        await this._authorization.mode.initialize(request);
         return AuthenticationResult.succeeded({
           ...authenticationResult.user,
           // Complement user returned from the provider with scopes.
@@ -269,10 +272,10 @@ class Authenticator {
   }
 }
 
-export async function initAuthenticator(server) {
+export async function initAuthenticator(server, authorization) {
   const session = await Session.create(server);
   const authScope = new AuthScopeService();
-  const authenticator = new Authenticator(server, authScope, session);
+  const authenticator = new Authenticator(server, authScope, session, authorization);
 
   server.expose('authenticate', (request) => authenticator.authenticate(request));
   server.expose('deauthenticate', (request) => authenticator.deauthenticate(request));

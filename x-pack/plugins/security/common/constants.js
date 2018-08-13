@@ -5,4 +5,3 @@
  */
 
 export const ALL_RESOURCE = '*';
-export const RBAC_AUTH_SCOPE = Symbol('RBAC_AUTH_SCOPE');
