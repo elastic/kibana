@@ -4,23 +4,18 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export const RepositorySchema = {
-  uri: {
-    type: 'text',
-  },
-  url: {
-    type: 'text',
-    index: false,
-  },
-  name: {
-    type: 'text',
-  },
-  org: {
-    type: 'text',
-  },
-};
+import {
+  DocumentAnalysisSettings,
+  DocumentIndexName,
+  DocumentIndexNamePrefix,
+  DocumentSchema,
+  DocumentTypeName,
+} from './document';
 
-export const RepositoryTypeName = 'repository';
-export const RepositoryIndexName = () => {
-  return `.codesearch-${RepositoryTypeName}`;
-};
+export const RepositorySchema = DocumentSchema;
+export const RepositoryAnalysisSettings = DocumentAnalysisSettings;
+export const RepositoryTypeName = DocumentTypeName;
+export const RepositoryIndexNamePrefix = DocumentIndexNamePrefix;
+export const RepositoryIndexName = DocumentIndexName;
+
+export const RepositoryReserviedField = 'repository';

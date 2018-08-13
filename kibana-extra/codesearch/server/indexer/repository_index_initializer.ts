@@ -10,7 +10,12 @@ import { RepositoryUri } from 'model';
 import { Log } from '../log';
 import { AbstractIndexer } from './abstract_indexer';
 import { IndexCreationRequest } from './index_creation_request';
-import { RepositoryIndexName, RepositorySchema, RepositoryTypeName } from './schema';
+import {
+  RepositoryAnalysisSettings,
+  RepositoryIndexName,
+  RepositorySchema,
+  RepositoryTypeName,
+} from './schema';
 
 // Inherit AbstractIndexer's index creation logics. This is not an actual indexer.
 export class RepositoryIndexInitializer extends AbstractIndexer {
@@ -20,11 +25,12 @@ export class RepositoryIndexInitializer extends AbstractIndexer {
     super(client, log);
   }
 
-  public async prepareIndexCreationRequests(_: RepositoryUri) {
+  public async prepareIndexCreationRequests(repoUri: RepositoryUri) {
     const creationReq: IndexCreationRequest = {
-      index: RepositoryIndexName(),
+      index: RepositoryIndexName(repoUri),
       type: RepositoryTypeName,
       settings: {
+        ...RepositoryAnalysisSettings,
         number_of_shards: 1,
         auto_expand_replicas: '0-1',
       },
@@ -33,8 +39,8 @@ export class RepositoryIndexInitializer extends AbstractIndexer {
     return [creationReq];
   }
 
-  public async init() {
-    const res = await this.prepareIndex('');
+  public async init(repoUri: RepositoryUri) {
+    const res = await this.prepareIndex(repoUri);
     if (!res) {
       this.log.error(`Initialize repository index failed.`);
     }

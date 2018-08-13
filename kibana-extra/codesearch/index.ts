@@ -75,7 +75,6 @@ export default (kibana: any) =>
 
       // Initialize repository index.
       const repositoryIndexInit = new RepositoryIndexInitializer(adminCluster.getClient(), log);
-      repositoryIndexInit.init();
 
       // Initialize queue.
       const repository = server.savedObjects.getSavedObjectsRepository(
@@ -106,7 +105,14 @@ export default (kibana: any) =>
       scheduler.start();
 
       // Add server routes and initialize the plugin here
-      repositoryRoute(server, serverOptions, cloneWorker, deleteWorker, indexWorker);
+      repositoryRoute(
+        server,
+        serverOptions,
+        cloneWorker,
+        deleteWorker,
+        indexWorker,
+        repositoryIndexInit
+      );
       repositorySearchRoute(server, repoSearchClient);
       documentSearchRoute(server, documentSearchClient);
       symbolSearchRoute(server, symbolSearchClient);

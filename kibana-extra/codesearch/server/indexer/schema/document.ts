@@ -42,6 +42,25 @@ export const DocumentSchema = {
     index: false,
     norms: false,
   },
+  // Repository is resided in this document index.
+  // There is always a single Repository object in this index.
+  repository: {
+    properties: {
+      uri: {
+        type: 'text',
+      },
+      url: {
+        type: 'text',
+        index: false,
+      },
+      name: {
+        type: 'text',
+      },
+      org: {
+        type: 'text',
+      },
+    },
+  },
 };
 
 export const DocumentAnalysisSettings = {

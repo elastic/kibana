@@ -75,7 +75,7 @@ export class LspIndexer extends AbstractIndexer {
       return RepositoryUtils.getAllFiles(fileTree).map((filePath: string) => {
         const req: LspIndexRequest = {
           repoUri,
-          localRepoPath: workspaceDir + filePath,
+          localRepoPath: workspaceDir,
           filePath,
           revision: workspaceRevision,
         };

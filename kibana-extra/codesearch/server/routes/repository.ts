@@ -8,7 +8,13 @@ import Boom from 'boom';
 
 import { RepositoryUtils } from '../../common/repository_utils';
 import { Repository } from '../../model';
-import { RepositoryIndexName, RepositoryTypeName } from '../indexer/schema';
+import { RepositoryIndexInitializer } from '../indexer';
+import {
+  RepositoryIndexName,
+  RepositoryIndexNamePrefix,
+  RepositoryReserviedField,
+  RepositoryTypeName,
+} from '../indexer/schema';
 import { Server } from '../kibana_types';
 import { Log } from '../log';
 import { CloneWorker, DeleteWorker, IndexWorker } from '../queue';
@@ -19,7 +25,8 @@ export function repositoryRoute(
   options: ServerOptions,
   cloneWorker: CloneWorker,
   deleteWorker: DeleteWorker,
-  indexWorker: IndexWorker
+  indexWorker: IndexWorker,
+  repoIndexInit: RepositoryIndexInitializer
 ) {
   // Clone a git repository
   server.route({
@@ -34,7 +41,7 @@ export function repositoryRoute(
       try {
         // Check if the repository already exists
         await callWithRequest(req, 'get', {
-          index: RepositoryIndexName(),
+          index: RepositoryIndexName(repo.uri),
           type: RepositoryTypeName,
           id: repo.uri,
         });
@@ -44,15 +51,20 @@ export function repositoryRoute(
       } catch (error) {
         log.info(`Repository ${repoUrl} does not exist. Go ahead with clone.`);
         try {
+          // Create the index for the repository
+          repoIndexInit.init(repo.uri);
+
           // Persist to elasticsearch
           await callWithRequest(req, 'create', {
-            index: RepositoryIndexName(),
+            index: RepositoryIndexName(repo.uri),
             type: RepositoryTypeName,
             id: repo.uri,
-            body: JSON.stringify(repo),
+            body: JSON.stringify({
+              repository: repo,
+            }),
           });
 
-          // Kick off clone job
+          // // Kick off clone job
           const payload = {
             url: repoUrl,
             dataPath: options.repoPath,
@@ -80,7 +92,7 @@ export function repositoryRoute(
         // Delete the repository from ES.
         // If object does not exist in ES, an error will be thrown.
         await callWithRequest(req, 'delete', {
-          index: RepositoryIndexName(),
+          index: RepositoryIndexName(repoUri),
           type: RepositoryTypeName,
           id: repoUri,
         });
@@ -110,11 +122,11 @@ export function repositoryRoute(
       const { callWithRequest } = req.server.plugins.elasticsearch.getCluster('data');
       try {
         const response = await callWithRequest(req, 'get', {
-          index: RepositoryIndexName(),
+          index: RepositoryIndexName(repoUri),
           type: RepositoryTypeName,
           id: repoUri,
         });
-        const repo: Repository = response.attributes;
+        const repo: Repository = response.attributes.repository;
         reply(repo);
       } catch (error) {
         const msg = `Get repository ${repoUri} error: ${error}`;
@@ -133,17 +145,21 @@ export function repositoryRoute(
       const { callWithRequest } = req.server.plugins.elasticsearch.getCluster('data');
       try {
         const response = await callWithRequest(req, 'search', {
-          index: RepositoryIndexName(),
+          index: `${RepositoryIndexNamePrefix}*`,
           type: RepositoryTypeName,
           body: {
             query: {
-              match_all: {},
+              exists: {
+                field: RepositoryReserviedField,
+              },
             },
           },
+          from: 0,
+          size: 10000,
         });
         const hits: any[] = response.hits.hits;
         const repos: Repository[] = hits.map(hit => {
-          const repo: Repository = hit._source;
+          const repo: Repository = hit._source.repository;
           return repo;
         });
         reply(repos);
