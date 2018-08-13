@@ -35,6 +35,8 @@ home-app {
   bottom: 0;
   z-index: 100000;
   background: inherit;
+  // When sassified, should pull in EUI colors: $euiColorLightestShade, $euiColorEmptyShade
+  background-image: linear-gradient(0deg, @globalColorLightestGray 0%, white 100%);
   color: inherit;
   opacity: 0;
   overflow: auto;
