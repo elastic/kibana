@@ -4,10 +4,10 @@ exports[`after fetch hideWriteControls 1`] = `
 <EuiPage
   className="dshDashboardListing__page"
   data-test-subj="dashboardLandingPage"
-  restrictWidth={false}
+  restrictWidth={true}
 >
   <EuiPageBody
-    restrictWidth={true}
+    restrictWidth={false}
   >
     <EuiPageContent
       horizontalPosition="center"
@@ -34,10 +34,10 @@ exports[`after fetch initialFilter 1`] = `
 <EuiPage
   className="dshDashboardListing__page"
   data-test-subj="dashboardLandingPage"
-  restrictWidth={false}
+  restrictWidth={true}
 >
   <EuiPageBody
-    restrictWidth={true}
+    restrictWidth={false}
   >
     <EuiPageContent
       horizontalPosition="center"
@@ -186,10 +186,10 @@ exports[`after fetch renders call to action when no dashboards exist 1`] = `
 <EuiPage
   className="dshDashboardListing__page"
   data-test-subj="dashboardLandingPage"
-  restrictWidth={false}
+  restrictWidth={true}
 >
   <EuiPageBody
-    restrictWidth={true}
+    restrictWidth={false}
   >
     <EuiPageContent
       horizontalPosition="center"
@@ -246,10 +246,10 @@ exports[`after fetch renders table rows 1`] = `
 <EuiPage
   className="dshDashboardListing__page"
   data-test-subj="dashboardLandingPage"
-  restrictWidth={false}
+  restrictWidth={true}
 >
   <EuiPageBody
-    restrictWidth={true}
+    restrictWidth={false}
   >
     <EuiPageContent
       horizontalPosition="center"
@@ -398,10 +398,10 @@ exports[`after fetch renders warning when listingLimit is exceeded 1`] = `
 <EuiPage
   className="dshDashboardListing__page"
   data-test-subj="dashboardLandingPage"
-  restrictWidth={false}
+  restrictWidth={true}
 >
   <EuiPageBody
-    restrictWidth={true}
+    restrictWidth={false}
   >
     <EuiPageContent
       horizontalPosition="center"
@@ -581,10 +581,10 @@ exports[`renders empty page in before initial fetch to avoid flickering 1`] = `
 <EuiPage
   className="dshDashboardListing__page"
   data-test-subj="dashboardLandingPage"
-  restrictWidth={false}
+  restrictWidth={true}
 >
   <EuiPageBody
-    restrictWidth={true}
+    restrictWidth={false}
   />
 </EuiPage>
 `;

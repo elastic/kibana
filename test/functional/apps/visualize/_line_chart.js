@@ -123,7 +123,7 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.visualize.waitForVisualization();
     });
 
-    describe('switch between Y axis scale types', () => {
+    describe.skip('switch between Y axis scale types', () => {
       before(initLineChart);
       const axisId = 'ValueAxis-1';
 

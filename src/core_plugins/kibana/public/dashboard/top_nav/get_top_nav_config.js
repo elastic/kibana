@@ -48,7 +48,7 @@ export function getTopNavConfig(dashboardMode, actions, hideWriteControls) {
         getSaveConfig(actions[TopNavIds.SAVE]),
         getViewConfig(actions[TopNavIds.EXIT_EDIT_MODE]),
         getAddConfig(actions[TopNavIds.ADD]),
-        getOptionsConfig(),
+        getOptionsConfig(actions[TopNavIds.OPTIONS]),
         getShareConfig()];
     default:
       return [];
@@ -139,11 +139,11 @@ function getShareConfig() {
 /**
  * @returns {kbnTopNavConfig}
  */
-function getOptionsConfig() {
+function getOptionsConfig(action) {
   return {
     key: TopNavIds.OPTIONS,
     description: 'Options',
     testId: 'dashboardOptionsButton',
-    template: require('plugins/kibana/dashboard/top_nav/options.html')
+    run: action,
   };
 }

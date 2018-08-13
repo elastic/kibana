@@ -50,8 +50,8 @@ import {
   DashboardPanelActionsProvider,
   FlyoutProvider,
   ComboBoxProvider,
-  VisualizationProvider,
   EmbeddingProvider,
+  RenderableProvider,
 } from './services';
 
 export default async function ({ readConfigFile }) {
@@ -107,8 +107,8 @@ export default async function ({ readConfigFile }) {
       dashboardPanelActions: DashboardPanelActionsProvider,
       flyout: FlyoutProvider,
       comboBox: ComboBoxProvider,
-      visualization: VisualizationProvider,
       embedding: EmbeddingProvider,
+      renderable: RenderableProvider,
     },
     servers: commonConfig.get('servers'),
 
