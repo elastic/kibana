@@ -77,7 +77,7 @@ export class Home extends Component {
         if (this.state.isLoading) {
           this.setState({ isWelcomeEnabled: false });
         }
-      }, 250);
+      }, 500);
 
       const resp = await this.props.find({
         type: 'index-pattern',
