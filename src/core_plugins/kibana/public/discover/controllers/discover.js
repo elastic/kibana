@@ -328,6 +328,8 @@ function discoverController(
   };
 
   const init = _.once(function () {
+    require('../components/discover_resize')();
+
     stateMonitor = stateMonitorFactory.create($state, getStateDefaults());
     stateMonitor.onChange((status) => {
       $appStatus.dirty = status.dirty || !savedSearch.id;
