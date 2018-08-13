@@ -5,7 +5,7 @@ exports[`NoData should show a default message if reason is unknown 1`] = `
   class="euiPage"
 >
   <div
-    class="euiPageBody"
+    class="euiPageBody euiPageBody--restrictWidth-custom"
     style="max-width:600px"
   >
     <div
@@ -43,7 +43,7 @@ exports[`NoData should show a default message if reason is unknown 1`] = `
         class="euiText"
       >
         <p>
-          There is a
+          There is a 
           <span
             class="euiCodeBlock euiCodeBlock--fontSmall euiCodeBlock--paddingLarge euiCodeBlock--inline"
           >
@@ -53,7 +53,7 @@ exports[`NoData should show a default message if reason is unknown 1`] = `
               food
             </code>
           </span>
-           setting that has
+           setting that has 
           <span
             class="euiCodeBlock euiCodeBlock--fontSmall euiCodeBlock--paddingLarge euiCodeBlock--inline"
           >
@@ -63,7 +63,7 @@ exports[`NoData should show a default message if reason is unknown 1`] = `
               xpack.monitoring.foo.bar
             </code>
           </span>
-           set to
+           set to 
           <span
             class="euiCodeBlock euiCodeBlock--fontSmall euiCodeBlock--paddingLarge euiCodeBlock--inline"
           >
@@ -86,7 +86,7 @@ exports[`NoData should show text next to the spinner while checking a setting 1`
   class="euiPage"
 >
   <div
-    class="euiPageBody"
+    class="euiPageBody euiPageBody--restrictWidth-custom"
     style="max-width:600px"
   >
     <div
