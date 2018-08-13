@@ -20,10 +20,11 @@ import { initPrivilegesApi } from './server/routes/api/v1/privileges';
 import { SecurityAuditLogger } from './server/lib/audit_logger';
 import { AuditLogger } from '../../server/lib/audit_logger';
 import { SecureSavedObjectsClient } from './server/lib/saved_objects_client/secure_saved_objects_client';
-import { initAuthorizationService, registerPrivilegesWithCluster } from './server/lib/authorization';
+import { createAuthorizationService, registerPrivilegesWithCluster } from './server/lib/authorization';
 import { watchStatusAndLicenseToInitialize } from '../../server/lib/watch_status_and_license_to_initialize';
 import { SecureSavedObjectsClientWrapper } from './server/lib/saved_objects_client/secure_saved_objects_client_wrapper';
 import { initRbacAuthScope } from './server/lib/rbac_auth_scope';
+import { deepFreeze } from './server/lib/deep_freeze';
 
 export const security = (kibana) => new kibana.Plugin({
   id: 'security',
@@ -107,8 +108,8 @@ export const security = (kibana) => new kibana.Plugin({
     server.auth.strategy('session', 'login', 'required');
 
     // exposes server.plugins.security.authorization
-    initAuthorizationService(server, xpackInfoFeature);
-    const { authorization } = server.plugins.security;
+    const authorization = createAuthorizationService(server, xpackInfoFeature);
+    server.expose('authorization', deepFreeze(authorization));
 
     watchStatusAndLicenseToInitialize(xpackMainPlugin, plugin, async (license) => {
       if (license.allowRbac) {

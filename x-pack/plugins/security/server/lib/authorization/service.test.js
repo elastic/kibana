@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { initAuthorizationService } from './init';
+import { createAuthorizationService } from './service';
 import { actionsFactory } from './actions';
 import { checkPrivilegesWithRequestFactory } from './check_privileges';
 import { getClient } from '../../../../../server/lib/get_client_shield';
@@ -48,7 +48,7 @@ test(`calls server.expose with exposed services`, () => {
   actionsFactory.mockReturnValue(mockActions);
   mockConfig.get.mock;
 
-  initAuthorizationService(mockServer);
+  createAuthorizationService(mockServer);
 
   const application = `kibana-${kibanaIndex}`;
   expect(getClient).toHaveBeenCalledWith(mockServer);
@@ -73,7 +73,7 @@ test(`deep freezes exposed service`, () => {
     login: 'login',
   });
 
-  initAuthorizationService(mockServer);
+  createAuthorizationService(mockServer);
 
   const exposed = mockServer.expose.mock.calls[0][1];
   expect(() => delete exposed.checkPrivilegesWithRequest).toThrowErrorMatchingSnapshot();
