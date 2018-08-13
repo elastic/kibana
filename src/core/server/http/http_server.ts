@@ -77,9 +77,9 @@ export class HttpServer {
             output: 'stream',
             parse: false,
             timeout: false,
-            // Having such a large value (1 GB) here will allow legacy routes to override
+            // Having such a large value here will allow legacy routes to override
             // maximum allowed payload size set in the core http server if needed.
-            maxBytes: 1024 * 1024 * 1024,
+            maxBytes: Number.MAX_SAFE_INTEGER,
           },
         },
         path: '/{p*}',

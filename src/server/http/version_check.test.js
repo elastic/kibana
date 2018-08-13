@@ -26,8 +26,8 @@ const versionHeader = 'kbn-version';
 const version = require(src('../package.json')).version;
 
 describe('version_check request filter', function () {
-  function makeRequest(kbnServer, opts) {
-    return kbnTestServer.makeRequest(kbnServer, opts);
+  async function makeRequest(kbnServer, opts) {
+    return await kbnTestServer.makeRequest(kbnServer, opts);
   }
 
   async function makeServer() {

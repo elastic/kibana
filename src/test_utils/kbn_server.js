@@ -96,11 +96,11 @@ export function authOptions() {
  * @param {KbnServer} kbnServer
  * @param {object}    options Any additional options or overrides for inject()
  */
-export function makeRequest(kbnServer, options) {
+export async function makeRequest(kbnServer, options) {
   // Since all requests to Kibana hit core http server first and only after that
   // are proxied to the "legacy" Kibana we should inject requests through the top
   // level Hapi server used by the core.
-  return kbnServer.newPlatform.proxyListener.root.server.http.service.httpServer.server.inject(
+  return await kbnServer.newPlatform.proxyListener.root.server.http.service.httpServer.server.inject(
     defaultsDeep({}, authOptions(), options)
   );
 }

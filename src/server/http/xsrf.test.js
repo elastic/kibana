@@ -30,8 +30,8 @@ const whitelistedTestPath = '/xsrf/test/route/whitelisted';
 const actualVersion = require(src('../package.json')).version;
 
 describe('xsrf request filter', function () {
-  function inject(kbnServer, opts) {
-    return kbnTestServer.makeRequest(kbnServer, opts);
+  async function inject(kbnServer, opts) {
+    return await kbnTestServer.makeRequest(kbnServer, opts);
   }
 
   const makeServer = async function () {

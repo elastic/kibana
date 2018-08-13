@@ -37,8 +37,8 @@ async function makeServer({ maxPayloadBytesDefault, maxPayloadBytesRoute }) {
   });
 }
 
-function makeRequest(opts) {
-  return kbnTestServer.makeRequest(kbnServer, opts);
+async function makeRequest(opts) {
+  return await kbnTestServer.makeRequest(kbnServer, opts);
 }
 
 afterEach(async () => await kbnServer.close());
