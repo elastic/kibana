@@ -12,6 +12,7 @@ import { ControlDefinitions } from './table_type_configs';
 interface AssignmentOptionsProps {
   assignmentOptions: any[] | null;
   assignmentTitle: string | null;
+  renderAssignmentOptions?: (item: any) => any;
   controlDefinitions: ControlDefinitions;
   selectionCount: number;
   actionHandler(action: string, payload?: any): void;
@@ -39,6 +40,7 @@ export class AssignmentOptions extends React.Component<
     const {
       actionHandler,
       assignmentOptions,
+      renderAssignmentOptions,
       assignmentTitle,
       controlDefinitions: { actions },
       selectionCount,
@@ -85,10 +87,10 @@ export class AssignmentOptions extends React.Component<
             panelPaddingSize="s"
             withTitle
           >
-            {assignmentOptions ? (
+            {assignmentOptions && renderAssignmentOptions ? (
               // @ts-ignore direction prop not available on current typing
               <EuiFlexGroup direction="column" gutterSize="xs">
-                {assignmentOptions}
+                {assignmentOptions.map(options => renderAssignmentOptions(options))}
               </EuiFlexGroup>
             ) : (
               <div>

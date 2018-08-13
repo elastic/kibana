@@ -7,12 +7,12 @@
 import { IModule, IScope } from 'angular';
 import { AxiosRequestConfig } from 'axios';
 import React from 'react';
-import { CMBeatsAdapter } from './adapters/beats/adapter_types';
 import { CMTagsAdapter } from './adapters/tags/adapter_types';
 import { CMTokensAdapter } from './adapters/tokens/adapter_types';
+import { BeatsLib } from './domains/beats';
 
 export interface FrontendDomainLibs {
-  beats: CMBeatsAdapter;
+  beats: BeatsLib;
   tags: CMTagsAdapter;
   tokens: CMTokensAdapter;
 }

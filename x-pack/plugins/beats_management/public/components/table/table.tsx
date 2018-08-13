@@ -18,6 +18,7 @@ import { TableType } from './table_type_configs';
 interface BeatsTableProps {
   assignmentOptions: any[] | null;
   assignmentTitle: string | null;
+  renderAssignmentOptions?: (item: any) => any;
   items: any[];
   showAssignmentOptions: boolean;
   type: TableType;
@@ -49,6 +50,7 @@ export class Table extends React.Component<BeatsTableProps, BeatsTableState> {
     const {
       actionHandler,
       assignmentOptions,
+      renderAssignmentOptions,
       assignmentTitle,
       items,
       showAssignmentOptions,
@@ -72,6 +74,7 @@ export class Table extends React.Component<BeatsTableProps, BeatsTableState> {
         <ControlBar
           actionHandler={(action: string, payload: any) => actionHandler(action, payload)}
           assignmentOptions={assignmentOptions}
+          renderAssignmentOptions={renderAssignmentOptions}
           assignmentTitle={assignmentTitle}
           controlDefinitions={type.controlDefinitions(items)}
           selectionCount={this.state.selection.length}
