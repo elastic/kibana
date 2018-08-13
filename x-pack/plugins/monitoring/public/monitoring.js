@@ -8,7 +8,6 @@ import moment from 'moment-timezone';
 import uiRoutes from 'ui/routes';
 import chrome from 'ui/chrome';
 import 'ui/autoload/all';
-import 'plugins/monitoring/less/main.less';
 import 'plugins/monitoring/filters';
 import 'plugins/monitoring/services/clusters';
 import 'plugins/monitoring/services/features';

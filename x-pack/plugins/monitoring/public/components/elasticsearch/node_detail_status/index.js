@@ -67,7 +67,7 @@ export function NodeDetailStatus({ stats }) {
 
   const IconComponent = ({ status, isOnline }) => (
     <Fragment>
-      Status: <NodeStatusIcon status={status} isOnline={isOnline} />
+      <NodeStatusIcon status={status} isOnline={isOnline} />
     </Fragment>
   );
 
