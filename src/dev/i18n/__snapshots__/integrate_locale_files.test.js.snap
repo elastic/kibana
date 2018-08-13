@@ -1,0 +1,138 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`dev/i18n/check_locale_files integrateLocaleFiles splits locale file by plugins and moves it to plugins folders 1`] = `
+"{
+  formats: {
+    number: {
+      currency: {
+        style: 'currency',
+      },
+      percent: {
+        style: 'percent',
+      },
+    },
+    date: {
+      short: {
+        month: 'numeric',
+        day: 'numeric',
+        year: '2-digit',
+      },
+      medium: {
+        month: 'short',
+        day: 'numeric',
+        year: 'numeric',
+      },
+      long: {
+        month: 'long',
+        day: 'numeric',
+        year: 'numeric',
+      },
+      full: {
+        weekday: 'long',
+        month: 'long',
+        day: 'numeric',
+        year: 'numeric',
+      },
+    },
+    time: {
+      short: {
+        hour: 'numeric',
+        minute: 'numeric',
+      },
+      medium: {
+        hour: 'numeric',
+        minute: 'numeric',
+        second: 'numeric',
+      },
+      long: {
+        hour: 'numeric',
+        minute: 'numeric',
+        second: 'numeric',
+        timeZoneName: 'short',
+      },
+      full: {
+        hour: 'numeric',
+        minute: 'numeric',
+        second: 'numeric',
+        timeZoneName: 'short',
+      },
+    },
+  },
+  'plugin-1.message-id-1': 'Translated text 1',
+  'plugin-1.message-id-2': 'Translated text 2',
+}"
+`;
+
+exports[`dev/i18n/check_locale_files integrateLocaleFiles splits locale file by plugins and moves it to plugins folders 2`] = `
+"{
+  formats: {
+    number: {
+      currency: {
+        style: 'currency',
+      },
+      percent: {
+        style: 'percent',
+      },
+    },
+    date: {
+      short: {
+        month: 'numeric',
+        day: 'numeric',
+        year: '2-digit',
+      },
+      medium: {
+        month: 'short',
+        day: 'numeric',
+        year: 'numeric',
+      },
+      long: {
+        month: 'long',
+        day: 'numeric',
+        year: 'numeric',
+      },
+      full: {
+        weekday: 'long',
+        month: 'long',
+        day: 'numeric',
+        year: 'numeric',
+      },
+    },
+    time: {
+      short: {
+        hour: 'numeric',
+        minute: 'numeric',
+      },
+      medium: {
+        hour: 'numeric',
+        minute: 'numeric',
+        second: 'numeric',
+      },
+      long: {
+        hour: 'numeric',
+        minute: 'numeric',
+        second: 'numeric',
+        timeZoneName: 'short',
+      },
+      full: {
+        hour: 'numeric',
+        minute: 'numeric',
+        second: 'numeric',
+        timeZoneName: 'short',
+      },
+    },
+  },
+  'plugin-2.message-id': 'Translated text',
+}"
+`;
+
+exports[`dev/i18n/check_locale_files verifyMessages throws an error for unused id and missing id 1`] = `
+"
+Missing translations:
+plugin-1.message-id-2"
+`;
+
+exports[`dev/i18n/check_locale_files verifyMessages throws an error for unused id and missing id 2`] = `
+"
+Unused translations:
+plugin-1.message-id-3"
+`;

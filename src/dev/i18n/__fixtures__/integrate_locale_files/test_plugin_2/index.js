@@ -17,32 +17,6 @@
  * under the License.
  */
 
-import { parse } from '@babel/parser';
-import { isObjectExpression } from '@babel/types';
+import { i18n } from '@kbn/i18n';
 
-import { traverseNodes } from './utils';
-
-export function verifyJSON(json) {
-  const jsonAST = parse(`+${json}`);
-
-  for (const node of traverseNodes(jsonAST.program.body)) {
-    if (!isObjectExpression(node)) {
-      continue;
-    }
-
-    if (!node.properties.some(prop => prop.key.name === 'formats')) {
-      throw 'Locale file should contain formats object.';
-    }
-
-    const idsSet = new Set();
-    for (const id of node.properties.map(prop => prop.key.value)) {
-      if (idsSet.has(id)) {
-        throw `Ids collision: ${id}`;
-      }
-
-      idsSet.add(id);
-    }
-
-    break;
-  }
-}
+i18n.translate('plugin-2.message-id', { defaultMessage: 'Message text' });

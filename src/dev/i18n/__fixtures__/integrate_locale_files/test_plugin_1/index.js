@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { run } from './run';
-import { checkLocaleFiles } from './i18n/check_locale_files';
+import { i18n } from '@kbn/i18n';
 
-run(() => checkLocaleFiles(process.argv.slice(2)));
+i18n.translate('plugin-1.message-id-1', { defaultMessage: 'Message text 1' });
+i18n.translate('plugin-1.message-id-2', { defaultMessage: 'Message text 2' });

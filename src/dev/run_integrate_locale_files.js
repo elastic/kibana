@@ -17,32 +17,20 @@
  * under the License.
  */
 
-import { parse } from '@babel/parser';
-import { isObjectExpression } from '@babel/types';
+import yargs from 'yargs';
 
-import { traverseNodes } from './utils';
+import { run } from './run';
+import { integrateLocaleFiles } from './i18n/integrate_locale_files';
+import { getDefaultMessagesMap } from './i18n/extract_default_translations';
 
-export function verifyJSON(json) {
-  const jsonAST = parse(`+${json}`);
+run(async () => {
+  const { argv } = yargs.option('path', {
+    demandOption: true,
+    describe: 'Path to locale files directory',
+    type: 'string',
+  });
 
-  for (const node of traverseNodes(jsonAST.program.body)) {
-    if (!isObjectExpression(node)) {
-      continue;
-    }
+  const defaultMessagesMap = await getDefaultMessagesMap(['.']);
 
-    if (!node.properties.some(prop => prop.key.name === 'formats')) {
-      throw 'Locale file should contain formats object.';
-    }
-
-    const idsSet = new Set();
-    for (const id of node.properties.map(prop => prop.key.value)) {
-      if (idsSet.has(id)) {
-        throw `Ids collision: ${id}`;
-      }
-
-      idsSet.add(id);
-    }
-
-    break;
-  }
-}
+  await integrateLocaleFiles(argv.path, defaultMessagesMap);
+});

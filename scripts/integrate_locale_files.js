@@ -18,4 +18,4 @@
  */
 
 require('../src/setup_node_env');
-require('../src/dev/run_check_locale_files');
+require('../src/dev/run_integrate_locale_files');
