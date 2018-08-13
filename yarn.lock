@@ -14159,14 +14159,7 @@ wrappy@1:
   version "1.0.2"
   resolved "https://registry.yarnpkg.com/wrappy/-/wrappy-1.0.2.tgz#b5243d8f3ec1aa35f1364605bc0d1036e30ab69f"
 
-wreck@12.4.0:
-  version "12.4.0"
-  resolved "https://registry.yarnpkg.com/wreck/-/wreck-12.4.0.tgz#bd931e1de059f1390f6c67bc29b91053cc479d3f"
-  dependencies:
-    boom "5.x.x"
-    hoek "4.x.x"
-
-wreck@14.x.x:
+wreck@14.0.2, wreck@14.x.x:
   version "14.0.2"
   resolved "https://registry.yarnpkg.com/wreck/-/wreck-14.0.2.tgz#89c17a9061c745ed1c3aebcb66ea181dbaab454c"
   dependencies:
