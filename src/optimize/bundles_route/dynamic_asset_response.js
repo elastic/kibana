@@ -54,10 +54,10 @@ import { replacePlaceholder } from '../public_path_placeholder';
 export async function createDynamicAssetResponse(options) {
   const {
     request,
+    h,
     bundlesPath,
     publicPath,
     fileHashCache,
-    h
   } = options;
 
   let fd;

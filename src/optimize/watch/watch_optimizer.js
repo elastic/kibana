@@ -64,7 +64,7 @@ export default class WatchOptimizer extends BaseOptimizer {
     // and continue once an outcome is reached (aborting the request
     // with an error if it was a failure).
     server.ext('onRequest', (request, h) => {
-      this.onceBuildOutcome()
+      return this.onceBuildOutcome()
         .then(() => h.continue);
     });
 
