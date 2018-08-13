@@ -211,6 +211,9 @@ export const phaseToES = (state, phase) => {
         _name: phase[PHASE_NODE_ATTRS]
       }
     };
+    if (isNumber(phase[PHASE_REPLICA_COUNT])) {
+      esPhase.actions.allocate.number_of_replicas = phase[PHASE_REPLICA_COUNT];
+    }
   }
 
   if (phase[PHASE_FORCE_MERGE_ENABLED]) {
@@ -224,12 +227,5 @@ export const phaseToES = (state, phase) => {
       number_of_shards: phase[PHASE_PRIMARY_SHARD_COUNT]
     };
   }
-
-  if (isNumber(phase[PHASE_REPLICA_COUNT])) {
-    esPhase.actions.replicas = {
-      number_of_replicas: phase[PHASE_REPLICA_COUNT]
-    };
-  }
-
   return esPhase;
 };
