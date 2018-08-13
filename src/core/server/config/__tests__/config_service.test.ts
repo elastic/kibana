@@ -18,7 +18,8 @@
  */
 
 /* tslint:disable max-classes-per-file */
-import { BehaviorSubject, first, k$, toPromise } from '../../../lib/kbn_observable';
+import { BehaviorSubject, from } from 'rxjs';
+import { first } from 'rxjs/operators';
 import { schema, Type, TypeOf } from '../schema';
 
 import { ConfigService, ObjectToRawConfigAdapter } from '..';
@@ -34,7 +35,9 @@ test('returns config at path as observable', async () => {
   const configService = new ConfigService(config$, defaultEnv, logger);
 
   const configs = configService.atPath('key', ExampleClassWithStringSchema);
-  const exampleConfig = await k$(configs)(first(), toPromise());
+  const exampleConfig = await from(configs)
+    .pipe(first())
+    .toPromise();
 
   expect(exampleConfig.value).toBe('foo');
 });
@@ -48,7 +51,9 @@ test('throws if config at path does not match schema', async () => {
   const configs = configService.atPath('key', ExampleClassWithStringSchema);
 
   try {
-    await k$(configs)(first(), toPromise());
+    await from(configs)
+      .pipe(first())
+      .toPromise();
   } catch (e) {
     expect(e.message).toMatchSnapshot();
   }
@@ -59,7 +64,9 @@ test("returns undefined if fetching optional config at a path that doesn't exist
   const configService = new ConfigService(config$, defaultEnv, logger);
 
   const configs = configService.optionalAtPath('unique-name', ExampleClassWithStringSchema);
-  const exampleConfig = await k$(configs)(first(), toPromise());
+  const exampleConfig = await from(configs)
+    .pipe(first())
+    .toPromise();
 
   expect(exampleConfig).toBeUndefined();
 });
@@ -69,7 +76,9 @@ test('returns observable config at optional path if it exists', async () => {
   const configService = new ConfigService(config$, defaultEnv, logger);
 
   const configs = configService.optionalAtPath('value', ExampleClassWithStringSchema);
-  const exampleConfig: any = await k$(configs)(first(), toPromise());
+  const exampleConfig: any = await from(configs)
+    .pipe(first())
+    .toPromise();
 
   expect(exampleConfig).toBeDefined();
   expect(exampleConfig.value).toBe('bar');
@@ -114,7 +123,9 @@ test("throws error if config class does not implement 'schema'", async () => {
   const configs = configService.atPath('key', ExampleClass as any);
 
   try {
-    await k$(configs)(first(), toPromise());
+    await from(configs)
+      .pipe(first())
+      .toPromise();
   } catch (e) {
     expect(e).toMatchSnapshot();
   }
@@ -198,7 +209,11 @@ test('correctly passes context', async () => {
     )
   );
 
-  expect(await k$(configs)(first(), toPromise())).toMatchSnapshot();
+  expect(
+    await from(configs)
+      .pipe(first())
+      .toPromise()
+  ).toMatchSnapshot();
 });
 
 test('handles enabled path, but only marks the enabled path as used', async () => {

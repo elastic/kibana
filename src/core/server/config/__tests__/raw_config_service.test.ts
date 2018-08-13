@@ -23,7 +23,8 @@ jest.mock('../read_config', () => ({
   getConfigFromFile: mockGetConfigFromFile,
 }));
 
-import { first, k$, toPromise } from '../../../lib/kbn_observable';
+import { from } from 'rxjs';
+import { first } from 'rxjs/operators';
 import { RawConfigService } from '../raw_config_service';
 
 const configFile = '/config/kibana.yml';
@@ -63,7 +64,9 @@ test('returns config at path as observable', async () => {
 
   configService.loadConfig();
 
-  const exampleConfig = await k$(configService.getConfig$())(first(), toPromise());
+  const exampleConfig = await from(configService.getConfig$())
+    .pipe(first())
+    .toPromise();
 
   expect(exampleConfig.get('key')).toEqual('value');
   expect(exampleConfig.getFlattenedPaths()).toEqual(['key']);

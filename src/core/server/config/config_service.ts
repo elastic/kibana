@@ -18,7 +18,8 @@
  */
 
 import { isEqual } from 'lodash';
-import { first, k$, map, Observable, skipRepeats, toPromise } from '../../lib/kbn_observable';
+import { from, Observable } from 'rxjs';
+import { first, map, skipWhile } from 'rxjs/operators';
 
 import { Logger, LoggerFactory } from '../logging';
 import { ConfigWithSchema } from './config_with_schema';
@@ -65,7 +66,7 @@ export class ConfigService {
     path: ConfigPath,
     ConfigClass: ConfigWithSchema<Schema, Config>
   ) {
-    return k$(this.getDistinctRawConfig(path))(
+    return from(this.getDistinctRawConfig(path)).pipe(
       map(rawConfig => this.createConfig(path, rawConfig, ConfigClass))
     );
   }
@@ -80,7 +81,7 @@ export class ConfigService {
     path: ConfigPath,
     ConfigClass: ConfigWithSchema<Schema, Config>
   ) {
-    return k$(this.getDistinctRawConfig(path))(
+    return from(this.getDistinctRawConfig(path)).pipe(
       map(
         rawConfig =>
           rawConfig === undefined ? undefined : this.createConfig(path, rawConfig, ConfigClass)
@@ -91,7 +92,9 @@ export class ConfigService {
   public async isEnabledAtPath(path: ConfigPath) {
     const enabledPath = createPluginEnabledPath(path);
 
-    const config = await k$(this.config$)(first(), toPromise());
+    const config = await from(this.config$)
+      .pipe(first())
+      .toPromise();
 
     if (!config.has(enabledPath)) {
       return true;
@@ -114,7 +117,9 @@ export class ConfigService {
   }
 
   public async getUnusedPaths(): Promise<string[]> {
-    const config = await k$(this.config$)(first(), toPromise());
+    const config = await from(this.config$)
+      .pipe(first())
+      .toPromise();
     const handledPaths = this.handledPaths.map(pathToString);
 
     return config.getFlattenedPaths().filter(path => !isPathHandled(path, handledPaths));
@@ -153,7 +158,10 @@ export class ConfigService {
   private getDistinctRawConfig(path: ConfigPath) {
     this.markAsHandled(path);
 
-    return k$(this.config$)(map(config => config.get(path)), skipRepeats(isEqual));
+    return from(this.config$).pipe(
+      map(config => config.get(path)),
+      skipWhile(isEqual)
+    );
   }
 
   private markAsHandled(path: ConfigPath) {

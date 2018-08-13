@@ -18,22 +18,16 @@
  */
 
 import { isEqual, isPlainObject } from 'lodash';
+import { BehaviorSubject, from, Observable } from 'rxjs';
+import { filter, map, skipWhile } from 'rxjs/operators';
 import typeDetect from 'type-detect';
-import {
-  BehaviorSubject,
-  filter,
-  k$,
-  map,
-  Observable,
-  skipRepeats,
-} from '../../lib/kbn_observable';
 
 import { ObjectToRawConfigAdapter } from './object_to_raw_config_adapter';
 import { RawConfig } from './raw_config';
 import { getConfigFromFile } from './read_config';
 
 // Used to indicate that no config has been received yet
-const notRead = Symbol('config not yet read');
+const notRead: symbol = Symbol('config not yet read');
 
 export class RawConfigService {
   /**
@@ -46,12 +40,12 @@ export class RawConfigService {
    * As we have a notion of a _current_ config we rely on a BehaviorSubject so
    * every new subscription will immediately receive the current config.
    */
-  private readonly rawConfigFromFile$: BehaviorSubject<any> = new BehaviorSubject(notRead);
+  private readonly rawConfigFromFile$: BehaviorSubject<symbol> = new BehaviorSubject(notRead);
 
   private readonly config$: Observable<RawConfig>;
 
   constructor(readonly configFile: string) {
-    this.config$ = k$(this.rawConfigFromFile$)(
+    this.config$ = from(this.rawConfigFromFile$).pipe(
       filter(rawConfig => rawConfig !== notRead),
       map(rawConfig => {
         // If the raw config is null, e.g. if empty config file, we default to
@@ -68,7 +62,7 @@ export class RawConfigService {
         throw new Error(`the raw config must be an object, got [${typeDetect(rawConfig)}]`);
       }),
       // We only want to update the config if there are changes to it
-      skipRepeats(isEqual)
+      skipWhile(isEqual)
     );
   }
 
