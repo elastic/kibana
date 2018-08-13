@@ -325,7 +325,7 @@
     "sinon": "^5.0.7",
     "source-map": "0.5.6",
     "source-map-support": "0.2.10",
-    "static-fs": "git+https://git@github.com/mistic/static-fs.git",
+    "static-fs": "git+https://git@github.com/mistic/static-fs.git#e034fc0",
     "strip-ansi": "^3.0.1",
     "supertest": "3.0.0",
     "supertest-as-promised": "4.0.2",

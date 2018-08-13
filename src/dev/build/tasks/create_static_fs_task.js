@@ -19,8 +19,8 @@
 
 import { deleteAll } from '../lib';
 import { dirname, relative } from 'path';
-import { StaticFilesystemCreator } from 'static-link/dist/main';
-import { calculateHash, isFile, mkdir, writeFile, copyFile, readFile } from 'static-link/dist/lib/common';
+import { StaticFilesystemCreator } from 'static-fs/dist/main';
+import { calculateHash, isFile, mkdir, writeFile, copyFile, readFile } from 'static-fs/dist/lib/common';
 
 export const CreateStaticFilesystem = {
   description:
