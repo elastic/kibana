@@ -9,7 +9,7 @@ import { HashRouter, Redirect, Route, Switch } from 'react-router-dom';
 
 import { BeatDetailsPage } from './pages/beat';
 import { MainPages } from './pages/main';
-import { TagPage } from './pages/tag/index';
+import { TagPage } from './pages/tag';
 
 export const PageRouter: React.SFC<{ libs: any }> = ({ libs }) => {
   return (

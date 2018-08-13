@@ -12,7 +12,6 @@ import {
 import React from 'react';
 import styled from 'styled-components';
 import { TABLE_CONFIG } from '../../../common/constants';
-import { CMPopulatedBeat } from '../../../common/domain_types';
 import { ControlBar } from './controls';
 import { TableType } from './table_type_configs';
 
@@ -26,7 +25,7 @@ interface BeatsTableProps {
 }
 
 interface BeatsTableState {
-  selection: CMPopulatedBeat[];
+  selection: any[];
 }
 
 const TableContainer = styled.div`
@@ -41,6 +40,10 @@ export class Table extends React.Component<BeatsTableProps, BeatsTableState> {
       selection: [],
     };
   }
+
+  public resetSelection = () => {
+    this.setSelection([]);
+  };
 
   public render() {
     const {
@@ -88,7 +91,7 @@ export class Table extends React.Component<BeatsTableProps, BeatsTableState> {
     );
   }
 
-  private setSelection = (selection: any) => {
+  private setSelection = (selection: any[]) => {
     this.setState({
       selection,
     });
