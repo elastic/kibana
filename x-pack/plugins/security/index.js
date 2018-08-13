@@ -164,7 +164,7 @@ export const security = (kibana) => new kibana.Plugin({
     getUserProvider(server);
 
     await initAuthenticator(server);
-    initRbacAuthScope(server, xpackInfoFeature);
+    initRbacAuthScope(server, authorization);
     initAuthenticateApi(server);
     initUsersApi(server);
     initPublicRolesApi(server);

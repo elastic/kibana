@@ -6,6 +6,7 @@
 
 import { actionsFactory } from './actions';
 import { CHECK_PRIVILEGES_RESULT, checkPrivilegesWithRequestFactory } from './check_privileges';
+import { checkPrivilegesAtAllResourcesWithRequestFactory } from './check_privileges_at_all_resources';
 import { getClient } from '../../../../../server/lib/get_client_shield';
 import { RBAC_AUTH_SCOPE } from '../../../common/constants';
 
@@ -16,11 +17,18 @@ export function createAuthorizationService(server, xpackInfoFeature) {
   const actions = actionsFactory(config);
   const application = `kibana-${config.get('kibana.index')}`;
   const checkPrivilegesWithRequest = checkPrivilegesWithRequestFactory(shieldClient, config, actions, application);
+  const checkPrivilegesAtAllResourcesWithRequest = checkPrivilegesAtAllResourcesWithRequestFactory(
+    checkPrivilegesWithRequest,
+    server.plugins.elasticsearch,
+    server.savedObjects,
+    server.plugins.spaces,
+  );
 
   return {
     actions,
     application,
     checkPrivilegesWithRequest,
+    checkPrivilegesAtAllResourcesWithRequest,
     CHECK_PRIVILEGES_RESULT,
     isRbacEnabled() {
       return xpackInfoFeature.getLicenseCheckResults().allowRbac;
