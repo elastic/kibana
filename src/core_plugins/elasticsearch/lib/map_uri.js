@@ -27,7 +27,7 @@ export default function mapUri(cluster, proxyPrefix) {
     return trimRight(pathA, '/') + '/' + trimLeft(pathB, '/');
   }
 
-  return function (request, done) {
+  return function (request) {
     const {
       protocol: esUrlProtocol,
       slashes: esUrlHasSlashes,
@@ -60,6 +60,6 @@ export default function mapUri(cluster, proxyPrefix) {
     const filteredHeaders = filterHeaders(request.headers, cluster.getRequestHeadersWhitelist());
     const mappedHeaders = setHeaders(filteredHeaders, cluster.getCustomHeaders());
     const mappedUrl = formatUrl(mappedUrlComponents);
-    done(null, mappedUrl, mappedHeaders);
+    return { uri: mappedUrl, headers: mappedHeaders };
   };
 }

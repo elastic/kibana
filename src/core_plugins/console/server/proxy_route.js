@@ -74,11 +74,7 @@ export const createProxyRoute = ({
 
     pre: [
       function filterPath(req) {
-        const { error, value: { path } } = req.query;
-
-        if (error) {
-          return Boom.badRequest(error);
-        }
+        const { path } = req.query;
 
         if (!pathFilters.some(re => re.test(path))) {
           const err = Boom.forbidden();
@@ -93,7 +89,7 @@ export const createProxyRoute = ({
 
     handler: async (req, h) => {
       const { payload, query } = req;
-      const { path, method } = query.value;
+      const { path, method } = query;
       const uri = resolveUri(baseUrl, path);
 
       const {

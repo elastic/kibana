@@ -63,26 +63,21 @@ export default async function (kbnServer, server, config) {
         maxBytes: config.get('server.maxPayloadBytes'),
       },
       validate: {
-        options: {
-          failAction: defaultValidationErrorHandler,
-          abortEarly: false,
-        },
+        failAction: defaultValidationErrorHandler,
       },
+      response: {
+        options: {
+          abortEarly: false,
+        }
+      }
     },
   });
 
   server = kbnServer.server;
 
-  server.register({
-    plugin: require('hapi-compat'),
-    options: {
-      server
-    }
-  });
-
   const shortUrlLookup = shortUrlLookupProvider(server);
 
-  registerHapiPlugins(server);
+  await registerHapiPlugins(server);
 
   // provide a simple way to expose static directories
   server.decorate('server', 'exposeStaticDir', function (routePath, dirPath) {
