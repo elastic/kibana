@@ -21,13 +21,16 @@ import expect from 'expect.js';
 
 export default function ({ getService, getPageObjects }) {
   const retry = getService('retry');
-  const remote = getService('remote');
   const dashboardPanelActions = getService('dashboardPanelActions');
-  const PageObjects = getPageObjects(['dashboard', 'common']);
+  const PageObjects = getPageObjects(['dashboard', 'common', 'header']);
 
   describe('full screen mode', async () => {
     before(async () => {
       await PageObjects.dashboard.loadSavedDashboard('few panels');
+
+      const fromTime = '2018-04-09 21:56:08.000';
+      const toTime = '2018-04-11 21:56:08.000';
+      await PageObjects.header.setAbsoluteRange(fromTime, toTime);
     });
 
     it('option not available in edit mode', async () => {
@@ -37,7 +40,7 @@ export default function ({ getService, getPageObjects }) {
     });
 
     it('available in view mode', async () => {
-      await PageObjects.dashboard.saveDashboard('full screen test', { saveAsNew: true });
+      await PageObjects.dashboard.saveDashboardAndVerify('full screen test', { saveAsNew: true });
       const exists = await PageObjects.dashboard.fullScreenModeMenuItemExists();
       expect(exists).to.be(true);
     });
@@ -55,21 +58,23 @@ export default function ({ getService, getPageObjects }) {
     });
 
     it('displays exit full screen logo button', async () => {
-      const exists = await PageObjects.dashboard.exitFullScreenLogoButtonExists();
+      const exists = await PageObjects.dashboard.exitFullScreenButtonExists();
       expect(exists).to.be(true);
     });
 
     it('displays exit full screen logo button when panel is expanded', async () => {
       await dashboardPanelActions.toggleExpandPanel();
 
-      const exists = await PageObjects.dashboard.exitFullScreenTextButtonExists();
+      const exists = await PageObjects.dashboard.exitFullScreenButtonExists();
       expect(exists).to.be(true);
     });
 
-    it('exits when the text button is clicked on', async () => {
-      const logoButton = await PageObjects.dashboard.getExitFullScreenLogoButton();
-      await remote.moveMouseTo(logoButton);
-      await PageObjects.dashboard.clickExitFullScreenTextButton();
+    it('exits when the full screen logo button is clicked on', async () => {
+      await retry.try(async () => {
+        await PageObjects.dashboard.exitFullScreenButtonExists();
+      });
+
+      await PageObjects.dashboard.clickExitFullScreenButton();
 
       await retry.try(async () => {
         const isChromeVisible = await PageObjects.common.isChromeVisible();

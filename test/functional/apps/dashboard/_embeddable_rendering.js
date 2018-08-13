@@ -32,7 +32,7 @@ export default function ({ getService, getPageObjects }) {
   const remote = getService('remote');
   const dashboardExpect = getService('dashboardExpect');
   const dashboardAddPanel = getService('dashboardAddPanel');
-  const PageObjects = getPageObjects(['common', 'dashboard', 'header', 'visualize', 'discover']);
+  const PageObjects = getPageObjects(['dashboard', 'header', 'visualize', 'discover']);
 
   const expectAllDataRenders = async () => {
     await dashboardExpect.pieSliceCount(16);
@@ -114,7 +114,13 @@ export default function ({ getService, getPageObjects }) {
       const panelCount = await PageObjects.dashboard.getPanelCount();
       expect(panelCount).to.be(28);
 
-      await PageObjects.dashboard.saveDashboard('embeddable rendering test', { storeTimeWithDashboard: true });
+      // Saving a dashboard causes the panels to refresh, which can be heavy on the browser.
+      // If the re-render takes too long, then the toast might disappear before selenium
+      // gets a chance to interact with it. This can cause flakiness, so we'll just ignore the
+      // success toast this time.
+      await PageObjects.dashboard.saveDashboard('embeddable rendering test', {
+        storeTimeWithDashboard: true,
+      });
     });
 
     it('initial render test', async () => {

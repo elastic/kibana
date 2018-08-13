@@ -16,11 +16,12 @@ const mkdirAsync = promisify(mkdirp);
 const REPORTS_FOLDER = path.resolve(__dirname, 'reports');
 
 export default function ({ getService, getPageObjects }) {
+  const PageObjects = getPageObjects(['reporting', 'common', 'dashboard', 'header', 'discover', 'visualize']);
   const retry = getService('retry');
   const kibanaServer = getService('kibanaServer');
   const config = getService('config');
-  const PageObjects = getPageObjects(['reporting', 'common', 'dashboard', 'header', 'discover', 'visualize']);
   const log = getService('log');
+  const toasts = getService('toasts');
 
   describe('Reporting', () => {
 
@@ -48,8 +49,7 @@ export default function ({ getService, getPageObjects }) {
 
     const expectReportCanBeCreated = async () => {
       await PageObjects.reporting.clickGenerateReportButton();
-      const success = await PageObjects.reporting.checkForReportingToasts();
-      expect(success).to.be(true);
+      await toasts.verifyAndDismiss('completeReportSuccess');
     };
 
     const writeSessionReport = async (name, rawPdf) => {
@@ -74,7 +74,7 @@ export default function ({ getService, getPageObjects }) {
         });
 
         it('becomes available when saved', async () => {
-          await PageObjects.dashboard.saveDashboard('mydash');
+          await PageObjects.dashboard.saveDashboardAndVerify('mydash');
           await expectEnabledGenerateReportButton();
         });
       });
@@ -97,7 +97,7 @@ export default function ({ getService, getPageObjects }) {
           visualizations.splice(tileMapIndex, 1);
           await PageObjects.dashboard.addVisualizations(visualizations);
 
-          await PageObjects.dashboard.saveDashboard('report test');
+          await PageObjects.dashboard.saveDashboardAndVerify('report test');
 
           await PageObjects.reporting.openReportingPanel();
           await PageObjects.reporting.clickGenerateReportButton();
@@ -126,7 +126,7 @@ export default function ({ getService, getPageObjects }) {
 
           await PageObjects.dashboard.clickEdit();
           await PageObjects.dashboard.useMargins(true);
-          await PageObjects.dashboard.saveDashboard('report test');
+          await PageObjects.dashboard.saveDashboardAndVerify('report test');
           await PageObjects.reporting.openReportingPanel();
           await PageObjects.reporting.clickGenerateReportButton();
           await PageObjects.reporting.clickDownloadReportButton(60000);
@@ -224,7 +224,7 @@ export default function ({ getService, getPageObjects }) {
           await PageObjects.visualize.clickBucket('X-Axis');
           await PageObjects.visualize.selectAggregation('Date Histogram');
           await PageObjects.visualize.clickGo();
-          await PageObjects.visualize.saveVisualization('my viz');
+          await PageObjects.visualize.saveVisualizationAndVerify('my viz');
           await expectEnabledGenerateReportButton();
         });
 

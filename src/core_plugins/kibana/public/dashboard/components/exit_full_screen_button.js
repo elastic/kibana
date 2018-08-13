@@ -64,9 +64,10 @@ export class ExitFullScreenButton extends PureComponent {
             aria-label="Exit full screen mode"
             className="exitFullScreenMode"
             onClick={this.props.onExitFullScreenMode}
+            data-test-subj="exitFullScreenModeButton"
           >
-            <span className="exitFullScreenModeLogo" data-test-subj="exitFullScreenModeLogo"/>
-            <span className="exitFullScreenModeText" data-test-subj="exitFullScreenModeText">
+            <span className="exitFullScreenModeLogo" />
+            <span className="exitFullScreenModeText">
               Exit full screen
               <span className="kuiIcon fa fa-angle-left"/>
             </span>

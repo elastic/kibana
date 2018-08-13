@@ -34,6 +34,7 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
   const kibanaServer = getService('kibanaServer');
   const testSubjects = getService('testSubjects');
   const dashboardAddPanel = getService('dashboardAddPanel');
+  const toasts = getService('toasts');
   const renderable = getService('renderable');
   const PageObjects = getPageObjects(['common', 'header', 'settings', 'visualize']);
 
@@ -83,28 +84,16 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
       return await testSubjects.exists('dashboardFullScreenMode');
     }
 
-    async exitFullScreenTextButtonExists() {
-      return await testSubjects.exists('exitFullScreenModeText');
+    async exitFullScreenButtonExists() {
+      return await testSubjects.exists('exitFullScreenModeButton');
     }
 
-    async getExitFullScreenTextButton() {
-      return await testSubjects.find('exitFullScreenModeText');
+    async getExitFullScreenButton() {
+      return await testSubjects.find('exitFullScreenModeButton');
     }
 
-    async exitFullScreenLogoButtonExists() {
-      return await testSubjects.exists('exitFullScreenModeLogo');
-    }
-
-    async getExitFullScreenLogoButton() {
-      return await testSubjects.find('exitFullScreenModeLogo');
-    }
-
-    async clickExitFullScreenLogoButton() {
-      await testSubjects.click('exitFullScreenModeLogo');
-    }
-
-    async clickExitFullScreenTextButton() {
-      await testSubjects.click('exitFullScreenModeText');
+    async clickExitFullScreenButton() {
+      await testSubjects.click('exitFullScreenModeButton');
     }
 
     async getDashboardIdFromCurrentUrl() {
@@ -287,22 +276,24 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
       await testSubjects.setValue('dashboardTitle', dashName);
     }
 
-    /**
-     *
-     * @param dashName {String}
-     * @param saveOptions {{storeTimeWithDashboard: boolean, saveAsNew: boolean, needsConfirm: false}}
-     */
-    async saveDashboard(dashName, saveOptions = {}) {
-      await this.enterDashboardTitleAndClickSave(dashName, saveOptions);
+    async saveDashboardAndVerify(dashName, options = {}) {
+      await this.saveDashboard(dashName, options);
+      await this.verifySaveSuccess();
+    }
 
-      if (saveOptions.needsConfirm) {
+    async saveDashboard(dashName, {
+      storeTimeWithDashboard = undefined,
+      saveAsNew = undefined,
+      needsConfirm = false,
+    } = {}) {
+      await this.enterDashboardTitleAndClickSave(dashName, {
+        storeTimeWithDashboard,
+        saveAsNew,
+      });
+
+      if (needsConfirm) {
         await this.clickSave();
       }
-
-      await PageObjects.header.waitUntilLoadingHasFinished();
-
-      // Confirm that the Dashboard has been saved.
-      return await testSubjects.exists('saveDashboardSuccess');
     }
 
     async deleteDashboard(dashboardName, dashboardId) {
@@ -325,12 +316,14 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
       });
     }
 
-    /**
-     *
-     * @param dashboardTitle {String}
-     * @param saveOptions {{storeTimeWithDashboard: boolean, saveAsNew: boolean}}
-     */
-    async enterDashboardTitleAndClickSave(dashboardTitle, saveOptions = {}) {
+    async verifySaveSuccess() {
+      await toasts.verifyAndDismiss('saveDashboardSuccess');
+    }
+
+    async enterDashboardTitleAndClickSave(dashboardTitle, {
+      storeTimeWithDashboard = undefined,
+      saveAsNew = undefined,
+    } = {}) {
       await testSubjects.click('dashboardSaveMenuItem');
 
       await PageObjects.header.waitUntilLoadingHasFinished();
@@ -338,12 +331,14 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
       log.debug('entering new title');
       await testSubjects.setValue('dashboardTitle', dashboardTitle);
 
-      if (saveOptions.storeTimeWithDashboard !== undefined) {
-        await this.setStoreTimeWithDashboard(saveOptions.storeTimeWithDashboard);
+      // Passing undefined allows us to bypass interacting with the UI.
+      if (storeTimeWithDashboard !== undefined) {
+        await this.setStoreTimeWithDashboard(storeTimeWithDashboard);
       }
 
-      if (saveOptions.saveAsNew !== undefined) {
-        await this.setSaveAsNewCheckBox(saveOptions.saveAsNew);
+      // Passing undefined allows us to bypass interacting with the UI.
+      if (saveAsNew !== undefined) {
+        await this.setSaveAsNewCheckBox(saveAsNew);
       }
 
       await this.clickSave();

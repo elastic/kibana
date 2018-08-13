@@ -29,6 +29,7 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
   const find = getService('find');
   const log = getService('log');
   const flyout = getService('flyout');
+  const toasts = getService('toasts');
   const renderable = getService('renderable');
   const PageObjects = getPageObjects(['common', 'header']);
   const defaultFindTimeout = config.get('timeouts.find');
@@ -654,6 +655,11 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
       });
     }
 
+    async saveVisualizationAndVerify(vizName, options = {}) {
+      await this.saveVisualization(vizName, options);
+      await toasts.verifyAndDismiss('saveVisualizationSuccess');
+    }
+
     async saveVisualization(vizName, { saveAsNew = false } = {}) {
       await this.ensureSavePanelOpen();
       await testSubjects.setValue('visTitleInput', vizName);
@@ -662,8 +668,6 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
       if (saveAsNew) {
         await testSubjects.click('saveAsNewCheckbox');
       }
-      await PageObjects.header.waitUntilLoadingHasFinished();
-      return await testSubjects.exists('saveVisualizationSuccess');
     }
 
     async clickLoadSavedVisButton() {

@@ -100,7 +100,7 @@ export default function ({ getService, getPageObjects }) {
       });
 
       it('are preserved after saving a dashboard', async () => {
-        await PageObjects.dashboard.saveDashboard('with filters');
+        await PageObjects.dashboard.saveDashboardAndVerify('with filters');
         await PageObjects.header.waitUntilLoadingHasFinished();
 
         const filters = await PageObjects.dashboard.getFilters();

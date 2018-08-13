@@ -17,12 +17,12 @@
  * under the License.
  */
 
-
 export function DashboardAddPanelProvider({ getService, getPageObjects }) {
   const log = getService('log');
   const retry = getService('retry');
   const testSubjects = getService('testSubjects');
   const flyout = getService('flyout');
+  const toasts = getService('toasts');
   const PageObjects = getPageObjects(['header', 'common']);
 
   return new class DashboardAddPanel {
@@ -39,20 +39,20 @@ export function DashboardAddPanelProvider({ getService, getPageObjects }) {
       await testSubjects.click('addSavedSearchTab');
     }
 
-    async addEveryEmbeddableOnCurrentPage() {
+    async addEveryEmbeddableOnCurrentPage(successToastSelector) {
       log.debug('addEveryEmbeddableOnCurrentPage');
       const addPanel = await testSubjects.find('dashboardAddPanel');
       const embeddableRows = await addPanel.findAllByClassName('euiLink');
       for (let i = 0; i < embeddableRows.length; i++) {
         await embeddableRows[i].click();
       }
+      // All of the toasts up to this point have been automatically removed by the UI. We just
+      // need to remove the last toast.
+      await toasts.verifyAndDismiss(successToastSelector);
       log.debug(`Added ${embeddableRows.length} embeddables`);
     }
 
     async clickPagerNextButton() {
-      // Clear all toasts that could hide pagination controls
-      await PageObjects.common.clearAllToasts();
-
       const addPanel = await testSubjects.find('dashboardAddPanel');
       const pagination = await addPanel.findAllByClassName('euiPagination');
       if (pagination.length === 0) {
@@ -120,7 +120,7 @@ export function DashboardAddPanelProvider({ getService, getPageObjects }) {
       }
       let morePages = true;
       while (morePages) {
-        await this.addEveryEmbeddableOnCurrentPage();
+        await this.addEveryEmbeddableOnCurrentPage('addVisualizationToDashboardSuccess');
         morePages = await this.clickPagerNextButton();
       }
       await this.closeAddPanel();
@@ -135,7 +135,7 @@ export function DashboardAddPanelProvider({ getService, getPageObjects }) {
       }
       let morePages = true;
       while (morePages) {
-        await this.addEveryEmbeddableOnCurrentPage();
+        await this.addEveryEmbeddableOnCurrentPage('addSavedSearchToDashboardSuccess');
         morePages = await this.clickPagerNextButton();
       }
       await this.closeAddPanel();
@@ -149,7 +149,11 @@ export function DashboardAddPanelProvider({ getService, getPageObjects }) {
       await this.filterEmbeddableNames(searchName);
 
       await testSubjects.click(`addPanel${searchName.split(' ').join('-')}`);
-      await testSubjects.exists('addSavedSearchToDashboardSuccess');
+
+      // Confirm it was added and close the toast.
+      await testSubjects.existOrFail('addSavedSearchToDashboardSuccess');
+      await testSubjects.click('addSavedSearchToDashboardSuccess toastCloseButton');
+
       await this.closeAddPanel();
     }
 
@@ -173,6 +177,7 @@ export function DashboardAddPanelProvider({ getService, getPageObjects }) {
       await PageObjects.common.sleep(500);
       await this.filterEmbeddableNames(`"${vizName.replace('-', ' ')}"`);
       await testSubjects.click(`addPanel${vizName.split(' ').join('-')}`);
+      await toasts.verifyAndDismiss('addVisualizationToDashboardSuccess');
       await this.closeAddPanel();
     }
 

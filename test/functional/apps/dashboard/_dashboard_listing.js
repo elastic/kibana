@@ -38,7 +38,7 @@ export default function ({ getService, getPageObjects }) {
 
       it('creates a new dashboard', async function () {
         await PageObjects.dashboard.clickCreateDashboardPrompt();
-        await PageObjects.dashboard.saveDashboard(dashboardName);
+        await PageObjects.dashboard.saveDashboardAndVerify(dashboardName);
 
         await PageObjects.dashboard.gotoDashboardLandingPage();
         const countOfDashboards = await PageObjects.dashboard.getDashboardCountWithName(dashboardName);
@@ -90,7 +90,7 @@ export default function ({ getService, getPageObjects }) {
       before(async () => {
         await PageObjects.dashboard.clearSearchValue();
         await PageObjects.dashboard.clickNewDashboard();
-        await PageObjects.dashboard.saveDashboard('Two Words');
+        await PageObjects.dashboard.saveDashboardAndVerify('Two Words');
       });
 
       it('matches on the first word', async function () {
@@ -168,7 +168,7 @@ export default function ({ getService, getPageObjects }) {
 
       it('stays on listing page if title matches two dashboards', async function () {
         await PageObjects.dashboard.clickNewDashboard();
-        await PageObjects.dashboard.saveDashboard('two words', { needsConfirm: true });
+        await PageObjects.dashboard.saveDashboardAndVerify('two words', { needsConfirm: true });
         await PageObjects.dashboard.gotoDashboardLandingPage();
         const currentUrl = await remote.getCurrentUrl();
         const newUrl = currentUrl + '&title=two%20words';
@@ -188,7 +188,7 @@ export default function ({ getService, getPageObjects }) {
 
       it('matches a title with many special characters', async function () {
         await PageObjects.dashboard.clickNewDashboard();
-        await PageObjects.dashboard.saveDashboard('i am !@#$%^&*()_+~`,.<>{}[]; so special');
+        await PageObjects.dashboard.saveDashboardAndVerify('i am !@#$%^&*()_+~`,.<>{}[]; so special');
         await PageObjects.dashboard.gotoDashboardLandingPage();
         const currentUrl = await remote.getCurrentUrl();
         // Need to encode that one.

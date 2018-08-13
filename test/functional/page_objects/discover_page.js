@@ -25,6 +25,7 @@ export function DiscoverPageProvider({ getService, getPageObjects }) {
   const retry = getService('retry');
   const testSubjects = getService('testSubjects');
   const find = getService('find');
+  const toasts = getService('toasts');
   const PageObjects = getPageObjects(['header', 'common']);
 
   const getRemote = () => (
@@ -54,7 +55,7 @@ export function DiscoverPageProvider({ getService, getPageObjects }) {
       await this.clickSaveSearchButton();
       await getRemote().findDisplayedById('SaveSearch').pressKeys(searchName);
       await testSubjects.click('discoverSaveSearchButton');
-      await PageObjects.header.waitUntilLoadingHasFinished();
+      await toasts.verifyAndDismiss('saveSearchSuccess');
       // LeeDr - this additional checking for the saved search name was an attempt
       // to cause this method to wait for the reloading of the page to complete so
       // that the next action wouldn't have to retry.  But it doesn't really solve
@@ -234,11 +235,9 @@ export function DiscoverPageProvider({ getService, getPageObjects }) {
       return testSubjects.click('sharedSnapshotShortUrlButton');
     }
 
-    async clickCopyToClipboard() {
+    async clickCopyToClipboardAndVerify() {
       await testSubjects.click('sharedSnapshotCopyButton');
-
-      // Confirm that the content was copied to the clipboard.
-      return await testSubjects.exists('shareCopyToClipboardSuccess');
+      await toasts.verifyAndDismiss('shareCopyToClipboardSuccess');
     }
 
     async getShareCaption() {
@@ -342,7 +341,7 @@ export function DiscoverPageProvider({ getService, getPageObjects }) {
       const fieldFilterFormExists = await testSubjects.exists('discoverFieldFilter');
       if (fieldFilterFormExists) {
         await testSubjects.click('toggleFieldFilterButton');
-        await testSubjects.missingOrFail('discoverFieldFilter');
+        await testSubjects.notExistOrFail('discoverFieldFilter');
       }
     }
 
