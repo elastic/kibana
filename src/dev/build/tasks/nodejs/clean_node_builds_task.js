@@ -17,9 +17,19 @@
  * under the License.
  */
 
-import { observable as SymbolObservable } from 'rxjs/internal/symbol/observable';
-import { Observable } from '../observable';
+import { deleteAll } from '../../lib';
 
-export function isObservable<T>(x: any): x is Observable<T> {
-  return x !== null && typeof x === 'object' && x[SymbolObservable] !== undefined;
-}
+export const CleanNodeBuildsTask = {
+  description:
+    'Cleaning npm from node',
+
+  async run(config, log, build) {
+    for (const platform of config.getPlatforms()) {
+      await deleteAll(log, [
+        build.resolvePathForPlatform(platform, 'node/lib/node_modules'),
+        build.resolvePathForPlatform(platform, 'node/bin/npm'),
+        build.resolvePathForPlatform(platform, 'node/bin/npx'),
+      ]);
+    }
+  },
+};
