@@ -33,7 +33,6 @@ import {
   EuiLoadingSpinner,
 } from '@elastic/eui';
 
-
 import {
   parse as parseUrl,
   format as formatUrl,
