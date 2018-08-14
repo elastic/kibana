@@ -11,5 +11,6 @@ export default function ({ loadTestFile }) {
     loadTestFile(require.resolve('./create'));
     loadTestFile(require.resolve('./get_all'));
     loadTestFile(require.resolve('./get'));
+    loadTestFile(require.resolve('./update'));
   });
 }

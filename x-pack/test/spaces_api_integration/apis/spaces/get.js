@@ -32,6 +32,7 @@ export default function ({ getService }) {
       expect(resp.body).to.eql(result);
     };
 
+    //todo: Add 404 test
     const getTest = (description, { currentSpace, spaceId, tests }) => {
       describe(description, () => {
         before(async () => esArchiver.load(`saved_objects/spaces`));

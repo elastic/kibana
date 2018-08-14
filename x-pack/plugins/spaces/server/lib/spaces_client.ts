@@ -59,7 +59,7 @@ export class SpacesClient {
     }
   }
 
-  public async get(spaceId: number) {
+  public async get(spaceId: string) {
     if (!this.authorization || !this.authorization.mode.useRbacForRequest(this.request)) {
       const savedObject = await this.callWithRequestSavedObjectRepository.get('space', spaceId);
       return this.transformSavedObjectToSpace(savedObject);
@@ -100,7 +100,31 @@ export class SpacesClient {
     }
   }
 
-  private async ensureAuthorized(resource: any, action: string, forbiddenMessage: string) {
+  public async update(id: string, space: any) {
+    const attributes = omit(space, 'id', '_reserved');
+    if (!this.authorization || !this.authorization.mode.useRbacForRequest(this.request)) {
+      const updatedSavedObject = await this.callWithRequestSavedObjectRepository.update(
+        'space',
+        id,
+        attributes
+      );
+      return this.transformSavedObjectToSpace(updatedSavedObject);
+    } else {
+      await this.ensureAuthorized(
+        this.authorization.RESOURCES.ALL,
+        actions.manage,
+        'Unauthorized to update spaces'
+      );
+      const updatedSavedObject = await this.internalSavedObjectRepository.update(
+        'space',
+        id,
+        attributes
+      );
+      return this.transformSavedObjectToSpace(updatedSavedObject);
+    }
+  }
+
+  private async ensureAuthorized(resource: string, action: string, forbiddenMessage: string) {
     const checkPrivileges = this.authorization.checkPrivilegesWithRequest(this.request);
     const { result } = await checkPrivileges([resource], [action]);
 

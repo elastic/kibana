@@ -5,7 +5,6 @@
  */
 
 import Boom from 'boom';
-import { omit } from 'lodash';
 import { routePreCheckLicense } from '../../../lib/route_pre_check_license';
 import { spaceSchema } from '../../../lib/space_schema';
 import { wrapError } from '../../../lib/errors';
@@ -14,13 +13,6 @@ import { addSpaceIdToPath } from '../../../lib/spaces_url_parser';
 
 export function initSpacesApi(server) {
   const routePreCheckLicenseFn = routePreCheckLicense(server);
-
-  function convertSavedObjectToSpace(savedObject) {
-    return {
-      id: savedObject.id,
-      ...savedObject.attributes
-    };
-  }
 
   server.route({
     method: 'GET',
@@ -88,27 +80,16 @@ export function initSpacesApi(server) {
     method: 'PUT',
     path: '/api/spaces/v1/space/{id}',
     async handler(request, reply) {
-      const client = request.getSavedObjectsClient();
-
-      const space = omit(request.payload, ['id']);
+      const spacesClient = server.plugins.spaces.spacesClient.getScopedClient(request);
+      const space = request.payload;
       const id = request.params.id;
 
-      const existingSpace = await getSpaceById(client, id);
-
-      if (existingSpace) {
-        space._reserved = existingSpace._reserved;
-      } else {
-        return reply(Boom.notFound(`Unable to find space with ID ${id}`));
-      }
-
-      let result;
       try {
-        result = await client.update('space', id, { ...space });
+        const response = spacesClient.update(id, space);
+        return reply(response);
       } catch (error) {
         return reply(wrapError(error));
       }
-
-      return reply(convertSavedObjectToSpace(result));
     },
     config: {
       validate: {
@@ -169,11 +150,15 @@ export function initSpacesApi(server) {
     }
   });
 
-  async function getSpaceById(spacesClient, spaceId) {
+  async function getSpaceById(client, spaceId) {
     try {
-      return await spacesClient.get(spaceId);
+      const existingSpace = await client.get('space', spaceId);
+      return {
+        id: existingSpace.id,
+        ...existingSpace.attributes
+      };
     } catch (error) {
-      if (spacesClient.errors.isNotFoundError(error)) {
+      if (client.errors.isNotFoundError(error)) {
         return null;
       }
       throw error;
