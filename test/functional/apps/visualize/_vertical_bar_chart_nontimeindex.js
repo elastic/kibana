@@ -33,6 +33,7 @@ export default function ({ getService, getPageObjects }) {
       log.debug('clickVerticalBarChart');
       await PageObjects.visualize.clickVerticalBarChart();
       await PageObjects.visualize.clickNewSearch(PageObjects.visualize.index.LOGSTASH_NON_TIME_BASED);
+      await PageObjects.common.sleep(500);
       log.debug('Bucket = X-Axis');
       await PageObjects.visualize.clickBucket('X-Axis');
       log.debug('Aggregation = Date Histogram');
