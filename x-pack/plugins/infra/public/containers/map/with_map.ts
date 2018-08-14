@@ -21,7 +21,7 @@ export const withMap = graphql<
   ChildProps
 >(mapQuery, {
   options: () => ({
-    // fetchPolicy: 'no-cache',
+    fetchPolicy: 'no-cache',
     variables: {
       id: 'default',
       timerange: {
