@@ -37,12 +37,12 @@ export const createFieldsForWildcardRoute = pre => ({
         meta_fields: metaFields,
       } = req.query;
 
-      const { fields } = await indexPatterns.getFieldsForWildcard({
+      const fields = await indexPatterns.getFieldsForWildcard({
         pattern,
         metaFields
       });
 
-      return fields;
+      return { fields };
     }
   }
 });

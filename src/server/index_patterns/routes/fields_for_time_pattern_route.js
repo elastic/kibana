@@ -40,14 +40,14 @@ export const createFieldsForTimePatternRoute = pre => ({
         meta_fields: metaFields,
       } = req.query;
 
-      const { fields } = await indexPatterns.getFieldsForTimePattern({
+      const fields = await indexPatterns.getFieldsForTimePattern({
         pattern,
         interval,
         lookBack,
         metaFields
       });
 
-      return fields;
+      return { fields };
     }
   }
 });
