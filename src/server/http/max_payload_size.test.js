@@ -65,6 +65,6 @@ test('fails with 400 if payload size is larger than default and route config all
     payload: { data: Array(250).fill('+').join('') },
   });
 
-  expect(resp.statusCode).toBe(400);
+  expect(resp.statusCode).toBe(413);
   expect(resp.payload).toMatchSnapshot();
 });
