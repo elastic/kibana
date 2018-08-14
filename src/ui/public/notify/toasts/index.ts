@@ -17,4 +17,5 @@
  * under the License.
  */
 
-export { toastNotifications, ToastNotifications } from './toast_notifications';
+export { toastNotifications, __newPlatformInit__ } from './toasts';
+export { Toast, ToastInput } from './toast_notifications';

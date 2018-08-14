@@ -17,5 +17,6 @@
  * under the License.
  */
 
-export { GlobalToastList } from './global_toast_list';
-export { toastNotifications } from './toast_notifications';
+export { ToastsService } from './toasts_service';
+export { ToastsStartContract, ToastInput } from './toasts_start_contract';
+export { Toast } from '@elastic/eui';
