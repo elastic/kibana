@@ -18,9 +18,10 @@
  */
 
 import { getRootProperties } from './get_root_properties';
+import { EsMappings } from './types';
 
 /**
- *  Get the property mappings for the root type in the EsMappingsDsl
+ *  Get the property mappings for the root type in the EsMappings
  *  where the properties are objects
  *
  *  If the mappings don't have a root type, or the root type is not
@@ -29,19 +30,18 @@ import { getRootProperties } from './get_root_properties';
  *
  *  This data can be found at `{indexName}.mappings.{typeName}.properties`
  *  in the es indices.get() response where the properties are objects.
- *
- *  @param  {EsMappingsDsl} mappings
- *  @return {EsPropertyMappings}
  */
-export function getRootPropertiesObjects(mappings) {
+export function getRootPropertiesObjects(mappings: EsMappings) {
   const rootProperties = getRootProperties(mappings);
-  return Object.entries(rootProperties).reduce((acc, [key, value]) => {
+  return Object.entries(rootProperties).reduce(
+    (acc: EsMappings, [key, value]) => {
+      // if value has properties or a type of object, we assume it is an object datatype
+      if (value.properties || value.type === 'object') {
+        acc[key] = value;
+      }
 
-    // we consider the existence of the properties or type of object to designate that this is an object datatype
-    if (value.properties || value.type === 'object') {
-      acc[key] = value;
-    }
-
-    return acc;
-  }, {});
+      return acc;
+    },
+    {} as any
+  ) as EsMappings;
 }
