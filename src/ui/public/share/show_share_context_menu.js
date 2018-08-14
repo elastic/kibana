@@ -52,6 +52,7 @@ export function showShareContextMenu({
   document.body.appendChild(container);
   const element = (
     <EuiWrappingPopover
+      className="navbar__popover"
       id="sharePopover"
       button={anchorElement}
       isOpen={true}
