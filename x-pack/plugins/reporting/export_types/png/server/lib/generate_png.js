@@ -22,11 +22,12 @@ const getTimeRange = (urlScreenshots) => {
   return null;
 };
 
+
 const formatDate = (date, timezone) => {
   return moment.tz(date, timezone).format('llll');
 };
 
-function generatePdfObservableFn(server) {
+function generatePngObservableFn(server) {
   const screenshotsObservable = screenshotsObservableFactory(server);
   const captureConcurrency = 1;
   const getLayout = getLayoutFactory(server);
@@ -40,7 +41,7 @@ function generatePdfObservableFn(server) {
     );
   };
 
-  const createPdfWithScreenshots = async ({ title, browserTimezone, urlScreenshots }) => {
+  const createPngWithScreenshots = async ({ title, browserTimezone, urlScreenshots }) => {
     if (title) {
       const timeRange = getTimeRange(urlScreenshots);
       title += (timeRange) ? ` — ${formatDate(timeRange.from, browserTimezone)} to ${formatDate(timeRange.to, browserTimezone)}` : '';
@@ -48,19 +49,17 @@ function generatePdfObservableFn(server) {
     return urlScreenshots[0].screenshots[0].base64EncodedData;
   };
 
+  return function generatePngObservable(title, urls, browserTimezone, headers, layoutParams, logo) {
 
-  return function generatePdfObservable(title, urls, browserTimezone, headers, layoutParams, logo) {
-    const layoutParams1 = { dimensions: { height: 2808, width: 1227 },
-      id: "preserve_layout"
-    };
-    const layout = getLayout(layoutParams1);
+    const layout = getLayout(layoutParams);
+
     const screenshots$ = urlScreenshotsObservable(urls, headers, layout);
 
     return screenshots$.pipe(
       toArray(),
-      mergeMap(urlScreenshots => createPdfWithScreenshots({ title, browserTimezone, urlScreenshots, logo }))
+      mergeMap(urlScreenshots => createPngWithScreenshots({ title, browserTimezone, urlScreenshots, logo }))
     );
   };
 }
 
-export const generatePdfObservableFactory = oncePerServer(generatePdfObservableFn);
+export const generatePngObservableFactory = oncePerServer(generatePngObservableFn);

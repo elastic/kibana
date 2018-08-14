@@ -26,12 +26,20 @@ export function JobParamsProvider(Private, config) {
   return function jobParams(controller) {
     const browserTimezone = config.get('dateFormat:tz') === 'Browser' ? moment.tz.guess() : config.get('dateFormat:tz');
     const relativeUrl = parseRelativeUrl(window.location);
+    const el = document.querySelector('[data-shared-items-container]');
+    const bounds = el.getBoundingClientRect();
 
     return {
       title: controller.getSharingTitle(),
       objectType: controller.getSharingType(),
       browserTimezone: browserTimezone,
       relativeUrls: [ relativeUrl ],
+      layout: { id: "preserve_layout",
+        dimensions: {
+          height: bounds.height,
+          width: bounds.width,
+        }
+      }
     };
   };
 }

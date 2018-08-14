@@ -10,7 +10,7 @@ import { mergeMap, catchError, map, takeUntil } from 'rxjs/operators';
 import { omit } from 'lodash';
 import { UI_SETTINGS_CUSTOM_PDF_LOGO } from '../../../../common/constants';
 import { oncePerServer } from '../../../../server/lib/once_per_server';
-import { generatePdfObservableFactory } from '../lib/generate_pdf';
+import { generatePngObservableFactory } from '../lib/generate_png';
 import { cryptoFactory } from '../../../../server/lib/crypto';
 import { compatibilityShimFactory } from './compatibility_shim';
 
@@ -27,7 +27,7 @@ const KBN_SCREENSHOT_HEADER_BLACKLIST = [
 ];
 
 function executeJobFn(server) {
-  const generatePdfObservable = generatePdfObservableFactory(server);
+  const generatePngObservable = generatePngObservableFactory(server);
   const crypto = cryptoFactory(server);
   const compatibilityShim = compatibilityShimFactory(server);
 
@@ -65,7 +65,6 @@ function executeJobFn(server) {
 
       const parsed = url.parse(jobUrl, true);
       const hash = url.parse(parsed.hash.replace(/^#/, ''), true);
-
       const transformedHash = url.format({
         pathname: hash.pathname,
         query: {
@@ -90,7 +89,7 @@ function executeJobFn(server) {
       mergeMap(getCustomLogo),
       mergeMap(addForceNowQuerystring),
       mergeMap(({ job, filteredHeaders, logo, urls }) => {
-        return generatePdfObservable(job.title, urls, job.browserTimezone, filteredHeaders, job.layout, logo);
+        return generatePngObservable(job.title, urls, job.browserTimezone, filteredHeaders, job.layout, logo);
       }),
       map(buffer => ({
         content_type: 'image/png',

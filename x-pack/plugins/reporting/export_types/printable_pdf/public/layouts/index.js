@@ -6,7 +6,7 @@
 
 import { print } from './print';
 import { preserveLayout } from './preserve_layout';
-import { LayoutTypes } from '../../common/constants';
+import { LayoutTypes } from '../../../png/common/constants';
 
 export function getLayout(name) {
   switch (name) {

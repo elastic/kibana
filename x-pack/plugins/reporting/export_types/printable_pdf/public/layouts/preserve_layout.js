@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { LayoutTypes } from '../../common/constants';
+import { LayoutTypes } from '../../../png/common/constants';
 
 export const preserveLayout = {
   getJobParams() {

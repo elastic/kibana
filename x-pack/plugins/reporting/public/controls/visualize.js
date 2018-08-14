@@ -19,7 +19,7 @@ function visualizeReportProvider(Private, $location) {
     template: `
       <export-config
         object-type="Visualization"
-        enabled-export-type="printablePdf"
+        enabled-export-type="png"
         options="{ layoutId: 'preserve_layout' }"
       ></export-config>`,
     description: 'Visualization Report',
