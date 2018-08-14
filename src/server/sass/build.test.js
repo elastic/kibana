@@ -38,7 +38,6 @@ describe('SASS builder', () => {
     expect(sass.render.mock.calls[0][0]).toEqual({
       file: '/foo/style.sass',
       outFile: '/foo/style.css',
-      sourceComments: true,
       sourceMap: true,
       sourceMapEmbed: true
     });

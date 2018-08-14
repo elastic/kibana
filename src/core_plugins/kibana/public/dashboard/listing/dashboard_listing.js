@@ -462,8 +462,8 @@ export class DashboardListing extends React.Component {
 
   render() {
     return (
-      <EuiPage data-test-subj="dashboardLandingPage" className="dashboardLandingPage">
-        <EuiPageBody restrictWidth>
+      <EuiPage data-test-subj="dashboardLandingPage" className="dashboardLandingPage" restrictWidth>
+        <EuiPageBody>
           {this.renderPageContent()}
         </EuiPageBody>
       </EuiPage>

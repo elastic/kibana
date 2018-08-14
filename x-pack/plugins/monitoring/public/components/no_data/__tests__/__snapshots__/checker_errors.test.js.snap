@@ -8,7 +8,7 @@ Array [
     class="euiSpacer euiSpacer--l"
   />,
   <div
-    class="euiCallOut euiCallOut--danger noData__alignLeft"
+    class="euiCallOut euiCallOut--danger eui-textLeft"
   >
     <div
       class="euiCallOutHeader"
