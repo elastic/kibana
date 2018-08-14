@@ -31,8 +31,8 @@ async function makeServer({ maxPayloadBytesDefault, maxPayloadBytesRoute }) {
     path: '/payload_size_check/test/route',
     method: 'POST',
     config: { payload: { maxBytes: maxPayloadBytesRoute } },
-    handler: function (req, reply) {
-      reply(null, req.payload.data.slice(0, 5));
+    handler: function (req) {
+      return req.payload.data.slice(0, 5);
     }
   });
 }
