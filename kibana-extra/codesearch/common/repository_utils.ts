@@ -27,6 +27,26 @@ export class RepositoryUtils {
     };
   }
 
+  // From uri 'origin/org/name' to 'name'
+  public static repoNameFromUri(repoUri: RepositoryUri): string {
+    const segs = repoUri.split('/');
+    if (segs && segs.length === 3) {
+      return segs[2];
+    } else {
+      return 'invalid';
+    }
+  }
+
+  // From uri 'origin/org/name' to 'org/name'
+  public static repoFullNameFromUri(repoUri: RepositoryUri): string {
+    const segs = repoUri.split('/');
+    if (segs && segs.length === 3) {
+      return segs[1] + '/' + segs[2];
+    } else {
+      return 'invalid';
+    }
+  }
+
   // Return the local data path of a given repository.
   public static repositoryLocalPath(repoPath: string, repoUri: RepositoryUri) {
     return path.join(repoPath, repoUri);

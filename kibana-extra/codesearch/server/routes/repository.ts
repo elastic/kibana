@@ -52,7 +52,7 @@ export function repositoryRoute(
         log.info(`Repository ${repoUrl} does not exist. Go ahead with clone.`);
         try {
           // Create the index for the repository
-          repoIndexInit.init(repo.uri);
+          await repoIndexInit.init(repo.uri);
 
           // Persist to elasticsearch
           await callWithRequest(req, 'create', {

@@ -91,9 +91,14 @@ export abstract class AbstractIndexer implements Indexer {
   protected async prepareIndex(repoUri: RepositoryUri) {
     const creationReqs = await this.prepareIndexCreationRequests(repoUri);
     for (const req of creationReqs) {
-      const res = await this.createIndex(req);
-      if (!res) {
-        this.log.info(`Index creation failed for ${req.index}.`);
+      try {
+        const res = await this.createIndex(req);
+        if (!res) {
+          this.log.info(`Index creation failed for ${req.index}.`);
+          return false;
+        }
+      } catch (error) {
+        this.log.error(`Index creation error: ${error}`);
         return false;
       }
     }

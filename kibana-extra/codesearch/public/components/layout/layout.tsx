@@ -34,7 +34,6 @@ import { FileTree } from '../file_tree/file_tree';
 import { Editor } from '../editor/editor';
 
 import { closeTreePath, fetchRepoTree, FetchRepoTreePayload } from '../../actions';
-import { history } from '../../utils/url';
 import { SymbolTree } from '../symbol_tree/symbol_tree';
 import { LayoutBreadcrumbs } from './layout_breadcrumbs';
 

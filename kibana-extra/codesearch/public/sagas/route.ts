@@ -3,14 +3,19 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+
 import { LOCATION_CHANGE } from 'connected-react-router';
+import _ from 'lodash';
 import { put, select, takeLatest } from 'redux-saga/effects';
-import { fetchRepos, loadStructure } from '../actions';
+
+import { fetchRepos, fullSearch, loadStructure } from '../actions';
 import * as ROUTES from '../components/routes';
 import { lastRequestPathSelector } from '../selectors';
 
 function* handleLocationChange(action: any) {
-  const { pathname } = action.payload.location;
+  // TODO: we need to find a better solution to integrate routing data into
+  // reducer.
+  const { pathname, search } = action.payload.location;
   if (ROUTES.adminRegex.test(pathname)) {
     yield put(fetchRepos());
   } else if (ROUTES.mainRegex.test(pathname)) {
@@ -24,6 +29,15 @@ function* handleLocationChange(action: any) {
         yield put(loadStructure(uri));
       }
     }
+  } else if (ROUTES.searchRegex.test(pathname)) {
+    const queryParams = _.chain(search)
+      .replace('?', '')
+      .split('&')
+      .map(_.partial(_.split, _, '=', 2))
+      .fromPairs()
+      .value();
+    const { q } = queryParams;
+    yield put(fullSearch(q));
   }
 }
 

@@ -6,6 +6,12 @@
 
 import { createAction } from 'redux-actions';
 
+// TODO: rename these actions to symbol search
 export const searchQueryChanged = createAction<string>('SEARCH QUERY CHANGED');
 export const searchSuccess = createAction<string>('SEARCH SUCCESS');
 export const searchFailed = createAction<string>('SEARCH FAILED');
+
+// For full search page
+export const fullSearch = createAction<string>('FULL SEARCH');
+export const fullSearchSuccess = createAction<string>('FULL SEARCH SUCCESS');
+export const fullSearchFailed = createAction<string>('FULL SEARCH FAILED');

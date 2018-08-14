@@ -12,6 +12,7 @@ import { history } from '../utils/url';
 import { Admin } from './admin_page/admin';
 import { Layout } from './layout/layout';
 import * as ROUTES from './routes';
+import { Search } from './search_page/search';
 
 export const App = () => {
   const redirectToAdmin = () => <Redirect to="/admin" />;
@@ -22,6 +23,7 @@ export const App = () => {
           <Route path={ROUTES.ROOT} exact={true} render={redirectToAdmin} />
           <Route path={ROUTES.MAIN} component={Layout} />
           <Route path={ROUTES.ADMIN} component={Admin} />
+          <Route path={ROUTES.SEARCH} component={Search} />
           <Route path="/:resource/:org/:repo/:pathType(blob|tree)/:revision" component={Layout} />
         </Switch>
       </Router>

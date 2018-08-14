@@ -28,6 +28,19 @@
   version "0.0.0"
   uid ""
 
+<<<<<<< HEAD
+=======
+"@codesearch/lsp-extension@link:../../lsp/javascript-typescript-langserver/packages/lsp-extension":
+  version "0.0.0"
+  uid ""
+
+"@codesearch/lsp-extension@file:../../lsp/javascript-typescript-langserver/packages/lsp-extension":
+  version "0.0.0-development"
+  dependencies:
+    vscode-languageserver "^4.2.1"
+    vscode-languageserver-types "^3.10.0"
+
+>>>>>>> Add highlight data into document search API
 "@elastic/eui@^3.0.0":
   version "3.2.0"
   resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-3.2.0.tgz#a995d440ebf2e5d49cb5ad3b20879afd5b12edf3"

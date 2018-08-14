@@ -6,7 +6,7 @@
 
 import { DetailSymbolInformation } from '@codesearch/lsp-extension';
 
-import { Repository } from '../model';
+import { Repository, SourceHit } from '../model';
 import { RepositoryUri } from './repository';
 
 export interface Document {
@@ -65,10 +65,60 @@ export interface RepositorySearchResult extends SearchResult {
 
 export interface DocumentSearchResult extends SearchResult {
   documents: Document[];
-  highlights: any[];
+  highlights: SourceHit[][];
+  repoAggregations: any[];
+  langAggregations: any[];
 }
 
 export interface SymbolSearchResult extends SearchResult {
   // TODO: we migit need an additional data structure for symbol search result.
   symbols: DetailSymbolInformation[];
+}
+
+// All the interfaces for search page
+
+// The item of the search result stats. e.g. Typescript -> 123
+export interface SearchResultStatsItem {
+  name: string;
+  value: number;
+}
+
+export interface SearchResultStats {
+  total: number; // Total number of results
+  from: number; // The beginning of the result range
+  to: number; // The end of the result range
+  page: number; // The page number
+  repoStats: SearchResultStatsItem[];
+  languageStats: SearchResultStatsItem[];
+}
+
+export interface SearchResultItem {
+  uri: string;
+  hits: number;
+  filePath: string;
+  content: string;
+  // TODO: add more in here.
+}
+
+export interface FullSearchResult {
+  query: string;
+  stats: SearchResultStats;
+  result: SearchResultItem[];
+}
+
+export interface SourceLocation {
+  line: number;
+  column: number;
+  offset: number;
+}
+
+export interface SourceRange {
+  startLoc: SourceLocation;
+  endLoc: SourceLocation;
+}
+
+export interface SourceHit {
+  range: SourceRange;
+  score: number;
+  term: string;
 }

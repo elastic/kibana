@@ -15,6 +15,8 @@ export const MAIN = `/:resource/:org/:repo/:pathType(${PathTypes.blob}|${
   PathTypes.blob
 })/:revision/:path*:goto(!.*)?`;
 export const ADMIN = '/admin';
+export const SEARCH = '/search';
 
 export const adminRegex = pathToRegexp(ADMIN);
 export const mainRegex = pathToRegexp(MAIN);
+export const searchRegex = pathToRegexp(SEARCH);

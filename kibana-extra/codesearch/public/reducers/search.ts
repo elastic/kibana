@@ -10,6 +10,7 @@ import { searchFailed, searchQueryChanged, searchSuccess } from '../actions';
 
 const MAX_SYMBOLS_NUM = 5;
 
+// TODO: rename search into symbol search
 export interface SearchState {
   query: string;
   isLoading: boolean;

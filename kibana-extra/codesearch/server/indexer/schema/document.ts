@@ -10,7 +10,7 @@ import { RepositoryUri } from '../../../model';
 // Coorespond to model/search/Document
 export const DocumentSchema = {
   repoUri: {
-    type: 'text',
+    type: 'keyword',
     index: false,
     norms: false,
   },
@@ -33,7 +33,7 @@ export const DocumentSchema = {
     analyzer: 'qname_path_hierarchy_analyzer',
   },
   language: {
-    type: 'text',
+    type: 'keyword',
     index: false,
     norms: false,
   },
