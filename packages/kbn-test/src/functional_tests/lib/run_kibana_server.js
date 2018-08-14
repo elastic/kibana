@@ -45,7 +45,8 @@ function getKibanaCmd(installDir) {
   return KIBANA_EXEC;
 }
 
-/* When installDir is passed, we run from a built version of Kibana,
+/**
+ * When installDir is passed, we run from a built version of Kibana,
  * which uses different command line arguments. If installDir is not
  * passed, we run from source code. We also allow passing in extra
  * Kibana server options, so we tack those on here.
@@ -58,14 +59,12 @@ function collectCliArgs(config, { installDir, extraKbnOpts }) {
   return pipe(
     serverArgs,
     args => (installDir ? args.filter(a => a !== '--oss') : args),
-    args => {
-      return installDir ? [...buildArgs, ...args] : [KIBANA_EXEC_PATH, ...sourceArgs, ...args];
-    },
+    args => (installDir ? [...buildArgs, ...args] : [KIBANA_EXEC_PATH, ...sourceArgs, ...args]),
     args => args.concat(extraKbnOpts || [])
   );
 }
 
-/*
+/**
  * Filter the cli args to remove duplications and
  * overridden options
  */
@@ -73,11 +72,13 @@ function filterCliArgs(args) {
   const argv = [...args].slice(1);
 
   const filteredArgv = argv.reduce((acc, val, ind) => {
+    // If original argv has a later basepath setting, skip this val.
     if (isBasePathSettingOverridden(argv, val, ind)) {
       return acc;
     }
 
-    // is any other setting overridden?
+    // Check if original argv has a later setting that overrides
+    // the current val. If so, skip this val.
     if (findIndexFrom(argv, ++ind, opt => opt.split('=')[0] === val.split('=')[0]) > -1) {
       return acc;
     }
@@ -88,7 +89,7 @@ function filterCliArgs(args) {
   return [args[0], ...filteredArgv];
 }
 
-/*
+/**
  * Apply each function in fns to the result of the
  * previous function. The first function's input
  * is the arr array.
