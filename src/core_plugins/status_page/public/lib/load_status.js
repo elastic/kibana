@@ -65,6 +65,23 @@ function formatMetrics(data) {
   ];
 }
 
+
+/**
+ * Reformat the backend data to make the frontend views simpler.
+ */
+function formatStatus(status) {
+  return {
+    id: status.id,
+    state: {
+      id: status.state,
+      title: status.title,
+      message: status.message,
+      uiColor: status.uiColor
+    }
+  };
+}
+
+
 async function fetchData() {
   return fetch(
     chrome.addBasePath('/api/status'),
@@ -107,8 +124,8 @@ async function loadStatus(fetchFn = fetchData) {
 
   return {
     name: data.name,
-    statuses: data.status.statuses,
-    serverState: data.status.overall.state,
+    statuses: data.status.statuses.map(formatStatus),
+    serverState: formatStatus(data.status.overall).state,
     metrics: formatMetrics(data),
   };
 }
