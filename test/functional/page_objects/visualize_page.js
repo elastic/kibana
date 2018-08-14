@@ -541,6 +541,14 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
     async setInterval(newValue) {
       const input = await find.byCssSelector('select[ng-model="agg.params.interval"]');
       await input.type(newValue);
+      await remote.pressKeys('\uE006');
+    }
+
+    async setCustomInterval(newValue) {
+      await this.setInterval('Custom');
+      const input = await find.byCssSelector('input[name="customInterval"]');
+      await input.clearValue();
+      await input.type(newValue);
     }
 
     async setNumericInterval(newValue, { append } = {}) {
