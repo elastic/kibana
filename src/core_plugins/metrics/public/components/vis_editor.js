@@ -155,7 +155,7 @@ VisEditor.defaultProps = {
 VisEditor.propTypes = {
   vis: PropTypes.object,
   visData: PropTypes.object,
-  appState: PropTypes.object,
+  appState: PropTypes.object.isRequired,
   renderComplete: PropTypes.func,
   config: PropTypes.object,
   isEditorMode: PropTypes.bool,
