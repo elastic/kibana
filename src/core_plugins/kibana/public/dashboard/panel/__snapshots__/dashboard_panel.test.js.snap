@@ -2,29 +2,29 @@
 
 exports[`DashboardPanel matches snapshot 1`] = `
 <div
-  class="dashboard-panel"
+  class="dshPanel"
 >
   <div
-    class="panel panel-default panel--edit-mode"
+    class="dshPanel__panel dshPanel__panel--editing"
     data-test-subj="dashboardPanel"
   >
     <div
-      class="panel-heading"
+      class="dshPanel__header"
       data-test-subj="dashboardPanelHeading-myembeddabletitle"
     >
       <span
         aria-label="Dashboard panel: my embeddable title"
-        class="panel-title"
+        class="dshPanel__title"
         data-test-subj="dashboardPanelTitle"
         title="my embeddable title"
       >
         my embeddable title
       </span>
       <div
-        class="kuiMicroButtonGroup"
+        class="dshPanel__headerButtonGroup"
       >
         <div
-          class="euiPopover euiPopover--anchorDownRight euiPopover--withTitle dashboardPanelPopOver"
+          class="euiPopover euiPopover--anchorDownRight euiPopover--withTitle dshPanel_optionsMenuPopover"
           id="dashboardPanelContextMenu"
         >
           <div

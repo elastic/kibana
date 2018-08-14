@@ -87,3 +87,28 @@
   fill: @svg-endzone-bg;
   pointer-events: none;
 }
+
+// SASSTODO: Make sure these colors convert to theme variables
+.tab-dashboard.theme-dark {
+  .axis {
+    line, path {
+      stroke: @gray8;
+    }
+  }
+
+  .tick text {
+    fill: @gray10;
+  }
+
+  .chart-label {
+    fill: @gray10;
+  }
+
+  .brush .extent {
+    stroke: @white;
+  }
+
+  .endzone {
+    fill: @white;
+  }
+}
