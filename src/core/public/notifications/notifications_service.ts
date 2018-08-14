@@ -17,9 +17,37 @@
  * under the License.
  */
 
-export { notify } from './notify';
-export { Notifier } from './notifier';
-export { fatalError, addFatalErrorCallback } from './fatal_error';
-export { toastNotifications } from './toasts';
-export { GlobalBannerList, banners } from './banners';
-export { addAppRedirectMessageToUrl, showAppRedirectNotification } from './app_redirect';
+import { ToastsService } from './toasts';
+
+interface Params {
+  targetDomElement: HTMLElement;
+}
+
+export class NotificationsService {
+  private readonly toasts: ToastsService;
+
+  private readonly toastsContainer: HTMLElement;
+
+  constructor(private readonly params: Params) {
+    this.toastsContainer = document.createElement('div');
+    this.toasts = new ToastsService({
+      targetDomElement: this.toastsContainer,
+    });
+  }
+
+  public start() {
+    this.params.targetDomElement.appendChild(this.toastsContainer);
+
+    return {
+      toasts: this.toasts.start(),
+    };
+  }
+
+  public stop() {
+    this.toasts.stop();
+
+    this.params.targetDomElement.textContent = '';
+  }
+}
+
+export type NotificationsStartContract = ReturnType<NotificationsService['start']>;

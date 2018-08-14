@@ -17,9 +17,15 @@
  * under the License.
  */
 
-export { notify } from './notify';
-export { Notifier } from './notifier';
-export { fatalError, addFatalErrorCallback } from './fatal_error';
-export { toastNotifications } from './toasts';
-export { GlobalBannerList, banners } from './banners';
-export { addAppRedirectMessageToUrl, showAppRedirectNotification } from './app_redirect';
+import { ToastsStartContract } from '../../../../core/public/notifications';
+import { ToastNotifications } from './toast_notifications';
+
+export let toastNotifications: ToastNotifications;
+
+export function __newPlatformInit__(toasts: ToastsStartContract) {
+  if (toastNotifications) {
+    throw new Error('ui/notify/toasts already initialized with new platform apis');
+  }
+
+  toastNotifications = new ToastNotifications(toasts);
+}

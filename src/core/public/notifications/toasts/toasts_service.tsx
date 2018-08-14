@@ -17,9 +17,37 @@
  * under the License.
  */
 
-export { notify } from './notify';
-export { Notifier } from './notifier';
-export { fatalError, addFatalErrorCallback } from './fatal_error';
-export { toastNotifications } from './toasts';
-export { GlobalBannerList, banners } from './banners';
-export { addAppRedirectMessageToUrl, showAppRedirectNotification } from './app_redirect';
+import React from 'react';
+import { render, unmountComponentAtNode } from 'react-dom';
+
+import { Toast } from '@elastic/eui';
+import { GlobalToastList } from './global_toast_list';
+import { ToastsStartContract } from './toasts_start_contract';
+
+interface Params {
+  targetDomElement: HTMLElement;
+}
+
+export class ToastsService {
+  constructor(private readonly params: Params) {}
+
+  public start() {
+    const toasts = new ToastsStartContract();
+
+    render(
+      <GlobalToastList
+        dismissToast={(toast: Toast) => toasts.remove(toast)}
+        toasts$={toasts.get$()}
+      />,
+      this.params.targetDomElement
+    );
+
+    return toasts;
+  }
+
+  public stop() {
+    unmountComponentAtNode(this.params.targetDomElement);
+
+    this.params.targetDomElement.textContent = '';
+  }
+}

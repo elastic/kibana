@@ -17,47 +17,46 @@
  * under the License.
  */
 
-import React, {
-  Component,
-} from 'react';
-import PropTypes from 'prop-types';
+import { EuiGlobalToastList, Toast } from '@elastic/eui';
 
-import {
-  EuiGlobalToastList,
-  EuiPortal,
-} from '@elastic/eui';
+import React from 'react';
+import * as Rx from 'rxjs';
 
-export class GlobalToastList extends Component {
-  constructor(props) {
-    super(props);
+interface Props {
+  toasts$: Rx.Observable<Toast[]>;
+  dismissToast: (t: Toast) => void;
+}
 
-    if (this.props.subscribe) {
-      this.props.subscribe(() => this.forceUpdate());
+interface State {
+  toasts: Toast[];
+}
+
+export class GlobalToastList extends React.Component<Props, State> {
+  public state: State = {
+    toasts: [],
+  };
+
+  private subscription?: Rx.Subscription;
+
+  public componentDidMount() {
+    this.subscription = this.props.toasts$.subscribe(toasts => {
+      this.setState({ toasts });
+    });
+  }
+
+  public componentWillUnmount() {
+    if (this.subscription) {
+      this.subscription.unsubscribe();
     }
   }
 
-  static propTypes = {
-    subscribe: PropTypes.func,
-    toasts: PropTypes.array,
-    dismissToast: PropTypes.func.isRequired,
-    toastLifeTimeMs: PropTypes.number.isRequired,
-  };
-
-  render() {
-    const {
-      toasts,
-      dismissToast,
-      toastLifeTimeMs,
-    } = this.props;
-
+  public render() {
     return (
-      <EuiPortal>
-        <EuiGlobalToastList
-          toasts={toasts}
-          dismissToast={dismissToast}
-          toastLifeTimeMs={toastLifeTimeMs}
-        />
-      </EuiPortal>
+      <EuiGlobalToastList
+        toasts={this.state.toasts}
+        dismissToast={this.props.dismissToast}
+        toastLifeTimeMs={6000}
+      />
     );
   }
 }
