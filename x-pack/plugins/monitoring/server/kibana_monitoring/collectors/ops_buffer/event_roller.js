@@ -29,7 +29,7 @@ export class EventRoller {
 
     return {
       concurrent_connections: sum([
-        mapConcurrentConnections(event.concurrents), // NOTE: incoming property is called `concurrents` and we map it to `concurrent_connections`
+        mapConcurrentConnections(event.concurrent_connections),
         this.getFromRollup('concurrent_connections')
       ]),
       // memory/os stats use the latest event's details

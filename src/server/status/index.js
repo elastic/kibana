@@ -21,6 +21,7 @@ import ServerStatus from './server_status';
 import { Metrics } from './lib/metrics';
 import { registerStatusPage, registerStatusApi, registerStatsApi } from './routes';
 import { getOpsStatsCollector } from './collectors';
+import Oppsy from 'oppsy';
 
 export function statusMixin(kbnServer, server, config) {
   kbnServer.status = new ServerStatus(kbnServer.server);
@@ -29,15 +30,13 @@ export function statusMixin(kbnServer, server, config) {
   const { collectorSet } = server.usage;
   collectorSet.register(statsCollector);
 
-  const { ['even-better']: evenBetter } = server.plugins;
+  const metrics = new Metrics(config, server);
 
-  if (evenBetter) {
-    const metrics = new Metrics(config, server);
-
-    evenBetter.monitor.on('ops', event => {
-      metrics.capture(event).then(data => { kbnServer.metrics = data; }); // captures (performs transforms on) the latest event data and stashes the metrics for status/stats API payload
-    });
-  }
+  const oppsy = new Oppsy(server);
+  oppsy.on('ops', event => {
+    metrics.capture(event).then(data => { kbnServer.metrics = data; }); // captures (performs transforms on) the latest event data and stashes the metrics for status/stats API payload
+  });
+  oppsy.start(config.get('ops.interval'));
 
   // init routes
   registerStatusPage(kbnServer, server, config);
