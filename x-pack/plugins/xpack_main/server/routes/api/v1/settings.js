@@ -26,7 +26,7 @@ export function settingsRoute(server, kbnServer) {
         const { collectorSet } = server.usage;
         const settingsCollector = collectorSet.getCollectorByType(KIBANA_SETTINGS_TYPE);
 
-        const settings = await settingsCollector.fetch(callCluster);
+        const settings = await settingsCollector.fetch({ callCluster });
         const uuid = await getClusterUuid(callCluster);
 
         const kibana = getKibanaInfoForStats(server, kbnServer);

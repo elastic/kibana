@@ -82,6 +82,13 @@ export function createSavedObjectsService(server) {
     }
   });
 
+  const unscopedClientProvider = {
+    getClient(callCluster) {
+      const repository = repositoryProvider.getRepository(callCluster);
+      return new SavedObjectsClient(repository);
+    }
+  };
+
   return {
     types: Object.keys(getRootPropertiesObjects(mappings)),
     SavedObjectsClient,
@@ -94,5 +101,7 @@ export function createSavedObjectsService(server) {
       scopedClientProvider.setClientFactory(...args),
     addScopedSavedObjectsClientWrapperFactory: (...args) =>
       scopedClientProvider.addClientWrapperFactory(...args),
+    getUnscopedSavedObjectsClient: (...args) =>
+      unscopedClientProvider.getClient(...args),
   };
 }

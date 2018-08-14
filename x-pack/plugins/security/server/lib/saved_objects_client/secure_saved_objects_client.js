@@ -164,4 +164,11 @@ export class SecureSavedObjectsClient {
       repository => repository.find(options)
     );
   }
+
+  /*
+   * Summarize the objects
+   */
+  async summarize() {
+    return this._internalRepository.summarize();
+  }
 }
