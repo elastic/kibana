@@ -3,6 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+// @ts-ignore
 import { CommonProps, EuiFormRow, EuiSelect } from '@elastic/eui';
 // @ts-ignore
 import { FormsyInputProps, withFormsy } from 'formsy-react';
