@@ -4,6 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import Boom from 'boom';
+import { omit } from 'lodash';
+import { actions } from './actions';
 
 export class SpacesClient {
   private readonly authorization: any;
@@ -62,15 +64,45 @@ export class SpacesClient {
       const savedObject = await this.callWithRequestSavedObjectRepository.get('space', spaceId);
       return this.transformSavedObjectToSpace(savedObject);
     } else {
-      await this.ensureAuthorized(spaceId, this.authorization.actions.login, 'get');
+      await this.ensureAuthorized(
+        spaceId,
+        this.authorization.actions.login,
+        `Unauthorized to get ${spaceId} space`
+      );
       const savedObject = await this.internalSavedObjectRepository.get('space', spaceId);
       return this.transformSavedObjectToSpace(savedObject);
     }
   }
 
-  private async ensureAuthorized(spaceId: number, action: string, actionDescription: string) {
+  public async create(space: any) {
+    const attributes = omit(space, ['id', '_reserved']);
+    const id = space.id;
+
+    if (!this.authorization || !this.authorization.mode.useRbacForRequest(this.request)) {
+      const createdSavedObject = await this.callWithRequestSavedObjectRepository.create(
+        'space',
+        attributes,
+        { id }
+      );
+      return this.transformSavedObjectToSpace(createdSavedObject);
+    } else {
+      await this.ensureAuthorized(
+        this.authorization.RESOURCES.ALL,
+        actions.manage,
+        'Unauthorized to create spaces'
+      );
+      const createSavedObject = await this.internalSavedObjectRepository.create(
+        'space',
+        attributes,
+        { id }
+      );
+      return this.transformSavedObjectToSpace(createSavedObject);
+    }
+  }
+
+  private async ensureAuthorized(resource: any, action: string, forbiddenMessage: string) {
     const checkPrivileges = this.authorization.checkPrivilegesWithRequest(this.request);
-    const { result } = await checkPrivileges([spaceId], [action]);
+    const { result } = await checkPrivileges([resource], [action]);
 
     switch (result) {
       case this.authorization.CHECK_PRIVILEGES_RESULT.AUTHORIZED: {
@@ -78,7 +110,7 @@ export class SpacesClient {
       }
       case this.authorization.CHECK_PRIVILEGES_RESULT.LEGACY:
       case this.authorization.CHECK_PRIVILEGES_RESULT.UNAUTHORIZED: {
-        throw Boom.forbidden(`Unauthorized to ${actionDescription} ${spaceId} space`);
+        throw Boom.forbidden(forbiddenMessage);
       }
       default: {
         throw new Error('Unexpected result from checkPrivileges');

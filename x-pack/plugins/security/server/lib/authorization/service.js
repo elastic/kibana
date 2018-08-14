@@ -5,6 +5,7 @@
  */
 
 import { actionsFactory } from './actions';
+import { ALL_RESOURCE } from '../../../common/constants';
 import { AuthorizationMode } from './mode';
 import { CHECK_PRIVILEGES_RESULT, checkPrivilegesWithRequestFactory } from './check_privileges';
 import { checkPrivilegesAtAllResourcesWithRequestFactory } from './check_privileges_at_all_resources';
@@ -29,8 +30,10 @@ export function createAuthorizationService(server, xpackInfoFeature) {
     actions,
     application,
     checkPrivilegesWithRequest,
-    checkPrivilegesAtAllResourcesWithRequest,
     CHECK_PRIVILEGES_RESULT,
     mode,
+    RESOURCES: {
+      ALL: ALL_RESOURCE
+    }
   };
 }

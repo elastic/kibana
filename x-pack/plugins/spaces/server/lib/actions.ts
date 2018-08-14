@@ -4,12 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-
-export default function ({ loadTestFile }) {
-
-  describe('spaces', () => {
-    loadTestFile(require.resolve('./create'));
-    loadTestFile(require.resolve('./get_all'));
-    loadTestFile(require.resolve('./get'));
-  });
-}
+export const actions = {
+  manage: 'action:manage_spaces/*',
+};

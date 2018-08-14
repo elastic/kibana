@@ -66,19 +66,11 @@ export function initSpacesApi(server) {
     method: 'POST',
     path: '/api/spaces/v1/space',
     async handler(request, reply) {
-      const client = request.getSavedObjectsClient();
-
-      const space = omit(request.payload, ['id', '_reserved']);
-
-      const id = request.payload.id;
-
-      const existingSpace = await getSpaceById(client, id);
-      if (existingSpace) {
-        return reply(Boom.conflict(`A space with the identifier ${id} already exists. Please choose a different identifier`));
-      }
+      const spacesClient = server.plugins.spaces.spacesClient.getScopedClient(request);
+      const space = request.payload;
 
       try {
-        return reply(await client.create('space', { ...space }, { id, overwrite: false }));
+        return reply(await spacesClient.create(space));
       } catch (error) {
         return reply(wrapError(error));
       }
@@ -177,15 +169,11 @@ export function initSpacesApi(server) {
     }
   });
 
-  async function getSpaceById(client, spaceId) {
+  async function getSpaceById(spacesClient, spaceId) {
     try {
-      const existingSpace = await client.get('space', spaceId);
-      return {
-        id: existingSpace.id,
-        ...existingSpace.attributes
-      };
+      return await spacesClient.get(spaceId);
     } catch (error) {
-      if (client.errors.isNotFoundError(error)) {
+      if (spacesClient.errors.isNotFoundError(error)) {
         return null;
       }
       throw error;
