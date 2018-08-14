@@ -39,6 +39,7 @@ export const CleanPackagesTask = {
     await deleteAll(log, [
       build.resolvePath('packages'),
       build.resolvePath('x-pack'),
+      build.resolvePath('yarn.lock'),
     ]);
   },
 };
@@ -50,7 +51,7 @@ export const CleanTypescriptTask = {
   async run(config, log, build) {
     await deleteAll(log, [
       build.resolvePath('**/*.{ts,tsx,d.ts}'),
-      build.resolvePath('**/tsconfig.json'),
+      build.resolvePath('**/tsconfig*.json'),
     ]);
   },
 };

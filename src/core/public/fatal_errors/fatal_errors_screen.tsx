@@ -20,11 +20,8 @@
 import {
   EuiButton,
   EuiButtonEmpty,
-  // @ts-ignore EuiCallOut not available until we upgrade to EUI 3.1.0
   EuiCallOut,
-  // @ts-ignore EuiCodeBlock not available until we upgrade to EUI 3.1.0
   EuiCodeBlock,
-  // @ts-ignore EuiEmptyPrompt not available until we upgrade to EUI 3.1.0
   EuiEmptyPrompt,
   EuiPage,
   EuiPageBody,

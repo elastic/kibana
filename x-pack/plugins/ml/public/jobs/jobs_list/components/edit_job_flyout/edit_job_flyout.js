@@ -26,7 +26,7 @@ import {
 import { JobDetails, Detectors, Datafeed, CustomUrls } from './tabs';
 import { saveJob } from './edit_utils';
 import { loadFullJob } from '../utils';
-import { validateModelMemoryLimit, validateGroupNames } from './validate_job';
+import { validateModelMemoryLimit, validateGroupNames } from '../validate_job';
 import { mlMessageBarService } from 'plugins/ml/components/messagebar/messagebar_service';
 import { toastNotifications } from 'ui/notify';
 
