@@ -20,32 +20,23 @@
 import * as kbnTestServer from '../test_utils/kbn_server';
 const basePath = '/kibana';
 
-describe('Server basePath config', function () {
+describe('Server basePath config', () => {
   let kbnServer;
-  beforeAll(async function () {
-    kbnServer = kbnTestServer.createServer({
-      server: { basePath }
-    });
+  beforeAll(async () => {
+    kbnServer = kbnTestServer.createServer({ server: { basePath } });
     await kbnServer.ready();
     return kbnServer;
   });
 
-  afterAll(async function () {
-    await kbnServer.close();
-  });
+  afterAll(async () => await kbnServer.close());
 
-  it('appends the basePath to root redirect', function (done) {
-    const options = {
+  test('appends the basePath to root redirect', async () => {
+    const resp = await kbnServer.inject({
       url: '/',
       method: 'GET'
-    };
-    kbnTestServer.makeRequest(kbnServer, options, function (res) {
-      try {
-        expect(res.payload).toMatch(/defaultRoute = '\/kibana\/app\/kibana'/);
-        done();
-      } catch (e) {
-        done(e);
-      }
     });
+
+    expect(resp).toHaveProperty('statusCode', 200);
+    expect(resp.payload).toMatch(/defaultRoute = '\/kibana\/app\/kibana'/);
   });
 });
