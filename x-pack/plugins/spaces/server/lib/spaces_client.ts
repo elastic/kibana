@@ -27,15 +27,7 @@ export class SpacesClient {
   }
 
   public async getAll() {
-    if (!this.authorization || !this.authorization.mode.useRbacForRequest(this.request)) {
-      const { saved_objects } = await this.callWithRequestSavedObjectRepository.find({
-        type: 'space',
-        page: 1,
-        perPage: 1000,
-      });
-
-      return saved_objects.map(this.transformSavedObjectToSpace);
-    } else {
+    if (this.useRbac()) {
       const { saved_objects } = await this.internalSavedObjectRepository.find({
         type: 'space',
         page: 1,
@@ -57,72 +49,66 @@ export class SpacesClient {
       }
 
       return spaces.filter((space: any) => authorized.includes(space.id));
+    } else {
+      const { saved_objects } = await this.callWithRequestSavedObjectRepository.find({
+        type: 'space',
+        page: 1,
+        perPage: 1000,
+      });
+
+      return saved_objects.map(this.transformSavedObjectToSpace);
     }
   }
 
   public async get(id: string) {
-    if (!this.authorization || !this.authorization.mode.useRbacForRequest(this.request)) {
-      const savedObject = await this.callWithRequestSavedObjectRepository.get('space', id);
-      return this.transformSavedObjectToSpace(savedObject);
-    } else {
+    if (this.useRbac()) {
       await this.ensureAuthorized(
         id,
         this.authorization.actions.login,
         `Unauthorized to get ${id} space`
       );
-      const savedObject = await this.internalSavedObjectRepository.get('space', id);
-      return this.transformSavedObjectToSpace(savedObject);
     }
+    const repository = this.useRbac()
+      ? this.internalSavedObjectRepository
+      : this.callWithRequestSavedObjectRepository;
+
+    const savedObject = await repository.get('space', id);
+    return this.transformSavedObjectToSpace(savedObject);
   }
 
   public async create(space: any) {
-    const attributes = omit(space, ['id', '_reserved']);
-    const id = space.id;
-
-    if (!this.authorization || !this.authorization.mode.useRbacForRequest(this.request)) {
-      const createdSavedObject = await this.callWithRequestSavedObjectRepository.create(
-        'space',
-        attributes,
-        { id }
-      );
-      return this.transformSavedObjectToSpace(createdSavedObject);
-    } else {
+    if (this.useRbac()) {
       await this.ensureAuthorized(
         this.authorization.RESOURCES.ALL,
         actions.manage,
         'Unauthorized to create spaces'
       );
-      const createSavedObject = await this.internalSavedObjectRepository.create(
-        'space',
-        attributes,
-        { id }
-      );
-      return this.transformSavedObjectToSpace(createSavedObject);
     }
+    const repository = this.useRbac()
+      ? this.internalSavedObjectRepository
+      : this.callWithRequestSavedObjectRepository;
+
+    const attributes = omit(space, ['id', '_reserved']);
+    const id = space.id;
+    const createdSavedObject = await repository.create('space', attributes, { id });
+    return this.transformSavedObjectToSpace(createdSavedObject);
   }
 
   public async update(id: string, space: any) {
-    const attributes = omit(space, 'id', '_reserved');
-    if (!this.authorization || !this.authorization.mode.useRbacForRequest(this.request)) {
-      const updatedSavedObject = await this.callWithRequestSavedObjectRepository.update(
-        'space',
-        id,
-        attributes
-      );
-      return this.transformSavedObjectToSpace(updatedSavedObject);
-    } else {
+    if (this.useRbac()) {
       await this.ensureAuthorized(
         this.authorization.RESOURCES.ALL,
         actions.manage,
         'Unauthorized to update spaces'
       );
-      const updatedSavedObject = await this.internalSavedObjectRepository.update(
-        'space',
-        id,
-        attributes
-      );
-      return this.transformSavedObjectToSpace(updatedSavedObject);
     }
+    const repository = this.useRbac()
+      ? this.internalSavedObjectRepository
+      : this.callWithRequestSavedObjectRepository;
+
+    const attributes = omit(space, 'id', '_reserved');
+    const updatedSavedObject = await repository.update('space', id, attributes);
+    return this.transformSavedObjectToSpace(updatedSavedObject);
   }
 
   public async delete(id: string) {
