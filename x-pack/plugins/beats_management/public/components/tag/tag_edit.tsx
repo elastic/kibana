@@ -8,27 +8,16 @@ import {
   // @ts-ignore
   EuiBadge,
   EuiButton,
-  EuiButtonEmpty,
-  // @ts-ignore
-  EuiCodeEditor,
   // @ts-ignore
   EuiColorPicker,
   EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiFlyout,
-  EuiFlyoutBody,
-  EuiFlyoutFooter,
-  EuiFlyoutHeader,
   // @ts-ignore
   EuiForm,
   EuiFormRow,
   EuiPanel,
-  // @ts-ignore
-  EuiSearchBar,
   EuiSpacer,
-  // @ts-ignore
-  EuiTabbedContent,
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
@@ -38,6 +27,7 @@ import React from 'react';
 import { BeatTag, CMBeat } from '../../../common/domain_types';
 import { Table } from '../table';
 import { BeatsTableType } from '../table';
+import { ConfigView } from './config_view';
 
 interface TagEditProps {
   tag: Partial<BeatTag>;
@@ -147,59 +137,7 @@ export class TagEdit extends React.PureComponent<TagEditProps, TagEditState> {
         )}
 
         {this.state.showFlyout && (
-          <EuiFlyout onClose={() => this.setState({ showFlyout: false })}>
-            <EuiFlyoutHeader>
-              <EuiTitle size="m">
-                <h2>Add Configuration</h2>
-              </EuiTitle>
-            </EuiFlyoutHeader>
-            <EuiFlyoutBody>
-              <EuiFormRow label="Configuration type">
-                <EuiSearchBar
-                  onChange={() => {
-                    // TODO: handle search changes
-                  }}
-                />
-              </EuiFormRow>
-              <EuiFormRow label="Configuration description">
-                <EuiFieldText
-                  onChange={() => {
-                    // TODO: update field value
-                  }}
-                  placeholder="Description (optional)"
-                />
-              </EuiFormRow>
-              <EuiTabbedContent
-                tabs={[
-                  {
-                    id: 'basic_settings',
-                    name: 'Basic Settings',
-                    content: <div>Add configuration options here</div>,
-                  },
-                  {
-                    id: 'yaml_editor',
-                    name: 'YAML Editor',
-                    content: <EuiCodeEditor mode="yaml" theme="github" />,
-                  },
-                ]}
-              />
-            </EuiFlyoutBody>
-            <EuiFlyoutFooter>
-              <EuiFlexGroup justifyContent="spaceBetween">
-                <EuiFlexItem grow={false}>
-                  <EuiButtonEmpty
-                    iconType="cross"
-                    onClick={() => this.setState({ showFlyout: false })}
-                  >
-                    Close
-                  </EuiButtonEmpty>
-                </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <EuiButton fill>Save</EuiButton>
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            </EuiFlyoutFooter>
-          </EuiFlyout>
+          <ConfigView onClose={() => this.setState({ showFlyout: false })} />
         )}
       </div>
     );
