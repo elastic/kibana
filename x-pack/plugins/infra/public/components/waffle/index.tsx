@@ -17,12 +17,12 @@ import {
 import { InfraWaffleData, InfraWaffleMapGroup, InfraWaffleOptions } from '../../lib/lib';
 import { applyWaffleMapLayout } from './lib/apply_wafflemap_layout';
 
-interface WafleMapProps {
+interface Props {
   options: InfraWaffleOptions;
   map: InfraWaffleData;
 }
 
-export class Waffle extends React.Component<WafleMapProps, {}> {
+export class Waffle extends React.Component<Props, {}> {
   public render() {
     return (
       <AutoSizer content>
