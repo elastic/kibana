@@ -124,7 +124,7 @@ describe('Console Proxy Route', () => {
         const args = getConfigForReq.getCall(0).args;
         expect(args[0]).to.have.property('path', '/api/console/proxy');
         expect(args[0]).to.have.property('method', 'post');
-        expect(args[0].query).to.have.property('value').eql({ method: 'HEAD', path: '/index/type/id' });
+        expect(args[0]).to.have.property('query').eql({ method: 'HEAD', path: '/index/type/id' });
         expect(args[1]).to.be('/index/type/id');
       });
 
