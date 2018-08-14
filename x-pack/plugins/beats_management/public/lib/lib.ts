@@ -7,18 +7,64 @@
 import { IModule, IScope } from 'angular';
 import { AxiosRequestConfig } from 'axios';
 import React from 'react';
-import { CMTagsAdapter } from './adapters/tags/adapter_types';
+import { BeatTag, ConfigurationBlock } from './../../common/domain_types';
 import { CMTokensAdapter } from './adapters/tokens/adapter_types';
 import { BeatsLib } from './domains/beats';
+import { TagsLib } from './domains/tags';
 
 export interface FrontendDomainLibs {
   beats: BeatsLib;
-  tags: CMTagsAdapter;
+  tags: TagsLib;
   tokens: CMTokensAdapter;
 }
 
 export interface FrontendLibs extends FrontendDomainLibs {
   framework: FrameworkAdapter;
+}
+
+export enum FilebeatModuleName {
+  system = 'system',
+  apache2 = 'apache2',
+  nginx = 'nginx',
+  mongodb = 'mongodb',
+  elasticsearch = 'elasticsearch',
+}
+
+export enum MetricbeatModuleName {
+  system = 'system',
+  apache2 = 'apache2',
+  nginx = 'nginx',
+  mongodb = 'mongodb',
+  elasticsearch = 'elasticsearch',
+}
+
+export enum OutputType {
+  elasticsearch = 'elasticsearch',
+  logstash = 'logstash',
+  kafka = 'kafka',
+  console = 'console',
+}
+
+export type ClientConfigContent =
+  | string[]
+  | FilebeatModuleName
+  | {
+      moduleName: MetricbeatModuleName;
+      hosts: string[];
+      period: string;
+    }
+  | {
+      outputType: OutputType;
+      hosts: string[];
+      username: string;
+      password: string;
+    };
+
+export interface ClientSideBeatTag extends BeatTag {
+  configuration_blocks: ClientSideConfigurationBlock[];
+}
+export interface ClientSideConfigurationBlock extends ConfigurationBlock {
+  config: ClientConfigContent;
 }
 
 export interface FrameworkAdapter {

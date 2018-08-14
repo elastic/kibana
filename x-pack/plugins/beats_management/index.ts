@@ -30,7 +30,6 @@ export function beats(kibana: any) {
     },
     config: () => config,
     configPrefix,
-
     init(server: any) {
       initServerWithKibana(server);
     },

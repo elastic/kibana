@@ -10,7 +10,7 @@ import 'brace/theme/github';
 import React from 'react';
 import { BeatTag } from '../../../common/domain_types';
 import { TagEdit } from '../../components/tag';
-import { FrontendLibs } from '../../lib/lib';
+import { ClientSideBeatTag, FrontendLibs } from '../../lib/lib';
 
 interface CreateTagPageProps {
   libs: FrontendLibs;
@@ -73,7 +73,7 @@ export class CreateTagPage extends React.PureComponent<CreateTagPageProps, Creat
   }
 
   private saveTag = async () => {
-    await this.props.libs.tags.upsertTag(this.state.tag as BeatTag);
+    await this.props.libs.tags.upsertTag(this.state.tag as ClientSideBeatTag);
     this.props.history.push('/overview/tags');
   };
 }
