@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import fs from 'fs';
 import Git from 'nodegit';
 import rimraf from 'rimraf';
 
@@ -20,36 +21,46 @@ export class RepositoryService {
       throw new Error(`Invalid repository.`);
     } else {
       const localPath = RepositoryUtils.repositoryLocalPath(this.repoVolPath, repo.uri);
-      try {
-        const gitRepo = await Git.Clone.clone(
-          repo.url,
-          localPath
-          // {
-          //   fetchOpts: {
-          //     callbacks: {
-          //       transferProgress: (stats) => {
-          //         const progress = (100 * (stats.receivedObjects() + stats.indexedObjects())) / (stats.totalObjects() * 2);
-          //         return progress;
-          //       }
-          //     }
-          //   }
-          // }
-        );
-        const headCommit = await gitRepo.getHeadCommit();
-        const headRevision = headCommit.sha();
-        this.log.info(
-          `Clone repository from ${
-            repo.url
-          } to ${localPath} done with head revision ${headRevision}`
-        );
+      if (fs.existsSync(localPath)) {
+        this.log.info(`Repository exist in local path: ${localPath}. Do update instead of clone.`);
+        // Do update instead of clone if the local repo exists.
+        await this.update(repo.uri);
         return {
           uri: repo.uri,
           repo,
         };
-      } catch (error) {
-        const msg = `Clone repository from ${repo.url} to ${localPath} error: ${error}`;
-        this.log.error(msg);
-        throw new Error(msg);
+      } else {
+        try {
+          const gitRepo = await Git.Clone.clone(
+            repo.url,
+            localPath
+            // {
+            //   fetchOpts: {
+            //     callbacks: {
+            //       transferProgress: (stats) => {
+            //         const progress = (100 * (stats.receivedObjects() + stats.indexedObjects())) / (stats.totalObjects() * 2);
+            //         return progress;
+            //       }
+            //     }
+            //   }
+            // }
+          );
+          const headCommit = await gitRepo.getHeadCommit();
+          const headRevision = headCommit.sha();
+          this.log.info(
+            `Clone repository from ${
+              repo.url
+            } to ${localPath} done with head revision ${headRevision}`
+          );
+          return {
+            uri: repo.uri,
+            repo,
+          };
+        } catch (error) {
+          const msg = `Clone repository from ${repo.url} to ${localPath} error: ${error}`;
+          this.log.error(msg);
+          throw new Error(msg);
+        }
       }
     }
   }
