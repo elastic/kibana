@@ -1,40 +1,27 @@
-@primary: #0d5a77;
-@replica: #5698ab;
-@relocating: #663db8;
-@initializing: #5c71ce;
-@unassigned: @esGray;
-@unassignedPrimary: @esRed;
-
-@esBlack: #232123;
-@esDarkGray: #666977;
-@esGray: #A3A5AD;
-@esLightGray: #D1D2D6;
-@esRed: #E74C3C;
-@esVeryLightGray: #EFF0F1;
-@esYellow: #F3BC18;
-
+// SASSTODO: Generic selector
 monitoring-shard-allocation {
   display: block;
-  border-top: 8px solid @esVeryLightGray;
+  border-top: $euiSizeS solid $euiColorLightestShade;
 }
 
-.monitoring-cluster-view-title {
-  font-size: 20px;
+.monClusterTitle {
+  font-size: $euiFontSizeL;
   margin: 0;
 }
 
-.monitoring-cluster-view {
+// SASSTODO: This needs a full rewrite / redesign
+.monCluster {
   cluster-view {
     display: block;
   }
   .parent {
     padding-top: 14px;
-    border-left: 3px solid @esGreen !important;
+    border-left: 3px solid $euiColorSuccess !important;
     &.red {
-      border-left: 3px solid @esRed !important;
+      border-left: 3px solid $euiColorDanger !important;
     }
     &.yellow {
-      border-left: 3px solid @esYellow !important;
+      border-left: 3px solid $euiColorWarning !important;
     }
   }
   td.unassigned {
@@ -49,15 +36,15 @@ monitoring-shard-allocation {
     display: flex;
     align-self: center;
     &.index {
-      border-left: 4px solid @esGreen;
+      border-left: $euiSizeXS solid $euiColorSuccess;
       &.red {
-        border-left: 4px solid @esRed;
+        border-left: $euiSizeXS solid $euiColorDanger;
       }
       &.yellow {
-        border-left: 4px solid @esYellow;
+        border-left: $euiSizeXS solid $euiColorWarning;
       }
     }
-    background-color: @esDarkGray;
+    background-color: $euiColorDarkShade;
     margin: 5px;
     .title {
       padding: 5px 7px;
@@ -65,9 +52,9 @@ monitoring-shard-allocation {
       text-align: center;
       font-size: 12px;
       font: 10px sans-serif;
-      color: @white;
+      color: $euiColorGhost;
       a {
-        color: @white;
+        color: $euiColorGhost;
         text-decoration: none;
       }
       i {
@@ -93,54 +80,54 @@ monitoring-shard-allocation {
   .shard {
     align-self: center;
     padding: 5px 7px;
-    background-color: @primary;
+    background-color: $euiColorPrimary;
     font: 10px sans-serif;
-    border-left: 1px solid @white;
+    border-left: 1px solid $euiColorEmptyShade;
     position: relative;
-    color: @white;
+    color: $euiColorGhost;
 
     .shard-tooltip {
       padding: 5px;
       bottom: 25px;
       left: 0;
-      background-color: @esLightGray;
+      background-color: $euiColorLightShade;
       position: absolute;
-      color: @esDarkGray;
-      border: 1px solid @esLightGray;
+      color: $euiColorDarkShade;
+      border: 1px solid $euiColorLightShade;
       white-space: nowrap;
     }
 
     &.replica {
-      background-color: @replica;
+      background-color: tintOrShade($euiColorPrimary, 15%, 15%);
     }
 
     &.unassigned {
-      background-color: @unassigned !important;
-      color: @black;
+      background-color: $euiColorMediumShade !important;
+      color: $euiColorFullShade;
     }
 
     &.emergency {
-      background-color: @unassignedPrimary !important;
-      color: @black;
+      background-color: $euiColorDanger !important;
+      color: $euiColorFullShade;
     }
 
     &.relocating {
-      background-color: @relocating;
+      background-color: $euiColorVis3;
     }
 
     &.initializing {
-      background-color: @initializing;
+      background-color: tintOrShade($euiColorVis3, 15%, 15%);
     }
   }
 
   .legend {
     font-size: 12px;
-    background-color: @white;
+    background-color: $euiColorEmptyShade;
     .title {
       margin-left: 5px;
       font-weight: bold;
     }
-    color: @esBlack;
+    color: $euiColorDarkestShade;
     padding: 5px;
     span.shard {
       float: none;
