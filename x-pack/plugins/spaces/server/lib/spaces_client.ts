@@ -5,6 +5,7 @@
  */
 import Boom from 'boom';
 import { omit } from 'lodash';
+import { isReservedSpace } from '../../common/is_reserved_space';
 import { actions } from './actions';
 
 export class SpacesClient {
@@ -59,17 +60,17 @@ export class SpacesClient {
     }
   }
 
-  public async get(spaceId: string) {
+  public async get(id: string) {
     if (!this.authorization || !this.authorization.mode.useRbacForRequest(this.request)) {
-      const savedObject = await this.callWithRequestSavedObjectRepository.get('space', spaceId);
+      const savedObject = await this.callWithRequestSavedObjectRepository.get('space', id);
       return this.transformSavedObjectToSpace(savedObject);
     } else {
       await this.ensureAuthorized(
-        spaceId,
+        id,
         this.authorization.actions.login,
-        `Unauthorized to get ${spaceId} space`
+        `Unauthorized to get ${id} space`
       );
-      const savedObject = await this.internalSavedObjectRepository.get('space', spaceId);
+      const savedObject = await this.internalSavedObjectRepository.get('space', id);
       return this.transformSavedObjectToSpace(savedObject);
     }
   }
@@ -122,6 +123,30 @@ export class SpacesClient {
       );
       return this.transformSavedObjectToSpace(updatedSavedObject);
     }
+  }
+
+  public async delete(id: string) {
+    if (this.useRbac()) {
+      await this.ensureAuthorized(
+        this.authorization.RESOURCES.ALL,
+        actions.manage,
+        'Unauthorized to delete spaces'
+      );
+    }
+
+    const existingSpace = await this.get(id);
+    if (isReservedSpace(existingSpace)) {
+      throw Boom.badRequest('This Space cannot be deleted because it is reserved.');
+    }
+
+    const repository = this.useRbac()
+      ? this.internalSavedObjectRepository
+      : this.callWithRequestSavedObjectRepository;
+    await repository.delete('space', id);
+  }
+
+  private useRbac(): boolean {
+    return this.authorization && this.authorization.mode.useRbacForRequest(this.request);
   }
 
   private async ensureAuthorized(resource: string, action: string, forbiddenMessage: string) {

@@ -4,11 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import Boom from 'boom';
 import { routePreCheckLicense } from '../../../lib/route_pre_check_license';
 import { spaceSchema } from '../../../lib/space_schema';
 import { wrapError } from '../../../lib/errors';
-import { isReservedSpace } from '../../../../common/is_reserved_space';
 import { addSpaceIdToPath } from '../../../lib/spaces_url_parser';
 
 export function initSpacesApi(server) {
@@ -103,24 +101,15 @@ export function initSpacesApi(server) {
     method: 'DELETE',
     path: '/api/spaces/v1/space/{id}',
     async handler(request, reply) {
-      const client = request.getSavedObjectsClient();
-
+      const spacesClient = server.plugins.spaces.spacesClient.getScopedClient(request);
       const id = request.params.id;
 
-      let result;
-
       try {
-        const existingSpace = await getSpaceById(client, id);
-        if (isReservedSpace(existingSpace)) {
-          return reply(wrapError(Boom.badRequest('This Space cannot be deleted because it is reserved.')));
-        }
-
-        result = await client.delete('space', id);
+        await spacesClient.delete(id);
+        return reply().code(204);
       } catch (error) {
         return reply(wrapError(error));
       }
-
-      return reply(result).code(204);
     },
     config: {
       pre: [routePreCheckLicenseFn]

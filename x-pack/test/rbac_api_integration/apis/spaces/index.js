@@ -9,6 +9,7 @@ export default function ({ loadTestFile }) {
 
   describe('spaces', () => {
     loadTestFile(require.resolve('./create'));
+    loadTestFile(require.resolve('./delete'));
     loadTestFile(require.resolve('./get_all'));
     loadTestFile(require.resolve('./get'));
     loadTestFile(require.resolve('./update'));
