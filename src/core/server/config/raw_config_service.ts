@@ -17,9 +17,9 @@
  * under the License.
  */
 
-import { isEqual, isPlainObject } from 'lodash';
+import { isPlainObject } from 'lodash';
 import { BehaviorSubject, from, Observable } from 'rxjs';
-import { filter, map, skipWhile } from 'rxjs/operators';
+import { distinctUntilChanged, filter, map } from 'rxjs/operators';
 import typeDetect from 'type-detect';
 
 import { ObjectToRawConfigAdapter } from './object_to_raw_config_adapter';
@@ -62,7 +62,7 @@ export class RawConfigService {
         throw new Error(`the raw config must be an object, got [${typeDetect(rawConfig)}]`);
       }),
       // We only want to update the config if there are changes to it
-      skipWhile(isEqual)
+      distinctUntilChanged()
     );
   }
 

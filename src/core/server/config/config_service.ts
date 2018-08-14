@@ -17,9 +17,8 @@
  * under the License.
  */
 
-import { isEqual } from 'lodash';
 import { from, Observable } from 'rxjs';
-import { first, map, skipWhile } from 'rxjs/operators';
+import { distinctUntilChanged, first, map } from 'rxjs/operators';
 
 import { Logger, LoggerFactory } from '../logging';
 import { ConfigWithSchema } from './config_with_schema';
@@ -160,7 +159,7 @@ export class ConfigService {
 
     return from(this.config$).pipe(
       map(config => config.get(path)),
-      skipWhile(isEqual)
+      distinctUntilChanged()
     );
   }
 
