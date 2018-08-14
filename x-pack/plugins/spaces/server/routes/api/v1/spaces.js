@@ -120,17 +120,16 @@ export function initSpacesApi(server) {
     method: 'POST',
     path: '/api/spaces/v1/space/{id}/select',
     async handler(request, reply) {
-      const client = request.getSavedObjectsClient();
-
+      const spacesClient = server.plugins.spaces.spacesClient.getScopedClient(request);
       const id = request.params.id;
 
       try {
-        const existingSpace = await getSpaceById(client, id);
+        const space = await spacesClient.get(id);
 
         const config = server.config();
 
         return reply({
-          location: addSpaceIdToPath(config.get('server.basePath'), existingSpace.id, config.get('server.defaultRoute'))
+          location: addSpaceIdToPath(config.get('server.basePath'), space.id, config.get('server.defaultRoute'))
         });
 
       } catch (error) {
@@ -138,19 +137,4 @@ export function initSpacesApi(server) {
       }
     }
   });
-
-  async function getSpaceById(client, spaceId) {
-    try {
-      const existingSpace = await client.get('space', spaceId);
-      return {
-        id: existingSpace.id,
-        ...existingSpace.attributes
-      };
-    } catch (error) {
-      if (client.errors.isNotFoundError(error)) {
-        return null;
-      }
-      throw error;
-    }
-  }
 }
