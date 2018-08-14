@@ -40,7 +40,7 @@ export const TranspileTypescriptTask = {
     await write(browserProject.tsConfigPath, JSON.stringify({
       ...browserProject.config,
       include: [
-        ...browserProject.config.exclude,
+        ...browserProject.config.include,
         'src/**/public/**/*'
       ]
     }));
