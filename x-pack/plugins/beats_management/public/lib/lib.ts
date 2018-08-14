@@ -7,7 +7,8 @@
 import { IModule, IScope } from 'angular';
 import { AxiosRequestConfig } from 'axios';
 import React from 'react';
-import { BeatTag, ConfigurationBlock } from './../../common/domain_types';
+import { ConfigurationBlockTypes } from '../../common/constants/configuration_blocks';
+import { BeatTag } from '../../common/domain_types';
 import { CMTokensAdapter } from './adapters/tokens/adapter_types';
 import { BeatsLib } from './domains/beats';
 import { TagsLib } from './domains/tags';
@@ -61,11 +62,53 @@ export type ClientConfigContent =
     };
 
 export interface ClientSideBeatTag extends BeatTag {
-  configuration_blocks: ClientSideConfigurationBlock[];
+  configurations: ClientSideConfigurationBlock[];
 }
-export interface ClientSideConfigurationBlock extends ConfigurationBlock {
-  config: ClientConfigContent;
+
+export interface YamlConfigSchema {
+  id: string;
+  ui: {
+    name: string;
+    type: 'input' | 'multi-input' | 'select';
+  };
+  options?: Array<{ value: string; text: string }>;
+  validations?: 'isHost' | 'isUsername' | 'isPassword' | 'isPeriod' | 'isPath' | 'isPaths';
+  error: string;
+  defaultValue?: string;
+  required?: boolean;
+  parseValidResult?: (value: any) => any;
 }
+
+export type ClientSideConfigurationBlock =
+  | {
+      type: ConfigurationBlockTypes.FilebeatInputs;
+      config: string[];
+    }
+  | {
+      type: ConfigurationBlockTypes.FilebeatModules;
+      config: FilebeatModuleName;
+    }
+  | {
+      type: ConfigurationBlockTypes.MetricbeatModules;
+      config: {
+        moduleName: MetricbeatModuleName;
+        hosts: string[];
+        period: string;
+      };
+    }
+  | {
+      type: ConfigurationBlockTypes.Output;
+      config: {
+        outputType: OutputType;
+        hosts: string[];
+        username: string;
+        password: string;
+      };
+    }
+  | {
+      type: ConfigurationBlockTypes.Processors;
+      config: ClientConfigContent;
+    };
 
 export interface FrameworkAdapter {
   // Insstance vars

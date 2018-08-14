@@ -27,9 +27,9 @@ export class TagsLib {
 
   private tagConfigsToYaml(tags: ClientSideBeatTag[]): BeatTag[] {
     return tags.map(tag => {
-      tag.configuration_blocks.map(block => {
+      tag.configuration_blocks = tag.configurations.map(block => {
         return {
-          ...block,
+          type: block.type,
           block_yml: yaml.safeDump(block.config),
         } as ConfigurationBlock;
       });
