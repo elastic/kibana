@@ -1,0 +1,27 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`emits 0 initially, and the right count when observables emit their own count 1`] = `
+Array [
+  Array [
+    15,
+  ],
+  Array [
+    16,
+  ],
+  Array [
+    17,
+  ],
+  Array [
+    2,
+  ],
+  Array [
+    3,
+  ],
+  Array [
+    2,
+  ],
+  Array [
+    0,
+  ],
+]
+`;
