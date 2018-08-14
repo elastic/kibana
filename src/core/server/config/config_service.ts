@@ -21,13 +21,9 @@ import { isEqual } from 'lodash';
 import { Observable } from 'rxjs';
 import { distinctUntilChanged, first, map } from 'rxjs/operators';
 
+import { ConfigPath, ConfigWithSchema, Env, RawConfig } from '.';
 import { Logger, LoggerFactory } from '../logging';
-import { ConfigWithSchema } from './config_with_schema';
-import { Env } from './env';
-import { RawConfig } from './raw_config';
 import { Type } from './schema';
-
-export type ConfigPath = string | string[];
 
 export class ConfigService {
   private readonly log: Logger;

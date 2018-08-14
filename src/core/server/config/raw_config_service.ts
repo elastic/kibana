@@ -17,14 +17,14 @@
  * under the License.
  */
 
-import { isEqual, isPlainObject } from 'lodash';
+import { cloneDeep, isEqual, isPlainObject } from 'lodash';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { distinctUntilChanged, filter, map } from 'rxjs/operators';
 import typeDetect from 'type-detect';
 
 import { ObjectToRawConfigAdapter } from './object_to_raw_config_adapter';
 import { RawConfig } from './raw_config';
-import { getConfigFromFile } from './read_config';
+import { getConfigFromFiles } from './read_config';
 
 // Used to indicate that no config has been received yet
 const notRead = Symbol('config not yet read');
@@ -44,25 +44,23 @@ export class RawConfigService {
 
   private readonly config$: Observable<RawConfig>;
 
-  constructor(readonly configFile: string) {
+  constructor(
+    readonly configFiles: ReadonlyArray<string>,
+    configAdapter: (rawValue: Record<string, any>) => RawConfig = rawValue =>
+      new ObjectToRawConfigAdapter(rawValue)
+  ) {
     this.config$ = this.rawConfigFromFile$.pipe(
       filter(rawConfig => rawConfig !== notRead),
+      // We only want to update the config if there are changes to it.
+      distinctUntilChanged(isEqual),
       map(rawConfig => {
-        // If the raw config is null, e.g. if empty config file, we default to
-        // an empty config
-        if (rawConfig == null) {
-          return new ObjectToRawConfigAdapter({});
-        }
-
         if (isPlainObject(rawConfig)) {
           // TODO Make config consistent, e.g. handle dots in keys
-          return new ObjectToRawConfigAdapter(rawConfig);
+          return configAdapter(cloneDeep(rawConfig));
         }
 
         throw new Error(`the raw config must be an object, got [${typeDetect(rawConfig)}]`);
-      }),
-      // We only want to update the config if there are changes to it
-      distinctUntilChanged(isEqual)
+      })
     );
   }
 
@@ -70,8 +68,7 @@ export class RawConfigService {
    * Read the initial Kibana config.
    */
   public loadConfig() {
-    const config = getConfigFromFile(this.configFile);
-    this.rawConfigFromFile$.next(config);
+    this.rawConfigFromFile$.next(getConfigFromFiles(this.configFiles));
   }
 
   public stop() {

@@ -23,35 +23,31 @@ import { map } from 'rxjs/operators';
 /** @internal */
 export { LegacyPlatformProxifier } from './legacy_platform_proxifier';
 /** @internal */
-export { LegacyConfigToRawConfigAdapter, LegacyConfig } from './legacy_platform_config';
+export { LegacyObjectToRawConfigAdapter } from './config/legacy_object_to_raw_config_adapter';
 
-import { LegacyConfig, LegacyConfigToRawConfigAdapter, LegacyPlatformProxifier } from '.';
+import { LegacyObjectToRawConfigAdapter, LegacyPlatformProxifier } from '.';
 import { Env } from '../config';
 import { Root } from '../root';
 import { BasePathProxyRoot } from '../root/base_path_proxy_root';
 
 function initEnvironment(rawKbnServer: any, isDevClusterMaster = false) {
-  const config: LegacyConfig = rawKbnServer.config;
-
-  const legacyConfig$ = new BehaviorSubject(config);
-  const config$ = legacyConfig$.pipe(
-    map(legacyConfig => new LegacyConfigToRawConfigAdapter(legacyConfig))
-  );
-
   const env = Env.createDefault({
     // The core doesn't work with configs yet, everything is provided by the
     // "legacy" Kibana, so we can have empty array here.
     configs: [],
     // `dev` is the only CLI argument we currently use.
-    cliArgs: { dev: config.get('env.dev') },
+    cliArgs: { dev: rawKbnServer.config.get('env.dev') },
     isDevClusterMaster,
   });
 
+  const legacyConfig$ = new BehaviorSubject<Record<string, any>>(rawKbnServer.config.get());
   return {
-    config$,
+    config$: legacyConfig$.pipe(
+      map(legacyConfig => new LegacyObjectToRawConfigAdapter(legacyConfig))
+    ),
     env,
     // Propagates legacy config updates to the new platform.
-    updateConfig(legacyConfig: LegacyConfig) {
+    updateConfig(legacyConfig: Record<string, any>) {
       legacyConfig$.next(legacyConfig);
     },
   };

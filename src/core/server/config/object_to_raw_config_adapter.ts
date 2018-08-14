@@ -17,9 +17,9 @@
  * under the License.
  */
 
-import { get, has, set } from 'lodash';
+import { cloneDeep, get, has, set } from 'lodash';
 
-import { ConfigPath } from './config_service';
+import { ConfigPath } from './';
 import { RawConfig } from './raw_config';
 
 /**
@@ -27,7 +27,7 @@ import { RawConfig } from './raw_config';
  * @internal
  */
 export class ObjectToRawConfigAdapter implements RawConfig {
-  constructor(private readonly rawValue: { [key: string]: any }) {}
+  constructor(protected readonly rawValue: Record<string, any>) {}
 
   public has(configPath: ConfigPath) {
     return has(this.rawValue, configPath);
@@ -43,6 +43,10 @@ export class ObjectToRawConfigAdapter implements RawConfig {
 
   public getFlattenedPaths() {
     return [...flattenObjectKeys(this.rawValue)];
+  }
+
+  public toRaw() {
+    return cloneDeep(this.rawValue);
   }
 }
 

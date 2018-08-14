@@ -43,7 +43,11 @@ export class Server {
 
     const unhandledConfigPaths = await this.configService.getUnusedPaths();
     if (unhandledConfigPaths.length > 0) {
-      throw new Error(`some config paths are not handled: ${JSON.stringify(unhandledConfigPaths)}`);
+      // We don't throw here since unhandled paths are verified by the "legacy"
+      // Kibana right now, but this will eventually change.
+      this.log.trace(
+        `some config paths are not handled by the core: ${JSON.stringify(unhandledConfigPaths)}`
+      );
     }
   }
 

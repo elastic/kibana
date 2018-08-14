@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { ConfigPath } from './config_service';
+export type ConfigPath = string | string[];
 
 /**
  * Represents raw config store.
@@ -49,4 +49,11 @@ export interface RawConfig {
    * @returns List of the string config paths.
    */
   getFlattenedPaths(): string[];
+
+  /**
+   * Returns a full copy of the underlying raw config object. Should be used ONLY
+   * in extreme cases when there is no other better way, e.g. bridging with the
+   * "legacy" systems that consume and process config in a different way.
+   */
+  toRaw(): Record<string, any>;
 }

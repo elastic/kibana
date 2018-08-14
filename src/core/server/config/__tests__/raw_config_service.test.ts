@@ -17,49 +17,73 @@
  * under the License.
  */
 
-const mockGetConfigFromFile = jest.fn();
+const mockGetConfigFromFiles = jest.fn();
 
 jest.mock('../read_config', () => ({
-  getConfigFromFile: mockGetConfigFromFile,
+  getConfigFromFiles: mockGetConfigFromFiles,
 }));
 
 import { first } from 'rxjs/operators';
 import { RawConfigService } from '../raw_config_service';
 
 const configFile = '/config/kibana.yml';
+const anotherConfigFile = '/config/kibana.dev.yml';
 
 beforeEach(() => {
-  mockGetConfigFromFile.mockReset();
-  mockGetConfigFromFile.mockImplementation(() => ({}));
+  mockGetConfigFromFiles.mockReset();
+  mockGetConfigFromFiles.mockImplementation(() => ({}));
 });
 
-test('loads raw config when started', () => {
-  const configService = new RawConfigService(configFile);
+test('loads single raw config when started', () => {
+  const configService = new RawConfigService([configFile]);
 
   configService.loadConfig();
 
-  expect(mockGetConfigFromFile).toHaveBeenCalledTimes(1);
-  expect(mockGetConfigFromFile).toHaveBeenLastCalledWith(configFile);
+  expect(mockGetConfigFromFiles).toHaveBeenCalledTimes(1);
+  expect(mockGetConfigFromFiles).toHaveBeenLastCalledWith([configFile]);
 });
 
-test('re-reads the config when reloading', () => {
-  const configService = new RawConfigService(configFile);
+test('loads multiple raw configs when started', () => {
+  const configService = new RawConfigService([configFile, anotherConfigFile]);
 
   configService.loadConfig();
 
-  mockGetConfigFromFile.mockClear();
-  mockGetConfigFromFile.mockImplementation(() => ({ foo: 'bar' }));
+  expect(mockGetConfigFromFiles).toHaveBeenCalledTimes(1);
+  expect(mockGetConfigFromFiles).toHaveBeenLastCalledWith([configFile, anotherConfigFile]);
+});
+
+test('re-reads single config when reloading', () => {
+  const configService = new RawConfigService([configFile]);
+
+  configService.loadConfig();
+
+  mockGetConfigFromFiles.mockClear();
+  mockGetConfigFromFiles.mockImplementation(() => ({ foo: 'bar' }));
 
   configService.reloadConfig();
 
-  expect(mockGetConfigFromFile).toHaveBeenCalledTimes(1);
-  expect(mockGetConfigFromFile).toHaveBeenLastCalledWith(configFile);
+  expect(mockGetConfigFromFiles).toHaveBeenCalledTimes(1);
+  expect(mockGetConfigFromFiles).toHaveBeenLastCalledWith([configFile]);
+});
+
+test('re-reads multiple configs when reloading', () => {
+  const configService = new RawConfigService([configFile, anotherConfigFile]);
+
+  configService.loadConfig();
+
+  mockGetConfigFromFiles.mockClear();
+  mockGetConfigFromFiles.mockImplementation(() => ({ foo: 'bar' }));
+
+  configService.reloadConfig();
+
+  expect(mockGetConfigFromFiles).toHaveBeenCalledTimes(1);
+  expect(mockGetConfigFromFiles).toHaveBeenLastCalledWith([configFile, anotherConfigFile]);
 });
 
 test('returns config at path as observable', async () => {
-  mockGetConfigFromFile.mockImplementation(() => ({ key: 'value' }));
+  mockGetConfigFromFiles.mockImplementation(() => ({ key: 'value' }));
 
-  const configService = new RawConfigService(configFile);
+  const configService = new RawConfigService([configFile]);
 
   configService.loadConfig();
 
@@ -73,9 +97,9 @@ test('returns config at path as observable', async () => {
 });
 
 test("does not push new configs when reloading if config at path hasn't changed", async () => {
-  mockGetConfigFromFile.mockImplementation(() => ({ key: 'value' }));
+  mockGetConfigFromFiles.mockImplementation(() => ({ key: 'value' }));
 
-  const configService = new RawConfigService(configFile);
+  const configService = new RawConfigService([configFile]);
 
   configService.loadConfig();
 
@@ -84,8 +108,8 @@ test("does not push new configs when reloading if config at path hasn't changed"
     valuesReceived.push(config);
   });
 
-  mockGetConfigFromFile.mockClear();
-  mockGetConfigFromFile.mockImplementation(() => ({ key: 'value' }));
+  mockGetConfigFromFiles.mockClear();
+  mockGetConfigFromFiles.mockImplementation(() => ({ key: 'value' }));
 
   configService.reloadConfig();
 
@@ -95,9 +119,9 @@ test("does not push new configs when reloading if config at path hasn't changed"
 });
 
 test('pushes new config when reloading and config at path has changed', async () => {
-  mockGetConfigFromFile.mockImplementation(() => ({ key: 'value' }));
+  mockGetConfigFromFiles.mockImplementation(() => ({ key: 'value' }));
 
-  const configService = new RawConfigService(configFile);
+  const configService = new RawConfigService([configFile]);
 
   configService.loadConfig();
 
@@ -106,8 +130,8 @@ test('pushes new config when reloading and config at path has changed', async ()
     valuesReceived.push(config);
   });
 
-  mockGetConfigFromFile.mockClear();
-  mockGetConfigFromFile.mockImplementation(() => ({ key: 'new value' }));
+  mockGetConfigFromFiles.mockClear();
+  mockGetConfigFromFiles.mockImplementation(() => ({ key: 'new value' }));
 
   configService.reloadConfig();
 
@@ -121,9 +145,9 @@ test('pushes new config when reloading and config at path has changed', async ()
 test('completes config observables when stopped', done => {
   expect.assertions(0);
 
-  mockGetConfigFromFile.mockImplementation(() => ({ key: 'value' }));
+  mockGetConfigFromFiles.mockImplementation(() => ({ key: 'value' }));
 
-  const configService = new RawConfigService(configFile);
+  const configService = new RawConfigService([configFile]);
 
   configService.loadConfig();
 
