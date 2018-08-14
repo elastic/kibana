@@ -27,7 +27,7 @@ import { RawConfig } from './raw_config';
 import { getConfigFromFile } from './read_config';
 
 // Used to indicate that no config has been received yet
-const notRead: symbol = Symbol('config not yet read');
+const notRead = Symbol('config not yet read');
 
 export class RawConfigService {
   /**
@@ -40,7 +40,7 @@ export class RawConfigService {
    * As we have a notion of a _current_ config we rely on a BehaviorSubject so
    * every new subscription will immediately receive the current config.
    */
-  private readonly rawConfigFromFile$: BehaviorSubject<symbol> = new BehaviorSubject(notRead);
+  private readonly rawConfigFromFile$ = new BehaviorSubject<any>(notRead);
 
   private readonly config$: Observable<RawConfig>;
 
