@@ -17,12 +17,15 @@ import { KibanaFrameworkAdapter } from '../adapters/framework/kibana_framework_a
 import { MemoryTagsAdapter } from '../adapters/tags/memory_tags_adapter';
 import { MemoryTokensAdapter } from '../adapters/tokens/memory_tokens_adapter';
 
+import { BeatsLib } from '../domains/beats';
 import { FrontendDomainLibs, FrontendLibs } from '../lib';
 
+import { TagsLib } from '../domains/tags';
+
 export function compose(): FrontendLibs {
-  const tags = new MemoryTagsAdapter([]);
+  const tags = new TagsLib(new MemoryTagsAdapter([]));
   const tokens = new MemoryTokensAdapter();
-  const beats = new MemoryBeatsAdapter([]);
+  const beats = new BeatsLib(new MemoryBeatsAdapter([]), { tags });
 
   const domainLibs: FrontendDomainLibs = {
     tags,

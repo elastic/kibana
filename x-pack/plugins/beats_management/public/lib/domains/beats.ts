@@ -12,12 +12,12 @@ import {
   CMAssignmentReturn,
   CMBeatsAdapter,
 } from '../adapters/beats/adapter_types';
-import { CMTagsAdapter } from './../adapters/tags/adapter_types';
+import { FrontendDomainLibs } from '../lib';
 
 export class BeatsLib {
   constructor(
     private readonly adapter: CMBeatsAdapter,
-    private readonly libs: { tags: CMTagsAdapter }
+    private readonly libs: { tags: FrontendDomainLibs['tags'] }
   ) {}
 
   public async get(id: string): Promise<CMPopulatedBeat | null> {

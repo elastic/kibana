@@ -18,13 +18,14 @@ import { KibanaFrameworkAdapter } from '../adapters/framework/kibana_framework_a
 import { AxiosRestAPIAdapter } from '../adapters/rest_api/axios_rest_api_adapter';
 import { RestTagsAdapter } from '../adapters/tags/rest_tags_adapter';
 import { RestTokensAdapter } from '../adapters/tokens/rest_tokens_adapter';
+import { BeatsLib } from '../domains/beats';
+import { TagsLib } from '../domains/tags';
 import { FrontendDomainLibs, FrontendLibs } from '../lib';
-import { BeatsLib } from './../domains/beats';
 
 export function compose(): FrontendLibs {
   const api = new AxiosRestAPIAdapter(chrome.getXsrfToken(), chrome.getBasePath());
 
-  const tags = new RestTagsAdapter(api);
+  const tags = new TagsLib(new RestTagsAdapter(api));
   const tokens = new RestTokensAdapter(api);
   const beats = new BeatsLib(new RestBeatsAdapter(api), {
     tags,
