@@ -106,7 +106,7 @@ visualize-app .vis-editor-canvas {
 *  Dashboard tweaks
 */
 
-.dashboard-panel .panel-heading {
+.dshPanel__header {
   /* hide the panel heading with the controls in it like expand */
   display: none !important;
 }
