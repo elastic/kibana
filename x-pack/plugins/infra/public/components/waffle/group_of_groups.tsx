@@ -19,7 +19,7 @@ interface Props {
 
 export const GroupOfGroups: React.SFC<Props> = props => {
   return (
-    <Container>
+    <GroupOfGroupsContainer>
       <GroupName group={props.group} onDrilldown={props.onDrilldown} />
       <Groups>
         {props.group.groups.map(group => (
@@ -33,11 +33,11 @@ export const GroupOfGroups: React.SFC<Props> = props => {
           />
         ))}
       </Groups>
-    </Container>
+    </GroupOfGroupsContainer>
   );
 };
 
-const Container = styled.div`
+const GroupOfGroupsContainer = styled.div`
   margin: 0 10px;
 `;
 

@@ -30,9 +30,11 @@ export class Waffle extends React.Component<Props, {}> {
           const { map } = this.props;
           const groupsWithLayout = applyWaffleMapLayout(map, width, height);
           return (
-            <Container innerRef={(el: any) => measureRef(el)}>
-              <MapContainer>{groupsWithLayout.map(this.renderGroup)}</MapContainer>
-            </Container>
+            <WaffleMapOuterContiner innerRef={(el: any) => measureRef(el)}>
+              <WaffleMapInnerContainer>
+                {groupsWithLayout.map(this.renderGroup)}
+              </WaffleMapInnerContainer>
+            </WaffleMapOuterContiner>
           );
         }}
       </AutoSizer>
@@ -75,7 +77,7 @@ export class Waffle extends React.Component<Props, {}> {
   };
 }
 
-const Container = styled.div`
+const WaffleMapOuterContiner = styled.div`
   flex: 1 0 0;
   display: flex;
   justify-content: center;
@@ -84,7 +86,7 @@ const Container = styled.div`
   overflow-y: auto;
 `;
 
-const MapContainer = styled.div`
+const WaffleMapInnerContainer = styled.div`
   display: flex;
   flex-direction: row;
   flex-wrap: wrap;

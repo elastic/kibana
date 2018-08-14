@@ -43,7 +43,10 @@ export class Node extends React.PureComponent<Props, State> {
         options={options}
       >
         <EuiToolTip position="top" content={`${node.name} | ${value}`}>
-          <Container style={{ width: squareSize, height: squareSize }} onClick={this.togglePopover}>
+          <NodeContainer
+            style={{ width: squareSize, height: squareSize }}
+            onClick={this.togglePopover}
+          >
             <SquareOuter>
               <SquareInner>
                 {valueMode && (
@@ -54,7 +57,7 @@ export class Node extends React.PureComponent<Props, State> {
                 )}
               </SquareInner>
             </SquareOuter>
-          </Container>
+          </NodeContainer>
         </EuiToolTip>
       </NodeContextMenu>
     );
@@ -69,7 +72,7 @@ export class Node extends React.PureComponent<Props, State> {
   };
 }
 
-const Container = styled.div`
+const NodeContainer = styled.div`
   position: relative;
 `;
 
