@@ -29,7 +29,7 @@ export const withLogSearchControlsProps = connect(
   }),
   bindPlainActionCreators({
     // clearSearch: searchActions.clearSearch,
-    jumpToTarget: targetActions.jumpToTarget,
+    jumpToTarget: targetActions.jumpToTargetPosition,
     // search: searchActions.search,
   })
 );

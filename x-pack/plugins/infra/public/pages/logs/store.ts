@@ -17,6 +17,7 @@ import {
   // searchSelectors,
   // sourceSelectors,
   State,
+  targetSelectors,
   // summarySelectors,
   // targetSelectors,
 } from '../../containers/logging_legacy/state';
@@ -44,6 +45,7 @@ export function createStore({ apolloClient, observableApi }: StoreDependencies) 
     selectEntriesStart: entriesSelectors.selectEntriesStart,
     selectHasMoreAfterEnd: entriesSelectors.selectHasMoreAfterEnd,
     selectHasMoreBeforeStart: entriesSelectors.selectHasMoreBeforeStart,
+    selectIsAutoReloading: targetSelectors.selectIsAutoReloading,
     // selectEntriesEndLoadingState: entriesSelectors.selectEntriesEndLoadingState,
     // selectEntriesStartLoadingState: entriesSelectors.selectEntriesStartLoadingState,
     // selectFirstEntry: entriesSelectors.selectFirstEntry,

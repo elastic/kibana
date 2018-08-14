@@ -6,14 +6,18 @@
 
 import actionCreatorFactory from 'typescript-fsa';
 
-import { LogEntryTime } from '../../../../../common/log_entry';
+import { TimeKey } from '../../../../../common/time';
 
-const actionCreator = actionCreatorFactory('kibana/logging/target');
+const actionCreator = actionCreatorFactory('kibana/logging/log_position');
 
-export const jumpToTarget = actionCreator<LogEntryTime>('JUMP_TO_TARGET');
+export const jumpToTargetPosition = actionCreator<TimeKey>('JUMP_TO_TARGET_POSITION');
 
-export const jumpToTime = (time: number) =>
-  jumpToTarget({
+export const jumpToTargetPositionTime = (time: number) =>
+  jumpToTargetPosition({
     tiebreaker: 0,
     time,
   });
+
+export const startAutoReload = actionCreator<number>('START_AUTO_RELOAD');
+
+export const stopAutoReload = actionCreator('STOP_AUTO_RELOAD');

@@ -6,4 +6,7 @@
 
 import { TargetState } from './reducer';
 
-export const selectTarget = (state: TargetState) => state;
+export const selectTargetPosition = (state: TargetState) => state.targetPosition;
+
+export const selectIsAutoReloading = (state: TargetState) =>
+  state.updatePolicy.policy === 'interval';

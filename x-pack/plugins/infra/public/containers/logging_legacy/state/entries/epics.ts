@@ -29,6 +29,7 @@ interface ManageEntriesDependencies<State> {
   selectEntriesEnd: (state: State) => TimeKey | null;
   selectHasMoreBeforeStart: (state: State) => boolean;
   selectHasMoreAfterEnd: (state: State) => boolean;
+  selectIsAutoReloading: (state: State) => boolean;
   selectIsLoadingEntries: (state: State) => boolean;
 }
 
@@ -52,11 +53,12 @@ export const createEntriesEffectsEpic = <State>(): Epic<
     selectEntriesEnd,
     selectHasMoreBeforeStart,
     selectHasMoreAfterEnd,
+    selectIsAutoReloading,
     selectIsLoadingEntries,
   }
 ) => {
   const shouldLoadAround$ = action$.pipe(
-    filter(targetActions.jumpToTarget.match),
+    filter(targetActions.jumpToTargetPosition.match),
     withLatestFrom(state$),
     filter(([{ payload }, state]) => {
       const entriesStart = selectEntriesStart(state);
@@ -73,6 +75,7 @@ export const createEntriesEffectsEpic = <State>(): Epic<
     filter(reportVisibleEntries.match),
     filter(({ payload: { pagesBeforeStart } }) => pagesBeforeStart < DESIRED_BUFFER_PAGES),
     withLatestFrom(state$),
+    filter(([action, state]) => !selectIsAutoReloading(state)),
     filter(([action, state]) => !selectIsLoadingEntries(state)),
     filter(([action, state]) => selectHasMoreBeforeStart(state)),
     map(([action, state]) => selectEntriesStart(state)),
@@ -84,6 +87,7 @@ export const createEntriesEffectsEpic = <State>(): Epic<
     filter(reportVisibleEntries.match),
     filter(({ payload: { pagesAfterEnd } }) => pagesAfterEnd < DESIRED_BUFFER_PAGES),
     withLatestFrom(state$),
+    filter(([action, state]) => !selectIsAutoReloading(state)),
     filter(([action, state]) => !selectIsLoadingEntries(state)),
     filter(([action, state]) => selectHasMoreAfterEnd(state)),
     map(([action, state]) => selectEntriesEnd(state)),

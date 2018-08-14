@@ -22,13 +22,17 @@ import { bindPlainActionCreators } from '../../utils/typed_redux';
 
 export const withStreamItems = connect(
   (state: State) => ({
-    endLoadingState: entriesSelectors.selectEntriesEndLoadingState(state),
+    isReloading: entriesSelectors.selectIsReloadingEntries(state),
+    isLoadingMore: entriesSelectors.selectIsLoadingMoreEntries(state),
+    hasMoreBeforeStart: entriesSelectors.selectHasMoreBeforeStart(state),
+    hasMoreAfterEnd: entriesSelectors.selectHasMoreAfterEnd(state),
+    isStreaming: targetSelectors.selectIsAutoReloading(state),
+    lastLoadedTime: entriesSelectors.selectEntriesLastLoadedTime(state),
     items: selectItems(state),
-    startLoadingState: entriesSelectors.selectEntriesStartLoadingState(state),
-    target: targetSelectors.selectTarget(state),
+    target: targetSelectors.selectTargetPosition(state),
   }),
   bindPlainActionCreators({
-    jumpToTarget: targetActions.jumpToTarget,
+    jumpToTarget: targetActions.jumpToTargetPosition,
     reportVisibleInterval: entriesActions.reportVisibleEntries,
   })
 );
@@ -38,9 +42,10 @@ export const WithStreamItems = asChildFunctionRenderer(withStreamItems);
 const selectItems = createSelector(
   entriesSelectors.selectEntries,
   entriesSelectors.selectIsReloadingEntries,
+  targetSelectors.selectIsAutoReloading,
   // searchResultsSelectors.selectSearchResultsById,
-  (logEntries, isReloading /*, searchResults*/) =>
-    isReloading
+  (logEntries, isReloading, isAutoReloading /*, searchResults*/) =>
+    isReloading && !isAutoReloading
       ? []
       : logEntries.map(logEntry =>
           createLogEntryStreamItem(logEntry /*, searchResults[logEntry.gid] || null*/)

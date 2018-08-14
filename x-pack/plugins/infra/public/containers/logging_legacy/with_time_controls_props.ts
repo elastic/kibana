@@ -6,22 +6,19 @@
 
 import { connect } from 'react-redux';
 
-import { isIntervalLoadingPolicy } from '../../utils/loading_state';
 import { asChildFunctionRenderer } from '../../utils/typed_react';
 import { bindPlainActionCreators } from '../../utils/typed_redux';
-import { entriesActions, entriesSelectors, sharedSelectors, State, targetActions } from './state';
+import { sharedSelectors, State, targetActions, targetSelectors } from './state';
 
 export const withTimeControls = connect(
   (state: State) => ({
     currentTime: sharedSelectors.selectVisibleMidpointOrTargetTime(state),
-    isLiveStreaming: isIntervalLoadingPolicy(
-      entriesSelectors.selectEntriesEndLoadingState(state).policy
-    ),
+    isLiveStreaming: targetSelectors.selectIsAutoReloading(state),
   }),
   bindPlainActionCreators({
-    disableLiveStreaming: entriesActions.stopLiveStreaming,
-    enableLiveStreaming: entriesActions.startLiveStreaming,
-    jumpToTime: targetActions.jumpToTime,
+    startLiveStreaming: targetActions.startAutoReload,
+    stopLiveStreaming: targetActions.stopAutoReload,
+    jumpToTargetPositionTime: targetActions.jumpToTargetPositionTime,
   })
 );
 

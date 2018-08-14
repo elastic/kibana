@@ -36,7 +36,7 @@ interface LogMinimapProps {
   intervalSize: number;
   summaryBuckets: SummaryBucket[];
   // searchSummaryBuckets?: SearchSummaryBucket[];
-  target: number;
+  target: number | null;
   width: number;
 }
 
@@ -55,8 +55,10 @@ export class LogMinimap extends React.Component<LogMinimapProps> {
   public getYScale = () => {
     const { height, intervalSize, target } = this.props;
 
+    const domainStart = target ? target - intervalSize / 2 : 0;
+    const domainEnd = target ? target + intervalSize / 2 : 0;
     return scaleLinear()
-      .domain([target - intervalSize / 2, target + intervalSize / 2])
+      .domain([domainStart, domainEnd])
       .range([0, height]);
   };
 

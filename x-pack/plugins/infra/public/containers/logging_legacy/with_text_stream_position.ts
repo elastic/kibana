@@ -20,7 +20,7 @@ export const withTextStreamPosition = connect(
     visibleMidpoint: sharedSelectors.selectVisibleMidpointOrTargetTime(state),
   }),
   bindPlainActionCreators({
-    jumpToPosition: targetActions.jumpToTarget,
+    jumpToPosition: targetActions.jumpToTargetPosition,
     reportVisibleInterval: entriesActions.reportVisibleEntries,
   })
 );

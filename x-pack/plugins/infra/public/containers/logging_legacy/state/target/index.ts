@@ -5,7 +5,8 @@
  */
 
 import * as targetActions from './actions';
+import * as targetEpics from './epics';
 import * as targetSelectors from './selectors';
 
-export { targetActions, targetSelectors };
+export { targetActions, targetEpics, targetSelectors };
 export * from './reducer';

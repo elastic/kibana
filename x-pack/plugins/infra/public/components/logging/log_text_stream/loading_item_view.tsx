@@ -8,19 +8,15 @@ import { EuiProgress, EuiText } from '@elastic/eui';
 import * as React from 'react';
 import styled from 'styled-components';
 
-import {
-  getTimeOrDefault,
-  isExhaustedLoadingResult,
-  isIntervalLoadingPolicy,
-  isRunningLoadingProgress,
-  LoadingState,
-} from '../../../utils/loading_state';
 import { RelativeTime } from './relative_time';
 
 interface LogTextStreamLoadingItemViewProps {
   alignment: 'top' | 'bottom';
   className?: string;
-  loadingState: LoadingState<any>;
+  hasMore: boolean;
+  isLoading: boolean;
+  isStreaming: boolean;
+  lastStreamingUpdate: number | null;
 }
 
 export class LogTextStreamLoadingItemView extends React.PureComponent<
@@ -28,21 +24,24 @@ export class LogTextStreamLoadingItemView extends React.PureComponent<
   {}
 > {
   public render() {
-    const { alignment, className, loadingState } = this.props;
-
-    const isLoading = isRunningLoadingProgress(loadingState.current);
-    const isExhausted = isExhaustedLoadingResult(loadingState.last);
-    const lastLoadedTime = getTimeOrDefault(loadingState.last);
-    const isStreaming = isIntervalLoadingPolicy(loadingState.policy);
+    const {
+      alignment,
+      className,
+      hasMore,
+      isLoading,
+      isStreaming,
+      lastStreamingUpdate,
+    } = this.props;
 
     if (isStreaming) {
       return (
         <ProgressEntry alignment={alignment} className={className} color="primary" isLoading={true}>
           <EuiText color="subdued">
             Streaming new entries
-            {lastLoadedTime ? (
+            {lastStreamingUpdate ? (
               <>
-                : last updated <RelativeTime time={lastLoadedTime} refreshInterval={1000} /> ago
+                : last updated <RelativeTime time={lastStreamingUpdate} refreshInterval={1000} />{' '}
+                ago
               </>
             ) : null}
           </EuiText>
@@ -54,7 +53,7 @@ export class LogTextStreamLoadingItemView extends React.PureComponent<
           Loading additional entries
         </ProgressEntry>
       );
-    } else if (isExhausted) {
+    } else if (!hasMore) {
       return (
         <ProgressEntry
           alignment={alignment}

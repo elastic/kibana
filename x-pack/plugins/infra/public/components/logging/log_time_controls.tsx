@@ -12,18 +12,18 @@ import styled from 'styled-components';
 const noop = () => undefined;
 
 interface LogTimeControlsProps {
-  currentTime: number;
-  disableLiveStreaming: () => any;
-  enableLiveStreaming: () => any;
+  currentTime: number | null;
+  startLiveStreaming: (interval: number) => any;
+  stopLiveStreaming: () => any;
   isLiveStreaming: boolean;
   jumpToTime: (time: number) => any;
 }
 
 export class LogTimeControls extends React.PureComponent<LogTimeControlsProps> {
   public render() {
-    const { currentTime, disableLiveStreaming, enableLiveStreaming, isLiveStreaming } = this.props;
+    const { currentTime, startLiveStreaming, stopLiveStreaming, isLiveStreaming } = this.props;
 
-    const currentMoment = moment(currentTime);
+    const currentMoment = currentTime ? moment(currentTime) : null;
 
     if (isLiveStreaming) {
       return (
@@ -35,7 +35,7 @@ export class LogTimeControls extends React.PureComponent<LogTimeControlsProps> {
             color="primary"
             iconType="pause"
             iconSide="left"
-            onClick={disableLiveStreaming}
+            onClick={stopLiveStreaming}
           >
             Stop streaming
           </EuiFilterButton>
@@ -53,10 +53,10 @@ export class LogTimeControls extends React.PureComponent<LogTimeControlsProps> {
               shouldCloseOnSelect
               showTimeSelect
               timeFormat="LTS"
-              injectTimes={[currentMoment]}
+              injectTimes={currentMoment ? [currentMoment] : []}
             />
           </InlineWrapper>
-          <EuiFilterButton iconType="play" iconSide="left" onClick={enableLiveStreaming}>
+          <EuiFilterButton iconType="play" iconSide="left" onClick={this.startLiveStreaming}>
             Stream live
           </EuiFilterButton>
         </EuiFilterGroup>
@@ -68,6 +68,10 @@ export class LogTimeControls extends React.PureComponent<LogTimeControlsProps> {
     if (date !== null) {
       this.props.jumpToTime(date.valueOf());
     }
+  };
+
+  private startLiveStreaming = () => {
+    this.props.startLiveStreaming(5000);
   };
 }
 

@@ -175,6 +175,10 @@ export const createGraphqlStateSelectors = <State>(
     selectLoadingResult,
     result => (!isUninitializedLoadingResult(result) ? result.parameters : null)
   );
+  const selectLoadingResultTime = createSelector(
+    selectLoadingResult,
+    result => (!isUninitializedLoadingResult(result) ? result.time : null)
+  );
   const selectIsUninitialized = createSelector(selectLoadingResult, isUninitializedLoadingResult);
   const selectIsSuccess = createSelector(selectLoadingResult, isSuccessLoadingResult);
   const selectIsFailure = createSelector(selectLoadingResult, isFailureLoadingResult);
@@ -202,6 +206,7 @@ export const createGraphqlStateSelectors = <State>(
     selectLoadingProgressOperationInfo,
     selectLoadingResult,
     selectLoadingResultOperationInfo,
+    selectLoadingResultTime,
     selectLoadingState,
   };
 };

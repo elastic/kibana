@@ -9,11 +9,6 @@ import * as React from 'react';
 import { TextScale } from '../../../../common/log_text_scale';
 import { TimeKey } from '../../../../common/time';
 import { callWithoutRepeats } from '../../../utils/handlers';
-import {
-  isIntervalLoadingPolicy,
-  isRunningLoadingProgress,
-  LoadingState,
-} from '../../../utils/loading_state';
 import { LogTextStreamEmptyView } from './empty_view';
 import { getStreamItemBeforeTimeKey, getStreamItemId, parseStreamItemId, StreamItem } from './item';
 import { LogTextStreamItemView } from './item_view';
@@ -28,9 +23,13 @@ interface ScrollableLogTextStreamViewProps {
   items: StreamItem[];
   scale: TextScale;
   wrap: boolean;
-  startLoadingState: LoadingState<any>;
-  endLoadingState: LoadingState<any>;
-  target: TimeKey;
+  isReloading: boolean;
+  isLoadingMore: boolean;
+  hasMoreBeforeStart: boolean;
+  hasMoreAfterEnd: boolean;
+  isStreaming: boolean;
+  lastLoadedTime: number | null;
+  target: TimeKey | null;
   jumpToTarget: (target: TimeKey) => any;
   reportVisibleInterval: (
     params: {
@@ -44,8 +43,8 @@ interface ScrollableLogTextStreamViewProps {
 }
 
 interface ScrollableLogTextStreamViewState {
-  target: TimeKey | undefined;
-  targetId: string | undefined;
+  target: TimeKey | null;
+  targetId: string | null;
 }
 
 export class ScrollableLogTextStreamView extends React.PureComponent<
@@ -58,9 +57,8 @@ export class ScrollableLogTextStreamView extends React.PureComponent<
   ): Partial<ScrollableLogTextStreamViewState> | null {
     const hasNewTarget = nextProps.target && nextProps.target !== prevState.target;
     const hasItems = nextProps.items.length > 0;
-    const isEndStreaming = isIntervalLoadingPolicy(nextProps.endLoadingState.policy);
 
-    if (isEndStreaming && hasItems) {
+    if (nextProps.isStreaming && hasItems) {
       return {
         target: nextProps.target,
         targetId: getStreamItemId(nextProps.items[nextProps.items.length - 1]),
@@ -68,12 +66,12 @@ export class ScrollableLogTextStreamView extends React.PureComponent<
     } else if (hasNewTarget && hasItems) {
       return {
         target: nextProps.target,
-        targetId: getStreamItemId(getStreamItemBeforeTimeKey(nextProps.items, nextProps.target)),
+        targetId: getStreamItemId(getStreamItemBeforeTimeKey(nextProps.items, nextProps.target!)),
       };
     } else if (!nextProps.target || !hasItems) {
       return {
-        target: undefined,
-        targetId: undefined,
+        target: null,
+        targetId: null,
       };
     }
 
@@ -81,20 +79,29 @@ export class ScrollableLogTextStreamView extends React.PureComponent<
   }
 
   public readonly state = {
-    target: undefined,
-    targetId: undefined,
+    target: null,
+    targetId: null,
   };
 
   public render() {
-    const { items, height, width, scale, wrap, startLoadingState, endLoadingState } = this.props;
+    const {
+      items,
+      height,
+      width,
+      scale,
+      wrap,
+      isReloading,
+      isLoadingMore,
+      hasMoreBeforeStart,
+      hasMoreAfterEnd,
+      isStreaming,
+      lastLoadedTime,
+    } = this.props;
     const { targetId } = this.state;
 
     const hasItems = items.length > 0;
-    const isStartLoading = isRunningLoadingProgress(startLoadingState.current);
-    const isEndLoading = isRunningLoadingProgress(endLoadingState.current);
-    const isLoading = isStartLoading || isEndLoading;
 
-    if (isLoading && !hasItems) {
+    if (isReloading && !hasItems) {
       return <LogTextStreamLoadingView height={height} width={width} />;
     } else if (!hasItems) {
       return <LogTextStreamEmptyView height={height} width={width} reload={this.handleReload} />;
@@ -109,7 +116,13 @@ export class ScrollableLogTextStreamView extends React.PureComponent<
         >
           {registerChild => (
             <>
-              <LogTextStreamLoadingItemView alignment="bottom" loadingState={startLoadingState} />
+              <LogTextStreamLoadingItemView
+                alignment="bottom"
+                isLoading={isLoadingMore}
+                hasMore={hasMoreBeforeStart}
+                isStreaming={false}
+                lastStreamingUpdate={null}
+              />
               {items.map(item => (
                 <MeasurableItemView
                   register={registerChild}
@@ -121,7 +134,13 @@ export class ScrollableLogTextStreamView extends React.PureComponent<
                   )}
                 </MeasurableItemView>
               ))}
-              <LogTextStreamLoadingItemView alignment="top" loadingState={endLoadingState} />
+              <LogTextStreamLoadingItemView
+                alignment="top"
+                isLoading={isStreaming || isLoadingMore}
+                hasMore={hasMoreAfterEnd}
+                isStreaming={isStreaming}
+                lastStreamingUpdate={isStreaming ? lastLoadedTime : null}
+              />
             </>
           )}
         </VerticalScrollPanel>
@@ -130,7 +149,11 @@ export class ScrollableLogTextStreamView extends React.PureComponent<
   }
 
   private handleReload = () => {
-    this.props.jumpToTarget(this.props.target);
+    const { jumpToTarget, target } = this.props;
+
+    if (target) {
+      jumpToTarget(target);
+    }
   };
 
   // this is actually a method but not recognized as such

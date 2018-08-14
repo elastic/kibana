@@ -117,7 +117,7 @@ export const sharedSelectors = {
   selectVisibleMidpointOrTargetTime: createSelector(
     entriesSelectors.selectFirstVisibleEntry,
     entriesSelectors.selectLastVisibleEntry,
-    targetSelectors.selectTarget,
+    targetSelectors.selectTargetPosition,
     (firstVisibleEntry, lastVisibleEntry, target) => {
       if (firstVisibleEntry && lastVisibleEntry) {
         return (firstVisibleEntry.key.time + lastVisibleEntry.key.time) / 2;
@@ -125,8 +125,10 @@ export const sharedSelectors = {
         return firstVisibleEntry.key.time;
       } else if (lastVisibleEntry) {
         return lastVisibleEntry.key.time;
-      } else {
+      } else if (target) {
         return target.time;
+      } else {
+        return null;
       }
     }
   ),
