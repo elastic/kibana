@@ -25,14 +25,14 @@ export default function ({ getService, getPageObjects }) {
   const PageObjects = getPageObjects(['common', 'visualize', 'header']);
 
   describe('vertical bar chart with index without time filter', function () {
-    const vizName1 = 'Visualization VerticalBarChart';
+    const vizName1 = 'Visualization VerticalBarChart without time filter';
 
     const initBarChart = async () => {
       log.debug('navigateToApp visualize');
       await PageObjects.visualize.navigateToNewVisualization();
       log.debug('clickVerticalBarChart');
       await PageObjects.visualize.clickVerticalBarChart();
-      await PageObjects.visualize.clickNewSearch('logstash*');
+      await PageObjects.visualize.clickNewSearch(PageObjects.visualize.index.LOGSTASH_NON_TIME_BASED);
       log.debug('Bucket = X-Axis');
       await PageObjects.visualize.clickBucket('X-Axis');
       log.debug('Aggregation = Date Histogram');

@@ -27,7 +27,7 @@ export default function ({ getService, getPageObjects }) {
   const PageObjects = getPageObjects(['common', 'visualize', 'header']);
 
   describe('data table with index without time filter', function indexPatternCreation() {
-    const vizName1 = 'Visualization DataTable';
+    const vizName1 = 'Visualization DataTable without time filter';
 
     before(async function () {
       log.debug('navigateToApp visualize');
@@ -35,7 +35,7 @@ export default function ({ getService, getPageObjects }) {
       log.debug('clickDataTable');
       await PageObjects.visualize.clickDataTable();
       log.debug('clickNewSearch');
-      await PageObjects.visualize.clickNewSearch('logstash*');
+      await PageObjects.visualize.clickNewSearch(PageObjects.visualize.index.LOGSTASH_NON_TIME_BASED);
       log.debug('Bucket = Split Rows');
       await PageObjects.visualize.clickBucket('Split Rows');
       log.debug('Aggregation = Histogram');
@@ -102,7 +102,7 @@ export default function ({ getService, getPageObjects }) {
     it('should show correct data when using average pipeline aggregation', async () => {
       await PageObjects.visualize.navigateToNewVisualization();
       await PageObjects.visualize.clickDataTable();
-      await PageObjects.visualize.clickNewSearch('logstash*');
+      await PageObjects.visualize.clickNewSearch(PageObjects.visualize.index.LOGSTASH_NON_TIME_BASED);
       await PageObjects.visualize.clickAddMetric();
       await PageObjects.visualize.clickBucket('Metric');
       await PageObjects.visualize.selectAggregation('Average Bucket', 'metrics');
@@ -117,7 +117,7 @@ export default function ({ getService, getPageObjects }) {
     it('should show correct data for a data table with date histogram', async () => {
       await PageObjects.visualize.navigateToNewVisualization();
       await PageObjects.visualize.clickDataTable();
-      await PageObjects.visualize.clickNewSearch('logstash*');
+      await PageObjects.visualize.clickNewSearch(PageObjects.visualize.index.LOGSTASH_NON_TIME_BASED);
       await PageObjects.visualize.clickBucket('Split Rows');
       await PageObjects.visualize.selectAggregation('Date Histogram');
       await PageObjects.visualize.selectField('@timestamp');
@@ -136,7 +136,7 @@ export default function ({ getService, getPageObjects }) {
     it('should show correct data for a data table with date histogram', async () => {
       await PageObjects.visualize.navigateToNewVisualization();
       await PageObjects.visualize.clickDataTable();
-      await PageObjects.visualize.clickNewSearch('logstash*');
+      await PageObjects.visualize.clickNewSearch(PageObjects.visualize.index.LOGSTASH_NON_TIME_BASED);
       await PageObjects.visualize.clickBucket('Split Rows');
       await PageObjects.visualize.selectAggregation('Date Histogram');
       await PageObjects.visualize.selectField('@timestamp');
