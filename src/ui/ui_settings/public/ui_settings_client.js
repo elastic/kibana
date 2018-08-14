@@ -102,13 +102,13 @@ You can use \`config.get("${key}", defaultValue)\`, which will just return
     return this.isDeclared(key) && !('value' in this._cache[key]);
   }
 
-  isControlledByServer(key) {
-    return this.isDeclared(key) && Boolean(this._cache[key].isControlledByServer);
+  isOverridden(key) {
+    return this.isDeclared(key) && Boolean(this._cache[key].isOverridden);
   }
 
   assertUpdateAllowed(key) {
-    if (this.isControlledByServer(key)) {
-      throw new Error(`Unable to update "${key}" because its value is controlled by the Kibana server`);
+    if (this.isOverridden(key)) {
+      throw new Error(`Unable to update "${key}" because its value is overridden by the Kibana server`);
     }
   }
 

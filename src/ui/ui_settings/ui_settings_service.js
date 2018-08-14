@@ -92,7 +92,7 @@ export class UiSettingsService {
 
     // write the userValue for each key stored in the saved object that is not overridden
     for (const [key, userValue] of Object.entries(await this._read(options))) {
-      if (userValue !== null && !this.isControlledByServer(key)) {
+      if (userValue !== null && !this.isOverridden(key)) {
         userProvided[key] = {
           userValue
         };
@@ -103,8 +103,8 @@ export class UiSettingsService {
     // adding keys for overrides that are not in saved object
     for (const [key, userValue] of Object.entries(this._overrides)) {
       userProvided[key] = userValue === null
-        ? { isControlledByServer: true }
-        : { isControlledByServer: true, userValue };
+        ? { isOverridden: true }
+        : { isOverridden: true, userValue };
     }
 
     return userProvided;
@@ -130,12 +130,12 @@ export class UiSettingsService {
     await this.setMany(changes);
   }
 
-  isControlledByServer(key) {
+  isOverridden(key) {
     return this._overrides.hasOwnProperty(key);
   }
 
   assertUpdateAllowed(key) {
-    if (this.isControlledByServer(key)) {
+    if (this.isOverridden(key)) {
       throw Boom.badRequest(`Unable to update "${key}" because it is overridden`);
     }
   }

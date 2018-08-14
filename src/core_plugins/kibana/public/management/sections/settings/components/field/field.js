@@ -319,7 +319,7 @@ export class Field extends PureComponent {
 
   renderField(setting) {
     const { loading, changeImage, unsavedValue } = this.state;
-    const { name, value, type, options, isControlledByServer } = setting;
+    const { name, value, type, options, isOverridden } = setting;
 
     switch(type) {
       case 'boolean':
@@ -328,7 +328,7 @@ export class Field extends PureComponent {
             label={!!unsavedValue ? 'On' : 'Off'}
             checked={!!unsavedValue}
             onChange={this.onFieldChange}
-            disabled={loading || isControlledByServer}
+            disabled={loading || isOverridden}
             onKeyDown={this.onFieldKeyDown}
             data-test-subj={`advancedSetting-editField-${name}`}
           />
@@ -346,7 +346,7 @@ export class Field extends PureComponent {
               height="auto"
               minLines={6}
               maxLines={30}
-              isReadOnly={isControlledByServer}
+              isReadOnly={isOverridden}
               setOptions={{
                 showLineNumbers: false,
                 tabSize: 2,
@@ -370,7 +370,7 @@ export class Field extends PureComponent {
         } else {
           return (
             <EuiFilePicker
-              disabled={loading || isControlledByServer}
+              disabled={loading || isOverridden}
               onChange={this.onImageChange}
               accept=".jpg,.jpeg,.png"
               ref={(input) => { this.changeImageForm = input; }}
@@ -388,7 +388,7 @@ export class Field extends PureComponent {
             })}
             onChange={this.onFieldChange}
             isLoading={loading}
-            disabled={loading || isControlledByServer}
+            disabled={loading || isOverridden}
             onKeyDown={this.onFieldKeyDown}
             data-test-subj={`advancedSetting-editField-${name}`}
           />
@@ -399,7 +399,7 @@ export class Field extends PureComponent {
             value={unsavedValue}
             onChange={this.onFieldChange}
             isLoading={loading}
-            disabled={loading || isControlledByServer}
+            disabled={loading || isOverridden}
             onKeyDown={this.onFieldKeyDown}
             data-test-subj={`advancedSetting-editField-${name}`}
           />
@@ -410,7 +410,7 @@ export class Field extends PureComponent {
             value={unsavedValue}
             onChange={this.onFieldChange}
             isLoading={loading}
-            disabled={loading || isControlledByServer}
+            disabled={loading || isOverridden}
             onKeyDown={this.onFieldKeyDown}
             data-test-subj={`advancedSetting-editField-${name}`}
           />
@@ -427,7 +427,7 @@ export class Field extends PureComponent {
   }
 
   renderHelpText(setting) {
-    if (setting.isControlledByServer) {
+    if (setting.isOverridden) {
       return (
         <EuiText size="xs">
           This setting is overriden by the Kibana server and can not be changed.
@@ -547,7 +547,7 @@ export class Field extends PureComponent {
   renderActions(setting) {
     const { ariaName, name } = setting;
     const { loading, isInvalid, changeImage, savedValue, unsavedValue } = this.state;
-    const isDisabled = loading || setting.isControlledByServer;
+    const isDisabled = loading || setting.isOverridden;
 
     if (savedValue === unsavedValue && !changeImage) {
       return;

@@ -20,7 +20,7 @@ You can use \`config.get(\\"throwableProperty\\", defaultValue)\`, which will ju
 \`defaultValue\` when the key is unrecognized."
 `;
 
-exports[`#overrideLocalDefault #assertUpdateAllowed() throws error when keys is overridden 1`] = `"Unable to update \\"foo\\" because its value is controlled by the Kibana server"`;
+exports[`#overrideLocalDefault #assertUpdateAllowed() throws error when keys is overridden 1`] = `"Unable to update \\"foo\\" because its value is overridden by the Kibana server"`;
 
 exports[`#overrideLocalDefault key has no user value calls subscriber with new and previous value: single subscriber call 1`] = `
 Array [
@@ -97,9 +97,9 @@ Object {
 }
 `;
 
-exports[`#remove throws an error if key is overridden 1`] = `"Unable to update \\"bar\\" because its value is controlled by the Kibana server"`;
+exports[`#remove throws an error if key is overridden 1`] = `"Unable to update \\"bar\\" because its value is overridden by the Kibana server"`;
 
-exports[`#set throws an error if key is overridden 1`] = `"Unable to update \\"foo\\" because its value is controlled by the Kibana server"`;
+exports[`#set throws an error if key is overridden 1`] = `"Unable to update \\"foo\\" because its value is overridden by the Kibana server"`;
 
 exports[`#subscribe calls handler with { key, newValue, oldValue } when config changes 1`] = `
 Array [

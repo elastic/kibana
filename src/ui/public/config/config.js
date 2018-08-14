@@ -38,7 +38,7 @@ module.service(`config`, function ($rootScope, Promise) {
   this.isDeclared = (...args) => uiSettings.isDeclared(...args);
   this.isDefault = (...args) => uiSettings.isDefault(...args);
   this.isCustom = (...args) => uiSettings.isCustom(...args);
-  this.isControlledByServer = (...args) => uiSettings.isControlledByServer(...args);
+  this.isOverridden = (...args) => uiSettings.isOverridden(...args);
 
   // modify remove() to use angular Promises
   this.remove = (key) => (

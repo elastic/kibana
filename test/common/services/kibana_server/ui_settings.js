@@ -66,7 +66,7 @@ export class KibanaServerUiSettings {
     const { payload } = await this._wreck.get('/api/kibana/settings');
 
     for (const key of Object.keys(payload.settings)) {
-      if (!payload.settings[key].isControlledByServer) {
+      if (!payload.settings[key].isOverridden) {
         await this._wreck.delete(`/api/kibana/settings/${key}`);
       }
     }

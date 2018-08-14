@@ -72,7 +72,7 @@ export function indexMissingSuite() {
         settings: {
           foo: {
             userValue: 'bar',
-            isControlledByServer: true
+            isOverridden: true
           }
         }
       });
@@ -103,7 +103,7 @@ export function indexMissingSuite() {
           },
           foo: {
             userValue: 'bar',
-            isControlledByServer: true
+            isOverridden: true
           }
         }
       });
@@ -136,7 +136,7 @@ export function indexMissingSuite() {
           },
           foo: {
             userValue: 'bar',
-            isControlledByServer: true
+            isOverridden: true
           }
         }
       });
@@ -162,7 +162,7 @@ export function indexMissingSuite() {
           },
           foo: {
             userValue: 'bar',
-            isControlledByServer: true
+            isOverridden: true
           }
         }
       });

@@ -45,7 +45,7 @@ const config = {
   set: () => {},
   remove: () => {},
   isCustom: (setting) => setting.isCustom,
-  isControlledByServer: (key) => Boolean(config.getAll()[key].isControlledByServer),
+  isOverridden: (key) => Boolean(config.getAll()[key].isOverridden),
   getAll: () => {
     return {
       'test:array:setting': {
@@ -111,36 +111,36 @@ const config = {
         type: 'string',
         isCustom: true,
       },
-      'test:isControlledByServer:string': {
-        isControlledByServer: true,
+      'test:isOverridden:string': {
+        isOverridden: true,
         value: 'foo',
-        name: 'An controlled string',
-        description: 'Description for controlled string',
+        name: 'An overridden string',
+        description: 'Description for overridden string',
         type: 'string',
       },
-      'test:isControlledByServer:number': {
-        isControlledByServer: true,
+      'test:isOverridden:number': {
+        isOverridden: true,
         value: 1234,
-        name: 'An controlled number',
-        description: 'Description for controlled number',
+        name: 'An overridden number',
+        description: 'Description for overridden number',
         type: 'number',
       },
-      'test:isControlledByServer:json': {
-        isControlledByServer: true,
+      'test:isOverridden:json': {
+        isOverridden: true,
         value: dedent`
           {
             "foo": "bar"
           }
         `,
-        name: 'An controlled json',
-        description: 'Description for controlled json',
+        name: 'An overridden json',
+        description: 'Description for overridden json',
         type: 'json',
       },
-      'test:isControlledByServer:select': {
-        isControlledByServer: true,
+      'test:isOverridden:select': {
+        isOverridden: true,
         value: 'orange',
-        name: 'Test controlled select setting',
-        description: 'Description for controlled select setting',
+        name: 'Test overridden select setting',
+        description: 'Description for overridden select setting',
         type: 'select',
         options: ['apple', 'orange', 'banana'],
       },

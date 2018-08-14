@@ -85,7 +85,7 @@ export function docExistsSuite() {
           },
           foo: {
             userValue: 'bar',
-            isControlledByServer: true
+            isOverridden: true
           },
         }
       });
@@ -116,7 +116,7 @@ export function docExistsSuite() {
           },
           foo: {
             userValue: 'bar',
-            isControlledByServer: true
+            isOverridden: true
           },
         }
       });
@@ -168,7 +168,7 @@ export function docExistsSuite() {
           },
           foo: {
             userValue: 'bar',
-            isControlledByServer: true
+            isOverridden: true
           },
         }
       });
@@ -219,7 +219,7 @@ export function docExistsSuite() {
           },
           foo: {
             userValue: 'bar',
-            isControlledByServer: true
+            isOverridden: true
           },
         }
       });

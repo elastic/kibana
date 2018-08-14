@@ -128,7 +128,7 @@ describe('#set', () => {
     const { config } = setup({
       initialSettings: {
         foo: {
-          isControlledByServer: true,
+          isOverridden: true,
           value: 'bar'
         }
       }
@@ -157,7 +157,7 @@ describe('#remove', () => {
     const { config } = setup({
       initialSettings: {
         bar: {
-          isControlledByServer: true,
+          isOverridden: true,
           userValue: true
         }
       }
@@ -318,10 +318,10 @@ describe('#overrideLocalDefault', () => {
     });
   });
 
-  describe('#isControlledByServer()', () => {
+  describe('#isOverridden()', () => {
     it('returns false if key is unknown', () => {
       const { config } = setup();
-      expect(config.isControlledByServer('foo')).toBe(false);
+      expect(config.isOverridden('foo')).toBe(false);
     });
     it('returns false if key is no overridden', () => {
       const { config } = setup({
@@ -330,12 +330,12 @@ describe('#overrideLocalDefault', () => {
             userValue: 1
           },
           bar: {
-            isControlledByServer: true,
+            isOverridden: true,
             userValue: 2
           }
         }
       });
-      expect(config.isControlledByServer('foo')).toBe(false);
+      expect(config.isOverridden('foo')).toBe(false);
     });
     it('returns true when key is overridden', () => {
       const { config } = setup({
@@ -344,16 +344,16 @@ describe('#overrideLocalDefault', () => {
             userValue: 1
           },
           bar: {
-            isControlledByServer: true,
+            isOverridden: true,
             userValue: 2
           },
         }
       });
-      expect(config.isControlledByServer('bar')).toBe(true);
+      expect(config.isOverridden('bar')).toBe(true);
     });
     it('returns false for object prototype properties', () => {
       const { config } = setup();
-      expect(config.isControlledByServer('hasOwnProperty')).toBe(false);
+      expect(config.isOverridden('hasOwnProperty')).toBe(false);
     });
   });
 
@@ -366,7 +366,7 @@ describe('#overrideLocalDefault', () => {
       const { config } = setup({
         initialSettings: {
           foo: {
-            isControlledByServer: true,
+            isOverridden: true,
             userValue: 'bar'
           }
         }
