@@ -15,8 +15,8 @@ interface ComponentProps extends FormsyInputProps, CommonProps, EuiTextAreaProps
   fullWidth: boolean;
   helpText: React.ReactElement<any>;
   compressed: boolean;
-  onChange(e: React.ChangeEvent<HTMLInputElement>, value: any): void;
-  onBlur(e: React.ChangeEvent<HTMLInputElement>, value: any): void;
+  onChange(e: React.ChangeEvent<HTMLTextAreaElement>, value: any): void;
+  onBlur(e: React.ChangeEvent<HTMLTextAreaElement>, value: any): void;
 }
 
 interface ComponentState {
@@ -24,7 +24,7 @@ interface ComponentState {
 }
 
 class MultiFieldText extends Component<
-  InputHTMLAttributes<HTMLInputElement> & ComponentProps,
+  InputHTMLAttributes<HTMLTextAreaElement> & ComponentProps,
   ComponentState
 > {
   public static defaultProps = {
