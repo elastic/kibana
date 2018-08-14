@@ -3,9 +3,9 @@
 Docker images for Kibana are available from the Elastic Docker registry. The
 base image is https://hub.docker.com/_/centos/[centos:7].
 
-A list of all published Docker images and tags can be found at
-https://www.docker.elastic.co[www.docker.elastic.co]. The source code can be
-found on https://github.com/elastic/kibana-docker/tree/{branch}[GitHub].
+A list of all published Docker images and tags is available at
+https://www.docker.elastic.co[www.docker.elastic.co]. The source code is in
+https://github.com/elastic/kibana-docker/tree/{branch}[GitHub].
 
 These images are free to use under the Elastic license. They contain open source 
 and free commercial features and access to paid commercial features.  
@@ -17,6 +17,7 @@ Elastic license levels.
 [float]
 [[pull-image]]
 === Pulling the image
+
 Obtaining Kibana for Docker is as simple as issuing a +docker pull+ command
 against the Elastic Docker registry.
 
@@ -29,15 +30,13 @@ endif::[]
 
 ifeval::["{release-state}"!="unreleased"]
 
-For example, the Docker image can be retrieved with the following command:
-
 ["source","txt",subs="attributes"]
 --------------------------------------------
 docker pull {docker-repo}:{version}
 --------------------------------------------
 
 Alternatively, you can download other Docker images that contain only features 
-that are available under the Apache 2.0 license from 
+available under the Apache 2.0 license. To download the images, go to 
 https://www.docker.elastic.co[www.docker.elastic.co].
 
 endif::[]

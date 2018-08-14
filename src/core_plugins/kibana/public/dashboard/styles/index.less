@@ -59,9 +59,14 @@
   z-index: 5;
 }
 
+/**
+ * 1. override the z-index: 1 applied to all non-eui elements that are in :focus via kui
+ *      - see packages/kbn-ui-framework/src/global_styling/reset/_reset.scss
+ */
 .exitFullScreenMode:hover,
 .exitFullScreenMode:focus {
   transition: all .5s ease;
+  z-index: 10 !important; /* 1. */
 
   .exitFullScreenModeText {
     visibility: visible;
@@ -443,8 +448,4 @@ dashboard-listing {
 
 .dashboardLandingPage {
   background: @globalColorLightestGray;
-}
-
-.dashboardLandingPageContent {
-  max-width: 1000px !important; // Temp fix till EUI@3.0.2 is merged
 }

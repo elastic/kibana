@@ -2,6 +2,7 @@
 
 exports[`ScriptingHelpFlyout should render normally 1`] = `
 <EuiFlyout
+  closeButtonAriaLabel="Closes this dialog"
   data-test-subj="scriptedFieldsHelpFlyout"
   hideCloseButton={false}
   onClose={[Function]}

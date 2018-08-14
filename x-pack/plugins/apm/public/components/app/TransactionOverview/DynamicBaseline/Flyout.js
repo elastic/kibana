@@ -21,7 +21,7 @@ import {
   EuiSpacer,
   EuiBetaBadge
 } from '@elastic/eui';
-import { getMlJobUrl } from '../../../../utils/url';
+import { getMlJobUrl, KibanaLink } from '../../../../utils/url';
 
 export default class DynamicBaselineFlyout extends Component {
   state = {
@@ -68,7 +68,8 @@ export default class DynamicBaselineFlyout extends Component {
           text: (
             <p>
               There&apos;s already a job running for anomaly detection on{' '}
-              {serviceName} ({transactionType}).{' '}
+              {serviceName} ({transactionType}
+              ).{' '}
               <a href={getMlJobUrl(serviceName, transactionType, location)}>
                 View existing job
               </a>
@@ -89,8 +90,8 @@ export default class DynamicBaselineFlyout extends Component {
           color: 'success',
           text: (
             <p>
-              The analysis is now running for {serviceName} ({transactionType}).
-              It might take a while before results are added to the response
+              The analysis is now running for {serviceName} ({transactionType}
+              ). It might take a while before results are added to the response
               times graph.{' '}
               <a href={getMlJobUrl(serviceName, transactionType, location)}>
                 View job
@@ -140,9 +141,9 @@ export default class DynamicBaselineFlyout extends Component {
                 iconType="check"
               >
                 <p>
-                  There is currently a job running for {serviceName} ({
-                    transactionType
-                  }).{' '}
+                  There is currently a job running for {serviceName} (
+                  {transactionType}
+                  ).{' '}
                   <a href={getMlJobUrl(serviceName, transactionType, location)}>
                     View existing job
                   </a>
@@ -159,9 +160,12 @@ export default class DynamicBaselineFlyout extends Component {
                   <span>
                     No APM index pattern available. To create a job, please
                     import the APM index pattern via the{' '}
-                    <a href="/app/kibana#/home/tutorial/apm">
+                    <KibanaLink
+                      pathname={'/app/kibana'}
+                      hash={`/home/tutorial/apm`}
+                    >
                       Setup Instructions
-                    </a>
+                    </KibanaLink>
                   </span>
                 }
                 color="warning"
