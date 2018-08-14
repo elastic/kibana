@@ -10,6 +10,7 @@ import _ from 'lodash';
 import semver from 'semver';
 import numeral from '@elastic/numeral';
 
+import { ALLOWED_DATA_UNITS } from '../constants/validation';
 import { parseInterval } from './parse_interval';
 
 // work out the default frequency based on the bucket_span in seconds
@@ -182,8 +183,12 @@ export function mlFunctionToESAggregation(functionName) {
     return functionName;
   }
 
+  if (functionName === 'rare') {
+    return 'count';
+  }
+
   // Return null if ML function does not map to an ES aggregation.
-  // i.e. median, low_median, high_median, rare, freq_rare,
+  // i.e. median, low_median, high_median, freq_rare,
   // varp, low_varp, high_varp, time_of_day, time_of_week, lat_long,
   // info_content, low_info_content, high_info_content
   return null;
@@ -235,7 +240,7 @@ export function uniqWithIsEqual(arr) {
 // check job without manipulating UI and return a list of messages
 // job and fields get passed as arguments and are not accessed as $scope.* via the outer scope
 // because the plan is to move this function to the common code area so that it can be used on the server side too.
-export function basicJobValidation(job, fields, limits) {
+export function basicJobValidation(job, fields, limits, skipMmlChecks = false) {
   const messages = [];
   let valid = true;
 
@@ -368,14 +373,28 @@ export function basicJobValidation(job, fields, limits) {
       }
     }
 
-    // model memory limit
-    const {
-      messages: mmlMessages,
-      valid: mmlValid,
-    } = validateModelMemoryLimit(job, limits);
+    if (skipMmlChecks === false) {
+      // model memory limit
+      const {
+        messages: mmlUnitMessages,
+        valid: mmlUnitValid,
+      } = validateModelMemoryLimitUnits(job);
 
-    messages.push(...mmlMessages);
-    valid = (valid && mmlValid);
+      messages.push(...mmlUnitMessages);
+      valid = (valid && mmlUnitValid);
+
+      if (mmlUnitValid) {
+        // if mml is a valid format,
+        // run the validation against max mml
+        const {
+          messages: mmlMessages,
+          valid: mmlValid,
+        } = validateModelMemoryLimit(job, limits);
+
+        messages.push(...mmlMessages);
+        valid = (valid && mmlValid);
+      }
+    }
 
   } else {
     valid = false;
@@ -407,6 +426,30 @@ export function validateModelMemoryLimit(job, limits) {
       } else {
         messages.push({ id: 'model_memory_limit_valid' });
       }
+    }
+  }
+  return {
+    valid,
+    messages,
+    contains: id =>  (messages.some(m => id === m.id)),
+    find: id => (messages.find(m => id === m.id)),
+  };
+}
+
+export function validateModelMemoryLimitUnits(job) {
+  const messages = [];
+  let valid = true;
+
+  if (typeof job.analysis_limits !== 'undefined' && typeof job.analysis_limits.model_memory_limit !== 'undefined') {
+    const mml = job.analysis_limits.model_memory_limit.toUpperCase();
+    const mmlSplit = mml.match(/\d+(\w+)/);
+    const unit = (mmlSplit && mmlSplit.length === 2) ? mmlSplit[1] : null;
+
+    if (ALLOWED_DATA_UNITS.indexOf(unit) === -1) {
+      messages.push({ id: 'model_memory_limit_units_invalid' });
+      valid = false;
+    } else {
+      messages.push({ id: 'model_memory_limit_units_valid' });
     }
   }
   return {

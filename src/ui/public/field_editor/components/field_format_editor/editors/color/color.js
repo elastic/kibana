@@ -33,7 +33,9 @@ import {
 
 import { DEFAULT_COLOR } from '../../../../../../../core_plugins/kibana/common/field_formats/types/color_default';
 
-export class ColorFormatEditor extends DefaultFormatEditor {
+import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
+
+export class ColorFormatEditorComponent extends DefaultFormatEditor {
   static formatId = 'color';
 
   constructor(props) {
@@ -73,7 +75,7 @@ export class ColorFormatEditor extends DefaultFormatEditor {
   }
 
   render() {
-    const { formatParams, fieldType } = this.props;
+    const { formatParams, fieldType, intl } = this.props;
 
     const items = formatParams.colors && formatParams.colors.length && formatParams.colors.map((color, index) => {
       return {
@@ -85,7 +87,8 @@ export class ColorFormatEditor extends DefaultFormatEditor {
     const columns = [
       fieldType === 'string' ? {
         field: 'regex',
-        name: 'Pattern (regular expression)',
+        name: intl.formatMessage(
+          { id: 'common.ui.fieldEditor.color.patternLabel', defaultMessage: 'Pattern (regular expression)' }),
         render: (value, item) => {
           return (
             <EuiFieldText
@@ -100,7 +103,7 @@ export class ColorFormatEditor extends DefaultFormatEditor {
         }
       } : {
         field: 'range',
-        name: 'Range (min:max)',
+        name: intl.formatMessage({ id: 'common.ui.fieldEditor.color.rangeLabel', defaultMessage: 'Range (min:max)' }),
         render: (value, item) => {
           return (
             <EuiFieldText
@@ -116,7 +119,7 @@ export class ColorFormatEditor extends DefaultFormatEditor {
       },
       {
         field: 'text',
-        name: 'Text color',
+        name: intl.formatMessage({ id: 'common.ui.fieldEditor.color.textColorLabel', defaultMessage: 'Text color' }),
         render: (color, item) => {
           return (
             <EuiColorPicker
@@ -132,7 +135,7 @@ export class ColorFormatEditor extends DefaultFormatEditor {
       },
       {
         field: 'background',
-        name: 'Background color',
+        name: intl.formatMessage({ id: 'common.ui.fieldEditor.color.backgroundLabel', defaultMessage: 'Background color' }),
         render: (color, item) => {
           return (
             <EuiColorPicker
@@ -147,7 +150,7 @@ export class ColorFormatEditor extends DefaultFormatEditor {
         }
       },
       {
-        name: 'Example',
+        name: intl.formatMessage({ id: 'common.ui.fieldEditor.color.exampleLabel', defaultMessage: 'Example' }),
         render: (item) => {
           return (
             <div
@@ -164,8 +167,9 @@ export class ColorFormatEditor extends DefaultFormatEditor {
       {
         actions: [
           {
-            name: 'Delete',
-            description: 'Delete color format',
+            name: intl.formatMessage({ id: 'common.ui.fieldEditor.color.deleteAria', defaultMessage: 'Delete' }),
+            description: intl.formatMessage(
+              { id: 'common.ui.fieldEditor.color.deleteTitle', defaultMessage: 'Delete color format' }),
             onClick: (item) => {
               this.removeColor(item.index);
             },
@@ -190,10 +194,12 @@ export class ColorFormatEditor extends DefaultFormatEditor {
           size="s"
           onClick={this.addColor}
         >
-          Add color
+          <FormattedMessage id="common.ui.fieldEditor.color.addColorButton" defaultMessage="Add color" />
         </EuiButton>
         <EuiSpacer size="l" />
       </Fragment>
     );
   }
 }
+
+export const ColorFormatEditor = injectI18n(ColorFormatEditorComponent);

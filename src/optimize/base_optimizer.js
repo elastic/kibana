@@ -21,10 +21,10 @@ import { writeFile } from 'fs';
 import os from 'os';
 import Boom from 'boom';
 import MiniCssExtractPlugin from 'mini-css-extract-plugin';
+import UglifyJsPlugin from 'uglifyjs-webpack-plugin';
 import webpack from 'webpack';
 import Stats from 'webpack/lib/Stats';
 import webpackMerge from 'webpack-merge';
-import UglifyJsPlugin from 'uglifyjs-webpack-plugin';
 import { DLLBundlerPlugin } from './dll_bundler';
 
 import { defaults } from 'lodash';
@@ -275,11 +275,6 @@ export default class BaseOptimizer {
             ],
           },
           {
-            // TODO: this doesn't seem to be used, remove?
-            test: /\.jade$/,
-            loader: 'jade-loader'
-          },
-          {
             test: /\.(html|tmpl)$/,
             loader: 'raw-loader'
           },
@@ -331,8 +326,20 @@ export default class BaseOptimizer {
       }
     };
 
-    // we transpile typescript in the optimizer unless we are running the distributable
-    const transpileTsConfig = {
+    // when running from the distributable define an environment variable we can use
+    // to exclude chunks of code, modules, etc.
+    const isDistributableConfig = {
+      plugins: [
+        new webpack.DefinePlugin({
+          'process.env': {
+            'IS_KIBANA_DISTRIBUTABLE': `"true"`
+          }
+        }),
+      ]
+    };
+
+    // when running from source transpile TypeScript automatically
+    const isSourceConfig = {
       module: {
         rules: [
           {
@@ -344,10 +351,9 @@ export default class BaseOptimizer {
                   transpileOnly: true,
                   experimentalWatchApi: true,
                   onlyCompileBundledFiles: true,
+                  configFile: fromRoot('tsconfig.browser.json'),
                   compilerOptions: {
                     sourceMap: Boolean(this.sourceMaps),
-                    target: 'es5',
-                    module: 'esnext',
                   }
                 }
               }
@@ -392,15 +398,39 @@ export default class BaseOptimizer {
         minimize: true,
         minimizer: [
           new UglifyJsPlugin({
+            parallel: true,
+            sourceMap: false,
             uglifyOptions: {
               compress: {
-                warnings: false
+                // the following is required for dead-code the removal
+                // check in React DevTools
+                unused: true,
+                dead_code: true,
+                conditionals: true,
+                evaluate: true,
+
+                comparisons: false,
+                sequences: false,
+                properties: false,
+                drop_debugger: false,
+                booleans: false,
+                loops: false,
+                toplevel: false,
+                top_retain: false,
+                hoist_funs: false,
+                if_return: false,
+                join_vars: false,
+                collapse_vars: false,
+                reduce_vars: false,
+                warnings: false,
+                negate_iife: false,
+                keep_fnames: true,
+                keep_infinity: true,
+                side_effects: false
               },
-              sourceMap: false,
               mangle: false
-            },
-            parallel: true
-          })
+            }
+          }),
         ]
       }
     };
@@ -410,7 +440,7 @@ export default class BaseOptimizer {
         new DLLBundlerPlugin({
           dllConfig: this.getDLLConfig(),
           log: this.log
-        }),
+        })
       ]
     };
 
@@ -418,8 +448,8 @@ export default class BaseOptimizer {
       commonConfig,
       dllBundlerPlugin,
       IS_KIBANA_DISTRIBUTABLE
-        ? {}
-        : transpileTsConfig,
+        ? isDistributableConfig
+        : isSourceConfig,
       this.uiBundles.isDevMode()
         ? webpackMerge(watchingConfig, supportEnzymeConfig)
         : productionConfig

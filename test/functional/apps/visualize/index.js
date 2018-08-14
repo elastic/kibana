@@ -32,6 +32,7 @@ export default function ({ getService, loadTestFile }) {
       await kibanaServer.uiSettings.replace({ 'dateFormat:tz': 'UTC', 'defaultIndex': 'logstash-*' });
     });
 
+    loadTestFile(require.resolve('./_embedding_chart'));
     loadTestFile(require.resolve('./_inspector'));
     loadTestFile(require.resolve('./_chart_types'));
     loadTestFile(require.resolve('./_experimental_vis'));

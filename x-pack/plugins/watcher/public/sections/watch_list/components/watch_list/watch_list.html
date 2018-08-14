@@ -1,5 +1,5 @@
 <kbn-management-app section="elasticsearch/watcher">
-  <div class="kuiViewContent kuiViewContent--constrainedWidth">
+  <div class="kuiViewContent">
     <forbidden-message ng-if="watchList.forbidden">
       You do not have permission to manage watches.
     </forbidden-message>
@@ -13,7 +13,7 @@
           class="kuiButton kuiButton--primary"
           ng-click="watchList.onClickCreateThresholdAlert()"
           data-test-subj="createThresholdAlertButton"
-          tooltip="Set up a custom watch in raw JSON"
+          tooltip="Send an alert on a specific condition"
         >
           Create threshold alert
         </button>
@@ -22,7 +22,7 @@
           class="kuiButton kuiButton--primary"
           ng-click="watchList.onClickCreateAdvancedWatch()"
           data-test-subj="createAdvancedWatchButton"
-          tooltip="Send an alert on a specific condition"
+          tooltip="Set up a custom watch in raw JSON"
         >
           Create advanced watch
         </button>

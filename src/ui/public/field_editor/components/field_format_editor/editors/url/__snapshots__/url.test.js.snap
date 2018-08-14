@@ -2,11 +2,11 @@
 
 exports[`UrlFormatEditor should render label template help 1`] = `
 <React.Fragment>
-  <LabelTemplateFlyout
+  <InjectIntl(LabelTemplateFlyout)
     isVisible={true}
     onClose={[Function]}
   />
-  <UrlTemplateFlyout
+  <InjectIntl(UrlTemplateFlyout)
     isVisible={false}
     onClose={[Function]}
   />
@@ -14,7 +14,13 @@ exports[`UrlFormatEditor should render label template help 1`] = `
     describedByIds={Array []}
     fullWidth={false}
     hasEmptyLabelSpace={false}
-    label="Type"
+    label={
+      <FormattedMessage
+        defaultMessage="Type"
+        id="common.ui.fieldEditor.url.typeLabel"
+        values={Object {}}
+      />
+    }
   >
     <EuiSelect
       compressed={false}
@@ -52,11 +58,21 @@ exports[`UrlFormatEditor should render label template help 1`] = `
         onClick={[Function]}
         type="button"
       >
-        URL template help
+        <FormattedMessage
+          defaultMessage="URL template help"
+          id="common.ui.fieldEditor.url.template.helpButton"
+          values={Object {}}
+        />
       </EuiLink>
     }
     isInvalid={false}
-    label="URL template"
+    label={
+      <FormattedMessage
+        defaultMessage="URL template"
+        id="common.ui.fieldEditor.url.urlTemplateLabel"
+        values={Object {}}
+      />
+    }
   >
     <EuiFieldText
       compressed={false}
@@ -82,7 +98,13 @@ exports[`UrlFormatEditor should render label template help 1`] = `
       </EuiLink>
     }
     isInvalid={false}
-    label="Label template"
+    label={
+      <FormattedMessage
+        defaultMessage="Label template"
+        id="common.ui.fieldEditor.url.labelTemplateLabel"
+        values={Object {}}
+      />
+    }
   >
     <EuiFieldText
       compressed={false}
@@ -93,7 +115,7 @@ exports[`UrlFormatEditor should render label template help 1`] = `
       value=""
     />
   </EuiFormRow>
-  <FormatEditorSamples
+  <InjectIntl(FormatEditorSamplesComponent)
     samples={Array []}
   />
 </React.Fragment>
@@ -101,11 +123,11 @@ exports[`UrlFormatEditor should render label template help 1`] = `
 
 exports[`UrlFormatEditor should render normally 1`] = `
 <React.Fragment>
-  <LabelTemplateFlyout
+  <InjectIntl(LabelTemplateFlyout)
     isVisible={false}
     onClose={[Function]}
   />
-  <UrlTemplateFlyout
+  <InjectIntl(UrlTemplateFlyout)
     isVisible={false}
     onClose={[Function]}
   />
@@ -113,7 +135,13 @@ exports[`UrlFormatEditor should render normally 1`] = `
     describedByIds={Array []}
     fullWidth={false}
     hasEmptyLabelSpace={false}
-    label="Type"
+    label={
+      <FormattedMessage
+        defaultMessage="Type"
+        id="common.ui.fieldEditor.url.typeLabel"
+        values={Object {}}
+      />
+    }
   >
     <EuiSelect
       compressed={false}
@@ -151,11 +179,21 @@ exports[`UrlFormatEditor should render normally 1`] = `
         onClick={[Function]}
         type="button"
       >
-        URL template help
+        <FormattedMessage
+          defaultMessage="URL template help"
+          id="common.ui.fieldEditor.url.template.helpButton"
+          values={Object {}}
+        />
       </EuiLink>
     }
     isInvalid={false}
-    label="URL template"
+    label={
+      <FormattedMessage
+        defaultMessage="URL template"
+        id="common.ui.fieldEditor.url.urlTemplateLabel"
+        values={Object {}}
+      />
+    }
   >
     <EuiFieldText
       compressed={false}
@@ -181,7 +219,13 @@ exports[`UrlFormatEditor should render normally 1`] = `
       </EuiLink>
     }
     isInvalid={false}
-    label="Label template"
+    label={
+      <FormattedMessage
+        defaultMessage="Label template"
+        id="common.ui.fieldEditor.url.labelTemplateLabel"
+        values={Object {}}
+      />
+    }
   >
     <EuiFieldText
       compressed={false}
@@ -192,7 +236,7 @@ exports[`UrlFormatEditor should render normally 1`] = `
       value=""
     />
   </EuiFormRow>
-  <FormatEditorSamples
+  <InjectIntl(FormatEditorSamplesComponent)
     samples={Array []}
   />
 </React.Fragment>
@@ -200,11 +244,11 @@ exports[`UrlFormatEditor should render normally 1`] = `
 
 exports[`UrlFormatEditor should render url template help 1`] = `
 <React.Fragment>
-  <LabelTemplateFlyout
+  <InjectIntl(LabelTemplateFlyout)
     isVisible={false}
     onClose={[Function]}
   />
-  <UrlTemplateFlyout
+  <InjectIntl(UrlTemplateFlyout)
     isVisible={true}
     onClose={[Function]}
   />
@@ -212,7 +256,13 @@ exports[`UrlFormatEditor should render url template help 1`] = `
     describedByIds={Array []}
     fullWidth={false}
     hasEmptyLabelSpace={false}
-    label="Type"
+    label={
+      <FormattedMessage
+        defaultMessage="Type"
+        id="common.ui.fieldEditor.url.typeLabel"
+        values={Object {}}
+      />
+    }
   >
     <EuiSelect
       compressed={false}
@@ -250,11 +300,21 @@ exports[`UrlFormatEditor should render url template help 1`] = `
         onClick={[Function]}
         type="button"
       >
-        URL template help
+        <FormattedMessage
+          defaultMessage="URL template help"
+          id="common.ui.fieldEditor.url.template.helpButton"
+          values={Object {}}
+        />
       </EuiLink>
     }
     isInvalid={false}
-    label="URL template"
+    label={
+      <FormattedMessage
+        defaultMessage="URL template"
+        id="common.ui.fieldEditor.url.urlTemplateLabel"
+        values={Object {}}
+      />
+    }
   >
     <EuiFieldText
       compressed={false}
@@ -280,7 +340,13 @@ exports[`UrlFormatEditor should render url template help 1`] = `
       </EuiLink>
     }
     isInvalid={false}
-    label="Label template"
+    label={
+      <FormattedMessage
+        defaultMessage="Label template"
+        id="common.ui.fieldEditor.url.labelTemplateLabel"
+        values={Object {}}
+      />
+    }
   >
     <EuiFieldText
       compressed={false}
@@ -291,7 +357,7 @@ exports[`UrlFormatEditor should render url template help 1`] = `
       value=""
     />
   </EuiFormRow>
-  <FormatEditorSamples
+  <InjectIntl(FormatEditorSamplesComponent)
     samples={Array []}
   />
 </React.Fragment>

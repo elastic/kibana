@@ -32,12 +32,6 @@ export const deprecations = ({ rename }) => {
           'It has been replaced with "xpack.monitoring.elasticsearch.ssl.verificationMode"');
     },
     (settings, log) => {
-      if (has(settings, 'node_resolver')) {
-        log('Config key "xpack.monitoring.node_resolver" is deprecated. ' +
-            'The only possible value is "uuid". This config key will be removed in 7.0.');
-      }
-    },
-    (settings, log) => {
       if (has(settings, 'report_stats')) {
         log('Config key "xpack.monitoring.report_stats" is deprecated and will be removed in 7.0. ' +
             'Use "xpack.xpack_main.telemetry.enabled" instead.');

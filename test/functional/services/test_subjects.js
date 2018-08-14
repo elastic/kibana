@@ -45,6 +45,14 @@ export function TestSubjectsProvider({ getService }) {
       expect(doesExist).to.be(true);
     }
 
+    async missingOrFail(selector, timeout = 1000) {
+      log.debug(`TestSubjects.missingOrFail(${selector})`);
+      const doesExist = await this.exists(selector, timeout);
+      // Verify element is missing, or else fail the test consuming this.
+      expect(doesExist).to.be(false);
+    }
+
+
     async append(selector, text) {
       return await retry.try(async () => {
         const input = await this.find(selector);
@@ -62,12 +70,26 @@ export function TestSubjectsProvider({ getService }) {
       });
     }
 
+    async doubleClick(selector, timeout = defaultFindTimeout) {
+      log.debug(`TestSubjects.doubleClick(${selector})`);
+      return await retry.try(async () => {
+        const element = await this.find(selector, timeout);
+        await remote.moveMouseTo(element);
+        await remote.doubleClick();
+      });
+    }
+
+
     async descendantExists(selector, parentElement) {
       return await find.descendantExistsByCssSelector(testSubjSelector(selector), parentElement);
     }
 
     async findDescendant(selector, parentElement) {
       return await find.descendantDisplayedByCssSelector(testSubjSelector(selector), parentElement);
+    }
+
+    async findAllDescendant(selector, parentElement) {
+      return await find.allDescendantDisplayedByCssSelector(testSubjSelector(selector), parentElement);
     }
 
     async find(selector, timeout = 1000) {
