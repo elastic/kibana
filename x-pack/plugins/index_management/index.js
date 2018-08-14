@@ -11,7 +11,6 @@ import { registerSettingsRoutes } from './server/routes/api/settings';
 import { registerStatsRoute } from './server/routes/api/stats';
 import { registerLicenseChecker } from './server/lib/register_license_checker';
 import { PLUGIN } from './common/constants';
-
 export function indexManagement(kibana)  {
   return new kibana.Plugin({
     id: PLUGIN.ID,
@@ -22,12 +21,18 @@ export function indexManagement(kibana)  {
         'plugins/index_management',
       ]
     },
+    config(Joi) {
+      return Joi.object({
+        enabled: Joi.boolean().default(true),
+      }).default();
+    },
     init: function (server) {
       registerLicenseChecker(server);
       registerIndicesRoutes(server);
       registerSettingsRoutes(server);
       registerStatsRoute(server);
       registerMappingRoute(server);
-    }
+    },
+    configPrefix: `xpack.${PLUGIN.ID}`
   });
 }
