@@ -5,7 +5,7 @@
  */
 
 import { ClusterMetric, Metric } from '../classes';
-import { SMALL_FLOAT } from '../../../../common/formatting';
+import { SMALL_FLOAT, LARGE_FLOAT } from '../../../../common/formatting';
 
 export class ApmClusterMetric extends ClusterMetric {
   constructor(opts) {
@@ -72,6 +72,47 @@ export class ApmCpuUtilizationMetric extends ApmMetric {
         }
       }
       return null;
+    };
+  }
+}
+
+export class ApmEventsRateClusterMetric extends ApmClusterMetric {
+  constructor(opts) {
+    super({
+      ...opts,
+      derivative: true,
+      format: LARGE_FLOAT,
+      metricAgg: 'max',
+      units: '/m'
+    });
+
+    this.aggs = {
+      beats_uuids: {
+        terms: {
+          field: 'beats_stats.beat.uuid',
+          size: 10000
+        },
+        aggs: {
+          event_rate_per_beat: {
+            max: {
+              field: this.field
+            }
+          }
+        }
+      },
+      event_rate: {
+        sum_bucket: {
+          buckets_path: 'beats_uuids>event_rate_per_beat',
+          gap_policy: 'skip'
+        }
+      },
+      metric_deriv: {
+        derivative: {
+          buckets_path: 'event_rate',
+          gap_policy: 'skip',
+          unit: '1m'
+        }
+      }
     };
   }
 }

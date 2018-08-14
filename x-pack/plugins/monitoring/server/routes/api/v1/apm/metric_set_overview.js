@@ -18,16 +18,13 @@ export const metricSet = [
       'apm_system_os_load_15'
     ],
     name: 'apm_os_load'
-  }
-  // {
-  //   keys: [
-  //     'beat_cluster_pipeline_events_total_rate',
-  //     'beat_cluster_output_events_total',
-  //     'beat_cluster_output_events_ack_rate',
-  //     'beat_cluster_pipeline_events_emitted_rate'
-  //   ],
-  //   name: 'beat_event_rates'
-  // },
+  },
+  {
+    keys: [
+      'apm_output_events_total',
+    ],
+    name: 'apm_events_rate'
+  },
   // {
   //   keys: [
   //     'beat_cluster_pipeline_events_failed_rate',

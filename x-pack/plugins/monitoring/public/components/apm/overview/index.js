@@ -23,7 +23,8 @@ export function ApmOverview({
 }) {
   const seriesToShow = [
     metrics.apm_cpu,
-    metrics.apm_os_load
+    metrics.apm_os_load,
+    metrics.apm_events_rate
   ];
 
   const charts = seriesToShow.map((data, index) => (

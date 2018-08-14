@@ -13,7 +13,7 @@ import {
   BeatsMetric
 } from '../beats/classes';
 import { LARGE_BYTES, LARGE_FLOAT } from '../../../../common/formatting';
-import { ApmMetric, ApmCpuUtilizationMetric } from './classes';
+import { ApmMetric, ApmCpuUtilizationMetric, ApmEventsRateClusterMetric } from './classes';
 
 export const metrics = {
   apm_cpu_total: new ApmCpuUtilizationMetric({
@@ -51,7 +51,7 @@ export const metrics = {
     units: ''
   }),
 
-  apm_mem_gc_next: new BeatsMetric({
+  apm_mem_gc_next: new ApmMetric({
     field: 'beats_stats.metrics.beat.memstats.gc_next',
     label: 'GC Next',
     title: 'Memory',
@@ -61,7 +61,7 @@ export const metrics = {
     metricAgg: 'max',
     units: 'B'
   }),
-  apm_mem_total: new BeatsMetric({
+  apm_mem_total: new ApmMetric({
     field: 'beats_stats.metrics.beat.memstats.memory_total',
     label: 'Total Memory',
     title: 'Memory',
@@ -71,7 +71,7 @@ export const metrics = {
     metricAgg: 'max',
     units: 'B'
   }),
-  apm_mem_alloc: new BeatsMetric({
+  apm_mem_alloc: new ApmMetric({
     field: 'beats_stats.metrics.beat.memstats.memory_alloc',
     label: 'Allocated Memory',
     title: 'Memory',
@@ -81,7 +81,7 @@ export const metrics = {
     metricAgg: 'max',
     units: 'B'
   }),
-  apm_mem_rss: new BeatsMetric({
+  apm_mem_rss: new ApmMetric({
     field: 'beats_stats.metrics.beat.memstats.rss',
     label: 'Process Total',
     title: 'Memory',
@@ -90,6 +90,12 @@ export const metrics = {
     metricAgg: 'max',
     units: 'B'
   }),
+  apm_output_events_total: new ApmEventsRateClusterMetric({
+    field: 'beats_stats.metrics.libbeat.output.events.total',
+    title: 'Events Rate',
+    label: 'Emitted',
+    description: 'Events processed by the output (including retries)'
+  })
 };
 
 export const metrics2 = {
