@@ -2,7 +2,6 @@
 
 exports[`render 1`] = `
 <EuiFlyout
-  className="addPanelFlyout"
   closeButtonAriaLabel="Closes this dialog"
   data-test-subj="dashboardAddPanel"
   hideCloseButton={false}
