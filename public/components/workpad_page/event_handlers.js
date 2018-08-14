@@ -1,6 +1,7 @@
 import { withHandlers } from 'recompose';
 
 const ancestorElement = (element, className) => {
+  if (!element) return element;
   do {
     if (element.classList.contains(className)) return element;
   } while ((element = element.parentElement));
@@ -42,6 +43,7 @@ const handleMouseDown = (commit, e, isEditable) => {
   const { target, clientX, clientY, button } = e;
   if (button !== 0 || !isEditable) return; // left-click and edit mode only
   const ancestor = ancestorElement(target, 'canvasPage');
+  if (!ancestor) return;
   const { x, y } = localMousePosition(ancestor, clientX, clientY);
   setupHandler(commit, ancestor);
   commit('mouseEvent', { event: 'mouseDown', x, y });
@@ -49,10 +51,35 @@ const handleMouseDown = (commit, e, isEditable) => {
 
 const keyCode = key => (key === 'Meta' ? 'MetaLeft' : 'Key' + key.toUpperCase());
 
+const isNotTextInput = ({ tagName, type }) => {
+  // input types that aren't variations of text input
+  const nonTextInputs = [
+    'button',
+    'checkbox',
+    'color',
+    'file',
+    'image',
+    'radio',
+    'range',
+    'reset',
+    'submit',
+  ];
+
+  switch (tagName.toLowerCase()) {
+    case 'input':
+      return nonTextInputs.includes(type);
+    case 'textarea':
+      return false;
+    default:
+      return true;
+  }
+};
+
 const handleKeyDown = (commit, e, editable, remove) => {
-  const key = e.key;
+  const { key, target } = e;
+
   if (editable) {
-    if (key === 'Backspace' || key === 'Delete') {
+    if (isNotTextInput(target) && (key === 'Backspace' || key === 'Delete')) {
       e.preventDefault();
       remove();
     } else {
