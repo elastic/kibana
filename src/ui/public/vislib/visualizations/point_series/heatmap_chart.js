@@ -107,14 +107,15 @@ export function VislibVisualizationsHeatmapChartProvider(Private) {
     }
 
     getHeatmapColors(cfg) {
-      const colorsNumber = cfg.get('colorsNumber');
       const invertColors = cfg.get('invertColors');
       const colorSchema = cfg.get('colorSchema');
       const labels = this.getHeatmapLabels(cfg);
+      const isCustomRangeEnabled = cfg.get('setColorRange');
+      const totalColors = isCustomRangeEnabled ? labels.length : cfg.get('colorsNumber');
       const colors = {};
       for (const i in labels) {
         if (labels[i]) {
-          const val = invertColors ? 1 - i / colorsNumber : i / colorsNumber;
+          const val = invertColors ? 1 - i / totalColors : i / totalColors;
           colors[labels[i]] = getHeatmapColors(val, colorSchema);
         }
       }
