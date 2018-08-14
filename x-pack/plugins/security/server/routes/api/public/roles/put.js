@@ -92,7 +92,7 @@ export function initPutRolesApi(
         return wrapError(err);
       }
     },
-    config: {
+    options: {
       validate: {
         params: Joi.object()
           .keys({
