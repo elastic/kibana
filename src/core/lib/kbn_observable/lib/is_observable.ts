@@ -17,8 +17,9 @@
  * under the License.
  */
 
+import { observable as SymbolObservable } from 'rxjs/internal/symbol/observable';
 import { Observable } from '../observable';
 
 export function isObservable<T>(x: any): x is Observable<T> {
-  return x !== null && typeof x === 'object' && x[Symbol.observable] !== undefined;
+  return x !== null && typeof x === 'object' && x[SymbolObservable] !== undefined;
 }

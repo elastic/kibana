@@ -6,6 +6,7 @@ exports[`render 1`] = `
   closeButtonAriaLabel="Closes this dialog"
   data-test-subj="dashboardAddPanel"
   hideCloseButton={false}
+  maxWidth={false}
   onClose={[Function]}
   ownFocus={true}
   size="s"
