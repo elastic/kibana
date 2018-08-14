@@ -144,9 +144,9 @@ export default class KbnServer {
    * @return undefined
    */
   async listen() {
-    const { server } = this;
-
     await this.ready();
+
+    const { server } = this;
     await fromNode(cb => server.start(cb));
 
     if (isWorker) {
