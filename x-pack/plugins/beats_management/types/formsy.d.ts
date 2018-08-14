@@ -33,10 +33,11 @@ declare module 'formsy-react' {
     value: string | null | undefined
   ) => void;
 
-  function addValidationRule<FormShape = {}>(
+  export function addValidationRule<FormShape = {}>(
     validationName: string,
     validationMethod: ValidationMethod<FormShape>
   ): void;
+  export function withFormsy(component: any): any;
 
   // function withFormsy<ComponentProps = any>(
   //   component:
