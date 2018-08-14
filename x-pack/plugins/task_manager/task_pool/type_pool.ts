@@ -42,7 +42,7 @@ export class TypePool {
     return this.availableSlots <= 0;
   }
 
-  public async run(callCluster: ElasticJs, instance: ConcreteTaskInstance) {
+  public async run(callCluster: ElasticJs, instance: ConcreteTaskInstance, onComplete: () => void) {
     if (this.isFull) {
       return;
     }
@@ -57,7 +57,10 @@ export class TypePool {
 
     if (await task.claimOwnership()) {
       this.running.add(task);
-      task.run().then(() => this.running.delete(task));
+      task.run().then(() => {
+        this.running.delete(task);
+        onComplete();
+      });
     }
   }
 

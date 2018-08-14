@@ -83,7 +83,7 @@ export class TaskPool {
     poll();
   }
 
-  public async checkForWork() {
+  public checkForWork = async () => {
     if (this.isChecking) {
       return;
     }
@@ -97,18 +97,18 @@ export class TaskPool {
       });
 
       // There's no more work for us in the index
-      if (instances.length) {
-        return;
+      if (!instances.length) {
+        break;
       }
 
       // Try to claim tasks
       for (const instance of instances) {
-        this.pools[instance.type].run(this.callCluster, instance);
+        await this.pools[instance.type].run(this.callCluster, instance, this.checkForWork);
       }
     }
 
     this.isChecking = false;
-  }
+  };
 
   private checkForExpiredTasks() {
     Object.values(this.pools).forEach(p => p.checkForExpiredTasks());

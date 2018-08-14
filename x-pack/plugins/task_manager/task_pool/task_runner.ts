@@ -77,7 +77,7 @@ export class TaskRunner {
       this.instance = await this.store.update({
         ...this.instance,
         status: 'running',
-        runAt: intervalFromNow(this.definition.timeOut!),
+        runAt: intervalFromNow(this.definition.timeOut)!,
       });
 
       return true;
@@ -105,7 +105,7 @@ export class TaskRunner {
   }
 
   private async processResult(result: RunResult): Promise<RunResult> {
-    const runAt = result.runAt || intervalFromNow(this.instance.interval!);
+    const runAt = result.runAt || intervalFromNow(this.instance.interval);
     const state = result.state || this.instance.state || {};
 
     if (runAt) {

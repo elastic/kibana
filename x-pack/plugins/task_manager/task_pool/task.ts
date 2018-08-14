@@ -4,6 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import Joi from 'joi';
+
 /*
  * Type definitions and validations for tasks.
  */
@@ -113,6 +115,15 @@ export interface TaskDefinition {
    */
   run: RunFunction;
 }
+
+export const validateTaskDefinition = Joi.object({
+  type: Joi.string().required(),
+  title: Joi.string().optional(),
+  description: Joi.string().optional(),
+  timeOut: Joi.string().default('5m'),
+  maxConcurrency: Joi.number().default(0), // Unlimited, as <= 0 is invalid
+  run: Joi.func().required(),
+}).default();
 
 /**
  * A dictionary mapping task types to their definitions.

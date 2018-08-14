@@ -10,7 +10,11 @@
  *
  * @param {string} interval - An interval of the form `Nm` such as `5m`
  */
-export function intervalFromNow(interval: string): Date {
+export function intervalFromNow(interval?: string): Date | undefined {
+  if (interval === undefined) {
+    return;
+  }
+
   assertValidInterval(interval);
 
   const mins = parseInterval(interval);

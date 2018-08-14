@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ConcreteTaskInstance, ElasticJs, TaskStatus } from './task';
+import { ConcreteTaskInstance, ElasticJs, TaskInstance, TaskStatus } from './task';
 
 const DOC_TYPE = 'doc';
 
@@ -12,12 +12,6 @@ export interface StoreOpts {
   callCluster: ElasticJs;
   index: string;
   maxAttempts: number;
-}
-
-export interface TaskStore {
-  availableTasks: (query: TaskQuery) => Promise<ConcreteTaskInstance[]>;
-  update: (instance: ConcreteTaskInstance) => Promise<ConcreteTaskInstance>;
-  remove: (id: string) => Promise<void>;
 }
 
 // Internal, the raw document, as stored in the Kibana index.
@@ -47,28 +41,79 @@ export interface TaskQuery {
 /**
  * Wraps an elasticsearch connection and provides a task manager-specific
  * interface into the index.
- *
- * @export
- * @class ElasticTaskStore
- * @implements {TaskStore}
  */
-export class ElasticTaskStore implements TaskStore {
+export class TaskStore {
   private callCluster: ElasticJs;
   private index: string;
   private maxAttempts: number;
 
   /**
-   * Constructs a new ElasticTaskStore.
+   * Constructs a new TaskStore.
    * @param {StoreOpts} opts
    * @prop {CallCluster} callCluster - The elastic search connection
    * @prop {string} index - The name of the task manager index
    * @prop {number} maxAttempts - The maximum number of attempts before a task will be abandoned
-   * @memberof ElasticTaskStore
    */
   constructor(opts: StoreOpts) {
     this.callCluster = opts.callCluster;
     this.index = opts.index;
     this.maxAttempts = opts.maxAttempts;
+  }
+
+  public async init() {
+    const properties = {
+      type: { type: 'keyword' },
+      runAt: { type: 'date' },
+      interval: { type: 'text' },
+      attempts: { type: 'integer' },
+      status: { type: 'keyword' },
+      params: { type: 'text' },
+      state: { type: 'text' },
+      user: { type: 'keyword' },
+      scope: { type: 'keyword' },
+    };
+
+    try {
+      await this.callCluster('indices.create', {
+        index: this.index,
+        body: {
+          mappings: {
+            doc: {
+              dynamic: 'strict',
+              properties,
+            },
+          },
+        },
+      });
+    } catch (err) {
+      if (
+        !err.body ||
+        !err.body.error ||
+        err.body.error.type !== 'resource_already_exists_exception'
+      ) {
+        throw err;
+      }
+      return this.callCluster('indices.putMapping', {
+        index: this.index,
+        type: DOC_TYPE,
+        body: {
+          properties,
+        },
+      });
+    }
+  }
+
+  public schedule(task: TaskInstance) {
+    return this.callCluster('index', {
+      index: this.index,
+      type: DOC_TYPE,
+      body: rawSource(task),
+      refresh: true,
+    });
+  }
+
+  public fetch(): Promise<ConcreteTaskInstance[]> {
+    return this.search();
   }
 
   /**
@@ -81,30 +126,26 @@ export class ElasticTaskStore implements TaskStore {
    * @prop {string[]} types - Task types to be queried
    * @prop {number} size - The number of task instances to retrieve
    * @returns {Promise<TaskDoc[]>}
-   * @memberof ElasticTaskStore
    */
-  public async availableTasks(query: TaskQuery): Promise<ConcreteTaskInstance[]> {
+  public availableTasks(query: TaskQuery): Promise<ConcreteTaskInstance[]> {
     const { types, size } = query;
 
-    const result = await this.callCluster('search', {
+    return this.search({
       body: {
         query: {
           bool: {
             must: [
               { terms: { type: types } },
               { range: { attempts: { lte: this.maxAttempts } } },
-              { range: { nextRun: { lte: 'now' } } },
+              { range: { runAt: { lte: 'now' } } },
             ],
           },
         },
         size,
-        sort: { nextRun: { order: 'asc' } },
+        sort: { runAt: { order: 'asc' } },
         version: true,
       },
-      index: this.index,
     });
-
-    return (result.hits.hits as RawTaskDoc[]).map(rawToTaskDoc);
   }
 
   /**
@@ -113,7 +154,6 @@ export class ElasticTaskStore implements TaskStore {
    *
    * @param {TaskDoc} doc
    * @returns {Promise<TaskDoc>}
-   * @memberof ElasticTaskStore
    */
   public async update(doc: ConcreteTaskInstance): Promise<ConcreteTaskInstance> {
     const rawDoc = taskDocToRaw(doc, this.index);
@@ -126,6 +166,7 @@ export class ElasticTaskStore implements TaskStore {
       index: this.index,
       type: DOC_TYPE,
       version: doc.version,
+      refresh: true,
     });
 
     return {
@@ -139,31 +180,45 @@ export class ElasticTaskStore implements TaskStore {
    *
    * @param {string} id
    * @returns {Promise<void>}
-   * @memberof ElasticTaskStore
    */
   public async remove(id: string): Promise<void> {
     return this.callCluster('delete', {
       id,
       index: this.index,
       type: DOC_TYPE,
+      refresh: true,
     });
+  }
+
+  private async search(opts: object = {}): Promise<ConcreteTaskInstance[]> {
+    const result = await this.callCluster('search', {
+      type: DOC_TYPE,
+      index: this.index,
+      ...opts,
+    });
+
+    return (result.hits.hits as RawTaskDoc[]).map(rawToTaskDoc);
   }
 }
 
-function taskDocToRaw(doc: ConcreteTaskInstance, index: string): RawTaskDoc {
+function rawSource(doc: TaskInstance) {
   const source = {
     ...doc,
     params: JSON.stringify(doc.params || {}),
     state: JSON.stringify(doc.state || {}),
   };
 
-  delete source.id;
-  delete source.version;
+  delete (source as any).id;
+  delete (source as any).version;
 
+  return source;
+}
+
+function taskDocToRaw(doc: ConcreteTaskInstance, index: string): RawTaskDoc {
   return {
     _id: doc.id,
     _index: index,
-    _source: source,
+    _source: rawSource(doc),
     _type: DOC_TYPE,
     _version: doc.version,
   };
