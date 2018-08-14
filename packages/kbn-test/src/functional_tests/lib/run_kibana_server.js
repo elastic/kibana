@@ -69,24 +69,20 @@ function collectCliArgs(config, { installDir, extraKbnOpts }) {
  * overridden options
  */
 function filterCliArgs(args) {
-  const argv = [...args].slice(1);
-
-  const filteredArgv = argv.reduce((acc, val, ind) => {
+  return args.reduce((acc, val, ind) => {
     // If original argv has a later basepath setting, skip this val.
-    if (isBasePathSettingOverridden(argv, val, ind)) {
+    if (isBasePathSettingOverridden(args, val, ind)) {
       return acc;
     }
 
     // Check if original argv has a later setting that overrides
     // the current val. If so, skip this val.
-    if (findIndexFrom(argv, ++ind, opt => opt.split('=')[0] === val.split('=')[0]) > -1) {
+    if (findIndexFrom(args, ++ind, opt => opt.split('=')[0] === val.split('=')[0]) > -1) {
       return acc;
     }
 
     return [...acc, val];
   }, []);
-
-  return [args[0], ...filteredArgv];
 }
 
 /**
