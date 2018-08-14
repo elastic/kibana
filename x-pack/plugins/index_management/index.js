@@ -26,13 +26,6 @@ export function indexManagement(kibana)  {
         enabled: Joi.boolean().default(true),
       }).default();
     },
-    isEnabled(config) {
-      const key = `xpack.${PLUGIN.ID}.enabled`;
-      return (
-        config.has(key) &&
-        config.get(key)
-      );
-    },
     init: function (server) {
       registerLicenseChecker(server);
       registerIndicesRoutes(server);
