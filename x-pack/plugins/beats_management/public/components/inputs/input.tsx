@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { CommonProps, EuiFieldText, EuiFieldTextProps, EuiFormRow } from '@elastic/eui';
-// @ts-ignore
 import { FormsyInputProps, withFormsy } from 'formsy-react';
 import React, { Component, InputHTMLAttributes } from 'react';
 
