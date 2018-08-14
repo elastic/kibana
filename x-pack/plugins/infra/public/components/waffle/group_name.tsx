@@ -43,7 +43,7 @@ export class GroupName extends React.PureComponent<Props, {}> {
   };
 }
 
-export const GroupNameContainer = styled.div`
+const GroupNameContainer = styled.div`
   position: relative;
   text-align: center
   font-size: 16px;
@@ -58,7 +58,7 @@ interface InnerProps {
   isChild?: boolean;
 }
 
-export const Inner = styled<InnerProps, 'div'>('div')`
+const Inner = styled<InnerProps, 'div'>('div')`
   border: 1px solid ${props => props.theme.eui.euiBorderColor};
   background-color: ${props =>
     props.isChild ? props.theme.eui.euiColorLightestShade : props.theme.eui.euiColorEmptyShade};
@@ -70,7 +70,7 @@ export const Inner = styled<InnerProps, 'div'>('div')`
   overflow: hidden;
 `;
 
-export const Name = styled.div`
+const Name = styled.div`
   flex: 1 1 auto;
   padding: 6px 10px;
   overflow: hidden;
@@ -78,7 +78,7 @@ export const Name = styled.div`
   white-space: nowrap;
 `;
 
-export const Count = styled.div`
+const Count = styled.div`
   flex: 0 0 auto;
   border-left: 1px solid ${props => props.theme.eui.euiBorderColor};
   padding: 6px 10px;

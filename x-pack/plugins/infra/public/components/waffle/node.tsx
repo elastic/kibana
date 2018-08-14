@@ -69,10 +69,11 @@ export class Node extends React.PureComponent<Props, State> {
   };
 }
 
-export const Container = styled.div`
+const Container = styled.div`
   position: relative;
 `;
-export const SquareOuter = styled.div`
+
+const SquareOuter = styled.div`
   position: absolute;
   top: 4px;
   left: 4px;
@@ -82,7 +83,8 @@ export const SquareOuter = styled.div`
   border-radius: 3px;
   box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.2);
 `;
-export const SquareInner = styled.div`
+
+const SquareInner = styled.div`
   cursor: pointer;
   position: absolute;
   top: 0;
@@ -92,7 +94,8 @@ export const SquareInner = styled.div`
   border-radius: 3px;
   background-color: ${props => props.theme.eui.euiColorVis0};
 `;
-export const ValueInner = styled.div`
+
+const ValueInner = styled.div`
   position: absolute;
   top: 0;
   left: 0;
@@ -106,7 +109,8 @@ export const ValueInner = styled.div`
   overflow: hidden;
   flex-wrap: wrap;
 `;
-export const Value = styled.div`
+
+const Value = styled.div`
   font-weight: bold;
   font-size: 1.5em;
   text-align: center;
@@ -114,7 +118,8 @@ export const Value = styled.div`
   flex: 1 0 auto;
   line-height: 1.2em;
 `;
-export const Label = styled.div`
+
+const Label = styled.div`
   text-overflow: ellipsis;
   font-size: 0.7em;
   margin-bottom: 0.7em;

@@ -37,11 +37,11 @@ export const GroupOfGroups: React.SFC<Props> = props => {
   );
 };
 
-export const Container = styled.div`
+const Container = styled.div`
   margin: 0 10px;
 `;
 
-export const Groups = styled.div`
+const Groups = styled.div`
   display: flex;
   background-color: rgba(0, 0, 0, 0.05);
   flex-wrap: wrap;

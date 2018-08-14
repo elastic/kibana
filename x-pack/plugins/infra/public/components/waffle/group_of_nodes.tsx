@@ -45,11 +45,11 @@ export const GroupOfNodes: React.SFC<Props> = ({
   );
 };
 
-export const GroupOfNodesContainer = styled.div`
+const GroupOfNodesContainer = styled.div`
   margin: 0 10px;
 `;
 
-export const Nodes = styled.div`
+const Nodes = styled.div`
   display: flex;
   background-color: rgba(0, 0, 0, 0.05);
   flex-wrap: wrap;
