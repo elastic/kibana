@@ -32,7 +32,7 @@ const actualVersion = require(src('../package.json')).version;
 
 describe('xsrf request filter', function () {
   async function inject(kbnServer, opts) {
-    return kbnTestServer.makeRequest(kbnServer, opts);
+    return await kbnTestServer.makeRequest(kbnServer, opts);
   }
 
   const makeServer = async function () {
@@ -181,8 +181,8 @@ describe('xsrf request filter', function () {
           method: method
         });
 
-        expect(resp.statusCode).to.be(400);
-        expect(resp.result.message).to.be('Request must contain a kbn-xsrf header.');
+        expect(resp.statusCode).toBe(400);
+        expect(resp.result).toMatchSnapshot(`${method} reject response`);
       });
 
       it('accepts whitelisted requests without either an xsrf or version header', async function () {

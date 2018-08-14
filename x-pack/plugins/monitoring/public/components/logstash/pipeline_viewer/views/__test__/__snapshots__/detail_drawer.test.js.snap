@@ -4,6 +4,7 @@ exports[`DetailDrawer component If vertices shows basic info and no stats for if
 <EuiFlyout
   closeButtonAriaLabel="Closes this dialog"
   hideCloseButton={false}
+  maxWidth={false}
   onClose={[MockFunction]}
   ownFocus={false}
   size="s"
@@ -72,6 +73,7 @@ exports[`DetailDrawer component Plugin vertices Plugin does not have explicit ID
 <EuiFlyout
   closeButtonAriaLabel="Closes this dialog"
   hideCloseButton={false}
+  maxWidth={false}
   onClose={[MockFunction]}
   ownFocus={false}
   size="s"
@@ -362,6 +364,7 @@ exports[`DetailDrawer component Plugin vertices Plugin has explicit ID shows bas
 <EuiFlyout
   closeButtonAriaLabel="Closes this dialog"
   hideCloseButton={false}
+  maxWidth={false}
   onClose={[MockFunction]}
   ownFocus={false}
   size="s"
@@ -648,6 +651,7 @@ exports[`DetailDrawer component Queue vertices shows basic info and no stats for
 <EuiFlyout
   closeButtonAriaLabel="Closes this dialog"
   hideCloseButton={false}
+  maxWidth={false}
   onClose={[MockFunction]}
   ownFocus={false}
   size="s"
@@ -706,6 +710,7 @@ exports[`DetailDrawer component shows vertex title 1`] = `
 <EuiFlyout
   closeButtonAriaLabel="Closes this dialog"
   hideCloseButton={false}
+  maxWidth={false}
   onClose={[MockFunction]}
   ownFocus={false}
   size="s"
