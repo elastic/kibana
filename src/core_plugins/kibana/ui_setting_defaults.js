@@ -416,13 +416,6 @@ export function getUiSettingDefaults() {
         target="_blank" rel="noopener noreferrer">accepted formats</a>),
         "display" (the title to be displayed), and "section" (which column to put the option in).`
     },
-    'home:welcome:show': {
-      name: 'Show the welcome screen',
-      value: true,
-      description: `Toggles whether or not to show the welcome screen if
-        this is a new installation of Kibana.`,
-      category: ['home'],
-    },
     'dashboard:defaultDarkTheme': {
       name: 'Dark theme',
       value: false,

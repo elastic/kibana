@@ -45,9 +45,7 @@ export class Home extends Component {
   constructor(props) {
     super(props);
 
-    const isWelcomeEnabled =
-      props.localStorage.getItem(KEY_ENABLE_WELCOME) !== 'false' &&
-      props.settingsClient.get(KEY_ENABLE_WELCOME, true);
+    const isWelcomeEnabled = props.localStorage.getItem(KEY_ENABLE_WELCOME) !== 'false';
 
     this.state = {
       // If welcome is enabled, we wait for loading to complete
@@ -245,6 +243,5 @@ Home.propTypes = {
   recentlyAccessed: PropTypes.arrayOf(recentlyAccessedShape).isRequired,
   find: PropTypes.func.isRequired,
   localStorage: PropTypes.object.isRequired,
-  settingsClient: PropTypes.object.isRequired,
   urlBasePath: PropTypes.string.isRequired,
 };

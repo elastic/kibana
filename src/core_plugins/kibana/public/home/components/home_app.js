@@ -45,7 +45,6 @@ export function HomeApp({
   const isCloudEnabled = chrome.getInjected('isCloudEnabled', false);
   const apmUiEnabled = chrome.getInjected('apmUiEnabled', true);
   const savedObjectsClient = chrome.getSavedObjectsClient();
-  const settingsClient = chrome.getUiSettingsClient();
 
   const renderTutorialDirectory = (props) => {
     return (
@@ -102,7 +101,6 @@ export function HomeApp({
             recentlyAccessed={recentlyAccessed}
             find={savedObjectsClient.find}
             localStorage={localStorage}
-            settingsClient={settingsClient}
             urlBasePath={chrome.getBasePath()}
           />
         </Route>

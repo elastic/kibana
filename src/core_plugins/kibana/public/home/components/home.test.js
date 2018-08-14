@@ -45,17 +45,9 @@ describe('home', () => {
       localStorage: {
         getItem: sinon.spy((path) => {
           expect(path).toEqual('home:welcome:show');
-          return null;
+          return 'false';
         }),
         setItem: sinon.mock(),
-      },
-      settingsClient: {
-        get: sinon.spy((path, defaultVal) => {
-          expect(path).toEqual('home:welcome:show');
-          expect(defaultVal).toBeTruthy();
-          return true;
-        }),
-        set: sinon.mock(),
       },
       urlBasePath: 'goober',
     };
@@ -157,21 +149,19 @@ describe('home', () => {
 
   describe('welcome', () => {
     test('should show the welcome screen if enabled, and there are no index patterns defined', async () => {
-      defaultProps.settingsClient.get = sinon.spy(() => true);
-      defaultProps.localStorage.getItem = sinon.spy(() => true);
+      defaultProps.localStorage.getItem = sinon.spy(() => 'true');
 
       const component = await renderHome({
         find: () => Promise.resolve({ total: 0 }),
       });
 
-      sinon.assert.calledOnce(defaultProps.settingsClient.get);
       sinon.assert.calledOnce(defaultProps.localStorage.getItem);
 
       expect(component).toMatchSnapshot();
     });
 
     test('stores skip welcome setting if skipped', async () => {
-      defaultProps.settingsClient.get = sinon.spy(() => true);
+      defaultProps.localStorage.getItem = sinon.spy(() => 'true');
 
       const component = await renderHome({
         find: () => Promise.resolve({ total: 0 }),
@@ -181,13 +171,12 @@ describe('home', () => {
       component.update();
 
       sinon.assert.calledWith(defaultProps.localStorage.setItem, 'home:welcome:show', 'false');
-      sinon.assert.notCalled(defaultProps.settingsClient.set);
 
       expect(component).toMatchSnapshot();
     });
 
     test('should show the normal home page if loading fails', async () => {
-      defaultProps.settingsClient.get = sinon.spy(() => true);
+      defaultProps.localStorage.getItem = sinon.spy(() => 'true');
 
       const component = await renderHome({
         find: () => Promise.reject('Doh!'),
@@ -197,17 +186,7 @@ describe('home', () => {
     });
 
     test('should show the normal home page if welcome screen is disabled locally', async () => {
-      defaultProps.settingsClient.getItem = sinon.spy(() => true);
       defaultProps.localStorage.getItem = sinon.spy(() => 'false');
-
-      const component = await renderHome();
-
-      expect(component).toMatchSnapshot();
-    });
-
-    test('should show the normal home page if welcome screen is disabled system wide', async () => {
-      defaultProps.settingsClient.getItem = sinon.spy(() => false);
-      defaultProps.localStorage.getItem = sinon.spy(() => 'true');
 
       const component = await renderHome();
 
@@ -217,9 +196,6 @@ describe('home', () => {
 
   describe('isNewKibanaInstance', () => {
     test('should set isNewKibanaInstance to true when there are no index patterns', async () => {
-      // Ensure the welcome screen does not show by disabling the setting
-      defaultProps.settingsClient.get = sinon.spy(() => false);
-
       const component = await renderHome({
         find: () => Promise.resolve({ total: 0 }),
       });

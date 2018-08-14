@@ -28,7 +28,6 @@ const names = {
   dashboard: 'Dashboard',
   reporting: 'Reporting',
   search: 'Search',
-  home: 'Home',
 };
 
 export function getCategoryName(category) {
