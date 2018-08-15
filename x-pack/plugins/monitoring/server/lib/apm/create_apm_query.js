@@ -8,6 +8,16 @@ import { defaults } from 'lodash';
 import { BeatsMetric } from '../metrics';
 import { createQuery } from '../create_query';
 
+export const apmFilter = {
+  bool: {
+    must: {
+      term: {
+        'beats_stats.beat.type': 'apm-server'
+      }
+    }
+  }
+};
+
 /**
  * {@code createQuery} for all Beats instances.
  *
@@ -23,15 +33,7 @@ export function createApmQuery(options = { }) {
     type: 'beats_stats',
   });
 
-  options.filters.push({
-    bool: {
-      must: {
-        term: {
-          'beats_stats.beat.type': 'apm-server'
-        }
-      }
-    }
-  });
+  options.filters.push(apmFilter);
 
   return createQuery(options);
 }

@@ -10,6 +10,7 @@ import { getApmClusterStatus } from './_get_apm_cluster_status';
 import { getMetrics } from '../../../../lib/details/get_metrics';
 import { metricSet } from './metric_set_overview';
 import { handleError } from '../../../../lib/errors';
+import { apmFilter } from '../../../../lib/apm/create_apm_query';
 
 export function apmOverviewRoute(server) {
   /**
@@ -41,7 +42,7 @@ export function apmOverviewRoute(server) {
       try {
         const [ clusterStatus, metrics ] = await Promise.all([
           getApmClusterStatus(req, apmIndexPattern, { clusterUuid }),
-          getMetrics(req, apmIndexPattern, metricSet),
+          getMetrics(req, apmIndexPattern, metricSet, [apmFilter]),
         ]);
 
         reply({

@@ -5,6 +5,7 @@
  */
 
 import { checkParam } from '../error_missing_required';
+import { get } from 'lodash';
 import { BeatsClusterMetric } from '../metrics';
 import { createApmQuery } from './create_apm_query';
 import {
@@ -62,6 +63,50 @@ export function getApmsForClusters(req, apmIndexPattern, clusters) {
 
     const { callWithRequest } = req.server.plugins.elasticsearch.getCluster('monitoring');
     const response = await callWithRequest(req, 'search', params);
-    return handleResponse(clusterUuid, response);
+    const formattedResponse = handleResponse(clusterUuid, response);
+
+    // Fetch additional information
+    const req2 = {
+      index: apmIndexPattern,
+      size: 0,
+      ignoreUnavailable: true,
+      // filterPath: apmAggFilterPath,
+      body: {
+        query: createApmQuery({
+          start,
+          end,
+          clusterUuid,
+          metric: BeatsClusterMetric.getMetricFields() // override default of BeatMetric.getMetricFields
+        }),
+        aggs: {
+          acked_events: {
+            filter: {
+              range: {
+                'beats_stats.metrics.libbeat.output.events.acked': {
+                  gt: 0,
+                }
+              }
+            },
+            aggs: {
+              max_timestamp: {
+                max: {
+                  field: 'timestamp'
+                }
+              }
+            }
+          }
+        }
+      }
+    };
+
+    const response2 = await callWithRequest(req, 'search', req2);
+
+    return {
+      ...formattedResponse,
+      stats: {
+        ...formattedResponse.stats,
+        timeOfLastEvent: get(response2, 'aggregations.acked_events.max_timestamp.value')
+      }
+    };
   }));
 }

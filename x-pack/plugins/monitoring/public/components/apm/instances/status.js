@@ -16,6 +16,7 @@ export function Status({ stats }) {
     },
     bytesSent,
     totalEvents,
+    timeOfLastEvent,
   } = stats;
 
   const metrics = [
@@ -34,6 +35,11 @@ export function Status({ stats }) {
       value: formatMetric(totalEvents),
       dataTestSubj: 'totalEvents'
     },
+    {
+      label: 'Last Event',
+      value: formatMetric(timeOfLastEvent, 'time_since2'),
+      dataTestSubj: 'timeOfLastEvent',
+    }
   ];
 
   const IconComponent = ({ status }) => (

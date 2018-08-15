@@ -30,6 +30,8 @@ export function formatNumber(num, which) {
   switch (which) {
     case 'time_since':
       return moment(moment() - num).from(moment(), true);
+    case 'time_since2':
+      return moment().from(num, true);
     case 'time':
       return moment(num).format('H:mm:ss');
     case 'int_commas':

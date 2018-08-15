@@ -23,8 +23,14 @@ export const metricSet = [
     keys: [
       'apm_output_events_total',
     ],
-    name: 'apm_events_rate'
+    name: 'apm_output_events_rate'
   },
+  {
+    keys: [
+      'apm_requests'
+    ],
+    name: 'apm_requests'
+  }
   // {
   //   keys: [
   //     'beat_cluster_pipeline_events_failed_rate',

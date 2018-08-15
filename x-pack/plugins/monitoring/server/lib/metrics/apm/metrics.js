@@ -90,9 +90,18 @@ export const metrics = {
     metricAgg: 'max',
     units: 'B'
   }),
+
+  apm_requests: new ApmEventsRateClusterMetric({
+    field: 'beats_stats.metrics.apm-server.server.request.count',
+    title: 'Requests',
+    label: 'Requested',
+    description: 'PLZ FILL ME IN'
+  }),
+
+
   apm_output_events_total: new ApmEventsRateClusterMetric({
     field: 'beats_stats.metrics.libbeat.output.events.total',
-    title: 'Events Rate',
+    title: 'Output Events Rate',
     label: 'Emitted',
     description: 'Events processed by the output (including retries)'
   })
