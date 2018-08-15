@@ -31,6 +31,7 @@ import {
   EuiFlexItem,
   EuiRadioGroup,
   EuiLoadingSpinner,
+  EuiCopy,
 } from '@elastic/eui';
 
 import {
@@ -278,13 +279,17 @@ export class ShareUrlContent extends Component {
 
         {this.renderShortUrlSwitch()}
 
-        <EuiButton
-          fill
-          onClick={() => window.alert(this.state.url)}
-          disabled={this.state.isCreatingShortUrl}
-        >
-          Copy { this.props.isEmbedded ? 'iFrame code' : 'link' }
-        </EuiButton>
+        <EuiCopy textToCopy={this.state.url}>
+          {(copy) => (
+            <EuiButton
+              fill
+              onClick={copy}
+              disabled={this.state.isCreatingShortUrl}
+            >
+              Copy { this.props.isEmbedded ? 'iFrame code' : 'link' }
+            </EuiButton>
+          )}
+        </EuiCopy>
 
       </EuiForm>
     );
