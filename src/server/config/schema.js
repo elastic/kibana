@@ -110,6 +110,10 @@ export default async () => Joi.object({
     }).default(),
   }).default(),
 
+  uiSettings: Joi.object().keys({
+    overrides: Joi.object().unknown(true).default()
+  }).default(),
+
   logging: Joi.object().keys({
     silent: Joi.boolean().default(false),
 

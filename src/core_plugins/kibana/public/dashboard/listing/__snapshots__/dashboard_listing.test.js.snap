@@ -2,7 +2,7 @@
 
 exports[`after fetch hideWriteControls 1`] = `
 <EuiPage
-  className="dashboardLandingPage"
+  className="dshDashboardListing__page"
   data-test-subj="dashboardLandingPage"
   restrictWidth={true}
 >
@@ -32,7 +32,7 @@ exports[`after fetch hideWriteControls 1`] = `
 
 exports[`after fetch initialFilter 1`] = `
 <EuiPage
-  className="dashboardLandingPage"
+  className="dshDashboardListing__page"
   data-test-subj="dashboardLandingPage"
   restrictWidth={true}
 >
@@ -184,7 +184,7 @@ exports[`after fetch initialFilter 1`] = `
 
 exports[`after fetch renders call to action when no dashboards exist 1`] = `
 <EuiPage
-  className="dashboardLandingPage"
+  className="dshDashboardListing__page"
   data-test-subj="dashboardLandingPage"
   restrictWidth={true}
 >
@@ -244,7 +244,7 @@ exports[`after fetch renders call to action when no dashboards exist 1`] = `
 
 exports[`after fetch renders table rows 1`] = `
 <EuiPage
-  className="dashboardLandingPage"
+  className="dshDashboardListing__page"
   data-test-subj="dashboardLandingPage"
   restrictWidth={true}
 >
@@ -396,7 +396,7 @@ exports[`after fetch renders table rows 1`] = `
 
 exports[`after fetch renders warning when listingLimit is exceeded 1`] = `
 <EuiPage
-  className="dashboardLandingPage"
+  className="dshDashboardListing__page"
   data-test-subj="dashboardLandingPage"
   restrictWidth={true}
 >
@@ -579,7 +579,7 @@ exports[`after fetch renders warning when listingLimit is exceeded 1`] = `
 
 exports[`renders empty page in before initial fetch to avoid flickering 1`] = `
 <EuiPage
-  className="dashboardLandingPage"
+  className="dshDashboardListing__page"
   data-test-subj="dashboardLandingPage"
   restrictWidth={true}
 >
