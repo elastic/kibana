@@ -25,7 +25,7 @@ let newPlatformLoadingCount;
 
 export function __newPlatformInit__(instance) {
   if (newPlatformLoadingCount) {
-    throw new Error('ui/chrome/loading_count already initialized with new platform apis');
+    throw new Error('ui/chrome/api/loading_count already initialized with new platform apis');
   }
   newPlatformLoadingCount = instance;
 }
