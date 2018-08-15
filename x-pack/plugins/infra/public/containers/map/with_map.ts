@@ -3,12 +3,13 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import moment from 'moment';
+import * as moment from 'moment';
 import { graphql } from 'react-apollo';
+
 import { InfraMetricType, InfraPathType, MapQuery } from '../../../common/graphql/types';
 import { InfraWaffleMapGroup } from '../../lib/lib';
+import { mapQuery } from './map.gql_query';
 import { nodesToWaffleMap } from './nodes_to_wafflemap';
-import { mapQuery } from './query';
 
 interface ChildProps {
   map: InfraWaffleMapGroup[];

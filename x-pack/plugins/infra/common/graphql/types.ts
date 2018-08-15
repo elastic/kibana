@@ -515,6 +515,48 @@ export namespace LogEntries {
     constant: string;
   };
 }
+export namespace MapQuery {
+  export type Variables = {
+    id: string;
+    timerange: InfraTimerangeInput;
+    filters?: InfraFilterInput[] | null;
+    metrics?: InfraMetricInput[] | null;
+    path?: InfraPathInput[] | null;
+  };
+
+  export type Query = {
+    __typename?: 'Query';
+    source: Source;
+  };
+
+  export type Source = {
+    __typename?: 'InfraSource';
+    id: string;
+    map?: Map | null;
+  };
+
+  export type Map = {
+    __typename?: 'InfraResponse';
+    nodes: Nodes[];
+  };
+
+  export type Nodes = {
+    __typename?: 'InfraNode';
+    path: Path[];
+    metrics: Metrics[];
+  };
+
+  export type Path = {
+    __typename?: 'InfraNodePath';
+    value: string;
+  };
+
+  export type Metrics = {
+    __typename?: 'InfraNodeMetric';
+    name: string;
+    value: number;
+  };
+}
 
 export namespace InfraTimeKeyFields {
   export type Fragment = {
