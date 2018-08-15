@@ -34,13 +34,13 @@ import { uiSettingsMixin } from '../ui_settings_mixin';
 describe('uiSettingsMixin()', () => {
   const sandbox = sinon.createSandbox();
 
-  async function setup(options = {}) {
-    const {
-      enabled = true
-    } = options;
-
+  async function setup() {
     const config = await Config.withDefaultSchema({
-      uiSettings: { enabled }
+      uiSettings: {
+        overrides: {
+          foo: 'bar'
+        }
+      }
     });
 
     // maps of decorations passed to `server.decorate()`
@@ -111,6 +111,9 @@ describe('uiSettingsMixin()', () => {
       sinon.assert.calledOnce(uiSettingsServiceFactory);
       sinon.assert.calledWithExactly(uiSettingsServiceFactory, server, {
         foo: 'bar',
+        overrides: {
+          foo: 'bar'
+        },
         getDefaults: sinon.match.func,
       });
     });
