@@ -8,13 +8,13 @@ import gql from 'graphql-tag';
 
 export const mapQuery = gql`
   query MapQuery(
-    $id: ID!
+    $sourceId: ID!
     $timerange: InfraTimerangeInput!
     $filters: [InfraFilterInput!]
     $metrics: [InfraMetricInput!]
     $path: [InfraPathInput!]
   ) {
-    source(id: $id) {
+    source(id: $sourceId) {
       id
       map(timerange: $timerange, filters: $filters) {
         nodes(path: $path) {
