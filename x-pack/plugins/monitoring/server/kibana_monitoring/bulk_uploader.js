@@ -57,6 +57,10 @@ export class BulkUploader {
 
     this._callClusterWithInternalUser = callClusterFactory(server).getCallClusterInternal();
 
+    const repository = server.savedObjects.getSavedObjectsRepository(
+      this._callClusterWithInternalUser
+    );
+    this._savedObjectsClient = new server.savedObjects.SavedObjectsClient(repository);
   }
 
   /*
@@ -97,7 +101,10 @@ export class BulkUploader {
    * @return {Promise} - resolves to undefined
    */
   async _fetchAndUpload(collectorSet) {
-    const data = await collectorSet.bulkFetch(this._callClusterWithInternalUser);
+    const data = await collectorSet.bulkFetch({
+      callCluster: this._callClusterWithInternalUser,
+      savedObjectsClient: this._savedObjectsClient,
+    });
     const payload = BulkUploader.toBulkUploadFormat(data);
 
     if (payload) {

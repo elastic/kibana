@@ -117,7 +117,7 @@ export function getReportingUsageCollector(server) {
   const { collectorSet } = server.usage;
   return collectorSet.makeUsageCollector({
     type: KIBANA_REPORTING_TYPE,
-    fetch: async callCluster => {
+    fetch: async ({ callCluster }) => {
       const xpackInfo = server.plugins.xpack_main.info;
       const config = server.config();
       const available = xpackInfo && xpackInfo.isAvailable(); // some form of reporting (csv at least) is available for all valid licenses
