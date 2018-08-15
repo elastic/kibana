@@ -6,13 +6,9 @@
 
 import { connect } from 'react-redux';
 import { LayerPanel } from './view';
-import { updateFlyout, FLYOUT_STATE } from '../../store/ui';
 import { getSelectedLayer } from '../../selectors/map_selectors';
-import { setSelectedLayer } from '../../actions/store_actions';
 
 const mapDispatchToProps = {
-  cancelLayerPanel: () => updateFlyout(FLYOUT_STATE.NONE),
-  saveLayerEdits: () => updateFlyout(FLYOUT_STATE.NONE) && setSelectedLayer(null)
 };
 
 function mapStateToProps(state = {}) {
@@ -21,6 +17,5 @@ function mapStateToProps(state = {}) {
   };
 }
 
-const connectedLayerPanel = connect(mapStateToProps, mapDispatchToProps, null,
-  { withRef: true })(LayerPanel);
+const connectedLayerPanel = connect(mapStateToProps, mapDispatchToProps)(LayerPanel);
 export { connectedLayerPanel as LayerPanel };
