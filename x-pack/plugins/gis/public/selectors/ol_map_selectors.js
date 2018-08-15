@@ -7,20 +7,10 @@
 import { createSelector } from 'reselect';
 import { getLayerList, getMapConstants } from "./map_selectors";
 import { LAYER_TYPE } from "../shared/layers/layer";
+import { FEATURE_PROJECTION, tempVectorStyle, defaultVectorStyle }
+  from './ol_layer_defaults';
 import * as ol from 'openlayers';
 import _ from 'lodash';
-
-const FEATURE_PROJECTION = 'EPSG:3857';
-
-const tempVectorStyle = new ol.style.Style({
-  fill: new ol.style.Fill({
-    color: 'rgba(160, 225, 255, .05)'
-  }),
-  stroke: new ol.style.Stroke({
-    color: 'rgba(160, 225, 255, .8)',
-    width: 1
-  })
-});
 
 // Layer-specific logic
 function convertTmsLayersToOl({ source, visible }) {
@@ -45,7 +35,8 @@ const convertVectorLayersToOl = (() => {
       })
     });
     vectorLayer.setVisible(visible);
-    temporary && vectorLayer.setStyle(tempVectorStyle);
+    temporary && vectorLayer.setStyle(tempVectorStyle)
+      || vectorLayer.setStyle(defaultVectorStyle);
     return vectorLayer;
   };
 })();
@@ -84,6 +75,19 @@ function updateMapLayerOrder(mapLayers, oldLayerOrder, newLayerOrder) {
   });
 }
 
+const getOlLayerStyle = ({ color }) => {
+  return new ol.style.Style({
+    fill: new ol.style.Fill({
+      // TODO: Make alpha channel adjustable
+      color: `${color}15`
+    }),
+    stroke: new ol.style.Stroke({
+      color,
+      width: 2
+    })
+  });
+};
+
 
 // Selectors
 const getOlMap = createSelector(
@@ -120,19 +124,23 @@ export const getOlMapAndLayers = createSelector(
   getLayersWithOl,
   (olMap, layersWithOl) => {
     const layersIds = getLayersIds(olMap.getLayers());
-    layersWithOl.forEach((layer) => {
-      const olLayerId = layer.id;
-      if (!layersIds.find(id => id === olLayerId)) {
-        olMap.addLayer(layer.olLayer);
-      } else {
-        // Individual layer-specific updates
-        layer.olLayer.setVisible(layer.visible);
+    layersWithOl.forEach(({ id, olLayer, visible, temporary, style }) => {
+      if (!layersIds.find(layerId => layerId === id)) {
+        olMap.addLayer(olLayer);
       }
+      // Individual layer-specific updates
+      olLayer.setVisible(visible);
+      const appliedStyle = !_.isEmpty(style) && getOlLayerStyle(style)
+        || temporary && tempVectorStyle
+        || defaultVectorStyle;
+      olLayer.setStyle && olLayer.setStyle(appliedStyle);
     });
     // Layer order updates
     const oldLayerIdsOrder = getLayersIds(olMap.getLayers());
     const newLayerIdsOrder = layersWithOl.map(({ id }) => id);
-    updateMapLayerOrder(olMap.getLayers(), oldLayerIdsOrder, newLayerIdsOrder);
+    if (oldLayerIdsOrder !== newLayerIdsOrder) {
+      updateMapLayerOrder(olMap.getLayers(), oldLayerIdsOrder, newLayerIdsOrder);
+    }
     return olMap;
   }
 );
