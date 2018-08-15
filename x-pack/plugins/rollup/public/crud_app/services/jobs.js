@@ -11,19 +11,22 @@ function deserializeJob(job) {
       index_pattern: indexPattern,
       rollup_index: rollupIndex,
       cron: rollupCron,
-      metrics,
+      metrics = [],
       groups: {
         date_histogram: {
           interval: rollupInterval,
           delay: rollupDelay,
-          time_zone: timeZone,
+          time_zone: dateHistogramTimeZone,
+          field: dateHistogramField,
         },
-        histogram,
-        terms,
+        terms = {
+          fields: [],
+        },
       },
     },
     status: {
       job_state: status,
+      upgraded_doc_id: upgradedDocId,
     },
     stats: {
       documents_processed: documentsProcessed,
@@ -33,6 +36,8 @@ function deserializeJob(job) {
     },
   } = job;
 
+  const json = job;
+
   return {
     id,
     indexPattern,
@@ -40,15 +45,17 @@ function deserializeJob(job) {
     rollupCron,
     rollupInterval,
     rollupDelay,
+    dateHistogramTimeZone,
+    dateHistogramField,
     metrics,
-    timeZone,
-    histogram,
     terms,
     status,
+    upgradedDocId,
     documentsProcessed,
     pagesProcessed,
     rollupsIndexed,
     triggerCount,
+    json,
   };
 }
 

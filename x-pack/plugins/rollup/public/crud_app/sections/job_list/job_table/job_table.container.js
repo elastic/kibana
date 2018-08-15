@@ -16,6 +16,7 @@ import {
 
 import {
   filterChanged,
+  openDetailPanel,
   pageChanged,
   pageSizeChanged,
   sortChanged,
@@ -46,6 +47,9 @@ const mapDispatchToProps = (dispatch) => {
     },
     sortChanged: (sortField, isSortAscending) => {
       dispatch(sortChanged({ sortField, isSortAscending }));
+    },
+    openDetailPanel: (job) => {
+      dispatch(openDetailPanel({ job }));
     },
   };
 };

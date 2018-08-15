@@ -1,0 +1,168 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License;
+ * you may not use this file except in compliance with the Elastic License.
+ */
+
+import React, { Fragment } from 'react';
+
+import {
+  EuiDescriptionList,
+  EuiDescriptionListTitle,
+  EuiDescriptionListDescription,
+  EuiTitle,
+  EuiSpacer,
+} from '@elastic/eui';
+
+import { JobStatus } from '../../job_status';
+
+export const TabSummary = ({
+  id,
+  indexPattern,
+  rollupIndex,
+  rollupCron,
+  rollupInterval,
+  rollupDelay,
+  dateHistogramTimeZone,
+  dateHistogramField,
+  documentsProcessed,
+  pagesProcessed,
+  rollupsIndexed,
+  triggerCount,
+  status,
+  upgradedDocId,
+}) => {
+  return (
+    <Fragment>
+      <EuiTitle size="s">
+        <h3>Config</h3>
+      </EuiTitle>
+
+      <EuiSpacer size="s" />
+
+      <EuiDescriptionList type="column" align="center">
+        <EuiDescriptionListTitle>
+          <strong>ID</strong>
+        </EuiDescriptionListTitle>
+
+        <EuiDescriptionListDescription>
+          {id}
+        </EuiDescriptionListDescription>
+
+        <EuiDescriptionListTitle>
+          <strong>Index pattern</strong>
+        </EuiDescriptionListTitle>
+
+        <EuiDescriptionListDescription>
+          {indexPattern}
+        </EuiDescriptionListDescription>
+
+        <EuiDescriptionListTitle>
+          <strong>Rollup index</strong>
+        </EuiDescriptionListTitle>
+
+        <EuiDescriptionListDescription>
+          {rollupIndex}
+        </EuiDescriptionListDescription>
+
+        <EuiDescriptionListTitle>
+          <strong>Cron</strong>
+        </EuiDescriptionListTitle>
+
+        <EuiDescriptionListDescription>
+          {rollupCron}
+        </EuiDescriptionListDescription>
+
+        <EuiDescriptionListTitle>
+          <strong>Delay</strong>
+        </EuiDescriptionListTitle>
+
+        <EuiDescriptionListDescription>
+          {rollupDelay}
+        </EuiDescriptionListDescription>
+
+        <EuiDescriptionListTitle>
+          <strong>Interval</strong>
+        </EuiDescriptionListTitle>
+
+        <EuiDescriptionListDescription>
+          {rollupInterval}
+        </EuiDescriptionListDescription>
+
+        <EuiDescriptionListTitle>
+          <strong>Time field</strong>
+        </EuiDescriptionListTitle>
+
+        <EuiDescriptionListDescription>
+          {dateHistogramField}
+        </EuiDescriptionListDescription>
+
+        <EuiDescriptionListTitle>
+          <strong>Timezone</strong>
+        </EuiDescriptionListTitle>
+
+        <EuiDescriptionListDescription>
+          {dateHistogramTimeZone}
+        </EuiDescriptionListDescription>
+      </EuiDescriptionList>
+
+      <EuiSpacer size="s" />
+
+      <EuiTitle size="s">
+        <h3>Stats</h3>
+      </EuiTitle>
+
+      <EuiSpacer size="s" />
+
+      <EuiDescriptionList type="column" align="center">
+        <EuiDescriptionListTitle>
+          <strong>Status</strong>
+        </EuiDescriptionListTitle>
+
+        <EuiDescriptionListDescription>
+          <JobStatus status={status} />
+        </EuiDescriptionListDescription>
+
+        <EuiDescriptionListTitle>
+          <strong>Upgraded doc ID</strong>
+        </EuiDescriptionListTitle>
+
+        <EuiDescriptionListDescription>
+          {upgradedDocId ? 'True' : 'False'}
+        </EuiDescriptionListDescription>
+
+        <EuiDescriptionListTitle>
+          <strong>Documents processed</strong>
+        </EuiDescriptionListTitle>
+
+        <EuiDescriptionListDescription>
+          {documentsProcessed}
+        </EuiDescriptionListDescription>
+
+        <EuiDescriptionListTitle>
+          <strong>Pages processed</strong>
+        </EuiDescriptionListTitle>
+
+        <EuiDescriptionListDescription>
+          {pagesProcessed}
+        </EuiDescriptionListDescription>
+
+        <EuiDescriptionListTitle>
+          <strong>Rollups indexed</strong>
+        </EuiDescriptionListTitle>
+
+        <EuiDescriptionListDescription>
+          {rollupsIndexed}
+        </EuiDescriptionListDescription>
+
+        <EuiDescriptionListTitle>
+          <strong>Trigger count</strong>
+        </EuiDescriptionListTitle>
+
+        <EuiDescriptionListDescription>
+          {triggerCount}
+        </EuiDescriptionListDescription>
+      </EuiDescriptionList>
+    </Fragment>
+  );
+};

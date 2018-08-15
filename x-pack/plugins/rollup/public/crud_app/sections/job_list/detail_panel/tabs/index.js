@@ -4,11 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { combineReducers } from 'redux';
-import { jobs } from './jobs';
-import { tableState } from './table_state';
-
-export const indexRollupJobs = combineReducers({
-  jobs,
-  tableState,
-});
+export { TabSummary } from './tab_summary';
+export { TabTerms } from './tab_terms';
+export { TabMetrics } from './tab_metrics';
+export { TabJson } from './tab_json';

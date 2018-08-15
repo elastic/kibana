@@ -17,3 +17,8 @@ export {
   pageSizeChanged,
   sortChanged,
 } from './table_state';
+
+export {
+  openDetailPanel,
+  closeDetailPanel,
+} from './detail_panel';

@@ -4,4 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { indexRollupJobs } from './index_rollup_jobs';
+import { combineReducers } from 'redux';
+import { jobs } from './jobs';
+import { tableState } from './table_state';
+import { detailPanel } from './detail_panel';
+
+export const indexRollupJobs = combineReducers({
+  jobs,
+  tableState,
+  detailPanel,
+});

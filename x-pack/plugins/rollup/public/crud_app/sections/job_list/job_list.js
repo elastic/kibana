@@ -11,6 +11,10 @@ import {
   JobTable,
 } from './job_table';
 
+import {
+  DetailPanel,
+} from './detail_panel';
+
 const REFRESH_RATE_MS = 30000;
 
 export class JobList extends PureComponent {
@@ -34,6 +38,7 @@ export class JobList extends PureComponent {
     return (
       <Fragment>
         <JobTable />
+        <DetailPanel />
       </Fragment>
     );
   }

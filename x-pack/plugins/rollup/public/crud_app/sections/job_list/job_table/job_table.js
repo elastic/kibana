@@ -8,7 +8,6 @@ import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 
 import {
-  EuiHealth,
   EuiFieldSearch,
   EuiPage,
   EuiSpacer,
@@ -23,30 +22,10 @@ import {
   EuiPageBody,
   EuiPageContent,
   EuiToolTip,
+  EuiLink,
 } from '@elastic/eui';
 
-const statusToHealthMap = {
-  stopped: (
-    <EuiHealth color="subdued">
-      Stopped
-    </EuiHealth>
-  ),
-  started: (
-    <EuiHealth color="success">
-      Started
-    </EuiHealth>
-  ),
-  indexing: (
-    <EuiHealth color="warning">
-      Indexing
-    </EuiHealth>
-  ),
-  abort: (
-    <EuiHealth color="danger">
-      Aborting
-    </EuiHealth>
-  ),
-};
+import { JobStatus } from '../job_status';
 
 const HEADERS = [{
   name: 'ID',
@@ -57,7 +36,7 @@ const HEADERS = [{
   render: ({ status, rollupCron }) => {
     return (
       <EuiToolTip placement="top" content={`Cron: ${rollupCron}`}>
-        {statusToHealthMap[status]}
+        <JobStatus status={status} />
       </EuiToolTip>
     );
   },
@@ -83,7 +62,7 @@ const HEADERS = [{
       humanizedGroupNames.push('histogram');
     }
 
-    if (terms) {
+    if (terms.fields.length) {
       humanizedGroupNames.push('terms');
     }
 
@@ -142,8 +121,26 @@ export class JobTable extends Component {
   }
 
   buildRowCells(job) {
+    const { openDetailPanel } = this.props;
+
     return HEADERS.map(({ name, fieldName, render }) => {
       const value = render ? render(job) : job[fieldName];
+      let content;
+
+      if (name === 'ID') {
+        content = (
+          <EuiLink
+            data-test-subj="indexRollupTableJobLink"
+            onClick={() => {
+              openDetailPanel(job);
+            }}
+          >
+            {value}
+          </EuiLink>
+        );
+      } else {
+        content = value;
+      }
 
       return (
         <EuiTableRowCell
@@ -151,7 +148,7 @@ export class JobTable extends Component {
           truncateText={false}
           data-test-subj={`jobTableCell-${name}`}
         >
-          {value}
+          {content}
         </EuiTableRowCell>
       );
     });
