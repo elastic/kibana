@@ -77,9 +77,9 @@
   version "0.0.0"
   uid ""
 
-"@elastic/eui@3.0.4":
-  version "3.0.4"
-  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-3.0.4.tgz#455cdf67257206f43314aaa09ffced7b5a785675"
+"@elastic/eui@3.0.5":
+  version "3.0.5"
+  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-3.0.5.tgz#a22598625fc950dfb94c73edb0358f065858ea6c"
   dependencies:
     classnames "^2.2.5"
     core-js "^2.5.1"
@@ -3155,7 +3155,7 @@ concat-stream@1.5.1:
     readable-stream "~2.0.0"
     typedarray "~0.0.5"
 
-concat-stream@1.6.2:
+concat-stream@1.6.2, concat-stream@^1.5.0:
   version "1.6.2"
   resolved "https://registry.yarnpkg.com/concat-stream/-/concat-stream-1.6.2.tgz#904bdf194cd3122fc675c77fc4ac3d4ff0fd1a34"
   dependencies:
@@ -3168,15 +3168,6 @@ concat-stream@^1.4.7, concat-stream@^1.6.0, concat-stream@~1.6.0:
   version "1.6.1"
   resolved "https://registry.yarnpkg.com/concat-stream/-/concat-stream-1.6.1.tgz#261b8f518301f1d834e36342b9fea095d2620a26"
   dependencies:
-    inherits "^2.0.3"
-    readable-stream "^2.2.2"
-    typedarray "^0.0.6"
-
-concat-stream@^1.5.0:
-  version "1.6.2"
-  resolved "https://registry.yarnpkg.com/concat-stream/-/concat-stream-1.6.2.tgz#904bdf194cd3122fc675c77fc4ac3d4ff0fd1a34"
-  dependencies:
-    buffer-from "^1.0.0"
     inherits "^2.0.3"
     readable-stream "^2.2.2"
     typedarray "^0.0.6"
