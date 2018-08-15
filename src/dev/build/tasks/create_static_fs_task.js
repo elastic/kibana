@@ -79,7 +79,7 @@ export const CreateStaticFilesystem = {
       const staticModulesFs = build.resolvePath(staticModulesDir, 'static_modules.fs');
       const staticModulesLoader = build.resolvePath(staticModulesDir, 'static_loader.js');
       const entryPointsToPatch = [
-        'src/cli'
+        'src/setup_node_env/babel_register'
       ];
 
       const hash = calculateHash({

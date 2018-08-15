@@ -12441,9 +12441,9 @@ static-extend@^0.1.1:
     define-property "^0.2.5"
     object-copy "^0.1.0"
 
-"static-fs@git+https://git@github.com/mistic/static-fs.git#ddd8d4e":
+"static-fs@git+https://git@github.com/mistic/static-fs.git#00ea434":
   version "0.1.0"
-  resolved "git+https://git@github.com/mistic/static-fs.git#ddd8d4e598c170abbb044092100621878d722ebb"
+  resolved "git+https://git@github.com/mistic/static-fs.git#00ea434cdc25d1d3b0b4bcde7e76733f12b98ca7"
 
 static-module@^2.2.0:
   version "2.2.2"
