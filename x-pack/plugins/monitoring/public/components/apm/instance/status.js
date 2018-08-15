@@ -15,6 +15,7 @@ export function Status({ stats }) {
     output,
     version,
     uptime,
+    timeOfLastEvent
   } = stats;
 
   const metrics = [
@@ -37,6 +38,11 @@ export function Status({ stats }) {
       label: 'Uptime',
       value: formatMetric(uptime, 'time_since'),
       dataTestSubj: 'uptime'
+    },
+    {
+      label: 'Last Event',
+      value: formatMetric(timeOfLastEvent, 'time_since2'),
+      dataTestSubj: 'timeOfLastEvent',
     }
   ];
 

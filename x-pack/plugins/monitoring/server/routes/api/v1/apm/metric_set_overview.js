@@ -20,6 +20,10 @@ export const metricSet = [
     name: 'apm_os_load'
   },
   {
+    keys: ['apm_mem_total', 'apm_mem_alloc', 'apm_mem_rss', 'apm_mem_gc_next'],
+    name: 'apm_memory'
+  },
+  {
     keys: [
       'apm_output_events_total',
     ],

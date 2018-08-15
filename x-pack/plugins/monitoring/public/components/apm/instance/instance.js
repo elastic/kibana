@@ -13,6 +13,8 @@ export function ApmServerInstance({ summary, metrics, ...props }) {
   const metricsToShow = [
     metrics.apm_cpu,
     metrics.apm_os_load,
+    metrics.apm_output_events_rate,
+    metrics.apm_requests,
     metrics.apm_memory
   ];
 

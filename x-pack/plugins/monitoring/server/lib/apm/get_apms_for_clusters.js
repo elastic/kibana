@@ -62,11 +62,9 @@ export function getApmsForClusters(req, apmIndexPattern, clusters) {
     // console.log('query', JSON.stringify(params.body));
 
     const { callWithRequest } = req.server.plugins.elasticsearch.getCluster('monitoring');
-    const response = await callWithRequest(req, 'search', params);
-    const formattedResponse = handleResponse(clusterUuid, response);
 
     // Fetch additional information
-    const req2 = {
+    const params2 = {
       index: apmIndexPattern,
       size: 0,
       ignoreUnavailable: true,
@@ -99,7 +97,12 @@ export function getApmsForClusters(req, apmIndexPattern, clusters) {
       }
     };
 
-    const response2 = await callWithRequest(req, 'search', req2);
+    const [response, response2] = await Promise.all([
+      callWithRequest(req, 'search', params),
+      callWithRequest(req, 'search', params2)
+    ]);
+
+    const formattedResponse = handleResponse(clusterUuid, response);
 
     return {
       ...formattedResponse,

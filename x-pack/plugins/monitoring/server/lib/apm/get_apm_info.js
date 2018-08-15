@@ -40,15 +40,15 @@ export function handleResponse(response, apmUuid) {
   };
 }
 
-export async function getApmInfo(req, beatsIndexPattern, { clusterUuid, apmUuid, start, end }) {
-  checkParam(beatsIndexPattern, 'beatsIndexPattern in beats/getBeatSummary');
+export async function getApmInfo(req, apmIndexPattern, { clusterUuid, apmUuid, start, end }) {
+  checkParam(apmIndexPattern, 'apmIndexPattern in beats/getBeatSummary');
 
   const filters = [
     { term: { 'beats_stats.beat.uuid': apmUuid } },
     { term: { 'beats_stats.beat.type': 'apm-server' } }
   ];
   const params = {
-    index: beatsIndexPattern,
+    index: apmIndexPattern,
     size: 1,
     ignoreUnavailable: true,
     filterPath: [
@@ -89,7 +89,51 @@ export async function getApmInfo(req, beatsIndexPattern, { clusterUuid, apmUuid,
   };
 
   const { callWithRequest } = req.server.plugins.elasticsearch.getCluster('monitoring');
-  const response = await callWithRequest(req, 'search', params);
 
-  return handleResponse(response, apmUuid);
+  // Fetch additional information
+  const params2 = {
+    index: apmIndexPattern,
+    size: 0,
+    ignoreUnavailable: true,
+    // filterPath: apmAggFilterPath,
+    body: {
+      query: createQuery({
+        start,
+        end,
+        clusterUuid,
+        metric: ApmMetric.getMetricFields(),
+        filters
+      }),
+      aggs: {
+        acked_events: {
+          filter: {
+            range: {
+              'beats_stats.metrics.libbeat.output.events.acked': {
+                gt: 0,
+              }
+            }
+          },
+          aggs: {
+            max_timestamp: {
+              max: {
+                field: 'timestamp'
+              }
+            }
+          }
+        }
+      }
+    }
+  };
+
+  const [response, response2] = await Promise.all([
+    callWithRequest(req, 'search', params),
+    callWithRequest(req, 'search', params2)
+  ]);
+
+  const formattedResponse = handleResponse(response, apmUuid);
+
+  return {
+    ...formattedResponse,
+    timeOfLastEvent: get(response2, 'aggregations.acked_events.max_timestamp.value')
+  };
 }

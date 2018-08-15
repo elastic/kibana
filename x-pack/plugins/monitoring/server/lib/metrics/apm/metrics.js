@@ -104,7 +104,45 @@ export const metrics = {
     title: 'Output Events Rate',
     label: 'Emitted',
     description: 'Events processed by the output (including retries)'
-  })
+  }),
+
+  apm_mem_alloc: new ApmMetric({
+    field: 'beats_stats.metrics.beat.memstats.memory_alloc',
+    label: 'Active',
+    title: 'Memory',
+    description: 'Private memory in active use by the Beat',
+    format: LARGE_BYTES,
+    metricAgg: 'max',
+    units: 'B'
+  }),
+  apm_mem_total: new ApmMetric({
+    field: 'beats_stats.metrics.beat.memstats.memory_total',
+    label: 'Total',
+    title: 'Memory',
+    description: 'Private memory in active use by the Beat',
+    format: LARGE_BYTES,
+    metricAgg: 'max',
+    units: 'B'
+  }),
+  apm_mem_rss: new ApmMetric({
+    field: 'beats_stats.metrics.beat.memstats.rss',
+    label: 'Process Total',
+    title: 'Memory',
+    description: 'Resident set size of memory reserved by the Beat from the OS',
+    format: LARGE_BYTES,
+    metricAgg: 'max',
+    units: 'B'
+  }),
+  apm_mem_gc_next: new ApmMetric({
+    field: 'beats_stats.metrics.beat.memstats.gc_next',
+    label: 'GC Next',
+    title: 'Memory',
+    description:
+      'Limit of allocated memory at which garbage collection will occur',
+    format: LARGE_BYTES,
+    metricAgg: 'max',
+    units: 'B'
+  }),
 };
 
 export const metrics2 = {
