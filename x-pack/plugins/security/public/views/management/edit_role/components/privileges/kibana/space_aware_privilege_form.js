@@ -16,6 +16,8 @@ import {
   EuiButton,
   EuiText,
   EuiTitle,
+  EuiFlexGroup,
+  EuiFlexItem,
 } from '@elastic/eui';
 import { isReservedRole } from '../../../../../../lib/role';
 import { copyRole } from '../../../lib/copy_role';
@@ -106,6 +108,7 @@ export class SpaceAwarePrivilegeForm extends Component {
     const {
       role,
       spaces,
+      kibanaAppPrivileges,
     } = this.props;
 
     const {
@@ -113,6 +116,11 @@ export class SpaceAwarePrivilegeForm extends Component {
     } = this.state;
 
     const availableSpaces = this.getAvailableSpaces();
+
+    const canAssignSpacePrivileges = basePrivilege !== 'all';
+    const hasAssignedSpacePrivileges = Object.keys(this.state.spacePrivileges).length > 0;
+
+    const showAddPrivilegeButton = this.props.editable && availableSpaces.length > 0;
 
     return (
       <Fragment>
@@ -140,7 +148,7 @@ export class SpaceAwarePrivilegeForm extends Component {
 
         {basePrivilege === 'read' && this.props.editable && <EuiSpacer />}
 
-        {basePrivilege !== 'all' && (
+        {canAssignSpacePrivileges && (
           <Fragment>
             <PrivilegeSpaceTable
               role={role}
@@ -150,22 +158,38 @@ export class SpaceAwarePrivilegeForm extends Component {
               onChange={this.onExistingSpacePrivilegesChange}
             />
 
-            {(Object.keys(this.state.spacePrivileges).length > 0) && <EuiSpacer />}
+            {hasAssignedSpacePrivileges && <EuiSpacer />}
 
-            {this.props.editable && (
-              <Fragment>
-                {this.state.privilegeForms.map((form, index) => this.getSpaceForm(form, index, basePrivilege))}
-                {availableSpaces.length > 0 &&
+            {this.getSpaceForms(basePrivilege)}
+
+            <EuiFlexGroup responsive={false} alignItems={'flexEnd'}>
+              {showAddPrivilegeButton && (
+                <EuiFlexItem grow={false}>
                   <EuiButton size={'s'} iconType={'plusInCircle'} onClick={this.addSpacePrivilege}>Add space privilege</EuiButton>
-                }
-              </Fragment>
-            )}
+                </EuiFlexItem>
+              )}
+              <EuiFlexItem>
+                <ImpactedSpacesFlyout
+                  role={role}
+                  spaces={spaces}
+                  kibanaAppPrivileges={kibanaAppPrivileges}
+                  basePrivilege={basePrivilege}
+                />
+              </EuiFlexItem>
+            </EuiFlexGroup>
+
           </Fragment>
         )}
-        <EuiSpacer />
-        <ImpactedSpacesFlyout role={role} spaces={spaces} spacePrivileges={spacePrivileges} basePrivilege={basePrivilege} />
       </Fragment>
     );
+  }
+
+  getSpaceForms = (basePrivilege) => {
+    if (!this.props.editable) {
+      return null;
+    }
+
+    return this.state.privilegeForms.map((form, index) => this.getSpaceForm(form, index, basePrivilege));
   }
 
   addSpacePrivilege = () => {

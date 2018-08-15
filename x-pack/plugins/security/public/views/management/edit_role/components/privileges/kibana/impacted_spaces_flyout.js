@@ -19,6 +19,7 @@ import {
 
 import './impacted_spaces_flyout.less';
 import { NO_PRIVILEGE_VALUE } from '../../../lib/constants';
+import { getKibanaPrivilegesViewModel } from '../../../lib/get_application_privileges';
 
 export class ImpactedSpacesFlyout extends Component {
   state = {
@@ -51,12 +52,14 @@ export class ImpactedSpacesFlyout extends Component {
     const {
       role,
       spaces,
-      spacePrivileges,
+      kibanaAppPrivileges,
       basePrivilege,
     } = this.props;
 
+    const { assignedPrivileges } = getKibanaPrivilegesViewModel(kibanaAppPrivileges, role.kibana);
+
     const allSpacePrivileges = spaces.reduce((acc, space) => {
-      const spacePrivilege = spacePrivileges[space.id] ? spacePrivileges[space.id][0] : basePrivilege;
+      const spacePrivilege = assignedPrivileges[space.id] ? assignedPrivileges[space.id][0] : basePrivilege;
 
       let displayName = spacePrivilege;
       if (displayName === NO_PRIVILEGE_VALUE) {
@@ -71,7 +74,7 @@ export class ImpactedSpacesFlyout extends Component {
     }, {});
 
     return (
-      <EuiFlyout onClose={this.toggleShowImpactedSpaces} aria-labelledby="showImpactedSpacesTitle">
+      <EuiFlyout onClose={this.toggleShowImpactedSpaces} aria-labelledby="showImpactedSpacesTitle" size="s">
         <EuiFlyoutHeader hasBorder>
           <EuiTitle size="m">
             <h1 id="showImpactedSpacesTitle">Summary of all space privileges</h1>
@@ -81,6 +84,7 @@ export class ImpactedSpacesFlyout extends Component {
           <PrivilegeSpaceTable readonly={true} role={role} spaces={spaces} spacePrivileges={allSpacePrivileges} />
         </EuiFlyoutBody>
         <EuiFlyoutFooter className="showImpactedSpaces--flyout--footer">
+          {/* TODO: Hide footer if button is not available */}
           <EuiButton fill onClick={() => { }}>Manage Spaces</EuiButton>
         </EuiFlyoutFooter>
       </EuiFlyout>
@@ -90,7 +94,7 @@ export class ImpactedSpacesFlyout extends Component {
 
 ImpactedSpacesFlyout.propTypes = {
   role: PropTypes.object.isRequired,
+  kibanaAppPrivileges: PropTypes.array.isRequired,
   spaces: PropTypes.array.isRequired,
-  spacePrivileges: PropTypes.object.isRequired,
   basePrivilege: PropTypes.string.isRequired,
 };

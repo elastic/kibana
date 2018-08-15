@@ -71,7 +71,7 @@ export class PrivilegeSpaceTable extends Component {
     const columns = [{
       field: 'space',
       name: 'Space',
-      width: '50%',
+      width: this.props.readonly ? '75%' : '50%',
       render: (space) => (
         <EuiFlexGroup gutterSize="s" responsive={false} alignItems={'center'}>
           <EuiFlexItem grow={false}><SpaceAvatar space={space} size="s" /></EuiFlexItem>
@@ -81,6 +81,7 @@ export class PrivilegeSpaceTable extends Component {
     }, {
       field: 'privilege',
       name: 'Privilege',
+      width: this.props.readonly ? '25%' : undefined,
       render: (privilege, record) => {
         if (this.props.readonly) {
           return privilege;
