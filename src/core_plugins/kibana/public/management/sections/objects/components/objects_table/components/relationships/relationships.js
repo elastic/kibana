@@ -187,7 +187,7 @@ export class Relationships extends Component {
                   name: 'Title',
                   field: 'title',
                   render: (title, item) => (
-                    <EuiLink href={`#${getEditUrl(item.id, type)}`}>
+                    <EuiLink href={`${getEditUrl(item.id, type)}`}>
                       {title}
                     </EuiLink>
                   ),

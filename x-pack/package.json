@@ -79,7 +79,7 @@
     "yargs": "4.7.1"
   },
   "dependencies": {
-    "@elastic/eui": "3.2.1",
+    "@elastic/eui": "3.6.0",
     "@elastic/node-crypto": "0.1.2",
     "@elastic/node-phantom-simple": "2.2.4",
     "@elastic/numeral": "2.3.2",
@@ -91,7 +91,6 @@
     "angular-resource": "1.4.9",
     "angular-sanitize": "1.4.9",
     "angular-ui-ace": "0.2.3",
-    "angular-ui-bootstrap": "1.2.5",
     "babel-core": "^6.26.0",
     "babel-preset-es2015": "^6.24.1",
     "babel-runtime": "^6.26.0",
@@ -169,7 +168,6 @@
     "uuid": "3.0.1",
     "url-parse": "1.3.0",
     "venn.js": "0.2.9",
-    "webcola": "3.3.6",
     "xregexp": "3.2.0"
   },
   "engines": {

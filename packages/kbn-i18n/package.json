@@ -20,7 +20,6 @@
     "cross-env": "^5.2.0"
   },
   "dependencies": {
-    "accept-language-parser": "^1.5.0",
     "intl-format-cache": "^2.1.0",
     "intl-messageformat": "^2.2.0",
     "intl-relativeformat": "^2.1.0",
