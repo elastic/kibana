@@ -130,7 +130,7 @@ export class EditJobFlyout extends Component {
 
     if (jobDetails.jobGroups !== undefined) {
       if (jobDetails.jobGroups.some(j => this.props.allJobIds.includes(j))) {
-        jobGroupsValidationError = 'A job with this ID already exists. Groups and jobs cannot use the same IDs.';
+        jobGroupsValidationError = 'A job with this ID already exists. Groups and jobs cannot use the same ID.';
       } else {
         jobGroupsValidationError = validateGroupNames(jobDetails.jobGroups).message;
       }
