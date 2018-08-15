@@ -5,12 +5,11 @@
  */
 
 import React, { Component } from 'react';
-import _ from 'lodash';
 import PropTypes from 'prop-types';
 import { getClusterPrivileges } from '../../../../../../services/role_privileges';
 import { isReservedRole } from '../../../../../../lib/role';
 import {
-  EuiCheckboxGroup,
+  EuiComboBox,
   EuiFlexGroup,
   EuiFlexItem,
 } from '@elastic/eui';
@@ -24,52 +23,37 @@ export class ClusterPrivileges extends Component {
   render() {
 
     const clusterPrivileges = getClusterPrivileges();
-    const privilegeGroups = _.chunk(clusterPrivileges, clusterPrivileges.length / 2);
 
     return (
       <EuiFlexGroup>
-        {privilegeGroups.map(this.buildCheckboxGroup)}
+        {this.buildComboBox(clusterPrivileges)}
       </EuiFlexGroup>
     );
   }
 
-  buildCheckboxGroup = (items, key) => {
+  buildComboBox = (items, key) => {
     const role = this.props.role;
 
-    const checkboxes = items.map(i => ({
-      id: i,
+    const options = items.map(i => ({
       label: i
     }));
 
-    const selectionMap = (role.elasticsearch.cluster || [])
-      .map(k => ({ [k]: true }))
-      .reduce((acc, o) => ({ ...acc, ...o }), {});
+    const selectedOptions = (role.elasticsearch.cluster || [])
+      .map(k => ({ label: k }));
 
     return (
       <EuiFlexItem key={key}>
-        <EuiCheckboxGroup
-          options={checkboxes}
-          idToSelectedMap={selectionMap}
+        <EuiComboBox
+          options={options}
+          selectedOptions={selectedOptions}
           onChange={this.onClusterPrivilegesChange}
-          disabled={isReservedRole(role)}
+          isDisabled={isReservedRole(role)}
         />
       </EuiFlexItem>
     );
   };
 
-  onClusterPrivilegesChange = (privilege) => {
-    const { cluster } = this.props.role.elasticsearch;
-    const indexOfExistingPrivilege = cluster.indexOf(privilege);
-
-    const shouldRemove = indexOfExistingPrivilege >= 0;
-
-    const newClusterPrivs = [...cluster];
-    if (shouldRemove) {
-      newClusterPrivs.splice(indexOfExistingPrivilege, 1);
-    } else {
-      newClusterPrivs.push(privilege);
-    }
-
-    this.props.onChange(newClusterPrivs);
+  onClusterPrivilegesChange = (selectedPrivileges) => {
+    this.props.onChange(selectedPrivileges.map(priv => priv.label));
   }
 }
