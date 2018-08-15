@@ -4,20 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-// First step, select type, options (fields for each one underneath, all of them accept “Other settings” as a raw input):
-// Filebeat Input
-//  - List of file paths (ie.  “/var/log/*.log”)
-// Filebeat Module
-//  - Module name, choose from a list: system, apache2, nginx, mongodb, elasticsearch…
-// Metricbeat Module
-//  - Module name, choose from a list: system, apache2, nginx, mongodb… (this list is different from filebeat’s)
-//  - hosts: list of hosts to query (ie. localhost:9200)
-//  - period: 10s by default
-// Output
-//  - Output type, choose from a list: elasticsearch, logstash, kafka, console
-//  - hosts: list of hosts (ie. https://…)
-//  - username
-//  - password
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -32,14 +18,21 @@ import {
   EuiFlyoutHeader,
   EuiFormRow,
   // @ts-ignore
+  EuiHorizontalRule,
+  // @ts-ignore
   EuiSearchBar,
+  // @ts-ignore
+  EuiSelect,
   // @ts-ignore
   EuiTabbedContent,
   EuiTitle,
 } from '@elastic/eui';
 import React from 'react';
-import { ConfigForm } from './form_editor';
+import { ConfigForm } from './config_form';
+import { supportedConfigs } from './config_schemas';
+
 interface ComponentProps {
+  values: {};
   onClose(): any;
 }
 
@@ -49,8 +42,14 @@ export class ConfigView extends React.Component<ComponentProps, any> {
     super(props);
     this.state = {
       valid: false,
+      type: supportedConfigs[0].value,
     };
   }
+  public onTypeChange = (e: any) => {
+    this.setState({
+      type: e.target.value,
+    });
+  };
   public render() {
     return (
       <EuiFlyout onClose={this.props.onClose}>
@@ -61,10 +60,10 @@ export class ConfigView extends React.Component<ComponentProps, any> {
         </EuiFlyoutHeader>
         <EuiFlyoutBody>
           <EuiFormRow label="Configuration type">
-            <EuiSearchBar
-              onChange={() => {
-                // TODO: handle search changes
-              }}
+            <EuiSelect
+              options={supportedConfigs}
+              value={this.state.type}
+              onChange={this.onTypeChange}
             />
           </EuiFormRow>
           <EuiFormRow label="Configuration description">
@@ -75,38 +74,22 @@ export class ConfigView extends React.Component<ComponentProps, any> {
               placeholder="Description (optional)"
             />
           </EuiFormRow>
-          <EuiTabbedContent
-            tabs={[
-              {
-                id: 'basic_settings',
-                name: 'Basic Settings',
-                content: (
-                  <ConfigForm
-                    // tslint:disable-next-line:no-console
-                    onSubmit={data => console.log(data)}
-                    canSubmit={canIt => this.setState({ valid: canIt })}
-                    ref={this.form}
-                    schema={[
-                      {
-                        id: 'string',
-                        ui: {
-                          name: 'string',
-                          type: 'multi-input',
-                        },
-                        validations: 'isPaths',
-                        error: 'This must be filled out',
-                        required: true,
-                      },
-                    ]}
-                  />
-                ),
-              },
-              {
-                id: 'yaml_editor',
-                name: 'YAML Editor',
-                content: <EuiCodeEditor mode="yaml" theme="github" />,
-              },
-            ]}
+          <h3>
+            Config for{' '}
+            {(supportedConfigs.find(config => this.state.type === config.value) as any).text}
+          </h3>
+          <EuiHorizontalRule />
+
+          <ConfigForm
+            // tslint:disable-next-line:no-console
+            onSubmit={data => console.log(data)}
+            canSubmit={canIt => this.setState({ valid: canIt })}
+            ref={this.form}
+            values={this.props.values}
+            id={(supportedConfigs.find(config => this.state.type === config.value) as any).value}
+            schema={
+              (supportedConfigs.find(config => this.state.type === config.value) as any).config
+            }
           />
         </EuiFlyoutBody>
         <EuiFlyoutFooter>

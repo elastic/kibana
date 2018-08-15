@@ -6,11 +6,11 @@
 
 import { YamlConfigSchema } from '../../../lib/lib';
 
-export const filebeatInputConfig: YamlConfigSchema[] = [
+const filebeatInputConfig: YamlConfigSchema[] = [
   {
     id: 'paths',
     ui: {
-      name: 'Paths',
+      label: 'Paths',
       type: 'multi-input',
     },
     validations: 'isPaths',
@@ -18,13 +18,22 @@ export const filebeatInputConfig: YamlConfigSchema[] = [
     required: true,
     parseValidResult: v => v.split('\n'),
   },
+  {
+    id: 'other',
+    ui: {
+      label: 'Other Config',
+      type: 'code',
+    },
+    validations: 'isYaml',
+    error: 'Config entered must be in valid YAML format',
+  },
 ];
 
-export const filebeatModuleConfig: YamlConfigSchema[] = [
+const filebeatModuleConfig: YamlConfigSchema[] = [
   {
     id: 'module',
     ui: {
-      name: 'Module',
+      label: 'Module',
       type: 'select',
     },
     options: [
@@ -52,13 +61,22 @@ export const filebeatModuleConfig: YamlConfigSchema[] = [
     error: 'Please select a module',
     required: true,
   },
+  {
+    id: 'other',
+    ui: {
+      label: 'Other Config',
+      type: 'code',
+    },
+    validations: 'isYaml',
+    error: 'Config entered must be in valid YAML format',
+  },
 ];
 
-export const metricbeatModuleConfig: YamlConfigSchema[] = [
+const metricbeatModuleConfig: YamlConfigSchema[] = [
   {
     id: 'module',
     ui: {
-      name: 'Module',
+      label: 'Module',
       type: 'select',
     },
     options: [
@@ -85,7 +103,7 @@ export const metricbeatModuleConfig: YamlConfigSchema[] = [
   {
     id: 'hosts',
     ui: {
-      name: 'Hosts',
+      label: 'Hosts',
       type: 'multi-input',
     },
     validations: 'isHost',
@@ -96,7 +114,7 @@ export const metricbeatModuleConfig: YamlConfigSchema[] = [
   {
     id: 'period',
     ui: {
-      name: 'Period',
+      label: 'Period',
       type: 'multi-input',
     },
     defaultValue: '10s',
@@ -105,4 +123,78 @@ export const metricbeatModuleConfig: YamlConfigSchema[] = [
     required: true,
     parseValidResult: v => v.split('\n'),
   },
+  {
+    id: 'other',
+    ui: {
+      label: 'Other Config',
+      type: 'code',
+    },
+    validations: 'isYaml',
+    error: 'Config entered must be in valid YAML format',
+  },
+];
+
+// const outputConfig: YamlConfigSchema[] = [
+//   {
+//     id: 'output',
+//     ui: {
+//       label: 'Output Type',
+//       type: 'select',
+//     },
+//     options: [
+//       {
+//         value: 'elasticsearch',
+//         text: 'Elasticsearch',
+//       },
+//       {
+//         value: 'logstash',
+//         text: 'Logstash',
+//       },
+//       {
+//         value: 'kafka',
+//         text: 'Kafka',
+//       },
+//       {
+//         value: 'console',
+//         text: 'Console',
+//       },
+//     ],
+//     error: 'Please select an output type',
+//     required: true,
+//   },
+//   {
+//     id: 'hosts',
+//     ui: {
+//       label: 'Hosts',
+//       type: 'multi-input',
+//     },
+//     validations: 'isHost',
+//     error: 'One file host per line',
+//     parseValidResult: v => v.split('\n'),
+//   },
+//   {
+//     id: 'username',
+//     ui: {
+//       label: 'Username',
+//       type: 'input',
+//     },
+//     validations: 'isString',
+//     error: 'Unprocessable username',
+//   },
+//   {
+//     id: 'password',
+//     ui: {
+//       label: 'Password',
+//       type: 'input',
+//     },
+//     validations: 'isString',
+//     error: 'Unprocessable password',
+//   },
+// ];
+
+export const supportedConfigs = [
+  { text: 'Filebeat Input', value: 'filebeatInput', config: filebeatInputConfig },
+  { text: 'Filebeat Module', value: 'filebeatModule', config: filebeatModuleConfig },
+  { text: 'Metricbeat Input', value: 'metricbeatModule', config: metricbeatModuleConfig },
+  // { text: 'Output', value: 'output', config: outputConfig },
 ];
