@@ -34,7 +34,7 @@ import { uiSettingsMixin } from '../ui_settings_mixin';
 describe('uiSettingsMixin()', () => {
   const sandbox = sinon.createSandbox();
 
-  async function setup(options = {}) {
+  function setup(options = {}) {
     const {
       enabled = true
     } = options;
