@@ -24,6 +24,7 @@ import { PrivilegeSpaceTable } from './privilege_space_table';
 import { ALL_RESOURCE } from '../../../../../../../common/constants';
 import { getKibanaPrivilegesViewModel } from '../../../lib/get_application_privileges';
 import { PrivilegeCalloutWarning } from './privilege_callout_warning';
+import { ImpactedSpacesFlyout } from './impacted_spaces_flyout';
 
 export class SpaceAwarePrivilegeForm extends Component {
   static propTypes = {
@@ -131,6 +132,7 @@ export class SpaceAwarePrivilegeForm extends Component {
           <PrivilegeCalloutWarning
             role={this.props.role}
             spaces={this.props.spaces}
+            spacePrivileges={spacePrivileges}
             basePrivilege={basePrivilege}
             isReservedRole={isReservedRole(this.props.role)}
           />
@@ -160,6 +162,8 @@ export class SpaceAwarePrivilegeForm extends Component {
             )}
           </Fragment>
         )}
+        <EuiSpacer />
+        <ImpactedSpacesFlyout role={role} spaces={spaces} spacePrivileges={spacePrivileges} basePrivilege={basePrivilege} />
       </Fragment>
     );
   }
