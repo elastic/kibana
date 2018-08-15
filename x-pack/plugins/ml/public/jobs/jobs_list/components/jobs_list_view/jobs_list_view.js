@@ -260,6 +260,7 @@ export class JobsListView extends Component {
   }
 
   render() {
+    const jobIds = this.state.jobsSummaryList.map(j => j.id);
     return (
       <div>
         <div className="actions-bar">
@@ -287,6 +288,7 @@ export class JobsListView extends Component {
           setShowFunction={this.setShowEditJobFlyoutFunction}
           unsetShowFunction={this.unsetShowEditJobFlyoutFunction}
           refreshJobs={() => this.refreshJobSummaryList(true)}
+          allJobIds={jobIds}
         />
         <DeleteJobModal
           setShowFunction={this.setShowDeleteJobModalFunction}
