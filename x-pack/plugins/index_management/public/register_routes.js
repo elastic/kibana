@@ -8,7 +8,6 @@ import React from 'react';
 import { render } from 'react-dom';
 import { Provider } from 'react-redux';
 import { HashRouter } from 'react-router-dom';
-import { setHttpClient } from './services/api';
 
 import { App } from './app';
 import { BASE_PATH } from '../common/constants/base_path';
@@ -34,9 +33,7 @@ routes.when(`${BASE_PATH}:view?/:id?`, {
   template: template,
   controllerAs: 'indexManagement',
   controller: class IndexManagementController {
-    constructor($scope, $route, $http) {
-      setHttpClient($http);
-
+    constructor($scope, $route) {
       $scope.$$postDigest(() => {
         const elem = document.getElementById('indexManagementReactRoot');
         renderReact(elem);
