@@ -46,7 +46,7 @@ export const graphqlHapi: IRegister = Object.assign(
           return reply(gqlResponse).type('application/json');
         } catch (error) {
           if ('HttpQueryError' !== error.name) {
-            const queryError = Boom.boomify(error);
+            const queryError = Boom.wrap(error);
 
             queryError.output.payload.message = error.message;
 

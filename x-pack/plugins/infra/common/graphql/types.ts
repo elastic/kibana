@@ -25,6 +25,8 @@ export interface InfraSource {
   id: string /** The id of the source */;
   configuration: InfraSourceConfiguration /** The raw configuration of the source */;
   status: InfraSourceStatus /** The status of the source */;
+  logEntriesAround: InfraLogEntryInterval /** A consecutive span of log entries surrounding a point in time */;
+  logEntriesBetween: InfraLogEntryInterval /** A consecutive span of log entries within an interval */;
   map?: InfraResponse | null /** A hierarchy of hosts, pods, containers, services or arbitrary groups */;
 }
 /** A set of configuration options for an infrastructure data source */
@@ -48,6 +50,36 @@ export interface InfraSourceStatus {
   logAliasExists: boolean /** Whether the configured log alias exists */;
   metricIndices: string[] /** The list of indices in the metric alias */;
   logIndices: string[] /** The list of indices in the log alias */;
+}
+/** A consecutive sequence of log entries */
+export interface InfraLogEntryInterval {
+  start?: InfraTimeKey | null /** The key corresponding to the start of the interval covered by the entries */;
+  end?: InfraTimeKey | null /** The key corresponding to the end of the interval covered by the entries */;
+  filterQuery?: string | null /** The query the log entries were filtered by */;
+  highlightQuery?: string | null /** The query the log entries were highlighted with */;
+  entries: InfraLogEntry[] /** A list of the log entries */;
+}
+/** A representation of the log entry's position in the event stream */
+export interface InfraTimeKey {
+  time: number /** The timestamp of the event that the log entry corresponds to */;
+  tiebreaker: number /** The tiebreaker that disambiguates events with the same timestamp */;
+}
+/** A log entry */
+export interface InfraLogEntry {
+  key: InfraTimeKey /** A unique representation of the log entry's position in the event stream */;
+  gid: string /** The log entry's id */;
+  source: string /** The source id */;
+  message: InfraLogMessageSegment[] /** A list of the formatted log entry segments */;
+}
+/** A segment of the log entry message that was derived from a field */
+export interface InfraLogMessageFieldSegment {
+  field: string /** The field the segment was derived from */;
+  value: string /** The segment's message */;
+  highlights: string[] /** A list of highlighted substrings of the value */;
+}
+/** A segment of the log entry message that was derived from a field */
+export interface InfraLogMessageConstantSegment {
+  constant: string /** The segment's message */;
 }
 
 export interface InfraResponse {
@@ -93,12 +125,31 @@ export namespace InfraSourceResolvers {
     id?: IdResolver /** The id of the source */;
     configuration?: ConfigurationResolver /** The raw configuration of the source */;
     status?: StatusResolver /** The status of the source */;
+    logEntriesAround?: LogEntriesAroundResolver /** A consecutive span of log entries surrounding a point in time */;
+    logEntriesBetween?: LogEntriesBetweenResolver /** A consecutive span of log entries within an interval */;
     map?: MapResolver /** A hierarchy of hosts, pods, containers, services or arbitrary groups */;
   }
 
   export type IdResolver = Resolver<string>;
   export type ConfigurationResolver = Resolver<InfraSourceConfiguration>;
   export type StatusResolver = Resolver<InfraSourceStatus>;
+  export type LogEntriesAroundResolver = Resolver<InfraLogEntryInterval, LogEntriesAroundArgs>;
+  export interface LogEntriesAroundArgs {
+    key: InfraTimeKeyInput /** The sort key that corresponds to the point in time */;
+    countBefore?: number | null /** The maximum number of preceding to return */;
+    countAfter?: number | null /** The maximum number of following to return */;
+    filterQuery?: string | null /** The query to filter the log entries by */;
+    highlightQuery?: string | null /** The query to highlight the log entries with */;
+  }
+
+  export type LogEntriesBetweenResolver = Resolver<InfraLogEntryInterval, LogEntriesBetweenArgs>;
+  export interface LogEntriesBetweenArgs {
+    startKey: InfraTimeKeyInput /** The sort key that corresponds to the start of the interval */;
+    endKey: InfraTimeKeyInput /** The sort key that corresponds to the end of the interval */;
+    filterQuery?: string | null /** The query to filter the log entries by */;
+    highlightQuery?: string | null /** The query to highlight the log entries with */;
+  }
+
   export type MapResolver = Resolver<InfraResponse | null, MapArgs>;
   export interface MapArgs {
     timerange: InfraTimerangeInput;
@@ -149,6 +200,66 @@ export namespace InfraSourceStatusResolvers {
   export type MetricIndicesResolver = Resolver<string[]>;
   export type LogIndicesResolver = Resolver<string[]>;
 }
+/** A consecutive sequence of log entries */
+export namespace InfraLogEntryIntervalResolvers {
+  export interface Resolvers {
+    start?: StartResolver /** The key corresponding to the start of the interval covered by the entries */;
+    end?: EndResolver /** The key corresponding to the end of the interval covered by the entries */;
+    filterQuery?: FilterQueryResolver /** The query the log entries were filtered by */;
+    highlightQuery?: HighlightQueryResolver /** The query the log entries were highlighted with */;
+    entries?: EntriesResolver /** A list of the log entries */;
+  }
+
+  export type StartResolver = Resolver<InfraTimeKey | null>;
+  export type EndResolver = Resolver<InfraTimeKey | null>;
+  export type FilterQueryResolver = Resolver<string | null>;
+  export type HighlightQueryResolver = Resolver<string | null>;
+  export type EntriesResolver = Resolver<InfraLogEntry[]>;
+}
+/** A representation of the log entry's position in the event stream */
+export namespace InfraTimeKeyResolvers {
+  export interface Resolvers {
+    time?: TimeResolver /** The timestamp of the event that the log entry corresponds to */;
+    tiebreaker?: TiebreakerResolver /** The tiebreaker that disambiguates events with the same timestamp */;
+  }
+
+  export type TimeResolver = Resolver<number>;
+  export type TiebreakerResolver = Resolver<number>;
+}
+/** A log entry */
+export namespace InfraLogEntryResolvers {
+  export interface Resolvers {
+    key?: KeyResolver /** A unique representation of the log entry's position in the event stream */;
+    gid?: GidResolver /** The log entry's id */;
+    source?: SourceResolver /** The source id */;
+    message?: MessageResolver /** A list of the formatted log entry segments */;
+  }
+
+  export type KeyResolver = Resolver<InfraTimeKey>;
+  export type GidResolver = Resolver<string>;
+  export type SourceResolver = Resolver<string>;
+  export type MessageResolver = Resolver<InfraLogMessageSegment[]>;
+}
+/** A segment of the log entry message that was derived from a field */
+export namespace InfraLogMessageFieldSegmentResolvers {
+  export interface Resolvers {
+    field?: FieldResolver /** The field the segment was derived from */;
+    value?: ValueResolver /** The segment's message */;
+    highlights?: HighlightsResolver /** A list of highlighted substrings of the value */;
+  }
+
+  export type FieldResolver = Resolver<string>;
+  export type ValueResolver = Resolver<string>;
+  export type HighlightsResolver = Resolver<string[]>;
+}
+/** A segment of the log entry message that was derived from a field */
+export namespace InfraLogMessageConstantSegmentResolvers {
+  export interface Resolvers {
+    constant?: ConstantResolver /** The segment's message */;
+  }
+
+  export type ConstantResolver = Resolver<string>;
+}
 
 export namespace InfraResponseResolvers {
   export interface Resolvers {
@@ -195,6 +306,11 @@ export namespace InfraNodeMetricResolvers {
 export interface InfraIndexPatternInput {
   pattern: string /** The index pattern to use, defaults to '*' */;
   timeFieldName: string /** The timefield to use, defaults to @timestamp */;
+}
+
+export interface InfraTimeKeyInput {
+  time: number;
+  tiebreaker: number;
 }
 
 export interface InfraTimerangeInput {
@@ -250,6 +366,19 @@ export interface FieldsQueryArgs {
 export interface SourceQueryArgs {
   id: string /** The id of the source */;
 }
+export interface LogEntriesAroundInfraSourceArgs {
+  key: InfraTimeKeyInput /** The sort key that corresponds to the point in time */;
+  countBefore?: number | null /** The maximum number of preceding to return */;
+  countAfter?: number | null /** The maximum number of following to return */;
+  filterQuery?: string | null /** The query to filter the log entries by */;
+  highlightQuery?: string | null /** The query to highlight the log entries with */;
+}
+export interface LogEntriesBetweenInfraSourceArgs {
+  startKey: InfraTimeKeyInput /** The sort key that corresponds to the start of the interval */;
+  endKey: InfraTimeKeyInput /** The sort key that corresponds to the end of the interval */;
+  filterQuery?: string | null /** The query to filter the log entries by */;
+  highlightQuery?: string | null /** The query to highlight the log entries with */;
+}
 export interface MapInfraSourceArgs {
   timerange: InfraTimerangeInput;
   filters?: InfraFilterInput[] | null;
@@ -303,6 +432,9 @@ export enum InfraOperator {
   lte = 'lte',
   eq = 'eq',
 }
+/** A segment of the log entry message */
+export type InfraLogMessageSegment = InfraLogMessageFieldSegment | InfraLogMessageConstantSegment;
+
 export namespace MapQuery {
   export type Variables = {
     id: string;
