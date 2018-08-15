@@ -24,7 +24,7 @@ import { getRootType } from './lib';
 
 const chance = new Chance();
 
-describe('saved objects index mapping', () => {
+describe('server/mapping/index_mapping', function () {
   describe('constructor', () => {
     it('initializes with a default mapping when no args', () => {
       const mapping = new IndexMappings();
@@ -38,56 +38,54 @@ describe('saved objects index mapping', () => {
       const mapping = new IndexMappings({
         foobar: {
           dynamic: false,
-          properties: {},
-        },
+          properties: {}
+        }
       });
 
       expect(mapping.getDsl()).toEqual({
         foobar: {
           dynamic: false,
-          properties: {},
-        },
+          properties: {}
+        }
       });
     });
 
     it('throws if root type is of type=anything-but-object', () => {
       expect(() => {
-        // tslint:disable-next-line:no-unused-expression
         new IndexMappings({
           root: {
-            type: chance.pickone(['string', 'keyword', 'geo_point']),
-          },
+            type: chance.pickone(['string', 'keyword', 'geo_point'])
+          }
         });
-      }).toThrowError(/not an object/);
+      }).toThrowError(/non-object/);
     });
 
     it('throws if root type has no type and no properties', () => {
       expect(() => {
-        // tslint:disable-next-line:no-unused-expression
         new IndexMappings({
-          root: {},
+          root: {}
         });
-      }).toThrowError(/not an object/);
+      }).toThrowError(/non-object/);
     });
 
     it('initialized root type with properties object if not set', () => {
       const mapping = new IndexMappings({
         root: {
-          type: 'object',
-        },
+          type: 'object'
+        }
       });
 
       expect(mapping.getDsl()).toEqual({
         root: {
           type: 'object',
-          properties: {},
-        },
+          properties: {}
+        }
       });
     });
 
     it('accepts an array of new extensions that will be added to the mapping', () => {
       const initialMapping = {
-        x: { properties: {} },
+        x: { properties: {} }
       };
       const extensions = [
         {
@@ -95,12 +93,12 @@ describe('saved objects index mapping', () => {
             y: {
               properties: {
                 z: {
-                  type: 'text',
-                },
-              },
-            },
-          },
-        },
+                  type: 'text'
+                }
+              }
+            }
+          }
+        }
       ];
 
       const mapping = new IndexMappings(initialMapping, extensions);
@@ -110,89 +108,89 @@ describe('saved objects index mapping', () => {
             y: {
               properties: {
                 z: {
-                  type: 'text',
-                },
-              },
-            },
-          },
-        },
+                  type: 'text'
+                }
+              }
+            }
+          }
+        }
       });
     });
 
     it('throws if any of the new properties conflict', () => {
       const initialMapping = {
-        root: { properties: { foo: { type: 'string' } } },
+        root: { properties: { foo: 'bar' } }
       };
       const extensions = [
         {
           properties: {
-            foo: { type: 'string' },
-          },
-        },
+            foo: 'bar'
+          }
+        }
       ];
 
       expect(() => {
-        new IndexMappings(initialMapping, extensions); // tslint:disable-line:no-unused-expression
+        new IndexMappings(initialMapping, extensions);
       }).toThrowError(/foo/);
     });
 
     it('includes the pluginId from the extension in the error message if defined', () => {
       const initialMapping = {
-        root: { properties: { foo: { type: 'string' } } },
+        root: { properties: { foo: 'bar' } }
       };
       const extensions = [
         {
           pluginId: 'abc123',
           properties: {
-            foo: { type: 'string' },
-          },
-        },
+            foo: 'bar'
+          }
+        }
       ];
 
       expect(() => {
-        new IndexMappings(initialMapping, extensions); // tslint:disable-line:no-unused-expression
+        new IndexMappings(initialMapping, extensions);
       }).toThrowError(/plugin abc123/);
     });
 
     it('throws if any of the new properties start with _', () => {
       const initialMapping = {
-        root: { properties: { foo: { type: 'string' } } },
+        root: { properties: { foo: 'bar' } }
       };
       const extensions = [
         {
           properties: {
-            _foo: { type: 'string' },
-          },
-        },
+            _foo: 'bar'
+          }
+        }
       ];
 
       expect(() => {
-        new IndexMappings(initialMapping, extensions); // tslint:disable-line:no-unused-expression
+        new IndexMappings(initialMapping, extensions);
       }).toThrowErrorMatchingSnapshot();
     });
 
     it('includes the pluginId from the extension in the _ error message if defined', () => {
       const initialMapping = {
-        root: { properties: { foo: { type: 'string' } } },
+        root: { properties: { foo: 'bar' } }
       };
       const extensions = [
         {
           pluginId: 'abc123',
           properties: {
-            _foo: { type: 'string' },
-          },
-        },
+            _foo: 'bar'
+          }
+        }
       ];
 
       expect(() => {
-        new IndexMappings(initialMapping, extensions); // tslint:disable-line:no-unused-expression
+        new IndexMappings(initialMapping, extensions);
       }).toThrowErrorMatchingSnapshot();
     });
   });
 
   describe('#getDsl()', () => {
     // tests are light because this method is used all over these tests
-    it('returns mapping as es dsl', () => {
+    it('returns mapping as es dsl', function () {
       const mapping = new IndexMappings();
       expect(typeof mapping.getDsl()).toBe('object');
     });
