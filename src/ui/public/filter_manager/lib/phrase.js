@@ -54,10 +54,10 @@ export function getPhraseScript(field, value) {
 // for the reason behind this change. Aggs now return boolean buckets with a key of 1 or 0.
 export function getConvertedValueForField(field, value) {
   if (typeof value !== 'boolean' && field.type === 'boolean') {
-    if ([1, 'true'].includes(value)) {
+    if ([1, 'true', '1'].includes(value)) {
       return true;
     }
-    else if ([0, 'false'].includes(value)) {
+    else if ([0, 'false', '0'].includes(value)) {
       return false;
     }
     else {
