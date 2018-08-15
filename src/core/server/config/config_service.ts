@@ -17,6 +17,7 @@
  * under the License.
  */
 
+import { isEqual } from 'lodash';
 import { from, Observable } from 'rxjs';
 import { distinctUntilChanged, first, map } from 'rxjs/operators';
 
@@ -159,7 +160,7 @@ export class ConfigService {
 
     return from(this.config$).pipe(
       map(config => config.get(path)),
-      distinctUntilChanged()
+      distinctUntilChanged(isEqual)
     );
   }
 
