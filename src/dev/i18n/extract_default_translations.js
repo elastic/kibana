@@ -26,8 +26,8 @@ import { extractHtmlMessages } from './extract_html_messages';
 import { extractCodeMessages } from './extract_code_messages';
 import { extractPugMessages } from './extract_pug_messages';
 import { extractHandlebarsMessages } from './extract_handlebars_messages';
-import { globAsync, makeDirAsync, accessAsync, readFileAsync, writeFileAsync } from './utils';
-import config from '../../../.localizationrc.json';
+import { globAsync, readFileAsync, writeFileAsync } from './utils';
+import config from '../../../.i18nrc.json';
 
 function addMessageToMap(targetMap, key, value) {
   const existingValue = targetMap.get(key);
@@ -40,7 +40,7 @@ function addMessageToMap(targetMap, key, value) {
   targetMap.set(key, value);
 }
 
-async function getPluginsPaths(inputPaths) {
+function filterPaths(inputPaths) {
   const availablePaths = Object.values(config.paths);
   const pathsForExtraction = [];
 
@@ -81,7 +81,7 @@ export function validateMessageNamespace(id, filePath) {
   }
 }
 
-export async function extractMesssagesFromPathToMap(inputPath, targetMap) {
+export async function extractMessagesFromPathToMap(inputPath, targetMap) {
   const entries = await globAsync('*.{js,jsx,pug,ts,tsx,html,hbs,handlebars}', {
     cwd: inputPath,
     matchBase: true,
@@ -141,8 +141,8 @@ export async function extractMesssagesFromPathToMap(inputPath, targetMap) {
 export async function extractDefaultTranslations({ paths, output }) {
   const defaultMessagesMap = new Map();
 
-  for (const inputPath of await getPluginsPaths(paths)) {
-    await extractMesssagesFromPathToMap(inputPath, defaultMessagesMap);
+  for (const inputPath of filterPaths(paths)) {
+    await extractMessagesFromPathToMap(inputPath, defaultMessagesMap);
   }
 
   if (!output || !defaultMessagesMap.size) {
@@ -168,12 +168,6 @@ export async function extractDefaultTranslations({ paths, output }) {
 
   // append previously removed closing curly brace
   jsonBuffer = Buffer.concat([jsonBuffer, Buffer.from('}\n')]);
-
-  try {
-    await accessAsync(path.resolve(output));
-  } catch (_) {
-    await makeDirAsync(path.resolve(output));
-  }
 
   await writeFileAsync(path.resolve(output, 'en.json'), jsonBuffer);
 }
