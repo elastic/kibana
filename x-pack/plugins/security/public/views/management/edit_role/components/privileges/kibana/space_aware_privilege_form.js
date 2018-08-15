@@ -162,7 +162,7 @@ export class SpaceAwarePrivilegeForm extends Component {
 
             {this.getSpaceForms(basePrivilege)}
 
-            <EuiFlexGroup responsive={false} alignItems={'flexEnd'}>
+            <EuiFlexGroup alignItems={'baseline'}>
               {showAddPrivilegeButton && (
                 <EuiFlexItem grow={false}>
                   <EuiButton size={'s'} iconType={'plusInCircle'} onClick={this.addSpacePrivilege}>Add space privilege</EuiButton>
