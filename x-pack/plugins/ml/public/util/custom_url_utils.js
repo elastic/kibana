@@ -97,7 +97,7 @@ function buildKibanaUrl(urlConfig, record) {
     }
 
     // If property not found string is not replaced.
-    return tokenValue !== null ? tokenValue : match;
+    return (tokenValue !== null) ? tokenValue : match;
   });
 }
 

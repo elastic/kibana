@@ -53,8 +53,8 @@ export class EditJobFlyout extends Component {
       datafeedScrollSize: '',
       jobModelMemoryLimitValidationError: '',
       jobGroupsValidationError: '',
-      validJobDetails: true,
-      validJobCustomUrls: true,
+      isValidJobDetails: true,
+      isValidJobCustomUrls: true,
     };
 
     this.refreshJobs = this.props.refreshJobs;
@@ -136,13 +136,13 @@ export class EditJobFlyout extends Component {
       jobGroupsValidationError = validateGroupNames(jobDetails.jobGroups).message;
     }
 
-    const validJobDetails = (jobModelMemoryLimitValidationError === '' && jobGroupsValidationError === '');
+    const isValidJobDetails = (jobModelMemoryLimitValidationError === '' && jobGroupsValidationError === '');
 
     this.setState({
       ...jobDetails,
       jobModelMemoryLimitValidationError,
       jobGroupsValidationError,
-      validJobDetails,
+      isValidJobDetails,
     });
   }
 
@@ -159,10 +159,10 @@ export class EditJobFlyout extends Component {
   }
 
   setCustomUrls = (jobCustomUrls) => {
-    const validJobCustomUrls = isValidCustomUrls(jobCustomUrls);
+    const isValidJobCustomUrls = isValidCustomUrls(jobCustomUrls);
     this.setState({
       jobCustomUrls,
-      validJobCustomUrls,
+      isValidJobCustomUrls,
     });
   }
 
@@ -211,8 +211,8 @@ export class EditJobFlyout extends Component {
         datafeedScrollSize,
         jobGroupsValidationError,
         jobModelMemoryLimitValidationError,
-        validJobDetails,
-        validJobCustomUrls,
+        isValidJobDetails,
+        isValidJobCustomUrls,
       } = this.state;
 
       const tabs = [{
@@ -293,7 +293,7 @@ export class EditJobFlyout extends Component {
                 <EuiButton
                   onClick={this.save}
                   fill
-                  isDisabled={(validJobDetails === false) || (validJobCustomUrls === false)}
+                  isDisabled={(isValidJobDetails === false) || (isValidJobCustomUrls === false)}
                 >
                   Save
                 </EuiButton>
