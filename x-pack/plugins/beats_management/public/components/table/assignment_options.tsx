@@ -12,6 +12,7 @@ import { ControlDefinitions } from './table_type_configs';
 interface AssignmentOptionsProps {
   assignmentOptions: any[] | null;
   assignmentTitle: string | null;
+  renderAssignmentOptions?: (item: any) => any;
   controlDefinitions: ControlDefinitions;
   selectionCount: number;
   actionHandler(action: string, payload?: any): void;
@@ -39,6 +40,7 @@ export class AssignmentOptions extends React.Component<
     const {
       actionHandler,
       assignmentOptions,
+      renderAssignmentOptions,
       assignmentTitle,
       controlDefinitions: { actions },
       selectionCount,
@@ -60,43 +62,45 @@ export class AssignmentOptions extends React.Component<
             }}
           />
         </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiPopover
-            button={
-              <EuiButton
-                color="primary"
-                iconSide="right"
-                iconType="arrowDown"
-                onClick={() => {
-                  this.setState({
-                    isAssignmentPopoverVisible: true,
-                  });
-                  actionHandler('loadAssignmentOptions');
-                }}
-              >
-                {assignmentTitle}
-              </EuiButton>
-            }
-            closePopover={() => {
-              this.setState({ isAssignmentPopoverVisible: false });
-            }}
-            id="assignmentList"
-            isOpen={isAssignmentPopoverVisible}
-            panelPaddingSize="s"
-            withTitle
-          >
-            {assignmentOptions ? (
-              // @ts-ignore direction prop not available on current typing
-              <EuiFlexGroup direction="column" gutterSize="xs">
-                {assignmentOptions}
-              </EuiFlexGroup>
-            ) : (
-              <div>
-                <EuiLoadingSpinner size="m" /> Loading
-              </div>
-            )}
-          </EuiPopover>
-        </EuiFlexItem>
+        {assignmentTitle && (
+          <EuiFlexItem grow={false}>
+            <EuiPopover
+              button={
+                <EuiButton
+                  color="primary"
+                  iconSide="right"
+                  iconType="arrowDown"
+                  onClick={() => {
+                    this.setState({
+                      isAssignmentPopoverVisible: true,
+                    });
+                    actionHandler('loadAssignmentOptions');
+                  }}
+                >
+                  {assignmentTitle}
+                </EuiButton>
+              }
+              closePopover={() => {
+                this.setState({ isAssignmentPopoverVisible: false });
+              }}
+              id="assignmentList"
+              isOpen={isAssignmentPopoverVisible}
+              panelPaddingSize="s"
+              withTitle
+            >
+              {assignmentOptions && renderAssignmentOptions ? (
+                // @ts-ignore direction prop not available on current typing
+                <EuiFlexGroup direction="column" gutterSize="xs">
+                  {assignmentOptions.map(options => renderAssignmentOptions(options))}
+                </EuiFlexGroup>
+              ) : (
+                <div>
+                  <EuiLoadingSpinner size="m" /> Loading
+                </div>
+              )}
+            </EuiPopover>
+          </EuiFlexItem>
+        )}
       </EuiFlexGroup>
     );
   }

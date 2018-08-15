@@ -13,10 +13,7 @@ import { entries } from '../../utils/polyfills';
 import { CMTagsAdapter } from '../adapters/tags/adapter_types';
 
 export class CMTagsDomain {
-  private adapter: CMTagsAdapter;
-  constructor(adapter: CMTagsAdapter) {
-    this.adapter = adapter;
-  }
+  constructor(private readonly adapter: CMTagsAdapter) {}
 
   public async getAll(user: FrameworkUser) {
     return await this.adapter.getAll(user);
@@ -26,14 +23,24 @@ export class CMTagsDomain {
     return await this.adapter.getTagsWithIds(user, tagIds);
   }
 
-  public async saveTag(user: FrameworkUser, tagId: string, configs: ConfigurationBlock[]) {
-    const { isValid, message } = await this.validateConfigurationBlocks(configs);
+  public async delete(user: FrameworkUser, tagIds: string[]) {
+    return await this.adapter.delete(user, tagIds);
+  }
+
+  public async saveTag(
+    user: FrameworkUser,
+    tagId: string,
+    config: { color: string; configuration_blocks: ConfigurationBlock[] }
+  ) {
+    const { isValid, message } = await this.validateConfigurationBlocks(
+      config.configuration_blocks
+    );
     if (!isValid) {
       return { isValid, result: message };
     }
 
     const tag = {
-      configuration_blocks: configs,
+      ...config,
       id: tagId,
       last_updated: new Date(),
     };

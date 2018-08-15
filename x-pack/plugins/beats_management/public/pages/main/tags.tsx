@@ -4,9 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-
-// @ts-ignore EuiToolTip has no typings in current version
-import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiIcon, EuiToolTip } from '@elastic/eui';
+import {
+  EuiButton,
+  EuiButtonEmpty,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiIcon,
+  // @ts-ignore EuiToolTip has no typings in current version
+  EuiToolTip,
+} from '@elastic/eui';
 import React from 'react';
 import { BeatTag, CMBeat } from '../../../common/domain_types';
 import { BeatsTagAssignment } from '../../../server/lib/adapters/beats/adapter_types';
@@ -19,17 +25,27 @@ interface TagsPageProps {
 
 interface TagsPageState {
   beats: any;
-  tableRef: any;
   tags: BeatTag[];
 }
 
 export class TagsPage extends React.PureComponent<TagsPageProps, TagsPageState> {
+  public static ActionArea = ({ history }: any) => (
+    <EuiButton
+      size="s"
+      color="primary"
+      onClick={async () => {
+        history.push(`/tag/create`);
+      }}
+    >
+      Create Tag
+    </EuiButton>
+  );
+  public tableRef = React.createRef<Table>();
   constructor(props: TagsPageProps) {
     super(props);
 
     this.state = {
       beats: [],
-      tableRef: React.createRef(),
       tags: [],
     };
 
@@ -41,19 +57,33 @@ export class TagsPage extends React.PureComponent<TagsPageProps, TagsPageState> 
       <Table
         actionHandler={this.handleTagsAction}
         assignmentOptions={this.state.beats}
-        assignmentTitle={'Assign Beats'}
+        assignmentTitle={null}
         items={this.state.tags}
-        ref={this.state.tableRef}
+        ref={this.tableRef}
         showAssignmentOptions={true}
         type={TagsTableType}
       />
     );
   }
 
-  private handleTagsAction = (action: string, payload: any) => {
+  private handleTagsAction = async (action: string) => {
     switch (action) {
       case 'loadAssignmentOptions':
         this.loadBeats();
+        break;
+      case 'delete':
+        const tags = this.getSelectedTags().map(tag => tag.id);
+        const success = await this.props.libs.tags.delete(tags);
+        if (!success) {
+          alert(
+            'Some of these tags might be assigned to beats. Please ensure tags being removed are not activly assigned'
+          );
+        } else {
+          this.loadTags();
+          if (this.tableRef && this.tableRef.current) {
+            this.tableRef.current.resetSelection();
+          }
+        }
         break;
     }
 
@@ -136,7 +166,10 @@ export class TagsPage extends React.PureComponent<TagsPageProps, TagsPageState> 
     await this.props.libs.beats.assignTagsToBeats(assignments);
   };
 
-  private getSelectedTags = () => {
-    return this.state.tableRef.current.state.selection;
+  private getSelectedTags = (): BeatTag[] => {
+    if (this.tableRef && this.tableRef.current) {
+      return this.tableRef.current.state.selection;
+    }
+    return [];
   };
 }

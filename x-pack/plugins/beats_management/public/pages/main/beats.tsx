@@ -11,7 +11,7 @@ import {
 } from '@elastic/eui';
 
 import React from 'react';
-import { BeatTag, CMBeat, CMPopulatedBeat } from '../../../common/domain_types';
+import { BeatTag, CMPopulatedBeat } from '../../../common/domain_types';
 import { BeatsTagAssignment } from '../../../server/lib/adapters/beats/adapter_types';
 import { BeatsTableType, Table } from '../../components/table';
 import { FrontendLibs } from '../../lib/lib';
@@ -23,19 +23,19 @@ interface BeatsPageProps {
 }
 
 interface BeatsPageState {
-  beats: CMBeat[];
-  tableRef: any;
+  beats: CMPopulatedBeat[];
   tags: any[] | null;
 }
 
 export class BeatsPage extends React.PureComponent<BeatsPageProps, BeatsPageState> {
   public static ActionArea = BeatsActionArea;
+  private tableRef = React.createRef<Table>();
+
   constructor(props: BeatsPageProps) {
     super(props);
 
     this.state = {
       beats: [],
-      tableRef: React.createRef(),
       tags: null,
     };
 
@@ -51,9 +51,32 @@ export class BeatsPage extends React.PureComponent<BeatsPageProps, BeatsPageStat
       <Table
         actionHandler={this.handleBeatsActions}
         assignmentOptions={this.state.tags}
+        renderAssignmentOptions={(tag: BeatTag) => {
+          const selectedBeats = this.getSelectedBeats();
+          const hasMatches = selectedBeats.some((beat: any) =>
+            (beat.tags || []).some((t: string) => t === tag.id)
+          );
+
+          return (
+            <EuiFlexItem key={`${tag.id}-${hasMatches ? 'matched' : 'unmatched'}`}>
+              <EuiBadge
+                color={tag.color}
+                iconType={hasMatches ? 'cross' : undefined}
+                onClick={
+                  hasMatches
+                    ? () => this.removeTagsFromBeats(selectedBeats, tag)
+                    : () => this.assignTagsToBeats(selectedBeats, tag)
+                }
+                onClickAriaLabel={tag.id}
+              >
+                {tag.id}
+              </EuiBadge>
+            </EuiFlexItem>
+          );
+        }}
         assignmentTitle="Set tags"
         items={this.state.beats || []}
-        ref={this.state.tableRef}
+        ref={this.tableRef}
         showAssignmentOptions={true}
         type={BeatsTableType}
       />
@@ -88,6 +111,9 @@ export class BeatsPage extends React.PureComponent<BeatsPageProps, BeatsPageStat
     // the max race condition time is really 10ms but doing 100 to be safe
     setTimeout(async () => {
       await this.loadBeats();
+      if (this.tableRef && this.tableRef.current) {
+        this.tableRef.current.resetSelection();
+      }
     }, 100);
   };
 
@@ -98,39 +124,16 @@ export class BeatsPage extends React.PureComponent<BeatsPageProps, BeatsPageStat
     });
   }
 
-  // todo: add reference to ES filter endpoint
+  // TODO: add reference to ES filter endpoint
   private handleSearchQuery = (query: any) => {
     // await this.props.libs.beats.searach(query);
   };
 
   private loadTags = async () => {
     const tags = await this.props.libs.tags.getAll();
-    const selectedBeats = this.getSelectedBeats();
 
-    const renderedTags = tags.map((tag: BeatTag) => {
-      const hasMatches = selectedBeats.some((beat: any) =>
-        beat.full_tags.some((t: any) => t.id === tag.id)
-      );
-
-      return (
-        <EuiFlexItem key={tag.id}>
-          <EuiBadge
-            color={tag.color}
-            iconType={hasMatches ? 'cross' : undefined}
-            onClick={
-              hasMatches
-                ? () => this.removeTagsFromBeats(selectedBeats, tag)
-                : () => this.assignTagsToBeats(selectedBeats, tag)
-            }
-            onClickAriaLabel={tag.id}
-          >
-            {tag.id}
-          </EuiBadge>
-        </EuiFlexItem>
-      );
-    });
     this.setState({
-      tags: renderedTags,
+      tags,
     });
   };
 
@@ -146,10 +149,16 @@ export class BeatsPage extends React.PureComponent<BeatsPageProps, BeatsPageStat
 
   private assignTagsToBeats = async (beats: CMPopulatedBeat[], tag: BeatTag) => {
     await this.props.libs.beats.assignTagsToBeats(this.createBeatTagAssignments(beats, tag));
-    this.loadBeats();
+    await this.loadBeats();
+    await this.loadTags();
   };
 
   private getSelectedBeats = (): CMPopulatedBeat[] => {
-    return this.state.tableRef.current.state.selection;
+    if (this.tableRef && this.tableRef.current) {
+      return this.tableRef.current.state.selection.map(
+        (beat: CMPopulatedBeat) => this.state.beats.find(b => b.id === beat.id) || beat
+      );
+    }
+    return [];
   };
 }

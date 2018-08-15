@@ -12,13 +12,13 @@ import {
 import React from 'react';
 import styled from 'styled-components';
 import { TABLE_CONFIG } from '../../../common/constants';
-import { CMPopulatedBeat } from '../../../common/domain_types';
 import { ControlBar } from './controls';
 import { TableType } from './table_type_configs';
 
 interface BeatsTableProps {
   assignmentOptions: any[] | null;
   assignmentTitle: string | null;
+  renderAssignmentOptions?: (item: any) => any;
   items: any[];
   showAssignmentOptions: boolean;
   type: TableType;
@@ -26,7 +26,7 @@ interface BeatsTableProps {
 }
 
 interface BeatsTableState {
-  selection: CMPopulatedBeat[];
+  selection: any[];
 }
 
 const TableContainer = styled.div`
@@ -42,11 +42,15 @@ export class Table extends React.Component<BeatsTableProps, BeatsTableState> {
     };
   }
 
-  public render() {
+  public resetSelection = () => {
+    this.setSelection([]);
+  };
 
+  public render() {
     const {
       actionHandler,
       assignmentOptions,
+      renderAssignmentOptions,
       assignmentTitle,
       items,
       showAssignmentOptions,
@@ -70,6 +74,7 @@ export class Table extends React.Component<BeatsTableProps, BeatsTableState> {
         <ControlBar
           actionHandler={(action: string, payload: any) => actionHandler(action, payload)}
           assignmentOptions={assignmentOptions}
+          renderAssignmentOptions={renderAssignmentOptions}
           assignmentTitle={assignmentTitle}
           controlDefinitions={type.controlDefinitions(items)}
           selectionCount={this.state.selection.length}
@@ -89,7 +94,7 @@ export class Table extends React.Component<BeatsTableProps, BeatsTableState> {
     );
   }
 
-  private setSelection = (selection: any) => {
+  private setSelection = (selection: any[]) => {
     this.setState({
       selection,
     });

@@ -4,5 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { TagCreateConfig, TagEditConfig, TagViewConfig } from './tag_configs';
 export { TagEdit } from './tag_edit';

@@ -5,13 +5,24 @@
  */
 
 import React from 'react';
+import { withRouter } from 'react-router-dom';
 import styled from 'styled-components';
 
-import { EuiPage, EuiPageBody, EuiPageContent, EuiPageContentBody, EuiTitle } from '@elastic/eui';
+import {
+  EuiModal,
+  EuiOverlayMask,
+  EuiPage,
+  EuiPageBody,
+  EuiPageContent,
+  EuiPageContentBody,
+  EuiTitle,
+} from '@elastic/eui';
 
 interface PrimaryLayoutProps {
   title: string;
-  actionSection: React.ReactNode;
+  actionSection?: React.ReactNode;
+  modalRender?: () => React.ReactNode;
+  modalClosePath?: string;
 }
 
 const HeaderContainer = styled.div`
@@ -22,22 +33,35 @@ const HeaderContainer = styled.div`
   margin-bottom: 16px;
 `;
 
-export const PrimaryLayout: React.SFC<PrimaryLayoutProps> = ({
-  actionSection,
-  title,
-  children,
-}) => (
-  <EuiPage>
-    <EuiPageBody>
-      <EuiPageContent>
-        <HeaderContainer>
-          <EuiTitle>
-            <h1>{title}</h1>
-          </EuiTitle>
-          {actionSection}
-        </HeaderContainer>
-        <EuiPageContentBody>{children}</EuiPageContentBody>
-      </EuiPageContent>
-    </EuiPageBody>
-  </EuiPage>
-);
+export const PrimaryLayout: React.SFC<PrimaryLayoutProps> = withRouter<any>(
+  ({ actionSection, title, modalRender, modalClosePath, children, history }) => {
+    const modalContent = modalRender && modalRender();
+    return (
+      <EuiPage>
+        <EuiPageBody>
+          <EuiPageContent>
+            <HeaderContainer>
+              <EuiTitle>
+                <h1>{title}</h1>
+              </EuiTitle>
+              {actionSection}
+            </HeaderContainer>
+            <EuiPageContentBody>{children}</EuiPageContentBody>
+          </EuiPageContent>
+        </EuiPageBody>
+        {modalContent && (
+          <EuiOverlayMask>
+            <EuiModal
+              onClose={() => {
+                history.push(modalClosePath);
+              }}
+              style={{ width: '640px' }}
+            >
+              {modalContent}
+            </EuiModal>
+          </EuiOverlayMask>
+        )}
+      </EuiPage>
+    );
+  }
+) as any;

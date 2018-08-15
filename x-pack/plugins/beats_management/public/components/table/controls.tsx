@@ -15,6 +15,8 @@ import { ControlDefinitions } from './table_type_configs';
 interface ControlBarProps {
   assignmentOptions: any[] | null;
   assignmentTitle: string | null;
+  renderAssignmentOptions?: (item: any) => any;
+
   showAssignmentOptions: boolean;
   controlDefinitions: ControlDefinitions;
   selectionCount: number;
@@ -25,6 +27,7 @@ export function ControlBar(props: ControlBarProps) {
   const {
     actionHandler,
     assignmentOptions,
+    renderAssignmentOptions,
     assignmentTitle,
     controlDefinitions,
     selectionCount,
@@ -36,6 +39,7 @@ export function ControlBar(props: ControlBarProps) {
     <AssignmentOptions
       actionHandler={actionHandler}
       assignmentOptions={assignmentOptions}
+      renderAssignmentOptions={renderAssignmentOptions}
       assignmentTitle={assignmentTitle}
       controlDefinitions={controlDefinitions}
       selectionCount={selectionCount}

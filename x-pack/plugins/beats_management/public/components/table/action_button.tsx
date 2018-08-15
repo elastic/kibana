@@ -18,6 +18,7 @@ interface ActionButtonProps {
 
 export function ActionButton(props: ActionButtonProps) {
   const { actions, actionHandler, hidePopover, isPopoverVisible, showPopover } = props;
+
   if (actions.length === 0) {
     return null;
   } else if (actions.length === 1) {

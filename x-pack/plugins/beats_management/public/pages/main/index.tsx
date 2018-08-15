@@ -11,13 +11,11 @@ import {
   EuiTabs,
 } from '@elastic/eui';
 import React from 'react';
-import { Redirect, Route, Switch } from 'react-router-dom';
+import { Route, Switch } from 'react-router-dom';
 import { PrimaryLayout } from '../../components/layouts/primary';
 import { FrontendLibs } from '../../lib/lib';
 import { ActivityPage } from './activity';
 import { BeatsPage } from './beats';
-import { CreateTagPage } from './create_tag';
-import { EditTagPage } from './edit_tag';
 import { TagsPage } from './tags';
 
 interface MainPagesProps {
@@ -26,7 +24,6 @@ interface MainPagesProps {
 }
 
 interface MainPagesState {
-  selectedTabId: string;
   enrollBeat?: {
     enrollmentToken: string;
   } | null;
@@ -35,10 +32,6 @@ interface MainPagesState {
 export class MainPages extends React.PureComponent<MainPagesProps, MainPagesState> {
   constructor(props: any) {
     super(props);
-
-    this.state = {
-      selectedTabId: '/',
-    };
   }
 
   public onSelectedTabChanged = (id: string) => {
@@ -48,28 +41,18 @@ export class MainPages extends React.PureComponent<MainPagesProps, MainPagesStat
   public render() {
     const tabs = [
       {
-        id: '/beats',
+        id: '/overview/beats',
         name: 'Beats List',
         disabled: false,
       },
       {
-        id: '/activity',
+        id: '/overview/activity',
         name: 'Beats Activity',
         disabled: false,
       },
       {
-        id: '/tags',
+        id: '/overview/tags',
         name: 'Tags',
-        disabled: false,
-      },
-      {
-        id: '/createtag',
-        name: 'Create Tag',
-        disabled: false,
-      },
-      {
-        id: '/edittag',
-        name: 'Edit Tag',
         disabled: false,
       },
     ];
@@ -90,8 +73,12 @@ export class MainPages extends React.PureComponent<MainPagesProps, MainPagesStat
         actionSection={
           <Switch>
             <Route
-              path="/beats/:action?/:enrollmentToken?"
+              path="/overview/beats/:action?/:enrollmentToken?"
               render={(props: any) => <BeatsPage.ActionArea libs={this.props.libs} {...props} />}
+            />
+            <Route
+              path="/overview/tags"
+              render={(props: any) => <TagsPage.ActionArea libs={this.props.libs} {...props} />}
             />
           </Switch>
         }
@@ -100,33 +87,18 @@ export class MainPages extends React.PureComponent<MainPagesProps, MainPagesStat
 
         <Switch>
           <Route
-            path="/"
-            exact={true}
-            render={() => <Redirect from="/" exact={true} to="/beats" />}
-          />
-          <Route
-            path="/beats/:action?/:enrollmentToken?"
+            path="/overview/beats/:action?/:enrollmentToken?"
             render={(props: any) => <BeatsPage libs={this.props.libs} {...props} />}
           />
           <Route
-            path="/activity"
+            path="/overview/activity"
             exact={true}
             render={(props: any) => <ActivityPage libs={this.props.libs} {...props} />}
           />
           <Route
-            path="/tags"
+            path="/overview/tags"
             exact={true}
             render={(props: any) => <TagsPage libs={this.props.libs} {...props} />}
-          />
-          <Route
-            path="/createtag"
-            exact={true}
-            render={(props: any) => <CreateTagPage libs={this.props.libs} {...props} />}
-          />
-          <Route
-            path="/edittag"
-            exact={true}
-            render={(props: any) => <EditTagPage libs={this.props.libs} {...props} />}
           />
         </Switch>
       </PrimaryLayout>

@@ -19,7 +19,7 @@ export const createTagRemovalsRoute = (libs: CMServerLibs) => ({
       payload: Joi.object({
         removals: Joi.array().items(
           Joi.object({
-            beat_id: Joi.string().required(),
+            beatId: Joi.string().required(),
             tag: Joi.string().required(),
           })
         ),
@@ -29,14 +29,8 @@ export const createTagRemovalsRoute = (libs: CMServerLibs) => ({
   handler: async (request: FrameworkRequest, reply: any) => {
     const { removals } = request.payload;
 
-    // TODO abstract or change API to keep beatId consistent
-    const tweakedRemovals = removals.map((removal: any) => ({
-      beatId: removal.beat_id,
-      tag: removal.tag,
-    }));
-
     try {
-      const response = await libs.beats.removeTagsFromBeats(request.user, tweakedRemovals);
+      const response = await libs.beats.removeTagsFromBeats(request.user, removals);
       reply(response);
     } catch (err) {
       // TODO move this to kibana route thing in adapter

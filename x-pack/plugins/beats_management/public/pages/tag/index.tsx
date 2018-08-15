@@ -7,12 +7,15 @@
 import 'brace/mode/yaml';
 import 'brace/theme/github';
 import React from 'react';
+import { Route, Switch } from 'react-router';
 import { ConfigurationBlock } from '../../../common/domain_types';
-import { TagEdit, TagEditConfig } from '../../components/tag';
+import { PrimaryLayout } from '../../components/layouts/primary';
 import { FrontendLibs } from '../../lib/lib';
-
+import { CreateTagPage } from './create';
+import { EditTagPage } from './edit';
 interface EditTagPageProps {
   libs: FrontendLibs;
+  history: any;
 }
 
 interface EditTagPageState {
@@ -22,7 +25,7 @@ interface EditTagPageState {
   tagName: string | null;
 }
 
-export class EditTagPage extends React.PureComponent<EditTagPageProps, EditTagPageState> {
+export class TagPage extends React.PureComponent<EditTagPageProps, EditTagPageState> {
   constructor(props: EditTagPageProps) {
     super(props);
 
@@ -35,6 +38,21 @@ export class EditTagPage extends React.PureComponent<EditTagPageProps, EditTagPa
   }
 
   public render() {
-    return <TagEdit config={TagEditConfig} items={[]} />;
+    return (
+      <PrimaryLayout title="Create Tag">
+        <Switch>
+          <Route
+            path="/tag/create"
+            exact={true}
+            render={(props: any) => <CreateTagPage libs={this.props.libs} {...props} />}
+          />
+          <Route
+            path="/tag/edit/:tagid"
+            exact={true}
+            render={(props: any) => <EditTagPage libs={this.props.libs} {...props} />}
+          />
+        </Switch>
+      </PrimaryLayout>
+    );
   }
 }

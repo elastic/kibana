@@ -12,6 +12,7 @@ import React from 'react';
 
 import { TABLE_CONFIG } from '../../../common/constants';
 import { BeatTag, CMPopulatedBeat, ConfigurationBlock } from '../../../common/domain_types';
+import { ConnectedLink } from '../connected_link';
 
 export interface ColumnDefinition {
   align?: string;
@@ -55,7 +56,7 @@ export const BeatsTableType: TableType = {
     {
       field: 'id',
       name: 'Beat name',
-      render: (id: string) => <EuiLink>{id}</EuiLink>,
+      render: (id: string) => <ConnectedLink path={`/beat/${id}`}>{id}</ConnectedLink>,
       sortable: true,
     },
     {
@@ -154,7 +155,13 @@ export const TagsTableType: TableType = {
     },
   ],
   controlDefinitions: (data: any) => ({
-    actions: [],
+    actions: [
+      {
+        name: 'Remove Selected',
+        action: 'delete',
+        danger: true,
+      },
+    ],
     filters: [],
   }),
 };

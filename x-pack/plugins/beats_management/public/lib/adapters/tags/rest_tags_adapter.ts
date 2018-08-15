@@ -12,16 +12,25 @@ export class RestTagsAdapter implements CMTagsAdapter {
   constructor(private readonly REST: RestAPIAdapter) {}
 
   public async getTagsWithIds(tagIds: string[]): Promise<BeatTag[]> {
-    return (await this.REST.get<{ tags: BeatTag[] }>(`/api/beats/tags/${tagIds.join(',')}`)).tags;
+    const tags = await this.REST.get<BeatTag[]>(`/api/beats/tags/${tagIds.join(',')}`);
+    return tags;
   }
 
   public async getAll(): Promise<BeatTag[]> {
-    return (await this.REST.get<{ tags: BeatTag[] }>(`/api/beats/tags`)).tags;
+    return await this.REST.get<BeatTag[]>(`/api/beats/tags`);
+  }
+
+  public async delete(tagIds: string[]): Promise<boolean> {
+    return (await this.REST.delete<{ success: boolean }>(`/api/beats/tags/${tagIds.join(',')}`))
+      .success;
   }
 
   public async upsertTag(tag: BeatTag): Promise<BeatTag | null> {
-    return (await this.REST.put<{ tag: BeatTag }>(`/api/beats/tag/{tag}`, {
+    const response = await this.REST.put<{ success: boolean }>(`/api/beats/tag/${tag.id}`, {
+      color: tag.color,
       configuration_blocks: tag.configuration_blocks,
-    })).tag;
+    });
+
+    return response.success ? tag : null;
   }
 }

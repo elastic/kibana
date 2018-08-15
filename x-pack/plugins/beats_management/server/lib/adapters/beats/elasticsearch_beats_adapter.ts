@@ -84,6 +84,28 @@ export class ElasticsearchBeatsAdapter implements CMBeatsAdapter {
       .map((b: any) => b._source.beat);
   }
 
+  public async getAllWithTags(user: FrameworkUser, tagIds: string[]): Promise<CMBeat[]> {
+    const params = {
+      ignore: [404],
+      index: INDEX_NAMES.BEATS,
+      type: '_doc',
+      body: {
+        query: {
+          terms: { 'beat.tags': tagIds },
+        },
+      },
+    };
+
+    const response = await this.database.search(user, params);
+
+    const beats = _get<CMBeat[]>(response, 'hits.hits', []);
+
+    if (beats.length === 0) {
+      return [];
+    }
+    return beats.map((beat: any) => omit(beat._source.beat, ['access_token']));
+  }
+
   public async getBeatWithToken(
     user: FrameworkUser,
     enrollmentToken: string
@@ -106,7 +128,7 @@ export class ElasticsearchBeatsAdapter implements CMBeatsAdapter {
     if (beats.length === 0) {
       return null;
     }
-    return _get<CMBeat>(beats[0], '_source.beat');
+    return omit<CMBeat, {}>(_get<CMBeat>(beats[0], '_source.beat'), ['access_token']);
   }
 
   public async getAll(user: FrameworkUser) {
