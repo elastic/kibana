@@ -17,9 +17,6 @@
  * under the License.
  */
 
-export { notify } from './notify';
-export { Notifier } from './notifier';
-export { fatalError, addFatalErrorCallback } from './fatal_error';
-export { toastNotifications } from './toasts';
-export { GlobalBannerList, banners } from './banners';
-export { addAppRedirectMessageToUrl, showAppRedirectNotification } from './app_redirect';
+export { ToastsService } from './toasts_service';
+export { ToastsStartContract, ToastInput } from './toasts_start_contract';
+export { Toast } from '@elastic/eui';

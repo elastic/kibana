@@ -17,9 +17,8 @@
  * under the License.
  */
 
-export { notify } from './notify';
-export { Notifier } from './notifier';
-export { fatalError, addFatalErrorCallback } from './fatal_error';
-export { toastNotifications } from './toasts';
-export { GlobalBannerList, banners } from './banners';
-export { addAppRedirectMessageToUrl, showAppRedirectNotification } from './app_redirect';
+export { getProperty } from './get_property';
+export { getTypes } from './get_types';
+export { getRootType } from './get_root_type';
+export { getRootProperties } from './get_root_properties';
+export { getRootPropertiesObjects } from './get_root_properties_objects';

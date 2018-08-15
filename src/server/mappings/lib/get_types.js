@@ -17,9 +17,12 @@
  * under the License.
  */
 
-export { notify } from './notify';
-export { Notifier } from './notifier';
-export { fatalError, addFatalErrorCallback } from './fatal_error';
-export { toastNotifications } from './toasts';
-export { GlobalBannerList, banners } from './banners';
-export { addAppRedirectMessageToUrl, showAppRedirectNotification } from './app_redirect';
+/**
+ *  Get the names of the types defined in the EsMappingsDsl
+ *
+ *  @param  {EsMappingsDsl} mappings
+ *  @return {Array<string>}
+ */
+export function getTypes(mappings) {
+  return Object.keys(mappings).filter(type => type !== '_default_');
+}
