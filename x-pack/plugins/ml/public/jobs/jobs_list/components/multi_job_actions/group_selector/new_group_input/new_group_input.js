@@ -39,7 +39,7 @@ export class NewGroupInput extends Component {
     if (tempNewGroupName === '') {
       groupsValidationError = '';
     } else if (this.props.allJobIds.includes(tempNewGroupName)) {
-      groupsValidationError = 'A job with this ID already exists. Groups and jobs cannot use the same IDs.';
+      groupsValidationError = 'A job with this ID already exists. Groups and jobs cannot use the same ID.';
     } else {
       groupsValidationError =  validateGroupNames([tempNewGroupName]).message;
     }
