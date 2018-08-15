@@ -38,7 +38,7 @@ export function DashboardViewport({
       data-shared-items-container
       data-title={title}
       data-description={description}
-      className={useMargins ? 'dashboard-viewport-with-margins' : 'dashboard-viewport'}
+      className={useMargins ? 'dshDashboardViewport-withMargins' : 'dshDashboardViewport'}
     >
       { isFullScreenMode && <ExitFullScreenButton onExitFullScreenMode={onExitFullScreenMode} /> }
       <DashboardGrid
