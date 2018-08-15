@@ -46,7 +46,7 @@ const CourierRequestHandlerProvider = function () {
         col.aggConfig.isFilterable()
         && (!field || field.filterable);
       return ({
-        name: col.title,
+        name: col.name,
         field: `col${index}`,
         filter: isCellContentFilterable && ((value) => {
           const filter = col.aggConfig.createFilter(value.raw);

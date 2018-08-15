@@ -23,7 +23,7 @@ const getColumn = (agg, i) => {
   return {
     aggConfig: agg,
     id: `col-${i}`,
-    title: agg.makeLabel()
+    name: agg.makeLabel()
   };
 };
 

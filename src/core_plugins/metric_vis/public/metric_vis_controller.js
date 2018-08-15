@@ -116,7 +116,7 @@ export class MetricVisComponent extends Component {
 
       table.rows.forEach((row, rowIndex) => {
 
-        let title = column.title;
+        let title = column.name;
         let value = row[column.id];
         const color = this._getColor(value, labels, colors);
 

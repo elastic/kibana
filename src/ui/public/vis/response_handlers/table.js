@@ -54,7 +54,7 @@ const TableResponseHandlerProvider = function () {
               };
               tableGroup.tables.push({
                 $parent: tableGroup,
-                columns: table.columns.filter((column, i) => i !== splitColumnIndex),
+                columns: table.columns.filter((column, i) => i !== splitColumnIndex).map(column => ({ title: column.name, ...column })),
                 rows: []
               });
 
@@ -77,7 +77,7 @@ const TableResponseHandlerProvider = function () {
         } else {
 
           converted.tables.push({
-            columns: table.columns,
+            columns: table.columns.map(column => ({ title: column.name, ...column })),
             rows: table.rows.map(row => {
               let previousSplitAgg;
               return table.columns.map(column => {
