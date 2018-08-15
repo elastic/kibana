@@ -18,6 +18,10 @@ import { SpaceAvatar } from '../../../../../../../../spaces/public/views/compone
 import { isReservedRole } from '../../../../../../lib/role';
 
 export class PrivilegeSpaceTable extends Component {
+  state = {
+    searchTerm: ''
+  }
+
   render() {
     const {
       role,
@@ -26,62 +30,89 @@ export class PrivilegeSpaceTable extends Component {
       spacePrivileges,
     } = this.props;
 
-    const tableItems = Object.keys(spacePrivileges).map(spaceId => {
+    const {
+      searchTerm
+    } = this.state;
+
+    const allTableItems = Object.keys(spacePrivileges).map(spaceId => {
       return {
         space: spaces.find(s => s.id === spaceId),
         privilege: spacePrivileges[spaceId][0]
       };
     }).filter(item => !!item.space);
 
-    if (tableItems.length === 0) {
+    const visibleTableItems = allTableItems.filter(item => item.space.name.toLowerCase().indexOf(searchTerm) >= 0);
+
+    if (allTableItems.length === 0) {
       return null;
     }
 
     return (
       <EuiInMemoryTable
         hasActions
-        columns={[{
-          field: 'space',
-          name: 'Space',
-          width: '50%',
-          render: (space) => (
-            <EuiFlexGroup gutterSize="s" responsive={false} alignItems={'center'}>
-              <EuiFlexItem grow={false}><SpaceAvatar space={space} size="s" /></EuiFlexItem>
-              <EuiFlexItem><EuiText>{space.name}</EuiText></EuiFlexItem>
-            </EuiFlexGroup>
-          )
-        }, {
-          field: 'privilege',
-          name: 'Privilege',
-          render: (privilege, record) => {
-            return (
-              <PrivilegeSelector
-                availablePrivileges={availablePrivileges}
-                value={privilege}
-                disabled={isReservedRole(role)}
-                onChange={this.onSpacePermissionChange(record)}
-                compressed
-              />
-            );
+        columns={this.getTableColumns(role, availablePrivileges)}
+        search={{
+          box: {
+            incremental: true,
+            placeholder: 'Filter...',
+          },
+          onChange: (search) => {
+            this.setState({
+              searchTerm: search.queryText.toLowerCase()
+            });
           }
-        }, {
-          name: 'Actions',
-          actions: [{
-            render: (record) => {
-              return (
-                <EuiButtonIcon
-                  aria-label={'Remove custom privileges for this space'}
-                  color={'danger'}
-                  onClick={() => this.onDeleteSpacePermissionsClick(record)}
-                  iconType={'trash'}
-                />
-              );
-            }
-          }]
-        }]}
-        items={tableItems}
+        }}
+        items={visibleTableItems}
       />
     );
+  }
+
+  getTableColumns = (role, availablePrivileges) => {
+    const columns = [{
+      field: 'space',
+      name: 'Space',
+      width: '50%',
+      render: (space) => (
+        <EuiFlexGroup gutterSize="s" responsive={false} alignItems={'center'}>
+          <EuiFlexItem grow={false}><SpaceAvatar space={space} size="s" /></EuiFlexItem>
+          <EuiFlexItem><EuiText>{space.name}</EuiText></EuiFlexItem>
+        </EuiFlexGroup>
+      )
+    }, {
+      field: 'privilege',
+      name: 'Privilege',
+      render: (privilege, record) => {
+        if (this.props.readonly) {
+          return privilege;
+        }
+
+        return (
+          <PrivilegeSelector
+            availablePrivileges={availablePrivileges}
+            value={privilege}
+            disabled={isReservedRole(role) || this.props.readonly}
+            onChange={this.onSpacePermissionChange(record)}
+            compressed
+          />
+        );
+      }
+    }];
+    if (!this.props.readonly) {
+      columns.push({
+        render: (record) => {
+          return (
+            <EuiButtonIcon
+              aria-label={'Remove custom privileges for this space'}
+              color={'danger'}
+              onClick={() => this.onDeleteSpacePermissionsClick(record)}
+              iconType={'trash'}
+            />
+          );
+        }
+      });
+    }
+
+    return columns;
   }
 
   onSpacePermissionChange = (record) => (selectedPrivilege) => {
@@ -108,7 +139,8 @@ export class PrivilegeSpaceTable extends Component {
 PrivilegeSpaceTable.propTypes = {
   role: PropTypes.object.isRequired,
   spaces: PropTypes.array.isRequired,
-  availablePrivileges: PropTypes.array.isRequired,
+  availablePrivileges: PropTypes.array,
   spacePrivileges: PropTypes.object.isRequired,
-  onChange: PropTypes.func.isRequired,
+  onChange: PropTypes.func,
+  readonly: PropTypes.bool,
 };

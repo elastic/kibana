@@ -10,6 +10,6 @@ import { PrivilegeCalloutWarning } from './privilege_callout_warning';
 
 describe('PrivilegeCalloutWarning', () => {
   it('renders without crashing', () => {
-    expect(mount(<PrivilegeCalloutWarning basePrivilege={'all'} isReservedRole={false} />)).toMatchSnapshot();
+    expect(mount(<PrivilegeCalloutWarning role={{}} spaces={[]} basePrivilege={'all'} isReservedRole={false} />)).toMatchSnapshot();
   });
 });

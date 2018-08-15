@@ -128,7 +128,12 @@ export class SpaceAwarePrivilegeForm extends Component {
         </EuiText>
 
         {(basePrivilege !== NO_PRIVILEGE_VALUE || isReservedRole(this.props.role)) &&
-          <PrivilegeCalloutWarning basePrivilege={basePrivilege} isReservedRole={isReservedRole(this.props.role)} />
+          <PrivilegeCalloutWarning
+            role={this.props.role}
+            spaces={this.props.spaces}
+            basePrivilege={basePrivilege}
+            isReservedRole={isReservedRole(this.props.role)}
+          />
         }
 
         {basePrivilege === 'read' && this.props.editable && <EuiSpacer />}
