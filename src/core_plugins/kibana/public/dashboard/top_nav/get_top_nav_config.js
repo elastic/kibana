@@ -131,7 +131,7 @@ function getShareConfig(action) {
   return {
     key: TopNavIds.SHARE,
     description: 'Share Dashboard',
-    testId: 'dashboardShareButton',
+    testId: 'shareTopNavButton',
     run: action,
   };
 }

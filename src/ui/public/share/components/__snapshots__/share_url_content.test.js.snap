@@ -3,6 +3,7 @@
 exports[`render 1`] = `
 <EuiForm
   className="shareUrlContentForm"
+  data-test-subj="shareUrlForm"
 >
   <EuiFormRow
     describedByIds={Array []}
@@ -102,6 +103,7 @@ exports[`render 1`] = `
       >
         <EuiSwitch
           checked={false}
+          data-test-subj="useShortUrl"
           label="Short URL"
           onChange={[Function]}
         />
@@ -132,6 +134,7 @@ exports[`render 1`] = `
 exports[`should enable saved object export option when objectId is provided 1`] = `
 <EuiForm
   className="shareUrlContentForm"
+  data-test-subj="shareUrlForm"
 >
   <EuiFormRow
     describedByIds={Array []}
@@ -230,6 +233,7 @@ exports[`should enable saved object export option when objectId is provided 1`] 
       >
         <EuiSwitch
           checked={false}
+          data-test-subj="useShortUrl"
           label="Short URL"
           onChange={[Function]}
         />

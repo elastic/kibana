@@ -281,6 +281,7 @@ export class ShareUrlContent extends Component {
       label={switchLabel}
       checked={this.state.useShortUrl}
       onChange={this.handleShortUrlChange}
+      data-test-subj="useShortUrl"
     />);
     const tipContent = `We recommend sharing shortened snapshot URLs for maximum compatibility.
       Internet Explorer has URL length restrictions,
@@ -296,7 +297,10 @@ export class ShareUrlContent extends Component {
 
   render() {
     return (
-      <EuiForm className="shareUrlContentForm">
+      <EuiForm
+        className="shareUrlContentForm"
+        data-test-subj="shareUrlForm"
+      >
 
         {this.renderExportAsRadioGroup()}
 
@@ -308,6 +312,8 @@ export class ShareUrlContent extends Component {
               fill
               onClick={copy}
               disabled={this.state.isCreatingShortUrl}
+              data-share-url={this.state.url}
+              data-test-subj="copyShareUrlButton"
             >
               Copy { this.props.isEmbedded ? 'iFrame code' : 'link' }
             </EuiButton>

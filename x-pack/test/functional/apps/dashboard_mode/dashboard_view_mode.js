@@ -158,7 +158,7 @@ export default function ({ getService, getPageObjects }) {
       });
 
       it('does not show the sharing menu item', async () => {
-        const shareMenuItemExists = await testSubjects.exists('dashboardShareButton');
+        const shareMenuItemExists = await testSubjects.exists('shareTopNavButton');
         expect(shareMenuItemExists).to.be(false);
       });
 

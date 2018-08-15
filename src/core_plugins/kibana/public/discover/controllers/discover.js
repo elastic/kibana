@@ -191,7 +191,7 @@ function discoverController(
   }, {
     key: 'share',
     description: 'Share Search',
-    testId: 'discoverShareButton',
+    testId: 'shareTopNavButton',
     run: (menuItem, navController, anchorElement) => {
       showShareContextMenu({
         anchorElement,

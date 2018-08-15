@@ -158,7 +158,7 @@ function VisEditor(
   }, {
     key: 'share',
     description: 'Share Visualization',
-    testId: 'visualizeShareButton',
+    testId: 'shareTopNavButton',
     run: (menuItem, navController, anchorElement) => {
       showShareContextMenu({
         anchorElement,
