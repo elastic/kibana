@@ -17,21 +17,14 @@
  * under the License.
  */
 
-import { runTests } from '../../tasks';
-import { runCli } from '../../lib';
-import { processOptions, displayHelp } from './args';
+/* eslint-env jest */
 
-/**
- * Run servers and tests for each config
- * Only cares about --config option. Other options
- * are passed directly to functional_test_runner, such as
- * --bail, --verbose, etc.
- * @param {string[]} defaultConfigPaths Optional paths to configs
- *                                      if no config option is passed
- */
-export async function runTestsCli(defaultConfigPaths) {
-  await runCli(displayHelp, async userOptions => {
-    const options = processOptions(userOptions, defaultConfigPaths);
-    await runTests(options);
-  });
+import { format } from 'util';
+
+export function checkMockConsoleLogSnapshot(logMock) {
+  const output = logMock.mock.calls
+    .reduce((acc, args) => `${acc}${format(...args)}\n`, '')
+    .replace(/(^    at.+[>)\d]$\n?)+/m, '    ...stack trace...');
+
+  expect(output).toMatchSnapshot();
 }
