@@ -44,14 +44,13 @@ export async function ensureAllBrowsersDownloaded() {
 async function ensureDownloaded(browsers) {
   await asyncMap(Object.values(browsers), async (browser) => {
     const { archivesPath } = browser.paths;
-    const packages = browser.paths.packages.filter(p => !p.skip);
 
-    await clean(archivesPath, packages.map(p => (
+    await clean(archivesPath, browser.paths.packages.map(p => (
       resolvePath(archivesPath, p.archiveFilename)
     )));
 
     const invalidChecksums = [];
-    await asyncMap(packages, async ({ archiveFilename, archiveChecksum }) => {
+    await asyncMap(browser.paths.packages, async ({ archiveFilename, archiveChecksum }) => {
       const url = `${browser.paths.baseUrl}${archiveFilename}`;
       const path = resolvePath(archivesPath, archiveFilename);
 

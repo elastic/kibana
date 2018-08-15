@@ -32,10 +32,6 @@ export async function installBrowser(logger, browserConfig, browserType, install
     throw new Error(`Unsupported platform: ${JSON.stringify(browser, null, 2)}`);
   }
 
-  if (pkg.skip) {
-    return browser.createDriverFactory('', logger, browserConfig);
-  }
-
   const binaryPath = path.join(installsPath, pkg.binaryRelativePath);
   try {
     await fsp.access(binaryPath, fs.X_OK);
