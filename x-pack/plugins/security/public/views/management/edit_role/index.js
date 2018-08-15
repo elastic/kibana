@@ -98,6 +98,25 @@ routes.when(`${EDIT_ROLES_PATH}/:name?`, {
     const allowFieldLevelSecurity = xpackInfo.get('features.security.allowRoleFieldLevelSecurity');
     const rbacApplication = chrome.getInjected('rbacApplication');
 
+    if (role.elasticsearch.indices.length === 0) {
+      const emptyOption = {
+        names: [],
+        privileges: []
+      };
+
+      if (allowFieldLevelSecurity) {
+        emptyOption.field_security = {
+          grant: ['*']
+        };
+      }
+
+      if (allowDocumentLevelSecurity) {
+        emptyOption.query = '';
+      }
+
+      role.elasticsearch.indices.push(emptyOption);
+    }
+
     const {
       users,
       indexPatterns,
