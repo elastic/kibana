@@ -4,4 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { licensePreRoutingFactory } from './license_pre_routing_factory';
+export { ROUTES } from './routes';
+export { PLUGIN } from './plugin';
+export { EDITOR } from './editor';

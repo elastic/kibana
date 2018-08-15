@@ -4,9 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-
-// @ts-ignore EuiToolTip has no typings in current version
-import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiIcon, EuiToolTip } from '@elastic/eui';
+import {
+  EuiButton,
+  EuiButtonEmpty,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiIcon,
+  // @ts-ignore EuiToolTip has no typings in current version
+  EuiToolTip,
+} from '@elastic/eui';
 import React from 'react';
 import { BeatTag, CMBeat } from '../../../common/domain_types';
 import { BeatsTagAssignment } from '../../../server/lib/adapters/beats/adapter_types';
@@ -24,6 +30,18 @@ interface TagsPageState {
 }
 
 export class TagsPage extends React.PureComponent<TagsPageProps, TagsPageState> {
+  public static ActionArea = ({ history }: any) => (
+    <EuiButton
+      size="s"
+      color="primary"
+      onClick={async () => {
+        history.push(`/tag/create`);
+      }}
+    >
+      Add Tag
+    </EuiButton>
+  );
+
   constructor(props: TagsPageProps) {
     super(props);
 
