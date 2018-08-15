@@ -21,6 +21,6 @@ export const reloadIndices = (indexNames) => async (dispatch, getState) => {
   if (indices && indices.length > 0) {
     return dispatch(reloadIndicesSuccess({ indices }));
   } else {
-    return toastNotifications.addSuccess('Failed to refresh current page of indices.');
+    return toastNotifications.addWarning('Failed to refresh current page of indices.');
   }
 };
