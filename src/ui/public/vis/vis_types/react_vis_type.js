@@ -35,7 +35,6 @@ class ReactVisController {
       const Component = this.vis.type.visConfig.component;
       const config = chrome.getUiSettingsClient();
       render(<Component
-        appState={this.vis.API.getAppState()}
         config={config}
         vis={this.vis}
         visData={visData}
