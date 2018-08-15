@@ -14,6 +14,16 @@ export interface StoreOpts {
   maxAttempts: number;
 }
 
+export interface FetchOpts {
+  searchAfter?: any[];
+  sort?: object[];
+}
+
+export interface FetchResult {
+  searchAfter: any[];
+  docs: ConcreteTaskInstance[];
+}
+
 // Internal, the raw document, as stored in the Kibana index.
 interface RawTaskDoc {
   _id: string;
@@ -112,8 +122,17 @@ export class TaskStore {
     });
   }
 
-  public fetch(): Promise<ConcreteTaskInstance[]> {
-    return this.search();
+  public async fetch(opts: FetchOpts = {}): Promise<FetchResult> {
+    const sort = paginatableSort(opts.sort);
+    const docs = await this.search({
+      body: {
+        sort,
+        search_after: opts.searchAfter,
+      },
+    });
+    const searchAfter = nextSearchAfter(docs.length && docs[docs.length - 1], sort);
+
+    return { docs, searchAfter };
   }
 
   /**
@@ -199,6 +218,29 @@ export class TaskStore {
 
     return (result.hits.hits as RawTaskDoc[]).map(rawToTaskDoc);
   }
+}
+
+function paginatableSort(sort: any[] = []) {
+  if (!sort.length) {
+    return [{ runAt: 'asc' }, { _id: 'desc' }];
+  }
+
+  if (sort.find(({ _id }) => !!_id)) {
+    return sort;
+  }
+
+  return [...sort, { _id: 'desc' }];
+}
+
+function nextSearchAfter(doc?: any, sort?: object[]): any[] {
+  if (!doc || !sort) {
+    return [];
+  }
+
+  return sort.map(opt => {
+    const [field] = Object.keys(opt);
+    return doc[field.startsWith('_') ? field.slice(1) : field];
+  });
 }
 
 function rawSource(doc: TaskInstance) {

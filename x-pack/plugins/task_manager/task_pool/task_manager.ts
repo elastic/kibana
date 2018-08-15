@@ -4,9 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ConcreteTaskInstance, TaskInstance } from './task';
+import { TaskInstance } from './task';
 import { TaskPool } from './task_pool';
-import { TaskStore } from './task_store';
+import { FetchOpts, FetchResult, TaskStore } from './task_store';
 
 interface Opts {
   pool: TaskPool;
@@ -27,8 +27,8 @@ export class TaskManager {
     this.pool.checkForWork();
   }
 
-  public fetch(): Promise<ConcreteTaskInstance[]> {
-    return this.store.fetch();
+  public fetch(opts: FetchOpts = {}): Promise<FetchResult> {
+    return this.store.fetch(opts);
   }
 
   public remove(id: string): Promise<void> {
