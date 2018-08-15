@@ -7,6 +7,6 @@ export const dropdownFilter = () => ({
   image: header,
   height: 50,
   expression: `demodata
-| dropdownControl valueColumn=project filterColumn=project`,
+| dropdownControl valueColumn=project filterColumn=project | render`,
   filter: '',
 });

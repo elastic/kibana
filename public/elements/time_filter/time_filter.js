@@ -7,6 +7,6 @@ export const timeFilter = () => ({
   image: header,
   height: 50,
   expression: `timefilterControl compact=true column=@timestamp
-| render as=time_filter`,
+| render`,
   filter: 'timefilter column=@timestamp from=now-24h to=now',
 });
