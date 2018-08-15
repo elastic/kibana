@@ -66,7 +66,9 @@ export class KibanaServerUiSettings {
     const { payload } = await this._wreck.get('/api/kibana/settings');
 
     for (const key of Object.keys(payload.settings)) {
-      await this._wreck.delete(`/api/kibana/settings/${key}`);
+      if (!payload.settings[key].isOverridden) {
+        await this._wreck.delete(`/api/kibana/settings/${key}`);
+      }
     }
 
     this._log.debug('replacing kibana config doc: %j', doc);
