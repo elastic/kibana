@@ -316,7 +316,7 @@
     "proxyquire": "1.7.11",
     "simple-git": "1.37.0",
     "sinon": "^5.0.7",
-    "static-fs": "git+https://git@github.com/mistic/static-fs.git#5ef29e9",
+    "static-fs": "git+https://git@github.com/mistic/static-fs.git#efbde0a",
     "strip-ansi": "^3.0.1",
     "supertest": "3.0.0",
     "supertest-as-promised": "4.0.2",
