@@ -17,37 +17,6 @@ exports[`render 1`] = `
       options={
         Array [
           Object {
-            "disabled": true,
-            "id": "savedObject",
-            "label": <EuiFlexGroup
-              alignItems="stretch"
-              component="div"
-              direction="row"
-              gutterSize="none"
-              justifyContent="flexStart"
-              responsive={true}
-              wrap={false}
-            >
-              <EuiFlexItem
-                component="div"
-                grow={true}
-              >
-                Saved object
-              </EuiFlexItem>
-              <EuiFlexItem
-                component="div"
-                grow={false}
-              >
-                <EuiIconTip
-                  aria-label="Info"
-                  content="You can share this URL with people to let them load the most recent saved version of this dashboard."
-                  position="bottom"
-                  type="questionInCircle"
-                />
-              </EuiFlexItem>
-            </EuiFlexGroup>,
-          },
-          Object {
             "id": "snapshot",
             "label": <EuiFlexGroup
               alignItems="stretch"
@@ -72,6 +41,37 @@ exports[`render 1`] = `
                   aria-label="Info"
                   content="Snapshot URLs encode the current state of the dashboard in the URL itself.
             Edits to the saved dashboard won't be visible via this URL."
+                  position="bottom"
+                  type="questionInCircle"
+                />
+              </EuiFlexItem>
+            </EuiFlexGroup>,
+          },
+          Object {
+            "disabled": true,
+            "id": "savedObject",
+            "label": <EuiFlexGroup
+              alignItems="stretch"
+              component="div"
+              direction="row"
+              gutterSize="none"
+              justifyContent="flexStart"
+              responsive={true}
+              wrap={false}
+            >
+              <EuiFlexItem
+                component="div"
+                grow={true}
+              >
+                Saved object
+              </EuiFlexItem>
+              <EuiFlexItem
+                component="div"
+                grow={false}
+              >
+                <EuiIconTip
+                  aria-label="Info"
+                  content="You can share this URL with people to let them load the most recent saved version of this dashboard."
                   position="bottom"
                   type="questionInCircle"
                 />
@@ -145,37 +145,6 @@ exports[`should enable saved object export option when objectId is provided 1`] 
       options={
         Array [
           Object {
-            "disabled": false,
-            "id": "savedObject",
-            "label": <EuiFlexGroup
-              alignItems="stretch"
-              component="div"
-              direction="row"
-              gutterSize="none"
-              justifyContent="flexStart"
-              responsive={true}
-              wrap={false}
-            >
-              <EuiFlexItem
-                component="div"
-                grow={true}
-              >
-                Saved object
-              </EuiFlexItem>
-              <EuiFlexItem
-                component="div"
-                grow={false}
-              >
-                <EuiIconTip
-                  aria-label="Info"
-                  content="You can share this URL with people to let them load the most recent saved version of this dashboard."
-                  position="bottom"
-                  type="questionInCircle"
-                />
-              </EuiFlexItem>
-            </EuiFlexGroup>,
-          },
-          Object {
             "id": "snapshot",
             "label": <EuiFlexGroup
               alignItems="stretch"
@@ -200,6 +169,37 @@ exports[`should enable saved object export option when objectId is provided 1`] 
                   aria-label="Info"
                   content="Snapshot URLs encode the current state of the dashboard in the URL itself.
             Edits to the saved dashboard won't be visible via this URL."
+                  position="bottom"
+                  type="questionInCircle"
+                />
+              </EuiFlexItem>
+            </EuiFlexGroup>,
+          },
+          Object {
+            "disabled": false,
+            "id": "savedObject",
+            "label": <EuiFlexGroup
+              alignItems="stretch"
+              component="div"
+              direction="row"
+              gutterSize="none"
+              justifyContent="flexStart"
+              responsive={true}
+              wrap={false}
+            >
+              <EuiFlexItem
+                component="div"
+                grow={true}
+              >
+                Saved object
+              </EuiFlexItem>
+              <EuiFlexItem
+                component="div"
+                grow={false}
+              >
+                <EuiIconTip
+                  aria-label="Info"
+                  content="You can share this URL with people to let them load the most recent saved version of this dashboard."
                   position="bottom"
                   type="questionInCircle"
                 />

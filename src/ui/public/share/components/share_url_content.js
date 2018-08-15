@@ -217,6 +217,14 @@ export class ShareUrlContent extends Component {
   renderExportUrlAsOptions = () => {
     return [
       {
+        id: EXPORT_URL_AS_SNAPSHOT,
+        label: this.renderWithIconTip(
+          'Snapshot',
+          `Snapshot URLs encode the current state of the ${this.props.objectType} in the URL itself.
+            Edits to the saved ${this.props.objectType} won't be visible via this URL.`
+        ),
+      },
+      {
         id: EXPORT_URL_AS_SAVED_OBJECT,
         disabled: this.isNotSaved(),
         label: this.renderWithIconTip(
@@ -224,14 +232,6 @@ export class ShareUrlContent extends Component {
           `You can share this URL with people to let them load the most recent saved version of this ${this.props.objectType}.`
         ),
       },
-      {
-        id: EXPORT_URL_AS_SNAPSHOT,
-        label: this.renderWithIconTip(
-          'Snapshot',
-          `Snapshot URLs encode the current state of the ${this.props.objectType} in the URL itself.
-            Edits to the saved ${this.props.objectType} won't be visible via this URL.`
-        ),
-      }
     ];
   }
 
