@@ -91,6 +91,7 @@ export default class BaseOptimizer {
           loader: 'style-loader'
         },
         use: [
+          'thread-loader',
           ...postProcessors,
           {
             loader: 'css-loader',
@@ -248,6 +249,7 @@ export default class BaseOptimizer {
           {
             resource: createSourceFileResourceSelector(/\.js$/),
             use: maybeAddCacheLoader('babel', [
+              'thread-loader',
               {
                 loader: 'babel-loader',
                 options: {
