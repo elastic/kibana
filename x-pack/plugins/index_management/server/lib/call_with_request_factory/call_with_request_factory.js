@@ -6,9 +6,8 @@
 
 import { once } from 'lodash';
 
-const callWithRequest = once((server) => {
-  const pipeline = server.config().get('elasticsearch');
-  const cluster = server.plugins.elasticsearch.createCluster('logstash', pipeline);
+const callWithRequest = once(server => {
+  const cluster = server.plugins.elasticsearch.getCluster('data');
   return cluster.callWithRequest;
 });
 

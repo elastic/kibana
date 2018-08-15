@@ -4,4 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { licensePreRoutingFactory } from './license_pre_routing_factory';
+export const INDEX_NAMES = {
+  BEATS: '.management-beats',
+};
