@@ -132,7 +132,9 @@ describe('GET roles', () => {
               ],
               run_as: ['other_user'],
             },
-            kibana: [],
+            kibana: {
+              global: [],
+            },
             _unrecognized_applications: [],
           },
         ],
@@ -181,14 +183,9 @@ describe('GET roles', () => {
               indices: [],
               run_as: [],
             },
-            kibana: [
-              {
-                privileges: ['read'],
-              },
-              {
-                privileges: ['all'],
-              },
-            ],
+            kibana: {
+              global: ['read', 'all']
+            },
             _unrecognized_applications: [],
           },
         ],
@@ -243,7 +240,9 @@ describe('GET roles', () => {
               indices: [],
               run_as: [],
             },
-            kibana: [],
+            kibana: {
+              global: [],
+            },
             _unrecognized_applications: [],
           },
         ],
@@ -287,7 +286,9 @@ describe('GET roles', () => {
               indices: [],
               run_as: [],
             },
-            kibana: [],
+            kibana: {
+              global: [],
+            },
             _unrecognized_applications: ['kibana-.another-kibana']
           },
         ],
@@ -416,7 +417,9 @@ describe('GET role', () => {
             ],
             run_as: ['other_user'],
           },
-          kibana: [],
+          kibana: {
+            global: [],
+          },
           _unrecognized_applications: [],
         },
       },
@@ -464,14 +467,9 @@ describe('GET role', () => {
             indices: [],
             run_as: [],
           },
-          kibana: [
-            {
-              privileges: ['read'],
-            },
-            {
-              privileges: ['all'],
-            },
-          ],
+          kibana: {
+            global: ['read', 'all']
+          },
           _unrecognized_applications: [],
         },
       },
@@ -525,7 +523,9 @@ describe('GET role', () => {
             indices: [],
             run_as: [],
           },
-          kibana: [],
+          kibana: {
+            global: [],
+          },
           _unrecognized_applications: [],
         },
       },
@@ -568,7 +568,9 @@ describe('GET role', () => {
             indices: [],
             run_as: [],
           },
-          kibana: [],
+          kibana: {
+            global: [],
+          },
           _unrecognized_applications: ['kibana-.another-kibana'],
         },
       },

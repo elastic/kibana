@@ -11,11 +11,15 @@ import { wrapError } from '../../../../lib/errors';
 export function initGetRolesApi(server, callWithRequest, routePreCheckLicenseFn, application) {
 
   const transformKibanaApplicationsFromEs = (roleApplications) => {
-    return roleApplications
+    const roleKibanaApplications = roleApplications
       .filter(roleApplication => roleApplication.application === application)
-      .filter(roleApplication => roleApplication.resources.length > 0)
-      .filter(roleApplication => roleApplication.resources.every(resource => resource === ALL_RESOURCE))
-      .map(roleApplication => ({ privileges: roleApplication.privileges }));
+      .filter(roleApplication => roleApplication.resources.length > 0);
+
+    return {
+      global: _.flatten(roleKibanaApplications
+        .filter(roleApplication => roleApplication.resources.every(resource => resource === ALL_RESOURCE))
+        .map(roleApplication => roleApplication.privileges))
+    };
   };
 
   const transformUnrecognizedApplicationsFromEs = (roleApplications) => {
