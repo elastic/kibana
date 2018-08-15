@@ -91,7 +91,6 @@ export default class BaseOptimizer {
           loader: 'style-loader'
         },
         use: [
-          'thread-loader',
           ...postProcessors,
           {
             loader: 'css-loader',
