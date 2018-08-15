@@ -35,20 +35,13 @@ export class Configuration extends Component {
     setSelectedReplicaCount: PropTypes.func.isRequired,
     validate: PropTypes.func.isRequired,
 
-    selectedPrimaryShardCount: PropTypes.oneOfType([
-      PropTypes.number,
-      PropTypes.string,
-    ]).isRequired,
+    selectedPrimaryShardCount: PropTypes.oneOfType([PropTypes.number, PropTypes.string]).isRequired,
     selectedNodeAttrs: PropTypes.string.isRequired,
     nodeOptions: PropTypes.array.isRequired,
-    selectedReplicaCount: PropTypes.oneOfType([
-      PropTypes.number,
-      PropTypes.string,
-    ]).isRequired,
+    selectedReplicaCount: PropTypes.oneOfType([PropTypes.number, PropTypes.string]).isRequired,
     isShowingErrors: PropTypes.bool.isRequired,
     errors: PropTypes.object.isRequired,
-    isPrimaryShardCountHigherThanSelectedNodeAttrsCount:
-      PropTypes.bool.isRequired,
+    isPrimaryShardCountHigherThanSelectedNodeAttrsCount: PropTypes.bool.isRequired,
   };
 
   constructor(props) {
@@ -98,21 +91,21 @@ export class Configuration extends Component {
           fullWidth
         >
           <ErrableFormRow
-            label="Where do you want your hot indices to live?"
+            label="Choose where to allocate indices by node attribute"
             errorKey={STRUCTURE_NODE_ATTRS}
             isShowingErrors={isShowingErrors}
             errors={errors}
-            helpText={selectedNodeAttrs ? (
-              <EuiButtonEmpty
-                flush="left"
-                iconType="eye"
-                onClick={() =>
-                  this.setState({ isShowingNodeDetailsFlyout: true })
-                }
-              >
-                View a list of nodes attached to this configuration
-              </EuiButtonEmpty>
-            ) : null}
+            helpText={
+              selectedNodeAttrs ? (
+                <EuiButtonEmpty
+                  flush="left"
+                  iconType="eye"
+                  onClick={() => this.setState({ isShowingNodeDetailsFlyout: true })}
+                >
+                  View a list of nodes attached to this configuration
+                </EuiButtonEmpty>
+              ) : null
+            }
           >
             <EuiSelect
               value={selectedNodeAttrs || ' '}
@@ -120,7 +113,7 @@ export class Configuration extends Component {
                 await setSelectedNodeAttrs(e.target.value);
                 validate();
               }}
-              options={nodeOptions}
+              options={[{ text: 'Default allocation (don\'t use attributes)', value: '' }, ...nodeOptions]}
             />
           </ErrableFormRow>
           <EuiCallOut
@@ -128,11 +121,9 @@ export class Configuration extends Component {
             size="s"
             title={
               <p>
-                The best way to determine how many shards you need is to benchmark
-                using realistic data and queries on your hardware.{' '}
-                <LearnMoreLink
-                  href="https://www.elastic.co/webinars/using-rally-to-get-your-elasticsearch-cluster-size-right"
-                />
+                The best way to determine how many shards you need is to benchmark using realistic
+                data and queries on your hardware.{' '}
+                <LearnMoreLink href="https://www.elastic.co/webinars/using-rally-to-get-your-elasticsearch-cluster-size-right" />
               </p>
             }
           />

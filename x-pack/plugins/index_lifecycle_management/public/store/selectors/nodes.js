@@ -20,11 +20,6 @@ export const getNodeOptions = createSelector(
     }));
 
     options.sort((a, b) => a.value.localeCompare(b.value));
-    options.unshift({
-      text: '-- Do not reallocate my indices --',
-      value: undefined,
-    });
-
     return options;
   }
 );
