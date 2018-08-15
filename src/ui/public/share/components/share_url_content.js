@@ -87,10 +87,25 @@ export class ShareUrlContent extends Component {
     }
   }
 
-  getShortUrl = async () => {
-    this.setState({ isCreatingShortUrl: true });
+  createShortUrl = async () => {
+    this.setState({
+      isCreatingShortUrl: true,
+      shortUrlErrorMsg: undefined,
+    });
 
-    const shortUrl = await shortenUrl(this.getSnapshotUrl());
+    let shortUrl;
+    try {
+      shortUrl = await shortenUrl(this.getSnapshotUrl());
+    } catch(fetchError) {
+      if (this._isMounted) {
+        this.setState({
+          isCreatingShortUrl: false,
+          shortUrlErrorMsg: `Unable to create short URL. Error: ${fetchError.message}`
+        });
+      }
+      throw fetchError;
+    }
+
     if (!this._isMounted) {
       return;
     }
@@ -184,7 +199,14 @@ export class ShareUrlContent extends Component {
   handleShortUrlChange = async evt => {
     const isChecked = evt.target.checked;
     if (this.state.shortUrl === undefined && isChecked) {
-      await this.getShortUrl();
+      try {
+        await this.createShortUrl();
+      } catch(fetchError) {
+        this.setState({
+          useShortUrl: false,
+        }, this.setUrl);
+        return;
+      }
     }
 
     this.setState({
@@ -252,8 +274,11 @@ export class ShareUrlContent extends Component {
       return;
     }
 
+    const switchLabel = this.state.isCreatingShortUrl
+      ? (<span><EuiLoadingSpinner size="s"/> Short URL</span>)
+      : 'Short URL';
     const switchComponent = (<EuiSwitch
-      label="Short URL"
+      label={switchLabel}
       checked={this.state.useShortUrl}
       onChange={this.handleShortUrlChange}
     />);
@@ -261,14 +286,9 @@ export class ShareUrlContent extends Component {
       Internet Explorer has URL length restrictions,
       and some wiki and markup parsers don't do well with the full-length version of the snapshot URL,
       but the short URL should work great.`;
-    let loadingShortUrl;
-    if (this.state.isCreatingShortUrl) {
-      loadingShortUrl = (
-        <EuiLoadingSpinner size="s"/>
-      );
-    }
+
     return (
-      <EuiFormRow helpText={loadingShortUrl}>
+      <EuiFormRow helpText={this.state.shortUrlErrorMsg}>
         {this.renderWithIconTip(switchComponent, tipContent)}
       </EuiFormRow>
     );

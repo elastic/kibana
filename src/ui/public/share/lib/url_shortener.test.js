@@ -20,13 +20,6 @@ jest.mock('ui/kfetch', () => ({}));
 
 jest.mock('../../chrome', () => ({}));
 
-jest.mock('ui/notify',
-  () => ({
-    toastNotifications: {
-      addDanger: () => {},
-    }
-  }), { virtual: true });
-
 import sinon from 'sinon';
 import expect from 'expect.js';
 import { shortenUrl } from './url_shortener';

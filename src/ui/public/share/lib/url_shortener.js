@@ -20,7 +20,6 @@
 import chrome from '../../chrome';
 import url from 'url';
 import { kfetch } from 'ui/kfetch';
-import { toastNotifications } from 'ui/notify';
 
 export async function shortenUrl(absoluteUrl) {
   const basePath = chrome.getBasePath();
@@ -32,17 +31,10 @@ export async function shortenUrl(absoluteUrl) {
 
   const body = JSON.stringify({ url: relativeUrl });
 
-  try {
-    const resp = await kfetch({ method: 'POST', 'pathname': '/api/shorten_url', body });
-    return url.format({
-      protocol: parsedUrl.protocol,
-      host: parsedUrl.host,
-      pathname: `${basePath}/goto/${resp.urlId}`
-    });
-  } catch (fetchError) {
-    toastNotifications.addDanger({
-      title: `Unable to create short URL. Error: ${fetchError.message}`,
-      'data-test-subj': 'shortenUrlFailure',
-    });
-  }
+  const resp = await kfetch({ method: 'POST', 'pathname': '/api/shorten_url', body });
+  return url.format({
+    protocol: parsedUrl.protocol,
+    host: parsedUrl.host,
+    pathname: `${basePath}/goto/${resp.urlId}`
+  });
 }
