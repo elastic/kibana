@@ -24,17 +24,17 @@ test(`returns single object with properties`, () => {
     rootType: {
       properties: {
         foo: {
-          properties: {},
-        },
-      },
-    },
+          properties: {}
+        }
+      }
+    }
   };
 
   const result = getRootPropertiesObjects(mappings);
   expect(result).toEqual({
     foo: {
-      properties: {},
-    },
+      properties: {}
+    }
   });
 });
 
@@ -43,17 +43,17 @@ test(`returns single object with type === 'object'`, () => {
     rootType: {
       properties: {
         foo: {
-          type: 'object',
-        },
-      },
-    },
+          type: 'object'
+        }
+      }
+    }
   };
 
   const result = getRootPropertiesObjects(mappings);
   expect(result).toEqual({
     foo: {
-      type: 'object',
-    },
+      type: 'object'
+    }
   });
 });
 
@@ -62,23 +62,23 @@ test(`returns two objects with properties`, () => {
     rootType: {
       properties: {
         foo: {
-          properties: {},
+          properties: {}
         },
         bar: {
-          properties: {},
-        },
-      },
-    },
+          properties: {}
+        }
+      }
+    }
   };
 
   const result = getRootPropertiesObjects(mappings);
   expect(result).toEqual({
     foo: {
-      properties: {},
+      properties: {}
     },
     bar: {
-      properties: {},
-    },
+      properties: {}
+    }
   });
 });
 
@@ -87,23 +87,23 @@ test(`returns two objects with type === 'object'`, () => {
     rootType: {
       properties: {
         foo: {
-          type: 'object',
+          type: 'object'
         },
         bar: {
-          type: 'object',
-        },
-      },
-    },
+          type: 'object'
+        }
+      }
+    }
   };
 
   const result = getRootPropertiesObjects(mappings);
   expect(result).toEqual({
     foo: {
-      type: 'object',
+      type: 'object'
     },
     bar: {
-      type: 'object',
-    },
+      type: 'object'
+    }
   });
 });
 
@@ -112,10 +112,10 @@ test(`excludes objects without properties and type of keyword`, () => {
     rootType: {
       properties: {
         foo: {
-          type: 'keyword',
-        },
-      },
-    },
+          type: 'keyword'
+        }
+      }
+    }
   };
 
   const result = getRootPropertiesObjects(mappings);
@@ -127,13 +127,13 @@ test(`excludes two objects without properties and type of keyword`, () => {
     rootType: {
       properties: {
         foo: {
-          type: 'keyword',
+          type: 'keyword'
         },
         bar: {
-          type: 'keyword',
-        },
-      },
-    },
+          type: 'keyword'
+        }
+      }
+    }
   };
 
   const result = getRootPropertiesObjects(mappings);
@@ -145,20 +145,20 @@ test(`includes one object with properties and excludes one object without proper
     rootType: {
       properties: {
         foo: {
-          properties: {},
+          properties: {}
         },
         bar: {
-          type: 'keyword',
-        },
-      },
-    },
+          type: 'keyword'
+        }
+      }
+    }
   };
 
   const result = getRootPropertiesObjects(mappings);
   expect(result).toEqual({
     foo: {
-      properties: {},
-    },
+      properties: {}
+    }
   });
 });
 
@@ -167,19 +167,19 @@ test(`includes one object with type === 'object' and excludes one object without
     rootType: {
       properties: {
         foo: {
-          type: 'object',
+          type: 'object'
         },
         bar: {
-          type: 'keyword',
-        },
-      },
-    },
+          type: 'keyword'
+        }
+      }
+    }
   };
 
   const result = getRootPropertiesObjects(mappings);
   expect(result).toEqual({
     foo: {
-      type: 'object',
-    },
+      type: 'object'
+    }
   });
 });
