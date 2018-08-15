@@ -17,7 +17,6 @@
  * under the License.
  */
 
-import { Env } from '../config';
 import { Appenders, DisposableAppender } from './appenders/appenders';
 import { BufferAppender } from './appenders/buffer/buffer_appender';
 import { LogLevel } from './log_level';
@@ -44,8 +43,6 @@ export class MutableLoggerFactory implements LoggerFactory {
   private readonly appenders: Map<string, DisposableAppender> = new Map();
   private readonly bufferAppender = new BufferAppender();
   private readonly loggers: Map<string, LoggerAdapter> = new Map();
-
-  constructor(private readonly env: Env) {}
 
   public get(...contextParts: string[]): Logger {
     const context = LoggingConfig.getLoggerContext(contextParts);
@@ -76,7 +73,7 @@ export class MutableLoggerFactory implements LoggerFactory {
     this.appenders.clear();
 
     for (const [appenderKey, appenderConfig] of config.appenders.entries()) {
-      this.appenders.set(appenderKey, Appenders.create(appenderConfig, this.env));
+      this.appenders.set(appenderKey, Appenders.create(appenderConfig));
     }
 
     for (const [loggerKey, loggerAdapter] of this.loggers.entries()) {

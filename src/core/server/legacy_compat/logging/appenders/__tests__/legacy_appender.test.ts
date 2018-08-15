@@ -17,16 +17,21 @@
  * under the License.
  */
 
+jest.mock('../../legacy_logging_server');
+
 import { LogLevel } from '../../../../logging/log_level';
 import { LogRecord } from '../../../../logging/log_record';
-import { LegacyKbnServer } from '../../../legacy_kbn_server';
+import { LegacyLoggingServer } from '../../legacy_logging_server';
 import { LegacyAppender } from '../legacy_appender';
+
+afterEach(() => (LegacyLoggingServer as any).mockClear());
 
 test('`configSchema` creates correct schema.', () => {
   const appenderSchema = LegacyAppender.configSchema;
-  const validConfig = { kind: 'legacy-appender' };
+  const validConfig = { kind: 'legacy-appender', legacyLoggingConfig: { verbose: true } };
   expect(appenderSchema.validate(validConfig)).toEqual({
     kind: 'legacy-appender',
+    legacyLoggingConfig: { verbose: true },
   });
 
   const wrongConfig = { kind: 'not-legacy-appender' };
@@ -102,14 +107,26 @@ test('`append()` correctly pushes records to legacy platform.', () => {
     },
   ];
 
-  const rawKbnServerMock = {
-    server: { log: jest.fn() },
-  };
-  const appender = new LegacyAppender(new LegacyKbnServer(rawKbnServerMock));
-
+  const appender = new LegacyAppender({ verbose: true });
   for (const record of records) {
     appender.append(record);
   }
 
-  expect(rawKbnServerMock.server.log.mock.calls).toMatchSnapshot();
+  const [mockLegacyLoggingServerInstance] = (LegacyLoggingServer as any).mock.instances;
+  expect(mockLegacyLoggingServerInstance.log.mock.calls).toMatchSnapshot();
+});
+
+test('legacy logging server is correctly created and disposed.', async () => {
+  const mockRawLegacyLoggingConfig = { verbose: true };
+  const appender = new LegacyAppender(mockRawLegacyLoggingConfig);
+
+  expect(LegacyLoggingServer).toHaveBeenCalledTimes(1);
+  expect(LegacyLoggingServer).toHaveBeenCalledWith(mockRawLegacyLoggingConfig);
+
+  const [mockLegacyLoggingServerInstance] = (LegacyLoggingServer as any).mock.instances;
+  expect(mockLegacyLoggingServerInstance.stop).not.toHaveBeenCalled();
+
+  await appender.dispose();
+
+  expect(mockLegacyLoggingServerInstance.stop).toHaveBeenCalledTimes(1);
 });
