@@ -117,6 +117,7 @@ export function getReportingUsageCollector(server) {
   const { collectorSet } = server.usage;
   return collectorSet.makeUsageCollector({
     type: KIBANA_REPORTING_TYPE,
+
     fetch: async callCluster => {
       const xpackInfo = server.plugins.xpack_main.info;
       const config = server.config();
@@ -145,6 +146,24 @@ export function getReportingUsageCollector(server) {
         },
         last7Days: {
           ...statsOverLast7Days
+        }
+      };
+    },
+
+    /*
+     * Format the response data into a model for internal upload
+     * 1. Make this data part of the "kibana_stats" type
+     * 2. Organize the payload in the usage.xpack.reporting namespace of the data payload
+     */
+    formatForBulkUpload: result => {
+      return {
+        type: 'kibana_stats',
+        payload: {
+          usage: {
+            xpack: {
+              reporting: result
+            }
+          }
         }
       };
     }
