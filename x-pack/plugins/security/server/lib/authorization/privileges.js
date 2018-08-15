@@ -4,9 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+const IGNORED_TYPES = ['space'];
+
 export function buildPrivilegeMap(savedObjectTypes, application, actions) {
   const buildSavedObjectsActions = (savedObjectActions) => {
     return savedObjectTypes
+      .filter(type => !IGNORED_TYPES.includes(type))
       .map(type => savedObjectActions.map(savedObjectAction => actions.getSavedObjectAction(type, savedObjectAction)))
       .reduce((acc, types) => [...acc, ...types], []);
   };
