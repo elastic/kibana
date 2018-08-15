@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import gql from 'graphql-tag';
-export const query = gql`
-  query Query(
+export const mapQuery = gql`
+  query MapQuery(
     $id: ID!
     $timerange: InfraTimerangeInput!
     $filters: [InfraFilterInput!]

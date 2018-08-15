@@ -12,7 +12,7 @@ import { convertNodesResponseToGroups } from './convert_nodes_response_to_groups
 import { createNodeItem } from './create_node_item';
 
 export function processNodes(options: InfraNodeRequestOptions, nodes: any[]): InfraResponse {
-  const response: InfraResponse = {};
+  const response: InfraResponse = { nodes: [] };
 
   if (options.groupBy.length === 0) {
     // If there are NO group by options then we need to return a

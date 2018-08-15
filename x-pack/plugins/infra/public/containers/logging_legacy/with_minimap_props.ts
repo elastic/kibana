@@ -6,6 +6,7 @@
 
 import { connect } from 'react-redux';
 
+import { bindPlainActionCreators } from '../../utils/typed_redux';
 import {
   entriesSelectors,
   minimapSelectors,
@@ -15,8 +16,7 @@ import {
   summaryActions,
   summarySelectors,
   targetActions,
-} from '../../containers/logging_legacy/state';
-import { bindPlainActionCreators } from '../../utils/typed_redux';
+} from './state';
 
 export const withMinimapProps = connect(
   (state: State) => ({

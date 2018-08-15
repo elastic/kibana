@@ -18,28 +18,26 @@ export function extractGroupPaths(
   node: InfraBucket
 ): InfraNode[] {
   const { groupBy } = options;
-  const firstGroup: InfraPathInput = groupBy[0];
   const secondGroup: InfraPathInput = groupBy[1];
-  const paths: InfraNode[] = node[firstGroup!.id].buckets.reduce(
+  const paths: InfraNode[] = node.path_0.buckets.reduce(
     (acc: InfraNode[], bucket: InfraBucket, index: number): InfraNode[] => {
       const nodeItem = createNodeItem(options, node, bucket);
       const key: string = String(bucket.key || index);
       if (secondGroup) {
         return acc.concat(
-          bucket[secondGroup!.id].buckets.map((b: InfraBucket): InfraNode => {
+          bucket.path_1.buckets.map((b: InfraBucket): InfraNode => {
+            const nodePath = [{ value: bucket.key }, { value: b.key }].concat(nodeItem.path);
             return {
               ...nodeItem,
-              path: [
-                { id: firstGroup.id, value: bucket.key },
-                { id: secondGroup.id, value: b.key },
-              ].concat(nodeItem.path),
+              path: nodePath,
             };
           })
         );
       }
+      const path = [{ value: key }].concat(nodeItem.path);
       return acc.concat({
         ...nodeItem,
-        path: [{ id: firstGroup.id, value: key }].concat(nodeItem.path),
+        path,
       });
     },
     []

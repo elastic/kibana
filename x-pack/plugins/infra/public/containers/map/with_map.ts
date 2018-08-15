@@ -5,41 +5,23 @@
  */
 import moment from 'moment';
 import { graphql } from 'react-apollo';
-import {
-  InfraFilterInput,
-  InfraMetricInput,
-  InfraMetricType,
-  InfraPathInput,
-  InfraPathType,
-  InfraResponse,
-  InfraSource,
-  InfraTimerangeInput,
-} from '../../../common/graphql/types';
-import { query } from './query';
+import { InfraMetricType, InfraPathType, MapQuery } from '../../../common/graphql/types';
+import { InfraWaffleMapGroup } from '../../lib/lib';
+import { nodesToWaffleMap } from './nodes_to_wafflemap';
+import { mapQuery } from './query';
 
 interface ChildProps {
-  map: InfraResponse;
-}
-
-interface Response {
-  source: InfraSource;
-}
-
-interface Variables {
-  id: string;
-  timerange: InfraTimerangeInput;
-  filters: InfraFilterInput[];
-  path: InfraPathInput[];
-  metrics: InfraMetricInput[];
+  map: InfraWaffleMapGroup[];
 }
 
 export const withMap = graphql<
   {}, // OptionProps, this will end up being the options that contain index pattern, filters, etc
-  Response,
-  Variables,
+  MapQuery.Query,
+  MapQuery.Variables,
   ChildProps
->(query, {
+>(mapQuery, {
   options: () => ({
+    fetchPolicy: 'no-cache',
     variables: {
       id: 'default',
       timerange: {
@@ -52,8 +34,19 @@ export const withMap = graphql<
       },
       filters: [],
       metrics: [{ type: InfraMetricType.count }],
-      path: [{ id: 'n1', type: InfraPathType.hosts }],
+      path: [
+        { type: InfraPathType.terms, field: 'metricset.module' },
+        { type: InfraPathType.terms, field: 'metricset.name' },
+        { type: InfraPathType.hosts },
+      ],
     },
   }),
-  props: ({ data }) => ({ map: (data && data.source && data.source.map) || {} }),
+  props: ({ data }) => {
+    return {
+      map:
+        data && data.source && data.source.map && data.source.map.nodes
+          ? nodesToWaffleMap(data.source.map.nodes)
+          : [],
+    };
+  },
 });
