@@ -10,7 +10,7 @@ export const ESIndexSelect = ({ value = '_all', loading, indices, onChange, onFo
   return (
     <EuiSelect
       compressed
-      defaultValue={value}
+      value={value}
       onChange={e => onChange(e.target.value)}
       onBlur={onBlur}
       onFocus={onFocus}

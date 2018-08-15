@@ -78,7 +78,7 @@ const EsdocsDatasource = ({ args, updateArgs }) => {
         compressed
       >
         <EuiSelect
-          defaultValue={sortOrder}
+          value={sortOrder}
           onChange={e => setArg('sort', [sortField, e.target.value].join(', '))}
           options={sortOptions}
         />
