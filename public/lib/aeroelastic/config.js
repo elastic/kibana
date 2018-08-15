@@ -6,7 +6,7 @@ const alignmentGuideName = 'alignmentGuide';
 const atopZ = 1000;
 const depthSelect = false;
 const devColor = 'magenta';
-const guideDistance = 4;
+const guideDistance = 3;
 const hoverAnnotationName = 'hoverAnnotation';
 const resizeAnnotationOffset = 0;
 const resizeAnnotationOffsetZ = 0.1; // causes resize markers to be slightly above the shape plane
@@ -21,6 +21,7 @@ const rotateSnapInPixels = 10;
 const shortcuts = false;
 const singleSelect = true;
 const snapConstraint = true;
+const minimumElementSize = 0; // guideDistance / 2 + 1;
 
 module.exports = {
   alignmentGuideName,
@@ -29,6 +30,7 @@ module.exports = {
   devColor,
   guideDistance,
   hoverAnnotationName,
+  minimumElementSize,
   resizeAnnotationOffset,
   resizeAnnotationOffsetZ,
   resizeAnnotationSize,

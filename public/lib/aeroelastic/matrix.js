@@ -303,6 +303,7 @@ const applyTransforms = (transforms, previousTransformMatrix) =>
 
 const clamp = (low, high, value) => Math.min(high, Math.max(low, value));
 
+// todo turn it into returning radians rather than degrees
 const matrixToAngle = transformMatrix => {
   // clamping is needed, otherwise inevitable floating point inaccuracies can cause NaN
   const z0 = Math.acos(clamp(-1, 1, transformMatrix[0])) * 180 / Math.PI;
