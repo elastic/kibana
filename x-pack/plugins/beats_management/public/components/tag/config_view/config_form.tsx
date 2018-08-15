@@ -5,12 +5,13 @@
  */
 // @ts-ignore
 import Formsy, { addValidationRule, FieldValue, FormData } from 'formsy-react';
+import yaml from 'js-yaml';
 import React from 'react';
 import { YamlConfigSchema } from '../../../lib/lib';
+import { FormsyEuiCodeEditor } from '../../inputs/code';
 import { FormsyEuiFieldText } from '../../inputs/input';
 import { FormsyEuiMultiFieldText } from '../../inputs/multi_input';
 import { FormsyEuiSelect } from '../../inputs/select';
-
 addValidationRule('isHost', (values: FormData, value: FieldValue) => {
   return value && value.length > 0;
 });
@@ -34,8 +35,23 @@ addValidationRule('isPaths', (values: FormData, value: FieldValue) => {
   return true;
 });
 
+addValidationRule('isYaml', (values: FormData, value: FieldValue) => {
+  try {
+    const stuff = yaml.safeLoad(value || '');
+    if (typeof stuff === 'string') {
+      return false;
+    }
+    return true;
+  } catch (e) {
+    return false;
+  }
+  return true;
+});
+
 interface ComponentProps {
+  values: {};
   schema: YamlConfigSchema[];
+  id: string;
   canSubmit(canIt: boolean): any;
   onSubmit(modal: any): any;
 }
@@ -93,8 +109,11 @@ export class ConfigForm extends React.Component<ComponentProps, any> {
               case 'input':
                 return (
                   <FormsyEuiFieldText
+                    key={schema.id}
                     id={schema.id}
-                    name={schema.ui.name}
+                    name={schema.id}
+                    helpText={schema.ui.helpText}
+                    label={schema.ui.label}
                     validations={schema.validations}
                     validationError={schema.error}
                     required={schema.required}
@@ -103,8 +122,11 @@ export class ConfigForm extends React.Component<ComponentProps, any> {
               case 'multi-input':
                 return (
                   <FormsyEuiMultiFieldText
+                    key={schema.id}
                     id={schema.id}
-                    name={schema.ui.name}
+                    name={schema.id}
+                    helpText={schema.ui.helpText}
+                    label={schema.ui.label}
                     validations={schema.validations}
                     validationError={schema.error}
                     required={schema.required}
@@ -113,8 +135,26 @@ export class ConfigForm extends React.Component<ComponentProps, any> {
               case 'select':
                 return (
                   <FormsyEuiSelect
+                    key={schema.id}
                     id={schema.id}
-                    name={schema.ui.name}
+                    name={schema.id}
+                    helpText={schema.ui.helpText}
+                    label={schema.ui.label}
+                    options={schema.options ? schema.options : []}
+                    validations={schema.validations}
+                    validationError={schema.error}
+                    required={schema.required}
+                  />
+                );
+              case 'code':
+                return (
+                  <FormsyEuiCodeEditor
+                    key={`${schema.id}-${this.props.id}`}
+                    mode="yaml"
+                    id={schema.id}
+                    name={schema.id}
+                    helpText={schema.ui.helpText}
+                    label={schema.ui.label}
                     options={schema.options ? schema.options : []}
                     validations={schema.validations}
                     validationError={schema.error}

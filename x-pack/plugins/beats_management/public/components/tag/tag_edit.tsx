@@ -137,7 +137,7 @@ export class TagEdit extends React.PureComponent<TagEditProps, TagEditState> {
         )}
 
         {this.state.showFlyout && (
-          <ConfigView onClose={() => this.setState({ showFlyout: false })} />
+          <ConfigView values={{}} onClose={() => this.setState({ showFlyout: false })} />
         )}
       </div>
     );

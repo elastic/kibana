@@ -68,11 +68,12 @@ export interface ClientSideBeatTag extends BeatTag {
 export interface YamlConfigSchema {
   id: string;
   ui: {
-    name: string;
-    type: 'input' | 'multi-input' | 'select';
+    label: string;
+    type: 'input' | 'multi-input' | 'select' | 'code';
+    helpText?: string;
   };
   options?: Array<{ value: string; text: string }>;
-  validations?: 'isHost' | 'isUsername' | 'isPassword' | 'isPeriod' | 'isPath' | 'isPaths';
+  validations?: 'isHost' | 'isString' | 'isPeriod' | 'isPath' | 'isPaths' | 'isYaml';
   error: string;
   defaultValue?: string;
   required?: boolean;
