@@ -17,33 +17,34 @@
  * under the License.
  */
 
-import { IndexMappings } from '../../../core/server/saved_objects/mappings';
+import { IndexMappings } from './index_mappings';
 
 /**
- *  The default mappings used for the Kibana index. This is
- *  extended via uiExports type "mappings". See the Kibana
- *  and Timelion plugins for examples.
+ *  The default mappings used for the kibana index. This is
+ *  extended via uiExports type "mappings". See the kibana
+ *  and timelion plugins for examples.
+ *  @type {EsMappingDsl}
  */
 const BASE_SAVED_OBJECT_MAPPINGS = {
   doc: {
     dynamic: 'strict',
     properties: {
       type: {
-        type: 'keyword',
+        type: 'keyword'
       },
       updated_at: {
-        type: 'date',
+        type: 'date'
       },
       config: {
         dynamic: true,
         properties: {
           buildNum: {
-            type: 'keyword',
-          },
-        },
+            type: 'keyword'
+          }
+        }
       },
-    },
-  },
+    }
+  }
 };
 
 export function kibanaIndexMappingsMixin(kbnServer, server) {
@@ -53,14 +54,17 @@ export function kibanaIndexMappingsMixin(kbnServer, server) {
   );
 
   /**
-   *  Get the mappings that we expect to see in the
-   *  Kibana index. Used by the Elasticsearch plugin to create
-   *  and update the Kibana index. Also used by the SavedObjectsClient
-   *  to determine the properties defined in the mapping and
-   *  the "rootType".
+   *  Get the mappings dsl that we expect to see in the
+   *  Kibana index. Used by the elasticsearch plugin to create
+   *  and update the kibana index. Also used by the SavedObjectsClient
+   *  to determine the properties defined in the mapping as well as
+   *  things like the "rootType".
    *
-   *  See `src/core/server/saved_objects/mappings/lib/index.js` for
-   *  helpers useful for reading the EsMappings object.
+   *  See `src/server/mappings/lib/index.js` for helpers useful for reading
+   *  the EsMappingDsl object.
+   *
+   *  @method server.getKibanaIndexMappingsDsl
+   *  @returns {EsMappingDsl}
    */
   server.decorate('server', 'getKibanaIndexMappingsDsl', () => {
     return mappings.getDsl();
