@@ -5,6 +5,7 @@
  */
 
 import { createSelector } from 'reselect';
+import { LAYER_TYPE } from '../shared/layers/layer';
 import _ from 'lodash';
 
 export const getMapConstants = ({ map }) => map && map.mapConstants;
@@ -32,3 +33,32 @@ export function getLayerById(state, id) {
   )(state);
 }
 
+export const getCurrentLayerStyle = createSelector(
+  getLayerList,
+  getSelectedLayer,
+  (layerList, { id }) => {
+    const layer = id && layerList.find(layer => id === layer.id);
+    return layer && layer.style;
+  }
+);
+
+export const getStyleDescriptor = createSelector(
+  getSelectedLayer,
+  selectedLayer => {
+    const isVector = selectedLayer.type === LAYER_TYPE.TILE;
+    return {
+      css: {
+        name: 'CSS',
+        tabs: {
+          'cssText': isVector
+        }
+      },
+      colorAdjustment: {
+        name: 'Color Adjustment',
+        tabs: {
+          'colorPicker': isVector
+        }
+      }
+    };
+  }
+);
