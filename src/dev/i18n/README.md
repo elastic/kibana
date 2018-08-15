@@ -4,7 +4,7 @@
 
 ### Description
 
-The tool is used to extract default messages from all `*.{js, ts, jsx, tsx, html, handlebars, hbs, jade}` files in provided plugins directories to `translations/en.json` (one JSON per plugin). `translations` directory is created in each of provided plugins directories.\
+The tool is used to extract default messages from all `*.{js, ts, jsx, tsx, html, handlebars, hbs, jade}` files in provided plugins directories to a JSON file.\
 The tool uses Babel to parse code and build an AST for each file or JS expression if whole file parsing is impossible. So only static parsing is available for messages extraction. It means that no variables, function calls or expressions can be used for ids, messages and context, only string literals.
 
 ### I18n examples and restrictions of the syntax
@@ -29,12 +29,12 @@ The tool uses Babel to parse code and build an AST for each file or JS expressio
 * **Directive**
 
   ```html
-  <ANY
+  <p
     i18n="plugin_namespace.message_id"
     i18n-values="{key: value}"
     i18n-default-message="Default message string literal"
     i18n-context="Message context"
-  ></ANY>
+  ></p>
   ```
 
   `i18n-values` and `i18n-context` attributes are optional.
@@ -79,8 +79,7 @@ The tool uses Babel to parse code and build an AST for each file or JS expressio
   ```
 
   `values` and `context` properties are optional.\
-  Callee of call expression should be either `intl.formatMessage` or `this.props.intl.formatMessage`.\
-  Expression can be parsed only if it is located in a JSX expression or in a block of JS code.
+  Callee of call expression should be either `intl.formatMessage` or `*.intl.formatMessage`.
 
 #### JavaScript (primarily server-side) (.js, .ts, .jsx, .tsx)
 
@@ -134,83 +133,51 @@ The third token (the second argument of i18n function call) should be a string l
 ### Usage
 
 ```
-node scripts/extract_default_translations path/to/plugin path/to/another/plugin ...
+node scripts/extract_default_translations --path path/to/plugins --output ./translations --output-format json5
 ```
 
-`path/to/plugin` is an example of path to a root directory where messages searching should start, `en.json` will be created in `translations` directory in each of mentioned plugins.
+`path/to/plugin` is an example of path to a directory(-es) where messages searching should start. By default `--path` is `.`, it means that messages from all paths in `.i18nrc.json` will be parsed. Each specified path should start with any path in `.i18nrc.json` or be a part of it.\
+`--output` specifies a path to a directory, where `en.json` will be created, if `--output` is not provided, `en.json` generation will be skipped. It is useful if you want to validate i18n engine usage.\
 In case of parsing issues, exception with the necessary information will be thrown to console and extraction will be aborted.
+`--output-format` specifies format of generated `en.json` (if `--output` is provided). By default it is `json`. Use it only if you need a JSON5 file.
 
 ### Output
 
-`plugin_root/translations/en.json`
+`<output_path>/en.json`
 
-The tool generates a partly plain JSON5 file. It contains injected `formats` object and plain structured `id: message` pairs.\
-If `context` is provided for a message, then its value will be written to result JSON as a comment after `id: message, \\`.\
-Messages are sorted by id, but `formats` object is always on top of JSON.
+The tool generates a JSON file, if `--output` path is provided. It contains injected `formats` object and `id: message` or `id: {text, comment}` pairs.\
+Messages are sorted by id, but `formats` object is always at the top of JSON.
 
 **Example**:
 
-```js
+```json
 {
-  formats: {
-    ...
-  },
-  'plugin_namespace.message.id-1': 'Default message text 1',
-  'plugin_namespace.message.id-2': 'Default message text 2', // Message context
+  "formats": {},
+  "plugin_namespace.message.id-1": "Default message text 1",
+  "plugin_namespace.message.id-2": {
+    "text": "Default message text 2",
+    "comment": "Message context"
+  }
 }
 ```
 
-## Locale files verification tool
+## Locale files verification / integration tool
 
 ### Description
 
-The tool is used for verifying locale files and finding unused messages, missing messages and key duplications.\
-
-### Requirements
-
-`plugin_root/translations/en.json` should be extracted first using the extraction tool.
+The tool is used for verifying locale files, finding unused / missing messages, key duplications, splitting them by namespaces and moving to the right folders.
 
 ### Notes
 
-The tool throws exceptions if
-
-* locale file has more than one namespace for ids;
-* two or more plugins have the same namespace;
-* formats object is missing in locale file.
+The tool throws exception if formats object is missing in locale file.
 
 ### Usage
 
 ```
-node scripts/check_locale_files path/to/plugin path/to/another/plugin
-```
-
-The tool checks namespaces collisions only for provided directories, so plugins shouldn't be verified one-by-one - this will hide possible namespaces collision.
-
-### Output
-
-The tool outputs only information about exceptions. If all locale files are valid, output will be empty.
-
-## Default messages updates checking tool
-
-### Description
-
-The tool is used to get default messages updates (new messages and removed messages) and outputs information about messages ids removed or added since the last check.
-
-The tool compares `en.json` with `messages_cache.json` and outputs a list of new messages ids and a list of removed messages ids if they're not empty, then it updates `messages_cache.json`.
-
-### Requirements
-
-`plugin_root/translations/en.json` should be extracted first using the extraction tool.
-
-### Usage
-
-```
-node scripts/check_l10n_updates path/to/plugin path/to/another/plugin
+node scripts/integrate_locale_files --path path/to/locales/folder
 ```
 
 ### Output
 
-`plugin_root/translations/messages_cache.json` is created or updated if it already exists.
-
-The tool creates or updates a `messages_cache.json` which contains an array of messages ids, extracted from `en.json`.\
-`formats` property is ignored by the tool, so `messages_cache.json` contains only messages ids.
+The tool generates locale files in plugins folders after splitting them by namespaces.\
+The tool outputs only information about exceptions to the console. If all locale files are valid, console output will be empty.
