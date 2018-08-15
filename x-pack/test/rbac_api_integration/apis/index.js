@@ -83,7 +83,7 @@ export default function ({ loadTestFile, getService }) {
         .send({
           kibana: [
             {
-              privileges: ['all'],
+              privileges: ['space_all'],
               spaces: ['default']
             }
           ]
@@ -93,7 +93,7 @@ export default function ({ loadTestFile, getService }) {
         .send({
           kibana: [
             {
-              privileges: ['read'],
+              privileges: ['space_read'],
               spaces: ['space_1']
             }
           ]

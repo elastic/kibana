@@ -20,13 +20,54 @@ export function buildPrivilegeMap(savedObjectTypes, application, actions) {
     all: {
       application,
       name: 'all',
-      actions: [actions.version, 'action:*'],
+      actions: [
+        actions.version,
+        'action:*'
+      ],
       metadata: {}
     },
     read: {
       application,
       name: 'read',
-      actions: [actions.version, actions.login, ...buildSavedObjectsActions(['get', 'bulk_get', 'find'])],
+      actions: [
+        actions.version,
+        actions.login,
+        ...buildSavedObjectsActions([
+          'get',
+          'bulk_get',
+          'find'
+        ])],
+      metadata: {}
+    },
+    space_all: {
+      application,
+      name: 'space_all',
+      actions: [
+        actions.version,
+        actions.login,
+        ...buildSavedObjectsActions([
+          'create',
+          'bulk_create',
+          'delete',
+          'get',
+          'bulk_get',
+          'find',
+          'update'
+        ])
+      ],
+      metadata: {}
+    },
+    space_read: {
+      application,
+      name: 'space_read',
+      actions: [
+        actions.version,
+        actions.login,
+        ...buildSavedObjectsActions([
+          'get',
+          'bulk_get',
+          'find'])
+      ],
       metadata: {}
     }
   };
