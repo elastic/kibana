@@ -50,11 +50,14 @@ export class ShareUrlContent extends Component {
   constructor(props) {
     super(props);
 
+    const defaultExportUrlAs = EXPORT_URL_AS_SNAPSHOT;
+    const defaultUseShortUrl = false;
+
     this.state = {
-      exportUrlAs: EXPORT_URL_AS_SNAPSHOT,
-      useShortUrl: false,
+      exportUrlAs: defaultExportUrlAs,
+      useShortUrl: defaultUseShortUrl,
       isCreatingShortUrl: false,
-      url: this.getUrl(EXPORT_URL_AS_SNAPSHOT, false),
+      url: this.getUrl(defaultExportUrlAs, defaultUseShortUrl),
     };
   }
 
