@@ -39,7 +39,13 @@ export async function startServers() {
   log.indent(-4);
   await es.start();
 
-  kbnServer = kbnTestServer.createServerWithCorePlugins();
+  kbnServer = kbnTestServer.createServerWithCorePlugins({
+    uiSettings: {
+      overrides: {
+        foo: 'bar',
+      }
+    }
+  });
   await kbnServer.ready();
   await kbnServer.server.plugins.elasticsearch.waitUntilReady();
 }

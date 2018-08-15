@@ -81,9 +81,9 @@
   version "0.0.0"
   uid ""
 
-"@elastic/eui@3.2.1":
-  version "3.2.1"
-  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-3.2.1.tgz#43bed65a6751d8d99d59570f7e04292d2f276e5a"
+"@elastic/eui@3.6.0":
+  version "3.6.0"
+  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-3.6.0.tgz#ce55a321510dfeb20ca0b46061cbbd29a70b91cd"
   dependencies:
     classnames "^2.2.5"
     core-js "^2.5.1"
@@ -100,6 +100,7 @@
     react-input-autosize "^2.2.1"
     react-virtualized "^9.18.5"
     react-vis "1.10.2"
+    resize-observer-polyfill "^1.5.0"
     tabbable "^1.1.0"
     uuid "^3.1.0"
 
@@ -11653,6 +11654,10 @@ reselect@3.0.1, reselect@^3.0.1:
 resize-observer-polyfill@1.2.1:
   version "1.2.1"
   resolved "https://registry.yarnpkg.com/resize-observer-polyfill/-/resize-observer-polyfill-1.2.1.tgz#55a4ff3e4f212a76470835fb7590dbb62a3e6542"
+
+resize-observer-polyfill@^1.5.0:
+  version "1.5.0"
+  resolved "https://registry.yarnpkg.com/resize-observer-polyfill/-/resize-observer-polyfill-1.5.0.tgz#660ff1d9712a2382baa2cad450a4716209f9ca69"
 
 resolve-cwd@^2.0.0:
   version "2.0.0"

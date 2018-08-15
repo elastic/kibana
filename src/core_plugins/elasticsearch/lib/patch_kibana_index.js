@@ -21,7 +21,7 @@ import {
   getTypes,
   getRootType,
   getRootProperties
-} from '../../../server/mappings';
+} from '../../../core/server/saved_objects/mappings';
 
 /**
  *  Checks that the root type in the kibana index has all of the
