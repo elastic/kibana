@@ -40,6 +40,10 @@ describe('BulkUploader', () => {
           },
         },
         usage: {},
+        savedObjects: {
+          getSavedObjectsRepository: sinon.stub(),
+          SavedObjectsClient: class SavedObjectsClientTest {}
+        }
       };
     });
 

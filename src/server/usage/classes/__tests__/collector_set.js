@@ -52,13 +52,17 @@ describe('CollectorSet', () => {
 
     it('should log debug status of fetching from the collector', async () => {
       const mockCallCluster = () => Promise.resolve({ passTest: 1000 });
+      const mockSavedObjectsClient = { summarize: () => ({}) };
       const collectors = new CollectorSet(server);
       collectors.register(new Collector(server, {
         type: 'MY_TEST_COLLECTOR',
-        fetch: caller => caller()
+        fetch: ({ callCluster: caller }) => caller()
       }));
 
-      const result = await collectors.bulkFetch(mockCallCluster);
+      const result = await collectors.bulkFetch({
+        callCluster: mockCallCluster,
+        savedObjectsClient: mockSavedObjectsClient
+      });
       const calls = server.log.getCalls();
       expect(calls.length).to.be(1);
       expect(calls[0].args).to.eql([
