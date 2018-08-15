@@ -60,6 +60,10 @@ export const pagesReducer = handleActions(
       return newState;
     },
 
+    [actions.setPage]: (workpadState, { payload }) => {
+      return setPageIndex(workpadState, payload);
+    },
+
     [actions.gotoPage]: (workpadState, { payload }) => {
       const newState = setPageIndex(workpadState, payload);
 

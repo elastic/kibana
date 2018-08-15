@@ -29,21 +29,22 @@ export class WorkpadApp extends React.PureComponent {
               </div>
 
               <div className="canvasLayout__stageContent" onMouseDown={deselectElement}>
-                <div className="canvasLayout__stageContentOverflow">
+                {/* NOTE: canvasWorkpadContainer is used for exporting */}
+                <div className="canvasWorkpadContainer canvasLayout__stageContentOverflow">
                   <Workpad />
                 </div>
               </div>
             </div>
 
             {editing && (
-              <div className="canvasLayout__sidebar">
+              <div className="canvasLayout__sidebar hide-for-sharing">
                 <Sidebar />
               </div>
             )}
           </div>
 
           {editing ? (
-            <div className="canvasLayout__footer">
+            <div className="canvasLayout__footer hide-for-sharing">
               <Toolbar />
             </div>
           ) : null}

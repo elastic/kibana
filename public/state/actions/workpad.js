@@ -23,8 +23,11 @@ export const removeColor = createThunk('removeColor', ({ dispatch, getState }, c
   dispatch(setColors(without(getWorkpadColors(getState()), color)));
 });
 
-export const setWorkpad = createThunk('setWorkpad', ({ dispatch, type }, workpad) => {
-  dispatch(setRefreshInterval(0)); // disable refresh interval
-  dispatch(createAction(type)(workpad)); // set the workpad object in state
-  dispatch(initializeWorkpad()); // load all the elements on the workpad
-});
+export const setWorkpad = createThunk(
+  'setWorkpad',
+  ({ dispatch, type }, workpad, { loadPages = true } = {}) => {
+    dispatch(setRefreshInterval(0)); // disable refresh interval
+    dispatch(createAction(type)(workpad)); // set the workpad object in state
+    if (loadPages) dispatch(initializeWorkpad()); // load all the elements on the workpad
+  }
+);

@@ -61,10 +61,10 @@ export const Toolbar = props => {
   };
 
   return !editing ? null : (
-    <div>
+    <div className="canvasToolbar hide-for-sharing">
       {trays[tray] && <Tray done={done}>{trays[tray]}</Tray>}
       <Navbar>
-        <EuiFlexGroup alignItems="center" gutterSize="none" className="canvasNavBar__controls">
+        <EuiFlexGroup alignItems="center" gutterSize="none" className="canvasToolbar__controls">
           <EuiFlexItem grow={false}>
             <EuiButtonEmpty
               color="text"

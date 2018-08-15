@@ -14,6 +14,7 @@ import {
 } from '@elastic/eui';
 import { AssetManager } from '../asset_manager';
 import { ElementTypes } from '../element_types';
+import { WorkpadExport } from '../workpad_export';
 import { FullscreenControl } from '../fullscreen_control';
 import { RefreshControl } from '../refresh_control';
 
@@ -70,6 +71,9 @@ export const WorkpadHeader = ({
                   </EuiToolTip>
                 )}
               </FullscreenControl>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <WorkpadExport />
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <Shortcuts name="EDITOR" handler={keyHandler} targetNodeSelector="body" global />

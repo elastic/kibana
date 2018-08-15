@@ -25,6 +25,7 @@ export default function(server /*options*/) {
   server.injectUiAppVars('canvas', () => {
     const config = server.config();
     const basePath = config.get('server.basePath');
+    const reportingBrowserType = config.get('xpack.reporting.capture.browser.type');
 
     return {
       kbnIndex: config.get('kibana.index'),
@@ -32,6 +33,7 @@ export default function(server /*options*/) {
       esApiVersion: config.get('elasticsearch.apiVersion'),
       serverFunctions: functionsRegistry.toArray(),
       basePath,
+      reportingBrowserType,
     };
   });
 

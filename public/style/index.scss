@@ -12,6 +12,7 @@
 // Canvas apps
 @import '../apps/home/home_app';
 @import '../apps/workpad/workpad_app/workpad_app';
+@import '../apps/export/export/export_app';
 
 // Canvas components
 @import '../components/alignment_guide/alignment_guide';
@@ -48,6 +49,7 @@
 @import '../components/shape_preview/shape_preview';
 @import '../components/shape_picker_mini/shape_picker_mini';
 @import '../components/sidebar/sidebar';
+@import '../components/toolbar/toolbar';
 @import '../components/toolbar/tray/tray';
 @import '../components/workpad/workpad';
 @import '../components/workpad_page/workpad_page';

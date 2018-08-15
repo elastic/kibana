@@ -4,7 +4,7 @@ import { getInitialState } from '../../state/initial_state';
 import { functionsRegistry } from '../../../common/lib/functions_registry';
 
 const app = uiModules.get('apps/canvas');
-app.service('canvasInitialState', (kbnVersion, basePath, serverFunctions) => {
+app.service('canvasInitialState', (kbnVersion, basePath, reportingBrowserType, serverFunctions) => {
   // this is effectively what happens to serverFunctions
   const clientFunctionsPOJO = JSON.parse(JSON.stringify(functionsRegistry.toArray()));
   const functionDefinitions = uniqBy(serverFunctions.concat(clientFunctionsPOJO), 'name');
@@ -14,8 +14,9 @@ app.service('canvasInitialState', (kbnVersion, basePath, serverFunctions) => {
   // Set the defaults from Kibana plugin
   initialState.app = {
     kbnVersion,
-    functionDefinitions,
     basePath,
+    reportingBrowserType,
+    functionDefinitions,
     ready: false,
   };
 

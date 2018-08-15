@@ -134,44 +134,51 @@ export const fetchRenderable = createThunk('fetchRenderable', ({ dispatch }, ele
   dispatch(fetchRenderableWithContext(element, ast, null));
 });
 
-export const fetchAllRenderables = createThunk('fetchAllRenderables', ({ dispatch, getState }) => {
-  const workpadPages = getPages(getState());
-  const currentPageIndex = getSelectedPageIndex(getState());
+export const fetchAllRenderables = createThunk(
+  'fetchAllRenderables',
+  ({ dispatch, getState }, { onlyActivePage = false } = {}) => {
+    const workpadPages = getPages(getState());
+    const currentPageIndex = getSelectedPageIndex(getState());
 
-  const currentPage = workpadPages[currentPageIndex];
-  const otherPages = without(workpadPages, currentPage);
+    const currentPage = workpadPages[currentPageIndex];
+    const otherPages = without(workpadPages, currentPage);
 
-  dispatch(args.inFlightActive());
+    dispatch(args.inFlightActive());
 
-  function fetchElementsOnPages(pages) {
-    const elements = [];
-    pages.forEach(page => {
-      page.elements.forEach(element => {
-        elements.push(element);
-      });
-    });
-
-    const renderablePromises = elements.map(element => {
-      const ast = element.ast || safeElementFromExpression(element.expression);
-      const argumentPath = [element.id, 'expressionRenderable'];
-
-      return runInterpreter(ast, null, { castToRender: true })
-        .then(renderable => ({ path: argumentPath, value: renderable }))
-        .catch(err => {
-          notify.error(err);
-          return { path: argumentPath, value: err };
+    function fetchElementsOnPages(pages) {
+      const elements = [];
+      pages.forEach(page => {
+        page.elements.forEach(element => {
+          elements.push(element);
         });
-    });
+      });
 
-    return Promise.all(renderablePromises).then(renderables => {
-      dispatch(args.setValues(renderables));
-    });
+      const renderablePromises = elements.map(element => {
+        const ast = element.ast || safeElementFromExpression(element.expression);
+        const argumentPath = [element.id, 'expressionRenderable'];
+
+        return runInterpreter(ast, null, { castToRender: true })
+          .then(renderable => ({ path: argumentPath, value: renderable }))
+          .catch(err => {
+            notify.error(err);
+            return { path: argumentPath, value: err };
+          });
+      });
+
+      return Promise.all(renderablePromises).then(renderables => {
+        dispatch(args.setValues(renderables));
+      });
+    }
+
+    if (onlyActivePage) {
+      fetchElementsOnPages([currentPage]).then(() => dispatch(args.inFlightComplete()));
+    } else {
+      fetchElementsOnPages([currentPage])
+        .then(() => fetchElementsOnPages(otherPages))
+        .then(() => dispatch(args.inFlightComplete()));
+    }
   }
-
-  fetchElementsOnPages([currentPage])
-    .then(() => fetchElementsOnPages(otherPages))
-    .then(() => dispatch(args.inFlightComplete()));
-});
+);
 
 export const duplicateElement = createThunk(
   'duplicateElement',

@@ -5,12 +5,3 @@
   position: relative;
   z-index: 200;
 }
-
-.canvasNavBar__controls, .canvasNavBar__element {
-  padding: $euiSizeM;
-}
-
-.canvasNavBar__element {
-  width: 350px;
-  background-color: darken($euiColorDarkestShade, 10%);
-}

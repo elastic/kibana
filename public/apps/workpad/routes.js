@@ -38,8 +38,8 @@ export const routes = [
             }
 
             const { assets, ...workpad } = fetchedWorkpad;
-            dispatch(setWorkpad(workpad));
             dispatch(setAssets(assets));
+            dispatch(setWorkpad(workpad));
           }
 
           // fetch the workpad again, to get changes
