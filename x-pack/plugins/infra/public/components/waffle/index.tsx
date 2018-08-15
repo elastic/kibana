@@ -14,11 +14,11 @@ import {
   isWaffleMapGroupWithGroups,
   isWaffleMapGroupWithNodes,
 } from '../../containers/map/type_guards';
-import { InfraWaffleData, InfraWaffleMapGroup, InfraWaffleOptions } from '../../lib/lib';
+import { InfraOptions, InfraWaffleData, InfraWaffleMapGroup } from '../../lib/lib';
 import { applyWaffleMapLayout } from './lib/apply_wafflemap_layout';
 
 interface Props {
-  options: InfraWaffleOptions;
+  options: InfraOptions;
   map: InfraWaffleData;
 }
 

@@ -8,7 +8,7 @@ import { EuiToolTip } from '@elastic/eui';
 import { darken } from 'polished';
 import React from 'react';
 import styled from 'styled-components';
-import { InfraWaffleMapNode, InfraWaffleOptions } from '../../lib/lib';
+import { InfraOptions, InfraWaffleMapNode } from '../../lib/lib';
 import { NodeContextMenu } from './node_context_menu';
 
 const initialState = {
@@ -20,7 +20,7 @@ type State = Readonly<typeof initialState>;
 interface Props {
   onDrilldown: () => void;
   squareSize: number;
-  options: InfraWaffleOptions;
+  options: InfraOptions;
   node: InfraWaffleMapNode;
   formatter: (val: number) => string;
 }

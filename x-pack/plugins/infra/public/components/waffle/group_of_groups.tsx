@@ -6,13 +6,13 @@
 
 import React from 'react';
 import styled from 'styled-components';
-import { InfraWaffleMapGroupOfGroups, InfraWaffleOptions } from '../../lib/lib';
+import { InfraOptions, InfraWaffleMapGroupOfGroups } from '../../lib/lib';
 import { GroupName } from './group_name';
 import { GroupOfNodes } from './group_of_nodes';
 
 interface Props {
   onDrilldown: () => void;
-  options: InfraWaffleOptions;
+  options: InfraOptions;
   group: InfraWaffleMapGroupOfGroups;
   formatter: (val: number) => string;
 }
