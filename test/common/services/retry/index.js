@@ -17,5 +17,4 @@
  * under the License.
  */
 
-export { GlobalToastList } from './global_toast_list';
-export { toastNotifications } from './toast_notifications';
+export { RetryProvider } from './retry';

@@ -17,25 +17,5 @@
  * under the License.
  */
 
-interface Toast extends ToastDescription {
-  id: number;
-}
-
-interface ToastDescription {
-  title: string;
-  color?: string;
-  iconType?: string;
-  text?: string;
-  'data-test-subj'?: string;
-}
-
-export interface ToastNotifications {
-  onChange(changeCallback: () => void): void;
-  remove(toast: Toast): void;
-  add(toast: ToastDescription | string): Toast;
-  addSuccess(toast: ToastDescription | string): Toast;
-  addWarning(toast: ToastDescription | string): Toast;
-  addDanger(toast: ToastDescription | string): Toast;
-}
-
-export const toastNotifications: ToastNotifications;
+export { Toast, ToastInput, ToastsStartContract } from './toasts';
+export { NotificationsService, NotificationsStartContract } from './notifications_service';

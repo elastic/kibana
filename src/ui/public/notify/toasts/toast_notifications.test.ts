@@ -18,98 +18,111 @@
  */
 
 import sinon from 'sinon';
+import { ToastsStartContract } from '../../../../core/public/notifications';
 
-import {
-  ToastNotifications,
-} from './toast_notifications';
+import { ToastNotifications } from './toast_notifications';
 
 describe('ToastNotifications', () => {
   describe('interface', () => {
-    let toastNotifications;
-
-    beforeEach(() => {
-      toastNotifications = new ToastNotifications();
-    });
+    function setup() {
+      return {
+        toastNotifications: new ToastNotifications(new ToastsStartContract()),
+      };
+    }
 
     describe('add method', () => {
       test('adds a toast', () => {
+        const { toastNotifications } = setup();
         toastNotifications.add({});
-        expect(toastNotifications.list.length).toBe(1);
+        expect(toastNotifications.list).toHaveLength(1);
       });
 
       test('adds a toast with an ID property', () => {
+        const { toastNotifications } = setup();
         toastNotifications.add({});
-        expect(toastNotifications.list[0].id).toBe(0);
+        expect(toastNotifications.list[0]).toHaveProperty('id', '0');
       });
 
       test('increments the toast ID', () => {
+        const { toastNotifications } = setup();
         toastNotifications.add({});
         toastNotifications.add({});
-        expect(toastNotifications.list[1].id).toBe(1);
+        expect(toastNotifications.list[1]).toHaveProperty('id', '1');
       });
 
       test('accepts a string', () => {
+        const { toastNotifications } = setup();
         toastNotifications.add('New toast');
-        expect(toastNotifications.list[0].title).toBe('New toast');
+        expect(toastNotifications.list[0]).toHaveProperty('title', 'New toast');
       });
     });
 
     describe('remove method', () => {
       test('removes a toast', () => {
+        const { toastNotifications } = setup();
         const toast = toastNotifications.add('Test');
         toastNotifications.remove(toast);
-        expect(toastNotifications.list.length).toBe(0);
+        expect(toastNotifications.list).toHaveLength(0);
       });
 
       test('ignores unknown toast', () => {
-        toastNotifications.add('Test');
-        toastNotifications.remove({});
-        expect(toastNotifications.list.length).toBe(1);
+        const { toastNotifications } = setup();
+        const toast = toastNotifications.add('Test');
+        toastNotifications.remove({
+          id: `not ${toast.id}`,
+        });
+        expect(toastNotifications.list).toHaveLength(1);
       });
     });
 
     describe('onChange method', () => {
       test('callback is called when a toast is added', () => {
+        const { toastNotifications } = setup();
         const onChangeSpy = sinon.spy();
         toastNotifications.onChange(onChangeSpy);
         toastNotifications.add({});
-        expect(onChangeSpy.callCount).toBe(1);
+        sinon.assert.calledOnce(onChangeSpy);
       });
 
       test('callback is called when a toast is removed', () => {
+        const { toastNotifications } = setup();
         const onChangeSpy = sinon.spy();
         toastNotifications.onChange(onChangeSpy);
         const toast = toastNotifications.add({});
         toastNotifications.remove(toast);
-        expect(onChangeSpy.callCount).toBe(2);
+        sinon.assert.calledTwice(onChangeSpy);
       });
 
       test('callback is not called when remove is ignored', () => {
+        const { toastNotifications } = setup();
         const onChangeSpy = sinon.spy();
         toastNotifications.onChange(onChangeSpy);
-        toastNotifications.remove({});
-        expect(onChangeSpy.callCount).toBe(0);
+        toastNotifications.remove({ id: 'foo' });
+        sinon.assert.notCalled(onChangeSpy);
       });
     });
 
     describe('addSuccess method', () => {
       test('adds a success toast', () => {
+        const { toastNotifications } = setup();
         toastNotifications.addSuccess({});
-        expect(toastNotifications.list[0].color).toBe('success');
+        expect(toastNotifications.list[0]).toHaveProperty('color', 'success');
       });
     });
 
     describe('addWarning method', () => {
       test('adds a warning toast', () => {
+        const { toastNotifications } = setup();
         toastNotifications.addWarning({});
-        expect(toastNotifications.list[0].color).toBe('warning');
+        expect(toastNotifications.list[0]).toHaveProperty('color', 'warning');
       });
     });
 
     describe('addDanger method', () => {
       test('adds a danger toast', () => {
+        const { toastNotifications } = setup();
         toastNotifications.addDanger({});
-        expect(toastNotifications.list[0].color).toBe('danger');
+        expect(toastNotifications.list[0]).toHaveProperty('color', 'danger');
       });
     });
   });

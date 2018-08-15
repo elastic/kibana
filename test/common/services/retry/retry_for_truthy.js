@@ -17,9 +17,33 @@
  * under the License.
  */
 
-export { notify } from './notify';
-export { Notifier } from './notifier';
-export { fatalError, addFatalErrorCallback } from './fatal_error';
-export { toastNotifications } from './toasts';
-export { GlobalBannerList, banners } from './banners';
-export { addAppRedirectMessageToUrl, showAppRedirectNotification } from './app_redirect';
+import { retryForSuccess } from './retry_for_success';
+
+export async function retryForTruthy(log, {
+  timeout,
+  methodName,
+  description,
+  block
+}) {
+  log.debug(`Waiting up to ${timeout}ms for ${description}...`);
+
+  const accept = result => Boolean(result);
+
+  const onFailure = lastError => {
+    let msg = `timed out waiting for ${description}`;
+
+    if (lastError) {
+      msg = `${msg} -- last error: ${lastError.stack || lastError.message}`;
+    }
+
+    throw new Error(msg);
+  };
+
+  await retryForSuccess(log, {
+    timeout,
+    methodName,
+    block,
+    onFailure,
+    accept
+  });
+}
