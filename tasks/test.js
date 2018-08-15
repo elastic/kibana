@@ -67,6 +67,7 @@ module.exports = function (grunt) {
       _.compact([
         !grunt.option('quick') && 'run:eslint',
         !grunt.option('quick') && 'run:tslint',
+        !grunt.option('quick') && 'run:typeCheck',
         'run:checkFileCasing',
         'licenses',
         'test:quick',

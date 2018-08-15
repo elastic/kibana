@@ -24,7 +24,7 @@ import { EuiButtonEmpty, EuiFieldText, EuiFormRow, keyCodes } from '@elastic/eui
 export interface PanelOptionsMenuFormProps {
   title?: string;
   onReset: () => void;
-  onUpdatePanelTitle: (newPanelTitle?: string) => void;
+  onUpdatePanelTitle: (newPanelTitle: string) => void;
   onClose: () => void;
 }
 
@@ -45,10 +45,7 @@ export function PanelOptionsMenuForm({
   }
 
   return (
-    <div
-      className="dashboardPanelMenuOptionsForm"
-      data-test-subj="dashboardPanelTitleInputMenuItem"
-    >
+    <div className="dshPanel__optionsMenuForm" data-test-subj="dashboardPanelTitleInputMenuItem">
       <EuiFormRow label="Panel title">
         <EuiFieldText
           id="panelTitleInput"

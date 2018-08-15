@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { getRootPropertiesObjects } from '../../../../mappings';
+import { getRootPropertiesObjects } from '../../../../../core/server/saved_objects/mappings';
 
 /**
  * Gets the types based on the type. Uses mappings to support

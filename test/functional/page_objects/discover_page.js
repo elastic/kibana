@@ -45,7 +45,7 @@ export function DiscoverPageProvider({ getService, getPageObjects }) {
 
     getChartTimespan() {
       return getRemote()
-        .findByCssSelector('center.small > span:nth-child(1)')
+        .findByCssSelector('.small > span:nth-child(1)')
         .getVisibleText();
     }
 

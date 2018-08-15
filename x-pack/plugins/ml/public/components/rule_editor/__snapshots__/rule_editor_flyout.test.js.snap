@@ -11,6 +11,7 @@ exports[`RuleEditorFlyout renders the flyout after adding a condition to a rule 
     className="ml-rule-editor-flyout"
     closeButtonAriaLabel="Closes this dialog"
     hideCloseButton={false}
+    maxWidth={false}
     onClose={[Function]}
     ownFocus={false}
     size="m"
@@ -230,6 +231,7 @@ exports[`RuleEditorFlyout renders the flyout after setting the rule to edit 1`] 
     className="ml-rule-editor-flyout"
     closeButtonAriaLabel="Closes this dialog"
     hideCloseButton={false}
+    maxWidth={false}
     onClose={[Function]}
     ownFocus={false}
     size="m"
@@ -463,6 +465,7 @@ exports[`RuleEditorFlyout renders the flyout for creating a rule with conditions
     className="ml-rule-editor-flyout"
     closeButtonAriaLabel="Closes this dialog"
     hideCloseButton={false}
+    maxWidth={false}
     onClose={[Function]}
     ownFocus={false}
     size="m"
@@ -674,6 +677,7 @@ exports[`RuleEditorFlyout renders the select action component for a detector wit
     className="ml-rule-editor-flyout"
     closeButtonAriaLabel="Closes this dialog"
     hideCloseButton={false}
+    maxWidth={false}
     onClose={[Function]}
     ownFocus={false}
     size="m"
