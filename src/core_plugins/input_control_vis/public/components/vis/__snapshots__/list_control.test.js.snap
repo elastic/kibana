@@ -25,6 +25,7 @@ exports[`renders ListControl 1`] = `
 >
   <EuiComboBox
     data-test-subj="listControlSelect0"
+    fullWidth={false}
     isClearable={true}
     isLoading={false}
     onChange={[Function]}

@@ -1,5 +1,74 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`dev/i18n/extract_default_translations extracts messages to en.json 1`] = `
+"{
+  formats: {
+    number: {
+      currency: {
+        style: 'currency',
+      },
+      percent: {
+        style: 'percent',
+      },
+    },
+    date: {
+      short: {
+        month: 'numeric',
+        day: 'numeric',
+        year: '2-digit',
+      },
+      medium: {
+        month: 'short',
+        day: 'numeric',
+        year: 'numeric',
+      },
+      long: {
+        month: 'long',
+        day: 'numeric',
+        year: 'numeric',
+      },
+      full: {
+        weekday: 'long',
+        month: 'long',
+        day: 'numeric',
+        year: 'numeric',
+      },
+    },
+    time: {
+      short: {
+        hour: 'numeric',
+        minute: 'numeric',
+      },
+      medium: {
+        hour: 'numeric',
+        minute: 'numeric',
+        second: 'numeric',
+      },
+      long: {
+        hour: 'numeric',
+        minute: 'numeric',
+        second: 'numeric',
+        timeZoneName: 'short',
+      },
+      full: {
+        hour: 'numeric',
+        minute: 'numeric',
+        second: 'numeric',
+        timeZoneName: 'short',
+      },
+    },
+  },
+  'plugin_1.id_1': 'Message 1',
+  'plugin_1.id_2': 'Message 2', // Message context
+  'plugin_1.id_3': 'Message 3',
+  'plugin_1.id_4': 'Message 4',
+  'plugin_1.id_5': 'Message 5',
+  'plugin_1.id_6': 'Message 6',
+  'plugin_1.id_7': 'Message 7',
+}
+"
+`;
+
 exports[`dev/i18n/extract_default_translations injects default formats into en.json 1`] = `
 "{
   formats: {

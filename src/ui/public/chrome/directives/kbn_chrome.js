@@ -29,8 +29,6 @@ import {
 } from '../../state_management/state_hashing';
 import {
   notify,
-  GlobalToastList,
-  toastNotifications,
   GlobalBannerList,
   banners,
 } from '../../notify';
@@ -97,17 +95,6 @@ export function kbnChromeProvider(chrome, internals) {
               subscribe={banners.onChange}
             />,
             document.getElementById('globalBannerList')
-          );
-
-          // Toast Notifications
-          ReactDOM.render(
-            <GlobalToastList
-              toasts={toastNotifications.list}
-              dismissToast={toastNotifications.remove}
-              toastLifeTimeMs={6000}
-              subscribe={toastNotifications.onChange}
-            />,
-            document.getElementById('globalToastList')
           );
 
           return chrome;

@@ -21,6 +21,8 @@ import { deepFreeze } from './deep_freeze';
 
 export interface InjectedMetadataParams {
   injectedMetadata: {
+    version: string;
+    buildNumber: number;
     legacyMetadata: {
       [key: string]: any;
     };
@@ -34,16 +36,24 @@ export interface InjectedMetadataParams {
  * and is read from the DOM in most cases.
  */
 export class InjectedMetadataService {
+  private state = deepFreeze(this.params.injectedMetadata);
+
   constructor(private readonly params: InjectedMetadataParams) {}
 
   public start() {
-    const state = deepFreeze(this.params.injectedMetadata);
-
     return {
-      getLegacyMetadata() {
-        return state.legacyMetadata;
+      getLegacyMetadata: () => {
+        return this.state.legacyMetadata;
       },
     };
+  }
+
+  public getKibanaVersion() {
+    return this.state.version;
+  }
+
+  public getKibanaBuildNumber() {
+    return this.state.buildNumber;
   }
 }
 

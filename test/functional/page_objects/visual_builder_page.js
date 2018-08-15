@@ -24,6 +24,7 @@ export function VisualBuilderPageProvider({ getService, getPageObjects }) {
   const retry = getService('retry');
   const log = getService('log');
   const testSubjects = getService('testSubjects');
+  const comboBox = getService('comboBox');
   const PageObjects = getPageObjects(['common', 'header', 'visualize']);
 
   class VisualBuilderPage {
@@ -154,7 +155,7 @@ export function VisualBuilderPageProvider({ getService, getPageObjects }) {
 
     async selectAggType(value, nth = 0) {
       const elements = await testSubjects.findAll('aggSelector');
-      await PageObjects.visualize.setComboBoxElement(elements[nth], value);
+      await comboBox.setElement(elements[nth], value);
       return await PageObjects.header.waitUntilLoadingHasFinished();
     }
 
@@ -169,14 +170,13 @@ export function VisualBuilderPageProvider({ getService, getPageObjects }) {
       const varNameInput = await elements[nth].findByCssSelector('.vis_editor__calc_vars-name input');
       await varNameInput.type(name);
       const metricSelectWrapper = await elements[nth].findByCssSelector('.vis_editor__calc_vars-var');
-      await PageObjects.visualize.setComboBoxElement(metricSelectWrapper, metric);
+      await comboBox.setElement(metricSelectWrapper, metric);
       return await PageObjects.header.waitUntilLoadingHasFinished();
     }
 
 
     async selectGroupByField(fieldName) {
-      const element = await testSubjects.find('groupByField');
-      await PageObjects.visualize.setComboBoxElement(element, fieldName);
+      await comboBox.set('groupByField', fieldName);
     }
 
     async setLabelValue(value) {

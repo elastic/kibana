@@ -12,7 +12,7 @@ import { KuiTableRowCell } from '@kbn/ui-framework/components';
 function OfflineCell() {
   return (
     <KuiTableRowCell>
-      <div className="monitoringTableCell__number monitoringTableCell__offline">
+      <div className="monTableCell__number monTableCell__offline">
         N/A
       </div>
     </KuiTableRowCell>
@@ -40,11 +40,11 @@ function MetricCell({ isOnline, metric = {}, isPercent, ...props }) {
 
     return (
       <KuiTableRowCell>
-        <div className="monitoringTableCell__MetricCell__metric" data-test-subj={props['data-test-subj']}>
+        <div className="monTableCell__metricCellMetric" data-test-subj={props['data-test-subj']}>
           { metricVal(lastVal, format, isPercent) }
         </div>
-        <span className={`monitoringTableCell__MetricCell__slopeArrow fa fa-long-arrow-${getSlopeArrow(slope)}`} />
-        <div className="monitoringTableCell__MetricCell__minMax">
+        <span className={`monTableCell__metricCellSlopeArrow fa fa-long-arrow-${getSlopeArrow(slope)}`} />
+        <div className="monTableCell__metricCellMixMax">
           <div>
             { metricVal(maxVal, format, isPercent) + ' max' }
           </div>

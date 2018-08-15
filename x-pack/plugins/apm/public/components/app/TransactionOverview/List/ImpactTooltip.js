@@ -22,7 +22,9 @@ const ImpactTooltip = () => (
       trigger="hover"
       overlay={
         <Tooltip>
-          Impact shows the most used and<br />slowest endpoints in your service.
+          Impact shows the most used and
+          <br />
+          slowest endpoints in your service.
         </Tooltip>
       }
     >
