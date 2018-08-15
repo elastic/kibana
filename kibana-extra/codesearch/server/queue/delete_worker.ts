@@ -34,28 +34,77 @@ export class DeleteWorker extends AbstractWorker {
   public async executeJob(job: Job) {
     const { uri, dataPath } = job.payload;
 
-    // TODO(mengwei): Optimize the async execution to maximize parallelizm.
     // 1. Delete repository on local fs.
     const repoService = new RepositoryService(dataPath, this.log);
-    const deleteRes = await repoService.remove(uri);
-
-    // 2. Delete repository data in ES.
-    try {
-      await this.objectsClient.delete(REPOSITORY_CLONE_STATUS_INDEX_TYPE, uri);
-      await this.objectsClient.delete(REPOSITORY_LSP_INDEX_STATUS_INDEX_TYPE, uri);
-      await this.objectsClient.delete(REPOSITORY_INDEX_STATUS_INDEX_TYPE, uri);
-
-      await this.client.indices.delete({
-        index: SymbolIndexName(uri),
+    const deleteRepoPromise = repoService
+      .remove(uri)
+      .then(() => {
+        this.log.info(`Delete git repository ${uri} done.`);
+      })
+      .catch(error => {
+        this.log.error(`Delete git repository ${uri} error: ${error}`);
       });
-      await this.client.indices.delete({
-        index: DocumentIndexName(uri),
-      });
-    } catch (error) {
-      this.log.error(`Delete repository status error: ${error}`);
-    }
 
-    return deleteRes;
+    // 2. Delete repository status in ES.
+    const deleteCloneStatusPromise = this.objectsClient
+      .delete(REPOSITORY_CLONE_STATUS_INDEX_TYPE, uri)
+      .then(() => {
+        this.log.info(`Delete clone status of repository ${uri} done.`);
+      })
+      .catch((error: Error) => {
+        this.log.error(`Delete clone status of repository ${uri} error: ${error}`);
+      });
+
+    const deleteLspIndexStatusPromise = this.objectsClient
+      .delete(REPOSITORY_LSP_INDEX_STATUS_INDEX_TYPE, uri)
+      .then(() => {
+        this.log.info(`Delete LSP index status of repository ${uri} done.`);
+      })
+      .catch((error: Error) => {
+        this.log.error(`Delete LSP index status of repository ${uri} error: ${error}`);
+      });
+
+    const deleteIndexStatusPromise = this.objectsClient
+      .delete(REPOSITORY_INDEX_STATUS_INDEX_TYPE, uri)
+      .then(() => {
+        this.log.info(`Delete index status of repository ${uri} done.`);
+      })
+      .catch((error: Error) => {
+        this.log.error(`Delete index status of repository ${uri} error: ${error}`);
+      });
+
+    // 3. Delete ES indices.
+    const deleteSymbolESIndexPromise = this.client.indices
+      .delete({ index: SymbolIndexName(uri) })
+      .then(() => {
+        this.log.info(`Delete symbol es index of repository ${uri} done.`);
+      })
+      .catch((error: Error) => {
+        this.log.error(`Delete symbol es index of repository ${uri} error: ${error}`);
+      });
+
+    const deleteDocumentESIndexPromise = this.client.indices
+      .delete({ index: DocumentIndexName(uri) })
+      .then(() => {
+        this.log.info(`Delete document es index of repository ${uri} done.`);
+      })
+      .catch((error: Error) => {
+        this.log.error(`Delete document es index of repository ${uri} error: ${error}`);
+      });
+
+    await Promise.all([
+      deleteRepoPromise,
+      deleteCloneStatusPromise,
+      deleteLspIndexStatusPromise,
+      deleteIndexStatusPromise,
+      deleteSymbolESIndexPromise,
+      deleteDocumentESIndexPromise,
+    ]);
+
+    return {
+      uri,
+      res: true,
+    };
   }
 
   public async onJobEnqueued(job: Job) {
