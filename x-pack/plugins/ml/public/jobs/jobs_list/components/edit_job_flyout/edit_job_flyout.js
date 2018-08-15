@@ -26,8 +26,11 @@ import {
 import { JobDetails, Detectors, Datafeed, CustomUrls } from './tabs';
 import { saveJob } from './edit_utils';
 import { loadFullJob } from '../utils';
-import { validateModelMemoryLimit, validateGroupNames } from './validate_job';
-import { mlMessageBarService } from 'plugins/ml/components/messagebar/messagebar_service';
+import {
+  validateModelMemoryLimit,
+  validateGroupNames,
+  isValidCustomUrls } from '../validate_job';
+import { mlMessageBarService } from '../../../../components/messagebar/messagebar_service';
 import { toastNotifications } from 'ui/notify';
 
 export class EditJobFlyout extends Component {
@@ -50,7 +53,8 @@ export class EditJobFlyout extends Component {
       datafeedScrollSize: '',
       jobModelMemoryLimitValidationError: '',
       jobGroupsValidationError: '',
-      valid: true,
+      isValidJobDetails: true,
+      isValidJobCustomUrls: true,
     };
 
     this.refreshJobs = this.props.refreshJobs;
@@ -132,13 +136,13 @@ export class EditJobFlyout extends Component {
       jobGroupsValidationError = validateGroupNames(jobDetails.jobGroups).message;
     }
 
-    const valid = (jobModelMemoryLimitValidationError === '' && jobGroupsValidationError === '');
+    const isValidJobDetails = (jobModelMemoryLimitValidationError === '' && jobGroupsValidationError === '');
 
     this.setState({
       ...jobDetails,
       jobModelMemoryLimitValidationError,
       jobGroupsValidationError,
-      valid,
+      isValidJobDetails,
     });
   }
 
@@ -155,7 +159,11 @@ export class EditJobFlyout extends Component {
   }
 
   setCustomUrls = (jobCustomUrls) => {
-    this.setState({ jobCustomUrls });
+    const isValidJobCustomUrls = isValidCustomUrls(jobCustomUrls);
+    this.setState({
+      jobCustomUrls,
+      isValidJobCustomUrls,
+    });
   }
 
   save = () => {
@@ -203,7 +211,8 @@ export class EditJobFlyout extends Component {
         datafeedScrollSize,
         jobGroupsValidationError,
         jobModelMemoryLimitValidationError,
-        valid,
+        isValidJobDetails,
+        isValidJobCustomUrls,
       } = this.state;
 
       const tabs = [{
@@ -284,7 +293,7 @@ export class EditJobFlyout extends Component {
                 <EuiButton
                   onClick={this.save}
                   fill
-                  isDisabled={(valid === false)}
+                  isDisabled={(isValidJobDetails === false) || (isValidJobCustomUrls === false)}
                 >
                   Save
                 </EuiButton>

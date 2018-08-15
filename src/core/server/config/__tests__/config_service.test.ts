@@ -19,7 +19,7 @@
 
 /* tslint:disable max-classes-per-file */
 import { BehaviorSubject, first, k$, toPromise } from '../../../lib/kbn_observable';
-import { AnyType, schema, TypeOf } from '../schema';
+import { schema, Type, TypeOf } from '../schema';
 
 import { ConfigService, ObjectToRawConfigAdapter } from '..';
 import { logger } from '../../logging/__mocks__';
@@ -268,7 +268,7 @@ test('treats config as enabled if config path is not present in config', async (
   expect(unusedPaths).toEqual([]);
 });
 
-function createClassWithSchema(s: AnyType) {
+function createClassWithSchema(s: Type<any>) {
   return class ExampleClassWithSchema {
     public static schema = s;
 

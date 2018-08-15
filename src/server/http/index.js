@@ -23,9 +23,6 @@ import _ from 'lodash';
 import Boom from 'boom';
 import Hapi from 'hapi';
 import { setupVersionCheck } from './version_check';
-import { handleShortUrlError } from './short_url_error';
-import { shortUrlAssertValid } from './short_url_assert_valid';
-import { shortUrlLookupProvider } from './short_url_lookup';
 import { registerHapiPlugins } from './register_hapi_plugins';
 import { setupBasePathProvider } from './setup_base_path_provider';
 import { setupXsrf } from './xsrf';
@@ -33,8 +30,6 @@ import { setupXsrf } from './xsrf';
 export default async function (kbnServer, server, config) {
   kbnServer.server = new Hapi.Server();
   server = kbnServer.server;
-
-  const shortUrlLookup = shortUrlLookupProvider(server);
 
   // Note that all connection options configured here should be exactly the same
   // as in `getServerOptions()` in the new platform (see `src/core/server/http/http_tools`).
@@ -142,45 +137,6 @@ export default async function (kbnServer, server, config) {
         pathname: pathPrefix + path.slice(0, -1),
       }))
         .permanent(true);
-    }
-  });
-
-  server.route({
-    method: 'GET',
-    path: '/goto/{urlId}',
-    handler: async function (request, reply) {
-      try {
-        const url = await shortUrlLookup.getUrl(request.params.urlId, request);
-        shortUrlAssertValid(url);
-
-        const uiSettings = request.getUiSettingsService();
-        const stateStoreInSessionStorage = await uiSettings.get('state:storeInSessionStorage');
-        if (!stateStoreInSessionStorage) {
-          reply().redirect(request.getBasePath() + url);
-          return;
-        }
-
-        const app = server.getHiddenUiAppById('stateSessionStorageRedirect');
-        reply.renderApp(app, {
-          redirectUrl: url,
-        });
-      } catch (err) {
-        reply(handleShortUrlError(err));
-      }
-    }
-  });
-
-  server.route({
-    method: 'POST',
-    path: '/shorten',
-    handler: async function (request, reply) {
-      try {
-        shortUrlAssertValid(request.payload.url);
-        const urlId = await shortUrlLookup.generateUrlId(request.payload.url, request);
-        reply(urlId);
-      } catch (err) {
-        reply(handleShortUrlError(err));
-      }
     }
   });
 

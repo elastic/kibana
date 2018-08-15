@@ -282,7 +282,10 @@ module.directive('mlExplorerChart', function (
         const score = parseInt(marker.anomalyScore);
         const displayScore = (score > 0 ? score : '< 1');
         contents += ('anomaly score: ' + displayScore);
-        if (_.has(marker, 'actual')) {
+        // Show actual/typical when available except for rare detectors.
+        // Rare detectors always have 1 as actual and the probability as typical.
+        // Exposing those values in the tooltip with actual/typical labels might irritate users.
+        if (_.has(marker, 'actual') && config.functionDescription !== 'rare') {
           // Display the record actual in preference to the chart value, which may be
           // different depending on the aggregation interval of the chart.
           contents += (`<br/>actual: ${formatValue(marker.actual, config.functionDescription, fieldFormat)}`);

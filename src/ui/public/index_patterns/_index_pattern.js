@@ -95,12 +95,10 @@ export function IndexPatternProvider(Private, config, Promise, confirmModalPromi
 
   function updateFromElasticSearch(indexPattern, response, forceFieldRefresh = false) {
     if (!response.found) {
-      const markdownSaveId = indexPattern.id.replace('*', '%2A');
-
       throw new SavedObjectNotFound(
         type,
         indexPattern.id,
-        kbnUrl.eval('#/management/kibana/index?id={{id}}&name=', { id: markdownSaveId })
+        '#/management/kibana/index',
       );
     }
 
@@ -465,7 +463,7 @@ export function IndexPatternProvider(Private, config, Promise, confirmModalPromi
           setVersion(this, _version);
         })
         .catch(err => {
-          if (err.statusCode === 409 && saveAttempts++ < MAX_ATTEMPTS_TO_RESOLVE_CONFLICTS) {
+          if (_.get(err, 'res.status') === 409 && saveAttempts++ < MAX_ATTEMPTS_TO_RESOLVE_CONFLICTS) {
             const samePattern = new IndexPattern(this.id);
             return samePattern.init()
               .then(() => {
