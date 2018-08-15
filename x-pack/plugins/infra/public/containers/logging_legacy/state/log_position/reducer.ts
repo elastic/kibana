@@ -10,35 +10,39 @@ import { reducerWithInitialState } from 'typescript-fsa-reducers';
 import { TimeKey } from '../../../../../common/time';
 import { jumpToTargetPosition, startAutoReload, stopAutoReload } from './actions';
 
-interface ManualTargetUpdatePolicy {
+interface ManualTargetPositionUpdatePolicy {
   policy: 'manual';
 }
 
-interface IntervalTargetUpdatePolicy {
+interface IntervalTargetPositionUpdatePolicy {
   policy: 'interval';
   interval: number;
 }
 
-type TargetUpdatePolicy = ManualTargetUpdatePolicy | IntervalTargetUpdatePolicy;
+type TargetPositionUpdatePolicy =
+  | ManualTargetPositionUpdatePolicy
+  | IntervalTargetPositionUpdatePolicy;
 
-export interface TargetState {
+export interface LogPositionState {
   targetPosition: TimeKey | null;
-  updatePolicy: TargetUpdatePolicy;
+  updatePolicy: TargetPositionUpdatePolicy;
 }
 
-export const initialTargetState: TargetState = {
+export const initialLogPositionState: LogPositionState = {
   targetPosition: null,
   updatePolicy: {
     policy: 'manual',
   },
 };
 
-const targetPositionReducer = reducerWithInitialState(initialTargetState.targetPosition).case(
+const targetPositionReducer = reducerWithInitialState(initialLogPositionState.targetPosition).case(
   jumpToTargetPosition,
   (state, target) => target
 );
 
-const targetUpdatePolicyReducer = reducerWithInitialState(initialTargetState.updatePolicy)
+const targetPositionUpdatePolicyReducer = reducerWithInitialState(
+  initialLogPositionState.updatePolicy
+)
   .case(startAutoReload, (state, interval) => ({
     policy: 'interval',
     interval,
@@ -47,7 +51,7 @@ const targetUpdatePolicyReducer = reducerWithInitialState(initialTargetState.upd
     policy: 'manual',
   }));
 
-export const targetReducer = combineReducers<TargetState>({
+export const logPositionReducer = combineReducers<LogPositionState>({
   targetPosition: targetPositionReducer,
-  updatePolicy: targetUpdatePolicyReducer,
+  updatePolicy: targetPositionUpdatePolicyReducer,
 });

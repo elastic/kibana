@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { targetActions } from './target';
+export { logPositionActions } from './log_position';
 export { entriesActions } from './entries';
 export { textviewActions } from './textview';
 export { summaryActions } from './summary';

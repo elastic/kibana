@@ -7,16 +7,16 @@
 import { combineEpics } from 'redux-observable';
 
 import { entriesEpics } from './entries';
+import { logPositionEpics } from './log_position';
 // import { searchResultsEpics } from './search_results';
 // import { searchSummaryEpics } from './search_summary';
 import { summaryEpics } from './summary';
-import { targetEpics } from './target';
 
 export const createRootEpic = <State>() =>
   combineEpics(
     summaryEpics.createSummaryEpic<State>(),
     entriesEpics.createEntriesEpic<State>(),
-    targetEpics.createTargetEpic<State>()
+    logPositionEpics.createLogPositionEpic<State>()
     // searchResultsEpics.createSearchResultsEpic<State>(),
     // searchSummaryEpics.createSearchSummaryEpic<State>()
   );

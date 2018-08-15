@@ -6,18 +6,12 @@
 
 import { Action } from 'redux';
 import { combineEpics, Epic, EpicWithState } from 'redux-observable';
-import { /*interval,*/ merge } from 'rxjs';
+import { merge } from 'rxjs';
 import { exhaustMap, filter, map, withLatestFrom } from 'rxjs/operators';
 
 import { pickTimeKey, TimeKey, timeKeyIsBetween } from '../../../../../common/time';
-import { targetActions } from '../target';
-import {
-  loadEntries,
-  loadMoreEntries,
-  reportVisibleEntries,
-  // startLiveStreaming,
-  // stopLiveStreaming,
-} from './actions';
+import { logPositionActions } from '../log_position';
+import { loadEntries, loadMoreEntries, reportVisibleEntries } from './actions';
 import { loadMoreEntriesEpic } from './load_more_operation';
 import { loadEntriesEpic } from './load_operation';
 
@@ -58,7 +52,7 @@ export const createEntriesEffectsEpic = <State>(): Epic<
   }
 ) => {
   const shouldLoadAround$ = action$.pipe(
-    filter(targetActions.jumpToTargetPosition.match),
+    filter(logPositionActions.jumpToTargetPosition.match),
     withLatestFrom(state$),
     filter(([{ payload }, state]) => {
       const entriesStart = selectEntriesStart(state);

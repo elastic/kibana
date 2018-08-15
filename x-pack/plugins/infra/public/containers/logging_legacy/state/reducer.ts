@@ -12,6 +12,7 @@ import {
   initialConfigurationState,
 } from './configuration';
 import { entriesReducer, EntriesState, initialEntriesState } from './entries';
+import { initialLogPositionState, logPositionReducer, LogPositionState } from './log_position';
 import { initialMinimapState, minimapReducer, MinimapState } from './minimap';
 // import { initialSearchState, searchReducer, SearchState } from './search';
 // import {
@@ -26,13 +27,12 @@ import { initialMinimapState, minimapReducer, MinimapState } from './minimap';
 // } from './search_summary';
 import { initialSourceState, sourceReducer, SourceState } from './source';
 import { initialSummaryState, summaryReducer, SummaryState } from './summary';
-import { initialTargetState, targetReducer, TargetState } from './target';
 import { initialTextviewState, textviewReducer, TextviewState } from './textview';
 
 export interface State {
   configuration: ConfigurationState;
   source: SourceState;
-  target: TargetState;
+  logPosition: LogPositionState;
   entries: EntriesState;
   textview: TextviewState;
   summary: SummaryState;
@@ -51,7 +51,7 @@ export const initialState: State = {
   // searchSummary: initialSearchSummaryState,
   source: initialSourceState,
   summary: initialSummaryState,
-  target: initialTargetState,
+  logPosition: initialLogPositionState,
   textview: initialTextviewState,
 };
 
@@ -64,6 +64,6 @@ export const reducer = combineReducers<State>({
   // searchSummary: searchSummaryReducer,
   source: sourceReducer,
   summary: summaryReducer,
-  target: targetReducer,
+  logPosition: logPositionReducer,
   textview: textviewReducer,
 });

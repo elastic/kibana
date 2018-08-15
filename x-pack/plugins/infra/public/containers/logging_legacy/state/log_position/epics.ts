@@ -11,7 +11,7 @@ import { exhaustMap, filter, map, takeUntil } from 'rxjs/operators';
 
 import { jumpToTargetPositionTime, startAutoReload, stopAutoReload } from './actions';
 
-export const createTargetEpic = <State>(): Epic<Action, Action, State, {}> => (action$, state$) =>
+export const createLogPositionEpic = <State>(): Epic<Action, Action, State, {}> => action$ =>
   action$.pipe(
     filter(startAutoReload.match),
     exhaustMap(({ payload }) =>

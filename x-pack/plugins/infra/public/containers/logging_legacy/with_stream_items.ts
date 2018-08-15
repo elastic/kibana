@@ -12,9 +12,9 @@ import {
   entriesActions,
   entriesSelectors,
   // searchResultsSelectors,
+  logPositionActions,
+  logPositionSelectors,
   State,
-  targetActions,
-  targetSelectors,
 } from '../../containers/logging_legacy/state';
 import { LogEntry, LogEntryMessageSegment } from '../../utils/log_entry';
 import { asChildFunctionRenderer } from '../../utils/typed_react';
@@ -26,13 +26,13 @@ export const withStreamItems = connect(
     isLoadingMore: entriesSelectors.selectIsLoadingMoreEntries(state),
     hasMoreBeforeStart: entriesSelectors.selectHasMoreBeforeStart(state),
     hasMoreAfterEnd: entriesSelectors.selectHasMoreAfterEnd(state),
-    isStreaming: targetSelectors.selectIsAutoReloading(state),
+    isStreaming: logPositionSelectors.selectIsAutoReloading(state),
     lastLoadedTime: entriesSelectors.selectEntriesLastLoadedTime(state),
     items: selectItems(state),
-    target: targetSelectors.selectTargetPosition(state),
+    target: logPositionSelectors.selectTargetPosition(state),
   }),
   bindPlainActionCreators({
-    jumpToTarget: targetActions.jumpToTargetPosition,
+    jumpToTarget: logPositionActions.jumpToTargetPosition,
     reportVisibleInterval: entriesActions.reportVisibleEntries,
   })
 );
@@ -42,7 +42,7 @@ export const WithStreamItems = asChildFunctionRenderer(withStreamItems);
 const selectItems = createSelector(
   entriesSelectors.selectEntries,
   entriesSelectors.selectIsReloadingEntries,
-  targetSelectors.selectIsAutoReloading,
+  logPositionSelectors.selectIsAutoReloading,
   // searchResultsSelectors.selectSearchResultsById,
   (logEntries, isReloading, isAutoReloading /*, searchResults*/) =>
     isReloading && !isAutoReloading

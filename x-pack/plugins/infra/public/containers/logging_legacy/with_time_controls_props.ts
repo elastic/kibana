@@ -8,17 +8,17 @@ import { connect } from 'react-redux';
 
 import { asChildFunctionRenderer } from '../../utils/typed_react';
 import { bindPlainActionCreators } from '../../utils/typed_redux';
-import { sharedSelectors, State, targetActions, targetSelectors } from './state';
+import { logPositionActions, logPositionSelectors, sharedSelectors, State } from './state';
 
 export const withTimeControls = connect(
   (state: State) => ({
     currentTime: sharedSelectors.selectVisibleMidpointOrTargetTime(state),
-    isLiveStreaming: targetSelectors.selectIsAutoReloading(state),
+    isLiveStreaming: logPositionSelectors.selectIsAutoReloading(state),
   }),
   bindPlainActionCreators({
-    startLiveStreaming: targetActions.startAutoReload,
-    stopLiveStreaming: targetActions.stopAutoReload,
-    jumpToTargetPositionTime: targetActions.jumpToTargetPositionTime,
+    startLiveStreaming: logPositionActions.startAutoReload,
+    stopLiveStreaming: logPositionActions.stopAutoReload,
+    jumpToTargetPositionTime: logPositionActions.jumpToTargetPositionTime,
   })
 );
 
