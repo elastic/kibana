@@ -99,16 +99,19 @@ export class PrivilegeSpaceTable extends Component {
     }];
     if (!this.props.readonly) {
       columns.push({
-        render: (record) => {
-          return (
-            <EuiButtonIcon
-              aria-label={'Remove custom privileges for this space'}
-              color={'danger'}
-              onClick={() => this.onDeleteSpacePermissionsClick(record)}
-              iconType={'trash'}
-            />
-          );
-        }
+        name: 'Actions',
+        actions: [{
+          render: (record) => {
+            return (
+              <EuiButtonIcon
+                aria-label={'Remove custom privileges for this space'}
+                color={'danger'}
+                onClick={() => this.onDeleteSpacePermissionsClick(record)}
+                iconType={'trash'}
+              />
+            );
+          }
+        }]
       });
     }
 
