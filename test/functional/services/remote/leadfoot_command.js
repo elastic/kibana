@@ -28,13 +28,12 @@ const MINUTE = 60 * SECOND;
 
 let attemptCounter = 0;
 async function attemptToCreateCommand(log, server, driverApi) {
-  const browserHeadless = process.env.TEST_BROWSER_HEADLESS || 'false';
   const attemptId = ++attemptCounter;
   log.debug('[leadfoot:command] Creating session');
 
   let browserOptions = {};
-  if (browserHeadless === 'true') {
-    browserOptions = { 'chromeOptions': { 'args': ['headless', 'disable-gpu', 'window-size=1024,768'] } };
+  if (process.env.TEST_BROWSER_HEADLESS) {
+    browserOptions = { chromeOptions: { args: ['headless', 'disable-gpu'] } };
   }
   const session = await server.createSession(browserOptions, driverApi.getRequiredCapabilities());
 
