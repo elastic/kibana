@@ -10,7 +10,6 @@ import { instantiateClient } from './server/es_client/instantiate_client';
 import { initMonitoringXpackInfo } from './server/init_monitoring_xpack_info';
 import { initBulkUploader } from './server/kibana_monitoring';
 import {
-  getKibanaUsageCollector,
   getOpsStatsCollector,
   getSettingsCollector,
 } from './server/kibana_monitoring/collectors';
@@ -33,7 +32,6 @@ export const init = (monitoringPlugin, server) => {
    * Register collector objects for stats to show up in the APIs
    */
   collectorSet.register(getOpsStatsCollector(server, kbnServer));
-  collectorSet.register(getKibanaUsageCollector(server));
   collectorSet.register(getSettingsCollector(server, kbnServer));
 
   /*

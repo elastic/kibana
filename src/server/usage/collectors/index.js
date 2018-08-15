@@ -17,19 +17,4 @@
  * under the License.
  */
 
-import { CollectorSet } from './classes';
-import { getKibanaUsageCollector } from './collectors';
-
-export function usageMixin(kbnServer, server) {
-  const collectorSet = new CollectorSet(server);
-
-  /*
-   * expose the collector set object on the server
-   * provides factory methods for feature owners to create their own collector objects
-   * use collectorSet.register(collector) to register your feature's collector object(s)
-   */
-  server.decorate('server', 'usage', { collectorSet });
-
-  // kibana's own usage collector for saved objects
-  collectorSet.register(getKibanaUsageCollector(server));
-}
+export { getKibanaUsageCollector } from './get_kibana_usage_collector';
