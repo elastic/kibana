@@ -17,22 +17,33 @@
  * under the License.
  */
 
-import React from 'react';
-import PropTypes from 'prop-types';
+import { retryForSuccess } from './retry_for_success';
 
-export function PanelError({ error }) {
-  return (
-    <div className="dshPanel__error panel-content">
-      <span aria-hidden="true" className="kuiIcon fa-exclamation-triangle"/>
-      <span>{error}</span>
-    </div>
-  );
+export async function retryForTruthy(log, {
+  timeout,
+  methodName,
+  description,
+  block
+}) {
+  log.debug(`Waiting up to ${timeout}ms for ${description}...`);
+
+  const accept = result => Boolean(result);
+
+  const onFailure = lastError => {
+    let msg = `timed out waiting for ${description}`;
+
+    if (lastError) {
+      msg = `${msg} -- last error: ${lastError.stack || lastError.message}`;
+    }
+
+    throw new Error(msg);
+  };
+
+  await retryForSuccess(log, {
+    timeout,
+    methodName,
+    block,
+    onFailure,
+    accept
+  });
 }
-
-PanelError.propTypes = {
-  error: PropTypes.oneOfType([
-    PropTypes.string,
-    PropTypes.node
-  ]),
-};
-
