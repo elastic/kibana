@@ -34,6 +34,7 @@ export class PrivilegeSelector extends Component {
     } = this.props;
 
     const options = [];
+
     if (allowNone) {
       options.push({ value: NO_PRIVILEGE_VALUE, text: 'none' });
     }
@@ -46,8 +47,8 @@ export class PrivilegeSelector extends Component {
     return (
       <EuiSelect
         options={options}
-        hasNoInitialSelection={!allowNone}
-        value={value || ''}
+        hasNoInitialSelection={!allowNone && !value}
+        value={value || undefined}
         onChange={this.onChange}
         disabled={disabled}
         compressed={compressed}

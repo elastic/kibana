@@ -4,4 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export const NO_PRIVILEGE_VALUE = '-no-privilege-';
+export const NO_PRIVILEGE_VALUE = 'none';
