@@ -3,8 +3,6 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { SET_SELECTED_LAYER } from "../actions/store_actions";
-
 export const UPDATE_FLYOUT = 'UPDATE_FLYOUT';
 
 export const FLYOUT_STATE = {
@@ -14,8 +12,7 @@ export const FLYOUT_STATE = {
 };
 
 const INITIAL_STATE = {
-  flyoutDisplay: FLYOUT_STATE.NONE,
-  selectedLayer: null
+  flyoutDisplay: FLYOUT_STATE.NONE
 };
 
 // Reducer
@@ -23,8 +20,6 @@ function ui(state = INITIAL_STATE, action) {
   switch (action.type) {
     case UPDATE_FLYOUT:
       return { ...state, flyoutDisplay: action.display };
-    case SET_SELECTED_LAYER:
-      return { ...state, selectedLayer: action.selectedLayer };
     default:
       return state;
   }

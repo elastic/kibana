@@ -9,6 +9,7 @@ import {
   ADD_LAYER, REMOVE_LAYER, PROMOTE_TEMPORARY_LAYERS,
   CLEAR_TEMPORARY_LAYERS, LAYER_LOADING, TOGGLE_LAYER_VISIBLE
 } from "../actions/store_actions";
+import { UPDATE_LAYER_STYLE } from '../actions/style_actions';
 
 const INITIAL_STATE = {
   mapConstants: {
@@ -57,15 +58,22 @@ export function map(state = INITIAL_STATE, action) {
         ({ temporary }) => !temporary) ] } };
     case LAYER_LOADING:
       return { ...state, layerLoading: action.loadingBool };
-    // TODO: Simplify this & promote temp layers
+    // TODO: Simplify cases below
     case TOGGLE_LAYER_VISIBLE:
       const visibleLayerIdx = state.layerList.findIndex(({ id }) => action.layerId === id);
       const visibleLayer = { ...state.layerList[visibleLayerIdx], visible: !state.layerList[visibleLayerIdx].visible };
       const visibleToggledList = [...state.layerList.slice(0, visibleLayerIdx), visibleLayer,
         ...state.layerList.slice(visibleLayerIdx + 1) ];
       return { ...state, ...{ layerList: visibleToggledList } };
+    case UPDATE_LAYER_STYLE:
+      const styleChangeLayerId = state.selectedLayer.id;
+      const styleChangeLayerIdx = state.layerList.findIndex(
+        ({ id }) => styleChangeLayerId === id);
+      const styledLayer = { ...state.layerList[styleChangeLayerIdx], style: action.style };
+      const styleUpdatedList = [...state.layerList.slice(0, styleChangeLayerIdx), styledLayer,
+        ...state.layerList.slice(styleChangeLayerIdx + 1) ];
+      return { ...state, ...{ layerList: styleUpdatedList } };
     default:
       return state;
   }
 }
-
