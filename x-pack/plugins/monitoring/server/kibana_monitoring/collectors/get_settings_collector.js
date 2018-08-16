@@ -81,7 +81,7 @@ export function getSettingsCollector(server, kbnServer) {
 
       // return nothing when there was no result
       let settingsDoc;
-      if (kibanaSettingsData != null) { // test null or undefined
+      if (kibanaSettingsData !== null) {
         settingsDoc = {
           kibana: getKibanaInfoForStats(server, kbnServer),
           ...kibanaSettingsData
