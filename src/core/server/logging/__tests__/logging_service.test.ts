@@ -43,7 +43,7 @@ let service: LoggingService;
 let updateConfigMock: jest.Mock<(config: LoggingConfig) => void>;
 
 beforeEach(() => {
-  factory = new MutableLoggerFactory({} as any);
+  factory = new MutableLoggerFactory();
   updateConfigMock = jest.spyOn(factory, 'updateConfig').mockImplementation(() => {
     // noop
   });

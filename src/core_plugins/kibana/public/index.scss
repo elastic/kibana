@@ -1,5 +1,7 @@
-// Import the EUI global scope so we can use EUI constants
-@import '../../../../src/ui/public/styles/_styling_constants';
+@import '../../../../src/ui/public/styles/styling_constants';
+
+// Dashboard styles
+@import './dashboard/index';
 
 // Discover styles
 @import 'discover/index';
