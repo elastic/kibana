@@ -250,9 +250,9 @@ export default function (program) {
         const settings = transformDeprecations(getCurrentSettings());
         const config = new Config(kbnServer.config.getSchema(), settings);
 
-        // kbnServer.server.log(['info', 'config'], 'Reloading logging configuration due to SIGHUP.');
-        // await kbnServer.applyLoggingConfiguration(config);
-        // kbnServer.server.log(['info', 'config'], 'Reloaded logging configuration due to SIGHUP.');
+        kbnServer.server.log(['info', 'config'], 'Reloading logging configuration due to SIGHUP.');
+        await kbnServer.applyLoggingConfiguration(config);
+        kbnServer.server.log(['info', 'config'], 'Reloaded logging configuration due to SIGHUP.');
 
         // If new platform config subscription is active, let's notify it with the updated config.
         if (kbnServer.newPlatform) {

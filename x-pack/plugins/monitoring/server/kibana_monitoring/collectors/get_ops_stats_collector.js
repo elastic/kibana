@@ -4,10 +4,16 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { KIBANA_STATS_TYPE_MONITORING } from '../../../common/constants';
+import {
+  LOGGING_TAG,
+  KIBANA_MONITORING_LOGGING_TAG,
+  KIBANA_STATS_TYPE_MONITORING
+} from '../../../common/constants';
 import { opsBuffer } from './ops_buffer';
 import { getKibanaInfoForStats } from '../lib';
 import Oppsy from 'oppsy';
+
+const LOGGING_TAGS = [LOGGING_TAG, KIBANA_MONITORING_LOGGING_TAG];
 
 
 class OpsMonitor {
@@ -32,8 +38,8 @@ class OpsMonitor {
   };
 
   stop = () => {
-    this._ops.stop();
-    this._ops.removeAllListeners();
+    this._oppsy.stop();
+    this._oppsy.removeAllListeners();
   };
 }
 
@@ -55,11 +61,11 @@ export function getOpsStatsCollector(server, kbnServer) {
 
   // `process` is a NodeJS global, and is always available without using require/import
   process.on('SIGHUP', () => {
-    this.log.info('Re-initializing Kibana Monitoring due to SIGHUP');
+    server.log(['info', ...LOGGING_TAGS], 'Re-initializing Kibana Monitoring due to SIGHUP');
     setTimeout(() => {
       opsMonitor.stop();
       opsMonitor.start();
-      this.log.info('Re-initialized Kibana Monitoring due to SIGHUP');
+      server.log(['info', ...LOGGING_TAGS], 'Re-initialized Kibana Monitoring due to SIGHUP');
     }, 5 * 1000); // wait 5 seconds to avoid race condition with reloading logging configuration
   });
 

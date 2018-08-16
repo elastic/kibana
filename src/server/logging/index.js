@@ -17,12 +17,11 @@
  * under the License.
  */
 
-// import evenBetter from 'even-better';
 import good from 'good';
 import loggingConfiguration from './configuration';
 
-export function setupLogging(server, config) {
-  return server.register({
+export async function setupLogging(server, config) {
+  return await server.register({
     plugin: good,
     options: loggingConfiguration(config)
   });

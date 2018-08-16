@@ -4689,16 +4689,6 @@ esutils@~1.0.0:
   version "1.0.0"
   resolved "https://registry.yarnpkg.com/esutils/-/esutils-1.0.0.tgz#8151d358e20c8acc7fb745e7472c0025fe496570"
 
-even-better@7.0.2:
-  version "7.0.2"
-  resolved "https://registry.yarnpkg.com/even-better/-/even-better-7.0.2.tgz#d056f429c90ecc20ee9494aca0a751f743504d2e"
-  dependencies:
-    hoek "2.x.x"
-    items "1.x.x"
-    joi "6.x.x"
-    traverse "0.6.6"
-    wreck "6.x.x"
-
 event-emitter@~0.3.5:
   version "0.3.5"
   resolved "https://registry.yarnpkg.com/event-emitter/-/event-emitter-0.3.5.tgz#df8c69eef1647923c7157b9ce83840610b02cc39"
@@ -5713,9 +5703,9 @@ good-squeeze@2.1.0:
     hoek "2.x.x"
     json-stringify-safe "5.0.x"
 
-good@^8.1.1:
+"good@github:joshdover/good#b9adb7f4e90bca43ef6c01bfcbd9359481a93bbc":
   version "8.1.1"
-  resolved "https://registry.yarnpkg.com/good/-/good-8.1.1.tgz#02b38a9bdab4862d9a4e7897b13a88f6663cd81f"
+  resolved "https://codeload.github.com/joshdover/good/tar.gz/b9adb7f4e90bca43ef6c01bfcbd9359481a93bbc"
   dependencies:
     hoek "5.x.x"
     joi "13.x.x"
@@ -7037,10 +7027,6 @@ isbinaryfile@^3.0.0:
   version "3.0.2"
   resolved "https://registry.yarnpkg.com/isbinaryfile/-/isbinaryfile-3.0.2.tgz#4a3e974ec0cba9004d3fc6cde7209ea69368a621"
 
-isemail@1.x.x:
-  version "1.2.0"
-  resolved "https://registry.yarnpkg.com/isemail/-/isemail-1.2.0.tgz#be03df8cc3e29de4d2c5df6501263f1fa4595e9a"
-
 isemail@3.x.x:
   version "3.1.1"
   resolved "https://registry.yarnpkg.com/isemail/-/isemail-3.1.1.tgz#e8450fe78ff1b48347db599122adcd0668bd92b5"
@@ -7180,10 +7166,6 @@ isurl@^1.0.0-alpha5:
   dependencies:
     has-to-string-tag-x "^1.2.0"
     is-object "^1.0.1"
-
-items@1.x.x:
-  version "1.1.1"
-  resolved "https://registry.yarnpkg.com/items/-/items-1.1.1.tgz#435b5dd21bca28b3cfd25bb5c6b278b715010fd9"
 
 items@2.x.x:
   version "2.1.1"
@@ -7500,15 +7482,6 @@ joi@13.x.x, joi@^13.4.0:
     hoek "5.x.x"
     isemail "3.x.x"
     topo "3.x.x"
-
-joi@6.x.x:
-  version "6.10.1"
-  resolved "https://registry.yarnpkg.com/joi/-/joi-6.10.1.tgz#4d50c318079122000fe5f16af1ff8e1917b77e06"
-  dependencies:
-    hoek "2.x.x"
-    isemail "1.x.x"
-    moment "2.x.x"
-    topo "1.x.x"
 
 jpeg-js@^0.2.0:
   version "0.2.0"
@@ -8899,7 +8872,7 @@ moment-timezone@^0.5.14:
   dependencies:
     moment ">= 2.9.0"
 
-moment@2.x.x, "moment@>= 2.9.0", moment@^2.10.6, moment@^2.13.0, moment@^2.20.1:
+"moment@>= 2.9.0", moment@^2.10.6, moment@^2.13.0, moment@^2.20.1:
   version "2.21.0"
   resolved "https://registry.yarnpkg.com/moment/-/moment-2.21.0.tgz#2a114b51d2a6ec9e6d83cf803f838a878d8a023a"
 
@@ -9414,7 +9387,7 @@ onetime@^2.0.0:
   dependencies:
     mimic-fn "^1.0.0"
 
-oppsy@2.x.x:
+oppsy@2.x.x, oppsy@^2.0.0:
   version "2.0.0"
   resolved "https://registry.yarnpkg.com/oppsy/-/oppsy-2.0.0.tgz#3a194517adc24c3c61cdc56f35f4537e93a35e34"
   dependencies:
@@ -12941,12 +12914,6 @@ token-stream@0.0.1:
   version "0.0.1"
   resolved "https://registry.yarnpkg.com/token-stream/-/token-stream-0.0.1.tgz#ceeefc717a76c4316f126d0b9dbaa55d7e7df01a"
 
-topo@1.x.x:
-  version "1.1.0"
-  resolved "https://registry.yarnpkg.com/topo/-/topo-1.1.0.tgz#e9d751615d1bb87dc865db182fa1ca0a5ef536d5"
-  dependencies:
-    hoek "2.x.x"
-
 topo@3.x.x:
   version "3.0.0"
   resolved "https://registry.yarnpkg.com/topo/-/topo-3.0.0.tgz#37e48c330efeac784538e0acd3e62ca5e231fe7a"
@@ -14170,13 +14137,6 @@ wreck@14.0.2, wreck@14.x.x:
   dependencies:
     boom "7.x.x"
     hoek "5.x.x"
-
-wreck@6.x.x:
-  version "6.3.0"
-  resolved "https://registry.yarnpkg.com/wreck/-/wreck-6.3.0.tgz#a1369769f07bbb62d6a378336a7871fc773c740b"
-  dependencies:
-    boom "2.x.x"
-    hoek "2.x.x"
 
 write-file-atomic@^1.1.2:
   version "1.3.4"

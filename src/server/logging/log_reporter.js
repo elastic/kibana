@@ -24,29 +24,7 @@ import LogFormatJson from './log_format_json';
 import LogFormatString from './log_format_string';
 import { LogInterceptor } from './log_interceptor';
 
-// Combine n streams into a single stream object.
-function compose(s1, s2, ...moreStreams) {
-  s1.pipe(s2);
-
-  // Redirect s1's pipe and unpipe to s2
-  s1.pipe = function (dest) {
-    return s2.pipe(dest);
-  };
-  s1.unpipe = function (dest) {
-    return s2.unpipe(dest);
-  };
-
-  if (moreStreams.length > 0) {
-    const [nextS, ...evenMoreStreams] = moreStreams;
-
-    return compose(s1, nextS, ...evenMoreStreams);
-  }
-
-  return s1;
-}
-
-
-export function GetLoggerStream({ events, config }) {
+export function getLoggerStream({ events, config }) {
   const squeeze = new Squeeze(events);
   const format = config.json ? new LogFormatJson(config) : new LogFormatString(config);
   const logInterceptor = new LogInterceptor();
@@ -59,28 +37,16 @@ export function GetLoggerStream({ events, config }) {
       flags: 'a',
       encoding: 'utf8'
     });
+
+    logInterceptor.on('end', () => {
+      dest.end();
+    });
   }
 
-  const output = compose(
-    logInterceptor,
-    squeeze,
-    format,
-    dest
-  );
+  logInterceptor
+    .pipe(squeeze)
+    .pipe(format)
+    .pipe(dest);
 
-  // TODO: get this working
-  // console.log('output going')
-
-  // logInterceptor.on('close', () => {
-  //   console.log('closing');
-  // });
-
-  // emitter.on('stop', () => {
-  //   this.output.unpipe(this.dest);
-  //   if (this.dest !== process.stdout) {
-  //     this.dest.end();
-  //   }
-  // });
-
-  return output;
+  return logInterceptor;
 }
