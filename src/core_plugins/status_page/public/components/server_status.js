@@ -27,6 +27,7 @@ import {
   EuiTitle,
   EuiBadge,
 } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n/react';
 
 const ServerState = ({
   name,
@@ -40,10 +41,17 @@ const ServerState = ({
     <EuiFlexItem grow={false}>
       <EuiTitle>
         <h2>
-          {'Kibana status is '}
-          <EuiBadge color={serverState.uiColor}>
-            {serverState.title }
-          </EuiBadge>
+          <FormattedMessage
+            id="statusPage.serverStatus.statusTitle"
+            defaultMessage="Kibana status is {kibanaStatus}"
+            values={{
+              kibanaStatus: (
+                <EuiBadge color={serverState.uiColor}>
+                  {serverState.title}
+                </EuiBadge>
+              ),
+            }}
+          />
         </h2>
       </EuiTitle>
     </EuiFlexItem>
