@@ -22,6 +22,9 @@ function deserializeJob(job) {
         terms = {
           fields: [],
         },
+        histogram = {
+          fields: [],
+        },
       },
     },
     status: {
@@ -49,6 +52,7 @@ function deserializeJob(job) {
     dateHistogramField,
     metrics,
     terms,
+    histogram,
     status,
     upgradedDocId,
     documentsProcessed,

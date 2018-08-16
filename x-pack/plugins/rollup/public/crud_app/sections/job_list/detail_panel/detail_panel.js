@@ -21,9 +21,10 @@ import {
   TabTerms,
   TabMetrics,
   TabJson,
+  TabHistogram,
 } from './tabs';
 
-const tabs = ['Summary', 'Terms', 'Metrics', 'JSON'];
+const tabs = ['Summary', 'Terms', 'Histogram', 'Metrics', 'JSON'];
 
 export class DetailPanel extends Component {
   static defaultProps = {
@@ -39,6 +40,10 @@ export class DetailPanel extends Component {
 
     return tabs.map((tab, index) => {
       if (tab === 'Terms' && !job.terms.fields.length) {
+        return;
+      }
+
+      if (tab === 'Histogram' && !job.histogram.fields.length) {
         return;
       }
 
@@ -75,6 +80,7 @@ export class DetailPanel extends Component {
         dateHistogramField,
         metrics,
         terms,
+        histogram,
         status,
         upgradedDocId,
         documentsProcessed,
@@ -110,6 +116,9 @@ export class DetailPanel extends Component {
       ),
       Terms: (
         <TabTerms terms={terms} />
+      ),
+      Histogram: (
+        <TabHistogram histogram={histogram} />
       ),
       Metrics: (
         <TabMetrics metrics={metrics} />
