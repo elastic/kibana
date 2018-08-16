@@ -4,18 +4,20 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-const XPACK_INFO_SIG_KEY = 'xpackMain.infoSignature';
+export const XPACK_INFO_SIG_KEY = 'xpackMain.infoSignature';
 
-export function XPackInfoSignatureProvider($window) {
-  return {
-    get() {
-      return $window.sessionStorage.getItem(XPACK_INFO_SIG_KEY);
-    },
-    set(updatedXPackInfoSignature) {
-      $window.sessionStorage.setItem(XPACK_INFO_SIG_KEY, updatedXPackInfoSignature);
-    },
-    clear() {
-      $window.sessionStorage.removeItem(XPACK_INFO_SIG_KEY);
-    }
-  };
+class XPackInfoSignature {
+  get() {
+    return window.sessionStorage.getItem(XPACK_INFO_SIG_KEY);
+  }
+
+  set(updatedXPackInfoSignature) {
+    window.sessionStorage.setItem(XPACK_INFO_SIG_KEY, updatedXPackInfoSignature);
+  }
+
+  clear() {
+    window.sessionStorage.removeItem(XPACK_INFO_SIG_KEY);
+  }
 }
+
+export const xpackInfoSignature = new XPackInfoSignature();

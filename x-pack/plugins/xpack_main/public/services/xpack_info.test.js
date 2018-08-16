@@ -5,25 +5,9 @@
  */
 
 import expect from 'expect.js';
-import ngMock from 'ng_mock';
-import { XPackInfoProvider } from 'plugins/xpack_main/services/xpack_info';
-import { MockWindowProvider } from './_mock_window';
-
-const XPACK_INFO_KEY = 'xpackMain.info';
+import { xpackInfo, XPACK_INFO_KEY } from './xpack_info';
 
 describe('xpack_info service', () => {
-  let mockWindow;
-  let xpackInfo;
-
-  beforeEach(ngMock.module('kibana', ($provide) => {
-    $provide.service('$window', MockWindowProvider);
-  }));
-
-  beforeEach(ngMock.inject(($window, Private) => {
-    mockWindow = $window;
-    xpackInfo = Private(XPackInfoProvider);
-  }));
-
   it ('updates the stored xpack info', () => {
     const updatedXPackInfo = {
       foo: {
@@ -31,7 +15,7 @@ describe('xpack_info service', () => {
       }
     };
     xpackInfo.setAll(updatedXPackInfo);
-    expect(mockWindow.sessionStorage.getItem(XPACK_INFO_KEY)).to.be(JSON.stringify(updatedXPackInfo));
+    expect(sessionStorage.__STORE__[XPACK_INFO_KEY]).to.be(JSON.stringify(updatedXPackInfo));
     expect(xpackInfo.get('foo.bar')).to.be(17);
   });
 
@@ -45,7 +29,7 @@ describe('xpack_info service', () => {
     expect(xpackInfo.get('foo.bar')).not.to.be(undefined);
 
     xpackInfo.clear();
-    expect(mockWindow.sessionStorage.getItem(XPACK_INFO_KEY)).to.be(undefined);
+    expect(sessionStorage.length).to.be(0);
     expect(xpackInfo.get('foo.bar')).to.be(undefined);
   });
 

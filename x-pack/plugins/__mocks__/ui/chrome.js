@@ -29,6 +29,8 @@ function getInjected(key) {
       return 'apm*';
     case 'mlEnabled':
       return true;
+    case 'xpackInitialInfo':
+      return undefined;
     default:
       throw new Error(`Unexpected config key: ${key}`);
   }
@@ -37,5 +39,5 @@ function getInjected(key) {
 export default {
   getInjected,
   addBasePath,
-  getUiSettingsClient
+  getUiSettingsClient,
 };

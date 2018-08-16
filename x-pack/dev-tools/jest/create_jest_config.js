@@ -30,6 +30,7 @@ export function createJestConfig({
       `${kibanaDirectory}/src/dev/jest/setup/babel_polyfill.js`,
       `<rootDir>/dev-tools/jest/setup/polyfills.js`,
       `<rootDir>/dev-tools/jest/setup/enzyme.js`,
+      `jest-localstorage-mock`,
     ],
     testMatch: [
       "**/*.test.{js,ts,tsx}"
