@@ -4,17 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import {
-  EuiButton,
-  EuiContextMenuItem,
-  EuiContextMenuPanel,
-  EuiFieldSearch,
-  EuiText,
-} from '@elastic/eui';
+import { EuiContextMenuItem, EuiContextMenuPanel, EuiFieldSearch, EuiText } from '@elastic/eui';
 import React, { Component } from 'react';
 import { SPACE_SEARCH_COUNT_THRESHOLD } from '../../../../common/constants';
 import { Space } from '../../../../common/model/space';
-import { SpaceAvatar } from '../../components/space_avatar';
+import { ManageSpacesButton, SpaceAvatar } from '../../components';
 import './spaces_menu.less';
 
 interface Props {
@@ -137,9 +131,7 @@ export class SpacesMenu extends Component<Props, State> {
   private renderManageButton = () => {
     return (
       <div key="manageSpacesButton" className="spacesMenu__manageButtonWrapper">
-        <EuiButton size="s" style={{ width: `100%` }}>
-          Manage spaces
-        </EuiButton>
+        <ManageSpacesButton size="s" style={{ width: `100%` }} />
       </div>
     );
   };

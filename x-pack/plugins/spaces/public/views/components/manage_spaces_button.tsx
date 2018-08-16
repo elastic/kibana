@@ -10,15 +10,19 @@ import { MANAGE_SPACES_URL } from '../../lib/constants';
 
 interface Props {
   isDisabled?: boolean;
+  size?: 's' | 'l';
+  style?: CSSProperties;
 }
 
 export class ManageSpacesButton extends Component<Props, {}> {
   public render() {
     return (
       <EuiButton
+        size={this.props.size || 's'}
         className="manage-spaces-button"
         isDisabled={this.props.isDisabled}
         onClick={this.navigateToManageSpaces}
+        style={this.props.style}
       >
         Manage Spaces
       </EuiButton>

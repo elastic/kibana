@@ -9,6 +9,7 @@ import React, { Component } from 'react';
 import { Space } from '../../../common/model/space';
 import { SpacesManager } from '../../lib/spaces_manager';
 import { SpaceAvatar } from '../components';
+import { SpacesDescription } from './components/spaces_description';
 import { SpacesMenu } from './components/spaces_menu';
 
 interface Props {
@@ -51,6 +52,13 @@ export class NavControlPopover extends Component<Props, State> {
       return null;
     }
 
+    let element: React.ReactNode;
+    if (this.state.spaces.length < 2) {
+      element = <SpacesDescription />;
+    } else {
+      element = <SpacesMenu spaces={this.state.spaces} onSelectSpace={this.onSelectSpace} />;
+    }
+
     return (
       <EuiPopover
         id={'spacesMenuPopover'}
@@ -61,7 +69,7 @@ export class NavControlPopover extends Component<Props, State> {
         panelPaddingSize="none"
         ownFocus
       >
-        <SpacesMenu spaces={this.state.spaces} onSelectSpace={this.onSelectSpace} />
+        {element}
       </EuiPopover>
     );
   }
