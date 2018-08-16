@@ -1,0 +1,26 @@
+{
+  "type": "index",
+  "value": {
+    "index": "testhuge",
+    "settings": {
+      "index": {
+        "mapping": {
+          "total_fields": {
+            "limit": "50000"
+          }
+        },
+        "number_of_shards": "5",
+        "number_of_replicas": "1"
+      }
+    },
+    "mappings": {
+      "test": {
+        "properties": {
+          "date": {
+            "type": "date"
+          }
+        }
+      }
+    }
+  }
+}
