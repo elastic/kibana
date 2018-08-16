@@ -24,7 +24,7 @@ export const essql = () => ({
   fn(context, args, helpers) {
     return helpers
       .elasticsearchClient('transport.request', {
-        path: '_xpack/sql?format=json',
+        path: '/_xpack/sql?format=json',
         method: 'POST',
         body: {
           fetch_size: args.count,
