@@ -217,9 +217,12 @@ export async function resolveSavedObjects(
       if (await importDocument(obj, otherDoc, overwriteAll)) {
         importedObjectCount++;
       }
-    } catch (err) {
-      if (err instanceof SavedObjectNotFound) {
-        if (err.savedObjectType === 'index-pattern') {
+    } catch (error) {
+      if (error instanceof SavedObjectNotFound) {
+        if (error.savedObjectType === 'search') {
+          failedImports.push({ obj, error });
+        }
+        if (error.savedObjectType === 'index-pattern') {
           if (obj.savedSearchId) {
             conflictedSavedObjectsLinkedToSavedSearches.push(obj);
           } else {
