@@ -1,4 +1,4 @@
-@media only screen and (max-width: 768px) {
+@include euiBreakpoint('xs', 's') {
   .recentlyAccessedSeparator {
     display: none;
   }
@@ -15,9 +15,7 @@
 }
 
 .recentlyAccessedLongLink {
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  @include euiTextTruncate;
   line-height: normal;
 }
 
