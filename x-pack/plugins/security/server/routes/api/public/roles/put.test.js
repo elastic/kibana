@@ -199,7 +199,11 @@ describe('PUT role', () => {
           run_as: ['test-run-as-1', 'test-run-as-2'],
         },
         kibana: {
-          global: ['test-kibana-privilege-1', 'test-kibana-privilege-2', 'test-kibana-privilege-3']
+          global: ['test-kibana-privilege-1', 'test-kibana-privilege-2', 'test-kibana-privilege-3'],
+          space: {
+            'test-space-1': ['test-kibana-privilege-1', 'test-kibana-privilege-2'],
+            'test-space-2': ['test-kibana-privilege-3'],
+          }
         },
       },
       preCheckLicenseImpl: defaultPreCheckLicenseImpl,
@@ -221,6 +225,21 @@ describe('PUT role', () => {
                       'test-kibana-privilege-3'
                     ],
                     resources: [ALL_RESOURCE],
+                  },
+                  {
+                    application,
+                    privileges: [
+                      'test-kibana-privilege-1',
+                      'test-kibana-privilege-2'
+                    ],
+                    resources: ['space:test-space-1']
+                  },
+                  {
+                    application,
+                    privileges: [
+                      'test-kibana-privilege-3',
+                    ],
+                    resources: ['space:test-space-2']
                   },
                 ],
                 cluster: ['test-cluster-privilege'],
@@ -272,6 +291,10 @@ describe('PUT role', () => {
         },
         kibana: {
           global: ['test-kibana-privilege-1', 'test-kibana-privilege-2', 'test-kibana-privilege-3'],
+          space: {
+            'test-space-1': ['test-kibana-privilege-1', 'test-kibana-privilege-2'],
+            'test-space-2': ['test-kibana-privilege-3'],
+          }
         },
       },
       preCheckLicenseImpl: defaultPreCheckLicenseImpl,
@@ -325,6 +348,21 @@ describe('PUT role', () => {
                       'test-kibana-privilege-3'
                     ],
                     resources: [ALL_RESOURCE],
+                  },
+                  {
+                    application,
+                    privileges: [
+                      'test-kibana-privilege-1',
+                      'test-kibana-privilege-2'
+                    ],
+                    resources: ['space:test-space-1']
+                  },
+                  {
+                    application,
+                    privileges: [
+                      'test-kibana-privilege-3',
+                    ],
+                    resources: ['space:test-space-2']
                   },
                 ],
                 cluster: ['test-cluster-privilege'],

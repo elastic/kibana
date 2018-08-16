@@ -19,6 +19,16 @@ const transformKibanaPrivilegesToEs = (application, kibanaPrivileges) => {
     });
   }
 
+  if (kibanaPrivileges.space) {
+    for(const [spaceId, privileges] of Object.entries(kibanaPrivileges.space)) {
+      kibanaApplicationPrivileges.push({
+        privileges: privileges,
+        application,
+        resources: [`space:${spaceId}`]
+      });
+    }
+  }
+
   return kibanaApplicationPrivileges;
 };
 
@@ -68,7 +78,8 @@ export function initPutRolesApi(
       run_as: Joi.array().items(Joi.string()),
     }),
     kibana: Joi.object().keys({
-      global: Joi.array().items(Joi.string().valid(Object.keys(privilegeMap)))
+      global: Joi.array().items(Joi.string().valid(Object.keys(privilegeMap))),
+      space: Joi.object().pattern(/^/, Joi.array().items(Joi.string().valid(Object.keys(privilegeMap))))
     })
   });
 
