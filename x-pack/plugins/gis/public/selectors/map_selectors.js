@@ -42,7 +42,8 @@ export const getCurrentLayerStyle = createSelector(
   }
 );
 
-export const getStyleDescriptor = createSelector(
+// Return selector instance for each component
+export const makeGetStyleDescriptor = () => createSelector(
   getSelectedLayer,
   selectedLayer => {
     const isVector = selectedLayer.type === LAYER_TYPE.TILE;

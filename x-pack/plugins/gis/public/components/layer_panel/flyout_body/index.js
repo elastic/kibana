@@ -7,7 +7,7 @@
 import { connect } from 'react-redux';
 import { FlyoutBody } from './view';
 import { updateLayerStyle } from '../../../actions/style_actions';
-import { getCurrentLayerStyle, getStyleDescriptor } from
+import { getCurrentLayerStyle, makeGetStyleDescriptor } from
   '../../../selectors/map_selectors';
 
 function mapDispatchToProps(dispatch) {
@@ -16,6 +16,7 @@ function mapDispatchToProps(dispatch) {
   };
 }
 
+const getStyleDescriptor = makeGetStyleDescriptor();
 function mapStateToProps(state) {
   return {
     currentLayerStyle: getCurrentLayerStyle(state),
