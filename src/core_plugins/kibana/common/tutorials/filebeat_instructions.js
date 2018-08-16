@@ -27,10 +27,10 @@ import {
 export const FILEBEAT_INSTRUCTIONS = {
   INSTALL: {
     OSX: {
-      title: i18n.translate('kbn.common.tutorials.fileBeatInstructions.install.osxTitle', {
+      title: i18n.translate('kbn.common.tutorials.filebeatInstructions.install.osxTitle', {
         defaultMessage: 'Download and install Filebeat',
       }),
-      textPre: i18n.translate('kbn.common.tutorials.fileBeatInstructions.install.osxTextPre', {
+      textPre: i18n.translate('kbn.common.tutorials.filebeatInstructions.install.osxTextPre', {
         defaultMessage: 'First time using Filebeat? See the [Getting Started Guide]({linkUrl}).',
         values: {
           linkUrl: '{config.docs.beats.filebeat}/filebeat-getting-started.html',
@@ -43,10 +43,10 @@ export const FILEBEAT_INSTRUCTIONS = {
       ]
     },
     DEB: {
-      title: i18n.translate('kbn.common.tutorials.fileBeatInstructions.install.debTitle', {
+      title: i18n.translate('kbn.common.tutorials.filebeatInstructions.install.debTitle', {
         defaultMessage: 'Download and install Filebeat',
       }),
-      textPre: i18n.translate('kbn.common.tutorials.fileBeatInstructions.install.debTextPre', {
+      textPre: i18n.translate('kbn.common.tutorials.filebeatInstructions.install.debTextPre', {
         defaultMessage: 'First time using Filebeat? See the [Getting Started Guide]({linkUrl}).',
         values: {
           linkUrl: '{config.docs.beats.filebeat}/filebeat-getting-started.html',
@@ -56,7 +56,7 @@ export const FILEBEAT_INSTRUCTIONS = {
         'curl -L -O https://artifacts.elastic.co/downloads/beats/filebeat/filebeat-{config.kibana.version}-amd64.deb',
         'sudo dpkg -i filebeat-{config.kibana.version}-amd64.deb'
       ],
-      textPost: i18n.translate('kbn.common.tutorials.fileBeatInstructions.install.debTextPost', {
+      textPost: i18n.translate('kbn.common.tutorials.filebeatInstructions.install.debTextPost', {
         defaultMessage: 'Looking for the 32-bit packages? See the [Download page]({linkUrl}).',
         values: {
           linkUrl: 'https://www.elastic.co/downloads/beats/filebeat',
@@ -64,10 +64,10 @@ export const FILEBEAT_INSTRUCTIONS = {
       }),
     },
     RPM: {
-      title: i18n.translate('kbn.common.tutorials.fileBeatInstructions.install.rpmTitle', {
+      title: i18n.translate('kbn.common.tutorials.filebeatInstructions.install.rpmTitle', {
         defaultMessage: 'Download and install Filebeat',
       }),
-      textPre: i18n.translate('kbn.common.tutorials.fileBeatInstructions.install.rpmTextPre', {
+      textPre: i18n.translate('kbn.common.tutorials.filebeatInstructions.install.rpmTextPre', {
         defaultMessage: 'First time using Filebeat? See the [Getting Started Guide]({linkUrl}).',
         values: {
           linkUrl: '{config.docs.beats.filebeat}/filebeat-getting-started.html',
@@ -77,7 +77,7 @@ export const FILEBEAT_INSTRUCTIONS = {
         'curl -L -O https://artifacts.elastic.co/downloads/beats/filebeat/filebeat-{config.kibana.version}-x86_64.rpm',
         'sudo rpm -vi filebeat-{config.kibana.version}-x86_64.rpm'
       ],
-      textPost: i18n.translate('kbn.common.tutorials.fileBeatInstructions.install.debTextPost', {
+      textPost: i18n.translate('kbn.common.tutorials.filebeatInstructions.install.debTextPost', {
         defaultMessage: 'Looking for the 32-bit packages? See the [Download page]({linkUrl}).',
         values: {
           linkUrl: 'https://www.elastic.co/downloads/beats/filebeat',
@@ -85,10 +85,10 @@ export const FILEBEAT_INSTRUCTIONS = {
       }),
     },
     WINDOWS: {
-      title: i18n.translate('kbn.common.tutorials.fileBeatInstructions.install.windowsTitle', {
+      title: i18n.translate('kbn.common.tutorials.filebeatInstructions.install.windowsTitle', {
         defaultMessage: 'Download and install Filebeat',
       }),
-      textPre: i18n.translate('kbn.common.tutorials.fileBeatInstructions.install.windowsTextPre', {
+      textPre: i18n.translate('kbn.common.tutorials.filebeatInstructions.install.windowsTextPre', {
         // eslint-disable-next-line
         defaultMessage: 'First time using Filebeat? See the [Getting Started Guide]({guideLinkUrl}).\n \
           1. Download the Filebeat Windows zip file from the [Download]({filebeatLinkUrl}) page.\n\
@@ -107,7 +107,7 @@ export const FILEBEAT_INSTRUCTIONS = {
         'PS > cd C:\\Program Files\\Filebeat',
         'PS C:\\Program Files\\Filebeat> .\\install-service-filebeat.ps1'
       ],
-      textPost: i18n.translate('kbn.common.tutorials.fileBeatInstructions.install.windowsTextPost', {
+      textPost: i18n.translate('kbn.common.tutorials.filebeatInstructions.install.windowsTextPost', {
         defaultMessage: 'Modify the settings under {propertyName} in the {filebeatPath} file to point to your Elasticsearch installation.',
         values: {
           propertyName: '`output.elasticsearch`',
@@ -118,10 +118,10 @@ export const FILEBEAT_INSTRUCTIONS = {
   },
   START: {
     OSX: {
-      title: i18n.translate('kbn.common.tutorials.fileBeatInstructions.start.osxTitle', {
+      title: i18n.translate('kbn.common.tutorials.filebeatInstructions.start.osxTitle', {
         defaultMessage: 'Start Filebeat',
       }),
-      textPre: i18n.translate('kbn.common.tutorials.fileBeatInstructions.start.osxTextPre', {
+      textPre: i18n.translate('kbn.common.tutorials.filebeatInstructions.start.osxTextPre', {
         defaultMessage: 'The `setup` command loads the Kibana dashboards. If the dashboards are already set up, omit this command.',
       }),
       commands: [
@@ -130,10 +130,10 @@ export const FILEBEAT_INSTRUCTIONS = {
       ]
     },
     DEB: {
-      title: i18n.translate('kbn.common.tutorials.fileBeatInstructions.start.debTitle', {
+      title: i18n.translate('kbn.common.tutorials.filebeatInstructions.start.debTitle', {
         defaultMessage: 'Start Filebeat',
       }),
-      textPre: i18n.translate('kbn.common.tutorials.fileBeatInstructions.start.debTextPre', {
+      textPre: i18n.translate('kbn.common.tutorials.filebeatInstructions.start.debTextPre', {
         defaultMessage: 'The `setup` command loads the Kibana dashboards. If the dashboards are already set up, omit this command.',
       }),
       commands: [
@@ -142,10 +142,10 @@ export const FILEBEAT_INSTRUCTIONS = {
       ]
     },
     RPM: {
-      title: i18n.translate('kbn.common.tutorials.fileBeatInstructions.start.rpmTitle', {
+      title: i18n.translate('kbn.common.tutorials.filebeatInstructions.start.rpmTitle', {
         defaultMessage: 'Start Filebeat',
       }),
-      textPre: i18n.translate('kbn.common.tutorials.fileBeatInstructions.start.rpmTextPre', {
+      textPre: i18n.translate('kbn.common.tutorials.filebeatInstructions.start.rpmTextPre', {
         defaultMessage: 'The `setup` command loads the Kibana dashboards. If the dashboards are already set up, omit this command.',
       }),
       commands: [
@@ -154,10 +154,10 @@ export const FILEBEAT_INSTRUCTIONS = {
       ],
     },
     WINDOWS: {
-      title: i18n.translate('kbn.common.tutorials.fileBeatInstructions.start.windowsTitle', {
+      title: i18n.translate('kbn.common.tutorials.filebeatInstructions.start.windowsTitle', {
         defaultMessage: 'Start Filebeat',
       }),
-      textPre: i18n.translate('kbn.common.tutorials.fileBeatInstructions.start.windowsTextPre', {
+      textPre: i18n.translate('kbn.common.tutorials.filebeatInstructions.start.windowsTextPre', {
         defaultMessage: 'The `setup` command loads the Kibana dashboards. If the dashboards are already set up, omit this command.',
       }),
       commands: [
@@ -168,10 +168,10 @@ export const FILEBEAT_INSTRUCTIONS = {
   },
   CONFIG: {
     OSX: {
-      title: i18n.translate('kbn.common.tutorials.fileBeatInstructions.config.osxTitle', {
+      title: i18n.translate('kbn.common.tutorials.filebeatInstructions.config.osxTitle', {
         defaultMessage: 'Edit the configuration',
       }),
-      textPre: i18n.translate('kbn.common.tutorials.fileBeatInstructions.config.osxTextPre', {
+      textPre: i18n.translate('kbn.common.tutorials.filebeatInstructions.config.osxTextPre', {
         defaultMessage: 'Modify {path} to set the connection information:',
         values: {
           path: '`filebeat.yml`',
@@ -185,7 +185,7 @@ export const FILEBEAT_INSTRUCTIONS = {
         'setup.kibana:',
         '  host: "<kibana_url>"'
       ],
-      textPost: i18n.translate('kbn.common.tutorials.fileBeatInstructions.config.osxTextPost', {
+      textPost: i18n.translate('kbn.common.tutorials.filebeatInstructions.config.osxTextPost', {
         // eslint-disable-next-line
         defaultMessage: 'Where {passwordTemplate} is the password of the `elastic` user, {esUrlTemplate} is the URL of Elasticsearch,\
           and {kibanaUrlTemplate} is the URL of Kibana.',
@@ -197,10 +197,10 @@ export const FILEBEAT_INSTRUCTIONS = {
       }),
     },
     DEB: {
-      title: i18n.translate('kbn.common.tutorials.fileBeatInstructions.config.debTitle', {
+      title: i18n.translate('kbn.common.tutorials.filebeatInstructions.config.debTitle', {
         defaultMessage: 'Edit the configuration',
       }),
-      textPre: i18n.translate('kbn.common.tutorials.fileBeatInstructions.config.debTextPre', {
+      textPre: i18n.translate('kbn.common.tutorials.filebeatInstructions.config.debTextPre', {
         defaultMessage: 'Modify {path} to set the connection information:',
         values: {
           path: '`/etc/filebeat/filebeat.yml`',
@@ -214,7 +214,7 @@ export const FILEBEAT_INSTRUCTIONS = {
         'setup.kibana:',
         '  host: "<kibana_url>"'
       ],
-      textPost: i18n.translate('kbn.common.tutorials.fileBeatInstructions.config.debTextPost', {
+      textPost: i18n.translate('kbn.common.tutorials.filebeatInstructions.config.debTextPost', {
         // eslint-disable-next-line
         defaultMessage: 'Where {passwordTemplate} is the password of the `elastic` user, {esUrlTemplate} is the URL of Elasticsearch,\
           and {kibanaUrlTemplate} is the URL of Kibana.',
@@ -226,10 +226,10 @@ export const FILEBEAT_INSTRUCTIONS = {
       }),
     },
     RPM: {
-      title: i18n.translate('kbn.common.tutorials.fileBeatInstructions.config.rpmTitle', {
+      title: i18n.translate('kbn.common.tutorials.filebeatInstructions.config.rpmTitle', {
         defaultMessage: 'Edit the configuration',
       }),
-      textPre: i18n.translate('kbn.common.tutorials.fileBeatInstructions.config.rpmTextPre', {
+      textPre: i18n.translate('kbn.common.tutorials.filebeatInstructions.config.rpmTextPre', {
         defaultMessage: 'Modify {path} to set the connection information:',
         values: {
           path: '`/etc/filebeat/filebeat.yml`',
@@ -243,7 +243,7 @@ export const FILEBEAT_INSTRUCTIONS = {
         'setup.kibana:',
         '  host: "<kibana_url>"'
       ],
-      textPost: i18n.translate('kbn.common.tutorials.fileBeatInstructions.config.rpmTextPost', {
+      textPost: i18n.translate('kbn.common.tutorials.filebeatInstructions.config.rpmTextPost', {
         // eslint-disable-next-line
         defaultMessage: 'Where {passwordTemplate} is the password of the `elastic` user, {esUrlTemplate} is the URL of Elasticsearch,\
           and {kibanaUrlTemplate} is the URL of Kibana.',
@@ -255,10 +255,10 @@ export const FILEBEAT_INSTRUCTIONS = {
       }),
     },
     WINDOWS: {
-      title: i18n.translate('kbn.common.tutorials.fileBeatInstructions.config.windowsTitle', {
+      title: i18n.translate('kbn.common.tutorials.filebeatInstructions.config.windowsTitle', {
         defaultMessage: 'Edit the configuration',
       }),
-      textPre: i18n.translate('kbn.common.tutorials.fileBeatInstructions.config.windowsTextPre', {
+      textPre: i18n.translate('kbn.common.tutorials.filebeatInstructions.config.windowsTextPre', {
         defaultMessage: 'Modify {path} to set the connection information:',
         values: {
           path: '`C:\\Program Files\\Filebeat\\filebeat.yml`',
@@ -272,7 +272,7 @@ export const FILEBEAT_INSTRUCTIONS = {
         'setup.kibana:',
         '  host: "<kibana_url>"'
       ],
-      textPost: i18n.translate('kbn.common.tutorials.fileBeatInstructions.config.windowsTextPost', {
+      textPost: i18n.translate('kbn.common.tutorials.filebeatInstructions.config.windowsTextPost', {
         // eslint-disable-next-line
         defaultMessage: 'Where {passwordTemplate} is the password of the `elastic` user, {esUrlTemplate} is the URL of Elasticsearch,\
           and {kibanaUrlTemplate} is the URL of Kibana.',
@@ -286,10 +286,10 @@ export const FILEBEAT_INSTRUCTIONS = {
   },
   PLUGINS: {
     GEOIP_AND_UA: {
-      title: i18n.translate('kbn.common.tutorials.fileBeatInstructions.plugins.geoipUiTitle', {
+      title: i18n.translate('kbn.common.tutorials.filebeatInstructions.plugins.geoipUiTitle', {
         defaultMessage: 'Install Elasticsearch GeoIP and user agent plugins',
       }),
-      textPre: i18n.translate('kbn.common.tutorials.fileBeatInstructions.plugins.geoipUiTextPre', {
+      textPre: i18n.translate('kbn.common.tutorials.filebeatInstructions.plugins.geoipUiTextPre', {
         // eslint-disable-next-line
         defaultMessage: 'This module requires two Elasticsearch plugins that are not installed by default.\n\n\
           From the Elasticsearch installation folder, run:',
@@ -300,10 +300,10 @@ export const FILEBEAT_INSTRUCTIONS = {
       ]
     },
     GEOIP: {
-      title: i18n.translate('kbn.common.tutorials.fileBeatInstructions.plugins.geoipTitle', {
+      title: i18n.translate('kbn.common.tutorials.filebeatInstructions.plugins.geoipTitle', {
         defaultMessage: 'Install Elasticsearch GeoIP plugin',
       }),
-      textPre: i18n.translate('kbn.common.tutorials.fileBeatInstructions.plugins.geoipUiTextPre', {
+      textPre: i18n.translate('kbn.common.tutorials.filebeatInstructions.plugins.geoipUiTextPre', {
         // eslint-disable-next-line
         defaultMessage: 'This module requires two Elasticsearch plugins that are not installed by default.\n\n\
           From the Elasticsearch installation folder, run:',
@@ -318,10 +318,10 @@ export const FILEBEAT_INSTRUCTIONS = {
 export const FILEBEAT_CLOUD_INSTRUCTIONS = {
   CONFIG: {
     OSX: {
-      title: i18n.translate('kbn.common.tutorials.fileBeatCloudInstructions.config.osxTitle', {
+      title: i18n.translate('kbn.common.tutorials.filebeatCloudInstructions.config.osxTitle', {
         defaultMessage: 'Edit the configuration',
       }),
-      textPre: i18n.translate('kbn.common.tutorials.fileBeatCloudInstructions.config.osxTextPre', {
+      textPre: i18n.translate('kbn.common.tutorials.filebeatCloudInstructions.config.osxTextPre', {
         defaultMessage: 'Modify {path} to set the connection information for Elastic Cloud:',
         values: {
           path: '`filebeat.yml`',
@@ -331,16 +331,16 @@ export const FILEBEAT_CLOUD_INSTRUCTIONS = {
         'cloud.id: "{config.cloud.id}"',
         'cloud.auth: "elastic:<password>"'
       ],
-      textPost: i18n.translate('kbn.common.tutorials.fileBeatCloudInstructions.config.osxTextPost', {
+      textPost: i18n.translate('kbn.common.tutorials.filebeatCloudInstructions.config.osxTextPost', {
         defaultMessage: 'Where {passwordTemplate} is the password of the `elastic` user.',
         values: { passwordTemplate: '`<password>`' },
       }),
     },
     DEB: {
-      title: i18n.translate('kbn.common.tutorials.fileBeatCloudInstructions.config.debTitle', {
+      title: i18n.translate('kbn.common.tutorials.filebeatCloudInstructions.config.debTitle', {
         defaultMessage: 'Edit the configuration',
       }),
-      textPre: i18n.translate('kbn.common.tutorials.fileBeatCloudInstructions.config.debTextPre', {
+      textPre: i18n.translate('kbn.common.tutorials.filebeatCloudInstructions.config.debTextPre', {
         defaultMessage: 'Modify {path} to set the connection information for Elastic Cloud:',
         values: {
           path: '`/etc/filebeat/filebeat.yml`',
@@ -350,16 +350,16 @@ export const FILEBEAT_CLOUD_INSTRUCTIONS = {
         'cloud.id: "{config.cloud.id}"',
         'cloud.auth: "elastic:<password>"'
       ],
-      textPost: i18n.translate('kbn.common.tutorials.fileBeatCloudInstructions.config.debTextPost', {
+      textPost: i18n.translate('kbn.common.tutorials.filebeatCloudInstructions.config.debTextPost', {
         defaultMessage: 'Where {passwordTemplate} is the password of the `elastic` user.',
         values: { passwordTemplate: '`<password>`' },
       }),
     },
     RPM: {
-      title: i18n.translate('kbn.common.tutorials.fileBeatCloudInstructions.config.rpmTitle', {
+      title: i18n.translate('kbn.common.tutorials.filebeatCloudInstructions.config.rpmTitle', {
         defaultMessage: 'Edit the configuration',
       }),
-      textPre: i18n.translate('kbn.common.tutorials.fileBeatCloudInstructions.config.rpmTextPre', {
+      textPre: i18n.translate('kbn.common.tutorials.filebeatCloudInstructions.config.rpmTextPre', {
         defaultMessage: 'Modify {path} to set the connection information for Elastic Cloud:',
         values: {
           path: '`/etc/filebeat/filebeat.yml`',
@@ -369,16 +369,16 @@ export const FILEBEAT_CLOUD_INSTRUCTIONS = {
         'cloud.id: "{config.cloud.id}"',
         'cloud.auth: "elastic:<password>"'
       ],
-      textPost: i18n.translate('kbn.common.tutorials.fileBeatCloudInstructions.config.rpmTextPost', {
+      textPost: i18n.translate('kbn.common.tutorials.filebeatCloudInstructions.config.rpmTextPost', {
         defaultMessage: 'Where {passwordTemplate} is the password of the `elastic` user.',
         values: { passwordTemplate: '`<password>`' },
       }),
     },
     WINDOWS: {
-      title: i18n.translate('kbn.common.tutorials.fileBeatCloudInstructions.config.windowsTitle', {
+      title: i18n.translate('kbn.common.tutorials.filebeatCloudInstructions.config.windowsTitle', {
         defaultMessage: 'Edit the configuration',
       }),
-      textPre: i18n.translate('kbn.common.tutorials.fileBeatCloudInstructions.config.windowsTextPre', {
+      textPre: i18n.translate('kbn.common.tutorials.filebeatCloudInstructions.config.windowsTextPre', {
         defaultMessage: 'Modify {path} to set the connection information for Elastic Cloud:',
         values: {
           path: '`C:\\Program Files\\Filebeat\\filebeat.yml`',
@@ -388,7 +388,7 @@ export const FILEBEAT_CLOUD_INSTRUCTIONS = {
         'cloud.id: "{config.cloud.id}"',
         'cloud.auth: "elastic:<password>"'
       ],
-      textPost: i18n.translate('kbn.common.tutorials.fileBeatCloudInstructions.config.windowsTextPost', {
+      textPost: i18n.translate('kbn.common.tutorials.filebeatCloudInstructions.config.windowsTextPost', {
         defaultMessage: 'Where {passwordTemplate} is the password of the `elastic` user.',
         values: { passwordTemplate: '`<password>`' },
       }),
@@ -399,60 +399,60 @@ export const FILEBEAT_CLOUD_INSTRUCTIONS = {
 export function filebeatEnableInstructions(moduleName) {
   return {
     OSX: {
-      title: i18n.translate('kbn.common.tutorials.fileBeatEnableInstructions.osxTitle', {
+      title: i18n.translate('kbn.common.tutorials.filebeatEnableInstructions.osxTitle', {
         defaultMessage: 'Enable and configure the {moduleName} module',
         values: { moduleName },
       }),
-      textPre: i18n.translate('kbn.common.tutorials.fileBeatEnableInstructions.osxTextPre', {
+      textPre: i18n.translate('kbn.common.tutorials.filebeatEnableInstructions.osxTextPre', {
         defaultMessage: 'From the installation directory, run:',
       }),
       commands: [
         './filebeat modules enable ' + moduleName,
       ],
-      textPost: i18n.translate('kbn.common.tutorials.fileBeatEnableInstructions.osxTextPost', {
+      textPost: i18n.translate('kbn.common.tutorials.filebeatEnableInstructions.osxTextPost', {
         defaultMessage: 'Modify the settings in the `modules.d/{moduleName}.yml` file.',
         values: { moduleName },
       }),
     },
     DEB: {
-      title: i18n.translate('kbn.common.tutorials.fileBeatEnableInstructions.devTitle', {
+      title: i18n.translate('kbn.common.tutorials.filebeatEnableInstructions.devTitle', {
         defaultMessage: 'Enable and configure the {moduleName} module',
         values: { moduleName },
       }),
       commands: [
         'sudo filebeat modules enable ' + moduleName,
       ],
-      textPost: i18n.translate('kbn.common.tutorials.fileBeatEnableInstructions.debTextPost', {
+      textPost: i18n.translate('kbn.common.tutorials.filebeatEnableInstructions.debTextPost', {
         defaultMessage: 'Modify the settings in the `/etc/filebeat/modules.d/{moduleName}.yml` file.',
         values: { moduleName },
       }),
     },
     RPM: {
-      title: i18n.translate('kbn.common.tutorials.fileBeatEnableInstructions.rpmTitle', {
+      title: i18n.translate('kbn.common.tutorials.filebeatEnableInstructions.rpmTitle', {
         defaultMessage: 'Enable and configure the {moduleName} module',
         values: { moduleName },
       }),
       commands: [
         'sudo filebeat modules enable ' + moduleName,
       ],
-      textPost: i18n.translate('kbn.common.tutorials.fileBeatEnableInstructions.rpmTextPost', {
+      textPost: i18n.translate('kbn.common.tutorials.filebeatEnableInstructions.rpmTextPost', {
         defaultMessage: 'Modify the settings in the `/etc/filebeat/modules.d/{moduleName}.yml` file.',
         values: { moduleName },
       }),
     },
     WINDOWS: {
-      title: i18n.translate('kbn.common.tutorials.fileBeatEnableInstructions.windowsTitle', {
+      title: i18n.translate('kbn.common.tutorials.filebeatEnableInstructions.windowsTitle', {
         defaultMessage: 'Enable and configure the {moduleName} module',
         values: { moduleName },
       }),
-      textPre: i18n.translate('kbn.common.tutorials.fileBeatEnableInstructions.windowsTextPre', {
+      textPre: i18n.translate('kbn.common.tutorials.filebeatEnableInstructions.windowsTextPre', {
         defaultMessage: 'From the {path} folder, run:',
         values: { path: `C:\\Program Files\\Filebeat` },
       }),
       commands: [
         'PS C:\\Program Files\\Filebeat> filebeat.exe modules enable ' + moduleName,
       ],
-      textPost: i18n.translate('kbn.common.tutorials.fileBeatEnableInstructions.windowsTextPost', {
+      textPost: i18n.translate('kbn.common.tutorials.filebeatEnableInstructions.windowsTextPost', {
         defaultMessage: 'Modify the settings in the `modules.d/{moduleName}.yml` file.',
         values: { moduleName },
       }),
@@ -515,7 +515,7 @@ export function onPremInstructions(moduleName, platforms, geoipRequired, uaRequi
   return {
     instructionSets: [
       {
-        title: i18n.translate('kbn.common.tutorials.premInstructions.gettingStarted.title', {
+        title: i18n.translate('kbn.common.tutorials.filebeat.premInstructions.gettingStarted.title', {
           defaultMessage: 'Getting Started',
         }),
         instructionVariants: variants,
@@ -545,7 +545,7 @@ export function onPremCloudInstructions(moduleName, platforms) {
   return {
     instructionSets: [
       {
-        title: i18n.translate('kbn.common.tutorials.premCloudInstructions.gettingStarted.title', {
+        title: i18n.translate('kbn.common.tutorials.filebeat.premCloudInstructions.gettingStarted.title', {
           defaultMessage: 'Getting Started',
         }),
         instructionVariants: variants,
@@ -573,7 +573,7 @@ export function cloudInstructions(moduleName, platforms) {
   return {
     instructionSets: [
       {
-        title: i18n.translate('kbn.common.tutorials.cloudInstructions.gettingStarted.title', {
+        title: i18n.translate('kbn.common.tutorials.filebeat.cloudInstructions.gettingStarted.title', {
           defaultMessage: 'Getting Started',
         }),
         instructionVariants: variants,
