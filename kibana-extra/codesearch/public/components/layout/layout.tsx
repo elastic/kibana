@@ -94,9 +94,7 @@ export class LayoutPage extends React.Component<Props, State> {
     }
   };
 
-  public getTreeToggler = (path: string) => e => {
-    e.preventDefault();
-    e.stopPropagation();
+  public getTreeToggler = (path: string) => () => {
     if (this.props.openedPaths.includes(path)) {
       this.props.closeTreePath(path);
     } else {

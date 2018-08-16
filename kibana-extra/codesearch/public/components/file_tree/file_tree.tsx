@@ -25,12 +25,13 @@ export class FileTree extends React.Component<Props, any> {
     const onClick = () => this.props.onClick(node);
     switch (node.type) {
       case FileTreeItemType.Directory: {
+        const onFolderClick = () => {
+          this.props.getTreeToggler(node.path || '')();
+          this.props.onClick(node);
+        };
         return (
-          <div onClick={onClick} className={className}>
-            <EuiIcon
-              type={forceOpen ? 'arrowDown' : 'arrowRight'}
-              onClick={this.props.getTreeToggler(node.path || '')}
-            />
+          <div onClick={onFolderClick} className={className}>
+            <EuiIcon type={forceOpen ? 'arrowDown' : 'arrowRight'} />
             {`${node.name}/`}
           </div>
         );
@@ -68,13 +69,16 @@ export class FileTree extends React.Component<Props, any> {
   };
 
   public render() {
+    const items = [
+      {
+        name: '',
+        id: '',
+        items: (this.props.node.children || []).map(this.treeToItems),
+      },
+    ];
     return (
       this.props.node && (
-        <EuiSideNav
-          items={(this.props.node.children || []).map(this.treeToItems)}
-          className="sideNavTree"
-          style={{ overflow: 'auto' }}
-        />
+        <EuiSideNav items={items} className="sideNavTree" style={{ overflow: 'auto' }} />
       )
     );
   }

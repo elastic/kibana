@@ -15,6 +15,15 @@ import { symbolTreeSelector, SymbolWithMembers } from '../../selectors';
 interface Props {
   structureTree: any;
 }
+
+const sortSymbol = (a, b) => {
+  const lineDiff = a.location.range.start.line - b.location.range.start.line;
+  if (lineDiff === 0) {
+    return a.location.range.start.character - b.location.range.start.character;
+  } else {
+    return lineDiff;
+  }
+};
 class SymbolTreeComponent extends React.PureComponent<Props> {
   public getStructureTreeItemRenderer = (location: Location, name: string) => () => (
     <div className="symbolLinkContainer">
@@ -23,7 +32,7 @@ class SymbolTreeComponent extends React.PureComponent<Props> {
   );
 
   public symbolsToSideNavItems = (symbolsWithMembers: SymbolWithMembers[]) => {
-    return symbolsWithMembers.map((s: SymbolWithMembers, index: number) => {
+    return symbolsWithMembers.sort(sortSymbol).map((s: SymbolWithMembers, index: number) => {
       const item = {
         name: s.name,
         id: `${s.name}_${index}`,
@@ -38,7 +47,9 @@ class SymbolTreeComponent extends React.PureComponent<Props> {
   };
 
   public render() {
-    const items = this.symbolsToSideNavItems(this.props.structureTree);
+    const items = [
+      { name: '', id: '', items: this.symbolsToSideNavItems(this.props.structureTree) },
+    ];
     return <EuiSideNav items={items} style={{ overflow: 'auto' }} className="sideNavTree" />;
   }
 }

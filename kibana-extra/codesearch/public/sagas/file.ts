@@ -41,14 +41,18 @@ function* handleFetchRepoTree(action: Action<FetchRepoTreePayload>) {
         if (child) {
           currentTree = child;
           currentPath = currentPath ? `${currentPath}/${p}` : p;
+          if (!currentTree.children) {
+            yield call(fetchPath, { uri, revision, path: currentPath });
+          }
           yield put(openTreePath(currentPath));
         } else {
           // path in missing in tree?
           break;
         }
       }
+    } else {
+      yield call(fetchPath, action.payload!);
     }
-    yield call(fetchPath, action.payload!);
   } catch (err) {
     yield put(fetchRepoTreeFailed(err));
   }
@@ -56,6 +60,14 @@ function* handleFetchRepoTree(action: Action<FetchRepoTreePayload>) {
 
 function* fetchPath(payload: FetchRepoTreePayload) {
   const update: FileTree = yield call(requestRepoTree, payload);
+  update.children.sort((a, b) => {
+    const typeDiff = a.type - b.type;
+    if (typeDiff === 0) {
+      return a.name > b.name ? 1 : -1;
+    } else {
+      return -typeDiff;
+    }
+  });
   yield put(fetchRepoTreeSuccess(update));
   return update;
 }
