@@ -40,6 +40,7 @@ module.exports = function (grunt) {
 
   grunt.registerTask('jenkins:selenium', [
     'checkPlugins',
+    'run:ossReleaseProductionSmokeTests',
     'run:functionalTestsRelease',
   ]);
 };

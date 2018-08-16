@@ -17,9 +17,26 @@
  * under the License.
  */
 
-require('../src/setup_node_env');
-require('@kbn/test').runTestsCli([
-  require.resolve('../test/functional_production/config.js'),
-  require.resolve('../test/functional/config.js'),
-  require.resolve('../test/api_integration/config.js'),
-]);
+export default async function ({ readConfigFile }) {
+  const functionalConfig = await readConfigFile(require.resolve('../functional/config'));
+
+  return {
+    ...functionalConfig.getAll(),
+
+    testFiles: [
+      require.resolve('../functional/apps/home'),
+    ],
+
+    junit: {
+      reportName: `${functionalConfig.get('junit.reportName')} (Production)`
+    },
+
+    kbnTestServer: {
+      ...functionalConfig.get('kbnTestServer'),
+
+      serverArgs: functionalConfig.get('kbnTestServer.serverArgs').filter(arg => (
+        arg !== '--env.name=development'
+      )),
+    },
+  };
+}
