@@ -25,7 +25,10 @@ export const PageRouter: React.SFC<{ libs: any }> = ({ libs }) => {
           path="/beat/:beatId"
           render={(props: any) => <BeatDetailsPage {...props} libs={libs} />}
         />
-        <Route path="/tag" render={(props: any) => <TagPage {...props} libs={libs} />} />
+        <Route
+          path="/tag/:action/:tagid?"
+          render={(props: any) => <TagPage {...props} libs={libs} />}
+        />
       </Switch>
     </HashRouter>
   );

@@ -7,7 +7,7 @@
 import { IModule, IScope } from 'angular';
 import { AxiosRequestConfig } from 'axios';
 import React from 'react';
-import { ConfigurationBlock } from './../../common/domain_types';
+import { ConfigurationBlock } from '../../common/domain_types';
 import { CMTokensAdapter } from './adapters/tokens/adapter_types';
 import { BeatsLib } from './domains/beats';
 import { TagsLib } from './domains/tags';
