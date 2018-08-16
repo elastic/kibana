@@ -100,6 +100,8 @@ export function HomeApp({
             apmUiEnabled={apmUiEnabled}
             recentlyAccessed={recentlyAccessed}
             find={savedObjectsClient.find}
+            localStorage={localStorage}
+            urlBasePath={chrome.getBasePath()}
           />
         </Route>
       </Switch>
