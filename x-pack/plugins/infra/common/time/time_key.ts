@@ -5,6 +5,7 @@
  */
 
 import { ascending, bisector } from 'd3-array';
+import pick from 'lodash/fp/pick';
 
 export interface TimeKey {
   time: number;
@@ -19,6 +20,9 @@ export const isTimeKey = (value: any): value is TimeKey =>
   typeof value === 'object' &&
   typeof value.time === 'number' &&
   typeof value.tiebreaker === 'number';
+
+export const pickTimeKey = <T extends TimeKey>(value: T): TimeKey =>
+  pick(['time', 'tiebreaker'], value);
 
 export function compareTimeKeys(
   firstKey: TimeKey,
@@ -49,24 +53,27 @@ export const compareToTimeKey = <Value>(
   compareValues?: Comparator
 ) => (value: Value, key: TimeKey) => compareTimeKeys(keyAccessor(value), key, compareValues);
 
-export const getAtTimeKey = <Value>(
+export const getIndexAtTimeKey = <Value>(
   keyAccessor: (value: Value) => TimeKey,
   compareValues?: Comparator
 ) => {
-  const compator = compareToTimeKey(keyAccessor, compareValues);
-  const collectionBisector = bisector(compator);
+  const comparator = compareToTimeKey(keyAccessor, compareValues);
+  const collectionBisector = bisector(comparator);
 
-  return (collection: Value[], key: TimeKey): Value | undefined => {
+  return (collection: Value[], key: TimeKey): number | null => {
     const index = collectionBisector.left(collection, key);
 
     if (index >= collection.length) {
-      return;
+      return null;
     }
 
-    if (compator(collection[index], key) !== 0) {
-      return;
+    if (comparator(collection[index], key) !== 0) {
+      return null;
     }
 
-    return collection[index];
+    return index;
   };
 };
+
+export const timeKeyIsBetween = (min: TimeKey, max: TimeKey, operand: TimeKey) =>
+  compareTimeKeys(min, operand) <= 0 && compareTimeKeys(max, operand) >= 0;

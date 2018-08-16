@@ -6,20 +6,65 @@
 
 import { createSelector } from 'reselect';
 
-import { getIndexOfLogEntry, LogEntry, LogEntryTime } from '../../../../../common/log_entry';
-import { EntriesState } from './reducer';
+import { TimeKey } from '../../../../../common/time';
+import { getLogEntryIndexAtTime, LogEntry } from '../../../../utils/log_entry';
+import { createGraphqlStateSelectors } from '../../../../utils/remote_state/remote_graphql_state';
+import { EntriesGraphqlState, EntriesState } from './state';
 
-const getEntry = (entries: LogEntry[], entryKey: LogEntryTime) => {
-  const entryIndex = getIndexOfLogEntry(entries, entryKey);
+const entriesGraphlStateSelectors = createGraphqlStateSelectors<EntriesGraphqlState['data']>(
+  (state: EntriesState) => state.entries
+);
+
+const getEntry = (entries: LogEntry[], entryKey: TimeKey) => {
+  const entryIndex = getLogEntryIndexAtTime(entries, entryKey);
 
   return entryIndex !== null ? entries[entryIndex] : null;
 };
 
-export const selectEntries = (state: EntriesState) => state.entries;
+export const selectEntries = createSelector(
+  entriesGraphlStateSelectors.selectData,
+  data => (data ? data.entries : [])
+);
 
-export const selectEntriesStartLoadingState = (state: EntriesState) => state.start;
+export const selectIsLoadingEntries = entriesGraphlStateSelectors.selectIsLoading;
 
-export const selectEntriesEndLoadingState = (state: EntriesState) => state.end;
+export const selectIsReloadingEntries = createSelector(
+  entriesGraphlStateSelectors.selectIsLoading,
+  entriesGraphlStateSelectors.selectLoadingProgressOperationInfo,
+  (isLoading, operationInfo) =>
+    isLoading && operationInfo ? operationInfo.operationKey === 'load' : false
+);
+
+export const selectIsLoadingMoreEntries = createSelector(
+  entriesGraphlStateSelectors.selectIsLoading,
+  entriesGraphlStateSelectors.selectLoadingProgressOperationInfo,
+  (isLoading, operationInfo) =>
+    isLoading && operationInfo ? operationInfo.operationKey === 'load_more' : false
+);
+
+export const selectEntriesStart = createSelector(
+  entriesGraphlStateSelectors.selectData,
+  data => (data && data.start ? data.start : null)
+);
+
+export const selectEntriesEnd = createSelector(
+  entriesGraphlStateSelectors.selectData,
+  data => (data && data.end ? data.end : null)
+);
+
+export const selectHasMoreBeforeStart = createSelector(
+  entriesGraphlStateSelectors.selectData,
+  data => (data ? data.hasMoreBefore : true)
+);
+
+export const selectHasMoreAfterEnd = createSelector(
+  entriesGraphlStateSelectors.selectData,
+  data => (data ? data.hasMoreAfter : true)
+);
+
+export const selectEntriesStartLoadingState = entriesGraphlStateSelectors.selectLoadingState;
+
+export const selectEntriesEndLoadingState = entriesGraphlStateSelectors.selectLoadingState;
 
 export const selectFirstEntry = createSelector(
   selectEntries,
@@ -32,11 +77,10 @@ export const selectLastEntry = createSelector(
 );
 
 export const selectLoadedEntriesTimeInterval = createSelector(
-  selectFirstEntry,
-  selectLastEntry,
-  (firstEntry, lastEntry) => ({
-    end: lastEntry ? lastEntry.fields.time : null,
-    start: firstEntry ? firstEntry.fields.time : null,
+  entriesGraphlStateSelectors.selectData,
+  data => ({
+    end: data && data.end ? data.end.time : null,
+    start: data && data.start ? data.start.time : null,
   })
 );
 
@@ -65,8 +109,8 @@ export const selectVisibleEntriesTimeInterval = createSelector(
   selectFirstVisibleEntry,
   selectLastVisibleEntry,
   (firstVisibleEntry, lastVisibleEntry) => ({
-    end: lastVisibleEntry ? lastVisibleEntry.fields.time : null,
-    start: firstVisibleEntry ? firstVisibleEntry.fields.time : null,
+    end: lastVisibleEntry ? lastVisibleEntry.key.time : null,
+    start: firstVisibleEntry ? firstVisibleEntry.key.time : null,
   })
 );
 

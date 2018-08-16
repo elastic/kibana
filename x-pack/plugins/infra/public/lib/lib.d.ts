@@ -17,11 +17,13 @@ export interface InfraFrontendLibs {
   framework: InfraFrameworkAdapter;
   fields: InfraFieldsDomain;
   api: InfraApiAdapter;
-  apolloClient: ApolloClient<NormalizedCacheObject>;
+  apolloClient: InfraApolloClient;
   observableApi: InfraObservableApi;
 }
 
 export type InfraTimezoneProvider = () => string;
+
+export type InfraApolloClient = ApolloClient<NormalizedCacheObject>;
 
 export interface InfraFrameworkAdapter {
   // Instance vars

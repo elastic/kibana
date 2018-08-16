@@ -56,11 +56,9 @@ interface ActionCreators {
   [key: string]: (arg: any) => any;
 }
 
-type PlainActionCreator<WrappedActionCreator> = WrappedActionCreator extends (
-  payload: infer A
-) => infer R
-  ? (payload: A) => R
-  : never;
+type PlainActionCreator<WrappedActionCreator> = WrappedActionCreator extends () => infer R
+  ? () => R
+  : WrappedActionCreator extends (payload: infer A) => infer R ? (payload: A) => R : never;
 
 export const bindPlainActionCreators = <WrappedActionCreators extends ActionCreators>(
   actionCreators: WrappedActionCreators

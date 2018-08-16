@@ -6,12 +6,18 @@
 
 import actionCreatorFactory from 'typescript-fsa';
 
-import { LogEntry, LogEntryTime } from '../../../../../common/log_entry';
+import { TimeKey } from '../../../../../common/time';
+import { LogEntry } from '../../../../utils/log_entry';
+import { loadMoreEntriesActionCreators } from './load_more_operation';
+import { loadEntriesActionCreators } from './load_operation';
 
 const actionCreator = actionCreatorFactory('kibana/logging/entries');
 
+export const loadEntries = loadEntriesActionCreators.resolve;
+export const loadMoreEntries = loadMoreEntriesActionCreators.resolve;
+
 /**
- * REPLACE_ENTRIES
+ * REPLACE_ENTRIES (deprecated)
  */
 
 export interface ReplaceEntriesPayload {
@@ -34,7 +40,7 @@ export const replaceEntries = actionCreator.async<ReplaceEntriesPayload, Replace
 
 export interface ExtendEntriesPayload {
   count: number;
-  target: LogEntryTime;
+  target: TimeKey;
 }
 
 export interface ExtendEntriesResult {
@@ -56,7 +62,7 @@ export const extendEntriesEnd = actionCreator.async<ExtendEntriesPayload, Extend
 export interface ConsolidateEntriesPayload {
   after: number;
   before: number;
-  target: LogEntryTime;
+  target: TimeKey;
 }
 
 export const consolidateEntries = actionCreator<ConsolidateEntriesPayload>('CONSOLIDATE_ENTRIES');
@@ -68,9 +74,9 @@ export const consolidateEntries = actionCreator<ConsolidateEntriesPayload>('CONS
 export interface ReportVisibleEntriesPayload {
   pagesAfterEnd: number;
   pagesBeforeStart: number;
-  endKey: LogEntryTime | null;
-  middleKey: LogEntryTime | null;
-  startKey: LogEntryTime | null;
+  endKey: TimeKey | null;
+  middleKey: TimeKey | null;
+  startKey: TimeKey | null;
 }
 
 export const reportVisibleEntries = actionCreator<ReportVisibleEntriesPayload>(

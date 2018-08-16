@@ -8,17 +8,17 @@ type Resolver<Result, Args = any> = (
   info: GraphQLResolveInfo
 ) => Promise<Result> | Result;
 
+export interface Query {
+  fields?: (InfraField | null)[] | null;
+  source: InfraSource /** Get an infrastructure data source by id */;
+  allSources: InfraSource[] /** Get a list of all infrastructure data sources */;
+}
+
 export interface InfraField {
   name?: string | null;
   type?: string | null;
   searchable?: boolean | null;
   aggregatable?: boolean | null;
-}
-
-export interface Query {
-  fields?: (InfraField | null)[] | null;
-  source: InfraSource /** Get an infrastructure data source by id */;
-  allSources: InfraSource[] /** Get a list of all infrastructure data sources */;
 }
 /** A source of infrastructure data */
 export interface InfraSource {
@@ -55,6 +55,8 @@ export interface InfraSourceStatus {
 export interface InfraLogEntryInterval {
   start?: InfraTimeKey | null /** The key corresponding to the start of the interval covered by the entries */;
   end?: InfraTimeKey | null /** The key corresponding to the end of the interval covered by the entries */;
+  hasMoreBefore: boolean /** Whether there are more log entries available before the start */;
+  hasMoreAfter: boolean /** Whether there are more log entries available after the end */;
   filterQuery?: string | null /** The query the log entries were filtered by */;
   highlightQuery?: string | null /** The query the log entries were highlighted with */;
   entries: InfraLogEntry[] /** A list of the log entries */;
@@ -118,6 +120,20 @@ export namespace QueryResolvers {
   }
 
   export type AllSourcesResolver = Resolver<InfraSource[]>;
+}
+
+export namespace InfraFieldResolvers {
+  export interface Resolvers {
+    name?: NameResolver;
+    type?: TypeResolver;
+    searchable?: SearchableResolver;
+    aggregatable?: AggregatableResolver;
+  }
+
+  export type NameResolver = Resolver<string | null>;
+  export type TypeResolver = Resolver<string | null>;
+  export type SearchableResolver = Resolver<boolean | null>;
+  export type AggregatableResolver = Resolver<boolean | null>;
 }
 /** A source of infrastructure data */
 export namespace InfraSourceResolvers {
@@ -205,6 +221,8 @@ export namespace InfraLogEntryIntervalResolvers {
   export interface Resolvers {
     start?: StartResolver /** The key corresponding to the start of the interval covered by the entries */;
     end?: EndResolver /** The key corresponding to the end of the interval covered by the entries */;
+    hasMoreBefore?: HasMoreBeforeResolver /** Whether there are more log entries available before the start */;
+    hasMoreAfter?: HasMoreAfterResolver /** Whether there are more log entries available after the end */;
     filterQuery?: FilterQueryResolver /** The query the log entries were filtered by */;
     highlightQuery?: HighlightQueryResolver /** The query the log entries were highlighted with */;
     entries?: EntriesResolver /** A list of the log entries */;
@@ -212,6 +230,8 @@ export namespace InfraLogEntryIntervalResolvers {
 
   export type StartResolver = Resolver<InfraTimeKey | null>;
   export type EndResolver = Resolver<InfraTimeKey | null>;
+  export type HasMoreBeforeResolver = Resolver<boolean>;
+  export type HasMoreAfterResolver = Resolver<boolean>;
   export type FilterQueryResolver = Resolver<string | null>;
   export type HighlightQueryResolver = Resolver<string | null>;
   export type EntriesResolver = Resolver<InfraLogEntry[]>;
@@ -435,6 +455,66 @@ export enum InfraOperator {
 /** A segment of the log entry message */
 export type InfraLogMessageSegment = InfraLogMessageFieldSegment | InfraLogMessageConstantSegment;
 
+export namespace LogEntries {
+  export type Variables = {
+    sourceId?: string | null;
+    timeKey: InfraTimeKeyInput;
+    countBefore?: number | null;
+    countAfter?: number | null;
+  };
+
+  export type Query = {
+    __typename?: 'Query';
+    source: Source;
+  };
+
+  export type Source = {
+    __typename?: 'InfraSource';
+    id: string;
+    logEntriesAround: LogEntriesAround;
+  };
+
+  export type LogEntriesAround = {
+    __typename?: 'InfraLogEntryInterval';
+    start?: Start | null;
+    end?: End | null;
+    hasMoreBefore: boolean;
+    hasMoreAfter: boolean;
+    entries: Entries[];
+  };
+
+  export type Start = InfraTimeKeyFields.Fragment;
+
+  export type End = InfraTimeKeyFields.Fragment;
+
+  export type Entries = {
+    __typename?: 'InfraLogEntry';
+    gid: string;
+    key: Key;
+    message: Message[];
+  };
+
+  export type Key = {
+    __typename?: 'InfraTimeKey';
+    time: number;
+    tiebreaker: number;
+  };
+
+  export type Message =
+    | InfraLogMessageFieldSegmentInlineFragment
+    | InfraLogMessageConstantSegmentInlineFragment;
+
+  export type InfraLogMessageFieldSegmentInlineFragment = {
+    __typename?: 'InfraLogMessageFieldSegment';
+    field: string;
+    value: string;
+  };
+
+  export type InfraLogMessageConstantSegmentInlineFragment = {
+    __typename?: 'InfraLogMessageConstantSegment';
+    constant: string;
+  };
+}
 export namespace MapQuery {
   export type Variables = {
     id: string;
@@ -475,5 +555,13 @@ export namespace MapQuery {
     __typename?: 'InfraNodeMetric';
     name: string;
     value: number;
+  };
+}
+
+export namespace InfraTimeKeyFields {
+  export type Fragment = {
+    __typename?: 'InfraTimeKey';
+    time: number;
+    tiebreaker: number;
   };
 }

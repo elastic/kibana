@@ -4,6 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { rootSchema } from '../../common/graphql/root/schema.gql';
+import gql from 'graphql-tag';
 
-export const schemas = [rootSchema];
+export const sharedFragments = {
+  InfraTimeKey: gql`
+    fragment InfraTimeKeyFields on InfraTimeKey {
+      time
+      tiebreaker
+    }
+  `,
+};

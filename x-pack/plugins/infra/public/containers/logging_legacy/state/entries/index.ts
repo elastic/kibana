@@ -10,3 +10,4 @@ import * as entriesSelectors from './selectors';
 
 export { entriesActions, entriesEpics, entriesSelectors };
 export * from './reducer';
+export * from './state';

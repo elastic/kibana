@@ -6,11 +6,11 @@
 
 export const initialSourceState: SourceState = {
   coreFields: {
-    message: '@message',
+    message: 'message',
     tiebreaker: '_doc',
     time: '@timestamp',
   },
-  indices: ['logstash-*'],
+  indices: ['xpack-infra-default-logs'],
   name: 'Unnamed Source',
 };
 

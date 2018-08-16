@@ -6,12 +6,12 @@
 
 import { createSelector } from 'reselect';
 
-import { getLogEntryKey } from '../../../../common/log_entry';
 import {
   getSearchResultIndexAfterTime,
   getSearchResultIndexBeforeTime,
   getSearchResultKey,
 } from '../../../../common/log_search_result';
+import { getLogEntryKey } from '../../../utils/log_entry';
 import { globalizeSelectors } from '../../../utils/typed_redux';
 import { configurationSelectors as localConfigurationSelectors } from './configuration';
 import { entriesSelectors as localEntriesSelectors } from './entries';
@@ -118,13 +118,13 @@ export const sharedSelectors = {
     entriesSelectors.selectFirstVisibleEntry,
     entriesSelectors.selectLastVisibleEntry,
     targetSelectors.selectTarget,
-    (firstVisibleEntry, lastVisibleLEntry, target) => {
-      if (firstVisibleEntry && lastVisibleLEntry) {
-        return (firstVisibleEntry.fields.time + lastVisibleLEntry.fields.time) / 2;
+    (firstVisibleEntry, lastVisibleEntry, target) => {
+      if (firstVisibleEntry && lastVisibleEntry) {
+        return (firstVisibleEntry.key.time + lastVisibleEntry.key.time) / 2;
       } else if (firstVisibleEntry) {
-        return firstVisibleEntry.fields.time;
-      } else if (lastVisibleLEntry) {
-        return lastVisibleLEntry.fields.time;
+        return firstVisibleEntry.key.time;
+      } else if (lastVisibleEntry) {
+        return lastVisibleEntry.key.time;
       } else {
         return target.time;
       }

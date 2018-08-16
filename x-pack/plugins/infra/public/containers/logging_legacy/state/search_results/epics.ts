@@ -9,7 +9,7 @@ import { Epic } from 'redux-observable';
 import { concat, merge } from 'rxjs';
 import { concatMap, filter, takeUntil, withLatestFrom } from 'rxjs/operators';
 
-import { getLogEntryKey, LogEntry } from '../../../../../common/log_entry';
+import { getLogEntryKey, LogEntry } from '../../../../utils/log_entry';
 import { entriesActions } from '../entries';
 import { searchActions } from '../search';
 import { CommonFetchSearchResultsDependencies } from './api/fetch_search_results';

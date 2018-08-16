@@ -14,13 +14,13 @@ import {
   entriesSelectors,
   initialState,
   reducer,
-  searchSelectors,
+  // searchSelectors,
   sourceSelectors,
   State,
   summarySelectors,
   targetSelectors,
 } from '../../containers/logging_legacy/state';
-import { InfraObservableApi } from '../../lib/lib';
+import { InfraApolloClient, InfraObservableApi } from '../../lib/lib';
 
 declare global {
   interface Window {
@@ -29,21 +29,28 @@ declare global {
 }
 
 export interface StoreDependencies {
+  apolloClient: Observable<InfraApolloClient>;
   observableApi: Observable<InfraObservableApi>;
 }
 
-export function createStore({ observableApi }: StoreDependencies) {
+export function createStore({ apolloClient, observableApi }: StoreDependencies) {
   const composeEnhancers = window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ || compose;
 
   const middlewareDependencies = {
     postToApi$: observableApi.pipe(map(({ post }) => post)),
-    selectEntriesEndLoadingState: entriesSelectors.selectEntriesEndLoadingState,
-    selectEntriesStartLoadingState: entriesSelectors.selectEntriesStartLoadingState,
-    selectFirstEntry: entriesSelectors.selectFirstEntry,
+    apolloClient$: apolloClient,
+    selectIsLoadingEntries: entriesSelectors.selectIsLoadingEntries,
+    selectEntriesEnd: entriesSelectors.selectEntriesEnd,
+    selectEntriesStart: entriesSelectors.selectEntriesStart,
+    selectHasMoreAfterEnd: entriesSelectors.selectHasMoreAfterEnd,
+    selectHasMoreBeforeStart: entriesSelectors.selectHasMoreBeforeStart,
+    // selectEntriesEndLoadingState: entriesSelectors.selectEntriesEndLoadingState,
+    // selectEntriesStartLoadingState: entriesSelectors.selectEntriesStartLoadingState,
+    // selectFirstEntry: entriesSelectors.selectFirstEntry,
     selectFirstSummaryBucket: summarySelectors.selectFirstSummaryBucket,
-    selectLastEntry: entriesSelectors.selectLastEntry,
+    // selectLastEntry: entriesSelectors.selectLastEntry,
     selectLastSummaryBucket: summarySelectors.selectLastSummaryBucket,
-    selectQuery: searchSelectors.selectQuery,
+    // selectQuery: searchSelectors.selectQuery,
     selectSourceCoreFields: sourceSelectors.selectSourceCoreFields,
     selectSourceIndices: sourceSelectors.selectSourceIndices,
     selectSummaryBucketSize: summarySelectors.selectSummaryBucketSize,

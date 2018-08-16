@@ -25,9 +25,12 @@ export class InfraLogEntriesDomain {
     maxCountAfter: number,
     filterQuery?: string,
     highlightQuery?: string
-  ): Promise<InfraLogEntry[]> {
+  ): Promise<{ entriesBefore: InfraLogEntry[]; entriesAfter: InfraLogEntry[] }> {
     if (maxCountBefore <= 0 && maxCountAfter <= 0) {
-      return [];
+      return {
+        entriesBefore: [],
+        entriesAfter: [],
+      };
     }
 
     const sourceConfiguration = await this.libs.sources.getConfiguration(sourceId);
@@ -62,11 +65,12 @@ export class InfraLogEntriesDomain {
       highlightQuery
     );
 
-    const entries = [...(maxCountBefore > 0 ? documentsBefore : []), ...documentsAfter].map(
-      convertLogDocumentToEntry(sourceId, formattingRules.format)
-    );
-
-    return entries;
+    return {
+      entriesBefore: (maxCountBefore > 0 ? documentsBefore : []).map(
+        convertLogDocumentToEntry(sourceId, formattingRules.format)
+      ),
+      entriesAfter: documentsAfter.map(convertLogDocumentToEntry(sourceId, formattingRules.format)),
+    };
   }
 
   public async getLogEntriesBetween(

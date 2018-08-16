@@ -5,244 +5,122 @@
  */
 
 import { Action } from 'redux';
-import { Epic } from 'redux-observable';
-import { interval, merge } from 'rxjs';
-import {
-  debounceTime,
-  exhaustMap,
-  filter,
-  map,
-  startWith,
-  switchMap,
-  takeUntil,
-  withLatestFrom,
-} from 'rxjs/operators';
+import { combineEpics, Epic, EpicWithState } from 'redux-observable';
+import { /*interval,*/ merge } from 'rxjs';
+import { exhaustMap, filter, map, withLatestFrom } from 'rxjs/operators';
 
-import { getLogEntryKey, isBetween, LogEntry } from '../../../../../common/log_entry';
-import {
-  isExhaustedLoadingResult,
-  isFailureLoadingResult,
-  isIntervalLoadingPolicy,
-  isRunningLoadingProgress,
-  LoadingState,
-} from '../../../../utils/loading_state';
+import { pickTimeKey, TimeKey, timeKeyIsBetween } from '../../../../../common/time';
 import { targetActions } from '../target';
 import {
-  consolidateEntries,
+  loadEntries,
+  loadMoreEntries,
   reportVisibleEntries,
-  startLiveStreaming,
-  stopLiveStreaming,
+  // startLiveStreaming,
+  // stopLiveStreaming,
 } from './actions';
-import { extendEntriesEnd$, extendEntriesStart$ } from './api/extend_entries';
-import { CommonFetchEntriesDependencies } from './api/fetch_entries';
-import { replaceEntries$, replaceEntriesWithLatest$ } from './api/replace_entries';
+import { loadMoreEntriesEpic } from './load_more_operation';
+import { loadEntriesEpic } from './load_operation';
 
-const ASSUMED_ENTRIES_PER_PAGE = 100;
+const LOAD_CHUNK_SIZE = 200;
 const DESIRED_BUFFER_PAGES = 2;
-const DEFAULT_INTERVAL_ENTRIES = (2 * DESIRED_BUFFER_PAGES + 1) * ASSUMED_ENTRIES_PER_PAGE;
-const MIN_CHUNK_SIZE = 25;
-const VISIBLE_INTERVAL_SETTLE_TIMEOUT = 2000;
 
-interface ManageStreamIntervalDependencies<State> extends CommonFetchEntriesDependencies<State> {
-  selectFirstEntry: (state: State) => LogEntry | null;
-  selectLastEntry: (state: State) => LogEntry | null;
-  selectEntriesStartLoadingState: (state: State) => LoadingState<any>;
-  selectEntriesEndLoadingState: (state: State) => LoadingState<any>;
+interface ManageEntriesDependencies<State> {
+  selectEntriesStart: (state: State) => TimeKey | null;
+  selectEntriesEnd: (state: State) => TimeKey | null;
+  selectHasMoreBeforeStart: (state: State) => boolean;
+  selectHasMoreAfterEnd: (state: State) => boolean;
+  selectIsLoadingEntries: (state: State) => boolean;
 }
 
-export const createSummaryEpic = <State>(): Epic<
+export const createEntriesEpic = <State>() =>
+  combineEpics(
+    createEntriesEffectsEpic<State>(),
+    loadEntriesEpic as EpicWithState<typeof loadEntriesEpic, State>,
+    loadMoreEntriesEpic as EpicWithState<typeof loadEntriesEpic, State>
+  );
+
+export const createEntriesEffectsEpic = <State>(): Epic<
   Action,
   Action,
   State,
-  ManageStreamIntervalDependencies<State>
+  ManageEntriesDependencies<State>
 > => (
   action$,
   state$,
   {
-    postToApi$,
-    selectFirstEntry,
-    selectLastEntry,
-    selectEntriesStartLoadingState,
-    selectEntriesEndLoadingState,
-    selectSourceCoreFields,
-    selectSourceIndices,
+    selectEntriesStart,
+    selectEntriesEnd,
+    selectHasMoreBeforeStart,
+    selectHasMoreAfterEnd,
+    selectIsLoadingEntries,
   }
 ) => {
-  const staleIntervalAfterJump$ = action$.pipe(
+  const shouldLoadAround$ = action$.pipe(
     filter(targetActions.jumpToTarget.match),
-    map(({ payload: target }) => target)
+    withLatestFrom(state$),
+    filter(([{ payload }, state]) => {
+      const entriesStart = selectEntriesStart(state);
+      const entriesEnd = selectEntriesEnd(state);
+
+      return entriesStart && entriesEnd
+        ? !timeKeyIsBetween(entriesStart, entriesEnd, payload)
+        : true;
+    }),
+    map(([{ payload }]) => pickTimeKey(payload))
   );
 
-  const staleIntervalAfterScroll$ = action$.pipe(
+  const shouldLoadMoreBefore$ = action$.pipe(
     filter(reportVisibleEntries.match),
-    debounceTime(VISIBLE_INTERVAL_SETTLE_TIMEOUT),
-    map(({ payload: { middleKey } }) => middleKey),
-    filter(middleKey => middleKey !== null)
+    filter(({ payload: { pagesBeforeStart } }) => pagesBeforeStart < DESIRED_BUFFER_PAGES),
+    withLatestFrom(state$),
+    filter(([action, state]) => !selectIsLoadingEntries(state)),
+    filter(([action, state]) => selectHasMoreBeforeStart(state)),
+    map(([action, state]) => selectEntriesStart(state)),
+    filter((entriesStart): entriesStart is TimeKey => entriesStart != null),
+    map(pickTimeKey)
   );
 
-  const missingStartEntriesAfterScroll$ = action$.pipe(
+  const shouldLoadMoreAfter$ = action$.pipe(
     filter(reportVisibleEntries.match),
-    map(({ payload: { pagesBeforeStart } }) =>
-      Math.ceil(ASSUMED_ENTRIES_PER_PAGE * (DESIRED_BUFFER_PAGES - pagesBeforeStart))
-    ),
-    filter(missingEntries => missingEntries > 0)
-  );
-
-  const missingEndEntriesAfterScroll$ = action$.pipe(
-    filter(reportVisibleEntries.match),
-    map(({ payload: { pagesAfterEnd } }) =>
-      Math.ceil(ASSUMED_ENTRIES_PER_PAGE * (DESIRED_BUFFER_PAGES - pagesAfterEnd))
-    ),
-    filter(missingEntries => missingEntries > 0)
-  );
-
-  const staleEndEntries$ = merge(
-    action$.pipe(
-      filter(startLiveStreaming.match),
-      exhaustMap(() =>
-        interval(3000).pipe(
-          map(() => ({ isJump: false })),
-          startWith({ isJump: true }),
-          takeUntil(action$.pipe(filter(stopLiveStreaming.match)))
-        )
-      )
-    ),
-    action$.pipe(filter(() => false /* TODO: filter jumpToEnd */), map(() => ({ isJump: true })))
-  ).pipe(
-    map(({ isJump }) => ({
-      isJump,
-      outdatedEntries: ASSUMED_ENTRIES_PER_PAGE * DESIRED_BUFFER_PAGES,
-    }))
+    filter(({ payload: { pagesAfterEnd } }) => pagesAfterEnd < DESIRED_BUFFER_PAGES),
+    withLatestFrom(state$),
+    filter(([action, state]) => !selectIsLoadingEntries(state)),
+    filter(([action, state]) => selectHasMoreAfterEnd(state)),
+    map(([action, state]) => selectEntriesEnd(state)),
+    filter((entriesEnd): entriesEnd is TimeKey => entriesEnd != null),
+    map(pickTimeKey)
   );
 
   return merge(
-    merge(
-      staleIntervalAfterJump$,
-      staleIntervalAfterScroll$.pipe(
-        filter(() => {
-          const state = state$.value;
-          const startLoadingState = selectEntriesStartLoadingState(state);
-          const endLoadingState = selectEntriesEndLoadingState(state);
-
-          return (
-            !isRunningLoadingProgress(startLoadingState.current) &&
-            !isRunningLoadingProgress(endLoadingState.current)
-          );
-        })
-      )
-    ).pipe(
-      withLatestFrom(postToApi$),
-      switchMap(([target, postToApi]) => {
-        const state = state$.value;
-        const firstLogEntry = selectFirstEntry(state);
-        const lastLogEntry = selectLastEntry(state);
-
-        const isLocalJump =
-          target !== null &&
-          firstLogEntry !== null &&
-          lastLogEntry !== null &&
-          isBetween(firstLogEntry.fields, lastLogEntry.fields, target);
-
-        // the interval is displayed symmetrically before and after the target
-        const desiredEntriesPerEndpoint = Math.ceil(DEFAULT_INTERVAL_ENTRIES / 2);
-
-        if (isLocalJump) {
-          return [
-            consolidateEntries({
-              after: desiredEntriesPerEndpoint,
-              before: desiredEntriesPerEndpoint,
-              target: target!,
-            }),
-          ];
-        } else if (target !== null) {
-          return replaceEntries$(
-            postToApi,
-            target,
-            desiredEntriesPerEndpoint,
-            selectSourceIndices(state),
-            selectSourceCoreFields(state)
-          );
-        } else {
-          return [];
-        }
-      })
+    shouldLoadAround$.pipe(
+      exhaustMap(target => [
+        loadEntries({
+          sourceId: 'default',
+          timeKey: target,
+          countBefore: LOAD_CHUNK_SIZE,
+          countAfter: LOAD_CHUNK_SIZE,
+        }),
+      ])
     ),
-    missingStartEntriesAfterScroll$.pipe(
-      filter(() => {
-        const state = state$.value;
-        const startLoadingState = selectEntriesStartLoadingState(state);
-        const endLoadingState = selectEntriesEndLoadingState(state);
-
-        return (
-          !isIntervalLoadingPolicy(endLoadingState.policy) &&
-          !isRunningLoadingProgress(startLoadingState.current) &&
-          !isExhaustedLoadingResult(startLoadingState.last) &&
-          !isFailureLoadingResult(startLoadingState.last)
-        );
-      }),
-      withLatestFrom(postToApi$),
-      exhaustMap(([missingEntries, postToApi]) => {
-        const state = state$.value;
-        const firstLogEntry = selectFirstEntry(state);
-
-        if (firstLogEntry === null) {
-          return [];
-        }
-
-        const chunkSize = Math.max(MIN_CHUNK_SIZE, missingEntries);
-        const target = getLogEntryKey(firstLogEntry);
-        return extendEntriesStart$(
-          postToApi,
-          target,
-          chunkSize,
-          selectSourceIndices(state),
-          selectSourceCoreFields(state)
-        ).pipe(takeUntil(staleIntervalAfterJump$));
-      })
+    shouldLoadMoreAfter$.pipe(
+      exhaustMap(target => [
+        loadMoreEntries({
+          sourceId: 'default',
+          timeKey: target,
+          countBefore: 0,
+          countAfter: LOAD_CHUNK_SIZE,
+        }),
+      ])
     ),
-    missingEndEntriesAfterScroll$.pipe(
-      filter(() => {
-        const loadingState = selectEntriesEndLoadingState(state$.value);
-
-        return (
-          !isRunningLoadingProgress(loadingState.current) &&
-          !isIntervalLoadingPolicy(loadingState.policy) &&
-          !isExhaustedLoadingResult(loadingState.last) &&
-          !isFailureLoadingResult(loadingState.last)
-        );
-      }),
-      withLatestFrom(postToApi$),
-      exhaustMap(([missingEntries, postToApi]) => {
-        const state = state$.value;
-        const lastLogEntry = selectLastEntry(state);
-
-        if (lastLogEntry !== null) {
-          return extendEntriesEnd$(
-            postToApi,
-            getLogEntryKey(lastLogEntry),
-            Math.max(MIN_CHUNK_SIZE, missingEntries),
-            selectSourceIndices(state),
-            selectSourceCoreFields(state)
-          ).pipe(takeUntil(staleIntervalAfterJump$));
-        } else {
-          return [];
-        }
-      })
-    ),
-    staleEndEntries$.pipe(
-      withLatestFrom(postToApi$),
-      exhaustMap(([{ isJump, outdatedEntries }, postToApi]) => {
-        const state = state$.value;
-
-        return replaceEntriesWithLatest$(
-          postToApi,
-          outdatedEntries,
-          selectSourceIndices(state),
-          selectSourceCoreFields(state),
-          isJump
-        ).pipe(takeUntil(staleIntervalAfterJump$));
-      })
-    ),
-    staleIntervalAfterJump$.pipe(map(() => stopLiveStreaming()))
+    shouldLoadMoreBefore$.pipe(
+      exhaustMap(target => [
+        loadMoreEntries({
+          sourceId: 'default',
+          timeKey: target,
+          countBefore: LOAD_CHUNK_SIZE,
+          countAfter: 0,
+        }),
+      ])
+    )
   );
 };

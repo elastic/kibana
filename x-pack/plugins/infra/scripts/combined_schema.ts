@@ -6,10 +6,9 @@
 
 import { buildSchemaFromTypeDefinitions } from 'graphql-tools';
 
-import { schemas as clientSchemas } from '../public/graphql';
 import { schemas as serverSchemas } from '../server/graphql';
 
-export const schemas = [...serverSchemas, ...clientSchemas];
+export const schemas = [...serverSchemas];
 
 // this default export is used to feed the combined types to the gql-gen tool
 // which generates the corresponding typescript types.

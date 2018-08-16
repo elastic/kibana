@@ -82,7 +82,7 @@ export class LogMinimap extends React.Component<LogMinimapProps, LogMinimapState
     const visibleDuration = getMillisOfScale(scale);
     const [minTime] = this.getYScale().domain();
 
-    return (time - minTime) * height / visibleDuration;
+    return ((time - minTime) * height) / visibleDuration;
   };
 
   public updateVisibleInterval = () => {

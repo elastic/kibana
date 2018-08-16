@@ -42,19 +42,32 @@ export const createLogEntriesResolvers = (libs: {
 } => ({
   InfraSource: {
     async logEntriesAround(source, args, { req }) {
-      const entries = await libs.logEntries.getLogEntriesAround(
+      const countBefore = args.countBefore || 0;
+      const countAfter = args.countAfter || 0;
+
+      const { entriesBefore, entriesAfter } = await libs.logEntries.getLogEntriesAround(
         req,
         source.id,
         args.key,
-        args.countBefore || 0,
-        args.countAfter || 0,
+        countBefore + 1,
+        countAfter + 1,
         args.filterQuery || undefined,
         args.highlightQuery || undefined
       );
 
+      const hasMoreBefore = entriesBefore.length > countBefore;
+      const hasMoreAfter = entriesAfter.length > countAfter;
+
+      const entries = [
+        ...(hasMoreBefore ? entriesBefore.slice(1) : entriesBefore),
+        ...(hasMoreAfter ? entriesAfter.slice(0, -1) : entriesAfter),
+      ];
+
       return {
         start: entries.length > 0 ? entries[0].key : null,
         end: entries.length > 0 ? entries[entries.length - 1].key : null,
+        hasMoreBefore,
+        hasMoreAfter,
         filterQuery: args.filterQuery,
         highlightQuery: args.highlightQuery,
         entries,
@@ -73,6 +86,8 @@ export const createLogEntriesResolvers = (libs: {
       return {
         start: entries.length > 0 ? entries[0].key : null,
         end: entries.length > 0 ? entries[entries.length - 1].key : null,
+        hasMoreBefore: true,
+        hasMoreAfter: true,
         filterQuery: args.filterQuery,
         highlightQuery: args.highlightQuery,
         entries,

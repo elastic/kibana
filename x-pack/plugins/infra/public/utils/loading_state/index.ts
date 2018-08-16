@@ -6,21 +6,25 @@
 
 export { initialLoadingState, LoadingState } from './loading_state';
 
-export { isManualLoadingPolicy, isIntervalLoadingPolicy } from './loading_policy';
+export { isManualLoadingPolicy, isIntervalLoadingPolicy, LoadingPolicy } from './loading_policy';
 
 export {
   createRunningProgressReducer,
   createIdleProgressReducer,
-  isUninitializedLoadingProgress,
+  isIdleLoadingProgress,
   isRunningLoadingProgress,
+  LoadingProgress,
 } from './loading_progress';
 
 export {
-  createSuccessResultReducer,
+  createFailureResult,
   createFailureResultReducer,
-  isUninitializedLoadingResult,
-  isSuccessLoadingResult,
-  isFailureLoadingResult,
-  isExhaustedLoadingResult,
+  createSuccessResult,
+  createSuccessResultReducer,
   getTimeOrDefault,
+  isExhaustedLoadingResult,
+  isFailureLoadingResult,
+  isSuccessLoadingResult,
+  isUninitializedLoadingResult,
+  LoadingResult,
 } from './loading_result';

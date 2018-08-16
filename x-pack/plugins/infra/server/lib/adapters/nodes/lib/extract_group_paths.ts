@@ -25,13 +25,15 @@ export function extractGroupPaths(
       const key: string = String(bucket.key || index);
       if (secondGroup) {
         return acc.concat(
-          bucket.path_1.buckets.map((b: InfraBucket): InfraNode => {
-            const nodePath = [{ value: bucket.key }, { value: b.key }].concat(nodeItem.path);
-            return {
-              ...nodeItem,
-              path: nodePath,
-            };
-          })
+          bucket.path_1.buckets.map(
+            (b: InfraBucket): InfraNode => {
+              const nodePath = [{ value: bucket.key }, { value: b.key }].concat(nodeItem.path);
+              return {
+                ...nodeItem,
+                path: nodePath,
+              };
+            }
+          )
         );
       }
       const path = [{ value: key }].concat(nodeItem.path);

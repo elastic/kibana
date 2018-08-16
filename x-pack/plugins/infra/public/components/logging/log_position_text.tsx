@@ -8,8 +8,8 @@ import { EuiIcon } from '@elastic/eui';
 import classNames from 'classnames';
 import * as React from 'react';
 
-import { LogEntry } from '../../../common/log_entry';
 import { formatTime } from '../../../common/time';
+import { LogEntry } from '../../utils/log_entry';
 
 interface LogPositionTextProps {
   className?: string;
@@ -27,11 +27,11 @@ export class LogPositionText extends React.PureComponent<LogPositionTextProps, {
       <div className={classes}>
         <span>Showing </span>
         <strong>
-          {firstVisibleLogEntry ? formatTime(firstVisibleLogEntry.fields.time) : 'unknown'}
+          {firstVisibleLogEntry ? formatTime(firstVisibleLogEntry.key.time) : 'unknown'}
         </strong>{' '}
         <EuiIcon type="sortRight" />{' '}
         <strong>
-          {lastVisibleLogEntry ? formatTime(lastVisibleLogEntry.fields.time) : 'unknown'}
+          {lastVisibleLogEntry ? formatTime(lastVisibleLogEntry.key.time) : 'unknown'}
         </strong>
       </div>
     );

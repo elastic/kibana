@@ -53,26 +53,36 @@ export const getTimeOrDefault: GetTimeOrDefaultT = <P, T>(
   defaultValue?: T
 ) => (isUninitializedLoadingResult(loadingResult) ? defaultValue || null : loadingResult.time);
 
-export const createSuccessResultReducer = <Parameters, Payload>(
-  isExhausted: (params: Parameters, result: Payload) => boolean
-) => (
-  state: LoadingResult<Parameters>,
-  { params, result }: { params: Parameters; result: Payload }
+export const createSuccessResult = <Parameters = any, Payload = any>(
+  parameters: Parameters,
+  isExhausted: boolean
 ): SuccessLoadingResult<Parameters> => ({
-  isExhausted: isExhausted(params, result),
-  parameters: params,
+  isExhausted,
+  parameters,
   result: 'success',
   time: Date.now(),
 });
 
-export const createFailureResultReducer = <Parameters, ErrorPayload>(
+export const createSuccessResultReducer = <Parameters = any, Payload = any>(
+  isExhausted: (params: Parameters, result: Payload) => boolean
+) => (
+  state: LoadingResult<Parameters>,
+  { params, result }: { params: Parameters; result: Payload }
+): SuccessLoadingResult<Parameters> => createSuccessResult(params, isExhausted(params, result));
+
+export const createFailureResult = <Parameters = any, ErrorPayload = any>(
+  parameters: Parameters,
+  reason: string
+): FailureLoadingResult<Parameters> => ({
+  parameters,
+  reason,
+  result: 'failure',
+  time: Date.now(),
+});
+
+export const createFailureResultReducer = <Parameters = any, ErrorPayload = any>(
   convertErrorToString: (error: ErrorPayload) => string = error => `${error}`
 ) => (
   state: LoadingResult<Parameters>,
   { params, error }: { params: Parameters; error: ErrorPayload }
-): FailureLoadingResult<Parameters> => ({
-  parameters: params,
-  reason: convertErrorToString(error),
-  result: 'failure',
-  time: Date.now(),
-});
+): FailureLoadingResult<Parameters> => createFailureResult(params, convertErrorToString(error));

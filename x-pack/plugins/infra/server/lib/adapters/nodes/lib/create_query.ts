@@ -40,32 +40,38 @@ export function createQuery(options: InfraNodeRequestOptions): InfraESQuery {
   filterClause.push(rangeFilter);
 
   if (groupBy) {
-    groupBy.forEach((group: InfraPathInput): void => {
-      if (isGroupByTerms(group) && group.field) {
-        const inputFilter: InfraFilterInput = {
-          type: InfraFilterType.exists,
-          value: group.field,
-        };
-        mustClause.push(convertInputFilterToESQuery(inputFilter));
+    groupBy.forEach(
+      (group: InfraPathInput): void => {
+        if (isGroupByTerms(group) && group.field) {
+          const inputFilter: InfraFilterInput = {
+            type: InfraFilterType.exists,
+            value: group.field,
+          };
+          mustClause.push(convertInputFilterToESQuery(inputFilter));
+        }
+        if (isGroupByFilters(group) && group.filters) {
+          group.filters!.forEach(
+            (groupFilter: InfraPathFilterInput | null): void => {
+              if (groupFilter != null && groupFilter.query) {
+                const inputFilter: InfraFilterInput = {
+                  type: InfraFilterType.query_string,
+                  value: groupFilter.query,
+                };
+                shouldClause.push(convertInputFilterToESQuery(inputFilter));
+              }
+            }
+          );
+        }
       }
-      if (isGroupByFilters(group) && group.filters) {
-        group.filters!.forEach((groupFilter: InfraPathFilterInput | null): void => {
-          if (groupFilter != null && groupFilter.query) {
-            const inputFilter: InfraFilterInput = {
-              type: InfraFilterType.query_string,
-              value: groupFilter.query,
-            };
-            shouldClause.push(convertInputFilterToESQuery(inputFilter));
-          }
-        });
-      }
-    });
+    );
   }
 
   if (filters) {
-    filters.forEach((filter: InfraFilterInput): void => {
-      mustClause.push(convertInputFilterToESQuery(filter));
-    });
+    filters.forEach(
+      (filter: InfraFilterInput): void => {
+        mustClause.push(convertInputFilterToESQuery(filter));
+      }
+    );
   }
 
   const query: InfraESBoolQuery = {
