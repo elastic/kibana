@@ -132,7 +132,8 @@ describe('plot', () => {
       it('sets the font style', () => {
         const result = fn(testPlot, { font: fontStyle }).value;
         const style = {
-          size: 12,
+          size: 14,
+          lHeight: 21,
           style: 'normal',
           weight: 'bolder',
           family: 'Chalkboard, serif',

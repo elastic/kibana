@@ -50,5 +50,5 @@ export const font = () => ({
   help: 'Set the font, size and color',
   template: templateFromReactComponent(FontArgInput),
   default:
-    '{font size=12 family="\'Open Sans\', Helvetica, Arial, sans-serif" color="#000000" align=left}',
+    '{font size=14 family="\'Open Sans\', Helvetica, Arial, sans-serif" color="#000000" align=left}',
 });

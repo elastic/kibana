@@ -24,10 +24,24 @@ describe('font', () => {
         expect(result.css).to.contain('font-size:20px');
       });
 
-      it('defaults to 12', () => {
+      it('defaults to 14', () => {
         const result = fn(null);
-        expect(result.spec).to.have.property('fontSize', '12px');
-        expect(result.css).to.contain('font-size:12px');
+        expect(result.spec).to.have.property('fontSize', '14px');
+        expect(result.css).to.contain('font-size:14px');
+      });
+    });
+
+    describe('lHeight', () => {
+      it('sets line height', () => {
+        const result = fn(null, { lHeight: 30 });
+        expect(result.spec).to.have.property('lineHeight', '30px');
+        expect(result.css).to.contain('line-height:30px');
+      });
+
+      it('defaults to 21', () => {
+        const result = fn(null);
+        expect(result.spec).to.have.property('lineHeight', '21px');
+        expect(result.css).to.contain('line-height:21px');
       });
     });
 

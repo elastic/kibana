@@ -17,7 +17,7 @@ export const metric = () => ({
       types: ['style'],
       help: 'Font settings for the metric. Technically you can stick other styles in here too!',
       default:
-        '{font size=48 family="\'Open Sans\', Helvetica, Arial, sans-serif" color="#000000" align=center}',
+        '{font size=48 family="\'Open Sans\', Helvetica, Arial, sans-serif" color="#000000" align=center lHeight=48}',
     },
     labelFont: {
       types: ['style'],

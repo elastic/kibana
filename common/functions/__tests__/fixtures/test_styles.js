@@ -9,10 +9,11 @@ export const fontStyle = {
     textDecoration: 'underline',
     color: 'pink',
     textAlign: 'center',
-    fontSize: '12px',
+    fontSize: '14px',
+    lineHeight: '21px',
   },
   css:
-    'font-family:Chalkboard, serif;font-weight:bolder;font-style:normal;text-decoration:underline;color:pink;text-align:center;font-size:12px',
+    'font-family:Chalkboard, serif;font-weight:bolder;font-style:normal;text-decoration:underline;color:pink;text-align:center;font-size:14px;line-height:21px',
 };
 
 export const containerStyle = {

@@ -17,7 +17,7 @@ export const metric = () => ({
       help: 'Fonts, alignment and color',
       argType: 'font',
       default:
-        '{font size=48 family="\'Open Sans\', Helvetica, Arial, sans-serif" color="#000000" align=center}',
+        '{font size=48 family="\'Open Sans\', Helvetica, Arial, sans-serif" color="#000000" align=center lHeight=48}',
     },
     {
       name: 'labelFont',

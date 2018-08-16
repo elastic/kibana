@@ -4,7 +4,8 @@ import { fontStyle } from './fixtures/test_styles';
 
 describe('getFontSpec', () => {
   const defaultSpec = {
-    size: 12,
+    size: 14,
+    lHeight: 21,
     style: 'normal',
     weight: 'normal',
     family: '"Open Sans", Helvetica, Arial, sans-serif',
@@ -20,7 +21,8 @@ describe('getFontSpec', () => {
   describe('convert from fontStyle object', () => {
     it('returns plot font spec', () => {
       expect(getFontSpec(fontStyle)).to.eql({
-        size: 12,
+        size: 14,
+        lHeight: 21,
         style: 'normal',
         weight: 'bolder',
         family: 'Chalkboard, serif',

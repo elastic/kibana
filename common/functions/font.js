@@ -12,7 +12,12 @@ export const font = () => ({
     size: {
       types: ['number'],
       help: 'Font size (px)',
-      default: 12,
+      default: 14,
+    },
+    lHeight: {
+      types: ['number'],
+      help: 'Line height (px)',
+      default: 21,
     },
     family: {
       types: ['string'],
@@ -73,6 +78,7 @@ export const font = () => ({
       textDecoration: args.underline ? 'underline' : 'none',
       textAlign: args.align,
       fontSize: `${args.size}px`, // apply font size as a pixel setting
+      lineHeight: `${args.lHeight}px`, // apply line height as a pixel setting
     };
 
     // conditionally apply styles based on input
