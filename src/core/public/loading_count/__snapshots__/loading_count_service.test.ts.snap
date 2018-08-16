@@ -3,7 +3,7 @@
 exports[`adds a fatal error if count observable emits a negative number 1`] = `
 Array [
   Array [
-    [Error: Observables passed to loadingCount.add() must only emit possitive numbers],
+    [Error: Observables passed to loadingCount.add() must only emit positive numbers],
   ],
 ]
 `;

@@ -48,7 +48,7 @@ export class LoadingCountService {
             tap(count => {
               if (count < 0) {
                 throw new Error(
-                  'Observables passed to loadingCount.add() must only emit possitive numbers'
+                  'Observables passed to loadingCount.add() must only emit positive numbers'
                 );
               }
             }),
