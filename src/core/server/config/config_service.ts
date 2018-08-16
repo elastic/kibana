@@ -18,7 +18,7 @@
  */
 
 import { isEqual } from 'lodash';
-import { from, Observable } from 'rxjs';
+import { Observable } from 'rxjs';
 import { distinctUntilChanged, first, map } from 'rxjs/operators';
 
 import { Logger, LoggerFactory } from '../logging';
@@ -66,7 +66,7 @@ export class ConfigService {
     path: ConfigPath,
     ConfigClass: ConfigWithSchema<Schema, Config>
   ) {
-    return from(this.getDistinctRawConfig(path)).pipe(
+    return this.getDistinctRawConfig(path).pipe(
       map(rawConfig => this.createConfig(path, rawConfig, ConfigClass))
     );
   }
@@ -81,7 +81,7 @@ export class ConfigService {
     path: ConfigPath,
     ConfigClass: ConfigWithSchema<Schema, Config>
   ) {
-    return from(this.getDistinctRawConfig(path)).pipe(
+    return this.getDistinctRawConfig(path).pipe(
       map(
         rawConfig =>
           rawConfig === undefined ? undefined : this.createConfig(path, rawConfig, ConfigClass)
@@ -92,9 +92,7 @@ export class ConfigService {
   public async isEnabledAtPath(path: ConfigPath) {
     const enabledPath = createPluginEnabledPath(path);
 
-    const config = await from(this.config$)
-      .pipe(first())
-      .toPromise();
+    const config = await this.config$.pipe(first()).toPromise();
 
     if (!config.has(enabledPath)) {
       return true;
@@ -117,9 +115,7 @@ export class ConfigService {
   }
 
   public async getUnusedPaths(): Promise<string[]> {
-    const config = await from(this.config$)
-      .pipe(first())
-      .toPromise();
+    const config = await this.config$.pipe(first()).toPromise();
     const handledPaths = this.handledPaths.map(pathToString);
 
     return config.getFlattenedPaths().filter(path => !isPathHandled(path, handledPaths));
@@ -158,10 +154,7 @@ export class ConfigService {
   private getDistinctRawConfig(path: ConfigPath) {
     this.markAsHandled(path);
 
-    return from(this.config$).pipe(
-      map(config => config.get(path)),
-      distinctUntilChanged(isEqual)
-    );
+    return this.config$.pipe(map(config => config.get(path)), distinctUntilChanged(isEqual));
   }
 
   private markAsHandled(path: ConfigPath) {

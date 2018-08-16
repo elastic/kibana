@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { from, Observable, Subscription } from 'rxjs';
+import { Observable, Subscription } from 'rxjs';
 import { first } from 'rxjs/operators';
 
 import { CoreService } from '../../types/core_service';
@@ -53,9 +53,7 @@ export class HttpService implements CoreService {
       }
     });
 
-    const config = await from(this.config$)
-      .pipe(first())
-      .toPromise();
+    const config = await this.config$.pipe(first()).toPromise();
 
     // If a redirect port is specified, we start an HTTP server at this port and
     // redirect all requests to the SSL port.

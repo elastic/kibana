@@ -17,7 +17,6 @@
  * under the License.
  */
 
-import { from } from 'rxjs';
 import { first } from 'rxjs/operators';
 
 import { Root } from '.';
@@ -36,10 +35,12 @@ export class BasePathProxyRoot extends Root {
     shouldRedirectFromOldBasePath,
   }: Pick<BasePathProxyServerOptions, 'blockUntil' | 'shouldRedirectFromOldBasePath'>) {
     const [devConfig, httpConfig] = await Promise.all([
-      from(this.configService.atPath('dev', DevConfig))
+      this.configService
+        .atPath('dev', DevConfig)
         .pipe(first())
         .toPromise(),
-      from(this.configService.atPath('server', HttpConfig))
+      this.configService
+        .atPath('server', HttpConfig)
         .pipe(first())
         .toPromise(),
     ]);

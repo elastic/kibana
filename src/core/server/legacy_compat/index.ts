@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { BehaviorSubject, from } from 'rxjs';
+import { BehaviorSubject } from 'rxjs';
 import { map } from 'rxjs/operators';
 /** @internal */
 export { LegacyPlatformProxifier } from './legacy_platform_proxifier';
@@ -40,7 +40,7 @@ function initEnvironment(rawKbnServer: any) {
   const config: LegacyConfig = rawKbnServer.config;
 
   const legacyConfig$ = new BehaviorSubject(config);
-  const config$ = from(legacyConfig$).pipe(
+  const config$ = legacyConfig$.pipe(
     map(legacyConfig => new LegacyConfigToRawConfigAdapter(legacyConfig))
   );
 

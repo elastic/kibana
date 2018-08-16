@@ -18,7 +18,7 @@
  */
 
 import { isEqual, isPlainObject } from 'lodash';
-import { BehaviorSubject, from, Observable } from 'rxjs';
+import { BehaviorSubject, Observable } from 'rxjs';
 import { distinctUntilChanged, filter, map } from 'rxjs/operators';
 import typeDetect from 'type-detect';
 
@@ -45,7 +45,7 @@ export class RawConfigService {
   private readonly config$: Observable<RawConfig>;
 
   constructor(readonly configFile: string) {
-    this.config$ = from(this.rawConfigFromFile$).pipe(
+    this.config$ = this.rawConfigFromFile$.pipe(
       filter(rawConfig => rawConfig !== notRead),
       map(rawConfig => {
         // If the raw config is null, e.g. if empty config file, we default to

@@ -23,7 +23,6 @@ jest.mock('../read_config', () => ({
   getConfigFromFile: mockGetConfigFromFile,
 }));
 
-import { from } from 'rxjs';
 import { first } from 'rxjs/operators';
 import { RawConfigService } from '../raw_config_service';
 
@@ -64,7 +63,8 @@ test('returns config at path as observable', async () => {
 
   configService.loadConfig();
 
-  const exampleConfig = await from(configService.getConfig$())
+  const exampleConfig = await configService
+    .getConfig$()
     .pipe(first())
     .toPromise();
 
