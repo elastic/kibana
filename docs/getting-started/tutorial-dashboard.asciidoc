@@ -1,14 +1,14 @@
 [[tutorial-dashboard]]
-== Putting it Together in a Dashboard
+=== Displaying your visualizations in a dashboard
 
 A dashboard is a collection of visualizations that you can arrange and share.
-Here you'll build a dashboard that contains the visualizations you saved during
+You'll build a dashboard that contains the visualizations you saved during
 this tutorial.
 
 . Open *Dashboard*.
 . Click *Create new dashboard*.
 . Click *Add*.
-. Click *Bar Example*, *Map Example*, *Markdown Example*, and *Pie Example*.
+. Add *Bar Example*, *Map Example*, *Markdown Example*, and *Pie Example*.
 
 
 Your sample dashboard look like this:

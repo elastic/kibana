@@ -1,5 +1,5 @@
 [[wrapping-up]]
-== Wrapping Up
+=== Wrapping up
 
 Now that you have a handle on the basics, you're ready to start exploring
 your own data with Kibana.
