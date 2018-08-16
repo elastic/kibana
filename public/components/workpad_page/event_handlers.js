@@ -25,6 +25,8 @@ const setupHandler = (commit, target) => {
     e.stopPropagation();
     const { clientX, clientY } = e;
     const { x, y } = localMousePosition(target, clientX, clientY);
+    window.onmousemove = null;
+    window.onmouseup = null;
     commit('mouseEvent', { event: 'mouseUp', x, y });
   };
 };
