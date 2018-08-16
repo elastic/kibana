@@ -40,23 +40,7 @@ interface LogMinimapProps {
   width: number;
 }
 
-interface LogMinimapState {
-  currentTarget: number;
-}
-
-export class LogMinimap extends React.Component<LogMinimapProps, LogMinimapState> {
-  public readonly state = {
-    currentTarget: this.props.target,
-  };
-
-  // public componentWillReceiveProps(nextProps: LogMinimapProps) {
-  //   if (nextProps.target !== this.props.target) {
-  //     this.setState({
-  //       currentTarget: nextProps.target,
-  //     });
-  //   }
-  // }
-
+export class LogMinimap extends React.Component<LogMinimapProps> {
   public handleClick: React.MouseEventHandler<SVGSVGElement> = event => {
     const svgPosition = event.currentTarget.getBoundingClientRect();
     const clickedYPosition = event.clientY - svgPosition.top;
@@ -106,7 +90,7 @@ export class LogMinimap extends React.Component<LogMinimapProps, LogMinimapState
     });
   };
 
-  public componentDidUpdate(prevProps: LogMinimapProps, prevState: LogMinimapState) {
+  public componentDidUpdate(prevProps: LogMinimapProps) {
     const hasNewTarget = prevProps.target !== this.props.target;
     const hasNewIntervalSize = prevProps.intervalSize !== this.props.intervalSize;
 
