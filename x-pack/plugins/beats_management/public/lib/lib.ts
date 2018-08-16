@@ -7,8 +7,7 @@
 import { IModule, IScope } from 'angular';
 import { AxiosRequestConfig } from 'axios';
 import React from 'react';
-import { ConfigurationBlockTypes } from '../../common/constants/configuration_blocks';
-import { BeatTag } from '../../common/domain_types';
+import { ConfigurationBlock } from './../../common/domain_types';
 import { CMTokensAdapter } from './adapters/tokens/adapter_types';
 import { BeatsLib } from './domains/beats';
 import { TagsLib } from './domains/tags';
@@ -47,23 +46,9 @@ export enum OutputType {
 }
 
 export type ClientConfigContent =
-  | string[]
-  | FilebeatModuleName
-  | {
-      moduleName: MetricbeatModuleName;
-      hosts: string[];
-      period: string;
-    }
-  | {
-      outputType: OutputType;
-      hosts: string[];
-      username: string;
-      password: string;
-    };
-
-export interface ClientSideBeatTag extends BeatTag {
-  configurations: ClientSideConfigurationBlock[];
-}
+  | FilebeatInputsConfig
+  | FilebeatModuleConfig
+  | MetricbeatModuleConfig;
 
 export interface YamlConfigSchema {
   id: string;
@@ -80,36 +65,29 @@ export interface YamlConfigSchema {
   parseValidResult?: (value: any) => any;
 }
 
-export type ClientSideConfigurationBlock =
-  | {
-      type: ConfigurationBlockTypes.FilebeatInputs;
-      config: string[];
-    }
-  | {
-      type: ConfigurationBlockTypes.FilebeatModules;
-      config: FilebeatModuleName;
-    }
-  | {
-      type: ConfigurationBlockTypes.MetricbeatModules;
-      config: {
-        moduleName: MetricbeatModuleName;
-        hosts: string[];
-        period: string;
-      };
-    }
-  | {
-      type: ConfigurationBlockTypes.Output;
-      config: {
-        outputType: OutputType;
-        hosts: string[];
-        username: string;
-        password: string;
-      };
-    }
-  | {
-      type: ConfigurationBlockTypes.Processors;
-      config: ClientConfigContent;
-    };
+export interface ClientSideBeatTag {
+  id: string;
+  configurations: ClientSideConfigurationBlock[];
+  color?: string;
+  last_updated: Date;
+}
+
+export interface ClientSideConfigurationBlock
+  extends Pick<ConfigurationBlock, Exclude<keyof ConfigurationBlock, 'block_yml'>> {
+  block_obj: ClientConfigContent;
+}
+
+export interface FilebeatInputsConfig {
+  paths: string[];
+}
+export interface FilebeatModuleConfig {
+  module: FilebeatModuleName;
+}
+export interface MetricbeatModuleConfig {
+  module: MetricbeatModuleName;
+  hosts: string[];
+  period: string;
+}
 
 export interface FrameworkAdapter {
   // Insstance vars

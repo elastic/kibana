@@ -8,7 +8,6 @@ import { EuiButton, EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiSpacer } from 
 import 'brace/mode/yaml';
 import 'brace/theme/github';
 import React from 'react';
-import { BeatTag } from '../../../common/domain_types';
 import { TagEdit } from '../../components/tag';
 import { ClientSideBeatTag, FrontendLibs } from '../../lib/lib';
 
@@ -19,7 +18,7 @@ interface CreateTagPageProps {
 
 interface CreateTagPageState {
   showFlyout: boolean;
-  tag: BeatTag;
+  tag: ClientSideBeatTag;
 }
 
 export class CreateTagPage extends React.PureComponent<CreateTagPageProps, CreateTagPageState> {
@@ -31,7 +30,7 @@ export class CreateTagPage extends React.PureComponent<CreateTagPageProps, Creat
       tag: {
         id: '',
         color: '#DD0A73',
-        configuration_blocks: [],
+        configurations: [],
         last_updated: new Date(),
       },
     };
@@ -42,10 +41,19 @@ export class CreateTagPage extends React.PureComponent<CreateTagPageProps, Creat
       <div>
         <TagEdit
           tag={this.state.tag}
-          onTagChange={(field: string, value: string) =>
-            this.setState(oldState => ({
-              tag: { ...oldState.tag, [field]: value },
-            }))
+          onTagChange={(field: string, value: string | number) =>
+            this.setState(oldState => {
+              let newValue;
+              if (field === 'configurations') {
+                newValue = [...oldState.tag.configurations, value];
+              } else {
+                newValue = value;
+              }
+
+              return {
+                tag: { ...oldState.tag, [field]: newValue },
+              };
+            })
           }
           attachedBeats={null}
         />

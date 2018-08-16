@@ -32,6 +32,7 @@ addValidationRule('isPath', (values: FormData, value: FieldValue) => {
 
 addValidationRule('isPaths', (values: FormData, value: FieldValue) => {
   // TODO add more validation
+
   return true;
 });
 
@@ -82,15 +83,15 @@ export class ConfigForm extends React.Component<ComponentProps, any> {
       this.form.current.click();
     }
   };
-  public onValidSubmit = <ModelType extends {}>(model: ModelType) => {
+  public onValidSubmit = <ModelType extends any>(model: ModelType) => {
     const newModel: any = {};
 
     Object.keys(model).forEach(field => {
       const fieldSchema = this.props.schema.find(s => s.id === field);
       if (fieldSchema && fieldSchema.parseValidResult) {
-        newModel[field] = fieldSchema.parseValidResult(newModel[field]);
+        newModel[field] = fieldSchema.parseValidResult(model[field]);
       } else {
-        newModel[field] = newModel[field];
+        newModel[field] = model[field];
       }
     });
     this.props.onSubmit(newModel);

@@ -33,11 +33,17 @@
             "color": {
               "type": "keyword"
             },
+            "last_updated": {
+              "type": "date"
+            },
             "configuration_blocks": {
               "type": "nested",
               "properties": {
                 "type": {
                   "type": "keyword"
+                },
+                "description": {
+                  "type": "text"
                 },
                 "block_yml": {
                   "type": "text"
