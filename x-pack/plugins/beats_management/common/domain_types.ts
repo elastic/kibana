@@ -7,6 +7,7 @@ import { ConfigurationBlockTypes } from './constants';
 
 export interface ConfigurationBlock {
   type: ConfigurationBlockTypes;
+  description: string;
   block_yml: string;
 }
 

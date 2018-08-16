@@ -24,14 +24,16 @@ import {
 import 'brace/mode/yaml';
 import 'brace/theme/github';
 import React from 'react';
-import { BeatTag, CMBeat } from '../../../common/domain_types';
+import { CMBeat } from '../../../common/domain_types';
+import { ClientSideBeatTag } from '../../lib/lib';
 import { Table } from '../table';
 import { BeatsTableType } from '../table';
 import { ConfigView } from './config_view';
 
 interface TagEditProps {
-  tag: Partial<BeatTag>;
-  onTagChange: (field: keyof BeatTag, value: string) => any;
+  tag: Pick<ClientSideBeatTag, Exclude<keyof ClientSideBeatTag, 'last_updated'>>;
+  onSave: (tag: ClientSideBeatTag) => any;
+  onTagChange: (field: keyof ClientSideBeatTag, value: string) => any;
   attachedBeats: CMBeat[] | null;
 }
 
@@ -93,9 +95,7 @@ export class TagEdit extends React.PureComponent<TagEditProps, TagEditState> {
         <EuiSpacer />
         <EuiPanel>
           <EuiFlexGroup
-            alignItems={
-              tag.configuration_blocks && tag.configuration_blocks.length ? 'stretch' : 'center'
-            }
+            alignItems={tag.configurations && tag.configurations.length ? 'stretch' : 'center'}
           >
             <EuiFlexItem>
               <EuiTitle size="xs">
@@ -137,7 +137,11 @@ export class TagEdit extends React.PureComponent<TagEditProps, TagEditState> {
         )}
 
         {this.state.showFlyout && (
-          <ConfigView values={{}} onClose={() => this.setState({ showFlyout: false })} />
+          <ConfigView
+            configBlock={undefined}
+            onClose={() => this.setState({ showFlyout: false })}
+            onSave={this.updateTag('configurations')}
+          />
         )}
       </div>
     );
@@ -148,6 +152,6 @@ export class TagEdit extends React.PureComponent<TagEditProps, TagEditState> {
       showFlyout: true,
     });
   };
-  private updateTag = (key: keyof BeatTag) => (e: any) =>
+  private updateTag = (key: keyof ClientSideBeatTag) => (e: any) =>
     this.props.onTagChange(key, e.target ? e.target.value : e);
 }

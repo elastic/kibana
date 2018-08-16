@@ -28,27 +28,38 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import React from 'react';
+import { ClientSideConfigurationBlock } from '../../../lib/lib';
 import { ConfigForm } from './config_form';
 import { supportedConfigs } from './config_schemas';
 
 interface ComponentProps {
-  values: {};
+  configBlock?: ClientSideConfigurationBlock;
   onClose(): any;
+  onSave(config: ClientSideConfigurationBlock): any;
 }
 
 export class ConfigView extends React.Component<ComponentProps, any> {
   private form = React.createRef<any>();
+  private editMode: boolean;
   constructor(props: any) {
     super(props);
+    this.editMode = props.configBlock !== undefined;
+
     this.state = {
       valid: false,
-      type: supportedConfigs[0].value,
+      configBlock: props.configBlock || {
+        type: supportedConfigs[0].value,
+      },
     };
   }
-  public onTypeChange = (e: any) => {
-    this.setState({
-      type: e.target.value,
-    });
+  public onValueChange = (field: string) => (e: any) => {
+    const value = e.currentTarget ? e.currentTarget.value : e;
+    this.setState((state: any) => ({
+      configBlock: {
+        ...state.configBlock,
+        [field]: value,
+      },
+    }));
   };
   public render() {
     return (
@@ -62,33 +73,45 @@ export class ConfigView extends React.Component<ComponentProps, any> {
           <EuiFormRow label="Configuration type">
             <EuiSelect
               options={supportedConfigs}
-              value={this.state.type}
-              onChange={this.onTypeChange}
+              value={this.state.configBlock.type}
+              disabled={this.editMode}
+              onChange={this.onValueChange('type')}
             />
           </EuiFormRow>
           <EuiFormRow label="Configuration description">
             <EuiFieldText
-              onChange={() => {
-                // TODO: update field value
-              }}
+              onChange={this.onValueChange('description')}
               placeholder="Description (optional)"
             />
           </EuiFormRow>
           <h3>
             Config for{' '}
-            {(supportedConfigs.find(config => this.state.type === config.value) as any).text}
+            {
+              (supportedConfigs.find(config => this.state.configBlock.type === config.value) as any)
+                .text
+            }
           </h3>
           <EuiHorizontalRule />
 
           <ConfigForm
             // tslint:disable-next-line:no-console
-            onSubmit={data => console.log(data)}
+            onSubmit={data => {
+              this.props.onSave({
+                ...this.state.configBlock,
+                ...data,
+              });
+              this.props.onClose();
+            }}
             canSubmit={canIt => this.setState({ valid: canIt })}
             ref={this.form}
-            values={this.props.values}
-            id={(supportedConfigs.find(config => this.state.type === config.value) as any).value}
+            values={this.state.configBlock}
+            id={
+              (supportedConfigs.find(config => this.state.configBlock.type === config.value) as any)
+                .value
+            }
             schema={
-              (supportedConfigs.find(config => this.state.type === config.value) as any).config
+              (supportedConfigs.find(config => this.state.configBlock.type === config.value) as any)
+                .config
             }
           />
         </EuiFlyoutBody>
@@ -101,7 +124,7 @@ export class ConfigView extends React.Component<ComponentProps, any> {
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <EuiButton
-                disabled={this.state.valid}
+                disabled={!this.state.valid}
                 fill
                 onClick={() => {
                   if (this.form.current) {

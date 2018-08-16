@@ -193,8 +193,8 @@ const metricbeatModuleConfig: YamlConfigSchema[] = [
 // ];
 
 export const supportedConfigs = [
-  { text: 'Filebeat Input', value: 'filebeatInput', config: filebeatInputConfig },
-  { text: 'Filebeat Module', value: 'filebeatModule', config: filebeatModuleConfig },
-  { text: 'Metricbeat Input', value: 'metricbeatModule', config: metricbeatModuleConfig },
+  { text: 'Filebeat Input', value: 'filebeat.inputs', config: filebeatInputConfig },
+  { text: 'Filebeat Module', value: 'filebeat.modules', config: filebeatModuleConfig },
+  { text: 'Metricbeat Input', value: 'metricbeat.modules', config: metricbeatModuleConfig },
   // { text: 'Output', value: 'output', config: outputConfig },
 ];
