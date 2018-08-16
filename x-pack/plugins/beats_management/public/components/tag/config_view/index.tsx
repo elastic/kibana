@@ -28,9 +28,9 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import React from 'react';
+import { supportedConfigs } from '../../../config_schemas';
 import { ClientSideConfigurationBlock } from '../../../lib/lib';
 import { ConfigForm } from './config_form';
-import { supportedConfigs } from './config_schemas';
 
 interface ComponentProps {
   configBlock?: ClientSideConfigurationBlock;
