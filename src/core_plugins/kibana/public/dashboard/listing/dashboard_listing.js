@@ -326,7 +326,6 @@ export class DashboardListing extends React.Component {
         sortable: true,
         render: (field, record) => (
           <EuiLink
-            className="dashboardLink"
             href={`#${createDashboardEditUrl(record.id)}`}
             data-test-subj={`dashboardListingTitleLink-${record.title.split(' ').join('-')}`}
           >
@@ -454,7 +453,7 @@ export class DashboardListing extends React.Component {
     }
 
     return (
-      <EuiPageContent className="dashboardLandingPageContent" horizontalPosition="center">
+      <EuiPageContent horizontalPosition="center">
         {this.renderListingOrEmptyState()}
       </EuiPageContent>
     );
@@ -462,8 +461,7 @@ export class DashboardListing extends React.Component {
 
   render() {
     return (
-      <EuiPage data-test-subj="dashboardLandingPage" className="dashboardLandingPage">
-        {/* TODO: add restrictWidth prop on EuiPageBody here when EUI@3.0.2 is applied */}
+      <EuiPage data-test-subj="dashboardLandingPage" className="dshDashboardListing__page" restrictWidth>
         <EuiPageBody>
           {this.renderPageContent()}
         </EuiPageBody>

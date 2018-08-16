@@ -41,7 +41,7 @@ export function CheckerErrors(props) {
       <EuiCallOut
         title="Errors found"
         color="danger"
-        className="noData__alignLeft"
+        className="eui-textLeft"
       >
         <p>
           There were some errors encountered in trying to check Elasticsearch

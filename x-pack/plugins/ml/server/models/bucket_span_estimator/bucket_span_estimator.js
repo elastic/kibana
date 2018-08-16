@@ -12,12 +12,16 @@ import { INTERVALS } from './intervals';
 import { singleSeriesCheckerFactory } from './single_series_checker';
 import { polledDataCheckerFactory } from './polled_data_checker';
 
-export function estimateBucketSpanFactory(callWithRequest) {
+import { callWithInternalUserFactory } from '../../client/call_with_internal_user_factory';
+import { isSecurityDisabled } from '../../lib/security_utils';
+
+export function estimateBucketSpanFactory(callWithRequest, server) {
+  const callWithInternalUser = callWithInternalUserFactory(server);
   const PolledDataChecker = polledDataCheckerFactory(callWithRequest);
   const SingleSeriesChecker = singleSeriesCheckerFactory(callWithRequest);
 
   class BucketSpanEstimator {
-    constructor({ index, timeField, aggTypes, fields, duration, query, splitField }, splitFieldValues) {
+    constructor({ index, timeField, aggTypes, fields, duration, query, splitField }, splitFieldValues, maxBuckets) {
       this.index = index;
       this.timeField = timeField;
       this.aggTypes = aggTypes;
@@ -32,9 +36,15 @@ export function estimateBucketSpanFactory(callWithRequest) {
         minimumBucketSpanMS: 0
       };
 
-      // only run the tests over the last 250 hours of data
+      // determine durations for bucket span estimation
+      // taking into account the clusters' search.max_buckets settings
+      // the polled_data_checker uses an aggregation interval of 1 minute
+      // so that's the smallest interval we have to check for not to
+      // exceed search.max_buckets.
+      const ONE_MINUTE_MS = 60000;
       const ONE_HOUR_MS = 3600000;
-      const HOUR_MULTIPLIER = 250;
+      // only run the tests over the last 250 hours of data at max
+      const HOUR_MULTIPLIER = Math.min(250, Math.floor((maxBuckets * ONE_MINUTE_MS) / ONE_HOUR_MS));
       const timePickerDurationLength = (this.duration.end - this.duration.start);
       const multiplierDurationLength = (ONE_HOUR_MS * HOUR_MULTIPLIER);
 
@@ -315,35 +325,87 @@ export function estimateBucketSpanFactory(callWithRequest) {
     }
 
     return new Promise((resolve, reject) => {
-      const runEstimator = (splitFieldValues = []) => {
-        const bucketSpanEstimator = new BucketSpanEstimator(
-          formConfig,
-          splitFieldValues
-        );
+      function getBucketSpanEstimation() {
+        // fetch the `search.max_buckets` cluster setting so we're able to
+        // adjust aggregations to not exceed that limit.
+        callWithInternalUser('cluster.getSettings', {
+          flatSettings: true,
+          includeDefaults: true,
+          filterPath: '*.*max_buckets'
+        })
+          .then((settings) => {
+            if (typeof settings !== 'object' || typeof settings.defaults !== 'object') {
+              reject('Unable to retrieve cluster setting search.max_buckets');
+            }
 
-        bucketSpanEstimator.run()
-          .then((resp) => {
-            resolve(resp);
+            const maxBuckets = parseInt(settings.defaults['search.max_buckets']);
+
+            const runEstimator = (splitFieldValues = []) => {
+              const bucketSpanEstimator = new BucketSpanEstimator(
+                formConfig,
+                splitFieldValues,
+                maxBuckets
+              );
+
+              bucketSpanEstimator.run()
+                .then((resp) => {
+                  resolve(resp);
+                })
+                .catch((resp) => {
+                  reject(resp);
+                });
+            };
+
+            // a partition has been selected, so we need to load some field values to use in the
+            // bucket span tests.
+            if (formConfig.splitField !== undefined) {
+              getRandomFieldValues(formConfig.index, formConfig.splitField, formConfig.query)
+                .then((splitFieldValues) => {
+                  runEstimator(splitFieldValues);
+                })
+                .catch((resp) => {
+                  reject(resp);
+                });
+            } else {
+              // no partition field selected or we're in the single metric config
+              runEstimator();
+            }
           })
           .catch((resp) => {
             reject(resp);
           });
-      };
-
-      // a partition has been selected, so we need to load some field values to use in the
-      // bucket span tests.
-      if (formConfig.splitField !== undefined) {
-        getRandomFieldValues(formConfig.index, formConfig.splitField, formConfig.query)
-          .then((splitFieldValues) => {
-            runEstimator(splitFieldValues);
-          })
-          .catch((resp) => {
-            reject(resp);
-          });
-      } else {
-        // no partition field selected or we're in the single metric config
-        runEstimator();
       }
+
+      if (isSecurityDisabled(server)) {
+        getBucketSpanEstimation();
+      } else {
+        // if security is enabled, check that the user has permission to
+        // view jobs before calling getBucketSpanEstimation.
+        // getBucketSpanEstimation calls the 'cluster.getSettings' endpoint as the internal user
+        // and so could give the user access to more information than
+        // they are entitled to.
+        const body = {
+          cluster: [
+            'cluster:monitor/xpack/ml/job/get',
+            'cluster:monitor/xpack/ml/job/stats/get',
+            'cluster:monitor/xpack/ml/datafeeds/get',
+            'cluster:monitor/xpack/ml/datafeeds/stats/get'
+          ]
+        };
+        callWithRequest('ml.privilegeCheck', { body })
+          .then((resp) => {
+            if (resp.cluster['cluster:monitor/xpack/ml/job/get'] &&
+              resp.cluster['cluster:monitor/xpack/ml/job/stats/get'] &&
+              resp.cluster['cluster:monitor/xpack/ml/datafeeds/get'] &&
+              resp.cluster['cluster:monitor/xpack/ml/datafeeds/stats/get']) {
+              getBucketSpanEstimation();
+            } else {
+              reject('Insufficient permissions to call bucket span estimation.');
+            }
+          })
+          .catch(reject);
+      }
+
 
     });
   };

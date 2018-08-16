@@ -12,8 +12,8 @@ FeatureCatalogueRegistryProvider.register(() => {
   return {
     id: 'spaces',
     title: 'Spaces',
-    description: 'You know, for space.',
-    icon: '/plugins/kibana/assets/app_security.svg',
+    description: 'Organize your dashboards, visualizations, and other saved objects',
+    icon: 'spacesApp',
     path: '/app/kibana#/management/spaces/list',
     showOnHomePage: true,
     category: FeatureCatalogueCategory.ADMIN

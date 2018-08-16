@@ -70,6 +70,7 @@ exports[`ErrorGroupOverview -> List should render empty state 1`] = `
         <tr>
           <th
             className="euiTableHeaderCell"
+            data-test-subj="tableHeaderCell_groupId_0"
             scope="col"
             width="96px"
           >
@@ -85,6 +86,7 @@ exports[`ErrorGroupOverview -> List should render empty state 1`] = `
           </th>
           <th
             className="euiTableHeaderCell"
+            data-test-subj="tableHeaderCell_message_1"
             scope="col"
             width="50%"
           >
@@ -100,6 +102,7 @@ exports[`ErrorGroupOverview -> List should render empty state 1`] = `
           </th>
           <th
             className="euiTableHeaderCell"
+            data-test-subj="tableHeaderCell_handled_2"
             scope="col"
           >
             <div
@@ -112,11 +115,13 @@ exports[`ErrorGroupOverview -> List should render empty state 1`] = `
           </th>
           <th
             className="euiTableHeaderCell"
+            data-test-subj="tableHeaderCell_occurrenceCount_3"
             scope="col"
           >
             <button
               aria-label="Sort Occurrences ascending"
               className="euiTableHeaderButton"
+              data-test-subj="tableHeaderSortButton"
               onClick={[Function]}
               type="button"
             >
@@ -133,11 +138,13 @@ exports[`ErrorGroupOverview -> List should render empty state 1`] = `
           </th>
           <th
             className="euiTableHeaderCell"
+            data-test-subj="tableHeaderCell_latestOccurrenceAt_4"
             scope="col"
           >
             <button
               aria-label="Sort Latest occurrence ascending"
               className="euiTableHeaderButton euiTableHeaderButton-isSorted"
+              data-test-subj="tableHeaderSortButton"
               onClick={[Function]}
               type="button"
             >
@@ -279,7 +286,7 @@ exports[`ErrorGroupOverview -> List should render with data 1`] = `
 }
 
 .c1 {
-  max-width: 512px;
+  max-width: 100%;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -367,6 +374,7 @@ exports[`ErrorGroupOverview -> List should render with data 1`] = `
         <tr>
           <th
             className="euiTableHeaderCell"
+            data-test-subj="tableHeaderCell_groupId_0"
             scope="col"
             width="96px"
           >
@@ -382,6 +390,7 @@ exports[`ErrorGroupOverview -> List should render with data 1`] = `
           </th>
           <th
             className="euiTableHeaderCell"
+            data-test-subj="tableHeaderCell_message_1"
             scope="col"
             width="50%"
           >
@@ -397,6 +406,7 @@ exports[`ErrorGroupOverview -> List should render with data 1`] = `
           </th>
           <th
             className="euiTableHeaderCell"
+            data-test-subj="tableHeaderCell_handled_2"
             scope="col"
           >
             <div
@@ -409,11 +419,13 @@ exports[`ErrorGroupOverview -> List should render with data 1`] = `
           </th>
           <th
             className="euiTableHeaderCell"
+            data-test-subj="tableHeaderCell_occurrenceCount_3"
             scope="col"
           >
             <button
               aria-label="Sort Occurrences ascending"
               className="euiTableHeaderButton"
+              data-test-subj="tableHeaderSortButton"
               onClick={[Function]}
               type="button"
             >
@@ -430,11 +442,13 @@ exports[`ErrorGroupOverview -> List should render with data 1`] = `
           </th>
           <th
             className="euiTableHeaderCell"
+            data-test-subj="tableHeaderCell_latestOccurrenceAt_4"
             scope="col"
           >
             <button
               aria-label="Sort Latest occurrence ascending"
               className="euiTableHeaderButton euiTableHeaderButton-isSorted"
+              data-test-subj="tableHeaderSortButton"
               onClick={[Function]}
               type="button"
             >

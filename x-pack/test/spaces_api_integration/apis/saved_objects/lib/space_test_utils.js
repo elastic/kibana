@@ -10,7 +10,6 @@ export function getUrlPrefix(spaceId) {
   return spaceId && spaceId !== DEFAULT_SPACE_ID ? `/s/${spaceId}` : ``;
 }
 
-// Spaces do not actually prefix the ID, but this simplifies testing positive and negative flows.
 export function getIdPrefix(spaceId) {
   return spaceId === DEFAULT_SPACE_ID ? '' : `${spaceId}-`;
 }

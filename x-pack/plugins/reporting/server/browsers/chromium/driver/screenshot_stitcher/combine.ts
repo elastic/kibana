@@ -13,6 +13,20 @@ import { ObservableInput } from 'rxjs';
 import { map, mergeMap, reduce, switchMap, tap, toArray } from 'rxjs/operators';
 import { Logger, Screenshot, Size } from './types';
 
+export class CapturePngSizeError extends Error {
+  constructor(
+    actualSize: { width: number; height: number },
+    expectedSize: { width: number; height: number }
+  ) {
+    super();
+    this.message =
+      `Capture PNG size error. Please visit https://github.com/elastic/kibana/issues/19563 to report this error. ` +
+      `Screenshot captured of size ${actualSize.width}x${
+        actualSize.height
+      } was not of expected size ${expectedSize.width}x${expectedSize.height}`;
+  }
+}
+
 // if we're only given one screenshot, and it matches the given size
 // we're going to skip the combination and just use it
 const canUseFirstScreenshot = (
@@ -69,14 +83,9 @@ export function $combine(
           png.width !== screenshot.rectangle.width ||
           png.height !== screenshot.rectangle.height
         ) {
-          const errorMessage = `Screenshot captured with width:${png.width} and height: ${
-            png.height
-          }) is not of expected width: ${screenshot.rectangle.width} and height: ${
-            screenshot.rectangle.height
-          }`;
-
-          logger.error(errorMessage);
-          throw new Error(errorMessage);
+          const error = new CapturePngSizeError(png, screenshot.rectangle);
+          logger.error(error.message);
+          throw error;
         }
         return { screenshot, png };
       }

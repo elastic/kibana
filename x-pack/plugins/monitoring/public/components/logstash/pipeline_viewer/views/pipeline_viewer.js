@@ -72,7 +72,7 @@ export class PipelineViewer extends React.Component {
     return (
       <EuiPage>
         <EuiPageBody>
-          <EuiPageContent verticalPosition="center" horizontalPosition="center" className="pipelineViewer">
+          <EuiPageContent verticalPosition="center" horizontalPosition="center" className="monPipelineViewer">
             <StatementSection
               iconType="logstashInput"
               headingText="Inputs"
