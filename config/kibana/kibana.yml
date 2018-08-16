@@ -2,7 +2,3 @@ optimize:
   unsafeCache: true
   sourceMaps: false
 #  sourceMaps: '#cheap-source-map'
-
-codesearch:
-  enabled: true
-  dataPath: 'codesearch/data'  # the path relative to your HOME folder

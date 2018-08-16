@@ -4,36 +4,16 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import os from 'os';
-import Path from 'path';
+import { resolve } from 'path';
 
 export class ServerOptions {
-  private options: any;
-  constructor(options: any) {
-    this.options = options;
-  }
-  public get workspacePath(): string {
-    return Path.join(this.dataPath, 'workspace');
-  }
+  public readonly workspacePath = resolve(this.config.get('path.data'), 'codesearch/workspace');
 
-  public get repoPath(): string {
-    return Path.join(this.dataPath, 'repos');
-  }
+  public readonly repoPath = resolve(this.config.get('path.data'), 'codesearch/repos');
 
-  public get dataPath(): string {
-    const dataPath = this.options.dataPath;
-    if (dataPath.startsWith('/')) {
-      return dataPath;
-    } else {
-      return Path.resolve(os.homedir(), dataPath);
-    }
-  }
+  public readonly updateFrequencyMs: number = this.options.updateFreqencyMs;
 
-  public get updateFrequencyMs(): number {
-    return this.options.updateFreqencyMs;
-  }
+  public readonly lspRequestTimeout: number = this.options.lspRequestTimeout;
 
-  public get lspRequestTimeout(): number {
-    return this.options.lspRequestTimeout;
-  }
+  constructor(private options: any, private config: any) {}
 }

@@ -48,7 +48,6 @@ export default (kibana: any) =>
     config(Joi: any) {
       return Joi.object({
         enabled: Joi.boolean().default(true),
-        dataPath: Joi.string().default('/tmp'),
         queueIndex: Joi.string().default('.codesearch-worker-queue'),
         queueTimeout: Joi.number().default(60 * 60 * 1000), // 1 hour by default
         updateFreqencyMs: Joi.number().default(5 * 60 * 1000), // 5 minutes by default.
@@ -62,7 +61,7 @@ export default (kibana: any) =>
       const adminCluster = server.plugins.elasticsearch.getCluster('admin');
       const dataCluster = server.plugins.elasticsearch.getCluster('data');
       const log = new Log(server);
-      const serverOptions = new ServerOptions(options);
+      const serverOptions = new ServerOptions(options, server.config());
 
       // Initialize search clients
       const repoSearchClient = new RepositorySearchClient(dataCluster.getClient(), log);
