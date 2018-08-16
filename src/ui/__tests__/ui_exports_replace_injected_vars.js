@@ -56,7 +56,15 @@ describe('UiExports', function () {
         logging: { silent: true }, // no logs
         optimize: { enabled: false },
         plugins: {
-          paths: [resolve(__dirname, './fixtures/test_app')] // inject an app so we can hit /app/{id}
+          paths: [
+            resolve(__dirname, './__fixtures__/elasticsearch_plugin'),
+            resolve(__dirname, './fixtures/test_app'),
+          ] // inject an app so we can hit /app/{id}
+        },
+        elasticsearch: {
+          ssl: {
+            verificationMode: 'full'
+          }
         },
       });
 

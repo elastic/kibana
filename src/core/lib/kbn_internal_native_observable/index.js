@@ -4,7 +4,7 @@ import { observable as SymbolObservable } from 'rxjs/internal/symbol/observable'
 // see https://github.com/tc39/proposal-observable.
 //
 // One change has been applied to work with current libraries: using the
-// Symbol.observable ponyfill instead of relying on the implementation in the
+// Symbol_observable ponyfill instead of relying on the implementation in the
 // spec.
 
 // === Abstract Operations ===
