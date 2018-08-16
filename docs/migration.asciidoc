@@ -6,8 +6,10 @@
 This section discusses the changes that you need to be aware of when migrating
 your application from one version of Kibana to another.
 
-* <<breaking-changes-6.0>>
-* <<migrating-6.0-index>>
+* <<breaking-6.4.0, Breaking changes in 6.4.0>>
+* <<breaking-6.3.0, Breaking changes in 6.3.0>>
+* <<breaking-changes-6.0, Breaking changes in 6.0>>
+* <<migrating-6.0-index, Migrating {kib} index to 6.0>>
 
 See also <<release-highlights>> and <<release-notes>>. 
 
