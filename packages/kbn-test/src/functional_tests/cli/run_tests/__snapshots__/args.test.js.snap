@@ -24,34 +24,34 @@ Options:
 
 exports[`process options for run tests CLI accepts boolean value for updateBaselines 1`] = `
 Object {
+  "addExtraKbnArgs": [Function],
   "configs": Array [
     "foo",
   ],
   "createLogger": [Function],
-  "extraKbnOpts": undefined,
   "updateBaselines": true,
 }
 `;
 
 exports[`process options for run tests CLI accepts debug option 1`] = `
 Object {
+  "addExtraKbnArgs": [Function],
   "configs": Array [
     "foo",
   ],
   "createLogger": [Function],
   "debug": true,
-  "extraKbnOpts": undefined,
 }
 `;
 
 exports[`process options for run tests CLI accepts empty config value if default passed 1`] = `
 Object {
+  "addExtraKbnArgs": [Function],
   "config": "",
   "configs": Array [
     "foo",
   ],
   "createLogger": [Function],
-  "extraKbnOpts": undefined,
 }
 `;
 
@@ -60,78 +60,76 @@ Object {
   "_": Object {
     "server.foo": "bar",
   },
+  "addExtraKbnArgs": [Function],
   "configs": Array [
     "foo",
   ],
   "createLogger": [Function],
-  "extraKbnOpts": Object {
-    "server.foo": "bar",
-  },
 }
 `;
 
 exports[`process options for run tests CLI accepts quiet option 1`] = `
 Object {
+  "addExtraKbnArgs": [Function],
   "configs": Array [
     "foo",
   ],
   "createLogger": [Function],
-  "extraKbnOpts": undefined,
   "quiet": true,
 }
 `;
 
 exports[`process options for run tests CLI accepts silent option 1`] = `
 Object {
+  "addExtraKbnArgs": [Function],
   "configs": Array [
     "foo",
   ],
   "createLogger": [Function],
-  "extraKbnOpts": undefined,
   "silent": true,
 }
 `;
 
 exports[`process options for run tests CLI accepts source value for esFrom 1`] = `
 Object {
+  "addExtraKbnArgs": [Function],
   "configs": Array [
     "foo",
   ],
   "createLogger": [Function],
   "esFrom": "source",
-  "extraKbnOpts": undefined,
 }
 `;
 
 exports[`process options for run tests CLI accepts string value for kibana-install-dir 1`] = `
 Object {
+  "addExtraKbnArgs": [Function],
   "configs": Array [
     "foo",
   ],
   "createLogger": [Function],
-  "extraKbnOpts": undefined,
   "installDir": "foo",
 }
 `;
 
 exports[`process options for run tests CLI accepts value for grep 1`] = `
 Object {
+  "addExtraKbnArgs": [Function],
   "configs": Array [
     "foo",
   ],
   "createLogger": [Function],
-  "extraKbnOpts": undefined,
   "grep": "management",
 }
 `;
 
 exports[`process options for run tests CLI accepts verbose option 1`] = `
 Object {
+  "addExtraKbnArgs": [Function],
   "configs": Array [
     "foo",
   ],
   "createLogger": [Function],
-  "extraKbnOpts": undefined,
   "verbose": true,
 }
 `;
