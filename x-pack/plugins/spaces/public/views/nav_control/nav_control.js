@@ -13,7 +13,7 @@ import 'plugins/spaces/views/nav_control/nav_control.less';
 
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
-import { NavControlModal } from 'plugins/spaces/views/nav_control/nav_control_modal';
+import { NavControlPopover } from 'plugins/spaces/views/nav_control/nav_control_popover';
 
 chromeNavControlsRegistry.register(constant({
   name: 'spaces',
@@ -30,7 +30,7 @@ module.controller('spacesNavController', ($scope, $http, chrome, activeSpace) =>
 
   spacesManager = new SpacesManager($http, chrome);
 
-  render(<NavControlModal spacesManager={spacesManager} activeSpace={activeSpace} />, domNode);
+  render(<NavControlPopover spacesManager={spacesManager} activeSpace={activeSpace} />, domNode);
 
   // unmount react on controller destroy
   $scope.$on('$destroy', () => {

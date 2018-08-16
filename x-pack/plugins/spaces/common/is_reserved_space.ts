@@ -5,6 +5,7 @@
  */
 
 import { get } from 'lodash';
+import { Space } from './model/space';
 
 /**
  * Returns whether the given Space is reserved or not.
@@ -12,6 +13,6 @@ import { get } from 'lodash';
  * @param space the space
  * @returns boolean
  */
-export function isReservedSpace(space) {
+export function isReservedSpace(space: Space): boolean {
   return get(space, '_reserved', false);
 }
