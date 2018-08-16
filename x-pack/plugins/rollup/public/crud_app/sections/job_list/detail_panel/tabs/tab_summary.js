@@ -72,23 +72,17 @@ export const TabSummary = ({
         <EuiDescriptionListDescription>
           {rollupCron}
         </EuiDescriptionListDescription>
+      </EuiDescriptionList>
 
-        <EuiDescriptionListTitle>
-          <strong>Delay</strong>
-        </EuiDescriptionListTitle>
+      <EuiSpacer size="s" />
 
-        <EuiDescriptionListDescription>
-          {rollupDelay}
-        </EuiDescriptionListDescription>
+      <EuiTitle size="s">
+        <h3>Date histogram</h3>
+      </EuiTitle>
 
-        <EuiDescriptionListTitle>
-          <strong>Interval</strong>
-        </EuiDescriptionListTitle>
+      <EuiSpacer size="s" />
 
-        <EuiDescriptionListDescription>
-          {rollupInterval}
-        </EuiDescriptionListDescription>
-
+      <EuiDescriptionList type="column" align="center">
         <EuiDescriptionListTitle>
           <strong>Time field</strong>
         </EuiDescriptionListTitle>
@@ -103,6 +97,22 @@ export const TabSummary = ({
 
         <EuiDescriptionListDescription>
           {dateHistogramTimeZone}
+        </EuiDescriptionListDescription>
+
+        <EuiDescriptionListTitle>
+          <strong>Delay</strong>
+        </EuiDescriptionListTitle>
+
+        <EuiDescriptionListDescription>
+          {rollupDelay || 'None'}
+        </EuiDescriptionListDescription>
+
+        <EuiDescriptionListTitle>
+          <strong>Interval</strong>
+        </EuiDescriptionListTitle>
+
+        <EuiDescriptionListDescription>
+          {rollupInterval}
         </EuiDescriptionListDescription>
       </EuiDescriptionList>
 
