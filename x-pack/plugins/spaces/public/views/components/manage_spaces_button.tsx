@@ -30,6 +30,6 @@ export class ManageSpacesButton extends Component<Props, {}> {
   }
 
   private navigateToManageSpaces = () => {
-    window.location.hash = MANAGE_SPACES_URL;
+    window.location.replace(MANAGE_SPACES_URL);
   };
 }
