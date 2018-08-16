@@ -1,5 +1,5 @@
 [[tutorial-load-dataset]]
-== Loading Sample Data
+=== Loading sample data
 
 This tutorial requires three data sets:
 
@@ -15,6 +15,8 @@ Two of the data sets are compressed. To extract the files, use these commands:
 [source,shell]
 unzip accounts.zip
 gunzip logs.jsonl.gz
+
+==== Structure of the data sets
 
 The Shakespeare data set has this structure:
 
@@ -54,10 +56,17 @@ The logs data set has dozens of different fields. Here are the notable fields fo
     "@timestamp": "date"
 }
 
+==== Set up mappings
+
 Before you load the Shakespeare and logs data sets, you must set up {ref}/mapping.html[_mappings_] for the fields.
 Mappings divide the documents in the index into logical groups and specify the characteristics
 of the fields. These characteristics include the searchability of the field
 and whether it's _tokenized_, or broken up into separate words.
+
+NOTE: If security is enabled, you must have the `all` Kibana privilege to run this tutorial.
+You must also have the `create`, `manage` `read`, `write,` and `delete` 
+index privileges. See {xpack-ref}/security-privileges.html[Security Privileges] 
+for more information.
 
 In Kibana *Dev Tools > Console*, set up a mapping for the Shakespeare data set:
 
@@ -148,6 +157,8 @@ PUT /logstash-2015.05.20
 //CONSOLE
 
 The accounts data set doesn't require any mappings.
+
+==== Load the data sets
 
 At this point, you're ready to use the Elasticsearch {ref}/docs-bulk.html[bulk]
 API to load the data sets:
