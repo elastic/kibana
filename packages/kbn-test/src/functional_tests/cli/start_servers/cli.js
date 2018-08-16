@@ -17,9 +17,8 @@
  * under the License.
  */
 
-import chalk from 'chalk';
-import getopts from 'getopts';
 import { startServers } from '../../tasks';
+import { runCli } from '../../lib';
 import { processOptions, displayHelp } from './args';
 
 /**
@@ -28,17 +27,8 @@ import { processOptions, displayHelp } from './args';
  *                                   if no config option is passed
  */
 export async function startServersCli(defaultConfigPath) {
-  try {
-    const userOptions = getopts(process.argv.slice(2)) || {};
-    if (userOptions.help) {
-      console.log(displayHelp());
-      return undefined;
-    }
-
+  await runCli(displayHelp, async userOptions => {
     const options = processOptions(userOptions, defaultConfigPath);
     await startServers(options);
-  } catch (err) {
-    console.log(chalk.red(err));
-    process.exit(1);
-  }
+  });
 }
