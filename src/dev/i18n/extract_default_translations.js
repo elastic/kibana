@@ -27,7 +27,7 @@ import { extractCodeMessages } from './extract_code_messages';
 import { extractPugMessages } from './extract_pug_messages';
 import { extractHandlebarsMessages } from './extract_handlebars_messages';
 import { globAsync, readFileAsync, writeFileAsync } from './utils';
-import config from '../../../.i18nrc.json';
+import { paths, exclude } from '../../../.i18nrc.json';
 
 function addMessageToMap(targetMap, key, value) {
   const existingValue = targetMap.get(key);
@@ -41,20 +41,18 @@ function addMessageToMap(targetMap, key, value) {
 }
 
 function filterPaths(inputPaths) {
-  const availablePaths = Object.values(config.paths);
-  const pathsForExtraction = [];
+  const availablePaths = Object.values(paths);
+  const pathsForExtraction = new Set();
 
   for (const inputPath of inputPaths) {
     const normalizedPath = normalize(path.relative('.', inputPath));
 
     if (normalizedPath) {
-      pathsForExtraction.push(
-        ...availablePaths.filter(
-          ePath => ePath.startsWith(`${normalizedPath}/`) || ePath === normalizedPath
-        )
-      );
+      availablePaths
+        .filter(ePath => ePath.startsWith(`${normalizedPath}/`) || ePath === normalizedPath)
+        .forEach(ePath => pathsForExtraction.add(ePath));
     } else {
-      pathsForExtraction.push(...availablePaths);
+      availablePaths.forEach(ePath => pathsForExtraction.add(ePath));
     }
 
     if (
@@ -62,22 +60,23 @@ function filterPaths(inputPaths) {
         ePath => normalizedPath.startsWith(`${ePath}/`) || ePath === normalizedPath
       )
     ) {
-      pathsForExtraction.push(normalizedPath);
+      pathsForExtraction.add(normalizedPath);
     }
   }
 
-  return pathsForExtraction;
+  return [...pathsForExtraction];
 }
 
 export function validateMessageNamespace(id, filePath) {
   const normalizedPath = normalize(path.relative('.', filePath));
 
-  const [expectedNamespace] = Object.entries(config.paths).find(([, pluginPath]) =>
+  const [expectedNamespace] = Object.entries(paths).find(([, pluginPath]) =>
     normalizedPath.startsWith(`${pluginPath}/`)
   );
 
   if (!id.startsWith(`${expectedNamespace}.`)) {
-    throw new Error(`Message id has a wrong namespace ("${id}").`);
+    throw new Error(`Expected "${id}" id to have "${expectedNamespace}" namespace. \
+See i18nrc.json for the list of supported namespaces.`);
   }
 }
 
@@ -115,7 +114,7 @@ export async function extractMessagesFromPathToMap(inputPath, targetMap) {
     ].map(async ([entries, extractFunction]) => {
       const files = await Promise.all(
         entries
-          .filter(entry => !config.exclude.includes(normalize(path.relative('.', entry))))
+          .filter(entry => !exclude.includes(normalize(path.relative('.', entry))))
           .map(async entry => {
             return {
               name: entry,
@@ -145,6 +144,7 @@ export async function extractDefaultTranslations({ paths, output }) {
     await extractMessagesFromPathToMap(inputPath, defaultMessagesMap);
   }
 
+  // messages shouldn't be extracted to a file if output is not supplied
   if (!output || !defaultMessagesMap.size) {
     return;
   }

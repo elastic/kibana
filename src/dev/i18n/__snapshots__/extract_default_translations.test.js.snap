@@ -132,4 +132,4 @@ exports[`dev/i18n/extract_default_translations injects default formats into en.j
 "
 `;
 
-exports[`dev/i18n/extract_default_translations throws on wrong message namespace 1`] = `"Message id has a wrong namespace (\\"wrong_plugin_namespace.message-id\\")."`;
+exports[`dev/i18n/extract_default_translations throws on wrong message namespace 1`] = `"Expected \\"wrong_plugin_namespace.message-id\\" id to have \\"plugin_2\\" namespace. See i18nrc.json for the list of supported namespaces."`;

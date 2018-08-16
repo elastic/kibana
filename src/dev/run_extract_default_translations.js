@@ -17,23 +17,12 @@
  * under the License.
  */
 
-import yargs from 'yargs';
-
 import { run } from './run';
 import { extractDefaultTranslations } from './i18n/extract_default_translations';
 
-run(async () => {
-  const { argv } = yargs
-    .option('path', {
-      default: './',
-      describe: 'paths to directories for messages searching',
-      type: 'array',
-    })
-    .option('output', {
-      default: null,
-      describe: '[optional] path to a folder for en.json extraction',
-      type: 'string',
-    });
-
-  await extractDefaultTranslations({ paths: argv.path, output: argv.output });
+run(async ({ flags: { path, output } }) => {
+  await extractDefaultTranslations({
+    paths: Array.isArray(path) ? path : [path || './'],
+    output,
+  });
 });

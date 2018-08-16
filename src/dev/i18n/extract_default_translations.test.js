@@ -18,16 +18,11 @@
  */
 
 import path from 'path';
-import fs from 'fs';
-import { promisify } from 'util';
 
 import {
   extractDefaultTranslations,
   validateMessageNamespace,
 } from './extract_default_translations';
-
-const readFileAsync = promisify(fs.readFile);
-const unlinkAsync = promisify(fs.unlink);
 
 const fixturesPath = path.resolve(__dirname, '__fixtures__', 'extract_default_translations');
 const pluginsPaths = [
@@ -36,7 +31,7 @@ const pluginsPaths = [
   path.join(fixturesPath, 'test_plugin_3'),
 ];
 
-jest.mock('../../../.localizationrc.json', () => ({
+jest.mock('../../../.i18nrc.json', () => ({
   paths: {
     plugin_1: 'src/dev/i18n/__fixtures__/extract_default_translations/test_plugin_1',
     plugin_2: 'src/dev/i18n/__fixtures__/extract_default_translations/test_plugin_2',
@@ -45,25 +40,30 @@ jest.mock('../../../.localizationrc.json', () => ({
   exclude: [],
 }));
 
+const utils = require('./utils');
+utils.writeFileAsync = jest.fn();
+
 describe('dev/i18n/extract_default_translations', () => {
   test('extracts messages to en.json', async () => {
     const [pluginPath] = pluginsPaths;
+
+    utils.writeFileAsync.mockClear();
     await extractDefaultTranslations({ paths: [pluginPath], output: pluginPath });
-    const extractedJSONBuffer = await readFileAsync(path.join(pluginPath, 'en.json'));
 
-    await unlinkAsync(path.join(pluginPath, 'en.json'));
+    const [[, json]] = utils.writeFileAsync.mock.calls;
 
-    expect(extractedJSONBuffer.toString()).toMatchSnapshot();
+    expect(json.toString()).toMatchSnapshot();
   });
 
   test('injects default formats into en.json', async () => {
     const [, pluginPath] = pluginsPaths;
+
+    utils.writeFileAsync.mockClear();
     await extractDefaultTranslations({ paths: [pluginPath], output: pluginPath });
-    const extractedJSONBuffer = await readFileAsync(path.join(pluginPath, 'en.json'));
 
-    await unlinkAsync(path.join(pluginPath, 'en.json'));
+    const [[, json]] = utils.writeFileAsync.mock.calls;
 
-    expect(extractedJSONBuffer.toString()).toMatchSnapshot();
+    expect(json.toString()).toMatchSnapshot();
   });
 
   test('throws on id collision', async () => {
