@@ -17,16 +17,14 @@
  * under the License.
  */
 
-import React from 'react';
-import { shallow } from 'enzyme';
+/* eslint-env jest */
 
-import {
-  CopyButton,
-} from './copy_button';
+import { format } from 'util';
 
-test('render', () => {
-  const component = shallow(<CopyButton
-    textToCopy={'text that is copied to clipboard'}
-  />);
-  expect(component).toMatchSnapshot();
-});
+export function checkMockConsoleLogSnapshot(logMock) {
+  const output = logMock.mock.calls
+    .reduce((acc, args) => `${acc}${format(...args)}\n`, '')
+    .replace(/(^    at.+[>)\d]$\n?)+/m, '    ...stack trace...');
+
+  expect(output).toMatchSnapshot();
+}
