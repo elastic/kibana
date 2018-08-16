@@ -17,6 +17,7 @@
 
 This section summarizes the changes in each release.
 
+* <<release-notes-6.4.0>>
 * <<release-notes-6.3.2>>
 * <<release-notes-6.3.1>>
 * <<release-notes-6.3.0>>
@@ -74,6 +75,540 @@ This section summarizes the changes in each release.
 //=== Known Issues
 ////
 
+[[release-notes-6.4.0]]
+== {kib} 6.4.0
+coming[6.4.0]
+
+[float]
+[[breaking-6.4.0]]
+=== Breaking Changes
+
+Platform::
+* Replaces `SearchSource` fetch with `fetchAsRejectablePromise` {pull}20130[#20130]
++
+`SearchSource` exposed two methods for fetching, `fetch` and `fetchAsRejectablePromise`. 
+`fetch` provided a broken implementation because it never set an `errorHandler` on 
+the created `SearchRequest` instance. This resulted in a method that worked fine 
+until the underlying {es} request failed. Then {kib} would crash because 
+`SearchRequest` would attempt to call `errorHandler` which was undefined.
++
+The only difference between `fetch` and `fetchAsRejectablePromise` was how errors 
+were handled. This change removes the original fetch method and renames 
+`fetchAsRejectablePromise` as fetch. It also moves `errorHandler` into 
+the constructor of `SearchRequest` and throws an error when not provided.
+
+[float]
+=== New Features
+
+For an overview of the features that were added in 6.4.0 and how the user experience
+improved, see <<release-highlights-6.4.0, 6.4.0 Release Highlights>>.
+
+[float]
+=== Enhancements
+
+APM::
+* Adds `compressed` prop to the EuiFormRows for a more compressed looking form. 
+Works nicely for smaller screensizes. {pull}19204[#19204]
+* Updates Ruby onboarding instructions {pull}21477[#21477]
+* Syncs stored_objects with files from APM Server {pull}21096[#21096]
+
+Console::
+* [Fixes #19178] Adds support for Console autocompletion of missing 
+Query Domain Specific Language (DSL) features {pull}19318[#19318]
+* [Fixes #19138] Adds `regexp` to query DSL support for Console autocompletion {pull}19176[#19176]
+* [Fixes #20141] Adds support to Console for autocompletion of template names in API endpoints {pull}20218[#20218]
+* [Fixes #20140] Adds rollover endpoint body completion to Console {pull}20167[#20167]
+* Adds links to the API documentation in the Console {pull}19715[#19715]
+* [Fixes #10264] Updates {es} API support to the 6.0 level for Console autocompletion {pull}18930[#18930]
+
+Discover::
+* [Fixes #11752] Adds the ability to show and hide the filter bar {pull}17161[#17161]
+* [Fixes #20182] Uses config `filters:pinnedByDefault` for filters created with the
+*Add a filter* modal so new filters are pinned by default  {pull}20359[#20359]
+
+Grok Debugger::
+* Converts the Grok Debugger to use React and EUI components {pull}20027[#20027]
+* [Fixes #17857] Adds syntax highlighting for grok expressions 
+in the *Grok pattern* text area of the Grok Debugger {pull}18572[#18572]
+
+Logstash::
+
+* Creates a new class that represents the pipeline in a flat structure to make it easier 
+for the Config view to visualize data {pull}19084[#19084]
+* [Fixes #18423, #18020] Adds a new visualization of Logstash pipelines that mimics what 
+users see when they look at the corresponding configuration file {pull}18597[#18597]
+* [Fixes #19006] Adds a *Netflow Overview dashboard* button at the end of the Netflow tutorial {pull}19299[#19299]
+
+Machine Learning::
+
+* Allows overwriting of query in recognized jobs {pull}18632[#18632]
+* Adds feature to move from wizard to advanced job configuration {pull}18633[#18633]
+* Converts forecasting modal to EUI and React {pull}18630[#18630]
+* Adds number of forecasts to monitoring overview {pull}20758[#20758]
+* Adds Ace editor for JSON {pull}18692[#18692]
+* Adds improvements to Data recognizer UI {pull}18804[#18804]
+* Adds APM module {pull}18805[#18805]
+* Adds jsconfig file for better code navigation in vscode {pull}19203[#19203]
+* Starts datafeed from the module setup endpoint {pull}19254[#19254]
+* Rewrites jobs list using React and EUI {pull}19758[#19758]
+* Allows job cloning via wizards {pull}20227[#20227]
+* Uses {kib}'s auto-refresh for jobs list {pull}20496[#20496]
+* [Fixes #20518] Provides better error notifications in jobs list {pull}20880[#20880]
+* Adds rules and filters permission checks {pull}21097[#21097]
+* Creates watch from new jobs list {pull}21112[#21112]
+* Updates URLs in job validation messages {pull}21361[#21361]
+* [Fixes #18192] Displays typical values for `lat_long` anomalies {pull}18715[#18715]
+* Converts Explorer Influencers List to React and EUI {pull}18773[#18773]
+* [Fixes #18456] Hides Top Influencers list if job has no influencers {pull}18819[#18819]
+* Filters Top Influencers list based on swimlane selection {pull}18946[#18946]
+* [Fixes #18574] Sorts Explorer view by swimlane for selected time {pull}18955[#18955]
+* Converts anomalies table to React and EUI {pull}19352[#19352]
+* Converts anomalies controls to React and EUI {pull}19856[#19856]
+* Adds page to ML Settings for viewing and editing filter lists {pull}20769[#20769]
+* Adds editor for configuring detector rules {pull}20989[#20989]
+* Converts the custom URL editor to React and EUI {pull}21094[#21094]
+* Adds icon to the Anomalies Table if detector has rules {pull}21135[#21135]
+* Migrates `mlDocumentationHelpLink` to React and EUI {pull}19124[#19124]
+* Migrates bucket span estimator button to React and EUI {pull}19045[#19045]
+* [Fixes #19068] Provides more helpful job validation success messages {pull}21079[#21079]
+* [Fixes #18689] Makes script_fields available in field dropdowns of the advanced wizard's detectors modal {pull}21205[#21205]
+* Improves job validation messages {pull}21191[#21191]
+
+
+Management::
+* [Fixes #19741] Modifies the logic for showing the *Extend Trial* pane {pull}20211[#20211]
+* [Fixes #19269] Refactors the *Management > Index Pattern > Edit field*
+and *Create scripted field* pages to use React and EUI {pull}20245[#20245]
+* [Fixes #11804] Adds the ability to run scripted fields so users can view the results and see if the script works 
+as intended {pull}20746[#20746]
+* Adds a field formatter for a static lookup table/map {pull}19637[#19637]
+* [Fixes #19872] Improves warnings for delete and force merge {pull}20264[#20264]
+* [Fixes #17045] Refactors the *Management > Advanced Settings* page to use React and EUI {pull}17465[#17465]
+* [Fixes #19185] Updates querying for saved objects to use the saved objects API {pull}19193[#19193]
+* [Fixes #18584] Adds support for index patterns to leverage 
+https://www.elastic.co/guide/en/elasticsearch/guide/current/optimistic-concurrency-control.html[optimistic concurrency], 
+ which is supported through the saved objects API {pull}18937[#18937]
+* Converts the *Users* and *Edit User* pages of security management to the EUI {pull}20739[#20739]
+* Updates the *Saved Objects* UI {pull}17426[#17426]
+
+Monitoring::
+
+* Adds `get_clusters_summary` to the shrink cluster API response {pull}18596[#18596]
+* Adds a yellow status phase to the Monitoring app plugin startup {pull}18939[#18939]
+* Adds anonymous Beats statistics found in the Monitoring data to the telemetry payload {pull}18833[#18833]
+
+Operations::
+
+* Adds metrics collector and stats API {pull}17773[#17773]
++
+Adds a new `/api/stats` route to expose metrics for {kib} Metricbeat.
+
+* Updates React to 16.3  {pull}18768[#18768]
+* Upgrades TypeScript to 2.9.2 {pull}20757[#20757]
+* Adds TypeScript support for the server and browser {pull}19104[#19104]
+* [Fixes #18780] Adds https://github.com/palantir/tslint[TSLint integration] {pull}19105[#19105]
+* Adds SCSS support for plugins {pull}19643[#19643]
+
+Platform::
+
+* Integrates new platform server side into {kib} {pull}18951[#18951]
+* [Fixes #14870] Documents how the new platform is integrated into the legacy {kib} platform {pull}20925[#20925]
+* Adds Beats tutorials {pull}20514[#20514]
+* Adds Apache 2.0 license headers to the top of each file {pull}19383[#19383]
+
+Security::
+* [Fixes #18178] Implements {kib} privileges to enable role-based access 
+control in {kib} without granting {kib} users direct access to the `.kibana 
+index` {pull}19723[#19723]
+
+Sharing::
+* [Fixes #16611] Adds a status check to the *Add data* tutorials {pull}17732[#17732]
+* [Fixes #17679] Adds an `isBeta` flag so the UI can indicate when an *Add Data* module
+is in Beta mode {pull}20049[#20049]
+* [Fixes #17803] Adds the ability to publish {kib} saved objects from 
+an *Add Data* tutorial {pull}19559[#19559]
+* [Fixes #16473, #10813] Adds REST endpoints for listing, installing, and uninstalling sample data sets {pull}17807[#17807]
+* Allows panels in the dashboard to include custom actions {pull}18877[#18877]
++
+This enables you to include actions specific to the type of visualization or search in the panel. 
+For example, some visualizations might have an action for creating a machine learning 
+job while others might have actions for generating a report or creating a watch.
+
+* [Fixes #14529] Adds a *Dynamic Options* toggle switch to the Controls visualization 
+{pull}18985[#18985]
++ 
+When set to true, the *Dropdown Options* list is updated and filtered by the user input.
+
+* Adds a notification service to {kib} that can be used to send
+asynchronous notifications, such as email and Slack messages {pull}19236[#19236]
+* Converts the dashboard listing page to React and EUI {pull}16967[#16967]
+* Converts the dashboard *Add Panel* to React and EUI {pull}17374[#17374]
+* Converts the dashboard *Save* modal to React and EUI {pull}19531[#19531]
+* [Fixes #19591] Migrates the dashboard Save error to EUI toast {pull}19956[#19956]
+* Converts KuiContextMenu to EuiContextMenu {pull}17621[#17621]
+* [Fixes #20742] Highlights sample data section for new users {pull}20953[#20953]
+
+Telemetry::
+* Add Beats module and input info to Telemetry {pull}20648[#20648]
+* [Fixes #19534] Moves `x-pack/monitoring` collector classes to `src/server/usage` {pull}20248[#20248]
+
+Visualization::
+* [Fixes #18918] Allows setting an offset relative to {kib} time {pull}19709[#19709]
++
+For example, you can set a Timelion expression as 
+`.es(index=logstash*,timefield=@timestamp,offset=timerange:-1)`. 
+When the time picker is set to "last 15 minutes", the offset is `-900s`. 
+When the time picker is set to "last 24", the offset is `-86400s`.
+ 
+* Allows splitting series on multiple fields {pull}17855[#17855]
++
+Splitting lines, bars, and so on in charts on multiple fields no longer requires 
+you to create a scripted field that contains the value of all other fields. 
+You can now define multiple aggregations to split your chart on multiple fields.
+
+* [Fixes #5517] Adds multiple colorramps to coordinate maps {pull}17403[#17403]
+* [Fixes #9502] Adds significant terms to tag cloud visualization {pull}17770[#17770]
+* Replaces spy panels with an Inspector {pull}16387[#16387]
+
+[float]
+=== Bug Fixes
+
+APM::
+
+* Fixes Kuery autocompletion in APM {pull}21249[#21249]
+* Fixes APM so it no longer has a hard requirement on `kuery_autocomplete` {pull}21539[#21539]
+
+Console::
+* Fixes issues with autocompletion {pull}19654[#19654]
+* [Fixes #20139] Fixes issues with autocompletion and slashes at end of a URL {pull}20151[#20151]
+* Brings Console in line with {kib} eslint rules {pull}19438[#19438]
+* Adds generated spec files for {xpack} endpoints to Console and adjusts code to
+to handle the same override logic {pull}19928[#19928]
+* Removes custom tokenizer code from Console {pull}20013[#20013]
+
+Discover::
+
+* Removes unnecessary PromiseEmitter {pull}19845[#19845]
+* Prevents undefined "to" and "from" timepicker dates {pull}20355[#20355]
+* Refactors courier by naming internal `searchRequest` variable consistently {pull}20448[#20448]
+* Replaces notifier warnings in Discover with toasts {pull}20650[#20650]
+* Tests the `callClient.js` client {pull}20605[#20605]
+* Fixes a bug in which Discover erroneously shows shard failures message {pull}21003[#21003]
+* [Fixes #16771] Fixes bug in Discover where the code expected the shard failure's `reason` 
+property to be a string or number, when it's really an object  {pull}21601[#21601]
+* [Fixes #15143, #17696] Incrementally increases the context time window {pull}16878[#16878]
+* [Fixes #18636] In the Filter editor, hides fields until they are scrolled into view to decrease load time {pull}18640[#18640]
+* Extracts the autocomplete functionality of {kib}'s query language into a plugin {pull}20747[#20747]
+* Ensures a field exists in an the index pattern before grabbing it.  This ensures that the filter bar displays even if the index pattern or the field name is bad. {pull}20639[#20639]
+* Fixes a typo where quotes were used when backticks were intended. This fixes the text for a shard failure warning toast. {pull}21285[#21285]
+* [Fixes #19718] Allows overwriting of filters when adding a filter with `queryFilter` {pull}19754[#19754]
+
+Grok Debugger::
+* [Fixes #17856] Fixes the border in the Grok Debugger so it no longer cuts off the bottom line of text {pull}18752[#18752]
+* [Grok Debugger] Exports a helper function from the Ace `index.js` file instead from its own file {pull}18820[#18820]
+
+Logstash::
+* [Fixes #18791] Removes Ruby mode from the Pipeline Ace editor {pull}18807[#18807]
+* Fixes the bottom border of the editor on the *Edit Pipeline* page in Logstash Management {pull}18834[#18834]
+* Adds vertex reference to pipeline statement classes in the Pipeline viewer {pull}19134[#19134]
+* Preserves all nested pipeline statements during graph conversion {pull}19101[#19101]
+* Provides `events_in_per_millisecond` and `events_out_per_millisecond` for Logstash pipelines {pull}19446[#19446]
+* [Fixes #19736] Removes obsolete visualization code as part of revamp of the Pipeline viewer {pull}20122[#20122]
+* [Fixes #20123] Renames the Config viewer to Pipeline viewer {pull}20230[#20230]
+* [PipelineViewer] Replaces the bare `img` tags the with EuiIcon component {pull}20330[#20330]
+* [Fixes #19844] Refactors the collapsible statement component to wrap `props.children` in the Pipeline viewer {pull}20252[#20252]
+* Removes the explicit Close button in the Pipeline viewer because the new EuiFlyout component provides a Close button by default   {pull}20044[#20044]
+
+
+Machine Learning::
+
+* [Fixes #5003] Provides better error reporting in create recognized job page {pull}18638[#18638]
+* [Fixes #18745] Fixes issue in Firefox and IE11 where the loading of new job icons results in a 404 response {pull}18766[#18766]
+* Fixes issue where the data recognizer appears to hang after all tasks have completed successfully {pull}18803[#18803]
+* Removes `_feature` and `_ignored` from detector modal {pull}20984[#20984]
+* Adds missing default privilege values {pull}21131[#21131]
+* [Fixes #18168] Fixes min and max date picker options {pull}21197[#21197]
+* [Fixes #18379] Clears bucket span invalid label {pull}21262[#21262]
+* [Fixes #21401] Provides fixes for wizard card layout when cloning {pull}21403[#21403]
+* Fixes crash in fields service when user has no index permission {pull}21469[#21469]
+* [Fixes #18575] Fixes issues with end time of Explorer swimlane selection {pull}18995[#18995]
+* [Fixes #19205] Turns off display of time series charts if metric field is script field {pull}19206[#19206]
+* [Fixes #19720] Fixes Single Metric Viewer for multi week bucket spans {pull}19759[#19759]
+* [Fixes #20096] Adds missing aria-label attribute to various components {pull}20117[#20117]
+* [Fixes #19944] Fixes link to Single Metric Viewer zoom for sparse data {pull}20144[#20144]
+* [Fixes #18023] Fixes cosmetic issues with cut off chart overflows {pull}19794[#19794]
+* [Fixes #18187] Fixes overlapping swimlane axis labels {pull}19800[#19800]
+* [Fixes #18880] Fixes `agg-type` dropdowns size and styling {pull}19816[#19816]
+* Changes info icon tooltip position to top to avoid overlapping with corresponding form fields {pull}20874[#20874]
+* [Fixes #20867] Updates job validation so it reports an error when categorization job is using `mlcategory` {pull}21075[#21075]
+* [Fixes #18516] Updates job validation so it uses fieldCaps to check aggregatable fields to avoid triggering Elasticsearch errors {pull}21087[#21087]
+* [Fixes #18163] Improves bucket span estimator stability {pull}21282[#21282]
+* Fixes an issue with failing job validation when fieldCaps object is malformed {pull}21116[#21116]
+
+
+Management::
+* [Fixes #17583] Clears error message for upload in `componentDidMount` so that users no
+longer see the message when they use the Cancel or Back button to go back to the Upload page. {pull}20268[#20268]
+* [Fixes #20069] Fixes sorting for index management {pull}20266[#20266]
+* [Fixes #20107] Fixes issues with bad error message for low permission users {pull}20275[#20275]
+* [Fixes #19309] Fixes issue in edit index settings caused by Ace upgrade {pull}19311[#19311]
+* [Fixes #21703] Fixes import of index patterns {pull}21743[#21743]
+* Removes Close buttons from *Saved Object Relationship* flyout and *Index Management* flyout {pull}20043[#20043]
+* In Watcher, replace uses of Notifier with toastNotifications {pull}20538[#20538]
+* [Fixes #20611] Re-enables the `indexPattern:placeholder` setting {pull}20685[#20685]
+*  Adds `SearchStrategyRegistry` and `defaultSearchStrategy` to support existing search behavior 
+and integrates it with `CallClient` {pull}20497[#20497]
+* [Fixes #21512] Fixes broken link to saved object from *Relationship* flyout {pull}21513[#21513]
+* [Fixes #21572] Blocks users from interacting with the UI while saved objects 
+are deleted {pull}21575[#21575]
+* [Fixes #21615]  Fixes saved objects item count and table filtering {pull}21574[#21574]
+* Swaps Watcher `create action` tooltips {pull}21717[#21717]
+* In Watcher, ensures the text property is optional {pull}19034[#19034]
+* Updates jest snapshots {pull}19186[#19186]
+* [Fixes #19120] Ensures Watcher accounts for cluster-level settings {pull}19121[#19121]
+* [Fixes #18756] Fixes Ace editor warnings {pull}18893[#18893]
+* Fixes Ace warnings in Console output {pull}19272[#19272]
+* [Fixes #19802] Fixes search in *Advanced Settings* {pull}19841[#19841]
+* [Fixes #20156] In *Advanced Settings*, changes the display of the JSON default setting value to 
+use EuiCodeBlock and uses the `overflowHeight` prop for long values {pull}20744[#20744]
+* Adds test coverage around the relationships endpoints to validate responses and check error handling {pull}19737[#19737]
+* Updates data test subject to use correct property from item object {pull}20794[#20794]
+* [Fixes #21416] Fixes *Export everything* {pull}21434[#21434]
+* Changes the painless scripted field {pull}21026[#21026]
+* Uses `SavedObjectsClientProvider` to provide `SavedObjectLoader` with an Angular-wrapped saved object client {pull}21541[#21541]
+* [Fixes #18443] Makes *Change password* button on account page keyboard accessible {pull}20958[#20958]
+
+Monitoring::
+* Ignores duplicate shards {pull}21057[#21057]
+* [Fixes #20276] Capitalizes the license type {pull}20683[#20683]
+* [Fixes #20853] Removes `kibana_stats.requests.status_codes` from the bulk uploader {pull}20855[#20855]
+* [Fixes #20628] Uses 0 as the default for shard count if the node is not found {pull}21000[#21000]
+* [Fixes #21308] Ensures {kib} passes down the `expiry_date` for the license {pull}21354[#21354]
+* Fixes capitalization typo for `className` attribute {pull}20104[#20104]
+* [Fixes #18104] Refactors the {es} Indices Listing to use Base Controller and a React component 
+instead of an Angular directive {pull}18595[#18595]
+* Adds collector classes for objects that are registered in a `CollectorSet` {pull}19098[#19098]
+* Ensures functional tests work correctly for the summary status component {pull}19289[#19289]
+* Refactors the {es} Nodes Listing to use Base Controller and a
+React component instead of an Angular directive {pull}18585[#18585]
+* Uses React components for {es} directives {pull}19362[#19362]
+* Uses React components for {kib} directives {pull}19379[#19379]
+* Updates the Logstash cluster status bars to React {pull}19433[#19433]
+* [Fixes #19453] Fixes the Node Advanced page {pull}19740[#19740]
+* [Fixes #20132] Fixes the listing and filtering of {es} nodes {pull}20321[#20321]
+* [Fixes #19052] Updates the monitoring status bars to use React components instead of Angular directives {pull}19183[#19183]
+* Removes the {xpack} usage module {pull}21099[#21099]
+* [Fixes #12504] Moves hardcoded Reporting stats type collection out of monitoring plugin {pull}18894[#18894]
+* [Fixes #19509] Checks if monitoring is enabled before registering collector {pull}19581[#19581]
+* Implements the &quot;kibana status&quot; spec from the Monitoring data model for stats {pull}20577[#20577]
+* [Fixes #12504] Renames `TypeCollector` to `CollectorSet` for semantics {pull}18987[#18987]
+* [Fixes #19567] Separates bulk upload behavior from CollectorSet {pull}19691[#19691]
+
+Operations::
+* Executes the `tsc.cmd` on Windows during a build {pull}19622[#19622]
+* Bumps `https-proxy-agent` to the latest version and removes the version lock {pull}17840[#17840]
+* [Fixes #16836] Uses the `--no-bin-links` flag and deletes the `.bin` folders in the final build because they are not used {pull}19373[#19373]
+* Removes build files {pull}19603[#19603]
+* [Fixes #7237] Allows setting `NODE_OPTIONS` via `/etc/default` when using `sysv` {pull}15900[#15900]
+* Puts JSX support in the root `tsconfig` file {pull}19359[#19359]
+* Allows prod optimizations when running source {pull}20174[#20174]
+* Avoids unnecessary recompile at startup {pull}20176[#20176]
+* Validates current node version {pull}19154[#19154]
+* Removes node version validator from git pre-commit hook script {pull}19950[#19950]
+* Organizes metrics into `metrics_collector`, tests into `test` directories, and removes `mock-fs` for the `cgroup` test {pull}17788[#17788]
+* Handles configured `path.data` for Keystore location {pull}19916[#19916]
+* Includes `Node.js` version in notice file {pull}20133[#20133]
+* [Fixes #20063] Uses zip snapshot on Windows {pull}20503[#20503]
+* Ensures no `yarn.lock` changes are required  {pull}20625[#20625]
+* Provides workaround for yarn interdependency conflicts {pull}20805[#20805]
+* Skips install dependencies {pull}20649[#20649]
+* Updates messaging when {xpack} is not available {pull}21221[#21221]
+* Updates status page to reflect changes to the `/api/stats` endpoint {pull}21055[#21055]
+* [Fixes #19968] Adds `data-test-subj` to buttons and updates snapshots {pull}20080[#20080]
+* Changes `tryForTime` error output from `failure` to `error`, to make it easier to grep the logs for actual failures {pull}19707[#19707]
+* Removes `markdown-to-jsx` from `yarn.lock` {pull}20537[#20537]
+* Extends the `Chrome` TypeScript type {pull}21076[#21076]
+* Updates `yarn.lock` with new `react-test-renderer` version {pull}19745[#19745]
+* [Fixes #21006] [esArchiver] Replace Windows line endings on parse {pull}21111[#21111]
+* [precommitHook] Ignores casing for files in `.github` directory {pull}19279[#19279]
+* [devUtils/procRunner] Waits for proc to exit so can fallback to SIGKILL {pull}20918[#20918]
+* [Fixes #19700] Turns off `object-literal-sort-keys` rule {pull}20274[#20274]
+* Converts `ResizeChecker` and `render-complete` tools to TypeScript {pull}20531[#20531]
+* Solves a problem where the `toApiFieldNames` method in the Stats API was converting 
+arrays in the data to objects. {pull}21053[#21053]
+
+Platform::
+* [Fixes #20573] Removes unnecessary`kbn-version` header on all HTTP responses {pull}20551[#20551]
+* [Fixes #18779] Renames `@kbn/babel-preset/common` and `node` and `webpack` 
+to `@kbn/babel-preset/common_preset` and `node_preset` and `webpack_preset` {pull}19025[#19025]
+* Upgrades RxJS from `6.1.0` to `6.2.1` {pull}20209[#20209]
+* Uses TSLint to handle errors in `kbn_internal_native_observable` types {pull}20705[#20705]
+* Makes legacy Kibana server aware of connection protocol {pull}20756[#20756]
+* Logs correct {kib} URL when TLS is enabled {pull}20721[#20721]
+* Fixes broken `SearchRequest` clone method {pull}20222[#20222]
+* Simplifies Courier interface and organizes internals {pull}20060[#20060]
+* Refactors `SearchLooper` and renames it `SearchPoll` {pull}20315[#20315]
+* Removes Notifier `lifecycle`, `timed`, `event`, `describeError`, and `log` methods {pull}20327[#20327]
+* Aggregates `SearchRequestQueue` functions into a single module {pull}20332[#20332]
+* Refactors `SearchSource` interface {pull}20334[#20334]
+* Declares `SearchRequest` state variables in constructor {pull}20578[#20578]
+* Fixes bug in `propFilter` logic when it is not passed a filter  {pull}20569[#20569]
+* Adds the ability to abort a `kfetch` call {pull}20700[#20700]
+* Removes `courier:searchRefresh` Angular event from `searchPoll` {pull}20850[#20850]
+* Converts `notify.warning` calls to use `toastNotifications` {pull}20767[#20767]
+* [Fixes #21386] Fixes formatting of *Saved object not found* error toast {pull}21421[#21421]
+* Adds missing dev dependencies to `package.json` {pull}19625[#19625]
+* Adds `_bulk_create` endpoint to `/api/saved_objects` {pull}20498[#20498]
+* Removes Angular dependencies in `SavedObjectClient` {pull}20384[#20384]
+* [Fixes #17481] Migrates uiApp &quot;uses&quot; to explicit imports in apps {pull}17828[#17828]
+* [eslint] Unifies resolver configs {pull}19102[#19102]
+* [tslint] Fixes violations in `kbn-system-loader` {pull}19336[#19336]
+* [tslint] Fixes violations in `kbn-pm` {pull}19335[#19335]
+* Adds `import()` support to `eslint-plugin-no-unsanitized` {pull}19315[#19315]
+* Checks filename casing in CI {pull}19282[#19282]
+* Ensures all failures are logged {pull}19271[#19271]
+* Uses https://github.com/sindresorhus/execa[execa] in plugin-helpers so that errors include 
+`stdout` with helpful information {pull}20110[#20110]
+* [tslint] Ensures that the status code is 1 when an error occurs in a linter {pull}20567[#20567]
+* [tslint] Adds helper for running tslint on specific projects {pull}20866[#20866]
+* [Fixes #20524] Fixes inconsistency with plugin naming in `kbn-plugin-generator` {pull}20808[#20808]
+* [Fixes #20694] Bootstraps the legacy platform within the new platform {pull}20699[#20699]
+* [tslint] Enables no-default-export rule {pull}20952[#20952]
+* [kfetch] Converts the kfetch API to TypeScript to make it easier to consume in a purely TypeScript project {pull}20914[#20914]
+* [kfetch] Calls `Error.captureStackTrace` only if it exists {pull}21376[#21376]
+* [Fixes #20922] Converts the `kibana-install-dir` flag to the `installDir` option in `kbn-test` {pull}21317[#21317]
+* Disables the tslint rule that checks that every interface name begins with an `I` {pull}19402[#19402]
+* Updates makelogs to 4.1.0 {pull}20232[#20232]
+* Increases the maximum line width in prettier to 100 {pull}20535[#20535]
+* Moves `del` to dependencies {pull}20921[#20921]
+* Adds the `_xpack/usage` HTTP API endpoint, which returns data fetched from {es} about {xpack} feature usage. {pull}19232[#19232]
+* [Fixes #19611] Uses authentication from request headers in {xpack} usage API {pull}19613[#19613]
+
+
+Security::
+
+* [Fixes #20600, #20177] Improves communication for {es}/{xpack} being unavailable {pull}21124[#21124]
+* [RBAC Phase 1] Updates application privileges when {xpack} license changes {pull}19839[#19839]
+* [Fixes #16516] Disallows use of `dangerouslySetInnerHTML` on React components {pull}17759[#17759]
+* Exposes `getSavedObjectsRepository` from Saved Objects Service to allow callers 
+to obtain an instance of the repository directly {pull}19677[#19677]
+* [Saved Objects Client] Returns information about what is missing in the 404 {pull}19868[#19868]
+* No longer sets certs and keys for proxied calls to {es} {pull}17804[#17804]
++
+Resolved issue with using PKI to authenticate the internal server user against 
+{es} when {security} is disabled or the realms in {es} are configured with 
+PKI taking precedence to basic authentication.
+
+
+Sharing::
+* [Fixes #17853] Replaces `react-select` with EuiComboBox for input controls {pull}17452[#17452]
+* [Fixes #19803] Provides valid value for InputRange component when Range slider is not set {pull}20002[#20002]
+* Updates RangeControl to properly handle disabled state {pull}20811[#20811]
+* [Fixes #20807] Avoids day-long gaps in sample data {pull}20897[#20897]
+* [Fixes #21430] Removes `mergePanelData` from dashboard redux reducers {pull}21607[#21607]
+* Removes padding {pull}19547[#19547]
+* [Fixes #20724] Blacklists `Transfer-Encoding` HTTP header for PDF report generation {pull}20755[#20755]
+* [Fixes #21212] Fixes layout on Reporting page {pull}21218[#21218]
+* [Fixes #20469] Fixes issue with layout of the Sample Data list in Internet Explorer {pull}21619[#21619]
+* [Fix #18838] Fixes incorrect 403 message when generating reports {pull}19054[#19054]
+* Edits the Reporting job complete notification service {pull}19283[#19283]
+* Removes application icon assets from {kib} because they now ship with EUI {pull}18570[#18570]
+* Removes double modal when cloning dashboard with duplicate title {pull}19049[#19049]
+* [Fixes #19665] Fixes gaps in the sample Flight data {pull}19912[#19912]
+* Replaces timefilter Angular service with singleton {pull}19852[#19852]
+* [Fixes #20062] Uses absolute path for sample data {pull}20244[#20244]
+* Removes `display` from timefilter refreshInterval state {pull}20348[#20348]
+* Removes Angular dependency from Field and FieldList {pull}20589[#20589]
+* [Fixes #21326] Moves the global state management out of `kbn_global_timepicker.js` and into `timefilter.js` so all of the 
+timefilter code resides in a single location and timefilter itself is responsible for updating the global state {pull}21440[#21440]
+* [Fixes #21438] Sets pause to `true` when refresh interval is zero {pull}21498[#21498]
+* [Fixes #21551] Ensures the Range control correctly handles response when read-only user does not have index permission {pull}21557[#21557]
+* [Fixes #20477] Fixes dashboard state filters {pull}20480[#20480]
+* Fleshes out communication layer between embeddables and dashboard {pull}17446[#17446]
+* Cleans up the time range handling in embeddables {pull}17718[#17718]
+* [Fixes #17912] Shows `completed_at` timestamp if status is completed or failed {pull}19551[#19551]
+* Cleans up context menu toggle in view mode {pull}19558[#19558]
+* [Fixes #19479, #19481] Updates the code for accessibility {pull}19561[#19561]
+* Converts `ui/embeddable` folder to TypeScript {pull}19648[#19648]
+* [Fixes #19541] Fixes bad call to `this.updateUrl` on Reporting panel {pull}19687[#19687]
+* Converts dashboard panel actions to TypeScript {pull}19675[#19675]
+* Converts dashboard redux code to TypeScript {pull}19857[#19857]
+* [Fixes #19563] Converts screenshot stitcher code in Reporting to TypeScript {pull}20061[#20061]
+* Removes `_behaviors` abstraction in Chromium reporting {pull}20106[#20106]
+* Removes unused `destroy` function {pull}20111[#20111]
+* [Fixes #20832] Bumps reporting timeout {pull}20833[#20833]
+* [Fixes #20154] Fixes the dashboard start screen so it is center aligned on IE11 {pull}21066[#21066]
+
+Telemetry::
+
+* Removes {xpack} Usage API endpoint {pull}20800[#20800]
+
+Visualization::
+* [Fixes #18949] Fixes rendering of Markdown when opening links in new tab {pull}19356[#19356]
+* [Fixes #17575] Sets timeout for Timelion search requests {pull}19711[#19711]
+* [Fixes #18626] Fixes the disabling of aggregations in the visualize editor {pull}18796[#18796]
+* [Fixes #19724] Fixes the filtering of the "other bucket" so that it works on all charts {pull}19860[#19860]
+* [Fixes #4877] Fixes an issue with links containing parentheses being broken in Markdown {pull}19470[#19470]
+* [Fixes #19823] Fixes issue with pre 6.1 gauge charts that were wrongly rendered as metric visualizations  {pull}19853[#19853]
+* [Fixes #19919] Fixes prop type check in `MetricVisValue` {pull}19991[#19991]
+* [Fixes #1059] Fixes relative URL for visualizations with terms aggregations {pull}20521[#20521]
+* Adds log scale mode to the Y-axis for TSVB {pull}17761[#17761]
+* Adds `AggTypeFieldFilters` to filter out fields in visualize editor {pull}20539[#20539]
+* Refactors Markdown lifecycle methods to React 16.3 {pull}19436[#19436]
+* [Fixes #21499] Fixes hidden ticks when using log scale {pull}21507[#21507]
+* Removes unused code `src/core_plugins/metrics/public/services/executor_provider.js` {pull}20135[#20135]
+* [Fixes #21426] Adds `if` check around using async `handler` object in `VisEditorVisualization` {pull}21454[#21454]
+* Removes Angular from field formats {pull}17581[#17581]
+* Removes Angular from `AggConfigs` {pull}17682[#17682]
+* [Fixes #16595] Explicitly passes filters and queries to dashboard visualizations and saved searches {pull}19172[#19172]
+* Removes Angular from courier request handler {pull}20032[#20032]
+* Replaces `showMeticsAtAllLevels`, which is missing an "r" in the word metrics, 
+with `showMetricsAtAllLevels` {pull}20369[#20369]
+* Moves the visualize editor out of visualize directive {pull}20263[#20263]
+* Splits edit state from saved state {pull}20323[#20323]
+* Removes Angular dependency from base and React vis types {pull}20386[#20386]
+* [Fixes #20459] Applies scope in Angular vis type {pull}20461[#20461]
+* Moves visualize legend into `vislib` legend {pull}20479[#20479]
+* Removes Angular from `render_complete` {pull}20478[#20478]
+* Refactors geohash agg to not use vis {pull}20298[#20298]
+* Adds `indexPattern` to agg so it is not accessed from `vis.indexPattern` {pull}20491[#20491]
+* Fixes broken interval label for the date histogram {pull}20548[#20548]
+* Removes Angular from visualize {pull}20295[#20295]
+* Removes `vis.aggs` references from `aggTypes` {pull}20508[#20508]
+* Removes schema references from vis types {pull}20489[#20489]
+* [Fixes #20407] Fixes filter on values that are not in the result {pull}20608[#20608]
+* [Fixes #21297] Fixes problems with Apply being disabled in some cases {pull}21333[#21333]
+* [Fixes #21301] Fixes error with average bucket pipeline aggregation {pull}21400[#21400]
+* [Fixes #21464] Fixes embedded mode in visualize {pull}21468[#21468]
+* [Fixes #21435, #21532] Fixes pinned filters in Visualize and Dashboard {pull}21463[#21463]
+* Adds `EditorOptionsGroup` component {pull}18812[#18812]
+* Replaces `_term` order in terms agg by `_key` {pull}19032[#19032]
+* Adds an update function to the visualize loader {pull}19030[#19030]
+* Changes toast notification so it doesn't show a warning in filter agg {pull}19255[#19255]
+* Replace `vis.reload` by `forceFetch` requestHandler param {pull}19296[#19296]
+* [Fixes #13590] Provides better geometry assessment in axis label filtering {pull}16130[#16130]
+* Adds `AggTypeFilters` to filter out aggs in editor {pull}19913[#19913]
+* Changes `AggConfig` to ES6 syntax {pull}20224[#20224]
+* Makes `aggTypeFilter` registry return value directly {pull}20523[#20523]
+* Reenables VEGA_DEBUG for Vega visualization {pull}20456[#20456]
+* Improves the update status and converts it to TypeScript {pull}20546[#20546]
+* Converts the components used in the visualization rendering infrastructure to TypeScript {pull}20940[#20940]
+* Converts the visualize loader to TypeScript {pull}21025[#21025]
+* Fixes empty vis toasts {pull}21388[#21388]
+* Adds support for HTML tooltips to Vega {pull}17632[#17632]
+* [Fixes #18942] Fixes Vega map refresh {pull}19245[#19245]
+* Adds `autoRefreshFetch` event to timefilter {pull}20863[#20863]
+* Always uses Elastic Map Services production url, even in dev {pull}21237[#21237]
+
+{xpack}::
+* Removes use of `resolveKibanaPath` from plugin helpers {pull}18979[#18979]
+* Upgrades redux, redux-thunk and react-redux in {xpack} {pull}20267[#20267]
+* [Fixes #18346] Temporarily ignores kebab casing in some parts of {xpack} {pull}18505[#18505]
+
+
+
+
+
 
 [[release-notes-6.3.2]]
 == {kib} 6.3.2
@@ -119,8 +654,6 @@ in the {xpack} directory {pull}20585[#20585]
 
 Visualization::
 * Adds distinct links and float tags to Region Map docs {pull}20499[#20499]
-
-
 
 [[release-notes-6.3.1]]
 == {kib} 6.3.1
