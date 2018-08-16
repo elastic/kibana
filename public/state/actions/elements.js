@@ -348,4 +348,7 @@ export const addElement = createThunk('addElement', ({ dispatch }, pageId, eleme
   // refresh all elements if there's a filter, otherwise just render the new element
   if (element.filter) dispatch(fetchAllRenderables());
   else dispatch(fetchRenderable(newElement));
+
+  // select the new element
+  dispatch(selectElement(newElement.id));
 });

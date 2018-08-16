@@ -136,7 +136,11 @@ export const aeroelastic = ({ dispatch, getState }) => {
       { silent: true }
     );
 
-  const unselectElement = page => {
+  const selectShape = (page, id) => {
+    aero.commit(page, 'shapeSelect', { shapes: [id] });
+  };
+
+  const unselectShape = page => {
     // TODO add a dedicated action type in `aeroelastic` for element selection (incl. null)
     const commit = aero.commit;
     commit(page, 'mouseEvent', { event: 'mouseDown', x: Infinity, y: Infinity }, { silent: true });
@@ -203,8 +207,10 @@ export const aeroelastic = ({ dispatch, getState }) => {
       case selectElement.toString():
         // without this condition, a mouse release anywhere will trigger it, leading to selection of whatever is
         // underneath the pointer (maybe nothing) when the mouse is released
-        if (!action.payload) {
-          unselectElement(prevPage);
+        if (action.payload) {
+          selectShape(prevPage, action.payload);
+        } else {
+          unselectShape(prevPage);
         }
         break;
 

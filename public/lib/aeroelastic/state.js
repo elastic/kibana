@@ -1,17 +1,10 @@
+const { shallowEqual } = require('./functional');
+
 /**
  * PoC action dispatch
  */
 
 const makeUid = () => 1e11 + Math.floor((1e12 - 1e11) * Math.random());
-
-const shallowEqual = (a, b) => {
-  if (a === b) return true;
-  if (a.length !== b.length) return false;
-  for (let i = 0; i < a.length; i++) {
-    if (a[i] !== b[i]) return false;
-  }
-  return true;
-};
 
 const selectReduce = (fun, previousValue, mapFun = d => d, logFun) => (...inputs) => {
   // last-value memoizing version of this single line function:

@@ -20,7 +20,7 @@ const matrix2d = require('./matrix2d');
 
 const config = require('./config');
 
-const { identity, disjunctiveUnion, mean, unnest } = require('./functional');
+const { identity, disjunctiveUnion, mean, shallowEqual, unnest } = require('./functional');
 
 /**
  * Selectors directly from a state object
@@ -188,38 +188,13 @@ const transformGestures = select((keyTransformGesture, mouseTransformGesture) =>
   keyTransformGesture.concat(mouseTransformGesture)
 )(keyTransformGesture, mouseTransformGesture);
 
-const shapeAddGesture = select(keys => Object.keys(keys).indexOf('KeyN') !== -1)(pressedKeys);
-
-const rand128 = () => 128 + Math.floor(128 * Math.random());
-
-const shapeAddEvent = select(
-  action => (action && action.type === 'shapeAddEvent' ? action.payload : null)
-)(primaryUpdate);
-
 const restateShapesEvent = select(
   action => (action && action.type === 'restateShapesEvent' ? action.payload : null)
 )(primaryUpdate);
 
-// todo remove this test function
-const enteringShapes = select((source1, source2) => {
-  const fromSource1 = source1 && {
-    id: 'newRect' + Math.random(),
-    type: 'rectangle',
-    localTransformMatrix: matrix.multiply(
-      matrix.translate(2 * rand128() - 256, 2 * rand128() - 256, 4 * rand128() - 768),
-      matrix.rotateX(Math.random() * 2 * Math.PI),
-      matrix.rotateY(Math.random() * 2 * Math.PI),
-      matrix.rotateZ(Math.random() * 2 * Math.PI)
-    ),
-    transformMatrix: matrix.translate(425, 290, 5),
-    a: rand128(),
-    b: rand128(),
-    backgroundColor: `rgb(${rand128()},${rand128()},${rand128()})`,
-    parent: 'rect1',
-  };
-  const fromSource2 = source2;
-  return [fromSource1, fromSource2].filter(identity);
-})(shapeAddGesture, shapeAddEvent);
+const directSelect = select(
+  action => (action && action.type === 'shapeSelect' ? action.payload : null)
+)(primaryUpdate);
 
 const initialSelectedShapeState = {
   shapes: [],
@@ -264,7 +239,15 @@ const multiSelect = (prev, hoveredShapes, metaHeld, down, uid) => {
 };
 
 const selectedShapes = selectReduce(
-  (prev, hoveredShapes, { down, uid }, metaHeld) => {
+  (prev, hoveredShapes, { down, uid }, metaHeld, directSelect, allShapes) => {
+    if (
+      directSelect &&
+      directSelect.shapes &&
+      !shallowEqual(directSelect.shapes, prev.shapes.map(shape => shape.id))
+    ) {
+      const { shapes, uid } = directSelect;
+      return { ...prev, shapes: shapes.map(id => allShapes.find(shape => shape.id === id)), uid };
+    }
     if (uid === prev.uid) return prev;
     const selectFunction = config.singleSelect ? singleSelect : multiSelect;
     const result = selectFunction(prev, hoveredShapes, metaHeld, down, uid);
@@ -272,7 +255,7 @@ const selectedShapes = selectReduce(
   },
   initialSelectedShapeState,
   d => d.shapes
-)(hoveredShapes, mouseButton, metaHeld);
+)(hoveredShapes, mouseButton, metaHeld, directSelect, shapes);
 
 const selectedShapeIds = select(shapes => shapes.map(shape => shape.id))(selectedShapes);
 
@@ -616,13 +599,13 @@ const shapeCascadeTransforms = shapes => shape => {
 
 const cascadeTransforms = shapes => shapes.map(shapeCascadeTransforms(shapes));
 
-const nextShapes = select((preexistingShapes, enteringShapes, restated) => {
+const nextShapes = select((preexistingShapes, restated) => {
   if (restated && restated.newShapes) {
     return restated.newShapes;
   }
   // this is the per-shape model update at the current PoC level
-  return preexistingShapes.concat(enteringShapes);
-})(shapes, enteringShapes, restateShapesEvent);
+  return preexistingShapes;
+})(shapes, restateShapesEvent);
 
 const transformedShapes = select(applyLocalTransforms)(nextShapes, transformIntents);
 
