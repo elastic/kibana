@@ -19,6 +19,20 @@ export const tempVectorStyle = new ol.style.Style({
   })
 });
 
+export const getOlLayerStyle = ({ color }) => {
+  return new ol.style.Style({
+    fill: new ol.style.Fill({
+      // TODO: Make alpha channel adjustable
+      color: `${color}15`
+    }),
+    stroke: new ol.style.Stroke({
+      color,
+      width: 2
+    })
+  });
+};
+
+
 export const defaultVectorStyle = new ol.style.Style({
   fill: new ol.style.Fill({
     color: [60, 25, 215, .05]

@@ -7,7 +7,7 @@
 import { createSelector } from 'reselect';
 import { getLayerList, getMapConstants } from "./map_selectors";
 import { LAYER_TYPE } from "../shared/layers/layer";
-import { FEATURE_PROJECTION, tempVectorStyle, defaultVectorStyle }
+import { FEATURE_PROJECTION, tempVectorStyle, getOlLayerStyle }
   from './ol_layer_defaults';
 import * as ol from 'openlayers';
 import _ from 'lodash';
@@ -27,7 +27,7 @@ const convertVectorLayersToOl = (() => {
   const geojsonFormat = new ol.format.GeoJSON({
     featureProjection: FEATURE_PROJECTION
   });
-  return ({ source, visible, temporary }) => {
+  return ({ source, visible, temporary, style }) => {
     const olFeatures = geojsonFormat.readFeatures(source);
     const vectorLayer = new ol.layer.Vector({
       source: new ol.source.Vector({
@@ -36,7 +36,7 @@ const convertVectorLayersToOl = (() => {
     });
     vectorLayer.setVisible(visible);
     temporary && vectorLayer.setStyle(tempVectorStyle)
-      || vectorLayer.setStyle(defaultVectorStyle);
+      || vectorLayer.setStyle(getOlLayerStyle(style));
     return vectorLayer;
   };
 })();
@@ -75,20 +75,6 @@ function updateMapLayerOrder(mapLayers, oldLayerOrder, newLayerOrder) {
   });
 }
 
-const getOlLayerStyle = ({ color }) => {
-  return new ol.style.Style({
-    fill: new ol.style.Fill({
-      // TODO: Make alpha channel adjustable
-      color: `${color}15`
-    }),
-    stroke: new ol.style.Stroke({
-      color,
-      width: 2
-    })
-  });
-};
-
-
 // Selectors
 const getOlMap = createSelector(
   getMapConstants,
@@ -124,15 +110,14 @@ export const getOlMapAndLayers = createSelector(
   getLayersWithOl,
   (olMap, layersWithOl) => {
     const layersIds = getLayersIds(olMap.getLayers());
-    layersWithOl.forEach(({ id, olLayer, visible, temporary, style }) => {
+    layersWithOl.forEach(({ id, olLayer, visible, style }) => {
       if (!layersIds.find(layerId => layerId === id)) {
         olMap.addLayer(olLayer);
       }
       // Individual layer-specific updates
       olLayer.setVisible(visible);
-      const appliedStyle = !_.isEmpty(style) && getOlLayerStyle(style)
-        || temporary && tempVectorStyle
-        || defaultVectorStyle;
+      const appliedStyle = getOlLayerStyle(style)
+        || tempVectorStyle;
       olLayer.setStyle && olLayer.setStyle(appliedStyle);
     });
     // Layer order updates

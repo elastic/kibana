@@ -40,9 +40,10 @@ class StyleContent extends React.Component {
 
   _getStyleContent({ updateColor, currentLayerStyle, styleDescriptor }) {
     const { mapboxCss, vectorAdjustment } = styleDescriptor;
-    const currentColor = currentLayerStyle && currentLayerStyle.color || '#fff';
+    // Default to first style tab
     vectorAdjustment && !this.state.tabSelected && this.setState({
       tabSelected: vectorAdjustment.name });
+    const currentColor = currentLayerStyle.color;
     if (!this.state.tabSelected) { return null; }
     return (
       <Fragment>
