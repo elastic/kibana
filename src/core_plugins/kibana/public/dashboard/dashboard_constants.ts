@@ -17,18 +17,18 @@
  * under the License.
  */
 
-interface IInjector {
-  get<T>(injectable: string): T;
+export const DashboardConstants = {
+  ADD_VISUALIZATION_TO_DASHBOARD_MODE_PARAM: 'addToDashboard',
+  NEW_VISUALIZATION_ID_PARAM: 'addVisualization',
+  LANDING_PAGE_PATH: '/dashboards',
+  CREATE_NEW_DASHBOARD_URL: '/dashboard',
+};
+export const DASHBOARD_GRID_COLUMN_COUNT = 48;
+export const DASHBOARD_GRID_HEIGHT = 20;
+export const DEFAULT_PANEL_WIDTH = DASHBOARD_GRID_COLUMN_COUNT / 2;
+export const DEFAULT_PANEL_HEIGHT = 15;
+
+// type string in dashboard_app.js
+export function createDashboardEditUrl(id: string) {
+  return `/dashboard/${id}`;
 }
-
-declare class Chrome {
-  public addBasePath<T = string>(path: T): T;
-  public dangerouslyGetActiveInjector(): Promise<IInjector>;
-  public getBasePath(): string;
-  public getXsrfToken(): string;
-  public getKibanaVersion(): string;
-}
-
-declare const chrome: Chrome;
-
-export default chrome;
