@@ -5,8 +5,15 @@
  */
 import pathToRegexp from 'path-to-regexp';
 
+export enum PathTypes {
+  blob = 'blob',
+  tree = 'tree',
+}
+
 export const ROOT = '/';
-export const MAIN = '/:resource/:org/:repo/:pathType(blob|tree)/:revision/:path*:goto(!.*)?';
+export const MAIN = `/:resource/:org/:repo/:pathType(${PathTypes.blob}|${
+  PathTypes.blob
+})/:revision/:path*:goto(!.*)?`;
 export const ADMIN = '/admin';
 
 export const adminRegex = pathToRegexp(ADMIN);

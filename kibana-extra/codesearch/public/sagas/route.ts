@@ -15,8 +15,10 @@ function* handleLocationChange(action: any) {
     yield put(fetchRepos());
   } else if (ROUTES.mainRegex.test(pathname)) {
     const lastRequestPath = yield select(lastRequestPathSelector);
-    const [resource, org, repo, , revision, path] = ROUTES.mainRegex.exec(pathname)!.slice(1);
-    if (path) {
+    const [resource, org, repo, pathType, revision, path] = ROUTES.mainRegex
+      .exec(pathname)!
+      .slice(1);
+    if (path && pathType === ROUTES.PathTypes.blob) {
       const uri = `${resource}/${org}/${repo}?${revision}#${path}`;
       if (lastRequestPath !== uri) {
         yield put(loadStructure(uri));
