@@ -5,6 +5,5 @@
  */
 
 export * from './log_entries_api';
-export * from './log_summary_api';
 export * from './search_results_api';
 export * from './search_summary_api';
