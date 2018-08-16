@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`cli invalid config support exits with statusCode 64 and logs a single line when config is invalid 1`] = `
+exports[`cli invalid config support exits with statusCode 64 and an error when config is invalid 1`] = `
 Array [
   Object {
     "@timestamp": "## @timestamp ##",

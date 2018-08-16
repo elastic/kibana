@@ -21,11 +21,11 @@ import { spawnSync } from 'child_process';
 import { resolve } from 'path';
 
 const ROOT_DIR = resolve(__dirname, '../../../../');
-const INVALID_CONFIG_PATH = resolve(__dirname, '__fixtures__/invalid_config.yml');
+const INVALID_CONFIG_PATH = resolve(__dirname, '__fixtures__/fatal_metadata.yml');
 
-describe('cli invalid config support', function () {
-  it('exits with statusCode 64 and an error when config is invalid', function () {
-    const { error, status, stdout } = spawnSync(process.execPath, [
+describe('fatal error', function () {
+  it('logs no metadata', function () {
+    const { stdout } = spawnSync(process.execPath, [
       'src/cli',
       '--config', INVALID_CONFIG_PATH
     ], {
@@ -42,14 +42,17 @@ describe('cli invalid config support', function () {
         }
       })
       .filter(Boolean)
-      .map(obj => ({
-        ...obj,
-        pid: '## PID ##',
-        '@timestamp': '## @timestamp ##'
-      }));
+      .map(obj => {
+        // contains system dependent paths
+        delete obj.error.stack;
 
-    expect(error).toBe(undefined);
-    expect(status).toBe(64);
+        return ({
+          ...obj,
+          pid: '## PID ##',
+          '@timestamp': '## @timestamp ##'
+        });
+      });
+
     expect(logLines).toMatchSnapshot();
   }, 20 * 1000);
 });

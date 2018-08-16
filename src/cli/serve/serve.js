@@ -275,11 +275,21 @@ function shouldStartRepl(opts) {
   return opts.repl && process.env.kbnWorkerType === 'server';
 }
 
-function logFatal(message, server) {
-  if (server) {
-    server.log(['fatal'], message);
-  }
+function logFatal(error, server) {
+  const stack = _.get(error, 'stack');
+  const message = _.get(error, 'message');
+  const duck = Boolean(stack) & Boolean(message);
+  const loggedError = duck
+    ? Object.assign(
+      new Error(message),
+      { stack }
+    )
+    : `${error}`;
 
-  // It's possible for the Hapi logger to not be setup
-  console.error('FATAL', message);
+  try {
+    if (server) server.log(['fatal'], loggedError);
+  } finally {
+    // It's possible for the Hapi logger to not be setup
+    console.log('FATAL', loggedError);
+  }
 }

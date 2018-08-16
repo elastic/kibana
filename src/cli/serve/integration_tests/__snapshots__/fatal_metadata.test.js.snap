@@ -1,0 +1,20 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`fatal error logs no metadata 1`] = `
+Array [
+  Object {
+    "@timestamp": "## @timestamp ##",
+    "error": Object {
+      "message": "child \\"elasticsearch\\" fails because [child \\"url\\" fails because [\\"url\\" must be a string]]",
+      "name": "Error",
+    },
+    "level": "fatal",
+    "message": "child \\"elasticsearch\\" fails because [child \\"url\\" fails because [\\"url\\" must be a string]]",
+    "pid": "## PID ##",
+    "tags": Array [
+      "fatal",
+    ],
+    "type": "error",
+  },
+]
+`;
