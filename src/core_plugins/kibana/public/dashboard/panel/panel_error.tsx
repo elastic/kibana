@@ -18,21 +18,16 @@
  */
 
 import React from 'react';
-import PropTypes from 'prop-types';
 
-export function PanelError({ error }) {
+export interface PanelErrorProps {
+  error: string | React.ReactNode;
+}
+
+export function PanelError({ error }: PanelErrorProps) {
   return (
     <div className="dshPanel__error panel-content">
-      <span aria-hidden="true" className="kuiIcon fa-exclamation-triangle"/>
+      <span aria-hidden="true" className="kuiIcon fa-exclamation-triangle" />
       <span>{error}</span>
     </div>
   );
 }
-
-PanelError.propTypes = {
-  error: PropTypes.oneOfType([
-    PropTypes.string,
-    PropTypes.node
-  ]),
-};
-
