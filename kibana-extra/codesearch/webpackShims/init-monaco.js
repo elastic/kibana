@@ -26,24 +26,14 @@ function handleNow(callback) {
   const r = window['require'];
   r.config({ paths: { 'vs': '../monaco/vs' } });
   r(['vs/editor/editor.main'], () => {
-    r(['vs/language/typescript/tokenization'], (tokenization) => {
-      monaco.languages.register({
-        id: 'ts',
-        extensions: ['.ts', '.tsx'],
-        aliases: ['TypeScript', 'ts', 'typescript'],
-        mimetypes: ['text/typescript']
-      });
-      monaco.languages.register({
-        id: 'js',
-        extensions: ['.js', '.es6', '.jsx'],
-        firstLine: '^#!.*\\bnode',
-        filenames: ['jakefile'],
-        aliases: ['JavaScript', 'javascript', 'js'],
-        mimetypes: ['text/javascript'],
-      });
-      monaco.languages.setTokensProvider('ts', tokenization.createTokenizationSupport(tokenization.Language.TypeScript));
-      monaco.languages.setTokensProvider('js', tokenization.createTokenizationSupport(tokenization.Language.EcmaScript5));
-      callback(monaco)
+    r(['vs/editor/browser/editorExtensions',
+      'vs/base/browser/htmlContentRenderer',
+      'vs/editor/common/modes/textToHtmlTokenizer',
+      'vs/base/browser/ui/scrollbar/scrollableElement'], (extensions, renderer, tokenizer, scrollable) => {
+      monaco.renderer = renderer;
+      monaco.tokenizer = tokenizer;
+      monaco.scrollable = scrollable;
+      callback(monaco, extensions)
     });
   });
 }

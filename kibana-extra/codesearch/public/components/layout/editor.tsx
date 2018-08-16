@@ -53,13 +53,7 @@ export class Editor extends React.Component<Props> {
         const contentType = response.headers.get('Content-Type');
 
         if (contentType && contentType.startsWith('text/')) {
-          let lang = contentType.split(';')[0].substring('text/'.length);
-          if (lang === 'typescript') {
-            lang = 'ts';
-          }
-          if (lang === 'javascript') {
-            lang = 'js';
-          }
+          const lang = contentType.split(';')[0].substring('text/'.length);
           response.text().then(text => this.loadText(text, repo, file, lang));
         } else if (contentType && contentType.startsWith('image/')) {
           alert('show image!');

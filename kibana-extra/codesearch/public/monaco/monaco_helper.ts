@@ -10,6 +10,7 @@ import { ResizeChecker } from 'ui/resize_checker';
 import { Definition, Hover, Location } from 'vscode-languageserver';
 import { LspRestClient, TextDocumentMethods } from '../../common/lsp_client';
 import { EditorService } from './editor_service';
+import { HoverController } from './hover_controller';
 import { TextModelResolverService } from './textmodel_resolver';
 
 export class MonacoHelper {
@@ -29,12 +30,17 @@ export class MonacoHelper {
   }
   public init() {
     return new Promise(resolve => {
-      initMonaco(monaco => {
+      initMonaco((monaco, extensions) => {
         this.monaco = monaco;
+        extensions.registerEditorContribution(HoverController);
         this.editor = monaco.editor.create(
           this.container!,
           {
             readOnly: true,
+            hover: {
+              enabled: false,
+            }, // disable default hover;
+            contextmenu: false,
           },
           {
             textModelService: new TextModelResolverService(monaco),

@@ -4,14 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { TextDocumentPositionParams } from 'vscode-languageserver';
 import {
   Definition,
   DocumentSymbolParams,
   Hover,
   SymbolInformation,
-  TextDocumentPositionParams,
-} from 'vscode-languageserver';
-
+} from 'vscode-languageserver-types';
 import { LspClient } from './lsp_client';
 import { LspMethod } from './lsp_method';
 

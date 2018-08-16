@@ -5,10 +5,26 @@
  */
 
 declare module 'init-monaco' {
-  import Monaco from 'monaco-editor';
+  import Monaco, { editor } from 'monaco-editor';
+  import IEditorContribution = editor.IEditorContribution;
+  import ICodeEditor = editor.ICodeEditor;
 
   export * from 'monaco-editor';
   export type Monaco = typeof Monaco;
 
-  export function initMonaco(callback: (monaco: typeof Monaco) => void): any;
+  export interface EditorExtensions {
+    registerEditorContribution(ctor: ICommonEditorContributionCtor): void;
+  }
+
+  export type ICommonEditorContributionCtor = IConstructorSignature1<
+    ICodeEditor,
+    IEditorContribution
+  >;
+  export interface IConstructorSignature1<A1, T> {
+    new (first: A1, ...services: Array<{ _serviceBrand: any }>): T;
+  }
+
+  export function initMonaco(
+    callback: (monaco: typeof Monaco, extensions: EditorExtensions) => void
+  ): any;
 }

@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { AsyncTask } from '../public/monaco/computer';
 import { LspClient } from './lsp_client';
 
 export class LspMethod<INPUT, OUTPUT> {
@@ -13,6 +14,21 @@ export class LspMethod<INPUT, OUTPUT> {
   constructor(method: string, client: LspClient) {
     this.client = client;
     this.method = method;
+  }
+
+  public asyncTask(input: INPUT): AsyncTask<OUTPUT> {
+    const abortController = new AbortController();
+    const promise = () => {
+      return this.client
+        .sendRequest(this.method, input, abortController.signal)
+        .then(result => result.result as OUTPUT);
+    };
+    return {
+      cancel() {
+        abortController.abort();
+      },
+      promise,
+    };
   }
 
   public async send(input: INPUT): Promise<OUTPUT> {
