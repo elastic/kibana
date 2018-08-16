@@ -75,7 +75,7 @@
   },
   "dependencies": {
     "@codesearch/esqueue": "link:packages/codesearch-esqueue",
-    "@codesearch/javascript-typescript-langserver": "link:../../lsp/javascript-typescript-langserver",
+    "@codesearch/lsp-extension": "link:../../lsp/javascript-typescript-langserver/packages/lsp-extension",
     "boom": "^7.2.0",
     "connected-react-router": "^4.3.0",
     "elasticsearch": "^15.1.1",
