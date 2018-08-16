@@ -57,8 +57,8 @@ export const getIndexAtTimeKey = <Value>(
   keyAccessor: (value: Value) => TimeKey,
   compareValues?: Comparator
 ) => {
-  const compator = compareToTimeKey(keyAccessor, compareValues);
-  const collectionBisector = bisector(compator);
+  const comparator = compareToTimeKey(keyAccessor, compareValues);
+  const collectionBisector = bisector(comparator);
 
   return (collection: Value[], key: TimeKey): number | null => {
     const index = collectionBisector.left(collection, key);
@@ -67,7 +67,7 @@ export const getIndexAtTimeKey = <Value>(
       return null;
     }
 
-    if (compator(collection[index], key) !== 0) {
+    if (comparator(collection[index], key) !== 0) {
       return null;
     }
 
