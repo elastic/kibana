@@ -751,9 +751,7 @@ const alignmentGuideAnnotations = select((shapes, draggedPrimaryShape, draggedSh
 })(transformedShapes, draggedPrimaryShape, draggedShape);
 
 const hoverAnnotations = select((hoveredShape, selectedPrimaryShapeIds) => {
-  return hoveredShape &&
-    hoveredShape.type !== 'annotation' &&
-    selectedPrimaryShapeIds.indexOf(hoveredShape.id) === -1
+  return hoveredShape && hoveredShape.type !== 'annotation' && !selectedPrimaryShapeIds.length
     ? [
         {
           ...hoveredShape,
