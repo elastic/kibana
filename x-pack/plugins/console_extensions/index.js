@@ -14,6 +14,7 @@ export function consoleExtensions(kibana) {
         config.get('console_extensions.enabled') &&
         config.has('console.enabled') &&
         config.get('console.enabled') &&
+        config.has('elasticsearch') &&
         !config.get('elasticsearch.tribe.url')
       );
     },
