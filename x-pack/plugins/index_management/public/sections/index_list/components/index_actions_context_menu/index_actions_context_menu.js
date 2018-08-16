@@ -241,8 +241,7 @@ class IndexActionsContextMenuUi extends Component {
     const { forcemergeIndices, indexNames, intl } = this.props;
     const helpText = intl.formatMessage({
       id: 'xpack.idxMgmt.indexActionsMenu.forceMerge.forceMergeSegmentsHelpText',
-      defaultMessage: `Merge the segments in an index until the number 
-        is reduced to this or fewer segments. The default is 1.`,
+      defaultMessage: 'Merge the segments in an index until the number is reduced to this or fewer segments. The default is 1.',
     });
     const oneIndexSelected = this.oneIndexSelected();
     const entity = this.getEntity(oneIndexSelected);
