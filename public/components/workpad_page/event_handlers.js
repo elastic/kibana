@@ -17,38 +17,38 @@ const localMousePosition = (target, clientX, clientY) => {
 };
 
 const setupHandler = (commit, target) => {
-  window.onmousemove = ({ clientX, clientY }) => {
+  window.onmousemove = ({ clientX, clientY, altKey, metaKey }) => {
     const { x, y } = localMousePosition(target, clientX, clientY);
-    commit('cursorPosition', { x, y });
+    commit('cursorPosition', { x, y, altKey, metaKey });
   };
   window.onmouseup = e => {
     e.stopPropagation();
-    const { clientX, clientY } = e;
+    const { clientX, clientY, altKey, metaKey } = e;
     const { x, y } = localMousePosition(target, clientX, clientY);
+    commit('mouseEvent', { event: 'mouseUp', x, y, altKey, metaKey });
     window.onmousemove = null;
     window.onmouseup = null;
-    commit('mouseEvent', { event: 'mouseUp', x, y });
   };
 };
 
-const handleMouseMove = (commit, { target, clientX, clientY }) => {
+const handleMouseMove = (commit, { target, clientX, clientY, altKey, metaKey }) => {
   // mouse move must be handled even before an initial click
   if (!window.onmousemove) {
     const { x, y } = localMousePosition(target, clientX, clientY);
     setupHandler(commit, target);
-    commit('cursorPosition', { x, y });
+    commit('cursorPosition', { x, y, altKey, metaKey });
   }
 };
 
 const handleMouseDown = (commit, e, isEditable) => {
   e.stopPropagation();
-  const { target, clientX, clientY, button } = e;
+  const { target, clientX, clientY, button, altKey, metaKey } = e;
   if (button !== 0 || !isEditable) return; // left-click and edit mode only
   const ancestor = ancestorElement(target, 'canvasPage');
   if (!ancestor) return;
   const { x, y } = localMousePosition(ancestor, clientX, clientY);
   setupHandler(commit, ancestor);
-  commit('mouseEvent', { event: 'mouseDown', x, y });
+  commit('mouseEvent', { event: 'mouseDown', x, y, altKey, metaKey });
 };
 
 const keyCode = key => (key === 'Meta' ? 'MetaLeft' : 'Key' + key.toUpperCase());

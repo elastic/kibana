@@ -140,18 +140,7 @@ const keyTransformGesture = select(
       : []
 )(pressedKeys);
 
-const alterSnapGesture = select(keys =>
-  Object.keys(keys)
-    .map(keypress => {
-      switch (keypress) {
-        case 'MetaLeft':
-          return 'relax';
-        default:
-          return false;
-      }
-    })
-    .filter(identity)
-)(pressedKeys);
+const alterSnapGesture = select(metaHeld => (metaHeld ? ['relax'] : []))(metaHeld);
 
 const initialTransformTuple = {
   deltaX: 0,

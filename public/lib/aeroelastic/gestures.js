@@ -25,18 +25,70 @@ const keyboardEvent = select(
   action => (action && action.type === 'keyboardEvent' ? action.payload : null)
 )(primaryUpdate);
 
-const pressedKeys = selectReduce((lookup, next) => {
+const keyInfoFromMouseEvents = select(
+  action =>
+    (action && action.type === 'cursorPosition') || action.type === 'mouseEvent'
+      ? { altKey: action.payload.altKey, metaKey: action.payload.metaKey }
+      : null
+)(primaryUpdate);
+
+const altTest = key => key.slice(0, 3) === 'Alt' || key === 'KeyALT';
+const metaTest = key => key.slice(0, 4) === 'Meta';
+
+// Key states (up vs down) from keyboard events are trivially only captured if there's a keyboard event, and that only
+// happens if the user is interacting with the browser, and specifically, with the DOM subset that captures the keyboard
+// event. It's also clear that all keys, and importantly, modifier keys (alt, meta etc.) can alter state while the user
+// is not sending keyboard DOM events to the browser, eg. while using another tab or application. Similarly, an alt-tab
+// switch away from the browser will cause the registration of an `Alt down`, but not an `Alt up`, because that happens
+// in the switched-to application (https://github.com/elastic/kibana-canvas/issues/901).
+//
+// The solution is to also harvest modifier key (and in the future, maybe other key) statuses from mouse events, as these
+// modifier keys typically alter behavior while a pointer gesture is going on, in this case now, relaxing or tightening
+// snapping behavior. So we simply toggle the current key set up/down status (`lookup`) opportunistically.
+//
+// This function destructively modifies lookup, but could be made to work on immutable structures in the future.
+const updateKeyLookupFromMouseEvent = (lookup, keyInfoFromMouseEvent) => {
+  Object.entries(keyInfoFromMouseEvent).forEach(([key, value]) => {
+    if (metaTest(key)) {
+      if (value) {
+        lookup.meta = true;
+      } else {
+        delete lookup.meta;
+      }
+    }
+    if (altTest(key)) {
+      if (value) {
+        lookup.alt = true;
+      } else {
+        delete lookup.alt;
+      }
+    }
+  });
+  return lookup;
+};
+
+const pressedKeys = selectReduce((prevLookup, next, keyInfoFromMouseEvent) => {
+  const lookup = keyInfoFromMouseEvent
+    ? updateKeyLookupFromMouseEvent(prevLookup, keyInfoFromMouseEvent)
+    : prevLookup;
   if (!next) {
     return { ...lookup };
   }
+  let code = next.code;
+  if (altTest(next.code)) {
+    code = 'alt';
+  }
+  if (metaTest(next.code)) {
+    code = 'meta';
+  }
   if (next.event === 'keyDown') {
-    return { ...lookup, [next.code]: true };
+    return { ...lookup, [code]: true };
   } else {
     /*eslint no-unused-vars: ["error", { "ignoreRestSiblings": true }]*/
-    const { [next.code]: ignore, ...rest } = lookup;
+    const { [code]: ignore, ...rest } = lookup;
     return rest;
   }
-}, {})(keyboardEvent);
+}, {})(keyboardEvent, keyInfoFromMouseEvents);
 
 const keyUp = selectReduce((prev, next) => {
   switch (next && next.event) {
@@ -49,32 +101,8 @@ const keyUp = selectReduce((prev, next) => {
   }
 }, true)(keyboardEvent);
 
-const metaHeld = selectReduce((prev, next) => {
-  if (!next || !next.code || next.code.slice(0, 4) !== 'Meta') return prev;
-  switch (next && next.event) {
-    case 'keyDown':
-      return true;
-    case 'keyUp':
-      return false;
-    default:
-      return prev;
-  }
-}, false)(keyboardEvent);
-
-// DRY these up
-const optionHeld = selectReduce((prev, next) => {
-  // first is for web standard, other is for React key code detection
-  if (!next || !next.code || (next.code.slice(0, 3) !== 'Alt' && next.code !== 'KeyALT'))
-    return prev;
-  switch (next && next.event) {
-    case 'keyDown':
-      return true;
-    case 'keyUp':
-      return false;
-    default:
-      return prev;
-  }
-}, false)(keyboardEvent);
+const metaHeld = select(lookup => Boolean(lookup.meta))(pressedKeys);
+const optionHeld = select(lookup => Boolean(lookup.alt))(pressedKeys);
 
 const cursorPosition = selectReduce((previous, position) => position || previous, { x: 0, y: 0 })(
   rawCursorPosition
