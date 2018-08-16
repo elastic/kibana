@@ -1012,6 +1012,13 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
       });
     }
 
+    async filterOnTableCell(column, row) {
+      const cell = await find.byCssSelector(`tbody tr:nth-child(${row}) td:nth-child(${column})`);
+      await remote.moveMouseTo(cell);
+      const filterBtn = await testSubjects.findDescendant('filterForCellValue', cell);
+      await filterBtn.click();
+    }
+
     async doesLegendColorChoiceExist(color) {
       return await testSubjects.exists(`legendSelectColor-${color}`);
     }
