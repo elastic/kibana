@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Full } from '@codesearch/lsp-extension';
 import Boom from 'boom';
 import fs from 'fs';
 import { Clone, Commit, Error, Repository, Reset } from 'nodegit';
@@ -13,6 +12,7 @@ import Url from 'url';
 import { ResponseMessage } from 'vscode-jsonrpc/lib/messages';
 import { Location, TextDocumentPositionParams } from 'vscode-languageserver';
 
+import { Full } from '@codesearch/lsp-extension';
 import { LspRequest } from '../../model';
 import { GitOperations } from '../git_operations';
 import { Log } from '../log';
@@ -103,7 +103,11 @@ export class WorkspaceHandler {
         for (const full of result) {
           if (full.symbols) {
             for (const symbol of full.symbols) {
-              this.convertLocation(symbol.symbolInformation.location);
+              const parsedLocation = this.parseLocation(symbol.symbolInformation.location);
+              if (parsedLocation) {
+                symbol.repoUri = parsedLocation[0];
+                symbol.revision = parsedLocation[1];
+              }
             }
           }
           if (full.references) {
@@ -136,7 +140,7 @@ export class WorkspaceHandler {
   }
 
   // todo add an unit test
-  private convertLocation(location: Location) {
+  private parseLocation(location: Location): [string, string, string] | null {
     const uri = location.uri;
     if (uri && uri.startsWith('file://')) {
       const filePath = uri.substring('file://'.length);
@@ -149,9 +153,17 @@ export class WorkspaceHandler {
           const revision = m[2];
           const gitRevision = this.revisionMap[`${repoUri}/${revision}`] || revision;
           const file = m[3];
-          location.uri = `git://${repoUri}?${gitRevision}#${file}`;
+          return [repoUri, gitRevision, file];
         }
       }
+    }
+    return null;
+  }
+
+  private convertLocation(location: Location) {
+    const parsedLocation = this.parseLocation(location);
+    if (parsedLocation) {
+      location.uri = `git://${parsedLocation[0]}?${parsedLocation[1]}#${parsedLocation[2]}`;
     }
   }
 
