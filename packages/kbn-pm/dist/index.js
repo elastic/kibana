@@ -12431,6 +12431,7 @@ class Project {
         this.path = projectPath;
         this.packageJsonLocation = (0, _path.resolve)(this.path, 'package.json');
         this.nodeModulesLocation = (0, _path.resolve)(this.path, 'node_modules');
+        this.optimizeLocation = (0, _path.resolve)(this.path, 'optimize');
         this.targetLocation = (0, _path.resolve)(this.path, 'target');
         this.productionDependencies = this.json.dependencies || {};
         this.devDependencies = this.json.devDependencies || {};
@@ -38923,6 +38924,9 @@ const CleanCommand = exports.CleanCommand = {
                 }
                 if (yield (0, _fs.isDirectory)(project.targetLocation)) {
                     directoriesToDelete.push(project.targetLocation);
+                }
+                if (yield (0, _fs.isDirectory)(project.optimizeLocation)) {
+                    directoriesToDelete.push(project.optimizeLocation);
                 }
             }
             if (directoriesToDelete.length === 0) {

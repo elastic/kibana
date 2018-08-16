@@ -22,7 +22,7 @@ export const reloadIndices = (indexNames) => async (dispatch, getState) => {
   if (indices && indices.length > 0) {
     return dispatch(reloadIndicesSuccess({ indices }));
   } else {
-    return toastNotifications.addSuccess(
+    return toastNotifications.addWarning(
       i18n.translate('xpack.idxMgmt.reloadIndicesAction.indicesPageRefreshFailureMessage', {
         defaultMessage: 'Failed to refresh current page of indices.',
       })

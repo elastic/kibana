@@ -21,7 +21,7 @@ import {
 } from '@elastic/eui';
 
 import { ScopeExpression } from './scope_expression';
-import { checkPermission } from 'plugins/ml/privilege/check_privilege';
+import { checkPermission } from '../../privilege/check_privilege';
 import { getScopeFieldDefaults } from './utils';
 
 

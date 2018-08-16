@@ -9,15 +9,8 @@ import PropTypes from 'prop-types';
 import styled from 'styled-components';
 import Suggestions from './Suggestions';
 import ClickOutside from './ClickOutside';
-import {
-  EuiButton,
-  EuiFieldSearch,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiProgress,
-  EuiToolTip
-} from '@elastic/eui';
-import { units, fontSizes } from '../../../../style/variables';
+import { EuiFieldSearch, EuiProgress, EuiToolTip } from '@elastic/eui';
+import { units, fontSizes, colors } from '../../../../style/variables';
 
 const KEY_CODES = {
   LEFT: 37,
@@ -36,6 +29,7 @@ const BetaLabel = styled.div`
   font-size: ${fontSizes.small};
   transform: translateY(calc(-100% - ${units.quarter}px));
   cursor: pointer;
+  color: ${colors.gray2};
 `;
 
 export class Typeahead extends Component {
@@ -178,53 +172,46 @@ export class Typeahead extends Component {
         onClickOutside={this.onClickOutside}
         style={{ position: 'relative' }}
       >
-        <EuiFlexGroup alignItems="center">
-          <EuiFlexItem style={{ position: 'relative' }}>
-            <BetaLabel>
-              <EuiToolTip content="The Query bar feature is still in beta. Help us report any issues or bugs by using the APM feedback link in the top.">
-                <div>Beta</div>
-              </EuiToolTip>
-            </BetaLabel>
+        <div style={{ position: 'relative' }}>
+          <BetaLabel>
+            <EuiToolTip content="The Query bar feature is still in beta. Help us report any issues or bugs by using the APM feedback link in the top.">
+              <div>Beta</div>
+            </EuiToolTip>
+          </BetaLabel>
 
-            <EuiFieldSearch
-              fullWidth
+          <EuiFieldSearch
+            fullWidth
+            style={{
+              backgroundImage: 'none'
+            }}
+            placeholder="Search transactions and errors... (E.g. transaction.duration.us > 300000 AND context.response.status_code >= 400)"
+            inputRef={node => {
+              if (node) {
+                this.inputRef = node;
+              }
+            }}
+            disabled={this.props.disabled}
+            value={this.state.value}
+            onKeyDown={this.onKeyDown}
+            onKeyUp={this.onKeyUp}
+            onChange={this.onChangeInputValue}
+            onClick={this.onClickInput}
+            autoComplete="off"
+            spellCheck={false}
+          />
+
+          {this.props.isLoading && (
+            <EuiProgress
+              size="xs"
+              color="accent"
+              position="absolute"
               style={{
-                backgroundImage: 'none'
+                bottom: 0,
+                top: 'initial'
               }}
-              placeholder="Search transactions and errors... (E.g. transaction.duration.us > 300000 AND context.response.status_code >= 400)"
-              inputRef={node => {
-                if (node) {
-                  this.inputRef = node;
-                }
-              }}
-              disabled={this.props.disabled}
-              value={this.state.value}
-              onKeyDown={this.onKeyDown}
-              onKeyUp={this.onKeyUp}
-              onChange={this.onChangeInputValue}
-              onClick={this.onClickInput}
-              autoComplete="off"
-              spellCheck={false}
             />
-
-            {this.props.isLoading && (
-              <EuiProgress
-                size="xs"
-                color="accent"
-                position="absolute"
-                style={{
-                  bottom: 0,
-                  top: 'initial'
-                }}
-              />
-            )}
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiButton onClick={this.onSubmit} disabled={this.props.disabled}>
-              Search
-            </EuiButton>
-          </EuiFlexItem>
-        </EuiFlexGroup>
+          )}
+        </div>
 
         <Suggestions
           show={this.state.isSuggestionsVisible}

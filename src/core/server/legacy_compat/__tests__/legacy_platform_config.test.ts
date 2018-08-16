@@ -68,12 +68,7 @@ describe('#get', () => {
   test('correctly handles silent logging config.', () => {
     legacyConfigMock.rawData = new Map([['logging', { silent: true }]]);
 
-    expect(configAdapter.get('logging')).toEqual({
-      appenders: {
-        default: { kind: 'legacy-appender' },
-      },
-      root: { level: 'off' },
-    });
+    expect(configAdapter.get('logging')).toMatchSnapshot();
   });
 
   test('correctly handles verbose file logging config with json format.', () => {
@@ -81,12 +76,7 @@ describe('#get', () => {
       ['logging', { verbose: true, json: true, dest: '/some/path.log' }],
     ]);
 
-    expect(configAdapter.get('logging')).toEqual({
-      appenders: {
-        default: { kind: 'legacy-appender' },
-      },
-      root: { level: 'all' },
-    });
+    expect(configAdapter.get('logging')).toMatchSnapshot();
   });
 });
 

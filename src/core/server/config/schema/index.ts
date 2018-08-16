@@ -48,8 +48,12 @@ import {
   UnionType,
 } from './types';
 
-export { AnyType, ObjectType, TypeOf };
+export { ObjectType, TypeOf, Type };
 export { ByteSizeValue } from './byte_size_value';
+
+function any(options?: TypeOptions<any>) {
+  return new AnyType(options);
+}
 
 function boolean(options?: TypeOptions<boolean>): Type<boolean> {
   return new BooleanType(options);
@@ -135,7 +139,7 @@ function oneOf<A, B, C>(
 ): Type<A | B | C>;
 function oneOf<A, B>(types: [Type<A>, Type<B>], options?: TypeOptions<A | B>): Type<A | B>;
 function oneOf<A>(types: [Type<A>], options?: TypeOptions<A>): Type<A>;
-function oneOf<RTS extends AnyType[]>(types: RTS, options?: TypeOptions<any>): Type<any> {
+function oneOf<RTS extends Array<Type<any>>>(types: RTS, options?: TypeOptions<any>): Type<any> {
   return new UnionType(types, options);
 }
 
@@ -158,6 +162,7 @@ function conditional<A extends ConditionalTypeValue, B, C>(
 }
 
 export const schema = {
+  any,
   arrayOf,
   boolean,
   byteSize,

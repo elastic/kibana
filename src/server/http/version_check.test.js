@@ -17,7 +17,6 @@
  * under the License.
  */
 
-import { fromNode } from 'bluebird';
 import { resolve } from 'path';
 import * as kbnTestServer from '../../test_utils/kbn_server';
 
@@ -27,12 +26,8 @@ const versionHeader = 'kbn-version';
 const version = require(src('../package.json')).version;
 
 describe('version_check request filter', function () {
-  function makeRequest(kbnServer, opts) {
-    return fromNode(cb => {
-      kbnTestServer.makeRequest(kbnServer, opts, (resp) => {
-        cb(null, resp);
-      });
-    });
+  async function makeRequest(kbnServer, opts) {
+    return await kbnTestServer.makeRequest(kbnServer, opts);
   }
 
   async function makeServer() {

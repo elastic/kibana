@@ -38,6 +38,8 @@ routes.when(`${BASE_PATH}:view?/:id?`, {
   controllerAs: 'indexManagement',
   controller: class IndexManagementController {
     constructor($scope, $route, $http) {
+      // NOTE: We depend upon Angular's $http service because it's decorated with interceptors,
+      // e.g. to check license status per request.
       setHttpClient($http);
 
       $scope.$$postDigest(() => {

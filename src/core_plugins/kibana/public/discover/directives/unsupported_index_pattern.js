@@ -37,7 +37,7 @@ export const DiscoverUnsupportedIndexPattern = ({ unsupportedType }) => {
       <EuiSpacer size="xl" />
 
       <EuiFlexGroup justifyContent="center">
-        <EuiFlexItem grow={false} className="discoverNoResults">
+        <EuiFlexItem grow={false} className="dscNoResults">
           <EuiCallOut
             title={message}
             color="danger"
