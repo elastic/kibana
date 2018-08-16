@@ -45,7 +45,7 @@ image::images/highlights_6_4_inspector.png[Visualization inspector]
 === New Beta tutorials
 
 You'll find new Beta tutorials on the *Add Data* page. The majority of these tutorials are 
-for Metricbeat modules that fetch metrics from services.  They include the Beta 
+for Metricbeat modules that fetch metrics from services.  These tutorials include the Beta 
 label to indicate that they are a pre-release of the software.
 
 To access the tutorials, go to the {kib} home page. In *Add Data to {kib}*, 
@@ -97,7 +97,7 @@ If you want to fine tune your machine learning results
 you can now create custom rules in {kib}. Custom rules instruct 
 anomaly detectors to change their behavior based on domain-specific 
 knowledge that you provide. See 
-https://www.elastic.co/guide/en/elastic-stack-overview/6.4/ml-rules.html[Machine learning custom rules]
+https://www.elastic.co/guide/en/elastic-stack-overview/6.4/ml-rules.html[machine learning custom rules].
 
 [role="screenshot"]
 image::images/highlights_6_4_ml_create_rule.jpg[Machine learning create rule]
@@ -114,13 +114,13 @@ image::images/highlights_6-4_ml_jobs.jpg[Machine learning job management]
 
 
 [float]
-=== Response time anomalies with machine Learning in APM
+=== Response time anomalies with machine learning in APM
 
-The APM UI now integrates with Machine Learning to show anomalies in 
+The APM UI now integrates with machine learning to show anomalies in 
 response times on transactions. This makes catching unexpected behavior in your 
 services much easier by annotating critical anomalies on top of the response times graph. 
 It’s a one-click setup in the APM UI to get the job running. 
-This feature is Beta in 6.4.
+This feature is in Beta for 6.4.
 
 [role="screenshot"]
 image::images/highlights_6_4_apm_response.png[Response time anomalies with Machine Learning in APM]
@@ -133,7 +133,7 @@ making the scope of the data immediately more focused. It comes with a handy
 autocomplete that helps find the fields and even provides suggestions to 
 the data they include. This way you can easily filter for transaction response 
 times higher than 2000 ms, a particular user ID, or even a response status code.
-This feature is Beta in 6.4.
+This feature is in Beta for 6.4.
 
 [role="screenshot"]
 image::images/highlights_6_4_apm_query.png[Query bar for searching and filtering APM data]
@@ -162,7 +162,7 @@ This release adds documentation for these experimental APIs:
 
 * The {kib} role management API enables you to control 
 access to {kib} features and saved objects.
-* The <<logstash-configuration-management-api>> allows you to 
+* The <<logstash-configuration-management-api, Logstash configuration management api>> allows you to 
 programmatically integrate with the Logstash configuration 
 management feature.
 
