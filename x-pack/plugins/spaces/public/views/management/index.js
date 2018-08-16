@@ -9,28 +9,29 @@ import routes from 'ui/routes';
 
 import { management } from 'ui/management';
 
+const MANAGE_SPACES_KEY = 'manage_spaces';
+
 routes.defaults(/\/management/, {
   resolve: {
     spacesManagementSection: function () {
 
+      function getKibanaSection() {
+        return management.getSection('kibana');
+      }
+
       function deregisterSpaces() {
-        management.deregister('spaces');
+        getKibanaSection().deregister(MANAGE_SPACES_KEY);
       }
 
       function ensureSpagesRegistered() {
-        const registerSpaces = () => management.register('spaces', {
-          display: 'Spaces',
-          order: 10
-        });
-        const getSpaces = () => management.getSection('spaces');
 
-        const spaces = (management.hasItem('spaces')) ? getSpaces() : registerSpaces();
+        const kibanaSection = getKibanaSection();
 
-        if (!spaces.hasItem('manage_spaces')) {
-          spaces.register('manage_spaces', {
+        if (!kibanaSection.hasItem(MANAGE_SPACES_KEY)) {
+          kibanaSection.register(MANAGE_SPACES_KEY, {
             name: 'spacesManagementLink',
             order: 10,
-            display: 'Spaces Management',
+            display: 'Spaces',
             url: `#/management/spaces/list`,
           });
         }

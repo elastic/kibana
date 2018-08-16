@@ -18,14 +18,14 @@
  */
 
 import React from 'react';
-import { shallow } from 'enzyme';
+import { shallowWithIntl } from 'test_utils/enzyme_helpers';
 
-import { AddFilter } from '../add_filter';
+import { AddFilterComponent } from '../add_filter';
 
 describe('AddFilter', () => {
   it('should render normally', async () => {
-    const component = shallow(
-      <AddFilter onAddFilter={() => {}}/>
+    const component = shallowWithIntl(
+      <AddFilterComponent onAddFilter={() => {}}/>
     );
 
     expect(component).toMatchSnapshot();
@@ -33,8 +33,8 @@ describe('AddFilter', () => {
 
   it('should allow adding a filter', async () => {
     const onAddFilter = jest.fn();
-    const component = shallow(
-      <AddFilter onAddFilter={onAddFilter}/>
+    const component = shallowWithIntl(
+      <AddFilterComponent onAddFilter={onAddFilter}/>
     );
 
     // Set a value in the input field
@@ -48,8 +48,8 @@ describe('AddFilter', () => {
   });
 
   it('should ignore strings with just spaces', async () => {
-    const component = shallow(
-      <AddFilter onAddFilter={() => {}}/>
+    const component = shallowWithIntl(
+      <AddFilterComponent onAddFilter={() => {}}/>
     );
 
     // Set a value in the input field

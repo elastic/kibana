@@ -106,15 +106,15 @@ export default function ({ getService }) {
       });
     };
 
-    const bulkGetTest = (description, { spaceId, urlContext, tests }) => {
+    const bulkGetTest = (description, { spaceId, tests, otherSpaceId = spaceId }) => {
       describe(description, () => {
         before(() => esArchiver.load('saved_objects/spaces'));
         after(() => esArchiver.unload('saved_objects/spaces'));
 
         it(`should return ${tests.default.statusCode}`, async () => {
           await supertest
-            .post(`${getUrlPrefix(urlContext)}/api/saved_objects/_bulk_get`)
-            .send(createBulkRequests(spaceId))
+            .post(`${getUrlPrefix(spaceId)}/api/saved_objects/_bulk_get`)
+            .send(createBulkRequests(otherSpaceId))
             .expect(tests.default.statusCode)
             .then(tests.default.response);
         });
@@ -133,11 +133,11 @@ export default function ({ getService }) {
 
     bulkGetTest(`objects within another space`, {
       ...SPACES.SPACE_1,
-      urlContext: SPACES.SPACE_2.urlContext,
+      otherSpaceId: SPACES.SPACE_2.spaceId,
       tests: {
         default: {
           statusCode: 200,
-          response: expectNotFoundResults(SPACES.SPACE_1.spaceId)
+          response: expectNotFoundResults(SPACES.SPACE_2.spaceId)
         },
       }
     });

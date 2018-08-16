@@ -142,7 +142,7 @@ export class ScopeExpression extends Component {
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiExpressionButton
-            className={enabled ? 'scope-field-button' : 'scope-field-button disabled'}
+            className="scope-field-button"
             description="when"
             buttonValue={fieldName}
             isActive={false}
@@ -156,9 +156,8 @@ export class ScopeExpression extends Component {
               id="operatorValuePopover"
               button={(
                 <EuiExpressionButton
-                  className={enabled ? '' : 'disabled'}
                   description={`is ${filterTypeToText(filterType)}`}
-                  buttonValue={filterId}
+                  buttonValue={filterId || ''}
                   isActive={this.state.isFilterListOpen}
                   onClick={this.openFilterList}
                 />

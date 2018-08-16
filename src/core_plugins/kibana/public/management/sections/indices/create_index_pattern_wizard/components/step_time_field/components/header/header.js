@@ -25,21 +25,27 @@ import {
   EuiText,
 } from '@elastic/eui';
 
+import { FormattedMessage } from '@kbn/i18n/react';
+
 export const Header = ({
   indexPattern,
 }) => (
   <div>
     <EuiTitle size="s">
       <h2>
-        Step 2 of 2: Configure settings
+        <FormattedMessage
+          id="kbn.management.createIndexPattern.stepTimeHeader"
+          defaultMessage="Step 2 of 2: Configure settings"
+        />
       </h2>
     </EuiTitle>
     <EuiSpacer size="m"/>
     <EuiText color="subdued">
-      <span>
-        You&apos;ve defined <strong>{indexPattern}</strong> as your index pattern.
-        Now you can specify some settings before we create it.
-      </span>
+      <FormattedMessage
+        id="kbn.management.createIndexPattern.stepTimeLabel"
+        defaultMessage="You've defined {indexPattern} as your index pattern. Now you can specify some settings before we create it."
+        values={{ indexPattern: <strong>{indexPattern}</strong> }}
+      />
     </EuiText>
   </div>
 );

@@ -16,7 +16,6 @@ import {
 import { CheckingSettings } from './checking_settings';
 import { ReasonFound, WeTried } from './reasons';
 import { CheckerErrors } from './checker_errors';
-import '../../less/components/no_data.less';
 
 function NoDataMessage(props) {
   const { isLoading, reason, checkMessage } = props;
@@ -36,11 +35,11 @@ export function NoData(props) {
 
   return (
     <EuiPage>
-      <EuiPageBody>
+      <EuiPageBody restrictWidth={600}>
         <EuiPageContent
           verticalPosition="center"
           horizontalPosition="center"
-          className="noData__content"
+          className="eui-textCenter"
         >
           <EuiIcon type="monitoringApp" size="xxl" />
           <EuiSpacer size="m" />

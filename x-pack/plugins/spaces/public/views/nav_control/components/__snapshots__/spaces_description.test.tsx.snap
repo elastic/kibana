@@ -1,0 +1,32 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`SpacesDescription renders without crashing 1`] = `
+<EuiContextMenuPanel
+  className="spacesDescription"
+  hasFocus={true}
+  items={Array []}
+  title="Spaces"
+>
+  <EuiText
+    className="spacesDescription__text"
+    grow={true}
+  >
+    <p>
+      Use Spaces within Kibana to organize your Dashboards, Visualizations, and other saved objects.
+    </p>
+  </EuiText>
+  <div
+    className="spacesDescription__manageButtonWrapper"
+    key="manageSpacesButton"
+  >
+    <ManageSpacesButton
+      size="s"
+      style={
+        Object {
+          "width": "100%",
+        }
+      }
+    />
+  </div>
+</EuiContextMenuPanel>
+`;

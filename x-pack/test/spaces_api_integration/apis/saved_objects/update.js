@@ -7,13 +7,14 @@
 import expect from 'expect.js';
 import { SPACES } from './lib/spaces';
 import { getUrlPrefix, getIdPrefix } from './lib/space_test_utils';
+import { DEFAULT_SPACE_ID } from '../../../../plugins/spaces/common/constants';
 
 export default function ({ getService }) {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
 
   describe('update', () => {
-    const expectSpaceAwareResults = resp => {
+    const expectSpaceAwareResults = () => resp => {
 
       // loose ISO8601 UTC time with milliseconds validation
       expect(resp.body).to.have.property('updated_at').match(/^[\d-]{10}T[\d:\.]{12}Z$/);
@@ -29,7 +30,7 @@ export default function ({ getService }) {
       });
     };
 
-    const expectNonSpaceAwareResults = resp => {
+    const expectNonSpaceAwareResults = () => resp => {
 
       // loose ISO8601 UTC time with milliseconds validation
       expect(resp.body).to.have.property('updated_at').match(/^[\d-]{10}T[\d:\.]{12}Z$/);
@@ -45,66 +46,66 @@ export default function ({ getService }) {
       });
     };
 
-    const expectNotFound = resp => {
+    const expectNotFound = (type, id) => resp => {
       expect(resp.body).eql({
         statusCode: 404,
         error: 'Not Found',
-        message: 'Not Found'
+        message: `Saved object [${type}/${id}] not found`
       });
     };
 
-    const updateTest = (description, { urlContext, spaceId, tests }) => {
+    const updateTest = (description, { spaceId, tests }) => {
       describe(description, () => {
         before(() => esArchiver.load('saved_objects/spaces'));
         after(() => esArchiver.unload('saved_objects/spaces'));
         it(`should return ${tests.spaceAware.statusCode} for a space-aware doc`, async () => {
           await supertest
-            .put(`${getUrlPrefix(urlContext)}/api/saved_objects/visualization/${getIdPrefix(spaceId)}dd7caf20-9efd-11e7-acb3-3dab96693fab`)
+            .put(`${getUrlPrefix(spaceId)}/api/saved_objects/visualization/${getIdPrefix(spaceId)}dd7caf20-9efd-11e7-acb3-3dab96693fab`)
             .send({
               attributes: {
                 title: 'My second favorite vis'
               }
             })
             .expect(tests.spaceAware.statusCode)
-            .then(tests.spaceAware.response);
+            .then(tests.spaceAware.response());
         });
 
         it(`should return ${tests.notSpaceAware.statusCode} for a non space-aware doc`, async () => {
           await supertest
-            .put(`${getUrlPrefix(urlContext)}/api/saved_objects/space/space_1`)
+            .put(`${getUrlPrefix(spaceId)}/api/saved_objects/space/space_1`)
             .send({
               attributes: {
                 name: 'My second favorite space'
               }
             })
             .expect(tests.notSpaceAware.statusCode)
-            .then(tests.notSpaceAware.response);
+            .then(tests.notSpaceAware.response());
         });
 
         it(`should return ${tests.inOtherSpace.statusCode} for a doc in another space`, async () => {
           const id = `${getIdPrefix('space_2')}dd7caf20-9efd-11e7-acb3-3dab96693fab`;
           await supertest
-            .put(`${getUrlPrefix(urlContext)}/api/saved_objects/visualization/${id}`)
+            .put(`${getUrlPrefix(spaceId)}/api/saved_objects/visualization/${id}`)
             .send({
               attributes: {
                 title: 'My second favorite vis'
               }
             })
             .expect(tests.inOtherSpace.statusCode)
-            .then(tests.inOtherSpace.response);
+            .then(tests.inOtherSpace.response(`visualization`, `${spaceId === DEFAULT_SPACE_ID ? '' : (spaceId + ':')}${id}`));
         });
 
         describe('unknown id', () => {
           it(`should return ${tests.doesntExist.statusCode}`, async () => {
             await supertest
-              .put(`${getUrlPrefix(urlContext)}/api/saved_objects/visualization/not an id`)
+              .put(`${getUrlPrefix(spaceId)}/api/saved_objects/visualization/not an id`)
               .send({
                 attributes: {
                   title: 'My second favorite vis'
                 }
               })
               .expect(tests.doesntExist.statusCode)
-              .then(tests.doesntExist.response);
+              .then(tests.doesntExist.response(`visualization`, `${spaceId === DEFAULT_SPACE_ID ? '' : (spaceId + ':')}not an id`));
           });
         });
       });

@@ -7,14 +7,11 @@
 export const SPACES = {
   SPACE_1: {
     spaceId: 'space_1',
-    urlContext: 'space-1'
   },
   SPACE_2: {
     spaceId: 'space_2',
-    urlContext: 'space-2'
   },
   DEFAULT: {
     spaceId: 'default',
-    urlContext: ''
   }
 };

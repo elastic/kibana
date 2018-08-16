@@ -90,6 +90,7 @@ export class AdvancedSettings extends Component {
           name: setting[0],
           value: setting[1].userValue,
           isCustom: config.isCustom(setting[0]),
+          isOverridden: config.isOverridden(setting[0]),
         });
       })
       .filter((c) => !c.readonly)
@@ -137,7 +138,7 @@ export class AdvancedSettings extends Component {
         <EuiFlexGroup gutterSize="none">
           <EuiFlexItem>
             <EuiText>
-              <h1>Settings</h1>
+              <h1 data-test-subj="managementSettingsTitle">Settings</h1>
             </EuiText>
           </EuiFlexItem>
           <EuiFlexItem>

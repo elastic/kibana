@@ -131,7 +131,17 @@ describe('setRefreshInterval', () => {
 
   test('should allow partial updates to refresh interval', () => {
     timefilter.setRefreshInterval({ value: 10 });
-    expect(timefilter.getRefreshInterval()).to.eql({ pause: false, value: 10 });
+    expect(timefilter.getRefreshInterval()).to.eql({ pause: true, value: 10 });
+  });
+
+  test('should not allow negative intervals', () => {
+    timefilter.setRefreshInterval({ value: -10 });
+    expect(timefilter.getRefreshInterval()).to.eql({ pause: true, value: 0 });
+  });
+
+  test('should set pause to true when interval is zero', () => {
+    timefilter.setRefreshInterval({ value: 0, pause: false });
+    expect(timefilter.getRefreshInterval()).to.eql({ pause: true, value: 0 });
   });
 
   test('not emit anything if nothing has changed', () => {

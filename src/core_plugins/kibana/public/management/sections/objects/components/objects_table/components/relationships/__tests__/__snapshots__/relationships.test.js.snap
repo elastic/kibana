@@ -2,7 +2,9 @@
 
 exports[`Relationships should render dashboards normally 1`] = `
 <EuiFlyout
+  closeButtonAriaLabel="Closes this dialog"
   hideCloseButton={false}
+  maxWidth={false}
   onClose={[MockFunction]}
   ownFocus={false}
   size="m"
@@ -105,7 +107,9 @@ exports[`Relationships should render dashboards normally 1`] = `
 
 exports[`Relationships should render errors 1`] = `
 <EuiFlyout
+  closeButtonAriaLabel="Closes this dialog"
   hideCloseButton={false}
+  maxWidth={false}
   onClose={[MockFunction]}
   ownFocus={false}
   size="m"
@@ -146,7 +150,9 @@ exports[`Relationships should render errors 1`] = `
 
 exports[`Relationships should render index patterns normally 1`] = `
 <EuiFlyout
+  closeButtonAriaLabel="Closes this dialog"
   hideCloseButton={false}
+  maxWidth={false}
   onClose={[MockFunction]}
   ownFocus={false}
   size="m"
@@ -305,7 +311,9 @@ exports[`Relationships should render index patterns normally 1`] = `
 
 exports[`Relationships should render searches normally 1`] = `
 <EuiFlyout
+  closeButtonAriaLabel="Closes this dialog"
   hideCloseButton={false}
+  maxWidth={false}
   onClose={[MockFunction]}
   ownFocus={false}
   size="m"
@@ -462,7 +470,9 @@ exports[`Relationships should render searches normally 1`] = `
 
 exports[`Relationships should render visualizations normally 1`] = `
 <EuiFlyout
+  closeButtonAriaLabel="Closes this dialog"
   hideCloseButton={false}
+  maxWidth={false}
   onClose={[MockFunction]}
   ownFocus={false}
   size="m"

@@ -99,7 +99,9 @@ jest.mock('../../saved_objects', () => {
       update: async (type, id, body, { version }) => {
         if (object._version !== version) {
           throw {
-            statusCode: 409
+            res: {
+              status: 409
+            }
           };
         }
 
@@ -125,10 +127,11 @@ const confirmModalPromise = jest.fn();
 const kbnUrl = {
   eval: jest.fn(),
 };
+const i18n = arg => arg;
 
 describe('IndexPattern', () => {
   it('should handle version conflicts', async () => {
-    const IndexPattern = IndexPatternProvider(Private, config, Promise, confirmModalPromise, kbnUrl); // eslint-disable-line new-cap
+    const IndexPattern = IndexPatternProvider(Private, config, Promise, confirmModalPromise, kbnUrl, i18n); // eslint-disable-line new-cap
 
     // Create a normal index pattern
     const pattern = new IndexPattern('foo');
@@ -157,6 +160,6 @@ describe('IndexPattern', () => {
       result = err;
     }
 
-    expect(result.statusCode).toBe(409);
+    expect(result.res.status).toBe(409);
   });
 });
