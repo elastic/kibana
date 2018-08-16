@@ -18,7 +18,15 @@
  */
 
 import * as Rx from 'rxjs';
-import { pairwise, startWith } from 'rxjs/operators';
+import {
+  distinctUntilChanged,
+  endWith,
+  map,
+  pairwise,
+  startWith,
+  takeUntil,
+  tap,
+} from 'rxjs/operators';
 
 import { FatalErrorsStartContract } from '../fatal_errors';
 
@@ -27,42 +35,51 @@ interface Deps {
 }
 
 export class LoadingCountService {
-  private readonly count$ = new Rx.BehaviorSubject(0);
-  private readonly subscriptions: Rx.Subscription[] = [];
+  private readonly total$ = new Rx.BehaviorSubject(0);
+  private readonly stop$ = new Rx.Subject();
 
   public start({ fatalErrors }: Deps) {
     return {
       add: (count$: Rx.Observable<number>) => {
-        this.subscriptions.push(
-          count$
-            .pipe(
-              startWith(0),
-              pairwise()
-            )
-            .subscribe({
-              next: ([prev, next]) => {
-                const delta = next - prev;
-                this.count$.next(this.count$.getValue() + delta);
-              },
-              error: error => {
-                fatalErrors.add(error);
-              },
-            })
-        );
+        count$
+          .pipe(
+            distinctUntilChanged(),
+
+            tap(count => {
+              if (count < 0) {
+                throw new Error(
+                  'Observables passed to loadingCount.add() must only emit possitive numbers'
+                );
+              }
+            }),
+
+            // use takeUntil() so that we can finish each stream on stop() the same way we do when they complete,
+            // by removing the previous count from the total
+            takeUntil(this.stop$),
+            endWith(0),
+            startWith(0),
+            pairwise(),
+            map(([prev, next]) => next - prev)
+          )
+          .subscribe({
+            next: delta => {
+              this.total$.next(this.total$.getValue() + delta);
+            },
+            error: error => {
+              fatalErrors.add(error);
+            },
+          });
       },
 
       getCount$: () => {
-        return this.count$.asObservable();
+        return this.total$.pipe(distinctUntilChanged());
       },
     };
   }
 
   public stop() {
-    for (const subscription of this.subscriptions) {
-      subscription.unsubscribe();
-    }
-
-    this.subscriptions.length = 0;
+    this.stop$.next();
+    this.total$.complete();
   }
 }
 
