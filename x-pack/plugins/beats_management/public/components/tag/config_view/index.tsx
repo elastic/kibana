@@ -98,7 +98,7 @@ export class ConfigView extends React.Component<ComponentProps, any> {
             onSubmit={data => {
               this.props.onSave({
                 ...this.state.configBlock,
-                ...data,
+                block_obj: data,
               });
               this.props.onClose();
             }}

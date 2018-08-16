@@ -29,11 +29,12 @@ export class TagsLib {
     return tags.map(tag => {
       const transformedTag: BeatTag = tag as any;
       transformedTag.configuration_blocks = tag.configurations.map(block => {
-        const { type, description, ...block_obj } = block;
+        const { type, description, block_obj } = block;
+        const { other, ...configs } = block_obj;
         return {
           type,
           description,
-          block_yml: yaml.safeDump(block_obj),
+          block_yml: yaml.safeDump({ ...configs, ...yaml.safeLoad(other) }),
         } as ConfigurationBlock;
       });
       return transformedTag;

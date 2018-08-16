@@ -79,14 +79,17 @@ export interface ClientSideConfigurationBlock
 
 export interface FilebeatInputsConfig {
   paths: string[];
+  other: string;
 }
 export interface FilebeatModuleConfig {
   module: FilebeatModuleName;
+  other: string;
 }
 export interface MetricbeatModuleConfig {
   module: MetricbeatModuleName;
   hosts: string[];
   period: string;
+  other: string;
 }
 
 export interface FrameworkAdapter {
