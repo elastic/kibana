@@ -602,13 +602,47 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
       await PageObjects.header.waitUntilLoadingHasFinished();
     }
 
+
+    async changeHeatmapColorNumbers(value = 6) {
+      const input = await testSubjects.find(`heatmapOptionsColorsNumberInput`);
+      await input.clearValue();
+      await input.type(`${value}`);
+    }
+
     async clickMetricsAndAxes() {
       await testSubjects.click('visEditorTabadvanced');
     }
 
+    async clickOptionsTab() {
+      await testSubjects.click('visEditorTaboptions');
+    }
+
+    async clickEnableCustomRanges() {
+      await testSubjects.click('heatmapEnableCustomRanges');
+    }
+
+    async clickAddRange() {
+      await testSubjects.click(`heatmapAddRangeButton`);
+    }
+
+    async isCustomRangeTableShown() {
+      await testSubjects.exists('heatmapCustomRangesTable');
+    }
+
+    async addCustomRange(from, to) {
+      const table = await testSubjects.find('heatmapCustomRangesTable');
+      const lastRow = await table.findByCssSelector('tr:last-child');
+      const fromCell = await lastRow.findByCssSelector('td:first-child input');
+      fromCell.clearValue();
+      fromCell.type(`${from}`);
+      const toCell = await lastRow.findByCssSelector('td:nth-child(2) input');
+      toCell.clearValue();
+      toCell.type(`${to}`);
+    }
     async clickYAxisOptions(axisId) {
       await testSubjects.click(`toggleYAxisOptions-${axisId}`);
     }
+
     async clickYAxisAdvancedOptions(axisId) {
       await testSubjects.click(`toggleYAxisAdvancedOptions-${axisId}`);
     }
@@ -1010,6 +1044,14 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
           throw new Error('legend color selector not open');
         }
       });
+    }
+
+    async filterOnTableCell(column, row) {
+      const table = await testSubjects.find('tableVis');
+      const cell = await table.findByCssSelector(`tbody tr:nth-child(${row}) td:nth-child(${column})`);
+      await remote.moveMouseTo(cell);
+      const filterBtn = await testSubjects.findDescendant('filterForCellValue', cell);
+      await filterBtn.click();
     }
 
     async doesLegendColorChoiceExist(color) {

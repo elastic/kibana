@@ -35,7 +35,7 @@ import * as Plugins from './plugins';
 import { indexPatternsMixin } from './index_patterns';
 import { savedObjectsMixin } from './saved_objects';
 import { sampleDataMixin } from './sample_data';
-import { kibanaIndexMappingsMixin } from './saved_objects/mappings';
+import { kibanaIndexMappingsMixin } from './mappings';
 import { urlShorteningMixin } from './url_shortening';
 import { serverExtensionsMixin } from './server_extensions';
 import { uiMixin } from '../ui';

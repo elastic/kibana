@@ -91,7 +91,7 @@ img.lspvDetailDrawerIcon {
   width: 7vw;
 }
 
-@include screenSmall {
+@include euiBreakpoint('m') {
   .monPipelineViewer {
     .monPipelineViewer__spacer {
       border: none;

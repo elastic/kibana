@@ -46,7 +46,7 @@ export class Root {
       // noop
     }
   ) {
-    const loggerFactory = new MutableLoggerFactory(env);
+    const loggerFactory = new MutableLoggerFactory();
     this.loggingService = new LoggingService(loggerFactory);
     this.logger = loggerFactory;
 

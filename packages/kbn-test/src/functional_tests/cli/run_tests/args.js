@@ -108,7 +108,7 @@ export function processOptions(userOptions, defaultConfigPaths) {
     ...userOptions,
     configs,
     createLogger,
-    extraKbnOpts: userOptions._,
+    addExtraKbnArgs: argv => argv.concat(userOptions._ || []),
   };
 }
 
