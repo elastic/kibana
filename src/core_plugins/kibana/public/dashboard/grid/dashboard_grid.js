@@ -22,6 +22,8 @@ import PropTypes from 'prop-types';
 import _ from 'lodash';
 import ReactGridLayout from 'react-grid-layout';
 import classNames from 'classnames';
+import 'react-grid-layout/css/styles.css';
+import 'react-resizable/css/styles.css';
 
 import { PanelUtils } from '../panel/panel_utils';
 import { DashboardViewMode } from '../dashboard_view_mode';
