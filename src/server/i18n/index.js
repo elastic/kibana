@@ -21,20 +21,17 @@ import { i18n, i18nLoader } from '@kbn/i18n';
 
 export async function i18nMixin(kbnServer, server, config) {
   const { translationPaths = [] } = kbnServer.uiExports;
+  const locale = config.get('i18n.locale');
+
   i18nLoader.registerTranslationFiles(translationPaths);
 
-  const translations = await getUiTranslations();
+  const pureTranslations = await i18nLoader.getTranslationsByLocale(locale);
+  const translations = Object.freeze({
+    locale,
+    ...pureTranslations,
+  });
+
   i18n.init(translations);
 
-  async function getUiTranslations() {
-    const locale = config.get('i18n.locale');
-    const translations = await i18nLoader.getTranslationsByLocale(locale);
-
-    return {
-      locale,
-      ...translations,
-    };
-  }
-
-  server.decorate('server', 'getUiTranslations', getUiTranslations);
+  server.decorate('server', 'getUiTranslations', () => translations);
 }
