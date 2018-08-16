@@ -14,8 +14,8 @@ import {
 } from '@elastic/eui';
 
 export function ColorPicker({ currentColor, changeColor, resetColor,
-  active = true }) {
-  return active && (
+  selected, tabName }) {
+  return selected === tabName && (
     <EuiFlexGroup alignItems="center">
       <EuiFlexItem grow={false}>
         <EuiColorPicker
@@ -34,5 +34,5 @@ export function ColorPicker({ currentColor, changeColor, resetColor,
         </p>
       </EuiFlexItem>
     </EuiFlexGroup>
-  );
+  ) || null;
 }

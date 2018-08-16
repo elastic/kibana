@@ -39,31 +39,35 @@ class StyleContent extends React.Component {
   }
 
   _getStyleContent({ updateColor, currentLayerStyle, styleDescriptor }) {
+    const { mapboxCss, vectorAdjustment } = styleDescriptor;
     const currentColor = currentLayerStyle && currentLayerStyle.color || '#fff';
-    this.state.tabSelected || this.setState({
-      tabSelected: styleDescriptor.colorAdjustment.name });
+    vectorAdjustment && !this.state.tabSelected && this.setState({
+      tabSelected: vectorAdjustment.name });
+    if (!this.state.tabSelected) { return null; }
     return (
       <Fragment>
         <EuiTabs>
           <StyleTab
-            tabName={styleDescriptor.css.name}
-            active={this.state.tabSelected === styleDescriptor.css.name}
+            name={mapboxCss && mapboxCss.name}
+            selected={this.state.tabSelected}
             onClick={this._activateTab}
           />
           <StyleTab
-            tabName={styleDescriptor.colorAdjustment.name}
-            active={this.state.tabSelected === styleDescriptor.colorAdjustment.name}
+            name={vectorAdjustment && vectorAdjustment.name}
+            selected={this.state.tabSelected}
             onClick={this._activateTab}
           />
         </EuiTabs>
         <EuiSpacer />
         <MapBoxCss
-          active={this.state.tabSelected === styleDescriptor.css.name}
+          tabName={mapboxCss && mapboxCss.name}
+          selected={this.state.tabSelected}
         />
         <ColorPicker
+          tabName={vectorAdjustment && vectorAdjustment.name}
           changeColor={updateColor}
           currentColor={currentColor}
-          active={this.state.tabSelected === styleDescriptor.colorAdjustment.name}
+          selected={this.state.tabSelected}
         />
       </Fragment>
     );
@@ -74,8 +78,9 @@ class StyleContent extends React.Component {
   }
 }
 
-function MapBoxCss({ active = true }) {
-  return active && (
-    <EuiTextArea />
+// Placeholder component
+function MapBoxCss({ selected, tabName }) {
+  return selected === tabName && (
+    <EuiTextArea /> || null
   );
 }

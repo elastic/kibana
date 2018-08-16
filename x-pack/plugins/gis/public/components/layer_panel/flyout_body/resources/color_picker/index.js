@@ -16,9 +16,10 @@ function mapDispatchToProps(dispatch, { resetColor, changeColor }) {
   };
 }
 
-function mapStateToProps(state = {}, { currentColor = '#ffffff' }) {
+function mapStateToProps(state = {}, { currentColor = '#ffffff', tabName }) {
   return {
-    currentColor
+    currentColor,
+    tabName
   };
 }
 

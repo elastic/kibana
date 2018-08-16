@@ -6,22 +6,23 @@
 
 import React from 'react';
 import {
-  EuiTab,
+  EuiTab
 } from '@elastic/eui';
 import _ from 'lodash';
 
-export function StyleTab({ tabName, active = true, onClick }) {
-  return (
+export function StyleTab(props) {
+  const { name, selected, onClick } = props;
+  return name && (
     <EuiTab
-      id={_.camelCase(tabName)}
-      key={_.camelCase(tabName)}
-      name={tabName}
+      id={_.camelCase(name)}
+      key={_.camelCase(name)}
+      name={name}
       onClick={(() => {
-        const name = tabName;
-        return () => onClick(name);
+        const tabName = name;
+        return () => onClick(tabName);
       })()}
-      isSelected={active}
-    >{ tabName }
+      isSelected={name === selected}
+    >{ name }
     </EuiTab>
-  );
+  ) || null;
 }

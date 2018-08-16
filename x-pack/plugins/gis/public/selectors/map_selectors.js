@@ -46,20 +46,31 @@ export const getCurrentLayerStyle = createSelector(
 export const makeGetStyleDescriptor = () => createSelector(
   getSelectedLayer,
   selectedLayer => {
-    const isVector = selectedLayer.type === LAYER_TYPE.TILE;
-    return {
-      css: {
+    const isVector = selectedLayer.type === LAYER_TYPE.VECTOR;
+    const styleDescriptor = {
+      mapboxCss: {
         name: 'CSS',
-        tabs: {
-          'cssText': isVector
-        }
+        mods: [{
+          name: 'cssText',
+          apply: isVector
+        }]
       },
-      colorAdjustment: {
-        name: 'Color Adjustment',
-        tabs: {
-          'colorPicker': isVector
-        }
+      vectorAdjustment: {
+        name: 'Vector Adjustment',
+        mods: [{
+          name: 'colorPicker',
+          apply: isVector
+        }, {
+          name: 'cssText',
+          apply: isVector
+        }]
       }
     };
+    const filteredDescriptor = _.reduce(styleDescriptor, (accu, attrs, cat) => {
+      const applicableMods = attrs.mods.filter(mod => mod.apply) || [];
+      applicableMods.length && (accu[cat] = attrs);
+      return accu;
+    }, {});
+    return filteredDescriptor;
   }
 );
