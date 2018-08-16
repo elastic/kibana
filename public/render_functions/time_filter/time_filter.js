@@ -30,6 +30,9 @@ export const timeFilter = () => ({
       () => handlers.done()
     );
 
-    handlers.onDestroy(() => ReactDOM.unmountComponentAtNode(domNode));
+    handlers.onDestroy(() => {
+      handlers.setFilter('');
+      ReactDOM.unmountComponentAtNode(domNode);
+    });
   },
 });
