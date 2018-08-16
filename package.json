@@ -60,7 +60,7 @@
     "url": "https://github.com/elastic/kibana.git"
   },
   "dependencies": {
-    "@elastic/eui": "3.6.0",
+    "@elastic/eui": "3.6.1",
     "@elastic/filesaver": "1.1.2",
     "@elastic/numeral": "2.3.2",
     "@elastic/ui-ace": "0.2.3",
@@ -250,7 +250,7 @@
     "chance": "1.0.10",
     "cheerio": "0.22.0",
     "chokidar": "1.6.0",
-    "chromedriver": "2.36",
+    "chromedriver": "2.41.0",
     "classnames": "2.2.5",
     "dedent": "^0.7.0",
     "enzyme": "3.2.0",
@@ -333,7 +333,7 @@
     "zlib": "^1.0.5"
   },
   "engines": {
-    "node": "8.11.3",
+    "node": "8.11.4",
     "yarn": "^1.6.0"
   }
 }

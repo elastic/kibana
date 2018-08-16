@@ -20,23 +20,15 @@
 import 'ui/autoload/styles';
 import { uiModules } from 'ui/modules';
 import chrome from 'ui/chrome';
-
-import StatusApp from './components/status_app';
-
-const app = uiModules.get('apps/status', []);
-app.directive('statusApp', function (reactDirective) {
-  return reactDirective(StatusApp);
-});
+import { destroyStatusPage, renderStatusPage } from './components/render';
 
 chrome
   .setRootTemplate(require('plugins/status_page/status_page.html'))
-  .setRootController('ui', function ($http, buildNum, buildSha) {
-    const ui = this;
-
-    ui.buildInfo = {
-      num: buildNum,
-      sha: buildSha.substr(0, 8)
-    };
+  .setRootController('ui', function ($scope, buildNum, buildSha) {
+    $scope.$$postDigest(() => {
+      renderStatusPage(buildNum, buildSha.substr(0, 8));
+      $scope.$on('$destroy', destroyStatusPage);
+    });
   });
 
 uiModules.get('kibana')
