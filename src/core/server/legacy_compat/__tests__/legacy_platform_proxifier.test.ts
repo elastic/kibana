@@ -24,10 +24,6 @@ class MockNetServer extends EventEmitter {
   public address() {
     return { port: 1234, family: 'test-family', address: 'test-address' };
   }
-
-  public getConnections(callback: (error: Error | null, count: number) => void) {
-    callback(null, 100500);
-  }
 }
 
 function mockNetServer() {
@@ -45,6 +41,7 @@ let root: any;
 let proxifier: LegacyPlatformProxifier;
 beforeEach(() => {
   root = {
+    getConnections: jest.fn(),
     logger: {
       get: jest.fn(() => ({
         debug: jest.fn(),
@@ -170,13 +167,11 @@ test('`close` shuts down the `root`.', async () => {
 test('returns connection count from the underlying server.', () => {
   const onGetConnectionsComplete = jest.fn();
 
-  proxifier.getConnections(onGetConnectionsComplete);
-
-  expect(onGetConnectionsComplete).toHaveBeenCalledTimes(1);
-  expect(onGetConnectionsComplete).toHaveBeenCalledWith(null, 0);
-  onGetConnectionsComplete.mockReset();
-
-  proxifier.bind(createServer());
+  root.getConnections.mockImplementation(
+    (callback: (error: Error | null, count: number) => void) => {
+      callback(null, 100500);
+    }
+  );
   proxifier.getConnections(onGetConnectionsComplete);
 
   expect(onGetConnectionsComplete).toHaveBeenCalledTimes(1);

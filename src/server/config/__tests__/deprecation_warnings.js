@@ -20,6 +20,7 @@
 import { spawn } from 'child_process';
 
 import expect from 'expect.js';
+import { race, delay } from 'bluebird';
 
 const RUN_KBN_SERVER_STARTUP = require.resolve('./fixtures/run_kbn_server_startup');
 const SETUP_NODE_ENV = require.resolve('../../../setup_node_env');
@@ -31,7 +32,7 @@ describe('config/deprecation warnings mixin', function () {
   let stdio = '';
   let proc = null;
 
-  before(() => new Promise((resolve, reject) => {
+  before(async () => {
     proc = spawn(process.execPath, [
       '-r', SETUP_NODE_ENV,
       RUN_KBN_SERVER_STARTUP
@@ -49,23 +50,35 @@ describe('config/deprecation warnings mixin', function () {
       }
     });
 
-    proc.stdout.on('data', (chunk) => {
-      stdio += chunk.toString('utf8');
-    });
+    // Either time out in 5 seconds, or resolve once the line is in our buffer
+    return race([
+      delay(5000),
+      new Promise((resolve, reject) => {
+        proc.stdout.on('data', (chunk) => {
+          stdio += chunk.toString('utf8');
+          if (chunk.toString('utf8').includes('deprecation')) {
+            resolve();
+          }
+        });
 
-    proc.stderr.on('data', (chunk) => {
-      stdio += chunk.toString('utf8');
-    });
+        proc.stderr.on('data', (chunk) => {
+          stdio += chunk.toString('utf8');
+          if (chunk.toString('utf8').includes('deprecation')) {
+            resolve();
+          }
+        });
 
-    proc.on('exit', (code) => {
-      proc = null;
-      if (code > 0) {
-        reject(new Error(`Kibana server exited with ${code} -- stdout:\n\n${stdio}\n`));
-      } else {
-        resolve();
-      }
-    });
-  }));
+        proc.on('exit', (code) => {
+          proc = null;
+          if (code > 0) {
+            reject(new Error(`Kibana server exited with ${code} -- stdout:\n\n${stdio}\n`));
+          } else {
+            resolve();
+          }
+        });
+      })
+    ]);
+  });
 
   after(() => {
     if (proc) {

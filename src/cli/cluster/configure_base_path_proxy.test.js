@@ -25,7 +25,6 @@ jest.mock('../../server/logging', () => ({
   setupLogging: jest.fn(),
 }));
 
-import { Server } from 'hapi';
 import { createBasePathProxy as createBasePathProxyMock } from '../../core';
 import { setupLogging as setupLoggingMock } from '../../server/logging';
 import { configureBasePathProxy } from './configure_base_path_proxy';
@@ -48,9 +47,8 @@ describe('configureBasePathProxy()', () => {
     await configureBasePathProxy(configMock);
 
     // Check that logging is configured with the right parameters.
-    // TODO: add back logging
     expect(setupLoggingMock).toHaveBeenCalledWith(
-      expect.any(Server),
+      expect.anything(),
       configMock
     );
 

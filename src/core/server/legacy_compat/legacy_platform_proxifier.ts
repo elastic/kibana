@@ -108,11 +108,7 @@ export class LegacyPlatformProxifier extends EventEmitter {
    */
   public getConnections(callback: (error: Error | null, count?: number) => number) {
     // This method is used by the monitoring plugin's ops stats collector
-    if (this.root) {
-      this.root.getConnections(callback);
-    } else {
-      callback(null, 0);
-    }
+    this.root.getConnections(callback);
   }
 
   /**
