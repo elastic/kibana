@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`SpacesDescription renders wihtout crashing 1`] = `
+exports[`SpacesDescription renders without crashing 1`] = `
 <EuiContextMenuPanel
   className="spacesDescription"
   hasFocus={true}

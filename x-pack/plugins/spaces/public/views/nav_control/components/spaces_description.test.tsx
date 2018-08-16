@@ -9,7 +9,7 @@ import React from 'react';
 import { SpacesDescription } from './spaces_description';
 
 describe('SpacesDescription', () => {
-  it('renders wihtout crashing', () => {
+  it('renders without crashing', () => {
     expect(shallow(<SpacesDescription />)).toMatchSnapshot();
   });
 });
