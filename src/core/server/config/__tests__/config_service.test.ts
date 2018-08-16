@@ -199,11 +199,7 @@ test('correctly passes context', async () => {
     )
   );
 
-  expect(
-    await from(configs)
-      .pipe(first())
-      .toPromise()
-  ).toMatchSnapshot();
+  expect(await configs.pipe(first()).toPromise()).toMatchSnapshot();
 });
 
 test('handles enabled path, but only marks the enabled path as used', async () => {
