@@ -6,18 +6,18 @@
 }
 
 .addDataIcon {
-  width: 64px;
-  height: 64px;
+  width: $euiSizeXL * 2;
+  height: $euiSizeXL * 2;
 }
 
 .addDataButton {
-  line-height: normal;
+  // line-height: normal;
 }
 
 .addDataFooterItem_highlight {
-  background-color: #e6f2f6;
-  padding-top: 16px;
-  padding-bottom: 16px;
+  background-color: tintOrShade($euiColorPrimary, 90%, 70%);
+  padding-top: $euiSize;
+  padding-bottom: $euiSize;
 }
 
 .addDataFooterItem {

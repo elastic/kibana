@@ -17,7 +17,6 @@
  * under the License.
  */
 
-import './recently_accessed.less';
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 

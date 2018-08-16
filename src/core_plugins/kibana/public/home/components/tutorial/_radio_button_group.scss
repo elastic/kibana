@@ -6,5 +6,5 @@
 
 // give primary button same border as secondary button so they are even heights when placed side-by-side
 .kuiRadioButton.kuiButton--primary {
-  border: solid 1px #0079a5;
+  border: solid 1px $euiColorPrimary;
 }
