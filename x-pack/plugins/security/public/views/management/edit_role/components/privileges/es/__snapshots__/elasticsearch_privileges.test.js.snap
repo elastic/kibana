@@ -82,6 +82,7 @@ exports[`it renders without crashing 1`] = `
         hasEmptyLabelSpace={true}
       >
         <EuiComboBox
+          fullWidth={false}
           isClearable={true}
           isDisabled={false}
           onChange={[Function]}
