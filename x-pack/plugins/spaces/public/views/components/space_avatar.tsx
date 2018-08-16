@@ -4,28 +4,29 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { EuiAvatar } from '@elastic/eui';
 import React from 'react';
-import PropTypes from 'prop-types';
-import {
-  EuiAvatar
-} from '@elastic/eui';
-import { MAX_SPACE_INITIALS, getSpaceInitials, getSpaceColor } from '../../../common';
+import { getSpaceColor, getSpaceInitials, MAX_SPACE_INITIALS } from '../../../common';
+import { Space } from '../../../common/model/space';
 
-export const SpaceAvatar = ({ space, size, ...rest }) => {
+interface Props {
+  space: Space;
+  size?: string;
+  className?: string;
+}
+
+export const SpaceAvatar = (props: Props) => {
+  const { space, size, ...rest } = props;
+
   return (
     <EuiAvatar
       type="space"
       name={space.name || ''}
-      size={size || "m"}
+      size={size || 'm'}
       initialsLength={MAX_SPACE_INITIALS}
       initials={getSpaceInitials(space)}
       color={getSpaceColor(space)}
       {...rest}
     />
   );
-};
-
-SpaceAvatar.propTypes = {
-  space: PropTypes.object.isRequired,
-  size: PropTypes.string,
 };

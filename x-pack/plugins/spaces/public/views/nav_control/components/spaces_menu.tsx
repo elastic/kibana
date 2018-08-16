@@ -4,36 +4,44 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { Component } from 'react';
-import PropTypes from 'prop-types';
 import {
-  EuiContextMenuPanel,
-  EuiContextMenuItem,
-  EuiFieldSearch,
   EuiButton,
+  EuiContextMenuItem,
+  EuiContextMenuPanel,
+  EuiFieldSearch,
   EuiText,
 } from '@elastic/eui';
-import { SpaceAvatar } from '../../components/space_avatar';
+import React, { Component } from 'react';
 import { SPACE_SEARCH_COUNT_THRESHOLD } from '../../../../common/constants';
+import { Space } from '../../../../common/model/space';
+import { SpaceAvatar } from '../../components/space_avatar';
 import './spaces_menu.less';
 
-export class SpacesMenu extends Component {
-  state = {
+interface Props {
+  spaces: Space[];
+  onSelectSpace: (space: Space) => void;
+}
+
+interface State {
+  searchTerm: string;
+  allowSpacesListFocus: boolean;
+}
+
+export class SpacesMenu extends Component<Props, State> {
+  public state = {
     searchTerm: '',
     allowSpacesListFocus: false,
-  }
+  };
 
-  render() {
-    const {
-      searchTerm
-    } = this.state;
+  public render() {
+    const { searchTerm } = this.state;
 
     const items = this.getVisibleSpaces(searchTerm).map(this.renderSpaceMenuItem);
 
     const panelProps = {
       className: 'spacesMenu',
       title: 'Change current space',
-      watchedItemProps: ['data-search-term']
+      watchedItemProps: ['data-search-term'],
     };
 
     if (this.props.spaces.length >= SPACE_SEARCH_COUNT_THRESHOLD) {
@@ -48,38 +56,34 @@ export class SpacesMenu extends Component {
 
     items.push(this.renderManageButton());
 
-    return (
-      <EuiContextMenuPanel
-        {...panelProps}
-        items={items}
-      />
-    );
+    return <EuiContextMenuPanel {...panelProps} items={items} />;
   }
 
-  getVisibleSpaces = (searchTerm) => {
-
-    const {
-      spaces,
-    } = this.props;
+  private getVisibleSpaces = (searchTerm: string): Space[] => {
+    const { spaces } = this.props;
 
     let filteredSpaces = spaces;
     if (searchTerm) {
-      filteredSpaces = spaces
-        .filter(space => {
-          const {
-            name,
-            description = ''
-          } = space;
-          return name.toLowerCase().indexOf(searchTerm) >= 0 || (description.toLowerCase().indexOf(searchTerm) >= 0);
-        });
+      filteredSpaces = spaces.filter(space => {
+        const { name, description = '' } = space;
+        return (
+          name.toLowerCase().indexOf(searchTerm) >= 0 ||
+          description.toLowerCase().indexOf(searchTerm) >= 0
+        );
+      });
     }
 
     return filteredSpaces;
-  }
+  };
 
-  renderSpacesListPanel = (items, searchTerm) => {
+  private renderSpacesListPanel = (items: JSX.Element[], searchTerm: string) => {
     if (items.length === 0) {
-      return <EuiText color="subdued" textAlign="center">no spaces found</EuiText>;
+      return (
+        <EuiText color="subdued" className="eui-textCenter">
+          {' '}
+          no spaces found{' '}
+        </EuiText>
+      );
     }
 
     return (
@@ -92,11 +96,11 @@ export class SpacesMenu extends Component {
         items={items}
       />
     );
-  }
+  };
 
-  renderSearchField = () => {
+  private renderSearchField = () => {
     return (
-      <div className="spacesMenu__searchFieldWrapper">
+      <div key="manageSpacesSearchField" className="spacesMenu__searchFieldWrapper">
         <EuiFieldSearch
           placeholder="Find a space"
           incremental={true}
@@ -107,9 +111,9 @@ export class SpacesMenu extends Component {
         />
       </div>
     );
-  }
+  };
 
-  onSearchKeyDown = (e) => {
+  private onSearchKeyDown = (e: any) => {
     //  9: tab
     // 13: enter
     // 40: arrow-down
@@ -119,33 +123,34 @@ export class SpacesMenu extends Component {
     if (focusableKeyCodes.includes(keyCode)) {
       // Allows the spaces list panel to recieve focus. This enables keyboard and screen reader navigation
       this.setState({
-        allowSpacesListFocus: true
+        allowSpacesListFocus: true,
       });
-
     }
-  }
+  };
 
-  onSearchFocus = () => {
+  private onSearchFocus = () => {
     this.setState({
-      allowSpacesListFocus: false
+      allowSpacesListFocus: false,
     });
-  }
+  };
 
-  renderManageButton = () => {
+  private renderManageButton = () => {
     return (
-      <div className="spacesMenu__manageButtonWrapper">
-        <EuiButton key="manageSpacesButton" size="s" style={{ width: `100%` }}>Manage spaces</EuiButton>
+      <div key="manageSpacesButton" className="spacesMenu__manageButtonWrapper">
+        <EuiButton size="s" style={{ width: `100%` }}>
+          Manage spaces
+        </EuiButton>
       </div>
     );
-  }
+  };
 
-  onSearch = (searchTerm) => {
+  private onSearch = (searchTerm: string) => {
     this.setState({
-      searchTerm: searchTerm.trim().toLowerCase()
+      searchTerm: searchTerm.trim().toLowerCase(),
     });
-  }
+  };
 
-  renderSpaceMenuItem = (space) => {
+  private renderSpaceMenuItem = (space: Space): JSX.Element => {
     const icon = <SpaceAvatar space={space} size={'s'} />;
     return (
       <EuiContextMenuItem
@@ -158,10 +163,5 @@ export class SpacesMenu extends Component {
         {space.name}
       </EuiContextMenuItem>
     );
-  }
+  };
 }
-
-SpacesMenu.propTypes = {
-  spaces: PropTypes.array.isRequired,
-  onSelectSpace: PropTypes.func.isRequired,
-};

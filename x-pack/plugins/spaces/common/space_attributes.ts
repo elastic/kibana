@@ -6,6 +6,10 @@
 
 import { VISUALIZATION_COLORS } from '@elastic/eui';
 import { MAX_SPACE_INITIALS } from './constants';
+import { Space } from './model/space';
+
+// code point for lowercase "a"
+const FALLBACK_CODE_POINT = 97;
 
 /**
  * Determines the color for the provided space.
@@ -14,17 +18,16 @@ import { MAX_SPACE_INITIALS } from './constants';
  *
  * @param {Space} space
  */
-export function getSpaceColor(space = {}) {
-  const {
-    color,
-    name = '',
-  } = space;
+export function getSpaceColor(space: Partial<Space> = {}) {
+  const { color, name = '' } = space;
 
   if (color) {
     return color;
   }
 
-  return VISUALIZATION_COLORS[name.codePointAt(0) % VISUALIZATION_COLORS.length];
+  const firstCodePoint = name.codePointAt(0) || FALLBACK_CODE_POINT;
+
+  return VISUALIZATION_COLORS[firstCodePoint % VISUALIZATION_COLORS.length];
 }
 
 /**
@@ -34,17 +37,14 @@ export function getSpaceColor(space = {}) {
  *
  * @param {Space} space
  */
-export function getSpaceInitials(space = {}) {
-  const {
-    initials,
-    name = ''
-  } = space;
+export function getSpaceInitials(space: Partial<Space> = {}) {
+  const { initials, name = '' } = space;
 
   if (initials) {
     return initials;
   }
 
-  const words = name.split(" ");
+  const words = name.split(' ');
 
   const numInitials = Math.min(MAX_SPACE_INITIALS, words.length);
 
