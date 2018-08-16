@@ -281,6 +281,13 @@ function VisEditor(
 
     const updateTimeRange = () => {
       $scope.timeRange = timefilter.getTime();
+      // In case we are running in embedded mode (i.e. we used the visualize loader to embed)
+      // the visualization, we need to update the timeRange on the visualize handler.
+      if ($scope._handler) {
+        $scope._handler.update({
+          timeRange: $scope.timeRange,
+        });
+      }
     };
 
     timefilter.enableAutoRefreshSelector();
