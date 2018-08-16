@@ -1013,7 +1013,8 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
     }
 
     async filterOnTableCell(column, row) {
-      const cell = await find.byCssSelector(`tbody tr:nth-child(${row}) td:nth-child(${column})`);
+      const table = await testSubjects.find('tableVis');
+      const cell = await table.findByCssSelector(`tbody tr:nth-child(${row}) td:nth-child(${column})`);
       await remote.moveMouseTo(cell);
       const filterBtn = await testSubjects.findDescendant('filterForCellValue', cell);
       await filterBtn.click();
