@@ -42,6 +42,7 @@ exports[`it renders without crashing 1`] = `
               label="Indices"
             >
               <EuiComboBox
+                fullWidth={false}
                 isClearable={true}
                 isDisabled={false}
                 onChange={[Function]}
@@ -63,6 +64,7 @@ exports[`it renders without crashing 1`] = `
               label="Privileges"
             >
               <EuiComboBox
+                fullWidth={false}
                 isClearable={true}
                 isDisabled={false}
                 onChange={[Function]}
@@ -125,6 +127,7 @@ exports[`it renders without crashing 1`] = `
             >
               <React.Fragment>
                 <EuiComboBox
+                  fullWidth={false}
                   isClearable={true}
                   isDisabled={false}
                   onChange={[Function]}
