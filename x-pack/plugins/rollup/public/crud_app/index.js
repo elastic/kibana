@@ -14,13 +14,13 @@ import routes from 'ui/routes';
 import { CRUD_APP_BASE_PATH } from '../../common/constants';
 import { App } from './app';
 import template from './main.html';
-import { indexRollupJobsStore } from './store';
+import { rollupJobsStore } from './store';
 
 const esSection = management.getSection('elasticsearch');
 
-esSection.register('index_rollup_jobs', {
+esSection.register('rollup_jobs', {
   visible: true,
-  display: 'Index Rollup Jobs',
+  display: 'Rollup Jobs',
   order: 2,
   url: `#${CRUD_APP_BASE_PATH}home`
 });
@@ -43,7 +43,7 @@ export const manageAngularLifecycle = ($scope, $route, elem) => {
 
 const renderReact = async (elem) => {
   render(
-    <Provider store={indexRollupJobsStore()}>
+    <Provider store={rollupJobsStore()}>
       <HashRouter>
         <App />
       </HashRouter>
@@ -54,11 +54,11 @@ const renderReact = async (elem) => {
 
 routes.when(`${CRUD_APP_BASE_PATH}:view?`, {
   template: template,
-  controllerAs: 'indexRollupJobs',
+  controllerAs: 'rollupJobs',
   controller: class IndexRollupJobsController {
     constructor($scope, $route) {
       $scope.$$postDigest(() => {
-        const elem = document.getElementById('indexRollupJobsReactRoot');
+        const elem = document.getElementById('rollupJobsReactRoot');
         renderReact(elem);
         manageAngularLifecycle($scope, $route, elem);
       });

@@ -9,7 +9,7 @@ import { jobs } from './jobs';
 import { tableState } from './table_state';
 import { detailPanel } from './detail_panel';
 
-export const indexRollupJobs = combineReducers({
+export const rollupJobs = combineReducers({
   jobs,
   tableState,
   detailPanel,

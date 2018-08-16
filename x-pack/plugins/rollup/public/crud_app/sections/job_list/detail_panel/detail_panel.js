@@ -134,11 +134,11 @@ export class DetailPanel extends Component {
       <EuiFlyout
         data-test-subj="indexDetailFlyout"
         onClose={closeDetailPanel}
-        aria-labelledby="indexRollupJobDetailsFlyoutTitle"
+        aria-labelledby="rollupJobDetailsFlyoutTitle"
         size="s"
       >
         <EuiFlyoutHeader>
-          <EuiTitle size="m" id="indexRollupJobDetailsFlyoutTitle">
+          <EuiTitle size="m" id="rollupJobDetailsFlyoutTitle">
             <h2>{id}</h2>
           </EuiTitle>
 

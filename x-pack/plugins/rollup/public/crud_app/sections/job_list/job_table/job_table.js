@@ -130,7 +130,7 @@ export class JobTable extends Component {
       if (name === 'ID') {
         content = (
           <EuiLink
-            data-test-subj="indexRollupTableJobLink"
+            data-test-subj="rollupTableJobLink"
             onClick={() => {
               openDetailPanel(job);
             }}
@@ -194,7 +194,7 @@ export class JobTable extends Component {
         <EuiPageBody>
           <EuiPageContent>
             <EuiTitle size="l">
-              <h1>Index rollup jobs</h1>
+              <h1>Rollup jobs</h1>
             </EuiTitle>
 
             <EuiSpacer />

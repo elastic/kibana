@@ -7,14 +7,14 @@
 import { createStore, applyMiddleware, compose } from 'redux';
 import thunk from 'redux-thunk';
 
-import { indexRollupJobs } from './reducers/';
+import { rollupJobs } from './reducers/';
 
-export const indexRollupJobsStore = (initialState = {}) => {
+export const rollupJobsStore = (initialState = {}) => {
   const enhancers = [ applyMiddleware(thunk) ];
 
   window.__REDUX_DEVTOOLS_EXTENSION__ && enhancers.push(window.__REDUX_DEVTOOLS_EXTENSION__());
   return createStore(
-    indexRollupJobs,
+    rollupJobs,
     initialState,
     compose(...enhancers)
   );
