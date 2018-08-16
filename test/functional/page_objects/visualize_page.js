@@ -1046,6 +1046,14 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
       });
     }
 
+    async filterOnTableCell(column, row) {
+      const table = await testSubjects.find('tableVis');
+      const cell = await table.findByCssSelector(`tbody tr:nth-child(${row}) td:nth-child(${column})`);
+      await remote.moveMouseTo(cell);
+      const filterBtn = await testSubjects.findDescendant('filterForCellValue', cell);
+      await filterBtn.click();
+    }
+
     async doesLegendColorChoiceExist(color) {
       return await testSubjects.exists(`legendSelectColor-${color}`);
     }
