@@ -130,15 +130,11 @@ export function MochaReporterProvider({ getService }) {
         '\n' +
         output
           .split('\n')
-          .slice(2) // drop the first two lines, (empty + test title)
-          .map(line => {
-            // move leading colors behind leading spaces
-            return line.replace(/^((?:\[.+m)+)(\s+)/, '$2$1');
-          })
-          .map(line => {
-            // shrink mocha's indentation
-            return line.replace(/^\s{5,5}/, ' ');
-          })
+          // drop the first two lines, (empty + test title)
+          .slice(2)
+          // move leading colors behind leading spaces
+          .map(line => line.replace(/^((?:\[.+m)+)(\s+)/, '$2$1'))
+          .map(line => ` ${line}`)
           .join('\n')
       );
       log.indent(2);
