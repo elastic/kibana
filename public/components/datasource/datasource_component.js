@@ -31,6 +31,8 @@ export class DatasourceComponent extends PureComponent {
     setSelecting: PropTypes.func,
     previewing: PropTypes.bool,
     setPreviewing: PropTypes.func,
+    isInvalid: PropTypes.bool,
+    setInvalid: PropTypes.func,
   };
 
   componentDidUpdate(prevProps) {
@@ -83,6 +85,8 @@ export class DatasourceComponent extends PureComponent {
       setSelecting,
       previewing,
       setPreviewing,
+      isInvalid,
+      setInvalid,
     } = this.props;
 
     if (selecting) {
@@ -101,7 +105,13 @@ export class DatasourceComponent extends PureComponent {
             Change your data source
           </EuiButtonEmpty>
           <EuiSpacer size="s" />
-          {stateDatasource.render({ args: stateArgs, updateArgs, datasourceDef })}
+          {stateDatasource.render({
+            args: stateArgs,
+            updateArgs,
+            datasourceDef,
+            isInvalid,
+            setInvalid,
+          })}
           <EuiSpacer size="m" />
           <EuiFlexGroup justifyContent="flexEnd" gutterSize="s">
             <EuiFlexItem grow={false}>
@@ -110,7 +120,14 @@ export class DatasourceComponent extends PureComponent {
               </EuiButton>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <EuiButton size="s" color="secondary" fill onClick={this.save} icon="check">
+              <EuiButton
+                disabled={isInvalid}
+                size="s"
+                color="secondary"
+                fill
+                onClick={this.save}
+                icon="check"
+              >
                 Save
               </EuiButton>
             </EuiFlexItem>

@@ -76,6 +76,7 @@ export const Datasource = compose(
   withState('stateArgs', 'updateArgs', ({ args }) => args),
   withState('selecting', 'setSelecting', false),
   withState('previewing', 'setPreviewing', false),
+  withState('isInvalid', 'setInvalid', false),
   withState('stateDatasource', 'selectDatasource', ({ datasource }) => datasource),
   withHandlers({
     resetArgs: ({ updateArgs, args }) => () => updateArgs(args),
