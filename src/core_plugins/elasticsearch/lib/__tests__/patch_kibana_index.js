@@ -23,7 +23,7 @@ import { times, cloneDeep, pick, partition } from 'lodash';
 import Chance from 'chance';
 
 import { patchKibanaIndex } from '../patch_kibana_index';
-import { getRootProperties, getRootType } from '../../../../core/server/saved_objects/mappings';
+import { getRootProperties, getRootType } from '../../../../server/mappings';
 
 const chance = new Chance();
 

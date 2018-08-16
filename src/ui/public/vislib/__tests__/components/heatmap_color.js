@@ -66,9 +66,9 @@ describe('Vislib Heatmap Color Module Test Suite', function () {
     }).to.throwError();
   });
 
-  it('should throw an error if input is greater than 9', function () {
+  it('should throw an error if input is greater than 1', function () {
     expect(function () {
-      getHeatmapColors(10, 'Greens');
+      getHeatmapColors(2, 'Greens');
     }).to.throwError();
   });
 
@@ -76,7 +76,7 @@ describe('Vislib Heatmap Color Module Test Suite', function () {
     expect(typeof getHeatmapColors).to.be('function');
   });
 
-  it('should return a color for numbers from 0 to 9', function () {
+  it('should return a color for 10 numbers from 0 to 1', function () {
     const colorRegex = /^rgb\((\d{1,3}),(\d{1,3}),(\d{1,3})\)$/;
     const schema = 'Greens';
     for (let i = 0; i < 10; i++) {
