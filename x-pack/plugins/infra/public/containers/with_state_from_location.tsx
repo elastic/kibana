@@ -10,12 +10,11 @@ import { parse as parseQueryString, stringify as stringifyQueryString } from 'qu
 import React from 'react';
 import { RouteComponentProps, withRouter } from 'react-router';
 import { decode_object, encode_object } from 'rison-node';
+import { Omit } from '../lib/lib';
 
 interface AnyObject {
   [key: string]: any;
 }
-
-type Omit<T1, T2> = Pick<T1, Exclude<keyof T1, keyof T2>>;
 
 interface WithStateFromLocationOptions<StateInLocation> {
   mapLocationToState: (location: Location) => StateInLocation;

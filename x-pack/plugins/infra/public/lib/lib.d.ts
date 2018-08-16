@@ -10,7 +10,15 @@ import ApolloClient from 'apollo-client';
 import { AxiosRequestConfig } from 'axios';
 import React from 'react';
 import { Observable } from 'rxjs';
-import { InfraNodeMetric, InfraNodePath } from '../../common/graphql/types';
+import {
+  InfraFilterInput,
+  InfraMetricInput,
+  InfraNodeMetric,
+  InfraNodePath,
+  InfraPathInput,
+  InfraTimerangeInput,
+  MapQuery,
+} from '../../common/graphql/types';
 import { InfraFieldsDomain } from './domains/fields_domain';
 
 export interface InfraFrontendLibs {
@@ -124,6 +132,12 @@ export interface InfraWaffleMapGroupOfNodes extends InfraWaffleMapGroupBase {
   nodes: InfraWaffleMapNode[];
 }
 
-export interface InfraWaffleOptions {
-  [name: string]: any;
+export interface InfraOptions {
+  sourceId: string;
+  timerange: InfraTimerangeInput;
+  filters: InfraFilterInput[];
+  metrics: InfraMetricInput[];
+  path: InfraPathInput[];
 }
+
+export type Omit<T1, T2> = Pick<T1, Exclude<keyof T1, keyof T2>>;

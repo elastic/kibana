@@ -517,7 +517,7 @@ export namespace LogEntries {
 }
 export namespace MapQuery {
   export type Variables = {
-    id: string;
+    sourceId: string;
     timerange: InfraTimerangeInput;
     filters?: InfraFilterInput[] | null;
     metrics?: InfraMetricInput[] | null;
