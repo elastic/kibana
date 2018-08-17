@@ -578,7 +578,6 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
 
     async clickGo() {
       await testSubjects.click('visualizeEditorRenderButton');
-      await PageObjects.header.waitUntilLoadingHasFinished();
       // For some reason there are two `data-render-complete` tags on each visualization in the visualize page.
       const countOfDataCompleteFlags = 2;
       await renderable.waitForRender(countOfDataCompleteFlags);
