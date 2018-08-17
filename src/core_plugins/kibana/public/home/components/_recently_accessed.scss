@@ -1,33 +1,32 @@
 @include euiBreakpoint('xs', 's') {
-  .recentlyAccessedSeparator {
+  .homRecentlyAccessed__separator {
     display: none;
   }
 }
 
-.recentlyAccessedItem {
+.homRecentlyAccessed__item {
   overflow: hidden;
   max-width: 300px;
 
+  // SASSTODO: Figure out how to not use eui class here
+  // ... tooltips don't pass classnames to the anchor and
+  // ... this is the only way to get truncation to work
   .euiToolTipAnchor {
     overflow: hidden;
     text-overflow: ellipsis;
   }
 }
 
-.recentlyAccessedLongLink {
+.homRecentlyAccessed__longLink {
   @include euiTextTruncate;
   line-height: normal;
 }
 
-.recentlyAccessedFlexItem {
+.homRecentlyAccessed__flexItem {
   max-width: 1000px;
 }
 
-.recentlyAccessedDropwdownLink {
-  white-space: nowrap;
-  height: 18px;
-}
-
-.recentlyAccessedDropdownLabel {
+.homRecentlyAccessed__dropdownLink,
+.homRecentlyAccessed__dropdownLabel {
   white-space: nowrap;
 }
