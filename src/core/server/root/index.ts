@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { Observable } from '../../lib/kbn_observable';
+import { Observable } from 'rxjs';
 
 import { Server } from '..';
 import { ConfigService, Env, RawConfig } from '../config';
@@ -46,7 +46,7 @@ export class Root {
       // noop
     }
   ) {
-    const loggerFactory = new MutableLoggerFactory(env);
+    const loggerFactory = new MutableLoggerFactory();
     this.loggingService = new LoggingService(loggerFactory);
     this.logger = loggerFactory;
 

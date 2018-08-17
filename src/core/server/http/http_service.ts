@@ -17,7 +17,8 @@
  * under the License.
  */
 
-import { first, k$, Observable, Subscription, toPromise } from '../../lib/kbn_observable';
+import { Observable, Subscription } from 'rxjs';
+import { first } from 'rxjs/operators';
 
 import { CoreService } from '../../types/core_service';
 import { Env } from '../config';
@@ -52,7 +53,7 @@ export class HttpService implements CoreService {
       }
     });
 
-    const config = await k$(this.config$)(first(), toPromise());
+    const config = await this.config$.pipe(first()).toPromise();
 
     // If a redirect port is specified, we start an HTTP server at this port and
     // redirect all requests to the SSL port.

@@ -78,6 +78,7 @@ export function getSettingsCollector(server) {
       // remember the current email so that we can mark it as successful if the bulk does not error out
       shouldUseNull = !!defaultAdminEmail;
 
+      // returns undefined if there was no result
       return kibanaSettingsData;
     }
   });

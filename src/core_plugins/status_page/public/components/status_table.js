@@ -24,6 +24,7 @@ import {
   EuiBasicTable,
   EuiIcon,
 } from '@elastic/eui';
+import { i18n }  from '@kbn/i18n';
 
 
 class StatusTable extends Component {
@@ -41,10 +42,14 @@ class StatusTable extends Component {
     width: '32px'
   }, {
     field: 'id',
-    name: 'ID',
+    name: i18n.translate('statusPage.statusTable.columns.idHeader', {
+      defaultMessage: 'ID',
+    }),
   }, {
     field: 'state',
-    name: 'Status',
+    name: i18n.translate('statusPage.statusTable.columns.statusHeader', {
+      defaultMessage: 'Status',
+    }),
     render: state => <span>{ state.message }</span>
   }];
 
