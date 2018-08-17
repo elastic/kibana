@@ -113,7 +113,6 @@
     "h2o2-latest": "npm:h2o2@8.1.2",
     "handlebars": "4.0.5",
     "hapi": "17.5.3",
-    "hapi-compat": "^1.1.0",
     "hapi-latest": "npm:hapi@17.5.0",
     "hjson": "3.1.0",
     "http-proxy-agent": "^2.1.0",
