@@ -186,18 +186,6 @@ module.exports = function (grunt) {
       ],
     },
 
-    ossReleaseProductionSmokeTests: {
-      cmd: process.execPath,
-      args: [
-        'scripts/functional_tests',
-        '--config', 'test/functional_production/config.js',
-        '--esFrom', 'source',
-        '--bail',
-        '--debug',
-        '--kibana-install-dir', `./build/oss/kibana-${PKG_VERSION}-${process.platform}-x86_64`,
-      ],
-    },
-
     functionalTestsRelease: {
       cmd: process.execPath,
       args: [
