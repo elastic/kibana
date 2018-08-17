@@ -33,7 +33,7 @@ export function createDashboardModeRequestInterceptor(dashboardViewerApp) {
           // that app and none others.  Here we are intercepting all other routing and ensuring the viewer
           // app is the only one ever rendered.
           // Read more about Dashboard Only Mode here: https://github.com/elastic/x-pack-kibana/issues/180
-          return h.renderApp(dashboardViewerApp);
+          return h.renderApp(dashboardViewerApp).takeover();
         }
 
         return Boom.notFound();

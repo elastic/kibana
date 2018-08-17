@@ -12,14 +12,12 @@ export const licensePreRoutingFactory = once((server) => {
   const xpackMainPlugin = server.plugins.xpack_main;
 
   // License checking and enable/disable logic
-  function licensePreRouting(request, h) {
+  function licensePreRouting() {
     const licenseCheckResults = xpackMainPlugin.info.feature(PLUGIN.ID).getLicenseCheckResults();
     if (!licenseCheckResults.isAvailable) {
       const error = new Error(licenseCheckResults.message);
       const statusCode = 403;
       return wrapCustomError(error, statusCode);
-    } else {
-      return h.response();
     }
   }
 

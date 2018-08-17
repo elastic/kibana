@@ -34,32 +34,28 @@ describe('license_pre_routing_factory', () => {
         };
       });
 
-      it ('replies with 403', (done) => {
+      it ('replies with 403', async () => {
         const licensePreRouting = licensePreRoutingFactory(mockServer);
         const stubRequest = {};
-        licensePreRouting(stubRequest, (response) => {
-          expect(response).to.be.an(Error);
-          expect(response.isBoom).to.be(true);
-          expect(response.output.statusCode).to.be(403);
-          done();
-        });
+        const response = await licensePreRouting(stubRequest);
+        expect(response).to.be.an(Error);
+        expect(response.isBoom).to.be(true);
+        expect(response.output.statusCode).to.be(403);
       });
     });
 
-    describe('isAvailable is true', () => {
+    describe('isAvailable is true', async () => {
       beforeEach(() => {
         mockLicenseCheckResults = {
           isAvailable: true
         };
       });
 
-      it ('replies with nothing', (done) => {
+      it ('replies with nothing', async () => {
         const licensePreRouting = licensePreRoutingFactory(mockServer);
         const stubRequest = {};
-        licensePreRouting(stubRequest, (response) => {
-          expect(response).to.eql(Boom.forbidden());
-          done();
-        });
+        const response = licensePreRouting(stubRequest);
+        expect(response).to.eql(Boom.forbidden());
       });
     });
   });

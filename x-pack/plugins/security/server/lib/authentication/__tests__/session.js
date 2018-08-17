@@ -21,7 +21,6 @@ describe('Session', () => {
     config = { get: sinon.stub() };
 
     server.config.returns(config);
-    server.register.yields();
 
     sandbox.useFakeTimers();
   });
@@ -40,7 +39,7 @@ describe('Session', () => {
       await Session.create(server);
 
       sinon.assert.calledOnce(server.auth.strategy);
-      sinon.assert.calledWithExactly(server.auth.strategy, 'security-cookie', 'cookie', false, {
+      sinon.assert.calledWithExactly(server.auth.strategy, 'security-cookie', 'cookie', {
         cookie: 'cookie-name',
         password: 'encryption-key',
         clearInvalid: true,
@@ -94,7 +93,7 @@ describe('Session', () => {
     });
 
     it('correctly process session expiration date', async () => {
-      const { validateFunc } = server.auth.strategy.firstCall.args[3];
+      const { validateFunc } = server.auth.strategy.firstCall.args[2];
       const currentTime = 100;
 
       sandbox.clock.tick(currentTime);

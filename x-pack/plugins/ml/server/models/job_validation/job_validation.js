@@ -124,6 +124,6 @@ export async function validateJob(callWithRequest, payload, kbnVersion = 'curren
       return message;
     });
   } catch (error) {
-    return Boom.badRequest(error);
+    throw Boom.badRequest(error);
   }
 }

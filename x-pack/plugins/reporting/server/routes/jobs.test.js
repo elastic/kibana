@@ -23,7 +23,7 @@ jest.mock('../lib/reporting_feature_pre_routing', () => {
 let mockServer;
 
 beforeEach(() => {
-  mockServer = new Hapi.Server({ debug: false, port: 8080 });
+  mockServer = new Hapi.Server({ debug: false, port: 8080, routes: { log: { collect: true } } });
   mockServer.config = memoize(() => ({ get: jest.fn() }));
   const exportTypesRegistry = new ExportTypesRegistry();
   exportTypesRegistry.register({
@@ -239,14 +239,12 @@ describe(`when job is completed`, () => {
       expect(payload).not.toMatch(/job output content/);
     });
 
-    // TODO: add logging back
     test(`logs error message about invalid content type`, async () => {
-      const { request } = await getCompletedResponse({ outputContentType: 'application/html' });
-      const logs = request.getLog();
+      const { request: { logs } } = await getCompletedResponse({ outputContentType: 'application/html' });
       const errorLogs = logs.filter(log => difference(['internal', 'implementation', 'error'], log.tags).length === 0);
       expect(errorLogs).toHaveLength(1);
-      expect(errorLogs[0].data).toBeInstanceOf(Error);
-      expect(errorLogs[0].data.message).toMatch(/Unsupported content-type of application\/html/);
+      expect(errorLogs[0].error).toBeInstanceOf(Error);
+      expect(errorLogs[0].error.message).toMatch(/Unsupported content-type of application\/html/);
     });
   });
 });

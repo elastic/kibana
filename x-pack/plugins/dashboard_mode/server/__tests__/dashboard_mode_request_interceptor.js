@@ -32,7 +32,8 @@ function setup() {
 
   // allow the extension to fake "render an app"
   server.decorate('toolkit', 'renderApp', function (app) {
-    return { renderApp: true, app };
+    // `this` is the `h` response toolkit
+    return this.response({ renderApp: true, app });
   });
 
   server.route({

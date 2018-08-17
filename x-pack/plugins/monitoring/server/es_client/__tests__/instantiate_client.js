@@ -53,7 +53,9 @@ function getMockServerFromConnectionUrl(monitoringClusterUrl) {
         ElasticsearchClientLogging: noop
       }
     },
-    on: noop,
+    events: {
+      on: noop,
+    },
     expose: sinon.stub(),
     log: sinon.stub()
   };
