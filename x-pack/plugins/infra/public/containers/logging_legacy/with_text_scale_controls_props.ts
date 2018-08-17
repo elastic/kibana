@@ -7,9 +7,9 @@
 import { connect } from 'react-redux';
 
 import { TextScale } from '../../../common/log_text_scale';
+import { State, textviewActions, textviewSelectors } from '../../store';
 import { asChildFunctionRenderer } from '../../utils/typed_react';
 import { bindPlainActionCreators } from '../../utils/typed_redux';
-import { State, textviewActions, textviewSelectors } from './state';
 
 export const withTextScale = connect(
   (state: State) => ({

@@ -19,7 +19,7 @@ import {
   // sharedSelectors,
   logPositionActions,
   State,
-} from './state';
+} from '../../store';
 
 export const withLogSearchControlsProps = connect(
   (state: State) => ({

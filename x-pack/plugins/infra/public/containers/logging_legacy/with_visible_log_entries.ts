@@ -6,7 +6,7 @@
 
 import { connect } from 'react-redux';
 
-import { entriesSelectors, State } from './state';
+import { entriesSelectors, State } from '../../store';
 
 export const withVisibleLogEntries = connect(
   (state: State) => ({

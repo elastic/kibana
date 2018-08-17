@@ -13,7 +13,7 @@ import { pluck } from 'rxjs/operators';
 import styled from 'styled-components';
 
 import { InfraFrontendLibs } from '../../lib/lib';
-import { createStore } from './store';
+import { createStore } from '../../store';
 
 import { AutoSizer } from '../../components/auto_sizer';
 import { Toolbar } from '../../components/eui';
@@ -30,7 +30,6 @@ import { LogTextWrapControls } from '../../components/logging/log_text_wrap_cont
 import { LogTimeControls } from '../../components/logging/log_time_controls';
 
 import { withLibs } from '../../containers/libs';
-import { logPositionActions, State } from '../../containers/logging_legacy/state';
 // import { withLogSearchControlsProps } from '../../containers/logging_legacy/with_log_search_controls_props';
 import { WithStreamItems } from '../../containers/logging_legacy/with_stream_items';
 import { WithSummary } from '../../containers/logging_legacy/with_summary';
@@ -39,6 +38,7 @@ import { WithTextStreamPosition } from '../../containers/logging_legacy/with_tex
 import { WithTextWrap } from '../../containers/logging_legacy/with_text_wrap_controls_props';
 import { WithTimeControls } from '../../containers/logging_legacy/with_time_controls_props';
 import { withVisibleLogEntries } from '../../containers/logging_legacy/with_visible_log_entries';
+import { logPositionActions, State } from '../../store';
 
 const ConnectedLogPositionText = withVisibleLogEntries(LogPositionText);
 // const ConnectedLogSearchControls = withLogSearchControlsProps(LogSearchControls);

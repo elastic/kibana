@@ -6,9 +6,9 @@
 
 import { connect } from 'react-redux';
 
+import { logPositionActions, logPositionSelectors, sharedSelectors, State } from '../../store';
 import { asChildFunctionRenderer } from '../../utils/typed_react';
 import { bindPlainActionCreators } from '../../utils/typed_redux';
-import { logPositionActions, logPositionSelectors, sharedSelectors, State } from './state';
 
 export const withTimeControls = connect(
   (state: State) => ({

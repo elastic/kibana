@@ -7,16 +7,16 @@
 import { connect } from 'react-redux';
 import { createSelector } from 'reselect';
 
-import { getLogEntryKey } from '../../utils/log_entry';
-import { asChildFunctionRenderer } from '../../utils/typed_react';
-import { bindPlainActionCreators } from '../../utils/typed_redux';
 import {
   entriesActions,
   entriesSelectors,
   logPositionActions,
   sharedSelectors,
   State,
-} from './state';
+} from '../../store';
+import { getLogEntryKey } from '../../utils/log_entry';
+import { asChildFunctionRenderer } from '../../utils/typed_react';
+import { bindPlainActionCreators } from '../../utils/typed_redux';
 
 export const withTextStreamPosition = connect(
   (state: State) => ({

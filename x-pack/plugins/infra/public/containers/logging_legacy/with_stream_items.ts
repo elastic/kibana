@@ -15,7 +15,7 @@ import {
   logPositionActions,
   logPositionSelectors,
   State,
-} from '../../containers/logging_legacy/state';
+} from '../../store';
 import { LogEntry, LogEntryMessageSegment } from '../../utils/log_entry';
 import { asChildFunctionRenderer } from '../../utils/typed_react';
 import { bindPlainActionCreators } from '../../utils/typed_redux';

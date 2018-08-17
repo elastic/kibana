@@ -6,9 +6,9 @@
 
 import { connect } from 'react-redux';
 
+import { State, summaryActions, summarySelectors } from '../../store';
 import { asChildFunctionRenderer } from '../../utils/typed_react';
 import { bindPlainActionCreators } from '../../utils/typed_redux';
-import { State, summaryActions, summarySelectors } from './state';
 
 export const withSummary = connect(
   (state: State) => ({
