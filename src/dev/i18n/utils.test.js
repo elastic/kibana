@@ -47,10 +47,13 @@ describe('i18n utils', () => {
 
   test('should escape linebreaks', () => {
     expect(
-      formatJSString(`Test
-multiline
-string`)
-    ).toEqual('Test\\nmultiline\\nstring');
+      formatJSString(`Text with
+
+
+line-breaks and \n\n
+      \n\n
+      `)
+    ).toMatchSnapshot();
   });
 
   test('should detect i18n translate function call', () => {
