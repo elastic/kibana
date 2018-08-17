@@ -14,7 +14,7 @@ const getBaseOptions = () => ({
   clusterHostSets: {},
   clusterInputSets: {},
   clusterModuleSets: {},
-  clusterArchitectureSets: {}
+  clusterArchitectureMaps: {}
 });
 
 describe('Get Beats Stats', () => {
@@ -114,7 +114,7 @@ describe('Get Beats Stats', () => {
           },
           architecture: {
             count: 0,
-            names: []
+            architectures: []
           }
         },
       });
@@ -147,7 +147,7 @@ describe('Get Beats Stats', () => {
           },
           architecture: {
             count: 1,
-            names: [ 'x86_64/darwin' ]
+            architectures: [ 'x86_64/darwin' ]
           }
         },
         FlV4ckTxQ0a78hmBkzzc9A: {
@@ -176,7 +176,7 @@ describe('Get Beats Stats', () => {
           },
           architecture: {
             count: 0,
-            names: []
+            architectures: []
           }
         },
       });
