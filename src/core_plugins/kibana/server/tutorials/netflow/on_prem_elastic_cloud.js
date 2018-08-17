@@ -17,6 +17,8 @@
  * under the License.
  */
 
+import { i18n } from '@kbn/i18n';
+
 import { INSTRUCTION_VARIANT } from '../../../common/tutorials/instruction_variant';
 import { LOGSTASH_INSTRUCTIONS } from '../../../common/tutorials/logstash_instructions';
 import {
@@ -29,7 +31,9 @@ import { COMMON_NETFLOW_INSTRUCTIONS } from './common_instructions';
 export const ON_PREM_ELASTIC_CLOUD_INSTRUCTIONS = {
   instructionSets: [
     {
-      title: 'Getting Started',
+      title: i18n.translate('kbn.server.tutorials.netflow.onPremElasticCloudInstructions.title', {
+        defaultMessage: 'Getting Started',
+      }),
       instructionVariants: [
         {
           id: INSTRUCTION_VARIANT.OSX,
