@@ -136,6 +136,7 @@ export class Flyout extends Component {
       conflictedSavedObjectsLinkedToSavedSearches,
       conflictedSearchDocs,
       importedObjectCount,
+      failedImports,
     } = await resolveSavedObjects(
       contents,
       isOverwriteAllChecked,
@@ -166,6 +167,7 @@ export class Flyout extends Component {
       conflictedIndexPatterns,
       conflictedSavedObjectsLinkedToSavedSearches,
       conflictedSearchDocs,
+      failedImports,
       conflicts,
       importCount: importedObjectCount,
       isLoading: false,
