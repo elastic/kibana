@@ -157,7 +157,9 @@ export function jobAuditMessagesProvider(callWithRequest) {
 
       let messagesPerJob = [];
       const jobMessages = [];
-      if (resp.hits.total !== 0 &&
+      if (resp &&
+        resp.hits &&
+        resp.hits.total !== 0 &&
         resp.aggregations &&
         resp.aggregations.levelsPerJob &&
         resp.aggregations.levelsPerJob.buckets &&

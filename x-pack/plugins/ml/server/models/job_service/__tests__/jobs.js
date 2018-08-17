@@ -8,6 +8,14 @@
 
 import expect from 'expect.js';
 import { jobsProvider } from '../jobs.js';
+import {
+  jobs,
+  jobStats,
+  datafeeds,
+  datafeedStats,
+  jobSummaryData,
+  fullJobList,
+} from './responses';
 
 // mock callWithRequest
 const callWithRequest = (request) => {
@@ -37,6 +45,18 @@ const callWithRequest = (request) => {
     response = {
       acknowledged: true
     };
+  } else if (request === 'ml.jobs') {
+    response = jobs;
+  } else if (request === 'ml.jobStats') {
+    response = jobStats;
+  } else if (request === 'ml.datafeeds') {
+    response = datafeeds;
+  } else if (request === 'ml.datafeedStats') {
+    response = datafeedStats;
+  } else if (request === 'ml.calendars') {
+    response = { calendars: [] };
+  } else if (request === 'ml.events') {
+    response = { events: [] };
   }
 
   return Promise.resolve(response);
@@ -108,6 +128,30 @@ describe('ML - Jobs service', () => {
           expect(resp[jobIds[1]].closed).to.be(true);
           done();
         }
+      });
+  });
+
+  it('job summary list', (done) => {
+    const { jobsSummary } = jobsProvider(callWithRequest);
+    jobsSummary()
+      .then((resp) => {
+        expect(JSON.stringify(resp)).to.eql(JSON.stringify(jobSummaryData));
+        done();
+      })
+      .catch(e => {
+        console.log(e);
+      });
+  });
+
+  it('full job list', (done) => {
+    const { createFullJobsList } = jobsProvider(callWithRequest);
+    createFullJobsList(['testFull1'])
+      .then((resp) => {
+        expect(JSON.stringify(resp)).to.eql(JSON.stringify(fullJobList));
+        done();
+      })
+      .catch(e => {
+        console.log(e);
       });
   });
 

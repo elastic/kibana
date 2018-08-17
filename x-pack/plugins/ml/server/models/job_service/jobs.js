@@ -88,6 +88,9 @@ export function jobsProvider(callWithRequest) {
     return results;
   }
 
+  // takes a list of job ids.
+  // will return the summary for each job. for each job id
+  // specified, a copy of the full job will also be returned
   async function jobsSummary(jobIds = []) {
     const fullJobsList = await createFullJobsList();
     const auditMessages = await getAuditMessagesSummary();
@@ -100,7 +103,8 @@ export function jobsProvider(callWithRequest) {
       const hasDatafeed = (typeof job.datafeed_config === 'object' && Object.keys(job.datafeed_config).length);
       const {
         earliest: earliestTimeStamp,
-        latest: latestTimeStamp } = earliestAndLatestTimeStamps(job.data_counts);
+        latest: latestTimeStamp,
+      } = earliestAndLatestTimeStamps(job.data_counts);
 
       const tempJob = {
         id: job.job_id,
@@ -132,6 +136,8 @@ export function jobsProvider(callWithRequest) {
     return jobs;
   }
 
+  // returns the full job objects, containing stats and datafeeds
+  // specifying job ids will limit the list to only those jobs.
   async function createFullJobsList(jobIds = []) {
     const [ JOBS, JOB_STATS, DATAFEEDS, DATAFEED_STATS, CALENDARS ] = [0, 1, 2, 3, 4];
 
