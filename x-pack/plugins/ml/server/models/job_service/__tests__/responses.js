@@ -4,6 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import moment from 'moment';
+
 export const jobs = {
   'count': 2,
   'jobs': [{
@@ -277,12 +279,12 @@ export const jobSummaryData = [{
   latestTimeStamp: {
     string: '2018-09-10 00:46:01',
     unix: 1536536761000,
-    moment: '2018-09-09T23:46:01.000Z'
+    moment: moment('2018-09-09T23:46:01.000Z')
   },
   earliestTimeStamp: {
     string: '2018-07-30 01:00:00',
     unix: 1532908800000,
-    moment: '2018-07-30T00:00:00.000Z'
+    moment: moment('2018-07-30T00:00:00.000Z')
   },
   nodeName: undefined
 },
@@ -299,12 +301,12 @@ export const jobSummaryData = [{
   latestTimeStamp: {
     string: '2018-09-10 00:46:01',
     unix: 1536536761000,
-    moment: '2018-09-09T23:46:01.000Z'
+    moment: moment('2018-09-09T23:46:01.000Z')
   },
   earliestTimeStamp: {
     string: '2018-07-30 01:00:00',
     unix: 1532908800000,
-    moment: '2018-07-30T00:00:00.000Z'
+    moment: moment('2018-07-30T00:00:00.000Z')
   },
   nodeName: undefined
 }];
