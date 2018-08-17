@@ -27,7 +27,7 @@ import {
 
 import { JobStatus } from '../job_status';
 
-const HEADERS = [{
+const COLUMNS = [{
   name: 'ID',
   fieldName: 'id',
 }, {
@@ -42,9 +42,11 @@ const HEADERS = [{
   },
 }, {
   name: 'Index pattern',
+  truncateText: true,
   fieldName: 'indexPattern',
 }, {
   name: 'Rollup index',
+  truncateText: true,
   fieldName: 'rollupIndex',
 }, {
   name: 'Delay',
@@ -54,6 +56,7 @@ const HEADERS = [{
   fieldName: 'rollupInterval',
 }, {
   name: 'Groups',
+  truncateText: true,
   render: job => {
     const { histogram, terms } = job;
     const humanizedGroupNames = [];
@@ -75,6 +78,7 @@ const HEADERS = [{
   },
 }, {
   name: 'Metrics',
+  truncateText: true,
   render: job => {
     const { metrics } = job;
     return metrics.map(metric => metric.field).join(', ');
@@ -103,7 +107,7 @@ export class JobTable extends Component {
 
   buildHeader() {
     const { sortField, isSortAscending } = this.props;
-    return HEADERS.map(({ name, fieldName }) => {
+    return COLUMNS.map(({ name, fieldName }) => {
       const isSorted = sortField === fieldName;
 
       return (
@@ -123,7 +127,7 @@ export class JobTable extends Component {
   buildRowCells(job) {
     const { openDetailPanel } = this.props;
 
-    return HEADERS.map(({ name, fieldName, render }) => {
+    return COLUMNS.map(({ name, fieldName, render, truncateText }) => {
       const value = render ? render(job) : job[fieldName];
       let content;
 
@@ -139,16 +143,28 @@ export class JobTable extends Component {
           </EuiLink>
         );
       } else {
-        content = value;
+        content = <span>{value}</span>;
+      }
+
+      let wrappedContent;
+
+      if (truncateText) {
+        wrappedContent = (
+          <EuiToolTip content={value}>
+            {content}
+          </EuiToolTip>
+        );
+      } else {
+        wrappedContent = content;
       }
 
       return (
         <EuiTableRowCell
           key={`${job.id}-${name}`}
-          truncateText={false}
           data-test-subj={`jobTableCell-${name}`}
+          truncateText={truncateText}
         >
-          {content}
+          {wrappedContent}
         </EuiTableRowCell>
       );
     });
