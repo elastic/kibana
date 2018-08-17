@@ -63,7 +63,7 @@ export const createUninstallRoute = () => ({
         }
       }
 
-      h.response();
+      return h.response();
     }
   }
 });

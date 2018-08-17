@@ -34,7 +34,10 @@ export function statusMixin(kbnServer, server, config) {
 
   const oppsy = new Oppsy(server);
   oppsy.on('ops', event => {
-    metrics.capture(event).then(data => { kbnServer.metrics = data; }); // captures (performs transforms on) the latest event data and stashes the metrics for status/stats API payload
+    server.listener.getConnections((_, count) => {
+      event.concurrent_connections = count;
+      metrics.capture(event).then(data => { kbnServer.metrics = data; }); // captures (performs transforms on) the latest event data and stashes the metrics for status/stats API payload
+    });
   });
   oppsy.start(config.get('ops.interval'));
 

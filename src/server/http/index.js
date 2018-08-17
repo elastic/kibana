@@ -61,8 +61,6 @@ export default async function (kbnServer, server, config) {
       },
       validate: {
         failAction: defaultValidationErrorHandler,
-      },
-      response: {
         options: {
           abortEarly: false,
         }
