@@ -291,7 +291,7 @@ function logFatal(error, server) {
       'address',
       'port',
     ]);
-    const duck = Boolean(pickedError.stack) && Boolean(pickedError.message);
+    const duck = Boolean(pickedError.stack && pickedError.message);
     const loggedError = duck
       ? Object.assign(
         new Error(pickedError.message),
