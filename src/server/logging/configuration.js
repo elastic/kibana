@@ -51,7 +51,6 @@ export default function loggingConfiguration(config) {
     });
   }
 
-  // debugger;
   const loggerStream = getLoggerStream({
     config: {
       json: config.get('logging.json'),
