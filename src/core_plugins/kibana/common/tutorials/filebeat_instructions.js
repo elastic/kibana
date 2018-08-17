@@ -90,9 +90,9 @@ export const FILEBEAT_INSTRUCTIONS = {
       }),
       textPre: i18n.translate('kbn.common.tutorials.filebeatInstructions.install.windowsTextPre', {
         // eslint-disable-next-line
-        defaultMessage: 'First time using Filebeat? See the [Getting Started Guide]({guideLinkUrl}).\n \
+        defaultMessage: 'First time using Filebeat? See the [Getting Started Guide]({guideLinkUrl}).\n\
           1. Download the Filebeat Windows zip file from the [Download]({filebeatLinkUrl}) page.\n\
-          2. Extract the contents of the zip file into `C:\\Program Files`.\n\
+          2. Extract the contents of the zip file into `C:\\u005cProgram Files`.\n\
           3. Rename the `{directoryName}` directory to `Filebeat`.\n\
           4. Open a PowerShell prompt as an Administrator (right-click the PowerShell icon and select\
           **Run As Administrator**). If you are running Windows XP, you might need to download and install PowerShell.\n\
