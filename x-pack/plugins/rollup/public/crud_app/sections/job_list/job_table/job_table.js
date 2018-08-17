@@ -51,6 +51,7 @@ const COLUMNS = [{
 }, {
   name: 'Delay',
   fieldName: 'rollupDelay',
+  render: ({ rollupDelay }) => rollupDelay || 'None',
 }, {
   name: 'Interval',
   fieldName: 'rollupInterval',
