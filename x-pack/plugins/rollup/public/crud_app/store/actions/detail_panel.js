@@ -4,5 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { PLUGIN } from './plugin';
-export { CRUD_APP_BASE_PATH } from './crud_app';
+import { createAction } from 'redux-actions';
+
+export const openDetailPanel = createAction(
+  'INDEX_ROLLUP_JOB_OPEN_DETAIL_PANEL'
+);
+export const closeDetailPanel = createAction(
+  'INDEX_ROLLUP_JOB_CLOSE_DETAIL_PANEL'
+);

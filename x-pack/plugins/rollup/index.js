@@ -7,7 +7,12 @@
 import { resolve } from 'path';
 import { PLUGIN } from './common/constants';
 import { registerLicenseChecker } from './server/lib/register_license_checker';
-import { registerIndicesRoute, registerFieldsForWildcardRoute, registerSearchRoute } from './server/routes/api';
+import {
+  registerIndicesRoute,
+  registerFieldsForWildcardRoute,
+  registerSearchRoute,
+  registerJobsRoute,
+} from './server/routes/api';
 
 export function rollup(kibana) {
   return new kibana.Plugin({
@@ -15,6 +20,9 @@ export function rollup(kibana) {
     publicDir: resolve(__dirname, 'public'),
     require: ['kibana', 'elasticsearch', 'xpack_main'],
     uiExports: {
+      managementSections: [
+        'plugins/rollup/crud_app',
+      ],
       indexManagement: [
         'plugins/rollup/index_pattern_creation',
         'plugins/rollup/index_pattern_list',
@@ -31,6 +39,7 @@ export function rollup(kibana) {
       registerIndicesRoute(server);
       registerFieldsForWildcardRoute(server);
       registerSearchRoute(server);
+      registerJobsRoute(server);
     }
   });
 }
