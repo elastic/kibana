@@ -4,6 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { minimapActions } from './log_minimap';
+export { logMinimapActions } from './log_minimap';
 export { logPositionActions } from './log_position';
-export { textviewActions } from './log_textview';
+export { logTextviewActions } from './log_textview';

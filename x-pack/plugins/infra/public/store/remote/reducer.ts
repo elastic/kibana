@@ -5,24 +5,24 @@
  */
 
 import { combineReducers } from 'redux';
-import { entriesReducer, EntriesState, initialEntriesState } from './log_entries';
-import { initialSummaryState, summaryReducer, SummaryState } from './log_summary';
+import { initialLogEntriesState, logEntriesReducer, LogEntriesState } from './log_entries';
+import { initialLogSummaryState, logSummaryReducer, LogSummaryState } from './log_summary';
 import { initialSourceState, sourceReducer, SourceState } from './source';
 
 export interface RemoteState {
-  logEntries: EntriesState;
-  logSummary: SummaryState;
+  logEntries: LogEntriesState;
+  logSummary: LogSummaryState;
   source: SourceState;
 }
 
 export const initialRemoteState = {
-  logEntries: initialEntriesState,
-  logSummary: initialSummaryState,
+  logEntries: initialLogEntriesState,
+  logSummary: initialLogSummaryState,
   source: initialSourceState,
 };
 
 export const remoteReducer = combineReducers<RemoteState>({
-  logEntries: entriesReducer,
-  logSummary: summaryReducer,
+  logEntries: logEntriesReducer,
+  logSummary: logSummaryReducer,
   source: sourceReducer,
 });

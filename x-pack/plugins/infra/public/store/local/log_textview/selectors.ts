@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { TextviewState } from './reducer';
+import { LogTextviewState } from './reducer';
 
-export const selectTextviewScale = (state: TextviewState) => state.scale;
+export const selectTextviewScale = (state: LogTextviewState) => state.scale;
 
-export const selectTextviewWrap = (state: TextviewState) => state.wrap;
+export const selectTextviewWrap = (state: LogTextviewState) => state.wrap;

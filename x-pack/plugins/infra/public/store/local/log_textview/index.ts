@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import * as textviewActions from './actions';
-import * as textviewSelectors from './selectors';
+import * as logTextviewActions from './actions';
+import * as logTextviewSelectors from './selectors';
 
-export { textviewActions, textviewSelectors };
+export { logTextviewActions, logTextviewSelectors };
 export * from './reducer';

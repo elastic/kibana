@@ -9,7 +9,7 @@ import { createGraphqlInitialState } from '../../../utils/remote_state/remote_gr
 
 export type SummaryGraphqlState = typeof initialSummaryGraphqlState;
 
-export interface SummaryState {
+export interface LogSummaryState {
   summary: SummaryGraphqlState;
   intervalSize: number;
 }
@@ -18,7 +18,7 @@ export const initialSummaryGraphqlState = createGraphqlInitialState<
   LogSummaryQuery.LogSummaryBetween
 >();
 
-export const initialSummaryState: SummaryState = {
+export const initialLogSummaryState: LogSummaryState = {
   summary: initialSummaryGraphqlState,
   intervalSize: 1000 * 60 * 60 * 24,
 };

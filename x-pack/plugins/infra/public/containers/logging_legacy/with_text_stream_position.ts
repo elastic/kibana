@@ -8,8 +8,8 @@ import { connect } from 'react-redux';
 import { createSelector } from 'reselect';
 
 import {
-  entriesActions,
-  entriesSelectors,
+  logEntriesActions,
+  logEntriesSelectors,
   logPositionActions,
   sharedSelectors,
   State,
@@ -20,22 +20,22 @@ import { bindPlainActionCreators } from '../../utils/typed_redux';
 
 export const withTextStreamPosition = connect(
   (state: State) => ({
-    firstVisibleLogEntry: entriesSelectors.selectFirstVisibleEntry(state),
-    lastVisibleLogEntry: entriesSelectors.selectLastVisibleEntry(state),
+    firstVisibleLogEntry: logEntriesSelectors.selectFirstVisibleEntry(state),
+    lastVisibleLogEntry: logEntriesSelectors.selectLastVisibleEntry(state),
     visibleTimeInterval: selectVisibleTimeInterval(state),
     visibleMidpoint: sharedSelectors.selectVisibleMidpointOrTargetTime(state),
   }),
   bindPlainActionCreators({
     jumpToPosition: logPositionActions.jumpToTargetPosition,
-    reportVisibleInterval: entriesActions.reportVisibleEntries,
+    reportVisibleInterval: logEntriesActions.reportVisibleEntries,
   })
 );
 
 export const WithTextStreamPosition = asChildFunctionRenderer(withTextStreamPosition);
 
 const selectVisibleTimeInterval = createSelector(
-  entriesSelectors.selectFirstVisibleEntry,
-  entriesSelectors.selectLastVisibleEntry,
+  logEntriesSelectors.selectFirstVisibleEntry,
+  logEntriesSelectors.selectLastVisibleEntry,
   (firstVisibleEntry, lastVisibleEntry) =>
     firstVisibleEntry && lastVisibleEntry
       ? {

@@ -4,6 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { MinimapState } from './reducer';
+import { LogMinimapState } from './reducer';
 
-export const selectMinimapScale = (state: MinimapState) => state.scale;
+export const selectMinimapScale = (state: LogMinimapState) => state.scale;

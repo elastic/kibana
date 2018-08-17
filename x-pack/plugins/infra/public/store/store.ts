@@ -11,8 +11,8 @@ import { map } from 'rxjs/operators';
 
 import {
   createRootEpic,
-  entriesSelectors,
   initialState,
+  logEntriesSelectors,
   logPositionSelectors,
   reducer,
   State,
@@ -36,11 +36,11 @@ export function createStore({ apolloClient, observableApi }: StoreDependencies) 
   const middlewareDependencies = {
     postToApi$: observableApi.pipe(map(({ post }) => post)),
     apolloClient$: apolloClient,
-    selectIsLoadingEntries: entriesSelectors.selectIsLoadingEntries,
-    selectEntriesEnd: entriesSelectors.selectEntriesEnd,
-    selectEntriesStart: entriesSelectors.selectEntriesStart,
-    selectHasMoreAfterEnd: entriesSelectors.selectHasMoreAfterEnd,
-    selectHasMoreBeforeStart: entriesSelectors.selectHasMoreBeforeStart,
+    selectIsLoadingEntries: logEntriesSelectors.selectIsLoadingEntries,
+    selectEntriesEnd: logEntriesSelectors.selectEntriesEnd,
+    selectEntriesStart: logEntriesSelectors.selectEntriesStart,
+    selectHasMoreAfterEnd: logEntriesSelectors.selectHasMoreAfterEnd,
+    selectHasMoreBeforeStart: logEntriesSelectors.selectHasMoreBeforeStart,
     selectIsAutoReloading: logPositionSelectors.selectIsAutoReloading,
   };
 

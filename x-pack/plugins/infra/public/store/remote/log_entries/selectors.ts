@@ -9,10 +9,10 @@ import { createSelector } from 'reselect';
 import { TimeKey } from '../../../../common/time';
 import { getLogEntryIndexAtTime, LogEntry } from '../../../utils/log_entry';
 import { createGraphqlStateSelectors } from '../../../utils/remote_state/remote_graphql_state';
-import { EntriesGraphqlState, EntriesState } from './state';
+import { EntriesGraphqlState, LogEntriesState } from './state';
 
 const entriesGraphlStateSelectors = createGraphqlStateSelectors<EntriesGraphqlState['data']>(
-  (state: EntriesState) => state.entries
+  (state: LogEntriesState) => state.entries
 );
 
 const getEntry = (entries: LogEntry[], entryKey: TimeKey) => {
@@ -88,21 +88,21 @@ export const selectLoadedEntriesTimeInterval = createSelector(
 
 export const selectFirstVisibleEntry = createSelector(
   selectEntries,
-  (state: EntriesState) => state.visible.startKey,
+  (state: LogEntriesState) => state.visible.startKey,
   (entries, firstVisibleEntryKey) =>
     firstVisibleEntryKey ? getEntry(entries, firstVisibleEntryKey) : null
 );
 
 export const selectMiddleVisibleEntry = createSelector(
   selectEntries,
-  (state: EntriesState) => state.visible.middleKey,
+  (state: LogEntriesState) => state.visible.middleKey,
   (entries, middleVisibleEntryKey) =>
     middleVisibleEntryKey ? getEntry(entries, middleVisibleEntryKey) : null
 );
 
 export const selectLastVisibleEntry = createSelector(
   selectEntries,
-  (state: EntriesState) => state.visible.endKey,
+  (state: LogEntriesState) => state.visible.endKey,
   (entries, lastVisibleEntryKey) =>
     lastVisibleEntryKey ? getEntry(entries, lastVisibleEntryKey) : null
 );

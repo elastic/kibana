@@ -4,10 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import * as entriesActions from './actions';
-import * as entriesSelectors from './selectors';
+import * as logEntriesActions from './actions';
+import * as logEntriesSelectors from './selectors';
 
-export { entriesActions, entriesSelectors };
+export { logEntriesActions, logEntriesSelectors };
 export * from './epic';
 export * from './reducer';
-export { initialEntriesState, EntriesState } from './state';
+export { initialLogEntriesState, LogEntriesState } from './state';

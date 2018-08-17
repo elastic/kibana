@@ -4,5 +4,5 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { entriesActions } from './log_entries';
-export { summaryActions } from './log_summary';
+export { logEntriesActions } from './log_entries';
+export { logSummaryActions } from './log_summary';

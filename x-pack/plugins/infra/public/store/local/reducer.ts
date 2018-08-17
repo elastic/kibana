@@ -6,24 +6,24 @@
 
 import { combineReducers } from 'redux';
 
-import { initialMinimapState, minimapReducer, MinimapState } from './log_minimap';
+import { initialLogMinimapState, logMinimapReducer, LogMinimapState } from './log_minimap';
 import { initialLogPositionState, logPositionReducer, LogPositionState } from './log_position';
-import { initialTextviewState, textviewReducer, TextviewState } from './log_textview';
+import { initialLogTextviewState, logTextviewReducer, LogTextviewState } from './log_textview';
 
 export interface LocalState {
-  logMinimap: MinimapState;
+  logMinimap: LogMinimapState;
   logPosition: LogPositionState;
-  logTextview: TextviewState;
+  logTextview: LogTextviewState;
 }
 
 export const initialLocalState = {
-  logMinimap: initialMinimapState,
+  logMinimap: initialLogMinimapState,
   logPosition: initialLogPositionState,
-  logTextview: initialTextviewState,
+  logTextview: initialLogTextviewState,
 };
 
 export const localReducer = combineReducers<LocalState>({
-  logMinimap: minimapReducer,
+  logMinimap: logMinimapReducer,
   logPosition: logPositionReducer,
-  logTextview: textviewReducer,
+  logTextview: logTextviewReducer,
 });

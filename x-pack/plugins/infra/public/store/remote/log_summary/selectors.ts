@@ -7,10 +7,10 @@
 import { createSelector } from 'reselect';
 
 import { createGraphqlStateSelectors } from '../../../utils/remote_state/remote_graphql_state';
-import { SummaryGraphqlState, SummaryState } from './state';
+import { LogSummaryState, SummaryGraphqlState } from './state';
 
 const summaryGraphlStateSelectors = createGraphqlStateSelectors<SummaryGraphqlState['data']>(
-  (state: SummaryState) => state.summary
+  (state: LogSummaryState) => state.summary
 );
 
 export const selectSummaryBuckets = createSelector(
@@ -18,4 +18,4 @@ export const selectSummaryBuckets = createSelector(
   data => (data ? data.buckets : [])
 );
 
-export const selectSummaryIntervalSize = (state: SummaryState) => state.intervalSize;
+export const selectSummaryIntervalSize = (state: LogSummaryState) => state.intervalSize;

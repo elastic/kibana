@@ -25,9 +25,9 @@ import {
 
 const selectLocal = (state: State) => state.local;
 
-export const minimapSelectors = globalizeSelectors(selectLocal, localLogMinimapSelectors);
+export const logMinimapSelectors = globalizeSelectors(selectLocal, localLogMinimapSelectors);
 export const logPositionSelectors = globalizeSelectors(selectLocal, localLogPositionSelectors);
-export const textviewSelectors = globalizeSelectors(selectLocal, localLogTextviewSelectors);
+export const logTextviewSelectors = globalizeSelectors(selectLocal, localLogTextviewSelectors);
 
 /**
  * remote selectors
@@ -35,9 +35,9 @@ export const textviewSelectors = globalizeSelectors(selectLocal, localLogTextvie
 
 const selectRemote = (state: State) => state.remote;
 
-export const entriesSelectors = globalizeSelectors(selectRemote, remoteLogEntriesSelectors);
+export const logEntriesSelectors = globalizeSelectors(selectRemote, remoteLogEntriesSelectors);
+export const logSummarySelectors = globalizeSelectors(selectRemote, remoteLogSummarySelectors);
 export const sourceSelectors = globalizeSelectors(selectRemote, remoteSourceSelectors);
-export const summarySelectors = globalizeSelectors(selectRemote, remoteLogSummarySelectors);
 
 /**
  * shared selectors
@@ -45,8 +45,8 @@ export const summarySelectors = globalizeSelectors(selectRemote, remoteLogSummar
 
 export const sharedSelectors = {
   selectVisibleMidpointOrTargetTime: createSelector(
-    entriesSelectors.selectFirstVisibleEntry,
-    entriesSelectors.selectLastVisibleEntry,
+    logEntriesSelectors.selectFirstVisibleEntry,
+    logEntriesSelectors.selectLastVisibleEntry,
     logPositionSelectors.selectTargetPosition,
     (firstVisibleEntry, lastVisibleEntry, target) => {
       if (firstVisibleEntry && lastVisibleEntry) {

@@ -10,27 +10,27 @@ import { reducerWithInitialState } from 'typescript-fsa-reducers';
 import { TextScale } from '../../../../common/log_text_scale';
 import { setTextviewScale, setTextviewWrap } from './actions';
 
-export interface TextviewState {
+export interface LogTextviewState {
   scale: TextScale;
   wrap: boolean;
 }
 
-export const initialTextviewState: TextviewState = {
+export const initialLogTextviewState: LogTextviewState = {
   scale: 'medium',
   wrap: true,
 };
 
-const textviewScaleReducer = reducerWithInitialState(initialTextviewState.scale).case(
+const textviewScaleReducer = reducerWithInitialState(initialLogTextviewState.scale).case(
   setTextviewScale,
   (state, scale) => scale
 );
 
-const textviewWrapReducer = reducerWithInitialState(initialTextviewState.wrap).case(
+const textviewWrapReducer = reducerWithInitialState(initialLogTextviewState.wrap).case(
   setTextviewWrap,
   (state, wrap) => wrap
 );
 
-export const textviewReducer = combineReducers<TextviewState>({
+export const logTextviewReducer = combineReducers<LogTextviewState>({
   scale: textviewScaleReducer,
   wrap: textviewWrapReducer,
 });

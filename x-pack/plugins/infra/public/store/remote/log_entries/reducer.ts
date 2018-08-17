@@ -15,13 +15,13 @@ import {
 } from './actions';
 import { loadMoreEntriesReducer } from './load_more_operation';
 import { loadEntriesReducer } from './load_operation';
-import { EntriesGraphqlState, EntriesState, initialEntriesState } from './state';
+import { EntriesGraphqlState, initialLogEntriesState, LogEntriesState } from './state';
 
 const entriesEntriesReducer = reduceReducers(loadEntriesReducer, loadMoreEntriesReducer) as Reducer<
   EntriesGraphqlState
 >;
 
-const entriesVisibleReducer = reducerWithInitialState(initialEntriesState.visible).case(
+const entriesVisibleReducer = reducerWithInitialState(initialLogEntriesState.visible).case(
   reportVisibleEntries,
   (state, { startKey, middleKey, endKey }) => ({
     endKey,
@@ -30,7 +30,7 @@ const entriesVisibleReducer = reducerWithInitialState(initialEntriesState.visibl
   })
 );
 
-export const entriesReducer = combineReducers<EntriesState>({
+export const logEntriesReducer = combineReducers<LogEntriesState>({
   entries: entriesEntriesReducer,
   visible: entriesVisibleReducer,
 });

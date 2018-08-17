@@ -10,12 +10,4 @@ import { createLocalEpic } from './local';
 import { createRemoteEpic } from './remote';
 
 export const createRootEpic = <State>() =>
-  combineEpics(
-    createLocalEpic<State>(),
-    createRemoteEpic<State>()
-    // summaryEpics.createSummaryEpic<State>(),
-    // entriesEpics.createEntriesEpic<State>(),
-    // logPositionEpics.createLogPositionEpic<State>()
-    // searchResultsEpics.createSearchResultsEpic<State>(),
-    // searchSummaryEpics.createSearchSummaryEpic<State>()
-  );
+  combineEpics(createLocalEpic<State>(), createRemoteEpic<State>());

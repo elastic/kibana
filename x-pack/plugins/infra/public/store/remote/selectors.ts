@@ -5,8 +5,8 @@
  */
 
 import { globalizeSelectors } from '../../utils/typed_redux';
-import { entriesSelectors as innerLogEntriesSelectors } from './log_entries';
-import { summarySelectors as innerLogSummarySelectors } from './log_summary';
+import { logEntriesSelectors as innerLogEntriesSelectors } from './log_entries';
+import { logSummarySelectors as innerLogSummarySelectors } from './log_summary';
 import { RemoteState } from './reducer';
 import { sourceSelectors as innerSourceSelectors } from './source';
 

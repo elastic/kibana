@@ -6,19 +6,19 @@
 
 import { connect } from 'react-redux';
 
-import { State, summaryActions, summarySelectors } from '../../store';
+import { logSummaryActions, logSummarySelectors, State } from '../../store';
 import { asChildFunctionRenderer } from '../../utils/typed_react';
 import { bindPlainActionCreators } from '../../utils/typed_redux';
 
 export const withSummary = connect(
   (state: State) => ({
     availableIntervalSizes,
-    buckets: summarySelectors.selectSummaryBuckets(state),
-    intervalSize: summarySelectors.selectSummaryIntervalSize(state),
+    buckets: logSummarySelectors.selectSummaryBuckets(state),
+    intervalSize: logSummarySelectors.selectSummaryIntervalSize(state),
   }),
   bindPlainActionCreators({
-    configureSummary: summaryActions.configureSummary,
-    reportVisibleInterval: summaryActions.reportVisibleSummary,
+    configureSummary: logSummaryActions.configureSummary,
+    reportVisibleInterval: logSummaryActions.reportVisibleSummary,
   })
 );
 

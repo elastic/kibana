@@ -5,9 +5,9 @@
  */
 
 import { globalizeSelectors } from '../../utils/typed_redux';
-import { minimapSelectors as innerLogMinimapSelectors } from './log_minimap';
+import { logMinimapSelectors as innerLogMinimapSelectors } from './log_minimap';
 import { logPositionSelectors as innerLogPositionSelectors } from './log_position';
-import { textviewSelectors as innerLogTextviewSelectors } from './log_textview';
+import { logTextviewSelectors as innerLogTextviewSelectors } from './log_textview';
 import { LocalState } from './reducer';
 
 export const logMinimapSelectors = globalizeSelectors(

@@ -9,7 +9,7 @@ import { createGraphqlInitialState } from '../../../utils/remote_state/remote_gr
 
 export type EntriesGraphqlState = typeof initialEntriesGraphqlState;
 
-export interface EntriesState {
+export interface LogEntriesState {
   entries: EntriesGraphqlState;
   visible: {
     startKey: InfraTimeKey | null;
@@ -22,7 +22,7 @@ export const initialEntriesGraphqlState = createGraphqlInitialState<
   LogEntriesQuery.LogEntriesAround
 >();
 
-export const initialEntriesState: EntriesState = {
+export const initialLogEntriesState: LogEntriesState = {
   entries: initialEntriesGraphqlState,
   visible: {
     endKey: null,

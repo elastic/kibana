@@ -6,16 +6,16 @@
 
 import { connect } from 'react-redux';
 
-import { State, textviewActions, textviewSelectors } from '../../store';
+import { logTextviewActions, logTextviewSelectors, State } from '../../store';
 import { asChildFunctionRenderer } from '../../utils/typed_react';
 import { bindPlainActionCreators } from '../../utils/typed_redux';
 
 export const withTextWrap = connect(
   (state: State) => ({
-    wrap: textviewSelectors.selectTextviewWrap(state),
+    wrap: logTextviewSelectors.selectTextviewWrap(state),
   }),
   bindPlainActionCreators({
-    setTextWrap: textviewActions.setTextviewWrap,
+    setTextWrap: logTextviewActions.setTextviewWrap,
   })
 );
 

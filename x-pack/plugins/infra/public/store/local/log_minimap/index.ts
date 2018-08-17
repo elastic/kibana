@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import * as minimapActions from './actions';
-import * as minimapSelectors from './selectors';
+import * as logMinimapActions from './actions';
+import * as logMinimapSelectors from './selectors';
 
-export { minimapActions, minimapSelectors };
+export { logMinimapActions, logMinimapSelectors };
 export * from './reducer';

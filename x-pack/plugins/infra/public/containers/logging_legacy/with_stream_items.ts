@@ -9,8 +9,8 @@ import { createSelector } from 'reselect';
 
 import { SearchResult } from '../../../common/log_search_result';
 import {
-  entriesActions,
-  entriesSelectors,
+  logEntriesActions,
+  logEntriesSelectors,
   // searchResultsSelectors,
   logPositionActions,
   logPositionSelectors,
@@ -22,26 +22,26 @@ import { bindPlainActionCreators } from '../../utils/typed_redux';
 
 export const withStreamItems = connect(
   (state: State) => ({
-    isReloading: entriesSelectors.selectIsReloadingEntries(state),
-    isLoadingMore: entriesSelectors.selectIsLoadingMoreEntries(state),
-    hasMoreBeforeStart: entriesSelectors.selectHasMoreBeforeStart(state),
-    hasMoreAfterEnd: entriesSelectors.selectHasMoreAfterEnd(state),
+    isReloading: logEntriesSelectors.selectIsReloadingEntries(state),
+    isLoadingMore: logEntriesSelectors.selectIsLoadingMoreEntries(state),
+    hasMoreBeforeStart: logEntriesSelectors.selectHasMoreBeforeStart(state),
+    hasMoreAfterEnd: logEntriesSelectors.selectHasMoreAfterEnd(state),
     isStreaming: logPositionSelectors.selectIsAutoReloading(state),
-    lastLoadedTime: entriesSelectors.selectEntriesLastLoadedTime(state),
+    lastLoadedTime: logEntriesSelectors.selectEntriesLastLoadedTime(state),
     items: selectItems(state),
     target: logPositionSelectors.selectTargetPosition(state),
   }),
   bindPlainActionCreators({
     jumpToTarget: logPositionActions.jumpToTargetPosition,
-    reportVisibleInterval: entriesActions.reportVisibleEntries,
+    reportVisibleInterval: logEntriesActions.reportVisibleEntries,
   })
 );
 
 export const WithStreamItems = asChildFunctionRenderer(withStreamItems);
 
 const selectItems = createSelector(
-  entriesSelectors.selectEntries,
-  entriesSelectors.selectIsReloadingEntries,
+  logEntriesSelectors.selectEntries,
+  logEntriesSelectors.selectIsReloadingEntries,
   logPositionSelectors.selectIsAutoReloading,
   // searchResultsSelectors.selectSearchResultsById,
   (logEntries, isReloading, isAutoReloading /*, searchResults*/) =>

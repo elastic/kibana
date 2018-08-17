@@ -7,17 +7,17 @@
 import { connect } from 'react-redux';
 
 import { TextScale } from '../../../common/log_text_scale';
-import { State, textviewActions, textviewSelectors } from '../../store';
+import { logTextviewActions, logTextviewSelectors, State } from '../../store';
 import { asChildFunctionRenderer } from '../../utils/typed_react';
 import { bindPlainActionCreators } from '../../utils/typed_redux';
 
 export const withTextScale = connect(
   (state: State) => ({
     availableTextScales: ['large', 'medium', 'small'] as TextScale[],
-    textScale: textviewSelectors.selectTextviewScale(state),
+    textScale: logTextviewSelectors.selectTextviewScale(state),
   }),
   bindPlainActionCreators({
-    setTextScale: textviewActions.setTextviewScale,
+    setTextScale: logTextviewActions.setTextviewScale,
   })
 );
 

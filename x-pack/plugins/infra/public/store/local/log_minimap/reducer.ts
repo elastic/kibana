@@ -9,18 +9,18 @@ import { reducerWithInitialState } from 'typescript-fsa-reducers';
 import { TimeScale, TimeUnit } from '../../../../common/time';
 import { setMinimapScale } from './actions';
 
-export interface MinimapState {
+export interface LogMinimapState {
   scale: TimeScale;
 }
 
-export const initialMinimapState: MinimapState = {
+export const initialLogMinimapState: LogMinimapState = {
   scale: {
     unit: TimeUnit.Day,
     value: 1,
   },
 };
 
-export const minimapReducer = reducerWithInitialState(initialMinimapState)
+export const logMinimapReducer = reducerWithInitialState(initialLogMinimapState)
   .case(setMinimapScale, (state, { scale }) => ({
     scale,
   }))

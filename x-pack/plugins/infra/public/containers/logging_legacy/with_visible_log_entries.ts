@@ -6,12 +6,12 @@
 
 import { connect } from 'react-redux';
 
-import { entriesSelectors, State } from '../../store';
+import { logEntriesSelectors, State } from '../../store';
 
 export const withVisibleLogEntries = connect(
   (state: State) => ({
-    firstVisibleLogEntry: entriesSelectors.selectFirstVisibleEntry(state),
-    lastVisibleLogEntry: entriesSelectors.selectLastVisibleEntry(state),
+    firstVisibleLogEntry: logEntriesSelectors.selectFirstVisibleEntry(state),
+    lastVisibleLogEntry: logEntriesSelectors.selectLastVisibleEntry(state),
   }),
   {}
 );

@@ -10,18 +10,17 @@ import { reducerWithInitialState } from 'typescript-fsa-reducers';
 
 import { configureSummary } from './actions';
 import { loadSummaryReducer } from './load_operation';
-import { initialSummaryState, SummaryGraphqlState, SummaryState } from './state';
+import { initialLogSummaryState, LogSummaryState, SummaryGraphqlState } from './state';
 
 const summarySummaryReducer = reduceReducers(
   loadSummaryReducer /*, loadMoreSummaryReducer*/
 ) as Reducer<SummaryGraphqlState>;
 
-const summaryIntervalSizeReducer = reducerWithInitialState(initialSummaryState.intervalSize).case(
-  configureSummary,
-  (state, { intervalSize }) => intervalSize
-);
+const summaryIntervalSizeReducer = reducerWithInitialState(
+  initialLogSummaryState.intervalSize
+).case(configureSummary, (state, { intervalSize }) => intervalSize);
 
-export const summaryReducer = combineReducers<SummaryState>({
+export const logSummaryReducer = combineReducers<LogSummaryState>({
   summary: summarySummaryReducer,
   intervalSize: summaryIntervalSizeReducer,
 });

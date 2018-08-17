@@ -4,5 +4,5 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { logPositionActions, minimapActions, textviewActions } from './local';
-export { entriesActions, summaryActions } from './remote';
+export { logMinimapActions, logPositionActions, logTextviewActions } from './local';
+export { logEntriesActions, logSummaryActions } from './remote';
