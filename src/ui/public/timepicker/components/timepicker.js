@@ -17,5 +17,38 @@
  * under the License.
  */
 
-import './timepicker';
-export { Timepicker } from './components/timepicker';
+import PropTypes from 'prop-types';
+import React, { Component } from 'react';
+
+import {
+  EuiAccordion,
+  EuiButtonIcon,
+  EuiFieldText,
+  EuiForm,
+  EuiFormRow,
+  EuiPanel,
+  EuiSpacer,
+} from '@elastic/eui';
+
+export class Timepicker extends Component {
+
+  render() {
+    return (
+      <div>
+
+        {this.props.from} to {this.props.to}
+
+      </div>
+    );
+  }
+}
+
+const timeType = PropTypes.oneOfType([
+  PropTypes.string,
+  PropTypes.object,
+]);
+
+Timepicker.propTypes = {
+  from: timeType,
+  to: timeType,
+}
