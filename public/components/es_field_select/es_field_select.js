@@ -1,19 +1,28 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { EuiSelect } from '@elastic/eui';
+import { EuiComboBox } from '@elastic/eui';
+import { get } from 'lodash';
 
-export const ESFieldSelect = ({ value = '_score', fields = [], onChange, onFocus, onBlur }) => {
-  const options = [{ value: '_score', text: '_score' }];
-  fields.forEach(value => options.push({ value, text: value }));
+const defaultField = '_score';
+
+export const ESFieldSelect = ({ value, fields = [], onChange, onFocus, onBlur }) => {
+  const selectedOption = value !== defaultField ? [{ label: value }] : [];
+  const options = fields.map(field => ({ label: field }));
 
   return (
-    <EuiSelect
-      compressed
-      value={value}
+    <EuiComboBox
+      selectedOptions={selectedOption}
+      placeholder={defaultField}
       options={options}
-      onChange={e => onChange(e.target.value)}
+      onChange={([field]) => onChange(get(field, 'label', defaultField))}
+      onSearchChange={searchValue => {
+        // resets input when user starts typing
+        if (searchValue) onChange(defaultField);
+      }}
       onFocus={onFocus}
       onBlur={onBlur}
+      singleSelection
+      isClearable={false}
     />
   );
 };
@@ -24,4 +33,8 @@ ESFieldSelect.propTypes = {
   onBlur: PropTypes.func,
   value: PropTypes.string,
   fields: PropTypes.array,
+};
+
+ESFieldSelect.defaultProps = {
+  value: defaultField,
 };

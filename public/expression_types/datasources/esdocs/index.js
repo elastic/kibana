@@ -35,7 +35,7 @@ const EsdocsDatasource = ({ args, updateArgs }) => {
   };
 
   const getSortBy = () => {
-    const commas = getSimpleArg('sort', args)[0] || '_score,desc';
+    const commas = getSimpleArg('sort', args)[0] || '_score, desc';
     return commas.split(',').map(str => str.trim());
   };
 
@@ -58,25 +58,21 @@ const EsdocsDatasource = ({ args, updateArgs }) => {
 
       <EuiSpacer size="m" />
 
-      <EuiFormRow label="Index Pattern">
+      <EuiFormRow label="Index" helpText="Enter an index name or select an index pattern">
         <ESIndexSelect value={index} onChange={index => setArg('index', index)} />
       </EuiFormRow>
 
       <EuiFormRow label="Query" helpText="Lucene query string syntax" compressed>
         <EuiFieldText value={getQuery()} onChange={e => setArg(getArgName(), e.target.value)} />
       </EuiFormRow>
-      <EuiFormRow label="Sort Field" helpText="Document sort order, field, and direction">
+      <EuiFormRow label="Sort Field" helpText="Document sort field">
         <ESFieldSelect
           index={index}
           value={sortField}
           onChange={field => setArg('sort', [field, sortOrder].join(', '))}
         />
       </EuiFormRow>
-      <EuiFormRow
-        label="Sort Order"
-        helpText="Document sort order, field, and direction"
-        compressed
-      >
+      <EuiFormRow label="Sort Order" helpText="Document sort order" compressed>
         <EuiSelect
           value={sortOrder}
           onChange={e => setArg('sort', [sortField, e.target.value].join(', '))}
@@ -84,7 +80,7 @@ const EsdocsDatasource = ({ args, updateArgs }) => {
         />
       </EuiFormRow>
       <EuiFormRow
-        label="fields"
+        label="Fields"
         helpText={
           fields.length <= 10
             ? 'The fields to extract. Kibana scripted fields are not currently available'
