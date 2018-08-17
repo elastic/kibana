@@ -8,59 +8,11 @@
 
 import expect from 'expect.js';
 import { jobsProvider } from '../jobs.js';
+import { callWithRequest } from './call_with_request';
 import {
-  jobs,
-  jobStats,
-  datafeeds,
-  datafeedStats,
   jobSummaryData,
   fullJobList,
 } from './responses';
-
-// mock callWithRequest
-const callWithRequest = (request) => {
-  let response = {};
-  if (request === 'ml.datafeeds') {
-    response = {
-      datafeeds: [
-        {
-          datafeed_id: 'datafeed-test',
-          job_id: 'test'
-        },
-        {
-          datafeed_id: 'datafeed-test-two',
-          job_id: 'test-two'
-        }
-      ]
-    };
-  } else if (request === 'ml.deleteJob') {
-    response = {
-      acknowledged: true
-    };
-  } else if (request === 'ml.deleteDatafeed') {
-    response = {
-      acknowledged: true
-    };
-  } else if (request === 'ml.closeJob') {
-    response = {
-      acknowledged: true
-    };
-  } else if (request === 'ml.jobs') {
-    response = jobs;
-  } else if (request === 'ml.jobStats') {
-    response = jobStats;
-  } else if (request === 'ml.datafeeds') {
-    response = datafeeds;
-  } else if (request === 'ml.datafeedStats') {
-    response = datafeedStats;
-  } else if (request === 'ml.calendars') {
-    response = { calendars: [] };
-  } else if (request === 'ml.events') {
-    response = { events: [] };
-  }
-
-  return Promise.resolve(response);
-};
 
 describe('ML - Jobs service', () => {
   it('call factory', () => {
@@ -137,9 +89,6 @@ describe('ML - Jobs service', () => {
       .then((resp) => {
         expect(JSON.stringify(resp)).to.eql(JSON.stringify(jobSummaryData));
         done();
-      })
-      .catch(e => {
-        console.log(e);
       });
   });
 
