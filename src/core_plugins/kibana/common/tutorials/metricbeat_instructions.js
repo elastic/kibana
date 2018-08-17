@@ -79,12 +79,14 @@ export const METRICBEAT_INSTRUCTIONS = {
         // eslint-disable-next-line
         defaultMessage: 'First time using Metricbeat? See the [Getting Started Guide]({metricbeatLink}).\n\
           1. Download the Metricbeat Windows zip file from the [Download]({elasticLink}) page.\n\
-          2. Extract the contents of the zip file into `C:\\Program Files`.\n\
-          3. Rename the `metricbeat-{config.kibana.version}-windows` directory to `Metricbeat`.\n\
+          2. Extract the contents of the zip file into {folderPath}.\n\
+          3. Rename the {directoryName} directory to `Metricbeat`.\n\
           4. Open a PowerShell prompt as an Administrator (right-click the PowerShell icon and select\
           **Run As Administrator**). If you are running Windows XP, you might need to download and install PowerShell.\n\
           5. From the PowerShell prompt, run the following commands to install Metricbeat as a Windows service.',
         values: {
+          directoryName: '`metricbeat-{config.kibana.version}-windows`',
+          folderPath: '`C:\\Program Files`',
           metricbeatLink: '{config.docs.beats.metricbeat}/metricbeat-getting-started.html',
           elasticLink: 'https://www.elastic.co/downloads/beats/metricbeat',
         },
