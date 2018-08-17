@@ -45,6 +45,14 @@ describe('i18n utils', () => {
     expect(formatJSString('Test\\\n str\\\ning')).toEqual('Test string');
   });
 
+  test('should escape linebreaks', () => {
+    expect(
+      formatJSString(`Test
+multiline
+string`)
+    ).toEqual('Test\\nmultiline\\nstring');
+  });
+
   test('should detect i18n translate function call', () => {
     let source = i18nTranslateSources[0];
     let expressionStatementNode = [...traverseNodes(parse(source).program.body)].find(node =>
