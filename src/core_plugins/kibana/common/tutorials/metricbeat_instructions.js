@@ -272,10 +272,10 @@ export const METRICBEAT_INSTRUCTIONS = {
 export const METRICBEAT_CLOUD_INSTRUCTIONS = {
   CONFIG: {
     OSX: {
-      title: i18n.translate('kbn.common.tutorials.metricbeatInstructions.config.osxTitle', {
+      title: i18n.translate('kbn.common.tutorials.metricbeatCloudInstructions.config.osxTitle', {
         defaultMessage: 'Edit the configuration',
       }),
-      textPre: i18n.translate('kbn.common.tutorials.metricbeatInstructions.config.osxTextPre', {
+      textPre: i18n.translate('kbn.common.tutorials.metricbeatCloudInstructions.config.osxTextPre', {
         defaultMessage: 'Modify {path} to set the connection information for Elastic Cloud:',
         values: {
           path: '`metricbeat.yml`',
@@ -285,16 +285,16 @@ export const METRICBEAT_CLOUD_INSTRUCTIONS = {
         'cloud.id: "{config.cloud.id}"',
         'cloud.auth: "elastic:<password>"'
       ],
-      textPost: i18n.translate('kbn.common.tutorials.metricbeatInstructions.config.osxTextPost', {
+      textPost: i18n.translate('kbn.common.tutorials.metricbeatCloudInstructions.config.osxTextPost', {
         defaultMessage: 'Where {passwordTemplate} is the password of the `elastic` user.',
         values: { passwordTemplate: '`<password>`' },
       }),
     },
     DEB: {
-      title: i18n.translate('kbn.common.tutorials.metricbeatInstructions.config.debTitle', {
+      title: i18n.translate('kbn.common.tutorials.metricbeatCloudInstructions.config.debTitle', {
         defaultMessage: 'Edit the configuration',
       }),
-      textPre: i18n.translate('kbn.common.tutorials.metricbeatInstructions.config.debTextPre', {
+      textPre: i18n.translate('kbn.common.tutorials.metricbeatCloudInstructions.config.debTextPre', {
         defaultMessage: 'Modify {path} to set the connection information for Elastic Cloud:',
         values: {
           path: '`/etc/metricbeat/metricbeat.yml`',
@@ -304,16 +304,16 @@ export const METRICBEAT_CLOUD_INSTRUCTIONS = {
         'cloud.id: "{config.cloud.id}"',
         'cloud.auth: "elastic:<password>"'
       ],
-      textPost: i18n.translate('kbn.common.tutorials.metricbeatInstructions.config.debTextPost', {
+      textPost: i18n.translate('kbn.common.tutorials.metricbeatCloudInstructions.config.debTextPost', {
         defaultMessage: 'Where {passwordTemplate} is the password of the `elastic` user.',
         values: { passwordTemplate: '`<password>`' },
       }),
     },
     RPM: {
-      title: i18n.translate('kbn.common.tutorials.metricbeatInstructions.config.rpmTitle', {
+      title: i18n.translate('kbn.common.tutorials.metricbeatCloudInstructions.config.rpmTitle', {
         defaultMessage: 'Edit the configuration',
       }),
-      textPre: i18n.translate('kbn.common.tutorials.metricbeatInstructions.config.rpmTextPre', {
+      textPre: i18n.translate('kbn.common.tutorials.metricbeatCloudInstructions.config.rpmTextPre', {
         defaultMessage: 'Modify {path} to set the connection information for Elastic Cloud:',
         values: {
           path: '`/etc/metricbeat/metricbeat.yml`',
@@ -323,16 +323,16 @@ export const METRICBEAT_CLOUD_INSTRUCTIONS = {
         'cloud.id: "{config.cloud.id}"',
         'cloud.auth: "elastic:<password>"'
       ],
-      textPost: i18n.translate('kbn.common.tutorials.metricbeatInstructions.config.rpmTextPost', {
+      textPost: i18n.translate('kbn.common.tutorials.metricbeatCloudInstructions.config.rpmTextPost', {
         defaultMessage: 'Where {passwordTemplate} is the password of the `elastic` user.',
         values: { passwordTemplate: '`<password>`' },
       }),
     },
     WINDOWS: {
-      title: i18n.translate('kbn.common.tutorials.metricbeatInstructions.config.windowsTitle', {
+      title: i18n.translate('kbn.common.tutorials.metricbeatCloudInstructions.config.windowsTitle', {
         defaultMessage: 'Edit the configuration',
       }),
-      textPre: i18n.translate('kbn.common.tutorials.metricbeatInstructions.config.windowsTextPre', {
+      textPre: i18n.translate('kbn.common.tutorials.metricbeatCloudInstructions.config.windowsTextPre', {
         defaultMessage: 'Modify {path} to set the connection information for Elastic Cloud:',
         values: {
           path: '`C:\\Program Files\\Metricbeat\\metricbeat.yml`',
@@ -342,7 +342,7 @@ export const METRICBEAT_CLOUD_INSTRUCTIONS = {
         'cloud.id: "{config.cloud.id}"',
         'cloud.auth: "elastic:<password>"'
       ],
-      textPost: i18n.translate('kbn.common.tutorials.metricbeatInstructions.config.windowsTextPost', {
+      textPost: i18n.translate('kbn.common.tutorials.metricbeatCloudInstructions.config.windowsTextPost', {
         defaultMessage: 'Where {passwordTemplate} is the password of the `elastic` user.',
         values: { passwordTemplate: '`<password>`' },
       }),

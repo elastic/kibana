@@ -44,7 +44,7 @@ export const TRYCLOUD_OPTION2 = {
   title: i18n.translate('kbn.common.tutorials.premCloudInstructions.option2.title', {
     defaultMessage: 'Option 2: Connect local Kibana to a Cloud instance',
   }),
-  textPre: i18n.translate('kbn.common.tutorials.premCloudInstructions.option1.textPre', {
+  textPre: i18n.translate('kbn.common.tutorials.premCloudInstructions.option2.textPre', {
     // eslint-disable-next-line
     defaultMessage: 'If you are running this Kibana instance against a hosted Elasticsearch instance, \
       proceed with manual setup.\n\n\
