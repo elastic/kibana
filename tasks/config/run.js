@@ -165,6 +165,19 @@ module.exports = function (grunt) {
       ],
     },
 
+    serverIntegrationTests: {
+      cmd: process.execPath,
+      args: [
+        'scripts/functional_tests',
+        '--config', 'test/server_integration/http/ssl/config.js',
+        '--config', 'test/server_integration/http/ssl_redirect/config.js',
+        '--esFrom', 'source',
+        '--bail',
+        '--debug',
+        '--kibana-install-dir', `./build/oss/kibana-${PKG_VERSION}-${process.platform}-x86_64`,
+      ],
+    },
+
     panelActionTests: {
       cmd: process.execPath,
       args: [
@@ -185,7 +198,7 @@ module.exports = function (grunt) {
         '--bail',
         '--debug',
         '--',
-        '--server.maxPayloadBytes=1648576',
+        '--server.maxPayloadBytes=1648576', //default is 1048576
       ],
     },
 
