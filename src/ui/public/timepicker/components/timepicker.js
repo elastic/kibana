@@ -20,25 +20,28 @@
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 
+import { QuickSelectPopover } from './quick_select_popover';
+
 import {
-  EuiAccordion,
-  EuiButtonIcon,
-  EuiFieldText,
-  EuiForm,
-  EuiFormRow,
-  EuiPanel,
-  EuiSpacer,
+  EuiText,
+  EuiFormControlLayout,
 } from '@elastic/eui';
 
 export class Timepicker extends Component {
 
   render() {
     return (
-      <div>
-
-        {this.props.from} to {this.props.to}
-
-      </div>
+      <EuiFormControlLayout
+        prepend={(<QuickSelectPopover/>)}
+      >
+        <div
+          className="euiDatePickerRange"
+        >
+          {this.props.from}
+          <EuiText className="euiDatePickerRange__delimeter" size="s" color="subdued">→</EuiText>
+          {this.props.to}
+        </div>
+      </EuiFormControlLayout>
     );
   }
 }
