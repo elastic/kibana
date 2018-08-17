@@ -42,6 +42,10 @@ const onChange = jest.fn();
 const onError = jest.fn();
 
 describe('StringFormatEditor', () => {
+  it('should have a formatId', () => {
+    expect(StringFormatEditor.formatId).toEqual('string');
+  });
+
   it('should render normally', async () => {
     const component = shallow(
       <StringFormatEditor

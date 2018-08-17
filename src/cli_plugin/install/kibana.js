@@ -42,8 +42,7 @@ export async function rebuildCache(settings, logger) {
     '--env.name=production',
     '--optimize.useBundleCache=false',
     '--server.autoListen=false',
-    '--plugins.initialize=false',
-    '--uiSettings.enabled=false'
+    '--plugins.initialize=false'
   ];
 
   const proc = execa(process.execPath, kibanaArgs, {

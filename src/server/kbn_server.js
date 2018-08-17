@@ -36,8 +36,8 @@ import * as Plugins from './plugins';
 import { indexPatternsMixin } from './index_patterns';
 import { savedObjectsMixin } from './saved_objects';
 import { sampleDataMixin } from './sample_data';
-import { urlShorteningMixin } from './url_shortening';
 import { kibanaIndexMappingsMixin } from './mappings';
+import { urlShorteningMixin } from './url_shortening';
 import { serverExtensionsMixin } from './server_extensions';
 import { uiMixin } from '../ui';
 import { sassMixin } from './sass';
@@ -144,9 +144,9 @@ export default class KbnServer {
    * @return undefined
    */
   async listen() {
-    const { server } = this;
-
     await this.ready();
+
+    const { server } = this;
     await fromNode(cb => server.start(cb));
 
     if (isWorker) {

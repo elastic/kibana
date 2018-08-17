@@ -22,9 +22,7 @@ jest.mock('../../layouts/layouts', () => {
   const { schema } = require('../../../config/schema');
   return {
     Layouts: {
-      configSchema: schema.object({
-        kind: schema.literal('mock'),
-      }),
+      configSchema: schema.object({ kind: schema.literal('mock') }),
       create: mockCreateLayout,
     },
   };
@@ -75,48 +73,23 @@ test('`configSchema` creates correct schema.', () => {
 test('`create()` creates correct appender.', () => {
   mockCreateLayout.mockReturnValue({ format: () => '' });
 
-  const consoleAppender = Appenders.create(
-    {
-      kind: 'console',
-      layout: {
-        highlight: true,
-        kind: 'pattern',
-        pattern: '',
-      },
-    },
-    {} as any
-  );
+  const consoleAppender = Appenders.create({
+    kind: 'console',
+    layout: { highlight: true, kind: 'pattern', pattern: '' },
+  });
   expect(consoleAppender).toBeInstanceOf(ConsoleAppender);
 
-  const fileAppender = Appenders.create(
-    {
-      kind: 'file',
-      layout: {
-        highlight: true,
-        kind: 'pattern',
-        pattern: '',
-      },
-      path: 'path',
-    },
-    {} as any
-  );
+  const fileAppender = Appenders.create({
+    kind: 'file',
+    layout: { highlight: true, kind: 'pattern', pattern: '' },
+    path: 'path',
+  });
   expect(fileAppender).toBeInstanceOf(FileAppender);
-});
 
-test('`create()` fails to create legacy appender if kbnServer is not provided.', () => {
-  expect(() => {
-    Appenders.create({ kind: 'legacy-appender' }, {
-      getLegacyKbnServer() {
-        // noop
-      },
-    } as any);
-  }).toThrowErrorMatchingSnapshot();
-});
-
-test('`create()` creates legacy appender if kbnServer is provided.', () => {
-  const legacyAppender = Appenders.create({ kind: 'legacy-appender' }, {
-    getLegacyKbnServer: () => ({}),
-  } as any);
+  const legacyAppender = Appenders.create({
+    kind: 'legacy-appender',
+    legacyLoggingConfig: { verbose: true },
+  });
 
   expect(legacyAppender).toBeInstanceOf(LegacyAppender);
 });

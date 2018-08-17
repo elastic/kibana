@@ -32,6 +32,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
 } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n/react';
 
 import MetricTiles from './metric_tiles';
 import StatusTable from './status_table';
@@ -75,7 +76,12 @@ class StatusApp extends Component {
 
     if (fetchError) {
       return (
-        <EuiText color="danger">An error occurred loading the status</EuiText>
+        <EuiText color="danger">
+          <FormattedMessage
+            id="statusPage.statusApp.loadingErrorText"
+            defaultMessage="An error occurred loading the status"
+          />
+        </EuiText>
       );
     }
 
@@ -97,11 +103,16 @@ class StatusApp extends Component {
 
           <EuiSpacer />
 
-          <EuiPageContent grow={0}>
+          <EuiPageContent grow={false}>
             <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
               <EuiFlexItem grow={false}>
                 <EuiTitle size="s">
-                  <h2>Plugin status</h2>
+                  <h2>
+                    <FormattedMessage
+                      id="statusPage.statusApp.statusTitle"
+                      defaultMessage="Plugin status"
+                    />
+                  </h2>
                 </EuiTitle>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
@@ -109,14 +120,26 @@ class StatusApp extends Component {
                   <EuiFlexItem grow={false}>
                     <EuiText size="s">
                       <p>
-                        BUILD <strong>{ buildNum }</strong>
+                        <FormattedMessage
+                          id="statusPage.statusApp.statusActions.buildText"
+                          defaultMessage="BUILD {buildNum}"
+                          values={{
+                            buildNum: (<strong>{ buildNum }</strong>),
+                          }}
+                        />
                       </p>
                     </EuiText>
                   </EuiFlexItem>
                   <EuiFlexItem grow={false}>
                     <EuiText size="s">
                       <p>
-                        COMMIT <strong>{ buildSha }</strong>
+                        <FormattedMessage
+                          id="statusPage.statusApp.statusActions.commitText"
+                          defaultMessage="COMMIT {buildSha}"
+                          values={{
+                            buildSha: (<strong>{ buildSha }</strong>),
+                          }}
+                        />
                       </p>
                     </EuiText>
                   </EuiFlexItem>

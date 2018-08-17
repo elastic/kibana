@@ -47,7 +47,10 @@ class Component extends PureComponent {
 `);
 
 const intlFormatMessageSource = `
-intl.formatMessage({ id: 'kbn.mgmt.id-1', defaultMessage: 'Message text 1', context: 'Message context' });
+  formatMessage({ id: 'kbn.mgmt.id-1', defaultMessage: 'Message text 1', context: 'Message context' });
+  intl.formatMessage({ id: 'kbn.mgmt.id-2', defaultMessage: 'Message text 2', context: 'Message context' });
+  props.intl.formatMessage({ id: 'kbn.mgmt.id-5', defaultMessage: 'Message text 5', context: 'Message context' });
+  this.props.intl.formatMessage({ id: 'kbn.mgmt.id-6', defaultMessage: 'Message text 6', context: 'Message context' });
 `;
 
 const formattedMessageSource = `
@@ -81,11 +84,12 @@ describe('extractCodeMessages', () => {
 
 describe('isIntlFormatMessageFunction', () => {
   test('detects intl.formatMessage call expression', () => {
-    const callExpressioNode = [...traverseNodes(parse(intlFormatMessageSource).program.body)].find(
+    const callExpressionNodes = [...traverseNodes(parse(intlFormatMessageSource).program.body)].filter(
       node => isCallExpression(node)
     );
 
-    expect(isIntlFormatMessageFunction(callExpressioNode)).toBe(true);
+    expect(callExpressionNodes).toHaveLength(4);
+    expect(callExpressionNodes.every(callExpressionNode => isIntlFormatMessageFunction(callExpressionNode))).toBe(true);
   });
 });
 
