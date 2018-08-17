@@ -50,7 +50,7 @@ function getKibanaCmd(installDir) {
  * passed, we run from source code. We also allow passing in extra
  * Kibana server options, so we tack those on here.
  */
-function collectCliArgs(config, { installDir, addExtraKbnArgs }) {
+function collectCliArgs(config, { installDir, extraKbnOpts }) {
   const buildArgs = config.get('kbnTestServer.buildArgs') || [];
   const sourceArgs = config.get('kbnTestServer.sourceArgs') || [];
   const serverArgs = config.get('kbnTestServer.serverArgs') || [];
@@ -61,7 +61,7 @@ function collectCliArgs(config, { installDir, addExtraKbnArgs }) {
     args => {
       return installDir ? [...args, ...buildArgs] : [KIBANA_EXEC_PATH, ...args, ...sourceArgs];
     },
-    addExtraKbnArgs || (args => args)
+    args => args.concat(extraKbnOpts || [])
   );
 }
 
