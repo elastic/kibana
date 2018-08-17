@@ -5,18 +5,17 @@
  */
 
 import { initMonaco, Monaco } from 'init-monaco';
-import { editor, IDisposable, languages } from 'monaco-editor';
+import { editor, languages } from 'monaco-editor';
 import { ResizeChecker } from 'ui/resize_checker';
-import { Definition, Hover, Location } from 'vscode-languageserver';
+import { Definition, Location } from 'vscode-languageserver';
 import { LspRestClient, TextDocumentMethods } from '../../common/lsp_client';
+import { parseUri } from '../../common/uri_util';
 import { EditorService } from './editor_service';
 import { HoverController } from './hover_controller';
 import { TextModelResolverService } from './textmodel_resolver';
 
 export class MonacoHelper {
   private monaco: Monaco | null = null;
-  private hoverProvider: IDisposable | null = null;
-  private definitionProvider: IDisposable | null = null;
   private lspMethods: TextDocumentMethods;
   private editor: editor.IStandaloneCodeEditor | null = null;
   private resizeChecker: ResizeChecker | null = null;
@@ -33,10 +32,21 @@ export class MonacoHelper {
       initMonaco((monaco, extensions) => {
         this.monaco = monaco;
         extensions.registerEditorContribution(HoverController);
+
+        // @ts-ignore  a hack to replace function in monaco editor.
+        monaco.StandaloneCodeEditorServiceImpl.prototype.openCodeEditor =
+          EditorService.prototype.openCodeEditor;
+        //  @ts-ignore another hack to replace function
+        this.monaco!.typescript.DefinitionAdapter.prototype.provideDefinition = (model, position) =>
+          this.provideDefinition(model, position);
+
         this.editor = monaco.editor.create(
           this.container!,
           {
             readOnly: true,
+            minimap: {
+              enabled: false,
+            },
             hover: {
               enabled: false,
             }, // disable default hover;
@@ -44,7 +54,6 @@ export class MonacoHelper {
           },
           {
             textModelService: new TextModelResolverService(monaco),
-            editorService: new EditorService(),
           }
         );
         this.resizeChecker = new ResizeChecker(this.container);
@@ -73,22 +82,7 @@ export class MonacoHelper {
     if (!this.initialized) {
       await this.init();
     }
-    if (lang !== 'plain') {
-      if (this.hoverProvider) {
-        this.hoverProvider.dispose();
-      }
-      this.hoverProvider = this.monaco!.languages.registerHoverProvider(lang, {
-        provideHover: (model, position) => this.onHover(repoUri, file, model, position),
-      });
-      if (this.definitionProvider) {
-        this.definitionProvider.dispose();
-      }
-      this.definitionProvider = this.monaco!.languages.registerDefinitionProvider(lang, {
-        provideDefinition: (model, position) =>
-          this.provideDefinition(repoUri, file, model, position),
-      });
-    }
-    // @ts-ignore
+
     this.editor!.setModel(null);
     const uri = this.monaco!.Uri.parse(`git://${repoUri}?${revision}#${file}`);
     let newModel = this.monaco!.editor.getModel(uri);
@@ -98,12 +92,9 @@ export class MonacoHelper {
     this.editor!.setModel(newModel);
     return this.editor!;
   }
-  public provideDefinition(
-    repoUri: string,
-    file: string,
-    model: any,
-    position: any
-  ): Promise<languages.Location[]> {
+
+  public provideDefinition(model: editor.ITextModel, position: any): Promise<languages.Location[]> {
+    const { repoUri, file } = parseUri(model.uri);
     return this.lspMethods.definition
       .send({
         position: {
@@ -131,65 +122,6 @@ export class MonacoHelper {
         }
       );
   }
-
-  public onHover(
-    repoUri: string,
-    file: string,
-    model: any,
-    position: any
-  ): Promise<languages.Hover> {
-    return this.lspMethods.hover
-      .send({
-        position: {
-          line: position.lineNumber - 1,
-          character: position.column - 1,
-        },
-        textDocument: {
-          uri: `git://${repoUri}?HEAD#${file}`,
-        },
-      })
-      .then(
-        (hover: Hover) => {
-          if (hover.contents && hover.range) {
-            const { range, contents } = hover;
-            return {
-              range: new this.monaco!.Range(
-                range.start.line + 1,
-                range.start.character + 1,
-                range.end.line + 1,
-                range.end.character + 1
-              ),
-              contents: (contents as any[]).reverse().map(e => {
-                return { value: e.value || e.toString() };
-              }),
-            };
-          } else if (hover.contents) {
-            const { contents } = hover;
-            if (Array.isArray(contents)) {
-              return {
-                contents: (contents as any[]).reverse().map(e => {
-                  return { value: e.value || e.toString() };
-                }),
-              };
-            } else {
-              return {
-                contents: [
-                  {
-                    value: typeof contents === 'string' ? contents : contents.value,
-                  },
-                ],
-              };
-            }
-          } else {
-            return { contents: [] };
-          }
-        },
-        _ => {
-          return { contents: [] };
-        }
-      );
-  }
-
   public revealLine(line: number) {
     this.editor!.revealLineInCenter(line);
     this.editor!.setPosition({

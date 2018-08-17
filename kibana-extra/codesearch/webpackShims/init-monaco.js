@@ -26,13 +26,19 @@ function handleNow(callback) {
   const r = window['require'];
   r.config({ paths: { 'vs': '../monaco/vs' } });
   r(['vs/editor/editor.main'], () => {
-    r(['vs/editor/browser/editorExtensions',
+    r(['vs/language/typescript/languageFeatures',
+      'vs/editor/browser/editorExtensions',
       'vs/base/browser/htmlContentRenderer',
       'vs/editor/common/modes/textToHtmlTokenizer',
-      'vs/base/browser/ui/scrollbar/scrollableElement'], (extensions, renderer, tokenizer, scrollable) => {
+      'vs/base/browser/ui/scrollbar/scrollableElement',
+      'vs/editor/standalone/browser/standaloneCodeServiceImpl',
+      'vs/editor/common/modes'], (ts, extensions, renderer, tokenizer, scrollable, standaloneCodeServiceImpl, modes) => {
       monaco.renderer = renderer;
       monaco.tokenizer = tokenizer;
       monaco.scrollable = scrollable;
+      monaco.modes = modes;
+      monaco.typescript = ts;
+      monaco.StandaloneCodeEditorServiceImpl = standaloneCodeServiceImpl.StandaloneCodeEditorServiceImpl;
       callback(monaco, extensions)
     });
   });

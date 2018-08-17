@@ -6,7 +6,7 @@
 
 'use strict';
 
-import { editor as Editor } from 'monaco-editor';
+import { editor as Editor, IRange } from 'monaco-editor';
 import { Hover, MarkedString } from 'vscode-languageserver-types';
 import { parseUri } from '../../common/uri_util';
 import { ContentWidget } from './content_widget';
@@ -17,8 +17,9 @@ export class ContentHoverWidget extends ContentWidget {
   public static ID = 'editor.contrib.contentHoverWidget';
   private hoverOperation: Operation<Hover>;
   private computer: HoverComputer;
-  private lastRange: any | null = null;
+  private lastRange: IRange | null = null;
   private shouldFocus: boolean = false;
+  private eventsBound: boolean = false;
 
   constructor(editor: Editor.ICodeEditor) {
     super(ContentHoverWidget.ID, editor);
@@ -50,6 +51,11 @@ export class ContentHoverWidget extends ContentWidget {
     this.hoverOperation.start();
     this.lastRange = range;
     this.shouldFocus = focus;
+  }
+
+  public showAt(position: any, focus: boolean): void {
+    super.showAt(position, focus);
+    this.bindButtonEvents();
   }
 
   private result(result: Hover, complete: boolean) {
@@ -111,7 +117,7 @@ export class ContentHoverWidget extends ContentWidget {
       'euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--directionRow euiFlexGroup--responsive';
     buttonGroup.style.cssText = 'padding: 4px 5px; border-top: 1px solid rgba(200, 200, 200, 0.5)';
     buttonGroup.innerHTML = `
-    <button class="euiFlexItem euiButton euiButton--primary euiButton--small" type="button">
+    <button id="btnDefinition" class="euiFlexItem euiButton euiButton--primary euiButton--small" type="button">
       <span class="euiButton__content">
         <span class="euiButton__text">Goto Definition</span>
       </span>
@@ -128,5 +134,32 @@ export class ContentHoverWidget extends ContentWidget {
     </button>
    `;
     this.containerDomNode.appendChild(buttonGroup);
+  }
+
+  private gotoDefinition() {
+    if (this.lastRange) {
+      this.editor.setPosition({
+        lineNumber: this.lastRange.startLineNumber,
+        column: this.lastRange.startColumn,
+      });
+      const action = this.editor.getAction('editor.action.goToDeclaration');
+      action.run().then(() => this.hide());
+    }
+  }
+
+  private bindButtonEvents() {
+    if (!this.eventsBound) {
+      const btnDefinition = document.getElementById('btnDefinition');
+      if (btnDefinition) {
+        const gotoDefinition = this.gotoDefinition.bind(this);
+        btnDefinition.addEventListener('click', gotoDefinition);
+        this.disposables.push({
+          dispose() {
+            btnDefinition.removeEventListener('click', gotoDefinition);
+          },
+        });
+      }
+      this.eventsBound = true;
+    }
   }
 }
