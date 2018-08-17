@@ -9,12 +9,27 @@ import Joi from 'joi';
 import { ALL_RESOURCE } from '../../../../../common/constants';
 import { wrapError } from '../../../../lib/errors';
 
-const transformKibanaPrivilegeToEs = (application, kibanaPrivilege) => {
-  return {
-    privileges: kibanaPrivilege.privileges,
-    application,
-    resources: [ALL_RESOURCE],
-  };
+const transformKibanaPrivilegesToEs = (application, kibanaPrivileges) => {
+  const kibanaApplicationPrivileges = [];
+  if (kibanaPrivileges.global && kibanaPrivileges.global.length) {
+    kibanaApplicationPrivileges.push({
+      privileges: kibanaPrivileges.global,
+      application,
+      resources: [ALL_RESOURCE],
+    });
+  }
+
+  if (kibanaPrivileges.space) {
+    for(const [spaceId, privileges] of Object.entries(kibanaPrivileges.space)) {
+      kibanaApplicationPrivileges.push({
+        privileges: privileges,
+        application,
+        resources: [`space:${spaceId}`]
+      });
+    }
+  }
+
+  return kibanaApplicationPrivileges;
 };
 
 const transformRolesToEs = (
@@ -22,7 +37,7 @@ const transformRolesToEs = (
   payload,
   existingApplications = []
 ) => {
-  const { elasticsearch = {}, kibana = [] } = payload;
+  const { elasticsearch = {}, kibana = {} } = payload;
   const otherApplications = existingApplications.filter(
     roleApplication => roleApplication.application !== application
   );
@@ -33,9 +48,7 @@ const transformRolesToEs = (
     indices: elasticsearch.indices || [],
     run_as: elasticsearch.run_as || [],
     applications: [
-      ...kibana.map(kibanaPrivilege =>
-        transformKibanaPrivilegeToEs(application, kibanaPrivilege)
-      ),
+      ...transformKibanaPrivilegesToEs(application, kibana),
       ...otherApplications,
     ],
   }, identity);
@@ -64,9 +77,10 @@ export function initPutRolesApi(
       }),
       run_as: Joi.array().items(Joi.string()),
     }),
-    kibana: Joi.array().items({
-      privileges: Joi.array().items(Joi.string().valid(Object.keys(privilegeMap))),
-    }),
+    kibana: Joi.object().keys({
+      global: Joi.array().items(Joi.string().valid(Object.keys(privilegeMap))),
+      space: Joi.object().pattern(/^/, Joi.array().items(Joi.string().valid(Object.keys(privilegeMap))))
+    })
   });
 
   server.route({
