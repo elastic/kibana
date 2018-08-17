@@ -55,5 +55,14 @@ export const elasticsearchJsPlugin = (Client, config, components) => {
     needBody: true,
     method: 'POST'
   });
+
+  rollup.jobs = ca({
+    urls: [
+      {
+        fmt: '/_xpack/rollup/job/_all',
+      }
+    ],
+    method: 'GET'
+  });
 };
 
