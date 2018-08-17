@@ -17,6 +17,8 @@
  * under the License.
  */
 
+import _ from 'lodash';
+import chrome from 'ui/chrome';
 import PropTypes from 'prop-types';
 import React, { Component, Fragment } from 'react';
 
@@ -50,6 +52,8 @@ const timeTenseOptions = [
 const timeUnitsOptions = Object.keys(timeUnits).map(key => {
   return { value: key, text: `${timeUnits[key]}s` };
 });
+
+const commonlyUsed = chrome.getUiSettingsClient().get('timepicker:quickRanges');
 
 export class QuickSelectPopover extends Component {
 
@@ -89,7 +93,7 @@ export class QuickSelectPopover extends Component {
     });
   }
 
-  setQuickTime = () => {
+  applyQuickSelect = () => {
     const {
       timeTense,
       timeValue,
@@ -97,17 +101,24 @@ export class QuickSelectPopover extends Component {
     } = this.state;
 
     if (timeTense === NEXT) {
-      this.props.setTime({
+      this.setTime({
         from: 'now',
         to: `now+${timeValue}${timeUnits}`
       });
-    } else {
-      this.props.setTime({
-        from: `now-${timeValue}${timeUnits}`,
-        to: 'now'
-      });
+      return;
     }
 
+    this.setTime({
+      from: `now-${timeValue}${timeUnits}`,
+      to: 'now'
+    });
+  }
+
+  setTime = ({ from, to }) => {
+    this.props.setTime({
+      from: from,
+      to: to
+    });
     this.closePopover();
   }
 
@@ -149,7 +160,7 @@ export class QuickSelectPopover extends Component {
           <EuiFlexItem grow={false}>
             <EuiFormRow>
               <EuiButton
-                onClick={this.setQuickTime}
+                onClick={this.applyQuickSelect}
                 style={{ minWidth: 0 }}
                 disabled={this.state.timeValue === ''}
               >
@@ -162,21 +173,38 @@ export class QuickSelectPopover extends Component {
     );
   }
 
-  renderCommonlyUsed = (commonDates) => {
-    const links = [].map((date) => {
-      return (
-        <EuiFlexItem key={date}><EuiLink onClick={this.closePopover}>{date}</EuiLink></EuiFlexItem>
-      );
-    });
+  renderCommonlyUsed = () => {
+    const sections = _.groupBy(commonlyUsed, 'section');
+
+    const renderSectionItems = (section) => {
+      return section.map(commonlyUsed => {
+        const setTime = () => {
+          this.setTime({
+            from: commonlyUsed.from,
+            to: commonlyUsed.to
+          });
+        };
+        return (
+          <EuiFlexItem key={commonlyUsed.display}>
+            <EuiLink onClick={setTime}>{commonlyUsed.display}</EuiLink>
+          </EuiFlexItem>
+        );
+      });
+    };
 
     return (
       <Fragment>
         <EuiTitle size="xxxs"><span>Commonly used</span></EuiTitle>
         <EuiSpacer size="s" />
         <EuiText size="s">
-          <EuiFlexGrid gutterSize="s" columns={2} responsive={false}>
-            {links}
-          </EuiFlexGrid>
+          {Object.keys(sections).map(key => (
+            <Fragment key={key}>
+              <EuiFlexGrid gutterSize="s" columns={2} responsive={false}>
+                {renderSectionItems(sections[key])}
+              </EuiFlexGrid>
+              <EuiSpacer size="m" />
+            </Fragment>
+          ))}
         </EuiText>
       </Fragment>
     );
