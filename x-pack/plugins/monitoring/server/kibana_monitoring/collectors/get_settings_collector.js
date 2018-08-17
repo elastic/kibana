@@ -61,7 +61,7 @@ export function getSettingsCollector(server, kbnServer) {
   return collectorSet.makeStatsCollector({
     type: KIBANA_SETTINGS_TYPE,
     async fetch(callCluster) {
-      let kibanaSettingsData;
+      let kibanaSettingsData = null;
       const defaultAdminEmail = await checkForEmailValue(config, callCluster);
 
       // skip everything if defaultAdminEmail === undefined
@@ -79,10 +79,16 @@ export function getSettingsCollector(server, kbnServer) {
       // remember the current email so that we can mark it as successful if the bulk does not error out
       shouldUseNull = !!defaultAdminEmail;
 
-      return {
-        kibana: getKibanaInfoForStats(server, kbnServer),
-        ...kibanaSettingsData
-      };
+      // return nothing when there was no result
+      let settingsDoc;
+      if (kibanaSettingsData !== null) {
+        settingsDoc = {
+          kibana: getKibanaInfoForStats(server, kbnServer),
+          ...kibanaSettingsData
+        };
+      }
+
+      return settingsDoc;
     }
   });
 }

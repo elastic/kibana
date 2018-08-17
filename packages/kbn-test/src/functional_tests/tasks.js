@@ -36,25 +36,6 @@ in another terminal session by running this command from this directory:
 `;
 
 /**
- * test if a list of argv flags tell the kibana server to run in the development environment
- * @param {string[]} argv
- * @return {boolean}
- */
-function includesEnvNameDevelopmentFlag(argv) {
-  return argv.some((arg, i) => {
-    // find single-arg format
-    if (arg === '--env.name=development') {
-      return true;
-    }
-
-    // find split arg format
-    if (arg === '--env.name' && argv[i + 1] === 'development') {
-      return true;
-    }
-  });
-}
-
-/**
  * Run servers and tests for each config
  * @param {object} options                   Optional
  * @property {string[]} configPaths          Array of paths to configs
@@ -95,12 +76,7 @@ export async function startServers(options) {
       config,
       options: {
         ...opts,
-        addExtraKbnArgs: argv => {
-          argv = options.addExtraKbnArgs(argv);
-          return !options.installDir && includesEnvNameDevelopmentFlag(argv)
-            ? argv.concat('--dev')
-            : argv;
-        },
+        extraKbnOpts: [...options.extraKbnOpts, ...(options.installDir ? [] : ['--dev'])],
       },
     });
 
