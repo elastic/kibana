@@ -283,12 +283,13 @@ function logFatal(error, server) {
   } finally {
     // https://nodejs.org/api/errors.html#errors_error_info
     const pickedError = _.pick(error, [
+      'stack',
+      'message',
       'code',
       'errno',
-      'stack',
       'path',
       'address',
-      'port'
+      'port',
     ]);
     const duck = Boolean(pickedError.stack) && Boolean(pickedError.message);
     const loggedError = duck
