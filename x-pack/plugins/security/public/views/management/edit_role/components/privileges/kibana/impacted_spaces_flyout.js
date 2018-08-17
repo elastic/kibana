@@ -13,13 +13,13 @@ import {
   EuiFlyoutHeader,
   EuiFlyoutFooter,
   EuiFlyoutBody,
-  EuiButton,
   EuiTitle,
 } from '@elastic/eui';
 
 import './impacted_spaces_flyout.less';
 import { NO_PRIVILEGE_VALUE } from '../../../lib/constants';
 import { getKibanaPrivilegesViewModel } from '../../../lib/get_application_privileges';
+import { ManageSpacesButton } from '../../../../../../../../spaces/public/components';
 
 export class ImpactedSpacesFlyout extends Component {
   state = {
@@ -85,7 +85,7 @@ export class ImpactedSpacesFlyout extends Component {
         </EuiFlyoutBody>
         <EuiFlyoutFooter className="showImpactedSpaces--flyout--footer">
           {/* TODO: Hide footer if button is not available */}
-          <EuiButton fill onClick={() => { }}>Manage Spaces</EuiButton>
+          <ManageSpacesButton />
         </EuiFlyoutFooter>
       </EuiFlyout>
     );
