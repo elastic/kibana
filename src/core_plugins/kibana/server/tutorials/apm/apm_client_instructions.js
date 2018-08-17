@@ -18,109 +18,201 @@
  */
 
 /* eslint-disable max-len */
+/* eslint-disable no-multi-str*/
+
+import { i18n } from '@kbn/i18n';
 
 export const NODE_CLIENT_INSTRUCTIONS = [
   {
-    title: 'Install the APM agent',
-    textPre:
-      'Install the APM agent for Node.js as a dependency to your application.',
+    title: i18n.translate('kbn.server.tutorials.apm.nodeClient.install.title', {
+      defaultMessage: 'Install the APM agent',
+    }),
+    textPre: i18n.translate('kbn.server.tutorials.apm.nodeClient.install.textPre', {
+      defaultMessage: 'Install the APM agent for Node.js as a dependency to your application.',
+    }),
     commands: ['npm install elastic-apm-node --save'],
   },
   {
-    title: 'Configure the agent',
-    textPre:
-      'Agents are libraries that run inside of your application process.' +
-      ' APM services are created programmatically based on the `serviceName`.' +
-      ' This agent supports Express, Koa, hapi, and custom Node.js.',
-    commands: `// Add this to the VERY top of the first file loaded in your app
-var apm = require('elastic-apm-node').start({curlyOpen}
-  // Set required service name (allowed characters: a-z, A-Z, 0-9, -, _, and space)
-  serviceName: '',
-
-  // Use if APM Server requires a token
-  secretToken: '',
-
-  // Set custom APM Server URL (default: http://localhost:8200)
-  serverUrl: ''
-{curlyClose})`.split('\n'),
-    textPost: `See [the documentation]({config.docs.base_url}guide/en/apm/agent/nodejs/1.x/index.html) for advanced usage, including how to use with [Babel/ES Modules]({config.docs.base_url}guide/en/apm/agent/nodejs/1.x/advanced-setup.html#es-modules).`,
+    title: i18n.translate('kbn.server.tutorials.apm.nodeClient.configure.title', {
+      defaultMessage: 'Configure the agent',
+    }),
+    textPre: i18n.translate('kbn.server.tutorials.apm.nodeClient.configure.textPre', {
+      defaultMessage:
+        'Agents are libraries that run inside of your application process. \
+APM services are created programmatically based on the `serviceName`. \
+This agent supports Express, Koa, hapi, and custom Node.js.',
+    }),
+    commands: [
+      i18n.translate('kbn.server.tutorials.apm.nodeClient.configure.commands.mainComment', {
+        defaultMessage: '// Add this to the VERY top of the first file loaded in your app',
+      }),
+      `var apm = require('elastic-apm-node').start({curlyOpen}`,
+      i18n.translate('kbn.server.tutorials.apm.nodeClient.configure.commands.serviceNameComment', {
+        defaultMessage:
+          '  // Set required service name (allowed characters: a-z, A-Z, 0-9, -, _, and space)',
+      }),
+      `  serviceName: '',`,
+      ``,
+      i18n.translate('kbn.server.tutorials.apm.nodeClient.configure.commands.secretTokenComment', {
+        defaultMessage: '  // Use if APM Server requires a token',
+      }),
+      `  secretToken: '',`,
+      ``,
+      i18n.translate('kbn.server.tutorials.apm.nodeClient.configure.commands.serverUrlComment', {
+        defaultMessage: '  // Set custom APM Server URL (default: {url})',
+        values: {
+          url: 'http://localhost:8200',
+        },
+      }),
+      `  serverUrl: ''`,
+      `{curlyClose})`,
+    ],
   },
 ];
 
 export const DJANGO_CLIENT_INSTRUCTIONS = [
   {
-    title: 'Install the APM agent',
-    textPre: 'Install the APM agent for Python as a dependency.',
+    title: i18n.translate('kbn.server.tutorials.apm.djangoClient.install.title', {
+      defaultMessage: 'Install the APM agent',
+    }),
+    textPre: i18n.translate('kbn.server.tutorials.apm.djangoClient.install.textPre', {
+      defaultMessage: 'Install the APM agent for Python as a dependency.',
+    }),
     commands: ['$ pip install elastic-apm'],
   },
   {
-    title: 'Configure the agent',
-    textPre:
-      'Agents are libraries that run inside of your application process.' +
-      ' APM services are created programmatically based on the `SERVICE_NAME`.',
-    commands: `# Add the agent to the installed apps
-INSTALLED_APPS = (
-  'elasticapm.contrib.django',
-  # ...
-)
-
-ELASTIC_APM = {curlyOpen}
-  # Set required service name. Allowed characters:
-  # a-z, A-Z, 0-9, -, _, and space
-  'SERVICE_NAME': '',
-
-  # Use if APM Server requires a token
-  'SECRET_TOKEN': '',
-
-  # Set custom APM Server URL (default: http://localhost:8200)
-  'SERVER_URL': '',
-{curlyClose}
-
-# To send performance metrics, add our tracing middleware:
-MIDDLEWARE = (
-  'elasticapm.contrib.django.middleware.TracingMiddleware',
-  #...
-)`.split('\n'),
-    textPost:
-      'See the [documentation]' +
-      '({config.docs.base_url}guide/en/apm/agent/python/2.x/django-support.html) for advanced usage.',
+    title: i18n.translate('kbn.server.tutorials.apm.djangoClient.configure.title', {
+      defaultMessage: 'Configure the agent',
+    }),
+    textPre: i18n.translate('kbn.server.tutorials.apm.djangoClient.configure.textPre', {
+      defaultMessage:
+        'Agents are libraries that run inside of your application process. \
+APM services are created programmatically based on the `SERVICE_NAME`.',
+    }),
+    commands: [
+      i18n.translate(
+        'kbn.server.tutorials.apm.djangoClient.configure.commands.installedAppsComment',
+        {
+          defaultMessage: '# Add the agent to the installed apps',
+        }
+      ),
+      `INSTALLED_APPS = (`,
+      `  'elasticapm.contrib.django',`,
+      `  # ...`,
+      `)`,
+      ``,
+      `ELASTIC_APM = {curlyOpen}`,
+      i18n.translate(
+        'kbn.server.tutorials.apm.djangoClient.configure.commands.serviceNameComment',
+        {
+          defaultMessage:
+            '  # Set required service name. Allowed characters:\
+  # a-z, A-Z, 0-9, -, _, and space',
+        }
+      ),
+      `  'SERVICE_NAME': '',`,
+      ``,
+      i18n.translate(
+        'kbn.server.tutorials.apm.djangoClient.configure.commands.secretTokenComment',
+        {
+          defaultMessage: '  # Use if APM Server requires a token',
+        }
+      ),
+      `  'SECRET_TOKEN': '',`,
+      ``,
+      i18n.translate('kbn.server.tutorials.apm.djangoClient.configure.commands.serverUrlComment', {
+        defaultMessage: '  # Set custom APM Server URL (default: {url})',
+        values: {
+          url: 'http://localhost:8200',
+        },
+      }),
+      `  'SERVER_URL': '',`,
+      `{curlyClose}`,
+      ``,
+      i18n.translate(
+        'kbn.server.tutorials.apm.djangoClient.configure.commands.tracingMiddlewareComment',
+        {
+          defaultMessage: '# To send performance metrics, add our tracing middleware:',
+        }
+      ),
+      `MIDDLEWARE = (`,
+      `  'elasticapm.contrib.django.middleware.TracingMiddleware',`,
+      `  #...`,
+      `)`,
+    ],
+    textPost: i18n.translate('kbn.server.tutorials.apm.djangoClient.configure.textPost', {
+      defaultMessage: 'See the [documentation]({docsLink}) for advanced usage.',
+      values: {
+        docsLink: '{config.docs.base_url}guide/en/apm/agent/python/2.x/django-support.html',
+      },
+    }),
   },
 ];
 
 export const FLASK_CLIENT_INSTRUCTIONS = [
   {
-    title: 'Install the APM agent',
-    textPre: 'Install the APM agent for Python as a dependency.',
+    title: i18n.translate('kbn.server.tutorials.apm.flaskClient.install.title', {
+      defaultMessage: 'Install the APM agent',
+    }),
+    textPre: i18n.translate('kbn.server.tutorials.apm.flaskClient.install.textPre', {
+      defaultMessage: 'Install the APM agent for Python as a dependency.',
+    }),
     commands: ['$ pip install elastic-apm[flask]'],
   },
   {
-    title: 'Configure the agent',
-    textPre:
-      'Agents are libraries that run inside of your application process.' +
-      ' APM services are created programmatically based on the `SERVICE_NAME`.',
-    commands: `# initialize using environment variables
-from elasticapm.contrib.flask import ElasticAPM
+    title: i18n.translate('kbn.server.tutorials.apm.flaskClient.configure.title', {
+      defaultMessage: 'Configure the agent',
+    }),
+    textPre: i18n.translate('kbn.server.tutorials.apm.flaskClient.configure.textPre', {
+      defaultMessage:
+        'Agents are libraries that run inside of your application process. \
+APM services are created programmatically based on the {serviceName}.',
+      values: {
+        serviceName: '`SERVICE_NAME`',
+      },
+    }),
+    commands: [
+      i18n.translate('kbn.server.tutorials.apm.flaskClient.configure.commands.initializeComment', {
+        defaultMessage: '# initialize using environment variables',
+      }),
+      ...`from elasticapm.contrib.flask import ElasticAPM
 app = Flask(__name__)
 apm = ElasticAPM(app)
-
-# or configure to use ELASTIC_APM in your application's settings
-from elasticapm.contrib.flask import ElasticAPM
-app.config['ELASTIC_APM'] = {curlyOpen}
-  # Set required service name. Allowed characters:
-  # a-z, A-Z, 0-9, -, _, and space
-  'SERVICE_NAME': '',
-
-  # Use if APM Server requires a token
-  'SECRET_TOKEN': '',
-
-  # Set custom APM Server URL (default: http://localhost:8200)
-  'SERVER_URL': '',
+`.split('\n'),
+      i18n.translate('kbn.server.tutorials.apm.flaskClient.configure.commands.elasticApmComment', {
+        defaultMessage: '# or configure to use ELASTIC_APM in your application\'s settings',
+      }),
+      `from elasticapm.contrib.flask import ElasticAPM`,
+      `app.config['ELASTIC_APM'] = {curlyOpen}`,
+      i18n.translate('kbn.server.tutorials.apm.flaskClient.configure.commands.serviceNameComment', {
+        defaultMessage:
+          '  # Set required service name. Allowed characters:\
+  # a-z, A-Z, 0-9, -, _, and space',
+      }),
+      `  'SERVICE_NAME': '',`,
+      ``,
+      i18n.translate('kbn.server.tutorials.apm.flaskClient.configure.commands.secretTokenComment', {
+        defaultMessage: '  # Use if APM Server requires a token',
+      }),
+      `  'SECRET_TOKEN': '',`,
+      ``,
+      i18n.translate('kbn.server.tutorials.apm.flaskClient.configure.commands.serverUrlComment', {
+        defaultMessage: '  # Set custom APM Server URL (default: {url})',
+        values: {
+          url: 'http://localhost:8200',
+        },
+      }),
+      `  'SERVER_URL': '',
 {curlyClose}
 
 apm = ElasticAPM(app)`.split('\n'),
-    textPost:
-      'See the [documentation]' +
-      '({config.docs.base_url}guide/en/apm/agent/python/2.x/flask-support.html) for advanced usage.',
+    ],
+    textPost: i18n.translate('kbn.server.tutorials.apm.flaskClient.configure.textPost', {
+      defaultMessage: 'See the [documentation]({docsUrl}) for advanced usage.',
+      values: {
+        docsUrl: '{config.docs.base_url}guide/en/apm/agent/python/2.x/flask-support.html',
+      },
+    }),
   },
 ];
 
@@ -207,8 +299,7 @@ export const JS_CLIENT_INSTRUCTIONS = [
   },
   {
     title: 'Install the APM agent',
-    textPre:
-      'Install the APM agent for JavaScript as a dependency to your application:',
+    textPre: 'Install the APM agent for JavaScript as a dependency to your application:',
     commands: [`npm install elastic-apm-js-base --save`],
   },
   {
@@ -289,24 +380,26 @@ func main() {curlyOpen}
 export const JAVA_CLIENT_INSTRUCTIONS = [
   {
     title: 'Download the APM agent',
-    textPre: 'Download the agent jar from [Maven Central](http://search.maven.org/#search%7Cga%7C1%7Ca%3Aelastic-apm-agent). ' +
-    'Do **not** add the agent as a dependency to your application.'
+    textPre:
+      'Download the agent jar from [Maven Central](http://search.maven.org/#search%7Cga%7C1%7Ca%3Aelastic-apm-agent). ' +
+      'Do **not** add the agent as a dependency to your application.',
   },
   {
     title: 'Start your application with the javaagent flag',
-    textPre: 'Add the `-javaagent` flag and configure the agent with system properties.\n' +
-    '\n' +
-    ' * Set required service name (allowed characters: a-z, A-Z, 0-9, -, _, and space)\n' +
-    ' * Set custom APM Server URL (default: http://localhost:8200)\n' +
-    ' * Set the base package of your application',
+    textPre:
+      'Add the `-javaagent` flag and configure the agent with system properties.\n' +
+      '\n' +
+      ' * Set required service name (allowed characters: a-z, A-Z, 0-9, -, _, and space)\n' +
+      ' * Set custom APM Server URL (default: http://localhost:8200)\n' +
+      ' * Set the base package of your application',
     commands: `java -javaagent:/path/to/elastic-apm-agent-<version>.jar \\
      -Delastic.apm.service_name=my-application \\
-     -Delastic.apm.server_url=http://localhost:8200 \\ 
-     -Delastic.apm.application_packages=org.example \\ 
+     -Delastic.apm.server_url=http://localhost:8200 \\
+     -Delastic.apm.application_packages=org.example \\
      -jar my-application.jar`.split('\n'),
     textPost:
-    'See the [documentation]' +
-    '({config.docs.base_url}guide/en/apm/agent/java/current/index.html) for configuration options and advanced usage.\n\n' +
-    '**Warning: The Java agent is currently in Beta and not meant for production use.**',
+      'See the [documentation]' +
+      '({config.docs.base_url}guide/en/apm/agent/java/current/index.html) for configuration options and advanced usage.\n\n' +
+      '**Warning: The Java agent is currently in Beta and not meant for production use.**',
   },
 ];
