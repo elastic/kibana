@@ -92,29 +92,5 @@ exports[`PrivilegeCalloutWarning renders without crashing 1`] = `
       </EuiText>
     </div>
   </EuiCallOut>
-  <div
-    className="privilegeCallout--showSpacesLink"
-  >
-    <EuiSpacer
-      size="l"
-    >
-      <div
-        className="euiSpacer euiSpacer--l"
-      />
-    </EuiSpacer>
-    <EuiLink
-      color="primary"
-      onClick={[Function]}
-      type="button"
-    >
-      <button
-        className="euiLink euiLink--primary"
-        onClick={[Function]}
-        type="button"
-      >
-        See summary of all spaces privileges
-      </button>
-    </EuiLink>
-  </div>
 </PrivilegeCalloutWarning>
 `;

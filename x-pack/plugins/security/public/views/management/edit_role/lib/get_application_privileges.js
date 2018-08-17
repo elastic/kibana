@@ -8,21 +8,10 @@ export function getKibanaPrivilegesViewModel(applicationPrivileges, roleKibanaPr
   const viewModel = {
     availablePrivileges: applicationPrivileges.map(privilege => privilege.name),
     assignedPrivileges: {
-      global: [],
-      spaces: {
-
-      }
+      global: roleKibanaPrivileges.global || [],
+      space: roleKibanaPrivileges.space || {}
     }
   };
-
-  if (!roleKibanaPrivileges || Object.keys(roleKibanaPrivileges).length === 0) {
-    return viewModel;
-  }
-
-  viewModel.assignedPrivileges.global = roleKibanaPrivileges.global;
-  Object.keys(roleKibanaPrivileges.spaces).forEach(spaceId => {
-    viewModel.assignedPrivileges.spaces[spaceId] = roleKibanaPrivileges.spaces[spaceId];
-  });
 
   return viewModel;
 }

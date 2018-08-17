@@ -59,7 +59,7 @@ export class ImpactedSpacesFlyout extends Component {
     const { assignedPrivileges } = getKibanaPrivilegesViewModel(kibanaAppPrivileges, role.kibana);
 
     const allSpacePrivileges = spaces.reduce((acc, space) => {
-      const spacePrivilege = assignedPrivileges[space.id] ? assignedPrivileges[space.id][0] : basePrivilege;
+      const spacePrivilege = assignedPrivileges.space[space.id] ? assignedPrivileges.space[space.id][0] : basePrivilege;
 
       let displayName = spacePrivilege;
       if (displayName === NO_PRIVILEGE_VALUE) {

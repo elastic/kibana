@@ -23,7 +23,6 @@ import { isReservedRole } from '../../../../../../lib/role';
 import { copyRole } from '../../../lib/copy_role';
 import { getAvailablePrivileges } from '../../../lib/get_available_privileges';
 import { PrivilegeSpaceTable } from './privilege_space_table';
-import { ALL_RESOURCE } from '../../../../../../../common/constants';
 import { getKibanaPrivilegesViewModel } from '../../../lib/get_application_privileges';
 import { PrivilegeCalloutWarning } from './privilege_callout_warning';
 import { ImpactedSpacesFlyout } from './impacted_spaces_flyout';
@@ -46,9 +45,8 @@ export class SpaceAwarePrivilegeForm extends Component {
 
     const { assignedPrivileges } = getKibanaPrivilegesViewModel(kibanaAppPrivileges, role.kibana);
     const spacePrivileges = {
-      ...assignedPrivileges
+      ...assignedPrivileges.space
     };
-    delete spacePrivileges[ALL_RESOURCE];
 
     this.state = {
       spacePrivileges,
@@ -64,7 +62,7 @@ export class SpaceAwarePrivilegeForm extends Component {
 
     const { availablePrivileges, assignedPrivileges } = getKibanaPrivilegesViewModel(kibanaAppPrivileges, role.kibana);
 
-    const basePrivilege = assignedPrivileges[ALL_RESOURCE].length > 0 ? assignedPrivileges[ALL_RESOURCE][0] : NO_PRIVILEGE_VALUE;
+    const basePrivilege = assignedPrivileges.global.length > 0 ? assignedPrivileges.global[0] : NO_PRIVILEGE_VALUE;
 
     const description = (<p>Specifies the lowest permission level for all spaces, unless a custom privilege is specified.</p>);
 
@@ -120,7 +118,7 @@ export class SpaceAwarePrivilegeForm extends Component {
     const canAssignSpacePrivileges = basePrivilege !== 'all';
     const hasAssignedSpacePrivileges = Object.keys(this.state.spacePrivileges).length > 0;
 
-    const showAddPrivilegeButton = this.props.editable && availableSpaces.length > 0;
+    const showAddPrivilegeButton = canAssignSpacePrivileges && this.props.editable && availableSpaces.length > 0;
 
     return (
       <Fragment>
@@ -161,25 +159,24 @@ export class SpaceAwarePrivilegeForm extends Component {
             {hasAssignedSpacePrivileges && <EuiSpacer />}
 
             {this.getSpaceForms(basePrivilege)}
-
-            <EuiFlexGroup alignItems={'baseline'}>
-              {showAddPrivilegeButton && (
-                <EuiFlexItem grow={false}>
-                  <EuiButton size={'s'} iconType={'plusInCircle'} onClick={this.addSpacePrivilege}>Add space privilege</EuiButton>
-                </EuiFlexItem>
-              )}
-              <EuiFlexItem>
-                <ImpactedSpacesFlyout
-                  role={role}
-                  spaces={spaces}
-                  kibanaAppPrivileges={kibanaAppPrivileges}
-                  basePrivilege={basePrivilege}
-                />
-              </EuiFlexItem>
-            </EuiFlexGroup>
-
           </Fragment>
         )}
+
+        <EuiFlexGroup alignItems={'baseline'}>
+          {showAddPrivilegeButton && (
+            <EuiFlexItem grow={false}>
+              <EuiButton size={'s'} iconType={'plusInCircle'} onClick={this.addSpacePrivilege}>Add space privilege</EuiButton>
+            </EuiFlexItem>
+          )}
+          <EuiFlexItem>
+            <ImpactedSpacesFlyout
+              role={role}
+              spaces={spaces}
+              kibanaAppPrivileges={kibanaAppPrivileges}
+              basePrivilege={basePrivilege}
+            />
+          </EuiFlexItem>
+        </EuiFlexGroup>
       </Fragment>
     );
   }
@@ -267,7 +264,7 @@ export class SpaceAwarePrivilegeForm extends Component {
     }
 
     selectedSpaceIds.forEach(spaceId => {
-      role.kibana[spaceId] = [selectedPrivilege];
+      role.kibana.space[spaceId] = [selectedPrivilege];
     });
 
     this.props.onChange(role);
@@ -283,7 +280,7 @@ export class SpaceAwarePrivilegeForm extends Component {
 
     const role = copyRole(this.props.role);
 
-    removedPrivilege.spaces.forEach(spaceId => {
+    removedPrivilege.space.forEach(spaceId => {
       delete role.kibana[spaceId];
     });
 
@@ -293,7 +290,7 @@ export class SpaceAwarePrivilegeForm extends Component {
   onExistingSpacePrivilegesChange = (assignedPrivileges) => {
     const role = copyRole(this.props.role);
 
-    role.kibana = assignedPrivileges;
+    role.kibana.space = assignedPrivileges;
 
     this.setState({
       spacePrivileges: assignedPrivileges
@@ -307,24 +304,11 @@ export class SpaceAwarePrivilegeForm extends Component {
     const role = copyRole(this.props.role);
 
     // Remove base privilege value
-    delete role.kibana[ALL_RESOURCE];
+    delete role.kibana.global;
 
     if (privilege !== NO_PRIVILEGE_VALUE) {
-      role.kibana[ALL_RESOURCE] = [privilege];
+      role.kibana.global = [privilege];
     }
-
-    this.props.onChange(role);
-  }
-
-  onRemoveSpacePrivilege = (spaceId) => {
-    const role = copyRole(this.props.role);
-
-    role.kibana.forEach(({ resources }) => {
-      const spacePrivilegeIndex = resources.indexOf(spaceId);
-      if (spacePrivilegeIndex >= 0) {
-        resources.splice(spacePrivilegeIndex, 1);
-      }
-    });
 
     this.props.onChange(role);
   }
