@@ -7,7 +7,7 @@
 import { createSelector } from 'reselect';
 import { getLayerList, getMapConstants } from "./map_selectors";
 import { LAYER_TYPE } from "../shared/layers/layer";
-import { FEATURE_PROJECTION, tempVectorStyle, getOlLayerStyle }
+import { FEATURE_PROJECTION, getOlLayerStyle }
   from './ol_layer_defaults';
 import * as ol from 'openlayers';
 import _ from 'lodash';
@@ -35,8 +35,7 @@ const convertVectorLayersToOl = (() => {
       })
     });
     vectorLayer.setVisible(visible);
-    temporary && vectorLayer.setStyle(tempVectorStyle)
-      || vectorLayer.setStyle(getOlLayerStyle(style));
+    vectorLayer.setStyle(getOlLayerStyle(style, temporary));
     return vectorLayer;
   };
 })();
@@ -75,6 +74,27 @@ function updateMapLayerOrder(mapLayers, oldLayerOrder, newLayerOrder) {
   });
 }
 
+function addLayers(map, newLayer, currentLayersIds) {
+  if (!currentLayersIds.find(layerId => layerId === newLayer.get('id'))) {
+    map.addLayer(newLayer);
+  }
+}
+
+function removeLayers(map, existingMapLayers, updatedLayersIds) {
+  const layersToRemove = [];
+  existingMapLayers.forEach((mapLayer, idx) => {
+    if (!updatedLayersIds.find(id => id === mapLayer.get('id'))) {
+      layersToRemove.push(idx);
+    }
+  });
+  layersToRemove.forEach(layerIdx => existingMapLayers.removeAt(layerIdx));
+}
+
+function updateStyle(layer, { style, temporary }) {
+  const appliedStyle = getOlLayerStyle(style, temporary);
+  layer.setStyle && layer.setStyle(appliedStyle);
+}
+
 // Selectors
 const getOlMap = createSelector(
   getMapConstants,
@@ -110,25 +130,24 @@ export const getOlMapAndLayers = createSelector(
   getLayersWithOl,
   (olMap, layersWithOl) => {
     const layersIds = getLayersIds(olMap.getLayers());
-    layersWithOl.forEach(({ id, olLayer, visible, style }) => {
-      if (!layersIds.find(layerId => layerId === id)) {
-        olMap.addLayer(olLayer);
-      }
-      // Individual layer-specific updates
+    // Adds & updates
+    layersWithOl.forEach(({ olLayer, visible, ...layerDescriptor }) => {
+      addLayers(olMap, olLayer, layersIds);
       olLayer.setVisible(visible);
-      const appliedStyle = getOlLayerStyle(style)
-        || tempVectorStyle;
-      olLayer.setStyle && olLayer.setStyle(appliedStyle);
+      updateStyle(olLayer, layerDescriptor);
     });
-    // Layer order updates
-    const oldLayerIdsOrder = getLayersIds(olMap.getLayers());
     const newLayerIdsOrder = layersWithOl.map(({ id }) => id);
+    // Deletes
+    removeLayers(olMap, olMap.getLayers(), newLayerIdsOrder);
+    // Update layers order
+    const oldLayerIdsOrder = getLayersIds(olMap.getLayers());
     if (oldLayerIdsOrder !== newLayerIdsOrder) {
       updateMapLayerOrder(olMap.getLayers(), oldLayerIdsOrder, newLayerIdsOrder);
     }
     return olMap;
   }
 );
+
 
 export const getOlLayersBySource = createSelector(
   getLayersWithOl,

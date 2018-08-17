@@ -9,39 +9,24 @@ import { LAYER_TYPE } from '../shared/layers/layer';
 
 export const FEATURE_PROJECTION = 'EPSG:3857';
 
-export const tempVectorStyle = new ol.style.Style({
-  fill: new ol.style.Fill({
-    color: [60, 25, 215, .02]
-  }),
-  stroke: new ol.style.Stroke({
-    color: [60, 25, 225, .4],
-    width: 1
-  })
-});
+const defaultColor = '#e6194b';
+const tempFillOpacity = '05';
+const fillOpacity = '15';
+const tempStrokeOpacity = '77';
+const strokeOpacity = 'FF';
 
-export const getOlLayerStyle = ({ color }) => {
+export const getOlLayerStyle = ({ color = defaultColor }, temp = false) => {
   return new ol.style.Style({
     fill: new ol.style.Fill({
       // TODO: Make alpha channel adjustable
-      color: `${color}15`
+      color: `${color}${temp ? tempFillOpacity : fillOpacity}`,
     }),
     stroke: new ol.style.Stroke({
-      color,
-      width: 2
+      color: `${color}${temp ? tempStrokeOpacity : strokeOpacity}`,
+      width: temp ? 1 : 2
     })
   });
 };
-
-
-export const defaultVectorStyle = new ol.style.Style({
-  fill: new ol.style.Fill({
-    color: [60, 25, 215, .05]
-  }),
-  stroke: new ol.style.Stroke({
-    color: [60, 25, 225, .8],
-    width: 2
-  })
-});
 
 export const olLayerCapabilities = (function () {
   const defaultVectorCapabilities = {
