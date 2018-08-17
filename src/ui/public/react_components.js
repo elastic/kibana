@@ -49,4 +49,4 @@ app.directive('iconTip', reactDirective => reactDirective(EuiIconTip, ['content'
 
 app.directive('callOut', reactDirective => reactDirective(EuiCallOut, ['title', 'color', 'size', 'iconType', 'children']));
 
-app.directive('newKbnTimepicker', reactDirective => reactDirective(Timepicker, ['from', 'to']));
+app.directive('newKbnTimepicker', reactDirective => reactDirective(Timepicker, ['from', 'to', 'setTime']));

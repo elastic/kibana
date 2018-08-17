@@ -25,21 +25,65 @@ import { QuickSelectPopover } from './quick_select_popover';
 import {
   EuiText,
   EuiFormControlLayout,
+  EuiButtonIcon,
 } from '@elastic/eui';
 
 export class Timepicker extends Component {
 
+  constructor(props) {
+    super(props);
+
+    this.state = {
+      from: this.props.from,
+      to: this.props.to,
+    };
+  }
+
+  static getDerivedStateFromProps = (nextProps) => {
+    return {
+      from: nextProps.from,
+      to: nextProps.to,
+    };
+  }
+
+  setTime = ({ from, to }) => {
+    this.setState({
+      from,
+      to,
+    });
+  }
+
+  applyTimeChanges = () => {
+    this.props.setTime(this.state.from, this.state.to);
+  }
+
   render() {
+    let applyButton;
+    if (this.state.from !== this.props.from || this.state.to !== this.props.to) {
+      applyButton = (
+        <EuiButtonIcon
+          size="s"
+          onClick={this.applyTimeChanges}
+          iconType="play"
+          aria-label="Apply time changes"
+        />
+      );
+    }
     return (
       <EuiFormControlLayout
-        prepend={(<QuickSelectPopover/>)}
+        prepend={(
+          <QuickSelectPopover
+            setTime={this.setTime}
+          />
+        )}
+        append={applyButton}
       >
         <div
           className="euiDatePickerRange"
         >
-          {this.props.from}
+          {this.state.from}
           <EuiText className="euiDatePickerRange__delimeter" size="s" color="subdued">→</EuiText>
-          {this.props.to}
+          {this.state.to}
         </div>
       </EuiFormControlLayout>
     );
@@ -54,4 +98,5 @@ const timeType = PropTypes.oneOfType([
 Timepicker.propTypes = {
   from: timeType,
   to: timeType,
-}
+  setTime: PropTypes.func.isRequired,
+};

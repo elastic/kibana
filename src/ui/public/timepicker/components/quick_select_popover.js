@@ -20,6 +20,8 @@
 import PropTypes from 'prop-types';
 import React, { Component, Fragment } from 'react';
 
+import { timeUnits } from '../time_units';
+
 import {
   EuiButtonEmpty,
   EuiIcon,
@@ -35,12 +37,27 @@ import {
   EuiButton,
   EuiText,
   EuiHorizontalRule,
+  EuiLink,
 } from '@elastic/eui';
+
+const LAST = 'last';
+const NEXT = 'next';
+
+const timeTenseOptions = [
+  { value: LAST, text: 'Last' },
+  { value: NEXT, text: 'Next' },
+];
+const timeUnitsOptions = Object.keys(timeUnits).map(key => {
+  return { value: key, text: `${timeUnits[key]}s` };
+});
 
 export class QuickSelectPopover extends Component {
 
   state = {
-    isOpen: false
+    isOpen: false,
+    timeTense: LAST,
+    timeValue: 15,
+    timeUnits: 'm',
   }
 
   closePopover = () => {
@@ -53,22 +70,48 @@ export class QuickSelectPopover extends Component {
     }));
   }
 
+  onTimeTenseChange = (evt) => {
+    this.setState({
+      timeTense: evt.target.value,
+    });
+  }
+
+  onTimeValueChange = (evt) => {
+    const sanitizedValue = parseInt(evt.target.value, 10);
+    this.setState({
+      timeValue: isNaN(sanitizedValue) ? '' : sanitizedValue,
+    });
+  }
+
+  onTimeUnitsChange = (evt) => {
+    this.setState({
+      timeUnits: evt.target.value,
+    });
+  }
+
+  setQuickTime = () => {
+    const {
+      timeTense,
+      timeValue,
+      timeUnits,
+    } = this.state;
+
+    if (timeTense === NEXT) {
+      this.props.setTime({
+        from: 'now',
+        to: `now+${timeValue}${timeUnits}`
+      });
+    } else {
+      this.props.setTime({
+        from: `now-${timeValue}${timeUnits}`,
+        to: 'now'
+      });
+    }
+
+    this.closePopover();
+  }
+
   renderQuickSelect = () => {
-    const firstOptions = [
-      { value: 'last', text: 'Last' },
-      { value: 'previous', text: 'Previous' },
-    ];
-
-    const lastOptions = [
-      { value: 'seconds', text: 'seconds' },
-      { value: 'minutes', text: 'minutes' },
-      { value: 'hours', text: 'hours' },
-      { value: 'days', text: 'days' },
-      { value: 'weeks', text: 'weeks' },
-      { value: 'months', text: 'months' },
-      { value: 'years', text: 'years' },
-    ];
-
     return (
       <Fragment>
         <EuiTitle size="xxxs"><span>Quick select</span></EuiTitle>
@@ -76,22 +119,42 @@ export class QuickSelectPopover extends Component {
         <EuiFlexGroup gutterSize="s" responsive={false}>
           <EuiFlexItem>
             <EuiFormRow>
-              <EuiSelect options={firstOptions} />
+              <EuiSelect
+                aria-label="Quick time tense"
+                value={this.state.timeTense}
+                options={timeTenseOptions}
+                onChange={this.onTimeTenseChange}
+              />
             </EuiFormRow>
           </EuiFlexItem>
           <EuiFlexItem>
             <EuiFormRow>
-              <EuiFieldNumber aria-label="Count of" defaultValue="256" />
+              <EuiFieldNumber
+                aria-label="Quick time value"
+                value={this.state.timeValue}
+                onChange={this.onTimeValueChange}
+              />
             </EuiFormRow>
           </EuiFlexItem>
           <EuiFlexItem>
             <EuiFormRow>
-              <EuiSelect options={lastOptions} />
+              <EuiSelect
+                aria-label="Quick time units"
+                value={this.state.timeUnits}
+                options={timeUnitsOptions}
+                onChange={this.onTimeUnitsChange}
+              />
             </EuiFormRow>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiFormRow>
-              <EuiButton onClick={this.closePopover} style={{ minWidth: 0 }}>Apply</EuiButton>
+              <EuiButton
+                onClick={this.setQuickTime}
+                style={{ minWidth: 0 }}
+                disabled={this.state.timeValue === ''}
+              >
+                Apply
+              </EuiButton>
             </EuiFormRow>
           </EuiFlexItem>
         </EuiFlexGroup>
@@ -182,5 +245,5 @@ export class QuickSelectPopover extends Component {
 }
 
 QuickSelectPopover.propTypes = {
-
-}
+  setTime: PropTypes.func.isRequired,
+};
