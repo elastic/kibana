@@ -191,19 +191,18 @@ const initialSelectedShapeState = {
   depthIndex: 0,
   down: false,
   metaHeld: false,
-  metaChanged: false,
 };
 
 const singleSelect = (prev, hoveredShapes, metaHeld, down, uid) => {
   // cycle from top ie. from zero after the cursor position changed ie. !sameLocation
   const metaChanged = metaHeld !== prev.metaHeld;
   const depthIndex =
-    config.depthSelect && !metaChanged && metaHeld
+    config.depthSelect && metaHeld
       ? (prev.depthIndex + (down && !prev.down ? 1 : 0)) % hoveredShapes.length
       : 0;
   if (!down) {
-    // take action on mouse down only
-    return { ...prev, down, uid, metaHeld, metaChanged };
+    // take action on mouse down only, ie. bail otherwise
+    return { ...prev, down, uid, metaHeld };
   }
   return hoveredShapes.length
     ? {

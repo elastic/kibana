@@ -4,7 +4,7 @@
 
 const alignmentGuideName = 'alignmentGuide';
 const atopZ = 1000;
-const depthSelect = false;
+const depthSelect = true;
 const devColor = 'magenta';
 const guideDistance = 3;
 const hoverAnnotationName = 'hoverAnnotation';
