@@ -25,7 +25,6 @@ interface TagsPageProps {
 
 interface TagsPageState {
   beats: any;
-  tableRef: any;
   tags: ClientSideBeatTag[];
 }
 
@@ -41,13 +40,13 @@ export class TagsPage extends React.PureComponent<TagsPageProps, TagsPageState> 
       Add Tag
     </EuiButton>
   );
+  private tableRef = React.createRef<Table>();
 
   constructor(props: TagsPageProps) {
     super(props);
 
     this.state = {
       beats: [],
-      tableRef: React.createRef(),
       tags: [],
     };
 
@@ -61,17 +60,31 @@ export class TagsPage extends React.PureComponent<TagsPageProps, TagsPageState> 
         assignmentOptions={this.state.beats}
         assignmentTitle={'Assign Beats'}
         items={this.state.tags}
-        ref={this.state.tableRef}
+        ref={this.tableRef}
         showAssignmentOptions={true}
         type={TagsTableType}
       />
     );
   }
 
-  private handleTagsAction = (action: string, payload: any) => {
+  private handleTagsAction = async (action: string, payload: any) => {
     switch (action) {
       case 'loadAssignmentOptions':
         this.loadBeats();
+        break;
+      case 'delete':
+        const tags = this.getSelectedTags().map(tag => tag.id);
+        const success = await this.props.libs.tags.delete(tags);
+        if (!success) {
+          alert(
+            'Some of these tags might be assigned to beats. Please ensure tags being removed are not activly assigned'
+          );
+        } else {
+          this.loadTags();
+          if (this.tableRef && this.tableRef.current) {
+            this.tableRef.current.resetSelection();
+          }
+        }
         break;
     }
 
@@ -155,6 +168,6 @@ export class TagsPage extends React.PureComponent<TagsPageProps, TagsPageState> 
   };
 
   private getSelectedTags = () => {
-    return this.state.tableRef.current.state.selection;
+    return this.tableRef.current ? this.tableRef.current.state.selection : [];
   };
 }
