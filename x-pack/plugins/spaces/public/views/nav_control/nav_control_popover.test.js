@@ -8,7 +8,7 @@ import React from 'react';
 import { shallow, mount } from 'enzyme';
 import { NavControlPopover } from './nav_control_popover';
 import { SpacesManager } from '../../lib/spaces_manager';
-import { SpaceAvatar } from '../components/space_avatar';
+import { SpaceAvatar } from '../../components';
 
 const mockChrome = {
   addBasePath: jest.fn((a) => a)

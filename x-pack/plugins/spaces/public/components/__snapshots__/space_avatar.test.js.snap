@@ -2,6 +2,7 @@
 
 exports[`renders without crashing 1`] = `
 <EuiAvatar
+  color="#BFA180"
   initials=""
   initialsLength={2}
   name=""

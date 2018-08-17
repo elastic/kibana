@@ -14,7 +14,7 @@ import {
   EuiButtonIcon,
 } from '@elastic/eui';
 import { PrivilegeSelector } from './privilege_selector';
-import { SpaceAvatar } from '../../../../../../../../spaces/public/views/components/space_avatar';
+import { SpaceAvatar } from '../../../../../../../../spaces/public/components';
 import { isReservedRole } from '../../../../../../lib/role';
 
 export class PrivilegeSpaceTable extends Component {

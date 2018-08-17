@@ -12,7 +12,7 @@ import {
 import './space_card.less';
 import {
   SpaceAvatar
-} from './space_avatar';
+} from '../../components';
 
 export const SpaceCard = (props) => {
   const {

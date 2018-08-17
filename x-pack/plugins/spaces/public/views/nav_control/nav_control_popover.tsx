@@ -7,8 +7,8 @@
 import { EuiAvatar, EuiPopover } from '@elastic/eui';
 import React, { Component } from 'react';
 import { Space } from '../../../common/model/space';
+import { SpaceAvatar } from '../../components';
 import { SpacesManager } from '../../lib/spaces_manager';
-import { SpaceAvatar } from '../components';
 import { SpacesDescription } from './components/spaces_description';
 import { SpacesMenu } from './components/spaces_menu';
 

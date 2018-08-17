@@ -6,8 +6,8 @@
 
 import { EuiAvatar } from '@elastic/eui';
 import React from 'react';
-import { getSpaceColor, getSpaceInitials, MAX_SPACE_INITIALS } from '../../../common';
-import { Space } from '../../../common/model/space';
+import { getSpaceColor, getSpaceInitials, MAX_SPACE_INITIALS } from '../../common';
+import { Space } from '../../common/model/space';
 
 interface Props {
   space: Space;
