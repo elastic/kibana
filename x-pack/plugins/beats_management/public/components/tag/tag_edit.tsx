@@ -16,7 +16,7 @@ import {
   // @ts-ignore
   EuiForm,
   EuiFormRow,
-  EuiPanel,
+  EuiHorizontalRule,
   EuiSpacer,
   EuiText,
   EuiTitle,
@@ -55,74 +55,74 @@ export class TagEdit extends React.PureComponent<TagEditProps, TagEditState> {
     const { tag, attachedBeats } = this.props;
     return (
       <div>
-        <EuiPanel>
-          <EuiFlexGroup>
-            <EuiFlexItem>
-              <EuiTitle size="xs">
-                <h3>Define this tag</h3>
-              </EuiTitle>
-              <EuiText color="subdued">
-                <p>
-                  Tags will apply a set configuration to a group of beats.
-                  <br />
-                  The tag type defines the options available.
-                </p>
-              </EuiText>
-              <div>
-                <EuiBadge color={tag.color ? tag.color : '#FF0'}>
-                  {tag.id ? tag.id : 'Tag name'}
-                </EuiBadge>
-              </div>
-            </EuiFlexItem>
-            <EuiFlexItem>
-              <EuiForm>
-                <EuiFormRow
-                  label="Name"
+        <EuiFlexGroup>
+          <EuiFlexItem>
+            <EuiTitle size="xs">
+              <h3>Define this tag</h3>
+            </EuiTitle>
+            <EuiText color="subdued">
+              <p>
+                Tags will apply a set configuration to a group of beats.
+                <br />
+                The tag type defines the options available.
+              </p>
+            </EuiText>
+            <div>
+              <EuiBadge color={tag.color ? tag.color : '#FF0'}>
+                {tag.id ? tag.id : 'Tag name'}
+              </EuiBadge>
+            </div>
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <EuiForm>
+              <EuiFormRow
+                label="Name"
+                isInvalid={!!this.getNameError(tag.id)}
+                error={this.getNameError(tag.id) || undefined}
+              >
+                <EuiFieldText
+                  name="name"
                   isInvalid={!!this.getNameError(tag.id)}
-                  error={this.getNameError(tag.id) || undefined}
-                >
-                  <EuiFieldText
-                    name="name"
-                    isInvalid={!!this.getNameError(tag.id)}
-                    onChange={this.updateTag('id')}
-                    value={tag.id}
-                    placeholder="Tag name (required)"
-                  />
-                </EuiFormRow>
-                <EuiFormRow label="Color">
-                  <EuiColorPicker color={tag.color} onChange={this.updateTag('color')} />
-                </EuiFormRow>
-              </EuiForm>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiPanel>
+                  onChange={this.updateTag('id')}
+                  value={tag.id}
+                  placeholder="Tag name (required)"
+                />
+              </EuiFormRow>
+              <EuiFormRow label="Color">
+                <EuiColorPicker color={tag.color} onChange={this.updateTag('color')} />
+              </EuiFormRow>
+            </EuiForm>
+          </EuiFlexItem>
+        </EuiFlexGroup>
         <EuiSpacer />
-        <EuiPanel>
-          <EuiFlexGroup
-            alignItems={tag.configurations && tag.configurations.length ? 'stretch' : 'center'}
-          >
-            <EuiFlexItem>
-              <EuiTitle size="xs">
-                <h3>Configurations</h3>
-              </EuiTitle>
-              <EuiText color="subdued">
-                <p>
-                  You can have multiple configurations applied to an individual tag. These
-                  configurations can repeat or mix types as necessary. For example, you may utilize
-                  three metricbeat configurations alongside one input and filebeat configuration.
-                </p>
-              </EuiText>
-            </EuiFlexItem>
-            <EuiFlexItem>
-              <div>
-                <EuiButton onClick={this.openConfigFlyout}>Add a new configuration</EuiButton>
-              </div>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiPanel>
+        <EuiHorizontalRule />
+
+        <EuiFlexGroup
+          alignItems={tag.configurations && tag.configurations.length ? 'stretch' : 'center'}
+        >
+          <EuiFlexItem>
+            <EuiTitle size="xs">
+              <h3>Configurations</h3>
+            </EuiTitle>
+            <EuiText color="subdued">
+              <p>
+                You can have multiple configurations applied to an individual tag. These
+                configurations can repeat or mix types as necessary. For example, you may utilize
+                three metricbeat configurations alongside one input and filebeat configuration.
+              </p>
+            </EuiText>
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <div>
+              <EuiButton onClick={this.openConfigFlyout}>Add a new configuration</EuiButton>
+            </div>
+          </EuiFlexItem>
+        </EuiFlexGroup>
         <EuiSpacer />
         {attachedBeats && (
-          <EuiPanel paddingSize="m">
+          <div>
+            <EuiHorizontalRule />
+
             <EuiTitle size="xs">
               <h3>Attached Beats</h3>
             </EuiTitle>
@@ -137,7 +137,7 @@ export class TagEdit extends React.PureComponent<TagEditProps, TagEditState> {
               showAssignmentOptions={false}
               type={BeatsTableType}
             />
-          </EuiPanel>
+          </div>
         )}
 
         {this.state.showFlyout && (
