@@ -927,6 +927,10 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
       return await find.byCssSelector('.visualization');
     }
 
+    async waitForVisualizationSavedToastGone() {
+      return await testSubjects.waitForDeleted('saveVisualizationSuccess');
+    }
+
     async getZoomSelectors(zoomSelector) {
       return await find.allByCssSelector(zoomSelector);
     }
