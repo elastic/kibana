@@ -25,7 +25,7 @@ import {
 } from '@elastic/eui';
 
 import { DeleteSpacesButton } from '../components';
-import { SpaceAvatar } from '../../components';
+import { SpaceAvatar } from '../../../components';
 
 import { Notifier, toastNotifications } from 'ui/notify';
 import { SpaceIdentifier } from './space_identifier';
