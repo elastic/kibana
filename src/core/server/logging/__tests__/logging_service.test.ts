@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { BehaviorSubject } from '../../../lib/kbn_observable';
+import { BehaviorSubject } from 'rxjs';
 import { MutableLoggerFactory } from '../logger_factory';
 import { LoggingConfig } from '../logging_config';
 import { LoggingService } from '../logging_service';
@@ -43,7 +43,7 @@ let service: LoggingService;
 let updateConfigMock: jest.Mock<(config: LoggingConfig) => void>;
 
 beforeEach(() => {
-  factory = new MutableLoggerFactory({} as any);
+  factory = new MutableLoggerFactory();
   updateConfigMock = jest.spyOn(factory, 'updateConfig').mockImplementation(() => {
     // noop
   });

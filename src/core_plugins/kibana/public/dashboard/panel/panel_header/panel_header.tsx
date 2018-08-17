@@ -39,8 +39,8 @@ export function PanelHeader({
 }: PanelHeaderProps) {
   if (isViewOnlyMode && (!title || hidePanelTitles)) {
     return (
-      <div className="panel-heading-floater">
-        <div className="kuiMicroButtonGroup">
+      <div className="dshPanel__header--floater">
+        <div className="dshPanel__headerButtonGroup">
           <PanelOptionsMenuContainer panelId={panelId} embeddable={embeddable} />
         </div>
       </div>
@@ -49,19 +49,19 @@ export function PanelHeader({
 
   return (
     <div
-      className="panel-heading"
+      className="dshPanel__header"
       data-test-subj={`dashboardPanelHeading-${(title || '').replace(/\s/g, '')}`}
     >
       <span
         data-test-subj="dashboardPanelTitle"
-        className="panel-title"
+        className="dshPanel__title"
         title={title}
         aria-label={`Dashboard panel: ${title}`}
       >
         {hidePanelTitles ? '' : title}
       </span>
 
-      <div className="kuiMicroButtonGroup">
+      <div className="dshPanel__headerButtonGroup">
         <PanelOptionsMenuContainer panelId={panelId} embeddable={embeddable} />
       </div>
     </div>

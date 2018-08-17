@@ -36,12 +36,13 @@ import * as Plugins from './plugins';
 import { indexPatternsMixin } from './index_patterns';
 import { savedObjectsMixin } from './saved_objects';
 import { sampleDataMixin } from './sample_data';
-import { kibanaIndexMappingsMixin } from './saved_objects/mappings';
+import { kibanaIndexMappingsMixin } from './mappings';
 import { urlShorteningMixin } from './url_shortening';
 import { serverExtensionsMixin } from './server_extensions';
 import { uiMixin } from '../ui';
 import { sassMixin } from './sass';
 import { injectIntoKbnServer as newPlatformMixin } from '../core';
+import { i18nMixin } from './i18n';
 
 const rootDir = fromRoot('.');
 
@@ -83,6 +84,7 @@ export default class KbnServer {
 
       // setup this.uiExports and this.uiBundles
       uiMixin,
+      i18nMixin,
       indexPatternsMixin,
 
       // setup server.getKibanaIndexMappingsDsl()
