@@ -226,7 +226,7 @@
     "@types/hapi-latest": "npm:@types/hapi@17.0.12",
     "@types/has-ansi": "^3.0.0",
     "@types/jest": "^22.2.3",
-    "@types/joi": "^10.4.4",
+    "@types/joi": "^13.4.2",
     "@types/jquery": "3.3.1",
     "@types/js-yaml": "^3.11.1",
     "@types/listr": "^0.13.0",

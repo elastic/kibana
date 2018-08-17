@@ -402,9 +402,9 @@
   version "13.3.0"
   resolved "https://registry.yarnpkg.com/@types/joi/-/joi-13.3.0.tgz#bdfa2e49d8d258ba79f23304228d0c4d5cfc848c"
 
-"@types/joi@^10.4.4":
-  version "10.6.2"
-  resolved "https://registry.yarnpkg.com/@types/joi/-/joi-10.6.2.tgz#0e7d632fe918c337784e87b16c7cc0098876179a"
+"@types/joi@^13.4.2":
+  version "13.4.2"
+  resolved "https://registry.yarnpkg.com/@types/joi/-/joi-13.4.2.tgz#d91b07bb52393bfdc38901f313f6bc96ce40f623"
 
 "@types/jquery@3.3.1":
   version "3.3.1"
