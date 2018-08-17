@@ -90,6 +90,7 @@ export function VislibLibChartTitleProvider(Private) {
           self.validateWidthandHeight(width, height);
 
           div.append('svg')
+            .attr('focusable', 'false')
             .attr('width', width)
             .attr('height', height)
             .append('text')
