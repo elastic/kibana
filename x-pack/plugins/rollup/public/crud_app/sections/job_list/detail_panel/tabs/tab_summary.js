@@ -12,6 +12,7 @@ import {
   EuiDescriptionListDescription,
   EuiTitle,
   EuiSpacer,
+  EuiIconTip,
 } from '@elastic/eui';
 
 import { JobStatus } from '../../job_status';
@@ -66,7 +67,10 @@ export const TabSummary = ({
         </EuiDescriptionListDescription>
 
         <EuiDescriptionListTitle>
-          <strong>Cron</strong>
+          <strong>Cron</strong>{' '}
+          <EuiIconTip
+            content="Interval at which data is rolled up"
+          />
         </EuiDescriptionListTitle>
 
         <EuiDescriptionListDescription>
@@ -108,7 +112,10 @@ export const TabSummary = ({
         </EuiDescriptionListDescription>
 
         <EuiDescriptionListTitle>
-          <strong>Interval</strong>
+          <strong>Interval</strong>{' '}
+          <EuiIconTip
+            content="Time bucket interval generated at roll-up time"
+          />
         </EuiDescriptionListTitle>
 
         <EuiDescriptionListDescription>
