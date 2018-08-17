@@ -36,7 +36,9 @@ export const esPersistMiddleware = ({ getState }) => next => action => {
           title: `Couldn't save your changes to Elasticsearch`,
         });
       }
-      return notify.error(err.response);
+      return notify.error(err.response, {
+        title: `Couldn't update workpad`,
+      });
     });
   }
 };

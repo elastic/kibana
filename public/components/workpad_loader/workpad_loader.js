@@ -56,21 +56,24 @@ export class WorkpadLoader extends React.PureComponent {
   }
 
   // create new empty workpad
-  createWorkpad = () => {
+  createWorkpad = async () => {
     this.setState({ createPending: true });
-    this.props.createWorkpad();
+    await this.props.createWorkpad();
+    this.setState({ createPending: false });
   };
 
   // create new workpad from uploaded JSON
-  uploadWorkpad = workpad => {
+  uploadWorkpad = async workpad => {
     this.setState({ createPending: true });
-    this.props.createWorkpad(workpad);
+    await this.props.createWorkpad(workpad);
+    this.setState({ createPending: false });
   };
 
   // clone existing workpad
-  cloneWorkpad = workpad => {
+  cloneWorkpad = async workpad => {
     this.setState({ createPending: true });
-    this.props.cloneWorkpad(workpad.id);
+    await this.props.cloneWorkpad(workpad.id);
+    this.setState({ createPending: false });
   };
 
   // Workpad remove methods
@@ -79,8 +82,18 @@ export class WorkpadLoader extends React.PureComponent {
   closeRemoveConfirm = () => this.setState({ deletingWorkpad: false });
 
   removeWorkpads = () => {
-    this.props.removeWorkpads(this.state.selectedWorkpads.map(({ id }) => id));
-    this.setState({ deletingWorkpad: false, selectedWorkpads: [] });
+    const { selectedWorkpads } = this.state;
+    this.props.removeWorkpads(selectedWorkpads.map(({ id }) => id)).then(remainingIds => {
+      const remainingWorkpads =
+        remainingIds.length > 0
+          ? selectedWorkpads.filter(({ id }) => remainingIds.includes(id))
+          : [];
+
+      this.setState({
+        deletingWorkpad: false,
+        selectedWorkpads: remainingWorkpads,
+      });
+    });
   };
 
   // downloads selected workpads as JSON files

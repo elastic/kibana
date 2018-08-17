@@ -3,6 +3,7 @@ import { connect } from 'react-redux';
 import { compose, withState, getContext, withHandlers } from 'recompose';
 import fileSaver from 'file-saver';
 import * as workpadService from '../../lib/workpad_service';
+import { notify } from '../../lib/notify';
 import { getWorkpad } from '../../state/selectors/workpad';
 import { getId } from '../../lib/get_id';
 import { WorkpadLoader as Component } from './workpad_loader';
@@ -22,8 +23,12 @@ export const WorkpadLoader = compose(
     createWorkpad: props => async workpad => {
       // workpad data uploaded, create and load it
       if (workpad != null) {
-        await workpadService.create(workpad);
-        props.router.navigateTo('loadWorkpad', { id: workpad.id, page: 1 });
+        try {
+          await workpadService.create(workpad);
+          props.router.navigateTo('loadWorkpad', { id: workpad.id, page: 1 });
+        } catch (err) {
+          notify.error(err, { title: `Couldn't upload workpad` });
+        }
         return;
       }
 
@@ -32,50 +37,83 @@ export const WorkpadLoader = compose(
 
     // Workpad search
     findWorkpads: ({ setWorkpads }) => async text => {
-      const workpads = await workpadService.find(text);
-      setWorkpads(workpads);
+      try {
+        const workpads = await workpadService.find(text);
+        setWorkpads(workpads);
+      } catch (err) {
+        notify.error(err, { title: `Couldn't find workpads` });
+      }
     },
 
     // Workpad import/export methods
     downloadWorkpad: () => async workpadId => {
-      const workpad = await workpadService.get(workpadId);
-      const jsonBlob = new Blob([JSON.stringify(workpad)], { type: 'application/json' });
-      fileSaver.saveAs(jsonBlob, `canvas-workpad-${workpad.name}-${workpad.id}.json`);
+      try {
+        const workpad = await workpadService.get(workpadId);
+        const jsonBlob = new Blob([JSON.stringify(workpad)], { type: 'application/json' });
+        fileSaver.saveAs(jsonBlob, `canvas-workpad-${workpad.name}-${workpad.id}.json`);
+      } catch (err) {
+        notify.error(err, { title: `Couldn't download workpad` });
+      }
     },
 
     // Clone workpad given an id
     cloneWorkpad: props => async workpadId => {
-      const workpad = await workpadService.get(workpadId);
-      workpad.name += ' - Copy';
-      workpad.id = getId('workpad');
-      await workpadService.create(workpad);
-      props.router.navigateTo('loadWorkpad', { id: workpad.id, page: 1 });
+      try {
+        const workpad = await workpadService.get(workpadId);
+        workpad.name += ' - Copy';
+        workpad.id = getId('workpad');
+        await workpadService.create(workpad);
+        props.router.navigateTo('loadWorkpad', { id: workpad.id, page: 1 });
+      } catch (err) {
+        notify.error(err, { title: `Couldn't clone workpad` });
+      }
     },
 
     // Remove workpad given an array of id
     removeWorkpads: props => async workpadIds => {
       const { setWorkpads, workpads, workpadId: loadedWorkpad } = props;
 
-      let redirectHome = false;
-      const removeWorkpads = workpadIds.map(id => {
-        if (id === loadedWorkpad) redirectHome = true;
-        return workpadService.remove(id);
-      });
+      const removeWorkpads = workpadIds.map(id =>
+        workpadService
+          .remove(id)
+          .then(() => ({ id, err: null }))
+          .catch(err => ({
+            id,
+            err,
+          }))
+      );
 
-      Promise.all(removeWorkpads).then(() => {
-        const remainingWorkpads = workpads.workpads.filter(({ id }) => !workpadIds.includes(id));
+      return Promise.all(removeWorkpads).then(results => {
+        let redirectHome = false;
+
+        const [passes, errors] = results.reduce(
+          ([passes, errors], result) => {
+            if (result.id === loadedWorkpad && !result.err) redirectHome = true;
+
+            if (result.err) errors.push(result.id);
+            else passes.push(result.id);
+
+            return [passes, errors];
+          },
+          [[], []]
+        );
+
+        const remainingWorkpads = workpads.workpads.filter(({ id }) => !passes.includes(id));
 
         const workpadState = {
           total: remainingWorkpads.length,
           workpads: remainingWorkpads,
         };
 
-        // update the workpad list, filtering out the removed workpad
+        if (errors.length > 0) notify.error("Couldn't delete all workpads");
+
         setWorkpads(workpadState);
 
         if (redirectHome) {
           props.router.navigateTo('home');
         }
+
+        return errors.map(({ id }) => id);
       });
     },
   })

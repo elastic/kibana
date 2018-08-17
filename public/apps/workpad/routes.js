@@ -1,4 +1,5 @@
 import * as workpadService from '../../lib/workpad_service';
+import { notify } from '../../lib/notify';
 import { getDefaultWorkpad } from '../../state/defaults';
 import { setWorkpad } from '../../state/actions/workpad';
 import { setAssets, resetAssets } from '../../state/actions/assets';
@@ -15,10 +16,14 @@ export const routes = [
         path: '/create',
         action: dispatch => async ({ router }) => {
           const newWorkpad = getDefaultWorkpad();
-          await workpadService.create(newWorkpad);
-          dispatch(setWorkpad(newWorkpad));
-          dispatch(resetAssets());
-          router.redirectTo('loadWorkpad', { id: newWorkpad.id, page: 1 });
+          try {
+            await workpadService.create(newWorkpad);
+            dispatch(setWorkpad(newWorkpad));
+            dispatch(resetAssets());
+            router.redirectTo('loadWorkpad', { id: newWorkpad.id, page: 1 });
+          } catch (err) {
+            notify.error(err, { title: `Couldn't create workpad` });
+          }
         },
         meta: {
           component: WorkpadApp,
@@ -31,15 +36,16 @@ export const routes = [
           // load workpad if given a new id via url param
           const currentWorkpad = getWorkpad(getState());
           if (params.id !== currentWorkpad.id) {
-            const fetchedWorkpad = await workpadService.get(params.id);
+            try {
+              const fetchedWorkpad = await workpadService.get(params.id);
 
-            if (fetchedWorkpad == null) {
+              const { assets, ...workpad } = fetchedWorkpad;
+              dispatch(setWorkpad(workpad));
+              dispatch(setAssets(assets));
+            } catch (err) {
+              notify.error(err, { title: `Couldn't load workpad with ID` });
               return router.redirectTo('home');
             }
-
-            const { assets, ...workpad } = fetchedWorkpad;
-            dispatch(setAssets(assets));
-            dispatch(setWorkpad(workpad));
           }
 
           // fetch the workpad again, to get changes
