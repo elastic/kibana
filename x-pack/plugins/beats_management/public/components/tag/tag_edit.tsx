@@ -32,7 +32,6 @@ import { ConfigView } from './config_view';
 
 interface TagEditProps {
   tag: Pick<ClientSideBeatTag, Exclude<keyof ClientSideBeatTag, 'last_updated'>>;
-  onSave: (tag: ClientSideBeatTag) => any;
   onTagChange: (field: keyof ClientSideBeatTag, value: string) => any;
   attachedBeats: CMBeat[] | null;
 }
@@ -77,9 +76,14 @@ export class TagEdit extends React.PureComponent<TagEditProps, TagEditState> {
             </EuiFlexItem>
             <EuiFlexItem>
               <EuiForm>
-                <EuiFormRow label="Name">
+                <EuiFormRow
+                  label="Name"
+                  isInvalid={!!this.getNameError(tag.id)}
+                  error={this.getNameError(tag.id) || undefined}
+                >
                   <EuiFieldText
                     name="name"
+                    isInvalid={!!this.getNameError(tag.id)}
                     onChange={this.updateTag('id')}
                     value={tag.id}
                     placeholder="Tag name (required)"
@@ -146,6 +150,14 @@ export class TagEdit extends React.PureComponent<TagEditProps, TagEditState> {
       </div>
     );
   }
+
+  private getNameError = (name: string) => {
+    if (name.search(/^[a-zA-Z0-9-]+$/) === -1) {
+      return 'Tag name must consist of letters, numbers, and dashes only';
+    } else {
+      return false;
+    }
+  };
 
   private openConfigFlyout = () => {
     this.setState({

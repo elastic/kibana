@@ -11,10 +11,10 @@ import {
 } from '@elastic/eui';
 
 import React from 'react';
-import { BeatTag, CMBeat, CMPopulatedBeat } from '../../../common/domain_types';
+import { CMBeat, CMPopulatedBeat } from '../../../common/domain_types';
 import { BeatsTagAssignment } from '../../../server/lib/adapters/beats/adapter_types';
 import { BeatsTableType, Table } from '../../components/table';
-import { FrontendLibs } from '../../lib/lib';
+import { ClientSideBeatTag, FrontendLibs } from '../../lib/lib';
 import { BeatsActionArea } from './beats_action_area';
 
 interface BeatsPageProps {
@@ -107,7 +107,7 @@ export class BeatsPage extends React.PureComponent<BeatsPageProps, BeatsPageStat
     const tags = await this.props.libs.tags.getAll();
     const selectedBeats = this.getSelectedBeats();
 
-    const renderedTags = tags.map((tag: BeatTag) => {
+    const renderedTags = tags.map(tag => {
       const hasMatches = selectedBeats.some((beat: any) =>
         beat.full_tags.some((t: any) => t.id === tag.id)
       );
@@ -136,15 +136,15 @@ export class BeatsPage extends React.PureComponent<BeatsPageProps, BeatsPageStat
 
   private createBeatTagAssignments = (
     beats: CMPopulatedBeat[],
-    tag: BeatTag
+    tag: ClientSideBeatTag
   ): BeatsTagAssignment[] => beats.map(({ id }) => ({ beatId: id, tag: tag.id }));
 
-  private removeTagsFromBeats = async (beats: CMPopulatedBeat[], tag: BeatTag) => {
+  private removeTagsFromBeats = async (beats: CMPopulatedBeat[], tag: ClientSideBeatTag) => {
     await this.props.libs.beats.removeTagsFromBeats(this.createBeatTagAssignments(beats, tag));
     this.loadBeats();
   };
 
-  private assignTagsToBeats = async (beats: CMPopulatedBeat[], tag: BeatTag) => {
+  private assignTagsToBeats = async (beats: CMPopulatedBeat[], tag: ClientSideBeatTag) => {
     await this.props.libs.beats.assignTagsToBeats(this.createBeatTagAssignments(beats, tag));
     this.loadBeats();
   };

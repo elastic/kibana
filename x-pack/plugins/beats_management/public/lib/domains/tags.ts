@@ -18,10 +18,11 @@ export class TagsLib {
   public async delete(tagIds: string[]): Promise<boolean> {
     return await this.adapter.delete(tagIds);
   }
-  public async getAll(): Promise<BeatTag[]> {
-    return await this.adapter.getAll();
+  public async getAll(): Promise<ClientSideBeatTag[]> {
+    return this.tagYamlToConfigs(await this.adapter.getAll());
   }
   public async upsertTag(tag: ClientSideBeatTag): Promise<BeatTag | null> {
+    tag.id = tag.id.replace(' ', '-');
     return await this.adapter.upsertTag(this.tagConfigsToYaml([tag])[0]);
   }
 
