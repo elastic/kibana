@@ -5,16 +5,24 @@
  */
 
 import { initMonaco, Monaco } from 'init-monaco';
-import { editor, languages } from 'monaco-editor';
+import { editor, IDisposable, IMouseEvent, languages } from 'monaco-editor';
 import { ResizeChecker } from 'ui/resize_checker';
 import { Definition, Location } from 'vscode-languageserver';
 import { LspRestClient, TextDocumentMethods } from '../../common/lsp_client';
 import { parseUri } from '../../common/uri_util';
+import { history } from '../utils/url';
 import { EditorService } from './editor_service';
 import { HoverController } from './hover_controller';
 import { TextModelResolverService } from './textmodel_resolver';
 
 export class MonacoHelper {
+  public get initialized() {
+    return this.monaco !== null;
+  }
+  public repoUri: string = '';
+  public file: string = '';
+  public revision: string = '';
+  public decorations = [];
   private monaco: Monaco | null = null;
   private lspMethods: TextDocumentMethods;
   private editor: editor.IStandaloneCodeEditor | null = null;
@@ -24,12 +32,9 @@ export class MonacoHelper {
     const lspClient = new LspRestClient('../api/lsp');
     this.lspMethods = new TextDocumentMethods(lspClient);
   }
-  public get initialized() {
-    return this.monaco !== null;
-  }
   public init() {
     return new Promise(resolve => {
-      initMonaco((monaco, extensions) => {
+      initMonaco((monaco: Monaco, extensions) => {
         this.monaco = monaco;
         extensions.registerEditorContribution(HoverController);
 
@@ -62,6 +67,15 @@ export class MonacoHelper {
             this.editor!.layout();
           });
         });
+        this.editor.onMouseDown((e: IMouseEvent) => {
+          if (e.target.type === this.monaco.editor.MouseTargetType.GUTTER_LINE_NUMBERS) {
+            history.push(
+              `/${this.repoUri}/blob/${this.revision}/${this.file}!L${
+                e.target.position.lineNumber
+              }:0`
+            );
+          }
+        });
         resolve(this.editor);
       });
     });
@@ -82,7 +96,25 @@ export class MonacoHelper {
     if (!this.initialized) {
       await this.init();
     }
-
+    this.repoUri = repoUri;
+    this.file = file;
+    this.revision = revision;
+    if (lang !== 'plain') {
+      if (this.hoverProvider) {
+        this.hoverProvider.dispose();
+      }
+      this.hoverProvider = this.monaco!.languages.registerHoverProvider(lang, {
+        provideHover: (model, position) => this.onHover(repoUri, file, model, position),
+      });
+      if (this.definitionProvider) {
+        this.definitionProvider.dispose();
+      }
+      this.definitionProvider = this.monaco!.languages.registerDefinitionProvider(lang, {
+        provideDefinition: (model, position) =>
+          this.provideDefinition(repoUri, file, model, position),
+      });
+    }
+    // @ts-ignore
     this.editor!.setModel(null);
     const uri = this.monaco!.Uri.parse(`git://${repoUri}?${revision}#${file}`);
     let newModel = this.monaco!.editor.getModel(uri);
@@ -128,6 +160,16 @@ export class MonacoHelper {
       lineNumber: line,
       column: 1,
     });
+    this.decorations = this.editor.deltaDecorations(this.decorations, [
+      {
+        range: new this.monaco.Range(line, 0, line, 0),
+        options: {
+          isWholeLine: true,
+          inlineClassName: 'highlightInline',
+          linesDecorationsClassName: 'markLineNumber',
+        },
+      },
+    ]);
   }
 
   public revealPosition(line: number, pos: number) {
@@ -135,6 +177,16 @@ export class MonacoHelper {
       lineNumber: line,
       column: pos,
     };
+    this.decorations = this.editor.deltaDecorations(this.decorations, [
+      {
+        range: new this.monaco.Range(line, 0, line, 0),
+        options: {
+          isWholeLine: true,
+          inlineClassName: 'highlightInline',
+          linesDecorationsClassName: 'markLineNumber',
+        },
+      },
+    ]);
     this.editor!.revealPositionInCenter(position);
     this.editor!.setPosition(position);
   }
