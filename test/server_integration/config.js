@@ -17,26 +17,38 @@
  * under the License.
  */
 
+import {
+  KibanaSupertestProvider,
+  KibanaSupertestWithoutAuthProvider,
+  ElasticsearchSupertestProvider,
+} from './services';
+
 export default async function ({ readConfigFile }) {
+  const commonConfig = await readConfigFile(require.resolve('../common/config'));
   const functionalConfig = await readConfigFile(require.resolve('../functional/config'));
 
   return {
-    ...functionalConfig.getAll(),
-
-    testFiles: [
-      require.resolve('../functional/apps/home'),
-    ],
-
-    junit: {
-      reportName: `${functionalConfig.get('junit.reportName')} (Production)`
+    services: {
+      es: commonConfig.get('services.es'),
+      esArchiver: commonConfig.get('services.esArchiver'),
+      retry: commonConfig.get('services.retry'),
+      supertest: KibanaSupertestProvider,
+      supertestWithoutAuth: KibanaSupertestWithoutAuthProvider,
+      esSupertest: ElasticsearchSupertestProvider,
     },
-
+    servers: commonConfig.get('servers'),
+    junit: {
+      reportName: 'Integration Tests'
+    },
+    esTestCluster: commonConfig.get('esTestCluster'),
     kbnTestServer: {
       ...functionalConfig.get('kbnTestServer'),
-
-      serverArgs: functionalConfig.get('kbnTestServer.serverArgs').filter(arg => (
-        arg !== '--env.name=development'
-      )),
+      serverArgs: [
+        ...functionalConfig.get('kbnTestServer.serverArgs'),
+        '--optimize.enabled=true',
+        '--elasticsearch.healthCheck.delay=3600000',
+        '--server.xsrf.disableProtection=true',
+      ],
     },
   };
 }

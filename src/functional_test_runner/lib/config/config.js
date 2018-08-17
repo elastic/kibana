@@ -24,14 +24,6 @@ import { schema } from './schema';
 
 const $values = Symbol('values');
 
-function cloneConfigValue(value) {
-  return cloneDeep(value, (v) => (
-    typeof v === 'function'
-      ? v
-      : undefined // tells lodash to use default behavior
-  ));
-}
-
 export class Config {
   constructor(options = {}) {
     const {
@@ -94,17 +86,15 @@ export class Config {
     return recursiveHasCheck(path, this[$values], schema);
   }
 
-  getAll() {
-    return cloneConfigValue(this[$values]);
-  }
-
   get(key, defaultValue) {
     if (!this.has(key)) {
       throw new Error(`Unknown config key "${key}"`);
     }
 
-    return cloneConfigValue(
-      get(this[$values], key, defaultValue)
-    );
+    return cloneDeep(get(this[$values], key, defaultValue), (v) => {
+      if (typeof v === 'function') {
+        return v;
+      }
+    });
   }
 }

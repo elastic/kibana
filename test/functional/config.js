@@ -64,14 +64,12 @@ export default async function ({ readConfigFile }) {
       require.resolve('./apps/context'),
       require.resolve('./apps/dashboard'),
       require.resolve('./apps/discover'),
+      require.resolve('./apps/home'),
       require.resolve('./apps/management'),
       require.resolve('./apps/status_page'),
       require.resolve('./apps/timelion'),
       require.resolve('./apps/visualize'),
       require.resolve('./apps/xpack'),
-
-      // migrated to functional_production config
-      // require.resolve('./apps/home')
     ],
     pageObjects: {
       common: CommonPageProvider,
@@ -113,8 +111,6 @@ export default async function ({ readConfigFile }) {
       renderable: RenderableProvider,
     },
     servers: commonConfig.get('servers'),
-
-    env: commonConfig.get('env'),
 
     esTestCluster: commonConfig.get('esTestCluster'),
 

@@ -17,24 +17,19 @@
  * under the License.
  */
 
-import _ from 'lodash';
-const longString = Array(200).join('_');
+export default function ({ getService }) {
+  const supertest = getService('supertest');
 
-export default function (id, mapping) {
-  function fakeVals(type) {
-    return _.mapValues(mapping, function (f, c) {
-      return c + '_' + type + '_' + id + longString;
+  describe('kibana server with ssl', () => {
+    it('redirects http requests at redirect port to https', async () => {
+      await supertest.get('/')
+        .expect('location', 'https://localhost:5620/')
+        .expect(302);
+
+      await supertest.get('/')
+        .redirects(1)
+        .expect('location', '/app/kibana')
+        .expect(302);
     });
-  }
-
-  return {
-    _id: id,
-    _index: 'test',
-    _source: fakeVals('original'),
-    _type: 'doc',
-    sort: [id],
-    $$_formatted: fakeVals('formatted'),
-    $$_partialFormatted: fakeVals('formatted'),
-    $$_flattened: fakeVals('_flattened')
-  };
+  });
 }
