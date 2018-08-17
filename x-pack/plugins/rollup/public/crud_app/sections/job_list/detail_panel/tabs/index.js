@@ -4,5 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { PLUGIN } from './plugin';
-export { CRUD_APP_BASE_PATH } from './crud_app';
+export { TabSummary } from './tab_summary';
+export { TabTerms } from './tab_terms';
+export { TabHistogram } from './tab_histogram';
+export { TabMetrics } from './tab_metrics';
+export { TabJson } from './tab_json';

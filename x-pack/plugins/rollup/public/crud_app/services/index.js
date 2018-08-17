@@ -4,5 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { PLUGIN } from './plugin';
-export { CRUD_APP_BASE_PATH } from './crud_app';
+export {
+  loadJobs,
+  setHttpClient,
+} from './api';
+export { sortTable } from './sort_table';
+export { filterItems } from './filter_items';
+export { deserializeJobs } from './jobs';
