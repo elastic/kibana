@@ -4,24 +4,41 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from "react";
+import React from 'react';
+import { i18n }  from '@kbn/i18n';
 import { healthToColor } from '../../../../../services';
 import {
   EuiHealth,
   EuiDescriptionList,
   EuiDescriptionListTitle,
   EuiDescriptionListDescription,
-} from "@elastic/eui";
+} from '@elastic/eui';
 
 const HEADERS = {
-  health: "Health",
-  status: "Status",
-  primary: "Primaries",
-  replica: "Replicas",
-  documents: "Docs Count",
-  documents_deleted: "Docs Deleted",
-  size: "Storage Size",
-  primary_size: "Primary Storage Size"
+  health: i18n.translate('xpack.idxMgmt.summary.headers.healthHeader', {
+    defaultMessage: 'Health',
+  }),
+  status: i18n.translate('xpack.idxMgmt.summary.headers.statusHeader', {
+    defaultMessage: 'Status',
+  }),
+  primary: i18n.translate('xpack.idxMgmt.summary.headers.primaryHeader', {
+    defaultMessage: 'Primaries',
+  }),
+  replica: i18n.translate('xpack.idxMgmt.summary.headers.replicaHeader', {
+    defaultMessage: 'Replicas',
+  }),
+  documents: i18n.translate('xpack.idxMgmt.summary.headers.documentsHeader', {
+    defaultMessage: 'Docs Count',
+  }),
+  documents_deleted: i18n.translate('xpack.idxMgmt.summary.headers.deletedDocumentsHeader', {
+    defaultMessage: 'Docs Deleted',
+  }),
+  size: i18n.translate('xpack.idxMgmt.summary.headers.storageSizeHeader', {
+    defaultMessage: 'Storage Size',
+  }),
+  primary_size: i18n.translate('xpack.idxMgmt.summary.headers.primaryStorageSizeHeader', {
+    defaultMessage: 'Primary Storage Size',
+  })
 };
 
 export class Summary extends React.PureComponent {

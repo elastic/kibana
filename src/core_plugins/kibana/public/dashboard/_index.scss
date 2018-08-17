@@ -1,7 +1,7 @@
 // External libraries
-// SASSTODO: Change from relative path once node-sass includes node_modules in includePaths
-@import './../../../../../node_modules/react-grid-layout/css/styles';
-@import './../../../../../node_modules/react-resizable/css/styles';
+// 'react-grid-layout/css/styles.css';
+// 'react-resizable/css/styles.css';
+// ... are being imported via JS in grid/dashboard_grid.js
 
 // Temporary hacks
 @import 'hacks';
