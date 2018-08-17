@@ -19,8 +19,8 @@
 
 import {
   KibanaSupertestProvider,
+  KibanaSupertestWithoutAuthProvider,
   ElasticsearchSupertestProvider,
-  ChanceProvider,
 } from './services';
 
 export default async function ({ readConfigFile }) {
@@ -28,27 +28,24 @@ export default async function ({ readConfigFile }) {
   const functionalConfig = await readConfigFile(require.resolve('../functional/config'));
 
   return {
-    testFiles: [
-      require.resolve('./apis'),
-    ],
     services: {
       es: commonConfig.get('services.es'),
       esArchiver: commonConfig.get('services.esArchiver'),
       retry: commonConfig.get('services.retry'),
       supertest: KibanaSupertestProvider,
+      supertestWithoutAuth: KibanaSupertestWithoutAuthProvider,
       esSupertest: ElasticsearchSupertestProvider,
-      chance: ChanceProvider,
     },
     servers: commonConfig.get('servers'),
     junit: {
-      reportName: 'API Integration Tests'
+      reportName: 'Integration Tests'
     },
     esTestCluster: commonConfig.get('esTestCluster'),
     kbnTestServer: {
       ...functionalConfig.get('kbnTestServer'),
       serverArgs: [
         ...functionalConfig.get('kbnTestServer.serverArgs'),
-        '--optimize.enabled=false',
+        '--optimize.enabled=true',
         '--elasticsearch.healthCheck.delay=3600000',
         '--server.xsrf.disableProtection=true',
       ],
