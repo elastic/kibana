@@ -24,7 +24,7 @@ import os from 'os';
 import { fromRoot } from '../../utils';
 import { getData } from '../path';
 
-export default async () => Joi.object({
+export default () => Joi.object({
   pkg: Joi.object({
     version: Joi.string().default(Joi.ref('$version')),
     branch: Joi.string().default(Joi.ref('$branch')),
@@ -108,6 +108,10 @@ export default async () => Joi.object({
       ).default([]),
       token: Joi.string().optional().notes('Deprecated')
     }).default(),
+  }).default(),
+
+  uiSettings: Joi.object().keys({
+    overrides: Joi.object().unknown(true).default()
   }).default(),
 
   logging: Joi.object().keys({

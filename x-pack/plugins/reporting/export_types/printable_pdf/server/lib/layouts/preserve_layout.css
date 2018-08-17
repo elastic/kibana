@@ -34,7 +34,7 @@ filter-bar,
 
 
 /* hide unusable controls */
-discover-app .discover-timechart,
+discover-app .dscTimechart,
 discover-app .sidebar-container,
 discover-app .sidebar-collapser,
 discover-app navbar[name=discover-search],
@@ -107,7 +107,7 @@ visualize-app .vis-editor-canvas {
 *  Dashboard tweaks
 */
 
-.dashboard-panel .panel-heading .kuiMicroButtonGroup {
+.dshPanel__headerButtonGroup {
   /* hide the panel heading with the controls in it like expand */
   display: none !important;
 }

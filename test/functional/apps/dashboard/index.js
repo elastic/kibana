@@ -42,6 +42,8 @@ export default function ({ getService, loadTestFile, getPageObjects }) {
 
       // This has to be first since the other tests create some embeddables as side affects and our counting assumes
       // a fresh index.
+      loadTestFile(require.resolve('./_empty_dashboard'));
+      loadTestFile(require.resolve('./_dark_theme'));
       loadTestFile(require.resolve('./_embeddable_rendering'));
       loadTestFile(require.resolve('./_create_and_add_embeddables'));
       loadTestFile(require.resolve('./_time_zones'));

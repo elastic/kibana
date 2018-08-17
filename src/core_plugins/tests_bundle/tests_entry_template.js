@@ -34,6 +34,7 @@ import 'babel-polyfill';
 import 'custom-event-polyfill';
 import 'whatwg-fetch';
 import 'abortcontroller-polyfill';
+import 'childnode-remove-polyfill';
 
 import { CoreSystem } from '__kibanaCore__'
 
@@ -72,13 +73,18 @@ const legacyMetadata = {
   }
 };
 
+// render the core system in a child of the body as the default children of the body
+// in the browser tests are needed for mocha and other test components to work
+const rootDomElement = document.createElement('div');
+document.body.appendChild(rootDomElement)
+
 new CoreSystem({
   injectedMetadata: {
     version: legacyMetadata.version,
     buildNumber: legacyMetadata.buildNum,
     legacyMetadata
   },
-  rootDomElement: document.body,
+  rootDomElement,
   useLegacyTestHarness: true,
   requireLegacyFiles: () => {
     ${bundle.getRequires().join('\n  ')}

@@ -34,11 +34,11 @@ export interface LegacyConfig {
  * Represents logging config supported by the legacy platform.
  */
 interface LegacyLoggingConfig {
-  silent: boolean;
-  verbose: boolean;
-  quiet: boolean;
-  dest: string;
-  json: boolean;
+  silent?: boolean;
+  verbose?: boolean;
+  quiet?: boolean;
+  dest?: string;
+  json?: boolean;
 }
 
 /**
@@ -56,7 +56,9 @@ export class LegacyConfigToRawConfigAdapter implements RawConfig {
 
   private static transformLogging(configValue: LegacyLoggingConfig) {
     const loggingConfig = {
-      appenders: { default: { kind: 'legacy-appender' } },
+      appenders: {
+        default: { kind: 'legacy-appender', legacyLoggingConfig: configValue },
+      },
       root: { level: 'info' },
     };
 
