@@ -45,7 +45,7 @@ export const TabSummary = ({
           <strong>ID</strong>
         </EuiDescriptionListTitle>
 
-        <EuiDescriptionListDescription>
+        <EuiDescriptionListDescription className="eui-textBreakWord">
           {id}
         </EuiDescriptionListDescription>
 
@@ -53,7 +53,7 @@ export const TabSummary = ({
           <strong>Index pattern</strong>
         </EuiDescriptionListTitle>
 
-        <EuiDescriptionListDescription>
+        <EuiDescriptionListDescription className="eui-textBreakWord">
           {indexPattern}
         </EuiDescriptionListDescription>
 
@@ -61,7 +61,7 @@ export const TabSummary = ({
           <strong>Rollup index</strong>
         </EuiDescriptionListTitle>
 
-        <EuiDescriptionListDescription>
+        <EuiDescriptionListDescription className="eui-textBreakWord">
           {rollupIndex}
         </EuiDescriptionListDescription>
 
@@ -87,7 +87,7 @@ export const TabSummary = ({
           <strong>Time field</strong>
         </EuiDescriptionListTitle>
 
-        <EuiDescriptionListDescription>
+        <EuiDescriptionListDescription className="eui-textBreakWord">
           {dateHistogramField}
         </EuiDescriptionListDescription>
 
