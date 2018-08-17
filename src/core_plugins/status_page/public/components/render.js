@@ -17,21 +17,33 @@
  * under the License.
  */
 
-import 'ui/autoload/styles';
-import { uiModules } from 'ui/modules';
-import chrome from 'ui/chrome';
-import { destroyStatusPage, renderStatusPage } from './components/render';
+import React from 'react';
+import { render, unmountComponentAtNode } from 'react-dom';
+import { I18nProvider } from '@kbn/i18n/react';
 
-chrome
-  .setRootTemplate(require('plugins/status_page/status_page.html'))
-  .setRootController('ui', function ($scope, buildNum, buildSha) {
-    $scope.$$postDigest(() => {
-      renderStatusPage(buildNum, buildSha.substr(0, 8));
-      $scope.$on('$destroy', destroyStatusPage);
-    });
-  });
+import StatusApp from './status_app';
 
-uiModules.get('kibana')
-  .config(function (appSwitcherEnsureNavigationProvider) {
-    appSwitcherEnsureNavigationProvider.forceNavigation(true);
-  });
+const STATUS_PAGE_DOM_NODE_ID = 'createStatusPageReact';
+
+export function renderStatusPage(buildNum, buildSha) {
+  const node = document.getElementById(STATUS_PAGE_DOM_NODE_ID);
+
+  if (!node) {
+    return;
+  }
+
+  render(
+    <I18nProvider>
+      <StatusApp
+        buildNum={buildNum}
+        buildSha={buildSha}
+      />
+    </I18nProvider>,
+    node,
+  );
+}
+
+export function destroyStatusPage() {
+  const node = document.getElementById(STATUS_PAGE_DOM_NODE_ID);
+  node && unmountComponentAtNode(node);
+}
