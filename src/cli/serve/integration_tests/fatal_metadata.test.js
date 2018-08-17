@@ -24,29 +24,16 @@ const ROOT_DIR = resolve(__dirname, '../../../../');
 const INVALID_CONFIG_PATH = resolve(__dirname, '__fixtures__/fatal_metadata.yml');
 
 describe('fatal error', function () {
-  it('logs no metadata', function () {
-    const { stdout } = spawnSync(process.execPath, [
+  it('logs no metadata to stderr', function () {
+    const { stderr } = spawnSync(process.execPath, [
       'src/cli',
       '--config', INVALID_CONFIG_PATH
     ], {
       cwd: ROOT_DIR
     });
 
-    const logLines = stdout.toString('utf8')
-      .split('\n')
-      .filter(Boolean)
-      .map(JSON.parse)
-      .map(obj => {
-        // contains system dependent paths
-        delete obj.error.stack;
-
-        return ({
-          ...obj,
-          pid: '## PID ##',
-          '@timestamp': '## @timestamp ##'
-        });
-      });
-
+    // remove paths from stack trace
+    const logLines = stderr.toString('utf8').replace(/\(.*\)/g, '');
     expect(logLines).toMatchSnapshot();
   }, 20 * 1000);
 });
