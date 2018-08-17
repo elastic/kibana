@@ -82,7 +82,6 @@ export class DetailPanel extends Component {
         terms,
         histogram,
         status,
-        upgradedDocId,
         documentsProcessed,
         pagesProcessed,
         rollupsIndexed,
@@ -111,7 +110,6 @@ export class DetailPanel extends Component {
           rollupsIndexed={rollupsIndexed}
           triggerCount={triggerCount}
           status={status}
-          upgradedDocId={upgradedDocId}
         />
       ),
       Terms: (

@@ -31,7 +31,6 @@ export const TabSummary = ({
   rollupsIndexed,
   triggerCount,
   status,
-  upgradedDocId,
 }) => {
   return (
     <Fragment>
@@ -138,14 +137,6 @@ export const TabSummary = ({
 
         <EuiDescriptionListDescription>
           <JobStatus status={status} />
-        </EuiDescriptionListDescription>
-
-        <EuiDescriptionListTitle>
-          <strong>Upgraded doc ID</strong>
-        </EuiDescriptionListTitle>
-
-        <EuiDescriptionListDescription>
-          {upgradedDocId ? 'True' : 'False'}
         </EuiDescriptionListDescription>
 
         <EuiDescriptionListTitle>

@@ -29,7 +29,6 @@ function deserializeJob(job) {
     },
     status: {
       job_state: status,
-      upgraded_doc_id: upgradedDocId,
     },
     stats: {
       documents_processed: documentsProcessed,
@@ -54,7 +53,6 @@ function deserializeJob(job) {
     terms,
     histogram,
     status,
-    upgradedDocId,
     documentsProcessed,
     pagesProcessed,
     rollupsIndexed,
