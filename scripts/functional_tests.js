@@ -19,7 +19,6 @@
 
 require('../src/setup_node_env');
 require('@kbn/test').runTestsCli([
-  require.resolve('../test/functional_production/config.js'),
   require.resolve('../test/functional/config.js'),
   require.resolve('../test/api_integration/config.js'),
   require.resolve('../test/panel_actions/config.js'),
