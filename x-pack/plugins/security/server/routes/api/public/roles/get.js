@@ -6,24 +6,36 @@
 import _ from 'lodash';
 import Boom from 'boom';
 import { wrapError } from '../../../../lib/errors';
+import { ALL_RESOURCE } from '../../../../../common/constants';
 
 export function initGetRolesApi(server, callWithRequest, routePreCheckLicenseFn, application) {
 
   const transformKibanaApplicationsFromEs = (roleApplications) => {
-    return roleApplications
-      .filter(roleApplication => roleApplication.application === application)
-      .filter(roleApplication => roleApplication.resources.length > 0)
-      .map(roleApplication => ({ privileges: roleApplication.privileges, resources: roleApplication.resources }))
-      .reduce((acc, roleApplication) => {
-        roleApplication.resources.forEach(resource => {
-          if (acc[resource]) {
-            acc[resource] = _.uniq([...acc[resource], ...roleApplication.privileges]);
-          } else {
-            acc[resource] = _.uniq(roleApplication.privileges);
-          }
-        });
-        return acc;
-      }, {});
+    const roleKibanaApplications = roleApplications
+      .filter(roleApplication => roleApplication.application === application);
+
+    const resourcePrivileges = _.flatten(roleKibanaApplications
+      .map(({ resources, privileges }) => resources.map(resource => ({ resource, privileges })))
+    );
+
+    return resourcePrivileges.reduce((result, { resource, privileges }) => {
+      if (resource === ALL_RESOURCE) {
+        result.global = _.uniq([...result.global, ...privileges]);
+        return result;
+      }
+
+      const spacePrefix = 'space:';
+      if (resource.startsWith(spacePrefix)) {
+        const spaceId = resource.slice(spacePrefix.length);
+        result.space[spaceId] = _.uniq([...result.space[spaceId] || [], ...privileges]);
+        return result;
+      }
+
+      throw new Error(`Unknown application privilege resource: ${resource}`);
+    }, {
+      global: [],
+      space: {},
+    });
   };
 
   const transformUnrecognizedApplicationsFromEs = (roleApplications) => {
@@ -54,13 +66,13 @@ export function initGetRolesApi(server, callWithRequest, routePreCheckLicenseFn,
   server.route({
     method: 'GET',
     path: '/api/security/role',
-    handler(request, reply) {
-      return callWithRequest(request, 'shield.getRole').then(
-        (response) => {
-          return reply(transformRolesFromEs(response));
-        },
-        _.flow(wrapError, reply)
-      );
+    async handler(request, reply) {
+      try {
+        const response = await callWithRequest(request, 'shield.getRole');
+        return reply(transformRolesFromEs(response));
+      } catch (error) {
+        reply(wrapError(error));
+      }
     },
     config: {
       pre: [routePreCheckLicenseFn]
@@ -70,14 +82,18 @@ export function initGetRolesApi(server, callWithRequest, routePreCheckLicenseFn,
   server.route({
     method: 'GET',
     path: '/api/security/role/{name}',
-    handler(request, reply) {
+    async handler(request, reply) {
       const name = request.params.name;
-      return callWithRequest(request, 'shield.getRole', { name }).then(
-        (response) => {
-          if (response[name]) return reply(transformRoleFromEs(response[name], name));
-          return reply(Boom.notFound());
-        },
-        _.flow(wrapError, reply));
+      try {
+        const response = await callWithRequest(request, 'shield.getRole', { name });
+        if (response[name]) {
+          return reply(transformRoleFromEs(response[name], name));
+        }
+
+        return reply(Boom.notFound());
+      } catch (error) {
+        reply(wrapError(error));
+      }
     },
     config: {
       pre: [routePreCheckLicenseFn]

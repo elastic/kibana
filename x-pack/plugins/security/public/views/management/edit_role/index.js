@@ -57,7 +57,10 @@ routes.when(`${EDIT_ROLES_PATH}/:name?`, {
             indices: [],
             run_as: [],
           },
-          kibana: {},
+          kibana: {
+            global: [],
+            space: {},
+          },
           _unrecognized_applications: [],
         }));
       }

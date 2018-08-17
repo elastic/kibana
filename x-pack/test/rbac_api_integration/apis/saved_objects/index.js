@@ -40,11 +40,9 @@ export default function ({ loadTestFile, getService }) {
               privileges: ['manage', 'read', 'index', 'delete']
             }]
           },
-          kibana: [
-            {
-              privileges: ['all']
-            }
-          ]
+          kibana: {
+            global: ['all']
+          }
         });
 
       await supertest.put('/api/security/role/kibana_dual_privileges_dashboard_only_user')
@@ -55,29 +53,24 @@ export default function ({ loadTestFile, getService }) {
               privileges: ['read', 'view_index_metadata']
             }]
           },
-          kibana: [
-            {
-              privileges: ['read']
-            }
-          ]
+          kibana: {
+            global: ['read']
+          }
         });
 
       await supertest.put('/api/security/role/kibana_rbac_user')
         .send({
-          kibana: [
-            {
-              privileges: ['all']
-            }
-          ]
+          kibana: {
+            global: ['all']
+          }
+
         });
 
       await supertest.put('/api/security/role/kibana_rbac_dashboard_only_user')
         .send({
-          kibana: [
-            {
-              privileges: ['read']
-            }
-          ]
+          kibana: {
+            global: ['read']
+          }
         });
 
       await es.shield.putUser({

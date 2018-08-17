@@ -116,7 +116,7 @@ describe('PUT role', () => {
       name: 'foo-role',
       payload: {
         kibana: {
-          [ALL_RESOURCE]: ['foo']
+          global: ['foo']
         }
       },
       asserts: {
@@ -124,10 +124,10 @@ describe('PUT role', () => {
         result: {
           error: 'Bad Request',
           //eslint-disable-next-line max-len
-          message: `child "kibana" fails because [child "&#x2a;" fails because ["&#x2a;" at position 0 fails because ["0" must be one of [test-kibana-privilege-1, test-kibana-privilege-2, test-kibana-privilege-3]]]]`,
+          message: `child \"kibana\" fails because [child \"global\" fails because [\"global\" at position 0 fails because [\"0\" must be one of [test-kibana-privilege-1, test-kibana-privilege-2, test-kibana-privilege-3]]]]`,
           statusCode: 400,
           validation: {
-            keys: ['kibana.&#x2a;.0'],
+            keys: ['kibana.global.0'],
             source: 'payload',
           },
         },
@@ -199,9 +199,12 @@ describe('PUT role', () => {
           run_as: ['test-run-as-1', 'test-run-as-2'],
         },
         kibana: {
-          [ALL_RESOURCE]: ['test-kibana-privilege-1', 'test-kibana-privilege-2'],
-          ['other-resource']: ['test-kibana-privilege-3'],
-        }
+          global: ['test-kibana-privilege-1', 'test-kibana-privilege-2', 'test-kibana-privilege-3'],
+          space: {
+            'test-space-1': ['test-kibana-privilege-1', 'test-kibana-privilege-2'],
+            'test-space-2': ['test-kibana-privilege-3'],
+          }
+        },
       },
       preCheckLicenseImpl: defaultPreCheckLicenseImpl,
       callWithRequestImpls: [async () => ({}), async () => { }],
@@ -219,13 +222,24 @@ describe('PUT role', () => {
                     privileges: [
                       'test-kibana-privilege-1',
                       'test-kibana-privilege-2',
+                      'test-kibana-privilege-3'
                     ],
                     resources: [ALL_RESOURCE],
                   },
                   {
                     application,
-                    privileges: ['test-kibana-privilege-3'],
-                    resources: ['other-resource'],
+                    privileges: [
+                      'test-kibana-privilege-1',
+                      'test-kibana-privilege-2'
+                    ],
+                    resources: ['space:test-space-1']
+                  },
+                  {
+                    application,
+                    privileges: [
+                      'test-kibana-privilege-3',
+                    ],
+                    resources: ['space:test-space-2']
                   },
                 ],
                 cluster: ['test-cluster-privilege'],
@@ -276,8 +290,11 @@ describe('PUT role', () => {
           run_as: ['test-run-as-1', 'test-run-as-2'],
         },
         kibana: {
-          [ALL_RESOURCE]: ['test-kibana-privilege-1', 'test-kibana-privilege-2'],
-          ['other-resource']: ['test-kibana-privilege-3'],
+          global: ['test-kibana-privilege-1', 'test-kibana-privilege-2', 'test-kibana-privilege-3'],
+          space: {
+            'test-space-1': ['test-kibana-privilege-1', 'test-kibana-privilege-2'],
+            'test-space-2': ['test-kibana-privilege-3'],
+          }
         },
       },
       preCheckLicenseImpl: defaultPreCheckLicenseImpl,
@@ -328,13 +345,24 @@ describe('PUT role', () => {
                     privileges: [
                       'test-kibana-privilege-1',
                       'test-kibana-privilege-2',
+                      'test-kibana-privilege-3'
                     ],
                     resources: [ALL_RESOURCE],
                   },
                   {
                     application,
-                    privileges: ['test-kibana-privilege-3'],
-                    resources: ['other-resource'],
+                    privileges: [
+                      'test-kibana-privilege-1',
+                      'test-kibana-privilege-2'
+                    ],
+                    resources: ['space:test-space-1']
+                  },
+                  {
+                    application,
+                    privileges: [
+                      'test-kibana-privilege-3',
+                    ],
+                    resources: ['space:test-space-2']
                   },
                 ],
                 cluster: ['test-cluster-privilege'],
@@ -385,8 +413,11 @@ describe('PUT role', () => {
             run_as: ['test-run-as-1', 'test-run-as-2'],
           },
           kibana: {
-            [ALL_RESOURCE]: ['test-kibana-privilege-1', 'test-kibana-privilege-2'],
-            ['other-resource']: ['test-kibana-privilege-3'],
+            global: [
+              'test-kibana-privilege-1',
+              'test-kibana-privilege-2',
+              'test-kibana-privilege-3'
+            ],
           },
         },
         preCheckLicenseImpl: defaultPreCheckLicenseImpl,
@@ -442,13 +473,9 @@ describe('PUT role', () => {
                       privileges: [
                         'test-kibana-privilege-1',
                         'test-kibana-privilege-2',
+                        'test-kibana-privilege-3'
                       ],
                       resources: [ALL_RESOURCE],
-                    },
-                    {
-                      application,
-                      privileges: ['test-kibana-privilege-3'],
-                      resources: ['other-resource'],
                     },
                     {
                       application: 'logstash-foo',
