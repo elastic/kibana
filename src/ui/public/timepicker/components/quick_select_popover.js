@@ -23,6 +23,8 @@ import PropTypes from 'prop-types';
 import React, { Component, Fragment } from 'react';
 
 import { timeUnits } from '../time_units';
+import { timeHistory } from '../../timefilter/time_history';
+import { prettyDuration } from '../pretty_duration';
 
 import {
   EuiButtonEmpty,
@@ -177,16 +179,13 @@ export class QuickSelectPopover extends Component {
     const sections = _.groupBy(commonlyUsed, 'section');
 
     const renderSectionItems = (section) => {
-      return section.map(commonlyUsed => {
+      return section.map(({ from, to, display }) => {
         const setTime = () => {
-          this.setTime({
-            from: commonlyUsed.from,
-            to: commonlyUsed.to
-          });
+          this.setTime({ from, to });
         };
         return (
-          <EuiFlexItem key={commonlyUsed.display}>
-            <EuiLink onClick={setTime}>{commonlyUsed.display}</EuiLink>
+          <EuiFlexItem key={display}>
+            <EuiLink onClick={setTime}>{display}</EuiLink>
           </EuiFlexItem>
         );
       });
@@ -211,14 +210,15 @@ export class QuickSelectPopover extends Component {
   }
 
   renderRecentlyUsed = () => {
-    const links = [].map((date) => {
-      let dateRange;
-      if (typeof date !== 'string') {
-        dateRange = `${date[0]} – ${date[1]}`;
-      }
-
+    const links = timeHistory.get().map(({ from, to }) => {
+      const setTime = () => {
+        this.setTime({ from, to });
+      };
+      const display = prettyDuration(from, to, (...args) => chrome.getUiSettingsClient().get(...args));
       return (
-        <EuiFlexItem grow={false} key={date}><EuiLink onClick={this.closePopover}>{dateRange || date}</EuiLink></EuiFlexItem>
+        <EuiFlexItem key={display}>
+          <EuiLink onClick={setTime}>{display}</EuiLink>
+        </EuiFlexItem>
       );
     });
 
