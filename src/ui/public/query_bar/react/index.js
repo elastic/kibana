@@ -17,5 +17,12 @@
  * under the License.
  */
 
-import './directive/query_bar';
-import './react';
+import 'ngreact';
+
+import { QueryBar } from './query_bar';
+
+import { uiModules } from '../../modules';
+
+const app = uiModules.get('kibana', ['react']);
+
+app.directive('reactQueryBar', reactDirective => reactDirective(QueryBar));

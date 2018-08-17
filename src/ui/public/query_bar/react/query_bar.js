@@ -17,5 +17,10 @@
  * under the License.
  */
 
-import './directive/query_bar';
-import './react';
+import React from 'react';
+
+export function QueryBar() {
+
+
+  return (<div>Hello world!</div>);
+}
