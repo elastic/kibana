@@ -31,3 +31,5 @@ export function PanelError({ error }: PanelErrorProps) {
     </div>
   );
 }
+
+test;
