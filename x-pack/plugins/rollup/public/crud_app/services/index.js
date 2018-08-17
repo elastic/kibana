@@ -6,6 +6,7 @@
 
 export {
   loadJobs,
+  setHttpClient,
 } from './api';
 export { sortTable } from './sort_table';
 export { filterItems } from './filter_items';

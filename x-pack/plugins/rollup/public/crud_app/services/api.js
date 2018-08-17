@@ -4,13 +4,17 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { kfetch } from 'ui/kfetch';
+import chrome from 'ui/chrome';
+
+let httpClient;
+
+export const setHttpClient = (client) => {
+  httpClient = client;
+};
+
+const apiPrefix = chrome.addBasePath('/api/rollup');
 
 export async function loadJobs() {
-  const { jobs } = await kfetch({
-    pathname: `/api/rollup/jobs`,
-    method: 'GET',
-  });
-
+  const { data: { jobs } } = await httpClient.get(`${apiPrefix}/jobs`);
   return jobs;
 }
