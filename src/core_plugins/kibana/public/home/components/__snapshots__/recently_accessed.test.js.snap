@@ -31,7 +31,7 @@ exports[`render 1`] = `
     wrap={true}
   >
     <EuiFlexItem
-      className="recentlyAccessedFlexItem"
+      className="homRecentlyAccessed__flexItem"
       component="div"
       grow={false}
     >
@@ -48,7 +48,7 @@ exports[`render 1`] = `
           key="0"
         >
           <EuiFlexItem
-            className="recentlyAccessedItem"
+            className="homRecentlyAccessed__item"
             component="div"
             grow={false}
             style={
@@ -62,7 +62,7 @@ exports[`render 1`] = `
               position="bottom"
             >
               <EuiLink
-                className="recentlyAccessedLongLink"
+                className="homRecentlyAccessed__longLink"
                 color="primary"
                 href="link0"
                 type="button"
@@ -76,7 +76,7 @@ exports[`render 1`] = `
           key="1"
         >
           <EuiFlexItem
-            className="recentlyAccessedSeparator"
+            className="homRecentlyAccessed__separator"
             component="div"
             grow={false}
           >
@@ -91,7 +91,7 @@ exports[`render 1`] = `
             </EuiText>
           </EuiFlexItem>
           <EuiFlexItem
-            className="recentlyAccessedItem"
+            className="homRecentlyAccessed__item"
             component="div"
             grow={false}
             style={
@@ -105,7 +105,7 @@ exports[`render 1`] = `
               position="bottom"
             >
               <EuiLink
-                className="recentlyAccessedLongLink"
+                className="homRecentlyAccessed__longLink"
                 color="primary"
                 href="link1"
                 type="button"

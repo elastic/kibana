@@ -26,7 +26,7 @@ const whiteListedRules = ['backticks', 'emphasis', 'link', 'list'];
 export function Content({ text }) {
   return (
     <Markdown
-      className="euiText euiTextColor--subdued tutorialContent"
+      className="euiText"
       markdown={text}
       openLinksInNewTab={true}
       whiteListedRules={whiteListedRules}
