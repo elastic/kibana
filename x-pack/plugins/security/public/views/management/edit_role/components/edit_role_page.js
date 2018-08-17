@@ -171,7 +171,6 @@ export class EditRolePage extends Component {
           kibanaAppPrivileges={this.props.kibanaAppPrivileges}
           spaces={this.props.spaces}
           editable={!isReservedRole(this.state.role)}
-          spacesEnabled={this.props.spaces.length > 1}
           role={this.state.role}
           onChange={this.onRoleChange}
         />

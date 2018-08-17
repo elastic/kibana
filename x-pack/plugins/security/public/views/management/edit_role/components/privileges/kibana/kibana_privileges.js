@@ -13,7 +13,6 @@ export class KibanaPrivileges extends Component {
   static propTypes = {
     role: PropTypes.object.isRequired,
     spaces: PropTypes.array,
-    spacesEnabled: PropTypes.bool.isRequired,
     editable: PropTypes.bool.isRequired,
     kibanaAppPrivileges: PropTypes.array.isRequired,
     onChange: PropTypes.func.isRequired,
