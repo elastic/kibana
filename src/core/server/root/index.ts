@@ -86,18 +86,6 @@ export class Root {
     this.onShutdown(reason);
   }
 
-  /**
-   * This is kept as a callback (non-async) function to mirror the Node's net.Server API.
-   * Keeping it this way should make removing the proxifier code simpler.
-   */
-  public getConnections(callback: (error: Error | null, count?: number) => number): number {
-    if (this.server) {
-      this.server.http.service.httpServer.server.listener.getConnections(callback);
-    } else {
-      callback(null, 0);
-    }
-  }
-
   protected async startServer() {
     this.server = new Server(this.configService, this.logger, this.env);
     return this.server.start();
