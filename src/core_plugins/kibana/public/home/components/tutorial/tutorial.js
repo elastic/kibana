@@ -314,7 +314,7 @@ export class Tutorial extends React.Component {
           />
 
           <EuiSpacer />
-          <div className="text-center">
+          <div className="eui-textCenter">
             {this.renderInstructionSetsToggle()}
           </div>
 
