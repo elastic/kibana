@@ -44,7 +44,7 @@ export function jobValidationRoutes(server, commonRouteConfig) {
     handler(request, reply) {
       const callWithRequest = callWithRequestFactory(server, request);
       try {
-        return estimateBucketSpanFactory(callWithRequest)(request.payload)
+        return estimateBucketSpanFactory(callWithRequest, server)(request.payload)
           .then(reply)
           // this catch gets triggered when the estimation code runs without error
           // but isn't able to come up with a bucket span estimation.
@@ -91,7 +91,7 @@ export function jobValidationRoutes(server, commonRouteConfig) {
       const callWithRequest = callWithRequestFactory(server, request);
       // pkg.branch corresponds to the version used in documentation links.
       const version = server.config().get('pkg.branch');
-      return validateJob(callWithRequest, request.payload, version)
+      return validateJob(callWithRequest, request.payload, version, server)
         .then(reply)
         .catch((resp) => {
           reply(wrapError(resp));

@@ -37,6 +37,7 @@ export function uiSettingsServiceFactory(server, options) {
   const {
     savedObjectsClient,
     getDefaults,
+    overrides,
   } = options;
 
   return new UiSettingsService({
@@ -45,6 +46,7 @@ export function uiSettingsServiceFactory(server, options) {
     buildNum: config.get('pkg.buildNum'),
     savedObjectsClient,
     getDefaults,
+    overrides,
     log: (...args) => server.log(...args),
   });
 }

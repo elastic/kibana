@@ -29,7 +29,7 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
   const find = getService('find');
   const log = getService('log');
   const flyout = getService('flyout');
-  const visualization = getService('visualization');
+  const renderable = getService('renderable');
   const PageObjects = getPageObjects(['common', 'header']);
   const defaultFindTimeout = config.get('timeouts.find');
 
@@ -363,6 +363,11 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
       await PageObjects.header.waitUntilLoadingHasFinished();
     }
 
+    async clickUnlinkSavedSearch() {
+      await testSubjects.doubleClick('unlinkSavedSearch');
+      await PageObjects.header.waitUntilLoadingHasFinished();
+    }
+
     async setValue(newValue) {
       await find.clickByCssSelector('button[ng-click="numberListCntr.add()"]', defaultFindTimeout * 2);
       const input = await find.byCssSelector('input[ng-model="numberListCntr.getList()[$index]"]');
@@ -396,8 +401,14 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
       await Promise.all(getChartTypesPromises);
     }
 
-    async selectAggregation(myString, groupName = 'buckets') {
-      const selector = `[group-name="${groupName}"] vis-editor-agg-params:not(.ng-hide) .agg-select`;
+    async selectAggregation(myString, groupName = 'buckets', childAggregationType = null) {
+      const selector = `
+        [group-name="${groupName}"]
+        vis-editor-agg-params:not(.ng-hide)
+        ${childAggregationType ? `vis-editor-agg-params[group-name="'${childAggregationType}'"]:not(.ng-hide)` : ''}
+        .agg-select
+      `;
+
       await retry.try(async () => {
         await find.clickByCssSelector(selector);
         const input = await find.byCssSelector(`${selector} input.ui-select-search`);
@@ -483,8 +494,14 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
       return await field.getVisibleText();
     }
 
-    async selectField(fieldValue, groupName = 'buckets') {
-      const selector = `[group-name="${groupName}"] vis-editor-agg-params:not(.ng-hide) .field-select`;
+    async selectField(fieldValue, groupName = 'buckets', childAggregationType = null) {
+      const selector = `
+        [group-name="${groupName}"]
+        vis-editor-agg-params:not(.ng-hide)
+        ${childAggregationType ? `vis-editor-agg-params[group-name="'${childAggregationType}'"]:not(.ng-hide)` : ''}
+        .field-select
+      `;
+
       await retry.try(async () => {
         await find.clickByCssSelector(selector);
         const input = await find.byCssSelector(`${selector} input.ui-select-search`);
@@ -562,7 +579,9 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
     async clickGo() {
       await testSubjects.click('visualizeEditorRenderButton');
       await PageObjects.header.waitUntilLoadingHasFinished();
-      await visualization.waitForRender();
+      // For some reason there are two `data-render-complete` tags on each visualization in the visualize page.
+      const countOfDataCompleteFlags = 2;
+      await renderable.waitForRender(countOfDataCompleteFlags);
     }
 
     async clickReset() {
@@ -583,12 +602,64 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
       await PageObjects.header.waitUntilLoadingHasFinished();
     }
 
+
+    async changeHeatmapColorNumbers(value = 6) {
+      const input = await testSubjects.find(`heatmapOptionsColorsNumberInput`);
+      await input.clearValue();
+      await input.type(`${value}`);
+    }
+
     async clickMetricsAndAxes() {
       await testSubjects.click('visEditorTabadvanced');
     }
 
+    async clickOptionsTab() {
+      await testSubjects.click('visEditorTaboptions');
+    }
+
+    async clickEnableCustomRanges() {
+      await testSubjects.click('heatmapEnableCustomRanges');
+    }
+
+    async clickAddRange() {
+      await testSubjects.click(`heatmapAddRangeButton`);
+    }
+
+    async isCustomRangeTableShown() {
+      await testSubjects.exists('heatmapCustomRangesTable');
+    }
+
+    async addCustomRange(from, to) {
+      const table = await testSubjects.find('heatmapCustomRangesTable');
+      const lastRow = await table.findByCssSelector('tr:last-child');
+      const fromCell = await lastRow.findByCssSelector('td:first-child input');
+      fromCell.clearValue();
+      fromCell.type(`${from}`);
+      const toCell = await lastRow.findByCssSelector('td:nth-child(2) input');
+      toCell.clearValue();
+      toCell.type(`${to}`);
+    }
+    async clickYAxisOptions(axisId) {
+      await testSubjects.click(`toggleYAxisOptions-${axisId}`);
+    }
+
+    async clickYAxisAdvancedOptions(axisId) {
+      await testSubjects.click(`toggleYAxisAdvancedOptions-${axisId}`);
+    }
+
+    async changeYAxisFilterLabelsCheckbox(axisId, enabled) {
+      const selector = `yAxisFilterLabelsCheckbox-${axisId}`;
+      enabled ? await this.checkCheckbox(selector) : await this.uncheckCheckbox(selector);
+    }
+
     async selectChartMode(mode) {
       const selector = await find.byCssSelector(`#seriesMode0 > option[label="${mode}"]`);
+      await selector.click();
+    }
+
+    async selectYAxisScaleType(axisId, scaleType) {
+      const selectElement = await testSubjects.find(`scaleSelectYAxis-${axisId}`);
+      const selector = await selectElement.findByCssSelector(`option[label="${scaleType}"]`);
       await selector.click();
     }
 
@@ -973,6 +1044,14 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
           throw new Error('legend color selector not open');
         }
       });
+    }
+
+    async filterOnTableCell(column, row) {
+      const table = await testSubjects.find('tableVis');
+      const cell = await table.findByCssSelector(`tbody tr:nth-child(${row}) td:nth-child(${column})`);
+      await remote.moveMouseTo(cell);
+      const filterBtn = await testSubjects.findDescendant('filterForCellValue', cell);
+      await filterBtn.click();
     }
 
     async doesLegendColorChoiceExist(color) {

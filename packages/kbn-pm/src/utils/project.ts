@@ -46,6 +46,7 @@ export class Project {
   public readonly json: IPackageJson;
   public readonly packageJsonLocation: string;
   public readonly nodeModulesLocation: string;
+  public readonly optimizeLocation: string;
   public readonly targetLocation: string;
   public readonly path: string;
   public readonly allDependencies: IPackageDependencies;
@@ -59,6 +60,7 @@ export class Project {
 
     this.packageJsonLocation = resolvePath(this.path, 'package.json');
     this.nodeModulesLocation = resolvePath(this.path, 'node_modules');
+    this.optimizeLocation = resolvePath(this.path, 'optimize');
     this.targetLocation = resolvePath(this.path, 'target');
 
     this.productionDependencies = this.json.dependencies || {};

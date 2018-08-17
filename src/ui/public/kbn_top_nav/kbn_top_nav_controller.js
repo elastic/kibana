@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { capitalize, isArray, isFunction } from 'lodash';
+import { capitalize, isArray, isFunction, get } from 'lodash';
 
 import chrome from '../chrome';
 import filterTemplate from '../chrome/config/filter.html';
@@ -79,11 +79,12 @@ export function KbnTopNavControllerProvider($compile) {
     toggle = (key) => { this.setCurrent(this.isCurrent(key) ? null : key); };
     click = (key) => { this.handleClick(this.getItem(key)); };
     getItem = (key) => { return this.menuItems.find(i => i.key === key); };
-    handleClick = (menuItem) => {
+    handleClick = (menuItem, event) => {
       if (menuItem.disableButton()) {
         return false;
       }
-      menuItem.run(menuItem, this);
+      // event will be undefined when method is called from click
+      menuItem.run(menuItem, this, get(event, 'target'));
     };
     // apply the defaults to individual options
     _applyOptDefault(opt = {}) {

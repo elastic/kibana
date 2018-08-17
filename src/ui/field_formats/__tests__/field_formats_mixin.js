@@ -27,26 +27,26 @@ import { createServer } from '../../../test_utils/kbn_server';
 describe('server.registerFieldFormat(createFormat)', () => {
   const sandbox = sinon.createSandbox();
 
-  let server;
+  let kbnServer;
   beforeEach(async () => {
-    const kbnServer = createServer();
+    kbnServer = createServer();
     await kbnServer.ready();
-    server = kbnServer.server;
   });
 
-  afterEach(() => {
+  afterEach(async () => {
     sandbox.restore();
+    await kbnServer.close();
   });
 
   it('throws if createFormat is not a function', () => {
-    expect(() => server.registerFieldFormat()).to.throwError(error => {
+    expect(() => kbnServer.server.registerFieldFormat()).to.throwError(error => {
       expect(error.message).to.match(/createFormat is not a function/i);
     });
   });
 
   it('calls the createFormat() function with the FieldFormat class', () => {
     const createFormat = sinon.stub();
-    server.registerFieldFormat(createFormat);
+    kbnServer.server.registerFieldFormat(createFormat);
     sinon.assert.calledOnce(createFormat);
     sinon.assert.calledWithExactly(createFormat, sinon.match.same(FieldFormat));
   });
@@ -61,9 +61,9 @@ describe('server.registerFieldFormat(createFormat)', () => {
     class FooFormat {
       static id = 'foo'
     }
-    server.registerFieldFormat(() => FooFormat);
+    kbnServer.server.registerFieldFormat(() => FooFormat);
 
-    const fieldFormats = await server.fieldFormatServiceFactory({
+    const fieldFormats = await kbnServer.server.fieldFormatServiceFactory({
       getAll: () => ({}),
       getDefaults: () => ({})
     });

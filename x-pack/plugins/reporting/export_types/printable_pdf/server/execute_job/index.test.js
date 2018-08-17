@@ -42,7 +42,7 @@ beforeEach(() => {
       'xpack.reporting.kibanaServer.protocol': 'http',
       'xpack.reporting.kibanaServer.hostname': 'localhost',
       'xpack.reporting.kibanaServer.port': 5601,
-      'server.basePath': ''
+      'server.basePath': '/sbp'
     }[key];
   });
 
@@ -106,6 +106,37 @@ test(`omits blacklisted headers`, async () => {
   expect(generatePdfObservable).toBeCalledWith(undefined, [], undefined, permittedHeaders, undefined, undefined);
 });
 
+test('uses basePath from job when creating saved object service', async () => {
+  const encryptedHeaders = await encryptHeaders({});
+
+  const logo = 'custom-logo';
+  mockServer.uiSettingsServiceFactory().get.mockReturnValue(logo);
+
+  const generatePdfObservable = generatePdfObservableFactory();
+  generatePdfObservable.mockReturnValue(Rx.of(Buffer.from('')));
+
+  const executeJob = executeJobFactory(mockServer);
+  const jobBasePath = '/sbp/s/marketing';
+  await executeJob({ objects: [], headers: encryptedHeaders, basePath: jobBasePath }, cancellationToken);
+
+  expect(mockServer.savedObjects.getScopedSavedObjectsClient.mock.calls[0][0].getBasePath()).toBe(jobBasePath);
+});
+
+test(`uses basePath from server if job doesn't have a basePath when creating saved object service`, async () => {
+  const encryptedHeaders = await encryptHeaders({});
+
+  const logo = 'custom-logo';
+  mockServer.uiSettingsServiceFactory().get.mockReturnValue(logo);
+
+  const generatePdfObservable = generatePdfObservableFactory();
+  generatePdfObservable.mockReturnValue(Rx.of(Buffer.from('')));
+
+  const executeJob = executeJobFactory(mockServer);
+  await executeJob({ objects: [], headers: encryptedHeaders }, cancellationToken);
+
+  expect(mockServer.savedObjects.getScopedSavedObjectsClient.mock.calls[0][0].getBasePath()).toBe('/sbp');
+});
+
 test(`gets logo from uiSettings`, async () => {
   const encryptedHeaders = await encryptHeaders({});
 
@@ -145,9 +176,9 @@ test(`adds forceNow to hash's query, if it exists`, async () => {
   const executeJob = executeJobFactory(mockServer);
   const forceNow = '2000-01-01T00:00:00.000Z';
 
-  await executeJob({ objects: [{ relativeUrl: 'app/kibana#/something' }], forceNow, headers: encryptedHeaders }, cancellationToken);
+  await executeJob({ objects: [{ relativeUrl: '/app/kibana#/something' }], forceNow, headers: encryptedHeaders }, cancellationToken);
 
-  expect(generatePdfObservable).toBeCalledWith(undefined, ['http://localhost:5601/app/kibana#/something?forceNow=2000-01-01T00%3A00%3A00.000Z'], undefined, {}, undefined, undefined);
+  expect(generatePdfObservable).toBeCalledWith(undefined, ['http://localhost:5601/sbp/app/kibana#/something?forceNow=2000-01-01T00%3A00%3A00.000Z'], undefined, {}, undefined, undefined);
 });
 
 test(`appends forceNow to hash's query, if it exists`, async () => {
@@ -160,12 +191,12 @@ test(`appends forceNow to hash's query, if it exists`, async () => {
   const forceNow = '2000-01-01T00:00:00.000Z';
 
   await executeJob({
-    objects: [{ relativeUrl: 'app/kibana#/something?_g=something' }],
+    objects: [{ relativeUrl: '/app/kibana#/something?_g=something' }],
     forceNow,
     headers: encryptedHeaders
   }, cancellationToken);
 
-  expect(generatePdfObservable).toBeCalledWith(undefined, ['http://localhost:5601/app/kibana#/something?_g=something&forceNow=2000-01-01T00%3A00%3A00.000Z'], undefined, {}, undefined, undefined);
+  expect(generatePdfObservable).toBeCalledWith(undefined, ['http://localhost:5601/sbp/app/kibana#/something?_g=something&forceNow=2000-01-01T00%3A00%3A00.000Z'], undefined, {}, undefined, undefined);
 });
 
 test(`doesn't append forceNow query to url, if it doesn't exists`, async () => {
@@ -176,9 +207,9 @@ test(`doesn't append forceNow query to url, if it doesn't exists`, async () => {
 
   const executeJob = executeJobFactory(mockServer);
 
-  await executeJob({ objects: [{ relativeUrl: 'app/kibana#/something' }], headers: encryptedHeaders }, cancellationToken);
+  await executeJob({ objects: [{ relativeUrl: '/app/kibana#/something' }], headers: encryptedHeaders }, cancellationToken);
 
-  expect(generatePdfObservable).toBeCalledWith(undefined, ['http://localhost:5601/app/kibana#/something'], undefined, {}, undefined, undefined);
+  expect(generatePdfObservable).toBeCalledWith(undefined, ['http://localhost:5601/sbp/app/kibana#/something'], undefined, {}, undefined, undefined);
 });
 
 test(`returns content_type of application/pdf`, async () => {

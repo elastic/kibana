@@ -53,16 +53,27 @@ jest.mock('ui/notify/fatal_error', () => {
   };
 });
 
+const mockNotifyToastsInit = jest.fn();
+jest.mock('ui/notify/toasts', () => {
+  mockLoadOrder.push('ui/notify/toasts');
+  return {
+    __newPlatformInit__: mockNotifyToastsInit,
+  };
+});
+
 import { LegacyPlatformService } from './legacy_platform_service';
 
 const fatalErrorsStartContract = {} as any;
+const notificationsStartContract = {
+  toasts: {},
+} as any;
 
 const injectedMetadataStartContract = {
   getLegacyMetadata: jest.fn(),
 };
 
 const defaultParams = {
-  rootDomElement: { someDomElement: true } as any,
+  targetDomElement: document.createElement('div'),
   requireLegacyFiles: jest.fn(() => {
     mockLoadOrder.push('legacy files');
   }),
@@ -88,6 +99,7 @@ describe('#start()', () => {
       legacyPlatform.start({
         fatalErrors: fatalErrorsStartContract,
         injectedMetadata: injectedMetadataStartContract,
+        notifications: notificationsStartContract,
       });
 
       expect(mockUiMetadataInit).toHaveBeenCalledTimes(1);
@@ -102,14 +114,30 @@ describe('#start()', () => {
       legacyPlatform.start({
         fatalErrors: fatalErrorsStartContract,
         injectedMetadata: injectedMetadataStartContract,
+        notifications: notificationsStartContract,
       });
 
       expect(mockFatalErrorInit).toHaveBeenCalledTimes(1);
       expect(mockFatalErrorInit).toHaveBeenCalledWith(fatalErrorsStartContract);
     });
 
+    it('passes toasts service to ui/notify/toasts', () => {
+      const legacyPlatform = new LegacyPlatformService({
+        ...defaultParams,
+      });
+
+      legacyPlatform.start({
+        fatalErrors: fatalErrorsStartContract,
+        injectedMetadata: injectedMetadataStartContract,
+        notifications: notificationsStartContract,
+      });
+
+      expect(mockNotifyToastsInit).toHaveBeenCalledTimes(1);
+      expect(mockNotifyToastsInit).toHaveBeenCalledWith(notificationsStartContract.toasts);
+    });
+
     describe('useLegacyTestHarness = false', () => {
-      it('passes the rootDomElement to ui/chrome', () => {
+      it('passes the targetDomElement to ui/chrome', () => {
         const legacyPlatform = new LegacyPlatformService({
           ...defaultParams,
         });
@@ -117,15 +145,16 @@ describe('#start()', () => {
         legacyPlatform.start({
           fatalErrors: fatalErrorsStartContract,
           injectedMetadata: injectedMetadataStartContract,
+          notifications: notificationsStartContract,
         });
 
         expect(mockUiTestHarnessBootstrap).not.toHaveBeenCalled();
         expect(mockUiChromeBootstrap).toHaveBeenCalledTimes(1);
-        expect(mockUiChromeBootstrap).toHaveBeenCalledWith(defaultParams.rootDomElement);
+        expect(mockUiChromeBootstrap).toHaveBeenCalledWith(defaultParams.targetDomElement);
       });
     });
     describe('useLegacyTestHarness = true', () => {
-      it('passes the rootDomElement to ui/test_harness', () => {
+      it('passes the targetDomElement to ui/test_harness', () => {
         const legacyPlatform = new LegacyPlatformService({
           ...defaultParams,
           useLegacyTestHarness: true,
@@ -134,11 +163,12 @@ describe('#start()', () => {
         legacyPlatform.start({
           fatalErrors: fatalErrorsStartContract,
           injectedMetadata: injectedMetadataStartContract,
+          notifications: notificationsStartContract,
         });
 
         expect(mockUiChromeBootstrap).not.toHaveBeenCalled();
         expect(mockUiTestHarnessBootstrap).toHaveBeenCalledTimes(1);
-        expect(mockUiTestHarnessBootstrap).toHaveBeenCalledWith(defaultParams.rootDomElement);
+        expect(mockUiTestHarnessBootstrap).toHaveBeenCalledWith(defaultParams.targetDomElement);
       });
     });
   });
@@ -155,11 +185,13 @@ describe('#start()', () => {
         legacyPlatform.start({
           fatalErrors: fatalErrorsStartContract,
           injectedMetadata: injectedMetadataStartContract,
+          notifications: notificationsStartContract,
         });
 
         expect(mockLoadOrder).toEqual([
           'ui/metadata',
           'ui/notify/fatal_error',
+          'ui/notify/toasts',
           'ui/chrome',
           'legacy files',
         ]);
@@ -178,11 +210,13 @@ describe('#start()', () => {
         legacyPlatform.start({
           fatalErrors: fatalErrorsStartContract,
           injectedMetadata: injectedMetadataStartContract,
+          notifications: notificationsStartContract,
         });
 
         expect(mockLoadOrder).toEqual([
           'ui/metadata',
           'ui/notify/fatal_error',
+          'ui/notify/toasts',
           'ui/test_harness',
           'legacy files',
         ]);
@@ -192,29 +226,28 @@ describe('#start()', () => {
 });
 
 describe('#stop()', () => {
-  it('does nothing if angular was not bootstrapped to rootDomElement', () => {
-    const rootDomElement = document.createElement('div');
-    rootDomElement.innerHTML = `
-      <h1>foo</h1>
-      <h2>bar</h2>
+  it('does nothing if angular was not bootstrapped to targetDomElement', () => {
+    const targetDomElement = document.createElement('div');
+    targetDomElement.innerHTML = `
+      <h1>this should not be removed</h1>
     `;
 
     const legacyPlatform = new LegacyPlatformService({
       ...defaultParams,
-      rootDomElement,
+      targetDomElement,
     });
 
     legacyPlatform.stop();
-    expect(rootDomElement).toMatchSnapshot();
+    expect(targetDomElement).toMatchSnapshot();
   });
 
-  it('destroys the angular scope and empties the rootDomElement if angular is bootstraped to rootDomElement', () => {
-    const rootDomElement = document.createElement('div');
+  it('destroys the angular scope and empties the targetDomElement if angular is bootstraped to targetDomElement', () => {
+    const targetDomElement = document.createElement('div');
     const scopeDestroySpy = jest.fn();
 
     const legacyPlatform = new LegacyPlatformService({
       ...defaultParams,
-      rootDomElement,
+      targetDomElement,
     });
 
     // simulate bootstraping with a module "foo"
@@ -225,15 +258,15 @@ describe('#stop()', () => {
       },
     }));
 
-    rootDomElement.innerHTML = `
+    targetDomElement.innerHTML = `
       <bar></bar>
     `;
 
-    angular.bootstrap(rootDomElement, ['foo']);
+    angular.bootstrap(targetDomElement, ['foo']);
 
     legacyPlatform.stop();
 
-    expect(rootDomElement).toMatchSnapshot();
+    expect(targetDomElement).toMatchSnapshot();
     expect(scopeDestroySpy).toHaveBeenCalledTimes(1);
   });
 });

@@ -7,7 +7,7 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { isReservedRole } from '../../../../../lib/role';
-import { getKibanaPrivilegesViewModel, getKibanaPrivileges } from '../../lib/get_application_privileges';
+import { getKibanaPrivilegesViewModel } from '../../lib/get_application_privileges';
 
 import { CollapsiblePanel } from '../collapsible_panel';
 import {
@@ -78,20 +78,18 @@ export class KibanaPrivileges extends Component {
   onKibanaPrivilegesChange = (e) => {
     const role = {
       ...this.props.role,
-      kibana: [...this.props.role.kibana]
+      kibana: {
+        ...this.props.role.kibana
+      }
     };
 
     const privilege = e.target.value;
 
     if (privilege === noPrivilegeValue) {
       // unsetting all privileges -- only necessary until RBAC Phase 3
-      const noPrivileges = {};
-      role.kibana = getKibanaPrivileges(noPrivileges);
+      role.kibana.global = [];
     } else {
-      const newPrivileges = {
-        [privilege]: true
-      };
-      role.kibana = getKibanaPrivileges(newPrivileges);
+      role.kibana.global = [privilege];
     }
 
     this.props.onChange(role);

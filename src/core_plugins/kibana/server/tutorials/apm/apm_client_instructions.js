@@ -138,17 +138,16 @@ export const RAILS_CLIENT_INSTRUCTIONS = [
 
 # Set service name - allowed characters: a-z, A-Z, 0-9, -, _ and space
 # Defaults to the name of your Rails app
-service_name: ''
+# service_name: 'my-service'
 
 # Use if APM Server requires a token
-secret_token: ''
+# secret_token: ''
 
 # Set custom APM Server URL (default: http://localhost:8200)
-server_url: ''`.split('\n'),
+# server_url: 'http://localhost:8200'`.split('\n'),
     textPost:
       'See the [documentation]' +
-      '({config.docs.base_url}guide/en/apm/agent/ruby/1.x/index.html) for configuration options and advanced usage.\n\n' +
-      '**Warning: The Ruby agent is currently in Beta and not meant for production use.**',
+      '({config.docs.base_url}guide/en/apm/agent/ruby/1.x/index.html) for configuration options and advanced usage.\n\n',
   },
 ];
 
@@ -161,7 +160,7 @@ export const RACK_CLIENT_INSTRUCTIONS = [
   {
     title: 'Configure the agent',
     textPre:
-      'Rack or compatible framework (like Sinatra). Include the middleware in your app and start the agent.',
+      'For Rack or a compatible framework (e.g. Sinatra), include the middleware in your app and start the agent.',
     commands: `# config.ru
   require 'sinatra/base'
 
@@ -186,18 +185,17 @@ export const RACK_CLIENT_INSTRUCTIONS = [
     commands: `# config/elastic_apm.yml:
 
 # Set service name - allowed characters: a-z, A-Z, 0-9, -, _ and space
-# Defaults to the name of your Rails app
-service_name: ''
+# Defaults to the name of your Rack app's class.
+# service_name: 'my-service'
 
 # Use if APM Server requires a token
-secret_token: ''
+# secret_token: ''
 
 # Set custom APM Server URL (default: http://localhost:8200)
-server_url: ''`.split('\n'),
+# server_url: 'http://localhost:8200'`.split('\n'),
     textPost:
       'See the [documentation]' +
-      '({config.docs.base_url}guide/en/apm/agent/ruby/1.x/index.html) for configuration options and advanced usage.\n\n' +
-      '**Warning: The Rack agent is currently in Beta and not meant for production use.**',
+      '({config.docs.base_url}guide/en/apm/agent/ruby/1.x/index.html) for configuration options and advanced usage.\n\n',
   },
 ];
 
