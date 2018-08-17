@@ -6,7 +6,6 @@
 
 import React from 'react';
 import { withRouter } from 'react-router-dom';
-import styled from 'styled-components';
 
 import {
   EuiModal,
@@ -15,6 +14,8 @@ import {
   EuiPageBody,
   EuiPageContent,
   EuiPageContentBody,
+  EuiPageHeader,
+  EuiPageHeaderSection,
   EuiTitle,
 } from '@elastic/eui';
 
@@ -25,27 +26,21 @@ interface PrimaryLayoutProps {
   modalClosePath?: string;
 }
 
-const HeaderContainer = styled.div`
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  padding: 24px 24px 0;
-  margin-bottom: 16px;
-`;
-
 export const PrimaryLayout: React.SFC<PrimaryLayoutProps> = withRouter<any>(
   ({ actionSection, title, modalRender, modalClosePath, children, history }) => {
     const modalContent = modalRender && modalRender();
     return (
       <EuiPage>
         <EuiPageBody>
-          <EuiPageContent>
-            <HeaderContainer>
+          <EuiPageHeader>
+            <EuiPageHeaderSection>
               <EuiTitle>
                 <h1>{title}</h1>
               </EuiTitle>
-              {actionSection}
-            </HeaderContainer>
+            </EuiPageHeaderSection>
+            <EuiPageHeaderSection> {actionSection}</EuiPageHeaderSection>
+          </EuiPageHeader>
+          <EuiPageContent>
             <EuiPageContentBody>{children}</EuiPageContentBody>
           </EuiPageContent>
         </EuiPageBody>
