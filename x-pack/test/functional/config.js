@@ -76,14 +76,6 @@ export default async function ({ readConfigFile }) {
     },
   };
 
-  const env = {
-    kibana: {
-      server: {
-        uuid: '5b2de169-2785-441b-ae8c-186a1936b17d', // Kibana UUID for "primary" cluster in monitoring data
-      }
-    }
-  };
-
   return {
     // list paths to the files that contain your plugins tests
     testFiles: [
@@ -145,8 +137,6 @@ export default async function ({ readConfigFile }) {
 
     servers,
 
-    env,
-
     esTestCluster: {
       license: 'trial',
       from: 'snapshot',
@@ -160,7 +150,7 @@ export default async function ({ readConfigFile }) {
       ...kibanaCommonConfig.get('kbnTestServer'),
       serverArgs: [
         ...kibanaCommonConfig.get('kbnTestServer.serverArgs'),
-        `--server.uuid=${env.kibana.server.uuid}`,
+        '--server.uuid=5b2de169-2785-441b-ae8c-186a1936b17d',
         `--server.port=${servers.kibana.port}`,
         `--elasticsearch.url=${formatUrl(servers.elasticsearch)}`,
         '--xpack.xpack_main.telemetry.enabled=false',
