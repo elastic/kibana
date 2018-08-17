@@ -34,14 +34,8 @@ describe('cli invalid config support', function () {
 
     const logLines = stdout.toString('utf8')
       .split('\n')
-      .map(l => {
-        try {
-          return JSON.parse(l);
-        } catch(e) {
-          return;
-        }
-      })
       .filter(Boolean)
+      .map(JSON.parse)
       .map(obj => ({
         ...obj,
         pid: '## PID ##',

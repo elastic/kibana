@@ -276,20 +276,27 @@ function shouldStartRepl(opts) {
 }
 
 function logFatal(error, server) {
-  const stack = _.get(error, 'stack');
-  const message = _.get(error, 'message');
-  const duck = Boolean(stack) & Boolean(message);
-  const loggedError = duck
-    ? Object.assign(
-      new Error(message),
-      { stack }
-    )
-    : `${error}`;
-
   try {
-    if (server) server.log(['fatal'], loggedError);
-  } finally {
+    if (server && server.log) server.log(['fatal'], error);
+  } catch(e) {
     // It's possible for the Hapi logger to not be setup
-    console.log('FATAL', loggedError);
+  } finally {
+    // https://nodejs.org/api/errors.html#errors_error_info
+    const pickedError = _.pick(error, [
+      'code',
+      'errno',
+      'stack',
+      'path',
+      'address',
+      'port'
+    ]);
+    const duck = Boolean(pickedError.stack) && Boolean(pickedError.message);
+    const loggedError = duck
+      ? Object.assign(
+        new Error(pickedError.message),
+        _.omit(pickedError, 'message')
+      )
+      : error.toString();
+    console.error('FATAL', loggedError);
   }
 }

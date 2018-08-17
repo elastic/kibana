@@ -6,7 +6,7 @@ Array [
     "@timestamp": "## @timestamp ##",
     "error": Object {
       "message": "child \\"elasticsearch\\" fails because [child \\"url\\" fails because [\\"url\\" must be a string]]",
-      "name": "Error",
+      "name": "ValidationError",
     },
     "level": "fatal",
     "message": "child \\"elasticsearch\\" fails because [child \\"url\\" fails because [\\"url\\" must be a string]]",
