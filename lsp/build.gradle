@@ -11,11 +11,11 @@ project("javascript-typescript-langserver") {
     download = true
   }
 
-  tasks.withType(NpmTask) { task ->
+  tasks.withType(YarnTask) { task ->
     task.environment = ['FORCE_COLOR': 'true']
   }
 
-  task build(type: NpmTask, dependsOn: "npm_install") {
+  task build(type: YarnTask, dependsOn: [yarn]) {
     args = ['run', "build"]
   }
 

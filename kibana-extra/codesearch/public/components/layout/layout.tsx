@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { DetailSymbolInformation } from '@codesearch/javascript-typescript-langserver';
+import { DetailSymbolInformation } from '@codesearch/lsp-extension';
 import {
   EuiButtonIcon,
   EuiComboBox,

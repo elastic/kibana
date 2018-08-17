@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { DetailSymbolInformation } from '@codesearch/javascript-typescript-langserver';
+import { DetailSymbolInformation } from '@codesearch/lsp-extension';
 
 import { Repository } from '../model';
 import { RepositoryUri } from './repository';

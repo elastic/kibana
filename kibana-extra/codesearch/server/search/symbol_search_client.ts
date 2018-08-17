@@ -5,7 +5,7 @@
  */
 
 import { EsClient } from '@codesearch/esqueue';
-import { DetailSymbolInformation } from '@codesearch/javascript-typescript-langserver';
+import { DetailSymbolInformation } from '@codesearch/lsp-extension';
 
 import { SymbolSearchRequest, SymbolSearchResult } from '../../model';
 import { SymbolIndexNamePrefix } from '../indexer/schema';

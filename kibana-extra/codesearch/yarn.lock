@@ -24,10 +24,6 @@
   version "0.0.0"
   uid ""
 
-"@codesearch/lsp-extension@link:../../lsp/javascript-typescript-langserver/packages/lsp-extension":
-  version "0.0.0"
-  uid ""
-
 "@elastic/eui@^3.0.0":
   version "3.2.0"
   resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-3.2.0.tgz#a995d440ebf2e5d49cb5ad3b20879afd5b12edf3"
@@ -943,6 +939,10 @@ co@^4.6.0:
 code-point-at@^1.0.0:
   version "1.1.0"
   resolved "https://registry.yarnpkg.com/code-point-at/-/code-point-at-1.1.0.tgz#0d070b4d043a5bea33a2f1a40e2edb3d9a4ccf77"
+
+"codesearch-lsp-extension@link:../../lsp/javascript-typescript-langserver/packages/lsp-extension":
+  version "0.0.0"
+  uid ""
 
 coffee-script@^1.10.0:
   version "1.12.7"
