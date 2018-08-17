@@ -2,7 +2,7 @@
 
 exports[`isCloudEnabled is false should not render instruction toggle when ON_PREM_ELASTIC_CLOUD instructions are not provided 1`] = `
 <EuiPage
-  className="home"
+  className="homPage"
   restrictWidth={false}
 >
   <EuiPageBody
@@ -78,7 +78,7 @@ exports[`isCloudEnabled is false should not render instruction toggle when ON_PR
 
 exports[`isCloudEnabled is false should render ON_PREM instructions with instruction toggle 1`] = `
 <EuiPage
-  className="home"
+  className="homPage"
   restrictWidth={false}
 >
   <EuiPageBody
@@ -173,7 +173,7 @@ exports[`isCloudEnabled is false should render ON_PREM instructions with instruc
 
 exports[`should render ELASTIC_CLOUD instructions when isCloudEnabled is true 1`] = `
 <EuiPage
-  className="home"
+  className="homPage"
   restrictWidth={false}
 >
   <EuiPageBody

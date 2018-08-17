@@ -58,7 +58,7 @@ export class RadioButtonGroup extends React.Component {
       }
       return (
         <KuiButton
-          className="kuiRadioButton"
+          className="homRadioButtonGroup__button"
           buttonType={buttonType}
           onClick={handleOnClick}
           key={index}
@@ -73,7 +73,6 @@ export class RadioButtonGroup extends React.Component {
   render = () => {
     return (
       <KuiButtonGroup
-        className="radioButtonGroup"
         isUnited
       >
         {this.renderButtons()}

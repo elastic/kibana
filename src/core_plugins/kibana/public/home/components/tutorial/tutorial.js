@@ -280,7 +280,7 @@ export class Tutorial extends React.Component {
     let content;
     if (this.state.notFound) {
       content = (
-        <div className="homePanel">
+        <div className="homTutorial__notFoundPanel">
           <EuiText>
             <p>
               Unable to find tutorial {this.props.tutorialId}
@@ -328,7 +328,7 @@ export class Tutorial extends React.Component {
       );
     }
     return (
-      <EuiPage className="home">
+      <EuiPage className="homPage">
         <EuiPageBody>
 
           <div>
