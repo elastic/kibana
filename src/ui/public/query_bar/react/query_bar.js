@@ -19,8 +19,24 @@
 
 import React from 'react';
 
-export function QueryBar() {
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiFieldSearch,
+} from '@elastic/eui';
 
-
-  return (<div>Hello world!</div>);
+export function QueryBar({ query, onSubmit }) {
+  return (
+    <EuiFlexGroup>
+      <EuiFlexItem>
+        {/*Need an onChange to update state, but should this be a stateful component or should it call a callback */}
+        <EuiFieldSearch
+          placeholder="Search..."
+          value={query.query}
+          onSearch={onSubmit}
+          fullWidth
+        />
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  );
 }
