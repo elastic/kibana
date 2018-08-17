@@ -17,23 +17,25 @@
  * under the License.
  */
 
-jest.mock('../chrome', () => ({
-  addBasePath: (path: string) => `http://localhost.com/myBase/${path}`,
-}));
+import { merge } from 'lodash';
+// @ts-ignore not really worth typing
+import { metadata } from 'ui/metadata';
+import { Interceptor } from './kfetch';
 
-jest.mock('../metadata', () => ({
-  metadata: {
-    version: 'my-version',
+export const defaultInterceptor: Interceptor = {
+  request: (config: any) => {
+    return merge(
+      {
+        method: 'GET',
+        credentials: 'same-origin',
+        headers: {
+          'Content-Type': 'application/json',
+          'kbn-version': metadata.version,
+        },
+      },
+      config
+    );
   },
-}));
 
-import { kfetchAbortable } from './kfetch_abortable';
-
-describe('kfetchAbortable', () => {
-  it('should return an object with a fetching promise and an abort callback', () => {
-    const { fetching, abort } = kfetchAbortable({ pathname: 'my/path' });
-    expect(typeof fetching.then).toBe('function');
-    expect(typeof fetching.catch).toBe('function');
-    expect(typeof abort).toBe('function');
-  });
-});
+  response: (res: any) => res.json(),
+};

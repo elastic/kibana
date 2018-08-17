@@ -17,23 +17,14 @@
  * under the License.
  */
 
-jest.mock('../chrome', () => ({
-  addBasePath: (path: string) => `http://localhost.com/myBase/${path}`,
-}));
+export class FetchError extends Error {
+  constructor(public readonly res: Response, public readonly body?: any) {
+    super(res.statusText);
 
-jest.mock('../metadata', () => ({
-  metadata: {
-    version: 'my-version',
-  },
-}));
-
-import { kfetchAbortable } from './kfetch_abortable';
-
-describe('kfetchAbortable', () => {
-  it('should return an object with a fetching promise and an abort callback', () => {
-    const { fetching, abort } = kfetchAbortable({ pathname: 'my/path' });
-    expect(typeof fetching.then).toBe('function');
-    expect(typeof fetching.catch).toBe('function');
-    expect(typeof abort).toBe('function');
-  });
-});
+    // captureStackTrace is only available in the V8 engine, so any browser using
+    // a different JS engine won't have access to this method.
+    if (Error.captureStackTrace) {
+      Error.captureStackTrace(this, FetchError);
+    }
+  }
+}
