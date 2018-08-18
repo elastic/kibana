@@ -24,7 +24,7 @@ esSection.register('rollup_jobs', {
   visible: true,
   display: 'Rollup Jobs',
   order: 2,
-  url: `#${CRUD_APP_BASE_PATH}`
+  url: `#${CRUD_APP_BASE_PATH}`,
 });
 
 export const manageAngularLifecycle = ($scope, $route, elem) => {

@@ -8,6 +8,21 @@ import React, { Component, Fragment } from 'react';
 import PropTypes from 'prop-types';
 
 import {
+  EuiButton,
+  EuiPage,
+  EuiPageBody,
+  EuiPageContent,
+  EuiSpacer,
+  EuiTitle,
+  EuiFlexGroup,
+  EuiFlexItem,
+} from '@elastic/eui';
+
+import { CRUD_APP_BASE_PATH } from '../../../../common/constants';
+
+import { getRouterLinkProps } from '../../services';
+
+import {
   JobTable,
 } from './job_table';
 
@@ -36,10 +51,31 @@ export class JobList extends Component {
 
   render() {
     return (
-      <Fragment>
-        <JobTable />
-        <DetailPanel />
-      </Fragment>
+      <EuiPage>
+        <EuiPageBody>
+          <EuiPageContent>
+            <EuiFlexGroup justifyContent="spaceBetween">
+              <EuiFlexItem grow={false}>
+                <EuiTitle size="l">
+                  <h1>Rollup jobs</h1>
+                </EuiTitle>
+              </EuiFlexItem>
+
+              <EuiFlexItem grow={false}>
+                <EuiButton fill {...getRouterLinkProps(`${CRUD_APP_BASE_PATH}create`)}>
+                  Create rollup job
+                </EuiButton>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+
+            <EuiSpacer />
+
+            <JobTable />
+
+            <DetailPanel />
+          </EuiPageContent>
+        </EuiPageBody>
+      </EuiPage>
     );
   }
 }

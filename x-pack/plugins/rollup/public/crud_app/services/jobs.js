@@ -4,7 +4,47 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-function deserializeJob(job) {
+export function serializeJob(jobConfig) {
+  const {
+    id,
+    indexPattern,
+    rollupIndex,
+    rollupCron,
+    rollupInterval,
+    rollupDelay,
+    dateHistogramTimeZone,
+    dateHistogramField,
+    metrics,
+    terms,
+    histogram,
+  } = jobConfig;
+
+  return {
+    config: {
+      id,
+      index_pattern: indexPattern,
+      rollup_index: rollupIndex,
+      cron: rollupCron,
+      metrics,
+      groups: {
+        date_histogram: {
+          interval: rollupInterval,
+          delay: rollupDelay,
+          time_zone: dateHistogramTimeZone,
+          field: dateHistogramField,
+        },
+        terms: {
+          fields: terms,
+        },
+        histogram: {
+          fields: histogram,
+        },
+      },
+    },
+  };
+}
+
+export function deserializeJob(job) {
   const {
     config: {
       id,

@@ -33,3 +33,6 @@ export async function deleteJobs(jobIds) {
   const body = { jobIds };
   return await httpClient.post(`${apiPrefix}/delete`, body);
 }
+
+export async function createJob() {
+}

@@ -10,6 +10,10 @@ export {
 } from './load_jobs';
 
 export {
+  createJob,
+} from './create_job';
+
+export {
   startJobs,
   startJobsSuccess,
 } from './start_jobs';
