@@ -139,10 +139,6 @@ export class Worker extends events.EventEmitter {
           ...doc
         };
         return updatedJob;
-      })
-      .catch((err) => {
-        this.emit(constants.EVENT_WORKER_JOB_CLAIM_ERROR, this._formatErrorParams(err, job));
-        return Promise.reject(err);
       });
   }
 
@@ -327,6 +323,7 @@ export class Worker extends events.EventEmitter {
               this.warn(`_claimPendingJobs encountered a version conflict on updating pending job ${job._id}`, err);
               return; // continue reducing and looking for a different job to claim
             }
+            this.emit(constants.EVENT_WORKER_JOB_CLAIM_ERROR, this._formatErrorParams(err, job));
             return Promise.reject(err);
           });
       });
