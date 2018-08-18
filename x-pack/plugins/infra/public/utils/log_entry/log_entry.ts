@@ -7,7 +7,7 @@
 import { bisector } from 'd3-array';
 
 import { LogEntries as LogEntriesQuery } from '../../../common/graphql/types';
-import { compareToTimeKey, getIndexAtTimeKey } from '../../../common/time';
+import { compareToTimeKey, getIndexAtTimeKey, TimeKey } from '../../../common/time';
 
 export type LogEntry = LogEntriesQuery.Entries;
 
@@ -20,3 +20,9 @@ const logEntryTimeBisector = bisector(compareToTimeKey(getLogEntryKey));
 export const getLogEntryIndexBeforeTime = logEntryTimeBisector.left;
 export const getLogEntryIndexAfterTime = logEntryTimeBisector.right;
 export const getLogEntryIndexAtTime = getIndexAtTimeKey(getLogEntryKey);
+
+export const getLogEntryAtTime = (entries: LogEntry[], time: TimeKey) => {
+  const entryIndex = getLogEntryIndexAtTime(entries, time);
+
+  return entryIndex !== null ? entries[entryIndex] : null;
+};

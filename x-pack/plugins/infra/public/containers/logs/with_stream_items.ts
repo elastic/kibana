@@ -8,17 +8,9 @@ import { connect } from 'react-redux';
 import { createSelector } from 'reselect';
 
 import { SearchResult } from '../../../common/log_search_result';
-import {
-  logEntriesActions,
-  logEntriesSelectors,
-  // searchResultsSelectors,
-  logPositionActions,
-  logPositionSelectors,
-  State,
-} from '../../store';
+import { logEntriesSelectors, logPositionSelectors, State } from '../../store';
 import { LogEntry, LogEntryMessageSegment } from '../../utils/log_entry';
 import { asChildFunctionRenderer } from '../../utils/typed_react';
-import { bindPlainActionCreators } from '../../utils/typed_redux';
 
 export const withStreamItems = connect(
   (state: State) => ({
@@ -26,15 +18,10 @@ export const withStreamItems = connect(
     isLoadingMore: logEntriesSelectors.selectIsLoadingMoreEntries(state),
     hasMoreBeforeStart: logEntriesSelectors.selectHasMoreBeforeStart(state),
     hasMoreAfterEnd: logEntriesSelectors.selectHasMoreAfterEnd(state),
-    isStreaming: logPositionSelectors.selectIsAutoReloading(state),
     lastLoadedTime: logEntriesSelectors.selectEntriesLastLoadedTime(state),
     items: selectItems(state),
-    target: logPositionSelectors.selectTargetPosition(state),
   }),
-  bindPlainActionCreators({
-    jumpToTarget: logPositionActions.jumpToTargetPosition,
-    reportVisibleInterval: logEntriesActions.reportVisibleEntries,
-  })
+  {}
 );
 
 export const WithStreamItems = asChildFunctionRenderer(withStreamItems);

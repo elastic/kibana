@@ -4,14 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { LogEntries as LogEntriesQuery } from '../../../../common/graphql/types';
+import { LogEntries as LogEntriesQuery } from '../../../../../common/graphql/types';
 import {
   createGraphqlOperationActionCreators,
   createGraphqlOperationReducer,
   createGraphqlQueryEpic,
-} from '../../../utils/remote_state/remote_graphql_state';
+} from '../../../../utils/remote_state/remote_graphql_state';
+import { initialLogEntriesState } from '../state';
 import { logEntriesQuery } from './log_entries.gql_query';
-import { initialEntriesGraphqlState } from './state';
 
 const operationKey = 'load';
 
@@ -22,7 +22,7 @@ export const loadEntriesActionCreators = createGraphqlOperationActionCreators<
 
 export const loadEntriesReducer = createGraphqlOperationReducer(
   operationKey,
-  initialEntriesGraphqlState,
+  initialLogEntriesState,
   loadEntriesActionCreators,
   (state, action) => action.payload.result.data.source.logEntriesAround
 );

@@ -11,9 +11,9 @@ import { exhaustMap, filter, map, withLatestFrom } from 'rxjs/operators';
 
 import { pickTimeKey, TimeKey, timeKeyIsBetween } from '../../../../common/time';
 import { logPositionActions } from '../../local/log_position';
-import { loadEntries, loadMoreEntries, reportVisibleEntries } from './actions';
-import { loadMoreEntriesEpic } from './load_more_operation';
-import { loadEntriesEpic } from './load_operation';
+import { loadEntries, loadMoreEntries } from './actions';
+import { loadEntriesEpic } from './operations/load';
+import { loadMoreEntriesEpic } from './operations/load_more';
 
 const LOAD_CHUNK_SIZE = 200;
 const DESIRED_BUFFER_PAGES = 2;
@@ -66,7 +66,7 @@ export const createEntriesEffectsEpic = <State>(): Epic<
   );
 
   const shouldLoadMoreBefore$ = action$.pipe(
-    filter(reportVisibleEntries.match),
+    filter(logPositionActions.reportVisiblePositions.match),
     filter(({ payload: { pagesBeforeStart } }) => pagesBeforeStart < DESIRED_BUFFER_PAGES),
     withLatestFrom(state$),
     filter(([action, state]) => !selectIsAutoReloading(state)),
@@ -78,7 +78,7 @@ export const createEntriesEffectsEpic = <State>(): Epic<
   );
 
   const shouldLoadMoreAfter$ = action$.pipe(
-    filter(reportVisibleEntries.match),
+    filter(logPositionActions.reportVisiblePositions.match),
     filter(({ payload: { pagesAfterEnd } }) => pagesAfterEnd < DESIRED_BUFFER_PAGES),
     withLatestFrom(state$),
     filter(([action, state]) => !selectIsAutoReloading(state)),

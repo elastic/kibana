@@ -18,6 +18,18 @@ export const jumpToTargetPositionTime = (time: number) =>
     time,
   });
 
+export interface ReportVisiblePositionsPayload {
+  pagesAfterEnd: number;
+  pagesBeforeStart: number;
+  endKey: TimeKey | null;
+  middleKey: TimeKey | null;
+  startKey: TimeKey | null;
+}
+
+export const reportVisiblePositions = actionCreator<ReportVisiblePositionsPayload>(
+  'REPORT_VISIBLE_POSITIONS'
+);
+
 export const startAutoReload = actionCreator<number>('START_AUTO_RELOAD');
 
 export const stopAutoReload = actionCreator('STOP_AUTO_RELOAD');

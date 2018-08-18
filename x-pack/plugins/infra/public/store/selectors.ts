@@ -6,6 +6,7 @@
 
 import { createSelector } from 'reselect';
 
+import { getLogEntryAtTime } from '../utils/log_entry';
 import { globalizeSelectors } from '../utils/typed_redux';
 import {
   logMinimapSelectors as localLogMinimapSelectors,
@@ -44,22 +45,22 @@ export const sourceSelectors = globalizeSelectors(selectRemote, remoteSourceSele
  */
 
 export const sharedSelectors = {
-  selectVisibleMidpointOrTargetTime: createSelector(
-    logEntriesSelectors.selectFirstVisibleEntry,
-    logEntriesSelectors.selectLastVisibleEntry,
-    logPositionSelectors.selectTargetPosition,
-    (firstVisibleEntry, lastVisibleEntry, target) => {
-      if (firstVisibleEntry && lastVisibleEntry) {
-        return (firstVisibleEntry.key.time + lastVisibleEntry.key.time) / 2;
-      } else if (firstVisibleEntry) {
-        return firstVisibleEntry.key.time;
-      } else if (lastVisibleEntry) {
-        return lastVisibleEntry.key.time;
-      } else if (target) {
-        return target.time;
-      } else {
-        return null;
-      }
-    }
+  selectFirstVisibleLogEntry: createSelector(
+    logEntriesSelectors.selectEntries,
+    logPositionSelectors.selectFirstVisiblePosition,
+    (entries, firstVisiblePosition) =>
+      firstVisiblePosition ? getLogEntryAtTime(entries, firstVisiblePosition) : null
+  ),
+  selectMiddleVisibleLogEntry: createSelector(
+    logEntriesSelectors.selectEntries,
+    logPositionSelectors.selectMiddleVisiblePosition,
+    (entries, middleVisiblePosition) =>
+      middleVisiblePosition ? getLogEntryAtTime(entries, middleVisiblePosition) : null
+  ),
+  selectLastVisibleLogEntry: createSelector(
+    logEntriesSelectors.selectEntries,
+    logPositionSelectors.selectLastVisiblePosition,
+    (entries, lastVisiblePosition) =>
+      lastVisiblePosition ? getLogEntryAtTime(entries, lastVisiblePosition) : null
   ),
 };

@@ -4,29 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { InfraTimeKey, LogEntries as LogEntriesQuery } from '../../../../common/graphql/types';
-import { createGraphqlInitialState } from '../../../utils/remote_state/remote_graphql_state';
+import { LogEntries as LogEntriesQuery } from '../../../../common/graphql/types';
+import {
+  createGraphqlInitialState,
+  GraphqlState,
+} from '../../../utils/remote_state/remote_graphql_state';
 
-export type EntriesGraphqlState = typeof initialEntriesGraphqlState;
+export type LogEntriesRemoteState = LogEntriesQuery.LogEntriesAround;
+export type LogEntriesState = GraphqlState<LogEntriesRemoteState>;
 
-export interface LogEntriesState {
-  entries: EntriesGraphqlState;
-  visible: {
-    startKey: InfraTimeKey | null;
-    middleKey: InfraTimeKey | null;
-    endKey: InfraTimeKey | null;
-  };
-}
-
-export const initialEntriesGraphqlState = createGraphqlInitialState<
-  LogEntriesQuery.LogEntriesAround
->();
-
-export const initialLogEntriesState: LogEntriesState = {
-  entries: initialEntriesGraphqlState,
-  visible: {
-    endKey: null,
-    middleKey: null,
-    startKey: null,
-  },
-};
+export const initialLogEntriesState = createGraphqlInitialState<LogEntriesRemoteState>();

@@ -8,18 +8,17 @@ import { EuiIcon } from '@elastic/eui';
 import classNames from 'classnames';
 import * as React from 'react';
 
-import { formatTime } from '../../../common/time';
-import { LogEntry } from '../../utils/log_entry';
+import { formatTime, TimeKey } from '../../../common/time';
 
 interface LogPositionTextProps {
   className?: string;
-  firstVisibleLogEntry: LogEntry | null;
-  lastVisibleLogEntry: LogEntry | null;
+  firstVisiblePosition: TimeKey | null;
+  lastVisiblePosition: TimeKey | null;
 }
 
 export class LogPositionText extends React.PureComponent<LogPositionTextProps, {}> {
   public render() {
-    const { className, firstVisibleLogEntry, lastVisibleLogEntry } = this.props;
+    const { className, firstVisiblePosition, lastVisiblePosition } = this.props;
 
     const classes = classNames('streamPositionText', className);
 
@@ -27,12 +26,10 @@ export class LogPositionText extends React.PureComponent<LogPositionTextProps, {
       <div className={classes}>
         <span>Showing </span>
         <strong>
-          {firstVisibleLogEntry ? formatTime(firstVisibleLogEntry.key.time) : 'unknown'}
+          {firstVisiblePosition ? formatTime(firstVisiblePosition.time) : 'unknown'}
         </strong>{' '}
         <EuiIcon type="sortRight" />{' '}
-        <strong>
-          {lastVisibleLogEntry ? formatTime(lastVisibleLogEntry.key.time) : 'unknown'}
-        </strong>
+        <strong>{lastVisiblePosition ? formatTime(lastVisiblePosition.time) : 'unknown'}</strong>
       </div>
     );
   }

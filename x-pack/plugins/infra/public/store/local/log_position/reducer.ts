@@ -8,7 +8,12 @@ import { combineReducers } from 'redux';
 import { reducerWithInitialState } from 'typescript-fsa-reducers';
 
 import { TimeKey } from '../../../../common/time';
-import { jumpToTargetPosition, startAutoReload, stopAutoReload } from './actions';
+import {
+  jumpToTargetPosition,
+  reportVisiblePositions,
+  startAutoReload,
+  stopAutoReload,
+} from './actions';
 
 interface ManualTargetPositionUpdatePolicy {
   policy: 'manual';
@@ -26,12 +31,22 @@ type TargetPositionUpdatePolicy =
 export interface LogPositionState {
   targetPosition: TimeKey | null;
   updatePolicy: TargetPositionUpdatePolicy;
+  visiblePositions: {
+    startKey: TimeKey | null;
+    middleKey: TimeKey | null;
+    endKey: TimeKey | null;
+  };
 }
 
 export const initialLogPositionState: LogPositionState = {
   targetPosition: null,
   updatePolicy: {
     policy: 'manual',
+  },
+  visiblePositions: {
+    endKey: null,
+    middleKey: null,
+    startKey: null,
   },
 };
 
@@ -51,7 +66,16 @@ const targetPositionUpdatePolicyReducer = reducerWithInitialState(
     policy: 'manual',
   }));
 
+const visiblePositionReducer = reducerWithInitialState(
+  initialLogPositionState.visiblePositions
+).case(reportVisiblePositions, (state, { startKey, middleKey, endKey }) => ({
+  endKey,
+  middleKey,
+  startKey,
+}));
+
 export const logPositionReducer = combineReducers<LogPositionState>({
   targetPosition: targetPositionReducer,
   updatePolicy: targetPositionUpdatePolicyReducer,
+  visiblePositions: visiblePositionReducer,
 });

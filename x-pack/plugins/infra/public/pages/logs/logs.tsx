@@ -23,15 +23,12 @@ import { LogTextWrapControls } from '../../components/logging/log_text_wrap_cont
 import { LogTimeControls } from '../../components/logging/log_time_controls';
 
 // import { withLogSearchControlsProps } from '../../containers/logs/with_log_search_controls_props';
+import { WithLogPosition } from '../../containers/logs/with_log_position';
 import { WithStreamItems } from '../../containers/logs/with_stream_items';
 import { WithSummary } from '../../containers/logs/with_summary';
 import { WithTextScale } from '../../containers/logs/with_text_scale_controls_props';
-import { WithTextStreamPosition } from '../../containers/logs/with_text_stream_position';
 import { WithTextWrap } from '../../containers/logs/with_text_wrap_controls_props';
-import { WithTimeControls } from '../../containers/logs/with_time_controls_props';
-import { withVisibleLogEntries } from '../../containers/logs/with_visible_log_entries';
 
-const ConnectedLogPositionText = withVisibleLogEntries(LogPositionText);
 // const ConnectedLogSearchControls = withLogSearchControlsProps(LogSearchControls);
 
 interface InnerLogsPageProps {
@@ -50,7 +47,14 @@ class InnerLogsPage extends React.PureComponent<InnerLogsPageProps> {
         <Toolbar>
           <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" gutterSize="none">
             <EuiFlexItem>
-              <ConnectedLogPositionText />
+              <WithLogPosition>
+                {({ firstVisiblePosition, lastVisiblePosition }) => (
+                  <LogPositionText
+                    firstVisiblePosition={firstVisiblePosition}
+                    lastVisiblePosition={lastVisiblePosition}
+                  />
+                )}
+              </WithLogPosition>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <LogCustomizationMenu>
@@ -80,23 +84,23 @@ class InnerLogsPage extends React.PureComponent<InnerLogsPageProps> {
               </LogCustomizationMenu>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <WithTimeControls>
+              <WithLogPosition>
                 {({
-                  currentTime,
-                  isLiveStreaming,
+                  visibleMidpoint,
+                  isAutoReloading,
                   jumpToTargetPositionTime,
                   startLiveStreaming,
                   stopLiveStreaming,
                 }) => (
                   <LogTimeControls
-                    currentTime={currentTime}
-                    isLiveStreaming={isLiveStreaming}
+                    currentTime={visibleMidpoint}
+                    isLiveStreaming={isAutoReloading}
                     jumpToTime={jumpToTargetPositionTime}
                     startLiveStreaming={startLiveStreaming}
                     stopLiveStreaming={stopLiveStreaming}
                   />
                 )}
-              </WithTimeControls>
+              </WithLogPosition>
             </EuiFlexItem>
           </EuiFlexGroup>
         </Toolbar>
@@ -108,17 +112,42 @@ class InnerLogsPage extends React.PureComponent<InnerLogsPageProps> {
                   {({ textScale }) => (
                     <WithTextWrap>
                       {({ wrap }) => (
-                        <WithStreamItems>
-                          {streamItemsProps => (
-                            <ScrollableLogTextStreamView
-                              scale={textScale}
-                              wrap={wrap}
-                              height={height}
-                              width={width}
-                              {...streamItemsProps}
-                            />
+                        <WithLogPosition>
+                          {({
+                            isAutoReloading,
+                            jumpToTargetPosition,
+                            reportVisiblePositions,
+                            targetPosition,
+                          }) => (
+                            <WithStreamItems>
+                              {({
+                                hasMoreAfterEnd,
+                                hasMoreBeforeStart,
+                                isLoadingMore,
+                                isReloading,
+                                items,
+                                lastLoadedTime,
+                              }) => (
+                                <ScrollableLogTextStreamView
+                                  hasMoreAfterEnd={hasMoreAfterEnd}
+                                  hasMoreBeforeStart={hasMoreBeforeStart}
+                                  height={height}
+                                  isLoadingMore={isLoadingMore}
+                                  isReloading={isReloading}
+                                  isStreaming={isAutoReloading}
+                                  items={items}
+                                  jumpToTarget={jumpToTargetPosition}
+                                  lastLoadedTime={lastLoadedTime}
+                                  reportVisibleInterval={reportVisiblePositions}
+                                  scale={textScale}
+                                  target={targetPosition}
+                                  width={width}
+                                  wrap={wrap}
+                                />
+                              )}
+                            </WithStreamItems>
                           )}
-                        </WithStreamItems>
+                        </WithLogPosition>
                       )}
                     </WithTextWrap>
                   )}
@@ -132,20 +161,20 @@ class InnerLogsPage extends React.PureComponent<InnerLogsPageProps> {
                 <LogPageMinimapColumn innerRef={measureRef as any}>
                   <WithSummary>
                     {({ buckets, intervalSize, reportVisibleInterval }) => (
-                      <WithTextStreamPosition>
-                        {({ jumpToPosition, visibleMidpoint, visibleTimeInterval }) => (
+                      <WithLogPosition>
+                        {({ jumpToTargetPosition, visibleMidpoint, visibleTimeInterval }) => (
                           <LogMinimap
                             height={height}
                             width={width}
                             highlightedInterval={visibleTimeInterval}
                             intervalSize={intervalSize}
-                            jumpToTarget={jumpToPosition}
+                            jumpToTarget={jumpToTargetPosition}
                             reportVisibleInterval={reportVisibleInterval}
                             summaryBuckets={buckets}
                             target={visibleMidpoint}
                           />
                         )}
-                      </WithTextStreamPosition>
+                      </WithLogPosition>
                     )}
                   </WithSummary>
                 </LogPageMinimapColumn>
@@ -164,9 +193,9 @@ class InnerLogsPage extends React.PureComponent<InnerLogsPageProps> {
 }
 
 export const LogsPage = () => (
-  <WithTimeControls>
+  <WithLogPosition>
     {({ jumpToTargetPositionTime }) => <InnerLogsPage jumpToTime={jumpToTargetPositionTime} />}
-  </WithTimeControls>
+  </WithLogPosition>
 );
 
 const LogPageContent = styled.div`

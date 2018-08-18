@@ -6,20 +6,10 @@
 
 import { createSelector } from 'reselect';
 
-import { TimeKey } from '../../../../common/time';
-import { getLogEntryIndexAtTime, LogEntry } from '../../../utils/log_entry';
 import { createGraphqlStateSelectors } from '../../../utils/remote_state/remote_graphql_state';
-import { EntriesGraphqlState, LogEntriesState } from './state';
+import { LogEntriesRemoteState } from './state';
 
-const entriesGraphlStateSelectors = createGraphqlStateSelectors<EntriesGraphqlState['data']>(
-  (state: LogEntriesState) => state.entries
-);
-
-const getEntry = (entries: LogEntry[], entryKey: TimeKey) => {
-  const entryIndex = getLogEntryIndexAtTime(entries, entryKey);
-
-  return entryIndex !== null ? entries[entryIndex] : null;
-};
+const entriesGraphlStateSelectors = createGraphqlStateSelectors<LogEntriesRemoteState>();
 
 export const selectEntries = createSelector(
   entriesGraphlStateSelectors.selectData,
@@ -84,37 +74,4 @@ export const selectLoadedEntriesTimeInterval = createSelector(
     end: data && data.end ? data.end.time : null,
     start: data && data.start ? data.start.time : null,
   })
-);
-
-export const selectFirstVisibleEntry = createSelector(
-  selectEntries,
-  (state: LogEntriesState) => state.visible.startKey,
-  (entries, firstVisibleEntryKey) =>
-    firstVisibleEntryKey ? getEntry(entries, firstVisibleEntryKey) : null
-);
-
-export const selectMiddleVisibleEntry = createSelector(
-  selectEntries,
-  (state: LogEntriesState) => state.visible.middleKey,
-  (entries, middleVisibleEntryKey) =>
-    middleVisibleEntryKey ? getEntry(entries, middleVisibleEntryKey) : null
-);
-
-export const selectLastVisibleEntry = createSelector(
-  selectEntries,
-  (state: LogEntriesState) => state.visible.endKey,
-  (entries, lastVisibleEntryKey) =>
-    lastVisibleEntryKey ? getEntry(entries, lastVisibleEntryKey) : null
-);
-
-export const selectIsFirstEntryVisible = createSelector(
-  selectFirstEntry,
-  selectFirstVisibleEntry,
-  (firstEntry, firstVisibleEntry) => firstEntry === firstVisibleEntry
-);
-
-export const selectIsLastEntryVisible = createSelector(
-  selectLastEntry,
-  selectLastVisibleEntry,
-  (lastEntry, lastVisibleEntry) => lastEntry === lastVisibleEntry
 );
