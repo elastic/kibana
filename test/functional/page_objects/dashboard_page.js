@@ -420,6 +420,8 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
     async loadSavedDashboard(dashName) {
       log.debug(`Load Saved Dashboard ${dashName}`);
 
+      await this.gotoDashboardLandingPage();
+
       await retry.try(async () => {
         await this.searchForDashboardWithName(dashName);
         await this.selectDashboard(dashName);
