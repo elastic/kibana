@@ -18,9 +18,10 @@
  */
 
 import 'isomorphic-fetch';
+// @ts-ignore not really worth typing
+import { metadata } from 'ui/metadata';
 import url from 'url';
 import chrome from '../chrome';
-import { defaultInterceptor } from './default_interceptor';
 import { FetchError } from './fetch_error';
 
 interface KFetchQuery {
@@ -43,17 +44,26 @@ export interface Interceptor {
   responseError?: (e: any) => any;
 }
 
-export const interceptors: Interceptor[] = [defaultInterceptor];
+export const interceptors: Interceptor[] = [];
 export function _resetInterceptors() {
   interceptors.length = 0;
-  interceptors.push(defaultInterceptor);
 }
 
 export async function kfetch(
   options: KFetchOptions,
   { prependBasePath = true }: KFetchKibanaOptions = {}
 ) {
-  const { pathname, query, ...restOptions } = await successInterceptors(options, 'request');
+  const combinedOptions = {
+    method: 'GET',
+    credentials: 'same-origin',
+    ...options,
+    headers: {
+      'Content-Type': 'application/json',
+      'kbn-version': metadata.version,
+      ...options.headers,
+    },
+  };
+  const { pathname, query, ...restOptions } = await successInterceptors(combinedOptions, 'request');
   const fullUrl = url.format({
     pathname: prependBasePath ? chrome.addBasePath(pathname) : pathname,
     query,
@@ -67,7 +77,8 @@ export async function kfetch(
   }
 
   if (res.ok) {
-    return successInterceptors(res, 'response');
+    const json = await res.json();
+    return successInterceptors(json, 'response');
   }
 
   const fetchError = new FetchError(res, getBodyAsJson(res));
@@ -86,7 +97,7 @@ function successInterceptors(res: any, name: 'request' | 'response') {
 }
 
 function errorInterceptors(e: Error, name: 'requestError' | 'responseError') {
-  return interceptors.reduce((acc, interceptor) => {
+  return interceptors.reduce((acc: Promise<any>, interceptor) => {
     const fn = interceptor[name];
     if (!fn) {
       return acc;
