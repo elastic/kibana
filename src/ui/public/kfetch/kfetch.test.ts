@@ -95,6 +95,11 @@ describe('kfetch', () => {
     });
   });
 
+  it('should reject on network error', async () => {
+    fetchMock.get('*', { throws: new Error('Network issue') });
+    expect(kfetch({ pathname: 'my/path' })).rejects.toThrowError('Network issue');
+  });
+
   it('should throw custom error containing response object', async () => {
     expect.assertions(3);
     fetchMock.get('*', { status: 404 });
@@ -142,8 +147,32 @@ describe('kfetch', () => {
       });
     });
 
+    describe('requestError', () => {
+      it('should throw custom error', () => {
+        fetchMock.get('*', { throws: new Error('Network issue') });
+        interceptors.push({
+          requestError: e => {
+            throw new Error(`${e.message} intercepted`);
+          },
+        });
+
+        const resp = kfetch({ pathname: 'my/path' });
+        expect(resp).rejects.toThrowError('Network issue intercepted');
+      });
+
+      it('should swallow error', () => {
+        fetchMock.get('*', { throws: new Error('Network issue') });
+        interceptors.push({
+          requestError: e => 'resolved value',
+        });
+
+        const resp = kfetch({ pathname: 'my/path' });
+        expect(resp).resolves.toBe('resolved value');
+      });
+    });
+
     describe('response', () => {
-      it('response: should modify response via interceptor', async () => {
+      it('should modify response via interceptor', async () => {
         fetchMock.get('*', { foo: 'bar' });
         interceptors.push({
           response: res => {
@@ -161,7 +190,7 @@ describe('kfetch', () => {
         });
       });
 
-      it('should support resolved promise', async () => {
+      it('should modify response via promise interceptor', async () => {
         fetchMock.get('*', { foo: 'bar' });
         interceptors.push({
           response: res => {
@@ -179,7 +208,7 @@ describe('kfetch', () => {
         });
       });
 
-      it('should support rejected promise', async () => {
+      it('should throw via interceptor', async () => {
         expect.assertions(1);
         fetchMock.get('*', { foo: 'bar' });
         interceptors.push({
@@ -208,7 +237,7 @@ describe('kfetch', () => {
         expect(resp).rejects.toThrow('my custom error');
       });
 
-      it('should swallow error', async () => {
+      it('should swallow error', () => {
         fetchMock.get('*', { status: 404 });
         interceptors.push({
           responseError: () => 'resolved valued',
