@@ -45,7 +45,15 @@ describe('kfetch', () => {
   it('should change Content-Type', async () => {
     fetchMock.get('*', {});
     await kfetch({ pathname: 'my/path', headers: { 'Content-Type': 'CustomContentType' } });
-    expect((fetchMock.lastOptions('*').headers as any)['Content-Type']).toBe('CustomContentType');
+    expect(fetchMock.lastOptions('*').headers).toMatchObject({
+      'Content-Type': 'CustomContentType',
+    });
+  });
+
+  it('should support querystring', async () => {
+    fetchMock.get('*', {});
+    await kfetch({ pathname: 'my/path', query: { a: 'b' } });
+    expect(fetchMock.lastUrl('*')).toBe('http://localhost.com/myBase/my/path?a=b');
   });
 
   it('should return response', async () => {
@@ -57,14 +65,14 @@ describe('kfetch', () => {
 
   it('should prepend with basepath by default', async () => {
     fetchMock.get('*', {});
-    await kfetch({ pathname: 'my/path', query: { a: 'b' } });
-    expect(fetchMock.lastUrl('*')).toBe('http://localhost.com/myBase/my/path?a=b');
+    await kfetch({ pathname: 'my/path' });
+    expect(fetchMock.lastUrl('*')).toBe('http://localhost.com/myBase/my/path');
   });
 
   it('should not prepend with basepath when disabled', async () => {
     fetchMock.get('*', {});
-    await kfetch({ pathname: 'my/path', query: { a: 'b' } }, { prependBasePath: false });
-    expect(fetchMock.lastUrl('*')).toBe('my/path?a=b');
+    await kfetch({ pathname: 'my/path' }, { prependBasePath: false });
+    expect(fetchMock.lastUrl('*')).toBe('my/path');
   });
 
   it('should call with default options', async () => {
@@ -96,13 +104,19 @@ describe('kfetch', () => {
   });
 
   it('should reject on network error', async () => {
+    expect.assertions(1);
     fetchMock.get('*', { throws: new Error('Network issue') });
-    expect(kfetch({ pathname: 'my/path' })).rejects.toThrowError('Network issue');
+
+    try {
+      await kfetch({ pathname: 'my/path' });
+    } catch (e) {
+      expect(e.message).toBe('Network issue');
+    }
   });
 
   it('should throw custom error containing response object', async () => {
-    expect.assertions(3);
-    fetchMock.get('*', { status: 404 });
+    expect.assertions(4);
+    fetchMock.get('*', { status: 404, body: { foo: 'bar' } });
 
     try {
       await kfetch({ pathname: 'my/path' });
@@ -110,6 +124,7 @@ describe('kfetch', () => {
       expect(e.message).toBe('Not Found');
       expect(e.res.status).toBe(404);
       expect(e.res.url).toBe('http://localhost.com/myBase/my/path');
+      expect(e.body).toEqual({ foo: 'bar' });
     }
   });
 
@@ -148,7 +163,8 @@ describe('kfetch', () => {
     });
 
     describe('requestError', () => {
-      it('should throw custom error', () => {
+      it('should throw custom error', async () => {
+        expect.assertions(1);
         fetchMock.get('*', { throws: new Error('Network issue') });
         addInterceptor({
           requestError: e => {
@@ -156,18 +172,21 @@ describe('kfetch', () => {
           },
         });
 
-        const resp = kfetch({ pathname: 'my/path' });
-        expect(resp).rejects.toThrowError('Network issue intercepted');
+        try {
+          await kfetch({ pathname: 'my/path' });
+        } catch (e) {
+          expect(e.message).toBe('Network issue intercepted');
+        }
       });
 
-      it('should swallow error', () => {
+      it('should swallow error', async () => {
         fetchMock.get('*', { throws: new Error('Network issue') });
         addInterceptor({
           requestError: e => 'resolved value',
         });
 
-        const resp = kfetch({ pathname: 'my/path' });
-        expect(resp).resolves.toBe('resolved value');
+        const resp = await kfetch({ pathname: 'my/path' });
+        expect(resp).toBe('resolved value');
       });
     });
 
@@ -224,7 +243,8 @@ describe('kfetch', () => {
     });
 
     describe('responseError', () => {
-      it('should throw custom error', () => {
+      it('should throw custom error', async () => {
+        expect.assertions(1);
         fetchMock.get('*', { status: 404 });
 
         addInterceptor({
@@ -233,23 +253,41 @@ describe('kfetch', () => {
           },
         });
 
-        const resp = kfetch({ pathname: 'my/path' });
-        expect(resp).rejects.toThrow('my custom error');
+        try {
+          await kfetch({ pathname: 'my/path' });
+        } catch (e) {
+          expect(e.message).toBe('my custom error');
+        }
       });
 
-      it('should swallow error', () => {
+      it('should return rejected promise', async () => {
+        expect.assertions(1);
+        fetchMock.get('*', { status: 404 });
+        addInterceptor({
+          responseError: e => Promise.reject(new Error('my rejected value')),
+        });
+
+        try {
+          await kfetch({ pathname: 'my/path' });
+        } catch (e) {
+          expect(e.message).toBe('my rejected value');
+        }
+      });
+
+      it('should swallow error', async () => {
         fetchMock.get('*', { status: 404 });
         addInterceptor({
           responseError: () => 'resolved valued',
         });
 
-        const resp = kfetch({ pathname: 'my/path' });
-        expect(resp).resolves.toBe('resolved valued');
+        const resp = await kfetch({ pathname: 'my/path' });
+        expect(resp).toBe('resolved valued');
       });
     });
 
     describe('multiple interceptors', () => {
       it('should throw last error', async () => {
+        expect.assertions(4);
         fetchMock.get('*', { status: 404 });
 
         const spy1 = jest.fn(e => {

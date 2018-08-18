@@ -80,7 +80,7 @@ export async function kfetch(
     return successInterceptors(json, 'response');
   }
 
-  const error = new KFetchError(res, getBodyAsJson(res));
+  const error = new KFetchError(res, await getBodyAsJson(res));
   return errorInterceptors(error, 'responseError');
 }
 
