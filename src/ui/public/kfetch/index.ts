@@ -17,5 +17,5 @@
  * under the License.
  */
 
-export { kfetch, interceptors } from './kfetch';
+export { kfetch, addInterceptor } from './kfetch';
 export { kfetchAbortable } from './kfetch_abortable';

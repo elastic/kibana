@@ -28,12 +28,12 @@ jest.mock('../metadata', () => ({
 }));
 
 import fetchMock from 'fetch-mock';
-import { _resetInterceptors, interceptors, kfetch } from './kfetch';
+import { addInterceptor, kfetch, resetInterceptors } from './kfetch';
 
 describe('kfetch', () => {
   afterEach(() => {
     fetchMock.restore();
-    _resetInterceptors();
+    resetInterceptors();
   });
 
   it('should change request method', async () => {
@@ -117,7 +117,7 @@ describe('kfetch', () => {
     describe('request', () => {
       it('should add headers via interceptor', async () => {
         fetchMock.get('*', {});
-        interceptors.push({
+        addInterceptor({
           request: config => {
             return {
               ...config,
@@ -150,7 +150,7 @@ describe('kfetch', () => {
     describe('requestError', () => {
       it('should throw custom error', () => {
         fetchMock.get('*', { throws: new Error('Network issue') });
-        interceptors.push({
+        addInterceptor({
           requestError: e => {
             throw new Error(`${e.message} intercepted`);
           },
@@ -162,7 +162,7 @@ describe('kfetch', () => {
 
       it('should swallow error', () => {
         fetchMock.get('*', { throws: new Error('Network issue') });
-        interceptors.push({
+        addInterceptor({
           requestError: e => 'resolved value',
         });
 
@@ -174,7 +174,7 @@ describe('kfetch', () => {
     describe('response', () => {
       it('should modify response via interceptor', async () => {
         fetchMock.get('*', { foo: 'bar' });
-        interceptors.push({
+        addInterceptor({
           response: res => {
             return {
               ...res,
@@ -192,7 +192,7 @@ describe('kfetch', () => {
 
       it('should modify response via promise interceptor', async () => {
         fetchMock.get('*', { foo: 'bar' });
-        interceptors.push({
+        addInterceptor({
           response: res => {
             return Promise.resolve({
               ...res,
@@ -211,7 +211,7 @@ describe('kfetch', () => {
       it('should throw via interceptor', async () => {
         expect.assertions(1);
         fetchMock.get('*', { foo: 'bar' });
-        interceptors.push({
+        addInterceptor({
           response: res => {
             throw new Error('custom response error');
           },
@@ -227,7 +227,7 @@ describe('kfetch', () => {
       it('should throw custom error', () => {
         fetchMock.get('*', { status: 404 });
 
-        interceptors.push({
+        addInterceptor({
           responseError: e => {
             throw new Error('my custom error');
           },
@@ -239,12 +239,43 @@ describe('kfetch', () => {
 
       it('should swallow error', () => {
         fetchMock.get('*', { status: 404 });
-        interceptors.push({
+        addInterceptor({
           responseError: () => 'resolved valued',
         });
 
         const resp = kfetch({ pathname: 'my/path' });
         expect(resp).resolves.toBe('resolved valued');
+      });
+    });
+
+    describe('multiple interceptors', () => {
+      it('should throw last error', async () => {
+        fetchMock.get('*', { status: 404 });
+
+        const spy1 = jest.fn(e => {
+          throw new Error('my custom error');
+        });
+
+        const spy2 = jest.fn(e => {
+          throw new Error('Another error was thrown!');
+        });
+
+        const spy3 = jest.fn(e => {
+          throw new Error('The very last error');
+        });
+
+        addInterceptor({ responseError: spy1 });
+        addInterceptor({ responseError: spy2 });
+        addInterceptor({ responseError: spy3 });
+
+        try {
+          await kfetch({ pathname: 'my/path' });
+        } catch (e) {
+          expect(spy1.mock.calls[0][0].message).toBe('Not Found');
+          expect(spy2.mock.calls[0][0].message).toBe('my custom error');
+          expect(spy3.mock.calls[0][0].message).toBe('Another error was thrown!');
+          expect(e.message).toBe('The very last error');
+        }
       });
     });
   });
