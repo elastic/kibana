@@ -30,8 +30,6 @@ jest.mock('../metadata', () => ({
 import fetchMock from 'fetch-mock';
 import { _resetInterceptors, interceptors, kfetch } from './kfetch';
 
-const matcherName: any = /my\/path/;
-
 describe('kfetch', () => {
   afterEach(() => {
     fetchMock.restore();
@@ -39,43 +37,41 @@ describe('kfetch', () => {
   });
 
   it('should change request method', async () => {
-    fetchMock.post(matcherName, {});
+    fetchMock.post('*', {});
     await kfetch({ pathname: 'my/path', method: 'POST' });
-    expect(fetchMock.lastOptions(matcherName).method).toBe('POST');
+    expect(fetchMock.lastOptions('*').method).toBe('POST');
   });
 
   it('should change Content-Type', async () => {
-    fetchMock.get(matcherName, {});
+    fetchMock.get('*', {});
     await kfetch({ pathname: 'my/path', headers: { 'Content-Type': 'CustomContentType' } });
-    expect((fetchMock.lastOptions(matcherName).headers as any)['Content-Type']).toBe(
-      'CustomContentType'
-    );
+    expect((fetchMock.lastOptions('*').headers as any)['Content-Type']).toBe('CustomContentType');
   });
 
   it('should return response', async () => {
-    fetchMock.get(matcherName, { foo: 'bar' });
+    fetchMock.get('*', { foo: 'bar' });
     expect(await kfetch({ pathname: 'my/path' })).toEqual({
       foo: 'bar',
     });
   });
 
   it('should prepend with basepath by default', async () => {
-    fetchMock.get(matcherName, {});
+    fetchMock.get('*', {});
     await kfetch({ pathname: 'my/path', query: { a: 'b' } });
-    expect(fetchMock.lastUrl(matcherName)).toBe('http://localhost.com/myBase/my/path?a=b');
+    expect(fetchMock.lastUrl('*')).toBe('http://localhost.com/myBase/my/path?a=b');
   });
 
   it('should not prepend with basepath when disabled', async () => {
-    fetchMock.get(matcherName, {});
+    fetchMock.get('*', {});
     await kfetch({ pathname: 'my/path', query: { a: 'b' } }, { prependBasePath: false });
-    expect(fetchMock.lastUrl(matcherName)).toBe('my/path?a=b');
+    expect(fetchMock.lastUrl('*')).toBe('my/path?a=b');
   });
 
   it('should call with default options', async () => {
-    fetchMock.get(matcherName, {});
+    fetchMock.get('*', {});
     await kfetch({ pathname: 'my/path' });
 
-    expect(fetchMock.lastOptions(matcherName)).toEqual({
+    expect(fetchMock.lastOptions('*')).toEqual({
       method: 'GET',
       credentials: 'same-origin',
       headers: {
@@ -86,22 +82,22 @@ describe('kfetch', () => {
   });
 
   it('should apply supplied headers', async () => {
-    fetchMock.get(matcherName, {});
+    fetchMock.get('*', {});
     await kfetch({
       pathname: 'my/path',
       headers: { myHeader: 'foo' },
     });
 
-    expect(fetchMock.lastOptions(matcherName).headers).toEqual({
+    expect(fetchMock.lastOptions('*').headers).toEqual({
       'Content-Type': 'application/json',
       'kbn-version': 'my-version',
       myHeader: 'foo',
     });
   });
 
-  fit('should throw custom error containing response object', async () => {
+  it('should throw custom error containing response object', async () => {
     expect.assertions(3);
-    fetchMock.get(matcherName, { status: 404 });
+    fetchMock.get('*', { status: 404 });
 
     try {
       await kfetch({ pathname: 'my/path' });
@@ -113,76 +109,114 @@ describe('kfetch', () => {
   });
 
   describe('interceptors', () => {
-    it('response: should modify response via interceptor', async () => {
-      fetchMock.get(matcherName, { foo: 'bar' });
-      interceptors.push({
-        response: res => {
-          return {
-            ...res,
+    describe('request', () => {
+      it('should add headers via interceptor', async () => {
+        fetchMock.get('*', {});
+        interceptors.push({
+          request: config => {
+            return {
+              ...config,
+              headers: {
+                ...config.headers,
+                addedByInterceptor: true,
+              },
+            };
+          },
+        });
+
+        await kfetch({
+          pathname: 'my/path',
+          headers: { myHeader: 'foo' },
+        });
+
+        expect(fetchMock.lastOptions('*')).toEqual({
+          method: 'GET',
+          credentials: 'same-origin',
+          headers: {
             addedByInterceptor: true,
-          };
-        },
-      });
-
-      const resp = await kfetch({ pathname: 'my/path' });
-      expect(resp).toEqual({
-        addedByInterceptor: true,
-        foo: 'bar',
+            myHeader: 'foo',
+            'Content-Type': 'application/json',
+            'kbn-version': 'my-version',
+          },
+        });
       });
     });
 
-    it('request: should add headers via interceptor', async () => {
-      fetchMock.get(matcherName, {});
-      interceptors.push({
-        request: config => {
-          return {
-            ...config,
-            headers: {
-              ...config.headers,
+    describe('response', () => {
+      it('response: should modify response via interceptor', async () => {
+        fetchMock.get('*', { foo: 'bar' });
+        interceptors.push({
+          response: res => {
+            return {
+              ...res,
               addedByInterceptor: true,
-            },
-          };
-        },
-      });
+            };
+          },
+        });
 
-      await kfetch({
-        pathname: 'my/path',
-        headers: { myHeader: 'foo' },
-      });
-
-      expect(fetchMock.lastOptions(matcherName)).toEqual({
-        method: 'GET',
-        credentials: 'same-origin',
-        headers: {
+        const resp = await kfetch({ pathname: 'my/path' });
+        expect(resp).toEqual({
           addedByInterceptor: true,
-          myHeader: 'foo',
-          'Content-Type': 'application/json',
-          'kbn-version': 'my-version',
-        },
+          foo: 'bar',
+        });
+      });
+
+      it('should support resolved promise', async () => {
+        fetchMock.get('*', { foo: 'bar' });
+        interceptors.push({
+          response: res => {
+            return Promise.resolve({
+              ...res,
+              addedByInterceptor: true,
+            });
+          },
+        });
+
+        const resp = await kfetch({ pathname: 'my/path' });
+        expect(resp).toEqual({
+          addedByInterceptor: true,
+          foo: 'bar',
+        });
+      });
+
+      it('should support rejected promise', async () => {
+        expect.assertions(1);
+        fetchMock.get('*', { foo: 'bar' });
+        interceptors.push({
+          response: res => {
+            throw new Error('custom response error');
+          },
+        });
+
+        return kfetch({ pathname: 'my/path' }).catch(e => {
+          expect(e.message).toBe('custom response error');
+        });
       });
     });
 
-    it('responseError: should throw custom error', () => {
-      fetchMock.get(matcherName, { status: 404 });
+    describe('responseError', () => {
+      it('should throw custom error', () => {
+        fetchMock.get('*', { status: 404 });
 
-      interceptors.push({
-        responseError: e => {
-          throw new Error('my custom error');
-        },
+        interceptors.push({
+          responseError: e => {
+            throw new Error('my custom error');
+          },
+        });
+
+        const resp = kfetch({ pathname: 'my/path' });
+        expect(resp).rejects.toThrow('my custom error');
       });
 
-      const resp = kfetch({ pathname: 'my/path' });
-      expect(resp).rejects.toThrow('my custom error');
-    });
+      it('should swallow error', async () => {
+        fetchMock.get('*', { status: 404 });
+        interceptors.push({
+          responseError: () => 'resolved valued',
+        });
 
-    it('responseError: should swallow error', async () => {
-      fetchMock.get(matcherName, { status: 404 });
-      interceptors.push({
-        responseError: () => 'resolved valued',
+        const resp = kfetch({ pathname: 'my/path' });
+        expect(resp).resolves.toBe('resolved valued');
       });
-
-      const resp = kfetch({ pathname: 'my/path' });
-      expect(resp).resolves.toBe('resolved valued');
     });
   });
 });
