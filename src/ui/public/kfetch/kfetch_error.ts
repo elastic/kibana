@@ -17,14 +17,14 @@
  * under the License.
  */
 
-export class FetchError extends Error {
+export class KFetchError extends Error {
   constructor(public readonly res: Response, public readonly body?: any) {
     super(res.statusText);
 
     // captureStackTrace is only available in the V8 engine, so any browser using
     // a different JS engine won't have access to this method.
     if (Error.captureStackTrace) {
-      Error.captureStackTrace(this, FetchError);
+      Error.captureStackTrace(this, KFetchError);
     }
   }
 }

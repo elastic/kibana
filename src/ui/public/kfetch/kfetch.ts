@@ -22,7 +22,7 @@ import 'isomorphic-fetch';
 import { metadata } from 'ui/metadata';
 import url from 'url';
 import chrome from '../chrome';
-import { FetchError } from './fetch_error';
+import { KFetchError } from './kfetch_error';
 
 interface KFetchQuery {
   [key: string]: string | number | boolean;
@@ -81,8 +81,8 @@ export async function kfetch(
     return successInterceptors(json, 'response');
   }
 
-  const fetchError = new FetchError(res, getBodyAsJson(res));
-  return errorInterceptors(fetchError, 'responseError');
+  const error = new KFetchError(res, getBodyAsJson(res));
+  return errorInterceptors(error, 'responseError');
 }
 
 function successInterceptors(res: any, name: 'request' | 'response') {
