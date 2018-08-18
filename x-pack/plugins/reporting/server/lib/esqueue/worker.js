@@ -141,13 +141,8 @@ export class Worker extends events.EventEmitter {
         return updatedJob;
       })
       .catch((err) => {
-        if (err.statusCode === 409) {
-          this.warn(`_claimJob got version conflict when updating job ${job._id}`, err);
-          return true;
-        }
-        this.warn(`_claimJob failed on job ${job._id}`, err);
         this.emit(constants.EVENT_WORKER_JOB_CLAIM_ERROR, this._formatErrorParams(err, job));
-        return false;
+        return Promise.reject(err);
       });
   }
 
@@ -324,21 +319,21 @@ export class Worker extends events.EventEmitter {
 
         return this._claimJob(job)
           .then((claimResult) => {
-            // could not update the job, use the previous object
-            if (claimResult === true) {
-              claimed = true;
-              return claimedJob;
+            claimed = true;
+            return claimResult;
+          })
+          .catch((err) => {
+            if (err.statusCode === 409) {
+              this.warn(`_claimPendingJobs encountered a version conflict on updating pending job ${job._id}`, err);
+              return; // continue reducing and looking for a different job to claim
             }
-            if (claimResult !== false) {
-              claimed = true;
-              return claimResult;
-            }
+            return Promise.reject(err);
           });
       });
     }, Promise.resolve())
       .then((claimedJob) => {
         if (!claimedJob) {
-          this.debug(`All ${jobs.length} jobs already claimed`); // FIXME this means _claimJob failed, and an error was emitted
+          this.debug(`Found no claimable jobs out of ${jobs.length} total`);
           return;
         }
         this.debug(`Claimed job ${claimedJob._id}`);

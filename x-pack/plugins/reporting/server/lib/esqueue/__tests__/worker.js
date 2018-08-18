@@ -494,18 +494,22 @@ describe('Worker class', function () {
       expect(msg).to.equal(false);
     });
 
-    it('should return true on version errors', function () {
+    it('should reject the promise on version errors', function () {
       mockQueue.client.update.restore();
       sinon.stub(mockQueue.client, 'update').returns(Promise.reject({ statusCode: 409 }));
       return worker._claimJob(job)
-        .then((res) => expect(res).to.equal(true));
+        .catch(err => {
+          expect(err).to.eql({ statusCode: 409 });
+        });
     });
 
-    it('should return false on other errors', function () {
+    it('should reject the promise on other errors', function () {
       mockQueue.client.update.restore();
       sinon.stub(mockQueue.client, 'update').returns(Promise.reject({ statusCode: 401 }));
       return worker._claimJob(job)
-        .then((res) => expect(res).to.equal(false));
+        .catch(err => {
+          expect(err).to.eql({ statusCode: 401 });
+        });
     });
 
     it('should emit on other errors', function (done) {
