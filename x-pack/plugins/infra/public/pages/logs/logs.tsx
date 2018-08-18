@@ -22,14 +22,14 @@ import { ScrollableLogTextStreamView } from '../../components/logging/log_text_s
 import { LogTextWrapControls } from '../../components/logging/log_text_wrap_controls';
 import { LogTimeControls } from '../../components/logging/log_time_controls';
 
-// import { withLogSearchControlsProps } from '../../containers/logging_legacy/with_log_search_controls_props';
-import { WithStreamItems } from '../../containers/logging_legacy/with_stream_items';
-import { WithSummary } from '../../containers/logging_legacy/with_summary';
-import { WithTextScale } from '../../containers/logging_legacy/with_text_scale_controls_props';
-import { WithTextStreamPosition } from '../../containers/logging_legacy/with_text_stream_position';
-import { WithTextWrap } from '../../containers/logging_legacy/with_text_wrap_controls_props';
-import { WithTimeControls } from '../../containers/logging_legacy/with_time_controls_props';
-import { withVisibleLogEntries } from '../../containers/logging_legacy/with_visible_log_entries';
+// import { withLogSearchControlsProps } from '../../containers/logs/with_log_search_controls_props';
+import { WithStreamItems } from '../../containers/logs/with_stream_items';
+import { WithSummary } from '../../containers/logs/with_summary';
+import { WithTextScale } from '../../containers/logs/with_text_scale_controls_props';
+import { WithTextStreamPosition } from '../../containers/logs/with_text_stream_position';
+import { WithTextWrap } from '../../containers/logs/with_text_wrap_controls_props';
+import { WithTimeControls } from '../../containers/logs/with_time_controls_props';
+import { withVisibleLogEntries } from '../../containers/logs/with_visible_log_entries';
 
 const ConnectedLogPositionText = withVisibleLogEntries(LogPositionText);
 // const ConnectedLogSearchControls = withLogSearchControlsProps(LogSearchControls);
