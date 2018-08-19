@@ -11,7 +11,7 @@ export const LAYER_TYPE = {
 export class ALayer {
   constructor() {}
 
-  static create(options) {
+  static createDescriptor(options) {
     const layerDescriptor = {};
     layerDescriptor.source = options.source;
     layerDescriptor.visible = options.visible || true;

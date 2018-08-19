@@ -12,8 +12,8 @@ export class VectorLayer extends ALayer {
     super();
   }
 
-  static create(options) {
-    const vectorLayerDescriptor = super.create(options);
+  static createDescriptor(options) {
+    const vectorLayerDescriptor = super.createDescriptor(options);
     vectorLayerDescriptor.type = LAYER_TYPE.VECTOR;
     vectorLayerDescriptor.style = {
       ...vectorLayerDescriptor.style,
