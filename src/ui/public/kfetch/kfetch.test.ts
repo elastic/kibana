@@ -240,6 +240,60 @@ describe('kfetch', () => {
           expect(e.message).toBe('custom response error');
         });
       });
+
+      describe('multiple', () => {
+        it('should throw first error', async () => {
+          expect.assertions(4);
+          fetchMock.get('*', { foo: 'bar' });
+
+          const spy1 = jest.fn(e => {
+            throw new Error('my custom error');
+          });
+
+          const spy2 = jest.fn();
+          const spy3 = jest.fn();
+
+          addInterceptor({ response: spy1 });
+          addInterceptor({ response: spy2 });
+          addInterceptor({ response: spy3 });
+
+          try {
+            await kfetch({ pathname: 'my/path' });
+          } catch (e) {
+            expect(spy1.mock.calls[0][0]).toEqual({ foo: 'bar' });
+            expect(spy2).not.toHaveBeenCalled();
+            expect(spy3).not.toHaveBeenCalled();
+            expect(e.message).toBe('my custom error');
+          }
+        });
+
+        it('should return last response', async () => {
+          expect.assertions(4);
+          fetchMock.get('*', { foo: 'bar' });
+
+          const spy1 = jest.fn(res => {
+            return { ...res, spy1: true };
+          });
+
+          const spy2 = jest.fn(res => {
+            return { ...res, spy2: true };
+          });
+
+          const spy3 = jest.fn(res => {
+            return { ...res, spy3: true };
+          });
+
+          addInterceptor({ response: spy1 });
+          addInterceptor({ response: spy2 });
+          addInterceptor({ response: spy3 });
+
+          const resp = await kfetch({ pathname: 'my/path' });
+          expect(spy1.mock.calls[0][0]).toEqual({ foo: 'bar' });
+          expect(spy2.mock.calls[0][0]).toEqual({ foo: 'bar', spy1: true });
+          expect(spy3.mock.calls[0][0]).toEqual({ foo: 'bar', spy1: true, spy2: true });
+          expect(resp).toEqual({ foo: 'bar', spy1: true, spy2: true, spy3: true });
+        });
+      });
     });
 
     describe('responseError', () => {
@@ -283,37 +337,60 @@ describe('kfetch', () => {
         const resp = await kfetch({ pathname: 'my/path' });
         expect(resp).toBe('resolved valued');
       });
-    });
 
-    describe('multiple interceptors', () => {
-      it('should throw last error', async () => {
-        expect.assertions(4);
-        fetchMock.get('*', { status: 404 });
+      describe('multiple', () => {
+        it('should throw last error', async () => {
+          expect.assertions(4);
+          fetchMock.get('*', { status: 404 });
 
-        const spy1 = jest.fn(e => {
-          throw new Error('my custom error');
+          const spy1 = jest.fn(e => {
+            throw new Error('my custom error');
+          });
+
+          const spy2 = jest.fn(e => {
+            throw new Error('Another error was thrown!');
+          });
+
+          const spy3 = jest.fn(e => {
+            throw new Error('The very last error');
+          });
+
+          addInterceptor({ responseError: spy1 });
+          addInterceptor({ responseError: spy2 });
+          addInterceptor({ responseError: spy3 });
+
+          try {
+            await kfetch({ pathname: 'my/path' });
+          } catch (e) {
+            expect(spy1.mock.calls[0][0].message).toBe('Not Found');
+            expect(spy2.mock.calls[0][0].message).toBe('my custom error');
+            expect(spy3.mock.calls[0][0].message).toBe('Another error was thrown!');
+            expect(e.message).toBe('The very last error');
+          }
         });
 
-        const spy2 = jest.fn(e => {
-          throw new Error('Another error was thrown!');
-        });
+        it('should return first value', async () => {
+          expect.assertions(4);
+          fetchMock.get('*', { status: 404 });
 
-        const spy3 = jest.fn(e => {
-          throw new Error('The very last error');
-        });
+          const spy1 = jest.fn(e => {
+            return 'my resolved value';
+          });
 
-        addInterceptor({ responseError: spy1 });
-        addInterceptor({ responseError: spy2 });
-        addInterceptor({ responseError: spy3 });
+          const spy2 = jest.fn();
+          const spy3 = jest.fn();
 
-        try {
-          await kfetch({ pathname: 'my/path' });
-        } catch (e) {
+          addInterceptor({ responseError: spy1 });
+          addInterceptor({ responseError: spy2 });
+          addInterceptor({ responseError: spy3 });
+
+          const resp = await kfetch({ pathname: 'my/path' });
+
           expect(spy1.mock.calls[0][0].message).toBe('Not Found');
-          expect(spy2.mock.calls[0][0].message).toBe('my custom error');
-          expect(spy3.mock.calls[0][0].message).toBe('Another error was thrown!');
-          expect(e.message).toBe('The very last error');
-        }
+          expect(spy2).not.toHaveBeenCalled();
+          expect(spy3).not.toHaveBeenCalled();
+          expect(resp).toBe('my resolved value');
+        });
       });
     });
   });
