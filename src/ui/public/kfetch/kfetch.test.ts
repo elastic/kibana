@@ -236,9 +236,11 @@ describe('kfetch', () => {
           },
         });
 
-        return kfetch({ pathname: 'my/path' }).catch(e => {
+        try {
+          await kfetch({ pathname: 'my/path' });
+        } catch (e) {
           expect(e.message).toBe('custom response error');
-        });
+        }
       });
 
       describe('multiple', () => {
