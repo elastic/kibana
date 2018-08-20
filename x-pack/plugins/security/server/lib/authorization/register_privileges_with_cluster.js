@@ -42,8 +42,8 @@ export async function registerPrivilegesWithCluster(server) {
   };
 
   const arePrivilegesEqual = (existingPrivileges, expectedPrivileges) => {
-    // when comparing privileges, the order of the actions doesn't matter, so since Javascript
-    // doesn't have the concept of an unordered collection, we sort them and compare them sorted.
+    // when comparing privileges, the order of the actions doesn't matter, lodash's isEqual
+    // doesn't know how to compare Sets
     return isEqual(existingPrivileges, expectedPrivileges, (value, other, key) => {
       if (key === 'actions' && Array.isArray(value) && Array.isArray(other)) {
         return isEqual(value.sort(), other.sort());
