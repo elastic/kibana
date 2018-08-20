@@ -175,19 +175,6 @@ module.exports = function (grunt) {
       ],
     },
 
-    pluginFunctionalTests: {
-      cmd: process.execPath,
-      args: [
-        'scripts/functional_tests',
-        '--config', 'test/plugin_functional/config.js',
-        '--esFrom', 'source',
-        '--bail',
-        '--debug',
-        '--',
-        '--server.maxPayloadBytes=1648576', //default is 1048576
-      ],
-    },
-
     pluginFunctionalTestsRelease: {
       cmd: process.execPath,
       args: [
