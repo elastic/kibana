@@ -5,6 +5,7 @@
  */
 
 import React, { Fragment } from 'react';
+import moment from 'moment';
 import { SummaryStatus } from '../../summary_status';
 import { ApmStatusIcon } from '../status_icon';
 import { formatMetric } from '../../../lib/format_number';
@@ -37,7 +38,7 @@ export function Status({ stats }) {
     },
     {
       label: 'Last Event',
-      value: formatMetric(timeOfLastEvent, 'time_since2'),
+      value: formatMetric(+moment(timeOfLastEvent), 'time_since2', 'ago'),
       dataTestSubj: 'timeOfLastEvent',
     }
   ];

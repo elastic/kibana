@@ -66,34 +66,30 @@ export function getApmsForClusters(req, apmIndexPattern, clusters) {
     // Fetch additional information
     const params2 = {
       index: apmIndexPattern,
-      size: 0,
+      size: 1,
       ignoreUnavailable: true,
-      // filterPath: apmAggFilterPath,
       body: {
+        _source: ['timestamp'],
+        sort: [{
+          timestamp: {
+            order: 'desc'
+          }
+        }],
         query: createApmQuery({
           start,
           end,
           clusterUuid,
-          metric: BeatsClusterMetric.getMetricFields() // override default of BeatMetric.getMetricFields
-        }),
-        aggs: {
-          acked_events: {
-            filter: {
+          metric: BeatsClusterMetric.getMetricFields(), // override default of BeatMetric.getMetricFields
+          filters: [
+            {
               range: {
                 'beats_stats.metrics.libbeat.output.events.acked': {
                   gt: 0,
                 }
               }
-            },
-            aggs: {
-              max_timestamp: {
-                max: {
-                  field: 'timestamp'
-                }
-              }
             }
-          }
-        }
+          ],
+        }),
       }
     };
 
@@ -108,7 +104,7 @@ export function getApmsForClusters(req, apmIndexPattern, clusters) {
       ...formattedResponse,
       stats: {
         ...formattedResponse.stats,
-        timeOfLastEvent: get(response2, 'aggregations.acked_events.max_timestamp.value')
+        timeOfLastEvent: get(response2, 'hits.hits[0]._source.timestamp')
       }
     };
   }));
