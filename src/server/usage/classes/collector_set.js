@@ -70,14 +70,14 @@ export class CollectorSet {
 
   /*
    * Call a bunch of fetch methods and then do them in bulk
-   * @param {Array} collectors - an array of collectors, default to all registered collectors
+   * @param {CollectorSet} collectorSet - a set of collectors to fetch. Default to all registered collectors
    */
-  bulkFetch(callCluster, collectors = this) {
-    if (!(collectors instanceof CollectorSet)) {
-      throw new Error(`bulkFetch method given bad collectors parameter: ` + typeof collectors);
+  bulkFetch(callCluster, collectorSet = this) {
+    if (!(collectorSet instanceof CollectorSet)) {
+      throw new Error(`bulkFetch method given bad collectorSet parameter: ` + typeof collectorSet);
     }
 
-    const fetchPromises = collectors.map(collector => {
+    const fetchPromises = collectorSet.map(collector => {
       const collectorType = collector.type;
       this._log.debug(`Fetching data from ${collectorType} collector`);
       return Promise.props({
