@@ -25,7 +25,9 @@ export default async function ({ readConfigFile }) {
 
   // Find all folders in ./plugins since we treat all them as plugin folder
   const allFiles = fs.readdirSync(path.resolve(__dirname, 'plugins'));
+  console.log('[plugin functional tests] allFiles', allFiles);
   const plugins = allFiles.filter(file => fs.statSync(path.resolve(__dirname, 'plugins', file)).isDirectory());
+  console.log('[plugin functional tests] plugins', plugins);
 
   return {
     testFiles: [
