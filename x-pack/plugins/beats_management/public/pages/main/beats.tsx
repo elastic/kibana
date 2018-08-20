@@ -55,6 +55,29 @@ export class BeatsPage extends React.PureComponent<BeatsPageProps, BeatsPageStat
         items={this.state.beats || []}
         ref={this.state.tableRef}
         showAssignmentOptions={true}
+        renderAssignmentOptions={(tag: ClientSideBeatTag) => {
+          const selectedBeats = this.getSelectedBeats();
+          const hasMatches = selectedBeats.some((beat: any) =>
+            (beat.tags || []).some((t: string) => t === tag.id)
+          );
+
+          return (
+            <EuiFlexItem key={`${tag.id}-${hasMatches ? 'matched' : 'unmatched'}`}>
+              <EuiBadge
+                color={tag.color}
+                iconType={hasMatches ? 'cross' : undefined}
+                onClick={
+                  hasMatches
+                    ? () => this.removeTagsFromBeats(selectedBeats, tag)
+                    : () => this.assignTagsToBeats(selectedBeats, tag)
+                }
+                onClickAriaLabel={tag.id}
+              >
+                {tag.id}
+              </EuiBadge>
+            </EuiFlexItem>
+          );
+        }}
         type={BeatsTableType}
       />
     );
@@ -105,32 +128,9 @@ export class BeatsPage extends React.PureComponent<BeatsPageProps, BeatsPageStat
 
   private loadTags = async () => {
     const tags = await this.props.libs.tags.getAll();
-    const selectedBeats = this.getSelectedBeats();
 
-    const renderedTags = tags.map(tag => {
-      const hasMatches = selectedBeats.some((beat: any) =>
-        beat.full_tags.some((t: any) => t.id === tag.id)
-      );
-
-      return (
-        <EuiFlexItem key={tag.id}>
-          <EuiBadge
-            color={tag.color}
-            iconType={hasMatches ? 'cross' : undefined}
-            onClick={
-              hasMatches
-                ? () => this.removeTagsFromBeats(selectedBeats, tag)
-                : () => this.assignTagsToBeats(selectedBeats, tag)
-            }
-            onClickAriaLabel={tag.id}
-          >
-            {tag.id}
-          </EuiBadge>
-        </EuiFlexItem>
-      );
-    });
     this.setState({
-      tags: renderedTags,
+      tags,
     });
   };
 
@@ -141,12 +141,14 @@ export class BeatsPage extends React.PureComponent<BeatsPageProps, BeatsPageStat
 
   private removeTagsFromBeats = async (beats: CMPopulatedBeat[], tag: ClientSideBeatTag) => {
     await this.props.libs.beats.removeTagsFromBeats(this.createBeatTagAssignments(beats, tag));
-    this.loadBeats();
+    await this.loadBeats();
+    await this.loadTags();
   };
 
   private assignTagsToBeats = async (beats: CMPopulatedBeat[], tag: ClientSideBeatTag) => {
     await this.props.libs.beats.assignTagsToBeats(this.createBeatTagAssignments(beats, tag));
-    this.loadBeats();
+    await this.loadBeats();
+    await this.loadTags();
   };
 
   private getSelectedBeats = (): CMPopulatedBeat[] => {

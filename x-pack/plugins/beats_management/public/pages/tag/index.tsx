@@ -62,7 +62,7 @@ export class TagPage extends React.PureComponent<TagPageProps, TagPageState> {
                 };
               })
             }
-            attachedBeats={null}
+            attachedBeats={[]}
           />
           <EuiSpacer size="m" />
           <EuiFlexGroup>
