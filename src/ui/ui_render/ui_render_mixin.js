@@ -96,7 +96,7 @@ export function uiRenderMixin(kbnServer, server, config) {
           return h.renderStatusPage();
         }
       } catch (err) {
-        return Boom.wrap(err);
+        return Boom.boomify(err);
       }
     }
   });

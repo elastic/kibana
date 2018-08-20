@@ -5,7 +5,7 @@
  */
 
 import Joi from 'joi';
-import { wrap } from 'boom';
+import { boomify } from 'boom';
 
 /**
  * Check the incoming request parameters to see if the action should be allowed to fire.
@@ -64,7 +64,7 @@ export async function sendNotification(server, notificationService, actionId, da
   if (error === null) {
     return action.performAction(data)
       .then(result => result.toJson())
-      .catch(err => wrap(err)); // by API definition, this should never happen as performAction isn't allow to throw errrors
+      .catch(err => boomify(err)); // by API definition, this should never happen as performAction isn't allow to throw errrors
   }
 
   server.log(['actions', 'error'], error.message);

@@ -14,5 +14,5 @@ import Boom from 'boom';
  * @return Object Boom error response
  */
 export function wrapCustomError(err, statusCode) {
-  return Boom.wrap(err, statusCode);
+  return Boom.boomify(err, { statusCode });
 }

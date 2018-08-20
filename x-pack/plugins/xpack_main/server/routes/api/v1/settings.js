@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { wrap as wrapError } from 'boom';
+import { boomify } from 'boom';
 import { KIBANA_SETTINGS_TYPE } from '../../../../../monitoring/common/constants';
 import { getKibanaInfoForStats } from '../../../../../monitoring/server/kibana_monitoring/lib';
 
@@ -42,7 +42,7 @@ export function settingsRoute(server, kbnServer) {
         if (err.isBoom) {
           return err;
         } else {
-          return wrapError(err, err.statusCode, err.message);
+          return boomify(err, { statusCode: err.statusCode, message: err.message });
         }
       }
     }

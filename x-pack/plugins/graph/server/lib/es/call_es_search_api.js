@@ -16,6 +16,6 @@ export async function callEsSearchApi({ callCluster, index, body }) {
       })
     };
   } catch (error) {
-    return Boom.wrap(error, error.statusCode || 500);
+    return Boom.boomify(error, { statusCode: error.statusCode || 500 });
   }
 }

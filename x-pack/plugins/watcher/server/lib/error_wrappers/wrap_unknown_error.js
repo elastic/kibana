@@ -13,5 +13,5 @@ import Boom from 'boom';
  * @return Object Boom error response
  */
 export function wrapUnknownError(err) {
-  return Boom.wrap(err);
+  return Boom.boomify(err);
 }

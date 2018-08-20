@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { wrap } from 'boom';
+import { boomify } from 'boom';
 import { isKnownError, handleKnownError } from './known_errors';
 import { isAuthError, handleAuthError } from './auth_errors';
 import { LOGGING_TAG } from '../../../common/constants';
@@ -34,5 +34,5 @@ export function handleError(err, req) {
 
   const statusCode = err.isBoom ? err.output.statusCode : err.statusCode;
   // wrap the error; defaults to statusCode = 500 if statusCode is undefined
-  return wrap(err, statusCode, err.message);
+  return boomify(err, { statusCode, message: err.message });
 }

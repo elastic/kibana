@@ -20,11 +20,11 @@ export function wrapEsError(err, statusCodeToMessageMap = {}) {
   // If no custom message if specified for the error's status code, just
   // wrap the error as a Boom error response and return it
   if (!statusCodeToMessageMap[statusCode]) {
-    return Boom.wrap(err, err.statusCode);
+    return Boom.boomify(err, { statusCode });
   }
 
   // Otherwise, use the custom message to create a Boom error response and
   // return it
   const message = statusCodeToMessageMap[statusCode];
-  return Boom.create(statusCode, message);
+  return new Boom(message, { statusCode });
 }

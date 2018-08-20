@@ -1077,12 +1077,6 @@ boom@2.x.x:
   dependencies:
     hoek "2.x.x"
 
-boom@3.1.1:
-  version "3.1.1"
-  resolved "https://registry.yarnpkg.com/boom/-/boom-3.1.1.tgz#b6424f01ed8d492b2b12ae86047c24e8b6a7c937"
-  dependencies:
-    hoek "3.x.x"
-
 boom@4.x.x:
   version "4.3.1"
   resolved "https://registry.yarnpkg.com/boom/-/boom-4.3.1.tgz#4f8a3005cb4a7e3889f749030fd25b96e01d2e31"
@@ -1095,7 +1089,7 @@ boom@5.x.x:
   dependencies:
     hoek "4.x.x"
 
-boom@7.x.x:
+boom@7.2.0, boom@7.x.x:
   version "7.2.0"
   resolved "https://registry.yarnpkg.com/boom/-/boom-7.2.0.tgz#2bff24a55565767fde869ec808317eb10c48e966"
   dependencies:
@@ -3394,10 +3388,6 @@ history@4.7.2, history@^4.7.2:
 hoek@2.x.x:
   version "2.16.3"
   resolved "https://registry.yarnpkg.com/hoek/-/hoek-2.16.3.tgz#20bb7403d3cea398e91dc4710a8ff1b8274a25ed"
-
-hoek@3.x.x:
-  version "3.0.4"
-  resolved "https://registry.yarnpkg.com/hoek/-/hoek-3.0.4.tgz#268adff66bb6695c69b4789a88b1e0847c3f3123"
 
 hoek@4.2.1:
   version "4.2.1"

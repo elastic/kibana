@@ -5,7 +5,7 @@
  */
 
 import { checkForErrors, sendNotification } from './notify';
-import { wrap } from 'boom';
+import { boomify } from 'boom';
 
 describe('notifications/routes/send', () => {
 
@@ -156,7 +156,7 @@ describe('notifications/routes/send', () => {
       expect(checkForErrors).toHaveBeenCalledTimes(1);
       expect(checkForErrors).toHaveBeenCalledWith(action, id, notification);
 
-      expect(sendResponse).toEqual(wrap(error));
+      expect(sendResponse).toEqual(boomify(error));
     });
 
   });

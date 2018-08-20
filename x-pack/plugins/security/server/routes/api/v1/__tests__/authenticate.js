@@ -94,7 +94,7 @@ describe('Authentication routes', () => {
       const response = await loginRoute.handler(request, hStub);
 
       expect(response.isBoom).to.be(true);
-      expect(response.message).to.be(failureReason.toString());
+      expect(response.message).to.be(failureReason.message);
       expect(response.output.statusCode).to.be(401);
     });
 
@@ -199,7 +199,7 @@ describe('Authentication routes', () => {
 
       const response = await logoutRoute.handler(request, hStub);
 
-      expect(response).to.be(Boom.wrap(unhandledException));
+      expect(response).to.be(Boom.boomify(unhandledException));
       sinon.assert.notCalled(hStub.redirect);
     });
 
@@ -213,7 +213,7 @@ describe('Authentication routes', () => {
 
       const response = await logoutRoute.handler(request, hStub);
 
-      expect(response).to.be(Boom.wrap(failureReason));
+      expect(response).to.be(Boom.boomify(failureReason));
       sinon.assert.notCalled(hStub.redirect);
     });
 
@@ -348,7 +348,7 @@ describe('Authentication routes', () => {
 
       sinon.assert.notCalled(hStub.redirect);
       expect(response.isBoom).to.be(true);
-      expect(response.message).to.be(failureReason.toString());
+      expect(response.message).to.be(failureReason.message);
       expect(response.output.statusCode).to.be(401);
     });
 

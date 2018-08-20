@@ -18,5 +18,5 @@ export function wrapEsError(err) {
   if (statusCode === 403) {
     return Boom.forbidden('Insufficient user permissions for managing Logstash pipelines');
   }
-  return Boom.wrap(err, err.statusCode);
+  return Boom.boomify(err, { statusCode: err.statusCode });
 }

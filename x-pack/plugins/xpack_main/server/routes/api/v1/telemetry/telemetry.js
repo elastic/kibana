@@ -5,7 +5,7 @@
  */
 
 import Joi from 'joi';
-import { wrap } from 'boom';
+import { boomify } from 'boom';
 import { getAllStats, getLocalStats } from '../../../../lib/telemetry';
 
 /**
@@ -62,7 +62,7 @@ export function telemetryRoute(server) {
       } catch (err) {
         if (config.get('env.dev')) {
         // don't ignore errors when running in dev mode
-          return wrap(err);
+          return boomify(err);
         } else {
         // ignore errors, return empty set and a 200
           return h.response([]).code(200);

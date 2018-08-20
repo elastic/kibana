@@ -88,7 +88,7 @@ describe('User routes', () => {
         expect(response.output.payload).to.eql({
           statusCode: 401,
           error: 'Unauthorized',
-          message: 'Error: Something went wrong.'
+          message: 'Something went wrong.'
         });
       });
 
@@ -117,7 +117,7 @@ describe('User routes', () => {
         expect(response.output.payload).to.eql({
           statusCode: 401,
           error: 'Unauthorized',
-          message: 'Error: Something went wrong.'
+          message: 'Something went wrong.'
         });
       });
 
