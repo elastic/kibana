@@ -16,18 +16,8 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import 'ui/autoload/all';
 
-import { Logger } from './logger';
+import chrome from 'ui/chrome';
 
-/**
- * The single purpose of `LoggerFactory` interface is to define a way to
- * retrieve a context-based logger instance.
- */
-export interface LoggerFactory {
-  /**
-   * Returns a `Logger` instance for the specified context.
-   * @param contextParts Parts of the context to return logger for. For example
-   * get('plugins', 'pid') will return a logger for the `plugins.pid` context.
-   */
-  get(...contextParts: string[]): Logger;
-}
+chrome.setRootTemplate('<div data-test-subj="pluginContent">Super simple app plugin</div>');
