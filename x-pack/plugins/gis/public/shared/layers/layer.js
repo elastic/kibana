@@ -45,5 +45,9 @@ export class ALayer {
   getType() {
     return this._descriptor.type;
   }
+
+  isVisible() {
+    return this._descriptor.visible;
+  }
 }
 

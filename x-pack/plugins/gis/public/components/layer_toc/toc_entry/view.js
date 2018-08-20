@@ -13,32 +13,22 @@ import {
 import { VisibilityToggle } from './visiblity_toggle';
 
 export function TOCEntry(props) {
-  const {
-    layerId,
-    layerVisible,
-    layerName,
-    toggleVisible,
-    onButtonClick
-  } = props;
-
-  const visible = layerVisible(layerId);
-
   return (
     <div
       className={`layerEntry`}
-      id={layerId}
-      data-layerid={layerId}
+      id={props.layer.getId()}
+      data-layerid={props.layer.getId()}
     >
-      <EuiFlexGroup gutterSize="s" responsive={false} className={visible ? 'visible' : 'notvisible'}>
+      <EuiFlexGroup gutterSize="s" responsive={false} className={props.layer.isVisible() ? 'visible' : 'notvisible'}>
         <EuiFlexItem grow={false} className="layerEntry--visibility">
           <VisibilityToggle
-            checked={visible}
-            onChange={() => toggleVisible(layerId)}
+            checked={props.layer.isVisible()}
+            onChange={() => props.toggleVisible(props.layer.getId())}
           />
         </EuiFlexItem>
         <EuiFlexItem className="layerEntry--name">
-          <button onClick={() => onButtonClick(layerId)}>
-            {layerName}
+          <button onClick={() => props.onButtonClick(props.layer.getId())}>
+            {props.layer.getDisplayName()}
           </button>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>

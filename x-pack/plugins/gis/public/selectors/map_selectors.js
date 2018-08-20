@@ -22,14 +22,18 @@ export const getSelectedLayerInstance = ({ map }) => {
 function createLayerInstance(layerDescriptor) {
   if (layerDescriptor.type === TileLayer.type) {
     return new TileLayer(layerDescriptor);
-  }
-  if (layerDescriptor.type === VectorLayer.type) {
+  } else if (layerDescriptor.type === VectorLayer.type) {
     return new VectorLayer(layerDescriptor);
+  } else {
+    throw new Error(`Unrecognized layerType ${layerDescriptor.type}`);
   }
 }
 
-
 export const getLayerList = ({ map }) => map && map.layerList;
+
+export const getLayerInstanceList = ({ map }) => {
+  return map.layerList ?  map.layerList.map(layerDescriptor => createLayerInstance(layerDescriptor)) : [];
+};
 
 export const getLayerLoading = ({ map }) => map && map.layerLoading;
 
