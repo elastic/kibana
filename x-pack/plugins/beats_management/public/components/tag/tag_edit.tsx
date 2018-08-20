@@ -26,6 +26,7 @@ import 'brace/theme/github';
 import React from 'react';
 import { CMBeat } from '../../../common/domain_types';
 import { ClientSideBeatTag } from '../../lib/lib';
+import { ConfigList } from '../config_list';
 import { Table } from '../table';
 import { BeatsTableType } from '../table';
 import { ConfigView } from './config_view';
@@ -114,6 +115,8 @@ export class TagEdit extends React.PureComponent<TagEditProps, TagEditState> {
           </EuiFlexItem>
           <EuiFlexItem>
             <div>
+              <ConfigList configs={tag.configurations} />
+              <br />
               <EuiButton onClick={this.openConfigFlyout}>Add a new configuration</EuiButton>
             </div>
           </EuiFlexItem>
