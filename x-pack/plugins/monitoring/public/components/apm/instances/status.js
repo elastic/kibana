@@ -33,7 +33,7 @@ export function Status({ stats }) {
     },
     {
       label: 'Total Events',
-      value: formatMetric(totalEvents),
+      value: formatMetric(totalEvents, '0.[0]a'),
       dataTestSubj: 'totalEvents'
     },
     {
