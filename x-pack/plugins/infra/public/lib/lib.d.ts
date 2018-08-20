@@ -47,8 +47,6 @@ export interface InfraFramworkAdapterConstructable {
 export type InfraRequestConfig = AxiosRequestConfig;
 
 export interface InfraApiAdapter {
-  kbnVersion: string;
-
   get<T>(url: string, config?: InfraRequestConfig | undefined): Promise<T>;
   post(url: string, data?: any, config?: AxiosRequestConfig | undefined): Promise<object>;
   delete(url: string, config?: InfraRequestConfig | undefined): Promise<object>;

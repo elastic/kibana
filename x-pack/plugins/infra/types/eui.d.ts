@@ -84,13 +84,4 @@ declare module '@elastic/eui' {
     type?: string;
   };
   export const EuiFilterButton: React.SFC<EuiFilterButtonProps>;
-
-  type EuiToolTipProps = CommonProps & {
-    id?: string;
-    content?: string;
-    title?: string;
-    position?: EuiToolTipPosition;
-    className?: string;
-  };
-  export const EuiToolTip: React.SFC<EuiToolTipProps>;
 }
