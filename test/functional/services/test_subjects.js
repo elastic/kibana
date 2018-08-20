@@ -190,6 +190,10 @@ export function TestSubjectsProvider({ getService }) {
         return await mapAsync(elements, mapFn);
       });
     }
+
+    async waitForDeleted(selector) {
+      await remote.waitForDeletedByCssSelector(testSubjSelector(selector));
+    }
   }
 
   return new TestSubjects();
