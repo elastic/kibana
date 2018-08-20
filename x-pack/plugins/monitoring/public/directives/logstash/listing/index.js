@@ -43,41 +43,41 @@ const nodeRowFactory = (scope, kbnUrl) => {
     return (
       <KuiTableRow>
         <KuiTableRowCell>
-          <div className="monitoringTableCell__name">
+          <div className="monTableCell__name">
             <EuiLink
               onClick={goToNode.bind(null, get(props, 'logstash.uuid'))}
             >
               { get(props, 'logstash.name') }
             </EuiLink>
           </div>
-          <div className="monitoringTableCell__transportAddress">{ get(props, 'logstash.http_address') }</div>
+          <div className="monTableCell__transportAddress">{ get(props, 'logstash.http_address') }</div>
         </KuiTableRowCell>
         <KuiTableRowCell>
-          <div className="monitoringTableCell__number">
+          <div className="monTableCell__number">
             { formatPercentageUsage(props.process.cpu.percent, 100) }
           </div>
         </KuiTableRowCell>
         <KuiTableRowCell>
-          <div className="monitoringTableCell__number">
+          <div className="monTableCell__number">
             { formatNumber(get(props, 'os.cpu.load_average["1m"]'), '0.00') }
           </div>
         </KuiTableRowCell>
         <KuiTableRowCell>
-          <div className="monitoringTableCell__number">
+          <div className="monTableCell__number">
             { formatPercentageUsage(props.jvm.mem.heap_used_percent, 100) }
           </div>
         </KuiTableRowCell>
         <KuiTableRowCell>
-          <div className="monitoringTableCell__number">
+          <div className="monTableCell__number">
             { formatNumber(props.events.out, '0.[0]a') }
           </div>
         </KuiTableRowCell>
         <KuiTableRowCell>
-          <div className="monitoringTableCell__splitNumber">{ props.reloads.successes } successes</div>
-          <div className="monitoringTableCell__splitNumber">{ props.reloads.failures } failures</div>
+          <div className="monTableCell__splitNumber">{ props.reloads.successes } successes</div>
+          <div className="monTableCell__splitNumber">{ props.reloads.failures } failures</div>
         </KuiTableRowCell>
         <KuiTableRowCell>
-          <div className="monitoringTableCell__version">
+          <div className="monTableCell__version">
             { formatNumber(get(props, 'logstash.version')) }
           </div>
         </KuiTableRowCell>

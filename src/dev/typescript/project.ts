@@ -41,10 +41,7 @@ function parseTsConfig(path: string) {
     throw error;
   }
 
-  const files: string[] | undefined = config.files;
-  const include: string[] | undefined = config.include;
-  const exclude: string[] | undefined = config.exclude;
-  return { files, include, exclude };
+  return config;
 }
 
 function testMatchers(matchers: IMinimatch[], path: string) {
@@ -54,11 +51,19 @@ function testMatchers(matchers: IMinimatch[], path: string) {
 export class Project {
   public directory: string;
   public name: string;
-  private include: IMinimatch[];
-  private exclude: IMinimatch[];
+  public config: any;
+
+  private readonly include: IMinimatch[];
+  private readonly exclude: IMinimatch[];
 
   constructor(public tsConfigPath: string, name?: string) {
-    const { files, include, exclude = [] } = parseTsConfig(tsConfigPath);
+    this.config = parseTsConfig(tsConfigPath);
+
+    const { files, include, exclude = [] } = this.config as {
+      files?: string[];
+      include?: string[];
+      exclude?: string[];
+    };
 
     if (files || !include) {
       throw new Error(

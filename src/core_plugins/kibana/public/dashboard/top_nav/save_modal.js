@@ -157,7 +157,7 @@ export class DashboardSaveModal extends React.Component {
       <EuiOverlayMask>
         <EuiModal
           data-test-subj="dashboardSaveModal"
-          className="dashboardModal"
+          className="dshSaveModal"
           onClose={this.props.onClose}
         >
           <EuiModalHeader>

@@ -39,6 +39,7 @@ export const CleanPackagesTask = {
     await deleteAll(log, [
       build.resolvePath('packages'),
       build.resolvePath('x-pack'),
+      build.resolvePath('yarn.lock'),
     ]);
   },
 };
@@ -100,7 +101,7 @@ export const CleanExtraFilesFromModulesTask = {
       '.jscs.json',
       '.lint',
     ];
-    const hints = ['*.flow', '*.webidl', '*.map'];
+    const hints = ['*.flow', '*.webidl', '*.map', '@types'];
     const scripts = [
       '*.sh',
       '*.bat',

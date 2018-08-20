@@ -5,7 +5,8 @@
  */
 
 import React, { Component } from 'react';
-import { Route } from "react-router-dom";
+import { injectI18n } from '@kbn/i18n/react';
+import { Route } from 'react-router-dom';
 import { ShowJson } from './show_json';
 import { Summary } from './summary';
 import { EditSettingsJson } from './edit_settings_json';
@@ -21,15 +22,15 @@ import {
   EuiTab,
   EuiTitle
 } from '@elastic/eui';
-import { IndexActionsContextMenu } from "../../components";
-import { INDEX_OPEN } from "../../../../../common/constants";
+import { IndexActionsContextMenu } from '../../components';
+import { INDEX_OPEN } from '../../../../../common/constants';
 
 function capitalizeFirstLetter(string) {
   return string.charAt(0).toUpperCase() + string.slice(1);
 }
 
 const tabs = ['Summary', 'Settings', 'Mapping', 'Stats', 'Edit settings'];
-export class DetailPanel extends Component {
+export class DetailPanelUi extends Component {
   renderTabs() {
     const { panelType, indexName, indexStatus, openDetailPanel } = this.props;
 
@@ -50,7 +51,7 @@ export class DetailPanel extends Component {
   }
 
   render() {
-    const { panelType, indexName, closeDetailPanel } = this.props;
+    const { panelType, indexName, closeDetailPanel, intl } = this.props;
     if (!panelType) {
       return null;
     }
@@ -94,7 +95,10 @@ export class DetailPanel extends Component {
                     anchorPosition="upRight"
                     detailPanel={true}
                     iconType="arrowUp"
-                    label="Manage"
+                    label={intl.formatMessage({
+                      id: 'xpack.idxMgmt.detailPanel.manageContextMenuLabel',
+                      defaultMessage: 'Manage',
+                    })}
                   />
                 )}
               />
@@ -105,3 +109,5 @@ export class DetailPanel extends Component {
     );
   }
 }
+
+export const DetailPanel = injectI18n(DetailPanelUi);
