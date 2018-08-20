@@ -4,13 +4,18 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { spy } from 'sinon';
+import { stub } from 'sinon';
 
 export function hFixture() {
-  return {
-    authenticated: spy(),
+  const h = {};
+
+  Object.assign(h, {
+    authenticated: stub().returns(h),
     continue: 'continue value',
-    redirect: spy(),
-    unstate: spy(),
-  };
+    redirect: stub().returns(h),
+    unstate: stub().returns(h),
+    takeover: stub().returns(h)
+  });
+
+  return h;
 }

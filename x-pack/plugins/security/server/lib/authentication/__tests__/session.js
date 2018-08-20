@@ -98,26 +98,20 @@ describe('Session', () => {
 
       sandbox.clock.tick(currentTime);
 
-      const callback = sinon.stub();
       const sessionWithoutExpires = { token: 'token' };
-      validateFunc({}, sessionWithoutExpires, callback);
+      let result = validateFunc({}, sessionWithoutExpires);
 
-      sinon.assert.calledOnce(callback);
-      sinon.assert.calledWithExactly(callback, null, true, sessionWithoutExpires);
+      expect(result.valid).to.be(true);
 
-      callback.resetHistory();
       const notExpiredSession = { token: 'token', expires: currentTime + 1 };
-      validateFunc({}, notExpiredSession, callback);
+      result = validateFunc({}, notExpiredSession);
 
-      sinon.assert.calledOnce(callback);
-      sinon.assert.calledWithExactly(callback, null, true, notExpiredSession);
+      expect(result.valid).to.be(true);
 
-      callback.resetHistory();
       const expiredSession = { token: 'token', expires: currentTime - 1 };
-      validateFunc({}, expiredSession, callback);
+      result = validateFunc({}, expiredSession);
 
-      sinon.assert.calledOnce(callback);
-      sinon.assert.calledWithExactly(callback, sinon.match.instanceOf(Error), false);
+      expect(result.valid).to.be(false);
     });
   });
 

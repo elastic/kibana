@@ -69,6 +69,7 @@ describe('lib/auth_redirect', function () {
     await authenticate(request, h);
 
     sinon.assert.calledWithExactly(h.redirect, '/some/url');
+    sinon.assert.called(h.takeover);
     sinon.assert.notCalled(h.authenticated);
   });
 

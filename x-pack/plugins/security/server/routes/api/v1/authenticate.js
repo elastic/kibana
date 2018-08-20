@@ -48,7 +48,7 @@ export function initAuthenticateApi(server) {
           server.log(['warning', 'deprecated', 'security'], msg);
         }
 
-        return h.authenticated({ credentials: authenticationResult.user });
+        return h.response();
       } catch(err) {
         return wrapError(err);
       }

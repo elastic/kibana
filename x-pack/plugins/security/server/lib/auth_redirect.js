@@ -40,7 +40,7 @@ export function authenticateFactory(server) {
       // authentication (username and password) or arbitrary external page managed by 3rd party
       // Identity Provider for SSO authentication mechanisms. Authentication provider is the one who
       // decides what location user should be redirected to.
-      return h.redirect(authenticationResult.redirectURL);
+      return h.redirect(authenticationResult.redirectURL).takeover();
     } else if (authenticationResult.failed()) {
       server.log(['info', 'authentication'], `Authentication attempt failed: ${authenticationResult.error.message}`);
       return wrapError(authenticationResult.error);

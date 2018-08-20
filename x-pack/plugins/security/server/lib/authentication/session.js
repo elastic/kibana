@@ -133,12 +133,11 @@ export class Session {
    * @param {function} callback Callback to be called once validation is completed.
    * @private
    */
-  static _validateCookie(request, session, callback) {
+  static _validateCookie(request, session) {
     if (session.expires && session.expires < Date.now()) {
-      callback(new Error('Session has expired'), false /* isValid */);
-      return;
+      return { valid: false };
     }
 
-    callback(null /* error */, true /* isValid */, session);
+    return { valid: true };
   }
 }

@@ -27,6 +27,7 @@ describe('Authentication routes', () => {
       authenticated: sinon.stub(),
       continue: 'blah',
       redirect: sinon.stub(),
+      response: sinon.stub()
     };
 
     initAuthenticateApi(serverStub);
@@ -127,8 +128,7 @@ describe('Authentication routes', () => {
         sinon.assert.calledWithExactly(checkPrivilegesWithRequestStub, request);
         sinon.assert.calledWithExactly(checkPrivilegesStub, [serverStub.plugins.security.authorization.actions.login]);
         sinon.assert.neverCalledWith(serverStub.log, ['warning', 'deprecated', 'security'], getDeprecationMessage(user.username));
-        sinon.assert.calledOnce(hStub.authenticated);
-        sinon.assert.calledWithExactly(hStub.authenticated, { credentials: user });
+        sinon.assert.calledOnce(hStub.response);
       });
 
       it(`returns user data and logs deprecation warning if checkPrivileges result is legacy.`, async () => {
@@ -144,8 +144,7 @@ describe('Authentication routes', () => {
         sinon.assert.calledWithExactly(checkPrivilegesWithRequestStub, request);
         sinon.assert.calledWithExactly(checkPrivilegesStub, [serverStub.plugins.security.authorization.actions.login]);
         sinon.assert.calledWith(serverStub.log, ['warning', 'deprecated', 'security'], getDeprecationMessage(user.username));
-        sinon.assert.calledOnce(hStub.authenticated);
-        sinon.assert.calledWithExactly(hStub.authenticated, { credentials: user });
+        sinon.assert.calledOnce(hStub.response);
       });
 
       it(`returns user data and doesn't log deprecation warning if checkPrivileges result is unauthorized.`, async () => {
@@ -161,8 +160,7 @@ describe('Authentication routes', () => {
         sinon.assert.calledWithExactly(checkPrivilegesWithRequestStub, request);
         sinon.assert.calledWithExactly(checkPrivilegesStub, [serverStub.plugins.security.authorization.actions.login]);
         sinon.assert.neverCalledWith(serverStub.log, ['warning', 'deprecated', 'security'], getDeprecationMessage(user.username));
-        sinon.assert.calledOnce(hStub.authenticated);
-        sinon.assert.calledWithExactly(hStub.authenticated, { credentials: user });
+        sinon.assert.calledOnce(hStub.response);
       });
     });
 
