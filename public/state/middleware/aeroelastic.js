@@ -9,6 +9,7 @@ import {
   setPosition,
   fetchAllRenderables,
 } from '../actions/elements';
+import { restoreHistory } from '../actions/history';
 import { selectElement } from '../actions/transient';
 import { addPage, removePage, duplicatePage } from '../actions/pages';
 import { appReady } from '../actions/app';
@@ -179,6 +180,7 @@ export const aeroelastic = ({ dispatch, getState }) => {
 
     switch (action.type) {
       case appReady.toString():
+      case restoreHistory.toString():
       case setWorkpad.toString():
         // Populate the aeroelastic store, which only happens once per page creation; disposed on workbook change.
         getPages(getState())
