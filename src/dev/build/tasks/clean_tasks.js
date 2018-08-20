@@ -23,7 +23,6 @@ import { dirname, isAbsolute, sep, extname } from 'path';
 import globby from 'globby';
 import deleteEmpty from 'delete-empty';
 import pkgUp from 'pkg-up';
-// import precinct from 'precinct';
 import * as parser from '@babel/parser';
 import traverse from '@babel/traverse';
 
@@ -339,33 +338,6 @@ export const CleanNodeModulesOnDLLTask = {
 
         wasParsed[dep] = true;
 
-        // const newEntries = precinct.paperwork(dep, {
-        //   includeCore: false
-        // }).reduce((filteredEntries, entry) => {
-        //   const absEntryPath = build.resolvePath(dirname(dep), entry);
-        //   const requiredPath = canRequire(absEntryPath);
-        //   const relativeFile = !isAbsolute(entry);
-        //   const requiredRelativePath = canRequire(entry);
-        //   const isNodeModuleDep = relativeFile && !requiredPath && requiredRelativePath;
-        //   const isNewEntry = relativeFile && requiredPath;
-        //
-        //   if (isNodeModuleDep) {
-        //     deps[entry] = true;
-        //     if (!entriesMap[requiredRelativePath]) {
-        //       filteredEntries.push(requiredRelativePath);
-        //       entriesMap[requiredRelativePath] = true;
-        //     }
-        //   }
-        //
-        //   if (isNewEntry && !wasParsed[requiredPath]) {
-        //     if (!entriesMap[requiredPath]) {
-        //       filteredEntries.push(requiredPath);
-        //       entriesMap[requiredPath] = true;
-        //     }
-        //   }
-        //
-        //   return filteredEntries;
-        // }, []);
         const newEntries = getDepsFromFile(dep).reduce((filteredEntries, entry) => {
           const absEntryPath = build.resolvePath(dirname(dep), entry);
           const requiredPath = canRequire(absEntryPath);
