@@ -175,8 +175,6 @@ Machine Learning::
 * [Fixes #19068] Provides more helpful job validation success messages {pull}21079[#21079]
 * [Fixes #18689] Makes script_fields available in field dropdowns of the advanced wizard's detectors modal {pull}21205[#21205]
 * Improves job validation messages {pull}21191[#21191]
-* [Fixes #21677] Fixes bucket span estimation when `search.max_buckets` is -1. {pull}21680[#21680]
-
 
 Management::
 * [Fixes #19741] Modifies the logic for showing the *Extend Trial* pane {pull}20211[#20211]
