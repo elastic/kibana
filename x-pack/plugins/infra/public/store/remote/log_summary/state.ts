@@ -5,20 +5,14 @@
  */
 
 import { LogSummary as LogSummaryQuery } from '../../../../common/graphql/types';
-import { createGraphqlInitialState } from '../../../utils/remote_state/remote_graphql_state';
+import {
+  createGraphqlInitialState,
+  GraphqlState,
+} from '../../../utils/remote_state/remote_graphql_state';
 
-export type SummaryGraphqlState = typeof initialSummaryGraphqlState;
+export type LogSummaryRemoteState = LogSummaryQuery.LogSummaryBetween;
+export type LogSummaryState = GraphqlState<LogSummaryRemoteState>;
 
-export interface LogSummaryState {
-  summary: SummaryGraphqlState;
-  intervalSize: number;
-}
-
-export const initialSummaryGraphqlState = createGraphqlInitialState<
-  LogSummaryQuery.LogSummaryBetween
+export const initialLogSummaryState: LogSummaryState = createGraphqlInitialState<
+  LogSummaryRemoteState
 >();
-
-export const initialLogSummaryState: LogSummaryState = {
-  summary: initialSummaryGraphqlState,
-  intervalSize: 1000 * 60 * 60 * 24,
-};

@@ -11,6 +11,7 @@ import { TimeKey } from '../../../../common/time';
 import {
   jumpToTargetPosition,
   reportVisiblePositions,
+  reportVisibleSummary,
   startAutoReload,
   stopAutoReload,
 } from './actions';
@@ -36,6 +37,10 @@ export interface LogPositionState {
     middleKey: TimeKey | null;
     endKey: TimeKey | null;
   };
+  visibleSummary: {
+    start: number | null;
+    end: number | null;
+  };
 }
 
 export const initialLogPositionState: LogPositionState = {
@@ -47,6 +52,10 @@ export const initialLogPositionState: LogPositionState = {
     endKey: null,
     middleKey: null,
     startKey: null,
+  },
+  visibleSummary: {
+    start: null,
+    end: null,
   },
 };
 
@@ -74,8 +83,14 @@ const visiblePositionReducer = reducerWithInitialState(
   startKey,
 }));
 
+const visibleSummaryReducer = reducerWithInitialState(initialLogPositionState.visibleSummary).case(
+  reportVisibleSummary,
+  state => ({ ...state })
+);
+
 export const logPositionReducer = combineReducers<LogPositionState>({
   targetPosition: targetPositionReducer,
   updatePolicy: targetPositionUpdatePolicyReducer,
   visiblePositions: visiblePositionReducer,
+  visibleSummary: visibleSummaryReducer,
 });

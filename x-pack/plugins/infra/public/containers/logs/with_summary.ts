@@ -12,41 +12,11 @@ import { bindPlainActionCreators } from '../../utils/typed_redux';
 
 export const withSummary = connect(
   (state: State) => ({
-    availableIntervalSizes,
     buckets: logSummarySelectors.selectSummaryBuckets(state),
-    intervalSize: logSummarySelectors.selectSummaryIntervalSize(state),
   }),
   bindPlainActionCreators({
-    configureSummary: logSummaryActions.configureSummary,
-    reportVisibleInterval: logSummaryActions.reportVisibleSummary,
+    load: logSummaryActions.loadSummary,
   })
 );
 
 export const WithSummary = asChildFunctionRenderer(withSummary);
-
-export const availableIntervalSizes = [
-  {
-    label: '1 Year',
-    intervalSize: 1000 * 60 * 60 * 24 * 365,
-  },
-  {
-    label: '1 Month',
-    intervalSize: 1000 * 60 * 60 * 24 * 30,
-  },
-  {
-    label: '1 Week',
-    intervalSize: 1000 * 60 * 60 * 24 * 7,
-  },
-  {
-    label: '1 Day',
-    intervalSize: 1000 * 60 * 60 * 24,
-  },
-  {
-    label: '1 Hour',
-    intervalSize: 1000 * 60 * 60,
-  },
-  {
-    label: '1 Minute',
-    intervalSize: 1000 * 60,
-  },
-];

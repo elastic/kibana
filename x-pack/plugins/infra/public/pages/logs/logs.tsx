@@ -23,6 +23,7 @@ import { LogTextWrapControls } from '../../components/logging/log_text_wrap_cont
 import { LogTimeControls } from '../../components/logging/log_time_controls';
 
 // import { withLogSearchControlsProps } from '../../containers/logs/with_log_search_controls_props';
+import { WithLogMinimap } from '../../containers/logs/with_log_minimap';
 import { WithLogPosition } from '../../containers/logs/with_log_position';
 import { WithStreamItems } from '../../containers/logs/with_stream_items';
 import { WithSummary } from '../../containers/logs/with_summary';
@@ -58,15 +59,15 @@ class InnerLogsPage extends React.PureComponent<InnerLogsPageProps> {
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <LogCustomizationMenu>
-                <WithSummary>
-                  {({ availableIntervalSizes, configureSummary, intervalSize }) => (
+                <WithLogMinimap>
+                  {({ availableIntervalSizes, intervalSize, setIntervalSize }) => (
                     <LogMinimapScaleControls
                       availableIntervalSizes={availableIntervalSizes}
-                      configureSummary={configureSummary}
+                      setIntervalSize={setIntervalSize}
                       intervalSize={intervalSize}
                     />
                   )}
-                </WithSummary>
+                </WithLogMinimap>
                 <WithTextWrap>
                   {({ wrap, setTextWrap }) => (
                     <LogTextWrapControls wrap={wrap} setTextWrap={setTextWrap} />
@@ -159,24 +160,33 @@ class InnerLogsPage extends React.PureComponent<InnerLogsPageProps> {
             {({ measureRef, content: { width = 0, height = 0 } }) => {
               return (
                 <LogPageMinimapColumn innerRef={measureRef as any}>
-                  <WithSummary>
-                    {({ buckets, intervalSize, reportVisibleInterval }) => (
-                      <WithLogPosition>
-                        {({ jumpToTargetPosition, visibleMidpoint, visibleTimeInterval }) => (
-                          <LogMinimap
-                            height={height}
-                            width={width}
-                            highlightedInterval={visibleTimeInterval}
-                            intervalSize={intervalSize}
-                            jumpToTarget={jumpToTargetPosition}
-                            reportVisibleInterval={reportVisibleInterval}
-                            summaryBuckets={buckets}
-                            target={visibleMidpoint}
-                          />
+                  <WithLogMinimap>
+                    {({ intervalSize }) => (
+                      <WithSummary>
+                        {({ buckets }) => (
+                          <WithLogPosition>
+                            {({
+                              jumpToTargetPosition,
+                              reportVisibleSummary,
+                              visibleMidpoint,
+                              visibleTimeInterval,
+                            }) => (
+                              <LogMinimap
+                                height={height}
+                                width={width}
+                                highlightedInterval={visibleTimeInterval}
+                                intervalSize={intervalSize}
+                                jumpToTarget={jumpToTargetPosition}
+                                reportVisibleInterval={reportVisibleSummary}
+                                summaryBuckets={buckets}
+                                target={visibleMidpoint}
+                              />
+                            )}
+                          </WithLogPosition>
                         )}
-                      </WithLogPosition>
+                      </WithSummary>
                     )}
-                  </WithSummary>
+                  </WithLogMinimap>
                 </LogPageMinimapColumn>
               );
             }}

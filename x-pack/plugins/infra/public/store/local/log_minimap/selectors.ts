@@ -6,4 +6,4 @@
 
 import { LogMinimapState } from './reducer';
 
-export const selectMinimapScale = (state: LogMinimapState) => state.scale;
+export const selectMinimapIntervalSize = (state: LogMinimapState) => state.intervalSize;

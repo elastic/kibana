@@ -9,8 +9,9 @@ import { combineEpics, Epic, EpicWithState } from 'redux-observable';
 import { merge } from 'rxjs';
 import { exhaustMap, filter, map } from 'rxjs/operators';
 
-import { loadSummary, reportVisibleSummary } from './actions';
-import { loadSummaryEpic } from './load_operation';
+import { logPositionActions } from '../../local';
+import { loadSummary } from './actions';
+import { loadSummaryEpic } from './operations/load';
 
 const LOAD_BUCKETS_PER_PAGE = 100;
 const MINIMUM_BUCKETS_PER_PAGE = 90;
@@ -28,7 +29,7 @@ export const createSummaryEffectsEpic = <State>(): Epic<Action, Action, State, {
   {}
 ) => {
   const shouldLoadBetween$ = action$.pipe(
-    filter(reportVisibleSummary.match),
+    filter(logPositionActions.reportVisibleSummary.match),
     filter(
       ({ payload: { bucketsOnPage, pagesBeforeStart, pagesAfterEnd } }) =>
         bucketsOnPage < MINIMUM_BUCKETS_PER_PAGE ||

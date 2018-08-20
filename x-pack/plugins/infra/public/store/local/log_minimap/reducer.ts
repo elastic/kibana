@@ -6,22 +6,18 @@
 
 import { reducerWithInitialState } from 'typescript-fsa-reducers';
 
-import { TimeScale, TimeUnit } from '../../../../common/time';
-import { setMinimapScale } from './actions';
+import { setMinimapIntervalSize } from './actions';
 
 export interface LogMinimapState {
-  scale: TimeScale;
+  intervalSize: number;
 }
 
 export const initialLogMinimapState: LogMinimapState = {
-  scale: {
-    unit: TimeUnit.Day,
-    value: 1,
-  },
+  intervalSize: 1000 * 60 * 60 * 24,
 };
 
 export const logMinimapReducer = reducerWithInitialState(initialLogMinimapState)
-  .case(setMinimapScale, (state, { scale }) => ({
-    scale,
+  .case(setMinimapIntervalSize, (state, intervalSize) => ({
+    intervalSize,
   }))
   .build();

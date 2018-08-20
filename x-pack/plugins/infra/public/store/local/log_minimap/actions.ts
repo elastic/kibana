@@ -6,10 +6,6 @@
 
 import actionCreatorFactory from 'typescript-fsa';
 
-import { TimeScale } from '../../../../common/time';
-
 const actionCreator = actionCreatorFactory('x-pack/infra/local/log_minimap');
 
-export const setMinimapScale = actionCreator<{
-  scale: TimeScale;
-}>('SET_MINIMAP_SCALE');
+export const setMinimapIntervalSize = actionCreator<number>('SET_MINIMAP_INTERVAL_SIZE');
