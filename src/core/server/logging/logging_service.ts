@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { Observable, Subscription } from '../../lib/kbn_observable';
+import { Observable, Subscription } from 'rxjs';
 
 import { MutableLoggerFactory } from './logger_factory';
 import { LoggingConfig } from './logging_config';
