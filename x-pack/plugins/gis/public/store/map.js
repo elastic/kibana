@@ -18,7 +18,6 @@ const INITIAL_STATE = {
   },
   selectedLayer: null,
   layerList: [],
-  sources: [],
   layerLoading: false
 };
 

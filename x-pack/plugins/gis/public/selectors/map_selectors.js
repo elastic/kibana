@@ -14,8 +14,6 @@ export const getSelectedLayer = ({ map }) => map && map.selectedLayer;
 
 export const getLayerList = ({ map }) => map && map.layerList;
 
-export const getSources = ({ map }) => map && map.sources;
-
 export const getLayerLoading = ({ map }) => map && map.layerLoading;
 
 export const getTemporaryLayers = ({ map }) => map &&
