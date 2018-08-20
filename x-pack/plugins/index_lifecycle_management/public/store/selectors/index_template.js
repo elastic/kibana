@@ -127,24 +127,28 @@ export const getExistingAllocationRules = state => {
 const hasJSONChanged = (json1, json2) => JSON.stringify(json1) !== JSON.stringify(json2);
 export const getTemplateDiff = state => {
   const originalFullIndexTemplate = getFullSelectedIndexTemplate(state) || { settings: {} };
-  const newFullIndexTemplate = merge(cloneDeep(originalFullIndexTemplate), {
+  const attributeName = getSelectedNodeAttrs(state);
+  const baseNewFullIndexTemplate = {
     settings: {
       index: {
-        number_of_shards: getSelectedPrimaryShardCount(state),
-        number_of_replicas: getSelectedReplicaCount(state),
+        number_of_shards: getSelectedPrimaryShardCount(state) + '',
+        number_of_replicas: getSelectedReplicaCount(state) + '',
         lifecycle: {
           name: getSelectedPolicyName(state)
         },
-        routing: {
-          allocation: {
-            include: {
-              sattr_name: getSelectedNodeAttrs(state),
-            }
-          }
-        }
       }
     }
-  });
+  };
+  if (attributeName) {
+    baseNewFullIndexTemplate.routing =  {
+      allocation: {
+        include: {
+          sattr_name: attributeName,
+        }
+      }
+    };
+  }
+  const newFullIndexTemplate = merge(cloneDeep(originalFullIndexTemplate), baseNewFullIndexTemplate);
 
   return {
     originalFullIndexTemplate,
