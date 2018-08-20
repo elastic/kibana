@@ -13,7 +13,7 @@ import { XPACK_INFO_API_DEFAULT_POLL_FREQUENCY_IN_MILLIS } from '../../server/li
  */
 export const config = (Joi) => {
   const { array, boolean, number, object, string } = Joi;
-  const DEFAULT_REQUEST_HEADERS = [ 'authorization' ];
+  const DEFAULT_REQUEST_HEADERS = ['authorization'];
 
   return object({
     ccs: object({
@@ -49,7 +49,8 @@ export const config = (Joi) => {
       enabled: boolean().default(true),
       index: string().default('.monitoring-alerts-6'),
       email_notifications: object({
-        enabled: boolean().default(true)
+        enabled: boolean().default(true),
+        email_address: string().email(),
       }).default()
     }).default(),
     xpack_api_polling_frequency_millis: number().default(XPACK_INFO_API_DEFAULT_POLL_FREQUENCY_IN_MILLIS),

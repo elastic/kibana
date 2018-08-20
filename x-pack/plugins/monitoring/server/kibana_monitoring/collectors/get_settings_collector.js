@@ -8,6 +8,7 @@ import { get } from 'lodash';
 import { XPACK_DEFAULT_ADMIN_EMAIL_UI_SETTING } from '../../../../../server/lib/constants';
 import { KIBANA_SETTINGS_TYPE } from '../../../common/constants';
 import { getKibanaInfoForStats } from '../lib';
+import { CLUSTER_ALERTS_ADDRESS_CONFIG_KEY } from '../../lib/constants';
 
 /*
  * Check if Cluster Alert email notifications is enabled in config
@@ -18,13 +19,21 @@ export async function getDefaultAdminEmail(config, callCluster) {
     return null;
   }
 
+  const configuredEmailAddress = config.get(`xpack.monitoring.${CLUSTER_ALERTS_ADDRESS_CONFIG_KEY}`);
+
+  if (configuredEmailAddress) {
+    return configuredEmailAddress;
+  }
+
+  // DEPRECATED (Remove below in 7.0): If an email address is not configured in kibana.yml, then fallback to xpack:defaultAdminEmail
+
   const index = config.get('kibana.index');
   const version = config.get('pkg.version');
   const uiSettingsDoc = await callCluster('get', {
     index,
     type: 'doc',
     id: `config:${version}`,
-    ignore: [ 400, 404 ] // 400 if the index is closed, 404 if it does not exist
+    ignore: [400, 404] // 400 if the index is closed, 404 if it does not exist
   });
 
   return get(uiSettingsDoc, ['_source', 'config', XPACK_DEFAULT_ADMIN_EMAIL_UI_SETTING], null);
