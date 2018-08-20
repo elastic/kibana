@@ -71,8 +71,8 @@ zip_filename = os.path.join(bin_dir, filename_prefix + '.zip')
 md5_filename = os.path.join(bin_dir, filename_prefix + '.md5')
 
 print('Creating ' + zip_filename)
-zipfile.ZipFile(zip_filename, mode='w').write(bin_filename)
+zipfile.ZipFile(zip_filename, mode='w').write(bin_filename, 'headless_shell-' + platform.system().lower() + '/headless_shell')
 
-print('Creating ' + hash_file)
+print('Creating ' + md5_filename)
 with open (md5_filename, 'w') as f:
   f.write(md5_file(zip_filename))
