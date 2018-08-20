@@ -37,5 +37,13 @@ export class ALayer {
   getDisplayName() {
     return this._descriptor.name;
   }
+
+  getId() {
+    return this._descriptor.id;
+  }
+
+  getType() {
+    return this._descriptor.type;
+  }
 }
 

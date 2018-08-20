@@ -12,8 +12,6 @@ import _ from 'lodash';
 
 export const getMapConstants = ({ map }) => map && map.mapConstants;
 
-export const getSelectedLayer = ({ map }) => map && map.selectedLayer;
-
 export const getSelectedLayerInstance = ({ map }) => {
   if (!map.selectedLayer) {
     return null;
@@ -52,18 +50,18 @@ export function getLayerById(state, id) {
 
 export const getCurrentLayerStyle = createSelector(
   getLayerList,
-  getSelectedLayer,
-  (layerList, { id }) => {
-    const layer = id && layerList.find(layer => id === layer.id);
+  getSelectedLayerInstance,
+  (layerList, layerInstance) => {
+    const layer = layerInstance.getId() && layerList.find(layer => layerInstance.getId() === layer.id);
     return layer && layer.style;
   }
 );
 
 // Return selector instance for each component
 export const makeGetStyleDescriptor = () => createSelector(
-  getSelectedLayer,
-  selectedLayer => {
-    const isVector = selectedLayer.type === LAYER_TYPE.VECTOR;
+  getSelectedLayerInstance,
+  selectedLayerInstance => {
+    const isVector = selectedLayerInstance.getType() === LAYER_TYPE.VECTOR;
     const styleDescriptor = {
       mapboxCss: {
         name: 'CSS',
