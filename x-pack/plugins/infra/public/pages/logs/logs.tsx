@@ -32,15 +32,7 @@ import { WithTextWrap } from '../../containers/logs/with_text_wrap_controls_prop
 
 // const ConnectedLogSearchControls = withLogSearchControlsProps(LogSearchControls);
 
-interface InnerLogsPageProps {
-  jumpToTime: (time: number) => void;
-}
-
-class InnerLogsPage extends React.PureComponent<InnerLogsPageProps> {
-  public componentDidMount() {
-    this.props.jumpToTime(Date.now());
-  }
-
+export class LogsPage extends React.Component {
   public render() {
     return (
       <ColumnarPage>
@@ -113,7 +105,7 @@ class InnerLogsPage extends React.PureComponent<InnerLogsPageProps> {
                   {({ textScale }) => (
                     <WithTextWrap>
                       {({ wrap }) => (
-                        <WithLogPosition>
+                        <WithLogPosition initializeOnMount>
                           {({
                             isAutoReloading,
                             jumpToTargetPosition,
@@ -201,12 +193,6 @@ class InnerLogsPage extends React.PureComponent<InnerLogsPageProps> {
     );
   }
 }
-
-export const LogsPage = () => (
-  <WithLogPosition>
-    {({ jumpToTargetPositionTime }) => <InnerLogsPage jumpToTime={jumpToTargetPositionTime} />}
-  </WithLogPosition>
-);
 
 const LogPageContent = styled.div`
   flex: 1 0 0;

@@ -29,4 +29,6 @@ export const withLogPosition = connect(
   })
 );
 
-export const WithLogPosition = asChildFunctionRenderer(withLogPosition);
+export const WithLogPosition = asChildFunctionRenderer(withLogPosition, {
+  onInitialize: props => props.jumpToTargetPositionTime(Date.now()),
+});
