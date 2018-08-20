@@ -65,7 +65,7 @@ export class BulkUploader {
     this._log.info('Starting monitoring stats collection');
 
     // this is internal bulk upload, so filter out API-only collectors
-    const filterThem = _collectorSet => _collectorSet.getFilteredCollectorSet(c => c.internalIgnore !== true);
+    const filterThem = _collectorSet => _collectorSet.getFilteredCollectorSet(c => c.ignoreForInternalUploader !== true);
     this._fetchAndUpload(filterThem(collectorSet)); // initial fetch
     this._timer = setInterval(() => {
       this._fetchAndUpload(filterThem(collectorSet));
