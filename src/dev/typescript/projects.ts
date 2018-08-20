@@ -25,7 +25,6 @@ import { Project } from './project';
 
 export const PROJECTS = [
   new Project(resolve(REPO_ROOT, 'tsconfig.json')),
-  new Project(resolve(REPO_ROOT, 'tsconfig.browser.json'), 'kibana (browser)'),
   new Project(resolve(REPO_ROOT, 'x-pack/tsconfig.json')),
 
   // NOTE: using glob.sync rather than glob-all or globby

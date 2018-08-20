@@ -1,0 +1,71 @@
+.dshExitFullScreenButton {
+  text-align: center;
+  width: 100%;
+  height: 0;
+  bottom: 0;
+  position: absolute;
+}
+
+/**
+ * 1. override the z-index: 1 applied to all non-eui elements that are in :focus via kui
+ *      - see packages/kbn-ui-framework/src/global_styling/reset/_reset.scss
+ */
+
+.dshExitFullScreenButton__mode {
+  height: $euiSizeXXL;
+  left: 0;
+  bottom: 0;
+  position: fixed;
+  display: block;
+  padding: 0;
+  border: none;
+  background: none;
+  z-index: 5;
+
+  &:hover,
+  &:focus {
+    transition: all $euiAnimSpeedExtraSlow $euiAnimSlightResistance;
+    z-index: 10 !important; /* 1 */
+
+    .dshExitFullScreenButton__text {
+      transition: all $euiAnimSpeedNormal $euiAnimSlightResistance;
+      transform: translateX(-$euiSize);
+    }
+  }
+}
+
+.dshExitFullScreenButton__logo {
+  display: block;
+  background-color: shadeOrTint($euiColorPrimary, 25%, 25%);
+  height: $euiSizeXXL;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 147 51' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%23FFF' fill-rule='evenodd'%3E%3Cpath d='m59.3 36.99v-6.7l2.1-0.2 4 7h4.1l-5-8.8 4.8-7.7h-4l-3.9 6.4-2 0.2v-13.6h-3.6v23.4h3.5zm13 0h3.6v-16.5h-3.6v16.5zm0-19.3h3.6v-3.8h-3.6v3.8zm15.7 2.5c-1.9 0-4.1 1-4.1 1v-7.5h-3.6v23.4s4.3 0.4 6 0.4c5.9 0 8.1-2 8.1-8.9 0-6.2-1.9-8.4-6.4-8.4zm-1.7 14c-0.7 0-2.5-0.1-2.5-0.1v-10s1.9-0.7 3.7-0.7c2.2 0 3.2 1.5 3.2 5.2 0 4-0.7 5.6-4.4 5.6zm23.9-8.6c0-3.8-1.7-5.5-5.7-5.5-3 0-6.6 0.9-6.6 0.9l0.1 2.5s4-0.3 6.2-0.3c1.6 0 2.4 0.6 2.4 2.4v1.2l-4.3 0.4c-3.5 0.3-5.5 1.5-5.5 5 0 3.4 1.7 5.3 4.9 5.3 2.7 0 5.3-1.2 5.3-1.2 1.2 1 2.4 1.2 4.4 1.2l0.1-2.7c-1-0.1-1.4-0.5-1.5-1.5l0.2-7.7zm-3.6 3.7v4.4s-2.2 0.7-4.1 0.7c-1.4 0-2-0.9-2-2.4s0.8-2.2 2.3-2.3l3.8-0.4zm11.7 7.7v-12.8s1.8-0.9 3.7-0.9c2.5 0 2.9 1.6 2.9 4.9v8.8h3.6v-8.9c0-5.4-1.1-8-5.7-8-2.1 0-4.6 1.4-4.6 1.4v-1h-3.6v16.5h3.7zm26.6-11.4c0-3.8-1.7-5.5-5.7-5.5-3 0-6.6 0.9-6.6 0.9l0.1 2.5s4-0.3 6.2-0.3c1.6 0 2.4 0.6 2.4 2.4v1.2l-4.3 0.4c-3.5 0.3-5.5 1.5-5.5 5 0 3.4 1.7 5.3 4.9 5.3 2.7 0 5.3-1.2 5.3-1.2 1.2 1 2.4 1.2 4.4 1.2l0.1-2.7c-1-0.1-1.4-0.5-1.5-1.5l0.2-7.7zm-3.6 3.7v4.4s-2.2 0.7-4.1 0.7c-1.4 0-2-0.9-2-2.4s0.8-2.2 2.3-2.3l3.8-0.4z' fill-rule='nonzero'/%3E%3Cpath d='m0.75002 23.052c6.9088 0 13.402-2.3515 19.066 0.6639l20.184-23.716h-40v47l-1.9774e-14 -25.287c0.25047-0.0054307 0.49816-0.019007 0.75002-0.019007v1.3577z' opacity='.7'/%3E%3Cpath d='m3.9602e-14 44.578l-3.9602e-14 6.4223h40c-2.2378-11.667-9.8136-21.496-20.158-27l-19.842 20.578z' opacity='.7'/%3E%3Cpath d='m3.9035e-14 44.579l-3.9035e-14 6.4209h7.0209l18.979-22.652s-1.2608-1.0527-3.0476-2.2888c-1.3665-0.96307-3.3951-2.0593-3.3951-2.0593l-19.557 20.579z' opacity='.5'/%3E%3Cpath d='m0.75697 19c-0.2542 0-0.50418 0.013566-0.75697 0.018993v27.981l20-23.267c-5.7173-3.0131-12.27-4.7334-19.243-4.7334'/%3E%3C/g%3E%3C/svg%3E%0A");
+
+  // These numbers are very specific to the Kibana logo size
+  width: 92px;
+  background-position: 8px 5px;
+  background-size: 72px 30px;
+  background-repeat: no-repeat;
+
+  z-index: $euiZLevel1;
+}
+
+/**
+ * 1. Calc made to allow caret in text to peek out / animate.
+ */
+
+.dshExitFullScreenButton__text {
+  background: $euiColorPrimary;
+  color: $euiColorEmptyShade;
+  line-height: $euiSizeXXL;
+  display: inline-block;
+  height: $euiSizeXXL;
+  position: absolute;
+  left: calc(100% + #{$euiSize}); /* 1 */
+  top: 0px;
+  bottom: 0px;
+  white-space: nowrap;
+  padding: 0px $euiSizeS 0px $euiSizeM;
+  transition: all .2s ease;
+  transform: translateX(-100%);
+  z-index: -1;
+}

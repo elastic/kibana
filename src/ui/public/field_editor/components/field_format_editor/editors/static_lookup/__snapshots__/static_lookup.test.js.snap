@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`StaticLookupFormatEditor should render multiple lookup entries and unknown key value 1`] = `
+exports[`StaticLookupFormatEditorComponent should render multiple lookup entries and unknown key value 1`] = `
 <React.Fragment>
   <EuiBasicTable
     columns={
@@ -94,7 +94,7 @@ exports[`StaticLookupFormatEditor should render multiple lookup entries and unkn
 </React.Fragment>
 `;
 
-exports[`StaticLookupFormatEditor should render normally 1`] = `
+exports[`StaticLookupFormatEditorComponent should render normally 1`] = `
 <React.Fragment>
   <EuiBasicTable
     columns={

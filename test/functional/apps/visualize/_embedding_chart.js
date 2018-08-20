@@ -38,6 +38,11 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.visualize.clickNewSearch();
         await PageObjects.header.setAbsoluteRange(fromTime, toTime);
         await PageObjects.visualize.clickBucket('Split Rows');
+        await PageObjects.visualize.selectAggregation('Date Histogram');
+        await PageObjects.visualize.selectField('@timestamp');
+        await PageObjects.visualize.toggleOpenEditor(2, 'false');
+        await PageObjects.visualize.clickAddBucket();
+        await PageObjects.visualize.clickBucket('Split Rows');
         await PageObjects.visualize.selectAggregation('Histogram');
         await PageObjects.visualize.selectField('bytes');
         await PageObjects.visualize.setNumericInterval('2000');
@@ -51,37 +56,58 @@ export default function ({ getService, getPageObjects }) {
         const data = await PageObjects.visualize.getTableVisData();
         log.debug(data.split('\n'));
         expect(data.trim().split('\n')).to.be.eql([
-          '0B', '2,088',
-          '1.953KB', '2,748',
-          '3.906KB', '2,707',
-          '5.859KB', '2,876',
-          '7.813KB', '2,863',
-          '9.766KB', '147',
-          '11.719KB', '148',
-          '13.672KB', '129',
-          '15.625KB', '161',
-          '17.578KB', '137'
+          '2015-09-20 00:00', '0B', '5',
+          '2015-09-20 00:00', '1.953KB', '5',
+          '2015-09-20 00:00', '3.906KB', '9',
+          '2015-09-20 00:00', '5.859KB', '4',
+          '2015-09-20 00:00', '7.813KB', '14',
+          '2015-09-20 03:00', '0B', '32',
+          '2015-09-20 03:00', '1.953KB', '33',
+          '2015-09-20 03:00', '3.906KB', '45',
+          '2015-09-20 03:00', '5.859KB', '31',
+          '2015-09-20 03:00', '7.813KB', '48'
         ]);
       });
 
       it('should allow to filter in embedded mode', async () => {
-        await filterBar.addFilter('@timestamp', 'is between', '2015-09-19', '2015-09-21');
+        await filterBar.addFilter('@timestamp', 'is between', '2015-09-21', '2015-09-23');
         await PageObjects.header.waitUntilLoadingHasFinished();
         await renderable.waitForRender();
 
         const data = await PageObjects.visualize.getTableVisData();
         log.debug(data.split('\n'));
         expect(data.trim().split('\n')).to.be.eql([
-          '0B', '708',
-          '1.953KB', '956',
-          '3.906KB', '935',
-          '5.859KB', '955',
-          '7.813KB', '953',
-          '9.766KB', '54',
-          '11.719KB', '56',
-          '13.672KB', '40',
-          '15.625KB', '51',
-          '17.578KB', '49'
+          '2015-09-21 00:00', '0B', '7',
+          '2015-09-21 00:00', '1.953KB', '9',
+          '2015-09-21 00:00', '3.906KB', '9',
+          '2015-09-21 00:00', '5.859KB', '6',
+          '2015-09-21 00:00', '7.813KB', '10',
+          '2015-09-21 00:00', '11.719KB', '1',
+          '2015-09-21 03:00', '0B', '28',
+          '2015-09-21 03:00', '1.953KB', '39',
+          '2015-09-21 03:00', '3.906KB', '36',
+          '2015-09-21 03:00', '5.859KB', '43',
+        ]);
+      });
+
+      it('should allow to change timerange from the visualization in embedded mode', async () => {
+        await PageObjects.visualize.filterOnTableCell(1, 7);
+        await PageObjects.header.waitUntilLoadingHasFinished();
+        await renderable.waitForRender();
+
+        const data = await PageObjects.visualize.getTableVisData();
+        log.debug(data.split('\n'));
+        expect(data.trim().split('\n')).to.be.eql([
+          '03:00', '0B', '1',
+          '03:00', '1.953KB', '1',
+          '03:00', '3.906KB', '1',
+          '03:00', '5.859KB', '2',
+          '03:10', '0B', '1',
+          '03:10', '5.859KB', '1',
+          '03:10', '7.813KB', '1',
+          '03:15', '0B', '1',
+          '03:15', '1.953KB', '1',
+          '03:20', '1.953KB', '1',
         ]);
       });
     });
