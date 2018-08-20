@@ -17,24 +17,21 @@
  * under the License.
  */
 
-import _ from 'lodash';
-const longString = Array(200).join('_');
+import { i18n, i18nLoader } from '@kbn/i18n';
 
-export default function (id, mapping) {
-  function fakeVals(type) {
-    return _.mapValues(mapping, function (f, c) {
-      return c + '_' + type + '_' + id + longString;
-    });
-  }
+export async function i18nMixin(kbnServer, server, config) {
+  const { translationPaths = [] } = kbnServer.uiExports;
+  const locale = config.get('i18n.locale');
 
-  return {
-    _id: id,
-    _index: 'test',
-    _source: fakeVals('original'),
-    _type: 'doc',
-    sort: [id],
-    $$_formatted: fakeVals('formatted'),
-    $$_partialFormatted: fakeVals('formatted'),
-    $$_flattened: fakeVals('_flattened')
-  };
+  i18nLoader.registerTranslationFiles(translationPaths);
+
+  const pureTranslations = await i18nLoader.getTranslationsByLocale(locale);
+  const translations = Object.freeze({
+    locale,
+    ...pureTranslations,
+  });
+
+  i18n.init(translations);
+
+  server.decorate('server', 'getUiTranslations', () => translations);
 }
