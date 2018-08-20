@@ -175,10 +175,10 @@ APM services are created programmatically based on the {serviceName}.',
       i18n.translate('kbn.server.tutorials.apm.flaskClient.configure.commands.initializeComment', {
         defaultMessage: '# initialize using environment variables',
       }),
-      ...`from elasticapm.contrib.flask import ElasticAPM
-app = Flask(__name__)
-apm = ElasticAPM(app)
-`.split('\n'),
+      `from elasticapm.contrib.flask import ElasticAPM`,
+      `app = Flask(__name__)`,
+      `apm = ElasticAPM(app)`,
+      ``,
       i18n.translate('kbn.server.tutorials.apm.flaskClient.configure.commands.elasticApmComment', {
         defaultMessage: '# or configure to use ELASTIC_APM in your application\'s settings',
       }),
@@ -202,10 +202,10 @@ apm = ElasticAPM(app)
           url: 'http://localhost:8200',
         },
       }),
-      `  'SERVER_URL': '',
-{curlyClose}
-
-apm = ElasticAPM(app)`.split('\n'),
+      `  'SERVER_URL': ''`,
+      `{curlyClose}`,
+      ``,
+      `apm = ElasticAPM(app)`,
     ],
     textPost: i18n.translate('kbn.server.tutorials.apm.flaskClient.configure.textPost', {
       defaultMessage: 'See the [documentation]({docsUrl}) for advanced usage.',
