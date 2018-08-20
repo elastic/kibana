@@ -236,11 +236,6 @@ export function HeaderPageProvider({ getService, getPageObjects }) {
       return messageText;
     }
 
-    async waitForToastMessageGone() {
-      remote.setFindTimeout(defaultFindTimeout);
-      await remote.waitForDeletedByCssSelector('kbn-truncated.toast-message');
-    }
-
     async clickToastOK() {
       log.debug('clickToastOK');
       await retry.try(async () => {

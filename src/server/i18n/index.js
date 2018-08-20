@@ -17,30 +17,21 @@
  * under the License.
  */
 
-import * as kbnTestServer from '../test_utils/kbn_server';
-const basePath = '/kibana';
+import { i18n, i18nLoader } from '@kbn/i18n';
 
-describe('Server basePath config', function () {
-  let kbnServer;
-  beforeAll(async function () {
-    kbnServer = kbnTestServer.createServer({
-      server: { basePath }
-    });
-    await kbnServer.ready();
-    return kbnServer;
+export async function i18nMixin(kbnServer, server, config) {
+  const { translationPaths = [] } = kbnServer.uiExports;
+  const locale = config.get('i18n.locale');
+
+  i18nLoader.registerTranslationFiles(translationPaths);
+
+  const pureTranslations = await i18nLoader.getTranslationsByLocale(locale);
+  const translations = Object.freeze({
+    locale,
+    ...pureTranslations,
   });
 
-  afterAll(async function () {
-    await kbnServer.close();
-  });
+  i18n.init(translations);
 
-  it('includes the basePath in root redirect', async () => {
-    const resp = await kbnServer.inject({
-      url: '/',
-      method: 'GET'
-    });
-
-    expect(resp).toHaveProperty('statusCode', 302);
-    expect(resp.headers).toHaveProperty('location', `${basePath}/app/kibana`);
-  });
-});
+  server.decorate('server', 'getUiTranslations', () => translations);
+}
