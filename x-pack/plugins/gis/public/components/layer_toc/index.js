@@ -18,7 +18,7 @@ const mapDispatchToProps = {
 
 function mapStateToProps(state = {}) {
   return {
-    layerInstanceList: getLayerInstanceList(state)
+    layerList: getLayerInstanceList(state)
   };
 }
 

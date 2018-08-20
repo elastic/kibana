@@ -41,7 +41,7 @@ export class LayerTOC extends React.Component {
   }
 
   _renderLayers() {
-    return [ ...this.props.layerInstanceList ]
+    return [ ...this.props.layerList ]
       .reverse()
       .map((layer) => {
         return (<TOCEntry key={layer.getId()} layer={layer} />);
