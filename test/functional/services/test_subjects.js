@@ -45,6 +45,14 @@ export function TestSubjectsProvider({ getService }) {
       expect(doesExist).to.be(true);
     }
 
+    async missingOrFail(selector, timeout = 1000) {
+      log.debug(`TestSubjects.missingOrFail(${selector})`);
+      const doesExist = await this.exists(selector, timeout);
+      // Verify element is missing, or else fail the test consuming this.
+      expect(doesExist).to.be(false);
+    }
+
+
     async append(selector, text) {
       return await retry.try(async () => {
         const input = await this.find(selector);
@@ -181,6 +189,10 @@ export function TestSubjectsProvider({ getService }) {
         const elements = await this.findAll(selectorAll);
         return await mapAsync(elements, mapFn);
       });
+    }
+
+    async waitForDeleted(selector) {
+      await remote.waitForDeletedByCssSelector(testSubjSelector(selector));
     }
   }
 

@@ -31,6 +31,7 @@ import { promisify } from 'util';
 const ESCAPE_LINE_BREAK_REGEX = /(?<!\\)\\\n/g;
 const ESCAPE_SINGLE_QUOTE_REGEX = /\\([\s\S])|(')/g;
 const HTML_LINE_BREAK_REGEX = /[\s]*\n[\s]*/g;
+const LINE_BREAK_REGEX = /\n/g;
 
 export const readFileAsync = promisify(fs.readFile);
 export const writeFileAsync = promisify(fs.writeFile);
@@ -63,7 +64,7 @@ export function formatJSString(string) {
   return (string || '')
     .replace(ESCAPE_LINE_BREAK_REGEX, '')
     .replace(ESCAPE_SINGLE_QUOTE_REGEX, '\\$1$2')
-    .replace('\n', '\\n');
+    .replace(LINE_BREAK_REGEX, '\\n');
 }
 
 export function formatHTMLString(string) {

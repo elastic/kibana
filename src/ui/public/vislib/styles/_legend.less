@@ -118,3 +118,35 @@ visualize-legend {
       font-size: 18px
     }
   }
+
+// SASSTODO: Make sure these colors convert to theme variables
+.tab-dashboard.theme-dark {
+  .legend {
+    background-color: #272727;
+  }
+
+  .legend-col-wrapper {
+
+    .legend-ul {
+      border-left-color: @gray7;
+      color: @gray10;
+    }
+
+  }
+
+  .legend-value-title {
+    padding: 3px;
+
+    &:hover {
+      background-color: darken(@gray7, 5%);
+    }
+  }
+
+  .legend-value-full {
+    background-color: @gray3;
+  }
+
+  .legend-value-details {
+    border-bottom: 1px solid @gray7;
+  }
+}

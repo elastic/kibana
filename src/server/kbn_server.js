@@ -37,10 +37,12 @@ import { indexPatternsMixin } from './index_patterns';
 import { savedObjectsMixin } from './saved_objects';
 import { sampleDataMixin } from './sample_data';
 import { kibanaIndexMappingsMixin } from './mappings';
+import { urlShorteningMixin } from './url_shortening';
 import { serverExtensionsMixin } from './server_extensions';
 import { uiMixin } from '../ui';
 import { sassMixin } from './sass';
 import { injectIntoKbnServer as newPlatformMixin } from '../core';
+import { i18nMixin } from './i18n';
 
 const rootDir = fromRoot('.');
 
@@ -82,6 +84,7 @@ export default class KbnServer {
 
       // setup this.uiExports and this.uiBundles
       uiMixin,
+      i18nMixin,
       indexPatternsMixin,
 
       // setup server.getKibanaIndexMappingsDsl()
@@ -92,6 +95,9 @@ export default class KbnServer {
 
       // setup routes for installing/uninstalling sample data sets
       sampleDataMixin,
+
+      // setup routes for short urls
+      urlShorteningMixin,
 
       // ensure that all bundles are built, or that the
       // watch bundle server is running
@@ -140,9 +146,9 @@ export default class KbnServer {
    * @return undefined
    */
   async listen() {
-    const { server } = this;
-
     await this.ready();
+
+    const { server } = this;
     await fromNode(cb => server.start(cb));
 
     if (isWorker) {

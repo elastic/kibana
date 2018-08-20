@@ -11,10 +11,14 @@
 import _ from 'lodash';
 import moment from 'moment';
 
-import { parseInterval } from 'plugins/ml/../common/util/parse_interval';
+import { parseInterval } from '../../common/util/parse_interval';
 import {
   escapeForElasticsearchQuery,
-  replaceStringTokens } from 'plugins/ml/util/string_utils';
+  replaceStringTokens } from './string_utils';
+
+// Value of custom_url time_range property indicating drilldown time range is calculated automatically
+// depending on the context in which the URL is being opened.
+const TIME_RANGE_AUTO = 'auto';
 
 // Replaces the $ delimited tokens in the url_value of the custom URL configuration
 // with values from the supplied document.
@@ -93,6 +97,27 @@ function buildKibanaUrl(urlConfig, record) {
     }
 
     // If property not found string is not replaced.
-    return tokenValue !== null ? tokenValue : match;
+    return (tokenValue !== null) ? tokenValue : match;
   });
+}
+
+// Returns whether the supplied label is valid for a custom URL.
+export function isValidLabel(label, savedCustomUrls) {
+  let isValid = (label !== undefined) && (label.trim().length > 0);
+  if (isValid === true && (savedCustomUrls !== undefined)) {
+    // Check the label is unique.
+    const existingLabels = savedCustomUrls.map(customUrl => customUrl.url_name);
+    isValid = !existingLabels.includes(label);
+  }
+  return isValid;
+}
+
+export function isValidTimeRange(timeRange) {
+  // Allow empty timeRange string, which gives the 'auto' behaviour.
+  if ((timeRange === undefined) || (timeRange.length === 0) || (timeRange === TIME_RANGE_AUTO)) {
+    return true;
+  }
+
+  const interval = parseInterval(timeRange);
+  return (interval !== null);
 }
