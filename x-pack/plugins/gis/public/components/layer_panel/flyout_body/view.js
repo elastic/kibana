@@ -9,8 +9,7 @@ import React, { Fragment } from 'react';
 import {
   EuiTabs,
   EuiTitle,
-  EuiSpacer,
-  EuiTextArea,
+  EuiSpacer
 } from '@elastic/eui';
 import { ColorPicker } from './resources/color_picker';
 import { StyleTab } from './resources/style_tab';
@@ -39,7 +38,7 @@ class StyleContent extends React.Component {
   }
 
   _getStyleContent({ updateColor, currentLayerStyle, styleDescriptor }) {
-    const { mapboxCss, vectorAdjustment } = styleDescriptor;
+    const { vectorAdjustment } = styleDescriptor;
     // Default to first style tab
     vectorAdjustment && !this.state.tabSelected && this.setState({
       tabSelected: vectorAdjustment.name });
@@ -49,21 +48,12 @@ class StyleContent extends React.Component {
       <Fragment>
         <EuiTabs>
           <StyleTab
-            name={mapboxCss && mapboxCss.name}
-            selected={this.state.tabSelected}
-            onClick={this._activateTab}
-          />
-          <StyleTab
             name={vectorAdjustment && vectorAdjustment.name}
             selected={this.state.tabSelected}
             onClick={this._activateTab}
           />
         </EuiTabs>
         <EuiSpacer />
-        <MapBoxCss
-          tabName={mapboxCss && mapboxCss.name}
-          selected={this.state.tabSelected}
-        />
         <ColorPicker
           tabName={vectorAdjustment && vectorAdjustment.name}
           changeColor={updateColor}
@@ -77,11 +67,4 @@ class StyleContent extends React.Component {
   render() {
     return this._getStyleContent(this.props);
   }
-}
-
-// Placeholder component
-function MapBoxCss({ selected, tabName }) {
-  return selected === tabName && (
-    <EuiTextArea /> || null
-  );
 }

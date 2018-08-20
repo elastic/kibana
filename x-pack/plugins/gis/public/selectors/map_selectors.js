@@ -67,13 +67,6 @@ export const makeGetStyleDescriptor = () => createSelector(
   selectedLayerInstance => {
     const isVector = selectedLayerInstance.getType() === LAYER_TYPE.VECTOR;
     const styleDescriptor = {
-      mapboxCss: {
-        name: 'CSS',
-        mods: [{
-          name: 'cssText',
-          apply: isVector
-        }]
-      },
       vectorAdjustment: {
         name: 'Vector Adjustment',
         mods: [{
