@@ -8,10 +8,11 @@ import Boom from 'boom';
 import fileType from 'file-type';
 import { Reference } from 'nodegit';
 import { ReferenceInfo } from '../../model/commit';
-import { detectLanguage } from '../detect_language';
 import { commitInfo, GitOperations, referenceInfo } from '../git_operations';
 import { Server } from '../kibana_types';
 import { ServerOptions } from '../server_options';
+import { extractLines } from '../utils/buffer';
+import { detectLanguage } from '../utils/detect_language';
 
 export function fileRoute(server: Server, options: ServerOptions) {
   server.route({
@@ -52,8 +53,20 @@ export function fileRoute(server: Server, options: ServerOptions) {
               .code(204);
           }
         } else {
-          const lang = await detectLanguage(path, blob.content());
-          reply(blob.content()).type(`text/${lang || 'plain'}`);
+          if (req.query.line) {
+            const [from, to] = req.query.line.split(',');
+            let fromLine = parseInt(from, 10);
+            let toLine = to === undefined ? fromLine + 1 : parseInt(to, 10);
+            if (fromLine > toLine) {
+              [fromLine, toLine] = [toLine, fromLine];
+            }
+            const lines = extractLines(blob.content(), fromLine, toLine);
+            const lang = await detectLanguage(path, lines);
+            reply(lines).type(`text/${lang || 'plain'}`);
+          } else {
+            const lang = await detectLanguage(path, blob.content());
+            reply(blob.content()).type(`text/${lang || 'plain'}`);
+          }
         }
       } catch (e) {
         if (e.isBoom) {

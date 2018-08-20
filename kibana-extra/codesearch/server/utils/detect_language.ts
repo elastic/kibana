@@ -23,12 +23,12 @@ function readFile(file: string) {
   );
 }
 
-export async function detectLanguage(file: string, fileContent?: Buffer) {
+export async function detectLanguage(file: string, fileContent?: Buffer | string) {
   let lang = detect.filename(file);
   if (!lang) {
     let content: string;
     if (fileContent) {
-      content = fileContent.toString('utf8');
+      content = typeof fileContent === 'string' ? fileContent : fileContent.toString('utf8');
     } else {
       content = await readFile(file);
     }

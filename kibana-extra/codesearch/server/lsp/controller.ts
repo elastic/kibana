@@ -7,8 +7,8 @@ import * as glob from 'glob';
 import * as Hapi from 'hapi';
 
 import { platform as getOsPlatform } from 'os';
-import { detectLanguage } from '../detect_language';
 import { Log } from '../log';
+import { detectLanguage } from '../utils/detect_language';
 import { ILanguageServerHandler, LanguageServerProxy } from './proxy';
 
 import { spawn } from 'child_process';
