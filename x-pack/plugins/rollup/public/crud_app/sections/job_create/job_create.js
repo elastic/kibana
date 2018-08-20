@@ -6,6 +6,7 @@
 
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
+import { isEmpty, mapValues, cloneDeep } from 'lodash';
 
 import {
   EuiPage,
@@ -15,16 +16,152 @@ import {
   EuiTitle,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiStepsHorizontal,
 } from '@elastic/eui';
+
+import { Navigation } from './navigation';
+
+const STEP_INDICES = 'STEP_INDICES';
+const STEP_SCHEDULE = 'STEP_SCHEDULE';
+const STEP_GROUPS = 'STEP_GROUPS';
+const STEP_METRICS = 'STEP_METRICS';
+const STEP_REVIEW = 'STEP_REVIEW';
+
+const stepIds = [
+  STEP_INDICES,
+  STEP_SCHEDULE,
+  STEP_GROUPS,
+  STEP_METRICS,
+  STEP_REVIEW,
+];
+
+const stepIdToStepMap = {
+  [STEP_INDICES]: {
+    defaultFields: {
+      rollupIndex: undefined,
+      indexPattern: undefined,
+    },
+  },
+  [STEP_SCHEDULE]: {
+    defaultFields: {
+      cron: undefined,
+      pageSize: undefined,
+    },
+  },
+  [STEP_GROUPS]: {
+    defaultFields: {
+      groups: undefined,
+    },
+  },
+  [STEP_METRICS]: {
+    defaultFields: {
+      metrics: undefined,
+    },
+  },
+  [STEP_REVIEW]: {
+  },
+};
+
+const stepIdToTitleMap = {
+  [STEP_INDICES]: 'Indices',
+  [STEP_SCHEDULE]: 'Schedule',
+  [STEP_GROUPS]: 'Groups',
+  [STEP_METRICS]: 'Metrics',
+  [STEP_REVIEW]: 'Review and save',
+};
 
 export class JobCreate extends Component {
   static propTypes = {
     createJob: PropTypes.func,
+    isSaving: PropTypes.bool,
   }
 
   constructor(props) {
     super(props);
+
+    const stepsFields = mapValues(stepIdToStepMap, step => cloneDeep(step.defaultFields || {}));
+
+    this.state = {
+      checkpointStepId: stepIds[0],
+      currentStepId: stepIds[0],
+      nextStepId: stepIds[1],
+      previousStepId: undefined,
+      stepsFieldErrors: this.getStepsFieldsErrors(stepsFields),
+      stepsFields,
+    };
   }
+
+  getSteps() {
+    const { currentStepId, checkpointStepId } = this.state;
+    const indexOfCurrentStep = stepIds.indexOf(currentStepId);
+
+    return stepIds.map((stepId, index) => ({
+      title: stepIdToTitleMap[stepId],
+      isComplete: index < indexOfCurrentStep,
+      isSelected: index === indexOfCurrentStep,
+      onClick: () => this.goToStep(stepId),
+      disabled: (
+        !this.canGoToStep(stepId)
+        || stepIds.indexOf(stepId) > stepIds.indexOf(checkpointStepId)
+      ),
+    }));
+  }
+
+  goToNextStep = () => {
+    this.goToStep(this.state.nextStepId);
+  };
+
+  goToPreviousStep = () => {
+    this.goToStep(this.state.previousStepId);
+  };
+
+  goToStep(stepId) {
+    // Instead of disabling the Next button while the step is invalid, we
+    // instead allow the user to click the Next button, prevent them leaving
+    // this step, and render a global error message to clearly convey the
+    // error.
+    if (!this.canGoToStep(stepId)) {
+      return;
+    }
+
+    const currentStepIndex = stepIds.indexOf(stepId);
+
+    this.setState({
+      currentStepId: stepId,
+      nextStepId: stepIds[currentStepIndex + 1],
+      previousStepId: stepIds[currentStepIndex - 1],
+    });
+
+    if (stepIds.indexOf(stepId) > stepIds.indexOf(this.state.checkpointStepId)) {
+      this.setState({ checkpointStepId: stepId });
+    }
+  }
+
+  canGoToStep(stepId) {
+    const indexOfStep = stepIds.indexOf(stepId);
+
+    // Check every step before this one and see if it's been completed.
+    const prerequisiteSteps = stepIds.slice(0, indexOfStep);
+
+    return prerequisiteSteps.every(prerequisiteStepId => !this.hasStepErrors(prerequisiteStepId));
+  }
+
+  hasStepErrors(stepId) {
+    return !isEmpty(this.state.stepsFieldErrors[stepId]);
+  }
+
+  getStepsFieldsErrors(newStepsFields) {
+    return Object.keys(newStepsFields).reduce((stepsFieldErrors, stepId) => {
+      const stepFields = newStepsFields[stepId];
+      const fieldsValidator = stepIdToStepMap[stepId].fieldsValidator;
+      stepsFieldErrors[stepId] = typeof fieldsValidator === `function` ? fieldsValidator(stepFields) : {};
+      return stepsFieldErrors;
+    }, {});
+  }
+
+  save = () => {
+
+  };
 
   render() {
     return (
@@ -40,10 +177,31 @@ export class JobCreate extends Component {
             </EuiFlexGroup>
 
             <EuiSpacer />
+
+            <EuiStepsHorizontal steps={this.getSteps()} />
+
+            <EuiSpacer />
+
+            {this.renderNavigation()}
           </EuiPageContent>
         </EuiPageBody>
       </EuiPage>
     );
   }
-}
 
+  renderNavigation = () => {
+    const { nextStepId, previousStepId } = this.state;
+    const { isSaving } = this.props;
+
+    return (
+      <Navigation
+        isSaving={isSaving}
+        hasNextStep={nextStepId != null}
+        hasPreviousStep={previousStepId != null}
+        goToNextStep={this.goToNextStep.bind(this)}
+        goToPreviousStep={this.goToPreviousStep.bind(this)}
+        save={this.save.bind(this)}
+      />
+    );
+  }
+}
