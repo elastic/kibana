@@ -15,15 +15,11 @@ export const getMapConstants = ({ map }) => map && map.mapConstants;
 export const getSelectedLayer = ({ map }) => map && map.selectedLayer;
 
 export const getSelectedLayerInstance = ({ map }) => {
-
   if (!map.selectedLayer) {
     return null;
   }
-
   return createLayerInstance(map.selectedLayer);
 };
-
-
 
 function createLayerInstance(layerDescriptor) {
   if (layerDescriptor.type === TileLayer.type) {
