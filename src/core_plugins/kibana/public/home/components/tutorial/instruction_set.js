@@ -26,6 +26,7 @@ import {
 } from '@kbn/ui-framework/components';
 import { Instruction } from './instruction';
 import { ParameterForm } from './parameter_form';
+import { Content } from './content';
 import { getDisplayText } from '../../../../common/tutorials/instruction_variant';
 import {
   EuiTabs,
@@ -34,7 +35,6 @@ import {
   EuiSteps,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiText,
   EuiButton,
   EuiCallOut,
 } from '@elastic/eui';
@@ -133,11 +133,9 @@ export class InstructionSet extends React.Component {
       <Fragment>
         <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
           <EuiFlexItem>
-            <EuiText>
-              <p>
-                {statusCheckConfig.text}
-              </p>
-            </EuiText>
+            <Content
+              text={statusCheckConfig.text}
+            />
           </EuiFlexItem>
 
           <EuiFlexItem
