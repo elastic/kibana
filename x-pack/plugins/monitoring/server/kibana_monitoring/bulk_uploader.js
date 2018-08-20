@@ -120,6 +120,39 @@ export class BulkUploader {
   /*
    * Bulk stats are transformed into a bulk upload format
    * Non-legacy transformation is done in CollectorSet.toApiStats
+   *
+   * Example:
+   * Before:
+   *    [
+   *      {
+   *        "type": "kibana_stats",
+   *        "result": {
+   *          "process": { ...  },
+   *          "requests": { ...  },
+   *          ...
+   *        }
+   *      },
+   *    ]
+   *
+   * After:
+   *    [
+   *      {
+   *        "index": {
+   *          "_type": "kibana_stats"
+   *        }
+   *      },
+   *      {
+   *        "kibana": {
+   *          "host": "localhost",
+   *          "uuid": "d619c5d1-4315-4f35-b69d-a3ac805489fb",
+   *          "version": "7.0.0-alpha1",
+   *          ...
+   *        },
+   *        "process": { ...  },
+   *        "requests": { ...  },
+   *        ...
+   *      }
+   *    ]
    */
   toBulkUploadFormat(rawData, collectorSet) {
     if (rawData.length === 0) {
