@@ -67,7 +67,7 @@ export class LoggingService implements LoggerFactory {
     }
     this.appenders.clear();
 
-    for (const [appenderKey, appenderConfig] of config.appenders.entries()) {
+    for (const [appenderKey, appenderConfig] of config.appenders) {
       this.appenders.set(appenderKey, Appenders.create(appenderConfig));
     }
 

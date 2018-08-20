@@ -18,7 +18,7 @@
  */
 
 import { Observable, Subscription } from 'rxjs';
-import { first, skip } from 'rxjs/operators';
+import { catchError, first, map, shareReplay } from 'rxjs/operators';
 
 import { Server } from '..';
 import { ConfigService, Env, RawConfig } from '../config';
@@ -94,37 +94,25 @@ export class Root {
   }
 
   private async setupLogging() {
-    function onLogUpgradeError(err: Error) {
-      // This specifically console.logs because we were not able to configure the logger.
-      // tslint:disable no-console
-      console.error('Configuring logger failed:', err);
-    }
+    // Stream that maps config updates to logger updates, including update failures.
+    const update$ = this.configService.atPath('logging', LoggingConfig).pipe(
+      map(config => this.loggingService.upgrade(config)),
+      catchError(err => {
+        // This specifically console.logs because we were not able to configure the logger.
+        // tslint:disable-next-line no-console
+        console.error('Configuring logger failed:', err);
 
-    // We should try to upgrade logger as soon as the root starts and shut root
-    // down if we can't do that, and subscribe to the consequent updates only if
-    // initial upgrade succeeded.
-    const config$ = this.configService.atPath('logging', LoggingConfig);
-    try {
-      this.loggingService.upgrade(await config$.pipe(first()).toPromise());
-    } catch (err) {
-      onLogUpgradeError(err);
-      throw err;
-    }
+        throw err;
+      }),
+      shareReplay(1)
+    );
 
-    // Skip the first emission as it has just been processed above.
-    this.loggingConfigSubscription = config$.pipe(skip(1)).subscribe({
-      next: async config => {
-        try {
-          this.loggingService.upgrade(config);
-        } catch (err) {
-          onLogUpgradeError(err);
-          await this.shutdown(err);
-        }
-      },
-      error: async err => {
-        onLogUpgradeError(err);
-        await this.shutdown(err);
-      },
+    // Wait for the first update to complete and throw if it fails.
+    await update$.pipe(first()).toPromise();
+
+    // Send subsequent update failures to this.shutdown(), stopped via loggingConfigSubscription.
+    this.loggingConfigSubscription = update$.subscribe({
+      error: error => this.shutdown(error),
     });
   }
 }
