@@ -12,33 +12,35 @@ export function serializeJob(jobConfig) {
     rollupCron,
     rollupInterval,
     rollupDelay,
+    rollupPageSize,
     dateHistogramTimeZone,
     dateHistogramField,
     metrics,
     terms,
     histogram,
+    histogramInterval,
   } = jobConfig;
 
   return {
-    config: {
-      id,
-      index_pattern: indexPattern,
-      rollup_index: rollupIndex,
-      cron: rollupCron,
-      metrics,
-      groups: {
-        date_histogram: {
-          interval: rollupInterval,
-          delay: rollupDelay,
-          time_zone: dateHistogramTimeZone,
-          field: dateHistogramField,
-        },
-        terms: {
-          fields: terms,
-        },
-        histogram: {
-          fields: histogram,
-        },
+    id,
+    index_pattern: indexPattern,
+    rollup_index: rollupIndex,
+    cron: rollupCron,
+    page_size: rollupPageSize,
+    metrics,
+    groups: {
+      date_histogram: {
+        interval: rollupInterval,
+        delay: rollupDelay,
+        time_zone: dateHistogramTimeZone,
+        field: dateHistogramField,
+      },
+      terms: {
+        fields: terms,
+      },
+      histogram: {
+        interval: histogramInterval,
+        fields: histogram,
       },
     },
   };

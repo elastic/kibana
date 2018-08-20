@@ -13,7 +13,7 @@ import {
 
 const mapDispatchToProps = (dispatch) => {
   return {
-    createJob: ({ jobConfig }) => {
+    createJob: jobConfig => {
       dispatch(createJob(jobConfig));
     },
   };

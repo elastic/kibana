@@ -6,13 +6,13 @@
 
 import { createAction } from 'redux-actions';
 import { toastNotifications } from 'ui/notify';
-import { loadJobs as request, deserializeJobs } from '../../services';
+import { loadJobs as sendLoadJobsRequest, deserializeJobs } from '../../services';
 
 export const loadJobsSuccess = createAction('LOAD_JOBS_SUCCESS');
 export const loadJobs = () => async (dispatch) => {
   let jobs;
   try {
-    jobs = await request();
+    jobs = await sendLoadJobsRequest();
   } catch (error) {
     return toastNotifications.addDanger(error.data.message);
   }

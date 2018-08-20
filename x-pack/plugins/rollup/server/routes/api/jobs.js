@@ -29,6 +29,34 @@ export function registerJobsRoute(server) {
   });
 
   server.route({
+    path: '/api/rollup/create',
+    method: 'PUT',
+    handler: async (request, reply) => {
+      try {
+        const {
+          id,
+          ...rest
+        } = request.payload.job;
+
+        const callWithRequest = callWithRequestFactory(server, request);
+
+        const results = await callWithRequest('rollup.createJob', {
+          id,
+          body: rest,
+        });
+
+        reply(results);
+      } catch(err) {
+        if (isEsError(err)) {
+          return reply(wrapEsError(err));
+        }
+
+        reply(wrapUnknownError(err));
+      }
+    },
+  });
+
+  server.route({
     path: '/api/rollup/start',
     method: 'POST',
     handler: async (request, reply) => {
@@ -76,14 +104,12 @@ export function registerJobsRoute(server) {
         const { jobIds } = request.payload;
         const callWithRequest = callWithRequestFactory(server, request);
         const results = await Promise.all(jobIds.map(id => callWithRequest('rollup.deleteJob', { id })));
-
-        reply(results);
+         reply(results);
       } catch(err) {
         if (isEsError(err)) {
           return reply(wrapEsError(err));
         }
-
-        reply(wrapUnknownError(err));
+         reply(wrapUnknownError(err));
       }
     },
   });

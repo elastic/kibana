@@ -160,7 +160,28 @@ export class JobCreate extends Component {
   }
 
   save = () => {
-
+    const { createJob } = this.props;
+    createJob({
+      id: 'new-job',
+      indexPattern: 'log*',
+      rollupIndex: 'test_rollup_index',
+      rollupCron: '*/30 * * * * ?',
+      rollupInterval: '1h',
+      rollupDelay: undefined,
+      rollupPageSize: 5,
+      dateHistogramTimeZone: 'UTC',
+      dateHistogramField: 'utc_time',
+      metrics: [{
+        'field': 'bytes',
+        'metrics': ['min', 'max', 'avg']
+      }, {
+        'field': 'memory',
+        'metrics': ['min', 'max', 'avg']
+      }],
+      terms: ['index.keyword'],
+      histogram: ['memory'],
+      histogramInterval: 5,
+    });
   };
 
   render() {
