@@ -6,26 +6,9 @@
 
 import * as Rx from 'rxjs';
 import { toArray, mergeMap } from 'rxjs/operators';
-import moment from 'moment';
-import { groupBy } from 'lodash';
 import { oncePerServer } from '../../../../server/lib/once_per_server';
 import { screenshotsObservableFactory } from './screenshots';
 import { getLayoutFactory } from './layouts';
-
-const getTimeRange = (urlScreenshots) => {
-  const grouped = groupBy(urlScreenshots.map(u => u.timeRange));
-  const values = Object.values(grouped);
-  if (values.length === 1) {
-    return values[0][0];
-  }
-
-  return null;
-};
-
-
-const formatDate = (date, timezone) => {
-  return moment.tz(date, timezone).format('llll');
-};
 
 function generatePngObservableFn(server) {
   const screenshotsObservable = screenshotsObservableFactory(server);
@@ -41,15 +24,20 @@ function generatePngObservableFn(server) {
     );
   };
 
-  const createPngWithScreenshots = async ({ title, browserTimezone, urlScreenshots }) => {
-    if (title) {
-      const timeRange = getTimeRange(urlScreenshots);
-      title += (timeRange) ? ` — ${formatDate(timeRange.from, browserTimezone)} to ${formatDate(timeRange.to, browserTimezone)}` : '';
+  const createPngWithScreenshots = async ({ urlScreenshots }) => {
+
+    if (urlScreenshots.length !== 1) {
+      throw new Error(`Expected there to be 1 URL screenshot, but there are ${urlScreenshots.length}`);
     }
+    if (urlScreenshots[0].screenshots.length !== 1) {
+      throw new Error(`Expected there to be 1 screenshot, but there are ${urlScreenshots[0].screenshots.length}`);
+    }
+
     return urlScreenshots[0].screenshots[0].base64EncodedData;
+
   };
 
-  return function generatePngObservable(title, urls, browserTimezone, headers, layoutParams, logo) {
+  return function generatePngObservable(urls, headers, layoutParams) {
 
     const layout = getLayout(layoutParams);
 
@@ -57,7 +45,7 @@ function generatePngObservableFn(server) {
 
     return screenshots$.pipe(
       toArray(),
-      mergeMap(urlScreenshots => createPngWithScreenshots({ title, browserTimezone, urlScreenshots, logo }))
+      mergeMap(urlScreenshots => createPngWithScreenshots({ urlScreenshots }))
     );
   };
 }

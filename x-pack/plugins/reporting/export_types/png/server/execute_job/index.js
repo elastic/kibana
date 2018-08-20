@@ -8,7 +8,6 @@ import url from 'url';
 import * as Rx from 'rxjs';
 import { mergeMap, catchError, map, takeUntil } from 'rxjs/operators';
 import { omit } from 'lodash';
-import { UI_SETTINGS_CUSTOM_PDF_LOGO } from '../../../../common/constants';
 import { oncePerServer } from '../../../../server/lib/once_per_server';
 import { generatePngObservableFactory } from '../lib/generate_png';
 import { cryptoFactory } from '../../../../server/lib/crypto';
@@ -41,22 +40,6 @@ function executeJobFn(server) {
     return { job, filteredHeaders };
   };
 
-  const getCustomLogo = async ({ job, filteredHeaders }) => {
-    const fakeRequest = {
-      headers: filteredHeaders,
-    };
-
-    const savedObjects = server.savedObjects;
-    const savedObjectsClient = savedObjects.getScopedSavedObjectsClient(fakeRequest);
-    const uiSettings = server.uiSettingsServiceFactory({
-      savedObjectsClient
-    });
-
-    const logo = await uiSettings.get(UI_SETTINGS_CUSTOM_PDF_LOGO);
-
-    return { job, filteredHeaders, logo };
-  };
-
   const addForceNowQuerystring = async ({ job, filteredHeaders, logo }) => {
     const urls = job.urls.map(jobUrl => {
       if (!job.forceNow) {
@@ -86,10 +69,9 @@ function executeJobFn(server) {
       mergeMap(decryptJobHeaders),
       catchError(() => Rx.throwError('Failed to decrypt report job data. Please re-generate this report.')),
       map(omitBlacklistedHeaders),
-      mergeMap(getCustomLogo),
       mergeMap(addForceNowQuerystring),
-      mergeMap(({ job, filteredHeaders, logo, urls }) => {
-        return generatePngObservable(job.title, urls, job.browserTimezone, filteredHeaders, job.layout, logo);
+      mergeMap(({ job, filteredHeaders, urls }) => {
+        return generatePngObservable(urls, filteredHeaders, job.layout);
       }),
       map(buffer => ({
         content_type: 'image/png',
