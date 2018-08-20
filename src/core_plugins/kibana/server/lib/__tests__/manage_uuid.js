@@ -19,21 +19,22 @@
 
 import expect from 'expect.js';
 import sinon from 'sinon';
-import * as kbnTestServer from '../../../../../test_utils/kbn_server.js';
+import * as kbnTestServer from '../../../../../test_utils/kbn_server';
 import manageUuid from '../manage_uuid';
 
 describe('core_plugins/kibana/server/lib', function () {
   describe('manage_uuid', function () {
     const testUuid = 'c4add484-0cba-4e05-86fe-4baa112d9e53';
+    let root;
     let kbnServer;
     let config;
 
     before(async function () {
       this.timeout(60000); // sometimes waiting for server takes longer than 10
 
-      kbnServer = kbnTestServer.createServerWithCorePlugins();
-
-      await kbnServer.ready();
+      root = kbnTestServer.createRootWithCorePlugins();
+      await root.start();
+      kbnServer = kbnTestServer.getKbnServer(root);
     });
 
     // clear uuid stuff from previous test runs
@@ -42,9 +43,7 @@ describe('core_plugins/kibana/server/lib', function () {
       config = kbnServer.server.config();
     });
 
-    after(async function () {
-      await kbnServer.close();
-    });
+    after(async () => await root.shutdown());
 
     it('ensure config uuid is validated as a guid', async function () {
       config.set('server.uuid', testUuid);

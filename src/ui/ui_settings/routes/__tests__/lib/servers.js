@@ -21,6 +21,7 @@ import { createEsTestCluster } from '@kbn/test';
 import { ToolingLog } from '@kbn/dev-utils';
 import * as kbnTestServer from '../../../../../test_utils/kbn_server';
 
+let root;
 let kbnServer;
 let services;
 let es;
@@ -41,14 +42,16 @@ export async function startServers() {
   log.indent(-4);
   await es.start();
 
-  kbnServer = kbnTestServer.createServerWithCorePlugins({
+  root = kbnTestServer.createRootWithCorePlugins({
     uiSettings: {
       overrides: {
         foo: 'bar',
       }
     }
   });
-  await kbnServer.ready();
+  await root.start();
+
+  kbnServer = kbnTestServer.getKbnServer(root);
   await kbnServer.server.plugins.elasticsearch.waitUntilReady();
 }
 
@@ -79,8 +82,9 @@ export function getServices() {
 export async function stopServers() {
   services = null;
 
-  if (kbnServer) {
-    await kbnServer.close();
+  if (root) {
+    await root.shutdown();
+    root = null;
     kbnServer = null;
   }
 

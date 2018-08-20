@@ -22,34 +22,30 @@ import { catchError, first, map, publishReplay } from 'rxjs/operators';
 
 import { Server } from '..';
 import { Config, ConfigService, Env } from '../config';
-
 import { Logger, LoggerFactory, LoggingConfig, LoggingService } from '../logging';
-
-export type OnShutdown = (reason?: Error) => void;
 
 /**
  * Top-level entry point to kick off the app and start the Kibana server.
  */
 export class Root {
   public readonly logger: LoggerFactory;
-  protected readonly configService: ConfigService;
+  private readonly configService: ConfigService;
   private readonly log: Logger;
-  private server?: Server;
+  private readonly server: Server;
   private readonly loggingService: LoggingService;
   private loggingConfigSubscription?: Subscription;
 
   constructor(
     config$: Observable<Config>,
     private readonly env: Env,
-    private readonly onShutdown: OnShutdown = () => {
-      // noop
-    }
+    private readonly onShutdown?: (reason?: Error | string) => void
   ) {
     this.loggingService = new LoggingService();
     this.logger = this.loggingService.asLoggerFactory();
-
     this.log = this.logger.get('root');
+
     this.configService = new ConfigService(config$, env, this.logger);
+    this.server = new Server(this.configService, this.logger, this.env);
   }
 
   public async start() {
@@ -57,40 +53,37 @@ export class Root {
 
     try {
       await this.setupLogging();
-      await this.startServer();
+      await this.server.start();
     } catch (e) {
       await this.shutdown(e);
       throw e;
     }
   }
 
-  public async shutdown(reason?: Error) {
+  public async shutdown(reason?: any) {
     this.log.debug('shutting root down');
 
-    await this.stopServer();
+    if (reason) {
+      if (reason.code === 'EADDRINUSE' && Number.isInteger(reason.port)) {
+        reason = new Error(
+          `Port ${reason.port} is already in use. Another instance of Kibana may be running!`
+        );
+      }
+
+      this.log.fatal(reason);
+    }
+
+    await this.server.stop();
 
     if (this.loggingConfigSubscription !== undefined) {
       this.loggingConfigSubscription.unsubscribe();
       this.loggingConfigSubscription = undefined;
     }
-
     await this.loggingService.stop();
 
-    this.onShutdown(reason);
-  }
-
-  protected async startServer() {
-    this.server = new Server(this.configService, this.logger, this.env);
-    return this.server.start();
-  }
-
-  protected async stopServer() {
-    if (this.server === undefined) {
-      return;
+    if (this.onShutdown !== undefined) {
+      this.onShutdown(reason);
     }
-
-    await this.server.stop();
-    this.server = undefined;
   }
 
   private async setupLogging() {

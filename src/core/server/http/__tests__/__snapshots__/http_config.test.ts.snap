@@ -2,6 +2,7 @@
 
 exports[`has defaults for config 1`] = `
 Object {
+  "autoListen": true,
   "cors": false,
   "host": "localhost",
   "maxPayload": ByteSizeValue {

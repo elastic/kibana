@@ -19,52 +19,34 @@
 
 import * as kbnTestServer from '../../test_utils/kbn_server';
 
-let kbnServer;
-async function makeServer({ maxPayloadBytesDefault, maxPayloadBytesRoute }) {
-  kbnServer = kbnTestServer.createServer({
-    server: { maxPayloadBytes: maxPayloadBytesDefault }
-  });
+let root;
+beforeAll(async () => {
+  root = kbnTestServer.createRoot({ server: { maxPayloadBytes: 100 } });
 
-  await kbnServer.ready();
+  await root.start();
 
-  kbnServer.server.route({
+  kbnTestServer.getKbnServer(root).server.route({
     path: '/payload_size_check/test/route',
     method: 'POST',
-    config: { payload: { maxBytes: maxPayloadBytesRoute } },
-    handler: function (req, reply) {
-      reply(null, req.payload.data.slice(0, 5));
-    }
+    config: { payload: { maxBytes: 200 } },
+    handler: (req, reply) => reply(null, req.payload.data.slice(0, 5)),
   });
-}
+}, 30000);
 
-async function makeRequest(opts) {
-  return await kbnTestServer.makeRequest(kbnServer, opts);
-}
-
-afterEach(async () => await kbnServer.close());
+afterAll(async () => await root.shutdown());
 
 test('accepts payload with a size larger than default but smaller than route config allows', async () => {
-  await makeServer({ maxPayloadBytesDefault: 100, maxPayloadBytesRoute: 200 });
-
-  const resp = await makeRequest({
-    url: '/payload_size_check/test/route',
-    method: 'POST',
-    payload: { data: Array(150).fill('+').join('') },
-  });
-
-  expect(resp.statusCode).toBe(200);
-  expect(resp.payload).toBe('+++++');
+  await kbnTestServer.request.post(root, '/payload_size_check/test/route')
+    .send({ data: Array(150).fill('+').join('') })
+    .expect(200, '+++++');
 });
 
 test('fails with 400 if payload size is larger than default and route config allows', async () => {
-  await makeServer({ maxPayloadBytesDefault: 100, maxPayloadBytesRoute: 200 });
-
-  const resp = await makeRequest({
-    url: '/payload_size_check/test/route',
-    method: 'POST',
-    payload: { data: Array(250).fill('+').join('') },
-  });
-
-  expect(resp.statusCode).toBe(400);
-  expect(resp.payload).toMatchSnapshot();
+  await kbnTestServer.request.post(root, '/payload_size_check/test/route')
+    .send({ data: Array(250).fill('+').join('') })
+    .expect(400, {
+      statusCode: 400,
+      error: 'Bad Request',
+      message: 'Payload content length greater than maximum allowed: 200'
+    });
 });

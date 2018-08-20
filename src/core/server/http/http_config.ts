@@ -29,6 +29,7 @@ const match = (regex: RegExp, errorMsg: string) => (str: string) =>
 
 const createHttpSchema = schema.object(
   {
+    autoListen: schema.boolean({ defaultValue: true }),
     basePath: schema.maybe(
       schema.string({
         validate: match(validBasePathRegex, "must start with a slash, don't end with one"),
@@ -91,6 +92,7 @@ export class HttpConfig {
    */
   public static schema = createHttpSchema;
 
+  public autoListen: boolean;
   public host: string;
   public port: number;
   public cors: boolean | { origin: string[] };
@@ -104,6 +106,7 @@ export class HttpConfig {
    * @internal
    */
   constructor(config: HttpConfigType, env: Env) {
+    this.autoListen = config.autoListen;
     this.host = config.host;
     this.port = config.port;
     this.cors = config.cors;

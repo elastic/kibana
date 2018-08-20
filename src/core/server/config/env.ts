@@ -17,7 +17,6 @@
  * under the License.
  */
 
-import { EventEmitter } from 'events';
 import { resolve } from 'path';
 import process from 'process';
 
@@ -67,11 +66,6 @@ export class Env {
   public readonly mode: Readonly<EnvironmentMode>;
 
   /**
-   * @internal
-   */
-  public readonly legacy: EventEmitter;
-
-  /**
    * Arguments provided through command line.
    */
   public readonly cliArgs: Readonly<Record<string, any>>;
@@ -100,10 +94,11 @@ export class Env {
     this.configs = Object.freeze(options.configs);
     this.isDevClusterMaster = options.isDevClusterMaster;
 
+    const isDevMode = this.cliArgs.dev || (this.cliArgs.env || {}).name === 'development';
     this.mode = Object.freeze<EnvironmentMode>({
-      dev: this.cliArgs.dev,
-      name: this.cliArgs.dev ? 'development' : 'production',
-      prod: !this.cliArgs.dev,
+      dev: isDevMode,
+      name: isDevMode ? 'development' : 'production',
+      prod: !isDevMode,
     });
 
     const isKibanaDistributable = pkg.build && pkg.build.distributable === true;
@@ -113,7 +108,5 @@ export class Env {
       buildSha: isKibanaDistributable ? pkg.build.sha : 'XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX',
       version: pkg.version,
     });
-
-    this.legacy = new EventEmitter();
   }
 }

@@ -21,12 +21,13 @@ import sinon from 'sinon';
 import expect from 'expect.js';
 
 import { createEsTestCluster } from '@kbn/test';
-import { createServerWithCorePlugins } from '../../../../test_utils/kbn_server';
+import { createRootWithCorePlugins, getKbnServer } from '../../../../test_utils/kbn_server';
 import { ToolingLog } from '@kbn/dev-utils';
 import { createOrUpgradeSavedConfig } from '../create_or_upgrade_saved_config';
 
 describe('createOrUpgradeSavedConfig()', () => {
   let savedObjectsClient;
+  let root;
   let kbnServer;
   const cleanup = [];
 
@@ -48,10 +49,13 @@ describe('createOrUpgradeSavedConfig()', () => {
 
     await es.start();
 
-    kbnServer = createServerWithCorePlugins();
-    await kbnServer.ready();
+    root = createRootWithCorePlugins();
+    await root.start();
+    kbnServer = getKbnServer(root);
+
     cleanup.push(async () => {
-      await kbnServer.close();
+      await root.shutdown();
+      root = null;
       kbnServer = null;
       savedObjectsClient = null;
     });

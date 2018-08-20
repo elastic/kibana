@@ -89,6 +89,33 @@ test('correctly creates default environment in prod non-distributable mode.', ()
   expect(defaultEnv).toMatchSnapshot('env properties');
 });
 
+test('correctly creates default environment if `--env.name` is supplied.', () => {
+  mockPackage.raw = {
+    branch: 'feature-v1',
+    version: 'v1',
+    build: {
+      distributable: false,
+      number: 100,
+      sha: 'feature-v1-build-sha',
+    },
+  };
+
+  const defaultDevEnv = Env.createDefault({
+    cliArgs: { someArg: 1, someOtherArg: '2', env: { name: 'development' } },
+    configs: ['/some/other/path/some-kibana.yml'],
+    isDevClusterMaster: false,
+  });
+
+  const defaultProdEnv = Env.createDefault({
+    cliArgs: { someArg: 1, someOtherArg: '2', env: { name: 'production' } },
+    configs: ['/some/other/path/some-kibana.yml'],
+    isDevClusterMaster: false,
+  });
+
+  expect(defaultDevEnv).toMatchSnapshot('dev env properties');
+  expect(defaultProdEnv).toMatchSnapshot('prod env properties');
+});
+
 test('correctly creates environment with constructor.', () => {
   mockPackage.raw = {
     branch: 'feature-v1',
