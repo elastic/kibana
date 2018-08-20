@@ -1,7 +1,7 @@
 {
   "name": "@kbn/i18n",
-  "browser": "./target/web",
-  "main": "./target/node",
+  "browser": "./target/web/browser.js",
+  "main": "./target/node/index.js",
   "module": "./src/index.js",
   "version": "1.0.0",
   "license": "Apache-2.0",
@@ -20,7 +20,6 @@
     "cross-env": "^5.2.0"
   },
   "dependencies": {
-    "accept-language-parser": "^1.5.0",
     "intl-format-cache": "^2.1.0",
     "intl-messageformat": "^2.2.0",
     "intl-relativeformat": "^2.1.0",

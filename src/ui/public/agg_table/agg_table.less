@@ -41,3 +41,16 @@ kbn-agg-table-group {
       padding: 0;
     }
   }
+
+// SASSTODO: Make sure these colors convert to theme variables
+.tab-dashboard.theme-dark {
+  .agg-table-paginated {
+    tr:hover td {
+      background-color: lighten(@gray6, 4%);
+
+      .table-cell-filter {
+        background-color: lighten(@gray6, 4%);
+      }
+    }
+  }
+}

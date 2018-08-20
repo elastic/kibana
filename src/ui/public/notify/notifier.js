@@ -17,20 +17,10 @@
  * under the License.
  */
 
-import React from 'react';
 import _ from 'lodash';
-import angular from 'angular';
-import MarkdownIt from 'markdown-it';
 import { metadata } from '../metadata';
 import { formatMsg, formatStack } from './lib';
-import { fatalError } from './fatal_error';
-import { banners } from './banners';
 import '../render_directive';
-
-import {
-  EuiCallOut,
-  EuiButton,
-} from '@elastic/eui';
 
 const notifs = [];
 
@@ -95,7 +85,6 @@ function restartNotifTimer(notif, cb) {
 
 const typeToButtonClassMap = {
   danger: 'kuiButton--danger', // NOTE: `error` type is internally named as `danger`
-  warning: 'kuiButton--warning',
   info: 'kuiButton--primary',
 };
 const buttonHierarchyClass = (index) => {
@@ -108,7 +97,6 @@ const buttonHierarchyClass = (index) => {
 };
 const typeToAlertClassMap = {
   danger: `alert-danger`,
-  warning: `alert-warning`,
   info: `alert-info`,
 };
 
@@ -188,7 +176,6 @@ export function Notifier(opts) {
 
   const notificationLevels = [
     'error',
-    'warning',
   ];
 
   notificationLevels.forEach(function (m) {
@@ -199,7 +186,6 @@ export function Notifier(opts) {
 Notifier.config = {
   bannerLifetime: 3000000,
   errorLifetime: 300000,
-  warningLifetime: 10000,
   infoLifetime: 5000,
   setInterval: window.setInterval,
   clearInterval: window.clearInterval
@@ -207,33 +193,6 @@ Notifier.config = {
 
 Notifier.applyConfig = function (config) {
   _.merge(Notifier.config, config);
-};
-
-// "Constants"
-Notifier.QS_PARAM_MESSAGE = 'notif_msg';
-Notifier.QS_PARAM_LEVEL = 'notif_lvl';
-Notifier.QS_PARAM_LOCATION = 'notif_loc';
-
-Notifier.pullMessageFromUrl = ($location) => {
-  const queryString = $location.search();
-  if (!queryString.notif_msg) {
-    return;
-  }
-  const message = queryString[Notifier.QS_PARAM_MESSAGE];
-  const config = queryString[Notifier.QS_PARAM_LOCATION] ? { location: queryString[Notifier.QS_PARAM_LOCATION] } : {};
-  const level = queryString[Notifier.QS_PARAM_LEVEL] || 'info';
-
-  $location.search(Notifier.QS_PARAM_MESSAGE, null);
-  $location.search(Notifier.QS_PARAM_LOCATION, null);
-  $location.search(Notifier.QS_PARAM_LEVEL, null);
-
-  const notifier = new Notifier(config);
-
-  if (level === 'fatal') {
-    fatalError(message);
-  } else {
-    notifier[level](message);
-  }
 };
 
 // simply a pointer to the global notif list
@@ -262,205 +221,4 @@ Notifier.prototype.error = function (err, opts, cb) {
     stack: formatStack(err)
   }, _.pick(opts, overridableOptions));
   return add(config, cb);
-};
-
-/**
- * Warn the user abort something
- * @param  {String} msg
- * @param  {Function} cb
- */
-Notifier.prototype.warning = function (msg, opts, cb) {
-  if (_.isFunction(opts)) {
-    cb = opts;
-    opts = {};
-  }
-
-  const config = _.assign({
-    type: 'warning',
-    content: formatMsg(msg, this.from),
-    icon: 'warning',
-    title: 'Warning',
-    lifetime: Notifier.config.warningLifetime,
-    actions: ['accept']
-  }, _.pick(opts, overridableOptions));
-  return add(config, cb);
-};
-
-/**
- * Display a banner message
- * @param  {String} content
- * @param  {String} name
- */
-let bannerId;
-let bannerTimeoutId;
-Notifier.prototype.banner = function (content = '', name = '') {
-  const BANNER_PRIORITY = 100;
-
-  const dismissBanner = () => {
-    banners.remove(bannerId);
-    clearTimeout(bannerTimeoutId);
-  };
-
-  const markdownIt = new MarkdownIt({
-    html: false,
-    linkify: true
-  });
-
-  const banner = (
-    <EuiCallOut
-      title="Attention"
-      iconType="help"
-    >
-      <div
-        /*
-         * Justification for dangerouslySetInnerHTML:
-         * The notifier relies on `markdown-it` to produce safe and correct HTML.
-         */
-        dangerouslySetInnerHTML={{ __html: markdownIt.render(content) }} //eslint-disable-line react/no-danger
-        data-test-subj={name ? `banner-${name}` : null}
-      />
-
-      <EuiButton type="primary" size="s" onClick={dismissBanner}>
-        Dismiss
-      </EuiButton>
-    </EuiCallOut>
-  );
-
-  bannerId = banners.set({
-    component: banner,
-    id: bannerId,
-    priority: BANNER_PRIORITY,
-  });
-
-  clearTimeout(bannerTimeoutId);
-  bannerTimeoutId = setTimeout(() => {
-    dismissBanner();
-  }, Notifier.config.bannerLifetime);
-};
-
-/**
- * Helper for common behavior in custom and directive types
- */
-function getDecoratedCustomConfig(config) {
-  // There is no helper condition that will allow for 2 parameters, as the
-  // other methods have. So check that config is an object
-  if (!_.isPlainObject(config)) {
-    throw new Error('Config param is required, and must be an object');
-  }
-
-  // workaround to allow callers to send `config.type` as `error` instead of
-  // reveal internal implementation that error notifications use a `danger`
-  // style
-  if (config.type === 'error') {
-    config.type = 'danger';
-  }
-
-  const getLifetime = (type) => {
-    switch (type) {
-      case 'warning':
-        return Notifier.config.warningLifetime;
-      case 'danger':
-        return Notifier.config.errorLifetime;
-      default: // info
-        return Notifier.config.infoLifetime;
-    }
-  };
-
-  const customConfig = _.assign({
-    type: 'info',
-    title: 'Notification',
-    lifetime: getLifetime(config.type)
-  }, config);
-
-  const hasActions = _.get(customConfig, 'actions.length');
-  if (hasActions) {
-    customConfig.customActions = customConfig.actions;
-    delete customConfig.actions;
-  } else {
-    customConfig.actions = ['accept'];
-  }
-
-  return customConfig;
-}
-
-/**
- * Display a custom message
- * @param  {String} msg - required
- * @param  {Object} config - required
- * @param  {Function} cb - optional
- *
- * config = {
- *   title: 'Some Title here',
- *   type: 'info',
- *   actions: [{
- *     text: 'next',
- *     callback: function() { next(); }
- *   }, {
- *     text: 'prev',
- *     callback: function() { prev(); }
- *   }]
- * }
- */
-Notifier.prototype.custom = function (msg, config, cb) {
-  const customConfig = getDecoratedCustomConfig(config);
-  customConfig.content = formatMsg(msg, this.from);
-  return add(customConfig, cb);
-};
-
-/**
- * Display a scope-bound directive using template rendering in the message area
- * @param  {Object} directive - required
- * @param  {Object} config - required
- * @param  {Function} cb - optional
- *
- * directive = {
- *  template: `<p>Hello World! <a ng-click="example.clickHandler()">Click me</a>.`,
- *  controllerAs: 'example',
- *  controller() {
- *    this.clickHandler = () {
- *      // do something
- *    };
- *  }
- * }
- *
- * config = {
- *   title: 'Some Title here',
- *   type: 'info',
- *   actions: [{
- *     text: 'next',
- *     callback: function() { next(); }
- *   }, {
- *     text: 'prev',
- *     callback: function() { prev(); }
- *   }]
- * }
- */
-Notifier.prototype.directive = function (directive, config, cb) {
-  if (!_.isPlainObject(directive)) {
-    throw new Error('Directive param is required, and must be an object');
-  }
-  if (!Notifier.$compile) {
-    throw new Error('Unable to use the directive notification until Angular has initialized.');
-  }
-  if (directive.scope) {
-    throw new Error('Directive should not have a scope definition. Notifier has an internal implementation.');
-  }
-  if (directive.link) {
-    throw new Error('Directive should not have a link function. Notifier has an internal link function helper.');
-  }
-
-  // make a local copy of the directive param (helps unit tests)
-  const localDirective = _.clone(directive, true);
-
-  localDirective.scope = { notif: '=' };
-  localDirective.link = function link($scope, $el) {
-    const $template = angular.element($scope.notif.directive.template);
-    const postLinkFunction = Notifier.$compile($template);
-    $el.html($template);
-    postLinkFunction($scope);
-  };
-
-  const customConfig = getDecoratedCustomConfig(config);
-  customConfig.directive = localDirective;
-  return add(customConfig, cb);
 };

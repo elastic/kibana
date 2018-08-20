@@ -42,7 +42,7 @@ export const IGNORE_FILE_GLOBS = [
   'src/dev/tslint/rules/*',
 
   // filename must match language code which requires capital letters
-  'src/ui/ui_i18n/__tests__/fixtures/translations/test_plugin_1/es-ES.json',
+  '**/translations/*.json',
 ];
 
 
@@ -193,8 +193,6 @@ export const TEMPORARILY_IGNORED_PATHS = [
   'src/ui/public/styles/bootstrap/mixins/vendor-prefixes.less',
   'src/ui/public/styles/bootstrap/progress-bars.less',
   'src/ui/public/styles/bootstrap/responsive-utilities.less',
-  'src/ui/public/styles/dark-theme.less',
-  'src/ui/public/styles/dark-variables.less',
   'src/ui/public/styles/fonts/glyphicons-halflings-regular.eot',
   'src/ui/public/styles/fonts/glyphicons-halflings-regular.svg',
   'src/ui/public/styles/fonts/glyphicons-halflings-regular.ttf',

@@ -10,7 +10,7 @@ import { SORT_ASCENDING } from '../../../../common/constants';
 import { NodeStatusIcon } from '../node';
 import { extractIp } from '../../../lib/extract_ip'; // TODO this is only used for elasticsearch nodes summary / node detail, so it should be moved to components/elasticsearch/nodes/lib
 import { ClusterStatus } from '../cluster_status';
-import { MonitoringTable } from '../../';
+import { MonitoringTable } from '../../table';
 import { MetricCell, OfflineCell } from './cells';
 import { EuiLink, EuiToolTip } from '@elastic/eui';
 import { KuiTableRowCell, KuiTableRow } from '@kbn/ui-framework/components';
@@ -88,7 +88,7 @@ const nodeRowFactory = showCgroupMetricsElasticsearch => {
       if (this.isOnline()) {
         return (
           <KuiTableRowCell>
-            <div className="monitoringTableCell__number" data-test-subj="shards">
+            <div className="monTableCell__number" data-test-subj="shards">
               {get(this.props, 'shardCount')}
             </div>
           </KuiTableRowCell>
@@ -104,7 +104,7 @@ const nodeRowFactory = showCgroupMetricsElasticsearch => {
       return (
         <KuiTableRow>
           <KuiTableRowCell>
-            <div className="monitoringTableCell__name">
+            <div className="monTableCell__name">
               <EuiToolTip
                 position="bottom"
                 content={this.props.nodeTypeLabel}
@@ -121,12 +121,12 @@ const nodeRowFactory = showCgroupMetricsElasticsearch => {
                 </EuiLink>
               </span>
             </div>
-            <div className="monitoringTableCell__transportAddress">
+            <div className="monTableCell__transportAddress">
               {extractIp(this.props.transport_address)}
             </div>
           </KuiTableRowCell>
           <KuiTableRowCell>
-            <div className="monitoringTableCell__status">
+            <div className="monTableCell__status">
               <NodeStatusIcon
                 isOnline={this.props.isOnline}
                 status={status}

@@ -21,13 +21,20 @@ import Joi from 'joi';
 
 import { loadData } from './lib/load_data';
 import { createIndexName } from './lib/create_index_name';
-import { adjustTimestamp } from './lib/adjust_timestamp';
+import {
+  dateToIso8601IgnoringTime,
+  translateTimeRelativeToDifference,
+  translateTimeRelativeToWeek
+} from './lib/translate_timestamp';
 
 export const createInstallRoute = () => ({
   path: '/api/sample_data/{id}',
   method: 'POST',
   config: {
     validate: {
+      query: Joi.object().keys({
+        now: Joi.date().iso()
+      }),
       params: Joi.object().keys({
         id: Joi.string().required(),
       }).required()
@@ -80,12 +87,14 @@ export const createInstallRoute = () => ({
         return reply(errMsg).code(err.status);
       }
 
-      const now = new Date();
-      const currentTimeMarker = new Date(Date.parse(sampleDataset.currentTimeMarker));
+      const now = request.query.now ? request.query.now : new Date();
+      const nowReference = dateToIso8601IgnoringTime(now);
       function updateTimestamps(doc) {
         sampleDataset.timeFields.forEach(timeFieldName => {
           if (doc[timeFieldName]) {
-            doc[timeFieldName] = adjustTimestamp(doc[timeFieldName], currentTimeMarker, now, sampleDataset.preserveDayOfWeekTimeOfDay);
+            doc[timeFieldName] = sampleDataset.preserveDayOfWeekTimeOfDay
+              ? translateTimeRelativeToWeek(doc[timeFieldName], sampleDataset.currentTimeMarker, nowReference)
+              : translateTimeRelativeToDifference(doc[timeFieldName], sampleDataset.currentTimeMarker, nowReference);
           }
         });
         return doc;

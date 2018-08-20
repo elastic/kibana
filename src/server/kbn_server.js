@@ -26,8 +26,8 @@ import configSetupMixin from './config/setup';
 import httpMixin from './http';
 import { loggingMixin } from './logging';
 import warningsMixin from './warnings';
-import { statusMixin } from './status';
 import { usageMixin } from './usage';
+import { statusMixin } from './status';
 import pidMixin from './pid';
 import { configDeprecationWarningsMixin } from './config/deprecation_warnings';
 import configCompleteMixin from './config/complete';
@@ -37,10 +37,12 @@ import { indexPatternsMixin } from './index_patterns';
 import { savedObjectsMixin } from './saved_objects';
 import { sampleDataMixin } from './sample_data';
 import { kibanaIndexMappingsMixin } from './mappings';
+import { urlShorteningMixin } from './url_shortening';
 import { serverExtensionsMixin } from './server_extensions';
 import { uiMixin } from '../ui';
 import { sassMixin } from './sass';
 import { injectIntoKbnServer as newPlatformMixin } from '../core';
+import { i18nMixin } from './i18n';
 
 const rootDir = fromRoot('.');
 
@@ -68,8 +70,8 @@ export default class KbnServer {
       loggingMixin,
       configDeprecationWarningsMixin,
       warningsMixin,
-      statusMixin,
       usageMixin,
+      statusMixin,
 
       // writes pid file
       pidMixin,
@@ -82,6 +84,7 @@ export default class KbnServer {
 
       // setup this.uiExports and this.uiBundles
       uiMixin,
+      i18nMixin,
       indexPatternsMixin,
 
       // setup server.getKibanaIndexMappingsDsl()
@@ -92,6 +95,9 @@ export default class KbnServer {
 
       // setup routes for installing/uninstalling sample data sets
       sampleDataMixin,
+
+      // setup routes for short urls
+      urlShorteningMixin,
 
       // ensure that all bundles are built, or that the
       // watch bundle server is running
@@ -140,12 +146,9 @@ export default class KbnServer {
    * @return undefined
    */
   async listen() {
-    const {
-      server,
-      config,
-    } = this;
-
     await this.ready();
+
+    const { server } = this;
     await fromNode(cb => server.start(cb));
 
     if (isWorker) {
@@ -153,11 +156,6 @@ export default class KbnServer {
       process.send(['WORKER_LISTENING']);
     }
 
-    server.log(['listening', 'info'], `Server running at ${server.info.uri}${
-      config.get('server.rewriteBasePath')
-        ? config.get('server.basePath')
-        : ''
-    }`);
     return server;
   }
 

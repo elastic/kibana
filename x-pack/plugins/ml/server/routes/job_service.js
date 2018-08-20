@@ -65,6 +65,22 @@ export function jobServiceRoutes(server, commonRouteConfig) {
 
   server.route({
     method: 'POST',
+    path: '/api/ml/jobs/close_jobs',
+    handler(request, reply) {
+      const callWithRequest = callWithRequestFactory(server, request);
+      const { closeJobs } = jobServiceProvider(callWithRequest);
+      const { jobIds } = request.payload;
+      return closeJobs(jobIds)
+        .then(resp => reply(resp))
+        .catch(resp => reply(wrapError(resp)));
+    },
+    config: {
+      ...commonRouteConfig
+    }
+  });
+
+  server.route({
+    method: 'POST',
     path: '/api/ml/jobs/jobs_summary',
     handler(request, reply) {
       const callWithRequest = callWithRequestFactory(server, request);
@@ -102,6 +118,22 @@ export function jobServiceRoutes(server, commonRouteConfig) {
       const callWithRequest = callWithRequestFactory(server, request);
       const { getAllGroups } = jobServiceProvider(callWithRequest);
       return getAllGroups()
+        .then(resp => reply(resp))
+        .catch(resp => reply(wrapError(resp)));
+    },
+    config: {
+      ...commonRouteConfig
+    }
+  });
+
+  server.route({
+    method: 'POST',
+    path: '/api/ml/jobs/update_groups',
+    handler(request, reply) {
+      const callWithRequest = callWithRequestFactory(server, request);
+      const { updateGroups } = jobServiceProvider(callWithRequest);
+      const { jobs } = request.payload;
+      return updateGroups(jobs)
         .then(resp => reply(resp))
         .catch(resp => reply(wrapError(resp)));
     },

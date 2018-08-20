@@ -5,11 +5,8 @@
  */
 
 import React from 'react';
-import { first, get } from 'lodash';
 
-export function InfoTooltip({ series }) {
-
-  const bucketSize = get(first(series), 'bucket_size'); // bucket size will be the same for all metrics in all series
+export function InfoTooltip({ series, bucketSize }) {
   const tableRows = series.map((item, index) => {
     return (
       <tr
@@ -19,8 +16,8 @@ export function InfoTooltip({ series }) {
         data-debug-metric-is-derivative={item.metric.isDerivative}
         data-debug-metric-has-calculation={item.metric.hasCalculation}
       >
-        <td className="monitoring-chart-tooltip__label">{ item.metric.label }</td>
-        <td className="monitoring-chart-tooltip__value">
+        <td className="monChart__tooltipLabel">{ item.metric.label }</td>
+        <td className="monChart__tooltipValue">
           { item.metric.description }
         </td>
       </tr>
@@ -28,11 +25,11 @@ export function InfoTooltip({ series }) {
   });
 
   return (
-    <table className="monitoring-chart-tooltip">
+    <table>
       <tbody>
         <tr>
-          <td className="monitoring-chart-tooltip__label">Interval</td>
-          <td className="monitoring-chart-tooltip__value">{bucketSize}</td>
+          <td className="monChart__tooltipLabel">Interval</td>
+          <td className="monChart__tooltipValue">{bucketSize}</td>
         </tr>
         { tableRows }
       </tbody>

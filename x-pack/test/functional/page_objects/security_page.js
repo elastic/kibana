@@ -16,7 +16,7 @@ export function SecurityPageProvider({ getService, getPageObjects }) {
   const testSubjects = getService('testSubjects');
   const esArchiver = getService('esArchiver');
   const defaultFindTimeout = config.get('timeouts.find');
-  const PageObjects = getPageObjects(['common', 'header', 'settings']);
+  const PageObjects = getPageObjects(['common', 'header', 'settings', 'home']);
 
   class LoginPage {
     async login(username, password) {
@@ -72,10 +72,22 @@ export function SecurityPageProvider({ getService, getPageObjects }) {
     async logout() {
       log.debug('SecurityPage.logout');
 
-      const logoutLinkExists = await find.existsByLinkText('Logout');
+      const [isWelcomeShowing, logoutLinkExists] = await Promise.all([
+        PageObjects.home.isWelcomeShowing(),
+        find.existsByLinkText('Logout'),
+      ]);
+
       if (!logoutLinkExists) {
         log.debug('Logout not found');
         return;
+      }
+
+      // This sometimes happens when hitting the home screen on a brand new / empty
+      // Kibana instance. It may not *always* happen, depending on how
+      // long it takes the home screen to query Elastic to see if it's a
+      // new Kibana instance.
+      if (isWelcomeShowing) {
+        await PageObjects.home.hideWelcomeScreen();
       }
 
       await find.clickByLinkText('Logout');
@@ -117,9 +129,7 @@ export function SecurityPageProvider({ getService, getPageObjects }) {
     }
 
     async clickSaveEditUser() {
-      const saveButton = await retry.try(() => testSubjects.find('userFormSaveButton'));
-      await remote.moveMouseTo(saveButton);
-      await saveButton.click();
+      await testSubjects.click('userFormSaveButton');
       await PageObjects.header.waitUntilLoadingHasFinished();
     }
 
@@ -146,11 +156,7 @@ export function SecurityPageProvider({ getService, getPageObjects }) {
     }
 
     async assignRoleToUser(role) {
-      log.debug(`Adding role ${role} to user`);
-      const privilegeInput =
-        await retry.try(() => find.byCssSelector('[data-test-subj="userFormRolesDropdown"] > div > input'));
-      await privilegeInput.type(role);
-      await privilegeInput.type('\n');
+      await this.selectRole(role);
     }
 
     async navigateTo() {
@@ -182,13 +188,13 @@ export function SecurityPageProvider({ getService, getPageObjects }) {
         const fullnameElement = await user.findByCssSelector('[data-test-subj="userRowFullName"]');
         const usernameElement = await user.findByCssSelector('[data-test-subj="userRowUserName"]');
         const rolesElement = await user.findByCssSelector('[data-test-subj="userRowRoles"]');
-        const isReservedElementVisible = await user.findByCssSelector('td:nth-child(5)');
+        const isReservedElementVisible =  await user.findByCssSelector('td:last-child');
 
         return {
           username: await usernameElement.getVisibleText(),
           fullname: await fullnameElement.getVisibleText(),
           roles: (await rolesElement.getVisibleText()).split(',').map(role => role.trim()),
-          reserved: (await isReservedElementVisible.getProperty('innerHTML')).includes('userRowReserved')
+          reserved: (await isReservedElementVisible.getProperty('innerHTML')).includes('reservedUser')
         };
       });
     }
@@ -217,27 +223,17 @@ export function SecurityPageProvider({ getService, getPageObjects }) {
     async addUser(userObj) {
       const self = this;
       await this.clickNewUser();
+      log.debug('username = ' + userObj.username);
       await testSubjects.setValue('userFormUserNameInput', userObj.username);
       await testSubjects.setValue('passwordInput', userObj.password);
       await testSubjects.setValue('passwordConfirmationInput', userObj.confirmPassword);
       await testSubjects.setValue('userFormFullNameInput', userObj.fullname);
-      await testSubjects.setValue('userFormEmailInput', userObj.email);
-
-      function addRoles(role) {
-        return role.reduce(function (promise, roleName) {
-          return promise
-            .then(function () {
-              log.debug('Add role: ' + roleName);
-              return self.selectRole(roleName);
-            })
-            .then(function () {
-              return PageObjects.common.sleep(1000);
-            });
-
-        }, Promise.resolve());
-      }
+      await testSubjects.setValue('userFormEmailInput', 'example@example.com');
       log.debug('Add roles: ', userObj.roles);
-      await addRoles(userObj.roles || []);
+      const rolesToAdd = userObj.roles || [];
+      for (let i = 0; i < rolesToAdd.length; i++) {
+        await self.selectRole(rolesToAdd[i]);
+      }
       log.debug('After Add role: , userObj.roleName');
       if (userObj.save === true) {
         await testSubjects.click('userFormSaveButton');
@@ -270,6 +266,31 @@ export function SecurityPageProvider({ getService, getPageObjects }) {
             return testSubjects.setValue('queryInput0', userObj.indices[0].query);
           }
         })
+
+        //KibanaPriv
+        .then(function () {
+
+          function addKibanaPriv(priv) {
+
+            return priv.reduce(function (promise, privName) {
+              // We have to use non-test-subject selectors because this markup is generated by ui-select.
+              return promise
+
+                .then(function () {
+                  log.debug('priv item = ' + privName);
+                  remote.setFindTimeout(defaultFindTimeout)
+                    .findByCssSelector(`[data-test-subj="kibanaPrivileges-${privName}"]`)
+                    .click();
+                })
+                .then(function () {
+                  return PageObjects.common.sleep(500);
+                });
+
+            }, Promise.resolve());
+          }
+          return userObj.kibana ? addKibanaPriv(userObj.kibana) : Promise.resolve();
+        })
+
         .then(function () {
 
           function addPriv(priv) {
@@ -337,8 +358,9 @@ export function SecurityPageProvider({ getService, getPageObjects }) {
       const dropdown = await testSubjects.find("userFormRolesDropdown");
       const input = await dropdown.findByCssSelector("input");
       await input.type(role);
-      await testSubjects.click(`addRoleOption-${role}`);
-      await testSubjects.find(`userRole-${role}`);
+      await testSubjects.click(`roleOption-${role}`);
+      await testSubjects.click('comboBoxToggleListButton');
+      await testSubjects.find(`roleOption-${role}`);
     }
 
     deleteUser(username) {

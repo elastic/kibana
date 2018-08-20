@@ -39,6 +39,16 @@ export const jobs = {
     });
   },
 
+  updateGroups(updatedJobs) {
+    return http({
+      url: `${basePath}/jobs/update_groups`,
+      method: 'POST',
+      data: {
+        jobs: updatedJobs,
+      }
+    });
+  },
+
   forceStartDatafeeds(datafeedIds, start, end) {
     return http({
       url: `${basePath}/jobs/force_start_datafeeds`,
@@ -64,6 +74,16 @@ export const jobs = {
   deleteJobs(jobIds) {
     return http({
       url: `${basePath}/jobs/delete_jobs`,
+      method: 'POST',
+      data: {
+        jobIds,
+      }
+    });
+  },
+
+  closeJobs(jobIds) {
+    return http({
+      url: `${basePath}/jobs/close_jobs`,
       method: 'POST',
       data: {
         jobIds,

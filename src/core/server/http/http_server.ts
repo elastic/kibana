@@ -77,15 +77,22 @@ export class HttpServer {
             output: 'stream',
             parse: false,
             timeout: false,
+            // Having such a large value here will allow legacy routes to override
+            // maximum allowed payload size set in the core http server if needed.
+            maxBytes: Number.MAX_SAFE_INTEGER,
           },
         },
         path: '/{p*}',
       });
     }
 
-    this.log.info(`starting http server [${config.host}:${config.port}]`);
-
     await this.server.start();
+
+    this.log.info(
+      `Server running at ${this.server.info.uri}${config.rewriteBasePath ? config.basePath : ''}`,
+      // The "legacy" Kibana will output log records with `listening` tag even if `quiet` logging mode is enabled.
+      { tags: ['listening'] }
+    );
   }
 
   public async stop() {

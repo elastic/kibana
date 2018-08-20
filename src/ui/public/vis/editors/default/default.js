@@ -32,6 +32,8 @@ import { DefaultEditorSize } from '../../editor_size';
 
 import { VisEditorTypesRegistryProvider } from '../../../registry/vis_editor_types';
 import { getVisualizeLoader } from '../../../visualize/loader/visualize_loader';
+import { updateEditorStateWithChanges } from './update_editor_state';
+
 
 const defaultEditor = function ($rootScope, $compile) {
   return class DefaultEditor {
@@ -128,7 +130,7 @@ const defaultEditor = function ($rootScope, $compile) {
 
             $scope.responseValueAggs = null;
             try {
-              $scope.responseValueAggs = $scope.vis.aggs.getResponseAggs().filter(function (agg) {
+              $scope.responseValueAggs = $scope.state.aggs.getResponseAggs().filter(function (agg) {
                 return _.get(agg, 'schema.group') === 'metrics';
               });
             }
@@ -142,36 +144,9 @@ const defaultEditor = function ($rootScope, $compile) {
           $scope.$watch(() => {
             return $scope.vis.getCurrentState(false);
           }, (newState) => {
-            const updateEditorStateWithChanges = (newState, oldState, editorState) => {
-              for (const prop in newState) {
-                if (newState.hasOwnProperty(prop)) {
-                  const newStateValue = newState[prop];
-                  const oldStateValue = oldState[prop];
-                  const editorStateValue = editorState[prop];
-
-                  if (typeof newStateValue === 'object') {
-                    if (editorStateValue) {
-                      // Keep traversing.
-                      return updateEditorStateWithChanges(newStateValue, oldStateValue, editorStateValue);
-                    }
-
-                    const newStateValueCopy = _.cloneDeep(newStateValue);
-                    editorState[prop] = newStateValueCopy;
-                    oldState[prop] = newStateValueCopy;
-                    lockDirty = true;
-                    return;
-                  }
-
-                  if (newStateValue !== oldStateValue) {
-                    oldState[prop] = newStateValue;
-                    editorState[prop] = newStateValue;
-                    lockDirty = true;
-                  }
-                }
-              }
-            };
-
-            updateEditorStateWithChanges(newState, $scope.oldState, $scope.state);
+            if (updateEditorStateWithChanges(newState, $scope.oldState, $scope.state)) {
+              lockDirty = true;
+            }
           }, true);
 
           // Load the default editor template, attach it to the DOM and compile it.

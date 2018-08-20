@@ -17,9 +17,9 @@
  * under the License.
  */
 
-
 export function HomePageProvider({ getService }) {
   const testSubjects = getService('testSubjects');
+  const retry = getService('retry');
 
   class HomePage {
 
@@ -61,6 +61,28 @@ export function HomePageProvider({ getService }) {
 
     async launchSampleDataSet(id) {
       await testSubjects.click(`launchSampleDataSet${id}`);
+    }
+
+    // When logging into a brand new Kibana instance, the welcome screen
+    // may pop up. It may not, depending on the speed of the test, so it
+    // pays to check for the welcome screen and hide it in any test that
+    // hits the Kibana home page.
+    isWelcomeShowing() {
+      return testSubjects.exists('skipWelcomeScreen');
+    }
+
+    async hideWelcomeScreen() {
+      await testSubjects.click('skipWelcomeScreen');
+    }
+
+    async loadSavedObjects() {
+      await retry.try(async () => {
+        await testSubjects.click('loadSavedObjects');
+        const successMsgExists = await testSubjects.exists('loadSavedObjects_success', 5000);
+        if (!successMsgExists) {
+          throw new Error('Failed to load saved objects');
+        }
+      });
     }
 
   }

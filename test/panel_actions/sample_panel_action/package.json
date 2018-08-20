@@ -1,0 +1,8 @@
+{
+  "name": "sample_panel_action",
+  "version": "7.0.0-alpha1",
+  "dependencies": {
+    "@elastic/eui": "0.0.55",
+    "react": "^16.4.1"
+  }
+}

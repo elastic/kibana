@@ -18,23 +18,25 @@
  */
 
 import { schema } from '../../../config/schema';
-
 import { DisposableAppender } from '../../../logging/appenders/appenders';
 import { LogRecord } from '../../../logging/log_record';
-import { LegacyKbnServer } from '../../legacy_kbn_server';
-
-const { literal, object } = schema;
+import { LegacyLoggingServer } from '../legacy_logging_server';
 
 /**
  * Simple appender that just forwards `LogRecord` to the legacy KbnServer log.
  * @internal
  */
 export class LegacyAppender implements DisposableAppender {
-  public static configSchema = object({
-    kind: literal('legacy-appender'),
+  public static configSchema = schema.object({
+    kind: schema.literal('legacy-appender'),
+    legacyLoggingConfig: schema.any(),
   });
 
-  constructor(private readonly kbnServer: LegacyKbnServer) {}
+  private readonly loggingServer: LegacyLoggingServer;
+
+  constructor(legacyLoggingConfig: Readonly<Record<string, any>>) {
+    this.loggingServer = new LegacyLoggingServer(legacyLoggingConfig);
+  }
 
   /**
    * Forwards `LogRecord` to the legacy platform that will layout and
@@ -42,14 +44,10 @@ export class LegacyAppender implements DisposableAppender {
    * @param record `LogRecord` instance to forward to.
    */
   public append(record: LogRecord) {
-    this.kbnServer.log(
-      [record.level.id.toLowerCase(), ...record.context.split('.')],
-      record.error || record.message,
-      record.timestamp
-    );
+    this.loggingServer.log(record);
   }
 
-  public async dispose() {
-    // noop
+  public dispose() {
+    this.loggingServer.stop();
   }
 }

@@ -18,9 +18,9 @@
  */
 
 import React from 'react';
-import { shallow } from 'enzyme';
+import { shallowWithIntl } from 'test_utils/enzyme_helpers';
 
-import { StaticLookupFormatEditor } from './static_lookup';
+import { StaticLookupFormatEditor, StaticLookupFormatEditorComponent } from './static_lookup';
 
 const fieldType = 'string';
 const format = {
@@ -33,11 +33,16 @@ const formatParams = {
 const onChange = jest.fn();
 const onError = jest.fn();
 
-
 describe('StaticLookupFormatEditor', () => {
+  it('should have a formatId', () => {
+    expect(StaticLookupFormatEditor.formatId).toEqual('static_lookup');
+  });
+});
+
+describe('StaticLookupFormatEditorComponent', () => {
   it('should render normally', async () => {
-    const component = shallow(
-      <StaticLookupFormatEditor
+    const component = shallowWithIntl(
+      <StaticLookupFormatEditorComponent
         fieldType={fieldType}
         format={format}
         formatParams={formatParams}
@@ -50,8 +55,8 @@ describe('StaticLookupFormatEditor', () => {
   });
 
   it('should render multiple lookup entries and unknown key value', async () => {
-    const component = shallow(
-      <StaticLookupFormatEditor
+    const component = shallowWithIntl(
+      <StaticLookupFormatEditorComponent
         fieldType={fieldType}
         format={format}
         formatParams={{ lookupEntries: [{}, {}, {}], unknownKeyValue: 'test value' }}

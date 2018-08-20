@@ -17,12 +17,12 @@
  * under the License.
  */
 
-import { compact, get } from 'lodash';
+import { compact } from 'lodash';
 import { uiModules } from '../../modules';
 import { callAfterBindingsWorkaround } from '../../compat';
 import template from './query_bar.html';
 import suggestionTemplate from './suggestion.html';
-import { getSuggestionsProvider } from '../../kuery';
+import { getAutocompleteProvider } from '../../autocomplete_providers';
 import './suggestion.less';
 import '../../directives/match_pairs';
 import './query_popover';
@@ -45,8 +45,9 @@ module.directive('queryBar', function () {
     controllerAs: 'queryBar',
     bindToController: true,
 
-    controller: callAfterBindingsWorkaround(function ($scope, $element, $http, $timeout, config, PersistedLog, indexPatterns) {
+    controller: callAfterBindingsWorkaround(function ($scope, $element, $http, $timeout, config, PersistedLog, indexPatterns, debounce) {
       this.appName = this.appName || 'global';
+      this.focusedTypeaheadItemID = '';
 
       this.getIndexPatterns = () => {
         if (compact(this.indexPatterns).length) return Promise.resolve(this.indexPatterns);
@@ -75,18 +76,27 @@ module.directive('queryBar', function () {
         }
       };
 
-      this.updateSuggestions = () => {
-        const query = get(this, 'localQuery.query');
-        if (typeof query === 'undefined') return;
+      this.updateSuggestions = debounce(async () => {
+        const suggestions = await this.getSuggestions();
+        if (!this._isScopeDestroyed) {
+          $scope.$apply(() => this.suggestions = suggestions);
+        }
+      }, 100);
 
-        this.suggestions = this.getRecentSearchSuggestions(query);
-        if (this.localQuery.language !== 'kuery' || !this.getKuerySuggestions) return;
+      this.getSuggestions = async () => {
+        const { localQuery: { query, language } } = this;
+        const recentSearchSuggestions = this.getRecentSearchSuggestions(query);
+
+        const autocompleteProvider = getAutocompleteProvider(language);
+        if (!autocompleteProvider) return recentSearchSuggestions;
+
+        const legacyIndexPatterns = await this.getIndexPatterns();
+        const indexPatterns = getFromLegacyIndexPattern(legacyIndexPatterns);
+        const getAutocompleteSuggestions = autocompleteProvider({ config, indexPatterns });
 
         const { selectionStart, selectionEnd } = $element.find('input')[0];
-        this.getKuerySuggestions({ query, selectionStart, selectionEnd })
-          .then(suggestions => {
-            $scope.$apply(() => this.suggestions = [...suggestions, ...this.suggestions]);
-          });
+        const suggestions = await getAutocompleteSuggestions({ query, selectionStart, selectionEnd });
+        return [...suggestions, ...recentSearchSuggestions];
       };
 
       // TODO: Figure out a better way to set selection
@@ -107,6 +117,7 @@ module.directive('queryBar', function () {
       };
 
       this.getRecentSearchSuggestions = (query) => {
+        if (!this.persistedLog) return [];
         const recentSearches = this.persistedLog.get();
         const matchingRecentSearches = recentSearches.filter(search => search.includes(query));
         return matchingRecentSearches.map(recentSearch => {
@@ -133,14 +144,12 @@ module.directive('queryBar', function () {
       }, true);
 
       $scope.$watch('queryBar.indexPatterns', () => {
-        this.getIndexPatterns().then(indexPatterns => {
+        this.updateSuggestions();
+      });
 
-          this.getKuerySuggestions = getSuggestionsProvider({
-            config,
-            indexPatterns: getFromLegacyIndexPattern(indexPatterns)
-          });
-          this.updateSuggestions();
-        });
+      $scope.$on('$destroy', () => {
+        this.updateSuggestions.cancel();
+        this._isScopeDestroyed = true;
       });
     })
   };

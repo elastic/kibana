@@ -19,10 +19,31 @@
 
 import { PureComponent } from 'react';
 import PropTypes from 'prop-types';
+import { i18n } from '@kbn/i18n';
 
-import {
-  convertSampleInput
-} from '../../../../lib';
+export const convertSampleInput = (converter, inputs) => {
+  let error = null;
+  let samples = [];
+
+  try {
+    samples = inputs.map(input => {
+      return {
+        input,
+        output: converter(input),
+      };
+    });
+  } catch(e) {
+    error = i18n.translate('common.ui.fieldEditor.defaultErrorMessage', {
+      defaultMessage: 'An error occurred while trying to use this format configuration: {message}',
+      values: { message: e.message }
+    });
+  }
+
+  return {
+    error,
+    samples,
+  };
+};
 
 export class DefaultFormatEditor extends PureComponent {
   static propTypes = {

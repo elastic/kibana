@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
+import { EuiContextMenuItemIcon } from '@elastic/eui';
 import { DashboardContextMenuPanel } from './dashboard_context_menu_panel';
 import { PanelActionAPI } from './types';
 
@@ -54,7 +54,7 @@ interface DashboardPanelActionOptions {
   /**
    * Optional icon to display to the left of the action.
    */
-  icon?: Node;
+  icon?: EuiContextMenuItemIcon;
 }
 
 interface DashboardPanelActionsConfig {
@@ -71,13 +71,13 @@ interface DashboardPanelActionsConfig {
   parentPanelId: string;
 }
 
-export abstract class DashboardPanelAction {
+export class DashboardPanelAction {
   public readonly id: string;
 
   /**
    * Optional icon to display to the left of the action.
    */
-  public readonly icon?: Node;
+  public readonly icon?: EuiContextMenuItemIcon;
 
   /**
    * Display name of the action in the menu
@@ -105,7 +105,7 @@ export abstract class DashboardPanelAction {
    * @param {function} options.isVisible - optionally set a custom isVisible function
    * @param {Element} options.icon
    */
-  protected constructor(
+  public constructor(
     config: DashboardPanelActionsConfig,
     options: DashboardPanelActionOptions = {}
   ) {

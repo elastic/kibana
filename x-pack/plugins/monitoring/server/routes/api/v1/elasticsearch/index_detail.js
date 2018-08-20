@@ -62,7 +62,6 @@ export function esIndexRoute(server) {
           const shardFilter = { term: { 'shard.index': indexUuid } };
           const stateUuid = get(cluster, 'cluster_state.state_uuid');
           const allocationOptions = {
-            nodeResolver: config.get('xpack.monitoring.node_resolver'),
             shardFilter,
             stateUuid,
             showSystemIndices,

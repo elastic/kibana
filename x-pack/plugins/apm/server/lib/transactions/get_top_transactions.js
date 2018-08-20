@@ -25,7 +25,7 @@ export async function getTopTransactions({
   const minutes = duration.asMinutes();
 
   const params = {
-    index: config.get('xpack.apm.indexPattern'),
+    index: config.get('apm_oss.transactionIndices'),
     body: {
       size: 0,
       query: {

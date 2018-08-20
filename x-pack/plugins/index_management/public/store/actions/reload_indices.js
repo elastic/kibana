@@ -5,6 +5,7 @@
  */
 
 import { createAction } from 'redux-actions';
+import { i18n }  from '@kbn/i18n';
 import { getIndexNamesForCurrentPage } from '../selectors';
 import { reloadIndices as request } from '../../services';
 import { toastNotifications } from 'ui/notify';
@@ -21,6 +22,10 @@ export const reloadIndices = (indexNames) => async (dispatch, getState) => {
   if (indices && indices.length > 0) {
     return dispatch(reloadIndicesSuccess({ indices }));
   } else {
-    return toastNotifications.addSuccess('Failed to refresh current page of indices.');
+    return toastNotifications.addWarning(
+      i18n.translate('xpack.idxMgmt.reloadIndicesAction.indicesPageRefreshFailureMessage', {
+        defaultMessage: 'Failed to refresh current page of indices.',
+      })
+    );
   }
 };

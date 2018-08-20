@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { first, k$, toPromise } from '../../lib/kbn_observable';
+import { first } from 'rxjs/operators';
 
 import { Root } from '.';
 import { DevConfig } from '../dev';
@@ -35,8 +35,14 @@ export class BasePathProxyRoot extends Root {
     shouldRedirectFromOldBasePath,
   }: Pick<BasePathProxyServerOptions, 'blockUntil' | 'shouldRedirectFromOldBasePath'>) {
     const [devConfig, httpConfig] = await Promise.all([
-      k$(this.configService.atPath('dev', DevConfig))(first(), toPromise()),
-      k$(this.configService.atPath('server', HttpConfig))(first(), toPromise()),
+      this.configService
+        .atPath('dev', DevConfig)
+        .pipe(first())
+        .toPromise(),
+      this.configService
+        .atPath('server', HttpConfig)
+        .pipe(first())
+        .toPromise(),
     ]);
 
     this.basePathProxy = new BasePathProxyServer(this.logger.get('server'), {

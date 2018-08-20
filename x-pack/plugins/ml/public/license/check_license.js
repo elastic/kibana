@@ -5,14 +5,15 @@
  */
 
 
-
+import React from 'react';
 import { XPackInfoProvider } from 'plugins/xpack_main/services/xpack_info';
-import { notify, Notifier } from 'ui/notify';
-import _ from 'lodash';
+import { banners, addAppRedirectMessageToUrl } from 'ui/notify';
 
 import chrome from 'ui/chrome';
+import { EuiCallOut } from '@elastic/eui';
 
 let licenseHasExpired = true;
+let expiredLicenseBannerId;
 
 export function checkLicense(Private, kbnBaseUrl) {
   const xpackInfo = Private(XPackInfoProvider);
@@ -20,12 +21,9 @@ export function checkLicense(Private, kbnBaseUrl) {
 
   const licenseAllowsToShowThisPage = features.isAvailable;
   if (!licenseAllowsToShowThisPage) {
-    const message = features.message;
-    let queryString = `?${Notifier.QS_PARAM_LOCATION}=Machine Learning&`;
-    queryString += `${Notifier.QS_PARAM_LEVEL}=error&${Notifier.QS_PARAM_MESSAGE}=${message}`;
-    const url = `${chrome.addBasePath(kbnBaseUrl)}#${queryString}`;
-
-    window.location.href = url;
+    const { message } = features;
+    const newUrl = addAppRedirectMessageToUrl(chrome.addBasePath(kbnBaseUrl), message);
+    window.location.href = newUrl;
     return Promise.halt();
   }
 
@@ -36,10 +34,17 @@ export function checkLicense(Private, kbnBaseUrl) {
   // Therefore we need to keep the app enabled but show an info banner to the user.
   if(licenseHasExpired) {
     const message = features.message;
-    const exists = _.find(notify._notifs, (item) => item.content === message);
-    if (!exists) {
-      // Only show the banner once with no countdown
-      notify.warning(message, { lifetime: 0 });
+    if (expiredLicenseBannerId === undefined) {
+      // Only show the banner once with no way to dismiss it
+      expiredLicenseBannerId = banners.add({
+        component: (
+          <EuiCallOut
+            iconType="iInCircle"
+            color="warning"
+            title={message}
+          />
+        ),
+      });
     }
   }
 

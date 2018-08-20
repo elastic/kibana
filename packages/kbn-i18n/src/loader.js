@@ -27,7 +27,6 @@
 import path from 'path';
 import { readFile } from 'fs';
 import { promisify } from 'util';
-import { pick } from 'accept-language-parser';
 import JSON5 from 'json5';
 import { unique } from './core/helper';
 
@@ -81,16 +80,6 @@ async function loadFile(pathToFile) {
 }
 
 /**
- * Parses the accept-language header from an HTTP request and picks
- * the best match of the locale from the registered locales
- * @param {string} header - accept-language header from an HTTP request
- * @returns {string} locale
- */
-function pickLocaleByLanguageHeader(header) {
-  return pick(getRegisteredLocales(), header);
-}
-
-/**
  * Loads translations files and adds them into "loadedFiles" cache
  * @param {string[]} files
  * @returns {Promise<void>}
@@ -137,18 +126,6 @@ export function registerTranslationFiles(arrayOfPaths = []) {
  */
 export function getRegisteredLocales() {
   return Object.keys(translationsRegistry);
-}
-
-/**
- * Returns translations for a suitable locale based on accept-language header.
- * This object will contain all registered translations for the highest priority
- * locale which is registered with the i18n loader. This object can be empty
- * if no locale in the language tags can be matched against the registered locales.
- * @param {string} header - accept-language header from an HTTP request
- * @returns {Promise<Messages>} translations - translation messages
- */
-export async function getTranslationsByLanguageHeader(header) {
-  return getTranslationsByLocale(pickLocaleByLanguageHeader(header));
 }
 
 /**

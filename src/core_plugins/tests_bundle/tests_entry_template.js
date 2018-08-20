@@ -29,7 +29,16 @@ export const createTestEntryTemplate = (defaultUiSettings) => (bundle) => `
  *
  */
 
-window.__KBN__ = {
+// import global polyfills before everything else
+import 'babel-polyfill';
+import 'custom-event-polyfill';
+import 'whatwg-fetch';
+import 'abortcontroller-polyfill';
+import 'childnode-remove-polyfill';
+
+import { CoreSystem } from '__kibanaCore__'
+
+const legacyMetadata = {
   version: '1.2.3',
   buildNum: 1234,
   vars: {
@@ -64,7 +73,21 @@ window.__KBN__ = {
   }
 };
 
-require('ui/test_harness');
-${bundle.getRequires().join('\n')}
-require('ui/test_harness').bootstrap(/* go! */);
+// render the core system in a child of the body as the default children of the body
+// in the browser tests are needed for mocha and other test components to work
+const rootDomElement = document.createElement('div');
+document.body.appendChild(rootDomElement)
+
+new CoreSystem({
+  injectedMetadata: {
+    version: legacyMetadata.version,
+    buildNumber: legacyMetadata.buildNum,
+    legacyMetadata
+  },
+  rootDomElement,
+  useLegacyTestHarness: true,
+  requireLegacyFiles: () => {
+    ${bundle.getRequires().join('\n  ')}
+  }
+}).start()
 `;
