@@ -62,13 +62,16 @@ export async function kfetch(
       ...options.headers,
     },
   };
-  const { pathname, query, ...restOptions } = await successInterceptors(combinedOptions, 'request');
+  const { pathname, query, ...restOptions }: KFetchOptions = await successInterceptors(
+    combinedOptions,
+    'request'
+  );
   const fullUrl = url.format({
     pathname: prependBasePath ? chrome.addBasePath(pathname) : pathname,
     query,
   });
 
-  let res;
+  let res: Response;
   try {
     res = await fetch(fullUrl, restOptions);
   } catch (e) {
