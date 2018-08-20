@@ -1,4 +1,5 @@
 import $ from 'jquery';
+import inlineStyle from 'inline-style';
 import { debounce, includes } from 'lodash';
 import '../../lib/flot-charts';
 import { pie as piePlugin } from './plugins/pie';
@@ -13,6 +14,21 @@ export const pie = () => ({
 
     config.options.legend.labelBoxBorderColor = 'transparent';
 
+    if (config.font) {
+      const labelFormatter = (label, slice) => {
+        // font color defaults to slice color if not specified
+        const fontSpec = { ...config.font.spec, color: config.font.spec.color || slice.color };
+        return `<div style="${inlineStyle(fontSpec)}"
+        >
+        ${label}
+        <br/>
+        ${Math.round(slice.percent)}%
+        </div>`;
+      };
+
+      config.options.series.pie.label.formatter = labelFormatter;
+    }
+
     let plot;
     function draw() {
       if (domNode.clientHeight < 1 || domNode.clientWidth < 1) return;
@@ -23,7 +39,6 @@ export const pie = () => ({
           $(domNode).empty();
         } else {
           plot = $.plot($(domNode), config.data, config.options);
-          $('.pieLabel > div', domNode).css(config.font.spec);
         }
       } catch (e) {
         console.log(e);
