@@ -51,7 +51,7 @@ export default (kibana: any) =>
         queueIndex: Joi.string().default('.codesearch-worker-queue'),
         queueTimeout: Joi.number().default(60 * 60 * 1000), // 1 hour by default
         updateFreqencyMs: Joi.number().default(5 * 60 * 1000), // 5 minutes by default.
-        lspRequestTimeout: Joi.number().default(30), // timeout a request over 30s
+        lspRequestTimeout: Joi.number().default(5 * 60), // timeout a request over 30s
       }).default();
     },
 
