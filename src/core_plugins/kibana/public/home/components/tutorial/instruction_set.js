@@ -110,6 +110,23 @@ export class InstructionSet extends React.Component {
     );
   }
 
+  getStepStatus(statusCheckState) {
+    switch (statusCheckState) {
+      case undefined:
+      case StatusCheckStates.NOT_CHECKED:
+      case StatusCheckStates.FETCHING:
+        return 'incomplete';
+      case StatusCheckStates.HAS_DATA:
+        return 'complete';
+      case StatusCheckStates.NO_DATA:
+        return 'warning';
+      case StatusCheckStates.ERROR:
+        return 'danger';
+      default:
+        throw new Error(`Unexpected status check state ${statusCheckState}`);
+    }
+  }
+
   renderStatusCheck() {
     const { statusCheckState, statusCheckConfig, onStatusCheck } = this.props;
     const checkStatusStep = (
@@ -141,11 +158,9 @@ export class InstructionSet extends React.Component {
       </Fragment>
     );
 
-    const stepStatus = statusCheckState === StatusCheckStates.NOT_CHECKED ||
-      statusCheckState === StatusCheckStates.FETCHING ? 'incomplete' : 'complete';
     return {
       title: statusCheckConfig.title || 'Status Check',
-      status: stepStatus,
+      status: this.getStepStatus(statusCheckState),
       children: checkStatusStep,
       key: 'checkStatusStep'
     };
