@@ -1,3 +1,7 @@
-.dom-preview .canvasLayoutAnnotation {
-  display: none;
+.dom-preview {
+  pointer-events: none;
+
+  .canvasLayoutAnnotation {
+    display: none;
+  }
 }
