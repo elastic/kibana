@@ -101,8 +101,8 @@ export class UiApp {
     }
   }
 
-  getMainModuleId() {
-    return this._main;
+  getModules() {
+    return this._main ? [this._main] : [];
   }
 
   getStyleSheetUrlPath() {

@@ -20,12 +20,9 @@ import {
 } from '@elastic/eui';
 
 import {
-  closeJobs,
   stopDatafeeds,
   isStartable,
-  isStoppable,
-  isClosable,
-} from '../utils';
+  isStoppable } from '../utils';
 
 export class MultiJobActionsMenu extends Component {
   constructor(props) {
@@ -37,7 +34,6 @@ export class MultiJobActionsMenu extends Component {
 
     this.canDeleteJob = checkPermission('canDeleteJob');
     this.canStartStopDatafeed = (checkPermission('canStartStopDatafeed') && mlNodesAvailable());
-    this.canCloseJob = (checkPermission('canCloseJob') && mlNodesAvailable());
   }
 
   onButtonClick = () => {
@@ -77,19 +73,6 @@ export class MultiJobActionsMenu extends Component {
         </EuiContextMenuItem>
       )
     ];
-
-    if(isClosable(this.props.jobs)) {
-      items.push(
-        <EuiContextMenuItem
-          key="close job"
-          icon="cross"
-          disabled={(this.canCloseJob === false)}
-          onClick={() => { closeJobs(this.props.jobs); this.closePopover(); }}
-        >
-          Close job{s}
-        </EuiContextMenuItem>
-      );
-    }
 
     if(isStoppable(this.props.jobs)) {
       items.push(

@@ -78,12 +78,15 @@ main {
   overflow: hidden; }
 
 .kuiActionItem {
+  display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
   display: flex;
+  -webkit-box-align: center;
   -webkit-align-items: center;
       -ms-flex-align: center;
           align-items: center;
+  -webkit-box-pack: justify;
   -webkit-justify-content: space-between;
       -ms-flex-pack: justify;
           justify-content: space-between; }
@@ -102,12 +105,15 @@ main {
   background-color: rgba(0, 0, 0, 0.1); }
 
 .kuiBar {
+  display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
   display: flex;
+  -webkit-box-align: center;
   -webkit-align-items: center;
       -ms-flex-align: center;
           align-items: center;
+  -webkit-box-pack: justify;
   -webkit-justify-content: space-between;
       -ms-flex-pack: justify;
           justify-content: space-between;
@@ -115,18 +121,22 @@ main {
   /* 1 */ }
 
 .kuiBarSection {
+  display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
   display: flex;
+  -webkit-box-align: center;
   -webkit-align-items: center;
       -ms-flex-align: center;
           align-items: center;
+  -webkit-box-flex: 1;
   -webkit-flex: 1 1 auto;
       -ms-flex: 1 1 auto;
           flex: 1 1 auto;
   margin-left: 25px;
   margin-right: 25px; }
   .kuiBarSection:not(:first-child):not(:last-child):not(:only-child) {
+    -webkit-box-pack: center;
     -webkit-justify-content: center;
         -ms-flex-pack: center;
             justify-content: center;
@@ -135,10 +145,12 @@ main {
     margin-left: 0; }
   .kuiBarSection:last-child {
     margin-right: 0;
+    -webkit-box-flex: 0;
     -webkit-flex: 0 1 auto;
         -ms-flex: 0 1 auto;
             flex: 0 1 auto;
     /* 4 */
+    -webkit-box-pack: end;
     -webkit-justify-content: flex-end;
         -ms-flex-pack: end;
             justify-content: flex-end;
@@ -189,10 +201,12 @@ main {
    * 1. Solves whitespace problems introduced by inline elements.
    */
 .kuiButton__inner {
+  display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
   display: flex;
   /* 1 */
+  -webkit-box-align: center;
   -webkit-align-items: center;
       -ms-flex-align: center;
           align-items: center;
@@ -499,9 +513,11 @@ main {
     background-color: rgba(165, 231, 255, 0.5); }
 
 .kuiButtonGroup {
+  display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
   display: flex;
+  -webkit-box-align: center;
   -webkit-align-items: center;
       -ms-flex-align: center;
           align-items: center; }
@@ -529,19 +545,24 @@ main {
   margin-left: 2px; }
 
 .kuiButtonGroup--fullWidth {
+  display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
   display: flex; }
   .kuiButtonGroup--fullWidth > .kuiButton {
+    -webkit-box-flex: 1;
     -webkit-flex: 1 1 auto;
         -ms-flex: 1 1 auto;
             flex: 1 1 auto;
     text-align: center; }
 
 .kuiCard {
+  display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
   display: flex;
+  -webkit-box-orient: vertical;
+  -webkit-box-direction: normal;
   -webkit-flex-direction: column;
       -ms-flex-direction: column;
           flex-direction: column;
@@ -551,15 +572,20 @@ main {
   line-height: 1.5; }
 
 .kuiCard__description {
+  display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
   display: flex;
+  -webkit-box-orient: vertical;
+  -webkit-box-direction: normal;
   -webkit-flex-direction: column;
       -ms-flex-direction: column;
           flex-direction: column;
+  -webkit-box-align: center;
   -webkit-align-items: center;
       -ms-flex-align: center;
           align-items: center;
+  -webkit-box-pack: start;
   -webkit-justify-content: flex-start;
       -ms-flex-pack: start;
           justify-content: flex-start;
@@ -587,6 +613,7 @@ main {
  * 2. Offset the spacing between wrapped cards.
  */
 .kuiCardGroup {
+  display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
   display: flex;
@@ -601,6 +628,7 @@ main {
    * 2. Use an even margin all around the card so that the spacing is still even when wrapped.
    */ }
   .kuiCardGroup .kuiCard {
+    -webkit-box-flex: 1;
     -webkit-flex: 1 1 auto;
         -ms-flex: 1 1 auto;
             flex: 1 1 auto;
@@ -608,6 +636,7 @@ main {
     margin: 15px;
     /* 2 */ }
     .kuiCardGroup .kuiCard .kuiCard__description {
+      -webkit-box-flex: 1;
       -webkit-flex: 1 1 auto;
           -ms-flex: 1 1 auto;
               flex: 1 1 auto; }
@@ -658,15 +687,20 @@ main {
   right: 0;
   left: 0;
   background: rgba(255, 255, 255, 0.7);
+  display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
   display: flex;
+  -webkit-box-orient: vertical;
+  -webkit-box-direction: normal;
   -webkit-flex-direction: column;
       -ms-flex-direction: column;
           flex-direction: column;
+  -webkit-box-pack: center;
   -webkit-justify-content: center;
       -ms-flex-pack: center;
           justify-content: center;
+  -webkit-box-align: center;
   -webkit-align-items: center;
       -ms-flex-align: center;
           align-items: center;
@@ -702,9 +736,11 @@ main {
   cursor: pointer; }
 
 .kuiColorPicker__preview {
+  display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
   display: flex;
+  -webkit-box-align: center;
   -webkit-align-items: center;
       -ms-flex-align: center;
           align-items: center; }
@@ -854,9 +890,11 @@ main {
   margin-right: 8px; }
 
 .kuiContextMenu__itemLayout {
+  display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
   display: flex;
+  -webkit-box-align: center;
   -webkit-align-items: center;
       -ms-flex-align: center;
           align-items: center; }
@@ -1033,11 +1071,13 @@ main {
     color: #ffffff; }
 
 .kuiContextMenuItem__inner {
+  display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
   display: flex; }
 
 .kuiContextMenuItem__text {
+  -webkit-box-flex: 1;
   -webkit-flex-grow: 1;
       -ms-flex-positive: 1;
           flex-grow: 1; }
@@ -1056,11 +1096,13 @@ main {
     text-decoration: none; }
 
 .kuiEvent {
+  display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
   display: flex; }
 
 .kuiEventSymbol {
+  -webkit-box-flex: 0;
   -webkit-flex: 0 1 auto;
       -ms-flex: 0 1 auto;
           flex: 0 1 auto;
@@ -1069,6 +1111,7 @@ main {
   padding-right: 8px; }
 
 .kuiEventBody {
+  -webkit-box-flex: 1;
   -webkit-flex: 1 1 0%;
       -ms-flex: 1 1 0%;
           flex: 1 1 0%; }
@@ -1107,13 +1150,16 @@ main {
   border-bottom: solid 2px #00A69B; }
 
 .kuiFlexGroup {
+  display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
   display: flex;
+  -webkit-box-align: stretch;
   -webkit-align-items: stretch;
       -ms-flex-align: stretch;
           align-items: stretch; }
   .kuiFlexGroup .kuiFlexItem {
+    -webkit-box-flex: 1;
     -webkit-flex-grow: 1;
         -ms-flex-positive: 1;
             flex-grow: 1; }
@@ -1139,11 +1185,13 @@ main {
     margin: 20px; }
 
 .kuiFlexGroup--justifyContentSpaceEvenly {
+  -webkit-box-pack: space-evenly;
   -webkit-justify-content: space-evenly;
       -ms-flex-pack: space-evenly;
           justify-content: space-evenly; }
 
 .kuiFlexGroup--justifyContentSpaceBetween {
+  -webkit-box-pack: justify;
   -webkit-justify-content: space-between;
       -ms-flex-pack: justify;
           justify-content: space-between; }
@@ -1154,26 +1202,31 @@ main {
           justify-content: space-around; }
 
 .kuiFlexGroup--justifyContentCenter {
+  -webkit-box-pack: center;
   -webkit-justify-content: center;
       -ms-flex-pack: center;
           justify-content: center; }
 
 .kuiFlexGroup--justifyContentFlexEnd {
+  -webkit-box-pack: end;
   -webkit-justify-content: flex-end;
       -ms-flex-pack: end;
           justify-content: flex-end; }
 
 .kuiFlexGroup--alignItemsStart {
+  -webkit-box-align: start;
   -webkit-align-items: flex-start;
       -ms-flex-align: start;
           align-items: flex-start; }
 
 .kuiFlexGroup--alignItemsCenter {
+  -webkit-box-align: center;
   -webkit-align-items: center;
       -ms-flex-align: center;
           align-items: center; }
 
 .kuiFlexGroup--alignItemsEnd {
+  -webkit-box-align: end;
   -webkit-align-items: flex-end;
       -ms-flex-align: end;
           align-items: flex-end; }
@@ -1190,6 +1243,7 @@ main {
             flex-wrap: wrap; } }
 
 .kuiFlexGrid {
+  display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
   display: flex;
@@ -1198,10 +1252,12 @@ main {
           flex-wrap: wrap;
   margin-bottom: 0; }
   .kuiFlexGrid > .kuiFlexItem {
+    -webkit-box-flex: 0;
     -webkit-flex-grow: 0;
         -ms-flex-positive: 0;
             flex-grow: 0; }
     .kuiFlexGrid > .kuiFlexItem.kuiFlexItem--flexGrowZero {
+      -webkit-box-flex: 0 !important;
       -webkit-flex-grow: 0 !important;
           -ms-flex-positive: 0 !important;
               flex-grow: 0 !important;
@@ -1218,6 +1274,7 @@ main {
 
 .kuiFlexGrid--gutterSmall {
   margin: -4px;
+  -webkit-box-align: stretch;
   -webkit-align-items: stretch;
       -ms-flex-align: stretch;
           align-items: stretch; }
@@ -1228,6 +1285,7 @@ main {
 
 .kuiFlexGrid--gutterSmall {
   margin: -4px;
+  -webkit-box-align: stretch;
   -webkit-align-items: stretch;
       -ms-flex-align: stretch;
           align-items: stretch; }
@@ -1238,6 +1296,7 @@ main {
 
 .kuiFlexGrid--gutterSmall {
   margin: -4px;
+  -webkit-box-align: stretch;
   -webkit-align-items: stretch;
       -ms-flex-align: stretch;
           align-items: stretch; }
@@ -1255,6 +1314,7 @@ main {
 
 .kuiFlexGrid--gutterMedium {
   margin: -8px;
+  -webkit-box-align: stretch;
   -webkit-align-items: stretch;
       -ms-flex-align: stretch;
           align-items: stretch; }
@@ -1265,6 +1325,7 @@ main {
 
 .kuiFlexGrid--gutterMedium {
   margin: -8px;
+  -webkit-box-align: stretch;
   -webkit-align-items: stretch;
       -ms-flex-align: stretch;
           align-items: stretch; }
@@ -1275,6 +1336,7 @@ main {
 
 .kuiFlexGrid--gutterMedium {
   margin: -8px;
+  -webkit-box-align: stretch;
   -webkit-align-items: stretch;
       -ms-flex-align: stretch;
           align-items: stretch; }
@@ -1292,6 +1354,7 @@ main {
 
 .kuiFlexGrid--gutterLarge {
   margin: -12px;
+  -webkit-box-align: stretch;
   -webkit-align-items: stretch;
       -ms-flex-align: stretch;
           align-items: stretch; }
@@ -1302,6 +1365,7 @@ main {
 
 .kuiFlexGrid--gutterLarge {
   margin: -12px;
+  -webkit-box-align: stretch;
   -webkit-align-items: stretch;
       -ms-flex-align: stretch;
           align-items: stretch; }
@@ -1312,6 +1376,7 @@ main {
 
 .kuiFlexGrid--gutterLarge {
   margin: -12px;
+  -webkit-box-align: stretch;
   -webkit-align-items: stretch;
       -ms-flex-align: stretch;
           align-items: stretch; }
@@ -1329,6 +1394,7 @@ main {
 
 .kuiFlexGrid--gutterXLarge {
   margin: -16px;
+  -webkit-box-align: stretch;
   -webkit-align-items: stretch;
       -ms-flex-align: stretch;
           align-items: stretch; }
@@ -1339,6 +1405,7 @@ main {
 
 .kuiFlexGrid--gutterXLarge {
   margin: -16px;
+  -webkit-box-align: stretch;
   -webkit-align-items: stretch;
       -ms-flex-align: stretch;
           align-items: stretch; }
@@ -1349,6 +1416,7 @@ main {
 
 .kuiFlexGrid--gutterXLarge {
   margin: -16px;
+  -webkit-box-align: stretch;
   -webkit-align-items: stretch;
       -ms-flex-align: stretch;
           align-items: stretch; }
@@ -1361,10 +1429,13 @@ main {
  * 1. Allow KuiPanels to expand to fill the item.
  */
 .kuiFlexItem {
+  display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
   display: flex;
   /* 1 */
+  -webkit-box-orient: vertical;
+  -webkit-box-direction: normal;
   -webkit-flex-direction: column;
       -ms-flex-direction: column;
           flex-direction: column;
@@ -1375,6 +1446,7 @@ main {
    */ }
   .kuiFlexItem.kuiFlexItem--flexGrowZero {
     /* 1 */
+    -webkit-box-flex: 0;
     -webkit-flex-grow: 0;
         -ms-flex-positive: 0;
             flex-grow: 0;
@@ -1384,42 +1456,52 @@ main {
             flex-basis: auto;
     /* 2 */ }
   .kuiFlexItem.kuiFlexItem--flexGrow1 {
+    -webkit-box-flex: 1;
     -webkit-flex-grow: 1;
         -ms-flex-positive: 1;
             flex-grow: 1; }
   .kuiFlexItem.kuiFlexItem--flexGrow2 {
+    -webkit-box-flex: 2;
     -webkit-flex-grow: 2;
         -ms-flex-positive: 2;
             flex-grow: 2; }
   .kuiFlexItem.kuiFlexItem--flexGrow3 {
+    -webkit-box-flex: 3;
     -webkit-flex-grow: 3;
         -ms-flex-positive: 3;
             flex-grow: 3; }
   .kuiFlexItem.kuiFlexItem--flexGrow4 {
+    -webkit-box-flex: 4;
     -webkit-flex-grow: 4;
         -ms-flex-positive: 4;
             flex-grow: 4; }
   .kuiFlexItem.kuiFlexItem--flexGrow5 {
+    -webkit-box-flex: 5;
     -webkit-flex-grow: 5;
         -ms-flex-positive: 5;
             flex-grow: 5; }
   .kuiFlexItem.kuiFlexItem--flexGrow6 {
+    -webkit-box-flex: 6;
     -webkit-flex-grow: 6;
         -ms-flex-positive: 6;
             flex-grow: 6; }
   .kuiFlexItem.kuiFlexItem--flexGrow7 {
+    -webkit-box-flex: 7;
     -webkit-flex-grow: 7;
         -ms-flex-positive: 7;
             flex-grow: 7; }
   .kuiFlexItem.kuiFlexItem--flexGrow8 {
+    -webkit-box-flex: 8;
     -webkit-flex-grow: 8;
         -ms-flex-positive: 8;
             flex-grow: 8; }
   .kuiFlexItem.kuiFlexItem--flexGrow9 {
+    -webkit-box-flex: 9;
     -webkit-flex-grow: 9;
         -ms-flex-positive: 9;
             flex-grow: 9; }
   .kuiFlexItem.kuiFlexItem--flexGrow10 {
+    -webkit-box-flex: 10;
     -webkit-flex-grow: 10;
         -ms-flex-positive: 10;
             flex-grow: 10; }
@@ -1510,9 +1592,11 @@ main {
       background-color: #0079a5; }
 
 .kuiCheckBoxLabel {
+  display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
   display: flex;
+  -webkit-box-align: center;
   -webkit-align-items: center;
       -ms-flex-align: center;
           align-items: center;
@@ -1776,15 +1860,18 @@ main {
  * 1. We may want to put elements in here which have different heights.
  */
 .kuiFieldGroup {
+  display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
   display: flex;
+  -webkit-box-align: center;
   -webkit-align-items: center;
       -ms-flex-align: center;
           align-items: center;
   /* 1 */ }
 
 .kuiFieldGroup--alignTop {
+  -webkit-box-align: start;
   -webkit-align-items: flex-start;
       -ms-flex-align: start;
           align-items: flex-start; }
@@ -1795,6 +1882,7 @@ main {
     margin-left: 10px; }
 
 .kuiFieldGroupSection--wide {
+  -webkit-box-flex: 1;
   -webkit-flex: 1 1 auto;
       -ms-flex: 1 1 auto;
           flex: 1 1 auto; }
@@ -1802,6 +1890,7 @@ main {
     width: 100%; }
 
 .kuiGallery {
+  display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
   display: flex;
@@ -1810,15 +1899,20 @@ main {
           flex-wrap: wrap; }
 
 .kuiGalleryItem {
+  display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
   display: flex;
+  -webkit-box-orient: vertical;
+  -webkit-box-direction: normal;
   -webkit-flex-direction: column;
       -ms-flex-direction: column;
           flex-direction: column;
+  -webkit-box-align: center;
   -webkit-align-items: center;
       -ms-flex-align: center;
           align-items: center;
+  -webkit-box-pack: center;
   -webkit-justify-content: center;
       -ms-flex-pack: center;
           justify-content: center;
@@ -1837,12 +1931,15 @@ main {
     border-color: #00A6FF; }
 
 .kuiGalleryItem__image {
+  display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
   display: flex;
+  -webkit-box-align: center;
   -webkit-align-items: center;
       -ms-flex-align: center;
           align-items: center;
+  -webkit-box-pack: center;
   -webkit-justify-content: center;
       -ms-flex-pack: center;
           justify-content: center;
@@ -1873,12 +1970,15 @@ main {
   color: #666; }
 
 .kuiHeaderBar {
+  display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
   display: flex;
+  -webkit-box-align: center;
   -webkit-align-items: center;
       -ms-flex-align: center;
           align-items: center;
+  -webkit-box-pack: justify;
   -webkit-justify-content: space-between;
       -ms-flex-pack: justify;
           justify-content: space-between;
@@ -1890,18 +1990,22 @@ main {
  * 1. Align a single section to the left by default.
  */
 .kuiHeaderBarSection {
+  display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
   display: flex;
+  -webkit-box-align: center;
   -webkit-align-items: center;
       -ms-flex-align: center;
           align-items: center;
+  -webkit-box-flex: 1;
   -webkit-flex: 1 1 auto;
       -ms-flex: 1 1 auto;
           flex: 1 1 auto;
   margin-left: 25px;
   margin-right: 25px; }
   .kuiHeaderBarSection:not(:first-child):not(:last-child):not(:only-child) {
+    -webkit-box-pack: center;
     -webkit-justify-content: center;
         -ms-flex-pack: center;
             justify-content: center;
@@ -1910,10 +2014,12 @@ main {
     margin-left: 0; }
   .kuiHeaderBarSection:last-child {
     margin-right: 0;
+    -webkit-box-flex: 0;
     -webkit-flex: 0 1 auto;
         -ms-flex: 0 1 auto;
             flex: 0 1 auto;
     /* 4 */
+    -webkit-box-pack: end;
     -webkit-justify-content: flex-end;
         -ms-flex-pack: end;
             justify-content: flex-end;
@@ -2012,9 +2118,11 @@ main {
  * 1. Align with first line of title text if it wraps.
  */
 .kuiInfoPanelHeader {
+  display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
   display: flex;
+  -webkit-box-align: baseline;
   -webkit-align-items: baseline;
       -ms-flex-align: baseline;
           align-items: baseline;
@@ -2071,9 +2179,11 @@ main {
  *    a bit.
  */
 .kuiLocalBreadcrumbs {
+  display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
   display: flex;
+  -webkit-box-align: center;
   -webkit-align-items: center;
       -ms-flex-align: center;
           align-items: center;
@@ -2143,12 +2253,15 @@ main {
   padding: 0; }
 
 .kuiDatePickerNavigation {
+  display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
   display: flex;
+  -webkit-box-align: center;
   -webkit-align-items: center;
       -ms-flex-align: center;
           align-items: center;
+  -webkit-box-pack: justify;
   -webkit-justify-content: space-between;
       -ms-flex-pack: justify;
           justify-content: space-between;
@@ -2312,11 +2425,13 @@ main {
     /* 1 */ }
 
 .kuiLocalDropdownPanels {
+  display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
   display: flex; }
 
 .kuiLocalDropdownPanel {
+  -webkit-box-flex: 1;
   -webkit-flex: 1 1 0%;
       -ms-flex: 1 1 0%;
           flex: 1 1 0%; }
@@ -2345,12 +2460,15 @@ main {
     margin-bottom: 0; }
 
 .kuiLocalDropdownHeader {
+  display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
   display: flex;
+  -webkit-box-align: center;
   -webkit-align-items: center;
       -ms-flex-align: center;
           align-items: center;
+  -webkit-box-pack: justify;
   -webkit-justify-content: space-between;
       -ms-flex-pack: justify;
           justify-content: space-between;
@@ -2369,6 +2487,7 @@ main {
     color: #cecece; }
 
 .kuiLocalDropdownHeader__actions {
+  display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
   display: flex; }
@@ -2430,17 +2549,21 @@ main {
     color: #9e9e9e; }
 
 .kuiLocalMenu {
+  display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
   display: flex;
+  -webkit-box-align: stretch;
   -webkit-align-items: stretch;
       -ms-flex-align: stretch;
           align-items: stretch; }
 
 .kuiLocalMenuItem {
+  display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
   display: flex;
+  -webkit-box-align: center;
   -webkit-align-items: center;
       -ms-flex-align: center;
           align-items: center;
@@ -2492,12 +2615,16 @@ main {
  *    dropdown.
  */
 .kuiLocalNav {
+  display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
   display: flex;
+  -webkit-box-orient: vertical;
+  -webkit-box-direction: normal;
   -webkit-flex-direction: column;
       -ms-flex-direction: column;
           flex-direction: column;
+  -webkit-box-pack: justify;
   -webkit-justify-content: space-between;
       -ms-flex-pack: justify;
           justify-content: space-between;
@@ -2516,12 +2643,15 @@ main {
  * 1. Allow row to expand if the content is so long that it wraps.
  */
 .kuiLocalNavRow {
+  display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
   display: flex;
+  -webkit-box-align: stretch;
   -webkit-align-items: stretch;
       -ms-flex-align: stretch;
           align-items: stretch;
+  -webkit-box-pack: justify;
   -webkit-justify-content: space-between;
       -ms-flex-pack: justify;
           justify-content: space-between;
@@ -2529,9 +2659,11 @@ main {
   /* 1 */ }
 
 .kuiLocalNavRow__section {
+  display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
   display: flex;
+  -webkit-box-align: stretch;
   -webkit-align-items: stretch;
       -ms-flex-align: stretch;
           align-items: stretch; }
@@ -2546,12 +2678,14 @@ main {
 .kuiLocalNavRow--secondary {
   padding: 0 10px;
   /* 1 */
+  -webkit-box-align: start;
   -webkit-align-items: flex-start;
       -ms-flex-align: start;
           align-items: flex-start;
   /* 1 */ }
 
 .kuiLocalSearch {
+  display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
   display: flex;
@@ -2574,6 +2708,7 @@ main {
   transition: border-color 0.1s linear;
   min-height: 30px;
   /* 1 */
+  -webkit-box-flex: 1;
   -webkit-flex: 1 1 100%;
       -ms-flex: 1 1 100%;
           flex: 1 1 100%;
@@ -2603,6 +2738,7 @@ main {
 
 .kuiLocalSearchInput--secondary {
   height: 30px;
+  -webkit-box-flex: 0;
   -webkit-flex: 0 0 auto;
       -ms-flex: 0 0 auto;
           flex: 0 0 auto;
@@ -2614,9 +2750,11 @@ main {
     border-right-color: #333333; }
 
 .kuiLocalSearchAssistedInput {
+  display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
   display: flex;
+  -webkit-box-flex: 1;
   -webkit-flex: 1 1 100%;
       -ms-flex: 1 1 100%;
           flex: 1 1 100%;
@@ -2719,9 +2857,11 @@ main {
  * 1. We want the bottom border on selected tabs to be flush with the bottom of the container.
  */
 .kuiLocalTabs {
+  display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
   display: flex;
+  -webkit-box-align: end;
   -webkit-align-items: flex-end;
       -ms-flex-align: end;
           align-items: flex-end;
@@ -2766,9 +2906,11 @@ main {
     color: #dedede; }
 
 .kuiLocalTitle {
+  display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
   display: flex;
+  -webkit-box-align: center;
   -webkit-align-items: center;
       -ms-flex-align: center;
           align-items: center;
@@ -2900,6 +3042,7 @@ main {
     /* 3 */ }
 
 .kuiMenuButtonGroup {
+  display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
   display: flex; }
@@ -2907,6 +3050,7 @@ main {
     margin-left: 4px; }
 
 .kuiMenuButtonGroup--alignRight {
+  -webkit-box-pack: end;
   -webkit-justify-content: flex-end;
       -ms-flex-pack: end;
           justify-content: flex-end; }
@@ -2929,6 +3073,7 @@ main {
     color: #191E23; }
 
 .kuiMicroButtonGroup {
+  display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
   display: flex; }
@@ -2942,12 +3087,15 @@ main {
   left: 0;
   right: 0;
   bottom: 0;
+  display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
   display: flex;
+  -webkit-box-align: center;
   -webkit-align-items: center;
       -ms-flex-align: center;
           align-items: center;
+  -webkit-box-pack: center;
   -webkit-justify-content: center;
       -ms-flex-pack: center;
           justify-content: center;
@@ -2973,12 +3121,15 @@ main {
   min-width: auto; }
 
 .kuiModalHeader {
+  display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
   display: flex;
+  -webkit-box-pack: justify;
   -webkit-justify-content: space-between;
       -ms-flex-pack: justify;
           justify-content: space-between;
+  -webkit-box-align: center;
   -webkit-align-items: center;
       -ms-flex-align: center;
           align-items: center;
@@ -3019,9 +3170,11 @@ main {
     color: #cecece; }
 
 .kuiModalFooter {
+  display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
   display: flex;
+  -webkit-box-pack: end;
   -webkit-justify-content: flex-end;
       -ms-flex-pack: end;
           justify-content: flex-end;
@@ -3060,9 +3213,11 @@ main {
  * 1. Put 10px of space between each child.
  */
 .kuiPager {
+  display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
   display: flex;
+  -webkit-box-align: center;
   -webkit-align-items: center;
       -ms-flex-align: center;
           align-items: center; }
@@ -3082,16 +3237,21 @@ main {
   border-radius: 4px; }
 
 .kuiPanel--prompt {
+  display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
   display: flex;
+  -webkit-box-orient: vertical;
+  -webkit-box-direction: normal;
   -webkit-flex-direction: column;
       -ms-flex-direction: column;
           flex-direction: column;
+  -webkit-box-align: center;
   -webkit-align-items: center;
       -ms-flex-align: center;
           align-items: center;
   text-align: center;
+  -webkit-box-pack: center;
   -webkit-justify-content: center;
       -ms-flex-pack: center;
           justify-content: center;
@@ -3108,23 +3268,29 @@ main {
   border-radius: 0; }
 
 .kuiPanel--centered {
+  display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
   display: flex;
+  -webkit-box-pack: center;
   -webkit-justify-content: center;
       -ms-flex-pack: center;
           justify-content: center;
+  -webkit-box-align: center;
   -webkit-align-items: center;
       -ms-flex-align: center;
           align-items: center; }
 
 .kuiPanelHeader {
+  display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
   display: flex;
+  -webkit-box-align: center;
   -webkit-align-items: center;
       -ms-flex-align: center;
           align-items: center;
+  -webkit-box-pack: justify;
   -webkit-justify-content: space-between;
       -ms-flex-pack: justify;
           justify-content: space-between;
@@ -3186,18 +3352,22 @@ main {
  * 1. Undo what barSection mixin does.
  */
 .kuiPanelHeaderSection {
+  display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
   display: flex;
+  -webkit-box-align: center;
   -webkit-align-items: center;
       -ms-flex-align: center;
           align-items: center;
+  -webkit-box-flex: 1;
   -webkit-flex: 1 1 auto;
       -ms-flex: 1 1 auto;
           flex: 1 1 auto;
   margin-left: 25px;
   margin-right: 25px; }
   .kuiPanelHeaderSection:not(:first-child):not(:last-child):not(:only-child) {
+    -webkit-box-pack: center;
     -webkit-justify-content: center;
         -ms-flex-pack: center;
             justify-content: center;
@@ -3206,10 +3376,12 @@ main {
     margin-left: 0; }
   .kuiPanelHeaderSection:last-child {
     margin-right: 0;
+    -webkit-box-flex: 0;
     -webkit-flex: 0 1 auto;
         -ms-flex: 0 1 auto;
             flex: 0 1 auto;
     /* 4 */
+    -webkit-box-pack: end;
     -webkit-justify-content: flex-end;
         -ms-flex-pack: end;
             justify-content: flex-end;
@@ -3234,6 +3406,7 @@ main {
   background-color: #FFF;
   border: 1px solid #D9D9D9;
   border-radius: 4px;
+  -webkit-box-flex: 1;
   -webkit-flex-grow: 1;
       -ms-flex-positive: 1;
           flex-grow: 1; }
@@ -3246,6 +3419,7 @@ main {
   .kuiPanelSimple.kuiPanelSimple--shadow {
     box-shadow: 0 16px 16px -8px rgba(0, 0, 0, 0.1); }
   .kuiPanelSimple.kuiPanelSimple--flexGrowZero {
+    -webkit-box-flex: 0;
     -webkit-flex-grow: 0;
         -ms-flex-positive: 0;
             flex-grow: 0; }
@@ -3339,12 +3513,16 @@ main {
     color: #ffffff; }
 
 .kuiEmptyTablePrompt {
+  display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
   display: flex;
+  -webkit-box-orient: vertical;
+  -webkit-box-direction: normal;
   -webkit-flex-direction: column;
       -ms-flex-direction: column;
           flex-direction: column;
+  -webkit-box-align: center;
   -webkit-align-items: center;
       -ms-flex-align: center;
           align-items: center;
@@ -3359,9 +3537,11 @@ main {
   margin-top: 10px; }
 
 .kuiStatusText {
+  display: -webkit-inline-box;
   display: -webkit-inline-flex;
   display: -ms-inline-flexbox;
   display: inline-flex;
+  -webkit-box-align: baseline;
   -webkit-align-items: baseline;
       -ms-flex-align: baseline;
           align-items: baseline; }
@@ -3477,9 +3657,11 @@ main {
     display: block;
     opacity: 1; }
   .kuiTableHeaderCellButton .kuiTableHeaderCell__liner {
+    display: -webkit-box;
     display: -webkit-flex;
     display: -ms-flexbox;
     display: flex;
+    -webkit-box-align: center;
     -webkit-align-items: center;
         -ms-flex-align: center;
             align-items: center; }
@@ -3580,6 +3762,7 @@ main {
   line-height: 1.5; }
 
 .kuiTabs {
+  display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
   display: flex;
@@ -3652,7 +3835,7 @@ main {
       border-bottom-color: #333333; }
 
 /**
- * 1. Allow container to determine font-size and line-height.
+ * 1. Allow container to deteermine font-size and line-height.
  * 2. Override inherited Bootstrap styles.
  */
 .kuiToggleButton {
@@ -3703,12 +3886,15 @@ main {
     /* 1 */ }
 
 .kuiToolBar {
+  display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
   display: flex;
+  -webkit-box-align: center;
   -webkit-align-items: center;
       -ms-flex-align: center;
           align-items: center;
+  -webkit-box-pack: justify;
   -webkit-justify-content: space-between;
       -ms-flex-pack: justify;
           justify-content: space-between;
@@ -3759,18 +3945,22 @@ main {
       border-color: #0079a5; }
 
 .kuiToolBarSection {
+  display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
   display: flex;
+  -webkit-box-align: center;
   -webkit-align-items: center;
       -ms-flex-align: center;
           align-items: center;
+  -webkit-box-flex: 1;
   -webkit-flex: 1 1 auto;
       -ms-flex: 1 1 auto;
           flex: 1 1 auto;
   margin-left: 25px;
   margin-right: 25px; }
   .kuiToolBarSection:not(:first-child):not(:last-child):not(:only-child) {
+    -webkit-box-pack: center;
     -webkit-justify-content: center;
         -ms-flex-pack: center;
             justify-content: center;
@@ -3779,10 +3969,12 @@ main {
     margin-left: 0; }
   .kuiToolBarSection:last-child {
     margin-right: 0;
+    -webkit-box-flex: 0;
     -webkit-flex: 0 1 auto;
         -ms-flex: 0 1 auto;
             flex: 0 1 auto;
     /* 4 */
+    -webkit-box-pack: end;
     -webkit-justify-content: flex-end;
         -ms-flex-pack: end;
             justify-content: flex-end;
@@ -3802,12 +3994,15 @@ main {
   /* 1 */ }
 
 .kuiToolBarFooter {
+  display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
   display: flex;
+  -webkit-box-align: center;
   -webkit-align-items: center;
       -ms-flex-align: center;
           align-items: center;
+  -webkit-box-pack: justify;
   -webkit-justify-content: space-between;
       -ms-flex-pack: justify;
           justify-content: space-between;
@@ -3819,18 +4014,22 @@ main {
   border: 1px solid #D9D9D9; }
 
 .kuiToolBarFooterSection {
+  display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
   display: flex;
+  -webkit-box-align: center;
   -webkit-align-items: center;
       -ms-flex-align: center;
           align-items: center;
+  -webkit-box-flex: 1;
   -webkit-flex: 1 1 auto;
       -ms-flex: 1 1 auto;
           flex: 1 1 auto;
   margin-left: 25px;
   margin-right: 25px; }
   .kuiToolBarFooterSection:not(:first-child):not(:last-child):not(:only-child) {
+    -webkit-box-pack: center;
     -webkit-justify-content: center;
         -ms-flex-pack: center;
             justify-content: center;
@@ -3839,10 +4038,12 @@ main {
     margin-left: 0; }
   .kuiToolBarFooterSection:last-child {
     margin-right: 0;
+    -webkit-box-flex: 0;
     -webkit-flex: 0 1 auto;
         -ms-flex: 0 1 auto;
             flex: 0 1 auto;
     /* 4 */
+    -webkit-box-pack: end;
     -webkit-justify-content: flex-end;
         -ms-flex-pack: end;
             justify-content: flex-end;
@@ -3860,14 +4061,17 @@ main {
  *    kuiToolBarSection sibling.
  */
 .kuiToolBarSearch {
+  display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
   display: flex;
+  -webkit-box-align: center;
   -webkit-align-items: center;
       -ms-flex-align: center;
           align-items: center;
   margin-left: 25px;
   margin-right: 25px;
+  -webkit-box-flex: 1;
   -webkit-flex: 1 1 auto;
       -ms-flex: 1 1 auto;
           flex: 1 1 auto;
@@ -3883,6 +4087,7 @@ main {
     /* 1 */ }
 
 .kuiToolBarSearchBox {
+  -webkit-box-flex: 1;
   -webkit-flex: 1 1 auto;
       -ms-flex: 1 1 auto;
           flex: 1 1 auto;
@@ -4005,6 +4210,7 @@ main {
 
 .kuiView {
   background-color: #FFF;
+  -webkit-box-flex: 1;
   -webkit-flex: 1 1 auto;
       -ms-flex: 1 1 auto;
           flex: 1 1 auto; }

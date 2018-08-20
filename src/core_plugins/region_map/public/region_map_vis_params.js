@@ -18,13 +18,15 @@
  */
 
 import { uiModules } from 'ui/modules';
-import { toastNotifications } from 'ui/notify';
 import regionMapVisParamsTemplate from './region_map_vis_params.html';
 import { mapToLayerWithId } from './util';
 import '../../tile_map/public/editors/wms_options';
 
 uiModules.get('kibana/region_map')
-  .directive('regionMapVisParams', function (serviceSettings, regionmapsConfig) {
+  .directive('regionMapVisParams', function (serviceSettings, regionmapsConfig, Notifier) {
+
+    const notify = new Notifier({ location: 'Region map' });
+
     return {
       restrict: 'E',
       template: regionMapVisParamsTemplate,
@@ -82,7 +84,7 @@ uiModules.get('kibana/region_map')
 
             })
             .catch(function (error) {
-              toastNotifications.addWarning(error.message);
+              notify.warning(error.message);
             });
         }
 

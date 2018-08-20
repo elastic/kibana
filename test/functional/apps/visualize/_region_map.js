@@ -32,7 +32,7 @@ export default function ({ getService, getPageObjects }) {
     before(async function () {
 
       log.debug('navigateToApp visualize');
-      await PageObjects.visualize.navigateToNewVisualization();
+      await PageObjects.common.navigateToUrl('visualize', 'new');
       log.debug('clickRegionMap');
       await PageObjects.visualize.clickRegionMap();
       await PageObjects.visualize.clickNewSearch();

@@ -41,10 +41,12 @@ export class LegacyAppender implements DisposableAppender {
    * write record to the configured destination.
    * @param record `LogRecord` instance to forward to.
    */
-  public append({ level, context, message, error, timestamp, meta = {} }: LogRecord) {
-    const tags = [level.id.toLowerCase(), ...context.split('.'), ...(meta.tags || [])];
-
-    this.kbnServer.log(tags, error || message, timestamp);
+  public append(record: LogRecord) {
+    this.kbnServer.log(
+      [record.level.id.toLowerCase(), ...record.context.split('.')],
+      record.error || record.message,
+      record.timestamp
+    );
   }
 
   public async dispose() {

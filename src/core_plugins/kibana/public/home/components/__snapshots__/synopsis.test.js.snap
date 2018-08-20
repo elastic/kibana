@@ -44,7 +44,6 @@ exports[`props iconType 1`] = `
         <p>
           <EuiTextColor
             color="subdued"
-            component="span"
           >
             this is a great tutorial about...
           </EuiTextColor>
@@ -100,7 +99,6 @@ exports[`props iconUrl 1`] = `
         <p>
           <EuiTextColor
             color="subdued"
-            component="span"
           >
             this is a great tutorial about...
           </EuiTextColor>
@@ -146,7 +144,6 @@ exports[`props isBeta 1`] = `
         <p>
           <EuiTextColor
             color="subdued"
-            component="span"
           >
             this is a great tutorial about...
           </EuiTextColor>
@@ -192,7 +189,6 @@ exports[`render 1`] = `
         <p>
           <EuiTextColor
             color="subdued"
-            component="span"
           >
             this is a great tutorial about...
           </EuiTextColor>

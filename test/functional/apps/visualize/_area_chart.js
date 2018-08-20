@@ -33,7 +33,7 @@ export default function ({ getService, getPageObjects }) {
       const toTime = '2015-09-23 18:31:44.000';
 
       log.debug('navigateToApp visualize');
-      await PageObjects.visualize.navigateToNewVisualization();
+      await PageObjects.common.navigateToUrl('visualize', 'new');
       log.debug('clickAreaChart');
       await PageObjects.visualize.clickAreaChart();
       log.debug('clickNewSearch');

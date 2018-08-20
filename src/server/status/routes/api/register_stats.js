@@ -18,33 +18,19 @@
  */
 
 import Joi from 'joi';
-import { boomify } from 'boom';
 import { wrapAuthConfig } from '../../wrap_auth_config';
-import { KIBANA_STATS_TYPE } from '../../constants';
 
 /*
  * API for Kibana meta info and accumulated operations stats
- * Including ?extended in the query string fetches Elasticsearch cluster_uuid and server.usage.collectorSet data
+ * Including ?extended in the query string fetches Elasticsearch cluster_uuid
  * - Requests to set isExtended = true
  *      GET /api/stats?extended=true
  *      GET /api/stats?extended
  * - No value or 'false' is isExtended = false
  * - Any other value causes a statusCode 400 response (Bad Request)
  */
-export function registerStatsApi(kbnServer, server, config) {
+export function registerStatsApi(kbnServer, server, config, collector) {
   const wrapAuth = wrapAuthConfig(config.get('status.allowAnonymous'));
-  const { collectorSet } = server.usage;
-
-  const getClusterUuid = async callCluster => {
-    const { cluster_uuid: uuid } = await callCluster('info', { filterPath: 'cluster_uuid', });
-    return uuid;
-  };
-
-  const getUsage = async callCluster => {
-    const usage = await collectorSet.bulkFetchUsage(callCluster);
-    return collectorSet.toObject(usage);
-  };
-
   server.route(
     wrapAuth({
       method: 'GET',
@@ -58,34 +44,27 @@ export function registerStatsApi(kbnServer, server, config) {
         tags: ['api'],
       },
       async handler(req, reply) {
-        const isExtended = req.query.extended !== undefined && req.query.extended !== 'false';
+        const { extended } = req.query;
+        const isExtended = extended !== undefined && extended !== 'false';
 
-        let extended;
+        let clusterUuid;
         if (isExtended) {
-          const { callWithRequest } = req.server.plugins.elasticsearch.getCluster('admin');
-          const callCluster = (...args) => callWithRequest(req, ...args);
           try {
-            const [ usage, clusterUuid ] = await Promise.all([
-              getUsage(callCluster),
-              getClusterUuid(callCluster),
-            ]);
-            extended = collectorSet.toApiFieldNames({ usage, clusterUuid });
-          } catch (e) {
-            return reply(boomify(e));
+            const { callWithRequest, } = server.plugins.elasticsearch.getCluster('data');
+            const { cluster_uuid: uuid } = await callWithRequest(req, 'info', { filterPath: 'cluster_uuid', });
+            clusterUuid = uuid;
+          } catch (err) {
+            clusterUuid = undefined; // fallback from anonymous access or auth failure, redundant for explicitness
           }
         }
 
-        /* kibana_stats gets singled out from the collector set as it is used
-         * for health-checking Kibana and fetch does not rely on fetching data
-         * from ES */
-        const kibanaStatsCollector = collectorSet.getCollectorByType(KIBANA_STATS_TYPE);
-        let kibanaStats = await kibanaStatsCollector.fetch();
-        kibanaStats = collectorSet.toApiFieldNames(kibanaStats);
+        const stats = {
+          cluster_uuid: clusterUuid, // serialization makes an undefined get stripped out, as undefined isn't a JSON type
+          status: kbnServer.status.toJSON(),
+          ...collector.getStats(),
+        };
 
-        reply({
-          ...kibanaStats,
-          ...extended,
-        });
+        reply(stats);
       },
     })
   );

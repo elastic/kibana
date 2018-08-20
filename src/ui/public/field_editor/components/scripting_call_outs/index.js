@@ -19,3 +19,4 @@
 
 export { ScriptingDisabledCallOut } from './disabled_call_out';
 export { ScriptingWarningCallOut } from './warning_call_out';
+export { ScriptingHelpFlyout } from './help_flyout';

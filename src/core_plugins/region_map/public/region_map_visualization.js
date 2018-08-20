@@ -24,9 +24,8 @@ import ChoroplethLayer from './choropleth_layer';
 import { truncatedColorMaps }  from 'ui/vislib/components/color/truncated_colormaps';
 import AggResponsePointSeriesTooltipFormatterProvider from './tooltip_formatter';
 import 'ui/vis/map/service_settings';
-import { toastNotifications } from 'ui/notify';
 
-export function RegionMapsVisualizationProvider(Private, config) {
+export function RegionMapsVisualizationProvider(Private, Notifier, config) {
 
   const tooltipFormatter = Private(AggResponsePointSeriesTooltipFormatterProvider);
   const BaseMapsVisualization = Private(BaseMapsVisualizationProvider);
@@ -37,7 +36,9 @@ export function RegionMapsVisualizationProvider(Private, config) {
       super(container, vis);
       this._vis = this.vis;
       this._choroplethLayer = null;
+      this._notify = new Notifier({ location: 'Region map' });
     }
+
 
     async render(esResponse, status) {
       await super.render(esResponse, status);
@@ -45,6 +46,7 @@ export function RegionMapsVisualizationProvider(Private, config) {
         await this._choroplethLayer.whenDataLoaded();
       }
     }
+
 
     async _updateData(tableGroup) {
       this._chartData = tableGroup;
@@ -78,6 +80,7 @@ export function RegionMapsVisualizationProvider(Private, config) {
 
       this._kibanaMap.useUiStateFromVisualization(this._vis);
     }
+
 
     async  _updateParams() {
 
@@ -153,14 +156,13 @@ export function RegionMapsVisualizationProvider(Private, config) {
         const rowIndex = this._chartData.tables[0].rows.findIndex(row => row[0] === event);
         this._vis.API.events.addFilter(this._chartData.tables[0], 0, rowIndex, event);
       });
-
       this._choroplethLayer.on('styleChanged', (event) => {
         const shouldShowWarning = this._vis.params.isDisplayWarning && config.get('visualization:regionmap:showWarnings');
         if (event.mismatches.length > 0 && shouldShowWarning) {
-          toastNotifications.addWarning({
-            title: `Unable to show ${event.mismatches.length} ${event.mismatches.length > 1 ? 'results' : 'result'} on map`,
-            text: `Ensure that each of these term matches a shape on that shape's join field: ${event.mismatches.join(', ')}`,
-          });
+          this._notify.warning(`Could not show ${event.mismatches.length} ${event.mismatches.length > 1 ? 'results' : 'result'} on the map.`
+            + ` To avoid this, ensure that each term can be matched to a corresponding shape on that shape's join field.`
+            + ` Could not match following terms: ${event.mismatches.join(',')}`
+          );
         }
       });
 

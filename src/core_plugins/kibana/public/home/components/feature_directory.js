@@ -26,7 +26,6 @@ import {
   EuiFlexItem,
   EuiFlexGrid,
   EuiPage,
-  EuiPageBody,
   EuiTitle,
   EuiSpacer,
 } from '@elastic/eui';
@@ -115,21 +114,19 @@ export class FeatureDirectory extends React.Component {
   render() {
     return (
       <EuiPage className="home">
-        <EuiPageBody>
-          <EuiTitle size="l">
-            <h1>
-              Directory
-            </h1>
-          </EuiTitle>
-          <EuiSpacer size="m" />
-          <EuiTabs className="homeDirectoryTabs">
-            {this.renderTabs()}
-          </EuiTabs>
-          <EuiSpacer />
-          <EuiFlexGrid columns={4}>
-            { this.renderDirectories() }
-          </EuiFlexGrid>
-        </EuiPageBody>
+        <EuiTitle size="l">
+          <h1>
+            Directory
+          </h1>
+        </EuiTitle>
+        <EuiSpacer size="m" />
+        <EuiTabs className="homeDirectoryTabs">
+          {this.renderTabs()}
+        </EuiTabs>
+        <EuiSpacer />
+        <EuiFlexGrid columns={4}>
+          { this.renderDirectories() }
+        </EuiFlexGrid>
       </EuiPage>
     );
   }

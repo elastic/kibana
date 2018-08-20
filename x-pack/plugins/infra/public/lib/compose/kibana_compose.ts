@@ -33,6 +33,12 @@ export function compose(): InfraFrontendLibs {
     }),
   });
 
+  const kbnVersion = (window as any).__KBN__.version;
+
+  const api = new InfraAxiosApiAdapter({
+    kbnVersion,
+  });
+
   const observableApi = new InfraKibanaObservableApiAdapter({
     basePath: chrome.getBasePath(),
     xsrfToken: chrome.getXsrfToken(),
@@ -60,8 +66,6 @@ export function compose(): InfraFrontendLibs {
   const infraModule = uiModules.get('app/infa');
 
   const framework = new InfraKibanaFrameworkAdapter(infraModule, timezoneProvider);
-
-  const api = new InfraAxiosApiAdapter({ framework });
 
   const libs: InfraFrontendLibs = {
     api,

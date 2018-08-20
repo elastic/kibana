@@ -86,8 +86,8 @@ describe('ui apps / UiApp', () => {
         expect(app.getNavLink()).to.be.a(UiNavLink);
       });
 
-      it('has no main module', () => {
-        expect(app.getMainModuleId()).to.be(undefined);
+      it('has an empty modules list', () => {
+        expect(app.getModules()).to.eql([]);
       });
 
       it('has no styleSheetPath', () => {
@@ -135,8 +135,10 @@ describe('ui apps / UiApp', () => {
         expect(app.getNavLink()).to.be(undefined);
       });
 
-      it('has a main module', () => {
-        expect(app.getMainModuleId()).to.be('main.js');
+      it('includes main and hack modules', () => {
+        expect(app.getModules()).to.eql([
+          'main.js',
+        ]);
       });
 
       it('has spec values in JSON representation', () => {
@@ -301,15 +303,15 @@ describe('ui apps / UiApp', () => {
     });
   });
 
-  describe('#getMainModuleId', () => {
-    it('returns undefined by default', () => {
+  describe('#getModules', () => {
+    it('returns empty array by default', () => {
       const app = createUiApp({ id: 'foo' });
-      expect(app.getMainModuleId()).to.be(undefined);
+      expect(app.getModules()).to.eql([]);
     });
 
-    it('returns main module id', () => {
+    it('returns main module if not using appExtensions', () => {
       const app = createUiApp({ id: 'foo', main: 'bar' });
-      expect(app.getMainModuleId()).to.be('bar');
+      expect(app.getModules()).to.eql(['bar']);
     });
   });
 

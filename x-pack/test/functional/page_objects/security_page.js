@@ -117,7 +117,9 @@ export function SecurityPageProvider({ getService, getPageObjects }) {
     }
 
     async clickSaveEditUser() {
-      await testSubjects.click('userFormSaveButton');
+      const saveButton = await retry.try(() => testSubjects.find('userFormSaveButton'));
+      await remote.moveMouseTo(saveButton);
+      await saveButton.click();
       await PageObjects.header.waitUntilLoadingHasFinished();
     }
 
@@ -144,7 +146,11 @@ export function SecurityPageProvider({ getService, getPageObjects }) {
     }
 
     async assignRoleToUser(role) {
-      await this.selectRole(role);
+      log.debug(`Adding role ${role} to user`);
+      const privilegeInput =
+        await retry.try(() => find.byCssSelector('[data-test-subj="userFormRolesDropdown"] > div > input'));
+      await privilegeInput.type(role);
+      await privilegeInput.type('\n');
     }
 
     async navigateTo() {
@@ -176,18 +182,13 @@ export function SecurityPageProvider({ getService, getPageObjects }) {
         const fullnameElement = await user.findByCssSelector('[data-test-subj="userRowFullName"]');
         const usernameElement = await user.findByCssSelector('[data-test-subj="userRowUserName"]');
         const rolesElement = await user.findByCssSelector('[data-test-subj="userRowRoles"]');
-        let reserved = false;
-        try {
-          reserved = !!(await user.findByCssSelector('[data-test-subj="reservedUser"]'));
-        } catch(e) {
-          //ignoring, just means user is not reserved
-        }
+        const isReservedElementVisible = await user.findByCssSelector('td:nth-child(5)');
 
         return {
           username: await usernameElement.getVisibleText(),
           fullname: await fullnameElement.getVisibleText(),
           roles: (await rolesElement.getVisibleText()).split(',').map(role => role.trim()),
-          reserved
+          reserved: (await isReservedElementVisible.getProperty('innerHTML')).includes('userRowReserved')
         };
       });
     }
@@ -220,12 +221,23 @@ export function SecurityPageProvider({ getService, getPageObjects }) {
       await testSubjects.setValue('passwordInput', userObj.password);
       await testSubjects.setValue('passwordConfirmationInput', userObj.confirmPassword);
       await testSubjects.setValue('userFormFullNameInput', userObj.fullname);
-      await testSubjects.setValue('userFormEmailInput', 'example@example.com');
-      log.debug('Add roles: ', userObj.roles);
-      const rolesToAdd = userObj.roles || [];
-      for (let i = 0; i < rolesToAdd.length; i++) {
-        await self.selectRole(rolesToAdd[i]);
+      await testSubjects.setValue('userFormEmailInput', userObj.email);
+
+      function addRoles(role) {
+        return role.reduce(function (promise, roleName) {
+          return promise
+            .then(function () {
+              log.debug('Add role: ' + roleName);
+              return self.selectRole(roleName);
+            })
+            .then(function () {
+              return PageObjects.common.sleep(1000);
+            });
+
+        }, Promise.resolve());
       }
+      log.debug('Add roles: ', userObj.roles);
+      await addRoles(userObj.roles || []);
       log.debug('After Add role: , userObj.roleName');
       if (userObj.save === true) {
         await testSubjects.click('userFormSaveButton');
@@ -325,9 +337,8 @@ export function SecurityPageProvider({ getService, getPageObjects }) {
       const dropdown = await testSubjects.find("userFormRolesDropdown");
       const input = await dropdown.findByCssSelector("input");
       await input.type(role);
-      await testSubjects.click(`roleOption-${role}`);
-      await testSubjects.click('comboBoxToggleListButton');
-      await testSubjects.find(`roleOption-${role}`);
+      await testSubjects.click(`addRoleOption-${role}`);
+      await testSubjects.find(`userRole-${role}`);
     }
 
     deleteUser(username) {

@@ -24,7 +24,6 @@ exports[`EmptyState should render normally 1`] = `
       >
         <EuiTextColor
           color="subdued"
-          component="span"
         >
           <h2
             style={
@@ -46,7 +45,6 @@ exports[`EmptyState should render normally 1`] = `
         <p>
           <EuiTextColor
             color="subdued"
-            component="span"
           >
             You'll need to index some data into Elasticsearch before you can create an index pattern.
           </EuiTextColor>

@@ -45,7 +45,10 @@ export default class WatchOptimizer extends BaseOptimizer {
 
     // log status changes
     this.status$.subscribe(this.onStatusChangeHandler);
-    await this.uiBundles.resetBundleDir();
+
+    await this.uiBundles.writeEntryFiles();
+    await this.uiBundles.ensureStyleFiles();
+
     await this.initCompiler();
 
     this.compiler.plugin('watch-run', this.compilerRunStartHandler);

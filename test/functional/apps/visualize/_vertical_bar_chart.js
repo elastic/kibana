@@ -31,7 +31,7 @@ export default function ({ getService, getPageObjects }) {
 
     const initBarChart = async () => {
       log.debug('navigateToApp visualize');
-      await PageObjects.visualize.navigateToNewVisualization();
+      await PageObjects.common.navigateToUrl('visualize', 'new');
       log.debug('clickVerticalBarChart');
       await PageObjects.visualize.clickVerticalBarChart();
       await PageObjects.visualize.clickNewSearch();

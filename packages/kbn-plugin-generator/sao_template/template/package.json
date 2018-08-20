@@ -1,5 +1,5 @@
 {
-  "name": "<%= snakeCase(name) %>",
+  "name": "<%= kebabCase(name) %>",
   "version": "0.0.0",
   "description": "<%= description %>",
   "main": "index.js",

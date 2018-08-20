@@ -5,13 +5,13 @@ import exampleRoute from './server/routes/example';
 export default function (kibana) {
   return new kibana.Plugin({
     require: ['elasticsearch'],
-    name: '<%= snakeCase(name) %>',
+    name: '<%= kebabCase(name) %>',
     uiExports: {
       <%_ if (generateApp) { -%>
       app: {
         title: '<%= startCase(name) %>',
         description: '<%= description %>',
-        main: 'plugins/<%= snakeCase(name) %>/app',
+        main: 'plugins/<%= kebabCase(name) %>/app',
         <%_ if (generateScss) { -%>
         styleSheetPath: require('path').resolve(__dirname, 'public/app.scss'),
         <%_ } -%>
@@ -19,7 +19,7 @@ export default function (kibana) {
       <%_ } -%>
       <%_ if (generateHack) { -%>
       hacks: [
-        'plugins/<%= snakeCase(name) %>/hack'
+        'plugins/<%= kebabCase(name) %>/hack'
       ]
       <%_ } -%>
     },

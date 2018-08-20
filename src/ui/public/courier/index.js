@@ -18,9 +18,7 @@
  */
 
 import './courier';
-
 export { SavedObjectProvider } from './saved_object';
-
 export {
   SearchSourceProvider,
   migrateFilter,
@@ -28,8 +26,3 @@ export {
   buildQueryFromFilters,
   luceneStringToDsl,
 } from './search_source';
-
-export {
-  hasSearchStategyForIndexPattern,
-  isDefaultTypeIndexPattern,
-} from './search_strategy';

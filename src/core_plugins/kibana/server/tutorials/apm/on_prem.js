@@ -38,7 +38,14 @@ import {
   JAVA_CLIENT_INSTRUCTIONS,
 } from './apm_client_instructions';
 
-export function onPremInstructions(apmIndexPattern) {
+export function onPremInstructions(server) {
+  let apmIndexPattern = 'apm*';
+  try {
+    apmIndexPattern = server.config().get('xpack.apm.indexPattern');
+  } catch (error) {
+    // ignore error when config does not contain 'xpack.apm.indexPattern'.
+    // This is expected when APM plugin is not running.
+  }
 
   return {
     instructionSets: [

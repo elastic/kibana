@@ -17,7 +17,6 @@
  * under the License.
  */
 
-import React, { Fragment } from 'react';
 import _ from 'lodash';
 import { SavedObjectNotFound, DuplicateField, IndexPatternMissingIndices } from '../errors';
 import angular from 'angular';
@@ -120,15 +119,13 @@ export function IndexPatternProvider(Private, config, Promise, confirmModalPromi
 
     if (indexPattern.isUnsupportedTimePattern()) {
       if (!isUserAwareOfUnsupportedTimePattern(indexPattern)) {
-        toastNotifications.addWarning({
-          title: 'Support for time intervals was removed',
-          text: (
-            <Fragment>
-              For more information, view the {' '}
-              <a href={kbnUrl.getRouteHref(indexPattern, 'edit')}>{indexPattern.title} index pattern</a>
-            </Fragment>
-          ),
-        });
+        const warning = (
+          'Support for time-intervals has been removed. ' +
+          `View the ["${indexPattern.title}" index pattern in management](` +
+          kbnUrl.getRouteHref(indexPattern, 'edit') +
+          ') for more information.'
+        );
+        notify.warning(warning, { lifetime: Infinity });
       }
     }
 

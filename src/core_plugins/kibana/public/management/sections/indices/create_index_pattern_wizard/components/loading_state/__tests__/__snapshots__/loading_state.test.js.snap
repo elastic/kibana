@@ -24,7 +24,6 @@ exports[`LoadingState should render normally 1`] = `
       >
         <EuiTextColor
           color="subdued"
-          component="span"
         >
           <h2
             style={

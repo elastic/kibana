@@ -20,26 +20,9 @@
 import { PureComponent } from 'react';
 import PropTypes from 'prop-types';
 
-export const convertSampleInput = (converter, inputs) => {
-  let error = null;
-  let samples = [];
-
-  try {
-    samples = inputs.map(input => {
-      return {
-        input,
-        output: converter(input),
-      };
-    });
-  } catch(e) {
-    error = `An error occurred while trying to use this format configuration: ${e.message}`;
-  }
-
-  return {
-    error,
-    samples,
-  };
-};
+import {
+  convertSampleInput
+} from '../../../../lib';
 
 export class DefaultFormatEditor extends PureComponent {
   static propTypes = {

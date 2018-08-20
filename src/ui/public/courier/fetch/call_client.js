@@ -17,8 +17,9 @@
  * under the License.
  */
 
+import _ from 'lodash';
+
 import { ErrorAllowExplicitIndexProvider } from '../../error_allow_explicit_index';
-import { assignSearchRequestsToSearchStrategies } from '../search_strategy';
 import { IsRequestProvider } from './is_request';
 import { MergeDuplicatesRequestProvider } from './merge_duplicate_requests';
 import { RequestStatus } from './req_status';
@@ -33,56 +34,43 @@ export function CallClientProvider(Private, Promise, es) {
   const ABORTED = RequestStatus.ABORTED;
   const DUPLICATE = RequestStatus.DUPLICATE;
 
-  function callClient(searchRequests) {
+  function callClient(requests) {
     // merging docs can change status to DUPLICATE, capture new statuses
-    const searchRequestsAndStatuses = mergeDuplicateRequests(searchRequests);
+    const statuses = mergeDuplicateRequests(requests);
 
     // get the actual list of requests that we will be fetching
-    const requestsToFetch = searchRequestsAndStatuses.filter(isRequest);
-    let requestsToFetchCount = requestsToFetch.length;
+    let requestsToFetch = statuses.filter(isRequest);
+    let execCount = requestsToFetch.length;
 
-    if (requestsToFetchCount === 0) {
-      return Promise.resolve([]);
-    }
+    if (!execCount) return Promise.resolve([]);
 
-    // This is how we'll provide the consumer with search responses. Resolved by
-    // respondToSearchRequests.
+    // resolved by respond()
+    let esPromise = undefined;
+    let isRequestAborted = false;
     const defer = Promise.defer();
 
-    const abortableSearches = [];
-    let areAllSearchRequestsAborted = false;
+    // for each respond with either the response or ABORTED
+    const respond = function (responses) {
+      responses = responses || [];
+      return Promise.map(requests, function (request, i) {
+        switch (statuses[i]) {
+          case ABORTED:
+            return ABORTED;
+          case DUPLICATE:
+            return request._uniq.resp;
+          default:
+            if (request.aborted) {
+              return ABORTED;
+            }
 
-    // When we traverse our search requests and send out searches, some of them may fail. We'll
-    // store those that don't fail here.
-    const activeSearchRequests = [];
+            const index = _.findIndex(requestsToFetch, request);
+            if (index < 0) {
+              // This means the request failed.
+              return ABORTED;
+            }
 
-    // Respond to each searchRequest with the response or ABORTED.
-    const respondToSearchRequests = (responsesInOriginalRequestOrder = []) => {
-      // We map over searchRequestsAndStatuses because if we were originally provided an ABORTED
-      // request then we'll return that value.
-      return Promise.map(searchRequestsAndStatuses, function (searchRequest, searchRequestIndex) {
-        if (searchRequest.aborted) {
-          return ABORTED;
+            return responses[index];
         }
-
-        const status = searchRequestsAndStatuses[searchRequestIndex];
-
-        if (status === ABORTED) {
-          return ABORTED;
-        }
-
-        if (status === DUPLICATE) {
-          return searchRequest._uniq.resp;
-        }
-
-        const activeSearchRequestIndex = activeSearchRequests.indexOf(searchRequest);
-        const isFailedSearchRequest = activeSearchRequestIndex === -1;
-
-        if (isFailedSearchRequest) {
-          return ABORTED;
-        }
-
-        return responsesInOriginalRequestOrder[searchRequestIndex];
       })
         .then(
           (res) => defer.resolve(res),
@@ -91,90 +79,65 @@ export function CallClientProvider(Private, Promise, es) {
     };
 
     // handle a request being aborted while being fetched
-    const requestWasAborted = Promise.method(function (searchRequest, index) {
-      if (searchRequestsAndStatuses[index] === ABORTED) {
+    const requestWasAborted = Promise.method(function (req, i) {
+      if (statuses[i] === ABORTED) {
         defer.reject(new Error('Request was aborted twice?'));
       }
 
-      requestsToFetchCount--;
-
-      if (requestsToFetchCount !== 0) {
-        // We can't resolve early unless all searchRequests have been aborted.
+      execCount -= 1;
+      if (execCount > 0) {
+        // the multi-request still contains other requests
         return;
       }
 
-      abortableSearches.forEach(({ abort }) => {
-        abort();
-      });
+      if (esPromise && _.isFunction(esPromise.abort)) {
+        esPromise.abort();
+      }
 
-      areAllSearchRequestsAborted = true;
+      esPromise = undefined;
+      isRequestAborted = true;
 
-      return respondToSearchRequests();
+      return respond();
     });
 
     // attach abort handlers, close over request index
-    searchRequestsAndStatuses.forEach(function (searchRequest, index) {
-      if (!isRequest(searchRequest)) {
-        return;
-      }
-
-      searchRequest.whenAborted(function () {
-        requestWasAborted(searchRequest, index).catch(defer.reject);
+    statuses.forEach(function (req, i) {
+      if (!isRequest(req)) return;
+      req.whenAborted(function () {
+        requestWasAborted(req, i).catch(defer.reject);
       });
     });
-
-    const searchStrategiesWithRequests = assignSearchRequestsToSearchStrategies(requestsToFetch);
 
     // We're going to create a new async context here, so that the logic within it can execute
     // asynchronously after we've returned a reference to defer.promise.
     Promise.resolve().then(async () => {
-      // Execute each request using its search strategy.
-      for (let i = 0; i < searchStrategiesWithRequests.length; i++) {
-        const searchStrategyWithSearchRequests = searchStrategiesWithRequests[i];
-        const { searchStrategy, searchRequests } = searchStrategyWithSearchRequests;
-        const {
-          searching,
-          abort,
-          failedSearchRequests,
-        } = await searchStrategy.search({ searchRequests, es, Promise, serializeFetchParams });
+      // Flatten the searchSource within each searchRequest to get the fetch params,
+      // e.g. body, filters, index pattern, query.
+      const allFetchParams = await getAllFetchParams(requestsToFetch);
 
-        // Collect searchRequests which have successfully been sent.
-        searchRequests.forEach(searchRequest => {
-          if (failedSearchRequests.includes(searchRequest)) {
-            return;
-          }
+      // Serialize the fetch params into a format suitable for the body of an ES query.
+      const serializedFetchParams = await serializeAllFetchParams(allFetchParams, requestsToFetch);
 
-          activeSearchRequests.push(searchRequest);
-        });
-
-        abortableSearches.push({
-          searching,
-          abort,
-        });
-      }
+      // The index of the request inside requestsToFetch determines which response is mapped to it.
+      // If a request won't generate a response, since it already failed, we need to remove the
+      // request from the requestsToFetch array so the indexes will continue to match up to the
+      // responses correctly.
+      requestsToFetch = requestsToFetch.filter(request => request !== undefined);
 
       try {
         // The request was aborted while we were doing the above logic.
-        if (areAllSearchRequestsAborted) {
-          return;
+        if (isRequestAborted) {
+          throw ABORTED;
         }
 
-        const segregatedResponses = await Promise.all(abortableSearches.map(({ searching }) => searching));
-
-        // Assigning searchRequests to strategies means that the responses come back in a different
-        // order than the original searchRequests. So we'll put them back in order so that we can
-        // use the order to associate each response with the original request.
-        const responsesInOriginalRequestOrder = new Array(searchRequestsAndStatuses.length);
-        segregatedResponses.forEach((responses, strategyIndex) => {
-          responses.forEach((response, responseIndex) => {
-            const searchRequest = searchStrategiesWithRequests[strategyIndex].searchRequests[responseIndex];
-            const requestIndex = searchRequestsAndStatuses.indexOf(searchRequest);
-            responsesInOriginalRequestOrder[requestIndex] = response;
-          });
-        });
-
-        await respondToSearchRequests(responsesInOriginalRequestOrder);
+        esPromise = es.msearch({ body: serializedFetchParams });
+        const clientResponse = await esPromise;
+        await respond(clientResponse.responses);
       } catch(error) {
+        if (error === ABORTED) {
+          return await respond();
+        }
+
         if (errorAllowExplicitIndex.test(error)) {
           return errorAllowExplicitIndex.takeover();
         }
@@ -183,17 +146,43 @@ export function CallClientProvider(Private, Promise, es) {
       }
     });
 
-    // If there are any errors, notify the searchRequests of them.
-    defer.promise.catch((err) => {
-      searchRequests.forEach((searchRequest, index) => {
-        if (searchRequestsAndStatuses[index] !== ABORTED) {
-          searchRequest.handleFailure(err);
-        }
+    // return our promise, but catch any errors we create and
+    // send them to the requests
+    return defer.promise
+      .catch((err) => {
+        requests.forEach((req, index) => {
+          if (statuses[index] !== ABORTED) {
+            req.handleFailure(err);
+          }
+        });
       });
-    });
+  }
 
-    // Return the promise which acts as our vehicle for providing search responses to the consumer.
-    return defer.promise;
+  function getAllFetchParams(requests) {
+    return Promise.map(requests, (request) => {
+      return Promise.try(request.getFetchParams, void 0, request)
+        .then((fetchParams) => {
+          return (request.fetchParams = fetchParams);
+        })
+        .then(value => ({ resolved: value }))
+        .catch(error => ({ rejected: error }));
+    });
+  }
+
+  function serializeAllFetchParams(fetchParams, requestsToFetch) {
+    const requestsWithFetchParams = [];
+
+    // Gather the fetch param responses from all the successful requests.
+    fetchParams.forEach((result, index) => {
+      if (result.resolved) {
+        requestsWithFetchParams.push(result.resolved);
+      } else {
+        const request = requestsToFetch[index];
+        request.handleFailure(result.rejected);
+        requestsToFetch[index] = undefined;
+      }
+    });
+    return serializeFetchParams(requestsWithFetchParams);
   }
 
   return callClient;

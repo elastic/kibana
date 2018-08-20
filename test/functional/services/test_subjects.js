@@ -101,7 +101,9 @@ export function TestSubjectsProvider({ getService }) {
 
     async setValue(selector, text) {
       return await retry.try(async () => {
-        await this.click(selector);
+        const element = await this.find(selector);
+        await element.click();
+
         // in case the input element is actually a child of the testSubject, we
         // call clearValue() and type() on the element that is focused after
         // clicking on the testSubject

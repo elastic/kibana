@@ -24,12 +24,14 @@ import { InfraFrontendLibs } from '../lib';
 
 export function compose(): InfraFrontendLibs {
   const infraModule = uiModules.get('app/infa');
+  const api = new InfraAxiosApiAdapter({
+    kbnVersion: (window as any).__KBN__.version,
+  });
   const observableApi = new InfraKibanaObservableApiAdapter({
     basePath: chrome.getBasePath(),
     xsrfToken: chrome.getXsrfToken(),
   });
   const framework = new InfraKibanaFrameworkAdapter(infraModule, timezoneProvider);
-  const api = new InfraAxiosApiAdapter({ framework });
   const typeDefs = `
   Query {}
 `;

@@ -50,7 +50,6 @@ export const docViews = appExtension;
 export const hacks = appExtension;
 export const home = appExtension;
 export const inspectorViews = appExtension;
-export const search = appExtension;
 // Add a visualize app extension that should be used for visualize specific stuff
 export const visualize = appExtension;
 

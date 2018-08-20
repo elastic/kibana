@@ -26,8 +26,8 @@ import configSetupMixin from './config/setup';
 import httpMixin from './http';
 import { loggingMixin } from './logging';
 import warningsMixin from './warnings';
-import { usageMixin } from './usage';
 import { statusMixin } from './status';
+import { usageMixin } from './usage';
 import pidMixin from './pid';
 import { configDeprecationWarningsMixin } from './config/deprecation_warnings';
 import configCompleteMixin from './config/complete';
@@ -68,8 +68,8 @@ export default class KbnServer {
       loggingMixin,
       configDeprecationWarningsMixin,
       warningsMixin,
-      usageMixin,
       statusMixin,
+      usageMixin,
 
       // writes pid file
       pidMixin,
@@ -140,7 +140,10 @@ export default class KbnServer {
    * @return undefined
    */
   async listen() {
-    const { server } = this;
+    const {
+      server,
+      config,
+    } = this;
 
     await this.ready();
     await fromNode(cb => server.start(cb));
@@ -150,6 +153,11 @@ export default class KbnServer {
       process.send(['WORKER_LISTENING']);
     }
 
+    server.log(['listening', 'info'], `Server running at ${server.info.uri}${
+      config.get('server.rewriteBasePath')
+        ? config.get('server.basePath')
+        : ''
+    }`);
     return server;
   }
 

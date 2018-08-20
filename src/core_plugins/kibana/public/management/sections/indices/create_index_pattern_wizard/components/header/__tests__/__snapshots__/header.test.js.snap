@@ -31,7 +31,6 @@ exports[`Header should render normally 1`] = `
         <p>
           <EuiTextColor
             color="subdued"
-            component="span"
           >
             Kibana uses index patterns to retrieve data from Elasticsearch indices for things like visualizations.
           </EuiTextColor>
@@ -86,7 +85,6 @@ exports[`Header should render without including system indices 1`] = `
         <p>
           <EuiTextColor
             color="subdued"
-            component="span"
           >
             Kibana uses index patterns to retrieve data from Elasticsearch indices for things like visualizations.
           </EuiTextColor>

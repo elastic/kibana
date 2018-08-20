@@ -12,7 +12,6 @@ exports[`render 1`] = `
     <h3>
       <EuiTextColor
         color="subdued"
-        component="span"
       >
         Recently viewed
       </EuiTextColor>

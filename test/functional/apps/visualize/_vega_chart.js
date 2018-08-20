@@ -26,7 +26,7 @@ export default function ({ getService, getPageObjects }) {
   describe('visualize app', () => {
     before(async () => {
       log.debug('navigateToApp visualize');
-      await PageObjects.visualize.navigateToNewVisualization();
+      await PageObjects.common.navigateToUrl('visualize', 'new');
       log.debug('clickVega');
       await PageObjects.visualize.clickVega();
     });

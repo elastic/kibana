@@ -22,7 +22,7 @@ export const MONITORING_SYSTEM_API_VERSION = '6';
  * The type name used within the Monitoring index to publish Kibana ops stats.
  * @type {string}
  */
-export const KIBANA_STATS_TYPE_MONITORING = 'kibana_stats_monitoring'; // similar to KIBANA_STATS_TYPE but rolled up into 10s stats from 5s intervals through ops_buffer
+export const KIBANA_STATS_TYPE = 'kibana_stats';
 /**
  * The type name used within the Monitoring index to publish Kibana stats.
  * @type {string}
@@ -30,7 +30,6 @@ export const KIBANA_STATS_TYPE_MONITORING = 'kibana_stats_monitoring'; // simila
 export const KIBANA_SETTINGS_TYPE = 'kibana_settings';
 /**
  * The type name used within the Monitoring index to publish Kibana usage stats.
- * NOTE: this string shows as-is in the stats API as a field name for the kibana usage stats
  * @type {string}
  */
 export const KIBANA_USAGE_TYPE = 'kibana';

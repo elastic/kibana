@@ -19,26 +19,15 @@
 
 export const appEntryTemplate = (bundle) => `
 /**
- * Kibana entry file
+ * Test entry file
  *
  * This is programmatically created and updated, do not modify
  *
  * context: ${bundle.getContext()}
  */
 
-// import global polyfills before everything else
-import 'babel-polyfill';
-import 'custom-event-polyfill';
-import 'whatwg-fetch';
-import 'abortcontroller-polyfill';
+require('ui/chrome');
+${bundle.getRequires().join('\n')}
+require('ui/chrome').bootstrap(/* xoxo */);
 
-import { CoreSystem } from '__kibanaCore__'
-
-new CoreSystem({
-  injectedMetadata: JSON.parse(document.querySelector('kbn-injected-metadata').getAttribute('data')),
-  rootDomElement: document.body,
-  requireLegacyFiles: () => {
-    ${bundle.getRequires().join('\n  ')}
-  }
-}).start()
 `;

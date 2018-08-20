@@ -927,9 +927,6 @@ class JobService {
     return ml.jobs.deleteJobs(jIds);
   }
 
-  closeJobs(jIds) {
-    return ml.jobs.closeJobs(jIds);
-  }
 
   validateDetector(detector) {
     return new Promise((resolve, reject) => {

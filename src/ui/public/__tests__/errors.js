@@ -19,8 +19,10 @@
 
 import expect from 'expect.js';
 import {
+  SearchTimeout,
   RequestFailure,
   FetchFailure,
+  ShardFailure,
   VersionConflict,
   MappingConflict,
   RestrictedMapping,
@@ -44,8 +46,10 @@ import {
 
 describe('ui/errors', () => {
   const errors = [
+    new SearchTimeout(),
     new RequestFailure('an error', { }),
     new FetchFailure({ }),
+    new ShardFailure({ '_shards': 5 }),
     new VersionConflict({ }),
     new MappingConflict({ }),
     new RestrictedMapping('field', 'indexPattern'),

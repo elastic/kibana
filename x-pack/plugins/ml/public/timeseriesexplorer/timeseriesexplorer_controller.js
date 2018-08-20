@@ -18,7 +18,7 @@ import moment from 'moment';
 import 'plugins/ml/components/anomalies_table';
 import 'plugins/ml/components/controls';
 
-import { toastNotifications } from 'ui/notify';
+import { notify } from 'ui/notify';
 import uiRoutes from 'ui/routes';
 import { timefilter } from 'ui/timefilter';
 import { parseInterval } from 'ui/utils/parse_interval';
@@ -129,24 +129,24 @@ module.controller('MlTimeSeriesExplorerController', function (
           selectedJobIds = _.without(selectedJobIds, ...invalidIds);
           if (invalidIds.length > 0) {
             const s = invalidIds.length === 1 ? '' : 's';
-            let warningText = `You can't view requested job${s} ${invalidIds} in this dashboard`;
+            let warningText = `Requested job${s} ${invalidIds} cannot be viewed in this dashboard`;
             if (selectedJobIds.length === 0 && timeSeriesJobIds.length > 0) {
               warningText += ', auto selecting first job';
             }
-            toastNotifications.addWarning(warningText);
+            notify.warning(warningText, { lifetime: 30000 });
           }
 
           if (selectedJobIds.length > 1 || mlJobSelectService.groupIds.length) {
           // if more than one job or a group has been loaded from the URL
             if (selectedJobIds.length > 1) {
             // if more than one job, select the first job from the selection.
-              toastNotifications.addWarning('You can only view one job at a time in this dashboard');
+              notify.warning('Only one job may be viewed at a time in this dashboard', { lifetime: 30000 });
               mlJobSelectService.setJobIds([selectedJobIds[0]]);
             } else {
             // if a group has been loaded
               if (selectedJobIds.length > 0) {
               // if the group contains valid jobs, select the first
-                toastNotifications.addWarning('You can only view one job at a time in this dashboard');
+                notify.warning('Only one job may be viewed at a time in this dashboard', { lifetime: 30000 });
                 mlJobSelectService.setJobIds([selectedJobIds[0]]);
               } else if ($scope.jobs.length > 0) {
               // if there are no valid jobs in the group but there are valid jobs
@@ -660,7 +660,7 @@ module.controller('MlTimeSeriesExplorerController', function (
     let detectorIndex = appStateDtrIdx !== undefined ? appStateDtrIdx : +(viewableDetectors[0].index);
     if (_.find(viewableDetectors, { 'index': '' + detectorIndex }) === undefined) {
       const warningText = `Requested detector index ${detectorIndex} is not valid for job ${$scope.selectedJob.job_id}`;
-      toastNotifications.addWarning(warningText);
+      notify.warning(warningText, { lifetime: 30000 });
       detectorIndex = +(viewableDetectors[0].index);
       $scope.appState.mlTimeSeriesExplorer.detectorIndex = detectorIndex;
       $scope.appState.save();

@@ -12,7 +12,7 @@ import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 
 import {
-  EuiButtonIcon,
+  EuiButtonEmpty,
   EuiContextMenuPanel,
   EuiContextMenuItem,
   EuiPopover
@@ -337,13 +337,15 @@ export class LinksMenu extends Component {
     const { anomaly, showViewSeriesLink } = this.props;
 
     const button = (
-      <EuiButtonIcon
+      <EuiButtonEmpty
         size="s"
-        color="text"
+        type="text"
+        iconType="arrowDown"
+        iconSide="right"
         onClick={this.onButtonClick}
-        iconType="gear"
-        aria-label="Select action"
-      />
+      >
+        Open link
+      </EuiButtonEmpty>
     );
 
     const items = [];
@@ -385,16 +387,6 @@ export class LinksMenu extends Component {
       );
     }
 
-    items.push(
-      <EuiContextMenuItem
-        key="create_rule"
-        icon="controlsHorizontal"
-        onClick={() => { this.closePopover(); this.props.showRuleEditorFlyout(anomaly); }}
-      >
-        Configure rules
-      </EuiContextMenuItem>
-    );
-
     return (
       <EuiPopover
         id="singlePanel"
@@ -417,6 +409,5 @@ LinksMenu.propTypes = {
   showViewSeriesLink: PropTypes.bool,
   isAggregatedData: PropTypes.bool,
   interval: PropTypes.string,
-  timefilter: PropTypes.object.isRequired,
-  showRuleEditorFlyout: PropTypes.func
+  timefilter: PropTypes.object.isRequired
 };

@@ -24,7 +24,6 @@ import 'uiExports/embeddableFactories';
 import 'uiExports/navbarExtensions';
 import 'uiExports/docViews';
 import 'uiExports/fieldFormats';
-import 'uiExports/search';
 
 import _ from 'lodash';
 import 'ui/autoload/all';

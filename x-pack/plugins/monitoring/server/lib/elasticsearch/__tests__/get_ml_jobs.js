@@ -21,7 +21,6 @@ describe('Get ML Jobs', () => {
       state: 'opened',
       data_counts: { processed_record_count: 1 },
       model_size_stats: { model_bytes: 293847 },
-      forecasts_stats: { total: 5 },
       node: { id: 'node-01', name: 'nameOfNode1' }
     });
     set(jobStats, 'hits.hits[1]._source.job_stats', {
@@ -29,7 +28,6 @@ describe('Get ML Jobs', () => {
       state: 'opened',
       data_counts: { processed_record_count: 3 },
       model_size_stats: { model_bytes: 39045 },
-      forecasts_stats: { total: 0 },
       node: { id: 'node-02', name: 'nameOfNode2' }
     });
     set(jobStats, 'hits.hits[2]._source.job_stats', {
@@ -37,7 +35,6 @@ describe('Get ML Jobs', () => {
       state: 'opened',
       data_counts: { processed_record_count: 5 },
       model_size_stats: { model_bytes: 983457 },
-      forecasts_stats: { total: 4 },
       node: { id: 'node-03', name: 'nameOfNode3' }
     });
 
@@ -48,7 +45,6 @@ describe('Get ML Jobs', () => {
         state: 'opened',
         data_counts: { processed_record_count: 1 },
         model_size_stats: { model_bytes: 293847 },
-        forecasts_stats: { total: 5 },
         node: { id: 'node-01', name: 'nameOfNode1' }
       },
       {
@@ -56,7 +52,6 @@ describe('Get ML Jobs', () => {
         state: 'opened',
         data_counts: { processed_record_count: 3 },
         model_size_stats: { model_bytes: 39045 },
-        forecasts_stats: { total: 0 },
         node: { id: 'node-02', name: 'nameOfNode2' }
       },
       {
@@ -64,7 +59,6 @@ describe('Get ML Jobs', () => {
         state: 'opened',
         data_counts: { processed_record_count: 5 },
         model_size_stats: { model_bytes: 983457 },
-        forecasts_stats: { total: 4 },
         node: { id: 'node-03', name: 'nameOfNode3' }
       }
     ]);

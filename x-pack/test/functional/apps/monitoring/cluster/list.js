@@ -10,7 +10,6 @@ import { getLifecycleMethods } from '../_get_lifecycle_methods';
 export default function ({ getService, getPageObjects }) {
   const clusterList = getService('monitoringClusterList');
   const clusterOverview = getService('monitoringClusterOverview');
-  const testSubjects = getService('testSubjects');
   const PageObjects = getPageObjects(['monitoring', 'header']);
 
   describe('Cluster listing', () => {
@@ -58,7 +57,14 @@ export default function ({ getService, getPageObjects }) {
         it('clicking the basic cluster shows a toast message', async () => {
           const basicClusterLink = await clusterList.getClusterLink(UNSUPPORTED_CLUSTER_UUID);
           await basicClusterLink.click();
-          expect(await testSubjects.exists('monitoringLicenseWarning', 2000)).to.be(true);
+
+          const actualMessage = await PageObjects.header.getToastMessage();
+          const expectedMessage = (
+            `You can't view the "clustertwo" cluster because the Basic license does not support multi-cluster monitoring.
+Need to monitor multiple clusters? Get a license with full functionality to enjoy multi-cluster monitoring.`
+          );
+          expect(actualMessage).to.be(expectedMessage);
+          await PageObjects.header.clickToastOK();
         });
 
         /*
@@ -115,7 +121,14 @@ export default function ({ getService, getPageObjects }) {
         it('clicking the non-primary basic cluster shows a toast message', async () => {
           const basicClusterLink = await clusterList.getClusterLink(UNSUPPORTED_CLUSTER_UUID);
           await basicClusterLink.click();
-          expect(await testSubjects.exists('monitoringLicenseWarning', 2000)).to.be(true);
+
+          const actualMessage = await PageObjects.header.getToastMessage();
+          const expectedMessage = (
+            `You can't view the "staging" cluster because the Basic license does not support multi-cluster monitoring.
+Need to monitor multiple clusters? Get a license with full functionality to enjoy multi-cluster monitoring.`
+          );
+          expect(actualMessage).to.be(expectedMessage);
+          await PageObjects.header.clickToastOK();
         });
 
         it('clicking the primary basic cluster goes to overview', async () => {

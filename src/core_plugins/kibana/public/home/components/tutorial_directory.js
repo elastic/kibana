@@ -31,7 +31,6 @@ import {
   EuiFlexGrid,
   EuiSpacer,
   EuiTitle,
-  EuiPageBody,
 } from '@elastic/eui';
 
 
@@ -97,8 +96,7 @@ export class TutorialDirectory extends React.Component {
         description: tutorialConfig.shortDescription,
         url: this.props.addBasePath(`#/home/tutorial/${tutorialConfig.id}`),
         elasticCloud: tutorialConfig.elasticCloud,
-        // Beta label is skipped on the tutorial overview page for now. Too many beta labels.
-        //isBeta: tutorialConfig.isBeta,
+        isBeta: tutorialConfig.isBeta,
       };
     });
 
@@ -215,27 +213,25 @@ export class TutorialDirectory extends React.Component {
   render() {
     return (
       <EuiPage className="home">
-        <EuiPageBody>
 
-          <a className="kuiLink" href="#/home">Home</a>
-          <EuiSpacer size="s" />
-          <EuiTitle size="l">
-            <h1>
-              Add Data to Kibana
-            </h1>
-          </EuiTitle>
+        <a className="kuiLink" href="#/home">Home</a>
+        <EuiSpacer size="s" />
+        <EuiTitle size="l">
+          <h1>
+            Add Data to Kibana
+          </h1>
+        </EuiTitle>
 
-          <EuiSpacer size="m" />
+        <EuiSpacer size="m" />
 
-          <EuiTabs>
-            {this.renderTabs()}
-          </EuiTabs>
-          <EuiSpacer />
-          <EuiFlexGrid columns={4}>
-            { this.renderTab() }
-          </EuiFlexGrid>
+        <EuiTabs>
+          {this.renderTabs()}
+        </EuiTabs>
+        <EuiSpacer />
+        <EuiFlexGrid columns={4}>
+          { this.renderTab() }
+        </EuiFlexGrid>
 
-        </EuiPageBody>
       </EuiPage>
     );
   }

@@ -20,12 +20,13 @@
 
 import { SavedObjectNotFound } from '../errors';
 import { uiModules } from '../modules';
-import { toastNotifications } from 'ui/notify';
 
 uiModules.get('kibana/url')
   .service('redirectWhenMissing', function (Private) { return Private(RedirectWhenMissingProvider); });
 
-export function RedirectWhenMissingProvider($location, kbnUrl, Promise) {
+export function RedirectWhenMissingProvider($location, kbnUrl, Notifier, Promise) {
+  const notify = new Notifier();
+
   /**
    * Creates an error handler that will redirect to a url when a SavedObjectNotFound
    * error is thrown
@@ -54,7 +55,7 @@ export function RedirectWhenMissingProvider($location, kbnUrl, Promise) {
 
       url += (url.indexOf('?') >= 0 ? '&' : '?') + `notFound=${err.savedObjectType}`;
 
-      toastNotifications.addWarning(err.message);
+      notify.warning(err);
       kbnUrl.redirect(url);
       return Promise.halt();
     };

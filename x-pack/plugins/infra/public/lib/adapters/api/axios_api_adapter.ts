@@ -5,16 +5,15 @@
  */
 
 import axios, { AxiosInstance } from 'axios';
-import { InfraApiAdapter, InfraFrameworkAdapter, InfraRequestConfig } from '../../lib';
+import { InfraApiAdapter, InfraRequestConfig } from '../../lib';
 
 let globalAPI: AxiosInstance;
 
-interface InfraAxiosApiAdapterDependencies {
-  framework: InfraFrameworkAdapter;
-}
-
 export class InfraAxiosApiAdapter implements InfraApiAdapter {
-  constructor(private readonly libs: InfraAxiosApiAdapterDependencies) {}
+  public kbnVersion: string;
+  constructor({ kbnVersion }: { kbnVersion: string }) {
+    this.kbnVersion = kbnVersion;
+  }
 
   get _api() {
     if (globalAPI) {
@@ -25,7 +24,7 @@ export class InfraAxiosApiAdapter implements InfraApiAdapter {
       headers: {
         Accept: 'application/json',
         'Content-Type': 'application/json',
-        'kbn-version': this.libs.framework.kbnVersion,
+        'kbn-version': this.kbnVersion,
       },
     });
     // Add a request interceptor

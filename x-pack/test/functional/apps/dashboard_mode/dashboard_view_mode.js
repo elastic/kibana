@@ -57,11 +57,12 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.settings.navigateTo();
         await PageObjects.security.clickUsersSection();
         await PageObjects.security.clickCreateNewUser();
+
         await testSubjects.setValue('userFormUserNameInput', 'dashuser');
         await testSubjects.setValue('passwordInput', '123456');
         await testSubjects.setValue('passwordConfirmationInput', '123456');
         await testSubjects.setValue('userFormFullNameInput', 'dashuser');
-        await testSubjects.setValue('userFormEmailInput', 'example@example.com');
+        await testSubjects.setValue('userFormEmailInput', 'my@email.com');
         await PageObjects.security.assignRoleToUser('kibana_dashboard_only_user');
         await PageObjects.security.assignRoleToUser('logstash-data');
 
@@ -75,7 +76,7 @@ export default function ({ getService, getPageObjects }) {
         await testSubjects.setValue('passwordInput', '123456');
         await testSubjects.setValue('passwordConfirmationInput', '123456');
         await testSubjects.setValue('userFormFullNameInput', 'mixeduser');
-        await testSubjects.setValue('userFormEmailInput', 'example@example.com');
+        await testSubjects.setValue('userFormEmailInput', 'my@email.com');
         await PageObjects.security.assignRoleToUser('kibana_dashboard_only_user');
         await PageObjects.security.assignRoleToUser('kibana_user');
         await PageObjects.security.assignRoleToUser('logstash-data');
@@ -90,7 +91,7 @@ export default function ({ getService, getPageObjects }) {
         await testSubjects.setValue('passwordInput', '123456');
         await testSubjects.setValue('passwordConfirmationInput', '123456');
         await testSubjects.setValue('userFormFullNameInput', 'mixeduser');
-        await testSubjects.setValue('userFormEmailInput', 'example@example.com');
+        await testSubjects.setValue('userFormEmailInput', 'my@email.com');
         await PageObjects.security.assignRoleToUser('kibana_dashboard_only_user');
         await PageObjects.security.assignRoleToUser('superuser');
 

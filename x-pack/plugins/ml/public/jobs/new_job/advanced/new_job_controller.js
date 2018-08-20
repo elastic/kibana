@@ -98,8 +98,6 @@ module.controller('MlNewJob',
       '_type',
       '_uid',
       '_version',
-      '_feature',
-      '_ignored',
     ];
 
     const allowedInfluencerTypes = [
