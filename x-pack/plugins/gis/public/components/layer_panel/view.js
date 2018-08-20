@@ -20,6 +20,12 @@ import {
 } from '@elastic/eui';
 
 export function LayerPanel({ selectedLayer }) {
+
+  if (!selectedLayer) {
+    //todo: temp placeholder to bypass state-bug
+    return (<div />);
+  }
+
   return (
     <EuiFlyout
       onClose={() => console.warn('EuiFlyout#onClose not implemented.')}
@@ -27,7 +33,7 @@ export function LayerPanel({ selectedLayer }) {
     >
       <EuiFlyoutHeader>
         <EuiTitle size="l">
-          <h2>{selectedLayer.name}</h2>
+          <h2>{selectedLayer.getDisplayName()}</h2>
         </EuiTitle>
         <EuiSpacer size="m"/>
         <EuiSpacer/>

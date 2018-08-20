@@ -6,15 +6,34 @@
 
 import { createSelector } from 'reselect';
 import { LAYER_TYPE } from '../shared/layers/layer';
+import { TileLayer } from '../shared/layers/tile_layer';
+import { VectorLayer } from '../shared/layers/vector_layer';
 import _ from 'lodash';
 
 export const getMapConstants = ({ map }) => map && map.mapConstants;
 
-export const getSelectedLayer = ({ map }) => map && map.selectedLayer;
+export const getSelectedLayerInstance = ({ map }) => {
+  if (!map.selectedLayer) {
+    return null;
+  }
+  return createLayerInstance(map.selectedLayer);
+};
+
+function createLayerInstance(layerDescriptor) {
+  if (layerDescriptor.type === TileLayer.type) {
+    return new TileLayer(layerDescriptor);
+  } else if (layerDescriptor.type === VectorLayer.type) {
+    return new VectorLayer(layerDescriptor);
+  } else {
+    throw new Error(`Unrecognized layerType ${layerDescriptor.type}`);
+  }
+}
 
 export const getLayerList = ({ map }) => map && map.layerList;
 
-export const getSources = ({ map }) => map && map.sources;
+export const getLayerInstanceList = ({ map }) => {
+  return map.layerList ?  map.layerList.map(layerDescriptor => createLayerInstance(layerDescriptor)) : [];
+};
 
 export const getLayerLoading = ({ map }) => map && map.layerLoading;
 
@@ -35,26 +54,19 @@ export function getLayerById(state, id) {
 
 export const getCurrentLayerStyle = createSelector(
   getLayerList,
-  getSelectedLayer,
-  (layerList, { id }) => {
-    const layer = id && layerList.find(layer => id === layer.id);
+  getSelectedLayerInstance,
+  (layerList, layerInstance) => {
+    const layer = layerInstance.getId() && layerList.find(layer => layerInstance.getId() === layer.id);
     return layer && layer.style;
   }
 );
 
 // Return selector instance for each component
 export const makeGetStyleDescriptor = () => createSelector(
-  getSelectedLayer,
-  selectedLayer => {
-    const isVector = selectedLayer.type === LAYER_TYPE.VECTOR;
+  getSelectedLayerInstance,
+  selectedLayerInstance => {
+    const isVector = selectedLayerInstance.getType() === LAYER_TYPE.VECTOR;
     const styleDescriptor = {
-      mapboxCss: {
-        name: 'CSS',
-        mods: [{
-          name: 'cssText',
-          apply: isVector
-        }]
-      },
       vectorAdjustment: {
         name: 'Vector Adjustment',
         mods: [{

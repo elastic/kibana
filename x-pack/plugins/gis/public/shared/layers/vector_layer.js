@@ -8,12 +8,14 @@ import { ALayer, LAYER_TYPE } from './layer';
 
 export class VectorLayer extends ALayer {
 
-  constructor() {
-    super();
+  static type = LAYER_TYPE.VECTOR;
+
+  constructor(layerDescriptor) {
+    super(layerDescriptor);
   }
 
-  static create(options) {
-    const vectorLayerDescriptor = super.create(options);
+  static createDescriptor(options) {
+    const vectorLayerDescriptor = super.createDescriptor(options);
     vectorLayerDescriptor.type = LAYER_TYPE.VECTOR;
     vectorLayerDescriptor.style = {
       ...vectorLayerDescriptor.style,

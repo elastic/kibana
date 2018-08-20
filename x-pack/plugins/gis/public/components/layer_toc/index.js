@@ -8,7 +8,7 @@ import { connect } from 'react-redux';
 import { LayerTOC } from './view';
 import { updateFlyout, FLYOUT_STATE } from '../../store/ui';
 import { updateLayerOrder, setSelectedLayer } from "../../actions/store_actions";
-import { getLayerList } from "../../selectors/map_selectors";
+import { getLayerInstanceList } from "../../selectors/map_selectors";
 
 const mapDispatchToProps = {
   showLayerDetails: layer =>
@@ -18,7 +18,7 @@ const mapDispatchToProps = {
 
 function mapStateToProps(state = {}) {
   return {
-    layerList: getLayerList(state)
+    layerList: getLayerInstanceList(state)
   };
 }
 

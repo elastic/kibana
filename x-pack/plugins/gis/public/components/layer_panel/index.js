@@ -6,14 +6,14 @@
 
 import { connect } from 'react-redux';
 import { LayerPanel } from './view';
-import { getSelectedLayer } from '../../selectors/map_selectors';
+import { getSelectedLayerInstance } from '../../selectors/map_selectors';
 
 const mapDispatchToProps = {
 };
 
 function mapStateToProps(state = {}) {
   return {
-    selectedLayer: getSelectedLayer(state)
+    selectedLayer: getSelectedLayerInstance(state)
   };
 }
 
