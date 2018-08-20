@@ -38,8 +38,7 @@ export const createUninstallRoute = () => ({
       });
 
       if (!sampleDataset) {
-        h.response().code(404);
-        return;
+        return h.response().code(404);
       }
 
       const { callWithRequest } = server.plugins.elasticsearch.getCluster('data');
