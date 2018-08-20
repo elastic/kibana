@@ -14,6 +14,7 @@ import { GitOperations } from '../git_operations';
 import { Log } from '../log';
 import { LspService } from '../lsp/lsp_service';
 import { ServerOptions } from '../server_options';
+import { detectLanguage } from '../utils/detect_language';
 import { AbstractIndexer } from './abstract_indexer';
 import { IndexCreationRequest } from './index_creation_request';
 import {
@@ -111,10 +112,12 @@ export class LspIndexer extends AbstractIndexer {
     const localFilePath = `${localRepoPath}${filePath}`;
     const readFile = util.promisify(fs.readFile);
     const content = await readFile(localFilePath, 'utf8');
+    const language = await detectLanguage(filePath, Buffer.from(content));
     const body: Document = {
       repoUri,
       path: filePath,
       content,
+      language,
       qnames: Array.from(symbolNames),
     };
     await this.client.index({

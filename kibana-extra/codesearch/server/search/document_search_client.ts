@@ -149,9 +149,11 @@ export class DocumentSearchClient extends AbstractSearchClient {
         // Might need refactoring.
         const content: string[] = highlight.content;
         let termContent: string[] = [];
-        content.forEach((c: string) => {
-          termContent = termContent.concat(this.extractKeywords(c));
-        });
+        if (content) {
+          content.forEach((c: string) => {
+            termContent = termContent.concat(this.extractKeywords(c));
+          });
+        }
         const hitsContent = this.termsToHits(doc.content, termContent);
         return hitsContent;
       }
