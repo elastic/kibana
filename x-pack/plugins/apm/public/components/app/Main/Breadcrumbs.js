@@ -11,8 +11,6 @@ import { routes } from './routeConfig';
 import { flatten, capitalize } from 'lodash';
 
 class Breadcrumbs extends React.Component {
-  componentWillUpdate() {}
-
   render() {
     const { breadcrumbs, location } = this.props;
     const { _g = '', kuery = '' } = toQuery(location.search);
