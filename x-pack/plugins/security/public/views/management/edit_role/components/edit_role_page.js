@@ -119,6 +119,7 @@ export class EditRolePage extends Component {
             name={'name'}
             value={this.state.role.name || ''}
             onChange={this.onNameChange}
+            data-test-subj={'roleFormNameInput'}
             readOnly={isReservedRole(this.props.role) || this.editingExistingRole()}
           />
         </EuiFormRow>
@@ -192,10 +193,20 @@ export class EditRolePage extends Component {
     return (
       <EuiFlexGroup responsive={false}>
         <EuiFlexItem grow={false}>
-          <EuiButton fill onClick={this.saveRole} disabled={isReservedRole(this.props.role)}>{saveText}</EuiButton>
+          <EuiButton
+            data-test-subj={`roleFormSaveButton`}
+            fill
+            onClick={this.saveRole}
+            disabled={isReservedRole(this.props.role)}
+          >
+            {saveText}
+          </EuiButton>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiButtonEmpty onClick={this.backToRoleList}>
+          <EuiButtonEmpty
+            data-test-subj={`roleFormCancelButton`}
+            onClick={this.backToRoleList}
+          >
             Cancel
           </EuiButtonEmpty>
         </EuiFlexItem>

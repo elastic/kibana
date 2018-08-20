@@ -86,6 +86,7 @@ export class SpaceAwarePrivilegeForm extends Component {
             helpText={helptext}
           >
             <PrivilegeSelector
+              data-test-subj={'kibanaMinimumPrivilege'}
               availablePrivileges={availablePrivileges}
               value={basePrivilege}
               disabled={isReservedRole(role)}

@@ -14,6 +14,7 @@ import { NO_PRIVILEGE_VALUE } from '../../../lib/constants';
 
 export class PrivilegeSelector extends Component {
   static propTypes = {
+    ['data-test-subj']: PropTypes.string,
     availablePrivileges: PropTypes.array.isRequired,
     onChange: PropTypes.func.isRequired,
     value: PropTypes.string,
@@ -46,6 +47,7 @@ export class PrivilegeSelector extends Component {
 
     return (
       <EuiSelect
+        data-test-subj={this.props['data-test-subj']}
         options={options}
         hasNoInitialSelection={!allowNone && !value}
         value={value || undefined}

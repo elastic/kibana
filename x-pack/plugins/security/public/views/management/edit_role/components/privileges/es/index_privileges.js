@@ -52,6 +52,7 @@ export class IndexPrivileges extends Component {
       <IndexPrivilegeForm
         key={idx}
         {...props}
+        formIndex={idx}
         validator={this.props.validator}
         allowDelete={!props.isReservedRole}
         indexPrivilege={indexPrivilege}

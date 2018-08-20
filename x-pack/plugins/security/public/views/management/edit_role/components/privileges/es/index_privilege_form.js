@@ -23,6 +23,7 @@ const toOption = (value) => ({ label: value });
 
 export class IndexPrivilegeForm extends Component {
   static propTypes = {
+    formIndex: PropTypes.number,
     indexPrivilege: PropTypes.object.isRequired,
     indexPatterns: PropTypes.array.isRequired,
     availableFields: PropTypes.array,
@@ -69,6 +70,7 @@ export class IndexPrivilegeForm extends Component {
           <EuiFlexItem>
             <EuiFormRow label={'Indices'} fullWidth={true} {...this.props.validator.validateIndexPrivilege(this.props.indexPrivilege)}>
               <EuiComboBox
+                data-test-subj={`indicesInput${this.props.formIndex}`}
                 options={this.props.indexPatterns.map(toOption)}
                 selectedOptions={this.props.indexPrivilege.names.map(toOption)}
                 onCreateOption={this.onCreateIndexPatternOption}
@@ -80,6 +82,7 @@ export class IndexPrivilegeForm extends Component {
           <EuiFlexItem>
             <EuiFormRow label={'Privileges'} fullWidth={true}>
               <EuiComboBox
+                data-test-subj={`privilegesInput${this.props.formIndex}`}
                 options={getIndexPrivileges().map(toOption)}
                 selectedOptions={this.props.indexPrivilege.privileges.map(toOption)}
                 onChange={this.onPrivilegeChange}
@@ -125,6 +128,7 @@ export class IndexPrivilegeForm extends Component {
           >
             <Fragment>
               <EuiComboBox
+                data-test-subj={`fieldInput${this.props.formIndex}`}
                 options={availableFields ? availableFields.map(toOption) : []}
                 selectedOptions={grant.map(toOption)}
                 onCreateOption={this.onCreateGrantedField}
@@ -155,6 +159,7 @@ export class IndexPrivilegeForm extends Component {
         {!this.props.isReservedRole &&
           <EuiFlexItem>
             <EuiSwitch
+              data-test-subj={`restrictDocumentsQuery${this.props.formIndex}`}
               label={'Restrict documents query'}
               compressed={true}
               value={this.state.queryExanded}
@@ -166,6 +171,7 @@ export class IndexPrivilegeForm extends Component {
           <EuiFlexItem>
             <EuiFormRow label={'Granted documents query'} fullWidth={true}>
               <EuiTextArea
+                data-test-subj={`queryInput${this.props.formIndex}`}
                 style={{ resize: "none" }}
                 fullWidth={true}
                 value={indexPrivilege.query}

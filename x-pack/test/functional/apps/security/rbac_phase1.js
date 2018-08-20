@@ -25,27 +25,37 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.settings.navigateTo();
       await PageObjects.security.clickElasticsearchRoles();
       await PageObjects.security.addRole('rbac_all', {
-        "kibana": ["all"],
-        "indices": [{
-          "names": [ "logstash-*" ],
-          "privileges": [ "read", "view_index_metadata" ]
-        }]
+        kibana: {
+          global: ['all']
+        },
+        elasticsearch: {
+          "indices": [{
+            "names": ["logstash-*"],
+            "privileges": ["read", "view_index_metadata"]
+          }]
+        }
       });
 
       await PageObjects.security.clickElasticsearchRoles();
       await PageObjects.security.addRole('rbac_read', {
-        "kibana": ["read"],
-        "indices": [{
-          "names": [ "logstash-*" ],
-          "privileges": [ "read", "view_index_metadata" ]
-        }]
+        kibana: {
+          global: ['read']
+        },
+        elasticsearch: {
+          "indices": [{
+            "names": ["logstash-*"],
+            "privileges": ["read", "view_index_metadata"]
+          }]
+        }
       });
       await PageObjects.security.clickElasticsearchUsers();
       log.debug('After Add user new: , userObj.userName');
-      await PageObjects.security.addUser({ username: 'kibanauser', password: 'changeme',
+      await PageObjects.security.addUser({
+        username: 'kibanauser', password: 'changeme',
         confirmPassword: 'changeme', fullname: 'kibanafirst kibanalast',
         email: 'kibanauser@myEmail.com', save: true,
-        roles: ['rbac_all'] });
+        roles: ['rbac_all']
+      });
       log.debug('After Add user: , userObj.userName');
       const users = indexBy(await PageObjects.security.getElasticsearchUsers(), 'username');
       log.debug('actualUsers = %j', users);
@@ -55,10 +65,12 @@ export default function ({ getService, getPageObjects }) {
       expect(users.kibanauser.reserved).to.be(false);
       await PageObjects.security.clickElasticsearchUsers();
       log.debug('After Add user new: , userObj.userName');
-      await PageObjects.security.addUser({ username: 'kibanareadonly', password: 'changeme',
+      await PageObjects.security.addUser({
+        username: 'kibanareadonly', password: 'changeme',
         confirmPassword: 'changeme', fullname: 'kibanareadonlyFirst kibanareadonlyLast',
         email: 'kibanareadonly@myEmail.com', save: true,
-        roles: ['rbac_read'] });
+        roles: ['rbac_read']
+      });
       log.debug('After Add user: , userObj.userName');
       const users1 = indexBy(await PageObjects.security.getElasticsearchUsers(), 'username');
       const user = users1.kibanareadonly;
