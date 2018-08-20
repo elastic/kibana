@@ -96,7 +96,7 @@ export class DeletePhase extends PureComponent {
                   validate();
                 }}
               >
-                Deactive cold phase
+                Deactive delete phase
               </EuiButton>
             </div>
 
