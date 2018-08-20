@@ -40,17 +40,6 @@ export const getLayerLoading = ({ map }) => map && map.layerLoading;
 export const getTemporaryLayers = ({ map }) => map &&
   map.layerList.filter(({ temporary }) => temporary);
 
-const getLayersById = createSelector(
-  getLayerList,
-  layerList => layerList.reduce((accu, layer) => ({ ...accu, [layer.id]: layer }), {})
-);
-
-export function getLayerById(state, id) {
-  return createSelector(
-    getLayersById,
-    layersByIdList => _.get(layersByIdList, id)
-  )(state);
-}
 
 export const getCurrentLayerStyle = createSelector(
   getLayerList,
