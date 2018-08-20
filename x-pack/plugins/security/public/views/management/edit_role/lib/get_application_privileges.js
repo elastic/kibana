@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 export function getKibanaPrivilegesViewModel(applicationPrivileges, roleKibanaPrivileges) {
-  const viewModel = applicationPrivileges.global.reduce((acc, applicationPrivilege) => {
-    acc[applicationPrivilege.name] = false;
+  const viewModel = Object.keys(applicationPrivileges.global).reduce((acc, applicationPrivilege) => {
+    acc[applicationPrivilege] = false;
     return acc;
   }, {});
 
