@@ -17,70 +17,157 @@
  * under the License.
  */
 
-import { BehaviorSubject } from 'rxjs';
-import { MutableLoggerFactory } from '../logger_factory';
+const mockStreamWrite = jest.fn();
+jest.mock('fs', () => ({
+  constants: {},
+  createWriteStream: jest.fn(() => ({ write: mockStreamWrite })),
+}));
+
+const timestamp = new Date(Date.UTC(2012, 1, 1));
+const mockConsoleLog = jest.spyOn(global.console, 'log').mockImplementation(() => {
+  // noop
+});
+jest.spyOn(global, 'Date').mockImplementation(() => timestamp);
+
+import { createWriteStream } from 'fs';
+const mockCreateWriteStream = createWriteStream as jest.Mock<typeof createWriteStream>;
+
 import { LoggingConfig } from '../logging_config';
 import { LoggingService } from '../logging_service';
 
-const createConfig = () => {
-  return new LoggingConfig({
-    appenders: new Map(),
-    loggers: [],
-    root: {
-      appenders: ['default'],
-      level: 'info',
-    },
-  });
-};
-
-const getLastMockCallArgs = (mockFunction: jest.Mock<(config: LoggingConfig) => void>) => {
-  expect(mockFunction).toHaveBeenCalled();
-  return mockFunction.mock.calls[mockFunction.mock.calls.length - 1];
-};
-
-let factory: MutableLoggerFactory;
 let service: LoggingService;
-let updateConfigMock: jest.Mock<(config: LoggingConfig) => void>;
+beforeEach(() => (service = new LoggingService()));
 
-beforeEach(() => {
-  factory = new MutableLoggerFactory();
-  updateConfigMock = jest.spyOn(factory, 'updateConfig').mockImplementation(() => {
-    // noop
-  });
-  jest.spyOn(factory, 'close').mockImplementation(() => {
-    // noop
-  });
-
-  service = new LoggingService(factory);
+afterEach(() => {
+  mockConsoleLog.mockClear();
+  mockCreateWriteStream.mockClear();
+  mockStreamWrite.mockClear();
 });
 
-test('`upgrade()` updates logging factory config.', () => {
-  expect(factory.updateConfig).not.toHaveBeenCalled();
+test('uses default memory buffer logger until config is provided', () => {
+  const bufferAppendSpy = jest.spyOn((service as any).bufferAppender, 'append');
 
-  const config = createConfig();
-  const config$ = new BehaviorSubject<LoggingConfig>(config);
+  const logger = service.get('test', 'context');
+  logger.trace('trace message');
 
-  service.upgrade(config$.asObservable());
+  // We shouldn't create new buffer appender for another context.
+  const anotherLogger = service.get('test', 'context2');
+  anotherLogger.fatal('fatal message', { some: 'value' });
 
-  expect(updateConfigMock).toHaveBeenCalledTimes(1);
-  expect(getLastMockCallArgs(updateConfigMock)[0]).toBe(config);
-
-  const newConfig = createConfig();
-  config$.next(newConfig);
-  expect(updateConfigMock).toHaveBeenCalledTimes(2);
-  expect(getLastMockCallArgs(updateConfigMock)[0]).toBe(newConfig);
+  expect(bufferAppendSpy.mock.calls).toMatchSnapshot();
 });
 
-test('`stop()` closes logger factory and stops config updates.', async () => {
-  const config$ = new BehaviorSubject<LoggingConfig>(createConfig());
+test('flushes memory buffer logger and switches to real logger once config is provided', () => {
+  const logger = service.get('test', 'context');
 
-  service.upgrade(config$.asObservable());
-  updateConfigMock.mockReset();
+  logger.trace('buffered trace message');
+  logger.info('buffered info message', { some: 'value' });
+  logger.fatal('buffered fatal message');
+
+  const bufferAppendSpy = jest.spyOn((service as any).bufferAppender, 'append');
+
+  // Switch to console appender with `info` level, so that `trace` message won't go through.
+  service.upgrade(
+    new LoggingConfig(
+      LoggingConfig.schema.validate({
+        appenders: { default: { kind: 'console', layout: { kind: 'json' } } },
+        root: { level: 'info' },
+      })
+    )
+  );
+
+  expect(mockConsoleLog.mock.calls).toMatchSnapshot('buffered messages');
+  mockConsoleLog.mockClear();
+
+  // Now message should go straight to thew newly configured appender, not buffered one.
+  logger.info('some new info message');
+  expect(mockConsoleLog.mock.calls).toMatchSnapshot('new messages');
+  expect(bufferAppendSpy).not.toHaveBeenCalled();
+});
+
+test('appends records via multiple appenders.', () => {
+  const loggerWithoutConfig = service.get('some-context');
+  const testsLogger = service.get('tests');
+  const testsChildLogger = service.get('tests', 'child');
+
+  loggerWithoutConfig.info('You know, just for your info.');
+  testsLogger.warn('Config is not ready!');
+  testsChildLogger.error('Too bad that config is not ready :/');
+  testsChildLogger.info('Just some info that should not be logged.');
+
+  expect(mockConsoleLog).not.toHaveBeenCalled();
+  expect(mockCreateWriteStream).not.toHaveBeenCalled();
+
+  service.upgrade(
+    new LoggingConfig(
+      LoggingConfig.schema.validate({
+        appenders: {
+          default: { kind: 'console', layout: { kind: 'pattern' } },
+          file: { kind: 'file', layout: { kind: 'pattern' }, path: 'path' },
+        },
+        loggers: [
+          { appenders: ['file'], context: 'tests', level: 'warn' },
+          { context: 'tests.child', level: 'error' },
+        ],
+      })
+    )
+  );
+
+  // Now all logs should added to configured appenders.
+  expect(mockConsoleLog.mock.calls).toMatchSnapshot('console logs');
+  expect(mockStreamWrite.mock.calls).toMatchSnapshot('file logs');
+});
+
+test('uses `root` logger if context is not specified.', () => {
+  service.upgrade(
+    new LoggingConfig(
+      LoggingConfig.schema.validate({
+        appenders: { default: { kind: 'console', layout: { kind: 'pattern' } } },
+      })
+    )
+  );
+
+  const rootLogger = service.get();
+  rootLogger.info('This message goes to a root context.');
+
+  expect(mockConsoleLog.mock.calls).toMatchSnapshot();
+});
+
+test('`stop()` disposes all appenders.', async () => {
+  service.upgrade(
+    new LoggingConfig(
+      LoggingConfig.schema.validate({
+        appenders: { default: { kind: 'console', layout: { kind: 'json' } } },
+        root: { level: 'info' },
+      })
+    )
+  );
+
+  const bufferDisposeSpy = jest.spyOn((service as any).bufferAppender, 'dispose');
+  const consoleDisposeSpy = jest.spyOn((service as any).appenders.get('default'), 'dispose');
 
   await service.stop();
 
-  expect(factory.close).toHaveBeenCalled();
+  expect(bufferDisposeSpy).toHaveBeenCalledTimes(1);
+  expect(consoleDisposeSpy).toHaveBeenCalledTimes(1);
+});
 
-  config$.next(createConfig());
-  expect(updateConfigMock).not.toHaveBeenCalled();
+test('asLoggerFactory() only allows to create new loggers.', () => {
+  const logger = service.asLoggerFactory().get('test', 'context');
+
+  service.upgrade(
+    new LoggingConfig(
+      LoggingConfig.schema.validate({
+        appenders: { default: { kind: 'console', layout: { kind: 'json' } } },
+        root: { level: 'all' },
+      })
+    )
+  );
+
+  logger.trace('buffered trace message');
+  logger.info('buffered info message', { some: 'value' });
+  logger.fatal('buffered fatal message');
+
+  expect(Object.keys(service.asLoggerFactory())).toEqual(['get']);
+  expect(mockConsoleLog.mock.calls).toMatchSnapshot();
 });
