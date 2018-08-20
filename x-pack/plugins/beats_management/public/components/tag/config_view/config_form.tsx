@@ -141,7 +141,9 @@ export class ConfigForm extends React.Component<ComponentProps, any> {
                     name={schema.id}
                     helpText={schema.ui.helpText}
                     label={schema.ui.label}
-                    options={schema.options ? schema.options : []}
+                    options={[{ value: '', text: 'Please Select An Option' }].concat(
+                      schema.options || []
+                    )}
                     validations={schema.validations}
                     validationError={schema.error}
                     required={schema.required}
