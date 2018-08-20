@@ -8,6 +8,7 @@ import { uniq } from 'lodash';
 import { getExportTypesHandler } from './get_export_type_handler';
 import { getReportCountsByParameter } from './get_reporting_type_counts';
 import { KIBANA_REPORTING_TYPE } from '../../common/constants';
+import { KIBANA_STATS_TYPE_MONITORING } from '../../../monitoring/common/constants';
 
 /**
  * @typedef {Object} ReportingUsageStats  Almost all of these stats are optional.
@@ -157,7 +158,7 @@ export function getReportingUsageCollector(server) {
      */
     formatForBulkUpload: result => {
       return {
-        type: 'kibana_stats',
+        type: KIBANA_STATS_TYPE_MONITORING,
         payload: {
           usage: {
             xpack: {

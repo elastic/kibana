@@ -5,7 +5,7 @@
  */
 
 import { get, snakeCase } from 'lodash';
-import { KIBANA_USAGE_TYPE } from '../../../common/constants';
+import { KIBANA_USAGE_TYPE, KIBANA_STATS_TYPE_MONITORING } from '../../../common/constants';
 
 const TYPES = [
   'dashboard',
@@ -70,7 +70,7 @@ export function getKibanaUsageCollector(server) {
      */
     formatForBulkUpload: result => {
       return {
-        type: 'kibana_stats',
+        type: KIBANA_STATS_TYPE_MONITORING,
         payload: {
           usage: result
         }
