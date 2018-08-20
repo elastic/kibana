@@ -77,7 +77,10 @@ function filterCliArgs(args) {
 
     // Check if original argv has a later setting that overrides
     // the current val. If so, skip this val.
-    if (findIndexFrom(args, ++ind, opt => opt.split('=')[0] === val.split('=')[0]) > -1) {
+    if (
+      !allowsDuplicate(val) &&
+      findIndexFrom(args, ++ind, opt => opt.split('=')[0] === val.split('=')[0]) > -1
+    ) {
       return acc;
     }
 
@@ -94,6 +97,14 @@ function pipe(arr, ...fns) {
   return fns.reduce((acc, fn) => {
     return fn(acc);
   }, arr);
+}
+
+/**
+ * Checks whether a specific parameter is allowed to appear multiple
+ * times in the Kibana parameters.
+ */
+function allowsDuplicate(val) {
+  return ['--plugin-path'].includes(val.split('=')[0]);
 }
 
 function isBasePathSettingOverridden(args, val, ind) {
