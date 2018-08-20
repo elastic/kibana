@@ -142,7 +142,7 @@ describe('kfetch', () => {
 
   describe('interceptors', () => {
     describe('request', () => {
-      it('should add headers via interceptor', async () => {
+      it('should add headers and return synchronously', async () => {
         fetchMock.get('*', {});
         addInterceptor({
           request: config => ({
@@ -154,10 +154,30 @@ describe('kfetch', () => {
           }),
         });
 
-        await kfetch({
-          pathname: 'my/path',
-          headers: { myHeader: 'foo' },
+        await kfetch({ pathname: 'my/path', headers: { myHeader: 'foo' } });
+
+        expect(fetchMock.lastOptions('*').headers).toEqual({
+          addedByInterceptor: true,
+          myHeader: 'foo',
+          'Content-Type': 'application/json',
+          'kbn-version': 'my-version',
         });
+      });
+
+      it('should add headers and return promise', async () => {
+        fetchMock.get('*', {});
+        addInterceptor({
+          request: config =>
+            Promise.resolve({
+              ...config,
+              headers: {
+                ...config.headers,
+                addedByInterceptor: true,
+              },
+            }),
+        });
+
+        await kfetch({ pathname: 'my/path', headers: { myHeader: 'foo' } });
 
         expect(fetchMock.lastOptions('*').headers).toEqual({
           addedByInterceptor: true,
@@ -185,6 +205,20 @@ describe('kfetch', () => {
         }
       });
 
+      it('should return rejected promise', async () => {
+        expect.assertions(1);
+        fetchMock.get('*', { throws: new Error('Network issue') });
+        addInterceptor({
+          requestError: e => Promise.reject(new Error(`${e.message} intercepted`)),
+        });
+
+        try {
+          await kfetch({ pathname: 'my/path' });
+        } catch (e) {
+          expect(e.message).toBe('Network issue intercepted');
+        }
+      });
+
       it('should swallow error', async () => {
         fetchMock.get('*', { throws: new Error('Network issue') });
         addInterceptor({
@@ -197,7 +231,7 @@ describe('kfetch', () => {
     });
 
     describe('response', () => {
-      it('should modify response via interceptor', async () => {
+      it('should modify response and return synchronously', async () => {
         fetchMock.get('*', { foo: 'bar' });
         addInterceptor({
           response: res => ({
@@ -213,7 +247,7 @@ describe('kfetch', () => {
         });
       });
 
-      it('should modify response via promise interceptor', async () => {
+      it('should modify response and return promise', async () => {
         fetchMock.get('*', { foo: 'bar' });
         addInterceptor({
           response: res =>
