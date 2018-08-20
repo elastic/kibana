@@ -19,8 +19,8 @@
 
 import path from 'path';
 
-export const KIBANA_ARCHIVE_PATH = path.resolve(__dirname, '../functional/fixtures/es_archiver/dashboard/current/kibana');
-export const DATA_ARCHIVE_PATH = path.resolve(__dirname, '../functional/fixtures/es_archiver/dashboard/current/data');
+export const KIBANA_ARCHIVE_PATH = path.resolve(__dirname, '../../../functional/fixtures/es_archiver/dashboard/current/kibana');
+export const DATA_ARCHIVE_PATH = path.resolve(__dirname, '../../../functional/fixtures/es_archiver/dashboard/current/data');
 
 
 export default function ({ getService, getPageObjects, loadTestFile }) {
