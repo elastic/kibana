@@ -16,12 +16,10 @@ const updateLayerInList = (()=> {
   return (state, id, attribute, newValue) => {
     const { layerList } = state;
     const layerIdx = getLayerIndex(layerList, id);
-    console.log(state, id, attribute, newValue, layerIdx);
     // Update layer w/ new value. If no value provided, toggle boolean value
     const updatedLayer = { ...layerList[layerIdx], [ attribute ]: newValue || !layerList[layerIdx][attribute] };
     const updatedList = [...layerList.slice(0, layerIdx), updatedLayer,
       ...layerList.slice(layerIdx + 1) ];
-    console.log(updatedList);
     return { ...state, layerList: updatedList };
   };
 })();
@@ -31,14 +29,16 @@ const INITIAL_STATE = {
     mapCenter: [37.41, 8.82],
     mapInitZoomLevel: 4
   },
-  swapLayer: null,
   selectedLayer: null,
   layerList: [],
+  sources: [],
   layerLoading: false
 };
 
 export function map(state = INITIAL_STATE, action) {
   switch (action.type) {
+    // case SET_META:
+    //   return { ...state, meta: action.meta };
     case SET_SELECTED_LAYER:
       return { ...state, selectedLayer: state.layerList.find(layer => layer.id === action.selectedLayer) };
     case UPDATE_LAYER_ORDER:
@@ -54,11 +54,11 @@ export function map(state = INITIAL_STATE, action) {
         state.layerList.splice(action.position, 0, action.layer);
         newLayerlist = state.layerList.slice();
       }
-      return { ...state, ...{ layerList: newLayerlist } };
+      return { ...state, layerList: newLayerlist };
 
     case REMOVE_LAYER:
-      return { ...state, ...{ layerList: [ ...state.layerList.filter(
-        ({ name }) => name !== action.layerName) ] } };
+      return { ...state, layerList: [ ...state.layerList.filter(
+        ({ name }) => name !== action.layerName) ] };
     //TODO: Handle more than one
     case PROMOTE_TEMPORARY_LAYERS:
       const tempLayer = state.layerList.find(({ temporary }) => temporary);
