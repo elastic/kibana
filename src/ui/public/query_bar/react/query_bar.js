@@ -18,6 +18,7 @@
  */
 
 import React, { Component } from 'react';
+import PropTypes from 'prop-types';
 
 import {
   EuiFlexGroup,
@@ -82,3 +83,10 @@ export class QueryBar extends Component {
     );
   }
 }
+
+
+QueryBar.propTypes = {
+  query: PropTypes.string,
+  language: PropTypes.string,
+  onSubmit: PropTypes.func,
+};
