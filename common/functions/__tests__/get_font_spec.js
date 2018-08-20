@@ -1,17 +1,8 @@
 import expect from 'expect.js';
-import { getFontSpec } from '../plot/get_font_spec';
+import { defaultSpec, getFontSpec } from '../plot/get_font_spec';
 import { fontStyle } from './fixtures/test_styles';
 
 describe('getFontSpec', () => {
-  const defaultSpec = {
-    size: 14,
-    lHeight: 21,
-    style: 'normal',
-    weight: 'normal',
-    family: '"Open Sans", Helvetica, Arial, sans-serif',
-    color: '#000',
-  };
-
   describe('default output', () => {
     it('returns the default spec object', () => {
       expect(getFontSpec()).to.eql(defaultSpec);

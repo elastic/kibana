@@ -1,3 +1,4 @@
+import { openSans } from '../../../common/lib/fonts';
 import header from './header.png';
 
 export const metric = () => ({
@@ -11,7 +12,7 @@ export const metric = () => ({
 | demodata
 | math "unique(country)"
 | metric "Countries" 
-  metricFont={font size=48 family="'Open Sans', Helvetica, Arial, sans-serif" color="#000000" align="center" lHeight=48} 
-  labelFont={font size=14 family="'Open Sans', Helvetica, Arial, sans-serif" color="#000000" align="center"}
+  metricFont={font size=48 family="${openSans.value}" color="#000000" align="center" lHeight=48} 
+  labelFont={font size=14 family="${openSans.value}" color="#000000" align="center"}
 | render`,
 });

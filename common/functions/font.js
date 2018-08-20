@@ -1,4 +1,5 @@
 import inlineStyle from 'inline-style';
+import { openSans } from '../lib/fonts';
 
 export const font = () => ({
   name: 'font',
@@ -21,7 +22,7 @@ export const font = () => ({
     },
     family: {
       types: ['string'],
-      default: `'"Open Sans", Helvetica, Arial, sans-serif'`,
+      default: `"${openSans.value}"`,
       help: 'An acceptable CSS web font string',
     },
     color: {

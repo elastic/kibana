@@ -1,11 +1,12 @@
+import { openSans } from '../../lib/fonts';
 // converts the output of the font function to a flot font spec
 // for font spec, see https://github.com/flot/flot/blob/master/API.md#customizing-the-axes
-const defaultSpec = {
+export const defaultSpec = {
   size: 14,
   lHeight: 21,
   style: 'normal',
   weight: 'normal',
-  family: '"Open Sans", Helvetica, Arial, sans-serif',
+  family: openSans.value,
   color: '#000',
 };
 

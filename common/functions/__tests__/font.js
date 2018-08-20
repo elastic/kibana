@@ -1,4 +1,5 @@
 import expect from 'expect.js';
+import { openSans } from '../../lib/fonts';
 import { font } from '../font';
 import { functionWrapper } from '../../../__tests__/helpers/function_wrapper';
 
@@ -52,13 +53,10 @@ describe('font', () => {
         expect(result.css).to.contain('font-family:Optima, serif');
       });
 
-      it(`defaults to '"Open Sans", Helvetica, Arial, sans-serif'`, () => {
+      it(`defaults to "${openSans.value}"`, () => {
         const result = fn(null);
-        expect(result.spec).to.have.property(
-          'fontFamily',
-          `'"Open Sans", Helvetica, Arial, sans-serif'`
-        );
-        expect(result.css).to.contain(`font-family:'"Open Sans", Helvetica, Arial, sans-serif'`);
+        expect(result.spec).to.have.property('fontFamily', `"${openSans.value}"`);
+        expect(result.css).to.contain(`font-family:"${openSans.value}"`);
       });
     });
 

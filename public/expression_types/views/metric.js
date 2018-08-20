@@ -1,3 +1,5 @@
+import { openSans } from '../../../common/lib/fonts';
+
 export const metric = () => ({
   name: 'metric',
   displayName: 'Metric',
@@ -16,16 +18,14 @@ export const metric = () => ({
       displayName: 'Metric Text Settings',
       help: 'Fonts, alignment and color',
       argType: 'font',
-      default:
-        '{font size=48 family="\'Open Sans\', Helvetica, Arial, sans-serif" color="#000000" align=center lHeight=48}',
+      default: `{font size=48 family="${openSans.value}" color="#000000" align=center lHeight=48}`,
     },
     {
       name: 'labelFont',
       displayName: 'Label Text Settings',
       help: 'Fonts, alignment and color',
       argType: 'font',
-      default:
-        '{font size=18 family="\'Open Sans\', Helvetica, Arial, sans-serif" color="#000000" align=center}',
+      default: `{font size=18 family="${openSans.value}" color="#000000" align=center}`,
     },
   ],
 });

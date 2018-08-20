@@ -1,3 +1,4 @@
+import { openSans } from '../lib/fonts';
 export const metric = () => ({
   name: 'metric',
   aliases: [],
@@ -16,14 +17,12 @@ export const metric = () => ({
     metricFont: {
       types: ['style'],
       help: 'Font settings for the metric. Technically you can stick other styles in here too!',
-      default:
-        '{font size=48 family="\'Open Sans\', Helvetica, Arial, sans-serif" color="#000000" align=center lHeight=48}',
+      default: `{font size=48 family="${openSans.value}" color="#000000" align=center lHeight=48}`,
     },
     labelFont: {
       types: ['style'],
       help: 'Font settings for the label. Technically you can stick other styles in here too!',
-      default:
-        '{font size=14 family="\'Open Sans\', Helvetica, Arial, sans-serif" color="#000000" align=center}',
+      default: `{font size=14 family="${openSans.value}" color="#000000" align=center}`,
     },
   },
   fn: (context, { _, metricFont, labelFont }) => {
