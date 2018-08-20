@@ -147,7 +147,13 @@ describe('Get Beats Stats', () => {
           },
           architecture: {
             count: 1,
-            architectures: [ 'x86_64/darwin' ]
+            architectures: [
+              {
+                architecture: 'x86_64',
+                count: 1,
+                name: 'darwin'
+              }
+            ]
           }
         },
         FlV4ckTxQ0a78hmBkzzc9A: {

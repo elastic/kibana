@@ -119,7 +119,7 @@ export function processResults(results = [], { clusters, clusterHostSets, cluste
 
         // overall total (which should be the same number as the sum of all os.count values)
         clusters[clusterUuid].architecture.count += 1;
-        clusters[clusterUuid].architecture.architectures = Array.from(hostMap.keys());
+        clusters[clusterUuid].architecture.architectures = Array.from(hostMap.values());
       }
     };
 
