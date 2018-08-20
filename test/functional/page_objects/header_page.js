@@ -268,6 +268,16 @@ export function HeaderPageProvider({ getService, getPageObjects }) {
       await testSubjects.find('globalLoadingIndicator-hidden', defaultFindTimeout * 10);
     }
 
+    async getGlobalNavigationLink(linkText) {
+      const nav = await testSubjects.find('globalNav');
+      return await nav.findByPartialLinkText(linkText);
+    }
+
+    async clickGlobalNavigationLink(appTitle) {
+      const link = await this.getGlobalNavigationLink(appTitle);
+      await link.click();
+    }
+
     async getPrettyDuration() {
       return await testSubjects.getVisibleText('globalTimepickerRange');
     }
