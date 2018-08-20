@@ -49,14 +49,14 @@ describe('tabifyAggResponse Integration', function () {
     normalizeIds(vis);
 
     const resp = tabifyAggResponse(vis.getAggConfig(), fixtures.metricOnly, {
-      minimalColumns: vis.isHierarchical()
+      metricsAtAllLevels: vis.isHierarchical()
     });
 
     expect(resp).to.have.property('rows').and.property('columns');
     expect(resp.rows).to.have.length(1);
     expect(resp.columns).to.have.length(1);
 
-    expect(resp.rows[0]).to.eql({ 'col-0': 1000 });
+    expect(resp.rows[0]).to.eql({ 'col-0-agg_1': 1000 });
     expect(resp.columns[0]).to.have.property('aggConfig', vis.aggs[0]);
   });
 
@@ -159,7 +159,7 @@ describe('tabifyAggResponse Integration', function () {
       // the existing bucket and it's metric
 
       vis.isHierarchical = _.constant(true);
-      const tabbed = tabifyAggResponse(vis.getAggConfig(), esResp, { minimalColumns: false });
+      const tabbed = tabifyAggResponse(vis.getAggConfig(), esResp, { metricsAtAllLevels: true });
 
       expectColumns(tabbed, [ext, avg, src, avg, os, avg]);
 

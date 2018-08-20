@@ -23,7 +23,7 @@ import ngMock from 'ng_mock';
 import expect from 'expect.js';
 import fixtures from 'fixtures/fake_hierarchical_data';
 import sinon from 'sinon';
-import { TableResponseHandlerProvider } from '../../vis/response_handlers/table';
+import { LegacyResponseHandlerProvider } from '../../vis/response_handlers/legacy';
 import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
 import { VisProvider } from '../../vis';
 describe('AggTable Directive', function () {
@@ -37,7 +37,7 @@ describe('AggTable Directive', function () {
 
   beforeEach(ngMock.module('kibana'));
   beforeEach(ngMock.inject(function ($injector, Private, config) {
-    tableAggResponse = Private(TableResponseHandlerProvider).handler;
+    tableAggResponse = Private(LegacyResponseHandlerProvider).handler;
     indexPattern = Private(FixturesStubbedLogstashIndexPatternProvider);
     Vis = Private(VisProvider);
     settings = config;

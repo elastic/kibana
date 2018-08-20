@@ -17,7 +17,6 @@
  * under the License.
  */
 
-import _ from 'lodash';
 import { AggResponseIndexProvider } from '../../agg_response';
 import { VisResponseHandlersRegistryProvider } from '../../registry/vis_response_handlers';
 
@@ -30,9 +29,7 @@ const TabifyResponseHandlerProvider = function (Private) {
       return new Promise((resolve) => {
 
         const tableGroup = aggResponse.tabify(vis.getAggConfig(), response, {
-          canSplit: true,
-          asAggConfigResults: _.get(vis, 'type.responseHandlerConfig.asAggConfigResults', false),
-          isHierarchical: vis.isHierarchical()
+          metricsAtAllLevels: vis.isHierarchical()
         });
 
         resolve(tableGroup);

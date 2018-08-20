@@ -18,12 +18,12 @@
  */
 
 import { AggResponseIndexProvider } from '../../agg_response';
-import { TableResponseHandlerProvider } from './table';
+import { LegacyResponseHandlerProvider } from './legacy';
 import { VisResponseHandlersRegistryProvider } from '../../registry/vis_response_handlers';
 
-const BasicResponseHandlerProvider = function (Private) {
+const VislibResponseHandlerProvider = function (Private) {
   const aggResponse = Private(AggResponseIndexProvider);
-  const tableResponseProvider = Private(TableResponseHandlerProvider).handler;
+  const tableResponseProvider = Private(LegacyResponseHandlerProvider).handler;
 
   function convertTableGroup(vis, tableGroup) {
     const tables = tableGroup.tables;
@@ -68,7 +68,7 @@ const BasicResponseHandlerProvider = function (Private) {
   }
 
   return {
-    name: 'basic',
+    name: 'vislib',
     handler: function (vis, response) {
       return new Promise((resolve) => {
         if (vis.isHierarchical()) {
@@ -96,6 +96,6 @@ const BasicResponseHandlerProvider = function (Private) {
   };
 };
 
-VisResponseHandlersRegistryProvider.register(BasicResponseHandlerProvider);
+VisResponseHandlersRegistryProvider.register(VislibResponseHandlerProvider);
 
-export { BasicResponseHandlerProvider };
+export { VislibResponseHandlerProvider };

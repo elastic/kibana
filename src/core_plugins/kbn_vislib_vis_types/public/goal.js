@@ -106,6 +106,6 @@ export default function GoalVisType(Private) {
         }
       ])
     },
-    handleNoResults: true
+    useCustomNoDataScreen: true
   });
 }

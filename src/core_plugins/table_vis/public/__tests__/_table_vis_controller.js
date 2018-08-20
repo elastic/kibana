@@ -21,7 +21,7 @@ import $ from 'jquery';
 import _ from 'lodash';
 import expect from 'expect.js';
 import ngMock from 'ng_mock';
-import { TableResponseHandlerProvider } from 'ui/vis/response_handlers/table';
+import { LegacyResponseHandlerProvider } from 'ui/vis/response_handlers/legacy';
 import { VisProvider } from 'ui/vis';
 import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
 import { AppStateProvider } from 'ui/state_management/app_state';
@@ -45,7 +45,7 @@ describe('Table Vis Controller', function () {
     fixtures = require('fixtures/fake_hierarchical_data');
     AppState = Private(AppStateProvider);
     Vis = Private(VisProvider);
-    tableAggResponse =  Private(TableResponseHandlerProvider).handler;
+    tableAggResponse =  Private(LegacyResponseHandlerProvider).handler;
   }));
 
   function OneRangeVis(params) {

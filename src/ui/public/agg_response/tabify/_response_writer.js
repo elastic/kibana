@@ -24,18 +24,17 @@ import { tabifyGetColumns } from './_get_columns';
  * Writer class that collects information about an aggregation response and
  * produces a table, or a series of tables.
  *
- * @param {Vis} vis - the vis object to which the aggregation response correlates
+ * @param {AggConfigs} aggs - the agg configs object to which the aggregation response correlates
+ * @param {boolean} minimalColumns - setting to false will produce metrics for every bucket
  */
-function TabbedAggResponseWriter(aggs, opts) {
-  this.opts = opts || {};
+function TabbedAggResponseWriter(aggs, { metricsAtAllLevels = false, partialRows = false }) {
   this.rowBuffer = {};
   this.bucketBuffer = [];
 
-  // by default minimalColumns is set to true
-  this.opts.minimalColumns = !(this.opts.minimalColumns === false);
-
+  this.metricsForAllBuckets = metricsAtAllLevels;
+  this.partialRows = partialRows;
   this.aggs = aggs;
-  this.columns = tabifyGetColumns(aggs.getResponseAggs(), this.opts.minimalColumns);
+  this.columns = tabifyGetColumns(aggs.getResponseAggs(), !metricsAtAllLevels);
   this.aggStack = [...this.columns];
 
   this.rows = [];
@@ -60,7 +59,7 @@ TabbedAggResponseWriter.prototype.row = function () {
 /**
  * Get the actual response
  *
- * @return {object} - the final table-tree
+ * @return {object} - the final table
  */
 TabbedAggResponseWriter.prototype.response = function () {
   return {

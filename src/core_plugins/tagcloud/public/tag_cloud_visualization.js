@@ -124,14 +124,14 @@ export class TagCloudVisualization {
 
     const hasTags = data.columns.length === 2;
     const tagColumn = hasTags ? data.columns[0].id : -1;
-    const countColumn = data.columns[hasTags ? 1 : 0].id;
+    const metricColumn = data.columns[hasTags ? 1 : 0].id;
     const tags = data.rows.map((row, rowIndex) => {
       const tag = row[tagColumn] || 'all';
-      const count = row[countColumn];
+      const metric = row[metricColumn];
       return {
         displayText: this._bucketAgg ? this._bucketAgg.fieldFormatter()(tag) : tag,
         rawText: tag,
-        value: count,
+        value: metric,
         meta: {
           data: data,
           rowIndex: rowIndex,

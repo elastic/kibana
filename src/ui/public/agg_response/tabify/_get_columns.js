@@ -22,7 +22,7 @@ import _ from 'lodash';
 const getColumn = (agg, i) => {
   return {
     aggConfig: agg,
-    id: `col-${i}`,
+    id: `col-${i}-${agg.id}`,
     name: agg.makeLabel()
   };
 };

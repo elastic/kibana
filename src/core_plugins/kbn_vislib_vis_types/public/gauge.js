@@ -111,6 +111,6 @@ export default function GaugeVisType(Private) {
         }
       ])
     },
-    handleNoResults: true
+    useCustomNoDataScreen: true
   });
 }

@@ -53,6 +53,8 @@ function collectBucket(write, bucket, key, aggScale) {
       const buckets = new TabifyBuckets(bucket[agg.id], agg.params);
       if (buckets.length) {
         buckets.forEach(function (subBucket, key) {
+          // if the bucket doesn't have value don't add it to the row
+          // we don't want rows like: { column1: undefined, column2: 10 }
           const bucketValue = agg.getKey(subBucket, key);
           const hasBucketValue = typeof bucketValue !== 'undefined';
           if (hasBucketValue) {
@@ -63,7 +65,7 @@ function collectBucket(write, bucket, key, aggScale) {
             write.bucketBuffer.pop();
           }
         });
-      } else if (write.partialRows && write.metricsForAllBuckets && write.minimalColumns) {
+      } else if (write.partialRows && write.metricsAtAllLevels) {
         // we don't have any buckets, but we do have metrics at this
         // level, then pass all the empty buckets and jump back in for
         // the metrics.

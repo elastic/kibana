@@ -35,10 +35,8 @@ const CourierRequestHandlerProvider = function () {
    */
   async function buildTabularInspectorData(vis, searchSource, aggConfigs) {
     const table = tabifyAggResponse(aggConfigs, searchSource.finalResponse, {
-      canSplit: false,
-      asAggConfigResults: false,
       partialRows: true,
-      isHierarchical: vis.isHierarchical(),
+      metricsAtAllLevels: vis.isHierarchical(),
     });
     const columns = table.columns.map((col, index) => {
       const field = col.aggConfig.getField();

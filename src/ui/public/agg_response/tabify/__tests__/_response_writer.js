@@ -74,8 +74,8 @@ describe('TabbedAggResponseWriter class', function () {
       expect(responseWriter.columns.length).to.eql(3);
     });
 
-    it('correctly generates columns with minimal columns set to false', () => {
-      const minimalColumnsResponseWriter = createResponseWritter(twoSplitsAggConfig, { minimalColumns: false });
+    it('correctly generates columns with metricsAtAllLevels set to true', () => {
+      const minimalColumnsResponseWriter = createResponseWritter(twoSplitsAggConfig, { metricsAtAllLevels: true });
       expect(minimalColumnsResponseWriter.columns.length).to.eql(4);
     });
   });
@@ -117,18 +117,18 @@ describe('TabbedAggResponseWriter class', function () {
     });
 
     it('produces correct response', () => {
-      responseWriter.rowBuffer['col-0'] = 'US';
-      responseWriter.rowBuffer['col-1'] = 5;
+      responseWriter.rowBuffer['col-0-1'] = 'US';
+      responseWriter.rowBuffer['col-1-2'] = 5;
       responseWriter.row();
       const response = responseWriter.response();
       expect(response).to.have.property('rows');
-      expect(response.rows).to.eql([{ 'col-0': 'US', 'col-1': 5 }]);
+      expect(response.rows).to.eql([{ 'col-0-1': 'US', 'col-1-2': 5 }]);
       expect(response).to.have.property('columns');
       expect(response.columns.length).to.equal(2);
-      expect(response.columns[0]).to.have.property('id', 'col-0');
+      expect(response.columns[0]).to.have.property('id', 'col-0-1');
       expect(response.columns[0]).to.have.property('name', 'geo.src: Descending');
       expect(response.columns[0]).to.have.property('aggConfig');
-      expect(response.columns[1]).to.have.property('id', 'col-1');
+      expect(response.columns[1]).to.have.property('id', 'col-1-2');
       expect(response.columns[1]).to.have.property('name', 'Count');
       expect(response.columns[1]).to.have.property('aggConfig');
     });
@@ -139,10 +139,10 @@ describe('TabbedAggResponseWriter class', function () {
       expect(response.rows.length).to.be(0);
       expect(response).to.have.property('columns');
       expect(response.columns.length).to.equal(2);
-      expect(response.columns[0]).to.have.property('id', 'col-0');
+      expect(response.columns[0]).to.have.property('id', 'col-0-1');
       expect(response.columns[0]).to.have.property('name', 'geo.src: Descending');
       expect(response.columns[0]).to.have.property('aggConfig');
-      expect(response.columns[1]).to.have.property('id', 'col-1');
+      expect(response.columns[1]).to.have.property('id', 'col-1-2');
       expect(response.columns[1]).to.have.property('name', 'Count');
       expect(response.columns[1]).to.have.property('aggConfig');
     });

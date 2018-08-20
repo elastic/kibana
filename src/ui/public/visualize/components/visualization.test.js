@@ -67,7 +67,7 @@ describe('<Visualization/>', () => {
       type: {
         title: 'new vis',
         requiresSearch: true,
-        handleNoResults: false,
+        useCustomNoDataScreen: false,
         visualization: VisualizationStub
       }
     };

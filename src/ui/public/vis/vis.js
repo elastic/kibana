@@ -103,18 +103,17 @@ export function VisProvider(Private, indexPatterns, getAppState) {
             filterBarClickHandler(appState)(event);
           },
           addFilter: (data, columnIndex, rowIndex, cellValue) => {
-            const agg = data.columns[columnIndex].aggConfig;
-            const columnId = data.columns[columnIndex].id;
+            const { aggConfig, id: columnId } = data.columns[columnIndex];
             let filter = [];
             const value = rowIndex > -1 ? data.rows[rowIndex][columnId] : cellValue;
             if (!value) {
               return;
             }
-            if (agg.type.name === 'terms' && agg.params.otherBucket) {
+            if (aggConfig.type.name === 'terms' && aggConfig.params.otherBucket) {
               const terms = getTerms(data, columnIndex, rowIndex);
-              filter = agg.createFilter(value, { terms });
+              filter = aggConfig.createFilter(value, { terms });
             } else {
-              filter = agg.createFilter(value);
+              filter = aggConfig.createFilter(value);
             }
             queryFilter.addFilters(filter);
           }, brush: (event) => {

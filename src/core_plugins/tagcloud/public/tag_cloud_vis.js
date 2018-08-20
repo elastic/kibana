@@ -78,6 +78,6 @@ VisTypesRegistryProvider.register(function (Private) {
         }
       ])
     },
-    handleNoResults: true
+    useCustomNoDataScreen: true
   });
 });

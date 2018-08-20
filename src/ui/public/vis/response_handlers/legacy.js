@@ -22,16 +22,18 @@ import { tabifyAggResponse } from '../../agg_response/tabify';
 import AggConfigResult from '../../vis/agg_config_result';
 import { VisResponseHandlersRegistryProvider } from '../../registry/vis_response_handlers';
 
-const TableResponseHandlerProvider = function () {
+const LegacyResponseHandlerProvider = function () {
 
   return {
-    name: 'table',
+    name: 'legacy',
     handler: function (vis, response) {
       return new Promise((resolve) => {
         const converted = { tables: [] };
         const table = tabifyAggResponse(vis.getAggConfig(), response, {
-          minimalColumns: !vis.isHierarchical()
+          metricsAtAllLevels: vis.isHierarchical()
         });
+
+        const asAggConfigResults = _.get(vis, 'type.responseHandlerConfig.asAggConfigResults', false);
 
         const splitColumn = table.columns.find(column => column.aggConfig.schema.name === 'split');
         if (splitColumn) {
@@ -69,7 +71,7 @@ const TableResponseHandlerProvider = function () {
               if (column.aggConfig.type.type === 'buckets') {
                 previousSplitAgg = aggConfigResult;
               }
-              return aggConfigResult;
+              return asAggConfigResults ? aggConfigResult : value;
             });
 
             converted.tables[tableIndex].tables[0].rows.push(newRow);
@@ -86,7 +88,7 @@ const TableResponseHandlerProvider = function () {
                 if (column.aggConfig.type.type === 'buckets') {
                   previousSplitAgg = aggConfigResult;
                 }
-                return aggConfigResult;
+                return asAggConfigResults ? aggConfigResult : value;
               });
             }),
             aggConfig: (column) => column.aggConfig
@@ -99,6 +101,6 @@ const TableResponseHandlerProvider = function () {
   };
 };
 
-VisResponseHandlersRegistryProvider.register(TableResponseHandlerProvider);
+VisResponseHandlersRegistryProvider.register(LegacyResponseHandlerProvider);
 
-export { TableResponseHandlerProvider };
+export { LegacyResponseHandlerProvider };
