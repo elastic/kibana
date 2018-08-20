@@ -233,17 +233,17 @@ describe('GET roles', () => {
           applications: [
             {
               application,
-              privileges: ['read'],
+              privileges: ['space_read'],
               resources: ['space:marketing'],
             },
             {
               application,
-              privileges: ['all'],
+              privileges: ['space_all'],
               resources: ['space:marketing'],
             },
             {
               application,
-              privileges: ['read'],
+              privileges: ['space_read'],
               resources: ['space:engineering'],
             },
           ],
@@ -602,17 +602,17 @@ describe('GET role', () => {
           applications: [
             {
               application,
-              privileges: ['read'],
+              privileges: ['space_read'],
               resources: ['space:marketing'],
             },
             {
               application,
-              privileges: ['all'],
+              privileges: ['space_all'],
               resources: ['space:marketing'],
             },
             {
               application,
-              privileges: ['read'],
+              privileges: ['space_read'],
               resources: ['space:engineering'],
             },
           ],

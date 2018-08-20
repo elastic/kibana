@@ -10,6 +10,7 @@ import { AuthorizationMode } from './mode';
 import { CHECK_PRIVILEGES_RESULT, checkPrivilegesWithRequestFactory } from './check_privileges';
 import { checkPrivilegesAtAllResourcesWithRequestFactory } from './check_privileges_at_all_resources';
 import { getClient } from '../../../../../server/lib/get_client_shield';
+import { spaceApplicationPrivilegesSerializer } from './space_application_privileges_serializer';
 
 export function createAuthorizationService(server, xpackInfoFeature) {
   const shieldClient = getClient(server);
@@ -32,8 +33,11 @@ export function createAuthorizationService(server, xpackInfoFeature) {
     checkPrivilegesWithRequest,
     CHECK_PRIVILEGES_RESULT,
     mode,
-    RESOURCES: {
-      ALL: ALL_RESOURCE
+    resources: {
+      all: ALL_RESOURCE,
+      getSpaceResource(spaceId) {
+        return spaceApplicationPrivilegesSerializer.resource.serialize(spaceId);
+      }
     }
   };
 }

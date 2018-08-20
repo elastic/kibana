@@ -18,8 +18,8 @@ export function initPrivilegesApi(server) {
       // in Elasticsearch because our current thinking is that we'll associate additional structure/metadata
       // with our view of them to allow users to more efficiently edit privileges for roles, and serialize it
       // into a different structure for enforcement within Elasticsearch
-      const privileges = buildPrivilegeMap(savedObjectTypes, authorization.application, authorization.actions);
-      reply(Object.values(privileges));
+      const privileges = buildPrivilegeMap(savedObjectTypes, authorization.actions);
+      reply(privileges);
     }
   });
 }

@@ -36,19 +36,23 @@ export class SpacesClient {
 
       const spaces = saved_objects.map(this.transformSavedObjectToSpace);
 
-      const spaceIds = spaces.map((space: any) => space.id);
+      const resources = spaces.map((space: any) =>
+        this.authorization.resources.getSpaceResource(space.id)
+      );
       const checkPrivileges = this.authorization.checkPrivilegesWithRequest(this.request);
-      const { response } = await checkPrivileges(spaceIds, [this.authorization.actions.login]);
+      const { response } = await checkPrivileges(resources, [this.authorization.actions.login]);
 
-      const authorized = Object.keys(response).filter(space => {
-        return response[space][this.authorization.actions.login];
+      const authorized = Object.keys(response).filter(resource => {
+        return response[resource][this.authorization.actions.login];
       });
 
       if (authorized.length === 0) {
         return Boom.forbidden();
       }
 
-      return spaces.filter((space: any) => authorized.includes(space.id));
+      return spaces.filter((space: any) =>
+        authorized.includes(this.authorization.resources.getSpaceResource(space.id))
+      );
     } else {
       const { saved_objects } = await this.callWithRequestSavedObjectRepository.find({
         type: 'space',
@@ -63,7 +67,7 @@ export class SpacesClient {
   public async get(id: string) {
     if (this.useRbac()) {
       await this.ensureAuthorized(
-        id,
+        this.authorization.resources.getSpaceResource(id),
         this.authorization.actions.login,
         `Unauthorized to get ${id} space`
       );
@@ -79,7 +83,7 @@ export class SpacesClient {
   public async create(space: any) {
     if (this.useRbac()) {
       await this.ensureAuthorized(
-        this.authorization.RESOURCES.ALL,
+        this.authorization.resources.all,
         actions.manage,
         'Unauthorized to create spaces'
       );
@@ -97,7 +101,7 @@ export class SpacesClient {
   public async update(id: string, space: any) {
     if (this.useRbac()) {
       await this.ensureAuthorized(
-        this.authorization.RESOURCES.ALL,
+        this.authorization.resources.all,
         actions.manage,
         'Unauthorized to update spaces'
       );
@@ -114,7 +118,7 @@ export class SpacesClient {
   public async delete(id: string) {
     if (this.useRbac()) {
       await this.ensureAuthorized(
-        this.authorization.RESOURCES.ALL,
+        this.authorization.resources.all,
         actions.manage,
         'Unauthorized to delete spaces'
       );

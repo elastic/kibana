@@ -8,51 +8,7 @@ import { pick, identity } from 'lodash';
 import Joi from 'joi';
 import { ALL_RESOURCE } from '../../../../../common/constants';
 import { wrapError } from '../../../../lib/errors';
-
-const transformKibanaPrivilegesToEs = (application, kibanaPrivileges) => {
-  const kibanaApplicationPrivileges = [];
-  if (kibanaPrivileges.global && kibanaPrivileges.global.length) {
-    kibanaApplicationPrivileges.push({
-      privileges: kibanaPrivileges.global,
-      application,
-      resources: [ALL_RESOURCE],
-    });
-  }
-
-  if (kibanaPrivileges.space) {
-    for(const [spaceId, privileges] of Object.entries(kibanaPrivileges.space)) {
-      kibanaApplicationPrivileges.push({
-        privileges: privileges,
-        application,
-        resources: [`space:${spaceId}`]
-      });
-    }
-  }
-
-  return kibanaApplicationPrivileges;
-};
-
-const transformRolesToEs = (
-  application,
-  payload,
-  existingApplications = []
-) => {
-  const { elasticsearch = {}, kibana = {} } = payload;
-  const otherApplications = existingApplications.filter(
-    roleApplication => roleApplication.application !== application
-  );
-
-  return pick({
-    metadata: payload.metadata,
-    cluster: elasticsearch.cluster || [],
-    indices: elasticsearch.indices || [],
-    run_as: elasticsearch.run_as || [],
-    applications: [
-      ...transformKibanaPrivilegesToEs(application, kibana),
-      ...otherApplications,
-    ],
-  }, identity);
-};
+import { spaceApplicationPrivilegesSerializer } from '../../../../lib/authorization';
 
 export function initPutRolesApi(
   server,
@@ -61,6 +17,51 @@ export function initPutRolesApi(
   privilegeMap,
   application
 ) {
+
+  const transformKibanaPrivilegesToEs = (application, kibanaPrivileges) => {
+    const kibanaApplicationPrivileges = [];
+    if (kibanaPrivileges.global && kibanaPrivileges.global.length) {
+      kibanaApplicationPrivileges.push({
+        privileges: kibanaPrivileges.global,
+        application,
+        resources: [ALL_RESOURCE],
+      });
+    }
+
+    if (kibanaPrivileges.space) {
+      for(const [spaceId, privileges] of Object.entries(kibanaPrivileges.space)) {
+        kibanaApplicationPrivileges.push({
+          privileges: privileges.map(privilege => spaceApplicationPrivilegesSerializer.privilege.serialize(privilege)),
+          application,
+          resources: [spaceApplicationPrivilegesSerializer.resource.serialize(spaceId)]
+        });
+      }
+    }
+
+    return kibanaApplicationPrivileges;
+  };
+
+  const transformRolesToEs = (
+    application,
+    payload,
+    existingApplications = []
+  ) => {
+    const { elasticsearch = {}, kibana = {} } = payload;
+    const otherApplications = existingApplications.filter(
+      roleApplication => roleApplication.application !== application
+    );
+
+    return pick({
+      metadata: payload.metadata,
+      cluster: elasticsearch.cluster || [],
+      indices: elasticsearch.indices || [],
+      run_as: elasticsearch.run_as || [],
+      applications: [
+        ...transformKibanaPrivilegesToEs(application, kibana),
+        ...otherApplications,
+      ],
+    }, identity);
+  };
 
   const schema = Joi.object().keys({
     metadata: Joi.object().optional(),
@@ -78,8 +79,8 @@ export function initPutRolesApi(
       run_as: Joi.array().items(Joi.string()),
     }),
     kibana: Joi.object().keys({
-      global: Joi.array().items(Joi.string().valid(Object.keys(privilegeMap))),
-      space: Joi.object().pattern(/^/, Joi.array().items(Joi.string().valid(Object.keys(privilegeMap))))
+      global: Joi.array().items(Joi.string().valid(Object.keys(privilegeMap.global))),
+      space: Joi.object().pattern(/^/, Joi.array().items(Joi.string().valid(Object.keys(privilegeMap.space))))
     })
   });
 

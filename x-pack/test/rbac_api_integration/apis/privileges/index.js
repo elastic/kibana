@@ -16,17 +16,10 @@ export default function ({ getService }) {
         .get(`/api/security/v1/privileges`)
         .expect(200)
         .then(resp => {
-          expect(resp.body).to.eql([
-            {
-              application: 'kibana-.kibana',
-              name: 'all',
-              actions: [`version:${version}`, 'action:*'],
-              metadata: {},
-            },
-            {
-              application: 'kibana-.kibana',
-              name: 'read',
-              actions: [
+          expect(resp.body).to.eql({
+            global: {
+              all: [`version:${version}`, 'action:*'],
+              read: [
                 `version:${version}`,
                 'action:login',
                 'action:saved_objects/config/get',
@@ -57,12 +50,9 @@ export default function ({ getService }) {
                 'action:saved_objects/server/bulk_get',
                 'action:saved_objects/server/find',
               ],
-              metadata: {},
             },
-            {
-              application: 'kibana-.kibana',
-              name: 'space_all',
-              actions: [
+            space: {
+              all: [
                 `version:${version}`,
                 'action:login',
                 'action:saved_objects/config/create',
@@ -127,14 +117,9 @@ export default function ({ getService }) {
                 'action:saved_objects/server/get',
                 'action:saved_objects/server/bulk_get',
                 'action:saved_objects/server/find',
-                'action:saved_objects/server/update'
+                'action:saved_objects/server/update',
               ],
-              metadata: {},
-            },
-            {
-              application: 'kibana-.kibana',
-              name: 'space_read',
-              actions: [
+              read: [
                 `version:${version}`,
                 'action:login',
                 'action:saved_objects/config/get',
@@ -165,9 +150,8 @@ export default function ({ getService }) {
                 'action:saved_objects/server/bulk_get',
                 'action:saved_objects/server/find',
               ],
-              metadata: {},
             },
-          ]);
+          });
         });
     });
   });

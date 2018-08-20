@@ -6,7 +6,7 @@
 
 const IGNORED_TYPES = ['space'];
 
-export function buildPrivilegeMap(savedObjectTypes, application, actions) {
+export function buildPrivilegeMap(savedObjectTypes, actions) {
   const buildSavedObjectsActions = (savedObjectActions) => {
     return savedObjectTypes
       .filter(type => !IGNORED_TYPES.includes(type))
@@ -17,32 +17,23 @@ export function buildPrivilegeMap(savedObjectTypes, application, actions) {
   // the following list of privileges should only be added to, you can safely remove actions, but not privileges as
   // it's a backwards compatibility issue and we'll have to at least adjust registerPrivilegesWithCluster to support it
   return {
-    all: {
-      application,
-      name: 'all',
-      actions: [
+    global: {
+      all: [
         actions.version,
         'action:*'
       ],
-      metadata: {}
-    },
-    read: {
-      application,
-      name: 'read',
-      actions: [
+      read: [
         actions.version,
         actions.login,
         ...buildSavedObjectsActions([
           'get',
           'bulk_get',
           'find'
-        ])],
-      metadata: {}
+        ])
+      ],
     },
-    space_all: {
-      application,
-      name: 'space_all',
-      actions: [
+    space: {
+      all: [
         actions.version,
         actions.login,
         ...buildSavedObjectsActions([
@@ -55,12 +46,7 @@ export function buildPrivilegeMap(savedObjectTypes, application, actions) {
           'update'
         ])
       ],
-      metadata: {}
-    },
-    space_read: {
-      application,
-      name: 'space_read',
-      actions: [
+      read: [
         actions.version,
         actions.login,
         ...buildSavedObjectsActions([
@@ -68,8 +54,7 @@ export function buildPrivilegeMap(savedObjectTypes, application, actions) {
           'bulk_get',
           'find'])
       ],
-      metadata: {}
-    }
+    },
   };
 }
 
