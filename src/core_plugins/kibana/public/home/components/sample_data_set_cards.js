@@ -27,6 +27,8 @@ import {
 
 import { SampleDataSetCard } from './sample_data_set_card';
 
+import { toastNotifications } from 'ui/notify';
+
 import {
   listSampleDataSets,
   installSampleDataSet,
@@ -55,7 +57,16 @@ export class SampleDataSetCards extends React.Component {
   }
 
   loadSampleDataSets = async () => {
-    const sampleDataSets = await listSampleDataSets();
+    let sampleDataSets;
+    try {
+      sampleDataSets = await listSampleDataSets();
+    } catch (fetchError) {
+      toastNotifications.addDanger({
+        title: `Unable to load sample data sets list`,
+        text: `${fetchError.message}`,
+      });
+      sampleDataSets = [];
+    }
 
     if (!this._isMounted) {
       return;
@@ -81,18 +92,30 @@ export class SampleDataSetCards extends React.Component {
       return sampleDataSet.id === id;
     });
 
-
     this.setState({
       processingStatus: { ...this.state.processingStatus, [id]: true }
     });
 
-    await installSampleDataSet(id, targetSampleDataSet.name, targetSampleDataSet.defaultIndex,
-      getConfig, setConfig, clearIndexPatternsCache);
-    if (!this._isMounted) {
+    try {
+      await installSampleDataSet(id, targetSampleDataSet.defaultIndex, getConfig, setConfig, clearIndexPatternsCache);
+    } catch (fetchError) {
+      if (this._isMounted) {
+        this.setState({
+          processingStatus: { ...this.state.processingStatus, [id]: false }
+        });
+      }
+      toastNotifications.addDanger({
+        title: `Unable to install sample data set: ${targetSampleDataSet.name}`,
+        text: `${fetchError.message}`,
+      });
       return;
     }
 
-    this.loadSampleDataSets();
+    await this.loadSampleDataSets();
+    toastNotifications.addSuccess({
+      title: `${targetSampleDataSet.name} installed`,
+      ['data-test-subj']: 'sampleDataSetInstallToast'
+    });
   }
 
   uninstall = async (id) => {
@@ -110,13 +133,26 @@ export class SampleDataSetCards extends React.Component {
       processingStatus: { ...this.state.processingStatus, [id]: true }
     });
 
-    await uninstallSampleDataSet(id, targetSampleDataSet.name, targetSampleDataSet.defaultIndex,
-      getConfig, setConfig, clearIndexPatternsCache);
-    if (!this._isMounted) {
+    try {
+      await uninstallSampleDataSet(id, targetSampleDataSet.defaultIndex, getConfig, setConfig, clearIndexPatternsCache);
+    } catch (fetchError) {
+      if (this._isMounted) {
+        this.setState({
+          processingStatus: { ...this.state.processingStatus, [id]: false }
+        });
+      }
+      toastNotifications.addDanger({
+        title: `Unable to uninstall sample data set: ${targetSampleDataSet.name}`,
+        text: `${fetchError.message}`,
+      });
       return;
     }
 
-    this.loadSampleDataSets();
+    await this.loadSampleDataSets();
+    toastNotifications.addSuccess({
+      title: `${targetSampleDataSet.name} uninstalled`,
+      ['data-test-subj']: 'sampleDataSetUninstallToast'
+    });
   }
 
   render() {
