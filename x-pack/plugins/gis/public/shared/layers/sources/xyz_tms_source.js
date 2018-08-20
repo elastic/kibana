@@ -4,6 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import React from 'react';
+
 export class XYZTMSSource {
 
   static type = 'EMS_XYZ';
@@ -19,6 +21,10 @@ export class XYZTMSSource {
     return {
       url: descriptor.urlTemplate
     };
+  }
+
+  static renderEditor() {
+    return (<div />);
   }
 
 }

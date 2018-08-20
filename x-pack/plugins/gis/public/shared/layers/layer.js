@@ -9,7 +9,10 @@ export const LAYER_TYPE = {
 };
 
 export class ALayer {
-  constructor() {}
+
+  constructor(layerDescriptor) {
+    this._descriptor = layerDescriptor;
+  }
 
   static createDescriptor(options) {
     const layerDescriptor = {};
@@ -29,6 +32,10 @@ export class ALayer {
         || listName.match(new RegExp(`${layerName} \\d`)))
       .length;
     return duplicateCount ? `${layerName} ${duplicateCount}` : layerName;
+  }
+
+  getDisplayName() {
+    return this._descriptor.name;
   }
 }
 

@@ -8,8 +8,10 @@ import { ALayer, LAYER_TYPE } from './layer';
 
 export class VectorLayer extends ALayer {
 
-  constructor() {
-    super();
+  static type = LAYER_TYPE.VECTOR;
+
+  constructor(layerDescriptor) {
+    super(layerDescriptor);
   }
 
   static createDescriptor(options) {

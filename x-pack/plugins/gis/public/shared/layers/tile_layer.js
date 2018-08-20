@@ -8,8 +8,10 @@ import { ALayer, LAYER_TYPE } from './layer';
 
 export class TileLayer extends ALayer {
 
-  constructor() {
-    super();
+  static type = LAYER_TYPE.TILE;
+
+  constructor(layerDescriptor) {
+    super(layerDescriptor);
   }
 
   static createDescriptor(options) {
@@ -17,4 +19,6 @@ export class TileLayer extends ALayer {
     tileLayerDescriptor.type = LAYER_TYPE.TILE;
     return tileLayerDescriptor;
   }
+
+
 }

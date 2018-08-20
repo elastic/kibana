@@ -27,7 +27,7 @@ export function LayerPanel({ selectedLayer }) {
     >
       <EuiFlyoutHeader>
         <EuiTitle size="l">
-          <h2>{selectedLayer.name}</h2>
+          <h2>{selectedLayer.getDisplayName()}</h2>
         </EuiTitle>
         <EuiSpacer size="m"/>
         <EuiSpacer/>

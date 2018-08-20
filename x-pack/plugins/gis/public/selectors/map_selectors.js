@@ -6,11 +6,34 @@
 
 import { createSelector } from 'reselect';
 import { LAYER_TYPE } from '../shared/layers/layer';
+import { TileLayer } from '../shared/layers/tile_layer';
+import { VectorLayer } from '../shared/layers/vector_layer';
 import _ from 'lodash';
 
 export const getMapConstants = ({ map }) => map && map.mapConstants;
 
 export const getSelectedLayer = ({ map }) => map && map.selectedLayer;
+
+export const getSelectedLayerInstance = ({ map }) => {
+
+  if (!map.selectedLayer) {
+    return null;
+  }
+
+  return createLayerInstance(map.selectedLayer);
+};
+
+
+
+function createLayerInstance(layerDescriptor) {
+  if (layerDescriptor.type === TileLayer.type) {
+    return new TileLayer(layerDescriptor);
+  }
+  if (layerDescriptor.type === VectorLayer.type) {
+    return new VectorLayer(layerDescriptor);
+  }
+}
+
 
 export const getLayerList = ({ map }) => map && map.layerList;
 
