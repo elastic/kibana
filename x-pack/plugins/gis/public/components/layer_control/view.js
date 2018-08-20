@@ -37,7 +37,7 @@ export class LayerControl extends React.Component {
     } else if (layerDetailsVisible) {
       return (
         <LayerPanel
-          removeLayer={this._removeLayer}
+          removeLayer={() => console.warn('removeLayer not implemented.')}
         />);
     }
   }
