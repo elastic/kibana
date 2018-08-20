@@ -31,6 +31,7 @@ export default function (id, mapping) {
     _id: id,
     _index: 'test',
     _source: fakeVals('original'),
+    _type: 'doc',
     sort: [id],
     $$_formatted: fakeVals('formatted'),
     $$_partialFormatted: fakeVals('formatted'),
