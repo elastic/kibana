@@ -20,6 +20,7 @@ import {
   EuiFlexItem,
   EuiButton,
   EuiPageBody,
+  EuiText,
 } from '@elastic/eui';
 import { saveRole, deleteRole } from '../../../../objects';
 import { isReservedRole } from '../../../../lib/role';
@@ -59,6 +60,14 @@ export class EditRolePage extends Component {
           <EuiForm {...this.state.formError}>
             {this.getFormTitle()}
 
+            {isReservedRole(this.props.role) && (
+              <EuiText size="s" color="subdued">
+                <p id="reservedRoleDescription" tabIndex="1">
+                  Reserved roles are built-in and cannot be removed or modified.
+                </p>
+              </EuiText>
+            )}
+
             <EuiSpacer />
 
             {this.getRoleName()}
@@ -78,8 +87,12 @@ export class EditRolePage extends Component {
 
   getFormTitle = () => {
     let titleText;
+    const props = {
+      tabindex: 0
+    };
     if (isReservedRole(this.props.role)) {
       titleText = 'Viewing role';
+      props['aria-describedby'] = 'reservedRoleDescription';
     } else if (this.editingExistingRole()) {
       titleText = 'Edit role';
     } else {
@@ -87,7 +100,7 @@ export class EditRolePage extends Component {
     }
 
     return (
-      <EuiTitle size="l"><h1>{titleText} <ReservedRoleBadge role={this.props.role} /></h1></EuiTitle>
+      <EuiTitle size="l" ><h1 {...props}>{titleText} <ReservedRoleBadge role={this.props.role} /></h1></EuiTitle>
     );
   };
 
