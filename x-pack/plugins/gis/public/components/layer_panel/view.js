@@ -46,7 +46,7 @@ export function LayerPanel({ selectedLayer }) {
         <EuiHorizontalRule margin="none"/>
       </EuiFlyoutHeader>
 
-      <EuiFlyoutBody style={{ paddingTop: 0 }} layer={selectedLayer}>
+      <EuiFlyoutBody style={{ paddingTop: 0 }}>
         <EuiSpacer size="l"/>
         <StyleTabs layer={selectedLayer}/>
         <EuiSpacer size="l"/>

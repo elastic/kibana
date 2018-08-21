@@ -15,5 +15,12 @@ function mapDispatchToProps(dispatch) {
     }
   };
 }
-const connectedFlyoutBody = connect(null, mapDispatchToProps)(StyleTabs);
+
+function mapStateToProps({}, props) {
+  return {
+    layer: props.layer
+  };
+}
+
+const connectedFlyoutBody = connect(mapStateToProps, mapDispatchToProps)(StyleTabs);
 export { connectedFlyoutBody as StyleTabs };

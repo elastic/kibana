@@ -5,7 +5,6 @@
  */
 
 import React from 'react';
-import { FlyOut } from '../layer_addpanel/index';
 
 export class KibanaMap extends React.Component {
 
@@ -22,7 +21,6 @@ export class KibanaMap extends React.Component {
     return (
       <div>
         <div className="mapContainer" ref="mapContainer"/>
-        <FlyOut/>
       </div>
     );
   }
