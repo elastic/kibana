@@ -11,7 +11,7 @@ import {
 } from "../actions/store_actions";
 import { UPDATE_LAYER_STYLE } from '../actions/style_actions';
 
-const updateLayerInList = (()=> {
+const updateLayerInList = (() => {
   const getLayerIndex = (list, layerId) => list.findIndex(({ id }) => layerId === id);
   return (state, id, attribute, newValue) => {
     const { layerList } = state;
