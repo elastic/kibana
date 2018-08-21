@@ -123,7 +123,6 @@ export function MochaReporterProvider({ getService }) {
         console.log = realLog;
       }
 
-      log.indent(-2);
       log.write(
         `- ${symbols.err} ` +
         colors.fail(`fail: "${test.fullTitle()}"`) +
@@ -137,7 +136,6 @@ export function MochaReporterProvider({ getService }) {
           .map(line => ` ${line}`)
           .join('\n')
       );
-      log.indent(2);
     }
 
     onEnd = () => {
