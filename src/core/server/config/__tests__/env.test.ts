@@ -46,7 +46,7 @@ test('correctly creates default environment in dev mode.', () => {
     isDevClusterMaster: true,
   });
 
-  expect(Object.entries(defaultEnv)).toMatchSnapshot('env properties');
+  expect(defaultEnv).toMatchSnapshot('env properties');
 });
 
 test('correctly creates default environment in prod distributable mode.', () => {
@@ -66,7 +66,7 @@ test('correctly creates default environment in prod distributable mode.', () => 
     isDevClusterMaster: false,
   });
 
-  expect(Object.entries(defaultEnv)).toMatchSnapshot('env properties');
+  expect(defaultEnv).toMatchSnapshot('env properties');
 });
 
 test('correctly creates default environment in prod non-distributable mode.', () => {
@@ -86,7 +86,7 @@ test('correctly creates default environment in prod non-distributable mode.', ()
     isDevClusterMaster: false,
   });
 
-  expect(Object.entries(defaultEnv)).toMatchSnapshot('env properties');
+  expect(defaultEnv).toMatchSnapshot('env properties');
 });
 
 test('correctly creates environment with constructor.', () => {
@@ -106,5 +106,5 @@ test('correctly creates environment with constructor.', () => {
     isDevClusterMaster: false,
   });
 
-  expect(Object.entries(env)).toMatchSnapshot('env properties');
+  expect(env).toMatchSnapshot('env properties');
 });
