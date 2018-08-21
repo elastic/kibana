@@ -25,7 +25,7 @@ const createMockServer = () => {
   return mockServer;
 };
 
-const defaultPreCheckLicenseImpl = (request, h) => h.response();
+const defaultPreCheckLicenseImpl = () => null;
 
 const privilegeMap = {
   'test-kibana-privilege-1': {},

@@ -42,7 +42,7 @@ export function registerLoadRoute(server) {
           }
 
           const pipeline = Pipeline.fromUpstreamJSON(pipelineResponseFromES);
-          pipeline.downstreamJSON;
+          return pipeline.downstreamJSON;
         })
         .catch((e) => Boom.internal(e));
     },

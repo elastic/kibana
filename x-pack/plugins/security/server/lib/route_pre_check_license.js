@@ -14,7 +14,7 @@ export function routePreCheckLicense(server) {
     if (!licenseCheckResults.showLinks) {
       return Boom.forbidden(licenseCheckResults.linksMessage);
     } else {
-      return;
+      return null;
     }
   };
 }

@@ -41,7 +41,7 @@ export const searchprofiler = (kibana) => {
           function forbidApiAccess() {
             const licenseCheckResults = xpackMainPlugin.info.feature(thisPlugin.id).getLicenseCheckResults();
             if (licenseCheckResults.showAppLink && licenseCheckResults.enableAppLink) {
-              return;
+              return null;
             } else {
               return Boom.forbidden(licenseCheckResults.message);
             }

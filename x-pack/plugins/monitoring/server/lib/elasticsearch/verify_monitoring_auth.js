@@ -56,6 +56,6 @@ async function verifyHasPrivileges(req) {
   const hasAllRequestedPrivileges = get(response, 'has_all_requested', true);
 
   if (!hasAllRequestedPrivileges) {
-    return Boom.forbidden();
+    throw Boom.forbidden();
   }
 }

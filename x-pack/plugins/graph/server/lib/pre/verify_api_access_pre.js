@@ -12,7 +12,7 @@ export function verifyApiAccessPre(request, h) {
   const licenseCheckResults = graph.getLicenseCheckResults();
 
   if (licenseCheckResults.showAppLink && licenseCheckResults.enableAppLink) {
-    return h.response();
+    return null;
   } else {
     return Boom.forbidden(licenseCheckResults.message);
   }

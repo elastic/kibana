@@ -61,7 +61,7 @@ describe('license_pre_routing_factory', () => {
         const licensePreRouting = licensePreRoutingFactory(mockServer);
         const stubRequest = {};
         const response = await licensePreRouting(stubRequest);
-        expect(response).to.be(undefined);
+        expect(response).to.be(null);
       });
     });
   });

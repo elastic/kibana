@@ -13,7 +13,7 @@ const createMockServer = () => {
   return mockServer;
 };
 
-const defaultPreCheckLicenseImpl = (request, h) => h.response();
+const defaultPreCheckLicenseImpl = () => null;
 
 describe('DELETE role', () => {
   const deleteRoleTest = (

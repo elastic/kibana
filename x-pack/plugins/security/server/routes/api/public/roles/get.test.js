@@ -18,7 +18,7 @@ describe('GET roles', () => {
   const getRolesTest = (
     description,
     {
-      preCheckLicenseImpl = (request, h) => h.response(),
+      preCheckLicenseImpl = () => null,
       callWithRequestImpl,
       asserts,
     }
@@ -299,7 +299,7 @@ describe('GET role', () => {
     description,
     {
       name,
-      preCheckLicenseImpl = (request, h) => h.response(),
+      preCheckLicenseImpl = () => null,
       callWithRequestImpl,
       asserts,
     }
