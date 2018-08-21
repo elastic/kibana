@@ -17,11 +17,17 @@
  * under the License.
  */
 
+import { i18n }  from '@kbn/i18n';
+
 export const EDIT_CONFIG = {
-  title: 'Edit the configuration',
-  textPre:
-    `If you're using an X-Pack secured version of Elastic Stack, you must specify` +
-    ' credentials in the `apm-server.yml` config file.',
+  title: i18n.translate('kbn.server.tutorials.apm.editConfig.title', {
+    defaultMessage: 'Edit the configuration',
+  }),
+  textPre: i18n.translate('kbn.server.tutorials.apm.editConfig.textPre', {
+    // eslint-disable-next-line no-multi-str
+    defaultMessage: 'If you\'re using an X-Pack secured version of Elastic Stack, you must specify \
+      credentials in the `apm-server.yml` config file.',
+  }),
   commands: [
     'output.elasticsearch:',
     '    hosts: ["<es_url>"]',
@@ -31,9 +37,12 @@ export const EDIT_CONFIG = {
 };
 
 const START_SERVER = {
-  title: 'Start APM Server',
-  textPre:
-    'The server processes and stores application performance metrics in Elasticsearch.',
+  title: i18n.translate('kbn.server.tutorials.apm.startServer.title', {
+    defaultMessage: 'Start APM Server',
+  }),
+  textPre: i18n.translate('kbn.server.tutorials.apm.startServer.textPre', {
+    defaultMessage: 'The server processes and stores application performance metrics in Elasticsearch.',
+  }),
 };
 
 export const START_SERVER_UNIX = {
@@ -42,7 +51,9 @@ export const START_SERVER_UNIX = {
   commands: ['./apm-server -e'],
 };
 
-const DOWNLOAD_SERVER_TITLE = 'Download and unpack APM Server';
+const DOWNLOAD_SERVER_TITLE = i18n.translate('kbn.server.tutorials.apm.downloadServer.title', {
+  defaultMessage: 'Download and unpack APM Server',
+});
 
 export const DOWNLOAD_SERVER_OSX = {
   title: DOWNLOAD_SERVER_TITLE,
@@ -59,8 +70,10 @@ export const DOWNLOAD_SERVER_DEB = {
     'curl -L -O https://artifacts.elastic.co/downloads/apm-server/apm-server-{config.kibana.version}-amd64.deb',
     'sudo dpkg -i apm-server-{config.kibana.version}-amd64.deb',
   ],
-  textPost:
-    'Looking for the 32-bit packages? See the [Download page]({config.docs.base_url}downloads/apm/apm-server).',
+  textPost: i18n.translate('kbn.server.tutorials.apm.downloadServerTitle', {
+    defaultMessage: 'Looking for the 32-bit packages? See the [Download page]({downloadPageLink}).',
+    values: { downloadPageLink: '{config.docs.base_url}downloads/apm/apm-server' },
+  }),
 };
 
 export const DOWNLOAD_SERVER_RPM = {
@@ -69,27 +82,39 @@ export const DOWNLOAD_SERVER_RPM = {
     'curl -L -O https://artifacts.elastic.co/downloads/apm-server/apm-server-{config.kibana.version}-x86_64.rpm',
     'sudo rpm -vi apm-server-{config.kibana.version}-x86_64.rpm',
   ],
-  textPost:
-    'Looking for the 32-bit packages? See the [Download page]({config.docs.base_url}downloads/apm/apm-server).',
+  textPost: i18n.translate('kbn.server.tutorials.apm.downloadServerRpm', {
+    defaultMessage: 'Looking for the 32-bit packages? See the [Download page]({downloadPageLink}).',
+    values: { downloadPageLink: '{config.docs.base_url}downloads/apm/apm-server' },
+  }),
 };
 
 export const WINDOWS_SERVER_INSTRUCTIONS = [
   {
     title: DOWNLOAD_SERVER_TITLE,
-    textPre:
-      '1. Download the APM Server Windows zip file from the [Download page](https://www.elastic.co/downloads/apm/apm-server).\n' +
-      '2. Extract the contents of the zip file into `C:\\Program Files`.\n' +
-      '3. Rename the `apm-server-{config.kibana.version}-windows` directory to `APM-Server`.\n' +
-      '4. Open a PowerShell prompt as an Administrator (right-click the PowerShell icon and select' +
-      ' **Run As Administrator**). If you are running Windows XP, you might need to download and install PowerShell.\n' +
-      '5. From the PowerShell prompt, run the following commands to install APM Server as a Windows service:',
+    textPre: i18n.translate('kbn.server.tutorials.apm.windowsServerInstructions.textPre', {
+      // eslint-disable-next-line no-multi-str
+      defaultMessage: '1. Download the APM Server Windows zip file from the \
+        [Download page]({downloadPageLink}).\n2. Extract the contents of \
+        the zip file into {zipFileExtractFolder}.\n3. Rename the {apmServerDirectory} \
+        directory to `APM-Server`.\n4. Open a PowerShell prompt as an Administrator \
+        (right-click the PowerShell icon and select \
+        **Run As Administrator**). If you are running Windows XP, you might need to download and install \
+        PowerShell.\n5. From the PowerShell prompt, run the following commands to install APM Server as a Windows service:',
+      values: {
+        downloadPageLink: 'https://www.elastic.co/downloads/apm/apm-server',
+        zipFileExtractFolder: '`C:\\Program Files`',
+        apmServerDirectory: '`apm-server-{config.kibana.version}-windows`',
+      }
+    }),
     commands: [
       `PS > cd 'C:\\Program Files\\APM-Server'`,
       `PS C:\\Program Files\\APM-Server> .\\install-service-apm-server.ps1`,
     ],
-    textPost:
-      'Note: If script execution is disabled on your system, you need to set the execution policy for the current session' +
-      ' to allow the script to run. For example: `PowerShell.exe -ExecutionPolicy UnRestricted -File .\\install-service-apm-server.ps1`.',
+    textPost: i18n.translate('kbn.server.tutorials.apm.windowsServerInstructions.textPost', {
+      // eslint-disable-next-line no-multi-str
+      defaultMessage: 'Note: If script execution is disabled on your system, you need to set the execution policy for the current session \
+        to allow the script to run. For example: `PowerShell.exe -ExecutionPolicy UnRestricted -File .\\install-service-apm-server.ps1`.',
+    }),
   },
   EDIT_CONFIG,
   {
