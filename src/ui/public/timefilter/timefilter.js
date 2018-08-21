@@ -54,6 +54,7 @@ class Timefilter extends SimpleEmitter {
    * @property {string} time.mode (quick | relative | absolute)
    */
   setTime = (time) => {
+    console.log(time);
     // Object.assign used for partially composed updates
     const newTime = Object.assign(this.getTime(), time);
     if (areTimePickerValsDifferent(this.getTime(), newTime)) {

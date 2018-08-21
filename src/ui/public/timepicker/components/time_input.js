@@ -20,6 +20,8 @@
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 
+import { AbsoluteForm } from './absolute_form';
+
 import {
   EuiPopover,
   EuiFieldText,
@@ -36,9 +38,10 @@ export class TimeInput extends Component {
         id: 'absolute',
         name: 'Absolute',
         content: (
-          <div>
-            Absolute time stuff goes here
-          </div>
+          <AbsoluteForm
+            value={this.props.value}
+            onChange={this.props.onChange}
+          />
         ),
       },
       {
