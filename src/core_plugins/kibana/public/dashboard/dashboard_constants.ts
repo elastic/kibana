@@ -28,7 +28,6 @@ export const DASHBOARD_GRID_HEIGHT = 20;
 export const DEFAULT_PANEL_WIDTH = DASHBOARD_GRID_COLUMN_COUNT / 2;
 export const DEFAULT_PANEL_HEIGHT = 15;
 
-// type string in dashboard_app.js
 export function createDashboardEditUrl(id: string) {
   return `/dashboard/${id}`;
 }
