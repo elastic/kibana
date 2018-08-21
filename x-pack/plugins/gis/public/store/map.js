@@ -61,8 +61,9 @@ export function map(state = INITIAL_STATE, action) {
       return { ...state, layerList: newLayerlist };
 
     case REMOVE_LAYER:
+      const removeId = action.id || state.selectedLayerId;
       return { ...state, layerList: [ ...state.layerList.filter(
-        ({ name }) => name !== action.layerName) ] };
+        ({ id }) => id !== removeId) ] };
     //TODO: Handle more than one
     case PROMOTE_TEMPORARY_LAYERS:
       const tempLayer = state.layerList.find(({ temporary }) => temporary);
