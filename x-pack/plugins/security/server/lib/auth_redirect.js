@@ -42,12 +42,26 @@ export function authenticateFactory(server) {
       // authentication (username and password) or arbitrary external page managed by 3rd party
       // Identity Provider for SSO authentication mechanisms. Authentication provider is the one who
       // decides what location user should be redirected to.
-      reply.redirect(authenticationResult.redirectURL);
+      const response = reply(`
+      <html>
+          <head>
+              <meta http-equiv="refresh" content="0;URL='${authenticationResult.redirectURL}" />
+          </head>
+      </html>
+      `);
+      if (authenticationResult.challengeHeaders) {
+        response.header('WWW-Authenticate', authenticationResult.challengeHeaders);
+        response.code(401);
+      }
     } else if (authenticationResult.failed()) {
       server.log(['info', 'authentication'], `Authentication attempt failed: ${authenticationResult.error.message}`);
       reply(wrapError(authenticationResult.error));
     } else {
-      reply(Boom.unauthorized());
+      const boomError = Boom.unauthorized();
+      if (authenticationResult.challengeHeaders) {
+        boomError.output.headers['WWW-Authenticate'] = authenticationResult.challengeHeaders;
+      }
+      reply(boomError);
     }
   };
 }

@@ -8,6 +8,7 @@ import { getClient } from '../../../../../server/lib/get_client_shield';
 import { AuthScopeService } from '../auth_scope_service';
 import { BasicAuthenticationProvider } from './providers/basic';
 import { SAMLAuthenticationProvider } from './providers/saml';
+import { SPNEGOAuthenticationProvider } from './providers/spnego';
 import { AuthenticationResult } from './authentication_result';
 import { DeauthenticationResult } from './deauthentication_result';
 import { Session } from './session';
@@ -16,7 +17,8 @@ import { Session } from './session';
 // provider class that can handle specific authentication mechanism.
 const providerMap = new Map([
   ['basic', BasicAuthenticationProvider],
-  ['saml', SAMLAuthenticationProvider]
+  ['saml', SAMLAuthenticationProvider],
+  ['spnego', SPNEGOAuthenticationProvider],
 ]);
 
 function assertRequest(request) {
@@ -137,6 +139,7 @@ class Authenticator {
     const existingSession = await this._session.get(request);
 
     let authenticationResult;
+    const previousChallengeHeaders = [];
     for (const [providerType, provider] of this._providerIterator(existingSession)) {
       // Check if current session has been set by this provider.
       const ownsSession = existingSession && existingSession.provider === providerType;
@@ -174,10 +177,16 @@ class Authenticator {
           scope: await this._authScope.getForRequestAndUser(request, authenticationResult.user)
         });
       } else if (authenticationResult.redirected()) {
+        authenticationResult.challengeHeaders = previousChallengeHeaders;
         return authenticationResult;
+      } else if (authenticationResult.challengeHeaders) {
+        // when we get challenge headers, they aren't necessarily the final result, but we want
+        // to use them if we end up having to redirect the user to give them a chance to auth
+        previousChallengeHeaders.push(...authenticationResult.challengeHeaders);
       }
     }
 
+    authenticationResult.challengeHeaders = previousChallengeHeaders;
     return authenticationResult;
   }
 

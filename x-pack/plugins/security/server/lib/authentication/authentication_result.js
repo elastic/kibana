@@ -31,7 +31,7 @@ const AuthenticationResultStatus = Object.freeze({
    * Authentication consists of multiple steps and user should be redirected to
    * a different location to complete it. Can be complemented with optional state.
    */
-  Redirected: 'redirected'
+  Redirected: 'redirected',
 });
 
 /**
@@ -48,6 +48,7 @@ export class AuthenticationResult {
   _state;
   _error;
   _redirectURL;
+  _challengeHeaders;
 
   /**
    * Authenticated user instance (only available for `succeeded` result).
@@ -83,16 +84,25 @@ export class AuthenticationResult {
     return this._redirectURL;
   }
 
+  get challengeHeaders() {
+    return this._challengeHeaders;
+  }
+
+  set challengeHeaders(value) {
+    this._challengeHeaders = value;
+  }
+
   /**
    * Constructor is not supposed to be used directly, please use corresponding static factory methods instead.
    * @private
    */
-  constructor(status, { user, state, error, redirectURL } = {}) {
+  constructor(status, { user, state, error, redirectURL, challengeHeaders } = {}) {
     this._status = status;
     this._user = user;
     this._state = state;
     this._error = error;
     this._redirectURL = redirectURL;
+    this._challengeHeaders = challengeHeaders;
   }
 
   /**
@@ -183,6 +193,17 @@ export class AuthenticationResult {
     return new AuthenticationResult(
       AuthenticationResultStatus.Redirected,
       { redirectURL, state }
+    );
+  }
+
+  static challenge(challengeHeader) {
+    if (!challengeHeader) {
+      throw new Error('WWW-Authenticate header must be specified');
+    }
+
+    return new AuthenticationResult(
+      AuthenticationResultStatus.NotHandled,
+      { challengeHeaders: [challengeHeader] }
     );
   }
 }
