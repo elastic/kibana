@@ -160,9 +160,9 @@ image::images/highlights_6_4_ems.png[Elastic Maps Service landing page]
 
 This release adds documentation for these experimental APIs:
 
-* The {kib} role management API enables you to control 
+* The <<role-management-api, {kib} role management API>> enables you to control 
 access to {kib} features and saved objects.
-* The <<logstash-configuration-management-api, Logstash configuration management api>> allows you to 
+* The <<logstash-configuration-management-api, Logstash configuration management API>> allows you to 
 programmatically integrate with the Logstash configuration 
 management feature.
 
