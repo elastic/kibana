@@ -20,6 +20,7 @@
 import { FatalErrorsService } from './fatal_errors';
 import { InjectedMetadataService } from './injected_metadata';
 import { LegacyPlatformService } from './legacy_platform';
+import { LoadingCountService } from './loading_count';
 import { NotificationsService } from './notifications';
 
 const MockLegacyPlatformService = jest.fn<LegacyPlatformService>(
@@ -65,6 +66,16 @@ jest.mock('./notifications', () => ({
   NotificationsService: MockNotificationsService,
 }));
 
+const mockLoadingCountContract = {};
+const MockLoadingCountService = jest.fn<LoadingCountService>(function _MockNotificationsService(
+  this: any
+) {
+  this.start = jest.fn().mockReturnValue(mockLoadingCountContract);
+});
+jest.mock('./loading_count', () => ({
+  LoadingCountService: MockLoadingCountService,
+}));
+
 import { CoreSystem } from './core_system';
 jest.spyOn(CoreSystem.prototype, 'stop');
 
@@ -89,6 +100,7 @@ describe('constructor', () => {
     expect(MockLegacyPlatformService).toHaveBeenCalledTimes(1);
     expect(MockFatalErrorsService).toHaveBeenCalledTimes(1);
     expect(MockNotificationsService).toHaveBeenCalledTimes(1);
+    expect(MockLoadingCountService).toHaveBeenCalledTimes(1);
   });
 
   it('passes injectedMetadata param to InjectedMetadataService', () => {
@@ -198,6 +210,15 @@ describe('#start()', () => {
     const [mockInstance] = MockInjectedMetadataService.mock.instances;
     expect(mockInstance.start).toHaveBeenCalledTimes(1);
     expect(mockInstance.start).toHaveBeenCalledWith();
+  });
+
+  it('calls loadingCount#start()', () => {
+    startCore();
+    const [mockInstance] = MockLoadingCountService.mock.instances;
+    expect(mockInstance.start).toHaveBeenCalledTimes(1);
+    expect(mockInstance.start).toHaveBeenCalledWith({
+      fatalErrors: mockFatalErrorsStartContract,
+    });
   });
 
   it('calls fatalErrors#start()', () => {

@@ -260,11 +260,13 @@ export class JobsListView extends Component {
   }
 
   render() {
+    const jobIds = this.state.jobsSummaryList.map(j => j.id);
     return (
       <div>
         <div className="actions-bar">
           <MultiJobActions
             selectedJobs={this.state.selectedJobs}
+            allJobIds={jobIds}
             showStartDatafeedModal={this.showStartDatafeedModal}
             showDeleteJobModal={this.showDeleteJobModal}
             refreshJobs={() => this.refreshJobSummaryList(true)}
@@ -287,6 +289,7 @@ export class JobsListView extends Component {
           setShowFunction={this.setShowEditJobFlyoutFunction}
           unsetShowFunction={this.unsetShowEditJobFlyoutFunction}
           refreshJobs={() => this.refreshJobSummaryList(true)}
+          allJobIds={jobIds}
         />
         <DeleteJobModal
           setShowFunction={this.setShowDeleteJobModalFunction}
