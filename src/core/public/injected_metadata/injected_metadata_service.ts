@@ -23,6 +23,7 @@ export interface InjectedMetadataParams {
   injectedMetadata: {
     version: string;
     buildNumber: number;
+    basePath: string;
     legacyMetadata: {
       [key: string]: any;
     };
@@ -42,6 +43,10 @@ export class InjectedMetadataService {
 
   public start() {
     return {
+      getBasePath: () => {
+        return this.state.basePath;
+      },
+
       getLegacyMetadata: () => {
         return this.state.legacyMetadata;
       },

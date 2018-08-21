@@ -18,6 +18,8 @@
  */
 
 import './core.css';
+
+import { BasePathService } from './base_path';
 import { FatalErrorsService } from './fatal_errors';
 import { InjectedMetadataParams, InjectedMetadataService } from './injected_metadata';
 import { LegacyPlatformParams, LegacyPlatformService } from './legacy_platform';
@@ -43,6 +45,7 @@ export class CoreSystem {
   private readonly legacyPlatform: LegacyPlatformService;
   private readonly notifications: NotificationsService;
   private readonly loadingCount: LoadingCountService;
+  private readonly basePath: BasePathService;
 
   private readonly rootDomElement: HTMLElement;
   private readonly notificationsTargetDomElement: HTMLDivElement;
@@ -71,6 +74,7 @@ export class CoreSystem {
     });
 
     this.loadingCount = new LoadingCountService();
+    this.basePath = new BasePathService();
 
     this.legacyPlatformTargetDomElement = document.createElement('div');
     this.legacyPlatform = new LegacyPlatformService({
@@ -92,7 +96,14 @@ export class CoreSystem {
       const injectedMetadata = this.injectedMetadata.start();
       const fatalErrors = this.fatalErrors.start();
       const loadingCount = this.loadingCount.start({ fatalErrors });
-      this.legacyPlatform.start({ injectedMetadata, fatalErrors, notifications, loadingCount });
+      const basePath = this.basePath.start({ injectedMetadata });
+      this.legacyPlatform.start({
+        injectedMetadata,
+        fatalErrors,
+        notifications,
+        loadingCount,
+        basePath,
+      });
     } catch (error) {
       this.fatalErrors.add(error);
     }

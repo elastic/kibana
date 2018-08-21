@@ -17,6 +17,7 @@
  * under the License.
  */
 
+import { BasePathService } from './base_path';
 import { FatalErrorsService } from './fatal_errors';
 import { InjectedMetadataService } from './injected_metadata';
 import { LegacyPlatformService } from './legacy_platform';
@@ -76,6 +77,14 @@ jest.mock('./loading_count', () => ({
   LoadingCountService: MockLoadingCountService,
 }));
 
+const mockBasePathStartContract = {};
+const MockBasePathService = jest.fn<BasePathService>(function _MockNotificationsService(this: any) {
+  this.start = jest.fn().mockReturnValue(mockBasePathStartContract);
+});
+jest.mock('./base_path', () => ({
+  BasePathService: MockBasePathService,
+}));
+
 import { CoreSystem } from './core_system';
 jest.spyOn(CoreSystem.prototype, 'stop');
 
@@ -101,6 +110,7 @@ describe('constructor', () => {
     expect(MockFatalErrorsService).toHaveBeenCalledTimes(1);
     expect(MockNotificationsService).toHaveBeenCalledTimes(1);
     expect(MockLoadingCountService).toHaveBeenCalledTimes(1);
+    expect(MockBasePathService).toHaveBeenCalledTimes(1);
   });
 
   it('passes injectedMetadata param to InjectedMetadataService', () => {
@@ -218,6 +228,15 @@ describe('#start()', () => {
     expect(mockInstance.start).toHaveBeenCalledTimes(1);
     expect(mockInstance.start).toHaveBeenCalledWith({
       fatalErrors: mockFatalErrorsStartContract,
+    });
+  });
+
+  it('calls basePath#start()', () => {
+    startCore();
+    const [mockInstance] = MockBasePathService.mock.instances;
+    expect(mockInstance.start).toHaveBeenCalledTimes(1);
+    expect(mockInstance.start).toHaveBeenCalledWith({
+      injectedMetadata: mockInjectedMetadataStartContract,
     });
   });
 

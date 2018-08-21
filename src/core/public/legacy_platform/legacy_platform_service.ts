@@ -18,6 +18,7 @@
  */
 
 import angular from 'angular';
+import { BasePathStartContract } from '../base_path';
 import { FatalErrorsStartContract } from '../fatal_errors';
 import { InjectedMetadataStartContract } from '../injected_metadata';
 import { LoadingCountStartContract } from '../loading_count';
@@ -28,6 +29,7 @@ interface Deps {
   fatalErrors: FatalErrorsStartContract;
   notifications: NotificationsStartContract;
   loadingCount: LoadingCountStartContract;
+  basePath: BasePathStartContract;
 }
 
 export interface LegacyPlatformParams {
@@ -46,13 +48,14 @@ export interface LegacyPlatformParams {
 export class LegacyPlatformService {
   constructor(private readonly params: LegacyPlatformParams) {}
 
-  public start({ injectedMetadata, fatalErrors, notifications, loadingCount }: Deps) {
+  public start({ injectedMetadata, fatalErrors, notifications, loadingCount, basePath }: Deps) {
     // Inject parts of the new platform into parts of the legacy platform
     // so that legacy APIs/modules can mimic their new platform counterparts
     require('ui/metadata').__newPlatformInit__(injectedMetadata.getLegacyMetadata());
     require('ui/notify/fatal_error').__newPlatformInit__(fatalErrors);
     require('ui/notify/toasts').__newPlatformInit__(notifications.toasts);
     require('ui/chrome/api/loading_count').__newPlatformInit__(loadingCount);
+    require('ui/chrome/api/base_path').__newPlatformInit__(basePath);
 
     // Load the bootstrap module before loading the legacy platform files so that
     // the bootstrap module can modify the environment a bit first

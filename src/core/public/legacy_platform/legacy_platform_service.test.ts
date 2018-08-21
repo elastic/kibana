@@ -70,6 +70,14 @@ jest.mock('ui/chrome/api/loading_count', () => {
   };
 });
 
+const mockBasePathInit = jest.fn();
+jest.mock('ui/chrome/api/base_path', () => {
+  mockLoadOrder.push('ui/chrome/api/base_path');
+  return {
+    __newPlatformInit__: mockBasePathInit,
+  };
+});
+
 import { LegacyPlatformService } from './legacy_platform_service';
 
 const fatalErrorsStartContract = {} as any;
@@ -78,12 +86,19 @@ const notificationsStartContract = {
 } as any;
 
 const injectedMetadataStartContract = {
+  getBasePath: jest.fn(),
   getLegacyMetadata: jest.fn(),
 };
 
 const loadingCountStartContract = {
   add: jest.fn(),
   getCount$: jest.fn().mockImplementation(() => new Rx.Observable(observer => observer.next(0))),
+};
+
+const basePathStartContract = {
+  get: jest.fn(),
+  addToPath: jest.fn(),
+  removeFromPath: jest.fn(),
 };
 
 const defaultParams = {
@@ -98,6 +113,7 @@ const defaultStartDeps = {
   injectedMetadata: injectedMetadataStartContract,
   notifications: notificationsStartContract,
   loadingCount: loadingCountStartContract,
+  basePath: basePathStartContract,
 };
 
 afterEach(() => {
@@ -156,6 +172,17 @@ describe('#start()', () => {
       expect(mockLoadingCountInit).toHaveBeenCalledWith(loadingCountStartContract);
     });
 
+    it('passes basePath service to ui/chrome/api/base_path', () => {
+      const legacyPlatform = new LegacyPlatformService({
+        ...defaultParams,
+      });
+
+      legacyPlatform.start(defaultStartDeps);
+
+      expect(mockBasePathInit).toHaveBeenCalledTimes(1);
+      expect(mockBasePathInit).toHaveBeenCalledWith(basePathStartContract);
+    });
+
     describe('useLegacyTestHarness = false', () => {
       it('passes the targetDomElement to ui/chrome', () => {
         const legacyPlatform = new LegacyPlatformService({
@@ -169,6 +196,7 @@ describe('#start()', () => {
         expect(mockUiChromeBootstrap).toHaveBeenCalledWith(defaultParams.targetDomElement);
       });
     });
+
     describe('useLegacyTestHarness = true', () => {
       it('passes the targetDomElement to ui/test_harness', () => {
         const legacyPlatform = new LegacyPlatformService({
@@ -201,6 +229,7 @@ describe('#start()', () => {
           'ui/notify/fatal_error',
           'ui/notify/toasts',
           'ui/chrome/api/loading_count',
+          'ui/chrome/api/base_path',
           'ui/chrome',
           'legacy files',
         ]);
@@ -223,6 +252,7 @@ describe('#start()', () => {
           'ui/notify/fatal_error',
           'ui/notify/toasts',
           'ui/chrome/api/loading_count',
+          'ui/chrome/api/base_path',
           'ui/test_harness',
           'legacy files',
         ]);
