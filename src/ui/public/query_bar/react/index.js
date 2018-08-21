@@ -20,9 +20,11 @@
 import 'ngreact';
 
 import { QueryBar } from './query_bar';
+import { QueryLanguageSwitcher } from './language_switcher';
 
 import { uiModules } from '../../modules';
 
-const app = uiModules.get('kibana', ['react']);
+const app = uiModules.get('app/kibana', ['react']);
 
 app.directive('reactQueryBar', reactDirective => reactDirective(QueryBar));
+app.directive('queryPopover', reactDirective => reactDirective(QueryLanguageSwitcher));

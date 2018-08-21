@@ -25,7 +25,6 @@ import suggestionTemplate from './suggestion.html';
 import { getAutocompleteProvider } from '../../autocomplete_providers';
 import './suggestion.less';
 import '../../directives/match_pairs';
-import './query_popover';
 import { getFromLegacyIndexPattern } from '../../index_patterns/static_utils';
 
 const module = uiModules.get('kibana');
