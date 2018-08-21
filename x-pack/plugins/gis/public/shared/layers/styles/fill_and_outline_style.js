@@ -37,7 +37,7 @@ export class FillAndOutlineStyle {
     return 'Vector Adjustment';
   }
 
-  static renderEditor({ handleStyleChange, style }) {
+  static renderEditor({ handleStyleChange, style, reset }) {
 
     if (style === null) {
       const fallbackDescriptor = FillAndOutlineStyle.createDescriptor(FillAndOutlineStyle.DEFAULT_COLOR_HEX);
@@ -48,11 +48,6 @@ export class FillAndOutlineStyle {
       const fillAndOutlineDescriptor = FillAndOutlineStyle.createDescriptor(color);
       handleStyleChange(fillAndOutlineDescriptor);
     };
-    const resetColor = () => {
-      //todo: do a handleStyleChange with the original settings
-      console.warn('reset color function not implemented/provided');
-    };
-
     const selectedColor = style ? style.getHexColor() : FillAndOutlineStyle.DEFAULT_COLOR_HEX;
     return (
       <EuiFlexGroup alignItems="center">
@@ -65,7 +60,7 @@ export class FillAndOutlineStyle {
         <EuiFlexItem grow={false}>
           <p className="kuiText">
             <EuiKeyboardAccessible>
-              <a className="kuiLink" onClick={resetColor}>
+              <a className="kuiLink" onClick={reset}>
                 Reset
               </a>
             </EuiKeyboardAccessible>

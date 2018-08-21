@@ -6,13 +6,14 @@
 
 import { connect } from 'react-redux';
 import { StyleTabs } from './view';
-import { updateLayerStyle } from '../../../actions/style_actions';
+import { updateLayerStyle, clearTemporaryStyles } from '../../../actions/style_actions';
 
 function mapDispatchToProps(dispatch) {
   return {
     updateStyle: styleDescriptor => {
       dispatch(updateLayerStyle(styleDescriptor));
-    }
+    },
+    reset: () => dispatch(clearTemporaryStyles())
   };
 }
 

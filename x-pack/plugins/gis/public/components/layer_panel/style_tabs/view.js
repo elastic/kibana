@@ -57,7 +57,8 @@ export class StyleTabs extends React.Component {
         handleStyleChange: (styleDescriptor) => {
           this.props.updateStyle(styleDescriptor);
         },
-        style: seedStyle
+        style: seedStyle,
+        reset: () => this.props.reset()
       });
 
       return (
