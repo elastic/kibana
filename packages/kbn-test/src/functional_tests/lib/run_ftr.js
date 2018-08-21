@@ -27,7 +27,7 @@ export async function runFtr({ configPath, options: { log, bail, grep, updateBas
     configOverrides: {
       mochaOpts: {
         bail: !!bail,
-        grep: grep,
+        grep,
       },
       updateBaselines,
     },
