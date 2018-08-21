@@ -144,10 +144,8 @@ export function initSpacesApi(server) {
 
       let result;
 
-      let existingSpace;
-
       try {
-        existingSpace = await getSpaceById(client, id);
+        const existingSpace = await getSpaceById(client, id);
         if (isReservedSpace(existingSpace)) {
           return reply(wrapError(Boom.badRequest('This Space cannot be deleted because it is reserved.')));
         }
