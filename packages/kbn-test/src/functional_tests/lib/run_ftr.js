@@ -36,8 +36,7 @@ export async function runFtr({ configPath, options: { log, bail, grep, updateBas
   const failureCount = await ftr.run();
   if (failureCount > 0) {
     throw new CliError(
-      `${failureCount} functional test ${failureCount === 1 ? 'failure' : 'failures'}`,
-      1
+      `${failureCount} functional test ${failureCount === 1 ? 'failure' : 'failures'}`
     );
   }
 }
