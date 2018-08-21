@@ -26,7 +26,7 @@ export function createOnPremInstructions() {
   const COMMON_NETFLOW_INSTRUCTIONS = createCommonNetflowInstructions();
   const LOGSTASH_INSTRUCTIONS = createLogstashInstructions();
 
-  {
+  return {
     instructionSets: [
       {
         title: 'Getting Started',
@@ -49,6 +49,6 @@ export function createOnPremInstructions() {
           },
         ],
       },
-    ];
-  }
+    ],
+  };
 }
