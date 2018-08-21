@@ -138,10 +138,10 @@ export function addEMSTMSFromSource(sourceDescriptor, options = {}, position) {
   };
 }
 
-export function removeLayer(layerName) {
+export function removeLayer(id) {
   return {
     type: REMOVE_LAYER,
-    layerName
+    id
   };
 }
 
