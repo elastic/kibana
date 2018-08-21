@@ -62,52 +62,40 @@ export async function kfetch(
       ...options.headers,
     },
   };
-  const { pathname, query, ...restOptions }: KFetchOptions = await successInterceptors(
-    combinedOptions,
-    'request'
+  const { pathname, query, ...restOptions }: KFetchOptions = await requestInterceptors(
+    combinedOptions
   );
   const fullUrl = url.format({
     pathname: prependBasePath ? chrome.addBasePath(pathname) : pathname,
     query,
   });
 
-  let res: Response;
-  try {
-    res = await fetch(fullUrl, restOptions);
-  } catch (e) {
-    return errorInterceptors(e, 'requestError');
-  }
+  const responsePromise = fetch(fullUrl, restOptions).then(async res => {
+    if (res.ok) {
+      return res.json();
+    }
+    throw new KFetchError(res, await getBodyAsJson(res));
+  });
 
-  if (res.ok) {
-    const json = await res.json();
-    return successInterceptors(json, 'response');
-  }
-
-  const error = new KFetchError(res, await getBodyAsJson(res));
-  return errorInterceptors(error, 'responseError');
+  return responseInterceptors(responsePromise);
 }
 
-function successInterceptors(res: any, name: 'request' | 'response') {
+function requestInterceptors(config: any) {
+  return [...interceptors].reverse().reduce((acc, interceptor) => {
+    return acc.then(interceptor.request || noop).catch(interceptor.requestError || noopError);
+  }, Promise.resolve(config));
+}
+
+function responseInterceptors(responsePromise: Promise<any>) {
   return interceptors.reduce((acc, interceptor) => {
-    const fn = interceptor[name];
-    if (!fn) {
-      return acc;
-    }
-
-    return acc.then(fn);
-  }, Promise.resolve(res));
+    return acc.then(interceptor.response || noop).catch(interceptor.responseError || noopError);
+  }, responsePromise);
 }
 
-function errorInterceptors(e: Error, name: 'requestError' | 'responseError') {
-  return interceptors.reduce((acc: Promise<any>, interceptor) => {
-    const fn = interceptor[name];
-    if (!fn) {
-      return acc;
-    }
-
-    return acc.catch(fn);
-  }, Promise.reject(e));
-}
+const noop = (v: any) => v;
+const noopError = (e: Error) => {
+  throw e;
+};
 
 async function getBodyAsJson(res: Response) {
   try {

@@ -191,8 +191,11 @@ describe('kfetch', () => {
     describe('requestError', () => {
       it('should throw custom error', async () => {
         expect.assertions(1);
-        fetchMock.get('*', { throws: new Error('Network issue') });
+        fetchMock.get('*', {});
         addInterceptor({
+          request: () => {
+            throw new Error('Initial error');
+          },
           requestError: e => {
             throw new Error(`${e.message} intercepted`);
           },
@@ -201,32 +204,40 @@ describe('kfetch', () => {
         try {
           await kfetch({ pathname: 'my/path' });
         } catch (e) {
-          expect(e.message).toBe('Network issue intercepted');
+          expect(e.message).toBe('Initial error intercepted');
         }
       });
 
       it('should return rejected promise', async () => {
         expect.assertions(1);
-        fetchMock.get('*', { throws: new Error('Network issue') });
+        fetchMock.get('*', {});
         addInterceptor({
+          request: () => {
+            throw new Error('Initial error');
+          },
           requestError: e => Promise.reject(new Error(`${e.message} intercepted`)),
         });
 
         try {
           await kfetch({ pathname: 'my/path' });
         } catch (e) {
-          expect(e.message).toBe('Network issue intercepted');
+          expect(e.message).toBe('Initial error intercepted');
         }
       });
 
-      it('should swallow error', async () => {
-        fetchMock.get('*', { throws: new Error('Network issue') });
+      it('should make request when error is resolved', async () => {
+        fetchMock.get('*', { foo: 'bar' });
         addInterceptor({
-          requestError: e => 'resolved value',
+          request: () => {
+            throw new Error('Initial error');
+          },
+          requestError: () => ({ pathname: 'myNewPath', myProp: 'myValue' }),
         });
 
         const resp = await kfetch({ pathname: 'my/path' });
-        expect(resp).toBe('resolved value');
+        expect(fetchMock.lastUrl('*')).toBe('http://localhost.com/myBase/myNewPath');
+        expect(fetchMock.lastOptions('*')).toEqual({ myProp: 'myValue' });
+        expect(resp).toEqual({ foo: 'bar' });
       });
     });
 
