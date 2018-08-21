@@ -11,6 +11,19 @@ import {
 } from "../actions/store_actions";
 import { UPDATE_LAYER_STYLE } from '../actions/style_actions';
 
+const updateLayerInList = (()=> {
+  const getLayerIndex = (list, layerId) => list.findIndex(({ id }) => layerId === id);
+  return (state, id, attribute, newValue) => {
+    const { layerList } = state;
+    const layerIdx = getLayerIndex(layerList, id);
+    // Update layer w/ new value. If no value provided, toggle boolean value
+    const updatedLayer = { ...layerList[layerIdx], [ attribute ]: newValue || !layerList[layerIdx][attribute] };
+    const updatedList = [...layerList.slice(0, layerIdx), updatedLayer,
+      ...layerList.slice(layerIdx + 1) ];
+    return { ...state, layerList: updatedList };
+  };
+})();
+
 const INITIAL_STATE = {
   mapConstants: {
     mapCenter: [37.41, 8.82],
@@ -18,11 +31,14 @@ const INITIAL_STATE = {
   },
   selectedLayer: null,
   layerList: [],
+  sources: [],
   layerLoading: false
 };
 
 export function map(state = INITIAL_STATE, action) {
   switch (action.type) {
+    // case SET_META:
+    //   return { ...state, meta: action.meta };
     case SET_SELECTED_LAYER:
       return { ...state, selectedLayer: state.layerList.find(layer => layer.id === action.selectedLayer) };
     case UPDATE_LAYER_ORDER:
@@ -38,38 +54,27 @@ export function map(state = INITIAL_STATE, action) {
         state.layerList.splice(action.position, 0, action.layer);
         newLayerlist = state.layerList.slice();
       }
-      return { ...state, ...{ layerList: newLayerlist } };
+      return { ...state, layerList: newLayerlist };
 
     case REMOVE_LAYER:
-      return { ...state, ...{ layerList: [ ...state.layerList.filter(
-        ({ name }) => name !== action.layerName) ] } };
+      return { ...state, layerList: [ ...state.layerList.filter(
+        ({ name }) => name !== action.layerName) ] };
     //TODO: Handle more than one
     case PROMOTE_TEMPORARY_LAYERS:
-      const tempLayerIdx = state.layerList.findIndex(({ temporary }) => temporary);
-      const newLayer = { ...state.layerList[tempLayerIdx], temporary: false };
-      const newLayerList = [...state.layerList.slice(0, tempLayerIdx), newLayer,
-        ...state.layerList.slice(tempLayerIdx + 1) ];
-      return { ...state, ...{ layerList: newLayerList } };
+      const tempLayer = state.layerList.find(({ temporary }) => temporary);
+      return tempLayer
+        ? updateLayerInList(state, tempLayer.id, 'temporary', false)
+        : state;
     case CLEAR_TEMPORARY_LAYERS:
-      return { ...state, ...{ layerList: [ ...state.layerList.filter(
-        ({ temporary }) => !temporary) ] } };
+      return { ...state, layerList: [ ...state.layerList.filter(
+        ({ temporary }) => !temporary) ] };
     case LAYER_LOADING:
       return { ...state, layerLoading: action.loadingBool };
     // TODO: Simplify cases below
     case TOGGLE_LAYER_VISIBLE:
-      const visibleLayerIdx = state.layerList.findIndex(({ id }) => action.layerId === id);
-      const visibleLayer = { ...state.layerList[visibleLayerIdx], visible: !state.layerList[visibleLayerIdx].visible };
-      const visibleToggledList = [...state.layerList.slice(0, visibleLayerIdx), visibleLayer,
-        ...state.layerList.slice(visibleLayerIdx + 1) ];
-      return { ...state, ...{ layerList: visibleToggledList } };
+      return updateLayerInList(state, action.layerId, 'visible');
     case UPDATE_LAYER_STYLE:
-      const styleChangeLayerId = state.selectedLayer.id;
-      const styleChangeLayerIdx = state.layerList.findIndex(
-        ({ id }) => styleChangeLayerId === id);
-      const styledLayer = { ...state.layerList[styleChangeLayerIdx], style: action.style };
-      const styleUpdatedList = [...state.layerList.slice(0, styleChangeLayerIdx), styledLayer,
-        ...state.layerList.slice(styleChangeLayerIdx + 1) ];
-      return { ...state, ...{ layerList: styleUpdatedList } };
+      return updateLayerInList(state, state.selectedLayer.id, 'style', action.style);
     default:
       return state;
   }
