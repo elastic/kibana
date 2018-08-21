@@ -7,7 +7,7 @@
 import { connect } from 'react-redux';
 import { FlyoutFooter } from './view';
 import { updateFlyout, FLYOUT_STATE } from '../../../store/ui';
-import { setSelectedLayer } from '../../../actions/store_actions';
+import { setSelectedLayer, removeLayer } from '../../../actions/store_actions';
 import { promoteTemporaryStyles, clearTemporaryStyles } from '../../../actions/style_actions';
 
 const mapDispatchToProps = dispatch => {
@@ -19,6 +19,11 @@ const mapDispatchToProps = dispatch => {
     saveLayerEdits: () => {
       dispatch(updateFlyout(FLYOUT_STATE.NONE));
       dispatch(promoteTemporaryStyles());
+      dispatch(setSelectedLayer(null));
+    },
+    removeLayer: () => {
+      dispatch(updateFlyout(FLYOUT_STATE.NONE));
+      dispatch(removeLayer());
       dispatch(setSelectedLayer(null));
     }
   };

@@ -13,7 +13,7 @@ import {
   EuiSpacer,
   EuiButtonEmpty,
 } from '@elastic/eui';
-export const FlyoutFooter = ({ cancelLayerPanel, saveLayerEdits }) => {
+export const FlyoutFooter = ({ cancelLayerPanel, saveLayerEdits, removeLayer }) => {
   return (
     <EuiFlexGroup responsive={false}>
       <EuiFlexItem grow={false}>
@@ -30,7 +30,7 @@ export const FlyoutFooter = ({ cancelLayerPanel, saveLayerEdits }) => {
       <EuiFlexItem grow={false}>
         <EuiButtonEmpty
           color="danger"
-          onClick={() => {console.warn("`Remove Layer` not implemented");}}
+          onClick={removeLayer}
           flush="right"
         >
           Remove layer
