@@ -5,11 +5,11 @@
  */
 
 import React from 'react';
-import { mount } from 'enzyme';
+import { shallow } from 'enzyme';
 import { SpaceSelector } from './space_selector';
 
 describe('SpaceSelector', () => {
   it('renders without crashing', () => {
-    expect(mount(<SpaceSelector spaces={[]} selectedSpaceIds={[]} onChange={jest.fn()} />)).toMatchSnapshot();
+    expect(shallow(<SpaceSelector spaces={[]} selectedSpaceIds={[]} onChange={jest.fn()} />)).toMatchSnapshot();
   });
 });

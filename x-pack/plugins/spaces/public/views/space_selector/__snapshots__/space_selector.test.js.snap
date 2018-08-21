@@ -2,11 +2,11 @@
 
 exports[`it renders without crashing 1`] = `
 <div
-  className="euiPage euiPage--widthIsNotRestricted spaceSelector__page"
+  className="euiPage spaceSelector__page"
   style={undefined}
 >
   <div
-    className="euiPageBody euiPage--widthIsNotRestricted"
+    className="euiPageBody"
     style={undefined}
   >
     <div

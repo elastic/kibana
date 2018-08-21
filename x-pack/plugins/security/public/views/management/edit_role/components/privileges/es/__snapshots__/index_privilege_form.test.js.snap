@@ -42,6 +42,8 @@ exports[`it renders without crashing 1`] = `
               label="Indices"
             >
               <EuiComboBox
+                data-test-subj="indicesInputundefined"
+                fullWidth={false}
                 isClearable={true}
                 isDisabled={false}
                 onChange={[Function]}
@@ -63,6 +65,8 @@ exports[`it renders without crashing 1`] = `
               label="Privileges"
             >
               <EuiComboBox
+                data-test-subj="privilegesInputundefined"
+                fullWidth={false}
                 isClearable={true}
                 isDisabled={false}
                 onChange={[Function]}
@@ -125,6 +129,8 @@ exports[`it renders without crashing 1`] = `
             >
               <React.Fragment>
                 <EuiComboBox
+                  data-test-subj="fieldInputundefined"
+                  fullWidth={false}
                   isClearable={true}
                   isDisabled={false}
                   onChange={[Function]}
@@ -155,6 +161,7 @@ exports[`it renders without crashing 1`] = `
           >
             <EuiSwitch
               compressed={true}
+              data-test-subj="restrictDocumentsQueryundefined"
               label="Restrict documents query"
               onChange={[Function]}
             />
