@@ -18,7 +18,6 @@ import {
 
 import './impacted_spaces_flyout.less';
 import { NO_PRIVILEGE_VALUE } from '../../../lib/constants';
-import { getKibanaPrivilegesViewModel } from '../../../lib/get_application_privileges';
 import { ManageSpacesButton } from '../../../../../../../../spaces/public/components';
 
 export class ImpactedSpacesFlyout extends Component {
@@ -52,11 +51,10 @@ export class ImpactedSpacesFlyout extends Component {
     const {
       role,
       spaces,
-      kibanaAppPrivileges,
       basePrivilege,
     } = this.props;
 
-    const { assignedPrivileges } = getKibanaPrivilegesViewModel(kibanaAppPrivileges, role.kibana);
+    const assignedPrivileges = role.kibana;
 
     const allSpacePrivileges = spaces.reduce((acc, space) => {
       const spacePrivilege = assignedPrivileges.space[space.id] ? assignedPrivileges.space[space.id][0] : basePrivilege;

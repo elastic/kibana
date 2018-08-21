@@ -23,7 +23,6 @@ import { isReservedRole } from '../../../../../../lib/role';
 import { copyRole } from '../../../lib/copy_role';
 import { getAvailablePrivileges } from '../../../lib/get_available_privileges';
 import { PrivilegeSpaceTable } from './privilege_space_table';
-import { getKibanaPrivilegesViewModel } from '../../../lib/get_application_privileges';
 import { PrivilegeCalloutWarning } from './privilege_callout_warning';
 import { ImpactedSpacesFlyout } from './impacted_spaces_flyout';
 
@@ -40,10 +39,9 @@ export class SpaceAwarePrivilegeForm extends Component {
     super(props);
     const {
       role,
-      kibanaAppPrivileges,
     } = props;
 
-    const { assignedPrivileges } = getKibanaPrivilegesViewModel(kibanaAppPrivileges, role.kibana);
+    const assignedPrivileges = role.kibana;
     const spacePrivileges = {
       ...assignedPrivileges.space
     };
@@ -60,7 +58,8 @@ export class SpaceAwarePrivilegeForm extends Component {
       role,
     } = this.props;
 
-    const { availablePrivileges, assignedPrivileges } = getKibanaPrivilegesViewModel(kibanaAppPrivileges, role.kibana);
+    const assignedPrivileges = role.kibana;
+    const availablePrivileges = kibanaAppPrivileges.map(privilege => privilege.name);
 
     const basePrivilege = assignedPrivileges.global.length > 0 ? assignedPrivileges.global[0] : NO_PRIVILEGE_VALUE;
 
