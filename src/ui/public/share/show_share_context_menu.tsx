@@ -17,14 +17,17 @@
  * under the License.
  */
 
+// TODO: Remove once typescript definitions are in EUI
+declare module '@elastic/eui' {
+  export const EuiWrappingPopover: React.SFC<any>;
+}
+
 import React from 'react';
 import ReactDOM from 'react-dom';
 
 import { ShareContextMenu } from './components/share_context_menu';
 
-import {
-  EuiWrappingPopover,
-} from '@elastic/eui';
+import { EuiWrappingPopover } from '@elastic/eui';
 
 let isOpen = false;
 
@@ -35,13 +38,21 @@ const onClose = () => {
   isOpen = false;
 };
 
+interface ShowProps {
+  anchorElement: any;
+  allowEmbed: boolean;
+  getUnhashableStates: () => any[];
+  objectId?: string;
+  objectType: string;
+}
+
 export function showShareContextMenu({
   anchorElement,
   allowEmbed,
   getUnhashableStates,
   objectId,
   objectType,
-}) {
+}: ShowProps) {
   if (isOpen) {
     onClose();
     return;

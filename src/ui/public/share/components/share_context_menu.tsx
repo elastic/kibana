@@ -18,17 +18,25 @@
  */
 
 import React, { Component } from 'react';
-import PropTypes from 'prop-types';
 
-import {
-  EuiContextMenu,
-} from '@elastic/eui';
+import { EuiContextMenu } from '@elastic/eui';
 
 import { ShareUrlContent } from './share_url_content';
 
-export class ShareContextMenu extends Component {
+interface Props {
+  allowEmbed: boolean;
+  objectId?: string;
+  objectType: string;
+  getUnhashableStates: () => any[];
+}
 
-  getPanels = () => {
+export class ShareContextMenu extends Component<Props> {
+  public render() {
+    const { panels, initialPanelId } = this.getPanels();
+    return <EuiContextMenu initialPanelId={initialPanelId} panels={panels} />;
+  }
+
+  private getPanels = () => {
     const panels = [];
     const menuItems = [];
 
@@ -41,12 +49,12 @@ export class ShareContextMenu extends Component {
           objectType={this.props.objectType}
           getUnhashableStates={this.props.getUnhashableStates}
         />
-      )
+      ),
     };
     menuItems.push({
       name: 'Permalinks',
       icon: 'link',
-      panel: permalinkPanel.id
+      panel: permalinkPanel.id,
     });
     panels.push(permalinkPanel);
 
@@ -61,13 +69,13 @@ export class ShareContextMenu extends Component {
             objectType={this.props.objectType}
             getUnhashableStates={this.props.getUnhashableStates}
           />
-        )
+        ),
       };
       panels.push(embedPanel);
       menuItems.push({
         name: 'Embed code',
         icon: 'console',
-        panel: embedPanel.id
+        panel: embedPanel.id,
       });
     }
 
@@ -87,22 +95,5 @@ export class ShareContextMenu extends Component {
     const lastPanelIndex = panels.length - 1;
     const initialPanelId = panels[lastPanelIndex].id;
     return { panels, initialPanelId };
-  }
-
-  render() {
-    const { panels, initialPanelId } = this.getPanels();
-    return (
-      <EuiContextMenu
-        initialPanelId={initialPanelId}
-        panels={panels}
-      />
-    );
-  }
+  };
 }
-
-ShareContextMenu.propTypes = {
-  allowEmbed: PropTypes.bool.isRequired,
-  objectId: PropTypes.string,
-  objectType: PropTypes.string.isRequired,
-  getUnhashableStates: PropTypes.func.isRequired,
-};
