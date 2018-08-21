@@ -9,17 +9,24 @@ import {
   ADD_LAYER, REMOVE_LAYER, PROMOTE_TEMPORARY_LAYERS,
   CLEAR_TEMPORARY_LAYERS, LAYER_LOADING, TOGGLE_LAYER_VISIBLE
 } from "../actions/store_actions";
-import { UPDATE_LAYER_STYLE } from '../actions/style_actions';
+import { UPDATE_LAYER_STYLE, PROMOTE_TEMPORARY_STYLES, CLEAR_TEMPORARY_STYLES }
+  from '../actions/style_actions';
 
 const updateLayerInList = (()=> {
   const getLayerIndex = (list, layerId) => list.findIndex(({ id }) => layerId === id);
   return (state, id, attribute, newValue) => {
     const { layerList } = state;
     const layerIdx = getLayerIndex(layerList, id);
-    // Update layer w/ new value. If no value provided, toggle boolean value
-    const updatedLayer = { ...layerList[layerIdx], [ attribute ]: newValue || !layerList[layerIdx][attribute] };
-    const updatedList = [...layerList.slice(0, layerIdx), updatedLayer,
-      ...layerList.slice(layerIdx + 1) ];
+    const updatedLayer = {
+      ...layerList[layerIdx],
+      // Update layer w/ new value. If no value provided, toggle boolean value
+      [ attribute ]: newValue || !layerList[layerIdx][attribute]
+    };
+    const updatedList = [
+      ...layerList.slice(0, layerIdx),
+      updatedLayer,
+      ...layerList.slice(layerIdx + 1)
+    ];
     return { ...state, layerList: updatedList };
   };
 })();
