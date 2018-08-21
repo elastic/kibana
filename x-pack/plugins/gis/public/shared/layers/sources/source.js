@@ -4,6 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import React from 'react';
+
 export class ASource {
 
   static renderEditor() {
@@ -18,4 +20,7 @@ export class ASource {
     this._descriptor = descriptor;
   }
 
+  renderDetails() {
+    return (<div>{`Here be details for source`}</div>);
+  }
 }

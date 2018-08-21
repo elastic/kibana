@@ -99,6 +99,7 @@ async function createDefaultLayerDescriptorForEMSFileSource(emsFileSource, optio
   const geojson = await EMSFileSource.getGeoJson(emsFileSource);
   return VectorLayer.createDescriptor({
     source: geojson,
+    sourceDescriptor: emsFileSource,
     name: emsFileSource.name || emsFileSource.id,
     ...options
   });
@@ -108,6 +109,7 @@ async function createDefaultLayerDescriptorForXYZTMSSource(xyzTMSsource, options
   const service = await XYZTMSSource.getTMSOptions(xyzTMSsource);
   return TileLayer.createDescriptor({
     source: service.url,
+    sourceDescriptor: xyzTMSsource,
     name: service.url,
     ...options
   });
@@ -121,14 +123,15 @@ export function addVectorLayerFromEMSFileSource(emsFileSource, options = {}, pos
   };
 }
 
-export function addEMSTMSFromSource(source, options = {}, position) {
+export function addEMSTMSFromSource(sourceDescriptor, options = {}, position) {
   return async (dispatch, getState) => {
     dispatch(layerLoading(true));
     const allServices = getState().config.meta.data_sources.ems.tms;
-    const service = await EMSTMSSource.getTMSOptions(source, allServices);
+    const service = await EMSTMSSource.getTMSOptions(sourceDescriptor, allServices);
     const layer = TileLayer.createDescriptor({
       source: service.url,
-      name: source.id,
+      sourceDescriptor: sourceDescriptor,
+      name: sourceDescriptor.id,
       ...options
     });
     dispatch(addLayer(layer, position));

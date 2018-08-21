@@ -61,4 +61,23 @@ export class EMSFileSource extends ASource {
     super(descriptor);
   }
 
+  renderDetails() {
+    return (
+      <Fragment>
+        <div>
+          <span className="bold">Source: </span><span>Elastic Maps Service</span>
+        </div>
+        <div>
+          <span className="bold">Type: </span><span>Vector (todo, use icon)</span>
+        </div>
+        <div>
+          <span className="bold">Name: </span><span>{this._descriptor.name}</span>
+        </div>
+        <div>
+          <span className="bold">todo hotlink to EMS landing page</span>
+        </div>
+      </Fragment>
+    );
+  }
+
 }
