@@ -7,7 +7,7 @@
 import invert from 'lodash/fp/invert';
 import mapKeys from 'lodash/fp/mapKeys';
 
-import { LogEntry, LogEntryFieldsMapping } from '../../common/log_entry';
+import { LogEntryFieldsMapping } from '../../common/log_entry';
 import { SearchResult } from '../../common/log_search_result';
 import { SearchSummaryBucket } from '../../common/log_search_summary';
 import {
@@ -16,24 +16,7 @@ import {
   Hit,
   HitsBucket,
   isBucketWithAggregation,
-  SortedHit,
 } from './elasticsearch';
-
-export const convertHitToLogEntry = (fields: LogEntryFieldsMapping) => (
-  hit: SortedHit
-): LogEntry => ({
-  fields: {
-    message: hit._source[fields.message],
-    tiebreaker: hit.sort[1], // use the sort property to get the normalized values
-    time: hit.sort[0],
-  },
-  gid: getHitGid(hit),
-  origin: {
-    id: hit._id,
-    index: hit._index,
-    type: hit._type,
-  },
-});
 
 export const convertHitToSearchResult = (fields: LogEntryFieldsMapping) => {
   const invertedFields = invert(fields);
