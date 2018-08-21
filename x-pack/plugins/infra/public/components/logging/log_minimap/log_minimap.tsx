@@ -10,50 +10,37 @@ import styled from 'styled-components';
 
 import { LogEntryTime } from '../../../../common/log_entry';
 import { SearchSummaryBucket } from '../../../../common/log_search_summary';
-import { LogSummaryBucket } from '../../../../common/log_summary';
-import { getMillisOfScale, TimeScale } from '../../../../common/time';
 import { DensityChart } from './density_chart';
 import { HighlightedInterval } from './highlighted_interval';
 import { SearchMarkers } from './search_markers';
 import { TimeRuler } from './time_ruler';
+import { SummaryBucket } from './types';
 
 interface LogMinimapProps {
   className?: string;
   height: number;
   highlightedInterval: {
-    end: number | null;
-    start: number | null;
-  };
+    end: number;
+    start: number;
+  } | null;
   jumpToTarget: (params: LogEntryTime) => any;
-  loadedInterval: {
-    end: number | null;
-    start: number | null;
-  };
-  reportVisibleInterval: (params: { start: number; end: number }) => any;
-  scale: TimeScale;
-  summaryBuckets: LogSummaryBucket[];
-  searchSummaryBuckets: SearchSummaryBucket[];
+  reportVisibleInterval: (
+    params: {
+      start: number;
+      end: number;
+      bucketsOnPage: number;
+      pagesBeforeStart: number;
+      pagesAfterEnd: number;
+    }
+  ) => any;
+  intervalSize: number;
+  summaryBuckets: SummaryBucket[];
+  searchSummaryBuckets?: SearchSummaryBucket[];
   target: number;
   width: number;
 }
 
-interface LogMinimapState {
-  currentTarget: number;
-}
-
-export class LogMinimap extends React.Component<LogMinimapProps, LogMinimapState> {
-  public readonly state = {
-    currentTarget: this.props.target,
-  };
-
-  public componentWillReceiveProps(nextProps: LogMinimapProps) {
-    if (nextProps.target !== this.props.target) {
-      this.setState({
-        currentTarget: nextProps.target,
-      });
-    }
-  }
-
+export class LogMinimap extends React.Component<LogMinimapProps> {
   public handleClick: React.MouseEventHandler<SVGSVGElement> = event => {
     const svgPosition = event.currentTarget.getBoundingClientRect();
     const clickedYPosition = event.clientY - svgPosition.top;
@@ -66,36 +53,48 @@ export class LogMinimap extends React.Component<LogMinimapProps, LogMinimapState
   };
 
   public getYScale = () => {
-    const { height, scale } = this.props;
-    const { currentTarget } = this.state;
-
-    const visibleDuration = getMillisOfScale(scale);
+    const { height, intervalSize, target } = this.props;
 
     return scaleLinear()
-      .domain([currentTarget - visibleDuration / 2, currentTarget + visibleDuration / 2])
+      .domain([target - intervalSize / 2, target + intervalSize / 2])
       .range([0, height]);
   };
 
   public getPositionOfTime = (time: number) => {
-    const { height, scale } = this.props;
+    const { height, intervalSize } = this.props;
 
-    const visibleDuration = getMillisOfScale(scale);
     const [minTime] = this.getYScale().domain();
 
-    return ((time - minTime) * height) / visibleDuration;
+    return ((time - minTime) * height) / intervalSize;
   };
 
   public updateVisibleInterval = () => {
+    const { summaryBuckets, intervalSize } = this.props;
     const [minTime, maxTime] = this.getYScale().domain();
+
+    const firstBucket = summaryBuckets[0];
+    const lastBucket = summaryBuckets[summaryBuckets.length - 1];
+
+    const pagesBeforeStart = firstBucket ? (minTime - firstBucket.start) / intervalSize : 0;
+    const pagesAfterEnd = lastBucket ? (lastBucket.end - maxTime) / intervalSize : 0;
+    const bucketsOnPage = firstBucket
+      ? (maxTime - minTime) / (firstBucket.end - firstBucket.start)
+      : 0;
 
     this.props.reportVisibleInterval({
       end: Math.ceil(maxTime),
       start: Math.floor(minTime),
+      bucketsOnPage,
+      pagesBeforeStart,
+      pagesAfterEnd,
     });
   };
 
-  public componentDidUpdate(prevProps: LogMinimapProps, prevState: LogMinimapState) {
-    if (prevState.currentTarget !== this.state.currentTarget) {
+  public componentDidUpdate(prevProps: LogMinimapProps) {
+    const hasNewTarget = prevProps.target !== this.props.target;
+    const hasNewIntervalSize = prevProps.intervalSize !== this.props.intervalSize;
+
+    if (hasNewTarget || hasNewIntervalSize) {
       this.updateVisibleInterval();
     }
   }
@@ -106,7 +105,6 @@ export class LogMinimap extends React.Component<LogMinimapProps, LogMinimapState
       height,
       highlightedInterval,
       jumpToTarget,
-      // loadedInterval,
       summaryBuckets,
       searchSummaryBuckets,
       width,
@@ -133,16 +131,7 @@ export class LogMinimap extends React.Component<LogMinimapProps, LogMinimapState
         />
         <MinimapBorder x1={width / 2} y1={0} x2={width / 2} y2={height} />
         <TimeRuler start={minTime} end={maxTime} width={width} height={height} tickCount={12} />
-        {/*loadedInterval.start !== null && loadedInterval.end !== null ? (
-          <HighlightedInterval
-            className="minimapHighlightedInterval--light"
-            end={loadedInterval.end}
-            getPositionOfTime={this.getPositionOfTime}
-            start={loadedInterval.start}
-            width={0}
-          />
-        ) : null*/}
-        {highlightedInterval.start !== null && highlightedInterval.end !== null ? (
+        {highlightedInterval ? (
           <HighlightedInterval
             end={highlightedInterval.end}
             getPositionOfTime={this.getPositionOfTime}
@@ -152,7 +141,7 @@ export class LogMinimap extends React.Component<LogMinimapProps, LogMinimapState
         ) : null}
         <g transform={`translate(${width * 0.5}, 0)`}>
           <SearchMarkers
-            buckets={searchSummaryBuckets}
+            buckets={searchSummaryBuckets || []}
             start={minTime}
             end={maxTime}
             width={width / 2}

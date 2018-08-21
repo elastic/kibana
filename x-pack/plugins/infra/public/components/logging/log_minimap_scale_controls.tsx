@@ -7,59 +7,55 @@
 import { EuiFormRow, EuiRadioGroup } from '@elastic/eui';
 import * as React from 'react';
 
-import { getMillisOfScale, TimeScale } from '../../../common/time';
-
-interface ScaleDescriptor {
-  key: string;
+interface IntervalSizeDescriptor {
   label: string;
-  bucketSize: TimeScale;
-  scale: TimeScale;
+  intervalSize: number;
 }
 
 interface LogMinimapScaleControlsProps {
-  availableMinimapScales: ScaleDescriptor[];
-  minimapScale: TimeScale;
-  setMinimapScale: (params: { scale: TimeScale }) => any;
-  configureSummary: (params: { bucketSize: TimeScale; bufferSize: TimeScale }) => any;
+  availableIntervalSizes: IntervalSizeDescriptor[];
+  intervalSize: number;
+  configureSummary: (params: { intervalSize: number }) => any;
 }
 
 export class LogMinimapScaleControls extends React.PureComponent<LogMinimapScaleControlsProps> {
-  public handleScaleChange = (scaleKey: string) => {
-    const { availableMinimapScales, configureSummary, setMinimapScale } = this.props;
-    const [scaleDescriptor] = availableMinimapScales.filter(scaleKeyEquals(scaleKey));
+  public handleScaleChange = (intervalSizeDescriptorKey: string) => {
+    const { availableIntervalSizes, configureSummary } = this.props;
+    const [sizeDescriptor] = availableIntervalSizes.filter(
+      intervalKeyEquals(intervalSizeDescriptorKey)
+    );
 
-    if (scaleDescriptor) {
+    if (sizeDescriptor) {
       configureSummary({
-        bucketSize: scaleDescriptor.bucketSize,
-        bufferSize: scaleDescriptor.scale,
-      });
-      setMinimapScale({
-        scale: scaleDescriptor.scale,
+        intervalSize: sizeDescriptor.intervalSize,
       });
     }
   };
 
   public render() {
-    const { availableMinimapScales, minimapScale } = this.props;
-    const [scaleDescriptor] = availableMinimapScales.filter(scaleValueEquals(minimapScale));
+    const { availableIntervalSizes, intervalSize } = this.props;
+    const [currentSizeDescriptor] = availableIntervalSizes.filter(intervalSizeEquals(intervalSize));
 
     return (
       <EuiFormRow label="Minimap Scale">
         <EuiRadioGroup
-          options={availableMinimapScales.map(scale => ({
-            id: scale.key,
-            label: scale.label,
+          options={availableIntervalSizes.map(sizeDescriptor => ({
+            id: getIntervalSizeDescriptorKey(sizeDescriptor),
+            label: sizeDescriptor.label,
           }))}
           onChange={this.handleScaleChange}
-          idSelected={scaleDescriptor.key}
+          idSelected={getIntervalSizeDescriptorKey(currentSizeDescriptor)}
         />
       </EuiFormRow>
     );
   }
 }
 
-const scaleKeyEquals = (key: ScaleDescriptor['key']) => (scaleDescriptor: ScaleDescriptor) =>
-  scaleDescriptor.key === key;
+const getIntervalSizeDescriptorKey = (sizeDescriptor: IntervalSizeDescriptor) =>
+  `${sizeDescriptor.intervalSize}`;
 
-const scaleValueEquals = (value: ScaleDescriptor['scale']) => (scaleDescriptor: ScaleDescriptor) =>
-  getMillisOfScale(value) === getMillisOfScale(scaleDescriptor.scale);
+const intervalKeyEquals = (key: string) => (sizeDescriptor: IntervalSizeDescriptor) =>
+  getIntervalSizeDescriptorKey(sizeDescriptor) === key;
+
+const intervalSizeEquals = (size: number) => (sizeDescriptor: IntervalSizeDescriptor) =>
+  sizeDescriptor.intervalSize === size;

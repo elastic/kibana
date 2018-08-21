@@ -9,4 +9,5 @@ import * as summaryEpics from './epics';
 import * as summarySelectors from './selectors';
 
 export { summaryActions, summaryEpics, summarySelectors };
-export { initialSummaryState, summaryReducer, SummaryState } from './reducer';
+export { summaryReducer } from './reducer';
+export { initialSummaryState, SummaryState } from './state';

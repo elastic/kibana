@@ -38,6 +38,16 @@ export const logEntriesSchema = gql`
     message: [InfraLogMessageSegment!]!
   }
 
+  "A log summary bucket"
+  type InfraLogSummaryBucket {
+    "The start timestamp of the bucket"
+    start: Float!
+    "The end timestamp of the bucket"
+    end: Float!
+    "The number of entries inside the bucket"
+    entriesCount: Int!
+  }
+
   "A consecutive sequence of log entries"
   type InfraLogEntryInterval {
     "The key corresponding to the start of the interval covered by the entries"
@@ -54,6 +64,18 @@ export const logEntriesSchema = gql`
     highlightQuery: String
     "A list of the log entries"
     entries: [InfraLogEntry!]!
+  }
+
+  "A consecutive sequence of log summary buckets"
+  type InfraLogSummaryInterval {
+    "The millisecond timestamp corresponding to the start of the interval covered by the summary"
+    start: Float
+    "The millisecond timestamp corresponding to the end of the interval covered by the summary"
+    end: Float
+    "The query the log entries were filtered by"
+    filterQuery: String
+    "A list of the log entries"
+    buckets: [InfraLogSummaryBucket!]!
   }
 
   extend type InfraSource {
@@ -81,5 +103,16 @@ export const logEntriesSchema = gql`
       "The query to highlight the log entries with"
       highlightQuery: String
     ): InfraLogEntryInterval!
+    "A consecutive span of summary buckets within an interval"
+    logSummaryBetween(
+      "The millisecond timestamp that corresponds to the start of the interval"
+      start: Float!
+      "The millisecond timestamp that corresponds to the end of the interval"
+      end: Float!
+      "The size of each bucket in milliseconds"
+      bucketSize: Float!
+      "The query to filter the log entries by"
+      filterQuery: String
+    ): InfraLogSummaryInterval!
   }
 `;

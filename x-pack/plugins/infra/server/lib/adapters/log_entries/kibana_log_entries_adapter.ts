@@ -4,13 +4,18 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { timeMilliseconds } from 'd3-time';
 import get from 'lodash/fp/get';
 import has from 'lodash/fp/has';
 import zip from 'lodash/fp/zip';
 
 import { compareTimeKeys, isTimeKey, TimeKey } from '../../../../common/time';
-import { SortedHit } from '../../../logging_legacy/elasticsearch';
-import { InfraFrameworkRequest } from '../../adapters/framework';
+import {
+  InfraDateRangeAggregationBucket,
+  InfraDateRangeAggregationResponse,
+  InfraFrameworkRequest,
+  SortedSearchHit,
+} from '../../adapters/framework';
 import { LogEntriesAdapter, LogEntryDocument } from '../../domains/log_entries_domain';
 import { InfraSourceConfiguration } from '../../sources';
 import { InfraBackendFrameworkAdapter } from '../framework';
@@ -85,6 +90,61 @@ export class InfraKibanaLogEntriesAdapter implements LogEntriesAdapter {
     return documents.filter(document => compareTimeKeys(document.key, end) < 0);
   }
 
+  public async getContainedLogSummaryBuckets(
+    request: InfraFrameworkRequest,
+    sourceConfiguration: InfraSourceConfiguration,
+    start: number,
+    end: number,
+    bucketSize: number,
+    filterQuery: string
+  ): Promise<InfraDateRangeAggregationBucket[]> {
+    const bucketIntervalStarts = timeMilliseconds(new Date(start), new Date(end), bucketSize);
+
+    const query = {
+      allowNoIndices: true,
+      index: sourceConfiguration.logAlias,
+      ignoreUnavailable: true,
+      body: {
+        aggregations: {
+          count_by_date: {
+            date_range: {
+              field: sourceConfiguration.fields.timestamp,
+              ranges: bucketIntervalStarts.map(bucketIntervalStart => ({
+                from: bucketIntervalStart.getTime(),
+                to: bucketIntervalStart.getTime() + bucketSize,
+              })),
+            },
+          },
+        },
+        query: {
+          bool: {
+            filter: [
+              ...createQueryFilterClauses(filterQuery),
+              {
+                range: {
+                  [sourceConfiguration.fields.timestamp]: {
+                    gte: start,
+                    lte: end,
+                  },
+                },
+              },
+            ],
+          },
+        },
+        size: 0,
+      },
+    };
+
+    const response = await this.framework.callWithRequest<
+      any,
+      { count_by_date?: InfraDateRangeAggregationResponse }
+    >(request, 'search', query);
+
+    return response.aggregations && response.aggregations.count_by_date
+      ? response.aggregations.count_by_date.buckets
+      : [];
+  }
+
   private async getLogEntryDocumentsBetween(
     request: InfraFrameworkRequest,
     sourceConfiguration: InfraSourceConfiguration,
@@ -111,17 +171,6 @@ export class InfraKibanaLogEntriesAdapter implements LogEntriesAdapter {
         : {
             [sortDirection === 'asc' ? 'lte' : 'gte']: end,
           };
-
-    const filterClauses = filterQuery
-      ? [
-          {
-            query_string: {
-              default_operator: 'AND',
-              query: filterQuery,
-            },
-          },
-        ]
-      : [];
 
     const highlightClause = highlightQuery
       ? {
@@ -156,7 +205,7 @@ export class InfraKibanaLogEntriesAdapter implements LogEntriesAdapter {
         query: {
           bool: {
             filter: [
-              ...filterClauses,
+              ...createQueryFilterClauses(filterQuery),
               {
                 range: {
                   [sourceConfiguration.fields.timestamp]: {
@@ -180,7 +229,11 @@ export class InfraKibanaLogEntriesAdapter implements LogEntriesAdapter {
       },
     };
 
-    const response = await this.framework.callWithRequest<SortedHit>(request, 'search', query);
+    const response = await this.framework.callWithRequest<SortedSearchHit>(
+      request,
+      'search',
+      query
+    );
     const hits = response.hits.hits;
     const documents = hits.map(convertHitToLogEntryDocument(fields));
 
@@ -197,7 +250,9 @@ function getLookupIntervals(start: number, direction: 'asc' | 'desc'): Array<[nu
   return intervals;
 }
 
-const convertHitToLogEntryDocument = (fields: string[]) => (hit: SortedHit): LogEntryDocument => ({
+const convertHitToLogEntryDocument = (fields: string[]) => (
+  hit: SortedSearchHit
+): LogEntryDocument => ({
   gid: hit._id,
   fields: fields.reduce(
     (flattenedFields, fieldName) =>
@@ -214,3 +269,15 @@ const convertHitToLogEntryDocument = (fields: string[]) => (hit: SortedHit): Log
     tiebreaker: hit.sort[1],
   },
 });
+
+const createQueryFilterClauses = (filterQuery: string | undefined) =>
+  filterQuery
+    ? [
+        {
+          query_string: {
+            default_operator: 'AND',
+            query: filterQuery,
+          },
+        },
+      ]
+    : [];

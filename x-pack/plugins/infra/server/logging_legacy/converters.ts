@@ -10,7 +10,6 @@ import mapKeys from 'lodash/fp/mapKeys';
 import { LogEntry, LogEntryFieldsMapping } from '../../common/log_entry';
 import { SearchResult } from '../../common/log_search_result';
 import { SearchSummaryBucket } from '../../common/log_search_summary';
-import { LogSummaryBucket } from '../../common/log_summary';
 import {
   DateHistogramResponse,
   HighlightedHit,
@@ -50,21 +49,6 @@ export const convertHitToSearchResult = (fields: LogEntryFieldsMapping) => {
     };
   };
 };
-
-export const convertDateHistogramToSummaryBuckets = () => (
-  buckets: DateHistogramResponse['buckets']
-): LogSummaryBucket[] =>
-  buckets
-    .reduceRight<LogSummaryBucket[]>((summaryBuckets, bucket) => {
-      const [previousBucket] = summaryBuckets;
-      const nextBucket = {
-        count: bucket.doc_count,
-        end: previousBucket ? previousBucket.start : 0,
-        start: bucket.key,
-      };
-      return [nextBucket, ...summaryBuckets];
-    }, [])
-    .slice(0, -1);
 
 export const convertDateHistogramToSearchSummaryBuckets = (
   fields: LogEntryFieldsMapping,
