@@ -49,5 +49,17 @@ export class ALayer {
   isVisible() {
     return this._descriptor.visible;
   }
+
+  isTemporary() {
+    return this._descriptor.temporary;
+  }
+
+  getSupportedStyles() {
+    return [];
+  }
+
+  getCurrentStyle() {
+    throw new Error('Style not implemented');
+  }
 }
 

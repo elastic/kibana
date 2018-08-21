@@ -20,5 +20,7 @@ export class TileLayer extends ALayer {
     return tileLayerDescriptor;
   }
 
-
+  getCurrentStyle() {
+    return null;
+  }
 }

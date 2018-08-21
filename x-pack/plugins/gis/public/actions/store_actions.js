@@ -35,7 +35,7 @@ export function toggleLayerVisible(layerId) {
 export function setSelectedLayer(layerId) {
   return {
     type: SET_SELECTED_LAYER,
-    selectedLayer: layerId
+    selectedLayerId: layerId
   };
 }
 
@@ -146,5 +146,4 @@ export async function loadMapResources(dispatch) {
 
   const worldCountries = EMSFileSource.createDescriptor('World Countries');
   await dispatch(addVectorLayerFromEMSFileSource(worldCountries, {}, 1));
-
 }
