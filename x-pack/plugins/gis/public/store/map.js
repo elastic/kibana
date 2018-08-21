@@ -12,24 +12,23 @@ import {
 import { UPDATE_LAYER_STYLE, PROMOTE_TEMPORARY_STYLES, CLEAR_TEMPORARY_STYLES }
   from '../actions/style_actions';
 
-const updateLayerInList = (() => {
-  const getLayerIndex = (list, layerId) => list.findIndex(({ id }) => layerId === id);
-  return (state, id, attribute, newValue) => {
-    const { layerList } = state;
-    const layerIdx = getLayerIndex(layerList, id);
-    const updatedLayer = {
-      ...layerList[layerIdx],
-      // Update layer w/ new value. If no value provided, toggle boolean value
-      [ attribute ]: newValue || !layerList[layerIdx][attribute]
-    };
-    const updatedList = [
-      ...layerList.slice(0, layerIdx),
-      updatedLayer,
-      ...layerList.slice(layerIdx + 1)
-    ];
-    return { ...state, layerList: updatedList };
+const getLayerIndex = (list, layerId) => list.findIndex(({ id }) => layerId === id);
+
+const updateLayerInList = (state, id, attribute, newValue) => {
+  const { layerList } = state;
+  const layerIdx = getLayerIndex(layerList, id);
+  const updatedLayer = {
+    ...layerList[layerIdx],
+    // Update layer w/ new value. If no value provided, toggle boolean value
+    [ attribute ]: newValue || !layerList[layerIdx][attribute]
   };
-})();
+  const updatedList = [
+    ...layerList.slice(0, layerIdx),
+    updatedLayer,
+    ...layerList.slice(layerIdx + 1)
+  ];
+  return { ...state, layerList: updatedList };
+};
 
 const INITIAL_STATE = {
   mapConstants: {
