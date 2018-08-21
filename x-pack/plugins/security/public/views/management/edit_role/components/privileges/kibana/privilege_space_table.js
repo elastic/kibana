@@ -36,12 +36,17 @@ export class PrivilegeSpaceTable extends Component {
 
     const allTableItems = Object.keys(spacePrivileges).map(spaceId => {
       return {
-        space: spaces.find(s => s.id === spaceId),
+        space: spaces.find(s => s.id === spaceId) || { id: spaceId, deleted: true },
         privilege: spacePrivileges[spaceId][0]
       };
-    }).filter(item => !!item.space);
+    }).sort((item1) => {
+      return item1.space.deleted ? 1 : -1;
+    });
 
-    const visibleTableItems = allTableItems.filter(item => item.space.name.toLowerCase().indexOf(searchTerm) >= 0);
+    const visibleTableItems = allTableItems.filter(item => {
+      const searchField = item.space.deleted ? item.space.id : item.space.name;
+      return searchField.toLowerCase().indexOf(searchTerm) >= 0;
+    });
 
     if (allTableItems.length === 0) {
       return null;
@@ -72,18 +77,30 @@ export class PrivilegeSpaceTable extends Component {
       field: 'space',
       name: 'Space',
       width: this.props.readonly ? '75%' : '50%',
-      render: (space) => (
-        <EuiFlexGroup gutterSize="s" responsive={false} alignItems={'center'}>
-          <EuiFlexItem grow={false}><SpaceAvatar space={space} size="s" /></EuiFlexItem>
-          <EuiFlexItem><EuiText>{space.name}</EuiText></EuiFlexItem>
-        </EuiFlexGroup>
-      )
+      render: (space) => {
+        let content;
+        if (space.deleted) {
+          content = [
+            <EuiFlexItem key={1}><EuiText color={"subdued"}>{space.id} (deleted)</EuiText></EuiFlexItem>
+          ];
+        } else {
+          content = [
+            <EuiFlexItem key={1} grow={false}><SpaceAvatar space={space} size="s" /></EuiFlexItem>,
+            <EuiFlexItem key={2}><EuiText>{space.name}</EuiText></EuiFlexItem>
+          ];
+        }
+        return (
+          <EuiFlexGroup gutterSize="s" responsive={false} alignItems={'center'}>
+            {content}
+          </EuiFlexGroup>
+        );
+      }
     }, {
       field: 'privilege',
       name: 'Privilege',
       width: this.props.readonly ? '25%' : undefined,
       render: (privilege, record) => {
-        if (this.props.readonly) {
+        if (this.props.readonly || record.space.deleted) {
           return privilege;
         }
 

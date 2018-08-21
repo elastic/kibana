@@ -67,7 +67,6 @@ export class ImpactedSpacesFlyout extends Component {
     const basePrivilege = assignedPrivileges.global.length ? assignedPrivileges.global[0] : NO_PRIVILEGE_VALUE;
 
     const allSpacePrivileges = spaces.reduce((acc, space) => {
-
       const spacePrivilege = assignedPrivileges.space[space.id] ? assignedPrivileges.space[space.id][0] : basePrivilege;
       const actualPrivilege = this.getHighestPrivilege(spacePrivilege, basePrivilege);
 
@@ -81,7 +80,7 @@ export class ImpactedSpacesFlyout extends Component {
         // Use the privilege assigned to the space, if provided. Otherwise, the baes privilege is used.
         [space.id]: [displayName]
       };
-    }, {});
+    }, { ...role.kibana.space });
 
     return (
       <EuiFlyout onClose={this.toggleShowImpactedSpaces} aria-labelledby="showImpactedSpacesTitle" size="s">
