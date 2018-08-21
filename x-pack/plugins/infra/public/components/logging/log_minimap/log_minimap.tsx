@@ -9,10 +9,10 @@ import * as React from 'react';
 import styled from 'styled-components';
 
 import { LogEntryTime } from '../../../../common/log_entry';
-import { SearchSummaryBucket } from '../../../../common/log_search_summary';
+// import { SearchSummaryBucket } from '../../../../common/log_search_summary';
 import { DensityChart } from './density_chart';
 import { HighlightedInterval } from './highlighted_interval';
-import { SearchMarkers } from './search_markers';
+// import { SearchMarkers } from './search_markers';
 import { TimeRuler } from './time_ruler';
 import { SummaryBucket } from './types';
 
@@ -35,7 +35,7 @@ interface LogMinimapProps {
   ) => any;
   intervalSize: number;
   summaryBuckets: SummaryBucket[];
-  searchSummaryBuckets?: SearchSummaryBucket[];
+  // searchSummaryBuckets?: SearchSummaryBucket[];
   target: number;
   width: number;
 }
@@ -104,9 +104,9 @@ export class LogMinimap extends React.Component<LogMinimapProps> {
       className,
       height,
       highlightedInterval,
-      jumpToTarget,
+      // jumpToTarget,
       summaryBuckets,
-      searchSummaryBuckets,
+      // searchSummaryBuckets,
       width,
     } = this.props;
 
@@ -139,7 +139,7 @@ export class LogMinimap extends React.Component<LogMinimapProps> {
             width={width}
           />
         ) : null}
-        <g transform={`translate(${width * 0.5}, 0)`}>
+        {/*<g transform={`translate(${width * 0.5}, 0)`}>
           <SearchMarkers
             buckets={searchSummaryBuckets || []}
             start={minTime}
@@ -148,7 +148,7 @@ export class LogMinimap extends React.Component<LogMinimapProps> {
             height={height}
             jumpToTarget={jumpToTarget}
           />
-        </g>
+        </g>*/}
       </svg>
     );
   }

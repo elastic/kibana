@@ -6,20 +6,20 @@
 
 import { createSelector } from 'reselect';
 
-import {
-  getSearchResultIndexAfterTime,
-  getSearchResultIndexBeforeTime,
-  getSearchResultKey,
-} from '../../../../common/log_search_result';
-import { getLogEntryKey } from '../../../utils/log_entry';
+// import {
+//   getSearchResultIndexAfterTime,
+//   getSearchResultIndexBeforeTime,
+//   getSearchResultKey,
+// } from '../../../../common/log_search_result';
+// import { getLogEntryKey } from '../../../utils/log_entry';
 import { globalizeSelectors } from '../../../utils/typed_redux';
 import { configurationSelectors as localConfigurationSelectors } from './configuration';
 import { entriesSelectors as localEntriesSelectors } from './entries';
 import { minimapSelectors as localMinimapSelectors } from './minimap';
 import { State } from './reducer';
-import { searchSelectors as localSearchSelectors } from './search';
-import { searchResultsSelectors as localSearchResultsSelectors } from './search_results';
-import { searchSummarySelectors as localSearchSummarySelectors } from './search_summary';
+// import { searchSelectors as localSearchSelectors } from './search';
+// import { searchResultsSelectors as localSearchResultsSelectors } from './search_results';
+// import { searchSummarySelectors as localSearchSummarySelectors } from './search_summary';
 import { sourceSelectors as localSourceSelectors } from './source';
 import { summarySelectors as localSummarySelectors } from './summary';
 import { targetSelectors as localTargetSelectors } from './target';
@@ -60,60 +60,60 @@ export const minimapSelectors = globalizeSelectors(
   localMinimapSelectors
 );
 
-export const searchSelectors = globalizeSelectors(
-  (state: State) => state.search,
-  localSearchSelectors
-);
+// export const searchSelectors = globalizeSelectors(
+//   (state: State) => state.search,
+//   localSearchSelectors
+// );
 
-export const searchResultsSelectors = globalizeSelectors(
-  (state: State) => state.searchResults,
-  localSearchResultsSelectors
-);
+// export const searchResultsSelectors = globalizeSelectors(
+//   (state: State) => state.searchResults,
+//   localSearchResultsSelectors
+// );
 
-export const searchSummarySelectors = globalizeSelectors(
-  (state: State) => state.searchSummary,
-  localSearchSummarySelectors
-);
+// export const searchSummarySelectors = globalizeSelectors(
+//   (state: State) => state.searchSummary,
+//   localSearchSummarySelectors
+// );
 
 export const sharedSelectors = {
-  selectNextSearchResultKey: createSelector(
-    searchResultsSelectors.selectSearchResults,
-    entriesSelectors.selectMiddleVisibleEntry,
-    (searchResults, middleVisibleEntry) => {
-      if (searchResults.length <= 0 || middleVisibleEntry === null) {
-        return null;
-      }
+  // selectNextSearchResultKey: createSelector(
+  //   searchResultsSelectors.selectSearchResults,
+  //   entriesSelectors.selectMiddleVisibleEntry,
+  //   (searchResults, middleVisibleEntry) => {
+  //     if (searchResults.length <= 0 || middleVisibleEntry === null) {
+  //       return null;
+  //     }
 
-      const nextResultIndex = getSearchResultIndexAfterTime(
-        searchResults,
-        getLogEntryKey(middleVisibleEntry)
-      );
+  //     const nextResultIndex = getSearchResultIndexAfterTime(
+  //       searchResults,
+  //       getLogEntryKey(middleVisibleEntry)
+  //     );
 
-      if (nextResultIndex < 0 || nextResultIndex >= searchResults.length) {
-        return null;
-      }
+  //     if (nextResultIndex < 0 || nextResultIndex >= searchResults.length) {
+  //       return null;
+  //     }
 
-      return getSearchResultKey(searchResults[nextResultIndex]);
-    }
-  ),
-  selectPreviousSearchResultKey: createSelector(
-    searchResultsSelectors.selectSearchResults,
-    entriesSelectors.selectMiddleVisibleEntry,
-    (searchResults, middleVisibleEntry) => {
-      if (searchResults.length <= 0 || middleVisibleEntry === null) {
-        return null;
-      }
+  //     return getSearchResultKey(searchResults[nextResultIndex]);
+  //   }
+  // ),
+  // selectPreviousSearchResultKey: createSelector(
+  //   searchResultsSelectors.selectSearchResults,
+  //   entriesSelectors.selectMiddleVisibleEntry,
+  //   (searchResults, middleVisibleEntry) => {
+  //     if (searchResults.length <= 0 || middleVisibleEntry === null) {
+  //       return null;
+  //     }
 
-      const nextResultIndex =
-        getSearchResultIndexBeforeTime(searchResults, getLogEntryKey(middleVisibleEntry)) - 1;
+  //     const nextResultIndex =
+  //       getSearchResultIndexBeforeTime(searchResults, getLogEntryKey(middleVisibleEntry)) - 1;
 
-      if (nextResultIndex < 0 || nextResultIndex >= searchResults.length) {
-        return null;
-      }
+  //     if (nextResultIndex < 0 || nextResultIndex >= searchResults.length) {
+  //       return null;
+  //     }
 
-      return getSearchResultKey(searchResults[nextResultIndex]);
-    }
-  ),
+  //     return getSearchResultKey(searchResults[nextResultIndex]);
+  //   }
+  // ),
   selectVisibleMidpointOrTargetTime: createSelector(
     entriesSelectors.selectFirstVisibleEntry,
     entriesSelectors.selectLastVisibleEntry,

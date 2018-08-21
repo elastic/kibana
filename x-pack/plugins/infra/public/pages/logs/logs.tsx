@@ -22,8 +22,8 @@ import { LogCustomizationMenu } from '../../components/logging/log_customization
 import { LogMinimap } from '../../components/logging/log_minimap';
 import { LogMinimapScaleControls } from '../../components/logging/log_minimap_scale_controls';
 import { LogPositionText } from '../../components/logging/log_position_text';
-import { LogSearchControls } from '../../components/logging/log_search_controls';
-import { LogStatusbar, LogStatusbarItem } from '../../components/logging/log_statusbar';
+// import { LogSearchControls } from '../../components/logging/log_search_controls';
+// import { LogStatusbar, LogStatusbarItem } from '../../components/logging/log_statusbar';
 import { LogTextScaleControls } from '../../components/logging/log_text_scale_controls';
 import { ScrollableLogTextStreamView } from '../../components/logging/log_text_stream';
 import { LogTextWrapControls } from '../../components/logging/log_text_wrap_controls';
@@ -31,7 +31,7 @@ import { LogTimeControls } from '../../components/logging/log_time_controls';
 
 import { withLibs } from '../../containers/libs';
 import { State, targetActions } from '../../containers/logging_legacy/state';
-import { withLogSearchControlsProps } from '../../containers/logging_legacy/with_log_search_controls_props';
+// import { withLogSearchControlsProps } from '../../containers/logging_legacy/with_log_search_controls_props';
 import { WithStreamItems } from '../../containers/logging_legacy/with_stream_items';
 import { WithSummary } from '../../containers/logging_legacy/with_summary';
 import { WithTextScale } from '../../containers/logging_legacy/with_text_scale_controls_props';
@@ -41,7 +41,7 @@ import { WithTimeControls } from '../../containers/logging_legacy/with_time_cont
 import { withVisibleLogEntries } from '../../containers/logging_legacy/with_visible_log_entries';
 
 const ConnectedLogPositionText = withVisibleLogEntries(LogPositionText);
-const ConnectedLogSearchControls = withLogSearchControlsProps(LogSearchControls);
+// const ConnectedLogSearchControls = withLogSearchControlsProps(LogSearchControls);
 
 interface LogsPageProps {
   libs: InfraFrontendLibs;
@@ -183,11 +183,11 @@ export const LogsPage = withLibs(
                 }}
               </AutoSizer>
             </LogPageContent>
-            <LogStatusbar>
+            {/*<LogStatusbar>
               <LogStatusbarItem>
                 <ConnectedLogSearchControls />
               </LogStatusbarItem>
-            </LogStatusbar>
+            </LogStatusbar>*/}
           </ColumnarPage>
         </Provider>
       );

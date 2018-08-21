@@ -11,7 +11,7 @@ import { SearchResult } from '../../../common/log_search_result';
 import {
   entriesActions,
   entriesSelectors,
-  searchResultsSelectors,
+  // searchResultsSelectors,
   State,
   targetActions,
   targetSelectors,
@@ -38,12 +38,12 @@ export const WithStreamItems = asChildFunctionRenderer(withStreamItems);
 const selectItems = createSelector(
   entriesSelectors.selectEntries,
   entriesSelectors.selectIsReloadingEntries,
-  searchResultsSelectors.selectSearchResultsById,
-  (logEntries, isReloading, searchResults) =>
+  // searchResultsSelectors.selectSearchResultsById,
+  (logEntries, isReloading /*, searchResults*/) =>
     isReloading
       ? []
       : logEntries.map(logEntry =>
-          createLogEntryStreamItem(logEntry, searchResults[logEntry.gid] || null)
+          createLogEntryStreamItem(logEntry /*, searchResults[logEntry.gid] || null*/)
         )
 );
 
