@@ -47,6 +47,9 @@ export async function runCli(getHelpText, run) {
     console.log();
     console.log(chalk.red(error.message));
 
+    // CliError is a special error class that indicates that the error is produced as a part
+    // of using the CLI, and does not need a stack trace to make sense, so we skip the stack
+    // trace logging if the error thrown is an instance of this class
     if (!(error instanceof CliError)) {
       // first line in the stack trace is the message, skip it as we log it directly and color it red
       if (error.stack) {
