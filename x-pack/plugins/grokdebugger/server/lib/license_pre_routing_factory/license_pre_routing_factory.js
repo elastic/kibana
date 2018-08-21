@@ -16,6 +16,8 @@ export const licensePreRoutingFactory = (server) => {
     if (!licenseCheckResults.enableAPIRoute) {
       return Boom.forbidden(licenseCheckResults.message);
     }
+
+    return null;
   }
 
   return licensePreRouting;
