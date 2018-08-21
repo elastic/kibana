@@ -8,14 +8,11 @@ import { connect } from 'react-redux';
 import { LayerPanel } from './view';
 import { getSelectedLayerInstance } from '../../selectors/map_selectors';
 
-const mapDispatchToProps = {
-};
-
 function mapStateToProps(state = {}) {
   return {
     selectedLayer: getSelectedLayerInstance(state)
   };
 }
 
-const connectedLayerPanel = connect(mapStateToProps, mapDispatchToProps)(LayerPanel);
+const connectedLayerPanel = connect(mapStateToProps, null)(LayerPanel);
 export { connectedLayerPanel as LayerPanel };
