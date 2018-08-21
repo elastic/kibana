@@ -58,27 +58,37 @@ class JobActionMenuUi extends Component {
     const isSingleSelection = this.isSingleSelection();
     const entity = this.getEntity(isSingleSelection);
 
-    const items = [{
-      name: intl.formatMessage({
-        id: 'xpack.rollupJobs.jobActionMenu.startJobLabel',
-        defaultMessage: 'Start {entity}',
-      }, { entity }),
-      icon: <EuiIcon type="play" />,
-      onClick: () => {
-        this.closePopover();
-        startJobs();
-      }
-    }, {
-      name: intl.formatMessage({
-        id: 'xpack.rollupJobs.jobActionMenu.stopJobLabel',
-        defaultMessage: 'Stop {entity}',
-      }, { entity }),
-      icon: <EuiIcon type="pause" />,
-      onClick: () => {
-        this.closePopover();
-        stopJobs();
-      }
-    }, {
+    const items = [];
+
+    if (this.canStartJobs()) {
+      items.push({
+        name: intl.formatMessage({
+          id: 'xpack.rollupJobs.jobActionMenu.startJobLabel',
+          defaultMessage: 'Start {entity}',
+        }, { entity }),
+        icon: <EuiIcon type="play" />,
+        onClick: () => {
+          this.closePopover();
+          startJobs();
+        },
+      });
+    }
+
+    if (this.canStopJobs()) {
+      items.push({
+        name: intl.formatMessage({
+          id: 'xpack.rollupJobs.jobActionMenu.stopJobLabel',
+          defaultMessage: 'Stop {entity}',
+        }, { entity }),
+        icon: <EuiIcon type="pause" />,
+        onClick: () => {
+          this.closePopover();
+          stopJobs();
+        },
+      });
+    }
+
+    items.push({
       name: intl.formatMessage({
         id: 'xpack.rollupJobs.jobActionMenu.deleteJobLabel',
         defaultMessage: 'Delete {entity}',
@@ -87,8 +97,8 @@ class JobActionMenuUi extends Component {
       onClick: () => {
         this.closePopover();
         this.openDeleteConfirmationModal();
-      }
-    }];
+      },
+    });
 
     const upperCasedEntity = `${entity[0].toUpperCase()}${entity.slice(1)}`;
     const panelTree = {
@@ -122,6 +132,16 @@ class JobActionMenuUi extends Component {
   openDeleteConfirmationModal = () => {
     this.setState({ showDeleteConfirmation: true });
   };
+
+  canStartJobs() {
+    const { jobs } = this.props;
+    return jobs.some(job => job.status === 'stopped');
+  }
+
+  canStopJobs() {
+    const { jobs } = this.props;
+    return jobs.some(job => job.status === 'started');
+  }
 
   confirmDeleteModal = () => {
     const isSingleSelection = this.isSingleSelection();
