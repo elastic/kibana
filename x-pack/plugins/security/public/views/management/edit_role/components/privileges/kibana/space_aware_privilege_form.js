@@ -304,7 +304,7 @@ export class SpaceAwarePrivilegeForm extends Component {
     const role = copyRole(this.props.role);
 
     // Remove base privilege value
-    delete role.kibana.global;
+    role.kibana.global = [];
 
     if (privilege !== NO_PRIVILEGE_VALUE) {
       role.kibana.global = [privilege];

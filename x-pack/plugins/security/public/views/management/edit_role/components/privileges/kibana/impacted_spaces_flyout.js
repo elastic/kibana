@@ -43,6 +43,16 @@ export class ImpactedSpacesFlyout extends Component {
     });
   }
 
+  getHighestPrivilege(...privileges) {
+    if (privileges.indexOf('all') >= 0) {
+      return 'all';
+    }
+    if (privileges.indexOf('read') >= 0) {
+      return 'read';
+    }
+    return 'none';
+  }
+
   getFlyout = () => {
     if (!this.state.showImpactedSpaces) {
       return null;
@@ -57,9 +67,11 @@ export class ImpactedSpacesFlyout extends Component {
     const assignedPrivileges = role.kibana;
 
     const allSpacePrivileges = spaces.reduce((acc, space) => {
-      const spacePrivilege = assignedPrivileges.space[space.id] ? assignedPrivileges.space[space.id][0] : basePrivilege;
 
-      let displayName = spacePrivilege;
+      const spacePrivilege = assignedPrivileges.space[space.id] ? assignedPrivileges.space[space.id][0] : basePrivilege;
+      const actualPrivilege = this.getHighestPrivilege(spacePrivilege, basePrivilege);
+
+      let displayName = actualPrivilege;
       if (displayName === NO_PRIVILEGE_VALUE) {
         displayName = 'none';
       }
