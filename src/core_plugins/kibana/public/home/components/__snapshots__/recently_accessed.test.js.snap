@@ -58,6 +58,7 @@ exports[`render 1`] = `
             }
           >
             <EuiToolTip
+              anchorClassName="homRecentlyAccessed__anchor"
               content="label0"
               position="bottom"
             >
@@ -101,6 +102,7 @@ exports[`render 1`] = `
             }
           >
             <EuiToolTip
+              anchorClassName="homRecentlyAccessed__anchor"
               content="label1"
               position="bottom"
             >

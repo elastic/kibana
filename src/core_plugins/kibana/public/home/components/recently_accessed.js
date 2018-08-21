@@ -151,6 +151,7 @@ export class RecentlyAccessed extends Component {
           grow={false}
         >
           <EuiToolTip
+            anchorClassName="homRecentlyAccessed__anchor"
             position="bottom"
             content={recentlyAccessedItem.label}
           >

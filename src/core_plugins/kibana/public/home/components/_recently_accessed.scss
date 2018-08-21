@@ -7,14 +7,11 @@
 .homRecentlyAccessed__item {
   overflow: hidden;
   max-width: 300px;
+}
 
-  // SASSTODO: Figure out how to not use eui class here
-  // ... tooltips don't pass classnames to the anchor and
-  // ... this is the only way to get truncation to work
-  .euiToolTipAnchor {
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
+.homRecentlyAccessed__anchor {
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .homRecentlyAccessed__longLink {
