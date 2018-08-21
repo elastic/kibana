@@ -122,6 +122,12 @@ export default async function ({ readConfigFile }) {
       ],
     },
 
+    uiSettings: {
+      defaults: {
+        'accessibility:disableAnimations': true,
+      },
+    },
+
     apps: {
       status_page: {
         pathname: '/status',
