@@ -4,13 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { createAction } from "redux-actions";
-import { closeIndices as request } from "../../services";
+import { createAction } from 'redux-actions';
+import { i18n }  from '@kbn/i18n';
+import { closeIndices as request } from '../../services';
 import { toastNotifications } from 'ui/notify';
-import { clearRowStatus, reloadIndices } from "../actions";
+import { clearRowStatus, reloadIndices } from '../actions';
 
 export const closeIndicesStart = createAction(
-  "INDEX_MANAGEMENT_CLOSE_INDICES_START"
+  'INDEX_MANAGEMENT_CLOSE_INDICES_START'
 );
 export const closeIndices = ({ indexNames }) => async (dispatch) => {
   dispatch(closeIndicesStart({ indexNames }));
@@ -21,5 +22,10 @@ export const closeIndices = ({ indexNames }) => async (dispatch) => {
     return dispatch(clearRowStatus({ indexNames }));
   }
   dispatch(reloadIndices(indexNames));
-  toastNotifications.addSuccess(`Successfully closed: [${indexNames.join(", ")}]`);
+  toastNotifications.addSuccess(
+    i18n.translate('xpack.idxMgmt.closeIndicesAction.successfullyClosedIndicesMessage', {
+      defaultMessage: 'Successfully closed: [{indexNames}]',
+      values: { indexNames: indexNames.join(', ') }
+    })
+  );
 };
