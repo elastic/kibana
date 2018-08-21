@@ -73,6 +73,7 @@ export const schema = Joi.object().keys({
   timeouts: Joi.object().keys({
     find: Joi.number().default(10000),
     try: Joi.number().default(40000),
+    waitFor: Joi.number().default(20000),
     esRequestTimeout: Joi.number().default(30000),
     kibanaStabilize: Joi.number().default(15000),
     navigateStatusPageCheck: Joi.number().default(250),
@@ -119,9 +120,6 @@ export const schema = Joi.object().keys({
     sourceArgs: Joi.array(),
     serverArgs: Joi.array(),
   }).default(),
-
-  // env allows generic data, but should be removed
-  env: Joi.object().default(),
 
   chromedriver: Joi.object().keys({
     url: Joi.string().uri({ scheme: /https?/ }).default('http://localhost:9515')

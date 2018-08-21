@@ -47,7 +47,7 @@ export function ResultLinks({ jobs })  {
           <EuiButtonIcon
             href={getLink('timeseriesexplorer', jobs)}
             iconType="stats"
-            aria-label="View results in single metric viewer"
+            aria-label={`Open ${tooltipJobs} in Single Metric Viewer`}
             className="results-button"
 
           />
@@ -60,7 +60,7 @@ export function ResultLinks({ jobs })  {
         <EuiButtonIcon
           href={getLink('explorer', jobs)}
           iconType="tableOfContents"
-          aria-label="View results in anomaly explorer"
+          aria-label={`Open ${tooltipJobs} in Anomaly Explorer`}
           className="results-button"
         />
       </EuiToolTip>
