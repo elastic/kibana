@@ -4,7 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export class EMSTMSSource {
+import { ASource } from './source';
+
+export class EMSTMSSource extends  ASource {
 
   static type = 'EMS_TMS';
 
@@ -21,4 +23,7 @@ export class EMSTMSSource {
     });
   }
 
+  constructor(descriptor) {
+    super(descriptor);
+  }
 }

@@ -77,28 +77,46 @@ export function clearTemporaryLayers() {
   };
 }
 
-export function addVectorLayerFromEMSFileSource(emsFileSource, options = {}, position) {
+
+export function addLayerFromSource(source, layerOptions = {}, position) {
+
   return async (dispatch) => {
     dispatch(layerLoading(true));
-    const geojson = await EMSFileSource.getGeoJson(emsFileSource);
-    const layer = VectorLayer.createDescriptor({
-      source: geojson,
-      name: emsFileSource.name || emsFileSource.id,
-      ...options
-    });
-    dispatch(addLayer(layer, position));
+    //todo: creating a default layer-descriptor should just be an implementation on the source
+    let layerDescriptor;
+    if (source.type === XYZTMSSource.type) {
+      layerDescriptor = await createDefaultLayerDescriptorForXYZTMSSource(source, layerOptions);
+    } else if (source.type === EMSFileSource.type) {
+      layerDescriptor = await createDefaultLayerDescriptorForEMSFileSource(source, layerOptions);
+    } else {
+      throw new Error('Does not recognize source-type ' + source.type);
+    }
+    dispatch(addLayer(layerDescriptor, position));
   };
 }
 
-export function addXYZTMSLayerFromSource(xyzTMSsource, options = {}, position) {
+async function createDefaultLayerDescriptorForEMSFileSource(emsFileSource, options) {
+  const geojson = await EMSFileSource.getGeoJson(emsFileSource);
+  return VectorLayer.createDescriptor({
+    source: geojson,
+    name: emsFileSource.name || emsFileSource.id,
+    ...options
+  });
+}
+
+async function createDefaultLayerDescriptorForXYZTMSSource(xyzTMSsource, options) {
+  const service = await XYZTMSSource.getTMSOptions(xyzTMSsource);
+  return TileLayer.createDescriptor({
+    source: service.url,
+    name: service.url,
+    ...options
+  });
+}
+
+export function addVectorLayerFromEMSFileSource(emsFileSource, options = {}, position) {
   return async (dispatch) => {
     dispatch(layerLoading(true));
-    const service = await XYZTMSSource.getTMSOptions(xyzTMSsource);
-    const layer = TileLayer.createDescriptor({
-      source: service.url,
-      name: service.url,
-      ...options
-    });
+    const layer = await createDefaultLayerDescriptorForEMSFileSource(emsFileSource, options);
     dispatch(addLayer(layer, position));
   };
 }

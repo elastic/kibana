@@ -5,8 +5,15 @@
  */
 
 import { GIS_API_PATH } from '../../../../common/constants';
+import { ASource } from './source';
+import React, { Fragment } from 'react';
+import {
+  EuiText,
+  EuiSelect,
+  EuiSpacer
+} from '@elastic/eui';
 
-export class EMSFileSource {
+export class EMSFileSource extends ASource {
 
   static type = 'EMS_FILE';
 
@@ -16,7 +23,6 @@ export class EMSFileSource {
       name: name
     };
   }
-
   static async getGeoJson(descriptor) {
     try {
       const vectorFetch = await fetch(`../${GIS_API_PATH}/data/ems?name=${encodeURIComponent(descriptor.name)}`);
@@ -25,6 +31,34 @@ export class EMSFileSource {
       console.error(e);
       throw e;
     }
+  }
+
+  static renderEditor({ dataSourcesMeta, onPreviewSource })  {
+
+    const emsVectorOptionsRaw = (dataSourcesMeta) ? dataSourcesMeta.ems.file : [];
+    const emsVectorOptions = emsVectorOptionsRaw ? emsVectorOptionsRaw.map((file) => ({ value: file.name, text: file.name })) : [];
+
+    const onChange = ({ target }) => {
+      const selectedId = target.options[target.selectedIndex].text;
+      const emsFileSource = EMSFileSource.createDescriptor(selectedId);
+      onPreviewSource(emsFileSource);
+    };
+    return (
+      <EuiText>
+        <Fragment>
+          <EuiSpacer size="m"/>
+          <EuiSelect
+            options={emsVectorOptions}
+            onChange={onChange}
+            aria-label="Use aria labels when no actual label is in use"
+          />
+        </Fragment>
+      </EuiText>
+    );
+  }
+
+  constructor(descriptor) {
+    super(descriptor);
   }
 
 }
