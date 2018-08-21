@@ -7,7 +7,7 @@
 import ngMock from 'ng_mock';
 import sinon from 'sinon';
 import { banners } from 'ui/notify';
-import * as kfetchExports from 'ui/kfetch';
+import fetchMock from 'fetch-mock';
 
 const XPACK_INFO_SIG_KEY = 'xpackMain.infoSignature';
 const XPACK_INFO_KEY = 'xpackMain.info';
@@ -26,7 +26,6 @@ describe('CheckXPackInfoChange Factory', () => {
   let $http;
   let $httpBackend;
   let $timeout;
-  let kfetchStub;
   beforeEach(ngMock.inject(($injector) => {
     $http = $injector.get('$http');
     $httpBackend = $injector.get('$httpBackend');
@@ -36,8 +35,6 @@ describe('CheckXPackInfoChange Factory', () => {
     // like the one related to the session expiration.
     $http.defaults.headers.common['kbn-system-api'] = 'x';
 
-    kfetchStub = sinon.stub(kfetchExports, 'kfetch');
-
     sandbox.stub(banners, 'add');
   }));
 
@@ -46,6 +43,7 @@ describe('CheckXPackInfoChange Factory', () => {
     $timeout.verifyNoPendingTasks();
 
     sandbox.restore();
+    fetchMock.restore();
   });
 
   it('does not show "license expired" banner if license is not expired.', () => {
@@ -56,13 +54,7 @@ describe('CheckXPackInfoChange Factory', () => {
       .when('POST', '/api/test')
       .respond('ok', { 'kbn-xpack-sig': 'foo' });
 
-    kfetchStub
-      .withArgs({
-        method: 'GET',
-        pathname: '/api/xpack/v1/info',
-      }).returns(Promise.resolve(license));
-    //  .when('GET', '/api/xpack/v1/info')
-    // .respond(license, { 'kbn-xpack-sig': 'foo' });
+    fetchMock.get('/api/xpack/v1/info', new Response(JSON.stringify(license)));
 
     $http.post('/api/test');
     $httpBackend.flush();
@@ -79,13 +71,7 @@ describe('CheckXPackInfoChange Factory', () => {
       .when('POST', '/api/test')
       .respond('ok', { 'kbn-xpack-sig': 'bar' });
 
-    kfetchStub
-      .withArgs({
-        method: 'GET',
-        pathname: '/api/xpack/v1/info',
-      }).returns(Promise.resolve(license));
-    //.when('GET', '/api/xpack/v1/info')
-    //.respond(license, { 'kbn-xpack-sig': 'bar' });
+    fetchMock.get('/api/xpack/v1/info', new Response(JSON.stringify(license)));
 
     $http.post('/api/test');
     $httpBackend.flush();
