@@ -78,18 +78,23 @@ export function map(state = INITIAL_STATE, action) {
     case TOGGLE_LAYER_VISIBLE:
       return updateLayerInList(state, action.layerId, 'visible');
     case UPDATE_LAYER_STYLE:
-      const previousStyle = action.temporary && (
-        !state.selectedLayer.style.previousStyle && state.selectedLayer.style ||
-        state.selectedLayer.style.previousStyle
-      ) || {};
-      return updateLayerInList(state, state.selectedLayer.id, 'style',
-        { ...action.style, ...{ previousStyle: { ...previousStyle } } });
+      const styleLayerId = state.selectedLayerId;
+      const styleLayerIdx = getLayerIndex(state.layerList, styleLayerId);
+      const layerStyle = state.layerList[styleLayerIdx].style;
+      const layerPrevStyle = layerStyle.previousStyle || layerStyle;
+      return updateLayerInList(state, styleLayerId, 'style',
+        { ...action.style, previousStyle: { ...layerPrevStyle } });
     case PROMOTE_TEMPORARY_STYLES:
-      return updateLayerInList(state, state.selectedLayer.id, 'style',
-        state.selectedLayer.style);
+      const stylePromoteIdx = getLayerIndex(state.layerList, state.selectedLayerId);
+      const styleToSet = {
+        ...state.layerList[stylePromoteIdx].style,
+        previousStyle: null
+      };
+      return updateLayerInList(state, state.selectedLayerId, 'style', styleToSet);
     case CLEAR_TEMPORARY_STYLES:
-      return updateLayerInList(state, state.selectedLayer.id, 'style',
-        state.selectedLayer.style.previousStyle || {});
+      const styleClearIdx = getLayerIndex(state.layerList, state.selectedLayerId);
+      const prevStyleToLoad = state.layerList[styleClearIdx].style.previousStyle || state.layerList[styleClearIdx].style || {};
+      return updateLayerInList(state, state.selectedLayerId, 'style', prevStyleToLoad);
     default:
       return state;
   }
