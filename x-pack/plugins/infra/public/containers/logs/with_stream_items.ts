@@ -51,7 +51,7 @@ const createLogEntryStreamItem = (logEntry: LogEntry, searchResult?: SearchResul
     fields: {
       time: logEntry.key.time,
       tiebreaker: logEntry.key.tiebreaker,
-      message: logEntry.message.map(formatMessageSegment).join(' '),
+      message: logEntry.message.map(formatMessageSegment).join(''),
     },
   },
   searchResult,
