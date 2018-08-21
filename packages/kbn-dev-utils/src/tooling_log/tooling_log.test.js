@@ -129,18 +129,15 @@ describe('#getWritten$()', () => {
     await testWrittenMsgs([]);
   });
 
+  it('emits msg if all writers return true', async () => {
+    await testWrittenMsgs([{ write: jest.fn(() => true) }, { write: jest.fn(() => true) }]);
+  });
+
+  it('emits msg if some writers return true', async () => {
+    await testWrittenMsgs([{ write: jest.fn(() => true) }, { write: jest.fn(() => false) }]);
+  });
+
   it('does not emit msg if all writers return false', async () => {
-    await testWrittenMsgs([
-      { write: jest.fn().mockReturnValue(false) },
-      { write: jest.fn().mockReturnValue(false) },
-    ]);
-  });
-
-  it('emits msg if no writers return false', async () => {
-    await testWrittenMsgs([{ write: jest.fn() }, { write: jest.fn() }]);
-  });
-
-  it('emits msg if one writer returns false', async () => {
-    await testWrittenMsgs([{ write: jest.fn().mockReturnValue(false) }, { write: jest.fn() }]);
+    await testWrittenMsgs([{ write: jest.fn(() => false) }, { write: jest.fn(() => false) }]);
   });
 });

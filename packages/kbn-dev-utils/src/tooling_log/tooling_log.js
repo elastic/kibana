@@ -89,7 +89,7 @@ export class ToolingLog extends EventEmitter {
 
     let written = false;
     for (const writer of this._writers) {
-      if (writer.write(msg) !== false) {
+      if (writer.write(msg)) {
         written = true;
       }
     }

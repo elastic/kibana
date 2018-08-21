@@ -44,11 +44,11 @@ it("throws error if writeTo config is not defined or doesn't have a write method
   }).toThrowErrorMatchingSnapshot();
 });
 
-it('only writes messages when the type matches the level', () => {
-  const levels = ['silent', 'verbose', 'debug', 'info', 'warning', 'error'];
-  const types = ['verbose', 'debug', 'info', 'warning', 'error', 'success'];
-  for (const level of levels) {
-    for (const type of types) {
+const levels = ['silent', 'verbose', 'debug', 'info', 'warning', 'error'];
+const types = ['verbose', 'debug', 'info', 'warning', 'error', 'success'];
+for (const level of levels) {
+  for (const type of types) {
+    it(`level:${level}/type:${type} snapshots`, () => {
       const write = jest.fn();
       const writer = new ToolingLogTextWriter({
         level,
@@ -57,17 +57,21 @@ it('only writes messages when the type matches the level', () => {
         },
       });
 
-      writer.write({
+      const written = writer.write({
         type: type,
         indent: 0,
         args: ['foo'],
       });
 
-      const output = write.mock.calls.reduce((acc, chunk) => `${acc}${chunk}`, '');
-      expect(output).toMatchSnapshot(`level:${level}, type:${type}`);
-    }
+      expect(written).toMatchSnapshot('is written');
+
+      if (written) {
+        const output = write.mock.calls.reduce((acc, chunk) => `${acc}${chunk}`, '');
+        expect(output).toMatchSnapshot('output');
+      }
+    });
   }
-});
+}
 
 it('formats %s patterns and indents multi-line messages correctly', () => {
   const write = jest.fn();

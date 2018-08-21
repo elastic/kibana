@@ -86,5 +86,7 @@ export class ToolingLogTextWriter {
 
       this.writeTo.write(`${lineIndent}${line}\n`);
     });
+
+    return true;
   }
 }

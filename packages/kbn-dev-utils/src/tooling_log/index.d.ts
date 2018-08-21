@@ -31,7 +31,7 @@ export interface LogMessage {
 }
 
 export interface ToolingLogWriter {
-  write(msg: LogMessage): false | undefined;
+  write(msg: LogMessage): boolean;
 }
 
 export interface WriterConfig {
@@ -56,7 +56,7 @@ export class ToolingLog {
 
 export class ToolingLogTextWriter implements ToolingLogTextWriter {
   constructor(config: WriterConfig);
-  public write(msg: LogMessage): false | undefined;
+  public write(msg: LogMessage): boolean;
 }
 
 export function pickLevelFromFlags(flags: { [key: string]: any }): LogLevel;
