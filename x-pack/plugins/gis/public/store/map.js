@@ -31,14 +31,11 @@ const INITIAL_STATE = {
   },
   selectedLayer: null,
   layerList: [],
-  sources: [],
   layerLoading: false
 };
 
 export function map(state = INITIAL_STATE, action) {
   switch (action.type) {
-    // case SET_META:
-    //   return { ...state, meta: action.meta };
     case SET_SELECTED_LAYER:
       return { ...state, selectedLayer: state.layerList.find(layer => layer.id === action.selectedLayer) };
     case UPDATE_LAYER_ORDER:
