@@ -91,6 +91,8 @@ This section summarizes the changes in each release.
 
 coming[5.6.11]
 
+There are no changes for Kibana in this version.
+
 [[release-notes-5.6.10]]
 == {kib} 5.6.10
 
