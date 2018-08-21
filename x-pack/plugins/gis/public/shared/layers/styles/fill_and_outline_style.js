@@ -40,9 +40,8 @@ export class FillAndOutlineStyle {
   static renderEditor({ handleStyleChange, style }) {
 
     if (style === null) {
-      style = {
-        color: FillAndOutlineStyle.DEFAULT_COLOR_HEX
-      };
+      const fallbackDescriptor = FillAndOutlineStyle.createDescriptor(FillAndOutlineStyle.DEFAULT_COLOR_HEX);
+      style = new FillAndOutlineStyle(fallbackDescriptor);
     }
 
     const changeColor = (color) => {
