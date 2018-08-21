@@ -61,10 +61,10 @@ export class ImpactedSpacesFlyout extends Component {
     const {
       role,
       spaces,
-      basePrivilege,
     } = this.props;
 
     const assignedPrivileges = role.kibana;
+    const basePrivilege = assignedPrivileges.global.length ? assignedPrivileges.global[0] : NO_PRIVILEGE_VALUE;
 
     const allSpacePrivileges = spaces.reduce((acc, space) => {
 
@@ -106,5 +106,4 @@ ImpactedSpacesFlyout.propTypes = {
   role: PropTypes.object.isRequired,
   kibanaAppPrivileges: PropTypes.array.isRequired,
   spaces: PropTypes.array.isRequired,
-  basePrivilege: PropTypes.string.isRequired,
 };

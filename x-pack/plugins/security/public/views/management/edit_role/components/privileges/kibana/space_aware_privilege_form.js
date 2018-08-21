@@ -165,7 +165,14 @@ export class SpaceAwarePrivilegeForm extends Component {
         <EuiFlexGroup alignItems={'baseline'}>
           {showAddPrivilegeButton && (
             <EuiFlexItem grow={false}>
-              <EuiButton size={'s'} iconType={'plusInCircle'} onClick={this.addSpacePrivilege}>Add space privilege</EuiButton>
+              <EuiButton
+                data-test-subj="addSpacePrivilegeButton"
+                size={'s'}
+                iconType={'plusInCircle'}
+                onClick={this.addSpacePrivilege}
+              >
+                Add space privilege
+              </EuiButton>
             </EuiFlexItem>
           )}
           <EuiFlexItem>
@@ -173,7 +180,6 @@ export class SpaceAwarePrivilegeForm extends Component {
               role={role}
               spaces={spaces}
               kibanaAppPrivileges={kibanaAppPrivileges}
-              basePrivilege={basePrivilege}
             />
           </EuiFlexItem>
         </EuiFlexGroup>
@@ -247,6 +253,7 @@ export class SpaceAwarePrivilegeForm extends Component {
   }
 
   onPrivilegeSpacePermissionChange = (index) => ({ selectedSpaceIds, selectedPrivilege }) => {
+    const existingPrivilegeForm = { ...this.state.privilegeForms[index] };
     const updatedPrivileges = [...this.state.privilegeForms];
     updatedPrivileges[index] = {
       spaces: selectedSpaceIds,
@@ -260,12 +267,14 @@ export class SpaceAwarePrivilegeForm extends Component {
     const role = copyRole(this.props.role);
 
     if (!selectedSpaceIds.length || !selectedPrivilege) {
-      return;
+      existingPrivilegeForm.spaces.forEach(spaceId => {
+        role.kibana.space[spaceId] = [];
+      });
+    } else {
+      selectedSpaceIds.forEach(spaceId => {
+        role.kibana.space[spaceId] = [selectedPrivilege];
+      });
     }
-
-    selectedSpaceIds.forEach(spaceId => {
-      role.kibana.space[spaceId] = [selectedPrivilege];
-    });
 
     this.props.onChange(role);
   }
@@ -280,7 +289,7 @@ export class SpaceAwarePrivilegeForm extends Component {
 
     const role = copyRole(this.props.role);
 
-    removedPrivilege.space.forEach(spaceId => {
+    removedPrivilege.spaces.forEach(spaceId => {
       delete role.kibana[spaceId];
     });
 

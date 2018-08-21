@@ -55,7 +55,6 @@ export class PrivilegeSpaceForm extends Component {
   }
 
   onSelectedSpacesChange = (selectedSpaceIds) => {
-
     this.props.onChange({
       selectedSpaceIds,
       selectedPrivilege: this.props.selectedPrivilege
@@ -63,7 +62,6 @@ export class PrivilegeSpaceForm extends Component {
   }
 
   onPrivilegeChange = (selectedPrivilege) => {
-
     this.props.onChange({
       selectedSpaceIds: this.props.selectedSpaceIds,
       selectedPrivilege
