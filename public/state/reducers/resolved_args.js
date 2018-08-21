@@ -3,7 +3,7 @@ import { set, del } from 'object-path-immutable';
 import { get } from 'lodash';
 import { prepend } from '../../lib/modify_path';
 import * as actions from '../actions/resolved_args';
-import { flushContext } from '../actions/elements';
+import { flushContext, flushContextAfterIndex } from '../actions/elements';
 
 /*
   Resolved args are a way to handle async values. They track the status, value, and error
@@ -87,8 +87,29 @@ export const resolvedArgsReducer = handleActions(
       return set(transientState, 'inFlight', false);
     },
 
+    /*
+     * Flush all cached contexts
+     */
     [flushContext]: (transientState, { payload: elementId }) => {
       return del(transientState, getFullPath([elementId, 'expressionContext']));
+    },
+
+    /*
+     * Flush cached context indices from the given index to the last
+     */
+    [flushContextAfterIndex]: (transientState, { payload }) => {
+      const { elementId, index } = payload;
+      const indexKeys = Object.keys(
+        get(transientState, getFullPath([elementId, 'expressionContext']))
+      );
+
+      return indexKeys.reduce((state, indexKey) => {
+        const indexAsNum = parseInt(indexKey, 10);
+        if (indexAsNum >= index) {
+          return del(state, getFullPath([elementId, 'expressionContext', indexKey]));
+        }
+        return state;
+      }, transientState);
     },
   },
   {}

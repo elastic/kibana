@@ -3,7 +3,7 @@ import { createThunk } from 'redux-thunks';
 import { set, del } from 'object-path-immutable';
 import { get, pick, cloneDeep, without } from 'lodash';
 import { getPages, getElementById, getSelectedPageIndex } from '../selectors/workpad';
-import { getValue } from '../selectors/resolved_args';
+import { getValue as getResolvedArgsValue } from '../selectors/resolved_args';
 import { getDefaultElement } from '../defaults';
 import { toExpression, safeElementFromExpression } from '../../../common/lib/ast';
 import { notify } from '../../lib/notify';
@@ -12,9 +12,9 @@ import { interpretAst } from '../../lib/interpreter';
 import { selectElement } from './transient';
 import * as args from './resolved_args';
 
-function getSiblingContext(state, elementId, checkIndex) {
+export function getSiblingContext(state, elementId, checkIndex) {
   const prevContextPath = [elementId, 'expressionContext', checkIndex];
-  const prevContextValue = getValue(state, prevContextPath);
+  const prevContextValue = getResolvedArgsValue(state, prevContextPath);
 
   // if a value is found, return it, along with the index it was found at
   if (prevContextValue != null) {
@@ -47,6 +47,7 @@ export const setPosition = createAction('setPosition', (elementId, pageId, posit
 }));
 
 export const flushContext = createAction('flushContext');
+export const flushContextAfterIndex = createAction('flushContextAfterIndex');
 
 export const fetchContext = createThunk(
   'fetchContext',
@@ -253,6 +254,9 @@ const setAst = createThunk('setAst', ({ dispatch }, ast, element, pageId, doRend
 export const setAstAtIndex = createThunk(
   'setAstAtIndex',
   ({ dispatch, getState }, index, ast, element, pageId) => {
+    // invalidate cached context for elements after this index
+    dispatch(flushContextAfterIndex({ elementId: element.id, index }));
+
     const newElement = set(element, ['ast', 'chain', index], ast);
     const newAst = get(newElement, 'ast');
 

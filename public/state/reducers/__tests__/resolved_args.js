@@ -1,5 +1,6 @@
 import expect from 'expect.js';
 import * as actions from '../../actions/resolved_args';
+import { flushContextAfterIndex } from '../../actions/elements';
 import { resolvedArgsReducer } from '../resolved_args';
 import { actionCreator } from './fixtures/action_creator';
 
@@ -134,6 +135,54 @@ describe('resolved args reducer', () => {
 
       const newState = resolvedArgsReducer(state, action);
       expect(newState.resolvedArgs['element-0']).to.be(undefined);
+    });
+  });
+
+  describe('flushContextAfterIndex', () => {
+    it('removes expression context from a given index to the end', () => {
+      state = {
+        selectedPage: 'page-1',
+        selectedElement: 'element-1',
+        resolvedArgs: {
+          'element-1': {
+            expressionContext: {
+              '1': {
+                state: 'ready',
+                value: 'test-1',
+                error: null,
+              },
+              '2': {
+                state: 'ready',
+                value: 'test-2',
+                error: null,
+              },
+              '3': {
+                state: 'ready',
+                value: 'test-3',
+                error: null,
+              },
+              '4': {
+                state: 'ready',
+                value: 'test-4',
+                error: null,
+              },
+            },
+          },
+        },
+      };
+
+      const action = actionCreator(flushContextAfterIndex)({
+        elementId: 'element-1',
+        index: 3,
+      });
+
+      const newState = resolvedArgsReducer(state, action);
+      expect(newState.resolvedArgs['element-1']).to.eql({
+        expressionContext: {
+          '1': { state: 'ready', value: 'test-1', error: null },
+          '2': { state: 'ready', value: 'test-2', error: null },
+        },
+      });
     });
   });
 });
