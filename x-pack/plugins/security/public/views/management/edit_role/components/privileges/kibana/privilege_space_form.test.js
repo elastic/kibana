@@ -7,6 +7,7 @@
 import React from 'react';
 import { shallow } from 'enzyme';
 import { PrivilegeSpaceForm } from './privilege_space_form';
+import { RoleValidator } from '../../../lib/validate_role';
 
 const buildProps = (customProps) => {
   return {
@@ -22,6 +23,7 @@ const buildProps = (customProps) => {
     availablePrivileges: ['all', 'read'],
     onChange: jest.fn(),
     onDelete: jest.fn(),
+    validator: new RoleValidator(),
     ...customProps
   };
 };

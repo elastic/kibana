@@ -23,6 +23,7 @@ export class PrivilegeSpaceForm extends Component {
     selectedPrivilege: PropTypes.string,
     onChange: PropTypes.func.isRequired,
     onDelete: PropTypes.func.isRequired,
+    validator: PropTypes.object.isRequired,
   }
 
   render() {
@@ -31,17 +32,18 @@ export class PrivilegeSpaceForm extends Component {
       selectedSpaceIds,
       availablePrivileges,
       selectedPrivilege,
+      validator,
     } = this.props;
 
     return (
       <EuiFlexGroup responsive={false}>
         <EuiFlexItem>
-          <EuiFormRow label={"Space(s)"}>
+          <EuiFormRow label={"Space(s)"} {...validator.validateSelectedSpaces(selectedSpaceIds, selectedPrivilege)}>
             <SpaceSelector spaces={availableSpaces} selectedSpaceIds={selectedSpaceIds} onChange={this.onSelectedSpacesChange} />
           </EuiFormRow>
         </EuiFlexItem>
         <EuiFlexItem>
-          <EuiFormRow label={"Privilege"}>
+          <EuiFormRow label={"Privilege"} {...validator.validateSelectedPrivilege(selectedSpaceIds, selectedPrivilege)}>
             <PrivilegeSelector availablePrivileges={availablePrivileges} value={selectedPrivilege} onChange={this.onPrivilegeChange} />
           </EuiFormRow>
         </EuiFlexItem>

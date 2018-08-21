@@ -100,3 +100,158 @@ describe('validateIndexPrivileges', () => {
     expect(() => validator.validateIndexPrivileges(role)).toThrowErrorMatchingSnapshot();
   });
 });
+
+describe('validateInProgressSpacePrivileges', () => {
+  beforeEach(() => {
+    validator = new RoleValidator({ shouldValidate: true });
+  });
+
+  it('should validate when both spaces and privilege is unassigned', () => {
+    const role = {
+      kibana: {
+        global: []
+      }
+    };
+
+    validator.setInProgressSpacePrivileges([{}, {}]);
+    expect(validator.validateInProgressSpacePrivileges(role)).toEqual({ isInvalid: false });
+  });
+
+  it('should invalidate when spaces are not assigned to a privilege', () => {
+    const role = {
+      kibana: {
+        global: []
+      }
+    };
+
+    validator.setInProgressSpacePrivileges([{
+      privilege: 'all'
+    }]);
+
+    expect(validator.validateInProgressSpacePrivileges(role)).toMatchObject({
+      isInvalid: true,
+    });
+  });
+
+  it('should invalidate when a privilege is not assigned to a space', () => {
+    const role = {
+      kibana: {
+        global: []
+      }
+    };
+
+    validator.setInProgressSpacePrivileges([{
+      spaces: ['marketing']
+    }]);
+
+    expect(validator.validateInProgressSpacePrivileges(role)).toMatchObject({
+      isInvalid: true,
+    });
+  });
+
+  it('should validate when a privilege is assigned to a space', () => {
+    const role = {
+      kibana: {
+        global: []
+      }
+    };
+
+    validator.setInProgressSpacePrivileges([{
+      spaces: ['marketing'],
+      privilege: 'all'
+    }]);
+
+    expect(validator.validateInProgressSpacePrivileges(role)).toEqual({
+      isInvalid: false,
+    });
+  });
+
+  it('should skip validation if the global privilege is set to "all"', () => {
+    const role = {
+      kibana: {
+        global: ["all"]
+      }
+    };
+
+    validator.setInProgressSpacePrivileges([{
+      spaces: ['marketing']
+    }]);
+
+    expect(validator.validateInProgressSpacePrivileges(role)).toMatchObject({
+      isInvalid: false,
+    });
+  });
+});
+
+describe('validateSpacePrivileges', () => {
+  beforeEach(() => {
+    validator = new RoleValidator({ shouldValidate: true });
+  });
+
+  it('should validate when no privileges are defined', () => {
+    const role = {
+      kibana: {
+        global: [],
+        space: {}
+      }
+    };
+
+    expect(validator.validateSpacePrivileges(role)).toEqual({ isInvalid: false });
+  });
+
+  it('should validate when a global privilege is defined', () => {
+    const role = {
+      kibana: {
+        global: ["all"],
+        space: {}
+      }
+    };
+
+    expect(validator.validateSpacePrivileges(role)).toEqual({ isInvalid: false });
+  });
+
+  it('should validate when a space privilege is defined', () => {
+    const role = {
+      kibana: {
+        global: [],
+        space: {
+          marketing: ['read']
+        }
+      }
+    };
+
+    expect(validator.validateSpacePrivileges(role)).toEqual({ isInvalid: false });
+  });
+
+  it('should validate when both global and space privileges are defined', () => {
+    const role = {
+      kibana: {
+        global: ["all"],
+        space: {
+          default: ['foo'],
+          marketing: ['read']
+        }
+      }
+    };
+
+    expect(validator.validateSpacePrivileges(role)).toEqual({ isInvalid: false });
+  });
+
+  it('should invalidate when in-progress space privileges are not valid', () => {
+    const role = {
+      kibana: {
+        global: ["read"],
+        space: {
+          default: ['foo'],
+          marketing: ['read']
+        }
+      }
+    };
+
+    validator.setInProgressSpacePrivileges([{
+      spaces: ["marketing"],
+    }]);
+
+    expect(validator.validateSpacePrivileges(role)).toEqual({ isInvalid: true });
+  });
+});

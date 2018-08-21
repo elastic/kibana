@@ -141,6 +141,7 @@ exports[`it renders without crashing 1`] = `
       }
       validator={
         RoleValidator {
+          "_inProgressSpacePrivileges": Array [],
           "_shouldValidate": undefined,
         }
       }

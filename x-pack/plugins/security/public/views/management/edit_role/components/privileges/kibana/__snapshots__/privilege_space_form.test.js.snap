@@ -18,6 +18,7 @@ exports[`<PrivilegeSpaceForm> renders without crashing 1`] = `
       describedByIds={Array []}
       fullWidth={false}
       hasEmptyLabelSpace={false}
+      isInvalid={false}
       label="Space(s)"
     >
       <SpaceSelector
@@ -47,6 +48,7 @@ exports[`<PrivilegeSpaceForm> renders without crashing 1`] = `
       describedByIds={Array []}
       fullWidth={false}
       hasEmptyLabelSpace={false}
+      isInvalid={false}
       label="Privilege"
     >
       <PrivilegeSelector

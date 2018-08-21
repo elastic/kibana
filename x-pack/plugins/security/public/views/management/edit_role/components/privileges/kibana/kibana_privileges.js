@@ -18,6 +18,7 @@ export class KibanaPrivileges extends Component {
     editable: PropTypes.bool.isRequired,
     kibanaAppPrivileges: PropTypes.array.isRequired,
     onChange: PropTypes.func.isRequired,
+    validator: PropTypes.object.isRequired,
   };
 
   render() {
@@ -36,6 +37,7 @@ export class KibanaPrivileges extends Component {
       spaces = [],
       onChange,
       editable,
+      validator,
     } = this.props;
 
     if (spacesEnabled) {
@@ -46,6 +48,7 @@ export class KibanaPrivileges extends Component {
           spaces={spaces}
           onChange={onChange}
           editable={editable}
+          validator={validator}
         />
       );
     } else {

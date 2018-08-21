@@ -33,6 +33,7 @@ export class SpaceAwarePrivilegeForm extends Component {
     spaces: PropTypes.array.isRequired,
     onChange: PropTypes.func.isRequired,
     editable: PropTypes.bool.isRequired,
+    validator: PropTypes.object.isRequired,
   }
 
   constructor(props) {
@@ -246,6 +247,7 @@ export class SpaceAwarePrivilegeForm extends Component {
           selectedPrivilege={privilege}
           onChange={this.onPrivilegeSpacePermissionChange(index)}
           onDelete={this.onPrivilegeSpacePermissionDelete(index)}
+          validator={this.props.validator}
         />
         <EuiSpacer />
       </Fragment>
@@ -276,6 +278,7 @@ export class SpaceAwarePrivilegeForm extends Component {
       });
     }
 
+    this.props.validator.setInProgressSpacePrivileges(updatedPrivileges);
     this.props.onChange(role);
   }
 

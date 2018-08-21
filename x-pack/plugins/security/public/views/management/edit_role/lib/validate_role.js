@@ -7,6 +7,7 @@
 export class RoleValidator {
   constructor(options = {}) {
     this._shouldValidate = options.shouldValidate;
+    this._inProgressSpacePrivileges = [];
   }
 
   enableValidation() {
@@ -58,11 +59,74 @@ export class RoleValidator {
     return valid();
   }
 
+  validateSelectedSpaces(spaceIds, privilege) {
+    if (!this._shouldValidate) return valid();
+
+    // If no assigned privilege, then no spaces are OK
+    if (!privilege) return valid();
+
+    if (Array.isArray(spaceIds) && spaceIds.length > 0) {
+      return valid();
+    }
+    return invalid('At least one space is required');
+  }
+
+  validateSelectedPrivilege(spaceIds, privilege) {
+    if (!this._shouldValidate) return valid();
+
+    // If no assigned spaces, then a missing privilege is OK
+    if (!spaceIds || spaceIds.length === 0) return valid();
+
+    if (privilege) {
+      return valid();
+    }
+    return invalid('Privilege is required');
+  }
+
+  setInProgressSpacePrivileges(inProgressSpacePrivileges) {
+    this._inProgressSpacePrivileges = [...inProgressSpacePrivileges];
+  }
+
+  validateInProgressSpacePrivileges(role) {
+    const { global } = role.kibana;
+
+    // A Global privilege of "all" will ignore all in progress privileges,
+    // so the form should not block saving in this scenario.
+    const shouldValidate = this._shouldValidate && !global.includes('all');
+
+    if (!shouldValidate) return valid();
+
+    const allInProgressValid = this._inProgressSpacePrivileges.every(({ spaces, privilege }) => {
+      return !this.validateSelectedSpaces(spaces, privilege).isInvalid
+        && !this.validateSelectedPrivilege(spaces, privilege).isInvalid;
+    });
+
+    if (allInProgressValid) {
+      return valid();
+    }
+    return invalid();
+  }
+
+  validateSpacePrivileges(role) {
+    if (!this._shouldValidate) return valid();
+
+    const privileges = Object.values(role.kibana.space || {});
+
+    const arePrivilegesValid = privileges.every(assignedPrivilege => !!assignedPrivilege);
+    const areInProgressPrivilegesValid = !this.validateInProgressSpacePrivileges(role).isInvalid;
+
+    if (arePrivilegesValid && areInProgressPrivilegesValid) {
+      return valid();
+    }
+    return invalid();
+  }
+
   validateForSave(role) {
     const { isInvalid: isNameInvalid } = this.validateRoleName(role);
     const { isInvalid: areIndicesInvalid } = this.validateIndexPrivileges(role);
+    const { isInvalid: areSpacePrivilegesInvalid } = this.validateSpacePrivileges(role);
 
-    if (isNameInvalid || areIndicesInvalid) {
+    if (isNameInvalid || areIndicesInvalid || areSpacePrivilegesInvalid) {
       return invalid();
     }
 

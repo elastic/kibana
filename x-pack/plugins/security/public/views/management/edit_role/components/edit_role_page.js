@@ -189,6 +189,7 @@ export class EditRolePage extends Component {
           editable={!isReservedRole(this.state.role)}
           role={this.state.role}
           onChange={this.onRoleChange}
+          validator={this.validator}
         />
       </div>
     );

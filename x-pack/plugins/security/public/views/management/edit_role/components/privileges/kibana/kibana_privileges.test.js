@@ -9,6 +9,7 @@ import { shallow } from 'enzyme';
 import { KibanaPrivileges } from './kibana_privileges';
 import { SimplePrivilegeForm } from './simple_privilege_form';
 import { SpaceAwarePrivilegeForm } from './space_aware_privilege_form';
+import { RoleValidator } from '../../../lib/validate_role';
 
 const buildProps = (customProps) => {
   return {
@@ -32,6 +33,7 @@ const buildProps = (customProps) => {
       name: 'read'
     }],
     onChange: jest.fn(),
+    validator: new RoleValidator(),
     ...customProps
   };
 };

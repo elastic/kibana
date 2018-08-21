@@ -10,6 +10,7 @@ import { SpaceAwarePrivilegeForm } from './space_aware_privilege_form';
 import { PrivilegeCalloutWarning } from './privilege_callout_warning';
 import { PrivilegeSpaceTable } from './privilege_space_table';
 import { PrivilegeSpaceForm } from './privilege_space_form';
+import { RoleValidator } from '../../../lib/validate_role';
 
 const buildProps = (customProps) => {
   return {
@@ -37,6 +38,7 @@ const buildProps = (customProps) => {
       name: 'read'
     }],
     onChange: jest.fn(),
+    validator: new RoleValidator(),
     ...customProps
   };
 };
