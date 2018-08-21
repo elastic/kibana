@@ -114,8 +114,6 @@ export default async function ({ readConfigFile }) {
     },
     servers: commonConfig.get('servers'),
 
-    env: commonConfig.get('env'),
-
     esTestCluster: commonConfig.get('esTestCluster'),
 
     kbnTestServer: {
@@ -124,6 +122,12 @@ export default async function ({ readConfigFile }) {
         ...commonConfig.get('kbnTestServer.serverArgs'),
         '--oss',
       ],
+    },
+
+    uiSettings: {
+      defaults: {
+        'accessibility:disableAnimations': true,
+      },
     },
 
     apps: {

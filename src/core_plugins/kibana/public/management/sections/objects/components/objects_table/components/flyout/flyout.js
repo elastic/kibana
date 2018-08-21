@@ -557,7 +557,7 @@ export class Flyout extends Component {
     const { close } = this.props;
 
     return (
-      <EuiFlyout onClose={close}>
+      <EuiFlyout onClose={close} size="s">
         <EuiFlyoutHeader>
           <EuiTitle>
             <h2>Import saved objects</h2>

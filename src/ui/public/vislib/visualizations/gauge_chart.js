@@ -66,6 +66,7 @@ export function GaugeChartProvider(Private) {
             const svg = div.append('svg')
               .style('display', 'inline-block')
               .style('overflow', 'hidden')
+              .attr('focusable', 'false')
               .attr('width', width);
 
             const g = svg.append('g');
