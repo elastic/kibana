@@ -81,7 +81,18 @@ export function map(state = INITIAL_STATE, action) {
     case TOGGLE_LAYER_VISIBLE:
       return updateLayerInList(state, action.layerId, 'visible');
     case UPDATE_LAYER_STYLE:
-      return updateLayerInList(state, state.selectedLayer.id, 'style', action.style);
+      const previousStyle = action.temporary && (
+        !state.selectedLayer.style.previousStyle && state.selectedLayer.style ||
+        state.selectedLayer.style.previousStyle
+      ) || {};
+      return updateLayerInList(state, state.selectedLayer.id, 'style',
+        { ...action.style, ...{ previousStyle: { ...previousStyle } } });
+    case PROMOTE_TEMPORARY_STYLES:
+      return updateLayerInList(state, state.selectedLayer.id, 'style',
+        state.selectedLayer.style);
+    case CLEAR_TEMPORARY_STYLES:
+      return updateLayerInList(state, state.selectedLayer.id, 'style',
+        state.selectedLayer.style.previousStyle || {});
     default:
       return state;
   }
