@@ -37,6 +37,12 @@ export function LayerPanel({ selectedLayer }) {
         </EuiTitle>
         <EuiSpacer size="m"/>
         <EuiSpacer/>
+
+        <div>
+          {selectedLayer.renderSourceDetails()}
+        </div>
+        <EuiSpacer/>
+
         <EuiHorizontalRule margin="none"/>
       </EuiFlyoutHeader>
 

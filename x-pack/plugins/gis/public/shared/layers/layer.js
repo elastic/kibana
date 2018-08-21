@@ -3,6 +3,10 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+import { EMSFileSource } from './sources/ems_file_source';
+import { EMSTMSSource } from './sources/ems_tms_source';
+import { XYZTMSSource } from './sources/xyz_tms_source';
+
 export const LAYER_TYPE = {
   TILE: 'TILE',
   VECTOR: 'VECTOR'
@@ -17,6 +21,7 @@ export class ALayer {
   static createDescriptor(options) {
     const layerDescriptor = {};
     layerDescriptor.source = options.source;
+    layerDescriptor.sourceDescriptor = options.sourceDescriptor;
     layerDescriptor.visible = options.visible || true;
     layerDescriptor.temporary = options.temporary || false;
     layerDescriptor.style = options.style || {};
@@ -27,8 +32,7 @@ export class ALayer {
 
   static _setName({ nameList, name }, id) {
     const layerName = name || `Layer ${id}`;
-    const duplicateCount = (nameList ? nameList : [])
-      .filter((listName) => listName === layerName
+    const duplicateCount = (nameList ? nameList : []).filter((listName) => listName === layerName
         || listName.match(new RegExp(`${layerName} \\d`)))
       .length;
     return duplicateCount ? `${layerName} ${duplicateCount}` : layerName;
@@ -61,5 +65,24 @@ export class ALayer {
   getCurrentStyle() {
     throw new Error('Style not implemented');
   }
+
+  renderSourceDetails() {
+    //todo: this is just a placeholder. actual resolution can happen in selector
+    let source;
+    if (this._descriptor.sourceDescriptor.type === XYZTMSSource.type) {
+      source = new XYZTMSSource(this._descriptor.sourceDescriptor);
+    }else if (this._descriptor.sourceDescriptor.type === EMSTMSSource.type) {
+      source = new EMSTMSSource(this._descriptor.sourceDescriptor);
+    }else if (this._descriptor.sourceDescriptor.type === EMSFileSource.type) {
+      source = new EMSFileSource(this._descriptor.sourceDescriptor);
+    }else {
+      console.error('Cannot marshall', this._descriptor.sourceDescriptor);
+      throw new Error(`Source with type ${this._descriptor.sourceDescriptor.type} not recognized`);
+    }
+
+    return source.renderDetails();
+  }
+
+
 }
 
