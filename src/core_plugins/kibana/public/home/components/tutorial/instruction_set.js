@@ -26,6 +26,7 @@ import {
 } from '@kbn/ui-framework/components';
 import { Instruction } from './instruction';
 import { ParameterForm } from './parameter_form';
+import { Content } from './content';
 import { getDisplayText } from '../../../../common/tutorials/instruction_variant';
 import {
   EuiTabs,
@@ -34,7 +35,6 @@ import {
   EuiSteps,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiText,
   EuiButton,
   EuiCallOut,
 } from '@elastic/eui';
@@ -110,17 +110,32 @@ export class InstructionSet extends React.Component {
     );
   }
 
+  getStepStatus(statusCheckState) {
+    switch (statusCheckState) {
+      case undefined:
+      case StatusCheckStates.NOT_CHECKED:
+      case StatusCheckStates.FETCHING:
+        return 'incomplete';
+      case StatusCheckStates.HAS_DATA:
+        return 'complete';
+      case StatusCheckStates.NO_DATA:
+        return 'warning';
+      case StatusCheckStates.ERROR:
+        return 'danger';
+      default:
+        throw new Error(`Unexpected status check state ${statusCheckState}`);
+    }
+  }
+
   renderStatusCheck() {
     const { statusCheckState, statusCheckConfig, onStatusCheck } = this.props;
     const checkStatusStep = (
       <Fragment>
         <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
           <EuiFlexItem>
-            <EuiText>
-              <p>
-                {statusCheckConfig.text}
-              </p>
-            </EuiText>
+            <Content
+              text={statusCheckConfig.text}
+            />
           </EuiFlexItem>
 
           <EuiFlexItem
@@ -141,11 +156,9 @@ export class InstructionSet extends React.Component {
       </Fragment>
     );
 
-    const stepStatus = statusCheckState === StatusCheckStates.NOT_CHECKED ||
-      statusCheckState === StatusCheckStates.FETCHING ? 'incomplete' : 'complete';
     return {
       title: statusCheckConfig.title || 'Status Check',
-      status: stepStatus,
+      status: this.getStepStatus(statusCheckState),
       children: checkStatusStep,
       key: 'checkStatusStep'
     };

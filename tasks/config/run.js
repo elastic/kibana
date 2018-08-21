@@ -175,14 +175,17 @@ module.exports = function (grunt) {
       ],
     },
 
-    panelActionTests: {
+    pluginFunctionalTestsRelease: {
       cmd: process.execPath,
       args: [
         'scripts/functional_tests',
-        '--config', 'test/panel_actions/config.js',
+        '--config', 'test/plugin_functional/config.js',
         '--esFrom', 'source',
         '--bail',
         '--debug',
+        '--kibana-install-dir', `./build/oss/kibana-${PKG_VERSION}-${process.platform}-x86_64`,
+        '--',
+        '--server.maxPayloadBytes=1648576',
       ],
     },
 
