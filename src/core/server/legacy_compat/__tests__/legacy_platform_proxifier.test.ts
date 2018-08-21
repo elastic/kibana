@@ -78,6 +78,7 @@ test('correctly redirects server events.', () => {
 
     expect(listener).toHaveBeenCalledTimes(2);
     expect(listener).toHaveBeenCalledWith(1, 2, 3, 4);
+    expect(listener).toHaveBeenCalledWith(5, 6, 7, 8);
 
     proxifier.removeListener(eventName, listener);
   }
