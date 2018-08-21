@@ -18,12 +18,12 @@
  */
 import { EuiFlyoutBody, EuiFlyoutHeader, EuiTitle } from '@elastic/eui';
 import React from 'react';
-import { openFlyout } from '../../../../src/ui/public/flyout';
+import { openFlyout } from 'ui/flyout';
 
 import {
   DashboardPanelAction,
   DashboardPanelActionsRegistryProvider,
-} from '../../../../src/ui/public/dashboard_panel_actions';
+} from 'ui/dashboard_panel_actions';
 
 class SamplePanelAction extends DashboardPanelAction {
   constructor() {

@@ -17,9 +17,14 @@
  * under the License.
  */
 
-require('../src/setup_node_env');
-require('@kbn/test').runTestsCli([
-  require.resolve('../test/functional/config.js'),
-  require.resolve('../test/api_integration/config.js'),
-  require.resolve('../test/plugin_functional/config.js'),
-]);
+export default function (kibana) {
+  return new kibana.Plugin({
+    uiExports: {
+      app: {
+        title: 'Test Plugin App',
+        description: 'This is a sample plugin for the functional tests.',
+        main: 'plugins/sample_app_plugin/app',
+      }
+    }
+  });
+}
