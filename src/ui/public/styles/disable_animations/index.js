@@ -17,33 +17,4 @@
  * under the License.
  */
 
-import { EsArchiver } from '../../../src/es_archiver';
-import * as KibanaServer from './kibana_server';
-
-export function EsArchiverProvider({ getService, hasService }) {
-  const config = getService('config');
-  const client = getService('es');
-  const log = getService('log');
-
-  if (!config.get('esArchiver')) {
-    throw new Error(`esArchiver can't be used unless you specify it's config in your config file`);
-  }
-
-  const dataDir = config.get('esArchiver.directory');
-
-  const esArchiver = new EsArchiver({
-    client,
-    dataDir,
-    log,
-  });
-
-  if (hasService('kibanaServer')) {
-    KibanaServer.extendEsArchiver({
-      esArchiver,
-      kibanaServer: getService('kibanaServer'),
-      defaults: config.get('uiSettings.defaults'),
-    });
-  }
-
-  return esArchiver;
-}
+import './disable_animations';
