@@ -114,10 +114,29 @@ const COLUMNS = [{
 export class JobTableUi extends Component {
   static propTypes = {
     jobs: PropTypes.array,
+    closeDetailPanel: PropTypes.func.isRequired,
   }
 
   static defaultProps = {
     jobs: [],
+  }
+
+  static getDerivedStateFromProps(props, state) {
+    // Deselct any jobs which no longer exist, e.g. they've been deleted.
+    const { idToSelectedJobMap } = state;
+    const jobIds = props.jobs.map(job => job.id);
+    const selectedJobIds = Object.keys(idToSelectedJobMap);
+    const missingJobIds = selectedJobIds.filter(selectedJobId => {
+      return !jobIds.includes(selectedJobId);
+    });
+
+    if (missingJobIds.length) {
+      const newMap = { ...idToSelectedJobMap };
+      missingJobIds.forEach(missingJobId => delete newMap[missingJobId]);
+      return { idToSelectedJobMap: newMap };
+    }
+
+    return null;
   }
 
   constructor(props) {
@@ -127,13 +146,6 @@ export class JobTableUi extends Component {
       idToSelectedJobMap: {},
     };
   }
-
-  onSort = column => {
-    const { sortField, isSortAscending, sortChanged } = this.props;
-
-    const newIsSortAscending = sortField === column ? !isSortAscending : true;
-    sortChanged(column, newIsSortAscending);
-  };
 
   toggleAll = () => {
     const allSelected = this.areAllItemsSelected();
@@ -166,8 +178,16 @@ export class JobTableUi extends Component {
     });
   };
 
-  isItemSelected = id => {
-    return !!this.state.idToSelectedJobMap[id];
+  resetSelection = () => {
+    this.setState({ idToSelectedJobMap: {} });
+  };
+
+  deselectItems = (itemIds) => {
+    this.setState(({ idToSelectedJobMap }) => {
+      const newMap = { ...idToSelectedJobMap };
+      itemIds.forEach(id => delete newMap[id]);
+      return { idToSelectedJobMap: newMap };
+    });
   };
 
   areAllItemsSelected = () => {
@@ -178,11 +198,24 @@ export class JobTableUi extends Component {
     return indexOfUnselectedItem === -1;
   };
 
+  isItemSelected = id => {
+    return !!this.state.idToSelectedJobMap[id];
+  };
+
   getSelectedJobs() {
-    return Object.keys(this.state.idToSelectedJobMap).map(jobId => {
-      return this.props.jobs.find(job => job.id === jobId);
+    const { jobs } = this.props;
+    const { idToSelectedJobMap } = this.state;
+    return Object.keys(idToSelectedJobMap).map(jobId => {
+      return jobs.find(job => job.id === jobId);
     });
   }
+
+  onSort = column => {
+    const { sortField, isSortAscending, sortChanged } = this.props;
+
+    const newIsSortAscending = sortField === column ? !isSortAscending : true;
+    sortChanged(column, newIsSortAscending);
+  };
 
   buildHeader() {
     const { sortField, isSortAscending } = this.props;
@@ -297,9 +330,11 @@ export class JobTableUi extends Component {
       filter,
       jobs,
       intl,
+      closeDetailPanel,
     } = this.props;
 
     const { idToSelectedJobMap } = this.state;
+
     const atLeastOneItemSelected = Object.keys(idToSelectedJobMap).length > 0;
 
     return (
@@ -317,9 +352,9 @@ export class JobTableUi extends Component {
                 <EuiFlexItem grow={false}>
                   <JobActionMenu
                     jobs={this.getSelectedJobs()}
-                    resetSelection={() => {
-                      this.setState({ idToSelectedJobMap: {} });
-                    }}
+                    closeDetailPanel={closeDetailPanel}
+                    resetSelection={this.resetSelection}
+                    deselectJobs={this.deselectItems}
                   />
                 </EuiFlexItem>
               ) : null}

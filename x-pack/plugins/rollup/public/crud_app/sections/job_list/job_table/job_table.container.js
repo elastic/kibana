@@ -15,6 +15,7 @@ import {
 } from '../../../store/selectors';
 
 import {
+  closeDetailPanel,
   filterChanged,
   openDetailPanel,
   pageChanged,
@@ -36,6 +37,9 @@ const mapStateToProps = (state) => {
 
 const mapDispatchToProps = (dispatch) => {
   return {
+    closeDetailPanel: () => {
+      dispatch(closeDetailPanel());
+    },
     filterChanged: (filter) => {
       dispatch(filterChanged({ filter }));
     },
@@ -56,5 +60,5 @@ const mapDispatchToProps = (dispatch) => {
 
 export const JobTable = connect(
   mapStateToProps,
-  mapDispatchToProps
+  mapDispatchToProps,
 )(JobTableComponent);

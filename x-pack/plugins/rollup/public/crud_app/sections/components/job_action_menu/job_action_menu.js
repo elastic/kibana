@@ -22,14 +22,20 @@ import { flattenPanelTree } from '../../../services';
 
 class JobActionMenuUi extends Component {
   static propTypes = {
-    startJobs: PropTypes.func,
-    stopJobs: PropTypes.func,
-    deleteJobs: PropTypes.func,
-    resetSelection: PropTypes.func,
+    startJobs: PropTypes.func.isRequired,
+    stopJobs: PropTypes.func.isRequired,
+    deleteJobs: PropTypes.func.isRequired,
+    iconSide: PropTypes.string,
+    anchorPosition: PropTypes.string,
+    label: PropTypes.node,
+    iconType: PropTypes.string,
     jobs: PropTypes.array,
   }
 
   static defaultProps = {
+    iconSide: 'right',
+    anchorPosition: 'rightUp',
+    iconType: 'arrowDown',
     jobs: [],
   }
 
@@ -120,7 +126,13 @@ class JobActionMenuUi extends Component {
   confirmDeleteModal = () => {
     const isSingleSelection = this.isSingleSelection();
     const entity = this.getEntity(isSingleSelection);
-    const { deleteJobs, jobs, resetSelection, intl } = this.props;
+
+    const {
+      deleteJobs,
+      jobs,
+      intl,
+    } = this.props;
+
     const { showDeleteConfirmation } = this.state;
 
     if (!showDeleteConfirmation) {
@@ -130,7 +142,6 @@ class JobActionMenuUi extends Component {
     const onDelete = () => {
       this.closePopover();
       deleteJobs();
-      resetSelection();
     };
 
     return (
@@ -208,13 +219,13 @@ class JobActionMenuUi extends Component {
     const jobCount = this.props.jobs.length;
 
     const {
-      iconSide = 'right',
-      anchorPosition = 'rightUp',
+      iconSide,
+      anchorPosition,
+      iconType,
       label = intl.formatMessage({
-        id: 'xpack.rollupJobs.jobActionMenu.manageButtonLabel',
+        id: 'xpack.rollupJobs.jobActionMenu.buttonLabel',
         defaultMessage: 'Manage {jobCount, plural, one {job} other {jobs}}',
       }, { jobCount }),
-      iconType = 'arrowDown'
     } = this.props;
 
     const panels = this.panels();
