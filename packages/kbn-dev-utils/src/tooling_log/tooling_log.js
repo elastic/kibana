@@ -25,7 +25,7 @@ import { ToolingLogTextWriter } from './tooling_log_text_writer';
 export class ToolingLog extends EventEmitter {
   /**
    * Create a ToolingLog object
-   * @param {{level: string, writeTo: WritableStream}} writerConfig
+   * @param {WriterConfig} writerConfig
    */
   constructor(writerConfig) {
     super();

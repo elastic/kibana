@@ -17,6 +17,13 @@
  * under the License.
  */
 
-export { ToolingLog } from './tooling_log';
-export { ToolingLogTextWriter, WriterConfig } from './tooling_log_text_writer';
-export { pickLevelFromFlags, LogLevel } from './log_levels';
+export type LogLevel = 'silent' | 'error' | 'warning' | 'info' | 'debug' | 'verbose';
+
+export interface ParsedLogLevel {
+  name: LogLevel;
+  flags: { [key in LogLevel]: boolean };
+}
+
+export function pickLevelFromFlags(flags: { [key: string]: any }): LogLevel;
+
+export function parseLogLevel(level: LogLevel): ParsedLogLevel;
