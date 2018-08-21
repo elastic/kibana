@@ -4,14 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { Fragment } from 'react';
+import React from 'react';
 import { XYZTMSSource } from '../../shared/layers/sources/xyz_tms_source';
 import { EMSFileSource } from '../../shared/layers/sources/ems_file_source';
 import {
   EuiAccordion,
-  EuiFieldText,
   EuiText,
-  EuiSelect,
   EuiSpacer,
   EuiButton,
   EuiFlyout,
@@ -30,36 +28,6 @@ export class FlyOut extends React.Component {
 
   constructor() {
     super();
-    this.state = {
-      tmsInput: ''
-    };
-  }
-
-  _renderEMSFileSelection = (options, previewEmsFileLayer) => {
-    const onChange = ({ target }) => {
-      const selectedId = target.options[target.selectedIndex].text;
-      const emsFileSource = EMSFileSource.createDescriptor(selectedId);
-      previewEmsFileLayer(emsFileSource);
-    };
-
-    return (
-      <Fragment>
-        <EuiSpacer size="m"/>
-        <EuiSelect
-          options={options}
-          onChange={onChange}
-          aria-label="Use aria labels when no actual label is in use"
-        />
-      </Fragment>
-    );
-  };
-
-
-  _handleTMSInputChange(e) {
-    this.setState({
-      tmsInput: e.target.value,
-      tmsCanPreview: (e.target.value.indexOf('{x}') >= 0 && e.target.value.indexOf('{y}') >= 0 && e.target.value.indexOf('{z}') >= 0)
-    });
   }
 
   _addToMapBtn() {
@@ -79,16 +47,14 @@ export class FlyOut extends React.Component {
     );
   }
 
-  _previewTMS() {
-    if (!this.state.tmsInput) {
-      return;
-    }
-
-    const xyzTmsSource = XYZTMSSource.createDescriptor(this.state.tmsInput);
-    this.props.previewXYZLayer(xyzTmsSource);
-  }
-
   _renderFlyout() {
+
+    const editorProperties = {
+      onPreviewSource: this.props.previewSource,
+      dataSourcesMeta: this.props.dataSourcesMeta
+    };
+    const xyzTmsEditor = XYZTMSSource.renderEditor(editorProperties);
+    const emsFileEditor = EMSFileSource.renderEditor(editorProperties);
 
     return (
       <EuiFlyout onClose={() => console.warn('EuiFlyout#onClose not implemented.')} style={{ maxWidth: 768 }}>
@@ -114,9 +80,7 @@ export class FlyOut extends React.Component {
               buttonContent="From Elastic Maps Service"
               paddingSize="l"
             >
-              <EuiText>
-                {this._renderEMSFileSelection(this.props.emsVectorOptions, this.props.previewEMSFileLayer)}
-              </EuiText>
+              {emsFileEditor}
             </EuiAccordion>
           </div>
           <div>
@@ -126,20 +90,7 @@ export class FlyOut extends React.Component {
               buttonContent="Tilemap service with XYZ url"
               paddingSize="l"
             >
-              <Fragment>
-                <EuiFieldText
-                  placeholder="https://a.tile.openstreetmap.org/{z}/{x}/{y}.png"
-                  onChange={(e) => this._handleTMSInputChange(e)}
-                  aria-label="Use aria labels when no actual label is in use"
-                />
-                <EuiButton
-                  size="s"
-                  onClick={(e) => this._previewTMS(e)}
-                  isDisabled={!this.state.tmsCanPreview}
-                >
-                  {this.state.tmsCanPreview ? "Preview on Map" : "Enter URL with {x}/{y}/{x} pattern." }
-                </EuiButton>
-              </Fragment>
+              {xyzTmsEditor}
             </EuiAccordion>
           </div>
         </EuiFlyoutBody>
@@ -164,7 +115,6 @@ export class FlyOut extends React.Component {
   }
 
   render() {
-    const { flyoutVisible } = this.props;
-    return (flyoutVisible ? this._renderFlyout() : null);
+    return (this.props.flyoutVisible) ? this._renderFlyout() : null;
   }
 }

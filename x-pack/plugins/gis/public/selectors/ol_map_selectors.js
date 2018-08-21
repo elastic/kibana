@@ -7,10 +7,8 @@
 import { createSelector } from 'reselect';
 import { getLayerList, getMapConstants } from "./map_selectors";
 import { LAYER_TYPE } from "../shared/layers/layer";
-import { FEATURE_PROJECTION, getOlLayerStyle }
-  from './ol_layer_defaults';
+import { FEATURE_PROJECTION, getOlLayerStyle } from './ol_layer_defaults';
 import * as ol from 'openlayers';
-import _ from 'lodash';
 
 // Layer-specific logic
 function convertTmsLayersToOl({ source, visible }) {
@@ -41,6 +39,7 @@ const convertVectorLayersToOl = (() => {
 })();
 
 function convertLayerByType(layer) {
+  //todo: don't do this! do not keep reference to openlayers-objects directly in the store
   switch (layer.type) {
     case LAYER_TYPE.TILE:
       layer.olLayer = convertTmsLayersToOl(layer);
@@ -146,15 +145,4 @@ export const getOlMapAndLayers = createSelector(
     }
     return olMap;
   }
-);
-
-
-export const getOlLayersBySource = createSelector(
-  getLayersWithOl,
-  layers => _.groupBy(layers, ({ appData }) => appData.source)
-);
-
-export const getOlLayersByType = createSelector(
-  getLayersWithOl,
-  layers => _.groupBy(layers, ({ appData }) => appData.layerType)
 );

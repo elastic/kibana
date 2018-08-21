@@ -12,7 +12,7 @@ import {
 import { UPDATE_LAYER_STYLE, PROMOTE_TEMPORARY_STYLES, CLEAR_TEMPORARY_STYLES }
   from '../actions/style_actions';
 
-const updateLayerInList = (()=> {
+const updateLayerInList = (() => {
   const getLayerIndex = (list, layerId) => list.findIndex(({ id }) => layerId === id);
   return (state, id, attribute, newValue) => {
     const { layerList } = state;
@@ -36,18 +36,16 @@ const INITIAL_STATE = {
     mapCenter: [37.41, 8.82],
     mapInitZoomLevel: 4
   },
-  selectedLayer: null,
+  selectedLayerId: null,
   layerList: [],
-  sources: [],
   layerLoading: false
 };
 
 export function map(state = INITIAL_STATE, action) {
   switch (action.type) {
-    // case SET_META:
-    //   return { ...state, meta: action.meta };
     case SET_SELECTED_LAYER:
-      return { ...state, selectedLayer: state.layerList.find(layer => layer.id === action.selectedLayer) };
+      const match = state.layerList.find(layer => layer.id === action.selectedLayerId);
+      return { ...state, selectedLayerId: match ? action.selectedLayerId : null };
     case UPDATE_LAYER_ORDER:
       return { ...state, layerList: action.newLayerOrder.map(layerNumber => state.layerList[layerNumber]) };
     case ADD_LAYER:
@@ -81,6 +79,7 @@ export function map(state = INITIAL_STATE, action) {
     case TOGGLE_LAYER_VISIBLE:
       return updateLayerInList(state, action.layerId, 'visible');
     case UPDATE_LAYER_STYLE:
+<<<<<<< HEAD
       const previousStyle = action.temporary && (
         !state.selectedLayer.style.previousStyle && state.selectedLayer.style ||
         state.selectedLayer.style.previousStyle
@@ -93,6 +92,9 @@ export function map(state = INITIAL_STATE, action) {
     case CLEAR_TEMPORARY_STYLES:
       return updateLayerInList(state, state.selectedLayer.id, 'style',
         state.selectedLayer.style.previousStyle || {});
+=======
+      return updateLayerInList(state, state.selectedLayerId, 'style', action.style);
+>>>>>>> 6d67fb182c37d4542a003892d5ae743cd046a458
     default:
       return state;
   }

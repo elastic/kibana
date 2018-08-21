@@ -6,7 +6,7 @@
 
 import React from 'react';
 
-import { FlyoutBody } from './flyout_body';
+import { StyleTabs } from './style_tabs';
 import { FlyoutFooter } from './flyout_footer';
 
 import {
@@ -40,9 +40,9 @@ export function LayerPanel({ selectedLayer }) {
         <EuiHorizontalRule margin="none"/>
       </EuiFlyoutHeader>
 
-      <EuiFlyoutBody style={{ paddingTop: 0 }}>
+      <EuiFlyoutBody style={{ paddingTop: 0 }} layer={selectedLayer}>
         <EuiSpacer size="l"/>
-        <FlyoutBody/>
+        <StyleTabs layer={selectedLayer}/>
         <EuiSpacer size="l"/>
       </EuiFlyoutBody>
 

@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="400px" height="373px" viewBox="0 0 400 373" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <!-- Generator: sketchtool 51.2 (57519) - http://www.bohemiancoding.com/sketch -->
+    <title>7901612E-113D-4EE2-89F8-C5AEAD9876B6</title>
+    <desc>Created with sketchtool.</desc>
+    <defs>
+        <linearGradient x1="10.7931708%" y1="50%" x2="100%" y2="50%" id="linearGradient-1">
+            <stop stop-color="#FFFFFF" stop-opacity="0.5" offset="0%"></stop>
+            <stop stop-color="#E2E2E2" stop-opacity="0" offset="100%"></stop>
+        </linearGradient>
+        <radialGradient cx="0%" cy="0%" fx="0%" fy="0%" r="146.629187%" gradientTransform="translate(0.000000,0.000000),scale(0.932500,1.000000),rotate(42.999538),translate(-0.000000,-0.000000)" id="radialGradient-2">
+            <stop stop-color="#FFFFFF" stop-opacity="0.5" offset="0%"></stop>
+            <stop stop-color="#000000" stop-opacity="0.2" offset="100%"></stop>
+        </radialGradient>
+        <polygon id="path-3" points="400 373 0 0 400 4.61930179e-14"></polygon>
+        <linearGradient x1="0%" y1="0%" x2="100%" y2="100%" id="linearGradient-4">
+            <stop stop-color="#FFFFFF" stop-opacity="0.6" offset="0%"></stop>
+            <stop stop-color="#000000" stop-opacity="0" offset="100%"></stop>
+        </linearGradient>
+        <radialGradient cx="0%" cy="0%" fx="0%" fy="0%" r="146.09634%" gradientTransform="translate(0.000000,0.000000),scale(0.938889,1.000000),rotate(43.194713),translate(-0.000000,-0.000000)" id="radialGradient-5">
+            <stop stop-color="#FFFFFF" stop-opacity="0.15" offset="0%"></stop>
+            <stop stop-color="#000000" stop-opacity="0.5" offset="100%"></stop>
+        </radialGradient>
+        <polygon id="path-6" points="400 169 220 0 400 2.09292762e-14"></polygon>
+    </defs>
+    <g id="Symbols" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="background/full/branded-alt" transform="translate(-1040.000000, 0.000000)">
+            <g id="bg-top-branded" transform="translate(1040.000000, 0.000000)">
+                <g id="shape" opacity="0.1">
+                    <use fill="url(#linearGradient-1)" xlink:href="#path-3"></use>
+                    <use fill="url(#radialGradient-2)" style="mix-blend-mode: overlay;" xlink:href="#path-3"></use>
+                </g>
+                <g id="shape" opacity="0.85">
+                    <use fill="#F5F5F5" xlink:href="#path-6"></use>
+                    <use fill="url(#linearGradient-4)" style="mix-blend-mode: overlay;" xlink:href="#path-6"></use>
+                    <use fill="url(#radialGradient-5)" style="mix-blend-mode: overlay;" xlink:href="#path-6"></use>
+                </g>
+            </g>
+        </g>
+    </g>
+</svg>

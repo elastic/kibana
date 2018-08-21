@@ -4,9 +4,16 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
+import React, { Fragment } from 'react';
 
-export class XYZTMSSource {
+import {
+  EuiFieldText,
+  EuiButton
+} from '@elastic/eui';
+
+import { ASource } from './source';
+
+export class XYZTMSSource extends ASource {
 
   static type = 'EMS_XYZ';
 
@@ -23,8 +30,55 @@ export class XYZTMSSource {
     };
   }
 
-  static renderEditor() {
-    return (<div />);
+  static renderEditor({  onPreviewSource }) {
+    const previewTMS = (urlTemplate) => {
+      const sourceDescriptor = XYZTMSSource.createDescriptor(urlTemplate);
+      onPreviewSource(sourceDescriptor);
+    };
+    return (<XYZTMSEditor previewTMS={previewTMS} />);
+  }
+
+  constructor(descriptor) {
+    super(descriptor);
+  }
+
+}
+
+
+class XYZTMSEditor extends  React.Component {
+
+  constructor() {
+    super();
+    this.state = {
+      tmsInput: '',
+      tmsCanPreview: false
+    };
+  }
+
+  _handleTMSInputChange(e) {
+    this.setState({
+      tmsInput: e.target.value,
+      tmsCanPreview: (e.target.value.indexOf('{x}') >= 0 && e.target.value.indexOf('{y}') >= 0 && e.target.value.indexOf('{z}') >= 0)
+    });
+  }
+
+  render() {
+    return (
+      <Fragment>
+        <EuiFieldText
+          placeholder="https://a.tile.openstreetmap.org/{z}/{x}/{y}.png"
+          onChange={(e) => this._handleTMSInputChange(e)}
+          aria-label="Use aria labels when no actual label is in use"
+        />
+        <EuiButton
+          size="s"
+          onClick={() => this.props.previewTMS(this.state.tmsInput)}
+          isDisabled={!this.state.tmsCanPreview}
+        >
+          {this.state.tmsCanPreview ? "Preview on Map" : "Enter URL with {x}/{y}/{x} pattern." }
+        </EuiButton>
+      </Fragment>
+    );
   }
 
 }
