@@ -130,7 +130,7 @@ apm = ElasticAPM(app)`.split('\n'),
 }
 
 export function createRailsClientInstructions() {
-  [
+  return [
     {
       title: 'Install the APM agent',
       textPre: 'Add the agent to your Gemfile.',
