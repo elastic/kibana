@@ -37,6 +37,7 @@ export default function (Private) {
     this.title = pattern;
     this.popularizeField = sinon.stub();
     this.timeFieldName = timeField;
+    this.isTimeBased = () => Boolean(this.timeFieldName);
     this.getNonScriptedFields = sinon.spy(IndexPattern.prototype.getNonScriptedFields);
     this.getScriptedFields = sinon.spy(IndexPattern.prototype.getScriptedFields);
     this.getSourceFiltering = sinon.stub();

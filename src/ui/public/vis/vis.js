@@ -117,6 +117,7 @@ export function VisProvider(Private, indexPatterns, getAppState) {
           }
         },
         inspectorAdapters: this._getActiveInspectorAdapters(),
+        getAppState,
       };
     }
 

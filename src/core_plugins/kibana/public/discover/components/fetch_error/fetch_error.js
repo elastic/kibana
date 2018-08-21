@@ -30,8 +30,6 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 
-import './fetch_error.less';
-
 const DiscoverFetchError = ({ fetchError }) => {
   if (!fetchError) {
     return null;

@@ -17,21 +17,48 @@
  * under the License.
  */
 
-import { exec } from '../lib';
+import { exec, write } from '../lib';
+import { Project } from '../../typescript';
 
 export const TranspileTypescriptTask = {
   description: 'Transpiling sources with typescript compiler',
 
   async run(config, log, build) {
-    await exec(
-      log,
-      require.resolve('typescript/bin/tsc'),
-      [
-        '--pretty', 'true'
-      ],
-      {
-        cwd: build.resolvePath(),
-      }
-    );
+    const defaultProject = new Project(build.resolvePath('tsconfig.json'));
+    const browserProject = new Project(build.resolvePath('tsconfig.browser.json'));
+
+    // update the default config to exclude **/public/**/* files
+    await write(defaultProject.tsConfigPath, JSON.stringify({
+      ...defaultProject.config,
+      exclude: [
+        ...defaultProject.config.exclude,
+        'src/**/public/**/*'
+      ]
+    }));
+
+    // update the browser config file to include **/public/**/* files
+    await write(browserProject.tsConfigPath, JSON.stringify({
+      ...browserProject.config,
+      include: [
+        ...browserProject.config.include,
+        'src/**/public/**/*'
+      ]
+    }));
+
+    // compile each typescript config file
+    for (const tsConfigPath of [defaultProject.tsConfigPath, browserProject.tsConfigPath]) {
+      log.info(`Compiling`, tsConfigPath, 'project');
+      await exec(
+        log,
+        require.resolve('typescript/bin/tsc'),
+        [
+          '--pretty', 'true',
+          '--project', tsConfigPath,
+        ],
+        {
+          cwd: build.resolvePath(),
+        }
+      );
+    }
   },
 };

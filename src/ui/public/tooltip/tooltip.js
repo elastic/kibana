@@ -18,12 +18,16 @@
  */
 
 import html from './tooltip.html';
+import chrome from 'ui/chrome';
 
 require('ui-bootstrap')
   .config(function ($tooltipProvider) {
+    // we use the uiSettings client because the config service is not available in the config phase
+    const uiSettings = chrome.getUiSettingsClient();
+
     $tooltipProvider.options({
       placement: 'bottom',
-      animation: true,
+      animation: !uiSettings.get('accessibility:disableAnimations'),
       popupDelay: 150,
       appendToBody: false
     });

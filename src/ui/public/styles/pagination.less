@@ -57,3 +57,22 @@ paginate {
     }
   }
 }
+
+// SASSTODO: Make sure these colors convert to theme variables
+.tab-dashboard.theme-dark {
+  paginate {
+    paginate-controls {
+      .pagination-other-pages-list {
+        > li {
+          a {
+            background-color: @gray7;
+            color: @white;
+          }
+          &.active a {
+            color: @gray9;
+          }
+        }
+      }
+    }
+  }
+}
