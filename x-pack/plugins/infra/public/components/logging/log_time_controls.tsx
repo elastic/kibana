@@ -21,7 +21,7 @@ interface LogTimeControlsProps {
 
 export class LogTimeControls extends React.PureComponent<LogTimeControlsProps> {
   public render() {
-    const { currentTime, startLiveStreaming, stopLiveStreaming, isLiveStreaming } = this.props;
+    const { currentTime, isLiveStreaming } = this.props;
 
     const currentMoment = currentTime ? moment(currentTime) : null;
 
@@ -35,7 +35,7 @@ export class LogTimeControls extends React.PureComponent<LogTimeControlsProps> {
             color="primary"
             iconType="pause"
             iconSide="left"
-            onClick={stopLiveStreaming}
+            onClick={this.stopLiveStreaming}
           >
             Stop streaming
           </EuiFilterButton>
@@ -72,6 +72,10 @@ export class LogTimeControls extends React.PureComponent<LogTimeControlsProps> {
 
   private startLiveStreaming = () => {
     this.props.startLiveStreaming(5000);
+  };
+
+  private stopLiveStreaming = () => {
+    this.props.stopLiveStreaming();
   };
 }
 
