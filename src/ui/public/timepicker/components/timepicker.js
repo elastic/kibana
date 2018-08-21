@@ -21,6 +21,7 @@ import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 
 import { QuickSelectPopover } from './quick_select_popover';
+import { TimeInput } from './time_input';
 
 import {
   EuiText,
@@ -53,6 +54,20 @@ export class Timepicker extends Component {
     });
   }
 
+  setFrom = (from) => {
+    this.setState((prevState) => ({
+      from: from,
+      to: prevState.to,
+    }));
+  }
+
+  setTo = (to) => {
+    this.setState((prevState) => ({
+      from: prevState.from,
+      to: to,
+    }));
+  }
+
   applyTimeChanges = () => {
     this.props.setTime(this.state.from, this.state.to);
   }
@@ -81,9 +96,15 @@ export class Timepicker extends Component {
         <div
           className="euiDatePickerRange"
         >
-          {this.state.from}
+          <TimeInput
+            value={this.state.from}
+            onChange={this.setFrom}
+          />
           <EuiText className="euiDatePickerRange__delimeter" size="s" color="subdued">→</EuiText>
-          {this.state.to}
+          <TimeInput
+            value={this.state.to}
+            onChange={this.setTo}
+          />
         </div>
       </EuiFormControlLayout>
     );
@@ -98,5 +119,5 @@ const timeType = PropTypes.oneOfType([
 Timepicker.propTypes = {
   from: timeType,
   to: timeType,
-  setTime: PropTypes.func.isRequired,
+  setTime: PropTypes.func,
 };
