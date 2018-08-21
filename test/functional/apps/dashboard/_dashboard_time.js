@@ -59,7 +59,7 @@ export default function ({ getPageObjects, getService }) {
 
     describe('dashboard with stored timed', async function () {
       it('is saved with quick time', async function () {
-        await PageObjects.dashboard.clickEdit();
+        await PageObjects.dashboard.switchToEditMode();
         await PageObjects.header.setQuickTime('Today');
         await PageObjects.dashboard.saveDashboard(dashboardName, { storeTimeWithDashboard: true });
       });
@@ -74,7 +74,7 @@ export default function ({ getPageObjects, getService }) {
       });
 
       it('is saved with absolute time', async function () {
-        await PageObjects.dashboard.clickEdit();
+        await PageObjects.dashboard.switchToEditMode();
         await PageObjects.header.setAbsoluteRange(fromTime, toTime);
         await PageObjects.dashboard.saveDashboard(dashboardName, { storeTimeWithDashboard: true });
       });
