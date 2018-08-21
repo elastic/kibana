@@ -27,7 +27,7 @@ function cantLookup(timeFrom, timeTo, dateFormat) {
   return `${displayFrom} to ${displayTo}`;
 }
 
-function formatTimeString(timeString, dateFormat, roundUp = false) {
+export function formatTimeString(timeString, dateFormat, roundUp = false) {
   if (moment(timeString).isValid()) {
     return moment(timeString).format(dateFormat);
   } else {

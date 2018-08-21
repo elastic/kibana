@@ -17,16 +17,17 @@
  * under the License.
  */
 
+import chrome from 'ui/chrome';
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
-
 import { AbsoluteForm } from './absolute_form';
 
 import {
   EuiPopover,
-  EuiFieldText,
   EuiTabbedContent,
 } from '@elastic/eui';
+
+import { formatTimeString } from '../pretty_duration';
 
 export class TimeInput extends Component {
 
@@ -87,11 +88,11 @@ export class TimeInput extends Component {
   render() {
 
     const input = (
-      <EuiFieldText
-        value={this.props.value}
-        readOnly
+      <span
         onClick={this.togglePopover}
-      />
+      >
+        {formatTimeString(this.props.value, chrome.getUiSettingsClient().get('dateFormat'))}
+      </span>
     );
 
     return (
@@ -101,6 +102,7 @@ export class TimeInput extends Component {
         closePopover={this.closePopover}
         anchorPosition="downRight"
         ownFocus
+        panelPaddingSize="none"
       >
         <EuiTabbedContent
           tabs={this.tabs}
