@@ -30,7 +30,7 @@ export function MonitoringPageProvider({ getService }) {
     getWelcome() {
       return getRemote()
         .findDisplayedByCssSelector('render-directive')
-        .getVisibleText();
+        .getText();
     }
 
     dismissWelcome() {
@@ -40,7 +40,7 @@ export function MonitoringPageProvider({ getService }) {
     getToasterContents() {
       return getRemote()
         .findByCssSelector('div.toaster-container')
-        .getVisibleText();
+        .getText();
     }
 
     clickOptOut() {

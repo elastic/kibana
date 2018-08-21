@@ -36,7 +36,7 @@ export default function ({ getService, getPageObjects }) {
 
     before(async function () {
       log.debug('Load empty_kibana and Shakespeare Getting Started data\n'
-      + 'https://www.elastic.co/guide/en/kibana/current/tutorial-load-dataset.html');
+        + 'https://www.elastic.co/guide/en/kibana/current/tutorial-load-dataset.html');
       await esArchiver.load('empty_kibana');
       log.debug('Load shakespeare data');
       await esArchiver.loadIfNeeded('getting_started/shakespeare');
@@ -47,7 +47,7 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.settings.navigateTo();
       await PageObjects.settings.createIndexPattern('shakes', null);
       const indexPageHeading = await PageObjects.settings.getIndexPageHeading();
-      const patternName = await indexPageHeading.getVisibleText();
+      const patternName = await indexPageHeading.getText();
       expect(patternName).to.be('shakes*');
     });
 
@@ -115,7 +115,7 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.visualize.selectField('play_name');
       await PageObjects.visualize.clickGo();
 
-      const expectedChartValues = [ 71, 65, 62, 55, 55 ];
+      const expectedChartValues = [71, 65, 62, 55, 55];
       await retry.try(async () => {
         const data = await PageObjects.visualize.getBarChartData('Speaking Parts');
         log.debug('data=' + data);
@@ -124,8 +124,8 @@ export default function ({ getService, getPageObjects }) {
       });
 
       const labels = await PageObjects.visualize.getXAxisLabels();
-      expect(labels).to.eql([ 'Richard III', 'Henry VI Part 2', 'Coriolanus',
-        'Antony and Cleopatra', 'Timon of Athens' ]);
+      expect(labels).to.eql(['Richard III', 'Henry VI Part 2', 'Coriolanus',
+        'Antony and Cleopatra', 'Timon of Athens']);
     });
 
 
@@ -144,8 +144,8 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.visualize.selectYAxisAggregation('Max', 'speech_number', 'Max Speaking Parts', aggIndex);
       await PageObjects.visualize.clickGo();
 
-      const expectedChartValues = [ 71, 65, 62, 55, 55 ];
-      const expectedChartValues2 = [177, 106, 153, 132, 162 ];
+      const expectedChartValues = [71, 65, 62, 55, 55];
+      const expectedChartValues2 = [177, 106, 153, 132, 162];
       await retry.try(async () => {
         const data = await PageObjects.visualize.getBarChartData('Speaking Parts');
         const data2 = await PageObjects.visualize.getBarChartData('Max Speaking Parts');
@@ -158,8 +158,8 @@ export default function ({ getService, getPageObjects }) {
       });
 
       const labels = await PageObjects.visualize.getXAxisLabels();
-      expect(labels).to.eql([ 'Richard III', 'Henry VI Part 2', 'Coriolanus',
-        'Antony and Cleopatra', 'Timon of Athens' ]);
+      expect(labels).to.eql(['Richard III', 'Henry VI Part 2', 'Coriolanus',
+        'Antony and Cleopatra', 'Timon of Athens']);
     });
 
     /* Continued from above.
@@ -172,8 +172,8 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.visualize.selectChartMode('normal');
       await PageObjects.visualize.clickGo();
 
-      const expectedChartValues = [ 71, 65, 62, 55, 55 ];
-      const expectedChartValues2 = [177, 106, 153, 132, 162 ];
+      const expectedChartValues = [71, 65, 62, 55, 55];
+      const expectedChartValues2 = [177, 106, 153, 132, 162];
       await retry.try(async () => {
         const data = await PageObjects.visualize.getBarChartData('Speaking Parts');
         const data2 = await PageObjects.visualize.getBarChartData('Max Speaking Parts');
@@ -198,8 +198,8 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.visualize.clickGo();
 
       // same values as previous test except scaled down by the 50 for Y-Axis min
-      const expectedChartValues = [ 21, 15, 12, 5, 5 ];
-      const expectedChartValues2 = [127, 56, 103, 82, 112 ];
+      const expectedChartValues = [21, 15, 12, 5, 5];
+      const expectedChartValues2 = [127, 56, 103, 82, 112];
       await retry.try(async () => {
         const data = await PageObjects.visualize.getBarChartData('Speaking Parts');
         const data2 = await PageObjects.visualize.getBarChartData('Max Speaking Parts');

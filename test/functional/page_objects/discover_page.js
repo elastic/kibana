@@ -46,7 +46,7 @@ export function DiscoverPageProvider({ getService, getPageObjects }) {
     getChartTimespan() {
       return getRemote()
         .findByCssSelector('center.small > span:nth-child(1)')
-        .getVisibleText();
+        .getText();
     }
 
     async saveSearch(searchName) {
@@ -68,7 +68,7 @@ export function DiscoverPageProvider({ getService, getPageObjects }) {
 
     async getColumnHeaders() {
       const headerElements = await testSubjects.findAll('docTableHeaderField');
-      return await Promise.all(headerElements.map(el => el.getVisibleText()));
+      return await Promise.all(headerElements.map(el => el.getText()));
     }
 
     async openSavedSearch() {
@@ -121,14 +121,14 @@ export function DiscoverPageProvider({ getService, getPageObjects }) {
         })
         .then(function setYAxisLabel(y) {
           return y
-            .getVisibleText()
+            .getText()
             .then(function (yLabel) {
               yAxisLabel = yLabel.replace(',', '');
               log.debug('yAxisLabel = ' + yAxisLabel);
               return yLabel;
             });
         })
-      // 2). find and save the y-axis pixel size (the chart height)
+        // 2). find and save the y-axis pixel size (the chart height)
         .then(function getRect() {
           return getRemote()
             .findByCssSelector('rect.background')
@@ -142,10 +142,10 @@ export function DiscoverPageProvider({ getService, getPageObjects }) {
                 });
             });
         })
-      // 3). get the chart-wrapper elements
+        // 3). get the chart-wrapper elements
         .then(function () {
           return getRemote()
-          // #kibana-body > div.content > div > div > div > div.vis-editor-canvas > visualize > div.visualize-chart > div > div.vis-col-wrapper > div.chart-wrapper > div > svg > g > g.series.\30 > rect:nth-child(1)
+            // #kibana-body > div.content > div > div > div > div.vis-editor-canvas > visualize > div.visualize-chart > div > div.vis-col-wrapper > div.chart-wrapper > div > svg > g > g.series.\30 > rect:nth-child(1)
             .findAllByCssSelector('svg > g > g.series > rect') // rect
             .then(function (chartTypes) {
               function getChartType(chart) {
@@ -167,7 +167,7 @@ export function DiscoverPageProvider({ getService, getPageObjects }) {
     async getChartInterval() {
       const selectedValue = await testSubjects.getProperty('discoverIntervalSelect', 'value');
       const selectedOption = await find.byCssSelector('option[value="' + selectedValue + '"]');
-      return selectedOption.getVisibleText();
+      return selectedOption.getText();
     }
 
     async setChartInterval(interval) {
@@ -199,13 +199,13 @@ export function DiscoverPageProvider({ getService, getPageObjects }) {
     getDocHeader() {
       return getRemote()
         .findByCssSelector('thead > tr:nth-child(1)')
-        .getVisibleText();
+        .getText();
     }
 
     getDocTableIndex(index) {
       return getRemote()
         .findByCssSelector('tr.discover-table-row:nth-child(' + (index) + ')')
-        .getVisibleText();
+        .getText();
     }
 
     clickDocSortDown() {
@@ -223,7 +223,7 @@ export function DiscoverPageProvider({ getService, getPageObjects }) {
     getMarks() {
       return getRemote()
         .findAllByCssSelector('mark')
-        .getVisibleText();
+        .getText();
     }
 
     clickShare() {
@@ -257,7 +257,7 @@ export function DiscoverPageProvider({ getService, getPageObjects }) {
       return getRemote()
         .findAllByClassName('sidebar-item')
         .then((items) => {
-          return Promise.all(items.map((item) => item.getVisibleText()));
+          return Promise.all(items.map((item) => item.getText()));
         });
     }
 

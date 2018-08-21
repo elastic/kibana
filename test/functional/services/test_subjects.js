@@ -35,7 +35,7 @@ export function TestSubjectsProvider({ getService }) {
   class TestSubjects {
     async exists(selector, timeout = 1000) {
       log.debug(`TestSubjects.exists(${selector})`);
-      return await find.existsByDisplayedByCssSelector(testSubjSelector(selector), timeout);
+      return await find.existsByCssSelector(testSubjSelector(selector), timeout);
     }
 
     async existOrFail(selector, timeout = 1000) {
@@ -62,16 +62,16 @@ export function TestSubjectsProvider({ getService }) {
       });
     }
 
-    async descendantExists(selector, parentElement) {
-      return await find.descendantExistsByCssSelector(testSubjSelector(selector), parentElement);
-    }
+    // async descendantExists(selector, parentElement) {
+    //   return await find.descendantExistsByCssSelector(testSubjSelector(selector), parentElement);
+    // }
 
     async findDescendant(selector, parentElement) {
       return await find.descendantDisplayedByCssSelector(testSubjSelector(selector), parentElement);
     }
 
     async findAllDescendant(selector, parentElement) {
-      return await find.allDescendantDisplayedByCssSelector(testSubjSelector(selector), parentElement);
+      return await find.allDescendantByCssSelector(testSubjSelector(selector), parentElement);
     }
 
     async find(selector, timeout = 1000) {
@@ -118,8 +118,12 @@ export function TestSubjectsProvider({ getService }) {
         // call clearValue() and type() on the element that is focused after
         // clicking on the testSubject
         const input = await remote.getActiveElement();
-        await input.clearValue();
-        await input.type(text);
+        await input.clear();
+        const textArray = text.split('');
+        for (let i = 0; i < textArray.length; i++) {
+          remote.sleep(50);
+          await input.sendKeys(text);
+        }
       });
     }
 
@@ -146,13 +150,13 @@ export function TestSubjectsProvider({ getService }) {
     async getVisibleText(selector) {
       return await retry.try(async () => {
         const element = await this.find(selector);
-        return await element.getVisibleText();
+        return await element.getText();
       });
     }
 
     async getVisibleTextAll(selectorAll) {
       return await this._mapAll(selectorAll, async (element) => {
-        return await element.getVisibleText();
+        return await element.getText();
       });
     }
 

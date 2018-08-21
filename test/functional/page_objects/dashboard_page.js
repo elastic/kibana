@@ -413,7 +413,7 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
       const titleObjects = await testSubjects.findAll('dashboardPanelTitle');
 
       function getTitles(chart) {
-        return chart.getVisibleText();
+        return chart.getText();
       }
       const getTitlePromises = _.map(titleObjects, getTitles);
       return Promise.all(getTitlePromises);
@@ -513,7 +513,7 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
       const filters = await find.allByCssSelector(
         '.filter-bar > .filter > .filter-description',
         timeout);
-      return _.map(filters, async (filter) => await filter.getVisibleText());
+      return _.map(filters, async (filter) => await filter.getText());
     }
 
     async getPieSliceCount(timeout) {

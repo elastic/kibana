@@ -80,7 +80,7 @@ export function FilterBarProvider({ getService }) {
 
     async getFilterEditorPhrases() {
       const spans = await testSubjects.findAll('filterEditorPhrases');
-      return await Promise.all(spans.map(el => el.getVisibleText()));
+      return await Promise.all(spans.map(el => el.getText()));
     }
 
     async ensureFieldEditorModalIsClosed() {
@@ -94,7 +94,7 @@ export function FilterBarProvider({ getService }) {
       const indexPatterns = [];
       const groups = await find.allByCssSelector('.ui-select-choices-group-label');
       for (let i = 0; i < groups.length; i++) {
-        indexPatterns.push(await groups[i].getVisibleText());
+        indexPatterns.push(await groups[i].getText());
       }
       return indexPatterns;
     }

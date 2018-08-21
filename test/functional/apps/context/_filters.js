@@ -55,7 +55,7 @@ export default function ({ getService, getPageObjects }) {
       const rows = await docTable.getBodyRows(table);
       const hasOnlyFilteredRows = (
         await Promise.all(rows.map(
-          async (row) => await (await docTable.getFields(row))[2].getVisibleText()
+          async (row) => await (await docTable.getFields(row))[2].getText()
         ))
       ).every((fieldContent) => fieldContent === TEST_ANCHOR_FILTER_VALUE);
       expect(hasOnlyFilteredRows).to.be(true);
@@ -72,7 +72,7 @@ export default function ({ getService, getPageObjects }) {
       const rows = await docTable.getBodyRows(table);
       const hasOnlyFilteredRows = (
         await Promise.all(rows.map(
-          async (row) => await (await docTable.getFields(row))[2].getVisibleText()
+          async (row) => await (await docTable.getFields(row))[2].getText()
         ))
       ).every((fieldContent) => fieldContent === TEST_ANCHOR_FILTER_VALUE);
       expect(hasOnlyFilteredRows).to.be(false);

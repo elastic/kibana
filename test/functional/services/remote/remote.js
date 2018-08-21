@@ -17,60 +17,205 @@
  * under the License.
  */
 
-import { initLeadfootCommand } from './leadfoot_command';
-import { createRemoteInterceptors } from './interceptors';
+import { By, Key } from 'selenium-webdriver';
+
+const webdriver = require('selenium-webdriver');
+const chrome = require('selenium-webdriver/chrome');
+const firefox = require('selenium-webdriver/firefox');
+import { modifyUrl } from '../../../../src/utils';
 import { BrowserDriverApi } from './browser_driver_api';
+import { createRemoteBrowserDriverApi } from './browser_driver_api/browser_driver_remote_api';
 
 export async function RemoteProvider({ getService }) {
   const lifecycle = getService('lifecycle');
   const config = getService('config');
+  const defaultFindTimeout = config.get('timeouts.find');
   const log = getService('log');
-  const possibleBrowsers = ['chrome', 'firefox'];
+  const possibleBrowsers = ['chrome', 'firefox', 'ie'];
   const browserType = process.env.TEST_BROWSER_TYPE || 'chrome';
 
   if (!possibleBrowsers.includes(browserType)) {
-    throw new Error(`Unexpected TEST_BROWSER_TYPE "${browserType}". Valid options are ` +  possibleBrowsers.join(','));
+    throw new Error(`Unexpected TEST_BROWSER_TYPE "${browserType}". Valid options are ` + possibleBrowsers.join(','));
   }
 
-  const browserDriverApi = await BrowserDriverApi.factory(log, config.get(browserType + 'driver.url'), browserType);
-  lifecycle.on('cleanup', async () => await browserDriverApi.stop());
+  const chromeOptions = new chrome.Options();
+  const prefs = new webdriver.logging.Preferences();
+  const loggingPref = prefs.setLevel(webdriver.logging.Type.BROWSER, webdriver.logging.Level.ALL);
+  chromeOptions.addArguments('verbose');
+  chromeOptions.setLoggingPrefs(loggingPref);
+  // chromeOptions.headless();
+  // chromeOptions.windowSize({ width: 1200, height: 1100 });
 
-  await browserDriverApi.start();
+  const chromeService = new chrome.ServiceBuilder()
+    // .loggingTo(process.stdout)
+    .enableVerboseLogging();
 
-  const { command } = await initLeadfootCommand({ log, browserDriverApi: browserDriverApi });
-  const interceptors = createRemoteInterceptors(command);
+  const firefoxOptions = new firefox.Options();
+  // firefoxOptions.headless();
+  // chromeOptions.windowSize({ width: 1200, height: 1100 });
+
+  const firefoxService = new firefox.ServiceBuilder()
+    // .loggingTo(process.stdout)
+    .enableVerboseLogging();
+
+  const driver = new webdriver.Builder()
+    .forBrowser(browserType)
+    .setChromeOptions(chromeOptions)
+    .setChromeService(chromeService)
+    .setFirefoxOptions(firefoxOptions)
+    .setFirefoxService(firefoxService)
+    .build();
+
+
+
+  const actions = driver.actions();
+  const mouse = actions.mouse();
+  lifecycle.on('cleanup', async () => await driver.quit());
 
   log.info('Remote initialized');
+
+
 
   lifecycle.on('beforeTests', async () => {
     // hard coded default, can be overridden per suite using `remote.setWindowSize()`
     // and will be automatically reverted after each suite
-    await command.setWindowSize(1600, 1000);
+    await driver.manage().window().setRect(1600, 1000);
   });
 
   const windowSizeStack = [];
   lifecycle.on('beforeTestSuite', async () => {
-    windowSizeStack.unshift(await command.getWindowSize());
+    windowSizeStack.unshift(await driver.manage().window().getRect());
   });
 
   lifecycle.on('afterTestSuite', async () => {
     const { width, height } = windowSizeStack.shift();
-    await command.setWindowSize(width, height);
+    await driver.manage().window().setRect(width, height);
   });
+  function createRemoteApi(findTimeout = defaultFindTimeout) {
 
-  return new Proxy({}, {
-    get(obj, prop) {
-      if (prop === 'then' || prop === 'catch' || prop === 'finally') {
-        // prevent the remote from being treated like a promise by
-        // hiding it's promise-like properties
-        return undefined;
-      }
-
-      if (interceptors.hasOwnProperty(prop)) {
-        return interceptors[prop];
-      }
-
-      return command[prop];
+    async function updateFindTimeout() {
+      await driver.manage().setTimeouts({ implicit: findTimeout });
     }
-  });
+
+    return {
+      async findByCssSelector(selector) {
+        await updateFindTimeout();
+        return await driver.findElement(By.css(selector));
+      },
+
+      async findAllByCssSelector(selector) {
+        await updateFindTimeout();
+        return await driver.findElements(By.css(selector));
+      },
+
+      async findByName(name) {
+        await updateFindTimeout();
+        return await driver.findElement(By.name(name));
+      },
+
+      async findByLinkText(text) {
+        await updateFindTimeout();
+        return await driver.findElement(By.linkText(text));
+      },
+
+      async findByPartialLinkText(text) {
+        await updateFindTimeout();
+        return await driver.findElement(By.partialLinkText(text));
+      },
+
+      async setWindowSize(x, y) {
+        await driver.manage().window().setRect(x, y);
+      },
+
+      async exists(selector) {
+        return await this.findByCssSelector(selector).isDisplayed();
+      },
+
+      async click(selector) {
+        await this.findByCssSelector(selector).click();
+      },
+
+      // async append(selector, text) {
+
+      // },
+
+      async get(url, insertTimestamp = true) {
+        if (insertTimestamp) {
+          const urlWithTime = modifyUrl(url, parsed => {
+            parsed.query._t = Date.now();
+          });
+
+          return await driver.get(urlWithTime);
+        }
+        return await driver.get(url);
+      },
+
+      async getCurrentUrl() {
+        const current = await driver.getCurrentUrl();
+        const currentWithoutTime = modifyUrl(current, parsed => {
+          delete parsed.query._t;
+        });
+        return currentWithoutTime;
+      },
+
+      async pressKeys(keys) {
+        switch (keys) {
+          case '\ue006':
+            await actions.keyDown(Key.ENTER).pause().pause().keyUp(Key.ENTER);
+            break;
+        }
+      },
+
+      //TODO: Implement Slow Type For Firefox to use (50ms)
+      async slowType(element, text) {
+        const textArray = text.split('');
+        for (let i = 0; i < textArray.length; i++) {
+          driver.sleep(50);
+          element.sendKeys(textArray[i]);
+        }
+      },
+
+      async sendKeysToElement(element, text) {
+        const textArray = text.split('');
+        for (let i = 0; i < textArray.length; i++) {
+          this.sleep(50);
+          await element.sendKeys(textArray[i]);
+        }
+      },
+
+      async moveMouseTo(element) {
+        // const element = await this.findByCssSelector(selector);
+        await actions.pause(mouse).move({ origin: element });
+      },
+
+      async getActiveElement() {
+        return await driver.switchTo().activeElement();
+      },
+
+      async sleep(milliseconds) {
+        await driver.sleep(milliseconds);
+      },
+
+      async descendantExistsByCssSelector(selector, parentElement) {
+        return await parentElement.findElement(selector).isDisplayed();
+      },
+
+      async getPageSource() {
+        return await driver.getPageSource();
+      },
+
+      async refresh() {
+        await driver.navigate().refresh();
+      },
+
+      setFindTimeout(milliseconds) {
+        return createRemoteApi(milliseconds);
+      },
+
+      async takeScreenshot(scroll = false) {
+        return await driver.takeScreenshot(scroll);
+      }
+    };
+  }
+  return createRemoteApi();
 }

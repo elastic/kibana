@@ -231,7 +231,7 @@ export function HeaderPageProvider({ getService, getPageObjects }) {
     async getToastMessage(findTimeout = defaultFindTimeout) {
       const toastMessage =
         await find.displayedByCssSelector('kbn-truncated.toast-message', findTimeout);
-      const messageText = await toastMessage.getVisibleText();
+      const messageText = await toastMessage.getText();
       log.debug(`getToastMessage: ${messageText}`);
       return messageText;
     }

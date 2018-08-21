@@ -35,14 +35,14 @@ export default function ({ getService, getPageObjects }) {
       first: '@message',
       last: 'xss.raw',
       selector: async function () {
-        return await PageObjects.settings.getTableRow(0, 0).getVisibleText();
+        return await PageObjects.settings.getTableRow(0, 0).getText();
       }
     }, {
       heading: 'Type',
       first: '_source',
       last: 'string',
       selector: async function () {
-        return await PageObjects.settings.getTableRow(0, 1).getVisibleText();
+        return await PageObjects.settings.getTableRow(0, 1).getText();
       }
     }];
 

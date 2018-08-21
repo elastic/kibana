@@ -28,7 +28,7 @@ export function VisualizeListingTableProvider({ getService, getPageObjects }) {
       const visualizationNames = [];
       const links = await find.allByCssSelector('.kuiLink');
       for (let i = 0; i < links.length; i++) {
-        visualizationNames.push(await links[i].getVisibleText());
+        visualizationNames.push(await links[i].getText());
       }
       log.debug(`Found ${visualizationNames.length} visualizations on current page`);
       return visualizationNames;

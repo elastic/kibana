@@ -17,15 +17,16 @@
  * under the License.
  */
 
+import { By } from 'selenium-webdriver';
 import Bluebird from 'bluebird';
 
 export function ConsolePageProvider({ getService }) {
   const testSubjects = getService('testSubjects');
   const retry = getService('retry');
 
-  async function getVisibleTextFromAceEditor(editor) {
-    const lines = await editor.findAllByClassName('ace_line_group');
-    const linesText = await Bluebird.map(lines, l => l.getVisibleText());
+  async function getTextFromAceEditor(editor) {
+    const lines = await editor.findElements(By.css('.ace_line_group'));
+    const linesText = await Bluebird.map(lines, l => l.getText());
     return linesText.join('\n');
   }
 
@@ -36,12 +37,12 @@ export function ConsolePageProvider({ getService }) {
 
     async getRequest() {
       const requestEditor = await this.getRequestEditor();
-      return await getVisibleTextFromAceEditor(requestEditor);
+      return await getTextFromAceEditor(requestEditor);
     }
 
     async getResponse() {
       const responseEditor = await testSubjects.find('response-editor');
-      return await getVisibleTextFromAceEditor(responseEditor);
+      return await getTextFromAceEditor(responseEditor);
     }
 
     async clickPlay() {
@@ -62,17 +63,17 @@ export function ConsolePageProvider({ getService }) {
       // while the settings form opens/loads this may fail, so retry for a while
       await retry.try(async () => {
         const fontSizeInput = await testSubjects.find('setting-font-size-input');
-        await fontSizeInput.clearValue();
+        await fontSizeInput.clear();
         await fontSizeInput.click();
-        await fontSizeInput.type(String(newSize));
+        await fontSizeInput.sendKeys(String(newSize));
       });
 
       await testSubjects.click('settings-save-button');
     }
 
     async getFontSize(editor) {
-      const aceLine = await editor.findByClassName('ace_line');
-      return await aceLine.getComputedStyle('font-size');
+      const aceLine = await editor.findElement(By.css('.ace_line'));
+      return await aceLine.getCssValue('font-size');
     }
 
     async getRequestFontSize() {

@@ -47,7 +47,7 @@ export default ({ getService, getPageObjects }) => {
         await PageObjects.visualize.selectVisSourceIfRequired();
         // Check that the experimental banner is there and state that this is experimental
         const info = await PageObjects.visualize.getExperimentalInfo();
-        expect(await info.getVisibleText()).to.contain('experimental');
+        expect(await info.getText()).to.contain('experimental');
       });
 
       it('should show an notification when creating lab visualizations', async () => {
@@ -64,7 +64,7 @@ export default ({ getService, getPageObjects }) => {
         await PageObjects.visualize.selectVisSourceIfRequired();
         // Check that the experimental banner is there and state that this is experimental
         const info = await PageObjects.visualize.getExperimentalInfo();
-        expect(await info.getVisibleText()).to.contain('experimental');
+        expect(await info.getText()).to.contain('experimental');
       });
 
       it('should not show that notification for stable visualizations', async () => {

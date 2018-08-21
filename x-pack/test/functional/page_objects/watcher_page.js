@@ -32,7 +32,7 @@ export function WatcherPageProvider({ getPageObjects, getService }) {
 
     async getWatch(watchID) {
       const watchRow = await testSubjects.find(`watchRow-${watchID}`);
-      const text =  await watchRow.getVisibleText();
+      const text =  await watchRow.getText();
       const columns = text.split("\n");
       return {
         id: columns[0],
@@ -55,8 +55,8 @@ export function WatcherPageProvider({ getPageObjects, getService }) {
 
         return {
           checkBox: (await checkBox.getProperty('innerHTML')).includes('input'),
-          id: await id.getVisibleText(),
-          name: (await name.getVisibleText()).split(',').map(role => role.trim())
+          id: await id.getText(),
+          name: (await name.getText()).split(',').map(role => role.trim())
         };
       });
     }

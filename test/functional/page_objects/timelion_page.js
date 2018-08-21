@@ -40,24 +40,24 @@ export function TimelionPageProvider({ getService, getPageObjects }) {
 
     async setExpression(expression) {
       const input = await testSubjects.find('timelionExpressionTextArea');
-      await input.clearValue();
-      await input.type(expression);
+      await input.clear();
+      await input.sendKeys(expression);
     }
 
     async updateExpression(updates) {
       const input = await testSubjects.find('timelionExpressionTextArea');
-      await input.type(updates);
+      await input.sendKeys(updates);
       await PageObjects.common.sleep(500);
     }
 
     async getExpression() {
       const input = await testSubjects.find('timelionExpressionTextArea');
-      return input.getVisibleText();
+      return input.getText();
     }
 
     async getSuggestionItemsText() {
       const elements = await find.allByCssSelector('.suggestions .suggestion');
-      return await Promise.all(elements.map(async element => await element.getVisibleText()));
+      return await Promise.all(elements.map(async element => await element.getText()));
     }
 
     async clickSuggestion(suggestionIndex = 0, waitTime = 500) {

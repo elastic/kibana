@@ -50,7 +50,7 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.settings.navigateTo();
       await PageObjects.settings.createIndexPattern('alias1', null);
       const indexPageHeading = await PageObjects.settings.getIndexPageHeading();
-      const patternName = await indexPageHeading.getVisibleText();
+      const patternName = await indexPageHeading.getText();
       expect(patternName).to.be('alias1*');
     });
 
@@ -67,7 +67,7 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.settings.navigateTo();
       await PageObjects.settings.createIndexPattern('alias2', 'date');
       const indexPageHeading = await PageObjects.settings.getIndexPageHeading();
-      const patternName = await indexPageHeading.getVisibleText();
+      const patternName = await indexPageHeading.getText();
       expect(patternName).to.be('alias2*');
     });
 

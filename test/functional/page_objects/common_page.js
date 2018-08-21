@@ -64,7 +64,7 @@ export function CommonPageProvider({ getService, getPageObjects }) {
     async loginIfPrompted(appUrl) {
       let currentUrl = await remote.getCurrentUrl();
       log.debug(`currentUrl = ${currentUrl}\n    appUrl = ${appUrl}`);
-      await remote.setFindTimeout(defaultTryTimeout * 2).findByCssSelector('[data-test-subj="kibanaChrome"]');
+      await find.byCssSelector('[data-test-subj="kibanaChrome"]', defaultTryTimeout * 2);
       const loginPage = currentUrl.includes('/login');
       const wantedLoginPage = appUrl.includes('/login') || appUrl.includes('/logout');
 
@@ -74,7 +74,7 @@ export function CommonPageProvider({ getService, getPageObjects }) {
           config.get('servers.kibana.username'),
           config.get('servers.kibana.password')
         );
-        await remote.setFindTimeout(20000).findByCssSelector('[data-test-subj="kibanaChrome"] nav:not(.ng-hide)');
+        await find.byCssSelector('[data-test-subj="kibanaChrome"] nav:not(.ng-hide)', 20000);
         currentUrl = await remote.getCurrentUrl();
         log.debug(`Finished login process currentUrl = ${currentUrl}`);
       }
@@ -262,7 +262,7 @@ export function CommonPageProvider({ getService, getPageObjects }) {
     }
 
     async pressEnterKey() {
-      await remote.pressKeys('\uE007');
+      await remote.sendKeys('\uE007');
     }
 
     // pass in true if your test will show multiple modals
@@ -302,9 +302,8 @@ export function CommonPageProvider({ getService, getPageObjects }) {
     async doesCssSelectorExist(selector) {
       log.debug(`doesCssSelectorExist ${selector}`);
 
-      const exists = await remote
-        .setFindTimeout(1000)
-        .findByCssSelector(selector)
+      const exists = await find
+        .byCssSelector(selector, 1000)
         .then(() => true)
         .catch(() => false);
 

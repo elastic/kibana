@@ -130,7 +130,7 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
 
     async getTextTag() {
       const elements = await find.allByCssSelector('text');
-      return await Promise.all(elements.map(async element => await element.getVisibleText()));
+      return await Promise.all(elements.map(async element => await element.getText()));
     }
 
     async getTextSizes() {
@@ -165,7 +165,7 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
     async getChartTypes() {
       const chartTypes = await testSubjects.findAll('visualizeWizardChartTypeTitle');
       async function getChartType(chart) {
-        return await chart.getVisibleText();
+        return await chart.getText();
       }
       const getChartTypesPromises = chartTypes.map(getChartType);
       return await Promise.all(getChartTypesPromises);
@@ -205,25 +205,25 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
     async setMarkdownTxt(markdownTxt) {
       const input = await testSubjects.find('markdownTextarea');
       await input.clearValue();
-      await input.type(markdownTxt);
+      await input.sendKeys(markdownTxt);
     }
 
     async getMarkdownText() {
       const markdownContainer = await testSubjects.find('markdownBody');
-      return markdownContainer.getVisibleText();
+      return markdownContainer.getText();
     }
 
     async getMarkdownBodyDescendentText(selector) {
       const markdownContainer = await testSubjects.find('markdownBody');
       const element = await find.descendantDisplayedByCssSelector(selector, markdownContainer);
-      return element.getVisibleText();
+      return element.getText();
     }
 
     async getVegaSpec() {
-      // Adapted from console_page.js:getVisibleTextFromAceEditor(). Is there a common utilities file?
+      // Adapted from console_page.js:getTextFromAceEditor(). Is there a common utilities file?
       const editor = await testSubjects.find('vega-editor');
       const lines = await editor.findAllByClassName('ace_line_group');
-      const linesText = await Bluebird.map(lines, l => l.getVisibleText());
+      const linesText = await Bluebird.map(lines, l => l.getText());
       return linesText.join('\n');
     }
 
@@ -238,13 +238,13 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
     async setFromTime(timeString) {
       const input = await find.byCssSelector('input[ng-model="absolute.from"]', defaultFindTimeout * 2);
       await input.clearValue();
-      await input.type(timeString);
+      await input.sendKeys(timeString);
     }
 
     async setToTime(timeString) {
       const input = await find.byCssSelector('input[ng-model="absolute.to"]', defaultFindTimeout * 2);
       await input.clearValue();
-      await input.type(timeString);
+      await input.sendKeys(timeString);
     }
 
     async addInputControl() {
@@ -265,7 +265,7 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
     async checkCheckbox(selector) {
       const element = await testSubjects.find(selector);
       const isSelected = await element.isSelected();
-      if(!isSelected) {
+      if (!isSelected) {
         log.debug(`checking checkbox ${selector}`);
         await testSubjects.click(selector);
       }
@@ -274,7 +274,7 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
     async uncheckCheckbox(selector) {
       const element = await testSubjects.find(selector);
       const isSelected = await element.isSelected();
-      if(isSelected) {
+      if (isSelected) {
         log.debug(`unchecking checkbox ${selector}`);
         await testSubjects.click(selector);
       }
@@ -283,7 +283,7 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
     async setSelectByOptionText(selectId, optionText) {
       const options = await find.allByCssSelector(`#${selectId} > option`);
       const optionsTextPromises = options.map(async (optionElement) => {
-        return await optionElement.getVisibleText();
+        return await optionElement.getText();
       });
       const optionsText = await Promise.all(optionsTextPromises);
 
@@ -341,12 +341,12 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
 
     async getMetric() {
       const metricElement = await find.byCssSelector('div[ng-controller="KbnMetricVisController"]');
-      return await metricElement.getVisibleText();
+      return await metricElement.getText();
     }
 
     async getGaugeValue() {
       const elements = await find.allByCssSelector('[data-test-subj="visualizationLoader"] .chart svg');
-      return await Promise.all(elements.map(async element => await element.getVisibleText()));
+      return await Promise.all(elements.map(async element => await element.getText()));
     }
 
     async clickMetricEditor() {
@@ -367,7 +367,7 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
       await find.clickByCssSelector('button[ng-click="numberListCntr.add()"]', defaultFindTimeout * 2);
       const input = await find.byCssSelector('input[ng-model="numberListCntr.getList()[$index]"]');
       await input.clearValue();
-      await input.type(newValue);
+      await input.sendKeys(newValue);
     }
 
     async selectSearch(searchName) {
@@ -376,7 +376,7 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
 
     async getErrorMessage() {
       const element = await find.byCssSelector('.item>h4');
-      return await element.getVisibleText();
+      return await element.getText();
     }
 
     // clickBucket(bucketType) 'X-Axis', 'Split Area', 'Split Chart'
@@ -386,7 +386,7 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
       log.debug('found bucket types ' + chartTypes.length);
 
       async function getChartType(chart) {
-        const chartString = await chart.getVisibleText();
+        const chartString = await chart.getText();
         if (chartString === bucketName) {
           await chart.click();
           await PageObjects.common.sleep(500);
@@ -407,7 +407,7 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
       await retry.try(async () => {
         await find.clickByCssSelector(selector);
         const input = await find.byCssSelector(`${selector} input.ui-select-search`);
-        await input.type(myString);
+        await input.sendKeys(myString);
         await remote.pressKeys('\uE006');
       });
       await PageObjects.common.sleep(500);
@@ -449,7 +449,7 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
 
     async setCustomLabel(label, index = 1) {
       const customLabel = await find.byCssSelector(`#visEditorStringInput${index}customLabel`);
-      customLabel.type(label);
+      customLabel.sendKeys(label);
     }
 
     async setAxisExtents(min, max, axis = 'LeftAxis-1') {
@@ -477,16 +477,16 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
         await checkbox.click();
       }
       const maxField = await find.byCssSelector('[ng-model="axis.scale.max"]');
-      await maxField.type(max);
+      await maxField.sendKeys(max);
       const minField = await find.byCssSelector('[ng-model="axis.scale.min"]');
-      await minField.type(min);
+      await minField.sendKeys(min);
 
     }
 
     async getField() {
       const field = await retry.try(
         async () => await find.byCssSelector('.ng-valid-required[name="field"] .ui-select-match-text'));
-      return await field.getVisibleText();
+      return await field.getText();
     }
 
     async selectField(fieldValue, groupName = 'buckets', childAggregationType = null) {
@@ -500,7 +500,7 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
       await retry.try(async () => {
         await find.clickByCssSelector(selector);
         const input = await find.byCssSelector(`${selector} input.ui-select-search`);
-        await input.type(fieldValue);
+        await input.sendKeys(fieldValue);
         await remote.pressKeys('\uE006');
       });
       await PageObjects.common.sleep(500);
@@ -535,7 +535,7 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
 
     async setInterval(newValue) {
       const input = await find.byCssSelector('select[ng-model="agg.params.interval"]');
-      await input.type(newValue);
+      await input.sendKeys(newValue);
     }
 
     async setNumericInterval(newValue, { append } = {}) {
@@ -550,7 +550,7 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
     async setSize(newValue) {
       const input = await find.byCssSelector('input[name="size"]');
       await input.clearValue();
-      await input.type(newValue);
+      await input.sendKeys(newValue);
     }
 
     async toggleDisabledAgg(agg) {
@@ -671,7 +671,7 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
       // can't uses dashes in saved visualizations when filtering
       // or extended character sets
       // https://github.com/elastic/kibana/issues/6300
-      await input.type(vizName.replace('-', ' '));
+      await input.sendKeys(vizName.replace('-', ' '));
       await PageObjects.header.waitUntilLoadingHasFinished();
     }
 
@@ -701,7 +701,7 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
     async getXAxisLabels() {
       const chartTypes = await find.allByCssSelector('.x > g');
       async function getChartType(chart) {
-        return await chart.getVisibleText();
+        return await chart.getText();
       }
       const getChartTypesPromises = chartTypes.map(getChartType);
       return await Promise.all(getChartTypesPromises);
@@ -709,7 +709,7 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
 
     async getYAxisLabels() {
       const chartTypes = await find.allByCssSelector('.y > g');
-      const getChartTypesPromises = chartTypes.map(async chart => await chart.getVisibleText());
+      const getChartTypesPromises = chartTypes.map(async chart => await chart.getText());
       return await Promise.all(getChartTypesPromises);
     }
 
@@ -790,15 +790,15 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
       const maxYAxisChartMarker = await retry.try(
         async () => await find.byCssSelector(`div.y-axis-div-wrapper > div > svg > g.${axis} > g:last-of-type.tick`)
       );
-      const maxYLabel = (await maxYAxisChartMarker.getVisibleText()).replace(/,/g, '');
-      const maxYLabelYPosition = (await maxYAxisChartMarker.getPosition()).y;
+      const maxYLabel = (await maxYAxisChartMarker.getText()).replace(/,/g, '');
+      const maxYLabelYPosition = (await maxYAxisChartMarker.getRect()).y;
       log.debug(`maxYLabel = ${maxYLabel}, maxYLabelYPosition = ${maxYLabelYPosition}`);
 
       // 2). get the minimum chart Y-Axis marker value and Y position
       const minYAxisChartMarker = await
         find.byCssSelector('div.y-axis-col.axis-wrapper-left  > div > div > svg:nth-child(2) > g > g:nth-child(1).tick');
-      const minYLabel = (await minYAxisChartMarker.getVisibleText()).replace(',', '');
-      const minYLabelYPosition = (await minYAxisChartMarker.getPosition()).y;
+      const minYLabel = (await minYAxisChartMarker.getText()).replace(',', '');
+      const minYLabelYPosition = (await minYAxisChartMarker.getRect()).y;
       return ((maxYLabel - minYLabel) / (minYLabelYPosition - maxYLabelYPosition));
     }
 
@@ -840,7 +840,7 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
 
     async getTableVisData() {
       const dataTable = await testSubjects.find('paginated-table-body');
-      return await dataTable.getVisibleText();
+      return await dataTable.getText();
     }
 
     async getInspectorTableData() {
@@ -852,7 +852,7 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
       const rows = await tableBody.findAllByTagName('tr');
       return await Promise.all(rows.map(async row => {
         const cells = await row.findAllByTagName('td');
-        return await Promise.all(cells.map(async cell => cell.getVisibleText()));
+        return await Promise.all(cells.map(async cell => cell.getText()));
       }));
     }
 
@@ -864,7 +864,7 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
       });
       const cells = await dataTableHeader.findAllByTagName('th');
       return await Promise.all(cells.map(async (cell) => {
-        const untrimmed = await cell.getVisibleText();
+        const untrimmed = await cell.getText();
         return untrimmed.trim();
       }));
     }
@@ -875,7 +875,7 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
 
     async getMarkdownData() {
       const markdown = await retry.try(async () => find.byCssSelector('visualize'));
-      return await markdown.getVisibleText();
+      return await markdown.getText();
     }
 
     async clickColumns() {
@@ -1019,7 +1019,7 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
 
     async getYAxisTitle() {
       const title = await find.byCssSelector('.y-axis-div .y-axis-title text');
-      return await title.getVisibleText();
+      return await title.getText();
     }
 
     async selectBucketType(type) {

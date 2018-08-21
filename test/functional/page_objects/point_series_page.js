@@ -115,7 +115,7 @@ export function PointSeriesPageProvider({ getService }) {
           log.debug('found sidebar titles ' + sidebarTitles.length);
           function getTitle(titleDiv) {
             return titleDiv
-              .getVisibleText()
+              .getText()
               .then(titleString => {
                 log.debug('sidebar title ' + titleString);
                 if (titleString === title) {

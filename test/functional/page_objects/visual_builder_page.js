@@ -56,7 +56,7 @@ export function VisualBuilderPageProvider({ getService, getPageObjects }) {
 
     async getMetricValue() {
       const metricValue = await find.byCssSelector('.rhythm_metric__primary-value');
-      return metricValue.getVisibleText();
+      return metricValue.getText();
     }
 
     async enterMarkdown(markdown) {
@@ -73,7 +73,7 @@ export function VisualBuilderPageProvider({ getService, getPageObjects }) {
 
     async getMarkdownText() {
       const el = await find.byCssSelector('.vis_editor__visualization');
-      return await el.getVisibleText();
+      return await el.getText();
     }
 
     async clickMarkdownData() {
@@ -102,7 +102,7 @@ export function VisualBuilderPageProvider({ getService, getPageObjects }) {
     async getRhythmChartLegendValue() {
       const metricValue = await find.byCssSelector('.rhythm_chart__legend_value');
       await metricValue.session.moveMouseTo(metricValue);
-      return await metricValue.getVisibleText();
+      return await metricValue.getText();
     }
 
     async clickGauge() {
@@ -112,12 +112,12 @@ export function VisualBuilderPageProvider({ getService, getPageObjects }) {
 
     async getGaugeLabel() {
       const gaugeLabel = await find.byCssSelector('.thorHalfGauge__label');
-      return await gaugeLabel.getVisibleText();
+      return await gaugeLabel.getText();
     }
 
     async getGaugeCount() {
       const gaugeCount = await find.byCssSelector('.thorHalfGauge__value');
-      return await gaugeCount.getVisibleText();
+      return await gaugeCount.getText();
     }
 
     async clickTopN()
@@ -128,12 +128,12 @@ export function VisualBuilderPageProvider({ getService, getPageObjects }) {
 
     async getTopNLabel() {
       const topNLabel = await find.byCssSelector('.rhythm_top_n__label');
-      return await topNLabel.getVisibleText();
+      return await topNLabel.getText();
     }
 
     async getTopNCount() {
       const gaugeCount = await find.byCssSelector('.rhythm_top_n__value');
-      return await gaugeCount.getVisibleText();
+      return await gaugeCount.getText();
     }
 
     async clickTable() {
@@ -188,7 +188,7 @@ export function VisualBuilderPageProvider({ getService, getPageObjects }) {
 
     async getViewTable() {
       const tableView = await testSubjects.find('tableView');
-      return await tableView.getVisibleText();
+      return await tableView.getText();
     }
 
 
