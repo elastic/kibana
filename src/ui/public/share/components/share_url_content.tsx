@@ -22,6 +22,7 @@ declare module '@elastic/eui' {
   export const EuiCopy: React.SFC<any>;
   export const EuiForm: React.SFC<any>;
 }
+const FixedEuiIconTip = EuiIconTip as React.SFC<any>;
 
 import React, { Component } from 'react';
 import './share_url_content.less';
@@ -303,7 +304,7 @@ export class ShareUrlContent extends Component<Props, State> {
       <EuiFlexGroup gutterSize="none">
         <EuiFlexItem>{child}</EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiIconTip content={tipContent} position="bottom" />
+          <FixedEuiIconTip content={tipContent} position="bottom" />
         </EuiFlexItem>
       </EuiFlexGroup>
     );
