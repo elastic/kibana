@@ -29,7 +29,6 @@ import glob from 'glob';
 import { promisify } from 'util';
 
 const ESCAPE_LINE_BREAK_REGEX = /(?<!\\)\\\n/g;
-const ESCAPE_SINGLE_QUOTE_REGEX = /\\([\s\S])|(')/g;
 const HTML_LINE_BREAK_REGEX = /[\s]*\n[\s]*/g;
 
 export const readFileAsync = promisify(fs.readFile);
@@ -60,16 +59,11 @@ export function isI18nTranslateFunction(node) {
 }
 
 export function formatJSString(string) {
-  return (string || '')
-    .replace(ESCAPE_LINE_BREAK_REGEX, '')
-    .replace(ESCAPE_SINGLE_QUOTE_REGEX, '\\$1$2')
-    .replace('\n', '\\n');
+  return (string || '').replace(ESCAPE_LINE_BREAK_REGEX, '').replace('\n', '\\n');
 }
 
 export function formatHTMLString(string) {
-  return (string || '')
-    .replace(ESCAPE_SINGLE_QUOTE_REGEX, '\\$1$2')
-    .replace(HTML_LINE_BREAK_REGEX, ' ');
+  return (string || '').replace(HTML_LINE_BREAK_REGEX, ' ');
 }
 
 /**

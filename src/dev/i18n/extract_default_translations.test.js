@@ -48,7 +48,10 @@ describe('dev/i18n/extract_default_translations', () => {
     const [pluginPath] = pluginsPaths;
 
     utils.writeFileAsync.mockClear();
-    await extractDefaultTranslations({ paths: [pluginPath], output: pluginPath });
+    await extractDefaultTranslations({
+      paths: [pluginPath],
+      output: pluginPath,
+    });
 
     const [[, json]] = utils.writeFileAsync.mock.calls;
 
@@ -59,7 +62,10 @@ describe('dev/i18n/extract_default_translations', () => {
     const [, pluginPath] = pluginsPaths;
 
     utils.writeFileAsync.mockClear();
-    await extractDefaultTranslations({ paths: [pluginPath], output: pluginPath });
+    await extractDefaultTranslations({
+      paths: [pluginPath],
+      output: pluginPath,
+    });
 
     const [[, json]] = utils.writeFileAsync.mock.calls;
 

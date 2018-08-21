@@ -29,6 +29,8 @@ import { extractHandlebarsMessages } from './extract_handlebars_messages';
 import { globAsync, readFileAsync, writeFileAsync } from './utils';
 import { paths, exclude } from '../../../.i18nrc.json';
 
+const ESCAPE_SINGLE_QUOTE_REGEX = /\\([\s\S])|(')/g;
+
 function addMessageToMap(targetMap, key, value) {
   const existingValue = targetMap.get(key);
   if (targetMap.has(key) && existingValue.message !== value.message) {
@@ -137,7 +139,7 @@ export async function extractMessagesFromPathToMap(inputPath, targetMap) {
   );
 }
 
-export async function extractDefaultTranslations({ paths, output }) {
+export async function extractDefaultTranslations({ paths, output, outputFormat }) {
   const defaultMessagesMap = new Map();
 
   for (const inputPath of filterPaths(paths)) {
@@ -149,25 +151,47 @@ export async function extractDefaultTranslations({ paths, output }) {
     return;
   }
 
-  // .slice(0, -1): remove closing curly brace from json to append messages
-  let jsonBuffer = Buffer.from(
-    JSON5.stringify({ formats: i18n.formats }, { quote: `'`, space: 2 }).slice(0, -1)
-  );
-
   const defaultMessages = [...defaultMessagesMap].sort(([key1], [key2]) => {
     return key1 < key2 ? -1 : 1;
   });
 
-  for (const [mapKey, mapValue] of defaultMessages) {
-    jsonBuffer = Buffer.concat([
-      jsonBuffer,
-      Buffer.from(`  '${mapKey}': '${mapValue.message}',`),
-      Buffer.from(mapValue.context ? ` // ${mapValue.context}\n` : '\n'),
-    ]);
+  const defaultMessagesObject = { formats: i18n.formats };
+
+  if (outputFormat === 'json5') {
+    // .slice(0, -1): remove closing curly brace from json to append messages
+    let jsonBuffer = Buffer.from(
+      JSON5.stringify(defaultMessagesObject, { quote: `'`, space: 2 }).slice(0, -1)
+    );
+
+    for (const [mapKey, mapValue] of defaultMessages) {
+      const formattedMessage = mapValue.message.replace(ESCAPE_SINGLE_QUOTE_REGEX, '\\$1$2');
+      const formattedContext = mapValue.context
+        ? mapValue.context.replace(ESCAPE_SINGLE_QUOTE_REGEX, '\\$1$2')
+        : '';
+
+      jsonBuffer = Buffer.concat([
+        jsonBuffer,
+        Buffer.from(`  '${mapKey}': '${formattedMessage}',`),
+        Buffer.from(formattedContext ? ` // ${formattedContext}\n` : '\n'),
+      ]);
+    }
+
+    // append previously removed closing curly brace
+    jsonBuffer = Buffer.concat([jsonBuffer, Buffer.from('}\n')]);
+
+    await writeFileAsync(path.resolve(output, 'en.json'), jsonBuffer);
+  } else {
+    for (const [mapKey, mapValue] of defaultMessages) {
+      if (mapValue.context) {
+        defaultMessagesObject[mapKey] = { message: mapValue.message, context: mapValue.context };
+      } else {
+        defaultMessagesObject[mapKey] = mapValue.message;
+      }
+    }
+
+    await writeFileAsync(
+      path.resolve(output, 'en.json'),
+      JSON.stringify(defaultMessagesObject, undefined, 2)
+    );
   }
-
-  // append previously removed closing curly brace
-  jsonBuffer = Buffer.concat([jsonBuffer, Buffer.from('}\n')]);
-
-  await writeFileAsync(path.resolve(output, 'en.json'), jsonBuffer);
 }

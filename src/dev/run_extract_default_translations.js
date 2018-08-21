@@ -20,9 +20,10 @@
 import { run } from './run';
 import { extractDefaultTranslations } from './i18n/extract_default_translations';
 
-run(async ({ flags: { path, output } }) => {
+run(async ({ flags: { path, output, 'output-format': outputFormat } }) => {
   await extractDefaultTranslations({
     paths: Array.isArray(path) ? path : [path || './'],
     output,
+    outputFormat,
   });
 });
