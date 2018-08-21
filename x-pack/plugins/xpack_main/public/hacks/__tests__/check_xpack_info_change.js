@@ -7,6 +7,7 @@
 import ngMock from 'ng_mock';
 import sinon from 'sinon';
 import { banners } from 'ui/notify';
+import * as kfetchExports from 'ui/kfetch';
 
 const XPACK_INFO_SIG_KEY = 'xpackMain.infoSignature';
 const XPACK_INFO_KEY = 'xpackMain.info';
@@ -14,25 +15,18 @@ const XPACK_INFO_KEY = 'xpackMain.info';
 describe('CheckXPackInfoChange Factory', () => {
   const sandbox = sinon.createSandbox();
 
-  let mockSessionStorage;
-  beforeEach(ngMock.module('kibana', ($provide) => {
-    mockSessionStorage = sinon.stub({
-      setItem() {},
-      getItem() {},
-      removeItem() {}
-    });
+  beforeEach(ngMock.module('kibana', () => {
+    sandbox.stub(sessionStorage, 'setItem');
+    sandbox.stub(sessionStorage, 'getItem');
+    sandbox.stub(sessionStorage, 'removeItem');
 
-    mockSessionStorage.getItem.withArgs(XPACK_INFO_SIG_KEY).returns('foo');
-
-    $provide.service('$window', () => ({
-      sessionStorage: mockSessionStorage,
-      location: { pathname: '' }
-    }));
+    sessionStorage.getItem.withArgs(XPACK_INFO_SIG_KEY).returns('foo');
   }));
 
   let $http;
   let $httpBackend;
   let $timeout;
+  let kfetchStub;
   beforeEach(ngMock.inject(($injector) => {
     $http = $injector.get('$http');
     $httpBackend = $injector.get('$httpBackend');
@@ -41,6 +35,8 @@ describe('CheckXPackInfoChange Factory', () => {
     // We set 'kbn-system-api' to not trigger other unrelated toast notifications
     // like the one related to the session expiration.
     $http.defaults.headers.common['kbn-system-api'] = 'x';
+
+    kfetchStub = sinon.stub(kfetchExports, 'kfetch');
 
     sandbox.stub(banners, 'add');
   }));
@@ -54,15 +50,19 @@ describe('CheckXPackInfoChange Factory', () => {
 
   it('does not show "license expired" banner if license is not expired.', () => {
     const license = { license: { isActive: true, type: 'x-license' } };
-    mockSessionStorage.getItem.withArgs(XPACK_INFO_KEY).returns(JSON.stringify(license));
+    sessionStorage.getItem.withArgs(XPACK_INFO_KEY).returns(JSON.stringify(license));
 
     $httpBackend
       .when('POST', '/api/test')
       .respond('ok', { 'kbn-xpack-sig': 'foo' });
 
-    $httpBackend
-      .when('GET', '/api/xpack/v1/info')
-      .respond(license, { 'kbn-xpack-sig': 'foo' });
+    kfetchStub
+      .withArgs({
+        method: 'GET',
+        pathname: '/api/xpack/v1/info',
+      }).returns(Promise.resolve(license));
+    //  .when('GET', '/api/xpack/v1/info')
+    // .respond(license, { 'kbn-xpack-sig': 'foo' });
 
     $http.post('/api/test');
     $httpBackend.flush();
@@ -73,15 +73,19 @@ describe('CheckXPackInfoChange Factory', () => {
 
   it('shows "license expired" banner if license is expired only once.', async () => {
     const license = { license: { isActive: false, type: 'diamond' } };
-    mockSessionStorage.getItem.withArgs(XPACK_INFO_KEY).returns(JSON.stringify(license));
+    sessionStorage.getItem.withArgs(XPACK_INFO_KEY).returns(JSON.stringify(license));
 
     $httpBackend
       .when('POST', '/api/test')
       .respond('ok', { 'kbn-xpack-sig': 'bar' });
 
-    $httpBackend
-      .when('GET', '/api/xpack/v1/info')
-      .respond(license, { 'kbn-xpack-sig': 'bar' });
+    kfetchStub
+      .withArgs({
+        method: 'GET',
+        pathname: '/api/xpack/v1/info',
+      }).returns(Promise.resolve(license));
+    //.when('GET', '/api/xpack/v1/info')
+    //.respond(license, { 'kbn-xpack-sig': 'bar' });
 
     $http.post('/api/test');
     $httpBackend.flush();
@@ -91,7 +95,7 @@ describe('CheckXPackInfoChange Factory', () => {
 
     // If license didn't change banner shouldn't be displayed.
     banners.add.resetHistory();
-    mockSessionStorage.getItem.withArgs(XPACK_INFO_SIG_KEY).returns('bar');
+    sessionStorage.getItem.withArgs(XPACK_INFO_SIG_KEY).returns('bar');
 
     $http.post('/api/test');
     $httpBackend.flush();
