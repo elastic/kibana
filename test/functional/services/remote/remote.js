@@ -23,8 +23,6 @@ const webdriver = require('selenium-webdriver');
 const chrome = require('selenium-webdriver/chrome');
 const firefox = require('selenium-webdriver/firefox');
 import { modifyUrl } from '../../../../src/utils';
-import { BrowserDriverApi } from './browser_driver_api';
-import { createRemoteBrowserDriverApi } from './browser_driver_api/browser_driver_remote_api';
 
 export async function RemoteProvider({ getService }) {
   const lifecycle = getService('lifecycle');
