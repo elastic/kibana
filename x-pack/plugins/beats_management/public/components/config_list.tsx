@@ -12,6 +12,7 @@ import { ClientSideConfigurationBlock } from '../lib/lib';
 
 interface ComponentProps {
   configs: ClientSideConfigurationBlock[];
+  onConfigClick: (action: 'edit' | 'delete', config: ClientSideConfigurationBlock) => any;
 }
 
 export const ConfigList: React.SFC<ComponentProps> = props => (
@@ -30,6 +31,9 @@ export const ConfigList: React.SFC<ComponentProps> = props => (
         name: 'Type',
         truncateText: false,
         hideForMobile: false,
+        render: (value: string, item: ClientSideConfigurationBlock) => (
+          <EuiLink onClick={props.onConfigClick('edit', item)}>{value}</EuiLink>
+        ),
       },
       {
         field: 'block_obj.module',
@@ -49,7 +53,7 @@ export const ConfigList: React.SFC<ComponentProps> = props => (
             description: 'Remove this config from tag',
             type: 'icon',
             icon: 'trash',
-            onClick: () => '',
+            onClick: (item: ClientSideConfigurationBlock) => props.onConfigClick('delete', item),
           },
         ],
       },

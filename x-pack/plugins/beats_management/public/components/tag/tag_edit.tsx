@@ -25,7 +25,7 @@ import 'brace/mode/yaml';
 import 'brace/theme/github';
 import React from 'react';
 import { CMBeat } from '../../../common/domain_types';
-import { ClientSideBeatTag } from '../../lib/lib';
+import { ClientSideBeatTag, ClientSideConfigurationBlock } from '../../lib/lib';
 import { ConfigList } from '../config_list';
 import { Table } from '../table';
 import { BeatsTableType } from '../table';
@@ -115,7 +115,14 @@ export class TagEdit extends React.PureComponent<TagEditProps, TagEditState> {
           </EuiFlexItem>
           <EuiFlexItem>
             <div>
-              <ConfigList configs={tag.configurations} />
+              <ConfigList
+                configs={tag.configurations}
+                onConfigClick={(action: string, config: ClientSideConfigurationBlock) => {
+                  if (action === 'delete') {
+                    // TODO delete
+                  }
+                }}
+              />
               <br />
               <EuiButton onClick={this.openConfigFlyout}>Add a new configuration</EuiButton>
             </div>
@@ -167,6 +174,8 @@ export class TagEdit extends React.PureComponent<TagEditProps, TagEditState> {
       showFlyout: true,
     });
   };
+
+  // TODO this should disable save button on bad validations
   private updateTag = (key: keyof ClientSideBeatTag) => (e: any) =>
     this.props.onTagChange(key, e.target ? e.target.value : e);
 }
