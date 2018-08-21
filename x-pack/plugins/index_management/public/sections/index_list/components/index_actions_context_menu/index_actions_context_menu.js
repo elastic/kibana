@@ -197,7 +197,7 @@ export class IndexActionsContextMenu extends Component {
     }
   };
   forcemergeSegmentsModal = () => {
-    const helpText = `Merge the segments in an index until the number 
+    const helpText = `Merge the segments in an index until the number
     is reduced to this or fewer segments. The default is 1.`;
     const oneIndexSelected = this.oneIndexSelected();
     const entity = this.getEntity(oneIndexSelected);

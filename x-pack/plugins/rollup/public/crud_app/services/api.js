@@ -18,3 +18,18 @@ export async function loadJobs() {
   const { data: { jobs } } = await httpClient.get(`${apiPrefix}/jobs`);
   return jobs;
 }
+
+export async function startJobs(jobIds) {
+  const body = { jobIds };
+  return await httpClient.post(`${apiPrefix}/start`, body);
+}
+
+export async function stopJobs(jobIds) {
+  const body = { jobIds };
+  return await httpClient.post(`${apiPrefix}/stop`, body);
+}
+
+export async function deleteJobs(jobIds) {
+  const body = { jobIds };
+  return await httpClient.post(`${apiPrefix}/delete`, body);
+}
