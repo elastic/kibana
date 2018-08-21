@@ -68,7 +68,7 @@ export class DetailPanelUi extends Component {
       const isSelected = tab === panelType;
       return (
         <EuiTab
-          onClick={() => openDetailPanel({ panelType: tab, job })}
+          onClick={() => openDetailPanel({ panelType: tab, jobId: job.id })}
           isSelected={isSelected}
           data-test-subj={`detailPanelTab${isSelected ? 'Selected' : ''}`}
           key={index}

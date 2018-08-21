@@ -248,7 +248,7 @@ export class JobTableUi extends Component {
           <EuiLink
             data-test-subj="rollupTableJobLink"
             onClick={() => {
-              openDetailPanel(job);
+              openDetailPanel(job.id);
             }}
           >
             {value}

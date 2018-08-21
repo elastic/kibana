@@ -17,7 +17,6 @@ const byId = handleActions({
     jobs.forEach(job => {
       newState[job.id] = job;
     });
-
     return newState;
   },
 }, {});
