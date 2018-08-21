@@ -9,6 +9,9 @@ import { call, put, select, takeEvery } from 'redux-saga/effects';
 import { kfetch } from 'ui/kfetch';
 import { FileTree } from '../../model';
 import {
+  fetchDirectory,
+  fetchDirectoryFaile,
+  fetchDirectorySuccess,
   fetchRepoBranches,
   fetchRepoBranchesFailed,
   fetchRepoBranchesSuccess,
@@ -113,7 +116,17 @@ function requestCommits({ uri, revision }: FetchRepoPayloadWithRevision) {
   });
 }
 
+function* handleFetchDirs(action: Action<FetchRepoTreePayload>) {
+  try {
+    const dir = yield call(requestRepoTree, action.payload);
+    yield put(fetchDirectorySuccess(dir));
+  } catch (err) {
+    yield fetchDirectoryFaile(err);
+  }
+}
+
 export function* watchFetchBranchesAndCommits() {
   yield takeEvery(String(fetchRepoBranches), handleFetchBranches);
   yield takeEvery(String(fetchRepoCommits), handleFetchCommits);
+  yield takeEvery(String(fetchDirectory), handleFetchDirs);
 }

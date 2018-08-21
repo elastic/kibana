@@ -109,13 +109,7 @@ export class VersionDropDownComponent extends React.Component<Props, State> {
       },
     ];
     const button = (
-      <EuiLink
-        color="subdued"
-        href={''}
-        onClick={this.onClick}
-        className={'euiBreadcrumb'}
-        title={this.props.head}
-      >
+      <EuiLink color="subdued" href={''} onClick={this.onClick} title={this.props.head}>
         {this.props.head}
       </EuiLink>
     );
@@ -144,6 +138,7 @@ const mapDispatchToProps = {
   fetchRepoBranches,
 };
 
-export const VersionDropDown = connect(mapStateToProps, mapDispatchToProps)(
-  VersionDropDownComponent
-);
+export const VersionDropDown = connect(
+  mapStateToProps,
+  mapDispatchToProps
+)(VersionDropDownComponent);

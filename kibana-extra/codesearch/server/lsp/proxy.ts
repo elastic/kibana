@@ -211,7 +211,10 @@ export class LanguageServerProxy implements ILanguageServerHandler {
       socket.on('error', () => void 0);
       socket.on('timeout', () => void 0);
       socket.on('drain', () => void 0);
-      socket.connect(this.targetPort, this.targetHost);
+      socket.connect(
+        this.targetPort,
+        this.targetHost
+      );
     });
   }
 

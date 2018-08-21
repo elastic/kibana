@@ -4,9 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { EuiBreadcrumbs } from '@elastic/eui';
 import React from 'react';
-// @ts-ignore
-import { EuiBreadcrumbs } from '../eui/breadcrumbs/breadcrumbs';
 import { FileListDropdown } from './filelist_dropdown';
 import { VersionDropDown } from './version_dropdown';
 
@@ -15,7 +14,7 @@ interface Props {
 }
 export class LayoutBreadcrumbs extends React.PureComponent<Props> {
   public render() {
-    const { resource, org, repo, revision, path, goto, pathType } = this.props.routeParams;
+    const { resource, org, repo, revision, path, pathType } = this.props.routeParams;
     const repoUri = `${resource}/${org}/${repo}`;
 
     const breadcrumbs = [
@@ -29,33 +28,24 @@ export class LayoutBreadcrumbs extends React.PureComponent<Props> {
       },
       {
         text: repo,
-        href: `#${resource}/${org}/${repo}/HEAD`,
+        href: `#${resource}/${org}/${repo}/tree/HEAD`,
       },
       {
-        text: '',
-        component: (
-          <VersionDropDown head={revision} repoUri={repoUri} path={path} pathType={pathType} />
-        ),
+        text: <VersionDropDown head={revision} repoUri={repoUri} path={path} pathType={pathType} />,
       },
     ];
     const pathSegments = path ? path.split('/') : [];
-    const baseUri = `#/${repoUri}/${revision}/`;
 
     pathSegments.forEach((p, index) => {
-      const isLast = index === pathSegments.length - 1;
-      if (isLast) {
-        breadcrumbs.push({
-          text: p || '',
-          href: baseUri + pathSegments.join('/') + '!' + goto,
-        });
-      } else {
-        breadcrumbs.push({
-          text: '',
-          component: (
-            <FileListDropdown baseUri={baseUri} paths={pathSegments.slice(0, index + 1)} />
-          ),
-        });
-      }
+      breadcrumbs.push({
+        text: (
+          <FileListDropdown
+            revision={revision}
+            repoUri={repoUri}
+            paths={pathSegments.slice(0, index + 1)}
+          />
+        ),
+      });
     });
     return <EuiBreadcrumbs max={Number.MAX_VALUE} truncate={false} breadcrumbs={breadcrumbs} />;
   }

@@ -102,21 +102,6 @@ export class LayoutPage extends React.Component<Props, State> {
     }
   };
 
-  public getDirectories = (pathSegments: string[]) => {
-    return pathSegments.map((p, index) => {
-      if (this.props.tree) {
-        const node = this.findNode(pathSegments.slice(0, index + 1), this.props.tree);
-        if (node && node.children) {
-          return node.children.map(_ => _.name);
-        } else {
-          return [];
-        }
-      } else {
-        return [];
-      }
-    });
-  };
-
   public searchInputOnChangedHandler = (event: React.ChangeEvent<HTMLInputElement>) => {
     this.props.searchQueryChanged(event.target.value);
   };
@@ -279,4 +264,7 @@ const mapDispatchToProps = {
   searchQueryChanged,
 };
 
-export const Layout = connect(mapStateToProps, mapDispatchToProps)(LayoutPage);
+export const Layout = connect(
+  mapStateToProps,
+  mapDispatchToProps
+)(LayoutPage);

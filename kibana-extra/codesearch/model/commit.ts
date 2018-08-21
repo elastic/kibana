@@ -19,5 +19,8 @@ export interface ReferenceInfo {
 }
 
 export enum ReferenceType {
-  BRANCH, TAG, REMOTE_BRANCH, OTHER
+  BRANCH,
+  TAG,
+  REMOTE_BRANCH,
+  OTHER,
 }

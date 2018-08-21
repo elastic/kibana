@@ -10,6 +10,8 @@ import { FileTree, FileTreeItemType } from '../../model';
 import { CommitInfo, ReferenceInfo, ReferenceType } from '../../model/commit';
 import {
   closeTreePath,
+  fetchDirectory,
+  fetchDirectorySuccess,
   fetchRepoBranchesSuccess,
   fetchRepoCommitsSuccess,
   fetchRepoTree,
@@ -25,6 +27,7 @@ export interface FileState {
   branches: ReferenceInfo[];
   tags: ReferenceInfo[];
   commits: CommitInfo[];
+  opendir?: FileTree;
 }
 
 const initialState: FileState = {
@@ -107,6 +110,14 @@ export const file = handleActions(
         const references = action.payload as ReferenceInfo[];
         draft.tags = references.filter(r => r.type === ReferenceType.TAG);
         draft.branches = references.filter(r => r.type !== ReferenceType.TAG);
+      }),
+    [String(fetchDirectorySuccess)]: (state: FileState, action: any) =>
+      produce<FileState>(state, draft => {
+        draft.opendir = action.payload;
+      }),
+    [String(fetchDirectory)]: (state: FileState, action: any) =>
+      produce<FileState>(state, draft => {
+        draft.opendir = undefined;
       }),
   },
   initialState

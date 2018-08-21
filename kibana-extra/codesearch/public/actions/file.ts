@@ -35,3 +35,7 @@ export const fetchRepoBranchesFailed = createAction<Error>('FETCH REPO BRANCHES 
 export const fetchRepoCommits = createAction<FetchRepoPayloadWithRevision>('FETCH REPO COMMITS');
 export const fetchRepoCommitsSuccess = createAction<CommitInfo[]>('FETCH REPO COMMITS SUCCESS');
 export const fetchRepoCommitsFailed = createAction<Error>('FETCH REPO COMMITS FAILED');
+
+export const fetchDirectory = createAction<FetchRepoTreePayload>('FETCH REPO DIR');
+export const fetchDirectorySuccess = createAction<FileTree>('FETCH REPO DIR SUCCESS');
+export const fetchDirectoryFaile = createAction<Error>('FETCH REPO DIR FAILED');

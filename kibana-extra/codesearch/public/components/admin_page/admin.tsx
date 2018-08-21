@@ -281,4 +281,7 @@ const mapDispatchToProps = {
   indexRepo,
 };
 
-export const Admin = connect(mapStateToProps, mapDispatchToProps)(AdminPage);
+export const Admin = connect(
+  mapStateToProps,
+  mapDispatchToProps
+)(AdminPage);

@@ -4,36 +4,86 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiLink } from '@elastic/eui';
-import React from 'react';
+import { EuiLink, EuiPopover } from '@elastic/eui';
+import React, { Fragment } from 'react';
+import { connect } from 'react-redux';
+import { FileTree, FileTreeItemType } from '../../../model';
+import { fetchDirectory, FetchRepoTreePayload } from '../../actions';
+import { RootState } from '../../reducers';
 
 interface Props {
-  baseUri: string;
+  revision: string;
+  repoUri: string;
   paths: string[];
+  dir: FileTree;
+  fetchDirectory: (payload: FetchRepoTreePayload) => void;
 }
-
-export class FileListDropdown extends React.Component<Props> {
+interface State {
+  isOpen: boolean;
+}
+class FileListDropdownComponent extends React.Component<Props, State> {
   constructor(props: Props, context: any) {
     super(props, context);
+    this.state = {
+      isOpen: false,
+    };
   }
+
+  public onClick = (e: Event) => {
+    const { repoUri, revision, paths } = this.props;
+    this.props.fetchDirectory({
+      uri: repoUri,
+      revision,
+      path: paths.slice(0, paths.length - 1).join('/'),
+    });
+    this.setState({ isOpen: true });
+    e.preventDefault();
+  };
+
+  public close = () => {
+    this.setState({ isOpen: false });
+  };
+
   public render() {
     const path = this.props.paths[this.props.paths.length - 1];
-    return (
-      <EuiLink
-        className={'euiBreadcrumb'}
-        href={`${this.props.baseUri}${this.props.paths.join('/')}`}
-      >
+    const button = (
+      <span onClick={this.onClick} className="breadcrumbs">
         {path}
-      </EuiLink>
+      </span>
     );
-  }
-  /*public render() {
-    const path = this.props.paths[this.props.paths.length - 1];
     return (
-        <EuiPopover
-        button={<span className="breadcrumbs">{path}</span>}>
-      {path}
+      <EuiPopover isOpen={this.state.isOpen} closePopover={this.close} button={button}>
+        {this.renderSiblings()}
       </EuiPopover>
     );
-  }*/
+  }
+
+  private renderSiblings() {
+    const { repoUri, revision } = this.props;
+    if (this.props.dir && this.props.dir.children) {
+      const links = this.props.dir.children.map(p => {
+        const type = p.type === FileTreeItemType.Directory ? 'tree' : 'blob';
+        return (
+          <div key={p.path}>
+            <EuiLink href={`#${repoUri}/${type}/${revision}/${p.path}`}>{p.name}</EuiLink>
+          </div>
+        );
+      });
+      return <Fragment>{links}</Fragment>;
+    } else {
+      return false;
+    }
+  }
 }
+const mapStateToProps = (state: RootState) => ({
+  dir: state.file.opendir,
+});
+
+const mapDispatchToProps = {
+  fetchDirectory,
+};
+
+export const FileListDropdown = connect(
+  mapStateToProps,
+  mapDispatchToProps
+)(FileListDropdownComponent);

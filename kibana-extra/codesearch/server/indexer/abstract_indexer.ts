@@ -57,7 +57,7 @@ export abstract class AbstractIndexer implements Indexer {
           total: totalCount,
           success: successCount,
           fail: failCount,
-          percentage: Math.floor(100 * (successCount + failCount) / totalCount),
+          percentage: Math.floor((100 * (successCount + failCount)) / totalCount),
         };
         if (progress.percentage > prevPercentage + 5) {
           progressReporter(progress);

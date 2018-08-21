@@ -5,7 +5,7 @@
  */
 
 import { initMonaco, Monaco } from 'init-monaco';
-import { editor, IDisposable, IMouseEvent, languages } from 'monaco-editor';
+import { editor, IMouseEvent, languages } from 'monaco-editor';
 import { ResizeChecker } from 'ui/resize_checker';
 import { Definition, Location } from 'vscode-languageserver';
 import { LspRestClient, TextDocumentMethods } from '../../common/lsp_client';
