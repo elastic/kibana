@@ -7,11 +7,13 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { CollapsiblePanel } from '../../collapsible_panel';
+import { SimplePrivilegeForm } from './simple_privilege_form';
 import { SpaceAwarePrivilegeForm } from './space_aware_privilege_form';
 
 export class KibanaPrivileges extends Component {
   static propTypes = {
     role: PropTypes.object.isRequired,
+    spacesEnabled: PropTypes.bool.isRequired,
     spaces: PropTypes.array,
     editable: PropTypes.bool.isRequired,
     kibanaAppPrivileges: PropTypes.array.isRequired,
@@ -30,21 +32,31 @@ export class KibanaPrivileges extends Component {
     const {
       kibanaAppPrivileges,
       role,
-      rbacApplication,
+      spacesEnabled,
       spaces = [],
       onChange,
       editable,
     } = this.props;
 
-    return (
-      <SpaceAwarePrivilegeForm
-        kibanaAppPrivileges={kibanaAppPrivileges}
-        role={role}
-        rbacApplication={rbacApplication}
-        spaces={spaces}
-        onChange={onChange}
-        editable={editable}
-      />
-    );
+    if (spacesEnabled) {
+      return (
+        <SpaceAwarePrivilegeForm
+          kibanaAppPrivileges={kibanaAppPrivileges}
+          role={role}
+          spaces={spaces}
+          onChange={onChange}
+          editable={editable}
+        />
+      );
+    } else {
+      return (
+        <SimplePrivilegeForm
+          kibanaAppPrivileges={kibanaAppPrivileges}
+          role={role}
+          onChange={onChange}
+          editable={editable}
+        />
+      );
+    }
   }
 }

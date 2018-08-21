@@ -27,7 +27,7 @@ export const security = (kibana) => new kibana.Plugin({
   id: 'security',
   configPrefix: 'xpack.security',
   publicDir: resolve(__dirname, 'public'),
-  require: ['kibana', 'elasticsearch', 'xpack_main', 'spaces'],
+  require: ['kibana', 'elasticsearch', 'xpack_main'],
 
   config(Joi) {
     return Joi.object({
@@ -78,6 +78,7 @@ export const security = (kibana) => new kibana.Plugin({
       return {
         secureCookies: config.get('xpack.security.secureCookies'),
         sessionTimeout: config.get('xpack.security.sessionTimeout'),
+        enableSpaceAwarePrivileges: config.get('xpack.spaces.enabled'),
       };
     }
   },

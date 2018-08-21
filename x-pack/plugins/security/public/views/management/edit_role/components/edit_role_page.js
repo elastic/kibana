@@ -42,6 +42,7 @@ export class EditRolePage extends Component {
     kibanaAppPrivileges: PropTypes.array.isRequired,
     notifier: PropTypes.func.isRequired,
     spaces: PropTypes.array,
+    spacesEnabled: PropTypes.bool.isRequired,
   };
 
   constructor(props) {
@@ -88,7 +89,7 @@ export class EditRolePage extends Component {
   getFormTitle = () => {
     let titleText;
     const props = {
-      tabindex: 0
+      tabIndex: 0
     };
     if (isReservedRole(this.props.role)) {
       titleText = 'Viewing role';
@@ -184,6 +185,7 @@ export class EditRolePage extends Component {
         <KibanaPrivileges
           kibanaAppPrivileges={this.props.kibanaAppPrivileges}
           spaces={this.props.spaces}
+          spacesEnabled={this.props.spacesEnabled}
           editable={!isReservedRole(this.state.role)}
           role={this.state.role}
           onChange={this.onRoleChange}

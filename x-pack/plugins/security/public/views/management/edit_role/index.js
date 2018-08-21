@@ -87,7 +87,7 @@ routes.when(`${EDIT_ROLES_PATH}/:name?`, {
     }
   },
   controllerAs: 'editRole',
-  controller($injector, $scope, $http) {
+  controller($injector, $scope, $http, enableSpaceAwarePrivileges) {
     const $route = $injector.get('$route');
     const Private = $injector.get('Private');
 
@@ -141,6 +141,7 @@ routes.when(`${EDIT_ROLES_PATH}/:name?`, {
         allowFieldLevelSecurity={allowFieldLevelSecurity}
         notifier={Notifier}
         spaces={spaces}
+        spacesEnabled={enableSpaceAwarePrivileges}
       />, domNode);
 
       // unmount react on controller destroy
