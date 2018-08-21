@@ -7,6 +7,7 @@
 import { wrap as wrapError } from 'boom';
 import { KIBANA_SETTINGS_TYPE } from '../../../../../monitoring/common/constants';
 import { getKibanaInfoForStats } from '../../../../../monitoring/server/kibana_monitoring/lib';
+import { getEmailValueStructure } from '../../../../../monitoring/server/kibana_monitoring/collectors/get_settings_collector';
 
 const getClusterUuid = async callCluster => {
   const { cluster_uuid: uuid } = await callCluster('info', { filterPath: 'cluster_uuid', });
@@ -26,7 +27,10 @@ export function settingsRoute(server, kbnServer) {
         const { collectorSet } = server.usage;
         const settingsCollector = collectorSet.getCollectorByType(KIBANA_SETTINGS_TYPE);
 
-        const settings = await settingsCollector.fetch(callCluster);
+        let settings = await settingsCollector.fetch(callCluster);
+        if (!settings) {
+          settings = getEmailValueStructure(null);
+        }
         const uuid = await getClusterUuid(callCluster);
 
         const kibana = getKibanaInfoForStats(server, kbnServer);

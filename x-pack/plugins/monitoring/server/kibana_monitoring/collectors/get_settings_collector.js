@@ -54,6 +54,14 @@ export async function checkForEmailValue(
   }
 }
 
+export function getEmailValueStructure(email) {
+  return {
+    xpack: {
+      default_admin_email: email
+    }
+  };
+}
+
 export function getSettingsCollector(server, kbnServer) {
   const config = server.config();
 
@@ -66,11 +74,7 @@ export function getSettingsCollector(server, kbnServer) {
 
       // skip everything if defaultAdminEmail === undefined
       if (defaultAdminEmail || (defaultAdminEmail === null && shouldUseNull)) {
-        kibanaSettingsData = {
-          xpack: {
-            default_admin_email: defaultAdminEmail
-          }
-        };
+        kibanaSettingsData = getEmailValueStructure(defaultAdminEmail);
         this.log.debug(`[${defaultAdminEmail}] default admin email setting found, sending [${KIBANA_SETTINGS_TYPE}] monitoring document.`);
       } else {
         this.log.debug(`not sending [${KIBANA_SETTINGS_TYPE}] monitoring document because [${defaultAdminEmail}] is null or invalid.`);
