@@ -29,12 +29,13 @@ const TabifyResponseHandlerProvider = function (Private) {
     name: 'tabify',
     handler: function (vis, response) {
       return new Promise((resolve) => {
+        const time = getTime(vis.indexPattern, vis.filters.timeRange);
 
         const tableGroup = aggResponse.tabify(vis.getAggConfig(), response, {
           canSplit: true,
           asAggConfigResults: _.get(vis, 'type.responseHandlerConfig.asAggConfigResults', false),
           isHierarchical: vis.isHierarchical(),
-          timeRange: getTime(vis.indexPattern, vis.filters.timeRange).range
+          timeRange: time ? time.range : undefined
         });
 
         resolve(tableGroup);

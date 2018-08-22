@@ -72,11 +72,13 @@ const BasicResponseHandlerProvider = function (Private) {
           resolve(aggResponse.hierarchical(vis, response));
         }
 
+        const time = getTime(vis.indexPattern, vis.filters.timeRange);
+
         const tableGroup = aggResponse.tabify(vis.getAggConfig(), response, {
           canSplit: true,
           asAggConfigResults: true,
           isHierarchical: vis.isHierarchical(),
-          timeRange: getTime(vis.indexPattern, vis.filters.timeRange).range
+          timeRange: time ? time.range : undefined
         });
 
         let converted = convertTableGroup(vis, tableGroup);
