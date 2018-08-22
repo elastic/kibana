@@ -16,6 +16,7 @@ import { Full } from '@codesearch/lsp-extension';
 import { LspRequest } from '../../model';
 import { GitOperations } from '../git_operations';
 import { Log } from '../log';
+import { parseLspUri } from '../../common/uri_util';
 
 export class WorkspaceHandler {
   private git: GitOperations;
@@ -173,19 +174,11 @@ export class WorkspaceHandler {
    */
   private async resolveUri(uri: string) {
     if (uri.startsWith('git://')) {
-      const url = Url.parse(uri);
-      const domain = url.hostname;
-      const repo = url.pathname;
-      const revision = url.query ? url.query.toLocaleLowerCase() : 'head';
-      const filePath = url.hash ? url.hash.substr(1) : '/';
-      const repositoryUri = `${domain}/${repo}`;
-      const { workspaceRepo, workspaceRevision } = await this.openWorkspace(
-        repositoryUri,
-        revision
-      );
+      const { repoUri, file, revision } = parseLspUri(uri);
+      const { workspaceRepo, workspaceRevision } = await this.openWorkspace(repoUri, revision);
       return {
         workspacePath: workspaceRepo.workdir(),
-        filePath: `file://${path.resolve(workspaceRepo.workdir(), filePath)}`,
+        filePath: `file://${path.resolve(workspaceRepo.workdir(), file || '/')}`,
         uri,
         workspaceRevision,
       };

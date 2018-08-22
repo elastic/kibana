@@ -15,10 +15,17 @@ export interface FetchRepoPayload {
 export interface FetchRepoPayloadWithRevision extends FetchRepoPayload {
   revision: string;
 }
-
-export interface FetchRepoTreePayload extends FetchRepoPayloadWithRevision {
+export interface FetchFilePayload extends FetchRepoPayloadWithRevision {
   path: string;
+}
+export interface FetchRepoTreePayload extends FetchFilePayload {
   depth?: number;
+}
+
+export interface FetchFileResponse {
+  content: string;
+  lang?: string;
+  isImage?: boolean;
 }
 
 export const fetchRepoTree = createAction<FetchRepoTreePayload>('FETCH REPO TREE');
@@ -35,6 +42,10 @@ export const fetchRepoBranchesFailed = createAction<Error>('FETCH REPO BRANCHES 
 export const fetchRepoCommits = createAction<FetchRepoPayloadWithRevision>('FETCH REPO COMMITS');
 export const fetchRepoCommitsSuccess = createAction<CommitInfo[]>('FETCH REPO COMMITS SUCCESS');
 export const fetchRepoCommitsFailed = createAction<Error>('FETCH REPO COMMITS FAILED');
+
+export const fetchFile = createAction<FetchFilePayload>('FETCH FILE');
+export const fetchFileSuccess = createAction<FetchFileResponse>('FETCH FILE SUCCESS');
+export const fetchFileFailed = createAction<Error>('FETCH FILE ERROR');
 
 export const fetchDirectory = createAction<FetchRepoTreePayload>('FETCH REPO DIR');
 export const fetchDirectorySuccess = createAction<FileTree>('FETCH REPO DIR SUCCESS');

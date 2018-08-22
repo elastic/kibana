@@ -5,8 +5,8 @@
  */
 
 import { Hover } from 'vscode-languageserver-types';
-import { LspRestClient, TextDocumentMethods } from '../../common/lsp_client';
-import { AsyncTask, Computer } from './computer';
+import { LspRestClient, TextDocumentMethods } from '../../../common/lsp_client';
+import { AsyncTask, Computer } from '../computer';
 
 export class HoverComputer implements Computer<Hover> {
   private lspMethods: TextDocumentMethods;

@@ -5,17 +5,17 @@
  */
 
 import { editor as Editor, IDisposable, IKeyboardEvent } from 'monaco-editor';
-import { ContentHoverWidget } from './content_hover_widget';
 import IEditorContribution = Editor.IEditorContribution;
 import ICodeEditor = Editor.ICodeEditor;
 import IEditorMouseEvent = Editor.IEditorMouseEvent;
+import { EditorActions } from '../../components/editor/editor';
+import { ContentHoverWidget } from './content_hover_widget';
 
 export class HoverController implements IEditorContribution {
+  public static ID = 'codesearch.editor.contrib.hover';
   public static get(editor: any): HoverController {
     return editor.getContribution(HoverController.ID);
   }
-
-  private static ID = 'codesearch.editor.contrib.hover';
   private contentWidget: ContentHoverWidget;
   private disposables: IDisposable[];
 
@@ -33,6 +33,10 @@ export class HoverController implements IEditorContribution {
 
   public getId(): string {
     return HoverController.ID;
+  }
+
+  public setReduxActions(actions: EditorActions) {
+    this.contentWidget.setHoverResultAction(actions.hoverResult);
   }
 
   private onEditorMouseMove(mouseEvent: IEditorMouseEvent) {

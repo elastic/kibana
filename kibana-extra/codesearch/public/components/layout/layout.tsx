@@ -31,7 +31,7 @@ import { RootState } from '../../reducers';
 
 import { history } from '../../utils/url';
 import { FileTree } from '../file_tree/file_tree';
-import { Editor } from './editor';
+import { Editor } from '../editor/editor';
 
 import { closeTreePath, fetchRepoTree, FetchRepoTreePayload } from '../../actions';
 import { history } from '../../utils/url';

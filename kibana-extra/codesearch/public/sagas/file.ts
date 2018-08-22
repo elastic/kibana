@@ -9,6 +9,11 @@ import { call, put, select, takeEvery } from 'redux-saga/effects';
 import { kfetch } from 'ui/kfetch';
 import { FileTree } from '../../model';
 import {
+  fetchFile,
+  fetchFileFailed,
+  FetchFilePayload,
+  FetchFileResponse,
+  fetchFileSuccess,
   fetchDirectory,
   fetchDirectoryFaile,
   fetchDirectorySuccess,
@@ -63,7 +68,7 @@ function* handleFetchRepoTree(action: Action<FetchRepoTreePayload>) {
 
 function* fetchPath(payload: FetchRepoTreePayload) {
   const update: FileTree = yield call(requestRepoTree, payload);
-  update.children.sort((a, b) => {
+  (update.children || []).sort((a, b) => {
     const typeDiff = a.type - b.type;
     if (typeDiff === 0) {
       return a.name > b.name ? 1 : -1;
@@ -116,6 +121,43 @@ function requestCommits({ uri, revision }: FetchRepoPayloadWithRevision) {
   });
 }
 
+export async function requestFile(
+  { uri, revision, path }: FetchFilePayload,
+  line?: string
+): Promise<FetchFileResponse> {
+  let url = `../api/cs/repo/${uri}/blob/${revision}/${path}`;
+  if (line) {
+    url += '?line=' + line;
+  }
+  const response: Response = await fetch(url);
+  if (response.status === 200) {
+    const contentType = response.headers.get('Content-Type');
+
+    if (contentType && contentType.startsWith('text/')) {
+      const lang = contentType.split(';')[0].substring('text/'.length);
+      return {
+        lang,
+        content: await response.text(),
+      };
+    } else if (contentType && contentType.startsWith('image/')) {
+      return {
+        isImage: true,
+        content: await response.text(),
+      };
+    }
+  }
+  throw new Error('invalid file type');
+}
+
+function* handleFetchFile(action: Action<FetchFilePayload>) {
+  try {
+    const results: FetchFileResponse = yield call(requestFile, action.payload!);
+    yield put(fetchFileSuccess(results));
+  } catch (err) {
+    yield put(fetchFileFailed(err));
+  }
+}
+
 function* handleFetchDirs(action: Action<FetchRepoTreePayload>) {
   try {
     const dir = yield call(requestRepoTree, action.payload);
@@ -128,5 +170,6 @@ function* handleFetchDirs(action: Action<FetchRepoTreePayload>) {
 export function* watchFetchBranchesAndCommits() {
   yield takeEvery(String(fetchRepoBranches), handleFetchBranches);
   yield takeEvery(String(fetchRepoCommits), handleFetchCommits);
+  yield takeEvery(String(fetchFile), handleFetchFile);
   yield takeEvery(String(fetchDirectory), handleFetchDirs);
 }

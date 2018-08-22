@@ -5,6 +5,7 @@
  */
 import { combineReducers } from 'redux';
 
+import { editor, EditorState } from './editor';
 import { file, FileState } from './file';
 import { repository, RepositoryState } from './repository';
 import { search, SearchState } from './search';
@@ -15,6 +16,7 @@ export interface RootState {
   search: SearchState;
   file: FileState;
   symbol: SymbolState;
+  editor: EditorState;
 }
 
-export const rootReducer = combineReducers({ repository, search, file, symbol });
+export const rootReducer = combineReducers({ repository, search, file, symbol, editor });

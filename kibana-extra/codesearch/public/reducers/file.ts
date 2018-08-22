@@ -10,6 +10,11 @@ import { FileTree, FileTreeItemType } from '../../model';
 import { CommitInfo, ReferenceInfo, ReferenceType } from '../../model/commit';
 import {
   closeTreePath,
+  fetchFile,
+  fetchFileFailed,
+  FetchFilePayload,
+  FetchFileResponse,
+  fetchFileSuccess,
   fetchDirectory,
   fetchDirectorySuccess,
   fetchRepoBranchesSuccess,
@@ -27,6 +32,9 @@ export interface FileState {
   branches: ReferenceInfo[];
   tags: ReferenceInfo[];
   commits: CommitInfo[];
+  file?: FetchFilePayload;
+  fileContent?: string;
+  fileLanguage?: string;
   opendir?: FileTree;
 }
 
@@ -110,6 +118,22 @@ export const file = handleActions(
         const references = action.payload as ReferenceInfo[];
         draft.tags = references.filter(r => r.type === ReferenceType.TAG);
         draft.branches = references.filter(r => r.type !== ReferenceType.TAG);
+      }),
+    [String(fetchFile)]: (state: FileState, action: any) =>
+      produce<FileState>(state, draft => {
+        const payload = action.payload as FetchFilePayload;
+        draft.file = payload;
+      }),
+    [String(fetchFileSuccess)]: (state: FileState, action: any) =>
+      produce<FileState>(state, draft => {
+        const response = action.payload as FetchFileResponse;
+        draft.fileContent = response.content;
+        draft.fileLanguage = response.lang;
+      }),
+    [String(fetchFileFailed)]: (state: FileState, action: any) =>
+      produce<FileState>(state, draft => {
+        draft.fileContent = undefined;
+        draft.fileLanguage = undefined;
       }),
     [String(fetchDirectorySuccess)]: (state: FileState, action: any) =>
       produce<FileState>(state, draft => {

@@ -7,43 +7,39 @@
 import { initMonaco, Monaco } from 'init-monaco';
 import { editor, IMouseEvent, languages } from 'monaco-editor';
 import { ResizeChecker } from 'ui/resize_checker';
-import { Definition, Location } from 'vscode-languageserver';
-import { LspRestClient, TextDocumentMethods } from '../../common/lsp_client';
-import { parseUri } from '../../common/uri_util';
+import { EditorActions } from '../components/editor/editor';
+import { provideDefinition } from './definition/definition_provider';
+
+import { parseLspUri } from '../../common/uri_util';
 import { history } from '../utils/url';
 import { EditorService } from './editor_service';
-import { HoverController } from './hover_controller';
+import { HoverController } from './hover/hover_controller';
+import { registerReferencesAction } from './references/references_action';
 import { TextModelResolverService } from './textmodel_resolver';
 
 export class MonacoHelper {
   public get initialized() {
     return this.monaco !== null;
   }
-  public repoUri: string = '';
-  public file: string = '';
-  public revision: string = '';
-  public decorations = [];
+  public decorations: string[] = [];
   private monaco: Monaco | null = null;
-  private lspMethods: TextDocumentMethods;
   private editor: editor.IStandaloneCodeEditor | null = null;
   private resizeChecker: ResizeChecker | null = null;
 
-  constructor(private readonly container: HTMLElement) {
-    const lspClient = new LspRestClient('../api/lsp');
-    this.lspMethods = new TextDocumentMethods(lspClient);
-  }
+  constructor(
+    private readonly container: HTMLElement,
+    private readonly editorActions: EditorActions
+  ) {}
   public init() {
     return new Promise(resolve => {
       initMonaco((monaco: Monaco, extensions) => {
         this.monaco = monaco;
-        extensions.registerEditorContribution(HoverController);
-
         // @ts-ignore  a hack to replace function in monaco editor.
         monaco.StandaloneCodeEditorServiceImpl.prototype.openCodeEditor =
           EditorService.prototype.openCodeEditor;
         //  @ts-ignore another hack to replace function
         this.monaco!.typescript.DefinitionAdapter.prototype.provideDefinition = (model, position) =>
-          this.provideDefinition(model, position);
+          provideDefinition(monaco, model, position);
 
         this.editor = monaco.editor.create(
           this.container!,
@@ -53,9 +49,10 @@ export class MonacoHelper {
               enabled: false,
             },
             hover: {
-              enabled: false,
-            }, // disable default hover;
+              enabled: false, // disable default hover;
+            },
             contextmenu: false,
+            folding: false,
           },
           {
             textModelService: new TextModelResolverService(monaco),
@@ -67,15 +64,15 @@ export class MonacoHelper {
             this.editor!.layout();
           });
         });
-        this.editor.onMouseDown((e: IMouseEvent) => {
-          if (e.target.type === this.monaco.editor.MouseTargetType.GUTTER_LINE_NUMBERS) {
-            history.push(
-              `/${this.repoUri}/blob/${this.revision}/${this.file}!L${
-                e.target.position.lineNumber
-              }:0`
-            );
+        registerReferencesAction(this.editor, this.editorActions);
+        this.editor.onMouseDown((e: editor.IEditorMouseEvent) => {
+          if (e.target.type === monaco.editor.MouseTargetType.GUTTER_LINE_NUMBERS) {
+            const { repoUri, revision, file } = parseLspUri(this.editor!.getModel().uri);
+            history.push(`/${repoUri}/blob/${revision}/${file}!L${e.target.position.lineNumber}:0`);
           }
         });
+        const hoverController: HoverController = new HoverController(this.editor);
+        hoverController.setReduxActions(this.editorActions);
         resolve(this.editor);
       });
     });
@@ -96,25 +93,7 @@ export class MonacoHelper {
     if (!this.initialized) {
       await this.init();
     }
-    this.repoUri = repoUri;
-    this.file = file;
-    this.revision = revision;
-    if (lang !== 'plain') {
-      if (this.hoverProvider) {
-        this.hoverProvider.dispose();
-      }
-      this.hoverProvider = this.monaco!.languages.registerHoverProvider(lang, {
-        provideHover: (model, position) => this.onHover(repoUri, file, model, position),
-      });
-      if (this.definitionProvider) {
-        this.definitionProvider.dispose();
-      }
-      this.definitionProvider = this.monaco!.languages.registerDefinitionProvider(lang, {
-        provideDefinition: (model, position) =>
-          this.provideDefinition(repoUri, file, model, position),
-      });
-    }
-    // @ts-ignore
+
     this.editor!.setModel(null);
     const uri = this.monaco!.Uri.parse(`git://${repoUri}?${revision}#${file}`);
     let newModel = this.monaco!.editor.getModel(uri);
@@ -125,44 +104,15 @@ export class MonacoHelper {
     return this.editor!;
   }
 
-  public provideDefinition(model: editor.ITextModel, position: any): Promise<languages.Location[]> {
-    const { repoUri, file } = parseUri(model.uri);
-    return this.lspMethods.definition
-      .send({
-        position: {
-          line: position.lineNumber - 1,
-          character: position.column - 1,
-        },
-        textDocument: {
-          uri: `git://${repoUri}?HEAD#${file}`,
-        },
-      })
-      .then(
-        (definition: Definition) => {
-          if (definition) {
-            if (Array.isArray(definition)) {
-              return definition.map(l => this.handleLocation(l));
-            } else {
-              return [this.handleLocation(definition)];
-            }
-          } else {
-            return [];
-          }
-        },
-        (_: any) => {
-          return [];
-        }
-      );
-  }
   public revealLine(line: number) {
     this.editor!.revealLineInCenter(line);
     this.editor!.setPosition({
       lineNumber: line,
       column: 1,
     });
-    this.decorations = this.editor.deltaDecorations(this.decorations, [
+    this.decorations = this.editor!.deltaDecorations(this.decorations, [
       {
-        range: new this.monaco.Range(line, 0, line, 0),
+        range: new this.monaco!.Range(line, 0, line, 0),
         options: {
           isWholeLine: true,
           inlineClassName: 'highlightInline',
@@ -177,9 +127,9 @@ export class MonacoHelper {
       lineNumber: line,
       column: pos,
     };
-    this.decorations = this.editor.deltaDecorations(this.decorations, [
+    this.decorations = this.editor!.deltaDecorations(this.decorations, [
       {
-        range: new this.monaco.Range(line, 0, line, 0),
+        range: new this.monaco!.Range(line, 0, line, 0),
         options: {
           isWholeLine: true,
           inlineClassName: 'highlightInline',
@@ -189,17 +139,5 @@ export class MonacoHelper {
     ]);
     this.editor!.revealPositionInCenter(position);
     this.editor!.setPosition(position);
-  }
-
-  private handleLocation(location: Location): languages.Location {
-    return {
-      uri: this.monaco!.Uri.parse(location.uri),
-      range: {
-        startLineNumber: location.range.start.line + 1,
-        startColumn: location.range.start.character + 1,
-        endLineNumber: location.range.end.line + 1,
-        endColumn: location.range.end.character + 1,
-      },
-    };
   }
 }

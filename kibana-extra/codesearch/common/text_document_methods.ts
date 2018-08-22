@@ -9,6 +9,7 @@ import {
   Definition,
   DocumentSymbolParams,
   Hover,
+  Location,
   SymbolInformation,
 } from 'vscode-languageserver-types';
 import { LspClient } from './lsp_client';
@@ -18,6 +19,7 @@ export class TextDocumentMethods {
   public documentSymbol: LspMethod<DocumentSymbolParams, SymbolInformation[]>;
   public hover: LspMethod<TextDocumentPositionParams, Hover>;
   public definition: LspMethod<TextDocumentPositionParams, Definition>;
+  public references: LspMethod<TextDocumentPositionParams, Location[]>;
 
   private readonly client: LspClient;
 
@@ -26,5 +28,6 @@ export class TextDocumentMethods {
     this.documentSymbol = new LspMethod('textDocument/documentSymbol', this.client);
     this.hover = new LspMethod('textDocument/hover', this.client);
     this.definition = new LspMethod('textDocument/definition', this.client);
+    this.references = new LspMethod('textDocument/references', this.client);
   }
 }

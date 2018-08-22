@@ -8,10 +8,10 @@
 
 import { editor as Editor, IRange } from 'monaco-editor';
 import { Hover, MarkedString } from 'vscode-languageserver-types';
-import { parseUri } from '../../common/uri_util';
-import { ContentWidget } from './content_widget';
+import { parseLspUri } from '../../../common/uri_util';
+import { ContentWidget } from '../content_widget';
+import { Operation } from '../operation';
 import { HoverComputer } from './hover_computer';
-import { Operation } from './operation';
 
 export class ContentHoverWidget extends ContentWidget {
   public static ID = 'editor.contrib.contentHoverWidget';
@@ -20,6 +20,7 @@ export class ContentHoverWidget extends ContentWidget {
   private lastRange: IRange | null = null;
   private shouldFocus: boolean = false;
   private eventsBound: boolean = false;
+  private hoverResultAction?: (hover: Hover) => void = undefined;
 
   constructor(editor: Editor.ICodeEditor) {
     super(ContentHoverWidget.ID, editor);
@@ -43,7 +44,7 @@ export class ContentHoverWidget extends ContentWidget {
     }
     this.hoverOperation.cancel();
     const uri = this.editor.getModel().uri;
-    const { repoUri, file } = parseUri(uri);
+    const { repoUri, file } = parseLspUri(uri);
     if (this.isVisible) {
       this.hide();
     }
@@ -58,7 +59,15 @@ export class ContentHoverWidget extends ContentWidget {
     this.bindButtonEvents();
   }
 
+  public setHoverResultAction(hoverResultAction: (hover: Hover) => void) {
+    this.hoverResultAction = hoverResultAction;
+  }
+
   private result(result: Hover, complete: boolean) {
+    if (this.hoverResultAction) {
+      // pass the result to redux
+      this.hoverResultAction(result);
+    }
     if (this.lastRange && result) {
       this.renderMessages(this.lastRange, result);
     } else if (complete) {
@@ -66,19 +75,15 @@ export class ContentHoverWidget extends ContentWidget {
     }
   }
 
-  private renderMessages(renderRange: any, result: Hover) {
-    let renderColumn = Number.MAX_VALUE;
+  private renderMessages(renderRange: IRange, result: Hover) {
     const fragment = document.createDocumentFragment();
-
-    if (!result.range) {
-      return;
+    let contents = [];
+    if (Array.isArray(result.contents)) {
+      contents = result.contents;
+    } else {
+      contents = [result.contents as MarkedString];
     }
-
-    renderColumn = Math.min(renderColumn, result.range.start.character + 1);
-    if (!Array.isArray(result.contents)) {
-      result.contents = [result.contents as MarkedString];
-    }
-    (result.contents as MarkedString[]).filter(contents => !!contents).forEach(markedString => {
+    contents.filter(content => !!content).forEach(markedString => {
       let markdown: string;
       if (typeof markedString === 'string') {
         markdown = markedString;
@@ -101,10 +106,13 @@ export class ContentHoverWidget extends ContentWidget {
       el.appendChild(renderedContents);
       fragment.appendChild(el);
     });
-
     // show
+    const startColumn = Math.min(
+      renderRange.startColumn,
+      result.range ? result.range.start.character : Number.MAX_VALUE
+    );
     this.showAt(
-      new window.monaco.Position(renderRange.startLineNumber, renderColumn),
+      new window.monaco.Position(renderRange.startLineNumber, startColumn),
       this.shouldFocus
     );
 
@@ -122,7 +130,7 @@ export class ContentHoverWidget extends ContentWidget {
         <span class="euiButton__text">Goto Definition</span>
       </span>
     </button>
-    <button class="euiFlexItem euiButton euiButton--primary euiButton--small" type="button">
+    <button id="btnReferences" class="euiFlexItem euiButton euiButton--primary euiButton--small" type="button">
       <span class="euiButton__content">
         <span class="euiButton__text">Find Reference</span>
       </span>
@@ -146,19 +154,33 @@ export class ContentHoverWidget extends ContentWidget {
       action.run().then(() => this.hide());
     }
   }
+  private findReferences() {
+    if (this.lastRange) {
+      this.editor.setPosition({
+        lineNumber: this.lastRange.startLineNumber,
+        column: this.lastRange.startColumn,
+      });
+      const action = this.editor.getAction('editor.action.referenceSearch.trigger');
+      action.run().then(() => this.hide());
+    }
+  }
+
+  private bindButton(btnId: string, func: () => void) {
+    const btn = document.getElementById(btnId);
+    if (btn) {
+      btn.addEventListener('click', func);
+      this.disposables.push({
+        dispose() {
+          btn.removeEventListener('click', func);
+        },
+      });
+    }
+  }
 
   private bindButtonEvents() {
     if (!this.eventsBound) {
-      const btnDefinition = document.getElementById('btnDefinition');
-      if (btnDefinition) {
-        const gotoDefinition = this.gotoDefinition.bind(this);
-        btnDefinition.addEventListener('click', gotoDefinition);
-        this.disposables.push({
-          dispose() {
-            btnDefinition.removeEventListener('click', gotoDefinition);
-          },
-        });
-      }
+      this.bindButton('btnDefinition', this.gotoDefinition.bind(this));
+      this.bindButton('btnReferences', this.findReferences.bind(this));
       this.eventsBound = true;
     }
   }
