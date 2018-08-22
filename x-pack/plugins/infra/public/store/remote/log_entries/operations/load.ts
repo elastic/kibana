@@ -18,7 +18,7 @@ const operationKey = 'load';
 export const loadEntriesActionCreators = createGraphqlOperationActionCreators<
   LogEntriesQuery.Query,
   LogEntriesQuery.Variables
->('entries', operationKey);
+>('log_entries', operationKey);
 
 export const loadEntriesReducer = createGraphqlOperationReducer(
   operationKey,

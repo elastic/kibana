@@ -23,7 +23,7 @@ const operationKey = 'load_more';
 export const loadMoreEntriesActionCreators = createGraphqlOperationActionCreators<
   LogEntriesQuery.Query,
   LogEntriesQuery.Variables
->('entries', operationKey);
+>('log_entries', operationKey);
 
 export const loadMoreEntriesReducer = createGraphqlOperationReducer(
   operationKey,

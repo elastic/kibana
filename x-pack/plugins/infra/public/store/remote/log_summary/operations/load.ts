@@ -18,7 +18,7 @@ const operationKey = 'load';
 export const loadSummaryActionCreators = createGraphqlOperationActionCreators<
   LogSummaryQuery.Query,
   LogSummaryQuery.Variables
->('summary', operationKey);
+>('log_summary', operationKey);
 
 export const loadSummaryReducer = createGraphqlOperationReducer(
   operationKey,
