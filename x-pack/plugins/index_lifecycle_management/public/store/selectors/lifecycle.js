@@ -121,8 +121,8 @@ export const validateLifecycle = state => {
     errors[STRUCTURE_INDEX_TEMPLATE][STRUCTURE_TEMPLATE_SELECTION][STRUCTURE_INDEX_NAME].push('An index name is required');
   }
 
-  if (getBootstrapEnabled(state) && !getAliasName(state)) {
-    errors[STRUCTURE_INDEX_TEMPLATE][STRUCTURE_TEMPLATE_SELECTION][STRUCTURE_ALIAS_NAME].push('An alias name is required');
+  if (!getAliasName(state)) {
+    errors[STRUCTURE_INDEX_TEMPLATE][STRUCTURE_TEMPLATE_SELECTION][STRUCTURE_ALIAS_NAME].push('A write alias name is required');
   }
 
   if (!isNumber(getSelectedPrimaryShardCount(state))) {

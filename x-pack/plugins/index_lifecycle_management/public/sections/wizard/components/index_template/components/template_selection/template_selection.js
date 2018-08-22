@@ -113,6 +113,20 @@ export class TemplateSelection extends Component {
             options={templateOptions}
           />
         </ErrableFormRow>
+        <ErrableFormRow
+          label="Write alias name"
+          errorKey={STRUCTURE_ALIAS_NAME}
+          isShowingErrors={isShowingErrors}
+          errors={errors}
+        >
+          <EuiFieldText
+            value={aliasName}
+            onChange={async e => {
+              await setAliasName(e.target.value);
+              validate();
+            }}
+          />
+        </ErrableFormRow>
         {selectedIndexTemplateName && selectedIndexTemplateIndices.length === 0 ? (
           <Fragment>
             <EuiFormRow label="Bootstrap options" style={{ maxWidth: '100%' }}>
@@ -120,7 +134,7 @@ export class TemplateSelection extends Component {
                 style={{ maxWidth: '100%' }}
                 checked={bootstrapEnabled}
                 onChange={e => setBootstrapEnabled(e.target.checked)}
-                label={<span>Create an index and alias for this template</span>}
+                label={<span>Create an index for this template</span>}
               />
             </EuiFormRow>
             {bootstrapEnabled ? (
@@ -135,20 +149,6 @@ export class TemplateSelection extends Component {
                     value={indexName}
                     onChange={async e => {
                       await setIndexName(e.target.value);
-                      validate();
-                    }}
-                  />
-                </ErrableFormRow>
-                <ErrableFormRow
-                  label="Alias name"
-                  errorKey={STRUCTURE_ALIAS_NAME}
-                  isShowingErrors={isShowingErrors}
-                  errors={errors}
-                >
-                  <EuiFieldText
-                    value={aliasName}
-                    onChange={async e => {
-                      await setAliasName(e.target.value);
                       validate();
                     }}
                   />

@@ -17,6 +17,7 @@ import {
   getSelectedReplicaCount,
   getSelectedNodeAttrs
 } from '.';
+import { getAliasName } from './general';
 
 export const getIndexTemplates = state => state.indexTemplate.indexTemplates;
 export const getIndexTemplateOptions = createSelector(
@@ -49,6 +50,9 @@ export const getSelectedIndexTemplate = createSelector(
     state => getIndexTemplates(state)
   ],
   (selectedIndexTemplateName, allTemplates) => {
+    if (!allTemplates) {
+      return null;
+    }
     return allTemplates.find(
       template => template.name === selectedIndexTemplateName
     );
@@ -174,6 +178,7 @@ export const getIndexTemplatePatch = state => {
     primaryShardCount: getSelectedPrimaryShardCount(state),
     replicaCount: getSelectedReplicaCount(state),
     lifecycleName: getSelectedPolicyName(state),
-    nodeAttrs: getSelectedNodeAttrs(state)
+    nodeAttrs: getSelectedNodeAttrs(state),
+    rolloverAlias: getAliasName(state)
   };
 };
