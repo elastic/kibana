@@ -27,5 +27,5 @@ export const rootReducer = combineReducers({
   file,
   symbol,
   editor,
-  fullsearch
+  fullsearch,
 });
