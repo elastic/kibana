@@ -22,6 +22,7 @@ import { resolve } from 'path';
 import process from 'process';
 
 import { pkg } from '../../../utils/package_json';
+import { deepFreeze, RecursiveReadOnly } from '../../utils';
 
 interface PackageInfo {
   version: string;
@@ -59,12 +60,12 @@ export class Env {
   /**
    * Information about Kibana package (version, build number etc.).
    */
-  public readonly packageInfo: Readonly<PackageInfo>;
+  public readonly packageInfo: RecursiveReadOnly<PackageInfo>;
 
   /**
    * Mode Kibana currently run in (development or production).
    */
-  public readonly mode: Readonly<EnvironmentMode>;
+  public readonly mode: RecursiveReadOnly<EnvironmentMode>;
 
   /**
    * @internal
@@ -74,12 +75,12 @@ export class Env {
   /**
    * Arguments provided through command line.
    */
-  public readonly cliArgs: Readonly<Record<string, any>>;
+  public readonly cliArgs: RecursiveReadOnly<Record<string, any>>;
 
   /**
    * Paths to the configuration files.
    */
-  public readonly configs: ReadonlyArray<string>;
+  public readonly configs: RecursiveReadOnly<string[]>;
 
   /**
    * Indicates that this Kibana instance is run as development Node Cluster master.
@@ -96,18 +97,18 @@ export class Env {
     this.logDir = resolve(this.homeDir, 'log');
     this.staticFilesDir = resolve(this.homeDir, 'ui');
 
-    this.cliArgs = Object.freeze(options.cliArgs);
-    this.configs = Object.freeze(options.configs);
+    this.cliArgs = deepFreeze(options.cliArgs);
+    this.configs = deepFreeze(options.configs);
     this.isDevClusterMaster = options.isDevClusterMaster;
 
-    this.mode = Object.freeze<EnvironmentMode>({
+    this.mode = deepFreeze<EnvironmentMode>({
       dev: this.cliArgs.dev,
       name: this.cliArgs.dev ? 'development' : 'production',
       prod: !this.cliArgs.dev,
     });
 
     const isKibanaDistributable = pkg.build && pkg.build.distributable === true;
-    this.packageInfo = Object.freeze({
+    this.packageInfo = deepFreeze({
       branch: pkg.branch,
       buildNum: isKibanaDistributable ? pkg.build.number : Number.MAX_SAFE_INTEGER,
       buildSha: isKibanaDistributable ? pkg.build.sha : 'XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX',

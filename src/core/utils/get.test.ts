@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { get } from '../get';
+import { get } from './get';
 
 const obj = {
   bar: {
