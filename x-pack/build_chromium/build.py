@@ -51,27 +51,44 @@ runcmd('gn gen out/headless')
 print('Compiling... this will take a while')
 runcmd('autoninja -C out/headless headless_shell')
 
-# The artifact filenames
-bin_dir = os.path.join(root_dir, 'bin')
-bin_filename = os.path.join(bin_dir, 'headless_shell')
-
 # Optimize the output on Linux and Mac by stripping inessentials from the binary
-print('Copying ' + bin_filename)
-mkdir(bin_dir)
-if platform.system() == 'Windows':
-  shutil.copyfile('out/headless/headless_shell', bin_filename)
-else:
-  runcmd('strip -o ' + bin_filename + ' out/headless/headless_shell')
+if platform.system() != 'Windows':
+  print('Optimizing headless_shell')
+  shutil.move('out/headless/headless_shell out/headless/headless_shell_raw')
+  runcmd('strip -o out/headless/headless_shell out/headless/headless_shell_raw')
 
 # Create the zip and generate the md5 hash using filenames like:
 # chromium-68_0_34-linux.zip
-truncated_version = source_version.replace('.', '_')[:7].strip('_')
-filename_prefix = 'chromium-' + truncated_version + '-' + platform.system().lower()
-zip_filename = os.path.join(bin_dir, filename_prefix + '.zip')
-md5_filename = os.path.join(bin_dir, filename_prefix + '.md5')
+base_filename = 'out/headless/chromium-' + source_version[:7].strip('.') + '-' + platform.system().lower()
+zip_filename = base_filename + '.zip'
+md5_filename = base_filename + '.md5'
 
 print('Creating ' + zip_filename)
-zipfile.ZipFile(zip_filename, mode='w').write(bin_filename, 'headless_shell-' + platform.system().lower() + '/headless_shell')
+archive = zipfile.ZipFile(zip_filename, mode='w', compression=zipfile.ZIP_DEFLATED)
+
+# A little helper function to write individual files to the zip file
+def archive_file(name):
+  from_path = os.path.join('out/headless', name)
+  to_path = os.path.join('headless_shell-' + platform.system().lower(), name)
+  archive.write(from_path, to_path)
+
+# Each platform has slightly different requirements for what dependencies
+# must be bundled with the Chromium executable
+if platform.system() == 'Linux':
+  archive_file('headless_shell')
+elif platform.system() == 'Windows':
+  archive_file('headless_shell.exe')
+  archive_file('dbghelp.dll')
+  archive_file('icudtl.dat')
+  archive_file('natives_blob.bin')
+  archive_file('snapshot_blob.bin')
+elif platform.system() == 'Darwin':
+  archive_file('headless_shell')
+  archive_file('natives_blob.bin')
+  archive_file('snapshot_blob.bin')
+  archive_file('Helpers/crashpad_handler')
+
+archive.close()
 
 print('Creating ' + md5_filename)
 with open (md5_filename, 'w') as f:

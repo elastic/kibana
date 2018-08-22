@@ -11,18 +11,18 @@ export const paths = {
   baseUrl: 'https://s3.amazonaws.com/headless-shell-dev/',
   packages: [{
     platforms: ['darwin', 'freebsd', 'openbsd'],
-    archiveFilename: 'chromium-68.0.3440.106-darwin.zip',
-    archiveChecksum: '68ffc0a821c98b539c6158ed82fa37fc',
+    archiveFilename: 'chromium-4747cc2-darwin.zip',
+    archiveChecksum: '23e769b9fdbbb7efdac719c03738c56d',
     binaryRelativePath: 'headless_shell-darwin/headless_shell',
   }, {
     platforms: ['linux'],
-    archiveFilename: 'chromium-68.0.3440.106-linux.zip',
-    archiveChecksum: '38db7736585dbf8e4d11dbf25d23bab2',
+    archiveFilename: 'chromium-4747cc2-linux.zip',
+    archiveChecksum: '8f361042d0fc8a84d60cd01777ec260f',
     binaryRelativePath: 'headless_shell-linux/headless_shell'
   }, {
     platforms: ['win32'],
-    archiveFilename: 'chromium-68.0.3440.106-win32.zip',
-    archiveChecksum: '37416b13e074e80f5bbb9796a5fb6198',
-    binaryRelativePath: 'headless_shell-win32\\headless_shell.exe'
+    archiveFilename: 'chromium-4747cc2-windows.zip',
+    archiveChecksum: '99547641a07745fc095211706162323d',
+    binaryRelativePath: 'headless_shell-windows\\headless_shell.exe'
   }]
 };

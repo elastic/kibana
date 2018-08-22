@@ -8,7 +8,7 @@
 : grabbing the source, etc). This must be completed before building, though.
 @echo "Installing Visual Studio"
 
-powershell -command "& {iwr -outf C:\build_chromium\install_vs.exe https://download.visualstudio.microsoft.com/download/pr/f9c35424-ffad-4b44-bb8f-d4e3968e90ce/f75403c967456e32e758ef558957f345/vs_community.exe}"
+powershell -command "& {iwr -outf c:\chromium\install_vs.exe https://download.visualstudio.microsoft.com/download/pr/f9c35424-ffad-4b44-bb8f-d4e3968e90ce/f75403c967456e32e758ef558957f345/vs_community.exe}"
 
 install_vs.exe --add Microsoft.VisualStudio.Workload.NativeDesktop --add Microsoft.VisualStudio.Component.VC.ATLMFC --includeRecommended
 
@@ -23,8 +23,8 @@ powershell -command "& {Expand-Archive %~dp0../../depot_tools.zip -DestinationPa
 
 pause
 
-SET PATH=%~dp0..\..\depot_tools;%path%
-SET DEPOT_TOOLS_WIN_TOOLCHAIN=0
+SETX PATH "%~dp0..\..\depot_tools;%path%"
+SETX DEPOT_TOOLS_WIN_TOOLCHAIN 0
 
 call gclient
 

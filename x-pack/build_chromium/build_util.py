@@ -25,7 +25,7 @@ def md5_file(filename):
   with open(filename, 'rb') as f: 
     for chunk in iter(lambda: f.read(128 * md5.block_size), b''): 
       md5.update(chunk)
-  md5.digest()
+  return md5.hexdigest()
 
 # Set up environment variables required by Chromium build
 def configure_environment():

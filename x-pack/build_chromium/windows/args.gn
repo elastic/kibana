@@ -1,18 +1,7 @@
-# This based on the //build/headless.gn, but modified to work with Windows.
-
-use_ozone = true
-ozone_auto_platforms = false
-ozone_platform = "headless"
-ozone_platform_headless = true
+# Based on //build/headless.gn
 
 # Embed resource.pak into binary to simplify deployment.
 headless_use_embedded_resources = true
-
-# Expose headless bindings for freetype library bundled with Chromium.
-headless_fontconfig_utils = false
-
-# Remove a dependency on a system fontconfig library.
-use_bundled_fontconfig = true
 
 # In order to simplify deployment we build ICU data file
 # into binary.
@@ -24,6 +13,7 @@ v8_use_external_startup_data = false
 
 enable_nacl = false
 enable_print_preview = false
+enable_basic_printing = false
 enable_remoting = false
 use_alsa = false
 use_cups = false

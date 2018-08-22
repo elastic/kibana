@@ -1,61 +1,95 @@
-# Chromium headless build
+# Chromium build
 
-This is the build setup for the headless Chromium used by Kibana reporting.
+We ship our own headless build of Chromium which is significantly smaller than the standard binaries shipped by Google. The scripts in this folder can be used to initialize the build environments and run the build on Mac, Windows, and Linux.
 
-The build scripts are written in a combination of shell, batch, and Python, with as much as possible in Python. Python was chosen because it's a reasonable cross-platform script, and it's already required by the Chromium build.
+The official Chromium build process is poorly documented, and seems to have breaking changes fairly regularly. The build pre-requisites, and the build flags change over time, so it is likely that the scripts in this directory will be out of date by the time we have to do another Chromium build.
 
-Chromium should be built on 3 different machines: Windows, Mac, and a debian flavored Linux such as Ubuntu. Each platform has its own folder with the following files:
+This document is an attempt to note all of the gotchas we've come across while building, so that the next time we have to tinker here, we'll have a good starting point.
 
-- `init.{sh|bat}` - an init script which needs only be run once per VM. In Windows, this requires a GUI and user input.
-- `args.gn` - The platform's build arguments
+## Build args
 
-If setting up a VM for the first time, run the `init` script from the appropriate platform folder, e.g. on Linux, you'd run `linux/init.sh`. Once the VM is initialized, you can kick off a build like so:
+Chromium is built via a build tool called "ninja". The build can be configured by specifying build flags either in an "args.gn" file or via commandline args. We have an "args.gn" file per platform:
 
-`python build.py {sha or Chromium version}`
+- mac: darwin/args.gn
+- linux: linux/args.gn
+- windows: windows/args.gn
 
-## build.py
+The various build flags are not well documented. Some are documented [here](https://www.chromium.org/developers/gn-build-configuration). Some, such as `enable_basic_printing = false`, I only found by poking through 3rd party build scripts.
 
-The `build.py` script runs the Chromium build. The VM should first have been initialized with the appropriate init script (see the previous section for details).
+As of this writing, there is an officially supported headless Chromium build args file for Linux: `build/args/headless.gn`. This does not work on Windows or Mac, so we have taken that as our starting point, and modified it until the Windows / Mac builds succeeded.
 
-When it's done, there will be the following build artifacts in a sibling directory:
+## VMs
 
-- `bin/headless_shell` - The raw headless_shell executable
-- `bin/headless_shell.zip` - The zipped headless_shell executable
-- `bin/headless_shell.md5` - A file containing the md5 hash of the zip file
+I ran Linux and Windows VMs in GCP with the following specs:
 
-## Building a Chromium revision
+- 8 core vCPU
+- 30GB RAM
+- 128GB hard drive
+- Ubuntu 18.04 LTS (not minimal)
+- Windows Server 2016 (full, with desktop)
 
-If you have a Chromium revision, such as the one referred to by Puppeteer's `package.json`, you have to convert it to a SHA in order to build it. Put the revision into this URL: https://crrev.com/
+The more cores the better, as the build makes effective use of each. For Linux, Ubuntu is the only officially supported build target.
 
-For example: https://crrev.com/575458
+- Linux:
+  - SSH in using [gcloud](https://cloud.google.com/sdk/)
+  - Get the ssh command in the [GCP console](https://console.cloud.google.com/) -> VM instances -> your-vm-name -> SSH -> gcloud
+  - Their in-browser UI is kinda sluggish, so use the commandline tool
 
-## Folders
+- Windows:
+  - Install Microsoft's Remote Desktop tools
+  - Get the RDP file in the [GCP console](https://console.cloud.google.com/) -> VM instances -> your-vm-name -> RDP -> Download the RDP file
+  - Edit it in Microsoft Remote Desktop:
+    - Display -> Resolution (1280 x 960 or something reasonable)
+    - Local Resources -> Folders, then select the folder(s) you want to share, this is at least `build_chromium` folder
+    - Save
 
-This folder is expected to be copied to the build machines where it will create sibling folders:
+## Initializing each VM / environment
 
-```
-/build_chromium
-  /build.py
-  /darwin
-    init.sn
-    args.gn
-  /windows
-    init.bat
-    args.gn
-  /linux
-    init.sh
-    args.gn
-/bin
-  headless_shell
-  headless_shell.zip
-  headless_shell.md5
-/depot_tools
-/chromium
-  /src
-    /out/headless
-```
+You only need to initialize each environment once.
 
-## References
+Create the build folder:
+
+- Mac / Linux: `mkdir -p ~/chromium`
+- Windows: `mkdir c:\chromium`
+
+Copy the `x-pack/build-chromium` folder to each. Replace `you@your-machine` with the correct username and VM name:
+
+- Mac: `cp -r ~/dev/elastic/kibana/x-pack/build_chromium ~/chromium/build_chromium`
+- Linux: `gcloud compute scp --recurse ~/dev/build_chromium/ you@your-machine:~/chromium --zone=us-east1-b`
+- Windows: Copy the `build_chromium` folder via the RDP GUI into `c:\chromium\build_chromium`
+
+There is an init script for each platform. This downloads and installs the necessary prerequisites, sets environment variables, etc.
+
+- Mac: `~/chromium/build_chromium/darwin/init.sh`
+- Linux: `~/chromium/build_chromium/linux/init.sh`
+- Windows `c:\chromium\build_chromium\windows\init.bat`
+
+In windows, at least, you will need to do a number of extra steps:
+
+- Follow the prompts in the Visual Studio installation process, click "Install" and wait a while
+- Once it's installed, open Control Panel and turn on Debugging Tools for Windows:
+  - Control Panel → Programs → Programs and Features → Select the “Windows Software Development Kit” → Change → Change → Check “Debugging Tools For Windows” → Change
+- Press enter in the terminal to continue running the init
+
+## Building
+
+Find the sha of the Chromium commit you wish to build. Most likely, you want to build the Chromium revision that is tied to the version of puppeteer that we're using.
+
+Find the Chromium revision (modify the following command to be wherever you have the kibana source installed):
+
+- `cat ~/dev/elastic/kibana/x-pack/node_modules/puppeteer-core/package.json | grep chromium_revision`
+- Take the revision number from that, and tack it to the end of this URL: https://crrev.com
+  - (For example: https://crrev.com/575458)
+- Grab the SHA from there
+  - (For example, rev 575458 has sha 4747cc23ae334a57a35ed3c8e6adcdbc8a50d479)
+
+Run the build, replacing the sha with the one you wish to build:
+
+- Mac: `python ~/chromium/build_chromium/build.py 4747cc23ae334a57a35ed3c8e6adcdbc8a50d479`
+- Linux: `python ~/chromium/build_chromium/build.py 4747cc23ae334a57a35ed3c8e6adcdbc8a50d479`
+- Windows: `python c:\chromium\build_chromium\build.py 4747cc23ae334a57a35ed3c8e6adcdbc8a50d479`
+
+## Resources
 
 The following links provide helpful context about how the Chromium build works, and its prerequisites:
 
@@ -63,74 +97,5 @@ The following links provide helpful context about how the Chromium build works, 
 - https://chromium.googlesource.com/chromium/src/+/master/docs/windows_build_instructions.md
 - https://chromium.googlesource.com/chromium/src/+/master/docs/mac_build_instructions.md
 - https://chromium.googlesource.com/chromium/src/+/master/docs/linux_build_instructions.md
+- Some build-flag descriptions: https://www.chromium.org/developers/gn-build-configuration
 - The serverless Chromium project was indispensable: https://github.com/adieuadieu/serverless-chrome/blob/b29445aa5a96d031be2edd5d1fc8651683bf262c/packages/lambda/builds/chromium/build/build.sh
-
-## Initializing machines in the cloud
-
-The following are notes on how I ran the build in GCP, and are here just to serve as a reference for setting up VMs initially.
-
-### Linux
-
-In GCP, create a machine with the following parameters:
-
-- Ubuntu 18.04 LTS (not minimal)
-- 128GB disk
-- 2 vCPUs
-- 10GB RAM
-- 128GB Disk
-- Name: 'chromium-build-linux'
-- SSH into the instance:
-  - `gcloud compute --project "elastic-kibana-184716" ssh --zone "us-east1-b" "chromium-build-linux"`
-  - Create build folder:
-    - `mkdir -p ~/chromium/build_chromium`
-    - `cd ~/chromium`
-- Copy build scripts (from dev machine to instance):
-  - `gcloud compute scp --recurse ~/dev/build_chromium/ chip@chromium-build-linux:~/chromium --zone=us-east1-b`
-- In Linux VM:
-  - Make sure it runs even if you disconnect: `tmux`
-  - Initialize: `./build_chromium/linux/init.sh`
-  - Build: `python ./build_chromium/build.py 4747cc23ae334a57a35ed3c8e6adcdbc8a50d479`
-
-### Mac
-
-Running the build on mac, you should copy the `x-pack/build_chromium` directory to its own location:
-
-- `mkdir -p ~/dev/chromium/build_chromium`
-- `cp -R ~/dev/elastic/kibana/x-pack/build_chromium ~/dev/chromium`
-- Run the init command, if you've never done it: `~/dev/chromium/build_chromium/darwin/init.sh`
-- Build: `python ~/dev/chromium/build_chromium/build.py 4747cc23ae334a57a35ed3c8e6adcdbc8a50d479`
-
-### Windows
-
-In GCP, create a machine with the following parameters:
-
-- Windows Server 2016 Datacenter (with desktop experience)
-- 128GB disk
-- 2 vCPUs
-- 10GB RAM
-- 128GB Disk
-- Name: 'chromium-build-windows'
-- Once provisioned, click: Set Windows password
-- Note the password, as it's only available once
-- Click Rdp -> Download RDP File
-- Open Microsoft's RDP Connection center (download the RDP app)
-- Drag the RDP file to this
-- Edit the RDP in the connection center
-  - Display -> Resolution (1280 x 960 or something reasonable)
-  - Local Resources -> Folders, then select the folder(s) you want to share, this is at least this build scripts folder
-  - Save
-- Launch the RDP connection
-  - Log in n' such
-  - Ignore the security warnings (should figure out how to set this up properly)
-- Create `C:\chromium\build_chromium`
-- Copy the `build_chromium` from x-pack into this location
-- Launch cmd
-  - `cd /chromium`
-  - `build_chromium\windows\init.bat`
-  - This will launch the Visual Studio installer, which will have lots of prompts and downloads
-  - Under "Individual Components", make sure Windows 10 SDK 10.0.17 is checked (or the latest)
-  - Click install and wait a while
-  - Once it's installed, open Control Panel and turn on Debugging Tools for Windows:
-     - Control Panel → Programs → Programs and Features → Select the “Windows Software Development Kit” → Change → Change → Check “Debugging Tools For Windows” → Change
-  - Press enter in the init terminal
-- Run the build: `python build_chromium\build.py 4747cc23ae334a57a35ed3c8e6adcdbc8a50d479`
