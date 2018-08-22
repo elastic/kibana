@@ -17,10 +17,11 @@
  * under the License.
  */
 
+import { ReactElement } from 'react';
 import { PanelActionAPI } from './types';
 
 interface DashboardContextMenuPanelOptions {
-  getContent?: (panelActionAPI: PanelActionAPI) => JSX.Element | Element | undefined;
+  getContent?: (panelActionAPI: PanelActionAPI) => ReactElement<any> | HTMLElement | undefined;
 }
 
 interface DashboardContextMenuPanelConfig {
@@ -47,7 +48,7 @@ export class DashboardContextMenuPanel {
   /**
    * Optional, could be composed of actions instead of content.
    */
-  public getContent(panelActionAPI: PanelActionAPI): JSX.Element | Element | undefined {
+  public getContent(panelActionAPI: PanelActionAPI): ReactElement<any> | HTMLElement | undefined {
     return;
   }
 }

@@ -173,9 +173,12 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
       return await testSubjects.exists('titleDupicateWarnMsg');
     }
 
-    async clickEdit() {
-      log.debug('Clicking edit');
-      return await testSubjects.click('dashboardEditMode');
+    async switchToEditMode() {
+      log.debug('Switching to edit mode');
+      await testSubjects.click('dashboardEditMode');
+      await retry.waitFor('not in view mode', async () => (
+        !await this.getIsInViewMode()
+      ));
     }
 
     async getIsInViewMode() {
@@ -278,7 +281,7 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
 
     async gotoDashboardEditMode(dashboardName) {
       await this.loadSavedDashboard(dashboardName);
-      await this.clickEdit();
+      await this.switchToEditMode();
     }
 
     async renameDashboard(dashName) {
@@ -288,6 +291,8 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
     }
 
     /**
+     * Save the current dashboard with the specified name and options and
+     * verify that the save was successful
      *
      * @param dashName {String}
      * @param saveOptions {{storeTimeWithDashboard: boolean, saveAsNew: boolean, needsConfirm: false}}
@@ -301,8 +306,21 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
 
       await PageObjects.header.waitUntilLoadingHasFinished();
 
-      // Confirm that the Dashboard has been saved.
-      return await testSubjects.exists('saveDashboardSuccess');
+      // Confirm that the Dashboard has actually been saved
+      if (!await testSubjects.exists('saveDashboardSuccess')) {
+        throw new Error('Expected to find "saveDashboardSuccess" toast after saving dashboard');
+      }
+
+      await this.waitForSaveModalToClose();
+    }
+
+    async waitForSaveModalToClose() {
+      log.debug('Waiting for dashboard save modal to close');
+      await retry.try(async () => {
+        if (await testSubjects.exists('dashboardSaveModal')) {
+          throw new Error('dashboard save still open');
+        }
+      });
     }
 
     async deleteDashboard(dashboardName, dashboardId) {
@@ -388,7 +406,7 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
     }
 
     async getCountOfDashboardsInListingTable() {
-      const dashboardTitles = await find.allByCssSelector('.dashboardLink');
+      const dashboardTitles = await find.allByCssSelector('[data-test-subj^="dashboardListingTitleLink"]');
       return dashboardTitles.length;
     }
 
@@ -404,6 +422,8 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
     // entry, or at least to a single page of results
     async loadSavedDashboard(dashName) {
       log.debug(`Load Saved Dashboard ${dashName}`);
+
+      await this.gotoDashboardLandingPage();
 
       await retry.try(async () => {
         await this.searchForDashboardWithName(dashName);

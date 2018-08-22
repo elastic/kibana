@@ -4,10 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { createAction } from "redux-actions";
+import { createAction } from 'redux-actions';
+import { i18n }  from '@kbn/i18n';
 
-import { refreshIndices as request } from "../../services";
-import { clearRowStatus, reloadIndices } from "../actions";
+import { refreshIndices as request } from '../../services';
+import { clearRowStatus, reloadIndices } from '../actions';
 import { toastNotifications } from 'ui/notify';
 
 export const refreshIndicesStart = createAction(
@@ -22,5 +23,10 @@ export const refreshIndices = ({ indexNames }) => async (dispatch) => {
     return dispatch(clearRowStatus({ indexNames }));
   }
   dispatch(reloadIndices(indexNames));
-  toastNotifications.addSuccess(`Successfully refreshed: [${indexNames.join(", ")}]`);
+  toastNotifications.addSuccess(
+    i18n.translate('xpack.idxMgmt.refreshIndicesAction.successfullyRefreshedIndicesMessage', {
+      defaultMessage: 'Successfully refreshed: [{indexNames}]',
+      values: { indexNames: indexNames.join(', ') }
+    })
+  );
 };

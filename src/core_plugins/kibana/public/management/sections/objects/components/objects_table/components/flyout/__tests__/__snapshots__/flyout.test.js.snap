@@ -4,9 +4,10 @@ exports[`Flyout conflicts should allow conflict resolution 1`] = `
 <EuiFlyout
   closeButtonAriaLabel="Closes this dialog"
   hideCloseButton={false}
+  maxWidth={false}
   onClose={[MockFunction]}
   ownFocus={false}
-  size="m"
+  size="s"
 >
   <EuiFlyoutHeader
     hasBorder={false}
@@ -164,9 +165,10 @@ exports[`Flyout should render import step 1`] = `
 <EuiFlyout
   closeButtonAriaLabel="Closes this dialog"
   hideCloseButton={false}
+  maxWidth={false}
   onClose={[MockFunction]}
   ownFocus={false}
-  size="m"
+  size="s"
 >
   <EuiFlyoutHeader
     hasBorder={false}

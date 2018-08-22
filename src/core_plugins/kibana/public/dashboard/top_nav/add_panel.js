@@ -17,7 +17,6 @@
  * under the License.
  */
 
-import './add_panel.less';
 import React from 'react';
 import PropTypes from 'prop-types';
 import { toastNotifications } from 'ui/notify';
@@ -128,7 +127,6 @@ export class DashboardAddPanel extends React.Component {
     return (
       <EuiFlyout
         ownFocus
-        className="addPanelFlyout"
         onClose={this.props.onClose}
         size="s"
         data-test-subj="dashboardAddPanel"

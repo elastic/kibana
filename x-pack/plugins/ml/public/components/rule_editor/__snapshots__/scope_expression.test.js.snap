@@ -20,6 +20,7 @@ exports[`ScopeExpression renders when empty list of filter IDs is supplied 1`] =
       compressed={false}
       disabled={false}
       id="scope_cb_domain"
+      indeterminate={false}
       onChange={[Function]}
     />
   </EuiFlexItem>
@@ -58,6 +59,7 @@ exports[`ScopeExpression renders when enabled set to false 1`] = `
       compressed={false}
       disabled={false}
       id="scope_cb_domain"
+      indeterminate={false}
       onChange={[Function]}
     />
   </EuiFlexItem>
@@ -211,6 +213,7 @@ exports[`ScopeExpression renders when filter ID and type supplied 1`] = `
       compressed={false}
       disabled={false}
       id="scope_cb_domain"
+      indeterminate={false}
       onChange={[Function]}
     />
   </EuiFlexItem>
@@ -364,6 +367,7 @@ exports[`ScopeExpression renders when no filter ID or type supplied 1`] = `
       compressed={false}
       disabled={false}
       id="scope_cb_domain"
+      indeterminate={false}
       onChange={[Function]}
     />
   </EuiFlexItem>
