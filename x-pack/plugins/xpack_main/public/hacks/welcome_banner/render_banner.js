@@ -14,15 +14,15 @@ import { OptInBanner } from './opt_in_banner_component';
 /**
  * Render the Telemetry Opt-in banner.
  *
- * @param {Object} config The advanced settings config.
+ * @param {Object} telemetryOptInProvider The telemetry opt-in provider.
  * @param {Function} fetchTelemetry Function to pull telemetry on demand.
  * @param {Object} _banners Banners singleton, which can be overridden for tests.
  */
-export function renderBanner(config, fetchTelemetry, { _banners = banners } = { }) {
+export function renderBanner(telemetryOptInProvider, fetchTelemetry, { _banners = banners } = {}) {
   const bannerId = _banners.add({
     component: (
       <OptInBanner
-        optInClick={optIn => clickBanner(bannerId, config, optIn)}
+        optInClick={optIn => clickBanner(bannerId, telemetryOptInProvider, optIn)}
         fetchTelemetry={fetchTelemetry}
       />
     ),
