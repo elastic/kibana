@@ -27,10 +27,10 @@ const unitsMap = {
   d: { weight: 5, type: 'mixed', base: 1000 * 60 * 60 * 24 },
   w: { weight: 6, type: 'calendar' },
   M: { weight: 7, type: 'calendar' },
-  q: { weight: 8, type: 'calendar' },
+  // q: { weight: 8, type: 'calendar' }, // TODO: moment duration does not support quarter
   y: { weight: 9, type: 'calendar' },
 };
-const units = Object.keys(unitsMap);
+const units = Object.keys(unitsMap).sort((a, b) => unitsMap[a].weight - unitsMap[b].weight);
 const unitsDesc = [...units].reverse();
 const unitsAsc = [...units];
 

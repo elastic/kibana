@@ -148,11 +148,6 @@ export const dateHistogramBucketAgg = new BucketAggType({
       },
     },
     {
-      name: 'intervalBase',
-      default: undefined,
-      write: _.noop
-    },
-    {
       name: 'customInterval',
       default: '2h',
       write: _.noop

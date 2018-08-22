@@ -103,7 +103,6 @@ describe('parseInterval', function () {
       expect(parseEsInterval('1d')).to.eql({ value: 1, unit: 'd', type: 'calendar' });
       expect(parseEsInterval('1w')).to.eql({ value: 1, unit: 'w', type: 'calendar' });
       expect(parseEsInterval('1M')).to.eql({ value: 1, unit: 'M', type: 'calendar' });
-      expect(parseEsInterval('1q')).to.eql({ value: 1, unit: 'q', type: 'calendar' });
       expect(parseEsInterval('1y')).to.eql({ value: 1, unit: 'y', type: 'calendar' });
     });
 
@@ -118,7 +117,6 @@ describe('parseInterval', function () {
     it('should throw an error for intervals containing calendar unit and multiple value', function () {
       expect(parseEsInterval).withArgs('4w').to.throwError();
       expect(parseEsInterval).withArgs('12M').to.throwError();
-      expect(parseEsInterval).withArgs('2q').to.throwError();
       expect(parseEsInterval).withArgs('10y').to.throwError();
     });
 

@@ -22,7 +22,7 @@
  */
 interface Param {
   hidden?: boolean;
-  warning?: string;
+  help?: string;
 }
 
 /**
