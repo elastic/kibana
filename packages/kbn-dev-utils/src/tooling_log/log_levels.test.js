@@ -17,11 +17,19 @@
  * under the License.
  */
 
-const { ToolingLog } = require('@kbn/dev-utils');
+import { parseLogLevel } from './log_levels';
 
-const log = new ToolingLog({
-  level: 'verbose',
-  writeTo: process.stdout,
+it('parses valid log levels correctly', () => {
+  expect(parseLogLevel('silent')).toMatchSnapshot('silent');
+  expect(parseLogLevel('error')).toMatchSnapshot('error');
+  expect(parseLogLevel('warning')).toMatchSnapshot('warning');
+  expect(parseLogLevel('info')).toMatchSnapshot('info');
+  expect(parseLogLevel('debug')).toMatchSnapshot('debug');
+  expect(parseLogLevel('verbose')).toMatchSnapshot('verbose');
 });
 
-exports.log = log;
+it('throws error for invalid levels', () => {
+  expect(() => parseLogLevel('warn')).toThrowErrorMatchingSnapshot('warn');
+  expect(() => parseLogLevel('foo')).toThrowErrorMatchingSnapshot('foo');
+  expect(() => parseLogLevel('bar')).toThrowErrorMatchingSnapshot('bar');
+});
