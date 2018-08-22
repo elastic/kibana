@@ -38,13 +38,13 @@ export function redisLogsSpecProvider() {
     longDescription: i18n.translate('kbn.server.tutorials.redisLogs.longDescription', {
       // eslint-disable-next-line no-multi-str
       defaultMessage: 'The `redis` Filebeat module parses error and slow logs created by Redis. \
-        For Redis to write error logs, make sure the `logfile` option, from the \
-        Redis configuration file, is set to `redis-server.log`. \
-        The slow logs are read directly from Redis via the `SLOWLOG` command. \
-        For Redis to record slow logs, make sure the `slowlog-log-slower-than` \
-        option is set. \
-        Note that the `slowlog` fileset is experimental. \
-        [Learn more]({learnMoreLink}).',
+For Redis to write error logs, make sure the `logfile` option, from the \
+Redis configuration file, is set to `redis-server.log`. \
+The slow logs are read directly from Redis via the `SLOWLOG` command. \
+For Redis to record slow logs, make sure the `slowlog-log-slower-than` \
+option is set. \
+Note that the `slowlog` fileset is experimental. \
+[Learn more]({learnMoreLink}).',
       values: {
         learnMoreLink: '{config.docs.beats.filebeat}/filebeat-module-redis.html',
       },

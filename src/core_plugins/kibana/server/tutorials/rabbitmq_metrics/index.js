@@ -35,7 +35,7 @@ export function rabbitmqMetricsSpecProvider() {
     longDescription: i18n.translate('kbn.server.tutorials.rabbitmqMetrics.longDescription', {
       // eslint-disable-next-line no-multi-str
       defaultMessage: 'The `rabbitmq` Metricbeat module fetches internal metrics from the RabbitMQ server. \
-        [Learn more]({learnMoreLink}).',
+[Learn more]({learnMoreLink}).',
       values: {
         learnMoreLink: '{config.docs.beats.metricbeat}/metricbeat-module-rabbitmq.html',
       },

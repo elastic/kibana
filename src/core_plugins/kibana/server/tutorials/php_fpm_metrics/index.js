@@ -36,7 +36,7 @@ export function phpfpmMetricsSpecProvider() {
     longDescription: i18n.translate('kbn.server.tutorials.phpFpmMetrics.shortDescription', {
       // eslint-disable-next-line no-multi-str
       defaultMessage: 'The `php_fpm` Metricbeat module fetches internal metrics from the PHP-FPM server. \
-        [Learn more]({learnMoreLink}).',
+[Learn more]({learnMoreLink}).',
       values: {
         learnMoreLink: '{config.docs.beats.metricbeat}/metricbeat-module-php_fpm.html',
       },

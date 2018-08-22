@@ -36,7 +36,7 @@ export function postgresqlMetricsSpecProvider() {
     longDescription: i18n.translate('kbn.server.tutorials.postgresqlMetrics.longDescription', {
       // eslint-disable-next-line no-multi-str
       defaultMessage: 'The `postgresql` Metricbeat module fetches internal metrics from the PostgreSQL server. \
-        [Learn more]({learnMoreLink}).',
+[Learn more]({learnMoreLink}).',
       values: {
         learnMoreLink: '{config.docs.beats.metricbeat}/metricbeat-module-postgresql.html',
       },

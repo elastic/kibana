@@ -38,7 +38,7 @@ export function osqueryLogsSpecProvider() {
     longDescription: i18n.translate('kbn.server.tutorials.osqueryLogs.longDescription', {
       // eslint-disable-next-line no-multi-str
       defaultMessage: 'The `osquery` Filebeat module collects the JSON result logs collected by `osqueryd`. \
-        [Learn more]({learnMoreLink}).',
+[Learn more]({learnMoreLink}).',
       values: {
         learnMoreLink: '{config.docs.beats.filebeat}/filebeat-module-osquery.html',
       },
