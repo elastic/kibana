@@ -104,7 +104,7 @@ export class WorkspaceHandler {
         for (const full of result) {
           if (full.symbols) {
             for (const symbol of full.symbols) {
-              const parsedLocation = this.parseLocation(symbol.symbolInformation.location);
+              const parsedLocation = this.convertLocation(symbol.symbolInformation.location);
               if (parsedLocation) {
                 symbol.repoUri = parsedLocation[0];
                 symbol.revision = parsedLocation[1];
@@ -166,6 +166,7 @@ export class WorkspaceHandler {
     if (parsedLocation) {
       location.uri = `git://${parsedLocation[0]}?${parsedLocation[1]}#${parsedLocation[2]}`;
     }
+    return parsedLocation;
   }
 
   /**
