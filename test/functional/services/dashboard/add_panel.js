@@ -24,6 +24,7 @@ export function DashboardAddPanelProvider({ getService, getPageObjects }) {
   const testSubjects = getService('testSubjects');
   const flyout = getService('flyout');
   const PageObjects = getPageObjects(['header', 'common']);
+  const remote = getService('remote');
 
   return new class DashboardAddPanel {
     async clickOpenAddPanel() {
@@ -94,8 +95,19 @@ export function DashboardAddPanelProvider({ getService, getPageObjects }) {
     }
 
     async waitForEuiTableLoading() {
-      const addPanel = await testSubjects.find('dashboardAddPanel');
-      await addPanel.waitForDeletedByClassName('euiBasicTable-loading');
+      // Lee.Dr: existing code - waited 10 second timeout to try to find 'euiBasicTable-loading'
+      // const addPanel = await testSubjects.find('dashboardAddPanel');
+      // await addPanel.waitForDeletedByClassName('euiBasicTable-loading');
+
+      // Option 1: waitForDeleted with a 1 second timeout
+      // await remote.setFindTimeout(1000).waitForDeletedByClassName('euiBasicTable-loading');
+
+      // Option 2: find the table and wait for it to not have the 'euiBasicTable-loading' class
+      // This should be the fastest.
+      await retry.waitFor('dashboard add panel loading to complete', async () => {
+        const table = await remote.findByClassName('euiBasicTable');
+        return !((await table.getAttribute('class')).includes('loading'));
+      });
     }
 
     async closeAddPanel() {
