@@ -35,7 +35,7 @@ export function mongodbMetricsSpecProvider() {
     longDescription: i18n.translate('kbn.server.tutorials.mongodbMetrics.longDescription', {
       // eslint-disable-next-line no-multi-str
       defaultMessage: 'The `mongodb` Metricbeat module fetches internal metrics from the MongoDB server. \
-        [Learn more]({learnMoreLink}).',
+[Learn more]({learnMoreLink}).',
       values: {
         learnMoreLink: '{config.docs.beats.metricbeat}/metricbeat-module-mongodb.html',
       },
