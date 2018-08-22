@@ -36,7 +36,7 @@ export function elasticsearchMetricsSpecProvider() {
     longDescription: i18n.translate('kbn.server.tutorials.elasticsearchMetrics.longDescription', {
       // eslint-disable-next-line no-multi-str
       defaultMessage: 'The `elasticsearch` Metricbeat module fetches internal metrics from Elasticsearch. \
-        [Learn more]({learnMoreLink}).',
+[Learn more]({learnMoreLink}).',
       values: {
         learnMoreLink: '{config.docs.beats.metricbeat}/metricbeat-module-elasticsearch.html',
       },

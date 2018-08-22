@@ -36,7 +36,7 @@ export function golangMetricsSpecProvider() {
     longDescription: i18n.translate('kbn.server.tutorials.golangMetrics.longDescription', {
       // eslint-disable-next-line no-multi-str
       defaultMessage: 'The `{moduleName}` Metricbeat module fetches internal metrics from a Golang app. \
-        [Learn more]({learnMoreLink}).',
+[Learn more]({learnMoreLink}).',
       values: {
         moduleName,
         learnMoreLink: `{config.docs.beats.metricbeat}/metricbeat-module-${moduleName}.html`,
