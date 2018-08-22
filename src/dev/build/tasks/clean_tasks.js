@@ -215,7 +215,6 @@ export const CleanExtraBrowsersTask = {
 };
 
 export const CleanEmptyFoldersTask = {
-  global: true,
   description: 'Cleaning all empty folders recursively',
 
   async run(config, log, build) {
