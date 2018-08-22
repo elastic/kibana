@@ -16,7 +16,7 @@ export class SecureSavedObjectsClientWrapper {
       errors,
       request,
       savedObjectTypes,
-      spacesService,
+      spaces,
     } = options;
 
     this.errors = errors;
@@ -26,7 +26,7 @@ export class SecureSavedObjectsClientWrapper {
     this._checkPrivileges = checkPrivilegesWithRequest(request);
     this._request = request;
     this._savedObjectTypes = savedObjectTypes;
-    this._spacesService = spacesService;
+    this._spaces = spaces;
   }
 
   async create(type, attributes = {}, options = {}) {
@@ -101,8 +101,8 @@ export class SecureSavedObjectsClientWrapper {
 
   async _checkSavedObjectPrivileges(actions) {
     try {
-      if (!this._spacesService) {
-        const spaceId = this._spacesService.getSpaceId(this._request);
+      if (!this._spaces) {
+        const spaceId = this._spaces.getSpaceId(this._request);
         return await this._checkPrivileges.atSpace(spaceId, actions);
       }
       else {

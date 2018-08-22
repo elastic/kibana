@@ -143,7 +143,7 @@ export const security = (kibana) => new kibana.Plugin({
 
     savedObjects.addScopedSavedObjectsClientWrapperFactory(Number.MIN_VALUE, ({ client, request }) => {
       if (authorization.mode.useRbacForRequest(request)) {
-        const { spacesService } = server.plugins.spaces;
+        const { spaces } = server.plugins;
 
         return new SecureSavedObjectsClientWrapper({
           actions: authorization.actions,
@@ -153,7 +153,7 @@ export const security = (kibana) => new kibana.Plugin({
           errors: savedObjects.SavedObjectsClient.errors,
           request,
           savedObjectTypes: savedObjects.types,
-          spacesService,
+          spaces,
         });
       }
 

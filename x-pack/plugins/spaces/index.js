@@ -81,7 +81,7 @@ export const spaces = (kibana) => new kibana.Plugin({
     validateConfig(config, message => server.log(['spaces', 'warning'], message));
 
     const spacesService = createSpacesService(server);
-    server.expose('spacesService', spacesService);
+    server.expose('getSpaceId', (request) => spacesService.getSpaceId(request));
 
     server.expose('spacesClient', {
       getScopedClient: (request) => {
