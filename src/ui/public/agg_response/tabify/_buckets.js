@@ -40,7 +40,9 @@ function TabifyBuckets(aggResp, aggParams, timeRange) {
 
   if (this.length && aggParams) {
     this._orderBucketsAccordingToParams(aggParams);
-    if (aggParams.drop_partials) this._dropPartials(aggParams, timeRange);
+    if (aggParams.drop_partials) {
+      this._dropPartials(aggParams, timeRange);
+    }
   }
 }
 
@@ -78,7 +80,9 @@ TabifyBuckets.prototype._orderBucketsAccordingToParams = function (params) {
       ranges = params.ipRangeType === 'mask' ? ranges.mask : ranges.fromTo;
     }
     this.buckets = ranges.map(range => {
-      if (range.mask) return this.buckets.find(el => el.key === range.mask);
+      if (range.mask) {
+        return this.buckets.find(el => el.key === range.mask);
+      }
       return this.buckets.find(el => this._isRangeEqual(el, range));
     });
   }
@@ -90,13 +94,19 @@ TabifyBuckets.prototype._dropPartials = function (params, timeRange) {
   if (!timeRange ||
     this.buckets.length <= 1 ||
     this.objectMode ||
-    params.field.name !== timeRange.name) return;
+    params.field.name !== timeRange.name) {
+    return;
+  }
 
   const interval = this.buckets[1].key - this.buckets[0].key;
 
   this.buckets = this.buckets.filter(bucket => {
-    if (bucket.key < timeRange.gte) return false;
-    if (bucket.key + interval > timeRange.lte) return false;
+    if (bucket.key < timeRange.gte) {
+      return false;
+    }
+    if (bucket.key + interval > timeRange.lte) {
+      return false;
+    }
     return true;
   });
 
