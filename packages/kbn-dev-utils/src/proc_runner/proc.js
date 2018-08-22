@@ -39,10 +39,7 @@ async function withTimeout(attempt, ms, onTimeout) {
   try {
     await Promise.race([
       attempt(),
-      new Promise((resolve, reject) => setTimeout(
-        () => reject(TIMEOUT),
-        STOP_TIMEOUT
-      ))
+      new Promise((resolve, reject) => setTimeout(() => reject(TIMEOUT), STOP_TIMEOUT)),
     ]);
   } catch (error) {
     if (error === TIMEOUT) {
@@ -143,7 +140,9 @@ export function createProc(name, { cmd, args, cwd, env, stdin, log }) {
         },
         STOP_TIMEOUT,
         async () => {
-          throw new Error(`Proc "${name}" was stopped but never emitted either the "exit" or "error" event after ${STOP_TIMEOUT} ms`);
+          throw new Error(
+            `Proc "${name}" was stopped but never emitted either the "exit" or "error" event after ${STOP_TIMEOUT} ms`
+          );
         }
       );
     }
