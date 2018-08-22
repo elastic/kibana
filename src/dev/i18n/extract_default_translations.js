@@ -168,7 +168,7 @@ function serializeToJson(defaultMessages) {
 
   for (const [mapKey, mapValue] of defaultMessages) {
     if (mapValue.context) {
-      resultJsonObject[mapKey] = { message: mapValue.message, context: mapValue.context };
+      resultJsonObject[mapKey] = { text: mapValue.message, comment: mapValue.context };
     } else {
       resultJsonObject[mapKey] = mapValue.message;
     }

@@ -60,8 +60,8 @@ exports[`dev/i18n/extract_default_translations extracts messages to en.json 1`] 
   },
   \\"plugin_1.id_1\\": \\"Message 1\\",
   \\"plugin_1.id_2\\": {
-    \\"message\\": \\"Message 2\\",
-    \\"context\\": \\"Message context\\"
+    \\"text\\": \\"Message 2\\",
+    \\"comment\\": \\"Message context\\"
   },
   \\"plugin_1.id_3\\": \\"Message 3\\",
   \\"plugin_1.id_4\\": \\"Message 4\\",
