@@ -3,7 +3,8 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { ALL_RESOURCE } from '../../../common/constants';
+import { GLOBAL_RESOURCE } from '../../../common/constants';
+import { spaceApplicationPrivilegesSerializer } from './space_application_privileges_serializer';
 
 const hasAnyApplicationPrivileges = applicationPrivilegesResponse => {
   return Object.values(applicationPrivilegesResponse).some(resource =>
@@ -16,7 +17,6 @@ export function authorizationModeFactory(
   checkPrivilegesWithRequest,
   config,
   plugins,
-  resources,
   savedObjects,
   xpackInfoFeature
 ) {
@@ -34,17 +34,16 @@ export function authorizationModeFactory(
       callWithInternalUser
     );
 
-    const getResources = async () => {
-      if (!plugins.spaces) {
-        return [ALL_RESOURCE];
-      }
-
-      const { saved_objects: savedObjects } = await internalSavedObjectsRepository.find({ type: 'space' });
-      return [ALL_RESOURCE, ...savedObjects.map(space => resources.getSpaceResource(space.id))];
-    };
-
     const checkPrivileges = checkPrivilegesWithRequest(request);
-    const { response } = await checkPrivileges(await getResources(), [actions.login]);
+    if (!plugins.spaces) {
+      const { response } = await checkPrivileges.globally(actions.login);
+      return hasAnyApplicationPrivileges(response);
+    }
+
+    const { saved_objects: spaceSavedObjects } = await internalSavedObjectsRepository.find({ type: 'space' });
+    const spaceResources = spaceSavedObjects.map(space => spaceApplicationPrivilegesSerializer.resource.serialize(space.id));
+    const allResources = [GLOBAL_RESOURCE, ...spaceResources];
+    const { response } = await checkPrivileges.atResources(allResources, actions.login);
     return hasAnyApplicationPrivileges(response);
   };
 

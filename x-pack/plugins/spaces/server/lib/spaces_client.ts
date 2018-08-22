@@ -36,23 +36,22 @@ export class SpacesClient {
 
       const spaces = saved_objects.map(this.transformSavedObjectToSpace);
 
-      const resources = spaces.map((space: any) =>
-        this.authorization.resources.getSpaceResource(space.id)
-      );
+      const spaceIds = spaces.map((space: any) => space.id);
       const checkPrivileges = this.authorization.checkPrivilegesWithRequest(this.request);
-      const { response } = await checkPrivileges(resources, [this.authorization.actions.login]);
+      const { response } = await checkPrivileges.atSpaces(
+        spaceIds,
+        this.authorization.actions.login
+      );
 
-      const authorized = Object.keys(response).filter(resource => {
-        return response[resource][this.authorization.actions.login];
+      const authorized = Object.keys(response).filter(spaceId => {
+        return response[spaceId][this.authorization.actions.login];
       });
 
       if (authorized.length === 0) {
         return Boom.forbidden();
       }
 
-      return spaces.filter((space: any) =>
-        authorized.includes(this.authorization.resources.getSpaceResource(space.id))
-      );
+      return spaces.filter((space: any) => authorized.includes(space.id));
     } else {
       const { saved_objects } = await this.callWithRequestSavedObjectRepository.find({
         type: 'space',
@@ -66,8 +65,8 @@ export class SpacesClient {
 
   public async get(id: string) {
     if (this.useRbac()) {
-      await this.ensureAuthorized(
-        this.authorization.resources.getSpaceResource(id),
+      await this.ensureAuthorizedAtSpace(
+        id,
         this.authorization.actions.login,
         `Unauthorized to get ${id} space`
       );
@@ -82,11 +81,7 @@ export class SpacesClient {
 
   public async create(space: any) {
     if (this.useRbac()) {
-      await this.ensureAuthorized(
-        this.authorization.resources.all,
-        actions.manage,
-        'Unauthorized to create spaces'
-      );
+      await this.ensureAuthorizedGlobally(actions.manage, 'Unauthorized to create spaces');
     }
     const repository = this.useRbac()
       ? this.internalSavedObjectRepository
@@ -100,11 +95,7 @@ export class SpacesClient {
 
   public async update(id: string, space: any) {
     if (this.useRbac()) {
-      await this.ensureAuthorized(
-        this.authorization.resources.all,
-        actions.manage,
-        'Unauthorized to update spaces'
-      );
+      await this.ensureAuthorizedGlobally(actions.manage, 'Unauthorized to update spaces');
     }
     const repository = this.useRbac()
       ? this.internalSavedObjectRepository
@@ -117,11 +108,7 @@ export class SpacesClient {
 
   public async delete(id: string) {
     if (this.useRbac()) {
-      await this.ensureAuthorized(
-        this.authorization.resources.all,
-        actions.manage,
-        'Unauthorized to delete spaces'
-      );
+      await this.ensureAuthorizedGlobally(actions.manage, 'Unauthorized to delete spaces');
     }
 
     const existingSpace = await this.get(id);
@@ -139,15 +126,28 @@ export class SpacesClient {
     return this.authorization && this.authorization.mode.useRbacForRequest(this.request);
   }
 
-  private async ensureAuthorized(resource: string, action: string, forbiddenMessage: string) {
+  private async ensureAuthorizedGlobally(action: string, forbiddenMessage: string) {
     const checkPrivileges = this.authorization.checkPrivilegesWithRequest(this.request);
-    const { hasAllRequested } = await checkPrivileges([resource], [action]);
+    const { hasAllRequested } = await checkPrivileges.globally(action);
 
     if (hasAllRequested) {
-      //TODO: LOG SOMETHING HERE
+      // TODO: LOG SOMETHING HERE
       return;
     } else {
-      //TODO: LOG SOMETHING HERE
+      // TODO: LOG SOMETHING HERE
+      throw Boom.forbidden(forbiddenMessage);
+    }
+  }
+
+  private async ensureAuthorizedAtSpace(spaceId: string, action: string, forbiddenMessage: string) {
+    const checkPrivileges = this.authorization.checkPrivilegesWithRequest(this.request);
+    const { hasAllRequested } = await checkPrivileges.atSpace(spaceId, action);
+
+    if (hasAllRequested) {
+      // TODO: LOG SOMETHING HERE
+      return;
+    } else {
+      // TODO: LOG SOMETHING HERE
       throw Boom.forbidden(forbiddenMessage);
     }
   }

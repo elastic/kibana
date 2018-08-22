@@ -35,6 +35,15 @@ export default function ({ getService }) {
       });
     };
 
+    const createExpectLegacyForbidden = (username) => (resp) => {
+      expect(resp.body).to.eql({
+        statusCode: 403,
+        error: 'Forbidden',
+        // eslint-disable-next-line max-len
+        message: `action [indices:data/read/get] is unauthorized for user [${username}]: [security_exception] action [indices:data/read/get] is unauthorized for user [${username}]`
+      });
+    };
+
     const selectTest = (description, { auth, tests }) => {
       describe(description, () => {
         before(async () => esArchiver.load(`saved_objects/spaces`));
@@ -70,11 +79,11 @@ export default function ({ getService }) {
       tests: {
         default: {
           statusCode: 403,
-          response: createExpectRbacForbidden('get', SPACES.DEFAULT.spaceId),
+          response: createExpectLegacyForbidden(AUTHENTICATION.NOT_A_KIBANA_USER.USERNAME),
         },
         space2FromSpace1: {
           statusCode: 403,
-          response: createExpectRbacForbidden('get', SPACES.SPACE_2.spaceId),
+          response: createExpectLegacyForbidden(AUTHENTICATION.NOT_A_KIBANA_USER.USERNAME),
         },
       }
     });

@@ -85,11 +85,11 @@ export default function ({ getService }) {
       tests: {
         fromDefaultSpace: {
           statusCode: 403,
-          response: createExpectRbacForbidden('update'),
+          response: createExpectLegacyForbidden(AUTHENTICATION.NOT_A_KIBANA_USER.USERNAME),
         },
         fromSpace1: {
           statusCode: 403,
-          response: createExpectRbacForbidden('update'),
+          response: createExpectLegacyForbidden(AUTHENTICATION.NOT_A_KIBANA_USER.USERNAME),
         },
       }
     });

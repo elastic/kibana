@@ -5,11 +5,9 @@
  */
 
 import { actionsFactory } from './actions';
-import { ALL_RESOURCE } from '../../../common/constants';
 import { authorizationModeFactory } from './mode';
 import { checkPrivilegesWithRequestFactory } from './check_privileges';
 import { getClient } from '../../../../../server/lib/get_client_shield';
-import { spaceApplicationPrivilegesSerializer } from './space_application_privileges_serializer';
 
 export function createAuthorizationService(server, xpackInfoFeature) {
   const shieldClient = getClient(server);
@@ -17,19 +15,12 @@ export function createAuthorizationService(server, xpackInfoFeature) {
 
   const actions = actionsFactory(config);
   const application = `kibana-${config.get('kibana.index')}`;
-  const checkPrivilegesWithRequest = checkPrivilegesWithRequestFactory(shieldClient, config, actions, application);
-  const resources = {
-    all: ALL_RESOURCE,
-    getSpaceResource(spaceId) {
-      return spaceApplicationPrivilegesSerializer.resource.serialize(spaceId);
-    }
-  };
+  const checkPrivilegesWithRequest = checkPrivilegesWithRequestFactory(actions, application, shieldClient);
   const mode = authorizationModeFactory(
     actions,
     checkPrivilegesWithRequest,
     config,
     server.plugins,
-    resources,
     server.savedObjects,
     xpackInfoFeature
   );
@@ -39,6 +30,5 @@ export function createAuthorizationService(server, xpackInfoFeature) {
     application,
     checkPrivilegesWithRequest,
     mode,
-    resources,
   };
 }

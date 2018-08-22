@@ -5,9 +5,9 @@
  */
 
 import { uniq } from 'lodash';
-import { checkPrivilegesWithRequestFactory, CHECK_PRIVILEGES_RESULT } from './check_privileges';
+import { checkPrivilegesWithRequestFactory } from './check_privileges';
 
-import { ALL_RESOURCE } from '../../../common/constants';
+import { GLOBAL_RESOURCE } from '../../../common/constants';
 
 const application = 'kibana-our_application';
 const defaultVersion = 'default-version';
@@ -64,7 +64,7 @@ const checkPrivilegesTest = (
       username,
       application: {
         [application]: {
-          [ALL_RESOURCE]: applicationPrivilegesResponse
+          [GLOBAL_RESOURCE]: applicationPrivilegesResponse
         }
       },
       index: {
@@ -89,7 +89,7 @@ const checkPrivilegesTest = (
       body: {
         applications: [{
           application,
-          resources: [ALL_RESOURCE],
+          resources: [GLOBAL_RESOURCE],
           privileges: uniq([
             mockActions.version, mockActions.login, ...privileges
           ])

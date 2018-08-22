@@ -5,9 +5,11 @@
  */
 
 import { pick, transform, uniq } from 'lodash';
+import { GLOBAL_RESOURCE } from '../../../common/constants';
+import { spaceApplicationPrivilegesSerializer } from './space_application_privileges_serializer';
 import { validateEsPrivilegeResponse } from './validate_es_response';
 
-export function checkPrivilegesWithRequestFactory(shieldClient, config, actions, application) {
+export function checkPrivilegesWithRequestFactory(actions, application, shieldClient) {
   const { callWithRequest } = shieldClient;
 
   const hasIncompatibileVersion = (applicationPrivilegesResponse) => {
@@ -16,7 +18,8 @@ export function checkPrivilegesWithRequestFactory(shieldClient, config, actions,
 
   return function checkPrivilegesWithRequest(request) {
 
-    return async function checkPrivileges(resources, privileges) {
+    const checkPrivilegesAtResources = async (resources, privilegeOrPrivileges) => {
+      const privileges = Array.isArray(privilegeOrPrivileges) ? privilegeOrPrivileges : [privilegeOrPrivileges];
       const allApplicationPrivileges = uniq([actions.version, actions.login, ...privileges]);
       const hasPrivilegesResponse = await callWithRequest(request, 'shield.hasPrivileges', {
         body: {
@@ -44,6 +47,38 @@ export function checkPrivilegesWithRequestFactory(shieldClient, config, actions,
           response[resourceResponse] = pick(resourcePrivilegesResponse, privileges);
         }),
       };
+    };
+
+    const checkPrivilegesAtResource = async (resource, privilegeOrPrivileges) => {
+      const { hasAllRequested, username, response } = await checkPrivilegesAtResources([resource], privilegeOrPrivileges);
+      return {
+        hasAllRequested,
+        username,
+        response: response[resource],
+      };
+    };
+
+    return {
+      atResources: checkPrivilegesAtResources,
+      async atSpace(spaceId, privilegeOrPrivileges) {
+        const spaceResource = spaceApplicationPrivilegesSerializer.resource.serialize(spaceId);
+        return await checkPrivilegesAtResource(spaceResource, privilegeOrPrivileges);
+      },
+      async atSpaces(spaceIds, privilegeOrPrivileges) {
+        const spaceResources = spaceIds.map(spaceId => spaceApplicationPrivilegesSerializer.resource.serialize(spaceId));
+        const { hasAllRequested, username, response } = await checkPrivilegesAtResources(spaceResources, privilegeOrPrivileges);
+        return {
+          hasAllRequested,
+          username,
+          response: transform(response, (result, value, key) => {
+            result[spaceApplicationPrivilegesSerializer.resource.deserialize(key)] = value;
+          }),
+        };
+
+      },
+      async globally(privilegeOrPrivileges) {
+        return await checkPrivilegesAtResource(GLOBAL_RESOURCE, privilegeOrPrivileges);
+      },
     };
   };
 }

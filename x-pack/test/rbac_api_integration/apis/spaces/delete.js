@@ -32,7 +32,7 @@ export default function ({ getService }) {
         statusCode: 403,
         error: 'Forbidden',
         // eslint-disable-next-line max-len
-        message: `action [indices:data/write/${action}] is unauthorized for user [${username}]: [security_exception] action [indices:data/write/${action}] is unauthorized for user [${username}]`
+        message: `action [indices:data/${action}] is unauthorized for user [${username}]: [security_exception] action [indices:data/${action}] is unauthorized for user [${username}]`
       });
     };
 
@@ -71,11 +71,11 @@ export default function ({ getService }) {
       tests: {
         fromDefaultSpace: {
           statusCode: 403,
-          response: createExpectRbacForbidden('delete'),
+          response: createExpectLegacyForbidden(AUTHENTICATION.NOT_A_KIBANA_USER.USERNAME, 'read/get'),
         },
         fromSpace1: {
           statusCode: 403,
-          response: createExpectRbacForbidden('delete'),
+          response: createExpectLegacyForbidden(AUTHENTICATION.NOT_A_KIBANA_USER.USERNAME, 'read/get'),
         },
       }
     });
@@ -122,11 +122,11 @@ export default function ({ getService }) {
       tests: {
         fromDefaultSpace: {
           statusCode: 403,
-          response: createExpectLegacyForbidden(AUTHENTICATION.KIBANA_LEGACY_DASHBOARD_ONLY_USER.USERNAME, 'delete'),
+          response: createExpectLegacyForbidden(AUTHENTICATION.KIBANA_LEGACY_DASHBOARD_ONLY_USER.USERNAME, 'write/delete'),
         },
         fromSpace1: {
           statusCode: 403,
-          response: createExpectLegacyForbidden(AUTHENTICATION.KIBANA_LEGACY_DASHBOARD_ONLY_USER.USERNAME, 'delete'),
+          response: createExpectLegacyForbidden(AUTHENTICATION.KIBANA_LEGACY_DASHBOARD_ONLY_USER.USERNAME, 'write/delete'),
         },
       }
     });

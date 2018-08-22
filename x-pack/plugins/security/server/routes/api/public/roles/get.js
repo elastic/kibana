@@ -5,7 +5,7 @@
  */
 import _ from 'lodash';
 import Boom from 'boom';
-import { ALL_RESOURCE } from '../../../../../common/constants';
+import { GLOBAL_RESOURCE } from '../../../../../common/constants';
 import { wrapError } from '../../../../lib/errors';
 import { spaceApplicationPrivilegesSerializer } from '../../../../lib/authorization';
 
@@ -20,7 +20,7 @@ export function initGetRolesApi(server, callWithRequest, routePreCheckLicenseFn,
     );
 
     return resourcePrivileges.reduce((result, { resource, privileges }) => {
-      if (resource === ALL_RESOURCE) {
+      if (resource === GLOBAL_RESOURCE) {
         result.global = _.uniq([...result.global, ...privileges]);
         return result;
       }

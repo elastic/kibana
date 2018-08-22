@@ -6,8 +6,8 @@
 
 import Joi from 'joi';
 
-export function validateEsPrivilegeResponse(response, application, actions, resources, kibanaIndex) {
-  const schema = buildValidationSchema(application, actions, resources, kibanaIndex);
+export function validateEsPrivilegeResponse(response, application, actions, resources) {
+  const schema = buildValidationSchema(application, actions, resources);
   const { error, value } = schema.validate(response);
 
   if (error) {

@@ -7,7 +7,7 @@
 import Hapi from 'hapi';
 import Boom from 'boom';
 import { initPutRolesApi } from './put';
-import { ALL_RESOURCE } from '../../../../../common/constants';
+import { GLOBAL_RESOURCE } from '../../../../../common/constants';
 
 const application = 'kibana-.kibana';
 
@@ -255,7 +255,7 @@ describe('PUT role', () => {
                       'test-global-privilege-2',
                       'test-global-privilege-3'
                     ],
-                    resources: [ALL_RESOURCE],
+                    resources: [GLOBAL_RESOURCE],
                   },
                   {
                     application,
@@ -378,7 +378,7 @@ describe('PUT role', () => {
                       'test-global-privilege-2',
                       'test-global-privilege-3'
                     ],
-                    resources: [ALL_RESOURCE],
+                    resources: [GLOBAL_RESOURCE],
                   },
                   {
                     application,
@@ -506,7 +506,7 @@ describe('PUT role', () => {
                         'test-global-privilege-2',
                         'test-global-privilege-3'
                       ],
-                      resources: [ALL_RESOURCE],
+                      resources: [GLOBAL_RESOURCE],
                     },
                     {
                       application: 'logstash-foo',

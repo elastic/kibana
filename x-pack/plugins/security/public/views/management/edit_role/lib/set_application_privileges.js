@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ALL_RESOURCE } from '../../../../../common/constants';
+import { GLOBAL_RESOURCE } from '../../../../../common/constants';
 
 export function setApplicationPrivileges(kibanaPrivileges, role, application) {
   if (!role.applications) {
@@ -23,20 +23,20 @@ export function setApplicationPrivileges(kibanaPrivileges, role, application) {
     role.applications = [...role.applications, {
       application,
       privileges,
-      resources: [ALL_RESOURCE]
+      resources: [GLOBAL_RESOURCE]
     }];
   }
 }
 
 export function togglePrivilege(role, application, permission) {
   const appPermissions = role.applications
-    .find(a => a.application === application && a.resources[0] === ALL_RESOURCE);
+    .find(a => a.application === application && a.resources[0] === GLOBAL_RESOURCE);
 
   if (!appPermissions) {
     role.applications.push({
       application,
       privileges: [permission],
-      resources: [ALL_RESOURCE]
+      resources: [GLOBAL_RESOURCE]
     });
   } else {
     const indexOfExisting = appPermissions.privileges.indexOf(permission);

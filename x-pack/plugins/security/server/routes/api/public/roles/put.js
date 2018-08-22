@@ -6,7 +6,7 @@
 
 import { pick, identity } from 'lodash';
 import Joi from 'joi';
-import { ALL_RESOURCE } from '../../../../../common/constants';
+import { GLOBAL_RESOURCE } from '../../../../../common/constants';
 import { wrapError } from '../../../../lib/errors';
 import { spaceApplicationPrivilegesSerializer } from '../../../../lib/authorization';
 
@@ -24,7 +24,7 @@ export function initPutRolesApi(
       kibanaApplicationPrivileges.push({
         privileges: kibanaPrivileges.global,
         application,
-        resources: [ALL_RESOURCE],
+        resources: [GLOBAL_RESOURCE],
       });
     }
 

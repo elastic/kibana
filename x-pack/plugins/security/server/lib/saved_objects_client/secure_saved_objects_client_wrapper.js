@@ -5,8 +5,6 @@
  */
 
 import { get, uniq } from 'lodash';
-import { spaceApplicationPrivilegesSerializer } from '../authorization';
-import { ALL_RESOURCE } from '../../../common/constants';
 
 export class SecureSavedObjectsClientWrapper {
   constructor(options) {
@@ -101,9 +99,15 @@ export class SecureSavedObjectsClientWrapper {
     return await this._baseClient.update(type, id, attributes, options);
   }
 
-  async _checkSavedObjectPrivileges(spaceId, actions) {
+  async _checkSavedObjectPrivileges(actions) {
     try {
-      return await this._checkPrivileges(spaceId, actions);
+      if (!this._spacesService) {
+        const spaceId = this._spacesService.getSpaceId(this._request);
+        return await this._checkPrivileges.atSpace(spaceId, actions);
+      }
+      else {
+        return await this._checkPrivileges.globally(actions);
+      }
     } catch(error) {
       const { reason } = get(error, 'body.error', {});
       throw this.errors.decorateGeneralError(error, reason);
@@ -113,13 +117,12 @@ export class SecureSavedObjectsClientWrapper {
   async _ensureAuthorized(typeOrTypes, action, args) {
     const types = Array.isArray(typeOrTypes) ? typeOrTypes : [typeOrTypes];
     const actions = types.map(type => this._actions.getSavedObjectAction(type, action));
-    const resource = this._getResource();
-    const { hasAllRequested, username, response } = await this._checkSavedObjectPrivileges([resource], actions);
+    const { hasAllRequested, username, response } = await this._checkSavedObjectPrivileges(actions);
 
     if (hasAllRequested) {
       this._auditLogger.savedObjectsAuthorizationSuccess(username, action, types, args);
     } else {
-      const missing = this._getMissingPrivileges(response, resource);
+      const missing = this._getMissingPrivileges(response);
       this._auditLogger.savedObjectsAuthorizationFailure(username, action, types, missing, args);
       const msg = `Unable to ${action} ${[...types].sort().join(',')}, missing ${[...missing].sort().join(',')}`;
       throw this.errors.decorateForbiddenError(new Error(msg));
@@ -132,10 +135,9 @@ export class SecureSavedObjectsClientWrapper {
     // we have to filter for only their authorized types
     const types = this._savedObjectTypes;
     const typesToPrivilegesMap = new Map(types.map(type => [type, this._actions.getSavedObjectAction(type, action)]));
-    const resource = this._getResource();
-    const { username, response } = await this._checkSavedObjectPrivileges([resource], Array.from(typesToPrivilegesMap.values()));
+    const { username, response } = await this._checkSavedObjectPrivileges(Array.from(typesToPrivilegesMap.values()));
 
-    const missing = this._getMissingPrivileges(response, resource);
+    const missing = this._getMissingPrivileges(response);
     const authorizedTypes = Array.from(typesToPrivilegesMap.entries())
       .filter(([, privilege]) => !missing.includes(privilege))
       .map(([type]) => type);
@@ -169,16 +171,8 @@ export class SecureSavedObjectsClientWrapper {
     return await this._baseClient.find(options);
   }
 
-  _getResource() {
-    if (!this._spacesService) {
-      return ALL_RESOURCE;
-    }
-    const spaceId = this._spacesService.getSpaceId(this._request);
-    return spaceApplicationPrivilegesSerializer.resource.serialize(spaceId);
-  }
-
-  _getMissingPrivileges(response, resource) {
-    return Object.keys(response[resource])
-      .filter(privilege => !response[resource][privilege]);
+  _getMissingPrivileges(response) {
+    return Object.keys(response)
+      .filter(privilege => !response[privilege]);
   }
 }

@@ -36,10 +36,12 @@ export default function ({ getService }) {
       expect(resp.body).to.eql(results);
     };
 
-    const expectRbacForbidden = resp => {
+    const createExpectLegacyForbidden = username => resp => {
       expect(resp.body).to.eql({
         statusCode: 403,
-        error: 'Forbidden'
+        error: 'Forbidden',
+        // eslint-disable-next-line max-len
+        message: `action [indices:data/read/search] is unauthorized for user [${username}]: [security_exception] action [indices:data/read/search] is unauthorized for user [${username}]`
       });
     };
 
@@ -66,7 +68,7 @@ export default function ({ getService }) {
       tests: {
         exists: {
           statusCode: 403,
-          response: expectRbacForbidden,
+          response: createExpectLegacyForbidden(AUTHENTICATION.NOT_A_KIBANA_USER.USERNAME),
         },
       }
     });
