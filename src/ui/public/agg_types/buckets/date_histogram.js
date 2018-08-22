@@ -129,13 +129,6 @@ export const dateHistogramBucketAgg = new BucketAggType({
         output.bucketInterval = interval;
         output.params.interval = interval.expression;
 
-        const isDefaultTimezone = config.isDefault('dateFormat:tz');
-        if (isDefaultTimezone) {
-          output.params.time_zone = detectedTimezone || tzOffset;
-        } else {
-          output.params.time_zone = config.get('dateFormat:tz');
-        }
-
         const scaleMetrics = interval.scaled && interval.scale < 1;
         if (scaleMetrics && aggs) {
           const all = _.every(aggs.bySchemaGroup.metrics, function (agg) {
@@ -148,7 +141,13 @@ export const dateHistogramBucketAgg = new BucketAggType({
         }
       }
     },
-
+    {
+      name: 'time_zone',
+      default: () => {
+        const isDefaultTimezone = config.isDefault('dateFormat:tz');
+        return isDefaultTimezone ? detectedTimezone || tzOffset : config.get('dateFormat:tz');
+      },
+    },
     {
       name: 'drop_partials',
       default: false,
@@ -161,7 +160,6 @@ export const dateHistogramBucketAgg = new BucketAggType({
       default: '2h',
       write: _.noop
     },
-
     {
       name: 'format'
     },

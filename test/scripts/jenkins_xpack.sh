@@ -37,6 +37,6 @@ tar -xzf "$linuxBuild" -C "$installDir" --strip=1
 
 echo " -> Running functional and api tests"
 cd "$XPACK_DIR"
-xvfb-run node scripts/functional_tests --bail --kibana-install-dir "$installDir" --esFrom=source
+xvfb-run node scripts/functional_tests --debug --bail --kibana-install-dir "$installDir" --esFrom=source
 echo ""
 echo ""

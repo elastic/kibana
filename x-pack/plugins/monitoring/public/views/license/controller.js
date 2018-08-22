@@ -49,9 +49,9 @@ export class LicenseViewController {
   renderReact($scope) {
     $scope.$evalAsync(() => {
       const { isPrimaryCluster, license, isExpired, uploadLicensePath } = this;
-      let expiryDate = license.expiry_date;
-      if (license.expiry_date !== undefined) {
-        expiryDate = formatDateTimeLocal(license.expiry_date);
+      let expiryDate = license.expiry_date_in_millis;
+      if (license.expiry_date_in_millis !== undefined) {
+        expiryDate = formatDateTimeLocal(license.expiry_date_in_millis);
       }
 
       // Mount the React component to the template

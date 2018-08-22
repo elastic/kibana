@@ -39,8 +39,8 @@ import {
   isInvalidPackError,
 } from './errors';
 
-async function defaultConfig(settings) {
-  return await Config.withDefaultSchema(
+function defaultConfig(settings) {
+  return Config.withDefaultSchema(
     transformDeprecations(settings)
   );
 }
@@ -93,8 +93,8 @@ function groupSpecsById(specs) {
  *  using Kibana's defaults, settings, and config service
  *
  *  @param {Object} settings
- *  @param {ConfigService} [config] when supplied **it is mutated** to include
- *                                  the config from discovered plugin specs
+ *  @param {ConfigService} [configToMutate] when supplied **it is mutated** to
+ *  include the config from discovered plugin specs
  *  @return {Object<name,Rx>}
  */
 export function findPluginSpecs(settings, configToMutate) {
@@ -104,7 +104,7 @@ export function findPluginSpecs(settings, configToMutate) {
         return configToMutate;
       }
 
-      return await defaultConfig(settings);
+      return defaultConfig(settings);
     })
     .pipe(shareReplay());
 

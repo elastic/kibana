@@ -36,8 +36,6 @@ import { DEFAULT_COLOR } from '../../../../../../../core_plugins/kibana/common/f
 import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
 
 export class ColorFormatEditorComponent extends DefaultFormatEditor {
-  static formatId = 'color';
-
   constructor(props) {
     super(props);
     this.onChange({
@@ -203,3 +201,4 @@ export class ColorFormatEditorComponent extends DefaultFormatEditor {
 }
 
 export const ColorFormatEditor = injectI18n(ColorFormatEditorComponent);
+ColorFormatEditor.formatId = 'color';

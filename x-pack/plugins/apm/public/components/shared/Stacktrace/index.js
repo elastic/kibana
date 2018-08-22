@@ -45,7 +45,7 @@ class Stacktrace extends PureComponent {
     libraryframes: {}
   };
 
-  componentWillMount() {
+  componentDidMount() {
     if (!this.props.stackframes) {
       // Don't do anything, if there are no stackframes
       return false;

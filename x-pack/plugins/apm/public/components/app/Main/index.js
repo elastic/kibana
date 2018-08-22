@@ -26,7 +26,9 @@ export default function Main() {
       {routes.map((route, i) => {
         return route.switch ? (
           <Switch key={i}>
-            {route.routes.map((route, i) => <Route key={i} {...route} />)}
+            {route.routes.map((route, i) => (
+              <Route key={i} {...route} />
+            ))}
           </Switch>
         ) : (
           <Route key={i} {...route} />

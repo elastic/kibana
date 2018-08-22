@@ -6,6 +6,15 @@
       position="'right'"
       content="'Interval will be automatically scaled in the event that the provided value creates more buckets than specified by Advanced Setting\'s histogram:maxBars'"
     ></icon-tip>
+
+    <icon-tip
+      ng-if="editorConfig.interval.warning"
+      position="'right'"
+      content="editorConfig.interval.warning"
+      type="'alert'"
+      color="'warning'"
+      style="float: right"
+    ></icon-tip>
   </label>
   <input
     id="visEditorInterval{{agg.id}}"
@@ -14,7 +23,8 @@
     type="number"
     class="form-control"
     name="interval"
-    min="0"
+    min="{{editorConfig.interval.base || 0}}"
+    step="{{editorConfig.interval.base}}"
     input-number
     >
 </div>

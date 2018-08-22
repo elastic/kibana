@@ -200,6 +200,7 @@ export class Flyout extends Component {
       isOverwriteAllChecked,
       conflictedSavedObjectsLinkedToSavedSearches,
       conflictedSearchDocs,
+      failedImports
     } = this.state;
 
     const { services, indexPatterns } = this.props;
@@ -237,6 +238,13 @@ export class Flyout extends Component {
           conflictedSearchDocs,
           services,
           indexPatterns,
+          isOverwriteAllChecked
+        );
+        this.setState({
+          loadingMessage: 'Retrying failed objects...',
+        });
+        importCount += await saveObjects(
+          failedImports.map(({ obj }) => obj),
           isOverwriteAllChecked
         );
       } catch (e) {
@@ -392,7 +400,7 @@ export class Flyout extends Component {
       );
     }
 
-    if (failedImports.length) {
+    if (failedImports.length && !this.hasConflicts) {
       return (
         <EuiCallOut
           title="Import failed"
@@ -549,7 +557,7 @@ export class Flyout extends Component {
     const { close } = this.props;
 
     return (
-      <EuiFlyout onClose={close}>
+      <EuiFlyout onClose={close} size="s">
         <EuiFlyoutHeader>
           <EuiTitle>
             <h2>Import saved objects</h2>

@@ -145,6 +145,7 @@ export class SampleDataSetCard extends React.Component {
   render() {
     return (
       <EuiCard
+        className="homSampleDataSetCard"
         image={this.props.previewUrl}
         title={this.props.name}
         description={this.props.description}

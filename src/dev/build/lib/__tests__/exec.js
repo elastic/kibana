@@ -20,16 +20,22 @@
 import sinon from 'sinon';
 import stripAnsi from 'strip-ansi';
 
-import { createToolingLog } from '@kbn/dev-utils';
+import { ToolingLog } from '@kbn/dev-utils';
 import { exec } from '../exec';
 
 describe('dev/build/lib/exec', () => {
   const sandbox = sinon.createSandbox();
   afterEach(() => sandbox.reset());
 
-  const log = createToolingLog('verbose');
   const onLogLine = sandbox.stub();
-  log.on('data', line => onLogLine(stripAnsi(line)));
+  const log = new ToolingLog({
+    level: 'verbose',
+    writeTo: {
+      write: chunk => {
+        onLogLine(stripAnsi(chunk));
+      }
+    }
+  });
 
   it('executes a command, logs the command, and logs the output', async () => {
     await exec(log, process.execPath, ['-e', 'console.log("hi")']);

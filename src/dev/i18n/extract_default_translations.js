@@ -31,14 +31,15 @@ function addMessageToMap(targetMap, key, value) {
   const existingValue = targetMap.get(key);
   if (targetMap.has(key) && existingValue.message !== value.message) {
     throw new Error(
-      `There is more than one default message for the same id "${key}": "${existingValue}" and "${value}"`
+      `There is more than one default message for the same id "${key}": \
+"${existingValue.message}" and "${value.message}"`
     );
   }
   targetMap.set(key, value);
 }
 
 export async function extractDefaultTranslations(inputPath) {
-  const entries = await globAsync('*.{js,jsx,jade,ts,tsx,html,hbs,handlebars}', {
+  const entries = await globAsync('*.{js,jsx,pug,ts,tsx,html,hbs,handlebars}', {
     cwd: inputPath,
     matchBase: true,
   });
@@ -52,7 +53,7 @@ export async function extractDefaultTranslations(inputPath) {
       } else if (resolvedPath.endsWith('.pug')) {
         paths.pugEntries.push(resolvedPath);
       } else if (resolvedPath.endsWith('.hbs') || resolvedPath.endsWith('.handlebars')) {
-        paths.hbsFiles.push(resolvedPath);
+        paths.hbsEntries.push(resolvedPath);
       } else {
         paths.codeEntries.push(resolvedPath);
       }

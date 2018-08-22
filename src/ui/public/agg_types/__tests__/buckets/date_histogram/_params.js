@@ -20,12 +20,16 @@
 import _ from 'lodash';
 import moment from 'moment';
 import expect from 'expect.js';
+import sinon from 'sinon';
 import ngMock from 'ng_mock';
 import AggParamWriterProvider from '../../agg_param_writer';
 import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
+import chrome from '../../../../chrome';
 import { aggTypes } from '../../..';
 import { AggConfig } from '../../../../vis/agg_config';
 import { timefilter } from 'ui/timefilter';
+
+const config = chrome.getUiSettingsClient();
 
 describe('params', function () {
 
@@ -129,6 +133,30 @@ describe('params', function () {
           expect(_.has(output, 'metricScale')).to.be(should);
         });
       });
+    });
+  });
+
+  describe('time_zone', () => {
+    beforeEach(() => {
+      sinon.stub(config, 'get');
+      sinon.stub(config, 'isDefault');
+    });
+
+    it('should use the specified time_zone', () => {
+      const output = paramWriter.write({ time_zone: 'Europe/Kiev' });
+      expect(output.params).to.have.property('time_zone', 'Europe/Kiev');
+    });
+
+    it('should use the Kibana time_zone if no parameter specified', () => {
+      config.isDefault.withArgs('dateFormat:tz').returns(false);
+      config.get.withArgs('dateFormat:tz').returns('Europe/Riga');
+      const output = paramWriter.write({});
+      expect(output.params).to.have.property('time_zone', 'Europe/Riga');
+    });
+
+    afterEach(() => {
+      config.get.restore();
+      config.isDefault.restore();
     });
   });
 

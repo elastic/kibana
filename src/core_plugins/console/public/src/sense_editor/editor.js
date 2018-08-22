@@ -291,6 +291,9 @@ export default function SenseEditor($el) {
 
 
   editor.getRequestInRange = onceDoneTokenizing(function (range, cb) {
+    if (!range) {
+      return;
+    }
     const request = {
       method: '',
       data: [],
@@ -379,6 +382,9 @@ export default function SenseEditor($el) {
       }
 
       editor.getRequest(currentRow, function (request) {
+        if (!request) {
+          return;
+        }
         explicitRangeToRequests({
           start: {
             row: request.range.end.row + 1

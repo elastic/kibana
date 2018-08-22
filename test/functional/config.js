@@ -50,7 +50,8 @@ import {
   DashboardPanelActionsProvider,
   FlyoutProvider,
   ComboBoxProvider,
-  VisualizationProvider,
+  EmbeddingProvider,
+  RenderableProvider,
 } from './services';
 
 export default async function ({ readConfigFile }) {
@@ -106,11 +107,10 @@ export default async function ({ readConfigFile }) {
       dashboardPanelActions: DashboardPanelActionsProvider,
       flyout: FlyoutProvider,
       comboBox: ComboBoxProvider,
-      visualization: VisualizationProvider,
+      embedding: EmbeddingProvider,
+      renderable: RenderableProvider,
     },
     servers: commonConfig.get('servers'),
-
-    env: commonConfig.get('env'),
 
     esTestCluster: commonConfig.get('esTestCluster'),
 
@@ -120,6 +120,12 @@ export default async function ({ readConfigFile }) {
         ...commonConfig.get('kbnTestServer.serverArgs'),
         '--oss',
       ],
+    },
+
+    uiSettings: {
+      defaults: {
+        'accessibility:disableAnimations': true,
+      },
     },
 
     apps: {

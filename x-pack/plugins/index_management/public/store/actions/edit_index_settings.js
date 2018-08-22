@@ -4,7 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { loadIndexSettings as request } from "../../services";
+import { i18n }  from '@kbn/i18n';
+import { loadIndexSettings as request } from '../../services';
 import { loadIndexDataSuccess } from './load_index_data';
 import { toastNotifications } from 'ui/notify';
 
@@ -15,7 +16,12 @@ export const editIndexSettings = ({ indexName }) => async (dispatch) => {
   } catch (error) {
     return toastNotifications.addDanger(error.data.message);
   }
-  toastNotifications.addSuccess(`Successfully saved settings for ${indexName}`);
+  toastNotifications.addSuccess(
+    i18n.translate('xpack.idxMgmt.editIndexSettingsAction.successfullySavedSettingsForIndicesMessage', {
+      defaultMessage: 'Successfully saved settings for {indexName}',
+      values: { indexName }
+    })
+  );
   dispatch(
     loadIndexDataSuccess({
       data: indexSettings,

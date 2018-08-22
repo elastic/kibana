@@ -17,7 +17,6 @@
  * under the License.
  */
 
-import './tutorial.less';
 import _ from 'lodash';
 import React from 'react';
 import PropTypes from 'prop-types';
@@ -281,7 +280,7 @@ export class Tutorial extends React.Component {
     let content;
     if (this.state.notFound) {
       content = (
-        <div className="homePanel">
+        <div className="homTutorial__notFoundPanel">
           <EuiText>
             <p>
               Unable to find tutorial {this.props.tutorialId}
@@ -315,7 +314,7 @@ export class Tutorial extends React.Component {
           />
 
           <EuiSpacer />
-          <div className="text-center">
+          <div className="eui-textCenter">
             {this.renderInstructionSetsToggle()}
           </div>
 
@@ -329,7 +328,7 @@ export class Tutorial extends React.Component {
       );
     }
     return (
-      <EuiPage className="home">
+      <EuiPage className="homPage">
         <EuiPageBody>
 
           <div>

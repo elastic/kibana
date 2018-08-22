@@ -21,6 +21,7 @@ import {
   CONFIG_TELEMETRY,
   CONFIG_TELEMETRY_DESC,
 } from './common/constants';
+import { settingsRoute } from './server/routes/api/v1/settings';
 
 export { callClusterFactory } from './server/lib/call_cluster_factory';
 
@@ -110,6 +111,7 @@ export const xpackMain = (kibana) => {
       // register routes
       xpackInfoRoute(server);
       telemetryRoute(server);
+      settingsRoute(server, this.kbnServer);
     }
   });
 };
