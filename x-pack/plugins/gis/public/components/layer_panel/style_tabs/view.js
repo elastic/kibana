@@ -15,11 +15,30 @@ import { StyleTab } from './resources/style_tab';
 
 export class StyleTabs extends React.Component {
 
-  constructor() {
+  constructor(props) {
     super();
     this.state = {
-      tabSelected: ''
+      tabSelected: '',
+      currentStyle: props.layer
+        && props.layer.getCurrentStyle()
     };
+  }
+
+  static getDerivedStateFromProps(nextProps, prevState) {
+    const currentStyle = nextProps.layer.getCurrentStyle();
+    if (currentStyle) {
+      if (!prevState.tabSelected) {
+        return {
+          tabSelected: currentStyle.constructor.getDisplayName(),
+          currentStyle
+        };
+      } else {
+        return {
+          ...prevState,
+          currentStyle
+        };
+      }
+    }
   }
 
   _activateTab = tabName => {
@@ -28,16 +47,8 @@ export class StyleTabs extends React.Component {
 
 
   render() {
-
-    const currentStyle = this.props.layer.getCurrentStyle();
-    if (currentStyle) {
-      if (!this.state.tabSelected) {
-        this.setState({
-          tabSelected: currentStyle.constructor.getDisplayName()
-        });
-      }
-    }
-    if (!this.state.tabSelected) {
+    const { currentStyle, tabSelected } = this.state;
+    if (!tabSelected) {
       return null;
     }
     const supportedStyles = this.props.layer.getSupportedStyles();
@@ -45,7 +56,7 @@ export class StyleTabs extends React.Component {
       return (<StyleTab
         key={index}
         name={style.getDisplayName()}
-        selected={this.state.tabSelected}
+        selected={tabSelected}
         onClick={this._activateTab}
       />);
     });
