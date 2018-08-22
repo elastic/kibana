@@ -111,11 +111,11 @@ describe('PUT role', () => {
         result: {
           error: 'Bad Request',
           message: `child "name" fails because ["name" length must be less than or equal to 1024 characters long]`,
+          statusCode: 400,
           validation: {
             keys: ['name'],
-            source: 'params'
+            source: 'params',
           },
-          statusCode: 400
         },
       },
     });
@@ -138,7 +138,7 @@ describe('PUT role', () => {
           statusCode: 400,
           validation: {
             keys: ['kibana.0.privileges.0'],
-            source: 'payload'
+            source: 'payload',
           }
         },
       },
