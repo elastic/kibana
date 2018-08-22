@@ -10,6 +10,11 @@ import { LAYER_TYPE } from "../shared/layers/layer";
 import { FEATURE_PROJECTION, getOlLayerStyle } from './ol_layer_defaults';
 import * as ol from 'openlayers';
 
+
+const OL_GEOJSON_FORMAT = new ol.format.GeoJSON({
+  featureProjection: FEATURE_PROJECTION
+});
+
 // Layer-specific logic
 function convertTmsLayersToOl({ source, visible }) {
   const tileLayer = new ol.layer.Tile({
@@ -21,22 +26,30 @@ function convertTmsLayersToOl({ source, visible }) {
   return tileLayer;
 }
 
-const convertVectorLayersToOl = (() => {
-  const geojsonFormat = new ol.format.GeoJSON({
-    featureProjection: FEATURE_PROJECTION
+function generatePlaceHolderLayerForGeohashGrid({ visible, source }) {
+  const olFeatures = OL_GEOJSON_FORMAT.readFeatures(source);
+  const placeHolderLayer = new ol.layer.Vector({
+    source: new ol.source.Vector({
+      features: olFeatures
+    })
   });
-  return ({ source, visible, temporary, style }) => {
-    const olFeatures = geojsonFormat.readFeatures(source);
-    const vectorLayer = new ol.layer.Vector({
-      source: new ol.source.Vector({
-        features: olFeatures
-      })
-    });
-    vectorLayer.setVisible(visible);
-    vectorLayer.setStyle(getOlLayerStyle(style, temporary));
-    return vectorLayer;
-  };
-})();
+  placeHolderLayer.setVisible(visible);
+  placeHolderLayer.setStyle(getOlLayerStyle({}));
+  return placeHolderLayer;
+}
+
+
+const convertVectorLayersToOl = ({ source, visible, temporary, style }) => {
+  const olFeatures = OL_GEOJSON_FORMAT.readFeatures(source);
+  const vectorLayer = new ol.layer.Vector({
+    source: new ol.source.Vector({
+      features: olFeatures
+    })
+  });
+  vectorLayer.setVisible(visible);
+  vectorLayer.setStyle(getOlLayerStyle(style, temporary));
+  return vectorLayer;
+};
 
 function convertLayerByType(layer) {
   //todo: don't do this! do not keep reference to openlayers-objects directly in the store
@@ -47,6 +60,8 @@ function convertLayerByType(layer) {
     case LAYER_TYPE.VECTOR:
       layer.olLayer = convertVectorLayersToOl(layer);
       break;
+    case LAYER_TYPE.GEOHASH_GRID:
+      layer.olLayer = generatePlaceHolderLayerForGeohashGrid(layer);
     default:
       break;
   }
@@ -69,7 +84,9 @@ function updateMapLayerOrder(mapLayers, oldLayerOrder, newLayerOrder) {
       mapLayers.insertAt(newIdx, layerToMove);
       updateMapLayerOrder(mapLayers, getLayersIds(mapLayers), newLayerOrder);
       return true;
-    } else { return false; }
+    } else {
+      return false;
+    }
   });
 }
 

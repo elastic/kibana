@@ -6,10 +6,12 @@
 import { EMSFileSource } from './sources/ems_file_source';
 import { EMSTMSSource } from './sources/ems_tms_source';
 import { XYZTMSSource } from './sources/xyz_tms_source';
+import { ESGeohashGridSource } from './sources/es_geohashgrid_source';
 
 export const LAYER_TYPE = {
   TILE: 'TILE',
-  VECTOR: 'VECTOR'
+  VECTOR: 'VECTOR',
+  GEOHASH_GRID: 'GEOHASH_GRID'
 };
 
 export class ALayer {
@@ -71,15 +73,16 @@ export class ALayer {
     let source;
     if (this._descriptor.sourceDescriptor.type === XYZTMSSource.type) {
       source = new XYZTMSSource(this._descriptor.sourceDescriptor);
-    }else if (this._descriptor.sourceDescriptor.type === EMSTMSSource.type) {
+    } else if (this._descriptor.sourceDescriptor.type === EMSTMSSource.type) {
       source = new EMSTMSSource(this._descriptor.sourceDescriptor);
-    }else if (this._descriptor.sourceDescriptor.type === EMSFileSource.type) {
+    } else if (this._descriptor.sourceDescriptor.type === EMSFileSource.type) {
       source = new EMSFileSource(this._descriptor.sourceDescriptor);
-    }else {
+    } else if (this._descriptor.sourceDescriptor.type === ESGeohashGridSource.type) {
+      source = new ESGeohashGridSource(this._descriptor.sourceDescriptor);
+    } else {
       console.error('Cannot marshall', this._descriptor.sourceDescriptor);
       throw new Error(`Source with type ${this._descriptor.sourceDescriptor.type} not recognized`);
     }
-
     return source.renderDetails();
   }
 

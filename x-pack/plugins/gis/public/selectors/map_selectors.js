@@ -7,6 +7,7 @@
 import { createSelector } from 'reselect';
 import { TileLayer } from '../shared/layers/tile_layer';
 import { VectorLayer } from '../shared/layers/vector_layer';
+import { GeohashGridLayer } from '../shared/layers/geohashgrid_layer';
 
 export const getMapConstants = ({ map }) => map && map.mapConstants;
 
@@ -23,6 +24,8 @@ function createLayerInstance(layerDescriptor) {
     return new TileLayer(layerDescriptor);
   } else if (layerDescriptor.type === VectorLayer.type) {
     return new VectorLayer(layerDescriptor);
+  } else if (layerDescriptor.type === GeohashGridLayer.type) {
+    return new GeohashGridLayer(layerDescriptor);
   } else {
     throw new Error(`Unrecognized layerType ${layerDescriptor.type}`);
   }
