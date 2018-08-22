@@ -22,22 +22,23 @@ export async function handleOldSettings(config, telemetryOptInProvider) {
 
   let legacyOptInValue = null;
 
-  if (oldTelemetrySetting !== null) {
+  if (typeof oldTelemetrySetting === 'boolean') {
     legacyOptInValue = oldTelemetrySetting;
-  } else if (oldAllowReportSetting !== null) {
+  } else if (typeof oldAllowReportSetting === 'boolean') {
     legacyOptInValue = oldAllowReportSetting;
   }
 
-  console.log({ legacyOptInValue, oldAllowReportSetting, oldTelemetrySetting });
   if (legacyOptInValue !== null) {
-    await telemetryOptInProvider.setOptIn(legacyOptInValue);
+    try {
+      await telemetryOptInProvider.setOptIn(legacyOptInValue);
 
-    // delete old keys once we've successfully changed the setting (if it fails, we just wait until next time)
-    config.remove(CONFIG_ALLOW_REPORT);
-    config.remove(CONFIG_SHOW_BANNER);
-    config.remove(CONFIG_TELEMETRY);
-
-    return false;
+      // delete old keys once we've successfully changed the setting (if it fails, we just wait until next time)
+      config.remove(CONFIG_ALLOW_REPORT);
+      config.remove(CONFIG_SHOW_BANNER);
+      config.remove(CONFIG_TELEMETRY);
+    } finally {
+      return false;
+    }
   }
 
   const oldShowSetting = config.get(CONFIG_SHOW_BANNER, null);

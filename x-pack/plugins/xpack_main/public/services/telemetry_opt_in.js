@@ -3,10 +3,10 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import chrome from 'ui/chrome';
+
 import moment from 'moment';
 
-export function TelemetryOptInProvider($injector) {
+export function TelemetryOptInProvider($injector, chrome) {
 
   let currentOptInStatus = $injector.get('telemetryOptedIn');
 
