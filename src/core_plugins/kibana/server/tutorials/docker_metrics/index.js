@@ -35,7 +35,7 @@ export function dockerMetricsSpecProvider() {
     longDescription: i18n.translate('kbn.server.tutorials.dockerMetrics.longDescription', {
       // eslint-disable-next-line no-multi-str
       defaultMessage: 'The `docker` Metricbeat module fetches metrics from the Docker server. \
-        [Learn more]({learnMoreLink}).',
+[Learn more]({learnMoreLink}).',
       values: {
         learnMoreLink: '{config.docs.beats.metricbeat}/metricbeat-module-docker.html',
       },
