@@ -26,7 +26,7 @@ export default (server) => {
     method: 'POST',
     handler: async (req) => {
       try {
-        return await getVisData(req);
+        return getVisData(req);
       } catch(err) {
         if (err.isBoom && err.status === 401) {
           return err;

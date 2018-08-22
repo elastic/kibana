@@ -41,7 +41,7 @@ const putRoleTest = (
     const mockServer = createMockServer();
     const mockPreCheckLicense = jest
       .fn()
-      .mockImplementation(preCheckLicenseImpl || defaultPreCheckLicenseImpl);
+      .mockImplementation(preCheckLicenseImpl);
     const mockCallWithRequest = jest.fn();
     for (const impl of callWithRequestImpls) {
       mockCallWithRequest.mockImplementationOnce(impl);
@@ -70,6 +70,8 @@ const putRoleTest = (
     expect(statusCode).toBe(asserts.statusCode);
     if (preCheckLicenseImpl) {
       expect(mockPreCheckLicense).toHaveBeenCalled();
+    } else {
+      expect(mockPreCheckLicense).not.toHaveBeenCalled();
     }
     if (asserts.callWithRequests) {
       for (const args of asserts.callWithRequests) {
@@ -139,7 +141,7 @@ describe('PUT role', () => {
           validation: {
             keys: ['kibana.0.privileges.0'],
             source: 'payload',
-          }
+          },
         },
       },
     });

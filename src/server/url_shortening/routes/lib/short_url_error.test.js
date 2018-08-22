@@ -17,7 +17,6 @@
  * under the License.
  */
 
-import expect from 'expect.js';
 import _ from 'lodash';
 import { handleShortUrlError } from './short_url_error';
 
@@ -54,19 +53,19 @@ describe('handleShortUrlError()', () => {
 
   caughtErrorsWithStatus.forEach((err) => {
     it(`should handle errors with status of ${err.status}`, function () {
-      expect(_.get(handleShortUrlError(err), 'output.statusCode')).to.be(err.status);
+      expect(_.get(handleShortUrlError(err), 'output.statusCode')).toBe(err.status);
     });
   });
 
   caughtErrorsWithStatusCode.forEach((err) => {
     it(`should handle errors with statusCode of ${err.statusCode}`, function () {
-      expect(_.get(handleShortUrlError(err), 'output.statusCode')).to.be(err.statusCode);
+      expect(_.get(handleShortUrlError(err), 'output.statusCode')).toBe(err.statusCode);
     });
   });
 
   uncaughtErrors.forEach((err) => {
     it(`should not handle unknown errors`, function () {
-      expect(_.get(handleShortUrlError(err), 'output.statusCode')).to.be(500);
+      expect(_.get(handleShortUrlError(err), 'output.statusCode')).toBe(500);
     });
   });
 });
