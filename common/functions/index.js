@@ -8,6 +8,7 @@ import { containerStyle } from './containerStyle';
 import { clog } from './clog';
 import { context } from './context';
 import { columns } from './columns';
+import { csv } from './csv';
 import { date } from './date';
 import { doFn } from './do';
 import { dropdownControl } from './dropdownControl';
@@ -64,6 +65,7 @@ export const commonFunctions = [
   compare,
   containerStyle,
   context,
+  csv,
   date,
   doFn,
   dropdownControl,

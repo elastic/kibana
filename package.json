@@ -60,6 +60,7 @@
     "mime": "^2.2.2",
     "moment": "^2.20.1",
     "object-path-immutable": "^0.5.3",
+    "papaparse": "^4.6.0",
     "prop-types": "^15.6.1",
     "raw-loader": "0.5.1",
     "react": "^16.3.0",
