@@ -26,7 +26,7 @@ import {
 } from './routes';
 import {
   flightsSpecProvider,
-  logsSpectProvider,
+  logsSpecProvider,
 } from './data_sets';
 
 export function sampleDataMixin(kbnServer, server) {
